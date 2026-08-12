@@ -11,7 +11,7 @@ The baseline was a clean checkout of NewsNow; the current workspace adds only th
 ## 2. Current Environment
 
 - Active branch / version: `main`, baseline `2173126f804bec0201769f59d933add6c4632d17`, package version `0.0.41`
-- Remote: `upstream=https://github.com/ourongxing/newsnow.git`; no `origin` because GitHub CLI authentication is invalid and Fork is pending
+- Remote: `origin=https://github.com/rallsix66/Shipping-HOT.git` (read-only `git ls-remote` succeeded at `d365f55839e6c399b9d592a1d41a3abe484b8630`); `upstream=https://github.com/ourongxing/newsnow.git`; GitHub CLI API authentication is still invalid, so account metadata was not API-verified
 - Local run status: `pending`; `node_modules/` is absent and no install/run was authorized
 - Deployment status: `out-of-scope`; repository contains optional Cloudflare/Vercel/Bun/Docker configuration, but no deployment was performed
 - Database / external services: db0 is configured; local Node uses `better-sqlite3`; exact runtime DB file location is `pending`
@@ -68,7 +68,7 @@ The baseline was a clean checkout of NewsNow; the current workspace adds only th
 | Current code is NewsNow | Proposed Shipping HOT documents | A reader could mistake proposal for implementation | Proposal is explicitly marked and kept in `docs/plans/` |
 | `package.json` uses `pnpm` scripts | No `node_modules/` in checkout | Commands cannot currently be runtime-verified | Mark runtime `pending`; do not install in this task |
 | `nitro.config.ts` selects SQLite connector | No explicit local DB path in repo | Exact DB file location is unknown | Mark pending until authorized runtime verification |
-| Git clone has only `upstream` | User's requested personal Fork/origin | Future push target is not configured | Keep `GitHub fork pending` |
+| GitHub API auth is invalid | `gh auth status` / `gh repo view` fail with 401 | Account visibility and repo metadata cannot be verified through `gh` | Keep API verification pending; local `origin` remains evidence of configured remote |
 
 ## 7. Current Risks
 
@@ -82,7 +82,7 @@ The baseline was a clean checkout of NewsNow; the current workspace adds only th
 ## 8. Current Work and Blockers
 
 - Active work: architecture/documentation reconciliation only.
-- Blockers: user approval is required before Shipping HOT business implementation; GitHub Fork requires re-authentication if `origin` is desired.
+- Blockers: user approval is required before Shipping HOT business implementation; GitHub CLI API re-authentication is still needed for account-level operations.
 - Pending verification: local runtime, build, tests, actual db0 file path, deployment/live state.
 
 ## 9. Recommended Next Action

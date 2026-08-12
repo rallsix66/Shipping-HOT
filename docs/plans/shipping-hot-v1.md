@@ -6,7 +6,7 @@
 
 目标是在 NewsNow 现有代码基础上，渐进改造成个人本地航运情报聚合与船舶跟踪工具。产品只关注用户关注的船、港口和可能影响货物的航运信息，不扩展为 ERP、TMS、WMS、全球 AIS 平台或多人 SaaS。
 
-本轮已经完成仓库准备和只读审计，未安装依赖、未迁移数据库、未修改业务代码。官方仓库由于 GitHub CLI token 无效，当前仅配置为 `upstream`；Fork 状态为 `GitHub fork pending`。
+本轮已经完成仓库准备和只读审计，未安装依赖、未迁移数据库、未修改业务代码。当前本地 Git 已配置 `origin=https://github.com/rallsix66/Shipping-HOT.git` 和 `upstream=https://github.com/ourongxing/newsnow.git`；`git ls-remote origin` 可读到 `main`，但 GitHub CLI token 仍无效，因此账号级元数据保持 `pending`。
 
 ## 2. 当前 NewsNow 架构
 
@@ -187,11 +187,12 @@ mmsi?
 callSign?
 carrier?
 shipType?
-watching
+isWatched
 currentPosition?
 speed?
 course?
 navigationStatus?
+statusChangedAt?
 destination?
 eta?
 lastUpdatedAt?
@@ -208,7 +209,7 @@ name
 nameEn
 unlocode?
 country?
-watching
+isWatched
 congestionLevel?
 waitingVessels?
 containerWaitingVessels?
@@ -229,17 +230,22 @@ vesselId
 voyageNumber
 originPortId?
 destinationPortId?
-plannedETD?
-plannedETA?
-currentETD?
-currentETA?
+baselineEtd?
+baselineEta?
+baselineEtdSource?
+baselineEtaSource?
+latestEtd?
+latestEta?
+latestEtdSource?
+latestEtaSource?
+latestEtaObservedAt?
 delayMinutes?
 status
 lastUpdatedAt?
 sourceStatus
 ```
 
-计划时间来自 Schedule Provider；当前时间来自最新结构化数据或运营更新；delay 是当前与计划的可解释差值，缺少基准时为 unknown，不猜测。
+`baselineEta`/`baselineEtd` 是开始跟踪航次时写入的基准；后续同步只能更新 `latestEta`/`latestEtd`。`delayMinutes = latestEta - baselineEta`，缺少任意一方时为 unknown，不猜测。
 
 ### Event
 
@@ -252,6 +258,10 @@ detectedAt
 status
 title
 summary
+dedupeKey
+firstDetectedAt
+lastDetectedAt
+resolvedAt?
 feedItemId?
 vesselId?
 portId?
@@ -260,13 +270,13 @@ evidenceJson
 sourceStatus
 ```
 
-第一版 Event 作为可查询的持久化事实保留有限时间，同时 HOT 是查询/排序结果，不重复存储每一次展示。
+第一版 Event 作为可查询的持久化事实保留有限时间，同时 HOT 是查询/排序结果，不重复存储每一次展示。`dedupeKey` 必须稳定且可预测；首次检测异常创建 Event，持续异常只更新 `lastDetectedAt`，严重程度变化更新 `severity/evidenceJson`，恢复时写入 `resolvedAt` 并将 `status` 设为 `resolved`。
+
+Vessel 状态规则：`navigationStatus` 未变化时不更新 `statusChangedAt`；状态变化时更新 `statusChangedAt`。锚泊持续时间为 `now - statusChangedAt`，用于确定性锚泊异常检测。
 
 ### Settings
 
 ```text
-watchedVesselIds[]
-watchedPortIds[]
 refreshInterval
 sourceEnabled
 providerEnabled
@@ -282,9 +292,9 @@ API Key 只来自环境变量或本地安全配置，不进入 Settings 普通 J
 
 ```text
 External News Source
-  → Fetcher
-  → Source normalizer
-  → cache/feed_items
+  → NewsNow Fetcher / cache
+  → Normalize
+  → feed_items
   → classification/rules
   → optional Event link
   → HOT query
@@ -319,8 +329,8 @@ PortProvider
 ```text
 Schedule data + Vessel data
   → Voyage state
-  → planned/current ETA comparison
-  → delay calculation
+  → baseline/latest ETA comparison
+  → delay = latestEta - baselineEta
   → event
   → HOT / voyage page
 ```
@@ -385,17 +395,18 @@ Shipping HOT
 
 ## 12. 本地存储
 
-优先继续使用现有 db0 + SQLite SQL 初始化方式。最小第一版表建议为 6 张：
+优先继续使用现有 db0 + SQLite SQL 初始化方式。V1 核心数据表明确为现有两张加新增六张：
 
 1. `cache`：继续复用，存 News Source 短期缓存。
-2. `feed_items`：需要跨 Source 去重/查询/关联时增加；若第一版只展示 Source 卡片，可 Phase 2 暂缓。
-3. `vessels`：必须，存关注船当前状态。
-4. `ports`：必须，存关注港口当前状态。
-5. `voyages`：必须，表达关注航次和 delay。
-6. `events`：必须，统一 HOT 异常与资讯关联。
-7. `settings`：必须，个人关注与阈值配置。
+2. `user`：现有 NewsNow 登录/同步遗留能力，后续裁剪，不属于 Shipping HOT 本地核心。
+3. `feed_items`：航运资讯结构化持久层，用于去重、severity、实体关联、HOT 排序和后续搜索。
+4. `vessels`：必须，存关注船当前状态和 `isWatched`。
+5. `ports`：必须，存关注港口当前状态和 `isWatched`。
+6. `voyages`：必须，表达关注航次、baseline/latest 时间和 delay。
+7. `events`：必须，统一 HOT 异常与资讯关联，并支持生命周期和去重。
+8. `settings`：必须，只存刷新、来源/Provider 开关、阈值和保留周期。
 
-因此“最小可运行结构化版”是现有 `cache` 加 `vessels/ports/voyages/events/settings` 五张新增表；若要持久化资讯去重与实体关联，再增加 `feed_items`，合计 7 张。`user` 是现有登录/同步功能的表，不属于本地单用户核心，但在依赖分析完成前保留。
+因此 V1 核心表就是：`cache`、`user`、`feed_items`、`vessels`、`ports`、`voyages`、`events`、`settings`。其中 `cache` 继续作为 NewsNow 抓取缓存，`feed_items` 作为航运资讯的结构化持久层；`user` 仍是现有遗留能力。
 
 不新增 ORM。没有代码证据表明当前 SQL/db0 不足以支撑上述少量本地表。
 
@@ -445,7 +456,7 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 - Files：`docs/**`，必要时架构权威文件。
 - Dependencies：Git、当前 NewsNow 源码。
 - Acceptance Criteria：审计证据可定位；所有新架构标为 proposal；工作树业务代码不变。
-- Risks：Project Architect Skill 在当前环境不可用；已明确记录并按 brief 的约束完成替代性证据审计。
+- Risks：架构与洁癖 Skill 来自外部 Skill 仓库，执行时需读取其真实 `SKILL.md` 和指定参考文件。
 - Rollback：删除本轮新增 docs 即可，不影响运行时代码。
 
 ### Phase 1 — Brand / UI 精简
@@ -473,7 +484,7 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 ### Phase 3 — Vessel / Port / Voyage Domain
 
 - Goal：建立最小本地结构化模型和 SQL 存储。
-- In Scope：五张新增核心表、设置、当前状态、计划/当前 ETA、delay DTO。
+- In Scope：`feed_items`、`vessels`、`ports`、`voyages`、`events`、`settings` 六张新增核心表，当前状态、baseline/latest ETA/ETD、delay DTO。
 - Out of Scope：真实 Provider、完整 Snapshot 历史、Port Call。
 - Files：目标 `server/storage`、`server/domain`、`shared/types`、迁移/初始化测试。
 - Dependencies：Phase 0 contract；确认 db0 本地路径和表初始化方式。
@@ -527,14 +538,13 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 
 ## 17. 风险
 
-1. GitHub Fork 未完成：当前只有 `upstream`，后续需重新认证后再创建 `origin`。
-2. Architect Skill 不在当前环境：本轮未伪造 Skill，使用 brief 约束和代码证据完成审计；若提供 Skill，应复核权威 schema。
-3. NewsNow 上游持续变化：后续修改前需重新对比 upstream，避免盲目依赖生成文件。
-4. 本地 db0 文件位置尚未通过运行时确认：实施 Phase 3 前必须安装现有依赖并验证，不得猜测。
-5. Source 抓取失败/限流/版权：Provider 和 Source 必须隔离、限频、可禁用。
-6. 结构化数据定义不一致：所有 Provider 必须输出规范化 DTO 和 evidence。
-7. 过度建模：第一版不做完整 Port Call 和轨迹库。
-8. OAuth/Cloudflare/Docker 依赖关系不清：本轮保留，实施前做 Dependency Analysis。
+1. GitHub CLI API 认证仍无效：本地 `origin` 已可读，但账号级元数据无法由 `gh` 验证。
+2. NewsNow 上游持续变化：后续修改前需重新对比 upstream，避免盲目依赖生成文件。
+3. 本地 db0 文件位置尚未通过运行时确认：实施 Phase 3 前必须安装现有依赖并验证，不得猜测。
+4. Source 抓取失败/限流/版权：Provider 和 Source 必须隔离、限频、可禁用。
+5. 结构化数据定义不一致：所有 Provider 必须输出规范化 DTO 和 evidence。
+6. 过度建模：第一版不做完整 Port Call 和轨迹库。
+7. OAuth/Cloudflare/Docker 依赖关系不清：本轮保留，实施前做 Dependency Analysis。
 
 ## 18. 验收条件
 
@@ -560,13 +570,11 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 
 ## 20. 待确认事项
 
-1. Fork 是否需要在 GitHub 重新认证后创建为个人 `shipping-hot`，并将其设置为 `origin`？
+1. 是否接受当前本地 `origin` 与 GitHub 仓库已存在、但 `gh` 账号级验证仍 pending 的状态？
 2. 本地第一版是否保留 NewsNow 的全部非航运 Source 作为过渡，还是 Phase 1 后仅显示航运资讯？
 3. 事件默认阈值与 Snapshot/Event 保留天数是否接受本计划的初始值？
-4. 第一版是否需要 `feed_items` 的跨 Source 去重，还是先沿用 `cache` + Source 卡片？
-5. 首个真实 Vessel/Port Provider 的成本、访问性、许可和 API Key 是否满足本地使用？
-6. `/news` 是否需要独立资讯阅读模式？当前提案暂不建立。
-7. 是否提供当前 Project Architect Skill 的实际文件/路径，以便后续按其官方 schema 复核本提案？
+4. 首个真实 Vessel/Port Provider 的成本、访问性、许可和 API Key 是否满足本地使用？
+5. `/news` 是否需要独立资讯阅读模式？当前提案暂不建立。
 
 ## 架构问题 Q1–Q17
 
@@ -577,14 +585,14 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 - **Q5：** Vessel Snapshot 不是全量轨迹必需；仅为变化检测/短期审计有限保存。
 - **Q6：** Port Snapshot 同理；如果只需当前拥堵等级，可先保存变化点或当前状态。
 - **Q7：** Voyage 通过 `vesselId` 关联 Vessel；不把船舶字段复制成航次实体。
-- **Q8：** `plannedETA` 来自计划，`currentETA` 来自最新运营数据；两者必须分别存储并带 source/updatedAt。
-- **Q9：** delay 是 current 与 planned 的可解释分钟差；缺基准时 unknown，不用抓取时间代替计划时间。
+- **Q8：** `baselineEta`/`baselineEtd` 是开始跟踪时的基准，`latestEta`/`latestEtd` 是最新值；基准不得被自动同步覆盖。
+- **Q9：** delay = `latestEta - baselineEta`；缺少任意一方时为 unknown。
 - **Q10：** FeedItem 是资讯；Vessel/Port/Voyage 是运营实体；Event 引用其中一个或多个；HOT 展示 Event 和相关 FeedItem。
 - **Q11：** 每个 Provider 独立刷新、状态和回退；服务层捕获错误，UI 展示 stale/error，不让单分支异常冒泡成整站失败。
 - **Q12：** 以 provider `updatedAt` 为准，统一输出 stale/error/sourceStatus；请求时间不是数据时间。
 - **Q13：** 对第一版本地单用户模型，现有 db0/SQLite 足够；需复用 cache、保留 user，增加最小结构化表，不换 ORM。
 - **Q14：** 没有证据需要 ORM；当前 db0 SQL 初始化直接可用，新增 ORM 只会增加迁移和依赖成本。
-- **Q15：** 结构化最小新增五表：vessels、ports、voyages、events、settings；是否新增 feed_items 取决于资讯去重需求；现有 cache/user 不应立即删除。
+- **Q15：** V1 核心表为 `cache`、`user`、`feed_items`、`vessels`、`ports`、`voyages`、`events`、`settings`；其中 `user` 是遗留能力，`feed_items` 是正式 V1 航运资讯持久层。
 - **Q16：** 最小范围是资讯 Source + 本地关注实体 + Mock Provider + 确定性 Event + HOT freshness 展示，不接真实 API。
 - **Q17：** 完整 Port Call、AIS 轨迹、AI 摘要、Daily Digest、多 Provider 聚合、OAuth/云部署裁剪和所有真实数据采购均后置。
 

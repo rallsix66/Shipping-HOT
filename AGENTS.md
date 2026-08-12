@@ -36,3 +36,25 @@
 - Read `docs/status.md` before claiming current behavior.
 - Run the relevant typecheck, lint, test, and build checks when dependencies are installed.
 - Keep unverified runtime claims marked `pending`.
+
+## Task Closeout Rule
+
+Every Implementation Task must complete Closeout before it is reported complete:
+
+```text
+Implementation
+→ Verification
+→ typecheck
+→ lint
+→ test
+→ build
+→ Neat Freak / 洁癖 Closeout
+→ Status Update
+→ Completion Report
+```
+
+- Run the real Neat Freak Skill available in the active environment; do not invent a substitute workflow.
+- Closeout must check code vs `docs/status.md`, proposal vs implemented/verified state, architecture accuracy, roadmap/state/ADR needs, stale TODOs, duplicate/conflicting docs, temporary files, secrets/local databases, and `git status`.
+- If a check cannot run, mark it `pending` and state why; never write `verified` without evidence.
+- Architecture-changing tasks must follow `Architect → Architecture Approval → Implementation → Verification → Neat Freak Closeout`; ordinary bug/style/page changes do not repeat Architect unless their boundaries change.
+- Do not delete cleanup candidates during Closeout without explicit user confirmation after the full report.

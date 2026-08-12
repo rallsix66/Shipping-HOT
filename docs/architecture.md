@@ -165,7 +165,7 @@ Changes that can remain local implementation decisions:
 | Shipping HOT target architecture | proposal | Must not be implemented yet | User confirms or requests `/architect change` |
 | Project Architect/Neat Freak docs reconciliation | changed-and-verified after this pass | Docs must remain one source of truth | Re-run closeout after implementation |
 | Runtime/database file path | pending | Cannot claim local DB behavior verified | Install/execute only in a later authorized verification task |
-| GitHub Fork/origin | pending | No personal `origin` exists | Re-authenticate `gh`, then create fork if desired |
+| GitHub remote/account metadata | pending | Local `origin` reaches `rallsix66/Shipping-HOT` and exposes `main`; `gh auth status` still reports an invalid token | Re-authenticate `gh` before account-level operations |
 | Real shipping data sources | pending | Cost/access/licensing unknown | Evaluate one provider before Phase 5 |
 | Current OAuth/cloud deployment code | implemented, not runtime-verified | May be unnecessary locally but dependencies are not mapped | Dependency analysis before removal |
 
@@ -175,4 +175,3 @@ Changes that can remain local implementation decisions:
 - `docs/adr/ADR-002-local-first-single-user-architecture.md`
 - `docs/adr/ADR-003-separate-information-and-operational-data.md`
 - Detailed unapproved proposal: `docs/plans/shipping-hot-v1.md`
-
