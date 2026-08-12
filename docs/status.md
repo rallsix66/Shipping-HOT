@@ -10,8 +10,8 @@ The baseline was a clean checkout of NewsNow; the current workspace adds only th
 
 ## 2. Current Environment
 
-- Active branch / version: `main`, HEAD `2385bc38f539f28fb180ab5c26b2316b74576422`, package version `0.0.41`
-- Git remotes: `origin=https://github.com/rallsix66/Shipping-HOT.git` and `upstream=https://github.com/ourongxing/newsnow.git`; `git ls-remote origin refs/heads/main` reports `2385bc38f539f28fb180ab5c26b2316b74576422`; GitHub CLI API authentication is still invalid, so account metadata was not API-verified
+- Active branch: `main`; package version: `0.0.41`
+- Git remotes: `origin=https://github.com/rallsix66/Shipping-HOT.git` and `upstream=https://github.com/ourongxing/newsnow.git`; GitHub CLI API authentication is still invalid, so account metadata was not API-verified
 - Local run status: `pending`; `node_modules/` is absent and no install/run was authorized
 - Deployment status: `out-of-scope`; repository contains optional Cloudflare/Vercel/Bun/Docker configuration, but no deployment was performed
 - Database / external services: db0 is configured; local Node uses `better-sqlite3`; exact runtime DB file location is `pending`
@@ -96,6 +96,6 @@ User reviews `docs/architecture.md` and `docs/plans/shipping-hot-v1.md`; no impl
 | Code | verified-current | Current `main` tree, package/config, server, shared and UI files inspected; runtime behavior not included | Treat code/config as authority for current implementation |
 | Runtime | pending | No `node_modules/`; no install, server, build or live probe performed | Verify only in a separately authorized task |
 | Documentation | changed-and-verified | `docs/architecture.md`, `docs/status.md`, ADRs and proposal were reconciled; links are relative existing paths | Keep current status/proposal split |
-| Rules | changed-and-verified | New 38-line root `AGENTS.md`; no project `CLAUDE.md` or override; global Codex `AGENTS.md` is empty | Use `AGENTS.md` as the project entry point |
+| Rules | changed-and-verified | Root `AGENTS.md` defines project guardrails, verification rules, architecture-change workflow, and mandatory task Closeout; no project `CLAUDE.md` or override; global Codex `AGENTS.md` is empty | Use `AGENTS.md` as the project entry point |
 | Memory | not-applicable | No project memory store or user-authorized memory write was identified | No memory files changed |
 | Workspace | changed-and-verified | `git status` reports a clean working tree; no business files changed | Preserve the clean workspace; no cleanup performed |
