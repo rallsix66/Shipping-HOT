@@ -1,7 +1,7 @@
 # ADR-002: Local-first Single-user Architecture
 
 - Date: 2026-08-11
-- Status: proposed
+- Status: accepted for the local Mock implementation; cloud and real Provider paths remain deferred
 - Decision owners: User
 - Supersedes: None
 - Superseded by: None
@@ -12,7 +12,7 @@ Shipping HOT is intended for one person on Windows, accessed through localhost. 
 
 ## Decision
 
-Propose one repository, one modular monolith, one local database, local settings and progressive enhancement. External Providers are optional adapters. Core pages and deterministic event rules must work without AI keys and without a real Provider.
+Use one repository, one modular monolith, local settings and progressive enhancement. External Providers are optional adapters. Core pages and deterministic event rules work without AI keys and without a real Provider.
 
 ## Reasons
 
@@ -70,4 +70,3 @@ Propose one repository, one modular monolith, one local database, local settings
 - `docs/architecture.md`
 - `docs/status.md`
 - `docs/plans/shipping-hot-v1.md`
-

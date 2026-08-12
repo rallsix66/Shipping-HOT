@@ -1,7 +1,7 @@
 # ADR-003: Separate Information Feed from Operational Shipping Data
 
 - Date: 2026-08-11
-- Status: proposed
+- Status: accepted for the local Mock implementation
 - Decision owners: User
 - Supersedes: None
 - Superseded by: None
@@ -12,7 +12,7 @@ NewsNow models articles and ranked items as `NewsItem[]`. Shipping HOT additiona
 
 ## Decision
 
-Propose two explicit data worlds:
+Use two explicit data worlds:
 
 - Information Feed: normalized FeedItems from News Sources.
 - Operational Data: Vessel, Port, Voyage and Provider Snapshots.
@@ -75,4 +75,3 @@ Use Event as the evidence-bearing convergence layer. HOT is a query/aggregation 
 - `docs/architecture.md`
 - `docs/status.md`
 - `docs/plans/shipping-hot-v1.md`
-

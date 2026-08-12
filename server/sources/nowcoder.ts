@@ -23,10 +23,7 @@ export default defineSource(async () => {
         url = `https://www.nowcoder.com/discuss/${k.id}`
         id = k.id
       }
-      return {
-        id,
-        title: k.title,
-        url,
-      }
+      return id && url ? { id, title: k.title, url } : undefined
     })
+    .filter((item): item is { id: string, title: string, url: string } => !!item)
 })

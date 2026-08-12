@@ -1,12 +1,12 @@
 # Shipping HOT v1 Architecture Proposal
 
-状态：`proposal`。本计划来自对当前 NewsNow 代码的 Brownfield 审计；不表示任何 Shipping HOT 业务功能已经实现、批准或验证。
+状态：`implemented-mock / real-providers-deferred`。本计划的本地 Mock 闭环已按用户授权实现并验证；真实 AIS、港口、航期、天气 Provider 仍保持 deferred。
 
 ## 1. 背景
 
 目标是在 NewsNow 现有代码基础上，渐进改造成个人本地航运情报聚合与船舶跟踪工具。产品只关注用户关注的船、港口和可能影响货物的航运信息，不扩展为 ERP、TMS、WMS、全球 AIS 平台或多人 SaaS。
 
-本轮已经完成仓库准备和只读审计，未安装依赖、未迁移数据库、未修改业务代码。当前本地 Git 已配置 `origin=https://github.com/rallsix66/Shipping-HOT.git` 和 `upstream=https://github.com/ourongxing/newsnow.git`；`git ls-remote origin` 可读到 `main`，但 GitHub CLI token 仍无效，因此账号级元数据保持 `pending`。
+本轮已完成本地 Mock 闭环：依赖已安装（原生 `better-sqlite3` 在当前 Node 24 环境构建失败，因此运行时使用内存 fallback）、UI/API/Domain/Event Engine/测试已实现并验证。当前本地 Git 已配置 `origin=https://github.com/rallsix66/Shipping-HOT.git` 和 `upstream=https://github.com/ourongxing/newsnow.git`；GitHub CLI token 仍无效，因此账号级元数据保持 `pending`。
 
 ## 2. 当前 NewsNow 架构
 
@@ -450,27 +450,27 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 
 ### Phase 0 — NewsNow Audit + Architecture Contract
 
-- Goal：完成证据化审计、复用矩阵、边界和 proposal 文档。
+- Goal：完成证据化审计、复用矩阵、边界和实现前架构文档。
 - In Scope：仓库准备、文档、ADR、路线和风险。
 - Out of Scope：任何业务代码、依赖、数据库变更。
 - Files：`docs/**`，必要时架构权威文件。
 - Dependencies：Git、当前 NewsNow 源码。
-- Acceptance Criteria：审计证据可定位；所有新架构标为 proposal；工作树业务代码不变。
+- Acceptance Criteria：审计证据可定位；本地 Mock 架构边界明确；真实 Provider 保持 deferred。
 - Risks：架构与洁癖 Skill 来自外部 Skill 仓库，执行时需读取其真实 `SKILL.md` 和指定参考文件。
 - Rollback：删除本轮新增 docs 即可，不影响运行时代码。
 
-### Phase 1 — Brand / UI 精简
+### Phase 1 — Brand / UI 精简（implemented-mock）
 
 - Goal：将 NewsNow 品牌和导航最小化改为 Shipping HOT，保留布局、卡片、响应式和 PWA 资产。
 - In Scope：名称、首页骨架、导航占位、空状态和视觉文案。
 - Out of Scope：真实航运数据、数据库、Provider、OAuth 裁剪。
 - Files：现有 `src/**`、PWA metadata、可能的 `public/**`。
-- Dependencies：用户明确回复“架构确认，开始执行 Phase 1”。
+- Dependencies：用户已确认架构并授权连续执行 Phase 1–4。
 - Acceptance Criteria：现有新闻卡片仍可运行；不引入新框架；路由和品牌行为有测试/手工记录。
 - Risks：过早删除登录/部署入口；先保留并通过后续依赖分析处理。
 - Rollback：按文件回滚品牌和导航变更。
 
-### Phase 2 — Shipping Information Sources
+### Phase 2 — Shipping Information Sources（implemented-mock）
 
 - Goal：把资讯流扩展为航运 Source，并保持 NewsNow Source contract。
 - In Scope：公告、航运新闻、天气/台风资讯的 normalized FeedItem；Source status。
@@ -481,7 +481,7 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 - Risks：抓取不稳定、版权、供应商格式变化。
 - Rollback：关闭新增 Source metadata/adapter，不删除 NewsNow 原有 Source。
 
-### Phase 3 — Vessel / Port / Voyage Domain
+### Phase 3 — Vessel / Port / Voyage Domain（implemented-mock）
 
 - Goal：建立最小本地结构化模型和 SQL 存储。
 - In Scope：`feed_items`、`vessels`、`ports`、`voyages`、`events`、`settings` 六张新增核心表，当前状态、baseline/latest ETA/ETD、delay DTO。
@@ -492,7 +492,7 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 - Risks：表过度建模、破坏现有 cache/user 初始化。
 - Rollback：新增表与服务隔离，不改现有 cache/user schema。
 
-### Phase 4 — Mock Provider + Event Engine
+### Phase 4 — Mock Provider + Event Engine（implemented-mock）
 
 - Goal：用 fixture 驱动确定性异常检测。
 - In Scope：Mock Vessel/Port/Schedule Provider、snapshot compare、事件去重、freshness。
@@ -558,7 +558,7 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 - 已给出目标目录职责与依赖方向。
 - 已给出每个 Phase 的 Goal/In Scope/Out of Scope/Files/Dependencies/Acceptance/Risk/Rollback。
 - 新增内容只在 `docs/**`，没有改动业务源码、依赖、锁文件或数据库。
-- 所有 Shipping HOT 结论保持 `proposal`。
+- 本地 Mock 闭环结论标记为 `implemented / verified`；真实 Provider、持久化 SQLite 在当前环境分别标记 `deferred / pending`。
 
 ## 19. 明确不做
 
@@ -650,4 +650,4 @@ Domain 规则使用确定性单元测试；Provider 使用 fixture/mock；Storag
 
 ### Change Rules
 
-架构确认前禁止业务实现；删除 NewsNow 能力、改数据库/认证/部署、引入框架或 Provider 需要新的架构变更确认；所有未确认目标保持 `proposal`。
+已确认的本地 Mock 范围允许继续维护；删除 NewsNow 能力、改数据库/认证/部署、引入框架或接入真实 Provider 需要新的架构变更确认；所有未确认目标保持 `proposal` 或 `deferred`。

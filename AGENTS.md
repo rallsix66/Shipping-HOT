@@ -2,8 +2,8 @@
 
 ## Project
 
-- Current codebase: NewsNow, being evaluated as the foundation for the proposed local Shipping HOT tool.
-- Shipping HOT remains `proposal`; do not describe it as implemented or verified.
+- Current codebase: NewsNow foundation with a local Shipping HOT Mock implementation.
+- Shipping HOT Mock flows are implemented and verified where stated in `docs/status.md`; real external Providers remain `deferred`.
 
 ## Commands
 
@@ -17,14 +17,15 @@
 - Architecture foundation: `docs/architecture.md`
 - Implementation status: `docs/status.md`
 - Decisions: `docs/adr/`
-- Shipping HOT proposal: `docs/plans/shipping-hot-v1.md`
+- Shipping HOT roadmap and Provider deferral: `docs/plans/shipping-hot-v1.md`
 
 ## Guardrails
 
 - Preserve the existing Vite + React + Nitro + db0 modular monolith unless an approved architecture change says otherwise.
 - Keep Information Feed and Operational Data separate; providers must not leak vendor formats into Domain or UI.
 - Do not make UI components call external APIs or SQLite directly.
-- Do not add real shipping APIs, ORM migrations, or Shipping HOT business code while the proposal is unconfirmed.
+- Do not add real shipping APIs, paid services, provider SDKs, or ORM migrations without a new architecture decision.
+- Keep Mock Providers, fixtures, deterministic Domain rules, and local fallback behavior independent from real API credentials.
 
 ## Confirm Before
 

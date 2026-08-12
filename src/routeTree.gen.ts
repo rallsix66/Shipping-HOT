@@ -9,13 +9,67 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VoyagesRouteImport } from './routes/voyages'
+import { Route as VesselsRouteImport } from './routes/vessels'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as PortsRouteImport } from './routes/ports'
+import { Route as FeedRouteImport } from './routes/feed'
+import { Route as EventsRouteImport } from './routes/events'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VoyagesIdRouteImport } from './routes/voyages.$id'
+import { Route as VesselsIdRouteImport } from './routes/vessels.$id'
+import { Route as PortsIdRouteImport } from './routes/ports.$id'
 import { Route as CColumnRouteImport } from './routes/c.$column'
 
+const VoyagesRoute = VoyagesRouteImport.update({
+  id: '/voyages',
+  path: '/voyages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VesselsRoute = VesselsRouteImport.update({
+  id: '/vessels',
+  path: '/vessels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortsRoute = PortsRouteImport.update({
+  id: '/ports',
+  path: '/ports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedRoute = FeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const VoyagesIdRoute = VoyagesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => VoyagesRoute,
+} as any)
+const VesselsIdRoute = VesselsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => VesselsRoute,
+} as any)
+const PortsIdRoute = PortsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => PortsRoute,
 } as any)
 const CColumnRoute = CColumnRouteImport.update({
   id: '/c/$column',
@@ -25,38 +79,168 @@ const CColumnRoute = CColumnRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/events': typeof EventsRoute
+  '/feed': typeof FeedRoute
+  '/ports': typeof PortsRouteWithChildren
+  '/settings': typeof SettingsRoute
+  '/vessels': typeof VesselsRouteWithChildren
+  '/voyages': typeof VoyagesRouteWithChildren
   '/c/$column': typeof CColumnRoute
+  '/ports/$id': typeof PortsIdRoute
+  '/vessels/$id': typeof VesselsIdRoute
+  '/voyages/$id': typeof VoyagesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/events': typeof EventsRoute
+  '/feed': typeof FeedRoute
+  '/ports': typeof PortsRouteWithChildren
+  '/settings': typeof SettingsRoute
+  '/vessels': typeof VesselsRouteWithChildren
+  '/voyages': typeof VoyagesRouteWithChildren
   '/c/$column': typeof CColumnRoute
+  '/ports/$id': typeof PortsIdRoute
+  '/vessels/$id': typeof VesselsIdRoute
+  '/voyages/$id': typeof VoyagesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/events': typeof EventsRoute
+  '/feed': typeof FeedRoute
+  '/ports': typeof PortsRouteWithChildren
+  '/settings': typeof SettingsRoute
+  '/vessels': typeof VesselsRouteWithChildren
+  '/voyages': typeof VoyagesRouteWithChildren
   '/c/$column': typeof CColumnRoute
+  '/ports/$id': typeof PortsIdRoute
+  '/vessels/$id': typeof VesselsIdRoute
+  '/voyages/$id': typeof VoyagesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/c/$column'
+  fullPaths:
+    | '/'
+    | '/events'
+    | '/feed'
+    | '/ports'
+    | '/settings'
+    | '/vessels'
+    | '/voyages'
+    | '/c/$column'
+    | '/ports/$id'
+    | '/vessels/$id'
+    | '/voyages/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/c/$column'
-  id: '__root__' | '/' | '/c/$column'
+  to:
+    | '/'
+    | '/events'
+    | '/feed'
+    | '/ports'
+    | '/settings'
+    | '/vessels'
+    | '/voyages'
+    | '/c/$column'
+    | '/ports/$id'
+    | '/vessels/$id'
+    | '/voyages/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/events'
+    | '/feed'
+    | '/ports'
+    | '/settings'
+    | '/vessels'
+    | '/voyages'
+    | '/c/$column'
+    | '/ports/$id'
+    | '/vessels/$id'
+    | '/voyages/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  EventsRoute: typeof EventsRoute
+  FeedRoute: typeof FeedRoute
+  PortsRoute: typeof PortsRouteWithChildren
+  SettingsRoute: typeof SettingsRoute
+  VesselsRoute: typeof VesselsRouteWithChildren
+  VoyagesRoute: typeof VoyagesRouteWithChildren
   CColumnRoute: typeof CColumnRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/voyages': {
+      id: '/voyages'
+      path: '/voyages'
+      fullPath: '/voyages'
+      preLoaderRoute: typeof VoyagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vessels': {
+      id: '/vessels'
+      path: '/vessels'
+      fullPath: '/vessels'
+      preLoaderRoute: typeof VesselsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ports': {
+      id: '/ports'
+      path: '/ports'
+      fullPath: '/ports'
+      preLoaderRoute: typeof PortsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed': {
+      id: '/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof FeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/voyages/$id': {
+      id: '/voyages/$id'
+      path: '/$id'
+      fullPath: '/voyages/$id'
+      preLoaderRoute: typeof VoyagesIdRouteImport
+      parentRoute: typeof VoyagesRoute
+    }
+    '/vessels/$id': {
+      id: '/vessels/$id'
+      path: '/$id'
+      fullPath: '/vessels/$id'
+      preLoaderRoute: typeof VesselsIdRouteImport
+      parentRoute: typeof VesselsRoute
+    }
+    '/ports/$id': {
+      id: '/ports/$id'
+      path: '/$id'
+      fullPath: '/ports/$id'
+      preLoaderRoute: typeof PortsIdRouteImport
+      parentRoute: typeof PortsRoute
     }
     '/c/$column': {
       id: '/c/$column'
@@ -68,8 +252,46 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface PortsRouteChildren {
+  PortsIdRoute: typeof PortsIdRoute
+}
+
+const PortsRouteChildren: PortsRouteChildren = {
+  PortsIdRoute: PortsIdRoute,
+}
+
+const PortsRouteWithChildren = PortsRoute._addFileChildren(PortsRouteChildren)
+
+interface VesselsRouteChildren {
+  VesselsIdRoute: typeof VesselsIdRoute
+}
+
+const VesselsRouteChildren: VesselsRouteChildren = {
+  VesselsIdRoute: VesselsIdRoute,
+}
+
+const VesselsRouteWithChildren =
+  VesselsRoute._addFileChildren(VesselsRouteChildren)
+
+interface VoyagesRouteChildren {
+  VoyagesIdRoute: typeof VoyagesIdRoute
+}
+
+const VoyagesRouteChildren: VoyagesRouteChildren = {
+  VoyagesIdRoute: VoyagesIdRoute,
+}
+
+const VoyagesRouteWithChildren =
+  VoyagesRoute._addFileChildren(VoyagesRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  EventsRoute: EventsRoute,
+  FeedRoute: FeedRoute,
+  PortsRoute: PortsRouteWithChildren,
+  SettingsRoute: SettingsRoute,
+  VesselsRoute: VesselsRouteWithChildren,
+  VoyagesRoute: VoyagesRouteWithChildren,
   CColumnRoute: CColumnRoute,
 }
 export const routeTree = rootRouteImport

@@ -56,3 +56,38 @@ button:disabled {
 .grabbing * {
   cursor: grabbing;
 }
+
+::selection { background: #0f766e; color: white; }
+
+.shipping-shell { color: #172033; }
+.dark .shipping-shell { color: #eef5f4; }
+.nav-link { --at-apply: rounded-lg px-3 py-2 op-70 transition-colors; }
+.nav-link:hover, .nav-link.active { --at-apply: bg-primary/10 op-100 text-primary; }
+.data-card, .section-panel, .hot-card, .stat-card { --at-apply: rounded-2xl border border-primary/12 bg-white/65 p-5 shadow-sm transition-all; }
+.dark .data-card, .dark .section-panel, .dark .hot-card, .dark .stat-card { --at-apply: bg-neutral-900/50; }
+.data-card:hover, .hot-card:hover { --at-apply: border-primary/35 shadow-lg shadow-primary/10; transform: translateY(-2px); }
+.hot-card { --at-apply: border-l-4 border-l-primary; }
+.stat-card { --at-apply: flex flex-col gap-2; }
+.stat-card span { --at-apply: text-xs uppercase tracking-wider op-60; }
+.stat-card strong { --at-apply: text-2xl font-bold capitalize; }
+.tone-warning strong { --at-apply: text-orange-600; }
+.tone-critical strong { --at-apply: text-red-600; }
+.status-badge, .severity, .filter-button { --at-apply: inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold capitalize; }
+.status-fresh { --at-apply: bg-green-500/15 text-green-700 dark:text-green-300; }
+.status-stale { --at-apply: bg-orange-500/15 text-orange-700 dark:text-orange-300; }
+.status-failed { --at-apply: bg-red-500/15 text-red-700 dark:text-red-300; }
+.severity-info { --at-apply: bg-blue-500/15 text-blue-700 dark:text-blue-300; }
+.severity-watch { --at-apply: bg-yellow-500/20 text-yellow-700 dark:text-yellow-300; }
+.severity-warning { --at-apply: bg-orange-500/20 text-orange-700 dark:text-orange-300; }
+.severity-critical { --at-apply: bg-red-500/20 text-red-700 dark:text-red-300; }
+.filter-button { --at-apply: border border-primary/15 bg-transparent px-4 py-2; }
+.filter-button.selected, .primary-button { --at-apply: bg-primary text-white; }
+.primary-button { --at-apply: rounded-xl px-4 py-2 font-semibold transition-opacity hover:op-85; }
+.list-row { --at-apply: flex items-center justify-between border-b border-primary/10 py-3 transition-colors hover:bg-primary/5; }
+.detail-grid { --at-apply: grid grid-cols-[minmax(120px,0.5fr)_1fr] gap-y-3 text-sm; }
+.detail-grid dt { --at-apply: op-60; }
+.detail-grid dd { --at-apply: font-semibold; }
+.setting-row { --at-apply: flex items-center justify-between gap-4 border-b border-primary/10 py-4; }
+.setting-row span { --at-apply: flex flex-col gap-1; }
+.setting-row small { --at-apply: op-60; }
+.setting-row input { --at-apply: w-24 rounded-lg border border-primary/20 bg-transparent px-3 py-2 text-right; }

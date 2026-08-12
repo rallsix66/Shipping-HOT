@@ -1,7 +1,7 @@
 # ADR-001: Use NewsNow as the Shipping HOT Foundation
 
 - Date: 2026-08-11
-- Status: proposed
+- Status: accepted for the local Mock implementation; real Provider expansion remains deferred
 - Decision owners: User
 - Supersedes: None
 - Superseded by: None
@@ -12,7 +12,7 @@ NewsNow already provides a React/Vite/Nitro modular monolith, Source metadata, f
 
 ## Decision
 
-Propose retaining NewsNow as the implementation foundation and adapting existing Source, cache, UI and routing boundaries incrementally. This proposal is not approved yet.
+Retain NewsNow as the implementation foundation and adapt existing Source, cache, UI and routing boundaries incrementally. The local Mock implementation is approved within this boundary; real Provider expansion remains deferred.
 
 ## Reasons
 
@@ -49,8 +49,8 @@ Propose retaining NewsNow as the implementation foundation and adapting existing
 ## Migration and Compatibility
 
 - Existing data: preserve `cache` and `user` until dependency analysis.
-- Existing interfaces: preserve `/api/s`, SourceGetter and current routes during proposal review.
-- Rollout sequence: architecture confirmation, then a separately approved implementation phase.
+- Existing interfaces: preserve `/api/s`, SourceGetter and current routes while Shipping HOT runs beside them.
+- Rollout sequence: local Mock implementation first; real Provider expansion requires a separate decision.
 - Compatibility period: until all current NewsNow consumers are mapped.
 
 ## Rollback
@@ -69,4 +69,3 @@ Propose retaining NewsNow as the implementation foundation and adapting existing
 - `docs/architecture.md`
 - `docs/status.md`
 - `docs/plans/shipping-hot-v1.md`
-
