@@ -1,7 +1,7 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
 > Snapshot date: 2026-08-13
-> Evidence scope: local code / configuration / Git metadata; Event Engine test determinism, typecheck, full test execution and build completed in this pass; lint, fresh API smoke and SQLite restart persistence remain pending or blocked for their recorded reasons; real external Providers not used
+> Evidence scope: local code / configuration / Git metadata; typecheck, full test execution and build completed in this pass; lint, fresh API smoke and SQLite restart persistence remain pending or blocked for their recorded reasons; real external Providers not used
 > Source of truth for: current implementation and verification state
 
 ## 1. One-Sentence Status
@@ -16,7 +16,7 @@ Shipping HOT local Mock implementation is in place on the retained NewsNow stack
 - Deployment status: `out-of-scope`; repository contains optional Cloudflare/Vercel/Bun/Docker configuration, but no deployment was performed
 - Database / external services: `feed_items`, `vessels`, `ports`, `voyages`, `events`, and `settings` now have Repository seed/list/upsert/reconcile/settings/retention paths; compatible SQLite restart persistence remains pending because `better-sqlite3` could not build under Node 24 without Visual Studio C++ tools; real external services are deferred
 - Mock fixture timestamps: generated relative to the runtime clock when a snapshot is created; deterministic fixed time is limited to `shared/shipping-engine.test.ts`
-- Last verified surface: source tree inspection, `git diff --check`, typecheck passed, full test suite (68/68 passed), and production build; lint, fresh Mock API smoke and SQLite restart persistence remain pending or blocked for their recorded reasons
+- Last verified surface: source tree inspection, `git diff --check`, typecheck passed, full test suite (68/68 passed), and production build passed in this closeout; lint, fresh Mock API smoke and SQLite restart persistence remain pending or blocked for their recorded reasons
 
 ## 3. Current Architecture Summary
 
@@ -83,9 +83,10 @@ Shipping HOT local Mock implementation is in place on the retained NewsNow stack
 
 ## 8. Current Work and Blockers
 
-- Active work: Mock-based local Shipping HOT core repair and verification closeout.
-- Blockers: lint remains blocked by 356 existing style/import errors and 4 warnings after removing only rules absent from the installed ESLint React plugin; compatible native SQLite toolchain, fresh API smoke, real Provider selection/access and GitHub CLI account authentication remain deferred/pending.
-- Verification: typecheck passed; full test suite passed 68/68, including Event Engine 5/5 and shipping rules 18/18; build passed; fresh API smoke, SQLite restart persistence, deployment/live state and real Provider behavior remain pending.
+- Active work: post-seal verification status closeout; no core business logic or product feature changes in this pass.
+- Blockers: lint remains pending with 356 existing style/import/format errors and 4 warnings, mainly across retained NewsNow and existing Shipping HOT surfaces; this pass made no broad lint changes. Compatible native SQLite toolchain, fresh API smoke, real Provider selection/access and GitHub CLI account authentication remain deferred/pending.
+- Verification: typecheck = passed; full test = passed (68/68, including Event Engine 5/5 and shipping rules 18/18); build = passed; lint = pending (356 errors / 4 warnings); fresh API smoke = pending; SQLite restart persistence = pending; Neat Freak Closeout = verified.
+- Neat Freak Closeout: verified. Real Skill loaded from `C:\Users\Administrator\.codex\skills\neat-freak\SKILL.md` and its `scripts/audit-inventory.sh` audit executed successfully in the active environment; audit confirmed the current Git/workspace inventory.
 
 ## 9. Recommended Next Action
 
