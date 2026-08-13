@@ -22,27 +22,29 @@ export function mergeProviderVessel(previous: Vessel | undefined, provider: Vess
 }
 
 export function mergeProviderVoyage(previous: Voyage | undefined, provider: Voyage): Voyage {
-  if (!previous) {
-    const baselineEta = provider.baselineEta ?? provider.latestEta
-    const baselineEtd = provider.baselineEtd ?? provider.latestEtd
-    return {
-      ...provider,
-      baselineEta,
-      baselineEtd,
-      baselineEtaSource: provider.latestEtaSource ?? provider.baselineEtaSource,
-      baselineEtdSource: provider.latestEtdSource ?? provider.baselineEtdSource,
-      delayMinutes: calculateDelayMinutes(baselineEta, provider.latestEta),
-    }
-  }
-  const baselineEta = previous.baselineEta ?? provider.baselineEta ?? provider.latestEta
-  const baselineEtd = previous.baselineEtd ?? provider.baselineEtd ?? provider.latestEtd
+  const baselineEta = previous?.baselineEta ?? provider.baselineEta ?? provider.latestEta
+  const baselineEtd = previous?.baselineEtd ?? provider.baselineEtd ?? provider.latestEtd
+  const baselineEtaSource = previous?.baselineEta !== undefined
+    ? previous.baselineEtaSource
+    : provider.baselineEta !== undefined
+      ? provider.baselineEtaSource
+      : provider.latestEta !== undefined
+        ? provider.latestEtaSource
+        : undefined
+  const baselineEtdSource = previous?.baselineEtd !== undefined
+    ? previous.baselineEtdSource
+    : provider.baselineEtd !== undefined
+      ? provider.baselineEtdSource
+      : provider.latestEtd !== undefined
+        ? provider.latestEtdSource
+        : undefined
   return {
     ...previous,
     ...provider,
     baselineEta,
     baselineEtd,
-    baselineEtaSource: previous.baselineEta !== undefined ? previous.baselineEtaSource : provider.latestEtaSource ?? provider.baselineEtaSource,
-    baselineEtdSource: previous.baselineEtd !== undefined ? previous.baselineEtdSource : provider.latestEtdSource ?? provider.baselineEtdSource,
+    baselineEtaSource,
+    baselineEtdSource,
     delayMinutes: calculateDelayMinutes(baselineEta, provider.latestEta),
   }
 }
