@@ -15,6 +15,7 @@ Shipping HOT local Mock implementation is in place on the retained NewsNow stack
 - Local run status: `pending`; the service path now routes through Mock Providers and Repository code, but a fresh Nitro smoke run was blocked by the incomplete dependency tree
 - Deployment status: `out-of-scope`; repository contains optional Cloudflare/Vercel/Bun/Docker configuration, but no deployment was performed
 - Database / external services: `feed_items`, `vessels`, `ports`, `voyages`, `events`, and `settings` now have Repository seed/list/upsert/reconcile/settings/retention paths; compatible SQLite restart persistence remains pending because `better-sqlite3` could not build under Node 24 without Visual Studio C++ tools; real external services are deferred
+- Mock fixture timestamps: generated relative to the runtime clock when a snapshot is created; deterministic fixed time is limited to `shared/shipping-engine.test.ts`
 - Last verified surface: source tree inspection, `git diff --check`, typecheck passed, full test suite (68/68 passed), and production build; lint, fresh Mock API smoke and SQLite restart persistence remain pending or blocked for their recorded reasons
 
 ## 3. Current Architecture Summary
@@ -94,7 +95,7 @@ Next: review the implemented Mock loop, then separately evaluate any real Provid
 
 | Fact surface | State | Evidence / limitation | Action |
 |---|---|---|---|
-| Code | changed-and-verified | Shipping HOT shared Domain, Provider orchestration, local Vessel/Voyage ownership merge, API validation, Repository paths, routes, UI and tests inspected; Event Engine determinism and typecheck fixes are covered by passing checks | Treat code/config as authority for current implementation |
+| Code | changed-and-verified | Shipping HOT shared Domain, Provider orchestration, local Vessel/Voyage ownership merge, API validation, Repository paths, routes, UI and tests inspected; runtime-relative Mock fixture timestamps and Event Engine test determinism are covered by passing checks | Treat code/config as authority for current implementation |
 | Runtime | pending | Fresh Nitro server smoke and SQLite restart persistence could not run because the dependency tree could not be restored offline | Do not claim runtime persistence verified |
 | Documentation | changed-and-verified | Architecture, status, ADRs and roadmap now distinguish implemented Mock scope from deferred real integrations | Keep implementation/deferred split |
 | Rules | changed-and-verified | Root `AGENTS.md` defines project guardrails, verification rules, architecture-change workflow, and mandatory task Closeout; no project `CLAUDE.md` or override; global Codex `AGENTS.md` is empty | Use `AGENTS.md` as the project entry point |

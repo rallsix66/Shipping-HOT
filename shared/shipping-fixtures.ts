@@ -1,8 +1,20 @@
 import type { FeedItem, Port, ShippingEvent, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "./shipping"
 import { calculateDelayMinutes } from "./shipping-rules"
 
-const now = Date.parse("2026-01-01T00:00:00.000Z")
-const iso = (offsetMinutes: number) => new Date(now + offsetMinutes * 60000).toISOString()
+const fixtureEpoch = Date.now()
+const iso = (offsetMinutes: number) => new Date(fixtureEpoch + offsetMinutes * 60000).toISOString()
+
+function rebaseSnapshot(snapshot: ShippingSnapshot): ShippingSnapshot {
+  const delta = Date.now() - fixtureEpoch
+  if (delta === 0) return snapshot
+  const shift = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(shift)
+    if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, shift(entry)]))
+    if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)) return new Date(Date.parse(value) + delta).toISOString()
+    return value
+  }
+  return shift(structuredClone(snapshot)) as ShippingSnapshot
+}
 
 export const mockVessels: Vessel[] = [
   { id: "vessel-ever-glory", name: "EVER GLORY", imo: "9876543", mmsi: "477123400", carrier: "Evergreen", shipType: "Container ship", isWatched: true, latitude: 22.276, longitude: 114.122, speed: 0.2, course: 180, navigationStatus: "anchored", statusChangedAt: iso(-150), destination: "CNSHK", eta: iso(720), updatedAt: iso(-8), stale: false, sourceStatus: "healthy" },
@@ -42,12 +54,12 @@ export const mockSettings: ShippingSettings = {
 }
 
 export function createMockSnapshot(): ShippingSnapshot {
-  return {
+  return rebaseSnapshot({
     vessels: structuredClone(mockVessels),
     ports: structuredClone(mockPorts),
     voyages: structuredClone(mockVoyages),
     events: structuredClone(mockEvents),
     feedItems: structuredClone(mockFeedItems),
     settings: structuredClone(mockSettings),
-  }
+  })
 }
