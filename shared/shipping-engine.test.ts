@@ -1,8 +1,17 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { detectShippingEvents } from "./shipping-engine"
 import { createMockSnapshot } from "./shipping-fixtures"
 
+vi.hoisted(() => {
+  vi.useFakeTimers()
+  vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"))
+})
+
 describe("Shipping HOT event engine", () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it("detects anchored, delay, congestion and feed signals", () => {
     const snapshot = createMockSnapshot()
     const events = detectShippingEvents(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, snapshot.settings, [], new Date().toISOString())

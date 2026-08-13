@@ -1,4 +1,4 @@
-import type { EventStatus, FeedItem, FreshnessState, HotItem, Port, Severity, ShippingEvent, ShippingSettings, Vessel, Voyage } from "./shipping"
+import type { EventStatus, FeedItem, FreshnessState, HotItem, Port, Severity, ShippingEvent, ShippingSettings, SourceStatus, Vessel, Voyage } from "./shipping"
 
 const severityWeight: Record<Severity, number> = { info: 1, watch: 2, warning: 3, critical: 4 }
 
@@ -91,7 +91,7 @@ export function freshnessState(item: { stale: boolean; sourceStatus: string }): 
   return item.stale ? "stale" : "fresh"
 }
 
-function relatedFreshness(event: ShippingEvent, ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[]): { stale: boolean, sourceStatus: string } {
+function relatedFreshness(event: ShippingEvent, ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[]): { stale: boolean, sourceStatus: SourceStatus } {
   if (event.feedItemId) {
     const feed = feedItems.find(item => item.id === event.feedItemId)
     if (feed) return feed
@@ -111,7 +111,7 @@ function relatedFreshness(event: ShippingEvent, ports: Port[], vessels: Vessel[]
   return { stale: true, sourceStatus: event.sourceStatus }
 }
 
-export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[] = [], now = new Date()): HotItem[] {
+export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[] = [], _now = new Date()): HotItem[] {
   const labels = new Map<string, string>()
   vessels.forEach(v => labels.set(v.id, v.name))
   ports.forEach(p => labels.set(p.id, p.name))
