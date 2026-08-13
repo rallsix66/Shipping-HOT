@@ -1,6 +1,6 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
-> Last verified: 2026-08-12
+> Last verified: 2026-08-13
 > Architecture status: approved for local Mock implementation; real Providers remain deferred
 > Source of truth for: the current retained system structure and approved boundaries
 
@@ -75,7 +75,7 @@ This is the smallest existing foundation compatible with the local Shipping HOT 
 | `cache` row | `server/database/cache.ts` | server cache service | `/api/s`, `/api/s/entire` | db0 table |
 | `user` row | `server/database/user.ts` | OAuth/sync handlers | authenticated sync | db0 table |
 | local focus/order metadata | `src/atoms` | browser Jotai/localStorage; optional sync | UI | browser localStorage, or synced user data when enabled |
-| Vessel/Port/Voyage/Event | `shared`, `server` and `src/components/shipping` | Mock Providers through `server/shipping-store.ts`; `ShippingRepository` persists state | HOT, detail pages and Event Engine | Repository-backed state when SQLite is available; explicit last-known in-memory fallback otherwise |
+| Vessel/Port/Voyage/Event | `shared`, `server` and `src/components/shipping` | Mock Providers through `server/shipping-store.ts`; `ShippingRepository` persists state; local Vessel `statusChangedAt` and Voyage baselines are retained by the service merge | HOT, detail pages and Event Engine | Repository-backed state when SQLite is available; explicit last-known in-memory fallback otherwise |
 
 ## 8. Key Data Flows
 
@@ -124,7 +124,7 @@ Information Feed and Operational Data remain separate and meet at the Event/HOT 
 
 - Source fetch failures are logged and may fall back to an existing cache row.
 - Missing auth configuration disables login-related behavior through middleware.
-- Shipping HOT DTOs now carry `updatedAt`, `stale`, `sourceStatus` and optional `error`; Mock/provider failures are isolated at the API boundary.
+- Shipping HOT DTOs now carry `updatedAt`, `stale`, `sourceStatus` and optional `error`; Mock/provider failures are isolated at the API boundary. HOT Event freshness follows the related Vessel/Port/Voyage/FeedItem rather than Event detection time, and disabled/degraded/failed sources are not treated as fresh.
 - Real adapters must preserve last-known data and the same freshness/error contract.
 
 ## 12. Deployment, Backup and Restore
@@ -139,7 +139,7 @@ Information Feed and Operational Data remain separate and meet at the Event/HOT 
 
 - Current tests: Vitest, primarily date parsing plus a placeholder common test.
 - Current verification state: server/client typecheck and `git diff --check` passed in this repair pass. Test/lint/build and fresh local Mock API smoke are pending because pnpm could not restore the dependency tree offline; the previous lint mismatch remains a known issue until rerun.
-- Shipping HOT tests now cover delay, baseline preservation, status duration, Event update/resolve/reopen, freshness, congestion threshold, settings bounds and HOT ranking; execution is pending in the current environment.
+- Shipping HOT tests now cover delay, baseline preservation, Vessel/Voyage ownership merges, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts; execution is pending in the current environment.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 
 ## 14. Architecture Change Rules

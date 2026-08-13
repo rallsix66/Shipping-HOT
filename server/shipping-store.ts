@@ -1,6 +1,7 @@
 import type { FeedItem, Port, ShippingEvent, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { detectShippingEvents } from "@shared/shipping-engine"
+import { mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules"
 import { initShippingTables, ShippingRepository } from "#/database/shipping"
 import { disabledProviderData, MockPortProvider, MockScheduleProvider, MockVesselProvider, MockWeatherProvider, providerResult, type PortProvider, type ScheduleProvider, type VesselProvider, type WeatherProvider } from "#/providers/shipping"
 
@@ -18,6 +19,16 @@ const providers: { vessel: VesselProvider, port: PortProvider, schedule: Schedul
 function preserveWatchState<T extends Vessel | Port>(latest: T[], stored: T[]): T[] {
   const previous = new Map(stored.map(item => [item.id, item.isWatched]))
   return latest.map(item => previous.has(item.id) ? { ...item, isWatched: previous.get(item.id)! } : item)
+}
+
+function mergeVessels(providerVessels: Vessel[], storedVessels: Vessel[], now: string): Vessel[] {
+  const previous = new Map(storedVessels.map(item => [item.id, item]))
+  return providerVessels.map(item => mergeProviderVessel(previous.get(item.id), item, now))
+}
+
+function mergeVoyages(providerVoyages: Voyage[], storedVoyages: Voyage[]): Voyage[] {
+  const previous = new Map(storedVoyages.map(item => [item.id, item]))
+  return providerVoyages.map(item => mergeProviderVoyage(previous.get(item.id), item))
 }
 
 async function initialize() {
@@ -87,9 +98,9 @@ export async function getShippingSnapshot(): Promise<ShippingSnapshot> {
   const providerSnapshot = await fetchProviderSnapshot(stored.settings, stored)
   const current: ShippingSnapshot = {
     ...stored,
-    vessels: preserveWatchState(providerSnapshot.vessels, stored.vessels),
+    vessels: preserveWatchState(mergeVessels(providerSnapshot.vessels, stored.vessels, new Date().toISOString()), stored.vessels),
     ports: preserveWatchState(providerSnapshot.ports, stored.ports),
-    voyages: providerSnapshot.voyages,
+    voyages: mergeVoyages(providerSnapshot.voyages, stored.voyages),
     feedItems: providerSnapshot.feedItems,
   }
   current.events = detectShippingEvents(current.vessels, current.ports, current.voyages, current.feedItems, current.settings, stored.events)
