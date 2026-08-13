@@ -1,4 +1,4 @@
-import type { EventStatus, FeedItem, FreshnessState, HotItem, Port, Severity, ShippingEvent, Vessel, Voyage } from "./shipping"
+import type { EventStatus, FeedItem, FreshnessState, HotItem, Port, Severity, ShippingEvent, ShippingSettings, Vessel, Voyage } from "./shipping"
 
 const severityWeight: Record<Severity, number> = { info: 1, watch: 2, warning: 3, critical: 4 }
 
@@ -38,6 +38,20 @@ export function reconcileEvent(existing: ShippingEvent | undefined, incoming: Om
   }
 }
 
+export function congestionLevelRank(level: Port["congestionLevel"]): number {
+  return { low: 0, medium: 1, high: 2, critical: 3 }[level]
+}
+
+export function validateShippingSettings(settings: ShippingSettings): string[] {
+  const errors: string[] = []
+  if (!Number.isInteger(settings.refreshInterval) || settings.refreshInterval < 1 || settings.refreshInterval > 1440) errors.push("refreshInterval")
+  if (!Number.isInteger(settings.retentionDays) || settings.retentionDays < 1 || settings.retentionDays > 3650) errors.push("retentionDays")
+  if (!Number.isInteger(settings.eventThresholds.anchoredHours) || settings.eventThresholds.anchoredHours < 1 || settings.eventThresholds.anchoredHours > 720) errors.push("eventThresholds.anchoredHours")
+  if (!Number.isInteger(settings.eventThresholds.delayMinutes) || settings.eventThresholds.delayMinutes < 1 || settings.eventThresholds.delayMinutes > 525600) errors.push("eventThresholds.delayMinutes")
+  if (!Object.prototype.hasOwnProperty.call({ low: 1, medium: 1, high: 1, critical: 1 }, settings.eventThresholds.congestionLevel)) errors.push("eventThresholds.congestionLevel")
+  return errors
+}
+
 export function freshnessState(item: { stale: boolean; sourceStatus: string }): FreshnessState {
   if (item.sourceStatus === "never_succeeded") return "unknown"
   return item.stale ? "stale" : "fresh"
@@ -75,6 +89,23 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
     relatedLabel: item.relatedPortIds[0] ? labels.get(item.relatedPortIds[0]) : item.relatedVesselIds[0] ? labels.get(item.relatedVesselIds[0]) : undefined,
     feedItemId: item.id,
   }))
+  const watchedIds = new Set([
+    ...vessels.filter(v => v.isWatched).map(v => v.id),
+    ...ports.filter(p => p.isWatched).map(p => p.id),
+  ])
+  const watchedVoyageIds = new Set(voyages.filter(voyage => watchedIds.has(voyage.vesselId) || watchedIds.has(voyage.originPortId) || watchedIds.has(voyage.destinationPortId)).map(voyage => voyage.id))
+  const relevance = (item: HotItem) => {
+    const event = item.eventId ? events.find(candidate => candidate.id === item.eventId) : undefined
+    const feed = item.feedItemId ? feedItems.find(candidate => candidate.id === item.feedItemId) : undefined
+    const relatedIds = event
+      ? [event.vesselId, event.portId, event.voyageId]
+      : [...(feed?.relatedVesselIds ?? []), ...(feed?.relatedPortIds ?? []), ...(feed?.relatedVoyageIds ?? [])]
+    return relatedIds.some(id => id !== undefined && (watchedIds.has(id) || watchedVoyageIds.has(id))) ? 1 : 0
+  }
+  const freshness = (value: FreshnessState) => ({ unknown: 0, stale: 1, fresh: 2 }[value])
   return [...eventItems, ...feedHotItems]
-    .sort((a, b) => severityWeight[b.severity] - severityWeight[a.severity] || Date.parse(b.occurredAt) - Date.parse(a.occurredAt))
+    .sort((a, b) => severityWeight[b.severity] - severityWeight[a.severity]
+      || relevance(b) - relevance(a)
+      || freshness(b.freshness) - freshness(a.freshness)
+      || Date.parse(b.occurredAt) - Date.parse(a.occurredAt))
 }

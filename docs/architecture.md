@@ -26,7 +26,7 @@ The repository retains NewsNow as its foundation and now exposes Shipping HOT as
 | Proposal | State | Reason not in current scope |
 |---|---|---|
 | Shipping HOT domain and HOT feed | implemented | Mock/fixture data, deterministic Event Engine and HOT query are active |
-| Vessel/Port/Voyage/Event storage | implemented | SQLite table initialization plus in-memory fallback are present |
+| Vessel/Port/Voyage/Event storage | implemented / runtime persistence pending | SQLite tables, Repository seed/read/write/reconcile paths and explicit last-known fallback are present; restart persistence needs compatible native runtime verification |
 | Structured shipping Providers | implemented as interfaces | Mock adapters are active; real adapters remain deferred |
 
 ## 3. Architecture Summary
@@ -75,7 +75,7 @@ This is the smallest existing foundation compatible with the local Shipping HOT 
 | `cache` row | `server/database/cache.ts` | server cache service | `/api/s`, `/api/s/entire` | db0 table |
 | `user` row | `server/database/user.ts` | OAuth/sync handlers | authenticated sync | db0 table |
 | local focus/order metadata | `src/atoms` | browser Jotai/localStorage; optional sync | UI | browser localStorage, or synced user data when enabled |
-| Vessel/Port/Voyage/Event | `shared`, `server` and `src/components/shipping` | Mock store/API and UI | HOT, detail pages and Event Engine | Mock snapshot; persistent SQLite when native driver is available |
+| Vessel/Port/Voyage/Event | `shared`, `server` and `src/components/shipping` | Mock Providers through `server/shipping-store.ts`; `ShippingRepository` persists state | HOT, detail pages and Event Engine | Repository-backed state when SQLite is available; explicit last-known in-memory fallback otherwise |
 
 ## 8. Key Data Flows
 
@@ -98,7 +98,7 @@ Failure and recovery: invalid auth causes a user-facing login prompt and local l
 
 ### Current Shipping HOT flow
 
-Information Feed and Operational Data remain separate and meet at the Event/HOT query layer. The current implementation uses local Mock/fixture inputs; real external adapters are deferred.
+Information Feed and Operational Data remain separate and meet at the Event/HOT query layer. The current implementation flows through Mock Provider interfaces, service orchestration, Repository persistence and the Event Engine; real external adapters are deferred.
 
 ## 9. Interfaces and External Dependencies
 
@@ -138,8 +138,8 @@ Information Feed and Operational Data remain separate and meet at the Event/HOT 
 ## 13. Testing and Verification Boundaries
 
 - Current tests: Vitest, primarily date parsing plus a placeholder common test.
-- Current verification state: 46 tests, client/server typecheck, Vite/Nitro build and local Mock API smoke passed; lint is blocked by the installed `react-dom` plugin/config rule mismatch.
-- Shipping HOT rules have deterministic tests for delay, baseline preservation, status duration, Event lifecycle, freshness, congestion and Event Engine detection.
+- Current verification state: server/client typecheck and `git diff --check` passed in this repair pass. Test/lint/build and fresh local Mock API smoke are pending because pnpm could not restore the dependency tree offline; the previous lint mismatch remains a known issue until rerun.
+- Shipping HOT tests now cover delay, baseline preservation, status duration, Event update/resolve/reopen, freshness, congestion threshold, settings bounds and HOT ranking; execution is pending in the current environment.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 
 ## 14. Architecture Change Rules

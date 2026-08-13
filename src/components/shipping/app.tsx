@@ -10,7 +10,7 @@ export function useShipping() {
     queryKey: ["shipping"],
     queryFn: () => myFetch<ShippingResponse>("/shipping"),
     staleTime: 10_000,
-    refetchInterval: 15_000,
+    refetchInterval: data => data.state.data ? data.state.data.settings.refreshInterval * 60 * 1000 : false,
   })
 }
 

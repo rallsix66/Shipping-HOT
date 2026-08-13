@@ -1,5 +1,5 @@
 import type { FeedItem, Port, ShippingEvent, ShippingSettings, Vessel, Voyage } from "./shipping"
-import { calculateDelayMinutes, reconcileEvent, statusDurationMinutes } from "./shipping-rules"
+import { calculateDelayMinutes, congestionLevelRank, reconcileEvent, statusDurationMinutes } from "./shipping-rules"
 
 export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: Voyage[], feedItems: FeedItem[], settings: ShippingSettings, previous: ShippingEvent[] = [], now = new Date().toISOString()): ShippingEvent[] {
   const candidates: Omit<ShippingEvent, "id" | "firstDetectedAt" | "lastDetectedAt" | "resolvedAt">[] = []
@@ -16,7 +16,7 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
     }
   }
   for (const port of ports) {
-    if (["high", "critical"].includes(port.congestionLevel) && port.congestionLevel === settings.eventThresholds.congestionLevel) {
+    if (congestionLevelRank(port.congestionLevel) >= congestionLevelRank(settings.eventThresholds.congestionLevel)) {
       candidates.push({ type: "port_congestion", severity: port.congestionLevel === "critical" ? "critical" : "warning", status: "active", title: `${port.nameEn} 拥堵升级`, summary: `等待 ${port.waitingVessels} 艘船，预计等待 ${port.waitingHours} 小时。`, occurredAt: port.updatedAt ?? now, detectedAt: now, dedupeKey: `port_congestion:${port.id}`, portId: port.id, evidenceJson: { congestionLevel: port.congestionLevel, waitingHours: port.waitingHours }, sourceStatus: port.sourceStatus })
     }
   }
@@ -24,5 +24,15 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
     candidates.push({ type: feed.type, severity: feed.severity, status: "active", title: feed.title, summary: feed.summary, occurredAt: feed.publishedAt, detectedAt: now, dedupeKey: `feed:${feed.id}`, feedItemId: feed.id, evidenceJson: { category: feed.category }, sourceStatus: feed.sourceStatus })
   }
   const byKey = new Map(previous.map(event => [event.dedupeKey, event]))
-  return candidates.map(candidate => reconcileEvent(byKey.get(candidate.dedupeKey), candidate, now))
+  const activeKeys = new Set(candidates.map(candidate => candidate.dedupeKey))
+  const reconciled = candidates.map(candidate => reconcileEvent(byKey.get(candidate.dedupeKey), candidate, now))
+  for (const existing of previous) {
+    if (existing.status === "active" && !activeKeys.has(existing.dedupeKey)) {
+      const { id: _id, firstDetectedAt: _first, lastDetectedAt: _last, resolvedAt: _resolved, ...incoming } = existing
+      reconciled.push(reconcileEvent(existing, { ...incoming, status: "resolved" }, now))
+    } else if (existing.status === "resolved" && !activeKeys.has(existing.dedupeKey)) {
+      reconciled.push(existing)
+    }
+  }
+  return reconciled
 }

@@ -6,7 +6,7 @@
 
 目标是在 NewsNow 现有代码基础上，渐进改造成个人本地航运情报聚合与船舶跟踪工具。产品只关注用户关注的船、港口和可能影响货物的航运信息，不扩展为 ERP、TMS、WMS、全球 AIS 平台或多人 SaaS。
 
-本轮已完成本地 Mock 闭环：依赖已安装（原生 `better-sqlite3` 在当前 Node 24 环境构建失败，因此运行时使用内存 fallback）、UI/API/Domain/Event Engine/测试已实现并验证。当前本地 Git 已配置 `origin=https://github.com/rallsix66/Shipping-HOT.git` 和 `upstream=https://github.com/ourongxing/newsnow.git`；GitHub CLI token 仍无效，因此账号级元数据保持 `pending`。
+本轮完成本地 Mock 闭环的核心修复：UI/API/Domain/Event Engine/Provider orchestration/SQLite Repository 已实现；原生 `better-sqlite3` 在当前 Node 24 环境构建失败，因此 SQLite restart persistence 和 fresh runtime smoke 保持 `pending`，代码保留明确的 last-known fallback。当前本地 Git 已配置 `origin=https://github.com/rallsix66/Shipping-HOT.git` 和 `upstream=https://github.com/ourongxing/newsnow.git`；GitHub CLI token 仍无效，因此账号级元数据保持 `pending`。
 
 ## 2. 当前 NewsNow 架构
 

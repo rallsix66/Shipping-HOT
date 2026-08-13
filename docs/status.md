@@ -1,7 +1,7 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
 > Snapshot date: 2026-08-12
-> Evidence scope: local code / configuration / Git metadata; Mock runtime smoke, tests, typecheck and build verified; real external Providers not used
+> Evidence scope: local code / configuration / Git metadata; server/app typecheck and diff validation verified in this pass; test/lint/build and SQLite restart persistence remain pending because the local dependency tree could not be restored offline; real external Providers not used
 > Source of truth for: current implementation and verification state
 
 ## 1. One-Sentence Status
@@ -12,10 +12,10 @@ Shipping HOT now runs locally on the retained NewsNow stack with Mock Providers,
 
 - Active branch: `main`; package version: `0.0.41`
 - Git remotes: `origin=https://github.com/rallsix66/Shipping-HOT.git` and `upstream=https://github.com/ourongxing/newsnow.git`; GitHub CLI API authentication is still invalid, so account metadata was not API-verified
-- Local run status: `verified-current`; built Nitro server smoke returned Mock data, HOT aggregation, watch toggles and Settings updates
+- Local run status: `pending`; the service path now routes through Mock Providers and Repository code, but a fresh Nitro smoke run was blocked by the incomplete dependency tree
 - Deployment status: `out-of-scope`; repository contains optional Cloudflare/Vercel/Bun/Docker configuration, but no deployment was performed
-- Database / external services: `feed_items`, `vessels`, `ports`, `voyages`, `events`, and `settings` SQLite tables are defined; runtime used the documented in-memory fallback because `better-sqlite3` could not build under Node 24 without Visual Studio C++ tools; real external services are deferred
-- Last verified surface: source tree, API/UI bundle, Mock API smoke, tests, typecheck and build
+- Database / external services: `feed_items`, `vessels`, `ports`, `voyages`, `events`, and `settings` now have Repository seed/list/upsert/reconcile/settings/retention paths; compatible SQLite restart persistence remains pending because `better-sqlite3` could not build under Node 24 without Visual Studio C++ tools; real external services are deferred
+- Last verified surface: source tree inspection, server/app typecheck and `git diff --check`; test/lint/build and fresh Mock API smoke are pending
 
 ## 3. Current Architecture Summary
 
@@ -37,8 +37,8 @@ Shipping HOT now runs locally on the retained NewsNow stack with Mock Providers,
 | Focus/order persistence | implemented | `src/atoms/primitiveMetadataAtom.ts`, `src/hooks/useFocus.ts` | Browser localStorage; optional sync |
 | PWA | implemented | `pwa.config.ts`, `src/hooks/usePWA.ts` | Build/runtime not verified |
 | Cloudflare/Vercel/Bun/Docker adapters | implemented | `nitro.config.ts`, `Dockerfile`, compose and wrangler examples | Deployment not performed |
-| Shipping HOT Domain and Event Engine | implemented | `shared/shipping.ts`, `shared/shipping-rules.ts`, `shared/shipping-engine.ts` | Mock/fixture driven; real Providers deferred |
-| Shipping HOT API and local tables | implemented | `server/api/shipping/**`, `server/database/shipping.ts`, `server/shipping-store.ts` | SQLite init has in-memory fallback when native driver is unavailable |
+| Shipping HOT Domain and Event Engine | implemented | `shared/shipping.ts`, `shared/shipping-rules.ts`, `shared/shipping-engine.ts` | Event reconcile covers update, resolve and reopen; HOT ranking includes severity, watched relevance, freshness and recency; real Providers deferred |
+| Shipping HOT API and local tables | implemented / runtime persistence pending | `server/api/shipping/**`, `server/database/shipping.ts`, `server/shipping-store.ts` | Provider → service → Repository path is implemented; SQLite restart verification is pending in the current native-toolchain environment |
 | Shipping HOT UI/routes | implemented | `src/routes/**`, `src/components/shipping/**` | `/`, `/vessels`, `/ports`, `/voyages`, `/events`, `/feed`, `/settings` and detail routes |
 
 ## 5. Decision Status
@@ -82,9 +82,9 @@ Shipping HOT now runs locally on the retained NewsNow stack with Mock Providers,
 
 ## 8. Current Work and Blockers
 
-- Active work: Mock-based local Shipping HOT implementation and closeout.
-- Blockers: real Provider selection/access and compatible native SQLite toolchain are deferred; GitHub CLI API re-authentication is still needed for account-level operations.
-- Pending verification: persistent SQLite mode on a compatible toolchain, deployment/live state, real Provider behavior.
+- Active work: Mock-based local Shipping HOT core repair and verification closeout.
+- Blockers: fresh test/lint/build/smoke execution is blocked by an incomplete dependency tree; compatible native SQLite toolchain, real Provider selection/access and GitHub CLI account authentication remain deferred/pending.
+- Pending verification: test/lint/build, fresh API smoke, SQLite restart persistence, deployment/live state and real Provider behavior.
 
 ## 9. Recommended Next Action
 
@@ -94,9 +94,9 @@ Next: review the implemented Mock loop, then separately evaluate any real Provid
 
 | Fact surface | State | Evidence / limitation | Action |
 |---|---|---|---|
-| Code | changed-and-verified | Shipping HOT shared Domain, providers, API, storage init, routes, UI and tests inspected | Treat code/config as authority for current implementation |
-| Runtime | changed-and-verified | Built Nitro server smoke returned Mock snapshot, HOT items, watch toggle and Settings update | Keep real Provider and persistent SQLite claims deferred |
+| Code | changed-and-verified | Shipping HOT shared Domain, Provider orchestration, API validation, Repository paths, routes, UI and tests inspected; server/app typecheck passed | Treat code/config as authority for current implementation |
+| Runtime | pending | Fresh Nitro server smoke and SQLite restart persistence could not run because the dependency tree could not be restored offline | Do not claim runtime persistence verified |
 | Documentation | changed-and-verified | Architecture, status, ADRs and roadmap now distinguish implemented Mock scope from deferred real integrations | Keep implementation/deferred split |
 | Rules | changed-and-verified | Root `AGENTS.md` defines project guardrails, verification rules, architecture-change workflow, and mandatory task Closeout; no project `CLAUDE.md` or override; global Codex `AGENTS.md` is empty | Use `AGENTS.md` as the project entry point |
 | Memory | not-applicable | No project memory store or user-authorized memory write was identified | No memory files changed |
-| Workspace | changed-and-verified | Current implementation changes are reviewable; generated route metadata is tracked and build output is ignored | No cleanup performed |
+| Workspace | changed-and-verified | Neat Freak inventory found only the intended project files plus ignored/generated local directories; no project database, env file or build artifact was added to the change set | Review the final `git status` before commit |

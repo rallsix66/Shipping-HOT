@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { calculateDelayMinutes, reconcileEvent, statusDurationMinutes, updateVesselStatus } from "./shipping-rules"
-import { mockEvents, mockVessels } from "./shipping-fixtures"
+import { calculateDelayMinutes, rankHotItems, reconcileEvent, statusDurationMinutes, updateVesselStatus, validateShippingSettings } from "./shipping-rules"
+import { createMockSnapshot, mockEvents, mockVessels } from "./shipping-fixtures"
 
 describe("Shipping HOT deterministic rules", () => {
   it("calculates ETA delay and keeps unknown values unknown", () => {
@@ -31,5 +31,22 @@ describe("Shipping HOT deterministic rules", () => {
     const resolved = reconcileEvent(update, { ...resolvedIncoming, status: "resolved" }, "2026-01-01T04:00:00.000Z")
     expect(resolved.status).toBe("resolved")
     expect(resolved.resolvedAt).toBe("2026-01-01T04:00:00.000Z")
+  })
+
+  it("ranks severity, watched relevance, freshness and recency in order", () => {
+    const snapshot = createMockSnapshot()
+    const items = rankHotItems(snapshot.events, snapshot.ports, snapshot.vessels, snapshot.voyages, [
+      { ...snapshot.feedItems[0], id: "feed-watched", severity: "warning", publishedAt: "2026-01-01T00:00:00.000Z", relatedPortIds: ["port-shekou"] },
+      { ...snapshot.feedItems[0], id: "feed-unrelated", severity: "warning", publishedAt: "2026-01-01T01:00:00.000Z", relatedPortIds: [] },
+    ], new Date("2026-01-01T02:00:00.000Z"))
+    expect(items[0].severity).toBe("critical")
+    const sameSeverity = items.filter(item => item.severity === "warning")
+    expect(sameSeverity.findIndex(item => item.feedItemId === "feed-watched")).toBeLessThan(sameSeverity.findIndex(item => item.feedItemId === "feed-unrelated"))
+  })
+
+  it("validates settings bounds", () => {
+    const settings = createMockSnapshot().settings
+    expect(validateShippingSettings(settings)).toEqual([])
+    expect(validateShippingSettings({ ...settings, refreshInterval: 0 })).toEqual(["refreshInterval"])
   })
 })
