@@ -1,7 +1,7 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
 > Snapshot date: 2026-08-13
-> Evidence scope: local code / configuration / Git metadata; typecheck, full test execution and build completed in this pass; lint, fresh API smoke and SQLite restart persistence remain pending or blocked for their recorded reasons; real external Providers not used
+> Evidence scope: local code / configuration / Git metadata; V1 port seed completion, targeted provider/repository checks and full test/build verification completed in this pass; real external Providers remain deferred pending architecture confirmation; lint, fresh API smoke and SQLite restart persistence remain pending or blocked for their recorded reasons
 > Source of truth for: current implementation and verification state
 
 ## 1. One-Sentence Status
@@ -16,7 +16,8 @@ Shipping HOT local Mock implementation is in place on the retained NewsNow stack
 - Deployment status: `out-of-scope`; repository contains optional Cloudflare/Vercel/Bun/Docker configuration, but no deployment was performed
 - Database / external services: `feed_items`, `vessels`, `ports`, `voyages`, `events`, and `settings` now have Repository seed/list/upsert/reconcile/settings/retention paths; compatible SQLite restart persistence remains pending because `better-sqlite3` could not build under Node 24 without Visual Studio C++ tools; real external services are deferred
 - Mock fixture timestamps: generated relative to the runtime clock when a snapshot is created; deterministic fixed time is limited to `shared/shipping-engine.test.ts`
-- Last verified surface: source tree inspection, `git diff --check`, typecheck passed, full test suite (68/68 passed), and production build passed in this closeout; lint, fresh Mock API smoke and SQLite restart persistence remain pending or blocked for their recorded reasons
+- V1 focus-port seed: all eight requested ports are present in the shared fixture and Repository seed path: Shekou, Yantian, Nansha, Laem Chabang, Port Klang, Manila, Jakarta and Ho Chi Minh City
+- Last verified surface: source tree inspection, `git diff --check`, typecheck passed, full test suite (69/69 passed), and production build passed in this pass; lint, fresh Mock API smoke and SQLite restart persistence remain pending or blocked for their recorded reasons
 
 ## 3. Current Architecture Summary
 
@@ -39,7 +40,7 @@ Shipping HOT local Mock implementation is in place on the retained NewsNow stack
 | PWA | implemented | `pwa.config.ts`, `src/hooks/usePWA.ts` | Build/runtime not verified |
 | Cloudflare/Vercel/Bun/Docker adapters | implemented | `nitro.config.ts`, `Dockerfile`, compose and wrangler examples | Deployment not performed |
 | Shipping HOT Domain and Event Engine | implemented | `shared/shipping.ts`, `shared/shipping-rules.ts`, `shared/shipping-engine.ts` | Event reconcile covers update, resolve and reopen; HOT removes FeedItem/Event duplicates, uses related entity freshness, and ranks severity, watched relevance, freshness and recency; real Providers deferred |
-| Shipping HOT API and local tables | implemented / runtime persistence pending | `server/api/shipping/**`, `server/database/shipping.ts`, `server/shipping-store.ts` | Provider → service → Repository path is implemented; SQLite restart verification is pending in the current native-toolchain environment |
+| Shipping HOT API and local tables | implemented / runtime persistence pending | `server/api/shipping/**`, `server/database/shipping.ts`, `server/shipping-store.ts` | Provider → service → Repository path is implemented; eight V1 focus-port seeds are present; SQLite restart verification is pending in the current native-toolchain environment |
 | Shipping HOT UI/routes | implemented | `src/routes/**`, `src/components/shipping/**` | `/`, `/vessels`, `/ports`, `/voyages`, `/events`, `/feed`, `/settings` and detail routes |
 
 ## 5. Decision Status
@@ -83,10 +84,11 @@ Shipping HOT local Mock implementation is in place on the retained NewsNow stack
 
 ## 8. Current Work and Blockers
 
-- Active work: post-seal verification status closeout; no core business logic or product feature changes in this pass.
-- Blockers: lint remains pending with 356 existing style/import/format errors and 4 warnings, mainly across retained NewsNow and existing Shipping HOT surfaces; this pass made no broad lint changes. Compatible native SQLite toolchain, fresh API smoke, real Provider selection/access and GitHub CLI account authentication remain deferred/pending.
-- Verification: typecheck = passed; full test = passed (68/68, including Event Engine 5/5 and shipping rules 18/18); build = passed; lint = pending (356 errors / 4 warnings); fresh API smoke = pending; SQLite restart persistence = pending; Neat Freak Closeout = verified.
-- Neat Freak Closeout: verified. Real Skill loaded from `C:\Users\Administrator\.codex\skills\neat-freak\SKILL.md` and its `scripts/audit-inventory.sh` audit executed successfully in the active environment; audit confirmed the current Git/workspace inventory.
+- Active work: V1 remaining work; eight-port Mock seed completed, real Vessel/Weather Provider work not started because the required architecture confirmation is absent.
+- Blockers: enabling an external Vessel or Weather Provider is an architecture change under `AGENTS.md` and `docs/architecture.md`; no provider-specific external secret class has been authorized. Lint remains pending with 356 existing style/import/format errors and 4 warnings, mainly across retained NewsNow and existing Shipping HOT surfaces. Compatible native SQLite toolchain, fresh API smoke and GitHub CLI account authentication remain deferred/pending.
+- Verification: targeted provider/repository tests = passed (6/6); typecheck = passed; full test = passed (69/69); build = passed; lint = pending (356 errors / 4 warnings); fresh API smoke = pending; SQLite restart persistence = pending; Neat Freak Closeout = verified.
+- V1 status: `implemented-mock / v1-port-seed-complete / real-providers-deferred`; Phase 5/6/7 acceptance is not complete. The remaining blocker is architecture confirmation for real Provider integration, not a Mock core logic defect.
+- Neat Freak Closeout: verified. Real Skill loaded from `C:\Users\Administrator\.codex\skills\neat-freak\SKILL.md` and its `scripts/audit-inventory.sh` audit executed successfully after this pass; the audit found six intended working-tree entries and no project database, environment file or build artifact in the change set.
 
 ## 9. Recommended Next Action
 

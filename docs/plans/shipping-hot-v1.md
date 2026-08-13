@@ -1,6 +1,6 @@
 # Shipping HOT v1 Architecture Proposal
 
-状态：`implemented-mock / real-providers-deferred`。本计划的本地 Mock 闭环已按用户授权实现并验证；真实 AIS、港口、航期、天气 Provider 仍保持 deferred。
+状态：`implemented-mock / v1-port-seed-complete / real-providers-deferred`。本计划的本地 Mock 闭环与八个 V1 重点港口 seed 已实现并验证；真实 AIS、港口、航期、天气 Provider 仍保持 deferred，直到完成项目规则要求的架构变更确认。
 
 ## 1. 背景
 

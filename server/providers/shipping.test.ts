@@ -1,9 +1,22 @@
 import { describe, expect, it } from "vitest"
-import { disabledProviderData, providerResult } from "./shipping"
-import { mockVessels } from "@shared/shipping-fixtures"
+import { mockPorts, mockVessels } from "@shared/shipping-fixtures"
 import type { Vessel } from "@shared/shipping"
+import { disabledProviderData, providerResult } from "./shipping"
 
-describe("Shipping Provider failure boundaries", () => {
+describe("shipping Provider failure boundaries", () => {
+  it("includes all eight V1 focus ports in the seed", () => {
+    expect(mockPorts.map(port => port.unlocode).sort()).toEqual([
+      "CNSHK",
+      "CNYTN",
+      "CNSNA",
+      "THLCH",
+      "MYPKG",
+      "PHMNL",
+      "IDJKT",
+      "VNSGN",
+    ].sort())
+  })
+
   it("keeps last-known data and marks a failed provider stale", () => {
     const [vessel] = mockVessels
     const result = providerResult<Vessel>({ status: "rejected", reason: new Error("mock outage") }, [vessel])
