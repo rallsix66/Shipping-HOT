@@ -1,7 +1,7 @@
 import type { FeedItem, Port, ShippingEvent, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "./shipping"
 import { calculateDelayMinutes } from "./shipping-rules"
 
-const now = Date.now()
+const now = Date.parse("2026-01-01T00:00:00.000Z")
 const iso = (offsetMinutes: number) => new Date(now + offsetMinutes * 60000).toISOString()
 
 export const mockVessels: Vessel[] = [

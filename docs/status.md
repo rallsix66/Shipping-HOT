@@ -1,7 +1,7 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
 > Snapshot date: 2026-08-13
-> Evidence scope: local code / configuration / Git metadata; Event Engine test determinism, typecheck and full test execution completed in this pass; build passed; lint and SQLite restart persistence remain pending or blocked for their recorded reasons; real external Providers not used
+> Evidence scope: local code / configuration / Git metadata; Event Engine test determinism, typecheck, full test execution and build completed in this pass; lint, fresh API smoke and SQLite restart persistence remain pending or blocked for their recorded reasons; real external Providers not used
 > Source of truth for: current implementation and verification state
 
 ## 1. One-Sentence Status
@@ -15,7 +15,7 @@ Shipping HOT local Mock implementation is in place on the retained NewsNow stack
 - Local run status: `pending`; the service path now routes through Mock Providers and Repository code, but a fresh Nitro smoke run was blocked by the incomplete dependency tree
 - Deployment status: `out-of-scope`; repository contains optional Cloudflare/Vercel/Bun/Docker configuration, but no deployment was performed
 - Database / external services: `feed_items`, `vessels`, `ports`, `voyages`, `events`, and `settings` now have Repository seed/list/upsert/reconcile/settings/retention paths; compatible SQLite restart persistence remains pending because `better-sqlite3` could not build under Node 24 without Visual Studio C++ tools; real external services are deferred
-- Last verified surface: source tree inspection, `git diff --check`, typecheck passed, full test suite (68/68 passed), and production build; lint and fresh Mock API smoke remain pending or blocked for their recorded reasons
+- Last verified surface: source tree inspection, `git diff --check`, typecheck passed, full test suite (68/68 passed), and production build; lint, fresh Mock API smoke and SQLite restart persistence remain pending or blocked for their recorded reasons
 
 ## 3. Current Architecture Summary
 
@@ -83,7 +83,7 @@ Shipping HOT local Mock implementation is in place on the retained NewsNow stack
 ## 8. Current Work and Blockers
 
 - Active work: Mock-based local Shipping HOT core repair and verification closeout.
-- Blockers: lint remains blocked by 356 existing style/import errors after removing rules that are absent from the installed ESLint React plugin; compatible native SQLite toolchain, fresh API smoke, real Provider selection/access and GitHub CLI account authentication remain deferred/pending.
+- Blockers: lint remains blocked by 356 existing style/import errors and 4 warnings after removing only rules absent from the installed ESLint React plugin; compatible native SQLite toolchain, fresh API smoke, real Provider selection/access and GitHub CLI account authentication remain deferred/pending.
 - Verification: typecheck passed; full test suite passed 68/68, including Event Engine 5/5 and shipping rules 18/18; build passed; fresh API smoke, SQLite restart persistence, deployment/live state and real Provider behavior remain pending.
 
 ## 9. Recommended Next Action

@@ -1,13 +1,13 @@
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { detectShippingEvents } from "./shipping-engine"
 import { createMockSnapshot } from "./shipping-fixtures"
 
-vi.hoisted(() => {
-  vi.useFakeTimers()
-  vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"))
-})
-
 describe("Shipping HOT event engine", () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"))
+  })
+
   afterEach(() => {
     vi.useRealTimers()
   })
