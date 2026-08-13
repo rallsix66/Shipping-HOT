@@ -1,12 +1,12 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
 > Snapshot date: 2026-08-13
-> Evidence scope: local code / configuration / Git metadata; server/app typecheck and diff validation verified in this pass; test/lint/build and SQLite restart persistence remain pending because the local dependency tree could not be restored offline; real external Providers not used
+> Evidence scope: local code / configuration / Git metadata; code inspection and diff validation completed in this pass; typecheck/test/lint/build and SQLite restart persistence remain pending because the local dependency tree could not be restored; real external Providers not used
 > Source of truth for: current implementation and verification state
 
 ## 1. One-Sentence Status
 
-Shipping HOT now runs locally on the retained NewsNow stack with Mock Providers, deterministic Domain/Event rules, local API routes, structured Feed/Vessel/Port/Voyage/Event/Settings models, and a usable HOT UI. Real AIS, port, schedule and weather Providers remain deferred.
+Shipping HOT local Mock implementation is in place on the retained NewsNow stack with deterministic Domain/Event rules, local API routes, structured Feed/Vessel/Port/Voyage/Event/Settings models, and a usable HOT UI; fresh runtime verification remains pending. Real AIS, port, schedule and weather Providers remain deferred.
 
 ## 2. Current Environment
 
@@ -15,7 +15,7 @@ Shipping HOT now runs locally on the retained NewsNow stack with Mock Providers,
 - Local run status: `pending`; the service path now routes through Mock Providers and Repository code, but a fresh Nitro smoke run was blocked by the incomplete dependency tree
 - Deployment status: `out-of-scope`; repository contains optional Cloudflare/Vercel/Bun/Docker configuration, but no deployment was performed
 - Database / external services: `feed_items`, `vessels`, `ports`, `voyages`, `events`, and `settings` now have Repository seed/list/upsert/reconcile/settings/retention paths; compatible SQLite restart persistence remains pending because `better-sqlite3` could not build under Node 24 without Visual Studio C++ tools; real external services are deferred
-- Last verified surface: source tree inspection, server/app typecheck and `git diff --check`; test/lint/build and fresh Mock API smoke are pending
+- Last verified surface: source tree inspection and `git diff --check`; typecheck/test/lint/build and fresh Mock API smoke are pending because the dependency tree could not be restored before timeout
 
 ## 3. Current Architecture Summary
 
@@ -83,7 +83,7 @@ Shipping HOT now runs locally on the retained NewsNow stack with Mock Providers,
 ## 8. Current Work and Blockers
 
 - Active work: Mock-based local Shipping HOT core repair and verification closeout.
-- Blockers: fresh test/lint/build/smoke execution is blocked by an incomplete dependency tree; compatible native SQLite toolchain, real Provider selection/access and GitHub CLI account authentication remain deferred/pending.
+- Blockers: typecheck, test, lint, build and fresh smoke execution are blocked by an incomplete dependency tree; compatible native SQLite toolchain, real Provider selection/access and GitHub CLI account authentication remain deferred/pending.
 - Pending verification: test/lint/build, fresh API smoke, SQLite restart persistence, deployment/live state and real Provider behavior.
 
 ## 9. Recommended Next Action
@@ -94,7 +94,7 @@ Next: review the implemented Mock loop, then separately evaluate any real Provid
 
 | Fact surface | State | Evidence / limitation | Action |
 |---|---|---|---|
-| Code | changed-and-verified | Shipping HOT shared Domain, Provider orchestration, local Vessel/Voyage ownership merge, API validation, Repository paths, routes, UI and targeted tests inspected; server/app typecheck passed | Treat code/config as authority for current implementation |
+| Code | changed-and-verified | Shipping HOT shared Domain, Provider orchestration, local Vessel/Voyage ownership merge, API validation, Repository paths, routes, UI and targeted tests inspected; current typecheck execution is pending because dependencies could not be restored | Treat code/config as authority for current implementation |
 | Runtime | pending | Fresh Nitro server smoke and SQLite restart persistence could not run because the dependency tree could not be restored offline | Do not claim runtime persistence verified |
 | Documentation | changed-and-verified | Architecture, status, ADRs and roadmap now distinguish implemented Mock scope from deferred real integrations | Keep implementation/deferred split |
 | Rules | changed-and-verified | Root `AGENTS.md` defines project guardrails, verification rules, architecture-change workflow, and mandatory task Closeout; no project `CLAUDE.md` or override; global Codex `AGENTS.md` is empty | Use `AGENTS.md` as the project entry point |

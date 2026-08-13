@@ -23,17 +23,26 @@ export function mergeProviderVessel(previous: Vessel | undefined, provider: Vess
 
 export function mergeProviderVoyage(previous: Voyage | undefined, provider: Voyage): Voyage {
   if (!previous) {
-    return { ...provider, delayMinutes: calculateDelayMinutes(provider.baselineEta, provider.latestEta) }
+    const baselineEta = provider.baselineEta ?? provider.latestEta
+    const baselineEtd = provider.baselineEtd ?? provider.latestEtd
+    return {
+      ...provider,
+      baselineEta,
+      baselineEtd,
+      baselineEtaSource: provider.latestEtaSource ?? provider.baselineEtaSource,
+      baselineEtdSource: provider.latestEtdSource ?? provider.baselineEtdSource,
+      delayMinutes: calculateDelayMinutes(baselineEta, provider.latestEta),
+    }
   }
-  const baselineEta = previous.baselineEta ?? provider.baselineEta
-  const baselineEtd = previous.baselineEtd ?? provider.baselineEtd
+  const baselineEta = previous.baselineEta ?? provider.baselineEta ?? provider.latestEta
+  const baselineEtd = previous.baselineEtd ?? provider.baselineEtd ?? provider.latestEtd
   return {
     ...previous,
     ...provider,
     baselineEta,
     baselineEtd,
-    baselineEtaSource: previous.baselineEta ? previous.baselineEtaSource : provider.baselineEtaSource,
-    baselineEtdSource: previous.baselineEtd ? previous.baselineEtdSource : provider.baselineEtdSource,
+    baselineEtaSource: previous.baselineEta !== undefined ? previous.baselineEtaSource : provider.latestEtaSource ?? provider.baselineEtaSource,
+    baselineEtdSource: previous.baselineEtd !== undefined ? previous.baselineEtdSource : provider.latestEtdSource ?? provider.baselineEtdSource,
     delayMinutes: calculateDelayMinutes(baselineEta, provider.latestEta),
   }
 }

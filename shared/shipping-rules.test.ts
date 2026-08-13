@@ -32,6 +32,37 @@ describe("Shipping HOT deterministic rules", () => {
     expect(refreshed.delayMinutes).toBe(calculateDelayMinutes(voyage.baselineEta, "2026-01-01T04:00:00.000Z"))
   })
 
+  it("creates an ETA baseline from the first available provider latest ETA", () => {
+    const voyage = { ...createMockSnapshot().voyages[0], baselineEta: undefined, baselineEtaSource: undefined, latestEta: undefined, latestEtaSource: undefined }
+    const refreshed = mergeProviderVoyage(voyage, { ...voyage, latestEta: "2026-08-20T10:00:00.000Z", latestEtaSource: "provider-eta" })
+    expect(refreshed.baselineEta).toBe("2026-08-20T10:00:00.000Z")
+    expect(refreshed.baselineEtaSource).toBe("provider-eta")
+    expect(refreshed.delayMinutes).toBe(0)
+  })
+
+  it("keeps the first ETA baseline when a later provider ETA changes", () => {
+    const voyage = { ...createMockSnapshot().voyages[0], baselineEta: undefined, baselineEtaSource: undefined, latestEta: undefined, latestEtaSource: undefined }
+    const first = mergeProviderVoyage(voyage, { ...voyage, latestEta: "2026-08-20T10:00:00.000Z", latestEtaSource: "provider-eta" })
+    const second = mergeProviderVoyage(first, { ...first, baselineEta: undefined, latestEta: "2026-08-20T16:00:00.000Z", latestEtaSource: "provider-eta-2" })
+    expect(second.baselineEta).toBe("2026-08-20T10:00:00.000Z")
+    expect(second.latestEta).toBe("2026-08-20T16:00:00.000Z")
+    expect(second.delayMinutes).toBe(360)
+  })
+
+  it("creates an ETD baseline from the first available provider latest ETD", () => {
+    const voyage = { ...createMockSnapshot().voyages[0], baselineEtd: undefined, baselineEtdSource: undefined, latestEtd: undefined, latestEtdSource: undefined }
+    const refreshed = mergeProviderVoyage(voyage, { ...voyage, latestEtd: "2026-08-20T08:00:00.000Z", latestEtdSource: "provider-etd" })
+    expect(refreshed.baselineEtd).toBe("2026-08-20T08:00:00.000Z")
+    expect(refreshed.baselineEtdSource).toBe("provider-etd")
+  })
+
+  it("does not invent a voyage baseline when provider times are absent", () => {
+    const voyage = { ...createMockSnapshot().voyages[0], baselineEta: undefined, baselineEtaSource: undefined, latestEta: undefined, latestEtaSource: undefined, delayMinutes: undefined }
+    const refreshed = mergeProviderVoyage(voyage, { ...voyage })
+    expect(refreshed.baselineEta).toBeUndefined()
+    expect(refreshed.delayMinutes).toBeUndefined()
+  })
+
   it("calculates anchored duration from statusChangedAt", () => {
     expect(statusDurationMinutes({ statusChangedAt: "2026-01-01T00:00:00.000Z" }, new Date("2026-01-01T02:00:00.000Z"))).toBe(120)
   })
