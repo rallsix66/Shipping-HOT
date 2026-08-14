@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { mockPorts, mockVessels } from "@shared/shipping-fixtures"
 import type { FeedItem, Vessel } from "@shared/shipping"
 import { detectShippingEvents } from "@shared/shipping-engine"
@@ -81,28 +81,52 @@ describe("shipping Provider failure boundaries", () => {
   })
 
   it("keeps partial AIS success and degrades only vessels without an update", async () => {
-    const socket = {
-      onopen: null as (() => void) | null,
-      onmessage: null as ((event: { data: unknown }) => void) | null,
-      onerror: null as ((event: unknown) => void) | null,
-      onclose: null as (() => void) | null,
-      send() {
-        this.onmessage?.({ data: JSON.stringify({
-          MessageType: "PositionReport",
-          MetaData: { MMSI: "477123400", ShipName: "EVER GLORY", time_utc: "2026-08-13T09:00:00.000Z" },
-          Message: { PositionReport: { UserID: 477123400, Latitude: 22.3, Longitude: 114.2 } },
-        }) })
-      },
-      close() {},
+    vi.useFakeTimers()
+    try {
+      const vesselA = { ...mockVessels[0], isWatched: true, mmsi: "477123400" }
+      const vesselB = { ...mockVessels[1], isWatched: true, mmsi: "219876500" }
+      const vesselC = { ...mockVessels[2], isWatched: false }
+      let subscription: Record<string, unknown> | undefined
+      let closed = false
+      const socket = {
+        onopen: null as (() => void) | null,
+        onmessage: null as ((event: { data: unknown }) => void) | null,
+        onerror: null as ((event: unknown) => void) | null,
+        onclose: null as (() => void) | null,
+        send(value: string) {
+          subscription = JSON.parse(value)
+          this.onmessage?.({ data: JSON.stringify({
+            MessageType: "PositionReport",
+            MetaData: { MMSI: "477123400", ShipName: "EVER GLORY", time_utc: "2026-08-13T09:00:00.000Z" },
+            Message: { PositionReport: { UserID: 477123400, Latitude: 22.3, Longitude: 114.2 } },
+          }) })
+        },
+        close() {
+          closed = true
+        },
+      }
+      const resultPromise = createAisStreamVesselProvider({ apiKey: "test-key", timeoutMs: 20, socketFactory: () => {
+        setTimeout(() => socket.onopen?.(), 0)
+        return socket
+      } }).getVessels([vesselA, vesselB, vesselC])
+      await vi.advanceTimersByTimeAsync(0)
+      expect(subscription?.FiltersShipMMSI).toEqual([vesselA.mmsi, vesselB.mmsi])
+      let settled = false
+      void resultPromise.then(() => {
+        settled = true
+      })
+      await vi.advanceTimersByTimeAsync(19)
+      expect(settled).toBe(false)
+      await vi.advanceTimersByTimeAsync(1)
+      const result = await resultPromise
+      expect(closed).toBe(true)
+      expect(result).toHaveLength(3)
+      expect(result.find(vessel => vessel.id === "vessel-ever-glory")).toMatchObject({ latitude: 22.3, longitude: 114.2, stale: false, sourceStatus: "healthy" })
+      expect(result.find(vessel => vessel.id === vesselB.id)).toMatchObject({ stale: true, sourceStatus: "degraded" })
+      expect(result.find(vessel => vessel.id === vesselC.id)).toEqual(vesselC)
+    } finally {
+      vi.useRealTimers()
     }
-    const result = await createAisStreamVesselProvider({ apiKey: "test-key", timeoutMs: 20, socketFactory: () => {
-      setTimeout(() => socket.onopen?.(), 0)
-      return socket
-    } }).getVessels([mockVessels[0], mockVessels[2], { ...mockVessels[1], isWatched: false }])
-    expect(result).toHaveLength(3)
-    expect(result.find(vessel => vessel.id === "vessel-ever-glory")).toMatchObject({ latitude: 22.3, longitude: 114.2, stale: false, sourceStatus: "healthy" })
-    expect(result.find(vessel => vessel.id === "vessel-cosco-harmony")).toMatchObject({ stale: true, sourceStatus: "degraded" })
-    expect(result.find(vessel => vessel.id === "vessel-maersk-saltoro")).toEqual({ ...mockVessels[1], isWatched: false })
   })
 
   it("rejects when no watched MMSI receives an AIS position", async () => {

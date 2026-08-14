@@ -1,7 +1,7 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
 > Snapshot date: 2026-08-14
-> Evidence scope: local code / configuration / Git metadata; V1 ports, AISStream/Open-Meteo adapters, fallback boundaries and provider/event tests are implemented; full tests, fresh API smoke and SQLite restart persistence passed on the compatible Node 22.23.2 environment; typecheck is pending because the pre-existing `server/glob.d.ts` state omits generated Nitro globals; lint remains pending for the recorded non-blocking style findings
+> Evidence scope: local code / configuration / Git metadata; V1 ports, AISStream/Open-Meteo adapters, fallback boundaries and provider/event tests are implemented; typecheck, full tests, fresh API smoke and SQLite restart persistence passed on the compatible Node 22.23.2 environment; lint remains pending for the recorded non-blocking style findings
 > Source of truth for: current implementation and verification state
 
 ## 1. One-Sentence Status
@@ -17,7 +17,7 @@ Shipping HOT V1 is implemented on the retained NewsNow stack with deterministic 
 - Database / external services: Repository paths are implemented; SQLite watch/settings restart persistence is verified on Node 22.23.2 with the compatible native module. Node 24.15.0 currently mismatches the bundled native module ABI and falls back to memory; AISStream and Open-Meteo remain optional server-side V1 sources
 - Mock fixture timestamps: generated relative to the runtime clock when a snapshot is created; deterministic fixed time is limited to `shared/shipping-engine.test.ts`
 - V1 focus-port seed: all eight requested ports are present in the shared fixture and Repository seed path: Shekou, Yantian, Nansha, Laem Chabang, Port Klang, Manila, Jakarta and Ho Chi Minh City
-- Last verified surface: source inspection, `git diff --check`, targeted Provider tests passed (14/14), full test suite passed (80/80), production build passed, and Node 22.23.2 fresh API/SQLite restart smoke passed; typecheck is pending due the pre-existing `server/glob.d.ts` state; lint remains pending with recorded non-blocking style findings
+- Last verified surface: source inspection, `git diff --check`, targeted Provider tests passed (14/14), full test suite passed (80/80), production build passed, and Node 22.23.2 fresh API/SQLite restart smoke passed; the repeatable type flow is `pnpm build` (generates `dist/.nitro/types`) followed by `pnpm typecheck`; lint remains pending with recorded non-blocking style findings
 
 ## 3. Current Architecture Summary
 
@@ -89,10 +89,10 @@ Shipping HOT V1 is implemented on the retained NewsNow stack with deterministic 
 ## 8. Current Work and Blockers
 
 - Active work: V1 implementation and verification closeout; eight ports, AISStream Vessel, Open-Meteo Marine Weather, fallback and Real → Event → HOT tests are implemented.
-- Blockers: Node 24.15.0 cannot load the bundled Node 22 native module, so Node 24 startup uses the documented in-memory fallback. Node 22.23.2 persistence smoke passed. Typecheck is pending because the pre-existing `server/glob.d.ts` state omits generated Nitro globals. Full lint remains pending with 362 errors / 4 warnings; this round added no new lint debt, while `server/providers/shipping.ts` retains 32 remaining non-blocking style findings. GitHub CLI account authentication remains invalid but is unrelated to local V1 code.
-- Verification: targeted Provider tests = passed (14/14); typecheck = pending (pre-existing `server/glob.d.ts` state); full test = passed (80/80); build = passed; lint = pending (362 errors / 4 warnings); fresh API smoke = verified on Node 22.23.2; SQLite restart persistence = verified on Node 22.23.2; Neat Freak Closeout = verified.
+- Blockers: Node 24.15.0 cannot load the bundled Node 22 native module, so Node 24 startup uses the documented in-memory fallback. Node 22.23.2 persistence smoke passed. Full lint remains pending with 362 errors / 4 warnings; this round added no new lint debt, while `server/providers/shipping.ts` retains 32 remaining non-blocking style findings. GitHub CLI account authentication remains invalid but is unrelated to local V1 code.
+- Verification: type generation and typecheck = passed via `pnpm build` → `pnpm typecheck`; targeted Provider tests = passed (14/14); full test = passed (80/80); build = passed; lint = pending (362 errors / 4 warnings); fresh API smoke = verified on Node 22.23.2; SQLite restart persistence = verified on Node 22.23.2; Neat Freak Closeout = verified.
 - V1 status: `implemented / v1-provider-complete / runtime-verified-on-node22`; Phase 5/6/7 code acceptance and Node 22 runtime smoke are complete. Live external Provider calls remain unconfigured without user-supplied credentials/network access; the approved Mock fallback remains healthy.
-- Neat Freak Closeout: verified. Real Skill loaded from `C:\Users\Administrator\.codex\skills\neat-freak\SKILL.md`; final `audit-inventory.sh` completed successfully at 2026-08-14T02:09:22Z, found no other-agent rule artifacts and recorded 8 current working-tree entries, including the pre-existing unrelated modifications; no database/env/build artifact is included in this change set.
+- Neat Freak Closeout: verified. Real Skill loaded from `C:\Users\Administrator\.codex\skills\neat-freak\SKILL.md`; final `audit-inventory.sh` completed successfully at 2026-08-14T02:48:10Z, found no other-agent rule artifacts and recorded 6 current working-tree entries, including the pre-existing unrelated modifications; no database/env/build artifact is included in this change set.
 
 ## 9. Recommended Next Action
 
@@ -107,4 +107,4 @@ Next: keep the compatible Node 22 runtime for local persistence verification, or
 | Documentation | changed-and-verified | Architecture, status, ADR-004 and roadmap describe approved V1 Provider adapters and Node 22 runtime evidence | Keep V1/V2 boundary explicit |
 | Rules | changed-and-verified | Root `AGENTS.md` defines project guardrails, verification rules, architecture-change workflow, and mandatory task Closeout; no project `CLAUDE.md` or override; global Codex `AGENTS.md` is empty | Use `AGENTS.md` as the project entry point |
 | Memory | not-applicable | No project memory store or user-authorized memory write was identified | No memory files changed |
-| Workspace | changed-and-verified | Final Neat Freak inventory found no other-agent rule artifacts, no project database/env/build artifact in the change set, and 8 current working-tree entries including 1 pre-existing unrelated modification | Review the final `git status` before any commit |
+| Workspace | changed-and-verified | Final Neat Freak inventory found no other-agent rule artifacts, no project database/env/build artifact in the change set, and 6 current working-tree entries including pre-existing unrelated modifications | Review the final `git status` before any commit |
