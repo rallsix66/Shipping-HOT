@@ -108,12 +108,13 @@ Next: keep the compatible Node 22 runtime for local persistence verification, or
 | Documentation | changed-and-verified | Architecture, status, ADR-004 and roadmap describe approved V1 Provider adapters and Node 22 runtime evidence | Keep V1/V2 boundary explicit |
 | Rules | changed-and-verified | Root `AGENTS.md` defines project guardrails, verification rules, architecture-change workflow, and mandatory task Closeout; no project `CLAUDE.md` or override; global Codex `AGENTS.md` is empty | Use `AGENTS.md` as the project entry point |
 | Memory | not-applicable | No project memory store or user-authorized memory write was identified | No memory files changed |
-| Workspace | changed-and-verified | Manual Neat Freak-equivalent inventory found no other-agent rule artifacts, no tracked database/env artifact, and 16 current working-tree paths including pre-existing unrelated modifications plus this planning change; `.data` is empty and `dist` remains ignored build output | Review the final `git status` before any commit; no cleanup performed |
+| Workspace | changed-and-verified | Manual Neat Freak-equivalent inventory found no other-agent rule artifacts, no tracked database/env artifact, and the final `git status` is recorded at closeout; `.data` is empty and `dist` remains ignored build output | Review the final `git status` before any commit; no cleanup performed |
 
 ## 11. Shipping HOT V2 Planning Status
 
-- V2 planning started on 2026-08-14.
 - V2 plan created: `docs/plans/shipping-hot-v2.md`.
-- V2 implementation approval: not granted; V2 is not marked `approved`.
-- V2 code development: not started; this planning task did not add V2 behavior, API integration, database schema changes, dependency changes or UI implementation.
+- V2 plan reviewed and corrected on 2026-08-14.
+- V2 implementation authorization: not present; this task did not add V2 behavior, API integration, database schema changes, dependency changes or UI implementation.
+- Fixed NewsNow updated-source metadata generation side effect: normal `dev`/`build`/`presource` no longer rewrites `shared/updated-sources.ts`; explicit `--updated-sources` generation is required.
+- Closeout: pending official `audit-inventory.sh` execution because Bash is unavailable in this Windows environment; the required manual Neat Freak-equivalent audit completed with no tracked database/env artifact or cleanup action.
 - Final V2 state: `V2 planned, not implemented`.

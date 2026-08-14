@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { execFileSync } from "node:child_process"
+import { argv } from "node:process"
 import { pinyin } from "@napi-rs/pinyin"
 import { consola } from "consola"
 import { projectDir } from "../shared/dir"
@@ -8,6 +9,7 @@ import { genSources } from "../shared/pre-sources"
 import packageJSON from "../package.json"
 
 const sources = genSources()
+const shouldGenerateUpdatedSources = argv.slice(2).includes("--updated-sources")
 
 function git(args: string[]) {
   return execFileSync("git", args, {
@@ -138,14 +140,18 @@ try {
   consola.error("Failed to generate sources.json")
 }
 
-try {
-  const updatedSourceIds = getUpdatedSourceIds()
-  if (updatedSourceIds) {
-    writeFileSync(join(projectDir, "./shared/updated-sources.ts"), `export const updatedSourceIds = ${JSON.stringify(updatedSourceIds, undefined, 2)} as const\n`)
-    consola.info("Generated updated-sources.ts")
-  } else {
-    consola.info("Skipped updated-sources.ts")
+if (shouldGenerateUpdatedSources) {
+  try {
+    const updatedSourceIds = getUpdatedSourceIds()
+    if (updatedSourceIds) {
+      writeFileSync(join(projectDir, "./shared/updated-sources.ts"), `export const updatedSourceIds = ${JSON.stringify(updatedSourceIds, undefined, 2)} as const\n`)
+      consola.info("Generated updated-sources.ts")
+    } else {
+      consola.info("Skipped updated-sources.ts")
+    }
+  } catch {
+    consola.error("Failed to generate updated-sources.ts")
   }
-} catch {
-  consola.error("Failed to generate updated-sources.ts")
+} else {
+  consola.info("Skipped updated-sources.ts (use --updated-sources to regenerate)")
 }

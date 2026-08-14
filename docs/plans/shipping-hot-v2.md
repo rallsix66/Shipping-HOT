@@ -4,13 +4,13 @@
 >
 > 本文是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料核对形成的 V2 方案。它描述目标、边界和实施顺序，不代表 V2 已获批准，也不代表文中 Provider、表结构、路由或规则已经实现。
 >
-> 方案核对日期：2026-08-14。Portcast、AISStream、Open-Meteo、Calendarific 和官方气象/假日来源的链接仅用于能力与风险评估；本轮没有申请 Key、调用 API、抓取页面或修改运行时代码。
+> 方案核对日期：2026-08-14。Portcast、AISStream、Open-Meteo、Calendarific 和官方气象/假日来源的链接仅用于能力与风险评估；本轮没有申请 Key、调用 API、抓取页面或实现 V2 Provider。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
 
 ## 1. V2 Executive Summary
 
 Shipping HOT V2 继续作为个人本地使用的 local-first 航运工作台，保留现有 NewsNow foundation、React/Vite/Nitro/db0/SQLite、Provider、Repository、Event Engine 和 Feed 边界。
 
-V2 的核心不是增加尽可能多的数据源，而是让每一条数据都能回答三个问题：来源是什么、什么时候更新、这是真实数据、衍生数据、估算数据还是 Mock 数据。任何 Provider 失败时，系统必须展示 last-known + stale/failed 状态，不能把旧数据或 Mock 数据伪装成最新真实数据。
+V2 的核心不是增加尽可能多的数据源，而是让每一条数据都能回答三个问题：来源是什么、什么时候更新、这条数据是观测、报告、预测、模型、衍生、估算还是计划数据。任何 Provider 失败时，系统必须展示 last-known + stale/failed 状态，不能把旧数据或 Mock 数据伪装成最新数据。
 
 V2 的首要实施顺序建议为：
 
@@ -78,7 +78,7 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 - 当前 AISStream 订阅使用全世界 Bounding Box + MMSI 过滤，只接收 `PositionReport`；当前没有持久化轨迹，也没有区域订阅会话管理。
 - 当前 PortProvider 和 ScheduleProvider 仍是 Mock。
 - 当前 Open-Meteo 仅请求当前风速、阵风和波高，并将风险作为 Weather FeedItem 输出。
-- 当前 `Freshness` 只有 `updatedAt`、`stale`、`sourceStatus`、`error`，还没有统一的 REAL/DERIVED/ESTIMATED/MOCK 业务标识。
+- 当前 `Freshness` 只有 `updatedAt`、`stale`、`sourceStatus`、`error`，还没有统一的 `sourceType`/`dataNature` 业务标识。
 - 当前 NewsNow Source 协议使用 `NewsItem[]` 和独立 cache，缺少 Shipping HOT 所需的完整 `sourceStatus/stale` 语义；V2 应在 Shipping Feed 适配层补齐，不应强行破坏所有 NewsNow Source。
 
 ## 3. V2 Goals
@@ -101,11 +101,11 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 
 ## 4. Non-Goals
 
-- 本轮不实现任何 V2 功能，不接 API，不申请或配置 Key，不修改业务代码、数据库 schema、UI 或 npm dependency。
+- 本轮不实现任何 V2 功能，不接 API，不申请或配置 Key，不修改 Shipping 业务代码、数据库 schema、UI 或 npm dependency；仅修复 NewsNow metadata 生成脚本的既有副作用。
 - 不把 Portcast 商业 API、VesselFinder、MarineTraffic 或其他商业 Vessel/Port API 作为 V2 强依赖。
 - 不绕过登录、付费墙、访问限制或 robots/ToS；不反向工程 Portcast 私有接口。
 - 不创建全球船舶数据库、完整 AIS 轨迹库、复杂 Port Call 网络模型或实时全球港口平台。
-- 不把 AIS 推导的拥堵当成 REAL；不把天气模型输出当成航行安全保证。
+- 不把 AIS 推导的拥堵当成官方观测；不把天气模型输出当成航行安全保证。
 - 不强行实现真实船期；没有免费稳定来源时 Planned Schedule 保持 Mock/手工并明确标识。
 - 不增加“海运新闻”独立页面；航运资讯继续进入现有资讯/Feed。
 - 不为了数据源数量堆叠 Provider；每个新增 Provider 必须有明确业务字段、更新频率和回退价值。
@@ -208,13 +208,19 @@ UI 不访问第三方 API，不访问 SQLite，不解析供应商响应。Nitro 
 ```text
 ProviderResult<T>
   data: T[]
-  sourceId
-  sourceUrl
+  provenance
+    sourceType: official | third_party | user | mock
+    dataNature: observed | reported | forecast | modelled | derived | estimated | planned
+    sourceId
+    sourceUrl?
+    verified?
   fetchedAt
   sourceUpdatedAt?
-  status: healthy | degraded | failed | disabled | never_succeeded
-  provenance: REAL | DERIVED | ESTIMATED | MOCK
-  error?
+  freshness
+    updatedAt
+    stale
+    sourceStatus: healthy | failed | disabled | never_succeeded
+    error?
 ```
 
 Provider 返回的 `data` 仍然必须是 Domain 可理解的规范化 DTO；供应商原始 JSON 只允许在 adapter 内作为受限 evidence 保存，不能泄漏到 Domain/UI。
@@ -235,7 +241,7 @@ Application Service 应继续使用并行刷新和逐分支 `Promise.allSettled`
 
 ## 8. Data Provenance / Trust Model
 
-### 8.1 不替换现有字段，而是补一个最小来源层
+### 8.1 两层语义：来源类型与数据性质
 
 当前 `Freshness` 已有 `sourceStatus`、`stale`、`updatedAt`、`error`。建议保留它们：
 
@@ -244,41 +250,49 @@ Application Service 应继续使用并行刷新和逐分支 `Promise.allSettled`
 - `updatedAt` 表示来源数据时间，不是本地请求时间。
 - `error` 表示可安全展示的失败摘要。
 
-只新增一个轻量的 `provenance` 值，不创建重复的七状态大枚举：
+新增轻量的 `provenance` 两层模型，不把来源、数据性质和可用性塞进一个大枚举：
 
 ```text
-provenance.kind: REAL | DERIVED | ESTIMATED | MOCK
-provenance.sourceId: string
-provenance.sourceUrl?: string
-provenance.verified?: boolean
+provenance
+  sourceType: official | third_party | user | mock
+  dataNature: observed | reported | forecast | modelled | derived | estimated | planned
+  sourceId: string
+  sourceUrl?: string
+  verified?: boolean
+
+freshness
+  updatedAt
+  stale
+  sourceStatus: healthy | failed | disabled | never_succeeded
+  error?
 ```
 
-页面最终可计算并显示以下用户可读状态：
+`sourceType` 表示“谁提供了这条数据”：`official` 是政府、港口、气象局或船公司等官方来源；`third_party` 是 Portcast、Calendarific、AISStream、Open-Meteo 等第三方来源；`user` 是人工输入；`mock` 是 fixture/Mock Provider。`dataNature` 表示“这条数据是什么性质”，按实际字段选择，不要求每条记录使用全部值。
+
+`sourceStatus`、`stale` 和 `updatedAt` 继续属于独立的可用性/新鲜度层。`stale` 不是来源类型，`failed`、`disabled` 和 `never_succeeded` 也不能覆盖 provenance。页面可以计算并显示以下用户可读状态：
 
 | 展示状态 | 计算原则 |
 | --- | --- |
-| REAL | `kind=REAL`、Provider healthy、`stale=false` |
-| DERIVED | 由 AIS/规则/多个来源计算，不能称为源站直接测量 |
-| ESTIMATED | 模型/规则估算，必须显示估算口径 |
-| MOCK | fixture 或 Mock Provider，无论数值看起来多合理都不能省略 |
+| 来源/性质标签 | 从 `sourceType` + `dataNature` 显示，例如 `third_party + observed` |
 | STALE | 数据仍有值但超出 freshness policy；保留原始 `updatedAt` |
 | FAILED | 最近刷新失败；若有 last-known，则同时显示 STALE |
 | DISABLED | 用户或配置明确关闭 Provider；不能当作“暂无异常” |
+| NEVER_SUCCEEDED | 从未成功取得过该来源的数据；不能用 Mock 或空值冒充成功 |
 
-`FAILED` 和 `DISABLED` 是可用性状态，不覆盖原始 `kind`。例如“Portcast REAL + FAILED + STALE”表示上一次成功数据是真实的，但本次读取失败；“AIS DERIVED + STALE”表示衍生统计仍存在但已过期。
+例如，“Portcast `third_party + derived` + `failed` + `stale`”表示上一次成功数据来自真实第三方来源，但本次读取失败；“AIS `third_party + derived` + `stale`”表示衍生统计仍存在但已过期。
 
 ### 8.2 六类数据的可信度规则
 
-- Port：Portcast 公开页面值为 REAL；AIS 推导为 DERIVED/ESTIMATED；Mock 为 MOCK；港口公告只说明运营事件，不自动替代拥堵数值。
-- Vessel：AISStream 规范化位置为 REAL；缺失字段的规则补全只能标为 ESTIMATED；Watched Vessel 以外没有数据时不能推断全港船数。
-- Voyage：手工/Mock Planned Schedule 为 MOCK 或 USER_ENTERED；AIS ETA 为 REAL/AIS-reported，但不是 Planned Schedule；两者分别展示。
-- Weather：Open-Meteo 模型预报为 REAL_SOURCE/forecast，但业务风险分级是 DERIVED；官方预警为 REAL；不能把风险阈值当成安全认证。
-- Holiday：官方记录为 REAL/verified；Calendarific 常规数据为 REAL（第三方来源）但默认 `verified=false`，经人工核对后才可显示 verified；业务影响等级是 DERIVED/可配置。
-- Feed：公开页面/RSS 的文章事实为 REAL_SOURCE；关联港口、严重程度和 HOT 资格是 DERIVED；Mock 资讯始终为 MOCK。
+- Port：Portcast 拥堵/等待指标为 `sourceType=third_party`、`dataNature=derived`；只有页面明确报告的字段才可标为 `reported`；AIS 推导为 `derived` 或 `estimated`；Mock 为 `sourceType=mock`；港口公告只说明运营事件，不自动替代拥堵数值。
+- Vessel：AISStream 规范化位置为 `third_party + observed`；缺失字段的规则补全只能标为 `estimated`；Watched Vessel 以外没有数据时不能推断全港船数。
+- Voyage：手工计划为 `user + planned`，Mock Planned Schedule 为 `mock + planned`；AIS ETA 为 `third_party + reported`，不是 Planned Schedule；两者分别展示。
+- Weather：Open-Meteo 输出为 `third_party + forecast/modelled`，业务风险分级是 `derived`；JMA/TMD/BMKG 等官方预警为 `official + reported` 且可 `verified=true`；不能把风险阈值当成安全认证。
+- Holiday：官方记录为 `official + reported`；Calendarific 常规数据为 `third_party + reported`，默认 `verified=false`；业务影响等级是 `derived`/可配置。
+- Feed：公开页面/RSS 的文章事实按来源标为 `official` 或 `third_party + reported`；关联港口、严重程度和 HOT 资格是 `derived`；Mock 资讯的 `sourceType` 始终为 `mock`。
 
 ### 8.3 UI 强制规则
 
-任何卡片至少显示来源状态、数据更新时间和 `REAL/DERIVED/ESTIMATED/MOCK/STALE/FAILED/DISABLED` 中适用的标签。没有 `updatedAt` 的数据不能显示“刚刚更新”；没有来源 URL 的外部数据不能标为 verified；Mock 模式必须在首页、详情页和事件证据中一致显示。
+任何卡片至少显示 `sourceType`、`dataNature`、数据更新时间和适用的 `STALE/FAILED/DISABLED/NEVER_SUCCEEDED` 状态。没有 `updatedAt` 的数据不能显示“刚刚更新”；没有来源 URL 的外部数据不能标为 `verified`；`mock` 模式必须在首页、详情页和事件证据中一致显示。
 
 ## 9. Vessel Strategy
 
@@ -331,7 +345,7 @@ V2.1 只读取 Portcast 公共港口拥堵页面中对匿名访问者已经展�
 - 模拟付费账户或批量抓取所有港口。
 - 将页面没有展示的指标推断成 Portcast 官方数据。
 
-如果公开页面只在浏览器执行脚本后显示数据，而 HTML 中没有可合规读取的公开内容，则 Provider 返回 `FAILED/never_succeeded` 或 `DISABLED`，不继续追私有接口。
+如果公开页面只在浏览器执行脚本后显示数据，而 HTML 中没有可合规读取的公开内容，则 Provider 返回 `failed`/`never_succeeded` 或 `disabled`，不继续追私有接口。
 
 ### 10.2 `PortcastPublicPageProvider`
 
@@ -358,7 +372,9 @@ PortCongestionSnapshot
   sourceUpdatedAt?
   fetchedAt
   sourceUrl
-  provenance: REAL
+  provenance
+    sourceType: third_party
+    dataNature: derived
   stale
   sourceStatus
   parserVersion
@@ -377,7 +393,7 @@ PortCongestionSnapshot
 
 ### 10.4 Portcast 覆盖不足时
 
-Portcast 公开页不一定展示八个重点港口的同样指标。每港独立显示：REAL、NO_PUBLIC_DATA、STALE 或 FAILED。港口公告可以进入 Feed/HOT，不能在没有拥堵数值时伪造 congestion category。
+Portcast 公开页不一定展示八个重点港口的同样指标。每港独立显示：`third_party + derived`、`NO_PUBLIC_DATA`、`STALE` 或 `FAILED`。港口公告可以进入 Feed/HOT，不能在没有拥堵数值时伪造 congestion category。
 
 ## 11. Weather Strategy
 
@@ -403,7 +419,7 @@ Portcast 公开页不一定展示八个重点港口的同样指标。每港独�
 
 ### 11.3 风险窗口
 
-Weather Provider 返回未来 24 小时、72 小时和 7 天摘要的原始预报时段；Domain 依据可配置阈值计算 `weather_risk` Feed/Event。风险卡必须显示：预报时间窗、数据更新时间、阈值版本、来源、REAL forecast + DERIVED rule 标签。
+Weather Provider 返回未来 24 小时、72 小时和 7 天摘要的原始预报时段；Domain 依据可配置阈值计算 `weather_risk` Feed/Event。风险卡必须显示：预报时间窗、数据更新时间、阈值版本、来源、`third_party + forecast/modelled` 与 `derived` rule 标签。
 
 Open-Meteo 的模型预报不等于官方警报，也不替代航海资料。页面需要同时显示“模型风险”和“官方预警”两种证据，不能将二者合并成一个无法解释的分数。
 
@@ -471,25 +487,28 @@ Manila、Jakarta、Ho Chi Minh City 官方源和船公司公告列为第二批�
 
 ### 13.2 Calendarific 角色
 
-Calendarific 作为常规年度基础源：按国家/年份批量同步，写入本地 Repository；页面读取本地数据，不在每次打开页面时请求 API。免费额度、归因、季度更新、语言和地区参数在实现前重新核对，默认按“有限额度、可能滞后”的源处理。
+Calendarific 作为常规年度基础源：按国家/年份批量同步，写入本地 Repository；页面读取本地数据，不在每次打开页面时请求 API。它是 `sourceType=third_party`、通常 `dataNature=reported` 的常规来源，不是官方事实层。免费额度、归因、季度更新、语言和地区参数在实现前重新核对，默认按“有限额度、可能滞后”的源处理。
+
+使用免费套餐时，国家日历页面必须展示符合当时官方条款的归因，例如 `Powered by Calendarific`，并链接到 Calendarific。最终文字和链接在实现 V2.2 前再次核对；归因要求同时属于产品验收和 UI 合同。
 
 建议同步策略：
 
-- 每年进入新年度时预抓取当前年和下一年。
+- 目标是本地缓存当前年和实际可获得的未来年度数据；不承诺免费套餐一定提供完整的下一年度。
+- 每年进入新年度时尝试预抓取当前年和可获得的未来年度。
 - 每季度检查一次未来数据更新。
 - 每日只检查临近日期或手工触发的变化，不重复下载整年数据。
-- Calendarific 失败时保留本地数据并标记 stale，不清空日历。
+- Calendarific 失败时保留本地数据并标记 stale，不清空日历；覆盖不足则显示 `coverageStatus=partial` 或 `unknown`，不伪造缺失假期。
 
 ### 13.3 官方来源与 ManualOverride
 
-设计 `OfficialHolidayProvider / ManualOverride`：
+设计 `OfficialHolidayProvider / ManualOverride`，并把事实层与业务层分开：
 
-- 官方政府/央行/主管部门记录：优先级 300，`verified=true` 需要来源 URL 和核验时间。
-- 公司手工 Override：优先级 400，必须填写原因、source URL 或内部说明、操作者和 last checked。
-- Calendarific：优先级 100，默认 `verified=false`。
+- 官方政府/央行/主管部门记录：事实层优先级最高，`sourceType=official`、`dataNature=reported`；`verified=true` 需要来源 URL 和核验时间。
+- Calendarific：事实层次于官方来源，`sourceType=third_party`、`dataNature=reported`，默认 `verified=false`。
+- ManualOverride：可以覆盖业务影响、内部提醒、展示备注和特殊业务日期；必须填写原因、source URL 或内部说明、操作者和 `lastCheckedAt`，不能无痕覆盖官方法定假期事实。
 - 普通商业日/公司自定义日：不覆盖法定假日事实，只增加独立 `company_custom` 事件。
 
-数据冲突不静默覆盖：保留主记录的选定值、冲突来源列表和 conflict flag；ManualOverride 可以改变业务展示日期，但不能删除官方/第三方证据。
+如果 ManualOverride 修改 `date`、holiday status 或 `isPublicHoliday`，必须保留原官方记录，标记 `conflictFlag`，并记录原因、操作者、来源和 `lastCheckedAt`。数据冲突不静默覆盖：保留主记录的选定值、冲突来源列表和 conflict flag；ManualOverride 可以改变业务展示日期，但不能删除官方/第三方证据。
 
 ### 13.4 Calendar Event 模型
 
@@ -511,6 +530,7 @@ CalendarEvent
   sourceUrl
   sourcePriority
   verified
+  coverageStatus: complete | partial | unknown
   lastCheckedAt
   updatedAt
   stale
@@ -535,7 +555,7 @@ CalendarEvent
 
 ### 14.1 V2 结论
 
-V2 不实现未经证实的真实 Planned Schedule Provider。当前 `MockScheduleProvider` 和 fixture 保留，但必须显示 MOCK；用户手工建立的计划可标记 USER_ENTERED/ESTIMATED；AISStream 提供的 ETA 单独标记 AIS-reported ETA。
+V2 不实现未经证实的真实 Planned Schedule Provider。当前 `MockScheduleProvider` 和 fixture 保留，并标记 `sourceType=mock`、`dataNature=planned`；用户手工建立的计划标记 `sourceType=user`、`dataNature=planned`；AISStream 提供的 ETA 标记 `sourceType=third_party`、`dataNature=reported`，并单独标记为 AIS-reported ETA。
 
 ### 14.2 两类事实必须分开
 
@@ -610,7 +630,7 @@ AIS-reported ETA
 | Port 当前摘要 | 最新值 | 长期 |
 | Portcast 页面 fingerprint/evidence | 当前值 + 有限比较值 | 至少支持 previous/WoW，建议不超过 90 天 |
 | Weather 当前/未来窗口 | 最新成功窗口 | 7 天以内，下一次成功覆盖 |
-| Calendar Event | 年度本地缓存 | 至少保留当前年和下一年 |
+| Calendar Event | 年度本地缓存 | 保留当前年和实际可获得的未来年度；覆盖不足时记录 `coverageStatus` |
 | FeedItem | 现有 retention 机制 | 默认 30 天，按 source 更新频率调整 |
 | Shipping Event | 现有 lifecycle | 默认 30 天，resolved 后按 retention 清理 |
 
@@ -646,10 +666,10 @@ Local Scheduler 是单进程、本地、可暂停的同步编排器，不是云�
 
 ### 18.1 通用规则
 
-1. 有 last-known 且刷新失败：保留原始 `updatedAt`，设置 `stale=true`、`sourceStatus=failed`、保留 `provenance.kind` 和错误摘要。
+1. 有 last-known 且刷新失败：保留原始 `updatedAt`，设置 `stale=true`、`sourceStatus=failed`，保留两层 provenance 和错误摘要。
 2. 没有 last-known 且刷新失败：返回空集合/暂无数据，`never_succeeded` 或 `failed`，不填充假数据。
 3. Provider disabled：返回 `disabled`，不把 disabled 视为 healthy 或 fresh。
-4. Mock 模式：明确 `provenance.kind=MOCK`，即使 fixture 时间是当前生成，也不得显示 REAL。
+4. Mock 模式：明确 `provenance.sourceType=mock`，即使 fixture 时间是当前生成，也不得显示为外部新鲜数据。
 5. 请求时间、缓存写入时间和源数据更新时间永不混用。
 6. 单源失败不影响其他实体、其他 Provider 或首页基本渲染。
 
@@ -673,12 +693,13 @@ fresh verified official / public source
   > no data
 ```
 
-ManualOverride 只在其适用领域优先级高于第三方常规源时生效；它不能把没有来源的数字变成 REAL，也不能掩盖冲突和 stale。
+ManualOverride 只在其适用领域优先级高于第三方常规源时生效；它不能把没有来源的数字变成官方事实，也不能掩盖冲突和 stale。
 
 ## 19. Security / API Key Rules
 
 - AISStream 和 Calendarific Key 只在 Nitro server/provider 使用，来源为环境变量或本地未跟踪安全配置。
-- Key 不进入浏览器 bundle、URL、SQLite、settings JSON、日志、事件 evidence、错误堆栈或 FeedItem。
+- Calendarific 官方协议要求在 server-side outbound request 的 query parameter 中传入 `api_key`；因此允许服务端按协议拼接该参数，但禁止浏览器访问、前端 bundle、客户端 URL、SQLite、settings JSON、FeedItem、Event evidence、Git、文档和任何错误输出中出现真实 Key。
+- 所有日志和错误摘要必须先脱敏，例如只允许记录 `https://calendarific.com/api/v2/holidays?api_key=***`，不得记录真实值、完整请求对象或带 Key 的堆栈。
 - Portcast 公共页面不需要商业 Key；如果实现所需页面要求登录/token/商业 API，则该 Provider 标记 deferred/disabled。
 - 公共页面请求使用低频、可配置 User-Agent、超时和退避；在实现前核对 robots、ToS、版权和再分发要求。
 - 原始响应只保留最小、可审计 evidence；不保存整页 HTML 或敏感 token。
@@ -745,7 +766,7 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 
 ### V2.0
 
-- 所有实体卡片统一显示 REAL/DERIVED/ESTIMATED/MOCK 和 STALE/FAILED/DISABLED。
+- 所有实体卡片统一显示 `sourceType`、`dataNature` 和 `STALE/FAILED/DISABLED/NEVER_SUCCEEDED`。
 - Mock fallback 不再看起来像真实源；provider chip 显示具体来源和更新时间。
 - 空数据、失败、过期、disabled、never_succeeded 使用不同状态。
 
@@ -774,11 +795,11 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 
 ### V2.0 — Data Trust Foundation
 
-- Goal：让所有 V1/V2 数据可判断来源、真实性和新鲜度。
+- Goal：让所有 V1/V2 数据可判断来源类型、数据性质和新鲜度。
 - In Scope：`provenance` 最小模型、统一 ProviderResult/状态映射、Mock 明示、失败/last-known 规则、AIS session 设计、测试契约。
 - Out of Scope：Portcast、Calendarific、真实 Port Provider、数据库 migration、UI 大改。
 - Dependencies：当前 V1 Provider/Repository/Event Engine；需要用户架构确认后才能编码。
-- Acceptance：六类数据都能显示 REAL/DERIVED/ESTIMATED/MOCK/STALE/FAILED/DISABLED；单 Provider 失败不影响其他分支；Mock 不再伪装真实；无 Key 时核心 UI 可用。
+- Acceptance：六类数据都能显示 `sourceType`、`dataNature`、`STALE/FAILED/DISABLED/NEVER_SUCCEEDED`；单 Provider 失败不影响其他分支；Mock 不再伪装真实；无 Key 时核心 UI 可用。
 - Main risks：字段扩展可能影响 fixtures/API/UI；先兼容读写并保留当前 `sourceStatus/stale`。
 - Rollback：关闭 provenance 展示增强，保留旧 Freshness 字段和现有 Mock 闭环。
 
@@ -798,7 +819,7 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 - In Scope：Calendarific 年度缓存、OfficialHolidayProvider/ManualOverride、`calendar_events` 最小表、类型/影响等级、冲突、Holiday → Event → HOT。
 - Out of Scope：所有国家、自动解释未知宗教日期、企业 ERP 同步、多用户共享日历。
 - Dependencies：V2.0 trust model；Calendarific Key 管理确认；五国官方来源清单。
-- Acceptance：不打开页面即请求 API；当前年/下一年可离线读取；官方/手工优先级可解释；普通、高影响、连续假期和政府临时假日提醒不重复；日历不把 observance 默认当作放假。
+- Acceptance：不打开页面即请求 API；本地可离线读取实际已缓存的年度数据；`coverageStatus` 可区分 complete/partial/unknown；国家日历页面展示符合条款的 Calendarific Attribution；官方事实层优先级最高；ManualOverride 修改事实字段时保留原记录并标记 conflict；普通、高影响、连续假期和政府临时假日提醒不重复；日历不把 observance 默认当作放假。
 - Main risks：官方临时变更、地区差异、农历/宗教日期、第三方滞后。
 - Rollback：停用自动同步但保留本地 CalendarEvent；关闭提醒规则不删除已核验记录。
 
@@ -886,7 +907,7 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 - Provider fixture 覆盖成功、超时、结构变化、无数据、disabled、last-known、stale 和 no-credential 场景。
 - Domain/Event 单元测试覆盖 Portcast fingerprint、Calendar lead window、dedupe/reopen/resolve、stale 不新建事件和 severity 规则。
 - SQLite 测试覆盖 calendar_events 初始化、读写、冲突字段和 retention；不引入 ORM。
-- UI 测试覆盖 REAL、DERIVED、ESTIMATED、MOCK、STALE、FAILED、DISABLED、暂无数据和来源链接。
+- UI 测试覆盖四类 `sourceType`、七类 `dataNature` 中实际使用的值、STALE/FAILED/DISABLED/NEVER_SUCCEEDED、暂无数据和来源链接。
 - AIS 测试证明 watched-only 不会被误报为全港统计；如果启用 area session，必须测试 Bounding Box、样本量不足、连接复用和退避。
 - Portcast 测试证明只解析允许的公开字段，页面 source updatedAt 不变时不会产生重复 Event。
 - 断网或没有 Key 时，核心本地工作台仍可启动；Mock/last-known/暂无数据状态清晰可见。
