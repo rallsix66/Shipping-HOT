@@ -455,7 +455,7 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 - Out of Scope：任何业务代码、依赖、数据库变更。
 - Files：`docs/**`，必要时架构权威文件。
 - Dependencies：Git、当前 NewsNow 源码。
-- Acceptance Criteria：审计证据可定位；本地 Mock 架构边界明确；真实 Provider 保持 deferred。
+- Acceptance Criteria：审计证据可定位；本地 Mock 架构边界明确；当时的 Phase 0 记录将真实 Provider 视为 deferred，后续 V1 决策已在 Phase 5/6 明确批准有限适配器。
 - Risks：架构与洁癖 Skill 来自外部 Skill 仓库，执行时需读取其真实 `SKILL.md` 和指定参考文件。
 - Rollback：删除本轮新增 docs 即可，不影响运行时代码。
 
@@ -503,24 +503,24 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 - Risks：规则阈值误报；所有事件保留 evidence 和可配置阈值。
 - Rollback：关闭 Mock Provider/事件服务，保留数据表。
 
-### Phase 5 — First Real Vessel Provider (`completed`)
+### Phase 5 — AISStream Vessel Provider (`completed`)
 
-- Goal：接入一个经评估的真实 Vessel Provider。
-- In Scope：一个 adapter、key 配置、限流/错误映射、状态展示。
+- Goal：接入经评估并获 V1 批准的 AISStream Vessel Provider。
+- In Scope：AISStream adapter、key 配置、超时/错误映射、状态 freshness 和 fallback。
 - Out of Scope：多供应商聚合、轨迹库、商业采购扩展。
 - Files：单一 Provider adapter、配置、contract tests、文档。
-- Dependencies：Phase 4；完成 Data Source Evaluation 和用户确认成本/访问性。
+- Dependencies：Phase 4；已完成 Data Source Evaluation，并获得 V1 范围确认。
 - Acceptance Criteria：没有 API Key 时核心 UI 仍可用；失败回退明确；原始供应商格式不泄漏到 Domain。
 - Risks：成本、限流、中国访问、许可变化。
 - Rollback：禁用 Provider 开关，回退 Mock/last known data。
 
-### Phase 6 — Real Weather Provider (`completed`)
+### Phase 6 — Open-Meteo Marine Weather Provider (`completed`)
 
-- Goal：接入一个港口或天气 Provider，形成港口异常闭环。
-- In Scope：Port/Weather adapter、拥堵/天气规则、状态 freshness。
+- Goal：接入获 V1 批准的 Open-Meteo Marine Weather Provider，形成天气风险闭环。
+- In Scope：Open-Meteo Marine/Forecast adapter、天气风险规则、状态 freshness。
 - Out of Scope：多区域全量覆盖、预测模型、AI。
 - Files：Provider adapter、规则、页面 Widget、测试。
-- Dependencies：Phase 4；优先选择可公开访问、个人成本低的来源。
+- Dependencies：Phase 4；已选择可公开访问、个人成本低的来源。
 - Acceptance Criteria：港口接口失败不影响 Vessel/HOT 资讯；UI 可区分实时/过期/暂无。
 - Risks：港口指标定义不一致；保留原始 evidence 和 source metadata。
 - Rollback：关闭对应 Provider，继续展示 last known 或暂无。
@@ -557,15 +557,15 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 - 已回答 Snapshot、Event、Voyage、delay、freshness、Provider 隔离、ORM 和最小表数量问题。
 - 已给出目标目录职责与依赖方向。
 - 已给出每个 Phase 的 Goal/In Scope/Out of Scope/Files/Dependencies/Acceptance/Risk/Rollback。
-- 新增内容只在 `docs/**`，没有改动业务源码、依赖、锁文件或数据库。
+- Phase 0 的历史验收记录当时只涉及 `docs/**`；后续 Phase 5/6/7 已按批准范围修改 Provider、测试和运行时集成。
 - 本地 Mock 闭环与 V1 AISStream/Open-Meteo Provider 标记为 `implemented / verified`；持久化 SQLite 在 Node 22.23.2 标记为 `verified`，Node 24.15.0 仍保留 ABI fallback caveat。
 
 ## 19. 明确不做
 
 - 不迁移 Next.js、Prisma、Supabase。
-- 不安装 AIS SDK，不连接 ShipXY、AISStream、VesselFinder、MarineTraffic、Portcast。
+- 不安装额外 AIS SDK，不接入第二个 Vessel Provider、ShipXY、VesselFinder、MarineTraffic 或 Portcast；V1 的 AISStream adapter 已按批准范围保留。
 - 不删除微博、知乎、Bilibili、AIHOT、OAuth、Cloudflare 或 Docker。
-- 不做真实 Provider、数据库 migration、业务 API、页面或组件。
+- 不新增未批准的真实 Provider、数据库 migration、业务 API、页面或组件；V1 仅保留已批准的 AISStream Vessel 和 Open-Meteo Marine Weather adapters。
 - 不创建全球船舶数据库、完整轨迹库、复杂队列或微服务。
 
 ## 20. 待确认事项

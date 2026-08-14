@@ -80,6 +80,47 @@ describe("shipping Provider failure boundaries", () => {
     expect(result.find(vessel => vessel.id === "vessel-cosco-harmony")).toMatchObject({ sourceStatus: "degraded" })
   })
 
+  it("keeps partial AIS success and degrades only vessels without an update", async () => {
+    const socket = {
+      onopen: null as (() => void) | null,
+      onmessage: null as ((event: { data: unknown }) => void) | null,
+      onerror: null as ((event: unknown) => void) | null,
+      onclose: null as (() => void) | null,
+      send() {
+        this.onmessage?.({ data: JSON.stringify({
+          MessageType: "PositionReport",
+          MetaData: { MMSI: "477123400", ShipName: "EVER GLORY", time_utc: "2026-08-13T09:00:00.000Z" },
+          Message: { PositionReport: { UserID: 477123400, Latitude: 22.3, Longitude: 114.2 } },
+        }) })
+      },
+      close() {},
+    }
+    const result = await createAisStreamVesselProvider({ apiKey: "test-key", timeoutMs: 20, socketFactory: () => {
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } }).getVessels([mockVessels[0], mockVessels[2], { ...mockVessels[1], isWatched: false }])
+    expect(result).toHaveLength(3)
+    expect(result.find(vessel => vessel.id === "vessel-ever-glory")).toMatchObject({ latitude: 22.3, longitude: 114.2, stale: false, sourceStatus: "healthy" })
+    expect(result.find(vessel => vessel.id === "vessel-cosco-harmony")).toMatchObject({ stale: true, sourceStatus: "degraded" })
+    expect(result.find(vessel => vessel.id === "vessel-maersk-saltoro")).toEqual({ ...mockVessels[1], isWatched: false })
+  })
+
+  it("rejects when no watched MMSI receives an AIS position", async () => {
+    const provider = createAisStreamVesselProvider({ apiKey: "test-key", timeoutMs: 20, socketFactory: () => {
+      const socket = {
+        onopen: null as (() => void) | null,
+        onmessage: null as ((event: { data: unknown }) => void) | null,
+        onerror: null as ((event: unknown) => void) | null,
+        onclose: null as (() => void) | null,
+        send() {},
+        close() {},
+      }
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    await expect(provider.getVessels([mockVessels[0]])).rejects.toThrow("timed out")
+  })
+
   it("uses PositionReport.UserID fallback when MetaData is missing", async () => {
     const result = await createAisStreamVesselProvider({ apiKey: "test-key", timeoutMs: 100, socketFactory: () => {
       const socket = {
@@ -95,7 +136,7 @@ describe("shipping Provider failure boundaries", () => {
       setTimeout(() => socket.onopen?.(), 0)
       return socket
     } }).getVessels([mockVessels[0]])
-    expect(result[0]).toMatchObject({ mmsi: "477123400", name: "EVER GLORY", updatedAt: undefined })
+    expect(result[0]).toMatchObject({ mmsi: "477123400", name: "EVER GLORY", updatedAt: undefined, stale: true, sourceStatus: "degraded" })
   })
 
   it("normalizes Open-Meteo warning and keeps normal weather quiet", async () => {

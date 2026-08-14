@@ -118,6 +118,7 @@ function normalizeAisPosition(message: AisStreamMessage, watched: Vessel): Vesse
   const mmsi = mmsiValue(metadata?.MMSI) ?? (position?.UserID === undefined ? undefined : String(position.UserID))
   if (!position || !mmsi || mmsi !== watched.mmsi) return undefined
   const updatedAt = normalizeProviderTimestamp(metadata?.time_utc)
+  const hasTrustedTimestamp = updatedAt !== undefined
   return {
     id: watched.id,
     name: stringValue(metadata?.ShipName) ?? watched.name,
@@ -136,8 +137,9 @@ function normalizeAisPosition(message: AisStreamMessage, watched: Vessel): Vesse
     destination: watched.destination,
     eta: watched.eta,
     updatedAt,
-    stale: false,
-    sourceStatus: "healthy",
+    stale: !hasTrustedTimestamp,
+    sourceStatus: hasTrustedTimestamp ? "healthy" : "degraded",
+    error: hasTrustedTimestamp ? undefined : "Provider timestamp unavailable",
   }
 }
 
@@ -167,7 +169,7 @@ export function createAisStreamVesselProvider(options: AisStreamVesselProviderOp
           if (error) reject(error)
           else resolve()
         }
-        timer = setTimeout(() => finish(new Error("AISStream request timed out")), timeoutMs)
+        timer = setTimeout(() => finish(received.size > 0 ? undefined : new Error("AISStream request timed out")), timeoutMs)
         socket.onopen = () => {
           socket.send(JSON.stringify({
             APIKey: options.apiKey,
@@ -188,7 +190,7 @@ export function createAisStreamVesselProvider(options: AisStreamVesselProviderOp
           received.set(normalized.id, normalized)
           if (received.size === watchedByMmsi.size) finish()
         }
-        socket.onerror = () => finish(new Error("AISStream request failed"))
+        socket.onerror = () => finish(received.size > 0 ? undefined : new Error("AISStream request failed"))
         socket.onclose = () => {
           if (!settled && received.size === 0) finish(new Error("AISStream connection closed"))
           else if (!settled) finish()
