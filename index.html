@@ -56,6 +56,17 @@
       window.history.replaceState({}, document.title, window.location.pathname)
     }
   </script>
+  <script>
+    // 首帧前按本地偏好同步主题，避免暗/亮闪烁（useDark 存 localStorage["color-scheme"]）
+    try {
+      var __scheme = JSON.parse(localStorage.getItem("color-scheme") || '"dark"')
+      var __dark = __scheme === "auto" ? window.matchMedia("(prefers-color-scheme: dark)").matches : __scheme !== "light"
+      document.documentElement.classList.toggle("dark", __dark)
+    }
+    catch (e) {
+      document.documentElement.classList.add("dark")
+    }
+  </script>
   <title>Shipping HOT</title>
 </head>
 

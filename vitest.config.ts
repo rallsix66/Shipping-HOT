@@ -4,6 +4,9 @@ import unimport from "unimport/unplugin"
 import { projectDir } from "./shared/dir"
 
 export default defineConfig({
+  esbuild: {
+    jsx: "automatic",
+  },
   test: {
     globals: true,
     environment: "node",
