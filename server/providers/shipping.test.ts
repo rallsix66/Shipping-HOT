@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest"
-import { mockPorts, mockVessels } from "@shared/shipping-fixtures"
+import { createMockSnapshot, mockPorts, mockVessels } from "@shared/shipping-fixtures"
 import type { FeedItem, Vessel } from "@shared/shipping"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeWeatherFeedItems } from "../shipping-store"
-import { configureProviders, createAisStreamVesselProvider, createOpenMeteoWeatherProvider, disabledProviderData, normalizeProviderTimestamp, providerResult } from "./shipping"
+import { configureProviders, createAisStreamVesselProvider, createOpenMeteoWeatherProvider, disabledProviderData, normalizeProviderTimestamp, providerProvenances, providerResult, toProviderResult } from "./shipping"
 
 describe("shipping Provider failure boundaries", () => {
   it("includes all eight V1 focus ports in the seed", () => {
@@ -21,8 +21,9 @@ describe("shipping Provider failure boundaries", () => {
 
   it("keeps last-known data and marks a failed provider stale", () => {
     const [vessel] = mockVessels
+    const updatedAt = vessel.updatedAt
     const result = providerResult<Vessel>({ status: "rejected", reason: new Error("mock outage") }, [vessel])
-    expect(result[0]).toMatchObject({ id: vessel.id, stale: true, sourceStatus: "failed", error: "mock outage" })
+    expect(result[0]).toMatchObject({ id: vessel.id, updatedAt, stale: true, sourceStatus: "failed", error: "mock outage" })
   })
 
   it("marks disabled streams without pretending they are fresh", () => {
@@ -75,7 +76,7 @@ describe("shipping Provider failure boundaries", () => {
     } }).getVessels([mockVessels[0], { ...mockVessels[1], mmsi: undefined }, mockVessels[2]])
     expect(subscription?.FiltersShipMMSI).toEqual(["477123400"])
     expect(result).toHaveLength(3)
-    expect(result.find(vessel => vessel.id === "vessel-ever-glory")).toMatchObject({ name: "EVER GLORY", latitude: 22.3, speed: 4.5, sourceStatus: "healthy", updatedAt: "2026-08-13T09:00:00.000Z" })
+    expect(result.find(vessel => vessel.id === "vessel-ever-glory")).toMatchObject({ name: "EVER GLORY", latitude: 22.3, speed: 4.5, sourceStatus: "healthy", updatedAt: "2026-08-13T09:00:00.000Z", sourceUpdatedAt: "2026-08-13T09:00:00.000Z", provenance: providerProvenances.aisstream })
     expect(result.find(vessel => vessel.id === "vessel-maersk-saltoro")).toMatchObject({ stale: true, sourceStatus: "degraded", error: "MMSI unavailable for real vessel lookup" })
     expect(result.find(vessel => vessel.id === "vessel-cosco-harmony")).toMatchObject({ sourceStatus: "degraded" })
   })
@@ -129,6 +130,23 @@ describe("shipping Provider failure boundaries", () => {
     }
   })
 
+  it("maps every Mock V1 entity to an explicit provenance", () => {
+    const snapshot = createMockSnapshot()
+    expect(snapshot.vessels[0].provenance).toMatchObject({ sourceType: "mock", dataNature: "observed", sourceId: "mock-vessel" })
+    expect(snapshot.ports[0].provenance).toMatchObject({ sourceType: "mock", dataNature: "derived", sourceId: "mock-port" })
+    expect(snapshot.voyages[0].provenance).toMatchObject({ sourceType: "mock", dataNature: "planned", sourceId: "mock-schedule" })
+    expect(snapshot.feedItems.find(item => item.sourceId === "mock-weather")?.provenance).toMatchObject({ sourceType: "mock", dataNature: "forecast", sourceId: "mock-weather" })
+  })
+
+  it("exposes a provider result freshness envelope, including never-succeeded", () => {
+    const result = toProviderResult([], providerProvenances.openMeteo, "2026-08-14T00:00:00.000Z")
+    expect(result).toMatchObject({
+      provenance: { sourceType: "third_party", dataNature: "forecast", sourceId: "open-meteo-marine" },
+      fetchedAt: "2026-08-14T00:00:00.000Z",
+      freshness: { stale: true, sourceStatus: "never_succeeded" },
+    })
+  })
+
   it("rejects when no watched MMSI receives an AIS position", async () => {
     const provider = createAisStreamVesselProvider({ apiKey: "test-key", timeoutMs: 20, socketFactory: () => {
       const socket = {
@@ -175,7 +193,7 @@ describe("shipping Provider failure boundaries", () => {
     })
     const provider = createOpenMeteoWeatherProvider({ fetcher })
     const warning = await provider.getFeedItems([mockPorts[0]])
-    expect(warning[0]).toMatchObject({ severity: "warning", relatedPortIds: ["port-shekou"], sourceStatus: "healthy" })
+    expect(warning[0]).toMatchObject({ severity: "warning", relatedPortIds: ["port-shekou"], sourceStatus: "healthy", sourceUpdatedAt: "2026-08-13T09:00:00.000Z", provenance: providerProvenances.openMeteo })
 
     const normalProvider = createOpenMeteoWeatherProvider({ fetcher: async (_url: string) => ({
       ok: true,

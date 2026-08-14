@@ -3,9 +3,11 @@ import { MotionConfig, motion } from "framer-motion"
 import { type ReactNode, useEffect, useRef } from "react"
 import type { ShippingEvent, ShippingSnapshot, Voyage } from "@shared/shipping"
 import { AuroraBackground } from "./aurora"
-import { type DotTone, formatDate, formatSourceStatus, formatStatus, severityTone, statusLabels } from "./format"
-import { AnimatedNumber, GradientText, StatusDot } from "./ui"
+import { type DotTone, formatDate, formatStatus, severityTone, statusLabels } from "./format"
+import { AnimatedNumber, GradientText, ProvenanceBadge, StatusDot } from "./ui"
 import { useDark } from "~/hooks/useDark"
+
+export { ProvenanceBadge } from "./ui"
 
 const navLinks = [
   { to: "/", label: "HOT", icon: "i-ph-fire" },
@@ -208,7 +210,15 @@ export function VoyageCard({ voyage, vessels, ports, onClick }: { voyage: Voyage
       <div className="mt-4 grid grid-cols-3 gap-3">
         <Field label="基准 ETA" value={formatDate(voyage.baselineEta)} />
         <Field label="最新 ETA" value={formatDate(voyage.latestEta)} />
-        <Field label="数据源" value={<StatusBadge stale={voyage.stale} sourceStatus={voyage.sourceStatus} />} />
+        <Field
+          label="来源 / 新鲜度"
+          value={(
+            <div className="flex flex-wrap gap-1.5">
+              <ProvenanceBadge provenance={voyage.provenance} />
+              <StatusBadge stale={voyage.stale} sourceStatus={voyage.sourceStatus} />
+            </div>
+          )}
+        />
       </div>
     </article>
   )
@@ -235,10 +245,8 @@ export function EventCard({ event, label }: { event: ShippingEvent, label?: stri
           {" "}
           {formatDate(event.lastDetectedAt)}
         </span>
-        <span>
-          数据源：
-          {formatSourceStatus(event.sourceStatus)}
-        </span>
+        <ProvenanceBadge provenance={event.provenance} />
+        <StatusBadge stale={event.stale ?? event.sourceStatus !== "healthy"} sourceStatus={event.sourceStatus} />
         {event.resolvedAt && (
           <span className="flex items-center gap-1">
             <span className="i-ph-check-circle" />
@@ -260,7 +268,10 @@ export function FeedCard({ item }: { item: ShippingSnapshot["feedItems"][number]
           <Severity value={item.severity} />
           <span className="chip">{formatStatus(item.category)}</span>
         </div>
-        <StatusBadge stale={item.stale} sourceStatus={item.sourceStatus} />
+        <div className="flex flex-wrap justify-end gap-1.5">
+          <ProvenanceBadge provenance={item.provenance} />
+          <StatusBadge stale={item.stale} sourceStatus={item.sourceStatus} />
+        </div>
       </div>
       <h2 className="mt-3 text-xl font-bold">{item.title}</h2>
       <p className="mt-2 flex-1 op-80">{item.summary}</p>
@@ -270,10 +281,7 @@ export function FeedCard({ item }: { item: ShippingSnapshot["feedItems"][number]
             <span className="i-ph-clock" />
             {formatDate(item.publishedAt)}
           </span>
-          <span>
-            数据源：
-            {item.sourceId}
-          </span>
+          <ProvenanceBadge provenance={item.provenance} />
         </div>
         <a className="flex items-center gap-1 text-sm font-semibold text-teal-600 transition-colors hover:text-teal-500 dark:text-teal-300" href={item.sourceUrl} target="_blank" rel="noreferrer">
           打开来源

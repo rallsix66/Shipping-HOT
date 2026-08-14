@@ -1,4 +1,5 @@
-import type { FeedItem, Freshness, Port, Vessel, Voyage } from "@shared/shipping"
+import { env } from "node:process"
+import type { DataProvenance, FeedItem, Freshness, Port, ProviderResult, SourceStatus, Vessel, Voyage } from "@shared/shipping"
 import { mockFeedItems, mockPorts, mockVessels, mockVoyages, portWeatherConfig } from "@shared/shipping-fixtures"
 
 export interface VesselProvider { getVessels(watched?: Vessel[]): Promise<Vessel[]> }
@@ -6,10 +7,43 @@ export interface PortProvider { getPorts(): Promise<Port[]> }
 export interface ScheduleProvider { getVoyages(): Promise<Voyage[]> }
 export interface WeatherProvider { getFeedItems(ports?: Port[]): Promise<FeedItem[]> }
 
+export const providerProvenances = {
+  aisstream: { sourceType: "third_party", dataNature: "observed", sourceId: "aisstream", sourceUrl: "https://aisstream.io/", verified: false },
+  openMeteo: { sourceType: "third_party", dataNature: "forecast", sourceId: "open-meteo-marine", sourceUrl: "https://open-meteo.com/", verified: false },
+  mockVessel: { sourceType: "mock", dataNature: "observed", sourceId: "mock-vessel", verified: false },
+  mockPort: { sourceType: "mock", dataNature: "derived", sourceId: "mock-port", verified: false },
+  mockSchedule: { sourceType: "mock", dataNature: "planned", sourceId: "mock-schedule", verified: false },
+  mockWeather: { sourceType: "mock", dataNature: "forecast", sourceId: "mock-weather", verified: false },
+} as const satisfies Record<string, DataProvenance>
+
+const aisstreamProvenance: DataProvenance = providerProvenances.aisstream
+const openMeteoProvenance: DataProvenance = providerProvenances.openMeteo
+
+export function toProviderResult<T extends Freshness>(data: T[], provenance: DataProvenance, fetchedAt = new Date().toISOString(), sourceStatusOverride?: SourceStatus): ProviderResult<T> {
+  const statusPriority = ["failed", "never_succeeded", "degraded", "disabled", "healthy"] as const
+  const sourceStatus = sourceStatusOverride ?? statusPriority.find(status => data.some(item => item.sourceStatus === status)) ?? "never_succeeded"
+  const first = data[0]
+  return {
+    data,
+    provenance,
+    fetchedAt,
+    sourceUpdatedAt: first?.sourceUpdatedAt,
+    freshness: {
+      updatedAt: first?.updatedAt,
+      sourceUpdatedAt: first?.sourceUpdatedAt,
+      fetchedAt,
+      stale: sourceStatus !== "healthy" || data.some(item => item.stale),
+      sourceStatus,
+      error: data.find(item => item.error)?.error,
+    },
+  }
+}
+
 export function providerResult<T extends Freshness>(result: PromiseSettledResult<T[]>, lastKnown: T[]): T[] {
-  if (result.status === "fulfilled") return result.value
+  const fetchedAt = new Date().toISOString()
+  if (result.status === "fulfilled") return result.value.map(item => ({ ...item, fetchedAt })) as T[]
   const error = result.reason instanceof Error ? result.reason.message : "Provider failed"
-  return lastKnown.map(item => ({ ...item, stale: true, sourceStatus: "failed", error })) as T[]
+  return lastKnown.map(item => ({ ...item, stale: true, sourceStatus: "failed", error, fetchedAt })) as T[]
 }
 
 export function disabledProviderData<T extends Freshness>(lastKnown: T[]): T[] {
@@ -137,9 +171,11 @@ function normalizeAisPosition(message: AisStreamMessage, watched: Vessel): Vesse
     destination: watched.destination,
     eta: watched.eta,
     updatedAt,
+    sourceUpdatedAt: updatedAt,
     stale: !hasTrustedTimestamp,
     sourceStatus: hasTrustedTimestamp ? "healthy" : "degraded",
     error: hasTrustedTimestamp ? undefined : "Provider timestamp unavailable",
+    provenance: aisstreamProvenance,
   }
 }
 
@@ -270,8 +306,10 @@ function weatherFeedItem(port: WeatherPortConfig, marine: OpenMeteoPayload, wind
     relatedVesselIds: [],
     relatedVoyageIds: [],
     updatedAt,
+    sourceUpdatedAt: updatedAt,
     stale: false,
     sourceStatus: "healthy",
+    provenance: openMeteoProvenance,
   }
 }
 
@@ -319,12 +357,12 @@ interface ProviderEnvironment {
   SHIPPING_WEATHER_PROVIDER?: string
 }
 
-export function configureProviders(env: ProviderEnvironment = { ...process.env }) {
-  const vesselMode = env.SHIPPING_VESSEL_PROVIDER === "aisstream" && env.AISSTREAM_API_KEY ? "aisstream" : "mock"
-  const weatherMode = env.SHIPPING_WEATHER_PROVIDER === "open-meteo" ? "open-meteo" : "mock"
+export function configureProviders(environment: ProviderEnvironment = { ...env }) {
+  const vesselMode = environment.SHIPPING_VESSEL_PROVIDER === "aisstream" && environment.AISSTREAM_API_KEY ? "aisstream" : "mock"
+  const weatherMode = environment.SHIPPING_WEATHER_PROVIDER === "open-meteo" ? "open-meteo" : "mock"
   return {
     providers: {
-      vessel: vesselMode === "aisstream" ? createAisStreamVesselProvider({ apiKey: env.AISSTREAM_API_KEY! }) : MockVesselProvider,
+      vessel: vesselMode === "aisstream" ? createAisStreamVesselProvider({ apiKey: environment.AISSTREAM_API_KEY! }) : MockVesselProvider,
       port: MockPortProvider,
       schedule: MockScheduleProvider,
       weather: weatherMode === "open-meteo" ? createOpenMeteoWeatherProvider() : MockWeatherProvider,

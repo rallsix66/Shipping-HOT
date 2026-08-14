@@ -1,7 +1,7 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
 > Last verified: 2026-08-14
-> Architecture status: approved for local Mock implementation plus V1 AISStream/Open-Meteo adapters
+> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters and the implemented V2.0 Data Trust Foundation; V2.1+ not started
 > Source of truth for: the current retained system structure and approved boundaries
 
 ## 1. Project Purpose
@@ -14,6 +14,7 @@ The repository retains NewsNow as its foundation and now exposes Shipping HOT as
 
 - Current NewsNow news Source aggregation, cache, UI cards, local preferences, optional GitHub login/sync, and deployment adapters.
 - Preserving the existing modular monolith as the foundation for the local Mock loop and approved V1 Provider adapters.
+- V2.0 Data Trust Foundation: provenance, freshness/status separation, last-known fallback semantics, Event evidence and UI attribution within the existing JSON/API boundaries.
 
 ### Explicitly Out of Scope
 
@@ -28,6 +29,7 @@ The repository retains NewsNow as its foundation and now exposes Shipping HOT as
 | Shipping HOT domain and HOT feed | implemented | Mock/fixture data, deterministic Event Engine and HOT query are active |
 | Vessel/Port/Voyage/Event storage | implemented / runtime persistence verified on Node 22 | SQLite tables, Repository seed/read/write/reconcile paths and explicit last-known fallback are present; watch/settings restart persistence passed on the compatible Node 22.23.2 runtime |
 | Structured shipping Providers | implemented | Mock adapters remain active; AISStream Vessel and Open-Meteo Marine Weather adapters are optional V1 paths |
+| V2.0 Data Trust Foundation | implemented / verified | `sourceType`/`dataNature` provenance, independent freshness timestamps/status, ProviderResult-compatible API data, Event evidence and explicit Mock/UI attribution; no schema migration |
 
 ## 3. Architecture Summary
 
@@ -100,6 +102,10 @@ Failure and recovery: invalid auth causes a user-facing login prompt and local l
 
 Information Feed and Operational Data remain separate and meet at the Event/HOT query layer. The current implementation flows through Mock or approved real Provider adapters, service orchestration, Repository persistence and the existing Event Engine.
 
+### V2.0 Data Trust flow
+
+Provider data is normalized with `sourceType`, `dataNature`, `sourceId`, optional `sourceUrl`/`verified`, and independent `updatedAt`, `sourceUpdatedAt`, `fetchedAt`, `stale` and `sourceStatus` fields. Provider failures preserve last-known `updatedAt`, add the current fetch time, and expose `failed`/`degraded`/other status without presenting the data as fresh. Domain events derive their own provenance while retaining lower-level evidence; Repository JSON, API responses, HOT items and UI cards carry the same trust information. No database field/table migration is used.
+
 ## 9. Interfaces and External Dependencies
 
 | Dependency / Interface | Purpose | Failure behavior | Replacement / fallback |
@@ -124,7 +130,7 @@ Information Feed and Operational Data remain separate and meet at the Event/HOT 
 
 - Source fetch failures are logged and may fall back to an existing cache row.
 - Missing auth configuration disables login-related behavior through middleware.
-- Shipping HOT DTOs now carry `updatedAt`, `stale`, `sourceStatus` and optional `error`; Mock/provider failures are isolated at the API boundary. HOT Event freshness follows the related Vessel/Port/Voyage/FeedItem rather than Event detection time, and disabled/degraded/failed sources are not treated as fresh.
+- Shipping HOT DTOs carry `updatedAt`, `sourceUpdatedAt`, `fetchedAt`, `stale`, `sourceStatus`, provenance and optional `error`; Mock/provider failures are isolated at the API boundary. HOT Event freshness follows the related Vessel/Port/Voyage/FeedItem rather than Event detection time, and disabled/degraded/failed sources are not treated as fresh.
 - Real adapters must preserve last-known data and the same freshness/error contract.
 
 ## 12. Deployment, Backup and Restore
@@ -137,8 +143,8 @@ Information Feed and Operational Data remain separate and meet at the Event/HOT 
 
 ## 13. Testing and Verification Boundaries
 
-- Current tests: Vitest, primarily date parsing plus a placeholder common test.
-- Current verification state: typecheck, full test, build and `git diff --check` passed; fresh Shipping HOT API and SQLite restart smoke passed on Node 22.23.2. Node 24.15.0 has a bundled native-module ABI mismatch and uses the documented in-memory fallback; lint remains pending.
+- Current tests: Vitest covers Shipping HOT Domain, Provider, Repository, Event/HOT and UI trust contracts.
+- Current verification state: 91/91 tests, build and `git diff --check` passed; Vite development smoke covered all requested Shipping HOT routes and `/api/shipping`. `pnpm typecheck` remains pending on pre-existing TS6142/TS6307 test-config errors; targeted lint retains historical style findings. Production Nitro subroutes remain pending because of the existing `#nitro/index` package-import runtime error.
 - Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, weather thresholds, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 

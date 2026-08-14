@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { motion } from "framer-motion"
 import { type ReactNode, useEffect, useState } from "react"
-import { ErrorState, EventCard, FeedCard, LoadingState, PageHero, Severity, ShippingShell, StatCard, StatusBadge, VoyageCard } from "./app"
+import { ErrorState, EventCard, FeedCard, LoadingState, PageHero, ProvenanceBadge, Severity, ShippingShell, StatCard, StatusBadge, VoyageCard } from "./app"
 import { useShipping } from "./data"
 import { formatDate, formatStatus, navTone, severityTone } from "./format"
 import { EmptyState, GradientText, Marquee, ProviderChip, Reveal, SectionHeading, Segmented, SpotlightCard, StatusDot } from "./ui"
@@ -78,7 +78,10 @@ export function HotPage() {
                     <article className={`glass-panel hot-glow ${item.severity} tile p-5`}>
                       <div className="flex items-center justify-between gap-2">
                         <Severity value={item.severity} />
-                        <StatusBadge stale={item.freshness === "stale"} sourceStatus={item.sourceStatus} unknown={item.freshness === "unknown"} />
+                        <div className="flex flex-wrap justify-end gap-1.5">
+                          <ProvenanceBadge provenance={item.provenance} />
+                          <StatusBadge stale={item.freshness === "stale"} sourceStatus={item.sourceStatus} unknown={item.freshness === "unknown"} />
+                        </div>
                       </div>
                       <h3 className="mt-3 text-xl font-bold">{item.title}</h3>
                       <p className="mt-1.5 op-80">{item.summary}</p>
@@ -211,6 +214,7 @@ export function VesselsPage() {
                           <div className="min-w-0">
                             <p className="flex items-center gap-2 text-xs uppercase tracking-wider op-65">
                               船舶
+                              <ProvenanceBadge provenance={v.provenance} />
                               <StatusBadge stale={v.stale} sourceStatus={v.sourceStatus} />
                             </p>
                             <h3 className="mt-0.5 truncate text-lg font-bold leading-tight">{v.name}</h3>
@@ -288,7 +292,12 @@ export function VesselDetailPage({ id }: { id: string }) {
           <dt>状态开始于</dt>
           <dd>{formatDate(vessel.statusChangedAt)}</dd>
           <dt>数据源</dt>
-          <dd><StatusBadge stale={vessel.stale} sourceStatus={vessel.sourceStatus} /></dd>
+          <dd>
+            <div className="flex flex-wrap gap-1.5">
+              <ProvenanceBadge provenance={vessel.provenance} />
+              <StatusBadge stale={vessel.stale} sourceStatus={vessel.sourceStatus} />
+            </div>
+          </dd>
         </dl>
       </Reveal>
     </ShippingShell>
@@ -331,6 +340,7 @@ export function PortsPage() {
                           <div className="min-w-0">
                             <p className="flex items-center gap-2 text-xs uppercase tracking-wider op-65">
                               港口
+                              <ProvenanceBadge provenance={p.provenance} />
                               <StatusBadge stale={p.stale} sourceStatus={p.sourceStatus} />
                             </p>
                             <h3 className="mt-0.5 truncate text-lg font-bold leading-tight">{p.name}</h3>
@@ -394,7 +404,12 @@ export function PortDetailPage({ id }: { id: string }) {
           <dt>最后更新</dt>
           <dd>{formatDate(port.updatedAt)}</dd>
           <dt>数据源</dt>
-          <dd><StatusBadge stale={port.stale} sourceStatus={port.sourceStatus} /></dd>
+          <dd>
+            <div className="flex flex-wrap gap-1.5">
+              <ProvenanceBadge provenance={port.provenance} />
+              <StatusBadge stale={port.stale} sourceStatus={port.sourceStatus} />
+            </div>
+          </dd>
         </dl>
       </Reveal>
     </ShippingShell>

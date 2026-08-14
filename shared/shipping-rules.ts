@@ -1,3 +1,4 @@
+import { deriveProvenance } from "./shipping"
 import type { EventStatus, FeedItem, FreshnessState, HotItem, Port, Severity, ShippingEvent, ShippingSettings, SourceStatus, Vessel, Voyage } from "./shipping"
 
 const severityWeight: Record<Severity, number> = { info: 1, watch: 2, warning: 3, critical: 4 }
@@ -91,24 +92,24 @@ export function freshnessState(item: { stale: boolean; sourceStatus: string }): 
   return item.stale ? "stale" : "fresh"
 }
 
-function relatedFreshness(event: ShippingEvent, ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[]): { stale: boolean, sourceStatus: SourceStatus } {
+function relatedFreshness(event: ShippingEvent, ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[]): { stale: boolean, sourceStatus: SourceStatus, provenance?: ShippingEvent["provenance"] } {
   if (event.feedItemId) {
     const feed = feedItems.find(item => item.id === event.feedItemId)
-    if (feed) return feed
+    if (feed) return { ...feed, provenance: event.provenance ?? deriveProvenance(feed.provenance) }
   }
   if (event.vesselId) {
     const vessel = vessels.find(item => item.id === event.vesselId)
-    if (vessel) return vessel
+    if (vessel) return { ...vessel, provenance: event.provenance ?? deriveProvenance(vessel.provenance) }
   }
   if (event.portId) {
     const port = ports.find(item => item.id === event.portId)
-    if (port) return port
+    if (port) return { ...port, provenance: event.provenance ?? deriveProvenance(port.provenance) }
   }
   if (event.voyageId) {
     const voyage = voyages.find(item => item.id === event.voyageId)
-    if (voyage) return voyage
+    if (voyage) return { ...voyage, provenance: event.provenance ?? deriveProvenance(voyage.provenance) }
   }
-  return { stale: true, sourceStatus: event.sourceStatus }
+  return { stale: event.stale ?? true, sourceStatus: event.sourceStatus, provenance: event.provenance }
 }
 
 export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[] = [], _now = new Date()): HotItem[] {
@@ -129,6 +130,7 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
         severity: event.severity,
         freshness: freshnessState(source),
         sourceStatus: source.sourceStatus,
+        provenance: source.provenance,
         occurredAt: event.occurredAt,
         relatedLabel: event.vesselId ? labels.get(event.vesselId) : event.portId ? labels.get(event.portId) : event.voyageId ? labels.get(event.voyageId) : undefined,
         eventId: event.id,
@@ -143,6 +145,7 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
     severity: item.severity,
     freshness: freshnessState(item),
     sourceStatus: item.sourceStatus,
+    provenance: deriveProvenance(item.provenance),
     occurredAt: item.publishedAt,
     relatedLabel: item.relatedPortIds[0] ? labels.get(item.relatedPortIds[0]) : item.relatedVesselIds[0] ? labels.get(item.relatedVesselIds[0]) : undefined,
     feedItemId: item.id,

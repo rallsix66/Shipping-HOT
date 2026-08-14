@@ -1,8 +1,36 @@
-import type { FeedItem, Port, ShippingEvent, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "./shipping"
+import type { DataProvenance, FeedItem, Port, ShippingEvent, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "./shipping"
 import { calculateDelayMinutes } from "./shipping-rules"
 
 const fixtureEpoch = Date.now()
 const iso = (offsetMinutes: number) => new Date(fixtureEpoch + offsetMinutes * 60000).toISOString()
+
+const mockProvenance = (sourceId: string, dataNature: DataProvenance["dataNature"]): DataProvenance => ({ sourceType: "mock", dataNature, sourceId, verified: false })
+
+function stampMockProvenance<T extends { provenance?: DataProvenance }>(items: T[], sourceId: string, dataNature: DataProvenance["dataNature"]) {
+  for (const item of items) item.provenance = mockProvenance(sourceId, dataNature)
+}
+
+function mockEvidenceNature(sourceId: string): DataProvenance["dataNature"] {
+  if (sourceId === "mock-weather") return "forecast"
+  if (sourceId === "mock-schedule") return "planned"
+  if (sourceId === "mock-port") return "derived"
+  return "observed"
+}
+
+function stampMockEventTrust(events: ShippingEvent[]) {
+  for (const event of events) {
+    let sourceId = "mock-vessel"
+    if (event.feedItemId === "feed-weather-south-china") sourceId = "mock-weather"
+    else if (event.voyageId) sourceId = "mock-schedule"
+    else if (event.portId) sourceId = "mock-port"
+    const sourceUpdatedAt = event.updatedAt ?? event.occurredAt
+    const evidenceProvenance = mockProvenance(sourceId, mockEvidenceNature(sourceId))
+    event.provenance = mockProvenance(sourceId, "derived")
+    event.evidence = [{ provenance: evidenceProvenance, sourceUpdatedAt }]
+    event.updatedAt ??= sourceUpdatedAt
+    event.stale ??= event.sourceStatus !== "healthy"
+  }
+}
 
 function rebaseSnapshot(snapshot: ShippingSnapshot): ShippingSnapshot {
   const delta = Date.now() - fixtureEpoch
@@ -61,6 +89,13 @@ export const mockEvents: ShippingEvent[] = [
   { id: "event-port-shekou", type: "port_congestion", severity: "warning", status: "active", title: "蛇口港拥堵升级", summary: "等待船舶和等待时长处于高位。", occurredAt: iso(-7), detectedAt: iso(-7), dedupeKey: "port_congestion:port-shekou", firstDetectedAt: iso(-7), lastDetectedAt: iso(-7), portId: "port-shekou", evidenceJson: { congestionLevel: "high", waitingHours: 31 }, sourceStatus: "healthy" },
   { id: "event-resolved-demo", type: "destination_changed", severity: "info", status: "resolved", title: "COSCO HARMONY 目的港变更提醒", summary: "该提醒已恢复，不再出现在 HOT 活跃列表。", occurredAt: iso(-3000), detectedAt: iso(-2990), dedupeKey: "destination_changed:vessel-cosco-harmony", firstDetectedAt: iso(-2990), lastDetectedAt: iso(-120), resolvedAt: iso(-120), vesselId: "vessel-cosco-harmony", evidenceJson: { previous: "CNSHK", current: "SGSIN" }, sourceStatus: "degraded" },
 ]
+
+stampMockProvenance(mockVessels, "mock-vessel", "observed")
+stampMockProvenance(mockPorts, "mock-port", "derived")
+stampMockProvenance(mockVoyages, "mock-schedule", "planned")
+stampMockProvenance(mockFeedItems.filter(item => item.sourceId === "mock-weather"), "mock-weather", "forecast")
+stampMockProvenance(mockFeedItems.filter(item => item.sourceId !== "mock-weather"), "mock-port-notice", "reported")
+stampMockEventTrust(mockEvents)
 
 export const mockSettings: ShippingSettings = {
   refreshInterval: 15,

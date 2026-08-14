@@ -1,9 +1,9 @@
-import type { FeedItem, Port, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
+import type { FeedItem, Port, ProviderResult, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
-import { disabledProviderData, isWeatherFeedItem, providerResult, providers } from "#/providers/shipping"
+import { disabledProviderData, isWeatherFeedItem, providerModes, providerProvenances, providerResult, providers, toProviderResult } from "#/providers/shipping"
 
 let repository: ShippingRepository | undefined
 let fallbackSnapshot = createMockSnapshot()
@@ -56,15 +56,22 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
     settings.providerEnabled ? providers.schedule.getVoyages() : Promise.resolve(disabledProviderData(lastKnown.voyages)),
     settings.sourceEnabled ? providers.weather.getFeedItems(lastKnown.ports) : Promise.resolve(disabledProviderData(weatherLastKnown)),
   ])
-  const read = <T extends Vessel | Port | Voyage | FeedItem>(result: PromiseSettledResult<T[]>, previous: T[]) => providerResult(result, previous)
-  const weatherItems = read(feedResult, weatherLastKnown)
+  const read = <T extends Vessel | Port | Voyage | FeedItem>(result: PromiseSettledResult<T[]>, previous: T[], provenance: ProviderResult<T>["provenance"], disabled: boolean): ProviderResult<T> => {
+    const data = disabled ? disabledProviderData(previous) : providerResult(result, previous)
+    return toProviderResult(data, provenance, new Date().toISOString(), disabled ? "disabled" : undefined)
+  }
+  const vessel = read(vesselResult, lastKnown.vessels, providerModes.vessel === "aisstream" ? providerProvenances.aisstream : providerProvenances.mockVessel, !settings.providerEnabled)
+  const port = read(portResult, lastKnown.ports, providerProvenances.mockPort, !settings.providerEnabled)
+  const voyage = read(voyageResult, lastKnown.voyages, providerProvenances.mockSchedule, !settings.providerEnabled)
+  const weather = read(feedResult, weatherLastKnown, providerModes.weather === "open-meteo" ? providerProvenances.openMeteo : providerProvenances.mockWeather, !settings.sourceEnabled)
   return {
-    vessels: read(vesselResult, lastKnown.vessels),
-    ports: read(portResult, lastKnown.ports),
-    voyages: read(voyageResult, lastKnown.voyages),
-    feedItems: mergeWeatherFeedItems(existingNonWeatherFeed, weatherItems),
+    vessels: vessel.data,
+    ports: port.data,
+    voyages: voyage.data,
+    feedItems: mergeWeatherFeedItems(existingNonWeatherFeed, weather.data),
     events: fallbackSnapshot.events,
     settings,
+    providerFreshness: { vessel: vessel.freshness, port: port.freshness, schedule: voyage.freshness, weather: weather.freshness },
   }
 }
 
@@ -102,6 +109,7 @@ export async function getShippingSnapshot(): Promise<ShippingSnapshot> {
     ports: preserveWatchState(providerSnapshot.ports, stored.ports),
     voyages: mergeVoyages(providerSnapshot.voyages, stored.voyages),
     feedItems: providerSnapshot.feedItems,
+    providerFreshness: providerSnapshot.providerFreshness,
   }
   current.events = detectShippingEvents(current.vessels, current.ports, current.voyages, current.feedItems, current.settings, stored.events)
   await saveSnapshot(current)

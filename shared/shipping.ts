@@ -1,18 +1,62 @@
 export type SourceStatus = "healthy" | "degraded" | "failed" | "disabled" | "never_succeeded"
+export type SourceType = "official" | "third_party" | "user" | "mock"
+export type DataNature = "observed" | "reported" | "forecast" | "modelled" | "derived" | "estimated" | "planned"
 export type FreshnessState = "fresh" | "stale" | "unknown"
 export type Severity = "info" | "watch" | "warning" | "critical"
 export type EventStatus = "active" | "resolved"
 export type NavigationStatus = "under_way" | "anchored" | "moored" | "aground" | "unknown"
 export type FeedCategory = "shipping_news" | "carrier_notice" | "weather" | "port_notice"
 
+export interface DataProvenance {
+  sourceType: SourceType
+  dataNature: DataNature
+  sourceId: string
+  sourceUrl?: string
+  verified?: boolean
+}
+
+export interface DataEvidence {
+  provenance: DataProvenance
+  sourceUpdatedAt?: string
+}
+
 export interface Freshness {
   updatedAt?: string
+  sourceUpdatedAt?: string
+  fetchedAt?: string
   stale: boolean
   sourceStatus: SourceStatus
   error?: string
 }
 
-export interface Vessel extends Freshness {
+export interface ProvenanceAware {
+  provenance?: DataProvenance
+}
+
+export interface ProviderResult<T> {
+  data: T[]
+  provenance: DataProvenance
+  fetchedAt: string
+  sourceUpdatedAt?: string
+  freshness: Freshness
+}
+
+export interface ShippingProviderFreshness {
+  vessel: Freshness
+  port: Freshness
+  schedule: Freshness
+  weather: Freshness
+}
+
+export function deriveProvenance(source?: DataProvenance): DataProvenance | undefined {
+  return source ? { ...source, dataNature: "derived" } : undefined
+}
+
+export function provenanceEvidence(source?: DataProvenance, sourceUpdatedAt?: string): DataEvidence[] {
+  return source ? [{ provenance: source, sourceUpdatedAt }] : []
+}
+
+export interface Vessel extends Freshness, ProvenanceAware {
   id: string
   name: string
   imo?: string
@@ -31,7 +75,7 @@ export interface Vessel extends Freshness {
   eta?: string
 }
 
-export interface Port extends Freshness {
+export interface Port extends Freshness, ProvenanceAware {
   id: string
   name: string
   nameEn: string
@@ -45,7 +89,7 @@ export interface Port extends Freshness {
   operationalStatus: "normal" | "disrupted" | "closed"
 }
 
-export interface Voyage extends Freshness {
+export interface Voyage extends Freshness, ProvenanceAware {
   id: string
   vesselId: string
   voyageNumber: string
@@ -64,7 +108,7 @@ export interface Voyage extends Freshness {
   status: "planned" | "in_transit" | "arrived" | "delayed"
 }
 
-export interface FeedItem extends Freshness {
+export interface FeedItem extends Freshness, ProvenanceAware {
   id: string
   sourceId: string
   category: FeedCategory
@@ -79,7 +123,7 @@ export interface FeedItem extends Freshness {
   relatedVoyageIds: string[]
 }
 
-export interface ShippingEvent {
+export interface ShippingEvent extends ProvenanceAware {
   id: string
   type: string
   severity: Severity
@@ -97,7 +141,13 @@ export interface ShippingEvent {
   portId?: string
   voyageId?: string
   evidenceJson: Record<string, unknown>
+  evidence?: DataEvidence[]
+  updatedAt?: string
+  sourceUpdatedAt?: string
+  fetchedAt?: string
+  stale?: boolean
   sourceStatus: SourceStatus
+  error?: string
 }
 
 export interface ShippingSettings {
@@ -119,6 +169,7 @@ export interface ShippingSnapshot {
   events: ShippingEvent[]
   feedItems: FeedItem[]
   settings: ShippingSettings
+  providerFreshness?: ShippingProviderFreshness
 }
 
 export interface HotItem {
@@ -129,6 +180,7 @@ export interface HotItem {
   severity: Severity
   freshness: FreshnessState
   sourceStatus: SourceStatus
+  provenance?: DataProvenance
   occurredAt: string
   relatedLabel?: string
   eventId?: string

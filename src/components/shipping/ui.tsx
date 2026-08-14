@@ -1,5 +1,7 @@
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
 import { type ReactNode, useEffect, useRef } from "react"
+import type { DataProvenance } from "@shared/shipping"
+import { formatProvenance } from "./format"
 
 /** 滚动进入视口时的渐显 + 上移动画（reactbits / motionsites 风格 reveal）。 */
 export function Reveal({ children, delay = 0, y = 24, className }: { children: ReactNode, delay?: number, y?: number, className?: string }) {
@@ -65,6 +67,16 @@ export function ProviderChip({ label, value, tone }: { label: string, value: str
       {tone && <StatusDot tone={tone} />}
       <span className="op-70">{label}</span>
       <span className="font-bold">{value}</span>
+    </span>
+  )
+}
+
+export function ProvenanceBadge({ provenance }: { provenance?: DataProvenance }) {
+  const isMock = provenance?.sourceType === "mock"
+  return (
+    <span className={`provenance-badge ${isMock ? "mock" : ""}`} title={formatProvenance(provenance)}>
+      <StatusDot tone={isMock ? "dim" : provenance?.sourceType === "third_party" ? "info" : provenance ? "fresh" : "dim"} />
+      {isMock ? "模拟数据" : formatProvenance(provenance)}
     </span>
   )
 }

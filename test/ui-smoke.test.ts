@@ -1,7 +1,7 @@
 import { renderToString } from "react-dom/server"
 import { describe, expect, it } from "vitest"
-import { EmptyState, GradientText, ProviderChip, StatusDot } from "../src/components/shipping/ui"
-import { formatDate, formatSourceStatus, formatStatus, navTone, severityTone, statusLabels } from "../src/components/shipping/format"
+import { EmptyState, GradientText, ProvenanceBadge, ProviderChip, StatusDot } from "../src/components/shipping/ui"
+import { formatDataNature, formatDate, formatProvenance, formatSourceStatus, formatSourceType, formatStatus, navTone, severityTone, statusLabels } from "../src/components/shipping/format"
 
 /**
  * UI 烟雾护栏：不引入 jsdom/testing-library 的前提下，
@@ -23,6 +23,16 @@ describe("shipping UI primitives smoke", () => {
     expect(html).toContain("status-dot")
   })
 
+  it("renders mock and third-party provenance without exposing code-only labels", () => {
+    const mockHtml = renderToString(ProvenanceBadge({ provenance: { sourceType: "mock", dataNature: "forecast", sourceId: "mock-weather", verified: false } }))
+    const realHtml = renderToString(ProvenanceBadge({ provenance: { sourceType: "third_party", dataNature: "observed", sourceId: "aisstream", verified: false } }))
+    expect(mockHtml).toContain("模拟数据")
+    expect(realHtml).toContain("aisstream")
+    expect(realHtml).toContain("第三方")
+    expect(realHtml).toContain("观测")
+    expect(realHtml).not.toContain("third_party")
+  })
+
   it("renders EmptyState with icon and text", () => {
     const html = renderToString(EmptyState({ text: "暂无数据" }))
     expect(html).toContain("i-ph-waves")
@@ -41,6 +51,12 @@ describe("shipping UI primitives smoke", () => {
     expect(formatSourceStatus("healthy")).toBe("正常")
     expect(formatDate(undefined)).toBe("—")
     expect(statusLabels.critical).toBe("严重")
+  })
+
+  it("keeps provenance format mapping stable", () => {
+    expect(formatSourceType("third_party")).toBe("第三方")
+    expect(formatDataNature("derived")).toBe("衍生")
+    expect(formatProvenance({ sourceType: "mock", dataNature: "planned", sourceId: "mock-schedule" })).toBe("mock-schedule · 模拟 · 计划")
   })
 
   it("keeps tone mapping stable", () => {

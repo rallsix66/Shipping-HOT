@@ -1,3 +1,5 @@
+import type { DataProvenance } from "@shared/shipping"
+
 export const statusLabels: Record<string, string> = {
   healthy: "正常",
   degraded: "降级",
@@ -27,6 +29,23 @@ export const statusLabels: Record<string, string> = {
   port_notice: "港口通知",
 }
 
+export const sourceTypeLabels: Record<string, string> = {
+  official: "官方",
+  third_party: "第三方",
+  user: "手工",
+  mock: "模拟",
+}
+
+export const dataNatureLabels: Record<string, string> = {
+  observed: "观测",
+  reported: "报告",
+  forecast: "预测",
+  modelled: "模型",
+  derived: "衍生",
+  estimated: "估算",
+  planned: "计划",
+}
+
 export type DotTone = "fresh" | "watch" | "failed" | "info" | "dim"
 
 export function navTone(status: string): DotTone {
@@ -54,4 +73,17 @@ export function formatStatus(value: string) {
 
 export function formatSourceStatus(value: string) {
   return statusLabels[value] ?? value
+}
+
+export function formatSourceType(value: string) {
+  return sourceTypeLabels[value] ?? "来源未记录"
+}
+
+export function formatDataNature(value: string) {
+  return dataNatureLabels[value] ?? "性质未记录"
+}
+
+export function formatProvenance(provenance?: DataProvenance) {
+  if (!provenance) return "来源未记录"
+  return `${provenance.sourceId} · ${formatSourceType(provenance.sourceType)} · ${formatDataNature(provenance.dataNature)}`
 }

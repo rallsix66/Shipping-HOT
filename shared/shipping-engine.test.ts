@@ -18,6 +18,17 @@ describe("Shipping HOT event engine", () => {
     expect(events.map(event => event.type)).toEqual(expect.arrayContaining(["vessel_anchored", "voyage_delay", "port_congestion", "port_disruption"]))
   })
 
+  it("keeps derived Event provenance and the underlying evidence source", () => {
+    const snapshot = createMockSnapshot()
+    const feedItems = snapshot.feedItems.map(item => item.sourceId === "mock-weather" ? { ...item, severity: "warning" as const } : item)
+    const events = detectShippingEvents(snapshot.vessels, snapshot.ports, snapshot.voyages, feedItems, snapshot.settings, [], "2026-01-01T03:00:00.000Z")
+    const weatherEvent = events.find(event => event.type === "weather_warning")
+    expect(weatherEvent).toMatchObject({
+      provenance: { sourceType: "mock", dataNature: "derived", sourceId: "mock-weather" },
+      evidence: [{ provenance: { sourceType: "mock", dataNature: "forecast", sourceId: "mock-weather" } }],
+    })
+  })
+
   it("keeps a stable event identity across refreshes", () => {
     const snapshot = createMockSnapshot()
     const first = detectShippingEvents(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, snapshot.settings, [], new Date().toISOString())

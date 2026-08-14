@@ -84,10 +84,12 @@ describe("ShippingRepository", () => {
     const repository = new ShippingRepository(database as unknown as Database)
     await repository.seed(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, snapshot.events.map(event => ({ ...event, status: "resolved" as const, resolvedAt: "2026-01-02T00:00:00.000Z", lastDetectedAt: "2026-01-02T00:00:00.000Z" })), snapshot.settings)
     expect(await repository.listVessels()).toHaveLength(snapshot.vessels.length)
+    expect((await repository.listVessels())[0].provenance).toMatchObject({ sourceType: "mock", sourceId: "mock-vessel" })
     expect(await repository.listPorts()).toHaveLength(snapshot.ports.length)
     expect(await repository.listVoyages()).toHaveLength(snapshot.voyages.length)
     expect(await repository.listFeedItems()).toHaveLength(snapshot.feedItems.length)
     expect(await repository.listEvents()).toHaveLength(snapshot.events.length)
+    expect((await repository.listEvents()).every(event => (event.evidence?.length ?? 0) > 0)).toBe(true)
     expect(await repository.getSettings()).toEqual(snapshot.settings)
   })
 

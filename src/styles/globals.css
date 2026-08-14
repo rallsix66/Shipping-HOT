@@ -330,6 +330,19 @@ button:disabled {
 .dark .status-stale { color: #fcd34d; }
 .status-failed { color: #be123c; background: rgba(244, 63, 94, 0.14); border-color: rgba(244, 63, 94, 0.4); }
 .dark .status-failed { color: #fda4af; }
+.provenance-badge {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  max-width: 100%;
+  border-radius: 9999px;
+  border: 1px solid rgba(14, 165, 233, 0.28);
+  background: rgba(14, 165, 233, 0.1);
+  padding: 0.28rem 0.65rem;
+  font-size: 0.72rem; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.provenance-badge.mock { color: #64748b; border-color: rgba(100, 116, 139, 0.3); background: rgba(100, 116, 139, 0.12); }
+.dark .provenance-badge { color: #bae6fd; }
+.dark .provenance-badge.mock { color: #cbd5e1; }
 
 /* --- segmented control --- */
 .segmented {

@@ -1,10 +1,10 @@
 # Shipping HOT V2 实施方案
 
-> 状态：`V2 planned, not implemented`
+> 状态：`V2.0 implemented and verified`; `V2.1 not started`
 >
-> 本文是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料核对形成的 V2 方案。它描述目标、边界和实施顺序，不代表 V2 已获批准，也不代表文中 Provider、表结构、路由或规则已经实现。
+> 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已按本文件的边界实现并验证；V2.1 及以后仍是未启动的规划，不代表其中的 Provider、表结构、路由或规则已经实现。
 >
-> 方案核对日期：2026-08-14。Portcast、AISStream、Open-Meteo、Calendarific 和官方气象/假日来源的链接仅用于能力与风险评估；本轮没有申请 Key、调用 API、抓取页面或实现 V2 Provider。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
+> 方案核对日期：2026-08-14。V2.0 本轮只实现数据可信度基础，不新增 Portcast、Calendarific 或其他 Provider，不申请 Key、不抓取页面、不修改数据库 schema；V2.1 及以后仍仅用于能力与风险评估。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
 
 ## 1. V2 Executive Summary
 
@@ -762,13 +762,14 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 
 ## 21. UI Changes
 
-本轮不开始 UI 开发。获批实施后，按以下顺序改动：
+V2.0 已完成最小 UI 信任标识；V2.1 及以后按以下规划改动：
 
 ### V2.0
 
 - 所有实体卡片统一显示 `sourceType`、`dataNature` 和 `STALE/FAILED/DISABLED/NEVER_SUCCEEDED`。
 - Mock fallback 不再看起来像真实源；provider chip 显示具体来源和更新时间。
 - 空数据、失败、过期、disabled、never_succeeded 使用不同状态。
+- 已覆盖 HOT、Vessel、Port、Voyage、Event、Feed 及详情页；Mock 明确显示“模拟数据”，真实 V1 来源显示中文来源类型和数据性质。
 
 ### V2.1
 
@@ -799,8 +800,8 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 - Goal：让所有 V1/V2 数据可判断来源类型、数据性质和新鲜度。
 - In Scope：`provenance` 最小模型、统一 ProviderResult/状态映射、Mock 明示、失败/last-known 规则、AIS session 设计、测试契约。
 - Out of Scope：Portcast、Calendarific、真实 Port Provider、数据库 migration、UI 大改。
-- Dependencies：当前 V1 Provider/Repository/Event Engine；需要用户架构确认后才能编码。
-- Acceptance：六类数据都能显示 `sourceType`、`dataNature`、`STALE/FAILED/DISABLED/NEVER_SUCCEEDED`；单 Provider 失败不影响其他分支；Mock 不再伪装真实；无 Key 时核心 UI 可用。
+- Dependencies：当前 V1 Provider/Repository/Event Engine；本轮已获得明确实施批准。
+- Acceptance：V2.0 已验证六类数据的来源/性质/新鲜度契约；单 Provider 失败不影响其他分支；Mock 不再伪装真实；无 Key 时核心 UI 可用。
 - Main risks：字段扩展可能影响 fixtures/API/UI；先兼容读写并保留当前 `sourceStatus/stale`。
 - Rollback：关闭 provenance 展示增强，保留旧 Freshness 字段和现有 Mock 闭环。
 
@@ -871,9 +872,9 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 
 ## 24. Open Questions
 
-以下问题需要用户在进入实现前确认；本轮不以猜测代替决定：
+以下问题保留给 V2.1 及以后实现前确认；V2.0 的实施批准和边界已经确定：
 
-1. 是否批准从 V2.0 Data Trust Foundation 开始，并接受对 `Freshness` 增加最小 `provenance` 字段？
+1. V2.0 已按批准范围完成；后续是否扩展 `Freshness` 之外的可信度字段，留待新的架构确认。
 2. Portcast Public Page 的公开页面读取是否接受“仅公开展示字段、每日低频、ToS/robots 不允许就停”的硬边界？
 3. 是否接受 Calendarific 只作为常规基础源，官方/ManualOverride 对临时和特殊假期拥有更高优先级？
 4. 国家日历第一版是否只覆盖 TH/ID/MY/PH/VN，是否需要地区/subdivision 级假期？
@@ -893,7 +894,7 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 ### 25.1 方案验收
 
 - 文档覆盖 V2 Executive Summary、V1 baseline、目标/非目标、导航、数据源、Provider、可信度、Vessel、Port、Weather、Feed、Calendar、Voyage、Event Engine、本地存储、Scheduler、失败回退、安全、数据模型、UI、阶段、风险、Open Questions 和 Acceptance Criteria。
-- 明确当前哪些已经实现、哪些是 V2 proposal、哪些延期或条件化；没有把 proposal 写成 approved。
+- 明确当前哪些已经实现、哪些仍是 V2 proposal、哪些延期或条件化；仅 V2.0 Data Trust Foundation 标记为 approved/implemented。
 - 明确 Portcast 只使用公开展示数据，禁止商业 API/私有接口/绕过访问限制。
 - 明确 AISStream 继续服务 Watched Vessel，区域全港统计需要独立结构调整且放后置阶段。
 - 明确 Weather 的模型风险与官方预警分层，且不把 Open-Meteo 当成航海安全保证。
@@ -916,7 +917,8 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 ### 25.3 本轮最终状态
 
 ```text
-V2 planned, not implemented
+V2.0 implemented and verified
+V2.1 not started
 ```
 
-本文件本身是方案产物，不是实施批准。实现前仍需用户明确确认架构和 Phase 1，之后才能进入 V2.0 Data Trust Foundation。
+本文件仍是方案与边界产物；V2.0 已完成实现、验证和文档同步。V2.1 及以后仍需新的范围确认和架构批准后才能开始。
