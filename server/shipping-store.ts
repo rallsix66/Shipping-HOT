@@ -2,8 +2,8 @@ import type { FeedItem, Port, ShippingSettings, ShippingSnapshot, Vessel, Voyage
 import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules"
-import { initShippingTables, ShippingRepository } from "#/database/shipping"
-import { disabledProviderData, providerResult, providers } from "#/providers/shipping"
+import { ShippingRepository, initShippingTables } from "#/database/shipping"
+import { disabledProviderData, isWeatherFeedItem, providerResult, providers } from "#/providers/shipping"
 
 let repository: ShippingRepository | undefined
 let fallbackSnapshot = createMockSnapshot()
@@ -22,6 +22,10 @@ function mergeVessels(providerVessels: Vessel[], storedVessels: Vessel[], now: s
 function mergeVoyages(providerVoyages: Voyage[], storedVoyages: Voyage[]): Voyage[] {
   const previous = new Map(storedVoyages.map(item => [item.id, item]))
   return providerVoyages.map(item => mergeProviderVoyage(previous.get(item.id), item))
+}
+
+export function mergeWeatherFeedItems(existing: FeedItem[], weather: FeedItem[]): FeedItem[] {
+  return [...existing.filter(item => !isWeatherFeedItem(item)), ...weather]
 }
 
 async function initialize() {
@@ -44,18 +48,21 @@ async function initialize() {
 }
 
 async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick<ShippingSnapshot, "vessels" | "ports" | "voyages" | "feedItems"> = fallbackSnapshot): Promise<ShippingSnapshot> {
+  const existingNonWeatherFeed = lastKnown.feedItems.filter(item => !isWeatherFeedItem(item))
+  const weatherLastKnown = lastKnown.feedItems.filter(isWeatherFeedItem)
   const [vesselResult, portResult, voyageResult, feedResult] = await Promise.allSettled([
     settings.providerEnabled ? providers.vessel.getVessels(lastKnown.vessels) : Promise.resolve(disabledProviderData(lastKnown.vessels)),
     settings.providerEnabled ? providers.port.getPorts() : Promise.resolve(disabledProviderData(lastKnown.ports)),
     settings.providerEnabled ? providers.schedule.getVoyages() : Promise.resolve(disabledProviderData(lastKnown.voyages)),
-    settings.sourceEnabled ? providers.weather.getFeedItems(lastKnown.ports) : Promise.resolve(disabledProviderData(lastKnown.feedItems)),
+    settings.sourceEnabled ? providers.weather.getFeedItems(lastKnown.ports) : Promise.resolve(disabledProviderData(weatherLastKnown)),
   ])
   const read = <T extends Vessel | Port | Voyage | FeedItem>(result: PromiseSettledResult<T[]>, previous: T[]) => providerResult(result, previous)
+  const weatherItems = read(feedResult, weatherLastKnown)
   return {
     vessels: read(vesselResult, lastKnown.vessels),
     ports: read(portResult, lastKnown.ports),
     voyages: read(voyageResult, lastKnown.voyages),
-    feedItems: read(feedResult, lastKnown.feedItems),
+    feedItems: mergeWeatherFeedItems(existingNonWeatherFeed, weatherItems),
     events: fallbackSnapshot.events,
     settings,
   }

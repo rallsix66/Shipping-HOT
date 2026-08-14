@@ -7,7 +7,7 @@
 
 ## Context
 
-Shipping HOT V1 needs one real Vessel source and one real Weather source while retaining the sealed local Mock core. The user explicitly approved Phase 5–7 and limited the change to AISStream Vessel, Open-Meteo Marine Weather, fallback behavior, runtime verification and documentation.
+Shipping HOT V1 needs one real Vessel source and one real Weather source while retaining the sealed local Mock core. The user explicitly approved the limited change to AISStream Vessel, Open-Meteo Marine Weather, fallback behavior, runtime verification and documentation.
 
 ## Decision
 
@@ -15,7 +15,7 @@ Shipping HOT V1 needs one real Vessel source and one real Weather source while r
 - Use Open-Meteo Marine API plus the existing Open-Meteo Forecast API as the optional real Weather adapter.
 - Keep provider-specific payloads inside `server/providers/shipping.ts`.
 - Continue sending normalized `Vessel[]` and `FeedItem[]` through `shipping-store.ts`, the existing merge rules, Repository, Event Engine and HOT query.
-- Keep Mock Providers as the default when the environment does not select a real Provider or required AIS key is absent.
+- Keep Mock Providers as the default when the environment does not select a real Provider or the required AIS key is absent.
 - Keep all keys server-side in environment variables; never persist or return them.
 - Keep Port and Schedule as Mock in V1. Do not add a Port congestion Provider.
 
@@ -32,4 +32,4 @@ This decision does not approve V2 features, AIS history, global vessel data, mul
 
 ## Verification
 
-Offline tests cover normalization, malformed/error payloads, no-key fallback, disabled behavior, watched-MMSI filtering, stale handling, weather thresholds, related ports, timestamps and normalized Real → Event flow. Runtime/API smoke and SQLite restart persistence remain pending until the local native runtime can execute them.
+Offline tests cover normalization, malformed/error payloads, no-key fallback, disabled behavior, watched-MMSI filtering, stale handling, weather thresholds, related ports, deterministic timestamps, weather-feed isolation and normalized Real to Event flow. Runtime/API smoke and SQLite restart persistence were verified on Node 22.23.2; Node 24.15.0 remains incompatible with the bundled native module and uses the documented fallback.

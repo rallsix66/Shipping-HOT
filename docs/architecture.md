@@ -1,6 +1,6 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
-> Last verified: 2026-08-13
+> Last verified: 2026-08-14
 > Architecture status: approved for local Mock implementation plus V1 AISStream/Open-Meteo adapters
 > Source of truth for: the current retained system structure and approved boundaries
 

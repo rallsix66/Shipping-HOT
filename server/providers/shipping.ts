@@ -16,10 +16,16 @@ export function disabledProviderData<T extends Freshness>(lastKnown: T[]): T[] {
   return lastKnown.map(item => ({ ...item, stale: false, sourceStatus: "disabled", error: undefined })) as T[]
 }
 
+const weatherSourceIds = new Set(["mock-weather", "open-meteo-marine"])
+
+export function isWeatherFeedItem(item: FeedItem): boolean {
+  return weatherSourceIds.has(item.sourceId)
+}
+
 export const MockVesselProvider: VesselProvider = { async getVessels() { return structuredClone(mockVessels) } }
 export const MockPortProvider: PortProvider = { async getPorts() { return structuredClone(mockPorts) } }
 export const MockScheduleProvider: ScheduleProvider = { async getVoyages() { return structuredClone(mockVoyages) } }
-export const MockWeatherProvider: WeatherProvider = { async getFeedItems() { return structuredClone(mockFeedItems) } }
+export const MockWeatherProvider: WeatherProvider = { async getFeedItems() { return structuredClone(mockFeedItems.filter(isWeatherFeedItem)) } }
 
 type AisSocketEvent = { data: unknown }
 interface AisSocket {
@@ -42,6 +48,7 @@ interface AisPositionReport {
 
 interface AisStreamMessage {
   MessageType?: string
+  MetaData?: { MMSI?: number | string, ShipName?: string, time_utc?: string }
   Metadata?: { MMSI?: number | string, ShipName?: string, time_utc?: string }
   Message?: { PositionReport?: AisPositionReport }
 }
@@ -61,6 +68,28 @@ function numberValue(value: unknown): number | undefined {
 
 function stringValue(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined
+}
+
+function mmsiValue(value: unknown): string | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) return String(value)
+  return stringValue(value)
+}
+
+function aisMetaData(message: AisStreamMessage) {
+  return message.MetaData ?? message.Metadata
+}
+
+export function normalizeProviderTimestamp(value: unknown): string | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    const date = new Date(value * 1000)
+    return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
+  }
+  if (typeof value !== "string" || !value.trim()) return undefined
+  const text = value.trim()
+  if (/^\d+(?:\.\d+)?$/.test(text)) return normalizeProviderTimestamp(Number(text))
+  if (!/(?:Z|[+-]\d{2}:?\d{2})$/i.test(text)) return undefined
+  const timestamp = Date.parse(text)
+  return Number.isNaN(timestamp) ? undefined : new Date(timestamp).toISOString()
 }
 
 function navigationStatus(value: number | undefined): Vessel["navigationStatus"] {
@@ -85,12 +114,13 @@ function socketFromGlobal(endpoint: string): AisSocket {
 
 function normalizeAisPosition(message: AisStreamMessage, watched: Vessel): Vessel | undefined {
   const position = message.Message?.PositionReport
-  const mmsi = stringValue(message.Metadata?.MMSI) ?? (position?.UserID === undefined ? undefined : String(position.UserID))
+  const metadata = aisMetaData(message)
+  const mmsi = mmsiValue(metadata?.MMSI) ?? (position?.UserID === undefined ? undefined : String(position.UserID))
   if (!position || !mmsi || mmsi !== watched.mmsi) return undefined
-  const updatedAt = stringValue(message.Metadata?.time_utc)
+  const updatedAt = normalizeProviderTimestamp(metadata?.time_utc)
   return {
     id: watched.id,
-    name: stringValue(message.Metadata?.ShipName) ?? watched.name,
+    name: stringValue(metadata?.ShipName) ?? watched.name,
     imo: watched.imo,
     mmsi,
     callSign: watched.callSign,
@@ -105,7 +135,7 @@ function normalizeAisPosition(message: AisStreamMessage, watched: Vessel): Vesse
     statusChangedAt: watched.statusChangedAt,
     destination: watched.destination,
     eta: watched.eta,
-    updatedAt: updatedAt && !Number.isNaN(Date.parse(updatedAt)) ? new Date(updatedAt).toISOString() : undefined,
+    updatedAt,
     stale: false,
     sourceStatus: "healthy",
   }
@@ -118,21 +148,26 @@ export function createAisStreamVesselProvider(options: AisStreamVesselProviderOp
   return {
     async getVessels(watched = []) {
       const watchedVessels = watched.filter(vessel => vessel.isWatched && vessel.mmsi)
-      if (!watchedVessels.length) return watched.map(vessel => vessel.isWatched ? { ...vessel, stale: true, sourceStatus: "degraded" as const } : vessel)
+      if (!watchedVessels.length) {
+        return watched.map(vessel => vessel.isWatched
+          ? { ...vessel, stale: true, sourceStatus: "degraded" as const, error: "MMSI unavailable for real vessel lookup" }
+          : vessel)
+      }
       const watchedByMmsi = new Map(watchedVessels.map(vessel => [vessel.mmsi!, vessel]))
       const received = new Map<string, Vessel>()
       await new Promise<void>((resolve, reject) => {
         let settled = false
         const socket = socketFactory(endpoint)
+        let timer: ReturnType<typeof setTimeout> | undefined
         const finish = (error?: Error) => {
           if (settled) return
           settled = true
-          clearTimeout(timer)
+          if (timer) clearTimeout(timer)
           socket.close()
           if (error) reject(error)
           else resolve()
         }
-        const timer = setTimeout(() => finish(new Error("AISStream request timed out")), timeoutMs)
+        timer = setTimeout(() => finish(new Error("AISStream request timed out")), timeoutMs)
         socket.onopen = () => {
           socket.send(JSON.stringify({
             APIKey: options.apiKey,
@@ -144,7 +179,8 @@ export function createAisStreamVesselProvider(options: AisStreamVesselProviderOp
         socket.onmessage = (event) => {
           const message = parseAisMessage(event.data)
           if (!message || message.MessageType !== "PositionReport") return
-          const mmsi = stringValue(message.Metadata?.MMSI) ?? (message.Message?.PositionReport?.UserID === undefined ? undefined : String(message.Message.PositionReport.UserID))
+          const metadata = aisMetaData(message)
+          const mmsi = mmsiValue(metadata?.MMSI) ?? (message.Message?.PositionReport?.UserID === undefined ? undefined : String(message.Message.PositionReport.UserID))
           const vessel = mmsi ? watchedByMmsi.get(mmsi) : undefined
           if (!vessel) return
           const normalized = normalizeAisPosition(message, vessel)
@@ -158,10 +194,11 @@ export function createAisStreamVesselProvider(options: AisStreamVesselProviderOp
           else if (!settled) finish()
         }
       })
-      return [
-        ...watchedVessels.map(vessel => received.get(vessel.id) ?? { ...vessel, stale: true, sourceStatus: "degraded" as const }),
-        ...watched.filter(vessel => !vessel.isWatched),
-      ]
+      return watched.map((vessel) => {
+        if (!vessel.isWatched) return vessel
+        if (!vessel.mmsi) return { ...vessel, stale: true, sourceStatus: "degraded" as const, error: "MMSI unavailable for real vessel lookup" }
+        return received.get(vessel.id) ?? { ...vessel, stale: true, sourceStatus: "degraded" as const }
+      })
     },
   }
 }
@@ -176,7 +213,7 @@ type WeatherFetcher = (url: string) => Promise<WeatherFetchResponse>
 type WeatherPortConfig = { id: string, name: string, nameEn: string, latitude: number, longitude: number }
 
 interface OpenMeteoPayload {
-  current?: { time?: string, wave_height?: number, wind_speed_10m?: number, wind_gusts_10m?: number }
+  current?: { time?: number | string, wave_height?: number, wind_speed_10m?: number, wind_gusts_10m?: number }
 }
 
 export const weatherRiskThresholds = {
@@ -195,7 +232,7 @@ function weatherFetcher(): WeatherFetcher {
 function validWeatherPayload(value: unknown): OpenMeteoPayload {
   if (!value || typeof value !== "object") throw new Error("Open-Meteo response is malformed")
   const current = (value as OpenMeteoPayload).current
-  if (!current || typeof current !== "object" || typeof current.time !== "string") throw new Error("Open-Meteo response is malformed: current weather is missing")
+  if (!current || typeof current !== "object" || normalizeProviderTimestamp(current.time) === undefined) throw new Error("Open-Meteo response is malformed: current timestamp is missing or invalid")
   return value as OpenMeteoPayload
 }
 
@@ -206,14 +243,14 @@ function weatherFeedItem(port: WeatherPortConfig, marine: OpenMeteoPayload, wind
   const windSpeed = numberValue(windCurrent?.wind_speed_10m)
   const windGusts = numberValue(windCurrent?.wind_gusts_10m)
   const maxWind = Math.max(windSpeed ?? 0, windGusts ?? 0)
-  const severity = waveHeight !== undefined && waveHeight >= weatherRiskThresholds.criticalWaveHeightM || maxWind >= weatherRiskThresholds.criticalWindKmh
+  const severity = (waveHeight !== undefined && waveHeight >= weatherRiskThresholds.criticalWaveHeightM) || maxWind >= weatherRiskThresholds.criticalWindKmh
     ? "critical"
-    : waveHeight !== undefined && waveHeight >= weatherRiskThresholds.warningWaveHeightM || maxWind >= weatherRiskThresholds.warningWindKmh
-      ? "warning"
-      : undefined
+    : (waveHeight !== undefined && waveHeight >= weatherRiskThresholds.warningWaveHeightM) || maxWind >= weatherRiskThresholds.warningWindKmh
+        ? "warning"
+        : undefined
   if (!severity) return undefined
-  const updatedAt = marineCurrent?.time ?? windCurrent?.time
-  if (!updatedAt || Number.isNaN(Date.parse(updatedAt))) throw new Error("Open-Meteo timestamp is malformed")
+  const updatedAt = normalizeProviderTimestamp(marineCurrent?.time ?? windCurrent?.time)
+  if (!updatedAt) throw new Error("Open-Meteo timestamp is malformed")
   const windText = windSpeed === undefined ? "风速未知" : `风速 ${Math.round(windSpeed)} km/h`
   const gustText = windGusts === undefined ? "" : `，阵风 ${Math.round(windGusts)} km/h`
   const waveText = waveHeight === undefined ? "浪高未知" : `浪高 ${waveHeight.toFixed(1)} m`
@@ -225,12 +262,12 @@ function weatherFeedItem(port: WeatherPortConfig, marine: OpenMeteoPayload, wind
     title: `${port.nameEn} 航运天气${severity === "critical" ? "严重" : "预警"}`,
     summary: `${windText}${gustText}，${waveText}。仅作为运营关注信号。`,
     sourceUrl: "https://marine-api.open-meteo.com/",
-    publishedAt: new Date(updatedAt).toISOString(),
+    publishedAt: updatedAt,
     severity,
     relatedPortIds: [port.id],
     relatedVesselIds: [],
     relatedVoyageIds: [],
-    updatedAt: new Date(updatedAt).toISOString(),
+    updatedAt,
     stale: false,
     sourceStatus: "healthy",
   }
@@ -255,11 +292,13 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
         marineUrl.searchParams.set("latitude", String(coordinates.latitude))
         marineUrl.searchParams.set("longitude", String(coordinates.longitude))
         marineUrl.searchParams.set("current", "wave_height")
+        marineUrl.searchParams.set("timeformat", "unixtime")
         marineUrl.searchParams.set("cell_selection", "sea")
         const weatherUrl = new URL(weatherEndpoint)
         weatherUrl.searchParams.set("latitude", String(coordinates.latitude))
         weatherUrl.searchParams.set("longitude", String(coordinates.longitude))
         weatherUrl.searchParams.set("current", "wind_speed_10m,wind_gusts_10m")
+        weatherUrl.searchParams.set("timeformat", "unixtime")
         weatherUrl.searchParams.set("wind_speed_unit", "kmh")
         const [marineResponse, weatherResponse] = await Promise.all([fetcher(marineUrl.toString()), fetcher(weatherUrl.toString())])
         if (!marineResponse.ok) throw new Error(`Open-Meteo marine request failed (${marineResponse.status})`)

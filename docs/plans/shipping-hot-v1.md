@@ -1,12 +1,12 @@
 # Shipping HOT v1 Architecture Proposal
 
-状态：`implemented / v1-provider-complete / runtime-persistence-pending`。本计划的本地 Mock 闭环、八个 V1 重点港口 seed、AISStream Vessel adapter、Open-Meteo Marine Weather adapter 及其 fallback/tests 已实现并验证；SQLite restart persistence 与 fresh runtime smoke 仍按实际环境保持 pending。
+状态：`implemented / v1-provider-complete / runtime-verified-on-node22`。本计划的本地 Mock 闭环、八个 V1 重点港口 seed、AISStream Vessel adapter、Open-Meteo Marine Weather adapter 及其 fallback/tests 已实现并验证；SQLite restart persistence 与 fresh runtime smoke 已在 Node 22.23.2 验证，Node 24.15.0 保留 native module ABI fallback caveat。
 
 ## 1. 背景
 
 目标是在 NewsNow 现有代码基础上，渐进改造成个人本地航运情报聚合与船舶跟踪工具。产品只关注用户关注的船、港口和可能影响货物的航运信息，不扩展为 ERP、TMS、WMS、全球 AIS 平台或多人 SaaS。
 
-本轮完成 V1 Provider 闭环：UI/API/Domain/Event Engine/Provider orchestration/SQLite Repository 已实现；AISStream 只查询已关注且有 MMSI 的 Vessel，Open-Meteo Marine 只查询八个重点港口坐标并输出风浪风险 FeedItem，Provider 错误沿用 stale/sourceStatus/last-known fallback。原生 `better-sqlite3` 在当前 Node 24 环境构建失败，因此 SQLite restart persistence 和 fresh runtime smoke 保持 `pending`。当前本地 Git 已配置 `origin=https://github.com/rallsix66/Shipping-HOT.git` 和 `upstream=https://github.com/ourongxing/newsnow.git`；GitHub CLI token 仍无效，因此账号级元数据保持 `pending`。
+本轮完成 V1 Provider 闭环：UI/API/Domain/Event Engine/Provider orchestration/SQLite Repository 已实现；AISStream 只查询已关注且有 MMSI 的 Vessel，Open-Meteo Marine 只查询八个重点港口坐标并输出风浪风险 FeedItem，Provider 错误沿用 stale/sourceStatus/last-known fallback。Node 22.23.2 已完成 fresh runtime smoke 与 SQLite restart persistence；Node 24.15.0 因 native module ABI 不兼容使用 documented fallback。当前本地 Git 已配置 `origin=https://github.com/rallsix66/Shipping-HOT.git` 和 `upstream=https://github.com/ourongxing/newsnow.git`；GitHub CLI token 仍无效，因此账号级元数据保持 `pending`。
 
 ## 2. 当前 NewsNow 架构
 
@@ -558,7 +558,7 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 - 已给出目标目录职责与依赖方向。
 - 已给出每个 Phase 的 Goal/In Scope/Out of Scope/Files/Dependencies/Acceptance/Risk/Rollback。
 - 新增内容只在 `docs/**`，没有改动业务源码、依赖、锁文件或数据库。
-- 本地 Mock 闭环结论标记为 `implemented / verified`；真实 Provider、持久化 SQLite 在当前环境分别标记 `deferred / pending`。
+- 本地 Mock 闭环与 V1 AISStream/Open-Meteo Provider 标记为 `implemented / verified`；持久化 SQLite 在 Node 22.23.2 标记为 `verified`，Node 24.15.0 仍保留 ABI fallback caveat。
 
 ## 19. 明确不做
 
