@@ -2,8 +2,8 @@
 
 ## Project
 
-- Current codebase: NewsNow foundation with a local Shipping HOT Mock implementation.
-- Shipping HOT Mock flows are implemented and verified where stated in `docs/status.md`; real external Providers remain `deferred`.
+- Current codebase: NewsNow foundation with a local Shipping HOT implementation and optional V1 real Provider adapters.
+- Shipping HOT Mock and approved V1 real-provider flows are implemented and verified where stated in `docs/status.md`; V2 integrations remain out of scope.
 
 ## Commands
 
@@ -14,17 +14,17 @@
 
 ## Source of Truth
 
-- Architecture foundation: `docs/architecture.md`
+- Architecture foundation and approved V1 Provider boundary: `docs/architecture.md`
 - Implementation status: `docs/status.md`
 - Decisions: `docs/adr/`
-- Shipping HOT roadmap and Provider deferral: `docs/plans/shipping-hot-v1.md`
+- Shipping HOT V1 roadmap and Provider status: `docs/plans/shipping-hot-v1.md`
 
 ## Guardrails
 
 - Preserve the existing Vite + React + Nitro + db0 modular monolith unless an approved architecture change says otherwise.
 - Keep Information Feed and Operational Data separate; providers must not leak vendor formats into Domain or UI.
 - Do not make UI components call external APIs or SQLite directly.
-- Do not add real shipping APIs, paid services, provider SDKs, or ORM migrations without a new architecture decision.
+- Do not add additional real shipping APIs, paid services, provider SDKs, or ORM migrations without a new architecture decision; AISStream and Open-Meteo Marine are the approved V1 adapters.
 - Keep Mock Providers, fixtures, deterministic Domain rules, and local fallback behavior independent from real API credentials.
 
 ## Confirm Before

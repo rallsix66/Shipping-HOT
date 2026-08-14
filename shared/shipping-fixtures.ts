@@ -26,12 +26,24 @@ export const mockPorts: Port[] = [
   { id: "port-shekou", name: "蛇口", nameEn: "Shekou", country: "China", unlocode: "CNSHK", isWatched: true, congestionLevel: "high", waitingVessels: 18, containerWaitingVessels: 11, waitingHours: 31, operationalStatus: "disrupted", updatedAt: iso(-7), stale: false, sourceStatus: "healthy" },
   { id: "port-yantian", name: "盐田", nameEn: "Yantian", country: "China", unlocode: "CNYTN", isWatched: true, congestionLevel: "medium", waitingVessels: 9, containerWaitingVessels: 6, waitingHours: 14, operationalStatus: "normal", updatedAt: iso(-12), stale: false, sourceStatus: "healthy" },
   { id: "port-manila", name: "马尼拉", nameEn: "Manila", country: "Philippines", unlocode: "PHMNL", isWatched: false, congestionLevel: "low", waitingVessels: 4, containerWaitingVessels: 2, waitingHours: 6, operationalStatus: "normal", updatedAt: iso(-90), stale: true, sourceStatus: "degraded" },
-  { id: "port-nansha", name: "南沙", nameEn: "Nansha", country: "China", unlocode: "CNSNA", isWatched: false, congestionLevel: "medium", waitingVessels: 8, containerWaitingVessels: 5, waitingHours: 12, operationalStatus: "normal", updatedAt: iso(-18), stale: false, sourceStatus: "healthy" },
+  { id: "port-nansha", name: "南沙", nameEn: "Nansha", country: "China", unlocode: "CNNSA", isWatched: false, congestionLevel: "medium", waitingVessels: 8, containerWaitingVessels: 5, waitingHours: 12, operationalStatus: "normal", updatedAt: iso(-18), stale: false, sourceStatus: "healthy" },
+
   { id: "port-laem-chabang", name: "林查班", nameEn: "Laem Chabang", country: "Thailand", unlocode: "THLCH", isWatched: false, congestionLevel: "low", waitingVessels: 5, containerWaitingVessels: 3, waitingHours: 8, operationalStatus: "normal", updatedAt: iso(-24), stale: false, sourceStatus: "healthy" },
   { id: "port-klang", name: "巴生港", nameEn: "Port Klang", country: "Malaysia", unlocode: "MYPKG", isWatched: false, congestionLevel: "medium", waitingVessels: 11, containerWaitingVessels: 7, waitingHours: 16, operationalStatus: "normal", updatedAt: iso(-30), stale: false, sourceStatus: "healthy" },
   { id: "port-jakarta", name: "雅加达", nameEn: "Jakarta", country: "Indonesia", unlocode: "IDJKT", isWatched: false, congestionLevel: "low", waitingVessels: 6, containerWaitingVessels: 4, waitingHours: 9, operationalStatus: "normal", updatedAt: iso(-36), stale: false, sourceStatus: "healthy" },
   { id: "port-ho-chi-minh", name: "胡志明市", nameEn: "Ho Chi Minh City", country: "Vietnam", unlocode: "VNSGN", isWatched: false, congestionLevel: "medium", waitingVessels: 10, containerWaitingVessels: 6, waitingHours: 15, operationalStatus: "normal", updatedAt: iso(-42), stale: false, sourceStatus: "healthy" },
 ]
+
+export const portWeatherConfig = {
+  "port-shekou": { latitude: 22.48, longitude: 113.91 },
+  "port-yantian": { latitude: 22.58, longitude: 114.27 },
+  "port-nansha": { latitude: 22.64, longitude: 113.66 },
+  "port-laem-chabang": { latitude: 13.08, longitude: 100.88 },
+  "port-klang": { latitude: 3, longitude: 101.4 },
+  "port-manila": { latitude: 14.6, longitude: 120.95 },
+  "port-jakarta": { latitude: -6.1, longitude: 106.88 },
+  "port-ho-chi-minh": { latitude: 10.77, longitude: 106.75 },
+} as const
 
 export const mockVoyages: Voyage[] = [
   { id: "voyage-eg-061", vesselId: "vessel-ever-glory", voyageNumber: "EG-061", originPortId: "port-yantian", destinationPortId: "port-shekou", baselineEtd: iso(-300), baselineEta: iso(500), baselineEtdSource: "mock-schedule", baselineEtaSource: "mock-schedule", latestEtd: iso(-270), latestEta: iso(620), latestEtdSource: "mock-schedule", latestEtaSource: "mock-schedule", latestEtaObservedAt: iso(-6), delayMinutes: calculateDelayMinutes(iso(500), iso(620)), status: "delayed", updatedAt: iso(-6), stale: false, sourceStatus: "healthy" },

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import type { HotItem, Port, ShippingEvent, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
 import { myFetch } from "~/utils"
 
-export type ShippingResponse = ShippingSnapshot & { hot: HotItem[], provider: string, realProviders: string }
+export type ShippingResponse = ShippingSnapshot & { hot: HotItem[], provider: { vessel: string, port: string, schedule: string, weather: string }, realProviders: { vessel: string, port: string, schedule: string, weather: string } }
 
 const statusLabels: Record<string, string> = {
   healthy: "正常",
@@ -70,8 +70,8 @@ export function PageTitle({ eyebrow, title, description }: { eyebrow: string, ti
   return <header className="mb-6"><p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-primary">{eyebrow}</p><h1 className="text-3xl font-bold tracking-tight md:text-4xl">{title}</h1><p className="mt-2 max-w-2xl text-base op-70">{description}</p></header>
 }
 
-export function LoadingState() { return <div className="rounded-2xl border border-primary/15 p-8 text-center op-70">正在加载本地 Mock 数据…</div> }
-export function ErrorState() { return <div className="rounded-2xl border border-red-400/30 bg-red-500/10 p-8 text-center text-red-700 dark:text-red-200">航运数据暂不可用，请在本地重启 Mock Provider。</div> }
+export function LoadingState() { return <div className="rounded-2xl border border-primary/15 p-8 text-center op-70">正在加载 Shipping HOT 数据…</div> }
+export function ErrorState() { return <div className="rounded-2xl border border-red-400/30 bg-red-500/10 p-8 text-center text-red-700 dark:text-red-200">航运数据暂不可用，请检查本地 Provider 与运行环境。</div> }
 
 export function StatCard({ label, value, tone = "default" }: { label: string, value: string | number, tone?: "default" | "warning" | "critical" }) {
   return <div className={`stat-card tone-${tone}`}><span>{label}</span><strong>{value}</strong></div>

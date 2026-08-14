@@ -1,24 +1,24 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
 > Last verified: 2026-08-13
-> Architecture status: approved for local Mock implementation; real Providers remain deferred
+> Architecture status: approved for local Mock implementation plus V1 AISStream/Open-Meteo adapters
 > Source of truth for: the current retained system structure and approved boundaries
 
 ## 1. Project Purpose
 
-The repository retains NewsNow as its foundation and now exposes Shipping HOT as a local single-user product surface. The implemented path uses Mock Providers and deterministic fixtures; no real AIS, port, schedule or weather API is required.
+The repository retains NewsNow as its foundation and now exposes Shipping HOT as a local single-user product surface. The implemented path uses normalized Mock or approved V1 real Provider adapters and deterministic Domain/Event rules; real provider credentials remain optional.
 
 ## 2. Current Scope
 
 ### In Scope
 
 - Current NewsNow news Source aggregation, cache, UI cards, local preferences, optional GitHub login/sync, and deployment adapters.
-- Preserving the existing modular monolith as the foundation for the implemented local Mock loop.
+- Preserving the existing modular monolith as the foundation for the local Mock loop and approved V1 Provider adapters.
 
 ### Explicitly Out of Scope
 
 - Any unapproved Shipping HOT business implementation.
-- Real AIS, port, schedule, weather or typhoon API integration.
+- Unapproved real AIS, port, schedule, weather or typhoon API integration; V1 AISStream and Open-Meteo Marine adapters are approved within this document's boundary.
 - Next.js, Prisma, Supabase, microservices, event buses, or a global vessel database.
 
 ### Deferred Integrations
@@ -26,8 +26,8 @@ The repository retains NewsNow as its foundation and now exposes Shipping HOT as
 | Proposal | State | Reason not in current scope |
 |---|---|---|
 | Shipping HOT domain and HOT feed | implemented | Mock/fixture data, deterministic Event Engine and HOT query are active |
-| Vessel/Port/Voyage/Event storage | implemented / runtime persistence pending | SQLite tables, Repository seed/read/write/reconcile paths and explicit last-known fallback are present; restart persistence needs compatible native runtime verification |
-| Structured shipping Providers | implemented as interfaces | Mock adapters are active; real adapters remain deferred |
+| Vessel/Port/Voyage/Event storage | implemented / runtime persistence verified on Node 22 | SQLite tables, Repository seed/read/write/reconcile paths and explicit last-known fallback are present; watch/settings restart persistence passed on the compatible Node 22.23.2 runtime |
+| Structured shipping Providers | implemented | Mock adapters remain active; AISStream Vessel and Open-Meteo Marine Weather adapters are optional V1 paths |
 
 ## 3. Architecture Summary
 
@@ -98,7 +98,7 @@ Failure and recovery: invalid auth causes a user-facing login prompt and local l
 
 ### Current Shipping HOT flow
 
-Information Feed and Operational Data remain separate and meet at the Event/HOT query layer. The current implementation flows through Mock Provider interfaces, service orchestration, Repository persistence and the Event Engine; real external adapters are deferred.
+Information Feed and Operational Data remain separate and meet at the Event/HOT query layer. The current implementation flows through Mock or approved real Provider adapters, service orchestration, Repository persistence and the existing Event Engine.
 
 ## 9. Interfaces and External Dependencies
 
@@ -109,14 +109,14 @@ Information Feed and Operational Data remain separate and meet at the Event/HOT 
 | db0 + local `better-sqlite3` | Local cache/user persistence | Cache can be disabled; auth requires DB | In-memory/no-cache only where current code supports it |
 | GitHub OAuth/JWT | Optional identity and sync | Login disabled when env is absent | Local browser preferences |
 | Cloudflare D1/Vercel/Bun | Optional runtime adapters | Runtime-specific failure | Local Node runtime |
-| Shipping Provider interfaces | Mock implemented; real adapters deferred | Must isolate provider failure | Mock/last-known/no-data state |
+| Shipping Provider interfaces | Mock plus approved V1 adapters implemented | Must isolate provider failure | Mock/last-known/no-data state with stale/sourceStatus |
 
 ## 10. Authentication, Authorization and Security
 
 - Authentication: optional GitHub OAuth with JWT; disabled when required env vars are absent.
 - Roles and permissions: none beyond authenticated sync access in current code.
 - Sensitive data: GitHub secrets, JWT secret and future provider keys.
-- Validation: `verifyPrimitiveMetadata` validates sync payload shape; provider validation is not yet implemented.
+- Validation: `verifyPrimitiveMetadata` validates sync payload shape; Provider adapters validate and normalize external payloads before Domain use.
 - Secret handling: environment variables or local untracked configuration; never commit keys.
 - Shipping HOT must not make OAuth or AI a core runtime dependency without a new decision.
 
@@ -138,8 +138,8 @@ Information Feed and Operational Data remain separate and meet at the Event/HOT 
 ## 13. Testing and Verification Boundaries
 
 - Current tests: Vitest, primarily date parsing plus a placeholder common test.
-- Current verification state: server/client typecheck and `git diff --check` passed in this repair pass. Test/lint/build and fresh local Mock API smoke are pending because pnpm could not restore the dependency tree offline; the previous lint mismatch remains a known issue until rerun.
-- Shipping HOT tests now cover delay, baseline preservation, Vessel/Voyage ownership merges, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts; execution is pending in the current environment.
+- Current verification state: typecheck, full test, build and `git diff --check` passed; fresh Shipping HOT API and SQLite restart smoke passed on Node 22.23.2. Node 24.15.0 has a bundled native-module ABI mismatch and uses the documented in-memory fallback; lint remains pending.
+- Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, weather thresholds, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 
 ## 14. Architecture Change Rules
@@ -162,11 +162,11 @@ Changes that can remain local implementation decisions:
 
 | Item | State | Impact | Owner / next action |
 |---|---|---|---|
-| Shipping HOT Mock architecture | accepted | Implemented and verified within the local no-real-API boundary | Preserve current module boundaries |
+| Shipping HOT V1 Provider architecture | accepted | User-approved AISStream Vessel and Open-Meteo Marine Weather adapters preserve existing interfaces and Domain/Event/HOT boundaries | Preserve current module boundaries; no V2 Provider expansion |
 | Project Architect/Neat Freak docs reconciliation | changed-and-verified after this pass | Docs must remain one source of truth | Re-run closeout after implementation |
 | Runtime/database file path | pending | Native `better-sqlite3` could not build on Node 24 in this environment | Verify on a compatible Node/toolchain |
 | GitHub remote/account metadata | pending | Local `origin` reaches `rallsix66/Shipping-HOT` and exposes `main`; `gh auth status` still reports an invalid token | Re-authenticate `gh` before account-level operations |
-| Real shipping data sources | pending | Cost/access/licensing unknown | Evaluate one provider before Phase 5 |
+| Real shipping data sources | changed-and-verified for V1 | AISStream is beta and key-gated; Open-Meteo Marine is optional-key for normal use and carries coastal-accuracy/attribution caveats | Keep keys server-side; retain Mock fallback |
 | Current OAuth/cloud deployment code | implemented, not runtime-verified | May be unnecessary locally but dependencies are not mapped | Dependency analysis before removal |
 
 ## 16. Related ADRs
@@ -174,4 +174,5 @@ Changes that can remain local implementation decisions:
 - `docs/adr/ADR-001-use-newsnow-as-shipping-hot-foundation.md`
 - `docs/adr/ADR-002-local-first-single-user-architecture.md`
 - `docs/adr/ADR-003-separate-information-and-operational-data.md`
+- `docs/adr/ADR-004-v1-real-provider-adapters.md`
 - Roadmap and deferred real-provider plan: `docs/plans/shipping-hot-v1.md`

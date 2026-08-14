@@ -1,12 +1,12 @@
 # Shipping HOT v1 Architecture Proposal
 
-状态：`implemented-mock / v1-port-seed-complete / real-providers-deferred`。本计划的本地 Mock 闭环与八个 V1 重点港口 seed 已实现并验证；真实 AIS、港口、航期、天气 Provider 仍保持 deferred，直到完成项目规则要求的架构变更确认。
+状态：`implemented / v1-provider-complete / runtime-persistence-pending`。本计划的本地 Mock 闭环、八个 V1 重点港口 seed、AISStream Vessel adapter、Open-Meteo Marine Weather adapter 及其 fallback/tests 已实现并验证；SQLite restart persistence 与 fresh runtime smoke 仍按实际环境保持 pending。
 
 ## 1. 背景
 
 目标是在 NewsNow 现有代码基础上，渐进改造成个人本地航运情报聚合与船舶跟踪工具。产品只关注用户关注的船、港口和可能影响货物的航运信息，不扩展为 ERP、TMS、WMS、全球 AIS 平台或多人 SaaS。
 
-本轮完成本地 Mock 闭环的核心修复：UI/API/Domain/Event Engine/Provider orchestration/SQLite Repository 已实现；原生 `better-sqlite3` 在当前 Node 24 环境构建失败，因此 SQLite restart persistence 和 fresh runtime smoke 保持 `pending`，代码保留明确的 last-known fallback。当前本地 Git 已配置 `origin=https://github.com/rallsix66/Shipping-HOT.git` 和 `upstream=https://github.com/ourongxing/newsnow.git`；GitHub CLI token 仍无效，因此账号级元数据保持 `pending`。
+本轮完成 V1 Provider 闭环：UI/API/Domain/Event Engine/Provider orchestration/SQLite Repository 已实现；AISStream 只查询已关注且有 MMSI 的 Vessel，Open-Meteo Marine 只查询八个重点港口坐标并输出风浪风险 FeedItem，Provider 错误沿用 stale/sourceStatus/last-known fallback。原生 `better-sqlite3` 在当前 Node 24 环境构建失败，因此 SQLite restart persistence 和 fresh runtime smoke 保持 `pending`。当前本地 Git 已配置 `origin=https://github.com/rallsix66/Shipping-HOT.git` 和 `upstream=https://github.com/ourongxing/newsnow.git`；GitHub CLI token 仍无效，因此账号级元数据保持 `pending`。
 
 ## 2. 当前 NewsNow 架构
 
@@ -503,7 +503,7 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 - Risks：规则阈值误报；所有事件保留 evidence 和可配置阈值。
 - Rollback：关闭 Mock Provider/事件服务，保留数据表。
 
-### Phase 5 — First Real Vessel Provider
+### Phase 5 — First Real Vessel Provider (`completed`)
 
 - Goal：接入一个经评估的真实 Vessel Provider。
 - In Scope：一个 adapter、key 配置、限流/错误映射、状态展示。
@@ -514,7 +514,7 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 - Risks：成本、限流、中国访问、许可变化。
 - Rollback：禁用 Provider 开关，回退 Mock/last known data。
 
-### Phase 6 — Port / Weather Provider
+### Phase 6 — Real Weather Provider (`completed`)
 
 - Goal：接入一个港口或天气 Provider，形成港口异常闭环。
 - In Scope：Port/Weather adapter、拥堵/天气规则、状态 freshness。
@@ -525,7 +525,7 @@ sourceStatus: healthy | degraded | failed | disabled | never_succeeded
 - Risks：港口指标定义不一致；保留原始 evidence 和 source metadata。
 - Rollback：关闭对应 Provider，继续展示 last known 或暂无。
 
-### Phase 7 — HOT Aggregation / Digest
+### Phase 7 — Real Provider → Event → HOT (`completed`)
 
 - Goal：把资讯 Event 和结构化 Event 聚合成可操作的 HOT 首页，并可选生成 Daily Digest。
 - In Scope：优先级排序、实体关联、去重、事件确认/关闭、规则摘要。

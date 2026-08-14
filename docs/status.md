@@ -1,23 +1,23 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
 > Snapshot date: 2026-08-13
-> Evidence scope: local code / configuration / Git metadata; V1 port seed completion, targeted provider/repository checks and full test/build verification completed in this pass; real external Providers remain deferred pending architecture confirmation; lint, fresh API smoke and SQLite restart persistence remain pending or blocked for their recorded reasons
+> Evidence scope: local code / configuration / Git metadata; V1 ports, AISStream/Open-Meteo adapters, fallback boundaries and provider/event tests are implemented; typecheck, full tests, fresh API smoke and SQLite restart persistence passed on the compatible Node 22.23.2 environment; lint remains pending for the recorded findings
 > Source of truth for: current implementation and verification state
 
 ## 1. One-Sentence Status
 
-Shipping HOT local Mock implementation is in place on the retained NewsNow stack with deterministic Domain/Event rules, local API routes, structured Feed/Vessel/Port/Voyage/Event/Settings models, and a usable HOT UI; fresh runtime verification remains pending. Real AIS, port, schedule and weather Providers remain deferred.
+Shipping HOT V1 is implemented on the retained NewsNow stack with deterministic Domain/Event rules, local API routes, Mock fallback, optional AISStream Vessel data, optional Open-Meteo Marine weather risk signals, structured Feed/Vessel/Port/Voyage/Event/Settings models, and a usable HOT UI; fresh runtime verification is verified on the compatible Node 22.23.2 environment, with the Node 24 native-module caveat recorded below.
 
 ## 2. Current Environment
 
 - Active branch: `main`; package version: `0.0.41`
 - Git remotes: `origin=https://github.com/rallsix66/Shipping-HOT.git` and `upstream=https://github.com/ourongxing/newsnow.git`; GitHub CLI API authentication is still invalid, so account metadata was not API-verified
-- Local run status: `pending`; the service path now routes through Mock Providers and Repository code, but a fresh Nitro smoke run was blocked by the incomplete dependency tree
+- Local run status: `verified on Node 22.23.2`; fresh Nitro smoke covered Shipping API, 8 ports, CNNSA, Provider mode, watch toggle and settings update
 - Deployment status: `out-of-scope`; repository contains optional Cloudflare/Vercel/Bun/Docker configuration, but no deployment was performed
-- Database / external services: `feed_items`, `vessels`, `ports`, `voyages`, `events`, and `settings` now have Repository seed/list/upsert/reconcile/settings/retention paths; compatible SQLite restart persistence remains pending because `better-sqlite3` could not build under Node 24 without Visual Studio C++ tools; real external services are deferred
+- Database / external services: Repository paths are implemented; SQLite watch/settings restart persistence is verified on Node 22.23.2 with the compatible native module. Node 24.15.0 currently mismatches the bundled native module ABI and falls back to memory; AISStream and Open-Meteo remain optional server-side V1 sources
 - Mock fixture timestamps: generated relative to the runtime clock when a snapshot is created; deterministic fixed time is limited to `shared/shipping-engine.test.ts`
 - V1 focus-port seed: all eight requested ports are present in the shared fixture and Repository seed path: Shekou, Yantian, Nansha, Laem Chabang, Port Klang, Manila, Jakarta and Ho Chi Minh City
-- Last verified surface: source tree inspection, `git diff --check`, typecheck passed, full test suite (69/69 passed), and production build passed in this pass; lint, fresh Mock API smoke and SQLite restart persistence remain pending or blocked for their recorded reasons
+- Last verified surface: source inspection, `git diff --check`, typecheck passed, targeted Provider tests passed (9/9), full test suite passed (75/75), production build passed, and Node 22.23.2 fresh API/SQLite restart smoke passed; lint remains pending with recorded existing/new style findings
 
 ## 3. Current Architecture Summary
 
@@ -39,8 +39,8 @@ Shipping HOT local Mock implementation is in place on the retained NewsNow stack
 | Focus/order persistence | implemented | `src/atoms/primitiveMetadataAtom.ts`, `src/hooks/useFocus.ts` | Browser localStorage; optional sync |
 | PWA | implemented | `pwa.config.ts`, `src/hooks/usePWA.ts` | Build/runtime not verified |
 | Cloudflare/Vercel/Bun/Docker adapters | implemented | `nitro.config.ts`, `Dockerfile`, compose and wrangler examples | Deployment not performed |
-| Shipping HOT Domain and Event Engine | implemented | `shared/shipping.ts`, `shared/shipping-rules.ts`, `shared/shipping-engine.ts` | Event reconcile covers update, resolve and reopen; HOT removes FeedItem/Event duplicates, uses related entity freshness, and ranks severity, watched relevance, freshness and recency; real Providers deferred |
-| Shipping HOT API and local tables | implemented / runtime persistence pending | `server/api/shipping/**`, `server/database/shipping.ts`, `server/shipping-store.ts` | Provider → service → Repository path is implemented; eight V1 focus-port seeds are present; SQLite restart verification is pending in the current native-toolchain environment |
+| Shipping HOT Domain and Event Engine | implemented | `shared/shipping.ts`, `shared/shipping-rules.ts`, `shared/shipping-engine.ts` | Event reconcile covers update, resolve and reopen; HOT removes FeedItem/Event duplicates, uses related entity freshness, and ranks severity, watched relevance, freshness and recency; normalized Real Vessel/Weather signals use the same path |
+| Shipping HOT API and local tables | implemented / runtime persistence verified on Node 22 | `server/api/shipping/**`, `server/database/shipping.ts`, `server/shipping-store.ts` | Provider → service → Repository path is implemented; eight V1 focus-port seeds are present; SQLite watch/settings restart persistence passed on the compatible Node 22.23.2 runtime |
 | Shipping HOT UI/routes | implemented | `src/routes/**`, `src/components/shipping/**` | `/`, `/vessels`, `/ports`, `/voyages`, `/events`, `/feed`, `/settings` and detail routes |
 
 ## 5. Decision Status
@@ -50,15 +50,19 @@ Shipping HOT local Mock implementation is in place on the retained NewsNow stack
 - Retain NewsNow as the foundation until migration cost and risk are proven higher.
 - Treat the current NewsNow code/config as the authority for current implementation facts.
 
+### Approved and Implemented for V1
+
+- AISStream Vessel and Open-Meteo Marine Weather adapters with server-side environment selection and fallback.
+
 ### Approved but Deferred
 
-- Real AIS, port, schedule and weather Provider integrations; persistent SQLite verification on a compatible native toolchain; deployment.
+- Deployment and Port/Schedule real Providers remain deferred. SQLite persistence and fresh API smoke are verified on Node 22.23.2; Node 24.15.0 still uses the documented native-module fallback.
 
 ### Implemented Local Mock Scope
 
 - Local-first single-user Shipping HOT architecture.
 - Separate Information Feed from Operational Data through Event/HOT convergence.
-- Vessel/Port/Voyage/Event/Settings model, isolated Provider interfaces, Mock adapters and deterministic Event Engine.
+- Vessel/Port/Voyage/Event/Settings model, isolated Provider interfaces, Mock adapters, approved V1 real adapters and deterministic Event Engine.
 
 ### Deprecated / Rejected
 
@@ -77,30 +81,30 @@ Shipping HOT local Mock implementation is in place on the retained NewsNow stack
 
 | Priority | Risk | Evidence | Recommended action |
 |---|---|---|---|
-| P1 | Real Provider access is not available | Provider adapters are intentionally deferred | Continue with Mock/fixture behavior; evaluate Providers separately |
+| P1 | External Provider runtime access is environment-dependent | AISStream needs a server-side key; Open-Meteo access is external; both have offline adapter tests | Keep Mock fallback; verify fresh runtime when credentials/network are available |
 | P1 | Legacy NewsNow Source failures use a different contract | `server/api/s/index.ts`, `shared/types.ts` | Keep legacy path; Shipping HOT DTOs use freshness/sourceStatus/error fields |
 | P2 | OAuth/cloud deployment dependencies may be unnecessary locally | `server/api/oauth/**`, `nitro.config.ts`, Docker files | Dependency analysis before removal |
 | P2 | Native SQLite runtime remains environment-dependent | `better-sqlite3` build requires compatible Node/toolchain | Verify persistent mode on a supported local toolchain |
 
 ## 8. Current Work and Blockers
 
-- Active work: V1 remaining work; eight-port Mock seed completed, real Vessel/Weather Provider work not started because the required architecture confirmation is absent.
-- Blockers: enabling an external Vessel or Weather Provider is an architecture change under `AGENTS.md` and `docs/architecture.md`; no provider-specific external secret class has been authorized. Lint remains pending with 356 existing style/import/format errors and 4 warnings, mainly across retained NewsNow and existing Shipping HOT surfaces. Compatible native SQLite toolchain, fresh API smoke and GitHub CLI account authentication remain deferred/pending.
-- Verification: targeted provider/repository tests = passed (6/6); typecheck = passed; full test = passed (69/69); build = passed; lint = pending (356 errors / 4 warnings); fresh API smoke = pending; SQLite restart persistence = pending; Neat Freak Closeout = verified.
-- V1 status: `implemented-mock / v1-port-seed-complete / real-providers-deferred`; Phase 5/6/7 acceptance is not complete. The remaining blocker is architecture confirmation for real Provider integration, not a Mock core logic defect.
-- Neat Freak Closeout: verified. Real Skill loaded from `C:\Users\Administrator\.codex\skills\neat-freak\SKILL.md` and its `scripts/audit-inventory.sh` audit executed successfully after this pass; the audit found six intended working-tree entries and no project database, environment file or build artifact in the change set.
+- Active work: V1 implementation and verification closeout; eight ports, AISStream Vessel, Open-Meteo Marine Weather, fallback and Real → Event → HOT tests are implemented.
+- Blockers: Node 24.15.0 cannot load the bundled Node 22 native module, so Node 24 startup uses the documented in-memory fallback. Node 22.23.2 persistence smoke passed. Lint remains pending with 375 errors / 4 warnings after the approved V1 files were added; GitHub CLI account authentication remains invalid but is unrelated to local V1 code.
+- Verification: targeted Provider tests = passed (9/9); typecheck = passed; full test = passed (75/75); build = passed; lint = pending (375 errors / 4 warnings); fresh API smoke = verified on Node 22.23.2; SQLite restart persistence = verified on Node 22.23.2; Neat Freak Closeout = verified.
+- V1 status: `implemented / v1-provider-complete / runtime-verified-on-node22`; Phase 5/6/7 code acceptance and Node 22 runtime smoke are complete. Live external Provider calls remain unconfigured without user-supplied credentials/network access; the approved Mock fallback remains healthy.
+- Neat Freak Closeout: verified. Real Skill loaded from `C:\Users\Administrator\.codex\skills\neat-freak\SKILL.md`; final `audit-inventory.sh` completed successfully at 2026-08-13T10:21:23Z, found no other-agent rule artifacts and no database/env/build artifact in the change set; the audit recorded 15 current working-tree entries, including the 2 pre-existing unrelated modifications.
 
 ## 9. Recommended Next Action
 
-Next: review the implemented Mock loop, then separately evaluate any real Provider and compatible persistent SQLite toolchain before enabling them.
+Next: keep the compatible Node 22 runtime for local persistence verification, or rebuild native dependencies for Node 24 through an authorized toolchain change; do not start V2.
 
 ## 10. Knowledge Closeout Surface
 
 | Fact surface | State | Evidence / limitation | Action |
 |---|---|---|---|
 | Code | changed-and-verified | Shipping HOT shared Domain, Provider orchestration, local Vessel/Voyage ownership merge, API validation, Repository paths, routes, UI and tests inspected; runtime-relative Mock fixture timestamps and Event Engine test determinism are covered by passing checks | Treat code/config as authority for current implementation |
-| Runtime | pending | Fresh Nitro server smoke and SQLite restart persistence could not run because the dependency tree could not be restored offline | Do not claim runtime persistence verified |
-| Documentation | changed-and-verified | Architecture, status, ADRs and roadmap now distinguish implemented Mock scope from deferred real integrations | Keep implementation/deferred split |
+| Runtime | changed-and-verified | Fresh Nitro API smoke and SQLite watch/settings restart persistence passed on Node 22.23.2; Node 24.15.0 has a native-module ABI mismatch and uses fallback | Keep runtime caveat explicit |
+| Documentation | changed-and-verified | Architecture, status, ADR-004 and roadmap describe approved V1 Provider adapters and pending runtime evidence | Keep V1/V2 boundary explicit |
 | Rules | changed-and-verified | Root `AGENTS.md` defines project guardrails, verification rules, architecture-change workflow, and mandatory task Closeout; no project `CLAUDE.md` or override; global Codex `AGENTS.md` is empty | Use `AGENTS.md` as the project entry point |
 | Memory | not-applicable | No project memory store or user-authorized memory write was identified | No memory files changed |
-| Workspace | changed-and-verified | Neat Freak inventory found only the intended project files plus ignored/generated local directories; no project database, env file or build artifact was added to the change set | Review the final `git status` before commit |
+| Workspace | changed-and-verified | Final Neat Freak inventory found no other-agent rule artifacts, no project database/env/build artifact in the change set, and 15 current working-tree entries including 2 pre-existing unrelated modifications | Review the final `git status` before any commit |
