@@ -114,6 +114,7 @@ Next: keep the compatible Node 22 runtime for local persistence verification, or
 
 - V2 plan created: `docs/plans/shipping-hot-v2.md`.
 - V2 plan reviewed and corrected on 2026-08-14.
+- V2 plan wording follow-up: `sourceStatus` includes `degraded`; data-model references use `sourceType/dataNature`; V2.2 UI explicitly includes Calendarific Attribution; no code changed.
 - V2 implementation authorization: not present; this task did not add V2 behavior, API integration, database schema changes, dependency changes or UI implementation.
 - Fixed NewsNow updated-source metadata generation side effect: normal `dev`/`build`/`presource` no longer rewrites `shared/updated-sources.ts`; explicit `--updated-sources` generation is required.
 - Closeout: pending official `audit-inventory.sh` execution because Bash is unavailable in this Windows environment; the required manual Neat Freak-equivalent audit completed with no tracked database/env artifact or cleanup action.

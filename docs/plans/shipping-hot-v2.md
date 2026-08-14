@@ -19,7 +19,7 @@ V2 的首要实施顺序建议为：
 3. Country Calendar：以 Calendarific 作为常规基础源，以官方来源和 ManualOverride 补充临时/特殊假期，并接入 Event/HOT。
 4. Shipping Information Feed：继续复用 NewsNow Source，把行业新闻、港口公告、船公司公告和海事预警统一进入资讯 Feed。
 5. Weather Intelligence：扩展现有 Open-Meteo Marine/Forecast 字段，按需增加官方极端天气和海事预警来源。
-6. AIS Derived Port Intelligence：在确认 AISStream 的区域订阅、覆盖和资源成本可接受后，再估算全港拥堵；它始终标记为 DERIVED/ESTIMATED，不替代 Portcast 的公开数据。
+6. AIS Derived Port Intelligence：在确认 AISStream 的区域订阅、覆盖和资源成本可接受后，再估算全港拥堵；它始终标记为 `dataNature=derived`/`estimated`，不替代 Portcast 的公开数据。
 
 V2 不承诺真实船期。V2 可以支持手工/Mock Planned Schedule，以及 AIS-reported ETA 作为实时补充，但两者不得合并为同一个事实。若没有免费、稳定、许可清晰的船期来源，真实 Planned Schedule 延期，不伪造。
 
@@ -62,7 +62,7 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 | HOT | 已实现 | `rankHotItems`、Shipping UI | 保持为行动视图，不与 Events 重复 |
 | AISStream Vessel | V1 已批准并实现 | `createAisStreamVesselProvider` | 继续只服务 Watched Vessel；重连/会话管理后置增强 |
 | Open-Meteo Marine/Forecast | V1 已批准并实现 | `createOpenMeteoWeatherProvider` | 增加海况字段和官方预警分层 |
-| Mock Providers | 已实现 | `MockVesselProvider`、`MockPortProvider`、`MockScheduleProvider`、`MockWeatherProvider` | 必须始终显式标记 MOCK |
+| Mock Providers | 已实现 | `MockVesselProvider`、`MockPortProvider`、`MockScheduleProvider`、`MockWeatherProvider` | 必须始终显式标记 `sourceType=mock` |
 | Repository | 已实现 | `server/database/shipping.ts` | 复用 db0/SQLite；Calendar 才评估最小新表 |
 | Shipping UI | 已实现 | `src/routes/**`、`src/components/shipping/**` | V2 UI 只在对应阶段实施 |
 
@@ -70,7 +70,7 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 
 现有 Shipping Repository 初始化 `feed_items`、`vessels`、`ports`、`voyages`、`events`、`settings`，NewsNow 另有 `cache`、`user`。当前实体主要以 `data` JSON 保存，同时保留查询和排序所需的少量列。
 
-当前 `shipping-store.ts` 会并行刷新 Vessel、Port、Voyage、Weather，失败时把 last-known 标记为 stale/failed；SQLite 不可用时保留内存 fallback。当前 Mock fixture 仍是产品可用的基础数据，因此 V2.0 必须让页面明确显示 MOCK，而不是只显示一个看起来正常的“healthy”。
+当前 `shipping-store.ts` 会并行刷新 Vessel、Port、Voyage、Weather，失败时把 last-known 标记为 stale/failed；SQLite 不可用时保留内存 fallback。当前 Mock fixture 仍是产品可用的基础数据，因此 V2.0 必须让页面明确显示 `sourceType=mock`，而不是只显示一个看起来正常的“healthy”。
 
 ### 2.4 当前限制
 
@@ -162,7 +162,7 @@ HOT
 | --- | --- | --- | --- | --- |
 | 船舶 | AISStream / `AisStreamVesselProvider` | MMSI、位置、速度、航向、Navigation Status、更新时间 | V2 必须，继续沿用 V1 | WebSocket、Key、beta/模型稳定性、AIS 漏报；失败回退 last-known，不伪造最新 |
 | 港口 | Portcast Public Page / `PortcastPublicPageProvider` | category、median waiting time、previous period、WoW、long-tail、last updated、source URL | V2.1 首选 | 页面结构、公开覆盖、每周更新、robots/ToS、无数据港口；仅低频缓存和公开展示字段 |
-| 港口 | `AISDerivedPortProvider` | 锚地等待、低速/静止船、等待数、趋势 | V2.5 条件项 | 当前只看 Watched MMSI 无法统计全港；需 Bounding Box/锚地地理范围；结果 DERIVED/ESTIMATED |
+| 港口 | `AISDerivedPortProvider` | 锚地等待、低速/静止船、等待数、趋势 | V2.5 条件项 | 当前只看 Watched MMSI 无法统计全港；需 Bounding Box/锚地地理范围；结果 `dataNature=derived`/`estimated` |
 | 天气 | Open-Meteo Marine + Forecast | 风、阵风、波高、波向、波周期、涌浪 | V2 必须，V2.4 增强 | 模型/海岸精度限制；需归因；不能替代航海资料或官方预警 |
 | 极端天气 | JMA、TMD、BMKG，后续评估 PAGASA/越南官方源 | 台风、海事预警、海况警报、有效期 | V2.4 先做少量高价值源 | 多国语言和格式不一；先用官方链接/公告 Feed，稳定接口确认后再自动化 |
 | 节假日 | Calendarific / `CalendarProvider` | 常规 public/local/religious/observance、日期、名称、类型 | V2.2 基础源 | API Key、免费额度、季度更新、未来数据范围、语言/region 限制；年度/季度缓存 |
@@ -219,7 +219,7 @@ ProviderResult<T>
   freshness
     updatedAt
     stale
-    sourceStatus: healthy | failed | disabled | never_succeeded
+    sourceStatus: healthy | degraded | failed | disabled | never_succeeded
     error?
 ```
 
@@ -231,7 +231,7 @@ Provider 返回的 `data` 仍然必须是 Domain 可理解的规范化 DTO；供
 - `OfficialHolidayProvider`：读取官方公开页面或受控手工记录。
 - `PortcastPublicPageProvider`：读取公开港口页面已经呈现的指标。
 - `OfficialWeatherAlertProvider`：将官方预警统一成 `FeedItem`/`AlertEvidence`。
-- `AISDerivedPortProvider`：输入区域观测，输出港口的 DERIVED 统计。
+- `AISDerivedPortProvider`：输入区域观测，输出港口的 `dataNature=derived` 统计。
 
 ### 7.3 Provider 独立失败
 
@@ -263,7 +263,7 @@ provenance
 freshness
   updatedAt
   stale
-  sourceStatus: healthy | failed | disabled | never_succeeded
+  sourceStatus: healthy | degraded | failed | disabled | never_succeeded
   error?
 ```
 
@@ -680,7 +680,7 @@ Local Scheduler 是单进程、本地、可暂停的同步编排器，不是云�
 - Open-Meteo：单港失败只影响该港天气 Feed；旧 forecast 显示 source updatedAt 和 stale；没有预警时不等于天气安全。
 - Calendarific：年度缓存仍可读；官方 ManualOverride 可以覆盖业务展示；冲突保留证据和 conflict flag。
 - NewsNow Source：沿用 cache fallback，但新 FeedItem 不得使用当前抓取时间覆盖原发布时间。
-- Planned Schedule：没有可靠来源时保留 Mock/手工计划，并与 AIS ETA 分栏显示。
+- Planned Schedule：没有可靠来源时保留 `sourceType=mock`/`user` 的计划，并与 AIS ETA 分栏显示。
 
 ### 18.3 Fallback 优先级
 
@@ -689,7 +689,7 @@ fresh verified official / public source
   > fresh normalized provider source
   > stale last-known source value
   > verified manual override
-  > explicit MOCK fixture
+  > explicit `sourceType=mock` fixture
   > no data
 ```
 
@@ -710,7 +710,7 @@ ManualOverride 只在其适用领域优先级高于第三方常规源时生效�
 
 ### 20.1 共享字段
 
-在现有 `Freshness` 上增加轻量 `provenance`：`kind`、`sourceId`、可选 `sourceUrl`、`verified`。保留现有 `sourceStatus/stale/updatedAt/error`，不改成一个含义重叠的大状态枚举。
+在现有 `Freshness` 上增加轻量 `provenance`：`sourceType`、`dataNature`、`sourceId`、可选 `sourceUrl`、`verified`。保留现有 `sourceStatus/stale/updatedAt/error`，不改成一个含义重叠的大状态枚举。
 
 ### 20.2 Port
 
@@ -753,7 +753,7 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 现有 Event 增加可选 evidence 约定：
 
 - `sourceUpdatedAt`
-- `provenanceKind`
+- `sourceType/dataNature`
 - `fingerprint`
 - `leadDays`（日历提醒）
 - `conflictFlag`
@@ -781,6 +781,7 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 - 新增国家日历页：国家、年份、月份、类型、影响等级、验证状态筛选。
 - 首页增加未来 14 天高影响日历。
 - 日历详情显示来源冲突、官方/手工优先级、最后核验和提醒 lifecycle。
+- 日历页面显示符合当时官方条款的 Calendarific Attribution（例如 `Powered by Calendarific` 和对应链接）；实现 V2.2 前再次核对最终文字与链接。
 
 ### V2.3–V2.4
 
@@ -846,7 +847,7 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 ### V2.5 — AIS / Port Derived Intelligence
 
 - Goal：在数据覆盖和资源成本满足条件时估算重点港口的实时拥堵趋势。
-- In Scope：区域 Bounding Box/锚地范围、AIS area session、低速/锚泊/等待窗口、样本量和 DERIVED/ESTIMATED 展示。
+- In Scope：区域 Bounding Box/锚地范围、AIS area session、低速/锚泊/等待窗口、样本量和 `dataNature=derived`/`estimated` 展示。
 - Out of Scope：把 watched MMSI 结果扩展成全港事实、完整轨迹、全球港口统计、商业 AIS Provider。
 - Dependencies：V2.0 AIS session；V2.1 Port entity/threshold；确认 AISStream 区域订阅覆盖、吞吐、许可和运行成本。
 - Acceptance：没有区域观测就不输出全港统计；样本量/覆盖不足显示 unknown；衍生值与 Portcast 并列而不覆盖；重复连接受控；短期 observation 可清理。
@@ -878,7 +879,7 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 4. 国家日历第一版是否只覆盖 TH/ID/MY/PH/VN，是否需要地区/subdivision 级假期？
 5. 首页的近期国家日历是否只显示 medium 及以上影响，还是也显示用户标记的 low observance？
 6. 是否接受 V2 暂不实现真实 Planned Schedule，只提供 Mock/手工计划和 AIS ETA 分栏？
-7. 是否接受 V2.5 的 AIS 全港拥堵只是 DERIVED/ESTIMATED，并且可以因 AISStream 区域能力不足继续延期？
+7. 是否接受 V2.5 的 AIS 全港拥堵只是 `dataNature=derived`/`estimated`，并且可以因 AISStream 区域能力不足继续延期？
 8. 首批资讯来源是否先采用两家行业媒体 + 中国三港和泰国/马来西亚官方公告，而把 Manila/Jakarta/Ho Chi Minh 和船公司公告放到第二批？
 9. 是否接受 V2.2 为 `calendar_events` 增加最小新表；其余阶段优先复用现有 JSON/data 列而不新增表？
 10. 本地 scheduler 是否允许在 Nitro 进程运行期间后台同步，还是只允许打开页面/手工刷新时按 TTL 同步？
