@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import type { Database } from "db0"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
-import { initShippingTables, ShippingRepository } from "./shipping"
+import { ShippingRepository, initShippingTables } from "./shipping"
 
 type StoredRow = Record<string, unknown>
 
@@ -71,12 +71,20 @@ class FakeDatabase {
 
   delete(tableName: string, args: unknown[]) {
     const table = this.table(tableName)
-    if (tableName === "events") for (const [id, row] of table) if (row.status === "resolved" && String(row.last_detected_at) < String(args[0])) table.delete(id)
-    if (tableName === "feed_items") for (const [id, row] of table) if (String(row.published_at) < String(args[0])) table.delete(id)
+    if (tableName === "events") {
+      for (const [id, row] of table) {
+        if (row.status === "resolved" && String(row.last_detected_at) < String(args[0])) table.delete(id)
+      }
+    }
+    if (tableName === "feed_items") {
+      for (const [id, row] of table) {
+        if (String(row.published_at) < String(args[0])) table.delete(id)
+      }
+    }
   }
 }
 
-describe("ShippingRepository", () => {
+describe("shippingRepository", () => {
   it("seeds and reads all entities and settings", async () => {
     const snapshot = createMockSnapshot()
     const database = new FakeDatabase()
@@ -119,5 +127,26 @@ describe("ShippingRepository", () => {
     await repository.pruneExpired(1, new Date("2099-01-03T00:00:00.000Z"))
     expect(await repository.listEvents()).toHaveLength(snapshot.events.filter(event => event.status === "active").length)
     expect(await repository.listFeedItems()).toHaveLength(0)
+  })
+
+  it("backfills only deterministically known legacy provenance", async () => {
+    const snapshot = createMockSnapshot()
+    const database = new FakeDatabase()
+    const legacyVessel = { ...snapshot.vessels[0], provenance: undefined }
+    const legacyPort = { ...snapshot.ports[0], provenance: undefined }
+    const legacyEvent = { ...snapshot.events[2], provenance: undefined, evidence: undefined }
+    const unknownFeed = { ...snapshot.feedItems[0], sourceId: "legacy-news", provenance: undefined }
+    database.table("vessels").set(legacyVessel.id, { id: legacyVessel.id, data: JSON.stringify(legacyVessel) })
+    database.table("ports").set(legacyPort.id, { id: legacyPort.id, data: JSON.stringify(legacyPort) })
+    database.table("events").set(legacyEvent.id, { id: legacyEvent.id, data: JSON.stringify(legacyEvent) })
+    database.table("feed_items").set(unknownFeed.id, { id: unknownFeed.id, data: JSON.stringify(unknownFeed) })
+    const repository = new ShippingRepository(database as unknown as Database)
+
+    expect((await repository.listVessels())[0].provenance).toBeUndefined()
+    expect((await repository.listVessels({ vessel: { sourceType: "mock", dataNature: "observed", sourceId: "mock-vessel" } }))[0].provenance).toMatchObject({ sourceId: "mock-vessel" })
+    const ports = await repository.listPorts({ port: { sourceType: "mock", dataNature: "derived", sourceId: "mock-port" } })
+    expect(ports[0].provenance).toMatchObject({ sourceId: "mock-port" })
+    expect((await repository.listEvents({ ports }))[0]).toMatchObject({ provenance: { sourceId: "mock-port", dataNature: "derived" }, evidence: [{ provenance: { sourceId: "mock-port", dataNature: "derived" } }] })
+    expect((await repository.listFeedItems())[0].provenance).toBeUndefined()
   })
 })

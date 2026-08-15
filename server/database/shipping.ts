@@ -1,7 +1,21 @@
 import type { Database } from "db0"
-import type { FeedItem, Port, ShippingEvent, ShippingSettings, Vessel, Voyage } from "@shared/shipping"
+import { knownMockProvenanceFor, normalizeLegacyEventTrust, normalizeLegacyTrust } from "@shared/shipping"
+import type { DataProvenance, FeedItem, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, Vessel, Voyage } from "@shared/shipping"
 
 type Row = Record<string, unknown>
+
+interface LegacyTrustDefaults {
+  vessel?: DataProvenance
+  port?: DataProvenance
+  voyage?: DataProvenance
+}
+
+interface LegacyEventSources {
+  vessels?: Vessel[]
+  ports?: Port[]
+  voyages?: Voyage[]
+  feedItems?: FeedItem[]
+}
 
 function rows<T>(value: unknown): T[] {
   if (Array.isArray(value)) return value as T[]
@@ -59,11 +73,38 @@ export class ShippingRepository {
     await this.saveSettings(settings)
   }
 
-  async listVessels() { return rows<Row>(await this.db.prepare("SELECT data FROM vessels ORDER BY id").all()).map(row => parse<Vessel>(row.data)) }
-  async listPorts() { return rows<Row>(await this.db.prepare("SELECT data FROM ports ORDER BY id").all()).map(row => parse<Port>(row.data)) }
-  async listVoyages() { return rows<Row>(await this.db.prepare("SELECT data FROM voyages ORDER BY id").all()).map(row => parse<Voyage>(row.data)) }
-  async listFeedItems() { return rows<Row>(await this.db.prepare("SELECT data FROM feed_items ORDER BY published_at DESC").all()).map(row => parse<FeedItem>(row.data)) }
-  async listEvents() { return rows<Row>(await this.db.prepare("SELECT data FROM events ORDER BY last_detected_at DESC").all()).map(row => parse<ShippingEvent>(row.data)) }
+  async listVessels(defaults: LegacyTrustDefaults = {}) {
+    return rows<Row>(await this.db.prepare("SELECT data FROM vessels ORDER BY id").all()).map(row => normalizeLegacyTrust(parse<Vessel>(row.data), defaults.vessel))
+  }
+
+  async listPorts(defaults: LegacyTrustDefaults = {}) {
+    return rows<Row>(await this.db.prepare("SELECT data FROM ports ORDER BY id").all()).map(row => normalizeLegacyTrust(parse<Port>(row.data), defaults.port))
+  }
+
+  async listVoyages(defaults: LegacyTrustDefaults = {}) {
+    return rows<Row>(await this.db.prepare("SELECT data FROM voyages ORDER BY id").all()).map(row => normalizeLegacyTrust(parse<Voyage>(row.data), defaults.voyage))
+  }
+
+  async listFeedItems() {
+    return rows<Row>(await this.db.prepare("SELECT data FROM feed_items ORDER BY published_at DESC").all()).map((row) => {
+      const item = parse<FeedItem>(row.data)
+      return normalizeLegacyTrust(item, knownMockProvenanceFor(item.sourceId))
+    })
+  }
+
+  async listEvents(sources: LegacyEventSources = {}) {
+    const findSource = (event: ShippingEvent): (Freshness & ProvenanceAware) | undefined => {
+      if (event.feedItemId) return sources.feedItems?.find(item => item.id === event.feedItemId)
+      if (event.vesselId) return sources.vessels?.find(item => item.id === event.vesselId)
+      if (event.portId) return sources.ports?.find(item => item.id === event.portId)
+      if (event.voyageId) return sources.voyages?.find(item => item.id === event.voyageId)
+      return undefined
+    }
+    return rows<Row>(await this.db.prepare("SELECT data FROM events ORDER BY last_detected_at DESC").all()).map((row) => {
+      const event = parse<ShippingEvent>(row.data)
+      return normalizeLegacyEventTrust(event, findSource(event))
+    })
+  }
 
   async getSettings(): Promise<ShippingSettings | undefined> {
     const row = await this.db.prepare("SELECT data FROM settings WHERE id = 'default'").get() as Row | undefined

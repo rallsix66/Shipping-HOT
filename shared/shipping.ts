@@ -56,6 +56,38 @@ export function provenanceEvidence(source?: DataProvenance, sourceUpdatedAt?: st
   return source ? [{ provenance: source, sourceUpdatedAt }] : []
 }
 
+const knownMockProvenance: Record<string, DataProvenance> = {
+  "mock-vessel": { sourceType: "mock", dataNature: "observed", sourceId: "mock-vessel", verified: false },
+  "mock-port": { sourceType: "mock", dataNature: "derived", sourceId: "mock-port", verified: false },
+  "mock-schedule": { sourceType: "mock", dataNature: "planned", sourceId: "mock-schedule", verified: false },
+  "mock-weather": { sourceType: "mock", dataNature: "forecast", sourceId: "mock-weather", verified: false },
+  "mock-port-notice": { sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice", verified: false },
+}
+
+export function knownMockProvenanceFor(sourceId?: string): DataProvenance | undefined {
+  const provenance = sourceId ? knownMockProvenance[sourceId] : undefined
+  return provenance ? { ...provenance } : undefined
+}
+
+export function normalizeLegacyTrust<T extends ProvenanceAware>(entity: T, provenance?: DataProvenance): T {
+  if (entity.provenance || !provenance) return entity
+  return { ...entity, provenance: { ...provenance } }
+}
+
+export function normalizeLegacyEventTrust(event: ShippingEvent, source?: Freshness & ProvenanceAware): ShippingEvent {
+  if (event.provenance || !source?.provenance) return event
+  const sourceUpdatedAt = event.sourceUpdatedAt ?? source.sourceUpdatedAt ?? source.updatedAt
+  return {
+    ...event,
+    provenance: deriveProvenance(source.provenance),
+    evidence: event.evidence?.length ? event.evidence : provenanceEvidence(source.provenance, sourceUpdatedAt),
+    updatedAt: event.updatedAt ?? source.updatedAt,
+    sourceUpdatedAt,
+    fetchedAt: event.fetchedAt ?? source.fetchedAt,
+    stale: event.stale ?? source.stale,
+  }
+}
+
 export interface Vessel extends Freshness, ProvenanceAware {
   id: string
   name: string

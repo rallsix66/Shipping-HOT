@@ -78,12 +78,21 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
 async function readStoredSnapshot(): Promise<ShippingSnapshot> {
   if (!repository) return structuredClone(fallbackSnapshot)
   const settings = await repository.getSettings() ?? fallbackSnapshot.settings
+  const legacyDefaults = {
+    vessel: providerModes.vessel === "mock" ? providerProvenances.mockVessel : undefined,
+    port: providerModes.port === "mock" ? providerProvenances.mockPort : undefined,
+    voyage: providerModes.schedule === "mock" ? providerProvenances.mockSchedule : undefined,
+  }
+  const vessels = await repository.listVessels(legacyDefaults)
+  const ports = await repository.listPorts(legacyDefaults)
+  const voyages = await repository.listVoyages(legacyDefaults)
+  const feedItems = await repository.listFeedItems()
   return {
-    vessels: await repository.listVessels(),
-    ports: await repository.listPorts(),
-    voyages: await repository.listVoyages(),
-    feedItems: await repository.listFeedItems(),
-    events: await repository.listEvents(),
+    vessels,
+    ports,
+    voyages,
+    feedItems,
+    events: await repository.listEvents({ vessels, ports, voyages, feedItems }),
     settings,
   }
 }

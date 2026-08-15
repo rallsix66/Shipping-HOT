@@ -59,12 +59,13 @@ export function reconcileEvent(existing: ShippingEvent | undefined, incoming: Om
     return { ...incoming, id: `event-${incoming.dedupeKey}`, firstDetectedAt: now, lastDetectedAt: now }
   }
   if (incoming.status === "resolved") {
-    return { ...existing, ...incoming, status: "resolved", lastDetectedAt: now, resolvedAt: now }
+    return { ...existing, ...incoming, status: "resolved", detectedAt: existing.detectedAt, lastDetectedAt: existing.lastDetectedAt, resolvedAt: now }
   }
   return {
     ...existing,
     ...incoming,
     id: existing.id,
+    detectedAt: existing.status === "active" ? existing.detectedAt : incoming.detectedAt,
     status: "active",
     firstDetectedAt: existing.firstDetectedAt,
     lastDetectedAt: now,
@@ -86,7 +87,7 @@ export function validateShippingSettings(settings: ShippingSettings): string[] {
   return errors
 }
 
-export function freshnessState(item: { stale: boolean; sourceStatus: string }): FreshnessState {
+export function freshnessState(item: { stale: boolean, sourceStatus: string }): FreshnessState {
   if (item.sourceStatus === "never_succeeded") return "unknown"
   if (item.sourceStatus !== "healthy") return "stale"
   return item.stale ? "stale" : "fresh"
@@ -120,7 +121,7 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
 
   const eventItems = events
     .filter(event => event.status === ("active" as EventStatus))
-    .map(event => {
+    .map((event) => {
       const source = relatedFreshness(event, ports, vessels, voyages, feedItems)
       return {
         id: event.id,
@@ -145,7 +146,7 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
     severity: item.severity,
     freshness: freshnessState(item),
     sourceStatus: item.sourceStatus,
-    provenance: deriveProvenance(item.provenance),
+    provenance: item.provenance,
     occurredAt: item.publishedAt,
     relatedLabel: item.relatedPortIds[0] ? labels.get(item.relatedPortIds[0]) : item.relatedVesselIds[0] ? labels.get(item.relatedVesselIds[0]) : undefined,
     feedItemId: item.id,

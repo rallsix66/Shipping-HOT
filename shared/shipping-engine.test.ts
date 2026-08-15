@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { detectShippingEvents } from "./shipping-engine"
+import { detectShippingEvents, isFreshEventEvidence } from "./shipping-engine"
 import { createMockSnapshot } from "./shipping-fixtures"
+import { rankHotItems } from "./shipping-rules"
 
-describe("Shipping HOT event engine", () => {
+describe("shipping HOT event engine", () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"))
@@ -71,5 +72,50 @@ describe("Shipping HOT event engine", () => {
     const medium = { ...snapshot, settings: { ...snapshot.settings, eventThresholds: { ...snapshot.settings.eventThresholds, congestionLevel: "medium" as const } } }
     const events = detectShippingEvents(medium.vessels, medium.ports, medium.voyages, medium.feedItems, medium.settings, [], "2026-01-01T03:00:00.000Z")
     expect(events.filter(event => event.type === "port_congestion").map(event => event.portId)).toEqual(expect.arrayContaining(["port-shekou", "port-yantian"]))
+  })
+
+  it("requires healthy and non-stale evidence before creating an Event", () => {
+    const snapshot = createMockSnapshot()
+    const stalePort = { ...snapshot.ports[0], stale: true, sourceStatus: "failed" as const, error: "Portcast unavailable" }
+    expect(isFreshEventEvidence(stalePort)).toBe(false)
+    const events = detectShippingEvents([], [stalePort], [], [], snapshot.settings, [], "2026-01-01T03:00:00.000Z")
+    expect(events).toEqual([])
+  })
+
+  it("keeps an active Event stale without upgrading, refreshing evidence or resolving it after failure", () => {
+    const snapshot = createMockSnapshot()
+    const freshPort = snapshot.ports[0]
+    const initial = detectShippingEvents([], [freshPort], [], [], snapshot.settings, [], "2026-01-01T03:00:00.000Z")
+    const portEvent = initial.find(event => event.type === "port_congestion")!
+    const failedPort = { ...freshPort, stale: true, sourceStatus: "failed" as const, error: "Portcast outage", fetchedAt: "2026-01-01T04:00:00.000Z" }
+    const next = detectShippingEvents([], [failedPort], [], [], snapshot.settings, [portEvent], "2026-01-01T04:00:00.000Z")
+    const preserved = next.find(event => event.id === portEvent.id)!
+    expect(preserved).toMatchObject({ status: "active", severity: "warning", stale: true, sourceStatus: "failed", error: "Portcast outage", fetchedAt: "2026-01-01T04:00:00.000Z" })
+    expect(preserved.lastDetectedAt).toBe(portEvent.lastDetectedAt)
+    expect(preserved.provenance).toEqual(portEvent.provenance)
+    expect(preserved.evidence).toEqual(portEvent.evidence)
+    expect(preserved.resolvedAt).toBeUndefined()
+  })
+
+  it("resolves only when fresh evidence confirms the condition is gone", () => {
+    const snapshot = createMockSnapshot()
+    const freshPort = snapshot.ports[0]
+    const initial = detectShippingEvents([], [freshPort], [], [], snapshot.settings, [], "2026-01-01T03:00:00.000Z")
+    const portEvent = initial.find(event => event.type === "port_congestion")!
+    const recoveredPort = { ...freshPort, congestionLevel: "low" as const, stale: false, sourceStatus: "healthy" as const, fetchedAt: "2026-01-01T04:00:00.000Z" }
+    const next = detectShippingEvents([], [recoveredPort], [], [], snapshot.settings, [portEvent], "2026-01-01T04:00:00.000Z")
+    const resolved = next.find(event => event.id === portEvent.id)!
+    expect(resolved.status).toBe("resolved")
+    expect(resolved.resolvedAt).toBe("2026-01-01T04:00:00.000Z")
+    expect(resolved.lastDetectedAt).toBe(portEvent.lastDetectedAt)
+    expect(resolved.sourceStatus).toBe("healthy")
+    expect(resolved.stale).toBe(false)
+  })
+
+  it("preserves Feed reported provenance when the Feed item is surfaced directly in HOT", () => {
+    const snapshot = createMockSnapshot()
+    const feed = { ...snapshot.feedItems[0], severity: "warning" as const }
+    const [item] = rankHotItems([], [], [], [], [feed])
+    expect(item.provenance).toMatchObject({ sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice" })
   })
 })

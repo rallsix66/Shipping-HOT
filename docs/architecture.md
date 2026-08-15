@@ -1,7 +1,7 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
 > Last verified: 2026-08-14
-> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters and the implemented V2.0 Data Trust Foundation; V2.1+ not started
+> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters and the sealed V2.0 Data Trust Foundation; V2.1+ not started
 > Source of truth for: the current retained system structure and approved boundaries
 
 ## 1. Project Purpose
@@ -104,7 +104,7 @@ Information Feed and Operational Data remain separate and meet at the Event/HOT 
 
 ### V2.0 Data Trust flow
 
-Provider data is normalized with `sourceType`, `dataNature`, `sourceId`, optional `sourceUrl`/`verified`, and independent `updatedAt`, `sourceUpdatedAt`, `fetchedAt`, `stale` and `sourceStatus` fields. Provider failures preserve last-known `updatedAt`, add the current fetch time, and expose `failed`/`degraded`/other status without presenting the data as fresh. Domain events derive their own provenance while retaining lower-level evidence; Repository JSON, API responses, HOT items and UI cards carry the same trust information. No database field/table migration is used.
+Provider data is normalized with `sourceType`, `dataNature`, `sourceId`, optional `sourceUrl`/`verified`, and independent `updatedAt`, `sourceUpdatedAt`, `fetchedAt`, `stale` and `sourceStatus` fields. Provider failures preserve last-known `updatedAt`, add the current fetch time, and expose `failed`/`degraded`/other status without presenting the data as fresh. Domain events derive their own provenance while retaining lower-level evidence; stale or failed source data cannot create new facts or resolve an active event, and recovery is required before resolution. Repository JSON, API responses, HOT items and UI cards carry the same trust information. No database field/table migration is used.
 
 ## 9. Interfaces and External Dependencies
 

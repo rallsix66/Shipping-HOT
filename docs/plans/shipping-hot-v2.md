@@ -1,6 +1,6 @@
 # Shipping HOT V2 实施方案
 
-> 状态：`V2.0 implemented and verified`; `V2.1 not started`
+> 状态：`V2.0 sealed`; `V2.1 not started`
 >
 > 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已按本文件的边界实现并验证；V2.1 及以后仍是未启动的规划，不代表其中的 Provider、表结构、路由或规则已经实现。
 >
@@ -70,7 +70,7 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 
 现有 Shipping Repository 初始化 `feed_items`、`vessels`、`ports`、`voyages`、`events`、`settings`，NewsNow 另有 `cache`、`user`。当前实体主要以 `data` JSON 保存，同时保留查询和排序所需的少量列。
 
-当前 `shipping-store.ts` 会并行刷新 Vessel、Port、Voyage、Weather，失败时把 last-known 标记为 stale/failed；SQLite 不可用时保留内存 fallback。当前 Mock fixture 仍是产品可用的基础数据，因此 V2.0 必须让页面明确显示 `sourceType=mock`，而不是只显示一个看起来正常的“healthy”。
+当前 `shipping-store.ts` 会并行刷新 Vessel、Port、Voyage、Weather，失败时把 last-known 标记为 stale/failed；SQLite 不可用时保留内存 fallback。当前 Mock fixture 仍是产品可用的基础数据，因此 V2.0 必须让页面明确显示 `sourceType=mock`，而不是只显示一个看起来正常的“healthy”。当事件来源变成 stale、degraded、failed、disabled 或 never_succeeded 时，不创建新的事实事件，也不把已有 active 事件误判为 resolved；只有来源重新 fresh 且条件消失时才可 resolve。
 
 ### 2.4 当前限制
 
@@ -685,15 +685,20 @@ Local Scheduler 是单进程、本地、可暂停的同步编排器，不是云�
 ### 18.3 Fallback 优先级
 
 ```text
-fresh verified official / public source
-  > fresh normalized provider source
-  > stale last-known source value
-  > verified manual override
-  > explicit `sourceType=mock` fixture
-  > no data
+事实数据:
+fresh verified official
+  > fresh third_party/public
+  > stale last-known
+  > unknown/no data
+
+业务判断:
+verified user/manual override
+  > derived/default rule
+
+Mock 是显式的 `sourceType=mock` fixture，不是隐形的 Provider 替换。
 ```
 
-ManualOverride 只在其适用领域优先级高于第三方常规源时生效；它不能把没有来源的数字变成官方事实，也不能掩盖冲突和 stale。
+ManualOverride 只在其适用领域覆盖业务判断时生效；它不能把没有来源的数字变成官方事实，也不能掩盖冲突和 stale。事实数据仍按来源与新鲜度独立判断。
 
 ## 19. Security / API Key Rules
 
