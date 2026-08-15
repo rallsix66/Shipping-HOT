@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { mockPorts } from "@shared/shipping-fixtures"
-import { createPublicFeedProvider, dedupeFeedItems, parseFeedHtml, parseFeedRss, shippingFeedSources } from "./feed"
+import { classifyFeedItem, createPublicFeedProvider, dedupeFeedItems, parseFeedHtml, parseFeedRss, shippingFeedSources } from "./feed"
 
 const rssSource = shippingFeedSources.find(source => source.id === "the-loadstar")!
 const officialSource = shippingFeedSources.find(source => source.id === "shekou-official")!
@@ -64,5 +64,22 @@ describe("shipping feed provider", () => {
     const items = await provider.getFeedItems([previous], mockPorts)
     expect(items.find(item => item.id === previous.id)).toMatchObject({ stale: true, sourceStatus: "failed", updatedAt: previous.updatedAt, publishedAt: previous.publishedAt })
     expect(items.some(item => item.sourceId === "shekou-official")).toBe(true)
+  })
+
+  it("keeps malformed or missing publication time unknown instead of using fetchedAt", () => {
+    const [missing] = parseFeedRss(`<rss><channel><item><title>Port notice without a date</title><link>https://theloadstar.com/story/undated</link></item></channel></rss>`, rssSource, mockPorts, "2026-08-15T00:00:00.000Z")
+    const [malformed] = parseFeedRss(`<rss><channel><item><title>Port notice with a malformed date</title><link>https://theloadstar.com/story/malformed</link><pubDate>not-a-date</pubDate></item></channel></rss>`, rssSource, mockPorts, "2026-08-15T00:00:00.000Z")
+    expect(missing).toMatchObject({ publishedAt: "", publicationTimeKnown: false, eventEligibility: false })
+    expect(malformed).toMatchObject({ publishedAt: "", publicationTimeKnown: false, eventEligibility: false })
+    expect(missing.updatedAt).toBeUndefined()
+    expect(dedupeFeedItems([missing, malformed]).at(0)?.publishedAt).toBe("")
+  })
+
+  it("classifies Chinese operational terms without English word-boundary matching", () => {
+    expect(classifyFeedItem("蛇口港因台风临时封港", "", officialSource, mockPorts).severity).toBe("critical")
+    expect(classifyFeedItem("盐田港部分闸口暂停作业", "", officialSource, mockPorts).severity).toBe("warning")
+    expect(classifyFeedItem("港区当前出现严重拥堵", "", officialSource, mockPorts).severity).toBe("warning")
+    expect(["warning", "watch"]).toContain(classifyFeedItem("预计部分航次延误", "", officialSource, mockPorts).severity)
+    expect(classifyFeedItem("今日港口举行安全培训", "", officialSource, mockPorts).severity).toBe("info")
   })
 })

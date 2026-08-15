@@ -138,7 +138,7 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
       }
     })
   const activeEventKeys = new Set(events.filter(event => event.status === "active").map(event => event.dedupeKey))
-  const feedHotItems = feedItems.filter(item => (item.severity === "warning" || item.severity === "critical") && !activeEventKeys.has(`feed:${item.id}`)).map(item => ({
+  const feedHotItems = feedItems.filter(item => item.eventEligibility !== false && item.publicationTimeKnown !== false && (item.severity === "warning" || item.severity === "critical") && !activeEventKeys.has(`feed:${item.id}`)).map(item => ({
     id: item.id,
     kind: "feed" as const,
     title: item.title,
@@ -147,7 +147,7 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
     freshness: freshnessState(item),
     sourceStatus: item.sourceStatus,
     provenance: item.provenance,
-    occurredAt: item.publishedAt,
+    occurredAt: item.publishedAt || "1970-01-01T00:00:00.000Z",
     relatedLabel: item.relatedPortIds[0] ? labels.get(item.relatedPortIds[0]) : item.relatedVesselIds[0] ? labels.get(item.relatedVesselIds[0]) : undefined,
     feedItemId: item.id,
     hotReason: item.hotReason,

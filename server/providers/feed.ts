@@ -26,6 +26,7 @@ export interface ShippingFeedSource {
   category: FeedCategory
   relatedPortIds?: string[]
   enabled: boolean
+  status?: "enabled" | "registered_parser_pending" | "deferred"
   description?: string
 }
 
@@ -60,6 +61,7 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     category: "port_notice",
     relatedPortIds: ["port-shekou"],
     enabled: true,
+    status: "enabled",
   },
   {
     id: "laem-chabang-official",
@@ -71,6 +73,7 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     category: "port_notice",
     relatedPortIds: ["port-laem-chabang"],
     enabled: false,
+    status: "registered_parser_pending",
     description: "Registry entry; enable after the authority's announcement list format is confirmed.",
   },
   {
@@ -83,7 +86,34 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     category: "port_notice",
     relatedPortIds: ["port-klang"],
     enabled: false,
+    status: "registered_parser_pending",
     description: "Registry entry; enable after the authority's announcement list format is confirmed.",
+  },
+  {
+    id: "yantian-official",
+    name: "Yantian Port official notices",
+    url: "https://www.yantian.gov.cn/",
+    sourceUrl: "https://www.yantian.gov.cn/",
+    format: "html",
+    sourceKind: "official",
+    category: "port_notice",
+    relatedPortIds: ["port-yantian"],
+    enabled: false,
+    status: "deferred",
+    description: "Deferred; no stable public announcement list source confirmed.",
+  },
+  {
+    id: "nansha-official",
+    name: "Nansha Port official notices",
+    url: "https://www.gzns.gov.cn/",
+    sourceUrl: "https://www.gzns.gov.cn/",
+    format: "html",
+    sourceKind: "official",
+    category: "port_notice",
+    relatedPortIds: ["port-nansha"],
+    enabled: false,
+    status: "deferred",
+    description: "Deferred; no stable public announcement list source confirmed.",
   },
 ]
 
@@ -139,9 +169,9 @@ function digest(value: string): string {
   return createHash("sha256").update(value).digest("hex").slice(0, 16)
 }
 
-function parsedDate(value: unknown, fallback: string): string {
+function parsedDate(value: unknown): string | undefined {
   const timestamp = typeof value === "string" || typeof value === "number" ? Date.parse(String(value)) : Number.NaN
-  return Number.isNaN(timestamp) ? fallback : new Date(timestamp).toISOString()
+  return Number.isNaN(timestamp) ? undefined : new Date(timestamp).toISOString()
 }
 
 function linkValue(value: unknown, base: string): string | undefined {
@@ -160,10 +190,14 @@ function portMatches(text: string, source: ShippingFeedSource, ports: Port[]): s
   return [...matched]
 }
 
-function classifyFeedItem(title: string, summary: string, source: ShippingFeedSource, ports: Port[]): Pick<FeedItem, "severity" | "hotReason" | "relatedPortIds"> {
+export function classifyFeedItem(title: string, summary: string, source: ShippingFeedSource, ports: Port[]): Pick<FeedItem, "severity" | "hotReason" | "relatedPortIds"> {
   const text = `${title} ${summary}`.toLocaleLowerCase()
-  const critical = /\b(?:closure|closed|suspend(?:ed|s)?|strike|typhoon|cyclone|collision|fire|explosion|事故|火灾|爆炸|台风|封港|关闭|停航|罢工)\b/i.test(text)
-  const warning = /\b(?:blank sailing|port omission|omission|disrupt(?:ion|ed)?|congestion|gate|delay(?:ed)?|closure|拥堵|延误|跳港|停闸|中断|警告|warning|advisory)\b/i.test(text)
+  const criticalEnglish = /\b(?:closure|closed|suspend(?:ed|s)?|strike|typhoon|cyclone|collision|fire|explosion)\b/i.test(text)
+  const criticalChinese = /事故|火灾|爆炸|台风|封港|关闭|停航|罢工/.test(text)
+  const warningEnglish = /\b(?:blank sailing|port omission|omission|disrupt(?:ion|ed)?|congestion|gate|delay(?:ed)?|closure|warning|advisory)\b/i.test(text)
+  const warningChinese = /拥堵|延误|跳港|停闸|暂停作业|中断|警告|部分闸口/.test(text)
+  const critical = criticalEnglish || criticalChinese
+  const warning = warningEnglish || warningChinese
   const relatedPortIds = portMatches(text, source, ports)
   if (critical) return { severity: "critical", hotReason: source.sourceKind === "official" && relatedPortIds.length ? "官方港口高影响公告" : "高影响航运预警", relatedPortIds }
   if (warning && (source.sourceKind === "official" || relatedPortIds.length > 0)) return { severity: "warning", hotReason: source.sourceKind === "official" ? "官方运营公告" : "明确运营影响信号", relatedPortIds }
@@ -191,7 +225,9 @@ function rawFeedItem(raw: RawFeedItem, source: ShippingFeedSource, ports: Port[]
   const summary = truncate(stripMarkup(textValue(raw.summary) ?? textValue(raw.description) ?? textValue(raw.content))) || title
   const articleUrl = linkValue(raw.link, source.url) ?? linkValue(raw.guid, source.url) ?? linkValue(raw.id, source.url)
   const canonicalUrl = articleUrl ?? `${source.url}#${digest(normalizeFeedTitle(title))}`
-  const publishedAt = parsedDate(raw.pubDate ?? raw.published ?? raw.updated ?? raw.created, fetchedAt)
+  const publishedAt = parsedDate(raw.pubDate ?? raw.published ?? raw.created)
+  const sourceUpdatedAt = parsedDate(raw.updated ?? raw.pubDate ?? raw.published ?? raw.created)
+  const publicationTimeKnown = publishedAt !== undefined
   const classification = classifyFeedItem(title, summary, source, ports)
   const provenance: DataProvenance = {
     sourceType: source.sourceKind,
@@ -209,15 +245,17 @@ function rawFeedItem(raw: RawFeedItem, source: ShippingFeedSource, ports: Port[]
     summary,
     sourceUrl: articleUrl ?? source.sourceUrl,
     canonicalUrl,
-    publishedAt,
+    publishedAt: publishedAt ?? "",
+    publicationTimeKnown,
+    eventEligibility: publicationTimeKnown,
     severity: classification.severity,
     hotReason: classification.hotReason,
     relatedPortIds: classification.relatedPortIds,
     relatedVesselIds: [],
     relatedVoyageIds: [],
     tags: [source.sourceKind, source.category],
-    updatedAt: publishedAt,
-    sourceUpdatedAt: publishedAt,
+    updatedAt: sourceUpdatedAt,
+    sourceUpdatedAt,
     fetchedAt,
     stale: false,
     sourceStatus: "healthy",
@@ -250,8 +288,11 @@ export function parseFeedHtml(html: string, source: ShippingFeedSource, ports: P
     const title = anchor.text().replace(/\s+/g, " ").trim()
     const articleUrl = canonicalizeFeedUrl(anchor.attr("href") ?? "", source.url)
     if (!articleUrl || !title || title.length < 12 || title.length > 220 || articleUrl === canonicalizeFeedUrl(source.url)) return
-    const context = anchor.closest("article, li, .item, .news, .list").text().replace(/\s+/g, " ").trim() || anchor.parent().text().replace(/\s+/g, " ").trim()
-    const item = rawFeedItem({ title, summary: context, link: articleUrl, pubDate: htmlDate(context) }, source, ports, fetchedAt, index)
+    const container = anchor.closest("article, li, .item, .news, .list")
+    const context = container.text().replace(/\s+/g, " ").trim() || anchor.parent().text().replace(/\s+/g, " ").trim()
+    const time = container.find("time").first()
+    const dateValue = time.attr("datetime") ?? htmlDate(context)
+    const item = rawFeedItem({ title, summary: context, link: articleUrl, pubDate: dateValue }, source, ports, fetchedAt, index)
     if (item) items.push(item)
   })
   return items.slice(0, 30)
@@ -264,7 +305,15 @@ function sourcePriority(item: FeedItem): number {
 function newer(a: FeedItem, b: FeedItem): FeedItem {
   const priorityDelta = sourcePriority(a) - sourcePriority(b)
   if (priorityDelta !== 0) return priorityDelta > 0 ? a : b
-  return Date.parse(a.publishedAt) >= Date.parse(b.publishedAt) ? a : b
+  const aTime = a.publicationTimeKnown === false || !a.publishedAt ? Number.NEGATIVE_INFINITY : Date.parse(a.publishedAt)
+  const bTime = b.publicationTimeKnown === false || !b.publishedAt ? Number.NEGATIVE_INFINITY : Date.parse(b.publishedAt)
+  return aTime >= bTime ? a : b
+}
+
+function publishedTime(item: FeedItem): number {
+  if (item.publicationTimeKnown === false || !item.publishedAt) return Number.NEGATIVE_INFINITY
+  const value = Date.parse(item.publishedAt)
+  return Number.isNaN(value) ? Number.NEGATIVE_INFINITY : value
 }
 
 export function dedupeFeedItems(items: FeedItem[]): FeedItem[] {
@@ -281,7 +330,7 @@ export function dedupeFeedItems(items: FeedItem[]): FeedItem[] {
     }
     for (const key of keys) byKey.set(key, winner)
   }
-  return [...new Set(byKey.values())].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
+  return [...new Set(byKey.values())].sort((a, b) => publishedTime(b) - publishedTime(a))
 }
 
 function markSourceFailed(item: FeedItem, fetchedAt: string, error: string): FeedItem {
