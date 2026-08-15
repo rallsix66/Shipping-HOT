@@ -3,20 +3,22 @@ import { mockPorts } from "@shared/shipping-fixtures"
 import { createOpenMeteoWeatherProvider } from "./shipping"
 
 function weatherPayload(url: string, severe = true) {
-  const times = ["2026-08-15T00:00:00.000Z", "2026-08-15T01:00:00.000Z", "2026-08-15T02:00:00.000Z"]
+  const times = Array.from({ length: 169 }, (_, index) => new Date(Date.parse("2026-08-15T00:00:00.000Z") + index * 60 * 60 * 1000).toISOString())
+  const wave = times.map((_, index) => severe ? index < 25 ? 1 : index < 73 ? 3 : 4.5 : 1)
+  const wind = times.map((_, index) => severe ? index < 25 ? 20 : index < 73 ? 50 : 70 : 20)
   return url.includes("marine-api")
-    ? { current: { time: times[0], wave_height: 1, swell_wave_height: 1, swell_wave_period: 8 }, hourly: { time: times, wave_height: severe ? [1, 3, 4.5] : [1, 1, 1], swell_wave_height: [1, 2, 3], swell_wave_period: [8, 10, 12] } }
-    : { current: { time: times[0], wind_speed_10m: 20, wind_gusts_10m: 25 }, hourly: { time: times, wind_speed_10m: severe ? [20, 50, 70] : [20, 20, 20], wind_gusts_10m: [25, 55, 75] } }
+    ? { current: { time: times[0], wave_height: 1, wave_direction: 90, swell_wave_height: 1, swell_wave_direction: 180, swell_wave_period: 8 }, hourly: { time: times, wave_height: wave, wave_direction: times.map(() => 90), swell_wave_height: times.map((_, index) => index < 25 ? 1 : index < 73 ? 2 : 3), swell_wave_direction: times.map(() => 180), swell_wave_period: times.map((_, index) => index < 25 ? 8 : index < 73 ? 10 : 12) } }
+    : { current: { time: times[0], wind_speed_10m: 20, wind_gusts_10m: 25 }, hourly: { time: times, wind_speed_10m: wind, wind_gusts_10m: wind.map(value => value + 5) } }
 }
 
 describe("open-meteo weather intelligence", () => {
-  it("normalizes a future model-risk window with swell fields", async () => {
+  it("normalizes independent 24-hour, 72-hour and 7-day windows with directions", async () => {
     const provider = createOpenMeteoWeatherProvider({ fetcher: async url => ({ ok: true, status: 200, json: async () => weatherPayload(url) }) })
     const [item] = await provider.getFeedItems([mockPorts[0]])
     expect(item).toMatchObject({
       severity: "critical",
-      title: "Shekou 未来 72 小时天气严重",
-      weather: { riskSource: "model", forecastWindowHours: 72, forecastStartAt: "2026-08-15T01:00:00.000Z", forecastEndAt: "2026-08-15T02:00:00.000Z", waveHeightM: 4.5, swellWaveHeightM: 3, swellPeriodSeconds: 12, windGustKmh: 75 },
+      title: "Shekou 未来 7 天天气严重",
+      weather: { riskSource: "model", forecastWindowHours: 72, forecastStartAt: "2026-08-15T00:00:00.000Z", forecastEndAt: "2026-08-18T00:00:00.000Z", waveHeightM: 3, waveDirectionDeg: 90, swellWaveHeightM: 2, swellDirectionDeg: 180, swellPeriodSeconds: 10, windGustKmh: 55, windows: { h24: { severity: "info" }, h72: { severity: "warning" }, d7: { severity: "critical" } } },
       tags: ["model", "weather_risk"],
     })
   })

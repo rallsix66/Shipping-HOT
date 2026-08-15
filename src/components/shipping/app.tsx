@@ -1,6 +1,6 @@
 import { Link, useMatchRoute } from "@tanstack/react-router"
 import { MotionConfig, motion } from "framer-motion"
-import { type ReactNode, useEffect, useRef } from "react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 import type { ShippingEvent, ShippingSnapshot, Voyage } from "@shared/shipping"
 import { AuroraBackground } from "./aurora"
 import { type DotTone, formatDate, formatStatus, severityTone, statusLabels } from "./format"
@@ -262,6 +262,15 @@ export function EventCard({ event, label }: { event: ShippingEvent, label?: stri
 }
 
 export function FeedCard({ item }: { item: ShippingSnapshot["feedItems"][number] }) {
+  const [weatherWindow, setWeatherWindow] = useState<"h24" | "h72" | "d7">("h72")
+  const selectedWeatherWindow = item.weather?.windows?.[weatherWindow]
+  const waveHeightM = selectedWeatherWindow?.maxWaveHeightM ?? item.weather?.waveHeightM
+  const swellWaveHeightM = selectedWeatherWindow?.maxSwellWaveHeightM ?? item.weather?.swellWaveHeightM
+  const swellPeriodSeconds = selectedWeatherWindow?.maxSwellPeriodSeconds ?? item.weather?.swellPeriodSeconds
+  const windSpeedKmh = selectedWeatherWindow?.maxWindSpeedKmh ?? item.weather?.windSpeedKmh
+  const windGustKmh = selectedWeatherWindow?.maxWindGustKmh ?? item.weather?.windGustKmh
+  const waveDirectionDeg = selectedWeatherWindow?.waveDirectionDeg ?? item.weather?.waveDirectionDeg
+  const swellDirectionDeg = selectedWeatherWindow?.swellDirectionDeg ?? item.weather?.swellDirectionDeg ?? item.weather?.swellWaveDirectionDeg
   return (
     <article className="glass-panel tile flex h-full flex-col p-5">
       <div className="flex items-center justify-between gap-2">
@@ -277,62 +286,109 @@ export function FeedCard({ item }: { item: ShippingSnapshot["feedItems"][number]
       <h2 className="mt-3 text-xl font-bold">{item.title}</h2>
       <p className="mt-2 flex-1 op-80">{item.summary}</p>
       {item.weather && (
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs op-70">
-          <span className="chip">
-            {item.weather.riskSource === "official" ? "官方预警" : "模型预报"}
-          </span>
-          {item.weather.forecastWindowHours && (
+        <div className="mt-3 space-y-2 text-xs op-70">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="chip">
-              未来
-              {" "}
-              {item.weather.forecastWindowHours}
-              {" "}
-              小时
+              {item.weather.riskSource === "official" ? "官方预警" : "模型预报"}
             </span>
-          )}
-          {item.weather.waveHeightM !== undefined && (
-            <span>
-              浪高
-              {" "}
-              {item.weather.waveHeightM.toFixed(1)}
-              {" "}
-              m
-            </span>
-          )}
-          {item.weather.swellWaveHeightM !== undefined && (
-            <span>
-              涌浪
-              {" "}
-              {item.weather.swellWaveHeightM.toFixed(1)}
-              {" "}
-              m
-            </span>
-          )}
-          {item.weather.swellPeriodSeconds !== undefined && (
-            <span>
-              涌浪周期
-              {" "}
-              {item.weather.swellPeriodSeconds.toFixed(1)}
-              {" "}
-              s
-            </span>
-          )}
-          {item.weather.forecastStartAt && item.weather.forecastEndAt && (
-            <span>
-              风险窗
-              {" "}
-              {formatDate(item.weather.forecastStartAt)}
-              {" – "}
-              {formatDate(item.weather.forecastEndAt)}
-            </span>
-          )}
-          {item.weather.alertExpiresAt && (
-            <span>
-              截至
-              {" "}
-              {formatDate(item.weather.alertExpiresAt)}
-            </span>
-          )}
+            {item.weather.windows && ([
+              ["h24", "24 小时"],
+              ["h72", "72 小时"],
+              ["d7", "7 天"],
+            ] as const).map(([key, label]) => (
+              <button key={key} type="button" className={`chip transition-colors ${weatherWindow === key ? "border-teal-500/60 bg-teal-500/15 text-teal-700 dark:text-teal-200" : ""}`} onClick={() => setWeatherWindow(key)}>{label}</button>
+            ))}
+            {item.weather.forecastWindowHours && !item.weather.windows && (
+              <span className="chip">
+                未来
+                {" "}
+                {item.weather.forecastWindowHours}
+                {" "}
+                小时
+              </span>
+            )}
+            {item.weather.alertState && (
+              <span className="chip">
+                预警状态：
+                {item.weather.alertState === "active" ? "生效" : item.weather.alertState === "expired" ? "已过期" : "未知"}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {waveHeightM !== undefined && (
+              <span>
+                浪高
+                {" "}
+                {waveHeightM.toFixed(1)}
+                {" "}
+                m
+              </span>
+            )}
+            {swellWaveHeightM !== undefined && (
+              <span>
+                涌浪
+                {" "}
+                {swellWaveHeightM.toFixed(1)}
+                {" "}
+                m
+              </span>
+            )}
+            {swellPeriodSeconds !== undefined && (
+              <span>
+                涌浪周期
+                {" "}
+                {swellPeriodSeconds.toFixed(1)}
+                {" "}
+                s
+              </span>
+            )}
+            {windSpeedKmh !== undefined && (
+              <span>
+                风速
+                {windSpeedKmh.toFixed(1)}
+                {" "}
+                km/h
+              </span>
+            )}
+            {windGustKmh !== undefined && (
+              <span>
+                阵风
+                {windGustKmh.toFixed(1)}
+                {" "}
+                km/h
+              </span>
+            )}
+            {waveDirectionDeg !== undefined && (
+              <span>
+                浪向
+                {waveDirectionDeg.toFixed(0)}
+                °
+              </span>
+            )}
+            {swellDirectionDeg !== undefined && (
+              <span>
+                涌浪向
+                {swellDirectionDeg.toFixed(0)}
+                °
+              </span>
+            )}
+            {(selectedWeatherWindow?.forecastStartAt ?? item.weather.forecastStartAt) && (selectedWeatherWindow?.forecastEndAt ?? item.weather.forecastEndAt) && (
+              <span>
+                风险窗
+                {" "}
+                {formatDate(selectedWeatherWindow?.forecastStartAt ?? item.weather.forecastStartAt)}
+                {" – "}
+                {formatDate(selectedWeatherWindow?.forecastEndAt ?? item.weather.forecastEndAt)}
+              </span>
+            )}
+            {item.weather.alertExpiresAt && (
+              <span>
+                截至
+                {" "}
+                {formatDate(item.weather.alertExpiresAt)}
+              </span>
+            )}
+          </div>
         </div>
       )}
       {(item.hotReason || item.tags?.length) && (
@@ -350,7 +406,7 @@ export function FeedCard({ item }: { item: ShippingSnapshot["feedItems"][number]
         <div className="flex flex-wrap gap-3 text-xs op-70">
           <span className="flex items-center gap-1">
             <span className="i-ph-clock" />
-            {formatDate(item.publishedAt)}
+            {item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}
           </span>
           <ProvenanceBadge provenance={item.provenance} />
         </div>

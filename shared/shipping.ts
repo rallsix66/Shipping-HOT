@@ -9,6 +9,7 @@ export type EventStatus = "active" | "resolved"
 export type NavigationStatus = "under_way" | "anchored" | "moored" | "aground" | "unknown"
 export type FeedCategory = "shipping_news" | "carrier_notice" | "weather" | "port_notice"
 export type WeatherRiskSource = "model" | "official"
+export type WeatherAlertState = "active" | "expired" | "unknown"
 
 export interface DataProvenance {
   sourceType: SourceType
@@ -166,6 +167,8 @@ export interface FeedItem extends Freshness, ProvenanceAware {
   sourceUrl: string
   canonicalUrl?: string
   publishedAt: string
+  publicationTimeKnown?: boolean
+  eventEligibility?: boolean
   severity: Severity
   hotReason?: string
   tags?: string[]
@@ -218,18 +221,43 @@ export interface ShippingSettings {
 
 export interface WeatherDetail {
   riskSource: WeatherRiskSource
+  alertState?: WeatherAlertState
   forecastWindowHours?: number
   forecastStartAt?: string
   forecastEndAt?: string
   waveHeightM?: number
   swellWaveHeightM?: number
   swellPeriodSeconds?: number
+  waveDirectionDeg?: number
+  swellDirectionDeg?: number
+  swellWaveDirectionDeg?: number
+  windows?: WeatherWindows
   windSpeedKmh?: number
   windGustKmh?: number
   alertId?: string
   alertRegion?: string
   alertIssuedAt?: string
   alertExpiresAt?: string
+}
+
+export interface WeatherWindow {
+  severity: Severity
+  forecastStartAt?: string
+  forecastEndAt?: string
+  maxWaveHeightM?: number
+  maxSwellWaveHeightM?: number
+  maxSwellPeriodSeconds?: number
+  maxWindSpeedKmh?: number
+  maxWindGustKmh?: number
+  waveDirectionDeg?: number
+  swellDirectionDeg?: number
+  swellWaveDirectionDeg?: number
+}
+
+export interface WeatherWindows {
+  h24: WeatherWindow
+  h72: WeatherWindow
+  d7: WeatherWindow
 }
 
 export interface ShippingSnapshot {

@@ -15,6 +15,7 @@ export interface WeatherAlertResponse {
 }
 
 export type WeatherAlertFetcher = (url: string) => Promise<WeatherAlertResponse>
+export type WeatherAlertParser = "jma" | "tmd" | "bmkg"
 
 export interface WeatherAlertSource {
   id: string
@@ -22,8 +23,10 @@ export interface WeatherAlertSource {
   url: string
   sourceUrl: string
   format: "rss" | "html"
+  parser: WeatherAlertParser
   relatedPortIds?: string[]
   enabled: boolean
+  liveStatus?: "source_specific_contract" | "live_parser_pending"
 }
 
 export const officialWeatherAlertSources: WeatherAlertSource[] = [
@@ -31,18 +34,22 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
     id: "jma",
     name: "Japan Meteorological Agency",
     url: "https://www.jma.go.jp/bosai/information/typhoon.html",
-    sourceUrl: "https://www.jma.go.jp/jma/indexe.html",
+    sourceUrl: "https://www.jma.go.jp/bosai/seawarning/",
     format: "html",
+    parser: "jma",
     enabled: true,
+    liveStatus: "source_specific_contract",
   },
   {
     id: "tmd",
     name: "Thai Meteorological Department",
     url: "https://www.tmd.go.th/warningpage",
-    sourceUrl: "https://tmd.go.th/warning-and-events",
+    sourceUrl: "https://www.tmd.go.th/en/service/rss",
     format: "html",
+    parser: "tmd",
     relatedPortIds: ["port-laem-chabang"],
     enabled: true,
+    liveStatus: "source_specific_contract",
   },
   {
     id: "bmkg",
@@ -50,8 +57,10 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
     url: "https://www.bmkg.go.id/cuaca/peringatan-dini-cuaca",
     sourceUrl: "https://www.bmkg.go.id/cuaca/peringatan-dini-cuaca",
     format: "html",
+    parser: "bmkg",
     relatedPortIds: ["port-jakarta"],
     enabled: true,
+    liveStatus: "source_specific_contract",
   },
 ]
 
@@ -93,9 +102,14 @@ function canonicalUrl(value: string, base: string): string | undefined {
   }
 }
 
-function timestamp(value: unknown, fallback: string): string {
+function timestamp(value: unknown): string | undefined {
   const parsed = typeof value === "string" || typeof value === "number" ? Date.parse(String(value)) : Number.NaN
-  return Number.isNaN(parsed) ? fallback : new Date(parsed).toISOString()
+  return Number.isNaN(parsed) ? undefined : new Date(parsed).toISOString()
+}
+
+function textDate(value: string): string | undefined {
+  const match = value.match(/\b(?:\d{4}[-/]\d{1,2}[-/]\d{1,2}(?:[ T]\d{1,2}:\d{2}(?::\d{2})?(?:Z|[+-]\d{2}:?\d{2})?)?|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})\b/)
+  return match ? timestamp(match[0]) : undefined
 }
 
 function relatedPorts(text: string, source: WeatherAlertSource, ports: Port[]): string[] {
@@ -129,6 +143,7 @@ interface RawAlert {
   expiresAt?: unknown
   severity?: unknown
   region?: unknown
+  active?: boolean
 }
 
 function linkValue(value: unknown, base: string): string | undefined {
@@ -143,19 +158,15 @@ function normalizeAlert(raw: RawAlert, source: WeatherAlertSource, ports: Port[]
   if (!title) return undefined
   const summary = truncate(stripMarkup(textValue(raw.summary) ?? textValue(raw.description))) || title
   const sourceUrl = linkValue(raw.link, source.url) ?? linkValue(raw.guid, source.url) ?? source.sourceUrl
-  const issuedAt = timestamp(raw.issuedAt ?? raw.pubDate ?? raw.published ?? raw.updated, fetchedAt)
-  const expiresAtText = textValue(raw.expiresAt)
-  const expiresAt = expiresAtText ? timestamp(expiresAtText, fetchedAt) : undefined
-  const severity = severityFor(title, summary, textValue(raw.severity))
+  const issuedAt = timestamp(raw.issuedAt ?? raw.pubDate ?? raw.published ?? raw.updated)
+  const expiresAt = timestamp(raw.expiresAt)
+  const isExpired = expiresAt !== undefined && Date.parse(expiresAt) <= Date.parse(fetchedAt)
+  const alertState: WeatherDetail["alertState"] = isExpired ? "expired" : raw.active ? "active" : "unknown"
+  const eventEligibility = Boolean(issuedAt || raw.active) && !isExpired
+  const severity = isExpired ? "info" : severityFor(title, summary, textValue(raw.severity))
   const region = textValue(raw.region)
   const sourceId = `${source.id}:${sourceUrl ?? `${title}:${index}`}`
-  const weather: WeatherDetail = {
-    riskSource: "official",
-    alertId: sourceId,
-    alertRegion: region,
-    alertIssuedAt: issuedAt,
-    alertExpiresAt: expiresAt,
-  }
+  const weather: WeatherDetail = { riskSource: "official", alertState, alertId: sourceId, alertRegion: region, alertIssuedAt: issuedAt, alertExpiresAt: expiresAt }
   const provenance = weatherAlertProvenance(source)
   return {
     id: `weather-alert:${source.id}:${createHash("sha256").update(sourceId).digest("hex").slice(0, 16)}`,
@@ -163,12 +174,14 @@ function normalizeAlert(raw: RawAlert, source: WeatherAlertSource, ports: Port[]
     category: "weather",
     type: "weather_warning_official",
     title,
-    summary,
+    summary: isExpired ? `${summary} 该官方预警已过期。` : summary,
     sourceUrl,
     canonicalUrl: sourceUrl,
-    publishedAt: issuedAt,
+    publishedAt: issuedAt ?? "",
+    publicationTimeKnown: Boolean(issuedAt),
+    eventEligibility,
     severity,
-    hotReason: severity === "warning" || severity === "critical" ? "官方天气预警" : undefined,
+    hotReason: eventEligibility && (severity === "warning" || severity === "critical") ? "官方天气预警" : undefined,
     tags: ["official", "weather_warning"],
     weather,
     relatedPortIds: relatedPorts(`${title} ${summary} ${region ?? ""}`, source, ports),
@@ -193,25 +206,51 @@ export function parseWeatherAlertRss(xml: string, source: WeatherAlertSource, po
   return rawItems.slice(0, 20).map((item, index) => normalizeAlert(item, source, ports, fetchedAt, index)).filter((item): item is FeedItem => item !== undefined)
 }
 
-export function parseWeatherAlertHtml(html: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
+function parseSourceSpecificNodes(html: string, source: WeatherAlertSource, selectors: string[], ports: Port[], fetchedAt: string): FeedItem[] {
   const $ = load(html)
+  const seen = new Set<string>()
   const items: FeedItem[] = []
-  $("[data-weather-warning]").each((index, element) => {
+  $(selectors.join(",")).each((index, element) => {
     const node = $(element)
-    const title = node.attr("data-title") ?? node.find("h1,h2,h3,a").first().text()
-    const summary = node.attr("data-summary") ?? node.find("p,.summary").first().text()
+    const title = node.find("h1,h2,h3,h4,strong,a").first().text().replace(/\s+/g, " ").trim() || node.text().replace(/\s+/g, " ").trim()
+    if (!title || title.length < 5 || seen.has(title)) return
+    const summary = node.find("p,.summary,.description,td").first().text().replace(/\s+/g, " ").trim() || title
+    const time = node.find("time").first()
+    const times = node.find("time").toArray().map(item => timestamp($(item).attr("datetime")) ?? textDate($(item).text())).filter((value): value is string => value !== undefined)
     const item = normalizeAlert({
       title,
       summary,
-      link: node.attr("data-url") ?? node.find("a[href]").first().attr("href"),
-      issuedAt: node.attr("data-issued-at"),
-      expiresAt: node.attr("data-expires-at"),
-      severity: node.attr("data-severity"),
-      region: node.attr("data-region"),
+      link: node.find("a[href]").first().attr("href"),
+      issuedAt: timestamp(time.attr("datetime")) ?? textDate(time.text()) ?? textDate(node.text()),
+      expiresAt: times[1],
+      severity: node.attr("data-severity") ?? node.find("[data-severity]").first().attr("data-severity"),
+      region: node.attr("data-region") ?? node.find(".region,.area,td").first().text(),
+      active: true,
     }, source, ports, fetchedAt, index)
-    if (item) items.push(item)
+    if (item) {
+      seen.add(title)
+      items.push(item)
+    }
   })
   return items.slice(0, 20)
+}
+
+export function parseJmaWarning(html: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
+  return parseSourceSpecificNodes(html, source, ["#contents table tbody tr", "main table tbody tr", ".jma-information-list li"], ports, fetchedAt)
+}
+
+export function parseTmdWarning(html: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
+  return parseSourceSpecificNodes(html, source, [".warning-list .warning-item", ".warning-list article", ".warning-card", "main table tbody tr"], ports, fetchedAt)
+}
+
+export function parseBmkgWarning(html: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
+  return parseSourceSpecificNodes(html, source, [".table-responsive table tbody tr", ".warning-table tbody tr", ".warning-card"], ports, fetchedAt)
+}
+
+export function parseWeatherAlertHtml(html: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
+  if (source.parser === "jma") return parseJmaWarning(html, source, ports, fetchedAt)
+  if (source.parser === "tmd") return parseTmdWarning(html, source, ports, fetchedAt)
+  return parseBmkgWarning(html, source, ports, fetchedAt)
 }
 
 function markFailed(item: FeedItem, fetchedAt: string, error: string): FeedItem {
@@ -223,8 +262,9 @@ function expiredAsInfo(item: FeedItem, fetchedAt: string): FeedItem {
     ...item,
     severity: "info",
     hotReason: undefined,
-    summary: `${item.summary} 该官方预警已过期。`,
-    updatedAt: fetchedAt,
+    summary: `${item.summary} 官方来源已不再列出该预警。`,
+    weather: item.weather ? { ...item.weather, alertState: "expired" } : item.weather,
+    eventEligibility: false,
     fetchedAt,
     stale: false,
     sourceStatus: "healthy",
@@ -244,6 +284,12 @@ function defaultFetcher(): WeatherAlertFetcher {
   return fetchImplementation
 }
 
+function publishedTime(item: FeedItem): number {
+  if (item.publicationTimeKnown === false || !item.publishedAt) return Number.NEGATIVE_INFINITY
+  const value = Date.parse(item.publishedAt)
+  return Number.isNaN(value) ? Number.NEGATIVE_INFINITY : value
+}
+
 export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlertProviderOptions = {}): WeatherAlertProvider {
   const fetcher = options.fetcher ?? defaultFetcher()
   const now = options.now ?? (() => new Date())
@@ -259,14 +305,15 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
           const body = await response.text()
           const parsed = source.format === "rss" ? parseWeatherAlertRss(body, source, ports, fetchedAt) : parseWeatherAlertHtml(body, source, ports, fetchedAt)
           const activeIds = new Set(parsed.map(item => item.id))
-          return [...parsed, ...previous.filter(item => item.weather?.alertExpiresAt && Date.parse(item.weather.alertExpiresAt) <= Date.parse(fetchedAt) && !activeIds.has(item.id)).map(item => expiredAsInfo(item, fetchedAt))]
+          const cleared = previous.filter(item => (item.severity === "warning" || item.severity === "critical") && !activeIds.has(item.id)).map(item => expiredAsInfo(item, fetchedAt))
+          return [...parsed, ...cleared]
         } catch (error) {
           return previous.map(item => markFailed(item, fetchedAt, error instanceof Error ? error.message : `${source.name} failed`))
         }
       }))
       const byId = new Map<string, FeedItem>()
       for (const item of results.flat()) byId.set(item.id, item)
-      return [...byId.values()].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
+      return [...byId.values()].sort((a, b) => publishedTime(b) - publishedTime(a))
     },
   }
 }

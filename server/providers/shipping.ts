@@ -1,5 +1,5 @@
 import { env } from "node:process"
-import type { DataProvenance, FeedItem, Freshness, Port, PortCongestionDetail, ProviderResult, SourceStatus, Vessel, Voyage } from "@shared/shipping"
+import type { DataProvenance, FeedItem, Freshness, Port, PortCongestionDetail, ProviderResult, Severity, SourceStatus, Vessel, Voyage, WeatherWindow, WeatherWindows } from "@shared/shipping"
 import { mockFeedItems, mockPorts, mockVessels, mockVoyages, portWeatherConfig } from "@shared/shipping-fixtures"
 import { type CalendarProvider, configureCalendarProviders } from "./calendar"
 import { configureFeedProviders } from "./feed"
@@ -503,8 +503,8 @@ interface WeatherPortConfig {
 }
 
 interface OpenMeteoPayload {
-  current?: { time?: number | string, wave_height?: number, swell_wave_height?: number, swell_wave_period?: number, wind_speed_10m?: number, wind_gusts_10m?: number }
-  hourly?: { time?: Array<number | string>, wave_height?: Array<number | undefined>, swell_wave_height?: Array<number | undefined>, swell_wave_period?: Array<number | undefined>, wind_speed_10m?: Array<number | undefined>, wind_gusts_10m?: Array<number | undefined> }
+  current?: { time?: number | string, wave_height?: number, wave_direction?: number, swell_wave_height?: number, swell_wave_direction?: number, swell_wave_period?: number, wind_speed_10m?: number, wind_gusts_10m?: number }
+  hourly?: { time?: Array<number | string>, wave_height?: Array<number | undefined>, wave_direction?: Array<number | undefined>, swell_wave_height?: Array<number | undefined>, swell_wave_direction?: Array<number | undefined>, swell_wave_period?: Array<number | undefined>, wind_speed_10m?: Array<number | undefined>, wind_gusts_10m?: Array<number | undefined> }
 }
 
 export const weatherRiskThresholds = {
@@ -513,7 +513,10 @@ export const weatherRiskThresholds = {
   warningWaveHeightM: 2.5,
   criticalWaveHeightM: 4,
   forecastWindowHours: 72,
+  forecastDays: 7,
 } as const
+
+const weatherWindowHours = { h24: 24, h72: 72, d7: 168 } as const
 
 function weatherFetcher(): WeatherFetcher {
   const fetchImplementation = (globalThis as typeof globalThis & { fetch?: WeatherFetcher }).fetch
@@ -534,7 +537,9 @@ function validWeatherPayload(value: unknown): OpenMeteoPayload {
 interface WeatherPoint {
   timestamp: string
   waveHeight?: number
+  waveDirection?: number
   swellWaveHeight?: number
+  swellDirection?: number
   swellPeriod?: number
   windSpeed?: number
   windGusts?: number
@@ -554,7 +559,9 @@ function weatherPointMap(marine: OpenMeteoPayload, wind: OpenMeteoPayload): Weat
     const point = ensure(time)
     if (!point) return
     point.waveHeight = numberValue(marineHourly.wave_height?.[index])
+    point.waveDirection = numberValue(marineHourly.wave_direction?.[index])
     point.swellWaveHeight = numberValue(marineHourly.swell_wave_height?.[index])
+    point.swellDirection = numberValue(marineHourly.swell_wave_direction?.[index])
     point.swellPeriod = numberValue(marineHourly.swell_wave_period?.[index])
   })
   const windHourly = wind.hourly
@@ -569,12 +576,14 @@ function weatherPointMap(marine: OpenMeteoPayload, wind: OpenMeteoPayload): Weat
   const currentPoint = ensure(marineCurrent?.time ?? windCurrent?.time)
   if (currentPoint) {
     currentPoint.waveHeight ??= numberValue(marineCurrent?.wave_height)
+    currentPoint.waveDirection ??= numberValue(marineCurrent?.wave_direction)
     currentPoint.swellWaveHeight ??= numberValue(marineCurrent?.swell_wave_height)
+    currentPoint.swellDirection ??= numberValue(marineCurrent?.swell_wave_direction)
     currentPoint.swellPeriod ??= numberValue(marineCurrent?.swell_wave_period)
     currentPoint.windSpeed ??= numberValue(windCurrent?.wind_speed_10m)
     currentPoint.windGusts ??= numberValue(windCurrent?.wind_gusts_10m)
   }
-  return [...points.values()].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp)).slice(0, weatherRiskThresholds.forecastWindowHours + 1)
+  return [...points.values()].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp)).slice(0, weatherWindowHours.d7 + 1)
 }
 
 function maximum(values: Array<number | undefined>): number | undefined {
@@ -582,49 +591,90 @@ function maximum(values: Array<number | undefined>): number | undefined {
   return present.length ? Math.max(...present) : undefined
 }
 
+function severityRank(value: Severity): number {
+  return { info: 0, watch: 1, warning: 2, critical: 3 }[value]
+}
+
+function maximumWithDirection(points: WeatherPoint[], valueKey: "waveHeight" | "swellWaveHeight", directionKey: "waveDirection" | "swellDirection") {
+  let value: number | undefined
+  let direction: number | undefined
+  for (const point of points) {
+    const candidate = point[valueKey]
+    if (candidate !== undefined && (value === undefined || candidate > value)) {
+      value = candidate
+      direction = point[directionKey]
+    }
+  }
+  return { value, direction }
+}
+
+function weatherWindow(points: WeatherPoint[], hours: number): WeatherWindow {
+  const start = points[0]?.timestamp
+  const endLimit = start ? Date.parse(start) + hours * 60 * 60 * 1000 : Number.POSITIVE_INFINITY
+  const scoped = points.filter(point => Date.parse(point.timestamp) <= endLimit)
+  const wave = maximumWithDirection(scoped, "waveHeight", "waveDirection")
+  const swell = maximumWithDirection(scoped, "swellWaveHeight", "swellDirection")
+  const maxSwellPeriodSeconds = maximum(scoped.map(point => point.swellPeriod))
+  const maxWindSpeedKmh = maximum(scoped.map(point => point.windSpeed))
+  const maxWindGustKmh = maximum(scoped.map(point => point.windGusts))
+  const maxWind = Math.max(maxWindSpeedKmh ?? 0, maxWindGustKmh ?? 0)
+  const severity: Severity = (wave.value !== undefined && wave.value >= weatherRiskThresholds.criticalWaveHeightM) || maxWind >= weatherRiskThresholds.criticalWindKmh
+    ? "critical"
+    : (wave.value !== undefined && wave.value >= weatherRiskThresholds.warningWaveHeightM) || maxWind >= weatherRiskThresholds.warningWindKmh
+        ? "warning"
+        : "info"
+  return {
+    severity,
+    forecastStartAt: scoped[0]?.timestamp,
+    forecastEndAt: scoped.at(-1)?.timestamp,
+    maxWaveHeightM: wave.value,
+    maxSwellWaveHeightM: swell.value,
+    maxSwellPeriodSeconds,
+    maxWindSpeedKmh,
+    maxWindGustKmh,
+    waveDirectionDeg: wave.direction,
+    swellDirectionDeg: swell.direction,
+    swellWaveDirectionDeg: swell.direction,
+  }
+}
+
 function weatherFeedItem(port: WeatherPortConfig, marine: OpenMeteoPayload, wind: OpenMeteoPayload): FeedItem | undefined {
   const points = weatherPointMap(marine, wind)
-  const riskyPoints = points.filter((point) => {
-    const maxWind = Math.max(point.windSpeed ?? 0, point.windGusts ?? 0)
-    return (point.waveHeight !== undefined && point.waveHeight >= weatherRiskThresholds.warningWaveHeightM) || maxWind >= weatherRiskThresholds.warningWindKmh
-  })
-  const waveHeight = maximum(points.map(point => point.waveHeight))
-  const swellWaveHeight = maximum(points.map(point => point.swellWaveHeight))
-  const swellPeriod = maximum(points.map(point => point.swellPeriod))
-  const windSpeed = maximum(points.map(point => point.windSpeed))
-  const windGusts = maximum(points.map(point => point.windGusts))
-  const maxWind = Math.max(windSpeed ?? 0, windGusts ?? 0)
-  const severity = (waveHeight !== undefined && waveHeight >= weatherRiskThresholds.criticalWaveHeightM) || maxWind >= weatherRiskThresholds.criticalWindKmh
-    ? "critical"
-    : (waveHeight !== undefined && waveHeight >= weatherRiskThresholds.warningWaveHeightM) || maxWind >= weatherRiskThresholds.warningWindKmh
-        ? "warning"
-        : undefined
-  if (!severity) return undefined
+  const windows: WeatherWindows = {
+    h24: weatherWindow(points, weatherWindowHours.h24),
+    h72: weatherWindow(points, weatherWindowHours.h72),
+    d7: weatherWindow(points, weatherWindowHours.d7),
+  }
+  const overall = Object.values(windows).sort((a, b) => severityRank(b.severity) - severityRank(a.severity))[0]
+  if (!overall || severityRank(overall.severity) === 0) return undefined
   const updatedAt = normalizeProviderTimestamp(marine.current?.time ?? wind.current?.time ?? points[0]?.timestamp)
   if (!updatedAt) throw new Error("Open-Meteo timestamp is malformed")
-  const riskStart = riskyPoints[0]?.timestamp ?? updatedAt
-  const riskEnd = riskyPoints.at(-1)?.timestamp ?? riskStart
-  const windText = windSpeed === undefined ? "风速未知" : `风速 ${Math.round(windSpeed)} km/h`
-  const gustText = windGusts === undefined ? "" : `，阵风 ${Math.round(windGusts)} km/h`
-  const waveText = waveHeight === undefined ? "浪高未知" : `浪高 ${waveHeight.toFixed(1)} m`
-  const swellText = swellWaveHeight === undefined ? "涌浪未知" : `涌浪 ${swellWaveHeight.toFixed(1)} m${swellPeriod === undefined ? "" : ` / ${swellPeriod.toFixed(1)} s`}`
+  const h72 = windows.h72
+  const waveText = h72.maxWaveHeightM === undefined ? "浪高未知" : `浪高 ${h72.maxWaveHeightM.toFixed(1)} m`
+  const swellText = h72.maxSwellWaveHeightM === undefined ? "涌浪未知" : `涌浪 ${h72.maxSwellWaveHeightM.toFixed(1)} m${h72.maxSwellPeriodSeconds === undefined ? "" : ` / ${h72.maxSwellPeriodSeconds.toFixed(1)} s`}`
+  const windText = h72.maxWindSpeedKmh === undefined ? "风速未知" : `风速 ${Math.round(h72.maxWindSpeedKmh)} km/h`
+  const gustText = h72.maxWindGustKmh === undefined ? "" : `，阵风 ${Math.round(h72.maxWindGustKmh)} km/h`
+  const windowSummary = `24 小时 ${windows.h24.severity} / 72 小时 ${windows.h72.severity} / 7 天 ${windows.d7.severity}`
   return {
     id: `weather-${port.id}`,
     sourceId: "open-meteo-marine",
     category: "weather",
     type: "weather_risk",
-    title: `${port.nameEn} 未来 ${weatherRiskThresholds.forecastWindowHours} 小时天气${severity === "critical" ? "严重" : "预警"}`,
-    summary: `${windText}${gustText}，${waveText}，${swellText}。模型风险窗口 ${riskStart} 至 ${riskEnd}，仅作为运营关注信号。`,
+    title: `${port.nameEn} 未来 7 天天气${overall.severity === "critical" ? "严重" : "预警"}`,
+    summary: `${windText}${gustText}，${waveText}，${swellText}。模型窗口：${windowSummary}，仅作为运营关注信号。`,
     sourceUrl: "https://marine-api.open-meteo.com/",
     publishedAt: updatedAt,
-    severity,
+    publicationTimeKnown: true,
+    eventEligibility: true,
+    severity: overall.severity,
     relatedPortIds: [port.id],
     relatedVesselIds: [],
     relatedVoyageIds: [],
-    weather: { riskSource: "model", forecastWindowHours: weatherRiskThresholds.forecastWindowHours, forecastStartAt: riskStart, forecastEndAt: riskEnd, waveHeightM: waveHeight, swellWaveHeightM: swellWaveHeight, swellPeriodSeconds: swellPeriod, windSpeedKmh: windSpeed, windGustKmh: windGusts },
+    weather: { riskSource: "model", forecastWindowHours: weatherRiskThresholds.forecastWindowHours, forecastStartAt: h72.forecastStartAt, forecastEndAt: h72.forecastEndAt, waveHeightM: h72.maxWaveHeightM, waveDirectionDeg: h72.waveDirectionDeg, swellWaveHeightM: h72.maxSwellWaveHeightM, swellDirectionDeg: h72.swellDirectionDeg, swellWaveDirectionDeg: h72.swellWaveDirectionDeg, swellPeriodSeconds: h72.maxSwellPeriodSeconds, windSpeedKmh: h72.maxWindSpeedKmh, windGustKmh: h72.maxWindGustKmh, windows },
     tags: ["model", "weather_risk"],
     updatedAt,
     sourceUpdatedAt: updatedAt,
+    fetchedAt: updatedAt,
     stale: false,
     sourceStatus: "healthy",
     provenance: openMeteoProvenance,
@@ -662,9 +712,9 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
         const marineUrl = new URL(marineEndpoint)
         marineUrl.searchParams.set("latitude", String(coordinates.latitude))
         marineUrl.searchParams.set("longitude", String(coordinates.longitude))
-        marineUrl.searchParams.set("current", "wave_height,swell_wave_height,swell_wave_period")
-        marineUrl.searchParams.set("hourly", "wave_height,swell_wave_height,swell_wave_period")
-        marineUrl.searchParams.set("forecast_days", "3")
+        marineUrl.searchParams.set("current", "wave_height,wave_direction,swell_wave_height,swell_wave_direction,swell_wave_period")
+        marineUrl.searchParams.set("hourly", "wave_height,wave_direction,swell_wave_height,swell_wave_direction,swell_wave_period")
+        marineUrl.searchParams.set("forecast_days", String(weatherRiskThresholds.forecastDays))
         marineUrl.searchParams.set("timeformat", "unixtime")
         marineUrl.searchParams.set("cell_selection", "sea")
         const weatherUrl = new URL(weatherEndpoint)
@@ -672,7 +722,7 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
         weatherUrl.searchParams.set("longitude", String(coordinates.longitude))
         weatherUrl.searchParams.set("current", "wind_speed_10m,wind_gusts_10m")
         weatherUrl.searchParams.set("hourly", "wind_speed_10m,wind_gusts_10m")
-        weatherUrl.searchParams.set("forecast_days", "3")
+        weatherUrl.searchParams.set("forecast_days", String(weatherRiskThresholds.forecastDays))
         weatherUrl.searchParams.set("timeformat", "unixtime")
         weatherUrl.searchParams.set("wind_speed_unit", "kmh")
         try {
