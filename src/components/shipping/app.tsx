@@ -276,6 +276,65 @@ export function FeedCard({ item }: { item: ShippingSnapshot["feedItems"][number]
       </div>
       <h2 className="mt-3 text-xl font-bold">{item.title}</h2>
       <p className="mt-2 flex-1 op-80">{item.summary}</p>
+      {item.weather && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs op-70">
+          <span className="chip">
+            {item.weather.riskSource === "official" ? "官方预警" : "模型预报"}
+          </span>
+          {item.weather.forecastWindowHours && (
+            <span className="chip">
+              未来
+              {" "}
+              {item.weather.forecastWindowHours}
+              {" "}
+              小时
+            </span>
+          )}
+          {item.weather.waveHeightM !== undefined && (
+            <span>
+              浪高
+              {" "}
+              {item.weather.waveHeightM.toFixed(1)}
+              {" "}
+              m
+            </span>
+          )}
+          {item.weather.swellWaveHeightM !== undefined && (
+            <span>
+              涌浪
+              {" "}
+              {item.weather.swellWaveHeightM.toFixed(1)}
+              {" "}
+              m
+            </span>
+          )}
+          {item.weather.swellPeriodSeconds !== undefined && (
+            <span>
+              涌浪周期
+              {" "}
+              {item.weather.swellPeriodSeconds.toFixed(1)}
+              {" "}
+              s
+            </span>
+          )}
+          {item.weather.forecastStartAt && item.weather.forecastEndAt && (
+            <span>
+              风险窗
+              {" "}
+              {formatDate(item.weather.forecastStartAt)}
+              {" – "}
+              {formatDate(item.weather.forecastEndAt)}
+            </span>
+          )}
+          {item.weather.alertExpiresAt && (
+            <span>
+              截至
+              {" "}
+              {formatDate(item.weather.alertExpiresAt)}
+            </span>
+          )}
+        </div>
+      )}
       {(item.hotReason || item.tags?.length) && (
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs op-70">
           {item.hotReason && (

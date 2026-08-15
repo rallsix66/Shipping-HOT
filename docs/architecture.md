@@ -1,7 +1,7 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
 > Last verified: 2026-08-15
-> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation, implemented V2.1 Port Intelligence, implemented V2.2 Country Calendar and implemented V2.3 Shipping Information Feed; V2.4+ not started
+> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation, implemented V2.1 Port Intelligence, implemented V2.2 Country Calendar, implemented V2.3 Shipping Information Feed and implemented V2.4 Weather Intelligence; V2.5 not started
 > Source of truth for: the current retained system structure and approved boundaries
 
 ## 1. Project Purpose
@@ -18,6 +18,7 @@ The repository retains NewsNow as its foundation and now exposes Shipping HOT as
 - V2.1 Port Intelligence: an optional server-side Portcast public-page adapter normalizes only anonymous public HTML fields into the existing Port entity; Mock remains the default and no commercial API or hidden endpoint is used.
 - V2.2 Country Calendar: a five-country annual calendar path uses a server-only Calendarific adapter when explicitly configured, official/manual/mock source contracts, a minimal `calendar_events` table, persisted coverage and Calendar → Event → HOT reminders; Mock remains the default.
 - V2.3 Shipping Information Feed: a small opt-in RSS/HTML registry normalizes industry and official notices into `FeedItem`, isolates source failures, deduplicates canonical/title reposts and converges explicit operational impact through Feed → Event → HOT; Mock remains the default.
+- V2.4 Weather Intelligence: Open-Meteo is an opt-in model source for a 72-hour wave/swell/wind window with TTL and per-port stale fallback; JMA/TMD/BMKG are separate opt-in official-warning contracts, and model risk never receives official provenance.
 
 ### Explicitly Out of Scope
 
@@ -36,6 +37,7 @@ The repository retains NewsNow as its foundation and now exposes Shipping HOT as
 | V2.1 Port Intelligence | implemented / verified | `PortcastPublicPageProvider`, public HTML parser, 24-hour cache/fingerprint and Port congestion detail; no schema migration or new dependency |
 | V2.2 Country Calendar | implemented / verified | TH/ID/MY/PH/VN contracts, Calendarific server-side adapter, official/manual/mock priority boundary, minimal `calendar_events` table, settings-backed coverage and calendar reminder Events; no ORM migration |
 | V2.3 Shipping Information Feed | implemented / verified | `server/providers/feed.ts` RSS/HTML adapters, normalized FeedItem metadata, per-source stale fallback, canonical/title dedupe and Feed → Event → HOT reasons; no new table or NewsNow cache rewrite |
+| V2.4 Weather Intelligence | implemented / verified | Open-Meteo 72-hour wave/swell/wind normalization, 30-minute TTL, per-port failure isolation, official warning parser contracts and expiry separation; no new table |
 
 ## 3. Architecture Summary
 
@@ -120,6 +122,8 @@ The V2.2 Calendar path is opt-in for Calendarific through `SHIPPING_CALENDAR_PRO
 
 The V2.3 Shipping Information Feed path is opt-in through `SHIPPING_FEED_PROVIDER=public`; otherwise the Mock Feed remains the default. `server/providers/feed.ts` fetches each enabled source independently, supports RSS for The Loadstar/The Maritime Executive and visible-link HTML parsing for Shekou official notices, keeps disabled registry entries for unconfirmed Laem Chabang/Port Klang formats, and emits normalized `FeedItem` records with `sourceType`, `dataNature=reported`, source timestamps, related ports, tags and optional `hotReason`. Canonical URLs and normalized titles deduplicate reposts with official-source priority. A failed source preserves only its own last-known records as stale/failed without changing their publication/update time; no last-known record means no fabricated item. Warning/critical fresh FeedItems create one `feed:<feedItemId>` Event and can surface in HOT; ordinary news remains Feed. The adapter stores links and metadata, not article bodies or full HTML.
 
+The V2.4 Weather Intelligence path extends the existing Open-Meteo adapter without changing the Weather Feed boundary. `SHIPPING_WEATHER_PROVIDER=open-meteo` requests current plus hourly wave height, swell wave height, swell period, wind and gusts for a 72-hour model window; a 30-minute in-process TTL avoids repeated requests. Each port is fetched independently, with its own last-known model FeedItem marked stale/failed when unavailable; if no last-known record exists, the adapter returns no fabricated weather value. Model items use `sourceType=third_party`, `dataNature=forecast`, `weather.riskSource=model` and explain the forecast window in the Feed card. `SHIPPING_WEATHER_ALERT_PROVIDER=public` additionally enables independent JMA, TMD and BMKG official-warning contracts; warning items use `sourceType=official`, `dataNature=reported`, `weather.riskSource=official`, retain issued/expiry metadata, and downgrade to info at expiry so an old official warning does not remain HOT. Mock remains the default and no official warning page is fetched unless both opt-in switches are configured.
+
 ## 9. Interfaces and External Dependencies
 
 | Dependency / Interface | Purpose | Failure behavior | Replacement / fallback |
@@ -129,7 +133,7 @@ The V2.3 Shipping Information Feed path is opt-in through `SHIPPING_FEED_PROVIDE
 | db0 + local `better-sqlite3` | Local cache/user persistence | Cache can be disabled; auth requires DB | In-memory/no-cache only where current code supports it |
 | GitHub OAuth/JWT | Optional identity and sync | Login disabled when env is absent | Local browser preferences |
 | Cloudflare D1/Vercel/Bun | Optional runtime adapters | Runtime-specific failure | Local Node runtime |
-| Shipping Provider interfaces | Mock plus approved V1 adapters, V2.2 Calendar and V2.3 Feed contracts implemented | Must isolate provider failure | Mock/last-known/no-data state with stale/sourceStatus |
+| Shipping Provider interfaces | Mock plus approved V1 adapters, V2.2 Calendar, V2.3 Feed and V2.4 Weather contracts implemented | Must isolate provider failure | Mock/last-known/no-data state with stale/sourceStatus |
 
 ## 10. Authentication, Authorization and Security
 
@@ -158,8 +162,8 @@ The V2.3 Shipping Information Feed path is opt-in through `SHIPPING_FEED_PROVIDE
 ## 13. Testing and Verification Boundaries
 
 - Current tests: Vitest covers Shipping HOT Domain, Provider, Repository, Event/HOT and UI trust contracts.
-- Current verification state: 114/114 tests, build and `git diff --check` passed; Vite development smoke covered the Shipping HOT shell, `/feed` and `/api/shipping` with default Mock Feed; V2.3 modified-file targeted lint passed. Full lint still reports six pre-existing errors outside this phase. `pnpm typecheck` remains pending on pre-existing TS6142/TS6307 test-config errors. Production Nitro subroutes remain pending because of the existing `#nitro/index` package-import runtime error.
-- Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, RSS/HTML Feed parsing, source isolation, repost dedupe, Feed → Event/HOT boundaries, weather thresholds, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
+- Current verification state: 119/119 tests, build and `git diff --check` passed; Vite development smoke covered the Shipping HOT shell, `/feed` and `/api/shipping` with default Mock Feed/Weather; V2.4 modified-file targeted lint passed. Full lint still reports six pre-existing errors outside this phase. `pnpm typecheck` remains pending on pre-existing TS6142/TS6307 test-config errors. Production Nitro subroutes remain pending because of the existing `#nitro/index` package-import runtime error.
+- Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, RSS/HTML Feed parsing, source isolation, repost dedupe, Feed → Event/HOT boundaries, Open-Meteo forecast-window/swell/TTL/per-port failure behavior, official weather warning parsing/expiry, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 
 ## 14. Architecture Change Rules

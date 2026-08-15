@@ -3,6 +3,7 @@ import type { DataProvenance, FeedItem, Freshness, Port, PortCongestionDetail, P
 import { mockFeedItems, mockPorts, mockVessels, mockVoyages, portWeatherConfig } from "@shared/shipping-fixtures"
 import { type CalendarProvider, configureCalendarProviders } from "./calendar"
 import { configureFeedProviders } from "./feed"
+import { type WeatherAlertProvider, createOfficialWeatherAlertProvider } from "./weather-alerts"
 
 export interface VesselProvider {
   getVessels: (watched?: Vessel[]) => Promise<Vessel[]>
@@ -14,7 +15,7 @@ export interface ScheduleProvider {
   getVoyages: () => Promise<Voyage[]>
 }
 export interface WeatherProvider {
-  getFeedItems: (ports?: Port[]) => Promise<FeedItem[]>
+  getFeedItems: (ports?: Port[], lastKnown?: FeedItem[]) => Promise<FeedItem[]>
 }
 
 export const providerProvenances = {
@@ -63,7 +64,7 @@ export function disabledProviderData<T extends Freshness>(lastKnown: T[]): T[] {
   return lastKnown.map(item => ({ ...item, stale: false, sourceStatus: "disabled", error: undefined })) as T[]
 }
 
-const weatherSourceIds = new Set(["mock-weather", "open-meteo-marine"])
+const weatherSourceIds = new Set(["mock-weather", "open-meteo-marine", "jma", "tmd", "bmkg"])
 
 export function isWeatherFeedItem(item: FeedItem): boolean {
   return weatherSourceIds.has(item.sourceId)
@@ -502,7 +503,8 @@ interface WeatherPortConfig {
 }
 
 interface OpenMeteoPayload {
-  current?: { time?: number | string, wave_height?: number, wind_speed_10m?: number, wind_gusts_10m?: number }
+  current?: { time?: number | string, wave_height?: number, swell_wave_height?: number, swell_wave_period?: number, wind_speed_10m?: number, wind_gusts_10m?: number }
+  hourly?: { time?: Array<number | string>, wave_height?: Array<number | undefined>, swell_wave_height?: Array<number | undefined>, swell_wave_period?: Array<number | undefined>, wind_speed_10m?: Array<number | undefined>, wind_gusts_10m?: Array<number | undefined> }
 }
 
 export const weatherRiskThresholds = {
@@ -510,6 +512,7 @@ export const weatherRiskThresholds = {
   criticalWindKmh: 65,
   warningWaveHeightM: 2.5,
   criticalWaveHeightM: 4,
+  forecastWindowHours: 72,
 } as const
 
 function weatherFetcher(): WeatherFetcher {
@@ -521,16 +524,75 @@ function weatherFetcher(): WeatherFetcher {
 function validWeatherPayload(value: unknown): OpenMeteoPayload {
   if (!value || typeof value !== "object") throw new Error("Open-Meteo response is malformed")
   const current = (value as OpenMeteoPayload).current
-  if (!current || typeof current !== "object" || normalizeProviderTimestamp(current.time) === undefined) throw new Error("Open-Meteo response is malformed: current timestamp is missing or invalid")
+  const hourly = (value as OpenMeteoPayload).hourly
+  const currentValid = current && typeof current === "object" && normalizeProviderTimestamp(current.time) !== undefined
+  const hourlyValid = hourly && Array.isArray(hourly.time) && hourly.time.some(time => normalizeProviderTimestamp(time) !== undefined)
+  if (!currentValid && !hourlyValid) throw new Error("Open-Meteo response is malformed: current/hourly timestamp is missing or invalid")
   return value as OpenMeteoPayload
 }
 
-function weatherFeedItem(port: WeatherPortConfig, marine: OpenMeteoPayload, wind: OpenMeteoPayload): FeedItem | undefined {
+interface WeatherPoint {
+  timestamp: string
+  waveHeight?: number
+  swellWaveHeight?: number
+  swellPeriod?: number
+  windSpeed?: number
+  windGusts?: number
+}
+
+function weatherPointMap(marine: OpenMeteoPayload, wind: OpenMeteoPayload): WeatherPoint[] {
+  const points = new Map<string, WeatherPoint>()
+  const ensure = (value: unknown) => {
+    const timestamp = normalizeProviderTimestamp(value)
+    if (!timestamp) return undefined
+    const point = points.get(timestamp) ?? { timestamp }
+    points.set(timestamp, point)
+    return point
+  }
+  const marineHourly = marine.hourly
+  marineHourly?.time?.forEach((time, index) => {
+    const point = ensure(time)
+    if (!point) return
+    point.waveHeight = numberValue(marineHourly.wave_height?.[index])
+    point.swellWaveHeight = numberValue(marineHourly.swell_wave_height?.[index])
+    point.swellPeriod = numberValue(marineHourly.swell_wave_period?.[index])
+  })
+  const windHourly = wind.hourly
+  windHourly?.time?.forEach((time, index) => {
+    const point = ensure(time)
+    if (!point) return
+    point.windSpeed = numberValue(windHourly.wind_speed_10m?.[index])
+    point.windGusts = numberValue(windHourly.wind_gusts_10m?.[index])
+  })
   const marineCurrent = marine.current
   const windCurrent = wind.current
-  const waveHeight = numberValue(marineCurrent?.wave_height)
-  const windSpeed = numberValue(windCurrent?.wind_speed_10m)
-  const windGusts = numberValue(windCurrent?.wind_gusts_10m)
+  const currentPoint = ensure(marineCurrent?.time ?? windCurrent?.time)
+  if (currentPoint) {
+    currentPoint.waveHeight ??= numberValue(marineCurrent?.wave_height)
+    currentPoint.swellWaveHeight ??= numberValue(marineCurrent?.swell_wave_height)
+    currentPoint.swellPeriod ??= numberValue(marineCurrent?.swell_wave_period)
+    currentPoint.windSpeed ??= numberValue(windCurrent?.wind_speed_10m)
+    currentPoint.windGusts ??= numberValue(windCurrent?.wind_gusts_10m)
+  }
+  return [...points.values()].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp)).slice(0, weatherRiskThresholds.forecastWindowHours + 1)
+}
+
+function maximum(values: Array<number | undefined>): number | undefined {
+  const present = values.filter((value): value is number => value !== undefined)
+  return present.length ? Math.max(...present) : undefined
+}
+
+function weatherFeedItem(port: WeatherPortConfig, marine: OpenMeteoPayload, wind: OpenMeteoPayload): FeedItem | undefined {
+  const points = weatherPointMap(marine, wind)
+  const riskyPoints = points.filter((point) => {
+    const maxWind = Math.max(point.windSpeed ?? 0, point.windGusts ?? 0)
+    return (point.waveHeight !== undefined && point.waveHeight >= weatherRiskThresholds.warningWaveHeightM) || maxWind >= weatherRiskThresholds.warningWindKmh
+  })
+  const waveHeight = maximum(points.map(point => point.waveHeight))
+  const swellWaveHeight = maximum(points.map(point => point.swellWaveHeight))
+  const swellPeriod = maximum(points.map(point => point.swellPeriod))
+  const windSpeed = maximum(points.map(point => point.windSpeed))
+  const windGusts = maximum(points.map(point => point.windGusts))
   const maxWind = Math.max(windSpeed ?? 0, windGusts ?? 0)
   const severity = (waveHeight !== undefined && waveHeight >= weatherRiskThresholds.criticalWaveHeightM) || maxWind >= weatherRiskThresholds.criticalWindKmh
     ? "critical"
@@ -538,24 +600,29 @@ function weatherFeedItem(port: WeatherPortConfig, marine: OpenMeteoPayload, wind
         ? "warning"
         : undefined
   if (!severity) return undefined
-  const updatedAt = normalizeProviderTimestamp(marineCurrent?.time ?? windCurrent?.time)
+  const updatedAt = normalizeProviderTimestamp(marine.current?.time ?? wind.current?.time ?? points[0]?.timestamp)
   if (!updatedAt) throw new Error("Open-Meteo timestamp is malformed")
+  const riskStart = riskyPoints[0]?.timestamp ?? updatedAt
+  const riskEnd = riskyPoints.at(-1)?.timestamp ?? riskStart
   const windText = windSpeed === undefined ? "风速未知" : `风速 ${Math.round(windSpeed)} km/h`
   const gustText = windGusts === undefined ? "" : `，阵风 ${Math.round(windGusts)} km/h`
   const waveText = waveHeight === undefined ? "浪高未知" : `浪高 ${waveHeight.toFixed(1)} m`
+  const swellText = swellWaveHeight === undefined ? "涌浪未知" : `涌浪 ${swellWaveHeight.toFixed(1)} m${swellPeriod === undefined ? "" : ` / ${swellPeriod.toFixed(1)} s`}`
   return {
     id: `weather-${port.id}`,
     sourceId: "open-meteo-marine",
     category: "weather",
     type: "weather_risk",
-    title: `${port.nameEn} 航运天气${severity === "critical" ? "严重" : "预警"}`,
-    summary: `${windText}${gustText}，${waveText}。仅作为运营关注信号。`,
+    title: `${port.nameEn} 未来 ${weatherRiskThresholds.forecastWindowHours} 小时天气${severity === "critical" ? "严重" : "预警"}`,
+    summary: `${windText}${gustText}，${waveText}，${swellText}。模型风险窗口 ${riskStart} 至 ${riskEnd}，仅作为运营关注信号。`,
     sourceUrl: "https://marine-api.open-meteo.com/",
     publishedAt: updatedAt,
     severity,
     relatedPortIds: [port.id],
     relatedVesselIds: [],
     relatedVoyageIds: [],
+    weather: { riskSource: "model", forecastWindowHours: weatherRiskThresholds.forecastWindowHours, forecastStartAt: riskStart, forecastEndAt: riskEnd, waveHeightM: waveHeight, swellWaveHeightM: swellWaveHeight, swellPeriodSeconds: swellPeriod, windSpeedKmh: windSpeed, windGustKmh: windGusts },
+    tags: ["model", "weather_risk"],
     updatedAt,
     sourceUpdatedAt: updatedAt,
     stale: false,
@@ -568,35 +635,71 @@ export interface OpenMeteoWeatherProviderOptions {
   fetcher?: WeatherFetcher
   marineEndpoint?: string
   weatherEndpoint?: string
+  alertProvider?: WeatherAlertProvider
+  now?: () => Date
+  minIntervalMs?: number
 }
 
 export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProviderOptions = {}): WeatherProvider {
   const fetcher = options.fetcher ?? weatherFetcher()
   const marineEndpoint = options.marineEndpoint ?? "https://marine-api.open-meteo.com/v1/marine"
   const weatherEndpoint = options.weatherEndpoint ?? "https://api.open-meteo.com/v1/forecast"
+  const now = options.now ?? (() => new Date())
+  const minIntervalMs = options.minIntervalMs ?? 30 * 60 * 1000
+  const cache = new Map<string, { checkedAt: number, items: FeedItem[] }>()
   return {
-    async getFeedItems(ports = mockPorts) {
+    async getFeedItems(ports = mockPorts, lastKnown = []) {
+      const checkedAt = now()
+      const fetchedAt = checkedAt.toISOString()
+      const modelLastKnown = lastKnown.filter(item => item.sourceId === "open-meteo-marine")
+      const failures: string[] = []
       const results = await Promise.all(ports.map(async (port) => {
         const coordinates = portWeatherConfig[port.id as keyof typeof portWeatherConfig]
         if (!coordinates) return undefined
+        const cached = cache.get(port.id)
+        if (cached && checkedAt.getTime() - cached.checkedAt < minIntervalMs) return structuredClone(cached.items)
+        const previous = modelLastKnown.filter(item => item.relatedPortIds.includes(port.id))
         const marineUrl = new URL(marineEndpoint)
         marineUrl.searchParams.set("latitude", String(coordinates.latitude))
         marineUrl.searchParams.set("longitude", String(coordinates.longitude))
-        marineUrl.searchParams.set("current", "wave_height")
+        marineUrl.searchParams.set("current", "wave_height,swell_wave_height,swell_wave_period")
+        marineUrl.searchParams.set("hourly", "wave_height,swell_wave_height,swell_wave_period")
+        marineUrl.searchParams.set("forecast_days", "3")
         marineUrl.searchParams.set("timeformat", "unixtime")
         marineUrl.searchParams.set("cell_selection", "sea")
         const weatherUrl = new URL(weatherEndpoint)
         weatherUrl.searchParams.set("latitude", String(coordinates.latitude))
         weatherUrl.searchParams.set("longitude", String(coordinates.longitude))
         weatherUrl.searchParams.set("current", "wind_speed_10m,wind_gusts_10m")
+        weatherUrl.searchParams.set("hourly", "wind_speed_10m,wind_gusts_10m")
+        weatherUrl.searchParams.set("forecast_days", "3")
         weatherUrl.searchParams.set("timeformat", "unixtime")
         weatherUrl.searchParams.set("wind_speed_unit", "kmh")
-        const [marineResponse, weatherResponse] = await Promise.all([fetcher(marineUrl.toString()), fetcher(weatherUrl.toString())])
-        if (!marineResponse.ok) throw new Error(`Open-Meteo marine request failed (${marineResponse.status})`)
-        if (!weatherResponse.ok) throw new Error(`Open-Meteo weather request failed (${weatherResponse.status})`)
-        return weatherFeedItem({ id: port.id, name: port.name, nameEn: port.nameEn, latitude: coordinates.latitude, longitude: coordinates.longitude }, validWeatherPayload(await marineResponse.json()), validWeatherPayload(await weatherResponse.json()))
+        try {
+          const [marineResponse, weatherResponse] = await Promise.all([fetcher(marineUrl.toString()), fetcher(weatherUrl.toString())])
+          if (!marineResponse.ok) throw new Error(`Open-Meteo marine request failed (${marineResponse.status})`)
+          if (!weatherResponse.ok) throw new Error(`Open-Meteo weather request failed (${weatherResponse.status})`)
+          const item = weatherFeedItem({ id: port.id, name: port.name, nameEn: port.nameEn, latitude: coordinates.latitude, longitude: coordinates.longitude }, validWeatherPayload(await marineResponse.json()), validWeatherPayload(await weatherResponse.json()))
+          const items = item ? [{ ...item, fetchedAt }] : []
+          cache.set(port.id, { checkedAt: checkedAt.getTime(), items })
+          return items
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Open-Meteo port request failed"
+          failures.push(message)
+          return previous.map(item => ({ ...item, stale: true, sourceStatus: "failed" as const, error: message, fetchedAt }))
+        }
       }))
-      return results.filter((item): item is FeedItem => item !== undefined)
+      const modelItems = results.flat().filter((item): item is FeedItem => item !== undefined)
+      let alertItems: FeedItem[] = []
+      if (options.alertProvider) {
+        try {
+          alertItems = await options.alertProvider.getFeedItems(lastKnown, ports)
+        } catch (error) {
+          alertItems = lastKnown.filter(item => item.sourceId === "jma" || item.sourceId === "tmd" || item.sourceId === "bmkg").map(item => ({ ...item, stale: true, sourceStatus: "failed" as const, error: error instanceof Error ? error.message : "Official weather alert provider failed", fetchedAt }))
+        }
+      }
+      if (failures.length && failures.length === ports.filter(port => portWeatherConfig[port.id as keyof typeof portWeatherConfig]).length && modelItems.length === 0 && alertItems.length === 0) throw new Error(failures[0])
+      return [...modelItems, ...alertItems]
     },
   }
 }
@@ -607,6 +710,7 @@ interface ProviderEnvironment {
   AISSTREAM_API_KEY?: string
   SHIPPING_PORT_PROVIDER?: string
   SHIPPING_WEATHER_PROVIDER?: string
+  SHIPPING_WEATHER_ALERT_PROVIDER?: string
   SHIPPING_FEED_PROVIDER?: string
 }
 
@@ -615,12 +719,13 @@ export function configureProviders(environment: ProviderEnvironment = { ...env }
   const portMode = environment.SHIPPING_PORT_PROVIDER === "portcast" ? "portcast" : "mock"
   const weatherMode = environment.SHIPPING_WEATHER_PROVIDER === "open-meteo" ? "open-meteo" : "mock"
   const configuredFeed = configureFeedProviders({ SHIPPING_FEED_PROVIDER: environment.SHIPPING_FEED_PROVIDER })
+  const weatherAlertProvider = weatherMode === "open-meteo" && environment.SHIPPING_WEATHER_ALERT_PROVIDER === "public" ? createOfficialWeatherAlertProvider() : undefined
   return {
     providers: {
       vessel: vesselMode === "aisstream" ? createAisStreamVesselProvider({ apiKey: environment.AISSTREAM_API_KEY! }) : MockVesselProvider,
       port: portMode === "portcast" ? createPortcastPublicPageProvider() : MockPortProvider,
       schedule: MockScheduleProvider,
-      weather: weatherMode === "open-meteo" ? createOpenMeteoWeatherProvider() : MockWeatherProvider,
+      weather: weatherMode === "open-meteo" ? createOpenMeteoWeatherProvider({ alertProvider: weatherAlertProvider }) : MockWeatherProvider,
       feed: configuredFeed.provider,
     },
     modes: {
