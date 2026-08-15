@@ -49,6 +49,7 @@ export function HotPage() {
             <ProviderChip label="天气" value={data.provider.weather} tone={data.provider.weather === "mock" ? "dim" : "info"} />
             <ProviderChip label="港口" value={data.provider.port} tone={data.provider.port === "mock" ? "dim" : "info"} />
             <ProviderChip label="班期" value={data.provider.schedule} tone={data.provider.schedule === "mock" ? "dim" : "info"} />
+            <ProviderChip label="资讯" value={data.provider.feed} tone={data.provider.feed === "mock" ? "dim" : "info"} />
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/vessels" className="btn-gradient">
@@ -598,7 +599,7 @@ export function FeedPage() {
   const items = data.feedItems.filter(item => filter === "all" || item.category === filter)
   return (
     <ShippingShell>
-      <PageHero eyebrow="信息资讯" title="航运资讯" description="结构化展示港口通知、天气信号和船公司信息。">
+      <PageHero eyebrow="信息资讯" title="航运资讯" description="普通航运资讯留在 Feed；明确运营影响的官方公告和预警才会进入 HOT。">
         <Segmented id="feed-category" options={categoryOptions} value={filter} onChange={setFilter} />
       </PageHero>
       {items.length === 0
@@ -816,9 +817,10 @@ export function SettingsPage() {
             <ProviderChip label="天气" value={data.provider.weather} />
             <ProviderChip label="港口" value={data.provider.port} />
             <ProviderChip label="班期" value={data.provider.schedule} />
+            <ProviderChip label="资讯" value={data.provider.feed} />
           </div>
         </div>
-        <p className="mt-4 text-xs op-60">数据源：AISStream（船位，可选 key）、Open-Meteo Marine（天气）、Portcast 公共港口页面（低频公开字段）与 Mock Schedule。</p>
+        <p className="mt-4 text-xs op-60">数据源：AISStream（船位，可选 key）、Open-Meteo Marine（天气）、Portcast 公共港口页面（低频公开字段）、Shipping Feed（默认 Mock，可选公开 RSS/官方公告）与 Mock Schedule。</p>
       </div>
     </ShippingShell>
   )

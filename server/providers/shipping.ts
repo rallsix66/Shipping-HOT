@@ -2,6 +2,7 @@ import { env } from "node:process"
 import type { DataProvenance, FeedItem, Freshness, Port, PortCongestionDetail, ProviderResult, SourceStatus, Vessel, Voyage } from "@shared/shipping"
 import { mockFeedItems, mockPorts, mockVessels, mockVoyages, portWeatherConfig } from "@shared/shipping-fixtures"
 import { type CalendarProvider, configureCalendarProviders } from "./calendar"
+import { configureFeedProviders } from "./feed"
 
 export interface VesselProvider {
   getVessels: (watched?: Vessel[]) => Promise<Vessel[]>
@@ -24,6 +25,8 @@ export const providerProvenances = {
   mockPort: { sourceType: "mock", dataNature: "derived", sourceId: "mock-port", verified: false },
   mockSchedule: { sourceType: "mock", dataNature: "planned", sourceId: "mock-schedule", verified: false },
   mockWeather: { sourceType: "mock", dataNature: "forecast", sourceId: "mock-weather", verified: false },
+  shippingFeed: { sourceType: "third_party", dataNature: "reported", sourceId: "shipping-feed", sourceUrl: "https://theloadstar.com/", verified: false },
+  mockFeed: { sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice", sourceUrl: "https://example.com/mock/feed", verified: false },
 } as const satisfies Record<string, DataProvenance>
 
 const aisstreamProvenance: DataProvenance = providerProvenances.aisstream
@@ -604,31 +607,35 @@ interface ProviderEnvironment {
   AISSTREAM_API_KEY?: string
   SHIPPING_PORT_PROVIDER?: string
   SHIPPING_WEATHER_PROVIDER?: string
+  SHIPPING_FEED_PROVIDER?: string
 }
 
 export function configureProviders(environment: ProviderEnvironment = { ...env }) {
   const vesselMode = environment.SHIPPING_VESSEL_PROVIDER === "aisstream" && environment.AISSTREAM_API_KEY ? "aisstream" : "mock"
   const portMode = environment.SHIPPING_PORT_PROVIDER === "portcast" ? "portcast" : "mock"
   const weatherMode = environment.SHIPPING_WEATHER_PROVIDER === "open-meteo" ? "open-meteo" : "mock"
+  const configuredFeed = configureFeedProviders({ SHIPPING_FEED_PROVIDER: environment.SHIPPING_FEED_PROVIDER })
   return {
     providers: {
       vessel: vesselMode === "aisstream" ? createAisStreamVesselProvider({ apiKey: environment.AISSTREAM_API_KEY! }) : MockVesselProvider,
       port: portMode === "portcast" ? createPortcastPublicPageProvider() : MockPortProvider,
       schedule: MockScheduleProvider,
       weather: weatherMode === "open-meteo" ? createOpenMeteoWeatherProvider() : MockWeatherProvider,
+      feed: configuredFeed.provider,
     },
     modes: {
       vessel: vesselMode,
       port: portMode,
       schedule: "mock" as const,
       weather: weatherMode,
+      feed: configuredFeed.modes.feed,
     },
   }
 }
 
 const configured = configureProviders()
 const configuredCalendar = configureCalendarProviders()
-export const providers = { ...configured.providers, calendar: configuredCalendar.provider as CalendarProvider }
+export const providers = { ...configured.providers, calendar: configuredCalendar.provider as CalendarProvider } as typeof configured.providers & { calendar: CalendarProvider }
 export const providerModes = { ...configured.modes, calendar: configuredCalendar.modes.calendar }
 export const calendarProviderModes = configuredCalendar.modes
 
@@ -637,5 +644,6 @@ export const realProviders = {
   port: "Portcast public page",
   schedule: "deferred",
   weather: "Open-Meteo Marine API",
+  feed: "The Loadstar / The Maritime Executive / official port notices",
   calendar: "Calendarific / OfficialHolidayProvider / ManualHolidayProvider",
 } as const

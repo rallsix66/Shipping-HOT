@@ -1,10 +1,10 @@
 # Shipping HOT V2 实施方案
 
-> 状态：`V2.2 implemented and verified`; `V2.3 not started`
+> 状态：`V2.3 implemented and verified`; `V2.4 not started`
 >
-> 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已封板，V2.1 Port Intelligence 和 V2.2 Country Calendar 已按本文件边界实现并验证；V2.3 及以后仍是未启动的规划，不代表其中的 Provider、表结构、路由或规则已经实现。
+> 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已封板，V2.1 Port Intelligence、V2.2 Country Calendar 和 V2.3 Shipping Information Feed 已按本文件边界实现并验证；V2.4 及以后仍是未启动的规划，不代表其中的 Provider、表结构、路由或规则已经实现。
 >
-> 方案核对日期：2026-08-15。V2.0 已完成收口；V2.1 仅新增 Portcast 公共港口页面 Provider，不使用商业 API、登录、token、hidden endpoint 或新依赖；V2.2 已按授权批次实现 Calendarific server-only、官方/手工/Mock 合同、日历最小表、覆盖持久化和 Calendar → Event → HOT。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
+> 方案核对日期：2026-08-15。V2.0 已完成收口；V2.1 仅新增 Portcast 公共港口页面 Provider，不使用商业 API、登录、token、hidden endpoint 或新依赖；V2.2 已按授权批次实现 Calendarific server-only、官方/手工/Mock 合同、日历最小表、覆盖持久化和 Calendar → Event → HOT；V2.3 已按授权批次实现少量 RSS/HTML 资讯适配、独立失败、去重和 Feed → Event → HOT。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
 
 ## 1. V2 Executive Summary
 
@@ -70,7 +70,7 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 
 现有 Shipping Repository 初始化 `feed_items`、`vessels`、`ports`、`voyages`、`events`、`settings`，NewsNow 另有 `cache`、`user`。当前实体主要以 `data` JSON 保存，同时保留查询和排序所需的少量列。
 
-当前 `shipping-store.ts` 会并行刷新 Vessel、Port、Voyage、Weather，失败时把 last-known 标记为 stale/failed；SQLite 不可用时保留内存 fallback。V2.2 另通过 `calendar_events` 保存年度事件事实，并在 `settings.calendarSync` 保存国家/年份 coverage。当前 Mock fixture 仍是产品可用的基础数据，因此 V2.0 必须让页面明确显示 `sourceType=mock`，而不是只显示一个看起来正常的“healthy”。当事件来源变成 stale、degraded、failed、disabled 或 never_succeeded 时，不创建新的事实事件，也不把已有 active 事件误判为 resolved；只有来源重新 fresh 且条件消失时才可 resolve。
+当前 `shipping-store.ts` 会并行刷新 Vessel、Port、Voyage、Shipping Feed、Weather，失败时把各自 last-known 标记为 stale/failed；SQLite 不可用时保留内存 fallback。V2.2 另通过 `calendar_events` 保存年度事件事实，并在 `settings.calendarSync` 保存国家/年份 coverage。V2.3 Shipping Feed 默认仍是 Mock；显式 public 模式逐 Source 解析 RSS/HTML，失败只影响该 Source，旧资讯保留原发布时间并标记 stale。当前 Mock fixture 仍是产品可用的基础数据，因此 V2.0 必须让页面明确显示 `sourceType=mock`，而不是只显示一个看起来正常的“healthy”。当事件来源变成 stale、degraded、failed、disabled 或 never_succeeded 时，不创建新的事实事件，也不把已有 active 事件误判为 resolved；只有来源重新 fresh 且条件消失时才可 resolve。
 
 ### 2.4 当前限制
 
@@ -80,7 +80,7 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 - 当前 Open-Meteo 仅请求当前风速、阵风和波高，并将风险作为 Weather FeedItem 输出。
 - V2.2 Calendar 已实现 TH/ID/MY/PH/VN 的 Calendarific/OfficialHolidayProvider/ManualOverride/Mock 合同；Calendarific 仅在服务端且显式配置 Key 后调用，默认仍为 Mock。
 - 当前 `Freshness` 只有 `updatedAt`、`stale`、`sourceStatus`、`error`，还没有统一的 `sourceType`/`dataNature` 业务标识。
-- 当前 NewsNow Source 协议使用 `NewsItem[]` 和独立 cache，缺少 Shipping HOT 所需的完整 `sourceStatus/stale` 语义；V2 应在 Shipping Feed 适配层补齐，不应强行破坏所有 NewsNow Source。
+- 当前 NewsNow Source 协议使用 `NewsItem[]` 和独立 cache，缺少 Shipping HOT 所需的完整 `sourceStatus/stale` 语义；V2.3 在独立 Shipping Feed 适配层补齐，不破坏所有 NewsNow Source。
 
 ## 3. V2 Goals
 
@@ -791,9 +791,14 @@ V2.0 已完成最小 UI 信任标识；V2.1 Port Intelligence 和 V2.2 Country C
 - 已实现日历详情的来源冲突、官方/手工优先级、最后核验、freshness 和来源链接展示。
 - 已实现可见 Calendarific Attribution：`Powered by Calendarific` 并链接到 Calendarific；Calendarific Key 仅出现在 server-side outbound request。
 
-### V2.3–V2.4
+### V2.3
 
-- Feed 增加航运分类、来源类型、关联实体和“进入 HOT 的原因”。
+- 已实现 Feed 复用现有 `/feed` 页面：航运分类、来源类型、关联港口、tags 和“进入 HOT 的原因”。
+- 已实现默认 Mock + 显式 `SHIPPING_FEED_PROVIDER=public` 的 server-only RSS/HTML Source registry：The Loadstar、The Maritime Executive、Shekou official；Laem Chabang/Port Klang 保留为 disabled registry，待公告列表格式核验后再启用。
+- 已实现逐 Source 独立失败、last-known stale、canonical URL/标题去重、official 优先和 `feed:<feedItemId>` Event dedupe；普通资讯留在 Feed，warning/critical fresh item 才进入 Event/HOT。
+
+### V2.4
+
 - Weather 卡片增加海况字段、时间窗、官方预警与模型风险区分。
 
 ### V2.5
@@ -844,6 +849,9 @@ V2.0 已完成最小 UI 信任标识；V2.1 Port Intelligence 和 V2.2 Country C
 - In Scope：首批行业媒体和港口官方 Source、FeedItem normalized adapter、港口/航线/船公司分类、Feed → Event/HOT 规则。
 - Out of Scope：海运新闻独立页面、无限 Source、全文镜像、付费墙内容抓取、AI 摘要。
 - Dependencies：V2.0 trust model；逐 Source 的 RSS/HTML/robots/版权核对。
+- Status：implemented and verified。
+- Implemented：`FeedProvider`/`createPublicFeedProvider`/`MockFeedProvider`、The Loadstar 与 The Maritime Executive RSS、Shekou official HTML、disabled official registry entries、normalized FeedItem fields、per-source stale fallback、canonical/title dedupe、Feed → Event → HOT reason/evidence and `/feed` UI attribution/status chips。
+- Verified：114/114 tests passed; D modified-file targeted lint passed; typecheck retains the pre-existing TS6142/TS6307 test-config errors; build passed; full lint still reports six pre-existing errors outside this phase; Vite smoke returned 200 for `/feed` and `/api/shipping` with default `provider.feed=mock`; `git diff --check` passed; real public-source runtime remains pending because public mode is opt-in and external network access is unavailable in this environment.
 - Acceptance：首批 Source 少于无限扩张；每个 Source 独立失败；普通新闻只进 Feed；有效公告/预警可进入 HOT；重复转载可去重；旧缓存明确 stale。
 - Main risks：来源质量、版权、抓取频率、来源结构变化。
 - Rollback：禁用单个 Source/分类，保留 NewsNow 原有 Source 和 cache。
@@ -933,7 +941,8 @@ V2.0 已完成最小 UI 信任标识；V2.1 Port Intelligence 和 V2.2 Country C
 V2.0 sealed
 V2.1 implemented
 V2.2 implemented
-V2.3 not started
+V2.3 implemented
+V2.4 not started
 ```
 
-本文件仍是方案与边界产物；V2.0 已封板，V2.1/V2.2 已完成实现、验证和文档同步。V2.3 及以后仍需在本批次前一阶段 Gate 通过后继续。
+本文件仍是方案与边界产物；V2.0 已封板，V2.1/V2.2/V2.3 已完成实现、验证和文档同步。V2.4 及以后仍需在本批次前一阶段 Gate 通过后继续。

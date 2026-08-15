@@ -150,6 +150,7 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
     occurredAt: item.publishedAt,
     relatedLabel: item.relatedPortIds[0] ? labels.get(item.relatedPortIds[0]) : item.relatedVesselIds[0] ? labels.get(item.relatedVesselIds[0]) : undefined,
     feedItemId: item.id,
+    hotReason: item.hotReason,
   }))
   const watchedIds = new Set([
     ...vessels.filter(v => v.isWatched).map(v => v.id),

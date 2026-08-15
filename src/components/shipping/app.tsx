@@ -276,6 +276,17 @@ export function FeedCard({ item }: { item: ShippingSnapshot["feedItems"][number]
       </div>
       <h2 className="mt-3 text-xl font-bold">{item.title}</h2>
       <p className="mt-2 flex-1 op-80">{item.summary}</p>
+      {(item.hotReason || item.tags?.length) && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs op-70">
+          {item.hotReason && (
+            <span className="chip text-amber-600 dark:text-amber-300">
+              HOT 原因：
+              {item.hotReason}
+            </span>
+          )}
+          {item.tags?.map(tag => <span key={tag} className="chip">{tag}</span>)}
+        </div>
+      )}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-3 text-xs op-70">
           <span className="flex items-center gap-1">

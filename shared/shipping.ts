@@ -59,6 +59,7 @@ export interface ShippingProviderFreshness {
   port: Freshness
   schedule: Freshness
   weather: Freshness
+  feed?: Freshness
 }
 
 export function deriveProvenance(source?: DataProvenance): DataProvenance | undefined {
@@ -162,8 +163,11 @@ export interface FeedItem extends Freshness, ProvenanceAware {
   title: string
   summary: string
   sourceUrl: string
+  canonicalUrl?: string
   publishedAt: string
   severity: Severity
+  hotReason?: string
+  tags?: string[]
   relatedPortIds: string[]
   relatedVesselIds: string[]
   relatedVoyageIds: string[]
@@ -235,4 +239,5 @@ export interface HotItem {
   relatedLabel?: string
   eventId?: string
   feedItemId?: string
+  hotReason?: string
 }
