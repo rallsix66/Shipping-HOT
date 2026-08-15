@@ -1,10 +1,10 @@
 # Shipping HOT V2 实施方案
 
-> 状态：`V2.0 sealed`; `V2.1 not started`
+> 状态：`V2.1 implemented and verified`; `V2.2 not started`
 >
-> 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已按本文件的边界实现并验证；V2.1 及以后仍是未启动的规划，不代表其中的 Provider、表结构、路由或规则已经实现。
+> 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已封板，V2.1 Port Intelligence 已按本文件边界实现并验证；V2.2 及以后仍是未启动的规划，不代表其中的 Provider、表结构、路由或规则已经实现。
 >
-> 方案核对日期：2026-08-14。V2.0 本轮只实现数据可信度基础，不新增 Portcast、Calendarific 或其他 Provider，不申请 Key、不抓取页面、不修改数据库 schema；V2.1 及以后仍仅用于能力与风险评估。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
+> 方案核对日期：2026-08-15。V2.0 已完成收口；V2.1 仅新增 Portcast 公共港口页面 Provider，不使用商业 API、登录、token、hidden endpoint 或新依赖。Calendarific 及 V2.2 以后仍仅用于能力与风险评估。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
 
 ## 1. V2 Executive Summary
 
@@ -767,7 +767,7 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 
 ## 21. UI Changes
 
-V2.0 已完成最小 UI 信任标识；V2.1 及以后按以下规划改动：
+V2.0 已完成最小 UI 信任标识；V2.1 Port Intelligence 已完成；V2.2 及以后按以下规划改动：
 
 ### V2.0
 
@@ -781,6 +781,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 及以后按以下规划改动：
 - 港口详情增加 Portcast congestion detail、source updatedAt、source URL、previous/WoW/long-tail。
 - 对公开数据缺失的港口显示“无公开数据”，不显示 0。
 - 港口详情组合天气、公告和拥堵证据。
+- 已实现：列表/详情携带 `public`/`no_public_data`、stale/failed 状态和 Portcast 公共页面链接；Mock 仍是默认 Provider。
 
 ### V2.2
 
@@ -816,7 +817,10 @@ V2.0 已完成最小 UI 信任标识；V2.1 及以后按以下规划改动：
 - In Scope：`PortcastPublicPageProvider`、公开页面 parser、低频 cache、Port congestion detail、fingerprint/dedupe、港口详情和公告关联。
 - Out of Scope：商业 API、登录、私有接口、全港 AIS 衍生统计、完整历史趋势表。
 - Dependencies：V2.0 trust model；逐页确认公开字段、robots/ToS 和页面结构。
-- Acceptance：只处理页面公开展示字段；页面失败/不存在/无数据有明确状态；每日最多按策略检查；source updatedAt 未变化不重复创建 Event；Portcast 不可用时不伪造值。
+- Status：implemented and verified。
+- Implemented：`PortcastPublicPageProvider`、公开 HTML parser、24 小时检查缓存、source fingerprint、Port congestion detail、Portcast attribution、环境开关 `SHIPPING_PORT_PROVIDER=portcast` 和 last-known/no-public-data/error fallback。
+- Verified public pages：Shekou、Yantian、Nansha（公开语言路径）、Laem Chabang、Port Klang、Manila、Jakarta、Ho Chi Minh City（公开语言路径）均有可访问的公开港口拥堵页面；页面公开字段按低频 fixture parser 读取，未调用商业 API 或隐藏接口。
+- Acceptance：只处理页面公开展示字段；页面失败/不存在/无数据有明确状态；每日最多按策略检查；source updatedAt/fingerprint 未变化不修改 Port 的业务更新时间并沿用 Event dedupe；Portcast 不可用时不伪造值。
 - Main risks：HTML 变化、页面动态渲染、授权限制、字段定义不稳定。
 - Rollback：关闭 Portcast Provider，回退 last-known/暂无数据/Mock 明示，不删已有历史 Event。
 
@@ -877,10 +881,10 @@ V2.0 已完成最小 UI 信任标识；V2.1 及以后按以下规划改动：
 
 ## 24. Open Questions
 
-以下问题保留给 V2.1 及以后实现前确认；V2.0 的实施批准和边界已经确定：
+以下问题保留给后续阶段；V2.0 的实施批准和 V2.1 的公共页面边界已经确定：
 
 1. V2.0 已按批准范围完成；后续是否扩展 `Freshness` 之外的可信度字段，留待新的架构确认。
-2. Portcast Public Page 的公开页面读取是否接受“仅公开展示字段、每日低频、ToS/robots 不允许就停”的硬边界？
+2. V2.1 已采用 Portcast Public Page 的硬边界：仅公开展示字段、每日低频、访问限制或合规不确定即停。
 3. 是否接受 Calendarific 只作为常规基础源，官方/ManualOverride 对临时和特殊假期拥有更高优先级？
 4. 国家日历第一版是否只覆盖 TH/ID/MY/PH/VN，是否需要地区/subdivision 级假期？
 5. 首页的近期国家日历是否只显示 medium 及以上影响，还是也显示用户标记的 low observance？
@@ -899,7 +903,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 及以后按以下规划改动：
 ### 25.1 方案验收
 
 - 文档覆盖 V2 Executive Summary、V1 baseline、目标/非目标、导航、数据源、Provider、可信度、Vessel、Port、Weather、Feed、Calendar、Voyage、Event Engine、本地存储、Scheduler、失败回退、安全、数据模型、UI、阶段、风险、Open Questions 和 Acceptance Criteria。
-- 明确当前哪些已经实现、哪些仍是 V2 proposal、哪些延期或条件化；仅 V2.0 Data Trust Foundation 标记为 approved/implemented。
+- 明确当前哪些已经实现、哪些仍是 V2 proposal、哪些延期或条件化；V2.0 Data Trust Foundation 标记为 sealed，V2.1 Port Intelligence 标记为 implemented/verified。
 - 明确 Portcast 只使用公开展示数据，禁止商业 API/私有接口/绕过访问限制。
 - 明确 AISStream 继续服务 Watched Vessel，区域全港统计需要独立结构调整且放后置阶段。
 - 明确 Weather 的模型风险与官方预警分层，且不把 Open-Meteo 当成航海安全保证。
@@ -922,8 +926,9 @@ V2.0 已完成最小 UI 信任标识；V2.1 及以后按以下规划改动：
 ### 25.3 本轮最终状态
 
 ```text
-V2.0 implemented and verified
-V2.1 not started
+V2.0 sealed
+V2.1 implemented and verified
+V2.2 not started
 ```
 
-本文件仍是方案与边界产物；V2.0 已完成实现、验证和文档同步。V2.1 及以后仍需新的范围确认和架构批准后才能开始。
+本文件仍是方案与边界产物；V2.0 已封板，V2.1 已完成实现、验证和文档同步。V2.2 及以后仍需在本批次前一阶段 Gate 通过后继续。

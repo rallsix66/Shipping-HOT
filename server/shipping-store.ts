@@ -52,7 +52,7 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
   const weatherLastKnown = lastKnown.feedItems.filter(isWeatherFeedItem)
   const [vesselResult, portResult, voyageResult, feedResult] = await Promise.allSettled([
     settings.providerEnabled ? providers.vessel.getVessels(lastKnown.vessels) : Promise.resolve(disabledProviderData(lastKnown.vessels)),
-    settings.providerEnabled ? providers.port.getPorts() : Promise.resolve(disabledProviderData(lastKnown.ports)),
+    settings.providerEnabled ? providers.port.getPorts(lastKnown.ports) : Promise.resolve(disabledProviderData(lastKnown.ports)),
     settings.providerEnabled ? providers.schedule.getVoyages() : Promise.resolve(disabledProviderData(lastKnown.voyages)),
     settings.sourceEnabled ? providers.weather.getFeedItems(lastKnown.ports) : Promise.resolve(disabledProviderData(weatherLastKnown)),
   ])
@@ -61,7 +61,7 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
     return toProviderResult(data, provenance, new Date().toISOString(), disabled ? "disabled" : undefined)
   }
   const vessel = read(vesselResult, lastKnown.vessels, providerModes.vessel === "aisstream" ? providerProvenances.aisstream : providerProvenances.mockVessel, !settings.providerEnabled)
-  const port = read(portResult, lastKnown.ports, providerProvenances.mockPort, !settings.providerEnabled)
+  const port = read(portResult, lastKnown.ports, providerModes.port === "portcast" ? providerProvenances.portcastPublic : providerProvenances.mockPort, !settings.providerEnabled)
   const voyage = read(voyageResult, lastKnown.voyages, providerProvenances.mockSchedule, !settings.providerEnabled)
   const weather = read(feedResult, weatherLastKnown, providerModes.weather === "open-meteo" ? providerProvenances.openMeteo : providerProvenances.mockWeather, !settings.sourceEnabled)
   return {

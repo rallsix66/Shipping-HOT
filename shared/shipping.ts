@@ -33,6 +33,17 @@ export interface ProvenanceAware {
   provenance?: DataProvenance
 }
 
+export type PortCongestionCoverage = "public" | "no_public_data"
+
+export interface PortCongestionDetail {
+  coverageStatus: PortCongestionCoverage
+  congestionCategory?: Port["congestionLevel"]
+  medianWaitingHours?: number
+  previousMedianWaitingHours?: number
+  weekOverWeekChangePct?: number
+  longTailCongestion?: boolean
+}
+
 export interface ProviderResult<T> {
   data: T[]
   provenance: DataProvenance
@@ -115,6 +126,7 @@ export interface Port extends Freshness, ProvenanceAware {
   unlocode: string
   isWatched: boolean
   congestionLevel: "low" | "medium" | "high" | "critical"
+  congestionDetail?: PortCongestionDetail
   waitingVessels: number
   containerWaitingVessels: number
   waitingHours: number

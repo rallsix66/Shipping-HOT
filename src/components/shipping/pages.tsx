@@ -403,6 +403,28 @@ export function PortDetailPage({ id }: { id: string }) {
           <dd><span className="block w-32"><CongestionGauge level={port.congestionLevel} /></span></dd>
           <dt>最后更新</dt>
           <dd>{formatDate(port.updatedAt)}</dd>
+          <dt>公开拥堵数据</dt>
+          <dd>
+            {port.congestionDetail?.coverageStatus === "no_public_data"
+              ? "无公开数据"
+              : port.congestionDetail?.coverageStatus === "public"
+                ? "Portcast 公共页面"
+                : "未记录"}
+          </dd>
+          <dt>中位等待</dt>
+          <dd>{port.congestionDetail?.medianWaitingHours === undefined ? "—" : `${port.congestionDetail.medianWaitingHours.toFixed(1)} 小时`}</dd>
+          <dt>上周中位等待</dt>
+          <dd>{port.congestionDetail?.previousMedianWaitingHours === undefined ? "—" : `${port.congestionDetail.previousMedianWaitingHours.toFixed(1)} 小时`}</dd>
+          <dt>周变化</dt>
+          <dd>{port.congestionDetail?.weekOverWeekChangePct === undefined ? "—" : `${port.congestionDetail.weekOverWeekChangePct > 0 ? "+" : ""}${port.congestionDetail.weekOverWeekChangePct.toFixed(0)}%`}</dd>
+          <dt>来源更新时间</dt>
+          <dd>{formatDate(port.sourceUpdatedAt)}</dd>
+          {port.provenance?.sourceUrl && (
+            <>
+              <dt>来源链接</dt>
+              <dd><a className="text-teal-600 underline decoration-teal-500/40 underline-offset-3 dark:text-teal-300" href={port.provenance.sourceUrl} target="_blank" rel="noreferrer">Portcast 公共页面</a></dd>
+            </>
+          )}
           <dt>数据源</dt>
           <dd>
             <div className="flex flex-wrap gap-1.5">
@@ -693,7 +715,7 @@ export function SettingsPage() {
             <ProviderChip label="班期" value={data.provider.schedule} />
           </div>
         </div>
-        <p className="mt-4 text-xs op-60">V1 数据源：AISStream（船位，可选 key）、Open-Meteo Marine（天气，无需普通使用 key）、Mock Port 与 Schedule。</p>
+        <p className="mt-4 text-xs op-60">数据源：AISStream（船位，可选 key）、Open-Meteo Marine（天气）、Portcast 公共港口页面（低频公开字段）与 Mock Schedule。</p>
       </div>
     </ShippingShell>
   )

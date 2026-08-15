@@ -3,7 +3,7 @@ import { createMockSnapshot, mockPorts, mockVessels } from "@shared/shipping-fix
 import type { FeedItem, Vessel } from "@shared/shipping"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeWeatherFeedItems } from "../shipping-store"
-import { configureProviders, createAisStreamVesselProvider, createOpenMeteoWeatherProvider, disabledProviderData, normalizeProviderTimestamp, providerProvenances, providerResult, toProviderResult } from "./shipping"
+import { configureProviders, createAisStreamVesselProvider, createOpenMeteoWeatherProvider, createPortcastPublicPageProvider, disabledProviderData, normalizeProviderTimestamp, parsePortcastPublicPage, portcastFingerprint, portcastPublicPageUrls, providerProvenances, providerResult, toProviderResult } from "./shipping"
 
 describe("shipping Provider failure boundaries", () => {
   it("includes all eight V1 focus ports in the seed", () => {
@@ -17,6 +17,78 @@ describe("shipping Provider failure boundaries", () => {
       "IDJKT",
       "VNSGN",
     ].sort())
+  })
+
+  it("parses only public Portcast congestion fields from a normal page fixture", () => {
+    const metrics = parsePortcastPublicPage(`
+      <main>
+        <h1>Port Congestion at Shekou, China</h1>
+        <p>Last updated on 26 Jul 2026</p>
+        <div>Congestion Category <strong>medium</strong></div>
+        <div>Long Tail Congestion <strong>Yes</strong></div>
+        <div>Median Waiting Time <span>-23 %</span> <b>0.62</b> <b>0.8</b> Current Week Last Week</div>
+      </main>
+    `)
+    expect(metrics).toEqual({
+      congestionCategory: "medium",
+      medianWaitingHours: 14.879999999999999,
+      previousMedianWaitingHours: 19.200000000000003,
+      weekOverWeekChangePct: -23,
+      longTailCongestion: true,
+      sourceUpdatedAt: "2026-07-26T00:00:00.000Z",
+    })
+  })
+
+  it("leaves missing Portcast fields undefined and tolerates layout changes", () => {
+    const metrics = parsePortcastPublicPage(`
+      <section data-kind="portcast">
+        <span>Congestion Category</span><em>low</em>
+        <div>Median Waiting Time 1.25 Current Week Last Week</div>
+      </section>
+    `)
+    expect(metrics).toMatchObject({ congestionCategory: "low", medianWaitingHours: 30 })
+    expect(metrics.previousMedianWaitingHours).toBeUndefined()
+    expect(metrics.weekOverWeekChangePct).toBeUndefined()
+    expect(metrics.longTailCongestion).toBeUndefined()
+    expect(metrics.sourceUpdatedAt).toBeUndefined()
+    expect(() => parsePortcastPublicPage("<html><body>not a port page</body></html>")).toThrow("empty or invalid")
+  })
+
+  it("uses the public page provider with daily caching and fingerprint stability", async () => {
+    let requestCount = 0
+    let now = new Date("2026-08-15T00:00:00.000Z")
+    const html = "<h1>Port Congestion at Shekou</h1><p>Last updated on 26 Jul 2026</p><p>Congestion Category medium</p><p>Long Tail Congestion No</p><p>Median Waiting Time 0.62 0.8 Current Week Last Week</p>"
+    const provider = createPortcastPublicPageProvider({
+      now: () => now,
+      fetcher: async (url) => {
+        requestCount += 1
+        expect(url).toBe(portcastPublicPageUrls["port-shekou"])
+        return { ok: true, status: 200, text: async () => html }
+      },
+    })
+    const first = await provider.getPorts([mockPorts[0]])
+    expect(first[0]).toMatchObject({ congestionLevel: "medium", waitingHours: 14.879999999999999, sourceUpdatedAt: "2026-07-26T00:00:00.000Z", stale: false, sourceStatus: "healthy", provenance: { ...providerProvenances.portcastPublic, sourceUrl: portcastPublicPageUrls["port-shekou"] } })
+    expect(first[0].congestionDetail).toMatchObject({ coverageStatus: "public", previousMedianWaitingHours: 19.200000000000003 })
+    expect(portcastFingerprint({ congestionCategory: "medium", medianWaitingHours: 14.879999999999999, previousMedianWaitingHours: 19.200000000000003, longTailCongestion: false, sourceUpdatedAt: "2026-07-26T00:00:00.000Z" })).toContain("medium")
+    now = new Date("2026-08-15T12:00:00.000Z")
+    const cached = await provider.getPorts(first)
+    expect(requestCount).toBe(1)
+    expect(cached[0].updatedAt).toBe(first[0].updatedAt)
+    now = new Date("2026-08-16T00:00:01.000Z")
+    const rechecked = await provider.getPorts(cached)
+    expect(requestCount).toBe(2)
+    expect(rechecked[0].updatedAt).toBe(first[0].updatedAt)
+  })
+
+  it("keeps last-known values explicit when a Portcast page is unavailable or malformed", async () => {
+    const unavailable = createPortcastPublicPageProvider({ fetcher: async () => ({ ok: false, status: 404, text: async () => "" }) })
+    const noPublicData = await unavailable.getPorts([mockPorts[3]])
+    expect(noPublicData[0]).toMatchObject({ waitingHours: mockPorts[3].waitingHours, stale: true, sourceStatus: "degraded", error: "no_public_data", provenance: mockPorts[3].provenance, congestionDetail: { coverageStatus: "no_public_data" } })
+
+    const malformed = createPortcastPublicPageProvider({ fetcher: async () => ({ ok: true, status: 200, text: async () => "<html>broken</html>" }) })
+    const failed = await malformed.getPorts([mockPorts[0]])
+    expect(failed[0]).toMatchObject({ congestionLevel: mockPorts[0].congestionLevel, waitingHours: mockPorts[0].waitingHours, stale: true, sourceStatus: "failed" })
+    expect(failed[0].error).toContain("empty or invalid")
   })
 
   it("keeps last-known data and marks a failed provider stale", () => {

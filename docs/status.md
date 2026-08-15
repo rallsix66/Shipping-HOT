@@ -1,12 +1,12 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
-> Snapshot date: 2026-08-14
-> Evidence scope: local code / configuration / Git metadata; V2.0 Data Trust Foundation is sealed; 96/96 tests and production build passed; targeted lint passed; typecheck retains the documented baseline TS6142/TS6307 findings; Vite development-route/API smoke passed; production Nitro subroute smoke remains pending because of the existing `#nitro/index` package-import runtime error.
+> Snapshot date: 2026-08-15
+> Evidence scope: local code / configuration / Git metadata; V2.0 is sealed and V2.1 Port Intelligence is implemented and verified; 100/100 tests and production build passed; targeted lint on V2.1 files passed; typecheck retains the documented baseline TS6142/TS6307 findings; Vite development-route/API smoke passed; production Nitro subroute smoke remains pending because of the existing `#nitro/index` package-import runtime error.
 > Source of truth for: current implementation and verification state
 
 ## 1. One-Sentence Status
 
-Shipping HOT V2.0 Data Trust Foundation is sealed on the retained NewsNow stack: deterministic Domain/Event rules, local API routes, Mock fallback, optional AISStream Vessel data, optional Open-Meteo Marine weather risk signals, structured provenance/freshness for Feed/Vessel/Port/Voyage/Event/HOT data, explicit legacy trust backfill rules, and Chinese UI trust labels are active; V2.1 is not started. The frontend remains the 2026-08-14 aurora glass/bento system with no new dependencies, and runtime caveats are recorded below.
+Shipping HOT V2.1 Port Intelligence is implemented and verified on the retained NewsNow stack: V2.0 trust rules remain sealed, Mock remains the default, and an opt-in Portcast public-page adapter normalizes low-frequency public congestion fields for the eight focus ports without commercial API access or a new dependency. The frontend remains the 2026-08-14 aurora glass/bento system with port attribution/detail fields, and runtime caveats are recorded below.
 
 ## 2. Current Environment
 
@@ -14,10 +14,10 @@ Shipping HOT V2.0 Data Trust Foundation is sealed on the retained NewsNow stack:
 - Git remotes: `origin=https://github.com/rallsix66/Shipping-HOT.git` and `upstream=https://github.com/ourongxing/newsnow.git`; GitHub CLI API authentication is still invalid, so account metadata was not API-verified
 - Local run status: Vite development smoke returned 200 for `/`, `/vessels`, `/ports`, `/voyages`, `/events`, `/feed`, `/settings` and `/api/shipping`; production Nitro API/root returned 200, while production subroutes hit the existing `#nitro/index` package-import error
 - Deployment status: `out-of-scope`; repository contains optional Cloudflare/Vercel/Bun/Docker configuration, but no deployment was performed
-- Database / external services: Repository paths are implemented; SQLite watch/settings restart persistence is verified on Node 22.23.2 with the compatible native module. Node 24.15.0 currently mismatches the bundled native module ABI and falls back to memory; AISStream and Open-Meteo remain optional server-side V1 sources
+- Database / external services: Repository paths are implemented; SQLite watch/settings restart persistence is verified on Node 22.23.2 with the compatible native module. Node 24.15.0 currently mismatches the bundled native module ABI and falls back to memory; AISStream, Portcast public pages and Open-Meteo remain optional server-side sources
 - Mock fixture timestamps: generated relative to the runtime clock when a snapshot is created; deterministic fixed time is limited to `shared/shipping-engine.test.ts`
 - V1 focus-port seed: all eight requested ports are present in the shared fixture and Repository seed path: Shekou, Yantian, Nansha, Laem Chabang, Port Klang, Manila, Jakarta and Ho Chi Minh City
-- Last verified surface: source inspection, `git diff --check`, full test suite passed (96/96), production build passed, Vite development-route/API smoke passed, and targeted lint on changed files passed; `pnpm typecheck` remains pending on pre-existing TS6142/TS6307 test-config errors.
+- Last verified surface: source inspection, `git diff --check`, full test suite passed (100/100), production build passed, Vite development-route/API smoke passed, targeted lint on all V2.1 modified files passed; `pnpm typecheck` remains pending on pre-existing TS6142/TS6307 test-config errors.
 
 ## 3. Current Architecture Summary
 
@@ -42,7 +42,8 @@ Shipping HOT V2.0 Data Trust Foundation is sealed on the retained NewsNow stack:
 | Shipping HOT Domain and Event Engine | implemented | `shared/shipping.ts`, `shared/shipping-rules.ts`, `shared/shipping-engine.ts` | Event reconcile covers update, resolve and reopen; HOT removes FeedItem/Event duplicates, uses related entity freshness, and ranks severity, watched relevance, freshness and recency; normalized Real Vessel/Weather signals use the same path |
 | Shipping HOT API and local tables | implemented / V2.0 verified | `server/api/shipping/**`, `server/database/shipping.ts`, `server/shipping-store.ts`, `shared/shipping.ts` | Provider → service → Repository path carries provenance, sourceUpdatedAt, fetchedAt and freshness; no DB schema/migration change; eight V1 focus-port seeds remain present |
 | Shipping HOT UI/routes | implemented / redesigned 2026-08-14 | `src/routes/**`, `src/components/shipping/**` | `/`, `/vessels`, `/ports`, `/voyages`, `/events`, `/feed`, `/settings` and detail routes; UI rebuilt as aurora glass/bento design system (CSS gradient blobs + grid/noise, glass panels, spotlight hover, gradient borders, segmented filters, marquee, animated counters, route transitions, dark-first theme with toggle) using the existing framer-motion dependency — no new packages |
-| Shipping HOT V2.0 Data Trust Foundation | sealed | `shared/shipping.ts`, `server/database/shipping.ts`, `server/providers/shipping.ts`, `server/shipping-store.ts`, `shared/shipping-engine.ts`, `src/components/shipping/format.ts`, `src/components/shipping/ui.tsx` | `sourceType`/`dataNature` provenance, independent freshness timestamps/status, deterministic legacy backfill, source-aware Event reconciliation/evidence and explicit Mock/Chinese UI labels; V2.1+ not started |
+| Shipping HOT V2.0 Data Trust Foundation | sealed | `shared/shipping.ts`, `server/database/shipping.ts`, `server/providers/shipping.ts`, `server/shipping-store.ts`, `shared/shipping-engine.ts`, `src/components/shipping/format.ts`, `src/components/shipping/ui.tsx` | `sourceType`/`dataNature` provenance, independent freshness timestamps/status, deterministic legacy backfill, source-aware Event reconciliation/evidence and explicit Mock/Chinese UI labels |
+| Shipping HOT V2.1 Port Intelligence | implemented / verified | `server/providers/shipping.ts`, `server/shipping-store.ts`, `shared/shipping.ts`, `src/components/shipping/pages.tsx` | Opt-in `PortcastPublicPageProvider`, eight public-page mappings, visible-field parser, 24-hour cache/fingerprint, `public`/`no_public_data` detail and source attribution; Mock remains default |
 
 ## 5. Decision Status
 
@@ -93,16 +94,16 @@ Shipping HOT V2.0 Data Trust Foundation is sealed on the retained NewsNow stack:
 
 ## 8. Current Work and Blockers
 
-- Active work: V2.0 closeout is complete and sealed; V2.1 Port Intelligence and all later phases are not started.
+- Active work: V2.1 Port Intelligence closeout is complete; V2.2 Country Calendar and all later phases are not started.
 - 2026-08-14 frontend redesign round (completed): all seven pages plus navigation rebuilt with the aurora glass/bento design system — `src/components/shipping/aurora.tsx` (CSS gradient-blob background + grid/noise/vignette), `src/components/shipping/ui.tsx` (Reveal, SpotlightCard, AnimatedNumber, Segmented, Marquee, ProviderChip, StatusDot, EmptyState), rewritten `app.tsx` (floating glass nav with layoutId active pill, route transitions, dark-first theme toggle, restyled badges/StatCard/VoyageCard/EventCard/FeedCard) and `pages.tsx` (bento hero dashboard, segmented filters, congestion gauges, staggered reveals). Data flow, API calls and routes are unchanged; no new dependencies. A follow-up smoothness pass removed per-frame GPU hotspots (blob `filter: blur(90px)`, dark-mode `mix-blend-mode: screen`, per-card `backdrop-filter`) in favor of pre-feathered gradients and opaque frosted fills; only the sticky nav keeps a reduced backdrop blur. An adversarial review round then fixed: watch/save busy-state reset via try/finally, `MotionConfig reducedMotion="user"` for JS animations, route-transition remount removal (hero-only entrance), dark-mode secondary-text contrast tier bump, settings save error state machine, `freshness=unknown` status label, mobile nav active-pill scrollIntoView, anti-FOUC theme script in `index.html`, react-refresh warnings eliminated by splitting `format.ts`/`data.ts`, and a `test/ui-smoke.test.ts` renderToString guard (86/86 tests). Verification: `pnpm typecheck` passed, eslint on changed files 0 errors / 0 warnings, full test suite passed (86/86), `pnpm build` passed.
 - Blockers: Node 24.15.0 cannot load the bundled Node 22 native module, so Node 24 startup uses the documented in-memory fallback. Production Nitro subroutes reproduce the existing `#nitro/index` package-import runtime error; Vite development routes are healthy. GitHub CLI account authentication remains invalid but direct Git push is available through the configured network path.
-- Verification: `pnpm test --run` = passed (96/96); `pnpm build` = passed; `pnpm typecheck` = pending on pre-existing TS6142/TS6307 test-config errors; targeted lint on changed files = passed; Vite development route/API smoke = passed; production API/root smoke = passed, production subroutes = pending existing Nitro runtime issue; `git diff --check` = passed; `shared/updated-sources.ts` unchanged; Neat Freak official Bash script = pending because Bash is unavailable, manual equivalent closeout = completed with no cleanup.
-- V2 status: `V2.0 sealed`; `V2.1 not started`. Live external Provider calls remain optional and unconfigured without user-supplied credentials/network access; the approved Mock fallback remains healthy.
+- Verification: `pnpm test --run` = passed (100/100); `pnpm build` = passed; `pnpm typecheck` = pending on pre-existing TS6142/TS6307 test-config errors; targeted lint on all V2.1 modified files = passed; Vite development route/API smoke = passed; production API/root smoke = passed, production subroutes = pending existing Nitro runtime issue; `git diff --check` = passed; `shared/updated-sources.ts` unchanged; Neat Freak official Bash script = pending because Bash is unavailable, manual equivalent closeout = completed with no cleanup.
+- V2 status: `V2.0 sealed`; `V2.1 implemented and verified`; `V2.2 not started`. Live external Provider calls remain optional; the approved Mock fallback remains healthy unless `SHIPPING_PORT_PROVIDER=portcast` is explicitly configured.
 - Neat Freak Closeout: pending official `audit-inventory.sh` execution because Bash is unavailable in this Windows environment; manual equivalent audit completed from the loaded Skill instructions. No cleanup candidates were deleted.
 
 ## 9. Recommended Next Action
 
-Next: V2.0 is sealed; proceed to the explicitly approved V2.1 Port Intelligence gate. Separately, use the compatible Node 22 runtime for persistence verification or rebuild native dependencies through an authorized toolchain change. Optional UI follow-ups stay out of scope.
+Next: V2.1 is implemented and verified; proceed to the explicitly approved V2.2 Country Calendar gate. Separately, use the compatible Node 22 runtime for persistence verification or rebuild native dependencies through an authorized toolchain change. Optional UI follow-ups stay out of scope.
 
 ## 10. Knowledge Closeout Surface
 
@@ -110,7 +111,7 @@ Next: V2.0 is sealed; proceed to the explicitly approved V2.1 Port Intelligence 
 |---|---|---|---|
 | Code | changed-and-verified | Shipping HOT shared Domain, Provider orchestration, local Vessel/Voyage ownership merge, API validation, Repository paths, routes, UI and tests inspected; runtime-relative Mock fixture timestamps and Event Engine test determinism are covered by passing checks | Treat code/config as authority for current implementation |
 | Runtime | changed-and-verified | Fresh Nitro API smoke and SQLite watch/settings restart persistence passed on Node 22.23.2; Node 24.15.0 has a native-module ABI mismatch and uses fallback | Keep runtime caveat explicit |
-| Documentation | changed-and-verified | Architecture, status and V2 roadmap describe sealed V2.0 trust boundaries, V1 Provider adapters and current runtime evidence | Keep V2.1+ explicitly not started until Gate A is handed off |
+| Documentation | changed-and-verified | Architecture, status and V2 roadmap describe sealed V2.0, implemented V2.1 Portcast boundary and current runtime evidence | Keep V2.2+ explicitly not started until Gate B is handed off |
 | Rules | changed-and-verified | Root `AGENTS.md` defines project guardrails, verification rules, architecture-change workflow, and mandatory task Closeout; no project `CLAUDE.md` or override; global Codex `AGENTS.md` is empty | Use `AGENTS.md` as the project entry point |
 | Memory | not-applicable | No project memory store or user-authorized memory write was identified | No memory files changed |
 | Workspace | changed-and-verified | Manual Neat Freak-equivalent inventory found no other-agent rule artifacts, no tracked database/env artifact, and the final `git status` is recorded at closeout; `.data` is empty and `dist` remains ignored build output | Review the final `git status` before any commit; no cleanup performed |
@@ -126,4 +127,4 @@ Next: V2.0 is sealed; proceed to the explicitly approved V2.1 Port Intelligence 
 - V2.0 scope guard: no Calendarific implementation, no new providers, no `calendar_events` table, no database migration, no new dependency and no major NewsNow/Event/UI rewrite.
 - Fixed NewsNow updated-source metadata generation side effect: normal `dev`/`build`/`presource` no longer rewrites `shared/updated-sources.ts`; explicit `--updated-sources` generation is required.
 - Closeout: pending official `audit-inventory.sh` execution because Bash is unavailable in this Windows environment; the required manual Neat Freak-equivalent audit completed with no tracked database/env artifact or cleanup action.
-- Final V2 state at this closeout checkpoint: `V2.0 sealed`; `V2.1 not started`.
+- Final V2 state at this closeout checkpoint: `V2.0 sealed`; `V2.1 implemented and verified`; `V2.2 not started`.
