@@ -154,6 +154,12 @@ export class ShippingRepository {
       .run(event.id, event.countryCode, event.subdivisionCode ?? null, event.date, event.endDate ?? null, event.type, event.isPublicHoliday ? 1 : 0, event.businessImpact, event.sourceId, event.sourceUrl ?? null, event.verified ? 1 : 0, event.lastCheckedAt, event.updatedAt ?? null, event.stale ? 1 : 0, JSON.stringify(event))
   }
 
+  async deleteCalendarEvents(ids: string[]) {
+    if (!ids.length) return
+    const placeholders = ids.map(() => "?").join(",")
+    await this.db.prepare(`DELETE FROM calendar_events WHERE id IN (${placeholders})`).run(...ids)
+  }
+
   async saveSettings(settings: ShippingSettings) {
     await this.db.prepare("INSERT OR REPLACE INTO settings (id, data, updated_at) VALUES ('default', ?, ?)").run(JSON.stringify(settings), new Date().toISOString())
   }

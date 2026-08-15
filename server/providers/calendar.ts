@@ -1,6 +1,6 @@
 import { env } from "node:process"
 import type { DataEvidence, DataProvenance } from "@shared/shipping"
-import { type BusinessImpact, type CalendarCountryCode, type CalendarEvent, type CalendarEventType, type CalendarProviderResult, type CalendarQuery, type CalendarSourceKind, calendarCountries, calendarEventId, calendarEventKey, calendarSeverity } from "@shared/calendar"
+import { type BusinessImpact, type CalendarCountryCode, type CalendarCoverageStatus, type CalendarEvent, type CalendarEventType, type CalendarProviderResult, type CalendarQuery, type CalendarSourceKind, calendarCountries, calendarEventId, calendarSeverity } from "@shared/calendar"
 
 export interface CalendarProvider {
   getEvents: (query: CalendarQuery) => Promise<CalendarProviderResult>
@@ -29,6 +29,8 @@ export const officialHolidaySources: Record<CalendarCountryCode, string> = {
   VN: "https://xaydungchinhsach.chinhphu.vn/nghi-le.html",
 }
 
+export const officialHolidayProviderStatus = "contract_available_live_sync_pending" as const
+
 interface CalendarificHoliday {
   name?: unknown
   description?: unknown
@@ -37,7 +39,8 @@ interface CalendarificHoliday {
 }
 
 interface CalendarificPayload {
-  response?: { holidays?: unknown }
+  response?: { holidays?: unknown, coverage?: unknown }
+  meta?: { coverage?: unknown }
 }
 
 interface CalendarEventOptions {
@@ -53,6 +56,9 @@ interface CalendarEventOptions {
   sourceUrl?: string
   verified: boolean
   description?: string
+  note?: string
+  internalReminder?: string
+  operator?: string
   lastCheckedAt: string
   stale?: boolean
   sourceStatus?: CalendarEvent["sourceStatus"]
@@ -68,6 +74,9 @@ function calendarEvent(options: CalendarEventOptions): CalendarEvent {
     countryCode: options.countryCode,
     name: options.name,
     description: options.description,
+    note: options.note,
+    internalReminder: options.internalReminder,
+    operator: options.operator,
     date: options.date,
     endDate: options.endDate,
     type: options.type,
@@ -146,6 +155,14 @@ export function normalizeCalendarificPayload(value: unknown, countryCode: Calend
   })
 }
 
+export function calendarificCoverageStatus(value: unknown, eventCount: number): CalendarCoverageStatus {
+  const payload = value as CalendarificPayload
+  const explicit = asString(payload?.response?.coverage ?? payload?.meta?.coverage)?.toLowerCase()
+  if (explicit === "complete") return "complete"
+  if (explicit === "partial") return "partial"
+  return eventCount > 0 ? "partial" : "unknown"
+}
+
 export interface CalendarificProviderOptions {
   apiKey: string
   fetcher?: CalendarFetcher
@@ -168,8 +185,10 @@ export function createCalendarificProvider(options: CalendarificProviderOptions)
         try {
           const response = await fetcher(url.toString())
           if (!response.ok) throw new Error(`Calendarific request failed (${response.status})`)
-          events.push(...normalizeCalendarificPayload(await response.json(), countryCode, query.year, fetchedAt))
-          coverage.push({ countryCode, year: query.year, status: "complete", sourceId: "calendarific", lastCheckedAt: fetchedAt })
+          const payload = await response.json()
+          const countryEvents = normalizeCalendarificPayload(payload, countryCode, query.year, fetchedAt)
+          events.push(...countryEvents)
+          coverage.push({ countryCode, year: query.year, status: calendarificCoverageStatus(payload, countryEvents.length), sourceId: "calendarific", lastCheckedAt: fetchedAt })
         } catch (error) {
           coverage.push({ countryCode, year: query.year, status: "unknown", sourceId: "calendarific", lastCheckedAt: fetchedAt, error: sanitizeCalendarError(error) })
         }
@@ -179,24 +198,35 @@ export function createCalendarificProvider(options: CalendarificProviderOptions)
   }
 }
 
+function scopedEvents(options: { events?: CalendarEvent[], now?: () => Date }, query: CalendarQuery, sourceId: string): CalendarProviderResult {
+  const fetchedAt = (options.now ?? (() => new Date()))().toISOString()
+  const events = (options.events ?? []).filter(event => query.countries.includes(event.countryCode) && event.date.startsWith(String(query.year))).map(event => ({
+    ...event,
+    lastCheckedAt: fetchedAt,
+    fetchedAt,
+    stale: false,
+    sourceStatus: "healthy" as const,
+  }))
+  return {
+    events,
+    coverage: query.countries.map(countryCode => ({
+      countryCode,
+      year: query.year,
+      status: events.some(event => event.countryCode === countryCode) ? "partial" as const : "unknown" as const,
+      sourceId,
+      lastCheckedAt: fetchedAt,
+    })),
+    fetchedAt,
+  }
+}
+
 export interface OfficialHolidayProviderOptions {
   events?: CalendarEvent[]
   now?: () => Date
 }
 
 export function createOfficialHolidayProvider(options: OfficialHolidayProviderOptions = {}): CalendarProvider {
-  const now = options.now ?? (() => new Date())
-  return {
-    async getEvents(query) {
-      const fetchedAt = now().toISOString()
-      const events = (options.events ?? []).filter(event => query.countries.includes(event.countryCode) && event.date.startsWith(String(query.year)))
-      return {
-        events,
-        coverage: query.countries.map(countryCode => ({ countryCode, year: query.year, status: events.some(event => event.countryCode === countryCode) ? "partial" as const : "unknown" as const, sourceId: "official-holiday-source", lastCheckedAt: fetchedAt })),
-        fetchedAt,
-      }
-    },
-  }
+  return { getEvents: async query => scopedEvents(options, query, "official-holiday-source") }
 }
 
 export interface ManualHolidayProviderOptions {
@@ -205,14 +235,7 @@ export interface ManualHolidayProviderOptions {
 }
 
 export function createManualHolidayProvider(options: ManualHolidayProviderOptions = {}): CalendarProvider {
-  const now = options.now ?? (() => new Date())
-  return {
-    async getEvents(query) {
-      const fetchedAt = now().toISOString()
-      const events = (options.events ?? []).filter(event => query.countries.includes(event.countryCode) && event.date.startsWith(String(query.year)))
-      return { events, coverage: query.countries.map(countryCode => ({ countryCode, year: query.year, status: events.some(event => event.countryCode === countryCode) ? "partial" as const : "unknown" as const, sourceId: "manual-holiday", lastCheckedAt: fetchedAt })), fetchedAt }
-    },
-  }
+  return { getEvents: async query => scopedEvents(options, query, "manual-holiday") }
 }
 
 function mockDate(year: number, month: number, day: number): string {
@@ -226,56 +249,130 @@ export function createMockCalendarEvents(year: number, now = new Date().toISOStr
   ])
 }
 
+export function createMockCalendarProvider(now = () => new Date()): CalendarProvider {
+  return {
+    async getEvents(query) {
+      const fetchedAt = now().toISOString()
+      const events = createMockCalendarEvents(query.year, fetchedAt).filter(event => query.countries.includes(event.countryCode))
+      return {
+        events,
+        coverage: query.countries.map(countryCode => ({ countryCode, year: query.year, status: "complete" as const, sourceId: "mock-calendar", lastCheckedAt: fetchedAt })),
+        fetchedAt,
+      }
+    },
+  }
+}
+
+export interface CompositeCalendarProviderOptions {
+  calendarific?: CalendarProvider
+  official?: CalendarProvider
+  manual?: CalendarProvider
+}
+
+export function createCompositeCalendarProvider(options: CompositeCalendarProviderOptions): CalendarProvider {
+  const sources = [
+    options.calendarific ? { sourceId: "calendarific", provider: options.calendarific } : undefined,
+    options.official ? { sourceId: "official-holiday-source", provider: options.official } : undefined,
+    options.manual ? { sourceId: "manual-holiday", provider: options.manual } : undefined,
+  ].filter((value): value is { sourceId: string, provider: CalendarProvider } => value !== undefined)
+  return {
+    async getEvents(query) {
+      const fetchedAt = new Date().toISOString()
+      const results = await Promise.all(sources.map(async (source) => {
+        try {
+          return await source.provider.getEvents(query)
+        } catch (error) {
+          return {
+            events: [] as CalendarEvent[],
+            coverage: query.countries.map(countryCode => ({ countryCode, year: query.year, status: "unknown" as const, sourceId: source.sourceId, lastCheckedAt: fetchedAt, error: sanitizeCalendarError(error) })),
+            fetchedAt,
+          }
+        }
+      }))
+      return {
+        events: results.flatMap(result => result.events),
+        coverage: results.flatMap(result => result.coverage),
+        fetchedAt: results.at(-1)?.fetchedAt ?? fetchedAt,
+      }
+    },
+  }
+}
+
+function normalizedName(value: string): string {
+  return value.trim().toLocaleLowerCase().normalize("NFKC").replace(/\s+/g, " ")
+}
+
+function factKey(event: Pick<CalendarEvent, "countryCode" | "name" | "type">): string {
+  return `${event.countryCode}:${normalizedName(event.name)}:${event.type}`
+}
+
+function factNameKey(event: Pick<CalendarEvent, "countryCode" | "name">): string {
+  return `${event.countryCode}:${normalizedName(event.name)}`
+}
+
 function factsChanged(base: CalendarEvent, override: CalendarEvent): boolean {
   return base.date !== override.date || base.endDate !== override.endDate || base.type !== override.type || base.isPublicHoliday !== override.isPublicHoliday
 }
 
+function evidenceFor(event: CalendarEvent): DataEvidence {
+  return { provenance: event.provenance ?? { sourceType: event.sourceKind, dataNature: "reported", sourceId: event.sourceId, sourceUrl: event.sourceUrl, verified: event.verified }, sourceUpdatedAt: event.sourceUpdatedAt ?? event.updatedAt }
+}
+
+function mergeFactGroup(events: CalendarEvent[], manualEvent: CalendarEvent | undefined): CalendarEvent | undefined {
+  const officialEvent = events.find(event => event.sourceKind === "official")
+  const thirdPartyEvent = events.find(event => event.sourceKind === "third_party" || event.sourceKind === "mock")
+  const selected = officialEvent ?? thirdPartyEvent ?? events[0]
+  if (!selected) return manualEvent
+  const factConflict = Boolean(officialEvent && thirdPartyEvent && factsChanged(thirdPartyEvent, officialEvent))
+  if (!manualEvent && !factConflict && events.length === 1 && !selected.evidence?.length) return selected
+  const baseEvidence = [...events.flatMap(event => event.evidence ?? []), ...events.map(evidenceFor)]
+  const base = {
+    ...selected,
+    conflictFlag: factConflict || selected.conflictFlag,
+    conflictReason: factConflict ? "Official source overrides a third-party calendar fact" : selected.conflictReason,
+    conflictingSourceIds: factConflict ? [...new Set([thirdPartyEvent!.sourceId, ...(selected.conflictingSourceIds ?? [])])] : selected.conflictingSourceIds,
+    evidence: [...new Map(baseEvidence.map(item => [`${item.provenance.sourceId}:${item.sourceUpdatedAt ?? ""}`, item])).values()],
+  }
+  if (!manualEvent) return base
+  const changed = factsChanged(base, manualEvent)
+  const manualEvidence = [...(manualEvent.evidence ?? []), evidenceFor(manualEvent)]
+  return {
+    ...base,
+    ...manualEvent,
+    id: manualEvent.id,
+    date: changed ? manualEvent.date : base.date,
+    endDate: changed ? manualEvent.endDate : base.endDate,
+    type: changed ? manualEvent.type : base.type,
+    isPublicHoliday: changed ? manualEvent.isPublicHoliday : base.isPublicHoliday,
+    name: base.name,
+    businessImpact: manualEvent.businessImpact,
+    description: manualEvent.description ?? base.description,
+    note: manualEvent.note ?? base.note,
+    internalReminder: manualEvent.internalReminder ?? base.internalReminder,
+    sourceId: manualEvent.sourceId,
+    sourceKind: "user",
+    verified: true,
+    conflictFlag: changed || base.conflictFlag,
+    conflictReason: changed ? manualEvent.conflictReason ?? "Manual override changes a source fact" : base.conflictReason,
+    conflictOperator: changed ? manualEvent.conflictOperator ?? manualEvent.operator : base.conflictOperator,
+    conflictingSourceIds: changed ? [...new Set([base.sourceId, ...(base.conflictingSourceIds ?? [])])] : base.conflictingSourceIds,
+    evidence: [...base.evidence ?? [], ...manualEvidence],
+  }
+}
+
 export function mergeCalendarSources(thirdParty: CalendarEvent[], official: CalendarEvent[], manual: CalendarEvent[]): CalendarEvent[] {
   const grouped = new Map<string, CalendarEvent[]>()
-  for (const event of [...thirdParty, ...official]) {
-    const key = calendarEventKey(event)
-    grouped.set(key, [...(grouped.get(key) ?? []), event])
-  }
-  const result: CalendarEvent[] = []
-  for (const events of grouped.values()) {
-    const officialEvent = events.find(event => event.sourceKind === "official")
-    const thirdPartyEvent = events.find(event => event.sourceKind === "third_party" || event.sourceKind === "mock")
-    const manualEvent = events.find(event => event.sourceKind === "user")
-    const selected = officialEvent ?? thirdPartyEvent ?? manualEvent ?? events[0]
-    if (!selected) continue
-    if (manualEvent && manualEvent !== selected) {
-      const changed = factsChanged(selected, manualEvent)
-      result.push({
-        ...selected,
-        ...manualEvent,
-        id: manualEvent.id,
-        conflictFlag: changed || selected.conflictFlag,
-        conflictReason: changed ? manualEvent.conflictReason ?? "Manual override changes a source fact" : manualEvent.conflictReason,
-        conflictingSourceIds: changed ? [...new Set([selected.sourceId, ...(selected.conflictingSourceIds ?? [])])] : selected.conflictingSourceIds,
-        evidence: [...(selected.evidence ?? []), ...(manualEvent.evidence ?? [])],
-      })
-    } else {
-      result.push(selected)
-    }
-  }
-  for (const manualEvent of manual) {
-    const matchingIndex = result.findIndex(event => event.countryCode === manualEvent.countryCode && event.type === manualEvent.type && event.name.trim().toLocaleLowerCase() === manualEvent.name.trim().toLocaleLowerCase())
-    const matching = matchingIndex < 0 ? undefined : result[matchingIndex]
-    if (!matching) {
-      result.push(manualEvent)
-      continue
-    }
-    if (matching.id === manualEvent.id) continue
-    const changed = factsChanged(matching, manualEvent)
-    result[matchingIndex] = {
-      ...matching,
-      ...manualEvent,
-      id: manualEvent.id,
-      conflictFlag: changed || matching.conflictFlag,
-      conflictReason: changed ? manualEvent.conflictReason ?? "Manual override changes a source fact" : manualEvent.conflictReason,
-      conflictingSourceIds: changed ? [...new Set([matching.sourceId, ...(matching.conflictingSourceIds ?? [])])] : matching.conflictingSourceIds,
-      evidence: [...(matching.evidence ?? []), ...(manualEvent.evidence ?? [])],
-    }
+  for (const event of [...thirdParty, ...official]) grouped.set(factKey(event), [...(grouped.get(factKey(event)) ?? []), event])
+  const manualByFact = new Map(manual.map(event => [factKey(event), event]))
+  const manualByName = new Map(manual.map(event => [factNameKey(event), event]))
+  const matchedManualIds = new Set<string>()
+  const result = [...grouped.entries()].map(([key, events]) => {
+    const manualEvent = manualByFact.get(key) ?? manualByName.get(factNameKey(events[0]))
+    if (manualEvent) matchedManualIds.add(manualEvent.id)
+    return mergeFactGroup(events, manualEvent)
+  }).filter((event): event is CalendarEvent => event !== undefined)
+  for (const event of manual) {
+    if (!matchedManualIds.has(event.id)) result.push(event)
   }
   return result.sort((a, b) => a.date.localeCompare(b.date) || a.countryCode.localeCompare(b.countryCode) || a.name.localeCompare(b.name))
 }
@@ -284,13 +381,17 @@ export function configureCalendarProviders(environment: { [key: string]: string 
   const key = environment.CALENDARIFIC_API_KEY
   const requested = environment.SHIPPING_CALENDAR_PROVIDER
   const mode = requested === "calendarific" && key ? "calendarific" : requested === "official" ? "official" : requested === "manual" ? "manual" : "mock"
-  const mock = createManualHolidayProvider({ events: createMockCalendarEvents(new Date().getUTCFullYear()) })
+  const calendarific = key ? createCalendarificProvider({ apiKey: key }) : undefined
+  const official = createOfficialHolidayProvider()
+  const manual = createManualHolidayProvider()
+  const selected = mode === "calendarific" ? { calendarific, official, manual } : mode === "official" ? { official, manual } : mode === "manual" ? { manual } : {}
+  const provider = mode === "mock" ? createMockCalendarProvider() : createCompositeCalendarProvider(selected)
   return {
-    provider: mode === "calendarific" ? createCalendarificProvider({ apiKey: key! }) : mode === "official" ? createOfficialHolidayProvider() : mode === "manual" ? createManualHolidayProvider() : mock,
-    modes: { calendar: mode },
-    calendarific: key ? createCalendarificProvider({ apiKey: key }) : undefined,
-    official: createOfficialHolidayProvider(),
-    manual: mock,
+    provider,
+    modes: { calendar: mode, calendarSources: Object.keys(selected).filter(source => selected[source as keyof typeof selected] !== undefined) },
+    calendarific,
+    official,
+    manual,
   }
 }
 
@@ -299,8 +400,8 @@ export const calendarProvider = configured.provider
 export const calendarProviderModes = configured.modes
 export const calendarProviders = { calendarific: configured.calendarific, official: configured.official, manual: configured.manual }
 
-export function calendarAttribution(): string {
-  return "Powered by Calendarific"
+export function calendarAttribution(options: { provider?: string, events?: CalendarEvent[] } = {}): string | undefined {
+  return options.provider === "calendarific" || options.events?.some(event => event.sourceId === "calendarific") ? "Powered by Calendarific" : undefined
 }
 
 export { calendarSeverity }

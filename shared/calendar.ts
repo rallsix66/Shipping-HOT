@@ -30,6 +30,9 @@ export interface CalendarEvent extends Freshness, ProvenanceAware {
   sourceKind: CalendarSourceKind
   verified: boolean
   lastCheckedAt: string
+  note?: string
+  internalReminder?: string
+  operator?: string
   conflictFlag?: boolean
   conflictReason?: string
   conflictOperator?: string

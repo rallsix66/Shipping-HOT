@@ -143,20 +143,50 @@ function calendarQuery(year: number, countries?: CalendarCountryCode[]): Calenda
   return { year, countries: countries?.length ? countries : Object.keys(calendarCountries) as CalendarCountryCode[] }
 }
 
+function calendarIdentity(event: Pick<CalendarEvent, "countryCode" | "name" | "type">): string {
+  return `${event.countryCode}:${event.name.trim().toLocaleLowerCase().normalize("NFKC").replace(/\s+/g, " ")}:${event.type}`
+}
+
+function coverageForEvent(event: CalendarEvent, coverage: CalendarProviderResult["coverage"], year: number) {
+  return coverage.filter(item => item.countryCode === event.countryCode && item.year === year && item.sourceId === event.sourceId)
+}
+
+export function reconcileCalendarEvents(existing: CalendarEvent[], incoming: CalendarEvent[], coverage: CalendarProviderResult["coverage"], year: number): { events: CalendarEvent[], removedIds: string[] } {
+  const merged = mergeCalendarSources(incoming.filter(event => event.sourceKind === "third_party" || event.sourceKind === "mock"), incoming.filter(event => event.sourceKind === "official"), incoming.filter(event => event.sourceKind === "user"))
+  const mergedIdentities = new Set(merged.map(calendarIdentity))
+  const incomingIds = new Set(incoming.map(event => event.id))
+  const removedIds: string[] = []
+  const retained = existing.filter((event) => {
+    if (!event.date.startsWith(String(year))) return true
+    if (mergedIdentities.has(calendarIdentity(event))) return false
+    const scoped = coverageForEvent(event, coverage, year)
+    if (scoped.some(item => item.status === "complete")) {
+      if (!incomingIds.has(event.id)) removedIds.push(event.id)
+      return incomingIds.has(event.id)
+    }
+    return true
+  })
+  const byId = new Map([...retained, ...merged].map(event => [event.id, event]))
+  return { events: [...byId.values()].sort((a, b) => a.date.localeCompare(b.date) || a.countryCode.localeCompare(b.countryCode) || a.name.localeCompare(b.name)), removedIds }
+}
+
 export async function syncCalendarEvents(year = mockCalendarYear, countries?: CalendarCountryCode[]): Promise<CalendarProviderResult> {
   await initialize()
-  const result = await providers.calendar.getEvents(calendarQuery(year, countries))
+  const query = calendarQuery(year, countries)
+  const result = await providers.calendar.getEvents(query)
   const existing = fallbackSnapshot.calendarEvents ?? []
-  const incomingKeys = new Set(result.events.map(event => `${event.countryCode}:${event.date}:${event.name}:${event.type}`))
-  const retained = existing.filter(event => !result.coverage.some(coverage => coverage.countryCode === event.countryCode && coverage.year === year) || !incomingKeys.has(`${event.countryCode}:${event.date}:${event.name}:${event.type}`))
-  const merged = mergeCalendarSources(result.events.filter(event => event.sourceKind === "third_party" || event.sourceKind === "mock"), result.events.filter(event => event.sourceKind === "official"), result.events.filter(event => event.sourceKind === "user"))
-  const next: CalendarEvent[] = [...retained, ...merged]
-  const settings = { ...fallbackSnapshot.settings, calendarSync: result.coverage }
-  const snapshot = { ...fallbackSnapshot, settings, calendarEvents: next, calendarCoverage: result.coverage }
+  const reconciled = reconcileCalendarEvents(existing, result.events, result.coverage, year)
+  const previousCoverage = fallbackSnapshot.calendarCoverage ?? fallbackSnapshot.settings.calendarSync ?? []
+  const coverage = [...previousCoverage.filter(item => !(query.countries.includes(item.countryCode) && item.year === year)), ...result.coverage]
+  const settings = { ...fallbackSnapshot.settings, calendarSync: coverage }
+  const snapshot = { ...fallbackSnapshot, settings, calendarEvents: reconciled.events, calendarCoverage: coverage }
+  snapshot.events = detectShippingEvents(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, snapshot.settings, fallbackSnapshot.events, result.fetchedAt, snapshot.calendarEvents)
   fallbackSnapshot = structuredClone(snapshot)
-  for (const event of next) await repository?.upsertCalendarEvent(event)
+  if (reconciled.removedIds.length) await repository?.deleteCalendarEvents(reconciled.removedIds)
+  for (const event of reconciled.events) await repository?.upsertCalendarEvent(event)
+  for (const event of snapshot.events) await repository?.upsertEvent(event)
   if (repository) await repository.saveSettings(settings)
-  return { ...result, events: next }
+  return { ...result, events: reconciled.events, coverage }
 }
 
 export async function updateShippingSettings(settings: Partial<Omit<ShippingSettings, "eventThresholds">> & { eventThresholds?: Partial<ShippingSettings["eventThresholds"]> }) {

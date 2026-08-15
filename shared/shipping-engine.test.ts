@@ -152,4 +152,38 @@ describe("shipping HOT event engine", () => {
     expect(retained[0]).toMatchObject({ status: "active", stale: true, sourceStatus: "failed", error: "Calendarific unavailable" })
     expect(retained[0].lastDetectedAt).toBe(initial[0].lastDetectedAt)
   })
+
+  it("announces a newly discovered government special holiday immediately and deduplicates it", () => {
+    const snapshot = createMockSnapshot()
+    const calendarEvent: CalendarEvent = {
+      id: "calendar:TH:2026-01-03:emergency-port-holiday:government_special",
+      countryCode: "TH",
+      name: "Emergency port holiday",
+      date: "2026-01-03",
+      type: "government_special",
+      isPublicHoliday: true,
+      businessImpact: "high",
+      sourceId: "official-th",
+      sourceKind: "official",
+      sourceUrl: "https://example.gov/holiday",
+      verified: true,
+      lastCheckedAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      fetchedAt: "2026-01-01T00:00:00.000Z",
+      stale: false,
+      sourceStatus: "healthy",
+      provenance: { sourceType: "official", dataNature: "reported", sourceId: "official-th" },
+    }
+    const initial = detectShippingEvents([], [], [], [], snapshot.settings, [], "2026-01-01T00:00:00.000Z", [calendarEvent])
+    expect(initial).toHaveLength(1)
+    expect(initial[0]).toMatchObject({
+      type: "calendar_announcement",
+      calendarEventId: calendarEvent.id,
+      dedupeKey: `calendar:${calendarEvent.id}:announced`,
+      severity: "warning",
+    })
+    const repeated = detectShippingEvents([], [], [], [], snapshot.settings, initial, "2026-01-01T01:00:00.000Z", [calendarEvent])
+    expect(repeated).toHaveLength(1)
+    expect(repeated[0].id).toBe(initial[0].id)
+  })
 })

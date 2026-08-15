@@ -33,7 +33,11 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
   feedItems.forEach(feed => sourceTrust.set(`feed:${feed.id}`, feed))
   const today = now.slice(0, 10)
   for (const event of calendarEvents) {
-    for (const lead of calendarLeadDays(event)) sourceTrust.set(`calendar:${event.id}:${lead}`, event)
+    if (event.type === "government_special") {
+      sourceTrust.set(`calendar:${event.id}:announced`, event)
+    } else {
+      for (const lead of calendarLeadDays(event)) sourceTrust.set(`calendar:${event.id}:${lead}`, event)
+    }
   }
 
   for (const vessel of vessels.filter(isFreshEventEvidence)) {
@@ -53,11 +57,17 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
       candidates.push({ ...eventTrust(port), type: "port_congestion", severity: port.congestionLevel === "critical" ? "critical" : "warning", status: "active", title: `${port.nameEn} 拥堵升级`, summary: `等待 ${port.waitingVessels} 艘船，预计等待 ${port.waitingHours} 小时。`, occurredAt: port.updatedAt ?? now, detectedAt: now, dedupeKey: `port_congestion:${port.id}`, portId: port.id, evidenceJson: { congestionLevel: port.congestionLevel, waitingHours: port.waitingHours } })
     }
   }
-  for (const feed of feedItems.filter(item => isFreshEventEvidence(item) && (item.severity === "warning" || item.severity === "critical"))) {
-    candidates.push({ ...eventTrust(feed), type: feed.type, severity: feed.severity, status: "active", title: feed.title, summary: feed.summary, occurredAt: feed.publishedAt, detectedAt: now, dedupeKey: `feed:${feed.id}`, feedItemId: feed.id, evidenceJson: { category: feed.category, hotReason: feed.hotReason, relatedPortIds: feed.relatedPortIds, relatedVesselIds: feed.relatedVesselIds, relatedVoyageIds: feed.relatedVoyageIds } })
+  for (const feed of feedItems.filter(item => isFreshEventEvidence(item) && item.eventEligibility !== false && item.publicationTimeKnown !== false && (item.severity === "warning" || item.severity === "critical"))) {
+    candidates.push({ ...eventTrust(feed), type: feed.type, severity: feed.severity, status: "active", title: feed.title, summary: feed.summary, occurredAt: feed.publishedAt || feed.sourceUpdatedAt || now, detectedAt: now, dedupeKey: `feed:${feed.id}`, feedItemId: feed.id, evidenceJson: { category: feed.category, hotReason: feed.hotReason, relatedPortIds: feed.relatedPortIds, relatedVesselIds: feed.relatedVesselIds, relatedVoyageIds: feed.relatedVoyageIds } })
   }
   for (const calendarEvent of calendarEvents.filter(isFreshEventEvidence)) {
     const daysUntil = daysUntilCalendarEvent(calendarEvent.date, today)
+    if (calendarEvent.type === "government_special") {
+      if (daysUntil < 0) continue
+      const dedupeKey = `calendar:${calendarEvent.id}:announced`
+      candidates.push({ ...eventTrust(calendarEvent), type: "calendar_announcement", severity: calendarSeverity(calendarEvent.businessImpact), status: "active", title: `${calendarCountriesLabel(calendarEvent)}：新增政府临时假日`, summary: `${calendarEvent.name} 已于本次同步发现，日期为 ${calendarEvent.date}，请立即检查船期、清关和港口作业。`, occurredAt: calendarEvent.sourceUpdatedAt ?? calendarEvent.updatedAt ?? now, detectedAt: now, dedupeKey, calendarEventId: calendarEvent.id, evidenceJson: { calendarEventId: calendarEvent.id, announcement: true, daysUntil, isPublicHoliday: calendarEvent.isPublicHoliday } })
+      continue
+    }
     for (const lead of calendarLeadDays(calendarEvent)) {
       if (daysUntil < 0 || daysUntil > lead) continue
       const dedupeKey = `calendar:${calendarEvent.id}:${lead}`

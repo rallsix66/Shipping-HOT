@@ -14,6 +14,6 @@ export default defineEventHandler(async (event) => {
     events: (snapshot.calendarEvents ?? []).filter(item => item.date.startsWith(String(year)) && (!country || item.countryCode === country)),
     coverage: (snapshot.calendarCoverage ?? []).filter(item => item.year === year && (!country || item.countryCode === country)),
     provider: calendarProviderModes.calendar,
-    attribution: calendarAttribution(),
+    attribution: calendarAttribution({ provider: calendarProviderModes.calendar, events: snapshot.calendarEvents }),
   }
 })

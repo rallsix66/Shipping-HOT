@@ -174,7 +174,7 @@ export function HotPage() {
                   <a key={item.id} href={item.sourceUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 whitespace-nowrap text-sm">
                     <StatusDot tone={severityTone(item.severity)} />
                     <span className="font-semibold">{item.title}</span>
-                    <span className="op-60">{formatDate(item.publishedAt)}</span>
+                    <span className="op-60">{item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}</span>
                   </a>
                 ))}
               </Marquee>
@@ -691,8 +691,8 @@ export function CalendarPage() {
         </div>
       </PageHero>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-2 text-xs op-65">
-        <span>{data.provider.calendar === "mock" ? "当前为 Mock 日历；配置 Calendarific Key 后可同步年度第三方缓存。" : `Provider：${data.provider.calendar}`}</span>
-        <a className="text-teal-600 underline decoration-teal-500/40 underline-offset-3 dark:text-teal-300" href="https://calendarific.com/" target="_blank" rel="noreferrer">Powered by Calendarific</a>
+        <span>{data.provider.calendar === "mock" ? "当前为 Mock 日历；配置 Calendarific Key 后可同步年度第三方缓存。" : `Provider：${data.provider.calendar}${data.provider.calendarSources?.length ? `（${data.provider.calendarSources.join(" + ")}）` : ""}`}</span>
+        {data.calendarAttribution && <a className="text-teal-600 underline decoration-teal-500/40 underline-offset-3 dark:text-teal-300" href="https://calendarific.com/" target="_blank" rel="noreferrer">{data.calendarAttribution}</a>}
       </div>
       {syncState === "error" && <p className="mb-4 text-sm text-rose-600 dark:text-rose-300">同步失败，继续显示本地缓存。</p>}
       {events.length === 0
