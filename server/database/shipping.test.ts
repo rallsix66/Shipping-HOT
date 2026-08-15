@@ -58,7 +58,7 @@ class FakeDatabase {
     else if (tableName === "vessels") table.set(id, { id, data: args[1], is_watched: args[2], status_changed_at: args[4] })
     else if (tableName === "ports") table.set(id, { id, data: args[1], is_watched: args[2] })
     else if (tableName === "voyages") table.set(id, { id, data: args[1], baseline_eta: args[4], latest_eta: args[6] })
-    else if (tableName === "feed_items") table.set(id, { id, data: args[13], published_at: args[7] })
+    else if (tableName === "feed_items") table.set(id, { id, data: args[13], published_at: args[7], fetched_at: args[8] })
     else if (tableName === "events") table.set(id, { id, data: args[1], status: args[4], dedupe_key: args[5], last_detected_at: args[7] })
     else if (tableName === "calendar_events") table.set(id, { id, data: args[14], date: args[3], country_code: args[1] })
   }
@@ -80,7 +80,9 @@ class FakeDatabase {
     }
     if (tableName === "feed_items") {
       for (const [id, row] of table) {
-        if (String(row.published_at) < String(args[0])) table.delete(id)
+        const publishedAt = String(row.published_at)
+        const retentionAt = publishedAt === "" ? String(row.fetched_at) : publishedAt
+        if (retentionAt < String(args[0])) table.delete(id)
       }
     }
   }
@@ -129,6 +131,24 @@ describe("shippingRepository", () => {
     await repository.pruneExpired(1, new Date("2099-01-03T00:00:00.000Z"))
     expect(await repository.listEvents()).toHaveLength(snapshot.events.filter(event => event.status === "active").length)
     expect(await repository.listFeedItems()).toHaveLength(0)
+  })
+
+  it("persists fetchedAt separately and retains unknown-publication items by fetch time", async () => {
+    const snapshot = createMockSnapshot()
+    const database = new FakeDatabase()
+    const repository = new ShippingRepository(database as unknown as Database)
+    const unknown = { ...snapshot.feedItems[0], id: "feed-unknown-published", publishedAt: "", publicationTimeKnown: false, eventEligibility: false, updatedAt: "2099-01-01T00:00:00.000Z", fetchedAt: "2026-08-15T10:00:00.000Z" }
+    const expiredUnknown = { ...unknown, id: "feed-unknown-expired", fetchedAt: "2026-08-13T10:00:00.000Z" }
+    const normalOld = { ...snapshot.feedItems[1], id: "feed-published-expired", publishedAt: "2026-08-13T10:00:00.000Z", updatedAt: "2099-01-01T00:00:00.000Z", fetchedAt: "2026-08-15T10:00:00.000Z" }
+    await repository.upsertFeedItem(unknown)
+    await repository.upsertFeedItem(expiredUnknown)
+    await repository.upsertFeedItem(normalOld)
+
+    expect(database.table("feed_items").get(unknown.id)).toMatchObject({ published_at: "", fetched_at: unknown.fetchedAt })
+    await repository.pruneExpired(1, new Date("2026-08-15T12:00:00.000Z"))
+
+    const remaining = await repository.listFeedItems()
+    expect(remaining.map(item => item.id)).toEqual([unknown.id])
   })
 
   it("backfills only deterministically known legacy provenance", async () => {

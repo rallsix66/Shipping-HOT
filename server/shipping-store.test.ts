@@ -36,14 +36,23 @@ describe("calendar source-scoped reconciliation", () => {
     expect(result.removedIds).toEqual([existing[0].id])
   })
 
-  it("retains last-known facts when coverage is partial or unknown", () => {
-    for (const status of ["partial", "unknown"] as const) {
+  it("retains last-known facts as stale degraded/failed evidence when coverage is partial or unknown", () => {
+    for (const [status, expectedStatus, expectedError] of [["partial", "degraded", "partial_coverage_last_known"], ["unknown", "failed", "Calendarific timeout"]] as const) {
       const existing = [holiday("calendarific")]
-      const result = reconcileCalendarEvents(existing, [], [coverage("calendarific", status)], 2026)
+      const result = reconcileCalendarEvents(existing, [], [{ ...coverage("calendarific", status), error: status === "unknown" ? expectedError : undefined }], 2026)
       expect(result.events).toHaveLength(1)
-      expect(result.events[0].id).toBe(existing[0].id)
+      expect(result.events[0]).toMatchObject({ id: existing[0].id, stale: true, sourceStatus: expectedStatus, error: expectedError })
       expect(result.removedIds).toEqual([])
     }
+  })
+
+  it("restores a retained fact to fresh healthy state when the provider recovers", () => {
+    const stale = { ...holiday("calendarific"), stale: true, sourceStatus: "failed" as const, error: "Calendarific timeout" }
+    const incoming = { ...holiday("calendarific"), lastCheckedAt: "2026-01-02T00:00:00.000Z", fetchedAt: "2026-01-02T00:00:00.000Z", updatedAt: "2026-01-02T00:00:00.000Z" }
+    const result = reconcileCalendarEvents([stale], [incoming], [coverage("calendarific", "unknown")], 2026)
+    expect(result.events).toHaveLength(1)
+    expect(result.events[0]).toMatchObject({ id: incoming.id, stale: false, sourceStatus: "healthy", fetchedAt: incoming.fetchedAt, lastCheckedAt: incoming.lastCheckedAt })
+    expect(result.events[0]).not.toHaveProperty("error")
   })
 
   it("replaces matching source facts while preserving other source facts", () => {

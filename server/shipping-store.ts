@@ -154,18 +154,33 @@ function coverageForEvent(event: CalendarEvent, coverage: CalendarProviderResult
 export function reconcileCalendarEvents(existing: CalendarEvent[], incoming: CalendarEvent[], coverage: CalendarProviderResult["coverage"], year: number): { events: CalendarEvent[], removedIds: string[] } {
   const merged = mergeCalendarSources(incoming.filter(event => event.sourceKind === "third_party" || event.sourceKind === "mock"), incoming.filter(event => event.sourceKind === "official"), incoming.filter(event => event.sourceKind === "user"))
   const mergedIdentities = new Set(merged.map(calendarIdentity))
-  const incomingIds = new Set(incoming.map(event => event.id))
   const removedIds: string[] = []
-  const retained = existing.filter((event) => {
-    if (!event.date.startsWith(String(year))) return true
-    if (mergedIdentities.has(calendarIdentity(event))) return false
+  const retained: CalendarEvent[] = []
+  for (const event of existing) {
+    if (!event.date.startsWith(String(year))) {
+      retained.push(event)
+      continue
+    }
+    if (mergedIdentities.has(calendarIdentity(event))) continue
     const scoped = coverageForEvent(event, coverage, year)
     if (scoped.some(item => item.status === "complete")) {
-      if (!incomingIds.has(event.id)) removedIds.push(event.id)
-      return incomingIds.has(event.id)
+      removedIds.push(event.id)
+      continue
     }
-    return true
-  })
+    const latestCoverage = scoped.at(-1)
+    if (!latestCoverage) {
+      retained.push(event)
+      continue
+    }
+    retained.push({
+      ...event,
+      stale: true,
+      sourceStatus: latestCoverage.error ? "failed" : "degraded",
+      error: latestCoverage.error ?? (latestCoverage.status === "partial" ? "partial_coverage_last_known" : "unknown_coverage_last_known"),
+      lastCheckedAt: latestCoverage.lastCheckedAt ?? event.lastCheckedAt,
+      fetchedAt: latestCoverage.lastCheckedAt ?? event.fetchedAt,
+    })
+  }
   const byId = new Map([...retained, ...merged].map(event => [event.id, event]))
   return { events: [...byId.values()].sort((a, b) => a.date.localeCompare(b.date) || a.countryCode.localeCompare(b.countryCode) || a.name.localeCompare(b.name)), removedIds }
 }

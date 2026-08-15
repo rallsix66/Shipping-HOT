@@ -140,8 +140,9 @@ export class ShippingRepository {
   }
 
   async upsertFeedItem(item: FeedItem) {
+    const fetchedAt = item.fetchedAt || item.updatedAt || item.publishedAt || new Date().toISOString()
     await this.db.prepare(`INSERT OR REPLACE INTO feed_items (id, source_id, category, type, title, summary, source_url, published_at, fetched_at, severity, related_port_ids, related_vessel_ids, related_voyage_ids, data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(item.id, item.sourceId, item.category, item.type, item.title, item.summary, item.sourceUrl, item.publishedAt, item.updatedAt ?? item.publishedAt, item.severity, JSON.stringify(item.relatedPortIds), JSON.stringify(item.relatedVesselIds), JSON.stringify(item.relatedVoyageIds), JSON.stringify(item))
+      .run(item.id, item.sourceId, item.category, item.type, item.title, item.summary, item.sourceUrl, item.publishedAt, fetchedAt, item.severity, JSON.stringify(item.relatedPortIds), JSON.stringify(item.relatedVesselIds), JSON.stringify(item.relatedVoyageIds), JSON.stringify(item))
   }
 
   async upsertEvent(event: ShippingEvent) {
@@ -177,6 +178,6 @@ export class ShippingRepository {
   async pruneExpired(retentionDays: number, now = new Date()) {
     const cutoff = new Date(now.getTime() - retentionDays * 24 * 60 * 60 * 1000).toISOString()
     await this.db.prepare("DELETE FROM events WHERE last_detected_at < ? AND status = 'resolved'").run(cutoff)
-    await this.db.prepare("DELETE FROM feed_items WHERE published_at < ?").run(cutoff)
+    await this.db.prepare("DELETE FROM feed_items WHERE (published_at <> '' AND published_at < ?) OR (published_at = '' AND fetched_at < ?)").run(cutoff, cutoff)
   }
 }
