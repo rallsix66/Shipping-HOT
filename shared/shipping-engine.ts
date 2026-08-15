@@ -54,7 +54,7 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
     }
   }
   for (const feed of feedItems.filter(item => isFreshEventEvidence(item) && (item.severity === "warning" || item.severity === "critical"))) {
-    candidates.push({ ...eventTrust(feed), type: feed.type, severity: feed.severity, status: "active", title: feed.title, summary: feed.summary, occurredAt: feed.publishedAt, detectedAt: now, dedupeKey: `feed:${feed.id}`, feedItemId: feed.id, evidenceJson: { category: feed.category } })
+    candidates.push({ ...eventTrust(feed), type: feed.type, severity: feed.severity, status: "active", title: feed.title, summary: feed.summary, occurredAt: feed.publishedAt, detectedAt: now, dedupeKey: `feed:${feed.id}`, feedItemId: feed.id, evidenceJson: { category: feed.category, hotReason: feed.hotReason, relatedPortIds: feed.relatedPortIds, relatedVesselIds: feed.relatedVesselIds, relatedVoyageIds: feed.relatedVoyageIds } })
   }
   for (const calendarEvent of calendarEvents.filter(isFreshEventEvidence)) {
     const daysUntil = daysUntilCalendarEvent(calendarEvent.date, today)

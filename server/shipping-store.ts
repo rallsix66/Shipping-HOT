@@ -53,10 +53,11 @@ async function initialize() {
 async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick<ShippingSnapshot, "vessels" | "ports" | "voyages" | "feedItems" | "calendarEvents" | "calendarCoverage"> = fallbackSnapshot): Promise<ShippingSnapshot> {
   const existingNonWeatherFeed = lastKnown.feedItems.filter(item => !isWeatherFeedItem(item))
   const weatherLastKnown = lastKnown.feedItems.filter(isWeatherFeedItem)
-  const [vesselResult, portResult, voyageResult, feedResult] = await Promise.allSettled([
+  const [vesselResult, portResult, voyageResult, shippingFeedResult, weatherResult] = await Promise.allSettled([
     settings.providerEnabled ? providers.vessel.getVessels(lastKnown.vessels) : Promise.resolve(disabledProviderData(lastKnown.vessels)),
     settings.providerEnabled ? providers.port.getPorts(lastKnown.ports) : Promise.resolve(disabledProviderData(lastKnown.ports)),
     settings.providerEnabled ? providers.schedule.getVoyages() : Promise.resolve(disabledProviderData(lastKnown.voyages)),
+    settings.sourceEnabled ? providers.feed.getFeedItems(existingNonWeatherFeed, lastKnown.ports) : Promise.resolve(disabledProviderData(existingNonWeatherFeed)),
     settings.sourceEnabled ? providers.weather.getFeedItems(lastKnown.ports) : Promise.resolve(disabledProviderData(weatherLastKnown)),
   ])
   const read = <T extends Vessel | Port | Voyage | FeedItem>(result: PromiseSettledResult<T[]>, previous: T[], provenance: ProviderResult<T>["provenance"], disabled: boolean): ProviderResult<T> => {
@@ -66,17 +67,18 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
   const vessel = read(vesselResult, lastKnown.vessels, providerModes.vessel === "aisstream" ? providerProvenances.aisstream : providerProvenances.mockVessel, !settings.providerEnabled)
   const port = read(portResult, lastKnown.ports, providerModes.port === "portcast" ? providerProvenances.portcastPublic : providerProvenances.mockPort, !settings.providerEnabled)
   const voyage = read(voyageResult, lastKnown.voyages, providerProvenances.mockSchedule, !settings.providerEnabled)
-  const weather = read(feedResult, weatherLastKnown, providerModes.weather === "open-meteo" ? providerProvenances.openMeteo : providerProvenances.mockWeather, !settings.sourceEnabled)
+  const shippingFeed = read(shippingFeedResult, existingNonWeatherFeed, providerModes.feed === "public" ? providerProvenances.shippingFeed : providerProvenances.mockFeed, !settings.sourceEnabled)
+  const weather = read(weatherResult, weatherLastKnown, providerModes.weather === "open-meteo" ? providerProvenances.openMeteo : providerProvenances.mockWeather, !settings.sourceEnabled)
   return {
     vessels: vessel.data,
     ports: port.data,
     voyages: voyage.data,
-    feedItems: mergeWeatherFeedItems(existingNonWeatherFeed, weather.data),
+    feedItems: mergeWeatherFeedItems(shippingFeed.data, weather.data),
     events: fallbackSnapshot.events,
     settings,
     calendarEvents: lastKnown.calendarEvents,
     calendarCoverage: lastKnown.calendarCoverage ?? settings.calendarSync,
-    providerFreshness: { vessel: vessel.freshness, port: port.freshness, schedule: voyage.freshness, weather: weather.freshness },
+    providerFreshness: { vessel: vessel.freshness, port: port.freshness, schedule: voyage.freshness, weather: weather.freshness, feed: shippingFeed.freshness },
   }
 }
 

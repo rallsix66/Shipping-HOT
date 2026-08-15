@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import type { HotItem, ShippingSnapshot } from "@shared/shipping"
 import { myFetch } from "~/utils"
 
-export type ShippingResponse = ShippingSnapshot & { hot: HotItem[], provider: { vessel: string, port: string, schedule: string, weather: string, calendar: string }, realProviders: { vessel: string, port: string, schedule: string, weather: string, calendar: string } }
+export type ShippingResponse = ShippingSnapshot & { hot: HotItem[], provider: { vessel: string, port: string, schedule: string, weather: string, feed: string, calendar: string }, realProviders: { vessel: string, port: string, schedule: string, weather: string, feed: string, calendar: string } }
 
 export function useShipping() {
   return useQuery({
