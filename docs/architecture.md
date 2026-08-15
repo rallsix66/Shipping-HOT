@@ -1,7 +1,7 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
-> Last verified: 2026-08-14
-> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation and implemented V2.1 Port Intelligence; V2.2+ not started
+> Last verified: 2026-08-15
+> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation, implemented V2.1 Port Intelligence and implemented V2.2 Country Calendar; V2.3+ not started
 > Source of truth for: the current retained system structure and approved boundaries
 
 ## 1. Project Purpose
@@ -16,6 +16,7 @@ The repository retains NewsNow as its foundation and now exposes Shipping HOT as
 - Preserving the existing modular monolith as the foundation for the local Mock loop and approved V1 Provider adapters.
 - V2.0 Data Trust Foundation: provenance, freshness/status separation, last-known fallback semantics, Event evidence and UI attribution within the existing JSON/API boundaries.
 - V2.1 Port Intelligence: an optional server-side Portcast public-page adapter normalizes only anonymous public HTML fields into the existing Port entity; Mock remains the default and no commercial API or hidden endpoint is used.
+- V2.2 Country Calendar: a five-country annual calendar path uses a server-only Calendarific adapter when explicitly configured, official/manual/mock source contracts, a minimal `calendar_events` table, persisted coverage and Calendar → Event → HOT reminders; Mock remains the default.
 
 ### Explicitly Out of Scope
 
@@ -32,6 +33,7 @@ The repository retains NewsNow as its foundation and now exposes Shipping HOT as
 | Structured shipping Providers | implemented | Mock adapters remain active; AISStream Vessel and Open-Meteo Marine Weather adapters are optional V1 paths |
 | V2.0 Data Trust Foundation | sealed | `sourceType`/`dataNature` provenance, independent freshness timestamps/status, ProviderResult-compatible API data, Event evidence and explicit Mock/UI attribution; no schema migration |
 | V2.1 Port Intelligence | implemented / verified | `PortcastPublicPageProvider`, public HTML parser, 24-hour cache/fingerprint and Port congestion detail; no schema migration or new dependency |
+| V2.2 Country Calendar | implemented / verified | TH/ID/MY/PH/VN contracts, Calendarific server-side adapter, official/manual/mock priority boundary, minimal `calendar_events` table, settings-backed coverage and calendar reminder Events; no ORM migration |
 
 ## 3. Architecture Summary
 
@@ -68,7 +70,7 @@ This is the smallest existing foundation compatible with the local Shipping HOT 
 - `shared/types.ts` and Source metadata may be consumed by both client and server, but must not import UI or database code.
 - `server/sources/**` may use shared Source contracts and fetch helpers; UI must not import it.
 - Shipping HOT now has separate shared Domain rules, Provider interfaces/Mock adapters, server API/storage and UI routes.
-- New structured shipping code must use the UI → Application/API → Domain → Provider interface → Adapter → External API boundary.
+- New structured shipping code must use the UI → Application/API → Domain → Provider interface → Adapter → External API boundary. V2.2's `calendar_events` table is the explicitly approved minimal exception to the prior no-new-table baseline; it is accessed only through `ShippingRepository`.
 
 ## 7. Data Model and Ownership
 
@@ -80,6 +82,7 @@ This is the smallest existing foundation compatible with the local Shipping HOT 
 | `user` row | `server/database/user.ts` | OAuth/sync handlers | authenticated sync | db0 table |
 | local focus/order metadata | `src/atoms` | browser Jotai/localStorage; optional sync | UI | browser localStorage, or synced user data when enabled |
 | Vessel/Port/Voyage/Event | `shared`, `server` and `src/components/shipping` | Mock Providers through `server/shipping-store.ts`; `ShippingRepository` persists state; local Vessel `statusChangedAt` and Voyage baselines are retained by the service merge | HOT, detail pages and Event Engine | Repository-backed state when SQLite is available; explicit last-known in-memory fallback otherwise |
+| CalendarEvent / CalendarCoverage | `shared/calendar.ts`, `server/providers/calendar.ts`, `server/database/shipping.ts` | Calendar Provider contracts through `server/shipping-store.ts`; `calendar_events` stores event facts and settings `calendarSync` stores coverage | `/api/shipping/calendar`, Calendar page, Event Engine | Cached event facts remain readable offline; unknown/partial coverage is explicit and source keys never cross the API boundary |
 
 ## 8. Key Data Flows
 
@@ -110,6 +113,8 @@ Provider data is normalized with `sourceType`, `dataNature`, `sourceId`, optiona
 
 The V2.1 Portcast adapter is opt-in through `SHIPPING_PORT_PROVIDER=portcast`; its default remains Mock. It requests only mapped public port pages once per 24-hour interval, parses visible congestion category, median wait, previous wait, week-over-week change, long-tail flag and page date, and stores no raw HTML. 404/no-public pages become an explicit degraded `no_public_data` state; parse/network failures retain last-known values and expose failed/stale status. Public-page attribution is carried in Port provenance and the port detail UI.
 
+The V2.2 Calendar path is opt-in for Calendarific through `SHIPPING_CALENDAR_PROVIDER=calendarific` plus `CALENDARIFIC_API_KEY`; otherwise Mock is the default. The server calls Calendarific only during an explicit calendar sync, normalizes the response into `CalendarEvent`, strips the key from errors and stored/API data, persists event facts in `calendar_events`, and persists per-country/year coverage in `settings.calendarSync`. Official and manual provider contracts are available for injected source facts; `mergeCalendarSources` gives official facts priority over third-party facts and records ManualOverride conflicts instead of erasing evidence. The calendar page exposes country/year/month/type/impact/verification filters and visible `Powered by Calendarific` attribution. Calendar events enter the existing Event Engine with 14/7/3/0-day lead rules and dedupe keys; observances are not public holidays by default.
+
 ## 9. Interfaces and External Dependencies
 
 | Dependency / Interface | Purpose | Failure behavior | Replacement / fallback |
@@ -119,7 +124,7 @@ The V2.1 Portcast adapter is opt-in through `SHIPPING_PORT_PROVIDER=portcast`; i
 | db0 + local `better-sqlite3` | Local cache/user persistence | Cache can be disabled; auth requires DB | In-memory/no-cache only where current code supports it |
 | GitHub OAuth/JWT | Optional identity and sync | Login disabled when env is absent | Local browser preferences |
 | Cloudflare D1/Vercel/Bun | Optional runtime adapters | Runtime-specific failure | Local Node runtime |
-| Shipping Provider interfaces | Mock plus approved V1 adapters implemented | Must isolate provider failure | Mock/last-known/no-data state with stale/sourceStatus |
+| Shipping Provider interfaces | Mock plus approved V1 adapters and V2.2 Calendar contracts implemented | Must isolate provider failure | Mock/last-known/no-data state with stale/sourceStatus |
 
 ## 10. Authentication, Authorization and Security
 
@@ -148,7 +153,7 @@ The V2.1 Portcast adapter is opt-in through `SHIPPING_PORT_PROVIDER=portcast`; i
 ## 13. Testing and Verification Boundaries
 
 - Current tests: Vitest covers Shipping HOT Domain, Provider, Repository, Event/HOT and UI trust contracts.
-- Current verification state: 100/100 tests, build and `git diff --check` passed; Vite development smoke covered all requested Shipping HOT routes and `/api/shipping`; V2.1 modified-file targeted lint passed. `pnpm typecheck` remains pending on pre-existing TS6142/TS6307 test-config errors. Production Nitro subroutes remain pending because of the existing `#nitro/index` package-import runtime error.
+- Current verification state: 108/108 tests, build and `git diff --check` passed; Vite development smoke covered the Shipping HOT shell, `/calendar`, `/api/shipping`, calendar GET/filter and calendar sync POST; V2.2 modified-file targeted lint passed. Full lint still reports six pre-existing errors outside this phase. `pnpm typecheck` remains pending on pre-existing TS6142/TS6307 test-config errors. Production Nitro subroutes remain pending because of the existing `#nitro/index` package-import runtime error.
 - Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, weather thresholds, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 

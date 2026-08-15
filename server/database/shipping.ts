@@ -1,6 +1,7 @@
 import type { Database } from "db0"
 import { knownMockProvenanceFor, normalizeLegacyEventTrust, normalizeLegacyTrust } from "@shared/shipping"
 import type { DataProvenance, FeedItem, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, Vessel, Voyage } from "@shared/shipping"
+import type { CalendarEvent } from "@shared/calendar"
 
 type Row = Record<string, unknown>
 
@@ -54,6 +55,13 @@ export async function initShippingTables(db: Database) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS settings (
     id TEXT PRIMARY KEY, data TEXT NOT NULL, updated_at TEXT NOT NULL
   )`).run()
+  await db.prepare(`CREATE TABLE IF NOT EXISTS calendar_events (
+    id TEXT PRIMARY KEY, country_code TEXT NOT NULL, subdivision_code TEXT, date TEXT NOT NULL,
+    end_date TEXT, type TEXT NOT NULL, is_public_holiday INTEGER NOT NULL,
+    business_impact TEXT NOT NULL, source_id TEXT NOT NULL, source_url TEXT,
+    verified INTEGER NOT NULL, last_checked_at TEXT NOT NULL, updated_at TEXT,
+    stale INTEGER NOT NULL, data TEXT NOT NULL
+  )`).run()
 }
 
 export class ShippingRepository {
@@ -64,12 +72,13 @@ export class ShippingRepository {
     return Number(row?.count ?? 0) === 0
   }
 
-  async seed(vessels: Vessel[], ports: Port[], voyages: Voyage[], feedItems: FeedItem[], events: ShippingEvent[], settings: ShippingSettings) {
+  async seed(vessels: Vessel[], ports: Port[], voyages: Voyage[], feedItems: FeedItem[], events: ShippingEvent[], settings: ShippingSettings, calendarEvents: CalendarEvent[] = []) {
     for (const vessel of vessels) await this.upsertVessel(vessel)
     for (const port of ports) await this.upsertPort(port)
     for (const voyage of voyages) await this.upsertVoyage(voyage)
     for (const feedItem of feedItems) await this.upsertFeedItem(feedItem)
     for (const event of events) await this.upsertEvent(event)
+    for (const event of calendarEvents) await this.upsertCalendarEvent(event)
     await this.saveSettings(settings)
   }
 
@@ -106,6 +115,10 @@ export class ShippingRepository {
     })
   }
 
+  async listCalendarEvents() {
+    return rows<Row>(await this.db.prepare("SELECT data FROM calendar_events ORDER BY date, country_code, id").all()).map(row => parse<CalendarEvent>(row.data))
+  }
+
   async getSettings(): Promise<ShippingSettings | undefined> {
     const row = await this.db.prepare("SELECT data FROM settings WHERE id = 'default'").get() as Row | undefined
     return row ? parse<ShippingSettings>(row.data) : undefined
@@ -134,6 +147,11 @@ export class ShippingRepository {
   async upsertEvent(event: ShippingEvent) {
     await this.db.prepare(`INSERT OR REPLACE INTO events (id, data, type, severity, status, dedupe_key, first_detected_at, last_detected_at, resolved_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
       .run(event.id, JSON.stringify(event), event.type, event.severity, event.status, event.dedupeKey, event.firstDetectedAt, event.lastDetectedAt, event.resolvedAt ?? null)
+  }
+
+  async upsertCalendarEvent(event: CalendarEvent) {
+    await this.db.prepare(`INSERT OR REPLACE INTO calendar_events (id, country_code, subdivision_code, date, end_date, type, is_public_holiday, business_impact, source_id, source_url, verified, last_checked_at, updated_at, stale, data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(event.id, event.countryCode, event.subdivisionCode ?? null, event.date, event.endDate ?? null, event.type, event.isPublicHoliday ? 1 : 0, event.businessImpact, event.sourceId, event.sourceUrl ?? null, event.verified ? 1 : 0, event.lastCheckedAt, event.updatedAt ?? null, event.stale ? 1 : 0, JSON.stringify(event))
   }
 
   async saveSettings(settings: ShippingSettings) {

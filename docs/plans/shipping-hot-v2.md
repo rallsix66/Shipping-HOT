@@ -1,10 +1,10 @@
 # Shipping HOT V2 实施方案
 
-> 状态：`V2.1 implemented and verified`; `V2.2 not started`
+> 状态：`V2.2 implemented and verified`; `V2.3 not started`
 >
-> 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已封板，V2.1 Port Intelligence 已按本文件边界实现并验证；V2.2 及以后仍是未启动的规划，不代表其中的 Provider、表结构、路由或规则已经实现。
+> 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已封板，V2.1 Port Intelligence 和 V2.2 Country Calendar 已按本文件边界实现并验证；V2.3 及以后仍是未启动的规划，不代表其中的 Provider、表结构、路由或规则已经实现。
 >
-> 方案核对日期：2026-08-15。V2.0 已完成收口；V2.1 仅新增 Portcast 公共港口页面 Provider，不使用商业 API、登录、token、hidden endpoint 或新依赖。Calendarific 及 V2.2 以后仍仅用于能力与风险评估。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
+> 方案核对日期：2026-08-15。V2.0 已完成收口；V2.1 仅新增 Portcast 公共港口页面 Provider，不使用商业 API、登录、token、hidden endpoint 或新依赖；V2.2 已按授权批次实现 Calendarific server-only、官方/手工/Mock 合同、日历最小表、覆盖持久化和 Calendar → Event → HOT。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
 
 ## 1. V2 Executive Summary
 
@@ -63,14 +63,14 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 | AISStream Vessel | V1 已批准并实现 | `createAisStreamVesselProvider` | 继续只服务 Watched Vessel；重连/会话管理后置增强 |
 | Open-Meteo Marine/Forecast | V1 已批准并实现 | `createOpenMeteoWeatherProvider` | 增加海况字段和官方预警分层 |
 | Mock Providers | 已实现 | `MockVesselProvider`、`MockPortProvider`、`MockScheduleProvider`、`MockWeatherProvider` | 必须始终显式标记 `sourceType=mock` |
-| Repository | 已实现 | `server/database/shipping.ts` | 复用 db0/SQLite；Calendar 才评估最小新表 |
-| Shipping UI | 已实现 | `src/routes/**`、`src/components/shipping/**` | V2 UI 只在对应阶段实施 |
+| Repository | 已实现 | `server/database/shipping.ts` | 复用 db0/SQLite；V2.2 已增加获批的最小 `calendar_events` 表 |
+| Shipping UI | 已实现 | `src/routes/**`、`src/components/shipping/**` | V2.2 已增加国家日历页、年度/月份/类型/影响/验证筛选、提醒和 Calendarific Attribution |
 
 ### 2.3 当前表和持久化边界
 
 现有 Shipping Repository 初始化 `feed_items`、`vessels`、`ports`、`voyages`、`events`、`settings`，NewsNow 另有 `cache`、`user`。当前实体主要以 `data` JSON 保存，同时保留查询和排序所需的少量列。
 
-当前 `shipping-store.ts` 会并行刷新 Vessel、Port、Voyage、Weather，失败时把 last-known 标记为 stale/failed；SQLite 不可用时保留内存 fallback。当前 Mock fixture 仍是产品可用的基础数据，因此 V2.0 必须让页面明确显示 `sourceType=mock`，而不是只显示一个看起来正常的“healthy”。当事件来源变成 stale、degraded、failed、disabled 或 never_succeeded 时，不创建新的事实事件，也不把已有 active 事件误判为 resolved；只有来源重新 fresh 且条件消失时才可 resolve。
+当前 `shipping-store.ts` 会并行刷新 Vessel、Port、Voyage、Weather，失败时把 last-known 标记为 stale/failed；SQLite 不可用时保留内存 fallback。V2.2 另通过 `calendar_events` 保存年度事件事实，并在 `settings.calendarSync` 保存国家/年份 coverage。当前 Mock fixture 仍是产品可用的基础数据，因此 V2.0 必须让页面明确显示 `sourceType=mock`，而不是只显示一个看起来正常的“healthy”。当事件来源变成 stale、degraded、failed、disabled 或 never_succeeded 时，不创建新的事实事件，也不把已有 active 事件误判为 resolved；只有来源重新 fresh 且条件消失时才可 resolve。
 
 ### 2.4 当前限制
 
@@ -78,6 +78,7 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 - 当前 AISStream 订阅使用全世界 Bounding Box + MMSI 过滤，只接收 `PositionReport`；当前没有持久化轨迹，也没有区域订阅会话管理。
 - 当前 PortProvider 和 ScheduleProvider 仍是 Mock。
 - 当前 Open-Meteo 仅请求当前风速、阵风和波高，并将风险作为 Weather FeedItem 输出。
+- V2.2 Calendar 已实现 TH/ID/MY/PH/VN 的 Calendarific/OfficialHolidayProvider/ManualOverride/Mock 合同；Calendarific 仅在服务端且显式配置 Key 后调用，默认仍为 Mock。
 - 当前 `Freshness` 只有 `updatedAt`、`stale`、`sourceStatus`、`error`，还没有统一的 `sourceType`/`dataNature` 业务标识。
 - 当前 NewsNow Source 协议使用 `NewsItem[]` 和独立 cache，缺少 Shipping HOT 所需的完整 `sourceStatus/stale` 语义；V2 应在 Shipping Feed 适配层补齐，不应强行破坏所有 NewsNow Source。
 
@@ -101,7 +102,7 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 
 ## 4. Non-Goals
 
-- 本轮不实现任何 V2 功能，不接 API，不申请或配置 Key，不修改 Shipping 业务代码、数据库 schema、UI 或 npm dependency；仅修复 NewsNow metadata 生成脚本的既有副作用。
+- 原始方案基线曾要求本轮不实现 V2 功能；该基线已被用户批准的连续批次覆盖。当前已完成 V2.0、V2.1、V2.2，后续仍必须按 Gate 顺序推进，未获批阶段不得提前实现。
 - 不把 Portcast 商业 API、VesselFinder、MarineTraffic 或其他商业 Vessel/Port API 作为 V2 强依赖。
 - 不绕过登录、付费墙、访问限制或 robots/ToS；不反向工程 Portcast 私有接口。
 - 不创建全球船舶数据库、完整 AIS 轨迹库、复杂 Port Call 网络模型或实时全球港口平台。
@@ -604,9 +605,9 @@ AIS-reported ETA
 
 ## 16. Local Persistence / Cache Strategy
 
-### 16.1 本轮结论
+### 16.1 V2.0 checkpoint 结论
 
-本轮不改数据库 schema。现有 `feed_items`、`vessels`、`ports`、`voyages`、`events`、`settings` 足以承载 V2.0 的可信度字段，因为实体数据已经以 JSON 保存，新增字段可在获批实施时通过兼容读写加入。
+V2.0 checkpoint 不改数据库 schema。现有 `feed_items`、`vessels`、`ports`、`voyages`、`events`、`settings` 足以承载 V2.0 的可信度字段，因为实体数据已经以 JSON 保存，新增字段可在获批实施时通过兼容读写加入。V2.2 的新表是随后明确获批的阶段性边界。
 
 ### 16.2 V2.2 最小新增表
 
@@ -767,7 +768,7 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 
 ## 21. UI Changes
 
-V2.0 已完成最小 UI 信任标识；V2.1 Port Intelligence 已完成；V2.2 及以后按以下规划改动：
+V2.0 已完成最小 UI 信任标识；V2.1 Port Intelligence 和 V2.2 Country Calendar 已完成；V2.3 及以后按以下规划改动：
 
 ### V2.0
 
@@ -785,10 +786,10 @@ V2.0 已完成最小 UI 信任标识；V2.1 Port Intelligence 已完成；V2.2 �
 
 ### V2.2
 
-- 新增国家日历页：国家、年份、月份、类型、影响等级、验证状态筛选。
-- 首页增加未来 14 天高影响日历。
-- 日历详情显示来源冲突、官方/手工优先级、最后核验和提醒 lifecycle。
-- 日历页面显示符合当时官方条款的 Calendarific Attribution（例如 `Powered by Calendarific` 和对应链接）；实现 V2.2 前再次核对最终文字与链接。
+- 已实现国家日历页：国家、年份、月份、类型、影响等级、验证状态筛选。
+- 已实现首页未来 14 天国家日历提醒入口；提醒通过现有 Event Engine 进入 HOT，按 14/7/3/0 天窗口去重。
+- 已实现日历详情的来源冲突、官方/手工优先级、最后核验、freshness 和来源链接展示。
+- 已实现可见 Calendarific Attribution：`Powered by Calendarific` 并链接到 Calendarific；Calendarific Key 仅出现在 server-side outbound request。
 
 ### V2.3–V2.4
 
@@ -830,6 +831,9 @@ V2.0 已完成最小 UI 信任标识；V2.1 Port Intelligence 已完成；V2.2 �
 - In Scope：Calendarific 年度缓存、OfficialHolidayProvider/ManualOverride、`calendar_events` 最小表、类型/影响等级、冲突、Holiday → Event → HOT。
 - Out of Scope：所有国家、自动解释未知宗教日期、企业 ERP 同步、多用户共享日历。
 - Dependencies：V2.0 trust model；Calendarific Key 管理确认；五国官方来源清单。
+- Status：implemented and verified。
+- Implemented：`CalendarProvider`/Calendarific server-only adapter、五国官方来源注册表、OfficialHolidayProvider/ManualHolidayProvider/Mock contracts、`calendar_events` 最小表、`settings.calendarSync` coverage persistence、source merge priority/conflict evidence、Calendar → Event → HOT lead windows、`/calendar` page、calendar GET/sync POST routes and visible attribution.
+- Verified：108/108 tests passed; targeted lint passed; typecheck retains the pre-existing TS6142/TS6307 test-config errors; build passed; full lint still reports six pre-existing errors outside this phase; Vite smoke returned 200 for `/calendar`, calendar GET/filter and calendar sync POST; Mock remains offline-safe and default.
 - Acceptance：不打开页面即请求 API；本地可离线读取实际已缓存的年度数据；`coverageStatus` 可区分 complete/partial/unknown；国家日历页面展示符合条款的 Calendarific Attribution；官方事实层优先级最高；ManualOverride 修改事实字段时保留原记录并标记 conflict；普通、高影响、连续假期和政府临时假日提醒不重复；日历不把 observance 默认当作放假。
 - Main risks：官方临时变更、地区差异、农历/宗教日期、第三方滞后。
 - Rollback：停用自动同步但保留本地 CalendarEvent；关闭提醒规则不删除已核验记录。
@@ -903,14 +907,14 @@ V2.0 已完成最小 UI 信任标识；V2.1 Port Intelligence 已完成；V2.2 �
 ### 25.1 方案验收
 
 - 文档覆盖 V2 Executive Summary、V1 baseline、目标/非目标、导航、数据源、Provider、可信度、Vessel、Port、Weather、Feed、Calendar、Voyage、Event Engine、本地存储、Scheduler、失败回退、安全、数据模型、UI、阶段、风险、Open Questions 和 Acceptance Criteria。
-- 明确当前哪些已经实现、哪些仍是 V2 proposal、哪些延期或条件化；V2.0 Data Trust Foundation 标记为 sealed，V2.1 Port Intelligence 标记为 implemented/verified。
+- 明确当前哪些已经实现、哪些仍是 V2 proposal、哪些延期或条件化；V2.0 Data Trust Foundation 标记为 sealed，V2.1 Port Intelligence 和 V2.2 Country Calendar 标记为 implemented。
 - 明确 Portcast 只使用公开展示数据，禁止商业 API/私有接口/绕过访问限制。
 - 明确 AISStream 继续服务 Watched Vessel，区域全港统计需要独立结构调整且放后置阶段。
 - 明确 Weather 的模型风险与官方预警分层，且不把 Open-Meteo 当成航海安全保证。
 - 明确资讯不新增独立海运新闻页，继续复用 NewsNow Source/Feed。
 - 明确 Calendarific + OfficialHolidayProvider/ManualOverride 的优先级、冲突、验证和缓存策略。
 - 明确 Planned Schedule 与 AIS-reported ETA 分离，并允许真实船期延期。
-- 明确 V2.2 最小新增 `calendar_events` 表；本轮没有 schema 变更。
+- 明确 V2.2 最小新增 `calendar_events` 表；日历覆盖写入现有 settings 的 `calendarSync` 区域；不引入 ORM migration。
 
 ### 25.2 未来实现验收
 
@@ -927,8 +931,9 @@ V2.0 已完成最小 UI 信任标识；V2.1 Port Intelligence 已完成；V2.2 �
 
 ```text
 V2.0 sealed
-V2.1 implemented and verified
-V2.2 not started
+V2.1 implemented
+V2.2 implemented
+V2.3 not started
 ```
 
-本文件仍是方案与边界产物；V2.0 已封板，V2.1 已完成实现、验证和文档同步。V2.2 及以后仍需在本批次前一阶段 Gate 通过后继续。
+本文件仍是方案与边界产物；V2.0 已封板，V2.1/V2.2 已完成实现、验证和文档同步。V2.3 及以后仍需在本批次前一阶段 Gate 通过后继续。

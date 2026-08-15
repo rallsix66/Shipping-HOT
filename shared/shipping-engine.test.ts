@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import type { CalendarEvent } from "./calendar"
 import { detectShippingEvents, isFreshEventEvidence } from "./shipping-engine"
 import { createMockSnapshot } from "./shipping-fixtures"
 import { rankHotItems } from "./shipping-rules"
@@ -117,5 +118,38 @@ describe("shipping HOT event engine", () => {
     const feed = { ...snapshot.feedItems[0], severity: "warning" as const }
     const [item] = rankHotItems([], [], [], [], [feed])
     expect(item.provenance).toMatchObject({ sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice" })
+  })
+
+  it("creates deduplicated Calendar reminders and keeps them stale on provider failure", () => {
+    const snapshot = createMockSnapshot()
+    const calendarEvent: CalendarEvent = {
+      id: "calendar:TH:2026-08-22:songkran:public_holiday",
+      countryCode: "TH",
+      name: "Songkran",
+      date: "2026-08-22",
+      type: "public_holiday",
+      isPublicHoliday: true,
+      businessImpact: "medium",
+      sourceId: "calendarific",
+      sourceKind: "third_party",
+      sourceUrl: "https://calendarific.com/holidays/2026/TH",
+      verified: false,
+      lastCheckedAt: "2026-08-15T00:00:00.000Z",
+      updatedAt: "2026-08-15T00:00:00.000Z",
+      fetchedAt: "2026-08-15T00:00:00.000Z",
+      stale: false,
+      sourceStatus: "healthy",
+      provenance: { sourceType: "third_party", dataNature: "reported", sourceId: "calendarific" },
+    }
+    const initial = detectShippingEvents([], [], [], [], snapshot.settings, [], "2026-08-15T00:00:00.000Z", [calendarEvent])
+    expect(initial).toHaveLength(1)
+    expect(initial[0]).toMatchObject({ type: "calendar_reminder", calendarEventId: calendarEvent.id, dedupeKey: `calendar:${calendarEvent.id}:7` })
+    const repeated = detectShippingEvents([], [], [], [], snapshot.settings, initial, "2026-08-15T01:00:00.000Z", [calendarEvent])
+    expect(repeated).toHaveLength(1)
+    expect(repeated[0].id).toBe(initial[0].id)
+    const stale = { ...calendarEvent, stale: true, sourceStatus: "failed" as const, error: "Calendarific unavailable" }
+    const retained = detectShippingEvents([], [], [], [], snapshot.settings, initial, "2026-08-15T02:00:00.000Z", [stale])
+    expect(retained[0]).toMatchObject({ status: "active", stale: true, sourceStatus: "failed", error: "Calendarific unavailable" })
+    expect(retained[0].lastDetectedAt).toBe(initial[0].lastDetectedAt)
   })
 })
