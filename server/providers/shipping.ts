@@ -769,7 +769,10 @@ export function configureProviders(environment: ProviderEnvironment = { ...env }
   const portMode = environment.SHIPPING_PORT_PROVIDER === "portcast" ? "portcast" : "mock"
   const weatherMode = environment.SHIPPING_WEATHER_PROVIDER === "open-meteo" ? "open-meteo" : "mock"
   const configuredFeed = configureFeedProviders({ SHIPPING_FEED_PROVIDER: environment.SHIPPING_FEED_PROVIDER })
-  const weatherAlertProvider = weatherMode === "open-meteo" && environment.SHIPPING_WEATHER_ALERT_PROVIDER === "public" ? createOfficialWeatherAlertProvider() : undefined
+  const weatherAlertMode = environment.SHIPPING_WEATHER_ALERT_PROVIDER
+  const weatherAlertProvider = weatherMode === "open-meteo" && (weatherAlertMode === "public" || weatherAlertMode === "experimental")
+    ? createOfficialWeatherAlertProvider({ allowPending: weatherAlertMode === "experimental" })
+    : undefined
   return {
     providers: {
       vessel: vesselMode === "aisstream" ? createAisStreamVesselProvider({ apiKey: environment.AISSTREAM_API_KEY! }) : MockVesselProvider,

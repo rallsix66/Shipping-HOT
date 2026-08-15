@@ -16,51 +16,52 @@ export interface WeatherAlertResponse {
 
 export type WeatherAlertFetcher = (url: string) => Promise<WeatherAlertResponse>
 export type WeatherAlertParser = "jma" | "tmd" | "bmkg"
+export type WeatherAlertSourceStatus = "verified_live" | "experimental" | "live_pending" | "disabled"
 
 export interface WeatherAlertSource {
   id: string
   name: string
   url: string
   sourceUrl: string
-  format: "rss" | "html"
+  format: "rss" | "cap" | "html"
   parser: WeatherAlertParser
   relatedPortIds?: string[]
   enabled: boolean
-  liveStatus?: "source_specific_contract" | "live_parser_pending"
+  liveStatus: WeatherAlertSourceStatus
 }
 
 export const officialWeatherAlertSources: WeatherAlertSource[] = [
   {
     id: "jma",
     name: "Japan Meteorological Agency",
-    url: "https://www.jma.go.jp/bosai/information/typhoon.html",
+    url: "https://www.jma.go.jp/bosai/seawarning/",
     sourceUrl: "https://www.jma.go.jp/bosai/seawarning/",
     format: "html",
     parser: "jma",
-    enabled: true,
-    liveStatus: "source_specific_contract",
+    enabled: false,
+    liveStatus: "live_pending",
   },
   {
     id: "tmd",
     name: "Thai Meteorological Department",
-    url: "https://www.tmd.go.th/warningpage",
+    url: "https://www.tmd.go.th/en/api/xml/CAP",
     sourceUrl: "https://www.tmd.go.th/en/service/rss",
-    format: "html",
+    format: "cap",
     parser: "tmd",
     relatedPortIds: ["port-laem-chabang"],
-    enabled: true,
-    liveStatus: "source_specific_contract",
+    enabled: false,
+    liveStatus: "live_pending",
   },
   {
     id: "bmkg",
     name: "Indonesia Agency for Meteorology, Climatology and Geophysics",
-    url: "https://www.bmkg.go.id/cuaca/peringatan-dini-cuaca",
-    sourceUrl: "https://www.bmkg.go.id/cuaca/peringatan-dini-cuaca",
-    format: "html",
+    url: "https://www.bmkg.go.id/alerts/nowcast/en",
+    sourceUrl: "https://data.bmkg.go.id/peringatan-dini-cuaca/",
+    format: "rss",
     parser: "bmkg",
     relatedPortIds: ["port-jakarta"],
-    enabled: true,
-    liveStatus: "source_specific_contract",
+    enabled: false,
+    liveStatus: "live_pending",
   },
 ]
 
@@ -131,6 +132,7 @@ function severityFor(title: string, summary: string, value?: string): FeedItem["
 }
 
 interface RawAlert {
+  identifier?: unknown
   title?: unknown
   summary?: unknown
   description?: unknown
@@ -140,8 +142,12 @@ interface RawAlert {
   published?: unknown
   updated?: unknown
   issuedAt?: unknown
+  effectiveAt?: unknown
+  onsetAt?: unknown
   expiresAt?: unknown
   severity?: unknown
+  urgency?: unknown
+  certainty?: unknown
   region?: unknown
   active?: boolean
 }
@@ -159,14 +165,16 @@ function normalizeAlert(raw: RawAlert, source: WeatherAlertSource, ports: Port[]
   const summary = truncate(stripMarkup(textValue(raw.summary) ?? textValue(raw.description))) || title
   const sourceUrl = linkValue(raw.link, source.url) ?? linkValue(raw.guid, source.url) ?? source.sourceUrl
   const issuedAt = timestamp(raw.issuedAt ?? raw.pubDate ?? raw.published ?? raw.updated)
+  const effectiveAt = timestamp(raw.effectiveAt ?? raw.onsetAt)
   const expiresAt = timestamp(raw.expiresAt)
+  const sourceUpdatedAt = timestamp(raw.updated ?? raw.issuedAt ?? raw.pubDate ?? raw.published) ?? issuedAt ?? effectiveAt
   const isExpired = expiresAt !== undefined && Date.parse(expiresAt) <= Date.parse(fetchedAt)
-  const alertState: WeatherDetail["alertState"] = isExpired ? "expired" : raw.active ? "active" : "unknown"
-  const eventEligibility = Boolean(issuedAt || raw.active) && !isExpired
+  const alertState: WeatherDetail["alertState"] = isExpired ? "expired" : issuedAt && raw.active !== false ? "active" : "unknown"
+  const eventEligibility = Boolean(issuedAt) && raw.active !== false && !isExpired
   const severity = isExpired ? "info" : severityFor(title, summary, textValue(raw.severity))
   const region = textValue(raw.region)
-  const sourceId = `${source.id}:${sourceUrl ?? `${title}:${index}`}`
-  const weather: WeatherDetail = { riskSource: "official", alertState, alertId: sourceId, alertRegion: region, alertIssuedAt: issuedAt, alertExpiresAt: expiresAt }
+  const sourceId = `${source.id}:${textValue(raw.identifier) ?? sourceUrl ?? `${title}:${index}`}`
+  const weather: WeatherDetail = { riskSource: "official", alertState, alertId: sourceId, alertRegion: region, alertIssuedAt: issuedAt, alertEffectiveAt: effectiveAt, alertExpiresAt: expiresAt, alertUrgency: textValue(raw.urgency), alertCertainty: textValue(raw.certainty) }
   const provenance = weatherAlertProvenance(source)
   return {
     id: `weather-alert:${source.id}:${createHash("sha256").update(sourceId).digest("hex").slice(0, 16)}`,
@@ -187,8 +195,8 @@ function normalizeAlert(raw: RawAlert, source: WeatherAlertSource, ports: Port[]
     relatedPortIds: relatedPorts(`${title} ${summary} ${region ?? ""}`, source, ports),
     relatedVesselIds: [],
     relatedVoyageIds: [],
-    updatedAt: issuedAt,
-    sourceUpdatedAt: issuedAt,
+    updatedAt: sourceUpdatedAt,
+    sourceUpdatedAt,
     fetchedAt,
     stale: false,
     sourceStatus: "healthy",
@@ -203,10 +211,54 @@ export function parseWeatherAlertRss(xml: string, source: WeatherAlertSource, po
   const channel = (rss?.channel ?? feed) as Record<string, unknown> | undefined
   if (!channel) throw new Error("Weather alert RSS payload has no channel")
   const rawItems = asArray<RawAlert>(channel.item as RawAlert | RawAlert[] | undefined ?? channel.entry as RawAlert | RawAlert[] | undefined)
-  return rawItems.slice(0, 20).map((item, index) => normalizeAlert(item, source, ports, fetchedAt, index)).filter((item): item is FeedItem => item !== undefined)
+  const channelUpdated = channel.lastBuildDate ?? channel.updated
+  const normalized = rawItems.slice(0, 20).map((item, index) => normalizeAlert({ ...item, updated: item.updated ?? channelUpdated }, source, ports, fetchedAt, index)).filter((item): item is FeedItem => item !== undefined)
+  if (rawItems.length > 0 && normalized.length === 0) throw new Error(`${source.name} RSS payload has no valid alert entries`)
+  return normalized
 }
 
-function parseSourceSpecificNodes(html: string, source: WeatherAlertSource, selectors: string[], ports: Port[], fetchedAt: string): FeedItem[] {
+function capInfoAlerts(xml: string): RawAlert[] {
+  const parsed = parser.parse(xml) as { alert?: unknown }
+  const alerts = asArray<Record<string, unknown>>(parsed.alert as Record<string, unknown> | Record<string, unknown>[] | undefined)
+  return alerts.flatMap((alert) => {
+    const info = asArray<Record<string, unknown>>(alert.info as Record<string, unknown> | Record<string, unknown>[] | undefined)[0]
+    if (!info) return []
+    const area = asArray<Record<string, unknown>>(info.area as Record<string, unknown> | Record<string, unknown>[] | undefined)[0]
+    return [{
+      identifier: alert.identifier,
+      title: info.headline ?? info.event,
+      summary: info.description ?? info.instruction,
+      link: info.web,
+      issuedAt: alert.sent,
+      updated: alert.sent,
+      effectiveAt: info.effective ?? info.onset,
+      onsetAt: info.onset,
+      expiresAt: info.expires,
+      severity: info.severity,
+      urgency: info.urgency,
+      certainty: info.certainty,
+      region: area?.areaDesc,
+      active: true,
+    } satisfies RawAlert]
+  })
+}
+
+export function parseWeatherAlertCap(xml: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
+  const parsed = parser.parse(xml) as { alert?: unknown }
+  if (parsed.alert === undefined) throw new Error(`${source.name} CAP payload has no alert root`)
+  const alertCount = asArray(parsed.alert as Record<string, unknown> | Record<string, unknown>[]).length
+  const normalized = capInfoAlerts(xml).slice(0, 20).map((item, index) => normalizeAlert(item, source, ports, fetchedAt, index)).filter((item): item is FeedItem => item !== undefined)
+  if (alertCount > 0 && normalized.length === 0) throw new Error(`${source.name} CAP payload has no valid alert entries`)
+  return normalized
+}
+
+interface ParsedHtmlAlerts {
+  items: FeedItem[]
+  structureRecognized: boolean
+  candidateCount: number
+}
+
+function parseSourceSpecificNodes(html: string, source: WeatherAlertSource, selectors: string[], containers: string[], ports: Port[], fetchedAt: string): ParsedHtmlAlerts {
   const $ = load(html)
   const seen = new Set<string>()
   const items: FeedItem[] = []
@@ -232,19 +284,19 @@ function parseSourceSpecificNodes(html: string, source: WeatherAlertSource, sele
       items.push(item)
     }
   })
-  return items.slice(0, 20)
+  return { items: items.slice(0, 20), structureRecognized: $(containers.join(",")).length > 0, candidateCount: $(selectors.join(",")).length }
 }
 
 export function parseJmaWarning(html: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
-  return parseSourceSpecificNodes(html, source, ["#contents table tbody tr", "main table tbody tr", ".jma-information-list li"], ports, fetchedAt)
+  return parseSourceSpecificNodes(html, source, ["#contents table tbody tr", "main table tbody tr", ".jma-information-list li"], ["#contents", "main", ".jma-information-list"], ports, fetchedAt).items
 }
 
 export function parseTmdWarning(html: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
-  return parseSourceSpecificNodes(html, source, [".warning-list .warning-item", ".warning-list article", ".warning-card", "main table tbody tr"], ports, fetchedAt)
+  return parseSourceSpecificNodes(html, source, [".warning-list .warning-item", ".warning-list article", ".warning-card", "main table tbody tr"], [".warning-list", ".warning-card", "main"], ports, fetchedAt).items
 }
 
 export function parseBmkgWarning(html: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
-  return parseSourceSpecificNodes(html, source, [".table-responsive table tbody tr", ".warning-table tbody tr", ".warning-card"], ports, fetchedAt)
+  return parseSourceSpecificNodes(html, source, [".table-responsive table tbody tr", ".warning-table tbody tr", ".warning-card"], [".table-responsive", ".warning-table", ".warning-card"], ports, fetchedAt).items
 }
 
 export function parseWeatherAlertHtml(html: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
@@ -253,8 +305,22 @@ export function parseWeatherAlertHtml(html: string, source: WeatherAlertSource, 
   return parseBmkgWarning(html, source, ports, fetchedAt)
 }
 
+function parseWeatherAlertHtmlStrict(html: string, source: WeatherAlertSource, ports: Port[], fetchedAt: string): FeedItem[] {
+  const result = source.parser === "jma"
+    ? parseSourceSpecificNodes(html, source, ["#contents table tbody tr", "main table tbody tr", ".jma-information-list li"], ["#contents", "main", ".jma-information-list"], ports, fetchedAt)
+    : source.parser === "tmd"
+      ? parseSourceSpecificNodes(html, source, [".warning-list .warning-item", ".warning-list article", ".warning-card", "main table tbody tr"], [".warning-list", ".warning-card", "main"], ports, fetchedAt)
+      : parseSourceSpecificNodes(html, source, [".table-responsive table tbody tr", ".warning-table tbody tr", ".warning-card"], [".table-responsive", ".warning-table", ".warning-card"], ports, fetchedAt)
+  if (!result.structureRecognized || (result.candidateCount > 0 && result.items.length === 0)) throw new Error(`${source.name} warning structure was not recognized`)
+  return result.items
+}
+
 function markFailed(item: FeedItem, fetchedAt: string, error: string): FeedItem {
   return { ...item, stale: true, sourceStatus: "failed", error, fetchedAt }
+}
+
+function markDisabled(item: FeedItem, fetchedAt: string, error: string): FeedItem {
+  return { ...item, stale: true, sourceStatus: "disabled", error, fetchedAt }
 }
 
 function expiredAsInfo(item: FeedItem, fetchedAt: string): FeedItem {
@@ -276,6 +342,7 @@ export interface OfficialWeatherAlertProviderOptions {
   fetcher?: WeatherAlertFetcher
   now?: () => Date
   sources?: WeatherAlertSource[]
+  allowPending?: boolean
 }
 
 function defaultFetcher(): WeatherAlertFetcher {
@@ -294,16 +361,26 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
   const fetcher = options.fetcher ?? defaultFetcher()
   const now = options.now ?? (() => new Date())
   const sources = options.sources ?? officialWeatherAlertSources
+  const enabledSources = sources.filter(source => options.allowPending
+    ? source.liveStatus === "verified_live" || source.liveStatus === "experimental" || source.liveStatus === "live_pending"
+    : source.enabled && source.liveStatus === "verified_live")
   return {
     async getFeedItems(lastKnown = [], ports = mockPorts) {
       const fetchedAt = now().toISOString()
-      const results = await Promise.all(sources.filter(source => source.enabled).map(async (source) => {
+      if (!enabledSources.length) {
+        return lastKnown.filter(item => item.sourceId === "jma" || item.sourceId === "tmd" || item.sourceId === "bmkg").map(item => markDisabled(item, fetchedAt, "official_weather_source_live_pending"))
+      }
+      const results = await Promise.all(enabledSources.map(async (source) => {
         const previous = lastKnown.filter(item => item.sourceId === source.id)
         try {
           const response = await fetcher(source.url)
           if (!response.ok) throw new Error(`${source.name} request failed (${response.status})`)
           const body = await response.text()
-          const parsed = source.format === "rss" ? parseWeatherAlertRss(body, source, ports, fetchedAt) : parseWeatherAlertHtml(body, source, ports, fetchedAt)
+          const parsed = source.format === "cap"
+            ? parseWeatherAlertCap(body, source, ports, fetchedAt)
+            : source.format === "rss"
+              ? parseWeatherAlertRss(body, source, ports, fetchedAt)
+              : parseWeatherAlertHtmlStrict(body, source, ports, fetchedAt)
           const activeIds = new Set(parsed.map(item => item.id))
           const cleared = previous.filter(item => (item.severity === "warning" || item.severity === "critical") && !activeIds.has(item.id)).map(item => expiredAsInfo(item, fetchedAt))
           return [...parsed, ...cleared]

@@ -237,7 +237,10 @@ export interface WeatherDetail {
   alertId?: string
   alertRegion?: string
   alertIssuedAt?: string
+  alertEffectiveAt?: string
   alertExpiresAt?: string
+  alertUrgency?: string
+  alertCertainty?: string
 }
 
 export interface WeatherWindow {

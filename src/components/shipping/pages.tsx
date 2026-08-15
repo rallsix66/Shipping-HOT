@@ -57,6 +57,13 @@ function CongestionGauge({ level }: { level: "low" | "medium" | "high" | "critic
   )
 }
 
+function eventTimestampLabel(event: ShippingEvent) {
+  const labels = [`首次发现：${formatDate(event.firstDetectedAt)}`]
+  if (event.firstDetectedAt !== event.lastDetectedAt) labels.push(`最近确认：${formatDate(event.lastDetectedAt)}`)
+  if (event.resolvedAt) labels.push(`解决于：${formatDate(event.resolvedAt)}`)
+  return labels.join(" · ")
+}
+
 function EventMini({ event }: { event: ShippingEvent }) {
   return (
     <article className={`glass-panel hot-glow ${event.severity} mini-event`}>
@@ -68,7 +75,7 @@ function EventMini({ event }: { event: ShippingEvent }) {
       <p>{event.summary}</p>
       <p className="hot-meta">
         <span className="i-ph-clock" />
-        {event.resolvedAt ? `解决于 ${formatDate(event.resolvedAt)}` : `发现于 ${formatDate(event.lastDetectedAt)}`}
+        <span>{eventTimestampLabel(event)}</span>
       </p>
     </article>
   )
@@ -1000,7 +1007,7 @@ export function EventsPage() {
                       <ProvenanceBadge provenance={e.provenance} />
                       <StatusBadge stale={e.stale ?? e.sourceStatus !== "healthy"} sourceStatus={e.sourceStatus} />
                       <span className="tl-time">
-                        {e.status === "resolved" ? `解决于 ${formatDate(e.resolvedAt)}` : `发现于 ${formatDate(e.lastDetectedAt)}`}
+                        {eventTimestampLabel(e)}
                       </span>
                       {relatedLabel(e, data) && <span className="chip">{relatedLabel(e, data)}</span>}
                     </div>
