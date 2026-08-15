@@ -1,6 +1,11 @@
 import { deriveProvenance, provenanceEvidence } from "./shipping"
 import type { FeedItem, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, Vessel, Voyage } from "./shipping"
+import { type CalendarEvent, calendarCountries, calendarLeadDays, calendarSeverity, daysUntilCalendarEvent } from "./calendar"
 import { calculateDelayMinutes, congestionLevelRank, reconcileEvent, statusDurationMinutes } from "./shipping-rules"
+
+function calendarCountriesLabel(event: CalendarEvent): string {
+  return calendarCountries[event.countryCode]
+}
 
 export function isFreshEventEvidence(value: Pick<Freshness, "stale" | "sourceStatus">): boolean {
   return value.sourceStatus === "healthy" && !value.stale
@@ -19,13 +24,17 @@ function eventTrust(source: Freshness & ProvenanceAware) {
   }
 }
 
-export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: Voyage[], feedItems: FeedItem[], settings: ShippingSettings, previous: ShippingEvent[] = [], now = new Date().toISOString()): ShippingEvent[] {
+export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: Voyage[], feedItems: FeedItem[], settings: ShippingSettings, previous: ShippingEvent[] = [], now = new Date().toISOString(), calendarEvents: CalendarEvent[] = []): ShippingEvent[] {
   const candidates: Omit<ShippingEvent, "id" | "firstDetectedAt" | "lastDetectedAt" | "resolvedAt">[] = []
   const sourceTrust = new Map<string, Freshness>()
   vessels.forEach(vessel => sourceTrust.set(`vessel_anchored:${vessel.id}`, vessel))
   ports.forEach(port => sourceTrust.set(`port_congestion:${port.id}`, port))
   voyages.forEach(voyage => sourceTrust.set(`voyage_delay:${voyage.id}`, voyage))
   feedItems.forEach(feed => sourceTrust.set(`feed:${feed.id}`, feed))
+  const today = now.slice(0, 10)
+  for (const event of calendarEvents) {
+    for (const lead of calendarLeadDays(event)) sourceTrust.set(`calendar:${event.id}:${lead}`, event)
+  }
 
   for (const vessel of vessels.filter(isFreshEventEvidence)) {
     const durationMinutes = statusDurationMinutes(vessel, new Date(now))
@@ -46,6 +55,14 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
   }
   for (const feed of feedItems.filter(item => isFreshEventEvidence(item) && (item.severity === "warning" || item.severity === "critical"))) {
     candidates.push({ ...eventTrust(feed), type: feed.type, severity: feed.severity, status: "active", title: feed.title, summary: feed.summary, occurredAt: feed.publishedAt, detectedAt: now, dedupeKey: `feed:${feed.id}`, feedItemId: feed.id, evidenceJson: { category: feed.category } })
+  }
+  for (const calendarEvent of calendarEvents.filter(isFreshEventEvidence)) {
+    const daysUntil = daysUntilCalendarEvent(calendarEvent.date, today)
+    for (const lead of calendarLeadDays(calendarEvent)) {
+      if (daysUntil < 0 || daysUntil > lead) continue
+      const dedupeKey = `calendar:${calendarEvent.id}:${lead}`
+      candidates.push({ ...eventTrust(calendarEvent), type: "calendar_reminder", severity: calendarSeverity(calendarEvent.businessImpact), status: "active", title: `${calendarCountriesLabel(calendarEvent)}：${calendarEvent.name}`, summary: daysUntil === 0 ? "今天进入运营日历提醒窗口。" : `距离日期还有 ${daysUntil} 天，提前安排船期、清关和港口作业。`, occurredAt: `${calendarEvent.date}T00:00:00.000Z`, detectedAt: now, dedupeKey, calendarEventId: calendarEvent.id, evidenceJson: { calendarEventId: calendarEvent.id, leadDays: lead, daysUntil, isPublicHoliday: calendarEvent.isPublicHoliday } })
+    }
   }
   const byKey = new Map(previous.map(event => [event.dedupeKey, event]))
   const activeKeys = new Set(candidates.map(candidate => candidate.dedupeKey))

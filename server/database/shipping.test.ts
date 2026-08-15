@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import type { Database } from "db0"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { ShippingRepository, initShippingTables } from "./shipping"
+import { createMockCalendarEvents } from "#/providers/calendar"
 
 type StoredRow = Record<string, unknown>
 
@@ -59,6 +60,7 @@ class FakeDatabase {
     else if (tableName === "voyages") table.set(id, { id, data: args[1], baseline_eta: args[4], latest_eta: args[6] })
     else if (tableName === "feed_items") table.set(id, { id, data: args[13], published_at: args[7] })
     else if (tableName === "events") table.set(id, { id, data: args[1], status: args[4], dedupe_key: args[5], last_detected_at: args[7] })
+    else if (tableName === "calendar_events") table.set(id, { id, data: args[14], date: args[3], country_code: args[1] })
   }
 
   updateWatch(tableName: string, args: unknown[]) {
@@ -148,5 +150,17 @@ describe("shippingRepository", () => {
     expect(ports[0].provenance).toMatchObject({ sourceId: "mock-port" })
     expect((await repository.listEvents({ ports }))[0]).toMatchObject({ provenance: { sourceId: "mock-port", dataNature: "derived" }, evidence: [{ provenance: { sourceId: "mock-port", dataNature: "derived" } }] })
     expect((await repository.listFeedItems())[0].provenance).toBeUndefined()
+  })
+
+  it("initializes and persists the minimal calendar_events table", async () => {
+    const snapshot = createMockSnapshot()
+    const calendarEvents = createMockCalendarEvents(2026, "2026-08-15T00:00:00.000Z")
+    const database = new FakeDatabase()
+    await initShippingTables(database as unknown as Database)
+    const repository = new ShippingRepository(database as unknown as Database)
+    await repository.seed(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, [], snapshot.settings, calendarEvents)
+    const stored = await repository.listCalendarEvents()
+    expect(stored).toHaveLength(10)
+    expect(stored[0]).toMatchObject({ countryCode: "TH", sourceId: "mock-calendar", stale: false })
   })
 })

@@ -1,12 +1,15 @@
 import type { FeedItem, Port, ProviderResult, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
+import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries } from "@shared/calendar"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules"
+import { createMockCalendarEvents, mergeCalendarSources } from "#/providers/calendar"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { disabledProviderData, isWeatherFeedItem, providerModes, providerProvenances, providerResult, providers, toProviderResult } from "#/providers/shipping"
 
 let repository: ShippingRepository | undefined
-let fallbackSnapshot = createMockSnapshot()
+const mockCalendarYear = new Date().getUTCFullYear()
+let fallbackSnapshot: ShippingSnapshot = { ...createMockSnapshot(), calendarEvents: createMockCalendarEvents(mockCalendarYear) }
 let initialized: Promise<void> | undefined
 
 function preserveWatchState<T extends Vessel | Port>(latest: T[], stored: T[]): T[] {
@@ -37,7 +40,7 @@ async function initialize() {
       repository = new ShippingRepository(db)
       if (await repository.isEmpty()) {
         const seeded = await fetchProviderSnapshot(fallbackSnapshot.settings)
-        await repository.seed(seeded.vessels, seeded.ports, seeded.voyages, seeded.feedItems, seeded.events, seeded.settings)
+        await repository.seed(seeded.vessels, seeded.ports, seeded.voyages, seeded.feedItems, seeded.events, seeded.settings, seeded.calendarEvents)
       }
     } catch (error) {
       repository = undefined
@@ -47,7 +50,7 @@ async function initialize() {
   return initialized
 }
 
-async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick<ShippingSnapshot, "vessels" | "ports" | "voyages" | "feedItems"> = fallbackSnapshot): Promise<ShippingSnapshot> {
+async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick<ShippingSnapshot, "vessels" | "ports" | "voyages" | "feedItems" | "calendarEvents" | "calendarCoverage"> = fallbackSnapshot): Promise<ShippingSnapshot> {
   const existingNonWeatherFeed = lastKnown.feedItems.filter(item => !isWeatherFeedItem(item))
   const weatherLastKnown = lastKnown.feedItems.filter(isWeatherFeedItem)
   const [vesselResult, portResult, voyageResult, feedResult] = await Promise.allSettled([
@@ -71,6 +74,8 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
     feedItems: mergeWeatherFeedItems(existingNonWeatherFeed, weather.data),
     events: fallbackSnapshot.events,
     settings,
+    calendarEvents: lastKnown.calendarEvents,
+    calendarCoverage: lastKnown.calendarCoverage ?? settings.calendarSync,
     providerFreshness: { vessel: vessel.freshness, port: port.freshness, schedule: voyage.freshness, weather: weather.freshness },
   }
 }
@@ -87,6 +92,7 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
   const ports = await repository.listPorts(legacyDefaults)
   const voyages = await repository.listVoyages(legacyDefaults)
   const feedItems = await repository.listFeedItems()
+  const storedCalendarEvents = await repository.listCalendarEvents()
   return {
     vessels,
     ports,
@@ -94,6 +100,8 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
     feedItems,
     events: await repository.listEvents({ vessels, ports, voyages, feedItems }),
     settings,
+    calendarEvents: storedCalendarEvents.length ? storedCalendarEvents : fallbackSnapshot.calendarEvents,
+    calendarCoverage: settings.calendarSync ?? fallbackSnapshot.calendarCoverage,
   }
 }
 
@@ -105,6 +113,7 @@ async function saveSnapshot(snapshot: ShippingSnapshot) {
   for (const voyage of snapshot.voyages) await repository.upsertVoyage(voyage)
   for (const item of snapshot.feedItems) await repository.upsertFeedItem(item)
   for (const event of snapshot.events) await repository.upsertEvent(event)
+  for (const event of snapshot.calendarEvents ?? []) await repository.upsertCalendarEvent(event)
   await repository.saveSettings(snapshot.settings)
 }
 
@@ -118,12 +127,34 @@ export async function getShippingSnapshot(): Promise<ShippingSnapshot> {
     ports: preserveWatchState(providerSnapshot.ports, stored.ports),
     voyages: mergeVoyages(providerSnapshot.voyages, stored.voyages),
     feedItems: providerSnapshot.feedItems,
+    calendarEvents: stored.calendarEvents,
+    calendarCoverage: stored.calendarCoverage,
     providerFreshness: providerSnapshot.providerFreshness,
   }
-  current.events = detectShippingEvents(current.vessels, current.ports, current.voyages, current.feedItems, current.settings, stored.events)
+  current.events = detectShippingEvents(current.vessels, current.ports, current.voyages, current.feedItems, current.settings, stored.events, new Date().toISOString(), current.calendarEvents ?? [])
   await saveSnapshot(current)
   await repository?.pruneExpired(current.settings.retentionDays)
   return structuredClone(current)
+}
+
+function calendarQuery(year: number, countries?: CalendarCountryCode[]): CalendarQuery {
+  return { year, countries: countries?.length ? countries : Object.keys(calendarCountries) as CalendarCountryCode[] }
+}
+
+export async function syncCalendarEvents(year = mockCalendarYear, countries?: CalendarCountryCode[]): Promise<CalendarProviderResult> {
+  await initialize()
+  const result = await providers.calendar.getEvents(calendarQuery(year, countries))
+  const existing = fallbackSnapshot.calendarEvents ?? []
+  const incomingKeys = new Set(result.events.map(event => `${event.countryCode}:${event.date}:${event.name}:${event.type}`))
+  const retained = existing.filter(event => !result.coverage.some(coverage => coverage.countryCode === event.countryCode && coverage.year === year) || !incomingKeys.has(`${event.countryCode}:${event.date}:${event.name}:${event.type}`))
+  const merged = mergeCalendarSources(result.events.filter(event => event.sourceKind === "third_party" || event.sourceKind === "mock"), result.events.filter(event => event.sourceKind === "official"), result.events.filter(event => event.sourceKind === "user"))
+  const next: CalendarEvent[] = [...retained, ...merged]
+  const settings = { ...fallbackSnapshot.settings, calendarSync: result.coverage }
+  const snapshot = { ...fallbackSnapshot, settings, calendarEvents: next, calendarCoverage: result.coverage }
+  fallbackSnapshot = structuredClone(snapshot)
+  for (const event of next) await repository?.upsertCalendarEvent(event)
+  if (repository) await repository.saveSettings(settings)
+  return { ...result, events: next }
 }
 
 export async function updateShippingSettings(settings: Partial<Omit<ShippingSettings, "eventThresholds">> & { eventThresholds?: Partial<ShippingSettings["eventThresholds"]> }) {

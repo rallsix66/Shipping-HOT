@@ -1,3 +1,5 @@
+import type { CalendarCoverage, CalendarEvent } from "./calendar"
+
 export type SourceStatus = "healthy" | "degraded" | "failed" | "disabled" | "never_succeeded"
 export type SourceType = "official" | "third_party" | "user" | "mock"
 export type DataNature = "observed" | "reported" | "forecast" | "modelled" | "derived" | "estimated" | "planned"
@@ -184,6 +186,7 @@ export interface ShippingEvent extends ProvenanceAware {
   vesselId?: string
   portId?: string
   voyageId?: string
+  calendarEventId?: string
   evidenceJson: Record<string, unknown>
   evidence?: DataEvidence[]
   updatedAt?: string
@@ -204,6 +207,7 @@ export interface ShippingSettings {
     congestionLevel: Port["congestionLevel"]
   }
   retentionDays: number
+  calendarSync?: CalendarCoverage[]
 }
 
 export interface ShippingSnapshot {
@@ -214,6 +218,8 @@ export interface ShippingSnapshot {
   feedItems: FeedItem[]
   settings: ShippingSettings
   providerFreshness?: ShippingProviderFreshness
+  calendarEvents?: CalendarEvent[]
+  calendarCoverage?: CalendarCoverage[]
 }
 
 export interface HotItem {

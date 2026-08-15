@@ -1,6 +1,7 @@
 import { env } from "node:process"
 import type { DataProvenance, FeedItem, Freshness, Port, PortCongestionDetail, ProviderResult, SourceStatus, Vessel, Voyage } from "@shared/shipping"
 import { mockFeedItems, mockPorts, mockVessels, mockVoyages, portWeatherConfig } from "@shared/shipping-fixtures"
+import { type CalendarProvider, configureCalendarProviders } from "./calendar"
 
 export interface VesselProvider {
   getVessels: (watched?: Vessel[]) => Promise<Vessel[]>
@@ -626,12 +627,15 @@ export function configureProviders(environment: ProviderEnvironment = { ...env }
 }
 
 const configured = configureProviders()
-export const providers = configured.providers
-export const providerModes = configured.modes
+const configuredCalendar = configureCalendarProviders()
+export const providers = { ...configured.providers, calendar: configuredCalendar.provider as CalendarProvider }
+export const providerModes = { ...configured.modes, calendar: configuredCalendar.modes.calendar }
+export const calendarProviderModes = configuredCalendar.modes
 
 export const realProviders = {
   vessel: "AISStream",
   port: "Portcast public page",
   schedule: "deferred",
   weather: "Open-Meteo Marine API",
+  calendar: "Calendarific / OfficialHolidayProvider / ManualHolidayProvider",
 } as const

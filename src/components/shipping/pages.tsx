@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { motion } from "framer-motion"
 import { type ReactNode, useEffect, useState } from "react"
+import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
 import { ErrorState, EventCard, FeedCard, LoadingState, PageHero, ProvenanceBadge, Severity, ShippingShell, StatCard, StatusBadge, VoyageCard } from "./app"
 import { useShipping } from "./data"
 import { formatDate, formatStatus, navTone, severityTone } from "./format"
@@ -15,6 +16,11 @@ export function HotPage() {
   const watchedVessels = data.vessels.filter(v => v.isWatched)
   const watchedPorts = data.ports.filter(p => p.isWatched)
   const feed = data.feedItems.slice(0, 10)
+  const today = new Date().toISOString().slice(0, 10)
+  const upcomingCalendar = (data.calendarEvents ?? []).filter((event) => {
+    const days = daysUntilCalendarEvent(event.date, today)
+    return days >= 0 && days <= 14
+  }).slice(0, 5)
   const stats = [
     { label: "活跃 HOT", value: data.hot.length, tone: "critical" as const },
     { label: "关注船舶", value: watchedVessels.length, tone: "default" as const },
@@ -172,6 +178,18 @@ export function HotPage() {
                 ))}
               </Marquee>
             )}
+      </Reveal>
+      <Reveal delay={0.16} className="glass-panel mt-4 p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold">近期国家日历</h2>
+          <Link to="/calendar" className="flex items-center gap-1 text-sm font-semibold text-teal-600 dark:text-teal-300">
+            查看日历
+            <span className="i-ph-arrow-right" />
+          </Link>
+        </div>
+        {upcomingCalendar.length === 0
+          ? <EmptyState icon="i-ph-calendar-blank" text="未来 14 天暂无已缓存日历提醒" />
+          : upcomingCalendar.map(event => <CalendarListRow key={event.id} event={event} today={today} />)}
       </Reveal>
     </ShippingShell>
   )
@@ -598,6 +616,91 @@ export function FeedPage() {
   )
 }
 
+/* ================= 国家日历 ================= */
+const calendarCountryOptions = [
+  { value: "all", label: "全部国家" },
+  ...Object.entries(calendarCountries).map(([value, label]) => ({ value, label })),
+]
+const calendarYearOptions = (() => {
+  const currentYear = new Date().getUTCFullYear()
+  return [currentYear - 1, currentYear, currentYear + 1].map(value => ({ value: String(value), label: `${value} 年` }))
+})()
+const calendarMonthOptions = [
+  { value: "all", label: "全年" },
+  ...Array.from({ length: 12 }, (_, index) => ({ value: String(index + 1).padStart(2, "0"), label: `${index + 1} 月` })),
+]
+const calendarTypeOptions = [
+  { value: "all", label: "全部类型" },
+  { value: "public_holiday", label: "公共假日" },
+  { value: "religious", label: "宗教日期" },
+  { value: "government_special", label: "政府临时" },
+  { value: "observance", label: "纪念/观察日" },
+  { value: "company_custom", label: "公司自定义" },
+]
+const calendarImpactOptions = [
+  { value: "all", label: "全部影响" },
+  { value: "low", label: "低影响" },
+  { value: "medium", label: "中影响" },
+  { value: "high", label: "高影响" },
+  { value: "critical", label: "关键影响" },
+]
+const calendarVerificationOptions = [
+  { value: "all", label: "全部验证" },
+  { value: "verified", label: "已验证" },
+  { value: "unverified", label: "待核验" },
+]
+
+export function CalendarPage() {
+  const { data, isLoading, isError, refetch } = useShipping()
+  const [country, setCountry] = useState("all")
+  const [selectedYear, setSelectedYear] = useState(String(new Date().getUTCFullYear()))
+  const [month, setMonth] = useState("all")
+  const [type, setType] = useState("all")
+  const [impact, setImpact] = useState("all")
+  const [verification, setVerification] = useState("all")
+  const [publicOnly, setPublicOnly] = useState(false)
+  const [syncState, setSyncState] = useState<"idle" | "syncing" | "done" | "error">("idle")
+  const year = Number(selectedYear)
+  if (isLoading) return <ShippingShell><LoadingState /></ShippingShell>
+  if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
+  const today = new Date().toISOString().slice(0, 10)
+  const events = (data.calendarEvents ?? []).filter(event => event.date.startsWith(String(year)) && (month === "all" || event.date.slice(5, 7) === month) && (country === "all" || event.countryCode === country) && (type === "all" || event.type === type) && (impact === "all" || event.businessImpact === impact) && (verification === "all" || (verification === "verified" ? event.verified : !event.verified)) && (!publicOnly || event.isPublicHoliday))
+  const sync = async () => {
+    setSyncState("syncing")
+    try {
+      await myFetch("/shipping/calendar/sync", { method: "POST", body: { year, countries: country === "all" ? undefined : [country] } })
+      await refetch()
+      setSyncState("done")
+    } catch {
+      setSyncState("error")
+    }
+  }
+  return (
+    <ShippingShell>
+      <PageHero eyebrow="市场日历" title="国家日历" description="缓存 TH / ID / MY / PH / VN 的国家假日与运营提醒；宗教日期不默认等同于停工。">
+        <div className="flex flex-wrap gap-2">
+          <Segmented id="calendar-country" options={calendarCountryOptions} value={country} onChange={setCountry} />
+          <Segmented id="calendar-year" options={calendarYearOptions} value={selectedYear} onChange={setSelectedYear} />
+          <Segmented id="calendar-month" options={calendarMonthOptions} value={month} onChange={setMonth} />
+          <Segmented id="calendar-type" options={calendarTypeOptions} value={type} onChange={setType} />
+          <Segmented id="calendar-impact" options={calendarImpactOptions} value={impact} onChange={setImpact} />
+          <Segmented id="calendar-verification" options={calendarVerificationOptions} value={verification} onChange={setVerification} />
+          <button type="button" className={`btn-ghost ${publicOnly ? "border-teal-500/50 text-teal-600 dark:text-teal-300" : ""}`} onClick={() => setPublicOnly(value => !value)}>仅公共假日</button>
+          <button type="button" className="btn-gradient" disabled={syncState === "syncing"} onClick={sync}>{syncState === "syncing" ? "同步中…" : "同步年度缓存"}</button>
+        </div>
+      </PageHero>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-2 text-xs op-65">
+        <span>{data.provider.calendar === "mock" ? "当前为 Mock 日历；配置 Calendarific Key 后可同步年度第三方缓存。" : `Provider：${data.provider.calendar}`}</span>
+        <a className="text-teal-600 underline decoration-teal-500/40 underline-offset-3 dark:text-teal-300" href="https://calendarific.com/" target="_blank" rel="noreferrer">Powered by Calendarific</a>
+      </div>
+      {syncState === "error" && <p className="mb-4 text-sm text-rose-600 dark:text-rose-300">同步失败，继续显示本地缓存。</p>}
+      {events.length === 0
+        ? <div className="glass-panel"><EmptyState icon="i-ph-calendar-blank" text="当前筛选下暂无已缓存事件" /></div>
+        : <div className="grid gap-4 lg:grid-cols-2">{events.map(event => <CalendarCard key={event.id} event={event} today={today} />)}</div>}
+    </ShippingShell>
+  )
+}
+
 /* ================= 设置 ================= */
 const settingsCongestionOptions = [
   { value: "low", label: "低" },
@@ -744,6 +847,75 @@ function MiniField({ label, value }: { label: string, value: ReactNode }) {
       <span className="block text-xs op-60">{label}</span>
       <span className="block truncate text-sm font-semibold">{value}</span>
     </div>
+  )
+}
+
+const calendarTypeLabels: Record<string, string> = {
+  public_holiday: "公共假日",
+  observance: "观察日",
+  religious: "宗教日期",
+  commercial: "商业日期",
+  government_special: "政府临时假日",
+  company_custom: "公司自定义",
+}
+
+const calendarImpactLabels: Record<string, string> = { low: "低影响", medium: "中影响", high: "高影响", critical: "关键" }
+
+function formatCalendarDate(value: string) {
+  return new Date(`${value}T00:00:00Z`).toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })
+}
+
+function CalendarListRow({ event, today }: { event: CalendarEvent, today: string }) {
+  const days = daysUntilCalendarEvent(event.date, today)
+  return (
+    <div className="list-row">
+      <span className="flex min-w-0 items-center gap-2">
+        <StatusDot tone={event.businessImpact === "critical" || event.businessImpact === "high" ? "failed" : event.businessImpact === "medium" ? "watch" : "info"} />
+        <span className="truncate font-semibold">{event.name}</span>
+      </span>
+      <span className="shrink-0 text-xs op-65">
+        {days === 0 ? "今天" : `${days} 天后`}
+        {" "}
+        ·
+        {" "}
+        {event.countryCode}
+      </span>
+    </div>
+  )
+}
+
+function CalendarCard({ event, today }: { event: CalendarEvent, today: string }) {
+  const days = daysUntilCalendarEvent(event.date, today)
+  return (
+    <Reveal className="glass-panel tile p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs uppercase tracking-wider op-60">
+            {event.countryCode}
+            {" "}
+            ·
+            {" "}
+            {calendarCountries[event.countryCode]}
+          </p>
+          <h3 className="mt-1 text-lg font-bold">{event.name}</h3>
+        </div>
+        <StatusDot tone={event.sourceStatus === "healthy" && !event.stale ? "fresh" : "watch"} />
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+        <MiniField label="日期" value={formatCalendarDate(event.date)} />
+        <MiniField label="倒计时" value={days < 0 ? "已过期" : days === 0 ? "今天" : `${days} 天后`} />
+        <MiniField label="类型" value={calendarTypeLabels[event.type] ?? event.type} />
+        <MiniField label="影响" value={calendarImpactLabels[event.businessImpact] ?? event.businessImpact} />
+        <MiniField label="公共假日" value={event.isPublicHoliday ? "是" : "否"} />
+        <MiniField label="已验证" value={event.verified ? "是" : "待核验"} />
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-2 text-xs op-70">
+        <ProvenanceBadge provenance={event.provenance} />
+        <StatusBadge stale={event.stale} sourceStatus={event.sourceStatus} />
+        {event.conflictFlag && <span className="status-badge status-stale">存在来源冲突</span>}
+        {event.sourceUrl && <a className="text-teal-600 underline decoration-teal-500/40 underline-offset-3 dark:text-teal-300" href={event.sourceUrl} target="_blank" rel="noreferrer">来源</a>}
+      </div>
+    </Reveal>
   )
 }
 

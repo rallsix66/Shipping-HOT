@@ -16,6 +16,7 @@ const navLinks = [
   { to: "/voyages", label: "航次", icon: "i-ph-compass" },
   { to: "/events", label: "事件", icon: "i-ph-bell-ringing" },
   { to: "/feed", label: "资讯", icon: "i-ph-newspaper" },
+  { to: "/calendar", label: "国家日历", icon: "i-ph-calendar-blank" },
   { to: "/settings", label: "设置", icon: "i-ph-gear" },
 ] as const
 
@@ -87,7 +88,7 @@ export function ShippingShell({ children }: { children: ReactNode }) {
           {children}
         </main>
         <footer className="mx-auto max-w-1200px px-4 pb-10 text-center text-xs op-55">
-          Shipping HOT · 本地指挥台 V1 · AISStream / Open-Meteo Marine / Mock
+          Shipping HOT · 本地指挥台 V2 · AISStream / Open-Meteo Marine / Calendar / Mock
         </footer>
       </div>
     </MotionConfig>
