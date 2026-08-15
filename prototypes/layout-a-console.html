@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原型 A · 指挥台化 — Shipping HOT 布局对比</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="dashboard">
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-fire" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+  <symbol id="i-anchor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="3"/><path d="M12 22V8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></symbol>
+  <symbol id="i-landmark" viewBox="0 0 24 24"><path d="M3 22h18"/><path d="M6 18v-7"/><path d="M10 18v-7"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="m12 2 8 5H4z"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36z"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="M4 2C2.8 3.7 2 5.7 2 8"/><path d="M22 8c0-2.3-.8-4.3-2-6"/></symbol>
+  <symbol id="i-news" viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8z"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M21 4h-7"/><path d="M10 4H3"/><path d="M21 12h-9"/><path d="M8 12H3"/><path d="M21 20h-5"/><path d="M12 20H3"/><path d="M14 2v4"/><path d="M8 10v4"/><path d="M16 18v4"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
+  <symbol id="i-waves" viewBox="0 0 24 24"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></symbol>
+  <symbol id="i-ship" viewBox="0 0 24 24"><path d="M4 18.5c1.2 1 2.8 1 4 0 1.4-1.2 2.6-1.2 4 0 1.4 1.2 2.6 1.2 4 0 1.2-1 2.8-1 4 0"/><path d="M5 15.5 3.5 9.5 8 6h8l4.5 3.5-1.5 6"/><path d="M12 2.5V6"/><path d="m12 6 3 3.5h-6L12 6z"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+</svg>
+
+<div class="bg-fx">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="bg-grid"></div><div class="bg-noise"></div><div class="bg-vignette"></div>
+</div>
+
+<div class="layout-a">
+  <!-- ===== 左侧固定侧栏 ===== -->
+  <aside class="sidebar">
+    <div class="side-head">
+      <span class="brand-badge"><svg class="ic"><use href="#i-fire"/></svg></span>
+      <span class="side-title">Shipping <b>HOT</b></span>
+      <button type="button" class="collapse-btn" data-collapse title="折叠/展开侧栏"><svg class="ic"><use href="#i-panel"/></svg></button>
+    </div>
+    <nav class="side-nav">
+      <a href="#" class="active" data-nav="dashboard"><svg class="ic"><use href="#i-fire"/></svg><span class="side-label">首页</span></a>
+      <a href="#" data-nav="vessels"><svg class="ic"><use href="#i-anchor"/></svg><span class="side-label">船舶</span></a>
+      <a href="#" data-nav="ports"><svg class="ic"><use href="#i-landmark"/></svg><span class="side-label">港口</span></a>
+      <a href="#" data-nav="voyages"><svg class="ic"><use href="#i-compass"/></svg><span class="side-label">航次</span></a>
+      <a href="#" data-nav="events"><svg class="ic"><use href="#i-bell"/></svg><span class="side-label">事件</span></a>
+      <a href="#" data-nav="feed"><svg class="ic"><use href="#i-news"/></svg><span class="side-label">资讯</span></a>
+      <a href="#" data-nav="calendar"><svg class="ic"><use href="#i-cal"/></svg><span class="side-label">国家日历</span></a>
+      <a href="#" data-nav="settings"><svg class="ic"><use href="#i-sliders"/></svg><span class="side-label">设置</span></a>
+    </nav>
+    <div class="side-foot">
+      <div class="side-note">改动① 顶部导航 → 左侧固定栏（点右上角可折叠成图标栏）</div>
+      <div class="sf-row"><span class="dot dim"></span><span class="lbl grow">船位</span><span class="lbl muted2">Mock</span></div>
+      <div class="sf-row"><span class="dot dim"></span><span class="lbl grow">天气</span><span class="lbl muted2">Mock</span></div>
+      <div class="sf-row"><span class="dot dim"></span><span class="lbl grow">港口</span><span class="lbl muted2">Mock</span></div>
+      <div class="sf-row"><span class="dot dim"></span><span class="lbl grow">班期</span><span class="lbl muted2">Mock</span></div>
+      <div class="sf-row"><span class="dot dim"></span><span class="lbl grow">资讯</span><span class="lbl muted2">Mock</span></div>
+      <div class="sf-row">
+        <button type="button" class="collapse-btn" data-theme title="切换明暗主题" style="margin:0">
+          <svg class="ic icon-sun"><use href="#i-sun"/></svg>
+          <svg class="ic icon-moon"><use href="#i-moon"/></svg>
+        </button>
+        <span class="lbl">明暗主题</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== 内容区 ===== -->
+  <div class="content-a">
+    <header class="topbar-a">
+      <h1 data-page-title>运营态势 · 首页</h1>
+      <span class="spacer"></span>
+      <span class="note-pill">改动③ 全局状态条常驻（原来只在首页 hero 展示一次）</span>
+      <span class="tchip"><i class="dot failed pulse"></i>活跃 HOT 4</span>
+      <span class="tchip"><svg class="ic"><use href="#i-refresh"/></svg>最后刷新 14:32</span>
+      <span class="tchip">数据源 全 Mock</span>
+    </header>
+
+    <main>
+      <!-- ===== 首页 ===== -->
+      <section data-page="dashboard" class="dash-a">
+        <div class="sec-head">
+          <div>
+            <span class="eyebrow">优先信号</span>
+            <h2 style="font-size:19px">需要关注的事项</h2>
+            <p>按严重程度排序，聚合事件与资讯去重后的关键运营信号。</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="note-pill">改动② HOT 信号上移首屏（原来在 hero 与统计卡之后）</span>
+            <span class="chip on">4 项</span>
+          </div>
+        </div>
+        <div class="hot-grid">
+          <article class="glass hot critical hot-card">
+            <div class="hot-top">
+              <span class="sev critical"><i class="dot failed"></i>严重 · 官方预警</span>
+              <div class="hot-badges"><span class="prov">官方 · 泰国气象局</span><span class="st fresh"><i class="dot fresh pulse"></i>最新</span></div>
+            </div>
+            <h3>台风“海燕”逼近林查班港</h3>
+            <p class="sum">TMD 发布风暴预警，预计 48 小时内影响靠泊作业，港区已启动防台响应。</p>
+            <div class="hot-meta"><svg class="ic"><use href="#i-clock"/></svg>港口 · 林查班 · 14:10 发现</div>
+          </article>
+          <article class="glass hot warning hot-card">
+            <div class="hot-top">
+              <span class="sev warning"><i class="dot failed"></i>警告</span>
+              <div class="hot-badges"><span class="prov">港口页面</span><span class="st fresh"><i class="dot fresh pulse"></i>最新</span></div>
+            </div>
+            <h3>蛇口港拥堵等级升至“严重”</h3>
+            <p class="sum">在泊时长与锚地等待均突破阈值，多条支线船期受影响。</p>
+            <div class="hot-meta"><svg class="ic"><use href="#i-clock"/></svg>港口 · 蛇口 · 13:52 发现</div>
+          </article>
+          <article class="glass hot watch hot-card">
+            <div class="hot-top">
+              <span class="sev watch"><i class="dot watch"></i>关注</span>
+              <div class="hot-badges"><span class="prov">AISStream</span><span class="st fresh"><i class="dot fresh pulse"></i>最新</span></div>
+            </div>
+            <h3>MSC ANNA 航速异常，偏离计划航线</h3>
+            <p class="sum">过去 1 小时航速由 18.4 节降至 14.2 节，位置偏离计划航迹约 6 海里。</p>
+            <div class="hot-meta"><svg class="ic"><use href="#i-clock"/></svg>船舶 · MSC ANNA · 13:48 发现</div>
+          </article>
+          <article class="glass hot info hot-card">
+            <div class="hot-top">
+              <span class="sev info"><i class="dot info"></i>提示</span>
+              <div class="hot-badges"><span class="prov">国家日历</span><span class="st fresh"><i class="dot fresh pulse"></i>最新</span></div>
+            </div>
+            <h3>印尼开斋节假期临近，雅加达清关预计放缓</h3>
+            <p class="sum">9 月 1 日起为政府临时调整日，预计清关与提柜时效顺延 1–2 天。</p>
+            <div class="hot-meta"><svg class="ic"><use href="#i-clock"/></svg>国家日历 · 印尼 · 09:00 发现</div>
+          </article>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;margin:2px 0 -4px">
+          <span class="note-pill">改动④ 统计卡由 2×2 大方块改为一行细条，不再抢占首屏</span>
+        </div>
+        <div class="stat-strip">
+          <div class="glass stat-cell"><span class="v tnum" style="color:#e11d48">4</span><span class="l">活跃 HOT</span></div>
+          <div class="glass stat-cell"><span class="v tnum">6</span><span class="l">关注船舶</span></div>
+          <div class="glass stat-cell"><span class="v tnum">8</span><span class="l">关注港口</span></div>
+          <div class="glass stat-cell"><span class="v" style="font-size:16px">5 / 5 Mock</span><span class="l">数据源</span></div>
+        </div>
+
+        <div class="bento2">
+          <div class="glass panel-pad">
+            <div class="panel-head">
+              <h2>关注的船舶</h2>
+              <a class="link-more" data-nav="vessels" href="#">查看全部 <svg class="ic"><use href="#i-arrow"/></svg></a>
+            </div>
+            <a class="list-row" data-nav="vessel-detail" href="#">
+              <span style="display:flex;align-items:center;gap:9px;font-weight:700;min-width:0"><i class="dot fresh"></i><span class="muted" style="font-size:11px">航行中</span><span style="overflow:hidden;text-overflow:ellipsis">MSC ANNA</span></span>
+              <span class="muted2" style="display:flex;align-items:center;gap:6px">林查班 <svg class="ic"><use href="#i-arrow"/></svg></span>
+            </a>
+            <div class="list-row">
+              <span style="display:flex;align-items:center;gap:9px;font-weight:700;min-width:0"><i class="dot watch"></i><span class="muted" style="font-size:11px">锚泊</span>COSCO SHIPPING STAR</span>
+              <span class="muted2" style="display:flex;align-items:center;gap:6px">蛇口 <svg class="ic"><use href="#i-arrow"/></svg></span>
+            </div>
+            <div class="list-row">
+              <span style="display:flex;align-items:center;gap:9px;font-weight:700;min-width:0"><i class="dot info"></i><span class="muted" style="font-size:11px">靠泊</span>MAERSK HANOI</span>
+              <span class="muted2" style="display:flex;align-items:center;gap:6px">盐田 <svg class="ic"><use href="#i-arrow"/></svg></span>
+            </div>
+            <div class="list-row">
+              <span style="display:flex;align-items:center;gap:9px;font-weight:700;min-width:0"><i class="dot fresh"></i><span class="muted" style="font-size:11px">航行中</span>EVER LUCKY</span>
+              <span class="muted2" style="display:flex;align-items:center;gap:6px">巴生港 <svg class="ic"><use href="#i-arrow"/></svg></span>
+            </div>
+          </div>
+          <div class="glass panel-pad">
+            <div class="panel-head">
+              <h2>关注的港口</h2>
+              <a class="link-more" data-nav="ports" href="#">查看全部 <svg class="ic"><use href="#i-arrow"/></svg></a>
+            </div>
+            <div class="list-row">
+              <span style="display:flex;align-items:center;gap:9px;font-weight:700;min-width:0"><span class="flag-badge">🇨🇳</span>蛇口 · Shekou</span>
+              <span style="display:flex;align-items:center;gap:8px;width:130px"><span class="tiny muted2">严重</span><span class="gauge g-critical"><i></i></span></span>
+            </div>
+            <div class="list-row">
+              <span style="display:flex;align-items:center;gap:9px;font-weight:700;min-width:0"><span class="flag-badge">🇨🇳</span>盐田 · Yantian</span>
+              <span style="display:flex;align-items:center;gap:8px;width:130px"><span class="tiny muted2">中</span><span class="gauge g-medium"><i></i></span></span>
+            </div>
+            <div class="list-row">
+              <span style="display:flex;align-items:center;gap:9px;font-weight:700;min-width:0"><span class="flag-badge">🇹🇭</span>林查班 · Laem Chabang</span>
+              <span style="display:flex;align-items:center;gap:8px;width:130px"><span class="tiny muted2">高</span><span class="gauge g-high"><i></i></span></span>
+            </div>
+            <div class="list-row">
+              <span style="display:flex;align-items:center;gap:9px;font-weight:700;min-width:0"><span class="flag-badge">🇮🇩</span>雅加达 · Jakarta</span>
+              <span style="display:flex;align-items:center;gap:8px;width:130px"><span class="tiny muted2">低</span><span class="gauge g-low"><i></i></span></span>
+            </div>
+          </div>
+          <div class="glass panel-pad">
+            <div class="panel-head">
+              <h2>资讯快讯</h2>
+              <a class="link-more" data-nav="feed" href="#">查看全部 <svg class="ic"><use href="#i-arrow"/></svg></a>
+            </div>
+            <div class="marquee">
+              <div class="marquee-track">
+                <div class="marquee-half">
+                  <span class="mq-item"><i class="dot failed"></i><b>台风“海燕”逼近林查班</b>14:10</span>
+                  <span class="mq-item"><i class="dot failed"></i><b>蛇口港 8/20–22 大雾封航窗口</b>13:52</span>
+                  <span class="mq-item"><i class="dot watch"></i><b>MSC 远东—欧洲 GRI 上调 $800/FEU</b>11:30</span>
+                  <span class="mq-item"><i class="dot watch"></i><b>南海热带低压生成</b>10:15</span>
+                  <span class="mq-item"><i class="dot info"></i><b>林查班三期扩建获批</b>08:40</span>
+                </div>
+                <div class="marquee-half" aria-hidden="true">
+                  <span class="mq-item"><i class="dot failed"></i><b>台风“海燕”逼近林查班</b>14:10</span>
+                  <span class="mq-item"><i class="dot failed"></i><b>蛇口港 8/20–22 大雾封航窗口</b>13:52</span>
+                  <span class="mq-item"><i class="dot watch"></i><b>MSC 远东—欧洲 GRI 上调 $800/FEU</b>11:30</span>
+                  <span class="mq-item"><i class="dot watch"></i><b>南海热带低压生成</b>10:15</span>
+                  <span class="mq-item"><i class="dot info"></i><b>林查班三期扩建获批</b>08:40</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="glass panel-pad">
+            <div class="panel-head">
+              <h2>近期国家日历</h2>
+              <a class="link-more" data-nav="calendar" href="#">查看日历 <svg class="ic"><use href="#i-arrow"/></svg></a>
+            </div>
+            <div class="list-row">
+              <span style="display:flex;align-items:center;gap:9px;font-weight:700;min-width:0"><span class="flag-badge">🇹🇭</span>母亲节（补假）</span>
+              <span style="display:flex;align-items:center;gap:8px"><span class="chip">高影响</span><span class="tiny muted2">8·21</span></span>
+            </div>
+            <div class="list-row">
+              <span style="display:flex;align-items:center;gap:9px;font-weight:700;min-width:0"><span class="flag-badge">🇲🇾</span>国庆日</span>
+              <span style="display:flex;align-items:center;gap:8px"><span class="chip">中影响</span><span class="tiny muted2">8·31</span></span>
+            </div>
+            <div class="list-row">
+              <span style="display:flex;align-items:center;gap:9px;font-weight:700;min-width:0"><span class="flag-badge">🇮🇩</span>开斋节后工作调整</span>
+              <span style="display:flex;align-items:center;gap:8px"><span class="chip">高影响</span><span class="tiny muted2">9·01</span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 船舶（密集表格） ===== -->
+      <section data-page="vessels">
+        <div class="sec-head">
+          <div>
+            <span class="eyebrow">运营数据</span>
+            <h2 style="font-size:19px">我的船舶</h2>
+            <p>关注船队的航行状态、目的港与数据新鲜度，一行一船快速扫描。</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="note-pill">改动⑤ 卡片栅格 → 密集表格行，适合快速扫描</span>
+            <div class="seg" data-filter-scope data-items="vessel-rows">
+              <button class="active" data-filter="all">全部 8</button>
+              <button data-filter="under_way">航行中</button>
+              <button data-filter="anchored">锚泊</button>
+              <button data-filter="moored">靠泊</button>
+            </div>
+          </div>
+        </div>
+        <div class="glass vt" data-items="vessel-rows">
+          <div class="vt-head">
+            <span class="c-name">船舶</span><span class="c-status">状态</span><span class="c-speed">航速</span><span class="c-dest">目的港</span><span class="c-eta">ETA</span><span class="c-fresh">数据</span>
+          </div>
+          <div class="vt-row" data-cat="under_way">
+            <span class="nm c-name">MSC ANNA<small>MSC · 集装箱船</small></span>
+            <span class="st-c c-status"><i class="dot fresh"></i>航行中</span>
+            <span class="c-speed tnum">18.4 节</span>
+            <span class="c-dest">🇹🇭 林查班</span>
+            <span class="eta c-eta tnum">08-19 06:00</span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span><a class="link-more" data-nav="vessel-detail" href="#"><svg class="ic"><use href="#i-arrow"/></svg></a></span>
+          </div>
+          <div class="vt-row" data-cat="anchored">
+            <span class="nm c-name">COSCO SHIPPING STAR<small>COSCO · 集装箱船</small></span>
+            <span class="st-c c-status"><i class="dot watch"></i>锚泊</span>
+            <span class="c-speed muted2">—</span>
+            <span class="c-dest">🇨🇳 蛇口</span>
+            <span class="eta c-eta tnum">08-18 23:00</span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span></span>
+          </div>
+          <div class="vt-row" data-cat="moored">
+            <span class="nm c-name">MAERSK HANOI<small>Maersk · 集装箱船</small></span>
+            <span class="st-c c-status"><i class="dot info"></i>靠泊</span>
+            <span class="c-speed muted2">—</span>
+            <span class="c-dest">🇨🇳 盐田</span>
+            <span class="eta c-eta muted2">已靠泊</span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span></span>
+          </div>
+          <div class="vt-row" data-cat="under_way">
+            <span class="nm c-name">EVER LUCKY<small>Evergreen · 集装箱船</small></span>
+            <span class="st-c c-status"><i class="dot fresh"></i>航行中</span>
+            <span class="c-speed tnum">20.1 节</span>
+            <span class="c-dest">🇲🇾 巴生港</span>
+            <span class="eta c-eta tnum">08-21 14:00</span>
+            <span class="fr c-fresh"><span class="st stale"><i class="dot watch"></i>12 小时前</span></span>
+          </div>
+          <div class="vt-row" data-cat="under_way">
+            <span class="nm c-name">OOCL KOREA<small>OOCL · 集装箱船</small></span>
+            <span class="st-c c-status"><i class="dot fresh"></i>航行中</span>
+            <span class="c-speed tnum">17.8 节</span>
+            <span class="c-dest">🇵🇭 马尼拉</span>
+            <span class="eta c-eta tnum">08-20 09:30</span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span></span>
+          </div>
+          <div class="vt-row" data-cat="anchored">
+            <span class="nm c-name">HMM ALGECIRAS<small>HMM · 集装箱船</small></span>
+            <span class="st-c c-status"><i class="dot watch"></i>锚泊</span>
+            <span class="c-speed muted2">—</span>
+            <span class="c-dest">🇨🇳 南沙</span>
+            <span class="eta c-eta tnum">08-19 04:00</span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span></span>
+          </div>
+          <div class="vt-row" data-cat="under_way">
+            <span class="nm c-name">PACIFIC MERMAID<small>PIL · 散货船</small></span>
+            <span class="st-c c-status"><i class="dot fresh"></i>航行中</span>
+            <span class="c-speed tnum">12.6 节</span>
+            <span class="c-dest">🇮🇩 雅加达</span>
+            <span class="eta c-eta tnum">08-24 18:00</span>
+            <span class="fr c-fresh"><span class="st stale"><i class="dot watch"></i>3 小时前</span></span>
+          </div>
+          <div class="vt-row" data-cat="moored">
+            <span class="nm c-name">WAN HAI 512<small>Wan Hai · 集装箱船</small></span>
+            <span class="st-c c-status"><i class="dot info"></i>靠泊</span>
+            <span class="c-speed muted2">—</span>
+            <span class="c-dest">🇻🇳 胡志明</span>
+            <span class="eta c-eta muted2">已靠泊</span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 船舶详情（双栏） ===== -->
+      <section data-page="vessel-detail">
+        <a class="link-more" data-back="vessels" href="#" style="margin-bottom:12px;display:inline-flex"><svg class="ic"><use href="#i-back"/></svg>返回船舶列表</a>
+        <div class="detail-a">
+          <div class="glass d-panel">
+            <div class="d-head">
+              <span class="d-avatar"><svg class="ic"><use href="#i-ship"/></svg></span>
+              <div style="min-width:0;flex:1">
+                <h2 class="d-title">MSC ANNA</h2>
+                <p class="d-sub">MSC（地中海航运）· 集装箱船 · IMO 9754900</p>
+              </div>
+              <div class="d-chips">
+                <span class="st fresh"><i class="dot fresh pulse"></i>最新</span>
+                <span class="prov">AISStream · observed</span>
+                <span class="chip">航行中</span>
+              </div>
+            </div>
+            <dl class="kv">
+              <dt>MMSI</dt><dd class="tnum">636092854</dd>
+              <dt>呼号</dt><dd>D5ZM7</dd>
+              <dt>总长</dt><dd>399 m</dd>
+              <dt>当前吃水</dt><dd>13.8 m</dd>
+              <dt>目的港</dt><dd>🇹🇭 Laem Chabang（林查班）</dd>
+              <dt>基准 ETA</dt><dd class="tnum">2026-08-19 06:00</dd>
+              <dt>当前航速</dt><dd class="tnum">18.4 节</dd>
+              <dt>当前航向</dt><dd class="tnum">214°</dd>
+            </dl>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <span class="note-pill">改动⑥ 详情页单列 → 双栏（实体信息 + 关联信号）</span>
+            <div class="glass d-panel">
+              <div class="panel-h"><h3>关联事件</h3><a class="link-more" data-nav="events" href="#">全部 <svg class="ic"><use href="#i-arrow"/></svg></a></div>
+              <article class="glass hot watch" style="padding:14px 16px;display:flex;flex-direction:column;gap:8px">
+                <div class="hot-top"><span class="sev watch"><i class="dot watch"></i>关注</span><span class="st fresh"><i class="dot fresh pulse"></i>最新</span></div>
+                <h3 style="font-size:14.5px">航速异常波动</h3>
+                <p class="muted" style="font-size:12.5px">过去 1 小时航速由 18.4 节降至 14.2 节。</p>
+                <div class="hot-meta"><svg class="ic"><use href="#i-clock"/></svg>发现于 13:48 · 进行中</div>
+              </article>
+            </div>
+            <div class="glass d-panel">
+              <div class="panel-h"><h3>航线天气窗口</h3><span class="prov">Open-Meteo · forecast</span></div>
+              <div class="weather-window">
+                <span class="chip">24 小时</span><span class="chip on">72 小时</span><span class="chip">7 天</span>
+              </div>
+              <div class="weather-window" style="gap:8px">
+                <div class="w-cell"><div class="t">浪高</div><div class="n tnum">2.4</div><div class="u">m</div></div>
+                <div class="w-cell"><div class="t">风速</div><div class="n tnum">38</div><div class="u">km/h</div></div>
+                <div class="w-cell"><div class="t">阵风</div><div class="n tnum">52</div><div class="u">km/h</div></div>
+                <div class="w-cell"><div class="t">涌浪</div><div class="n tnum">3.1</div><div class="u">m · 9.2 s</div></div>
+              </div>
+              <div class="d-chips"><span class="chip">浪向 210°</span><span class="chip">涌浪向 196°</span><span class="chip">风险窗 08-18 14:00 – 08-21 14:00</span></div>
+            </div>
+            <div class="glass d-panel">
+              <div class="panel-h"><h3>关联航次</h3><a class="link-more" data-nav="voyage-detail" href="#">航次 <svg class="ic"><use href="#i-arrow"/></svg></a></div>
+              <div class="list-row">
+                <span style="font-weight:800">MSC ANNA 076W</span>
+                <span class="muted" style="display:flex;align-items:center;gap:8px">蛇口 → 林查班 <span class="chip">+35 分钟</span><span class="st fresh"><i class="dot fresh"></i>最新</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 资讯（筛选侧栏 + 时间线） ===== -->
+      <section data-page="feed">
+        <div class="sec-head">
+          <div>
+            <span class="eyebrow">信息资讯</span>
+            <h2 style="font-size:19px">航运资讯</h2>
+            <p>普通资讯留在 Feed；明确运营影响的官方公告与预警才会进入 HOT。</p>
+          </div>
+          <span class="note-pill">改动⑦ 顶部筛选 → 左侧筛选面板；双列大卡片 → 密集时间线</span>
+        </div>
+        <div class="feed-wrap">
+          <aside class="glass filter-panel">
+            <h4>分类</h4>
+            <div data-filter-scope data-items="feed-list">
+              <button class="fbtn active" data-filter="all">全部 <em>8</em></button>
+              <button class="fbtn" data-filter="weather">天气 <em>2</em></button>
+              <button class="fbtn" data-filter="port_notice">港口通知 <em>2</em></button>
+              <button class="fbtn" data-filter="carrier_notice">船公司通知 <em>2</em></button>
+              <button class="fbtn" data-filter="shipping_news">航运新闻 <em>2</em></button>
+            </div>
+            <h4>来源（示意）</h4>
+            <div class="sf-row" style="padding:2px 6px"><i class="dot failed"></i><span class="lbl grow">官方公告</span><em class="muted2" style="font-style:normal">2</em></div>
+            <div class="sf-row" style="padding:2px 6px"><i class="dot info"></i><span class="lbl grow">公开 RSS</span><em class="muted2" style="font-style:normal">3</em></div>
+            <div class="sf-row" style="padding:2px 6px"><i class="dot dim"></i><span class="lbl grow">Mock</span><em class="muted2" style="font-style:normal">3</em></div>
+            <h4>时间范围（示意）</h4>
+            <button class="btn-ghost" style="width:100%;justify-content:space-between">最近 7 天 <span class="muted2">▾</span></button>
+          </aside>
+          <div class="glass tl" data-items="feed-list">
+            <div class="tl-item" data-cat="weather">
+              <div class="tl-sev"><i class="dot failed pulse"></i><span class="tl-line"></span></div>
+              <div class="tl-body">
+                <div class="tl-title-row"><h4>泰国气象局发布安达曼海风暴预警</h4><a class="src-link" href="#">打开来源 <svg class="ic"><use href="#i-up"/></svg></a></div>
+                <p class="tl-sum">预计 48 小时内影响林查班港靠泊作业，港区已启动防台响应，相关船期可能顺延。</p>
+                <div class="tl-chips"><span class="chip">官方预警 · 生效</span><span class="prov">官方 · TMD</span><span class="st fresh"><i class="dot fresh"></i>最新</span><span class="muted2" style="font-size:11.5px">14:05 · 8月18日</span></div>
+              </div>
+            </div>
+            <div class="tl-item" data-cat="port_notice">
+              <div class="tl-sev"><i class="dot failed"></i><span class="tl-line"></span></div>
+              <div class="tl-body">
+                <div class="tl-title-row"><h4>蛇口港 8/20–8/22 大雾封航窗口</h4><a class="src-link" href="#">打开来源 <svg class="ic"><use href="#i-up"/></svg></a></div>
+                <p class="tl-sum">海事局发布能见度不足预警，期间进港引航受限，拖轮作业视天气安排。</p>
+                <div class="tl-chips"><span class="chip">港口通知</span><span class="prov">官方 · 蛇口港</span><span class="st fresh"><i class="dot fresh"></i>最新</span><span class="muted2" style="font-size:11.5px">13:52 · 8月18日</span></div>
+              </div>
+            </div>
+            <div class="tl-item" data-cat="shipping_news">
+              <div class="tl-sev"><i class="dot watch"></i><span class="tl-line"></span></div>
+              <div class="tl-body">
+                <div class="tl-title-row"><h4>MSC 宣布远东—欧洲航线 GRI 上调 $800/FEU</h4><a class="src-link" href="#">打开来源 <svg class="ic"><use href="#i-up"/></svg></a></div>
+                <p class="tl-sum">9 月 1 日起生效，覆盖所有远东至北欧基本港，旺季附加费同步上调。</p>
+                <div class="tl-chips"><span class="chip">航运新闻</span><span class="prov">公开 RSS · The Loadstar</span><span class="st fresh"><i class="dot fresh"></i>最新</span><span class="muted2" style="font-size:11.5px">11:30 · 8月18日</span></div>
+              </div>
+            </div>
+            <div class="tl-item" data-cat="carrier_notice">
+              <div class="tl-sev"><i class="dot watch"></i><span class="tl-line"></span></div>
+              <div class="tl-body">
+                <div class="tl-title-row"><h4>COSCO 发布雅加达堆场拥堵客户通知</h4><a class="src-link" href="#">打开来源 <svg class="ic"><use href="#i-up"/></svg></a></div>
+                <p class="tl-sum">堆场利用率达 92%，建议客户提前 48 小时预约提柜，免堆期政策不变。</p>
+                <div class="tl-chips"><span class="chip">船公司通知</span><span class="prov">官方 · COSCO</span><span class="st fresh"><i class="dot fresh"></i>最新</span><span class="muted2" style="font-size:11.5px">10:58 · 8月18日</span></div>
+              </div>
+            </div>
+            <div class="tl-item" data-cat="weather">
+              <div class="tl-sev"><i class="dot watch"></i><span class="tl-line"></span></div>
+              <div class="tl-body">
+                <div class="tl-title-row"><h4>南海热带低压生成，72 小时内可能加强</h4><a class="src-link" href="#">打开来源 <svg class="ic"><use href="#i-up"/></svg></a></div>
+                <p class="tl-sum">模型预报路径向西北移动，蛇口—林查班航线风浪条件将逐步转差。</p>
+                <div class="tl-chips"><span class="chip">模型预报</span><span class="prov">Open-Meteo · forecast</span><span class="st fresh"><i class="dot fresh"></i>最新</span><span class="muted2" style="font-size:11.5px">10:15 · 8月18日</span></div>
+              </div>
+            </div>
+            <div class="tl-item" data-cat="shipping_news">
+              <div class="tl-sev"><i class="dot info"></i><span class="tl-line"></span></div>
+              <div class="tl-body">
+                <div class="tl-title-row"><h4>林查班港三期扩建工程获准</h4><a class="src-link" href="#">打开来源 <svg class="ic"><use href="#i-up"/></svg></a></div>
+                <p class="tl-sum">新增 4 个泊位与自动化堆场，预计 2028 年投产，短期对现船期无影响。</p>
+                <div class="tl-chips"><span class="chip">航运新闻</span><span class="prov">公开 RSS</span><span class="st fresh"><i class="dot fresh"></i>最新</span><span class="muted2" style="font-size:11.5px">08:40 · 8月18日</span></div>
+              </div>
+            </div>
+            <div class="tl-item" data-cat="port_notice">
+              <div class="tl-sev"><i class="dot info"></i><span class="tl-line"></span></div>
+              <div class="tl-body">
+                <div class="tl-title-row"><h4>巴生港北港闸口 8/19 维护半天</h4><a class="src-link" href="#">打开来源 <svg class="ic"><use href="#i-up"/></svg></a></div>
+                <p class="tl-sum">07:00–12:00 闸口系统维护，建议车队错峰进闸，堆场作业正常。</p>
+                <div class="tl-chips"><span class="chip">港口通知</span><span class="prov">官方 · 巴生港</span><span class="st fresh"><i class="dot fresh"></i>最新</span><span class="muted2" style="font-size:11.5px">昨天 20:12</span></div>
+              </div>
+            </div>
+            <div class="tl-item" data-cat="carrier_notice">
+              <div class="tl-sev"><i class="dot info"></i><span class="tl-line"></span></div>
+              <div class="tl-body">
+                <div class="tl-title-row"><h4>HMM 公布 9 月空白航次计划</h4><a class="src-link" href="#">打开来源 <svg class="ic"><use href="#i-up"/></svg></a></div>
+                <p class="tl-sum">亚洲—中东航线第 37、39 周各取消一个航次，相关订舱将并班处理。</p>
+                <div class="tl-chips"><span class="chip">船公司通知</span><span class="prov">官方 · HMM</span><span class="st stale"><i class="dot watch"></i>2 天前</span><span class="muted2" style="font-size:11.5px">8月16日</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 国家日历（筛选面板 + 3 列） ===== -->
+      <section data-page="calendar">
+        <div class="sec-head">
+          <div>
+            <span class="eyebrow">市场日历</span>
+            <h2 style="font-size:19px">国家日历</h2>
+            <p>缓存 TH / ID / MY / PH / VN 的假日与运营提醒；宗教日期不默认等同于停工。</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="note-pill">改动⑧ 7 个顶部筛选控件 → 左侧面板；卡片 2 列 → 3 列</span>
+            <div class="seg">
+              <button>2025 年</button><button class="active">2026 年</button><button>2027 年</button>
+            </div>
+            <button class="btn-grad"><svg class="ic"><use href="#i-refresh"/></svg>同步年度缓存</button>
+          </div>
+        </div>
+        <div class="cal-wrap">
+          <aside class="glass filter-panel">
+            <h4>国家</h4>
+            <div data-filter-scope data-items="cal-list">
+              <button class="fbtn active" data-filter="all">全部国家</button>
+              <button class="fbtn" data-filter="TH"><span class="fl">🇹🇭</span> 泰国 <em>2</em></button>
+              <button class="fbtn" data-filter="MY"><span class="fl">🇲🇾</span> 马来西亚 <em>1</em></button>
+              <button class="fbtn" data-filter="ID"><span class="fl">🇮🇩</span> 印尼 <em>1</em></button>
+              <button class="fbtn" data-filter="PH"><span class="fl">🇵🇭</span> 菲律宾 <em>1</em></button>
+              <button class="fbtn" data-filter="VN"><span class="fl">🇻🇳</span> 越南 <em>1</em></button>
+            </div>
+            <h4>月份</h4>
+            <div data-filter-scope data-items="cal-list">
+              <button class="fbtn active" data-filter="all">全部月份</button>
+              <button class="fbtn" data-filter="08">8 月 <em>3</em></button>
+              <button class="fbtn" data-filter="09">9 月 <em>3</em></button>
+            </div>
+            <h4>类型</h4>
+            <div data-filter-scope data-items="cal-list">
+              <button class="fbtn active" data-filter="all">全部类型</button>
+              <button class="fbtn" data-filter="public_holiday">公共假日 <em>4</em></button>
+              <button class="fbtn" data-filter="government_special">政府临时 <em>1</em></button>
+              <button class="fbtn" data-filter="company_custom">公司自定义 <em>1</em></button>
+            </div>
+            <h4>影响</h4>
+            <div data-filter-scope data-items="cal-list">
+              <button class="fbtn active" data-filter="all">全部影响</button>
+              <button class="fbtn" data-filter="high">高影响 <em>3</em></button>
+              <button class="fbtn" data-filter="medium">中影响 <em>2</em></button>
+              <button class="fbtn" data-filter="low">低影响 <em>1</em></button>
+            </div>
+            <h4>验证状态</h4>
+            <div data-filter-scope data-items="cal-list">
+              <button class="fbtn active" data-filter="all">全部验证</button>
+              <button class="fbtn" data-filter="verified">已验证 <em>4</em></button>
+              <button class="fbtn" data-filter="unverified">待核验 <em>2</em></button>
+            </div>
+          </aside>
+          <div class="cal-grid" data-items="cal-list">
+            <div class="glass cal-card tile" data-cat="TH 08 public_holiday high verified">
+              <div class="cal-head"><span class="cal-date">21<span>8月</span></span><span class="cal-flag">🇹🇭 泰国</span></div>
+              <h4>母亲节（补假）</h4>
+              <div class="cal-chips"><span class="chip">公共假日</span><span class="chip">高影响</span><span class="chip">已验证</span></div>
+              <p class="cal-note">停工预期：港区 1 天 · 清关顺延半天</p>
+            </div>
+            <div class="glass cal-card tile" data-cat="MY 08 public_holiday medium verified">
+              <div class="cal-head"><span class="cal-date">31<span>8月</span></span><span class="cal-flag">🇲🇾 马来西亚</span></div>
+              <h4>国庆日</h4>
+              <div class="cal-chips"><span class="chip">公共假日</span><span class="chip">中影响</span><span class="chip">已验证</span></div>
+              <p class="cal-note">停工预期：港区 1 天</p>
+            </div>
+            <div class="glass cal-card tile" data-cat="ID 09 government_special high unverified">
+              <div class="cal-head"><span class="cal-date">01<span>9月</span></span><span class="cal-flag">🇮🇩 印尼</span></div>
+              <h4>开斋节后工作调整</h4>
+              <div class="cal-chips"><span class="chip">政府临时</span><span class="chip">高影响</span><span class="chip">待核验</span></div>
+              <p class="cal-note">清关与提柜预计顺延 1–2 天</p>
+            </div>
+            <div class="glass cal-card tile" data-cat="PH 08 public_holiday medium verified">
+              <div class="cal-head"><span class="cal-date">21<span>8月</span></span><span class="cal-flag">🇵🇭 菲律宾</span></div>
+              <h4>尼诺·阿基诺日</h4>
+              <div class="cal-chips"><span class="chip">公共假日</span><span class="chip">中影响</span><span class="chip">已验证</span></div>
+              <p class="cal-note">马尼拉港行政窗口关闭</p>
+            </div>
+            <div class="glass cal-card tile" data-cat="VN 09 public_holiday high verified">
+              <div class="cal-head"><span class="cal-date">02<span>9月</span></span><span class="cal-flag">🇻🇳 越南</span></div>
+              <h4>国庆日</h4>
+              <div class="cal-chips"><span class="chip">公共假日</span><span class="chip">高影响</span><span class="chip">已验证</span></div>
+              <p class="cal-note">停工预期：港区 1–2 天</p>
+            </div>
+            <div class="glass cal-card tile" data-cat="TH 09 company_custom low unverified">
+              <div class="cal-head"><span class="cal-date">05<span>9月</span></span><span class="cal-flag">🇹🇭 泰国</span></div>
+              <h4>港区清关加班日</h4>
+              <div class="cal-chips"><span class="chip">公司自定义</span><span class="chip">低影响</span><span class="chip">待核验</span></div>
+              <p class="cal-note">内部安排 · 仅影响自有货代窗口</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 设置 ===== -->
+      <section data-page="settings">
+        <div class="glass panel-pad" style="max-width:640px">
+          <div class="panel-head"><h2 style="font-size:16px">本地配置</h2><span class="chip">数据源 全 Mock</span></div>
+          <label class="setting-row">
+            <span class="sl"><b>刷新间隔</b><small>本地数据刷新间隔（分钟）</small></span>
+            <input class="setting-input tnum" type="number" value="15" min="1">
+          </label>
+          <label class="setting-row">
+            <span class="sl"><b>锚泊告警阈值</b><small>锚泊多少小时后生成事件</small></span>
+            <input class="setting-input tnum" type="number" value="2" min="1">
+          </label>
+          <label class="setting-row">
+            <span class="sl"><b>ETA 延误阈值</b><small>航次延误多少分钟后升级提醒</small></span>
+            <input class="setting-input tnum" type="number" value="60" min="1">
+          </label>
+          <label class="setting-row">
+            <span class="sl"><b>拥堵阈值</b><small>达到或超过此港口等级时告警</small></span>
+            <div class="seg"><button>低</button><button>中</button><button class="active">高</button><button>严重</button></div>
+          </label>
+          <label class="setting-row">
+            <span class="sl"><b>数据保留</b><small>事件和资讯的保留天数</small></span>
+            <input class="setting-input tnum" type="number" value="30" min="1">
+          </label>
+          <div class="d-chips" style="margin-top:16px">
+            <button class="btn-grad"><svg class="ic"><use href="#i-check"/></svg>保存设置</button>
+            <span class="prov mock">船位 Mock</span><span class="prov mock">天气 Mock</span><span class="prov mock">港口 Mock</span><span class="prov mock">班期 Mock</span><span class="prov mock">资讯 Mock</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 港口（密集表格 + 拥堵量表） ===== -->
+      <section data-page="ports">
+        <div class="sec-head">
+          <div>
+            <span class="eyebrow">运营数据</span>
+            <h2 style="font-size:19px">港口</h2>
+            <p>关注港口的拥堵态势、在港船舶与数据新鲜度，拥堵以量表内联展示。</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="note-pill">港口同「船舶」：密集表格，拥堵量表内联对比</span>
+            <div class="seg" data-filter-scope data-items="port-rows">
+              <button class="active" data-filter="all">全部 8</button>
+              <button data-filter="critical">严重</button>
+              <button data-filter="high">高</button>
+              <button data-filter="medium">中</button>
+              <button data-filter="low">低</button>
+            </div>
+          </div>
+        </div>
+        <div class="glass vt ports" data-items="port-rows">
+          <div class="vt-head">
+            <span class="c-name">港口</span><span class="c-country">国家</span><span class="c-cong">拥堵</span><span class="c-vessels">在泊</span><span class="c-watch">关注</span><span class="c-fresh">数据</span>
+          </div>
+          <div class="vt-row" data-cat="critical">
+            <a class="nm c-name" data-nav="port-detail" href="#">蛇口 · Shekou<small>华南 · 珠江口</small></a>
+            <span class="c-country">🇨🇳 中国</span>
+            <span class="gauge-cell c-cong"><span class="gauge g-critical"><i></i></span><span class="tiny g-lbl critical">严重</span></span>
+            <span class="c-vessels tnum">18</span>
+            <span class="c-watch"><span class="chip on">已关注</span></span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+          <div class="vt-row" data-cat="high">
+            <a class="nm c-name" data-nav="port-detail" href="#">林查班 · Laem Chabang<small>泰国湾东岸</small></a>
+            <span class="c-country">🇹🇭 泰国</span>
+            <span class="gauge-cell c-cong"><span class="gauge g-high"><i></i></span><span class="tiny g-lbl high">高</span></span>
+            <span class="c-vessels tnum">14</span>
+            <span class="c-watch"><span class="chip on">已关注</span></span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+          <div class="vt-row" data-cat="medium">
+            <a class="nm c-name" data-nav="port-detail" href="#">盐田 · Yantian<small>深圳东部港区</small></a>
+            <span class="c-country">🇨🇳 中国</span>
+            <span class="gauge-cell c-cong"><span class="gauge g-medium"><i></i></span><span class="tiny g-lbl medium">中</span></span>
+            <span class="c-vessels tnum">12</span>
+            <span class="c-watch"><span class="chip on">已关注</span></span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+          <div class="vt-row" data-cat="medium">
+            <a class="nm c-name" data-nav="port-detail" href="#">巴生港 · Port Klang<small>马六甲海峡</small></a>
+            <span class="c-country">🇲🇾 马来西亚</span>
+            <span class="gauge-cell c-cong"><span class="gauge g-medium"><i></i></span><span class="tiny g-lbl medium">中</span></span>
+            <span class="c-vessels tnum">10</span>
+            <span class="c-watch"><span class="chip on">已关注</span></span>
+            <span class="fr c-fresh"><span class="st stale"><i class="dot watch"></i>5 小时前</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+          <div class="vt-row" data-cat="medium">
+            <a class="nm c-name" data-nav="port-detail" href="#">雅加达 · Jakarta<small>爪哇海</small></a>
+            <span class="c-country">🇮🇩 印尼</span>
+            <span class="gauge-cell c-cong"><span class="gauge g-medium"><i></i></span><span class="tiny g-lbl medium">中</span></span>
+            <span class="c-vessels tnum">11</span>
+            <span class="c-watch"><span class="chip on">已关注</span></span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+          <div class="vt-row" data-cat="low">
+            <a class="nm c-name" data-nav="port-detail" href="#">南沙 · Nansha<small>珠江口西岸</small></a>
+            <span class="c-country">🇨🇳 中国</span>
+            <span class="gauge-cell c-cong"><span class="gauge g-low"><i></i></span><span class="tiny g-lbl low">低</span></span>
+            <span class="c-vessels tnum">9</span>
+            <span class="c-watch"><span class="chip">未关注</span></span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+          <div class="vt-row" data-cat="low">
+            <a class="nm c-name" data-nav="port-detail" href="#">马尼拉 · Manila<small>马尼拉湾</small></a>
+            <span class="c-country">🇵🇭 菲律宾</span>
+            <span class="gauge-cell c-cong"><span class="gauge g-low"><i></i></span><span class="tiny g-lbl low">低</span></span>
+            <span class="c-vessels tnum">7</span>
+            <span class="c-watch"><span class="chip">未关注</span></span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+          <div class="vt-row" data-cat="low">
+            <a class="nm c-name" data-nav="port-detail" href="#">胡志明 · Ho Chi Minh City<small>湄公河三角洲</small></a>
+            <span class="c-country">🇻🇳 越南</span>
+            <span class="gauge-cell c-cong"><span class="gauge g-low"><i></i></span><span class="tiny g-lbl low">低</span></span>
+            <span class="c-vessels tnum">6</span>
+            <span class="c-watch"><span class="chip on">已关注</span></span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 港口详情（双栏） ===== -->
+      <section data-page="port-detail">
+        <a class="link-more" data-back="ports" href="#" style="margin-bottom:12px;display:inline-flex"><svg class="ic"><use href="#i-back"/></svg>返回港口列表</a>
+        <div class="detail-a">
+          <div class="glass d-panel">
+            <div class="d-head">
+              <span class="d-avatar"><svg class="ic"><use href="#i-landmark"/></svg></span>
+              <div style="min-width:0;flex:1">
+                <h2 class="d-title">蛇口港 · Shekou</h2>
+                <p class="d-sub">中国 · 华南 · UTC+8 · 深圳西部港区</p>
+              </div>
+              <div class="d-chips">
+                <span class="st fresh"><i class="dot fresh pulse"></i>最新</span>
+                <span class="prov">Portcast · observed</span>
+                <span class="chip on">已关注</span>
+              </div>
+            </div>
+            <dl class="kv">
+              <dt>拥堵等级</dt>
+              <dd><span class="gauge-cell"><span class="gauge g-critical" style="width:130px"><i></i></span><span class="tiny g-lbl critical">严重</span></span></dd>
+              <dt>在泊船舶</dt><dd class="tnum">18 艘</dd>
+              <dt>锚地等待</dt><dd class="tnum">23 艘</dd>
+              <dt>主要码头</dt><dd>SCT / CCT / MCT</dd>
+              <dt>数据更新</dt><dd class="tnum">14:20 · 8月18日</dd>
+            </dl>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <span class="note-pill">港口详情与「船舶详情」同一套双栏结构</span>
+            <div class="glass d-panel">
+              <div class="panel-h"><h3>关联事件</h3><a class="link-more" data-nav="events" href="#">全部 <svg class="ic"><use href="#i-arrow"/></svg></a></div>
+              <article class="glass hot warning" style="padding:13px 15px;display:flex;flex-direction:column;gap:7px">
+                <div class="hot-top"><span class="sev warning"><i class="dot failed"></i>警告</span><span class="st fresh"><i class="dot fresh pulse"></i>最新</span></div>
+                <h3 style="font-size:14px">拥堵等级升至“严重”</h3>
+                <p class="muted" style="font-size:12px">在泊时长与锚地等待均突破阈值。</p>
+              </article>
+              <article class="glass hot warning" style="padding:13px 15px;display:flex;flex-direction:column;gap:7px;margin-top:10px">
+                <div class="hot-top"><span class="sev warning"><i class="dot failed"></i>警告</span><span class="st fresh"><i class="dot fresh pulse"></i>最新</span></div>
+                <h3 style="font-size:14px">8/20–8/22 大雾封航窗口</h3>
+                <p class="muted" style="font-size:12px">进港引航受限，拖轮作业视天气安排。</p>
+              </article>
+            </div>
+            <div class="glass d-panel">
+              <div class="panel-h"><h3>在港关注船舶</h3><a class="link-more" data-nav="vessels" href="#">船舶 <svg class="ic"><use href="#i-arrow"/></svg></a></div>
+              <div class="list-row">
+                <span style="display:flex;align-items:center;gap:9px;font-weight:700;min-width:0"><i class="dot watch"></i>COSCO SHIPPING STAR</span>
+                <span class="muted2" style="display:flex;align-items:center;gap:6px">锚泊 · ETA 08-18 23:00</span>
+              </div>
+              <div class="list-row">
+                <span style="display:flex;align-items:center;gap:9px;font-weight:600;min-width:0"><i class="dot info"></i>CMA CGM SCANDOLA</span>
+                <span class="muted2" style="display:flex;align-items:center;gap:6px">靠泊 · SCT 7#</span>
+              </div>
+              <div class="list-row">
+                <span style="display:flex;align-items:center;gap:9px;font-weight:600;min-width:0"><i class="dot watch"></i>OOCL NEW YORK</span>
+                <span class="muted2" style="display:flex;align-items:center;gap:6px">锚泊 · 等泊 6 小时</span>
+              </div>
+            </div>
+            <div class="glass d-panel">
+              <div class="panel-h"><h3>港口天气窗口</h3><span class="prov">Open-Meteo · forecast</span></div>
+              <div class="weather-window" style="gap:8px">
+                <div class="w-cell"><div class="t">风速</div><div class="n tnum">22</div><div class="u">km/h</div></div>
+                <div class="w-cell"><div class="t">阵风</div><div class="n tnum">31</div><div class="u">km/h</div></div>
+                <div class="w-cell"><div class="t">浪高</div><div class="n tnum">1.2</div><div class="u">m</div></div>
+                <div class="w-cell"><div class="t">能见度</div><div class="n tnum">4.5</div><div class="u">km</div></div>
+              </div>
+              <div class="d-chips"><span class="chip">24 小时窗口</span><span class="chip">风险窗 08-18 14:00 – 08-19 14:00</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 航次（密集表格 + 延误列） ===== -->
+      <section data-page="voyages">
+        <div class="sec-head">
+          <div>
+            <span class="eyebrow">运营数据</span>
+            <h2 style="font-size:19px">航次</h2>
+            <p>航次计划与执行对比，延误内联展示，准点 / 延误一键筛选。</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="note-pill">航次同「船舶」：密集表格，基准/最新 ETA 与延误对比</span>
+            <div class="seg" data-filter-scope data-items="voyage-rows">
+              <button class="active" data-filter="all">全部 7</button>
+              <button data-filter="delay">延误 2</button>
+              <button data-filter="ontime">准点 5</button>
+            </div>
+          </div>
+        </div>
+        <div class="glass vt voyages" data-items="voyage-rows">
+          <div class="vt-head">
+            <span class="c-no">航次</span><span class="c-vessel">船舶</span><span class="c-route">航线</span><span class="c-eta">最新 ETA</span><span class="c-delay">延误</span><span class="c-fresh">数据</span>
+          </div>
+          <div class="vt-row" data-cat="delay">
+            <a class="nm c-no" data-nav="voyage-detail" href="#">MSC ANNA 076W<small>基准 08-19 05:25</small></a>
+            <span class="c-vessel">MSC ANNA</span>
+            <span class="c-route">🇨🇳 蛇口 → 🇹🇭 林查班</span>
+            <span class="eta c-eta tnum">08-19 06:00</span>
+            <span class="c-delay"><span class="delay on">+35 分钟</span></span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+          <div class="vt-row" data-cat="delay">
+            <a class="nm c-no" data-nav="voyage-detail" href="#">EVER LUCKY 088W<small>基准 08-21 12:00</small></a>
+            <span class="c-vessel">EVER LUCKY</span>
+            <span class="c-route">🇨🇳 蛇口 → 🇲🇾 巴生港</span>
+            <span class="eta c-eta tnum">08-21 14:00</span>
+            <span class="c-delay"><span class="delay on">+120 分钟</span></span>
+            <span class="fr c-fresh"><span class="st stale"><i class="dot watch"></i>12 小时前</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+          <div class="vt-row" data-cat="ontime">
+            <a class="nm c-no" data-nav="voyage-detail" href="#">COSCO STAR 052E<small>基准 08-20 12:00</small></a>
+            <span class="c-vessel">COSCO SHIPPING STAR</span>
+            <span class="c-route">🇨🇳 盐田 → 🇲🇾 巴生港</span>
+            <span class="eta c-eta tnum">08-20 12:00</span>
+            <span class="c-delay"><span class="delay ok">准点</span></span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+          <div class="vt-row" data-cat="ontime">
+            <a class="nm c-no" data-nav="voyage-detail" href="#">OOCL KOREA 041E<small>基准 08-20 09:30</small></a>
+            <span class="c-vessel">OOCL KOREA</span>
+            <span class="c-route">🇨🇳 南沙 → 🇵🇭 马尼拉</span>
+            <span class="eta c-eta tnum">08-20 09:30</span>
+            <span class="c-delay"><span class="delay ok">准点</span></span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+          <div class="vt-row" data-cat="ontime">
+            <a class="nm c-no" data-nav="voyage-detail" href="#">HMM ALGECIRAS 213W<small>基准 08-24 18:00</small></a>
+            <span class="c-vessel">HMM ALGECIRAS</span>
+            <span class="c-route">🇨🇳 南沙 → 🇮🇩 雅加达</span>
+            <span class="eta c-eta tnum">08-24 18:00</span>
+            <span class="c-delay"><span class="delay ok">准点</span></span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+          <div class="vt-row" data-cat="ontime">
+            <a class="nm c-no" data-nav="voyage-detail" href="#">MAERSK HANOI 118S<small>基准 08-17 20:00</small></a>
+            <span class="c-vessel">MAERSK HANOI</span>
+            <span class="c-route">🇨🇳 盐田 → 🇻🇳 胡志明</span>
+            <span class="eta c-eta muted2">已靠泊</span>
+            <span class="c-delay"><span class="delay ok">准点</span></span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+          <div class="vt-row" data-cat="ontime">
+            <a class="nm c-no" data-nav="voyage-detail" href="#">WAN HAI 512 076S<small>基准 08-18 06:00</small></a>
+            <span class="c-vessel">WAN HAI 512</span>
+            <span class="c-route">🇻🇳 胡志明 → 🇨🇳 蛇口</span>
+            <span class="eta c-eta muted2">已靠泊</span>
+            <span class="c-delay"><span class="delay ok">准点</span></span>
+            <span class="fr c-fresh"><span class="st fresh"><i class="dot fresh"></i>最新</span><svg class="ic" style="color:var(--sh-dim)"><use href="#i-arrow"/></svg></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 航次详情（双栏） ===== -->
+      <section data-page="voyage-detail">
+        <a class="link-more" data-back="voyages" href="#" style="margin-bottom:12px;display:inline-flex"><svg class="ic"><use href="#i-back"/></svg>返回航次列表</a>
+        <div class="detail-a">
+          <div class="glass d-panel">
+            <div class="d-head">
+              <span class="d-avatar"><svg class="ic"><use href="#i-compass"/></svg></span>
+              <div style="min-width:0;flex:1">
+                <h2 class="d-title">MSC ANNA 076W</h2>
+                <p class="d-sub">西向干线 · 蛇口 → 林查班</p>
+              </div>
+              <div class="d-chips">
+                <span class="st fresh"><i class="dot fresh pulse"></i>最新</span>
+                <span class="prov">AISStream · observed</span>
+                <span class="chip">航行中</span>
+              </div>
+            </div>
+            <dl class="kv">
+              <dt>航次号</dt><dd>MSC ANNA 076W</dd>
+              <dt>船舶</dt><dd><a class="link-more" data-nav="vessel-detail" href="#">MSC ANNA <svg class="ic"><use href="#i-arrow"/></svg></a></dd>
+              <dt>航线</dt><dd>🇨🇳 蛇口 → 🇹🇭 林查班</dd>
+              <dt>基准 ETA</dt><dd class="tnum">2026-08-19 05:25</dd>
+              <dt>最新 ETA</dt><dd class="tnum">2026-08-19 06:00</dd>
+              <dt>延误</dt><dd><span class="delay on">+35 分钟</span></dd>
+              <dt>状态</dt><dd>航行中 · 距目的港 412 海里</dd>
+            </dl>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <span class="note-pill">航次详情同样双栏：航次信息 + 关联信号</span>
+            <div class="glass d-panel">
+              <div class="panel-h"><h3>关联事件</h3><a class="link-more" data-nav="events" href="#">全部 <svg class="ic"><use href="#i-arrow"/></svg></a></div>
+              <article class="glass hot watch" style="padding:13px 15px;display:flex;flex-direction:column;gap:7px">
+                <div class="hot-top"><span class="sev watch"><i class="dot watch"></i>关注</span><span class="st fresh"><i class="dot fresh pulse"></i>最新</span></div>
+                <h3 style="font-size:14px">航速异常波动</h3>
+                <p class="muted" style="font-size:12px">过去 1 小时航速由 18.4 节降至 14.2 节，导致 ETA 顺延 35 分钟。</p>
+              </article>
+            </div>
+            <div class="glass d-panel">
+              <div class="panel-h"><h3>航线天气窗口</h3><span class="prov">Open-Meteo · forecast</span></div>
+              <div class="weather-window" style="gap:8px">
+                <div class="w-cell"><div class="t">浪高</div><div class="n tnum">2.4</div><div class="u">m</div></div>
+                <div class="w-cell"><div class="t">风速</div><div class="n tnum">38</div><div class="u">km/h</div></div>
+                <div class="w-cell"><div class="t">阵风</div><div class="n tnum">52</div><div class="u">km/h</div></div>
+                <div class="w-cell"><div class="t">涌浪</div><div class="n tnum">3.1</div><div class="u">m · 9.2 s</div></div>
+              </div>
+              <div class="d-chips"><span class="chip">浪向 210°</span><span class="chip">涌浪向 196°</span><span class="chip">72 小时窗口</span></div>
+            </div>
+            <div class="glass d-panel">
+              <div class="panel-h"><h3>关联船舶</h3><a class="link-more" data-nav="vessel-detail" href="#">详情 <svg class="ic"><use href="#i-arrow"/></svg></a></div>
+              <div class="list-row">
+                <span style="display:flex;align-items:center;gap:9px;font-weight:800"><i class="dot fresh"></i>MSC ANNA</span>
+                <span class="muted" style="display:flex;align-items:center;gap:8px">航行中 · 18.4 节 <span class="st fresh"><i class="dot fresh"></i>最新</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 事件（状态 + 严重度筛选 + 时间线） ===== -->
+      <section data-page="events">
+        <div class="sec-head">
+          <div>
+            <span class="eyebrow">事件生命周期</span>
+            <h2 style="font-size:19px">事件</h2>
+            <p>包含证据、去重、严重程度变化与明确解决状态的运营异常。</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="note-pill">事件：状态 + 严重度组合筛选，时间线展示生命周期</span>
+            <div class="seg" data-filter-scope data-items="event-list">
+              <button class="active" data-filter="all">全部</button>
+              <button data-filter="active">进行中</button>
+              <button data-filter="resolved">已解决</button>
+            </div>
+            <div class="seg" data-filter-scope data-items="event-list">
+              <button class="active" data-filter="all">全部严重度</button>
+              <button data-filter="critical">严重</button>
+              <button data-filter="warning">警告</button>
+              <button data-filter="watch">关注</button>
+              <button data-filter="info">提示</button>
+            </div>
+          </div>
+        </div>
+        <div class="glass tl" data-items="event-list">
+          <div class="tl-item" data-cat="active critical">
+            <div class="tl-sev"><i class="dot failed pulse"></i><span class="tl-line"></span></div>
+            <div class="tl-body">
+              <div class="tl-title-row"><h4>台风“海燕”逼近林查班港</h4><span class="chip">进行中</span></div>
+              <p class="tl-sum">TMD 官方预警生效，预计 48 小时内影响靠泊作业，港区已启动防台响应。</p>
+              <div class="tl-chips">
+                <span class="sev critical"><i class="dot failed"></i>严重</span>
+                <span class="prov">官方 · TMD</span>
+                <span class="st fresh"><i class="dot fresh"></i>最新</span>
+                <span class="muted2" style="font-size:11.5px">发现于 14:10 · 港口 · 林查班</span>
+              </div>
+            </div>
+          </div>
+          <div class="tl-item" data-cat="active warning">
+            <div class="tl-sev"><i class="dot failed"></i><span class="tl-line"></span></div>
+            <div class="tl-body">
+              <div class="tl-title-row"><h4>蛇口港拥堵等级升至“严重”</h4><span class="chip">进行中</span></div>
+              <p class="tl-sum">在泊时长与锚地等待均突破阈值，多条支线船期受影响。</p>
+              <div class="tl-chips">
+                <span class="sev warning"><i class="dot failed"></i>警告</span>
+                <span class="prov">港口页面</span>
+                <span class="st fresh"><i class="dot fresh"></i>最新</span>
+                <span class="muted2" style="font-size:11.5px">发现于 13:52 · 港口 · 蛇口</span>
+              </div>
+            </div>
+          </div>
+          <div class="tl-item" data-cat="active watch">
+            <div class="tl-sev"><i class="dot watch"></i><span class="tl-line"></span></div>
+            <div class="tl-body">
+              <div class="tl-title-row"><h4>MSC ANNA 航速异常</h4><span class="chip">进行中</span></div>
+              <p class="tl-sum">过去 1 小时航速由 18.4 节降至 14.2 节，关联航次 ETA 顺延 35 分钟。</p>
+              <div class="tl-chips">
+                <span class="sev watch"><i class="dot watch"></i>关注</span>
+                <span class="prov">AISStream · observed</span>
+                <span class="st fresh"><i class="dot fresh"></i>最新</span>
+                <span class="muted2" style="font-size:11.5px">发现于 13:48 · 船舶 · MSC ANNA</span>
+              </div>
+            </div>
+          </div>
+          <div class="tl-item" data-cat="active info">
+            <div class="tl-sev"><i class="dot info"></i><span class="tl-line"></span></div>
+            <div class="tl-body">
+              <div class="tl-title-row"><h4>印尼开斋节清关放缓</h4><span class="chip">进行中</span></div>
+              <p class="tl-sum">9 月 1 日起为政府临时调整日，雅加达清关与提柜预计顺延 1–2 天。</p>
+              <div class="tl-chips">
+                <span class="sev info"><i class="dot info"></i>提示</span>
+                <span class="prov">国家日历</span>
+                <span class="st fresh"><i class="dot fresh"></i>最新</span>
+                <span class="muted2" style="font-size:11.5px">发现于 09:00 · 国家日历 · 印尼</span>
+              </div>
+            </div>
+          </div>
+          <div class="tl-item resolved" data-cat="resolved warning">
+            <div class="tl-sev"><i class="dot failed"></i><span class="tl-line"></span></div>
+            <div class="tl-body">
+              <div class="tl-title-row"><h4>盐田港龙门吊检修导致提柜延迟</h4><span class="chip">已解决</span></div>
+              <p class="tl-sum">检修完成后提柜时效恢复，事件已自动解决。</p>
+              <div class="tl-chips">
+                <span class="sev warning"><i class="dot failed"></i>警告</span>
+                <span class="prov">港口页面</span>
+                <span class="st stale"><i class="dot watch"></i>已解决</span>
+                <span class="muted2" style="font-size:11.5px">解决于 8月16日 18:30 · 港口 · 盐田</span>
+              </div>
+            </div>
+          </div>
+          <div class="tl-item resolved" data-cat="resolved watch">
+            <div class="tl-sev"><i class="dot watch"></i></div>
+            <div class="tl-body">
+              <div class="tl-title-row"><h4>COSCO SHIPPING STAR 锚泊超时</h4><span class="chip">已解决</span></div>
+              <p class="tl-sum">船舶已起锚进港，锚泊超时事件自动解决。</p>
+              <div class="tl-chips">
+                <span class="sev watch"><i class="dot watch"></i>关注</span>
+                <span class="prov">AISStream · observed</span>
+                <span class="st stale"><i class="dot watch"></i>已解决</span>
+                <span class="muted2" style="font-size:11.5px">解决于 8月15日 07:20 · 船舶</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- 移动端底部 tab -->
+<nav class="bottom-tab">
+  <a href="#" class="active" data-nav="dashboard"><svg class="ic"><use href="#i-fire"/></svg>首页</a>
+  <a href="#" data-nav="vessels"><svg class="ic"><use href="#i-anchor"/></svg>船舶</a>
+  <a href="#" data-nav="feed"><svg class="ic"><use href="#i-news"/></svg>资讯</a>
+  <a href="#" data-nav="calendar"><svg class="ic"><use href="#i-cal"/></svg>日历</a>
+  <a href="#" data-nav="settings"><svg class="ic"><use href="#i-sliders"/></svg>设置</a>
+</nav>
+
+<div class="swap-link">
+  <a href="layout-b-evolution.html">对比原型 B ↗</a><span class="sep">·</span><a href="index.html">目录</a>
+</div>
+
+<script>
+  window.__PROTO_TITLES__ = {
+    dashboard: "运营态势 · 首页",
+    vessels: "我的船舶",
+    "vessel-detail": "船舶详情 · MSC ANNA",
+    ports: "港口",
+    "port-detail": "港口详情 · 蛇口",
+    voyages: "航次",
+    "voyage-detail": "航次详情 · MSC ANNA 076W",
+    events: "事件",
+    feed: "航运资讯",
+    calendar: "国家日历",
+    settings: "设置"
+  };
+</script>
+<script src="common.js"></script>
+</body>
+</html>

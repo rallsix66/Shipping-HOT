@@ -1,5 +1,5 @@
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
-import { type ReactNode, useEffect, useRef } from "react"
+import { type ReactNode, useEffect } from "react"
 import type { DataProvenance } from "@shared/shipping"
 import { formatProvenance } from "./format"
 
@@ -15,27 +15,6 @@ export function Reveal({ children, delay = 0, y = 24, className }: { children: R
     >
       {children}
     </motion.div>
-  )
-}
-
-/** 鼠标跟随聚光卡片（reactbits Spotlight Card），CSS 变量 --spot-x/--spot-y 驱动径向高光。 */
-export function SpotlightCard({ children, className = "" }: { children: ReactNode, className?: string }) {
-  const ref = useRef<HTMLDivElement>(null)
-  return (
-    <div
-      ref={ref}
-      className={`spotlight-card ${className}`}
-      onMouseMove={(event) => {
-        const el = ref.current
-        if (!el) return
-        const rect = el.getBoundingClientRect()
-        el.style.setProperty("--spot-x", `${event.clientX - rect.left}px`)
-        el.style.setProperty("--spot-y", `${event.clientY - rect.top}px`)
-      }}
-    >
-      <span aria-hidden className="spotlight-glow" />
-      {children}
-    </div>
   )
 }
 
@@ -78,25 +57,6 @@ export function ProvenanceBadge({ provenance }: { provenance?: DataProvenance })
       <StatusDot tone={isMock ? "dim" : provenance?.sourceType === "third_party" ? "info" : provenance ? "fresh" : "dim"} />
       {isMock ? "模拟数据" : formatProvenance(provenance)}
     </span>
-  )
-}
-
-/** 区块标题：eyebrow 渐变短横线 + 标题 + 描述 + 右侧扩展区。 */
-export function SectionHeading({ eyebrow, title, description, right }: { eyebrow?: string, title: string, description?: string, right?: ReactNode }) {
-  return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-      <div>
-        {eyebrow && (
-          <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-teal-600 dark:text-teal-300">
-            <span className="h-px w-8 bg-gradient-to-r from-teal-400 to-transparent" />
-            {eyebrow}
-          </p>
-        )}
-        <h2 className="text-2xl font-bold tracking-tight md:text-3xl">{title}</h2>
-        {description && <p className="mt-2 max-w-2xl text-sm op-75 md:text-base">{description}</p>}
-      </div>
-      {right}
-    </div>
   )
 }
 

@@ -1,22 +1,30 @@
 import { Link, useMatchRoute } from "@tanstack/react-router"
 import { MotionConfig, motion } from "framer-motion"
 import { type ReactNode, useEffect, useRef, useState } from "react"
-import type { ShippingEvent, ShippingSnapshot, Voyage } from "@shared/shipping"
 import { AuroraBackground } from "./aurora"
-import { type DotTone, formatDate, formatStatus, severityTone, statusLabels } from "./format"
-import { AnimatedNumber, GradientText, ProvenanceBadge, StatusDot } from "./ui"
+import { type DotTone, severityTone, statusLabels } from "./format"
+import { GradientText, StatusDot } from "./ui"
+import { useShipping } from "./data"
 import { useDark } from "~/hooks/useDark"
 
 export { ProvenanceBadge } from "./ui"
 
 const navLinks = [
-  { to: "/", label: "HOT", icon: "i-ph-fire" },
+  { to: "/", label: "首页", icon: "i-ph-fire" },
   { to: "/vessels", label: "船舶", icon: "i-ph-anchor" },
   { to: "/ports", label: "港口", icon: "i-ph-lighthouse" },
   { to: "/voyages", label: "航次", icon: "i-ph-compass" },
   { to: "/events", label: "事件", icon: "i-ph-bell-ringing" },
   { to: "/feed", label: "资讯", icon: "i-ph-newspaper" },
   { to: "/calendar", label: "国家日历", icon: "i-ph-calendar-blank" },
+  { to: "/settings", label: "设置", icon: "i-ph-gear" },
+] as const
+
+const bottomTabLinks = [
+  { to: "/", label: "首页", icon: "i-ph-fire" },
+  { to: "/vessels", label: "船舶", icon: "i-ph-anchor" },
+  { to: "/feed", label: "资讯", icon: "i-ph-newspaper" },
+  { to: "/calendar", label: "日历", icon: "i-ph-calendar-blank" },
   { to: "/settings", label: "设置", icon: "i-ph-gear" },
 ] as const
 
@@ -33,46 +41,136 @@ function NavItem({ to, label, icon }: { to: (typeof navLinks)[number]["to"], lab
     <Link
       ref={ref}
       to={to}
-      className="nav-link-sh"
+      className={`side-nav-link${isActive ? " active" : ""}`}
       activeOptions={{ exact: to === "/" }}
-      activeProps={{ className: "nav-link-sh active" }}
     >
-      {isActive && <motion.span layoutId="nav-pill" className="nav-pill" transition={{ type: "spring", bounce: 0.18, duration: 0.55 }} />}
+      {isActive && <motion.span layoutId="side-pill" className="side-pill" transition={{ type: "spring", bounce: 0.18, duration: 0.55 }} />}
       <span className={`${icon} relative z-1 text-base`} />
-      <span className="relative z-1">{label}</span>
+      <span className="side-label relative z-1">{label}</span>
     </Link>
   )
 }
 
-export function ShippingShell({ children }: { children: ReactNode }) {
+function BottomTabItem({ to, label, icon }: { to: (typeof bottomTabLinks)[number]["to"], label: string, icon: string }) {
+  const matchRoute = useMatchRoute()
+  const isActive = !!matchRoute({ to, fuzzy: to !== "/" })
+  return (
+    <Link to={to} className={isActive ? "active" : ""} activeOptions={{ exact: to === "/" }}>
+      <span className={`${icon} text-lg`} />
+      {label}
+    </Link>
+  )
+}
+
+function formatClock(value?: string) {
+  if (!value) return "—"
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })
+}
+
+const providerRows = [
+  { key: "vessel", label: "船位" },
+  { key: "weather", label: "天气" },
+  { key: "port", label: "港口" },
+  { key: "schedule", label: "班期" },
+  { key: "feed", label: "资讯" },
+] as const
+
+export function ShippingShell({ children, title }: { children: ReactNode, title?: string }) {
   const { isDark, toggleDark } = useDark()
+  const { data } = useShipping()
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem("sh-side-collapsed") === "1"
+    } catch {
+      return false
+    }
+  })
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark)
   }, [isDark])
+  useEffect(() => {
+    try {
+      localStorage.setItem("sh-side-collapsed", collapsed ? "1" : "0")
+    } catch {
+      // ignore storage failures
+    }
+  }, [collapsed])
+
+  const hotCount = data?.hot.length
+  const fetchedAts = data?.providerFreshness
+    ? Object.values(data.providerFreshness).map(freshness => freshness.fetchedAt).filter((value): value is string => Boolean(value))
+    : []
+  const lastRefresh = fetchedAts.length
+    ? formatClock(new Date(Math.max(...fetchedAts.map(value => new Date(value).getTime()))).toISOString())
+    : "—"
+  const providers = data ? [data.provider.vessel, data.provider.weather, data.provider.port, data.provider.schedule, data.provider.feed] : []
+  const allMock = providers.length > 0 && providers.every(provider => provider === "mock")
+  const providerLabel = data ? (allMock ? "全 Mock" : providers.join(" / ")) : "—"
+
   return (
     <MotionConfig reducedMotion="user">
-      <div className="shipping-shell min-h-dvh">
+      <div className={`shipping-shell min-h-dvh${collapsed ? " side-collapsed" : ""}`}>
         <AuroraBackground />
-        <header className="sticky top-4 z-30 px-4">
-          <nav className="glass-nav mx-auto flex max-w-1200px items-center gap-1 px-3 py-2">
-            <Link to="/" className="mr-2 flex shrink-0 items-center gap-2.5">
-              <span className="brand-mark h-9 w-9 overflow-hidden rounded-xl">
-                <img src="/shipping-hot-icon.svg" alt="Shipping HOT" className="h-full w-full rounded-xl" />
-              </span>
-              <span className="font-brand text-lg font-bold tracking-tight">
-                <span className="hidden sm:inline">Shipping </span>
-                <GradientText>HOT</GradientText>
-              </span>
+        <aside className="console-sidebar">
+          <div className="side-head">
+            <Link to="/" className="brand-mark h-9 w-9 shrink-0 overflow-hidden rounded-xl" title="Shipping HOT">
+              <img src="/shipping-hot-icon.svg" alt="Shipping HOT" className="h-full w-full rounded-xl" />
             </Link>
-            <div className="flex flex-1 items-center gap-0.5 overflow-x-auto">
-              {navLinks.map(link => <NavItem key={link.to} {...link} />)}
-            </div>
+            <span className="side-title">
+              Shipping
+              {" "}
+              <GradientText>HOT</GradientText>
+            </span>
+            <button
+              type="button"
+              className="icon-btn side-collapse"
+              title={collapsed ? "展开侧栏" : "折叠侧栏"}
+              onClick={() => setCollapsed(value => !value)}
+            >
+              <span className={collapsed ? "i-ph-caret-double-right" : "i-ph-caret-double-left"} />
+            </button>
+          </div>
+          <nav className="side-nav">
+            {navLinks.map(link => <NavItem key={link.to} {...link} />)}
+          </nav>
+          <div className="side-foot">
+            {providerRows.map(row => (
+              <div key={row.key} className="sf-row">
+                <StatusDot tone={data?.provider[row.key] && data.provider[row.key] !== "mock" ? "info" : "dim"} />
+                <span className="lbl grow">{row.label}</span>
+                <span className="val">{data?.provider[row.key] ?? "—"}</span>
+              </div>
+            ))}
+          </div>
+        </aside>
+        <div className="console-main">
+          <header className="console-topbar">
+            <h1>{title ?? "运营态势 · 首页"}</h1>
+            <span className="topbar-spacer" />
+            <span className="tchip">
+              <StatusDot tone={hotCount ? "failed" : "fresh"} pulse={Boolean(hotCount)} />
+              活跃 HOT
+              {" "}
+              {hotCount ?? "—"}
+            </span>
+            <span className="tchip">
+              <span className="i-ph-clock" />
+              最后刷新
+              {" "}
+              {lastRefresh}
+            </span>
+            <span className="tchip">
+              数据源
+              {" "}
+              {providerLabel}
+            </span>
             <button
               type="button"
               aria-label="切换明暗主题"
               title="切换明暗主题"
               onClick={toggleDark}
-              className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+              className="icon-btn"
             >
               <motion.span
                 key={isDark ? "moon" : "sun"}
@@ -82,14 +180,17 @@ export function ShippingShell({ children }: { children: ReactNode }) {
                 className={`${isDark ? "i-ph-moon-stars" : "i-ph-sun"} block`}
               />
             </button>
-          </nav>
-        </header>
-        <main className="mx-auto max-w-1200px px-4 pb-16 pt-8 md:px-6">
-          {children}
-        </main>
-        <footer className="mx-auto max-w-1200px px-4 pb-10 text-center text-xs op-55">
-          Shipping HOT · 本地指挥台 V2 · AISStream / Open-Meteo Marine / Calendar / Mock
-        </footer>
+          </header>
+          <main>
+            {children}
+          </main>
+          <footer className="mt-8 text-center text-xs op-55">
+            Shipping HOT · 本地指挥台 V2 · AISStream / Open-Meteo Marine / Calendar / Mock
+          </footer>
+        </div>
+        <nav className="console-bottom-tab">
+          {bottomTabLinks.map(link => <BottomTabItem key={link.to} {...link} />)}
+        </nav>
       </div>
     </MotionConfig>
   )
@@ -116,25 +217,6 @@ export function Severity({ value }: { value: string }) {
   )
 }
 
-export function PageHero({ eyebrow, title, description, children }: { eyebrow: string, title: ReactNode, description: string, children?: ReactNode }) {
-  return (
-    <motion.header
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="mb-8"
-    >
-      <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-teal-600 dark:text-teal-300">
-        <span className="h-px w-8 bg-gradient-to-r from-teal-400 to-transparent" />
-        {eyebrow}
-      </p>
-      <h1 className="text-3xl font-bold tracking-tight md:text-5xl">{title}</h1>
-      <p className="mt-3 max-w-2xl text-sm op-75 md:text-base">{description}</p>
-      {children && <div className="mt-5">{children}</div>}
-    </motion.header>
-  )
-}
-
 export function LoadingState() {
   return (
     <div className="glass-panel flex flex-col items-center gap-4 p-12 text-center">
@@ -150,271 +232,5 @@ export function ErrorState() {
       <p className="text-lg font-bold">航运数据暂不可用</p>
       <p className="mt-2 text-sm op-80">请检查本地 Provider 与运行环境。</p>
     </div>
-  )
-}
-
-const statToneClass = {
-  default: "",
-  warning: "text-orange-500 dark:text-amber-300",
-  critical: "text-rose-500 dark:text-rose-300",
-  accent: "gradient-text",
-}
-
-export function StatCard({ label, value, tone = "default", hint }: { label: string, value: string | number, tone?: keyof typeof statToneClass, hint?: string }) {
-  return (
-    <div className="glass-panel tile flex flex-col gap-1.5 p-4">
-      <span className="text-xs font-semibold uppercase tracking-wider op-65">{label}</span>
-      <strong className={`tabular-nums ${typeof value === "number" ? "text-2xl md:text-3xl" : "text-base md:text-lg"} ${statToneClass[tone]}`}>
-        {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
-      </strong>
-      {hint && <small className="op-60">{hint}</small>}
-    </div>
-  )
-}
-
-function Field({ label, value }: { label: string, value: ReactNode }) {
-  return (
-    <div className="min-w-0">
-      <span className="block text-xs op-60">{label}</span>
-      <span className="block truncate text-sm font-semibold">{value}</span>
-    </div>
-  )
-}
-
-export function VoyageCard({ voyage, vessels, ports, onClick }: { voyage: Voyage, vessels: ShippingSnapshot["vessels"], ports: ShippingSnapshot["ports"], onClick?: () => void }) {
-  const vessel = vessels.find(v => v.id === voyage.vesselId)
-  const destination = ports.find(p => p.id === voyage.destinationPortId)
-  const delay = voyage.delayMinutes
-  const delayClass = delay === undefined ? "op-65" : delay > 0 ? "text-orange-500 dark:text-amber-300" : "text-emerald-600 dark:text-emerald-300"
-  const delayLabel = delay === undefined ? "未知" : delay > 0 ? `+${delay} 分钟` : "准点"
-  return (
-    <article className="glass-panel tile h-full cursor-pointer p-5" onClick={onClick}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sky-500/30 bg-sky-500/10 text-lg text-sky-600 dark:text-sky-300">
-            <span className="i-ph-compass" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-xs uppercase tracking-wider op-65">航次</p>
-            <h3 className="truncate text-lg font-bold leading-tight">{voyage.voyageNumber}</h3>
-            <p className="truncate text-xs op-70">
-              {vessel?.name ?? "—"}
-              {" "}
-              →
-              {" "}
-              {destination?.name ?? "—"}
-            </p>
-          </div>
-        </div>
-        <span className={`chip shrink-0 font-bold ${delayClass}`}>{delayLabel}</span>
-      </div>
-      <div className="mt-4 grid grid-cols-3 gap-3">
-        <Field label="基准 ETA" value={formatDate(voyage.baselineEta)} />
-        <Field label="最新 ETA" value={formatDate(voyage.latestEta)} />
-        <Field
-          label="来源 / 新鲜度"
-          value={(
-            <div className="flex flex-wrap gap-1.5">
-              <ProvenanceBadge provenance={voyage.provenance} />
-              <StatusBadge stale={voyage.stale} sourceStatus={voyage.sourceStatus} />
-            </div>
-          )}
-        />
-      </div>
-    </article>
-  )
-}
-
-export function EventCard({ event, label }: { event: ShippingEvent, label?: string }) {
-  return (
-    <article className={`glass-panel hot-glow ${event.severity} tile p-5`}>
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="mb-2 flex flex-wrap items-center gap-2">
-            <Severity value={event.severity} />
-            <span className="text-xs font-semibold uppercase tracking-wider op-65">{formatStatus(event.status)}</span>
-          </div>
-          <h3 className="text-lg font-bold">{event.title}</h3>
-          <p className="mt-1 text-sm op-80">{event.summary}</p>
-        </div>
-        {label && <span className="chip shrink-0">{label}</span>}
-      </div>
-      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs op-70">
-        <span className="flex items-center gap-1">
-          <span className="i-ph-clock" />
-          发现于
-          {" "}
-          {formatDate(event.lastDetectedAt)}
-        </span>
-        <ProvenanceBadge provenance={event.provenance} />
-        <StatusBadge stale={event.stale ?? event.sourceStatus !== "healthy"} sourceStatus={event.sourceStatus} />
-        {event.resolvedAt && (
-          <span className="flex items-center gap-1">
-            <span className="i-ph-check-circle" />
-            解决于
-            {" "}
-            {formatDate(event.resolvedAt)}
-          </span>
-        )}
-      </div>
-    </article>
-  )
-}
-
-export function FeedCard({ item }: { item: ShippingSnapshot["feedItems"][number] }) {
-  const [weatherWindow, setWeatherWindow] = useState<"h24" | "h72" | "d7">("h72")
-  const selectedWeatherWindow = item.weather?.windows?.[weatherWindow]
-  const waveHeightM = selectedWeatherWindow?.maxWaveHeightM ?? item.weather?.waveHeightM
-  const swellWaveHeightM = selectedWeatherWindow?.maxSwellWaveHeightM ?? item.weather?.swellWaveHeightM
-  const swellPeriodSeconds = selectedWeatherWindow?.maxSwellPeriodSeconds ?? item.weather?.swellPeriodSeconds
-  const windSpeedKmh = selectedWeatherWindow?.maxWindSpeedKmh ?? item.weather?.windSpeedKmh
-  const windGustKmh = selectedWeatherWindow?.maxWindGustKmh ?? item.weather?.windGustKmh
-  const waveDirectionDeg = selectedWeatherWindow?.waveDirectionDeg ?? item.weather?.waveDirectionDeg
-  const swellDirectionDeg = selectedWeatherWindow?.swellDirectionDeg ?? item.weather?.swellDirectionDeg ?? item.weather?.swellWaveDirectionDeg
-  return (
-    <article className="glass-panel tile flex h-full flex-col p-5">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <Severity value={item.severity} />
-          <span className="chip">{formatStatus(item.category)}</span>
-        </div>
-        <div className="flex flex-wrap justify-end gap-1.5">
-          <ProvenanceBadge provenance={item.provenance} />
-          <StatusBadge stale={item.stale} sourceStatus={item.sourceStatus} />
-        </div>
-      </div>
-      <h2 className="mt-3 text-xl font-bold">{item.title}</h2>
-      <p className="mt-2 flex-1 op-80">{item.summary}</p>
-      {item.weather && (
-        <div className="mt-3 space-y-2 text-xs op-70">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="chip">
-              {item.weather.riskSource === "official" ? "官方预警" : "模型预报"}
-            </span>
-            {item.weather.windows && ([
-              ["h24", "24 小时"],
-              ["h72", "72 小时"],
-              ["d7", "7 天"],
-            ] as const).map(([key, label]) => (
-              <button key={key} type="button" className={`chip transition-colors ${weatherWindow === key ? "border-teal-500/60 bg-teal-500/15 text-teal-700 dark:text-teal-200" : ""}`} onClick={() => setWeatherWindow(key)}>{label}</button>
-            ))}
-            {item.weather.forecastWindowHours && !item.weather.windows && (
-              <span className="chip">
-                未来
-                {" "}
-                {item.weather.forecastWindowHours}
-                {" "}
-                小时
-              </span>
-            )}
-            {item.weather.alertState && (
-              <span className="chip">
-                预警状态：
-                {item.weather.alertState === "active" ? "生效" : item.weather.alertState === "expired" ? "已过期" : "未知"}
-              </span>
-            )}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {waveHeightM !== undefined && (
-              <span>
-                浪高
-                {" "}
-                {waveHeightM.toFixed(1)}
-                {" "}
-                m
-              </span>
-            )}
-            {swellWaveHeightM !== undefined && (
-              <span>
-                涌浪
-                {" "}
-                {swellWaveHeightM.toFixed(1)}
-                {" "}
-                m
-              </span>
-            )}
-            {swellPeriodSeconds !== undefined && (
-              <span>
-                涌浪周期
-                {" "}
-                {swellPeriodSeconds.toFixed(1)}
-                {" "}
-                s
-              </span>
-            )}
-            {windSpeedKmh !== undefined && (
-              <span>
-                风速
-                {windSpeedKmh.toFixed(1)}
-                {" "}
-                km/h
-              </span>
-            )}
-            {windGustKmh !== undefined && (
-              <span>
-                阵风
-                {windGustKmh.toFixed(1)}
-                {" "}
-                km/h
-              </span>
-            )}
-            {waveDirectionDeg !== undefined && (
-              <span>
-                浪向
-                {waveDirectionDeg.toFixed(0)}
-                °
-              </span>
-            )}
-            {swellDirectionDeg !== undefined && (
-              <span>
-                涌浪向
-                {swellDirectionDeg.toFixed(0)}
-                °
-              </span>
-            )}
-            {(selectedWeatherWindow?.forecastStartAt ?? item.weather.forecastStartAt) && (selectedWeatherWindow?.forecastEndAt ?? item.weather.forecastEndAt) && (
-              <span>
-                风险窗
-                {" "}
-                {formatDate(selectedWeatherWindow?.forecastStartAt ?? item.weather.forecastStartAt)}
-                {" – "}
-                {formatDate(selectedWeatherWindow?.forecastEndAt ?? item.weather.forecastEndAt)}
-              </span>
-            )}
-            {item.weather.alertExpiresAt && (
-              <span>
-                截至
-                {" "}
-                {formatDate(item.weather.alertExpiresAt)}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-      {(item.hotReason || item.tags?.length) && (
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs op-70">
-          {item.hotReason && (
-            <span className="chip text-amber-600 dark:text-amber-300">
-              HOT 原因：
-              {item.hotReason}
-            </span>
-          )}
-          {item.tags?.map(tag => <span key={tag} className="chip">{tag}</span>)}
-        </div>
-      )}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-3 text-xs op-70">
-          <span className="flex items-center gap-1">
-            <span className="i-ph-clock" />
-            {item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}
-          </span>
-          <ProvenanceBadge provenance={item.provenance} />
-        </div>
-        <a className="flex items-center gap-1 text-sm font-semibold text-teal-600 transition-colors hover:text-teal-500 dark:text-teal-300" href={item.sourceUrl} target="_blank" rel="noreferrer">
-          打开来源
-          <span className="i-ph-arrow-up-right" />
-        </a>
-      </div>
-    </article>
   )
 }

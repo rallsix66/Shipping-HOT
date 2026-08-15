@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-labelledby="title desc">
   <title id="title">Shipping HOT</title>
-  <desc id="desc">珊瑚红底色上的深色锚图标</desc>
-  <rect width="192" height="192" rx="36" fill="#ff6b6b"/>
+  <desc id="desc">天蓝色底色上的深色锚图标</desc>
+  <rect width="192" height="192" rx="36" fill="#0ea5e9"/>
   <g fill="none" stroke="#241d20" stroke-linecap="round" stroke-linejoin="round" stroke-width="10">
     <circle cx="96" cy="58" r="15"/>
     <path d="M96 73v72M70 88h52M54 115c7 20 22 31 42 31s35-11 42-31M73 146H52M119 146h21"/>

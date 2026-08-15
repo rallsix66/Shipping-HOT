@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shipping HOT · 布局对比原型</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .landing { max-width: 1080px; margin: 0 auto; padding: 56px 20px 80px; }
+  .landing-head { text-align: center; margin-bottom: 40px; }
+  .landing-head h1 { font-family: "Baloo 2", sans-serif; font-size: 40px; font-weight: 700; }
+  .landing-head h1 b {
+    background: linear-gradient(100deg, #0d9488, #0284c7 35%, #6366f1 65%, #e11d48);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .landing-head p { margin-top: 12px; color: var(--sh-dim); font-size: 14px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 760px) { .two { grid-template-columns: 1fr; } .landing-head h1 { font-size: 30px; } }
+  .plan { padding: 26px 26px 22px; display: flex; flex-direction: column; gap: 16px; }
+  .plan .tag { align-self: flex-start; }
+  .plan h2 { font-size: 22px; font-weight: 800; }
+  .plan .sub { font-size: 13px; color: var(--sh-dim); }
+  .plan ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--sh-dim); }
+  .plan ul b { color: var(--sh-text); }
+  .plan .fit { border: 1px solid var(--sh-border); border-radius: 12px; background: var(--sh-panel); padding: 10px 14px; font-size: 12.5px; color: var(--sh-dim); }
+  .plan .cta { margin-top: auto; display: flex; gap: 10px; }
+  .hint { text-align: center; margin-top: 30px; font-size: 12.5px; color: var(--sh-dim-2); }
+  .pill-a { border: 1px solid rgba(20,184,166,.4); background: rgba(20,184,166,.1); color: #0f766e; }
+  html.dark .pill-a { color: #5eead4; }
+  .pill-b { border: 1px solid rgba(14,165,233,.4); background: rgba(14,165,233,.1); color: #0369a1; }
+  html.dark .pill-b { color: #7dd3fc; }
+</style>
+</head>
+<body>
+<div class="bg-fx">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="bg-grid"></div><div class="bg-noise"></div><div class="bg-vignette"></div>
+</div>
+
+<div class="landing">
+  <header class="landing-head">
+    <h1>Shipping <b>HOT</b> · 布局对比原型</h1>
+    <p>两个方向的纯离线原型，双击即可打开，无需构建。<br>建议在桌面浏览器（≥1280px）中并排打开两个窗口对比，也可以用开发者工具切换到手机宽度查看移动端方案。</p>
+  </header>
+
+  <div class="two">
+    <section class="glass plan tile">
+      <span class="chip pill-a tag">方案 A · 指挥台化</span>
+      <h2>左侧固定导航 + 全宽布局</h2>
+      <p class="sub">把产品当"本地运营指挥台"来做：信息密度、全局状态、快速扫描优先。</p>
+      <ul>
+        <li><b>左侧固定侧栏</b>（可折叠成 78px 图标栏），为 V2.5 等新增页面留出空间</li>
+        <li><b>全局状态条常驻</b>：数据源 / 最后刷新 / 活跃 HOT 数在任何页面可见</li>
+        <li><b>首页 HOT 信号上移首屏</b>，统计卡缩为一行细条</li>
+        <li>船舶 / 港口 / 航次列表统一为<b>密集表格行</b>（拥堵量表、延误内联对比），资讯与事件为<b>时间线</b></li>
+        <li><b>详情页双栏</b>：左侧实体信息，右侧关联事件 / 天气 / 航次</li>
+        <li>日历页 7 个筛选控件收进<b>左侧筛选面板</b>，卡片 3 列</li>
+      </ul>
+      <p class="fit">适合：长期作为桌面端工作台使用、每天高频查看、后续功能会继续增加的场景。</p>
+      <div class="cta">
+        <a class="btn-grad" href="layout-a-console.html">打开原型 A <span>↗</span></a>
+      </div>
+    </section>
+
+    <section class="glass plan tile">
+      <span class="chip pill-b tag">方案 B · 渐进微调</span>
+      <h2>保留顶部导航 + 1200px 居中</h2>
+      <p class="sub">不推翻现有结构，只做优先级与栅格微调，改动最小、风险最低。</p>
+      <ul>
+        <li><b>保留顶部玻璃导航</b>与现有 1200px 内容宽度，视觉语言完全不变</li>
+        <li>首页 hero 大卡片<b>压缩为一条状态行</b>，不再占据首屏</li>
+        <li><b>HOT 信号上移</b>，统计卡缩为横条</li>
+        <li>资讯快讯与近期日历由上下堆叠改为<b>左右并排</b>，首页长度明显缩短</li>
+        <li>统一各页页头节奏、筛选控件与卡片间距</li>
+        <li>移动端（&lt;900px）改用<b>底部 tab 栏</b>，替代横向滚动导航</li>
+      </ul>
+      <p class="fit">适合：想快速看到首页改善、暂不引入侧栏、改动回归风险要压到最小的场景。</p>
+      <div class="cta">
+        <a class="btn-grad" href="layout-b-evolution.html">打开原型 B <span>↗</span></a>
+      </div>
+    </section>
+  </div>
+
+  <p class="hint">
+    原型仅用于对比排版，未改动 <code>src/</code> 任何代码；数据均为演示用静态模拟数据。
+    确定方向后，我再把选定方案落到真实前端（React + 现有 aurora 设计系统）。
+  </p>
+</div>
+</body>
+</html>
