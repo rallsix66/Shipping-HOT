@@ -8,6 +8,7 @@ export type Severity = "info" | "watch" | "warning" | "critical"
 export type EventStatus = "active" | "resolved"
 export type NavigationStatus = "under_way" | "anchored" | "moored" | "aground" | "unknown"
 export type FeedCategory = "shipping_news" | "carrier_notice" | "weather" | "port_notice"
+export type WeatherRiskSource = "model" | "official"
 
 export interface DataProvenance {
   sourceType: SourceType
@@ -168,6 +169,7 @@ export interface FeedItem extends Freshness, ProvenanceAware {
   severity: Severity
   hotReason?: string
   tags?: string[]
+  weather?: WeatherDetail
   relatedPortIds: string[]
   relatedVesselIds: string[]
   relatedVoyageIds: string[]
@@ -212,6 +214,22 @@ export interface ShippingSettings {
   }
   retentionDays: number
   calendarSync?: CalendarCoverage[]
+}
+
+export interface WeatherDetail {
+  riskSource: WeatherRiskSource
+  forecastWindowHours?: number
+  forecastStartAt?: string
+  forecastEndAt?: string
+  waveHeightM?: number
+  swellWaveHeightM?: number
+  swellPeriodSeconds?: number
+  windSpeedKmh?: number
+  windGustKmh?: number
+  alertId?: string
+  alertRegion?: string
+  alertIssuedAt?: string
+  alertExpiresAt?: string
 }
 
 export interface ShippingSnapshot {

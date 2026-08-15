@@ -58,7 +58,7 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
     settings.providerEnabled ? providers.port.getPorts(lastKnown.ports) : Promise.resolve(disabledProviderData(lastKnown.ports)),
     settings.providerEnabled ? providers.schedule.getVoyages() : Promise.resolve(disabledProviderData(lastKnown.voyages)),
     settings.sourceEnabled ? providers.feed.getFeedItems(existingNonWeatherFeed, lastKnown.ports) : Promise.resolve(disabledProviderData(existingNonWeatherFeed)),
-    settings.sourceEnabled ? providers.weather.getFeedItems(lastKnown.ports) : Promise.resolve(disabledProviderData(weatherLastKnown)),
+    settings.sourceEnabled ? providers.weather.getFeedItems(lastKnown.ports, weatherLastKnown) : Promise.resolve(disabledProviderData(weatherLastKnown)),
   ])
   const read = <T extends Vessel | Port | Voyage | FeedItem>(result: PromiseSettledResult<T[]>, previous: T[], provenance: ProviderResult<T>["provenance"], disabled: boolean): ProviderResult<T> => {
     const data = disabled ? disabledProviderData(previous) : providerResult(result, previous)

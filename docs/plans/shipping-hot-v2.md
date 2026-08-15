@@ -1,10 +1,10 @@
 # Shipping HOT V2 实施方案
 
-> 状态：`V2.3 implemented and verified`; `V2.4 not started`
+> 状态：`V2.4 implemented and verified`; `V2.5 not started`
 >
-> 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已封板，V2.1 Port Intelligence、V2.2 Country Calendar 和 V2.3 Shipping Information Feed 已按本文件边界实现并验证；V2.4 及以后仍是未启动的规划，不代表其中的 Provider、表结构、路由或规则已经实现。
+> 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已封板，V2.1 Port Intelligence、V2.2 Country Calendar、V2.3 Shipping Information Feed 和 V2.4 Weather Intelligence 已按本文件边界实现并验证；V2.5 仍是未启动的规划，不代表其中的 Provider、表结构、路由或规则已经实现。
 >
-> 方案核对日期：2026-08-15。V2.0 已完成收口；V2.1 仅新增 Portcast 公共港口页面 Provider，不使用商业 API、登录、token、hidden endpoint 或新依赖；V2.2 已按授权批次实现 Calendarific server-only、官方/手工/Mock 合同、日历最小表、覆盖持久化和 Calendar → Event → HOT；V2.3 已按授权批次实现少量 RSS/HTML 资讯适配、独立失败、去重和 Feed → Event → HOT。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
+> 方案核对日期：2026-08-15。V2.0 已完成收口；V2.1 仅新增 Portcast 公共港口页面 Provider，不使用商业 API、登录、token、hidden endpoint 或新依赖；V2.2 已按授权批次实现 Calendarific server-only、官方/手工/Mock 合同、日历最小表、覆盖持久化和 Calendar → Event → HOT；V2.3 已按授权批次实现少量 RSS/HTML 资讯适配、独立失败、去重和 Feed → Event → HOT；V2.4 已按授权批次实现 Open-Meteo 72 小时模型海况窗口、逐港失败隔离、TTL 和 JMA/TMD/BMKG 官方预警合同。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
 
 ## 1. V2 Executive Summary
 
@@ -70,15 +70,16 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 
 现有 Shipping Repository 初始化 `feed_items`、`vessels`、`ports`、`voyages`、`events`、`settings`，NewsNow 另有 `cache`、`user`。当前实体主要以 `data` JSON 保存，同时保留查询和排序所需的少量列。
 
-当前 `shipping-store.ts` 会并行刷新 Vessel、Port、Voyage、Shipping Feed、Weather，失败时把各自 last-known 标记为 stale/failed；SQLite 不可用时保留内存 fallback。V2.2 另通过 `calendar_events` 保存年度事件事实，并在 `settings.calendarSync` 保存国家/年份 coverage。V2.3 Shipping Feed 默认仍是 Mock；显式 public 模式逐 Source 解析 RSS/HTML，失败只影响该 Source，旧资讯保留原发布时间并标记 stale。当前 Mock fixture 仍是产品可用的基础数据，因此 V2.0 必须让页面明确显示 `sourceType=mock`，而不是只显示一个看起来正常的“healthy”。当事件来源变成 stale、degraded、failed、disabled 或 never_succeeded 时，不创建新的事实事件，也不把已有 active 事件误判为 resolved；只有来源重新 fresh 且条件消失时才可 resolve。
+当前 `shipping-store.ts` 会并行刷新 Vessel、Port、Voyage、Shipping Feed、Weather，失败时把各自 last-known 标记为 stale/failed；SQLite 不可用时保留内存 fallback。V2.2 另通过 `calendar_events` 保存年度事件事实，并在 `settings.calendarSync` 保存国家/年份 coverage。V2.3 Shipping Feed 默认仍是 Mock；显式 public 模式逐 Source 解析 RSS/HTML，失败只影响该 Source，旧资讯保留原发布时间并标记 stale。V2.4 Weather 默认仍是 Mock；显式 Open-Meteo 模式请求 72 小时 current/hourly 海况，30 分钟 TTL 复用结果，单港失败只影响该港并保留其 last-known。当前 Mock fixture 仍是产品可用的基础数据，因此 V2.0 必须让页面明确显示 `sourceType=mock`，而不是只显示一个看起来正常的“healthy”。当事件来源变成 stale、degraded、failed、disabled 或 never_succeeded 时，不创建新的事实事件，也不把已有 active 事件误判为 resolved；只有来源重新 fresh 且条件消失时才可 resolve。
 
 ### 2.4 当前限制
 
 - 当前 AISStream Provider 每次 `getVessels` 调用会创建一次短连接，并只请求 watched 且有 MMSI 的船舶；它适合个人关注船，不足以统计整个港口。
 - 当前 AISStream 订阅使用全世界 Bounding Box + MMSI 过滤，只接收 `PositionReport`；当前没有持久化轨迹，也没有区域订阅会话管理。
 - 当前 PortProvider 和 ScheduleProvider 仍是 Mock。
-- 当前 Open-Meteo 仅请求当前风速、阵风和波高，并将风险作为 Weather FeedItem 输出。
+- 当前 Open-Meteo 已请求 current/hourly 风速、阵风、波高、涌浪高度和涌浪周期，并将 72 小时模型风险作为 Weather FeedItem 输出；官方 JMA/TMD/BMKG warning 仍需显式开关。
 - V2.2 Calendar 已实现 TH/ID/MY/PH/VN 的 Calendarific/OfficialHolidayProvider/ManualOverride/Mock 合同；Calendarific 仅在服务端且显式配置 Key 后调用，默认仍为 Mock。
+- V2.4 Weather 已实现 Open-Meteo current + hourly wave/swell/wind 72 小时窗口、30 分钟 TTL、逐港 last-known stale/failure 和可选的 JMA/TMD/BMKG 官方 warning 合同；模型风险和官方预警使用不同 `riskSource`/provenance，默认仍为 Mock。
 - 当前 `Freshness` 只有 `updatedAt`、`stale`、`sourceStatus`、`error`，还没有统一的 `sourceType`/`dataNature` 业务标识。
 - 当前 NewsNow Source 协议使用 `NewsItem[]` 和独立 cache，缺少 Shipping HOT 所需的完整 `sourceStatus/stale` 语义；V2.3 在独立 Shipping Feed 适配层补齐，不破坏所有 NewsNow Source。
 
@@ -768,7 +769,7 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 
 ## 21. UI Changes
 
-V2.0 已完成最小 UI 信任标识；V2.1 Port Intelligence 和 V2.2 Country Calendar 已完成；V2.3 及以后按以下规划改动：
+V2.0 已完成最小 UI 信任标识；V2.1 Port Intelligence、V2.2 Country Calendar、V2.3 Shipping Information Feed 和 V2.4 Weather Intelligence 已完成；V2.5 及以后按以下规划改动：
 
 ### V2.0
 
@@ -799,7 +800,9 @@ V2.0 已完成最小 UI 信任标识；V2.1 Port Intelligence 和 V2.2 Country C
 
 ### V2.4
 
-- Weather 卡片增加海况字段、时间窗、官方预警与模型风险区分。
+- 已实现 Weather Feed 卡片：浪高、涌浪、涌浪周期、未来 72 小时风险窗、模型/官方标识和官方预警过期时间。
+- 已实现 `SHIPPING_WEATHER_PROVIDER=open-meteo`：Open-Meteo current + hourly 海况字段，30 分钟 server-side/in-process TTL，逐港失败隔离和 last-known stale；没有 last-known 时不填充假天气。
+- 已实现 `SHIPPING_WEATHER_ALERT_PROVIDER=public`：JMA、TMD、BMKG 独立官方 warning contracts；解析结构化 RSS/HTML fixture，保留 issued/expiry，过期降为 info，不能继续触发 HOT；默认不联网。
 
 ### V2.5
 
@@ -862,6 +865,9 @@ V2.0 已完成最小 UI 信任标识；V2.1 Port Intelligence 和 V2.2 Country C
 - In Scope：Open-Meteo wave/swell 字段、未来窗口、官方 JMA/TMD/BMKG 候选、模型风险与官方预警分层。
 - Out of Scope：航行安全认证、复杂气象模型、多国 Provider 全量接入、海流/潮汐决策系统。
 - Dependencies：V2.0 trust model；现有 Open-Meteo adapter；官方来源合规核对。
+- Status：implemented and verified。
+- Implemented：扩展 `createOpenMeteoWeatherProvider` 的 current/hourly wave/swell/wind 请求、72 小时风险窗口、30 分钟 TTL、逐港 failure/last-known stale；新增 `WeatherDetail`、model/official risk labels 和 `createOfficialWeatherAlertProvider`，注册 JMA/TMD/BMKG 官方源及 warning expiry 处理。
+- Verified：119/119 tests passed；E modified-file targeted lint passed；typecheck retains the pre-existing TS6142/TS6307 test-config errors；build passed；full lint still reports six pre-existing errors outside this phase；Vite smoke returned 200 for `/feed` and `/api/shipping` with default Mock Feed/Weather; `git diff --check` passed；public Open-Meteo/official warning runtime remains pending because the switches are opt-in and external network is unavailable in this environment.
 - Acceptance：字段来源和预报时间窗清楚；海况请求按 TTL 缓存；模型风险不能伪装官方预警；官方预警过期可关闭；单港失败不影响其他港口。
 - Main risks：沿岸精度、预警格式、重复公告、不同国家定义不一致。
 - Rollback：只保留现有 Open-Meteo 风/阵风/波高，关闭官方预警 Provider。
@@ -942,7 +948,8 @@ V2.0 sealed
 V2.1 implemented
 V2.2 implemented
 V2.3 implemented
-V2.4 not started
+V2.4 implemented
+V2.5 not started
 ```
 
-本文件仍是方案与边界产物；V2.0 已封板，V2.1/V2.2/V2.3 已完成实现、验证和文档同步。V2.4 及以后仍需在本批次前一阶段 Gate 通过后继续。
+本文件仍是方案与边界产物；V2.0 已封板，V2.1/V2.2/V2.3/V2.4 已完成实现、验证和文档同步。V2.5 仍需新的 Gate 批准后继续。
