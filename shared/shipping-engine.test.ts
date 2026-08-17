@@ -35,10 +35,30 @@ describe("shipping HOT event engine", () => {
     const snapshot = createMockSnapshot()
     const first = detectShippingEvents(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, snapshot.settings, [], new Date().toISOString())
     const second = detectShippingEvents(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, snapshot.settings, first, new Date().toISOString())
-    const firstAnchored = first.find(event => event.dedupeKey === "vessel_anchored:vessel-ever-glory")!
-    const secondAnchored = second.find(event => event.dedupeKey === "vessel_anchored:vessel-ever-glory")!
+    const firstAnchored = first.find(event => event.dedupeKey === "vessel_anchored:vessel-ever-glory:mock-vessel")!
+    const secondAnchored = second.find(event => event.dedupeKey === "vessel_anchored:vessel-ever-glory:mock-vessel")!
     expect(secondAnchored.id).toBe(firstAnchored.id)
     expect(secondAnchored.firstDetectedAt).toBe(firstAnchored.firstDetectedAt)
+  })
+
+  it("scopes identical logical vessel conditions by evidence source", () => {
+    const snapshot = createMockSnapshot()
+    const mockEvents = detectShippingEvents(snapshot.vessels, [], [], [], snapshot.settings, [], "2026-01-01T03:00:00.000Z")
+    const aisVessel = {
+      ...snapshot.vessels[0],
+      provenance: { sourceType: "third_party" as const, dataNature: "observed" as const, sourceId: "aisstream" },
+      statusChangedAt: "2026-01-01T00:00:00.000Z",
+      sourceUpdatedAt: "2026-01-01T00:00:00.000Z",
+    }
+    const aisEvents = detectShippingEvents([aisVessel], [], [], [], snapshot.settings, [], "2026-01-01T03:00:00.000Z")
+    const mockEvent = mockEvents.find(event => event.type === "vessel_anchored")!
+    const aisEvent = aisEvents.find(event => event.type === "vessel_anchored")!
+    expect(mockEvent.dedupeKey).toBe("vessel_anchored:vessel-ever-glory:mock-vessel")
+    expect(aisEvent.dedupeKey).toBe("vessel_anchored:vessel-ever-glory:aisstream")
+    expect(mockEvent.id).not.toBe(aisEvent.id)
+    const allMockEvents = detectShippingEvents(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, snapshot.settings, [], "2026-01-01T03:00:00.000Z")
+    expect(allMockEvents.find(event => event.type === "port_congestion")?.dedupeKey).toBe("port_congestion:port-shekou:mock-port")
+    expect(allMockEvents.find(event => event.type === "voyage_delay")?.dedupeKey).toBe("voyage_delay:voyage-eg-061:mock-schedule")
   })
 
   it("reconciles active, resolved and reopened events", () => {
@@ -47,11 +67,11 @@ describe("shipping HOT event engine", () => {
     const first = detectShippingEvents(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, snapshot.settings, [], now)
     const withoutAnchored = { ...snapshot, vessels: snapshot.vessels.map(v => v.id === "vessel-ever-glory" ? { ...v, navigationStatus: "under_way" as const } : v) }
     const resolved = detectShippingEvents(withoutAnchored.vessels, withoutAnchored.ports, withoutAnchored.voyages, withoutAnchored.feedItems, withoutAnchored.settings, first, "2026-01-01T04:00:00.000Z")
-    const resolvedAnchored = resolved.find(event => event.dedupeKey === "vessel_anchored:vessel-ever-glory")!
+    const resolvedAnchored = resolved.find(event => event.dedupeKey === "vessel_anchored:vessel-ever-glory:mock-vessel")!
     expect(resolvedAnchored.status).toBe("resolved")
     expect(resolvedAnchored.resolvedAt).toBe("2026-01-01T04:00:00.000Z")
     const reopened = detectShippingEvents(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, snapshot.settings, resolved, "2026-01-01T05:00:00.000Z")
-    const reopenedAnchored = reopened.find(event => event.dedupeKey === "vessel_anchored:vessel-ever-glory")!
+    const reopenedAnchored = reopened.find(event => event.dedupeKey === "vessel_anchored:vessel-ever-glory:mock-vessel")!
     expect(reopenedAnchored.id).toBe(resolvedAnchored.id)
     expect(reopenedAnchored.status).toBe("active")
     expect(reopenedAnchored.resolvedAt).toBeUndefined()
@@ -63,7 +83,7 @@ describe("shipping HOT event engine", () => {
     const first = detectShippingEvents(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, snapshot.settings, [], "2026-01-01T03:00:00.000Z")
     const changed = { ...snapshot, vessels: snapshot.vessels.map(v => v.id === "vessel-ever-glory" ? { ...v, statusChangedAt: "2025-12-31T20:00:00.000Z" } : v) }
     const next = detectShippingEvents(changed.vessels, changed.ports, changed.voyages, changed.feedItems, changed.settings, first, "2026-01-01T04:00:00.000Z")
-    const anchored = next.find(event => event.dedupeKey === "vessel_anchored:vessel-ever-glory")!
+    const anchored = next.find(event => event.dedupeKey === "vessel_anchored:vessel-ever-glory:mock-vessel")!
     expect(anchored.severity).toBe("critical")
     expect(anchored.evidenceJson).toMatchObject({ durationMinutes: 480 })
   })

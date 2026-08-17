@@ -117,7 +117,11 @@ export const shippingFeedSources: ShippingFeedSource[] = [
   },
 ]
 
-const publicFeedSourceIds = new Set(shippingFeedSources.filter(source => source.enabled).map(source => source.id))
+export function activeShippingFeedSourceIds(sources: ShippingFeedSource[] = shippingFeedSources): Set<string> {
+  return new Set(sources
+    .filter(source => source.enabled && (source.status === undefined || source.status === "enabled"))
+    .map(source => source.id))
+}
 
 export const feedProvenances = {
   mock: { sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice", sourceUrl: "https://example.com/mock/feed", verified: false },
@@ -384,7 +388,7 @@ export const MockFeedProvider: FeedProvider = {
 
 export function filterFeedLastKnownForMode(items: FeedItem[], mode: string): FeedItem[] {
   return mode === "public"
-    ? items.filter(item => publicFeedSourceIds.has(item.sourceId) && !isMockProvenance(item.provenance))
+    ? items.filter(item => activeShippingFeedSourceIds().has(item.sourceId) && !isMockProvenance(item.provenance))
     : items.filter(item => item.sourceId === "mock-port-notice")
 }
 

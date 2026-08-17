@@ -67,6 +67,13 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
   },
 ]
 
+export function activeOfficialWeatherAlertSourceIds(options: { allowPending?: boolean, sources?: WeatherAlertSource[] } = {}): Set<string> {
+  const sources = options.sources ?? officialWeatherAlertSources
+  return new Set(sources.filter(source => options.allowPending
+    ? source.liveStatus === "verified_live" || source.liveStatus === "experimental" || source.liveStatus === "live_pending"
+    : source.enabled && source.liveStatus === "verified_live").map(source => source.id))
+}
+
 export function weatherAlertProvenance(source: WeatherAlertSource): DataProvenance {
   return { sourceType: "official", dataNature: "reported", sourceId: source.id, sourceUrl: source.sourceUrl, verified: true }
 }
@@ -363,9 +370,7 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
   const fetcher = options.fetcher ?? defaultFetcher()
   const now = options.now ?? (() => new Date())
   const sources = options.sources ?? officialWeatherAlertSources
-  const enabledSources = sources.filter(source => options.allowPending
-    ? source.liveStatus === "verified_live" || source.liveStatus === "experimental" || source.liveStatus === "live_pending"
-    : source.enabled && source.liveStatus === "verified_live")
+  const enabledSources = sources.filter(source => activeOfficialWeatherAlertSourceIds({ allowPending: options.allowPending, sources }).has(source.id))
   return {
     async getFeedItems(lastKnown = [], ports = mockPorts) {
       const fetchedAt = now().toISOString()

@@ -1,4 +1,4 @@
-import { deriveProvenance, provenanceEvidence } from "./shipping"
+import { deriveProvenance, provenanceEvidence, sourceScopedEventDedupeKey } from "./shipping"
 import type { FeedItem, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, Vessel, Voyage } from "./shipping"
 import { type CalendarEvent, calendarCountries, calendarLeadDays, calendarSeverity, daysUntilCalendarEvent } from "./calendar"
 import { calculateDelayMinutes, congestionLevelRank, reconcileEvent, statusDurationMinutes } from "./shipping-rules"
@@ -24,12 +24,24 @@ function eventTrust(source: Freshness & ProvenanceAware) {
   }
 }
 
+export function vesselAnchoredEventKey(vessel: Pick<Vessel, "id" | "provenance">): string {
+  return sourceScopedEventDedupeKey(`vessel_anchored:${vessel.id}`, vessel.provenance?.sourceId)
+}
+
+export function portCongestionEventKey(port: Pick<Port, "id" | "provenance">): string {
+  return sourceScopedEventDedupeKey(`port_congestion:${port.id}`, port.provenance?.sourceId)
+}
+
+export function voyageDelayEventKey(voyage: Pick<Voyage, "id" | "provenance">): string {
+  return sourceScopedEventDedupeKey(`voyage_delay:${voyage.id}`, voyage.provenance?.sourceId)
+}
+
 export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: Voyage[], feedItems: FeedItem[], settings: ShippingSettings, previous: ShippingEvent[] = [], now = new Date().toISOString(), calendarEvents: CalendarEvent[] = []): ShippingEvent[] {
   const candidates: Omit<ShippingEvent, "id" | "firstDetectedAt" | "lastDetectedAt" | "resolvedAt">[] = []
   const sourceTrust = new Map<string, Freshness>()
-  vessels.forEach(vessel => sourceTrust.set(`vessel_anchored:${vessel.id}`, vessel))
-  ports.forEach(port => sourceTrust.set(`port_congestion:${port.id}`, port))
-  voyages.forEach(voyage => sourceTrust.set(`voyage_delay:${voyage.id}`, voyage))
+  vessels.forEach(vessel => sourceTrust.set(vesselAnchoredEventKey(vessel), vessel))
+  ports.forEach(port => sourceTrust.set(portCongestionEventKey(port), port))
+  voyages.forEach(voyage => sourceTrust.set(voyageDelayEventKey(voyage), voyage))
   feedItems.forEach(feed => sourceTrust.set(`feed:${feed.id}`, feed))
   const today = now.slice(0, 10)
   for (const event of calendarEvents) {
@@ -43,13 +55,13 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
   for (const vessel of vessels.filter(isFreshEventEvidence)) {
     const durationMinutes = statusDurationMinutes(vessel, new Date(now))
     if (vessel.navigationStatus === "anchored" && durationMinutes >= settings.eventThresholds.anchoredHours * 60) {
-      candidates.push({ ...eventTrust(vessel), type: "vessel_anchored", severity: durationMinutes >= settings.eventThresholds.anchoredHours * 120 ? "critical" : "warning", status: "active", title: `${vessel.name} 锚泊时间过长`, summary: `当前锚泊已持续 ${Math.round(durationMinutes / 60)} 小时。`, occurredAt: vessel.statusChangedAt ?? now, detectedAt: now, dedupeKey: `vessel_anchored:${vessel.id}`, vesselId: vessel.id, evidenceJson: { durationMinutes, thresholdMinutes: settings.eventThresholds.anchoredHours * 60 } })
+      candidates.push({ ...eventTrust(vessel), type: "vessel_anchored", severity: durationMinutes >= settings.eventThresholds.anchoredHours * 120 ? "critical" : "warning", status: "active", title: `${vessel.name} 锚泊时间过长`, summary: `当前锚泊已持续 ${Math.round(durationMinutes / 60)} 小时。`, occurredAt: vessel.statusChangedAt ?? now, detectedAt: now, dedupeKey: vesselAnchoredEventKey(vessel), vesselId: vessel.id, evidenceJson: { durationMinutes, thresholdMinutes: settings.eventThresholds.anchoredHours * 60 } })
     }
   }
   for (const voyage of voyages.filter(isFreshEventEvidence)) {
     const delayMinutes = calculateDelayMinutes(voyage.baselineEta, voyage.latestEta)
     if (delayMinutes !== undefined && delayMinutes >= settings.eventThresholds.delayMinutes) {
-      candidates.push({ ...eventTrust(voyage), type: "voyage_delay", severity: delayMinutes >= settings.eventThresholds.delayMinutes * 2 ? "critical" : "warning", status: "active", title: `${voyage.voyageNumber} ETA 延误 ${delayMinutes} 分钟`, summary: "最新 ETA 晚于跟踪基准，延误已超过关注阈值。", occurredAt: voyage.latestEtaObservedAt ?? now, detectedAt: now, dedupeKey: `voyage_delay:${voyage.id}`, voyageId: voyage.id, evidenceJson: { delayMinutes, thresholdMinutes: settings.eventThresholds.delayMinutes } })
+      candidates.push({ ...eventTrust(voyage), type: "voyage_delay", severity: delayMinutes >= settings.eventThresholds.delayMinutes * 2 ? "critical" : "warning", status: "active", title: `${voyage.voyageNumber} ETA 延误 ${delayMinutes} 分钟`, summary: "最新 ETA 晚于跟踪基准，延误已超过关注阈值。", occurredAt: voyage.latestEtaObservedAt ?? now, detectedAt: now, dedupeKey: voyageDelayEventKey(voyage), voyageId: voyage.id, evidenceJson: { delayMinutes, thresholdMinutes: settings.eventThresholds.delayMinutes } })
     }
   }
   for (const port of ports.filter(isFreshEventEvidence)) {
@@ -58,7 +70,7 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
         port.waitingVessels === undefined ? "等待船舶暂无数据" : `等待 ${port.waitingVessels} 艘船`,
         port.waitingHours === undefined ? "等待时长暂无数据" : `预计等待 ${port.waitingHours} 小时`,
       ].join("，")
-      candidates.push({ ...eventTrust(port), type: "port_congestion", severity: port.congestionLevel === "critical" ? "critical" : "warning", status: "active", title: `${port.nameEn} 拥堵升级`, summary: detail, occurredAt: port.updatedAt ?? now, detectedAt: now, dedupeKey: `port_congestion:${port.id}`, portId: port.id, evidenceJson: { congestionLevel: port.congestionLevel, waitingHours: port.waitingHours } })
+      candidates.push({ ...eventTrust(port), type: "port_congestion", severity: port.congestionLevel === "critical" ? "critical" : "warning", status: "active", title: `${port.nameEn} 拥堵升级`, summary: detail, occurredAt: port.updatedAt ?? now, detectedAt: now, dedupeKey: portCongestionEventKey(port), portId: port.id, evidenceJson: { congestionLevel: port.congestionLevel, waitingHours: port.waitingHours } })
     }
   }
   for (const feed of feedItems.filter(item => isFreshEventEvidence(item) && item.eventEligibility !== false && item.publicationTimeKnown !== false && (item.severity === "warning" || item.severity === "critical"))) {

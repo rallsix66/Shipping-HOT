@@ -1,9 +1,9 @@
 import { env } from "node:process"
-import type { DataProvenance, FeedItem, Freshness, Port, PortCongestionDetail, ProviderResult, Severity, SourceStatus, Vessel, VesselWatchTarget, Voyage, WeatherWindow, WeatherWindows } from "@shared/shipping"
+import type { DataProvenance, FeedItem, Freshness, OperationalSourceContext, Port, PortCongestionDetail, ProviderResult, Severity, ShippingProviderModes, SourceStatus, Vessel, VesselWatchTarget, Voyage, WeatherWindow, WeatherWindows } from "@shared/shipping"
 import { mockFeedItems, mockPorts, mockVessels, mockVoyages, portWeatherConfig } from "@shared/shipping-fixtures"
 import { type CalendarProvider, configureCalendarProviders } from "./calendar"
-import { configureFeedProviders } from "./feed"
-import { type WeatherAlertProvider, createOfficialWeatherAlertProvider, officialWeatherAlertSourceIds } from "./weather-alerts"
+import { activeShippingFeedSourceIds, configureFeedProviders } from "./feed"
+import { type WeatherAlertProvider, activeOfficialWeatherAlertSourceIds, createOfficialWeatherAlertProvider, officialWeatherAlertSourceIds } from "./weather-alerts"
 
 export interface VesselProvider {
   getVessels: (targets?: VesselWatchTarget[], lastKnown?: Vessel[]) => Promise<Vessel[]>
@@ -896,6 +896,32 @@ const configuredCalendar = configureCalendarProviders()
 export const providers = { ...configured.providers, calendar: configuredCalendar.provider as CalendarProvider } as typeof configured.providers & { calendar: CalendarProvider }
 export const providerModes = { ...configured.modes, calendar: configuredCalendar.modes.calendar, calendarSources: configuredCalendar.modes.calendarSources }
 export const calendarProviderModes = configuredCalendar.modes
+
+export function createOperationalSourceContext(modes: ShippingProviderModes & { calendarSources?: string[] }): OperationalSourceContext {
+  const activeSourceIds = new Set<string>()
+  if (modes.vessel === "mock") activeSourceIds.add("mock-vessel")
+  if (modes.vessel === "aisstream") activeSourceIds.add("aisstream")
+  if (modes.port === "mock") activeSourceIds.add("mock-port")
+  if (modes.port === "portcast") activeSourceIds.add("portcast-public")
+  if (modes.schedule === "mock") activeSourceIds.add("mock-schedule")
+  if (modes.weather === "mock") activeSourceIds.add("mock-weather")
+  if (modes.weather === "open-meteo") activeSourceIds.add("open-meteo-marine")
+  if (modes.weatherAlerts === "public" || modes.weatherAlerts === "experimental") {
+    for (const sourceId of activeOfficialWeatherAlertSourceIds({ allowPending: modes.weatherAlerts === "experimental" })) activeSourceIds.add(sourceId)
+  }
+  if (modes.feed === "mock") activeSourceIds.add("mock-port-notice")
+  if (modes.feed === "public") {
+    for (const sourceId of activeShippingFeedSourceIds()) activeSourceIds.add(sourceId)
+  }
+  if (modes.calendar === "mock") {
+    activeSourceIds.add("mock-calendar")
+  } else {
+    for (const sourceId of modes.calendarSources ?? []) activeSourceIds.add(sourceId)
+  }
+  return { modes, activeSourceIds }
+}
+
+export const operationalSourceContext = createOperationalSourceContext(providerModes)
 
 export const realProviders = {
   vessel: "AISStream",

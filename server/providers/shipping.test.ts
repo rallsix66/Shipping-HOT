@@ -3,7 +3,9 @@ import { createMockSnapshot, mockFeedItems, mockPorts, mockVessels } from "@shar
 import type { FeedItem, Vessel } from "@shared/shipping"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeWeatherFeedItems } from "../shipping-store"
-import { DisabledWeatherAlertProvider, MockWeatherProvider, configureProviders, createAisStreamVesselProvider, createOpenMeteoWeatherProvider, createPortcastPublicPageProvider, disabledProviderData, fetchWeatherProviderResults, normalizeProviderTimestamp, parsePortcastPublicPage, portcastFingerprint, portcastPublicPageUrls, providerProvenances, providerResult, toProviderResult } from "./shipping"
+import { DisabledWeatherAlertProvider, MockWeatherProvider, configureProviders, createAisStreamVesselProvider, createOpenMeteoWeatherProvider, createOperationalSourceContext, createPortcastPublicPageProvider, disabledProviderData, fetchWeatherProviderResults, normalizeProviderTimestamp, parsePortcastPublicPage, portcastFingerprint, portcastPublicPageUrls, providerProvenances, providerResult, toProviderResult } from "./shipping"
+import { activeShippingFeedSourceIds } from "./feed"
+import { activeOfficialWeatherAlertSourceIds } from "./weather-alerts"
 
 describe("shipping Provider failure boundaries", () => {
   it("includes all eight V1 focus ports in the seed", () => {
@@ -155,6 +157,21 @@ describe("shipping Provider failure boundaries", () => {
     const experimental = configureProviders({ SHIPPING_WEATHER_ALERT_PROVIDER: "experimental" })
     expect(experimental.modes).toMatchObject({ weather: "mock", weatherAlerts: "experimental" })
     expect(experimental.providers.weatherAlerts).not.toBe(DisabledWeatherAlertProvider)
+  })
+
+  it("builds operational source activation from registry state instead of Provider mode alone", () => {
+    const publicModes = { ...configureProviders({ SHIPPING_WEATHER_ALERT_PROVIDER: "public", SHIPPING_FEED_PROVIDER: "public" }).modes, calendar: "mock" as const, calendarSources: [] as string[] }
+    const publicContext = createOperationalSourceContext(publicModes)
+    expect(activeOfficialWeatherAlertSourceIds()).toEqual(new Set())
+    expect(publicContext.activeSourceIds.has("jma")).toBe(false)
+    expect([...publicContext.activeSourceIds]).toEqual(expect.arrayContaining(["the-loadstar", "maritime-executive", "shekou-official"]))
+    expect(publicContext.activeSourceIds.has("laem-chabang-official")).toBe(false)
+
+    const experimentalModes = { ...configureProviders({ SHIPPING_WEATHER_ALERT_PROVIDER: "experimental" }).modes, calendar: "mock" as const, calendarSources: [] as string[] }
+    const experimentalContext = createOperationalSourceContext(experimentalModes)
+    expect(activeOfficialWeatherAlertSourceIds({ allowPending: true })).toEqual(new Set(["jma", "tmd", "bmkg"]))
+    expect([...experimentalContext.activeSourceIds]).toEqual(expect.arrayContaining(["jma", "tmd", "bmkg"]))
+    expect(activeShippingFeedSourceIds()).toEqual(new Set(["the-loadstar", "maritime-executive", "shekou-official"]))
   })
 
   it("isolates model-weather and official-alert failures", async () => {

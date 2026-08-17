@@ -677,7 +677,7 @@ Local Scheduler 是单进程、本地、可暂停的同步编排器，不是云�
 
 ### 18.2 Provider 特定回退
 
-- AISStream：连接失败、超时、无 MMSI 或无 PositionReport 时保留旧 Vessel；不把“无消息”解释为停船。
+- AISStream：Watch Target 只携带身份/关注配置；连接失败、超时或无 PositionReport 时只保留同源 AIS last-known，首次未成功或无 MMSI 时返回 identity-only/unknown；不把“无消息”解释为停船，也不继承 Mock 动态字段。
 - Portcast：页面不存在、结构变化、无公开数据、robots/ToS 不允许或解析失败时停止该源，保留最后合法结果并标 stale/failed；不抓隐藏接口。
 - Open-Meteo：单港失败只影响该港天气 Feed；旧 forecast 显示 source updatedAt 和 stale；没有预警时不等于天气安全。
 - Calendarific：年度缓存仍可读；官方 ManualOverride 可以覆盖业务展示；冲突保留证据和 conflict flag。
@@ -740,7 +740,7 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 增加/明确：
 
 - `lastObservedAt` 与 `updatedAt` 的语义。
-- AIS session/observation 的短期 evidence 引用，而不是完整轨迹。
+- `VesselWatchTarget` 与 AIS observation 分离；`statusChangedAt` 表示系统连续观测到当前导航状态的起点，不保证是船舶真实切换时间；不保存完整 AIS 轨迹。
 - `positionSource`、`etaSource` 的来源区分。
 
 ### 20.4 Voyage
@@ -764,6 +764,9 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 - `fingerprint`
 - `leadDays`（日历提醒）
 - `conflictFlag`
+
+- Entity Event 的 `dedupeKey` 对 Vessel/Port/Voyage 使用 `logical key + provenance.sourceId`，让同一条件的 Mock/AIS 历史并存。
+- 当前 Event/HOT 只消费由 Provider mode 与 active Source registry 共同允许的 operational input；来源切换会隐藏不兼容历史，不把切换当作 resolved 证据。
 
 不要立即增加 provider_runs、event_history、full_snapshots 等表；先用现有 JSON evidence 满足 V2 的可解释性，再用真实查询需求驱动 schema。
 
@@ -842,7 +845,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Dependencies：V2.0 trust model；Calendarific Key 管理确认；五国官方来源清单。
 - Status：implemented / locally verified; live pending。
 - Implemented：`CalendarProvider`/Calendarific server-only adapter、五国官方来源注册表、OfficialHolidayProvider/ManualHolidayProvider/Mock contracts、`calendar_events` 最小表、`settings.calendarSync` source-scoped coverage persistence、source merge priority/conflict evidence、government-special announced lifecycle、Calendar → Event → HOT lead windows、`/calendar` page、calendar GET/sync POST routes and conditional attribution；显式 Calendarific 缺少 Key 时保持 calendarific 模式并返回 unknown/暂无数据，不回退 Mock。
-- Verification：历史阶段 checkpoint 为 136 tests；此前 closeout 为 146/146，2026-08-17 AIS/Event final batch 为 154/154；current `pnpm typecheck` and build passed；在当前依赖/工具链环境下重新执行历史 commit `fdf3191`，也复现 TS6142/TS6307（旧 status 的历史记录仍是当时的 passed，不改写为当前重跑结论）；targeted lint passed；default-Mock route smoke and requested-real/no-credential matrix passed；official live sync remains pending；Neat Freak Bash inventory script remains unavailable on Windows and its manual equivalent is complete。
+- Verification：历史阶段 checkpoint 为 136 tests；此前 closeout 为 146/146，2026-08-17 AIS/Event final batch 为 161/161；current `pnpm typecheck` and build passed；在当前依赖/工具链环境下重新执行历史 commit `fdf3191`，也复现 TS6142/TS6307（旧 status 的历史记录仍是当时的 passed，不改写为当前重跑结论）；targeted lint passed；no-network provider-mode smoke and Python stdlib SQLite migration smoke passed；official live sync remains pending；Neat Freak Bash inventory script remains unavailable on Windows and its manual equivalent is complete。
 - Acceptance：不打开页面即请求 API；本地可离线读取实际已缓存的年度数据；`coverageStatus` 可区分 complete/partial/unknown；国家日历页面展示符合条款的 Calendarific Attribution；官方事实层优先级最高；ManualOverride 修改事实字段时保留原记录并标记 conflict；普通、高影响、连续假期和政府临时假日提醒不重复；日历不把 observance 默认当作放假。
 - Main risks：官方临时变更、地区差异、农历/宗教日期、第三方滞后。
 - Rollback：停用自动同步但保留本地 CalendarEvent；关闭提醒规则不删除已核验记录。
@@ -855,7 +858,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Dependencies：V2.0 trust model；逐 Source 的 RSS/HTML/robots/版权核对。
 - Status：implemented / locally verified; live pending。
 - Implemented：`FeedProvider`/`createPublicFeedProvider`/`MockFeedProvider`、The Loadstar 与 The Maritime Executive RSS、Shekou official HTML、registered/parser-pending and deferred registry entries、unknown publication semantics、Chinese classification、normalized FeedItem fields、per-source stale fallback、canonical/title dedupe、Feed → Event → HOT reason/evidence and `/feed` UI status chips；Repository 使用真实 `fetchedAt` 写入 `fetched_at`，未知 `publishedAt` 按 `fetched_at` retention/prune。
-- Verification：历史阶段 checkpoint 为 136 tests；此前 closeout 为 146/146，2026-08-17 AIS/Event final batch 为 154/154；build、typecheck and targeted lint passed；在当前依赖/工具链环境下重新执行历史 commit `fdf3191` 也复现 TS6142/TS6307；default-Mock and requested-real/no-credential route smoke passed；real public-source runtime remains pending because public mode is opt-in。
+- Verification：历史阶段 checkpoint 为 136 tests；此前 closeout 为 146/146，2026-08-17 AIS/Event final batch 为 161/161；build、typecheck and targeted lint passed；在当前依赖/工具链环境下重新执行历史 commit `fdf3191` 也复现 TS6142/TS6307；no-network provider-mode smoke passed；real public-source runtime remains pending because public mode is opt-in。
 - Acceptance：首批 Source 少于无限扩张；每个 Source 独立失败；普通新闻只进 Feed；有效公告/预警可进入 HOT；重复转载可去重；旧缓存明确 stale。
 - Main risks：来源质量、版权、抓取频率、来源结构变化。
 - Rollback：禁用单个 Source/分类，保留 NewsNow 原有 Source 和 cache。
@@ -868,7 +871,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Dependencies：V2.0 trust model；现有 Open-Meteo adapter；官方来源合规核对。
 - Status：implemented / locally verified; live pending。
 - Implemented：扩展 `createOpenMeteoWeatherProvider` 的 current/hourly wave/swell/wind 请求、24/72/168 小时风险窗口和方向字段、30 分钟 TTL、逐港 failure/同源 last-known stale；没有同源历史时首次失败返回暂无模型天气；新增 `WeatherDetail.windows`、model/official risk labels、JMA 海上警报 HTML、TMD CAP、BMKG 官方 RSS source-specific adapters 和 warning expiry/parse-failure 保留逻辑。三个官方来源均标记 `live_pending`；`public` 不会启用它们，`experimental` 才显式允许 pending adapter。
-- Verification：历史阶段 checkpoint 为 136 tests；此前 closeout 为 146/146，2026-08-17 AIS/Event final batch 为 154/154；build、typecheck and targeted lint passed；在当前依赖/工具链环境下重新执行历史 commit `fdf3191` 也复现 TS6142/TS6307；default-Mock and Open-Meteo requested/no-credential route smoke passed；public Open-Meteo/official warning runtime remains pending because the switches are opt-in。
+- Verification：历史阶段 checkpoint 为 136 tests；此前 closeout 为 146/146，2026-08-17 AIS/Event final batch 为 161/161；build、typecheck and targeted lint passed；在当前依赖/工具链环境下重新执行历史 commit `fdf3191` 也复现 TS6142/TS6307；no-network forced Open-Meteo failure smoke passed；public Open-Meteo/official warning runtime remains pending because the switches are opt-in。
 - Acceptance：字段来源和预报时间窗清楚；海况请求按 TTL 缓存；模型风险不能伪装官方预警；官方预警过期可关闭；单港失败不影响其他港口。
 - Main risks：沿岸精度、预警格式、重复公告、不同国家定义不一致。
 - Rollback：只保留现有 Open-Meteo 风/阵风/波高，关闭官方预警 Provider。
@@ -895,7 +898,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 | P1 | NewsNow Source 与 Shipping Feed freshness 不一致 | 资讯新鲜度误判 | Shipping adapter 增加 source status，不修改旧 Source 语义 |
 | P1 | 真实船期来源不稳定 | 伪造 ETA/延误 | V2 不承诺真实 Planned Schedule；严格分开 AIS ETA |
 | P2 | Nitro/本地 scheduler 重复启动 | 高频请求、重复事件 | 单例 loop、single-flight、持久化 last run/TTL |
-| P2 | SQLite native module 环境差异 | 本地持久化不一致 | 继续兼容内存 fallback；实施阶段用 Node 22 运行验证 |
+| P2 | SQLite native module 环境差异 | 本地持久化不一致 | nullable `status_changed_at` migration SQL 已离线验证；继续兼容内存 fallback，native runtime 待兼容 Node/toolchain |
 | P2 | Provider 增多导致维护成本 | 复杂度和误报上升 | 每个 Provider 必须通过 source matrix、验收和开关；后置低价值来源 |
 
 ## 24. Open Questions
@@ -929,7 +932,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - 明确资讯不新增独立海运新闻页，继续复用 NewsNow Source/Feed。
 - 明确 Calendarific + OfficialHolidayProvider/ManualOverride 的优先级、冲突、验证和缓存策略。
 - 明确 Planned Schedule 与 AIS-reported ETA 分离，并允许真实船期延期。
-- 明确 V2.2 最小新增 `calendar_events` 表；日历覆盖写入现有 settings 的 `calendarSync` 区域；不引入 ORM migration。
+- 明确 V2.2 最小新增 `calendar_events` 表；日历覆盖写入现有 settings 的 `calendarSync` 区域；不引入 ORM migration。最终 Mock isolation seal 仅对既有 `vessels` 表执行 nullable `status_changed_at` 兼容重建，不新增业务表。
 
 ### 25.2 未来实现验收
 

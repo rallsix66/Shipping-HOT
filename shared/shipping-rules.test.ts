@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { filterEventsForProviderModes } from "./shipping"
+import { filterEventsForOperationalContext, filterEventsForProviderModes, sourceAllowedForOperationalContext } from "./shipping"
 import { calculateDelayMinutes, freshnessState, mergeProviderVessel, mergeProviderVoyage, rankHotItems, reconcileEvent, statusDurationMinutes, updateVesselStatus, validateShippingSettings } from "./shipping-rules"
 import { createMockSnapshot, mockEvents, mockVessels } from "./shipping-fixtures"
 
@@ -12,6 +12,11 @@ const realProviderModes = {
   feed: "public",
   calendar: "calendarific",
 } as const
+
+const realOperationalContext = {
+  modes: realProviderModes,
+  activeSourceIds: new Set(["aisstream", "portcast-public", "mock-schedule", "open-meteo-marine", "the-loadstar", "maritime-executive", "shekou-official", "calendarific"]),
+}
 
 describe("shipping HOT deterministic rules", () => {
   it("calculates ETA delay and keeps unknown values unknown", () => {
@@ -211,9 +216,9 @@ describe("shipping HOT deterministic rules", () => {
 
   it("excludes incompatible historical Mock Events and Feed HOT items from real Provider mode", () => {
     const snapshot = createMockSnapshot()
-    const hot = rankHotItems(snapshot.events, snapshot.ports, snapshot.vessels, snapshot.voyages, snapshot.feedItems, new Date("2026-08-13T10:00:00.000Z"), realProviderModes)
+    const hot = rankHotItems(snapshot.events, snapshot.ports, snapshot.vessels, snapshot.voyages, snapshot.feedItems, new Date("2026-08-13T10:00:00.000Z"), realOperationalContext)
     expect(filterEventsForProviderModes(snapshot.events, realProviderModes).map(event => event.provenance?.sourceId)).toEqual(["mock-schedule"])
-    expect(hot.map(item => item.eventId)).toEqual(["event-voyage-eg-delay"])
+    expect(hot.map(item => item.eventId)).toEqual(["event-voyage_delay:voyage-eg-061:mock-schedule"])
   })
 
   it("filters switched Mock vessel, port, weather, feed and calendar sources by their mode", () => {
@@ -233,5 +238,24 @@ describe("shipping HOT deterministic rules", () => {
     const scheduleEvent = { ...snapshot.events[1], provenance: { sourceType: "mock" as const, dataNature: "derived" as const, sourceId: "mock-schedule" } }
     expect(filterEventsForProviderModes([snapshot.events[0], scheduleEvent], realProviderModes)).toEqual([scheduleEvent])
     expect(filterEventsForProviderModes([{ ...snapshot.events[0], provenance: { sourceType: "mock" as const, dataNature: "derived" as const, sourceId: "mock-vessel" } }], realProviderModes)).toEqual([])
+  })
+
+  it("requires active registry membership in addition to Provider mode", () => {
+    const publicWithoutJma = { modes: { ...realProviderModes, weatherAlerts: "public" }, activeSourceIds: new Set<string>() }
+    const publicVerifiedJma = { modes: { ...realProviderModes, weatherAlerts: "public" }, activeSourceIds: new Set(["jma"]) }
+    const experimentalPendingJma = { modes: { ...realProviderModes, weatherAlerts: "experimental" }, activeSourceIds: new Set(["jma"]) }
+    expect(sourceAllowedForOperationalContext("jma", publicWithoutJma)).toBe(false)
+    expect(sourceAllowedForOperationalContext("jma", publicVerifiedJma)).toBe(true)
+    expect(sourceAllowedForOperationalContext("jma", experimentalPendingJma)).toBe(true)
+    expect(sourceAllowedForOperationalContext("laem-chabang-official", { modes: { ...realProviderModes, feed: "public" }, activeSourceIds: new Set(["laem-chabang-official"]) })).toBe(true)
+    expect(sourceAllowedForOperationalContext("laem-chabang-official", { modes: { ...realProviderModes, feed: "public" }, activeSourceIds: new Set() })).toBe(false)
+  })
+
+  it("keeps legacy unscoped entity Events in history but out of operational input", () => {
+    const snapshot = createMockSnapshot()
+    const legacy = { ...snapshot.events[0], dedupeKey: "vessel_anchored:vessel-ever-glory", id: "event-vessel_anchored:vessel-ever-glory", provenance: { sourceType: "mock" as const, dataNature: "derived" as const, sourceId: "mock-vessel" } }
+    const mockContext = { modes: { ...realProviderModes, vessel: "mock" }, activeSourceIds: new Set(["mock-vessel", "mock-port", "mock-schedule", "mock-weather", "mock-port-notice", "mock-calendar"]) }
+    expect(filterEventsForOperationalContext([legacy], mockContext)).toEqual([])
+    expect(filterEventsForProviderModes([legacy], { ...realProviderModes, vessel: "mock" })).toEqual([])
   })
 })

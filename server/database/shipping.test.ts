@@ -10,6 +10,22 @@ class FakeStatement {
   constructor(private readonly database: FakeDatabase, private readonly sql: string) {}
 
   async run(...args: unknown[]) {
+    if (/INSERT INTO vessels_new/i.test(this.sql)) {
+      this.database.copyVesselsToMigrationTable()
+      return { success: true }
+    }
+    if (/DROP TABLE vessels\b/i.test(this.sql)) {
+      this.database.dropVesselsForMigration()
+      return { success: true }
+    }
+    if (/ALTER TABLE vessels_new RENAME TO vessels/i.test(this.sql)) {
+      this.database.renameMigratedVessels()
+      return { success: true }
+    }
+    if (/COMMIT/i.test(this.sql)) {
+      this.database.vesselStatusChangedAtNotNull = false
+      return { success: true }
+    }
     const insert = this.sql.match(/INSERT OR REPLACE INTO (\w+)/i)
     if (insert) this.database.insert(insert[1], args)
     const update = this.sql.match(/UPDATE (\w+) SET data = \?, is_watched = \? WHERE id = \?/i)
@@ -29,6 +45,7 @@ class FakeStatement {
   }
 
   async all() {
+    if (/PRAGMA table_info\(vessels\)/i.test(this.sql)) return this.database.vesselTableInfo()
     const table = this.sql.match(/SELECT data FROM (\w+)/i)?.[1]
     return table ? [...this.database.table(table).values()] : []
   }
@@ -36,6 +53,8 @@ class FakeStatement {
 
 class FakeDatabase {
   private tables = new Map<string, Map<string, StoredRow>>()
+  vesselStatusChangedAtNotNull = false
+  private migrationVessels = new Map<string, StoredRow>()
   lastArgs: unknown[] = []
 
   prepare(sql: string) {
@@ -49,6 +68,24 @@ class FakeDatabase {
       this.tables.set(name, table)
     }
     return table
+  }
+
+  vesselTableInfo() {
+    return this.vesselStatusChangedAtNotNull
+      ? [{ name: "id", notnull: 0 }, { name: "data", notnull: 1 }, { name: "is_watched", notnull: 1 }, { name: "navigation_status", notnull: 1 }, { name: "status_changed_at", notnull: 1 }, { name: "last_updated_at", notnull: 0 }]
+      : []
+  }
+
+  copyVesselsToMigrationTable() {
+    this.migrationVessels = new Map(this.table("vessels"))
+  }
+
+  dropVesselsForMigration() {
+    this.tables.delete("vessels")
+  }
+
+  renameMigratedVessels() {
+    this.tables.set("vessels", this.migrationVessels)
   }
 
   insert(tableName: string, args: unknown[]) {
@@ -131,6 +168,62 @@ describe("shippingRepository", () => {
     await repository.pruneExpired(1, new Date("2099-01-03T00:00:00.000Z"))
     expect(await repository.listEvents()).toHaveLength(snapshot.events.filter(event => event.status === "active").length)
     expect(await repository.listFeedItems()).toHaveLength(0)
+  })
+
+  it("roundtrips an identity-only AIS Vessel with a nullable statusChangedAt", async () => {
+    const snapshot = createMockSnapshot()
+    const database = new FakeDatabase()
+    const repository = new ShippingRepository(database as unknown as Database)
+    const identityOnly = {
+      ...snapshot.vessels[0],
+      navigationStatus: "unknown" as const,
+      statusChangedAt: undefined,
+      stale: true,
+      sourceStatus: "degraded" as const,
+      provenance: { sourceType: "third_party" as const, dataNature: "observed" as const, sourceId: "aisstream" },
+    }
+    await repository.upsertVessel(identityOnly)
+    expect(database.table("vessels").get(identityOnly.id)?.status_changed_at).toBeNull()
+    expect((await repository.listVessels())[0]).toMatchObject({ id: identityOnly.id, navigationStatus: "unknown", sourceStatus: "degraded" })
+    expect((await repository.listVessels())[0].statusChangedAt).toBeUndefined()
+    const normal = { ...identityOnly, navigationStatus: "anchored" as const, statusChangedAt: "2026-08-17T00:00:00.000Z", stale: false, sourceStatus: "healthy" as const }
+    await repository.upsertVessel(normal)
+    expect((await repository.listVessels())[0].statusChangedAt).toBe(normal.statusChangedAt)
+  })
+
+  it("rebuilds an old NOT NULL vessel schema without dropping rows or watch state", async () => {
+    const snapshot = createMockSnapshot()
+    const database = new FakeDatabase()
+    database.vesselStatusChangedAtNotNull = true
+    const vessel = { ...snapshot.vessels[0], isWatched: false }
+    database.table("vessels").set(vessel.id, { id: vessel.id, data: JSON.stringify(vessel), is_watched: 0, status_changed_at: vessel.statusChangedAt })
+    await initShippingTables(database as unknown as Database)
+    expect(database.vesselStatusChangedAtNotNull).toBe(false)
+    expect(database.table("vessels").get(vessel.id)).toMatchObject({ id: vessel.id, is_watched: 0, status_changed_at: vessel.statusChangedAt })
+    expect((await new ShippingRepository(database as unknown as Database).listVessels())[0].isWatched).toBe(vessel.isWatched)
+    await initShippingTables(database as unknown as Database)
+    expect(database.vesselStatusChangedAtNotNull).toBe(false)
+  })
+
+  it("keeps same-condition Mock and AIS Events as separate history rows", async () => {
+    const snapshot = createMockSnapshot()
+    const database = new FakeDatabase()
+    const repository = new ShippingRepository(database as unknown as Database)
+    const mockEvent = { ...snapshot.events[0] }
+    const aisEvent = {
+      ...mockEvent,
+      id: "event-vessel_anchored:vessel-ever-glory:aisstream",
+      dedupeKey: "vessel_anchored:vessel-ever-glory:aisstream",
+      provenance: { sourceType: "third_party" as const, dataNature: "derived" as const, sourceId: "aisstream" },
+      evidence: [{ provenance: { sourceType: "third_party" as const, dataNature: "observed" as const, sourceId: "aisstream" }, sourceUpdatedAt: "2026-08-17T00:00:00.000Z" }],
+    }
+    await repository.upsertEvent(mockEvent)
+    await repository.upsertEvent(aisEvent)
+    expect(await repository.listEvents()).toHaveLength(2)
+    await repository.upsertEvent({ ...aisEvent, lastDetectedAt: "2026-08-17T01:00:00.000Z" })
+    expect(await repository.listEvents()).toHaveLength(2)
+    expect((await repository.listEvents()).find(event => event.dedupeKey === mockEvent.dedupeKey)?.id).toBe(mockEvent.id)
+    expect((await repository.listEvents()).find(event => event.dedupeKey === aisEvent.dedupeKey)?.lastDetectedAt).toBe("2026-08-17T01:00:00.000Z")
   })
 
   it("persists fetchedAt separately and retains unknown-publication items by fetch time", async () => {

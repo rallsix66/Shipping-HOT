@@ -5,6 +5,11 @@ import type { CalendarEvent } from "@shared/calendar"
 
 type Row = Record<string, unknown>
 
+interface TableInfoRow {
+  name?: string
+  notnull?: number | boolean | string
+}
+
 interface LegacyTrustDefaults {
   vessel?: DataProvenance
   port?: DataProvenance
@@ -28,6 +33,32 @@ function parse<T>(value: unknown): T {
   return JSON.parse(String(value)) as T
 }
 
+async function migrateNullableVesselStatusChangedAt(db: Database) {
+  const columns = rows<TableInfoRow>(await db.prepare("PRAGMA table_info(vessels)").all())
+  const statusChangedAt = columns.find(column => column.name === "status_changed_at")
+  if (!statusChangedAt || Number(statusChangedAt.notnull) === 0) return
+
+  await db.prepare("BEGIN").run()
+  try {
+    await db.prepare(`CREATE TABLE vessels_new (
+      id TEXT PRIMARY KEY, data TEXT NOT NULL, is_watched INTEGER NOT NULL DEFAULT 0,
+      navigation_status TEXT NOT NULL, status_changed_at TEXT, last_updated_at TEXT
+    )`).run()
+    await db.prepare(`INSERT INTO vessels_new (id, data, is_watched, navigation_status, status_changed_at, last_updated_at)
+      SELECT id, data, is_watched, navigation_status, status_changed_at, last_updated_at FROM vessels`).run()
+    await db.prepare("DROP TABLE vessels").run()
+    await db.prepare("ALTER TABLE vessels_new RENAME TO vessels").run()
+    await db.prepare("COMMIT").run()
+  } catch (error) {
+    try {
+      await db.prepare("ROLLBACK").run()
+    } catch {
+      // Preserve the original migration error when the connector cannot roll back.
+    }
+    throw error
+  }
+}
+
 export async function initShippingTables(db: Database) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS feed_items (
     id TEXT PRIMARY KEY, source_id TEXT NOT NULL, category TEXT NOT NULL, type TEXT NOT NULL,
@@ -37,8 +68,9 @@ export async function initShippingTables(db: Database) {
   )`).run()
   await db.prepare(`CREATE TABLE IF NOT EXISTS vessels (
     id TEXT PRIMARY KEY, data TEXT NOT NULL, is_watched INTEGER NOT NULL DEFAULT 0,
-    navigation_status TEXT NOT NULL, status_changed_at TEXT NOT NULL, last_updated_at TEXT
+    navigation_status TEXT NOT NULL, status_changed_at TEXT, last_updated_at TEXT
   )`).run()
+  await migrateNullableVesselStatusChangedAt(db)
   await db.prepare(`CREATE TABLE IF NOT EXISTS ports (
     id TEXT PRIMARY KEY, data TEXT NOT NULL, is_watched INTEGER NOT NULL DEFAULT 0,
     congestion_level TEXT NOT NULL, last_updated_at TEXT
@@ -126,7 +158,7 @@ export class ShippingRepository {
 
   async upsertVessel(vessel: Vessel) {
     await this.db.prepare(`INSERT OR REPLACE INTO vessels (id, data, is_watched, navigation_status, status_changed_at, last_updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
-      .run(vessel.id, JSON.stringify(vessel), vessel.isWatched ? 1 : 0, vessel.navigationStatus, vessel.statusChangedAt, vessel.updatedAt ?? null)
+      .run(vessel.id, JSON.stringify(vessel), vessel.isWatched ? 1 : 0, vessel.navigationStatus, vessel.statusChangedAt ?? null, vessel.updatedAt ?? null)
   }
 
   async upsertPort(port: Port) {

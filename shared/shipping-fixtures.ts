@@ -1,4 +1,5 @@
 import type { DataProvenance, FeedItem, Port, ShippingEvent, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "./shipping"
+import { sourceScopedEventDedupeKey } from "./shipping"
 import { calculateDelayMinutes } from "./shipping-rules"
 
 const fixtureEpoch = Date.now()
@@ -25,6 +26,10 @@ function stampMockEventTrust(events: ShippingEvent[]) {
     else if (event.portId) sourceId = "mock-port"
     const sourceUpdatedAt = event.updatedAt ?? event.occurredAt
     const evidenceProvenance = mockProvenance(sourceId, mockEvidenceNature(sourceId))
+    if (["vessel_anchored", "port_congestion", "voyage_delay"].includes(event.type)) {
+      event.dedupeKey = sourceScopedEventDedupeKey(event.dedupeKey, sourceId)
+      event.id = `event-${event.dedupeKey}`
+    }
     event.provenance = mockProvenance(sourceId, "derived")
     event.evidence = [{ provenance: evidenceProvenance, sourceUpdatedAt }]
     event.updatedAt ??= sourceUpdatedAt

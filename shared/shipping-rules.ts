@@ -1,5 +1,5 @@
-import { deriveProvenance, eventIsCompatibleWithCurrentProviders, sourceAllowedForProviderModes } from "./shipping"
-import type { EventStatus, FeedItem, FreshnessState, HotItem, Port, Severity, ShippingEvent, ShippingProviderModes, ShippingSettings, SourceStatus, Vessel, Voyage } from "./shipping"
+import { deriveProvenance, eventIsCompatibleWithOperationalContext, sourceAllowedForOperationalContext } from "./shipping"
+import type { EventStatus, FeedItem, FreshnessState, HotItem, OperationalSourceContext, Port, Severity, ShippingEvent, ShippingSettings, SourceStatus, Vessel, Voyage } from "./shipping"
 
 const severityWeight: Record<Severity, number> = { info: 1, watch: 2, warning: 3, critical: 4 }
 
@@ -26,7 +26,6 @@ export function mergeProviderVessel(previous: Vessel | undefined, provider: Vess
     return {
       ...provider,
       isWatched: previous.isWatched,
-      statusChangedAt: provider.statusChangedAt ?? (previous.navigationStatus === provider.navigationStatus ? previous.statusChangedAt : provider.sourceUpdatedAt ?? now),
     }
   }
   if (!isSameSource) return { ...provider, isWatched: previous.isWatched }
@@ -127,9 +126,9 @@ function relatedFreshness(event: ShippingEvent, ports: Port[], vessels: Vessel[]
   return { stale: event.stale ?? true, sourceStatus: event.sourceStatus, provenance: event.provenance }
 }
 
-export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[] = [], _now = new Date(), modes?: ShippingProviderModes): HotItem[] {
-  const operationalEvents = modes ? events.filter(event => eventIsCompatibleWithCurrentProviders(event, modes)) : events
-  const operationalFeedItems = modes ? feedItems.filter(item => sourceAllowedForProviderModes(item.provenance?.sourceId ?? item.sourceId, modes)) : feedItems
+export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[] = [], _now = new Date(), context?: OperationalSourceContext): HotItem[] {
+  const operationalEvents = context ? events.filter(event => eventIsCompatibleWithOperationalContext(event, context)) : events
+  const operationalFeedItems = context ? feedItems.filter(item => sourceAllowedForOperationalContext(item.provenance?.sourceId ?? item.sourceId, context)) : feedItems
   const labels = new Map<string, string>()
   vessels.forEach(v => labels.set(v.id, v.name))
   ports.forEach(p => labels.set(p.id, p.name))

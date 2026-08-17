@@ -171,6 +171,11 @@ export interface ShippingProviderModes {
   calendar?: string
 }
 
+export interface OperationalSourceContext {
+  modes: ShippingProviderModes
+  activeSourceIds: ReadonlySet<string>
+}
+
 const realFeedSourceIds = new Set([
   "shipping-feed",
   "the-loadstar",
@@ -203,7 +208,36 @@ export function sourceAllowedForProviderModes(sourceId: string | undefined, mode
   return false
 }
 
-export function eventIsCompatibleWithCurrentProviders(event: Pick<ShippingEvent, "provenance" | "evidence">, modes: ShippingProviderModes): boolean {
+const sourceScopedEventTypes = new Set(["vessel_anchored", "port_congestion", "voyage_delay"])
+
+export function sourceScopedEventDedupeKey(logicalDedupeKey: string, sourceId?: string): string {
+  return `${logicalDedupeKey}:${sourceId ?? "unknown"}`
+}
+
+function sourceScopeForEvent(event: Pick<ShippingEvent, "provenance" | "evidence">): string | undefined {
+  return event.provenance?.sourceId ?? event.evidence?.[0]?.provenance.sourceId
+}
+
+function entityIdForSourceScopedEvent(event: Pick<ShippingEvent, "type" | "vesselId" | "portId" | "voyageId">): string | undefined {
+  if (event.type === "vessel_anchored") return event.vesselId
+  if (event.type === "port_congestion") return event.portId
+  if (event.type === "voyage_delay") return event.voyageId
+  return undefined
+}
+
+export function eventHasSourceScopedIdentity(event: Pick<ShippingEvent, "type" | "dedupeKey" | "provenance" | "evidence" | "vesselId" | "portId" | "voyageId">): boolean {
+  if (!sourceScopedEventTypes.has(event.type)) return true
+  const entityId = entityIdForSourceScopedEvent(event)
+  const sourceId = sourceScopeForEvent(event)
+  return Boolean(entityId && sourceId && event.dedupeKey === sourceScopedEventDedupeKey(`${event.type}:${entityId}`, sourceId))
+}
+
+export function sourceAllowedForOperationalContext(sourceId: string | undefined, context: OperationalSourceContext): boolean {
+  return Boolean(sourceId && context.activeSourceIds.has(sourceId) && sourceAllowedForProviderModes(sourceId, context.modes))
+}
+
+export function eventIsCompatibleWithCurrentProviders(event: Pick<ShippingEvent, "type" | "dedupeKey" | "provenance" | "evidence" | "vesselId" | "portId" | "voyageId">, modes: ShippingProviderModes): boolean {
+  if (!eventHasSourceScopedIdentity(event)) return false
   const sourceId = event.provenance?.sourceId
   if (sourceId) return sourceAllowedForProviderModes(sourceId, modes)
   return (event.evidence ?? []).some(evidence => sourceAllowedForProviderModes(evidence.provenance.sourceId, modes))
@@ -211,6 +245,16 @@ export function eventIsCompatibleWithCurrentProviders(event: Pick<ShippingEvent,
 
 export function filterEventsForProviderModes(events: ShippingEvent[], modes: ShippingProviderModes): ShippingEvent[] {
   return events.filter(event => eventIsCompatibleWithCurrentProviders(event, modes))
+}
+
+export function eventIsCompatibleWithOperationalContext(event: ShippingEvent, context: OperationalSourceContext): boolean {
+  if (!eventHasSourceScopedIdentity(event)) return false
+  const sourceId = event.provenance?.sourceId ?? event.evidence?.[0]?.provenance.sourceId
+  return sourceAllowedForOperationalContext(sourceId, context)
+}
+
+export function filterEventsForOperationalContext(events: ShippingEvent[], context: OperationalSourceContext): ShippingEvent[] {
+  return events.filter(event => eventIsCompatibleWithOperationalContext(event, context))
 }
 
 export interface Voyage extends Freshness, ProvenanceAware {

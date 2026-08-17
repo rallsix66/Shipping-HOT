@@ -1,4 +1,4 @@
-import { filterEventsForProviderModes, toVesselWatchTarget } from "@shared/shipping"
+import { filterEventsForOperationalContext, toVesselWatchTarget } from "@shared/shipping"
 import type { FeedItem, Port, ProviderResult, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries } from "@shared/calendar"
@@ -7,7 +7,7 @@ import { mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules
 import { createMockCalendarEvents, filterCalendarCoverageForMode, filterCalendarEventsForMode, mergeCalendarSources } from "#/providers/calendar"
 import { filterFeedLastKnownForMode } from "#/providers/feed"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
-import { disabledProviderData, fetchWeatherProviderResults, isOfficialWeatherAlertFeedItem, isWeatherFeedItem, providerError, providerModes, providerProvenances, providerResult, providers, sanitizeAisVessel, toProviderResult } from "#/providers/shipping"
+import { disabledProviderData, fetchWeatherProviderResults, isOfficialWeatherAlertFeedItem, isWeatherFeedItem, operationalSourceContext, providerError, providerModes, providerProvenances, providerResult, providers, sanitizeAisVessel, toProviderResult } from "#/providers/shipping"
 
 let repository: ShippingRepository | undefined
 const mockCalendarYear = new Date().getUTCFullYear()
@@ -98,7 +98,7 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
     ports: port.data,
     voyages: voyage.data,
     feedItems: mergeWeatherFeedItems(shippingFeed.data, [...weather.data, ...weatherAlerts.data]),
-    events: filterEventsForProviderModes(fallbackSnapshot.events, providerModes),
+    events: filterEventsForOperationalContext(fallbackSnapshot.events, operationalSourceContext),
     settings,
     calendarEvents,
     calendarCoverage,
@@ -110,7 +110,7 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
   if (!repository) {
     return {
       ...structuredClone(fallbackSnapshot),
-      events: filterEventsForProviderModes(fallbackSnapshot.events, providerModes),
+      events: filterEventsForOperationalContext(fallbackSnapshot.events, operationalSourceContext),
       calendarEvents: filterCalendarEventsForMode(fallbackSnapshot.calendarEvents ?? [], providerModes.calendar),
       calendarCoverage: filterCalendarCoverageForMode(fallbackSnapshot.calendarCoverage ?? fallbackSnapshot.settings.calendarSync ?? [], providerModes.calendar),
     }
@@ -134,7 +134,7 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
     ports,
     voyages,
     feedItems,
-    events: filterEventsForProviderModes(await repository.listEvents({ vessels, ports, voyages, feedItems }), providerModes),
+    events: filterEventsForOperationalContext(await repository.listEvents({ vessels, ports, voyages, feedItems }), operationalSourceContext),
     settings,
     calendarEvents,
     calendarCoverage,

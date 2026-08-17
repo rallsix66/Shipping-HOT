@@ -1,7 +1,7 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
 > Last verified: 2026-08-17
-> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation, implemented V2.1 Port Intelligence, and V2.2/V2.3/V2.4 implemented with local verification; live external-provider verification pending; V2.5 not started
+> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation and Mock Isolation boundary, implemented V2.1 Port Intelligence, and V2.2/V2.3/V2.4 implemented with local verification; live external-provider verification pending; V2.5 not started
 > Source of truth for: the current retained system structure and approved boundaries
 
 ## 1. Project Purpose
@@ -31,9 +31,9 @@ The repository retains NewsNow as its foundation and now exposes Shipping HOT as
 | Proposal | State | Reason not in current scope |
 |---|---|---|
 | Shipping HOT domain and HOT feed | implemented | Mock/fixture data, deterministic Event Engine and HOT query are active |
-| Vessel/Port/Voyage/Event storage | implemented / runtime persistence verified on Node 22 | SQLite tables, Repository seed/read/write/reconcile paths and explicit last-known fallback are present; watch/settings restart persistence passed on the compatible Node 22.23.2 runtime |
+| Vessel/Port/Voyage/Event storage | implemented / schema migration locally verified; native runtime pending | SQLite tables, Repository seed/read/write/reconcile paths and explicit last-known fallback are present; `vessels.status_changed_at` is nullable, with an idempotent old-schema rebuild that preserves rows and watch state; native better-sqlite3 cannot load in the current Node 24 environment |
 | Structured shipping Providers | implemented | Mock adapters remain active; AISStream Vessel and Open-Meteo Marine Weather adapters are optional V1 paths |
-| V2.0 Data Trust Foundation | sealed | `sourceType`/`dataNature` provenance, independent freshness timestamps/status, ProviderResult-compatible API data, Event evidence and explicit Mock/UI attribution; no schema migration |
+| V2.0 Data Trust Foundation | sealed | `sourceType`/`dataNature` provenance, independent freshness timestamps/status, ProviderResult-compatible API data, Event evidence and explicit Mock/UI attribution; final isolation seal adds only the nullable Vessel status compatibility rebuild, not a new domain table |
 | V2.1 Port Intelligence | implemented / verified | `PortcastPublicPageProvider`, public HTML parser, 24-hour cache/fingerprint and Port congestion detail; no schema migration or new dependency |
 | V2.2 Country Calendar | implemented / locally verified; live pending | TH/ID/MY/PH/VN contracts, Calendarific + Official + Manual composition, source-scoped reconciliation, minimal `calendar_events` table, settings-backed coverage and calendar reminder Events; no ORM migration |
 | V2.3 Shipping Information Feed | implemented / locally verified; live pending | RSS/HTML adapters, normalized FeedItem metadata with unknown publication semantics, per-source stale fallback, Chinese classification, canonical/title dedupe and Feed → Event → HOT reasons; no new table or NewsNow cache rewrite |
@@ -43,7 +43,7 @@ The repository retains NewsNow as its foundation and now exposes Shipping HOT as
 
 The current retained architecture is a single repository modular monolith: React and TanStack Router render the browser UI; React Query and Jotai manage query/local state; Nitro exposes server handlers; `server/sources/**` fetches and normalizes news; db0 provides the local database abstraction; and the cache stores normalized `NewsItem[]` payloads.
 
-This is the smallest existing foundation compatible with the local Shipping HOT product. No framework or ORM migration is approved.
+This is the smallest existing foundation compatible with the local Shipping HOT product. No framework or ORM migration is approved; the only persistence change in the final isolation seal is an idempotent SQLite table rebuild for the existing `vessels` table.
 
 ## 4. System Context
 
@@ -114,7 +114,7 @@ Information Feed and Operational Data remain separate and meet at the Event/HOT 
 
 ### V2.0 Data Trust flow
 
-Provider data is normalized with `sourceType`, `dataNature`, `sourceId`, optional `sourceUrl`/`verified`, and independent `updatedAt`, `sourceUpdatedAt`, `fetchedAt`, `stale` and `sourceStatus` fields. Provider failures preserve last-known `updatedAt`, add the current fetch time, and expose `failed`/`degraded`/other status without presenting the data as fresh. Domain events derive their own provenance while retaining lower-level evidence; stale or failed source data cannot create new facts or resolve an active event, and recovery is required before resolution. Repository JSON, API responses, HOT items and UI cards carry the same trust information. No database field/table migration is used.
+Provider data is normalized with `sourceType`, `dataNature`, `sourceId`, optional `sourceUrl`/`verified`, and independent `updatedAt`, `sourceUpdatedAt`, `fetchedAt`, `stale` and `sourceStatus` fields. Provider failures preserve last-known `updatedAt`, add the current fetch time, and expose `failed`/`degraded`/other status without presenting the data as fresh. Domain events derive their own provenance while retaining lower-level evidence; stale or failed source data cannot create new facts or resolve an active event, and recovery is required before resolution. Repository JSON, API responses, HOT items and UI cards carry the same trust information. The final seal keeps `status_changed_at` nullable so identity-only AIS observations can persist; startup rebuilds only the existing table when an older NOT NULL schema is found.
 
 The V2.1 Portcast adapter is opt-in through `SHIPPING_PORT_PROVIDER=portcast`; its default remains Mock. It requests only mapped public port pages once per 24-hour interval, parses visible congestion category, median wait, previous wait, week-over-week change, long-tail flag and page date, and stores no raw HTML. 404/no-public pages become an explicit degraded `no_public_data` state; parse/network failures retain last-known values and expose failed/stale status. Public-page attribution is carried in Port provenance and the port detail UI.
 
@@ -124,9 +124,11 @@ The V2.3 Shipping Information Feed path is opt-in through `SHIPPING_FEED_PROVIDE
 
 The V2.4 Weather Intelligence path extends the existing Open-Meteo adapter without changing the Weather Feed boundary. `SHIPPING_WEATHER_PROVIDER=open-meteo` requests current plus hourly wave height/direction, swell height/direction, swell period, wind and gusts for one 7-day model response; local 24-hour, 72-hour and 7-day windows are calculated without repeating API calls, with a 30-minute in-process TTL. Each port is fetched independently, with its own last-known model FeedItem marked stale/failed when unavailable. Model items use `sourceType=third_party`, `dataNature=forecast`, `weather.riskSource=model` and the UI can switch windows. `SHIPPING_WEATHER_ALERT_PROVIDER=public` additionally enables independent source-specific JMA, TMD and BMKG official-warning contracts; warning items retain issued/expiry metadata, expose active/expired/unknown state, and downgrade to info at expiry without rewriting the official `updatedAt/sourceUpdatedAt`. Public live runtime remains pending; Mock remains the default, and a real model mode never consumes `mock-weather` as first-failure last-known.
 
-The final AIS/Event boundary keeps watch configuration separate from observation data: `VesselWatchTarget` carries only identity/control fields, AIS receives only same-source sanitized last-known observations, and successful PositionReports never inherit Mock dynamic fields. AIS `statusChangedAt` is the first continuously observed timestamp of the current navigation state, not a guaranteed real-world transition time. Current operational Event/HOT reads apply explicit `sourceId` to Provider-mode compatibility; incompatible historical Events remain in SQLite for audit and are not auto-resolved when a Provider switches.
+The final AIS/Event boundary keeps watch configuration separate from observation data: `VesselWatchTarget` carries only identity/control fields, AIS receives only same-source sanitized last-known observations, and successful PositionReports never inherit Mock dynamic fields. AIS `statusChangedAt` is the first continuously observed timestamp of the current navigation state, not a guaranteed real-world transition time. Entity Event identities are source-scoped (`logical key + provenance.sourceId`) so Mock/AIS histories coexist. Current operational Event/HOT reads use an `OperationalSourceContext` that combines requested Provider modes with enabled/verified registry source IDs; incompatible historical Events remain in SQLite for audit and are not auto-resolved when a Provider switches.
 
 ## Mock Isolation Rule
+
+Status: `Mock isolation complete` for the local operational boundary. Native SQLite and live external-provider verification remain separate pending gates.
 
 Only explicit Mock mode may surface Mock data.
 
@@ -139,9 +141,9 @@ Real Provider modes:
 - unknown fields remain unknown rather than inheriting Mock values.
 - Watch configuration is not observation data; AIS receives only `VesselWatchTarget` identity/control fields and same-source AIS last-known observations.
 - A successful AIS observation never inherits Mock `destination`, `eta`, `callSign`, `carrier`, `shipType` or `statusChangedAt`; AIS `statusChangedAt` is an observed-state boundary, not an authoritative vessel transition time.
-- Current Event/HOT input uses explicit `sourceId` → Provider-mode compatibility for vessels, ports, weather, feeds, calendars and alerts. Incompatible Events stay in Repository history and are not auto-resolved.
+- Current Event/HOT input uses explicit `sourceId` → `OperationalSourceContext` compatibility for vessels, ports, weather, feeds, calendars and alerts. Registry-disabled, parser-pending or otherwise inactive sources are excluded even when their broad Provider mode matches. Incompatible Events stay in Repository history and are not auto-resolved.
 
-Provider mode is the requested source (`mock`, `aisstream`, `portcast`, `open-meteo`, `calendarific` or `public`); runtime availability is represented independently by `healthy`, `degraded`, `failed`, `disabled` or `never_succeeded`. This keeps a missing AISStream key visible as `aisstream / never_succeeded`, while the data array is empty. Portcast retains static port identity on first failure, and its dynamic fields remain optional/unknown. Calendar and Feed read boundaries filter retained Mock rows without deleting them from SQLite.
+Provider mode is the requested source (`mock`, `aisstream`, `portcast`, `open-meteo`, `calendarific` or `public`); runtime availability is represented independently by `healthy`, `degraded`, `failed`, `disabled` or `never_succeeded`. This keeps a missing AISStream key visible as `aisstream / never_succeeded`, while the data array is empty. Portcast retains static port identity on first failure, and its dynamic fields remain optional/unknown. Calendar, Feed, Event and HOT read boundaries filter retained incompatible rows without deleting them from SQLite.
 
 ## 9. Interfaces and External Dependencies
 
@@ -176,12 +178,12 @@ Provider mode is the requested source (`mock`, `aisstream`, `portcast`, `open-me
 - Optional deployment: Cloudflare Pages/D1, Vercel, Bun, and Docker are configured in existing files.
 - Local database path: not explicitly configured in the repository; exact runtime location is pending dependency/runtime verification.
 - Docker persists `/usr/app/.data` through the compose volume.
-- No Shipping HOT migration, backup or restore procedure is approved yet.
+- No general Shipping HOT backup/restore procedure is approved; the only current migration is the startup-safe nullable `vessels.status_changed_at` compatibility rebuild.
 
 ## 13. Testing and Verification Boundaries
 
 - Current tests: Vitest covers Shipping HOT Domain, Provider, Repository, Event/HOT and UI trust contracts.
-- Current verification state: final AIS/Event batch 154/154 tests, build, typecheck, targeted lint, default-Mock and AIS/Calendarific requested-real/no-credential route smoke, `git diff --check` and `shared/updated-sources.ts` stability passed. Full lint retains four pre-existing errors outside this batch. Official external-provider live runtime remains pending; model weather and official weather alerts are independently configured and freshness-tracked.
+- Current verification state: final AIS/Event batch 161/161 tests, build, typecheck, targeted lint, no-network provider-mode smoke, Python stdlib SQLite migration smoke, `git diff --check` and `shared/updated-sources.ts` stability passed. Full lint retains four pre-existing errors outside this batch; native better-sqlite3 runtime and official external-provider live runtime remain pending. Model weather and official weather alerts are independently configured and freshness-tracked.
 - Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, Calendar source composition/conflict/reconciliation/announcement behavior, RSS/HTML Feed parsing with unknown publication and Chinese classification, source isolation, repost dedupe, Feed → Event/HOT boundaries, Open-Meteo 24-hour/72-hour/7-day windows/direction/TTL/per-port failure behavior, source-specific official warning parsing/expiry, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 
