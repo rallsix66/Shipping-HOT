@@ -894,10 +894,10 @@ export function configureProviders(environment: ProviderEnvironment = { ...env }
 const configured = configureProviders()
 const configuredCalendar = configureCalendarProviders()
 export const providers = { ...configured.providers, calendar: configuredCalendar.provider as CalendarProvider } as typeof configured.providers & { calendar: CalendarProvider }
-export const providerModes = { ...configured.modes, calendar: configuredCalendar.modes.calendar, calendarSources: configuredCalendar.modes.calendarSources }
+export const providerModes = { ...configured.modes, calendar: configuredCalendar.modes.calendar, calendarSourceIds: configuredCalendar.modes.calendarSourceIds }
 export const calendarProviderModes = configuredCalendar.modes
 
-export function createOperationalSourceContext(modes: ShippingProviderModes & { calendarSources?: string[] }): OperationalSourceContext {
+export function createOperationalSourceContext(modes: ShippingProviderModes): OperationalSourceContext {
   const activeSourceIds = new Set<string>()
   if (modes.vessel === "mock") activeSourceIds.add("mock-vessel")
   if (modes.vessel === "aisstream") activeSourceIds.add("aisstream")
@@ -916,7 +916,7 @@ export function createOperationalSourceContext(modes: ShippingProviderModes & { 
   if (modes.calendar === "mock") {
     activeSourceIds.add("mock-calendar")
   } else {
-    for (const sourceId of modes.calendarSources ?? []) activeSourceIds.add(sourceId)
+    for (const sourceId of modes.calendarSourceIds ?? []) activeSourceIds.add(sourceId)
   }
   return { modes, activeSourceIds }
 }

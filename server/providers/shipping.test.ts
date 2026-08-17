@@ -4,6 +4,7 @@ import type { FeedItem, Vessel } from "@shared/shipping"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeWeatherFeedItems } from "../shipping-store"
 import { DisabledWeatherAlertProvider, MockWeatherProvider, configureProviders, createAisStreamVesselProvider, createOpenMeteoWeatherProvider, createOperationalSourceContext, createPortcastPublicPageProvider, disabledProviderData, fetchWeatherProviderResults, normalizeProviderTimestamp, parsePortcastPublicPage, portcastFingerprint, portcastPublicPageUrls, providerProvenances, providerResult, toProviderResult } from "./shipping"
+import { configureCalendarProviders } from "./calendar"
 import { activeShippingFeedSourceIds } from "./feed"
 import { activeOfficialWeatherAlertSourceIds } from "./weather-alerts"
 
@@ -160,18 +161,35 @@ describe("shipping Provider failure boundaries", () => {
   })
 
   it("builds operational source activation from registry state instead of Provider mode alone", () => {
-    const publicModes = { ...configureProviders({ SHIPPING_WEATHER_ALERT_PROVIDER: "public", SHIPPING_FEED_PROVIDER: "public" }).modes, calendar: "mock" as const, calendarSources: [] as string[] }
+    const publicModes = { ...configureProviders({ SHIPPING_WEATHER_ALERT_PROVIDER: "public", SHIPPING_FEED_PROVIDER: "public" }).modes, calendar: "mock" as const, calendarSourceIds: ["mock-calendar"] as string[] }
     const publicContext = createOperationalSourceContext(publicModes)
     expect(activeOfficialWeatherAlertSourceIds()).toEqual(new Set())
     expect(publicContext.activeSourceIds.has("jma")).toBe(false)
     expect([...publicContext.activeSourceIds]).toEqual(expect.arrayContaining(["the-loadstar", "maritime-executive", "shekou-official"]))
     expect(publicContext.activeSourceIds.has("laem-chabang-official")).toBe(false)
 
-    const experimentalModes = { ...configureProviders({ SHIPPING_WEATHER_ALERT_PROVIDER: "experimental" }).modes, calendar: "mock" as const, calendarSources: [] as string[] }
+    const experimentalModes = { ...configureProviders({ SHIPPING_WEATHER_ALERT_PROVIDER: "experimental" }).modes, calendar: "mock" as const, calendarSourceIds: ["mock-calendar"] as string[] }
     const experimentalContext = createOperationalSourceContext(experimentalModes)
     expect(activeOfficialWeatherAlertSourceIds({ allowPending: true })).toEqual(new Set(["jma", "tmd", "bmkg"]))
     expect([...experimentalContext.activeSourceIds]).toEqual(expect.arrayContaining(["jma", "tmd", "bmkg"]))
     expect(activeShippingFeedSourceIds()).toEqual(new Set(["the-loadstar", "maritime-executive", "shekou-official"]))
+  })
+
+  it("uses the configured Calendar composite provenance IDs in operational source activation", () => {
+    const noKey = configureCalendarProviders({ SHIPPING_CALENDAR_PROVIDER: "calendarific" }).modes
+    const noKeyContext = createOperationalSourceContext({ ...configureProviders().modes, ...noKey })
+    expect(noKey.calendarSourceIds).toEqual(["calendarific"])
+    expect(noKeyContext.activeSourceIds.has("calendarific")).toBe(true)
+    expect(noKeyContext.activeSourceIds.has("official-holiday-source")).toBe(false)
+    expect(noKeyContext.activeSourceIds.has("manual-holiday")).toBe(false)
+    expect(noKeyContext.activeSourceIds.has("mock-calendar")).toBe(false)
+
+    const official = configureCalendarProviders({ SHIPPING_CALENDAR_PROVIDER: "official" }).modes
+    const officialContext = createOperationalSourceContext({ ...configureProviders().modes, ...official })
+    expect(official.calendarSourceIds).toEqual(["official-holiday-source", "manual-holiday"])
+    expect(officialContext.activeSourceIds.has("official-holiday-source")).toBe(true)
+    expect(officialContext.activeSourceIds.has("manual-holiday")).toBe(true)
+    expect(officialContext.activeSourceIds.has("calendarific")).toBe(false)
   })
 
   it("isolates model-weather and official-alert failures", async () => {

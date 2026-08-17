@@ -14,11 +14,18 @@ export interface CalendarResponse {
 
 export type CalendarFetcher = (url: string) => Promise<CalendarResponse>
 
+export const calendarProviderSourceIds = {
+  calendarific: "calendarific",
+  official: "official-holiday-source",
+  manual: "manual-holiday",
+  mock: "mock-calendar",
+} as const
+
 export const calendarProvenances = {
-  calendarific: { sourceType: "third_party", dataNature: "reported", sourceId: "calendarific", sourceUrl: "https://calendarific.com/", verified: false },
-  official: { sourceType: "official", dataNature: "reported", sourceId: "official-holiday-source", verified: true },
-  manual: { sourceType: "user", dataNature: "reported", sourceId: "manual-holiday", verified: true },
-  mock: { sourceType: "mock", dataNature: "reported", sourceId: "mock-calendar", sourceUrl: "https://example.com/mock/calendar", verified: false },
+  calendarific: { sourceType: "third_party", dataNature: "reported", sourceId: calendarProviderSourceIds.calendarific, sourceUrl: "https://calendarific.com/", verified: false },
+  official: { sourceType: "official", dataNature: "reported", sourceId: calendarProviderSourceIds.official, verified: true },
+  manual: { sourceType: "user", dataNature: "reported", sourceId: calendarProviderSourceIds.manual, verified: true },
+  mock: { sourceType: "mock", dataNature: "reported", sourceId: calendarProviderSourceIds.mock, sourceUrl: "https://example.com/mock/calendar", verified: false },
 } as const satisfies Record<string, DataProvenance>
 
 export const officialHolidaySources: Record<CalendarCountryCode, string> = {
@@ -287,6 +294,11 @@ export function filterCalendarEventsForMode(events: CalendarEvent[], mode: strin
   return events.filter(event => allowed.has(event.sourceId))
 }
 
+export function filterCalendarEventsForSourceIds(events: CalendarEvent[], sourceIds: ReadonlySet<string> | readonly string[]): CalendarEvent[] {
+  const allowed = sourceIds instanceof Set ? sourceIds : new Set(sourceIds)
+  return events.filter(event => allowed.has(event.sourceId))
+}
+
 export function filterCalendarCoverageForMode(coverage: CalendarCoverage[], mode: string): CalendarCoverage[] {
   const allowed = mode === "mock"
     ? new Set(["mock-calendar"])
@@ -298,6 +310,11 @@ export function filterCalendarCoverageForMode(coverage: CalendarCoverage[], mode
   return coverage.filter(item => allowed.has(item.sourceId))
 }
 
+export function filterCalendarCoverageForSourceIds(coverage: CalendarCoverage[], sourceIds: ReadonlySet<string> | readonly string[]): CalendarCoverage[] {
+  const allowed = sourceIds instanceof Set ? sourceIds : new Set(sourceIds)
+  return coverage.filter(item => allowed.has(item.sourceId))
+}
+
 export interface CompositeCalendarProviderOptions {
   calendarific?: CalendarProvider
   official?: CalendarProvider
@@ -305,11 +322,12 @@ export interface CompositeCalendarProviderOptions {
 }
 
 export function createCompositeCalendarProvider(options: CompositeCalendarProviderOptions): CalendarProvider {
-  const sources = [
-    options.calendarific ? { sourceId: "calendarific", provider: options.calendarific } : undefined,
-    options.official ? { sourceId: "official-holiday-source", provider: options.official } : undefined,
-    options.manual ? { sourceId: "manual-holiday", provider: options.manual } : undefined,
-  ].filter((value): value is { sourceId: string, provider: CalendarProvider } => value !== undefined)
+  const sourceOptions: Array<{ sourceId: string, provider: CalendarProvider } | undefined> = [
+    options.calendarific ? { sourceId: calendarProviderSourceIds.calendarific, provider: options.calendarific } : undefined,
+    options.official ? { sourceId: calendarProviderSourceIds.official, provider: options.official } : undefined,
+    options.manual ? { sourceId: calendarProviderSourceIds.manual, provider: options.manual } : undefined,
+  ]
+  const sources = sourceOptions.filter((value): value is { sourceId: string, provider: CalendarProvider } => value !== undefined)
   return {
     async getEvents(query) {
       const fetchedAt = new Date().toISOString()
@@ -423,9 +441,14 @@ export function configureCalendarProviders(environment: { [key: string]: string 
     ? key ? { calendarific, official, manual } : { calendarific }
     : mode === "official" ? { official, manual } : mode === "manual" ? { manual } : {}
   const provider = mode === "mock" ? createMockCalendarProvider() : createCompositeCalendarProvider(selected)
+  const calendarSourceIds = mode === "mock"
+    ? [calendarProviderSourceIds.mock]
+    : Object.entries(selected)
+        .filter(([, source]) => source !== undefined)
+        .map(([source]) => calendarProviderSourceIds[source as keyof typeof calendarProviderSourceIds])
   return {
     provider,
-    modes: { calendar: mode, calendarSources: Object.keys(selected).filter(source => selected[source as keyof typeof selected] !== undefined) },
+    modes: { calendar: mode, calendarSourceIds },
     calendarific,
     official,
     manual,

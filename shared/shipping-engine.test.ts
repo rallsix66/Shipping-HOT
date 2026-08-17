@@ -2,7 +2,30 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import type { CalendarEvent } from "./calendar"
 import { detectShippingEvents, isFreshEventEvidence } from "./shipping-engine"
 import { createMockSnapshot } from "./shipping-fixtures"
+import { filterEventsForOperationalContext } from "./shipping"
 import { rankHotItems } from "./shipping-rules"
+
+function calendarEventForSource(sourceId: "official-holiday-source" | "manual-holiday"): CalendarEvent {
+  const official = sourceId === "official-holiday-source"
+  return {
+    id: `calendar:TH:2026-08-22:source-test:public_holiday:${sourceId}`,
+    countryCode: "TH",
+    name: official ? "Official source holiday" : "Manual source holiday",
+    date: "2026-08-22",
+    type: "public_holiday",
+    isPublicHoliday: true,
+    businessImpact: "medium",
+    sourceId,
+    sourceKind: official ? "official" : "user",
+    verified: official,
+    lastCheckedAt: "2026-08-15T00:00:00.000Z",
+    updatedAt: "2026-08-15T00:00:00.000Z",
+    fetchedAt: "2026-08-15T00:00:00.000Z",
+    stale: false,
+    sourceStatus: "healthy",
+    provenance: { sourceType: official ? "official" : "user", dataNature: "reported", sourceId },
+  }
+}
 
 describe("shipping HOT event engine", () => {
   beforeEach(() => {
@@ -214,6 +237,40 @@ describe("shipping HOT event engine", () => {
     const repeated = detectShippingEvents([], [], [], [], snapshot.settings, initial, "2026-01-01T01:00:00.000Z", [calendarEvent])
     expect(repeated).toHaveLength(1)
     expect(repeated[0].id).toBe(initial[0].id)
+  })
+
+  it("keeps official and manual Calendar events through the full Event/HOT path only for active provenance sources", () => {
+    const snapshot = createMockSnapshot()
+    for (const [mode, sourceId] of [["official", "official-holiday-source"], ["manual", "manual-holiday"]] as const) {
+      const calendarEvent = calendarEventForSource(sourceId)
+      const events = detectShippingEvents([], [], [], [], snapshot.settings, [], "2026-08-15T00:00:00.000Z", [calendarEvent])
+      const context = { modes: { calendar: mode }, activeSourceIds: new Set([sourceId]) }
+      const currentEvents = filterEventsForOperationalContext(events, context)
+      const hot = rankHotItems(currentEvents, [], [], [], [], new Date("2026-08-15T00:00:00.000Z"), context)
+      expect(currentEvents).toHaveLength(1)
+      expect(currentEvents[0].provenance?.sourceId).toBe(sourceId)
+      expect(hot).toEqual(expect.arrayContaining([expect.objectContaining({ kind: "event", eventId: currentEvents[0].id })]))
+
+      const calendarificContext = { modes: { calendar: "calendarific" }, activeSourceIds: new Set(["calendarific"]) }
+      expect(filterEventsForOperationalContext(events, calendarificContext)).toEqual([])
+    }
+  })
+
+  it("does not let a Calendarific no-key context surface Mock Calendar Event/HOT data", () => {
+    const snapshot = createMockSnapshot()
+    const mockEvent = {
+      ...calendarEventForSource("manual-holiday"),
+      id: "calendar:TH:2026-08-22:mock-source:public_holiday",
+      sourceId: "mock-calendar",
+      sourceKind: "mock" as const,
+      verified: false,
+      provenance: { sourceType: "mock" as const, dataNature: "reported" as const, sourceId: "mock-calendar" },
+    }
+    const events = detectShippingEvents([], [], [], [], snapshot.settings, [], "2026-08-15T00:00:00.000Z", [mockEvent])
+    const context = { modes: { calendar: "calendarific" }, activeSourceIds: new Set(["calendarific"]) }
+    const currentEvents = filterEventsForOperationalContext(events, context)
+    expect(currentEvents).toEqual([])
+    expect(rankHotItems(currentEvents, [], [], [], [], new Date("2026-08-15T00:00:00.000Z"), context)).toEqual([])
   })
 
   it("keeps a same-source AIS Event stale and active when the next observation fails", () => {

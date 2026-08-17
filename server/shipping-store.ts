@@ -4,7 +4,7 @@ import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries } from "@shared/calendar"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules"
-import { createMockCalendarEvents, filterCalendarCoverageForMode, filterCalendarEventsForMode, mergeCalendarSources } from "#/providers/calendar"
+import { createMockCalendarEvents, filterCalendarCoverageForSourceIds, filterCalendarEventsForSourceIds, mergeCalendarSources } from "#/providers/calendar"
 import { filterFeedLastKnownForMode } from "#/providers/feed"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { disabledProviderData, fetchWeatherProviderResults, isOfficialWeatherAlertFeedItem, isWeatherFeedItem, operationalSourceContext, providerError, providerModes, providerProvenances, providerResult, providers, sanitizeAisVessel, toProviderResult } from "#/providers/shipping"
@@ -66,8 +66,8 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
     .map(item => sanitizeAisVessel(item))
   const vesselLastKnown = providerModes.vessel === "aisstream" ? aisLastKnown : lastKnown.vessels
   const portLastKnown = providerModes.port === "portcast" ? lastKnown.ports.filter(item => item.provenance?.sourceId === "portcast-public") : lastKnown.ports
-  const calendarEvents = filterCalendarEventsForMode(lastKnown.calendarEvents ?? [], providerModes.calendar)
-  const calendarCoverage = filterCalendarCoverageForMode(lastKnown.calendarCoverage ?? settings.calendarSync ?? [], providerModes.calendar)
+  const calendarEvents = filterCalendarEventsForSourceIds(lastKnown.calendarEvents ?? [], providerModes.calendarSourceIds ?? [])
+  const calendarCoverage = filterCalendarCoverageForSourceIds(lastKnown.calendarCoverage ?? settings.calendarSync ?? [], providerModes.calendarSourceIds ?? [])
   const weatherResults = settings.sourceEnabled
     ? fetchWeatherProviderResults(providers.weather, providers.weatherAlerts, lastKnown.ports, modelWeatherLastKnown, officialWeatherLastKnown)
     : Promise.resolve<[PromiseSettledResult<FeedItem[]>, PromiseSettledResult<FeedItem[]>]>([
@@ -111,8 +111,8 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
     return {
       ...structuredClone(fallbackSnapshot),
       events: filterEventsForOperationalContext(fallbackSnapshot.events, operationalSourceContext),
-      calendarEvents: filterCalendarEventsForMode(fallbackSnapshot.calendarEvents ?? [], providerModes.calendar),
-      calendarCoverage: filterCalendarCoverageForMode(fallbackSnapshot.calendarCoverage ?? fallbackSnapshot.settings.calendarSync ?? [], providerModes.calendar),
+      calendarEvents: filterCalendarEventsForSourceIds(fallbackSnapshot.calendarEvents ?? [], providerModes.calendarSourceIds ?? []),
+      calendarCoverage: filterCalendarCoverageForSourceIds(fallbackSnapshot.calendarCoverage ?? fallbackSnapshot.settings.calendarSync ?? [], providerModes.calendarSourceIds ?? []),
     }
   }
   const settings = await repository.getSettings() ?? fallbackSnapshot.settings
@@ -125,10 +125,10 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
   const ports = await repository.listPorts(legacyDefaults)
   const voyages = await repository.listVoyages(legacyDefaults)
   const feedItems = await repository.listFeedItems()
-  const storedCalendarEvents = filterCalendarEventsForMode(await repository.listCalendarEvents(), providerModes.calendar)
-  const fallbackCalendarEvents = filterCalendarEventsForMode(fallbackSnapshot.calendarEvents ?? [], providerModes.calendar)
+  const storedCalendarEvents = filterCalendarEventsForSourceIds(await repository.listCalendarEvents(), providerModes.calendarSourceIds ?? [])
+  const fallbackCalendarEvents = filterCalendarEventsForSourceIds(fallbackSnapshot.calendarEvents ?? [], providerModes.calendarSourceIds ?? [])
   const calendarEvents = storedCalendarEvents.length ? storedCalendarEvents : fallbackCalendarEvents
-  const calendarCoverage = filterCalendarCoverageForMode(settings.calendarSync ?? fallbackSnapshot.calendarCoverage ?? [], providerModes.calendar)
+  const calendarCoverage = filterCalendarCoverageForSourceIds(settings.calendarSync ?? fallbackSnapshot.calendarCoverage ?? [], providerModes.calendarSourceIds ?? [])
   return {
     vessels,
     ports,
@@ -223,9 +223,9 @@ export async function syncCalendarEvents(year = mockCalendarYear, countries?: Ca
   await initialize()
   const query = calendarQuery(year, countries)
   const result = await providers.calendar.getEvents(query)
-  const existing = filterCalendarEventsForMode(fallbackSnapshot.calendarEvents ?? [], providerModes.calendar)
+  const existing = filterCalendarEventsForSourceIds(fallbackSnapshot.calendarEvents ?? [], providerModes.calendarSourceIds ?? [])
   const reconciled = reconcileCalendarEvents(existing, result.events, result.coverage, year)
-  const previousCoverage = filterCalendarCoverageForMode(fallbackSnapshot.calendarCoverage ?? fallbackSnapshot.settings.calendarSync ?? [], providerModes.calendar)
+  const previousCoverage = filterCalendarCoverageForSourceIds(fallbackSnapshot.calendarCoverage ?? fallbackSnapshot.settings.calendarSync ?? [], providerModes.calendarSourceIds ?? [])
   const coverage = [...previousCoverage.filter(item => !(query.countries.includes(item.countryCode) && item.year === year)), ...result.coverage]
   const settings = { ...fallbackSnapshot.settings, calendarSync: coverage }
   const snapshot = { ...fallbackSnapshot, settings, calendarEvents: reconciled.events, calendarCoverage: coverage }

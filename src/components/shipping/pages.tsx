@@ -1178,7 +1178,7 @@ export function CalendarPage() {
         )}
       />
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-xs op-65">
-        <span>{data.provider.calendar === "mock" ? "当前为 Mock 日历；配置 Calendarific Key 后可同步年度第三方缓存。" : `Provider：${data.provider.calendar}${data.provider.calendarSources?.length ? `（${data.provider.calendarSources.join(" + ")}）` : ""}`}</span>
+        <span>{data.provider.calendar === "mock" ? "当前为 Mock 日历；配置 Calendarific Key 后可同步年度第三方缓存。" : `Provider：${data.provider.calendar}${data.provider.calendarSourceIds?.length ? `（${data.provider.calendarSourceIds.join(" + ")}）` : ""}`}</span>
         {data.calendarAttribution && <a className="text-teal-600 underline decoration-teal-500/40 underline-offset-3 dark:text-teal-300" href="https://calendarific.com/" target="_blank" rel="noreferrer">{data.calendarAttribution}</a>}
       </div>
       {syncState === "error" && <p className="mb-4 text-sm text-rose-600 dark:text-rose-300">同步失败，继续显示本地缓存。</p>}

@@ -169,6 +169,7 @@ export interface ShippingProviderModes {
   weatherAlerts?: string
   feed?: string
   calendar?: string
+  calendarSourceIds?: readonly string[]
 }
 
 export interface OperationalSourceContext {

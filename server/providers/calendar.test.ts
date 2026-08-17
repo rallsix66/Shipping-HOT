@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { type CalendarEvent, calendarCountries, calendarLeadDays } from "@shared/calendar"
-import { calendarAttribution, calendarProvenances, calendarificCoverageStatus, configureCalendarProviders, createCalendarificProvider, createCompositeCalendarProvider, createMockCalendarEvents, filterCalendarEventsForMode, mergeCalendarSources, normalizeCalendarificPayload, officialHolidaySources, sanitizeCalendarError } from "./calendar"
+import { calendarAttribution, calendarProvenances, calendarProviderSourceIds, calendarificCoverageStatus, configureCalendarProviders, createCalendarificProvider, createCompositeCalendarProvider, createMockCalendarEvents, filterCalendarEventsForMode, mergeCalendarSources, normalizeCalendarificPayload, officialHolidaySources, sanitizeCalendarError } from "./calendar"
 
 describe("calendar providers", () => {
   it("keeps Calendarific mode and returns unknown coverage when its key is missing", async () => {
@@ -16,6 +16,14 @@ describe("calendar providers", () => {
     expect(configured.modes.calendar).toBe("calendarific")
     expect(configured.provider).not.toBeUndefined()
     expect(filterCalendarEventsForMode(createMockCalendarEvents(2026), configured.modes.calendar)).toEqual([])
+  })
+
+  it("returns configured Calendar provenance source IDs instead of composite option keys", () => {
+    expect(configureCalendarProviders({}).modes).toEqual({ calendar: "mock", calendarSourceIds: [calendarProviderSourceIds.mock] })
+    expect(configureCalendarProviders({ SHIPPING_CALENDAR_PROVIDER: "calendarific", CALENDARIFIC_API_KEY: "test-key" }).modes).toEqual({ calendar: "calendarific", calendarSourceIds: [calendarProviderSourceIds.calendarific, calendarProviderSourceIds.official, calendarProviderSourceIds.manual] })
+    expect(configureCalendarProviders({ SHIPPING_CALENDAR_PROVIDER: "calendarific" }).modes).toEqual({ calendar: "calendarific", calendarSourceIds: [calendarProviderSourceIds.calendarific] })
+    expect(configureCalendarProviders({ SHIPPING_CALENDAR_PROVIDER: "official" }).modes).toEqual({ calendar: "official", calendarSourceIds: [calendarProviderSourceIds.official, calendarProviderSourceIds.manual] })
+    expect(configureCalendarProviders({ SHIPPING_CALENDAR_PROVIDER: "manual" }).modes).toEqual({ calendar: "manual", calendarSourceIds: [calendarProviderSourceIds.manual] })
   })
 
   it("normalizes Calendarific public, religious and observance records", () => {
