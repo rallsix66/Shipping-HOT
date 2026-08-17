@@ -1,3 +1,4 @@
+import { filterEventsForProviderModes, toVesselWatchTarget } from "@shared/shipping"
 import type { FeedItem, Port, ProviderResult, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries } from "@shared/calendar"
@@ -6,7 +7,7 @@ import { mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules
 import { createMockCalendarEvents, filterCalendarCoverageForMode, filterCalendarEventsForMode, mergeCalendarSources } from "#/providers/calendar"
 import { filterFeedLastKnownForMode } from "#/providers/feed"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
-import { disabledProviderData, fetchWeatherProviderResults, isOfficialWeatherAlertFeedItem, isWeatherFeedItem, providerError, providerModes, providerProvenances, providerResult, providers, toProviderResult } from "#/providers/shipping"
+import { disabledProviderData, fetchWeatherProviderResults, isOfficialWeatherAlertFeedItem, isWeatherFeedItem, providerError, providerModes, providerProvenances, providerResult, providers, sanitizeAisVessel, toProviderResult } from "#/providers/shipping"
 
 let repository: ShippingRepository | undefined
 const mockCalendarYear = new Date().getUTCFullYear()
@@ -59,7 +60,11 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
     .filter(item => !isOfficialWeatherAlertFeedItem(item))
     .filter(item => providerModes.weather === "open-meteo" ? item.sourceId === "open-meteo-marine" : item.sourceId === "mock-weather")
   const officialWeatherLastKnown = weatherLastKnown.filter(isOfficialWeatherAlertFeedItem)
-  const vesselLastKnown = providerModes.vessel === "aisstream" ? lastKnown.vessels.filter(item => item.provenance?.sourceId === "aisstream") : lastKnown.vessels
+  const watchTargets = lastKnown.vessels.map(toVesselWatchTarget)
+  const aisLastKnown = lastKnown.vessels
+    .filter(item => item.provenance?.sourceId === "aisstream")
+    .map(item => sanitizeAisVessel(item))
+  const vesselLastKnown = providerModes.vessel === "aisstream" ? aisLastKnown : lastKnown.vessels
   const portLastKnown = providerModes.port === "portcast" ? lastKnown.ports.filter(item => item.provenance?.sourceId === "portcast-public") : lastKnown.ports
   const calendarEvents = filterCalendarEventsForMode(lastKnown.calendarEvents ?? [], providerModes.calendar)
   const calendarCoverage = filterCalendarCoverageForMode(lastKnown.calendarCoverage ?? settings.calendarSync ?? [], providerModes.calendar)
@@ -70,7 +75,7 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
         { status: "fulfilled", value: disabledProviderData(officialWeatherLastKnown) },
       ])
   const [vesselResult, portResult, voyageResult, shippingFeedResult] = await Promise.allSettled([
-    settings.providerEnabled ? providers.vessel.getVessels(lastKnown.vessels) : Promise.resolve(disabledProviderData(lastKnown.vessels)),
+    settings.providerEnabled ? providers.vessel.getVessels(watchTargets, aisLastKnown) : Promise.resolve(disabledProviderData(vesselLastKnown)),
     settings.providerEnabled ? providers.port.getPorts(lastKnown.ports) : Promise.resolve(disabledProviderData(lastKnown.ports)),
     settings.providerEnabled ? providers.schedule.getVoyages() : Promise.resolve(disabledProviderData(lastKnown.voyages)),
     settings.sourceEnabled ? providers.feed.getFeedItems(feedLastKnown, lastKnown.ports) : Promise.resolve(disabledProviderData(feedLastKnown)),
@@ -93,7 +98,7 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
     ports: port.data,
     voyages: voyage.data,
     feedItems: mergeWeatherFeedItems(shippingFeed.data, [...weather.data, ...weatherAlerts.data]),
-    events: fallbackSnapshot.events,
+    events: filterEventsForProviderModes(fallbackSnapshot.events, providerModes),
     settings,
     calendarEvents,
     calendarCoverage,
@@ -105,6 +110,7 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
   if (!repository) {
     return {
       ...structuredClone(fallbackSnapshot),
+      events: filterEventsForProviderModes(fallbackSnapshot.events, providerModes),
       calendarEvents: filterCalendarEventsForMode(fallbackSnapshot.calendarEvents ?? [], providerModes.calendar),
       calendarCoverage: filterCalendarCoverageForMode(fallbackSnapshot.calendarCoverage ?? fallbackSnapshot.settings.calendarSync ?? [], providerModes.calendar),
     }
@@ -128,7 +134,7 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
     ports,
     voyages,
     feedItems,
-    events: await repository.listEvents({ vessels, ports, voyages, feedItems }),
+    events: filterEventsForProviderModes(await repository.listEvents({ vessels, ports, voyages, feedItems }), providerModes),
     settings,
     calendarEvents,
     calendarCoverage,

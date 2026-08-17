@@ -7,7 +7,7 @@ export default defineEventHandler(async () => {
   const snapshot = await getShippingSnapshot()
   return {
     ...snapshot,
-    hot: rankHotItems(snapshot.events, snapshot.ports, snapshot.vessels, snapshot.voyages, snapshot.feedItems),
+    hot: rankHotItems(snapshot.events, snapshot.ports, snapshot.vessels, snapshot.voyages, snapshot.feedItems, new Date(), providerModes),
     provider: providerModes,
     realProviders,
     calendarAttribution: calendarAttribution({ provider: providerModes.calendar, events: snapshot.calendarEvents }),

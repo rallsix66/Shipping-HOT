@@ -195,4 +195,19 @@ describe("shipping HOT event engine", () => {
     expect(repeated).toHaveLength(1)
     expect(repeated[0].id).toBe(initial[0].id)
   })
+
+  it("keeps a same-source AIS Event stale and active when the next observation fails", () => {
+    const snapshot = createMockSnapshot()
+    const aisVessel = {
+      ...snapshot.vessels[0],
+      provenance: { sourceType: "third_party" as const, dataNature: "observed" as const, sourceId: "aisstream" },
+      statusChangedAt: "2026-01-01T00:00:00.000Z",
+      sourceUpdatedAt: "2026-01-01T00:00:00.000Z",
+    }
+    const initial = detectShippingEvents([aisVessel], [], [], [], snapshot.settings, [], "2026-01-01T03:00:00.000Z")
+    const failedVessel = { ...aisVessel, stale: true, sourceStatus: "failed" as const, error: "AIS timeout", fetchedAt: "2026-01-01T04:00:00.000Z" }
+    const next = detectShippingEvents([failedVessel], [], [], [], snapshot.settings, initial, "2026-01-01T04:00:00.000Z")
+    expect(next[0]).toMatchObject({ status: "active", stale: true, sourceStatus: "failed", error: "AIS timeout", provenance: { sourceId: "aisstream" } })
+    expect(next[0].resolvedAt).toBeUndefined()
+  })
 })

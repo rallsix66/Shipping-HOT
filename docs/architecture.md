@@ -124,6 +124,8 @@ The V2.3 Shipping Information Feed path is opt-in through `SHIPPING_FEED_PROVIDE
 
 The V2.4 Weather Intelligence path extends the existing Open-Meteo adapter without changing the Weather Feed boundary. `SHIPPING_WEATHER_PROVIDER=open-meteo` requests current plus hourly wave height/direction, swell height/direction, swell period, wind and gusts for one 7-day model response; local 24-hour, 72-hour and 7-day windows are calculated without repeating API calls, with a 30-minute in-process TTL. Each port is fetched independently, with its own last-known model FeedItem marked stale/failed when unavailable. Model items use `sourceType=third_party`, `dataNature=forecast`, `weather.riskSource=model` and the UI can switch windows. `SHIPPING_WEATHER_ALERT_PROVIDER=public` additionally enables independent source-specific JMA, TMD and BMKG official-warning contracts; warning items retain issued/expiry metadata, expose active/expired/unknown state, and downgrade to info at expiry without rewriting the official `updatedAt/sourceUpdatedAt`. Public live runtime remains pending; Mock remains the default, and a real model mode never consumes `mock-weather` as first-failure last-known.
 
+The final AIS/Event boundary keeps watch configuration separate from observation data: `VesselWatchTarget` carries only identity/control fields, AIS receives only same-source sanitized last-known observations, and successful PositionReports never inherit Mock dynamic fields. AIS `statusChangedAt` is the first continuously observed timestamp of the current navigation state, not a guaranteed real-world transition time. Current operational Event/HOT reads apply explicit `sourceId` to Provider-mode compatibility; incompatible historical Events remain in SQLite for audit and are not auto-resolved when a Provider switches.
+
 ## Mock Isolation Rule
 
 Only explicit Mock mode may surface Mock data.
@@ -135,6 +137,9 @@ Real Provider modes:
 - preserve only same-provider successful historical data;
 - first failure with no same-provider history returns no data / `never_succeeded`;
 - unknown fields remain unknown rather than inheriting Mock values.
+- Watch configuration is not observation data; AIS receives only `VesselWatchTarget` identity/control fields and same-source AIS last-known observations.
+- A successful AIS observation never inherits Mock `destination`, `eta`, `callSign`, `carrier`, `shipType` or `statusChangedAt`; AIS `statusChangedAt` is an observed-state boundary, not an authoritative vessel transition time.
+- Current Event/HOT input uses explicit `sourceId` → Provider-mode compatibility for vessels, ports, weather, feeds, calendars and alerts. Incompatible Events stay in Repository history and are not auto-resolved.
 
 Provider mode is the requested source (`mock`, `aisstream`, `portcast`, `open-meteo`, `calendarific` or `public`); runtime availability is represented independently by `healthy`, `degraded`, `failed`, `disabled` or `never_succeeded`. This keeps a missing AISStream key visible as `aisstream / never_succeeded`, while the data array is empty. Portcast retains static port identity on first failure, and its dynamic fields remain optional/unknown. Calendar and Feed read boundaries filter retained Mock rows without deleting them from SQLite.
 
@@ -176,7 +181,7 @@ Provider mode is the requested source (`mock`, `aisstream`, `portcast`, `open-me
 ## 13. Testing and Verification Boundaries
 
 - Current tests: Vitest covers Shipping HOT Domain, Provider, Repository, Event/HOT and UI trust contracts.
-- Current verification state: 146/146 tests, build, typecheck, targeted lint, default-Mock and requested-real/no-credential route smoke, security scan and `git diff --check` passed. Official external-provider live runtime remains pending; model weather and official weather alerts are independently configured and freshness-tracked.
+- Current verification state: final AIS/Event batch 154/154 tests, build, typecheck, targeted lint, default-Mock and AIS/Calendarific requested-real/no-credential route smoke, `git diff --check` and `shared/updated-sources.ts` stability passed. Full lint retains four pre-existing errors outside this batch. Official external-provider live runtime remains pending; model weather and official weather alerts are independently configured and freshness-tracked.
 - Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, Calendar source composition/conflict/reconciliation/announcement behavior, RSS/HTML Feed parsing with unknown publication and Chinese classification, source isolation, repost dedupe, Feed → Event/HOT boundaries, Open-Meteo 24-hour/72-hour/7-day windows/direction/TTL/per-port failure behavior, source-specific official warning parsing/expiry, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 

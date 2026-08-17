@@ -221,8 +221,75 @@ describe("shipping Provider failure boundaries", () => {
     expect(subscription?.FiltersShipMMSI).toEqual(["477123400"])
     expect(result).toHaveLength(3)
     expect(result.find(vessel => vessel.id === "vessel-ever-glory")).toMatchObject({ name: "EVER GLORY", latitude: 22.3, speed: 4.5, sourceStatus: "healthy", updatedAt: "2026-08-13T09:00:00.000Z", sourceUpdatedAt: "2026-08-13T09:00:00.000Z", provenance: providerProvenances.aisstream })
+    expect(result.find(vessel => vessel.id === "vessel-ever-glory")).toMatchObject({ statusChangedAt: "2026-08-13T09:00:00.000Z", navigationStatus: "under_way" })
+    expect(result.find(vessel => vessel.id === "vessel-ever-glory")).not.toHaveProperty("destination")
+    expect(result.find(vessel => vessel.id === "vessel-ever-glory")).not.toHaveProperty("eta")
+    expect(result.find(vessel => vessel.id === "vessel-ever-glory")).not.toHaveProperty("carrier")
+    expect(result.find(vessel => vessel.id === "vessel-ever-glory")).not.toHaveProperty("shipType")
     expect(result.find(vessel => vessel.id === "vessel-maersk-saltoro")).toMatchObject({ stale: true, sourceStatus: "degraded", error: "MMSI unavailable for real vessel lookup" })
     expect(result.find(vessel => vessel.id === "vessel-cosco-harmony")).toMatchObject({ sourceStatus: "degraded" })
+  })
+
+  it("derives AIS statusChangedAt from the first same-source observation and updates only on status change", async () => {
+    const target = { id: "vessel-ever-glory", name: "EVER GLORY", imo: "9876543", mmsi: "477123400", isWatched: true }
+    const messages = [
+      { MessageType: "PositionReport", MetaData: { MMSI: target.mmsi, ShipName: target.name, time_utc: "2026-08-13T09:00:00.000Z" }, Message: { PositionReport: { UserID: 477123400, Latitude: 22.3, Longitude: 114.2, NavigationalStatus: 1 } } },
+      { MessageType: "PositionReport", MetaData: { MMSI: target.mmsi, ShipName: target.name, time_utc: "2026-08-13T10:00:00.000Z" }, Message: { PositionReport: { UserID: 477123400, Latitude: 22.4, Longitude: 114.3, NavigationalStatus: 1 } } },
+      { MessageType: "PositionReport", MetaData: { MMSI: target.mmsi, ShipName: target.name, time_utc: "2026-08-13T11:00:00.000Z" }, Message: { PositionReport: { UserID: 477123400, Latitude: 22.5, Longitude: 114.4, NavigationalStatus: 0 } } },
+    ]
+    let call = 0
+    const provider = createAisStreamVesselProvider({ apiKey: "test-key", timeoutMs: 100, socketFactory: () => {
+      const message = messages[call++]
+      const socket = {
+        onopen: null as (() => void) | null,
+        onmessage: null as ((event: { data: unknown }) => void) | null,
+        onerror: null as ((event: unknown) => void) | null,
+        onclose: null as (() => void) | null,
+        send() {
+          this.onmessage?.({ data: JSON.stringify(message) })
+        },
+        close() {},
+      }
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    const first = (await provider.getVessels([target]))[0]
+    const second = (await provider.getVessels([target], [first]))[0]
+    const third = (await provider.getVessels([target], [second]))[0]
+    expect(first).toMatchObject({ navigationStatus: "anchored", sourceUpdatedAt: "2026-08-13T09:00:00.000Z", statusChangedAt: "2026-08-13T09:00:00.000Z" })
+    expect(second).toMatchObject({ navigationStatus: "anchored", sourceUpdatedAt: "2026-08-13T10:00:00.000Z", statusChangedAt: "2026-08-13T09:00:00.000Z" })
+    expect(third).toMatchObject({ navigationStatus: "under_way", sourceUpdatedAt: "2026-08-13T11:00:00.000Z", statusChangedAt: "2026-08-13T11:00:00.000Z" })
+  })
+
+  it("keeps only AIS last-known data for a missed update and strips Mock data when no same-source history exists", async () => {
+    const targetA = { id: "vessel-ever-glory", name: "EVER GLORY", imo: "9876543", mmsi: "477123400", isWatched: true }
+    const targetB = { id: "vessel-maersk-saltoro", name: "MAERSK SALTORO", imo: "9784561", mmsi: "219876500", isWatched: true }
+    let call = 0
+    const provider = createAisStreamVesselProvider({ apiKey: "test-key", timeoutMs: 20, socketFactory: () => {
+      const socket = {
+        onopen: null as (() => void) | null,
+        onmessage: null as ((event: { data: unknown }) => void) | null,
+        onerror: null as ((event: unknown) => void) | null,
+        onclose: null as (() => void) | null,
+        send() {
+          call++
+          this.onmessage?.({ data: JSON.stringify({ MessageType: "PositionReport", MetaData: { MMSI: targetA.mmsi, ShipName: targetA.name, time_utc: "2026-08-13T09:00:00.000Z" }, Message: { PositionReport: { UserID: 477123400, Latitude: 22.3, Longitude: 114.2, NavigationalStatus: 1 } } }) })
+        },
+        close() {},
+      }
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    const aisLastKnown = { ...mockVessels[1], provenance: providerProvenances.aisstream, statusChangedAt: "2026-08-13T08:00:00.000Z" }
+    const mockOnly = { ...mockVessels[1], provenance: providerProvenances.mockVessel }
+    const withAisHistory = await provider.getVessels([targetA, targetB], [aisLastKnown])
+    const withMockHistory = await provider.getVessels([targetA, targetB], [mockOnly])
+    expect(call).toBe(2)
+    expect(withAisHistory.find(item => item.id === targetB.id)).toMatchObject({ latitude: aisLastKnown.latitude, longitude: aisLastKnown.longitude, statusChangedAt: aisLastKnown.statusChangedAt, stale: true, sourceStatus: "degraded", provenance: providerProvenances.aisstream })
+    expect(withAisHistory.find(item => item.id === targetB.id)).not.toHaveProperty("destination")
+    expect(withMockHistory.find(item => item.id === targetB.id)).toMatchObject({ id: targetB.id, navigationStatus: "unknown", stale: true, sourceStatus: "degraded", provenance: providerProvenances.aisstream })
+    expect(withMockHistory.find(item => item.id === targetB.id)).not.toHaveProperty("latitude")
+    expect(withMockHistory.find(item => item.id === targetB.id)).not.toHaveProperty("statusChangedAt")
   })
 
   it("keeps partial AIS success and degrades only vessels without an update", async () => {
@@ -268,7 +335,18 @@ describe("shipping Provider failure boundaries", () => {
       expect(result).toHaveLength(3)
       expect(result.find(vessel => vessel.id === "vessel-ever-glory")).toMatchObject({ latitude: 22.3, longitude: 114.2, stale: false, sourceStatus: "healthy" })
       expect(result.find(vessel => vessel.id === vesselB.id)).toMatchObject({ stale: true, sourceStatus: "degraded" })
-      expect(result.find(vessel => vessel.id === vesselC.id)).toEqual(vesselC)
+      expect(result.find(vessel => vessel.id === vesselC.id)).toMatchObject({
+        id: vesselC.id,
+        name: vesselC.name,
+        mmsi: vesselC.mmsi,
+        imo: vesselC.imo,
+        isWatched: false,
+        navigationStatus: "unknown",
+        stale: true,
+        sourceStatus: "degraded",
+        provenance: providerProvenances.aisstream,
+      })
+      expect(result.find(vessel => vessel.id === vesselC.id)).not.toHaveProperty("latitude")
     } finally {
       vi.useRealTimers()
     }

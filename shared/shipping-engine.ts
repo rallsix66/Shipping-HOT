@@ -43,7 +43,7 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
   for (const vessel of vessels.filter(isFreshEventEvidence)) {
     const durationMinutes = statusDurationMinutes(vessel, new Date(now))
     if (vessel.navigationStatus === "anchored" && durationMinutes >= settings.eventThresholds.anchoredHours * 60) {
-      candidates.push({ ...eventTrust(vessel), type: "vessel_anchored", severity: durationMinutes >= settings.eventThresholds.anchoredHours * 120 ? "critical" : "warning", status: "active", title: `${vessel.name} 锚泊时间过长`, summary: `当前锚泊已持续 ${Math.round(durationMinutes / 60)} 小时。`, occurredAt: vessel.statusChangedAt, detectedAt: now, dedupeKey: `vessel_anchored:${vessel.id}`, vesselId: vessel.id, evidenceJson: { durationMinutes, thresholdMinutes: settings.eventThresholds.anchoredHours * 60 } })
+      candidates.push({ ...eventTrust(vessel), type: "vessel_anchored", severity: durationMinutes >= settings.eventThresholds.anchoredHours * 120 ? "critical" : "warning", status: "active", title: `${vessel.name} 锚泊时间过长`, summary: `当前锚泊已持续 ${Math.round(durationMinutes / 60)} 小时。`, occurredAt: vessel.statusChangedAt ?? now, detectedAt: now, dedupeKey: `vessel_anchored:${vessel.id}`, vesselId: vessel.id, evidenceJson: { durationMinutes, thresholdMinutes: settings.eventThresholds.anchoredHours * 60 } })
     }
   }
   for (const voyage of voyages.filter(isFreshEventEvidence)) {

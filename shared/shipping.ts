@@ -37,6 +37,24 @@ export interface ProvenanceAware {
   provenance?: DataProvenance
 }
 
+export interface VesselWatchTarget {
+  id: string
+  name: string
+  mmsi?: string
+  imo?: string
+  isWatched: boolean
+}
+
+export function toVesselWatchTarget(vessel: Pick<Vessel, "id" | "name" | "mmsi" | "imo" | "isWatched">): VesselWatchTarget {
+  return {
+    id: vessel.id,
+    name: vessel.name,
+    mmsi: vessel.mmsi,
+    imo: vessel.imo,
+    isWatched: vessel.isWatched,
+  }
+}
+
 export type PortCongestionCoverage = "public" | "no_public_data"
 
 export interface PortCongestionDetail {
@@ -123,7 +141,7 @@ export interface Vessel extends Freshness, ProvenanceAware {
   speed?: number
   course?: number
   navigationStatus: NavigationStatus
-  statusChangedAt: string
+  statusChangedAt?: string
   destination?: string
   eta?: string
 }
@@ -141,6 +159,58 @@ export interface Port extends Freshness, ProvenanceAware {
   containerWaitingVessels?: number
   waitingHours?: number
   operationalStatus?: "normal" | "disrupted" | "closed"
+}
+
+export interface ShippingProviderModes {
+  vessel?: string
+  port?: string
+  schedule?: string
+  weather?: string
+  weatherAlerts?: string
+  feed?: string
+  calendar?: string
+}
+
+const realFeedSourceIds = new Set([
+  "shipping-feed",
+  "the-loadstar",
+  "maritime-executive",
+  "shekou-official",
+  "laem-chabang-official",
+  "port-klang-official",
+  "yantian-official",
+  "nansha-official",
+])
+
+const officialWeatherAlertSourceIds = new Set(["official-weather-alerts", "jma", "tmd", "bmkg"])
+
+export function sourceAllowedForProviderModes(sourceId: string | undefined, modes: ShippingProviderModes): boolean {
+  if (!sourceId) return false
+  if (sourceId === "mock-vessel") return modes.vessel === "mock"
+  if (sourceId === "aisstream") return modes.vessel === "aisstream"
+  if (sourceId === "mock-port") return modes.port === "mock"
+  if (sourceId === "portcast-public") return modes.port === "portcast"
+  if (sourceId === "mock-weather") return modes.weather === "mock"
+  if (sourceId === "open-meteo-marine") return modes.weather === "open-meteo"
+  if (officialWeatherAlertSourceIds.has(sourceId)) return modes.weatherAlerts === "public" || modes.weatherAlerts === "experimental"
+  if (sourceId === "mock-port-notice") return modes.feed === "mock"
+  if (realFeedSourceIds.has(sourceId)) return modes.feed === "public"
+  if (sourceId === "mock-calendar") return modes.calendar === "mock"
+  if (sourceId === "calendarific") return modes.calendar === "calendarific"
+  if (sourceId === "official-holiday-source" || ["official-th", "official-id", "official-my", "official-ph", "official-vn"].includes(sourceId)) return modes.calendar === "calendarific" || modes.calendar === "official"
+  if (sourceId === "manual-holiday") return modes.calendar === "calendarific" || modes.calendar === "official" || modes.calendar === "manual"
+  if (sourceId === "mock-schedule") return modes.schedule === "mock"
+  return false
+}
+
+export function eventIsCompatibleWithCurrentProviders(event: Pick<ShippingEvent, "provenance" | "evidence">, modes: ShippingProviderModes): boolean {
+  const sourceId = event.provenance?.sourceId
+  if (sourceId) return sourceAllowedForProviderModes(sourceId, modes)
+  return (event.evidence ?? []).some(evidence => sourceAllowedForProviderModes(evidence.provenance.sourceId, modes))
+}
+
+export function filterEventsForProviderModes(events: ShippingEvent[], modes: ShippingProviderModes): ShippingEvent[] {
+  return events.filter(event => eventIsCompatibleWithCurrentProviders(event, modes))
 }
 
 export interface Voyage extends Freshness, ProvenanceAware {

@@ -1,12 +1,12 @@
 import { env } from "node:process"
-import type { DataProvenance, FeedItem, Freshness, Port, PortCongestionDetail, ProviderResult, Severity, SourceStatus, Vessel, Voyage, WeatherWindow, WeatherWindows } from "@shared/shipping"
+import type { DataProvenance, FeedItem, Freshness, Port, PortCongestionDetail, ProviderResult, Severity, SourceStatus, Vessel, VesselWatchTarget, Voyage, WeatherWindow, WeatherWindows } from "@shared/shipping"
 import { mockFeedItems, mockPorts, mockVessels, mockVoyages, portWeatherConfig } from "@shared/shipping-fixtures"
 import { type CalendarProvider, configureCalendarProviders } from "./calendar"
 import { configureFeedProviders } from "./feed"
 import { type WeatherAlertProvider, createOfficialWeatherAlertProvider, officialWeatherAlertSourceIds } from "./weather-alerts"
 
 export interface VesselProvider {
-  getVessels: (watched?: Vessel[]) => Promise<Vessel[]>
+  getVessels: (targets?: VesselWatchTarget[], lastKnown?: Vessel[]) => Promise<Vessel[]>
 }
 export interface PortProvider {
   getPorts: (lastKnown?: Port[]) => Promise<Port[]>
@@ -445,32 +445,73 @@ function socketFromGlobal(endpoint: string): AisSocket {
   return new WebSocketCtor(endpoint) as AisSocket
 }
 
-function normalizeAisPosition(message: AisStreamMessage, watched: Vessel): Vessel | undefined {
+function aisIdentity(target: VesselWatchTarget) {
+  return {
+    id: target.id,
+    name: target.name,
+    mmsi: target.mmsi,
+    imo: target.imo,
+    isWatched: target.isWatched,
+  }
+}
+
+export function sanitizeAisVessel(vessel: Vessel, target?: VesselWatchTarget): Vessel {
+  const identity = target ? aisIdentity(target) : aisIdentity(vessel)
+  return {
+    ...identity,
+    latitude: vessel.latitude,
+    longitude: vessel.longitude,
+    speed: vessel.speed,
+    course: vessel.course,
+    navigationStatus: vessel.navigationStatus,
+    statusChangedAt: vessel.statusChangedAt,
+    updatedAt: vessel.updatedAt,
+    sourceUpdatedAt: vessel.sourceUpdatedAt,
+    fetchedAt: vessel.fetchedAt,
+    stale: vessel.stale,
+    sourceStatus: vessel.sourceStatus,
+    error: vessel.error,
+    provenance: aisstreamProvenance,
+  }
+}
+
+function identityOnlyAisVessel(target: VesselWatchTarget, fetchedAt: string, sourceStatus: SourceStatus = "degraded", error = "AIS observation unavailable"): Vessel {
+  return {
+    ...aisIdentity(target),
+    navigationStatus: "unknown",
+    fetchedAt,
+    stale: true,
+    sourceStatus,
+    error,
+    provenance: aisstreamProvenance,
+  }
+}
+
+function normalizeAisPosition(message: AisStreamMessage, watched: VesselWatchTarget, previous: Vessel | undefined, fetchedAt: string): Vessel | undefined {
   const position = message.Message?.PositionReport
   const metadata = aisMetaData(message)
   const mmsi = mmsiValue(metadata?.MMSI) ?? (position?.UserID === undefined ? undefined : String(position.UserID))
   if (!position || !mmsi || mmsi !== watched.mmsi) return undefined
   const updatedAt = normalizeProviderTimestamp(metadata?.time_utc)
   const hasTrustedTimestamp = updatedAt !== undefined
+  const currentNavigationStatus = navigationStatus(numberValue(position.NavigationalStatus))
+  const statusChangedAt = currentNavigationStatus === "unknown"
+    ? undefined
+    : previous?.navigationStatus === currentNavigationStatus && previous.statusChangedAt
+      ? previous.statusChangedAt
+      : updatedAt ?? fetchedAt
   return {
-    id: watched.id,
-    name: stringValue(metadata?.ShipName) ?? watched.name,
-    imo: watched.imo,
+    ...aisIdentity({ ...watched, name: stringValue(metadata?.ShipName) ?? watched.name }),
     mmsi,
-    callSign: watched.callSign,
-    carrier: watched.carrier,
-    shipType: watched.shipType,
-    isWatched: true,
     latitude: numberValue(position.Latitude),
     longitude: numberValue(position.Longitude),
     speed: numberValue(position.Sog),
     course: numberValue(position.Cog),
-    navigationStatus: navigationStatus(numberValue(position.NavigationalStatus)),
-    statusChangedAt: watched.statusChangedAt,
-    destination: watched.destination,
-    eta: watched.eta,
+    navigationStatus: currentNavigationStatus,
+    statusChangedAt,
     updatedAt,
     sourceUpdatedAt: updatedAt,
+    fetchedAt,
     stale: !hasTrustedTimestamp,
     sourceStatus: hasTrustedTimestamp ? "healthy" : "degraded",
     error: hasTrustedTimestamp ? undefined : "Provider timestamp unavailable",
@@ -483,12 +524,14 @@ export function createAisStreamVesselProvider(options: AisStreamVesselProviderOp
   const timeoutMs = options.timeoutMs ?? 5000
   const socketFactory = options.socketFactory ?? socketFromGlobal
   return {
-    async getVessels(watched = []) {
-      const watchedVessels = watched.filter(vessel => vessel.isWatched && vessel.mmsi)
+    async getVessels(targets = [], lastKnown = []) {
+      const fetchedAt = new Date().toISOString()
+      const lastKnownById = new Map(lastKnown
+        .filter(vessel => vessel.provenance?.sourceId === "aisstream")
+        .map(vessel => [vessel.id, sanitizeAisVessel(vessel)]))
+      const watchedVessels = targets.filter(vessel => vessel.isWatched && vessel.mmsi)
       if (!watchedVessels.length) {
-        return watched.map(vessel => vessel.isWatched
-          ? { ...vessel, stale: true, sourceStatus: "degraded" as const, error: "MMSI unavailable for real vessel lookup" }
-          : vessel)
+        return targets.map(target => identityOnlyAisVessel(target, fetchedAt, "degraded", target.isWatched ? "MMSI unavailable for real vessel lookup" : "AIS observation unavailable"))
       }
       const watchedByMmsi = new Map(watchedVessels.map(vessel => [vessel.mmsi!, vessel]))
       const received = new Map<string, Vessel>()
@@ -520,7 +563,7 @@ export function createAisStreamVesselProvider(options: AisStreamVesselProviderOp
           const mmsi = mmsiValue(metadata?.MMSI) ?? (message.Message?.PositionReport?.UserID === undefined ? undefined : String(message.Message.PositionReport.UserID))
           const vessel = mmsi ? watchedByMmsi.get(mmsi) : undefined
           if (!vessel) return
-          const normalized = normalizeAisPosition(message, vessel)
+          const normalized = normalizeAisPosition(message, vessel, lastKnownById.get(vessel.id), fetchedAt)
           if (!normalized) return
           received.set(normalized.id, normalized)
           if (received.size === watchedByMmsi.size) finish()
@@ -531,10 +574,15 @@ export function createAisStreamVesselProvider(options: AisStreamVesselProviderOp
           else if (!settled) finish()
         }
       })
-      return watched.map((vessel) => {
-        if (!vessel.isWatched) return vessel
-        if (!vessel.mmsi) return { ...vessel, stale: true, sourceStatus: "degraded" as const, error: "MMSI unavailable for real vessel lookup" }
-        return received.get(vessel.id) ?? { ...vessel, stale: true, sourceStatus: "degraded" as const }
+      return targets.map((target) => {
+        if (!target.isWatched) return identityOnlyAisVessel(target, fetchedAt)
+        if (!target.mmsi) return identityOnlyAisVessel(target, fetchedAt, "degraded", "MMSI unavailable for real vessel lookup")
+        const receivedVessel = received.get(target.id)
+        if (receivedVessel) return receivedVessel
+        const previous = lastKnownById.get(target.id)
+        return previous
+          ? { ...previous, ...aisIdentity(target), stale: true, sourceStatus: "degraded" as const, error: "AIS update unavailable", fetchedAt, provenance: aisstreamProvenance }
+          : identityOnlyAisVessel(target, fetchedAt)
       })
     },
   }

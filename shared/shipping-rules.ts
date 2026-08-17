@@ -1,5 +1,5 @@
-import { deriveProvenance } from "./shipping"
-import type { EventStatus, FeedItem, FreshnessState, HotItem, Port, Severity, ShippingEvent, ShippingSettings, SourceStatus, Vessel, Voyage } from "./shipping"
+import { deriveProvenance, eventIsCompatibleWithCurrentProviders, sourceAllowedForProviderModes } from "./shipping"
+import type { EventStatus, FeedItem, FreshnessState, HotItem, Port, Severity, ShippingEvent, ShippingProviderModes, ShippingSettings, SourceStatus, Vessel, Voyage } from "./shipping"
 
 const severityWeight: Record<Severity, number> = { info: 1, watch: 2, warning: 3, critical: 4 }
 
@@ -19,6 +19,17 @@ export function updateVesselStatus(previous: Vessel, next: Pick<Vessel, "navigat
 
 export function mergeProviderVessel(previous: Vessel | undefined, provider: Vessel, now = new Date().toISOString()): Vessel {
   if (!previous) return { ...provider }
+  const previousSource = previous.provenance?.sourceId
+  const providerSource = provider.provenance?.sourceId
+  const isSameSource = previousSource !== undefined && previousSource === providerSource
+  if (providerSource === "aisstream") {
+    return {
+      ...provider,
+      isWatched: previous.isWatched,
+      statusChangedAt: provider.statusChangedAt ?? (previous.navigationStatus === provider.navigationStatus ? previous.statusChangedAt : provider.sourceUpdatedAt ?? now),
+    }
+  }
+  if (!isSameSource) return { ...provider, isWatched: previous.isWatched }
   return updateVesselStatus(previous, provider, now)
 }
 
@@ -51,7 +62,9 @@ export function mergeProviderVoyage(previous: Voyage | undefined, provider: Voya
 }
 
 export function statusDurationMinutes(vessel: Pick<Vessel, "statusChangedAt">, now = new Date()): number {
-  return Math.max(0, Math.round((now.getTime() - Date.parse(vessel.statusChangedAt)) / 60000))
+  if (!vessel.statusChangedAt) return 0
+  const timestamp = Date.parse(vessel.statusChangedAt)
+  return Number.isFinite(timestamp) ? Math.max(0, Math.round((now.getTime() - timestamp) / 60000)) : 0
 }
 
 export function reconcileEvent(existing: ShippingEvent | undefined, incoming: Omit<ShippingEvent, "id" | "firstDetectedAt" | "lastDetectedAt" | "resolvedAt">, now = new Date().toISOString()): ShippingEvent {
@@ -114,16 +127,18 @@ function relatedFreshness(event: ShippingEvent, ports: Port[], vessels: Vessel[]
   return { stale: event.stale ?? true, sourceStatus: event.sourceStatus, provenance: event.provenance }
 }
 
-export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[] = [], _now = new Date()): HotItem[] {
+export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[] = [], _now = new Date(), modes?: ShippingProviderModes): HotItem[] {
+  const operationalEvents = modes ? events.filter(event => eventIsCompatibleWithCurrentProviders(event, modes)) : events
+  const operationalFeedItems = modes ? feedItems.filter(item => sourceAllowedForProviderModes(item.provenance?.sourceId ?? item.sourceId, modes)) : feedItems
   const labels = new Map<string, string>()
   vessels.forEach(v => labels.set(v.id, v.name))
   ports.forEach(p => labels.set(p.id, p.name))
   voyages.forEach(v => labels.set(v.id, v.voyageNumber))
 
-  const eventItems = events
+  const eventItems = operationalEvents
     .filter(event => event.status === ("active" as EventStatus))
     .map((event) => {
-      const source = relatedFreshness(event, ports, vessels, voyages, feedItems)
+      const source = relatedFreshness(event, ports, vessels, voyages, operationalFeedItems)
       return {
         id: event.id,
         kind: "event" as const,
@@ -138,8 +153,8 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
         eventId: event.id,
       }
     })
-  const activeEventKeys = new Set(events.filter(event => event.status === "active").map(event => event.dedupeKey))
-  const feedHotItems = feedItems.filter(item => item.eventEligibility !== false && item.publicationTimeKnown !== false && (item.severity === "warning" || item.severity === "critical") && !activeEventKeys.has(`feed:${item.id}`)).map(item => ({
+  const activeEventKeys = new Set(operationalEvents.filter(event => event.status === "active").map(event => event.dedupeKey))
+  const feedHotItems = operationalFeedItems.filter(item => item.eventEligibility !== false && item.publicationTimeKnown !== false && (item.severity === "warning" || item.severity === "critical") && !activeEventKeys.has(`feed:${item.id}`)).map(item => ({
     id: item.id,
     kind: "feed" as const,
     title: item.title,
@@ -159,8 +174,8 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
   ])
   const watchedVoyageIds = new Set(voyages.filter(voyage => watchedIds.has(voyage.vesselId) || watchedIds.has(voyage.originPortId) || watchedIds.has(voyage.destinationPortId)).map(voyage => voyage.id))
   const relevance = (item: HotItem) => {
-    const event = item.eventId ? events.find(candidate => candidate.id === item.eventId) : undefined
-    const feed = item.feedItemId ? feedItems.find(candidate => candidate.id === item.feedItemId) : undefined
+    const event = item.eventId ? operationalEvents.find(candidate => candidate.id === item.eventId) : undefined
+    const feed = item.feedItemId ? operationalFeedItems.find(candidate => candidate.id === item.feedItemId) : undefined
     const relatedIds = event
       ? [event.vesselId, event.portId, event.voyageId]
       : [...(feed?.relatedVesselIds ?? []), ...(feed?.relatedPortIds ?? []), ...(feed?.relatedVoyageIds ?? [])]
