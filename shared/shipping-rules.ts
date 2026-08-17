@@ -74,6 +74,7 @@ export function reconcileEvent(existing: ShippingEvent | undefined, incoming: Om
 }
 
 export function congestionLevelRank(level: Port["congestionLevel"]): number {
+  if (level === undefined) return -1
   return { low: 0, medium: 1, high: 2, critical: 3 }[level]
 }
 

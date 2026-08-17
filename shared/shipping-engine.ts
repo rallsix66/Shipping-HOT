@@ -53,8 +53,12 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
     }
   }
   for (const port of ports.filter(isFreshEventEvidence)) {
-    if (congestionLevelRank(port.congestionLevel) >= congestionLevelRank(settings.eventThresholds.congestionLevel)) {
-      candidates.push({ ...eventTrust(port), type: "port_congestion", severity: port.congestionLevel === "critical" ? "critical" : "warning", status: "active", title: `${port.nameEn} 拥堵升级`, summary: `等待 ${port.waitingVessels} 艘船，预计等待 ${port.waitingHours} 小时。`, occurredAt: port.updatedAt ?? now, detectedAt: now, dedupeKey: `port_congestion:${port.id}`, portId: port.id, evidenceJson: { congestionLevel: port.congestionLevel, waitingHours: port.waitingHours } })
+    if (port.congestionLevel !== undefined && congestionLevelRank(port.congestionLevel) >= congestionLevelRank(settings.eventThresholds.congestionLevel)) {
+      const detail = [
+        port.waitingVessels === undefined ? "等待船舶暂无数据" : `等待 ${port.waitingVessels} 艘船`,
+        port.waitingHours === undefined ? "等待时长暂无数据" : `预计等待 ${port.waitingHours} 小时`,
+      ].join("，")
+      candidates.push({ ...eventTrust(port), type: "port_congestion", severity: port.congestionLevel === "critical" ? "critical" : "warning", status: "active", title: `${port.nameEn} 拥堵升级`, summary: detail, occurredAt: port.updatedAt ?? now, detectedAt: now, dedupeKey: `port_congestion:${port.id}`, portId: port.id, evidenceJson: { congestionLevel: port.congestionLevel, waitingHours: port.waitingHours } })
     }
   }
   for (const feed of feedItems.filter(item => isFreshEventEvidence(item) && item.eventEligibility !== false && item.publicationTimeKnown !== false && (item.severity === "warning" || item.severity === "critical"))) {

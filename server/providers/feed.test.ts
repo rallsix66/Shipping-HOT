@@ -1,11 +1,23 @@
 import { describe, expect, it } from "vitest"
 import { mockPorts } from "@shared/shipping-fixtures"
-import { classifyFeedItem, createPublicFeedProvider, dedupeFeedItems, parseFeedHtml, parseFeedRss, shippingFeedSources } from "./feed"
+import { classifyFeedItem, createPublicFeedProvider, dedupeFeedItems, filterFeedLastKnownForMode, parseFeedHtml, parseFeedRss, shippingFeedSources } from "./feed"
 
 const rssSource = shippingFeedSources.find(source => source.id === "the-loadstar")!
 const officialSource = shippingFeedSources.find(source => source.id === "shekou-official")!
 
 describe("shipping feed provider", () => {
+  it("does not use Mock Feed records as public last-known data", async () => {
+    const mock = { id: "mock-feed", sourceId: "mock-port-notice", category: "port_notice" as const, type: "port_notice", title: "Mock notice", summary: "Mock", sourceUrl: "https://example.com/mock", publishedAt: "2026-08-14T00:00:00.000Z", relatedPortIds: [], relatedVesselIds: [], relatedVoyageIds: [], severity: "warning" as const, stale: false, sourceStatus: "healthy" as const }
+    expect(filterFeedLastKnownForMode([mock], "public")).toEqual([])
+    const provider = createPublicFeedProvider({
+      sources: [rssSource],
+      fetcher: async () => {
+        throw new Error("feed unavailable")
+      },
+    })
+    expect(await provider.getFeedItems([mock], mockPorts)).toEqual([])
+  })
+
   it("normalizes RSS entries and attaches source and port provenance", () => {
     const [item] = parseFeedRss(`
       <rss><channel>

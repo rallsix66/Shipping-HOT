@@ -1,7 +1,7 @@
 import { renderToString } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 import { EmptyState, GradientText, ProvenanceBadge, ProviderChip, StatusDot } from "../src/components/shipping/ui"
-import { formatDataNature, formatDate, formatProvenance, formatSourceStatus, formatSourceType, formatStatus, navTone, severityTone, statusBadgePresentation, statusLabels } from "../src/components/shipping/format"
+import { formatDataNature, formatDate, formatPortMetric, formatProvenance, formatSourceStatus, formatSourceType, formatStatus, navTone, providerSummary, severityTone, statusBadgePresentation, statusLabels } from "../src/components/shipping/format"
 
 /**
  * UI 烟雾护栏：不引入 jsdom/testing-library 的前提下，
@@ -57,6 +57,8 @@ describe("shipping UI primitives smoke", () => {
     expect(formatStatus("unknown_key")).toBe("unknown key")
     expect(formatSourceStatus("healthy")).toBe("正常")
     expect(formatDate(undefined)).toBe("—")
+    expect(formatPortMetric(undefined, "艘")).toBe("暂无数据")
+    expect(formatPortMetric(3, "艘")).toBe("3 艘")
     expect(statusLabels.critical).toBe("严重")
   })
 
@@ -75,5 +77,10 @@ describe("shipping UI primitives smoke", () => {
     expect(severityTone("info")).toBe("info")
     expect(severityTone("warning")).toBe("watch")
     expect(severityTone("critical")).toBe("failed")
+  })
+
+  it("does not call a public alert source all Mock", () => {
+    expect(providerSummary({ vessel: "mock", weather: "mock", port: "mock", schedule: "mock", feed: "mock", calendar: "mock", weatherAlerts: "off" })).toEqual({ allMock: true, label: "全 Mock" })
+    expect(providerSummary({ vessel: "mock", weather: "mock", port: "mock", schedule: "mock", feed: "mock", calendar: "mock", weatherAlerts: "public" }).label).toContain("预警 public")
   })
 })

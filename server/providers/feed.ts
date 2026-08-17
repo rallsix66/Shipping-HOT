@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto"
 import { XMLParser } from "fast-xml-parser"
 import { load } from "cheerio"
-import type { DataProvenance, FeedCategory, FeedItem, Port, SourceType } from "@shared/shipping"
+import { type DataProvenance, type FeedCategory, type FeedItem, type Port, type SourceType, isMockProvenance } from "@shared/shipping"
 import { mockFeedItems, mockPorts } from "@shared/shipping-fixtures"
 
 export interface FeedProvider {
@@ -116,6 +116,8 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     description: "Deferred; no stable public announcement list source confirmed.",
   },
 ]
+
+const publicFeedSourceIds = new Set(shippingFeedSources.filter(source => source.enabled).map(source => source.id))
 
 export const feedProvenances = {
   mock: { sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice", sourceUrl: "https://example.com/mock/feed", verified: false },
@@ -378,6 +380,12 @@ export const MockFeedProvider: FeedProvider = {
   async getFeedItems() {
     return structuredClone(mockFeedItems.filter(item => item.sourceId !== "mock-weather"))
   },
+}
+
+export function filterFeedLastKnownForMode(items: FeedItem[], mode: string): FeedItem[] {
+  return mode === "public"
+    ? items.filter(item => publicFeedSourceIds.has(item.sourceId) && !isMockProvenance(item.provenance))
+    : items.filter(item => item.sourceId === "mock-port-notice")
 }
 
 export function configureFeedProviders(environment: { SHIPPING_FEED_PROVIDER?: string } = {}) {

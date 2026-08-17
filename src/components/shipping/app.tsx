@@ -2,7 +2,7 @@ import { Link, useMatchRoute } from "@tanstack/react-router"
 import { MotionConfig, motion } from "framer-motion"
 import { type ReactNode, useEffect, useRef, useState } from "react"
 import { AuroraBackground } from "./aurora"
-import { severityTone, statusBadgePresentation, statusLabels } from "./format"
+import { providerSummary, severityTone, statusBadgePresentation, statusLabels } from "./format"
 import { GradientText, StatusDot } from "./ui"
 import { useShipping } from "./data"
 import { useDark } from "~/hooks/useDark"
@@ -105,9 +105,8 @@ export function ShippingShell({ children, title }: { children: ReactNode, title?
   const lastRefresh = fetchedAts.length
     ? formatClock(new Date(Math.max(...fetchedAts.map(value => new Date(value).getTime()))).toISOString())
     : "—"
-  const providers = data ? [data.provider.vessel, data.provider.weather, data.provider.port, data.provider.schedule, data.provider.feed] : []
-  const allMock = providers.length > 0 && providers.every(provider => provider === "mock") && (data?.provider.weatherAlerts ?? "off") === "off"
-  const providerLabel = data ? (allMock ? "全 Mock" : providers.join(" / ")) : "—"
+  const summary = data ? providerSummary(data.provider) : undefined
+  const providerLabel = summary?.label ?? "—"
 
   return (
     <MotionConfig reducedMotion="user">

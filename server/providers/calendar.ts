@@ -1,6 +1,6 @@
 import { env } from "node:process"
 import type { DataEvidence, DataProvenance } from "@shared/shipping"
-import { type BusinessImpact, type CalendarCountryCode, type CalendarCoverageStatus, type CalendarEvent, type CalendarEventType, type CalendarProviderResult, type CalendarQuery, type CalendarSourceKind, calendarCountries, calendarEventId, calendarSeverity } from "@shared/calendar"
+import { type BusinessImpact, type CalendarCountryCode, type CalendarCoverage, type CalendarCoverageStatus, type CalendarEvent, type CalendarEventType, type CalendarProviderResult, type CalendarQuery, type CalendarSourceKind, calendarCountries, calendarEventId, calendarSeverity } from "@shared/calendar"
 
 export interface CalendarProvider {
   getEvents: (query: CalendarQuery) => Promise<CalendarProviderResult>
@@ -263,6 +263,41 @@ export function createMockCalendarProvider(now = () => new Date()): CalendarProv
   }
 }
 
+export function createUnavailableCalendarProvider(sourceId: string, error: string, now = () => new Date()): CalendarProvider {
+  return {
+    async getEvents(query) {
+      const fetchedAt = now().toISOString()
+      return {
+        events: [],
+        coverage: query.countries.map(countryCode => ({ countryCode, year: query.year, status: "unknown" as const, sourceId, lastCheckedAt: fetchedAt, error })),
+        fetchedAt,
+      }
+    },
+  }
+}
+
+export function filterCalendarEventsForMode(events: CalendarEvent[], mode: string): CalendarEvent[] {
+  const allowed = mode === "mock"
+    ? new Set(["mock-calendar"])
+    : mode === "calendarific"
+      ? new Set(["calendarific", "official-holiday-source", "manual-holiday"])
+      : mode === "official"
+        ? new Set(["official-holiday-source", "manual-holiday"])
+        : new Set(["manual-holiday"])
+  return events.filter(event => allowed.has(event.sourceId))
+}
+
+export function filterCalendarCoverageForMode(coverage: CalendarCoverage[], mode: string): CalendarCoverage[] {
+  const allowed = mode === "mock"
+    ? new Set(["mock-calendar"])
+    : mode === "calendarific"
+      ? new Set(["calendarific", "official-holiday-source", "manual-holiday"])
+      : mode === "official"
+        ? new Set(["official-holiday-source", "manual-holiday"])
+        : new Set(["manual-holiday"])
+  return coverage.filter(item => allowed.has(item.sourceId))
+}
+
 export interface CompositeCalendarProviderOptions {
   calendarific?: CalendarProvider
   official?: CalendarProvider
@@ -380,11 +415,13 @@ export function mergeCalendarSources(thirdParty: CalendarEvent[], official: Cale
 export function configureCalendarProviders(environment: { [key: string]: string | undefined } = { ...env }) {
   const key = environment.CALENDARIFIC_API_KEY
   const requested = environment.SHIPPING_CALENDAR_PROVIDER
-  const mode = requested === "calendarific" && key ? "calendarific" : requested === "official" ? "official" : requested === "manual" ? "manual" : "mock"
-  const calendarific = key ? createCalendarificProvider({ apiKey: key }) : undefined
+  const mode = requested === "calendarific" ? "calendarific" : requested === "official" ? "official" : requested === "manual" ? "manual" : "mock"
+  const calendarific = key ? createCalendarificProvider({ apiKey: key }) : requested === "calendarific" ? createUnavailableCalendarProvider("calendarific", "CALENDARIFIC_API_KEY missing") : undefined
   const official = createOfficialHolidayProvider()
   const manual = createManualHolidayProvider()
-  const selected = mode === "calendarific" ? { calendarific, official, manual } : mode === "official" ? { official, manual } : mode === "manual" ? { manual } : {}
+  const selected = mode === "calendarific"
+    ? key ? { calendarific, official, manual } : { calendarific }
+    : mode === "official" ? { official, manual } : mode === "manual" ? { manual } : {}
   const provider = mode === "mock" ? createMockCalendarProvider() : createCompositeCalendarProvider(selected)
   return {
     provider,

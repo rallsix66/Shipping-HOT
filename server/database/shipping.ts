@@ -131,7 +131,7 @@ export class ShippingRepository {
 
   async upsertPort(port: Port) {
     await this.db.prepare(`INSERT OR REPLACE INTO ports (id, data, is_watched, congestion_level, last_updated_at) VALUES (?, ?, ?, ?, ?)`)
-      .run(port.id, JSON.stringify(port), port.isWatched ? 1 : 0, port.congestionLevel, port.updatedAt ?? null)
+      .run(port.id, JSON.stringify(port), port.isWatched ? 1 : 0, port.congestionLevel ?? "unknown", port.updatedAt ?? null)
   }
 
   async upsertVoyage(voyage: Voyage) {

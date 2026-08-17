@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { mockPorts } from "@shared/shipping-fixtures"
+import { mockFeedItems, mockPorts } from "@shared/shipping-fixtures"
 import { createOpenMeteoWeatherProvider } from "./shipping"
 
 function weatherPayload(url: string, severe = true) {
@@ -12,6 +12,12 @@ function weatherPayload(url: string, severe = true) {
 }
 
 describe("open-meteo weather intelligence", () => {
+  it("does not return Mock Weather as Open-Meteo first-failure last-known", async () => {
+    const mockWeather = mockFeedItems.find(item => item.sourceId === "mock-weather")!
+    const provider = createOpenMeteoWeatherProvider({ fetcher: async () => ({ ok: false, status: 503, json: async () => ({}) }) })
+    await expect(provider.getFeedItems([mockPorts[0]], [mockWeather])).rejects.toThrow("Open-Meteo marine request failed (503)")
+  })
+
   it("normalizes independent 24-hour, 72-hour and 7-day windows with directions", async () => {
     const provider = createOpenMeteoWeatherProvider({ fetcher: async url => ({ ok: true, status: 200, json: async () => weatherPayload(url) }) })
     const [item] = await provider.getFeedItems([mockPorts[0]])

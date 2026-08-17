@@ -86,6 +86,10 @@ export function knownMockProvenanceFor(sourceId?: string): DataProvenance | unde
   return provenance ? { ...provenance } : undefined
 }
 
+export function isMockProvenance(provenance?: DataProvenance): boolean {
+  return provenance?.sourceType === "mock"
+}
+
 export function normalizeLegacyTrust<T extends ProvenanceAware>(entity: T, provenance?: DataProvenance): T {
   if (entity.provenance || !provenance) return entity
   return { ...entity, provenance: { ...provenance } }
@@ -131,12 +135,12 @@ export interface Port extends Freshness, ProvenanceAware {
   country: string
   unlocode: string
   isWatched: boolean
-  congestionLevel: "low" | "medium" | "high" | "critical"
+  congestionLevel?: "low" | "medium" | "high" | "critical"
   congestionDetail?: PortCongestionDetail
-  waitingVessels: number
-  containerWaitingVessels: number
-  waitingHours: number
-  operationalStatus: "normal" | "disrupted" | "closed"
+  waitingVessels?: number
+  containerWaitingVessels?: number
+  waitingHours?: number
+  operationalStatus?: "normal" | "disrupted" | "closed"
 }
 
 export interface Voyage extends Freshness, ProvenanceAware {
@@ -214,7 +218,7 @@ export interface ShippingSettings {
   eventThresholds: {
     anchoredHours: number
     delayMinutes: number
-    congestionLevel: Port["congestionLevel"]
+    congestionLevel: NonNullable<Port["congestionLevel"]>
   }
   retentionDays: number
   calendarSync?: CalendarCoverage[]

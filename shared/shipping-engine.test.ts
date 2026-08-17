@@ -75,6 +75,15 @@ describe("shipping HOT event engine", () => {
     expect(events.filter(event => event.type === "port_congestion").map(event => event.portId)).toEqual(expect.arrayContaining(["port-shekou", "port-yantian"]))
   })
 
+  it("does not treat unknown Portcast dynamic fields as zero or invent them in events", () => {
+    const snapshot = createMockSnapshot()
+    const port = { ...snapshot.ports[0], congestionLevel: "high" as const, waitingVessels: undefined, waitingHours: undefined, containerWaitingVessels: undefined, operationalStatus: undefined, provenance: { sourceType: "third_party" as const, dataNature: "derived" as const, sourceId: "portcast-public" }, sourceStatus: "healthy" as const, stale: false }
+    const events = detectShippingEvents(snapshot.vessels, [port], [], [], snapshot.settings, [], "2026-01-01T03:00:00.000Z")
+    const portEvent = events.find(event => event.type === "port_congestion")
+    expect(portEvent).toMatchObject({ type: "port_congestion", summary: "等待船舶暂无数据，等待时长暂无数据" })
+    expect(portEvent?.summary).not.toContain("undefined")
+  })
+
   it("requires healthy and non-stale evidence before creating an Event", () => {
     const snapshot = createMockSnapshot()
     const stalePort = { ...snapshot.ports[0], stale: true, sourceStatus: "failed" as const, error: "Portcast unavailable" }

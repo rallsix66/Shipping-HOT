@@ -1,6 +1,6 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
-> Last verified: 2026-08-15
+> Last verified: 2026-08-17
 > Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation, implemented V2.1 Port Intelligence, and V2.2/V2.3/V2.4 implemented with local verification; live external-provider verification pending; V2.5 not started
 > Source of truth for: the current retained system structure and approved boundaries
 
@@ -122,7 +122,21 @@ The V2.2 Calendar path is opt-in for Calendarific through `SHIPPING_CALENDAR_PRO
 
 The V2.3 Shipping Information Feed path is opt-in through `SHIPPING_FEED_PROVIDER=public`; otherwise the Mock Feed remains the default. `server/providers/feed.ts` fetches each enabled source independently, supports RSS for The Loadstar/The Maritime Executive and source-structured HTML parsing for Shekou official notices, marks Laem Chabang/Port Klang as registered parser pending and Yantian/Nansha as deferred without a stable source, and emits normalized `FeedItem` records with `sourceType`, `dataNature=reported`, source timestamps, related ports, tags and optional `hotReason`. A source-provided publication time is never replaced by `fetchedAt`; unknown publication items remain visible but are not eligible for new Event/HOT creation. Canonical URLs and normalized titles deduplicate reposts with official-source priority. A failed source preserves only its own last-known records as stale/failed without changing their publication/update time.
 
-The V2.4 Weather Intelligence path extends the existing Open-Meteo adapter without changing the Weather Feed boundary. `SHIPPING_WEATHER_PROVIDER=open-meteo` requests current plus hourly wave height/direction, swell height/direction, swell period, wind and gusts for one 7-day model response; local 24-hour, 72-hour and 7-day windows are calculated without repeating API calls, with a 30-minute in-process TTL. Each port is fetched independently, with its own last-known model FeedItem marked stale/failed when unavailable. Model items use `sourceType=third_party`, `dataNature=forecast`, `weather.riskSource=model` and the UI can switch windows. `SHIPPING_WEATHER_ALERT_PROVIDER=public` additionally enables independent source-specific JMA, TMD and BMKG official-warning contracts; warning items retain issued/expiry metadata, expose active/expired/unknown state, and downgrade to info at expiry without rewriting the official `updatedAt/sourceUpdatedAt`. Public live runtime remains pending; Mock remains the default.
+The V2.4 Weather Intelligence path extends the existing Open-Meteo adapter without changing the Weather Feed boundary. `SHIPPING_WEATHER_PROVIDER=open-meteo` requests current plus hourly wave height/direction, swell height/direction, swell period, wind and gusts for one 7-day model response; local 24-hour, 72-hour and 7-day windows are calculated without repeating API calls, with a 30-minute in-process TTL. Each port is fetched independently, with its own last-known model FeedItem marked stale/failed when unavailable. Model items use `sourceType=third_party`, `dataNature=forecast`, `weather.riskSource=model` and the UI can switch windows. `SHIPPING_WEATHER_ALERT_PROVIDER=public` additionally enables independent source-specific JMA, TMD and BMKG official-warning contracts; warning items retain issued/expiry metadata, expose active/expired/unknown state, and downgrade to info at expiry without rewriting the official `updatedAt/sourceUpdatedAt`. Public live runtime remains pending; Mock remains the default, and a real model mode never consumes `mock-weather` as first-failure last-known.
+
+## Mock Isolation Rule
+
+Only explicit Mock mode may surface Mock data.
+
+Real Provider modes:
+
+- never fall back to Mock on missing configuration;
+- never use Mock as last-known;
+- preserve only same-provider successful historical data;
+- first failure with no same-provider history returns no data / `never_succeeded`;
+- unknown fields remain unknown rather than inheriting Mock values.
+
+Provider mode is the requested source (`mock`, `aisstream`, `portcast`, `open-meteo`, `calendarific` or `public`); runtime availability is represented independently by `healthy`, `degraded`, `failed`, `disabled` or `never_succeeded`. This keeps a missing AISStream key visible as `aisstream / never_succeeded`, while the data array is empty. Portcast retains static port identity on first failure, and its dynamic fields remain optional/unknown. Calendar and Feed read boundaries filter retained Mock rows without deleting them from SQLite.
 
 ## 9. Interfaces and External Dependencies
 
@@ -133,7 +147,7 @@ The V2.4 Weather Intelligence path extends the existing Open-Meteo adapter witho
 | db0 + local `better-sqlite3` | Local cache/user persistence | Cache can be disabled; auth requires DB | In-memory/no-cache only where current code supports it |
 | GitHub OAuth/JWT | Optional identity and sync | Login disabled when env is absent | Local browser preferences |
 | Cloudflare D1/Vercel/Bun | Optional runtime adapters | Runtime-specific failure | Local Node runtime |
-| Shipping Provider interfaces | Mock plus approved V1 adapters, V2.2 Calendar, V2.3 Feed and V2.4 Weather contracts implemented | Must isolate provider failure | Mock/last-known/no-data state with stale/sourceStatus |
+| Shipping Provider interfaces | Mock plus approved V1 adapters, V2.2 Calendar, V2.3 Feed and V2.4 Weather contracts implemented | Must isolate provider failure | Explicit Mock mode, same-provider last-known or no-data with stale/sourceStatus |
 
 ## 10. Authentication, Authorization and Security
 
@@ -149,7 +163,7 @@ The V2.4 Weather Intelligence path extends the existing Open-Meteo adapter witho
 - Source fetch failures are logged and may fall back to an existing cache row.
 - Missing auth configuration disables login-related behavior through middleware.
 - Shipping HOT DTOs carry `updatedAt`, `sourceUpdatedAt`, `fetchedAt`, `stale`, `sourceStatus`, provenance and optional `error`; Mock/provider failures are isolated at the API boundary. HOT Event freshness follows the related Vessel/Port/Voyage/FeedItem rather than Event detection time, and disabled/degraded/failed sources are not treated as fresh.
-- Real adapters must preserve last-known data and the same freshness/error contract.
+- Real adapters must preserve only same-provider last-known data and the same freshness/error contract; missing configuration is a requested real mode with no-data, never an implicit Mock switch.
 
 ## 12. Deployment, Backup and Restore
 
@@ -162,7 +176,7 @@ The V2.4 Weather Intelligence path extends the existing Open-Meteo adapter witho
 ## 13. Testing and Verification Boundaries
 
 - Current tests: Vitest covers Shipping HOT Domain, Provider, Repository, Event/HOT and UI trust contracts.
-- Current verification state: 139/139 tests, build, typecheck, targeted lint, default-Mock route smoke, security scan and `git diff --check` passed. Official external-provider live runtime remains pending; model weather and official weather alerts are independently configured and freshness-tracked.
+- Current verification state: 146/146 tests, build, typecheck, targeted lint, default-Mock and requested-real/no-credential route smoke, security scan and `git diff --check` passed. Official external-provider live runtime remains pending; model weather and official weather alerts are independently configured and freshness-tracked.
 - Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, Calendar source composition/conflict/reconciliation/announcement behavior, RSS/HTML Feed parsing with unknown publication and Chinese classification, source isolation, repost dedupe, Feed → Event/HOT boundaries, Open-Meteo 24-hour/72-hour/7-day windows/direction/TTL/per-port failure behavior, source-specific official warning parsing/expiry, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 
@@ -190,7 +204,7 @@ Changes that can remain local implementation decisions:
 | Project Architect/Neat Freak docs reconciliation | changed-and-verified after this pass | Docs must remain one source of truth | Re-run closeout after implementation |
 | Runtime/database file path | pending | Native `better-sqlite3` could not build on Node 24 in this environment | Verify on a compatible Node/toolchain |
 | GitHub remote/account metadata | pending | Local `origin` reaches `rallsix66/Shipping-HOT` and exposes `main`; `gh auth status` still reports an invalid token | Re-authenticate `gh` before account-level operations |
-| Real shipping data sources | changed-and-verified for V1 | AISStream is beta and key-gated; Open-Meteo Marine is optional-key for normal use and carries coastal-accuracy/attribution caveats | Keep keys server-side; retain Mock fallback |
+| Real shipping data sources | changed-and-verified for V1 | AISStream is beta and key-gated; Open-Meteo Marine is optional-key for normal use and carries coastal-accuracy/attribution caveats | Keep keys server-side; Mock is default only, with no Mock fallback in an explicitly real mode |
 | Current OAuth/cloud deployment code | implemented, not runtime-verified | May be unnecessary locally but dependencies are not mapped | Dependency analysis before removal |
 
 ## 16. Related ADRs

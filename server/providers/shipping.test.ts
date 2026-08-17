@@ -68,6 +68,9 @@ describe("shipping Provider failure boundaries", () => {
     })
     const first = await provider.getPorts([mockPorts[0]])
     expect(first[0]).toMatchObject({ congestionLevel: "medium", waitingHours: 14.879999999999999, sourceUpdatedAt: "2026-07-26T00:00:00.000Z", stale: false, sourceStatus: "healthy", provenance: { ...providerProvenances.portcastPublic, sourceUrl: portcastPublicPageUrls["port-shekou"] } })
+    expect(first[0].waitingVessels).toBeUndefined()
+    expect(first[0].containerWaitingVessels).toBeUndefined()
+    expect(first[0].operationalStatus).toBeUndefined()
     expect(first[0].congestionDetail).toMatchObject({ coverageStatus: "public", previousMedianWaitingHours: 19.200000000000003 })
     expect(portcastFingerprint({ congestionCategory: "medium", medianWaitingHours: 14.879999999999999, previousMedianWaitingHours: 19.200000000000003, longTailCongestion: false, sourceUpdatedAt: "2026-07-26T00:00:00.000Z" })).toContain("medium")
     now = new Date("2026-08-15T12:00:00.000Z")
@@ -80,15 +83,29 @@ describe("shipping Provider failure boundaries", () => {
     expect(rechecked[0].updatedAt).toBe(first[0].updatedAt)
   })
 
-  it("keeps last-known values explicit when a Portcast page is unavailable or malformed", async () => {
+  it("keeps only static identity when Portcast has never succeeded", async () => {
     const unavailable = createPortcastPublicPageProvider({ fetcher: async () => ({ ok: false, status: 404, text: async () => "" }) })
     const noPublicData = await unavailable.getPorts([mockPorts[3]])
-    expect(noPublicData[0]).toMatchObject({ waitingHours: mockPorts[3].waitingHours, stale: true, sourceStatus: "degraded", error: "no_public_data", provenance: mockPorts[3].provenance, congestionDetail: { coverageStatus: "no_public_data" } })
+    expect(noPublicData[0]).toMatchObject({ id: mockPorts[3].id, name: mockPorts[3].name, unlocode: mockPorts[3].unlocode, stale: true, sourceStatus: "degraded", error: "no_public_data", provenance: { sourceType: "third_party", sourceId: "portcast-public" }, congestionDetail: { coverageStatus: "no_public_data" } })
+    expect(noPublicData[0].waitingHours).toBeUndefined()
+    expect(noPublicData[0].waitingVessels).toBeUndefined()
+    expect(noPublicData[0].containerWaitingVessels).toBeUndefined()
+    expect(noPublicData[0].operationalStatus).toBeUndefined()
 
     const malformed = createPortcastPublicPageProvider({ fetcher: async () => ({ ok: true, status: 200, text: async () => "<html>broken</html>" }) })
     const failed = await malformed.getPorts([mockPorts[0]])
-    expect(failed[0]).toMatchObject({ congestionLevel: mockPorts[0].congestionLevel, waitingHours: mockPorts[0].waitingHours, stale: true, sourceStatus: "failed" })
+    expect(failed[0]).toMatchObject({ id: mockPorts[0].id, stale: true, sourceStatus: "failed", provenance: { sourceType: "third_party", sourceId: "portcast-public" } })
+    expect(failed[0].congestionLevel).toBeUndefined()
+    expect(failed[0].waitingHours).toBeUndefined()
     expect(failed[0].error).toContain("empty or invalid")
+  })
+
+  it("keeps only real Portcast dynamic last-known values after a later failure", async () => {
+    const real = { ...mockPorts[0], congestionLevel: "medium" as const, waitingHours: 14, waitingVessels: undefined, containerWaitingVessels: undefined, operationalStatus: undefined, provenance: providerProvenances.portcastPublic }
+    const provider = createPortcastPublicPageProvider({ fetcher: async () => ({ ok: false, status: 503, text: async () => "" }) })
+    const [failed] = await provider.getPorts([real])
+    expect(failed).toMatchObject({ congestionLevel: "medium", waitingHours: 14, stale: true, sourceStatus: "failed", provenance: { sourceType: "third_party", sourceId: "portcast-public" } })
+    expect(failed.waitingVessels).toBeUndefined()
   })
 
   it("keeps last-known data and marks a failed provider stale", () => {
@@ -103,10 +120,14 @@ describe("shipping Provider failure boundaries", () => {
     expect(disabledProviderData([vessel])[0]).toMatchObject({ id: vessel.id, stale: false, sourceStatus: "disabled" })
   })
 
-  it("uses Mock when AISStream is selected without an API key", () => {
+  it("keeps AISStream mode and returns no data when its API key is missing", async () => {
     const configured = configureProviders({ SHIPPING_VESSEL_PROVIDER: "aisstream" })
-    expect(configured.modes.vessel).toBe("mock")
+    expect(configured.modes.vessel).toBe("aisstream")
     expect(configured.providers.vessel).not.toBeUndefined()
+    await expect(configured.providers.vessel.getVessels(mockVessels)).rejects.toThrow("AISSTREAM_API_KEY missing")
+    const result = toProviderResult([], providerProvenances.aisstream, "2026-08-15T00:00:00.000Z", "never_succeeded", "AISSTREAM_API_KEY missing")
+    expect(result.data).toEqual([])
+    expect(result.freshness).toMatchObject({ sourceStatus: "never_succeeded", stale: true, error: "AISSTREAM_API_KEY missing" })
   })
 
   it("selects model weather and official alerts independently", async () => {

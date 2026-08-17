@@ -1,8 +1,23 @@
 import { describe, expect, it } from "vitest"
 import { type CalendarEvent, calendarCountries, calendarLeadDays } from "@shared/calendar"
-import { calendarAttribution, calendarProvenances, calendarificCoverageStatus, createCalendarificProvider, createCompositeCalendarProvider, createMockCalendarEvents, mergeCalendarSources, normalizeCalendarificPayload, officialHolidaySources, sanitizeCalendarError } from "./calendar"
+import { calendarAttribution, calendarProvenances, calendarificCoverageStatus, configureCalendarProviders, createCalendarificProvider, createCompositeCalendarProvider, createMockCalendarEvents, filterCalendarEventsForMode, mergeCalendarSources, normalizeCalendarificPayload, officialHolidaySources, sanitizeCalendarError } from "./calendar"
 
 describe("calendar providers", () => {
+  it("keeps Calendarific mode and returns unknown coverage when its key is missing", async () => {
+    const configured = configureCalendarProviders({ SHIPPING_CALENDAR_PROVIDER: "calendarific" })
+    expect(configured.modes.calendar).toBe("calendarific")
+    const result = await configured.provider.getEvents({ year: 2026, countries: ["TH"] })
+    expect(result.events).toEqual([])
+    expect(result.coverage).toEqual([expect.objectContaining({ sourceId: "calendarific", status: "unknown", error: "CALENDARIFIC_API_KEY missing" })])
+  })
+
+  it("keeps Mock Calendar records out of real mode inputs", () => {
+    const configured = configureCalendarProviders({ SHIPPING_CALENDAR_PROVIDER: "calendarific" })
+    expect(configured.modes.calendar).toBe("calendarific")
+    expect(configured.provider).not.toBeUndefined()
+    expect(filterCalendarEventsForMode(createMockCalendarEvents(2026), configured.modes.calendar)).toEqual([])
+  })
+
   it("normalizes Calendarific public, religious and observance records", () => {
     const events = normalizeCalendarificPayload({ response: { holidays: [
       { name: "National Day", date: { iso: "2026-08-17" }, type: ["national"] },

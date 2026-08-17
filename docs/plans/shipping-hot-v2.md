@@ -10,7 +10,7 @@
 
 Shipping HOT V2 继续作为个人本地使用的 local-first 航运工作台，保留现有 NewsNow foundation、React/Vite/Nitro/db0/SQLite、Provider、Repository、Event Engine 和 Feed 边界。
 
-V2 的核心不是增加尽可能多的数据源，而是让每一条数据都能回答三个问题：来源是什么、什么时候更新、这条数据是观测、报告、预测、模型、衍生、估算还是计划数据。任何 Provider 失败时，系统必须展示 last-known + stale/failed 状态，不能把旧数据或 Mock 数据伪装成最新数据。
+V2 的核心不是增加尽可能多的数据源，而是让每一条数据都能回答三个问题：来源是什么、什么时候更新、这条数据是观测、报告、预测、模型、衍生、估算还是计划数据。任何 Provider 失败时，系统只能展示同一 Provider 的 last-known + stale/failed 状态，不能把旧数据或 Mock 数据伪装成最新数据；没有同源历史时必须返回暂无数据。
 
 V2 的首要实施顺序建议为：
 
@@ -70,7 +70,7 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 
 现有 Shipping Repository 初始化 `feed_items`、`vessels`、`ports`、`voyages`、`events`、`settings`，NewsNow 另有 `cache`、`user`。当前实体主要以 `data` JSON 保存，同时保留查询和排序所需的少量列。
 
-当前 `shipping-store.ts` 会并行刷新 Vessel、Port、Voyage、Shipping Feed、Weather，失败时把各自 last-known 标记为 stale/failed；SQLite 不可用时保留内存 fallback。V2.2 另通过 `calendar_events` 保存年度事件事实，并在 `settings.calendarSync` 保存国家/年份/source coverage；partial/unknown coverage 缺失事件会保留为 stale degraded/failed，fresh incoming 恢复为 healthy，只有 complete coverage 才删除缺失事实。V2.3 Shipping Feed 默认仍是 Mock；显式 public 模式逐 Source 解析 RSS/HTML，失败只影响该 Source，旧资讯保留原发布时间并标记 stale，未知发布时间保存空 `published_at` 并按真实 `fetched_at` retention/prune。V2.4 Weather 默认仍是 Mock；显式 Open-Meteo 模式一次请求 7 天 current/hourly 海况，本地计算 24/72/168 小时窗口，30 分钟 TTL 复用结果，单港失败只影响该港并保留其 last-known。当前 Mock fixture 仍是产品可用的基础数据，因此 V2.0 必须让页面明确显示 `sourceType=mock`，而不是只显示一个看起来正常的“healthy”。当事件来源变成 stale、degraded、failed、disabled 或 never_succeeded 时，不创建新的事实事件，也不把已有 active 事件误判为 resolved；只有来源重新 fresh 且条件消失时才可 resolve。
+当前 `shipping-store.ts` 会并行刷新 Vessel、Port、Voyage、Shipping Feed、Weather，失败时只把同一 Provider 的 last-known 标记为 stale/failed；没有同源历史时返回空集合/暂无数据，SQLite 不可用时保留内存 fallback。V2.2 另通过 `calendar_events` 保存年度事件事实，并在 `settings.calendarSync` 保存国家/年份/source coverage；partial/unknown coverage 缺失事件会保留为 stale degraded/failed，fresh incoming 恢复为 healthy，只有 complete coverage 才删除缺失事实。V2.3 Shipping Feed 默认仍是 Mock；显式 public 模式逐 Source 解析 RSS/HTML，失败只影响该 Source，旧资讯保留原发布时间并标记 stale，未知发布时间保存空 `published_at` 并按真实 `fetched_at` retention/prune。V2.4 Weather 默认仍是 Mock；显式 Open-Meteo 模式一次请求 7 天 current/hourly 海况，本地计算 24/72/168 小时窗口，30 分钟 TTL 复用结果，单港失败只影响该港并保留同源 last-known，没有同源历史时不填充 `mock-weather`。当前 Mock fixture 仍是产品可用的基础数据，因此 V2.0 必须让页面明确显示 `sourceType=mock`，而不是只显示一个看起来正常的“healthy”。当事件来源变成 stale、degraded、failed、disabled 或 never_succeeded 时，不创建新的事实事件，也不把已有 active 事件误判为 resolved；只有来源重新 fresh 且条件消失时才可 resolve。
 
 ### 2.4 当前限制
 
@@ -78,8 +78,8 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 - 当前 AISStream 订阅使用全世界 Bounding Box + MMSI 过滤，只接收 `PositionReport`；当前没有持久化轨迹，也没有区域订阅会话管理。
 - 当前 PortProvider 和 ScheduleProvider 仍是 Mock。
 - 当前 Open-Meteo 已请求 current/hourly 风速、阵风、波高/波向、涌浪高度/方向和涌浪周期，一次取得 7 天数据后本地计算 24 小时、72 小时和 7 天模型风险；JMA 使用官方海上警报 HTML，TMD 使用官方 CAP，BMKG 使用官方 RSS 列表（其详情 CAP 入口已记录但未隐式抓取），三者均为 `live_pending`。
-- V2.2 Calendar 当前组合 TH/ID/MY/PH/VN 的 Calendarific、Official、Manual 和 Mock 边界；Calendarific 仅在服务端且显式配置 Key 后调用，默认仍为 Mock；Official 仍是 contract/local verified source，live sync pending。
-- V2.4 Weather 当前已实现 Open-Meteo 三窗口、30 分钟 TTL、逐港 last-known stale/failure 和 source-specific JMA/TMD/BMKG 官方 warning 合同；三个来源均 `live_pending`，`SHIPPING_WEATHER_ALERT_PROVIDER=public` 只允许 `verified_live` 来源（当前没有），`experimental` 才显式启用 pending adapter；模型风险和官方预警使用不同 `riskSource`/provenance，默认仍为 Mock。
+- V2.2 Calendar 当前组合 TH/ID/MY/PH/VN 的 Calendarific、Official、Manual 和 Mock 边界；Calendarific 仅在服务端且显式配置 Key 后调用，默认仍为 Mock；显式选择 Calendarific 但缺少 Key 时保持 calendarific 模式并返回 unknown/暂无数据，不回退 Mock；Official 仍是 contract/local verified source，live sync pending。
+- V2.4 Weather 当前已实现 Open-Meteo 三窗口、30 分钟 TTL、逐港同源 last-known stale/failure 和 source-specific JMA/TMD/BMKG 官方 warning 合同；Open-Meteo 首次失败且没有同源历史时返回暂无模型天气，不使用 `mock-weather`；三个来源均 `live_pending`，`SHIPPING_WEATHER_ALERT_PROVIDER=public` 只允许 `verified_live` 来源（当前没有），`experimental` 才显式启用 pending adapter；模型风险和官方预警使用不同 `riskSource`/provenance，默认仍为 Mock。
 - 当前 `Freshness` 只有 `updatedAt`、`stale`、`sourceStatus`、`error`，还没有统一的 `sourceType`/`dataNature` 业务标识。
 - 当前 NewsNow Source 协议使用 `NewsItem[]` 和独立 cache，缺少 Shipping HOT 所需的完整 `sourceStatus/stale` 语义；V2.3 在独立 Shipping Feed 适配层补齐，不破坏所有 NewsNow Source。
 
@@ -162,7 +162,7 @@ HOT
 
 | 领域 | 来源/Provider | 目标字段 | V2 结论 | 主要限制与回退 |
 | --- | --- | --- | --- | --- |
-| 船舶 | AISStream / `AisStreamVesselProvider` | MMSI、位置、速度、航向、Navigation Status、更新时间 | V2 必须，继续沿用 V1 | WebSocket、Key、beta/模型稳定性、AIS 漏报；失败回退 last-known，不伪造最新 |
+| 船舶 | AISStream / `AisStreamVesselProvider` | MMSI、位置、速度、航向、Navigation Status、更新时间 | V2 必须，继续沿用 V1 | WebSocket、Key、beta/模型稳定性、AIS 漏报；失败只回退同源 last-known，没有同源历史则暂无数据，不伪造最新 |
 | 港口 | Portcast Public Page / `PortcastPublicPageProvider` | category、median waiting time、previous period、WoW、long-tail、last updated、source URL | V2.1 首选 | 页面结构、公开覆盖、每周更新、robots/ToS、无数据港口；仅低频缓存和公开展示字段 |
 | 港口 | `AISDerivedPortProvider` | 锚地等待、低速/静止船、等待数、趋势 | V2.5 条件项 | 当前只看 Watched MMSI 无法统计全港；需 Bounding Box/锚地地理范围；结果 `dataNature=derived`/`estimated` |
 | 天气 | Open-Meteo Marine + Forecast | 风、阵风、波高、波向、波周期、涌浪 | V2 必须，V2.4 增强 | 模型/海岸精度限制；需归因；不能替代航海资料或官方预警 |
@@ -311,7 +311,7 @@ V2.0/V2.5 的实现建议：
 - 增加本地 `AisStreamSession`/连接管理器，按 server process 复用连接。
 - Watched MMSI 集合变化时 debounce 订阅重建，而不是每次 UI 请求都重建。
 - 连接空闲超过本地配置时间后关闭；用户明确点击刷新时允许一次受控重连。
-- 连接异常采用有限次指数退避；下次成功前继续返回 last-known + stale/failed。
+- 连接异常采用有限次指数退避；下次成功前继续返回同源 last-known + stale/failed，没有同源历史则暂无数据。
 - 单一共享会话只服务当前关注列表；不为每个 Vessel 创建连接。
 - 先保存当前状态和有限变化点，不保存无限轨迹；默认只保留近期变化用于状态持续时间和排错。
 
@@ -668,7 +668,7 @@ Local Scheduler 是单进程、本地、可暂停的同步编排器，不是云�
 
 ### 18.1 通用规则
 
-1. 有 last-known 且刷新失败：保留原始 `updatedAt`，设置 `stale=true`、`sourceStatus=failed`，保留两层 provenance 和错误摘要。
+1. 有同一 Provider 的 last-known 且刷新失败：保留原始 `updatedAt`，设置 `stale=true`、`sourceStatus=failed`，保留两层 provenance 和错误摘要。
 2. 没有 last-known 且刷新失败：返回空集合/暂无数据，`never_succeeded` 或 `failed`，不填充假数据。
 3. Provider disabled：返回 `disabled`，不把 disabled 视为 healthy 或 fresh。
 4. Mock 模式：明确 `provenance.sourceType=mock`，即使 fixture 时间是当前生成，也不得显示为外部新鲜数据。
@@ -774,7 +774,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 ### V2.0
 
 - 所有实体卡片统一显示 `sourceType`、`dataNature` 和 `STALE/FAILED/DISABLED/NEVER_SUCCEEDED`。
-- Mock fallback 不再看起来像真实源；provider chip 显示具体来源和更新时间。
+- 只有显式 Mock 模式才使用 Mock 数据；显式真实模式缺少配置或首次失败时显示暂无数据/`never_succeeded`，provider chip 显示具体来源和更新时间。
 - 空数据、失败、过期、disabled、never_succeeded 使用不同状态。
 - 已覆盖 HOT、Vessel、Port、Voyage、Event、Feed 及详情页；Mock 明确显示“模拟数据”，真实 V1 来源显示中文来源类型和数据性质。
 
@@ -802,7 +802,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 ### V2.4
 
 - 已实现 Weather Feed 卡片：可切换 24 小时、72 小时、7 天窗口，显示浪高、涌浪、周期、风/阵风、浪向/涌浪向、模型/官方标识和官方预警状态。
-- 已实现 `SHIPPING_WEATHER_PROVIDER=open-meteo`：一次请求 7 天 Open-Meteo current + hourly 海况字段，本地计算三个窗口，30 分钟 server-side/in-process TTL，逐港失败隔离和 last-known stale；没有 last-known 时不填充假天气。
+- 已实现 `SHIPPING_WEATHER_PROVIDER=open-meteo`：一次请求 7 天 Open-Meteo current + hourly 海况字段，本地计算三个窗口，30 分钟 server-side/in-process TTL，逐港失败隔离和同源 last-known stale；没有同源 last-known 时不填充 `mock-weather` 或其他假天气。
 - 已实现天气预警 source registry：JMA 海上警报 HTML、TMD CAP、BMKG RSS 独立 source-specific contracts；保留 issued/updated/effective/expiry，过期降为 info，解析失败保留 stale last-known，不能继续触发 HOT。三个来源均为 `live_pending`；`SHIPPING_WEATHER_ALERT_PROVIDER=public` 只启用 `verified_live` 来源（当前没有），`experimental` 才显式启用 pending adapter。
 
 ### V2.5
@@ -828,11 +828,11 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Out of Scope：商业 API、登录、私有接口、全港 AIS 衍生统计、完整历史趋势表。
 - Dependencies：V2.0 trust model；逐页确认公开字段、robots/ToS 和页面结构。
 - Status：implemented and verified。
-- Implemented：`PortcastPublicPageProvider`、公开 HTML parser、24 小时检查缓存、source fingerprint、Port congestion detail、Portcast attribution、环境开关 `SHIPPING_PORT_PROVIDER=portcast` 和 last-known/no-public-data/error fallback。
+- Implemented：`PortcastPublicPageProvider`、公开 HTML parser、24 小时检查缓存、source fingerprint、Port congestion detail、Portcast attribution、环境开关 `SHIPPING_PORT_PROVIDER=portcast` 和同源 last-known/no-public-data/error fallback；首次失败且无同源历史时只保留静态港口身份，动态指标不使用 Mock 值。
 - Verified public pages：Shekou、Yantian、Nansha（公开语言路径）、Laem Chabang、Port Klang、Manila、Jakarta、Ho Chi Minh City（公开语言路径）均有可访问的公开港口拥堵页面；页面公开字段按低频 fixture parser 读取，未调用商业 API 或隐藏接口。
 - Acceptance：只处理页面公开展示字段；页面失败/不存在/无数据有明确状态；每日最多按策略检查；source updatedAt/fingerprint 未变化不修改 Port 的业务更新时间并沿用 Event dedupe；Portcast 不可用时不伪造值。
 - Main risks：HTML 变化、页面动态渲染、授权限制、字段定义不稳定。
-- Rollback：关闭 Portcast Provider，回退 last-known/暂无数据/Mock 明示，不删已有历史 Event。
+- Rollback：关闭 Portcast Provider，回退同源 last-known/暂无数据；只有显式切换到 Mock 才使用 Mock，不删已有历史 Event。
 
 ### V2.2 — Country Calendar
 
@@ -841,8 +841,8 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Out of Scope：所有国家、自动解释未知宗教日期、企业 ERP 同步、多用户共享日历。
 - Dependencies：V2.0 trust model；Calendarific Key 管理确认；五国官方来源清单。
 - Status：implemented / locally verified; live pending。
-- Implemented：`CalendarProvider`/Calendarific server-only adapter、五国官方来源注册表、OfficialHolidayProvider/ManualHolidayProvider/Mock contracts、`calendar_events` 最小表、`settings.calendarSync` source-scoped coverage persistence、source merge priority/conflict evidence、government-special announced lifecycle、Calendar → Event → HOT lead windows、`/calendar` page、calendar GET/sync POST routes and conditional attribution。
-- Verification：136 tests pass；current `pnpm typecheck` and build passed；在当前依赖/工具链环境下重新执行历史 commit `fdf3191`，也复现 TS6142/TS6307（旧 status 的历史记录仍是当时的 passed，不改写为当前重跑结论）；targeted lint passed；default-Mock route smoke and security scan passed；official live sync remains pending；Neat Freak Bash inventory script remains unavailable on Windows and its manual equivalent is complete。
+- Implemented：`CalendarProvider`/Calendarific server-only adapter、五国官方来源注册表、OfficialHolidayProvider/ManualHolidayProvider/Mock contracts、`calendar_events` 最小表、`settings.calendarSync` source-scoped coverage persistence、source merge priority/conflict evidence、government-special announced lifecycle、Calendar → Event → HOT lead windows、`/calendar` page、calendar GET/sync POST routes and conditional attribution；显式 Calendarific 缺少 Key 时保持 calendarific 模式并返回 unknown/暂无数据，不回退 Mock。
+- Verification：历史阶段 checkpoint 为 136 tests；本轮最终 closeout 为 146/146；current `pnpm typecheck` and build passed；在当前依赖/工具链环境下重新执行历史 commit `fdf3191`，也复现 TS6142/TS6307（旧 status 的历史记录仍是当时的 passed，不改写为当前重跑结论）；targeted lint passed；default-Mock route smoke and requested-real/no-credential matrix passed；official live sync remains pending；Neat Freak Bash inventory script remains unavailable on Windows and its manual equivalent is complete。
 - Acceptance：不打开页面即请求 API；本地可离线读取实际已缓存的年度数据；`coverageStatus` 可区分 complete/partial/unknown；国家日历页面展示符合条款的 Calendarific Attribution；官方事实层优先级最高；ManualOverride 修改事实字段时保留原记录并标记 conflict；普通、高影响、连续假期和政府临时假日提醒不重复；日历不把 observance 默认当作放假。
 - Main risks：官方临时变更、地区差异、农历/宗教日期、第三方滞后。
 - Rollback：停用自动同步但保留本地 CalendarEvent；关闭提醒规则不删除已核验记录。
@@ -855,7 +855,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Dependencies：V2.0 trust model；逐 Source 的 RSS/HTML/robots/版权核对。
 - Status：implemented / locally verified; live pending。
 - Implemented：`FeedProvider`/`createPublicFeedProvider`/`MockFeedProvider`、The Loadstar 与 The Maritime Executive RSS、Shekou official HTML、registered/parser-pending and deferred registry entries、unknown publication semantics、Chinese classification、normalized FeedItem fields、per-source stale fallback、canonical/title dedupe、Feed → Event → HOT reason/evidence and `/feed` UI status chips；Repository 使用真实 `fetchedAt` 写入 `fetched_at`，未知 `publishedAt` 按 `fetched_at` retention/prune。
-- Verification：136 tests pass；build、typecheck and targeted lint passed；在当前依赖/工具链环境下重新执行历史 commit `fdf3191` 也复现 TS6142/TS6307；default-Mock route smoke passed；real public-source runtime remains pending because public mode is opt-in。
+- Verification：历史阶段 checkpoint 为 136 tests；本轮最终 closeout 为 146/146；build、typecheck and targeted lint passed；在当前依赖/工具链环境下重新执行历史 commit `fdf3191` 也复现 TS6142/TS6307；default-Mock and requested-real/no-credential route smoke passed；real public-source runtime remains pending because public mode is opt-in。
 - Acceptance：首批 Source 少于无限扩张；每个 Source 独立失败；普通新闻只进 Feed；有效公告/预警可进入 HOT；重复转载可去重；旧缓存明确 stale。
 - Main risks：来源质量、版权、抓取频率、来源结构变化。
 - Rollback：禁用单个 Source/分类，保留 NewsNow 原有 Source 和 cache。
@@ -867,8 +867,8 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Out of Scope：航行安全认证、复杂气象模型、多国 Provider 全量接入、海流/潮汐决策系统。
 - Dependencies：V2.0 trust model；现有 Open-Meteo adapter；官方来源合规核对。
 - Status：implemented / locally verified; live pending。
-- Implemented：扩展 `createOpenMeteoWeatherProvider` 的 current/hourly wave/swell/wind 请求、24/72/168 小时风险窗口和方向字段、30 分钟 TTL、逐港 failure/last-known stale；新增 `WeatherDetail.windows`、model/official risk labels、JMA 海上警报 HTML、TMD CAP、BMKG 官方 RSS source-specific adapters 和 warning expiry/parse-failure 保留逻辑。三个官方来源均标记 `live_pending`；`public` 不会启用它们，`experimental` 才显式允许 pending adapter。
-- Verification：136 tests pass；build、typecheck and targeted lint passed；在当前依赖/工具链环境下重新执行历史 commit `fdf3191` 也复现 TS6142/TS6307；default-Mock route smoke passed；public Open-Meteo/official warning runtime remains pending because the switches are opt-in。
+- Implemented：扩展 `createOpenMeteoWeatherProvider` 的 current/hourly wave/swell/wind 请求、24/72/168 小时风险窗口和方向字段、30 分钟 TTL、逐港 failure/同源 last-known stale；没有同源历史时首次失败返回暂无模型天气；新增 `WeatherDetail.windows`、model/official risk labels、JMA 海上警报 HTML、TMD CAP、BMKG 官方 RSS source-specific adapters 和 warning expiry/parse-failure 保留逻辑。三个官方来源均标记 `live_pending`；`public` 不会启用它们，`experimental` 才显式允许 pending adapter。
+- Verification：历史阶段 checkpoint 为 136 tests；本轮最终 closeout 为 146/146；build、typecheck and targeted lint passed；在当前依赖/工具链环境下重新执行历史 commit `fdf3191` 也复现 TS6142/TS6307；default-Mock and Open-Meteo requested/no-credential route smoke passed；public Open-Meteo/official warning runtime remains pending because the switches are opt-in。
 - Acceptance：字段来源和预报时间窗清楚；海况请求按 TTL 缓存；模型风险不能伪装官方预警；官方预警过期可关闭；单港失败不影响其他港口。
 - Main risks：沿岸精度、预警格式、重复公告、不同国家定义不一致。
 - Rollback：只保留现有 Open-Meteo 风/阵风/波高，关闭官方预警 Provider。
@@ -940,7 +940,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - UI 测试覆盖四类 `sourceType`、七类 `dataNature` 中实际使用的值、STALE/FAILED/DISABLED/NEVER_SUCCEEDED、暂无数据和来源链接。
 - AIS 测试证明 watched-only 不会被误报为全港统计；如果启用 area session，必须测试 Bounding Box、样本量不足、连接复用和退避。
 - Portcast 测试证明只解析允许的公开字段，页面 source updatedAt 不变时不会产生重复 Event。
-- 断网或没有 Key 时，核心本地工作台仍可启动；Mock/last-known/暂无数据状态清晰可见。
+- 断网或没有 Key 时，核心本地工作台仍可启动；显式 Mock、同源 last-known 和暂无数据状态清晰可见，真实模式不借用 Mock。
 
 ### 25.3 本轮最终状态
 

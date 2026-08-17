@@ -5,7 +5,7 @@ import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@
 import type { Severity as SeverityValue, ShippingEvent, WeatherDetail } from "@shared/shipping"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
 import { type ShippingResponse, useShipping } from "./data"
-import { formatDate, formatStatus, navTone, severityTone } from "./format"
+import { formatDate, formatPortMetric, formatStatus, navTone, severityTone } from "./format"
 import { AnimatedNumber, EmptyState, Marquee, ProvenanceBadge, ProviderChip, Reveal, Segmented, StatusDot } from "./ui"
 import { myFetch } from "~/utils"
 
@@ -43,13 +43,13 @@ function StatCell({ label, value, tone = "" }: { label: string, value: number | 
 
 const congestionLevels = { low: 25, medium: 50, high: 75, critical: 100 } as const
 
-function CongestionGauge({ level }: { level: "low" | "medium" | "high" | "critical" }) {
+function CongestionGauge({ level }: { level?: "low" | "medium" | "high" | "critical" }) {
   return (
     <div className="gauge-track">
       <motion.div
-        className={`gauge-fill gauge-${level}`}
+        className={`gauge-fill gauge-${level ?? "unknown"}`}
         initial={{ width: 0 }}
-        whileInView={{ width: `${congestionLevels[level]}%` }}
+        whileInView={{ width: `${level ? congestionLevels[level] : 0}%` }}
         viewport={{ once: true }}
         transition={{ duration: 0.9, ease: "easeOut" }}
       />
@@ -344,12 +344,12 @@ export function HotPage() {
               : watchedPorts.map(p => (
                   <Link key={p.id} to="/ports/$id" params={{ id: p.id }} className="list-row group">
                     <span className="flex min-w-0 items-center gap-2 font-semibold">
-                      <StatusDot tone={p.congestionLevel === "critical" ? "failed" : p.congestionLevel === "high" ? "watch" : "fresh"} />
+                      <StatusDot tone={p.congestionLevel === undefined ? "dim" : p.congestionLevel === "critical" ? "failed" : p.congestionLevel === "high" ? "watch" : "fresh"} />
                       <span className="truncate">{p.name}</span>
                     </span>
                     <span className="gauge-cell">
                       <CongestionGauge level={p.congestionLevel} />
-                      <span className={`g-lbl ${p.congestionLevel}`}>{formatStatus(p.congestionLevel)}</span>
+                      <span className={`g-lbl ${p.congestionLevel ?? "unknown"}`}>{formatStatus(p.congestionLevel ?? "unknown")}</span>
                     </span>
                   </Link>
                 ))}
@@ -620,12 +620,10 @@ export function PortsPage() {
                   <span className="c-country">{p.country}</span>
                   <span className="gauge-cell c-cong">
                     <CongestionGauge level={p.congestionLevel} />
-                    <span className={`g-lbl ${p.congestionLevel}`}>{formatStatus(p.congestionLevel)}</span>
+                    <span className={`g-lbl ${p.congestionLevel ?? "unknown"}`}>{formatStatus(p.congestionLevel ?? "unknown")}</span>
                   </span>
                   <span className="c-vessels">
-                    {p.waitingVessels}
-                    {" "}
-                    艘
+                    {formatPortMetric(p.waitingVessels, "艘")}
                   </span>
                   <span className="c-watch">
                     <WatchChip kind="port" id={p.id} watched={p.isWatched} onSaved={() => refetch()} />
@@ -680,33 +678,27 @@ export function PortDetailPage({ id }: { id: string }) {
           <dl className="kv">
             <dt>运营状态</dt>
             <dd className="flex items-center gap-2">
-              <StatusDot tone={port.operationalStatus === "normal" ? "fresh" : port.operationalStatus === "closed" ? "failed" : "watch"} />
-              {formatStatus(port.operationalStatus)}
+              <StatusDot tone={port.operationalStatus === undefined ? "dim" : port.operationalStatus === "normal" ? "fresh" : port.operationalStatus === "closed" ? "failed" : "watch"} />
+              {formatStatus(port.operationalStatus ?? "unknown")}
             </dd>
             <dt>拥堵态势</dt>
             <dd>
               <span className="gauge-cell">
                 <CongestionGauge level={port.congestionLevel} />
-                <span className={`g-lbl ${port.congestionLevel}`}>{formatStatus(port.congestionLevel)}</span>
+                <span className={`g-lbl ${port.congestionLevel ?? "unknown"}`}>{formatStatus(port.congestionLevel ?? "unknown")}</span>
               </span>
             </dd>
             <dt>等待船舶</dt>
             <dd>
-              {port.waitingVessels}
-              {" "}
-              艘
+              {formatPortMetric(port.waitingVessels, "艘")}
             </dd>
             <dt>其中集装箱船</dt>
             <dd>
-              {port.containerWaitingVessels}
-              {" "}
-              艘
+              {formatPortMetric(port.containerWaitingVessels, "艘")}
             </dd>
             <dt>等待时长</dt>
             <dd>
-              {port.waitingHours}
-              {" "}
-              小时
+              {formatPortMetric(port.waitingHours, "小时")}
             </dd>
             <dt>公开拥堵数据</dt>
             <dd>

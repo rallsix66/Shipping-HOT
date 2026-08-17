@@ -47,7 +47,7 @@ export const providerProvenances = {
 const aisstreamProvenance: DataProvenance = providerProvenances.aisstream
 const openMeteoProvenance: DataProvenance = providerProvenances.openMeteo
 
-export function toProviderResult<T extends Freshness>(data: T[], provenance: DataProvenance, fetchedAt = new Date().toISOString(), sourceStatusOverride?: SourceStatus): ProviderResult<T> {
+export function toProviderResult<T extends Freshness>(data: T[], provenance: DataProvenance, fetchedAt = new Date().toISOString(), sourceStatusOverride?: SourceStatus, errorOverride?: string): ProviderResult<T> {
   const statusPriority = ["failed", "never_succeeded", "degraded", "disabled", "healthy"] as const
   const sourceStatus = sourceStatusOverride ?? statusPriority.find(status => data.some(item => item.sourceStatus === status)) ?? "never_succeeded"
   const first = data[0]
@@ -62,15 +62,20 @@ export function toProviderResult<T extends Freshness>(data: T[], provenance: Dat
       fetchedAt,
       stale: sourceStatus !== "healthy" || data.some(item => item.stale),
       sourceStatus,
-      error: data.find(item => item.error)?.error,
+      error: errorOverride ?? data.find(item => item.error)?.error,
     },
   }
+}
+
+export function providerError(result: PromiseSettledResult<unknown[]>): string | undefined {
+  if (result.status !== "rejected") return undefined
+  return result.reason instanceof Error ? result.reason.message : "Provider failed"
 }
 
 export function providerResult<T extends Freshness>(result: PromiseSettledResult<T[]>, lastKnown: T[]): T[] {
   const fetchedAt = new Date().toISOString()
   if (result.status === "fulfilled") return result.value.map(item => ({ ...item, fetchedAt })) as T[]
-  const error = result.reason instanceof Error ? result.reason.message : "Provider failed"
+  const error = providerError(result)
   return lastKnown.map(item => ({ ...item, stale: true, sourceStatus: "failed", error, fetchedAt })) as T[]
 }
 
@@ -91,6 +96,13 @@ export function isOfficialWeatherAlertFeedItem(item: FeedItem): boolean {
 export const MockVesselProvider: VesselProvider = { async getVessels() {
   return structuredClone(mockVessels)
 } }
+export function createUnavailableVesselProvider(error: string): VesselProvider {
+  return {
+    async getVessels() {
+      throw new Error(error)
+    },
+  }
+}
 export const MockPortProvider: PortProvider = { async getPorts() {
   return structuredClone(mockPorts)
 } }
@@ -245,31 +257,47 @@ function portcastExistingFingerprint(port: Port): string {
   })
 }
 
-function withPortcastAttempt(port: Port, url: string): Port {
+function portIdentity(port: Port): Pick<Port, "id" | "name" | "nameEn" | "country" | "unlocode" | "isWatched"> {
+  return { id: port.id, name: port.name, nameEn: port.nameEn, country: port.country, unlocode: port.unlocode, isWatched: port.isWatched }
+}
+
+function isPortcastHistory(port: Port): boolean {
   return port.provenance?.sourceId === "portcast-public"
-    ? { ...port, provenance: { ...port.provenance, sourceUrl: url } }
-    : port
+}
+
+function stalePortcastData(port: Port, url: string | undefined, fetchedAt: string, sourceStatus: "degraded" | "failed", error: string, noPublicData = false): Port {
+  const historical = isPortcastHistory(port)
+  const historicalData = historical
+    ? {
+        congestionLevel: port.congestionLevel,
+        congestionDetail: port.congestionDetail,
+        waitingVessels: port.waitingVessels,
+        containerWaitingVessels: port.containerWaitingVessels,
+        waitingHours: port.waitingHours,
+        operationalStatus: port.operationalStatus,
+        updatedAt: port.updatedAt,
+        sourceUpdatedAt: port.sourceUpdatedAt,
+      }
+    : noPublicData
+      ? { congestionDetail: { coverageStatus: "no_public_data" as const } }
+      : {}
+  return {
+    ...portIdentity(port),
+    ...historicalData,
+    provenance: { ...(historical && port.provenance ? port.provenance : providerProvenances.portcastPublic), sourceUrl: url ?? providerProvenances.portcastPublic.sourceUrl },
+    fetchedAt,
+    stale: true,
+    sourceStatus,
+    error,
+  }
 }
 
 function noPublicPortData(port: Port, url: string | undefined, fetchedAt: string): Port {
-  return {
-    ...withPortcastAttempt(port, url ?? providerProvenances.portcastPublic.sourceUrl),
-    fetchedAt,
-    stale: true,
-    sourceStatus: "degraded",
-    error: "no_public_data",
-    congestionDetail: { coverageStatus: "no_public_data" },
-  }
+  return stalePortcastData(port, url, fetchedAt, "degraded", "no_public_data", true)
 }
 
 function failedPortcastData(port: Port, url: string | undefined, fetchedAt: string, error: string): Port {
-  return {
-    ...withPortcastAttempt(port, url ?? providerProvenances.portcastPublic.sourceUrl),
-    fetchedAt,
-    stale: true,
-    sourceStatus: "failed",
-    error,
-  }
+  return stalePortcastData(port, url, fetchedAt, "failed", error)
 }
 
 interface PortcastCacheEntry {
@@ -305,10 +333,13 @@ export function createPortcastPublicPageProvider(options: PortcastPublicPageProv
           const fingerprint = portcastFingerprint(metrics)
           const unchanged = cached?.fingerprint === fingerprint || (!cached && port.provenance?.sourceId === "portcast-public" && portcastExistingFingerprint(port) === fingerprint)
           const next: Port = {
-            ...port,
-            congestionLevel: metrics.congestionCategory ?? port.congestionLevel,
+            ...portIdentity(port),
+            congestionLevel: metrics.congestionCategory,
             congestionDetail: portcastDetail(metrics),
-            waitingHours: metrics.medianWaitingHours ?? port.waitingHours,
+            waitingHours: metrics.medianWaitingHours,
+            waitingVessels: undefined,
+            containerWaitingVessels: undefined,
+            operationalStatus: undefined,
             updatedAt: unchanged ? port.updatedAt : fetchedAt,
             sourceUpdatedAt: metrics.sourceUpdatedAt,
             fetchedAt,
@@ -778,7 +809,7 @@ interface ProviderEnvironment {
 }
 
 export function configureProviders(environment: ProviderEnvironment = { ...env }) {
-  const vesselMode = environment.SHIPPING_VESSEL_PROVIDER === "aisstream" && environment.AISSTREAM_API_KEY ? "aisstream" : "mock"
+  const vesselMode = environment.SHIPPING_VESSEL_PROVIDER === "aisstream" ? "aisstream" : "mock"
   const portMode = environment.SHIPPING_PORT_PROVIDER === "portcast" ? "portcast" : "mock"
   const weatherMode = environment.SHIPPING_WEATHER_PROVIDER === "open-meteo" ? "open-meteo" : "mock"
   const configuredFeed = configureFeedProviders({ SHIPPING_FEED_PROVIDER: environment.SHIPPING_FEED_PROVIDER })
@@ -790,7 +821,11 @@ export function configureProviders(environment: ProviderEnvironment = { ...env }
     : DisabledWeatherAlertProvider
   return {
     providers: {
-      vessel: vesselMode === "aisstream" ? createAisStreamVesselProvider({ apiKey: environment.AISSTREAM_API_KEY! }) : MockVesselProvider,
+      vessel: vesselMode === "aisstream"
+        ? environment.AISSTREAM_API_KEY
+          ? createAisStreamVesselProvider({ apiKey: environment.AISSTREAM_API_KEY })
+          : createUnavailableVesselProvider("AISSTREAM_API_KEY missing")
+        : MockVesselProvider,
       port: portMode === "portcast" ? createPortcastPublicPageProvider() : MockPortProvider,
       schedule: MockScheduleProvider,
       weather: weatherMode === "open-meteo" ? createOpenMeteoWeatherProvider() : MockWeatherProvider,
@@ -811,7 +846,7 @@ export function configureProviders(environment: ProviderEnvironment = { ...env }
 const configured = configureProviders()
 const configuredCalendar = configureCalendarProviders()
 export const providers = { ...configured.providers, calendar: configuredCalendar.provider as CalendarProvider } as typeof configured.providers & { calendar: CalendarProvider }
-export const providerModes = { ...configured.modes, calendar: configuredCalendar.modes.calendar }
+export const providerModes = { ...configured.modes, calendar: configuredCalendar.modes.calendar, calendarSources: configuredCalendar.modes.calendarSources }
 export const calendarProviderModes = configuredCalendar.modes
 
 export const realProviders = {
