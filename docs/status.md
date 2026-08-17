@@ -1,12 +1,12 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
 > Snapshot date: 2026-08-17
-> Evidence scope: local code / configuration / Git metadata; V2.0 is sealed, V2.1 is implemented, and V2.2/V2.3/V2.4 local closeout gates passed; the 2026-08-17 Calendar source activation final-fix batch has 165/165 tests, typecheck, build, targeted lint, offline runtime smoke and documentation closeout passing; full lint retains four pre-existing errors, native SQLite runtime is pending on this Node 24 environment, and live external-provider verification remains pending.
+> Evidence scope: local code / configuration / Git metadata; V2.0 is sealed, V2.1 is implemented, and V2.2/V2.3/V2.4 local closeout gates passed. The 2026-08-17 Real Provider live probe verified Portcast 8/8 public pages and Open-Meteo 8/8 port responses, partially verified the active Feed sources and independently probed JMA/TMD/BMKG; AISStream and Calendarific live verification were blocked because the required secrets were absent. Full lint retains four pre-existing errors, native SQLite runtime is pending on this Node 24 environment, and sources not meeting the live criteria remain live_pending.
 > Source of truth for: current implementation and verification state
 
 ## 1. One-Sentence Status
 
-Shipping HOT V2.2–V2.4 local closeout is complete on the retained NewsNow stack: V2.0 trust rules remain sealed, V2.1 is implemented, Mock remains the default, and the fixes cover composed calendar sources, verified Calendar provenance source activation, unknown Feed publication times, three weather windows, wave/swell directions, source-specific official warning contracts and final Mock isolation. The final isolation batch separates AIS watch configuration from observations, derives AIS status duration only from same-source observations, and filters incompatible historical Events out of the current Event/HOT view without deleting them. Official weather alerts are independently selected from the model-weather Provider, with model/alert failure isolation and explicit status display. Public live-provider verification remains pending and is recorded below.
+Shipping HOT V2.2–V2.4 local closeout is complete on the retained NewsNow stack: V2.0 trust rules remain sealed, V2.1 is implemented, Mock remains the default, and the fixes cover composed calendar sources, verified Calendar provenance source activation, unknown Feed publication times, three weather windows, wave/swell directions, source-specific official warning contracts and final Mock isolation. The 2026-08-17 live probe exercised all requested real-mode switches in one App run; Portcast and Open-Meteo returned real public responses, active Feed sources had mixed results, Official Alerts remained registry-gated, and missing AISStream/Calendarific secrets correctly produced no-data without Mock fallback. The final isolation batch separates AIS watch configuration from observations, derives AIS status duration only from same-source observations, and filters incompatible historical Events out of the current Event/HOT view without deleting them.
 
 `Mock isolation: complete` for the local operational boundary; native SQLite runtime and real external-provider live verification remain pending.
 
@@ -131,6 +131,36 @@ The requested Provider mode is shown independently from runtime `sourceStatus` (
 ### Deprecated / Rejected
 
 - None recorded. Do not infer deletion approval from the proposal's `REMOVE` section.
+
+## Real Provider Live Verification — 2026-08-17
+
+The requested one-shot mode configuration was applied to the local App without writing secrets:
+
+`vessel=aisstream`, `port=portcast`, `weather=open-meteo`, `weatherAlerts=public`, `feed=public`, `calendar=calendarific`; Schedule remains Mock by approved scope.
+
+Required secrets were absent from the process environment and no `.env` file was present: `AISSTREAM_API_KEY` and `CALENDARIFIC_API_KEY`. No placeholder or fabricated secret was used.
+
+| Module | Source | Requested | Live result | Data count | Freshness / status | Notes |
+|---|---|---:|---|---:|---|---|
+| AISStream | AISStream | yes | not requested; key absent | 0 vessels | `never_succeeded` | Connection/PositionReport observation pending; no Mock fallback |
+| Portcast | Shekou | yes | verified | 1/1 | healthy, fresh | public page, medium, 62.88h; source date 2026-08-16 |
+| Portcast | Yantian | yes | verified | 1/1 | healthy, fresh | public page, medium, 32.40h; source date 2026-08-16 |
+| Portcast | Nansha | yes | verified | 1/1 | healthy, fresh | public page, medium, 26.88h; source date 2026-02-16 |
+| Portcast | Laem Chabang | yes | verified | 1/1 | healthy, fresh | public page, low, 4.56h; source date 2026-08-16 |
+| Portcast | Port Klang | yes | verified | 1/1 | healthy, fresh | public page, low, 3.84h; source date 2026-08-16 |
+| Portcast | Manila | yes | verified | 1/1 | healthy, fresh | public page, medium, 27.60h; source date 2026-08-16 |
+| Portcast | Jakarta | yes | verified | 1/1 | healthy, fresh | public page, low, 7.44h; long-tail=true; source date 2026-08-16 |
+| Portcast | Ho Chi Minh | yes | verified | 1/1 | healthy, fresh | public page, low, 1.92h; source date 2026-02-16 |
+| Open-Meteo | 8 focus ports | yes | 8/8 HTTP + parser responses | 8 responses / 6 risk FeedItems | healthy, fresh | 16 requests total; each port uses one Marine + one Forecast request; emitted items contain `h24/h72/d7`; Port Klang/Jakarta were below risk emission threshold |
+| Shipping Feed | The Loadstar | yes | verified | 10 | parser success | HTTP 200 RSS; latest publishedAt 2026-08-16T23:01:39Z; publication times known |
+| Shipping Feed | Maritime Executive | yes | failed | 0 | `failed_live` | direct HTTPS fetch failed; no fabricated item or Mock fallback |
+| Shipping Feed | Shekou Official | yes | partial | 14 | parser success, publication unknown | HTTP 200 HTML; all 14 items had unknown publication time and therefore cannot create Event/HOT |
+| Calendarific | TH/ID/MY/PH/VN | yes | not requested; key absent | 0 | `live_pending` | requested mode remained `calendarific`; no Mock Calendar records |
+| Official Alerts | JMA | independent probe | partial | 0 | `live_pending` | HTTP 200 HTML, current parser produced no alerts |
+| Official Alerts | TMD | independent probe | failed parser | 0 | `live_pending` | HTTP 200 CAP endpoint, payload had no recognizable alert root |
+| Official Alerts | BMKG | independent probe | partial | 6 | `live_pending` | HTTP 200 XML/RSS and 6 parsed items; registry remains disabled/live_pending |
+
+No `live_pending` source was upgraded to `verified_live`; the live results above do not yet satisfy every registry upgrade criterion. Public mode therefore still activates no Official Alert source by default.
 
 ## 6. Known Inconsistencies
 
