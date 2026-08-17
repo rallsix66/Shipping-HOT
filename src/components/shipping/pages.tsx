@@ -256,7 +256,7 @@ export function HotPage() {
     { label: "活跃 HOT", value: data.hot.length as number, tone: "stat-critical" as const },
     { label: "关注船舶", value: watchedVessels.length as number, tone: "" as const },
     { label: "关注港口", value: watchedPorts.length as number, tone: "stat-warning" as const },
-    { label: "数据源", value: `${data.provider.vessel} / ${data.provider.weather}` as string, tone: "" as const },
+    { label: "数据源", value: `${data.provider.vessel} / ${data.provider.weather} / 预警 ${data.provider.weatherAlerts}` as string, tone: "" as const },
   ]
   return (
     <ShippingShell title="运营态势 · 首页">
@@ -1354,12 +1354,13 @@ export function SettingsPage() {
           <div className="flex flex-wrap gap-2">
             <ProviderChip label="船位" value={data.provider.vessel} />
             <ProviderChip label="天气" value={data.provider.weather} />
+            <ProviderChip label="官方预警" value={data.provider.weatherAlerts} />
             <ProviderChip label="港口" value={data.provider.port} />
             <ProviderChip label="班期" value={data.provider.schedule} />
             <ProviderChip label="资讯" value={data.provider.feed} />
           </div>
         </div>
-        <p className="mt-4 text-xs op-60">数据源：AISStream（船位，可选 key）、Open-Meteo Marine（天气）、Portcast 公共港口页面（低频公开字段）、Shipping Feed（默认 Mock，可选公开 RSS/官方公告）与 Mock Schedule。</p>
+        <p className="mt-4 text-xs op-60">数据源：AISStream（船位，可选 key）、Open-Meteo Marine（天气模型）、JMA / TMD / BMKG（官方天气预警，可选 public / experimental）、Portcast 公共港口页面（低频公开字段）、Shipping Feed（默认 Mock，可选公开 RSS/官方公告）与 Mock Schedule。</p>
       </div>
     </ShippingShell>
   )

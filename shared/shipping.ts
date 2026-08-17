@@ -61,6 +61,7 @@ export interface ShippingProviderFreshness {
   port: Freshness
   schedule: Freshness
   weather: Freshness
+  weatherAlerts: Freshness
   feed?: Freshness
 }
 

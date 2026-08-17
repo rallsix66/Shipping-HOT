@@ -3,7 +3,7 @@ import type { DataProvenance, FeedItem, Freshness, Port, PortCongestionDetail, P
 import { mockFeedItems, mockPorts, mockVessels, mockVoyages, portWeatherConfig } from "@shared/shipping-fixtures"
 import { type CalendarProvider, configureCalendarProviders } from "./calendar"
 import { configureFeedProviders } from "./feed"
-import { type WeatherAlertProvider, createOfficialWeatherAlertProvider } from "./weather-alerts"
+import { type WeatherAlertProvider, createOfficialWeatherAlertProvider, officialWeatherAlertSourceIds } from "./weather-alerts"
 
 export interface VesselProvider {
   getVessels: (watched?: Vessel[]) => Promise<Vessel[]>
@@ -18,6 +18,19 @@ export interface WeatherProvider {
   getFeedItems: (ports?: Port[], lastKnown?: FeedItem[]) => Promise<FeedItem[]>
 }
 
+export async function fetchWeatherProviderResults(
+  modelProvider: WeatherProvider,
+  alertProvider: WeatherAlertProvider,
+  ports: Port[],
+  modelLastKnown: FeedItem[],
+  alertLastKnown: FeedItem[],
+): Promise<[PromiseSettledResult<FeedItem[]>, PromiseSettledResult<FeedItem[]>]> {
+  return Promise.allSettled([
+    modelProvider.getFeedItems(ports, modelLastKnown),
+    alertProvider.getFeedItems(alertLastKnown, ports),
+  ])
+}
+
 export const providerProvenances = {
   aisstream: { sourceType: "third_party", dataNature: "observed", sourceId: "aisstream", sourceUrl: "https://aisstream.io/", verified: false },
   openMeteo: { sourceType: "third_party", dataNature: "forecast", sourceId: "open-meteo-marine", sourceUrl: "https://open-meteo.com/", verified: false },
@@ -26,6 +39,7 @@ export const providerProvenances = {
   mockPort: { sourceType: "mock", dataNature: "derived", sourceId: "mock-port", verified: false },
   mockSchedule: { sourceType: "mock", dataNature: "planned", sourceId: "mock-schedule", verified: false },
   mockWeather: { sourceType: "mock", dataNature: "forecast", sourceId: "mock-weather", verified: false },
+  officialWeatherAlerts: { sourceType: "official", dataNature: "reported", sourceId: "official-weather-alerts", verified: true },
   shippingFeed: { sourceType: "third_party", dataNature: "reported", sourceId: "shipping-feed", sourceUrl: "https://theloadstar.com/", verified: false },
   mockFeed: { sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice", sourceUrl: "https://example.com/mock/feed", verified: false },
 } as const satisfies Record<string, DataProvenance>
@@ -64,10 +78,14 @@ export function disabledProviderData<T extends Freshness>(lastKnown: T[]): T[] {
   return lastKnown.map(item => ({ ...item, stale: false, sourceStatus: "disabled", error: undefined })) as T[]
 }
 
-const weatherSourceIds = new Set(["mock-weather", "open-meteo-marine", "jma", "tmd", "bmkg"])
+const weatherSourceIds = new Set(["mock-weather", "open-meteo-marine", ...officialWeatherAlertSourceIds])
 
 export function isWeatherFeedItem(item: FeedItem): boolean {
   return weatherSourceIds.has(item.sourceId)
+}
+
+export function isOfficialWeatherAlertFeedItem(item: FeedItem): boolean {
+  return officialWeatherAlertSourceIds.has(item.sourceId)
 }
 
 export const MockVesselProvider: VesselProvider = { async getVessels() {
@@ -81,6 +99,10 @@ export const MockScheduleProvider: ScheduleProvider = { async getVoyages() {
 } }
 export const MockWeatherProvider: WeatherProvider = { async getFeedItems() {
   return structuredClone(mockFeedItems.filter(isWeatherFeedItem))
+} }
+
+export const DisabledWeatherAlertProvider: WeatherAlertProvider = { async getFeedItems() {
+  return []
 } }
 
 export interface PortcastPublicPageResponse {
@@ -685,7 +707,6 @@ export interface OpenMeteoWeatherProviderOptions {
   fetcher?: WeatherFetcher
   marineEndpoint?: string
   weatherEndpoint?: string
-  alertProvider?: WeatherAlertProvider
   now?: () => Date
   minIntervalMs?: number
 }
@@ -740,16 +761,8 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
         }
       }))
       const modelItems = results.flat().filter((item): item is FeedItem => item !== undefined)
-      let alertItems: FeedItem[] = []
-      if (options.alertProvider) {
-        try {
-          alertItems = await options.alertProvider.getFeedItems(lastKnown, ports)
-        } catch (error) {
-          alertItems = lastKnown.filter(item => item.sourceId === "jma" || item.sourceId === "tmd" || item.sourceId === "bmkg").map(item => ({ ...item, stale: true, sourceStatus: "failed" as const, error: error instanceof Error ? error.message : "Official weather alert provider failed", fetchedAt }))
-        }
-      }
-      if (failures.length && failures.length === ports.filter(port => portWeatherConfig[port.id as keyof typeof portWeatherConfig]).length && modelItems.length === 0 && alertItems.length === 0) throw new Error(failures[0])
-      return [...modelItems, ...alertItems]
+      if (failures.length && failures.length === ports.filter(port => portWeatherConfig[port.id as keyof typeof portWeatherConfig]).length && modelItems.length === 0) throw new Error(failures[0])
+      return modelItems
     },
   }
 }
@@ -769,16 +782,19 @@ export function configureProviders(environment: ProviderEnvironment = { ...env }
   const portMode = environment.SHIPPING_PORT_PROVIDER === "portcast" ? "portcast" : "mock"
   const weatherMode = environment.SHIPPING_WEATHER_PROVIDER === "open-meteo" ? "open-meteo" : "mock"
   const configuredFeed = configureFeedProviders({ SHIPPING_FEED_PROVIDER: environment.SHIPPING_FEED_PROVIDER })
-  const weatherAlertMode = environment.SHIPPING_WEATHER_ALERT_PROVIDER
-  const weatherAlertProvider = weatherMode === "open-meteo" && (weatherAlertMode === "public" || weatherAlertMode === "experimental")
+  const weatherAlertMode = environment.SHIPPING_WEATHER_ALERT_PROVIDER === "public" || environment.SHIPPING_WEATHER_ALERT_PROVIDER === "experimental"
+    ? environment.SHIPPING_WEATHER_ALERT_PROVIDER
+    : "off"
+  const weatherAlertProvider = weatherAlertMode !== "off"
     ? createOfficialWeatherAlertProvider({ allowPending: weatherAlertMode === "experimental" })
-    : undefined
+    : DisabledWeatherAlertProvider
   return {
     providers: {
       vessel: vesselMode === "aisstream" ? createAisStreamVesselProvider({ apiKey: environment.AISSTREAM_API_KEY! }) : MockVesselProvider,
       port: portMode === "portcast" ? createPortcastPublicPageProvider() : MockPortProvider,
       schedule: MockScheduleProvider,
-      weather: weatherMode === "open-meteo" ? createOpenMeteoWeatherProvider({ alertProvider: weatherAlertProvider }) : MockWeatherProvider,
+      weather: weatherMode === "open-meteo" ? createOpenMeteoWeatherProvider() : MockWeatherProvider,
+      weatherAlerts: weatherAlertProvider,
       feed: configuredFeed.provider,
     },
     modes: {
@@ -786,6 +802,7 @@ export function configureProviders(environment: ProviderEnvironment = { ...env }
       port: portMode,
       schedule: "mock" as const,
       weather: weatherMode,
+      weatherAlerts: weatherAlertMode,
       feed: configuredFeed.modes.feed,
     },
   }
@@ -802,6 +819,7 @@ export const realProviders = {
   port: "Portcast public page",
   schedule: "deferred",
   weather: "Open-Meteo Marine API",
+  weatherAlerts: "JMA / TMD / BMKG official weather alerts",
   feed: "The Loadstar / The Maritime Executive / official port notices",
   calendar: "Calendarific / OfficialHolidayProvider / ManualHolidayProvider",
 } as const

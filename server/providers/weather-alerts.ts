@@ -8,6 +8,8 @@ export interface WeatherAlertProvider {
   getFeedItems: (lastKnown?: FeedItem[], ports?: Port[]) => Promise<FeedItem[]>
 }
 
+export const officialWeatherAlertSourceIds = new Set(["jma", "tmd", "bmkg"])
+
 export interface WeatherAlertResponse {
   ok: boolean
   status: number

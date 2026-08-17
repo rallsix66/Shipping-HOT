@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest"
-import { createMockSnapshot, mockPorts, mockVessels } from "@shared/shipping-fixtures"
+import { createMockSnapshot, mockFeedItems, mockPorts, mockVessels } from "@shared/shipping-fixtures"
 import type { FeedItem, Vessel } from "@shared/shipping"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeWeatherFeedItems } from "../shipping-store"
-import { configureProviders, createAisStreamVesselProvider, createOpenMeteoWeatherProvider, createPortcastPublicPageProvider, disabledProviderData, normalizeProviderTimestamp, parsePortcastPublicPage, portcastFingerprint, portcastPublicPageUrls, providerProvenances, providerResult, toProviderResult } from "./shipping"
+import { DisabledWeatherAlertProvider, MockWeatherProvider, configureProviders, createAisStreamVesselProvider, createOpenMeteoWeatherProvider, createPortcastPublicPageProvider, disabledProviderData, fetchWeatherProviderResults, normalizeProviderTimestamp, parsePortcastPublicPage, portcastFingerprint, portcastPublicPageUrls, providerProvenances, providerResult, toProviderResult } from "./shipping"
 
 describe("shipping Provider failure boundaries", () => {
   it("includes all eight V1 focus ports in the seed", () => {
@@ -107,6 +107,57 @@ describe("shipping Provider failure boundaries", () => {
     const configured = configureProviders({ SHIPPING_VESSEL_PROVIDER: "aisstream" })
     expect(configured.modes.vessel).toBe("mock")
     expect(configured.providers.vessel).not.toBeUndefined()
+  })
+
+  it("selects model weather and official alerts independently", async () => {
+    expect(configureProviders({}).modes.weatherAlerts).toBe("off")
+    const mockOff = configureProviders({ SHIPPING_WEATHER_PROVIDER: "mock", SHIPPING_WEATHER_ALERT_PROVIDER: "off" })
+    expect(mockOff.modes).toMatchObject({ weather: "mock", weatherAlerts: "off" })
+    expect(mockOff.providers.weather).toBe(MockWeatherProvider)
+    expect(mockOff.providers.weatherAlerts).toBe(DisabledWeatherAlertProvider)
+    expect(await mockOff.providers.weather.getFeedItems()).toEqual(expect.arrayContaining([expect.objectContaining({ sourceId: "mock-weather" })]))
+
+    const mockPublic = configureProviders({ SHIPPING_WEATHER_PROVIDER: "mock", SHIPPING_WEATHER_ALERT_PROVIDER: "public" })
+    expect(mockPublic.modes).toMatchObject({ weather: "mock", weatherAlerts: "public" })
+    expect(mockPublic.providers.weather).toBe(MockWeatherProvider)
+    expect(mockPublic.providers.weatherAlerts).not.toBe(DisabledWeatherAlertProvider)
+    expect(await mockPublic.providers.weather.getFeedItems()).toEqual(expect.arrayContaining([expect.objectContaining({ sourceId: "mock-weather" })]))
+
+    const openOff = configureProviders({ SHIPPING_WEATHER_PROVIDER: "open-meteo", SHIPPING_WEATHER_ALERT_PROVIDER: "off" })
+    expect(openOff.modes).toMatchObject({ weather: "open-meteo", weatherAlerts: "off" })
+    expect(openOff.providers.weatherAlerts).toBe(DisabledWeatherAlertProvider)
+
+    const openPublic = configureProviders({ SHIPPING_WEATHER_PROVIDER: "open-meteo", SHIPPING_WEATHER_ALERT_PROVIDER: "public" })
+    expect(openPublic.modes).toMatchObject({ weather: "open-meteo", weatherAlerts: "public" })
+    expect(openPublic.providers.weatherAlerts).not.toBe(DisabledWeatherAlertProvider)
+
+    const experimental = configureProviders({ SHIPPING_WEATHER_ALERT_PROVIDER: "experimental" })
+    expect(experimental.modes).toMatchObject({ weather: "mock", weatherAlerts: "experimental" })
+    expect(experimental.providers.weatherAlerts).not.toBe(DisabledWeatherAlertProvider)
+  })
+
+  it("isolates model-weather and official-alert failures", async () => {
+    const modelWeather = mockFeedItems.find(item => item.sourceId === "mock-weather")!
+    const officialAlert = { ...modelWeather, id: "weather-alert:jma:test", sourceId: "jma" }
+    const modelFailure = {
+      getFeedItems: async () => {
+        throw new Error("model unavailable")
+      },
+    }
+    const alertSuccess = { getFeedItems: async () => [officialAlert] }
+    const [failedModel, successfulAlert] = await fetchWeatherProviderResults(modelFailure, alertSuccess, [mockPorts[0]], [], [])
+    expect(failedModel.status).toBe("rejected")
+    expect(successfulAlert).toMatchObject({ status: "fulfilled", value: [expect.objectContaining({ sourceId: "jma" })] })
+
+    const modelSuccess = { getFeedItems: async () => [modelWeather] }
+    const alertFailure = {
+      getFeedItems: async () => {
+        throw new Error("alerts unavailable")
+      },
+    }
+    const [successfulModel, failedAlert] = await fetchWeatherProviderResults(modelSuccess, alertFailure, [mockPorts[0]], [], [])
+    expect(successfulModel).toMatchObject({ status: "fulfilled", value: [expect.objectContaining({ sourceId: "mock-weather" })] })
+    expect(failedAlert.status).toBe("rejected")
   })
 
   it("does not query or erase watched vessels that have no MMSI", async () => {

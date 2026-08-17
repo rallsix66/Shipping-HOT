@@ -162,7 +162,7 @@ The V2.4 Weather Intelligence path extends the existing Open-Meteo adapter witho
 ## 13. Testing and Verification Boundaries
 
 - Current tests: Vitest covers Shipping HOT Domain, Provider, Repository, Event/HOT and UI trust contracts.
-- Current verification state: 131/131 tests, build, historical typecheck comparison, targeted lint, default-Mock route smoke, security scan and `git diff --check` passed. Current and historical typecheck both reproduce only TS6142/TS6307; official external-provider live runtime remains pending.
+- Current verification state: 139/139 tests, build, typecheck, targeted lint, default-Mock route smoke, security scan and `git diff --check` passed. Official external-provider live runtime remains pending; model weather and official weather alerts are independently configured and freshness-tracked.
 - Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, Calendar source composition/conflict/reconciliation/announcement behavior, RSS/HTML Feed parsing with unknown publication and Chinese classification, source isolation, repost dedupe, Feed → Event/HOT boundaries, Open-Meteo 24-hour/72-hour/7-day windows/direction/TTL/per-port failure behavior, source-specific official warning parsing/expiry, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 

@@ -1,7 +1,7 @@
 import { renderToString } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 import { EmptyState, GradientText, ProvenanceBadge, ProviderChip, StatusDot } from "../src/components/shipping/ui"
-import { formatDataNature, formatDate, formatProvenance, formatSourceStatus, formatSourceType, formatStatus, navTone, severityTone, statusLabels } from "../src/components/shipping/format"
+import { formatDataNature, formatDate, formatProvenance, formatSourceStatus, formatSourceType, formatStatus, navTone, severityTone, statusBadgePresentation, statusLabels } from "../src/components/shipping/format"
 
 /**
  * UI 烟雾护栏：不引入 jsdom/testing-library 的前提下，
@@ -37,6 +37,13 @@ describe("shipping UI primitives smoke", () => {
     const html = renderToString(EmptyState({ text: "暂无数据" }))
     expect(html).toContain("i-ph-waves")
     expect(html).toContain("暂无数据")
+  })
+
+  it("prioritizes provider status over stale freshness in StatusBadge", () => {
+    expect(statusBadgePresentation({ sourceStatus: "disabled", stale: true }).label).toBe("已禁用")
+    expect(statusBadgePresentation({ sourceStatus: "failed", stale: true }).label).toBe("数据源失败")
+    expect(statusBadgePresentation({ sourceStatus: "degraded", stale: true }).label).toBe("数据源降级")
+    expect(statusBadgePresentation({ sourceStatus: "healthy", stale: true }).label).toBe("已过期")
   })
 
   it("renders GradientText wrapper", () => {

@@ -67,6 +67,24 @@ export function severityTone(value: string): DotTone {
   return "dim"
 }
 
+export function statusBadgePresentation({ stale, sourceStatus, unknown = false }: { stale: boolean, sourceStatus: string, unknown?: boolean }) {
+  return sourceStatus === "failed"
+    ? { className: "failed", label: "数据源失败", tone: "failed" as const }
+    : sourceStatus === "disabled"
+      ? { className: "stale", label: "已禁用", tone: "watch" as const }
+      : sourceStatus === "never_succeeded"
+        ? { className: "stale", label: "尚未成功", tone: "watch" as const }
+        : sourceStatus === "degraded"
+          ? { className: "stale", label: "数据源降级", tone: "watch" as const }
+          : unknown
+            ? { className: "stale", label: "状态未知", tone: "dim" as const }
+            : sourceStatus === "healthy" && stale
+              ? { className: "stale", label: "已过期", tone: "watch" as const }
+              : sourceStatus === "healthy"
+                ? { className: "fresh", label: "最新", tone: "fresh" as const }
+                : { className: "stale", label: sourceStatus, tone: "watch" as const }
+}
+
 export function formatDate(value?: string) {
   return value ? new Date(value).toLocaleString("zh-CN", { year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"
 }

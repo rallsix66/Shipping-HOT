@@ -5,7 +5,7 @@ import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules"
 import { createMockCalendarEvents, mergeCalendarSources } from "#/providers/calendar"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
-import { disabledProviderData, isWeatherFeedItem, providerModes, providerProvenances, providerResult, providers, toProviderResult } from "#/providers/shipping"
+import { disabledProviderData, fetchWeatherProviderResults, isOfficialWeatherAlertFeedItem, isWeatherFeedItem, providerModes, providerProvenances, providerResult, providers, toProviderResult } from "#/providers/shipping"
 
 let repository: ShippingRepository | undefined
 const mockCalendarYear = new Date().getUTCFullYear()
@@ -53,13 +53,21 @@ async function initialize() {
 async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick<ShippingSnapshot, "vessels" | "ports" | "voyages" | "feedItems" | "calendarEvents" | "calendarCoverage"> = fallbackSnapshot): Promise<ShippingSnapshot> {
   const existingNonWeatherFeed = lastKnown.feedItems.filter(item => !isWeatherFeedItem(item))
   const weatherLastKnown = lastKnown.feedItems.filter(isWeatherFeedItem)
-  const [vesselResult, portResult, voyageResult, shippingFeedResult, weatherResult] = await Promise.allSettled([
+  const modelWeatherLastKnown = weatherLastKnown.filter(item => !isOfficialWeatherAlertFeedItem(item))
+  const officialWeatherLastKnown = weatherLastKnown.filter(isOfficialWeatherAlertFeedItem)
+  const weatherResults = settings.sourceEnabled
+    ? fetchWeatherProviderResults(providers.weather, providers.weatherAlerts, lastKnown.ports, modelWeatherLastKnown, officialWeatherLastKnown)
+    : Promise.resolve<[PromiseSettledResult<FeedItem[]>, PromiseSettledResult<FeedItem[]>]>([
+        { status: "fulfilled", value: disabledProviderData(modelWeatherLastKnown) },
+        { status: "fulfilled", value: disabledProviderData(officialWeatherLastKnown) },
+      ])
+  const [vesselResult, portResult, voyageResult, shippingFeedResult] = await Promise.allSettled([
     settings.providerEnabled ? providers.vessel.getVessels(lastKnown.vessels) : Promise.resolve(disabledProviderData(lastKnown.vessels)),
     settings.providerEnabled ? providers.port.getPorts(lastKnown.ports) : Promise.resolve(disabledProviderData(lastKnown.ports)),
     settings.providerEnabled ? providers.schedule.getVoyages() : Promise.resolve(disabledProviderData(lastKnown.voyages)),
     settings.sourceEnabled ? providers.feed.getFeedItems(existingNonWeatherFeed, lastKnown.ports) : Promise.resolve(disabledProviderData(existingNonWeatherFeed)),
-    settings.sourceEnabled ? providers.weather.getFeedItems(lastKnown.ports, weatherLastKnown) : Promise.resolve(disabledProviderData(weatherLastKnown)),
   ])
+  const [weatherResult, weatherAlertResult] = await weatherResults
   const read = <T extends Vessel | Port | Voyage | FeedItem>(result: PromiseSettledResult<T[]>, previous: T[], provenance: ProviderResult<T>["provenance"], disabled: boolean): ProviderResult<T> => {
     const data = disabled ? disabledProviderData(previous) : providerResult(result, previous)
     return toProviderResult(data, provenance, new Date().toISOString(), disabled ? "disabled" : undefined)
@@ -68,17 +76,20 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
   const port = read(portResult, lastKnown.ports, providerModes.port === "portcast" ? providerProvenances.portcastPublic : providerProvenances.mockPort, !settings.providerEnabled)
   const voyage = read(voyageResult, lastKnown.voyages, providerProvenances.mockSchedule, !settings.providerEnabled)
   const shippingFeed = read(shippingFeedResult, existingNonWeatherFeed, providerModes.feed === "public" ? providerProvenances.shippingFeed : providerProvenances.mockFeed, !settings.sourceEnabled)
-  const weather = read(weatherResult, weatherLastKnown, providerModes.weather === "open-meteo" ? providerProvenances.openMeteo : providerProvenances.mockWeather, !settings.sourceEnabled)
+  const weather = read(weatherResult, modelWeatherLastKnown, providerModes.weather === "open-meteo" ? providerProvenances.openMeteo : providerProvenances.mockWeather, !settings.sourceEnabled)
+  const weatherAlerts = providerModes.weatherAlerts === "off" && settings.sourceEnabled
+    ? toProviderResult([], providerProvenances.officialWeatherAlerts, new Date().toISOString(), "disabled")
+    : read(weatherAlertResult, officialWeatherLastKnown, providerProvenances.officialWeatherAlerts, !settings.sourceEnabled)
   return {
     vessels: vessel.data,
     ports: port.data,
     voyages: voyage.data,
-    feedItems: mergeWeatherFeedItems(shippingFeed.data, weather.data),
+    feedItems: mergeWeatherFeedItems(shippingFeed.data, [...weather.data, ...weatherAlerts.data]),
     events: fallbackSnapshot.events,
     settings,
     calendarEvents: lastKnown.calendarEvents,
     calendarCoverage: lastKnown.calendarCoverage ?? settings.calendarSync,
-    providerFreshness: { vessel: vessel.freshness, port: port.freshness, schedule: voyage.freshness, weather: weather.freshness, feed: shippingFeed.freshness },
+    providerFreshness: { vessel: vessel.freshness, port: port.freshness, schedule: voyage.freshness, weather: weather.freshness, weatherAlerts: weatherAlerts.freshness, feed: shippingFeed.freshness },
   }
 }
 

@@ -2,7 +2,7 @@ import { Link, useMatchRoute } from "@tanstack/react-router"
 import { MotionConfig, motion } from "framer-motion"
 import { type ReactNode, useEffect, useRef, useState } from "react"
 import { AuroraBackground } from "./aurora"
-import { type DotTone, severityTone, statusLabels } from "./format"
+import { severityTone, statusBadgePresentation, statusLabels } from "./format"
 import { GradientText, StatusDot } from "./ui"
 import { useShipping } from "./data"
 import { useDark } from "~/hooks/useDark"
@@ -71,6 +71,7 @@ function formatClock(value?: string) {
 const providerRows = [
   { key: "vessel", label: "船位" },
   { key: "weather", label: "天气" },
+  { key: "weatherAlerts", label: "官方预警" },
   { key: "port", label: "港口" },
   { key: "schedule", label: "班期" },
   { key: "feed", label: "资讯" },
@@ -105,7 +106,7 @@ export function ShippingShell({ children, title }: { children: ReactNode, title?
     ? formatClock(new Date(Math.max(...fetchedAts.map(value => new Date(value).getTime()))).toISOString())
     : "—"
   const providers = data ? [data.provider.vessel, data.provider.weather, data.provider.port, data.provider.schedule, data.provider.feed] : []
-  const allMock = providers.length > 0 && providers.every(provider => provider === "mock")
+  const allMock = providers.length > 0 && providers.every(provider => provider === "mock") && (data?.provider.weatherAlerts ?? "off") === "off"
   const providerLabel = data ? (allMock ? "全 Mock" : providers.join(" / ")) : "—"
 
   return (
@@ -145,7 +146,7 @@ export function ShippingShell({ children, title }: { children: ReactNode, title?
             </button>
             {providerRows.map(row => (
               <div key={row.key} className="sf-row">
-                <StatusDot tone={data?.provider[row.key] && data.provider[row.key] !== "mock" ? "info" : "dim"} />
+                <StatusDot tone={data?.provider[row.key] && data.provider[row.key] !== "mock" && !(row.key === "weatherAlerts" && data.provider[row.key] === "off") ? "info" : "dim"} />
                 <span className="lbl grow">{row.label}</span>
                 <span className="val">{data?.provider[row.key] ?? "—"}</span>
               </div>
@@ -205,13 +206,11 @@ export function ShippingShell({ children, title }: { children: ReactNode, title?
 }
 
 export function StatusBadge({ stale, sourceStatus, unknown = false }: { stale: boolean, sourceStatus: string, unknown?: boolean }) {
-  const statusClass = unknown ? "stale" : sourceStatus === "healthy" && !stale ? "fresh" : sourceStatus === "failed" ? "failed" : "stale"
-  const dotTone: DotTone = unknown ? "dim" : statusClass === "fresh" ? "fresh" : statusClass === "failed" ? "failed" : "watch"
-  const label = unknown ? "状态未知" : sourceStatus === "healthy" && !stale ? "最新" : sourceStatus === "failed" ? "数据源失败" : stale ? "已过期" : sourceStatus === "degraded" ? "数据源降级" : sourceStatus === "disabled" ? "已禁用" : sourceStatus === "never_succeeded" ? "尚未成功" : sourceStatus
+  const priority = statusBadgePresentation({ stale, sourceStatus, unknown })
   return (
-    <span className={`status-badge status-${statusClass}`}>
-      <StatusDot tone={dotTone} pulse={statusClass === "fresh"} />
-      {label}
+    <span className={`status-badge status-${priority.className}`}>
+      <StatusDot tone={priority.tone} pulse={priority.className === "fresh"} />
+      {priority.label}
     </span>
   )
 }
