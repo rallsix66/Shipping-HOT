@@ -369,8 +369,13 @@ html.dark .side-note { color: #fcd34d; }
 
 body.collapsed .sidebar { width: 78px; }
 body.collapsed .side-label, body.collapsed .side-title, body.collapsed .side-note { display: none; }
-body.collapsed .collapse-btn { margin-left: auto; }
+body.collapsed .side-head { justify-content: center; padding: 4px 0 10px; }
+body.collapsed .side-head .collapse-btn { display: none; }
+body.collapsed .side-nav a { justify-content: center; padding: 9px 0; }
+body.collapsed .sf-row { justify-content: center; }
 body.collapsed .sf-row .lbl { display: none; }
+.foot-expand { display: none; width: 100%; }
+body.collapsed .foot-expand { display: flex; }
 
 .content-a { margin-left: 286px; padding: 22px 30px 96px; max-width: 1620px; transition: margin-left .3s cubic-bezier(.22, 1, .36, 1); }
 body.collapsed .content-a { margin-left: 112px; }

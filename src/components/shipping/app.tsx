@@ -135,6 +135,14 @@ export function ShippingShell({ children, title }: { children: ReactNode, title?
             {navLinks.map(link => <NavItem key={link.to} {...link} />)}
           </nav>
           <div className="side-foot">
+            <button
+              type="button"
+              className="icon-btn side-collapse-footer"
+              title="展开侧栏"
+              onClick={() => setCollapsed(value => !value)}
+            >
+              <span className="i-ph-caret-double-right" />
+            </button>
             {providerRows.map(row => (
               <div key={row.key} className="sf-row">
                 <StatusDot tone={data?.provider[row.key] && data.provider[row.key] !== "mock" ? "info" : "dim"} />

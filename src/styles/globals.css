@@ -499,6 +499,13 @@ button:disabled {
 .sf-row .val { opacity: 0.6; }
 .filter-panel .frow { padding: 2px 6px; }
 .side-collapsed .side-label, .side-collapsed .side-title, .side-collapsed .sf-row .lbl { display: none; }
+.side-collapsed .side-head { justify-content: center; padding: 2px 0 10px; }
+.side-collapsed .side-collapse { display: none; }
+.side-collapsed .side-nav-link { justify-content: center; padding: 9px 0; }
+.side-collapsed .sf-row { justify-content: center; }
+.side-collapsed .sf-row .val { display: none; }
+.side-collapse-footer { display: none; width: 100%; }
+.side-collapsed .side-collapse-footer { display: flex; }
 
 .console-topbar {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
