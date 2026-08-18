@@ -48,7 +48,7 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
     name: "Thai Meteorological Department",
     url: "https://www.tmd.go.th/en/api/xml/CAP",
     sourceUrl: "https://www.tmd.go.th/en/service/rss",
-    format: "cap",
+    format: "rss",
     parser: "tmd",
     relatedPortIds: ["port-laem-chabang"],
     enabled: false,

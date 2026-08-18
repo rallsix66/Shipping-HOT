@@ -77,7 +77,7 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 - 当前 AISStream Provider 每次 `getVessels` 调用会创建一次短连接，并只请求 watched 且有 MMSI 的船舶；它适合个人关注船，不足以统计整个港口。
 - 当前 AISStream 订阅使用全世界 Bounding Box + MMSI 过滤，只接收 `PositionReport`；当前没有持久化轨迹，也没有区域订阅会话管理。
 - 当前 PortProvider 和 ScheduleProvider 仍是 Mock。
-- 当前 Open-Meteo 已请求 current/hourly 风速、阵风、波高/波向、涌浪高度/方向和涌浪周期，一次取得 7 天数据后本地计算 24 小时、72 小时和 7 天模型风险；JMA 使用官方海上警报 HTML，TMD 使用官方 CAP，BMKG 使用官方 RSS 列表（其详情 CAP 入口已记录但未隐式抓取），三者均为 `live_pending`。
+- 当前 Open-Meteo 已请求 current/hourly 风速、阵风、波高/波向、涌浪高度/方向和涌浪周期，一次取得 7 天数据后本地计算 24 小时、72 小时和 7 天模型风险；JMA 使用官方海上警报 HTML，TMD 使用官方 RSS 列表（其条目链接到 CAP 详情但未隐式抓取），BMKG 使用官方 RSS 列表，三者均为 `live_pending`。
 - V2.2 Calendar 当前组合 TH/ID/MY/PH/VN 的 Calendarific、Official、Manual 和 Mock 边界；Calendarific 仅在服务端且显式配置 Key 后调用，默认仍为 Mock；显式选择 Calendarific 但缺少 Key 时保持 calendarific 模式并返回 unknown/暂无数据，不回退 Mock；Official 仍是 contract/local verified source，live sync pending。
 - V2.4 Weather 当前已实现 Open-Meteo 三窗口、30 分钟 TTL、逐港同源 last-known stale/failure 和 source-specific JMA/TMD/BMKG 官方 warning 合同；Open-Meteo 首次失败且没有同源历史时返回暂无模型天气，不使用 `mock-weather`；三个来源均 `live_pending`，`SHIPPING_WEATHER_ALERT_PROVIDER=public` 只允许 `verified_live` 来源（当前没有），`experimental` 才显式启用 pending adapter；模型风险和官方预警使用不同 `riskSource`/provenance，默认仍为 Mock。
 - 当前 `Freshness` 只有 `updatedAt`、`stale`、`sourceStatus`、`error`，还没有统一的 `sourceType`/`dataNature` 业务标识。
@@ -806,7 +806,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 
 - 已实现 Weather Feed 卡片：可切换 24 小时、72 小时、7 天窗口，显示浪高、涌浪、周期、风/阵风、浪向/涌浪向、模型/官方标识和官方预警状态。
 - 已实现 `SHIPPING_WEATHER_PROVIDER=open-meteo`：一次请求 7 天 Open-Meteo current + hourly 海况字段，本地计算三个窗口，30 分钟 server-side/in-process TTL，逐港失败隔离和同源 last-known stale；`updatedAt` 是 forecast/current valid time，`sourceUpdatedAt` 只有可靠 source/model-run 时间才填写，`fetchedAt` 是本地抓取完成时间；没有同源 last-known 时不填充 `mock-weather` 或其他假天气。
-- 已实现天气预警 source registry：JMA 海上警报 HTML、TMD CAP、BMKG RSS 独立 source-specific contracts；保留 issued/updated/effective/expiry，过期降为 info，解析失败保留 stale last-known，不能继续触发 HOT。三个来源均为 `live_pending`；`SHIPPING_WEATHER_ALERT_PROVIDER=public` 只启用 `verified_live` 来源（当前没有），`experimental` 才显式启用 pending adapter。
+- 已实现天气预警 source registry：JMA 海上警报 HTML、TMD 公共 RSS 列表、BMKG RSS 独立 source-specific contracts；保留 issued/updated/effective/expiry（来源提供时），过期降为 info，解析失败保留 stale last-known，不能继续触发 HOT。三个来源均为 `live_pending`；`SHIPPING_WEATHER_ALERT_PROVIDER=public` 只启用 `verified_live` 来源（当前没有），`experimental` 才显式启用 pending adapter。
 
 ### V2.5
 
@@ -870,8 +870,8 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Out of Scope：航行安全认证、复杂气象模型、多国 Provider 全量接入、海流/潮汐决策系统。
 - Dependencies：V2.0 trust model；现有 Open-Meteo adapter；官方来源合规核对。
 - Status：implemented / locally verified; live pending。
-- Implemented：扩展 `createOpenMeteoWeatherProvider` 的 current/hourly wave/swell/wind 请求、24/72/168 小时风险窗口和方向字段、30 分钟 TTL、逐港 failure/同源 last-known stale；没有同源历史时首次失败返回暂无模型天气；`updatedAt`/`sourceUpdatedAt`/`fetchedAt` 语义分离，`generationtime_ms` 不冒充 source time；新增 `WeatherDetail.windows`、model/official risk labels、JMA 海上警报 HTML、TMD CAP、BMKG 官方 RSS source-specific adapters 和 warning expiry/parse-failure 保留逻辑。三个官方来源均标记 `live_pending`；`public` 不会启用它们，`experimental` 才显式允许 pending adapter。
-- Verification：当前 Provider/live-path batch 为 173/173；build、typecheck and targeted lint passed；Open-Meteo timestamp/window/direction/cache fixtures passed；corrected public Open-Meteo probe verified 16 requests for 8 ports and `sourceUpdatedAt` remained undefined；official warning runtime remains pending。
+- Implemented：扩展 `createOpenMeteoWeatherProvider` 的 current/hourly wave/swell/wind 请求、24/72/168 小时风险窗口和方向字段、30 分钟 TTL、逐港 failure/同源 last-known stale；没有同源历史时首次失败返回暂无模型天气；`updatedAt`/`sourceUpdatedAt`/`fetchedAt` 语义分离，`generationtime_ms` 不冒充 source time；新增 `WeatherDetail.windows`、model/official risk labels、JMA 海上警报 HTML、TMD 公共 RSS 列表、BMKG 官方 RSS source-specific adapters 和 warning expiry/parse-failure 保留逻辑。三个官方来源均标记 `live_pending`；`public` 不会启用它们，`experimental` 才显式允许 pending adapter。
+- Verification：preceding Provider/live-path batch 为 173/173；本轮 Remaining Real Provider Verification 增加 TMD RSS registry/parser fixture 后为 174/174；build、typecheck and targeted lint passed；Open-Meteo timestamp/window/direction/cache fixtures passed；corrected public Open-Meteo probe verified 16 requests for 8 ports and `sourceUpdatedAt` remained undefined；official warning runtime remains pending。
 - Acceptance：字段来源和预报时间窗清楚；海况请求按 TTL 缓存；模型风险不能伪装官方预警；官方预警过期可关闭；单港失败不影响其他港口。
 - Main risks：沿岸精度、预警格式、重复公告、不同国家定义不一致。
 - Rollback：只保留现有 Open-Meteo 风/阵风/波高，关闭官方预警 Provider。
