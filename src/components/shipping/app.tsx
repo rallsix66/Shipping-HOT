@@ -87,6 +87,18 @@ export function ShippingShell({ children, title }: { children: ReactNode, title?
       return false
     }
   })
+  // ChatGPT 式：收起后 hover 窄栏顶部才浮现「打开边栏」按钮
+  const [roVisible, setRoVisible] = useState(false)
+  const roHideTimer = useRef<number | undefined>(undefined)
+  const showRo = () => {
+    window.clearTimeout(roHideTimer.current)
+    setRoVisible(true)
+  }
+  const hideRo = () => {
+    window.clearTimeout(roHideTimer.current)
+    roHideTimer.current = window.setTimeout(() => setRoVisible(false), 160)
+  }
+  useEffect(() => () => window.clearTimeout(roHideTimer.current), [])
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark)
   }, [isDark])
@@ -112,8 +124,12 @@ export function ShippingShell({ children, title }: { children: ReactNode, title?
     <MotionConfig reducedMotion="user">
       <div className={`shipping-shell min-h-dvh${collapsed ? " side-collapsed" : ""}`}>
         <AuroraBackground />
-        <aside className="console-sidebar">
-          <div className="side-head">
+        <aside className={`console-sidebar${roVisible ? " ro-visible" : ""}`}>
+          <div
+            className="side-head"
+            onMouseEnter={collapsed ? showRo : undefined}
+            onMouseLeave={collapsed ? hideRo : undefined}
+          >
             <Link to="/" className="brand-mark h-9 w-9 shrink-0 overflow-hidden rounded-xl" title="Shipping HOT">
               <img src="/shipping-hot-icon.svg" alt="Shipping HOT" className="h-full w-full rounded-xl" />
             </Link>
@@ -125,24 +141,29 @@ export function ShippingShell({ children, title }: { children: ReactNode, title?
             <button
               type="button"
               className="icon-btn side-collapse"
-              title={collapsed ? "展开侧栏" : "折叠侧栏"}
+              title="折叠侧栏"
               onClick={() => setCollapsed(value => !value)}
             >
-              <span className={collapsed ? "i-ph-caret-double-right" : "i-ph-caret-double-left"} />
+              <span className="i-ph-caret-double-left" />
+            </button>
+            {/* 收起后 hover：Logo 位置变成此按钮，右侧弹出「打开边栏」提示 */}
+            <button
+              type="button"
+              className="side-reopen"
+              title="打开边栏"
+              aria-label="打开边栏"
+              onClick={() => setCollapsed(false)}
+              onMouseEnter={showRo}
+              onMouseLeave={hideRo}
+            >
+              <span className="ro-icon i-ph-sidebar-simple" />
+              <span className="ro-label">打开边栏</span>
             </button>
           </div>
           <nav className="side-nav">
             {navLinks.map(link => <NavItem key={link.to} {...link} />)}
           </nav>
           <div className="side-foot">
-            <button
-              type="button"
-              className="icon-btn side-collapse-footer"
-              title="展开侧栏"
-              onClick={() => setCollapsed(value => !value)}
-            >
-              <span className="i-ph-caret-double-right" />
-            </button>
             {providerRows.map(row => (
               <div key={row.key} className="sf-row">
                 <StatusDot tone={data?.provider[row.key] && data.provider[row.key] !== "mock" && !(row.key === "weatherAlerts" && data.provider[row.key] === "off") ? "info" : "dim"} />

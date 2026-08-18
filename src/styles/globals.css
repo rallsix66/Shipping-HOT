@@ -93,65 +93,16 @@ button:disabled {
 }
 .dark .aurora { background: linear-gradient(180deg, #04060c 0%, #05070f 50%, #060a14 100%); }
 
-/* 渐变本身已用透明衰减做羽化，因此不再叠加 filter: blur()，避免动画期间持续重光栅化 */
-.aurora-blob {
+/* WebGL 流光渐变画布：暗色主题下淡入，亮色回退为 .aurora 的 CSS 渐变底 */
+.aurora-canvas {
   position: absolute;
-  border-radius: 50%;
-  opacity: 0.45;
-  will-change: transform;
-  transform: translateZ(0);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.6s ease;
 }
-.dark .aurora-blob { opacity: 0.6; }
-.aurora-blob-1 {
-  width: 48vmax; height: 48vmax; left: -14vmax; top: -20vmax;
-  background:
-    radial-gradient(circle at 32% 32%, rgba(45, 212, 191, 0.5), transparent 62%),
-    radial-gradient(circle at 68% 58%, rgba(34, 211, 238, 0.34), transparent 58%);
-  animation: aurora-a 26s ease-in-out infinite alternate;
-}
-.aurora-blob-2 {
-  width: 44vmax; height: 44vmax; right: -16vmax; top: -4vmax;
-  background:
-    radial-gradient(circle at 40% 40%, rgba(129, 140, 248, 0.46), transparent 62%),
-    radial-gradient(circle at 65% 70%, rgba(167, 139, 250, 0.3), transparent 55%);
-  animation: aurora-b 34s ease-in-out infinite alternate;
-  animation-delay: -12s;
-}
-.aurora-blob-3 {
-  width: 40vmax; height: 40vmax; left: 16vmax; bottom: -22vmax;
-  background:
-    radial-gradient(circle at 50% 40%, rgba(251, 113, 133, 0.38), transparent 62%),
-    radial-gradient(circle at 30% 70%, rgba(251, 191, 36, 0.22), transparent 55%);
-  animation: aurora-c 40s ease-in-out infinite alternate;
-  animation-delay: -20s;
-}
-.dark .aurora-blob-1 {
-  background:
-    radial-gradient(circle at 32% 32%, rgba(20, 184, 166, 0.6), transparent 62%),
-    radial-gradient(circle at 68% 58%, rgba(6, 182, 212, 0.45), transparent 58%);
-}
-.dark .aurora-blob-2 {
-  background:
-    radial-gradient(circle at 40% 40%, rgba(99, 102, 241, 0.55), transparent 62%),
-    radial-gradient(circle at 65% 70%, rgba(139, 92, 246, 0.38), transparent 55%);
-}
-.dark .aurora-blob-3 {
-  background:
-    radial-gradient(circle at 50% 40%, rgba(244, 63, 94, 0.46), transparent 62%),
-    radial-gradient(circle at 30% 70%, rgba(245, 158, 11, 0.24), transparent 55%);
-}
-@keyframes aurora-a {
-  from { transform: translate3d(-4%, -2%, 0) scale(1) rotate(0deg); }
-  to { transform: translate3d(8%, 10%, 0) scale(1.18) rotate(24deg); }
-}
-@keyframes aurora-b {
-  from { transform: translate3d(4%, 6%, 0) scale(1.1) rotate(0deg); }
-  to { transform: translate3d(-10%, -8%, 0) scale(0.94) rotate(-18deg); }
-}
-@keyframes aurora-c {
-  from { transform: translate3d(-6%, -4%, 0) scale(0.95) rotate(0deg); }
-  to { transform: translate3d(6%, -12%, 0) scale(1.14) rotate(16deg); }
-}
+.aurora-dark .aurora-canvas { opacity: 1; }
 .aurora-grid {
   position: absolute; inset: 0;
   background-image:
@@ -453,13 +404,11 @@ button:disabled {
 
 /* --- reduced motion --- */
 @media (prefers-reduced-motion: reduce) {
-  .aurora-blob,
   .brand-mark::after,
   .marquee-track,
   .status-dot.pulse {
     animation: none !important;
   }
-  .aurora-blob,
   .marquee-track {
     will-change: auto;
   }
@@ -483,7 +432,7 @@ button:disabled {
 }
 .shipping-shell.side-collapsed .console-sidebar { width: 76px; }
 .shipping-shell.side-collapsed .console-main { margin-left: 106px; }
-.side-head { display: flex; align-items: center; gap: 10px; padding: 2px 4px 12px; }
+.side-head { position: relative; display: flex; align-items: center; gap: 10px; padding: 2px 4px 12px; }
 .side-title { font-family: 'Baloo 2', sans-serif; font-size: 17px; font-weight: 700; white-space: nowrap; }
 .side-collapse { margin-left: auto; }
 .icon-btn {
@@ -504,8 +453,38 @@ button:disabled {
 .side-collapsed .side-nav-link { justify-content: center; padding: 9px 0; }
 .side-collapsed .sf-row { justify-content: center; }
 .side-collapsed .sf-row .val { display: none; }
-.side-collapse-footer { display: none; width: 100%; }
-.side-collapsed .side-collapse-footer { display: flex; }
+
+/* --- ChatGPT 式唤出按钮：默认隐藏，hover 窄栏顶部时 Logo 原位变按钮、右侧弹「打开边栏」 --- */
+.shipping-shell:not(.side-collapsed) .side-reopen { display: none; }
+.side-collapsed .console-sidebar { overflow: visible; }
+.side-reopen {
+  position: absolute; inset: 0; z-index: 5; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border: 0; padding: 0; background: none;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.side-collapsed .console-sidebar.ro-visible .side-reopen { opacity: 1; pointer-events: auto; }
+.brand-mark { transition: opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1); }
+.side-collapsed .console-sidebar.ro-visible .brand-mark { opacity: 0; }
+.side-reopen .ro-icon {
+  width: 36px; height: 36px; border-radius: 11px; flex: none;
+  display: grid; place-items: center; font-size: 16px;
+  border: 1px solid var(--sh-border-strong); background: var(--sh-panel); color: var(--sh-dim);
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.side-reopen:hover .ro-icon { border-color: rgba(103, 232, 249, 0.55); background: var(--sh-spot); color: inherit; }
+.side-reopen .ro-label {
+  position: absolute; left: calc(100% + 8px); top: 50%;
+  transform: translate(-6px, -50%);
+  white-space: nowrap; padding: 7px 13px; border-radius: 11px;
+  border: 1px solid var(--sh-border-strong); background: var(--sh-panel-strong);
+  color: var(--sh-dim); font-size: 12.5px; font-weight: 700;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.45);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1) 0.06s, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1) 0.06s;
+}
+.side-collapsed .console-sidebar.ro-visible .side-reopen .ro-label { opacity: 1; transform: translate(0, -50%); }
 
 .console-topbar {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
