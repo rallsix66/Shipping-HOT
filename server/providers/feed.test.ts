@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
-import { mockPorts } from "@shared/shipping-fixtures"
+import { createMockSnapshot, mockPorts } from "@shared/shipping-fixtures"
+import { detectShippingEvents } from "@shared/shipping-engine"
+import { rankHotItems } from "@shared/shipping-rules"
 import { classifyFeedItem, createPublicFeedProvider, dedupeFeedItems, filterFeedLastKnownForMode, parseFeedHtml, parseFeedRss, shippingFeedSources } from "./feed"
 
 const rssSource = shippingFeedSources.find(source => source.id === "the-loadstar")!
@@ -44,21 +46,56 @@ describe("shipping feed provider", () => {
   it("parses official HTML notices without treating ordinary navigation links as news", () => {
     const items = parseFeedHtml(`
       <nav><a href="/">首页</a><a href="/contact">联系我们</a></nav>
-      <ul><li><article><a href="/news/2026/08/14/gate-closure">Shekou terminal gate closure advisory</a><time>2026-08-14</time><p>Gate operations will suspend during maintenance.</p></article></li></ul>
+      <ul><li><article><a href="/ywgg/2026/08/14/gate-closure">Shekou terminal gate closure advisory</a><time>2026-08-14</time><p>Gate operations will suspend during maintenance.</p></article></li></ul>
     `, officialSource, mockPorts, "2026-08-15T00:00:00.000Z")
     expect(items).toHaveLength(1)
     expect(items[0]).toMatchObject({
       sourceId: "shekou-official",
-      sourceUrl: "https://www.portshekou.com/news/2026/08/14/gate-closure",
+      sourceUrl: "https://www.portshekou.com/ywgg/2026/08/14/gate-closure",
       severity: "critical",
       hotReason: "官方港口高影响公告",
       provenance: { sourceType: "official", verified: true },
     })
   })
 
+  it("uses the Shekou /ywgg/ selector and excludes company, navigation, and footer noise", () => {
+    const items = parseFeedHtml(`
+      <nav><a href="/ywgg/">业务公告</a><a href="/gsxw/company-news">Company news headline</a></nav>
+      <main class="news-list">
+        <ul><li class="news-item"><a href="/ywgg/2026/08/16/gate-closure">Shekou terminal gate closure advisory</a><span>2026-08-16</span></li></ul>
+      </main>
+      <footer><a href="/ywgg/contact">联系我们与网站导航</a></footer>
+    `, officialSource, mockPorts, "2026-08-18T00:00:00.000Z")
+    expect(items).toHaveLength(1)
+    expect(items[0]).toMatchObject({
+      sourceUrl: "https://www.portshekou.com/ywgg/2026/08/16/gate-closure",
+      publishedAt: "2026-08-16T00:00:00.000Z",
+      publicationTimeKnown: true,
+      eventEligibility: true,
+      severity: "critical",
+      relatedPortIds: ["port-shekou"],
+    })
+    expect(items.some(item => item.title.includes("Company"))).toBe(false)
+  })
+
+  it("keeps Shekou notices with unknown dates out of event eligibility", () => {
+    const [item] = parseFeedHtml(`<section><a href="/ywgg/notice-without-date">Shekou terminal operational advisory</a></section>`, officialSource, mockPorts, "2026-08-18T00:00:00.000Z")
+    expect(item).toMatchObject({ publishedAt: "", publicationTimeKnown: false, eventEligibility: false, fetchedAt: "2026-08-18T00:00:00.000Z" })
+    expect(item.updatedAt).toBeUndefined()
+  })
+
+  it("carries a dated Shekou operational warning through Event and HOT", () => {
+    const [item] = parseFeedHtml(`<article><a href="/ywgg/2026/08/16/gate-closure">Shekou terminal gate closure advisory</a><time>2026-08-16</time></article>`, officialSource, mockPorts, "2026-08-18T00:00:00.000Z")
+    const snapshot = createMockSnapshot()
+    const events = detectShippingEvents([], [], [], [item], snapshot.settings, [], "2026-08-18T00:00:00.000Z")
+    const event = events.find(candidate => candidate.feedItemId === item.id)
+    expect(event).toMatchObject({ type: "port_notice", severity: "critical", status: "active" })
+    expect(rankHotItems(events, [], [], [], [item]).some(hot => hot.kind === "event" && hot.eventId === event?.id)).toBe(true)
+  })
+
   it("deduplicates reposts and prefers an official source", () => {
     const [thirdParty] = parseFeedRss(`<rss><channel><item><title>Shekou terminal closure advisory</title><link>https://news.example.com/story</link><pubDate>2026-08-15T00:00:00Z</pubDate></item></channel></rss>`, rssSource, mockPorts, "2026-08-15T00:00:00.000Z")
-    const [official] = parseFeedHtml(`<article><a href="https://www.portshekou.com/story">Shekou terminal closure advisory</a><time>2026-08-15</time></article>`, officialSource, mockPorts, "2026-08-15T00:00:00.000Z")
+    const [official] = parseFeedHtml(`<article><a href="https://www.portshekou.com/ywgg/story">Shekou terminal closure advisory</a><time>2026-08-15</time></article>`, officialSource, mockPorts, "2026-08-15T00:00:00.000Z")
     const deduped = dedupeFeedItems([{ ...thirdParty, title: official.title }, official])
     expect(deduped).toHaveLength(1)
     expect(deduped[0].provenance?.sourceType).toBe("official")
@@ -71,7 +108,7 @@ describe("shipping feed provider", () => {
       sources: [rssSource, { ...officialSource, enabled: true }],
       fetcher: async url => url.includes("loadstar")
         ? { ok: false, status: 503, text: async () => "" }
-        : { ok: true, status: 200, text: async () => `<article><a href="/notice">Routine terminal notice</a><time>2026-08-15</time></article>` },
+        : { ok: true, status: 200, text: async () => `<article><a href="/ywgg/notice">Routine terminal notice</a><time>2026-08-15</time></article>` },
     })
     const items = await provider.getFeedItems([previous], mockPorts)
     expect(items.find(item => item.id === previous.id)).toMatchObject({ stale: true, sourceStatus: "failed", updatedAt: previous.updatedAt, publishedAt: previous.publishedAt })

@@ -53,15 +53,16 @@ export const shippingFeedSources: ShippingFeedSource[] = [
   },
   {
     id: "shekou-official",
-    name: "Shekou Port official notices",
-    url: "https://www.portshekou.com/gsxw/",
-    sourceUrl: "https://www.portshekou.com/gsxw/",
+    name: "Shekou Port operational notices",
+    url: "https://www.portshekou.com/ywgg/",
+    sourceUrl: "https://www.portshekou.com/ywgg/",
     format: "html",
     sourceKind: "official",
     category: "port_notice",
     relatedPortIds: ["port-shekou"],
     enabled: true,
     status: "enabled",
+    description: "Official Shekou Port operational announcements; company news is excluded.",
   },
   {
     id: "laem-chabang-official",
@@ -280,7 +281,7 @@ export function parseFeedRss(xml: string, source: ShippingFeedSource, ports: Por
 }
 
 function htmlDate(text: string): string | undefined {
-  const match = text.match(/\b(?:\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}[-/]\d{1,2}[-/]\d{4}|\d{1,2}\s+[a-z]{3,9}\s+\d{4})\b/i)
+  const match = text.match(/\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}[-/]\d{1,2}[-/]\d{4}|\d{1,2}\s+[a-z]{3,9}\s+\d{4}/i)
   if (!match) return undefined
   const timestamp = Date.parse(match[0])
   return Number.isNaN(timestamp) ? undefined : new Date(timestamp).toISOString()
@@ -289,11 +290,13 @@ function htmlDate(text: string): string | undefined {
 export function parseFeedHtml(html: string, source: ShippingFeedSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
   const $ = load(html)
   const items: FeedItem[] = []
-  $("a[href]").each((index, element) => {
+  const anchors = source.id === "shekou-official" ? $("a[href*='/ywgg/']") : $("a[href]")
+  anchors.each((index, element) => {
     const anchor = $(element)
     const title = anchor.text().replace(/\s+/g, " ").trim()
     const articleUrl = canonicalizeFeedUrl(anchor.attr("href") ?? "", source.url)
     if (!articleUrl || !title || title.length < 12 || title.length > 220 || articleUrl === canonicalizeFeedUrl(source.url)) return
+    if (source.id === "shekou-official" && !new URL(articleUrl).pathname.includes("/ywgg/")) return
     const container = anchor.closest("article, li, .item, .news, .list")
     const context = container.text().replace(/\s+/g, " ").trim() || anchor.parent().text().replace(/\s+/g, " ").trim()
     const time = container.find("time").first()

@@ -142,6 +142,9 @@ export interface PortcastPublicPageProviderOptions {
   minIntervalMs?: number
 }
 
+export const PORTCAST_FRESH_MAX_AGE_DAYS = 14
+export const portcastFreshMaxAgeMs = PORTCAST_FRESH_MAX_AGE_DAYS * 24 * 60 * 60 * 1000
+
 export const portcastPublicPageUrls: Record<string, string> = {
   "port-shekou": "https://www.portcast.io/port-congestion/shekou",
   "port-yantian": "https://www.portcast.io/port-congestion/yantian",
@@ -150,7 +153,7 @@ export const portcastPublicPageUrls: Record<string, string> = {
   "port-klang": "https://www.portcast.io/port-congestion/port-klang",
   "port-manila": "https://www.portcast.io/port-congestion/manila",
   "port-jakarta": "https://www.portcast.io/port-congestion/jakarta",
-  "port-ho-chi-minh": "https://www.portcast.io/de/port-congestion/ho-chi-minh",
+  "port-ho-chi-minh": "https://www.portcast.io/port-congestion/ho-chi-minh",
 }
 
 const portcastDefaultIntervalMs = 24 * 60 * 60 * 1000
@@ -265,6 +268,16 @@ function isPortcastHistory(port: Port): boolean {
   return port.provenance?.sourceId === "portcast-public"
 }
 
+function portcastFreshness(sourceUpdatedAt: string | undefined, fetchedAt: string): Pick<Port, "stale" | "sourceStatus" | "error"> {
+  if (!sourceUpdatedAt) return { stale: true, sourceStatus: "degraded", error: "source_update_time_unknown" }
+  const sourceTimestamp = Date.parse(sourceUpdatedAt)
+  const fetchedTimestamp = Date.parse(fetchedAt)
+  if (!Number.isFinite(sourceTimestamp) || !Number.isFinite(fetchedTimestamp) || fetchedTimestamp - sourceTimestamp > portcastFreshMaxAgeMs) {
+    return { stale: true, sourceStatus: "degraded", error: "source_stale" }
+  }
+  return { stale: false, sourceStatus: "healthy", error: undefined }
+}
+
 function stalePortcastData(port: Port, url: string | undefined, fetchedAt: string, sourceStatus: "degraded" | "failed", error: string, noPublicData = false): Port {
   const historical = isPortcastHistory(port)
   const historicalData = historical
@@ -340,12 +353,10 @@ export function createPortcastPublicPageProvider(options: PortcastPublicPageProv
             waitingVessels: undefined,
             containerWaitingVessels: undefined,
             operationalStatus: undefined,
-            updatedAt: unchanged ? port.updatedAt : fetchedAt,
+            updatedAt: metrics.sourceUpdatedAt ?? (unchanged ? port.updatedAt : undefined),
             sourceUpdatedAt: metrics.sourceUpdatedAt,
             fetchedAt,
-            stale: false,
-            sourceStatus: "healthy",
-            error: undefined,
+            ...portcastFreshness(metrics.sourceUpdatedAt, fetchedAt),
             provenance: { ...providerProvenances.portcastPublic, sourceUrl: url },
           }
           cache.set(port.id, { checkedAt: checkedAt.getTime(), fingerprint, port: next })
@@ -739,7 +750,7 @@ function weatherWindow(points: WeatherPoint[], hours: number): WeatherWindow {
   }
 }
 
-function weatherFeedItem(port: WeatherPortConfig, marine: OpenMeteoPayload, wind: OpenMeteoPayload): FeedItem | undefined {
+function weatherFeedItem(port: WeatherPortConfig, marine: OpenMeteoPayload, wind: OpenMeteoPayload, fetchedAt: string): FeedItem | undefined {
   const points = weatherPointMap(marine, wind)
   const windows: WeatherWindows = {
     h24: weatherWindow(points, weatherWindowHours.h24),
@@ -774,8 +785,8 @@ function weatherFeedItem(port: WeatherPortConfig, marine: OpenMeteoPayload, wind
     weather: { riskSource: "model", forecastWindowHours: weatherRiskThresholds.forecastWindowHours, forecastStartAt: h72.forecastStartAt, forecastEndAt: h72.forecastEndAt, waveHeightM: h72.maxWaveHeightM, waveDirectionDeg: h72.waveDirectionDeg, swellWaveHeightM: h72.maxSwellWaveHeightM, swellDirectionDeg: h72.swellDirectionDeg, swellWaveDirectionDeg: h72.swellWaveDirectionDeg, swellPeriodSeconds: h72.maxSwellPeriodSeconds, windSpeedKmh: h72.maxWindSpeedKmh, windGustKmh: h72.maxWindGustKmh, windows },
     tags: ["model", "weather_risk"],
     updatedAt,
-    sourceUpdatedAt: updatedAt,
-    fetchedAt: updatedAt,
+    sourceUpdatedAt: undefined,
+    fetchedAt,
     stale: false,
     sourceStatus: "healthy",
     provenance: openMeteoProvenance,
@@ -829,7 +840,7 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
           const [marineResponse, weatherResponse] = await Promise.all([fetcher(marineUrl.toString()), fetcher(weatherUrl.toString())])
           if (!marineResponse.ok) throw new Error(`Open-Meteo marine request failed (${marineResponse.status})`)
           if (!weatherResponse.ok) throw new Error(`Open-Meteo weather request failed (${weatherResponse.status})`)
-          const item = weatherFeedItem({ id: port.id, name: port.name, nameEn: port.nameEn, latitude: coordinates.latitude, longitude: coordinates.longitude }, validWeatherPayload(await marineResponse.json()), validWeatherPayload(await weatherResponse.json()))
+          const item = weatherFeedItem({ id: port.id, name: port.name, nameEn: port.nameEn, latitude: coordinates.latitude, longitude: coordinates.longitude }, validWeatherPayload(await marineResponse.json()), validWeatherPayload(await weatherResponse.json()), fetchedAt)
           const items = item ? [{ ...item, fetchedAt }] : []
           cache.set(port.id, { checkedAt: checkedAt.getTime(), items })
           return items

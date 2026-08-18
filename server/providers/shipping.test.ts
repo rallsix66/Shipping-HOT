@@ -3,7 +3,7 @@ import { createMockSnapshot, mockFeedItems, mockPorts, mockVessels } from "@shar
 import type { FeedItem, Vessel } from "@shared/shipping"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeWeatherFeedItems } from "../shipping-store"
-import { DisabledWeatherAlertProvider, MockWeatherProvider, configureProviders, createAisStreamVesselProvider, createOpenMeteoWeatherProvider, createOperationalSourceContext, createPortcastPublicPageProvider, disabledProviderData, fetchWeatherProviderResults, normalizeProviderTimestamp, parsePortcastPublicPage, portcastFingerprint, portcastPublicPageUrls, providerProvenances, providerResult, toProviderResult } from "./shipping"
+import { DisabledWeatherAlertProvider, MockWeatherProvider, PORTCAST_FRESH_MAX_AGE_DAYS, configureProviders, createAisStreamVesselProvider, createOpenMeteoWeatherProvider, createOperationalSourceContext, createPortcastPublicPageProvider, disabledProviderData, fetchWeatherProviderResults, normalizeProviderTimestamp, parsePortcastPublicPage, portcastFingerprint, portcastPublicPageUrls, providerProvenances, providerResult, toProviderResult } from "./shipping"
 import { configureCalendarProviders } from "./calendar"
 import { activeShippingFeedSourceIds } from "./feed"
 import { activeOfficialWeatherAlertSourceIds } from "./weather-alerts"
@@ -60,7 +60,7 @@ describe("shipping Provider failure boundaries", () => {
   it("uses the public page provider with daily caching and fingerprint stability", async () => {
     let requestCount = 0
     let now = new Date("2026-08-15T00:00:00.000Z")
-    const html = "<h1>Port Congestion at Shekou</h1><p>Last updated on 26 Jul 2026</p><p>Congestion Category medium</p><p>Long Tail Congestion No</p><p>Median Waiting Time 0.62 0.8 Current Week Last Week</p>"
+    const html = "<h1>Port Congestion at Shekou</h1><p>Last updated on 1 Aug 2026</p><p>Congestion Category medium</p><p>Long Tail Congestion No</p><p>Median Waiting Time 0.62 0.8 Current Week Last Week</p>"
     const provider = createPortcastPublicPageProvider({
       now: () => now,
       fetcher: async (url) => {
@@ -70,12 +70,12 @@ describe("shipping Provider failure boundaries", () => {
       },
     })
     const first = await provider.getPorts([mockPorts[0]])
-    expect(first[0]).toMatchObject({ congestionLevel: "medium", waitingHours: 14.879999999999999, sourceUpdatedAt: "2026-07-26T00:00:00.000Z", stale: false, sourceStatus: "healthy", provenance: { ...providerProvenances.portcastPublic, sourceUrl: portcastPublicPageUrls["port-shekou"] } })
+    expect(first[0]).toMatchObject({ congestionLevel: "medium", waitingHours: 14.879999999999999, updatedAt: "2026-08-01T00:00:00.000Z", sourceUpdatedAt: "2026-08-01T00:00:00.000Z", fetchedAt: "2026-08-15T00:00:00.000Z", stale: false, sourceStatus: "healthy", provenance: { ...providerProvenances.portcastPublic, sourceUrl: portcastPublicPageUrls["port-shekou"] } })
     expect(first[0].waitingVessels).toBeUndefined()
     expect(first[0].containerWaitingVessels).toBeUndefined()
     expect(first[0].operationalStatus).toBeUndefined()
     expect(first[0].congestionDetail).toMatchObject({ coverageStatus: "public", previousMedianWaitingHours: 19.200000000000003 })
-    expect(portcastFingerprint({ congestionCategory: "medium", medianWaitingHours: 14.879999999999999, previousMedianWaitingHours: 19.200000000000003, longTailCongestion: false, sourceUpdatedAt: "2026-07-26T00:00:00.000Z" })).toContain("medium")
+    expect(portcastFingerprint({ congestionCategory: "medium", medianWaitingHours: 14.879999999999999, previousMedianWaitingHours: 19.200000000000003, longTailCongestion: false, sourceUpdatedAt: "2026-08-01T00:00:00.000Z" })).toContain("medium")
     now = new Date("2026-08-15T12:00:00.000Z")
     const cached = await provider.getPorts(first)
     expect(requestCount).toBe(1)
@@ -84,6 +84,45 @@ describe("shipping Provider failure boundaries", () => {
     const rechecked = await provider.getPorts(cached)
     expect(requestCount).toBe(2)
     expect(rechecked[0].updatedAt).toBe(first[0].updatedAt)
+  })
+
+  it("uses the corrected HCM Portcast URL and applies the 14-day source-age gate", async () => {
+    expect(portcastPublicPageUrls["port-ho-chi-minh"]).toBe("https://www.portcast.io/port-congestion/ho-chi-minh")
+    expect(PORTCAST_FRESH_MAX_AGE_DAYS).toBe(14)
+    const page = (lastUpdated?: string) => `<h1>Port Congestion at Ho Chi Minh</h1>${lastUpdated ? `<p>Last updated on ${lastUpdated}</p>` : ""}<p>Congestion Category medium</p><p>Median Waiting Time 1.5 1 Current Week Last Week</p>`
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    for (const [daysOld, expected] of [[1, "healthy"], [13, "healthy"], [15, "degraded"], [180, "degraded"]] as const) {
+      const sourceDate = new Date("2026-08-18T00:00:00.000Z")
+      sourceDate.setUTCDate(sourceDate.getUTCDate() - daysOld)
+      const provider = createPortcastPublicPageProvider({
+        now: () => new Date("2026-08-18T00:00:00.000Z"),
+        minIntervalMs: 0,
+        fetcher: async (url) => {
+          expect(url).toBe(portcastPublicPageUrls["port-ho-chi-minh"])
+          return { ok: true, status: 200, text: async () => page(`${sourceDate.getUTCDate()} ${months[sourceDate.getUTCMonth()]} ${sourceDate.getUTCFullYear()}`) }
+        },
+      })
+      const [result] = await provider.getPorts([mockPorts.find(port => port.id === "port-ho-chi-minh")!])
+      expect(result.sourceStatus).toBe(expected)
+      expect(result.stale).toBe(expected !== "healthy")
+      expect(result.congestionLevel).toBe("medium")
+      expect(result.waitingHours).toBe(36)
+      expect(result.fetchedAt).toBe("2026-08-18T00:00:00.000Z")
+      expect(result.updatedAt).toBe(`${sourceDate.toISOString().slice(0, 10)}T00:00:00.000Z`)
+    }
+    const missingDate = createPortcastPublicPageProvider({
+      now: () => new Date("2026-08-18T00:00:00.000Z"),
+      minIntervalMs: 0,
+      fetcher: async () => ({ ok: true, status: 200, text: async () => page() }),
+    })
+    const [unknown] = await missingDate.getPorts([mockPorts.find(port => port.id === "port-ho-chi-minh")!])
+    expect(unknown).toMatchObject({ stale: true, sourceStatus: "degraded", error: "source_update_time_unknown", updatedAt: undefined, sourceUpdatedAt: undefined, congestionLevel: "medium", waitingHours: 36 })
+  })
+
+  it("does not create a Port congestion Event from stale Portcast evidence", () => {
+    const stalePort = { ...mockPorts[0], congestionLevel: "high" as const, waitingHours: 48, stale: true, sourceStatus: "degraded" as const, error: "source_stale", provenance: providerProvenances.portcastPublic }
+    const events = detectShippingEvents([], [stalePort], [], [], createMockSnapshot().settings, [], "2026-08-18T00:00:00.000Z")
+    expect(events.some(event => event.type === "port_congestion")).toBe(false)
   })
 
   it("keeps only static identity when Portcast has never succeeded", async () => {
@@ -444,13 +483,17 @@ describe("shipping Provider failure boundaries", () => {
       status: 200,
       async json() {
         return url.includes("marine-api")
-          ? { current: { time: "2026-08-13T09:00:00.000Z", wave_height: 3 } }
+          ? { current: { time: "2026-08-13T09:00:00.000Z", wave_height: 3, wave_direction: 90, swell_wave_height: 1.2, swell_wave_direction: 120, swell_wave_period: 8 } }
           : { current: { time: "2026-08-13T09:00:00.000Z", wind_speed_10m: 20, wind_gusts_10m: 25 } }
       },
     })
-    const provider = createOpenMeteoWeatherProvider({ fetcher })
+    const provider = createOpenMeteoWeatherProvider({ fetcher, now: () => new Date("2026-08-13T10:00:00.000Z") })
     const warning = await provider.getFeedItems([mockPorts[0]])
-    expect(warning[0]).toMatchObject({ severity: "warning", relatedPortIds: ["port-shekou"], sourceStatus: "healthy", sourceUpdatedAt: "2026-08-13T09:00:00.000Z", provenance: providerProvenances.openMeteo })
+    expect(warning[0]).toMatchObject({ severity: "warning", relatedPortIds: ["port-shekou"], sourceStatus: "healthy", updatedAt: "2026-08-13T09:00:00.000Z", sourceUpdatedAt: undefined, fetchedAt: "2026-08-13T10:00:00.000Z", provenance: providerProvenances.openMeteo })
+    expect(Object.keys(warning[0].weather?.windows ?? {})).toEqual(["h24", "h72", "d7"])
+    expect(warning[0].weather?.windows?.h72.waveDirectionDeg).toBe(90)
+    const wrapped = toProviderResult(warning, providerProvenances.openMeteo, "2026-08-13T10:00:00.000Z")
+    expect(wrapped).toMatchObject({ sourceUpdatedAt: undefined, fetchedAt: "2026-08-13T10:00:00.000Z", freshness: { updatedAt: "2026-08-13T09:00:00.000Z", sourceUpdatedAt: undefined, fetchedAt: "2026-08-13T10:00:00.000Z" } })
 
     const normalProvider = createOpenMeteoWeatherProvider({ fetcher: async (_url: string) => ({
       ok: true,
@@ -473,7 +516,7 @@ describe("shipping Provider failure boundaries", () => {
           : { current: { time: unixTime, wind_speed_10m: 20, wind_gusts_10m: 25 } }
       },
     }) })
-    expect(await provider.getFeedItems([mockPorts[0]])).toMatchObject([{ publishedAt: "2026-08-13T09:00:00.000Z", updatedAt: "2026-08-13T09:00:00.000Z" }])
+    expect(await provider.getFeedItems([mockPorts[0]])).toMatchObject([{ publishedAt: "2026-08-13T09:00:00.000Z", updatedAt: "2026-08-13T09:00:00.000Z", sourceUpdatedAt: undefined }])
     expect(normalizeProviderTimestamp("2026-08-13T09:00")).toBeUndefined()
   })
 
