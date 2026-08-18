@@ -86,6 +86,48 @@ describe("shipping Provider failure boundaries", () => {
     expect(rechecked[0].updatedAt).toBe(first[0].updatedAt)
   })
 
+  it("re-evaluates Portcast freshness on a cache hit without refetching or changing fetchedAt", async () => {
+    let now = new Date("2026-08-17T23:00:00.000Z")
+    let requestCount = 0
+    let html = "<h1>Port Congestion at Shekou</h1><p>Last updated on 4 Aug 2026</p><p>Congestion Category high</p><p>Median Waiting Time 2 1 Current Week Last Week</p>"
+    const provider = createPortcastPublicPageProvider({
+      now: () => now,
+      fetcher: async () => {
+        requestCount += 1
+        return { ok: true, status: 200, text: async () => html }
+      },
+    })
+    const [first] = await provider.getPorts([mockPorts[0]])
+    expect(first).toMatchObject({ sourceStatus: "healthy", stale: false, fetchedAt: "2026-08-17T23:00:00.000Z" })
+    now = new Date("2026-08-18T13:00:00.000Z")
+    const [cached] = await provider.getPorts([first])
+    expect(requestCount).toBe(1)
+    expect(cached).toMatchObject({ sourceStatus: "degraded", stale: true, error: "source_stale", fetchedAt: first.fetchedAt, congestionLevel: "high", waitingHours: 48 })
+    const events = detectShippingEvents([], [cached], [], [], createMockSnapshot().settings, [], "2026-08-18T13:00:00.000Z")
+    expect(events.some(event => event.type === "port_congestion")).toBe(false)
+    html = "<h1>Port Congestion at Shekou</h1><p>Last updated on 19 Aug 2026</p><p>Congestion Category high</p><p>Median Waiting Time 2 1 Current Week Last Week</p>"
+    now = new Date("2026-08-19T00:00:00.000Z")
+    const [recovered] = await provider.getPorts([cached])
+    expect(requestCount).toBe(2)
+    expect(recovered).toMatchObject({ sourceStatus: "healthy", stale: false, error: undefined, sourceUpdatedAt: "2026-08-19T00:00:00.000Z", fetchedAt: "2026-08-19T00:00:00.000Z" })
+  })
+
+  it("does not let cached failed or no-public states recover from source-age evaluation", async () => {
+    let now = new Date("2026-08-18T00:00:00.000Z")
+    const failedProvider = createPortcastPublicPageProvider({ now: () => now, fetcher: async () => ({ ok: false, status: 503, text: async () => "" }) })
+    const [failed] = await failedProvider.getPorts([mockPorts[0]])
+    now = new Date("2026-08-18T01:00:00.000Z")
+    const [failedCached] = await failedProvider.getPorts([failed])
+    expect(failedCached).toMatchObject({ sourceStatus: "failed", stale: true, error: "Portcast public page failed (503)" })
+
+    now = new Date("2026-08-18T00:00:00.000Z")
+    const noPublicProvider = createPortcastPublicPageProvider({ now: () => now, fetcher: async () => ({ ok: false, status: 404, text: async () => "" }) })
+    const [noPublic] = await noPublicProvider.getPorts([mockPorts[0]])
+    now = new Date("2026-08-18T01:00:00.000Z")
+    const [noPublicCached] = await noPublicProvider.getPorts([noPublic])
+    expect(noPublicCached).toMatchObject({ sourceStatus: "degraded", stale: true, error: "no_public_data", congestionDetail: { coverageStatus: "no_public_data" } })
+  })
+
   it("uses the corrected HCM Portcast URL and applies the 14-day source-age gate", async () => {
     expect(portcastPublicPageUrls["port-ho-chi-minh"]).toBe("https://www.portcast.io/port-congestion/ho-chi-minh")
     expect(PORTCAST_FRESH_MAX_AGE_DAYS).toBe(14)

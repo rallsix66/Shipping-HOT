@@ -50,7 +50,19 @@ describe("open-meteo weather intelligence", () => {
     now = new Date("2026-08-15T01:00:00.000Z")
     failShekou = true
     const retried = await provider.getFeedItems([mockPorts[0], mockPorts[1]], first)
-    expect(retried.find(item => item.relatedPortIds.includes("port-shekou"))).toMatchObject({ stale: true, sourceStatus: "failed", error: "Open-Meteo marine request failed (503)" })
+    expect(retried.find(item => item.relatedPortIds.includes("port-shekou"))).toMatchObject({ stale: true, sourceStatus: "failed", error: "Open-Meteo marine request failed (503)", updatedAt: first.find(item => item.relatedPortIds.includes("port-shekou"))?.updatedAt, sourceUpdatedAt: undefined, fetchedAt: "2026-08-15T01:00:00.000Z" })
     expect(retried.find(item => item.relatedPortIds.includes("port-yantian"))).toMatchObject({ stale: false, sourceStatus: "healthy" })
+  })
+
+  it("records Open-Meteo fetchedAt after response parsing and keeps it on cache hits", async () => {
+    const times = ["2026-08-18T10:00:00.000Z", "2026-08-18T10:00:02.000Z", "2026-08-18T10:00:30.000Z"]
+    const provider = createOpenMeteoWeatherProvider({
+      now: () => new Date(times.shift() ?? "2026-08-18T10:00:30.000Z"),
+      fetcher: async url => ({ ok: true, status: 200, json: async () => weatherPayload(url) }),
+    })
+    const [first] = await provider.getFeedItems([mockPorts[0]])
+    expect(first).toMatchObject({ updatedAt: "2026-08-15T00:00:00.000Z", sourceUpdatedAt: undefined, fetchedAt: "2026-08-18T10:00:02.000Z" })
+    const [cached] = await provider.getFeedItems([mockPorts[0]])
+    expect(cached.fetchedAt).toBe(first.fetchedAt)
   })
 })

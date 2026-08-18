@@ -268,14 +268,24 @@ function isPortcastHistory(port: Port): boolean {
   return port.provenance?.sourceId === "portcast-public"
 }
 
-function portcastFreshness(sourceUpdatedAt: string | undefined, fetchedAt: string): Pick<Port, "stale" | "sourceStatus" | "error"> {
+function portcastFreshness(sourceUpdatedAt: string | undefined, evaluatedAt: string): Pick<Port, "stale" | "sourceStatus" | "error"> {
   if (!sourceUpdatedAt) return { stale: true, sourceStatus: "degraded", error: "source_update_time_unknown" }
   const sourceTimestamp = Date.parse(sourceUpdatedAt)
-  const fetchedTimestamp = Date.parse(fetchedAt)
-  if (!Number.isFinite(sourceTimestamp) || !Number.isFinite(fetchedTimestamp) || fetchedTimestamp - sourceTimestamp > portcastFreshMaxAgeMs) {
+  const evaluatedTimestamp = Date.parse(evaluatedAt)
+  if (!Number.isFinite(sourceTimestamp) || !Number.isFinite(evaluatedTimestamp) || evaluatedTimestamp - sourceTimestamp > portcastFreshMaxAgeMs) {
     return { stale: true, sourceStatus: "degraded", error: "source_stale" }
   }
   return { stale: false, sourceStatus: "healthy", error: undefined }
+}
+
+function canReevaluatePortcastAge(port: Port): boolean {
+  return port.provenance?.sourceId === "portcast-public"
+    && port.congestionDetail?.coverageStatus === "public"
+    && (port.sourceStatus === "healthy" || (port.sourceStatus === "degraded" && (port.error === "source_stale" || port.error === "source_update_time_unknown")))
+}
+
+function reevaluateCachedPortcast(port: Port, evaluatedAt: string): Port {
+  return canReevaluatePortcastAge(port) ? { ...port, ...portcastFreshness(port.sourceUpdatedAt, evaluatedAt) } : port
 }
 
 function stalePortcastData(port: Port, url: string | undefined, fetchedAt: string, sourceStatus: "degraded" | "failed", error: string, noPublicData = false): Port {
@@ -327,20 +337,22 @@ export function createPortcastPublicPageProvider(options: PortcastPublicPageProv
   return {
     async getPorts(lastKnown = []) {
       const checkedAt = now()
-      const fetchedAt = checkedAt.toISOString()
+      const evaluatedAt = checkedAt.toISOString()
+      const fetchedAt = evaluatedAt
       return Promise.all(lastKnown.map(async (port) => {
         const url = portcastPublicPageUrls[port.id]
         const cached = cache.get(port.id)
         const previousCheckedAt = cached?.checkedAt ?? (port.provenance?.sourceId === "portcast-public" && port.fetchedAt ? Date.parse(port.fetchedAt) : Number.NaN)
         if (Number.isFinite(previousCheckedAt) && checkedAt.getTime() - previousCheckedAt < minIntervalMs) {
-          return { ...(cached?.port ?? port), isWatched: port.isWatched }
+          const reused = reevaluateCachedPortcast(cached?.port ?? port, evaluatedAt)
+          return { ...reused, isWatched: port.isWatched }
         }
-        if (!url) return noPublicPortData(port, url, fetchedAt)
+        if (!url) return noPublicPortData(port, url, evaluatedAt)
         try {
           const response = await fetcher(url)
           if (!response.ok) {
-            if (response.status === 404 || response.status === 410) return noPublicPortData(port, url, fetchedAt)
-            return failedPortcastData(port, url, fetchedAt, `Portcast public page failed (${response.status})`)
+            if (response.status === 404 || response.status === 410) return noPublicPortData(port, url, evaluatedAt)
+            return failedPortcastData(port, url, evaluatedAt, `Portcast public page failed (${response.status})`)
           }
           const metrics = parsePortcastPublicPage(await response.text())
           const fingerprint = portcastFingerprint(metrics)
@@ -356,13 +368,13 @@ export function createPortcastPublicPageProvider(options: PortcastPublicPageProv
             updatedAt: metrics.sourceUpdatedAt ?? (unchanged ? port.updatedAt : undefined),
             sourceUpdatedAt: metrics.sourceUpdatedAt,
             fetchedAt,
-            ...portcastFreshness(metrics.sourceUpdatedAt, fetchedAt),
+            ...portcastFreshness(metrics.sourceUpdatedAt, evaluatedAt),
             provenance: { ...providerProvenances.portcastPublic, sourceUrl: url },
           }
           cache.set(port.id, { checkedAt: checkedAt.getTime(), fingerprint, port: next })
           return next
         } catch (error) {
-          return failedPortcastData(port, url, fetchedAt, error instanceof Error ? error.message : "Portcast public page parse failed")
+          return failedPortcastData(port, url, evaluatedAt, error instanceof Error ? error.message : "Portcast public page parse failed")
         }
       }))
     },
@@ -811,7 +823,6 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
   return {
     async getFeedItems(ports = mockPorts, lastKnown = []) {
       const checkedAt = now()
-      const fetchedAt = checkedAt.toISOString()
       const modelLastKnown = lastKnown.filter(item => item.sourceId === "open-meteo-marine")
       const failures: string[] = []
       const results = await Promise.all(ports.map(async (port) => {
@@ -840,14 +851,18 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
           const [marineResponse, weatherResponse] = await Promise.all([fetcher(marineUrl.toString()), fetcher(weatherUrl.toString())])
           if (!marineResponse.ok) throw new Error(`Open-Meteo marine request failed (${marineResponse.status})`)
           if (!weatherResponse.ok) throw new Error(`Open-Meteo weather request failed (${weatherResponse.status})`)
-          const item = weatherFeedItem({ id: port.id, name: port.name, nameEn: port.nameEn, latitude: coordinates.latitude, longitude: coordinates.longitude }, validWeatherPayload(await marineResponse.json()), validWeatherPayload(await weatherResponse.json()), fetchedAt)
+          const marinePayload = validWeatherPayload(await marineResponse.json())
+          const weatherPayload = validWeatherPayload(await weatherResponse.json())
+          const fetchedAt = now().toISOString()
+          const item = weatherFeedItem({ id: port.id, name: port.name, nameEn: port.nameEn, latitude: coordinates.latitude, longitude: coordinates.longitude }, marinePayload, weatherPayload, fetchedAt)
           const items = item ? [{ ...item, fetchedAt }] : []
           cache.set(port.id, { checkedAt: checkedAt.getTime(), items })
           return items
         } catch (error) {
           const message = error instanceof Error ? error.message : "Open-Meteo port request failed"
+          const failureFetchedAt = now().toISOString()
           failures.push(message)
-          return previous.map(item => ({ ...item, stale: true, sourceStatus: "failed" as const, error: message, fetchedAt }))
+          return previous.map(item => ({ ...item, stale: true, sourceStatus: "failed" as const, error: message, fetchedAt: failureFetchedAt }))
         }
       }))
       const modelItems = results.flat().filter((item): item is FeedItem => item !== undefined)

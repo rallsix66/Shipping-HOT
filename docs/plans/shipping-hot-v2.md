@@ -832,7 +832,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Dependencies：V2.0 trust model；逐页确认公开字段、robots/ToS 和页面结构。
 - Status：implemented and verified。
 - Implemented：`PortcastPublicPageProvider`、公开 HTML parser、24 小时检查缓存、source fingerprint、Port congestion detail、Portcast attribution、环境开关 `SHIPPING_PORT_PROVIDER=portcast` 和同源 last-known/no-public-data/error fallback；首次失败且无同源历史时只保留静态港口身份，动态指标不使用 Mock 值；HCM 映射使用 `/port-congestion/ho-chi-minh`，14 天 source-age gate 允许真实值显示但阻止 stale Event/HOT。
-- Historical public probe：2026-08-17 对八个旧映射收到 8/8 HTTP/parser 响应；Nansha 与旧 HCM 路径的页面日期已落入新鲜度门槛之外。当前修正 URL 的新 public re-probe pending，未把它写成 live verified。
+- Historical public probe：2026-08-17 对八个旧映射收到 8/8 HTTP/parser 响应；Nansha 与旧 HCM 路径的页面日期已落入新鲜度门槛之外。Corrected public re-probe 2026-08-18 verified 8/8 Portcast HTTP/parser responses: 7 fresh, Nansha stale, and the corrected HCM URL returned HTTP 200/fresh.
 - Acceptance：只处理页面公开展示字段；页面失败/不存在/无数据有明确状态；每日最多按策略检查；source updatedAt/fingerprint 未变化不修改 Port 的业务更新时间并沿用 Event dedupe；Portcast 不可用或 source date 不明时不伪造 fresh 值。
 - Main risks：HTML 变化、页面动态渲染、授权限制、字段定义不稳定。
 - Rollback：关闭 Portcast Provider，回退同源 last-known/暂无数据；只有显式切换到 Mock 才使用 Mock，不删已有历史 Event。
@@ -845,7 +845,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Dependencies：V2.0 trust model；Calendarific Key 管理确认；五国官方来源清单。
 - Status：implemented / locally verified; live pending。
 - Implemented：`CalendarProvider`/Calendarific server-only adapter、五国官方来源注册表、OfficialHolidayProvider/ManualHolidayProvider/Mock contracts、`calendar_events` 最小表、`settings.calendarSync` source-scoped coverage persistence、source merge priority/conflict evidence、government-special announced lifecycle、Calendar → Event → HOT lead windows、`/calendar` page、calendar GET/sync POST routes and conditional attribution；显式 Calendarific 缺少 Key 时保持 calendarific 模式并返回 unknown/暂无数据，不回退 Mock。
-- Verification：当前 Provider/live-path batch 为 170/170；`pnpm typecheck` and build passed；Portcast 1/13/15/180-day and missing-date fixtures, Open-Meteo timestamp/window fixtures and Shekou `/ywgg/` parser/Event/HOT fixtures passed；corrected public re-probe remains pending；Neat Freak Bash inventory script remains unavailable on Windows and its manual equivalent is complete。
+- Verification：当前 Provider/live-path batch 为 173/173；`pnpm typecheck` and build passed；Portcast 1/13/15/180-day, cache-crossing and missing-date fixtures, Open-Meteo completion/cache timestamp/window fixtures and Shekou `/ywgg/` parser/Event/HOT fixtures passed；corrected public Portcast re-probe verified 8/8 with Nansha stale；Neat Freak Bash inventory script remains unavailable on Windows and its manual equivalent is complete。
 - Acceptance：不打开页面即请求 API；本地可离线读取实际已缓存的年度数据；`coverageStatus` 可区分 complete/partial/unknown；国家日历页面展示符合条款的 Calendarific Attribution；官方事实层优先级最高；ManualOverride 修改事实字段时保留原记录并标记 conflict；普通、高影响、连续假期和政府临时假日提醒不重复；日历不把 observance 默认当作放假。
 - Main risks：官方临时变更、地区差异、农历/宗教日期、第三方滞后。
 - Rollback：停用自动同步但保留本地 CalendarEvent；关闭提醒规则不删除已核验记录。
@@ -858,7 +858,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Dependencies：V2.0 trust model；逐 Source 的 RSS/HTML/robots/版权核对。
 - Status：implemented / locally verified; live pending。
 - Implemented：`FeedProvider`/`createPublicFeedProvider`/`MockFeedProvider`、The Loadstar 与 The Maritime Executive RSS、Shekou `/ywgg/` official HTML、registered/parser-pending and deferred registry entries、unknown publication semantics、Chinese classification、normalized FeedItem fields、per-source stale fallback、canonical/title dedupe、Feed → Event → HOT reason/evidence and `/feed` UI status chips；Repository 使用真实 `fetchedAt` 写入 `fetched_at`，未知 `publishedAt` 按 `fetched_at` retention/prune。
-- Verification：当前 Provider/live-path batch 为 170/170；build、typecheck and targeted lint passed；Shekou `/ywgg/` parser excludes `/gsxw/` and nav/footer fixtures and carries dated notices through Event/HOT; corrected public-source runtime remains pending until the new public re-probe is allowed。
+- Verification：当前 Provider/live-path batch 为 173/173；build、typecheck and targeted lint passed；Shekou `/ywgg/` parser excludes `/gsxw/` and nav/footer fixtures and carries dated notices through Event/HOT；corrected public probe returned 5 `/ywgg/` items and zero `/gsxw/` items, with publication times unknown。
 - Acceptance：首批 Source 少于无限扩张；每个 Source 独立失败；普通新闻只进 Feed；有效公告/预警可进入 HOT；重复转载可去重；旧缓存明确 stale。
 - Main risks：来源质量、版权、抓取频率、来源结构变化。
 - Rollback：禁用单个 Source/分类，保留 NewsNow 原有 Source 和 cache。
@@ -871,7 +871,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Dependencies：V2.0 trust model；现有 Open-Meteo adapter；官方来源合规核对。
 - Status：implemented / locally verified; live pending。
 - Implemented：扩展 `createOpenMeteoWeatherProvider` 的 current/hourly wave/swell/wind 请求、24/72/168 小时风险窗口和方向字段、30 分钟 TTL、逐港 failure/同源 last-known stale；没有同源历史时首次失败返回暂无模型天气；`updatedAt`/`sourceUpdatedAt`/`fetchedAt` 语义分离，`generationtime_ms` 不冒充 source time；新增 `WeatherDetail.windows`、model/official risk labels、JMA 海上警报 HTML、TMD CAP、BMKG 官方 RSS source-specific adapters 和 warning expiry/parse-failure 保留逻辑。三个官方来源均标记 `live_pending`；`public` 不会启用它们，`experimental` 才显式允许 pending adapter。
-- Verification：当前 Provider/live-path batch 为 170/170；build、typecheck and targeted lint passed；Open-Meteo timestamp/window/direction fixtures passed；corrected public Open-Meteo/official warning runtime remains pending because the public re-probe was not allowed。
+- Verification：当前 Provider/live-path batch 为 173/173；build、typecheck and targeted lint passed；Open-Meteo timestamp/window/direction/cache fixtures passed；corrected public Open-Meteo probe verified 16 requests for 8 ports and `sourceUpdatedAt` remained undefined；official warning runtime remains pending。
 - Acceptance：字段来源和预报时间窗清楚；海况请求按 TTL 缓存；模型风险不能伪装官方预警；官方预警过期可关闭；单港失败不影响其他港口。
 - Main risks：沿岸精度、预警格式、重复公告、不同国家定义不一致。
 - Rollback：只保留现有 Open-Meteo 风/阵风/波高，关闭官方预警 Provider。
