@@ -59,6 +59,15 @@ describe("official weather alert provider", () => {
     expect(bmkgItem.relatedPortIds).toEqual([])
   })
 
+  it("ignores provider-wide default ports even when a registry entry is misconfigured", () => {
+    const misconfiguredTmd = { ...tmd, relatedPortIds: ["port-laem-chabang"] }
+    const misconfiguredBmkg = { ...bmkg, relatedPortIds: ["port-jakarta"] }
+    const [tmdItem] = parseWeatherAlertRss(`<rss><channel><item><title>Heavy Rain</title><description>Heavy rain in Northern Thailand.</description><pubDate>Tue, 18 Aug 2026 04:00:00 GMT</pubDate></item></channel></rss>`, misconfiguredTmd, mockPorts)
+    const [bmkgItem] = parseWeatherAlertRss(`<rss><channel><item><title>Storm warning</title><description>Storm warning for Bali.</description><pubDate>Tue, 18 Aug 2026 04:00:00 GMT</pubDate></item></channel></rss>`, misconfiguredBmkg, mockPorts)
+    expect(tmdItem.relatedPortIds).toEqual([])
+    expect(bmkgItem.relatedPortIds).toEqual([])
+  })
+
   it("maps weather alert aliases to the canonical focus ports", () => {
     const [chonburi] = parseWeatherAlertRss(`<rss><channel><item><title>Gale warning near Chonburi</title><description>Strong wind near Chon Buri.</description><pubDate>Tue, 18 Aug 2026 04:00:00 GMT</pubDate></item></channel></rss>`, tmd, mockPorts)
     const [priok] = parseWeatherAlertRss(`<rss><channel><item><title>Heavy rain near Tanjung Priok</title><description>North Jakarta coastal warning.</description><pubDate>Tue, 18 Aug 2026 04:00:00 GMT</pubDate></item></channel></rss>`, bmkg, mockPorts)

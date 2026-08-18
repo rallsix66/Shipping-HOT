@@ -1,7 +1,7 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
 > Snapshot date: 2026-08-18
-> Evidence scope: local code / configuration / Git metadata; V2.0 is sealed, V2.1 is implemented, and V2.2/V2.3/V2.4 local closeout gates passed. The corrected 2026-08-18 public re-probe verified Portcast 8/8 page/parser responses (7 fresh, 1 stale), Open-Meteo 8/8 port responses and Shekou `/ywgg/` parsing; Loadstar returned 10 items and Maritime Executive remained failed. AISStream and Calendarific remain `pending_credentials`; official-alert verification remains `live_pending`. The final alert lifecycle/feed timeout closeout now prevents stale unknown warnings from entering HOT, isolates per-source Feed timeouts, maps the remaining weather aliases and requires JMA-specific empty structures. Full lint retains four pre-existing errors and native SQLite runtime is pending on this Node 24 environment.
+> Evidence scope: local code / configuration / Git metadata; V2.0 is sealed, V2.1 is implemented, and V2.2/V2.3/V2.4 local closeout gates passed. The corrected 2026-08-18 public re-probe verified Portcast 8/8 page/parser responses (7 fresh, 1 stale), Open-Meteo 8/8 port responses and Shekou `/ywgg/` parsing; Loadstar returned 10 items and Maritime Executive remained failed. AISStream and Calendarific remain `pending_credentials`; official-alert verification remains `live_pending`. The final trust boundary seal now prevents stale FeedItems from bypassing freshness into direct HOT, aborts timed-out Feed source pipelines and derives official alert port links only from alert evidence; the prior lifecycle, alias and JMA structure rules remain in force. Full lint retains four pre-existing errors and native SQLite runtime is pending on this Node 24 environment.
 > Source of truth for: current implementation and verification state
 
 ## 1. One-Sentence Status
@@ -19,7 +19,7 @@ Shipping HOT V2.2–V2.4 local closeout is complete on the retained NewsNow stac
 - Database / external services: Repository paths are implemented; the nullable `vessels.status_changed_at` rebuild, row/watch-state preservation and NULL identity-only writes passed an offline Python stdlib SQLite smoke. Node 24.15.0 currently mismatches the bundled native module ABI, so native SQLite persistence remains pending and the app uses its documented memory fallback; the ignored local `.data/db.sqlite3` artifact remains from prior/local runtime work and was not deleted; AISStream, Portcast public pages and Open-Meteo remain optional server-side sources
 - Mock fixture timestamps: generated relative to the runtime clock when a snapshot is created; deterministic fixed time is limited to `shared/shipping-engine.test.ts`
 - V1 focus-port seed: all eight requested ports are present in the shared fixture and Repository seed path: Shekou, Yantian, Nansha, Laem Chabang, Port Klang, Manila, Jakarta and Ho Chi Minh City
-- Last verified surface: source inspection, final 181/181 tests, typecheck, targeted lint, production build, corrected public re-probe, no-network provider-mode smoke, SQLite migration smoke, `git diff --check` and `shared/updated-sources.ts` stability passed; full lint retains four pre-existing errors outside this batch; official Neat Freak Bash inventory script is unavailable on this Windows environment, with the manual equivalent completed.
+- Last verified surface: source inspection, final 184/184 tests, typecheck, targeted lint, production build, corrected public re-probe, no-network provider-mode smoke, SQLite migration smoke, `git diff --check` and `shared/updated-sources.ts` stability passed; full lint retains four pre-existing errors outside this batch; official Neat Freak Bash inventory script is unavailable on this Windows environment, with the manual equivalent completed.
 
 ## 3. Current Architecture Summary
 
@@ -201,6 +201,13 @@ No source was upgraded to `verified_live` in this pass. V2.2 remains `implemente
 - Weather alert aliases now map `Chonburi`/`Chon Buri` to Laem Chabang and `Tanjung Priok`/`North Jakarta` to Jakarta; registry-wide default port association remains disabled.
 - JMA strict validation no longer accepts `#contents table`; it requires the JMA `#seawarning-container`/warning structure or an explicit empty marker.
 - Regression coverage is now 181/181. Mock Isolation, Portcast/Open-Meteo trust semantics, Schedule and V2.5 scope remain unchanged.
+
+## Final Trust Boundary Seal — 2026-08-18
+
+- Direct FeedItem → HOT now requires `sourceStatus=healthy` and `stale=false` in addition to severity, publication-time and event-eligibility checks; stale/failed/degraded FeedItems cannot bypass Event/HOT freshness through the direct Feed path. Existing active Event → HOT behavior is unchanged.
+- Public Feed retains a 10-second per-source deadline over fetch, response body and parser, and calls `AbortController.abort()` when the deadline expires so the underlying HTTP fetch receives cancellation. Timed-out sources keep only their own stale/failed last-known items; without previous data they return no placeholder item.
+- Official Weather Alert port association is alert-evidence-only: `WeatherAlertSource` no longer exposes `relatedPortIds`, and parser logic ignores any runtime-injected provider-wide default. Matching uses alert title/summary/area, canonical port names/UNLOCODEs and the verified aliases only.
+- Regression coverage is now 184/184. Mock Isolation, Portcast/Open-Meteo trust semantics, Schedule and V2.5 scope remain unchanged.
 
 ## Official Alert Trust + Feed Failure Isolation Closeout — 2026-08-18
 

@@ -14,7 +14,7 @@ export interface FeedResponse {
   text: () => Promise<string>
 }
 
-export type FeedFetcher = (url: string) => Promise<FeedResponse>
+export type FeedFetcher = (url: string, init?: { signal?: AbortSignal }) => Promise<FeedResponse>
 
 export interface ShippingFeedSource {
   id: string
@@ -357,24 +357,35 @@ export interface PublicFeedProviderOptions {
 
 export const PUBLIC_FEED_TIMEOUT_MS = 10_000
 
-async function withFeedSourceTimeout<T>(operation: Promise<T>, timeoutMs: number, sourceName: string): Promise<T> {
+async function withFeedSourceTimeout<T>(operation: (signal: AbortSignal) => Promise<T>, timeoutMs: number, sourceName: string): Promise<T> {
+  const controller = new AbortController()
+  let timedOut = false
   let timer: ReturnType<typeof setTimeout> | undefined
+  let rejectTimeout: ((reason?: unknown) => void) | undefined
   try {
     return await Promise.race([
-      operation,
+      operation(controller.signal),
       new Promise<T>((_, reject) => {
-        timer = setTimeout(() => reject(new Error(`${sourceName} request timed out after ${timeoutMs}ms`)), timeoutMs)
+        rejectTimeout = reject
+        timer = setTimeout(() => {
+          timedOut = true
+          controller.abort()
+          rejectTimeout?.(new Error(`${sourceName} request timed out after ${timeoutMs}ms`))
+        }, timeoutMs)
       }),
     ])
+  } catch (error) {
+    if (timedOut || controller.signal.aborted) throw new Error(`${sourceName} request timed out after ${timeoutMs}ms`)
+    throw error
   } finally {
     if (timer) clearTimeout(timer)
   }
 }
 
 function publicFeedFetcher(): FeedFetcher {
-  const fetchImplementation = (globalThis as typeof globalThis & { fetch?: FeedFetcher }).fetch
+  const fetchImplementation = globalThis.fetch
   if (!fetchImplementation) throw new Error("Fetch runtime is unavailable")
-  return fetchImplementation
+  return (url, init) => fetchImplementation(url, init)
 }
 
 export function createPublicFeedProvider(options: PublicFeedProviderOptions = {}): FeedProvider {
@@ -389,12 +400,12 @@ export function createPublicFeedProvider(options: PublicFeedProviderOptions = {}
       const results = await Promise.all(sources.filter(source => activeSourceIds.has(source.id)).map(async (source) => {
         const previous = lastKnown.filter(item => item.sourceId === source.id)
         try {
-          const parsed = await withFeedSourceTimeout((async () => {
-            const response = await fetcher(source.url)
+          const parsed = await withFeedSourceTimeout(async (signal) => {
+            const response = await fetcher(source.url, { signal })
             if (!response.ok) throw new Error(`${source.name} request failed (${response.status})`)
             const body = await response.text()
             return source.format === "rss" ? parseFeedRss(body, source, ports, fetchedAt) : parseFeedHtml(body, source, ports, fetchedAt)
-          })(), timeoutMs, source.name)
+          }, timeoutMs, source.name)
           return parsed
         } catch (error) {
           const message = error instanceof Error ? error.message : `${source.name} feed failed`

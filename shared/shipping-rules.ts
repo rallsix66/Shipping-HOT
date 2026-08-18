@@ -153,7 +153,7 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
       }
     })
   const activeEventKeys = new Set(operationalEvents.filter(event => event.status === "active").map(event => event.dedupeKey))
-  const feedHotItems = operationalFeedItems.filter(item => item.eventEligibility !== false && item.publicationTimeKnown !== false && (item.severity === "warning" || item.severity === "critical") && !activeEventKeys.has(`feed:${item.id}`)).map(item => ({
+  const feedHotItems = operationalFeedItems.filter(item => freshnessState(item) === "fresh" && item.eventEligibility !== false && item.publicationTimeKnown !== false && (item.severity === "warning" || item.severity === "critical") && !activeEventKeys.has(`feed:${item.id}`)).map(item => ({
     id: item.id,
     kind: "feed" as const,
     title: item.title,

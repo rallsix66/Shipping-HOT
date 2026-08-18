@@ -27,7 +27,6 @@ export interface WeatherAlertSource {
   sourceUrl: string
   format: "rss" | "cap" | "html"
   parser: WeatherAlertParser
-  relatedPortIds?: string[]
   enabled: boolean
   liveStatus: WeatherAlertSourceStatus
 }
@@ -127,9 +126,10 @@ const weatherAlertPortAliases: ReadonlyArray<readonly [string, string]> = [
   ["north jakarta", "port-jakarta"],
 ]
 
-function relatedPorts(text: string, source: WeatherAlertSource, ports: Port[]): string[] {
+function relatedPorts(text: string, ports: Port[]): string[] {
   const haystack = text.toLocaleLowerCase()
-  const result = new Set(source.relatedPortIds ?? [])
+  // Weather alerts must never inherit provider-wide default ports; association comes from alert evidence.
+  const result = new Set<string>()
   for (const [alias, portId] of weatherAlertPortAliases) {
     if (haystack.includes(alias)) result.add(portId)
   }
@@ -209,7 +209,7 @@ function normalizeAlert(raw: RawAlert, source: WeatherAlertSource, ports: Port[]
     hotReason: eventEligibility && (severity === "warning" || severity === "critical") ? "官方天气预警" : undefined,
     tags: ["official", "weather_warning"],
     weather,
-    relatedPortIds: relatedPorts(`${title} ${summary} ${region ?? ""}`, source, ports),
+    relatedPortIds: relatedPorts(`${title} ${summary} ${region ?? ""}`, ports),
     relatedVesselIds: [],
     relatedVoyageIds: [],
     updatedAt: sourceUpdatedAt,

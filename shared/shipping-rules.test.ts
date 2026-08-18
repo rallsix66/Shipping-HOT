@@ -214,6 +214,16 @@ describe("shipping HOT deterministic rules", () => {
     expect(items.filter(item => item.feedItemId === feed.id || item.eventId === event.id)).toHaveLength(1)
   })
 
+  it("requires fresh healthy evidence for direct Feed HOT items", () => {
+    const snapshot = createMockSnapshot()
+    const base = snapshot.feedItems[0]
+    const hot = (feed: typeof base) => rankHotItems([], snapshot.ports, snapshot.vessels, snapshot.voyages, [feed]).filter(item => item.kind === "feed")
+    expect(hot({ ...base, id: "failed-warning", severity: "warning", stale: true, sourceStatus: "failed", eventEligibility: true, publicationTimeKnown: true })).toEqual([])
+    expect(hot({ ...base, id: "degraded-critical", severity: "critical", stale: true, sourceStatus: "degraded", eventEligibility: true, publicationTimeKnown: true })).toEqual([])
+    expect(hot({ ...base, id: "fresh-warning", severity: "warning", stale: false, sourceStatus: "healthy", eventEligibility: true, publicationTimeKnown: true })).toHaveLength(1)
+    expect(hot({ ...base, id: "missing-warning", severity: "warning", stale: true, sourceStatus: "degraded", eventEligibility: false, publicationTimeKnown: true, weather: { riskSource: "official", alertState: "unknown" } })).toEqual([])
+  })
+
   it("excludes incompatible historical Mock Events and Feed HOT items from real Provider mode", () => {
     const snapshot = createMockSnapshot()
     const hot = rankHotItems(snapshot.events, snapshot.ports, snapshot.vessels, snapshot.voyages, snapshot.feedItems, new Date("2026-08-13T10:00:00.000Z"), realOperationalContext)
