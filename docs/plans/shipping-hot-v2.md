@@ -6,6 +6,12 @@
 >
 > 方案核对日期：2026-08-18。V2.0 已完成收口；V2.1 仅新增 Portcast 公共港口页面 Provider，不使用商业 API、登录、token、hidden endpoint 或新依赖；V2.2 的组合源/覆盖 reconcile、V2.3 的时间与分类语义、V2.4 的三窗口天气和 source-specific warning parser 已完成本地验证，live runtime 仍 pending。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
 
+## Current Live Verification Supersession — 2026-08-18
+
+本节覆盖此前“AISStream/Calendarific credential pending”的历史记录：AISStream 本轮达到 connection_verified / pending_observation，但 120 秒内没有 PositionReport，不能升级 verified_live；Calendarific 五国 HTTP 200、合法 JSON 和 parser 均通过，当前状态为 verified_live，但五国 coverageStatus 均为 partial，不能宣称 complete。
+
+Calendarific live 数据暴露了 National holiday / Common local holiday 标签和 MY 的完全重复事实；normalizer 已完成类型归一化与 country/date/name/type 去重。当前本地 suite 为 186/186；all-real API/page smoke 通过；JMA/TMD/BMKG 仍 live_pending，V2.5 仍未启动。
+
 ## 1. V2 Executive Summary
 
 Shipping HOT V2 继续作为个人本地使用的 local-first 航运工作台，保留现有 NewsNow foundation、React/Vite/Nitro/db0/SQLite、Provider、Repository、Event Engine 和 Feed 边界。

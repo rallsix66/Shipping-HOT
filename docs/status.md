@@ -1,7 +1,7 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
 > Snapshot date: 2026-08-18
-> Evidence scope: local code / configuration / Git metadata; V2.0 is sealed, V2.1 is implemented, and V2.2/V2.3/V2.4 local closeout gates passed. The corrected 2026-08-18 public re-probe verified Portcast 8/8 page/parser responses (7 fresh, 1 stale), Open-Meteo 8/8 port responses and Shekou `/ywgg/` parsing; Loadstar returned 10 items and Maritime Executive remained failed. AISStream and Calendarific remain `pending_credentials`; official-alert verification remains `live_pending`. The final trust boundary seal now prevents stale FeedItems from bypassing freshness into direct HOT, aborts timed-out Feed source pipelines and derives official alert port links only from alert evidence; the prior lifecycle, alias and JMA structure rules remain in force. Full lint retains four pre-existing errors and native SQLite runtime is pending on this Node 24 environment.
+> Evidence scope: local code / configuration / Git metadata; V2.0 is sealed, V2.1 is implemented, and V2.2/V2.3/V2.4 local closeout gates passed. The corrected 2026-08-18 public re-probe verified Portcast 8/8 page/parser responses (7 fresh, 1 stale), Open-Meteo 8/8 port responses and Shekou `/ywgg/` parsing; Loadstar returned 10 items and Maritime Executive remained failed. AISStream is `connection_verified / pending_observation` after a 120-second WebSocket window with no PositionReport; Calendarific is `verified_live` for five HTTP 200/parser-success country responses with partial coverage. Official-alert verification remains `live_pending`. The final trust boundary seal now prevents stale FeedItems from bypassing freshness into direct HOT, aborts timed-out Feed source pipelines and derives official alert port links only from alert evidence; the prior lifecycle, alias and JMA structure rules remain in force. Full lint retains four pre-existing errors and native SQLite runtime is pending on this Node 24 environment.
 > Source of truth for: current implementation and verification state
 
 ## 1. One-Sentence Status
@@ -19,7 +19,7 @@ Shipping HOT V2.2–V2.4 local closeout is complete on the retained NewsNow stac
 - Database / external services: Repository paths are implemented; the nullable `vessels.status_changed_at` rebuild, row/watch-state preservation and NULL identity-only writes passed an offline Python stdlib SQLite smoke. Node 24.15.0 currently mismatches the bundled native module ABI, so native SQLite persistence remains pending and the app uses its documented memory fallback; the ignored local `.data/db.sqlite3` artifact remains from prior/local runtime work and was not deleted; AISStream, Portcast public pages and Open-Meteo remain optional server-side sources
 - Mock fixture timestamps: generated relative to the runtime clock when a snapshot is created; deterministic fixed time is limited to `shared/shipping-engine.test.ts`
 - V1 focus-port seed: all eight requested ports are present in the shared fixture and Repository seed path: Shekou, Yantian, Nansha, Laem Chabang, Port Klang, Manila, Jakarta and Ho Chi Minh City
-- Last verified surface: source inspection, final 184/184 tests, typecheck, targeted lint, production build, corrected public re-probe, no-network provider-mode smoke, SQLite migration smoke, `git diff --check` and `shared/updated-sources.ts` stability passed; full lint retains four pre-existing errors outside this batch; official Neat Freak Bash inventory script is unavailable on this Windows environment, with the manual equivalent completed.
+- Last verified surface: source inspection, final 186/186 tests, typecheck, targeted lint, production build, corrected public re-probe, all-real local API/page smoke, AIS/Calendarific live verification, SQLite migration smoke, `git diff --check` and `shared/updated-sources.ts` stability passed; full lint retains four pre-existing errors outside this batch; official Neat Freak Bash inventory script is unavailable on this Windows environment, with the manual equivalent completed.
 
 ## 3. Current Architecture Summary
 
@@ -46,7 +46,7 @@ Shipping HOT V2.2–V2.4 local closeout is complete on the retained NewsNow stac
 | Shipping HOT UI/routes | implemented / locally verified; live pending | `src/routes/**`, `src/components/shipping/**` | `/`, `/vessels`, `/ports`, `/voyages`, `/events`, `/feed`, `/calendar`, `/settings` and detail routes; UI uses the aurora glass console layout (左侧可折叠侧栏 + 全局状态条 + 密集表格 + 筛选侧栏/时间线 + 双栏详情 + 移动端底部 tab), blue `#0ea5e9` brand icon, conditional Calendarific Attribution and weather window controls |
 | Shipping HOT V2.0 Data Trust Foundation | sealed | `shared/shipping.ts`, `server/database/shipping.ts`, `server/providers/shipping.ts`, `server/shipping-store.ts`, `shared/shipping-engine.ts`, `src/components/shipping/format.ts`, `src/components/shipping/ui.tsx` | `sourceType`/`dataNature` provenance, independent freshness timestamps/status, deterministic legacy backfill, source-aware Event reconciliation/evidence and explicit Mock/Chinese UI labels |
 | Shipping HOT V2.1 Port Intelligence | implemented / verified | `server/providers/shipping.ts`, `server/shipping-store.ts`, `shared/shipping.ts`, `src/components/shipping/pages.tsx` | Opt-in `PortcastPublicPageProvider`, eight public-page mappings, visible-field parser, 24-hour cache/fingerprint, `public`/`no_public_data` detail and source attribution; Mock remains default |
-| Shipping HOT V2.2 Country Calendar | implemented / locally verified; live pending | `shared/calendar.ts`, `server/providers/calendar.ts`, `server/database/shipping.ts`, `server/api/shipping/calendar/**`, `src/routes/calendar.tsx`, `src/components/shipping/pages.tsx` | Calendarific + Official + Manual composition, actual provenance `calendarSourceIds` activation mapping, source-scoped coverage reconciliation, stale last-known marking for partial/unknown coverage, conflict evidence and Calendar → Event → HOT reminders are implemented; Official live sync remains pending; Mock remains default |
+| Shipping HOT V2.2 Country Calendar | implemented / locally verified; Calendarific verified_live; Official live pending | `shared/calendar.ts`, `server/providers/calendar.ts`, `server/database/shipping.ts`, `server/api/shipping/calendar/**`, `src/routes/calendar.tsx`, `src/components/shipping/pages.tsx` | Calendarific + Official + Manual composition, actual provenance `calendarSourceIds` activation mapping, source-scoped coverage reconciliation, stale last-known marking for partial/unknown coverage, live type-label normalization/deduplication, conflict evidence and Calendar → Event → HOT reminders are implemented; Official live sync remains pending; Mock remains default |
 | Shipping HOT V2.3 Shipping Information Feed | implemented / locally verified; live pending | `server/providers/feed.ts`, `server/shipping-store.ts`, `shared/shipping.ts`, `shared/shipping-engine.ts`, `src/components/shipping/**` | Unknown publication semantics, Chinese classification, realistic HTML handling and source registry states are implemented; public-source live runtime remains pending; Mock remains default |
 | Shipping HOT V2.4 Weather Intelligence | implemented / locally verified; live pending | `server/providers/shipping.ts`, `server/providers/weather-alerts.ts`, `server/shipping-store.ts`, `shared/shipping.ts`, `src/components/shipping/app.tsx` | Open-Meteo 24-hour/72-hour/7-day windows and direction fields are implemented; model weather and JMA/TMD/BMKG official alerts are independently selected and composed with failure isolation; official sources remain `live_pending` and are disabled without requests in public mode until live verification; Mock remains default |
 
@@ -67,7 +67,7 @@ Shipping HOT V2.2–V2.4 local closeout is complete on the retained NewsNow stac
 
 ### Approved / V2.2 Locally Verified; Live Pending
 
-- Country Calendar: TH/ID/MY/PH/VN contracts, server-only Calendarific integration with conditional attribution, composed official/manual/mock boundaries, source-scoped coverage, conflict evidence and deduplicated Event/HOT reminders; official live sync is still pending.
+- Country Calendar: TH/ID/MY/PH/VN contracts, server-only Calendarific integration with conditional attribution, composed official/manual/mock boundaries, source-scoped coverage, conflict evidence, live Calendarific type-label normalization/deduplication and deduplicated Event/HOT reminders; Calendarific is verified_live, while official live sync is still pending.
 
 ### Approved / V2.3 Locally Verified; Live Pending
 
@@ -209,6 +209,41 @@ No source was upgraded to `verified_live` in this pass. V2.2 remains `implemente
 - Official Weather Alert port association is alert-evidence-only: `WeatherAlertSource` no longer exposes `relatedPortIds`, and parser logic ignores any runtime-injected provider-wide default. Matching uses alert title/summary/area, canonical port names/UNLOCODEs and the verified aliases only.
 - Regression coverage is now 184/184. Mock Isolation, Portcast/Open-Meteo trust semantics, Schedule and V2.5 scope remain unchanged.
 
+## AISStream + Calendarific Live Verification — 2026-08-18
+
+### Credentials
+
+- AISSTREAM_API_KEY: present in local .env.local; value was never printed, persisted to docs, or included in a request log.
+- CALENDARIFIC_API_KEY: present in local .env.local; value was never printed, persisted to docs, or included in a request log.
+- .env.local is ignored and untracked; git diff, git status, and generated/API outputs contained no secret values.
+
+### AISStream
+
+- Watched targets: 2; valid watched MMSI: 2; subscription filter contained only those 2 MMSIs and PositionReport.
+- Provider observation window: 120 seconds; provider returned AISStream request timed out; normalized PositionReports: 0; matched MMSIs: 0.
+- Wire-level check: WebSocket opened=true for the full 120-second window; no explicit WebSocket error or server close was observed. The subscription was sent with the current MMSI filter, but no PositionReport arrived, so this is connection_verified / pending_observation, not verified_live.
+- No real AIS Event/HOT sample was claimed. Existing AIS normalization, Mock-field isolation, same-source statusChangedAt continuity and Event/HOT rules remain covered by the local suite; the no-observation live run did not provide a new status transition sample.
+- Current all-real API freshness is vessel=never_succeeded with no vessels, and no mock-vessel entered current Vessel/Event/HOT output.
+
+### Calendarific
+
+- Current year: 2026. Direct Calendarific responses: TH 200 / 36, ID 200 / 31, MY 200 / 64, PH 200 / 37, VN 200 / 30; total 198 normalized events before operational composition.
+- All five responses were legal JSON and parser-successful. Each country had eventSourceStatus=healthy, coverageStatus=partial, sourceId=calendarific, and valid country/date fields. The API did not declare complete coverage, so no country was upgraded to complete.
+- Live data exposed "National holiday" and "Common local holiday" labels; the normalizer now maps these to public_holiday. MY also contained three exact duplicate facts; the normalizer now deduplicates by country/date/name/type. Regression tests cover both fixes.
+- The current CalendarEvent contract has no localName field, and the sampled Calendarific payloads did not provide a local-name field; no localName value was fabricated.
+- Operational Calendar sync returned HTTP 200 with 189 persisted/read-back Calendarific events after source composition/reconciliation. calendarSourceIds contained only calendarific for the resulting facts; official/manual coverage rows were unknown with no events, and mock-calendar count was zero.
+- Current-year reminder window produced 4 Calendar → ShippingEvent → HOT samples, all fresh and provenance.sourceId=calendarific. Persistence/read-back worked through the app's current runtime; native SQLite remains pending because Node 24 cannot load the bundled better-sqlite3 ABI and used the documented memory fallback.
+- Final Calendarific status: verified_live with per-country partial coverage; it is not an assertion of complete national-calendar coverage.
+
+### All-real requested-mode smoke
+
+- Requested modes: aisstream, portcast, open-meteo, public alerts, public Feed, calendarific; Schedule remained Mock.
+- /, /vessels, /ports, /voyages, /feed, /calendar, /events, /settings and /api/shipping returned HTTP 200.
+- API provider modes matched the request. Portcast returned configured real data with current source_stale freshness for old public page dates; Open-Meteo and public Feed were healthy; public JMA/TMD/BMKG remained inactive/live_pending and were not requested; Calendarific attribution was present.
+- Across the current snapshot there were no mock-vessel, mock-port, mock-weather, mock-port-notice or mock-calendar records. mock-schedule remained the only Mock source.
+
+- Regression coverage after the live-exposed Calendarific fixes: 186/186.
+
 ## Official Alert Trust + Feed Failure Isolation Closeout — 2026-08-18
 
 - TMD/BMKG no longer receive registry-wide default `relatedPortIds`; known port association is derived only from explicit alert title/summary/area text.
@@ -248,6 +283,7 @@ No source was upgraded to `verified_live` in this pass. V2.2 remains `implemente
 - 2026-08-18 Remaining Real Provider Verification (completed locally; live credentials/criteria remain pending): direct JMA/TMD/BMKG probes recorded HTTP/parser/timestamp/area/severity evidence; TMD's public endpoint was corrected from registry `cap` to `rss` and its regression fixture passed, while all three official sources remain `live_pending`; Maritime Executive DNS resolved but TCP 443 timed out and remains `failed_live`; AISStream and Calendarific remain `pending_credentials`. The preceding local suite was 174/174; no source was upgraded to `verified_live` and V2.5 remains not started.
 - 2026-08-18 Official Alert Trust + Feed Failure Isolation Closeout: TMD/BMKG associations are text-derived only; warning disappearance without reliable expiry preserves stale/degraded last-known evidence; JMA generic `<main>` no longer counts as a valid empty structure; Maritime Executive is disabled as `failed_live` and excluded from active public scheduling. Current suite: 178/178; front-end dirty lane remains user-owned and untouched.
 - 2026-08-18 Final Alert Lifecycle + Feed Timeout Closeout: missing-index warnings are lifecycle-unknown and excluded from Event/HOT eligibility; active Public Feed sources have independent 10-second fetch/body/parser timeouts; Chonburi/Chon Buri and Tanjung Priok/North Jakarta aliases map to canonical focus ports; JMA requires its sea-warning mount or explicit empty marker. Current suite: 181/181.
+- 2026-08-18 AISStream + Calendarific Live Verification: AISStream WebSocket opened for a 120-second watched-MMSI subscription but received no PositionReport, so status is connection_verified / pending_observation; Calendarific TH/ID/MY/PH/VN each returned HTTP 200 and valid JSON, normalized 198 direct events with partial coverage, operational sync read back 189 Calendarific events and produced 4 reminder Event/HOT samples. Calendarific is verified_live; no Mock source entered the all-real operational view; suite is 186/186.
 - Blockers: Node 24.15.0 cannot load the bundled Node 22 native module, so Node 24 startup uses the documented in-memory fallback. Production Nitro subroutes reproduce the existing `#nitro/index` package-import runtime error; Vite development routes are healthy. Portcast/Open-Meteo/Shekou corrected public paths are verified; AISStream/Calendarific remain `pending_credentials` and official alert criteria remain pending. GitHub CLI account authentication remains invalid; Git HTTPS uses the repository-local OpenSSL backend because Windows Schannel failed with `SEC_E_NO_CREDENTIALS`.
 - Verification: prior local gate `pnpm test --run` = 146/146; final AIS/Event batch `pnpm test --run` = 161/161; Calendar source activation batch `pnpm test --run` = 165/165; preceding Provider/live-path `pnpm test --run` = 173/173; preceding Remaining Real Provider Verification batch = 174/174; preceding Official Alert Trust + Feed Failure Isolation batch = 178/178; current Final Alert Lifecycle + Feed Timeout batch is 181/181 with `pnpm typecheck`, targeted eslint and `git diff --check` passed; full `pnpm lint` retains four pre-existing errors in `server/api/shipping/settings.post.ts`, `shared/updated-sources.ts`, and `src/routes/__root.tsx`; `shared/updated-sources.ts` itself is unchanged; native better-sqlite3 remains pending.
 - V2 status: `V2.0 sealed`; `V2.1 implemented`; `V2.2 implemented / locally verified / live pending`; `V2.3 implemented / locally verified / live pending`; `V2.4 implemented / locally verified / live pending`; `V2.5 not started`. Live external Provider calls remain optional; explicit Mock mode remains the default and real modes do not fall back to it.

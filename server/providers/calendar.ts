@@ -1,6 +1,6 @@
 import { env } from "node:process"
 import type { DataEvidence, DataProvenance } from "@shared/shipping"
-import { type BusinessImpact, type CalendarCountryCode, type CalendarCoverage, type CalendarCoverageStatus, type CalendarEvent, type CalendarEventType, type CalendarProviderResult, type CalendarQuery, type CalendarSourceKind, calendarCountries, calendarEventId, calendarSeverity } from "@shared/calendar"
+import { type BusinessImpact, type CalendarCountryCode, type CalendarCoverage, type CalendarCoverageStatus, type CalendarEvent, type CalendarEventType, type CalendarProviderResult, type CalendarQuery, type CalendarSourceKind, calendarCountries, calendarEventId, calendarEventKey, calendarSeverity } from "@shared/calendar"
 
 export interface CalendarProvider {
   getEvents: (query: CalendarQuery) => Promise<CalendarProviderResult>
@@ -111,7 +111,7 @@ function calendarFetcher(): CalendarFetcher {
 }
 
 function holidayType(types: string[]): { type: CalendarEventType, isPublicHoliday: boolean } {
-  if (types.includes("national") || types.includes("local")) return { type: "public_holiday", isPublicHoliday: true }
+  if (types.some(type => /\b(?:national|public|local)\b/.test(type))) return { type: "public_holiday", isPublicHoliday: true }
   if (types.includes("religious")) return { type: "religious", isPublicHoliday: false }
   if (types.includes("observance")) return { type: "observance", isPublicHoliday: false }
   return { type: "commercial", isPublicHoliday: false }
@@ -137,7 +137,7 @@ export function sanitizeCalendarError(value: unknown): string {
 export function normalizeCalendarificPayload(value: unknown, countryCode: CalendarCountryCode, year: number, fetchedAt: string): CalendarEvent[] {
   const holidays = (value as CalendarificPayload)?.response?.holidays
   if (!Array.isArray(holidays)) throw new Error("Calendarific response is malformed")
-  return holidays.flatMap((item) => {
+  const events = holidays.flatMap((item) => {
     if (!item || typeof item !== "object") return []
     const holiday = item as CalendarificHoliday
     const name = asString(holiday.name)
@@ -160,6 +160,7 @@ export function normalizeCalendarificPayload(value: unknown, countryCode: Calend
       provenance: { ...calendarProvenances.calendarific, sourceUrl: `https://calendarific.com/holidays/${year}/${countryCode}` },
     })]
   })
+  return [...new Map(events.map(event => [calendarEventKey(event), event])).values()]
 }
 
 export function calendarificCoverageStatus(value: unknown, eventCount: number): CalendarCoverageStatus {

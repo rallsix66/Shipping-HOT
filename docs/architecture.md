@@ -4,6 +4,14 @@
 > Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation and Mock Isolation boundary, implemented V2.1 Port Intelligence, and V2.2/V2.3/V2.4 implemented with local verification; Portcast/Open-Meteo/Shekou corrected live-path closeout, Final Alert Lifecycle + Feed Timeout closeout and Final Trust Boundary Seal are verified on 2026-08-18; V2.5 not started
 > Source of truth for: the current retained system structure and approved boundaries
 
+## Current AISStream + Calendarific Live Verification — 2026-08-18
+
+AISStream reached the official WebSocket and stayed open for a 120-second filtered subscription covering the two current watched MMSIs, but no PositionReport arrived. Its current live state is connection_verified / pending_observation; the provider must not be labeled verified_live without an observation.
+
+Calendarific returned HTTP 200 and valid JSON for TH/ID/MY/PH/VN. All five countries produced healthy Calendarific events with coverageStatus=partial; the provider is verified_live for transport/parser/data availability, while partial coverage remains explicit. The normalizer maps real labels such as National holiday and Common local holiday to public holidays and deduplicates identical country/date/name/type facts. Calendar → Event → HOT accepts only the configured Calendarific provenance IDs.
+
+All-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source; mock-schedule remained the only Mock source. Native SQLite persistence remains pending because the current Node 24 runtime cannot load the bundled better-sqlite3 ABI.
+
 ## 1. Project Purpose
 
 The repository retains NewsNow as its foundation and now exposes Shipping HOT as a local single-user product surface. The implemented path uses normalized Mock or approved V1 real Provider adapters and deterministic Domain/Event rules; real provider credentials remain optional.
@@ -222,3 +230,6 @@ Changes that can remain local implementation decisions:
 - `docs/adr/ADR-003-separate-information-and-operational-data.md`
 - `docs/adr/ADR-004-v1-real-provider-adapters.md`
 - Roadmap and deferred real-provider plan: `docs/plans/shipping-hot-v1.md`
+All-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source; mock-schedule remained the only Mock source. Native SQLite persistence remains pending because the current Node 24 runtime cannot load the bundled better-sqlite3 ABI.
+
+The superseding local suite is 186/186 with production build, typecheck, targeted lint and all-real API/page smoke passed; the older 184/184 entry below is retained as the preceding trust-boundary batch history.

@@ -38,6 +38,27 @@ describe("calendar providers", () => {
     expect(events[2]).toMatchObject({ type: "observance", isPublicHoliday: false, businessImpact: "low" })
   })
 
+  it("normalizes Calendarific live type labels such as National holiday and Common local holiday", () => {
+    const events = normalizeCalendarificPayload({ response: { holidays: [
+      { name: "National Day", date: { iso: "2026-08-17" }, type: ["National holiday"] },
+      { name: "Local Holiday", date: { iso: "2026-08-18" }, type: ["Common local holiday"] },
+    ] } }, "TH", 2026, "2026-08-15T00:00:00.000Z")
+    expect(events).toMatchObject([
+      { type: "public_holiday", isPublicHoliday: true },
+      { type: "public_holiday", isPublicHoliday: true },
+    ])
+  })
+
+  it("deduplicates identical Calendarific facts without merging different dates", () => {
+    const events = normalizeCalendarificPayload({ response: { holidays: [
+      { name: "Hari Raya Haji (Day 2)", date: { iso: "2026-05-28" }, type: ["Common local holiday"] },
+      { name: "Hari Raya Haji (Day 2)", date: { iso: "2026-05-28" }, type: ["Common local holiday"] },
+      { name: "Hari Raya Haji (Day 2)", date: { iso: "2026-05-29" }, type: ["Common local holiday"] },
+    ] } }, "MY", 2026, "2026-08-15T00:00:00.000Z")
+    expect(events).toHaveLength(2)
+    expect(new Set(events.map(event => event.date))).toEqual(new Set(["2026-05-28", "2026-05-29"]))
+  })
+
   it("keeps Calendarific API keys server-side and does not overclaim empty coverage", async () => {
     let requestedUrl = ""
     const provider = createCalendarificProvider({
