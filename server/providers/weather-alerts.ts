@@ -120,9 +120,19 @@ function textDate(value: string): string | undefined {
   return match ? timestamp(match[0]) : undefined
 }
 
+const weatherAlertPortAliases: ReadonlyArray<readonly [string, string]> = [
+  ["chonburi", "port-laem-chabang"],
+  ["chon buri", "port-laem-chabang"],
+  ["tanjung priok", "port-jakarta"],
+  ["north jakarta", "port-jakarta"],
+]
+
 function relatedPorts(text: string, source: WeatherAlertSource, ports: Port[]): string[] {
   const haystack = text.toLocaleLowerCase()
   const result = new Set(source.relatedPortIds ?? [])
+  for (const [alias, portId] of weatherAlertPortAliases) {
+    if (haystack.includes(alias)) result.add(portId)
+  }
   for (const port of ports) {
     if ([port.name, port.nameEn, port.unlocode].some(value => haystack.includes(value.toLocaleLowerCase()))) result.add(port.id)
   }
@@ -295,7 +305,7 @@ function parseSourceSpecificNodes(html: string, source: WeatherAlertSource, sele
 }
 
 export function parseJmaWarning(html: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
-  return parseSourceSpecificNodes(html, source, ["#contents table tbody tr", "#seawarning-container table tbody tr", ".jma-information-list li"], ["#contents table", "#seawarning-container", ".jma-information-list"], ports, fetchedAt).items
+  return parseJmaSourceSpecificNodes(html, source, ports, fetchedAt).items
 }
 
 export function parseTmdWarning(html: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
@@ -312,9 +322,23 @@ export function parseWeatherAlertHtml(html: string, source: WeatherAlertSource, 
   return parseBmkgWarning(html, source, ports, fetchedAt)
 }
 
+function parseJmaSourceSpecificNodes(html: string, source: WeatherAlertSource, ports: Port[], fetchedAt: string): ParsedHtmlAlerts {
+  const result = parseSourceSpecificNodes(
+    html,
+    source,
+    ["#seawarning-container table tbody tr", "#seawarning-container .warning-item", "#seawarning-container li", ".jma-information-list li"],
+    ["#seawarning-container", ".jma-information-list"],
+    ports,
+    fetchedAt,
+  )
+  const $ = load(html)
+  const explicitEmpty = $("[data-jma-empty='true'], [data-empty='true'], .no-active-warnings, .no-warnings, .no-alerts").length > 0
+  return { ...result, structureRecognized: result.structureRecognized || explicitEmpty }
+}
+
 function parseWeatherAlertHtmlStrict(html: string, source: WeatherAlertSource, ports: Port[], fetchedAt: string): FeedItem[] {
   const result = source.parser === "jma"
-    ? parseSourceSpecificNodes(html, source, ["#contents table tbody tr", "#seawarning-container table tbody tr", ".jma-information-list li"], ["#contents table", "#seawarning-container", ".jma-information-list"], ports, fetchedAt)
+    ? parseJmaSourceSpecificNodes(html, source, ports, fetchedAt)
     : source.parser === "tmd"
       ? parseSourceSpecificNodes(html, source, [".warning-list .warning-item", ".warning-list article", ".warning-card", "main table tbody tr"], [".warning-list", ".warning-card", "main"], ports, fetchedAt)
       : parseSourceSpecificNodes(html, source, [".table-responsive table tbody tr", ".warning-table tbody tr", ".warning-card"], [".table-responsive", ".warning-table", ".warning-card"], ports, fetchedAt)
@@ -353,7 +377,16 @@ export interface OfficialWeatherAlertProviderOptions {
 }
 
 function markMissingFromCurrentIndex(item: FeedItem, fetchedAt: string): FeedItem {
-  return { ...item, stale: true, sourceStatus: "degraded", error: "warning_missing_from_current_index", fetchedAt }
+  return {
+    ...item,
+    eventEligibility: false,
+    hotReason: undefined,
+    weather: item.weather ? { ...item.weather, alertState: "unknown" } : item.weather,
+    stale: true,
+    sourceStatus: "degraded",
+    error: "warning_missing_from_current_index",
+    fetchedAt,
+  }
 }
 
 function hasExpiredEvidence(item: FeedItem, fetchedAt: string): boolean {

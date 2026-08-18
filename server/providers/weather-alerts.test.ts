@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { mockPorts } from "@shared/shipping-fixtures"
+import { rankHotItems } from "@shared/shipping-rules"
 import { createOfficialWeatherAlertProvider, officialWeatherAlertSources, parseJmaWarning, parseTmdWarning, parseWeatherAlertCap, parseWeatherAlertRss } from "./weather-alerts"
 
 const jma = officialWeatherAlertSources.find(source => source.id === "jma")!
@@ -22,7 +23,7 @@ describe("official weather alert provider", () => {
   })
 
   it("uses source-specific JMA and BMKG structures", () => {
-    const [jmaItem] = parseJmaWarning(`<div id="contents"><table><tbody><tr><td><a href="/bosai/information/typhoon.html?id=1">台風第7号に関する情報</a><time datetime="2026-08-15T00:00:00Z">2026-08-15</time></td></tr></tbody></table></div>`, jma, mockPorts, "2026-08-15T01:00:00.000Z")
+    const [jmaItem] = parseJmaWarning(`<div id="seawarning-container"><table><tbody><tr><td><a href="/bosai/information/typhoon.html?id=1">台風第7号に関する情報</a><time datetime="2026-08-15T00:00:00Z">2026-08-15</time></td></tr></tbody></table></div>`, jma, mockPorts, "2026-08-15T01:00:00.000Z")
     const [bmkgItem] = parseWeatherAlertRss(`<rss><channel><lastBuildDate>Sat, 15 Aug 2026 06:00:00 GMT</lastBuildDate><item><title>Extreme weather warning Bangka Belitung</title><description>Heavy rain and strong wind.</description><link>https://www.bmkg.go.id/alerts/nowcast/en/1</link><pubDate>Sat, 15 Aug 2026 05:15:00 GMT</pubDate></item></channel></rss>`, bmkg, mockPorts, "2026-08-15T05:30:00.000Z")
     expect(jmaItem).toMatchObject({ sourceId: "jma", eventEligibility: true, weather: { alertIssuedAt: "2026-08-15T00:00:00.000Z" } })
     expect(bmkgItem).toMatchObject({ sourceId: "bmkg", eventEligibility: true, sourceUpdatedAt: "2026-08-15T06:00:00.000Z", provenance: { sourceId: "bmkg" } })
@@ -58,6 +59,13 @@ describe("official weather alert provider", () => {
     expect(bmkgItem.relatedPortIds).toEqual([])
   })
 
+  it("maps weather alert aliases to the canonical focus ports", () => {
+    const [chonburi] = parseWeatherAlertRss(`<rss><channel><item><title>Gale warning near Chonburi</title><description>Strong wind near Chon Buri.</description><pubDate>Tue, 18 Aug 2026 04:00:00 GMT</pubDate></item></channel></rss>`, tmd, mockPorts)
+    const [priok] = parseWeatherAlertRss(`<rss><channel><item><title>Heavy rain near Tanjung Priok</title><description>North Jakarta coastal warning.</description><pubDate>Tue, 18 Aug 2026 04:00:00 GMT</pubDate></item></channel></rss>`, bmkg, mockPorts)
+    expect(chonburi.relatedPortIds).toEqual(["port-laem-chabang"])
+    expect(priok.relatedPortIds).toEqual(["port-jakarta"])
+  })
+
   it("does not invent alerts from an empty or unrelated page", async () => {
     expect(parseTmdWarning("<html><body><h1>No active warnings</h1></body></html>", tmd, mockPorts)).toEqual([])
     const provider = createOfficialWeatherAlertProvider({ allowPending: true, sources: [tmd], fetcher: async () => ({ ok: true, status: 200, text: async () => "<html><body>No active warnings</body></html>" }) })
@@ -73,7 +81,7 @@ describe("official weather alert provider", () => {
         return { ok: true, status: 200, text: async () => "" }
       },
     })
-    const [previous] = parseJmaWarning(`<div id="contents"><table><tbody><tr><td><a href="/warning/1">Marine gale warning</a><time datetime="2026-08-15T00:00:00Z">2026-08-15</time></td></tr></tbody></table></div>`, jma, mockPorts, "2026-08-15T00:00:00.000Z")
+    const [previous] = parseJmaWarning(`<div id="seawarning-container"><table><tbody><tr><td><a href="/warning/1">Marine gale warning</a><time datetime="2026-08-15T00:00:00Z">2026-08-15</time></td></tr></tbody></table></div>`, jma, mockPorts, "2026-08-15T00:00:00.000Z")
     const items = await provider.getFeedItems([previous], mockPorts)
     expect(requests).toBe(0)
     expect(items[0]).toMatchObject({ id: previous.id, stale: true, sourceStatus: "disabled", error: "official_weather_source_live_pending" })
@@ -107,20 +115,30 @@ describe("official weather alert provider", () => {
       fetcher: async () => ({ ok: true, status: 200, text: async () => "<rss><channel><lastBuildDate>Tue, 18 Aug 2026 05:00:00 GMT</lastBuildDate></channel></rss>" }),
     })
     const [item] = await provider.getFeedItems([previous], mockPorts)
-    expect(item).toMatchObject({ id: previous.id, severity: "warning", stale: true, sourceStatus: "degraded", error: "warning_missing_from_current_index", eventEligibility: true, weather: { alertState: "active" } })
-    expect(item).not.toMatchObject({ severity: "info", eventEligibility: false })
+    expect(item).toMatchObject({ id: previous.id, severity: "warning", stale: true, sourceStatus: "degraded", error: "warning_missing_from_current_index", eventEligibility: false, hotReason: undefined, weather: { alertState: "unknown" } })
+    expect(rankHotItems([], [], [], [], [item])).toEqual([])
   })
 
   it("rejects a generic main element as a JMA empty-result structure", async () => {
-    const [previous] = parseJmaWarning(`<div id="contents"><table><tbody><tr><td><a href="/warning/1">Marine gale warning</a><time datetime="2026-08-15T00:00:00Z">2026-08-15</time></td></tr></tbody></table></div>`, jma, mockPorts, "2026-08-15T00:00:00.000Z")
+    const [previous] = parseJmaWarning(`<div id="seawarning-container"><table><tbody><tr><td><a href="/warning/1">Marine gale warning</a><time datetime="2026-08-15T00:00:00Z">2026-08-15</time></td></tr></tbody></table></div>`, jma, mockPorts, "2026-08-15T00:00:00.000Z")
     const provider = createOfficialWeatherAlertProvider({ allowPending: true, sources: [jma], fetcher: async () => ({ ok: true, status: 200, text: async () => "<main><p>No active warnings</p></main>" }) })
     const [item] = await provider.getFeedItems([previous], mockPorts)
     expect(item).toMatchObject({ id: previous.id, stale: true, sourceStatus: "failed", sourceUpdatedAt: previous.sourceUpdatedAt })
     expect(item.error).toContain("structure was not recognized")
   })
 
+  it("rejects a generic contents table and accepts an explicit JMA empty marker", async () => {
+    const [previous] = parseJmaWarning(`<div id="seawarning-container"><table><tbody><tr><td><a href="/warning/1">Marine gale warning</a><time datetime="2026-08-15T00:00:00Z">2026-08-15</time></td></tr></tbody></table></div>`, jma, mockPorts, "2026-08-15T00:00:00.000Z")
+    const genericProvider = createOfficialWeatherAlertProvider({ allowPending: true, sources: [jma], fetcher: async () => ({ ok: true, status: 200, text: async () => "<div id=\"contents\"><table><tbody></tbody></table></div>" }) })
+    const [generic] = await genericProvider.getFeedItems([previous], mockPorts)
+    expect(generic).toMatchObject({ id: previous.id, sourceStatus: "failed", stale: true })
+    expect(generic.error).toContain("structure was not recognized")
+    const explicitEmptyProvider = createOfficialWeatherAlertProvider({ allowPending: true, sources: [jma], fetcher: async () => ({ ok: true, status: 200, text: async () => "<div id=\"seawarning-container\" data-jma-empty=\"true\"></div>" }) })
+    await expect(explicitEmptyProvider.getFeedItems([], mockPorts)).resolves.toEqual([])
+  })
+
   it("keeps last-known warnings stale when a source parser cannot recognize the response", async () => {
-    const [previous] = parseJmaWarning(`<div id="contents"><table><tbody><tr><td><a href="/warning/1">Marine gale warning</a><time datetime="2026-08-15T00:00:00Z">2026-08-15</time></td></tr></tbody></table></div>`, jma, mockPorts, "2026-08-15T00:00:00.000Z")
+    const [previous] = parseJmaWarning(`<div id="seawarning-container"><table><tbody><tr><td><a href="/warning/1">Marine gale warning</a><time datetime="2026-08-15T00:00:00Z">2026-08-15</time></td></tr></tbody></table></div>`, jma, mockPorts, "2026-08-15T00:00:00.000Z")
     const provider = createOfficialWeatherAlertProvider({ allowPending: true, sources: [jma], fetcher: async () => ({ ok: true, status: 200, text: async () => "<html><body>unrecognized layout</body></html>" }) })
     const [item] = await provider.getFeedItems([previous], mockPorts)
     expect(item).toMatchObject({ id: previous.id, stale: true, sourceStatus: "failed", sourceUpdatedAt: previous.sourceUpdatedAt })

@@ -35,6 +35,21 @@ describe("shipping feed provider", () => {
     expect(requested).toEqual([rssSource.url])
   })
 
+  it("times out one public source without delaying the other sources", async () => {
+    const maritime = { ...shippingFeedSources.find(source => source.id === "maritime-executive")!, enabled: true, status: "enabled" as const }
+    const [previous] = parseFeedRss(`<rss><channel><item><title>Maritime old warning</title><link>https://maritime-executive.com/story/old</link><pubDate>Tue, 18 Aug 2026 00:00:00 GMT</pubDate></item></channel></rss>`, maritime, mockPorts, "2026-08-18T00:00:00.000Z")
+    const provider = createPublicFeedProvider({
+      sources: [maritime, rssSource],
+      timeoutMs: 10,
+      fetcher: async url => url === maritime.url
+        ? new Promise<never>(() => {})
+        : { ok: true, status: 200, text: async () => "<rss><channel><item><title>Loadstar update</title><link>https://theloadstar.com/story/1</link><pubDate>Tue, 18 Aug 2026 00:00:00 GMT</pubDate></item></channel></rss>" },
+    })
+    const items = await provider.getFeedItems([previous], mockPorts)
+    expect(items.some(item => item.sourceId === rssSource.id)).toBe(true)
+    expect(items.find(item => item.id === previous.id)).toMatchObject({ stale: true, sourceStatus: "failed", error: "The Maritime Executive request timed out after 10ms" })
+  })
+
   it("normalizes RSS entries and attaches source and port provenance", () => {
     const [item] = parseFeedRss(`
       <rss><channel>

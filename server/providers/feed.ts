@@ -352,6 +352,23 @@ export interface PublicFeedProviderOptions {
   fetcher?: FeedFetcher
   now?: () => Date
   sources?: ShippingFeedSource[]
+  timeoutMs?: number
+}
+
+export const PUBLIC_FEED_TIMEOUT_MS = 10_000
+
+async function withFeedSourceTimeout<T>(operation: Promise<T>, timeoutMs: number, sourceName: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  try {
+    return await Promise.race([
+      operation,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`${sourceName} request timed out after ${timeoutMs}ms`)), timeoutMs)
+      }),
+    ])
+  } finally {
+    if (timer) clearTimeout(timer)
+  }
 }
 
 function publicFeedFetcher(): FeedFetcher {
@@ -364,6 +381,7 @@ export function createPublicFeedProvider(options: PublicFeedProviderOptions = {}
   const fetcher = options.fetcher ?? publicFeedFetcher()
   const now = options.now ?? (() => new Date())
   const sources = options.sources ?? shippingFeedSources
+  const timeoutMs = Math.max(1, options.timeoutMs ?? PUBLIC_FEED_TIMEOUT_MS)
   return {
     async getFeedItems(lastKnown = [], ports = mockPorts) {
       const fetchedAt = now().toISOString()
@@ -371,10 +389,12 @@ export function createPublicFeedProvider(options: PublicFeedProviderOptions = {}
       const results = await Promise.all(sources.filter(source => activeSourceIds.has(source.id)).map(async (source) => {
         const previous = lastKnown.filter(item => item.sourceId === source.id)
         try {
-          const response = await fetcher(source.url)
-          if (!response.ok) throw new Error(`${source.name} request failed (${response.status})`)
-          const body = await response.text()
-          const parsed = source.format === "rss" ? parseFeedRss(body, source, ports, fetchedAt) : parseFeedHtml(body, source, ports, fetchedAt)
+          const parsed = await withFeedSourceTimeout((async () => {
+            const response = await fetcher(source.url)
+            if (!response.ok) throw new Error(`${source.name} request failed (${response.status})`)
+            const body = await response.text()
+            return source.format === "rss" ? parseFeedRss(body, source, ports, fetchedAt) : parseFeedHtml(body, source, ports, fetchedAt)
+          })(), timeoutMs, source.name)
           return parsed
         } catch (error) {
           const message = error instanceof Error ? error.message : `${source.name} feed failed`
