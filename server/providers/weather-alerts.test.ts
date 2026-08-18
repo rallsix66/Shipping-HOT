@@ -46,9 +46,16 @@ describe("official weather alert provider", () => {
       publishedAt: "2026-08-17T15:33:00.000Z",
       sourceUpdatedAt: "2026-08-18T04:38:29.000Z",
       eventEligibility: true,
-      relatedPortIds: ["port-laem-chabang"],
+      relatedPortIds: [],
       provenance: { sourceType: "official", dataNature: "reported", sourceId: "tmd" },
     })
+  })
+
+  it("derives official warning port associations from alert text, not registry defaults", () => {
+    const [tmdItem] = parseWeatherAlertRss(`<rss><channel><item><title>Heavy Rain</title><description>Heavy rain in the eastern region.</description><pubDate>Tue, 18 Aug 2026 04:00:00 GMT</pubDate></item></channel></rss>`, tmd, mockPorts)
+    const [bmkgItem] = parseWeatherAlertRss(`<rss><channel><item><title>Thunderstorm in Sumatera Utara</title><description>Heavy rain and strong wind.</description><pubDate>Tue, 18 Aug 2026 04:00:00 GMT</pubDate></item></channel></rss>`, bmkg, mockPorts)
+    expect(tmdItem.relatedPortIds).toEqual([])
+    expect(bmkgItem.relatedPortIds).toEqual([])
   })
 
   it("does not invent alerts from an empty or unrelated page", async () => {
@@ -89,6 +96,27 @@ describe("official weather alert provider", () => {
     mode = "failed"
     const failed = await provider.getFeedItems([previous], mockPorts)
     expect(failed[0]).toMatchObject({ id: previous.id, severity: "warning", stale: true, sourceStatus: "failed", sourceUpdatedAt: previous.sourceUpdatedAt })
+  })
+
+  it("does not resolve an RSS warning merely because an index no longer lists it", async () => {
+    const [previous] = parseWeatherAlertRss(`<rss><channel><lastBuildDate>Tue, 18 Aug 2026 04:00:00 GMT</lastBuildDate><item><title>Gale warning</title><description>Gale warning for the eastern region.</description><link>https://www.tmd.go.th/uploads/CAP/en/1.xml</link><pubDate>Tue, 18 Aug 2026 03:00:00 GMT</pubDate></item></channel></rss>`, tmd, mockPorts, "2026-08-18T04:00:00.000Z")
+    const provider = createOfficialWeatherAlertProvider({
+      allowPending: true,
+      now: () => new Date("2026-08-18T05:00:00.000Z"),
+      sources: [tmd],
+      fetcher: async () => ({ ok: true, status: 200, text: async () => "<rss><channel><lastBuildDate>Tue, 18 Aug 2026 05:00:00 GMT</lastBuildDate></channel></rss>" }),
+    })
+    const [item] = await provider.getFeedItems([previous], mockPorts)
+    expect(item).toMatchObject({ id: previous.id, severity: "warning", stale: true, sourceStatus: "degraded", error: "warning_missing_from_current_index", eventEligibility: true, weather: { alertState: "active" } })
+    expect(item).not.toMatchObject({ severity: "info", eventEligibility: false })
+  })
+
+  it("rejects a generic main element as a JMA empty-result structure", async () => {
+    const [previous] = parseJmaWarning(`<div id="contents"><table><tbody><tr><td><a href="/warning/1">Marine gale warning</a><time datetime="2026-08-15T00:00:00Z">2026-08-15</time></td></tr></tbody></table></div>`, jma, mockPorts, "2026-08-15T00:00:00.000Z")
+    const provider = createOfficialWeatherAlertProvider({ allowPending: true, sources: [jma], fetcher: async () => ({ ok: true, status: 200, text: async () => "<main><p>No active warnings</p></main>" }) })
+    const [item] = await provider.getFeedItems([previous], mockPorts)
+    expect(item).toMatchObject({ id: previous.id, stale: true, sourceStatus: "failed", sourceUpdatedAt: previous.sourceUpdatedAt })
+    expect(item.error).toContain("structure was not recognized")
   })
 
   it("keeps last-known warnings stale when a source parser cannot recognize the response", async () => {

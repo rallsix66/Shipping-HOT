@@ -246,14 +246,15 @@ describe("shipping Provider failure boundaries", () => {
     const publicContext = createOperationalSourceContext(publicModes)
     expect(activeOfficialWeatherAlertSourceIds()).toEqual(new Set())
     expect(publicContext.activeSourceIds.has("jma")).toBe(false)
-    expect([...publicContext.activeSourceIds]).toEqual(expect.arrayContaining(["the-loadstar", "maritime-executive", "shekou-official"]))
+    expect([...publicContext.activeSourceIds]).toEqual(expect.arrayContaining(["the-loadstar", "shekou-official"]))
+    expect(publicContext.activeSourceIds.has("maritime-executive")).toBe(false)
     expect(publicContext.activeSourceIds.has("laem-chabang-official")).toBe(false)
 
     const experimentalModes = { ...configureProviders({ SHIPPING_WEATHER_ALERT_PROVIDER: "experimental" }).modes, calendar: "mock" as const, calendarSourceIds: ["mock-calendar"] as string[] }
     const experimentalContext = createOperationalSourceContext(experimentalModes)
     expect(activeOfficialWeatherAlertSourceIds({ allowPending: true })).toEqual(new Set(["jma", "tmd", "bmkg"]))
     expect([...experimentalContext.activeSourceIds]).toEqual(expect.arrayContaining(["jma", "tmd", "bmkg"]))
-    expect(activeShippingFeedSourceIds()).toEqual(new Set(["the-loadstar", "maritime-executive", "shekou-official"]))
+    expect(activeShippingFeedSourceIds()).toEqual(new Set(["the-loadstar", "shekou-official"]))
   })
 
   it("uses the configured Calendar composite provenance IDs in operational source activation", () => {

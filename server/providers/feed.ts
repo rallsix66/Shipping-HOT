@@ -26,7 +26,7 @@ export interface ShippingFeedSource {
   category: FeedCategory
   relatedPortIds?: string[]
   enabled: boolean
-  status?: "enabled" | "registered_parser_pending" | "deferred"
+  status?: "enabled" | "registered_parser_pending" | "deferred" | "failed_live"
   description?: string
 }
 
@@ -49,7 +49,9 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     format: "rss",
     sourceKind: "third_party",
     category: "shipping_news",
-    enabled: true,
+    enabled: false,
+    status: "failed_live",
+    description: "Temporarily disabled after direct HTTPS connectivity failure; retain for future re-probe without slowing the public Feed.",
   },
   {
     id: "shekou-official",
@@ -365,7 +367,8 @@ export function createPublicFeedProvider(options: PublicFeedProviderOptions = {}
   return {
     async getFeedItems(lastKnown = [], ports = mockPorts) {
       const fetchedAt = now().toISOString()
-      const results = await Promise.all(sources.filter(source => source.enabled).map(async (source) => {
+      const activeSourceIds = activeShippingFeedSourceIds(sources)
+      const results = await Promise.all(sources.filter(source => activeSourceIds.has(source.id)).map(async (source) => {
         const previous = lastKnown.filter(item => item.sourceId === source.id)
         try {
           const response = await fetcher(source.url)

@@ -20,6 +20,21 @@ describe("shipping feed provider", () => {
     expect(await provider.getFeedItems([mock], mockPorts)).toEqual([])
   })
 
+  it("does not schedule a failed-live source with the public Feed", async () => {
+    const maritime = shippingFeedSources.find(source => source.id === "maritime-executive")!
+    expect(maritime).toMatchObject({ enabled: false, status: "failed_live" })
+    const requested: string[] = []
+    const provider = createPublicFeedProvider({
+      sources: [maritime, rssSource],
+      fetcher: async (url) => {
+        requested.push(url)
+        return { ok: true, status: 200, text: async () => "<rss><channel><item><title>Loadstar update</title><link>https://theloadstar.com/story/1</link><pubDate>Tue, 18 Aug 2026 00:00:00 GMT</pubDate></item></channel></rss>" }
+      },
+    })
+    await provider.getFeedItems([], mockPorts)
+    expect(requested).toEqual([rssSource.url])
+  })
+
   it("normalizes RSS entries and attaches source and port provenance", () => {
     const [item] = parseFeedRss(`
       <rss><channel>

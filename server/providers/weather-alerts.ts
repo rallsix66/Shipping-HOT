@@ -50,7 +50,6 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
     sourceUrl: "https://www.tmd.go.th/en/service/rss",
     format: "rss",
     parser: "tmd",
-    relatedPortIds: ["port-laem-chabang"],
     enabled: false,
     liveStatus: "live_pending",
   },
@@ -61,7 +60,6 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
     sourceUrl: "https://data.bmkg.go.id/peringatan-dini-cuaca/",
     format: "rss",
     parser: "bmkg",
-    relatedPortIds: ["port-jakarta"],
     enabled: false,
     liveStatus: "live_pending",
   },
@@ -297,7 +295,7 @@ function parseSourceSpecificNodes(html: string, source: WeatherAlertSource, sele
 }
 
 export function parseJmaWarning(html: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
-  return parseSourceSpecificNodes(html, source, ["#contents table tbody tr", "main table tbody tr", ".jma-information-list li"], ["#contents", "main", ".jma-information-list"], ports, fetchedAt).items
+  return parseSourceSpecificNodes(html, source, ["#contents table tbody tr", "#seawarning-container table tbody tr", ".jma-information-list li"], ["#contents table", "#seawarning-container", ".jma-information-list"], ports, fetchedAt).items
 }
 
 export function parseTmdWarning(html: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
@@ -316,7 +314,7 @@ export function parseWeatherAlertHtml(html: string, source: WeatherAlertSource, 
 
 function parseWeatherAlertHtmlStrict(html: string, source: WeatherAlertSource, ports: Port[], fetchedAt: string): FeedItem[] {
   const result = source.parser === "jma"
-    ? parseSourceSpecificNodes(html, source, ["#contents table tbody tr", "main table tbody tr", ".jma-information-list li"], ["#contents", "main", ".jma-information-list"], ports, fetchedAt)
+    ? parseSourceSpecificNodes(html, source, ["#contents table tbody tr", "#seawarning-container table tbody tr", ".jma-information-list li"], ["#contents table", "#seawarning-container", ".jma-information-list"], ports, fetchedAt)
     : source.parser === "tmd"
       ? parseSourceSpecificNodes(html, source, [".warning-list .warning-item", ".warning-list article", ".warning-card", "main table tbody tr"], [".warning-list", ".warning-card", "main"], ports, fetchedAt)
       : parseSourceSpecificNodes(html, source, [".table-responsive table tbody tr", ".warning-table tbody tr", ".warning-card"], [".table-responsive", ".warning-table", ".warning-card"], ports, fetchedAt)
@@ -354,6 +352,15 @@ export interface OfficialWeatherAlertProviderOptions {
   allowPending?: boolean
 }
 
+function markMissingFromCurrentIndex(item: FeedItem, fetchedAt: string): FeedItem {
+  return { ...item, stale: true, sourceStatus: "degraded", error: "warning_missing_from_current_index", fetchedAt }
+}
+
+function hasExpiredEvidence(item: FeedItem, fetchedAt: string): boolean {
+  const expiresAt = item.weather?.alertExpiresAt
+  return Boolean(expiresAt && Date.parse(expiresAt) <= Date.parse(fetchedAt))
+}
+
 function defaultFetcher(): WeatherAlertFetcher {
   const fetchImplementation = (globalThis as typeof globalThis & { fetch?: WeatherAlertFetcher }).fetch
   if (!fetchImplementation) throw new Error("Fetch runtime is unavailable")
@@ -389,7 +396,8 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
               ? parseWeatherAlertRss(body, source, ports, fetchedAt)
               : parseWeatherAlertHtmlStrict(body, source, ports, fetchedAt)
           const activeIds = new Set(parsed.map(item => item.id))
-          const cleared = previous.filter(item => (item.severity === "warning" || item.severity === "critical") && !activeIds.has(item.id)).map(item => expiredAsInfo(item, fetchedAt))
+          const disappeared = previous.filter(item => (item.severity === "warning" || item.severity === "critical") && !activeIds.has(item.id))
+          const cleared = disappeared.map(item => hasExpiredEvidence(item, fetchedAt) ? expiredAsInfo(item, fetchedAt) : markMissingFromCurrentIndex(item, fetchedAt))
           return [...parsed, ...cleared]
         } catch (error) {
           return previous.map(item => markFailed(item, fetchedAt, error instanceof Error ? error.message : `${source.name} failed`))

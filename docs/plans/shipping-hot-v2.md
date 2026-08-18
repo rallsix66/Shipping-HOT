@@ -799,14 +799,14 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 ### V2.3
 
 - 已实现 Feed 复用现有 `/feed` 页面：航运分类、来源类型、关联港口、tags 和“进入 HOT 的原因”。
-- 已实现默认 Mock + 显式 `SHIPPING_FEED_PROVIDER=public` 的 server-only RSS/HTML Source registry：The Loadstar、The Maritime Executive、Shekou `/ywgg/` operational notices；`/gsxw/` company news、导航/footer 噪声不进入 Shekou parser；Laem Chabang/Port Klang 标记 registered/parser pending，Yantian/Nansha 标记 deferred/no stable source confirmed。
+- 已实现默认 Mock + 显式 `SHIPPING_FEED_PROVIDER=public` 的 server-only RSS/HTML Source registry：The Loadstar、保留但 `failed_live`/disabled 的 The Maritime Executive、Shekou `/ywgg/` operational notices；failed-live source 不进入 active public fetch，`/gsxw/` company news、导航/footer 噪声不进入 Shekou parser；Laem Chabang/Port Klang 标记 registered/parser pending，Yantian/Nansha 标记 deferred/no stable source confirmed。
 - 已实现逐 Source 独立失败、last-known stale、canonical URL/标题去重、official 优先和 `feed:<feedItemId>` Event dedupe；普通资讯留在 Feed，warning/critical fresh item 才进入 Event/HOT。
 
 ### V2.4
 
 - 已实现 Weather Feed 卡片：可切换 24 小时、72 小时、7 天窗口，显示浪高、涌浪、周期、风/阵风、浪向/涌浪向、模型/官方标识和官方预警状态。
 - 已实现 `SHIPPING_WEATHER_PROVIDER=open-meteo`：一次请求 7 天 Open-Meteo current + hourly 海况字段，本地计算三个窗口，30 分钟 server-side/in-process TTL，逐港失败隔离和同源 last-known stale；`updatedAt` 是 forecast/current valid time，`sourceUpdatedAt` 只有可靠 source/model-run 时间才填写，`fetchedAt` 是本地抓取完成时间；没有同源 last-known 时不填充 `mock-weather` 或其他假天气。
-- 已实现天气预警 source registry：JMA 海上警报 HTML、TMD 公共 RSS 列表、BMKG RSS 独立 source-specific contracts；保留 issued/updated/effective/expiry（来源提供时），过期降为 info，解析失败保留 stale last-known，不能继续触发 HOT。三个来源均为 `live_pending`；`SHIPPING_WEATHER_ALERT_PROVIDER=public` 只启用 `verified_live` 来源（当前没有），`experimental` 才显式启用 pending adapter。
+- 已实现天气预警 source registry：JMA 海上警报 HTML、TMD 公共 RSS 列表、BMKG RSS 独立 source-specific contracts；TMD/BMKG 仅从标题/摘要/area 文本推导港口关联，不使用 registry 全局默认港口；保留 issued/updated/effective/expiry（来源提供时），只有可靠 expiry 已经过期才降为 info，RSS 列表消失但无 expiry 时保留 stale/degraded last-known，不能继续触发 HOT。JMA strict empty 判定要求 source-specific structure。三个来源均为 `live_pending`；`SHIPPING_WEATHER_ALERT_PROVIDER=public` 只启用 `verified_live` 来源（当前没有），`experimental` 才显式启用 pending adapter。
 
 ### V2.5
 
@@ -845,7 +845,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Dependencies：V2.0 trust model；Calendarific Key 管理确认；五国官方来源清单。
 - Status：implemented / locally verified; live pending。
 - Implemented：`CalendarProvider`/Calendarific server-only adapter、五国官方来源注册表、OfficialHolidayProvider/ManualHolidayProvider/Mock contracts、`calendar_events` 最小表、`settings.calendarSync` source-scoped coverage persistence、source merge priority/conflict evidence、government-special announced lifecycle、Calendar → Event → HOT lead windows、`/calendar` page、calendar GET/sync POST routes and conditional attribution；显式 Calendarific 缺少 Key 时保持 calendarific 模式并返回 unknown/暂无数据，不回退 Mock。
-- Verification：当前 Provider/live-path batch 为 173/173；`pnpm typecheck` and build passed；Portcast 1/13/15/180-day, cache-crossing and missing-date fixtures, Open-Meteo completion/cache timestamp/window fixtures and Shekou `/ywgg/` parser/Event/HOT fixtures passed；corrected public Portcast re-probe verified 8/8 with Nansha stale；Neat Freak Bash inventory script remains unavailable on Windows and its manual equivalent is complete。
+- Verification：preceding Provider/live-path batch 为 173/173；`pnpm typecheck` and build passed；Portcast 1/13/15/180-day, cache-crossing and missing-date fixtures, Open-Meteo completion/cache timestamp/window fixtures and Shekou `/ywgg/` parser/Event/HOT fixtures passed；corrected public Portcast re-probe verified 8/8 with Nansha stale；Neat Freak Bash inventory script remains unavailable on Windows and its manual equivalent is complete。
 - Acceptance：不打开页面即请求 API；本地可离线读取实际已缓存的年度数据；`coverageStatus` 可区分 complete/partial/unknown；国家日历页面展示符合条款的 Calendarific Attribution；官方事实层优先级最高；ManualOverride 修改事实字段时保留原记录并标记 conflict；普通、高影响、连续假期和政府临时假日提醒不重复；日历不把 observance 默认当作放假。
 - Main risks：官方临时变更、地区差异、农历/宗教日期、第三方滞后。
 - Rollback：停用自动同步但保留本地 CalendarEvent；关闭提醒规则不删除已核验记录。
@@ -857,8 +857,8 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Out of Scope：海运新闻独立页面、无限 Source、全文镜像、付费墙内容抓取、AI 摘要。
 - Dependencies：V2.0 trust model；逐 Source 的 RSS/HTML/robots/版权核对。
 - Status：implemented / locally verified; live pending。
-- Implemented：`FeedProvider`/`createPublicFeedProvider`/`MockFeedProvider`、The Loadstar 与 The Maritime Executive RSS、Shekou `/ywgg/` official HTML、registered/parser-pending and deferred registry entries、unknown publication semantics、Chinese classification、normalized FeedItem fields、per-source stale fallback、canonical/title dedupe、Feed → Event → HOT reason/evidence and `/feed` UI status chips；Repository 使用真实 `fetchedAt` 写入 `fetched_at`，未知 `publishedAt` 按 `fetched_at` retention/prune。
-- Verification：当前 Provider/live-path batch 为 173/173；build、typecheck and targeted lint passed；Shekou `/ywgg/` parser excludes `/gsxw/` and nav/footer fixtures and carries dated notices through Event/HOT；corrected public probe returned 5 `/ywgg/` items and zero `/gsxw/` items, with publication times unknown。
+- Implemented：`FeedProvider`/`createPublicFeedProvider`/`MockFeedProvider`、The Loadstar 与保留但 disabled 的 The Maritime Executive RSS、Shekou `/ywgg/` official HTML、registered/parser-pending/deferred/failed-live registry entries、unknown publication semantics、Chinese classification、normalized FeedItem fields、per-source stale fallback、canonical/title dedupe、Feed → Event → HOT reason/evidence and `/feed` UI status chips；active public fetch 只调度 enabled registry sources，Repository 使用真实 `fetchedAt` 写入 `fetched_at`，未知 `publishedAt` 按 `fetchedAt` retention/prune。
+- Verification：preceding Provider/live-path batch 为 173/173；current Official Alert Trust + Feed Failure Isolation batch 为 178/178；build、typecheck and targeted lint passed；Shekou `/ywgg/` parser excludes `/gsxw/` and nav/footer fixtures and carries dated notices through Event/HOT；corrected public probe returned 5 `/ywgg/` items and zero `/gsxw/` items, with publication times unknown。
 - Acceptance：首批 Source 少于无限扩张；每个 Source 独立失败；普通新闻只进 Feed；有效公告/预警可进入 HOT；重复转载可去重；旧缓存明确 stale。
 - Main risks：来源质量、版权、抓取频率、来源结构变化。
 - Rollback：禁用单个 Source/分类，保留 NewsNow 原有 Source 和 cache。
@@ -870,8 +870,8 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Out of Scope：航行安全认证、复杂气象模型、多国 Provider 全量接入、海流/潮汐决策系统。
 - Dependencies：V2.0 trust model；现有 Open-Meteo adapter；官方来源合规核对。
 - Status：implemented / locally verified; live pending。
-- Implemented：扩展 `createOpenMeteoWeatherProvider` 的 current/hourly wave/swell/wind 请求、24/72/168 小时风险窗口和方向字段、30 分钟 TTL、逐港 failure/同源 last-known stale；没有同源历史时首次失败返回暂无模型天气；`updatedAt`/`sourceUpdatedAt`/`fetchedAt` 语义分离，`generationtime_ms` 不冒充 source time；新增 `WeatherDetail.windows`、model/official risk labels、JMA 海上警报 HTML、TMD 公共 RSS 列表、BMKG 官方 RSS source-specific adapters 和 warning expiry/parse-failure 保留逻辑。三个官方来源均标记 `live_pending`；`public` 不会启用它们，`experimental` 才显式允许 pending adapter。
-- Verification：preceding Provider/live-path batch 为 173/173；本轮 Remaining Real Provider Verification 增加 TMD RSS registry/parser fixture 后为 174/174；build、typecheck and targeted lint passed；Open-Meteo timestamp/window/direction/cache fixtures passed；corrected public Open-Meteo probe verified 16 requests for 8 ports and `sourceUpdatedAt` remained undefined；official warning runtime remains pending。
+- Implemented：扩展 `createOpenMeteoWeatherProvider` 的 current/hourly wave/swell/wind 请求、24/72/168 小时风险窗口和方向字段、30 分钟 TTL、逐港 failure/同源 last-known stale；没有同源历史时首次失败返回暂无模型天气；`updatedAt`/`sourceUpdatedAt`/`fetchedAt` 语义分离，`generationtime_ms` 不冒充 source time；新增 `WeatherDetail.windows`、model/official risk labels、JMA 海上警报 HTML、TMD 公共 RSS 列表、BMKG 官方 RSS source-specific adapters 和 warning expiry/parse-failure 保留逻辑。TMD/BMKG 港口关联仅接受 alert text/area 明示；RSS 缺少 expiry 时 warning disappearance 只能保留 stale/degraded，不自动 expired；JMA generic `<main>` 不再通过 strict empty 判定。三个官方来源均标记 `live_pending`；`public` 不会启用它们，`experimental` 才显式允许 pending adapter。
+- Verification：preceding Provider/live-path batch 为 173/173；preceding Remaining Real Provider Verification 为 174/174；本轮 Official Alert Trust + Feed Failure Isolation 增加 4 个回归测试后为 178/178；typecheck and targeted lint passed；Open-Meteo timestamp/window/direction/cache fixtures passed；corrected public Open-Meteo probe verified 16 requests for 8 ports and `sourceUpdatedAt` remained undefined；official warning runtime remains pending。
 - Acceptance：字段来源和预报时间窗清楚；海况请求按 TTL 缓存；模型风险不能伪装官方预警；官方预警过期可关闭；单港失败不影响其他港口。
 - Main risks：沿岸精度、预警格式、重复公告、不同国家定义不一致。
 - Rollback：只保留现有 Open-Meteo 风/阵风/波高，关闭官方预警 Provider。
