@@ -268,6 +268,7 @@ describe("shippingRepository", () => {
   it("initializes and persists the minimal calendar_events table", async () => {
     const snapshot = createMockSnapshot()
     const calendarEvents = createMockCalendarEvents(2026, "2026-08-15T00:00:00.000Z")
+    calendarEvents[0] = { ...calendarEvents[0], scope: "subdivision", subdivisionCode: "my-05", subdivisionCodes: ["my-05"], scopeLabel: "Negeri Sembilan" }
     const database = new FakeDatabase()
     await initShippingTables(database as unknown as Database)
     const repository = new ShippingRepository(database as unknown as Database)
@@ -275,5 +276,6 @@ describe("shippingRepository", () => {
     const stored = await repository.listCalendarEvents()
     expect(stored).toHaveLength(10)
     expect(stored[0]).toMatchObject({ countryCode: "TH", sourceId: "mock-calendar", stale: false })
+    expect(stored.find(event => event.id === calendarEvents[0].id)).toMatchObject({ scope: "subdivision", subdivisionCode: "my-05", subdivisionCodes: ["my-05"], scopeLabel: "Negeri Sembilan" })
   })
 })

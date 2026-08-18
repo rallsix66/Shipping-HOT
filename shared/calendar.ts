@@ -5,6 +5,7 @@ export type CalendarEventType = "public_holiday" | "observance" | "religious" | 
 export type BusinessImpact = "low" | "medium" | "high" | "critical"
 export type CalendarCoverageStatus = "complete" | "partial" | "unknown"
 export type CalendarSourceKind = "official" | "third_party" | "user" | "mock"
+export type CalendarEventScope = "national" | "subdivision" | "unknown"
 
 export const calendarCountries: Record<CalendarCountryCode, string> = {
   TH: "泰国",
@@ -17,7 +18,10 @@ export const calendarCountries: Record<CalendarCountryCode, string> = {
 export interface CalendarEvent extends Freshness, ProvenanceAware {
   id: string
   countryCode: CalendarCountryCode
+  scope?: CalendarEventScope
   subdivisionCode?: string
+  subdivisionCodes?: string[]
+  scopeLabel?: string
   name: string
   description?: string
   date: string
@@ -63,11 +67,26 @@ export interface CalendarProviderResult extends CalendarSnapshot {
   fetchedAt: string
 }
 
-export function calendarEventKey(event: Pick<CalendarEvent, "countryCode" | "date" | "name" | "type">): string {
-  return `${event.countryCode}:${event.date}:${event.name.trim().toLowerCase()}:${event.type}`
+export type CalendarEventIdentity = Pick<CalendarEvent, "countryCode" | "date" | "name" | "type"> & Partial<Pick<CalendarEvent, "scope" | "subdivisionCode" | "subdivisionCodes" | "scopeLabel">>
+
+export function calendarEventScopeKey(event: Pick<CalendarEvent, "scope" | "subdivisionCode" | "subdivisionCodes" | "scopeLabel">): string | undefined {
+  if (!event.scope || event.scope === "national") return undefined
+  const codes = [...new Set([...(event.subdivisionCodes ?? []), ...(event.subdivisionCode ? [event.subdivisionCode] : [])])].sort()
+  if (codes.length) return `subdivision:${codes.join(",")}`
+  if (event.scopeLabel?.trim()) return `${event.scope}:${event.scopeLabel.trim().toLowerCase().normalize("NFKC").replace(/\s+/g, " ")}`
+  return `scope:${event.scope}`
 }
 
-export function calendarEventId(event: Pick<CalendarEvent, "countryCode" | "date" | "name" | "type">, sourceId: string): string {
+export function calendarEventKey(event: CalendarEventIdentity): string {
+  return `${calendarEventNameKey(event)}:${event.type}`
+}
+
+export function calendarEventNameKey(event: Omit<CalendarEventIdentity, "type">): string {
+  const scopeKey = calendarEventScopeKey(event)
+  return `${event.countryCode}:${event.date}:${event.name.trim().toLowerCase()}${scopeKey ? `:${scopeKey}` : ""}`
+}
+
+export function calendarEventId(event: CalendarEventIdentity, sourceId: string): string {
   return `calendar:${calendarEventKey(event)}:${sourceId}`
 }
 

@@ -10,7 +10,7 @@
 
 本节覆盖此前“AISStream/Calendarific credential pending”的历史记录：AISStream 本轮达到 connection_verified / pending_observation，但 120 秒内没有 PositionReport，不能升级 verified_live；Calendarific 五国 HTTP 200、合法 JSON 和 parser 均通过，当前状态为 verified_live，但五国 coverageStatus 均为 partial，不能宣称 complete。
 
-Calendarific live 数据暴露了 National holiday / Common local holiday 标签和 MY 的完全重复事实；normalizer 已完成类型归一化与 country/date/name/type 去重。当前本地 suite 为 186/186；all-real API/page smoke 通过；JMA/TMD/BMKG 仍 live_pending，V2.5 仍未启动。
+Calendarific live 数据暴露了 National holiday / Common local holiday 标签、实际 `locations`/`states[].iso` 地区证据和同名同日跨 subdivision 事实；normalizer 现按 national/local scope 归类，并以 country/date/name/type/scope 做去重与 reconcile。当前本地 suite 为 191/191；先前 all-real API/page smoke 仍是既有基线证据；JMA/TMD/BMKG 仍 live_pending，V2.5 仍未启动。
 
 ## 1. V2 Executive Summary
 
@@ -499,6 +499,17 @@ Calendarific 作为常规年度基础源：按国家/年份批量同步，写入
 
 使用免费套餐时，国家日历页面必须展示符合当时官方条款的归因，例如 `Powered by Calendarific`，并链接到 Calendarific。最终文字和链接在实现 V2.2 前再次核对；归因要求同时属于产品验收和 UI 合同。
 
+### 13.2.1 Calendarific Local Holiday Scope Closeout
+
+本轮已将 Calendarific 的地点范围从“类型标签”中分离出来：
+
+- `National holiday`、`Public holiday`、`Federal holiday` 和 `Bank holiday` → `type=public_holiday`、`isPublicHoliday=true`、`scope=national`。
+- `Local holiday`、`Common local holiday`、`Regional holiday`、`State holiday`、`Provincial holiday` 和 subdivision-specific 标签 → 保留 CalendarEvent；有明确地区证据时 `scope=subdivision`，没有地区证据时 `scope=unknown`，不自动升级为全国假日。
+- Calendarific payload 中的 `states[].iso` 只在实际存在时写入 `subdivisionCode` / `subdivisionCodes`；`locations` 和地区名称保留为 `scopeLabel` 证据，不创造港口或国家 subdivision mapping。
+- Calendar 页面/API 可以展示 local/unknown 事实；Event Engine 的 `isCalendarOperationallyRelevant()` 不为它们创建国家级 Calendar Event/HOT。`government_special` 保持现有即时公告语义。
+- Calendar ID 对旧的 national/unscoped 事实保持稳定；source merge/reconcile key 现在包含 `country + date + name + type + scope`，所以同名同日不同 subdivision 不会被错误合并。历史记录保留，scope/provider 切换不自动 resolve Event。
+- 2026 五国目标探针：raw `201`、invalid date `0`、missing name `0`、normalized unique `201`、merged `201`、local/unknown `48`；coverage 仍为 `partial`。此前 `198` direct / `189` operational 是旧 key 的历史数值，已被本轮对账替代。
+
 建议同步策略：
 
 - 目标是本地缓存当前年和实际可获得的未来年度数据；不承诺免费套餐一定提供完整的下一年度。
@@ -526,9 +537,12 @@ Calendarific 作为常规年度基础源：按国家/年份批量同步，写入
 CalendarEvent
   id
   countryCode
+  scope: national | subdivision | unknown
   subdivisionCode?
+  subdivisionCodes?
+  scopeLabel?
   name
-  localName?
+  localName? (not supplied by current Calendarific contract; do not fabricate)
   date
   endDate?
   type

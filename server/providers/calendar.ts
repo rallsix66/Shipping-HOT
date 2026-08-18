@@ -1,6 +1,6 @@
 import { env } from "node:process"
 import type { DataEvidence, DataProvenance } from "@shared/shipping"
-import { type BusinessImpact, type CalendarCountryCode, type CalendarCoverage, type CalendarCoverageStatus, type CalendarEvent, type CalendarEventType, type CalendarProviderResult, type CalendarQuery, type CalendarSourceKind, calendarCountries, calendarEventId, calendarEventKey, calendarSeverity } from "@shared/calendar"
+import { type BusinessImpact, type CalendarCountryCode, type CalendarCoverage, type CalendarCoverageStatus, type CalendarEvent, type CalendarEventScope, type CalendarEventType, type CalendarProviderResult, type CalendarQuery, type CalendarSourceKind, calendarCountries, calendarEventId, calendarEventKey, calendarSeverity } from "@shared/calendar"
 
 export interface CalendarProvider {
   getEvents: (query: CalendarQuery) => Promise<CalendarProviderResult>
@@ -43,6 +43,16 @@ interface CalendarificHoliday {
   description?: unknown
   date?: { iso?: unknown }
   type?: unknown
+  location?: unknown
+  locations?: unknown
+  state?: unknown
+  states?: unknown
+  province?: unknown
+  provinces?: unknown
+  subdivision?: unknown
+  subdivisions?: unknown
+  region?: unknown
+  regions?: unknown
 }
 
 interface CalendarificPayload {
@@ -52,6 +62,10 @@ interface CalendarificPayload {
 
 interface CalendarEventOptions {
   countryCode: CalendarCountryCode
+  scope?: CalendarEventScope
+  subdivisionCode?: string
+  subdivisionCodes?: string[]
+  scopeLabel?: string
   name: string
   date: string
   endDate?: string
@@ -79,6 +93,10 @@ function calendarEvent(options: CalendarEventOptions): CalendarEvent {
   return {
     id: calendarEventId(options, options.sourceId),
     countryCode: options.countryCode,
+    scope: options.scope,
+    subdivisionCode: options.subdivisionCode,
+    subdivisionCodes: options.subdivisionCodes,
+    scopeLabel: options.scopeLabel,
     name: options.name,
     description: options.description,
     note: options.note,
@@ -110,11 +128,14 @@ function calendarFetcher(): CalendarFetcher {
   return fetchImplementation
 }
 
-function holidayType(types: string[]): { type: CalendarEventType, isPublicHoliday: boolean } {
-  if (types.some(type => /\b(?:national|public|local)\b/.test(type))) return { type: "public_holiday", isPublicHoliday: true }
-  if (types.includes("religious")) return { type: "religious", isPublicHoliday: false }
-  if (types.includes("observance")) return { type: "observance", isPublicHoliday: false }
-  return { type: "commercial", isPublicHoliday: false }
+function holidayType(types: string[]): { type: CalendarEventType, isPublicHoliday: boolean, scope?: CalendarEventScope, isLocal: boolean, recognized: boolean } {
+  const isLocal = types.some(type => /\b(?:local|regional|state|provincial|subdivision)\b/.test(type))
+  const isNational = types.some(type => /\b(?:national|public|federal|bank)(?:\s+holiday)?\b/.test(type))
+  if (isLocal) return { type: "public_holiday", isPublicHoliday: true, scope: "unknown", isLocal: true, recognized: true }
+  if (isNational) return { type: "public_holiday", isPublicHoliday: true, scope: "national", isLocal: false, recognized: true }
+  if (types.includes("religious")) return { type: "religious", isPublicHoliday: false, isLocal: false, recognized: true }
+  if (types.includes("observance")) return { type: "observance", isPublicHoliday: false, isLocal: false, recognized: true }
+  return { type: "commercial", isPublicHoliday: false, isLocal: false, recognized: false }
 }
 
 function impactFor(type: CalendarEventType, isPublicHoliday: boolean): BusinessImpact {
@@ -126,7 +147,43 @@ function asString(value: unknown): string | undefined {
 }
 
 function asTypes(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string").map(item => item.toLowerCase()) : []
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string").map(item => item.trim().toLowerCase().replace(/\s+/g, " ")) : []
+}
+
+function asObject(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined
+}
+
+function asStringList(value: unknown): string[] {
+  if (typeof value === "string" && value.trim() && !/^all$/i.test(value.trim())) return [value.trim()]
+  if (!Array.isArray(value)) return []
+  return value.flatMap((item) => {
+    if (typeof item === "string" && item.trim()) return [item.trim()]
+    const record = asObject(item)
+    const name = asString(record?.name)
+    return name ? [name] : []
+  })
+}
+
+function calendarScopeEvidence(holiday: CalendarificHoliday, classification: ReturnType<typeof holidayType>): Pick<CalendarEvent, "scope" | "subdivisionCode" | "subdivisionCodes" | "scopeLabel"> {
+  if (!classification.isLocal) return { scope: classification.scope }
+  const rawStates = holiday.states ?? holiday.state ?? holiday.provinces ?? holiday.province ?? holiday.subdivisions ?? holiday.subdivision ?? holiday.regions ?? holiday.region
+  const stateRecords = Array.isArray(rawStates) ? rawStates.map(asObject).filter((item): item is Record<string, unknown> => item !== undefined) : []
+  const subdivisionCodes = [...new Set(stateRecords.flatMap((record) => {
+    const iso = asString(record.iso)
+    return iso ? [iso] : []
+  }))].sort()
+  const subdivisionNames = asStringList(rawStates)
+  const locationText = asString(holiday.locations ?? holiday.location)
+  const labels = [...new Set([...(locationText ? [locationText] : []), ...subdivisionNames])]
+  const specificLocation = labels.some(label => !/^all$/i.test(label.trim()))
+  const scope = subdivisionCodes.length || specificLocation ? "subdivision" : "unknown"
+  return {
+    scope,
+    subdivisionCode: subdivisionCodes.length === 1 ? subdivisionCodes[0] : undefined,
+    subdivisionCodes: subdivisionCodes.length ? subdivisionCodes : undefined,
+    scopeLabel: labels.length ? labels.sort().join(", ") : undefined,
+  }
 }
 
 export function sanitizeCalendarError(value: unknown): string {
@@ -134,23 +191,64 @@ export function sanitizeCalendarError(value: unknown): string {
   return message.replace(/([?&]api_key=)[^&\s]+/gi, "$1***").slice(0, 240)
 }
 
-export function normalizeCalendarificPayload(value: unknown, countryCode: CalendarCountryCode, year: number, fetchedAt: string): CalendarEvent[] {
+export interface CalendarNormalizationStats {
+  rawCount: number
+  normalizedCandidateCount: number
+  uniqueCount: number
+  invalidDateCount: number
+  missingNameCount: number
+  unsupportedTypeCount: number
+  exactDuplicateSameFactCount: number
+  sameFactAfterTypeNormalizationCount: number
+  semanticCollisionCount: number
+  scopeFilteredOperationalRecords: number
+}
+
+export interface CalendarificNormalizationResult {
+  events: CalendarEvent[]
+  stats: CalendarNormalizationStats
+}
+
+export function normalizeCalendarificPayloadWithStats(value: unknown, countryCode: CalendarCountryCode, year: number, fetchedAt: string): CalendarificNormalizationResult {
   const holidays = (value as CalendarificPayload)?.response?.holidays
   if (!Array.isArray(holidays)) throw new Error("Calendarific response is malformed")
-  const events = holidays.flatMap((item) => {
-    if (!item || typeof item !== "object") return []
+  const stats: CalendarNormalizationStats = {
+    rawCount: holidays.length,
+    normalizedCandidateCount: 0,
+    uniqueCount: 0,
+    invalidDateCount: 0,
+    missingNameCount: 0,
+    unsupportedTypeCount: 0,
+    exactDuplicateSameFactCount: 0,
+    sameFactAfterTypeNormalizationCount: 0,
+    semanticCollisionCount: 0,
+    scopeFilteredOperationalRecords: 0,
+  }
+  const events: CalendarEvent[] = []
+  const seen = new Map<string, { rawTypeKey: string, scopeKey: string }>()
+  for (const item of holidays) {
+    if (!item || typeof item !== "object") {
+      stats.invalidDateCount++
+      continue
+    }
     const holiday = item as CalendarificHoliday
     const name = asString(holiday.name)
     const date = asString(holiday.date?.iso)
-    if (!name || !date || !new RegExp(`^${year}-\\d{2}-\\d{2}$`).test(date)) return []
-    const { type, isPublicHoliday } = holidayType(asTypes(holiday.type))
-    return [calendarEvent({
+    if (!name) stats.missingNameCount++
+    if (!date || !new RegExp(`^${year}-\\d{2}-\\d{2}$`).test(date)) stats.invalidDateCount++
+    if (!name || !date || !new RegExp(`^${year}-\\d{2}-\\d{2}$`).test(date)) continue
+    const types = asTypes(holiday.type)
+    const classification = holidayType(types)
+    if (!classification.recognized) stats.unsupportedTypeCount++
+    const scopeEvidence = calendarScopeEvidence(holiday, classification)
+    const event = calendarEvent({
       countryCode,
       name,
       date,
-      type,
-      isPublicHoliday,
-      businessImpact: impactFor(type, isPublicHoliday),
+      ...scopeEvidence,
+      type: classification.type,
+      isPublicHoliday: classification.isPublicHoliday,
+      businessImpact: impactFor(classification.type, classification.isPublicHoliday),
       sourceId: "calendarific",
       sourceKind: "third_party",
       sourceUrl: `https://calendarific.com/holidays/${year}/${countryCode}`,
@@ -158,9 +256,32 @@ export function normalizeCalendarificPayload(value: unknown, countryCode: Calend
       description: asString(holiday.description),
       lastCheckedAt: fetchedAt,
       provenance: { ...calendarProvenances.calendarific, sourceUrl: `https://calendarific.com/holidays/${year}/${countryCode}` },
-    })]
-  })
-  return [...new Map(events.map(event => [calendarEventKey(event), event])).values()]
+    })
+    stats.normalizedCandidateCount++
+    const key = calendarEventKey(event)
+    const scopeKey = [event.scope, event.subdivisionCodes?.join(","), event.scopeLabel].join("|")
+    const prior = seen.get(key)
+    if (prior) {
+      if (prior.rawTypeKey === types.join("|") && prior.scopeKey === scopeKey) stats.exactDuplicateSameFactCount++
+      else stats.sameFactAfterTypeNormalizationCount++
+      continue
+    }
+    seen.set(key, { rawTypeKey: types.join("|"), scopeKey })
+    events.push(event)
+  }
+  const semanticGroups = new Map<string, Set<string>>()
+  for (const event of events) {
+    const baseKey = `${event.countryCode}:${event.date}:${event.name.trim().toLowerCase()}`
+    semanticGroups.set(baseKey, new Set([...(semanticGroups.get(baseKey) ?? []), calendarEventKey(event)]))
+  }
+  stats.semanticCollisionCount = [...semanticGroups.values()].filter(keys => keys.size > 1).length
+  stats.uniqueCount = events.length
+  stats.scopeFilteredOperationalRecords = events.filter(event => event.scope !== undefined && event.scope !== "national").length
+  return { events, stats }
+}
+
+export function normalizeCalendarificPayload(value: unknown, countryCode: CalendarCountryCode, year: number, fetchedAt: string): CalendarEvent[] {
+  return normalizeCalendarificPayloadWithStats(value, countryCode, year, fetchedAt).events
 }
 
 export function calendarificCoverageStatus(value: unknown, eventCount: number): CalendarCoverageStatus {
@@ -352,20 +473,16 @@ export function createCompositeCalendarProvider(options: CompositeCalendarProvid
   }
 }
 
-function normalizedName(value: string): string {
-  return value.trim().toLocaleLowerCase().normalize("NFKC").replace(/\s+/g, " ")
+function factKey(event: CalendarEvent): string {
+  return calendarEventKey(event)
 }
 
-function factKey(event: Pick<CalendarEvent, "countryCode" | "name" | "type">): string {
-  return `${event.countryCode}:${normalizedName(event.name)}:${event.type}`
-}
-
-function factNameKey(event: Pick<CalendarEvent, "countryCode" | "name">): string {
-  return `${event.countryCode}:${normalizedName(event.name)}`
+function logicalNameKey(event: CalendarEvent): string {
+  return `${event.countryCode}:${event.name.trim().toLowerCase().normalize("NFKC").replace(/\s+/g, " ")}`
 }
 
 function factsChanged(base: CalendarEvent, override: CalendarEvent): boolean {
-  return base.date !== override.date || base.endDate !== override.endDate || base.type !== override.type || base.isPublicHoliday !== override.isPublicHoliday
+  return base.date !== override.date || base.endDate !== override.endDate || base.type !== override.type || base.isPublicHoliday !== override.isPublicHoliday || calendarEventKey(base) !== calendarEventKey(override)
 }
 
 function evidenceFor(event: CalendarEvent): DataEvidence {
@@ -418,10 +535,15 @@ export function mergeCalendarSources(thirdParty: CalendarEvent[], official: Cale
   const grouped = new Map<string, CalendarEvent[]>()
   for (const event of [...thirdParty, ...official]) grouped.set(factKey(event), [...(grouped.get(factKey(event)) ?? []), event])
   const manualByFact = new Map(manual.map(event => [factKey(event), event]))
-  const manualByName = new Map(manual.map(event => [factNameKey(event), event]))
+  const manualByLogicalName = new Map<string, CalendarEvent[]>()
+  for (const event of manual) manualByLogicalName.set(logicalNameKey(event), [...(manualByLogicalName.get(logicalNameKey(event)) ?? []), event])
+  const groupsByLogicalName = new Map<string, string[]>()
+  for (const [key, events] of grouped) groupsByLogicalName.set(logicalNameKey(events[0]), [...(groupsByLogicalName.get(logicalNameKey(events[0])) ?? []), key])
   const matchedManualIds = new Set<string>()
   const result = [...grouped.entries()].map(([key, events]) => {
-    const manualEvent = manualByFact.get(key) ?? manualByName.get(factNameKey(events[0]))
+    const nameKey = logicalNameKey(events[0])
+    const fallbackManual = groupsByLogicalName.get(nameKey)?.length === 1 && manualByLogicalName.get(nameKey)?.length === 1 ? manualByLogicalName.get(nameKey)?.[0] : undefined
+    const manualEvent = manualByFact.get(key) ?? fallbackManual
     if (manualEvent) matchedManualIds.add(manualEvent.id)
     return mergeFactGroup(events, manualEvent)
   }).filter((event): event is CalendarEvent => event !== undefined)

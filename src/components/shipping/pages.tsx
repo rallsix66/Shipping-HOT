@@ -1370,6 +1370,7 @@ const calendarTypeLabels: Record<string, string> = {
 }
 
 const calendarImpactLabels: Record<string, string> = { low: "低影响", medium: "中影响", high: "高影响", critical: "关键" }
+const calendarScopeLabels: Record<string, string> = { national: "全国范围", subdivision: "地方范围", unknown: "范围待核实" }
 
 function formatCalendarDate(value: string) {
   return new Date(`${value}T00:00:00Z`).toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })
@@ -1414,6 +1415,12 @@ function CalendarCard({ event, today }: { event: CalendarEvent, today: string })
       <h4>{event.name}</h4>
       <div className="cal-chips">
         <span className="chip">{calendarTypeLabels[event.type] ?? event.type}</span>
+        {event.scope && (
+          <span className="chip">
+            {calendarScopeLabels[event.scope] ?? event.scope}
+            {event.scope === "subdivision" && event.scopeLabel ? ` · ${event.scopeLabel}` : ""}
+          </span>
+        )}
         <span className="chip">{calendarImpactLabels[event.businessImpact] ?? event.businessImpact}</span>
         <span className="chip">{event.verified ? "已验证" : "待核验"}</span>
       </div>
@@ -1421,7 +1428,7 @@ function CalendarCard({ event, today }: { event: CalendarEvent, today: string })
         {formatCalendarDate(event.date)}
         {" · "}
         {days < 0 ? "已过期" : days === 0 ? "今天" : `${days} 天后`}
-        {event.isPublicHoliday ? " · 公共假日" : ""}
+        {event.scope === "national" ? " · 全国公共假日" : event.scope === "subdivision" ? " · 地方公共假日" : event.scope === "unknown" ? " · 范围待核实" : event.isPublicHoliday ? " · 公共假日" : ""}
         {event.conflictFlag ? " · 存在来源冲突" : ""}
       </p>
       <div className="flex flex-wrap items-center gap-2 text-xs op-70">

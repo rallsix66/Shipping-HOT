@@ -1,7 +1,7 @@
 import { filterEventsForOperationalContext, toVesselWatchTarget } from "@shared/shipping"
 import type { FeedItem, Port, ProviderResult, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
-import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries } from "@shared/calendar"
+import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries, calendarEventKey } from "@shared/calendar"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules"
 import { createMockCalendarEvents, filterCalendarCoverageForSourceIds, filterCalendarEventsForSourceIds, mergeCalendarSources } from "#/providers/calendar"
@@ -177,8 +177,8 @@ function calendarQuery(year: number, countries?: CalendarCountryCode[]): Calenda
   return { year, countries: countries?.length ? countries : Object.keys(calendarCountries) as CalendarCountryCode[] }
 }
 
-function calendarIdentity(event: Pick<CalendarEvent, "countryCode" | "name" | "type">): string {
-  return `${event.countryCode}:${event.name.trim().toLocaleLowerCase().normalize("NFKC").replace(/\s+/g, " ")}:${event.type}`
+function calendarIdentity(event: CalendarEvent): string {
+  return calendarEventKey(event)
 }
 
 function coverageForEvent(event: CalendarEvent, coverage: CalendarProviderResult["coverage"], year: number) {

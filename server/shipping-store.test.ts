@@ -55,12 +55,13 @@ describe("calendar source-scoped reconciliation", () => {
     expect(result.events[0]).not.toHaveProperty("error")
   })
 
-  it("replaces matching source facts while preserving other source facts", () => {
+  it("does not merge same-name facts from different dates while preserving other source facts", () => {
     const other = { ...holiday("official-th"), name: "Royal event", id: "calendar:TH:2026-04-13:Royal event:public_holiday:official-th" }
     const existing = [holiday("calendarific"), other]
     const official = { ...holiday("official-th"), date: "2026-04-14", id: "calendar:TH:2026-04-14:Songkran:public_holiday:official-th" }
     const result = reconcileCalendarEvents(existing, [official], [coverage("official-th", "partial")], 2026)
     expect(result.events.map(event => event.id)).toEqual(expect.arrayContaining([other.id, official.id]))
-    expect(result.events).toHaveLength(2)
+    expect(result.events).toHaveLength(3)
+    expect(result.events.find(event => event.sourceId === "calendarific")).toMatchObject({ date: "2026-04-13" })
   })
 })

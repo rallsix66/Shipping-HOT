@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { type CalendarEvent, calendarCountries, calendarLeadDays } from "@shared/calendar"
-import { calendarAttribution, calendarProvenances, calendarProviderSourceIds, calendarificCoverageStatus, configureCalendarProviders, createCalendarificProvider, createCompositeCalendarProvider, createMockCalendarEvents, filterCalendarEventsForMode, mergeCalendarSources, normalizeCalendarificPayload, officialHolidaySources, sanitizeCalendarError } from "./calendar"
+import { type CalendarEvent, calendarCountries, calendarEventId, calendarEventKey, calendarLeadDays } from "@shared/calendar"
+import { calendarAttribution, calendarProvenances, calendarProviderSourceIds, calendarificCoverageStatus, configureCalendarProviders, createCalendarificProvider, createCompositeCalendarProvider, createMockCalendarEvents, filterCalendarEventsForMode, mergeCalendarSources, normalizeCalendarificPayload, normalizeCalendarificPayloadWithStats, officialHolidaySources, sanitizeCalendarError } from "./calendar"
 
 describe("calendar providers", () => {
   it("keeps Calendarific mode and returns unknown coverage when its key is missing", async () => {
@@ -44,9 +44,46 @@ describe("calendar providers", () => {
       { name: "Local Holiday", date: { iso: "2026-08-18" }, type: ["Common local holiday"] },
     ] } }, "TH", 2026, "2026-08-15T00:00:00.000Z")
     expect(events).toMatchObject([
-      { type: "public_holiday", isPublicHoliday: true },
-      { type: "public_holiday", isPublicHoliday: true },
+      { type: "public_holiday", isPublicHoliday: true, scope: "national" },
+      { type: "public_holiday", isPublicHoliday: true, scope: "unknown" },
     ])
+  })
+
+  it("treats Public, Federal and Bank holiday labels as national public holidays", () => {
+    const events = normalizeCalendarificPayload({ response: { holidays: [
+      { name: "Public Day", date: { iso: "2026-08-17" }, type: ["Public holiday"] },
+      { name: "Federal Day", date: { iso: "2026-08-18" }, type: ["Federal holiday"] },
+      { name: "Bank Day", date: { iso: "2026-08-19" }, type: ["Bank holiday"] },
+    ] } }, "TH", 2026, "2026-08-15T00:00:00.000Z")
+    expect(events).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: "Public Day", type: "public_holiday", isPublicHoliday: true, scope: "national" }),
+      expect.objectContaining({ name: "Federal Day", type: "public_holiday", isPublicHoliday: true, scope: "national" }),
+      expect.objectContaining({ name: "Bank Day", type: "public_holiday", isPublicHoliday: true, scope: "national" }),
+    ]))
+  })
+
+  it("preserves local subdivision evidence and does not merge same-day facts from different subdivisions", () => {
+    const events = normalizeCalendarificPayload({ response: { holidays: [
+      { name: "Local Founders Day", date: { iso: "2026-03-19" }, type: ["Local holiday"], locations: "KTN", states: [{ iso: "my-03", name: "Kelantan" }] },
+      { name: "Local Founders Day", date: { iso: "2026-03-19" }, type: ["Local holiday"], locations: "TRG", states: [{ iso: "my-11", name: "Terengganu" }] },
+      { name: "Local Unknown Day", date: { iso: "2026-03-20" }, type: ["Common local holiday"], locations: "All", states: "All" },
+    ] } }, "MY", 2026, "2026-08-15T00:00:00.000Z")
+    expect(events).toHaveLength(3)
+    expect(events[0]).toMatchObject({ scope: "subdivision", subdivisionCode: "my-03", subdivisionCodes: ["my-03"], scopeLabel: "KTN, Kelantan" })
+    expect(events[1]).toMatchObject({ scope: "subdivision", subdivisionCode: "my-11", subdivisionCodes: ["my-11"], scopeLabel: "TRG, Terengganu" })
+    expect(events[2]).toMatchObject({ scope: "unknown", subdivisionCode: undefined, subdivisionCodes: undefined })
+  })
+
+  it("keeps exact duplicates separate from type-normalization collisions", () => {
+    const result = normalizeCalendarificPayloadWithStats({ response: { holidays: [
+      { name: "Founders Day", date: { iso: "2026-08-17" }, type: ["National holiday"] },
+      { name: "Founders Day", date: { iso: "2026-08-17" }, type: ["National holiday"] },
+      { name: "Founders Day", date: { iso: "2026-08-17" }, type: ["national"] },
+      { name: "Founders Day", date: { iso: "2026-08-17" }, type: ["Local holiday"], states: [{ iso: "my-05", name: "Negeri Sembilan" }] },
+      { name: "Founders Day", date: { iso: "2026-08-17" }, type: ["Local holiday"], states: [{ iso: "my-11", name: "Terengganu" }] },
+    ] } }, "MY", 2026, "2026-08-15T00:00:00.000Z")
+    expect(result.events).toHaveLength(3)
+    expect(result.stats).toMatchObject({ rawCount: 5, normalizedCandidateCount: 5, uniqueCount: 3, exactDuplicateSameFactCount: 1, sameFactAfterTypeNormalizationCount: 1, semanticCollisionCount: 1, scopeFilteredOperationalRecords: 2 })
   })
 
   it("deduplicates identical Calendarific facts without merging different dates", () => {
@@ -57,6 +94,14 @@ describe("calendar providers", () => {
     ] } }, "MY", 2026, "2026-08-15T00:00:00.000Z")
     expect(events).toHaveLength(2)
     expect(new Set(events.map(event => event.date))).toEqual(new Set(["2026-05-28", "2026-05-29"]))
+  })
+
+  it("keeps existing national Calendar IDs stable while scoping local IDs", () => {
+    const national = { countryCode: "TH" as const, name: "National Day", date: "2026-08-17", type: "public_holiday" as const }
+    expect(calendarEventKey(national)).toBe("TH:2026-08-17:national day:public_holiday")
+    expect(calendarEventKey({ ...national, scope: "national" })).toBe(calendarEventKey(national))
+    expect(calendarEventId(national, "calendarific")).toBe("calendar:TH:2026-08-17:national day:public_holiday:calendarific")
+    expect(calendarEventKey({ ...national, scope: "subdivision", subdivisionCode: "my-05" })).toContain(":subdivision:my-05")
   })
 
   it("keeps Calendarific API keys server-side and does not overclaim empty coverage", async () => {

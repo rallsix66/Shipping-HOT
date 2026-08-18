@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import type { CalendarEvent } from "./calendar"
-import { detectShippingEvents, isFreshEventEvidence } from "./shipping-engine"
+import { detectShippingEvents, isCalendarOperationallyRelevant, isFreshEventEvidence } from "./shipping-engine"
 import { createMockSnapshot } from "./shipping-fixtures"
 import { filterEventsForOperationalContext } from "./shipping"
 import { rankHotItems } from "./shipping-rules"
@@ -237,6 +237,21 @@ describe("shipping HOT event engine", () => {
     const repeated = detectShippingEvents([], [], [], [], snapshot.settings, initial, "2026-01-01T01:00:00.000Z", [calendarEvent])
     expect(repeated).toHaveLength(1)
     expect(repeated[0].id).toBe(initial[0].id)
+  })
+
+  it("keeps local Calendar facts visible but out of national Event/HOT", () => {
+    const snapshot = createMockSnapshot()
+    const national = calendarEventForSource("official-holiday-source")
+    const local = { ...national, id: "calendar:TH:2026-08-22:local:public_holiday:official-holiday-source", name: "Local holiday", scope: "subdivision" as const, subdivisionCode: "th-10" }
+    expect(isCalendarOperationallyRelevant(national)).toBe(true)
+    expect(isCalendarOperationallyRelevant(local)).toBe(false)
+    const nationalEvents = detectShippingEvents([], [], [], [], snapshot.settings, [], "2026-08-15T00:00:00.000Z", [national])
+    expect(nationalEvents).toHaveLength(1)
+    const historicalLocalEvent = nationalEvents.map(event => ({ ...event, calendarEventId: local.id }))
+    expect(detectShippingEvents([], [], [], [], snapshot.settings, historicalLocalEvent, "2026-08-15T00:00:00.000Z", [local])).toEqual([])
+    const localEvents = detectShippingEvents([], [], [], [], snapshot.settings, [], "2026-08-15T00:00:00.000Z", [local])
+    expect(localEvents).toEqual([])
+    expect(rankHotItems(localEvents, [], [], [], [], new Date("2026-08-15T00:00:00.000Z"))).toEqual([])
   })
 
   it("keeps official and manual Calendar events through the full Event/HOT path only for active provenance sources", () => {
