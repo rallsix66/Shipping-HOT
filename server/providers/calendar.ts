@@ -128,17 +128,18 @@ function calendarFetcher(): CalendarFetcher {
   return fetchImplementation
 }
 
-function holidayType(types: string[]): { type: CalendarEventType, isPublicHoliday: boolean, scope?: CalendarEventScope, isLocal: boolean, recognized: boolean } {
+function holidayType(types: string[]): { type: CalendarEventType, isPublicHoliday: boolean, scope: CalendarEventScope, isLocal: boolean, recognized: boolean } {
   const isLocal = types.some(type => /\b(?:local|regional|state|provincial|subdivision)\b/.test(type))
   const isNational = types.some(type => /\b(?:national|public|federal|bank)(?:\s+holiday)?\b/.test(type))
   if (isLocal) return { type: "public_holiday", isPublicHoliday: true, scope: "unknown", isLocal: true, recognized: true }
   if (isNational) return { type: "public_holiday", isPublicHoliday: true, scope: "national", isLocal: false, recognized: true }
-  if (types.includes("religious")) return { type: "religious", isPublicHoliday: false, isLocal: false, recognized: true }
-  if (types.includes("observance")) return { type: "observance", isPublicHoliday: false, isLocal: false, recognized: true }
-  return { type: "commercial", isPublicHoliday: false, isLocal: false, recognized: false }
+  if (types.includes("religious")) return { type: "religious", isPublicHoliday: false, scope: "unknown", isLocal: false, recognized: true }
+  if (types.includes("observance")) return { type: "observance", isPublicHoliday: false, scope: "unknown", isLocal: false, recognized: true }
+  return { type: "commercial", isPublicHoliday: false, scope: "unknown", isLocal: false, recognized: false }
 }
 
-function impactFor(type: CalendarEventType, isPublicHoliday: boolean): BusinessImpact {
+function impactFor(type: CalendarEventType, isPublicHoliday: boolean, recognized = true): BusinessImpact {
+  if (!recognized) return "low"
   return type === "government_special" ? "high" : isPublicHoliday ? "medium" : type === "observance" ? "low" : "medium"
 }
 
@@ -195,9 +196,14 @@ export interface CalendarNormalizationStats {
   rawCount: number
   normalizedCandidateCount: number
   uniqueCount: number
+  nationalCount: number
+  subdivisionCount: number
+  unknownScopeCount: number
+  operationalEligibleCount: number
   invalidDateCount: number
   missingNameCount: number
   unsupportedTypeCount: number
+  unsupportedTypeLabels: string[]
   exactDuplicateSameFactCount: number
   sameFactAfterTypeNormalizationCount: number
   semanticCollisionCount: number
@@ -216,9 +222,14 @@ export function normalizeCalendarificPayloadWithStats(value: unknown, countryCod
     rawCount: holidays.length,
     normalizedCandidateCount: 0,
     uniqueCount: 0,
+    nationalCount: 0,
+    subdivisionCount: 0,
+    unknownScopeCount: 0,
+    operationalEligibleCount: 0,
     invalidDateCount: 0,
     missingNameCount: 0,
     unsupportedTypeCount: 0,
+    unsupportedTypeLabels: [],
     exactDuplicateSameFactCount: 0,
     sameFactAfterTypeNormalizationCount: 0,
     semanticCollisionCount: 0,
@@ -239,7 +250,10 @@ export function normalizeCalendarificPayloadWithStats(value: unknown, countryCod
     if (!name || !date || !new RegExp(`^${year}-\\d{2}-\\d{2}$`).test(date)) continue
     const types = asTypes(holiday.type)
     const classification = holidayType(types)
-    if (!classification.recognized) stats.unsupportedTypeCount++
+    if (!classification.recognized) {
+      stats.unsupportedTypeCount++
+      stats.unsupportedTypeLabels = [...new Set([...stats.unsupportedTypeLabels, types.join(" | ") || "<empty>"])]
+    }
     const scopeEvidence = calendarScopeEvidence(holiday, classification)
     const event = calendarEvent({
       countryCode,
@@ -248,7 +262,7 @@ export function normalizeCalendarificPayloadWithStats(value: unknown, countryCod
       ...scopeEvidence,
       type: classification.type,
       isPublicHoliday: classification.isPublicHoliday,
-      businessImpact: impactFor(classification.type, classification.isPublicHoliday),
+      businessImpact: impactFor(classification.type, classification.isPublicHoliday, classification.recognized),
       sourceId: "calendarific",
       sourceKind: "third_party",
       sourceUrl: `https://calendarific.com/holidays/${year}/${countryCode}`,
@@ -276,7 +290,11 @@ export function normalizeCalendarificPayloadWithStats(value: unknown, countryCod
   }
   stats.semanticCollisionCount = [...semanticGroups.values()].filter(keys => keys.size > 1).length
   stats.uniqueCount = events.length
-  stats.scopeFilteredOperationalRecords = events.filter(event => event.scope !== undefined && event.scope !== "national").length
+  stats.nationalCount = events.filter(event => event.scope === "national").length
+  stats.subdivisionCount = events.filter(event => event.scope === "subdivision").length
+  stats.unknownScopeCount = events.filter(event => event.scope === "unknown").length
+  stats.operationalEligibleCount = events.filter(event => event.scope === "national" || event.type === "government_special").length
+  stats.scopeFilteredOperationalRecords = stats.subdivisionCount + stats.unknownScopeCount
   return { events, stats }
 }
 

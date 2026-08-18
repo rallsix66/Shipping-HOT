@@ -12,13 +12,15 @@ Calendarific returned HTTP 200 and valid JSON for TH/ID/MY/PH/VN. All five count
 
 All-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source; mock-schedule remained the only Mock source. Native SQLite persistence remains pending because the current Node 24 runtime cannot load the bundled better-sqlite3 ABI.
 
-## Calendarific Local Holiday Scope Closeout — 2026-08-18
+## Calendarific Final Operational Semantics Seal — 2026-08-18
 
 - `scope=national` is reserved for national/public/federal/bank holiday labels. Local, regional, state, provincial and subdivision-specific labels remain CalendarEvent facts with `scope=subdivision` when the payload supplies region evidence, or `scope=unknown` when it does not.
 - Calendarific's actual MY payload supplies `states[].iso` and `locations`; PH also supplies local-labeled records with broad `All` location evidence. The adapter stores actual ISO values, preserves multiple codes and location text, and never fabricates a subdivision mapping.
 - `calendarEventKey()` and source merge/reconciliation include date and scope. Existing unscoped/national IDs remain stable; scoped facts receive a deterministic scope component, so same-name same-day facts from different subdivisions do not collapse.
 - Local/unknown facts are retained in Calendar persistence and API reads but `isCalendarOperationallyRelevant()` prevents national Calendar Event/HOT creation. Switching provider or scope is not treated as evidence that an old Event resolved.
-- The targeted 2026 probe reconciled 201 raw → 201 normalized unique → 201 provider/merged facts, including 48 local/unknown-scope facts. The earlier 198/189 counts came from the pre-scope key and are historical, superseded measurements. Coverage remains partial.
+- Unknown Calendarific type labels normalize to `commercial` with `scope=unknown`, `businessImpact=low` and `recognized=false`; they remain Calendar-visible facts but are not operationally eligible. The targeted 2026 probe reconciled `201` raw → `201` normalized unique → `201` provider/merged facts: `98` national, `44` subdivision, `59` unknown and `25` unsupported-type records; `98` are operationally eligible. The earlier 198/189/48 counts came from pre-seal measurements and are historical, superseded values. Coverage remains partial.
+- Legacy unscoped Calendarific local facts are superseded only when an incoming scoped subdivision/unknown fact matches the same source, country, date, normalized name and type. The old CalendarEvent and linked ShippingEvent remain historical, are excluded from current Event/HOT input, and are not falsely resolved. Legacy unscoped national facts and unscoped Official/Manual facts retain compatibility.
+- The current Calendarific reminder window has `3` national reminders; the previous aggregate four-reminder sample cannot be reconstructed exactly.
 
 ## 1. Project Purpose
 
@@ -227,7 +229,7 @@ Changes that can remain local implementation decisions:
 | Shipping HOT V1 Provider architecture | accepted | User-approved AISStream Vessel and Open-Meteo Marine Weather adapters preserve existing interfaces and Domain/Event/HOT boundaries | Preserve current module boundaries; no V2 Provider expansion |
 | Project Architect/Neat Freak docs reconciliation | changed-and-verified after this pass | Docs must remain one source of truth | Re-run closeout after implementation |
 | Runtime/database file path | pending | Native `better-sqlite3` could not build on Node 24 in this environment | Verify on a compatible Node/toolchain |
-| GitHub remote/account metadata | pending | Local `origin` reaches `rallsix66/Shipping-HOT` and exposes `main`; `gh auth status` still reports an invalid token | Re-authenticate `gh` before account-level operations |
+| GitHub remote/account metadata | changed-and-verified; no remote CI evidence | `gh auth status` and `gh repo view` verified `rallsix66/Shipping-HOT` and `main`; `gh run list` returned no workflow runs | Keep local verification separate from GitHub CI claims |
 | Real shipping data sources | changed-and-verified for V1 | AISStream is beta and key-gated; Open-Meteo Marine is optional-key for normal use and carries coastal-accuracy/attribution caveats | Keep keys server-side; Mock is default only, with no Mock fallback in an explicitly real mode |
 | Current OAuth/cloud deployment code | implemented, not runtime-verified | May be unnecessary locally but dependencies are not mapped | Dependency analysis before removal |
 

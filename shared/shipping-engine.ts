@@ -1,6 +1,6 @@
 import { deriveProvenance, provenanceEvidence, sourceScopedEventDedupeKey } from "./shipping"
 import type { FeedItem, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, Vessel, Voyage } from "./shipping"
-import { type CalendarEvent, calendarCountries, calendarLeadDays, calendarSeverity, daysUntilCalendarEvent } from "./calendar"
+import { type CalendarEvent, calendarCountries, calendarEventLegacyId, calendarLeadDays, calendarSeverity, daysUntilCalendarEvent } from "./calendar"
 import { calculateDelayMinutes, congestionLevelRank, reconcileEvent, statusDurationMinutes } from "./shipping-rules"
 
 function calendarCountriesLabel(event: CalendarEvent): string {
@@ -14,6 +14,10 @@ export function isFreshEventEvidence(value: Pick<Freshness, "stale" | "sourceSta
 export function isCalendarOperationallyRelevant(event: Pick<CalendarEvent, "type" | "scope">): boolean {
   if (event.type === "government_special") return true
   return event.scope === undefined || event.scope === "national"
+}
+
+function isCalendarificScopedLocal(event: CalendarEvent): boolean {
+  return event.sourceId === "calendarific" && (event.scope === "subdivision" || event.scope === "unknown")
 }
 
 function eventTrust(source: Freshness & ProvenanceAware) {
@@ -44,7 +48,11 @@ export function voyageDelayEventKey(voyage: Pick<Voyage, "id" | "provenance">): 
 export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: Voyage[], feedItems: FeedItem[], settings: ShippingSettings, previous: ShippingEvent[] = [], now = new Date().toISOString(), calendarEvents: CalendarEvent[] = []): ShippingEvent[] {
   const candidates: Omit<ShippingEvent, "id" | "firstDetectedAt" | "lastDetectedAt" | "resolvedAt">[] = []
   const calendarById = new Map(calendarEvents.map(event => [event.id, event]))
-  const operationalPrevious = previous.filter(event => !event.calendarEventId || !calendarById.has(event.calendarEventId) || isCalendarOperationallyRelevant(calendarById.get(event.calendarEventId)!))
+  const supersededLegacyCalendarEventIds = new Set(calendarEvents.filter(isCalendarificScopedLocal).map(event => calendarEventLegacyId(event, event.sourceId)))
+  const operationalPrevious = previous.filter((event) => {
+    if (event.calendarEventId && supersededLegacyCalendarEventIds.has(event.calendarEventId)) return false
+    return !event.calendarEventId || !calendarById.has(event.calendarEventId) || isCalendarOperationallyRelevant(calendarById.get(event.calendarEventId)!)
+  })
   const sourceTrust = new Map<string, Freshness>()
   vessels.forEach(vessel => sourceTrust.set(vesselAnchoredEventKey(vessel), vessel))
   ports.forEach(port => sourceTrust.set(portCongestionEventKey(port), port))

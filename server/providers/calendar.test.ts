@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { type CalendarEvent, calendarCountries, calendarEventId, calendarEventKey, calendarLeadDays } from "@shared/calendar"
+import { type CalendarEvent, calendarCountries, calendarEventId, calendarEventKey, calendarEventLegacyId, calendarLeadDays } from "@shared/calendar"
 import { calendarAttribution, calendarProvenances, calendarProviderSourceIds, calendarificCoverageStatus, configureCalendarProviders, createCalendarificProvider, createCompositeCalendarProvider, createMockCalendarEvents, filterCalendarEventsForMode, mergeCalendarSources, normalizeCalendarificPayload, normalizeCalendarificPayloadWithStats, officialHolidaySources, sanitizeCalendarError } from "./calendar"
 
 describe("calendar providers", () => {
@@ -60,6 +60,16 @@ describe("calendar providers", () => {
       expect.objectContaining({ name: "Federal Day", type: "public_holiday", isPublicHoliday: true, scope: "national" }),
       expect.objectContaining({ name: "Bank Day", type: "public_holiday", isPublicHoliday: true, scope: "national" }),
     ]))
+  })
+
+  it("quarantines an unsupported Calendarific type as low-impact unknown scope", () => {
+    const result = normalizeCalendarificPayloadWithStats({ response: { holidays: [
+      { name: "Future Label Day", date: { iso: "2026-08-20" }, type: ["Some future Calendarific label"] },
+    ] } }, "TH", 2026, "2026-08-15T00:00:00.000Z")
+    const [event] = result.events
+    expect(event).toMatchObject({ type: "commercial", scope: "unknown", isPublicHoliday: false, businessImpact: "low" })
+    expect(result.stats).toMatchObject({ unsupportedTypeCount: 1, unsupportedTypeLabels: ["some future calendarific label"], unknownScopeCount: 1, operationalEligibleCount: 0 })
+    expect(calendarEventLegacyId(event, "calendarific")).not.toBe(event.id)
   })
 
   it("preserves local subdivision evidence and does not merge same-day facts from different subdivisions", () => {

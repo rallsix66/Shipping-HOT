@@ -90,6 +90,10 @@ export function calendarEventId(event: CalendarEventIdentity, sourceId: string):
   return `calendar:${calendarEventKey(event)}:${sourceId}`
 }
 
+export function calendarEventLegacyId(event: CalendarEventIdentity, sourceId: string): string {
+  return calendarEventId({ ...event, scope: undefined, subdivisionCode: undefined, subdivisionCodes: undefined, scopeLabel: undefined }, sourceId)
+}
+
 export function calendarSeverity(impact: BusinessImpact): "info" | "watch" | "warning" | "critical" {
   return impact === "critical" ? "critical" : impact === "high" ? "warning" : impact === "medium" ? "watch" : "info"
 }

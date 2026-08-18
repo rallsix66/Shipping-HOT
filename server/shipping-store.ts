@@ -1,7 +1,7 @@
 import { filterEventsForOperationalContext, toVesselWatchTarget } from "@shared/shipping"
 import type { FeedItem, Port, ProviderResult, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
-import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries, calendarEventKey } from "@shared/calendar"
+import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries, calendarEventKey, calendarEventLegacyId } from "@shared/calendar"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules"
 import { createMockCalendarEvents, filterCalendarCoverageForSourceIds, filterCalendarEventsForSourceIds, mergeCalendarSources } from "#/providers/calendar"
@@ -181,6 +181,14 @@ function calendarIdentity(event: CalendarEvent): string {
   return calendarEventKey(event)
 }
 
+function isCalendarificScopedLocal(event: CalendarEvent): boolean {
+  return event.sourceId === "calendarific" && (event.scope === "subdivision" || event.scope === "unknown")
+}
+
+function calendarificLegacyIdentity(event: CalendarEvent): string {
+  return calendarEventLegacyId(event, event.sourceId)
+}
+
 function coverageForEvent(event: CalendarEvent, coverage: CalendarProviderResult["coverage"], year: number) {
   return coverage.filter(item => item.countryCode === event.countryCode && item.year === year && item.sourceId === event.sourceId)
 }
@@ -188,11 +196,16 @@ function coverageForEvent(event: CalendarEvent, coverage: CalendarProviderResult
 export function reconcileCalendarEvents(existing: CalendarEvent[], incoming: CalendarEvent[], coverage: CalendarProviderResult["coverage"], year: number): { events: CalendarEvent[], removedIds: string[] } {
   const merged = mergeCalendarSources(incoming.filter(event => event.sourceKind === "third_party" || event.sourceKind === "mock"), incoming.filter(event => event.sourceKind === "official"), incoming.filter(event => event.sourceKind === "user"))
   const mergedIdentities = new Set(merged.map(calendarIdentity))
+  const incomingScopedLocalLegacyIdentities = new Set(incoming.filter(isCalendarificScopedLocal).map(calendarificLegacyIdentity))
   const removedIds: string[] = []
   const retained: CalendarEvent[] = []
   for (const event of existing) {
     if (!event.date.startsWith(String(year))) {
       retained.push(event)
+      continue
+    }
+    if (event.sourceId === "calendarific" && event.scope === undefined && incomingScopedLocalLegacyIdentities.has(calendarificLegacyIdentity(event))) {
+      removedIds.push(event.id)
       continue
     }
     if (mergedIdentities.has(calendarIdentity(event))) continue

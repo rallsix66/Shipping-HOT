@@ -10,7 +10,7 @@
 
 本节覆盖此前“AISStream/Calendarific credential pending”的历史记录：AISStream 本轮达到 connection_verified / pending_observation，但 120 秒内没有 PositionReport，不能升级 verified_live；Calendarific 五国 HTTP 200、合法 JSON 和 parser 均通过，当前状态为 verified_live，但五国 coverageStatus 均为 partial，不能宣称 complete。
 
-Calendarific live 数据暴露了 National holiday / Common local holiday 标签、实际 `locations`/`states[].iso` 地区证据和同名同日跨 subdivision 事实；normalizer 现按 national/local scope 归类，并以 country/date/name/type/scope 做去重与 reconcile。当前本地 suite 为 191/191；先前 all-real API/page smoke 仍是既有基线证据；JMA/TMD/BMKG 仍 live_pending，V2.5 仍未启动。
+Calendarific live 数据暴露了 National holiday / Common local holiday 标签、实际 `locations`/`states[].iso` 地区证据和同名同日跨 subdivision 事实；normalizer 现按 national/local scope 归类，并以 country/date/name/type/scope 做去重与 reconcile。未知 type 现在固定为 `scope=unknown`、`businessImpact=low`、非 operational；旧版无 scope 的 Calendarific local fact 只有在新 scoped fact 提供同源迁移证据时才从 current operational view 移除，历史 Event 不被伪造 resolved。当前最终 probe 为 `201` unique、`98` national、`44` subdivision、`59` unknown、`25` unsupported、`98` operational eligible，当前 reminder 为 `3` 且全部 national；先前 all-real API/page smoke 仍是既有基线证据；JMA/TMD/BMKG 仍 live_pending，V2.5 仍未启动。
 
 ## 1. V2 Executive Summary
 
@@ -84,7 +84,7 @@ Shipping HOT 的 Information Feed 与 Operational Data 通过 Event/HOT 查询�
 - 当前 AISStream 订阅使用全世界 Bounding Box + MMSI 过滤，只接收 `PositionReport`；当前没有持久化轨迹，也没有区域订阅会话管理。
 - 当前 PortProvider 和 ScheduleProvider 仍是 Mock。
 - 当前 Open-Meteo 已请求 current/hourly 风速、阵风、波高/波向、涌浪高度/方向和涌浪周期，一次取得 7 天数据后本地计算 24 小时、72 小时和 7 天模型风险；JMA 使用官方海上警报 HTML，TMD 使用官方 RSS 列表（其条目链接到 CAP 详情但未隐式抓取），BMKG 使用官方 RSS 列表，三者均为 `live_pending`。
-- V2.2 Calendar 当前组合 TH/ID/MY/PH/VN 的 Calendarific、Official、Manual 和 Mock 边界；Calendarific 仅在服务端且显式配置 Key 后调用，默认仍为 Mock；显式选择 Calendarific 但缺少 Key 时保持 calendarific 模式并返回 unknown/暂无数据，不回退 Mock；Official 仍是 contract/local verified source，live sync pending。
+- V2.2 Calendar 当前组合 TH/ID/MY/PH/VN 的 Calendarific、Official、Manual 和 Mock 边界；Calendarific 仅在服务端且显式配置 Key 后调用，默认仍为 Mock；显式选择 Calendarific 但缺少 Key 时保持 calendarific 模式并返回 unknown/暂无数据，不回退 Mock；Calendarific transport/parser 为 verified_live、五国 coverage 均 partial；Official 仍是 contract/local verified source，live sync pending。
 - V2.4 Weather 当前已实现 Open-Meteo 三窗口、30 分钟 TTL、逐港同源 last-known stale/failure 和 source-specific JMA/TMD/BMKG 官方 warning 合同；Open-Meteo 首次失败且没有同源历史时返回暂无模型天气，不使用 `mock-weather`；warning missing-from-index 在无可靠 expiry 时变为 lifecycle-unknown、不可进入 Event/HOT；Chonburi/Chon Buri 与 Tanjung Priok/North Jakarta 映射到 canonical focus port；JMA empty 只接受 source-specific mount/structure 或显式 empty marker；三个来源均 `live_pending`，`SHIPPING_WEATHER_ALERT_PROVIDER=public` 只允许 `verified_live` 来源（当前没有），`experimental` 才显式启用 pending adapter；模型风险和官方预警使用不同 `riskSource`/provenance，默认仍为 Mock。
 - 当前 `Freshness` 只有 `updatedAt`、`stale`、`sourceStatus`、`error`，还没有统一的 `sourceType`/`dataNature` 业务标识。
 - 当前 NewsNow Source 协议使用 `NewsItem[]` 和独立 cache，缺少 Shipping HOT 所需的完整 `sourceStatus/stale` 语义；V2.3 在独立 Shipping Feed 适配层补齐，不破坏所有 NewsNow Source。
@@ -499,16 +499,17 @@ Calendarific 作为常规年度基础源：按国家/年份批量同步，写入
 
 使用免费套餐时，国家日历页面必须展示符合当时官方条款的归因，例如 `Powered by Calendarific`，并链接到 Calendarific。最终文字和链接在实现 V2.2 前再次核对；归因要求同时属于产品验收和 UI 合同。
 
-### 13.2.1 Calendarific Local Holiday Scope Closeout
+### 13.2.1 Calendarific Final Operational Semantics Seal
 
 本轮已将 Calendarific 的地点范围从“类型标签”中分离出来：
 
 - `National holiday`、`Public holiday`、`Federal holiday` 和 `Bank holiday` → `type=public_holiday`、`isPublicHoliday=true`、`scope=national`。
 - `Local holiday`、`Common local holiday`、`Regional holiday`、`State holiday`、`Provincial holiday` 和 subdivision-specific 标签 → 保留 CalendarEvent；有明确地区证据时 `scope=subdivision`，没有地区证据时 `scope=unknown`，不自动升级为全国假日。
 - Calendarific payload 中的 `states[].iso` 只在实际存在时写入 `subdivisionCode` / `subdivisionCodes`；`locations` 和地区名称保留为 `scopeLabel` 证据，不创造港口或国家 subdivision mapping。
-- Calendar 页面/API 可以展示 local/unknown 事实；Event Engine 的 `isCalendarOperationallyRelevant()` 不为它们创建国家级 Calendar Event/HOT。`government_special` 保持现有即时公告语义。
-- Calendar ID 对旧的 national/unscoped 事实保持稳定；source merge/reconcile key 现在包含 `country + date + name + type + scope`，所以同名同日不同 subdivision 不会被错误合并。历史记录保留，scope/provider 切换不自动 resolve Event。
-- 2026 五国目标探针：raw `201`、invalid date `0`、missing name `0`、normalized unique `201`、merged `201`、local/unknown `48`；coverage 仍为 `partial`。此前 `198` direct / `189` operational 是旧 key 的历史数值，已被本轮对账替代。
+- Calendar 页面/API 可以展示 local/unknown 事实；Event Engine 的 `isCalendarOperationallyRelevant()` 不为它们创建国家级 Calendar Event/HOT。未知 type 还固定为 `type=commercial`、`scope=unknown`、`businessImpact=low`、`recognized=false`，因此不产生 reminder。`government_special` 保持现有即时公告语义。
+- Calendar ID 对旧的 national/unscoped 事实保持稳定；source merge/reconcile key 现在包含 `country + date + name + type + scope`，所以同名同日不同 subdivision 不会被错误合并。对旧版 Calendarific unscoped local，只有同源 incoming subdivision/unknown fact 匹配 country/date/name/type 时才执行 legacy identity migration；旧 CalendarEvent/ShippingEvent 保留审计历史、退出 current operational view、绝不自动 resolve。Official/Manual unscoped facts 不受影响。
+- 2026 五国目标探针：raw `201`、invalid date `0`、missing name `0`、normalized unique `201`、merged `201`、national `98`、subdivision `44`、unknown `59`、unsupported `25`、operational eligible `98`；coverage 仍为 `partial`。此前 `198` direct / `189` operational / `48` local-unknown 是旧 key 或旧语义的历史数值，已被本轮对账替代。
+- 当前 reminder 对账为 `3` 条，全部 `scope=national`；旧版聚合记录的 4 条 reminder 无法逐条重建，因此不猜测其 national/local/unknown/unsupported 构成。
 
 建议同步策略：
 
@@ -569,7 +570,7 @@ CalendarEvent
 - 重要节日或高影响日期：提前 14 天，并在提前 3 天再次提醒。
 - 连续假期：以假期区间作为整体，提前 14 天提醒一次。
 - 政府临时宣布：发现后立即进入 HOT。
-- `dedupeKey` 示例：`calendar:<countryCode>:<date>:<normalizedName>:<type>`。
+- `dedupeKey` 示例：`calendar:<countryCode>:<date>:<normalizedName>:<type>:<scope>`；legacy national/unscoped IDs remain readable for compatibility, while scoped facts carry their explicit scope identity.
 - 事件 lifecycle 复用现有 `active/resolved`；提醒级别写入 evidence，不能每天创建一条同名 Event。
 - 日期过去后事件 resolved，但 Calendar 页面保留历史并显示来源/验证状态。
 
@@ -976,4 +977,4 @@ V2.4 implemented / locally verified / live pending
 V2.5 not started
 ```
 
-本文件仍是方案与边界产物；V2.0 已封板，V2.1 已实现，V2.2/V2.3/V2.4 已完成本地 closeout 和文档同步，但官方/公开 Provider live verification 仍 pending。V2.5 仍需新的 Gate 批准后继续。
+本文件仍是方案与边界产物；V2.0 已封板，V2.1 已实现，V2.2/V2.3/V2.4 已完成本地 closeout 和文档同步；Calendarific transport/parser 已 verified_live 但 coverage 仍 partial，AIS observation 与官方预警 live verification 仍 pending。V2.5 仍需新的 Gate 批准后继续。

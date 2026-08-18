@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import type { CalendarEvent } from "./calendar"
+import { type CalendarEvent, calendarEventLegacyId } from "./calendar"
 import { detectShippingEvents, isCalendarOperationallyRelevant, isFreshEventEvidence } from "./shipping-engine"
 import { createMockSnapshot } from "./shipping-fixtures"
 import { filterEventsForOperationalContext } from "./shipping"
@@ -252,6 +252,43 @@ describe("shipping HOT event engine", () => {
     const localEvents = detectShippingEvents([], [], [], [], snapshot.settings, [], "2026-08-15T00:00:00.000Z", [local])
     expect(localEvents).toEqual([])
     expect(rankHotItems(localEvents, [], [], [], [], new Date("2026-08-15T00:00:00.000Z"))).toEqual([])
+  })
+
+  it("quarantines unsupported Calendarific facts and migrates legacy local Events without resolving them", () => {
+    const snapshot = createMockSnapshot()
+    const unknown = {
+      ...calendarEventForSource("official-holiday-source"),
+      id: "calendar:TH:2026-08-20:future-label:commercial:calendarific",
+      name: "Future label",
+      type: "commercial" as const,
+      businessImpact: "low" as const,
+      scope: "unknown" as const,
+      sourceId: "calendarific",
+      sourceKind: "third_party" as const,
+      provenance: { sourceType: "third_party" as const, dataNature: "reported" as const, sourceId: "calendarific" },
+    }
+    expect(isCalendarOperationallyRelevant(unknown)).toBe(false)
+    const unknownEvents = detectShippingEvents([], [], [], [], snapshot.settings, [], "2026-08-15T00:00:00.000Z", [unknown])
+    expect(unknownEvents).toEqual([])
+    expect(rankHotItems(unknownEvents, [], [], [], [], new Date("2026-08-15T00:00:00.000Z"))).toEqual([])
+
+    const scoped = {
+      ...unknown,
+      id: "calendar:TH:2026-08-22:local-founders:public_holiday:subdivision:th-10:calendarific",
+      name: "Local Founders",
+      type: "public_holiday" as const,
+      businessImpact: "medium" as const,
+      scope: "subdivision" as const,
+      subdivisionCode: "th-10",
+      subdivisionCodes: ["th-10"],
+    }
+    const legacy = { ...scoped, id: calendarEventLegacyId(scoped, "calendarific"), scope: undefined, subdivisionCode: undefined, subdivisionCodes: undefined, scopeLabel: undefined }
+    const historical = detectShippingEvents([], [], [], [], snapshot.settings, [], "2026-08-15T00:00:00.000Z", [legacy])
+    expect(historical).toHaveLength(1)
+    expect(historical[0].status).toBe("active")
+    const current = detectShippingEvents([], [], [], [], snapshot.settings, historical, "2026-08-15T00:00:00.000Z", [scoped])
+    expect(current).toEqual([])
+    expect(historical[0].resolvedAt).toBeUndefined()
   })
 
   it("keeps official and manual Calendar events through the full Event/HOT path only for active provenance sources", () => {

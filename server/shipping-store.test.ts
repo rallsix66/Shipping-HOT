@@ -64,4 +64,26 @@ describe("calendar source-scoped reconciliation", () => {
     expect(result.events).toHaveLength(3)
     expect(result.events.find(event => event.sourceId === "calendarific")).toMatchObject({ date: "2026-04-13" })
   })
+
+  it.each([["subdivision", "my-03"] as const, ["unknown", undefined] as const])("supersedes a legacy unscoped Calendarific local fact with %s scope", (scope, subdivisionCode) => {
+    const old = holiday("calendarific", "2026-08-22")
+    old.name = "Local Founders Day"
+    const scoped = { ...old, id: `new-${scope}`, scope, subdivisionCode, subdivisionCodes: subdivisionCode ? [subdivisionCode] : undefined, scopeLabel: subdivisionCode ? "MY-03" : undefined }
+    const result = reconcileCalendarEvents([old], [scoped], [coverage("calendarific", "partial")], 2026)
+    expect(result.events).toEqual([scoped])
+    expect(result.removedIds).toEqual([old.id])
+  })
+
+  it("keeps an unscoped national fact and an unscoped official fact outside Calendarific local migration", () => {
+    const national = holiday("calendarific", "2026-08-22")
+    const noIncoming = reconcileCalendarEvents([national], [], [coverage("calendarific", "partial")], 2026)
+    expect(noIncoming.events).toHaveLength(1)
+    expect(noIncoming.removedIds).toEqual([])
+
+    const official = { ...holiday("official-th", "2026-08-22"), name: "Local Founders Day" }
+    const scoped = { ...holiday("calendarific", "2026-08-22"), id: "calendarific-scoped", name: official.name, scope: "subdivision" as const, subdivisionCode: "my-03", subdivisionCodes: ["my-03"] }
+    const mixed = reconcileCalendarEvents([official], [scoped], [coverage("calendarific", "partial")], 2026)
+    expect(mixed.events.map(event => event.id)).toEqual(expect.arrayContaining([official.id, scoped.id]))
+    expect(mixed.removedIds).toEqual([])
+  })
 })
