@@ -1328,6 +1328,9 @@ export function SettingsPage() {
   }, [data])
   if (isLoading) return <ShippingShell><LoadingState /></ShippingShell>
   if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
+  const weatherAlertLabel = data.provider.weatherAlerts === "public" && data.providerFreshness?.weatherAlerts?.sourceStatus === "never_succeeded"
+    ? "public · 无已验证来源"
+    : data.provider.weatherAlerts
   return (
     <ShippingShell title="设置">
       <SecHead eyebrow="本地配置" title="设置" description="配置刷新间隔和确定性的事件阈值。船舶与港口的关注状态单独保存。" />
@@ -1414,11 +1417,12 @@ export function SettingsPage() {
           <div className="flex flex-wrap gap-2">
             <ProviderChip label="船位" value={data.provider.vessel} />
             <ProviderChip label="天气" value={data.provider.weather} />
-            <ProviderChip label="官方预警" value={data.provider.weatherAlerts} />
+            <ProviderChip label="官方预警" value={weatherAlertLabel} />
             <ProviderChip label="港口" value={data.provider.port} />
             <ProviderChip label="AIS 区域" value={data.provider.aisArea ?? "off"} />
             <ProviderChip label="班期" value={data.provider.schedule} />
             <ProviderChip label="资讯" value={data.provider.feed} />
+            <ProviderChip label="日历" value={data.provider.calendar} />
           </div>
         </div>
         <p className="mt-4 text-xs op-60">数据源：AISStream（船位，可选 key）、AISStream 区域 PositionReport（显式开启后提供派生趋势）、Open-Meteo Marine（天气模型）、JMA / TMD / BMKG（官方天气预警，可选 public / experimental）、Portcast 公共港口页面（低频公开字段）、Shipping Feed（默认 Mock，可选公开 RSS/官方公告）与 Mock Schedule。</p>

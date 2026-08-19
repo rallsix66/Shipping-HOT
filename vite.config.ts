@@ -12,6 +12,9 @@ import pwa from "./pwa.config"
 dotenv.config({
   path: join(projectDir, ".env.server"),
 })
+dotenv.config({
+  path: join(projectDir, ".env.local"),
+})
 
 export default defineConfig({
   resolve: {
