@@ -24,6 +24,30 @@ function socketWithMessage() {
   }
 }
 
+function socketWithPayloads(payloads: Record<string, unknown>[]) {
+  return {
+    onopen: null as (() => void) | null,
+    onmessage: null as ((event: { data: unknown }) => void) | null,
+    onerror: null as ((event: unknown) => void) | null,
+    onclose: null as (() => void) | null,
+    closed: false,
+    send() {
+      for (const payload of payloads) this.onmessage?.({ data: JSON.stringify(payload) })
+    },
+    close() {
+      this.closed = true
+    },
+  }
+}
+
+function areaPosition(mmsi: string, time_utc: string, status = 1) {
+  return {
+    MessageType: "PositionReport",
+    MetaData: { MMSI: mmsi, time_utc },
+    Message: { PositionReport: { UserID: Number(mmsi), Latitude: 22.48, Longitude: 113.91, Sog: 0.2, NavigationalStatus: status } },
+  }
+}
+
 describe("area stream boundary", () => {
   it("does not create a socket without watched ports", async () => {
     let socketCount = 0
@@ -122,5 +146,52 @@ describe("area stream boundary", () => {
     expect(sockets).toHaveLength(2)
     await new Promise(resolve => setTimeout(resolve, 120))
     expect(sockets[1].closed).toBe(true)
+  })
+
+  it("prunes expired observations from the Map while retaining fresh ones", async () => {
+    let now = new Date("2026-08-19T00:00:10.000Z")
+    const socket = socketWithMessage()
+    const session = new AisAreaSession({ apiKey: "test-key", now: () => now, initialObservationWaitMs: 0, minimumSampleSize: 1, socketFactory: () => {
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    await session.getPortMetrics([mockPorts[0]])
+    expect(session.observationCount).toBe(1)
+    now = new Date("2026-08-19T00:05:00.000Z")
+    await session.getPortMetrics([mockPorts[0]])
+    expect(session.observationCount).toBe(1)
+    now = new Date("2026-08-19T00:16:00.000Z")
+    const stale = await session.getPortMetrics([mockPorts[0]])
+    expect(session.observationCount).toBe(0)
+    expect(stale[0]).toMatchObject({ sourceStatus: "failed", coverage: "stale", stale: true })
+  })
+
+  it("reports never_succeeded when the first connected window has no valid observation", async () => {
+    const socket = socketWithPayloads([])
+    const session = new AisAreaSession({ apiKey: "test-key", initialObservationWaitMs: 0, minimumSampleSize: 1, socketFactory: () => {
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    const [metric] = await session.getPortMetrics([mockPorts[0]])
+    expect(metric).toMatchObject({ sourceStatus: "never_succeeded", coverage: "no_observation", stale: true })
+    expect(session.liveStats).toMatchObject({ socketOpened: 1, subscriptionsSent: 1, positionReportsReceived: 0, validPositionReports: 0, distinctMmsi: 0 })
+  })
+
+  it("enforces the observation hard cap and replaces the same MMSI", async () => {
+    const socket = socketWithPayloads([
+      areaPosition("477123400", "2026-08-19T00:00:00.000Z"),
+      areaPosition("477123401", "2026-08-19T00:01:00.000Z"),
+      areaPosition("477123402", "2026-08-19T00:02:00.000Z"),
+      areaPosition("477123402", "2026-08-19T00:03:00.000Z", 0),
+    ])
+    const session = new AisAreaSession({ apiKey: "test-key", now: () => new Date("2026-08-19T00:04:00.000Z"), initialObservationWaitMs: 0, minimumSampleSize: 1, maxObservations: 2, socketFactory: () => {
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    const [metric] = await session.getPortMetrics([mockPorts[0]])
+    expect(session.observationCount).toBe(2)
+    expect(metric.sampleSize).toBe(2)
+    expect(metric.observationWindow?.startAt).toBe("2026-08-19T00:01:00.000Z")
+    expect(session.liveStats).toMatchObject({ socketOpened: 1, subscriptionsSent: 1, subscriptionBboxCount: 1, positionReportsReceived: 4, validPositionReports: 4, assignedPortSamples: 4, sourceTimestampPresent: 4, distinctMmsi: 2 })
   })
 })

@@ -1,5 +1,5 @@
 import type { AisAreaObservation, AisAreaObservationMessage, AisDerivedPortMetric, PortAisAreaConfig } from "@shared/ais-area"
-import { AIS_AREA_DEFAULT_HISTORY_SIZE, AIS_AREA_DEFAULT_LOW_SPEED_KNOTS, AIS_AREA_DEFAULT_MINIMUM_SAMPLE_SIZE, AIS_AREA_DEFAULT_TTL_MS, AIS_AREA_SOURCE_ID, aggregateAisPortMetric, assignAisAreaObservation, normalizeAisAreaPositionReport, pushAisAreaMetricHistory, watchedPortAisAreaConfigs } from "@shared/ais-area"
+import { AIS_AREA_BUCKET_MS, AIS_AREA_DEFAULT_LOW_SPEED_KNOTS, AIS_AREA_DEFAULT_MINIMUM_SAMPLE_SIZE, AIS_AREA_DEFAULT_TTL_MS, AIS_AREA_MAX_OBSERVATIONS, AIS_AREA_SOURCE_ID, aggregateAisPortMetric, aisAreaObservationTimestamp, assignAisAreaObservation, normalizeAisAreaPositionReport, watchedPortAisAreaConfigs } from "@shared/ais-area"
 import type { DataProvenance, Port } from "@shared/shipping"
 
 export const aisstreamAreaObservedProvenance: DataProvenance = { sourceType: "third_party", dataNature: "observed", sourceId: AIS_AREA_SOURCE_ID, sourceUrl: "https://aisstream.io/", verified: false }
@@ -34,9 +34,21 @@ export interface AisAreaSessionOptions {
   reconnectDelaysMs?: number[]
   idleCloseMs?: number
   observationTtlMs?: number
+  maxObservations?: number
   minimumSampleSize?: number
   lowSpeedThresholdKnots?: number
-  historySize?: number
+}
+
+export interface AisAreaSessionStats {
+  socketOpened: number
+  subscriptionsSent: number
+  subscriptionBboxCount: number
+  positionReportsReceived: number
+  validPositionReports: number
+  assignedPortSamples: number
+  ambiguousSamples: number
+  sourceTimestampPresent: number
+  distinctMmsi: number
 }
 
 const aisAreaEndpoint = "wss://stream.aisstream.io/v0/stream"
@@ -89,7 +101,17 @@ export class AisAreaSession {
   private activeConfigs: PortAisAreaConfig[] = []
   private readonly observations = new Map<string, AisAreaObservation>()
   private readonly metrics = new Map<string, AisDerivedPortMetric>()
-  private readonly histories = new Map<string, AisDerivedPortMetric[]>()
+  private readonly stats = {
+    socketOpened: 0,
+    subscriptionsSent: 0,
+    subscriptionBboxCount: 0,
+    positionReportsReceived: 0,
+    validPositionReports: 0,
+    assignedPortSamples: 0,
+    ambiguousSamples: 0,
+    sourceTimestampPresent: 0,
+  }
+
   private reconnectAttempt = 0
   private readonly endpoint: string
   private readonly socketFactory: (endpoint: string) => AisAreaSocket
@@ -100,9 +122,9 @@ export class AisAreaSession {
   private readonly reconnectDelaysMs: number[]
   private readonly idleCloseMs: number
   private readonly observationTtlMs: number
+  private readonly maxObservations: number
   private readonly minimumSampleSize: number
   private readonly lowSpeedThresholdKnots: number
-  private readonly historySize: number
 
   constructor(private readonly options: AisAreaSessionOptions) {
     this.endpoint = options.endpoint ?? aisAreaEndpoint
@@ -114,9 +136,9 @@ export class AisAreaSession {
     this.reconnectDelaysMs = options.reconnectDelaysMs ?? [1000, 2000, 5000, 10000]
     this.idleCloseMs = options.idleCloseMs ?? 120000
     this.observationTtlMs = options.observationTtlMs ?? AIS_AREA_DEFAULT_TTL_MS
+    this.maxObservations = Math.max(1, options.maxObservations ?? AIS_AREA_MAX_OBSERVATIONS)
     this.minimumSampleSize = options.minimumSampleSize ?? AIS_AREA_DEFAULT_MINIMUM_SAMPLE_SIZE
     this.lowSpeedThresholdKnots = options.lowSpeedThresholdKnots ?? AIS_AREA_DEFAULT_LOW_SPEED_KNOTS
-    this.historySize = options.historySize ?? AIS_AREA_DEFAULT_HISTORY_SIZE
   }
 
   get currentSocket(): AisAreaSocket | undefined {
@@ -129,6 +151,10 @@ export class AisAreaSession {
 
   get observationCount(): number {
     return this.observations.size
+  }
+
+  get liveStats(): AisAreaSessionStats {
+    return { ...this.stats, distinctMmsi: this.observations.size }
   }
 
   private clearIdleTimer() {
@@ -147,6 +173,37 @@ export class AisAreaSession {
     if (!this.socket || !this.socketOpen || !configs.length) return
     this.activeConfigs = [...configs]
     this.socket.send(JSON.stringify(aisAreaSubscription(this.options.apiKey, configs)))
+    this.stats.subscriptionsSent++
+    this.stats.subscriptionBboxCount = configs.length
+  }
+
+  private pruneObservations(now: Date) {
+    const nowTimestamp = now.getTime()
+    for (const [mmsi, observation] of this.observations) {
+      const timestamp = aisAreaObservationTimestamp(observation)
+      if (!Number.isFinite(timestamp) || nowTimestamp - timestamp > this.observationTtlMs) this.observations.delete(mmsi)
+    }
+  }
+
+  private storeObservation(observation: AisAreaObservation) {
+    this.observations.set(observation.mmsi, observation)
+    while (this.observations.size > this.maxObservations) {
+      let oldestMmsi: string | undefined
+      let oldestTimestamp = Number.POSITIVE_INFINITY
+      for (const [mmsi, candidate] of this.observations) {
+        const timestamp = aisAreaObservationTimestamp(candidate)
+        if (!Number.isFinite(timestamp)) {
+          oldestMmsi = mmsi
+          break
+        }
+        if (timestamp < oldestTimestamp) {
+          oldestTimestamp = timestamp
+          oldestMmsi = mmsi
+        }
+      }
+      if (!oldestMmsi) break
+      this.observations.delete(oldestMmsi)
+    }
   }
 
   private setDesiredConfigs(configs: PortAisAreaConfig[]) {
@@ -205,16 +262,23 @@ export class AisAreaSession {
       socket.onopen = () => {
         opened = true
         this.socketOpen = true
+        this.stats.socketOpened++
         this.reconnectAttempt = 0
         this.sendSubscription(this.desiredConfigs)
         finish()
       }
       socket.onmessage = (event) => {
-        const normalized = normalizeAisAreaPositionReport(parseMessage(event.data) ?? {}, this.now().toISOString())
+        const message = parseMessage(event.data) ?? {}
+        if (message.MessageType === "PositionReport") this.stats.positionReportsReceived++
+        const normalized = normalizeAisAreaPositionReport(message, this.now().toISOString())
         if (!normalized) return
+        this.stats.validPositionReports++
+        if (normalized.sourceUpdatedAt) this.stats.sourceTimestampPresent++
         const assigned = assignAisAreaObservation(normalized, this.activeConfigs)
         if (!assigned) return
-        this.observations.set(assigned.mmsi, assigned)
+        this.stats.assignedPortSamples++
+        if (assigned.areaAmbiguous) this.stats.ambiguousSamples++
+        this.storeObservation(assigned)
       }
       socket.onerror = (event) => {
         const error = new Error(sanitizeAreaError(event))
@@ -243,16 +307,14 @@ export class AisAreaSession {
     try {
       await this.ensureConnected()
       if (this.initialObservationWaitMs > 0) await new Promise(resolve => setTimeout(resolve, this.initialObservationWaitMs))
-      const fetchedAt = this.now().toISOString()
+      const now = this.now()
+      this.pruneObservations(now)
+      const fetchedAt = now.toISOString()
       const lastKnownByPort = new Map(lastKnown.filter(metric => metric.provenance?.sourceId === AIS_AREA_SOURCE_ID).map(metric => [metric.portId, metric]))
       const result = configs.map((config) => {
         const previous = this.metrics.get(config.portId) ?? lastKnownByPort.get(config.portId)
         const observations = [...this.observations.values()].filter(observation => observation.portId === config.portId)
-        const freshObservationCount = observations.filter((observation) => {
-          const sourceAt = observation.sourceUpdatedAt ? Date.parse(observation.sourceUpdatedAt) : Date.parse(observation.fetchedAt)
-          return Number.isFinite(sourceAt) && this.now().getTime() - sourceAt <= this.observationTtlMs
-        }).length
-        const metric = freshObservationCount === 0 && previous?.sampleSize
+        const metric = observations.length === 0 && previous?.sampleSize
           ? markMetricStale(previous, fetchedAt, "AIS area observations stale")
           : aggregateAisPortMetric(config, observations, {
               now: fetchedAt,
@@ -265,7 +327,6 @@ export class AisAreaSession {
               trendProvenance: aisstreamAreaEstimatedProvenance,
             })
         this.metrics.set(config.portId, metric)
-        this.histories.set(config.portId, pushAisAreaMetricHistory(this.histories.get(config.portId) ?? [], metric, this.historySize))
         return metric
       })
       this.scheduleIdleClose()
@@ -310,7 +371,8 @@ export function createUnavailableAisAreaProvider(error: string): AisAreaProvider
 export const AisAreaProviderDefaults = {
   endpoint: aisAreaEndpoint,
   ttlMs: AIS_AREA_DEFAULT_TTL_MS,
+  bucketMs: AIS_AREA_BUCKET_MS,
+  maxObservations: AIS_AREA_MAX_OBSERVATIONS,
   minimumSampleSize: AIS_AREA_DEFAULT_MINIMUM_SAMPLE_SIZE,
   lowSpeedThresholdKnots: AIS_AREA_DEFAULT_LOW_SPEED_KNOTS,
-  historySize: AIS_AREA_DEFAULT_HISTORY_SIZE,
 }

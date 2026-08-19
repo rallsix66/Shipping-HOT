@@ -294,6 +294,8 @@ describe("shippingRepository", () => {
       ambiguousSampleCount: 1,
       trend: "rising" as const,
       consecutiveRisingWindows: 3,
+      bucketStartedAt: "2026-08-19T00:00:00.000Z",
+      bucketEndedAt: "2026-08-19T00:05:00.000Z",
       bbox: { south: 22, west: 113, north: 23, east: 114 },
       boundarySource: "configured_heuristic" as const,
       coverage: "usable" as const,

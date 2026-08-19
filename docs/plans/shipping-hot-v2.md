@@ -2,7 +2,7 @@
 
 > 状态：`V2.2/V2.3/V2.4 implemented / locally verified / live pending`; `V2.5 implemented / locally verified / live pending`
 >
-> 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已封板，V2.1 Port Intelligence 已实现，V2.2 Country Calendar、V2.3 Shipping Information Feed、V2.4 Weather Intelligence 和 V2.5 AIS / Port Derived Intelligence 已完成本地实现与验证；官方/公开 Provider 的 live runtime 仍 pending，V2.5 本轮未启动真实 external live smoke。
+> 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已封板，V2.1 Port Intelligence 已实现，V2.2 Country Calendar、V2.3 Shipping Information Feed、V2.4 Weather Intelligence 和 V2.5 AIS / Port Derived Intelligence 已完成本地实现与验证；V2.5 Final Trust Seal 已完成本地收口，但 Area live probe 只有 `connection_verified / coverage_pending`，不能升级 `verified_live`。
 >
 > 方案核对日期：2026-08-19。V2.0 已完成收口；V2.1 仅新增 Portcast 公共港口页面 Provider，不使用商业 API、登录、token、hidden endpoint 或新依赖；V2.2 的组合源/覆盖 reconcile、V2.3 的时间与分类语义、V2.4 的三窗口天气和 source-specific warning parser 已完成本地验证，live runtime 仍 pending；2026-08-19 Calendar sync persisted-baseline restart boundary 已完成本地验证。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
 
@@ -20,13 +20,26 @@ Calendarific live 数据暴露了 National holiday / Common local holiday 标签
 - Area source ID 固定为 `aisstream-area`；原始 PositionReport 使用 `aisstream + observed`，区域 aggregate 使用 `aisstream-area + derived`，趋势判断使用 `aisstream-area + estimated`。
 - Area session 为 server-process singleton，单飞连接、订阅复用、同 socket subscription replacement、至少 1 秒 debounce、有限指数退避和 idle close。Area subscription 只使用当前 watched ports 的小型 observation bounding boxes、`FilterMessageTypes=["PositionReport"]`，不使用 `FiltersShipMMSI`。
 - Area bounding box 是 `configured_heuristic` 的区域观察范围，不是官方港界、锚地、terminal 或 pilot-station polygon。重叠区域按最近港口中心分配，并标记 `areaAmbiguous`/`ambiguousSampleCount`，不静默重复计算。
-- Area session 内存只保留每港每 MMSI 的 latest observation 和有界 aggregate ring buffer；观测 TTL 默认 15 分钟，禁止保存 raw AIS track、无限 vessel history 或逐消息写 SQLite。
+- Area session 内存只保留每港每 MMSI 的 latest observation，观测 TTL 默认 15 分钟并有 5000 条 hard cap；禁止保存 raw AIS track、无限 vessel history 或逐消息写 SQLite。Metric 只保留当前/last-known aggregate，不再保留未参与决策的死 history ring。
 - Metric 至少包含 sample size、active vessel count、anchored/moored count、low-speed count、stationary ratio、ambiguous sample count、coverage、trend、observation window、bbox、freshness 和 provenance。minimum distinct MMSI 默认 5；样本不足为 `insufficient_samples/unknown`，无观测为 `no_observation/unknown`，过期为 `stale`。
 - 默认 low-speed 阈值为 `<=1 knot`。第一版只输出 `rising|stable|falling|unknown`，不输出 low/medium/high/critical 港口拥堵等级，不生成 waitingHours、queueTime、berthDelay 或 median waiting time。
 - 可增加最小 `ais_port_metrics` 表，只保存每港当前/last-known aggregate metric；不增加 `ais_tracks`、`ais_messages` 或 raw event 表。Area metric 永远不覆盖 Portcast 的 Port 字段。
-- AIS-derived Event 只有在 fresh、usable、minimum sample、连续至少 3 个 rising aggregate windows、watched port 条件同时满足时生成，source identity 为 `ais_port_congestion_trend:<portId>:aisstream-area`，最高 severity 为 `warning`。失败/stale 保留同源 active Event 的 stale 状态，不自动 resolve；只有 fresh evidence 且趋势条件消失才 resolve。
+- AIS-derived Event 只有在 fresh、usable、minimum sample、连续至少 3 个独立 5 分钟 rising buckets、watched port 条件同时满足时生成，source identity 为 `ais_port_congestion_trend:<portId>:aisstream-area`，最高 severity 为 `warning`。同 bucket 不增加连续计数；bucket gap、stale/insufficient previous、restart gap 都 reset。失败/stale 保留同源 active Event 的 stale 状态，不自动 resolve；只有 fresh evidence 且趋势条件消失才 resolve。
 - Event/HOT 与 current `OperationalSourceContext` 绑定；`aisstream-area` 未启用时历史 metric/Event 可以留在 Repository，但不能进入 current view。`mock-schedule` 仍是唯一允许继续工作的 Mock Schedule source。
 - Rollback 为 `SHIPPING_AIS_AREA_PROVIDER=off`：Area socket 不启动，Area metric/Event/HOT 离开 current operational view，历史可保留，Watched AIS Vessel 与 Portcast 不受影响。
+
+## V2.5 Final Trust Seal — 2026-08-19
+
+本轮只收口 AIS Area 的信任边界、时间窗口、内存上限和运行状态语义，没有扩展 Portcast、Calendar、Feed、Weather、Official Alerts、Watched AIS、AIS track 或 V2.6。
+
+- Timestamp trust：`sourceUpdatedAt` 只来自 PositionReport metadata 中可验证的 `time_utc`；本地 `fetchedAt` 不会被提升为 source timestamp。若可靠 source timestamp 存在，metric `updatedAt` 使用最新可靠 source time；若全部缺失，`updatedAt` 使用最新本地 observation/fetched time。`observationWindow` 使用 `sourceUpdatedAt ?? fetchedAt` 表达本地聚合窗口，但不改写 provenance。
+- Real buckets：`AIS_AREA_BUCKET_MS=5*60*1000`。metric 记录 `bucketStartedAt`/`bucketEndedAt`；同 bucket 的重复 aggregate 不增加 `consecutiveRisingWindows`，只有相邻新 bucket 才比较上一 bucket。bucket gap、previous stale/failed/non-usable、当前 insufficient sample 和重启后长 gap 都将 trend 设为 `unknown`、计数归零。
+- Conservative trend：`stationaryCount=anchoredCount+mooredCount`。rising 要求 stationary count 严格增加且 stationary ratio 也增加；stationary count 不变为 stable，减少为 falling。样本从 10 缩到 6 但 stationary count 仍为 2 时不会误报 rising。
+- Observation memory：Area Session 在 aggregate 前按 15 分钟 TTL 实际从 Map 删除过期/无效 observation；写入时执行 `AIS_AREA_MAX_OBSERVATIONS=5000` hard cap，超限删除最旧 observation；同 MMSI 更新覆盖原记录，不增加 Map size。未参与决策的历史 ring 已删除；SQLite 仍只保存 `ais_port_metrics` aggregate。
+- Provider status：`providerEnabled=false` 或 Area mode `off` 的 freshness 为 `disabled`；Area mode `aisstream` 且 provider enabled 但缺 key 为 `never_succeeded/failed`，不会被误标 disabled；连接成功但窗口没有 valid PositionReport 为 `never_succeeded/no_observation`，历史成功后无 fresh observation 为 `failed/stale`。
+- Event/HOT gate：仍要求 fresh + healthy + usable + 至少 5 个 MMSI + watched port + 3 个独立 rising buckets；最高 severity 为 warning。同源 Area 失败保持 stale active，不自动 resolve；fresh evidence 恢复但趋势条件消失才 resolve。Portcast 字段和 Mock/Event 历史隔离边界保持不变。
+- Live evidence：2026-08-19 对 Shekou 当前 watched port 执行 60 秒 probe，使用一个 configured heuristic bbox，发送 1 次 `FilterMessageTypes=["PositionReport"]` subscription，不使用 `FiltersShipMMSI`。socket opened=1、subscription sent=1、bbox count=1、PositionReport=0、valid=0、distinct MMSI=0、assigned=0、ambiguous=0、source timestamp=0；最终 `AISStream Area=connection_verified / coverage_pending`，没有写 `verified_live`。
+- Verification：`V2.5 Trust Boundary=SEALED`（仅本地信任语义）；Final Trust Seal 本地套件 `227/227`，typecheck、targeted lint、build 和 `git diff --check` 通过；full lint 继续保留四个既有错误，native better-sqlite3 persistence 仍 pending，Area live 仍为 `connection_verified / coverage_pending`，远程 CI 无 workflow evidence。
 
 ## Calendar Sync Persisted Baseline Seal — 2026-08-19
 

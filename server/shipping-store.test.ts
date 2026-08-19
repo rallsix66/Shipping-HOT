@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { CalendarCoverage, CalendarEvent } from "@shared/calendar"
-import { reconcileCalendarEvents } from "./shipping-store"
+import { isAisAreaProviderDisabled, reconcileCalendarEvents } from "./shipping-store"
 
 function holiday(sourceId: string, date = "2026-04-13"): CalendarEvent {
   return {
@@ -29,6 +29,12 @@ function coverage(sourceId: string, status: CalendarCoverage["status"]): Calenda
 }
 
 describe("calendar source-scoped reconciliation", () => {
+  it("marks AIS Area disabled only when the global provider is disabled or area mode is off", () => {
+    expect(isAisAreaProviderDisabled(false, "aisstream")).toBe(true)
+    expect(isAisAreaProviderDisabled(true, "off")).toBe(true)
+    expect(isAisAreaProviderDisabled(true, "aisstream")).toBe(false)
+  })
+
   it("removes a stale source fact only after complete coverage", () => {
     const existing = [holiday("calendarific")]
     const result = reconcileCalendarEvents(existing, [], [coverage("calendarific", "complete")], 2026)

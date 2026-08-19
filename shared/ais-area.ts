@@ -56,6 +56,8 @@ export interface AisDerivedPortMetric extends Freshness {
   ambiguousSampleCount: number
   trend: AisAreaTrend
   consecutiveRisingWindows: number
+  bucketStartedAt?: string
+  bucketEndedAt?: string
   observationWindow?: { startAt: string, endAt: string }
   bbox: AisAreaBoundingBox
   boundarySource: "configured_heuristic"
@@ -71,7 +73,8 @@ export const AIS_AREA_SOURCE_ID = "aisstream-area"
 export const AIS_AREA_DEFAULT_TTL_MS = 15 * 60 * 1000
 export const AIS_AREA_DEFAULT_MINIMUM_SAMPLE_SIZE = 5
 export const AIS_AREA_DEFAULT_LOW_SPEED_KNOTS = 1
-export const AIS_AREA_DEFAULT_HISTORY_SIZE = 12
+export const AIS_AREA_BUCKET_MS = 5 * 60 * 1000
+export const AIS_AREA_MAX_OBSERVATIONS = 5000
 
 const areaHalfHeight = 0.12
 const areaHalfWidth = 0.16
@@ -177,7 +180,7 @@ export function assignAisAreaObservation(observation: Omit<AisAreaObservation, "
   return { ...observation, portId: nearest.portId, areaAmbiguous: matches.length > 1 }
 }
 
-function observationTimestamp(observation: AisAreaObservation): number {
+export function aisAreaObservationTimestamp(observation: AisAreaObservation): number {
   const source = observation.sourceUpdatedAt ? Date.parse(observation.sourceUpdatedAt) : Number.NaN
   const fetched = Date.parse(observation.fetchedAt)
   return Number.isFinite(source) ? source : fetched
@@ -186,14 +189,26 @@ function observationTimestamp(observation: AisAreaObservation): number {
 export function pruneAisAreaObservations(observations: Iterable<AisAreaObservation>, now: Date | string, ttlMs = AIS_AREA_DEFAULT_TTL_MS): AisAreaObservation[] {
   const nowTimestamp = typeof now === "string" ? Date.parse(now) : now.getTime()
   return [...observations].filter((observation) => {
-    const timestamp = observationTimestamp(observation)
+    const timestamp = aisAreaObservationTimestamp(observation)
     return Number.isFinite(timestamp) && (!Number.isFinite(nowTimestamp) || nowTimestamp - timestamp <= ttlMs)
   })
 }
 
-function trendFor(current: number, previous: number | undefined): AisAreaTrend {
-  if (previous === undefined || Math.abs(current - previous) < 0.001) return previous === undefined ? "unknown" : "stable"
-  return current > previous ? "rising" : "falling"
+function metricBucketId(metric: AisDerivedPortMetric): number | undefined {
+  const bucketStartedAt = metric.bucketStartedAt ? Date.parse(metric.bucketStartedAt) : Number.NaN
+  if (Number.isFinite(bucketStartedAt)) return Math.floor(bucketStartedAt / AIS_AREA_BUCKET_MS)
+  const observationEndAt = metric.observationWindow?.endAt ? Date.parse(metric.observationWindow.endAt) : Number.NaN
+  return Number.isFinite(observationEndAt) ? Math.floor(observationEndAt / AIS_AREA_BUCKET_MS) : undefined
+}
+
+function bucketBounds(timestamp: number): { id: number, startedAt: string, endedAt: string } {
+  const id = Math.floor(timestamp / AIS_AREA_BUCKET_MS)
+  const start = id * AIS_AREA_BUCKET_MS
+  return {
+    id,
+    startedAt: new Date(start).toISOString(),
+    endedAt: new Date(start + AIS_AREA_BUCKET_MS).toISOString(),
+  }
 }
 
 export interface AggregateAisAreaOptions {
@@ -219,14 +234,45 @@ export function aggregateAisPortMetric(config: PortAisAreaConfig, observations: 
   const anchoredCount = fresh.filter(item => item.navigationStatus === "anchored").length
   const mooredCount = fresh.filter(item => item.navigationStatus === "moored").length
   const lowSpeedCount = fresh.filter(item => item.speed !== undefined && item.speed <= lowSpeedThresholdKnots).length
-  const stationaryRatio = sampleSize ? (anchoredCount + mooredCount) / sampleSize : 0
-  const trend = sampleSize >= minimumSampleSize && options.previous?.coverage === "usable"
-    ? trendFor(stationaryRatio, options.previous.stationaryRatio)
-    : "unknown"
-  const consecutiveRisingWindows = trend === "rising" ? (options.previous?.trend === "rising" ? options.previous.consecutiveRisingWindows + 1 : 1) : 0
-  const timestamps = fresh.map(observation => observation.sourceUpdatedAt ?? observation.fetchedAt).filter(value => Number.isFinite(Date.parse(value))).sort()
+  const stationaryCount = anchoredCount + mooredCount
+  const stationaryRatio = sampleSize ? stationaryCount / sampleSize : 0
+  const timestamps = fresh
+    .map((observation) => {
+      const timestamp = aisAreaObservationTimestamp(observation)
+      return Number.isFinite(timestamp) ? { timestamp, value: new Date(timestamp).toISOString() } : undefined
+    })
+    .filter((value): value is { timestamp: number, value: string } => value !== undefined)
+    .sort((a, b) => a.timestamp - b.timestamp)
   const coverage: AisAreaCoverage = sampleSize === 0 ? "no_observation" : sampleSize < minimumSampleSize ? "insufficient_samples" : "usable"
-  const latestSourceUpdatedAt = timestamps.at(-1)
+  const latestEffectiveTimestamp = timestamps.at(-1)
+  const reliableSourceTimestamps = fresh
+    .map(observation => observation.sourceUpdatedAt)
+    .filter((value): value is string => value !== undefined && Number.isFinite(Date.parse(value)))
+    .map(value => ({ timestamp: Date.parse(value), value: new Date(Date.parse(value)).toISOString() }))
+    .sort((a, b) => a.timestamp - b.timestamp)
+  const latestReliableSourceUpdatedAt = reliableSourceTimestamps.at(-1)?.value
+  const currentBucket = latestEffectiveTimestamp ? bucketBounds(latestEffectiveTimestamp.timestamp) : undefined
+  let trend: AisAreaTrend = "unknown"
+  let consecutiveRisingWindows = 0
+  const previous = options.previous
+  const previousBucketId = previous ? metricBucketId(previous) : undefined
+  const previousIsUsable = previous?.sourceStatus === "healthy" && !previous.stale && previous.coverage === "usable"
+  if (coverage === "usable" && currentBucket && previous && previousIsUsable && previousBucketId !== undefined) {
+    const bucketDelta = currentBucket.id - previousBucketId
+    if (bucketDelta === 0) {
+      trend = previous.trend
+      consecutiveRisingWindows = previous.trend === "rising" ? previous.consecutiveRisingWindows : 0
+    } else if (bucketDelta === 1) {
+      const previousStationaryCount = previous.anchoredCount + previous.mooredCount
+      if (stationaryCount < previousStationaryCount) trend = "falling"
+      else if (stationaryCount === previousStationaryCount) trend = "stable"
+      else if (stationaryRatio > previous.stationaryRatio) trend = "rising"
+      else trend = "stable"
+      consecutiveRisingWindows = trend === "rising"
+        ? previous.trend === "rising" ? previous.consecutiveRisingWindows + 1 : 1
+        : 0
+    }
+  }
   const stale = coverage === "no_observation"
   return {
     portId: config.portId,
@@ -239,14 +285,16 @@ export function aggregateAisPortMetric(config: PortAisAreaConfig, observations: 
     ambiguousSampleCount: fresh.filter(item => item.areaAmbiguous).length,
     trend,
     consecutiveRisingWindows,
-    observationWindow: timestamps.length ? { startAt: timestamps[0], endAt: timestamps.at(-1)! } : undefined,
+    bucketStartedAt: currentBucket?.startedAt,
+    bucketEndedAt: currentBucket?.endedAt,
+    observationWindow: timestamps.length ? { startAt: timestamps[0].value, endAt: timestamps.at(-1)!.value } : undefined,
     bbox: config.bbox,
     boundarySource: config.boundarySource,
     coverage,
     lowSpeedThresholdKnots,
     minimumSampleSize,
-    updatedAt: latestSourceUpdatedAt,
-    sourceUpdatedAt: latestSourceUpdatedAt,
+    updatedAt: latestReliableSourceUpdatedAt ?? latestEffectiveTimestamp?.value,
+    sourceUpdatedAt: latestReliableSourceUpdatedAt,
     fetchedAt,
     stale,
     sourceStatus: sampleSize === 0 ? "never_succeeded" : "healthy",
@@ -255,10 +303,6 @@ export function aggregateAisPortMetric(config: PortAisAreaConfig, observations: 
     observationProvenance: options.observationProvenance,
     trendProvenance: options.trendProvenance,
   }
-}
-
-export function pushAisAreaMetricHistory(history: AisDerivedPortMetric[], metric: AisDerivedPortMetric, maxSize = AIS_AREA_DEFAULT_HISTORY_SIZE): AisDerivedPortMetric[] {
-  return [...history, metric].slice(-Math.max(1, maxSize))
 }
 
 export function isUsableAisAreaMetric(metric: AisDerivedPortMetric, minimumSampleSize = AIS_AREA_DEFAULT_MINIMUM_SAMPLE_SIZE): boolean {

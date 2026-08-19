@@ -1,6 +1,6 @@
 import { filterEventsForOperationalContext, sourceAllowedForOperationalContext, toVesselWatchTarget } from "@shared/shipping"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
-import type { FeedItem, Freshness, Port, ProviderResult, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
+import type { FeedItem, Freshness, Port, ProviderResult, ShippingProviderModes, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries, calendarEventKey, calendarEventLegacyId } from "@shared/calendar"
 import { detectShippingEvents } from "@shared/shipping-engine"
@@ -34,6 +34,10 @@ function filterOperationalAisAreaMetrics(metrics: AisDerivedPortMetric[]): AisDe
   return providerModes.aisArea === "aisstream"
     ? metrics.filter(metric => sourceAllowedForOperationalContext(metric.provenance?.sourceId, operationalSourceContext))
     : []
+}
+
+export function isAisAreaProviderDisabled(providerEnabled: boolean, areaMode: ShippingProviderModes["aisArea"]): boolean {
+  return !providerEnabled || areaMode !== "aisstream"
 }
 
 export function mergeWeatherFeedItems(existing: FeedItem[], weather: FeedItem[]): FeedItem[] {
@@ -90,8 +94,9 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
   ])
   const areaProviderPorts = (portResult.status === "fulfilled" ? portResult.value : portLastKnown)
     .filter(item => item.isWatched && sourceAllowedForOperationalContext(item.provenance?.sourceId, operationalSourceContext))
+  const aisAreaDisabled = isAisAreaProviderDisabled(settings.providerEnabled, providerModes.aisArea)
   const [aisAreaResult] = await Promise.allSettled([
-    settings.providerEnabled && providerModes.aisArea === "aisstream" ? providers.aisArea.getPortMetrics(areaProviderPorts, areaLastKnown) : Promise.resolve([] as AisDerivedPortMetric[]),
+    aisAreaDisabled ? Promise.resolve([] as AisDerivedPortMetric[]) : providers.aisArea.getPortMetrics(areaProviderPorts, areaLastKnown),
   ])
   const [weatherResult, weatherAlertResult] = await weatherResults
   const read = <T extends Freshness>(result: PromiseSettledResult<T[]>, previous: T[], provenance: ProviderResult<T>["provenance"], disabled: boolean): ProviderResult<T> => {
@@ -106,7 +111,7 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
   const weatherAlerts = providerModes.weatherAlerts === "off" && settings.sourceEnabled
     ? toProviderResult([], providerProvenances.officialWeatherAlerts, new Date().toISOString(), "disabled")
     : read(weatherAlertResult, officialWeatherLastKnown, providerProvenances.officialWeatherAlerts, !settings.sourceEnabled)
-  const aisArea = read(aisAreaResult, areaLastKnown, providerProvenances.aisstreamAreaDerived, settings.providerEnabled && providerModes.aisArea !== "aisstream")
+  const aisArea = read(aisAreaResult, areaLastKnown, providerProvenances.aisstreamAreaDerived, aisAreaDisabled)
   return {
     vessels: vessel.data,
     ports: port.data,

@@ -47,6 +47,9 @@ describe("aIS area Event and HOT boundary", () => {
 
     const insufficient = detectShippingEvents([], [port], [], [], settings, [], "2026-08-19T00:11:00.000Z", [], [metric({ coverage: "insufficient_samples", sampleSize: 4, consecutiveRisingWindows: 9 })])
     expect(insufficient.some(item => item.type === "ais_port_congestion_trend")).toBe(false)
+
+    expect(detectShippingEvents([], [port], [], [], settings, [], "2026-08-19T00:11:00.000Z", [], [metric({ consecutiveRisingWindows: 1 })]).some(item => item.type === "ais_port_congestion_trend")).toBe(false)
+    expect(detectShippingEvents([], [port], [], [], settings, [], "2026-08-19T00:11:00.000Z", [], [metric({ consecutiveRisingWindows: 2 })]).some(item => item.type === "ais_port_congestion_trend")).toBe(false)
   })
 
   it("keeps a same-source active Event stale on area failure without resolving it", () => {
@@ -54,6 +57,9 @@ describe("aIS area Event and HOT boundary", () => {
     const first = detectShippingEvents([], [port], [], [], settings, [], "2026-08-19T00:11:00.000Z", [], [metric()])
     const stale = detectShippingEvents([], [port], [], [], settings, first, "2026-08-19T00:20:00.000Z", [], [metric({ stale: true, sourceStatus: "failed", coverage: "stale", error: "AIS area timeout" })])
     expect(stale.find(item => item.type === "ais_port_congestion_trend")).toMatchObject({ status: "active", stale: true, sourceStatus: "failed", error: "AIS area timeout" })
+
+    const resolved = detectShippingEvents([], [port], [], [], settings, first, "2026-08-19T00:20:00.000Z", [], [metric({ trend: "stable", consecutiveRisingWindows: 0 })])
+    expect(resolved.find(item => item.type === "ais_port_congestion_trend")).toMatchObject({ status: "resolved", stale: false })
   })
 
   it("removes area history from the current view when the mode is off", () => {
