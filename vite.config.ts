@@ -4,17 +4,12 @@ import react from "@vitejs/plugin-react-swc"
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite"
 import unocss from "unocss/vite"
 import unimport from "unimport/unplugin"
-import dotenv from "dotenv"
 import nitro from "./nitro.config"
 import { projectDir } from "./shared/dir"
 import pwa from "./pwa.config"
+import { loadServerEnv } from "./scripts/load-env"
 
-dotenv.config({
-  path: join(projectDir, ".env.server"),
-})
-dotenv.config({
-  path: join(projectDir, ".env.local"),
-})
+loadServerEnv()
 
 export default defineConfig({
   resolve: {

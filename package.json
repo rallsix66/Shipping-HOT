@@ -15,7 +15,7 @@
     "build": "npm run presource && vite build",
     "lint": "eslint",
     "presource": "tsx ./scripts/favicon.ts && tsx ./scripts/source.ts",
-    "start": "node --env-file .env.server dist/output/server/index.mjs",
+    "start": "tsx ./scripts/start.ts",
     "preview": "cross-env CF_PAGES=1 npm run build && wrangler pages dev dist/output/public",
     "deploy": "cross-env CF_PAGES=1 npm run build && wrangler pages deploy dist/output/public",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.app.json",

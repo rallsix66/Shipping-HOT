@@ -67,6 +67,29 @@ INIT_TABLE=true
 ENABLE_CACHE=true
 ```
 
+Shipping HOT 本地环境约定：
+
+1. 复制 `example.env.server` 为 `.env.server`，保存非敏感服务端配置和默认的 Mock/Off 安全模式。
+2. 本机 secret 或 Real Mode 覆盖项写入 `.env.local`；`.env.local` 优先于 `.env.server`，显式 shell 环境变量优先级最高。
+3. `.env`、`.env.*` 已被 Git 忽略，禁止提交 secret。
+4. `pnpm dev` 与 `pnpm start` 使用同一套环境优先级：`process env > .env.local > .env.server > code defaults`。
+5. 若使用生产构建启动本地 Nitro 服务，先运行 `pnpm build`，再运行 `pnpm start`。
+
+真实 Provider 示例（仅在 `.env.local` 或本机配置中显式启用）：
+
+```env
+SHIPPING_VESSEL_PROVIDER=aisstream
+SHIPPING_PORT_PROVIDER=portcast
+SHIPPING_WEATHER_PROVIDER=open-meteo
+SHIPPING_WEATHER_ALERT_PROVIDER=public
+SHIPPING_FEED_PROVIDER=public
+SHIPPING_CALENDAR_PROVIDER=calendarific
+SHIPPING_AIS_AREA_PROVIDER=aisstream
+
+AISSTREAM_API_KEY=
+CALENDARIFIC_API_KEY=
+```
+
 ### 数据库支持
 本项目主推 Cloudflare Pages 以及 Docker 部署， Vercel 需要你自行搞定数据库，其他支持的数据库可以查看 https://db0.unjs.io/connectors 。
 

@@ -65,6 +65,14 @@ INIT_TABLE=true
 ENABLE_CACHE=true
 ```
 
+Shipping HOT のローカル環境設定：
+
+1. `example.env.server` を `.env.server` にコピーし、永続的な非機密設定と安全な Mock/Off のデフォルトを保存します。
+2. ローカルの secret または Real Mode の上書きは `.env.local` に記述します。優先順位は明示的な process env、`.env.local`、`.env.server`、コードのデフォルトの順です。
+3. `.env` と `.env.*` は Git の対象外です。secret を commit しないでください。
+4. `pnpm dev` と `pnpm start` は同じ環境変数の優先順位を使用します。
+5. ローカルの Nitro 本番サーバーを起動する場合は、先に `pnpm build`、続けて `pnpm start` を実行します。
+
 ### データベースサポート
 対応データベースコネクタ： https://db0.unjs.io/connectors Cloudflare D1 Database を推奨。
 

@@ -72,6 +72,14 @@ INIT_TABLE=true
 ENABLE_CACHE=true
 ```
 
+Shipping HOT local environment contract:
+
+1. Copy `example.env.server` to `.env.server` for durable non-secret server configuration and safe Mock/Off defaults.
+2. Put local secrets or Real Mode overrides in `.env.local`; `.env.local` overrides `.env.server`, while explicit process environment variables have the highest priority.
+3. `.env` and `.env.*` are ignored by Git; never commit secrets.
+4. `pnpm dev` and `pnpm start` use the same precedence: `process env > .env.local > .env.server > code defaults`.
+5. To run the local Nitro production server, run `pnpm build` first and then `pnpm start`.
+
 ### Database Support
 
 Supported database connectors: https://db0.unjs.io/connectors
