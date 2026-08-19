@@ -113,6 +113,7 @@ export class AisAreaSession {
   }
 
   private reconnectAttempt = 0
+  private reconnectExhausted = false
   private readonly endpoint: string
   private readonly socketFactory: (endpoint: string) => AisAreaSocket
   private readonly now: () => Date
@@ -220,11 +221,19 @@ export class AisAreaSession {
 
   private scheduleReconnect() {
     if (!this.desiredConfigs.length || this.reconnectTimer) return
-    const delay = this.reconnectDelaysMs[Math.min(this.reconnectAttempt, this.reconnectDelaysMs.length - 1)] ?? 10000
+
+    if (this.reconnectAttempt >= this.reconnectDelaysMs.length) {
+      this.reconnectExhausted = true
+      return
+    }
+
+    const delay = this.reconnectDelaysMs[this.reconnectAttempt]
     this.reconnectAttempt++
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = undefined
-      void this.ensureConnected().catch(() => undefined)
+      void this.ensureConnected().catch(() => {
+        this.scheduleReconnect()
+      })
     }, delay)
   }
 
@@ -240,6 +249,7 @@ export class AisAreaSession {
         socket = this.socketFactory(this.endpoint)
       } catch (error) {
         reject(new Error(sanitizeAreaError(error)))
+        this.scheduleReconnect()
         return
       }
       this.socket = socket
@@ -248,8 +258,12 @@ export class AisAreaSession {
         if (settled) return
         settled = true
         if (timer) clearTimeout(timer)
-        if (error) reject(error)
-        else resolve()
+        if (error) {
+          reject(error)
+          this.scheduleReconnect()
+        } else {
+          resolve()
+        }
       }
       timer = setTimeout(() => {
         if (!opened) {
@@ -264,6 +278,7 @@ export class AisAreaSession {
         this.socketOpen = true
         this.stats.socketOpened++
         this.reconnectAttempt = 0
+        this.reconnectExhausted = false
         this.sendSubscription(this.desiredConfigs)
         finish()
       }
@@ -303,6 +318,10 @@ export class AisAreaSession {
     if (!configs.length) {
       this.close()
       return []
+    }
+    if (this.reconnectExhausted && !this.socketOpen && !this.connectPromise && !this.reconnectTimer) {
+      this.reconnectAttempt = 0
+      this.reconnectExhausted = false
     }
     try {
       await this.ensureConnected()
@@ -345,9 +364,13 @@ export class AisAreaSession {
     if (this.subscriptionTimer) clearTimeout(this.subscriptionTimer)
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer)
     this.clearIdleTimer()
+    this.subscriptionTimer = undefined
+    this.reconnectTimer = undefined
     this.desiredConfigs = []
     this.activeConfigs = []
     this.socketOpen = false
+    this.reconnectAttempt = 0
+    this.reconnectExhausted = false
     try {
       this.socket?.close()
     } catch { /* Ignore close errors during shutdown. */ }

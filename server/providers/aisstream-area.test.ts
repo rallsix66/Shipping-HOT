@@ -148,6 +148,94 @@ describe("area stream boundary", () => {
     expect(sockets[1].closed).toBe(true)
   })
 
+  it("stops automatic reconnects after the configured retry budget", async () => {
+    const sockets: ReturnType<typeof socketWithMessage>[] = []
+    const provider = createAisStreamAreaProvider({ apiKey: "test-key", initialObservationWaitMs: 0, reconnectDelaysMs: [10, 20, 30], socketFactory: () => {
+      const socket = socketWithMessage()
+      sockets.push(socket)
+      if (sockets.length === 1) setTimeout(() => socket.onopen?.(), 0)
+      else setTimeout(() => socket.onclose?.(), 0)
+      return socket
+    } })
+    await provider.getPortMetrics([mockPorts[0]])
+    sockets[0].onclose?.()
+
+    await new Promise(resolve => setTimeout(resolve, 200))
+    expect(sockets).toHaveLength(4)
+    await new Promise(resolve => setTimeout(resolve, 100))
+    expect(sockets).toHaveLength(4)
+  })
+
+  it("recovers when the initial socket fails and the first retry opens", async () => {
+    const sockets: ReturnType<typeof socketWithMessage>[] = []
+    const provider = createAisStreamAreaProvider({ apiKey: "test-key", initialObservationWaitMs: 0, reconnectDelaysMs: [10, 20], socketFactory: () => {
+      const socket = socketWithMessage()
+      sockets.push(socket)
+      if (sockets.length === 1) setTimeout(() => socket.onclose?.(), 0)
+      else setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    await expect(provider.getPortMetrics([mockPorts[0]])).rejects.toThrow("AIS area stream closed before subscription")
+    await new Promise(resolve => setTimeout(resolve, 35))
+    expect(sockets).toHaveLength(2)
+
+    await expect(provider.getPortMetrics([mockPorts[0]])).resolves.toHaveLength(1)
+  })
+
+  it("starts a fresh retry cycle on a new explicit request after exhaustion", async () => {
+    const sockets: ReturnType<typeof socketWithMessage>[] = []
+    const provider = createAisStreamAreaProvider({ apiKey: "test-key", initialObservationWaitMs: 0, reconnectDelaysMs: [10], socketFactory: () => {
+      const socket = socketWithMessage()
+      sockets.push(socket)
+      if (sockets.length === 1 || sockets.length === 3) setTimeout(() => socket.onopen?.(), 0)
+      else setTimeout(() => socket.onclose?.(), 0)
+      return socket
+    } })
+    await provider.getPortMetrics([mockPorts[0]])
+    sockets[0].onclose?.()
+    await new Promise(resolve => setTimeout(resolve, 45))
+    expect(sockets).toHaveLength(2)
+
+    await provider.getPortMetrics([mockPorts[0]])
+    expect(sockets).toHaveLength(3)
+  })
+
+  it("resets the retry budget after a reconnect succeeds", async () => {
+    const sockets: ReturnType<typeof socketWithMessage>[] = []
+    const provider = createAisStreamAreaProvider({ apiKey: "test-key", initialObservationWaitMs: 0, reconnectDelaysMs: [10, 20], socketFactory: () => {
+      const socket = socketWithMessage()
+      sockets.push(socket)
+      if (sockets.length <= 2) setTimeout(() => socket.onopen?.(), 0)
+      else setTimeout(() => socket.onclose?.(), 0)
+      return socket
+    } })
+    await provider.getPortMetrics([mockPorts[0]])
+    sockets[0].onclose?.()
+    await new Promise(resolve => setTimeout(resolve, 35))
+    expect(sockets).toHaveLength(2)
+
+    sockets[1].onclose?.()
+    await new Promise(resolve => setTimeout(resolve, 80))
+    expect(sockets).toHaveLength(4)
+  })
+
+  it("cancels a pending reconnect when the session closes", async () => {
+    const sockets: ReturnType<typeof socketWithMessage>[] = []
+    const session = new AisAreaSession({ apiKey: "test-key", initialObservationWaitMs: 0, reconnectDelaysMs: [30], socketFactory: () => {
+      const socket = socketWithMessage()
+      sockets.push(socket)
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    await session.getPortMetrics([mockPorts[0]])
+    sockets[0].onclose?.()
+    session.close()
+
+    await new Promise(resolve => setTimeout(resolve, 60))
+    expect(sockets).toHaveLength(1)
+    expect(session.currentConfigs).toEqual([])
+  })
+
   it("prunes expired observations from the Map while retaining fresh ones", async () => {
     let now = new Date("2026-08-19T00:00:10.000Z")
     const socket = socketWithMessage()
