@@ -1,7 +1,7 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
-> Last verified: 2026-08-18
-> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation and Mock Isolation boundary, implemented V2.1 Port Intelligence, and V2.2/V2.3/V2.4 implemented with local verification; Portcast/Open-Meteo/Shekou corrected live-path closeout, Final Alert Lifecycle + Feed Timeout closeout and Final Trust Boundary Seal are verified on 2026-08-18; V2.5 not started
+> Last verified: 2026-08-19
+> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation and Mock Isolation boundary, implemented V2.1 Port Intelligence, and V2.2/V2.3/V2.4 implemented with local verification; Portcast/Open-Meteo/Shekou corrected live-path closeout, Final Alert Lifecycle + Feed Timeout closeout and Final Trust Boundary Seal are verified on 2026-08-18; Calendar sync persisted-baseline restart boundary is verified on 2026-08-19; V2.5 not started
 > Source of truth for: the current retained system structure and approved boundaries
 
 ## Current AISStream + Calendarific Live Verification — 2026-08-18
@@ -21,6 +21,13 @@ All-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source
 - Unknown Calendarific type labels normalize to `commercial` with `scope=unknown`, `businessImpact=low` and `recognized=false`; they remain Calendar-visible facts but are not operationally eligible. The targeted 2026 probe reconciled `201` raw → `201` normalized unique → `201` provider/merged facts: `98` national, `44` subdivision, `59` unknown and `25` unsupported-type records; `98` are operationally eligible. The earlier 198/189/48 counts came from pre-seal measurements and are historical, superseded values. Coverage remains partial.
 - Legacy unscoped Calendarific local facts are superseded only when an incoming scoped subdivision/unknown fact matches the same source, country, date, normalized name and type. The old normalized CalendarEvent is removed from the current `calendar_events` set via `removedIds`; its linked ShippingEvent remains historical in the Event audit repository, is excluded from current Event/HOT input, and is not falsely resolved. Legacy unscoped national facts and unscoped Official/Manual facts retain compatibility.
 - The current Calendarific reminder window has `3` national reminders; the previous aggregate four-reminder sample cannot be reconstructed exactly.
+
+## Calendar Sync Persisted Baseline Seal — 2026-08-19
+
+- Direct Calendar sync begins with `readStoredSnapshot()` after initialization. Repository-backed Calendar facts, coverage, settings, Vessel/Port/Voyage/Feed state and previous ShippingEvents are the authoritative baseline for reconciliation and Event detection.
+- `fallbackSnapshot` remains the in-memory fallback only when Repository initialization/read is unavailable. It cannot replace persisted state during a successful Repository-backed sync.
+- A restart-style test confirms persisted legacy Calendarific local identity migration: the old normalized row is deleted through `removedIds`, the new scoped row is upserted, the linked ShippingEvent remains historical and is not resolved, and the local fact creates no current Calendar reminder.
+- A real-mode persisted-state test confirms direct Calendar sync does not re-inject `mock-vessel`, `mock-port`, `mock-weather`, `mock-port-notice` or `mock-calendar` Events; `mock-schedule` remains allowed. No schema or Provider architecture change was introduced.
 
 ## 1. Project Purpose
 

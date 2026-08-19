@@ -4,13 +4,17 @@
 >
 > 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已封板，V2.1 Port Intelligence 已实现，V2.2 Country Calendar、V2.3 Shipping Information Feed 和 V2.4 Weather Intelligence 已完成本地实现与验证；官方/公开 Provider 的 live runtime 仍 pending；V2.5 仍是未启动的规划，不代表其中的 Provider、表结构、路由或规则已经实现。
 >
-> 方案核对日期：2026-08-18。V2.0 已完成收口；V2.1 仅新增 Portcast 公共港口页面 Provider，不使用商业 API、登录、token、hidden endpoint 或新依赖；V2.2 的组合源/覆盖 reconcile、V2.3 的时间与分类语义、V2.4 的三窗口天气和 source-specific warning parser 已完成本地验证，live runtime 仍 pending。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
+> 方案核对日期：2026-08-19。V2.0 已完成收口；V2.1 仅新增 Portcast 公共港口页面 Provider，不使用商业 API、登录、token、hidden endpoint 或新依赖；V2.2 的组合源/覆盖 reconcile、V2.3 的时间与分类语义、V2.4 的三窗口天气和 source-specific warning parser 已完成本地验证，live runtime 仍 pending；2026-08-19 Calendar sync persisted-baseline restart boundary 已完成本地验证。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
 
 ## Current Live Verification Supersession — 2026-08-18
 
 本节覆盖此前“AISStream/Calendarific credential pending”的历史记录：AISStream 本轮达到 connection_verified / pending_observation，但 120 秒内没有 PositionReport，不能升级 verified_live；Calendarific 五国 HTTP 200、合法 JSON 和 parser 均通过，当前状态为 verified_live，但五国 coverageStatus 均为 partial，不能宣称 complete。
 
 Calendarific live 数据暴露了 National holiday / Common local holiday 标签、实际 `locations`/`states[].iso` 地区证据和同名同日跨 subdivision 事实；normalizer 现按 national/local scope 归类，并以 country/date/name/type/scope 做去重与 reconcile。未知 type 现在固定为 `scope=unknown`、`businessImpact=low`、非 operational；旧版无 scope 的 Calendarific local fact 只有在新 scoped fact 提供同源迁移证据时才从 current operational view 移除，历史 Event 不被伪造 resolved。当前最终 probe 为 `201` unique、`98` national、`44` subdivision、`59` unknown、`25` unsupported、`98` operational eligible，当前 reminder 为 `3` 且全部 national；先前 all-real API/page smoke 仍是既有基线证据；JMA/TMD/BMKG 仍 live_pending，V2.5 仍未启动。
+
+## Calendar Sync Persisted Baseline Seal — 2026-08-19
+
+`syncCalendarEvents()` 在 `initialize()` 后调用 `readStoredSnapshot()`。Repository 可用时，Calendar events、coverage/settings、Vessel/Port/Voyage/Feed 状态和 previous ShippingEvents 均来自持久化快照；`fallbackSnapshot` 只作为 Repository 不可用时的内存 fallback。restart-style 测试已验证：旧 legacy Calendarific local row 可被发现并通过 `removedIds` 删除，新 scoped row 写入，历史 ShippingEvent 不被 resolve，local fact 不产生 reminder；real persisted state 直连 Calendar sync 不会重新写入非 schedule Mock Event。`mock-schedule` 仍是允许的 Mock 来源，未引入 schema 或 Provider 架构变化。
 
 ## 1. V2 Executive Summary
 

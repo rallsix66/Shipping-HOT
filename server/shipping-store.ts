@@ -234,15 +234,16 @@ export function reconcileCalendarEvents(existing: CalendarEvent[], incoming: Cal
 
 export async function syncCalendarEvents(year = mockCalendarYear, countries?: CalendarCountryCode[]): Promise<CalendarProviderResult> {
   await initialize()
+  const stored = await readStoredSnapshot()
   const query = calendarQuery(year, countries)
   const result = await providers.calendar.getEvents(query)
-  const existing = filterCalendarEventsForSourceIds(fallbackSnapshot.calendarEvents ?? [], providerModes.calendarSourceIds ?? [])
+  const existing = filterCalendarEventsForSourceIds(stored.calendarEvents ?? [], providerModes.calendarSourceIds ?? [])
   const reconciled = reconcileCalendarEvents(existing, result.events, result.coverage, year)
-  const previousCoverage = filterCalendarCoverageForSourceIds(fallbackSnapshot.calendarCoverage ?? fallbackSnapshot.settings.calendarSync ?? [], providerModes.calendarSourceIds ?? [])
+  const previousCoverage = filterCalendarCoverageForSourceIds(stored.calendarCoverage ?? stored.settings.calendarSync ?? [], providerModes.calendarSourceIds ?? [])
   const coverage = [...previousCoverage.filter(item => !(query.countries.includes(item.countryCode) && item.year === year)), ...result.coverage]
-  const settings = { ...fallbackSnapshot.settings, calendarSync: coverage }
-  const snapshot = { ...fallbackSnapshot, settings, calendarEvents: reconciled.events, calendarCoverage: coverage }
-  snapshot.events = detectShippingEvents(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, snapshot.settings, fallbackSnapshot.events, result.fetchedAt, snapshot.calendarEvents)
+  const settings = { ...stored.settings, calendarSync: coverage }
+  const snapshot = { ...stored, settings, calendarEvents: reconciled.events, calendarCoverage: coverage }
+  snapshot.events = detectShippingEvents(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, snapshot.settings, stored.events, result.fetchedAt, snapshot.calendarEvents)
   fallbackSnapshot = structuredClone(snapshot)
   if (reconciled.removedIds.length) await repository?.deleteCalendarEvents(reconciled.removedIds)
   for (const event of reconciled.events) await repository?.upsertCalendarEvent(event)
