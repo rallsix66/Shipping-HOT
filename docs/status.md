@@ -10,6 +10,14 @@ Shipping HOT V2.2–V2.5 local closeout is complete on the retained NewsNow stac
 
 `Mock isolation: complete` for the local operational boundary; native SQLite runtime, AIS observation evidence and official-alert live verification remain pending.
 
+## V2 Plan Archive
+
+V2.0–V2.5 development plan is archived as completed.
+
+Archive file: `docs/archive/shipping-hot-v2-completion.md`
+
+Remaining pending work: real data coverage / runtime follow-up.
+
 ## 2. Current Environment
 
 - Active branch: `main`; package version: `0.0.41`

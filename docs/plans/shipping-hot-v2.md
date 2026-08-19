@@ -1,6 +1,14 @@
 # Shipping HOT V2 实施方案
 
-> 状态：`V2.2/V2.3/V2.4 implemented / locally verified / live pending`; `V2.5 implemented / locally verified / live pending`；V2.5 Trust Boundary 与 Reconnect Lifecycle 已 sealed
+> Status: `ARCHIVED / COMPLETED`
+>
+> Archive: `docs/archive/shipping-hot-v2-completion.md`
+>
+> Archived at: 2026-08-19
+>
+> Final plan baseline: `9e996a4778ff6c7eedd1aacfd9c34ce922efb9cb`
+>
+> Further work belongs to post-V2 real data coverage/runtime follow-up.
 >
 > 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已封板，V2.1 Port Intelligence 已实现，V2.2 Country Calendar、V2.3 Shipping Information Feed、V2.4 Weather Intelligence 和 V2.5 AIS / Port Derived Intelligence 已完成本地实现与验证；V2.5 Final Trust Seal 与 Final Reconnect Lifecycle Seal 已完成本地收口，但 Area live probe 只有 `connection_verified / coverage_pending`，不能升级 `verified_live`。
 >
