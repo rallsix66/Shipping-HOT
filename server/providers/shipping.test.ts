@@ -214,6 +214,15 @@ describe("shipping Provider failure boundaries", () => {
     expect(result.freshness).toMatchObject({ sourceStatus: "never_succeeded", stale: true, error: "AISSTREAM_API_KEY missing" })
   })
 
+  it("keeps AIS area explicitly off unless its own mode is requested", async () => {
+    const defaultConfig = configureProviders({ SHIPPING_VESSEL_PROVIDER: "aisstream", AISSTREAM_API_KEY: "test-key" })
+    expect(defaultConfig.modes.aisArea).toBe("off")
+    const areaConfig = configureProviders({ SHIPPING_AIS_AREA_PROVIDER: "aisstream" })
+    expect(areaConfig.modes.aisArea).toBe("aisstream")
+    await expect(areaConfig.providers.aisArea.getPortMetrics([mockPorts[0]])).rejects.toThrow("AISSTREAM_API_KEY missing")
+    expect(createOperationalSourceContext(areaConfig.modes).activeSourceIds.has("aisstream-area")).toBe(true)
+  })
+
   it("selects model weather and official alerts independently", async () => {
     expect(configureProviders({}).modes.weatherAlerts).toBe("off")
     const mockOff = configureProviders({ SHIPPING_WEATHER_PROVIDER: "mock", SHIPPING_WEATHER_ALERT_PROVIDER: "off" })

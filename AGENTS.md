@@ -3,7 +3,7 @@
 ## Project
 
 - Current codebase: NewsNow foundation with a local Shipping HOT implementation and optional V1 real Provider adapters.
-- Shipping HOT Mock, approved V1 real-provider flows and V2.2–V2.4 local flows are implemented and verified where stated in `docs/status.md`; V2.5 remains explicitly not started and out of scope.
+- Shipping HOT Mock, approved V1 real-provider flows and V2.2–V2.5 local flows are implemented and verified where stated in `docs/status.md`; V2.5 follow-on work remains out of scope until separately approved.
 
 ## Commands
 

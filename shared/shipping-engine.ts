@@ -1,5 +1,7 @@
 import { deriveProvenance, provenanceEvidence, sourceScopedEventDedupeKey } from "./shipping"
 import type { FeedItem, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, Vessel, Voyage } from "./shipping"
+import type { AisDerivedPortMetric } from "./ais-area"
+import { isUsableAisAreaMetric } from "./ais-area"
 import { type CalendarEvent, calendarCountries, calendarEventLegacyId, calendarLeadDays, calendarSeverity, daysUntilCalendarEvent } from "./calendar"
 import { calculateDelayMinutes, congestionLevelRank, reconcileEvent, statusDurationMinutes } from "./shipping-rules"
 
@@ -45,7 +47,11 @@ export function voyageDelayEventKey(voyage: Pick<Voyage, "id" | "provenance">): 
   return sourceScopedEventDedupeKey(`voyage_delay:${voyage.id}`, voyage.provenance?.sourceId)
 }
 
-export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: Voyage[], feedItems: FeedItem[], settings: ShippingSettings, previous: ShippingEvent[] = [], now = new Date().toISOString(), calendarEvents: CalendarEvent[] = []): ShippingEvent[] {
+export function aisPortCongestionTrendEventKey(metric: Pick<AisDerivedPortMetric, "portId" | "provenance">): string {
+  return sourceScopedEventDedupeKey(`ais_port_congestion_trend:${metric.portId}`, metric.provenance?.sourceId)
+}
+
+export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: Voyage[], feedItems: FeedItem[], settings: ShippingSettings, previous: ShippingEvent[] = [], now = new Date().toISOString(), calendarEvents: CalendarEvent[] = [], aisPortMetrics: AisDerivedPortMetric[] = []): ShippingEvent[] {
   const candidates: Omit<ShippingEvent, "id" | "firstDetectedAt" | "lastDetectedAt" | "resolvedAt">[] = []
   const calendarById = new Map(calendarEvents.map(event => [event.id, event]))
   const supersededLegacyCalendarEventIds = new Set(calendarEvents.filter(isCalendarificScopedLocal).map(event => calendarEventLegacyId(event, event.sourceId)))
@@ -56,6 +62,7 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
   const sourceTrust = new Map<string, Freshness>()
   vessels.forEach(vessel => sourceTrust.set(vesselAnchoredEventKey(vessel), vessel))
   ports.forEach(port => sourceTrust.set(portCongestionEventKey(port), port))
+  aisPortMetrics.forEach(metric => sourceTrust.set(aisPortCongestionTrendEventKey(metric), metric))
   voyages.forEach(voyage => sourceTrust.set(voyageDelayEventKey(voyage), voyage))
   feedItems.forEach(feed => sourceTrust.set(`feed:${feed.id}`, feed))
   const today = now.slice(0, 10)
@@ -88,6 +95,41 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
       candidates.push({ ...eventTrust(port), type: "port_congestion", severity: port.congestionLevel === "critical" ? "critical" : "warning", status: "active", title: `${port.nameEn} 拥堵升级`, summary: detail, occurredAt: port.updatedAt ?? now, detectedAt: now, dedupeKey: portCongestionEventKey(port), portId: port.id, evidenceJson: { congestionLevel: port.congestionLevel, waitingHours: port.waitingHours } })
     }
   }
+  for (const metric of aisPortMetrics.filter(metric => isUsableAisAreaMetric(metric) && metric.trend === "rising" && metric.consecutiveRisingWindows >= 3)) {
+    const port = ports.find(item => item.id === metric.portId)
+    if (!port?.isWatched) continue
+    const dedupeKey = aisPortCongestionTrendEventKey(metric)
+    candidates.push({
+      provenance: metric.trendProvenance ?? metric.provenance,
+      evidence: [{ provenance: metric.provenance ?? metric.trendProvenance!, sourceUpdatedAt: metric.sourceUpdatedAt }, ...(metric.observationProvenance ? [{ provenance: metric.observationProvenance, sourceUpdatedAt: metric.sourceUpdatedAt }] : [])],
+      updatedAt: metric.updatedAt,
+      sourceUpdatedAt: metric.sourceUpdatedAt,
+      fetchedAt: metric.fetchedAt,
+      stale: metric.stale,
+      sourceStatus: metric.sourceStatus,
+      error: metric.error,
+      type: "ais_port_congestion_trend",
+      severity: "warning",
+      status: "active",
+      title: `${port.nameEn} AIS 区域静止趋势上升`,
+      summary: `区域 AIS 估算显示静止比例连续 ${metric.consecutiveRisingWindows} 个窗口上升（${metric.sampleSize} 个不同 MMSI）。`,
+      occurredAt: metric.observationWindow?.endAt ?? metric.updatedAt ?? now,
+      detectedAt: now,
+      dedupeKey,
+      portId: metric.portId,
+      evidenceJson: {
+        sampleSize: metric.sampleSize,
+        anchoredCount: metric.anchoredCount,
+        mooredCount: metric.mooredCount,
+        lowSpeedCount: metric.lowSpeedCount,
+        stationaryRatio: metric.stationaryRatio,
+        trend: metric.trend,
+        consecutiveRisingWindows: metric.consecutiveRisingWindows,
+        coverage: metric.coverage,
+        boundarySource: metric.boundarySource,
+      },
+    })
+  }
   for (const feed of feedItems.filter(item => isFreshEventEvidence(item) && item.eventEligibility !== false && item.publicationTimeKnown !== false && (item.severity === "warning" || item.severity === "critical"))) {
     candidates.push({ ...eventTrust(feed), type: feed.type, severity: feed.severity, status: "active", title: feed.title, summary: feed.summary, occurredAt: feed.publishedAt || feed.sourceUpdatedAt || now, detectedAt: now, dedupeKey: `feed:${feed.id}`, feedItemId: feed.id, evidenceJson: { category: feed.category, hotReason: feed.hotReason, relatedPortIds: feed.relatedPortIds, relatedVesselIds: feed.relatedVesselIds, relatedVoyageIds: feed.relatedVoyageIds } })
   }
@@ -112,7 +154,11 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
     if (existing.status === "active" && !activeKeys.has(existing.dedupeKey)) {
       const trust = sourceTrust.get(existing.dedupeKey)
       if (!trust) {
-        reconciled.push(existing)
+        if (existing.provenance?.sourceId === "aisstream-area") {
+          reconciled.push({ ...existing, stale: true, sourceStatus: "failed", error: "AIS area observation unavailable" })
+        } else {
+          reconciled.push(existing)
+        }
         continue
       }
       const { id: _id, firstDetectedAt: _first, lastDetectedAt: _last, resolvedAt: _resolved, ...incoming } = existing

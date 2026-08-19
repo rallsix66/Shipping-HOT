@@ -1,5 +1,6 @@
 import type { Database } from "db0"
 import { knownMockProvenanceFor, normalizeLegacyEventTrust, normalizeLegacyTrust } from "@shared/shipping"
+import type { AisDerivedPortMetric } from "@shared/ais-area"
 import type { DataProvenance, FeedItem, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, Vessel, Voyage } from "@shared/shipping"
 import type { CalendarEvent } from "@shared/calendar"
 
@@ -94,6 +95,9 @@ export async function initShippingTables(db: Database) {
     verified INTEGER NOT NULL, last_checked_at TEXT NOT NULL, updated_at TEXT,
     stale INTEGER NOT NULL, data TEXT NOT NULL
   )`).run()
+  await db.prepare(`CREATE TABLE IF NOT EXISTS ais_port_metrics (
+    port_id TEXT PRIMARY KEY, data TEXT NOT NULL, updated_at TEXT
+  )`).run()
 }
 
 export class ShippingRepository {
@@ -104,13 +108,14 @@ export class ShippingRepository {
     return Number(row?.count ?? 0) === 0
   }
 
-  async seed(vessels: Vessel[], ports: Port[], voyages: Voyage[], feedItems: FeedItem[], events: ShippingEvent[], settings: ShippingSettings, calendarEvents: CalendarEvent[] = []) {
+  async seed(vessels: Vessel[], ports: Port[], voyages: Voyage[], feedItems: FeedItem[], events: ShippingEvent[], settings: ShippingSettings, calendarEvents: CalendarEvent[] = [], aisPortMetrics: AisDerivedPortMetric[] = []) {
     for (const vessel of vessels) await this.upsertVessel(vessel)
     for (const port of ports) await this.upsertPort(port)
     for (const voyage of voyages) await this.upsertVoyage(voyage)
     for (const feedItem of feedItems) await this.upsertFeedItem(feedItem)
     for (const event of events) await this.upsertEvent(event)
     for (const event of calendarEvents) await this.upsertCalendarEvent(event)
+    for (const metric of aisPortMetrics) await this.upsertAisPortMetric(metric)
     await this.saveSettings(settings)
   }
 
@@ -159,6 +164,10 @@ export class ShippingRepository {
   async upsertVessel(vessel: Vessel) {
     await this.db.prepare(`INSERT OR REPLACE INTO vessels (id, data, is_watched, navigation_status, status_changed_at, last_updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
       .run(vessel.id, JSON.stringify(vessel), vessel.isWatched ? 1 : 0, vessel.navigationStatus, vessel.statusChangedAt ?? null, vessel.updatedAt ?? null)
+  }
+
+  async listAisPortMetrics() {
+    return rows<Row>(await this.db.prepare("SELECT data FROM ais_port_metrics ORDER BY port_id").all()).map(row => parse<AisDerivedPortMetric>(row.data))
   }
 
   async upsertPort(port: Port) {
@@ -211,5 +220,10 @@ export class ShippingRepository {
     const cutoff = new Date(now.getTime() - retentionDays * 24 * 60 * 60 * 1000).toISOString()
     await this.db.prepare("DELETE FROM events WHERE last_detected_at < ? AND status = 'resolved'").run(cutoff)
     await this.db.prepare("DELETE FROM feed_items WHERE (published_at <> '' AND published_at < ?) OR (published_at = '' AND fetched_at < ?)").run(cutoff, cutoff)
+  }
+
+  async upsertAisPortMetric(metric: AisDerivedPortMetric) {
+    await this.db.prepare("INSERT OR REPLACE INTO ais_port_metrics (port_id, data, updated_at) VALUES (?, ?, ?)")
+      .run(metric.portId, JSON.stringify(metric), metric.updatedAt ?? metric.fetchedAt ?? null)
   }
 }

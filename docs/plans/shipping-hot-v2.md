@@ -1,8 +1,8 @@
 # Shipping HOT V2 实施方案
 
-> 状态：`V2.2/V2.3/V2.4 implemented / locally verified / live pending`; `V2.5 not started`
+> 状态：`V2.2/V2.3/V2.4 implemented / locally verified / live pending`; `V2.5 implemented / locally verified / live pending`
 >
-> 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已封板，V2.1 Port Intelligence 已实现，V2.2 Country Calendar、V2.3 Shipping Information Feed 和 V2.4 Weather Intelligence 已完成本地实现与验证；官方/公开 Provider 的 live runtime 仍 pending；V2.5 仍是未启动的规划，不代表其中的 Provider、表结构、路由或规则已经实现。
+> 本文最初是基于当前 V1 代码、架构文档、ADR、V1 路线图和公开资料形成的 V2 方案。V2.0 Data Trust Foundation 已封板，V2.1 Port Intelligence 已实现，V2.2 Country Calendar、V2.3 Shipping Information Feed、V2.4 Weather Intelligence 和 V2.5 AIS / Port Derived Intelligence 已完成本地实现与验证；官方/公开 Provider 的 live runtime 仍 pending，V2.5 本轮未启动真实 external live smoke。
 >
 > 方案核对日期：2026-08-19。V2.0 已完成收口；V2.1 仅新增 Portcast 公共港口页面 Provider，不使用商业 API、登录、token、hidden endpoint 或新依赖；V2.2 的组合源/覆盖 reconcile、V2.3 的时间与分类语义、V2.4 的三窗口天气和 source-specific warning parser 已完成本地验证，live runtime 仍 pending；2026-08-19 Calendar sync persisted-baseline restart boundary 已完成本地验证。另有独立的 NewsNow source metadata 生成副作用修复，范围限于构建脚本和稳定 source 列表。
 
@@ -10,7 +10,23 @@
 
 本节覆盖此前“AISStream/Calendarific credential pending”的历史记录：AISStream 本轮达到 connection_verified / pending_observation，但 120 秒内没有 PositionReport，不能升级 verified_live；Calendarific 五国 HTTP 200、合法 JSON 和 parser 均通过，当前状态为 verified_live，但五国 coverageStatus 均为 partial，不能宣称 complete。
 
-Calendarific live 数据暴露了 National holiday / Common local holiday 标签、实际 `locations`/`states[].iso` 地区证据和同名同日跨 subdivision 事实；normalizer 现按 national/local scope 归类，并以 country/date/name/type/scope 做去重与 reconcile。未知 type 现在固定为 `scope=unknown`、`businessImpact=low`、非 operational；旧版无 scope 的 Calendarific local fact 只有在新 scoped fact 提供同源迁移证据时才从 current operational view 移除，历史 Event 不被伪造 resolved。当前最终 probe 为 `201` unique、`98` national、`44` subdivision、`59` unknown、`25` unsupported、`98` operational eligible，当前 reminder 为 `3` 且全部 national；先前 all-real API/page smoke 仍是既有基线证据；JMA/TMD/BMKG 仍 live_pending，V2.5 仍未启动。
+Calendarific live 数据暴露了 National holiday / Common local holiday 标签、实际 `locations`/`states[].iso` 地区证据和同名同日跨 subdivision 事实；normalizer 现按 national/local scope 归类，并以 country/date/name/type/scope 做去重与 reconcile。未知 type 现在固定为 `scope=unknown`、`businessImpact=low`、非 operational；旧版无 scope 的 Calendarific local fact 只有在新 scoped fact 提供同源迁移证据时才从 current operational view 移除，历史 Event 不被伪造 resolved。当前最终 probe 为 `201` unique、`98` national、`44` subdivision、`59` unknown、`25` unsupported、`98` operational eligible，当前 reminder 为 `3` 且全部 national；先前 all-real API/page smoke 仍是既有基线证据；JMA/TMD/BMKG 仍 live_pending，V2.5 已进入本地实现状态，外部 area observation 仍 pending。
+
+## V2.5 Implementation Gate — 2026-08-19
+
+本 Gate 已获架构确认，开始执行 V2.5 Phase 1。V2.5 定义为 AIS 区域 PositionReport 驱动的重点港口船舶活动/静止趋势估算，不等同官方港口拥堵率、真实等待船数、锚地船数或排队时间。
+
+- Watched AIS Vessel 与 Port Area AIS 是两个独立逻辑 session。Area provider 由 `SHIPPING_AIS_AREA_PROVIDER=off|aisstream` 显式开启，默认 `off`，复用 `AISSTREAM_API_KEY`；不因 `SHIPPING_VESSEL_PROVIDER=aisstream` 自动开启。
+- Area source ID 固定为 `aisstream-area`；原始 PositionReport 使用 `aisstream + observed`，区域 aggregate 使用 `aisstream-area + derived`，趋势判断使用 `aisstream-area + estimated`。
+- Area session 为 server-process singleton，单飞连接、订阅复用、同 socket subscription replacement、至少 1 秒 debounce、有限指数退避和 idle close。Area subscription 只使用当前 watched ports 的小型 observation bounding boxes、`FilterMessageTypes=["PositionReport"]`，不使用 `FiltersShipMMSI`。
+- Area bounding box 是 `configured_heuristic` 的区域观察范围，不是官方港界、锚地、terminal 或 pilot-station polygon。重叠区域按最近港口中心分配，并标记 `areaAmbiguous`/`ambiguousSampleCount`，不静默重复计算。
+- Area session 内存只保留每港每 MMSI 的 latest observation 和有界 aggregate ring buffer；观测 TTL 默认 15 分钟，禁止保存 raw AIS track、无限 vessel history 或逐消息写 SQLite。
+- Metric 至少包含 sample size、active vessel count、anchored/moored count、low-speed count、stationary ratio、ambiguous sample count、coverage、trend、observation window、bbox、freshness 和 provenance。minimum distinct MMSI 默认 5；样本不足为 `insufficient_samples/unknown`，无观测为 `no_observation/unknown`，过期为 `stale`。
+- 默认 low-speed 阈值为 `<=1 knot`。第一版只输出 `rising|stable|falling|unknown`，不输出 low/medium/high/critical 港口拥堵等级，不生成 waitingHours、queueTime、berthDelay 或 median waiting time。
+- 可增加最小 `ais_port_metrics` 表，只保存每港当前/last-known aggregate metric；不增加 `ais_tracks`、`ais_messages` 或 raw event 表。Area metric 永远不覆盖 Portcast 的 Port 字段。
+- AIS-derived Event 只有在 fresh、usable、minimum sample、连续至少 3 个 rising aggregate windows、watched port 条件同时满足时生成，source identity 为 `ais_port_congestion_trend:<portId>:aisstream-area`，最高 severity 为 `warning`。失败/stale 保留同源 active Event 的 stale 状态，不自动 resolve；只有 fresh evidence 且趋势条件消失才 resolve。
+- Event/HOT 与 current `OperationalSourceContext` 绑定；`aisstream-area` 未启用时历史 metric/Event 可以留在 Repository，但不能进入 current view。`mock-schedule` 仍是唯一允许继续工作的 Mock Schedule source。
+- Rollback 为 `SHIPPING_AIS_AREA_PROVIDER=off`：Area socket 不启动，Area metric/Event/HOT 离开 current operational view，历史可保留，Watched AIS Vessel 与 Portcast 不受影响。
 
 ## Calendar Sync Persisted Baseline Seal — 2026-08-19
 
@@ -801,7 +817,7 @@ Portcast 不公开某字段时保持 undefined，不用 0 代替未知。
 
 ## 21. UI Changes
 
-V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成本地 closeout，外部 live verification pending；V2.5 及以后按以下规划改动：
+V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4/V2.5 已完成本地 closeout，外部 live verification pending；V2.5 后续扩展保持未启动：
 
 ### V2.0
 
@@ -839,7 +855,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 
 ### V2.5
 
-- AIS derived 港口指标单独展示“估算/衍生”，并提供观测窗口、Bounding Box/锚地范围摘要、样本量和覆盖警告。
+- 已实现 AIS derived 港口指标独立展示“估算/衍生”，包含趋势、观测窗口、heuristic Bounding Box 摘要、样本量、歧义样本、覆盖和源状态；样本不足/过期明确显示不能判断趋势，不替换 Portcast 拥堵字段。
 
 ## 22. V2 Phases
 
@@ -915,6 +931,15 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - Main risks：AIS 漏报、区域边界、港区地理范围、连接/消息量、误报。
 - Rollback：关闭 area session，保留 Watched Vessel AIS 和 Portcast/公告路径。
 
+#### V2.5 Phase 1 implementation result — 2026-08-19
+
+- Implemented `shared/ais-area.ts` as a pure contract/aggregation boundary. It creates eight configured heuristic port boxes from existing focus-port centers, validates PositionReport coordinates, assigns overlaps to the nearest center, counts ambiguous samples, applies a 15-minute TTL, calculates anchored/moored/low-speed/stationary metrics and emits only `rising|stable|falling|unknown` trends.
+- Implemented `server/providers/aisstream-area.ts` as a separate Area session. It is explicit-off by default, uses watched current-port identities, sends `FilterMessageTypes=["PositionReport"]` without `FiltersShipMMSI`, reuses a single socket with single-flight setup, one-second subscription debounce, finite reconnect backoff, idle close and bounded latest-observation/metric history. It never changes Watched AIS behavior.
+- Added the minimal `ais_port_metrics` repository table, which stores aggregate JSON only. Current Store reads filter by `aisstream-area`; disabled area mode retains historical rows but exposes no current metrics. Portcast fields remain independent.
+- Added `ais_port_congestion_trend` Event/HOT logic. It requires a fresh usable watched-port metric, five distinct MMSIs and three consecutive rising windows; severity is capped at warning. Same-source active Events remain stale on Area failure, while source switching/area off removes them from current operational view without resolving history.
+- Added independent Port list/detail Area labels and settings provider display. Unknown/insufficient/stale metrics are presented as “当前 AIS 区域样本不足，不能判断趋势”, never as normal port congestion.
+- Local test evidence covers session boundaries, bounding boxes, no Watched MMSI filters, malformed messages, TTL/overlap/aggregation, persistence, provenance, failure/last-known behavior, Event/HOT thresholds and Mock isolation. No real external Area smoke was started.
+
 ## 23. Risks
 
 | 优先级 | 风险 | 影响 | 缓解 |
@@ -961,7 +986,7 @@ V2.0 已完成最小 UI 信任标识；V2.1 已实现，V2.2/V2.3/V2.4 已完成
 - 明确资讯不新增独立海运新闻页，继续复用 NewsNow Source/Feed。
 - 明确 Calendarific + OfficialHolidayProvider/ManualOverride 的优先级、冲突、验证和缓存策略。
 - 明确 Planned Schedule 与 AIS-reported ETA 分离，并允许真实船期延期。
-- 明确 V2.2 最小新增 `calendar_events` 表；日历覆盖写入现有 settings 的 `calendarSync` 区域；不引入 ORM migration。最终 Mock isolation seal 仅对既有 `vessels` 表执行 nullable `status_changed_at` 兼容重建，不新增业务表。
+- 明确 V2.2 最小新增 `calendar_events` 表；日历覆盖写入现有 settings 的 `calendarSync` 区域；V2.5 仅新增 `ais_port_metrics` aggregate JSON 表，不引入 ORM migration、raw AIS track/message 表或无限历史。
 
 ### 25.2 未来实现验收
 
@@ -982,7 +1007,7 @@ V2.1 implemented
 V2.2 implemented / locally verified / live pending
 V2.3 implemented / locally verified / live pending
 V2.4 implemented / locally verified / live pending
-V2.5 not started
+V2.5 implemented / locally verified / live pending
 ```
 
-本文件仍是方案与边界产物；V2.0 已封板，V2.1 已实现，V2.2/V2.3/V2.4 已完成本地 closeout 和文档同步；Calendarific transport/parser 已 verified_live 但 coverage 仍 partial，AIS observation 与官方预警 live verification 仍 pending。V2.5 仍需新的 Gate 批准后继续。
+本文件仍是方案与边界产物；V2.0 已封板，V2.1 已实现，V2.2/V2.3/V2.4/V2.5 已完成本地 closeout 和文档同步；Calendarific transport/parser 已 verified_live 但 coverage 仍 partial，Watched AIS observation、AIS area observation 与官方预警 live verification 仍 pending。本轮未开始 V2.5 后续阶段或 V2.6。

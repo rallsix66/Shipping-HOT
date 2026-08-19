@@ -107,6 +107,7 @@ export function freshnessState(item: { stale: boolean, sourceStatus: string }): 
 }
 
 function relatedFreshness(event: ShippingEvent, ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[]): { stale: boolean, sourceStatus: SourceStatus, provenance?: ShippingEvent["provenance"] } {
+  if (event.provenance?.sourceId === "aisstream-area") return { stale: event.stale ?? true, sourceStatus: event.sourceStatus, provenance: event.provenance }
   if (event.feedItemId) {
     const feed = feedItems.find(item => item.id === event.feedItemId)
     if (feed) return { ...feed, provenance: event.provenance ?? deriveProvenance(feed.provenance) }
@@ -136,6 +137,7 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
 
   const eventItems = operationalEvents
     .filter(event => event.status === ("active" as EventStatus))
+    .filter(event => event.provenance?.sourceId !== "aisstream-area" || Boolean(event.portId && ports.some(port => port.id === event.portId && port.isWatched)))
     .map((event) => {
       const source = relatedFreshness(event, ports, vessels, voyages, operationalFeedItems)
       return {

@@ -98,6 +98,7 @@ class FakeDatabase {
     else if (tableName === "feed_items") table.set(id, { id, data: args[13], published_at: args[7], fetched_at: args[8] })
     else if (tableName === "events") table.set(id, { id, data: args[1], status: args[4], dedupe_key: args[5], last_detected_at: args[7] })
     else if (tableName === "calendar_events") table.set(id, { id, data: args[14], date: args[3], country_code: args[1] })
+    else if (tableName === "ais_port_metrics") table.set(id, { id, data: args[1], updated_at: args[2] })
   }
 
   updateWatch(tableName: string, args: unknown[]) {
@@ -277,5 +278,34 @@ describe("shippingRepository", () => {
     expect(stored).toHaveLength(10)
     expect(stored[0]).toMatchObject({ countryCode: "TH", sourceId: "mock-calendar", stale: false })
     expect(stored.find(event => event.id === calendarEvents[0].id)).toMatchObject({ scope: "subdivision", subdivisionCode: "my-05", subdivisionCodes: ["my-05"], scopeLabel: "Negeri Sembilan" })
+  })
+
+  it("roundtrips only the bounded AIS area aggregate metric", async () => {
+    const database = new FakeDatabase()
+    const repository = new ShippingRepository(database as unknown as Database)
+    const metric = {
+      portId: "port-shekou",
+      sampleSize: 5,
+      activeVesselCount: 5,
+      anchoredCount: 4,
+      mooredCount: 0,
+      lowSpeedCount: 4,
+      stationaryRatio: 0.8,
+      ambiguousSampleCount: 1,
+      trend: "rising" as const,
+      consecutiveRisingWindows: 3,
+      bbox: { south: 22, west: 113, north: 23, east: 114 },
+      boundarySource: "configured_heuristic" as const,
+      coverage: "usable" as const,
+      lowSpeedThresholdKnots: 1,
+      minimumSampleSize: 5,
+      stale: false,
+      sourceStatus: "healthy" as const,
+      fetchedAt: "2026-08-19T00:00:00.000Z",
+      provenance: { sourceType: "third_party" as const, dataNature: "derived" as const, sourceId: "aisstream-area" },
+    }
+    await repository.upsertAisPortMetric(metric)
+    expect(await repository.listAisPortMetrics()).toEqual([metric])
+    expect(database.table("ais_port_metrics").get("port-shekou")).toBeDefined()
   })
 })

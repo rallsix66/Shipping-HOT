@@ -1,5 +1,6 @@
 import { filterEventsForOperationalContext, sourceAllowedForOperationalContext, toVesselWatchTarget } from "@shared/shipping"
-import type { FeedItem, Port, ProviderResult, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
+import type { AisDerivedPortMetric } from "@shared/ais-area"
+import type { FeedItem, Freshness, Port, ProviderResult, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries, calendarEventKey, calendarEventLegacyId } from "@shared/calendar"
 import { detectShippingEvents } from "@shared/shipping-engine"
@@ -29,6 +30,12 @@ function mergeVoyages(providerVoyages: Voyage[], storedVoyages: Voyage[]): Voyag
   return providerVoyages.map(item => mergeProviderVoyage(previous.get(item.id), item))
 }
 
+function filterOperationalAisAreaMetrics(metrics: AisDerivedPortMetric[]): AisDerivedPortMetric[] {
+  return providerModes.aisArea === "aisstream"
+    ? metrics.filter(metric => sourceAllowedForOperationalContext(metric.provenance?.sourceId, operationalSourceContext))
+    : []
+}
+
 export function mergeWeatherFeedItems(existing: FeedItem[], weather: FeedItem[]): FeedItem[] {
   return [...existing.filter(item => !isWeatherFeedItem(item)), ...weather]
 }
@@ -52,7 +59,7 @@ async function initialize() {
   return initialized
 }
 
-async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick<ShippingSnapshot, "vessels" | "ports" | "voyages" | "feedItems" | "calendarEvents" | "calendarCoverage"> = fallbackSnapshot): Promise<ShippingSnapshot> {
+async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick<ShippingSnapshot, "vessels" | "ports" | "voyages" | "feedItems" | "calendarEvents" | "calendarCoverage" | "aisPortMetrics"> = fallbackSnapshot): Promise<ShippingSnapshot> {
   const existingNonWeatherFeed = lastKnown.feedItems.filter(item => !isWeatherFeedItem(item))
   const feedLastKnown = filterFeedLastKnownForMode(existingNonWeatherFeed, providerModes.feed)
   const weatherLastKnown = lastKnown.feedItems.filter(isWeatherFeedItem)
@@ -66,6 +73,7 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
     .map(item => sanitizeAisVessel(item))
   const vesselLastKnown = providerModes.vessel === "aisstream" ? aisLastKnown : lastKnown.vessels
   const portLastKnown = providerModes.port === "portcast" ? lastKnown.ports.filter(item => item.provenance?.sourceId === "portcast-public") : lastKnown.ports
+  const areaLastKnown = filterOperationalAisAreaMetrics(lastKnown.aisPortMetrics ?? [])
   const calendarEvents = filterCalendarEventsForSourceIds(lastKnown.calendarEvents ?? [], providerModes.calendarSourceIds ?? [])
   const calendarCoverage = filterCalendarCoverageForSourceIds(lastKnown.calendarCoverage ?? settings.calendarSync ?? [], providerModes.calendarSourceIds ?? [])
   const weatherResults = settings.sourceEnabled
@@ -80,8 +88,13 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
     settings.providerEnabled ? providers.schedule.getVoyages() : Promise.resolve(disabledProviderData(lastKnown.voyages)),
     settings.sourceEnabled ? providers.feed.getFeedItems(feedLastKnown, lastKnown.ports) : Promise.resolve(disabledProviderData(feedLastKnown)),
   ])
+  const areaProviderPorts = (portResult.status === "fulfilled" ? portResult.value : portLastKnown)
+    .filter(item => item.isWatched && sourceAllowedForOperationalContext(item.provenance?.sourceId, operationalSourceContext))
+  const [aisAreaResult] = await Promise.allSettled([
+    settings.providerEnabled && providerModes.aisArea === "aisstream" ? providers.aisArea.getPortMetrics(areaProviderPorts, areaLastKnown) : Promise.resolve([] as AisDerivedPortMetric[]),
+  ])
   const [weatherResult, weatherAlertResult] = await weatherResults
-  const read = <T extends Vessel | Port | Voyage | FeedItem>(result: PromiseSettledResult<T[]>, previous: T[], provenance: ProviderResult<T>["provenance"], disabled: boolean): ProviderResult<T> => {
+  const read = <T extends Freshness>(result: PromiseSettledResult<T[]>, previous: T[], provenance: ProviderResult<T>["provenance"], disabled: boolean): ProviderResult<T> => {
     const data = disabled ? disabledProviderData(previous) : providerResult(result, previous)
     return toProviderResult(data, provenance, new Date().toISOString(), disabled ? "disabled" : undefined, disabled ? undefined : providerError(result))
   }
@@ -93,6 +106,7 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
   const weatherAlerts = providerModes.weatherAlerts === "off" && settings.sourceEnabled
     ? toProviderResult([], providerProvenances.officialWeatherAlerts, new Date().toISOString(), "disabled")
     : read(weatherAlertResult, officialWeatherLastKnown, providerProvenances.officialWeatherAlerts, !settings.sourceEnabled)
+  const aisArea = read(aisAreaResult, areaLastKnown, providerProvenances.aisstreamAreaDerived, settings.providerEnabled && providerModes.aisArea !== "aisstream")
   return {
     vessels: vessel.data,
     ports: port.data,
@@ -102,7 +116,8 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
     settings,
     calendarEvents,
     calendarCoverage,
-    providerFreshness: { vessel: vessel.freshness, port: port.freshness, schedule: voyage.freshness, weather: weather.freshness, weatherAlerts: weatherAlerts.freshness, feed: shippingFeed.freshness },
+    aisPortMetrics: providerModes.aisArea === "aisstream" ? aisArea.data : [],
+    providerFreshness: { vessel: vessel.freshness, port: port.freshness, schedule: voyage.freshness, weather: weather.freshness, weatherAlerts: weatherAlerts.freshness, feed: shippingFeed.freshness, aisArea: aisArea.freshness },
   }
 }
 
@@ -111,6 +126,7 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
     return {
       ...structuredClone(fallbackSnapshot),
       events: filterEventsForOperationalContext(fallbackSnapshot.events, operationalSourceContext),
+      aisPortMetrics: filterOperationalAisAreaMetrics(fallbackSnapshot.aisPortMetrics ?? []),
       calendarEvents: filterCalendarEventsForSourceIds(fallbackSnapshot.calendarEvents ?? [], providerModes.calendarSourceIds ?? []),
       calendarCoverage: filterCalendarCoverageForSourceIds(fallbackSnapshot.calendarCoverage ?? fallbackSnapshot.settings.calendarSync ?? [], providerModes.calendarSourceIds ?? []),
     }
@@ -129,6 +145,9 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
   const fallbackCalendarEvents = filterCalendarEventsForSourceIds(fallbackSnapshot.calendarEvents ?? [], providerModes.calendarSourceIds ?? [])
   const calendarEvents = storedCalendarEvents.length ? storedCalendarEvents : fallbackCalendarEvents
   const calendarCoverage = filterCalendarCoverageForSourceIds(settings.calendarSync ?? fallbackSnapshot.calendarCoverage ?? [], providerModes.calendarSourceIds ?? [])
+  const aisPortMetrics = providerModes.aisArea === "aisstream"
+    ? filterOperationalAisAreaMetrics(await repository.listAisPortMetrics())
+    : []
   return {
     vessels,
     ports,
@@ -138,6 +157,7 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
     settings,
     calendarEvents,
     calendarCoverage,
+    aisPortMetrics,
   }
 }
 
@@ -160,6 +180,7 @@ async function saveSnapshot(snapshot: ShippingSnapshot) {
   for (const item of snapshot.feedItems) await repository.upsertFeedItem(item)
   for (const event of snapshot.events) await repository.upsertEvent(event)
   for (const event of snapshot.calendarEvents ?? []) await repository.upsertCalendarEvent(event)
+  for (const metric of snapshot.aisPortMetrics ?? []) await repository.upsertAisPortMetric(metric)
   await repository.saveSettings(snapshot.settings)
 }
 
@@ -175,9 +196,10 @@ export async function getShippingSnapshot(): Promise<ShippingSnapshot> {
     feedItems: providerSnapshot.feedItems,
     calendarEvents: stored.calendarEvents,
     calendarCoverage: stored.calendarCoverage,
+    aisPortMetrics: providerSnapshot.aisPortMetrics,
     providerFreshness: providerSnapshot.providerFreshness,
   }
-  current.events = detectShippingEvents(current.vessels, current.ports, current.voyages, current.feedItems, current.settings, stored.events, new Date().toISOString(), current.calendarEvents ?? [])
+  current.events = detectShippingEvents(current.vessels, current.ports, current.voyages, current.feedItems, current.settings, filterEventsForOperationalContext(stored.events, operationalSourceContext), new Date().toISOString(), current.calendarEvents ?? [], current.aisPortMetrics ?? [])
   await saveSnapshot(current)
   await repository?.pruneExpired(current.settings.retentionDays)
   return structuredClone(current)
@@ -254,7 +276,7 @@ export async function syncCalendarEvents(year = mockCalendarYear, countries?: Ca
   const settings = { ...stored.settings, calendarSync: coverage }
   const snapshot = { ...stored, settings, calendarEvents: reconciled.events, calendarCoverage: coverage }
   const operational = filterOperationalSnapshotInputs(stored)
-  snapshot.events = detectShippingEvents(operational.vessels, operational.ports, operational.voyages, operational.feedItems, snapshot.settings, stored.events, result.fetchedAt, snapshot.calendarEvents)
+  snapshot.events = detectShippingEvents(operational.vessels, operational.ports, operational.voyages, operational.feedItems, snapshot.settings, filterEventsForOperationalContext(stored.events, operationalSourceContext), result.fetchedAt, snapshot.calendarEvents, filterOperationalAisAreaMetrics(stored.aisPortMetrics ?? []))
   fallbackSnapshot = structuredClone(snapshot)
   if (reconciled.removedIds.length) await repository?.deleteCalendarEvents(reconciled.removedIds)
   for (const event of reconciled.events) await repository?.upsertCalendarEvent(event)

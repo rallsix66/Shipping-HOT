@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router"
 import { motion } from "framer-motion"
 import { type ReactNode, useEffect, useState } from "react"
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
+import type { AisDerivedPortMetric } from "@shared/ais-area"
 import type { Severity as SeverityValue, ShippingEvent, WeatherDetail } from "@shared/shipping"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
 import { type ShippingResponse, useShipping } from "./data"
@@ -229,6 +230,65 @@ function delayCell(delay?: number) {
   if (delay === undefined) return <span className="delay op-50">未知</span>
   if (delay > 0) return <span className="delay on">{`+${delay} 分钟`}</span>
   return <span className="delay ok">准点</span>
+}
+
+function AisAreaPanel({ metric }: { metric?: AisDerivedPortMetric }) {
+  const usable = metric?.coverage === "usable" && !metric.stale && metric.sourceStatus === "healthy"
+  const trendLabel = metric?.trend === "rising" ? "上升" : metric?.trend === "falling" ? "下降" : metric?.trend === "stable" ? "稳定" : "未知"
+  return (
+    <div className="glass-panel d-panel">
+      <div className="panel-h">
+        <div>
+          <span className="eyebrow-sh">AIS 衍生信息</span>
+          <h3>AIS 区域估算</h3>
+        </div>
+        <StatusBadge stale={!usable} sourceStatus={metric?.sourceStatus ?? "never_succeeded"} unknown={!metric || metric.coverage !== "usable"} />
+      </div>
+      {!usable
+        ? <p className="text-sm op-70">当前 AIS 区域样本不足，不能判断趋势。</p>
+        : (
+            <dl className="kv">
+              <dt>区域趋势</dt>
+              <dd>{trendLabel}</dd>
+              <dt>区域活跃船舶</dt>
+              <dd>
+                {metric.activeVesselCount}
+                {" "}
+                艘
+              </dd>
+              <dt>锚泊 / 靠泊</dt>
+              <dd>
+                {metric.anchoredCount}
+                {" "}
+                /
+                {" "}
+                {metric.mooredCount}
+              </dd>
+              <dt>低速船舶</dt>
+              <dd>
+                {metric.lowSpeedCount}
+                {" "}
+                艘（≤
+                {" "}
+                {metric.lowSpeedThresholdKnots}
+                {" "}
+                kn）
+              </dd>
+              <dt>样本 / 歧义样本</dt>
+              <dd>
+                {metric.sampleSize}
+                {" "}
+                /
+                {" "}
+                {metric.ambiguousSampleCount}
+              </dd>
+              <dt>观察窗口</dt>
+              <dd>{formatDate(metric.observationWindow?.endAt)}</dd>
+            </dl>
+          )}
+      <p className="mt-3 text-xs op-55">区域观察范围：配置启发式 bbox；非港口官方统计，不等同等待时间或港口拥堵等级。</p>
+    </div>
+  )
 }
 
 function relatedLabel(event: ShippingEvent, data: ShippingResponse) {
@@ -616,6 +676,12 @@ export function PortsPage() {
                       {" · "}
                       {p.unlocode}
                     </small>
+                    {data.aisPortMetrics?.find(metric => metric.portId === p.id) && (
+                      <small>
+                        AIS 区域：
+                        {data.aisPortMetrics.find(metric => metric.portId === p.id)?.trend === "rising" ? "上升" : data.aisPortMetrics.find(metric => metric.portId === p.id)?.trend === "falling" ? "下降" : "未知"}
+                      </small>
+                    )}
                   </Link>
                   <span className="c-country">{p.country}</span>
                   <span className="gauge-cell c-cong">
@@ -649,6 +715,7 @@ export function PortDetailPage({ id }: { id: string }) {
   if (!port) return <ShippingShell><ErrorState /></ShippingShell>
   const relatedEvents = data.events.filter(e => e.portId === id)
   const relatedFeed = data.feedItems.filter(item => item.relatedPortIds.includes(id)).slice(0, 4)
+  const aisAreaMetric = data.aisPortMetrics?.find(metric => metric.portId === id)
   return (
     <ShippingShell title={`港口详情 · ${port.name}`}>
       <Link to="/ports" className="back-link">
@@ -731,6 +798,7 @@ export function PortDetailPage({ id }: { id: string }) {
           </dl>
         </div>
         <div className="flex flex-col gap-4">
+          <AisAreaPanel metric={aisAreaMetric} />
           <div className="glass-panel d-panel">
             <div className="panel-h">
               <h3>关联事件</h3>
@@ -1348,11 +1416,12 @@ export function SettingsPage() {
             <ProviderChip label="天气" value={data.provider.weather} />
             <ProviderChip label="官方预警" value={data.provider.weatherAlerts} />
             <ProviderChip label="港口" value={data.provider.port} />
+            <ProviderChip label="AIS 区域" value={data.provider.aisArea ?? "off"} />
             <ProviderChip label="班期" value={data.provider.schedule} />
             <ProviderChip label="资讯" value={data.provider.feed} />
           </div>
         </div>
-        <p className="mt-4 text-xs op-60">数据源：AISStream（船位，可选 key）、Open-Meteo Marine（天气模型）、JMA / TMD / BMKG（官方天气预警，可选 public / experimental）、Portcast 公共港口页面（低频公开字段）、Shipping Feed（默认 Mock，可选公开 RSS/官方公告）与 Mock Schedule。</p>
+        <p className="mt-4 text-xs op-60">数据源：AISStream（船位，可选 key）、AISStream 区域 PositionReport（显式开启后提供派生趋势）、Open-Meteo Marine（天气模型）、JMA / TMD / BMKG（官方天气预警，可选 public / experimental）、Portcast 公共港口页面（低频公开字段）、Shipping Feed（默认 Mock，可选公开 RSS/官方公告）与 Mock Schedule。</p>
       </div>
     </ShippingShell>
   )

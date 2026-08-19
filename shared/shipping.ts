@@ -1,4 +1,5 @@
 import type { CalendarCoverage, CalendarEvent } from "./calendar"
+import type { AisDerivedPortMetric } from "./ais-area"
 
 export type SourceStatus = "healthy" | "degraded" | "failed" | "disabled" | "never_succeeded"
 export type SourceType = "official" | "third_party" | "user" | "mock"
@@ -81,6 +82,7 @@ export interface ShippingProviderFreshness {
   weather: Freshness
   weatherAlerts: Freshness
   feed?: Freshness
+  aisArea?: Freshness
 }
 
 export function deriveProvenance(source?: DataProvenance): DataProvenance | undefined {
@@ -169,6 +171,7 @@ export interface ShippingProviderModes {
   weatherAlerts?: string
   feed?: string
   calendar?: string
+  aisArea?: "off" | "aisstream"
   calendarSourceIds?: readonly string[]
 }
 
@@ -194,6 +197,7 @@ export function sourceAllowedForProviderModes(sourceId: string | undefined, mode
   if (!sourceId) return false
   if (sourceId === "mock-vessel") return modes.vessel === "mock"
   if (sourceId === "aisstream") return modes.vessel === "aisstream"
+  if (sourceId === "aisstream-area") return modes.aisArea === "aisstream"
   if (sourceId === "mock-port") return modes.port === "mock"
   if (sourceId === "portcast-public") return modes.port === "portcast"
   if (sourceId === "mock-weather") return modes.weather === "mock"
@@ -209,7 +213,7 @@ export function sourceAllowedForProviderModes(sourceId: string | undefined, mode
   return false
 }
 
-const sourceScopedEventTypes = new Set(["vessel_anchored", "port_congestion", "voyage_delay"])
+const sourceScopedEventTypes = new Set(["vessel_anchored", "port_congestion", "voyage_delay", "ais_port_congestion_trend"])
 
 export function sourceScopedEventDedupeKey(logicalDedupeKey: string, sourceId?: string): string {
   return `${logicalDedupeKey}:${sourceId ?? "unknown"}`
@@ -221,7 +225,7 @@ function sourceScopeForEvent(event: Pick<ShippingEvent, "provenance" | "evidence
 
 function entityIdForSourceScopedEvent(event: Pick<ShippingEvent, "type" | "vesselId" | "portId" | "voyageId">): string | undefined {
   if (event.type === "vessel_anchored") return event.vesselId
-  if (event.type === "port_congestion") return event.portId
+  if (event.type === "port_congestion" || event.type === "ais_port_congestion_trend") return event.portId
   if (event.type === "voyage_delay") return event.voyageId
   return undefined
 }
@@ -391,6 +395,7 @@ export interface ShippingSnapshot {
   feedItems: FeedItem[]
   settings: ShippingSettings
   providerFreshness?: ShippingProviderFreshness
+  aisPortMetrics?: AisDerivedPortMetric[]
   calendarEvents?: CalendarEvent[]
   calendarCoverage?: CalendarCoverage[]
 }

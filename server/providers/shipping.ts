@@ -1,9 +1,11 @@
 import { env } from "node:process"
+import type { AisDerivedPortMetric } from "@shared/ais-area"
 import type { DataProvenance, FeedItem, Freshness, OperationalSourceContext, Port, PortCongestionDetail, ProviderResult, Severity, ShippingProviderModes, SourceStatus, Vessel, VesselWatchTarget, Voyage, WeatherWindow, WeatherWindows } from "@shared/shipping"
 import { mockFeedItems, mockPorts, mockVessels, mockVoyages, portWeatherConfig } from "@shared/shipping-fixtures"
 import { type CalendarProvider, configureCalendarProviders } from "./calendar"
 import { activeShippingFeedSourceIds, configureFeedProviders } from "./feed"
 import { type WeatherAlertProvider, activeOfficialWeatherAlertSourceIds, createOfficialWeatherAlertProvider, officialWeatherAlertSourceIds } from "./weather-alerts"
+import { aisstreamAreaDerivedProvenance, aisstreamAreaEstimatedProvenance, createAisStreamAreaProvider, createUnavailableAisAreaProvider } from "./aisstream-area"
 
 export interface VesselProvider {
   getVessels: (targets?: VesselWatchTarget[], lastKnown?: Vessel[]) => Promise<Vessel[]>
@@ -16,6 +18,9 @@ export interface ScheduleProvider {
 }
 export interface WeatherProvider {
   getFeedItems: (ports?: Port[], lastKnown?: FeedItem[]) => Promise<FeedItem[]>
+}
+export interface AisAreaProviderResult {
+  getPortMetrics: (ports?: Port[], lastKnown?: AisDerivedPortMetric[]) => Promise<AisDerivedPortMetric[]>
 }
 
 export async function fetchWeatherProviderResults(
@@ -33,6 +38,9 @@ export async function fetchWeatherProviderResults(
 
 export const providerProvenances = {
   aisstream: { sourceType: "third_party", dataNature: "observed", sourceId: "aisstream", sourceUrl: "https://aisstream.io/", verified: false },
+  aisstreamAreaObserved: { sourceType: "third_party", dataNature: "observed", sourceId: "aisstream-area", sourceUrl: "https://aisstream.io/", verified: false },
+  aisstreamAreaDerived: aisstreamAreaDerivedProvenance,
+  aisstreamAreaEstimated: aisstreamAreaEstimatedProvenance,
   openMeteo: { sourceType: "third_party", dataNature: "forecast", sourceId: "open-meteo-marine", sourceUrl: "https://open-meteo.com/", verified: false },
   portcastPublic: { sourceType: "third_party", dataNature: "derived", sourceId: "portcast-public", sourceUrl: "https://www.portcast.io/port-congestion", verified: false },
   mockVessel: { sourceType: "mock", dataNature: "observed", sourceId: "mock-vessel", verified: false },
@@ -875,6 +883,7 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
 interface ProviderEnvironment {
   [key: string]: string | undefined
   SHIPPING_VESSEL_PROVIDER?: string
+  SHIPPING_AIS_AREA_PROVIDER?: string
   AISSTREAM_API_KEY?: string
   SHIPPING_PORT_PROVIDER?: string
   SHIPPING_WEATHER_PROVIDER?: string
@@ -884,6 +893,7 @@ interface ProviderEnvironment {
 
 export function configureProviders(environment: ProviderEnvironment = { ...env }) {
   const vesselMode = environment.SHIPPING_VESSEL_PROVIDER === "aisstream" ? "aisstream" : "mock"
+  const aisAreaMode: ShippingProviderModes["aisArea"] = environment.SHIPPING_AIS_AREA_PROVIDER === "aisstream" ? "aisstream" : "off"
   const portMode = environment.SHIPPING_PORT_PROVIDER === "portcast" ? "portcast" : "mock"
   const weatherMode = environment.SHIPPING_WEATHER_PROVIDER === "open-meteo" ? "open-meteo" : "mock"
   const configuredFeed = configureFeedProviders({ SHIPPING_FEED_PROVIDER: environment.SHIPPING_FEED_PROVIDER })
@@ -901,6 +911,11 @@ export function configureProviders(environment: ProviderEnvironment = { ...env }
           : createUnavailableVesselProvider("AISSTREAM_API_KEY missing")
         : MockVesselProvider,
       port: portMode === "portcast" ? createPortcastPublicPageProvider() : MockPortProvider,
+      aisArea: aisAreaMode === "aisstream"
+        ? environment.AISSTREAM_API_KEY
+          ? createAisStreamAreaProvider({ apiKey: environment.AISSTREAM_API_KEY })
+          : createUnavailableAisAreaProvider("AISSTREAM_API_KEY missing")
+        : createUnavailableAisAreaProvider("AIS area provider disabled"),
       schedule: MockScheduleProvider,
       weather: weatherMode === "open-meteo" ? createOpenMeteoWeatherProvider() : MockWeatherProvider,
       weatherAlerts: weatherAlertProvider,
@@ -908,6 +923,7 @@ export function configureProviders(environment: ProviderEnvironment = { ...env }
     },
     modes: {
       vessel: vesselMode,
+      aisArea: aisAreaMode,
       port: portMode,
       schedule: "mock" as const,
       weather: weatherMode,
@@ -927,6 +943,7 @@ export function createOperationalSourceContext(modes: ShippingProviderModes): Op
   const activeSourceIds = new Set<string>()
   if (modes.vessel === "mock") activeSourceIds.add("mock-vessel")
   if (modes.vessel === "aisstream") activeSourceIds.add("aisstream")
+  if (modes.aisArea === "aisstream") activeSourceIds.add("aisstream-area")
   if (modes.port === "mock") activeSourceIds.add("mock-port")
   if (modes.port === "portcast") activeSourceIds.add("portcast-public")
   if (modes.schedule === "mock") activeSourceIds.add("mock-schedule")
@@ -951,6 +968,7 @@ export const operationalSourceContext = createOperationalSourceContext(providerM
 
 export const realProviders = {
   vessel: "AISStream",
+  aisArea: "AISStream area PositionReport",
   port: "Portcast public page",
   schedule: "deferred",
   weather: "Open-Meteo Marine API",
