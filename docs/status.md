@@ -136,6 +136,12 @@ The requested Provider mode is shown independently from runtime `sourceStatus` (
 - `fallbackSnapshot` remains the Repository-unavailable memory fallback only; it is no longer the authoritative Calendar sync baseline when persisted state exists.
 - Restart-style tests verify legacy migration, no non-schedule Mock Event reinjection from the module fallback, current national reminder behavior, and Repository-unavailable memory fallback. `mock-schedule` remains explicitly allowed.
 
+## Calendar Sync Operational Source Isolation Seal — 2026-08-19
+
+- Repository rows remain historical facts and are not deleted merely because Provider mode changes. Calendar sync filters Vessel, Port, Voyage and Feed inputs through the existing `OperationalSourceContext` before Event detection.
+- The same context checks both Provider mode and active registry source IDs: current real sources may produce current evidence, inactive Mock sources cannot, and `mock-schedule` remains allowed by the current Schedule contract.
+- Persisted historical Mock Events remain in the audit repository, but are excluded from current reconciliation/HOT and are not re-upserted or falsely resolved.
+
 ### Local runtime smoke — 2026-08-18
 
 - Default all-Mock request: `/api/shipping` returned HTTP 200 with Mock vessels/calendar/HOT present.

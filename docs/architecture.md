@@ -29,6 +29,10 @@ All-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source
 - A restart-style test confirms persisted legacy Calendarific local identity migration: the old normalized row is deleted through `removedIds`, the new scoped row is upserted, the linked ShippingEvent remains historical and is not resolved, and the local fact creates no current Calendar reminder.
 - A real-mode persisted-state test confirms direct Calendar sync does not re-inject `mock-vessel`, `mock-port`, `mock-weather`, `mock-port-notice` or `mock-calendar` Events; `mock-schedule` remains allowed. No schema or Provider architecture change was introduced.
 
+## Calendar Sync Operational Source Isolation Seal — 2026-08-19
+
+Calendar sync preserves Repository history but passes only current `OperationalSourceContext`-compatible Vessel, Port, Voyage and Feed inputs to the Event Engine. `sourceAllowedForOperationalContext()` checks both the requested Provider mode and `activeSourceIds`, so disabled or inactive Mock/registry sources cannot become current evidence. Existing operational Event filtering is reused for previous Events; `mock-schedule` remains the explicitly allowed Mock source.
+
 ## 1. Project Purpose
 
 The repository retains NewsNow as its foundation and now exposes Shipping HOT as a local single-user product surface. The implemented path uses normalized Mock or approved V1 real Provider adapters and deterministic Domain/Event rules; real provider credentials remain optional.

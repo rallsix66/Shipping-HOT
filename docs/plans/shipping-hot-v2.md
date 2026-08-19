@@ -16,6 +16,10 @@ Calendarific live 数据暴露了 National holiday / Common local holiday 标签
 
 `syncCalendarEvents()` 在 `initialize()` 后调用 `readStoredSnapshot()`。Repository 可用时，Calendar events、coverage/settings、Vessel/Port/Voyage/Feed 状态和 previous ShippingEvents 均来自持久化快照；`fallbackSnapshot` 只作为 Repository 不可用时的内存 fallback。restart-style 测试已验证：旧 legacy Calendarific local row 可被发现并通过 `removedIds` 删除，新 scoped row 写入，历史 ShippingEvent 不被 resolve，local fact 不产生 reminder；real persisted state 直连 Calendar sync 不会重新写入非 schedule Mock Event。`mock-schedule` 仍是允许的 Mock 来源，未引入 schema 或 Provider 架构变化。
 
+## Calendar Sync Operational Source Isolation Seal — 2026-08-19
+
+Repository 保存 historical facts，不因 Provider mode 切换删除 Vessel、Port、Voyage、Feed 或 Event 行。Calendar sync 在 Event Engine 边界复用 `OperationalSourceContext` 与 `sourceAllowedForOperationalContext()`，同时检查 Provider mode 和 active registry source IDs；只有当前 active real source、Calendar source 和允许的 `mock-schedule` 能生成 current Event/HOT，历史 Mock source 只能留在审计记录中。
+
 ## 1. V2 Executive Summary
 
 Shipping HOT V2 继续作为个人本地使用的 local-first 航运工作台，保留现有 NewsNow foundation、React/Vite/Nitro/db0/SQLite、Provider、Repository、Event Engine 和 Feed 边界。

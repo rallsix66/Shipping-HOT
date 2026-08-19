@@ -1,4 +1,4 @@
-import { filterEventsForOperationalContext, toVesselWatchTarget } from "@shared/shipping"
+import { filterEventsForOperationalContext, sourceAllowedForOperationalContext, toVesselWatchTarget } from "@shared/shipping"
 import type { FeedItem, Port, ProviderResult, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries, calendarEventKey, calendarEventLegacyId } from "@shared/calendar"
@@ -141,6 +141,16 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
   }
 }
 
+function filterOperationalSnapshotInputs(snapshot: ShippingSnapshot): Pick<ShippingSnapshot, "vessels" | "ports" | "voyages" | "feedItems"> {
+  const isOperational = (sourceId: string | undefined) => sourceAllowedForOperationalContext(sourceId, operationalSourceContext)
+  return {
+    vessels: snapshot.vessels.filter(item => isOperational(item.provenance?.sourceId)),
+    ports: snapshot.ports.filter(item => isOperational(item.provenance?.sourceId)),
+    voyages: snapshot.voyages.filter(item => isOperational(item.provenance?.sourceId)),
+    feedItems: snapshot.feedItems.filter(item => isOperational(item.provenance?.sourceId)),
+  }
+}
+
 async function saveSnapshot(snapshot: ShippingSnapshot) {
   fallbackSnapshot = structuredClone(snapshot)
   if (!repository) return
@@ -243,7 +253,8 @@ export async function syncCalendarEvents(year = mockCalendarYear, countries?: Ca
   const coverage = [...previousCoverage.filter(item => !(query.countries.includes(item.countryCode) && item.year === year)), ...result.coverage]
   const settings = { ...stored.settings, calendarSync: coverage }
   const snapshot = { ...stored, settings, calendarEvents: reconciled.events, calendarCoverage: coverage }
-  snapshot.events = detectShippingEvents(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, snapshot.settings, stored.events, result.fetchedAt, snapshot.calendarEvents)
+  const operational = filterOperationalSnapshotInputs(stored)
+  snapshot.events = detectShippingEvents(operational.vessels, operational.ports, operational.voyages, operational.feedItems, snapshot.settings, stored.events, result.fetchedAt, snapshot.calendarEvents)
   fallbackSnapshot = structuredClone(snapshot)
   if (reconciled.removedIds.length) await repository?.deleteCalendarEvents(reconciled.removedIds)
   for (const event of reconciled.events) await repository?.upsertCalendarEvent(event)
