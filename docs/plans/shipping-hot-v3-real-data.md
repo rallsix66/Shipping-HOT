@@ -10,7 +10,7 @@
 >
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；未能由公开页面确认的 entitlement、调用计费单位或个人申请资格必须保持 `unknown/pending`。
 >
-> 实施门槛：只有用户明确确认 `架构确认，开始执行 Phase 1` 后，才可以从本文的 P0 开始；P0 中的 schema、Node 版本和 Provider runtime 仍需按本文“待确认决策”落实为 `Proposed` ADR 后再实施。本轮只修订文档，不执行 P0、不创建账号、不写入密钥、不购买服务、不修改业务代码。
+> 实施门槛：当前 `docs/adr/ADR-005-v3-real-data-boundaries.md` 已存在且为 `Proposed`；只有 Architecture Approval 后将 ADR-005 改为 `Accepted`，并且用户明确确认 `架构确认，开始执行 Phase 1`，才可以从本文的 P0 开始。本轮只修订文档，不执行 P0、不创建账号、不写入密钥、不购买服务、不修改业务代码。
 
 ## 1. 背景与当前问题
 
@@ -46,7 +46,7 @@ Shipping HOT V2 已经建立了 Provider、Domain、Repository、Event/HOT 和�
 | 官方气象预警 | JMA/TMD/BMKG adapters | Provider 边界存在，但 `public` 模式没有任何 `verified_live` active source | 作为 `feed_items` | 适配器存在不等于启用；当前 UI 只显示模式值 | 每源独立 live gate、生命周期、覆盖和 health；未启用明确显示“不可用/未验证” |
 | 行业资讯 | The Loadstar active；Maritime Executive disabled；其他 registry 项未启用 | Loadstar 真实；Maritime Executive failed；无 Mock fallback 时边界正确 | `feed_items` 设计持久化；当前实际为内存 | 无发布时间年龄闸门、future/异常日期校验和 current/history 分层 | 拆成 Ingestion Gate、Current Feed Query Gate、HOT/Event Freshness Gate；默认 7 天，重大资讯最多 14 天，历史单独查询 |
 | 港口公告 | Shekou `/ywgg/` active；其他港口 registry 多为 pending/deferred | Shekou 页面真实；多数条目 publication time unknown | 同 Feed | 发布时间未知仍出现在 Feed；是否仍有效不可判断 | 官方公告与行业新闻分层；基于有效期/撤回状态，未知时间默认不进当前流 |
-| 国家日历 | Calendarific + 空的 Official/Manual composition | Calendarific transport/parser 真实且 partial；Official/Manual 当前没有实数据 | `calendar_events` + `settings.calendarSync` 设计；当前实际为内存 | 启动不自动同步；seed 可重置 coverage；只手工维护单年 | 启动先读库，后台维护当前年 + 下一年，24 小时 TTL，失败保留 last-known |
+| 国家日历 | Calendarific + 空的 Official/Manual composition | Calendarific transport/parser 真实且 partial；Official/Manual 当前没有实数据 | `calendar_events` + `settings.calendarSync` 设计；当前实际为内存 | 启动不自动同步；seed 可重置 coverage；只手工维护单年 | 启动先读库，后台维护当前年 + 下一年，约 7 天 TTL，失败保留 last-known |
 | 当前航程 | AIS 目的地/ETA 字段和 Mock Voyage 分散存在 | 混合，未形成真实 Current Voyage | `voyages` 当前只保存 Mock schedule | AIS ETA 与官方班期没有分层；无 port-call 事实 | 先用 AIS observed + 已验证 port-call evidence 形成 Current Voyage；VesselAPI ETA/events 只能作为账号验证后的可选 enrichment |
 | 商业班期 | `MockScheduleProvider` | 全 Mock | `voyages` | Real Mode 也始终 operational；无真实 ScheduleProvider adapter | DCSA 规范化合同；按获准船公司逐个接入；无 Provider 时为空 |
 | Events | `detectShippingEvents()` | derived；显式 sourceId 过滤能排除多数 Mock，但 `mock-schedule` 被允许 | `events` 设计持久化；当前实际为内存 | orphan active Event 无当前 source trust 时不会 resolve/expire；混合 fixture lineage 未被识别 | 所有 evidence 必须是 real/user/derived-from-real；有明确有效期、source identity 和可追溯链 |
@@ -148,7 +148,7 @@ Normalize + Identity Resolution + Provenance
           ├──────────────► Translation jobs ─► Translation cache
           │                                      │
           ▼                                      ▼
-SQLite Repository (original facts + localized fields + last-known)
+SQLite Repository (original facts + translation cache + last-known)
           │
           ├─ Query APIs ─────────────────────────────► Chinese UI
           │
@@ -168,6 +168,7 @@ SQLite Repository (original facts + localized fields + last-known)
 3. Watchlist 是用户拥有的数据；Provider 不能覆盖。
 4. Event/HOT 只消费通过 Real Evidence Gate 的记录。
 5. 同一 UI 聚合多个 Provider 时，每个字段/事实保留自己的 provenance，不用“另一个 Provider 的值”掩盖失败。
+6. 业务事实表只保存原文；中文译文统一由 `translation_cache` 提供，避免业务表与缓存形成两个真相。
 
 ## 6. 数据可信度规则
 
@@ -283,16 +284,25 @@ UI 全局显示：`数据库不可用，修改无法保存。`。任何 watch/se
 
 VesselAPI 的 V3 定位是 **Vessel Discovery / Static Metadata**：公开文档的 `GET /v1/search/vessels` 支持按 name、callsign、MMSI、IMO 等检索，返回的 identity/particulars 可用于确认候选船和建立 watchlist。公开价格页在 2026-08-20 显示 Free 150 calls/月、Basic $14.99/月和 1,500 calls/月；具体每个 endpoint 的计费单位、Port/ETA/事件 entitlement 仍需账号内复核，不能从“能搜索”推导“能实时跟踪”。
 
-AISStream 是 V3 唯一的 watched-vessel tracking session：它接收已关注 MMSI 的 PositionReport，并由长期 `AisTrackingService` 维护连接、退避和增量重订阅。VesselAPI 不承担实时船位，AISStream 也不承担全球身份搜索；两者通过字段级 provenance 并列。
+AISStream 是 V3 唯一的 watched-vessel tracking session：它接收已关注 MMSI 的 `PositionReport`，以及可用时的 `ShipStaticData`/`StaticDataReport`，并由长期 `AisTrackingService` 维护连接、退避和增量重订阅。VesselAPI 不承担实时船位，AISStream 也不承担全球身份搜索；两者通过字段级 provenance 并列。
+
+### 8.1.1 AIS tracking runtime contract
+
+- `AisTrackingService` 是服务端进程级单例；HTTP GET、页面挂载和 React Query 刷新都不能创建或关闭 WebSocket。
+- 连接建立后在规定窗口内发送订阅；watchlist 变化采用替换式订阅更新，并保持至少约 1 秒的更新节流。
+- Position facts 保存位置、速度、航向、导航状态及可靠的 source timestamp；Static/Voyage facts 保存 AIS 报告的船名、IMO、Callsign、destination、AIS ETA、draft、ship type。两类事实都使用 `source=AISStream`、`factNature=observed|reported`，AIS ETA 永远不升级为官方班期 ETA。
+- V3 第一版最多同时订阅 50 个 MMSI（官方 `FiltersShipMMSI` 当前限制）；超过上限返回可解释的 capacity 状态，不提前实现多 session/sharding。超过 50 艘的扩展另行走架构决策。
+- 断线只按有限退避重连；无观测不伪造 fresh，已有同源数据按 stale/degraded 展示。
 
 ### 8.2 搜索流程
 
 1. 服务端规范化 `q`，识别 IMO/MMSI/Callsign/Name。
-2. 调用 `VesselDiscoveryProvider.search()`；结果缓存 24 小时，保留 provider record key，并将本次请求/命中/cache hit 写入 usage ledger。
-3. 返回 normalized `VesselSearchResult`，不把结果自动加入业务表。
-4. 用户点击“添加关注”后，在一个 SQLite 事务内：upsert vessel identity、insert watchlist、写审计时间。
-5. Watchlist 变更事件通知长期 AISStream `AisTrackingService` 增量重订阅；不在 HTTP request 中打开/关闭 WebSocket。
-6. AIS 尚未观测时，仍保留真实搜索身份并显示“暂无 AIS 观测”，不能消失或变成 Mock。
+2. 先查本地 `search_cache`；仅在用户按 Enter 或点击“搜索”后，才允许向 `VesselDiscoveryProvider.search()` 发出外部请求。输入框逐字变化、debounce 提示和页面打开都不能调用外部 API。
+3. 结果缓存 24 小时，保留 provider record key，并将本次 request/cache hit 写入 usage ledger。
+4. 返回 normalized `VesselSearchResult`。如果结果已含建立 watch 所需的 identity/static 字段，用户选择后直接在同一事务中 watch，不默认再调用 Detail。
+5. 仅当必需字段缺失，或本地 Detail 缓存过期且需要确认时，才调用 `VesselDiscoveryProvider.detail()`；Search 与 Detail 不默认各调用一次。
+6. Watchlist 变更事件通知长期 AISStream `AisTrackingService` 增量重订阅；不在 HTTP request 中打开/关闭 WebSocket。
+7. AIS 尚未观测时，仍保留真实搜索身份并显示“暂无 AIS 观测”，不能消失或变成 Mock。
 
 ### 8.3 身份规则
 
@@ -307,8 +317,8 @@ AISStream 是 V3 唯一的 watched-vessel tracking session：它接收已关注 
 
 节流合同：
 
-- 搜索先查本地 `vessel_metadata/search_cache`；24 小时内同一 normalized query 直接返回，不调用 Provider。
-- 用户点击已缓存且未过期的船舶 Detail 不重复请求；过期才排入后台刷新。
+- 搜索先查本地 `vessel_metadata/search_cache`；24 小时内同一 normalized query 直接返回，不调用 Provider；只有 Enter/“搜索”按钮可以产生外部 Search 请求。
+- 搜索结果字段足够时，选择结果直接进入 watch；Detail 只在字段缺失或缓存过期时请求，不能把 Search→Detail 写成固定双调用。
 - Search、Detail、Refresh 分别计入 `provider_usage` 的本地 request/cache-hit；UI 显示“本月本地统计 xx calls”，若没有官方 Remaining 则显示“本地估算”，不把本地数伪装成 Free quota/余额。
 - 自动刷新只针对已关注身份，默认数天级；实时位置由 AISStream 长连接承担，VesselAPI 不做分钟级轮询。
 
@@ -377,11 +387,11 @@ Calendar 按国家/年份 coverage 和同步成功时间独立维护；Feed 的 
 
 1. **Server Start**：打开 SQLite、执行 migration，并读取 `app_metadata.bootstrap_completed_at`。
 2. **SQLite → UI**：先读取已持久化日历和 coverage；页面无需等待外部 API，显示 last-known/coverage/status。
-3. **后台检查**：scheduler 检查当前年和下一年 × TH/ID/MY/PH/VN，coverage 缺失、超过 24 小时、年份变化或 provider version 变化时入队。
+3. **后台检查**：scheduler 检查当前年和下一年 × TH/ID/MY/PH/VN；coverage 缺失、`lastSuccessAt` 超过约 7 天、年份变化或 provider version 变化时入队。年份变化是强制检查，不受 TTL 抑制。
 4. **同步**：每个 country/year 独立成功或失败；成功事务更新 events + coverage + `provider_usage`，失败保留同源 last-known 并写 runtime/sync_runs。
 5. **UI 更新**：通过 React Query invalidation/SSE 可选通知刷新；手工“立即刷新”保留但有 rate limit 和 cooldown。
 
-Calendarific Free 官方公开额度为 500 calls/月。五国 × 两年 × 每 24 小时一次约 300 calls/月，仍留约 200 次给首次启动、失败重试和手工刷新，适合个人项目。注意 Free 的 upcoming/historical coverage 有限制且数据集按季度更新，所以 coverage 必须继续标 partial/unknown，不能宣称完整。
+Calendarific Free 官方公开额度为 500 calls/月。默认约 7 天 TTL 下，五国 × 两年 × 每月约 4.3 次检查约 43 calls/月（约 40–50 calls/月），为首次启动、失败重试和手工刷新保留足够余量。数据集按较低频率更新，coverage 仍必须标 partial/unknown，不能宣称完整；手工“立即刷新”保留并受 cooldown 限制。
 
 ### 11.2 年份滚动
 
@@ -393,7 +403,7 @@ Calendarific Free 官方公开额度为 500 calls/月。五国 × 两年 × 每 
 
 ### 12.1 两类事实
 
-**Current Voyage** 是 observed/derived：上一港、当前位置、AIS 目的地、AIS ETA、下一港候选、当前状态。VesselAPI 可作为经账号 entitlement 验证后的低频 static/event enrichment；AISStream position 单独保存 evidence。任何 VesselAPI ETA/事件能力都必须标明“已配置且已验证”，未知能力返回 unknown，不得把搜索 API 直接宣传为实时航程。
+**Current Voyage** 是 observed/derived：上一港、当前位置、AIS 目的地、AIS ETA、下一港候选、当前状态。V3 优先使用 AISStream 的 PositionReport + ShipStaticData/StaticDataReport 及真实 Port Directory/已验证 port-call evidence；VesselAPI 可作为经账号 entitlement 验证后的低频 static/event enrichment。AIS position、AIS static/voyage facts 分开保存 evidence。任何 VesselAPI ETA/事件能力都必须标明“已配置且已验证”，未知能力返回 unknown，不得把搜索 API 直接宣传为实时航程。
 
 **Commercial Schedule** 是 carrier planned：service/voyage number、rotation、scheduled ETA/ETD、更新后的 estimated ETA/ETD、actual ATA/ATD。只能来自船公司/获授权聚合 Schedule，不可由 AIS ETA 替代。
 
@@ -465,14 +475,14 @@ Settings 增加“AI 翻译中心”，包括：
 
 密钥只允许 server-only `.env.local`/`.env.server` 或等价 secret manager；禁止 LocalStorage、前端 bundle、Git、docs、fixture 和 SQLite 明文列。UI 只显示 `configured=true` 或掩码末四位；日志、错误和 provider_runtime 不得包含完整 key、Authorization header 或带 key 的 URL。
 
-### 13.4 两阶段持久化
+### 13.4 两阶段持久化与单一事实源
 
 1. Normalizer 先保存原文事实，确保抓取成功不依赖翻译。
 2. Translation job 根据 allowlist 批量翻译。
 3. `translation_cache` key = entity + field + provider + model/version + source language + target language + content hash；缓存状态和 usage 统一写 ledger。
-4. 成功写 `title_original/title_zh`、`summary_original/summary_zh`；失败记录 health，UI 显示原文。
-5. 打开页面不调用翻译 API；只读缓存。
-6. 切换 Provider 默认继续显示已有成功译文；只有源文本变化、用户点击“重新翻译”或缓存版本失效时才生成新版本，旧版本保留可审计。
+4. 业务表只保存 `title_original`、`summary_original`、`name_original`、`content_original` 等原文事实；不再保存 `title_zh`/`summary_zh` 或其他业务表级中文列作为第二份 truth。
+5. UI 查询时返回原文并 join 当前 preferred translation。若 preferred 版本缺失，先显示最近成功的任意中文译文；随后后台按 preferred Provider/model 生成新版本，成功后切换显示。若没有任何成功中文译文，则显示原文并排队生成。
+6. 打开页面不调用翻译 API；只读缓存。切换 Provider 不删除旧版本；只有源文本变化、用户点击“重新翻译”或缓存版本失效时才生成新版本，所有 provider/model/timestamp 保留可审计。
 
 内部 Event/HOT 模板直接使用中文，不需要为确定性系统文案调用外部翻译。
 
@@ -524,23 +534,25 @@ Usage ledger 只代表本机已发出的请求和按公开价/账号计划推算
 | `voyages` | Current/Commercial Voyage 头 | `kind`、vessel、voyage number、source/confidence |
 | `voyage_legs` | 商业 rotation legs | scheduled/estimated/actual 分列 |
 | `port_calls` | observed arrival/departure | Provider event identity + time |
-| `feed_items` | 原文资讯、当前/历史状态 | original/zh 字段、effective/expiry/current_until |
-| `calendar_events` | 当前/历史日历 | 保留 scope/coverage/source；增加翻译字段 |
+| `feed_items` | 原文资讯、当前/历史状态 | 只保存 original/effective/expiry/current_until；中文从 `translation_cache` 查询 |
+| `calendar_events` | 当前/历史日历 | 保留 scope/coverage/source；中文从 `translation_cache` 查询 |
 | `events` | derived lifecycle | evidence JSON schema、expires_at、real_evidence flag |
 | `provider_runtime` | health + scheduler cursor | UI 和失败恢复真相 |
-| `settings` | 用户设置 | 保持单用户 JSON 可接受；增加 schemaVersion |
+| `settings` | 用户设置与 `ProviderConfig` | 可保存 provider/model/baseUrl/enabled/budget/preferred translation；绝不保存 API key |
 | `ais_port_metrics` | bounded aggregate | 继续 current/last-known，不存 raw AIS |
-| `translation_cache` | 内容哈希翻译缓存 | 至少包含 `id/entity_type/entity_id/field_name/source_text/source_hash/source_language/target_language/provider/model/translated_text/translated_at/status/error_message`；唯一键覆盖实体、字段、hash、语言、provider/model |
+| `translation_cache` | 唯一中文翻译事实源 | 至少包含 `id/entity_type/entity_id/field_name/source_text/source_hash/source_language/target_language/provider/model/translated_text/translated_at/status/error_message`；唯一键覆盖实体、字段、hash、语言、provider/model；保留 preferred 与最近成功选择所需索引 |
 | `provider_usage` | 本地请求/结果/估算账本 | request/success/failure/cache hit、字符/token、估算成本、币种、pricing reference、last called；余额未知时不伪造 |
 | `sync_runs` | 最近同步执行/错误 | 有界保留，例如 90 天/每源最近 N 次 |
 
-`feed_translations` 不单独建表：个人项目用 `feed_items` 的 original/zh 列 + 通用 `translation_cache` 已足够。若未来一个 Feed 需要多目标语言，再通过新 ADR 拆表。`provider_usage` 不承担账单真相，只记录本机可验证的调用和估算。
+`feed_translations` 不单独建表：所有业务实体统一使用 `translation_cache`，不在 `feed_items`/`calendar_events` 等事实表复制中文列。若未来需要多目标语言，只扩展通用缓存键或通过新 ADR 拆表。`provider_usage` 不承担账单真相，只记录本机可验证的调用和估算。
+
+`ProviderConfig` 与 `ProviderSecret` 永远分离：前者是可持久化、可审计的非敏感运行配置；后者只通过 `SecretStore` 解析。P0 只建立这两个 contract、registry 刷新和脱敏 API，不实现 DeepSeek/Qwen/Gemini/OpenAI 等全部实际 adapter；具体 adapter 在 P6 或对应 Provider 阶段按批准范围加入。
 
 ## 16. 自动刷新策略
 
 | 数据 | 建议频率 | 缓存/失败策略 |
 | --- | --- | --- |
-| AIS watched vessels | 长期 WebSocket | 断线指数退避；PositionReport 立即落库；无消息不伪造 fresh |
+| AIS watched vessels | 长期 WebSocket | 单例连接消费 PositionReport + ShipStaticData/StaticDataReport；断线指数退避；事实立即落库；无消息不伪造 fresh |
 | AIS Area | 长期独立 WebSocket，会话按 watched ports 更新 | 保留 15 分钟 bounded observation memory；只持久化 aggregate |
 | Vessel static/search cache | 3–7 天；搜索结果 24 小时 | 手工关注时强校验；静态数据慢更新 |
 | Current Voyage / port calls | 2–6 小时；关注后立即一次 | 同 Provider last-known；AIS ETA 与 port events 分字段 |
@@ -550,7 +562,7 @@ Usage ledger 只代表本机已发出的请求和按公开价/账号计划推算
 | Official weather alerts | 10–30 分钟 | source-specific lifecycle/expiry |
 | Industry news | 15–30 分钟 | ETag/Last-Modified；7/14 天 current gate |
 | Official notices | 10–30 分钟 | 有效状态优先；未知时间不进 current |
-| Calendar | 启动检查 + 24 小时 | 10 country-year calls/day；同源 last-known |
+| Calendar | 启动检查 + 约 7 天 TTL；年份变化强制检查 | 5 国 × 2 年约 40–50 calls/月；同源 last-known；手工刷新保留 |
 | Translation | ingestion 后批处理；最多每分钟一批 | cache hit 不调用；失败指数退避，不阻塞 ingestion |
 | Provider health | 每次 job 写入 | 保留最近 success/failure 和 next due |
 
@@ -584,6 +596,9 @@ Usage ledger 只代表本机已发出的请求和按公开价/账号计划推算
 - `POST /api/shipping/calendar/refresh`：当前年 + 下一年或显式 year，仍走同一 scheduler job。
 - `PATCH /api/shipping/settings/translation`：切换 TranslationProvider、模型、locale、预算和启用状态；保存后只影响后台 translation job。
 - `POST /api/shipping/translation/test`：服务端短请求验证配置；默认不发送业务内容，响应不得暴露 secret。
+- `GET /api/shipping/providers/secrets/status`：只返回 provider、`configured`、source（environment/file/missing）和掩码末四位。
+- `PUT /api/shipping/providers/:provider/secret` / `DELETE /api/shipping/providers/:provider/secret`：经过 `SecretStore` 修改本地 secret；环境变量管理的 provider 返回 `managed_by_environment`，不能被 UI 覆盖。成功后立即刷新 Provider Registry。
+- `POST /api/shipping/providers/:provider/test`：服务端测试连接，响应只含脱敏状态/错误码和 usage，不回传 key 或业务内容。
 
 所有 mutation 在 SQLite unavailable 时返回 `503 persistence_unavailable`，UI 不显示“已保存”。搜索 Provider unavailable 返回可解释的 503/200 空结果 envelope，不回退 Mock。
 
@@ -612,7 +627,7 @@ Usage ledger 只代表本机已发出的请求和按公开价/账号计划推算
 
 ### 18.4 AI 翻译中心
 
-Settings 页面新增 AI 翻译中心：Provider/model/endpoint（仅 Custom 显示）、启用状态、目标语言、预算、队列和最近错误集中管理；密钥输入永不回显，前端只接收掩码/配置状态。Usage 面板把“本地统计/估算”与 Provider 官方剩余额度分栏；无官方余额时只显示前者。Feed、公告、天气预警和日历可展开原文，registered name、IMO、MMSI、Callsign、Voyage number、SCAC、UN/LOCODE 等标准标识始终原样。
+Settings 页面新增 AI 翻译中心和 Provider Secret 区：Provider/model/endpoint（仅 Custom 显示）、启用状态、目标语言、预算、队列和最近错误集中管理；用户可添加、修改、删除和测试 DeepSeek/Gemini/OpenAI/VesselAPI 等 key，但密钥输入永不回显，前端只接收掩码/配置状态。环境变量管理的 key 显示“不可覆盖”，本地 FileSecretStore 修改成功后立即生效。Usage 面板把“本地统计/估算”与 Provider 官方剩余额度分栏；无官方余额时只显示前者。Feed、公告、天气预警和日历可展开原文，registered name、IMO、MMSI、Callsign、Voyage number、SCAC、UN/LOCODE 等标准标识始终原样。
 
 ## 19. Migration 方案
 
@@ -639,40 +654,55 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 
 ## 20. P0–P7 实施阶段
 
-依赖审查结论：P0 必须先预留 V3 后续会用到的 schema 和运行时合同，即 `app_metadata/schema_version/bootstrap_completed_at`、所有权分表、`translation_cache`、`provider_usage`、`provider_runtime/sync_runs`、Secret/Config contract、`TranslationProvider` 接口骨架和同步 job 骨架。P6 只能填充翻译 adapter/UI，不能在那时才发现无法保存翻译缓存或用量。
+依赖审查结论：P0 必须先预留 V3 后续会用到的 schema 和运行时合同，即 `app_metadata/schema_version/bootstrap_completed_at`、所有权分表、`translation_cache`、`provider_usage`、`provider_runtime/sync_runs`、`ProviderConfig`/`ProviderSecret`/`SecretStore` contract、`TranslationProvider` 接口骨架和同步 job 骨架。P6 只能填充翻译 adapter/UI，不能在那时才发现无法保存翻译缓存或用量。P1 拆为 **P1A → P1B**：P1A 先提供真实 Port Directory Foundation，P1B 才能移除 Real Mode 对 Mock fixture/seed 的正式依赖；P2 依赖 P1A 与 P1B 均完成。
 
 ### P0 — Persistence
 
 | 项目 | 内容 |
 | --- | --- |
-| 目标 | 固定已验证的单一 Node LTS 工具链；SQLite 成为唯一持久化真相；数据库失败显式只读/不可用；重启恢复全部用户状态；预留 V3 schema、Provider Runtime、Usage、Secret/Config 和 Translation interface skeleton |
+| 目标 | 固定已验证的单一 Node LTS 工具链；SQLite 成为唯一持久化真相；数据库失败显式只读/不可用；重启恢复全部用户状态；只铺 V3 schema、Provider Runtime、Usage、`ProviderConfig`/`ProviderSecret`/`SecretStore` 和 `TranslationProvider` contract skeleton，不在 P0 实现全部 AI adapter |
 | 修改文件 | `package.json`、`README.md`、`nitro.config.ts`、`example.env.server`、`server/database/shipping.ts`、`server/shipping-store.ts`、现有 mutation API、`shared/shipping.ts`、`src/components/shipping/app.tsx`、`src/components/shipping/data.ts` |
 | 新增文件 | `.nvmrc`/`.node-version`、`server/database/runtime.ts`、`server/database/migrations/**`、`server/api/shipping/health.get.ts`、restart smoke fixture/script |
-| 数据库 | 引入 `app_metadata`/schema version；拆 watchlist；新增 provider_runtime/sync_runs/provider_usage/translation_cache；移除 OR REPLACE 和单表空判断；side-by-side V3 DB |
+| 数据库 | 引入 `app_metadata`/schema version；拆 watchlist；新增 provider_runtime/sync_runs/provider_usage/translation_cache；移除 OR REPLACE 和单表空判断；side-by-side V3 DB；业务表只保留原文，不复制 `title_zh/summary_zh` |
 | API | 所有 mutation 在事务失败时返回 503；GET 返回 `persistence` health |
 | 测试 | native SQLite integration、进程 A 写入→关闭→进程 B 读取、无 vessel 时不 reseed、settings/calendar/watch 不被 Provider upsert 覆盖、DB unavailable UI/API |
 | 验收 | Node 24 下 `better-sqlite3` 真实加载；A–F 中的重启保存前置条件全部通过；不存在成功但未落库的 mutation |
 | 风险 | native build/toolchain；V2 JSON 迁移不一致；生产 Nitro subroute 的已知 `#nitro/index` 问题 |
 | 回滚 | 切回 V2 DB 备份和旧 runtime；不删除 V3 DB，保留诊断 |
 
-### P1 — Mock Isolation
+### P1A — Real Port Directory Foundation
 
 | 项目 | 内容 |
 | --- | --- |
-| 目标 | Mock 只存在于 test/demo；real/production code path 无 fixture import、Mock seed、Mock Schedule；AIS 进入长期 `AisTrackingService` |
-| 修改文件 | `server/providers/shipping.ts`、`server/providers/feed.ts`、`server/providers/calendar.ts`、`server/shipping-store.ts`、`shared/ais-area.ts`、全部相关测试、`example.env.server` |
+| 目标 | 建立最小可用的真实港口基础目录：UNECE UN/LOCODE、重点港口真实 identity、真实坐标、基础中英文 aliases；让 Open-Meteo、AIS Area、Portcast identity 可以脱离 `shared/shipping-fixtures.ts` |
+| 修改文件 | `server/providers/port-catalog.ts`、`shared/shipping.ts`、Repository、settings/config、目录同步脚本 |
+| 新增文件 | `server/providers/unlocode.ts`、UN/LOCODE snapshot/importer、重点港口 alias/coordinate source metadata、目录 contract tests |
+| 数据库 | `ports`、`port_aliases`、directory provenance/coverage；不导入 Mock Port rows 作为 Real baseline |
+| API/UI | 本地 Port Search 和 identity/coordinate 查询先可用；缺少动态 coverage 时明确 `unavailable` |
+| 测试 | `Shekou`/`CNSHK`/`蛇口` identity resolution、坐标来源、重复/冲突、目录重启恢复；Real Mode 无 fixture 坐标 |
+| 验收 | 至少八个重点港口拥有真实 identity/坐标/aliases；Open-Meteo/AIS Area/Portcast 的几何输入不再从 `shipping-fixtures.ts` 读取 |
+| 风险 | UN/LOCODE 快照覆盖与坐标质量；需要记录 source/version，不将人工别名伪装成官方字段 |
+| 回滚 | 关闭目录 enrichment，保留已验证目录快照；Real Mode 不回退 Mock Port |
+
+### P1B — Mock Isolation + AIS Tracking Runtime
+
+| 项目 | 内容 |
+| --- | --- |
+| 目标 | 依赖 P1A 的真实目录后，Mock 只存在于 test/demo；real/production code path 无 fixture import、Mock seed、Mock Schedule；AIS 进入长期单例 `AisTrackingService` |
+| 修改文件 | `server/providers/shipping.ts`、`server/providers/feed.ts`、`server/providers/calendar.ts`、`server/shipping-store.ts`、`shared/ais-area.ts`、`server/services/ais-tracking.ts`、全部相关测试、`example.env.server` |
 | 新增文件 | `server/config/shipping.ts`、`server/providers/unavailable.ts`、`test/fixtures/shipping.ts`、Real Evidence Gate tests |
 | 数据库 | migration 时隔离/不导入 Mock operational rows；增加 origin/environment 约束 |
 | API | response 明确 `unavailable/misconfigured`；Real Mode 不返回 Mock payload |
-| 测试 | production bundle 无 fixture import；每个 Provider 缺 key/失败/无历史矩阵；Event/HOT mixed evidence rejection |
-| 验收 | Real Mode 即使全部 Provider 失败，页面只有真实 last-known 或空；`mock-schedule=0`；正式 UI 无 Mock 计数/卡片 |
-| 风险 | 现有八港身份/坐标全部来自 fixture，移除前必须先有真实目录 |
+| 测试 | production bundle 无 fixture import；每个 Provider 缺 key/失败/无历史矩阵；Event/HOT mixed evidence rejection；Position + Static/Voyage message normalization；50 MMSI 上限；断线重连与替换式订阅 |
+| 验收 | Real Mode 即使全部 Provider 失败，页面只有真实 last-known 或空；`mock-schedule=0`；正式 UI 无 Mock 计数/卡片；HTTP GET 不创建 AIS socket |
+| 风险 | P1A 目录覆盖不足；AISStream Beta/no SLA；超过 50 MMSI 的扩展不在本阶段 |
 | 回滚 | 仅在 development demo 显式切 `SHIPPING_DATA_MODE=mock`；production 不提供回滚到 Mock 的开关 |
 
 ### P2 — Search & Watch
 
 | 项目 | 内容 |
 | --- | --- |
+| 依赖 | P1A、P1B 完成；不允许绕过真实目录或在 P1B 前删除 fixture |
 | 目标 | Vessel Discovery/静态身份搜索、UN/LOCODE 本地 Port Search、事务式关注和 AIS/Weather/Area 能力协商；VesselAPI 不作为实时船位 Provider |
 | 修改文件 | `shared/shipping.ts`、Repository、shipping service、Vessels/Ports 页面、settings/config |
 | 新增文件 | `server/providers/vessel-discovery.ts`、`server/providers/vesselapi.ts`、`server/providers/port-catalog.ts`、`server/services/ais-tracking.ts`、search/watchlist API、search UI components |
@@ -706,7 +736,7 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 | 新增文件 | calendar scheduler job、year-rollover/restart tests |
 | 数据库 | coverage/last_success/next_due 持久化；不再把 coverage 只嵌 settings 作为唯一真相 |
 | API | 手工 refresh 走 scheduler；GET 只读库 |
-| 测试 | 冷/热启动、24h TTL、跨年、部分国家失败、500 calls/月预算、last-known |
+| 测试 | 冷/热启动、约 7 天 TTL、年份变化强制检查、部分国家失败、500 calls/月预算、last-known |
 | 验收 | 验收 D；进程启动后页面立即有缓存，后台自动更新 2 年 |
 | 风险 | Calendarific Free upcoming 限制；季度更新；系统时间错误 |
 | 回滚 | 停自动 job，保留已缓存真实 Calendar 和手工 refresh；不启用 Mock |
@@ -717,7 +747,7 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 | --- | --- |
 | 目标 | 清除 mock-schedule；先上线有 evidence 的 Current Voyage，再按已确认 entitlement 接 Commercial Schedule，不提前锁死具体商业 Provider |
 | 修改文件 | shared Voyage types、Repository、Event engine、Voyage 页面、provider config |
-| 新增文件 | CurrentVoyage/Schedule interfaces、VesselAPI current-voyage adapter、port_calls/voyage_legs API/tests；获批后 carrier adapter |
+| 新增文件 | CurrentVoyage/Schedule interfaces、AIS/port-call Current Voyage service、可选且 entitlement 验证后的 VesselAPI enrichment adapter、port_calls/voyage_legs API/tests；获批后 carrier adapter |
 | 数据库 | voyages、voyage_legs、port_calls 拆表；planned/observed/derived 字段 |
 | API | current voyage、schedule search/detail、port calls |
 | 测试 | AIS ETA 不等于 schedule ETA、baseline freeze、actual ATA/ATD、provider failure、DCSA normalization contract |
@@ -732,7 +762,7 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 | 目标 | 外部文本自动中文化并缓存，原文永远可查，标识不翻译；TranslationProvider 可切换且有预算/usage/secret 合同 |
 | 修改文件 | shared DTO、Feed/Calendar/Event UI、Provider Runtime/settings |
 | 新增文件 | TranslationProvider、DeepSeek/Qwen/Gemini/OpenAI/Claude/Google/DeepL/Azure/Custom adapters（按批准范围选其一或多项）、translation service/cache、字段 allowlist、i18n labels |
-| 数据库 | P0 预留的 translation_cache/provider_usage；各内容表 original/zh/translation status |
+| 数据库 | P0 预留的 `translation_cache`/`provider_usage`；各内容表只保留 original，中文与状态由通用缓存查询 |
 | API | 默认返回 zh + original；可选 `locale`/原文展开，不在页面请求时翻译 |
 | 测试 | identifier denylist、cache key/version、批量、失败原文 fallback、费用上限、HTML/术语保护 |
 | 验收 | 验收 H/I；所有固定 UI 中文；英文资讯自动有中文且保留原文 |
@@ -786,14 +816,14 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 
 | Provider | 免费/最低价 | 优点 | 缺点 | 结论 |
 | --- | --- | --- | --- | --- |
-| DeepSeek | 官方模型/区域/计费需在接入时复核 | 中文上下文和成本控制候选 | 价格、数据区域、可用性随账号/模型变化 | 可切换 LLM adapter，非默认锁定 |
-| Qwen | 官方模型/区域/计费需在接入时复核 | 中文术语和本地生态候选 | 需要确认 API endpoint、数据处理和版本 | 可切换 LLM adapter |
-| Gemini | 官方模型/区域/计费需在接入时复核 | 多语言和结构化输出 | 需要 Google Cloud/AI Studio 账户与地区确认 | 可切换 LLM adapter |
-| OpenAI API | 官方价格页按模型、input/cached input/cache writes/output 的每 1M tokens 计费；具体模型价格随页面变化 | 上下文、术语保护和结构化输出强 | 非专用 NMT；需要 prompt/version/cost 管理与 API key | 可选高质量模式 |
-| Claude API | 官方模型/区域/计费需在接入时复核 | 长文本和术语一致性候选 | 价格、区域和个人申请资格需确认 | 可切换 LLM adapter |
-| Google Cloud Translation | 官方页面按字符/计划计费；免费 credit 和后续单价需按账号/地区复核 | 专用 NMT、语言多 | Billing/项目配置复杂 | 专用 NMT 候选 |
-| DeepL API | Developer/Pro 额度和订阅需按当前官方页面与账号确认；不写成持续免费 | 质量/术语表强 | 地区价格和额度变化 | 质量优先备选 |
-| Azure Translator | F0/S1 额度和单价需按当前官方页面与区域确认；先前的 200 万字符/月和 $10/百万字符仅作待复核线索 | 专用 NMT、REST 简单 | 需 Azure resource/key；地区可达性要实测 | 专用 NMT 候选，不锁死 |
+| DeepSeek | 价格快照见 21.4；无官方 API Free Tier 声明 | 中文上下文和成本控制候选 | 区域、余额和模型可用性随账号变化 | 可切换 LLM adapter，非默认锁定 |
+| Qwen | 官方页面显示 1M tokens/model 试用；逐模型 API 单价 pending | 中文术语和本地生态候选 | endpoint、数据区域和计费版本需确认 | 可切换 LLM adapter |
+| Gemini | 免费层 + 付费层价格快照见 21.4 | 多语言和结构化输出 | Google AI Studio/Cloud 账户与地区确认 | 可切换 LLM adapter |
+| OpenAI API | 价格快照见 21.4；按模型、input/cached/output token 计费 | 上下文、术语保护和结构化输出强 | 非专用 NMT；需要 prompt/version/cost 管理与 API key | 可选高质量模式 |
+| Claude API | 价格快照见 21.4；官方文档写新用户有少量免费 credits | 长文本和术语一致性候选 | 价格、区域和账号账单政策需确认 | 可切换 LLM adapter |
+| Google Cloud Translation | Basic/Advanced 字符价格和免费赠金见 21.4 | 专用 NMT、语言多 | 需 Cloud project/billing，账号和地区确认 | 专用 NMT 候选 |
+| DeepL API | Developer 1M 一次性试用、Growth 计划见 21.4 | 质量/术语表强 | 地区币种、账号和订阅需确认 | 质量优先备选 |
+| Azure Translator | F0 2M 字符/月、S1 $10/M 文本见 21.4 | 专用 NMT、REST 简单 | 需 Azure resource/key；地区可达性要实测 | 专用 NMT 候选，不锁死 |
 | Custom OpenAI-compatible | 由用户自托管或第三方计划决定，公开价格 unknown | 可接入已有网关/本地服务 | endpoint、模型、数据处理、可靠性全部由用户负责 | 支持但必须显式配置 |
 | 本地模型 | API 成本 0；模型下载/运行成本不计入 Provider 账单 | 数据不出本机 | CPU/RAM、质量和升级成本高 | V3 可留接口，默认非目标 |
 
@@ -806,16 +836,35 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 | Custom OpenAI-compatible | 同上 | 由用户网关/自托管计划决定；本地成本另算 | 显式配置后可用 |
 | 本地模型 | 100k–300k 字符 | 外部 API $0；CPU/RAM/模型下载成本不计入 Provider ledger | 零外部费用候选 |
 
-### 21.4 运营 Provider Cost Matrix
+### 21.4 Pricing Snapshot — 2026-08-20
+
+以下是 2026-08-20 读取官方价格/文档页面后的决策快照，只用于当前成本估算，不属于长期架构合同。模型、地区、税费、免费资格和计费方式可能变化；正式接入前仍需用用户自己的账号做 contract test。`unknown/pending` 仅保留在官方页面没有给出或本快照无法确认的字段。
+
+| Provider | Free tier / 免费额度 | 输入价格 | 输出价格 | 字符价格 | 最低套餐 / 账号要求 | Shipping-HOT 月成本估算（100k–300k 新内容） |
+| --- | --- | --- | --- | --- | --- | --- |
+| DeepSeek | 官方价格页未说明 API Free Tier；费用从余额或 granted balance 扣除 | `deepseek-v4-flash` cache hit $0.007–0.014/M、miss $0.22–0.44/M；`v4-pro` hit $0.022–0.044/M、miss $0.66–1.32/M | Flash $0.66–1.32/M；Pro $1.98–3.96/M（均按 peak/off-peak） | N/A | 需充值余额或 granted balance；价格可能变化 | 约 $0.1–$1.5，取决于模型、cache 和输出量；无免费额度承诺 |
+| Qwen / Alibaba Cloud Model Studio | 官方页面可见 “Free Trial: 1M Tokens per Model”；另有 $6/月 AI Token Plan，但不把活动套餐当作永久 API Free Tier | 当前抓取到的公开 Model Studio pricing 页未稳定呈现模型逐 token 单价，`unknown/pending` | `unknown/pending` | N/A | 需 Alibaba Cloud/Model Studio 账号；API 计费地区和模型需复核 | 试用额度内目标 $0；超出后的成本 pending |
+| Gemini Developer API | 免费层：特定模型有限访问、免费 input/output tokens、AI Studio；内容可能用于改进 Google 产品 | `Gemini 3.6 Flash` 付费层 $1.50/M；免费层免费 | $7.50/M（含思考 token）；免费层免费 | N/A | AI Studio 可免费开始；生产付费层需升级/绑定结算 | 免费层内 $0；付费层约 $0.2–$3，按 input/output 比例 |
+| OpenAI API | 页面未声明通用 API Free Tier | `gpt-5.6-luna` $0.20/M、`terra` $2/M、`sol` $5/M；cached input 分别 $0.02/$0.20/$0.50/M | Luna $1.20/M、Terra $12/M、Sol $30/M | N/A | 需 API key 与余额/账单；按模型和 input/cache/output 计费 | Luna 约 $0.1–$0.5；Terra 约 $1–$5；Sol 约 $3–$15 |
+| Claude API | 官方文档写新用户有少量 API 免费 credits；长期 Free Tier 额度未承诺 | `Claude Sonnet 5` $2/M；Sonnet 4.6 $3/M；Haiku 4.5 $1/M；Opus 5 $5/M | Sonnet 5 $10/M；Sonnet 4.6 $15/M；Haiku 4.5 $5/M；Opus 5 $25/M | N/A | API 按 token 后付费；AWS/Google Cloud 代运营账单另有规则 | Haiku 约 $0.1–$1；Sonnet 5 约 $0.3–$3；Opus 约 $1–$8 |
+| Google Cloud Translation Basic NMT | 每月前 500,000 字符免费（$10/月赠金支付；赠金不顺延） | 超过 500k 后 $20/M 字符 | N/A（NMT 按输入字符） | $20/M 字符；Advanced text LLM $10/M input + $10/M output | 需 Google Cloud project、billing account 和 API credentials | 100k–300k 字符通常 $0（在 500k 内）；超出后按字符计费 |
+| DeepL API | Developer 一次性 1,000,000 字符试用额度 | Growth：JP¥3,025/月（年度付费）含 12M 字符/年，超出 JP¥2,750/M 字符；Enterprise 自定义 | N/A | 按字符；Developer 1M 一次性，Growth 50M/月用量上限 | 需 DeepL API 账号；地区/币种以官方结算页为准 | Developer 试用期目标 $0；超出后按 Growth/地区价格，不能写成永久免费 |
+| Azure Translator | F0：每月 2,000,000 字符（标准翻译与自定义训练合计）免费 | S1 文本翻译 $10/M 字符；文档 $15/M | N/A | $10/M 文本，$15/M 文档 | 需 Azure resource/key；Azure Free Account 另有 $200/30 天试用，不等于永久 F0 资格 | 100k–300k 字符在 F0 内目标 $0；超出按 $10/M |
+| Open-Meteo Marine | Free/Open-Access：600 calls/min、5,000/hour、10,000/day、300,000/month；含 Marine API | N/A | N/A | N/A | 非商业使用、无 uptime guarantee、CC BY 4.0 attribution；商业 Standard €29/月起 | 8 港按小时约 5,760 calls/月，个人非商业预计 ¥0/月 |
+| AISStream | 当前公开免费；Beta；无 uptime guarantee/SLA | N/A | N/A | N/A | 服务端 API key；单订阅最多 50 MMSI；政策可能变化 | 目标 $0/月；以 Beta/no SLA 记录，不承诺商业可用性 |
+
+DeepSeek/OpenAI 的 token 数字、Gemini 的免费/付费层、Claude 模型价格、Google Cloud/DeepL/Azure 字符价格都只是该日期快照；它们不会把对应 Provider 变成 V3 的必选依赖。Open-Meteo 的非商业免费额度与 AISStream 的当前免费 Beta 也不构成永久服务承诺。
+
+### 21.5 运营 Provider Cost Matrix
 
 下表把“数据能力、免费/价格、额度单位与重置、超额、计费方式、卡/资格、限流、Shipping-HOT 月用量和月成本”放在同一审查面。`unknown/pending` 是有意保留的状态，不代表已获得供应商 entitlement。用量按单用户、8 个关注港口、少量关注船、30 天估算；条件请求/缓存会显著降低实际传输量。
 
 | Provider | 提供数据 | 免费/最低价与额度 | 重置/超额/计费 | 卡/资格 | Rate limit | 月用量估算 | 月成本目标 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| AISStream | watched MMSI 实时 AIS PositionReport | 现有账号条款；公开个人固定价/额度需账号确认 | 按账号/消息与连接条款，单位和超额 unknown | API key；个人资格/覆盖 pending | MMSI/filter/连接限制按账号确认 | 1 个长期 session；消息数取决于船舶活动，不按 HTTP call 轮询 | $0 目标；账号条款 pending |
-| Open-Meteo Marine/Forecast | 港口天气模型 | 公开 API；免费/商业限额随使用条款变化 | 按请求/服务条款；月度重置和超额 unknown | 通常无需 key；生产用途/高频限制需确认 | 官方服务限制 unknown | 8 港 × 24 × 30 ≈ 5,760 请求（可按 cache/批量坐标降到更低） | $0 目标，需遵守条款 |
+| AISStream | watched MMSI 实时 AIS PositionReport + Static/Voyage messages | 当前公开免费、Beta；无 uptime guarantee/SLA；`FiltersShipMMSI` 单订阅最多 50 MMSI | 非商业 SLA/未来政策可能变化；消息/连接计费未声明 | 服务端 API key；正式接入前复核条款与覆盖 | 初始连接 3 秒内订阅；订阅更新约 1 次/秒；50 MMSI | 1 个长期单例 session；消息数取决于船舶活动，不按 HTTP call 轮询 | $0 目标；Beta/no SLA |
+| Open-Meteo Marine/Forecast | 港口天气模型 | Free/Open-Access：600 calls/min、5,000/hour、10,000/day、300,000/month；含 Marine API；通常无需 key | 非商业使用；无 uptime guarantee；超过变量/范围可能按 fractional calls；需 CC BY 4.0 attribution | 个人非商业；商业需 Standard €29/月起（1M calls/月）等计划 | 官方限额如左 | 8 港按小时刷新约 5,760 calls/月，远低于 300,000/月；可按 cache/批量更低 | 个人非商业预计 ¥0/月；商业另评估 |
 | Portcast public page | 已覆盖港口拥堵/derived 页面 | 页面无公开 API 套餐承诺 | 不是稳定 API 额度；超额/计费/重置 unknown | 公开页面可达不等于个人抓取许可；robots/条款待审 | 页面/IP 限制 unknown | 8 港 × 30 ≈ 240 次条件请求 | $0 目标但不可保证；无覆盖即 unavailable |
-| Calendarific | 国家节假日 | Free 500 calls/月（前次官方快照；本轮按账号复核） | 约 300 calls/月策略；月度重置日、超额/Starter 需账号确认 | Free 资格/attribution 按计划确认 | 计划限额 unknown | 5 国 × 2 年 × 每日约 300 calls/月 | $0 在 quota 内 |
+| Calendarific | 国家节假日 | Free 500 calls/月（官方页面快照） | 约 7 天 TTL；约 40–50 calls/月；月度重置日、超额/Starter 需账号确认 | Free 资格/attribution 按计划确认 | 计划限额 unknown | 5 国 × 2 年 × 每 7 天检查约 43 calls/月 | $0 在 quota 内 |
 | The Loadstar / Public RSS | 行业资讯 | 公共 RSS/页面，无固定 API 费用 | 按 robots/站点条款；无月度 quota 承诺 | 无 key；抓取许可需逐源审查 | 站点/IP 限制 unknown | 约 5 源 × 15–30 分钟条件检查；ETag 后传输更低 | $0 目标 |
 | Official weather sources | JMA/TMD/BMKG 等预警 | 公共源，固定价/额度多为 unknown | 按站点/机构条款；无统一 reset | 通常无需 key；live enablement/资格逐源确认 | source-specific unknown | 3 源 × 10–30 分钟检查 | $0 目标 |
 | VesselAPI | Discovery/static metadata，可选已验证 enrichment | Free 150 calls/月；Basic $14.99/月、1,500 calls/月；Starter/其他档需复核 | 成功 2xx 计入额度；Search/Detail 是否各 1 call unknown；月度 reset/超额按计划 | Free 公开快照显示无信用卡；生产资格/地区 pending | 约 500/5m/IP、3,000/5m/key、location 300/5m、并发 20（快照，接入时复核） | 低频搜索/metadata 约 20–80 calls/月；不做实时轮询 | $0 Free PoC；Basic 公开基线 $14.99/月 |
@@ -841,7 +890,7 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 
 ### 22.2 用量预算与估算规则
 
-- Calendarific Free 500 calls/月的公开额度和五国 × 两年 × 每日同步约 300 calls/月只是 2026-08-20 的方案估算；失败重试、手工刷新和官方 coverage 限制必须留余量。
+- Calendarific Free 500 calls/月的公开额度和五国 × 两年 × 约 7 天 TTL 的 40–50 calls/月只是 2026-08-20 的方案估算；失败重试、手工刷新和官方 coverage 限制必须留余量。
 - 翻译预算按 `provider_usage` 记录的字符/token 估算，cache hit 不计外部请求；预算超限时暂停后台翻译，不阻塞 ingestion。
 - VesselAPI Search/Detail 是否“每 endpoint 严格各计 1 call”没有在当前可访问资料中形成足够证据，计划和 UI 都显示 `unknown`/本地估算，不能把搜索次数直接等同账单次数。
 
@@ -929,18 +978,45 @@ AZURE_TRANSLATOR_KEY=
 AZURE_TRANSLATOR_REGION=
 ```
 
-- 个人模式优先使用 server-only `.env.local`/`.env.server`（或等价 secret manager）；`.env.server` 中若含 secret 必须限制文件权限；process env 优先级最高。绝不把 key 放到 LocalStorage、前端、Git、docs、fixture 或普通 SQLite 列。
+- 个人模式由服务端 `SecretStore` 统一读取；环境变量优先于本地文件，且 `.env.local`/`.env.server` 中的值不能被 UI 覆盖。绝不把 key 放到 LocalStorage、前端、Git、docs、fixture 或普通 SQLite 列。
 - `example.env.server` 只留空 key 和注释，不放真实值。
 - API/日志/provider_runtime 只显示 configured boolean，不输出 key。
 - real/production 缺少必需 key 时该 Provider 为 `misconfigured`，不改 mode、不回退 Mock。
 - 新 Provider key 命名使用实际品牌，避免含糊的 `VESSEL_SEARCH_API_KEY` 无法支持未来并存/迁移；Custom OpenAI-compatible 还必须单独配置 base URL/model。
 
-### 24.1 个人模式 Secret 方案比较
+### 24.1 SecretStore 合同与运行时生效
+
+V3 正式定义 Secret 与普通 Provider 配置的边界：
+
+```ts
+interface SecretStore {
+  get: (providerId: string) => Promise<string | undefined>
+  set: (providerId: string, secret: string) => Promise<void>
+  delete: (providerId: string) => Promise<void>
+  has: (providerId: string) => Promise<boolean>
+  source: (providerId: string) => Promise<"environment" | "file" | "missing">
+}
+```
+
+- 本地个人模式实现 `FileSecretStore`，文件固定为 `.data/provider-secrets.json`；`.data/` 已在 `.gitignore`，文件只由 server runtime 读写，不能被前端直接读取。
+- `EnvironmentVariableSecretStore`（或平台 Secret Manager）先查实际 Provider 环境变量，例如 `DEEPSEEK_API_KEY`、`VESSELAPI_API_KEY`；环境变量命中后，其优先级高于本地文件，且 `set/delete` 对该 provider 返回 `managed_by_environment`，UI 显示“当前密钥由环境变量管理，设置页不可覆盖”。
+- 没有环境变量时才读写 `.data/provider-secrets.json`。Settings 的新增、修改、删除、测试连接都经过 server API；写入成功后立即刷新 Provider Registry/Config Service，下一次 Translation/Vessel 请求直接使用新 secret，不要求重启。
+- FileSecretStore 只保存 secret，不保存 Provider model/baseUrl/budget/enabled；这些 `ProviderConfig` 字段进入 SQLite settings。`ProviderSecret` 只能通过 `SecretStore` 访问，不能塞进 settings JSON 或 `provider_runtime`。
+- API 只返回 `configured`、`source` 和掩码末四位（例如 `****AB12`）；日志、错误、缓存、测试响应和 provider_runtime 不得包含完整值或 Authorization header。
+
+```text
+Settings mutation
+  → SecretStore.set/delete (server-only)
+  → Provider Registry refresh
+  → next job/request reads current secret
+```
+
+### 24.2 个人模式 Secret 方案比较
 
 | 方案 | 适合度 | 结论 |
 | --- | --- | --- |
-| A. server-only `.env.local` / `.env.server` | 简单、可审计、符合现有 Nitro/Node 运行方式；需限制文件权限并加入 ignore | **个人模式默认**；UI 只写入服务端受控配置，不回显明文 |
-| B. 独立 server-only secrets file | 与 A 类似，适合把配置和 secret 分开；需要明确路径和权限 | 可选；部署脚本/本机权限足够时采用 |
+| A. 环境变量/平台 Secret Manager | 简单、可审计；优先级最高且 UI 不可覆盖 | **Cloud/受管部署默认** |
+| B. `FileSecretStore` `.data/provider-secrets.json` | 适合本地个人模式；需限制文件权限并加入 ignore | **Local/个人模式默认 fallback**；Settings 修改可立即生效 |
 | C. encrypted SQLite secrets | 需要密钥管理、迁移和启动解密链路，容易把恢复问题变成新单点 | V3 不默认；只有后续明确需要多环境加密存储时再做 ADR |
 | D. OS Credential Store | 安全性更高但跨平台、无头服务器和备份行为复杂 | V3 不默认；可作为未来本地增强，不阻塞个人模式 |
 
@@ -974,14 +1050,16 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 
 ## 27. 实施门槛与文档后续
 
-本文批准后，应先新增 `docs/adr/ADR-005-v3-real-data-boundaries.md`，状态只能是 `Proposed`，不得在用户确认前写成 `Accepted`。该 ADR 至少覆盖：
+`docs/adr/ADR-005-v3-real-data-boundaries.md` 已存在，当前状态为 `Proposed`。Architecture Approval 后，先将 ADR-005 更新为 `Accepted`，再开始 P0；本轮不得提前修改其状态。该 ADR 至少覆盖：
 
 - V3 real-only runtime、SQLite fail-closed/read-only 行为和已验证的单一 Node LTS。
 - VesselAPI 仅 Discovery/static metadata、AISStream 长期 tracking、UN/LOCODE 默认 Port Search，以及 provider-owned/user-owned/directory-owned/translation-owned 字段边界。
-- TranslationProvider 可切换合同、Settings AI 翻译中心、server-only secret、`translation_cache`/`provider_usage` 和“本地统计/估算”标签。
+- P1A → P1B → P2 依赖、AISStream 50 MMSI/Beta/no SLA、长期单例连接和 Position/Static/Voyage facts。
+- `ProviderConfig`/`ProviderSecret` 分离、`SecretStore`（环境变量优先 + `FileSecretStore`）、Settings 立即刷新 Provider Registry。
+- TranslationProvider 可切换合同、Settings AI 翻译中心、单一 `translation_cache` source of truth、server-only secret、`provider_usage` 和“本地统计/估算”标签。
 - Current Voyage 与 DCSA Commercial Schedule 的事实分层。
 
-之后从 P0 开始，严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。不得从本文直接跳到 P2 搜索或 P5 Schedule。
+之后从 P0 开始，严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。不得从本文直接跳到 P2 搜索或 P5 Schedule；P0 只铺合同和 schema，不实现全部 AI adapter。
 
 ## 28. 外部资料
 
@@ -994,6 +1072,12 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 - Maersk：[Integration Hub](https://integration.maersk.com/)
 - Calendarific：[Pricing](https://calendarific.com/pricing)
 - UNECE：[UN/LOCODE](https://unece.org/trade/cefact/unlocode-code-list-country-and-territory)
+- Open-Meteo：[Pricing](https://open-meteo.com/en/pricing)
+- AISStream：[Home](https://aisstream.io/)、[Documentation](https://aisstream.io/documentation)
+- DeepSeek：[API pricing](https://api-docs.deepseek.com/quick_start/pricing)
+- Qwen/Alibaba Cloud：[Model Studio pricing](https://www.alibabacloud.com/help/en/model-studio/model-pricing)
+- Gemini：[Gemini Developer API pricing](https://ai.google.dev/gemini-api/docs/pricing)
+- Claude：[API model pricing](https://docs.anthropic.com/en/docs/about-claude/pricing)
 - Azure：[Translator pricing](https://azure.microsoft.com/en-us/pricing/details/translator/)
 - Google Cloud：[Translation pricing](https://cloud.google.com/translate/pricing)
 - DeepL：[API pricing](https://www.deepl.com/en/pro-api)
