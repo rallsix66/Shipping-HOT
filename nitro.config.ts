@@ -15,11 +15,19 @@ const nitroOption: Parameters<typeof viteNitro>[0] = {
   database: {
     default: {
       connector: "better-sqlite3",
+      options: {
+        cwd: projectDir,
+        name: "shipping-hot-v3",
+      },
     },
   },
   devDatabase: {
     default: {
       connector: "better-sqlite3",
+      options: {
+        cwd: projectDir,
+        name: "shipping-hot-v3",
+      },
     },
   },
   imports: {

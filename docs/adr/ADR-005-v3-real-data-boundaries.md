@@ -1,17 +1,17 @@
 # ADR-005: Shipping HOT V3 Real-Data Boundaries
 
 - Date: 2026-08-20
-- Status: Proposed
-- Decision owners: User (architecture approval pending)
+- Status: Accepted
+- Decision owners: User (architecture approval completed 2026-08-20)
 - Supersedes: none; extends ADR-004 only after explicit V3 approval
 
 ## Context
 
 Shipping HOT V3 is a proposal for moving from the V2 mixed/mock runtime to a local-first, real-data operational runtime. The review found that adding search, translation and more Providers on top of the current request-triggered flow would leave several unsafe ambiguities: SQLite failure can expose a Mock snapshot, `vessels` emptiness is used as a seed signal, user watch state shares rows with Provider state, VesselAPI could be mistaken for live AIS, Port Search could become dependent on a paid entitlement, and translation would have no durable cache, secret or usage contract. The implementation order therefore separates **P1A Real Port Directory Foundation** from **P1B Mock Isolation + AIS Tracking Runtime**; P2 depends on both.
 
-This ADR is intentionally **Proposed**. It does not authorize implementation, account creation, paid subscriptions, key entry or schema migration. Implementation starts only after the user explicitly confirms `架构确认，开始执行 Phase 1`.
+This ADR is **Accepted** as of 2026-08-20. It authorizes the approved V3 implementation boundaries, beginning with P0 Persistence. It does not authorize account creation, paid subscriptions, key entry, or any phase beyond the explicitly approved phase.
 
-## Proposed decision
+## Accepted decision
 
 ### 1. Real-only operational boundary
 

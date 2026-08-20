@@ -4,6 +4,10 @@
   "version": "0.0.41",
   "private": true,
   "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": "24.15.0",
+    "pnpm": "10.30.3"
+  },
   "author": {
     "url": "https://github.com/ourongxing/",
     "email": "orongxing@gmail.com",
@@ -22,7 +26,8 @@
     "release": "bumpp",
     "prepare": "simple-git-hooks",
     "log": "wrangler pages deployment tail --project-name newsnow",
-    "test": "vitest -c vitest.config.ts"
+    "test": "vitest -c vitest.config.ts",
+    "smoke:p0-native": "tsx ./scripts/p0-native-sqlite-smoke.ts"
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.7",

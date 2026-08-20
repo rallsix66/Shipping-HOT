@@ -1,19 +1,45 @@
+import process from "node:process"
 import { filterEventsForOperationalContext, sourceAllowedForOperationalContext, toVesselWatchTarget } from "@shared/shipping"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
-import type { FeedItem, Freshness, Port, ProviderResult, ShippingProviderModes, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
-import { createMockSnapshot } from "@shared/shipping-fixtures"
+import type { DatabasePersistenceStatus, FeedItem, Freshness, Port, ProviderResult, ShippingProviderModes, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
 import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries, calendarEventKey, calendarEventLegacyId } from "@shared/calendar"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules"
-import { createMockCalendarEvents, filterCalendarCoverageForSourceIds, filterCalendarEventsForSourceIds, mergeCalendarSources } from "#/providers/calendar"
+import { filterCalendarCoverageForSourceIds, filterCalendarEventsForSourceIds, mergeCalendarSources } from "#/providers/calendar"
 import { filterFeedLastKnownForMode } from "#/providers/feed"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
+import { defaultShippingSettings, healthyPersistenceStatus, persistenceUnavailableError } from "#/database/runtime"
 import { disabledProviderData, fetchWeatherProviderResults, isOfficialWeatherAlertFeedItem, isWeatherFeedItem, operationalSourceContext, providerError, providerModes, providerProvenances, providerResult, providers, sanitizeAisVessel, toProviderResult } from "#/providers/shipping"
 
 let repository: ShippingRepository | undefined
 const mockCalendarYear = new Date().getUTCFullYear()
-let fallbackSnapshot: ShippingSnapshot = { ...createMockSnapshot(), calendarEvents: createMockCalendarEvents(mockCalendarYear) }
 let initialized: Promise<void> | undefined
+let persistenceStatus: DatabasePersistenceStatus = { status: "unavailable", schemaVersion: 0, errorCode: "persistence_unavailable" }
+
+function emptySnapshot(): ShippingSnapshot {
+  return {
+    vessels: [],
+    ports: [],
+    voyages: [],
+    events: [],
+    feedItems: [],
+    settings: structuredClone(defaultShippingSettings),
+    calendarEvents: [],
+    calendarCoverage: [],
+    aisPortMetrics: [],
+    database: structuredClone(persistenceStatus),
+  }
+}
+
+function requireRepository(): ShippingRepository {
+  if (!repository || persistenceStatus.status === "unavailable") throw persistenceUnavailableError()
+  return repository
+}
+
+function markWriteFailure(error: unknown): never {
+  persistenceStatus = { ...persistenceStatus, status: "read_only_degraded", errorCode: "persistence_write_failed" }
+  throw persistenceUnavailableError(error)
+}
 
 function preserveWatchState<T extends Vessel | Port>(latest: T[], stored: T[]): T[] {
   const previous = new Map(stored.map(item => [item.id, item.isWatched]))
@@ -49,21 +75,21 @@ async function initialize() {
   initialized = (async () => {
     try {
       const db = useDatabase()
-      await initShippingTables(db)
+      const metadata = await initShippingTables(db, process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock")
       repository = new ShippingRepository(db)
-      if (await repository.isEmpty()) {
-        const seeded = await fetchProviderSnapshot(fallbackSnapshot.settings)
-        await repository.seed(seeded.vessels, seeded.ports, seeded.voyages, seeded.feedItems, seeded.events, seeded.settings, seeded.calendarEvents)
-      }
+      persistenceStatus = metadata
+        ? healthyPersistenceStatus(metadata)
+        : { status: "healthy", schemaVersion: 0 }
     } catch (error) {
       repository = undefined
-      logger.warn("Shipping SQLite unavailable; retaining last-known Mock data in memory", error)
+      persistenceStatus = { status: "unavailable", schemaVersion: 0, errorCode: "persistence_unavailable" }
+      logger.error("Shipping SQLite unavailable; no in-memory replacement will be used", error)
     }
   })()
   return initialized
 }
 
-async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick<ShippingSnapshot, "vessels" | "ports" | "voyages" | "feedItems" | "calendarEvents" | "calendarCoverage" | "aisPortMetrics"> = fallbackSnapshot): Promise<ShippingSnapshot> {
+async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick<ShippingSnapshot, "vessels" | "ports" | "voyages" | "feedItems" | "calendarEvents" | "calendarCoverage" | "aisPortMetrics"> = emptySnapshot()): Promise<ShippingSnapshot> {
   const existingNonWeatherFeed = lastKnown.feedItems.filter(item => !isWeatherFeedItem(item))
   const feedLastKnown = filterFeedLastKnownForMode(existingNonWeatherFeed, providerModes.feed)
   const weatherLastKnown = lastKnown.feedItems.filter(isWeatherFeedItem)
@@ -117,7 +143,7 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
     ports: port.data,
     voyages: voyage.data,
     feedItems: mergeWeatherFeedItems(shippingFeed.data, [...weather.data, ...weatherAlerts.data]),
-    events: filterEventsForOperationalContext(fallbackSnapshot.events, operationalSourceContext),
+    events: [],
     settings,
     calendarEvents,
     calendarCoverage,
@@ -128,15 +154,9 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
 
 async function readStoredSnapshot(): Promise<ShippingSnapshot> {
   if (!repository) {
-    return {
-      ...structuredClone(fallbackSnapshot),
-      events: filterEventsForOperationalContext(fallbackSnapshot.events, operationalSourceContext),
-      aisPortMetrics: filterOperationalAisAreaMetrics(fallbackSnapshot.aisPortMetrics ?? []),
-      calendarEvents: filterCalendarEventsForSourceIds(fallbackSnapshot.calendarEvents ?? [], providerModes.calendarSourceIds ?? []),
-      calendarCoverage: filterCalendarCoverageForSourceIds(fallbackSnapshot.calendarCoverage ?? fallbackSnapshot.settings.calendarSync ?? [], providerModes.calendarSourceIds ?? []),
-    }
+    return emptySnapshot()
   }
-  const settings = await repository.getSettings() ?? fallbackSnapshot.settings
+  const settings = await repository.getSettings() ?? structuredClone(defaultShippingSettings)
   const legacyDefaults = {
     vessel: providerModes.vessel === "mock" ? providerProvenances.mockVessel : undefined,
     port: providerModes.port === "mock" ? providerProvenances.mockPort : undefined,
@@ -147,9 +167,8 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
   const voyages = await repository.listVoyages(legacyDefaults)
   const feedItems = await repository.listFeedItems()
   const storedCalendarEvents = filterCalendarEventsForSourceIds(await repository.listCalendarEvents(), providerModes.calendarSourceIds ?? [])
-  const fallbackCalendarEvents = filterCalendarEventsForSourceIds(fallbackSnapshot.calendarEvents ?? [], providerModes.calendarSourceIds ?? [])
-  const calendarEvents = storedCalendarEvents.length ? storedCalendarEvents : fallbackCalendarEvents
-  const calendarCoverage = filterCalendarCoverageForSourceIds(settings.calendarSync ?? fallbackSnapshot.calendarCoverage ?? [], providerModes.calendarSourceIds ?? [])
+  const calendarEvents = storedCalendarEvents
+  const calendarCoverage = filterCalendarCoverageForSourceIds(settings.calendarSync ?? [], providerModes.calendarSourceIds ?? [])
   const aisPortMetrics = providerModes.aisArea === "aisstream"
     ? filterOperationalAisAreaMetrics(await repository.listAisPortMetrics())
     : []
@@ -163,6 +182,7 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
     calendarEvents,
     calendarCoverage,
     aisPortMetrics,
+    database: structuredClone(persistenceStatus),
   }
 }
 
@@ -177,20 +197,25 @@ function filterOperationalSnapshotInputs(snapshot: ShippingSnapshot): Pick<Shipp
 }
 
 async function saveSnapshot(snapshot: ShippingSnapshot) {
-  fallbackSnapshot = structuredClone(snapshot)
-  if (!repository) return
-  for (const vessel of snapshot.vessels) await repository.upsertVessel(vessel)
-  for (const port of snapshot.ports) await repository.upsertPort(port)
-  for (const voyage of snapshot.voyages) await repository.upsertVoyage(voyage)
-  for (const item of snapshot.feedItems) await repository.upsertFeedItem(item)
-  for (const event of snapshot.events) await repository.upsertEvent(event)
-  for (const event of snapshot.calendarEvents ?? []) await repository.upsertCalendarEvent(event)
-  for (const metric of snapshot.aisPortMetrics ?? []) await repository.upsertAisPortMetric(metric)
-  await repository.saveSettings(snapshot.settings)
+  if (!repository) throw persistenceUnavailableError()
+  try {
+    for (const vessel of snapshot.vessels) await repository.upsertVessel(vessel)
+    for (const port of snapshot.ports) await repository.upsertPort(port)
+    for (const voyage of snapshot.voyages) await repository.upsertVoyage(voyage)
+    for (const item of snapshot.feedItems) await repository.upsertFeedItem(item)
+    for (const event of snapshot.events) await repository.upsertEvent(event)
+    for (const event of snapshot.calendarEvents ?? []) await repository.upsertCalendarEvent(event)
+    for (const metric of snapshot.aisPortMetrics ?? []) await repository.upsertAisPortMetric(metric)
+    await repository.saveSettings(snapshot.settings)
+  } catch (error) {
+    persistenceStatus = { ...persistenceStatus, status: "read_only_degraded", errorCode: "persistence_write_failed" }
+    throw persistenceUnavailableError(error)
+  }
 }
 
 export async function getShippingSnapshot(): Promise<ShippingSnapshot> {
   await initialize()
+  if (!repository || persistenceStatus.status === "unavailable") return emptySnapshot()
   const stored = await readStoredSnapshot()
   const providerSnapshot = await fetchProviderSnapshot(stored.settings, stored)
   const current: ShippingSnapshot = {
@@ -206,8 +231,13 @@ export async function getShippingSnapshot(): Promise<ShippingSnapshot> {
   }
   current.events = detectShippingEvents(current.vessels, current.ports, current.voyages, current.feedItems, current.settings, filterEventsForOperationalContext(stored.events, operationalSourceContext), new Date().toISOString(), current.calendarEvents ?? [], current.aisPortMetrics ?? [])
   await saveSnapshot(current)
-  await repository?.pruneExpired(current.settings.retentionDays)
+  await repository.pruneExpired(current.settings.retentionDays)
   return structuredClone(current)
+}
+
+export async function getShippingPersistenceStatus(): Promise<DatabasePersistenceStatus> {
+  await initialize()
+  return structuredClone(persistenceStatus)
 }
 
 function calendarQuery(year: number, countries?: CalendarCountryCode[]): CalendarQuery {
@@ -271,6 +301,7 @@ export function reconcileCalendarEvents(existing: CalendarEvent[], incoming: Cal
 
 export async function syncCalendarEvents(year = mockCalendarYear, countries?: CalendarCountryCode[]): Promise<CalendarProviderResult> {
   await initialize()
+  const persistence = requireRepository()
   const stored = await readStoredSnapshot()
   const query = calendarQuery(year, countries)
   const result = await providers.calendar.getEvents(query)
@@ -282,33 +313,48 @@ export async function syncCalendarEvents(year = mockCalendarYear, countries?: Ca
   const snapshot = { ...stored, settings, calendarEvents: reconciled.events, calendarCoverage: coverage }
   const operational = filterOperationalSnapshotInputs(stored)
   snapshot.events = detectShippingEvents(operational.vessels, operational.ports, operational.voyages, operational.feedItems, snapshot.settings, filterEventsForOperationalContext(stored.events, operationalSourceContext), result.fetchedAt, snapshot.calendarEvents, filterOperationalAisAreaMetrics(stored.aisPortMetrics ?? []))
-  fallbackSnapshot = structuredClone(snapshot)
-  if (reconciled.removedIds.length) await repository?.deleteCalendarEvents(reconciled.removedIds)
-  for (const event of reconciled.events) await repository?.upsertCalendarEvent(event)
-  for (const event of snapshot.events) await repository?.upsertEvent(event)
-  if (repository) await repository.saveSettings(settings)
+  try {
+    if (reconciled.removedIds.length) await persistence.deleteCalendarEvents(reconciled.removedIds)
+    for (const event of reconciled.events) await persistence.upsertCalendarEvent(event)
+    for (const event of snapshot.events) await persistence.upsertEvent(event)
+    await persistence.saveSettings(settings)
+  } catch (error) {
+    markWriteFailure(error)
+  }
   return { ...result, events: reconciled.events, coverage }
 }
 
 export async function updateShippingSettings(settings: Partial<Omit<ShippingSettings, "eventThresholds">> & { eventThresholds?: Partial<ShippingSettings["eventThresholds"]> }) {
+  await initialize()
+  const persistence = requireRepository()
   const current = await getShippingSnapshot()
   const next: ShippingSettings = {
     ...current.settings,
     ...settings,
     eventThresholds: { ...current.settings.eventThresholds, ...settings.eventThresholds },
   }
-  if (repository) await repository.saveSettings(next)
-  fallbackSnapshot.settings = next
+  try {
+    await persistence.saveSettings(next)
+  } catch (error) {
+    markWriteFailure(error)
+  }
   return structuredClone(next)
 }
 
 export async function toggleWatch(kind: "vessel" | "port", id: string) {
+  await initialize()
+  const persistence = requireRepository()
   const current = await getShippingSnapshot()
   const collection = kind === "vessel" ? current.vessels : current.ports
   const item = collection.find(entry => entry.id === id)
   if (!item) throw createError({ statusCode: 404, message: `${kind} not found` })
   item.isWatched = !item.isWatched
-  if (repository) await repository.updateWatch(kind, id, item.isWatched)
-  fallbackSnapshot = current
+  try {
+    const updated = await persistence.updateWatch(kind, id, item.isWatched)
+    if (!updated) throw createError({ statusCode: 404, message: `${kind} not found` })
+  } catch (error) {
+    if (typeof error === "object" && error && "statusCode" in error && (error as { statusCode?: number }).statusCode === 404) throw error
+    markWriteFailure(error)
+  }
   return { id, isWatched: item.isWatched }
 }

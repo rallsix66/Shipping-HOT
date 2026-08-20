@@ -6,11 +6,11 @@
 >
 > 代码基线：`main` @ `c292be4`
 >
-> 实施状态：**未开始**。本文只记录现状审查、外部选型和实施方案，不授权修改业务代码、数据库或外部账号。
+> 实施状态：**P0 Persistence 已完成并通过本地验证**。ADR-005 已于 2026-08-20 Accepted；本轮只执行 P0，不进入 P1A、P1B、P2 或后续 Provider 功能。
 >
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；只有具体 endpoint entitlement、地区/账号资格等未确认事项保持 `unknown/pending`。
 >
-> 实施门槛：当前 `docs/adr/ADR-005-v3-real-data-boundaries.md` 已存在且为 `Proposed`；只有 Architecture Approval 后将 ADR-005 改为 `Accepted`，并且用户明确确认 `架构确认，开始执行 Phase 1`，才可以从本文的 P0 开始。本轮只修订文档，不执行 P0、不创建账号、不写入密钥、不购买服务、不修改业务代码。
+> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮仅落实 P0 Persistence；不创建账号、不购买服务、不实现 VesselAPI、UN/LOCODE、AIS 长连接、Feed、Calendar、Voyage 或 Translation Adapter。
 
 ## 1. 背景与当前问题
 
@@ -670,12 +670,12 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 | 项目 | 内容 |
 | --- | --- |
 | 目标 | 固定已验证的单一 Node LTS 工具链；SQLite 成为唯一持久化真相；数据库失败显式只读/不可用；重启恢复全部用户状态；只铺 V3 schema、Provider Runtime、Usage、`ProviderConfig`/`ProviderSecret`/`SecretStore` 和 `TranslationProvider` contract skeleton，不在 P0 实现全部 AI adapter |
-| 修改文件 | `package.json`、`README.md`、`nitro.config.ts`、`example.env.server`、`server/database/shipping.ts`、`server/shipping-store.ts`、现有 mutation API、`shared/shipping.ts`、`src/components/shipping/app.tsx`、`src/components/shipping/data.ts` |
-| 新增文件 | `.nvmrc`/`.node-version`、`server/database/runtime.ts`、`server/database/migrations/**`、`server/api/shipping/health.get.ts`、restart smoke fixture/script |
+| 修改文件 | `package.json`、`nitro.config.ts`、`example.env.server`、`eslint.config.mjs`、`server/database/cache.ts`、`server/database/shipping.ts`、`server/shipping-store.ts`、现有 Shipping mutation API、`shared/shipping.ts` |
+| 新增文件 | `.nvmrc`、`server/database/runtime.ts`、`server/database/migrations/**`、`server/api/shipping/health.get.ts`、`server/providers/contracts.ts`、`server/services/provider-registry.ts`、`server/secrets/file-secret-store.ts`、`scripts/p0-native-sqlite-smoke.ts` |
 | 数据库 | 引入 `app_metadata`/schema version；拆 watchlist；新增 provider_runtime/sync_runs/provider_usage/translation_cache；移除 OR REPLACE 和单表空判断；side-by-side V3 DB；业务表只保留原文，不复制 `title_zh/summary_zh` |
-| API | 所有 mutation 在事务失败时返回 503；GET 返回 `persistence` health |
+| API | 所有 Shipping mutation 在事务失败时返回 503；`GET /api/shipping/health` 和 Shipping snapshot 返回 `database` persistence health；未新增 Provider/AI API |
 | 测试 | native SQLite integration、进程 A 写入→关闭→进程 B 读取、无 vessel 时不 reseed、settings/calendar/watch 不被 Provider upsert 覆盖、DB unavailable UI/API |
-| 验收 | Node 24 下 `better-sqlite3` 真实加载；A–F 中的重启保存前置条件全部通过；不存在成功但未落库的 mutation |
+| 验收 | Node 24 下 `better-sqlite3` 真实加载；真实进程 A 写入→关闭→进程 B 读取通过；watchlist 不被 Provider upsert 覆盖；不存在成功但未落库的 Shipping mutation |
 | 风险 | native build/toolchain；V2 JSON 迁移不一致；生产 Nitro subroute 的已知 `#nitro/index` 问题 |
 | 回滚 | 切回 V2 DB 备份和旧 runtime；不删除 V3 DB，保留诊断 |
 
@@ -1060,7 +1060,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 
 ## 27. 实施门槛与文档后续
 
-`docs/adr/ADR-005-v3-real-data-boundaries.md` 已存在，当前状态为 `Proposed`。Architecture Approval 后，先将 ADR-005 更新为 `Accepted`，再开始 P0；本轮不得提前修改其状态。该 ADR 至少覆盖：
+`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0 已获授权、实施并完成本地验证；P1A、P1B、P2 及后续 Provider 功能仍未获本轮实施授权。该 ADR 至少覆盖：
 
 - V3 real-only runtime、SQLite fail-closed/read-only 行为和已验证的单一 Node LTS。
 - VesselAPI 仅 Discovery/static metadata、AISStream 长期 tracking、UN/LOCODE 默认 Port Search，以及 provider-owned/user-owned/directory-owned/translation-owned 字段边界。

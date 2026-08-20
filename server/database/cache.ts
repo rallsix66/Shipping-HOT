@@ -23,7 +23,8 @@ export class Cache {
   async set(key: string, value: NewsItem[]) {
     const now = Date.now()
     await this.db.prepare(
-      `INSERT OR REPLACE INTO cache (id, data, updated) VALUES (?, ?, ?)`,
+      `INSERT INTO cache (id, data, updated) VALUES (?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated = excluded.updated`,
     ).run(key, JSON.stringify(value), now)
     logger.success(`set ${key} cache`)
   }

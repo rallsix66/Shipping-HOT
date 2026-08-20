@@ -1,15 +1,12 @@
+import process from "node:process"
 import type { Database } from "db0"
 import { knownMockProvenanceFor, normalizeLegacyEventTrust, normalizeLegacyTrust } from "@shared/shipping"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
 import type { DataProvenance, FeedItem, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, Vessel, Voyage } from "@shared/shipping"
 import type { CalendarEvent } from "@shared/calendar"
+import { type DatabaseMetadata, type ShippingDataMode, initializeShippingDatabase } from "#/database/runtime"
 
 type Row = Record<string, unknown>
-
-interface TableInfoRow {
-  name?: string
-  notnull?: number | boolean | string
-}
 
 interface LegacyTrustDefaults {
   vessel?: DataProvenance
@@ -34,97 +31,181 @@ function parse<T>(value: unknown): T {
   return JSON.parse(String(value)) as T
 }
 
-async function migrateNullableVesselStatusChangedAt(db: Database) {
-  const columns = rows<TableInfoRow>(await db.prepare("PRAGMA table_info(vessels)").all())
-  const statusChangedAt = columns.find(column => column.name === "status_changed_at")
-  if (!statusChangedAt || Number(statusChangedAt.notnull) === 0) return
-
+async function transaction<T>(db: Database, work: () => Promise<T>): Promise<T> {
   await db.prepare("BEGIN").run()
   try {
-    await db.prepare(`CREATE TABLE vessels_new (
-      id TEXT PRIMARY KEY, data TEXT NOT NULL, is_watched INTEGER NOT NULL DEFAULT 0,
-      navigation_status TEXT NOT NULL, status_changed_at TEXT, last_updated_at TEXT
-    )`).run()
-    await db.prepare(`INSERT INTO vessels_new (id, data, is_watched, navigation_status, status_changed_at, last_updated_at)
-      SELECT id, data, is_watched, navigation_status, status_changed_at, last_updated_at FROM vessels`).run()
-    await db.prepare("DROP TABLE vessels").run()
-    await db.prepare("ALTER TABLE vessels_new RENAME TO vessels").run()
+    const result = await work()
     await db.prepare("COMMIT").run()
+    return result
   } catch (error) {
     try {
       await db.prepare("ROLLBACK").run()
     } catch {
-      // Preserve the original migration error when the connector cannot roll back.
+      // Preserve the original persistence error.
     }
     throw error
   }
 }
 
-export async function initShippingTables(db: Database) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS feed_items (
-    id TEXT PRIMARY KEY, source_id TEXT NOT NULL, category TEXT NOT NULL, type TEXT NOT NULL,
-    title TEXT NOT NULL, summary TEXT NOT NULL, source_url TEXT NOT NULL, published_at TEXT NOT NULL,
-    fetched_at TEXT NOT NULL, severity TEXT NOT NULL, related_port_ids TEXT NOT NULL,
-    related_vessel_ids TEXT NOT NULL, related_voyage_ids TEXT NOT NULL, data TEXT NOT NULL
-  )`).run()
-  await db.prepare(`CREATE TABLE IF NOT EXISTS vessels (
-    id TEXT PRIMARY KEY, data TEXT NOT NULL, is_watched INTEGER NOT NULL DEFAULT 0,
-    navigation_status TEXT NOT NULL, status_changed_at TEXT, last_updated_at TEXT
-  )`).run()
-  await migrateNullableVesselStatusChangedAt(db)
-  await db.prepare(`CREATE TABLE IF NOT EXISTS ports (
-    id TEXT PRIMARY KEY, data TEXT NOT NULL, is_watched INTEGER NOT NULL DEFAULT 0,
-    congestion_level TEXT NOT NULL, last_updated_at TEXT
-  )`).run()
-  await db.prepare(`CREATE TABLE IF NOT EXISTS voyages (
-    id TEXT PRIMARY KEY, data TEXT NOT NULL, vessel_id TEXT NOT NULL,
-    baseline_etd TEXT, baseline_eta TEXT, latest_etd TEXT, latest_eta TEXT, delay_minutes INTEGER
-  )`).run()
-  await db.prepare(`CREATE TABLE IF NOT EXISTS events (
-    id TEXT PRIMARY KEY, data TEXT NOT NULL, type TEXT NOT NULL, severity TEXT NOT NULL,
-    status TEXT NOT NULL, dedupe_key TEXT NOT NULL UNIQUE, first_detected_at TEXT NOT NULL,
-    last_detected_at TEXT NOT NULL, resolved_at TEXT
-  )`).run()
-  await db.prepare(`CREATE TABLE IF NOT EXISTS settings (
-    id TEXT PRIMARY KEY, data TEXT NOT NULL, updated_at TEXT NOT NULL
-  )`).run()
-  await db.prepare(`CREATE TABLE IF NOT EXISTS calendar_events (
-    id TEXT PRIMARY KEY, country_code TEXT NOT NULL, subdivision_code TEXT, date TEXT NOT NULL,
-    end_date TEXT, type TEXT NOT NULL, is_public_holiday INTEGER NOT NULL,
-    business_impact TEXT NOT NULL, source_id TEXT NOT NULL, source_url TEXT,
-    verified INTEGER NOT NULL, last_checked_at TEXT NOT NULL, updated_at TEXT,
-    stale INTEGER NOT NULL, data TEXT NOT NULL
-  )`).run()
-  await db.prepare(`CREATE TABLE IF NOT EXISTS ais_port_metrics (
-    port_id TEXT PRIMARY KEY, data TEXT NOT NULL, updated_at TEXT
-  )`).run()
+export async function initShippingTables(db: Database, dataMode: ShippingDataMode = process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock"): Promise<DatabaseMetadata> {
+  return initializeShippingDatabase(db, dataMode)
 }
 
 export class ShippingRepository {
   constructor(private readonly db: Database) {}
 
-  async isEmpty(): Promise<boolean> {
-    const row = await this.db.prepare("SELECT COUNT(*) AS count FROM vessels").get() as Row | undefined
-    return Number(row?.count ?? 0) === 0
+  private async listWatchIds(kind: "vessel" | "port") {
+    const table = kind === "vessel" ? "vessel_watchlist" : "port_watchlist"
+    const key = kind === "vessel" ? "vessel_id" : "port_id"
+    const values = rows<Row>(await this.db.prepare(`SELECT ${key} FROM ${table}`).all())
+    return new Set(values.map(row => String(row[key])))
+  }
+
+  private async insertVessel(vessel: Vessel, conflict: "update" | "ignore") {
+    const data = JSON.stringify({ ...vessel, isWatched: false })
+    const conflictClause = conflict === "ignore"
+      ? "ON CONFLICT(id) DO NOTHING"
+      : `ON CONFLICT(id) DO UPDATE SET
+          data = excluded.data,
+          navigation_status = excluded.navigation_status,
+          status_changed_at = excluded.status_changed_at,
+          last_updated_at = excluded.last_updated_at`
+    await this.db.prepare(`
+      INSERT INTO vessels (id, data, navigation_status, status_changed_at, last_updated_at)
+      VALUES (?, ?, ?, ?, ?)
+      ${conflictClause}
+    `).run(vessel.id, data, vessel.navigationStatus, vessel.statusChangedAt ?? null, vessel.updatedAt ?? null)
+  }
+
+  private async insertPort(port: Port, conflict: "update" | "ignore") {
+    const data = JSON.stringify({ ...port, isWatched: false })
+    const conflictClause = conflict === "ignore"
+      ? "ON CONFLICT(id) DO NOTHING"
+      : `ON CONFLICT(id) DO UPDATE SET
+          data = excluded.data,
+          congestion_level = excluded.congestion_level,
+          last_updated_at = excluded.last_updated_at`
+    await this.db.prepare(`
+      INSERT INTO ports (id, data, congestion_level, last_updated_at)
+      VALUES (?, ?, ?, ?)
+      ${conflictClause}
+    `).run(port.id, data, port.congestionLevel ?? null, port.updatedAt ?? null)
+  }
+
+  private async insertVoyage(voyage: Voyage, conflict: "update" | "ignore") {
+    const conflictClause = conflict === "ignore"
+      ? "ON CONFLICT(id) DO NOTHING"
+      : `ON CONFLICT(id) DO UPDATE SET
+          data = excluded.data,
+          vessel_id = excluded.vessel_id,
+          baseline_etd = excluded.baseline_etd,
+          baseline_eta = excluded.baseline_eta,
+          latest_etd = excluded.latest_etd,
+          latest_eta = excluded.latest_eta,
+          delay_minutes = excluded.delay_minutes`
+    await this.db.prepare(`
+      INSERT INTO voyages (id, data, vessel_id, baseline_etd, baseline_eta, latest_etd, latest_eta, delay_minutes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ${conflictClause}
+    `).run(voyage.id, JSON.stringify(voyage), voyage.vesselId, voyage.baselineEtd ?? null, voyage.baselineEta ?? null, voyage.latestEtd ?? null, voyage.latestEta ?? null, voyage.delayMinutes ?? null)
+  }
+
+  private async insertFeedItem(item: FeedItem, conflict: "update" | "ignore") {
+    const fetchedAt = item.fetchedAt || item.updatedAt || item.publishedAt || new Date().toISOString()
+    const conflictClause = conflict === "ignore"
+      ? "ON CONFLICT(id) DO NOTHING"
+      : `ON CONFLICT(id) DO UPDATE SET
+          source_id = excluded.source_id,
+          category = excluded.category,
+          type = excluded.type,
+          title = excluded.title,
+          summary = excluded.summary,
+          source_url = excluded.source_url,
+          published_at = excluded.published_at,
+          fetched_at = excluded.fetched_at,
+          severity = excluded.severity,
+          related_port_ids = excluded.related_port_ids,
+          related_vessel_ids = excluded.related_vessel_ids,
+          related_voyage_ids = excluded.related_voyage_ids,
+          data = excluded.data`
+    await this.db.prepare(`
+      INSERT INTO feed_items (id, source_id, category, type, title, summary, source_url, published_at, fetched_at, severity, related_port_ids, related_vessel_ids, related_voyage_ids, data)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ${conflictClause}
+    `).run(item.id, item.sourceId, item.category, item.type, item.title, item.summary, item.sourceUrl, item.publishedAt, fetchedAt, item.severity, JSON.stringify(item.relatedPortIds), JSON.stringify(item.relatedVesselIds), JSON.stringify(item.relatedVoyageIds), JSON.stringify(item))
+  }
+
+  private async insertEvent(event: ShippingEvent, conflict: "update" | "ignore") {
+    const conflictClause = conflict === "ignore"
+      ? "ON CONFLICT(id) DO NOTHING"
+      : `ON CONFLICT(id) DO UPDATE SET
+          data = excluded.data,
+          type = excluded.type,
+          severity = excluded.severity,
+          status = excluded.status,
+          dedupe_key = excluded.dedupe_key,
+          first_detected_at = excluded.first_detected_at,
+          last_detected_at = excluded.last_detected_at,
+          resolved_at = excluded.resolved_at`
+    await this.db.prepare(`
+      INSERT INTO events (id, data, type, severity, status, dedupe_key, first_detected_at, last_detected_at, resolved_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ${conflictClause}
+    `).run(event.id, JSON.stringify(event), event.type, event.severity, event.status, event.dedupeKey, event.firstDetectedAt, event.lastDetectedAt, event.resolvedAt ?? null)
+  }
+
+  private async insertCalendarEvent(event: CalendarEvent, conflict: "update" | "ignore") {
+    const conflictClause = conflict === "ignore"
+      ? "ON CONFLICT(id) DO NOTHING"
+      : `ON CONFLICT(id) DO UPDATE SET
+          country_code = excluded.country_code,
+          subdivision_code = excluded.subdivision_code,
+          date = excluded.date,
+          end_date = excluded.end_date,
+          type = excluded.type,
+          is_public_holiday = excluded.is_public_holiday,
+          business_impact = excluded.business_impact,
+          source_id = excluded.source_id,
+          source_url = excluded.source_url,
+          verified = excluded.verified,
+          last_checked_at = excluded.last_checked_at,
+          updated_at = excluded.updated_at,
+          stale = excluded.stale,
+          data = excluded.data`
+    await this.db.prepare(`
+      INSERT INTO calendar_events (id, country_code, subdivision_code, date, end_date, type, is_public_holiday, business_impact, source_id, source_url, verified, last_checked_at, updated_at, stale, data)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ${conflictClause}
+    `).run(event.id, event.countryCode, event.subdivisionCode ?? null, event.date, event.endDate ?? null, event.type, event.isPublicHoliday ? 1 : 0, event.businessImpact, event.sourceId, event.sourceUrl ?? null, event.verified ? 1 : 0, event.lastCheckedAt, event.updatedAt ?? null, event.stale ? 1 : 0, JSON.stringify(event))
   }
 
   async seed(vessels: Vessel[], ports: Port[], voyages: Voyage[], feedItems: FeedItem[], events: ShippingEvent[], settings: ShippingSettings, calendarEvents: CalendarEvent[] = [], aisPortMetrics: AisDerivedPortMetric[] = []) {
-    for (const vessel of vessels) await this.upsertVessel(vessel)
-    for (const port of ports) await this.upsertPort(port)
-    for (const voyage of voyages) await this.upsertVoyage(voyage)
-    for (const feedItem of feedItems) await this.upsertFeedItem(feedItem)
-    for (const event of events) await this.upsertEvent(event)
-    for (const event of calendarEvents) await this.upsertCalendarEvent(event)
-    for (const metric of aisPortMetrics) await this.upsertAisPortMetric(metric)
-    await this.saveSettings(settings)
+    await transaction(this.db, async () => {
+      for (const vessel of vessels) await this.insertVessel(vessel, "ignore")
+      for (const port of ports) await this.insertPort(port, "ignore")
+      for (const voyage of voyages) await this.insertVoyage(voyage, "ignore")
+      for (const feedItem of feedItems) await this.insertFeedItem(feedItem, "ignore")
+      for (const event of events) await this.insertEvent(event, "ignore")
+      for (const event of calendarEvents) await this.insertCalendarEvent(event, "ignore")
+      for (const metric of aisPortMetrics) await this.insertAisPortMetric(metric, "ignore")
+      await this.insertSettingsIfMissing(settings)
+    })
   }
 
   async listVessels(defaults: LegacyTrustDefaults = {}) {
-    return rows<Row>(await this.db.prepare("SELECT data FROM vessels ORDER BY id").all()).map(row => normalizeLegacyTrust(parse<Vessel>(row.data), defaults.vessel))
+    const watched = await this.listWatchIds("vessel")
+    return rows<Row>(await this.db.prepare("SELECT data FROM vessels ORDER BY id").all()).map((row) => {
+      const vessel = parse<Vessel>(row.data)
+      return normalizeLegacyTrust({ ...vessel, isWatched: watched.has(vessel.id) }, defaults.vessel)
+    })
   }
 
   async listPorts(defaults: LegacyTrustDefaults = {}) {
-    return rows<Row>(await this.db.prepare("SELECT data FROM ports ORDER BY id").all()).map(row => normalizeLegacyTrust(parse<Port>(row.data), defaults.port))
+    const watched = await this.listWatchIds("port")
+    return rows<Row>(await this.db.prepare("SELECT data FROM ports ORDER BY id").all()).map((row) => {
+      const port = parse<Port>(row.data)
+      return normalizeLegacyTrust({ ...port, isWatched: watched.has(port.id) }, defaults.port)
+    })
   }
 
   async listVoyages(defaults: LegacyTrustDefaults = {}) {
@@ -162,8 +243,7 @@ export class ShippingRepository {
   }
 
   async upsertVessel(vessel: Vessel) {
-    await this.db.prepare(`INSERT OR REPLACE INTO vessels (id, data, is_watched, navigation_status, status_changed_at, last_updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
-      .run(vessel.id, JSON.stringify(vessel), vessel.isWatched ? 1 : 0, vessel.navigationStatus, vessel.statusChangedAt ?? null, vessel.updatedAt ?? null)
+    await this.insertVessel(vessel, "update")
   }
 
   async listAisPortMetrics() {
@@ -171,29 +251,23 @@ export class ShippingRepository {
   }
 
   async upsertPort(port: Port) {
-    await this.db.prepare(`INSERT OR REPLACE INTO ports (id, data, is_watched, congestion_level, last_updated_at) VALUES (?, ?, ?, ?, ?)`)
-      .run(port.id, JSON.stringify(port), port.isWatched ? 1 : 0, port.congestionLevel ?? "unknown", port.updatedAt ?? null)
+    await this.insertPort(port, "update")
   }
 
   async upsertVoyage(voyage: Voyage) {
-    await this.db.prepare(`INSERT OR REPLACE INTO voyages (id, data, vessel_id, baseline_etd, baseline_eta, latest_etd, latest_eta, delay_minutes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(voyage.id, JSON.stringify(voyage), voyage.vesselId, voyage.baselineEtd ?? null, voyage.baselineEta ?? null, voyage.latestEtd ?? null, voyage.latestEta ?? null, voyage.delayMinutes ?? null)
+    await this.insertVoyage(voyage, "update")
   }
 
   async upsertFeedItem(item: FeedItem) {
-    const fetchedAt = item.fetchedAt || item.updatedAt || item.publishedAt || new Date().toISOString()
-    await this.db.prepare(`INSERT OR REPLACE INTO feed_items (id, source_id, category, type, title, summary, source_url, published_at, fetched_at, severity, related_port_ids, related_vessel_ids, related_voyage_ids, data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(item.id, item.sourceId, item.category, item.type, item.title, item.summary, item.sourceUrl, item.publishedAt, fetchedAt, item.severity, JSON.stringify(item.relatedPortIds), JSON.stringify(item.relatedVesselIds), JSON.stringify(item.relatedVoyageIds), JSON.stringify(item))
+    await this.insertFeedItem(item, "update")
   }
 
   async upsertEvent(event: ShippingEvent) {
-    await this.db.prepare(`INSERT OR REPLACE INTO events (id, data, type, severity, status, dedupe_key, first_detected_at, last_detected_at, resolved_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(event.id, JSON.stringify(event), event.type, event.severity, event.status, event.dedupeKey, event.firstDetectedAt, event.lastDetectedAt, event.resolvedAt ?? null)
+    await this.insertEvent(event, "update")
   }
 
   async upsertCalendarEvent(event: CalendarEvent) {
-    await this.db.prepare(`INSERT OR REPLACE INTO calendar_events (id, country_code, subdivision_code, date, end_date, type, is_public_holiday, business_impact, source_id, source_url, verified, last_checked_at, updated_at, stale, data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(event.id, event.countryCode, event.subdivisionCode ?? null, event.date, event.endDate ?? null, event.type, event.isPublicHoliday ? 1 : 0, event.businessImpact, event.sourceId, event.sourceUrl ?? null, event.verified ? 1 : 0, event.lastCheckedAt, event.updatedAt ?? null, event.stale ? 1 : 0, JSON.stringify(event))
+    await this.insertCalendarEvent(event, "update")
   }
 
   async deleteCalendarEvents(ids: string[]) {
@@ -202,28 +276,63 @@ export class ShippingRepository {
     await this.db.prepare(`DELETE FROM calendar_events WHERE id IN (${placeholders})`).run(...ids)
   }
 
+  private async saveSettingsUnlocked(settings: ShippingSettings) {
+    await this.db.prepare(`
+      INSERT INTO settings (id, data, updated_at) VALUES ('default', ?, ?)
+      ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at
+    `).run(JSON.stringify(settings), new Date().toISOString())
+  }
+
+  private async insertSettingsIfMissing(settings: ShippingSettings) {
+    await this.db.prepare(`
+      INSERT INTO settings (id, data, updated_at) VALUES ('default', ?, ?)
+      ON CONFLICT(id) DO NOTHING
+    `).run(JSON.stringify(settings), new Date().toISOString())
+  }
+
   async saveSettings(settings: ShippingSettings) {
-    await this.db.prepare("INSERT OR REPLACE INTO settings (id, data, updated_at) VALUES ('default', ?, ?)").run(JSON.stringify(settings), new Date().toISOString())
+    await transaction(this.db, () => this.saveSettingsUnlocked(settings))
   }
 
   async updateWatch(kind: "vessel" | "port", id: string, isWatched: boolean) {
-    const table = kind === "vessel" ? "vessels" : "ports"
-    const row = await this.db.prepare(`SELECT data FROM ${table} WHERE id = ?`).get(id) as Row | undefined
+    const entityTable = kind === "vessel" ? "vessels" : "ports"
+    const watchTable = kind === "vessel" ? "vessel_watchlist" : "port_watchlist"
+    const watchColumn = kind === "vessel" ? "vessel_id" : "port_id"
+    const row = await this.db.prepare(`SELECT id FROM ${entityTable} WHERE id = ?`).get(id)
     if (!row) return false
-    const item = parse<Vessel | Port>(row.data)
-    item.isWatched = isWatched
-    await this.db.prepare(`UPDATE ${table} SET data = ?, is_watched = ? WHERE id = ?`).run(JSON.stringify(item), isWatched ? 1 : 0, id)
+    await transaction(this.db, async () => {
+      if (isWatched) {
+        await this.db.prepare(`
+          INSERT INTO ${watchTable} (${watchColumn}, watched_at${kind === "vessel" ? ", ais_enabled" : ""})
+          VALUES (?, ?${kind === "vessel" ? ", 1" : ""})
+          ON CONFLICT(${watchColumn}) DO UPDATE SET watched_at = excluded.watched_at
+        `).run(id, new Date().toISOString())
+      } else {
+        await this.db.prepare(`DELETE FROM ${watchTable} WHERE ${watchColumn} = ?`).run(id)
+      }
+    })
     return true
   }
 
   async pruneExpired(retentionDays: number, now = new Date()) {
     const cutoff = new Date(now.getTime() - retentionDays * 24 * 60 * 60 * 1000).toISOString()
-    await this.db.prepare("DELETE FROM events WHERE last_detected_at < ? AND status = 'resolved'").run(cutoff)
-    await this.db.prepare("DELETE FROM feed_items WHERE (published_at <> '' AND published_at < ?) OR (published_at = '' AND fetched_at < ?)").run(cutoff, cutoff)
+    await transaction(this.db, async () => {
+      await this.db.prepare("DELETE FROM events WHERE last_detected_at < ? AND status = 'resolved'").run(cutoff)
+      await this.db.prepare("DELETE FROM feed_items WHERE (published_at <> '' AND published_at < ?) OR (published_at = '' AND fetched_at < ?)").run(cutoff, cutoff)
+    })
+  }
+
+  private async insertAisPortMetric(metric: AisDerivedPortMetric, conflict: "update" | "ignore") {
+    const conflictClause = conflict === "ignore"
+      ? "ON CONFLICT(port_id) DO NOTHING"
+      : "ON CONFLICT(port_id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at"
+    await this.db.prepare(`
+      INSERT INTO ais_port_metrics (port_id, data, updated_at) VALUES (?, ?, ?)
+      ${conflictClause}
+    `).run(metric.portId, JSON.stringify(metric), metric.updatedAt ?? metric.fetchedAt ?? null)
   }
 
   async upsertAisPortMetric(metric: AisDerivedPortMetric) {
-    await this.db.prepare("INSERT OR REPLACE INTO ais_port_metrics (port_id, data, updated_at) VALUES (?, ?, ?)")
-      .run(metric.portId, JSON.stringify(metric), metric.updatedAt ?? metric.fetchedAt ?? null)
+    await this.insertAisPortMetric(metric, "update")
   }
 }

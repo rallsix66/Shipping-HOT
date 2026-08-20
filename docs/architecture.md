@@ -1,7 +1,7 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
-> Last verified: 2026-08-19
-> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation and Mock Isolation boundary, implemented V2.1 Port Intelligence, V2.2/V2.3/V2.4 local verification and V2.5 AIS / Port Derived Intelligence local verification; Portcast/Open-Meteo/Shekou corrected live-path closeout, Final Alert Lifecycle + Feed Timeout closeout and Final Trust Boundary Seal are verified on 2026-08-18; Calendar sync persisted-baseline restart boundary and V2.5 reconnect lifecycle seal are verified on 2026-08-19; V2.5 external area observation remains live pending
+> Last verified: 2026-08-20
+> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation and Mock Isolation boundary, implemented V2.1 Port Intelligence, V2.2/V2.3/V2.4 local verification and V2.5 AIS / Port Derived Intelligence local verification; ADR-005 V3 Real-Data Boundaries is Accepted and P0 Persistence is implemented/verified; P1A/P1B/P2 remain deferred; V2.5 external area observation remains live pending
 > Source of truth for: the current retained system structure and approved boundaries
 
 ## Current AISStream + Calendarific Live Verification — 2026-08-18
@@ -10,7 +10,16 @@ AISStream reached the official WebSocket and stayed open for a 120-second filter
 
 Calendarific returned HTTP 200 and valid JSON for TH/ID/MY/PH/VN. All five countries produced healthy Calendarific events with coverageStatus=partial; the provider is verified_live for transport/parser/data availability, while partial coverage remains explicit. The normalizer maps national/public/federal/bank labels to national `public_holiday`, maps local/regional/state/provincial/subdivision labels to explicit `subdivision` or `unknown` scope, preserves supplied subdivision evidence, and deduplicates by country/date/name/type/scope. Local/unknown Calendar facts remain in Calendar but do not enter national Calendar → Event → HOT.
 
-All-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source; mock-schedule remained the only Mock source. Native SQLite persistence remains pending because the current Node 24 runtime cannot load the bundled better-sqlite3 ABI.
+All-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source; mock-schedule remained the only Mock source. That 2026-08-18 baseline predates the accepted V3 P0 persistence work; native SQLite is now verified under Node 24.15.0 / ABI 137.
+
+## V3 P0 Persistence Foundation — 2026-08-20
+
+- Node is fixed to `24.15.0` via `.nvmrc` and `package.json` engines; `better-sqlite3@12.6.2` uses the official `node-v137-win32-x64` prebuilt and passes native read/write verification.
+- Nitro/db0 uses the side-by-side local file `.data/shipping-hot-v3.sqlite3`. SQLite is the only Shipping HOT persistence truth; initialization failure returns an unavailable status and never creates a mutable memory replacement. Mutations fail with `503 persistence_unavailable` when persistence is unavailable or degraded.
+- The migration runner records `schema_migrations`, `app_metadata.schema_version`, `bootstrap_completed_at`, `database_id`, `last_migration_at` and `data_mode`. `bootstrap_completed_at` means App/DB foundation only. `port_directory_status/version/imported_at` remains independently `pending` in P0.
+- Provider-owned Vessel/Port rows no longer own watch state. `vessel_watchlist` and `port_watchlist` are user-owned; Provider upserts update only Provider columns with explicit `ON CONFLICT ... DO UPDATE` clauses. No Shipping HOT persistence path uses `INSERT OR REPLACE`.
+- P0 creates `translation_cache`, `provider_usage`, `provider_runtime` and `sync_runs` schemas plus TypeScript contracts, and defines server-only `ProviderConfig`/`ProviderSecret`/`SecretStore` contracts with `.data/provider-secrets.json` fallback and environment-secret precedence. No AI adapter or later real-data capability is implemented here.
+- Verification includes full native Repository tests and a real process-A-write → close → process-B-read smoke. P1A Port Directory import and P1B/P2 operational work remain out of scope.
 
 ## Calendarific Final Operational Semantics Seal — 2026-08-18
 
@@ -25,7 +34,7 @@ All-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source
 ## Calendar Sync Persisted Baseline Seal — 2026-08-19
 
 - Direct Calendar sync begins with `readStoredSnapshot()` after initialization. Repository-backed Calendar facts, coverage, settings, Vessel/Port/Voyage/Feed state and previous ShippingEvents are the authoritative baseline for reconciliation and Event detection.
-- `fallbackSnapshot` remains the in-memory fallback only when Repository initialization/read is unavailable. It cannot replace persisted state during a successful Repository-backed sync.
+- Historical V2 behavior: `fallbackSnapshot` was the Repository-unavailable memory fallback. It is superseded by V3 P0, where no mutable memory replacement exists.
 - A restart-style test confirms persisted legacy Calendarific local identity migration: the old normalized row is deleted through `removedIds`, the new scoped row is upserted, the linked ShippingEvent remains historical and is not resolved, and the local fact creates no current Calendar reminder.
 - A real-mode persisted-state test confirms direct Calendar sync does not re-inject `mock-vessel`, `mock-port`, `mock-weather`, `mock-port-notice` or `mock-calendar` Events; `mock-schedule` remains allowed. No schema or Provider architecture change was introduced.
 
@@ -116,7 +125,7 @@ This is the smallest existing foundation compatible with the local Shipping HOT 
 | `cache` row | `server/database/cache.ts` | server cache service | `/api/s`, `/api/s/entire` | db0 table |
 | `user` row | `server/database/user.ts` | OAuth/sync handlers | authenticated sync | db0 table |
 | local focus/order metadata | `src/atoms` | browser Jotai/localStorage; optional sync | UI | browser localStorage, or synced user data when enabled |
-| Vessel/Port/Voyage/Event | `shared`, `server` and `src/components/shipping` | Mock Providers through `server/shipping-store.ts`; `ShippingRepository` persists state; local Vessel `statusChangedAt` and Voyage baselines are retained by the service merge | HOT, detail pages and Event Engine | Repository-backed state when SQLite is available; explicit last-known in-memory fallback otherwise |
+| Vessel/Port/Voyage/Event | `shared`, `server` and `src/components/shipping` | Providers through `server/shipping-store.ts`; `ShippingRepository` persists Provider facts and separate user watchlists; local Vessel `statusChangedAt` and Voyage baselines are retained by the service merge | HOT, detail pages and Event Engine | SQLite-backed state only; unavailable persistence exposes status and cannot accept mutation |
 | FeedItem | `shared/shipping.ts`, `server/providers/feed.ts`, `server/shipping-store.ts` | Mock Feed or opt-in RSS/HTML adapters; `ShippingRepository` persists normalized JSON | `/api/shipping`, `/feed`, Event Engine and HOT | Provider-specific XML/HTML stays inside the adapter; ordinary news remains Feed and stale failures do not create new Events |
 | CalendarEvent / CalendarCoverage | `shared/calendar.ts`, `server/providers/calendar.ts`, `server/database/shipping.ts` | Calendar Provider contracts through `server/shipping-store.ts`; `calendar_events` stores event facts and settings `calendarSync` stores coverage | `/api/shipping/calendar`, Calendar page, Event Engine | Cached national, subdivision and unknown-scope facts remain readable offline; supplied subdivision evidence is preserved, local/unknown facts are excluded from national Event/HOT, unknown/partial coverage is explicit and source keys never cross the API boundary |
 
@@ -212,14 +221,14 @@ Provider mode is the requested source (`mock`, `aisstream`, `portcast`, `open-me
 
 - Local development: Vite/Nitro Node runtime, intended to use `pnpm dev` after dependencies are installed.
 - Optional deployment: Cloudflare Pages/D1, Vercel, Bun, and Docker are configured in existing files.
-- Local database path: not explicitly configured in the repository; exact runtime location is pending dependency/runtime verification.
+- Local database path: `.data/shipping-hot-v3.sqlite3` for the Node/db0 local runtime; the prior ignored `.data/db.sqlite3` is not the V3 database and was retained as a cleanup candidate.
 - Docker persists `/usr/app/.data` through the compose volume.
 - No general Shipping HOT backup/restore procedure is approved; current persistence changes are the startup-safe nullable `vessels.status_changed_at` compatibility rebuild plus the minimal JSON-backed `calendar_events` and aggregate-only `ais_port_metrics` tables.
 
 ## 13. Testing and Verification Boundaries
 
 - Current tests: Vitest covers Shipping HOT Domain, Provider, Repository, Event/HOT and UI trust contracts.
-- Current verification state: the 2026-08-19 V2.5 Final Trust and Reconnect Lifecycle Seal closeout is 232/232 tests, with typecheck, targeted lint, build, `git diff --check`, local Mock/AIS-no-key/Calendarific-no-key runtime smoke, forced Provider failure fixtures, `shared/updated-sources.ts` stability and a 60-second Shekou Area probe. The Area socket opened and subscription was sent, but 0 PositionReports/valid reports/assigned samples/distinct MMSIs/source timestamps were received, so Area remains `connection_verified / coverage_pending`; no `verified_live` claim is made. Automatic reconnects have a finite default budget of four attempts after the initial socket, reset on successful open and explicit-request cycle restart after exhaustion; `close()` cancels pending retry state. The preceding corrected public Portcast/Open-Meteo/Shekou re-probe and all-real API/page smoke remain documented as prior baseline evidence. Full lint retains four pre-existing errors outside this batch; native better-sqlite3 runtime, Watched AIS observations and official-alert live criteria remain pending. Model weather, official weather alerts and AIS Area are independently configured and freshness-tracked.
+- Current verification state: V3 P0 has 235/235 tests, typecheck, production build, targeted lint, native better-sqlite3 read/write and process-A-write → close → process-B-read persistence smoke. Full lint retains four pre-existing errors outside this batch. Watched AIS observations, official-alert live criteria and all P1A/P1B/P2 capabilities remain pending or deferred.
 - Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, Calendar source composition/conflict/reconciliation/announcement behavior, RSS/HTML Feed parsing with unknown publication and Chinese classification, source isolation, repost dedupe, Feed → Event/HOT boundaries, Open-Meteo 24-hour/72-hour/7-day windows/direction/TTL/per-port failure behavior, source-specific official warning parsing/expiry, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 
@@ -245,7 +254,7 @@ Changes that can remain local implementation decisions:
 |---|---|---|---|
 | Shipping HOT V1 Provider architecture | accepted | User-approved AISStream Vessel and Open-Meteo Marine Weather adapters preserve existing interfaces and Domain/Event/HOT boundaries | Preserve current module boundaries; no V2 Provider expansion |
 | Project Architect/Neat Freak docs reconciliation | changed-and-verified after this pass | Docs must remain one source of truth | Re-run closeout after implementation |
-| Runtime/database file path | pending | Native `better-sqlite3` could not build on Node 24 in this environment | Verify on a compatible Node/toolchain |
+| Runtime/database file path | changed-and-verified | Node `24.15.0` / ABI `137`, `better-sqlite3@12.6.2`, and `.data/shipping-hot-v3.sqlite3` passed native and restart persistence smoke | Preserve the fixed Node 24 toolchain; do not reintroduce memory fallback |
 | GitHub remote/account metadata | changed-and-verified; no remote CI evidence | `gh auth status` and `gh repo view` verified `rallsix66/Shipping-HOT` and `main`; `gh run list` returned no workflow runs | Keep local verification separate from GitHub CI claims |
 | Real shipping data sources | changed-and-verified for V1 | AISStream is beta and key-gated; Open-Meteo Marine is optional-key for normal use and carries coastal-accuracy/attribution caveats | Keep keys server-side; Mock is default only, with no Mock fallback in an explicitly real mode |
 | Current OAuth/cloud deployment code | implemented, not runtime-verified | May be unnecessary locally but dependencies are not mapped | Dependency analysis before removal |

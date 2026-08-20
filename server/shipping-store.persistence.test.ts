@@ -210,12 +210,12 @@ describe("calendar sync persisted baseline", () => {
     expect(state.upsertedEvents.some(event => event.provenance?.sourceId === "calendarific")).toBe(true)
   })
 
-  it("keeps the memory fallback path working when Repository is unavailable", async () => {
+  it("fails mutations explicitly when Repository is unavailable", async () => {
     databaseAvailable = false
     const national = { ...calendarificEvent("national", "memory-national-id"), name: "National Day", date: "2026-08-25", businessImpact: "medium" as const }
     calendarResult = { events: [national], coverage: [{ countryCode: "MY", year: 2026, sourceId: "calendarific", status: "partial" }], fetchedAt: "2026-08-18T00:00:00.000Z" }
 
     const { syncCalendarEvents } = await import("./shipping-store")
-    await expect(syncCalendarEvents(2026, ["MY"])).resolves.toMatchObject({ events: [national] })
+    await expect(syncCalendarEvents(2026, ["MY"])).rejects.toMatchObject({ statusCode: 503, statusMessage: "persistence_unavailable" })
   })
 })

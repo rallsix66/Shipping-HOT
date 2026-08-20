@@ -85,6 +85,15 @@ export interface ShippingProviderFreshness {
   aisArea?: Freshness
 }
 
+export type DatabasePersistenceState = "healthy" | "read_only_degraded" | "unavailable"
+
+export interface DatabasePersistenceStatus {
+  status: DatabasePersistenceState
+  schemaVersion: number
+  bootstrapCompletedAt?: string
+  errorCode?: "persistence_unavailable" | "persistence_write_failed"
+}
+
 export function deriveProvenance(source?: DataProvenance): DataProvenance | undefined {
   return source ? { ...source, dataNature: "derived" } : undefined
 }
@@ -398,6 +407,7 @@ export interface ShippingSnapshot {
   aisPortMetrics?: AisDerivedPortMetric[]
   calendarEvents?: CalendarEvent[]
   calendarCoverage?: CalendarCoverage[]
+  database?: DatabasePersistenceStatus
 }
 
 export interface HotItem {
