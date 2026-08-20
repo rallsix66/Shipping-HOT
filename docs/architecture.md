@@ -18,8 +18,10 @@ All-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source
 - Nitro/db0 uses the side-by-side local file `.data/shipping-hot-v3.sqlite3`. SQLite is the only Shipping HOT persistence truth; initialization failure returns an unavailable status and never creates a mutable memory replacement. Mutations fail with `503 persistence_unavailable` when persistence is unavailable or degraded.
 - The migration runner records `schema_migrations`, `app_metadata.schema_version`, `bootstrap_completed_at`, `database_id`, `last_migration_at` and `data_mode`. `bootstrap_completed_at` means App/DB foundation only. `port_directory_status/version/imported_at` remains independently `pending` in P0.
 - Provider-owned Vessel/Port rows no longer own watch state. `vessel_watchlist` and `port_watchlist` are user-owned; Provider upserts update only Provider columns with explicit `ON CONFLICT ... DO UPDATE` clauses. No Shipping HOT persistence path uses `INSERT OR REPLACE`.
-- P0 creates `translation_cache`, `provider_usage`, `provider_runtime` and `sync_runs` schemas plus TypeScript contracts, and defines server-only `ProviderConfig`/`ProviderSecret`/`SecretStore` contracts with `.data/provider-secrets.json` fallback and environment-secret precedence. No AI adapter or later real-data capability is implemented here.
-- Verification includes full native Repository tests and a real process-A-write → close → process-B-read smoke. P1A Port Directory import and P1B/P2 operational work remain out of scope.
+- P0 scope is SQLite startup, migration runner, schema version, App/DB bootstrap state, Repository persistence, user-owned data persistence and removal of the mutable memory fallback. The approved `translation_cache`, `provider_usage`, `provider_runtime` and `sync_runs` tables are persistence placeholders only; their complete Provider Runtime/Usage behavior is not implemented.
+- P0 defines server-only `ProviderConfig`/`ProviderSecret`/`SecretStore`/`TranslationProvider` contracts, with non-secret ProviderConfig in SQLite settings and `.data/provider-secrets.json` for local secrets. API keys never enter SQLite settings. No AIS WebSocket, VesselAPI or Translation Adapter is added or activated by P0.
+- The migration strategy defines `source_type = real | mock | imported | derived`. Real Mode reads only allowed `real`, `imported` and `derived` records and never reads `mock`; old Mock rows are excluded from current operational reads and are retained only in audit/quarantine when needed. This `source_type` lineage field is distinct from Provider provenance `sourceType` and `dataNature`; no importer/schema implementation was added in this documentation-only review.
+- The required persistence acceptance is process A write → abnormal exit → process B restart against the same native SQLite file → complete state verification. The existing normal-close smoke is supplementary; P1A Port Directory import and P1B/P2 operational work remain out of scope.
 
 ## Calendarific Final Operational Semantics Seal — 2026-08-18
 
@@ -70,7 +72,7 @@ The repository retains NewsNow as its foundation and now exposes Shipping HOT as
 | Proposal | State | Reason not in current scope |
 |---|---|---|
 | Shipping HOT domain and HOT feed | implemented | Mock/fixture data, deterministic Event Engine and HOT query are active |
-| Vessel/Port/Voyage/Event storage | implemented / schema migration locally verified; native runtime pending | SQLite tables, Repository seed/read/write/reconcile paths and explicit last-known fallback are present; `vessels.status_changed_at` is nullable, with an idempotent old-schema rebuild that preserves rows and watch state; native better-sqlite3 cannot load in the current Node 24 environment |
+| Vessel/Port/Voyage/Event storage | implemented / schema migration locally verified | SQLite tables, Repository seed/read/write/reconcile paths and explicit last-known fallback are present; `vessels.status_changed_at` is nullable, with an idempotent old-schema rebuild that preserves rows and watch state; V3 P0 native better-sqlite3 read/write and persistence smoke are verified |
 | Structured shipping Providers | implemented | Mock adapters remain active; AISStream Vessel and Open-Meteo Marine Weather adapters are optional V1 paths |
 | V2.0 Data Trust Foundation | sealed | `sourceType`/`dataNature` provenance, independent freshness timestamps/status, ProviderResult-compatible API data, Event evidence and explicit Mock/UI attribution; final isolation seal adds only the nullable Vessel status compatibility rebuild, not a new domain table |
 | V2.1 Port Intelligence | implemented / verified | `PortcastPublicPageProvider`, public HTML parser, 24-hour cache/fingerprint and Port congestion detail; no schema migration or new dependency |
@@ -83,7 +85,7 @@ The repository retains NewsNow as its foundation and now exposes Shipping HOT as
 
 The current retained architecture is a single repository modular monolith: React and TanStack Router render the browser UI; React Query and Jotai manage query/local state; Nitro exposes server handlers; `server/sources/**` fetches and normalizes news; db0 provides the local database abstraction; and the cache stores normalized `NewsItem[]` payloads.
 
-This is the smallest existing foundation compatible with the local Shipping HOT product. No framework or ORM migration is approved; persistence changes remain minimal JSON-backed tables accessed through `ShippingRepository`: the nullable Vessel status compatibility rebuild, the approved `calendar_events` table and the V2.5 aggregate-only `ais_port_metrics` table.
+This is the smallest existing foundation compatible with the local Shipping HOT product. No framework or ORM migration is approved. Legacy NewsNow cache/user paths remain JSON-backed where documented, while Shipping HOT V3 P0 uses the side-by-side native SQLite file through `ShippingRepository`; SQLite is the only Shipping HOT persistence truth.
 
 ## 4. System Context
 
@@ -170,7 +172,7 @@ The final AIS/Event boundary keeps watch configuration separate from observation
 
 ## Mock Isolation Rule
 
-Status: `Mock isolation complete` for the local operational boundary. Native SQLite and live external-provider verification remain separate pending gates.
+Status: `Mock isolation complete` for the retained local operational boundary. V3 P0 native SQLite persistence is verified; live external-provider verification remains a separate pending gate.
 
 Only explicit Mock mode may surface Mock data.
 

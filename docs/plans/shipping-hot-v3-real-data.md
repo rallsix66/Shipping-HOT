@@ -94,7 +94,7 @@ Shipping HOT V2 已经建立了 Provider、Domain、Repository、Event/HOT 和�
 | --- | --- | --- |
 | `Mock isolation: complete` | 显式 Mock sourceId 的过滤基本成立，但 `shared/ais-area.ts` 和 Open-Meteo 生产路径仍引用 `shared/shipping-fixtures.ts` 的港口坐标；Portcast 身份也从 Mock Port 派生 | 将表述收窄为“显式 Mock record isolation 已实现”；P1 去除正式代码对 fixture 的依赖 |
 | Real Mode 不回退 Mock | Provider failure 的 same-source last-known 规则成立，但 SQLite 初始化失败会回到初始 Mock `fallbackSnapshot`，Schedule 也固定 Mock | P0 禁止静默 memory fallback；P1 Real Mode 禁止任何 Mock Provider/seed/schedule |
-| Provider Runtime 已显示 | UI 显示 requested mode 和一次请求的 freshness；不持久化 last success/request、错误次数或 next sync | P0/P7 建立真实 Runtime Health |
+| Provider Runtime 已显示 | UI 显示 requested mode 和一次请求的 freshness；不持久化 last success/request、错误次数或 next sync | P0 只保留 schema/interface/contract placeholder；P7 或单独批准的 Provider 阶段才建立完整 Runtime Health |
 | `README` 要求 Node `>=20` | 当前安装物只能在 ABI 127 运行，Node 24.15.0 实测加载失败 | P0 固定一个支持的 Node 24 LTS 工具链并重装原生依赖 |
 | Calendar restart persistence 已 sealed | Repository 可用时的 Calendar sync baseline 测试成立；当前实际运行因 native SQLite 失败仍无法跨进程保存，且空 vessels 会触发重复 seed | P0 先修真实数据库和 seed，再做 P4 自动同步 |
 
@@ -655,7 +655,22 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 9. AIS real aggregate 可复制为 stale last-known，但必须验证 sourceId 和数据 shape。
 10. Events 不直接继承 active 状态；保留 legacy audit export，V3 从当前真实事实重新生成 active Event。
 
-### 19.2 回滚
+### 19.2 Migration lineage 与 Real Mode 读取策略
+
+迁移边界统一使用 `source_type`，枚举固定为 `real | mock | imported | derived`：
+
+| `source_type` | 含义 | Real Mode 行为 |
+| --- | --- | --- |
+| `real` | 已批准真实 Provider 返回、保留 provenance 的事实 | 在 Provider/source 允许且 freshness 合约满足时可读 |
+| `mock` | Mock Provider、fixture、demo seed 或 Mock-derived operational row | Real Mode 永不读取为当前数据；最多保留在 audit/quarantine |
+| `imported` | 经用户批准、完成 identity/provenance 检查后导入的 V2/manual/official snapshot | 只有迁移策略接受并保留来源后才可读 |
+| `derived` | 从允许的 `real` 或 `imported` 事实派生的 Domain/Event/aggregate | 仅当输入 lineage 可读时可读；Real Mode 不得从 `mock` 派生 |
+
+Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness 条件的 `derived`，但绝不读取 `mock`。旧 Mock vessel/port 不因表为空而升级，也不做盲目整表复制；无法 exact identity match 的用户 watch 进入 migration report。`mock-schedule`、Mock Feed、Mock Calendar、Mock operational Event 及其他 Mock-derived rows 不进入 V3 当前 operational read。迁移失败或来源不明的记录保留在报告/quarantine，不伪装成真实数据。
+
+`source_type` 是迁移 lineage 字段，与现有 V2 `provenance.sourceType`（Provider 来源）和 `dataNature`（事实性质）分开；不得用一个字段替代另一个字段。
+
+### 19.3 回滚
 
 - V3 migration 不修改 V2 原文件。
 - 回滚时停止 V3、恢复配置指向 V2 文件并回退代码；V3 新写数据不会反向写入 V2。
@@ -663,19 +678,19 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 
 ## 20. P0–P7 实施阶段
 
-依赖审查结论：P0 必须先预留 V3 后续会用到的 schema 和运行时合同，即 `app_metadata/schema_version/bootstrap_completed_at`（只代表 App/DB 基础初始化）、独立的 `port_directory_status/version/imported_at`、所有权分表、`translation_cache`、`provider_usage`、`provider_runtime/sync_runs`、`ProviderConfig`/`ProviderSecret`/`SecretStore` contract、`TranslationProvider` 接口骨架和同步 job 骨架。P0 不等待目录 ready；P1A 负责把目录状态推进到 `ready`，P1B 明确依赖 `port_directory_status=ready` 后才移除 Real Mode 对 Mock fixture/seed 的正式依赖；P2 依赖 P1A 与 P1B 均完成。
+依赖审查结论：P0 只实现 SQLite persistence foundation：SQLite 正常启动、migration runner、schema version、App/DB bootstrap state、Repository persistence、user-owned data persistence 和 memory fallback removal。经批准的 `translation_cache`、`provider_usage`、`provider_runtime/sync_runs` schema placeholder 以及 `ProviderConfig`/`ProviderSecret`/`SecretStore`/`TranslationProvider` interface/contract 可以存在，但不实现 Provider Runtime 完整业务、Provider Usage 完整统计或任何实际 Translation Adapter；AIS WebSocket、VesselAPI 也只保留后续接口/contract。P0 不等待目录 ready；P1A 负责把目录状态推进到 `ready`，P1B 明确依赖 `port_directory_status=ready` 后才移除 Real Mode 对 Mock fixture/seed 的正式依赖；P2 依赖 P1A 与 P1B 均完成。
 
 ### P0 — Persistence
 
 | 项目 | 内容 |
 | --- | --- |
-| 目标 | 固定已验证的单一 Node LTS 工具链；SQLite 成为唯一持久化真相；数据库失败显式只读/不可用；重启恢复全部用户状态；只铺 V3 schema、Provider Runtime、Usage、`ProviderConfig`/`ProviderSecret`/`SecretStore` 和 `TranslationProvider` contract skeleton，不在 P0 实现全部 AI adapter |
+| 目标 | 只实现 SQLite persistence foundation：SQLite 正常启动、migration runner、schema version、App/DB bootstrap state、Repository persistence、user-owned data persistence 和 memory fallback removal；允许铺设后续 schema/interface/contract placeholder，但不实现 AIS WebSocket、VesselAPI、Translation Adapter、Provider Runtime 完整业务或 Provider Usage 完整统计 |
 | 修改文件 | `package.json`、`nitro.config.ts`、`example.env.server`、`eslint.config.mjs`、`server/database/cache.ts`、`server/database/shipping.ts`、`server/shipping-store.ts`、现有 Shipping mutation API、`shared/shipping.ts` |
 | 新增文件 | `.nvmrc`、`server/database/runtime.ts`、`server/database/migrations/**`、`server/api/shipping/health.get.ts`、`server/providers/contracts.ts`、`server/services/provider-registry.ts`、`server/secrets/file-secret-store.ts`、`scripts/p0-native-sqlite-smoke.ts` |
-| 数据库 | 引入 `app_metadata`/schema version；拆 watchlist；新增 provider_runtime/sync_runs/provider_usage/translation_cache；移除 OR REPLACE 和单表空判断；side-by-side V3 DB；业务表只保留原文，不复制 `title_zh/summary_zh` |
+| 数据库 | 引入 `app_metadata`/schema version；拆 watchlist；移除 OR REPLACE 和单表空判断；side-by-side V3 DB；业务表只保留原文，不复制 `title_zh/summary_zh`；后续 `translation_cache`/`provider_runtime`/`provider_usage`/`sync_runs` 只作为已批准的 schema/contract placeholder，不启用 Provider 业务 |
 | API | 所有 Shipping mutation 在事务失败时返回 503；`GET /api/shipping/health` 和 Shipping snapshot 返回 `database` persistence health；未新增 Provider/AI API |
-| 测试 | native SQLite integration、进程 A 写入→关闭→进程 B 读取、无 vessel 时不 reseed、settings/calendar/watch 不被 Provider upsert 覆盖、DB unavailable UI/API |
-| 验收 | Node 24 下 `better-sqlite3` 真实加载；真实进程 A 写入→关闭→进程 B 读取通过；watchlist 不被 Provider upsert 覆盖；不存在成功但未落库的 Shipping mutation |
+| 测试 | native SQLite integration、进程 A 写入→异常退出→进程 B 使用同一 DB 读取并校验完整状态、无 vessel 时不 reseed、settings/calendar/watch 不被 Provider upsert 覆盖、DB unavailable UI/API；不得用 FakeRepository 代替 |
+| 验收 | Node 24 下 `better-sqlite3` 真实加载；真实进程 A 写入后异常退出，进程 B 重启并完整读回通过；watchlist 不被 Provider upsert 覆盖；不存在成功但未落库的 Shipping mutation |
 | 风险 | native build/toolchain；V2 JSON 迁移不一致；生产 Nitro subroute 的已知 `#nitro/index` 问题 |
 | 回滚 | 切回 V2 DB 备份和旧 runtime；不删除 V3 DB，保留诊断 |
 
@@ -928,7 +943,7 @@ Qwen-MT 的输入/输出价格与 Lite 的 RPM/TPM 是该日期快照；免费�
 
 ### F. Restart Persistence
 
-在进程 A 修改 settings、vessel/port watch、calendar、voyage tracking 后正常退出；进程 B 使用同一 DB 启动，逐项一致；测试直接使用 native SQLite，不使用 FakeRepository。
+在进程 A 写入 settings、user-owned vessel/port watch 和其他 P0 持久化状态后，故意异常退出进程 A；进程 B 使用同一 SQLite DB 启动，逐项校验数据完整且无重复 seed。测试直接使用 native SQLite，不使用 FakeRepository。正常关闭重启可以作为补充，但不能替代异常退出场景。
 
 ### G. Real Mode Failure
 
@@ -940,7 +955,7 @@ Qwen-MT 的输入/输出价格与 Lite 的 RPM/TPM 是该日期快照；免费�
 
 ### I. 翻译
 
-英文 Feed/公告自动生成中文标题和摘要并持久化；原文可展开；重启/刷新不重复计费；翻译失败显示原文且采集成功；Settings 可切换 Provider；usage panel 标明本地统计/估算，不伪造官方余额；标识保护测试通过。
+这是 P6 或单独批准的 Translation Provider 阶段验收，不属于 P0：英文 Feed/公告自动生成中文标题和摘要并持久化；原文可展开；重启/刷新不重复计费；翻译失败显示原文且采集成功；Settings 可切换 Provider；usage panel 标明本地统计/估算，不伪造官方余额；标识保护测试通过。
 
 ### J. HOT 追溯
 
@@ -948,7 +963,7 @@ Qwen-MT 的输入/输出价格与 Lite 的 RPM/TPM 是该日期快照；免费�
 
 ### K. Provider Usage / Secret
 
-Provider 请求数、成功/失败、cache hit、字符/token、估算成本和最近调用均可在 SQLite/Settings 查询；没有任何 API key 出现在前端、LocalStorage、Git、docs、fixture、日志或 error message 中。
+这是后续 Provider Runtime/Usage 阶段验收，不属于 P0。届时 Provider 请求数、成功/失败、cache hit、字符/token、估算成本和最近调用才可在 SQLite/Settings 查询；P0 只保留 schema/interface/contract placeholder。SQLite settings 只能保存非敏感 `ProviderConfig`（provider/model/base URL/enabled/budget 等），API key/`ProviderSecret` 只能由 server-only `SecretStore` 读取，Local 模式存放在 `.data/provider-secrets.json`，绝不进入 SQLite settings。
 
 ## 24. 配置与密钥管理
 
@@ -988,7 +1003,7 @@ AZURE_TRANSLATOR_KEY=
 AZURE_TRANSLATOR_REGION=
 ```
 
-- 个人模式由服务端 `SecretStore` 统一读取；环境变量优先于本地文件，且 `.env.local`/`.env.server` 中的值不能被 UI 覆盖。绝不把 key 放到 LocalStorage、前端、Git、docs、fixture 或普通 SQLite 列。
+- 个人模式由服务端 `SecretStore` 统一读取；环境变量优先于本地文件，且 `.env.local`/`.env.server` 中的值不能被 UI 覆盖。SQLite settings 只保存非敏感 `ProviderConfig`，禁止保存 API key/`ProviderSecret`；key 绝不进入 LocalStorage、前端、Git、docs、fixture 或任何普通 SQLite 列。
 - `example.env.server` 只留空 key 和注释，不放真实值。
 - API/日志/provider_runtime 只显示 configured boolean，不输出 key。
 - real/production 缺少必需 key 时该 Provider 为 `misconfigured`，不改 mode、不回退 Mock。
@@ -1011,7 +1026,7 @@ interface SecretStore {
 - 本地个人模式实现 `FileSecretStore`，文件固定为 `.data/provider-secrets.json`；`.data/` 已在 `.gitignore`，文件只由 server runtime 读写，不能被前端直接读取。
 - `EnvironmentVariableSecretStore`（或平台 Secret Manager）先查实际 Provider 环境变量，例如 `DEEPSEEK_API_KEY`、`VESSELAPI_API_KEY`；环境变量命中后，其优先级高于本地文件，且 `set/delete` 对该 provider 返回 `managed_by_environment`，UI 显示“当前密钥由环境变量管理，设置页不可覆盖”。
 - 没有环境变量时才读写 `.data/provider-secrets.json`。Settings 的新增、修改、删除、测试连接都经过 server API；写入成功后立即刷新 Provider Registry/Config Service，下一次 Translation/Vessel 请求直接使用新 secret，不要求重启。
-- FileSecretStore 只保存 secret，不保存 Provider model/baseUrl/budget/enabled；这些 `ProviderConfig` 字段进入 SQLite settings。`ProviderSecret` 只能通过 `SecretStore` 访问，不能塞进 settings JSON 或 `provider_runtime`。
+- FileSecretStore 只保存 secret，不保存 Provider model/baseUrl/budget/enabled；这些非敏感 `ProviderConfig` 字段进入 SQLite settings。`ProviderSecret` 只能通过 `SecretStore` 访问，不能塞进 settings JSON、`provider_runtime` 或任何 SQLite settings 列。
 - API 只返回 `configured`、`source` 和掩码末四位（例如 `****AB12`）；日志、错误、缓存、测试响应和 provider_runtime 不得包含完整值或 Authorization header。
 
 ```text

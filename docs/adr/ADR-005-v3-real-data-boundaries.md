@@ -13,6 +13,18 @@ This ADR is **Accepted** as of 2026-08-20. It authorizes the approved V3 impleme
 
 ## Accepted decision
 
+### 0. P0 scope boundary
+
+P0 is the SQLite persistence foundation only. It is limited to:
+
+- opening SQLite successfully under the fixed Node runtime;
+- the schema migration runner and authoritative schema version;
+- App/DB bootstrap state (`bootstrap_completed_at`);
+- Repository persistence and user-owned data persistence;
+- removal of the mutable in-memory fallback.
+
+P0 does not implement or activate V3 AIS WebSocket tracking, VesselAPI, Translation Adapters, complete Provider Runtime behavior, or complete Provider Usage accounting. Those later capabilities retain interfaces/contracts only. The approved P0 placeholder tables (`translation_cache`, `provider_usage`, `provider_runtime` and `sync_runs`) and the `ProviderConfig`/`ProviderSecret`/`SecretStore`/`TranslationProvider` contracts do not constitute working Provider business logic. Existing V1 adapters are outside this P0 boundary and are not expanded by it.
+
 ### 1. Real-only operational boundary
 
 - `SHIPPING_DATA_MODE=real` and production reject Mock Providers, Mock seed, fixture coordinates and `mock-schedule`.
@@ -30,15 +42,30 @@ This ADR is **Accepted** as of 2026-08-20. It authorizes the approved V3 impleme
 
 P0 only completes App/DB foundation and does not wait for Port Directory readiness. P1A establishes the real Port Directory (UN/LOCODE, verified identities, coordinates and aliases) and sets `port_directory_status=ready` only after its baseline is imported and validated. P1B depends on `port_directory_status=ready` before removing Real Mode imports of `shared/shipping-fixtures.ts`; it then removes Mock seed/schedule/fixture dependencies and installs the long-lived AIS runtime. P2 Search & Watch cannot start until both stages pass their acceptance tests.
 
+### 2.1 Migration strategy and source classification
+
+V3 migration is side-by-side. The V2 database is backed up and never rewritten; a new V3 SQLite file runs the migration runner before any approved import. Every migrated or newly persisted record that participates in the migration boundary carries the lineage classification `source_type`:
+
+| `source_type` | Meaning | Real Mode read policy |
+| --- | --- | --- |
+| `real` | Fact received from an approved real Provider and retained with provenance | Readable when the Provider/source is allowed and the freshness contract permits it |
+| `mock` | Mock Provider, fixture, demo seed or Mock-derived operational record | Never read as current data in Real Mode; may remain only in an audit/quarantine path |
+| `imported` | User-approved data imported from V2/manual/official snapshots after identity and provenance checks | Readable only after the migration policy accepts the record and preserves its origin |
+| `derived` | Domain/Event/aggregate data derived from accepted `real` or approved `imported` facts | Readable only when its input lineage is allowed; it must not derive from `mock` in Real Mode |
+
+Real Mode therefore reads `real`, approved `imported` and permitted `derived` records, and never reads `mock` records. V2 Mock vessels/ports are not promoted by table emptiness or blind copy. User watch state is migrated only after exact identity resolution; unresolved items go to a migration report. Mock schedule, Mock Feed, Mock Calendar, Mock operational Events and other Mock-derived rows are excluded from current V3 operational reads. Secrets are never migrated into SQLite.
+
+`source_type` is migration lineage, distinct from the existing Provider provenance `sourceType` and `dataNature`; the fields must not be conflated or silently substituted.
+
 ### 3. Translation and secrets
 
 - Define a switchable `TranslationProvider` interface. Candidate adapters include DeepSeek, Qwen-MT, Gemini, OpenAI, Claude, Google Cloud Translation, DeepL, Azure Translator and Custom OpenAI-compatible; no single Provider is an architectural default.
 - Store original text first. Translation is asynchronous enrichment and never blocks ingestion. Identifiers such as registered vessel name, IMO, MMSI, Callsign, Voyage number, SCAC and UN/LOCODE are never translated.
 - `translation_cache` is the only translation source of truth. Business tables keep only original facts; they do not duplicate `title_zh`/`summary_zh`. The UI selects the preferred provider/model when available, otherwise shows the most recent successful Chinese cache entry and queues the preferred version. Old provider/model versions remain auditable.
-- `ProviderConfig` (provider/model/base URL/enabled/budget) is separate from `ProviderSecret` (API key). P0 only establishes the contracts, registry refresh and redacted APIs; actual AI adapters belong to P6 or a separately approved Provider phase.
-- `provider_usage` records local request outcomes, cache hits, characters/tokens, estimated cost and last call. A balance is shown as “本地统计/估算” unless the Provider returns an official remaining value.
+- `ProviderConfig` (provider/model/base URL/enabled/budget) is separate from `ProviderSecret` (API key). P0 stores only non-secret ProviderConfig in SQLite settings and establishes the contracts, registry refresh and redacted APIs; actual AI adapters belong to P6 or a separately approved Provider phase.
+- `provider_usage` is a P0 schema/contract placeholder for future local request outcomes, cache hits, characters/tokens, estimated cost and last call. Complete Provider Usage accounting is not implemented in P0. A future balance is shown as “本地统计/估算” unless the Provider returns an official remaining value.
 - Settings exposes an AI Translation Center with Provider/model, endpoint for Custom, enable state, locale, budget and sanitized health. When no official balance API is available, usage is labeled “本地统计/估算”, not account balance.
-- Define a server-only `SecretStore` interface (`get/set/delete/has/source`). Local mode uses `FileSecretStore` at `.data/provider-secrets.json`; environment variables or a platform Secret Manager take precedence and are immutable from the UI. A successful Settings mutation refreshes the Provider Registry immediately, so the next job/request uses the new secret without a restart. Secrets never enter LocalStorage, frontend bundles, Git, docs, fixtures, ordinary SQLite columns, `provider_runtime`, logs or error messages.
+- Define a server-only `SecretStore` interface (`get/set/delete/has/source`). Local mode uses `FileSecretStore` at `.data/provider-secrets.json`; environment variables or a platform Secret Manager take precedence and are immutable from the UI. SQLite settings may store ProviderConfig only; API keys/ProviderSecret must never enter SQLite settings or any ordinary SQLite column. A successful Settings mutation refreshes the Provider Registry immediately, so the next job/request uses the new secret without a restart. Secrets never enter LocalStorage, frontend bundles, Git, docs, fixtures, `provider_runtime`, logs or error messages.
 
 ### 4. Freshness and lifecycle
 
@@ -50,12 +77,12 @@ Calendar follows `Server Start → SQLite → UI → background check → sync`;
 
 - V3 can provide a real watchlist and Current Voyage even when Commercial Schedule or a per-port intelligence capability is unavailable.
 - The plan can be run at zero external Provider cost, with optional low-cost Discovery/static enrichment and separately budgeted translation.
-- More schema and runtime work is required in P0: metadata/bootstrap, ownership isolation, runtime/usage, translation skeleton, `ProviderConfig`/`ProviderSecret` and `SecretStore` contracts must exist before P2/P6; P0 must not implement all AI adapters.
+- P0 is deliberately narrow: metadata/bootstrap, ownership isolation, SQLite persistence and the removal of memory fallback are the implementation work. Approved future schema placeholders and `ProviderConfig`/`ProviderSecret`/`SecretStore`/`TranslationProvider` contracts may be present, but P0 must not implement AIS WebSocket, VesselAPI, Translation Adapters, complete Provider Runtime behavior or complete Provider Usage accounting.
 - Provider prices, entitlement, public signup and regional availability remain time-sensitive and must be rechecked before implementation.
 
 ## Verification required after approval
 
-- Native SQLite restart smoke under the selected Node LTS; no reseed when `vessels` is empty; mutation success only after commit.
+- Native SQLite persistence smoke under the selected Node LTS must write data in process A, terminate process A abnormally, start process B against the same database and verify the complete persisted state; no reseed when `vessels` is empty; mutation success only after commit. The smoke must use native SQLite, not FakeRepository.
 - Production bundle scan proves no fixture import, Mock seed or `mock-schedule` in real mode.
 - P1A real directory tests cover UN/LOCODE, coordinates and `Shekou`/`CNSHK`/`蛇口`; P1B proves Real Mode has no fixture/Mock seed and HTTP GET creates no AIS socket.
 - AIS long-lived session and watchlist resubscription tests cover Position + Static/Voyage facts, finite reconnect and the 50-MMSI ceiling.
