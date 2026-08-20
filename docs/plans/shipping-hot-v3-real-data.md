@@ -8,7 +8,7 @@
 >
 > 实施状态：**未开始**。本文只记录现状审查、外部选型和实施方案，不授权修改业务代码、数据库或外部账号。
 >
-> 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；未能由公开页面确认的 entitlement、调用计费单位或个人申请资格必须保持 `unknown/pending`。
+> 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；只有具体 endpoint entitlement、地区/账号资格等未确认事项保持 `unknown/pending`。
 >
 > 实施门槛：当前 `docs/adr/ADR-005-v3-real-data-boundaries.md` 已存在且为 `Proposed`；只有 Architecture Approval 后将 ADR-005 改为 `Accepted`，并且用户明确确认 `架构确认，开始执行 Phase 1`，才可以从本文的 P0 开始。本轮只修订文档，不执行 P0、不创建账号、不写入密钥、不购买服务、不修改业务代码。
 
@@ -267,7 +267,8 @@ UI 全局显示：`数据库不可用，修改无法保存。`。任何 watch/se
 
 - 使用 schema version/migration，不以 `vessels COUNT(*)` 判断整个数据库是否为空。
 - 新增单行 `app_metadata`（或等价 metadata 表），至少保存 `schema_version`、`bootstrap_completed_at`、`database_id`、`last_migration_at` 和 `data_mode`；启动只根据 migration/bootstrap 状态决定是否需要初始化。
-- `bootstrap_completed_at` 只有在 schema、默认 settings、用户表和目录 baseline 成功提交同一事务后才写入；AIS 没有观测不代表未 bootstrap。
+- `bootstrap_completed_at` 只表示 P0 的 App/DB 基础初始化完成：schema/migration、默认 settings、用户表和运行时 metadata 成功提交后写入；它不等待 Port Directory baseline，也不表示目录已 ready。AIS 没有观测不代表未 bootstrap。
+- Port Directory 使用独立的 `port_directory_status`、`port_directory_version`、`port_directory_imported_at` 状态/元数据；P1A 负责导入和校验 baseline，只有成功后才将 status 置为 `ready`。P0 的 bootstrap 不得依赖该状态。
 - Real Mode 不运行 Mock seed。
 - Demo/Test seed 只在独立测试数据库执行，且只用 `INSERT ... ON CONFLICT DO NOTHING`。
 - Provider upsert 使用 `INSERT ... ON CONFLICT DO UPDATE SET provider_owned_columns...`，禁止 `INSERT OR REPLACE`。
@@ -282,7 +283,7 @@ UI 全局显示：`数据库不可用，修改无法保存。`。任何 watch/se
 
 ### 8.1 推荐 Provider
 
-VesselAPI 的 V3 定位是 **Vessel Discovery / Static Metadata**：公开文档的 `GET /v1/search/vessels` 支持按 name、callsign、MMSI、IMO 等检索，返回的 identity/particulars 可用于确认候选船和建立 watchlist。公开价格页在 2026-08-20 显示 Free 150 calls/月、Basic $14.99/月和 1,500 calls/月；具体每个 endpoint 的计费单位、Port/ETA/事件 entitlement 仍需账号内复核，不能从“能搜索”推导“能实时跟踪”。
+VesselAPI 的 V3 定位是 **Vessel Discovery / Static Metadata**：公开文档的 `GET /v1/search/vessels` 支持按 name、callsign、MMSI、IMO 等检索，返回的 identity/particulars 可用于确认候选船和建立 watchlist。配额按 account 计算，使用 billing-date monthly window；Free 为 150 calls，Basic 为 $14.99/月、1,500 calls，并列出 Port data。成功的 2xx 请求计入额度，错误响应（包括 404/429）不计入；可读 `X-RateLimit-Remaining` 时优先展示官方剩余额度。只有具体 endpoint entitlement（例如当前账号是否可用某个 Port/ETA/事件 endpoint）仍需账号 contract test，不能从“能搜索”推导“能实时跟踪”。
 
 AISStream 是 V3 唯一的 watched-vessel tracking session：它接收已关注 MMSI 的 `PositionReport`，以及可用时的 `ShipStaticData`/`StaticDataReport`，并由长期 `AisTrackingService` 维护连接、退避和增量重订阅。VesselAPI 不承担实时船位，AISStream 也不承担全球身份搜索；两者通过字段级 provenance 并列。
 
@@ -290,7 +291,14 @@ AISStream 是 V3 唯一的 watched-vessel tracking session：它接收已关注 
 
 - `AisTrackingService` 是服务端进程级单例；HTTP GET、页面挂载和 React Query 刷新都不能创建或关闭 WebSocket。
 - 连接建立后在规定窗口内发送订阅；watchlist 变化采用替换式订阅更新，并保持至少约 1 秒的更新节流。
-- Position facts 保存位置、速度、航向、导航状态及可靠的 source timestamp；Static/Voyage facts 保存 AIS 报告的船名、IMO、Callsign、destination、AIS ETA、draft、ship type。两类事实都使用 `source=AISStream`、`factNature=observed|reported`，AIS ETA 永远不升级为官方班期 ETA。
+- AIS static message 的字段映射必须保持消息类型边界：
+
+  | AIS 消息 | 可使用字段 | 不得假设 |
+  | --- | --- | --- |
+  | `ShipStaticData` | `IMO`、`Callsign`、`Name`、`Type`、`ETA`、`Draught`、`Destination`、`Dimensions` | — |
+  | `StaticDataReport` | `Name`、`Callsign`、`ShipType`、`Dimensions` 等该消息实际声明的静态字段 | 不得假设具有 `ETA`、`Destination` 或 `Draught`；缺失值保持 unknown |
+
+- Position facts 保存位置、速度、航向、导航状态及可靠的 source timestamp；上述静态/航次字段使用 `source=AISStream`、`factNature=observed|reported`。AIS ETA 永远不升级为官方班期 ETA。
 - V3 第一版最多同时订阅 50 个 MMSI（官方 `FiltersShipMMSI` 当前限制）；超过上限返回可解释的 capacity 状态，不提前实现多 session/sharding。超过 50 艘的扩展另行走架构决策。
 - 断线只按有限退避重连；无观测不伪造 fresh，已有同源数据按 stale/degraded 展示。
 
@@ -313,13 +321,13 @@ AISStream 是 V3 唯一的 watched-vessel tracking session：它接收已关注 
 
 ### 8.4 VesselAPI 配额节流与可见性
 
-按 2026-08-20 可访问的 VesselAPI 官方文档/价格页快照，V3 记录以下已知约束，并在接入时用账号 contract test 复核：Free 为 150 calls/月；Basic 为 $14.99/月、1,500 calls/月；官方文档说明成功的 2xx 请求才计入月度额度；可读 `X-RateLimit-Remaining` 时优先展示官方剩余值。页面还列出约 500 requests/5 分钟/IP、3,000 requests/5 分钟/key、location 约 300 requests/5 分钟和并发 20 等限制。Search 与 Detail 是否严格各计 1 call、Free 是否包含 Port/ETA/事件 endpoint，公开资料未形成足够明确的统一答案，必须标为 `unknown/pending` 并以实际账号为准。
+按 2026-08-20 可访问的 VesselAPI 官方文档/价格页快照，V3 记录以下配额口径：quota per account，按 billing-date monthly window 计算；Free 为 150 calls，Basic 为 $14.99/月、1,500 calls，并增加 Port data。成功的 2xx 请求才计入月度额度，错误响应（包括 404/429）不计入；可读 `X-RateLimit-Remaining` 时优先展示官方剩余额度。页面还列出约 500 requests/5 分钟/IP、3,000 requests/5 分钟/key、location 约 300 requests/5 分钟和并发 20 等限制。只有具体 endpoint entitlement（例如当前账号是否可用某个 Port/ETA/事件 endpoint）保持 `unknown/pending`，以实际账号 contract test 为准。
 
 节流合同：
 
 - 搜索先查本地 `vessel_metadata/search_cache`；24 小时内同一 normalized query 直接返回，不调用 Provider；只有 Enter/“搜索”按钮可以产生外部 Search 请求。
 - 搜索结果字段足够时，选择结果直接进入 watch；Detail 只在字段缺失或缓存过期时请求，不能把 Search→Detail 写成固定双调用。
-- Search、Detail、Refresh 分别计入 `provider_usage` 的本地 request/cache-hit；UI 显示“本月本地统计 xx calls”，若没有官方 Remaining 则显示“本地估算”，不把本地数伪装成 Free quota/余额。
+- Search、Detail、Refresh 分别计入 `provider_usage` 的本地 request/cache-hit；UI 显示“当前 billing-date window 本地统计 xx calls”，若没有官方 Remaining 则显示“本地估算”，不把本地数伪装成 Free quota/余额。
 - 自动刷新只针对已关注身份，默认数天级；实时位置由 AISStream 长连接承担，VesselAPI 不做分钟级轮询。
 
 ## 9. Port Search / Watch 方案
@@ -327,7 +335,7 @@ AISStream 是 V3 唯一的 watched-vessel tracking session：它接收已关注 
 ### 9.1 推荐来源
 
 - 基础真实目录：定期同步 UNECE UN/LOCODE 官方快照到本地，只保存 Function 含港口/码头的记录。
-- API enrichment（可选）：VesselAPI 的 Port API 只有在用户账号明确具备 entitlement 且通过 contract test 后才启用；不能把 Basic 或任何商业计划写成 Port Search 的默认前提。
+- API enrichment（可选）：Basic 套餐虽列出 Port data，具体 Port endpoint 仍只有在用户账号通过 entitlement contract test 后才启用；不能把任何商业计划写成 Port Search 的默认前提。
 - 中文别名：本地 `port_aliases`，由明确来源/人工确认维护。`蛇口`、`Shekou`、`CNSHK` 都归一到同一 `port_id`。
 
 Port Search 的默认链路是本地 UN/LOCODE snapshot → normalized name/alias match → 坐标补充目录。它即使没有 VesselAPI key 也必须可用；VesselAPI enrichment 失败只影响补充字段，不得清空或伪造本地目录结果。
@@ -385,7 +393,7 @@ Calendar 按国家/年份 coverage 和同步成功时间独立维护；Feed 的 
 
 ### 11.1 启动流程
 
-1. **Server Start**：打开 SQLite、执行 migration，并读取 `app_metadata.bootstrap_completed_at`。
+1. **Server Start**：打开 SQLite、执行 migration，并读取 `app_metadata.bootstrap_completed_at`；Port Directory 另读自身的 `port_directory_status/version/imported_at`，两条状态链不互相替代。
 2. **SQLite → UI**：先读取已持久化日历和 coverage；页面无需等待外部 API，显示 last-known/coverage/status。
 3. **后台检查**：scheduler 检查当前年和下一年 × TH/ID/MY/PH/VN；coverage 缺失、`lastSuccessAt` 超过约 7 天、年份变化或 provider version 变化时入队。年份变化是强制检查，不受 TTL 抑制。
 4. **同步**：每个 country/year 独立成功或失败；成功事务更新 events + coverage + `provider_usage`，失败保留同源 last-known 并写 runtime/sync_runs。
@@ -403,7 +411,7 @@ Calendarific Free 官方公开额度为 500 calls/月。默认约 7 天 TTL 下�
 
 ### 12.1 两类事实
 
-**Current Voyage** 是 observed/derived：上一港、当前位置、AIS 目的地、AIS ETA、下一港候选、当前状态。V3 优先使用 AISStream 的 PositionReport + ShipStaticData/StaticDataReport 及真实 Port Directory/已验证 port-call evidence；VesselAPI 可作为经账号 entitlement 验证后的低频 static/event enrichment。AIS position、AIS static/voyage facts 分开保存 evidence。任何 VesselAPI ETA/事件能力都必须标明“已配置且已验证”，未知能力返回 unknown，不得把搜索 API 直接宣传为实时航程。
+**Current Voyage** 是 observed/derived：上一港、当前位置、AIS 目的地、AIS ETA、下一港候选、当前状态。V3 优先使用 AISStream 的 PositionReport + 按消息类型映射的 ShipStaticData/StaticDataReport 及真实 Port Directory/已验证 port-call evidence；VesselAPI 可作为经账号 entitlement 验证后的低频 static/event enrichment。AIS position、AIS static/voyage facts 分开保存 evidence。任何 VesselAPI ETA/事件能力都必须标明“已配置且已验证”，未知能力返回 unknown，不得把搜索 API 直接宣传为实时航程。
 
 **Commercial Schedule** 是 carrier planned：service/voyage number、rotation、scheduled ETA/ETD、更新后的 estimated ETA/ETD、actual ATA/ATD。只能来自船公司/获授权聚合 Schedule，不可由 AIS ETA 替代。
 
@@ -447,7 +455,7 @@ interface ScheduleProvider {
 
 V3 只定义稳定的 `TranslationProvider` 合同，不把 Azure、OpenAI 或任何单一厂商写死为架构依赖。候选实现包括：
 
-- DeepSeek、Qwen、Gemini、OpenAI、Claude：上下文翻译/术语约束/结构化输出能力强，按各自 token 或字符计费；正式接入前必须复核官方价格、区域可用性、数据处理条款和模型版本。
+- DeepSeek、Qwen-MT、Gemini、OpenAI、Claude：上下文翻译/术语约束/结构化输出能力强，按各自 token 或字符计费；正式接入前必须复核官方价格、区域可用性、数据处理条款和模型版本。
 - Google Cloud Translation、DeepL、Azure Translator：专用翻译 API，适合批量 NMT；额度和免费政策随计划变化，按账号/地区确认。
 - Custom OpenAI-compatible：允许用户接入自托管或兼容 API；必须配置 base URL、model 和数据处理说明，不能假设与 OpenAI 价格相同。
 
@@ -525,7 +533,8 @@ Usage ledger 只代表本机已发出的请求和按公开价/账号计划推算
 | 表 | 用途 | 关键决定 |
 | --- | --- | --- |
 | `schema_migrations` | schema version | P0 必需，替代 ad-hoc startup rebuild |
-| `app_metadata` | bootstrap/runtime metadata | `schema_version`、`bootstrap_completed_at`、`database_id`、`data_mode`；不以 vessels 是否为空判定 seed |
+| `app_metadata` | bootstrap/runtime metadata | `schema_version`、`bootstrap_completed_at`、`database_id`、`data_mode`；只表示 P0 App/DB 基础初始化，不以 vessels 是否为空判定 seed |
+| `port_directory_status` | Port Directory baseline 状态 | 独立保存 `port_directory_status`、`port_directory_version`、`port_directory_imported_at`；P1A 成功校验后才为 `ready` |
 | `vessels` | 真实船舶身份/静态元数据 | IMO/MMSI/Callsign 索引；registered name 原样保存 |
 | `vessel_watchlist` | 用户关注 | 与 Provider upsert 隔离；watch 时间和 AIS enabled |
 | `ports` | 真实港口身份 | UN/LOCODE unique、zh/en name、country、lat/lon |
@@ -546,13 +555,13 @@ Usage ledger 只代表本机已发出的请求和按公开价/账号计划推算
 
 `feed_translations` 不单独建表：所有业务实体统一使用 `translation_cache`，不在 `feed_items`/`calendar_events` 等事实表复制中文列。若未来需要多目标语言，只扩展通用缓存键或通过新 ADR 拆表。`provider_usage` 不承担账单真相，只记录本机可验证的调用和估算。
 
-`ProviderConfig` 与 `ProviderSecret` 永远分离：前者是可持久化、可审计的非敏感运行配置；后者只通过 `SecretStore` 解析。P0 只建立这两个 contract、registry 刷新和脱敏 API，不实现 DeepSeek/Qwen/Gemini/OpenAI 等全部实际 adapter；具体 adapter 在 P6 或对应 Provider 阶段按批准范围加入。
+`ProviderConfig` 与 `ProviderSecret` 永远分离：前者是可持久化、可审计的非敏感运行配置；后者只通过 `SecretStore` 解析。P0 只建立这两个 contract、registry 刷新和脱敏 API，不实现 DeepSeek/Qwen-MT/Gemini/OpenAI 等全部实际 adapter；具体 adapter 在 P6 或对应 Provider 阶段按批准范围加入。
 
 ## 16. 自动刷新策略
 
 | 数据 | 建议频率 | 缓存/失败策略 |
 | --- | --- | --- |
-| AIS watched vessels | 长期 WebSocket | 单例连接消费 PositionReport + ShipStaticData/StaticDataReport；断线指数退避；事实立即落库；无消息不伪造 fresh |
+| AIS watched vessels | 长期 WebSocket | 单例连接消费 PositionReport，并按消息类型分别处理 ShipStaticData/StaticDataReport；断线指数退避；事实立即落库；无消息不伪造 fresh |
 | AIS Area | 长期独立 WebSocket，会话按 watched ports 更新 | 保留 15 分钟 bounded observation memory；只持久化 aggregate |
 | Vessel static/search cache | 3–7 天；搜索结果 24 小时 | 手工关注时强校验；静态数据慢更新 |
 | Current Voyage / port calls | 2–6 小时；关注后立即一次 | 同 Provider last-known；AIS ETA 与 port events 分字段 |
@@ -654,7 +663,7 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 
 ## 20. P0–P7 实施阶段
 
-依赖审查结论：P0 必须先预留 V3 后续会用到的 schema 和运行时合同，即 `app_metadata/schema_version/bootstrap_completed_at`、所有权分表、`translation_cache`、`provider_usage`、`provider_runtime/sync_runs`、`ProviderConfig`/`ProviderSecret`/`SecretStore` contract、`TranslationProvider` 接口骨架和同步 job 骨架。P6 只能填充翻译 adapter/UI，不能在那时才发现无法保存翻译缓存或用量。P1 拆为 **P1A → P1B**：P1A 先提供真实 Port Directory Foundation，P1B 才能移除 Real Mode 对 Mock fixture/seed 的正式依赖；P2 依赖 P1A 与 P1B 均完成。
+依赖审查结论：P0 必须先预留 V3 后续会用到的 schema 和运行时合同，即 `app_metadata/schema_version/bootstrap_completed_at`（只代表 App/DB 基础初始化）、独立的 `port_directory_status/version/imported_at`、所有权分表、`translation_cache`、`provider_usage`、`provider_runtime/sync_runs`、`ProviderConfig`/`ProviderSecret`/`SecretStore` contract、`TranslationProvider` 接口骨架和同步 job 骨架。P0 不等待目录 ready；P1A 负责把目录状态推进到 `ready`，P1B 明确依赖 `port_directory_status=ready` 后才移除 Real Mode 对 Mock fixture/seed 的正式依赖；P2 依赖 P1A 与 P1B 均完成。
 
 ### P0 — Persistence
 
@@ -675,8 +684,8 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 | 项目 | 内容 |
 | --- | --- |
 | 目标 | 建立最小可用的真实港口基础目录：UNECE UN/LOCODE、重点港口真实 identity、真实坐标、基础中英文 aliases；让 Open-Meteo、AIS Area、Portcast identity 可以脱离 `shared/shipping-fixtures.ts` |
-| 修改文件 | `server/providers/port-catalog.ts`、`shared/shipping.ts`、Repository、settings/config、目录同步脚本 |
-| 新增文件 | `server/providers/unlocode.ts`、UN/LOCODE snapshot/importer、重点港口 alias/coordinate source metadata、目录 contract tests |
+| 修改文件 | `shared/shipping.ts`、Repository、settings/config、目录同步脚本 |
+| 新增文件 | `server/providers/port-catalog.ts`、`server/providers/unlocode.ts`、UN/LOCODE snapshot/importer、重点港口 alias/coordinate source metadata、目录 contract tests |
 | 数据库 | `ports`、`port_aliases`、directory provenance/coverage；不导入 Mock Port rows 作为 Real baseline |
 | API/UI | 本地 Port Search 和 identity/coordinate 查询先可用；缺少动态 coverage 时明确 `unavailable` |
 | 测试 | `Shekou`/`CNSHK`/`蛇口` identity resolution、坐标来源、重复/冲突、目录重启恢复；Real Mode 无 fixture 坐标 |
@@ -688,7 +697,7 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 
 | 项目 | 内容 |
 | --- | --- |
-| 目标 | 依赖 P1A 的真实目录后，Mock 只存在于 test/demo；real/production code path 无 fixture import、Mock seed、Mock Schedule；AIS 进入长期单例 `AisTrackingService` |
+| 目标 | 依赖 P1A 且要求 `port_directory_status=ready` 后，Mock 只存在于 test/demo；real/production code path 无 fixture import、Mock seed、Mock Schedule；AIS 进入长期单例 `AisTrackingService` |
 | 修改文件 | `server/providers/shipping.ts`、`server/providers/feed.ts`、`server/providers/calendar.ts`、`server/shipping-store.ts`、`shared/ais-area.ts`、`server/services/ais-tracking.ts`、全部相关测试、`example.env.server` |
 | 新增文件 | `server/config/shipping.ts`、`server/providers/unavailable.ts`、`test/fixtures/shipping.ts`、Real Evidence Gate tests |
 | 数据库 | migration 时隔离/不导入 Mock operational rows；增加 origin/environment 约束 |
@@ -702,10 +711,10 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 
 | 项目 | 内容 |
 | --- | --- |
-| 依赖 | P1A、P1B 完成；不允许绕过真实目录或在 P1B 前删除 fixture |
+| 依赖 | P1A、P1B 完成且 `port_directory_status=ready`；不允许绕过真实目录或在 P1B 前删除 fixture |
 | 目标 | Vessel Discovery/静态身份搜索、UN/LOCODE 本地 Port Search、事务式关注和 AIS/Weather/Area 能力协商；VesselAPI 不作为实时船位 Provider |
-| 修改文件 | `shared/shipping.ts`、Repository、shipping service、Vessels/Ports 页面、settings/config |
-| 新增文件 | `server/providers/vessel-discovery.ts`、`server/providers/vesselapi.ts`、`server/providers/port-catalog.ts`、`server/services/ais-tracking.ts`、search/watchlist API、search UI components |
+| 修改文件 | `shared/shipping.ts`、`server/providers/port-catalog.ts`、Repository、shipping service、Vessels/Ports 页面、settings/config |
+| 新增文件 | `server/providers/vessel-discovery.ts`、`server/providers/vesselapi.ts`、`server/services/ais-tracking.ts`、search/watchlist API、search UI components |
 | 数据库 | vessels/ports identity、watchlist、port_aliases、search cache |
 | API | 本文 17 节 search/watchlist CRUD |
 | 测试 | DONG FANG FU 多字段 provider-contract fixture（仅测试数据）、Shekou/CNSHK/蛇口 identity resolution、duplicate/conflict、重启、AIS subscription update |
@@ -761,7 +770,7 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 | --- | --- |
 | 目标 | 外部文本自动中文化并缓存，原文永远可查，标识不翻译；TranslationProvider 可切换且有预算/usage/secret 合同 |
 | 修改文件 | shared DTO、Feed/Calendar/Event UI、Provider Runtime/settings |
-| 新增文件 | TranslationProvider、DeepSeek/Qwen/Gemini/OpenAI/Claude/Google/DeepL/Azure/Custom adapters（按批准范围选其一或多项）、translation service/cache、字段 allowlist、i18n labels |
+| 新增文件 | TranslationProvider、DeepSeek/Qwen-MT/Gemini/OpenAI/Claude/Google/DeepL/Azure/Custom adapters（按批准范围选其一或多项）、translation service/cache、字段 allowlist、i18n labels |
 | 数据库 | P0 预留的 `translation_cache`/`provider_usage`；各内容表只保留 original，中文与状态由通用缓存查询 |
 | API | 默认返回 zh + original；可选 `locale`/原文展开，不在页面请求时翻译 |
 | 测试 | identifier denylist、cache key/version、批量、失败原文 fallback、费用上限、HTML/术语保护 |
@@ -791,19 +800,19 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 
 | Provider | 船名 | IMO/MMSI | Callsign | 港口搜索 | 公开价格/试用 | 注册/稳定性 | 与 AISStream 重复 | 结论 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| VesselAPI | 是，partial name | 是 | 是 | Port API/UNLOCODE/coords：公开文档可见，但 Free/Basic entitlement 与逐 endpoint 计费仍需账号确认 | 公开页面显示 Free 150 calls/月；Basic $14.99/月、1,500 calls/月；Starter 与 call 计费细则需复核 | 自助注册和公开文档已见；个人生产可用性、地区和条款仍需确认 | 不承担实时 Position；Discovery/static/已验证事件可补充 AISStream | **Discovery/static 候选**；先 Free PoC，不默认承诺 Port/ETA/实时能力 |
+| VesselAPI | 是，partial name | 是 | 是 | Port data/UNLOCODE/coords：公开文档可见；具体 endpoint entitlement 仍需账号确认 | quota per account；billing-date monthly window；Free 150 calls；Basic $14.99/月、1,500 calls、Port data；成功 2xx 计入，错误/404/429 不计；可读 `X-RateLimit-Remaining` | 自助注册和公开文档已见；接入时只对具体 endpoint entitlement 做 contract test | 不承担实时 Position；Discovery/static/已验证事件可补充 AISStream | **Discovery/static 候选**；先 Free PoC，不默认承诺具体 Port/ETA/实时 endpoint entitlement |
 | Datalastic | 是 | 是 | 是 | 是，name/country/UNLOCODE/coords | 14 天优惠试用后 Starter €199/月、20k credits | 自助但个人成本高；功能完整 | 大量重复，包括 AIS/历史/天气 | 能力强但不适合本个人项目预算 |
 | MyShipTracking | 是 | 状态端点支持；search 页面主打 name | 未从公开 search 摘要确认 | 是，name/UNLOCODE | Trial 10 天/2,000 coins；Basic €90/月 | 自助试用；纯 terrestrial AIS，官方提示覆盖有限 | 高 | 次选，成本高于 VesselAPI |
 | VesselFinder | API 页面提供 position、voyage、port calls、particulars | 是 | 未公开确认 | Port calls 有；目录搜索未公开确认 | Subscription/按需求询价，无公开价 | 需要提交需求，个人接入摩擦高 | 高 | 不作为 P2 默认 |
 | MarineTraffic / Kpler | Ships DB、AIS、events、predictive ETA | 企业级能力 | 企业级能力 | 事件/港口能力强 | Request demo/询价，无公开自助低价 | 成熟但企业销售流程 | 很高 | 作为稳定付费/企业备选，不适合最低成本 |
 
-**选择理由**：VesselAPI 的公开搜索文档和低频套餐适合作为 Discovery/static 候选；它不再被描述为实时船位、默认 Port API 或必然 Current Voyage Provider。AISStream 负责长期 watched MMSI，Port Search 默认由本地 UN/LOCODE 目录承担；只有账号 contract test 通过后才启用 VesselAPI enrichment。
+**选择理由**：VesselAPI 的公开搜索文档和低频套餐适合作为 Discovery/static 候选；它不再被描述为实时船位或必然 Current Voyage Provider。Basic 套餐列出 Port data，但具体 endpoint entitlement 仍需账号 contract test；Port Search 仍默认由本地 UN/LOCODE 目录承担。AISStream 负责长期 watched MMSI，只有账号 contract test 通过后才启用 VesselAPI enrichment。
 
 ### 21.2 航次 / 船期
 
 | 来源 | Current Voyage | Commercial Schedule | 接入/价格 | 适合度 |
 | --- | --- | --- | --- | --- |
-| VesselAPI | 公开资料存在 ETA/port-event 相关页面，但具体 entitlement/计费需账号验证 | 否；不是官方 carrier rotation | Free/Basic 价格公开；能力/申请资格部分 pending | 可选 enrichment，不是实时默认 |
+| VesselAPI | 公开资料存在 ETA/port-event 相关页面；具体 endpoint entitlement 需账号验证 | 否；不是官方 carrier rotation | quota 口径明确；Free/Basic 价格公开；仅 endpoint entitlement pending | 可选 enrichment，不是实时默认 |
 | MarineTraffic/Kpler | AIS、real/predictive events、ETA/voyage forecast | 不等同 Carrier official schedule | 企业询价 | 更稳定付费备选 |
 | Datalastic | Pro query 含 ETA/ATD/LOCODE，历史/port info | 不等同 Carrier official schedule | €199/月起 | 成本不适合个人默认 |
 | DCSA Commercial Schedules | 不是数据源 | Point-to-Point、Port Schedule、Vessel Schedule 的标准/API schema | 标准公开；数据仍要向 Carrier 取 | **内部 normalization 标准** |
@@ -817,7 +826,7 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 | Provider | 免费/最低价 | 优点 | 缺点 | 结论 |
 | --- | --- | --- | --- | --- |
 | DeepSeek | 价格快照见 21.4；无官方 API Free Tier 声明 | 中文上下文和成本控制候选 | 区域、余额和模型可用性随账号变化 | 可切换 LLM adapter，非默认锁定 |
-| Qwen | 官方页面显示 1M tokens/model 试用；逐模型 API 单价 pending | 中文术语和本地生态候选 | endpoint、数据区域和计费版本需确认 | 可切换 LLM adapter |
+| Qwen-MT | 面向 Qwen-MT 的免费额度按实际地区/账号确认，保持 `unknown/pending`；不套用 generic Qwen 试用额度 | 中文术语和本地生态候选 | endpoint、数据区域和计费版本需确认 | 可切换 LLM adapter |
 | Gemini | 免费层 + 付费层价格快照见 21.4 | 多语言和结构化输出 | Google AI Studio/Cloud 账户与地区确认 | 可切换 LLM adapter |
 | OpenAI API | 价格快照见 21.4；按模型、input/cached/output token 计费 | 上下文、术语保护和结构化输出强 | 非专用 NMT；需要 prompt/version/cost 管理与 API key | 可选高质量模式 |
 | Claude API | 价格快照见 21.4；官方文档写新用户有少量免费 credits | 长文本和术语一致性候选 | 价格、区域和账号账单政策需确认 | 可切换 LLM adapter |
@@ -831,7 +840,7 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 
 | TranslationProvider | 预计月用量 | 预计月成本口径 | 当前状态 |
 | --- | --- | --- | --- |
-| DeepSeek / Qwen / Gemini / OpenAI / Claude | 100k–300k 字符等价 tokens | 按实际模型 input/output/cached token 价格估算；免费额度/最低消费、reset、卡和区域 pending | 可切换 LLM adapter |
+| DeepSeek / Qwen-MT / Gemini / OpenAI / Claude | 100k–300k 字符等价 tokens | 按实际模型 input/output/cached token 价格估算；Qwen-MT 免费额度按地区/账号 pending，不使用 generic Qwen 免费额度 | 可切换 LLM adapter |
 | Google Cloud Translation / DeepL / Azure Translator | 100k–300k 字符 | 按字符计费；free credit/plan、超额单价和 reset pending | 可切换专用 NMT |
 | Custom OpenAI-compatible | 同上 | 由用户网关/自托管计划决定；本地成本另算 | 显式配置后可用 |
 | 本地模型 | 100k–300k 字符 | 外部 API $0；CPU/RAM/模型下载成本不计入 Provider ledger | 零外部费用候选 |
@@ -843,7 +852,8 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 | Provider | Free tier / 免费额度 | 输入价格 | 输出价格 | 字符价格 | 最低套餐 / 账号要求 | Shipping-HOT 月成本估算（100k–300k 新内容） |
 | --- | --- | --- | --- | --- | --- | --- |
 | DeepSeek | 官方价格页未说明 API Free Tier；费用从余额或 granted balance 扣除 | `deepseek-v4-flash` cache hit $0.007–0.014/M、miss $0.22–0.44/M；`v4-pro` hit $0.022–0.044/M、miss $0.66–1.32/M | Flash $0.66–1.32/M；Pro $1.98–3.96/M（均按 peak/off-peak） | N/A | 需充值余额或 granted balance；价格可能变化 | 约 $0.1–$1.5，取决于模型、cache 和输出量；无免费额度承诺 |
-| Qwen / Alibaba Cloud Model Studio | 官方页面可见 “Free Trial: 1M Tokens per Model”；另有 $6/月 AI Token Plan，但不把活动套餐当作永久 API Free Tier | 当前抓取到的公开 Model Studio pricing 页未稳定呈现模型逐 token 单价，`unknown/pending` | `unknown/pending` | N/A | 需 Alibaba Cloud/Model Studio 账号；API 计费地区和模型需复核 | 试用额度内目标 $0；超出后的成本 pending |
+| `qwen-mt-lite` / Alibaba Cloud Model Studio | Qwen-MT 免费额度按实际地区/账号确认，`unknown/pending`；不把 generic Qwen 免费额度套用到 Qwen-MT | $0.086 / 1M tokens | $0.229 / 1M tokens | N/A | RPM 60；TPM 100,000；需 Alibaba Cloud/Model Studio 账号 | 按实际账号和地区确认；不预设免费额度 | 100k–300k tokens 约 $0.03–$0.10，免费额度未确认 |
+| `qwen-mt-flash` / Alibaba Cloud Model Studio | Qwen-MT 免费额度按实际地区/账号确认，`unknown/pending`；不把 generic Qwen 免费额度套用到 Qwen-MT | $0.101 / 1M tokens | $0.28 / 1M tokens | N/A | RPM/TPM 按实际账号和地区确认 | 不预设免费额度；需 Alibaba Cloud/Model Studio 账号 | 100k–300k tokens 约 $0.04–$0.11，免费额度未确认 |
 | Gemini Developer API | 免费层：特定模型有限访问、免费 input/output tokens、AI Studio；内容可能用于改进 Google 产品 | `Gemini 3.6 Flash` 付费层 $1.50/M；免费层免费 | $7.50/M（含思考 token）；免费层免费 | N/A | AI Studio 可免费开始；生产付费层需升级/绑定结算 | 免费层内 $0；付费层约 $0.2–$3，按 input/output 比例 |
 | OpenAI API | 页面未声明通用 API Free Tier | `gpt-5.6-luna` $0.20/M、`terra` $2/M、`sol` $5/M；cached input 分别 $0.02/$0.20/$0.50/M | Luna $1.20/M、Terra $12/M、Sol $30/M | N/A | 需 API key 与余额/账单；按模型和 input/cache/output 计费 | Luna 约 $0.1–$0.5；Terra 约 $1–$5；Sol 约 $3–$15 |
 | Claude API | 官方文档写新用户有少量 API 免费 credits；长期 Free Tier 额度未承诺 | `Claude Sonnet 5` $2/M；Sonnet 4.6 $3/M；Haiku 4.5 $1/M；Opus 5 $5/M | Sonnet 5 $10/M；Sonnet 4.6 $15/M；Haiku 4.5 $5/M；Opus 5 $25/M | N/A | API 按 token 后付费；AWS/Google Cloud 代运营账单另有规则 | Haiku 约 $0.1–$1；Sonnet 5 约 $0.3–$3；Opus 约 $1–$8 |
@@ -853,7 +863,7 @@ V2 数据库可能同时含 Mock、真实 last-known 和用户状态，不能原
 | Open-Meteo Marine | Free/Open-Access：600 calls/min、5,000/hour、10,000/day、300,000/month；含 Marine API | N/A | N/A | N/A | 非商业使用、无 uptime guarantee、CC BY 4.0 attribution；商业 Standard €29/月起 | 8 港按小时约 5,760 calls/月，个人非商业预计 ¥0/月 |
 | AISStream | 当前公开免费；Beta；无 uptime guarantee/SLA | N/A | N/A | N/A | 服务端 API key；单订阅最多 50 MMSI；政策可能变化 | 目标 $0/月；以 Beta/no SLA 记录，不承诺商业可用性 |
 
-DeepSeek/OpenAI 的 token 数字、Gemini 的免费/付费层、Claude 模型价格、Google Cloud/DeepL/Azure 字符价格都只是该日期快照；它们不会把对应 Provider 变成 V3 的必选依赖。Open-Meteo 的非商业免费额度与 AISStream 的当前免费 Beta 也不构成永久服务承诺。
+Qwen-MT 的输入/输出价格与 Lite 的 RPM/TPM 是该日期快照；免费额度继续按实际地区/账号保持 `unknown/pending`，不能把 generic Qwen 的免费试用或套餐额度套用到 Qwen-MT。DeepSeek/OpenAI 的 token 数字、Gemini 的免费/付费层、Claude 模型价格、Google Cloud/DeepL/Azure 字符价格都只是该日期快照；它们不会把对应 Provider 变成 V3 的必选依赖。Open-Meteo 的非商业免费额度与 AISStream 的当前免费 Beta 也不构成永久服务承诺。
 
 ### 21.5 运营 Provider Cost Matrix
 
@@ -867,7 +877,7 @@ DeepSeek/OpenAI 的 token 数字、Gemini 的免费/付费层、Claude 模型价
 | Calendarific | 国家节假日 | Free 500 calls/月（官方页面快照） | 约 7 天 TTL；约 40–50 calls/月；月度重置日、超额/Starter 需账号确认 | Free 资格/attribution 按计划确认 | 计划限额 unknown | 5 国 × 2 年 × 每 7 天检查约 43 calls/月 | $0 在 quota 内 |
 | The Loadstar / Public RSS | 行业资讯 | 公共 RSS/页面，无固定 API 费用 | 按 robots/站点条款；无月度 quota 承诺 | 无 key；抓取许可需逐源审查 | 站点/IP 限制 unknown | 约 5 源 × 15–30 分钟条件检查；ETag 后传输更低 | $0 目标 |
 | Official weather sources | JMA/TMD/BMKG 等预警 | 公共源，固定价/额度多为 unknown | 按站点/机构条款；无统一 reset | 通常无需 key；live enablement/资格逐源确认 | source-specific unknown | 3 源 × 10–30 分钟检查 | $0 目标 |
-| VesselAPI | Discovery/static metadata，可选已验证 enrichment | Free 150 calls/月；Basic $14.99/月、1,500 calls/月；Starter/其他档需复核 | 成功 2xx 计入额度；Search/Detail 是否各 1 call unknown；月度 reset/超额按计划 | Free 公开快照显示无信用卡；生产资格/地区 pending | 约 500/5m/IP、3,000/5m/key、location 300/5m、并发 20（快照，接入时复核） | 低频搜索/metadata 约 20–80 calls/月；不做实时轮询 | $0 Free PoC；Basic 公开基线 $14.99/月 |
+| VesselAPI | Discovery/static metadata，可选已验证 enrichment | quota per account；billing-date monthly window；Free 150 calls；Basic $14.99/月、1,500 calls、Port data | 成功 2xx 计入；错误/404/429 不计；可读 `X-RateLimit-Remaining` 作为官方剩余额度；仅具体 endpoint entitlement pending | Free 公开快照显示无信用卡；接入时只对具体 endpoint entitlement 做 contract test | 约 500/5m/IP、3,000/5m/key、location 300/5m、并发 20（快照，接入时复核） | 低频搜索/metadata 约 20–80 calls/月；不做实时轮询 | $0 Free PoC；Basic 公开基线 $14.99/月 |
 | Datalastic | Vessel/port/AIS/ETA 等聚合 | 前次公开快照：14 天试用后 Starter 约 €199/月、20k credits；需复核 | credits 制；重置/超额按计划 unknown | 自助试用；个人生产资格/卡要求 pending | plan-specific unknown | 0（仅商业增强候选） | €0 当前；正式接入约 €199/月起线索 |
 | MyShipTracking | 船舶/港口搜索与 terrestrial AIS | 前次公开快照：试用 10 天/2,000 coins；Basic €90/月；需复核 | coins/plan 制；reset/超额 unknown | 自助试用；覆盖和资格 pending | plan-specific unknown | 0（不作为默认） | €0 当前；Basic 约 €90/月线索 |
 | VesselFinder | AIS/voyage/port calls/particulars | 公开页面以 subscription/询价为主，无个人低价确认 | 订阅/用量、reset/超额 unknown | 需提交需求，个人资格 pending | unknown | 0（不作为默认） | 询价 |
@@ -883,7 +893,7 @@ DeepSeek/OpenAI 的 token 数字、Gemini 的免费/付费层、Claude 模型价
 | 档位 | 组合 | 适用边界 | 成本口径 |
 | --- | --- | --- | --- |
 | 零成本 | AISStream（按现有账号条款）、Open-Meteo、Public RSS/official pages、UN/LOCODE 本地目录；VesselAPI Free 仅低频 Discovery PoC；翻译 disabled 或本地模型 | 个人单用户、少量 watch、允许部分能力 unavailable；不做实时轮询和商业 Schedule | Provider 固定费用目标为 $0；AISStream/来源条款和本地运行成本仍需用户确认；翻译不产生外部账单 |
-| 推荐低成本 | 默认继续本地 UN/LOCODE + VesselAPI Free 低频 Discovery（150 calls/月公开快照），翻译使用用户已有的 DeepSeek/Qwen/Google/DeepL/Azure/OpenAI 等 Provider 的小批量缓存，并设置预算上限；Free quota 不够时再把 Basic 作为可选 add-on | 个人长期使用、少量搜索和关注；仍不承诺实时船位或商业班期；本地目录不因没有付费 Port API 而失效 | 固定 Provider 目标 $0；翻译按小批量实际 token/字符估算，通常为低个位数美元或更低；可选 VesselAPI Basic 另加公开基线 $14.99/月 |
+| 推荐低成本 | 默认继续本地 UN/LOCODE + VesselAPI Free 低频 Discovery（每 account 150 calls 的公开快照），翻译使用用户已有的 DeepSeek/Qwen-MT/Google/DeepL/Azure/OpenAI 等 Provider 的小批量缓存，并设置预算上限；Free quota 不够时再把 Basic（$14.99/月、1,500 calls、Port data）作为可选 add-on | 个人长期使用、少量搜索和关注；仍不承诺实时船位或商业班期；本地目录不因没有付费 Port endpoint entitlement 而失效 | 固定 Provider 目标 $0；翻译按小批量实际 token/字符估算，通常为低个位数美元或更低；可选 VesselAPI Basic 另加公开基线 $14.99/月 |
 | 商业增强 | 更高 VesselAPI 套餐、Calendar/翻译付费档、企业 AIS/ETA/port intelligence、已获授权的 Carrier Schedule Provider | 多船、多用户、较高刷新频率或企业 SLA | 所有 Provider 需逐项报价/合同/entitlement；不能在本个人项目中预设总价 |
 
 零成本档的关键限制：Port Search 依赖本地目录，VesselAPI Port/ETA enrichment 可能不可用；Commercial Schedule 始终可以为空；没有官方余额接口时 UI 只显示本地调用/估算。
@@ -892,7 +902,7 @@ DeepSeek/OpenAI 的 token 数字、Gemini 的免费/付费层、Claude 模型价
 
 - Calendarific Free 500 calls/月的公开额度和五国 × 两年 × 约 7 天 TTL 的 40–50 calls/月只是 2026-08-20 的方案估算；失败重试、手工刷新和官方 coverage 限制必须留余量。
 - 翻译预算按 `provider_usage` 记录的字符/token 估算，cache hit 不计外部请求；预算超限时暂停后台翻译，不阻塞 ingestion。
-- VesselAPI Search/Detail 是否“每 endpoint 严格各计 1 call”没有在当前可访问资料中形成足够证据，计划和 UI 都显示 `unknown`/本地估算，不能把搜索次数直接等同账单次数。
+- VesselAPI 的 quota 口径按 account、billing-date monthly window 和成功 2xx 计数；错误/404/429 不计，官方 `X-RateLimit-Remaining` 优先。只有具体 endpoint entitlement 仍需账号 contract test，不能把可搜索能力直接等同于 Port/ETA/事件可用。
 
 ## 23. 最终验收标准
 
@@ -968,7 +978,7 @@ SHIPPING_TRANSLATION_PROVIDER=disabled
 SHIPPING_TRANSLATION_MODEL=
 SHIPPING_TRANSLATION_BASE_URL=
 DEEPSEEK_API_KEY=
-QWEN_API_KEY=
+QWEN_MT_API_KEY=
 GEMINI_API_KEY=
 OPENAI_API_KEY=
 ANTHROPIC_API_KEY=
@@ -1026,12 +1036,12 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 
 实施前需要确认：
 
-1. 是否接受 VesselAPI 仅作为 P2 Vessel Discovery/静态 metadata 候选；先 Free PoC，Port/ETA/事件能力只有 entitlement contract test 通过后再启用，Basic $14.99/月只作为公开价格线索。
+1. 是否接受 VesselAPI 仅作为 P2 Vessel Discovery/静态 metadata 候选；先 Free PoC，Port/ETA/事件能力只有具体 endpoint entitlement contract test 通过后再启用，Basic $14.99/月、1,500 calls、Port data 作为公开套餐基线。
 2. 是否接受 UNECE UN/LOCODE 本地同步目录作为 Port 搜索默认基础，VesselAPI 只做可选 enrichment。
 3. 是否接受固定 Node 24 LTS 单一工具链，并创建 side-by-side V3 SQLite，而不是继续兼容 Node 20/22/24。
 4. V2 Mock watchlist 是否按 IMO/MMSI/UNLOCODE 重新解析后迁移；推荐 exact match 才迁移，未解析项不进入 Real Mode。
 5. P5 是否按“Current Voyage 先行，Commercial Schedule 需 Carrier entitlement 后再做”；首批需要哪几家 Carrier，是否已有 portal/API 账号。
-6. 是否选择哪一个 TranslationProvider（DeepSeek/Qwen/Gemini/OpenAI/Claude/Google/DeepL/Azure/Custom）；默认推荐可切换且未配置时 disabled，不提前把 Azure 或任何单一 Provider 写死。
+6. 是否选择哪一个 TranslationProvider（DeepSeek/Qwen-MT/Gemini/OpenAI/Claude/Google/DeepL/Azure/Custom）；默认推荐可切换且未配置时 disabled，不提前把 Azure 或任何单一 Provider 写死。
 7. 对新增港口无 Portcast/official notice coverage 时，是否接受显示“未覆盖”，而不是要求每港都有拥堵和公告。
 
 ## 26. 用户未点名但会阻塞 V3 的架构问题
@@ -1075,7 +1085,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 - Open-Meteo：[Pricing](https://open-meteo.com/en/pricing)
 - AISStream：[Home](https://aisstream.io/)、[Documentation](https://aisstream.io/documentation)
 - DeepSeek：[API pricing](https://api-docs.deepseek.com/quick_start/pricing)
-- Qwen/Alibaba Cloud：[Model Studio pricing](https://www.alibabacloud.com/help/en/model-studio/model-pricing)
+- Qwen-MT/Alibaba Cloud：[Model Studio pricing](https://www.alibabacloud.com/help/en/model-studio/model-pricing)
 - Gemini：[Gemini Developer API pricing](https://ai.google.dev/gemini-api/docs/pricing)
 - Claude：[API model pricing](https://docs.anthropic.com/en/docs/about-claude/pricing)
 - Azure：[Translator pricing](https://azure.microsoft.com/en-us/pricing/details/translator/)
