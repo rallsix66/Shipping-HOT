@@ -70,6 +70,11 @@ export class VesselWatchlistService {
     return items.find(item => (
       item.id === metadata.id
       || Boolean(metadata.imo && item.imo === metadata.imo)
+      || Boolean(
+        metadata.providerRecordId
+        && item.source === metadata.source
+        && item.providerRecordId === metadata.providerRecordId,
+      )
       || Boolean(metadata.mmsi && item.mmsi === metadata.mmsi)
       || (!metadata.imo && !metadata.mmsi && item.source === metadata.source && normalizeVesselSearchTerm(item.name) === normalizeVesselSearchTerm(metadata.name))
     ))
@@ -88,7 +93,7 @@ export class VesselWatchlistService {
     const metadata = (await this.metadata.getByIds([id]))[0]
     if (!metadata) throw new Error("vessel_search_result_not_found")
     const existing = await this.findMatching(metadata)
-    const targetId = existing?.imo ? existing.id : metadata.id
+    const targetId = existing?.id ?? metadata.id
     const watchedAt = existing?.watchedAt ?? new Date().toISOString()
     const aisEnabled = Boolean(metadata.mmsi ?? existing?.mmsi)
 

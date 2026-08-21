@@ -31,8 +31,8 @@ export class VesselSearchService {
     }
     const results = await this.provider.search(query)
     const sourceType = results.some(result => result.source_type === "mock") || this.provider.providerId.startsWith("mock") ? "mock" : "real"
-    await this.repository.saveSearch(query, results, this.provider.providerId, sourceType, now, this.cacheTtlMs)
-    return { query, results, cacheHit: false, providerId: this.provider.providerId, fetchedAt: now.toISOString() }
+    const canonicalResults = await this.repository.saveSearch(query, results, this.provider.providerId, sourceType, now, this.cacheTtlMs)
+    return { query, results: canonicalResults, cacheHit: false, providerId: this.provider.providerId, fetchedAt: now.toISOString() }
   }
 }
 

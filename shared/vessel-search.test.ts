@@ -11,6 +11,7 @@ describe("vessel search domain", () => {
 
   it("uses IMO first for a stable metadata identity", () => {
     expect(stableVesselMetadataId("vesselapi", { imo: "9876543", mmsi: "477123400", name: "EVER GLORY" })).toBe("imo:9876543")
+    expect(stableVesselMetadataId("vesselapi", { providerRecordId: "vessel-1", mmsi: "477123400", name: "EVER GLORY" })).toBe("vesselapi:vessel-1")
     expect(stableVesselMetadataId("vesselapi", { mmsi: "477123400", name: "EVER GLORY" })).toBe("mmsi:477123400")
   })
 })

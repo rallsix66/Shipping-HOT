@@ -63,7 +63,7 @@ export function vesselSearchCacheKey(query: VesselSearchQuery): string {
 
 export function stableVesselMetadataId(source: string, record: Pick<VesselMetadata, "imo" | "mmsi" | "providerRecordId" | "name">): string {
   if (record.imo) return `imo:${record.imo}`
-  if (record.mmsi) return `mmsi:${record.mmsi}`
   if (record.providerRecordId) return `${source}:${record.providerRecordId}`
+  if (record.mmsi) return `mmsi:${record.mmsi}`
   return `${source}:name:${normalizeVesselSearchTerm(record.name)}`
 }

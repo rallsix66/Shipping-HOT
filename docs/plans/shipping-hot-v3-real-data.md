@@ -753,11 +753,11 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | 项目 | 内容 |
 | --- | --- |
 | 依赖 | P2A 已完成；P1A、P1B 与 `port_directory_status=ready` 继续作为基础约束；不允许绕过真实目录或重新引入 Real Mode Mock |
-| P2B 目标 | 搜索结果进入现有 user-owned `vessel_watchlist`，稳定 identity 去重，支持 add/remove/list，保留 P2A `vessel_metadata` 静态字段；VesselAPI 不作为实时船位 Provider |
+| P2B 目标 | 搜索结果进入现有 user-owned `vessel_watchlist`，通过 canonical identity resolver 去重并安全 promotion，支持 add/remove/list，保留 P2A `vessel_metadata` 静态字段；VesselAPI 不作为实时船位 Provider |
 | P2B 修改文件 | `server/search/vessel-watchlist.ts`、`server/database/vessel-search.ts`、搜索 Watchlist API、Vessels 页面、shared search types、native smoke |
 | P2B 数据库 | 复用现有 `vessel_watchlist(vessel_id, watched_at, ais_enabled)` 与 `vessel_metadata`；本轮不新增 migration，不把 `isWatched` 写回 Provider-owned 表 |
 | P2B API | `GET /api/shipping/search/vessels/watchlist`、`POST/DELETE /api/shipping/search/vessels/watch` |
-| P2B 测试 | `DONG FANG FU` 搜索关注/取消、IMO/MMSI/name 去重、name/callsign/source 保留、无 MMSI 降级标记、重启 persistence |
+| P2B 测试 | `DONG FANG FU` 一致身份（IMO `9162423` / MMSI `413393620` / Callsign `BPCL3`）搜索关注/取消、IMO/MMSI/name 去重、provider identity promotion 与 MMSI 更新、identity conflict、name/callsign/source 保留、无 MMSI 降级标记、重启 persistence |
 | P2B 验收 | 关注后重启仍在；同一 Vessel 通过 IMO/MMSI/name 再搜索不产生重复 entry；无 MMSI 不伪造值 |
 | AIS Tracking Runtime | `AisTrackingService`、AIS WebSocket、后台长连接、watchlist 变化订阅更新仍 pending，不在本轮实现 |
 | 风险 | Provider 数据库找不到目标船；免费额度；MMSI 重用/IMO 缺失；中文 alias 质量 |

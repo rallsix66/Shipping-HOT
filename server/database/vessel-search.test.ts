@@ -79,4 +79,57 @@ describe("vessel metadata persistence and search cache", () => {
     expect(native.prepare("SELECT COUNT(*) AS count FROM vessel_metadata").get()).toEqual({ count: 0 })
     native.close()
   })
+
+  it("keeps the provider canonical id while promoting IMO and updating MMSI", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const repository = new VesselMetadataRepository(database, "real")
+    const incomplete: VesselSearchResult = {
+      ...result,
+      id: "vesselapi:vessel-123",
+      name: "IDENTITY PROMOTION TEST",
+      imo: undefined,
+      mmsi: "111111111",
+      providerRecordId: "vessel-123",
+    }
+    const first = (await repository.saveSearch({ query: incomplete.name }, [incomplete], "vesselapi", "real", new Date(result.fetchedAt)))[0]
+    expect(first.id).toBe("vesselapi:vessel-123")
+
+    const promoted = (await repository.saveSearch({ query: "9876543", field: "imo" }, [{
+      ...incomplete,
+      id: "imo:9876543",
+      imo: "9876543",
+    }], "vesselapi", "real", new Date(result.fetchedAt)))[0]
+    expect(promoted.id).toBe("vesselapi:vessel-123")
+
+    const changedMmsi = (await repository.saveSearch({ query: "9876543", field: "imo" }, [{
+      ...promoted,
+      id: "imo:9876543",
+      mmsi: "222222222",
+    }], "vesselapi", "real", new Date(result.fetchedAt)))[0]
+    expect(changedMmsi.id).toBe("vesselapi:vessel-123")
+    expect(native.prepare("SELECT COUNT(*) AS count FROM vessel_metadata").get()).toEqual({ count: 1 })
+    expect(native.prepare("SELECT id, imo, mmsi, provider_record_id FROM vessel_metadata").get()).toEqual({ id: "vesselapi:vessel-123", imo: "9876543", mmsi: "222222222", provider_record_id: "vessel-123" })
+    await expect(repository.getCachedSearch({ query: "9876543", field: "imo" })).resolves.toMatchObject({ results: [expect.objectContaining({ id: "vesselapi:vessel-123", imo: "9876543", mmsi: "222222222" })] })
+    native.close()
+  })
+
+  it("rejects identity attributes that point to different canonical entities", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const repository = new VesselMetadataRepository(database, "real")
+    await repository.saveSearch({ query: "VESSEL A" }, [{ ...result, id: "imo:1000001", name: "VESSEL A", imo: "1000001", mmsi: "111111111", providerRecordId: "a" }], "vesselapi", "real", new Date(result.fetchedAt))
+    await repository.saveSearch({ query: "VESSEL B" }, [{ ...result, id: "imo:1000002", name: "VESSEL B", imo: "1000002", mmsi: "222222222", providerRecordId: "b" }], "vesselapi", "real", new Date(result.fetchedAt))
+
+    await expect(repository.saveSearch({ query: "CONFLICT" }, [{
+      ...result,
+      id: "imo:1000001",
+      name: "CONFLICT",
+      imo: "1000001",
+      mmsi: "222222222",
+      providerRecordId: "a",
+    }], "vesselapi", "real", new Date(result.fetchedAt))).rejects.toThrow("identity_conflict")
+    expect(native.prepare("SELECT COUNT(*) AS count FROM vessel_metadata").get()).toEqual({ count: 2 })
+    native.close()
+  })
 })
