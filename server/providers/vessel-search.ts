@@ -2,6 +2,8 @@ import { env } from "node:process"
 import { mockVessels } from "@shared/shipping-fixtures"
 import type { SourceLineage } from "@shared/shipping"
 import { type VesselMetadata, type VesselSearchQuery, type VesselSearchResult, normalizeVesselSearchQuery, stableVesselMetadataId } from "@shared/vessel-search"
+import { FileSecretStore } from "#/secrets/file-secret-store"
+import type { SecretStore } from "#/providers/contracts"
 
 export interface VesselSearchProvider {
   readonly providerId: string
@@ -45,9 +47,7 @@ function responseRecords(value: unknown): Array<Record<string, unknown>> {
   const candidate = Array.isArray(value)
     ? value
     : value && typeof value === "object"
-      ? (value as { results?: unknown[], data?: unknown[], items?: unknown[] }).results
-      ?? (value as { results?: unknown[], data?: unknown[], items?: unknown[] }).data
-      ?? (value as { results?: unknown[], data?: unknown[], items?: unknown[] }).items
+      ? recordValue(value as Record<string, unknown>, "vessels", "results", "data", "items")
       : undefined
   return Array.isArray(candidate)
     ? candidate.filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
@@ -59,9 +59,9 @@ function normalizeVesselApiRecord(record: Record<string, unknown>, fetchedAt: st
   if (!name) return undefined
   const imo = stringValue(recordValue(record, "imo", "IMO"))
   const mmsi = stringValue(recordValue(record, "mmsi", "MMSI"))
-  const callsign = stringValue(recordValue(record, "callsign", "callSign", "call_sign", "Callsign"))
-  const type = stringValue(recordValue(record, "type", "ship_type", "shipType", "vessel_type"))
-  const flag = stringValue(recordValue(record, "flag", "flag_code", "flagCode"))
+  const callsign = stringValue(recordValue(record, "call_sign", "callsign", "callSign", "Callsign"))
+  const type = stringValue(recordValue(record, "vessel_type", "type", "ship_type", "shipType"))
+  const flag = stringValue(recordValue(record, "country", "flag", "flag_code", "flagCode"))
   const providerRecordId = stringValue(recordValue(record, "id", "vessel_id", "vesselId", "uuid"))
   const source = "vesselapi"
   const metadata: VesselMetadata = {
@@ -88,7 +88,7 @@ export function createVesselApiSearchProvider(options: VesselApiSearchProviderOp
     async search(input) {
       const query = normalizeVesselSearchQuery(input)
       const url = new URL(endpoint)
-      url.searchParams.set(query.field ?? "name", query.query)
+      url.searchParams.set(`filter.${query.field ?? "name"}`, query.query)
       const response = await fetcher(url.toString(), {
         headers: { Accept: "application/json", Authorization: `Bearer ${options.apiKey}` },
       })
@@ -138,18 +138,23 @@ export function createUnavailableVesselSearchProvider(error: string): VesselSear
   }
 }
 
-interface VesselSearchEnvironment {
+export interface VesselSearchEnvironment {
   [key: string]: string | undefined
   SHIPPING_DATA_MODE?: string
   SHIPPING_VESSEL_SEARCH_PROVIDER?: string
   VESSELAPI_API_KEY?: string
 }
 
-export function configureVesselSearchProvider(environment: VesselSearchEnvironment = { ...env }): VesselSearchProvider {
+export async function configureVesselSearchProvider(
+  environment: VesselSearchEnvironment = { ...env },
+  secretStore: SecretStore = new FileSecretStore({ environment }),
+): Promise<VesselSearchProvider> {
   const dataMode = environment.SHIPPING_DATA_MODE === "real" ? "real" : "mock"
-  if (environment.SHIPPING_VESSEL_SEARCH_PROVIDER === "vesselapi" || (dataMode === "real" && environment.VESSELAPI_API_KEY)) {
-    return environment.VESSELAPI_API_KEY
-      ? createVesselApiSearchProvider({ apiKey: environment.VESSELAPI_API_KEY })
+  const configuredProvider = environment.SHIPPING_VESSEL_SEARCH_PROVIDER?.trim().toLowerCase()
+  const apiKey = await secretStore.get("vesselapi")
+  if (configuredProvider === "vesselapi" || (dataMode === "real" && apiKey)) {
+    return apiKey
+      ? createVesselApiSearchProvider({ apiKey })
       : createUnavailableVesselSearchProvider("VESSELAPI_API_KEY missing")
   }
   if (dataMode === "mock") return MockVesselSearchProvider

@@ -10,5 +10,5 @@ export default defineEventHandler(async (event) => {
   const db = useDatabase()
   await initShippingTables(db, dataMode)
   const field = typeof query.field === "string" && ["name", "imo", "mmsi", "callsign"].includes(query.field) ? query.field as "name" | "imo" | "mmsi" | "callsign" : undefined
-  return createVesselSearchService(db, dataMode, configureVesselSearchProvider()).search({ query: query.q, field })
+  return createVesselSearchService(db, dataMode, await configureVesselSearchProvider()).search({ query: query.q, field })
 })
