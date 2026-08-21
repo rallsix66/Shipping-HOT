@@ -2,7 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { describe, expect, it, vi } from "vitest"
-import { configureVesselSearchProvider, createVesselApiSearchProvider } from "./vessel-search"
+import { MockVesselSearchProvider, configureVesselSearchProvider, createVesselApiSearchProvider } from "./vessel-search"
 import { FileSecretStore } from "#/secrets/file-secret-store"
 
 describe("vesselapi search adapter", () => {
@@ -76,6 +76,7 @@ describe("vesselapi search adapter", () => {
         { SHIPPING_DATA_MODE: "real", SHIPPING_VESSEL_SEARCH_PROVIDER: "vesselapi" },
         environmentStore,
       )
+      expect(environmentProvider.providerId).toBe("vesselapi")
       await environmentProvider.search({ query: "DONG FANG FU", field: "name" })
       expect(fetcher).toHaveBeenLastCalledWith(
         "https://api.vesselapi.com/v1/search/vessels?filter.name=dong+fang+fu",
@@ -86,11 +87,36 @@ describe("vesselapi search adapter", () => {
         { SHIPPING_DATA_MODE: "real", SHIPPING_VESSEL_SEARCH_PROVIDER: "vesselapi" },
         fileStore,
       )
+      expect(fileProvider.providerId).toBe("vesselapi")
       await fileProvider.search({ query: "DONG FANG FU", field: "name" })
       expect(fetcher).toHaveBeenLastCalledWith(
         "https://api.vesselapi.com/v1/search/vessels?filter.name=dong+fang+fu",
         { headers: { Accept: "application/json", Authorization: "Bearer file-secret" } },
       )
+    } finally {
+      vi.unstubAllGlobals()
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("keeps Mock Mode isolated when FileSecretStore has a VesselAPI key", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "shipping-hot-vesselapi-mock-"))
+    const path = join(directory, "provider-secrets.json")
+    const fetcher = vi.fn(async () => {
+      throw new Error("VesselAPI fetch must not run in Mock Mode")
+    })
+    vi.stubGlobal("fetch", fetcher)
+    try {
+      const fileStore = new FileSecretStore({ path, environment: {} })
+      await fileStore.set("vesselapi", "file-secret")
+
+      const provider = await configureVesselSearchProvider(
+        { SHIPPING_DATA_MODE: "mock", SHIPPING_VESSEL_SEARCH_PROVIDER: "mock" },
+        fileStore,
+      )
+      expect(provider).toBe(MockVesselSearchProvider)
+      await expect(provider.search({ query: "EVER GLORY", field: "name" })).resolves.toEqual([expect.objectContaining({ source: "mock-vessel-search" })])
+      expect(fetcher).not.toHaveBeenCalled()
     } finally {
       vi.unstubAllGlobals()
       await rm(directory, { recursive: true, force: true })
