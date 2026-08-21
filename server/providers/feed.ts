@@ -2,7 +2,7 @@ import { createHash } from "node:crypto"
 import { XMLParser } from "fast-xml-parser"
 import { load } from "cheerio"
 import { type DataProvenance, type FeedCategory, type FeedItem, type Port, type SourceType, isMockProvenance } from "@shared/shipping"
-import { mockFeedItems, mockPorts } from "@shared/shipping-fixtures"
+import { mockFeedItems } from "@shared/shipping-fixtures"
 
 export interface FeedProvider {
   getFeedItems: (lastKnown?: FeedItem[], ports?: Port[]) => Promise<FeedItem[]>
@@ -272,7 +272,7 @@ function rawFeedItem(raw: RawFeedItem, source: ShippingFeedSource, ports: Port[]
   }
 }
 
-export function parseFeedRss(xml: string, source: ShippingFeedSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
+export function parseFeedRss(xml: string, source: ShippingFeedSource, ports: Port[] = [], fetchedAt = new Date().toISOString()): FeedItem[] {
   const parsed = parser.parse(xml) as Record<string, unknown>
   const rss = parsed.rss as Record<string, unknown> | undefined
   const feed = parsed.feed as Record<string, unknown> | undefined
@@ -289,7 +289,7 @@ function htmlDate(text: string): string | undefined {
   return Number.isNaN(timestamp) ? undefined : new Date(timestamp).toISOString()
 }
 
-export function parseFeedHtml(html: string, source: ShippingFeedSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
+export function parseFeedHtml(html: string, source: ShippingFeedSource, ports: Port[] = [], fetchedAt = new Date().toISOString()): FeedItem[] {
   const $ = load(html)
   const items: FeedItem[] = []
   const anchors = source.id === "shekou-official" ? $("a[href*='/ywgg/']") : $("a[href]")
@@ -394,7 +394,7 @@ export function createPublicFeedProvider(options: PublicFeedProviderOptions = {}
   const sources = options.sources ?? shippingFeedSources
   const timeoutMs = Math.max(1, options.timeoutMs ?? PUBLIC_FEED_TIMEOUT_MS)
   return {
-    async getFeedItems(lastKnown = [], ports = mockPorts) {
+    async getFeedItems(lastKnown = [], ports: Port[] = []) {
       const fetchedAt = now().toISOString()
       const activeSourceIds = activeShippingFeedSourceIds(sources)
       const results = await Promise.all(sources.filter(source => activeSourceIds.has(source.id)).map(async (source) => {
@@ -423,16 +423,25 @@ export const MockFeedProvider: FeedProvider = {
   },
 }
 
+export function createUnavailableFeedProvider(error: string): FeedProvider {
+  return {
+    async getFeedItems() {
+      throw new Error(error)
+    },
+  }
+}
+
 export function filterFeedLastKnownForMode(items: FeedItem[], mode: string): FeedItem[] {
   return mode === "public"
     ? items.filter(item => activeShippingFeedSourceIds().has(item.sourceId) && !isMockProvenance(item.provenance))
-    : items.filter(item => item.sourceId === "mock-port-notice")
+    : mode === "mock" ? items.filter(item => item.sourceId === "mock-port-notice") : []
 }
 
-export function configureFeedProviders(environment: { SHIPPING_FEED_PROVIDER?: string } = {}) {
-  const mode = environment.SHIPPING_FEED_PROVIDER === "public" ? "public" : "mock"
+export function configureFeedProviders(environment: { SHIPPING_DATA_MODE?: string, SHIPPING_FEED_PROVIDER?: string } = {}) {
+  const dataMode = environment.SHIPPING_DATA_MODE === "real" ? "real" : "mock"
+  const mode = environment.SHIPPING_FEED_PROVIDER === "public" ? "public" : dataMode === "real" ? "unavailable" : "mock"
   return {
-    provider: mode === "public" ? createPublicFeedProvider() : MockFeedProvider,
+    provider: mode === "public" ? createPublicFeedProvider() : mode === "mock" ? MockFeedProvider : createUnavailableFeedProvider("Real Feed provider not configured"),
     modes: { feed: mode },
   }
 }

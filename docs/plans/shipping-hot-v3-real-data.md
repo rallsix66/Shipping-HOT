@@ -1,16 +1,16 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 文档状态：`accepted / P1A implemented / awaiting P1B approval`
+> 文档状态：`accepted / P1B mock isolation implemented / AIS tracking runtime deferred`
 >
 > 审查日期：2026-08-20（Asia/Shanghai）
 >
-> 代码基线：`codex/shipping-hot-v3-real-data`（P1A 本轮）
+> 代码基线：`codex/shipping-hot-v3-real-data`（P1B 本轮）
 >
-> 实施状态：**P0 Persistence 与 P1A Real Port Directory Foundation 已完成并通过本地验证**。ADR-005 已于 2026-08-20 Accepted；本轮只执行 P1A，不进入 P1B、P2 或后续 Provider 功能。
+> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation 与 P1B Mock Isolation 已完成并通过本地验证**。本轮只执行 Real Mode 隔离；不实现 AIS 长连接、P2 Search & Watch 或其他后续 Provider 功能。
 >
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；只有具体 endpoint entitlement、地区/账号资格等未确认事项保持 `unknown/pending`。
 >
-> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮仅落实 P0 Persistence；不创建账号、不购买服务、不实现 VesselAPI、UN/LOCODE、AIS 长连接、Feed、Calendar、Voyage 或 Translation Adapter。
+> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮仅落实 P1B Mock Isolation；不创建账号、不购买服务、不实现 AIS 长连接、VesselAPI、Search/Watch、Feed/Calendar/Voyage/Translation Adapter 或 Provider Runtime/Usage 业务。
 
 ## 1. 背景与当前问题
 
@@ -698,7 +698,7 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 
 | 项目 | 内容 |
 | --- | --- |
-| 状态 | implemented / locally verified；P1B/P2 deferred |
+| 状态 | implemented / locally verified；P1B Mock Isolation complete，AIS Tracking Runtime/P2 deferred |
 | 目标 | 建立 migration-backed `port_directory` 基础目录：UN/LOCODE identity、真实坐标、timezone、中文/英文 aliases 和 source provenance；让 Open-Meteo/AIS Area 的生产几何输入脱离 `shared/shipping-fixtures.ts` |
 | 修改文件 | `server/database/runtime.ts`、`server/database/port-directory.ts`、`server/providers/shipping.ts`、`server/providers/aisstream-area.ts`、`shared/ais-area.ts`、`scripts/p0-native-sqlite-smoke.ts` |
 | 新增文件 | `shared/port-directory.ts`、`server/database/migrations/003-p1a-port-directory.ts`、`server/database/port-directory.test.ts` |
@@ -710,19 +710,18 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | 风险 | 当前 baseline 的 `verified_at` 仍为 unknown；后续 UN/LOCODE snapshot/importer 需补充官方校验，不将 manual/mock 数据伪装成 official |
 | 回滚 | 停用目录 enrichment，保留 V3 DB；Real Mode 不回退 Mock Port |
 
-### P1B — Mock Isolation + AIS Tracking Runtime
+### P1B — Mock Isolation（本轮批准范围）
 
 | 项目 | 内容 |
 | --- | --- |
-| 目标 | 依赖 P1A 且要求 `port_directory_status=ready` 后，Mock 只存在于 test/demo；real/production code path 无 fixture import、Mock seed、Mock Schedule；AIS 进入长期单例 `AisTrackingService` |
-| 修改文件 | `server/providers/shipping.ts`、`server/providers/feed.ts`、`server/providers/calendar.ts`、`server/shipping-store.ts`、`shared/ais-area.ts`、`server/services/ais-tracking.ts`、全部相关测试、`example.env.server` |
-| 新增文件 | `server/config/shipping.ts`、`server/providers/unavailable.ts`、`test/fixtures/shipping.ts`、Real Evidence Gate tests |
-| 数据库 | migration 时隔离/不导入 Mock operational rows；增加 origin/environment 约束 |
-| API | response 明确 `unavailable/misconfigured`；Real Mode 不返回 Mock payload |
-| 测试 | production bundle 无 fixture import；每个 Provider 缺 key/失败/无历史矩阵；Event/HOT mixed evidence rejection；Position + Static/Voyage message normalization；50 MMSI 上限；断线重连与替换式订阅 |
-| 验收 | Real Mode 即使全部 Provider 失败，页面只有真实 last-known 或空；`mock-schedule=0`；正式 UI 无 Mock 计数/卡片；HTTP GET 不创建 AIS socket |
-| 风险 | P1A 目录覆盖不足；AISStream Beta/no SLA；超过 50 MMSI 的扩展不在本阶段 |
-| 回滚 | 仅在 development demo 显式切 `SHIPPING_DATA_MODE=mock`；production 不提供回滚到 Mock 的开关 |
+| 目标 | 依赖 P1A 且要求 `port_directory_status=ready` 后，Real Mode 只允许 `source_type=real/imported/derived`；Mock 只保留给显式 Test/Mock Mode |
+| 修改文件 | `server/database/migrations/004-p1b-mock-isolation.ts`、`server/database/shipping.ts`、`server/providers/shipping.ts`、`server/providers/feed.ts`、`server/providers/calendar.ts`、`server/shipping-store.ts`、`shared/shipping.ts`、相关测试 |
+| 数据库 | 为 `vessels`、`ports`、`voyages`、`feed_items`、`events`、`calendar_events`、`ais_port_metrics` 增加 `source_type` lineage；旧 Mock/来源不明记录不进入 Real Mode 当前读取 |
+| Provider | Real Mode 缺少真实 Provider 时返回 unavailable/misconfigured；不构造 Mock Provider，不使用 `MockScheduleProvider`，不把 Mock last-known 作为运营数据 |
+| Event/HOT | Event 必须通过 Real Evidence Gate；任何 Mock provenance/evidence 不进入 Real Mode 当前 Event/HOT |
+| 测试 | Repository 全实体查询隔离、混合 Mock evidence 拒绝、Real Mode Provider/Schedule unavailable、Mock Mode 保留、migration lineage、native SQLite restart persistence smoke |
+| 验收 | Real Mode 读取结果只有 `real/imported/derived`；即使 Provider 缺失也只返回真实 last-known 或空；`mock-schedule=0`；本阶段不创建 AIS 长连接或其他新业务功能 |
+| 后续 | AIS Tracking Runtime 仍未开始；P2 Search & Watch 及后续 Provider 功能保持 deferred |
 
 ### P2 — Search & Watch
 
@@ -1077,7 +1076,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 
 ## 27. 实施门槛与文档后续
 
-`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0 与 P1A 已获授权、实施并完成本地验证；P1B、P2 及后续 Provider 功能仍未获本轮实施授权。该 ADR 至少覆盖：
+`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A 与本轮 P1B Mock Isolation slice 已获授权、实施并完成本地验证；AIS Tracking Runtime、P2 及后续 Provider 功能仍 deferred。该 ADR 至少覆盖：
 
 - V3 real-only runtime、SQLite fail-closed/read-only 行为和已验证的单一 Node LTS。
 - VesselAPI 仅 Discovery/static metadata、AISStream 长期 tracking、UN/LOCODE 默认 Port Search，以及 provider-owned/user-owned/directory-owned/translation-owned 字段边界。
@@ -1086,7 +1085,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 - TranslationProvider 可切换合同、Settings AI 翻译中心、单一 `translation_cache` source of truth、server-only secret、`provider_usage` 和“本地统计/估算”标签。
 - Current Voyage 与 DCSA Commercial Schedule 的事实分层。
 
-后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A 已完成；不得从本文直接跳到 P1B、P2 搜索或 P5 Schedule；后续 Provider/AI adapter 仍按单独批准范围实施。
+后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A 与本轮 P1B Mock Isolation 已完成；不得从本文直接跳到 AIS Tracking Runtime、P2 搜索或 P5 Schedule；后续 Provider/AI adapter 仍按单独批准范围实施。
 
 ## 28. 外部资料
 

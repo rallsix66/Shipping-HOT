@@ -3,6 +3,7 @@ import type { AisDerivedPortMetric } from "./ais-area"
 
 export type SourceStatus = "healthy" | "degraded" | "failed" | "disabled" | "never_succeeded"
 export type SourceType = "official" | "third_party" | "user" | "mock"
+export type SourceLineage = "real" | "mock" | "imported" | "derived"
 export type DataNature = "observed" | "reported" | "forecast" | "modelled" | "derived" | "estimated" | "planned"
 export type FreshnessState = "fresh" | "stale" | "unknown"
 export type Severity = "info" | "watch" | "warning" | "critical"
@@ -36,6 +37,8 @@ export interface Freshness {
 
 export interface ProvenanceAware {
   provenance?: DataProvenance
+  /** Migration lineage; deliberately distinct from provenance.sourceType. */
+  source_type?: SourceLineage
 }
 
 export interface VesselWatchTarget {
@@ -119,6 +122,22 @@ export function isMockProvenance(provenance?: DataProvenance): boolean {
   return provenance?.sourceType === "mock"
 }
 
+export function sourceLineageForRecord(record: ProvenanceAware, fallback: SourceLineage = "mock"): SourceLineage {
+  if (record.source_type) return record.source_type
+  if (record.provenance) return isMockProvenance(record.provenance) ? "mock" : "real"
+  return fallback
+}
+
+export function hasMockEvidence(record: ProvenanceAware & { evidence?: DataEvidence[] }): boolean {
+  return sourceLineageForRecord(record) === "mock"
+    || isMockProvenance(record.provenance)
+    || Boolean(record.evidence?.some(evidence => isMockProvenance(evidence.provenance)))
+}
+
+export function recordAllowedForDataMode(record: ProvenanceAware & { evidence?: DataEvidence[] }, dataMode: "mock" | "real"): boolean {
+  return dataMode !== "real" || (sourceLineageForRecord(record) !== "mock" && !hasMockEvidence(record))
+}
+
 export function normalizeLegacyTrust<T extends ProvenanceAware>(entity: T, provenance?: DataProvenance): T {
   if (entity.provenance || !provenance) return entity
   return { ...entity, provenance: { ...provenance } }
@@ -173,6 +192,7 @@ export interface Port extends Freshness, ProvenanceAware {
 }
 
 export interface ShippingProviderModes {
+  dataMode?: "mock" | "real"
   vessel?: string
   port?: string
   schedule?: string
@@ -204,21 +224,21 @@ const officialWeatherAlertSourceIds = new Set(["official-weather-alerts", "jma",
 
 export function sourceAllowedForProviderModes(sourceId: string | undefined, modes: ShippingProviderModes): boolean {
   if (!sourceId) return false
-  if (sourceId === "mock-vessel") return modes.vessel === "mock"
+  if (sourceId === "mock-vessel") return modes.dataMode !== "real" && modes.vessel === "mock"
   if (sourceId === "aisstream") return modes.vessel === "aisstream"
   if (sourceId === "aisstream-area") return modes.aisArea === "aisstream"
-  if (sourceId === "mock-port") return modes.port === "mock"
+  if (sourceId === "mock-port") return modes.dataMode !== "real" && modes.port === "mock"
   if (sourceId === "portcast-public") return modes.port === "portcast"
-  if (sourceId === "mock-weather") return modes.weather === "mock"
+  if (sourceId === "mock-weather") return modes.dataMode !== "real" && modes.weather === "mock"
   if (sourceId === "open-meteo-marine") return modes.weather === "open-meteo"
   if (officialWeatherAlertSourceIds.has(sourceId)) return modes.weatherAlerts === "public" || modes.weatherAlerts === "experimental"
-  if (sourceId === "mock-port-notice") return modes.feed === "mock"
+  if (sourceId === "mock-port-notice") return modes.dataMode !== "real" && modes.feed === "mock"
   if (realFeedSourceIds.has(sourceId)) return modes.feed === "public"
-  if (sourceId === "mock-calendar") return modes.calendar === "mock"
+  if (sourceId === "mock-calendar") return modes.dataMode !== "real" && modes.calendar === "mock"
   if (sourceId === "calendarific") return modes.calendar === "calendarific"
   if (sourceId === "official-holiday-source" || ["official-th", "official-id", "official-my", "official-ph", "official-vn"].includes(sourceId)) return modes.calendar === "calendarific" || modes.calendar === "official"
   if (sourceId === "manual-holiday") return modes.calendar === "calendarific" || modes.calendar === "official" || modes.calendar === "manual"
-  if (sourceId === "mock-schedule") return modes.schedule === "mock"
+  if (sourceId === "mock-schedule") return modes.dataMode !== "real" && modes.schedule === "mock"
   return false
 }
 
@@ -252,6 +272,7 @@ export function sourceAllowedForOperationalContext(sourceId: string | undefined,
 
 export function eventIsCompatibleWithCurrentProviders(event: Pick<ShippingEvent, "type" | "dedupeKey" | "provenance" | "evidence" | "vesselId" | "portId" | "voyageId">, modes: ShippingProviderModes): boolean {
   if (!eventHasSourceScopedIdentity(event)) return false
+  if (!recordAllowedForDataMode(event, modes.dataMode ?? "mock")) return false
   const sourceId = event.provenance?.sourceId
   if (sourceId) return sourceAllowedForProviderModes(sourceId, modes)
   return (event.evidence ?? []).some(evidence => sourceAllowedForProviderModes(evidence.provenance.sourceId, modes))
@@ -263,6 +284,7 @@ export function filterEventsForProviderModes(events: ShippingEvent[], modes: Shi
 
 export function eventIsCompatibleWithOperationalContext(event: ShippingEvent, context: OperationalSourceContext): boolean {
   if (!eventHasSourceScopedIdentity(event)) return false
+  if (!recordAllowedForDataMode(event, context.modes.dataMode ?? "mock")) return false
   const sourceId = event.provenance?.sourceId ?? event.evidence?.[0]?.provenance.sourceId
   return sourceAllowedForOperationalContext(sourceId, context)
 }

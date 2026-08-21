@@ -4,9 +4,10 @@ import { calculateDelayMinutes, freshnessState, mergeProviderVessel, mergeProvid
 import { createMockSnapshot, mockEvents, mockVessels } from "./shipping-fixtures"
 
 const realProviderModes = {
+  dataMode: "real",
   vessel: "aisstream",
   port: "portcast",
-  schedule: "mock",
+  schedule: "unavailable",
   weather: "open-meteo",
   weatherAlerts: "off",
   feed: "public",
@@ -15,7 +16,7 @@ const realProviderModes = {
 
 const realOperationalContext = {
   modes: realProviderModes,
-  activeSourceIds: new Set(["aisstream", "portcast-public", "mock-schedule", "open-meteo-marine", "the-loadstar", "maritime-executive", "shekou-official", "calendarific"]),
+  activeSourceIds: new Set(["aisstream", "portcast-public", "open-meteo-marine", "the-loadstar", "maritime-executive", "shekou-official", "calendarific"]),
 }
 
 describe("shipping HOT deterministic rules", () => {
@@ -227,8 +228,8 @@ describe("shipping HOT deterministic rules", () => {
   it("excludes incompatible historical Mock Events and Feed HOT items from real Provider mode", () => {
     const snapshot = createMockSnapshot()
     const hot = rankHotItems(snapshot.events, snapshot.ports, snapshot.vessels, snapshot.voyages, snapshot.feedItems, new Date("2026-08-13T10:00:00.000Z"), realOperationalContext)
-    expect(filterEventsForProviderModes(snapshot.events, realProviderModes).map(event => event.provenance?.sourceId)).toEqual(["mock-schedule"])
-    expect(hot.map(item => item.eventId)).toEqual(["event-voyage_delay:voyage-eg-061:mock-schedule"])
+    expect(filterEventsForProviderModes(snapshot.events, realProviderModes)).toEqual([])
+    expect(hot).toEqual([])
   })
 
   it("filters switched Mock vessel, port, weather, feed and calendar sources by their mode", () => {
@@ -243,10 +244,10 @@ describe("shipping HOT deterministic rules", () => {
     expect(filterEventsForProviderModes(switched, realProviderModes)).toEqual([])
   })
 
-  it("keeps compatible Mock schedule events while excluding each switched Mock source", () => {
+  it("excludes Mock schedule events in Real Mode along with every other Mock source", () => {
     const snapshot = createMockSnapshot()
     const scheduleEvent = { ...snapshot.events[1], provenance: { sourceType: "mock" as const, dataNature: "derived" as const, sourceId: "mock-schedule" } }
-    expect(filterEventsForProviderModes([snapshot.events[0], scheduleEvent], realProviderModes)).toEqual([scheduleEvent])
+    expect(filterEventsForProviderModes([snapshot.events[0], scheduleEvent], realProviderModes)).toEqual([])
     expect(filterEventsForProviderModes([{ ...snapshot.events[0], provenance: { sourceType: "mock" as const, dataNature: "derived" as const, sourceId: "mock-vessel" } }], realProviderModes)).toEqual([])
   })
 

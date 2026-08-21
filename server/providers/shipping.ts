@@ -117,12 +117,33 @@ export function createUnavailableVesselProvider(error: string): VesselProvider {
 export const MockPortProvider: PortProvider = { async getPorts() {
   return structuredClone(mockPorts)
 } }
+export function createUnavailablePortProvider(error: string): PortProvider {
+  return {
+    async getPorts() {
+      throw new Error(error)
+    },
+  }
+}
 export const MockScheduleProvider: ScheduleProvider = { async getVoyages() {
   return structuredClone(mockVoyages)
 } }
+export function createUnavailableScheduleProvider(error: string): ScheduleProvider {
+  return {
+    async getVoyages() {
+      throw new Error(error)
+    },
+  }
+}
 export const MockWeatherProvider: WeatherProvider = { async getFeedItems() {
   return structuredClone(mockFeedItems.filter(isWeatherFeedItem))
 } }
+export function createUnavailableWeatherProvider(error: string): WeatherProvider {
+  return {
+    async getFeedItems() {
+      throw new Error(error)
+    },
+  }
+}
 
 export const DisabledWeatherAlertProvider: WeatherAlertProvider = { async getFeedItems() {
   return []
@@ -834,7 +855,7 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
   const portDirectory = options.portDirectory ?? createBaselinePortDirectoryLookup()
   const cache = new Map<string, { checkedAt: number, items: FeedItem[] }>()
   return {
-    async getFeedItems(ports = mockPorts, lastKnown = []) {
+    async getFeedItems(ports: Port[] = [], lastKnown = []) {
       const checkedAt = now()
       const modelLastKnown = lastKnown.filter(item => item.sourceId === "open-meteo-marine")
       const failures: string[] = []
@@ -909,11 +930,12 @@ interface ProviderEnvironment {
 }
 
 export function configureProviders(environment: ProviderEnvironment = { ...env }) {
-  const vesselMode = environment.SHIPPING_VESSEL_PROVIDER === "aisstream" ? "aisstream" : "mock"
+  const dataMode: "mock" | "real" = environment.SHIPPING_DATA_MODE === "real" ? "real" : "mock"
+  const vesselMode = environment.SHIPPING_VESSEL_PROVIDER === "aisstream" ? "aisstream" : dataMode === "real" ? "unavailable" : "mock"
   const aisAreaMode: ShippingProviderModes["aisArea"] = environment.SHIPPING_AIS_AREA_PROVIDER === "aisstream" ? "aisstream" : "off"
-  const portMode = environment.SHIPPING_PORT_PROVIDER === "portcast" ? "portcast" : "mock"
-  const weatherMode = environment.SHIPPING_WEATHER_PROVIDER === "open-meteo" ? "open-meteo" : "mock"
-  const configuredFeed = configureFeedProviders({ SHIPPING_FEED_PROVIDER: environment.SHIPPING_FEED_PROVIDER })
+  const portMode = environment.SHIPPING_PORT_PROVIDER === "portcast" ? "portcast" : dataMode === "real" ? "unavailable" : "mock"
+  const weatherMode = environment.SHIPPING_WEATHER_PROVIDER === "open-meteo" ? "open-meteo" : dataMode === "real" ? "unavailable" : "mock"
+  const configuredFeed = configureFeedProviders({ SHIPPING_DATA_MODE: environment.SHIPPING_DATA_MODE, SHIPPING_FEED_PROVIDER: environment.SHIPPING_FEED_PROVIDER })
   const weatherAlertMode = environment.SHIPPING_WEATHER_ALERT_PROVIDER === "public" || environment.SHIPPING_WEATHER_ALERT_PROVIDER === "experimental"
     ? environment.SHIPPING_WEATHER_ALERT_PROVIDER
     : "off"
@@ -927,23 +949,24 @@ export function configureProviders(environment: ProviderEnvironment = { ...env }
         ? environment.AISSTREAM_API_KEY
           ? createAisStreamVesselProvider({ apiKey: environment.AISSTREAM_API_KEY })
           : createUnavailableVesselProvider("AISSTREAM_API_KEY missing")
-        : MockVesselProvider,
-      port: portMode === "portcast" ? createPortcastPublicPageProvider() : MockPortProvider,
+        : vesselMode === "mock" ? MockVesselProvider : createUnavailableVesselProvider("Real Vessel provider not configured"),
+      port: portMode === "portcast" ? createPortcastPublicPageProvider() : portMode === "mock" ? MockPortProvider : createUnavailablePortProvider("Real Port provider not configured"),
       aisArea: aisAreaMode === "aisstream"
         ? environment.AISSTREAM_API_KEY
           ? createAisStreamAreaProvider({ apiKey: environment.AISSTREAM_API_KEY, portDirectory })
           : createUnavailableAisAreaProvider("AISSTREAM_API_KEY missing")
         : createUnavailableAisAreaProvider("AIS area provider disabled"),
-      schedule: MockScheduleProvider,
-      weather: weatherMode === "open-meteo" ? createOpenMeteoWeatherProvider({ portDirectory }) : MockWeatherProvider,
+      schedule: dataMode === "real" ? createUnavailableScheduleProvider("Real Schedule provider not configured") : MockScheduleProvider,
+      weather: weatherMode === "open-meteo" ? createOpenMeteoWeatherProvider({ portDirectory }) : weatherMode === "mock" ? MockWeatherProvider : createUnavailableWeatherProvider("Real Weather provider not configured"),
       weatherAlerts: weatherAlertProvider,
       feed: configuredFeed.provider,
     },
     modes: {
+      dataMode,
       vessel: vesselMode,
       aisArea: aisAreaMode,
       port: portMode,
-      schedule: "mock" as const,
+      schedule: dataMode === "real" ? "unavailable" as const : "mock" as const,
       weather: weatherMode,
       weatherAlerts: weatherAlertMode,
       feed: configuredFeed.modes.feed,
@@ -959,22 +982,23 @@ export const calendarProviderModes = configuredCalendar.modes
 
 export function createOperationalSourceContext(modes: ShippingProviderModes): OperationalSourceContext {
   const activeSourceIds = new Set<string>()
-  if (modes.vessel === "mock") activeSourceIds.add("mock-vessel")
+  const allowMock = modes.dataMode !== "real"
+  if (allowMock && modes.vessel === "mock") activeSourceIds.add("mock-vessel")
   if (modes.vessel === "aisstream") activeSourceIds.add("aisstream")
   if (modes.aisArea === "aisstream") activeSourceIds.add("aisstream-area")
-  if (modes.port === "mock") activeSourceIds.add("mock-port")
+  if (allowMock && modes.port === "mock") activeSourceIds.add("mock-port")
   if (modes.port === "portcast") activeSourceIds.add("portcast-public")
-  if (modes.schedule === "mock") activeSourceIds.add("mock-schedule")
-  if (modes.weather === "mock") activeSourceIds.add("mock-weather")
+  if (allowMock && modes.schedule === "mock") activeSourceIds.add("mock-schedule")
+  if (allowMock && modes.weather === "mock") activeSourceIds.add("mock-weather")
   if (modes.weather === "open-meteo") activeSourceIds.add("open-meteo-marine")
   if (modes.weatherAlerts === "public" || modes.weatherAlerts === "experimental") {
     for (const sourceId of activeOfficialWeatherAlertSourceIds({ allowPending: modes.weatherAlerts === "experimental" })) activeSourceIds.add(sourceId)
   }
-  if (modes.feed === "mock") activeSourceIds.add("mock-port-notice")
+  if (allowMock && modes.feed === "mock") activeSourceIds.add("mock-port-notice")
   if (modes.feed === "public") {
     for (const sourceId of activeShippingFeedSourceIds()) activeSourceIds.add(sourceId)
   }
-  if (modes.calendar === "mock") {
+  if (allowMock && modes.calendar === "mock") {
     activeSourceIds.add("mock-calendar")
   } else {
     for (const sourceId of modes.calendarSourceIds ?? []) activeSourceIds.add(sourceId)

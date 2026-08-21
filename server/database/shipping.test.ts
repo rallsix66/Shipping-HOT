@@ -34,6 +34,12 @@ async function preparedRepository() {
   return { ...state, repository: new ShippingRepository(state.database) }
 }
 
+async function preparedRealRepository() {
+  const state = createNativeDatabase()
+  await initShippingTables(state.database, "real")
+  return { ...state, repository: new ShippingRepository(state.database, "real") }
+}
+
 describe("shippingRepository", () => {
   it("runs the P0 migration runner and records foundation metadata", async () => {
     const { database, native } = createNativeDatabase()
@@ -42,12 +48,15 @@ describe("shippingRepository", () => {
     const migration = native.prepare("SELECT version, name FROM schema_migrations ORDER BY version DESC LIMIT 1").get() as { version: number, name: string }
     const metadata = native.prepare("SELECT schema_version, bootstrap_completed_at, data_mode FROM app_metadata WHERE id = 'default'").get() as { schema_version: number, bootstrap_completed_at?: string, data_mode: string }
     const directory = native.prepare("SELECT port_directory_status, port_directory_version, port_directory_imported_at FROM port_directory_status WHERE id = 'default'").get() as { port_directory_status: string, port_directory_version?: string, port_directory_imported_at?: string }
-    expect(migration).toEqual({ version: 3, name: "p1a-port-directory-foundation" })
-    expect(metadata).toMatchObject({ schema_version: 3, data_mode: "real" })
+    expect(migration).toEqual({ version: 4, name: "p1b-mock-isolation-lineage" })
+    expect(metadata).toMatchObject({ schema_version: 4, data_mode: "real" })
     expect(metadata.bootstrap_completed_at).toEqual(expect.any(String))
     expect(directory).toMatchObject({ port_directory_status: "ready", port_directory_version: "p1a-unlocode-baseline-v1", port_directory_imported_at: expect.any(String) })
     for (const table of ["translation_cache", "provider_usage", "provider_runtime", "sync_runs", "vessel_watchlist", "port_watchlist", "port_directory"]) {
       expect(native.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?").get(table)).toEqual({ 1: 1 })
+    }
+    for (const table of ["vessels", "ports", "voyages", "feed_items", "events", "calendar_events", "ais_port_metrics"]) {
+      expect(native.prepare(`SELECT name FROM pragma_table_info('${table}') WHERE name = 'source_type'`).get()).toEqual({ name: "source_type" })
     }
     expect(native.prepare("SELECT COUNT(*) AS count FROM port_directory WHERE is_active = 1 AND source <> 'mock'").get()).toEqual({ count: 8 })
     expect(native.prepare("SELECT name FROM pragma_table_info('vessels') WHERE name = 'is_watched'").get()).toBeUndefined()
@@ -67,6 +76,26 @@ describe("shippingRepository", () => {
     expect(await repository.listEvents()).toHaveLength(snapshot.events.length)
     expect((await repository.listEvents()).every(event => (event.evidence?.length ?? 0) > 0)).toBe(true)
     expect(await repository.getSettings()).toMatchObject({ refreshInterval: 15, retentionDays: 30, eventThresholds: { anchoredHours: 24, delayMinutes: 120 } })
+    native.close()
+  })
+
+  it("keeps Mock rows out of every Real Mode Repository query", async () => {
+    const { repository, native } = await preparedRealRepository()
+    const snapshot = createMockSnapshot()
+    await repository.seed(snapshot.vessels, snapshot.ports, snapshot.voyages, snapshot.feedItems, snapshot.events, snapshot.settings, createMockCalendarEvents(2026))
+    expect(await repository.listVessels()).toEqual([])
+    expect(await repository.listPorts()).toEqual([])
+    expect(await repository.listVoyages()).toEqual([])
+    expect(await repository.listFeedItems()).toEqual([])
+    expect(await repository.listEvents()).toEqual([])
+    expect(await repository.listCalendarEvents()).toEqual([])
+
+    const realVessel = { ...snapshot.vessels[0], source_type: "real" as const, provenance: { sourceType: "third_party" as const, dataNature: "observed" as const, sourceId: "aisstream" } }
+    await repository.upsertVessel(realVessel)
+    expect(await repository.listVessels()).toEqual([expect.objectContaining({ id: realVessel.id, source_type: "real" })])
+
+    const mixedEvidenceEvent = { ...snapshot.events[0], source_type: "derived" as const, provenance: { sourceType: "third_party" as const, dataNature: "derived" as const, sourceId: "aisstream" }, evidence: [{ provenance: { sourceType: "mock" as const, dataNature: "observed" as const, sourceId: "mock-vessel" } }] }
+    await expect(repository.upsertEvent(mixedEvidenceEvent)).rejects.toThrow("mock_record_not_allowed_in_real_mode")
     native.close()
   })
 
@@ -182,7 +211,7 @@ describe("shippingRepository", () => {
       provenance: { sourceType: "third_party" as const, dataNature: "derived" as const, sourceId: "aisstream-area" },
     }
     await repository.upsertAisPortMetric(metric)
-    expect(await repository.listAisPortMetrics()).toEqual([metric])
+    expect(await repository.listAisPortMetrics()).toEqual([{ ...metric, source_type: "derived" }])
     native.close()
   })
 })

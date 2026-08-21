@@ -214,6 +214,17 @@ describe("shipping Provider failure boundaries", () => {
     expect(result.freshness).toMatchObject({ sourceStatus: "never_succeeded", stale: true, error: "AISSTREAM_API_KEY missing" })
   })
 
+  it("never selects Mock operational providers in Real Mode", async () => {
+    const configured = configureProviders({ SHIPPING_DATA_MODE: "real" })
+    expect(configured.modes).toMatchObject({ dataMode: "real", vessel: "unavailable", port: "unavailable", schedule: "unavailable", weather: "unavailable", feed: "unavailable" })
+    await expect(configured.providers.vessel.getVessels()).rejects.toThrow("Real Vessel provider not configured")
+    await expect(configured.providers.port.getPorts()).rejects.toThrow("Real Port provider not configured")
+    await expect(configured.providers.schedule.getVoyages()).rejects.toThrow("Real Schedule provider not configured")
+    await expect(configured.providers.weather.getFeedItems()).rejects.toThrow("Real Weather provider not configured")
+    await expect(configured.providers.feed.getFeedItems()).rejects.toThrow("Real Feed provider not configured")
+    expect(createOperationalSourceContext(configured.modes).activeSourceIds).not.toContain("mock-schedule")
+  })
+
   it("keeps AIS area explicitly off unless its own mode is requested", async () => {
     const defaultConfig = configureProviders({ SHIPPING_VESSEL_PROVIDER: "aisstream", AISSTREAM_API_KEY: "test-key" })
     expect(defaultConfig.modes.aisArea).toBe("off")

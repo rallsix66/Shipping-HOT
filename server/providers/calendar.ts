@@ -118,6 +118,7 @@ function calendarEvent(options: CalendarEventOptions): CalendarEvent {
     sourceStatus: options.sourceStatus ?? "healthy",
     error: options.error,
     provenance: options.provenance,
+    source_type: options.provenance.sourceType === "mock" ? "mock" : "real",
     evidence: options.evidence,
   }
 }
@@ -430,7 +431,9 @@ export function filterCalendarEventsForMode(events: CalendarEvent[], mode: strin
       ? new Set(["calendarific", "official-holiday-source", "manual-holiday"])
       : mode === "official"
         ? new Set(["official-holiday-source", "manual-holiday"])
-        : new Set(["manual-holiday"])
+        : mode === "manual"
+          ? new Set(["manual-holiday"])
+          : new Set<string>()
   return events.filter(event => allowed.has(event.sourceId))
 }
 
@@ -446,7 +449,9 @@ export function filterCalendarCoverageForMode(coverage: CalendarCoverage[], mode
       ? new Set(["calendarific", "official-holiday-source", "manual-holiday"])
       : mode === "official"
         ? new Set(["official-holiday-source", "manual-holiday"])
-        : new Set(["manual-holiday"])
+        : mode === "manual"
+          ? new Set(["manual-holiday"])
+          : new Set<string>()
   return coverage.filter(item => allowed.has(item.sourceId))
 }
 
@@ -572,21 +577,30 @@ export function mergeCalendarSources(thirdParty: CalendarEvent[], official: Cale
 }
 
 export function configureCalendarProviders(environment: { [key: string]: string | undefined } = { ...env }) {
+  const dataMode: "mock" | "real" = environment.SHIPPING_DATA_MODE === "real" ? "real" : "mock"
   const key = environment.CALENDARIFIC_API_KEY
   const requested = environment.SHIPPING_CALENDAR_PROVIDER
-  const mode = requested === "calendarific" ? "calendarific" : requested === "official" ? "official" : requested === "manual" ? "manual" : "mock"
+  const mode = dataMode === "real" && !["calendarific", "official", "manual"].includes(requested ?? "")
+    ? "unavailable"
+    : requested === "calendarific" ? "calendarific" : requested === "official" ? "official" : requested === "manual" ? "manual" : "mock"
   const calendarific = key ? createCalendarificProvider({ apiKey: key }) : requested === "calendarific" ? createUnavailableCalendarProvider("calendarific", "CALENDARIFIC_API_KEY missing") : undefined
   const official = createOfficialHolidayProvider()
   const manual = createManualHolidayProvider()
   const selected = mode === "calendarific"
     ? key ? { calendarific, official, manual } : { calendarific }
     : mode === "official" ? { official, manual } : mode === "manual" ? { manual } : {}
-  const provider = mode === "mock" ? createMockCalendarProvider() : createCompositeCalendarProvider(selected)
+  const provider = mode === "mock"
+    ? createMockCalendarProvider()
+    : mode === "unavailable"
+      ? createUnavailableCalendarProvider("calendar", "Real Calendar provider not configured")
+      : createCompositeCalendarProvider(selected)
   const calendarSourceIds = mode === "mock"
     ? [calendarProviderSourceIds.mock]
-    : Object.entries(selected)
-        .filter(([, source]) => source !== undefined)
-        .map(([source]) => calendarProviderSourceIds[source as keyof typeof calendarProviderSourceIds])
+    : mode === "unavailable"
+      ? []
+      : Object.entries(selected)
+          .filter(([, source]) => source !== undefined)
+          .map(([source]) => calendarProviderSourceIds[source as keyof typeof calendarProviderSourceIds])
   return {
     provider,
     modes: { calendar: mode, calendarSourceIds },

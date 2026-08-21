@@ -42,6 +42,8 @@ P0 does not implement or activate V3 AIS WebSocket tracking, VesselAPI, Translat
 
 P0 only completes App/DB foundation and does not wait for Port Directory readiness. P1A establishes the real Port Directory (UN/LOCODE, verified identities, coordinates and aliases) and sets `port_directory_status=ready` only after its baseline is imported and validated. P1B depends on `port_directory_status=ready` before removing Real Mode imports of `shared/shipping-fixtures.ts`; it then removes Mock seed/schedule/fixture dependencies and installs the long-lived AIS runtime. P2 Search & Watch cannot start until both stages pass their acceptance tests.
 
+The current execution slice of P1B is Mock Isolation only: migration lineage, Repository read/write filtering, unavailable real-provider defaults, Schedule Mock removal and Event/HOT evidence gating. AIS Tracking Runtime is not started by this slice and remains separately deferred; no new AIS, Search/Watch or Provider business functionality is implied by its completion.
+
 ### 2.1 Migration strategy and source classification
 
 V3 migration is side-by-side. The V2 database is backed up and never rewritten; a new V3 SQLite file runs the migration runner before any approved import. Every migrated or newly persisted record that participates in the migration boundary carries the lineage classification `source_type`:

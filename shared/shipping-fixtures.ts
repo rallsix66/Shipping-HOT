@@ -8,7 +8,10 @@ const iso = (offsetMinutes: number) => new Date(fixtureEpoch + offsetMinutes * 6
 const mockProvenance = (sourceId: string, dataNature: DataProvenance["dataNature"]): DataProvenance => ({ sourceType: "mock", dataNature, sourceId, verified: false })
 
 function stampMockProvenance<T extends { provenance?: DataProvenance }>(items: T[], sourceId: string, dataNature: DataProvenance["dataNature"]) {
-  for (const item of items) item.provenance = mockProvenance(sourceId, dataNature)
+  for (const item of items) {
+    item.provenance = mockProvenance(sourceId, dataNature)
+    ;(item as T & { source_type?: "mock" }).source_type = "mock"
+  }
 }
 
 function mockEvidenceNature(sourceId: string): DataProvenance["dataNature"] {
@@ -31,6 +34,7 @@ function stampMockEventTrust(events: ShippingEvent[]) {
       event.id = `event-${event.dedupeKey}`
     }
     event.provenance = mockProvenance(sourceId, "derived")
+    event.source_type = "mock"
     event.evidence = [{ provenance: evidenceProvenance, sourceUpdatedAt }]
     event.updatedAt ??= sourceUpdatedAt
     event.stale ??= event.sourceStatus !== "healthy"

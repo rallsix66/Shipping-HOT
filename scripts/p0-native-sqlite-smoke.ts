@@ -9,11 +9,12 @@ import type { Vessel } from "@shared/shipping"
 import { p0FoundationMigration } from "../server/database/migrations/001-p0-foundation"
 import { watchlistIsolationMigration } from "../server/database/migrations/002-watchlist-isolation"
 import { p1aPortDirectoryMigration } from "../server/database/migrations/003-p1a-port-directory"
+import { p1bMockIsolationMigration } from "../server/database/migrations/004-p1b-mock-isolation"
 
 async function openDatabase(path: string): Promise<InstanceType<typeof NativeDatabase>> {
   const native = new NativeDatabase(path)
   native.exec("CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL)")
-  const migrations = [p0FoundationMigration, watchlistIsolationMigration, p1aPortDirectoryMigration]
+  const migrations = [p0FoundationMigration, watchlistIsolationMigration, p1aPortDirectoryMigration, p1bMockIsolationMigration]
   for (const migration of migrations) {
     if (native.prepare("SELECT 1 FROM schema_migrations WHERE version = ?").get(migration.version)) continue
     native.exec("BEGIN")
@@ -39,7 +40,7 @@ async function openDatabase(path: string): Promise<InstanceType<typeof NativeDat
   const existing = native.prepare("SELECT database_id FROM app_metadata WHERE id = 'default'").get() as { database_id?: string } | undefined
   native.prepare(`
     INSERT INTO app_metadata (id, schema_version, bootstrap_completed_at, database_id, last_migration_at, data_mode)
-    VALUES ('default', 3, ?, COALESCE(?, lower(hex(randomblob(16)))), ?, 'real')
+    VALUES ('default', 4, ?, COALESCE(?, lower(hex(randomblob(16)))), ?, 'real')
     ON CONFLICT(id) DO UPDATE SET bootstrap_completed_at = COALESCE(app_metadata.bootstrap_completed_at, excluded.bootstrap_completed_at), data_mode = excluded.data_mode
   `).run(new Date().toISOString(), existing?.database_id ?? null, new Date().toISOString())
   native.prepare(`
@@ -64,10 +65,10 @@ const smokeVessel: Vessel = {
 async function writer(path: string) {
   const database = await openDatabase(path)
   database.prepare(`
-    INSERT INTO vessels (id, data, navigation_status, status_changed_at, last_updated_at)
-    VALUES (?, ?, ?, NULL, ?)
-    ON CONFLICT(id) DO UPDATE SET data = excluded.data, navigation_status = excluded.navigation_status, last_updated_at = excluded.last_updated_at
-  `).run(smokeVessel.id, JSON.stringify(smokeVessel), smokeVessel.navigationStatus, smokeVessel.updatedAt)
+    INSERT INTO vessels (id, data, source_type, navigation_status, status_changed_at, last_updated_at)
+    VALUES (?, ?, 'real', ?, NULL, ?)
+    ON CONFLICT(id) DO UPDATE SET data = excluded.data, source_type = excluded.source_type, navigation_status = excluded.navigation_status, last_updated_at = excluded.last_updated_at
+  `).run(smokeVessel.id, JSON.stringify({ ...smokeVessel, source_type: "real" }), smokeVessel.navigationStatus, smokeVessel.updatedAt)
   database.prepare(`
     INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled) VALUES (?, ?, 1)
     ON CONFLICT(vessel_id) DO UPDATE SET watched_at = excluded.watched_at

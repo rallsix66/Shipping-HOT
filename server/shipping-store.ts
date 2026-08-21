@@ -1,7 +1,7 @@
 import process from "node:process"
-import { filterEventsForOperationalContext, sourceAllowedForOperationalContext, toVesselWatchTarget } from "@shared/shipping"
+import { filterEventsForOperationalContext, recordAllowedForDataMode, sourceAllowedForOperationalContext, toVesselWatchTarget } from "@shared/shipping"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
-import type { DatabasePersistenceStatus, FeedItem, Freshness, Port, ProviderResult, ShippingProviderModes, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
+import type { DataEvidence, DatabasePersistenceStatus, FeedItem, Freshness, Port, ProvenanceAware, ProviderResult, ShippingProviderModes, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
 import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries, calendarEventKey, calendarEventLegacyId } from "@shared/calendar"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules"
@@ -76,7 +76,7 @@ async function initialize() {
     try {
       const db = useDatabase()
       const metadata = await initShippingTables(db, process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock")
-      repository = new ShippingRepository(db)
+      repository = new ShippingRepository(db, process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock")
       persistenceStatus = metadata
         ? healthyPersistenceStatus(metadata)
         : { status: "healthy", schemaVersion: 0 }
@@ -187,12 +187,15 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
 }
 
 function filterOperationalSnapshotInputs(snapshot: ShippingSnapshot): Pick<ShippingSnapshot, "vessels" | "ports" | "voyages" | "feedItems"> {
-  const isOperational = (sourceId: string | undefined) => sourceAllowedForOperationalContext(sourceId, operationalSourceContext)
+  const isOperational = (record: ProvenanceAware & { evidence?: DataEvidence[], sourceId?: string }, sourceIdOverride?: string) => {
+    return recordAllowedForDataMode(record, operationalSourceContext.modes.dataMode ?? "mock")
+      && sourceAllowedForOperationalContext(sourceIdOverride ?? record.provenance?.sourceId ?? record.sourceId, operationalSourceContext)
+  }
   return {
-    vessels: snapshot.vessels.filter(item => isOperational(item.provenance?.sourceId)),
-    ports: snapshot.ports.filter(item => isOperational(item.provenance?.sourceId)),
-    voyages: snapshot.voyages.filter(item => isOperational(item.provenance?.sourceId)),
-    feedItems: snapshot.feedItems.filter(item => isOperational(item.provenance?.sourceId)),
+    vessels: snapshot.vessels.filter(item => isOperational(item)),
+    ports: snapshot.ports.filter(item => isOperational(item)),
+    voyages: snapshot.voyages.filter(item => isOperational(item)),
+    feedItems: snapshot.feedItems.filter(item => isOperational(item, item.provenance?.sourceId ?? item.sourceId)),
   }
 }
 
