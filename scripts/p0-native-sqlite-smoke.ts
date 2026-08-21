@@ -3,8 +3,9 @@ import { rmSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import process from "node:process"
-import { fileURLToPath } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 import NativeDatabase from "better-sqlite3"
+import { createDatabase } from "db0"
 import type { Vessel } from "@shared/shipping"
 import type { VesselSearchResult } from "@shared/vessel-search"
 import { p0FoundationMigration } from "../server/database/migrations/001-p0-foundation"
@@ -12,6 +13,8 @@ import { watchlistIsolationMigration } from "../server/database/migrations/002-w
 import { p1aPortDirectoryMigration } from "../server/database/migrations/003-p1a-port-directory"
 import { p1bMockIsolationMigration } from "../server/database/migrations/004-p1b-mock-isolation"
 import { p2aSearchFoundationMigration } from "../server/database/migrations/005-p2a-search-foundation"
+import { VesselMetadataRepository } from "../server/database/vessel-search"
+import { VesselWatchlistService } from "../server/search/vessel-watchlist"
 
 async function openDatabase(path: string): Promise<InstanceType<typeof NativeDatabase>> {
   const native = new NativeDatabase(path)
@@ -51,6 +54,27 @@ async function openDatabase(path: string): Promise<InstanceType<typeof NativeDat
     ON CONFLICT(id) DO NOTHING
   `).run(new Date().toISOString())
   return native
+}
+
+function createShippingDatabase(native: InstanceType<typeof NativeDatabase>) {
+  return createDatabase({
+    name: "sqlite",
+    dialect: "sqlite",
+    getInstance: () => native,
+    exec: (sql: string) => native.exec(sql),
+    prepare: (sql: string) => {
+      const statement = native.prepare(sql)
+      return {
+        all: async (...params: (string | number | boolean | null | undefined)[]) => statement.all(...params),
+        get: async (...params: (string | number | boolean | null | undefined)[]) => statement.get(...params),
+        run: async (...params: (string | number | boolean | null | undefined)[]) => {
+          const result = statement.run(...params)
+          return { success: result.changes > 0, changes: result.changes, lastInsertRowid: result.lastInsertRowid }
+        },
+      }
+    },
+    dispose: () => native.close(),
+  } as never)
 }
 
 const smokeVessel: Vessel = {
@@ -94,29 +118,24 @@ async function writer(path: string) {
     INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled) VALUES (?, ?, 1)
     ON CONFLICT(vessel_id) DO UPDATE SET watched_at = excluded.watched_at
   `).run(smokeVessel.id, new Date().toISOString())
-  database.prepare(`
-    INSERT INTO vessel_metadata (id, name, imo, mmsi, callsign, type, flag, source, fetched_at, source_type, provider_record_id, data)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ON CONFLICT(id) DO UPDATE SET name = excluded.name, imo = excluded.imo, mmsi = excluded.mmsi, callsign = excluded.callsign, type = excluded.type, flag = excluded.flag, source = excluded.source, fetched_at = excluded.fetched_at, source_type = excluded.source_type, provider_record_id = excluded.provider_record_id, data = excluded.data
-  `).run(smokeSearchVessel.id, smokeSearchVessel.name, smokeSearchVessel.imo ?? null, smokeSearchVessel.mmsi ?? null, smokeSearchVessel.callsign ?? null, smokeSearchVessel.type ?? null, smokeSearchVessel.flag ?? null, smokeSearchVessel.source, smokeSearchVessel.fetchedAt, smokeSearchVessel.source_type, smokeSearchVessel.providerRecordId ?? null, JSON.stringify(smokeSearchVessel))
-  database.prepare(`
-    INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled) VALUES (?, ?, ?)
-    ON CONFLICT(vessel_id) DO UPDATE SET ais_enabled = excluded.ais_enabled
-  `).run(smokeSearchVessel.id, new Date().toISOString(), smokeSearchVessel.mmsi ? 1 : 0)
+  const shippingDatabase = createShippingDatabase(database)
+  const metadata = new VesselMetadataRepository(shippingDatabase, "real")
+  const watchlist = new VesselWatchlistService(shippingDatabase, "real")
+  const incomplete = (await metadata.saveSearch({ query: smokeSearchVessel.name }, [smokeSearchVessel], "vesselapi", "real", new Date(smokeSearchVessel.fetchedAt)))[0]
+  if (incomplete.id !== smokeSearchVessel.id) throw new Error(`unexpected incomplete canonical id: ${incomplete.id}`)
+  await watchlist.add(incomplete.id)
   database.close()
 }
 
 async function reader(path: string) {
   const database = await openDatabase(path)
-  database.prepare(`
-    UPDATE vessel_metadata
-    SET imo = ?, mmsi = ?, fetched_at = ?, data = ?
-    WHERE id = ? AND source = ? AND provider_record_id = ?
-  `).run(promotedSmokeSearchVessel.imo ?? null, promotedSmokeSearchVessel.mmsi ?? null, promotedSmokeSearchVessel.fetchedAt, JSON.stringify(promotedSmokeSearchVessel), smokeSearchVessel.id, smokeSearchVessel.source, smokeSearchVessel.providerRecordId)
-  database.prepare(`
-    INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled) VALUES (?, ?, ?)
-    ON CONFLICT(vessel_id) DO UPDATE SET ais_enabled = excluded.ais_enabled
-  `).run(smokeSearchVessel.id, new Date().toISOString(), promotedSmokeSearchVessel.mmsi ? 1 : 0)
+  const shippingDatabase = createShippingDatabase(database)
+  const metadata = new VesselMetadataRepository(shippingDatabase, "real")
+  const watchlist = new VesselWatchlistService(shippingDatabase, "real")
+  const promoted = (await metadata.saveSearch({ query: promotedSmokeSearchVessel.imo ?? "", field: "imo" }, [promotedSmokeSearchVessel], "vesselapi", "real", new Date(promotedSmokeSearchVessel.fetchedAt)))[0]
+  if (promoted.id !== smokeSearchVessel.id) throw new Error(`canonical vessel id changed: ${promoted.id}`)
+  const watched = await watchlist.add(promoted.id)
+  if (watched.id !== smokeSearchVessel.id || watched.imo !== promotedSmokeSearchVessel.imo || watched.mmsi !== promotedSmokeSearchVessel.mmsi) throw new Error("service watch promotion was not persisted")
   const appMetadata = database.prepare("SELECT schema_version, bootstrap_completed_at, data_mode FROM app_metadata WHERE id = 'default'").get() as { schema_version: number, bootstrap_completed_at?: string, data_mode: string } | undefined
   const vesselRow = database.prepare(`SELECT v.data, w.vessel_id FROM vessels v LEFT JOIN vessel_watchlist w ON w.vessel_id = v.id WHERE v.id = ?`).get(smokeVessel.id) as { data: string, vessel_id?: string } | undefined
   const searchWatchRow = database.prepare(`SELECT w.vessel_id, m.name, m.imo, m.mmsi FROM vessel_watchlist w JOIN vessel_metadata m ON m.id = w.vessel_id WHERE w.vessel_id = ?`).get(smokeSearchVessel.id) as { vessel_id?: string, name?: string, imo?: string, mmsi?: string } | undefined
@@ -150,7 +169,8 @@ if (phase === "writer") {
   rmSync(path, { force: true })
   const script = fileURLToPath(import.meta.url)
   for (const childPhase of ["writer", "reader"]) {
-    const result = spawnSync(process.execPath, ["--import", "tsx/esm", script, childPhase, path], {
+    const loader = pathToFileURL(fileURLToPath(new URL("./tsx-alias-loader.mjs", import.meta.url))).href
+    const result = spawnSync(process.execPath, ["--import", "tsx/esm", "--experimental-loader", loader, script, childPhase, path], {
       stdio: "inherit",
       env: { ...process.env, SHIPPING_DATA_MODE: "real" },
     })
