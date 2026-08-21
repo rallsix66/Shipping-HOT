@@ -25,6 +25,12 @@ export interface VesselSearchResult extends VesselMetadata {
   matchField?: VesselSearchField
 }
 
+export interface VesselWatchlistItem extends VesselMetadata {
+  watchedAt: string
+  aisEnabled: boolean
+  aisTrackingAvailable: boolean
+}
+
 export interface VesselSearchResponse {
   query: VesselSearchQuery
   results: VesselSearchResult[]

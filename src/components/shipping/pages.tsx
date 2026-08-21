@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useState } from "react"
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
 import type { Severity as SeverityValue, ShippingEvent, WeatherDetail } from "@shared/shipping"
+import type { VesselSearchResponse, VesselSearchResult, VesselWatchlistItem } from "@shared/vessel-search"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
 import { type ShippingResponse, useShipping } from "./data"
 import { formatDate, formatPortMetric, formatStatus, navTone, severityTone } from "./format"
@@ -468,6 +469,134 @@ const vesselStatusOptions = [
   { value: "unknown", label: "未知" },
 ]
 
+function sameVessel(left: Pick<VesselSearchResult, "id" | "imo" | "mmsi">, right: Pick<VesselSearchResult, "id" | "imo" | "mmsi">) {
+  return left.id === right.id
+    || Boolean(left.imo && right.imo && left.imo === right.imo)
+    || Boolean(left.mmsi && right.mmsi && left.mmsi === right.mmsi)
+}
+
+function VesselSearchPanel() {
+  const [query, setQuery] = useState("")
+  const [results, setResults] = useState<VesselSearchResult[]>([])
+  const [watchlist, setWatchlist] = useState<VesselWatchlistItem[]>([])
+  const [searching, setSearching] = useState(false)
+  const [busyId, setBusyId] = useState<string>()
+  const [message, setMessage] = useState("")
+
+  useEffect(() => {
+    let active = true
+    myFetch<VesselWatchlistItem[]>("/shipping/search/vessels/watchlist")
+      .then((items) => {
+        if (active) setWatchlist(items)
+      })
+      .catch(() => {
+        if (active) setMessage("关注列表暂时无法加载")
+      })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  async function search() {
+    if (!query.trim()) {
+      setMessage("请输入船名、IMO、MMSI 或 Call Sign")
+      return
+    }
+    setSearching(true)
+    setMessage("")
+    try {
+      const response = await myFetch<VesselSearchResponse>(`/shipping/search/vessels?q=${encodeURIComponent(query.trim())}`)
+      setResults(response.results)
+      if (!response.results.length) setMessage("没有找到匹配船舶")
+    } catch {
+      setResults([])
+      setMessage("搜索暂时不可用，请检查 Provider 配置")
+    } finally {
+      setSearching(false)
+    }
+  }
+
+  async function toggleWatch(result: VesselSearchResult, watched?: VesselWatchlistItem) {
+    setBusyId(result.id)
+    setMessage("")
+    try {
+      if (watched) {
+        await myFetch(`/shipping/search/vessels/watch`, { method: "DELETE", body: { id: watched.id } })
+        setWatchlist(items => items.filter(item => !sameVessel(item, result)))
+      } else {
+        const added = await myFetch<VesselWatchlistItem>("/shipping/search/vessels/watch", { method: "POST", body: { id: result.id } })
+        setWatchlist(items => [...items.filter(item => !sameVessel(item, added)), added])
+      }
+    } catch {
+      setMessage("关注操作失败，请稍后重试")
+    } finally {
+      setBusyId(undefined)
+    }
+  }
+
+  return (
+    <div className="glass-panel mb-4 p-5">
+      <div className="mb-4">
+        <p className="eyebrow-sh">Vessel Search</p>
+        <h3 className="text-lg font-bold">搜索并关注船舶</h3>
+        <p className="mt-1 text-sm op-65">搜索结果写入 user-owned 关注列表；没有 MMSI 的船舶可保存，但暂不可进行 AIS Tracking。</p>
+      </div>
+      <form
+        className="flex flex-wrap gap-2"
+        onSubmit={(event) => {
+          event.preventDefault()
+          void search()
+        }}
+      >
+        <input
+          className="setting-input min-w-0 flex-1"
+          value={query}
+          onChange={event => setQuery(event.target.value)}
+          placeholder="DONG FANG FU / IMO / MMSI"
+          aria-label="搜索船舶"
+        />
+        <button type="submit" className="btn-gradient" disabled={searching}>{searching ? "搜索中…" : "搜索"}</button>
+      </form>
+      {message && <p className="mt-3 text-sm op-70">{message}</p>}
+      {results.length > 0 && (
+        <div className="mt-4 grid gap-2">
+          {results.map((result) => {
+            const watched = watchlist.find(item => sameVessel(item, result))
+            return (
+              <div key={result.id} className="list-row flex-wrap gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold">{result.name}</p>
+                  <p className="text-xs op-65">
+                    {result.imo ? `IMO ${result.imo}` : "IMO —"}
+                    {" · "}
+                    {result.mmsi ? `MMSI ${result.mmsi}` : "MMSI —"}
+                    {" · "}
+                    {result.callsign ?? "Call Sign —"}
+                    {" · "}
+                    {result.source}
+                  </p>
+                  <p className="mt-1 text-xs op-60">{result.mmsi ? "MMSI 可用于 AIS lookup" : "暂无 MMSI，暂不可进行 AIS Tracking"}</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  {watched && <span className="chip">已关注</span>}
+                  <button
+                    type="button"
+                    className={watched ? "btn-ghost" : "watch-chip"}
+                    disabled={busyId === result.id}
+                    onClick={() => void toggleWatch(result, watched)}
+                  >
+                    {watched ? "取消关注" : "关注"}
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function VesselsPage() {
   const { data, isLoading, isError } = useShipping()
   const [filter, setFilter] = useState("all")
@@ -482,6 +611,7 @@ export function VesselsPage() {
         description="关注船队的航行状态、目的港与数据新鲜度，一行一船快速扫描。"
         right={<Segmented id="vessel-status" options={vesselStatusOptions} value={filter} onChange={setFilter} />}
       />
+      <VesselSearchPanel />
       {vessels.length === 0
         ? <div className="glass-panel"><EmptyState icon="i-ph-anchor" text="当前筛选条件下没有船舶" /></div>
         : (

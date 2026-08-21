@@ -100,6 +100,10 @@ export class VesselMetadataRepository {
     return ids.flatMap(id => mapped.get(id) ? [mapped.get(id)!] : [])
   }
 
+  async getByIds(ids: string[]): Promise<VesselMetadata[]> {
+    return this.listByIds(ids)
+  }
+
   async saveSearch(query: VesselSearchQuery, results: VesselSearchResult[], providerId: string, sourceType: NonNullable<VesselMetadata["source_type"]>, now = new Date(), ttlMs = 24 * 60 * 60 * 1000): Promise<void> {
     if (this.dataMode === "real" && sourceType === "mock") throw new Error("mock_search_not_allowed_in_real_mode")
     const normalized = normalizeVesselSearchQuery(query)

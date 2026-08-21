@@ -63,6 +63,19 @@ const smokeVessel: Vessel = {
   updatedAt: "2026-08-20T00:00:00.000Z",
 }
 
+const smokeSearchVessel = {
+  id: "imo:9321483",
+  name: "DONG FANG FU",
+  imo: "9321483",
+  mmsi: "477045900",
+  callsign: "H3RC",
+  type: "Container Ship",
+  flag: "Panama",
+  source: "vesselapi",
+  fetchedAt: "2026-08-21T00:00:00.000Z",
+  source_type: "real",
+}
+
 async function writer(path: string) {
   const database = await openDatabase(path)
   database.prepare(`
@@ -74,6 +87,15 @@ async function writer(path: string) {
     INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled) VALUES (?, ?, 1)
     ON CONFLICT(vessel_id) DO UPDATE SET watched_at = excluded.watched_at
   `).run(smokeVessel.id, new Date().toISOString())
+  database.prepare(`
+    INSERT INTO vessel_metadata (id, name, imo, mmsi, callsign, type, flag, source, fetched_at, source_type, provider_record_id, data)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
+    ON CONFLICT(id) DO UPDATE SET name = excluded.name, imo = excluded.imo, mmsi = excluded.mmsi, callsign = excluded.callsign, type = excluded.type, flag = excluded.flag, source = excluded.source, fetched_at = excluded.fetched_at, source_type = excluded.source_type, data = excluded.data
+  `).run(smokeSearchVessel.id, smokeSearchVessel.name, smokeSearchVessel.imo, smokeSearchVessel.mmsi, smokeSearchVessel.callsign, smokeSearchVessel.type, smokeSearchVessel.flag, smokeSearchVessel.source, smokeSearchVessel.fetchedAt, smokeSearchVessel.source_type, JSON.stringify(smokeSearchVessel))
+  database.prepare(`
+    INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled) VALUES (?, ?, 1)
+    ON CONFLICT(vessel_id) DO UPDATE SET watched_at = excluded.watched_at
+  `).run(smokeSearchVessel.id, new Date().toISOString())
   database.close()
 }
 
@@ -81,6 +103,7 @@ async function reader(path: string) {
   const database = await openDatabase(path)
   const metadata = database.prepare("SELECT schema_version, bootstrap_completed_at, data_mode FROM app_metadata WHERE id = 'default'").get() as { schema_version: number, bootstrap_completed_at?: string, data_mode: string } | undefined
   const vesselRow = database.prepare(`SELECT v.data, w.vessel_id FROM vessels v LEFT JOIN vessel_watchlist w ON w.vessel_id = v.id WHERE v.id = ?`).get(smokeVessel.id) as { data: string, vessel_id?: string } | undefined
+  const searchWatchRow = database.prepare(`SELECT w.vessel_id, m.name, m.imo, m.mmsi FROM vessel_watchlist w JOIN vessel_metadata m ON m.id = w.vessel_id WHERE w.vessel_id = ?`).get(smokeSearchVessel.id) as { vessel_id?: string, name?: string, imo?: string, mmsi?: string } | undefined
   const tables = database.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>
   const tableNames = new Set(tables.map(table => table.name))
   const portDirectory = database.prepare("SELECT port_directory_status, port_directory_version, port_directory_imported_at FROM port_directory_status WHERE id = 'default'").get() as { port_directory_status: string, port_directory_version?: string, port_directory_imported_at?: string } | undefined
@@ -89,12 +112,13 @@ async function reader(path: string) {
   if (metadata?.data_mode !== "real") throw new Error(`unexpected data mode: ${metadata?.data_mode}`)
   if (!metadata.bootstrap_completed_at) throw new Error("bootstrap_completed_at was not persisted")
   if (!vesselRow || vesselRow.vessel_id !== smokeVessel.id) throw new Error("user watchlist was not persisted")
+  if (!searchWatchRow || searchWatchRow.vessel_id !== smokeSearchVessel.id || searchWatchRow.name !== smokeSearchVessel.name || searchWatchRow.imo !== smokeSearchVessel.imo || searchWatchRow.mmsi !== smokeSearchVessel.mmsi) throw new Error("search vessel watchlist was not persisted")
   for (const table of ["schema_migrations", "app_metadata", "port_directory_status", "vessel_watchlist", "port_watchlist", "translation_cache", "provider_usage", "provider_runtime", "sync_runs", "vessel_metadata", "vessel_search_cache"]) {
     if (!tableNames.has(table)) throw new Error(`missing P0 table: ${table}`)
   }
   if (portDirectory?.port_directory_status !== "ready" || portDirectory.port_directory_version !== "p1a-unlocode-baseline-v1" || !portDirectory.port_directory_imported_at) throw new Error("Port Directory baseline was not persisted")
   if (Number(portCount.count) !== 8) throw new Error(`unexpected active Port Directory baseline count: ${portCount.count}`)
-  console.log(JSON.stringify({ process: "B", node: process.version, abi: process.versions.modules, bootstrapCompletedAt: metadata.bootstrap_completed_at, watched: true, portDirectory: portDirectory?.port_directory_status }))
+  console.log(JSON.stringify({ process: "B", node: process.version, abi: process.versions.modules, bootstrapCompletedAt: metadata.bootstrap_completed_at, watched: true, searchWatched: searchWatchRow.name, portDirectory: portDirectory?.port_directory_status }))
 }
 
 const phase = process.argv[2]
