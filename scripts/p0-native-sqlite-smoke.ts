@@ -10,11 +10,12 @@ import { p0FoundationMigration } from "../server/database/migrations/001-p0-foun
 import { watchlistIsolationMigration } from "../server/database/migrations/002-watchlist-isolation"
 import { p1aPortDirectoryMigration } from "../server/database/migrations/003-p1a-port-directory"
 import { p1bMockIsolationMigration } from "../server/database/migrations/004-p1b-mock-isolation"
+import { p2aSearchFoundationMigration } from "../server/database/migrations/005-p2a-search-foundation"
 
 async function openDatabase(path: string): Promise<InstanceType<typeof NativeDatabase>> {
   const native = new NativeDatabase(path)
   native.exec("CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL)")
-  const migrations = [p0FoundationMigration, watchlistIsolationMigration, p1aPortDirectoryMigration, p1bMockIsolationMigration]
+  const migrations = [p0FoundationMigration, watchlistIsolationMigration, p1aPortDirectoryMigration, p1bMockIsolationMigration, p2aSearchFoundationMigration]
   for (const migration of migrations) {
     if (native.prepare("SELECT 1 FROM schema_migrations WHERE version = ?").get(migration.version)) continue
     native.exec("BEGIN")
@@ -40,7 +41,7 @@ async function openDatabase(path: string): Promise<InstanceType<typeof NativeDat
   const existing = native.prepare("SELECT database_id FROM app_metadata WHERE id = 'default'").get() as { database_id?: string } | undefined
   native.prepare(`
     INSERT INTO app_metadata (id, schema_version, bootstrap_completed_at, database_id, last_migration_at, data_mode)
-    VALUES ('default', 4, ?, COALESCE(?, lower(hex(randomblob(16)))), ?, 'real')
+    VALUES ('default', 5, ?, COALESCE(?, lower(hex(randomblob(16)))), ?, 'real')
     ON CONFLICT(id) DO UPDATE SET bootstrap_completed_at = COALESCE(app_metadata.bootstrap_completed_at, excluded.bootstrap_completed_at), data_mode = excluded.data_mode
   `).run(new Date().toISOString(), existing?.database_id ?? null, new Date().toISOString())
   native.prepare(`
@@ -88,7 +89,7 @@ async function reader(path: string) {
   if (metadata?.data_mode !== "real") throw new Error(`unexpected data mode: ${metadata?.data_mode}`)
   if (!metadata.bootstrap_completed_at) throw new Error("bootstrap_completed_at was not persisted")
   if (!vesselRow || vesselRow.vessel_id !== smokeVessel.id) throw new Error("user watchlist was not persisted")
-  for (const table of ["schema_migrations", "app_metadata", "port_directory_status", "vessel_watchlist", "port_watchlist", "translation_cache", "provider_usage", "provider_runtime", "sync_runs"]) {
+  for (const table of ["schema_migrations", "app_metadata", "port_directory_status", "vessel_watchlist", "port_watchlist", "translation_cache", "provider_usage", "provider_runtime", "sync_runs", "vessel_metadata", "vessel_search_cache"]) {
     if (!tableNames.has(table)) throw new Error(`missing P0 table: ${table}`)
   }
   if (portDirectory?.port_directory_status !== "ready" || portDirectory.port_directory_version !== "p1a-unlocode-baseline-v1" || !portDirectory.port_directory_imported_at) throw new Error("Port Directory baseline was not persisted")

@@ -40,9 +40,17 @@ P0 does not implement or activate V3 AIS WebSocket tracking, VesselAPI, Translat
 - DCSA Commercial Schedules is an internal normalization contract, not a data Provider. Carrier adapters require separate official access, terms and price confirmation. Without one, Commercial Schedule is empty/unavailable and never Mock.
 - Fields are provider-owned, user-owned, directory-owned or translation-owned. Provider upserts can update only provider-owned columns; user watch, aliases, settings and overrides cannot be replaced by Provider rows.
 
-P0 only completes App/DB foundation and does not wait for Port Directory readiness. P1A establishes the real Port Directory (UN/LOCODE, verified identities, coordinates and aliases) and sets `port_directory_status=ready` only after its baseline is imported and validated. P1B depends on `port_directory_status=ready` before removing Real Mode imports of `shared/shipping-fixtures.ts`; it then removes Mock seed/schedule/fixture dependencies and installs the long-lived AIS runtime. P2 Search & Watch cannot start until both stages pass their acceptance tests.
+P0 only completes App/DB foundation and does not wait for Port Directory readiness. P1A establishes the real Port Directory (UN/LOCODE, verified identities, coordinates and aliases) and sets `port_directory_status=ready` only after its baseline is imported and validated. P1B depends on `port_directory_status=ready` before removing Real Mode imports of `shared/shipping-fixtures.ts`; its approved Mock Isolation slice is complete, while the long-lived AIS runtime remains separately deferred. P2A Search Foundation may start after both P1A and P1B acceptance gates pass; remaining watch/tracking work still requires its own phase boundary.
 
-The current execution slice of P1B is Mock Isolation only: migration lineage, Repository read/write filtering, unavailable real-provider defaults, Schedule Mock removal and Event/HOT evidence gating. AIS Tracking Runtime is not started by this slice and remains separately deferred; no new AIS, Search/Watch or Provider business functionality is implied by its completion.
+The completed P1B execution slice was Mock Isolation only: migration lineage, Repository read/write filtering, unavailable real-provider defaults, Schedule Mock removal and Event/HOT evidence gating. It did not start AIS Tracking Runtime or Search/Watch. P2A is a separate Search Foundation slice and does not imply any AIS, watchlist, Feed, Calendar, Voyage or Translation business functionality.
+
+### 2.2 P2A Search Foundation boundary
+
+- `vessel_metadata` is the SQLite cache for VesselAPI discovery/static identity: name, IMO, MMSI, callsign, type, flag, source and fetched time. `vessel_search_cache` stores normalized search keys and result identities for 24 hours.
+- `VesselSearchProvider` is the server-side search contract. `VesselSearchService` reads the SQLite cache before invoking a Provider; page/UI code does not call VesselAPI directly.
+- VesselAPI is limited to discovery/static metadata. The adapter must not return real-time position, create AIS sessions or substitute for AISStream tracking. Missing configuration fails explicitly, and Mock records are excluded from Real Mode.
+- Port Search uses the SQLite-backed UN/LOCODE `port_directory` and supports Chinese/English names, UN/LOCODE and aliases. VesselAPI Port enrichment is not required.
+- P2A does not implement watchlist workflow changes, AIS WebSocket/Tracking Runtime, Feed, Calendar, Voyage, Translation Adapter or complete Provider Runtime/Usage business.
 
 ### 2.1 Migration strategy and source classification
 
@@ -87,6 +95,7 @@ Calendar follows `Server Start → SQLite → UI → background check → sync`;
 - Native SQLite persistence smoke under the selected Node LTS must write data in process A, terminate process A abnormally, start process B against the same database and verify the complete persisted state; no reseed when `vessels` is empty; mutation success only after commit. The smoke must use native SQLite, not FakeRepository.
 - Production bundle scan proves no fixture import, Mock seed or `mock-schedule` in real mode.
 - P1A real directory tests cover UN/LOCODE, coordinates and `Shekou`/`CNSHK`/`蛇口`; P1B proves Real Mode has no fixture/Mock seed and HTTP GET creates no AIS socket.
+- P2A tests cover vessel query normalization, IMO/MMSI/name search, VesselAPI static-only mapping, SQLite metadata/cache hits and expiry, Real Mode Mock isolation, and Port Directory search/aliases.
 - AIS long-lived session and watchlist resubscription tests cover Position + Static/Voyage facts, finite reconnect and the 50-MMSI ceiling.
 - UN/LOCODE + `Shekou`/`CNSHK`/`蛇口` identity tests without VesselAPI.
 - Translation identifier denylist, single-source cache selection, cache-hit/no-repeat billing, budget stop, SecretStore precedence/immediate reload, secret redaction and usage-label tests.

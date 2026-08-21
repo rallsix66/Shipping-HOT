@@ -1,7 +1,7 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
 > Last verified: 2026-08-21
-> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation, implemented V2.1–V2.5 local capabilities; ADR-005 V3 Real-Data Boundaries is Accepted, P0 Persistence, P1A Port Directory Foundation and the P1B Mock Isolation slice are implemented/verified; AIS Tracking Runtime and P2 remain deferred; V2.5 external area observation remains live pending
+> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation, implemented V2.1–V2.5 local capabilities; ADR-005 V3 Real-Data Boundaries is Accepted, P0 Persistence, P1A Port Directory Foundation, P1B Mock Isolation and P2A Search Foundation are implemented/verified; AIS Tracking Runtime and remaining P2 watch/tracking work remain deferred; V2.5 external area observation remains live pending
 > Source of truth for: the current retained system structure and approved boundaries
 
 ## Current AISStream + Calendarific Live Verification — 2026-08-18
@@ -36,7 +36,15 @@ All-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source
 - The migration backfills old rows from explicit Mock provenance/evidence and source IDs. Rows with no reliable provenance are conservatively classified as `mock`; Real Mode never promotes them. Mock fixture records, including Event evidence, carry `source_type=mock`.
 - `ShippingRepository` applies the lineage filter to every operational entity query and rejects Mock or mixed Mock-evidence writes in Real Mode. Test/Mock Mode retains the fixture path. SQLite remains the persistence truth; historical Mock rows are retained only for Mock Mode/audit and are not current Real Mode data.
 - Real Mode provider configuration no longer defaults Vessel, Port, Weather, Feed, Calendar or Schedule to Mock. Missing real capability returns unavailable/misconfigured; `MockScheduleProvider` is not an operational source. No AIS long connection, VesselAPI, Search/Watch or other new business capability was added.
-- Current Event/HOT reads apply the same Real Evidence Gate: Mock provenance or any Mock evidence is excluded, including mixed-evidence Events. The current P1B scope stops here; AIS Tracking Runtime remains a separately deferred slice.
+- Current Event/HOT reads apply the same Real Evidence Gate: Mock provenance or any Mock evidence is excluded, including mixed-evidence Events. The P1B Mock Isolation slice is complete; AIS Tracking Runtime remains a separately deferred slice.
+
+## V3 P2A Search Foundation — 2026-08-21
+
+- Migration v5 adds `vessel_metadata` for discovery/static identity (`name`, `imo`, `mmsi`, `callsign`, `type`, `flag`, `source`, `fetched_at`) and `vessel_search_cache` for normalized query results with a 24-hour TTL. Both carry `source_type`; Real Mode reads only `real/imported/derived` rows and never reads Mock search data.
+- `shared/vessel-search.ts` defines the Vessel Search Domain and normalization for vessel name, IMO, MMSI and callsign queries. `VesselSearchProvider` is a server-side contract; pages do not call VesselAPI directly.
+- `createVesselApiSearchProvider()` is a discovery/static metadata adapter only. It returns identity/particulars and deliberately does not return position, tracking or AIS replacement data. A missing key/provider fails explicitly; Test/Mock Mode keeps an isolated Mock search provider.
+- `VesselSearchService` checks the local SQLite search cache before invoking the provider and persists normalized metadata/results. Port Search is a service boundary over the existing SQLite-backed `PortDirectoryRepository`, covering Chinese/English names, UN/LOCODE and aliases.
+- Server endpoints are `/api/shipping/search/vessels?q=...` and `/api/shipping/search/ports?q=...`; no UI workflow, AIS WebSocket, Tracking Runtime, Feed, Calendar, Voyage or Translation functionality was added in P2A.
 
 ## Calendarific Final Operational Semantics Seal — 2026-08-18
 
@@ -245,7 +253,7 @@ Provider mode is the requested source (`mock`, `aisstream`, `portcast`, `open-me
 ## 13. Testing and Verification Boundaries
 
 - Current tests: Vitest covers Shipping HOT Domain, Provider, Repository, Event/HOT and UI trust contracts.
-- Current verification state: V3 P0/P1A/P1B Mock Isolation has 241/241 tests, typecheck, production build, native better-sqlite3 read/write and migration-aware process-A-write → close → process-B-read persistence smoke. Full lint retains four pre-existing errors outside this batch. Neat Freak Closeout is complete via the loaded skill and manual Windows-equivalent audit; Bash inventory is pending/unavailable. AIS observations, official-alert live criteria and AIS Tracking Runtime/P2 remain pending or deferred.
+- Current verification state: V3 P0/P1A/P1B/P2A has 248/248 tests, typecheck, production build, native better-sqlite3 read/write and migration-aware process-A-write → close → process-B-read persistence smoke. Full lint retains four pre-existing errors outside this batch. Neat Freak Closeout is complete via the loaded skill and manual Windows-equivalent audit; Bash inventory is pending/unavailable. AIS observations, official-alert live criteria, AIS Tracking Runtime and remaining P2 watch/tracking work remain pending or deferred.
 - Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, Calendar source composition/conflict/reconciliation/announcement behavior, RSS/HTML Feed parsing with unknown publication and Chinese classification, source isolation, repost dedupe, Feed → Event/HOT boundaries, Open-Meteo 24-hour/72-hour/7-day windows/direction/TTL/per-port failure behavior, source-specific official warning parsing/expiry, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 
@@ -270,7 +278,7 @@ Changes that can remain local implementation decisions:
 | Item | State | Impact | Owner / next action |
 |---|---|---|---|
 | Shipping HOT V1 Provider architecture | accepted | User-approved AISStream Vessel and Open-Meteo Marine Weather adapters preserve existing interfaces and Domain/Event/HOT boundaries | Preserve current module boundaries; no V2 Provider expansion |
-| Project Architect/Neat Freak docs reconciliation | changed-and-verified | Docs, status and accepted ADR now record P1B Mock Isolation as implemented and AIS Tracking Runtime/P2 as deferred | Re-run closeout after any later implementation phase |
+| Project Architect/Neat Freak docs reconciliation | changed-and-verified | Docs, status and accepted ADR now record P2A Search Foundation as implemented while AIS Tracking Runtime and remaining P2 watch/tracking work remain deferred | Re-run closeout after any later implementation phase |
 | Runtime/database file path | changed-and-verified | Node `24.15.0` / ABI `137`, `better-sqlite3@12.6.2`, and `.data/shipping-hot-v3.sqlite3` passed native and restart persistence smoke | Preserve the fixed Node 24 toolchain; do not reintroduce memory fallback |
 | GitHub remote/account metadata | changed-and-verified; no remote CI evidence | `gh auth status` and `gh repo view` verified `rallsix66/Shipping-HOT` and `main`; `gh run list` returned no workflow runs | Keep local verification separate from GitHub CI claims |
 | Real shipping data sources | changed-and-verified for V1 | AISStream is beta and key-gated; Open-Meteo Marine is optional-key for normal use and carries coastal-accuracy/attribution caveats | Keep keys server-side; Mock is default only, with no Mock fallback in an explicitly real mode |
@@ -285,4 +293,4 @@ Changes that can remain local implementation decisions:
 - Roadmap and deferred real-provider plan: `docs/plans/shipping-hot-v1.md`
 Historical all-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source; `mock-schedule` was the only Mock source at that 2026-08-18 checkpoint. It is superseded by P1B, where Real Mode excludes Mock Schedule and native SQLite persistence is verified under Node `24.15.0` / ABI `137`.
 
-The superseding local suite is 191/191 with production build, typecheck, targeted lint and `git diff --check` passed; the older 184/184 and 186/186 entries remain preceding trust-boundary and live-verification batch history.
+The current local suite is 248/248 with production build, typecheck, native restart smoke and no new P2A lint errors; the four remaining lint errors are pre-existing and outside this batch.

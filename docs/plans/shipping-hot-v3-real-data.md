@@ -1,16 +1,16 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 文档状态：`accepted / P1B mock isolation implemented / AIS tracking runtime deferred`
+> 文档状态：`accepted / P2A search foundation implemented / AIS tracking runtime deferred`
 >
 > 审查日期：2026-08-20（Asia/Shanghai）
 >
-> 代码基线：`codex/shipping-hot-v3-real-data`（P1B 本轮）
+> 代码基线：`codex/shipping-hot-v3-real-data`（P2A 本轮）
 >
-> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation 与 P1B Mock Isolation 已完成并通过本地验证**。本轮只执行 Real Mode 隔离；不实现 AIS 长连接、P2 Search & Watch 或其他后续 Provider 功能。
+> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation 与 P2A Search Foundation 已完成并通过本地验证**。本轮只建立 Vessel/Port Search 基础；不实现 AIS 长连接、Tracking Runtime、Watchlist、Feed、Calendar、Voyage、Translation 或其他后续 Provider 业务。
 >
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；只有具体 endpoint entitlement、地区/账号资格等未确认事项保持 `unknown/pending`。
 >
-> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮仅落实 P1B Mock Isolation；不创建账号、不购买服务、不实现 AIS 长连接、VesselAPI、Search/Watch、Feed/Calendar/Voyage/Translation Adapter 或 Provider Runtime/Usage 业务。
+> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮仅落实 P2A Search Foundation；不创建账号、不购买服务、不实现 AIS 长连接、Tracking Runtime、Watchlist、Feed/Calendar/Voyage/Translation Adapter 或 Provider Runtime/Usage 业务。
 
 ## 1. 背景与当前问题
 
@@ -723,12 +723,27 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | 验收 | Real Mode 读取结果只有 `real/imported/derived`；即使 Provider 缺失也只返回真实 last-known 或空；`mock-schedule=0`；本阶段不创建 AIS 长连接或其他新业务功能 |
 | 后续 | AIS Tracking Runtime 仍未开始；P2 Search & Watch 及后续 Provider 功能保持 deferred |
 
-### P2 — Search & Watch
+### P2A — Search Foundation
 
 | 项目 | 内容 |
 | --- | --- |
-| 依赖 | P1A、P1B 完成且 `port_directory_status=ready`；不允许绕过真实目录或在 P1B 前删除 fixture |
-| 目标 | Vessel Discovery/静态身份搜索、UN/LOCODE 本地 Port Search、事务式关注和 AIS/Weather/Area 能力协商；VesselAPI 不作为实时船位 Provider |
+| 状态 | implemented / locally verified；AIS Tracking Runtime、Watchlist workflow 与其余 P2 deferred |
+| 目标 | 建立 Vessel name/IMO/MMSI/callsign 搜索 Domain、服务端 `VesselSearchProvider` contract、VesselAPI discovery/static adapter、本地 SQLite metadata/search cache，以及基于 `port_directory` 的中文/英文/UNLOCODE/alias Port Search |
+| 修改文件 | `server/database/runtime.ts`、`server/database/vessel-search.ts`、`server/providers/vessel-search.ts`、`server/search/vessel.ts`、`server/search/port.ts`、`server/api/shipping/search/**`、`shared/vessel-search.ts` |
+| 新增文件 | `server/database/migrations/005-p2a-search-foundation.ts`、`server/database/vessel-search.test.ts`、`server/providers/vessel-search.test.ts`、`shared/vessel-search.test.ts` |
+| 数据库 | `vessel_metadata` 保存 name/IMO/MMSI/callsign/type/flag/source/fetched_at；`vessel_search_cache` 保存 normalized query、result identities、Provider 和 24 小时 TTL；两者均携带 `source_type`，Real Mode 不读 Mock |
+| Provider | `VesselSearchProvider` 隔离页面与 VesselAPI；VesselAPI 只返回 discovery/static metadata，不返回实时位置、不创建 AIS、不替代 AISStream；缺失 Provider/key 明确失败，Mock provider 仅保留 Test/Mock Mode |
+| Port Search | `PortSearchService` 复用 SQLite `PortDirectoryRepository`，支持中文名、英文名、UN/LOCODE 和 aliases；不依赖 VesselAPI Port entitlement |
+| API | `/api/shipping/search/vessels?q=...` 与 `/api/shipping/search/ports?q=...`；本轮不新增 UI 搜索流程或 Watchlist workflow |
+| 测试 | Domain normalization、IMO/MMSI/name query、VesselAPI static-only payload、cache hit/expiry、Real Mode Mock isolation、Port Directory search/alias 和 migration-aware native restart smoke |
+| 验收 | typecheck、lint（无新增 P2A 错误）、248/248 tests、production build、Node 24 native SQLite process-A-write → close → process-B-read smoke；不进入 AIS Tracking Runtime/P2 watch 或后续 Provider |
+
+### P2（剩余）— Watch & Tracking
+
+| 项目 | 内容 |
+| --- | --- |
+| 依赖 | P2A 已完成；P1A、P1B 与 `port_directory_status=ready` 继续作为基础约束；不允许绕过真实目录或重新引入 Real Mode Mock |
+| 目标 | 事务式关注和 AIS/Weather/Area 能力协商、长期 AIS Tracking Runtime 及后续 watch 业务；VesselAPI 不作为实时船位 Provider。Vessel/Port Search 已由 P2A 单独完成 |
 | 修改文件 | `shared/shipping.ts`、`server/providers/port-catalog.ts`、Repository、shipping service、Vessels/Ports 页面、settings/config |
 | 新增文件 | `server/providers/vessel-discovery.ts`、`server/providers/vesselapi.ts`、`server/services/ais-tracking.ts`、search/watchlist API、search UI components |
 | 数据库 | vessels/ports identity、watchlist、port_aliases、search cache |
@@ -1076,16 +1091,16 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 
 ## 27. 实施门槛与文档后续
 
-`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A 与本轮 P1B Mock Isolation slice 已获授权、实施并完成本地验证；AIS Tracking Runtime、P2 及后续 Provider 功能仍 deferred。该 ADR 至少覆盖：
+`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation 与本轮 P2A Search Foundation 已获授权、实施并完成本地验证；AIS Tracking Runtime、剩余 P2 watch/tracking 及后续 Provider 功能仍 deferred。该 ADR 至少覆盖：
 
 - V3 real-only runtime、SQLite fail-closed/read-only 行为和已验证的单一 Node LTS。
 - VesselAPI 仅 Discovery/static metadata、AISStream 长期 tracking、UN/LOCODE 默认 Port Search，以及 provider-owned/user-owned/directory-owned/translation-owned 字段边界。
-- P1A → P1B → P2 依赖、AISStream 50 MMSI/Beta/no SLA、长期单例连接和 Position/Static/Voyage facts。
+- P1A → P1B → P2A → 剩余 P2 依赖、AISStream 50 MMSI/Beta/no SLA、长期单例连接和 Position/Static/Voyage facts。
 - `ProviderConfig`/`ProviderSecret` 分离、`SecretStore`（环境变量优先 + `FileSecretStore`）、Settings 立即刷新 Provider Registry。
 - TranslationProvider 可切换合同、Settings AI 翻译中心、单一 `translation_cache` source of truth、server-only secret、`provider_usage` 和“本地统计/估算”标签。
 - Current Voyage 与 DCSA Commercial Schedule 的事实分层。
 
-后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A 与本轮 P1B Mock Isolation 已完成；不得从本文直接跳到 AIS Tracking Runtime、P2 搜索或 P5 Schedule；后续 Provider/AI adapter 仍按单独批准范围实施。
+后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B 与本轮 P2A Search Foundation 已完成；不得从本文直接跳到 AIS Tracking Runtime、剩余 P2 watch 或 P5 Schedule；后续 Provider/AI adapter 仍按单独批准范围实施。
 
 ## 28. 外部资料
 
