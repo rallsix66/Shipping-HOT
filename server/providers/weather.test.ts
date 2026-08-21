@@ -54,6 +54,23 @@ describe("open-meteo weather intelligence", () => {
     expect(retried.find(item => item.relatedPortIds.includes("port-yantian"))).toMatchObject({ stale: false, sourceStatus: "healthy" })
   })
 
+  it("uses the injected Port Directory coordinate instead of fixture coordinates", async () => {
+    const urls: string[] = []
+    const provider = createOpenMeteoWeatherProvider({
+      portDirectory: { getPortCoordinate: async (unlocode) => {
+        expect(unlocode).toBe("CNSHK")
+        return { latitude: 1.23, longitude: 4.56 }
+      } },
+      fetcher: async (url) => {
+        urls.push(url)
+        return { ok: true, status: 200, json: async () => weatherPayload(url, false) }
+      },
+    })
+    await provider.getFeedItems([mockPorts[0]])
+    expect(urls).toHaveLength(2)
+    expect(urls.every(url => url.includes("latitude=1.23") && url.includes("longitude=4.56"))).toBe(true)
+  })
+
   it("records Open-Meteo fetchedAt after response parsing and keeps it on cache hits", async () => {
     const times = ["2026-08-18T10:00:00.000Z", "2026-08-18T10:00:02.000Z", "2026-08-18T10:00:30.000Z"]
     const provider = createOpenMeteoWeatherProvider({

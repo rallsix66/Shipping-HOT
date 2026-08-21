@@ -1,7 +1,7 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
 > Last verified: 2026-08-20
-> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation and Mock Isolation boundary, implemented V2.1 Port Intelligence, V2.2/V2.3/V2.4 local verification and V2.5 AIS / Port Derived Intelligence local verification; ADR-005 V3 Real-Data Boundaries is Accepted and P0 Persistence is implemented/verified; P1A/P1B/P2 remain deferred; V2.5 external area observation remains live pending
+> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation and Mock Isolation boundary, implemented V2.1 Port Intelligence, V2.2/V2.3/V2.4 local verification and V2.5 AIS / Port Derived Intelligence local verification; ADR-005 V3 Real-Data Boundaries is Accepted, P0 Persistence and P1A Port Directory Foundation are implemented/verified; P1B/P2 remain deferred; V2.5 external area observation remains live pending
 > Source of truth for: the current retained system structure and approved boundaries
 
 ## Current AISStream + Calendarific Live Verification — 2026-08-18
@@ -16,12 +16,19 @@ All-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source
 
 - Node is fixed to `24.15.0` via `.nvmrc` and `package.json` engines; `better-sqlite3@12.6.2` uses the official `node-v137-win32-x64` prebuilt and passes native read/write verification.
 - Nitro/db0 uses the side-by-side local file `.data/shipping-hot-v3.sqlite3`. SQLite is the only Shipping HOT persistence truth; initialization failure returns an unavailable status and never creates a mutable memory replacement. Mutations fail with `503 persistence_unavailable` when persistence is unavailable or degraded.
-- The migration runner records `schema_migrations`, `app_metadata.schema_version`, `bootstrap_completed_at`, `database_id`, `last_migration_at` and `data_mode`. `bootstrap_completed_at` means App/DB foundation only. `port_directory_status/version/imported_at` remains independently `pending` in P0.
+- The migration runner records `schema_migrations`, `app_metadata.schema_version`, `bootstrap_completed_at`, `database_id`, `last_migration_at` and `data_mode`. `bootstrap_completed_at` means App/DB foundation only. `port_directory_status/version/imported_at` remains independent from bootstrap and is `ready` after the P1A baseline import.
 - Provider-owned Vessel/Port rows no longer own watch state. `vessel_watchlist` and `port_watchlist` are user-owned; Provider upserts update only Provider columns with explicit `ON CONFLICT ... DO UPDATE` clauses. No Shipping HOT persistence path uses `INSERT OR REPLACE`.
 - P0 scope is SQLite startup, migration runner, schema version, App/DB bootstrap state, Repository persistence, user-owned data persistence and removal of the mutable memory fallback. The approved `translation_cache`, `provider_usage`, `provider_runtime` and `sync_runs` tables are persistence placeholders only; their complete Provider Runtime/Usage behavior is not implemented.
 - P0 defines server-only `ProviderConfig`/`ProviderSecret`/`SecretStore`/`TranslationProvider` contracts, with non-secret ProviderConfig in SQLite settings and `.data/provider-secrets.json` for local secrets. API keys never enter SQLite settings. No AIS WebSocket, VesselAPI or Translation Adapter is added or activated by P0.
-- The migration strategy defines `source_type = real | mock | imported | derived`. Real Mode reads only allowed `real`, `imported` and `derived` records and never reads `mock`; old Mock rows are excluded from current operational reads and are retained only in audit/quarantine when needed. This `source_type` lineage field is distinct from Provider provenance `sourceType` and `dataNature`; no importer/schema implementation was added in this documentation-only review.
-- The required persistence acceptance is process A write → abnormal exit → process B restart against the same native SQLite file → complete state verification. The existing normal-close smoke is supplementary; P1A Port Directory import and P1B/P2 operational work remain out of scope.
+- The migration strategy defines `source_type = real | mock | imported | derived`. Real Mode reads only allowed `real`, `imported` and `derived` records and never reads `mock`; old Mock rows are excluded from current operational reads and are retained only in audit/quarantine when needed. This `source_type` lineage field is distinct from Provider provenance `sourceType` and `dataNature`; P1A adds the separate `port_directory.source` provenance filter.
+- The required persistence acceptance is process A write → abnormal exit → process B restart against the same native SQLite file → complete state verification. The existing normal-close smoke is supplementary; P1B/P2 operational work remain out of scope.
+
+## V3 P1A Real Port Directory Foundation — 2026-08-20
+
+- Migration v3 creates `port_directory` with `unlocode`, English/Chinese names, country code, latitude/longitude, timezone, aliases, `source`, `verified_at` and `is_active`; the eight-port baseline is imported with `source=unlocode` and `port_directory_status=ready`.
+- `PortDirectoryRepository` provides `searchPorts()`, `getPortByUNLocode()`, `getPortCoordinate()` and `getPortAliases()`. Real Mode excludes `source=mock`; Mock rows remain available only in mock data mode/tests.
+- Production Open-Meteo and AIS Area providers receive a SQLite-backed Port Directory lookup. Their production coordinate paths no longer read `shared/shipping-fixtures.ts`; pure tests retain the shared baseline as an explicit test input.
+- P1A does not add Port Search UI/API, AIS long-connection behavior, VesselAPI, or watchlist workflow. P1B and P2 remain deferred.
 
 ## Calendarific Final Operational Semantics Seal — 2026-08-18
 
@@ -230,7 +237,7 @@ Provider mode is the requested source (`mock`, `aisstream`, `portcast`, `open-me
 ## 13. Testing and Verification Boundaries
 
 - Current tests: Vitest covers Shipping HOT Domain, Provider, Repository, Event/HOT and UI trust contracts.
-- Current verification state: V3 P0 has 235/235 tests, typecheck, production build, targeted lint, native better-sqlite3 read/write and process-A-write → close → process-B-read persistence smoke. Full lint retains four pre-existing errors outside this batch. Watched AIS observations, official-alert live criteria and all P1A/P1B/P2 capabilities remain pending or deferred.
+- Current verification state: V3 P0/P1A has 239/239 tests, typecheck, production build, targeted lint, native better-sqlite3 read/write and migration-aware process-A-write → close → process-B-read persistence smoke. Full lint retains four pre-existing errors outside this batch. Watched AIS observations, official-alert live criteria and P1B/P2 capabilities remain pending or deferred.
 - Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, Calendar source composition/conflict/reconciliation/announcement behavior, RSS/HTML Feed parsing with unknown publication and Chinese classification, source isolation, repost dedupe, Feed → Event/HOT boundaries, Open-Meteo 24-hour/72-hour/7-day windows/direction/TTL/per-port failure behavior, source-specific official warning parsing/expiry, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 

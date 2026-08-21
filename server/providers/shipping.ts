@@ -1,11 +1,14 @@
 import { env } from "node:process"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
 import type { DataProvenance, FeedItem, Freshness, OperationalSourceContext, Port, PortCongestionDetail, ProviderResult, Severity, ShippingProviderModes, SourceStatus, Vessel, VesselWatchTarget, Voyage, WeatherWindow, WeatherWindows } from "@shared/shipping"
-import { mockFeedItems, mockPorts, mockVessels, mockVoyages, portWeatherConfig } from "@shared/shipping-fixtures"
+import { createBaselinePortDirectoryLookup } from "@shared/port-directory"
+import type { PortDirectoryCoordinateLookup } from "@shared/port-directory"
+import { mockFeedItems, mockPorts, mockVessels, mockVoyages } from "@shared/shipping-fixtures"
 import { type CalendarProvider, configureCalendarProviders } from "./calendar"
 import { activeShippingFeedSourceIds, configureFeedProviders } from "./feed"
 import { type WeatherAlertProvider, activeOfficialWeatherAlertSourceIds, createOfficialWeatherAlertProvider, officialWeatherAlertSourceIds } from "./weather-alerts"
 import { aisstreamAreaDerivedProvenance, aisstreamAreaEstimatedProvenance, createAisStreamAreaProvider, createUnavailableAisAreaProvider } from "./aisstream-area"
+import { createRuntimePortDirectoryLookup } from "#/database/port-directory"
 
 export interface VesselProvider {
   getVessels: (targets?: VesselWatchTarget[], lastKnown?: Vessel[]) => Promise<Vessel[]>
@@ -819,6 +822,7 @@ export interface OpenMeteoWeatherProviderOptions {
   weatherEndpoint?: string
   now?: () => Date
   minIntervalMs?: number
+  portDirectory?: PortDirectoryCoordinateLookup
 }
 
 export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProviderOptions = {}): WeatherProvider {
@@ -827,6 +831,7 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
   const weatherEndpoint = options.weatherEndpoint ?? "https://api.open-meteo.com/v1/forecast"
   const now = options.now ?? (() => new Date())
   const minIntervalMs = options.minIntervalMs ?? 30 * 60 * 1000
+  const portDirectory = options.portDirectory ?? createBaselinePortDirectoryLookup()
   const cache = new Map<string, { checkedAt: number, items: FeedItem[] }>()
   return {
     async getFeedItems(ports = mockPorts, lastKnown = []) {
@@ -834,11 +839,22 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
       const modelLastKnown = lastKnown.filter(item => item.sourceId === "open-meteo-marine")
       const failures: string[] = []
       const results = await Promise.all(ports.map(async (port) => {
-        const coordinates = portWeatherConfig[port.id as keyof typeof portWeatherConfig]
-        if (!coordinates) return undefined
         const cached = cache.get(port.id)
         if (cached && checkedAt.getTime() - cached.checkedAt < minIntervalMs) return structuredClone(cached.items)
         const previous = modelLastKnown.filter(item => item.relatedPortIds.includes(port.id))
+        let coordinates
+        try {
+          coordinates = port.unlocode ? await portDirectory.getPortCoordinate(port.unlocode) : undefined
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Port Directory coordinate lookup failed"
+          failures.push(message)
+          return previous.map(item => ({ ...item, stale: true, sourceStatus: "failed" as const, error: message, fetchedAt: now().toISOString() }))
+        }
+        if (!coordinates) {
+          const message = `Port Directory coordinate unavailable for ${port.unlocode ?? port.id}`
+          failures.push(message)
+          return previous.map(item => ({ ...item, stale: true, sourceStatus: "failed" as const, error: message, fetchedAt: now().toISOString() }))
+        }
         const marineUrl = new URL(marineEndpoint)
         marineUrl.searchParams.set("latitude", String(coordinates.latitude))
         marineUrl.searchParams.set("longitude", String(coordinates.longitude))
@@ -874,7 +890,7 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
         }
       }))
       const modelItems = results.flat().filter((item): item is FeedItem => item !== undefined)
-      if (failures.length && failures.length === ports.filter(port => portWeatherConfig[port.id as keyof typeof portWeatherConfig]).length && modelItems.length === 0) throw new Error(failures[0])
+      if (failures.length && modelItems.length === 0) throw new Error(failures[0])
       return modelItems
     },
   }
@@ -883,6 +899,7 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
 interface ProviderEnvironment {
   [key: string]: string | undefined
   SHIPPING_VESSEL_PROVIDER?: string
+  SHIPPING_DATA_MODE?: string
   SHIPPING_AIS_AREA_PROVIDER?: string
   AISSTREAM_API_KEY?: string
   SHIPPING_PORT_PROVIDER?: string
@@ -903,6 +920,7 @@ export function configureProviders(environment: ProviderEnvironment = { ...env }
   const weatherAlertProvider = weatherAlertMode !== "off"
     ? createOfficialWeatherAlertProvider({ allowPending: weatherAlertMode === "experimental" })
     : DisabledWeatherAlertProvider
+  const portDirectory = createRuntimePortDirectoryLookup(environment.SHIPPING_DATA_MODE === "real" ? "real" : "mock")
   return {
     providers: {
       vessel: vesselMode === "aisstream"
@@ -913,11 +931,11 @@ export function configureProviders(environment: ProviderEnvironment = { ...env }
       port: portMode === "portcast" ? createPortcastPublicPageProvider() : MockPortProvider,
       aisArea: aisAreaMode === "aisstream"
         ? environment.AISSTREAM_API_KEY
-          ? createAisStreamAreaProvider({ apiKey: environment.AISSTREAM_API_KEY })
+          ? createAisStreamAreaProvider({ apiKey: environment.AISSTREAM_API_KEY, portDirectory })
           : createUnavailableAisAreaProvider("AISSTREAM_API_KEY missing")
         : createUnavailableAisAreaProvider("AIS area provider disabled"),
       schedule: MockScheduleProvider,
-      weather: weatherMode === "open-meteo" ? createOpenMeteoWeatherProvider() : MockWeatherProvider,
+      weather: weatherMode === "open-meteo" ? createOpenMeteoWeatherProvider({ portDirectory }) : MockWeatherProvider,
       weatherAlerts: weatherAlertProvider,
       feed: configuredFeed.provider,
     },

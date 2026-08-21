@@ -3,8 +3,9 @@ import type { Database } from "db0"
 import type { DatabasePersistenceStatus, ShippingSettings } from "@shared/shipping"
 import { p0FoundationMigration } from "#/database/migrations/001-p0-foundation"
 import { watchlistIsolationMigration } from "#/database/migrations/002-watchlist-isolation"
+import { p1aPortDirectoryMigration } from "#/database/migrations/003-p1a-port-directory"
 
-export const latestSchemaVersion = watchlistIsolationMigration.version
+export const latestSchemaVersion = p1aPortDirectoryMigration.version
 
 export type ShippingDataMode = "mock" | "real"
 
@@ -72,7 +73,7 @@ async function runMigrations(db: Database) {
 
   const appliedRows = await db.prepare("SELECT version FROM schema_migrations ORDER BY version").all() as Array<{ version: number }>
   const applied = new Set(appliedRows.map(row => Number(row.version)))
-  const migrations = [p0FoundationMigration, watchlistIsolationMigration]
+  const migrations = [p0FoundationMigration, watchlistIsolationMigration, p1aPortDirectoryMigration]
   for (const migration of migrations) {
     if (applied.has(migration.version)) continue
     await transaction(db, async () => {

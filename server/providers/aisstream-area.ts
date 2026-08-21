@@ -1,5 +1,6 @@
 import type { AisAreaObservation, AisAreaObservationMessage, AisDerivedPortMetric, PortAisAreaConfig } from "@shared/ais-area"
-import { AIS_AREA_BUCKET_MS, AIS_AREA_DEFAULT_LOW_SPEED_KNOTS, AIS_AREA_DEFAULT_MINIMUM_SAMPLE_SIZE, AIS_AREA_DEFAULT_TTL_MS, AIS_AREA_MAX_OBSERVATIONS, AIS_AREA_SOURCE_ID, aggregateAisPortMetric, aisAreaObservationTimestamp, assignAisAreaObservation, normalizeAisAreaPositionReport, watchedPortAisAreaConfigs } from "@shared/ais-area"
+import { AIS_AREA_BUCKET_MS, AIS_AREA_DEFAULT_LOW_SPEED_KNOTS, AIS_AREA_DEFAULT_MINIMUM_SAMPLE_SIZE, AIS_AREA_DEFAULT_TTL_MS, AIS_AREA_MAX_OBSERVATIONS, AIS_AREA_SOURCE_ID, aggregateAisPortMetric, aisAreaObservationTimestamp, assignAisAreaObservation, createPortAisAreaConfig, normalizeAisAreaPositionReport, watchedPortAisAreaConfigs } from "@shared/ais-area"
+import type { PortDirectoryCoordinateLookup } from "@shared/port-directory"
 import type { DataProvenance, Port } from "@shared/shipping"
 
 export const aisstreamAreaObservedProvenance: DataProvenance = { sourceType: "third_party", dataNature: "observed", sourceId: AIS_AREA_SOURCE_ID, sourceUrl: "https://aisstream.io/", verified: false }
@@ -37,6 +38,7 @@ export interface AisAreaSessionOptions {
   maxObservations?: number
   minimumSampleSize?: number
   lowSpeedThresholdKnots?: number
+  portDirectory?: PortDirectoryCoordinateLookup
 }
 
 export interface AisAreaSessionStats {
@@ -312,8 +314,18 @@ export class AisAreaSession {
     return this.connectPromise
   }
 
+  private async resolvePortConfigs(ports: Port[]): Promise<PortAisAreaConfig[]> {
+    if (!this.options.portDirectory) return watchedPortAisAreaConfigs(ports)
+    const watched = ports.filter(port => port.isWatched && port.unlocode)
+    const configs = await Promise.all(watched.map(async (port) => {
+      const coordinate = await this.options.portDirectory!.getPortCoordinate(port.unlocode!)
+      return coordinate ? createPortAisAreaConfig(port.id, coordinate) : undefined
+    }))
+    return configs.filter((config): config is PortAisAreaConfig => config !== undefined)
+  }
+
   async getPortMetrics(ports: Port[] = [], lastKnown: AisDerivedPortMetric[] = []): Promise<AisDerivedPortMetric[]> {
-    const configs = watchedPortAisAreaConfigs(ports)
+    const configs = await this.resolvePortConfigs(ports)
     this.setDesiredConfigs(configs)
     if (!configs.length) {
       this.close()

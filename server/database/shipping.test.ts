@@ -42,13 +42,14 @@ describe("shippingRepository", () => {
     const migration = native.prepare("SELECT version, name FROM schema_migrations ORDER BY version DESC LIMIT 1").get() as { version: number, name: string }
     const metadata = native.prepare("SELECT schema_version, bootstrap_completed_at, data_mode FROM app_metadata WHERE id = 'default'").get() as { schema_version: number, bootstrap_completed_at?: string, data_mode: string }
     const directory = native.prepare("SELECT port_directory_status, port_directory_version, port_directory_imported_at FROM port_directory_status WHERE id = 'default'").get() as { port_directory_status: string, port_directory_version?: string, port_directory_imported_at?: string }
-    expect(migration).toEqual({ version: 2, name: "p0-watchlist-isolation" })
-    expect(metadata).toMatchObject({ schema_version: 2, data_mode: "real" })
+    expect(migration).toEqual({ version: 3, name: "p1a-port-directory-foundation" })
+    expect(metadata).toMatchObject({ schema_version: 3, data_mode: "real" })
     expect(metadata.bootstrap_completed_at).toEqual(expect.any(String))
-    expect(directory).toEqual({ port_directory_status: "pending", port_directory_version: null, port_directory_imported_at: null })
-    for (const table of ["translation_cache", "provider_usage", "provider_runtime", "sync_runs", "vessel_watchlist", "port_watchlist"]) {
+    expect(directory).toMatchObject({ port_directory_status: "ready", port_directory_version: "p1a-unlocode-baseline-v1", port_directory_imported_at: expect.any(String) })
+    for (const table of ["translation_cache", "provider_usage", "provider_runtime", "sync_runs", "vessel_watchlist", "port_watchlist", "port_directory"]) {
       expect(native.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?").get(table)).toEqual({ 1: 1 })
     }
+    expect(native.prepare("SELECT COUNT(*) AS count FROM port_directory WHERE is_active = 1 AND source <> 'mock'").get()).toEqual({ count: 8 })
     expect(native.prepare("SELECT name FROM pragma_table_info('vessels') WHERE name = 'is_watched'").get()).toBeUndefined()
     expect(native.prepare("SELECT name FROM pragma_table_info('ports') WHERE name = 'is_watched'").get()).toBeUndefined()
     native.close()

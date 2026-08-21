@@ -1,12 +1,12 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 文档状态：`proposal / revised-review / awaiting architecture approval`
+> 文档状态：`accepted / P1A implemented / awaiting P1B approval`
 >
 > 审查日期：2026-08-20（Asia/Shanghai）
 >
-> 代码基线：`main` @ `c292be4`
+> 代码基线：`codex/shipping-hot-v3-real-data`（P1A 本轮）
 >
-> 实施状态：**P0 Persistence 已完成并通过本地验证**。ADR-005 已于 2026-08-20 Accepted；本轮只执行 P0，不进入 P1A、P1B、P2 或后续 Provider 功能。
+> 实施状态：**P0 Persistence 与 P1A Real Port Directory Foundation 已完成并通过本地验证**。ADR-005 已于 2026-08-20 Accepted；本轮只执行 P1A，不进入 P1B、P2 或后续 Provider 功能。
 >
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；只有具体 endpoint entitlement、地区/账号资格等未确认事项保持 `unknown/pending`。
 >
@@ -537,8 +537,8 @@ Usage ledger 只代表本机已发出的请求和按公开价/账号计划推算
 | `port_directory_status` | Port Directory baseline 状态 | 独立保存 `port_directory_status`、`port_directory_version`、`port_directory_imported_at`；P1A 成功校验后才为 `ready` |
 | `vessels` | 真实船舶身份/静态元数据 | IMO/MMSI/Callsign 索引；registered name 原样保存 |
 | `vessel_watchlist` | 用户关注 | 与 Provider upsert 隔离；watch 时间和 AIS enabled |
-| `ports` | 真实港口身份 | UN/LOCODE unique、zh/en name、country、lat/lon |
-| `port_aliases` | 中文/英文/历史别名 | normalized alias 索引；支持蛇口/Shekou/CNSHK |
+| `ports` | Shipping operational port facts | Provider-owned operational fields；不再承担 Port Directory 的身份/坐标真相 |
+| `port_directory` | P1A 真实港口基础目录 | `unlocode`、`name_en`/`name_zh`、`country_code`、lat/lon、timezone、JSON aliases、`source`、`verified_at`、`is_active`；Real Mode 过滤 `source=mock` |
 | `port_watchlist` | 用户关注 | 独立 user-owned |
 | `voyages` | Current/Commercial Voyage 头 | `kind`、vessel、voyage number、source/confidence |
 | `voyage_legs` | 商业 rotation legs | scheduled/estimated/actual 分列 |
@@ -698,15 +698,17 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 
 | 项目 | 内容 |
 | --- | --- |
-| 目标 | 建立最小可用的真实港口基础目录：UNECE UN/LOCODE、重点港口真实 identity、真实坐标、基础中英文 aliases；让 Open-Meteo、AIS Area、Portcast identity 可以脱离 `shared/shipping-fixtures.ts` |
-| 修改文件 | `shared/shipping.ts`、Repository、settings/config、目录同步脚本 |
-| 新增文件 | `server/providers/port-catalog.ts`、`server/providers/unlocode.ts`、UN/LOCODE snapshot/importer、重点港口 alias/coordinate source metadata、目录 contract tests |
-| 数据库 | `ports`、`port_aliases`、directory provenance/coverage；不导入 Mock Port rows 作为 Real baseline |
-| API/UI | 本地 Port Search 和 identity/coordinate 查询先可用；缺少动态 coverage 时明确 `unavailable` |
-| 测试 | `Shekou`/`CNSHK`/`蛇口` identity resolution、坐标来源、重复/冲突、目录重启恢复；Real Mode 无 fixture 坐标 |
-| 验收 | 至少八个重点港口拥有真实 identity/坐标/aliases；Open-Meteo/AIS Area/Portcast 的几何输入不再从 `shipping-fixtures.ts` 读取 |
-| 风险 | UN/LOCODE 快照覆盖与坐标质量；需要记录 source/version，不将人工别名伪装成官方字段 |
-| 回滚 | 关闭目录 enrichment，保留已验证目录快照；Real Mode 不回退 Mock Port |
+| 状态 | implemented / locally verified；P1B/P2 deferred |
+| 目标 | 建立 migration-backed `port_directory` 基础目录：UN/LOCODE identity、真实坐标、timezone、中文/英文 aliases 和 source provenance；让 Open-Meteo/AIS Area 的生产几何输入脱离 `shared/shipping-fixtures.ts` |
+| 修改文件 | `server/database/runtime.ts`、`server/database/port-directory.ts`、`server/providers/shipping.ts`、`server/providers/aisstream-area.ts`、`shared/ais-area.ts`、`scripts/p0-native-sqlite-smoke.ts` |
+| 新增文件 | `shared/port-directory.ts`、`server/database/migrations/003-p1a-port-directory.ts`、`server/database/port-directory.test.ts` |
+| 数据库 | `port_directory` 表及 migration v3；首批 8 港口 source=`unlocode`，`verified_at` 保持 unknown/undefined 直到独立校验；`port_directory_status=ready`；Real Mode 不读取 `source=mock` |
+| Repository | `searchPorts()`、`getPortByUNLocode()`、`getPortCoordinate()`、`getPortAliases()`；Mock rows 仅在 mock data mode 可读 |
+| API/UI | 本阶段不新增 Port Search API/UI；P2 再接入搜索/关注流程 |
+| 测试 | `Shekou`/`CNSHK`/`蛇口` identity/alias resolution、source filter、坐标 lookup、migration baseline、天气/AIS Area 注入路径、native persistence smoke |
+| 验收 | 八个重点港口拥有 directory identity/坐标/aliases；Open-Meteo/AIS Area 生产 Provider 通过 SQLite PortDirectory lookup，不从 `shipping-fixtures.ts` 读取坐标 |
+| 风险 | 当前 baseline 的 `verified_at` 仍为 unknown；后续 UN/LOCODE snapshot/importer 需补充官方校验，不将 manual/mock 数据伪装成 official |
+| 回滚 | 停用目录 enrichment，保留 V3 DB；Real Mode 不回退 Mock Port |
 
 ### P1B — Mock Isolation + AIS Tracking Runtime
 
@@ -1075,7 +1077,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 
 ## 27. 实施门槛与文档后续
 
-`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0 已获授权、实施并完成本地验证；P1A、P1B、P2 及后续 Provider 功能仍未获本轮实施授权。该 ADR 至少覆盖：
+`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0 与 P1A 已获授权、实施并完成本地验证；P1B、P2 及后续 Provider 功能仍未获本轮实施授权。该 ADR 至少覆盖：
 
 - V3 real-only runtime、SQLite fail-closed/read-only 行为和已验证的单一 Node LTS。
 - VesselAPI 仅 Discovery/static metadata、AISStream 长期 tracking、UN/LOCODE 默认 Port Search，以及 provider-owned/user-owned/directory-owned/translation-owned 字段边界。
@@ -1084,7 +1086,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 - TranslationProvider 可切换合同、Settings AI 翻译中心、单一 `translation_cache` source of truth、server-only secret、`provider_usage` 和“本地统计/估算”标签。
 - Current Voyage 与 DCSA Commercial Schedule 的事实分层。
 
-之后从 P0 开始，严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。不得从本文直接跳到 P2 搜索或 P5 Schedule；P0 只铺合同和 schema，不实现全部 AI adapter。
+后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A 已完成；不得从本文直接跳到 P1B、P2 搜索或 P5 Schedule；后续 Provider/AI adapter 仍按单独批准范围实施。
 
 ## 28. 外部资料
 

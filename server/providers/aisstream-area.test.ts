@@ -76,6 +76,25 @@ describe("area stream boundary", () => {
     expect(metrics[0]).not.toHaveProperty("waitingHours")
   })
 
+  it("uses the injected Port Directory coordinate for the area boundary", async () => {
+    const socket = socketWithPayloads([])
+    const session = new AisAreaSession({
+      apiKey: "test-key",
+      initialObservationWaitMs: 0,
+      minimumSampleSize: 1,
+      portDirectory: { getPortCoordinate: async (unlocode) => {
+        expect(unlocode).toBe("CNSHK")
+        return { latitude: 1.23, longitude: 4.56 }
+      } },
+      socketFactory: () => {
+        setTimeout(() => socket.onopen?.(), 0)
+        return socket
+      },
+    })
+    await session.getPortMetrics([mockPorts[0]])
+    expect(session.currentConfigs[0]).toMatchObject({ portId: "port-shekou", center: { latitude: 1.23, longitude: 4.56 } })
+  })
+
   it("ignores malformed and non-position messages, and preserves same-source last-known only on failure", async () => {
     const session = new AisAreaSession({ apiKey: "test-key", initialObservationWaitMs: 0, socketFactory: () => {
       throw new Error("network unavailable")

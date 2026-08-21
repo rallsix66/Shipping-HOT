@@ -8,16 +8,23 @@ import NativeDatabase from "better-sqlite3"
 import type { Vessel } from "@shared/shipping"
 import { p0FoundationMigration } from "../server/database/migrations/001-p0-foundation"
 import { watchlistIsolationMigration } from "../server/database/migrations/002-watchlist-isolation"
+import { p1aPortDirectoryMigration } from "../server/database/migrations/003-p1a-port-directory"
 
 async function openDatabase(path: string): Promise<InstanceType<typeof NativeDatabase>> {
   const native = new NativeDatabase(path)
   native.exec("CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL)")
-  const migrations = [p0FoundationMigration, watchlistIsolationMigration]
+  const migrations = [p0FoundationMigration, watchlistIsolationMigration, p1aPortDirectoryMigration]
   for (const migration of migrations) {
     if (native.prepare("SELECT 1 FROM schema_migrations WHERE version = ?").get(migration.version)) continue
     native.exec("BEGIN")
     try {
-      await migration.up({ exec: (sql: string) => native.exec(sql), prepare: (sql: string) => ({ all: async () => native.prepare(sql).all() }) } as never)
+      await migration.up({
+        exec: (sql: string) => native.exec(sql),
+        prepare: (sql: string) => ({
+          all: async (...params: (string | number | boolean | null | undefined)[]) => native.prepare(sql).all(...params),
+          run: async (...params: (string | number | boolean | null | undefined)[]) => native.prepare(sql).run(...params),
+        }),
+      } as never)
       native.prepare("INSERT INTO schema_migrations (version, name, applied_at) VALUES (?, ?, ?)").run(migration.version, migration.name, new Date().toISOString())
       native.exec("COMMIT")
     } catch (error) {
@@ -32,14 +39,14 @@ async function openDatabase(path: string): Promise<InstanceType<typeof NativeDat
   const existing = native.prepare("SELECT database_id FROM app_metadata WHERE id = 'default'").get() as { database_id?: string } | undefined
   native.prepare(`
     INSERT INTO app_metadata (id, schema_version, bootstrap_completed_at, database_id, last_migration_at, data_mode)
-    VALUES ('default', 2, ?, COALESCE(?, lower(hex(randomblob(16)))), ?, 'real')
+    VALUES ('default', 3, ?, COALESCE(?, lower(hex(randomblob(16)))), ?, 'real')
     ON CONFLICT(id) DO UPDATE SET bootstrap_completed_at = COALESCE(app_metadata.bootstrap_completed_at, excluded.bootstrap_completed_at), data_mode = excluded.data_mode
   `).run(new Date().toISOString(), existing?.database_id ?? null, new Date().toISOString())
   native.prepare(`
     INSERT INTO port_directory_status (id, port_directory_status, port_directory_version, port_directory_imported_at)
-    VALUES ('default', 'pending', NULL, NULL)
+    VALUES ('default', 'ready', 'p1a-unlocode-baseline-v1', ?)
     ON CONFLICT(id) DO NOTHING
-  `).run()
+  `).run(new Date().toISOString())
   return native
 }
 
@@ -75,6 +82,7 @@ async function reader(path: string) {
   const tables = database.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>
   const tableNames = new Set(tables.map(table => table.name))
   const portDirectory = database.prepare("SELECT port_directory_status, port_directory_version, port_directory_imported_at FROM port_directory_status WHERE id = 'default'").get() as { port_directory_status: string, port_directory_version?: string, port_directory_imported_at?: string } | undefined
+  const portCount = database.prepare("SELECT COUNT(*) AS count FROM port_directory WHERE is_active = 1 AND source <> 'mock'").get() as { count: number }
   database.close()
   if (metadata?.data_mode !== "real") throw new Error(`unexpected data mode: ${metadata?.data_mode}`)
   if (!metadata.bootstrap_completed_at) throw new Error("bootstrap_completed_at was not persisted")
@@ -82,7 +90,8 @@ async function reader(path: string) {
   for (const table of ["schema_migrations", "app_metadata", "port_directory_status", "vessel_watchlist", "port_watchlist", "translation_cache", "provider_usage", "provider_runtime", "sync_runs"]) {
     if (!tableNames.has(table)) throw new Error(`missing P0 table: ${table}`)
   }
-  if (portDirectory?.port_directory_status !== "pending" || portDirectory.port_directory_version !== null || portDirectory.port_directory_imported_at !== null) throw new Error("Port Directory state was changed during P0")
+  if (portDirectory?.port_directory_status !== "ready" || portDirectory.port_directory_version !== "p1a-unlocode-baseline-v1" || !portDirectory.port_directory_imported_at) throw new Error("Port Directory baseline was not persisted")
+  if (Number(portCount.count) !== 8) throw new Error(`unexpected active Port Directory baseline count: ${portCount.count}`)
   console.log(JSON.stringify({ process: "B", node: process.version, abi: process.versions.modules, bootstrapCompletedAt: metadata.bootstrap_completed_at, watched: true, portDirectory: portDirectory?.port_directory_status }))
 }
 

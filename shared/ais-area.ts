@@ -1,5 +1,6 @@
 import type { DataProvenance, Freshness, NavigationStatus, Port } from "./shipping"
-import { portWeatherConfig } from "./shipping-fixtures"
+import { portDirectoryBaseline } from "./port-directory"
+import type { PortDirectoryCoordinate } from "./port-directory"
 
 export type AisAreaTrend = "rising" | "stable" | "falling" | "unknown"
 export type AisAreaCoverage = "usable" | "insufficient_samples" | "no_observation" | "stale"
@@ -87,8 +88,8 @@ function clampLongitude(value: number): number {
   return Math.max(-180, Math.min(180, value))
 }
 
-export const portAisAreaConfig: Record<string, PortAisAreaConfig> = Object.fromEntries(
-  Object.entries(portWeatherConfig).map(([portId, center]) => [portId, {
+export function createPortAisAreaConfig(portId: string, center: PortDirectoryCoordinate): PortAisAreaConfig {
+  return {
     portId,
     center,
     bbox: {
@@ -97,16 +98,21 @@ export const portAisAreaConfig: Record<string, PortAisAreaConfig> = Object.fromE
       north: clampLatitude(center.latitude + areaHalfHeight),
       east: clampLongitude(center.longitude + areaHalfWidth),
     },
-    boundarySource: "configured_heuristic" as const,
-  }]),
+    boundarySource: "configured_heuristic",
+  }
+}
+
+// Pure-function/test baseline. Server providers inject PortDirectoryRepository-backed coordinates.
+export const portAisAreaConfig: Record<string, PortAisAreaConfig> = Object.fromEntries(
+  portDirectoryBaseline.map(port => [port.shippingPortId, createPortAisAreaConfig(port.shippingPortId, port)]),
 )
 
 export function getPortAisAreaConfig(portId: string): PortAisAreaConfig | undefined {
   return portAisAreaConfig[portId]
 }
 
-export function watchedPortAisAreaConfigs(ports: Pick<Port, "id" | "isWatched">[]): PortAisAreaConfig[] {
-  return ports.filter(port => port.isWatched).map(port => portAisAreaConfig[port.id]).filter((config): config is PortAisAreaConfig => config !== undefined)
+export function watchedPortAisAreaConfigs(ports: Pick<Port, "id" | "isWatched">[], configs: Record<string, PortAisAreaConfig> = portAisAreaConfig): PortAisAreaConfig[] {
+  return ports.filter(port => port.isWatched).map(port => configs[port.id]).filter((config): config is PortAisAreaConfig => config !== undefined)
 }
 
 export function aisAreaBoundingBoxContains(bbox: AisAreaBoundingBox, latitude: number, longitude: number): boolean {
