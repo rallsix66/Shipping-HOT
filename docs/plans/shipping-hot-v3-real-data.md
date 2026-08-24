@@ -68,7 +68,7 @@ Shipping HOT V2 已经建立了 Provider、Domain、Repository、Event/HOT 和�
 - `GET /api/shipping/calendar`：读取已缓存日历。
 - `POST /api/shipping/calendar/sync`：手工同步指定年/国家。
 
-仍不存在 Current Voyage/Port Call、Provider Health、历史 Feed 搜索、翻译状态和同步运行记录 API；AIS Tracking Runtime 也仍 deferred。
+仍不存在 Current Voyage/Port Call、Provider Health、历史 Feed 搜索和翻译状态 API；P3A 已提供 bounded AIS latest-position API，但长期 AIS session、Static/Voyage enrichment 与完整业务 Provider API 仍 deferred。
 
 ### 2.3 Provider 已存在但未真正启用的部分
 
