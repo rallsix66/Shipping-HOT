@@ -13,13 +13,14 @@ import { watchlistIsolationMigration } from "../server/database/migrations/002-w
 import { p1aPortDirectoryMigration } from "../server/database/migrations/003-p1a-port-directory"
 import { p1bMockIsolationMigration } from "../server/database/migrations/004-p1b-mock-isolation"
 import { p2aSearchFoundationMigration } from "../server/database/migrations/005-p2a-search-foundation"
+import { p2cRuntimeFoundationMigration } from "../server/database/migrations/006-p2c-runtime-foundation"
 import { VesselMetadataRepository } from "../server/database/vessel-search"
 import { VesselWatchlistService } from "../server/search/vessel-watchlist"
 
 async function openDatabase(path: string): Promise<InstanceType<typeof NativeDatabase>> {
   const native = new NativeDatabase(path)
   native.exec("CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL)")
-  const migrations = [p0FoundationMigration, watchlistIsolationMigration, p1aPortDirectoryMigration, p1bMockIsolationMigration, p2aSearchFoundationMigration]
+  const migrations = [p0FoundationMigration, watchlistIsolationMigration, p1aPortDirectoryMigration, p1bMockIsolationMigration, p2aSearchFoundationMigration, p2cRuntimeFoundationMigration]
   for (const migration of migrations) {
     if (native.prepare("SELECT 1 FROM schema_migrations WHERE version = ?").get(migration.version)) continue
     native.exec("BEGIN")
@@ -45,7 +46,7 @@ async function openDatabase(path: string): Promise<InstanceType<typeof NativeDat
   const existing = native.prepare("SELECT database_id FROM app_metadata WHERE id = 'default'").get() as { database_id?: string } | undefined
   native.prepare(`
     INSERT INTO app_metadata (id, schema_version, bootstrap_completed_at, database_id, last_migration_at, data_mode)
-    VALUES ('default', 5, ?, COALESCE(?, lower(hex(randomblob(16)))), ?, 'real')
+    VALUES ('default', 6, ?, COALESCE(?, lower(hex(randomblob(16)))), ?, 'real')
     ON CONFLICT(id) DO UPDATE SET bootstrap_completed_at = COALESCE(app_metadata.bootstrap_completed_at, excluded.bootstrap_completed_at), data_mode = excluded.data_mode
   `).run(new Date().toISOString(), existing?.database_id ?? null, new Date().toISOString())
   native.prepare(`

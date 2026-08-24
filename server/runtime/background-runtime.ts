@@ -131,6 +131,11 @@ export class BackgroundRuntime {
     })()
     try {
       await this.startPromise
+    } catch (error) {
+      this.running = false
+      this.clearTimers()
+      this.startedAt = undefined
+      throw error
     } finally {
       this.startPromise = undefined
     }
@@ -139,8 +144,7 @@ export class BackgroundRuntime {
   stop(): void {
     if (!this.running) return
     this.running = false
-    for (const timer of this.timers.values()) this.clearTimer(timer)
-    this.timers.clear()
+    this.clearTimers()
     this.log.info("runtime stopped")
   }
 
@@ -149,7 +153,12 @@ export class BackgroundRuntime {
     if (!state) return { status: "skipped", errorCode: "job_not_found" }
     if (!this.running) return { status: "skipped", errorCode: "runtime_stopped" }
     if (!state.job.enabled) return { status: "skipped", errorCode: "job_disabled" }
-    return this.execute(state)
+    this.cancelTimer(state.job.id)
+    const result = await this.execute(state)
+    if (this.running && state.job.enabled && !(result.status === "skipped" && result.errorCode === "job_running")) {
+      this.scheduleAt(state, state.nextSyncAt ?? new Date(this.now().getTime() + state.job.intervalMs).toISOString())
+    }
+    return result
   }
 
   getStatus(): BackgroundRuntimeStatus {
@@ -187,7 +196,7 @@ export class BackgroundRuntime {
       })
       return
     }
-    const persisted = await this.repository.getProviderRuntime(state.job.providerId)
+    const persisted = await this.repository.getProviderRuntime(state.job.providerId, state.job.capability)
     if (persisted) {
       state.providerStatus = persisted.status
       state.lastSuccessAt = persisted.lastSuccessAt
@@ -207,22 +216,35 @@ export class BackgroundRuntime {
       })
       state.nextSyncAt = created.nextSyncAt
     }
-    this.schedule(state, toDelay(state.nextSyncAt, this.now(), state.job.intervalMs))
+    this.scheduleAt(state, state.nextSyncAt ?? new Date(this.now().getTime() + state.job.intervalMs).toISOString())
   }
 
-  private schedule(state: JobState, delayMs: number): void {
+  private scheduleAt(state: JobState, nextSyncAt: string): void {
     if (!this.running || !state.job.enabled) return
-    const existing = this.timers.get(state.job.id)
-    if (existing) this.clearTimer(existing)
-    const nextSyncAt = new Date(this.now().getTime() + delayMs).toISOString()
+    this.cancelTimer(state.job.id)
     state.nextSyncAt = nextSyncAt
+    const delayMs = toDelay(nextSyncAt, this.now(), state.job.intervalMs)
     const timer = this.setTimer(() => {
       this.timers.delete(state.job.id)
       void this.execute(state).finally(() => {
-        if (this.running) this.schedule(state, state.job.intervalMs)
+        if (this.running && state.job.enabled) {
+          this.scheduleAt(state, state.nextSyncAt ?? new Date(this.now().getTime() + state.job.intervalMs).toISOString())
+        }
       })
     }, delayMs)
     this.timers.set(state.job.id, timer)
+  }
+
+  private cancelTimer(jobId: string): void {
+    const timer = this.timers.get(jobId)
+    if (!timer) return
+    this.clearTimer(timer)
+    this.timers.delete(jobId)
+  }
+
+  private clearTimers(): void {
+    for (const timer of this.timers.values()) this.clearTimer(timer)
+    this.timers.clear()
   }
 
   private async execute(state: JobState): Promise<SyncResult> {
@@ -263,11 +285,20 @@ export class BackgroundRuntime {
         this.log.info("job success", { jobId: state.job.id, providerId: state.job.providerId })
       } else if (result.status === "skipped") {
         await this.repository.completeSyncRun({ id: syncRun.id, completedAt, status: "skipped", recordsRead: result.recordsRead, recordsWritten: result.recordsWritten, errorCode: result.errorCode, errorMessage: result.errorMessage })
-        state.executionStatus = "skipped"
+        const runtime = await this.repository.updateProviderRuntime({
+          providerId: state.job.providerId,
+          capability: state.job.capability,
+          lastRequestAt: startedAt,
+          nextSyncAt,
+          errorCode: result.errorCode ?? null,
+          errorMessage: result.errorMessage ? safeErrorMessage(result.errorMessage) : null,
+          updatedAt: completedAt,
+        })
+        this.applyRuntimeState(state, runtime, "skipped")
       } else {
         const details = { errorCode: result.errorCode ?? "job_failed", errorMessage: safeErrorMessage(result.errorMessage ?? "job failed") }
         await this.repository.completeSyncRun({ id: syncRun.id, completedAt, status: "failed", recordsRead: result.recordsRead, recordsWritten: result.recordsWritten, errorCode: details.errorCode, errorMessage: details.errorMessage })
-        const current = await this.repository.getProviderRuntime(state.job.providerId)
+        const current = await this.repository.getProviderRuntime(state.job.providerId, state.job.capability)
         const runtime = await this.repository.updateProviderRuntime({
           providerId: state.job.providerId,
           capability: state.job.capability,
@@ -290,7 +321,7 @@ export class BackgroundRuntime {
       if (syncRun) {
         await this.repository.completeSyncRun({ id: syncRun.id, completedAt, status: "failed", errorCode: details.errorCode, errorMessage: details.errorMessage })
       }
-      const current = await this.repository.getProviderRuntime(state.job.providerId)
+      const current = await this.repository.getProviderRuntime(state.job.providerId, state.job.capability)
       const runtime = await this.repository.updateProviderRuntime({
         providerId: state.job.providerId,
         capability: state.job.capability,

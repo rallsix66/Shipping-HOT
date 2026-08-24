@@ -40,7 +40,7 @@ async function runStage(stage: "A" | "B", path: string) {
     await repository.completeSyncRun({ id: run.id, status: "success", completedAt: "2026-08-24T00:00:01.000Z", recordsRead: 1, recordsWritten: 1 })
     await repository.updateProviderRuntime({ providerId: "p2c-smoke-provider", capability: "p2c-smoke", status: "healthy", lastSuccessAt: "2026-08-24T00:00:01.000Z", nextSyncAt: "2026-08-24T01:00:01.000Z", consecutiveFailures: 0, updatedAt: "2026-08-24T00:00:01.000Z" })
   } else {
-    const runtime = await repository.getProviderRuntime("p2c-smoke-provider")
+    const runtime = await repository.getProviderRuntime("p2c-smoke-provider", "p2c-smoke")
     const runs = await repository.listSyncRuns("p2c-smoke-provider")
     if (runtime?.status !== "healthy" || runtime.lastSuccessAt !== "2026-08-24T00:00:01.000Z" || runs.length !== 1 || runs[0].status !== "success") {
       throw new Error("p2c_runtime_persistence_failed")

@@ -1,12 +1,12 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 文档状态：`accepted / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / AIS tracking runtime deferred`
+> 文档状态：`accepted / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed / AIS tracking runtime deferred`
 >
 > 审查日期：2026-08-24（Asia/Shanghai）
 >
 > 代码基线：`codex/shipping-hot-v3-real-data`（P2B 本轮）
 >
-> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal 与 P2C Background Runtime Foundation 已完成并通过本地验证**。本轮完成统一 Runtime、SQLite execution history/provider health、启动/关闭接线和测试 Job 验证；不实现 AIS 长连接、Tracking Runtime、Feed、Calendar、Voyage、Translation 或其他后续 Provider 业务。
+> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal 与 P2C Background Runtime Foundation 已完成、封板并通过本地验证**。本轮完成统一 Runtime、migration v6 复合 identity、cadence-safe `runNow`、失败安全 bootstrap、SQLite execution history/provider health、启动/关闭接线和测试 Job 验证；不实现 AIS 长连接、Tracking Runtime、Feed、Calendar、Voyage、Translation 或其他后续 Provider 业务。
 >
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；只有具体 endpoint entitlement、地区/账号资格等未确认事项保持 `unknown/pending`。
 >
@@ -763,20 +763,20 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | 风险 | Provider 数据库找不到目标船；免费额度；MMSI 重用/IMO 缺失；中文 alias 质量 |
 | 回滚 | 禁用 search Provider；保留已持久化 watchlist 和 last-known，不回退 Mock |
 
-### P2C — Background Runtime Foundation（complete）
+### P2C — Background Runtime Foundation（complete / sealed）
 
 | 项目 | 内容 |
 | --- | --- |
 | 目标 | 建立单 Node 进程内的 Background Runtime singleton，为后续 Provider Workstream 提供统一 Job、调度、失败隔离、运行历史和 Provider health 边界 |
-| 修改文件 | `server/runtime/background-runtime.ts`、`server/runtime/bootstrap.ts`、`server/runtime/registry.ts`、`server/plugins/background-runtime.ts`、`server/database/runtime-jobs.ts`、`server/api/shipping/runtime.get.ts`、`server/providers/contracts.ts` |
+| 修改文件 | `server/database/migrations/006-p2c-runtime-foundation.ts`、`server/database/runtime.ts`、`server/runtime/background-runtime.ts`、`server/runtime/bootstrap.ts`、`server/runtime/registry.ts`、`server/plugins/background-runtime.ts`、`server/database/runtime-jobs.ts`、`server/api/shipping/runtime.get.ts`、`server/providers/contracts.ts` |
 | Runtime Contract | `RuntimeJob { id, providerId, capability, intervalMs, enabled, run }`；`SyncResult` 只包含 status、recordsRead、recordsWritten、sourceUpdatedAt、errorCode、errorMessage |
-| 调度 | Node timer；同一 Job in-flight 时下一次触发 skip；失败只影响当前 Job；`stop()` 清理 timer 并阻止新执行；启动从 SQLite `next_sync_at`/health cursor 恢复 |
-| 数据库 | 复用 P0 `sync_runs` 与 `provider_runtime`；`RuntimeRepository` 集中 SQL。运行状态为 `healthy/degraded/failed/disabled/never_succeeded`，失败按下一次正常 schedule 继续，不实现复杂 retry queue |
-| Bootstrap | Nitro server plugin 初始化 DB/migrations、创建单例、注册当前 Registry、启动 Runtime；SIGTERM/SIGINT/Nitro close 都调用 stop；`SHIPPING_RUNTIME_ENABLED=false` 可关闭 |
+| 调度 | Node timer；同一 Job in-flight 时下一次触发 skip；`runNow()` 取消旧 timer 并从本次完成时间重启 cadence；Job 返回 `skipped` 也持久化新的 `next_sync_at`；失败只影响当前 Job；`stop()` 清理 timer 并阻止新执行；启动从 SQLite `next_sync_at`/health cursor 恢复 |
+| 数据库 | migration v6 安全 rebuild `provider_runtime` 为 `PRIMARY KEY(provider_id, capability)` 并保留现有列/数据；`RuntimeRepository` 集中 SQL 且所有读写使用复合 identity。运行状态为 `healthy/degraded/failed/disabled/never_succeeded`，失败按下一次正常 schedule 继续，不实现复杂 retry queue |
+| Bootstrap | Nitro server plugin 初始化 DB/migrations、创建单例、注册当前 Registry、启动 Runtime；仅成功启动后发布 singleton/安装 signal handlers；失败时清理 timer、running state、singleton、bootstrap promise 和 signal handlers；SIGTERM/SIGINT/Nitro close 都调用 stop；`SHIPPING_RUNTIME_ENABLED=false` 可关闭 |
 | Registry | P2C 默认为空；测试 FakeJob 只存在于自动测试，不注册任何真实 AIS/Feed/Calendar/Voyage/Translation Job |
 | API 边界 | `GET /api/shipping/runtime` 只返回本地非敏感状态；现有 `GET /api/shipping` 请求触发 Provider path 标记为 legacy/deferred，后续按 Workstream 逐个迁移，P2C 不重写 `shipping-store` |
-| 测试 | singleton、no-overlap、failure isolation、success/failure sync_runs、provider_runtime 状态恢复、stop、native SQLite reopen persistence |
-| 验收 | P2C targeted tests、database runtime tests、full tests、typecheck、build、full lint、native SQLite restart smoke、git diff --check 与 Neat Freak Closeout |
+| 测试 | singleton、same-provider multi-capability independence/restart、disabled capability isolation、no-overlap、failure isolation、success/failure/skipped sync_runs、runNow fake-timer cadence、provider_runtime 状态恢复、stop、start/bootstrap failure recovery、native SQLite reopen persistence |
+| 验收 | P2C targeted 20/20、full tests 270/270、typecheck、build、full lint（仅既有 4 个无关错误）、native SQLite restart smoke、git diff --check 与 Neat Freak Closeout；AIS Tracking Runtime、Feed Auto Sync、Calendar Auto Sync、Voyage、Translation 继续 pending |
 
 ### P3 — Feed Freshness
 

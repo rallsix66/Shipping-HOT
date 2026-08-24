@@ -152,8 +152,8 @@ export class RuntimeRepository {
     return rows<SyncRunRow>(result).map(toSyncRun)
   }
 
-  async getProviderRuntime(providerId: string): Promise<ProviderRuntimeRecord | undefined> {
-    const row = await this.db.prepare("SELECT * FROM provider_runtime WHERE provider_id = ?").get(providerId) as ProviderRuntimeRow | undefined
+  async getProviderRuntime(providerId: string, capability: string): Promise<ProviderRuntimeRecord | undefined> {
+    const row = await this.db.prepare("SELECT * FROM provider_runtime WHERE provider_id = ? AND capability = ?").get(providerId, capability) as ProviderRuntimeRow | undefined
     return row ? toProviderRuntime(row) : undefined
   }
 
@@ -163,7 +163,7 @@ export class RuntimeRepository {
   }
 
   async updateProviderRuntime(patch: ProviderRuntimePatch): Promise<ProviderRuntimeRecord> {
-    const current = await this.getProviderRuntime(patch.providerId)
+    const current = await this.getProviderRuntime(patch.providerId, patch.capability)
     const next: ProviderRuntimeRecord = {
       providerId: patch.providerId,
       capability: patch.capability,
@@ -183,7 +183,7 @@ export class RuntimeRepository {
         provider_id, capability, status, last_request_at, last_success_at, last_failure_at,
         last_source_updated_at, next_sync_at, consecutive_failures, error_code, error_message, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(provider_id) DO UPDATE SET
+      ON CONFLICT(provider_id, capability) DO UPDATE SET
         capability = excluded.capability,
         status = excluded.status,
         last_request_at = excluded.last_request_at,

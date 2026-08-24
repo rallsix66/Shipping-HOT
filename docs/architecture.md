@@ -48,9 +48,10 @@ All-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source
 
 ## V3 P2C Background Runtime Foundation — 2026-08-24
 
-- `BackgroundRuntime` is a process-level singleton with idempotent `start()`/`stop()`, registered `RuntimeJob` contracts, timer scheduling, `runNow()` and a per-job in-flight guard. A failed Job is converted to a failed result and cannot stop another Job or the Runtime.
+- Migration v6 safely rebuilds the P0 `provider_runtime` table as `PRIMARY KEY(provider_id, capability)` and copies all existing columns/rows before renaming the rebuilt table. `RuntimeRepository` uses both identity fields for reads and upserts.
+- `BackgroundRuntime` is a process-level singleton with idempotent `start()`/`stop()`, registered `RuntimeJob` contracts, timer scheduling, `runNow()` and a per-job in-flight guard. `runNow()` cancels the old timer and schedules the next timer from the completed execution's persisted `next_sync_at`; a Job-returned `skipped` also advances and persists cadence. A failed Job is converted to a failed result and cannot stop another Job or the Runtime.
 - `RuntimeRepository` is the only P2C SQL boundary for `sync_runs` and `provider_runtime`. Each actual execution writes a `running` row, then `success`, `failed` or `skipped`; Provider runtime tracks `healthy`, `degraded`, `failed`, `disabled` and `never_succeeded`, including next schedule and consecutive failures.
-- `server/runtime/bootstrap.ts` initializes SQLite/migrations before constructing the singleton, installs SIGTERM/SIGINT shutdown hooks when used by the Nitro plugin, and honors `SHIPPING_RUNTIME_ENABLED`. The default Registry is intentionally empty so P2C cannot call AIS/Feed/Calendar/Voyage/Translation Providers.
+- `server/runtime/bootstrap.ts` initializes SQLite/migrations before constructing the singleton, installs SIGTERM/SIGINT shutdown hooks only after successful startup, and honors `SHIPPING_RUNTIME_ENABLED`. Failed Runtime startup clears timers/running state and leaves no reusable singleton or signal handlers. The default Registry is intentionally empty so P2C cannot call AIS/Feed/Calendar/Voyage/Translation Providers.
 - `GET /api/shipping/runtime` is a local, redacted runtime status surface. The existing `GET /api/shipping` request-triggered Provider path is marked legacy/deferred; new capabilities must use `BackgroundRuntime → Provider → SQLite`, while reads move toward `GET → Repository → SQLite` one workstream at a time.
 
 ## Calendarific Final Operational Semantics Seal — 2026-08-18

@@ -24,6 +24,7 @@ function runtimeEnabled(): boolean {
 
 export interface BootstrapBackgroundRuntimeOptions {
   database?: Database
+  repository?: RuntimeRepository
   jobs?: RuntimeJob[]
   enabled?: boolean
   installSignalHandlers?: boolean
@@ -55,15 +56,19 @@ export async function bootstrapBackgroundRuntime(options: BootstrapBackgroundRun
   state.bootstrapPromise = (async () => {
     const database = options.database ?? useDatabase()
     await initShippingTables(database, process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock")
-    const runtime = new BackgroundRuntime(new RuntimeRepository(database))
+    const runtime = new BackgroundRuntime(options.repository ?? new RuntimeRepository(database))
     for (const job of options.jobs ?? getDefaultRuntimeJobs()) runtime.register(job)
+    if (options.enabled ?? runtimeEnabled()) await runtime.start()
     state.runtime = runtime
     if (options.installSignalHandlers ?? false) installSignalHandlers()
-    if (options.enabled ?? runtimeEnabled()) await runtime.start()
     return runtime
   })()
   try {
     return await state.bootstrapPromise
+  } catch (error) {
+    state.runtime = undefined
+    removeSignalHandlers()
+    throw error
   } finally {
     state.bootstrapPromise = undefined
   }
