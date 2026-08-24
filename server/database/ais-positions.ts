@@ -107,7 +107,7 @@ export class AisPositionRepository {
         if (this.dataMode === "real" && position.sourceType === "mock") throw new Error("mock_position_not_allowed_in_real_mode")
         const id = position.id ?? positionId(position)
         const record = { ...position, id, vesselId: vessel.vesselId }
-        await this.db.prepare(`
+        const insertResult = await this.db.prepare(`
           INSERT INTO ais_positions (
             id, vessel_id, mmsi, latitude, longitude, speed, course, heading,
             navigation_status, timestamp, source, source_type, created_at
@@ -128,7 +128,8 @@ export class AisPositionRepository {
           record.sourceType,
           createdAt,
         )
-        written++
+        const changes = (insertResult as { changes?: number }).changes ?? 0
+        if (changes > 0) written++
         const current = await this.db.prepare("SELECT timestamp FROM ais_latest_positions WHERE vessel_id = ?").get(record.vesselId) as { timestamp?: string } | undefined
         if (!current?.timestamp || timestampMs(record.timestamp) >= timestampMs(current.timestamp)) {
           await this.db.prepare(`

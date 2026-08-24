@@ -24,6 +24,10 @@ export interface AisStreamProviderOptions {
 
 interface AisStreamMessage {
   MessageType?: string
+  error?: unknown
+  Error?: unknown
+  message?: unknown
+  code?: unknown
   MetaData?: { MMSI?: number | string, time_utc?: number | string }
   Metadata?: { MMSI?: number | string, time_utc?: number | string }
   Message?: { PositionReport?: {
@@ -39,6 +43,20 @@ interface AisStreamMessage {
 }
 
 const aisStreamEndpoint = "wss://stream.aisstream.io/v0/stream"
+const aisStreamBoundingBoxes = [[[-90, -180], [90, 180]]] as const
+
+export const AISSTREAM_MAX_MMSI_PER_REQUEST = 50
+
+const safeAisStreamErrorCodes = new Set([
+  "aisstream_api_key_missing",
+  "aisstream_auth_failed",
+  "aisstream_connection_closed",
+  "aisstream_rate_limited",
+  "aisstream_subscription_failed",
+  "aisstream_timeout",
+  "aisstream_unavailable",
+  "aisstream_websocket_unavailable",
+])
 
 function socketFromGlobal(endpoint: string): AisStreamSocket {
   const WebSocketCtor = (globalThis as typeof globalThis & { WebSocket?: new (url: string) => unknown }).WebSocket
@@ -86,6 +104,32 @@ function parseMessage(data: unknown): AisStreamMessage | undefined {
   }
 }
 
+function errorText(value: unknown): string | undefined {
+  if (value instanceof Error) return value.message || undefined
+  if (typeof value === "string") return value
+  if (!value || typeof value !== "object") return undefined
+  const record = value as Record<string, unknown>
+  const codeValue = record.code ?? record.Code
+  const code = typeof codeValue === "string" || typeof codeValue === "number" ? String(codeValue) : undefined
+  const message = typeof record.message === "string" ? record.message : typeof record.Message === "string" ? record.Message : undefined
+  if (code || message) return [code, message].filter(Boolean).join(" ")
+  for (const key of ["error", "Error", "message", "Message"]) {
+    const nested = errorText(record[key])
+    if (nested) return nested
+  }
+  return undefined
+}
+
+function protocolError(message: AisStreamMessage): Error | undefined {
+  const record = message as Record<string, unknown>
+  const hasError = Object.prototype.hasOwnProperty.call(record, "error")
+    || Object.prototype.hasOwnProperty.call(record, "Error")
+  const errorValue = Object.prototype.hasOwnProperty.call(record, "error") ? record.error : record.Error
+  const messageType = typeof message.MessageType === "string" ? message.MessageType : ""
+  if (!hasError && !/error/i.test(messageType)) return undefined
+  return new Error(errorText(errorValue) ?? errorText(message.message) ?? "aisstream_unavailable")
+}
+
 export function mapAisStreamPosition(message: AisStreamMessage, fetchedAt: string, sourceType: AisPosition["sourceType"] = "real"): AisPosition | undefined {
   if (message.MessageType !== "PositionReport") return undefined
   const report = message.Message?.PositionReport
@@ -112,7 +156,12 @@ export function mapAisStreamPosition(message: AisStreamMessage, fetchedAt: strin
 }
 
 function safeProviderError(error: unknown): Error {
-  if (error instanceof Error && error.message && !/api.?key|wss?:\/\//i.test(error.message)) return new Error(error.message.slice(0, 200))
+  const text = errorText(error)?.trim() ?? ""
+  const directCode = text.toLowerCase()
+  if (safeAisStreamErrorCodes.has(directCode)) return new Error(directCode)
+  if (/api.?key|auth|credential|unauthori[sz]ed|forbidden|\b401\b|\b403\b/i.test(text)) return new Error("aisstream_auth_failed")
+  if (/rate|limit|quota|\b429\b/i.test(text)) return new Error("aisstream_rate_limited")
+  if (/subscri|filter|bounding|\b400\b/i.test(text)) return new Error("aisstream_subscription_failed")
   return new Error("aisstream_unavailable")
 }
 
@@ -140,16 +189,30 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
 
   async getLatestPositions(vessels: readonly AisTrackingVessel[]): Promise<readonly AisPosition[]> {
     if (!vessels.length) return []
-    const apiKey = this.apiKey ?? await this.apiKeyResolver?.()
-    if (!apiKey) throw new Error("aisstream_api_key_missing")
-    const trackedMmsi = new Set(vessels.map(vessel => vessel.mmsi))
-    const positions = new Map<string, AisPosition>()
-    const fetchedAt = this.now().toISOString()
+    try {
+      const apiKey = this.apiKey ?? await this.apiKeyResolver?.()
+      if (!apiKey) throw new Error("aisstream_api_key_missing")
+      const trackedMmsi = [...new Set(vessels.map(vessel => vessel.mmsi))]
+      const positions = new Map<string, AisPosition>()
+      const fetchedAt = this.now().toISOString()
+      for (let offset = 0; offset < trackedMmsi.length; offset += AISSTREAM_MAX_MMSI_PER_REQUEST) {
+        const batch = trackedMmsi.slice(offset, offset + AISSTREAM_MAX_MMSI_PER_REQUEST)
+        const result = await this.getLatestPositionsBatch(apiKey, batch, fetchedAt)
+        for (const position of result) positions.set(position.mmsi, position)
+      }
+      return [...positions.values()]
+    } catch (error) {
+      throw safeProviderError(error)
+    }
+  }
+
+  private async getLatestPositionsBatch(apiKey: string, trackedMmsi: readonly string[], fetchedAt: string): Promise<readonly AisPosition[]> {
     let socket: AisStreamSocket | undefined
     let timer: ReturnType<typeof setTimeout> | undefined
+    const positions = new Map<string, AisPosition>()
     try {
       socket = this.socketFactory(this.endpoint)
-      const result = await new Promise<readonly AisPosition[]>((resolve, reject) => {
+      return await new Promise<readonly AisPosition[]>((resolve, reject) => {
         let settled = false
         let opened = false
         const finish = (error?: Error) => {
@@ -162,22 +225,34 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
         timer = setTimeout(() => finish(opened ? undefined : new Error("aisstream_timeout")), this.timeoutMs)
         socket!.onopen = () => {
           opened = true
-          socket!.send(JSON.stringify({ APIKey: apiKey, FiltersShipMMSI: [...trackedMmsi], FilterMessageTypes: ["PositionReport"] }))
+          try {
+            socket!.send(JSON.stringify({
+              APIKey: apiKey,
+              BoundingBoxes: aisStreamBoundingBoxes,
+              FiltersShipMMSI: [...trackedMmsi],
+              FilterMessageTypes: ["PositionReport"],
+            }))
+          } catch (error) {
+            finish(safeProviderError(error))
+          }
         }
         socket!.onmessage = (event) => {
-          const position = mapAisStreamPosition(parseMessage(event.data) ?? {}, fetchedAt)
+          const message = parseMessage(event.data)
+          const error = message ? protocolError(message) : undefined
+          if (error) {
+            finish(error)
+            return
+          }
+          const position = mapAisStreamPosition(message ?? {}, fetchedAt)
           if (!position) return
           positions.set(position.mmsi, position)
-          if ([...trackedMmsi].every(mmsi => positions.has(mmsi))) finish()
+          if (trackedMmsi.every(mmsi => positions.has(mmsi))) finish()
         }
         socket!.onerror = event => finish(safeProviderError(event))
         socket!.onclose = () => {
           if (!settled) finish(positions.size ? undefined : new Error("aisstream_connection_closed"))
         }
       })
-      return result
-    } catch (error) {
-      throw safeProviderError(error)
     } finally {
       if (timer) clearTimeout(timer)
       try {

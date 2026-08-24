@@ -53,6 +53,16 @@ describe("ais position repository", () => {
     native.close()
   })
 
+  it("does not count a duplicate history position as written", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const repository = new AisPositionRepository(database, "mock")
+    await expect(repository.savePositions([position], [target])).resolves.toMatchObject({ written: 1 })
+    await expect(repository.savePositions([position], [target])).resolves.toMatchObject({ written: 0 })
+    expect(native.prepare("SELECT COUNT(*) AS count FROM ais_positions").get()).toEqual({ count: 1 })
+    native.close()
+  })
+
   it("discards unknown MMSI and invalid coordinates without creating a vessel", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
