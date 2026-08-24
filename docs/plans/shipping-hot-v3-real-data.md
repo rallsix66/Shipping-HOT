@@ -1,16 +1,16 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 文档状态：`accepted / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed / AIS tracking runtime deferred`
+> 文档状态：`accepted / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed + P3A AIS Tracking Runtime Foundation implemented / Feed, Calendar, Voyage, Translation pending`
 >
 > 审查日期：2026-08-24（Asia/Shanghai）
 >
-> 代码基线：`codex/shipping-hot-v3-real-data`（P2B 本轮）
+> 代码基线：`codex/shipping-hot-v3-real-data`（P3A 本轮）
 >
-> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal 与 P2C Background Runtime Foundation 已完成、封板并通过本地验证**。本轮完成统一 Runtime、migration v6 复合 identity、cadence-safe `runNow`、失败安全 bootstrap、SQLite execution history/provider health、启动/关闭接线和测试 Job 验证；不实现 AIS 长连接、Tracking Runtime、Feed、Calendar、Voyage、Translation 或其他后续 Provider 业务。
+> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 已完成封板，P3A AIS Tracking Runtime Foundation 已实现并通过本地验证**。本轮完成 migration v7 AIS history/latest、AISStream bounded PositionReport adapter、watchlist MMSI filter、AIS Runtime Job、Provider/Runtime failure isolation、latest-position API/UI 和 SQLite restart persistence；不实现 Feed、Calendar、Voyage、Translation、地图、轨迹动画或长期 AIS WebSocket 服务。
 >
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；只有具体 endpoint entitlement、地区/账号资格等未确认事项保持 `unknown/pending`。
 >
-> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮落实获批的 P2C Background Runtime Foundation；不创建账号、不购买服务、不实现 AIS 长连接、Tracking Runtime、Feed/Calendar/Voyage/Translation Adapter 或真实业务 Job。
+> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮落实获批的 P3A AIS Tracking Runtime Foundation；不创建账号、不购买服务、不实现 Feed/Calendar/Voyage/Translation Adapter、地图/轨迹系统或长期 AIS WebSocket 服务。
 
 ## 1. 背景与当前问题
 
@@ -778,6 +778,20 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | 测试 | singleton、same-provider multi-capability independence/restart、disabled capability isolation、no-overlap、failure isolation、success/failure/skipped sync_runs、runNow fake-timer cadence、provider_runtime 状态恢复、stop、start/bootstrap failure recovery、native SQLite reopen persistence |
 | 验收 | P2C targeted 20/20、full tests 270/270、typecheck、build、full lint（仅既有 4 个无关错误）、native SQLite restart smoke、git diff --check 与 Neat Freak Closeout；AIS Tracking Runtime、Feed Auto Sync、Calendar Auto Sync、Voyage、Translation 继续 pending |
 
+### P3A — AIS Tracking Runtime Foundation（implemented / locally verified）
+
+| 项目 | 内容 |
+| --- | --- |
+| 目标 | 在既有 BackgroundRuntime → Provider → Repository → SQLite 链路中建立第一条真实 AIS 船位链路；先验证 bounded `MMSI → PositionReport → position history/latest → API/UI`，不实现长期 WebSocket 服务 |
+| 修改文件 | `server/providers/ais/contracts.ts`、`server/providers/ais/aisstream-provider.ts`、`server/providers/ais/mock-provider.ts`、`server/providers/ais/index.ts`、`server/database/migrations/007-p3a-ais-tracking.ts`、`server/database/ais-positions.ts`、`server/runtime/ais-tracking-job.ts`、`server/runtime/registry.ts`、`server/api/shipping/vessels/[id]/position.get.ts`、`src/components/shipping/data.ts`、`src/components/shipping/pages.tsx`、`example.env.server` |
+| Provider Contract | `AisTrackingProvider` 提供 `subscribe(vessels)`、`unsubscribe(vessels)`、`getLatestPositions(vessels)`；本阶段只调用 bounded `getLatestPositions()`，AISStream key 通过 environment-first/FileSecretStore fallback 读取 |
+| 数据库 | migration v7 新增 append-only `ais_positions` 与 keyed `ais_latest_positions`；保留历史，latest 按 canonical `vessel_id` 快速读取；`source_type` 遵守 Real Mode `real/imported/derived` filter |
+| Job | `AisTrackingJob` 使用 `provider_id=aisstream|mock`、`capability=ais_tracking`，读取 `vessel_watchlist` 中 `ais_enabled=true` 且有 MMSI 的 canonical metadata；写 `sync_runs` 与 `provider_runtime`，不自动猜 MMSI、不通过船名搜索 AIS |
+| 异常 | 未知 MMSI 丢弃并记录 warning code；非法坐标拒绝保存；TTL 外 latest 标记 `stale` 但不删历史；Provider 失败保留 last-known position；Real Mode 拒绝 Mock position |
+| API/UI | `GET /api/shipping/vessels/:id/position` 只读 SQLite；Watchlist/船舶详情显示 Tracking Active、Unavailable (No MMSI)、最新位置、更新时间、source/stale；不做地图或轨迹动画；`GET /api/shipping` 继续 legacy/deferred |
+| 测试 | Provider mapping、unknown MMSI、invalid coordinate、Mock isolation、watchlist filter、Runtime success/failure、last-known preservation、restart persistence、no duplicate execution、stale/latest view |
+| 验收 | P3A targeted tests、full tests、typecheck、build、full lint、P0/P2C/P3A native SQLite restart smoke、git diff --check 与 Neat Freak Closeout；Feed Auto Sync、Calendar Auto Sync、Voyage、Translation 继续 pending |
+
 ### P3 — Feed Freshness
 
 | 项目 | 内容 |
@@ -1117,7 +1131,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 
 ## 27. 实施门槛与文档后续
 
-`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal 与 P2C Background Runtime Foundation 已获授权、实施并完成本地验证；AIS Tracking Runtime、剩余 P2 watch/tracking 及后续 Provider 功能仍 deferred。该 ADR 至少覆盖：
+`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 与 P3A AIS Tracking Runtime Foundation 已获授权、实施并完成本地验证；Feed、Calendar、Voyage、Translation 及长期 AIS observation coverage 仍 pending/deferred。该 ADR 至少覆盖：
 
 - V3 real-only runtime、SQLite fail-closed/read-only 行为和已验证的单一 Node LTS。
 - VesselAPI 仅 Discovery/static metadata、AISStream 长期 tracking、UN/LOCODE 默认 Port Search，以及 provider-owned/user-owned/directory-owned/translation-owned 字段边界。
@@ -1126,7 +1140,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 - TranslationProvider 可切换合同、Settings AI 翻译中心、单一 `translation_cache` source of truth、server-only secret、`provider_usage` 和“本地统计/估算”标签。
 - Current Voyage 与 DCSA Commercial Schedule 的事实分层。
 
-后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B、P2A Search Foundation、P2B Identity Seal 与 P2C Background Runtime Foundation 已完成；AIS Tracking Runtime、剩余 P2 watch 或 P5 Schedule 不在本轮；后续 Provider/AI adapter 仍按单独批准范围实施。
+后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 与 P3A AIS Tracking Runtime Foundation 已完成；Feed、Calendar、Voyage、Translation 及后续 Provider/AI adapter 仍按单独批准范围实施。
 
 ## 28. 外部资料
 

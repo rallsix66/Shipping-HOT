@@ -6,7 +6,7 @@ import type { AisDerivedPortMetric } from "@shared/ais-area"
 import type { Severity as SeverityValue, ShippingEvent, WeatherDetail } from "@shared/shipping"
 import type { VesselSearchResponse, VesselSearchResult, VesselWatchlistItem } from "@shared/vessel-search"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
-import { type ShippingResponse, useShipping } from "./data"
+import { type ShippingResponse, useAisLatestPosition, useShipping } from "./data"
 import { formatDate, formatPortMetric, formatStatus, navTone, severityTone } from "./format"
 import { AnimatedNumber, EmptyState, Marquee, ProvenanceBadge, ProviderChip, Reveal, Segmented, StatusDot } from "./ui"
 import { myFetch } from "~/utils"
@@ -575,7 +575,7 @@ function VesselSearchPanel() {
                     {" · "}
                     {result.source}
                   </p>
-                  <p className="mt-1 text-xs op-60">{result.mmsi ? "MMSI 可用于 AIS lookup" : "暂无 MMSI，暂不可进行 AIS Tracking"}</p>
+                  <p className="mt-1 text-xs op-60">{watched ? (result.mmsi ? "Tracking: Active" : "Unavailable (No MMSI)") : result.mmsi ? "MMSI 可用于 AIS lookup" : "暂无 MMSI，暂不可进行 AIS Tracking"}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   {watched && <span className="chip">已关注</span>}
@@ -632,6 +632,12 @@ export function VesselsPage() {
                       {v.carrier ?? "未知船公司"}
                       {" · "}
                       {v.shipType ?? "船舶"}
+                      {v.isWatched && (
+                        <>
+                          {" · "}
+                          {v.mmsi ? "Tracking: Active" : "Unavailable (No MMSI)"}
+                        </>
+                      )}
                     </small>
                   </Link>
                   <span className="st-c c-status">
@@ -656,6 +662,7 @@ export function VesselsPage() {
 
 export function VesselDetailPage({ id }: { id: string }) {
   const { data, isLoading, isError, refetch } = useShipping()
+  const { data: latestPosition, isLoading: isPositionLoading } = useAisLatestPosition(id)
   if (isLoading) return <ShippingShell><LoadingState /></ShippingShell>
   if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
   const vessel = data.vessels.find(v => v.id === id)
@@ -710,6 +717,38 @@ export function VesselDetailPage({ id }: { id: string }) {
             <dt>状态开始于</dt>
             <dd>{formatDate(vessel.statusChangedAt)}</dd>
           </dl>
+          <div className="mt-4 border-t border-white/10 pt-4">
+            <div className="panel-h">
+              <h3>AIS Tracking</h3>
+              <StatusBadge stale={latestPosition?.stale ?? true} sourceStatus={latestPosition ? "healthy" : "never_succeeded"} unknown={!latestPosition} />
+            </div>
+            {!vessel.isWatched
+              ? <p className="text-sm op-70">未加入关注列表。</p>
+              : !vessel.mmsi
+                  ? <p className="text-sm op-70">Unavailable (No MMSI)</p>
+                  : isPositionLoading
+                    ? <p className="text-sm op-70">正在读取最新位置…</p>
+                    : !latestPosition
+                        ? <p className="text-sm op-70">暂无 AIS 位置。</p>
+                        : (
+                            <dl className="kv">
+                              <dt>最新位置</dt>
+                              <dd>
+                                {latestPosition.latitude.toFixed(4)}
+                                ,
+                                {" "}
+                                {latestPosition.longitude.toFixed(4)}
+                              </dd>
+                              <dt>更新时间</dt>
+                              <dd>{formatDate(latestPosition.timestamp)}</dd>
+                              <dt>数据来源</dt>
+                              <dd>
+                                {latestPosition.source}
+                                {latestPosition.stale ? " · stale" : ""}
+                              </dd>
+                            </dl>
+                          )}
+          </div>
         </div>
         <div className="flex flex-col gap-4">
           <div className="glass-panel d-panel">

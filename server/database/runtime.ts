@@ -7,8 +7,9 @@ import { p1aPortDirectoryMigration } from "#/database/migrations/003-p1a-port-di
 import { p1bMockIsolationMigration } from "#/database/migrations/004-p1b-mock-isolation"
 import { p2aSearchFoundationMigration } from "#/database/migrations/005-p2a-search-foundation"
 import { p2cRuntimeFoundationMigration } from "#/database/migrations/006-p2c-runtime-foundation"
+import { p3aAisTrackingMigration } from "#/database/migrations/007-p3a-ais-tracking"
 
-export const latestSchemaVersion = p2cRuntimeFoundationMigration.version
+export const latestSchemaVersion = p3aAisTrackingMigration.version
 
 export type ShippingDataMode = "mock" | "real"
 
@@ -76,7 +77,7 @@ async function runMigrations(db: Database) {
 
   const appliedRows = await db.prepare("SELECT version FROM schema_migrations ORDER BY version").all() as Array<{ version: number }>
   const applied = new Set(appliedRows.map(row => Number(row.version)))
-  const migrations = [p0FoundationMigration, watchlistIsolationMigration, p1aPortDirectoryMigration, p1bMockIsolationMigration, p2aSearchFoundationMigration, p2cRuntimeFoundationMigration]
+  const migrations = [p0FoundationMigration, watchlistIsolationMigration, p1aPortDirectoryMigration, p1bMockIsolationMigration, p2aSearchFoundationMigration, p2cRuntimeFoundationMigration, p3aAisTrackingMigration]
   for (const migration of migrations) {
     if (applied.has(migration.version)) continue
     await transaction(db, async () => {

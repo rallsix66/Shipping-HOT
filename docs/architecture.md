@@ -1,7 +1,7 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
 > Last verified: 2026-08-24
-> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation, implemented V2.1–V2.5 local capabilities; ADR-005 V3 Real-Data Boundaries is Accepted, P0 Persistence, P1A Port Directory Foundation, P1B Mock Isolation, P2A Search Foundation, P2B Identity Seal and P2C Background Runtime Foundation are implemented/verified; AIS Tracking Runtime and remaining P2 watch/tracking work remain deferred; V2.5 external area observation remains live pending
+> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation, implemented V2.1–V2.5 local capabilities; ADR-005 V3 Real-Data Boundaries is Accepted, P0 Persistence, P1A Port Directory Foundation, P1B Mock Isolation, P2A Search Foundation, P2B Identity Seal, P2C Background Runtime Foundation and P3A AIS Tracking Runtime Foundation are implemented/verified; Feed, Calendar, Voyage and Translation remain deferred; V2.5 external area observation remains live pending
 > Source of truth for: the current retained system structure and approved boundaries
 
 ## Current AISStream + Calendarific Live Verification — 2026-08-18
@@ -53,6 +53,14 @@ All-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source
 - `RuntimeRepository` is the only P2C SQL boundary for `sync_runs` and `provider_runtime`. Each actual execution writes a `running` row, then `success`, `failed` or `skipped`; Provider runtime tracks `healthy`, `degraded`, `failed`, `disabled` and `never_succeeded`, including next schedule and consecutive failures.
 - `server/runtime/bootstrap.ts` initializes SQLite/migrations before constructing the singleton, installs SIGTERM/SIGINT shutdown hooks only after successful startup, and honors `SHIPPING_RUNTIME_ENABLED`. Failed Runtime startup clears timers/running state and leaves no reusable singleton or signal handlers. The default Registry is intentionally empty so P2C cannot call AIS/Feed/Calendar/Voyage/Translation Providers.
 - `GET /api/shipping/runtime` is a local, redacted runtime status surface. The existing `GET /api/shipping` request-triggered Provider path is marked legacy/deferred; new capabilities must use `BackgroundRuntime → Provider → SQLite`, while reads move toward `GET → Repository → SQLite` one workstream at a time.
+
+## V3 P3A AIS Tracking Runtime Foundation — 2026-08-24
+
+- Migration v7 adds append-only `ais_positions` history and the keyed `ais_latest_positions` read model. Both carry `source_type`; Real Mode reads only `real/imported/derived` and rejects Mock positions.
+- `AisTrackingProvider` is a server-only contract with `subscribe()`, `unsubscribe()` and bounded `getLatestPositions()`. The AISStream adapter performs a short, timeout-bounded PositionReport read and maps MMSI, coordinates, speed, course, heading, navigation status and source timestamp. It does not create a long-lived WebSocket service.
+- `AisTrackingJob` is registered through `BackgroundRuntime` with capability `ais_tracking`. It reads only `vessel_watchlist` entries where `ais_enabled=true` and canonical metadata has an MMSI; no-MMSI watches remain available but are never guessed or sent to AIS.
+- Unknown MMSI and invalid coordinates are discarded before persistence; stale latest data remains queryable with `stale=true`; Provider failure leaves the latest position/history untouched. `GET /api/shipping/vessels/:id/position` reads SQLite only. The UI exposes only Tracking state and latest position/source metadata; it does not add a map or trajectory view.
+- `SHIPPING_AIS_PROVIDER=mock` is the safe default for Mock/Test Mode. Real Mode accepts only the AISStream adapter or another real adapter explicitly added behind the contract; environment secrets take precedence over `FileSecretStore`.
 
 ## Calendarific Final Operational Semantics Seal — 2026-08-18
 
@@ -262,7 +270,7 @@ Provider mode is the requested source (`mock`, `aisstream`, `portcast`, `open-me
 ## 13. Testing and Verification Boundaries
 
 - Current tests: Vitest covers Shipping HOT Domain, Provider, Repository, Event/HOT and UI trust contracts.
-- Current verification state: V3 P0/P1A/P1B/P2A has 248/248 tests, typecheck, production build, native better-sqlite3 read/write and migration-aware process-A-write → close → process-B-read persistence smoke. Full lint retains four pre-existing errors outside this batch. Neat Freak Closeout is complete via the loaded skill and manual Windows-equivalent audit; Bash inventory is pending/unavailable. AIS observations, official-alert live criteria, AIS Tracking Runtime and remaining P2 watch/tracking work remain pending or deferred.
+- Current verification state: V3 P0/P1A/P1B/P2A/P2B/P2C/P3A has 280/280 tests, typecheck, production build, native better-sqlite3 read/write and migration-aware process-A-write → close → process-B-read persistence smoke for the runtime and AIS position stores. Full lint retains four pre-existing errors outside this batch. Neat Freak Closeout is complete via the loaded skill and manual Windows-equivalent audit; Bash inventory is pending/unavailable. Live AIS observation coverage and official-alert live criteria remain pending; Feed, Calendar, Voyage and Translation remain deferred.
 - Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, Calendar source composition/conflict/reconciliation/announcement behavior, RSS/HTML Feed parsing with unknown publication and Chinese classification, source isolation, repost dedupe, Feed → Event/HOT boundaries, Open-Meteo 24-hour/72-hour/7-day windows/direction/TTL/per-port failure behavior, source-specific official warning parsing/expiry, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 
@@ -287,7 +295,7 @@ Changes that can remain local implementation decisions:
 | Item | State | Impact | Owner / next action |
 |---|---|---|---|
 | Shipping HOT V1 Provider architecture | accepted | User-approved AISStream Vessel and Open-Meteo Marine Weather adapters preserve existing interfaces and Domain/Event/HOT boundaries | Preserve current module boundaries; no V2 Provider expansion |
-| Project Architect/Neat Freak docs reconciliation | changed-and-verified | Docs, status and accepted ADR now record P2A Search Foundation as implemented while AIS Tracking Runtime and remaining P2 watch/tracking work remain deferred | Re-run closeout after any later implementation phase |
+| Project Architect/Neat Freak docs reconciliation | changed-and-verified | Docs, status and accepted ADR now record P3A AIS Tracking Runtime Foundation as implemented while Feed, Calendar, Voyage and Translation remain deferred | Re-run closeout after any later implementation phase |
 | Runtime/database file path | changed-and-verified | Node `24.15.0` / ABI `137`, `better-sqlite3@12.6.2`, and `.data/shipping-hot-v3.sqlite3` passed native and restart persistence smoke | Preserve the fixed Node 24 toolchain; do not reintroduce memory fallback |
 | GitHub remote/account metadata | changed-and-verified; no remote CI evidence | `gh auth status` and `gh repo view` verified `rallsix66/Shipping-HOT` and `main`; `gh run list` returned no workflow runs | Keep local verification separate from GitHub CI claims |
 | Real shipping data sources | changed-and-verified for V1 | AISStream is beta and key-gated; Open-Meteo Marine is optional-key for normal use and carries coastal-accuracy/attribution caveats | Keep keys server-side; Mock is default only, with no Mock fallback in an explicitly real mode |

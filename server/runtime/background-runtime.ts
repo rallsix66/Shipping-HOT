@@ -277,11 +277,12 @@ export class BackgroundRuntime {
           lastSourceUpdatedAt: result.sourceUpdatedAt ?? null,
           nextSyncAt,
           consecutiveFailures: 0,
-          errorCode: null,
-          errorMessage: null,
+          errorCode: result.errorCode ?? null,
+          errorMessage: result.errorMessage ? safeErrorMessage(result.errorMessage) : null,
           updatedAt: completedAt,
         })
         this.applyRuntimeState(state, runtime, "success")
+        if (result.errorCode) this.log.error("job completed with warnings", { jobId: state.job.id, providerId: state.job.providerId, errorCode: result.errorCode })
         this.log.info("job success", { jobId: state.job.id, providerId: state.job.providerId })
       } else if (result.status === "skipped") {
         await this.repository.completeSyncRun({ id: syncRun.id, completedAt, status: "skipped", recordsRead: result.recordsRead, recordsWritten: result.recordsWritten, errorCode: result.errorCode, errorMessage: result.errorMessage })

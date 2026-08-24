@@ -28,7 +28,8 @@
     "log": "wrangler pages deployment tail --project-name newsnow",
     "test": "vitest -c vitest.config.ts",
     "smoke:p0-native": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p0-native-sqlite-smoke.ts",
-    "smoke:p2c-runtime": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p2c-runtime-sqlite-smoke.ts"
+    "smoke:p2c-runtime": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p2c-runtime-sqlite-smoke.ts",
+    "smoke:p3a-ais": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p3a-ais-sqlite-smoke.ts"
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.7",

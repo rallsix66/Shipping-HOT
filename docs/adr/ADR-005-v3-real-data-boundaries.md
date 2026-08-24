@@ -63,6 +63,16 @@ P2C establishes the shared background execution foundation without activating an
 - Nitro startup initializes DB/migrations before Runtime startup, and SIGTERM/SIGINT/Nitro close stop the Runtime. A failed Runtime start clears timers/running state; bootstrap publishes the singleton and installs signal handlers only after successful initialization. `SHIPPING_RUNTIME_ENABLED=false` disables startup. `GET /api/shipping/runtime` exposes only local non-sensitive status.
 - The existing `GET /api/shipping` request-triggered Provider path is explicitly legacy/deferred. P2C adds no new request-triggered sync and does not claim that all Shipping HOT reads are already background-only.
 
+### 2.4 P3A AIS Tracking Runtime Foundation boundary
+
+P3A is the first approved business Provider Workstream after P2C. It uses the existing process-local Runtime and SQLite boundaries and does not change the application architecture.
+
+- `AisTrackingProvider` is server-only and exposes `subscribe`, `unsubscribe` and bounded `getLatestPositions`; the first implementation uses a short-lived AISStream PositionReport read and does not create a long-lived WebSocket service, queue, worker or separate service.
+- Migration v7 adds append-only `ais_positions` history and keyed `ais_latest_positions`. Every position carries `source_type`; Real Mode reads only `real`, `imported` and `derived`, and Mock positions are rejected in Real Mode.
+- `AisTrackingJob` is registered through `BackgroundRuntime` with capability `ais_tracking`. Its input is exclusively the user-owned `vessel_watchlist` joined to canonical `vessel_metadata`; only `ais_enabled=true` rows with an existing MMSI are sent to the Provider. No MMSI guessing or vessel-name AIS lookup is allowed.
+- Unknown MMSI and invalid coordinates never create a Vessel or position row. Provider failures preserve the last-known position. The latest-position API is Repository → SQLite only, and the UI is limited to status/latest position/source/stale metadata without a map or trajectory surface.
+- The default configuration is Mock for Mock/Test Mode. AISStream credentials are environment-first with server-only FileSecretStore fallback. P3A does not authorize Feed, Calendar, Voyage or Translation Jobs.
+
 ### 2.1 Migration strategy and source classification
 
 V3 migration is side-by-side. The V2 database is backed up and never rewritten; a new V3 SQLite file runs the migration runner before any approved import. Every migrated or newly persisted record that participates in the migration boundary carries the lineage classification `source_type`:

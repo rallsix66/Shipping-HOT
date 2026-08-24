@@ -2,6 +2,7 @@ import process from "node:process"
 import type { Database } from "db0"
 import { initShippingTables } from "#/database/shipping"
 import { RuntimeRepository } from "#/database/runtime-jobs"
+import type { AisTrackingProvider } from "#/providers/ais/contracts"
 import { BackgroundRuntime, type RuntimeJob } from "#/runtime/background-runtime"
 import { getDefaultRuntimeJobs } from "#/runtime/registry"
 
@@ -26,6 +27,7 @@ export interface BootstrapBackgroundRuntimeOptions {
   database?: Database
   repository?: RuntimeRepository
   jobs?: RuntimeJob[]
+  aisProvider?: AisTrackingProvider
   enabled?: boolean
   installSignalHandlers?: boolean
 }
@@ -55,9 +57,10 @@ export async function bootstrapBackgroundRuntime(options: BootstrapBackgroundRun
   if (state.bootstrapPromise) return state.bootstrapPromise
   state.bootstrapPromise = (async () => {
     const database = options.database ?? useDatabase()
-    await initShippingTables(database, process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock")
+    const dataMode = process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock"
+    await initShippingTables(database, dataMode)
     const runtime = new BackgroundRuntime(options.repository ?? new RuntimeRepository(database))
-    for (const job of options.jobs ?? getDefaultRuntimeJobs()) runtime.register(job)
+    for (const job of options.jobs ?? getDefaultRuntimeJobs({ database, dataMode, aisProvider: options.aisProvider })) runtime.register(job)
     if (options.enabled ?? runtimeEnabled()) await runtime.start()
     state.runtime = runtime
     if (options.installSignalHandlers ?? false) installSignalHandlers()
