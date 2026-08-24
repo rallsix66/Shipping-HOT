@@ -4,9 +4,10 @@ import { type ReactNode, useEffect, useState } from "react"
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
 import type { Severity as SeverityValue, ShippingEvent, WeatherDetail } from "@shared/shipping"
+import type { VoyageRecord } from "@shared/voyage"
 import type { VesselSearchResponse, VesselSearchResult, VesselWatchlistItem } from "@shared/vessel-search"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
-import { type ShippingResponse, useAisLatestPosition, useShipping } from "./data"
+import { type ShippingResponse, useAisLatestPosition, useLatestVoyage, useShipping } from "./data"
 import { formatDate, formatPortMetric, formatStatus, navTone, severityTone } from "./format"
 import { AnimatedNumber, EmptyState, Marquee, ProvenanceBadge, ProviderChip, Reveal, Segmented, StatusDot } from "./ui"
 import { myFetch } from "~/utils"
@@ -663,6 +664,7 @@ export function VesselsPage() {
 export function VesselDetailPage({ id }: { id: string }) {
   const { data, isLoading, isError, refetch } = useShipping()
   const { data: latestPosition, isLoading: isPositionLoading } = useAisLatestPosition(id)
+  const { data: latestVoyage, isLoading: isVoyageLoading } = useLatestVoyage(id)
   if (isLoading) return <ShippingShell><LoadingState /></ShippingShell>
   if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
   const vessel = data.vessels.find(v => v.id === id)
@@ -670,6 +672,7 @@ export function VesselDetailPage({ id }: { id: string }) {
   const relatedEvents = data.events.filter(e => e.vesselId === id)
   const relatedVoyages = data.voyages.filter(v => v.vesselId === id)
   const weatherItems = data.feedItems.filter(item => item.weather && item.relatedVesselIds.includes(id)).slice(0, 2)
+  const voyagePortName = (portId: string) => data.ports.find(port => port.id === portId || port.unlocode === portId)?.name ?? portId
   return (
     <ShippingShell title={`船舶详情 · ${vessel.name}`}>
       <Link to="/vessels" className="back-link">
@@ -752,6 +755,14 @@ export function VesselDetailPage({ id }: { id: string }) {
         </div>
         <div className="flex flex-col gap-4">
           <div className="glass-panel d-panel">
+            <div className="panel-h"><h3>Voyage</h3></div>
+            {isVoyageLoading
+              ? <p className="text-sm op-60">正在读取航次…</p>
+              : !latestVoyage
+                  ? <p className="text-sm op-60">暂无航次数据</p>
+                  : <VoyageSummary voyage={latestVoyage} portName={voyagePortName} />}
+          </div>
+          <div className="glass-panel d-panel">
             <div className="panel-h">
               <h3>关联事件</h3>
               <Link to="/events" className="link-more">
@@ -797,6 +808,25 @@ export function VesselDetailPage({ id }: { id: string }) {
         </div>
       </div>
     </ShippingShell>
+  )
+}
+
+function VoyageSummary({ voyage, portName }: { voyage: VoyageRecord, portName: (portId: string) => string }) {
+  return (
+    <dl className="kv">
+      <dt>Origin</dt>
+      <dd>{portName(voyage.originPortId)}</dd>
+      <dt>Destination</dt>
+      <dd>{portName(voyage.destinationPortId)}</dd>
+      <dt>ETA</dt>
+      <dd>{formatDate(voyage.eta)}</dd>
+      <dt>Status</dt>
+      <dd>{formatStatus(voyage.status)}</dd>
+      <dt>Source</dt>
+      <dd>{voyage.source}</dd>
+      <dt>更新时间</dt>
+      <dd>{formatDate(voyage.lastUpdatedAt)}</dd>
+    </dl>
   )
 }
 

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import type { HotItem, ShippingSnapshot } from "@shared/shipping"
+import type { VoyageRecord } from "@shared/voyage"
 import { myFetch } from "~/utils"
 
 export type ShippingResponse = ShippingSnapshot & { hot: HotItem[], provider: { vessel: string, port: string, schedule: string, weather: string, weatherAlerts: "off" | "public" | "experimental", feed: string, calendar: string, aisArea?: "off" | "aisstream", calendarSourceIds?: string[] }, realProviders: { vessel: string, port: string, schedule: string, weather: string, weatherAlerts: string, aisArea: string, feed: string, calendar: string }, calendarAttribution?: string }
@@ -32,6 +33,15 @@ export function useAisLatestPosition(vesselId: string) {
   return useQuery({
     queryKey: ["ais-position", vesselId],
     queryFn: () => myFetch<AisLatestPosition | null>(`/shipping/vessels/${encodeURIComponent(vesselId)}/position`),
+    staleTime: 30_000,
+    enabled: Boolean(vesselId),
+  })
+}
+
+export function useLatestVoyage(vesselId: string) {
+  return useQuery({
+    queryKey: ["voyage", vesselId],
+    queryFn: () => myFetch<VoyageRecord | null>(`/shipping/vessels/${encodeURIComponent(vesselId)}/voyage`),
     staleTime: 30_000,
     enabled: Boolean(vesselId),
   })

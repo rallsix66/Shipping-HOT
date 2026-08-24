@@ -1,16 +1,16 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 文档状态：`accepted / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed + P3A AIS Tracking Runtime Foundation implemented / Feed, Calendar, Voyage, Translation pending`
+> 文档状态：`accepted / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed + P3A AIS Tracking Runtime Foundation + P3B Voyage / ETA Foundation implemented / Feed, Calendar, Translation pending`
 >
 > 审查日期：2026-08-24（Asia/Shanghai）
 >
 > 代码基线：`codex/shipping-hot-v3-real-data`（P3A 本轮）
 >
-> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 已完成封板，P3A AIS Tracking Runtime Foundation 已实现并通过本地验证**。本轮完成 migration v7 AIS history/latest、AISStream bounded PositionReport adapter、watchlist MMSI filter、AIS Runtime Job、Provider/Runtime failure isolation、latest-position API/UI 和 SQLite restart persistence；不实现 Feed、Calendar、Voyage、Translation、地图、轨迹动画或长期 AIS WebSocket 服务。
+> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 已完成封板，P3A AIS Tracking Runtime Foundation 与 P3B Voyage / ETA Foundation 已实现并通过本地验证**。本阶段完成 migration v8 Voyage/ETA history、Mock VoyageProvider、`voyage_sync` Runtime Job、Repository/API/UI 和 SQLite restart persistence；不实现 Feed、Calendar、Translation、AIS ETA prediction、地图、轨迹动画或商业 Voyage adapter。
 >
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；只有具体 endpoint entitlement、地区/账号资格等未确认事项保持 `unknown/pending`。
 >
-> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮落实获批的 P3A AIS Tracking Runtime Foundation；不创建账号、不购买服务、不实现 Feed/Calendar/Voyage/Translation Adapter、地图/轨迹系统或长期 AIS WebSocket 服务。
+> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮落实获批的 P3B Voyage / ETA Intelligence Foundation；不创建账号、不购买服务、不实现 Feed/Calendar/Translation Adapter、AIS ETA prediction、地图/轨迹系统或商业 Voyage adapter。
 
 ## 1. 背景与当前问题
 
@@ -47,7 +47,7 @@ Shipping HOT V2 已经建立了 Provider、Domain、Repository、Event/HOT 和�
 | 行业资讯 | The Loadstar active；Maritime Executive disabled；其他 registry 项未启用 | Loadstar 真实；Maritime Executive failed；无 Mock fallback 时边界正确 | `feed_items` 设计持久化；当前实际为内存 | 无发布时间年龄闸门、future/异常日期校验和 current/history 分层 | 拆成 Ingestion Gate、Current Feed Query Gate、HOT/Event Freshness Gate；默认 7 天，重大资讯最多 14 天，历史单独查询 |
 | 港口公告 | Shekou `/ywgg/` active；其他港口 registry 多为 pending/deferred | Shekou 页面真实；多数条目 publication time unknown | 同 Feed | 发布时间未知仍出现在 Feed；是否仍有效不可判断 | 官方公告与行业新闻分层；基于有效期/撤回状态，未知时间默认不进当前流 |
 | 国家日历 | Calendarific + 空的 Official/Manual composition | Calendarific transport/parser 真实且 partial；Official/Manual 当前没有实数据 | `calendar_events` + `settings.calendarSync` 设计；当前实际为内存 | 启动不自动同步；seed 可重置 coverage；只手工维护单年 | 启动先读库，后台维护当前年 + 下一年，约 7 天 TTL，失败保留 last-known |
-| 当前航程 | AIS 目的地/ETA 字段和 Mock Voyage 分散存在 | 混合，未形成真实 Current Voyage | `voyages` 当前只保存 Mock schedule | AIS ETA 与官方班期没有分层；无 port-call 事实 | 先用 AIS observed + 已验证 port-call evidence 形成 Current Voyage；VesselAPI ETA/events 只能作为账号验证后的可选 enrichment |
+| 当前航程 | P3B `VoyageRecord` + Mock Voyage Provider；AIS Position 仍独立 | Current Voyage Foundation 已形成，真实 Voyage adapter pending | `voyages` + `voyage_eta_history` | AIS ETA 与 Provider ETA 仍不合并；无 ETA prediction/port-call enrichment | 只保存 Provider 提供的 ETA/ETD；后续另行批准真实 adapter 与 AIS/ETA 联动 |
 | 商业班期 | `MockScheduleProvider` | 全 Mock | `voyages` | Real Mode 也始终 operational；无真实 ScheduleProvider adapter | DCSA 规范化合同；按获准船公司逐个接入；无 Provider 时为空 |
 | Events | `detectShippingEvents()` | derived；显式 sourceId 过滤能排除多数 Mock，但 `mock-schedule` 被允许 | `events` 设计持久化；当前实际为内存 | orphan active Event 无当前 source trust 时不会 resolve/expire；混合 fixture lineage 未被识别 | 所有 evidence 必须是 real/user/derived-from-real；有明确有效期、source identity 和可追溯链 |
 | HOT | `rankHotItems()` | derived；可含 Mock schedule Event 和长期 active 的旧 Event | 查询结果，不单独持久化 | 没有强制 `all evidence real`；stale active Event 仍可出现 | 只消费通过 Real Evidence Gate 的 Event/Feed，逐条可追溯 |
@@ -68,7 +68,7 @@ Shipping HOT V2 已经建立了 Provider、Domain、Repository、Event/HOT 和�
 - `GET /api/shipping/calendar`：读取已缓存日历。
 - `POST /api/shipping/calendar/sync`：手工同步指定年/国家。
 
-仍不存在 Current Voyage/Port Call、Provider Health、历史 Feed 搜索和翻译状态 API；P3A 已提供 bounded AIS latest-position API，但长期 AIS session、Static/Voyage enrichment 与完整业务 Provider API 仍 deferred。
+Current Voyage latest API 已由 P3B 提供；仍不存在 Commercial Port Call、Provider Health、历史 Feed 搜索和翻译状态 API。P3A 的 bounded AIS latest-position API 与 P3B Voyage/ETA API 保持独立，长期 AIS session、真实 Voyage enrichment 与完整业务 Provider API 仍 deferred。
 
 ### 2.3 Provider 已存在但未真正启用的部分
 
@@ -776,7 +776,7 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | Registry | P2C 默认为空；测试 FakeJob 只存在于自动测试，不注册任何真实 AIS/Feed/Calendar/Voyage/Translation Job |
 | API 边界 | `GET /api/shipping/runtime` 只返回本地非敏感状态；现有 `GET /api/shipping` 请求触发 Provider path 标记为 legacy/deferred，后续按 Workstream 逐个迁移，P2C 不重写 `shipping-store` |
 | 测试 | singleton、same-provider multi-capability independence/restart、disabled capability isolation、no-overlap、failure isolation、success/failure/skipped sync_runs、runNow fake-timer cadence、provider_runtime 状态恢复、stop、start/bootstrap failure recovery、native SQLite reopen persistence |
-| 验收 | P2C targeted 20/20、full tests 270/270、typecheck、build、full lint（仅既有 4 个无关错误）、native SQLite restart smoke、git diff --check 与 Neat Freak Closeout；AIS Tracking Runtime、Feed Auto Sync、Calendar Auto Sync、Voyage、Translation 继续 pending |
+| 验收 | P2C targeted 20/20、full tests 270/270、typecheck、build、full lint（仅既有 4 个无关错误）、native SQLite restart smoke、git diff --check 与 Neat Freak Closeout；AIS Tracking Runtime、Feed Auto Sync、Calendar Auto Sync、Voyage、Translation 继续 pending（历史 P2C 记录） |
 
 ### P3A — AIS Tracking Runtime Foundation（implemented / locally verified）
 
@@ -790,7 +790,7 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | 异常 | 未知 MMSI 丢弃并记录 warning code；非法坐标拒绝保存；TTL 外 latest 标记 `stale` 但不删历史；Provider 失败保留 last-known position；Real Mode 拒绝 Mock position |
 | API/UI | `GET /api/shipping/vessels/:id/position` 只读 SQLite；Watchlist/船舶详情显示 Tracking Active、Unavailable (No MMSI)、最新位置、更新时间、source/stale；不做地图或轨迹动画；`GET /api/shipping` 继续 legacy/deferred |
 | 测试 | Provider mapping、unknown MMSI、invalid coordinate、Mock isolation、watchlist filter、Runtime success/failure、last-known preservation、restart persistence、no duplicate execution、stale/latest view |
-| 验收 | P3A targeted tests、full tests、typecheck、build、full lint、P0/P2C/P3A native SQLite restart smoke、git diff --check 与 Neat Freak Closeout；Feed Auto Sync、Calendar Auto Sync、Voyage、Translation 继续 pending |
+| 验收 | P3A targeted tests、full tests、typecheck、build、full lint、P0/P2C/P3A native SQLite restart smoke、git diff --check 与 Neat Freak Closeout；P3B 后 Feed Auto Sync、Calendar Auto Sync、Translation 继续 pending，real Voyage adapter coverage pending |
 
 ### P3 — Feed Freshness
 
@@ -1131,7 +1131,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 
 ## 27. 实施门槛与文档后续
 
-`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 与 P3A AIS Tracking Runtime Foundation 已获授权、实施并完成本地验证；Feed、Calendar、Voyage、Translation 及长期 AIS observation coverage 仍 pending/deferred。该 ADR 至少覆盖：
+`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation、P3A AIS Tracking Runtime Foundation 与 P3B Voyage / ETA Foundation 已获授权、实施并完成本地验证；Feed、Calendar、Translation、real Voyage adapter 及长期 AIS observation coverage 仍 pending/deferred。该 ADR 至少覆盖：
 
 - V3 real-only runtime、SQLite fail-closed/read-only 行为和已验证的单一 Node LTS。
 - VesselAPI 仅 Discovery/static metadata、AISStream 长期 tracking、UN/LOCODE 默认 Port Search，以及 provider-owned/user-owned/directory-owned/translation-owned 字段边界。
@@ -1140,7 +1140,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 - TranslationProvider 可切换合同、Settings AI 翻译中心、单一 `translation_cache` source of truth、server-only secret、`provider_usage` 和“本地统计/估算”标签。
 - Current Voyage 与 DCSA Commercial Schedule 的事实分层。
 
-后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 与 P3A AIS Tracking Runtime Foundation 已完成；Feed、Calendar、Voyage、Translation 及后续 Provider/AI adapter 仍按单独批准范围实施。
+后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation、P3A AIS Tracking Runtime Foundation 与 P3B Voyage / ETA Foundation 已完成；Feed、Calendar、Translation、real Voyage adapter 及后续 Provider/AI adapter 仍按单独批准范围实施。
 
 ## 28. 外部资料
 
