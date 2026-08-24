@@ -52,6 +52,16 @@ The completed P1B execution slice was Mock Isolation only: migration lineage, Re
 - Port Search uses the SQLite-backed UN/LOCODE `port_directory` and supports Chinese/English names, UN/LOCODE and aliases. VesselAPI Port enrichment is not required.
 - P2A does not implement watchlist workflow changes, AIS WebSocket/Tracking Runtime, Feed, Calendar, Voyage, Translation Adapter or complete Provider Runtime/Usage business.
 
+### 2.3 P2C Background Runtime Foundation boundary
+
+P2C establishes the shared background execution foundation without activating any real business Provider:
+
+- `BackgroundRuntime` is a process-level singleton. It owns Job registration, simple Node timers, `runNow()`, stop/shutdown behavior and one in-flight guard per Job. A Job failure is isolated from other Jobs and does not crash the Runtime.
+- `RuntimeJob` is limited to `id`, `providerId`, `capability`, `intervalMs`, `enabled` and `run()`. `SyncResult` is limited to status, record counts, source update time and redacted error fields. The production Registry is empty in P2C; AIS, Feed, Calendar, Voyage and Translation Jobs remain separately approved workstreams.
+- `RuntimeRepository` is the only SQL boundary for the existing `sync_runs` and `provider_runtime` tables. Actual executions write `running` then `success`/`failed`/`skipped`; Provider runtime health uses `healthy`, `degraded`, `failed`, `disabled` and `never_succeeded`, with the next schedule and consecutive failure count persisted in SQLite.
+- Nitro startup initializes DB/migrations before Runtime startup, and SIGTERM/SIGINT/Nitro close stop the Runtime. `SHIPPING_RUNTIME_ENABLED=false` disables startup. `GET /api/shipping/runtime` exposes only local non-sensitive status.
+- The existing `GET /api/shipping` request-triggered Provider path is explicitly legacy/deferred. P2C adds no new request-triggered sync and does not claim that all Shipping HOT reads are already background-only.
+
 ### 2.1 Migration strategy and source classification
 
 V3 migration is side-by-side. The V2 database is backed up and never rewritten; a new V3 SQLite file runs the migration runner before any approved import. Every migrated or newly persisted record that participates in the migration boundary carries the lineage classification `source_type`:
@@ -87,7 +97,7 @@ Calendar follows `Server Start → SQLite → UI → background check → sync`;
 
 - V3 can provide a real watchlist and Current Voyage even when Commercial Schedule or a per-port intelligence capability is unavailable.
 - The plan can be run at zero external Provider cost, with optional low-cost Discovery/static enrichment and separately budgeted translation.
-- P0 is deliberately narrow: metadata/bootstrap, ownership isolation, SQLite persistence and the removal of memory fallback are the implementation work. Approved future schema placeholders and `ProviderConfig`/`ProviderSecret`/`SecretStore`/`TranslationProvider` contracts may be present, but P0 must not implement AIS WebSocket, VesselAPI, Translation Adapters, complete Provider Runtime behavior or complete Provider Usage accounting.
+- P0 is deliberately narrow: metadata/bootstrap, ownership isolation, SQLite persistence and the removal of memory fallback are the implementation work. P2C later adds only the shared process Runtime and minimal runtime/sync persistence boundary; approved future schema placeholders and `ProviderConfig`/`ProviderSecret`/`SecretStore`/`TranslationProvider` contracts may be present, but P2C must not implement AIS WebSocket, VesselAPI, Translation Adapters, Provider-specific business Jobs or complete Provider Usage accounting.
 - Provider prices, entitlement, public signup and regional availability remain time-sensitive and must be rechecked before implementation.
 
 ## Verification required after approval

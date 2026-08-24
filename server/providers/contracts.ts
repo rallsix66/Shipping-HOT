@@ -90,7 +90,7 @@ export interface ProviderUsageRecord {
 export interface ProviderRuntimeRecord {
   providerId: string
   capability: string
-  status: "healthy" | "degraded" | "stale" | "unavailable" | "misconfigured" | "disabled"
+  status: "healthy" | "degraded" | "failed" | "disabled" | "never_succeeded"
   lastRequestAt?: string
   lastSuccessAt?: string
   lastFailureAt?: string
@@ -114,7 +114,7 @@ export interface SyncRunRecord {
   capability: string
   startedAt: string
   completedAt?: string
-  status: "running" | "succeeded" | "failed"
+  status: "running" | "success" | "failed" | "skipped"
   recordsRead?: number
   recordsWritten?: number
   errorCode?: string

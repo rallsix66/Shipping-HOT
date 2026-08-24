@@ -219,6 +219,9 @@ async function saveSnapshot(snapshot: ShippingSnapshot) {
 export async function getShippingSnapshot(): Promise<ShippingSnapshot> {
   await initialize()
   if (!repository || persistenceStatus.status === "unavailable") return emptySnapshot()
+  // LEGACY / DEFERRED MIGRATION: fetchProviderSnapshot may still call the
+  // existing Providers for this GET. New Provider work must use the
+  // BackgroundRuntime → SQLite path and must not add another request trigger.
   const stored = await readStoredSnapshot()
   const providerSnapshot = await fetchProviderSnapshot(stored.settings, stored)
   const current: ShippingSnapshot = {

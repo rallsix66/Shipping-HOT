@@ -4,6 +4,9 @@ import { operationalSourceContext, providerModes, realProviders } from "#/provid
 import { calendarAttribution } from "#/providers/calendar"
 
 export default defineEventHandler(async () => {
+  // LEGACY / DEFERRED MIGRATION: this endpoint still uses the historical
+  // request-triggered Provider path. P2C adds no new request-triggered sync;
+  // future workstreams must move each capability behind BackgroundRuntime.
   const snapshot = await getShippingSnapshot()
   return {
     ...snapshot,

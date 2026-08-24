@@ -1,7 +1,7 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
-> Last verified: 2026-08-21
-> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation, implemented V2.1–V2.5 local capabilities; ADR-005 V3 Real-Data Boundaries is Accepted, P0 Persistence, P1A Port Directory Foundation, P1B Mock Isolation and P2A Search Foundation are implemented/verified; AIS Tracking Runtime and remaining P2 watch/tracking work remain deferred; V2.5 external area observation remains live pending
+> Last verified: 2026-08-24
+> Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation, implemented V2.1–V2.5 local capabilities; ADR-005 V3 Real-Data Boundaries is Accepted, P0 Persistence, P1A Port Directory Foundation, P1B Mock Isolation, P2A Search Foundation, P2B Identity Seal and P2C Background Runtime Foundation are implemented/verified; AIS Tracking Runtime and remaining P2 watch/tracking work remain deferred; V2.5 external area observation remains live pending
 > Source of truth for: the current retained system structure and approved boundaries
 
 ## Current AISStream + Calendarific Live Verification — 2026-08-18
@@ -45,6 +45,13 @@ All-real local API smoke showed no Mock Vessel/Port/Weather/Feed/Calendar source
 - `createVesselApiSearchProvider()` is a discovery/static metadata adapter only. It returns identity/particulars and deliberately does not return position, tracking or AIS replacement data. A missing key/provider fails explicitly; Test/Mock Mode keeps an isolated Mock search provider.
 - `VesselSearchService` checks the local SQLite search cache before invoking the provider and persists normalized metadata/results. Port Search is a service boundary over the existing SQLite-backed `PortDirectoryRepository`, covering Chinese/English names, UN/LOCODE and aliases.
 - Server endpoints are `/api/shipping/search/vessels?q=...` and `/api/shipping/search/ports?q=...`; no UI workflow, AIS WebSocket, Tracking Runtime, Feed, Calendar, Voyage or Translation functionality was added in P2A.
+
+## V3 P2C Background Runtime Foundation — 2026-08-24
+
+- `BackgroundRuntime` is a process-level singleton with idempotent `start()`/`stop()`, registered `RuntimeJob` contracts, timer scheduling, `runNow()` and a per-job in-flight guard. A failed Job is converted to a failed result and cannot stop another Job or the Runtime.
+- `RuntimeRepository` is the only P2C SQL boundary for `sync_runs` and `provider_runtime`. Each actual execution writes a `running` row, then `success`, `failed` or `skipped`; Provider runtime tracks `healthy`, `degraded`, `failed`, `disabled` and `never_succeeded`, including next schedule and consecutive failures.
+- `server/runtime/bootstrap.ts` initializes SQLite/migrations before constructing the singleton, installs SIGTERM/SIGINT shutdown hooks when used by the Nitro plugin, and honors `SHIPPING_RUNTIME_ENABLED`. The default Registry is intentionally empty so P2C cannot call AIS/Feed/Calendar/Voyage/Translation Providers.
+- `GET /api/shipping/runtime` is a local, redacted runtime status surface. The existing `GET /api/shipping` request-triggered Provider path is marked legacy/deferred; new capabilities must use `BackgroundRuntime → Provider → SQLite`, while reads move toward `GET → Repository → SQLite` one workstream at a time.
 
 ## Calendarific Final Operational Semantics Seal — 2026-08-18
 
@@ -129,7 +136,7 @@ This is the smallest existing foundation compatible with the local Shipping HOT 
 | `src/atoms` / `src/hooks` | Browser preferences and query orchestration | local metadata state | Jotai, React Query | Become server data authority |
 | `server/api` | HTTP handlers and error mapping | API response contract | getters, database, middleware | Contain provider-specific parsing |
 | `server/sources` | Fetch one news Source and return `NewsItem[]` | Source result | Source helpers, fetcher | Render UI or own database schema |
-| `server/database` | db0 SQL access for cache/user | `cache`, `user` tables | db0 | Import React or external provider formats |
+| `server/database` | db0 SQL access for cache/user/Shipping HOT/runtime state | `cache`, `user`, Shipping HOT tables, `sync_runs`, `provider_runtime` | db0 | Import React or external provider formats |
 | `shared` | Shared types, Source metadata and pure utilities | Shared contracts | no app-specific UI | Become a second database or service layer |
 | `scripts` | Generate Source metadata/assets | Generated source files | git/package data | Run as runtime business logic |
 
@@ -153,6 +160,7 @@ This is the smallest existing foundation compatible with the local Shipping HOT 
 | Vessel/Port/Voyage/Event | `shared`, `server` and `src/components/shipping` | Providers through `server/shipping-store.ts`; `ShippingRepository` persists Provider facts and separate user watchlists; local Vessel `statusChangedAt` and Voyage baselines are retained by the service merge | HOT, detail pages and Event Engine | SQLite-backed state only; unavailable persistence exposes status and cannot accept mutation |
 | FeedItem | `shared/shipping.ts`, `server/providers/feed.ts`, `server/shipping-store.ts` | Mock Feed or opt-in RSS/HTML adapters; `ShippingRepository` persists normalized JSON | `/api/shipping`, `/feed`, Event Engine and HOT | Provider-specific XML/HTML stays inside the adapter; ordinary news remains Feed and stale failures do not create new Events |
 | CalendarEvent / CalendarCoverage | `shared/calendar.ts`, `server/providers/calendar.ts`, `server/database/shipping.ts` | Calendar Provider contracts through `server/shipping-store.ts`; `calendar_events` stores event facts and settings `calendarSync` stores coverage | `/api/shipping/calendar`, Calendar page, Event Engine | Cached national, subdivision and unknown-scope facts remain readable offline; supplied subdivision evidence is preserved, local/unknown facts are excluded from national Event/HOT, unknown/partial coverage is explicit and source keys never cross the API boundary |
+| Runtime execution / Provider health | `server/runtime/background-runtime.ts`, `server/database/runtime-jobs.ts` | `RuntimeRepository` owns `sync_runs` and `provider_runtime`; BackgroundRuntime owns timers and in-flight state for the current Node process | `GET /api/shipping/runtime`, later Provider jobs | Runtime never imports UI or provider-specific formats; production Registry is empty until a separately approved Workstream registers a Job |
 
 ## 8. Key Data Flows
 

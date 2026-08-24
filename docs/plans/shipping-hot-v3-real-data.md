@@ -1,16 +1,16 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 文档状态：`accepted / P2A search foundation + P2B Identity Seal complete / P2C Background Runtime Foundation pending / AIS tracking runtime deferred`
+> 文档状态：`accepted / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / AIS tracking runtime deferred`
 >
 > 审查日期：2026-08-24（Asia/Shanghai）
 >
 > 代码基线：`codex/shipping-hot-v3-real-data`（P2B 本轮）
 >
-> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation 与 P2B Identity Seal 已完成并通过本地验证**。本轮收紧 canonical identity 的 provisional name fallback，完成 strong identity conflict rollback 与跨进程 promotion 验证；不实现 P2C Background Runtime、AIS 长连接、Tracking Runtime、Feed、Calendar、Voyage、Translation 或其他后续 Provider 业务。
+> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal 与 P2C Background Runtime Foundation 已完成并通过本地验证**。本轮完成统一 Runtime、SQLite execution history/provider health、启动/关闭接线和测试 Job 验证；不实现 AIS 长连接、Tracking Runtime、Feed、Calendar、Voyage、Translation 或其他后续 Provider 业务。
 >
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；只有具体 endpoint entitlement、地区/账号资格等未确认事项保持 `unknown/pending`。
 >
-> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮落实获批的 P2B Identity Seal；不创建账号、不购买服务、不实现 P2C Background Runtime、AIS 长连接、Tracking Runtime、Feed/Calendar/Voyage/Translation Adapter 或 Provider Runtime/Usage 业务。
+> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮落实获批的 P2C Background Runtime Foundation；不创建账号、不购买服务、不实现 AIS 长连接、Tracking Runtime、Feed/Calendar/Voyage/Translation Adapter 或真实业务 Job。
 
 ## 1. 背景与当前问题
 
@@ -748,7 +748,7 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | 测试 | Domain normalization、IMO/MMSI/name query、VesselAPI static-only payload、cache hit/expiry、Real Mode Mock isolation、Port Directory search/alias 和 migration-aware native restart smoke |
 | 验收 | identity/P2A/P2B targeted 18/18、full 259/259、typecheck、production build、full lint（仅既有 4 个无关错误）、Node 24 service-backed native SQLite process-A provisional-name watch → close → process-B same-name provider/IMO/MMSI promotion smoke；不进入 P2C/AIS Tracking Runtime 或后续 Provider |
 
-### P2B — Identity Seal（complete）与 P2C/AIS Tracking Runtime（deferred）
+### P2B — Identity Seal（complete）与 P2C Background Runtime Foundation（complete）
 
 | 项目 | 内容 |
 | --- | --- |
@@ -762,6 +762,21 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | AIS Tracking Runtime | `AisTrackingService`、AIS WebSocket、后台长连接、watchlist 变化订阅更新仍 pending，不在本轮实现 |
 | 风险 | Provider 数据库找不到目标船；免费额度；MMSI 重用/IMO 缺失；中文 alias 质量 |
 | 回滚 | 禁用 search Provider；保留已持久化 watchlist 和 last-known，不回退 Mock |
+
+### P2C — Background Runtime Foundation（complete）
+
+| 项目 | 内容 |
+| --- | --- |
+| 目标 | 建立单 Node 进程内的 Background Runtime singleton，为后续 Provider Workstream 提供统一 Job、调度、失败隔离、运行历史和 Provider health 边界 |
+| 修改文件 | `server/runtime/background-runtime.ts`、`server/runtime/bootstrap.ts`、`server/runtime/registry.ts`、`server/plugins/background-runtime.ts`、`server/database/runtime-jobs.ts`、`server/api/shipping/runtime.get.ts`、`server/providers/contracts.ts` |
+| Runtime Contract | `RuntimeJob { id, providerId, capability, intervalMs, enabled, run }`；`SyncResult` 只包含 status、recordsRead、recordsWritten、sourceUpdatedAt、errorCode、errorMessage |
+| 调度 | Node timer；同一 Job in-flight 时下一次触发 skip；失败只影响当前 Job；`stop()` 清理 timer 并阻止新执行；启动从 SQLite `next_sync_at`/health cursor 恢复 |
+| 数据库 | 复用 P0 `sync_runs` 与 `provider_runtime`；`RuntimeRepository` 集中 SQL。运行状态为 `healthy/degraded/failed/disabled/never_succeeded`，失败按下一次正常 schedule 继续，不实现复杂 retry queue |
+| Bootstrap | Nitro server plugin 初始化 DB/migrations、创建单例、注册当前 Registry、启动 Runtime；SIGTERM/SIGINT/Nitro close 都调用 stop；`SHIPPING_RUNTIME_ENABLED=false` 可关闭 |
+| Registry | P2C 默认为空；测试 FakeJob 只存在于自动测试，不注册任何真实 AIS/Feed/Calendar/Voyage/Translation Job |
+| API 边界 | `GET /api/shipping/runtime` 只返回本地非敏感状态；现有 `GET /api/shipping` 请求触发 Provider path 标记为 legacy/deferred，后续按 Workstream 逐个迁移，P2C 不重写 `shipping-store` |
+| 测试 | singleton、no-overlap、failure isolation、success/failure sync_runs、provider_runtime 状态恢复、stop、native SQLite reopen persistence |
+| 验收 | P2C targeted tests、database runtime tests、full tests、typecheck、build、full lint、native SQLite restart smoke、git diff --check 与 Neat Freak Closeout |
 
 ### P3 — Feed Freshness
 
@@ -989,7 +1004,7 @@ P2B 搜索 `DONG FANG FU`，从所选 Discovery Provider 找到真实候选并�
 
 ### K. Provider Usage / Secret
 
-这是后续 Provider Runtime/Usage 阶段验收，不属于 P0。届时 Provider 请求数、成功/失败、cache hit、字符/token、估算成本和最近调用才可在 SQLite/Settings 查询；P0 只保留 schema/interface/contract placeholder。SQLite settings 只能保存非敏感 `ProviderConfig`（provider/model/base URL/enabled/budget 等），API key/`ProviderSecret` 只能由 server-only `SecretStore` 读取，Local 模式存放在 `.data/provider-secrets.json`，绝不进入 SQLite settings。
+这是后续 Provider Usage 与业务 Job 阶段验收，不属于 P2C。P2C 只记录通用 Job execution 与 Provider health；Provider 请求数、成功/失败、cache hit、字符/token、估算成本和最近调用的完整 usage ledger 仍需后续 Provider Workstream 在 SQLite/Settings 中实现。SQLite settings 只能保存非敏感 `ProviderConfig`（provider/model/base URL/enabled/budget 等），API key/`ProviderSecret` 只能由 server-only `SecretStore` 读取，Local 模式存放在 `.data/provider-secrets.json`，绝不进入 SQLite settings。
 
 ## 24. 配置与密钥管理
 
@@ -999,6 +1014,7 @@ P2B 搜索 `DONG FANG FU`，从所选 Discovery Provider 找到真实候选并�
 NODE_ENV=development
 SHIPPING_DATA_MODE=real
 SHIPPING_DATABASE_PATH=.data/shipping-hot-v3.sqlite3
+SHIPPING_RUNTIME_ENABLED=true
 
 SHIPPING_VESSEL_SEARCH_PROVIDER=vesselapi
 VESSELAPI_API_KEY=
@@ -1101,7 +1117,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 
 ## 27. 实施门槛与文档后续
 
-`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation、P2A Search Foundation 与本轮 P2B Identity Seal 已获授权、实施并完成本地验证；P2C Background Runtime Foundation、AIS Tracking Runtime、剩余 P2 watch/tracking 及后续 Provider 功能仍 deferred。该 ADR 至少覆盖：
+`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal 与 P2C Background Runtime Foundation 已获授权、实施并完成本地验证；AIS Tracking Runtime、剩余 P2 watch/tracking 及后续 Provider 功能仍 deferred。该 ADR 至少覆盖：
 
 - V3 real-only runtime、SQLite fail-closed/read-only 行为和已验证的单一 Node LTS。
 - VesselAPI 仅 Discovery/static metadata、AISStream 长期 tracking、UN/LOCODE 默认 Port Search，以及 provider-owned/user-owned/directory-owned/translation-owned 字段边界。
@@ -1110,7 +1126,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 - TranslationProvider 可切换合同、Settings AI 翻译中心、单一 `translation_cache` source of truth、server-only secret、`provider_usage` 和“本地统计/估算”标签。
 - Current Voyage 与 DCSA Commercial Schedule 的事实分层。
 
-后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B、P2A Search Foundation 与 P2B Identity Seal 已完成；P2C Background Runtime Foundation、AIS Tracking Runtime、剩余 P2 watch 或 P5 Schedule 不在本轮；后续 Provider/AI adapter 仍按单独批准范围实施。
+后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B、P2A Search Foundation、P2B Identity Seal 与 P2C Background Runtime Foundation 已完成；AIS Tracking Runtime、剩余 P2 watch 或 P5 Schedule 不在本轮；后续 Provider/AI adapter 仍按单独批准范围实施。
 
 ## 28. 外部资料
 
