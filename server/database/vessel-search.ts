@@ -104,6 +104,8 @@ export class VesselMetadataRepository {
     const candidates = await this.findMetadataRows("source = ?", result.source)
     return candidates.filter(candidate => (
       !candidate.imo
+      && !candidate.mmsi
+      && !candidate.providerRecordId
       && normalizeVesselSearchTerm(candidate.name) === normalizedName
     ))
   }

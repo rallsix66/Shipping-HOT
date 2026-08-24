@@ -1,16 +1,16 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 文档状态：`accepted / P2A search foundation + P2B watchlist integration implemented / AIS tracking runtime deferred`
+> 文档状态：`accepted / P2A search foundation + P2B Identity Seal complete / P2C Background Runtime Foundation pending / AIS tracking runtime deferred`
 >
-> 审查日期：2026-08-20（Asia/Shanghai）
+> 审查日期：2026-08-24（Asia/Shanghai）
 >
 > 代码基线：`codex/shipping-hot-v3-real-data`（P2B 本轮）
 >
-> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation 与 P2B Watchlist Integration 已完成并通过本地验证**。本轮在既有搜索基础上建立搜索结果到 user-owned Watchlist 的持久化链路；不实现 AIS 长连接、Tracking Runtime、Feed、Calendar、Voyage、Translation 或其他后续 Provider 业务。
+> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation 与 P2B Identity Seal 已完成并通过本地验证**。本轮收紧 canonical identity 的 provisional name fallback，完成 strong identity conflict rollback 与跨进程 promotion 验证；不实现 P2C Background Runtime、AIS 长连接、Tracking Runtime、Feed、Calendar、Voyage、Translation 或其他后续 Provider 业务。
 >
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；只有具体 endpoint entitlement、地区/账号资格等未确认事项保持 `unknown/pending`。
 >
-> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮落实获批的 P2B Watchlist Integration；不创建账号、不购买服务、不实现 AIS 长连接、Tracking Runtime、Feed/Calendar/Voyage/Translation Adapter 或 Provider Runtime/Usage 业务。
+> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮落实获批的 P2B Identity Seal；不创建账号、不购买服务、不实现 P2C Background Runtime、AIS 长连接、Tracking Runtime、Feed/Calendar/Voyage/Translation Adapter 或 Provider Runtime/Usage 业务。
 
 ## 1. 背景与当前问题
 
@@ -333,7 +333,7 @@ AISStream 是 V3 唯一的 watched-vessel tracking session：它接收已关注 
 - Search、Detail、Refresh 分别计入 `provider_usage` 的本地 request/cache-hit；UI 显示“当前 billing-date window 本地统计 xx calls”，若没有官方 Remaining 则显示“本地估算”，不把本地数伪装成 Free quota/余额。
 - 自动刷新只针对已关注身份，默认数天级；实时位置由 AISStream 长连接承担，VesselAPI 不做分钟级轮询。
 
-### 8.5 P2B Watchlist Integration
+### 8.5 P2B Watchlist Integration / Identity Seal
 
 - P2B 使用现有 user-owned `vessel_watchlist(vessel_id, watched_at, ais_enabled)`；静态 name/IMO/MMSI/callsign/source 继续由 P2A `vessel_metadata` 保存，不能把 `isWatched` 写回 Provider-owned 表。
 - `/api/shipping/search/vessels/watch` 提供 POST add / DELETE remove；`/api/shipping/search/vessels/watchlist` 提供 GET list。页面只调用这些 server API，不直接访问 SQLite。
@@ -746,9 +746,9 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | Port Search | `PortSearchService` 复用 SQLite `PortDirectoryRepository`，支持中文名、英文名、UN/LOCODE 和 aliases；不依赖 VesselAPI Port entitlement |
 | API | `/api/shipping/search/vessels?q=...` 与 `/api/shipping/search/ports?q=...`；本轮不新增 UI 搜索流程或 Watchlist workflow |
 | 测试 | Domain normalization、IMO/MMSI/name query、VesselAPI static-only payload、cache hit/expiry、Real Mode Mock isolation、Port Directory search/alias 和 migration-aware native restart smoke |
-| 验收 | typecheck、lint（无新增 P2A 错误）、248/248 tests、production build、Node 24 native SQLite process-A-write → close → process-B-read smoke；不进入 AIS Tracking Runtime/P2 watch 或后续 Provider |
+| 验收 | identity/P2A/P2B targeted 18/18、full 259/259、typecheck、production build、full lint（仅既有 4 个无关错误）、Node 24 service-backed native SQLite process-A provisional-name watch → close → process-B same-name provider/IMO/MMSI promotion smoke；不进入 P2C/AIS Tracking Runtime 或后续 Provider |
 
-### P2B — Watchlist Integration（implemented）与 AIS Tracking Runtime（deferred）
+### P2B — Identity Seal（complete）与 P2C/AIS Tracking Runtime（deferred）
 
 | 项目 | 内容 |
 | --- | --- |
@@ -757,8 +757,8 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | P2B 修改文件 | `server/search/vessel-watchlist.ts`、`server/database/vessel-search.ts`、搜索 Watchlist API、Vessels 页面、shared search types、native smoke |
 | P2B 数据库 | 复用现有 `vessel_watchlist(vessel_id, watched_at, ais_enabled)` 与 `vessel_metadata`；本轮不新增 migration，不把 `isWatched` 写回 Provider-owned 表 |
 | P2B API | `GET /api/shipping/search/vessels/watchlist`、`POST/DELETE /api/shipping/search/vessels/watch` |
-| P2B 测试 | `DONG FANG FU` 一致身份（IMO `9162423` / MMSI `413393620` / Callsign `BPCL3`）搜索关注/取消、IMO/MMSI/name 去重、provider identity promotion 与 MMSI 更新、identity conflict、name/callsign/source 保留、无 MMSI 降级标记、重启 persistence |
-| P2B 验收 | 关注后重启仍在；同一 Vessel 通过 IMO/MMSI/name 再搜索不产生重复 entry；无 MMSI 不伪造值 |
+| P2B 测试 | `DONG FANG FU` 一致身份（IMO `9162423` / MMSI `413393620` / Callsign `BPCL3` / flag `China`）搜索关注/取消、IMO/MMSI/name 去重、provider identity promotion 与 MMSI 更新、同名不同 strong identity 隔离、真正 provisional name promotion、identity conflict rollback、name/callsign/source 保留、无 MMSI 降级标记、重启 persistence |
+| P2B 验收 | 关注后重启仍在；同一 Vessel 通过 IMO/MMSI/name 再搜索不产生重复 entry；同名不同 strong identity 不 merge/不 cross-remove；仅真正 provisional entity 允许 name promotion；无 MMSI 不伪造值 |
 | AIS Tracking Runtime | `AisTrackingService`、AIS WebSocket、后台长连接、watchlist 变化订阅更新仍 pending，不在本轮实现 |
 | 风险 | Provider 数据库找不到目标船；免费额度；MMSI 重用/IMO 缺失；中文 alias 质量 |
 | 回滚 | 禁用 search Provider；保留已持久化 watchlist 和 last-known，不回退 Mock |
@@ -1101,7 +1101,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 
 ## 27. 实施门槛与文档后续
 
-`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation、P2A Search Foundation 与本轮 P2B Watchlist Integration 已获授权、实施并完成本地验证；AIS Tracking Runtime、剩余 P2 watch/tracking 及后续 Provider 功能仍 deferred。该 ADR 至少覆盖：
+`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation、P2A Search Foundation 与本轮 P2B Identity Seal 已获授权、实施并完成本地验证；P2C Background Runtime Foundation、AIS Tracking Runtime、剩余 P2 watch/tracking 及后续 Provider 功能仍 deferred。该 ADR 至少覆盖：
 
 - V3 real-only runtime、SQLite fail-closed/read-only 行为和已验证的单一 Node LTS。
 - VesselAPI 仅 Discovery/static metadata、AISStream 长期 tracking、UN/LOCODE 默认 Port Search，以及 provider-owned/user-owned/directory-owned/translation-owned 字段边界。
@@ -1110,7 +1110,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 - TranslationProvider 可切换合同、Settings AI 翻译中心、单一 `translation_cache` source of truth、server-only secret、`provider_usage` 和“本地统计/估算”标签。
 - Current Voyage 与 DCSA Commercial Schedule 的事实分层。
 
-后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B、P2A Search Foundation 与 P2B Watchlist Integration 已完成；不得从本文直接跳到 AIS Tracking Runtime、剩余 P2 watch 或 P5 Schedule；后续 Provider/AI adapter 仍按单独批准范围实施。
+后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B、P2A Search Foundation 与 P2B Identity Seal 已完成；P2C Background Runtime Foundation、AIS Tracking Runtime、剩余 P2 watch 或 P5 Schedule 不在本轮；后续 Provider/AI adapter 仍按单独批准范围实施。
 
 ## 28. 外部资料
 

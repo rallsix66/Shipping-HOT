@@ -89,22 +89,22 @@ const smokeVessel: Vessel = {
 }
 
 const smokeSearchVessel: VesselSearchResult = {
-  id: "vesselapi:dong-fang-fu",
+  id: "vesselapi:name:dong fang fu",
   name: "DONG FANG FU",
-  mmsi: "413393620",
-  callsign: "BPCL3",
-  type: "Container Ship",
-  flag: "Panama",
   source: "vesselapi",
   fetchedAt: "2026-08-21T00:00:00.000Z",
   source_type: "real",
-  providerRecordId: "dong-fang-fu",
 }
 
 const promotedSmokeSearchVessel: VesselSearchResult = {
   ...smokeSearchVessel,
   id: "imo:9162423",
   imo: "9162423",
+  mmsi: "413393620",
+  callsign: "BPCL3",
+  type: "Container Ship",
+  flag: "China",
+  providerRecordId: "dong-fang-fu",
 }
 
 async function writer(path: string) {

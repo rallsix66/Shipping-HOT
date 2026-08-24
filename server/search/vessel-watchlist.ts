@@ -76,7 +76,16 @@ export class VesselWatchlistService {
         && item.providerRecordId === metadata.providerRecordId,
       )
       || Boolean(metadata.mmsi && item.mmsi === metadata.mmsi)
-      || (!metadata.imo && !metadata.mmsi && item.source === metadata.source && normalizeVesselSearchTerm(item.name) === normalizeVesselSearchTerm(metadata.name))
+      || (
+        !metadata.imo
+        && !metadata.mmsi
+        && !metadata.providerRecordId
+        && !item.imo
+        && !item.mmsi
+        && !item.providerRecordId
+        && item.source === metadata.source
+        && normalizeVesselSearchTerm(item.name) === normalizeVesselSearchTerm(metadata.name)
+      )
     ))
   }
 

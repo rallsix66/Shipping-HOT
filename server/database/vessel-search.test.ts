@@ -110,7 +110,38 @@ describe("vessel metadata persistence and search cache", () => {
     expect(changedMmsi.id).toBe("vesselapi:vessel-123")
     expect(native.prepare("SELECT COUNT(*) AS count FROM vessel_metadata").get()).toEqual({ count: 1 })
     expect(native.prepare("SELECT id, imo, mmsi, provider_record_id FROM vessel_metadata").get()).toEqual({ id: "vesselapi:vessel-123", imo: "9876543", mmsi: "222222222", provider_record_id: "vessel-123" })
-    await expect(repository.getCachedSearch({ query: "9876543", field: "imo" })).resolves.toMatchObject({ results: [expect.objectContaining({ id: "vesselapi:vessel-123", imo: "9876543", mmsi: "222222222" })] })
+    await expect(repository.getCachedSearch({ query: "9876543", field: "imo" }, new Date(result.fetchedAt))).resolves.toMatchObject({ results: [expect.objectContaining({ id: "vesselapi:vessel-123", imo: "9876543", mmsi: "222222222" })] })
+    native.close()
+  })
+
+  it("does not merge same-name entities with different strong identities", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const repository = new VesselMetadataRepository(database, "real")
+    const first = await repository.saveSearch({ query: "SAME NAME" }, [{
+      ...result,
+      id: "vesselapi:A",
+      name: "SAME NAME",
+      imo: undefined,
+      mmsi: "111111111",
+      providerRecordId: "A",
+    }], "vesselapi", "real", new Date(result.fetchedAt))
+    const second = await repository.saveSearch({ query: "SAME NAME" }, [{
+      ...result,
+      id: "vesselapi:B",
+      name: "SAME NAME",
+      imo: undefined,
+      mmsi: "222222222",
+      providerRecordId: "B",
+    }], "vesselapi", "real", new Date(result.fetchedAt))
+
+    expect(first[0].id).toBe("vesselapi:A")
+    expect(second[0].id).toBe("vesselapi:B")
+    expect(native.prepare("SELECT COUNT(*) AS count FROM vessel_metadata").get()).toEqual({ count: 2 })
+    expect(native.prepare("SELECT id, mmsi, provider_record_id FROM vessel_metadata ORDER BY id").all()).toEqual([
+      { id: "vesselapi:A", mmsi: "111111111", provider_record_id: "A" },
+      { id: "vesselapi:B", mmsi: "222222222", provider_record_id: "B" },
+    ])
     native.close()
   })
 
@@ -130,6 +161,10 @@ describe("vessel metadata persistence and search cache", () => {
       providerRecordId: "a",
     }], "vesselapi", "real", new Date(result.fetchedAt))).rejects.toThrow("identity_conflict")
     expect(native.prepare("SELECT COUNT(*) AS count FROM vessel_metadata").get()).toEqual({ count: 2 })
+    expect(native.prepare("SELECT id, imo, mmsi, provider_record_id FROM vessel_metadata ORDER BY id").all()).toEqual([
+      { id: "imo:1000001", imo: "1000001", mmsi: "111111111", provider_record_id: "a" },
+      { id: "imo:1000002", imo: "1000002", mmsi: "222222222", provider_record_id: "b" },
+    ])
     native.close()
   })
 })

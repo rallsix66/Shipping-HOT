@@ -42,7 +42,7 @@ function searchResult(overrides: Partial<VesselSearchResult>): VesselSearchResul
     mmsi: "413393620",
     callsign: "BPCL3",
     type: "Container Ship",
-    flag: "Panama",
+    flag: "China",
     source: "vesselapi",
     fetchedAt,
     source_type: "real",
@@ -165,6 +165,69 @@ describe("vessel search watchlist", () => {
     expect(complete.id).toBe("vesselapi:vessel-456")
     await watchlist.add(complete.id)
     expect(await watchlist.list()).toEqual([expect.objectContaining({ id: "vesselapi:vessel-456", imo: "9162423", mmsi: "413393620" })])
+    expect(native.prepare("SELECT COUNT(*) AS count FROM vessel_watchlist").get()).toEqual({ count: 1 })
+    native.close()
+  })
+
+  it("keeps same-name strong identities in separate watches", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const metadata = new VesselMetadataRepository(database, "real")
+    const watchlist = new VesselWatchlistService(database, "real")
+
+    const first = await persistSearch(metadata, searchResult({
+      id: "vesselapi:A",
+      name: "SAME NAME",
+      imo: undefined,
+      mmsi: "111111111",
+      providerRecordId: "A",
+    }), "SAME NAME")
+    const second = await persistSearch(metadata, searchResult({
+      id: "vesselapi:B",
+      name: "SAME NAME",
+      imo: undefined,
+      mmsi: "222222222",
+      providerRecordId: "B",
+    }), "SAME NAME")
+    await watchlist.add(first.id)
+    await watchlist.add(second.id)
+    expect(await watchlist.list()).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "vesselapi:A", mmsi: "111111111", providerRecordId: "A" }),
+      expect.objectContaining({ id: "vesselapi:B", mmsi: "222222222", providerRecordId: "B" }),
+    ]))
+    expect((await watchlist.list())).toHaveLength(2)
+
+    await expect(watchlist.remove(second.id)).resolves.toBe(true)
+    expect(await watchlist.list()).toEqual([expect.objectContaining({ id: "vesselapi:A", mmsi: "111111111", providerRecordId: "A" })])
+    native.close()
+  })
+
+  it("promotes a truly provisional name watch without duplicating it", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const metadata = new VesselMetadataRepository(database, "real")
+    const watchlist = new VesselWatchlistService(database, "real")
+
+    const provisional = await persistSearch(metadata, searchResult({
+      id: "vesselapi:name:same name",
+      name: "SAME NAME",
+      imo: undefined,
+      mmsi: undefined,
+      providerRecordId: undefined,
+    }), "SAME NAME")
+    await watchlist.add(provisional.id)
+
+    const complete = await persistSearch(metadata, searchResult({
+      id: "imo:9876543",
+      name: "SAME NAME",
+      imo: "9876543",
+      mmsi: "222222222",
+      providerRecordId: "A",
+    }), "9876543")
+    expect(complete.id).toBe(provisional.id)
+    await watchlist.add(complete.id)
+    expect(await watchlist.list()).toEqual([expect.objectContaining({ id: provisional.id, imo: "9876543", mmsi: "222222222", providerRecordId: "A" })])
+    expect(native.prepare("SELECT COUNT(*) AS count FROM vessel_metadata").get()).toEqual({ count: 1 })
     expect(native.prepare("SELECT COUNT(*) AS count FROM vessel_watchlist").get()).toEqual({ count: 1 })
     native.close()
   })
