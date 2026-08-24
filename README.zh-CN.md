@@ -75,6 +75,8 @@ Shipping HOT 本地环境约定：
 4. `pnpm dev` 与 `pnpm start` 使用同一套环境优先级：`process env > .env.local > .env.server > code defaults`。
 5. 若使用生产构建启动本地 Nitro 服务，先运行 `pnpm build`，再运行 `pnpm start`。
 
+V3 Readiness 可运行 `pnpm smoke:v3-readiness`，检查固定 Node/ABI、SQLite schema、Port Directory 和已批准 Runtime 范围；该门禁不发起外部 Provider 请求，并要求 Mock/Off 配置。
+
 真实 Provider 示例（仅在 `.env.local` 或本机配置中显式启用）：
 
 ```env

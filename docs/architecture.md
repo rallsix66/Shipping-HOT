@@ -4,6 +4,12 @@
 > Architecture status: approved for local Mock implementation, V1 AISStream/Open-Meteo adapters, sealed V2.0 Data Trust Foundation, implemented V2.1–V2.5 local capabilities; ADR-005 V3 Real-Data Boundaries is Accepted, P0 Persistence, P1A Port Directory Foundation, P1B Mock Isolation, P2A Search Foundation, P2B Identity Seal, P2C Background Runtime Foundation, P3A AIS Tracking Runtime Foundation and P3B Voyage / ETA Foundation are implemented/verified; Feed, Calendar and Translation remain deferred, real Voyage adapter coverage remains pending; V2.5 external area observation remains live pending
 > Source of truth for: the current retained system structure and approved boundaries
 
+## V3 Readiness Gate — 2026-08-24
+
+- `server/services/v3-readiness.ts` is a local, redacted foundation gate. It verifies the pinned Node/ABI contract, current SQLite migration/schema, P1A Port Directory readiness, Mock-only provider configuration, enabled Background Runtime and the approved AIS/Voyage Job scope.
+- `GET /api/shipping/readiness` initializes the existing migration runner and reads only local SQLite/runtime state. `pnpm smoke:v3-readiness` provides the process-level check against `.data/shipping-hot-v3.sqlite3`.
+- The gate performs no external Provider request and marks live contract/coverage checks as skipped. It deliberately fails when a Real/paid Provider override is active, so Readiness cannot silently become Provider activation. Feed, Calendar, Translation and real Voyage adapter work remain deferred.
+
 ## Current AISStream + Calendarific Live Verification — 2026-08-18
 
 AISStream reached the official WebSocket and stayed open for a 120-second filtered subscription covering the two current watched MMSIs, but no PositionReport arrived. Its current live state is connection_verified / pending_observation; the provider must not be labeled verified_live without an observation.
@@ -278,7 +284,7 @@ Provider mode is the requested source (`mock`, `aisstream`, `portcast`, `open-me
 ## 13. Testing and Verification Boundaries
 
 - Current tests: Vitest covers Shipping HOT Domain, Provider, Repository, Event/HOT and UI trust contracts.
-- Current verification state: V3 P0/P1A/P1B/P2A/P2B/P2C/P3A/P3B verification is recorded in `docs/status.md`; it includes typecheck, production build, native better-sqlite3 read/write and migration-aware process-A-write → close → process-B-read persistence smoke for runtime, AIS position and Voyage/ETA stores. The 2026-08-24 closeout repair removed the four pre-existing lint errors; `pnpm lint` is all green. Live AIS observation, real Voyage adapter coverage and official-alert live criteria remain pending; Feed, Calendar and Translation remain deferred.
+- Current verification state: V3 P0/P1A/P1B/P2A/P2B/P2C/P3A/P3B and the local V3 Readiness Gate verification are recorded in `docs/status.md`; it includes typecheck, production build, native better-sqlite3 read/write and migration-aware process-A-write → close → process-B-read persistence smoke for runtime, AIS position and Voyage/ETA stores. The 2026-08-24 closeout repair removed the four pre-existing lint errors; `pnpm lint` is all green. Live AIS observation, real Voyage adapter coverage and official-alert live criteria remain pending; Feed, Calendar and Translation remain deferred.
 - Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, Calendar source composition/conflict/reconciliation/announcement behavior, RSS/HTML Feed parsing with unknown publication and Chinese classification, source isolation, repost dedupe, Feed → Event/HOT boundaries, Open-Meteo 24-hour/72-hour/7-day windows/direction/TTL/per-port failure behavior, source-specific official warning parsing/expiry, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 

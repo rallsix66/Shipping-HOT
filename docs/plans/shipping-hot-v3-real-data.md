@@ -1,6 +1,6 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 文档状态：`accepted / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed + P3A AIS Tracking Runtime Foundation + P3B Voyage / ETA Foundation implemented / Feed, Calendar, Translation pending`
+> 文档状态：`accepted / V3 Readiness gate implemented / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed + P3A AIS Tracking Runtime Foundation + P3B Voyage / ETA Foundation implemented / Feed, Calendar, Translation pending`
 >
 > 审查日期：2026-08-24（Asia/Shanghai）
 >
@@ -11,6 +11,8 @@
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；只有具体 endpoint entitlement、地区/账号资格等未确认事项保持 `unknown/pending`。
 >
 > 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮落实获批的 P3B Voyage / ETA Intelligence Foundation；不创建账号、不购买服务、不实现 Feed/Calendar/Translation Adapter、AIS ETA prediction、地图/轨迹系统或商业 Voyage adapter。
+
+> V3 Readiness：本轮只建立本地安全就绪门（固定 Node/ABI、SQLite schema/Port Directory、已批准 Runtime scope、Mock-only provider configuration），通过 `GET /api/shipping/readiness` 与 `pnpm smoke:v3-readiness` 验证；不执行外部 Provider 请求，不进入下一阶段。
 
 ## 1. 背景与当前问题
 
