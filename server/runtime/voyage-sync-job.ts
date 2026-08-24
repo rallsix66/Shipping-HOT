@@ -30,8 +30,10 @@ export function createVoyageSyncJob(options: VoyageSyncJobOptions): RuntimeJob {
       const vessels = watched.map(item => ({ vesselId: item.id, imo: item.imo, mmsi: item.mmsi }))
       if (!vessels.length) return { status: "success", recordsRead: 0, recordsWritten: 0 }
       const received = await options.provider.getVoyages(vessels)
-      const saved = await voyages.saveVoyages(received, now().toISOString())
-      const sourceUpdatedAt = [...received]
+      const saved = await voyages.saveVoyages(received, now().toISOString(), { requestedVesselIds: vessels.map(vessel => vessel.vesselId) })
+      const acceptedIds = new Set(saved.acceptedIds)
+      const sourceUpdatedAt = received
+        .filter(voyage => acceptedIds.has(voyage.id))
         .map(voyage => Date.parse(voyage.lastUpdatedAt))
         .filter(timestamp => Number.isFinite(timestamp))
         .sort((a, b) => b - a)[0]

@@ -92,7 +92,7 @@ docker compose up
 
 ## 開発
 > [!TIP]
-> Node.js >= 20が必要
+> Node.js `24.15.0` 固定ツールチェーンが必要（`engines` / `.nvmrc`、`better-sqlite3` は ABI `137`）
 
 ```sh
 corepack enable

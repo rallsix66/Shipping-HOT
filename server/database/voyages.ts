@@ -5,6 +5,13 @@ import type { ShippingDataMode } from "#/database/runtime"
 export interface VoyageWriteResult {
   written: number
   historyWritten: number
+  rejectedVesselIds: number
+  staleSkipped: number
+  acceptedIds: string[]
+}
+
+export interface SaveVoyagesOptions {
+  requestedVesselIds?: readonly string[]
 }
 
 interface VoyageRow {
@@ -117,13 +124,27 @@ export class VoyageRepository {
     if (!row) throw new Error("voyage_port_identity_not_found")
   }
 
-  async saveVoyages(records: readonly VoyageRecord[], createdAt = new Date().toISOString()): Promise<VoyageWriteResult> {
+  async saveVoyages(records: readonly VoyageRecord[], createdAt = new Date().toISOString(), options: SaveVoyagesOptions = {}): Promise<VoyageWriteResult> {
     let written = 0
     let historyWritten = 0
+    let rejectedVesselIds = 0
+    let staleSkipped = 0
+    const acceptedIds: string[] = []
+    const requestedVesselIds = options.requestedVesselIds ? new Set(options.requestedVesselIds) : undefined
     await transaction(this.db, async () => {
       for (const record of records) {
         validateRecord(record)
+        if (requestedVesselIds && !requestedVesselIds.has(record.vesselId)) {
+          rejectedVesselIds++
+          continue
+        }
         if (this.dataMode === "real" && record.sourceType === "mock") throw new Error("mock_voyage_not_allowed_in_real_mode")
+        const existing = await this.db.prepare("SELECT last_updated_at FROM voyages WHERE id = ?").get(record.id) as { last_updated_at?: string | null } | undefined
+        if (existing?.last_updated_at && Date.parse(record.lastUpdatedAt) < Date.parse(existing.last_updated_at)) {
+          staleSkipped++
+          continue
+        }
+        acceptedIds.push(record.id)
         await this.assertPortIdentity(record.originPortId)
         await this.assertPortIdentity(record.destinationPortId)
         const data = JSON.stringify({
@@ -196,7 +217,7 @@ export class VoyageRepository {
         if ((history.changes ?? 0) > 0) historyWritten++
       }
     })
-    return { written, historyWritten }
+    return { written, historyWritten, rejectedVesselIds, staleSkipped, acceptedIds }
   }
 
   async getLatestVoyage(vesselId: string): Promise<VoyageRecord | undefined> {

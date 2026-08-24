@@ -107,7 +107,7 @@ docker compose up
 
 ## 开发
 > [!Note]
-> 需要 Node.js >= 20
+> 需要固定的 Node.js `24.15.0` 工具链（`engines` / `.nvmrc`；`better-sqlite3` 使用 ABI `137`）
 
 ```bash
 corepack enable

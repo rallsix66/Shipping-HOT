@@ -3,6 +3,7 @@ import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
 import type { VoyageRecord } from "@shared/voyage"
 import { initShippingTables } from "#/database/shipping"
+import { VoyageRepository } from "#/database/voyages"
 import { RuntimeRepository } from "#/database/runtime-jobs"
 import type { VoyageProvider } from "#/providers/voyage/contracts"
 import { createVoyageSyncJob } from "#/runtime/voyage-sync-job"
@@ -80,6 +81,92 @@ describe("voyage sync job", () => {
     await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({ status: "success", recordsRead: 1, recordsWritten: 1 })
     expect(requested).toEqual([{ vesselId: "vessel-1", imo: "9162423", mmsi: "413393620" }])
     expect(await new RuntimeRepository(database).getProviderRuntime("mock-voyage", "voyage_sync")).toMatchObject({ status: "healthy" })
+    runtime.stop()
+    native.close()
+  })
+
+  it("ignores Provider records outside the requested watchlist vessels", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    await seedWatchlist(database)
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database))
+    runtime.register(createVoyageSyncJob({
+      database,
+      dataMode: "mock",
+      provider: provider(async () => [
+        record,
+        { ...record, id: "voyage-vessel-9-001", vesselId: "vessel-9", mmsi: "999999999" },
+      ]),
+      intervalMs: 60 * 60 * 1000,
+    }))
+    await runtime.start()
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({ status: "success", recordsRead: 2, recordsWritten: 1 })
+    expect(await new VoyageRepository(database, "mock").getLatestVoyage("vessel-9")).toBeUndefined()
+    expect(await new VoyageRepository(database, "mock").getLatestVoyage("vessel-1")).toMatchObject({ vesselId: "vessel-1" })
+    runtime.stop()
+    native.close()
+  })
+
+  it("computes runtime sourceUpdatedAt from accepted records only", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    await seedWatchlist(database)
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database))
+    runtime.register(createVoyageSyncJob({
+      database,
+      dataMode: "mock",
+      provider: provider(async () => [
+        { ...record, lastUpdatedAt: "2026-08-25T10:00:00.000Z", timestamp: "2026-08-25T10:00:00.000Z" },
+        { ...record, id: "voyage-vessel-9-001", vesselId: "vessel-9", mmsi: "999999999", lastUpdatedAt: "2026-08-26T00:00:00.000Z", timestamp: "2026-08-26T00:00:00.000Z" },
+      ]),
+      intervalMs: 60 * 60 * 1000,
+    }))
+    await runtime.start()
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({
+      status: "success",
+      recordsRead: 2,
+      recordsWritten: 1,
+      sourceUpdatedAt: "2026-08-25T10:00:00.000Z",
+    })
+    expect(await new RuntimeRepository(database).getProviderRuntime("mock-voyage", "voyage_sync"))
+      .toMatchObject({ lastSourceUpdatedAt: "2026-08-25T10:00:00.000Z" })
+    runtime.stop()
+    native.close()
+  })
+
+  it("keeps the previous runtime sourceUpdatedAt when no record is accepted", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    await seedWatchlist(database)
+    const initial: VoyageRecord[] = [
+      { ...record, lastUpdatedAt: "2026-08-25T10:00:00.000Z", timestamp: "2026-08-25T10:00:00.000Z" },
+    ]
+    let next: VoyageRecord[] = initial
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database))
+    runtime.register(createVoyageSyncJob({
+      database,
+      dataMode: "mock",
+      provider: provider(async () => next),
+      intervalMs: 60 * 60 * 1000,
+    }))
+    await runtime.start()
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({
+      status: "success",
+      sourceUpdatedAt: "2026-08-25T10:00:00.000Z",
+    })
+
+    next = [
+      { ...record, lastUpdatedAt: "2026-08-24T00:00:00.000Z", timestamp: "2026-08-24T00:00:00.000Z" },
+      { ...record, id: "voyage-vessel-9-001", vesselId: "vessel-9", mmsi: "999999999", lastUpdatedAt: "2026-08-26T00:00:00.000Z", timestamp: "2026-08-26T00:00:00.000Z" },
+    ]
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({
+      status: "success",
+      recordsRead: 2,
+      recordsWritten: 0,
+      sourceUpdatedAt: undefined,
+    })
+    expect(await new RuntimeRepository(database).getProviderRuntime("mock-voyage", "voyage_sync"))
+      .toMatchObject({ status: "healthy", lastSourceUpdatedAt: "2026-08-25T10:00:00.000Z" })
     runtime.stop()
     native.close()
   })

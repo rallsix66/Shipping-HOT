@@ -1,5 +1,5 @@
-import { updateShippingSettings } from "#/shipping-store"
 import type { Port, ShippingSettings } from "@shared/shipping"
+import { updateShippingSettings } from "#/shipping-store"
 
 const congestionLevels: Port["congestionLevel"][] = ["low", "medium", "high", "critical"]
 type SettingsPatch = Partial<Omit<ShippingSettings, "eventThresholds">> & { eventThresholds?: Partial<ShippingSettings["eventThresholds"]> }

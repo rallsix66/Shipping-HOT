@@ -14,7 +14,12 @@ export const Route = createRootRouteWithContext<{
 })
 
 function NotFoundComponent() {
-  return <div className="mx-auto max-w-2xl p-12 text-center"><h1 className="text-3xl font-bold">页面不存在</h1><p className="mt-2 op-70">返回 Shipping HOT 继续浏览。</p></div>
+  return (
+    <div className="mx-auto max-w-2xl p-12 text-center">
+      <h1 className="text-3xl font-bold">页面不存在</h1>
+      <p className="mt-2 op-70">返回 Shipping HOT 继续浏览。</p>
+    </div>
+  )
 }
 
 function RootComponent() {

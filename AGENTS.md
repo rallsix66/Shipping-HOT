@@ -2,8 +2,8 @@
 
 ## Project
 
-- Current codebase: NewsNow foundation with a local Shipping HOT implementation and optional V1 real Provider adapters.
-- Shipping HOT Mock, approved V1 real-provider flows and V2.2–V2.5 local flows are implemented and verified where stated in `docs/status.md`; V2.5 follow-on work remains out of scope until separately approved.
+- Current codebase: NewsNow foundation with a local Shipping HOT implementation on the fixed Node `24.15.0` / ABI `137` toolchain (`better-sqlite3@12.6.2`, `.data/shipping-hot-v3.sqlite3`).
+- Shipping HOT Mock, approved V1 real-provider flows, V2.2–V2.5 local flows, and accepted V3 phases P0 Persistence, P1A Port Directory Foundation, P1B Mock Isolation, P2A Search Foundation, P2B Identity Seal, P2C Background Runtime Foundation, P3A AIS Tracking Runtime Foundation and P3B Voyage / ETA Foundation are implemented and locally verified where stated in `docs/status.md`. Feed, Calendar, Translation, real Voyage adapter coverage and live AIS observation remain pending/deferred until separately approved.
 
 ## Commands
 
@@ -19,6 +19,7 @@
 - Decisions: `docs/adr/`
 - Shipping HOT V1 roadmap and Provider status: `docs/plans/shipping-hot-v1.md`
 - Shipping HOT V2 implementation boundaries and closeout state: `docs/plans/shipping-hot-v2.md`
+- Shipping HOT V3 Real Data plan and phase state (P0–P3B): `docs/plans/shipping-hot-v3-real-data.md`
 
 ## Guardrails
 

@@ -274,7 +274,7 @@ export class BackgroundRuntime {
           status: "healthy",
           lastRequestAt: startedAt,
           lastSuccessAt: completedAt,
-          lastSourceUpdatedAt: result.sourceUpdatedAt ?? null,
+          lastSourceUpdatedAt: result.sourceUpdatedAt,
           nextSyncAt,
           consecutiveFailures: 0,
           errorCode: result.errorCode ?? null,

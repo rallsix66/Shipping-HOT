@@ -70,6 +70,45 @@ describe("voyage repository", () => {
     native.close()
   })
 
+  it("rejects records whose vesselId was not requested", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const repository = new VoyageRepository(database, "mock")
+    const result = await repository.saveVoyages([
+      voyage(),
+      voyage({ id: "voyage-vessel-9-001", vesselId: "vessel-9", mmsi: "999999999" }),
+    ], "2026-08-24T00:00:00.000Z", { requestedVesselIds: ["vessel-1"] })
+    expect(result).toMatchObject({ written: 1, rejectedVesselIds: 1, historyWritten: 1 })
+    expect(await repository.getLatestVoyage("vessel-9")).toBeUndefined()
+    expect(native.prepare("SELECT COUNT(*) AS count FROM voyages").get()).toEqual({ count: 1 })
+    expect(await repository.getLatestVoyage("vessel-1")).toMatchObject({ vesselId: "vessel-1" })
+    native.close()
+  })
+
+  it("does not let an older timestamp overwrite the latest voyage", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const repository = new VoyageRepository(database, "mock")
+    await repository.saveVoyages([voyage({
+      eta: "2026-09-03T00:00:00.000Z",
+      status: "departed",
+      lastUpdatedAt: "2026-08-25T12:00:00.000Z",
+      timestamp: "2026-08-25T12:00:00.000Z",
+    })])
+    const result = await repository.saveVoyages([voyage()], "2026-08-26T00:00:00.000Z")
+    expect(result).toMatchObject({ written: 0, staleSkipped: 1, historyWritten: 0 })
+    expect(await repository.getLatestVoyage("vessel-1")).toMatchObject({
+      eta: "2026-09-03T00:00:00.000Z",
+      status: "departed",
+      lastUpdatedAt: "2026-08-25T12:00:00.000Z",
+    })
+    expect(native.prepare("SELECT COUNT(*) AS count FROM voyage_eta_history").get()).toEqual({ count: 1 })
+    expect(await repository.listEtaHistory("voyage-vessel-1-001")).toMatchObject([
+      { eta: "2026-09-03T00:00:00.000Z" },
+    ])
+    native.close()
+  })
+
   it("persists voyage and ETA history across a native restart", async () => {
     const root = mkdtempSync("shipping-hot-voyage-")
     const path = join(root, "voyage.sqlite3")
