@@ -36,7 +36,8 @@ function createNativeDatabase(path: string): { database: Database, native: { clo
 
 function actualPnpmContract(): string | undefined {
   try {
-    const version = execFileSync("pnpm", ["--version"], { cwd: projectDir, encoding: "utf8" }).trim()
+    const executable = process.platform === "win32" ? "pnpm.cmd" : "pnpm"
+    const version = execFileSync(executable, ["--version"], { cwd: projectDir, encoding: "utf8", shell: process.platform === "win32" }).trim()
     return version ? `pnpm@${version}` : undefined
   } catch {
     return undefined
@@ -63,7 +64,7 @@ try {
   const report = await readV3Readiness(database, {
     dataMode,
     bootstrapFailed,
-    packageManager: actualPnpmContract(),
+    toolchain: { packageManager: actualPnpmContract() },
     runtime: runtimeStatus && {
       running: runtimeStatus.running,
       jobs: runtimeStatus.jobs.map(job => ({

@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
 import process from "node:process"
 import NativeDatabase from "better-sqlite3"
 import type { Database } from "db0"
@@ -37,6 +39,13 @@ export interface RuntimeReadinessStatus {
   jobs: RuntimeReadinessJob[]
 }
 
+export interface V3ToolchainObservation {
+  packageManager?: string
+  betterSqlite3Version?: string
+  betterSqlite3VersionError?: string
+  betterSqlite3LoadError?: string
+}
+
 export interface V3ReadinessReport {
   phase: "v3-readiness"
   ready: boolean
@@ -49,7 +58,7 @@ export interface V3ReadinessOptions {
   dataMode?: ShippingDataMode
   runtime?: RuntimeReadinessStatus
   bootstrapFailed?: boolean
-  packageManager?: string
+  toolchain?: Partial<V3ToolchainObservation>
 }
 
 function check(id: string, status: ReadinessCheckStatus, detail: string, value?: unknown): ReadinessCheck {
@@ -80,31 +89,67 @@ function localProviderBoundaryCheck(): ReadinessCheck {
     : check("local-provider-boundary", "pass", "Mock-only provider configuration is active; no new real or paid Provider is activated")
 }
 
-function observedPackageManager(): string | undefined {
-  const userAgent = process.env.npm_config_user_agent
-  const match = userAgent?.match(/(?:^|\s)pnpm\/(\S+)/)
-  return match ? `pnpm@${match[1]}` : undefined
+export function readV3PackageManagerObservation(userAgent = process.env.npm_config_user_agent): string | undefined {
+  if (!userAgent) return undefined
+  const match = userAgent.match(/(?:^|\s)(pnpm|npm|yarn)\/(\S+)/i)
+  return match ? `${match[1].toLowerCase()}@${match[2]}` : "unknown"
 }
 
-export function readV3ToolchainChecks(packageManager = observedPackageManager()): ReadinessCheck[] {
-  const betterSqlite3 = (() => {
-    try {
-      const database = new NativeDatabase(":memory:")
-      database.prepare("SELECT 1").get()
-      database.close()
-      return check("better-sqlite3", "pass", `better-sqlite3 ${v3ToolchainContract.betterSqlite3} loaded successfully on ABI ${v3ToolchainContract.abi}`, { version: v3ToolchainContract.betterSqlite3, abi: process.versions.modules })
-    } catch (error) {
-      return check("better-sqlite3", "fail", error instanceof Error ? `better-sqlite3 failed to load: ${error.message}` : "better-sqlite3 failed to load")
-    }
-  })()
-  const packageManagerStatus = packageManager === undefined || packageManager === v3ToolchainContract.packageManager ? "pass" : "fail"
+function readInstalledBetterSqlite3Version(): { version?: string, error?: string } {
+  try {
+    const manifestPath = join(process.cwd(), "node_modules", "better-sqlite3", "package.json")
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as { version?: unknown }
+    if (typeof manifest.version !== "string" || !manifest.version) return { error: "better-sqlite3 package version is missing" }
+    return { version: manifest.version }
+  } catch (error) {
+    return { error: error instanceof Error ? `better-sqlite3 package version could not be read: ${error.message}` : "better-sqlite3 package version could not be read" }
+  }
+}
+
+function collectV3ToolchainObservation(): V3ToolchainObservation {
+  const packageVersion = readInstalledBetterSqlite3Version()
+  let betterSqlite3LoadError: string | undefined
+  try {
+    const database = new NativeDatabase(":memory:")
+    database.prepare("SELECT 1").get()
+    database.close()
+  } catch (error) {
+    betterSqlite3LoadError = error instanceof Error ? error.message : "better-sqlite3 native load failed"
+  }
+  return {
+    packageManager: readV3PackageManagerObservation(),
+    betterSqlite3Version: packageVersion.version,
+    betterSqlite3VersionError: packageVersion.error,
+    betterSqlite3LoadError,
+  }
+}
+
+export function readV3ToolchainChecks(overrides: Partial<V3ToolchainObservation> = {}): ReadinessCheck[] {
+  const observation = { ...collectV3ToolchainObservation(), ...overrides }
+  const packageManagerStatus: ReadinessCheckStatus = observation.packageManager === undefined
+    ? "skipped"
+    : observation.packageManager === v3ToolchainContract.packageManager
+      ? "pass"
+      : "fail"
+  const betterSqlite3Status: ReadinessCheck = observation.betterSqlite3VersionError
+    ? check("better-sqlite3", "fail", observation.betterSqlite3VersionError)
+    : observation.betterSqlite3LoadError
+      ? check("better-sqlite3", "fail", `better-sqlite3 native load failed: ${observation.betterSqlite3LoadError}`)
+      : observation.betterSqlite3Version === undefined
+        ? check("better-sqlite3", "fail", "better-sqlite3 installed version was not observed")
+        : check(
+            "better-sqlite3",
+            observation.betterSqlite3Version === v3ToolchainContract.betterSqlite3 ? "pass" : "fail",
+            `better-sqlite3 observed version ${observation.betterSqlite3Version}; expected ${v3ToolchainContract.betterSqlite3}`,
+            { observed: observation.betterSqlite3Version, expected: v3ToolchainContract.betterSqlite3, abi: process.versions.modules },
+          )
   return [
-    check("node-version", process.versions.node === v3ToolchainContract.nodeVersion ? "pass" : "fail", `Node ${process.versions.node}; expected ${v3ToolchainContract.nodeVersion}`, process.versions.node),
-    check("node-abi", process.versions.modules === v3ToolchainContract.abi ? "pass" : "fail", `Node ABI ${process.versions.modules}; expected ${v3ToolchainContract.abi}`, process.versions.modules),
-    check("package-manager", packageManagerStatus, packageManager === undefined
-      ? `Package manager contract ${v3ToolchainContract.packageManager} is declared; runtime user-agent was unavailable`
-      : `Package manager is ${packageManager}; expected ${v3ToolchainContract.packageManager}`, packageManager ?? v3ToolchainContract.packageManager),
-    betterSqlite3,
+    check("node-version", process.versions.node === v3ToolchainContract.nodeVersion ? "pass" : "fail", `Node observed ${process.versions.node}; expected ${v3ToolchainContract.nodeVersion}`, { observed: process.versions.node, expected: v3ToolchainContract.nodeVersion }),
+    check("node-abi", process.versions.modules === v3ToolchainContract.abi ? "pass" : "fail", `Node ABI observed ${process.versions.modules}; expected ${v3ToolchainContract.abi}`, { observed: process.versions.modules, expected: v3ToolchainContract.abi }),
+    check("package-manager", packageManagerStatus, observation.packageManager === undefined
+      ? `pnpm version unverified; expected ${v3ToolchainContract.packageManager}`
+      : `Package manager observed ${observation.packageManager}; expected ${v3ToolchainContract.packageManager}`, { observed: observation.packageManager, expected: v3ToolchainContract.packageManager }),
+    betterSqlite3Status,
   ]
 }
 
@@ -189,7 +234,7 @@ function runtimeChecks(runtime: RuntimeReadinessStatus | undefined, bootstrapFai
 export async function readV3Readiness(db: Database, options: V3ReadinessOptions = {}): Promise<V3ReadinessReport> {
   const dataMode: ShippingDataMode = options.dataMode ?? (process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock")
   const checks = [
-    ...readV3ToolchainChecks(options.packageManager),
+    ...readV3ToolchainChecks(options.toolchain),
     localProviderBoundaryCheck(),
     requestedValue("SHIPPING_RUNTIME_ENABLED", "true") === "true"
       ? check("background-runtime-enabled", "pass", "Background Runtime is enabled")
@@ -200,7 +245,7 @@ export async function readV3Readiness(db: Database, options: V3ReadinessOptions 
   ]
   return {
     phase: "v3-readiness",
-    ready: checks.every(item => item.status !== "fail"),
+    ready: checks.filter(item => item.id !== "network-probes").every(item => item.status === "pass"),
     checkedAt: new Date().toISOString(),
     dataMode,
     checks,

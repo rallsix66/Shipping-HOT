@@ -2,7 +2,7 @@ import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
 import { initShippingTables } from "#/database/shipping"
-import { type RuntimeReadinessStatus, approvedRuntimeJobs, readV3Readiness, readV3ToolchainChecks } from "#/services/v3-readiness"
+import { type RuntimeReadinessStatus, type V3ToolchainObservation, approvedRuntimeJobs, readV3PackageManagerObservation, readV3Readiness, readV3ToolchainChecks } from "#/services/v3-readiness"
 
 function createNativeDatabase() {
   const native = new NativeDatabase(":memory:")
@@ -35,10 +35,15 @@ function validRuntime(overrides: Partial<RuntimeReadinessStatus> = {}): RuntimeR
   }
 }
 
-async function readiness(runtime: RuntimeReadinessStatus | undefined, options: { bootstrapFailed?: boolean } = {}) {
+async function readiness(runtime: RuntimeReadinessStatus | undefined, options: { bootstrapFailed?: boolean, toolchain?: Partial<V3ToolchainObservation> } = {}) {
   const { database, native } = createNativeDatabase()
   await initShippingTables(database, "mock")
-  const report = await readV3Readiness(database, { dataMode: "mock", runtime, ...options })
+  const report = await readV3Readiness(database, {
+    dataMode: "mock",
+    runtime,
+    bootstrapFailed: options.bootstrapFailed,
+    toolchain: { packageManager: "pnpm@10.30.3", ...options.toolchain },
+  })
   native.close()
   return report
 }
@@ -73,13 +78,42 @@ describe("v3 readiness", () => {
     expect(report.checks.find(check => check.id === "runtime-scope")).toMatchObject({ status: "fail" })
   })
 
-  it("evaluates the same toolchain contract used by API and CLI", () => {
-    expect(readV3ToolchainChecks("pnpm@10.30.3")).toEqual(expect.arrayContaining([
+  it("does not report ready when the HTTP package manager observation is unavailable", async () => {
+    const report = await readiness(validRuntime(), { toolchain: { packageManager: undefined } })
+    expect(report.ready).toBe(false)
+    expect(report.checks.find(check => check.id === "package-manager")).toMatchObject({ status: "skipped" })
+  })
+
+  it("rejects a non-pnpm user-agent instead of treating it as unverified success", async () => {
+    const packageManager = readV3PackageManagerObservation("npm/10.9.0 node/v24.15.0 win32 x64")
+    expect(packageManager).toBe("npm@10.9.0")
+    const report = await readiness(validRuntime(), { toolchain: { packageManager } })
+    expect(report.ready).toBe(false)
+    expect(report.checks.find(check => check.id === "package-manager")).toMatchObject({ status: "fail" })
+  })
+
+  it("rejects a mismatched pnpm version", async () => {
+    const report = await readiness(validRuntime(), { toolchain: { packageManager: "pnpm@9.0.0" } })
+    expect(report.ready).toBe(false)
+    expect(report.checks.find(check => check.id === "package-manager")).toMatchObject({ status: "fail" })
+  })
+
+  it("evaluates the actual better-sqlite3 package version and native load", () => {
+    expect(readV3ToolchainChecks({ packageManager: "pnpm@10.30.3" })).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: "node-version" }),
       expect.objectContaining({ id: "node-abi" }),
       expect.objectContaining({ id: "package-manager", status: "pass" }),
       expect.objectContaining({ id: "better-sqlite3", status: "pass" }),
     ]))
-    expect(readV3ToolchainChecks("pnpm@9.0.0").find(check => check.id === "package-manager")).toMatchObject({ status: "fail" })
+  })
+
+  it.each([
+    ["wrong installed version", { betterSqlite3Version: "12.6.1", betterSqlite3VersionError: undefined }],
+    ["unreadable installed version", { betterSqlite3Version: undefined, betterSqlite3VersionError: "version read failed" }],
+    ["native load failure", { betterSqlite3Version: "12.6.2", betterSqlite3LoadError: "native load failed" }],
+  ])("fails when better-sqlite3 is not reliably observed: %s", async (_name, toolchain) => {
+    const report = await readiness(validRuntime(), { toolchain })
+    expect(report.ready).toBe(false)
+    expect(report.checks.find(check => check.id === "better-sqlite3")).toMatchObject({ status: "fail" })
   })
 })
