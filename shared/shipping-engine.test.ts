@@ -3,7 +3,7 @@ import { type CalendarEvent, calendarEventLegacyId } from "./calendar"
 import { detectShippingEvents, isCalendarOperationallyRelevant, isFreshEventEvidence } from "./shipping-engine"
 import { createMockSnapshot } from "./shipping-fixtures"
 import { filterEventsForOperationalContext } from "./shipping"
-import { rankHotItems } from "./shipping-rules"
+import { applyFeedFreshnessPolicy, rankHotItems } from "./shipping-rules"
 
 function calendarEventForSource(sourceId: "official-holiday-source" | "manual-holiday"): CalendarEvent {
   const official = sourceId === "official-holiday-source"
@@ -193,6 +193,19 @@ describe("shipping HOT event engine", () => {
     const next = detectShippingEvents([], [], [], [expired], snapshot.settings, [feedEvent], "2026-01-02T03:00:00.000Z")
     expect(next.find(event => event.id === feedEvent.id)).toMatchObject({ status: "resolved", error: "feed_item_expired" })
     expect(rankHotItems(next, [], [], [], [expired], new Date("2026-01-02T03:00:00.000Z"))).toEqual([])
+  })
+
+  it("keeps invalid Feed dates out of Event and HOT", () => {
+    const snapshot = createMockSnapshot()
+    const invalid = applyFeedFreshnessPolicy({
+      ...snapshot.feedItems[0],
+      severity: "warning",
+      publishedAt: "2026-01-01T00:00:00.000Z",
+      effectiveAt: "not-a-date",
+    }, new Date("2026-01-01T03:00:00.000Z"))
+    expect(invalid).toMatchObject({ visibility: "quarantine", eventEligibility: false })
+    expect(detectShippingEvents([], [], [], [invalid], snapshot.settings, [], "2026-01-01T03:00:00.000Z")).toEqual([])
+    expect(rankHotItems([], [], [], [], [invalid], new Date("2026-01-01T03:00:00.000Z"))).toEqual([])
   })
 
   it("creates deduplicated Calendar reminders and keeps them stale on provider failure", () => {

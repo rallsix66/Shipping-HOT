@@ -293,12 +293,12 @@ export class ShippingRepository {
     const limit = Math.max(1, Math.min(Math.floor(options.limit ?? 100), 500))
     const clauses = [this.dataMode === "real" ? "source_type IN ('real', 'imported', 'derived')" : "1 = 1"]
     const params: (string | number)[] = []
+    const query = options.query?.trim().toLocaleLowerCase()
     if (options.sourceId) {
       clauses.push("source_id = ?")
       params.push(options.sourceId)
     }
-    const rowsValue = rows<Row>(await this.db.prepare(`SELECT id, feed_item_id, observed_at, data FROM feed_item_history WHERE ${clauses.join(" AND ")} ORDER BY observed_at DESC LIMIT ?`).all(...params, limit))
-    const query = options.query?.trim().toLocaleLowerCase()
+    const rowsValue = rows<Row>(await this.db.prepare(`SELECT id, feed_item_id, observed_at, data FROM feed_item_history WHERE ${clauses.join(" AND ")} ORDER BY observed_at DESC`).all(...params))
     return rowsValue.map((row) => {
       const item = parse<FeedItem>(row.data)
       return {
@@ -307,7 +307,7 @@ export class ShippingRepository {
         observedAt: String(row.observed_at),
         item: normalizeLegacyTrust(item, knownMockProvenanceFor(item.sourceId)),
       }
-    }).filter(record => !query || [record.item.title, record.item.summary, record.item.sourceUrl, record.item.sourceId].some(value => value.toLocaleLowerCase().includes(query)))
+    }).filter(record => !query || [record.item.title, record.item.summary, record.item.sourceUrl, record.item.sourceId].some(value => value.toLocaleLowerCase().includes(query))).slice(0, limit)
   }
 
   async listEvents(sources: LegacyEventSources = {}) {

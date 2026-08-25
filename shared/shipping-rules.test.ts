@@ -41,7 +41,7 @@ describe("shipping HOT deterministic rules", () => {
     expect(changed.statusChangedAt).toBe("2026-01-01T00:00:00.000Z")
   })
 
-  it("applies the Feed 7/14-day, future, unknown and explicit expiry gates", () => {
+  it("applies the Feed 7/14-day, absent, invalid, future and expired gates", () => {
     const base = createMockSnapshot().feedItems[0]
     const now = new Date("2026-01-15T00:00:00.000Z")
     const ordinary = applyFeedFreshnessPolicy({ ...base, category: "shipping_news", freshnessPolicy: "ordinary", publishedAt: "2026-01-10T00:00:00.000Z" }, now)
@@ -49,6 +49,12 @@ describe("shipping HOT deterministic rules", () => {
     const official = applyFeedFreshnessPolicy({ ...base, category: "port_notice", freshnessPolicy: "official", publishedAt: "2026-01-10T00:00:00.000Z", expiresAt: "2026-01-12T00:00:00.000Z" }, now)
     const future = applyFeedFreshnessPolicy({ ...base, publishedAt: "2026-01-16T00:00:00.000Z" }, now)
     const unknown = applyFeedFreshnessPolicy({ ...base, publishedAt: "not-a-date", publicationTimeKnown: false }, now)
+    const absentExpiry = applyFeedFreshnessPolicy({ ...base, publishedAt: "2026-01-10T00:00:00.000Z", expiresAt: undefined }, now)
+    const invalidPublication = applyFeedFreshnessPolicy({ ...base, publishedAt: "not-a-date", publicationTimeKnown: true }, now)
+    const invalidEffective = applyFeedFreshnessPolicy({ ...base, publishedAt: "2026-01-10T00:00:00.000Z", effectiveAt: "not-a-date", currentUntil: "2026-01-20T00:00:00.000Z" }, now)
+    const futureEffective = applyFeedFreshnessPolicy({ ...base, publishedAt: "2026-01-10T00:00:00.000Z", effectiveAt: "2026-01-16T00:00:00.000Z" }, now)
+    const invalidExpiry = applyFeedFreshnessPolicy({ ...base, publishedAt: "2026-01-10T00:00:00.000Z", expiresAt: "not-a-date" }, now)
+    const invalidWeatherExpiry = applyFeedFreshnessPolicy({ ...base, publishedAt: "2026-01-10T00:00:00.000Z", weather: { riskSource: "official", alertExpiresAt: "not-a-date" } }, now)
 
     expect(feedFreshnessPolicyFor(ordinary).maxAgeDays).toBe(7)
     expect(feedFreshnessPolicyFor(operational).maxAgeDays).toBe(14)
@@ -57,6 +63,13 @@ describe("shipping HOT deterministic rules", () => {
     expect(official).toMatchObject({ visibility: "history", eventEligibility: false, currentUntil: "2026-01-12T00:00:00.000Z" })
     expect(future).toMatchObject({ visibility: "quarantine", eventEligibility: false })
     expect(unknown).toMatchObject({ visibility: "quarantine", eventEligibility: false })
+    expect(absentExpiry).toMatchObject({ visibility: "current", eventEligibility: true })
+    expect(invalidPublication).toMatchObject({ visibility: "quarantine", eventEligibility: false, error: "publication_time_invalid" })
+    expect(invalidEffective).toMatchObject({ visibility: "quarantine", eventEligibility: false, currentUntil: undefined, error: "effective_time_invalid" })
+    expect(futureEffective).toMatchObject({ visibility: "quarantine", eventEligibility: false, error: "effective_time_future" })
+    expect(invalidExpiry).toMatchObject({ visibility: "quarantine", eventEligibility: false, error: "expiry_time_invalid" })
+    expect(invalidWeatherExpiry).toMatchObject({ visibility: "quarantine", eventEligibility: false, error: "expiry_time_invalid" })
+    expect(isFeedItemCurrent(invalidEffective, now)).toBe(false)
     expect(isFeedItemCurrent(ordinary, now)).toBe(true)
     expect(isFeedItemCurrent(official, now)).toBe(false)
   })

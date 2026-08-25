@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { ShippingRepository, initShippingTables } from "./shipping"
 import { p3FeedFreshnessMigration } from "./migrations/009-p3-feed-freshness"
+import { p3FeedFreshnessReclassificationMigration } from "./migrations/010-p3-feed-freshness-reclassification"
 import { createMockCalendarEvents } from "#/providers/calendar"
 
 function createNativeDatabase() {
@@ -49,8 +50,8 @@ describe("shippingRepository", () => {
     const migration = native.prepare("SELECT version, name FROM schema_migrations ORDER BY version DESC LIMIT 1").get() as { version: number, name: string }
     const metadata = native.prepare("SELECT schema_version, bootstrap_completed_at, data_mode FROM app_metadata WHERE id = 'default'").get() as { schema_version: number, bootstrap_completed_at?: string, data_mode: string }
     const directory = native.prepare("SELECT port_directory_status, port_directory_version, port_directory_imported_at FROM port_directory_status WHERE id = 'default'").get() as { port_directory_status: string, port_directory_version?: string, port_directory_imported_at?: string }
-    expect(migration).toEqual({ version: 9, name: "p3-feed-freshness" })
-    expect(metadata).toMatchObject({ schema_version: 9, data_mode: "real" })
+    expect(migration).toEqual({ version: 10, name: "p3-feed-freshness-reclassification" })
+    expect(metadata).toMatchObject({ schema_version: 10, data_mode: "real" })
     expect(metadata.bootstrap_completed_at).toEqual(expect.any(String))
     expect(directory).toMatchObject({ port_directory_status: "ready", port_directory_version: "p1a-unlocode-baseline-v1", port_directory_imported_at: expect.any(String) })
     for (const table of ["translation_cache", "provider_usage", "provider_runtime", "sync_runs", "vessel_watchlist", "port_watchlist", "port_directory", "vessel_metadata", "vessel_search_cache", "ais_positions", "ais_latest_positions", "voyage_eta_history", "feed_item_history"]) {
@@ -138,6 +139,92 @@ describe("shippingRepository", () => {
     })
     await p3FeedFreshnessMigration.up(database)
     expect(native.prepare("SELECT COUNT(*) AS count FROM feed_item_history WHERE feed_item_id = ?").get("legacy-feed")).toEqual({ count: 1 })
+    native.close()
+  })
+
+  it("reclassifies v9 Feed rows and syncs current/history/quarantine state in v10", async () => {
+    const { database, native } = createNativeDatabase()
+    native.exec(`
+      CREATE TABLE feed_items (
+        id TEXT PRIMARY KEY,
+        source_id TEXT NOT NULL,
+        category TEXT NOT NULL,
+        type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        summary TEXT NOT NULL,
+        source_url TEXT NOT NULL,
+        published_at TEXT NOT NULL,
+        fetched_at TEXT NOT NULL,
+        severity TEXT NOT NULL,
+        related_port_ids TEXT NOT NULL,
+        related_vessel_ids TEXT NOT NULL,
+        related_voyage_ids TEXT NOT NULL,
+        source_type TEXT NOT NULL,
+        data TEXT NOT NULL
+      )
+    `)
+    await p3FeedFreshnessMigration.up(database)
+    const insert = native.prepare(`
+      INSERT INTO feed_items (
+        id, source_id, category, type, title, summary, source_url,
+        published_at, fetched_at, severity, related_port_ids,
+        related_vessel_ids, related_voyage_ids, source_type, data
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+    const add = (id: string, sourceType: string, publishedAt: string, data: Record<string, unknown>) => insert.run(
+      id,
+      `source-${id}`,
+      "shipping_news",
+      "shipping_news",
+      id,
+      id,
+      `https://example.test/${id}`,
+      publishedAt,
+      "2026-08-20T00:01:00.000Z",
+      "warning",
+      "[]",
+      "[]",
+      "[]",
+      sourceType,
+      JSON.stringify({
+        id,
+        sourceId: `source-${id}`,
+        category: "shipping_news",
+        type: "shipping_news",
+        title: id,
+        summary: id,
+        sourceUrl: `https://example.test/${id}`,
+        publishedAt,
+        fetchedAt: "2026-08-20T00:01:00.000Z",
+        severity: "warning",
+        relatedPortIds: [],
+        relatedVesselIds: [],
+        relatedVoyageIds: [],
+        sourceStatus: "healthy",
+        stale: false,
+        eventEligibility: true,
+        provenance: { sourceType: sourceType === "mock" ? "mock" : "third_party", dataNature: "reported", sourceId: `source-${id}` },
+        ...data,
+      }),
+    )
+    add("feed-v10-current", "real", "2026-08-20T00:00:00.000Z", {})
+    add("feed-v10-expired", "imported", "2026-08-01T00:00:00.000Z", {})
+    add("feed-v10-mock-valid", "mock", "2026-08-20T00:00:00.000Z", {})
+    add("feed-v10-invalid", "mock", "2026-08-20T00:00:00.000Z", { effectiveAt: "not-a-date" })
+
+    const now = new Date("2026-08-25T00:00:00.000Z")
+    await p3FeedFreshnessReclassificationMigration.up(database, now)
+    const states = native.prepare("SELECT id, visibility, current_until, source_type FROM feed_items ORDER BY id").all()
+    expect(states).toEqual([
+      { id: "feed-v10-current", visibility: "current", current_until: "2026-09-03T00:00:00.000Z", source_type: "real" },
+      { id: "feed-v10-expired", visibility: "history", current_until: "2026-08-15T00:00:00.000Z", source_type: "imported" },
+      { id: "feed-v10-invalid", visibility: "quarantine", current_until: null, source_type: "mock" },
+      { id: "feed-v10-mock-valid", visibility: "current", current_until: "2026-09-03T00:00:00.000Z", source_type: "mock" },
+    ])
+    const invalidData = JSON.parse(String((native.prepare("SELECT data FROM feed_items WHERE id = ?").get("feed-v10-invalid") as { data: string }).data)) as Record<string, unknown>
+    expect(invalidData).toMatchObject({ visibility: "quarantine", eventEligibility: false, source_type: "mock", effectiveAt: "not-a-date" })
+    expect(native.prepare("SELECT COUNT(*) AS count FROM feed_item_history").get()).toEqual({ count: 4 })
+    expect(native.prepare("SELECT visibility, source_type FROM feed_item_history WHERE feed_item_id = ?").get("feed-v10-invalid")).toEqual({ visibility: "quarantine", source_type: "mock" })
     native.close()
   })
 
@@ -264,6 +351,31 @@ describe("shippingRepository", () => {
     expect(await repository.archiveFeedItemsNotIn([current.sourceId], new Set(), now)).toBe(1)
     expect(await repository.listFeedItems({ now })).toEqual([])
     expect((await repository.listFeedHistory({ query: "updated observation", limit: 10 })).map(record => record.item.id)).toContain(current.id)
+    native.close()
+  })
+
+  it("filters Feed history query and source before applying the limit", async () => {
+    const { repository, native } = await preparedRepository()
+    const snapshot = createMockSnapshot()
+    const base = snapshot.feedItems[0]
+    const targetSource = base.sourceId
+    const add = (id: string, fetchedAt: string, title: string, sourceId = targetSource) => repository.upsertFeedItem({
+      ...base,
+      id,
+      sourceId,
+      title,
+      summary: title,
+      fetchedAt,
+      publishedAt: "2026-01-10T00:00:00.000Z",
+    })
+    await add("feed-history-newest-unmatched", "2026-01-10T00:04:00.000Z", "newest unrelated")
+    await add("feed-history-second-unmatched", "2026-01-10T00:03:00.000Z", "second unrelated")
+    await add("feed-history-older-match", "2026-01-10T00:01:00.000Z", "older needle match")
+    await add("feed-history-other-source-match", "2026-01-10T00:05:00.000Z", "needle from another source", "other-source")
+
+    const result = await repository.listFeedHistory({ query: "needle", sourceId: targetSource, limit: 1 })
+    expect(result.map(record => record.item.id)).toEqual(["feed-history-older-match"])
+    expect(await repository.listFeedHistory({ query: "needle", sourceId: targetSource, limit: 500 })).toHaveLength(1)
     native.close()
   })
 

@@ -116,7 +116,7 @@ export interface FeedFreshnessDecision {
   currentUntil?: string
   visibility: FeedVisibility
   eventEligibility: boolean
-  reason?: "publication_time_unknown" | "publication_time_future" | "effective_time_future" | "expired" | "stale_source"
+  reason?: "publication_time_unknown" | "publication_time_invalid" | "publication_time_future" | "effective_time_invalid" | "effective_time_future" | "expiry_time_invalid" | "expired" | "stale_source"
 }
 
 export function feedFreshnessPolicyFor(item: Pick<FeedItem, "category" | "severity" | "freshnessPolicy" | "provenance">): FeedFreshnessPolicy {
@@ -126,33 +126,52 @@ export function feedFreshnessPolicyFor(item: Pick<FeedItem, "category" | "severi
   return { class: policyClass, maxAgeDays, maxAgeMs: maxAgeDays * 24 * 60 * 60 * 1000 }
 }
 
-function validTimestamp(value: string | undefined): number | undefined {
-  if (!value) return undefined
+interface TimestampObservation {
+  provided: boolean
+  value?: number
+}
+
+function inspectTimestamp(value: unknown): TimestampObservation {
+  if (value === undefined || value === null) return { provided: false }
+  if (typeof value !== "string") return { provided: true }
+  if (value.trim() === "") return { provided: false }
   const parsed = Date.parse(value)
-  return Number.isFinite(parsed) ? parsed : undefined
+  return Number.isFinite(parsed) ? { provided: true, value: parsed } : { provided: true }
 }
 
 export function applyFeedFreshnessPolicy(item: FeedItem, now = new Date()): FeedItem {
-  const publicationAt = validTimestamp(item.publishedAt)
-  const effectiveAt = validTimestamp(item.effectiveAt)
-  const expiresAt = validTimestamp(item.expiresAt ?? item.weather?.alertExpiresAt)
+  const publication = inspectTimestamp(item.publishedAt)
+  const effective = inspectTimestamp(item.effectiveAt)
+  const explicitExpiry = inspectTimestamp(item.expiresAt)
+  const weatherExpiry: TimestampObservation = explicitExpiry.provided ? { provided: false } : inspectTimestamp(item.weather?.alertExpiresAt)
+  const expiry = explicitExpiry.provided ? explicitExpiry : weatherExpiry
   const policy = feedFreshnessPolicyFor(item)
-  const publicationKnown = item.publicationTimeKnown !== false && publicationAt !== undefined
+  const publicationKnown = item.publicationTimeKnown !== false && publication.value !== undefined
   const base = { ...item, freshnessPolicy: policy.class, publicationTimeKnown: publicationKnown }
   const quarantine = (reason: FeedFreshnessDecision["reason"]): FeedItem => ({
     ...base,
+    currentUntil: undefined,
     visibility: "quarantine",
     eventEligibility: false,
     stale: true,
     sourceStatus: base.sourceStatus === "healthy" ? "degraded" : base.sourceStatus,
     error: base.error ?? reason,
   })
-  if (!publicationKnown || publicationAt === undefined) return quarantine("publication_time_unknown")
-  if (publicationAt > now.getTime()) return quarantine("publication_time_future")
-  if (effectiveAt !== undefined && effectiveAt > now.getTime()) return quarantine("effective_time_future")
+  if (!publication.provided) return quarantine("publication_time_unknown")
+  if (publication.value === undefined) return quarantine("publication_time_invalid")
+  if (!publicationKnown) return quarantine("publication_time_unknown")
+  if (!effective.provided) {
+    // No effective time is a valid absence; only a supplied invalid value quarantines.
+  } else if (effective.value === undefined) {
+    return quarantine("effective_time_invalid")
+  } else if (effective.value > now.getTime()) {
+    return quarantine("effective_time_future")
+  }
+  if (expiry.provided && expiry.value === undefined) return quarantine("expiry_time_invalid")
+  if (publication.value > now.getTime()) return quarantine("publication_time_future")
 
-  const ageUntil = publicationAt + policy.maxAgeMs
-  const currentUntilMs = expiresAt === undefined ? ageUntil : Math.min(ageUntil, expiresAt)
+  const ageUntil = publication.value + policy.maxAgeMs
+  const currentUntilMs = expiry.value === undefined ? ageUntil : Math.min(ageUntil, expiry.value)
   const currentUntil = new Date(currentUntilMs).toISOString()
   if (currentUntilMs <= now.getTime()) {
     return {
@@ -177,7 +196,7 @@ export function applyFeedFreshnessPolicy(item: FeedItem, now = new Date()): Feed
 export function isFeedItemCurrent(item: FeedItem, now = new Date()): boolean {
   const normalized = item.visibility === undefined ? applyFeedFreshnessPolicy(item, now) : item
   if (normalized.visibility !== "current") return false
-  const currentUntil = validTimestamp(normalized.currentUntil)
+  const currentUntil = inspectTimestamp(normalized.currentUntil).value
   return currentUntil !== undefined && currentUntil > now.getTime()
 }
 

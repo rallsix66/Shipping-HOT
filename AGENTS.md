@@ -3,7 +3,7 @@
 ## Project
 
 - Current codebase: NewsNow foundation with a local Shipping HOT implementation and explicit V3 Readiness gate on the fixed Node `24.15.0` / ABI `137` toolchain (`better-sqlite3@12.6.2`, `.data/shipping-hot-v3.sqlite3`).
-- Shipping HOT Mock, approved V1 real-provider flows, V2.2–V2.5 local flows, and accepted V3 phases P0 Persistence, P1A Port Directory Foundation, P1B Mock Isolation, P2A Search Foundation, P2B Identity Seal, P2C Background Runtime Foundation, P3A AIS Tracking Runtime Foundation and P3B Voyage / ETA Foundation are implemented and locally verified where stated in `docs/status.md`. Feed, Calendar, Translation, real Voyage adapter coverage and live AIS observation remain pending/deferred until separately approved.
+- Shipping HOT Mock, approved V1 real-provider flows, V2.2–V2.5 local flows, and accepted V3 phases P0 Persistence, P1A Port Directory Foundation, P1B Mock Isolation, P2A Search Foundation, P2B Identity Seal, P2C Background Runtime Foundation, P3A AIS Tracking Runtime Foundation, P3B Voyage / ETA Foundation and P3 Feed Freshness Batch 1 are implemented and locally verified where stated in `docs/status.md`. Feed Background Runtime Batch 2, Calendar, Translation, real Voyage adapter coverage and live AIS observation remain pending/deferred until separately approved.
 
 ## Commands
 

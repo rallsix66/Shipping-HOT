@@ -31,6 +31,7 @@
     "smoke:p2c-runtime": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p2c-runtime-sqlite-smoke.ts",
     "smoke:p3a-ais": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p3a-ais-sqlite-smoke.ts",
     "smoke:p3b-voyage": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p3b-voyage-sqlite-smoke.ts",
+    "smoke:p3-feed": "pnpm smoke:p3-feed-freshness",
     "smoke:p3-feed-freshness": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p3-feed-freshness-sqlite-smoke.ts",
     "smoke:v3-readiness": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/v3-readiness.ts"
   },

@@ -1,20 +1,20 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 文档状态：`accepted / V3 Readiness gate implemented / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed + P3A AIS Tracking Runtime Foundation + P3B Voyage / ETA Foundation implemented / Feed, Calendar, Translation pending`
+> 文档状态：`accepted / V3 Readiness gate implemented / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed + P3A AIS Tracking Runtime Foundation + P3B Voyage / ETA Foundation + P3 Feed Freshness Batch 1 implemented / Feed Background Runtime Batch 2, Calendar, Translation pending`
 >
 > 审查日期：2026-08-24（Asia/Shanghai）
 >
 > 代码基线：`codex/shipping-hot-v3-real-data`（P3B 本轮；Node `24.15.0` / ABI `137` 基线）
 >
-> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 已完成封板，P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation 与 P3 Feed Freshness Batch 1 已实现并通过本地验证**。本阶段完成 migration v8 Voyage/ETA history、Mock VoyageProvider、`voyage_sync` Runtime Job、Repository/API/UI 和 SQLite restart persistence；批次 1 新增 migration v9 Feed current/history/quarantine metadata、查询边界与 Event/HOT expiry，不注册 Feed Runtime Job；Feed Background Runtime 批次 2、Calendar、Translation、AIS ETA prediction、地图、轨迹动画或商业 Voyage adapter 不在本批次实现。Closeout repair 追加两项 P3B 防护并已本地验证：Repository 拒绝非请求 `vesselId` 的 Provider 记录（`rejectedVesselIds` 计数），旧 `lastUpdatedAt` 观测不得覆盖最新航程或追加重复历史（`staleSkipped` 计数）；同日跟进修复使 Voyage Runtime `sourceUpdatedAt` 仅由被接受记录计算，且无接受记录的运行保留既有 `provider_runtime.last_source_updated_at`。
+> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 已完成封板，P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation 与 P3 Feed Freshness Batch 1 已实现并通过本地验证**。本阶段完成 migration v8 Voyage/ETA history、Mock VoyageProvider、`voyage_sync` Runtime Job、Repository/API/UI 和 SQLite restart persistence；批次 1 新增 migration v9 Feed current/history/quarantine metadata 与 append-only history、migration v10 Feed 重分类与 observation 同步、current/history API、严格 invalid/future/expired/absent 日期边界和 Event/HOT expiry；不注册 Feed Runtime Job。Feed Background Runtime 批次 2、Calendar、Translation、AIS ETA prediction、地图、轨迹动画或商业 Voyage adapter 不在本批次实现。Closeout repair 追加两项 P3B 防护并已本地验证：Repository 拒绝非请求 `vesselId` 的 Provider 记录（`rejectedVesselIds` 计数），旧 `lastUpdatedAt` 观测不得覆盖最新航程或追加重复历史（`staleSkipped` 计数）；同日跟进修复使 Voyage Runtime `sourceUpdatedAt` 仅由被接受记录计算，且无接受记录的运行保留既有 `provider_runtime.last_source_updated_at`。
 >
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；只有具体 endpoint entitlement、地区/账号资格等未确认事项保持 `unknown/pending`。
 >
-> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮落实获批的 P3B Voyage / ETA Intelligence Foundation；不创建账号、不购买服务、不实现 Feed/Calendar/Translation Adapter、AIS ETA prediction、地图/轨迹系统或商业 Voyage adapter。
+> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮仅落实已批准的 P3 Feed Freshness Batch 1 review fixes；不创建账号、不购买服务、不实现 Feed Background Runtime Batch 2、Calendar/Translation Adapter、AIS ETA prediction、地图/轨迹系统或商业 Voyage adapter。
 
 > V3 Readiness：本轮只建立本地安全就绪门（观测 Node/ABI、CLI 实测 pnpm、实际安装的 better-sqlite3 版本/native load、SQLite schema/Port Directory、已批准 Runtime scope、Mock-only provider configuration），通过 `GET /api/shipping/readiness` 与 `pnpm smoke:v3-readiness` 验证；HTTP 缺少 pnpm 观测时标记 skipped 且严格 Readiness 不得 ready；不执行外部 Provider 请求，不进入下一阶段。
 
-> 当前执行状态：P3 Feed Freshness 已按批准拆为两个批次；批次 1（policy、current/history persistence/query、Event/HOT expiry）已完成并独立验证，批次 2（Feed Background Runtime、来源独立调度/失败隔离、Readiness Job 集更新）仍待单独执行和收尾。
+> 当前执行状态：P3 Feed Freshness 已按批准拆为两个批次；批次 1（policy、严格日期可信度、v9→v10 current/history/quarantine 重分类、current/history persistence/query、Event/HOT expiry）已完成审查修复并独立验证，批次 2（Feed Background Runtime、来源独立调度/失败隔离、Readiness Job 集更新）仍待单独执行和收尾。
 
 ## 1. 背景与当前问题
 
@@ -72,7 +72,7 @@ Shipping HOT V2 已经建立了 Provider、Domain、Repository、Event/HOT 和�
 - `GET /api/shipping/calendar`：读取已缓存日历。
 - `POST /api/shipping/calendar/sync`：手工同步指定年/国家。
 
-Current Voyage latest API 已由 P3B 提供；仍不存在 Commercial Port Call、Provider Health、历史 Feed 搜索和翻译状态 API。P3A 的 bounded AIS latest-position API 与 P3B Voyage/ETA API 保持独立，长期 AIS session、真实 Voyage enrichment 与完整业务 Provider API 仍 deferred。
+Current Voyage latest API 已由 P3B 提供；仍不存在 Commercial Port Call、Provider Health 和翻译状态 API，Feed current/history API 已由 P3 Feed Freshness Batch 1 提供。P3A 的 bounded AIS latest-position API 与 P3B Voyage/ETA API 保持独立，长期 AIS session、Feed Background Runtime、真实 Voyage enrichment 与完整业务 Provider API 仍 deferred。
 
 ### 2.3 Provider 已存在但未真正启用的部分
 
@@ -802,11 +802,11 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | --- | --- |
 | 目标 | 批次 1：当前 Feed/HOT 不再出现过时新闻，历史可查，Event/HOT expiry 可追溯；批次 2：来源独立后台刷新与失败隔离 |
 | 修改文件 | `server/providers/feed.ts`、Repository、Event/HOT engine、Feed query API |
-| 新增文件 | `server/database/migrations/009-p3-feed-freshness.ts`、Feed history API、native persistence smoke |
-| 数据库 | Feed `current_until/effective_at/expires_at/visibility` 与 append-only `feed_item_history`；必要索引 |
+| 新增文件 | `server/database/migrations/009-p3-feed-freshness.ts`、`010-p3-feed-freshness-reclassification.ts`、Feed history API、native persistence smoke |
+| 数据库 | Feed `current_until/effective_at/expires_at/visibility` 与 append-only `feed_item_history`；v10 重分类/observation 同步；必要索引 |
 | API | `GET /api/shipping/feed` current query 与 `GET /api/shipping/feed/history` history search 分离 |
-| 测试 | 7/14 天边界、future/unknown/malformed dates、explicit expiry、source disappearance、Event expiry、current/history restart persistence、时区 |
-| 验收 | 批次 1 已通过 Feed targeted 71/71、full 317/317、typecheck、lint、build、native Feed restart smoke、git diff check 与 Closeout；批次 2 单独验收并更新 Readiness Job 集 |
+| 测试 | 7/14 天边界、absent/invalid/future/expired dates、effective/expiry/weather expiry、v9→v10 current/history/quarantine reclassification、source disappearance、Event/HOT exclusion、query-before-limit、current/history restart persistence、时区 |
+| 验收 | 批次 1 review fixes 完成后重新通过 targeted/full tests、typecheck、lint、build、`smoke:p3-feed`、P0 native smoke、Mock/Off Readiness smoke、git diff check 与 Closeout；批次 2 仍单独验收并更新 Readiness Job 集 |
 | 风险 | RSS 错误日期、官方公告无 expiry、站点结构/版权变化 |
 | 回滚 | 关闭单一 source；保留 current-window policy，不恢复无限旧新闻 |
 
@@ -1135,7 +1135,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 
 ## 27. 实施门槛与文档后续
 
-`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation、P3A AIS Tracking Runtime Foundation 与 P3B Voyage / ETA Foundation 已获授权、实施并完成本地验证；Feed、Calendar、Translation、real Voyage adapter 及长期 AIS observation coverage 仍 pending/deferred。该 ADR 至少覆盖：
+`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation、P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation 与 P3 Feed Freshness Batch 1 已获授权、实施并完成本地验证；Feed Background Runtime Batch 2、Calendar、Translation、real Voyage adapter 及长期 AIS observation coverage 仍 pending/deferred。该 ADR 至少覆盖：
 
 - V3 real-only runtime、SQLite fail-closed/read-only 行为和已验证的单一 Node LTS。
 - VesselAPI 仅 Discovery/static metadata、AISStream 长期 tracking、UN/LOCODE 默认 Port Search，以及 provider-owned/user-owned/directory-owned/translation-owned 字段边界。
