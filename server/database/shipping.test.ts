@@ -2,10 +2,13 @@ import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
+import type { VoyageRecord } from "@shared/voyage"
 import { ShippingRepository, initShippingTables } from "./shipping"
+import { VoyageRepository } from "./voyages"
 import { p3FeedFreshnessMigration } from "./migrations/009-p3-feed-freshness"
 import { p3FeedFreshnessReclassificationMigration } from "./migrations/010-p3-feed-freshness-reclassification"
 import { createMockCalendarEvents } from "#/providers/calendar"
+import { readLatestVoyage } from "#/services/voyage-read"
 
 function createNativeDatabase() {
   const native = new NativeDatabase(":memory:")
@@ -82,6 +85,43 @@ describe("shippingRepository", () => {
     expect(await repository.listEvents()).toHaveLength(snapshot.events.length)
     expect((await repository.listEvents()).every(event => (event.evidence?.length ?? 0) > 0)).toBe(true)
     expect(await repository.getSettings()).toMatchObject({ refreshInterval: 15, retentionDays: 30, eventThresholds: { anchoredHours: 24, delayMinutes: 120 } })
+    native.close()
+  })
+
+  it("keeps the legacy Snapshot Voyage aligned with the P3B latest Voyage API", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const voyageRepository = new VoyageRepository(database, "mock")
+    const shippingRepository = new ShippingRepository(database, "mock")
+    const first: VoyageRecord = {
+      id: "voyage-consistency-1",
+      vesselId: "vessel-consistency-1",
+      imo: "9162423",
+      mmsi: "413393620",
+      originPortId: "CNSHK",
+      destinationPortId: "PHMNL",
+      voyageNumber: "CONSISTENCY-001",
+      status: "in_transit",
+      eta: "2026-09-01T00:00:00.000Z",
+      etd: "2026-08-24T00:00:00.000Z",
+      source: "mock-voyage",
+      sourceType: "mock",
+      timestamp: "2026-08-24T00:00:00.000Z",
+      lastUpdatedAt: "2026-08-24T00:00:00.000Z",
+    }
+    await voyageRepository.saveVoyages([first])
+    await voyageRepository.saveVoyages([{ ...first, eta: "2026-09-03T00:00:00.000Z", lastUpdatedAt: "2026-08-25T00:00:00.000Z", timestamp: "2026-08-25T00:00:00.000Z" }])
+
+    const snapshotVoyage = (await shippingRepository.listVoyages()).find(item => item.vesselId === first.vesselId)
+    const latestVoyage = await readLatestVoyage(database, "mock", first.vesselId)
+    expect(snapshotVoyage).toMatchObject({
+      baselineEta: "2026-09-01T00:00:00.000Z",
+      latestEta: "2026-09-03T00:00:00.000Z",
+      delayMinutes: 2880,
+    })
+    expect(latestVoyage).toMatchObject({ eta: "2026-09-03T00:00:00.000Z" })
+    expect(snapshotVoyage?.latestEta).toBe(latestVoyage?.eta)
+    expect(snapshotVoyage?.baselineEta).not.toBe(snapshotVoyage?.latestEta)
     native.close()
   })
 

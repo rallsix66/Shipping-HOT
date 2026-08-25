@@ -2,12 +2,24 @@ import process from "node:process"
 import type { Database } from "db0"
 import { hasMockEvidence, knownMockProvenanceFor, normalizeLegacyEventTrust, normalizeLegacyTrust, recordAllowedForDataMode } from "@shared/shipping"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
+import { mergeNormalizedVoyageFields, voyageRecordToShippingVoyage } from "@shared/voyage-normalizer"
+import type { NormalizedVoyageFields } from "@shared/voyage-normalizer"
+import type { VoyageRecord } from "@shared/voyage"
 import type { DataEvidence, DataProvenance, FeedItem, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, SourceLineage, Vessel, Voyage } from "@shared/shipping"
 import type { CalendarEvent } from "@shared/calendar"
 import { applyFeedFreshnessPolicy } from "@shared/shipping-rules"
 import { type DatabaseMetadata, type ShippingDataMode, initializeShippingDatabase } from "#/database/runtime"
 
 type Row = Record<string, unknown>
+
+interface VoyageStorageRow extends Row {
+  data: string
+  baseline_etd?: string | null
+  baseline_eta?: string | null
+  latest_etd?: string | null
+  latest_eta?: string | null
+  delay_minutes?: number | null
+}
 
 interface LegacyTrustDefaults {
   vessel?: DataProvenance
@@ -268,7 +280,24 @@ export class ShippingRepository {
   }
 
   async listVoyages(defaults: LegacyTrustDefaults = {}) {
-    return rows<Row>(await this.db.prepare(`SELECT data FROM voyages${this.sourceWhere()} ORDER BY id`).all()).map(row => normalizeLegacyTrust(parse<Voyage>(row.data), defaults.voyage)).filter(voyage => recordAllowedForDataMode(voyage, this.dataMode))
+    const records = rows<VoyageStorageRow>(await this.db.prepare(`
+      SELECT data, baseline_etd, baseline_eta, latest_etd, latest_eta, delay_minutes
+      FROM voyages${this.sourceWhere()} ORDER BY id
+    `).all())
+    return records.map((row) => {
+      const stored = parse<Record<string, unknown>>(row.data)
+      const fields: NormalizedVoyageFields = {
+        baselineEtd: row.baseline_etd,
+        baselineEta: row.baseline_eta,
+        latestEtd: row.latest_etd,
+        latestEta: row.latest_eta,
+        delayMinutes: row.delay_minutes,
+      }
+      const voyage = typeof stored.sourceType === "string"
+        ? voyageRecordToShippingVoyage(stored as unknown as VoyageRecord, fields)
+        : mergeNormalizedVoyageFields(stored as unknown as Voyage, fields)
+      return normalizeLegacyTrust(voyage, defaults.voyage)
+    }).filter(voyage => recordAllowedForDataMode(voyage, this.dataMode))
   }
 
   async listFeedItems(options: { now?: Date, view?: "current" | "history" } = {}) {

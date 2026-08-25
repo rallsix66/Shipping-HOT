@@ -1,5 +1,6 @@
 import type { Database } from "db0"
 import type { VoyageEtaHistoryRecord, VoyageRecord, VoyageStatus } from "@shared/voyage"
+import { calculateDelayMinutes } from "@shared/shipping-rules"
 import type { ShippingDataMode } from "#/database/runtime"
 
 export interface VoyageWriteResult {
@@ -31,6 +32,13 @@ interface VoyageRow {
   created_at?: string | null
 }
 
+interface ExistingVoyageRow {
+  last_updated_at?: string | null
+  baseline_etd?: string | null
+  baseline_eta?: string | null
+  data?: string | null
+}
+
 interface HistoryRow {
   id: string
   voyage_id: string
@@ -48,6 +56,16 @@ const lineageValues = new Set(["real", "mock", "imported", "derived"])
 
 function rows<T>(value: unknown): T[] {
   return Array.isArray(value) ? value as T[] : []
+}
+
+function storedFields(value: string | null | undefined): Record<string, unknown> {
+  if (!value) return {}
+  try {
+    const parsed = JSON.parse(value) as unknown
+    return parsed && typeof parsed === "object" ? parsed as Record<string, unknown> : {}
+  } catch {
+    return {}
+  }
 }
 
 function validateRecord(record: VoyageRecord): void {
@@ -139,7 +157,7 @@ export class VoyageRepository {
           continue
         }
         if (this.dataMode === "real" && record.sourceType === "mock") throw new Error("mock_voyage_not_allowed_in_real_mode")
-        const existing = await this.db.prepare("SELECT last_updated_at FROM voyages WHERE id = ?").get(record.id) as { last_updated_at?: string | null } | undefined
+        const existing = await this.db.prepare("SELECT last_updated_at, baseline_etd, baseline_eta, data FROM voyages WHERE id = ?").get(record.id) as ExistingVoyageRow | undefined
         if (existing?.last_updated_at && Date.parse(record.lastUpdatedAt) < Date.parse(existing.last_updated_at)) {
           staleSkipped++
           continue
@@ -147,6 +165,16 @@ export class VoyageRepository {
         acceptedIds.push(record.id)
         await this.assertPortIdentity(record.originPortId)
         await this.assertPortIdentity(record.destinationPortId)
+        const previous = storedFields(existing?.data)
+        const baselineEta = existing?.baseline_eta ?? record.eta
+        const baselineEtd = existing?.baseline_etd ?? record.etd
+        const delayMinutes = calculateDelayMinutes(baselineEta ?? undefined, record.eta)
+        const baselineEtaSource = existing?.baseline_eta !== undefined && existing?.baseline_eta !== null
+          ? typeof previous.baselineEtaSource === "string" ? previous.baselineEtaSource : record.source
+          : record.source
+        const baselineEtdSource = existing?.baseline_etd !== undefined && existing?.baseline_etd !== null
+          ? typeof previous.baselineEtdSource === "string" ? previous.baselineEtdSource : record.source
+          : record.source
         const data = JSON.stringify({
           ...record,
           source_type: record.sourceType,
@@ -156,10 +184,11 @@ export class VoyageRepository {
           latestEtaSource: record.source,
           latestEtdSource: record.source,
           latestEtaObservedAt: record.lastUpdatedAt,
-          baselineEta: record.eta,
-          baselineEtd: record.etd,
-          baselineEtaSource: record.source,
-          baselineEtdSource: record.source,
+          baselineEta,
+          baselineEtd,
+          baselineEtaSource,
+          baselineEtdSource,
+          delayMinutes,
           stale: false,
           sourceStatus: "healthy",
         })
@@ -172,8 +201,11 @@ export class VoyageRepository {
             data = excluded.data,
             source_type = excluded.source_type,
             vessel_id = excluded.vessel_id,
+            baseline_etd = COALESCE(voyages.baseline_etd, excluded.baseline_etd),
+            baseline_eta = COALESCE(voyages.baseline_eta, excluded.baseline_eta),
             latest_etd = excluded.latest_etd,
             latest_eta = excluded.latest_eta,
+            delay_minutes = excluded.delay_minutes,
             imo = excluded.imo,
             mmsi = excluded.mmsi,
             origin_port_id = excluded.origin_port_id,
@@ -189,11 +221,11 @@ export class VoyageRepository {
           data,
           record.sourceType,
           record.vesselId,
+          baselineEtd ?? null,
+          baselineEta ?? null,
           record.etd ?? null,
           record.eta ?? null,
-          record.etd ?? null,
-          record.eta ?? null,
-          null,
+          delayMinutes ?? null,
           record.imo ?? null,
           record.mmsi ?? null,
           record.originPortId,

@@ -61,6 +61,17 @@ describe("voyage repository", () => {
       timestamp: "2026-08-25T00:00:00.000Z",
       lastUpdatedAt: "2026-08-25T00:00:00.000Z",
     })])
+    expect(native.prepare("SELECT baseline_eta, latest_eta, delay_minutes FROM voyages WHERE id = ?").get("voyage-vessel-1-001")).toEqual({
+      baseline_eta: "2026-09-01T00:00:00.000Z",
+      latest_eta: "2026-09-03T00:00:00.000Z",
+      delay_minutes: 2880,
+    })
+    const stored = JSON.parse(String((native.prepare("SELECT data FROM voyages WHERE id = ?").get("voyage-vessel-1-001") as { data: string }).data)) as Record<string, unknown>
+    expect(stored).toMatchObject({
+      baselineEta: "2026-09-01T00:00:00.000Z",
+      latestEta: "2026-09-03T00:00:00.000Z",
+      delayMinutes: 2880,
+    })
     expect(await repository.getLatestVoyage("vessel-1")).toMatchObject({ eta: "2026-09-03T00:00:00.000Z" })
     expect(await repository.listEtaHistory("voyage-vessel-1-001")).toMatchObject([
       { eta: "2026-09-01T00:00:00.000Z" },
