@@ -172,6 +172,29 @@ describe("shipping HOT event engine", () => {
     expect(item.provenance).toMatchObject({ sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice" })
   })
 
+  it("resolves expired Feed Events and removes them from HOT", () => {
+    const snapshot = createMockSnapshot()
+    const feed = {
+      ...snapshot.feedItems[0],
+      severity: "warning" as const,
+      publishedAt: "2026-01-01T00:00:00.000Z",
+      currentUntil: "2026-01-02T00:00:00.000Z",
+      visibility: "current" as const,
+      publicationTimeKnown: true,
+      eventEligibility: true,
+      stale: false,
+      sourceStatus: "healthy" as const,
+    }
+    const initial = detectShippingEvents([], [], [], [feed], snapshot.settings, [], "2026-01-01T03:00:00.000Z")
+    const feedEvent = initial.find(event => event.feedItemId === feed.id)!
+    expect(feedEvent).toMatchObject({ status: "active", expiresAt: "2026-01-02T00:00:00.000Z" })
+
+    const expired = { ...feed, visibility: "history" as const, stale: true, eventEligibility: false }
+    const next = detectShippingEvents([], [], [], [expired], snapshot.settings, [feedEvent], "2026-01-02T03:00:00.000Z")
+    expect(next.find(event => event.id === feedEvent.id)).toMatchObject({ status: "resolved", error: "feed_item_expired" })
+    expect(rankHotItems(next, [], [], [], [expired], new Date("2026-01-02T03:00:00.000Z"))).toEqual([])
+  })
+
   it("creates deduplicated Calendar reminders and keeps them stale on provider failure", () => {
     const snapshot = createMockSnapshot()
     const calendarEvent: CalendarEvent = {

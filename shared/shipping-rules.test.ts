@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { filterEventsForOperationalContext, filterEventsForProviderModes, sourceAllowedForOperationalContext } from "./shipping"
-import { calculateDelayMinutes, freshnessState, mergeProviderVessel, mergeProviderVoyage, rankHotItems, reconcileEvent, statusDurationMinutes, updateVesselStatus, validateShippingSettings } from "./shipping-rules"
+import { applyFeedFreshnessPolicy, calculateDelayMinutes, feedFreshnessPolicyFor, freshnessState, isFeedItemCurrent, mergeProviderVessel, mergeProviderVoyage, rankHotItems, reconcileEvent, statusDurationMinutes, updateVesselStatus, validateShippingSettings } from "./shipping-rules"
 import { createMockSnapshot, mockEvents, mockVessels } from "./shipping-fixtures"
 
 const realProviderModes = {
@@ -39,6 +39,26 @@ describe("shipping HOT deterministic rules", () => {
     const changed = mergeProviderVessel(vessel, { ...vessel, navigationStatus: "under_way", statusChangedAt: "2099-01-01T00:00:00.000Z" }, "2026-01-01T00:00:00.000Z")
     expect(same.statusChangedAt).toBe(vessel.statusChangedAt)
     expect(changed.statusChangedAt).toBe("2026-01-01T00:00:00.000Z")
+  })
+
+  it("applies the Feed 7/14-day, future, unknown and explicit expiry gates", () => {
+    const base = createMockSnapshot().feedItems[0]
+    const now = new Date("2026-01-15T00:00:00.000Z")
+    const ordinary = applyFeedFreshnessPolicy({ ...base, category: "shipping_news", freshnessPolicy: "ordinary", publishedAt: "2026-01-10T00:00:00.000Z" }, now)
+    const operational = applyFeedFreshnessPolicy({ ...base, category: "shipping_news", freshnessPolicy: "operational", severity: "warning", publishedAt: "2026-01-10T00:00:00.000Z" }, now)
+    const official = applyFeedFreshnessPolicy({ ...base, category: "port_notice", freshnessPolicy: "official", publishedAt: "2026-01-10T00:00:00.000Z", expiresAt: "2026-01-12T00:00:00.000Z" }, now)
+    const future = applyFeedFreshnessPolicy({ ...base, publishedAt: "2026-01-16T00:00:00.000Z" }, now)
+    const unknown = applyFeedFreshnessPolicy({ ...base, publishedAt: "not-a-date", publicationTimeKnown: false }, now)
+
+    expect(feedFreshnessPolicyFor(ordinary).maxAgeDays).toBe(7)
+    expect(feedFreshnessPolicyFor(operational).maxAgeDays).toBe(14)
+    expect(ordinary).toMatchObject({ visibility: "current", currentUntil: "2026-01-17T00:00:00.000Z" })
+    expect(operational).toMatchObject({ visibility: "current", currentUntil: "2026-01-24T00:00:00.000Z" })
+    expect(official).toMatchObject({ visibility: "history", eventEligibility: false, currentUntil: "2026-01-12T00:00:00.000Z" })
+    expect(future).toMatchObject({ visibility: "quarantine", eventEligibility: false })
+    expect(unknown).toMatchObject({ visibility: "quarantine", eventEligibility: false })
+    expect(isFeedItemCurrent(ordinary, now)).toBe(true)
+    expect(isFeedItemCurrent(official, now)).toBe(false)
   })
 
   it("does not merge Mock vessel dynamics into an AIS provider vessel", () => {

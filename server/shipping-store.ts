@@ -4,9 +4,9 @@ import type { AisDerivedPortMetric } from "@shared/ais-area"
 import type { DataEvidence, DatabasePersistenceStatus, FeedItem, Freshness, Port, ProvenanceAware, ProviderResult, ShippingProviderModes, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
 import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries, calendarEventKey, calendarEventLegacyId } from "@shared/calendar"
 import { detectShippingEvents } from "@shared/shipping-engine"
-import { mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules"
+import { applyFeedFreshnessPolicy, mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules"
 import { filterCalendarCoverageForSourceIds, filterCalendarEventsForSourceIds, mergeCalendarSources } from "#/providers/calendar"
-import { filterFeedLastKnownForMode } from "#/providers/feed"
+import { activeShippingFeedSourceIds, filterFeedLastKnownForMode } from "#/providers/feed"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { defaultShippingSettings, healthyPersistenceStatus, persistenceUnavailableError } from "#/database/runtime"
 import { disabledProviderData, fetchWeatherProviderResults, isOfficialWeatherAlertFeedItem, isWeatherFeedItem, operationalSourceContext, providerError, providerModes, providerProvenances, providerResult, providers, sanitizeAisVessel, toProviderResult } from "#/providers/shipping"
@@ -142,7 +142,7 @@ async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick
     vessels: vessel.data,
     ports: port.data,
     voyages: voyage.data,
-    feedItems: mergeWeatherFeedItems(shippingFeed.data, [...weather.data, ...weatherAlerts.data]),
+    feedItems: mergeWeatherFeedItems(shippingFeed.data, [...weather.data, ...weatherAlerts.data]).map(item => applyFeedFreshnessPolicy(item, new Date())),
     events: [],
     settings,
     calendarEvents,
@@ -165,7 +165,7 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
   const vessels = await repository.listVessels(legacyDefaults)
   const ports = await repository.listPorts(legacyDefaults)
   const voyages = await repository.listVoyages(legacyDefaults)
-  const feedItems = await repository.listFeedItems()
+  const feedItems = await repository.listFeedItems({ now: new Date() })
   const storedCalendarEvents = filterCalendarEventsForSourceIds(await repository.listCalendarEvents(), providerModes.calendarSourceIds ?? [])
   const calendarEvents = storedCalendarEvents
   const calendarCoverage = filterCalendarCoverageForSourceIds(settings.calendarSync ?? [], providerModes.calendarSourceIds ?? [])
@@ -237,6 +237,10 @@ export async function getShippingSnapshot(): Promise<ShippingSnapshot> {
   }
   current.events = detectShippingEvents(current.vessels, current.ports, current.voyages, current.feedItems, current.settings, filterEventsForOperationalContext(stored.events, operationalSourceContext), new Date().toISOString(), current.calendarEvents ?? [], current.aisPortMetrics ?? [])
   await saveSnapshot(current)
+  if (current.providerFreshness?.feed?.sourceStatus === "healthy" && current.settings.sourceEnabled) {
+    const sourceIds = providerModes.feed === "public" ? [...activeShippingFeedSourceIds()] : providerModes.feed === "mock" ? ["mock-port-notice"] : []
+    await repository.archiveFeedItemsNotIn(sourceIds, new Set(current.feedItems.filter(item => sourceIds.includes(item.sourceId)).map(item => item.id)))
+  }
   await repository.pruneExpired(current.settings.retentionDays)
   return structuredClone(current)
 }
@@ -244,6 +248,16 @@ export async function getShippingSnapshot(): Promise<ShippingSnapshot> {
 export async function getShippingPersistenceStatus(): Promise<DatabasePersistenceStatus> {
   await initialize()
   return structuredClone(persistenceStatus)
+}
+
+export async function getCurrentFeedItems(now = new Date()): Promise<FeedItem[]> {
+  await initialize()
+  return repository ? repository.listFeedItems({ now }) : []
+}
+
+export async function getFeedHistory(options: { query?: string, sourceId?: string, limit?: number } = {}) {
+  await initialize()
+  return repository ? repository.listFeedHistory({ ...options, now: new Date() }) : []
 }
 
 function calendarQuery(year: number, countries?: CalendarCountryCode[]): CalendarQuery {

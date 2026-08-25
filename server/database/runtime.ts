@@ -9,8 +9,9 @@ import { p2aSearchFoundationMigration } from "#/database/migrations/005-p2a-sear
 import { p2cRuntimeFoundationMigration } from "#/database/migrations/006-p2c-runtime-foundation"
 import { p3aAisTrackingMigration } from "#/database/migrations/007-p3a-ais-tracking"
 import { p3bVoyageEtaMigration } from "#/database/migrations/008-p3b-voyage-eta"
+import { p3FeedFreshnessMigration } from "#/database/migrations/009-p3-feed-freshness"
 
-export const latestSchemaVersion = p3bVoyageEtaMigration.version
+export const latestSchemaVersion = p3FeedFreshnessMigration.version
 
 export type ShippingDataMode = "mock" | "real"
 
@@ -78,7 +79,7 @@ async function runMigrations(db: Database) {
 
   const appliedRows = await db.prepare("SELECT version FROM schema_migrations ORDER BY version").all() as Array<{ version: number }>
   const applied = new Set(appliedRows.map(row => Number(row.version)))
-  const migrations = [p0FoundationMigration, watchlistIsolationMigration, p1aPortDirectoryMigration, p1bMockIsolationMigration, p2aSearchFoundationMigration, p2cRuntimeFoundationMigration, p3aAisTrackingMigration, p3bVoyageEtaMigration]
+  const migrations = [p0FoundationMigration, watchlistIsolationMigration, p1aPortDirectoryMigration, p1bMockIsolationMigration, p2aSearchFoundationMigration, p2cRuntimeFoundationMigration, p3aAisTrackingMigration, p3bVoyageEtaMigration, p3FeedFreshnessMigration]
   for (const migration of migrations) {
     if (applied.has(migration.version)) continue
     await transaction(db, async () => {

@@ -6,7 +6,7 @@ import { rankHotItems } from "./shipping-rules"
 describe("shipping feed HOT boundary", () => {
   it("surfaces explicit operational impact with one feed dedupe key and reason", () => {
     const snapshot = createMockSnapshot()
-    const feed = { ...snapshot.feedItems[0], severity: "warning" as const, hotReason: "官方运营公告", stale: false, sourceStatus: "healthy" as const }
+    const feed = { ...snapshot.feedItems[0], severity: "warning" as const, hotReason: "官方运营公告", publishedAt: "2026-08-14T00:00:00.000Z", stale: false, sourceStatus: "healthy" as const }
     const events = detectShippingEvents([], [], [], [feed], snapshot.settings, [], "2026-08-15T00:00:00.000Z")
     expect(events).toHaveLength(1)
     expect(events[0]).toMatchObject({ dedupeKey: `feed:${feed.id}`, feedItemId: feed.id, evidenceJson: { category: feed.category, hotReason: "官方运营公告" } })

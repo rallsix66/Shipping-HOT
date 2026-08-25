@@ -6,13 +6,15 @@
 >
 > 代码基线：`codex/shipping-hot-v3-real-data`（P3B 本轮；Node `24.15.0` / ABI `137` 基线）
 >
-> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 已完成封板，P3A AIS Tracking Runtime Foundation 与 P3B Voyage / ETA Foundation 已实现并通过本地验证**。本阶段完成 migration v8 Voyage/ETA history、Mock VoyageProvider、`voyage_sync` Runtime Job、Repository/API/UI 和 SQLite restart persistence；不实现 Feed、Calendar、Translation、AIS ETA prediction、地图、轨迹动画或商业 Voyage adapter。Closeout repair 追加两项 P3B 防护并已本地验证：Repository 拒绝非请求 `vesselId` 的 Provider 记录（`rejectedVesselIds` 计数），旧 `lastUpdatedAt` 观测不得覆盖最新航程或追加重复历史（`staleSkipped` 计数）；同日跟进修复使 Voyage Runtime `sourceUpdatedAt` 仅由被接受记录计算，且无接受记录的运行保留既有 `provider_runtime.last_source_updated_at`。
+> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 已完成封板，P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation 与 P3 Feed Freshness Batch 1 已实现并通过本地验证**。本阶段完成 migration v8 Voyage/ETA history、Mock VoyageProvider、`voyage_sync` Runtime Job、Repository/API/UI 和 SQLite restart persistence；批次 1 新增 migration v9 Feed current/history/quarantine metadata、查询边界与 Event/HOT expiry，不注册 Feed Runtime Job；Feed Background Runtime 批次 2、Calendar、Translation、AIS ETA prediction、地图、轨迹动画或商业 Voyage adapter 不在本批次实现。Closeout repair 追加两项 P3B 防护并已本地验证：Repository 拒绝非请求 `vesselId` 的 Provider 记录（`rejectedVesselIds` 计数），旧 `lastUpdatedAt` 观测不得覆盖最新航程或追加重复历史（`staleSkipped` 计数）；同日跟进修复使 Voyage Runtime `sourceUpdatedAt` 仅由被接受记录计算，且无接受记录的运行保留既有 `provider_runtime.last_source_updated_at`。
 >
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；只有具体 endpoint entitlement、地区/账号资格等未确认事项保持 `unknown/pending`。
 >
 > 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮落实获批的 P3B Voyage / ETA Intelligence Foundation；不创建账号、不购买服务、不实现 Feed/Calendar/Translation Adapter、AIS ETA prediction、地图/轨迹系统或商业 Voyage adapter。
 
 > V3 Readiness：本轮只建立本地安全就绪门（观测 Node/ABI、CLI 实测 pnpm、实际安装的 better-sqlite3 版本/native load、SQLite schema/Port Directory、已批准 Runtime scope、Mock-only provider configuration），通过 `GET /api/shipping/readiness` 与 `pnpm smoke:v3-readiness` 验证；HTTP 缺少 pnpm 观测时标记 skipped 且严格 Readiness 不得 ready；不执行外部 Provider 请求，不进入下一阶段。
+
+> 当前执行状态：P3 Feed Freshness 已按批准拆为两个批次；批次 1（policy、current/history persistence/query、Event/HOT expiry）已完成并独立验证，批次 2（Feed Background Runtime、来源独立调度/失败隔离、Readiness Job 集更新）仍待单独执行和收尾。
 
 ## 1. 背景与当前问题
 
@@ -794,17 +796,17 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | 测试 | Provider mapping、unknown MMSI、invalid coordinate、Mock isolation、watchlist filter、Runtime success/failure、last-known preservation、restart persistence、no duplicate execution、stale/latest view |
 | 验收 | P3A targeted tests、full tests、typecheck、build、full lint、P0/P2C/P3A native SQLite restart smoke、git diff --check 与 Neat Freak Closeout；P3B 后 Feed Auto Sync、Calendar Auto Sync、Translation 继续 pending，real Voyage adapter coverage pending |
 
-### P3 — Feed Freshness
+### P3 — Feed Freshness（Batch 1 complete / Batch 2 pending）
 
 | 项目 | 内容 |
 | --- | --- |
-| 目标 | 当前 Feed/HOT 不再出现过时新闻，历史可查，来源独立刷新 |
-| 修改文件 | `server/providers/feed.ts`、Repository、Event/HOT engine、Feed/HOT 页面 |
-| 新增文件 | feed freshness policy、history API、source registry metadata、定时 job tests |
-| 数据库 | feed current_until/effective/expires/visibility/translation fields；必要索引 |
-| API | current feed 与 history search 分离 |
-| 测试 | 7/14 天边界、future/unknown/malformed dates、旧 cache 再抓、source disappearance、Event expiry、时区 |
-| 验收 | 验收 C；当前流/首页没有数年前数据；history 能查到；失败只留同源 stale |
+| 目标 | 批次 1：当前 Feed/HOT 不再出现过时新闻，历史可查，Event/HOT expiry 可追溯；批次 2：来源独立后台刷新与失败隔离 |
+| 修改文件 | `server/providers/feed.ts`、Repository、Event/HOT engine、Feed query API |
+| 新增文件 | `server/database/migrations/009-p3-feed-freshness.ts`、Feed history API、native persistence smoke |
+| 数据库 | Feed `current_until/effective_at/expires_at/visibility` 与 append-only `feed_item_history`；必要索引 |
+| API | `GET /api/shipping/feed` current query 与 `GET /api/shipping/feed/history` history search 分离 |
+| 测试 | 7/14 天边界、future/unknown/malformed dates、explicit expiry、source disappearance、Event expiry、current/history restart persistence、时区 |
+| 验收 | 批次 1 已通过 Feed targeted 71/71、full 317/317、typecheck、lint、build、native Feed restart smoke、git diff check 与 Closeout；批次 2 单独验收并更新 Readiness Job 集 |
 | 风险 | RSS 错误日期、官方公告无 expiry、站点结构/版权变化 |
 | 回滚 | 关闭单一 source；保留 current-window policy，不恢复无限旧新闻 |
 

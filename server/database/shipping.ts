@@ -4,6 +4,7 @@ import { hasMockEvidence, knownMockProvenanceFor, normalizeLegacyEventTrust, nor
 import type { AisDerivedPortMetric } from "@shared/ais-area"
 import type { DataEvidence, DataProvenance, FeedItem, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, SourceLineage, Vessel, Voyage } from "@shared/shipping"
 import type { CalendarEvent } from "@shared/calendar"
+import { applyFeedFreshnessPolicy } from "@shared/shipping-rules"
 import { type DatabaseMetadata, type ShippingDataMode, initializeShippingDatabase } from "#/database/runtime"
 
 type Row = Record<string, unknown>
@@ -19,6 +20,20 @@ interface LegacyEventSources {
   ports?: Port[]
   voyages?: Voyage[]
   feedItems?: FeedItem[]
+}
+
+export interface FeedHistoryQuery {
+  query?: string
+  sourceId?: string
+  limit?: number
+  now?: Date
+}
+
+export interface FeedHistoryRecord {
+  id: string
+  feedItemId: string
+  observedAt: string
+  item: FeedItem
 }
 
 function rows<T>(value: unknown): T[] {
@@ -133,9 +148,18 @@ export class ShippingRepository {
     `).run(voyage.id, JSON.stringify(record), record.source_type, voyage.vesselId, voyage.baselineEtd ?? null, voyage.baselineEta ?? null, voyage.latestEtd ?? null, voyage.latestEta ?? null, voyage.delayMinutes ?? null)
   }
 
-  private async insertFeedItem(item: FeedItem, conflict: "update" | "ignore") {
-    const record = this.prepareRecord(item, "real")
+  private async insertFeedHistory(item: FeedItem, sourceType: SourceLineage, observedAt: string) {
+    const historyId = `feed-history:${item.id}:${observedAt}`
+    await this.db.prepare(`
+      INSERT OR IGNORE INTO feed_item_history (id, feed_item_id, source_id, observed_at, effective_at, expires_at, current_until, visibility, source_type, data)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(historyId, item.id, item.sourceId, observedAt, item.effectiveAt ?? null, item.expiresAt ?? null, item.currentUntil ?? null, item.visibility ?? "history", sourceType, JSON.stringify(item))
+  }
+
+  private async insertFeedItem(item: FeedItem, conflict: "update" | "ignore", normalizedOverride?: FeedItem) {
     const fetchedAt = item.fetchedAt || item.updatedAt || item.publishedAt || new Date().toISOString()
+    const normalized = normalizedOverride ?? applyFeedFreshnessPolicy({ ...item, fetchedAt }, new Date(fetchedAt))
+    const record = this.prepareRecord(normalized, "real")
     const conflictClause = conflict === "ignore"
       ? "ON CONFLICT(id) DO NOTHING"
       : `ON CONFLICT(id) DO UPDATE SET
@@ -148,16 +172,21 @@ export class ShippingRepository {
           source_url = excluded.source_url,
           published_at = excluded.published_at,
           fetched_at = excluded.fetched_at,
+          effective_at = excluded.effective_at,
+          expires_at = excluded.expires_at,
+          current_until = excluded.current_until,
+          visibility = excluded.visibility,
           severity = excluded.severity,
           related_port_ids = excluded.related_port_ids,
           related_vessel_ids = excluded.related_vessel_ids,
           related_voyage_ids = excluded.related_voyage_ids,
           data = excluded.data`
     await this.db.prepare(`
-      INSERT INTO feed_items (id, source_id, category, type, title, summary, source_url, published_at, fetched_at, severity, related_port_ids, related_vessel_ids, related_voyage_ids, source_type, data)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO feed_items (id, source_id, category, type, title, summary, source_url, published_at, fetched_at, effective_at, expires_at, current_until, visibility, severity, related_port_ids, related_vessel_ids, related_voyage_ids, source_type, data)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ${conflictClause}
-    `).run(item.id, item.sourceId, item.category, item.type, item.title, item.summary, item.sourceUrl, item.publishedAt, fetchedAt, item.severity, JSON.stringify(item.relatedPortIds), JSON.stringify(item.relatedVesselIds), JSON.stringify(item.relatedVoyageIds), record.source_type, JSON.stringify({ ...record, fetchedAt }))
+    `).run(normalized.id, normalized.sourceId, normalized.category, normalized.type, normalized.title, normalized.summary, normalized.sourceUrl, normalized.publishedAt, fetchedAt, normalized.effectiveAt ?? null, normalized.expiresAt ?? null, normalized.currentUntil ?? null, normalized.visibility ?? "history", normalized.severity, JSON.stringify(normalized.relatedPortIds), JSON.stringify(normalized.relatedVesselIds), JSON.stringify(normalized.relatedVoyageIds), record.source_type, JSON.stringify({ ...record, fetchedAt }))
+    await this.insertFeedHistory({ ...normalized, ...record, fetchedAt }, record.source_type, fetchedAt)
   }
 
   private async insertEvent(event: ShippingEvent, conflict: "update" | "ignore") {
@@ -242,11 +271,43 @@ export class ShippingRepository {
     return rows<Row>(await this.db.prepare(`SELECT data FROM voyages${this.sourceWhere()} ORDER BY id`).all()).map(row => normalizeLegacyTrust(parse<Voyage>(row.data), defaults.voyage)).filter(voyage => recordAllowedForDataMode(voyage, this.dataMode))
   }
 
-  async listFeedItems() {
-    return rows<Row>(await this.db.prepare(`SELECT data FROM feed_items${this.sourceWhere()} ORDER BY published_at DESC`).all()).map((row) => {
+  async listFeedItems(options: { now?: Date, view?: "current" | "history" } = {}) {
+    const now = options.now ?? new Date()
+    const view = options.view ?? "current"
+    const clauses = [this.dataMode === "real" ? "source_type IN ('real', 'imported', 'derived')" : "1 = 1"]
+    const params: (string | number)[] = []
+    if (view === "current") {
+      clauses.push("visibility = 'current'", "current_until > ?")
+      params.push(now.toISOString())
+    } else {
+      clauses.push("visibility <> 'current'")
+    }
+    const records = rows<Row>(await this.db.prepare(`SELECT data FROM feed_items WHERE ${clauses.join(" AND ")} ORDER BY published_at DESC`).all(...params)).map((row) => {
       const item = parse<FeedItem>(row.data)
-      return normalizeLegacyTrust(item, knownMockProvenanceFor(item.sourceId))
+      return normalizeLegacyTrust(applyFeedFreshnessPolicy(item, now), knownMockProvenanceFor(item.sourceId))
     }).filter(item => recordAllowedForDataMode(item, this.dataMode))
+    return records
+  }
+
+  async listFeedHistory(options: FeedHistoryQuery = {}): Promise<FeedHistoryRecord[]> {
+    const limit = Math.max(1, Math.min(Math.floor(options.limit ?? 100), 500))
+    const clauses = [this.dataMode === "real" ? "source_type IN ('real', 'imported', 'derived')" : "1 = 1"]
+    const params: (string | number)[] = []
+    if (options.sourceId) {
+      clauses.push("source_id = ?")
+      params.push(options.sourceId)
+    }
+    const rowsValue = rows<Row>(await this.db.prepare(`SELECT id, feed_item_id, observed_at, data FROM feed_item_history WHERE ${clauses.join(" AND ")} ORDER BY observed_at DESC LIMIT ?`).all(...params, limit))
+    const query = options.query?.trim().toLocaleLowerCase()
+    return rowsValue.map((row) => {
+      const item = parse<FeedItem>(row.data)
+      return {
+        id: String(row.id),
+        feedItemId: String(row.feed_item_id),
+        observedAt: String(row.observed_at),
+        item: normalizeLegacyTrust(item, knownMockProvenanceFor(item.sourceId)),
+      }
+    }).filter(record => !query || [record.item.title, record.item.summary, record.item.sourceUrl, record.item.sourceId].some(value => value.toLocaleLowerCase().includes(query)))
   }
 
   async listEvents(sources: LegacyEventSources = {}) {
@@ -290,6 +351,30 @@ export class ShippingRepository {
 
   async upsertFeedItem(item: FeedItem) {
     await this.insertFeedItem(item, "update")
+  }
+
+  async archiveFeedItemsNotIn(sourceIds: readonly string[], retainedIds: ReadonlySet<string>, now = new Date(), reason = "source_item_not_in_current_index") {
+    if (!sourceIds.length) return 0
+    const placeholders = sourceIds.map(() => "?").join(",")
+    const clauses = [`source_id IN (${placeholders})`, "visibility = 'current'"]
+    const params: (string | number)[] = [...sourceIds]
+    if (this.dataMode === "real") clauses.push("source_type IN ('real', 'imported', 'derived')")
+    const candidates = rows<Row>(await this.db.prepare(`SELECT data FROM feed_items WHERE ${clauses.join(" AND ")}`).all(...params))
+    let archived = 0
+    for (const row of candidates) {
+      const item = parse<FeedItem>(row.data)
+      if (retainedIds.has(item.id)) continue
+      const next = {
+        ...applyFeedFreshnessPolicy({ ...item, fetchedAt: now.toISOString() }, now),
+        visibility: "history" as const,
+        eventEligibility: false,
+        stale: true,
+        error: item.error ?? reason,
+      }
+      await this.insertFeedItem(next, "update", next)
+      archived += 1
+    }
+    return archived
   }
 
   async upsertEvent(event: ShippingEvent) {
@@ -349,6 +434,7 @@ export class ShippingRepository {
     await transaction(this.db, async () => {
       await this.db.prepare("DELETE FROM events WHERE last_detected_at < ? AND status = 'resolved'").run(cutoff)
       await this.db.prepare("DELETE FROM feed_items WHERE (published_at <> '' AND published_at < ?) OR (published_at = '' AND fetched_at < ?)").run(cutoff, cutoff)
+      await this.db.prepare("DELETE FROM feed_item_history WHERE observed_at < ?").run(cutoff)
     })
   }
 

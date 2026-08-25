@@ -3,7 +3,7 @@ import type { FeedItem, Freshness, Port, ProvenanceAware, ShippingEvent, Shippin
 import type { AisDerivedPortMetric } from "./ais-area"
 import { isUsableAisAreaMetric } from "./ais-area"
 import { type CalendarEvent, calendarCountries, calendarEventLegacyId, calendarLeadDays, calendarSeverity, daysUntilCalendarEvent } from "./calendar"
-import { calculateDelayMinutes, congestionLevelRank, reconcileEvent, statusDurationMinutes } from "./shipping-rules"
+import { calculateDelayMinutes, congestionLevelRank, isFeedItemCurrent, reconcileEvent, statusDurationMinutes } from "./shipping-rules"
 
 function calendarCountriesLabel(event: CalendarEvent): string {
   return calendarCountries[event.countryCode]
@@ -130,8 +130,8 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
       },
     })
   }
-  for (const feed of feedItems.filter(item => isFreshEventEvidence(item) && item.eventEligibility !== false && item.publicationTimeKnown !== false && (item.severity === "warning" || item.severity === "critical"))) {
-    candidates.push({ ...eventTrust(feed), type: feed.type, severity: feed.severity, status: "active", title: feed.title, summary: feed.summary, occurredAt: feed.publishedAt || feed.sourceUpdatedAt || now, detectedAt: now, dedupeKey: `feed:${feed.id}`, feedItemId: feed.id, evidenceJson: { category: feed.category, hotReason: feed.hotReason, relatedPortIds: feed.relatedPortIds, relatedVesselIds: feed.relatedVesselIds, relatedVoyageIds: feed.relatedVoyageIds } })
+  for (const feed of feedItems.filter(item => isFeedItemCurrent(item, new Date(now)) && isFreshEventEvidence(item) && item.eventEligibility !== false && item.publicationTimeKnown !== false && (item.severity === "warning" || item.severity === "critical"))) {
+    candidates.push({ ...eventTrust(feed), expiresAt: feed.expiresAt ?? feed.currentUntil, type: feed.type, severity: feed.severity, status: "active", title: feed.title, summary: feed.summary, occurredAt: feed.publishedAt || feed.sourceUpdatedAt || now, detectedAt: now, dedupeKey: `feed:${feed.id}`, feedItemId: feed.id, evidenceJson: { category: feed.category, hotReason: feed.hotReason, relatedPortIds: feed.relatedPortIds, relatedVesselIds: feed.relatedVesselIds, relatedVoyageIds: feed.relatedVoyageIds } })
   }
   for (const calendarEvent of calendarEvents.filter(event => isCalendarOperationallyRelevant(event) && isFreshEventEvidence(event))) {
     const daysUntil = daysUntilCalendarEvent(calendarEvent.date, today)
@@ -153,15 +153,35 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
   for (const existing of operationalPrevious) {
     if (existing.status === "active" && !activeKeys.has(existing.dedupeKey)) {
       const trust = sourceTrust.get(existing.dedupeKey)
+      const { id: _id, firstDetectedAt: _first, lastDetectedAt: _last, resolvedAt: _resolved, ...incoming } = existing
       if (!trust) {
-        if (existing.provenance?.sourceId === "aisstream-area") {
+        if (existing.feedItemId) {
+          reconciled.push(reconcileEvent(existing, {
+            ...incoming,
+            status: "resolved",
+            stale: true,
+            sourceStatus: "degraded",
+            error: "feed_item_expired",
+            fetchedAt: now,
+          }, now))
+        } else if (existing.provenance?.sourceId === "aisstream-area") {
           reconciled.push({ ...existing, stale: true, sourceStatus: "failed", error: "AIS area observation unavailable" })
         } else {
           reconciled.push(existing)
         }
         continue
       }
-      const { id: _id, firstDetectedAt: _first, lastDetectedAt: _last, resolvedAt: _resolved, ...incoming } = existing
+      if (existing.feedItemId && !isFeedItemCurrent(trust as FeedItem, new Date(now))) {
+        reconciled.push(reconcileEvent(existing, {
+          ...incoming,
+          status: "resolved",
+          stale: true,
+          sourceStatus: trust.sourceStatus,
+          error: "feed_item_expired",
+          fetchedAt: trust.fetchedAt,
+        }, now))
+        continue
+      }
       if (!isFreshEventEvidence(trust)) {
         reconciled.push({
           ...existing,

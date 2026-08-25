@@ -1,5 +1,5 @@
 import { deriveProvenance, eventIsCompatibleWithOperationalContext, recordAllowedForDataMode, sourceAllowedForOperationalContext } from "./shipping"
-import type { EventStatus, FeedItem, FreshnessState, HotItem, OperationalSourceContext, Port, Severity, ShippingEvent, ShippingSettings, SourceStatus, Vessel, Voyage } from "./shipping"
+import type { EventStatus, FeedFreshnessClass, FeedItem, FeedVisibility, FreshnessState, HotItem, OperationalSourceContext, Port, Severity, ShippingEvent, ShippingSettings, SourceStatus, Vessel, Voyage } from "./shipping"
 
 const severityWeight: Record<Severity, number> = { info: 1, watch: 2, warning: 3, critical: 4 }
 
@@ -106,6 +106,81 @@ export function freshnessState(item: { stale: boolean, sourceStatus: string }): 
   return item.stale ? "stale" : "fresh"
 }
 
+export interface FeedFreshnessPolicy {
+  class: FeedFreshnessClass
+  maxAgeDays: 7 | 14
+  maxAgeMs: number
+}
+
+export interface FeedFreshnessDecision {
+  currentUntil?: string
+  visibility: FeedVisibility
+  eventEligibility: boolean
+  reason?: "publication_time_unknown" | "publication_time_future" | "effective_time_future" | "expired" | "stale_source"
+}
+
+export function feedFreshnessPolicyFor(item: Pick<FeedItem, "category" | "severity" | "freshnessPolicy" | "provenance">): FeedFreshnessPolicy {
+  const policyClass: FeedFreshnessClass = item.freshnessPolicy
+    ?? (item.provenance?.sourceType === "official" || item.category === "port_notice" ? "official" : item.category === "carrier_notice" || item.severity === "warning" || item.severity === "critical" ? "operational" : "ordinary")
+  const maxAgeDays = policyClass === "ordinary" ? 7 : 14
+  return { class: policyClass, maxAgeDays, maxAgeMs: maxAgeDays * 24 * 60 * 60 * 1000 }
+}
+
+function validTimestamp(value: string | undefined): number | undefined {
+  if (!value) return undefined
+  const parsed = Date.parse(value)
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+export function applyFeedFreshnessPolicy(item: FeedItem, now = new Date()): FeedItem {
+  const publicationAt = validTimestamp(item.publishedAt)
+  const effectiveAt = validTimestamp(item.effectiveAt)
+  const expiresAt = validTimestamp(item.expiresAt ?? item.weather?.alertExpiresAt)
+  const policy = feedFreshnessPolicyFor(item)
+  const publicationKnown = item.publicationTimeKnown !== false && publicationAt !== undefined
+  const base = { ...item, freshnessPolicy: policy.class, publicationTimeKnown: publicationKnown }
+  const quarantine = (reason: FeedFreshnessDecision["reason"]): FeedItem => ({
+    ...base,
+    visibility: "quarantine",
+    eventEligibility: false,
+    stale: true,
+    sourceStatus: base.sourceStatus === "healthy" ? "degraded" : base.sourceStatus,
+    error: base.error ?? reason,
+  })
+  if (!publicationKnown || publicationAt === undefined) return quarantine("publication_time_unknown")
+  if (publicationAt > now.getTime()) return quarantine("publication_time_future")
+  if (effectiveAt !== undefined && effectiveAt > now.getTime()) return quarantine("effective_time_future")
+
+  const ageUntil = publicationAt + policy.maxAgeMs
+  const currentUntilMs = expiresAt === undefined ? ageUntil : Math.min(ageUntil, expiresAt)
+  const currentUntil = new Date(currentUntilMs).toISOString()
+  if (currentUntilMs <= now.getTime()) {
+    return {
+      ...base,
+      currentUntil,
+      visibility: "history",
+      eventEligibility: false,
+      stale: true,
+      error: base.error ?? "expired",
+    }
+  }
+  const sourceFresh = base.sourceStatus === "healthy" && !base.stale
+  return {
+    ...base,
+    currentUntil,
+    visibility: "current",
+    eventEligibility: base.eventEligibility !== false && sourceFresh,
+    error: sourceFresh ? base.error : base.error ?? "stale_source",
+  }
+}
+
+export function isFeedItemCurrent(item: FeedItem, now = new Date()): boolean {
+  const normalized = item.visibility === undefined ? applyFeedFreshnessPolicy(item, now) : item
+  if (normalized.visibility !== "current") return false
+  const currentUntil = validTimestamp(normalized.currentUntil)
+  return currentUntil !== undefined && currentUntil > now.getTime()
+}
+
 function relatedFreshness(event: ShippingEvent, ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[]): { stale: boolean, sourceStatus: SourceStatus, provenance?: ShippingEvent["provenance"] } {
   if (event.provenance?.sourceId === "aisstream-area") return { stale: event.stale ?? true, sourceStatus: event.sourceStatus, provenance: event.provenance }
   if (event.feedItemId) {
@@ -127,7 +202,7 @@ function relatedFreshness(event: ShippingEvent, ports: Port[], vessels: Vessel[]
   return { stale: event.stale ?? true, sourceStatus: event.sourceStatus, provenance: event.provenance }
 }
 
-export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[] = [], _now = new Date(), context?: OperationalSourceContext): HotItem[] {
+export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Vessel[], voyages: Voyage[], feedItems: FeedItem[] = [], now = new Date(), context?: OperationalSourceContext): HotItem[] {
   const operationalEvents = context ? events.filter(event => eventIsCompatibleWithOperationalContext(event, context)) : events
   const operationalFeedItems = context
     ? feedItems.filter(item => recordAllowedForDataMode(item, context.modes.dataMode ?? "mock") && sourceAllowedForOperationalContext(item.provenance?.sourceId ?? item.sourceId, context))
@@ -139,6 +214,11 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
 
   const eventItems = operationalEvents
     .filter(event => event.status === ("active" as EventStatus))
+    .filter((event) => {
+      if (!event.feedItemId) return true
+      const feed = operationalFeedItems.find(item => item.id === event.feedItemId)
+      return Boolean(feed && isFeedItemCurrent(feed, now) && freshnessState(feed) === "fresh" && (!event.expiresAt || Date.parse(event.expiresAt) > now.getTime()))
+    })
     .filter(event => event.provenance?.sourceId !== "aisstream-area" || Boolean(event.portId && ports.some(port => port.id === event.portId && port.isWatched)))
     .map((event) => {
       const source = relatedFreshness(event, ports, vessels, voyages, operationalFeedItems)
@@ -156,8 +236,11 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
         eventId: event.id,
       }
     })
-  const activeEventKeys = new Set(operationalEvents.filter(event => event.status === "active").map(event => event.dedupeKey))
-  const feedHotItems = operationalFeedItems.filter(item => freshnessState(item) === "fresh" && item.eventEligibility !== false && item.publicationTimeKnown !== false && (item.severity === "warning" || item.severity === "critical") && !activeEventKeys.has(`feed:${item.id}`)).map(item => ({
+  const activeEventKeys = new Set(operationalEvents
+    .filter(event => event.status === "active")
+    .filter(event => !event.feedItemId || eventItems.some(item => item.eventId === event.id))
+    .map(event => event.dedupeKey))
+  const feedHotItems = operationalFeedItems.filter(item => isFeedItemCurrent(item, now) && freshnessState(item) === "fresh" && item.eventEligibility !== false && item.publicationTimeKnown !== false && (item.severity === "warning" || item.severity === "critical") && !activeEventKeys.has(`feed:${item.id}`)).map(item => ({
     id: item.id,
     kind: "feed" as const,
     title: item.title,

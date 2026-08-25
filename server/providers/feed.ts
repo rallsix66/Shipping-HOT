@@ -1,8 +1,9 @@
 import { createHash } from "node:crypto"
 import { XMLParser } from "fast-xml-parser"
 import { load } from "cheerio"
-import { type DataProvenance, type FeedCategory, type FeedItem, type Port, type SourceType, isMockProvenance } from "@shared/shipping"
+import { type DataProvenance, type FeedCategory, type FeedFreshnessClass, type FeedItem, type Port, type SourceType, isMockProvenance } from "@shared/shipping"
 import { mockFeedItems } from "@shared/shipping-fixtures"
+import { applyFeedFreshnessPolicy } from "@shared/shipping-rules"
 
 export interface FeedProvider {
   getFeedItems: (lastKnown?: FeedItem[], ports?: Port[]) => Promise<FeedItem[]>
@@ -26,6 +27,7 @@ export interface ShippingFeedSource {
   category: FeedCategory
   relatedPortIds?: string[]
   enabled: boolean
+  freshnessPolicy?: FeedFreshnessClass
   status?: "enabled" | "registered_parser_pending" | "deferred" | "failed_live"
   description?: string
 }
@@ -39,6 +41,7 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     format: "rss",
     sourceKind: "third_party",
     category: "shipping_news",
+    freshnessPolicy: "ordinary",
     enabled: true,
   },
   {
@@ -49,6 +52,7 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     format: "rss",
     sourceKind: "third_party",
     category: "shipping_news",
+    freshnessPolicy: "ordinary",
     enabled: false,
     status: "failed_live",
     description: "Temporarily disabled after direct HTTPS connectivity failure; retain for future re-probe without slowing the public Feed.",
@@ -61,6 +65,7 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     format: "html",
     sourceKind: "official",
     category: "port_notice",
+    freshnessPolicy: "official",
     relatedPortIds: ["port-shekou"],
     enabled: true,
     status: "enabled",
@@ -74,6 +79,7 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     format: "html",
     sourceKind: "official",
     category: "port_notice",
+    freshnessPolicy: "official",
     relatedPortIds: ["port-laem-chabang"],
     enabled: false,
     status: "registered_parser_pending",
@@ -87,6 +93,7 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     format: "html",
     sourceKind: "official",
     category: "port_notice",
+    freshnessPolicy: "official",
     relatedPortIds: ["port-klang"],
     enabled: false,
     status: "registered_parser_pending",
@@ -100,6 +107,7 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     format: "html",
     sourceKind: "official",
     category: "port_notice",
+    freshnessPolicy: "official",
     relatedPortIds: ["port-yantian"],
     enabled: false,
     status: "deferred",
@@ -113,6 +121,7 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     format: "html",
     sourceKind: "official",
     category: "port_notice",
+    freshnessPolicy: "official",
     relatedPortIds: ["port-nansha"],
     enabled: false,
     status: "deferred",
@@ -226,6 +235,11 @@ interface RawFeedItem {
   published?: unknown
   updated?: unknown
   created?: unknown
+  effective?: unknown
+  effectiveAt?: unknown
+  expires?: unknown
+  expiresAt?: unknown
+  expiration?: unknown
 }
 
 function rawFeedItem(raw: RawFeedItem, source: ShippingFeedSource, ports: Port[], fetchedAt: string, fallbackIndex: number): FeedItem | undefined {
@@ -245,10 +259,11 @@ function rawFeedItem(raw: RawFeedItem, source: ShippingFeedSource, ports: Port[]
     sourceUrl: source.sourceUrl,
     verified: source.sourceKind === "official",
   }
-  return {
+  const item: FeedItem = {
     id: `feed:${source.id}:${digest(canonicalUrl || `${normalizeFeedTitle(title)}:${fallbackIndex}`)}`,
     sourceId: source.id,
     category: source.category,
+    freshnessPolicy: source.freshnessPolicy,
     type: source.category === "port_notice" ? "port_notice" : "shipping_news",
     title,
     summary,
@@ -256,6 +271,8 @@ function rawFeedItem(raw: RawFeedItem, source: ShippingFeedSource, ports: Port[]
     canonicalUrl,
     publishedAt: publishedAt ?? "",
     publicationTimeKnown,
+    effectiveAt: parsedDate(raw.effectiveAt ?? raw.effective),
+    expiresAt: parsedDate(raw.expiresAt ?? raw.expires ?? raw.expiration),
     eventEligibility: publicationTimeKnown,
     severity: classification.severity,
     hotReason: classification.hotReason,
@@ -270,6 +287,7 @@ function rawFeedItem(raw: RawFeedItem, source: ShippingFeedSource, ports: Port[]
     sourceStatus: "healthy",
     provenance,
   }
+  return applyFeedFreshnessPolicy(item, new Date(fetchedAt))
 }
 
 export function parseFeedRss(xml: string, source: ShippingFeedSource, ports: Port[] = [], fetchedAt = new Date().toISOString()): FeedItem[] {
@@ -345,7 +363,7 @@ export function dedupeFeedItems(items: FeedItem[]): FeedItem[] {
 }
 
 function markSourceFailed(item: FeedItem, fetchedAt: string, error: string): FeedItem {
-  return { ...item, stale: true, sourceStatus: "failed", error, fetchedAt }
+  return applyFeedFreshnessPolicy({ ...item, stale: true, sourceStatus: "failed", error, fetchedAt }, new Date(fetchedAt))
 }
 
 export interface PublicFeedProviderOptions {
@@ -419,7 +437,7 @@ export function createPublicFeedProvider(options: PublicFeedProviderOptions = {}
 
 export const MockFeedProvider: FeedProvider = {
   async getFeedItems() {
-    return structuredClone(mockFeedItems.filter(item => item.sourceId !== "mock-weather"))
+    return mockFeedItems.filter(item => item.sourceId !== "mock-weather").map(item => applyFeedFreshnessPolicy(structuredClone(item), new Date()))
   },
 }
 

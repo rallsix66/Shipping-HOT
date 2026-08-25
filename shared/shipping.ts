@@ -10,6 +10,8 @@ export type Severity = "info" | "watch" | "warning" | "critical"
 export type EventStatus = "active" | "resolved"
 export type NavigationStatus = "under_way" | "anchored" | "moored" | "aground" | "unknown"
 export type FeedCategory = "shipping_news" | "carrier_notice" | "weather" | "port_notice"
+export type FeedFreshnessClass = "ordinary" | "operational" | "official"
+export type FeedVisibility = "current" | "history" | "quarantine"
 export type WeatherRiskSource = "model" | "official"
 export type WeatherAlertState = "active" | "expired" | "unknown"
 
@@ -316,6 +318,7 @@ export interface FeedItem extends Freshness, ProvenanceAware {
   id: string
   sourceId: string
   category: FeedCategory
+  freshnessPolicy?: FeedFreshnessClass
   type: string
   title: string
   summary: string
@@ -323,6 +326,10 @@ export interface FeedItem extends Freshness, ProvenanceAware {
   canonicalUrl?: string
   publishedAt: string
   publicationTimeKnown?: boolean
+  effectiveAt?: string
+  expiresAt?: string
+  currentUntil?: string
+  visibility?: FeedVisibility
   eventEligibility?: boolean
   severity: Severity
   hotReason?: string
@@ -356,6 +363,7 @@ export interface ShippingEvent extends ProvenanceAware {
   updatedAt?: string
   sourceUpdatedAt?: string
   fetchedAt?: string
+  expiresAt?: string
   stale?: boolean
   sourceStatus: SourceStatus
   error?: string
