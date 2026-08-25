@@ -1128,7 +1128,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 7. **Provider Runtime 不是真相**：当前 freshness 取第一条数据的时间，不能代表多港口/多源整体状态，也不能跨重启。
 8. **全球关注后的 Provider capability 不对称**：Open-Meteo 可通用坐标化，但 Portcast/official notices 不是全球覆盖；UI/Domain 必须支持 per-port capability，而不是假设“关注即全能力”。
 9. **翻译与账单边界缺失**：没有可切换 TranslationProvider、usage ledger、预算上限和 server-only secret contract；P0 必须先留接口/表，P6 才填 adapter。
-10. **生产 Nitro subroute 已知故障**：`docs/status.md` 记录 production subroutes 存在 `#nitro/index` package-import error；V3 P0 的 restart/production smoke 必须先把它纳入 gate，否则本地 dev 成功不能代表可交付运行。
+10. **生产 Nitro subroute 历史故障已复核**：早期 `#nitro/index` package-import error 已不再出现在当前 production build smoke；Readiness Review 将 root、health、runtime、readiness、search 和 legacy Shipping API HTTP checks 纳入 gate，后续仍需在真实部署环境单独验证。
 11. **没有 migration runner**：当前 startup 只有一次 ad-hoc nullable rebuild，不足以安全承载 V3 拆表和回滚。
 
 ## 27. 实施门槛与文档后续

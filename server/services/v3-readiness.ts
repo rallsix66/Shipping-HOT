@@ -1,7 +1,20 @@
 import process from "node:process"
+import NativeDatabase from "better-sqlite3"
 import type { Database } from "db0"
 import { latestSchemaVersion, readDatabaseMetadata } from "#/database/runtime"
 import type { ShippingDataMode } from "#/database/runtime"
+
+export const v3ToolchainContract = {
+  nodeVersion: "24.15.0",
+  abi: "137",
+  packageManager: "pnpm@10.30.3",
+  betterSqlite3: "12.6.2",
+} as const
+
+export const approvedRuntimeJobs = [
+  { id: "ais-tracking", capability: "ais_tracking" },
+  { id: "voyage-sync", capability: "voyage_sync" },
+] as const
 
 export type ReadinessCheckStatus = "pass" | "fail" | "skipped"
 
@@ -19,6 +32,11 @@ export interface RuntimeReadinessJob {
   enabled: boolean
 }
 
+export interface RuntimeReadinessStatus {
+  running: boolean
+  jobs: RuntimeReadinessJob[]
+}
+
 export interface V3ReadinessReport {
   phase: "v3-readiness"
   ready: boolean
@@ -27,10 +45,12 @@ export interface V3ReadinessReport {
   checks: ReadinessCheck[]
 }
 
-const allowedRuntimeJobs = new Map([
-  ["ais-tracking", "ais_tracking"],
-  ["voyage-sync", "voyage_sync"],
-])
+export interface V3ReadinessOptions {
+  dataMode?: ShippingDataMode
+  runtime?: RuntimeReadinessStatus
+  bootstrapFailed?: boolean
+  packageManager?: string
+}
 
 function check(id: string, status: ReadinessCheckStatus, detail: string, value?: unknown): ReadinessCheck {
   return { id, status, detail, ...(value === undefined ? {} : { value }) }
@@ -58,6 +78,34 @@ function localProviderBoundaryCheck(): ReadinessCheck {
   return unsafe.length
     ? check("local-provider-boundary", "fail", "V3 Readiness requires Mock-only providers and Area AIS off; no real Provider is activated", unsafe.map(([name, actual]) => ({ name, requested: actual })))
     : check("local-provider-boundary", "pass", "Mock-only provider configuration is active; no new real or paid Provider is activated")
+}
+
+function observedPackageManager(): string | undefined {
+  const userAgent = process.env.npm_config_user_agent
+  const match = userAgent?.match(/(?:^|\s)pnpm\/(\S+)/)
+  return match ? `pnpm@${match[1]}` : undefined
+}
+
+export function readV3ToolchainChecks(packageManager = observedPackageManager()): ReadinessCheck[] {
+  const betterSqlite3 = (() => {
+    try {
+      const database = new NativeDatabase(":memory:")
+      database.prepare("SELECT 1").get()
+      database.close()
+      return check("better-sqlite3", "pass", `better-sqlite3 ${v3ToolchainContract.betterSqlite3} loaded successfully on ABI ${v3ToolchainContract.abi}`, { version: v3ToolchainContract.betterSqlite3, abi: process.versions.modules })
+    } catch (error) {
+      return check("better-sqlite3", "fail", error instanceof Error ? `better-sqlite3 failed to load: ${error.message}` : "better-sqlite3 failed to load")
+    }
+  })()
+  const packageManagerStatus = packageManager === undefined || packageManager === v3ToolchainContract.packageManager ? "pass" : "fail"
+  return [
+    check("node-version", process.versions.node === v3ToolchainContract.nodeVersion ? "pass" : "fail", `Node ${process.versions.node}; expected ${v3ToolchainContract.nodeVersion}`, process.versions.node),
+    check("node-abi", process.versions.modules === v3ToolchainContract.abi ? "pass" : "fail", `Node ABI ${process.versions.modules}; expected ${v3ToolchainContract.abi}`, process.versions.modules),
+    check("package-manager", packageManagerStatus, packageManager === undefined
+      ? `Package manager contract ${v3ToolchainContract.packageManager} is declared; runtime user-agent was unavailable`
+      : `Package manager is ${packageManager}; expected ${v3ToolchainContract.packageManager}`, packageManager ?? v3ToolchainContract.packageManager),
+    betterSqlite3,
+  ]
 }
 
 async function databaseChecks(db: Database, dataMode: ShippingDataMode): Promise<ReadinessCheck[]> {
@@ -98,23 +146,56 @@ async function databaseChecks(db: Database, dataMode: ShippingDataMode): Promise
   }
 }
 
-function runtimeScopeCheck(jobs: RuntimeReadinessJob[] | undefined): ReadinessCheck {
-  if (!jobs) return check("runtime-scope", "skipped", "Background Runtime status is not available; no Job was started by this check")
-  const invalid = jobs.filter(job => allowedRuntimeJobs.get(job.id) !== job.capability)
-  return invalid.length
-    ? check("runtime-scope", "fail", "Runtime contains a Job outside the approved V3 Readiness scope", invalid.map(job => ({ id: job.id, capability: job.capability })))
-    : check("runtime-scope", "pass", "Runtime Job scope contains only the approved AIS/Voyage foundation jobs", jobs.map(job => ({ id: job.id, providerId: job.providerId, capability: job.capability, enabled: job.enabled })))
+function runtimeChecks(runtime: RuntimeReadinessStatus | undefined, bootstrapFailed: boolean | undefined): ReadinessCheck[] {
+  if (bootstrapFailed) {
+    return [
+      check("runtime-bootstrap", "fail", "Background Runtime bootstrap failed"),
+      check("runtime-running", "fail", "Background Runtime is unavailable after bootstrap failure"),
+      check("runtime-scope", "fail", "Background Runtime Job set is unavailable after bootstrap failure"),
+    ]
+  }
+  if (!runtime) {
+    return [
+      check("runtime-bootstrap", "fail", "Background Runtime is not initialized; bootstrap may have failed"),
+      check("runtime-running", "fail", "Background Runtime is not running"),
+      check("runtime-scope", "fail", "Background Runtime Job set is unavailable"),
+    ]
+  }
+
+  const expected = new Map(approvedRuntimeJobs.map(job => [`${job.id}:${job.capability}`, job]))
+  const actual = runtime.jobs
+  const actualKeys = actual.map(job => `${job.id}:${job.capability}`)
+  const counts = new Map<string, number>()
+  actualKeys.forEach(key => counts.set(key, (counts.get(key) ?? 0) + 1))
+  const duplicateKeys = [...counts.entries()].filter(([, count]) => count > 1).map(([key]) => key)
+  const missingKeys = [...expected.keys()].filter(key => !counts.has(key))
+  const unexpectedKeys = actualKeys.filter(key => !expected.has(key))
+  const disabledKeys = actual.filter(job => expected.has(`${job.id}:${job.capability}`) && !job.enabled).map(job => `${job.id}:${job.capability}`)
+  const exact = actual.length === expected.size && duplicateKeys.length === 0 && missingKeys.length === 0 && unexpectedKeys.length === 0 && disabledKeys.length === 0
+  return [
+    check("runtime-bootstrap", "pass", "Background Runtime bootstrap completed"),
+    check("runtime-running", runtime.running ? "pass" : "fail", runtime.running ? "Background Runtime is running" : "Background Runtime is initialized but not running", runtime.running),
+    check("runtime-scope", exact ? "pass" : "fail", exact ? "Runtime Job set exactly matches the approved AIS Tracking and Voyage Sync jobs" : "Runtime Job set does not exactly match the approved AIS Tracking and Voyage Sync jobs", {
+      expected: [...expected.keys()],
+      actual: actualKeys,
+      duplicate: duplicateKeys,
+      missing: missingKeys,
+      unexpected: unexpectedKeys,
+      disabled: disabledKeys,
+    }),
+  ]
 }
 
-export async function readV3Readiness(db: Database, options: { dataMode?: ShippingDataMode, runtimeJobs?: RuntimeReadinessJob[] } = {}): Promise<V3ReadinessReport> {
+export async function readV3Readiness(db: Database, options: V3ReadinessOptions = {}): Promise<V3ReadinessReport> {
   const dataMode: ShippingDataMode = options.dataMode ?? (process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock")
   const checks = [
+    ...readV3ToolchainChecks(options.packageManager),
     localProviderBoundaryCheck(),
     requestedValue("SHIPPING_RUNTIME_ENABLED", "true") === "true"
-      ? check("background-runtime", "pass", "Background Runtime is enabled")
-      : check("background-runtime", "fail", "Background Runtime must remain enabled for V3 Readiness"),
+      ? check("background-runtime-enabled", "pass", "Background Runtime is enabled")
+      : check("background-runtime-enabled", "fail", "Background Runtime must be enabled for V3 Readiness"),
     ...(await databaseChecks(db, dataMode)),
-    runtimeScopeCheck(options.runtimeJobs),
+    ...runtimeChecks(options.runtime, options.bootstrapFailed),
     check("network-probes", "skipped", "Readiness performs no external Provider requests; live contract and coverage checks remain deferred"),
   ]
   return {

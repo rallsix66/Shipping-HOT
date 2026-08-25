@@ -1,6 +1,6 @@
 import process from "node:process"
 import { initShippingTables } from "#/database/shipping"
-import { getBackgroundRuntime } from "#/runtime/bootstrap"
+import { getBackgroundRuntime, hasBackgroundRuntimeBootstrapFailed } from "#/runtime/bootstrap"
 import { readV3Readiness } from "#/services/v3-readiness"
 
 export default defineEventHandler(async () => {
@@ -8,11 +8,15 @@ export default defineEventHandler(async () => {
   const database = useDatabase()
   await initShippingTables(database, dataMode)
   const runtime = getBackgroundRuntime()
-  const runtimeJobs = runtime?.getStatus().jobs.map(job => ({
-    id: job.id,
-    providerId: job.providerId,
-    capability: job.capability,
-    enabled: job.enabled,
-  }))
-  return readV3Readiness(database, { dataMode, runtimeJobs })
+  const runtimeStatus = runtime?.getStatus()
+  const runtimeSnapshot = runtimeStatus && {
+    running: runtimeStatus.running,
+    jobs: runtimeStatus.jobs.map(job => ({
+      id: job.id,
+      providerId: job.providerId,
+      capability: job.capability,
+      enabled: job.enabled,
+    })),
+  }
+  return readV3Readiness(database, { dataMode, runtime: runtimeSnapshot, bootstrapFailed: hasBackgroundRuntimeBootstrapFailed() })
 })

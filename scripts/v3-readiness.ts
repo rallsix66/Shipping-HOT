@@ -1,5 +1,6 @@
-import { mkdirSync, readFileSync } from "node:fs"
-import { dirname, isAbsolute, join, resolve } from "node:path"
+import { execFileSync } from "node:child_process"
+import { mkdirSync } from "node:fs"
+import { dirname, isAbsolute, resolve } from "node:path"
 import process from "node:process"
 import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
@@ -7,14 +8,8 @@ import type { Database } from "db0"
 import { projectDir } from "../shared/dir"
 import { loadServerEnv } from "./load-env"
 import { initShippingTables } from "#/database/shipping"
-import { getDefaultRuntimeJobs } from "#/runtime/registry"
+import { bootstrapBackgroundRuntime, getBackgroundRuntime, shutdownBackgroundRuntime } from "#/runtime/bootstrap"
 import { readV3Readiness } from "#/services/v3-readiness"
-import type { ReadinessCheck } from "#/services/v3-readiness"
-
-interface PackageManifest {
-  engines?: { node?: string }
-  packageManager?: string
-}
 
 function createNativeDatabase(path: string): { database: Database, native: { close: () => void } } {
   const native = new NativeDatabase(path)
@@ -39,18 +34,13 @@ function createNativeDatabase(path: string): { database: Database, native: { clo
   return { database, native }
 }
 
-function check(id: string, status: ReadinessCheck["status"], detail: string, value?: unknown): ReadinessCheck {
-  return { id, status, detail, ...(value === undefined ? {} : { value }) }
-}
-
-function toolchainChecks(): ReadinessCheck[] {
-  const manifest = JSON.parse(readFileSync(join(projectDir, "package.json"), "utf8")) as PackageManifest
-  return [
-    check("node-version", process.versions.node === manifest.engines?.node ? "pass" : "fail", `Node ${process.versions.node}; expected ${manifest.engines?.node ?? "unknown"}`, process.versions.node),
-    check("node-abi", process.versions.modules === "137" ? "pass" : "fail", `Node ABI ${process.versions.modules}; expected 137`, process.versions.modules),
-    check("package-manager", manifest.packageManager === "pnpm@10.30.3" ? "pass" : "fail", `Manifest package manager is ${manifest.packageManager ?? "missing"}; expected pnpm@10.30.3`, manifest.packageManager),
-    check("better-sqlite3", "pass", "better-sqlite3 loaded successfully on the pinned ABI", { abi: process.versions.modules }),
-  ]
+function actualPnpmContract(): string | undefined {
+  try {
+    const version = execFileSync("pnpm", ["--version"], { cwd: projectDir, encoding: "utf8" }).trim()
+    return version ? `pnpm@${version}` : undefined
+  } catch {
+    return undefined
+  }
 }
 
 loadServerEnv()
@@ -59,25 +49,34 @@ const databasePath = isAbsolute(databasePathValue) ? databasePathValue : resolve
 mkdirSync(dirname(databasePath), { recursive: true })
 
 const { database, native } = createNativeDatabase(databasePath)
+let bootstrapFailed = false
 try {
   const dataMode = process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock"
   await initShippingTables(database, dataMode)
-  const runtimeJobs = getDefaultRuntimeJobs({ database, dataMode }).map(job => ({
-    id: job.id,
-    providerId: job.providerId,
-    capability: job.capability,
-    enabled: job.enabled,
-  }))
-  const foundation = await readV3Readiness(database, { dataMode, runtimeJobs })
-  const checks = [...toolchainChecks(), ...foundation.checks]
-  const report = {
-    ...foundation,
-    ready: checks.every(item => item.status !== "fail"),
-    databasePath,
-    checks,
+  try {
+    await bootstrapBackgroundRuntime({ database, installSignalHandlers: false })
+  } catch {
+    bootstrapFailed = true
   }
-  process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
+  const runtime = getBackgroundRuntime()
+  const runtimeStatus = runtime?.getStatus()
+  const report = await readV3Readiness(database, {
+    dataMode,
+    bootstrapFailed,
+    packageManager: actualPnpmContract(),
+    runtime: runtimeStatus && {
+      running: runtimeStatus.running,
+      jobs: runtimeStatus.jobs.map(job => ({
+        id: job.id,
+        providerId: job.providerId,
+        capability: job.capability,
+        enabled: job.enabled,
+      })),
+    },
+  })
+  process.stdout.write(`${JSON.stringify({ ...report, databasePath }, null, 2)}\n`)
   if (!report.ready) process.exitCode = 1
 } finally {
+  shutdownBackgroundRuntime()
   native.close()
 }

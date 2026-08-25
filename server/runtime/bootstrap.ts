@@ -9,6 +9,7 @@ import { getDefaultRuntimeJobs } from "#/runtime/registry"
 interface RuntimeGlobalState {
   runtime?: BackgroundRuntime
   bootstrapPromise?: Promise<BackgroundRuntime>
+  bootstrapFailed?: boolean
   signalHandlers?: { SIGINT: () => void, SIGTERM: () => void }
 }
 
@@ -55,6 +56,7 @@ export async function bootstrapBackgroundRuntime(options: BootstrapBackgroundRun
   const state = globalState()
   if (state.runtime) return state.runtime
   if (state.bootstrapPromise) return state.bootstrapPromise
+  state.bootstrapFailed = false
   state.bootstrapPromise = (async () => {
     const database = options.database ?? useDatabase()
     const dataMode = process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock"
@@ -70,6 +72,7 @@ export async function bootstrapBackgroundRuntime(options: BootstrapBackgroundRun
     return await state.bootstrapPromise
   } catch (error) {
     state.runtime = undefined
+    state.bootstrapFailed = true
     removeSignalHandlers()
     throw error
   } finally {
@@ -81,6 +84,10 @@ export function getBackgroundRuntime(): BackgroundRuntime | undefined {
   return globalState().runtime
 }
 
+export function hasBackgroundRuntimeBootstrapFailed(): boolean {
+  return globalState().bootstrapFailed === true
+}
+
 export function isBackgroundRuntimeEnabled(): boolean {
   return runtimeEnabled()
 }
@@ -90,5 +97,6 @@ export function shutdownBackgroundRuntime(): void {
   state.runtime?.stop()
   state.runtime = undefined
   state.bootstrapPromise = undefined
+  state.bootstrapFailed = undefined
   removeSignalHandlers()
 }

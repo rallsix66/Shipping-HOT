@@ -6,8 +6,8 @@
 
 ## V3 Readiness Gate — 2026-08-24
 
-- `server/services/v3-readiness.ts` is a local, redacted foundation gate. It verifies the pinned Node/ABI contract, current SQLite migration/schema, P1A Port Directory readiness, Mock-only provider configuration, enabled Background Runtime and the approved AIS/Voyage Job scope.
-- `GET /api/shipping/readiness` initializes the existing migration runner and reads only local SQLite/runtime state. `pnpm smoke:v3-readiness` provides the process-level check against `.data/shipping-hot-v3.sqlite3`.
+- `server/services/v3-readiness.ts` is a local, redacted foundation gate. It verifies the shared Node `24.15.0` / ABI `137` / pnpm `10.30.3` / better-sqlite3 `12.6.2` contract, current SQLite migration/schema, P1A Port Directory readiness, Mock-only provider configuration, and a running Background Runtime whose Job set exactly matches approved AIS Tracking + Voyage Sync.
+- `GET /api/shipping/readiness` initializes the existing migration runner and reads local SQLite/runtime state plus the same toolchain contract used by `pnpm smoke:v3-readiness`. The CLI additionally observes `pnpm --version` when available and bootstraps/stops the Runtime around its check; HTTP falls back to the declared pnpm contract when no package-manager user-agent exists.
 - The gate performs no external Provider request and marks live contract/coverage checks as skipped. It deliberately fails when a Real/paid Provider override is active, so Readiness cannot silently become Provider activation. Feed, Calendar, Translation and real Voyage adapter work remain deferred.
 
 ## Current AISStream + Calendarific Live Verification — 2026-08-18
@@ -277,14 +277,14 @@ Provider mode is the requested source (`mock`, `aisstream`, `portcast`, `open-me
 
 - Local development: Vite/Nitro Node runtime, intended to use `pnpm dev` after dependencies are installed.
 - Optional deployment: Cloudflare Pages/D1, Vercel, Bun, and Docker are configured in existing files.
-- Local database path: `.data/shipping-hot-v3.sqlite3` for the Node/db0 local runtime; the prior ignored `.data/db.sqlite3` is not the V3 database and was retained as a cleanup candidate.
+- Local database path: `.data/shipping-hot-v3.sqlite3` for the Node/db0 local runtime; the legacy `.data/db.sqlite3` path is not the V3 database and is absent from the current workspace. Do not reuse that legacy path without a new migration decision.
 - Docker persists `/usr/app/.data` through the compose volume.
 - No general Shipping HOT backup/restore procedure is approved. Current persistence changes go through the migration runner (`schema_migrations`, v1–v8): the startup-safe nullable `vessels.status_changed_at` compatibility rebuild predates it and has been superseded by versioned migrations covering the P0 foundation/watchlist isolation, `port_directory` (v3), P1B `source_type` lineage backfill (v4), `vessel_metadata`/`vessel_search_cache` (v5), the `(provider_id, capability)` `provider_runtime` rebuild with row preservation (v6), `ais_positions`/`ais_latest_positions` (v7) and the `voyages` extension plus append-only `voyage_eta_history` (v8), alongside the minimal JSON-backed `calendar_events` and aggregate-only `ais_port_metrics` tables.
 
 ## 13. Testing and Verification Boundaries
 
 - Current tests: Vitest covers Shipping HOT Domain, Provider, Repository, Event/HOT and UI trust contracts.
-- Current verification state: V3 P0/P1A/P1B/P2A/P2B/P2C/P3A/P3B and the local V3 Readiness Gate verification are recorded in `docs/status.md`; it includes typecheck, production build, native better-sqlite3 read/write and migration-aware process-A-write → close → process-B-read persistence smoke for runtime, AIS position and Voyage/ETA stores. The 2026-08-24 closeout repair removed the four pre-existing lint errors; `pnpm lint` is all green. Live AIS observation, real Voyage adapter coverage and official-alert live criteria remain pending; Feed, Calendar and Translation remain deferred.
+- Current verification state: V3 P0/P1A/P1B/P2A/P2B/P2C/P3A/P3B and the 2026-08-25 V3 Readiness Review repair are recorded in `docs/status.md`; Readiness now requires the initialized/running exact AIS/Voyage Job set and shares the Node/ABI/pnpm/better-sqlite3 contract between API and CLI. It includes typecheck, production build, native better-sqlite3 read/write and migration-aware process-A-write → close → process-B-read persistence smoke for runtime, AIS position and Voyage/ETA stores. `pnpm lint` is all green. Live AIS observation, real Voyage adapter coverage and official-alert live criteria remain pending; Feed, Calendar and Translation remain deferred.
 - Shipping HOT tests cover delay, baseline preservation, Vessel/Voyage ownership merges, Provider normalization/failure/fallback, Calendar source composition/conflict/reconciliation/announcement behavior, RSS/HTML Feed parsing with unknown publication and Chinese classification, source isolation, repost dedupe, Feed → Event/HOT boundaries, Open-Meteo 24-hour/72-hour/7-day windows/direction/TTL/per-port failure behavior, source-specific official warning parsing/expiry, Real → Event flow, status duration, Event update/resolve/reopen, freshness, Feed/Event dedupe, congestion threshold, settings bounds, HOT ranking and Repository seed/read/write/prune contracts.
 - Minimum release checks after implementation: typecheck, lint, relevant tests, build and local smoke verification.
 
