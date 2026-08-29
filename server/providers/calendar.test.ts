@@ -132,9 +132,9 @@ describe("calendar providers", () => {
     expect(sanitizeCalendarError(new Error("https://calendarific.com/api/v2/holidays?api_key=secret-calendarific-key&country=TH"))).toBe("https://calendarific.com/api/v2/holidays?api_key=***&country=TH")
   })
 
-  it("covers the five-country official source registry without pretending unsupported live formats are complete", () => {
-    expect(Object.keys(officialHolidaySources).sort()).toEqual(["ID", "MY", "PH", "TH", "VN"])
-    expect(Object.keys(calendarCountries).sort()).toEqual(["ID", "MY", "PH", "TH", "VN"])
+  it("covers the six-country official source registry without pretending unsupported live formats are complete", () => {
+    expect(Object.keys(officialHolidaySources).sort()).toEqual(["CN", "ID", "MY", "PH", "TH", "VN"])
+    expect(Object.keys(calendarCountries).sort()).toEqual(["CN", "ID", "MY", "PH", "TH", "VN"])
   })
 
   it("preserves official facts and records a Manual Override conflict", () => {
@@ -198,8 +198,8 @@ describe("calendar providers", () => {
 
   it("provides deterministic Mock coverage and lead windows", () => {
     const events = createMockCalendarEvents(2026, "2026-08-15T00:00:00.000Z")
-    expect(events).toHaveLength(10)
-    expect(new Set(events.map(event => event.countryCode))).toEqual(new Set(["TH", "ID", "MY", "PH", "VN"]))
+    expect(events).toHaveLength(12)
+    expect(new Set(events.map(event => event.countryCode))).toEqual(new Set(["CN", "TH", "ID", "MY", "PH", "VN"]))
     expect(calendarLeadDays({ ...events[0], businessImpact: "medium" })).toEqual([7])
     expect(calendarLeadDays({ ...events[0], businessImpact: "high" })).toEqual([14, 3])
     expect(calendarLeadDays({ ...events[0], type: "government_special" })).toEqual([0])

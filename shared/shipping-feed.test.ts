@@ -10,7 +10,7 @@ describe("shipping feed HOT boundary", () => {
     const events = detectShippingEvents([], [], [], [feed], snapshot.settings, [], "2026-08-15T00:00:00.000Z")
     expect(events).toHaveLength(1)
     expect(events[0]).toMatchObject({ dedupeKey: `feed:${feed.id}`, feedItemId: feed.id, evidenceJson: { category: feed.category, hotReason: "官方运营公告" } })
-    expect(rankHotItems([], [], [], [], [feed])[0]).toMatchObject({ kind: "feed", feedItemId: feed.id, hotReason: "官方运营公告" })
+    expect(rankHotItems([], [], [], [], [feed], new Date("2026-08-15T00:00:00.000Z"))[0]).toMatchObject({ kind: "feed", feedItemId: feed.id, hotReason: "官方运营公告" })
   })
 
   it("does not create a HOT event from stale feed evidence", () => {

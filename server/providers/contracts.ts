@@ -87,6 +87,33 @@ export interface ProviderUsageRecord {
   errorCode?: string
 }
 
+export type ProviderFailureCode = "auth_failed" | "entitlement_missing" | "provider_forbidden" | "rate_limited" | "provider_timeout" | "provider_unavailable" | "provider_contract_changed"
+
+export class ProviderError extends Error {
+  readonly code: ProviderFailureCode
+  readonly status?: number
+
+  constructor(code: ProviderFailureCode, message: string, status?: number) {
+    super(message)
+    this.name = "ProviderError"
+    this.code = code
+    this.status = status
+  }
+}
+
+export function providerFailureCode(status: number): ProviderFailureCode {
+  if (status === 401) return "auth_failed"
+  if (status === 403) return "entitlement_missing"
+  if (status === 429) return "rate_limited"
+  if (status >= 500) return "provider_unavailable"
+  return "provider_contract_changed"
+}
+
+export function providerHttpError(provider: string, status: number, message = `${provider} request failed (${status})`): ProviderError {
+  const code = providerFailureCode(status)
+  return new ProviderError(code, message, status)
+}
+
 export interface ProviderRuntimeRecord {
   providerId: string
   capability: string

@@ -71,6 +71,17 @@ describe("shipping feed provider", () => {
     expect(bodySignal?.aborted).toBe(true)
   })
 
+  it("can surface a source failure with no last-known item for isolated Runtime handling", async () => {
+    const provider = createPublicFeedProvider({
+      sources: [rssSource],
+      throwOnSourceFailureWithoutLastKnown: true,
+      fetcher: async () => {
+        throw new Error("source unavailable")
+      },
+    })
+    await expect(provider.getFeedItems([], mockPorts)).rejects.toThrow("source unavailable")
+  })
+
   it("normalizes RSS entries and attaches source and port provenance", () => {
     const [item] = parseFeedRss(`
       <rss><channel>

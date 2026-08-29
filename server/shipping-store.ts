@@ -1,15 +1,14 @@
 import process from "node:process"
-import { filterEventsForOperationalContext, recordAllowedForDataMode, sourceAllowedForOperationalContext, toVesselWatchTarget } from "@shared/shipping"
+import { filterEventsForOperationalContext, recordAllowedForDataMode, sourceAllowedForOperationalContext } from "@shared/shipping"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
-import type { DataEvidence, DatabasePersistenceStatus, FeedItem, Freshness, Port, ProvenanceAware, ProviderResult, ShippingProviderModes, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "@shared/shipping"
+import type { DataEvidence, DatabasePersistenceStatus, FeedItem, ProvenanceAware, ShippingProviderModes, ShippingSettings, ShippingSnapshot } from "@shared/shipping"
+import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries, calendarEventKey, calendarEventLegacyId } from "@shared/calendar"
 import { detectShippingEvents } from "@shared/shipping-engine"
-import { applyFeedFreshnessPolicy, mergeProviderVessel, mergeProviderVoyage } from "@shared/shipping-rules"
 import { filterCalendarCoverageForSourceIds, filterCalendarEventsForSourceIds, mergeCalendarSources } from "#/providers/calendar"
-import { activeShippingFeedSourceIds, filterFeedLastKnownForMode } from "#/providers/feed"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { defaultShippingSettings, healthyPersistenceStatus, persistenceUnavailableError } from "#/database/runtime"
-import { disabledProviderData, fetchWeatherProviderResults, isOfficialWeatherAlertFeedItem, isWeatherFeedItem, operationalSourceContext, providerError, providerModes, providerProvenances, providerResult, providers, sanitizeAisVessel, toProviderResult } from "#/providers/shipping"
+import { isWeatherFeedItem, operationalSourceContext, providerModes, providerProvenances, providers } from "#/providers/shipping"
 
 let repository: ShippingRepository | undefined
 const mockCalendarYear = new Date().getUTCFullYear()
@@ -41,21 +40,6 @@ function markWriteFailure(error: unknown): never {
   throw persistenceUnavailableError(error)
 }
 
-function preserveWatchState<T extends Vessel | Port>(latest: T[], stored: T[]): T[] {
-  const previous = new Map(stored.map(item => [item.id, item.isWatched]))
-  return latest.map(item => previous.has(item.id) ? { ...item, isWatched: previous.get(item.id)! } : item)
-}
-
-function mergeVessels(providerVessels: Vessel[], storedVessels: Vessel[], now: string): Vessel[] {
-  const previous = new Map(storedVessels.map(item => [item.id, item]))
-  return providerVessels.map(item => mergeProviderVessel(previous.get(item.id), item, now))
-}
-
-function mergeVoyages(providerVoyages: Voyage[], storedVoyages: Voyage[]): Voyage[] {
-  const previous = new Map(storedVoyages.map(item => [item.id, item]))
-  return providerVoyages.map(item => mergeProviderVoyage(previous.get(item.id), item))
-}
-
 function filterOperationalAisAreaMetrics(metrics: AisDerivedPortMetric[]): AisDerivedPortMetric[] {
   return providerModes.aisArea === "aisstream"
     ? metrics.filter(metric => sourceAllowedForOperationalContext(metric.provenance?.sourceId, operationalSourceContext))
@@ -75,8 +59,13 @@ async function initialize() {
   initialized = (async () => {
     try {
       const db = useDatabase()
-      const metadata = await initShippingTables(db, process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock")
-      repository = new ShippingRepository(db, process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock")
+      const dataMode = process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock"
+      const metadata = await initShippingTables(db, dataMode)
+      repository = new ShippingRepository(db, dataMode)
+      if (dataMode === "mock" && await repository.isEmpty()) {
+        const fixture = createMockSnapshot()
+        await repository.seed(fixture.vessels, fixture.ports, fixture.voyages, fixture.feedItems, fixture.events, fixture.settings, fixture.calendarEvents ?? [], fixture.aisPortMetrics ?? [])
+      }
       persistenceStatus = metadata
         ? healthyPersistenceStatus(metadata)
         : { status: "healthy", schemaVersion: 0 }
@@ -87,69 +76,6 @@ async function initialize() {
     }
   })()
   return initialized
-}
-
-async function fetchProviderSnapshot(settings: ShippingSettings, lastKnown: Pick<ShippingSnapshot, "vessels" | "ports" | "voyages" | "feedItems" | "calendarEvents" | "calendarCoverage" | "aisPortMetrics"> = emptySnapshot()): Promise<ShippingSnapshot> {
-  const existingNonWeatherFeed = lastKnown.feedItems.filter(item => !isWeatherFeedItem(item))
-  const feedLastKnown = filterFeedLastKnownForMode(existingNonWeatherFeed, providerModes.feed)
-  const weatherLastKnown = lastKnown.feedItems.filter(isWeatherFeedItem)
-  const modelWeatherLastKnown = weatherLastKnown
-    .filter(item => !isOfficialWeatherAlertFeedItem(item))
-    .filter(item => providerModes.weather === "open-meteo" ? item.sourceId === "open-meteo-marine" : item.sourceId === "mock-weather")
-  const officialWeatherLastKnown = weatherLastKnown.filter(isOfficialWeatherAlertFeedItem)
-  const watchTargets = lastKnown.vessels.map(toVesselWatchTarget)
-  const aisLastKnown = lastKnown.vessels
-    .filter(item => item.provenance?.sourceId === "aisstream")
-    .map(item => sanitizeAisVessel(item))
-  const vesselLastKnown = providerModes.vessel === "aisstream" ? aisLastKnown : lastKnown.vessels
-  const portLastKnown = providerModes.port === "portcast" ? lastKnown.ports.filter(item => item.provenance?.sourceId === "portcast-public") : lastKnown.ports
-  const areaLastKnown = filterOperationalAisAreaMetrics(lastKnown.aisPortMetrics ?? [])
-  const calendarEvents = filterCalendarEventsForSourceIds(lastKnown.calendarEvents ?? [], providerModes.calendarSourceIds ?? [])
-  const calendarCoverage = filterCalendarCoverageForSourceIds(lastKnown.calendarCoverage ?? settings.calendarSync ?? [], providerModes.calendarSourceIds ?? [])
-  const weatherResults = settings.sourceEnabled
-    ? fetchWeatherProviderResults(providers.weather, providers.weatherAlerts, lastKnown.ports, modelWeatherLastKnown, officialWeatherLastKnown)
-    : Promise.resolve<[PromiseSettledResult<FeedItem[]>, PromiseSettledResult<FeedItem[]>]>([
-        { status: "fulfilled", value: disabledProviderData(modelWeatherLastKnown) },
-        { status: "fulfilled", value: disabledProviderData(officialWeatherLastKnown) },
-      ])
-  const [vesselResult, portResult, voyageResult, shippingFeedResult] = await Promise.allSettled([
-    settings.providerEnabled ? providers.vessel.getVessels(watchTargets, aisLastKnown) : Promise.resolve(disabledProviderData(vesselLastKnown)),
-    settings.providerEnabled ? providers.port.getPorts(lastKnown.ports) : Promise.resolve(disabledProviderData(lastKnown.ports)),
-    settings.providerEnabled ? providers.schedule.getVoyages() : Promise.resolve(disabledProviderData(lastKnown.voyages)),
-    settings.sourceEnabled ? providers.feed.getFeedItems(feedLastKnown, lastKnown.ports) : Promise.resolve(disabledProviderData(feedLastKnown)),
-  ])
-  const areaProviderPorts = (portResult.status === "fulfilled" ? portResult.value : portLastKnown)
-    .filter(item => item.isWatched && sourceAllowedForOperationalContext(item.provenance?.sourceId, operationalSourceContext))
-  const aisAreaDisabled = isAisAreaProviderDisabled(settings.providerEnabled, providerModes.aisArea)
-  const [aisAreaResult] = await Promise.allSettled([
-    aisAreaDisabled ? Promise.resolve([] as AisDerivedPortMetric[]) : providers.aisArea.getPortMetrics(areaProviderPorts, areaLastKnown),
-  ])
-  const [weatherResult, weatherAlertResult] = await weatherResults
-  const read = <T extends Freshness>(result: PromiseSettledResult<T[]>, previous: T[], provenance: ProviderResult<T>["provenance"], disabled: boolean): ProviderResult<T> => {
-    const data = disabled ? disabledProviderData(previous) : providerResult(result, previous)
-    return toProviderResult(data, provenance, new Date().toISOString(), disabled ? "disabled" : undefined, disabled ? undefined : providerError(result))
-  }
-  const vessel = read(vesselResult, vesselLastKnown, providerModes.vessel === "aisstream" ? providerProvenances.aisstream : providerProvenances.mockVessel, !settings.providerEnabled)
-  const port = read(portResult, portLastKnown, providerModes.port === "portcast" ? providerProvenances.portcastPublic : providerProvenances.mockPort, !settings.providerEnabled)
-  const voyage = read(voyageResult, lastKnown.voyages, providerProvenances.mockSchedule, !settings.providerEnabled)
-  const shippingFeed = read(shippingFeedResult, feedLastKnown, providerModes.feed === "public" ? providerProvenances.shippingFeed : providerProvenances.mockFeed, !settings.sourceEnabled)
-  const weather = read(weatherResult, modelWeatherLastKnown, providerModes.weather === "open-meteo" ? providerProvenances.openMeteo : providerProvenances.mockWeather, !settings.sourceEnabled)
-  const weatherAlerts = providerModes.weatherAlerts === "off" && settings.sourceEnabled
-    ? toProviderResult([], providerProvenances.officialWeatherAlerts, new Date().toISOString(), "disabled")
-    : read(weatherAlertResult, officialWeatherLastKnown, providerProvenances.officialWeatherAlerts, !settings.sourceEnabled)
-  const aisArea = read(aisAreaResult, areaLastKnown, providerProvenances.aisstreamAreaDerived, aisAreaDisabled)
-  return {
-    vessels: vessel.data,
-    ports: port.data,
-    voyages: voyage.data,
-    feedItems: mergeWeatherFeedItems(shippingFeed.data, [...weather.data, ...weatherAlerts.data]).map(item => applyFeedFreshnessPolicy(item, new Date())),
-    events: [],
-    settings,
-    calendarEvents,
-    calendarCoverage,
-    aisPortMetrics: providerModes.aisArea === "aisstream" ? aisArea.data : [],
-    providerFreshness: { vessel: vessel.freshness, port: port.freshness, schedule: voyage.freshness, weather: weather.freshness, weatherAlerts: weatherAlerts.freshness, feed: shippingFeed.freshness, aisArea: aisArea.freshness },
-  }
 }
 
 async function readStoredSnapshot(): Promise<ShippingSnapshot> {
@@ -199,50 +125,25 @@ function filterOperationalSnapshotInputs(snapshot: ShippingSnapshot): Pick<Shipp
   }
 }
 
-async function saveSnapshot(snapshot: ShippingSnapshot) {
-  if (!repository) throw persistenceUnavailableError()
-  try {
-    for (const vessel of snapshot.vessels) await repository.upsertVessel(vessel)
-    for (const port of snapshot.ports) await repository.upsertPort(port)
-    for (const voyage of snapshot.voyages) await repository.upsertVoyage(voyage)
-    for (const item of snapshot.feedItems) await repository.upsertFeedItem(item)
-    for (const event of snapshot.events) await repository.upsertEvent(event)
-    for (const event of snapshot.calendarEvents ?? []) await repository.upsertCalendarEvent(event)
-    for (const metric of snapshot.aisPortMetrics ?? []) await repository.upsertAisPortMetric(metric)
-    await repository.saveSettings(snapshot.settings)
-  } catch (error) {
-    persistenceStatus = { ...persistenceStatus, status: "read_only_degraded", errorCode: "persistence_write_failed" }
-    throw persistenceUnavailableError(error)
-  }
-}
-
 export async function getShippingSnapshot(): Promise<ShippingSnapshot> {
   await initialize()
   if (!repository || persistenceStatus.status === "unavailable") return emptySnapshot()
-  // LEGACY / DEFERRED MIGRATION: fetchProviderSnapshot may still call the
-  // existing Providers for this GET. New Provider work must use the
-  // BackgroundRuntime → SQLite path and must not add another request trigger.
   const stored = await readStoredSnapshot()
-  const providerSnapshot = await fetchProviderSnapshot(stored.settings, stored)
-  const current: ShippingSnapshot = {
+  const operational = filterOperationalSnapshotInputs(stored)
+  return {
     ...stored,
-    vessels: preserveWatchState(mergeVessels(providerSnapshot.vessels, stored.vessels, new Date().toISOString()), stored.vessels),
-    ports: preserveWatchState(providerSnapshot.ports, stored.ports),
-    voyages: mergeVoyages(providerSnapshot.voyages, stored.voyages),
-    feedItems: providerSnapshot.feedItems,
-    calendarEvents: stored.calendarEvents,
-    calendarCoverage: stored.calendarCoverage,
-    aisPortMetrics: providerSnapshot.aisPortMetrics,
-    providerFreshness: providerSnapshot.providerFreshness,
+    events: detectShippingEvents(
+      operational.vessels,
+      operational.ports,
+      operational.voyages,
+      operational.feedItems,
+      stored.settings,
+      filterEventsForOperationalContext(stored.events, operationalSourceContext),
+      new Date().toISOString(),
+      stored.calendarEvents ?? [],
+      filterOperationalAisAreaMetrics(stored.aisPortMetrics ?? []),
+    ),
   }
-  current.events = detectShippingEvents(current.vessels, current.ports, current.voyages, current.feedItems, current.settings, filterEventsForOperationalContext(stored.events, operationalSourceContext), new Date().toISOString(), current.calendarEvents ?? [], current.aisPortMetrics ?? [])
-  await saveSnapshot(current)
-  if (current.providerFreshness?.feed?.sourceStatus === "healthy" && current.settings.sourceEnabled) {
-    const sourceIds = providerModes.feed === "public" ? [...activeShippingFeedSourceIds()] : providerModes.feed === "mock" ? ["mock-port-notice"] : []
-    await repository.archiveFeedItemsNotIn(sourceIds, new Set(current.feedItems.filter(item => sourceIds.includes(item.sourceId)).map(item => item.id)))
-  }
-  await repository.pruneExpired(current.settings.retentionDays)
-  return structuredClone(current)
 }
 
 export async function getShippingPersistenceStatus(): Promise<DatabasePersistenceStatus> {

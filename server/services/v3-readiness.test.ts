@@ -2,7 +2,7 @@ import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
 import { initShippingTables } from "#/database/shipping"
-import { type RuntimeReadinessStatus, type V3ToolchainObservation, approvedRuntimeJobs, readV3PackageManagerObservation, readV3Readiness, readV3ToolchainChecks } from "#/services/v3-readiness"
+import { type RuntimeReadinessStatus, type V3ToolchainObservation, approvedRuntimeJobKeys, readV3PackageManagerObservation, readV3Readiness, readV3ToolchainChecks } from "#/services/v3-readiness"
 
 function createNativeDatabase() {
   const native = new NativeDatabase(":memory:")
@@ -30,7 +30,10 @@ function createNativeDatabase() {
 function validRuntime(overrides: Partial<RuntimeReadinessStatus> = {}): RuntimeReadinessStatus {
   return {
     running: true,
-    jobs: approvedRuntimeJobs.map(job => ({ ...job, providerId: "mock", enabled: true })),
+    jobs: approvedRuntimeJobKeys("mock").map((key) => {
+      const [id, capability] = key.split(":")
+      return { id: id === "feed-sync" ? `${id}:${capability}` : id, providerId: "mock", capability: id === "feed-sync" ? "feed_sync" : capability, enabled: true }
+    }),
     ...overrides,
   }
 }

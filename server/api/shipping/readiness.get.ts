@@ -16,6 +16,10 @@ export default defineEventHandler(async () => {
       providerId: job.providerId,
       capability: job.capability,
       enabled: job.enabled,
+      status: job.status,
+      lastSuccessAt: job.lastSuccessAt,
+      lastSourceUpdatedAt: job.lastSourceUpdatedAt,
+      nextSyncAt: job.nextSyncAt,
     })),
   }
   return readV3Readiness(database, { dataMode, runtime: runtimeSnapshot, bootstrapFailed: hasBackgroundRuntimeBootstrapFailed() })

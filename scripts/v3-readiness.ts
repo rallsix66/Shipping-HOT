@@ -72,6 +72,10 @@ try {
         providerId: job.providerId,
         capability: job.capability,
         enabled: job.enabled,
+        status: job.status,
+        lastSuccessAt: job.lastSuccessAt,
+        lastSourceUpdatedAt: job.lastSourceUpdatedAt,
+        nextSyncAt: job.nextSyncAt,
       })),
     },
   })

@@ -11,6 +11,12 @@ Shipping HOT V3 is a proposal for moving from the V2 mixed/mock runtime to a loc
 
 This ADR is **Accepted** as of 2026-08-20. It authorizes the approved V3 implementation boundaries, beginning with P0 Persistence. It does not authorize account creation, paid subscriptions, key entry, or any phase beyond the explicitly approved phase.
 
+## Current implementation note — 2026-08-29
+
+The controlled Real Data Activation slice reuses the Providers already approved by this ADR: AISStream tracking, public Feed sources, Calendarific, Portcast public pages and Open-Meteo Marine. It adds only their server-side Background Runtime registration, SQLite persistence/repository reads, provider-runtime usage records and capability-level Readiness reporting. Feed sources are isolated as `feed-sync:<sourceId>` Jobs; Calendar, Port and Weather use independent Jobs; the legacy Shipping Snapshot is repository/SQLite-only. This is not authorization for a new Provider, paid account, secret, deployment or later business phase.
+
+The activation evidence is recorded in `docs/live-verification.md`. Real Voyage/ETA adapter coverage, VesselAPI credentials/entitlement, AIS PositionReport observation and official weather-alert coverage remain pending. `docs/voyage-provider-gap.md` records that the Voyage gap is not an entitlement result because no credentialed probe was made.
+
 ## Accepted decision
 
 ### 0. P0 scope boundary

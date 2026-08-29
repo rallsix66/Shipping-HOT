@@ -33,6 +33,7 @@ export interface RuntimeJobStatus {
   status: ProviderRuntimeRecord["status"]
   executionStatus: RuntimeExecutionStatus
   lastSuccessAt?: string
+  lastSourceUpdatedAt?: string
   lastFailureAt?: string
   nextSyncAt?: string
   consecutiveFailures: number
@@ -62,6 +63,7 @@ interface JobState {
   providerStatus: ProviderRuntimeRecord["status"]
   executionStatus: RuntimeExecutionStatus
   lastSuccessAt?: string
+  lastSourceUpdatedAt?: string
   lastFailureAt?: string
   nextSyncAt?: string
   consecutiveFailures: number
@@ -69,6 +71,9 @@ interface JobState {
 }
 
 function errorDetails(error: unknown): { errorCode: string, errorMessage: string } {
+  if (error && typeof error === "object" && "code" in error && typeof (error as { code?: unknown }).code === "string") {
+    return { errorCode: (error as { code: string }).code, errorMessage: safeErrorMessage(error instanceof Error ? error.message : String(error)) }
+  }
   if (error instanceof Error) {
     return { errorCode: "job_failed", errorMessage: safeErrorMessage(error.message) }
   }
@@ -174,6 +179,7 @@ export class BackgroundRuntime {
         status: state.providerStatus,
         executionStatus: state.executionStatus,
         lastSuccessAt: state.lastSuccessAt,
+        lastSourceUpdatedAt: state.lastSourceUpdatedAt,
         lastFailureAt: state.lastFailureAt,
         nextSyncAt: state.nextSyncAt,
         consecutiveFailures: state.consecutiveFailures,
@@ -200,6 +206,7 @@ export class BackgroundRuntime {
     if (persisted) {
       state.providerStatus = persisted.status
       state.lastSuccessAt = persisted.lastSuccessAt
+      state.lastSourceUpdatedAt = persisted.lastSourceUpdatedAt
       state.lastFailureAt = persisted.lastFailureAt
       state.nextSyncAt = persisted.nextSyncAt
       state.consecutiveFailures = persisted.consecutiveFailures
@@ -265,6 +272,7 @@ export class BackgroundRuntime {
       })
       const result = await state.job.run()
       const completedAt = this.now().toISOString()
+      await this.recordUsage(state, result, completedAt)
       const nextSyncAt = new Date(this.now().getTime() + state.job.intervalMs).toISOString()
       if (result.status === "success") {
         await this.repository.completeSyncRun({ id: syncRun.id, completedAt, status: "success", recordsRead: result.recordsRead, recordsWritten: result.recordsWritten })
@@ -319,6 +327,7 @@ export class BackgroundRuntime {
     } catch (error) {
       const details = errorDetails(error)
       const completedAt = this.now().toISOString()
+      await this.recordUsage(state, { status: "failed", errorCode: details.errorCode, errorMessage: details.errorMessage }, completedAt)
       if (syncRun) {
         await this.repository.completeSyncRun({ id: syncRun.id, completedAt, status: "failed", errorCode: details.errorCode, errorMessage: details.errorMessage })
       }
@@ -344,10 +353,27 @@ export class BackgroundRuntime {
     }
   }
 
+  private async recordUsage(state: JobState, result: SyncResult, calledAt: string): Promise<void> {
+    try {
+      await this.repository.recordProviderUsage({
+        providerId: state.job.providerId,
+        capability: state.job.capability,
+        succeeded: result.status === "success",
+        failed: result.status === "failed",
+        records: result.recordsRead,
+        calledAt,
+        errorCode: result.errorCode,
+      })
+    } catch (error) {
+      this.log.error("provider usage recording failed", { jobId: state.job.id, errorCode: error instanceof Error ? error.message : "usage_write_failed" })
+    }
+  }
+
   private applyRuntimeState(state: JobState, runtime: ProviderRuntimeRecord, executionStatus: SyncResultStatus): void {
     state.providerStatus = runtime.status
     state.executionStatus = executionStatus
     state.lastSuccessAt = runtime.lastSuccessAt
+    state.lastSourceUpdatedAt = runtime.lastSourceUpdatedAt
     state.lastFailureAt = runtime.lastFailureAt
     state.nextSyncAt = runtime.nextSyncAt
     state.consecutiveFailures = runtime.consecutiveFailures

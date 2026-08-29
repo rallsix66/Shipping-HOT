@@ -1,6 +1,7 @@
 import { env } from "node:process"
 import type { DataEvidence, DataProvenance } from "@shared/shipping"
 import { type BusinessImpact, type CalendarCountryCode, type CalendarCoverage, type CalendarCoverageStatus, type CalendarEvent, type CalendarEventScope, type CalendarEventType, type CalendarProviderResult, type CalendarQuery, type CalendarSourceKind, calendarCountries, calendarEventId, calendarEventKey, calendarSeverity } from "@shared/calendar"
+import { providerHttpError } from "#/providers/contracts"
 
 export interface CalendarProvider {
   getEvents: (query: CalendarQuery) => Promise<CalendarProviderResult>
@@ -29,6 +30,7 @@ export const calendarProvenances = {
 } as const satisfies Record<string, DataProvenance>
 
 export const officialHolidaySources: Record<CalendarCountryCode, string> = {
+  CN: "https://www.gov.cn/",
   TH: "https://www.bot.or.th/en/financial-institutions-holiday.html",
   ID: "https://www.kemenkopmk.go.id/pemerintah-tetapkan-17-hari-libur-nasional-dan-8-cuti-bersama-tahun-2026",
   MY: "https://www.kabinet.gov.my/hari-kelepasan-am/",
@@ -332,7 +334,7 @@ export function createCalendarificProvider(options: CalendarificProviderOptions)
         url.searchParams.set("year", String(query.year))
         try {
           const response = await fetcher(url.toString())
-          if (!response.ok) throw new Error(`Calendarific request failed (${response.status})`)
+          if (!response.ok) throw providerHttpError("Calendarific", response.status, `Calendarific request failed (${response.status})`)
           const payload = await response.json()
           const countryEvents = normalizeCalendarificPayload(payload, countryCode, query.year, fetchedAt)
           events.push(...countryEvents)

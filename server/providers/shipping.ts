@@ -9,6 +9,7 @@ import { activeShippingFeedSourceIds, configureFeedProviders } from "./feed"
 import { type WeatherAlertProvider, activeOfficialWeatherAlertSourceIds, createOfficialWeatherAlertProvider, officialWeatherAlertSourceIds } from "./weather-alerts"
 import { aisstreamAreaDerivedProvenance, aisstreamAreaEstimatedProvenance, createAisStreamAreaProvider, createUnavailableAisAreaProvider } from "./aisstream-area"
 import { createRuntimePortDirectoryLookup } from "#/database/port-directory"
+import { providerHttpError } from "#/providers/contracts"
 
 export interface VesselProvider {
   getVessels: (targets?: VesselWatchTarget[], lastKnown?: Vessel[]) => Promise<Vessel[]>
@@ -384,7 +385,8 @@ export function createPortcastPublicPageProvider(options: PortcastPublicPageProv
           const response = await fetcher(url)
           if (!response.ok) {
             if (response.status === 404 || response.status === 410) return noPublicPortData(port, url, evaluatedAt)
-            return failedPortcastData(port, url, evaluatedAt, `Portcast public page failed (${response.status})`)
+            const failure = providerHttpError("Portcast public page", response.status, `Portcast public page failed (${response.status})`)
+            return failedPortcastData(port, url, evaluatedAt, failure.message)
           }
           const metrics = parsePortcastPublicPage(await response.text())
           const fingerprint = portcastFingerprint(metrics)
@@ -894,8 +896,8 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
         weatherUrl.searchParams.set("wind_speed_unit", "kmh")
         try {
           const [marineResponse, weatherResponse] = await Promise.all([fetcher(marineUrl.toString()), fetcher(weatherUrl.toString())])
-          if (!marineResponse.ok) throw new Error(`Open-Meteo marine request failed (${marineResponse.status})`)
-          if (!weatherResponse.ok) throw new Error(`Open-Meteo weather request failed (${weatherResponse.status})`)
+          if (!marineResponse.ok) throw providerHttpError("Open-Meteo marine", marineResponse.status, `Open-Meteo marine request failed (${marineResponse.status})`)
+          if (!weatherResponse.ok) throw providerHttpError("Open-Meteo weather", weatherResponse.status, `Open-Meteo weather request failed (${weatherResponse.status})`)
           const marinePayload = validWeatherPayload(await marineResponse.json())
           const weatherPayload = validWeatherPayload(await weatherResponse.json())
           const fetchedAt = now().toISOString()

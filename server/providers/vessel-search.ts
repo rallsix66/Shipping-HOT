@@ -3,6 +3,7 @@ import { mockVessels } from "@shared/shipping-fixtures"
 import type { SourceLineage } from "@shared/shipping"
 import { type VesselMetadata, type VesselSearchQuery, type VesselSearchResult, normalizeVesselSearchQuery, stableVesselMetadataId } from "@shared/vessel-search"
 import { FileSecretStore } from "#/secrets/file-secret-store"
+import { providerHttpError } from "#/providers/contracts"
 import type { SecretStore } from "#/providers/contracts"
 
 export interface VesselSearchProvider {
@@ -92,7 +93,7 @@ export function createVesselApiSearchProvider(options: VesselApiSearchProviderOp
       const response = await fetcher(url.toString(), {
         headers: { Accept: "application/json", Authorization: `Bearer ${options.apiKey}` },
       })
-      if (!response.ok) throw new Error(`VesselAPI search failed (${response.status})`)
+      if (!response.ok) throw providerHttpError("VesselAPI", response.status, `VesselAPI search failed (${response.status})`)
       const fetchedAt = new Date().toISOString()
       return responseRecords(await response.json())
         .map(record => normalizeVesselApiRecord(record, fetchedAt))

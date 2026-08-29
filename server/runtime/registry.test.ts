@@ -42,14 +42,37 @@ const voyageProvider: VoyageProvider = {
 }
 
 describe("runtime registry", () => {
-  it("registers AIS and Voyage jobs without Feed, Calendar or Translation jobs", async () => {
+  it("registers AIS, Voyage, Feed, and Calendar jobs without Translation jobs", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
     const jobs = getDefaultRuntimeJobs({ database, dataMode: "mock", aisProvider, voyageProvider })
     expect(jobs.map(job => [job.id, job.capability])).toEqual([
       ["ais-tracking", "ais_tracking"],
       ["voyage-sync", "voyage_sync"],
+      ["feed-sync:mock-port-notice", "feed_sync"],
+      ["calendar-sync", "calendar_sync"],
+      ["port-sync", "port_intelligence"],
+      ["weather-sync", "weather_sync"],
     ])
     native.close()
+  })
+
+  it("uses the existing vessel provider setting as the AIS provider alias", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const previousAis = process.env.SHIPPING_AIS_PROVIDER
+    const previousVessel = process.env.SHIPPING_VESSEL_PROVIDER
+    try {
+      delete process.env.SHIPPING_AIS_PROVIDER
+      process.env.SHIPPING_VESSEL_PROVIDER = "aisstream"
+      const jobs = getDefaultRuntimeJobs({ database, dataMode: "real", voyageProvider })
+      expect(jobs.find(job => job.id === "ais-tracking")).toMatchObject({ providerId: "aisstream", enabled: true })
+    } finally {
+      if (previousAis === undefined) delete process.env.SHIPPING_AIS_PROVIDER
+      else process.env.SHIPPING_AIS_PROVIDER = previousAis
+      if (previousVessel === undefined) delete process.env.SHIPPING_VESSEL_PROVIDER
+      else process.env.SHIPPING_VESSEL_PROVIDER = previousVessel
+      native.close()
+    }
   })
 })

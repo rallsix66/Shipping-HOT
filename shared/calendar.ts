@@ -1,6 +1,6 @@
 import type { DataEvidence, Freshness, ProvenanceAware } from "./shipping"
 
-export type CalendarCountryCode = "TH" | "ID" | "MY" | "PH" | "VN"
+export type CalendarCountryCode = "CN" | "TH" | "ID" | "MY" | "PH" | "VN"
 export type CalendarEventType = "public_holiday" | "observance" | "religious" | "commercial" | "government_special" | "company_custom"
 export type BusinessImpact = "low" | "medium" | "high" | "critical"
 export type CalendarCoverageStatus = "complete" | "partial" | "unknown"
@@ -8,6 +8,7 @@ export type CalendarSourceKind = "official" | "third_party" | "user" | "mock"
 export type CalendarEventScope = "national" | "subdivision" | "unknown"
 
 export const calendarCountries: Record<CalendarCountryCode, string> = {
+  CN: "中国",
   TH: "泰国",
   ID: "印度尼西亚",
   MY: "马来西亚",

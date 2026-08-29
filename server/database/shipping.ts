@@ -81,6 +81,19 @@ export async function initShippingTables(db: Database, dataMode: ShippingDataMod
 export class ShippingRepository {
   constructor(private readonly db: Database, private readonly dataMode: ShippingDataMode = process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock") {}
 
+  async isEmpty(): Promise<boolean> {
+    const row = await this.db.prepare(`
+      SELECT
+        (SELECT COUNT(*) FROM vessels)
+        + (SELECT COUNT(*) FROM ports)
+        + (SELECT COUNT(*) FROM voyages)
+        + (SELECT COUNT(*) FROM feed_items)
+        + (SELECT COUNT(*) FROM events)
+        + (SELECT COUNT(*) FROM calendar_events) AS total
+    `).get() as { total?: number } | undefined
+    return Number(row?.total ?? 0) === 0
+  }
+
   private sourceWhere() {
     return this.dataMode === "real" ? " WHERE source_type IN ('real', 'imported', 'derived')" : ""
   }
@@ -300,7 +313,7 @@ export class ShippingRepository {
     }).filter(voyage => recordAllowedForDataMode(voyage, this.dataMode))
   }
 
-  async listFeedItems(options: { now?: Date, view?: "current" | "history" } = {}) {
+  async listFeedItems(options: { now?: Date, view?: "current" | "history" | "all" } = {}) {
     const now = options.now ?? new Date()
     const view = options.view ?? "current"
     const clauses = [this.dataMode === "real" ? "source_type IN ('real', 'imported', 'derived')" : "1 = 1"]
@@ -308,7 +321,7 @@ export class ShippingRepository {
     if (view === "current") {
       clauses.push("visibility = 'current'", "current_until > ?")
       params.push(now.toISOString())
-    } else {
+    } else if (view === "history") {
       clauses.push("visibility <> 'current'")
     }
     const records = rows<Row>(await this.db.prepare(`SELECT data FROM feed_items WHERE ${clauses.join(" AND ")} ORDER BY published_at DESC`).all(...params)).map((row) => {

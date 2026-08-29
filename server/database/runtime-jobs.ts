@@ -35,6 +35,16 @@ export interface ProviderRuntimePatch {
   updatedAt?: string
 }
 
+export interface ProviderUsagePatch {
+  providerId: string
+  capability: string
+  succeeded?: boolean
+  failed?: boolean
+  records?: number
+  calledAt?: string
+  errorCode?: string
+}
+
 interface ProviderRuntimeRow {
   provider_id: string
   capability: string
@@ -160,6 +170,22 @@ export class RuntimeRepository {
   async listProviderRuntime(): Promise<ProviderRuntimeRecord[]> {
     const result = await this.db.prepare("SELECT * FROM provider_runtime ORDER BY provider_id").all()
     return rows<ProviderRuntimeRow>(result).map(toProviderRuntime)
+  }
+
+  async recordProviderUsage(patch: ProviderUsagePatch): Promise<void> {
+    const calledAt = patch.calledAt ?? new Date().toISOString()
+    const windowStart = `${calledAt.slice(0, 13)}:00:00.000Z`
+    const id = `usage:${patch.providerId}:${patch.capability}:${windowStart}`
+    await this.db.prepare(`
+      INSERT INTO provider_usage (id, provider_id, capability, window_start, request_count, success_count, failure_count, last_called_at, error_code)
+      VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        request_count = provider_usage.request_count + 1,
+        success_count = provider_usage.success_count + excluded.success_count,
+        failure_count = provider_usage.failure_count + excluded.failure_count,
+        last_called_at = excluded.last_called_at,
+        error_code = excluded.error_code
+    `).run(id, patch.providerId, patch.capability, windowStart, patch.succeeded ? 1 : 0, patch.failed ? 1 : 0, calledAt, patch.errorCode ?? null)
   }
 
   async updateProviderRuntime(patch: ProviderRuntimePatch): Promise<ProviderRuntimeRecord> {

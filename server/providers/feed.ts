@@ -4,6 +4,7 @@ import { load } from "cheerio"
 import { type DataProvenance, type FeedCategory, type FeedFreshnessClass, type FeedItem, type Port, type SourceType, isMockProvenance } from "@shared/shipping"
 import { mockFeedItems } from "@shared/shipping-fixtures"
 import { applyFeedFreshnessPolicy } from "@shared/shipping-rules"
+import { providerHttpError } from "#/providers/contracts"
 
 export interface FeedProvider {
   getFeedItems: (lastKnown?: FeedItem[], ports?: Port[]) => Promise<FeedItem[]>
@@ -371,6 +372,7 @@ export interface PublicFeedProviderOptions {
   now?: () => Date
   sources?: ShippingFeedSource[]
   timeoutMs?: number
+  throwOnSourceFailureWithoutLastKnown?: boolean
 }
 
 export const PUBLIC_FEED_TIMEOUT_MS = 10_000
@@ -420,13 +422,14 @@ export function createPublicFeedProvider(options: PublicFeedProviderOptions = {}
         try {
           const parsed = await withFeedSourceTimeout(async (signal) => {
             const response = await fetcher(source.url, { signal })
-            if (!response.ok) throw new Error(`${source.name} request failed (${response.status})`)
+            if (!response.ok) throw providerHttpError(source.name, response.status, `${source.name} request failed (${response.status})`)
             const body = await response.text()
             return source.format === "rss" ? parseFeedRss(body, source, ports, fetchedAt) : parseFeedHtml(body, source, ports, fetchedAt)
           }, timeoutMs, source.name)
           return parsed
         } catch (error) {
           const message = error instanceof Error ? error.message : `${source.name} feed failed`
+          if (options.throwOnSourceFailureWithoutLastKnown && previous.length === 0) throw error
           return previous.map(item => markSourceFailed(item, fetchedAt, message))
         }
       }))
