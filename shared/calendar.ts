@@ -52,6 +52,7 @@ export interface CalendarCoverage {
   sourceId: string
   lastCheckedAt?: string
   error?: string
+  errorCode?: string
 }
 
 export interface CalendarSnapshot {

@@ -51,7 +51,7 @@ describe("shipping snapshot read boundary", () => {
       }
     }
     vi.stubGlobal("useDatabase", () => ({}))
-    vi.doMock("#/database/shipping", () => ({ ShippingRepository: FakeRepository, initShippingTables: async () => ({ schemaVersion: 10, bootstrapCompletedAt: "2026-08-29T00:00:00.000Z" }) }))
+    vi.doMock("#/database/shipping", () => ({ ShippingRepository: FakeRepository, initShippingTables: async () => ({ schemaVersion: 11, bootstrapCompletedAt: "2026-08-29T00:00:00.000Z" }) }))
     vi.doMock("#/providers/shipping", async () => {
       const actual = await vi.importActual<typeof import("#/providers/shipping")>("#/providers/shipping")
       return { ...actual, providers: { ...actual.providers, feed: { getFeedItems: feedCalls } } }

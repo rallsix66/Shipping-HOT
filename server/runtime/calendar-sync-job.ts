@@ -13,7 +13,7 @@ export const CALENDAR_SYNC_CAPABILITY = "calendar_sync" as const
 export interface CalendarSyncJobOptions {
   database: Database
   dataMode: ShippingDataMode
-  providerId: string
+  providerId?: string
   provider?: CalendarProvider
   intervalMs: number
   enabled?: boolean
@@ -28,6 +28,7 @@ export function createCalendarSyncJob(options: CalendarSyncJobOptions): RuntimeJ
   const countries = options.countries ?? Object.keys(calendarCountries) as CalendarCountryCode[]
   const now = options.now ?? (() => new Date())
   const repository = new ShippingRepository(options.database, options.dataMode)
+  const providerId = options.provider?.providerId ?? options.providerId ?? "unavailable"
   const sync = options.sync ?? (async (year, requestedCountries) => {
     if (!options.provider) throw new Error("calendar_provider_missing")
     const result = await options.provider.getEvents({ year, countries: [...requestedCountries] })
@@ -43,20 +44,20 @@ export function createCalendarSyncJob(options: CalendarSyncJobOptions): RuntimeJ
   })
   return {
     id: "calendar-sync",
-    providerId: options.providerId,
+    providerId,
     capability: CALENDAR_SYNC_CAPABILITY,
     intervalMs: options.intervalMs,
     enabled: options.enabled ?? true,
     run: async () => {
       const year = options.year?.() ?? now().getUTCFullYear()
       const result = await sync(year, countries)
-      const failed = result.coverage.filter(item => item.sourceId === options.providerId && (item.status === "unknown" || item.error))
+      const failed = result.coverage.filter(item => item.sourceId === providerId && (item.status === "unknown" || item.error))
       return {
         status: failed.length ? "failed" : "success",
         recordsRead: result.events.length,
         recordsWritten: result.events.length,
         sourceUpdatedAt: result.fetchedAt,
-        errorCode: failed.length ? "calendar_coverage_failed" : undefined,
+        errorCode: failed[0]?.errorCode ?? (failed.length ? "calendar_coverage_failed" : undefined),
         errorMessage: failed.length ? `${failed.length} calendar country sync(s) failed` : undefined,
       }
     },

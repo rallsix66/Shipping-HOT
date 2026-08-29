@@ -38,9 +38,10 @@ function directoryPort(record: { unlocode: string, nameEn: string, nameZh: strin
 export function createPortSyncJob(options: PortSyncJobOptions): RuntimeJob {
   const repository = new ShippingRepository(options.database, options.dataMode)
   const directory = new PortDirectoryRepository(options.database, options.dataMode)
+  const providerId = options.provider.providerId
   return {
     id: "port-sync",
-    providerId: "portcast-public",
+    providerId,
     capability: PORT_INTELLIGENCE_CAPABILITY,
     intervalMs: options.intervalMs,
     enabled: options.enabled ?? true,
@@ -61,7 +62,7 @@ export function createPortSyncJob(options: PortSyncJobOptions): RuntimeJob {
         recordsRead: received.length,
         recordsWritten: received.length,
         sourceUpdatedAt: sourceUpdatedAt === undefined ? undefined : new Date(sourceUpdatedAt).toISOString(),
-        errorCode: failed?.error,
+        errorCode: failed?.errorCode,
         errorMessage: failed?.error,
       }
     },

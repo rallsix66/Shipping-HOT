@@ -1,4 +1,5 @@
 import type { AisPosition, AisTrackingProvider, AisTrackingVessel } from "#/providers/ais/contracts"
+import { ProviderError } from "#/providers/contracts"
 
 export interface AisStreamSocketEvent {
   data: unknown
@@ -46,17 +47,6 @@ const aisStreamEndpoint = "wss://stream.aisstream.io/v0/stream"
 const aisStreamBoundingBoxes = [[[-90, -180], [90, 180]]] as const
 
 export const AISSTREAM_MAX_MMSI_PER_REQUEST = 50
-
-const safeAisStreamErrorCodes = new Set([
-  "aisstream_api_key_missing",
-  "aisstream_auth_failed",
-  "aisstream_connection_closed",
-  "aisstream_rate_limited",
-  "aisstream_subscription_failed",
-  "aisstream_timeout",
-  "aisstream_unavailable",
-  "aisstream_websocket_unavailable",
-])
 
 function socketFromGlobal(endpoint: string): AisStreamSocket {
   const WebSocketCtor = (globalThis as typeof globalThis & { WebSocket?: new (url: string) => unknown }).WebSocket
@@ -155,14 +145,19 @@ export function mapAisStreamPosition(message: AisStreamMessage, fetchedAt: strin
   }
 }
 
-function safeProviderError(error: unknown): Error {
+function safeProviderError(error: unknown): ProviderError {
+  if (error instanceof ProviderError) return error
   const text = errorText(error)?.trim() ?? ""
   const directCode = text.toLowerCase()
-  if (safeAisStreamErrorCodes.has(directCode)) return new Error(directCode)
-  if (/api.?key|auth|credential|unauthori[sz]ed|forbidden|\b401\b|\b403\b/i.test(text)) return new Error("aisstream_auth_failed")
-  if (/rate|limit|quota|\b429\b/i.test(text)) return new Error("aisstream_rate_limited")
-  if (/subscri|filter|bounding|\b400\b/i.test(text)) return new Error("aisstream_subscription_failed")
-  return new Error("aisstream_unavailable")
+  if (directCode === "aisstream_timeout") return new ProviderError("provider_timeout", directCode)
+  if (directCode === "aisstream_api_key_missing" || directCode === "aisstream_auth_failed") return new ProviderError("auth_failed", directCode)
+  if (directCode === "aisstream_rate_limited") return new ProviderError("rate_limited", directCode)
+  if (directCode === "aisstream_subscription_failed") return new ProviderError("provider_contract_changed", directCode)
+  if (directCode === "aisstream_connection_closed" || directCode === "aisstream_unavailable" || directCode === "aisstream_websocket_unavailable") return new ProviderError("provider_unavailable", directCode)
+  if (/api.?key|auth|credential|unauthori[sz]ed|forbidden|\b401\b|\b403\b/i.test(text)) return new ProviderError("auth_failed", "aisstream_auth_failed")
+  if (/rate|limit|quota|\b429\b/i.test(text)) return new ProviderError("rate_limited", "aisstream_rate_limited")
+  if (/subscri|filter|bounding|\b400\b/i.test(text)) return new ProviderError("provider_contract_changed", "aisstream_subscription_failed")
+  return new ProviderError("provider_unavailable", "aisstream_unavailable")
 }
 
 export class AisStreamTrackingProvider implements AisTrackingProvider {

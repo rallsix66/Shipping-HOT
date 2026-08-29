@@ -1,6 +1,7 @@
 import type { Database } from "db0"
 import type { ShippingDataMode } from "#/database/runtime"
 import type { SecretStore } from "#/providers/contracts"
+import { ProviderError } from "#/providers/contracts"
 import type { AisTrackingProvider } from "#/providers/ais/contracts"
 import { createAisStreamTrackingProvider } from "#/providers/ais/aisstream-provider"
 import { createMockAisTrackingProvider } from "#/providers/ais/mock-provider"
@@ -17,13 +18,13 @@ function unavailableAisProvider(providerId: string, error: string): AisTrackingP
   return {
     providerId,
     async subscribe() {
-      throw new Error(error)
+      throw new ProviderError("provider_unavailable", error)
     },
     async unsubscribe() {
-      throw new Error(error)
+      throw new ProviderError("provider_unavailable", error)
     },
     async getLatestPositions() {
-      throw new Error(error)
+      throw new ProviderError("provider_unavailable", error)
     },
   }
 }

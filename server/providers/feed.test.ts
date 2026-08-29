@@ -17,6 +17,7 @@ describe("shipping feed provider", () => {
         throw new Error("feed unavailable")
       },
     })
+    expect(provider.providerId).toBe("the-loadstar")
     expect(await provider.getFeedItems([mock], mockPorts)).toEqual([])
   })
 
@@ -53,7 +54,7 @@ describe("shipping feed provider", () => {
     expect(timeoutSignal).toBeDefined()
     expect(timeoutSignal?.aborted).toBe(true)
     expect(items.some(item => item.sourceId === rssSource.id)).toBe(true)
-    expect(items.find(item => item.id === previous.id)).toMatchObject({ stale: true, sourceStatus: "failed", error: "The Maritime Executive request timed out after 10ms" })
+    expect(items.find(item => item.id === previous.id)).toMatchObject({ stale: true, sourceStatus: "failed", error: "The Maritime Executive request timed out after 10ms", errorCode: "provider_timeout" })
   })
 
   it("aborts a source whose response body stalls and returns no placeholder without previous", async () => {

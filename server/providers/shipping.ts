@@ -9,18 +9,20 @@ import { activeShippingFeedSourceIds, configureFeedProviders } from "./feed"
 import { type WeatherAlertProvider, activeOfficialWeatherAlertSourceIds, createOfficialWeatherAlertProvider, officialWeatherAlertSourceIds } from "./weather-alerts"
 import { aisstreamAreaDerivedProvenance, aisstreamAreaEstimatedProvenance, createAisStreamAreaProvider, createUnavailableAisAreaProvider } from "./aisstream-area"
 import { createRuntimePortDirectoryLookup } from "#/database/port-directory"
-import { providerHttpError } from "#/providers/contracts"
+import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
 
 export interface VesselProvider {
   getVessels: (targets?: VesselWatchTarget[], lastKnown?: Vessel[]) => Promise<Vessel[]>
 }
 export interface PortProvider {
+  readonly providerId: string
   getPorts: (lastKnown?: Port[]) => Promise<Port[]>
 }
 export interface ScheduleProvider {
   getVoyages: () => Promise<Voyage[]>
 }
 export interface WeatherProvider {
+  readonly providerId: string
   getFeedItems: (ports?: Port[], lastKnown?: FeedItem[]) => Promise<FeedItem[]>
 }
 export interface AisAreaProviderResult {
@@ -111,17 +113,18 @@ export const MockVesselProvider: VesselProvider = { async getVessels() {
 export function createUnavailableVesselProvider(error: string): VesselProvider {
   return {
     async getVessels() {
-      throw new Error(error)
+      throw new ProviderError("provider_unavailable", error)
     },
   }
 }
-export const MockPortProvider: PortProvider = { async getPorts() {
+export const MockPortProvider: PortProvider = { providerId: "mock-port", async getPorts() {
   return structuredClone(mockPorts)
 } }
 export function createUnavailablePortProvider(error: string): PortProvider {
   return {
+    providerId: "unavailable",
     async getPorts() {
-      throw new Error(error)
+      throw new ProviderError("provider_unavailable", error)
     },
   }
 }
@@ -131,17 +134,18 @@ export const MockScheduleProvider: ScheduleProvider = { async getVoyages() {
 export function createUnavailableScheduleProvider(error: string): ScheduleProvider {
   return {
     async getVoyages() {
-      throw new Error(error)
+      throw new ProviderError("provider_unavailable", error)
     },
   }
 }
-export const MockWeatherProvider: WeatherProvider = { async getFeedItems() {
+export const MockWeatherProvider: WeatherProvider = { providerId: "mock-weather", async getFeedItems() {
   return structuredClone(mockFeedItems.filter(isWeatherFeedItem))
 } }
 export function createUnavailableWeatherProvider(error: string): WeatherProvider {
   return {
+    providerId: "unavailable",
     async getFeedItems() {
-      throw new Error(error)
+      throw new ProviderError("provider_unavailable", error)
     },
   }
 }
@@ -321,7 +325,7 @@ function reevaluateCachedPortcast(port: Port, evaluatedAt: string): Port {
   return canReevaluatePortcastAge(port) ? { ...port, ...portcastFreshness(port.sourceUpdatedAt, evaluatedAt) } : port
 }
 
-function stalePortcastData(port: Port, url: string | undefined, fetchedAt: string, sourceStatus: "degraded" | "failed", error: string, noPublicData = false): Port {
+function stalePortcastData(port: Port, url: string | undefined, fetchedAt: string, sourceStatus: "degraded" | "failed", error: string, noPublicData = false, errorCode?: string): Port {
   const historical = isPortcastHistory(port)
   const historicalData = historical
     ? {
@@ -345,6 +349,7 @@ function stalePortcastData(port: Port, url: string | undefined, fetchedAt: strin
     stale: true,
     sourceStatus,
     error,
+    errorCode,
   }
 }
 
@@ -352,8 +357,8 @@ function noPublicPortData(port: Port, url: string | undefined, fetchedAt: string
   return stalePortcastData(port, url, fetchedAt, "degraded", "no_public_data", true)
 }
 
-function failedPortcastData(port: Port, url: string | undefined, fetchedAt: string, error: string): Port {
-  return stalePortcastData(port, url, fetchedAt, "failed", error)
+function failedPortcastData(port: Port, url: string | undefined, fetchedAt: string, failure: ProviderError): Port {
+  return stalePortcastData(port, url, fetchedAt, "failed", failure.message, false, failure.code)
 }
 
 interface PortcastCacheEntry {
@@ -368,6 +373,7 @@ export function createPortcastPublicPageProvider(options: PortcastPublicPageProv
   const minIntervalMs = options.minIntervalMs ?? portcastDefaultIntervalMs
   const cache = new Map<string, PortcastCacheEntry>()
   return {
+    providerId: "portcast-public",
     async getPorts(lastKnown = []) {
       const checkedAt = now()
       const evaluatedAt = checkedAt.toISOString()
@@ -385,8 +391,9 @@ export function createPortcastPublicPageProvider(options: PortcastPublicPageProv
           const response = await fetcher(url)
           if (!response.ok) {
             if (response.status === 404 || response.status === 410) return noPublicPortData(port, url, evaluatedAt)
-            const failure = providerHttpError("Portcast public page", response.status, `Portcast public page failed (${response.status})`)
-            return failedPortcastData(port, url, evaluatedAt, failure.message)
+            const body = await response.text().catch(() => "")
+            const failure = providerHttpError("Portcast public page", response.status, `Portcast public page failed (${response.status})`, body)
+            return failedPortcastData(port, url, evaluatedAt, failure)
           }
           const metrics = parsePortcastPublicPage(await response.text())
           const fingerprint = portcastFingerprint(metrics)
@@ -408,7 +415,9 @@ export function createPortcastPublicPageProvider(options: PortcastPublicPageProv
           cache.set(port.id, { checkedAt: checkedAt.getTime(), fingerprint, port: next })
           return next
         } catch (error) {
-          return failedPortcastData(port, url, evaluatedAt, error instanceof Error ? error.message : "Portcast public page parse failed")
+          const message = error instanceof Error ? error.message : "Portcast public page failed"
+          const fallback = /empty|invalid|parse/i.test(message) ? "provider_contract_changed" : "provider_unavailable"
+          return failedPortcastData(port, url, evaluatedAt, providerErrorFromUnknown("Portcast public page", error, fallback))
         }
       }))
     },
@@ -857,10 +866,11 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
   const portDirectory = options.portDirectory ?? createBaselinePortDirectoryLookup()
   const cache = new Map<string, { checkedAt: number, items: FeedItem[] }>()
   return {
+    providerId: "open-meteo-marine",
     async getFeedItems(ports: Port[] = [], lastKnown = []) {
       const checkedAt = now()
       const modelLastKnown = lastKnown.filter(item => item.sourceId === "open-meteo-marine")
-      const failures: string[] = []
+      const failures: ProviderError[] = []
       const results = await Promise.all(ports.map(async (port) => {
         const cached = cache.get(port.id)
         if (cached && checkedAt.getTime() - cached.checkedAt < minIntervalMs) return structuredClone(cached.items)
@@ -869,14 +879,14 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
         try {
           coordinates = port.unlocode ? await portDirectory.getPortCoordinate(port.unlocode) : undefined
         } catch (error) {
-          const message = error instanceof Error ? error.message : "Port Directory coordinate lookup failed"
-          failures.push(message)
-          return previous.map(item => ({ ...item, stale: true, sourceStatus: "failed" as const, error: message, fetchedAt: now().toISOString() }))
+          const failure = providerErrorFromUnknown("Open-Meteo Port Directory", error)
+          failures.push(failure)
+          return previous.map(item => ({ ...item, stale: true, sourceStatus: "failed" as const, error: failure.message, errorCode: failure.code, fetchedAt: now().toISOString() }))
         }
         if (!coordinates) {
-          const message = `Port Directory coordinate unavailable for ${port.unlocode ?? port.id}`
-          failures.push(message)
-          return previous.map(item => ({ ...item, stale: true, sourceStatus: "failed" as const, error: message, fetchedAt: now().toISOString() }))
+          const failure = new ProviderError("provider_unavailable", `Port Directory coordinate unavailable for ${port.unlocode ?? port.id}`)
+          failures.push(failure)
+          return previous.map(item => ({ ...item, stale: true, sourceStatus: "failed" as const, error: failure.message, errorCode: failure.code, fetchedAt: now().toISOString() }))
         }
         const marineUrl = new URL(marineEndpoint)
         marineUrl.searchParams.set("latitude", String(coordinates.latitude))
@@ -896,8 +906,14 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
         weatherUrl.searchParams.set("wind_speed_unit", "kmh")
         try {
           const [marineResponse, weatherResponse] = await Promise.all([fetcher(marineUrl.toString()), fetcher(weatherUrl.toString())])
-          if (!marineResponse.ok) throw providerHttpError("Open-Meteo marine", marineResponse.status, `Open-Meteo marine request failed (${marineResponse.status})`)
-          if (!weatherResponse.ok) throw providerHttpError("Open-Meteo weather", weatherResponse.status, `Open-Meteo weather request failed (${weatherResponse.status})`)
+          if (!marineResponse.ok) {
+            const body = await marineResponse.json().catch(() => undefined)
+            throw providerHttpError("Open-Meteo marine", marineResponse.status, `Open-Meteo marine request failed (${marineResponse.status})`, body)
+          }
+          if (!weatherResponse.ok) {
+            const body = await weatherResponse.json().catch(() => undefined)
+            throw providerHttpError("Open-Meteo weather", weatherResponse.status, `Open-Meteo weather request failed (${weatherResponse.status})`, body)
+          }
           const marinePayload = validWeatherPayload(await marineResponse.json())
           const weatherPayload = validWeatherPayload(await weatherResponse.json())
           const fetchedAt = now().toISOString()
@@ -907,13 +923,15 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
           return items
         } catch (error) {
           const message = error instanceof Error ? error.message : "Open-Meteo port request failed"
+          const fallback = /malformed|invalid/i.test(message) ? "provider_contract_changed" : "provider_unavailable"
+          const failure = providerErrorFromUnknown("Open-Meteo", error, fallback)
           const failureFetchedAt = now().toISOString()
-          failures.push(message)
-          return previous.map(item => ({ ...item, stale: true, sourceStatus: "failed" as const, error: message, fetchedAt: failureFetchedAt }))
+          failures.push(failure)
+          return previous.map(item => ({ ...item, stale: true, sourceStatus: "failed" as const, error: failure.message, errorCode: failure.code, fetchedAt: failureFetchedAt }))
         }
       }))
       const modelItems = results.flat().filter((item): item is FeedItem => item !== undefined)
-      if (failures.length && modelItems.length === 0) throw new Error(failures[0])
+      if (failures.length && modelItems.length === 0) throw failures[0]
       return modelItems
     },
   }

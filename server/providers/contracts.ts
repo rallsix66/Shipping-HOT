@@ -74,6 +74,7 @@ export interface ProviderUsageRecord {
   requestCount: number
   successCount: number
   failureCount: number
+  recordsCount: number
   cacheHitCount: number
   charactersIn?: number
   charactersOut?: number
@@ -101,17 +102,40 @@ export class ProviderError extends Error {
   }
 }
 
-export function providerFailureCode(status: number): ProviderFailureCode {
+function contextText(context?: unknown): string {
+  if (context instanceof Error) return context.message
+  if (typeof context === "string") return context
+  if (context === undefined) return ""
+  try {
+    return JSON.stringify(context)
+  } catch {
+    return String(context)
+  }
+}
+
+export function providerFailureCode(status: number, context?: unknown): ProviderFailureCode {
   if (status === 401) return "auth_failed"
-  if (status === 403) return "entitlement_missing"
+  if (status === 403) {
+    return /feature\s+not\s+available|plan\s+restriction|endpoint\s+entitlement|subscription\s+required|entitlement/i.test(contextText(context))
+      ? "entitlement_missing"
+      : "provider_forbidden"
+  }
   if (status === 429) return "rate_limited"
+  if (status === 408 || status === 504) return "provider_timeout"
   if (status >= 500) return "provider_unavailable"
   return "provider_contract_changed"
 }
 
-export function providerHttpError(provider: string, status: number, message = `${provider} request failed (${status})`): ProviderError {
-  const code = providerFailureCode(status)
+export function providerHttpError(provider: string, status: number, message = `${provider} request failed (${status})`, context?: unknown): ProviderError {
+  const code = providerFailureCode(status, context ?? message)
   return new ProviderError(code, message, status)
+}
+
+export function providerErrorFromUnknown(provider: string, error: unknown, fallback: ProviderFailureCode = "provider_unavailable"): ProviderError {
+  if (error instanceof ProviderError) return error
+  const message = error instanceof Error ? error.message : String(error)
+  const code = /timeout|timed out|ETIMEDOUT|aborted/i.test(message) ? "provider_timeout" : fallback
+  return new ProviderError(code, `${provider}: ${message}`)
 }
 
 export interface ProviderRuntimeRecord {

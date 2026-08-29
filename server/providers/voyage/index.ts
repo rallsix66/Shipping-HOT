@@ -3,12 +3,13 @@ import type { ShippingDataMode } from "#/database/runtime"
 import { PortDirectoryRepository } from "#/database/port-directory"
 import type { VoyageProvider } from "#/providers/voyage/contracts"
 import { createMockVoyageProvider } from "#/providers/voyage/mock-provider"
+import { ProviderError } from "#/providers/contracts"
 
 function unavailableVoyageProvider(providerId: string, error: string): VoyageProvider {
   return {
     providerId,
     async getVoyages() {
-      throw new Error(error)
+      throw new ProviderError("provider_unavailable", error)
     },
   }
 }

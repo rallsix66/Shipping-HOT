@@ -2,7 +2,7 @@ import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
 import { initShippingTables } from "#/database/shipping"
-import { type RuntimeReadinessStatus, type V3ToolchainObservation, approvedRuntimeJobKeys, readV3PackageManagerObservation, readV3Readiness, readV3ToolchainChecks } from "#/services/v3-readiness"
+import { type RuntimeReadinessStatus, type V3ToolchainObservation, aggregateRuntimeReadiness, approvedRuntimeJobKeys, readV3PackageManagerObservation, readV3Readiness, readV3ToolchainChecks } from "#/services/v3-readiness"
 
 function createNativeDatabase() {
   const native = new NativeDatabase(":memory:")
@@ -118,5 +118,43 @@ describe("v3 readiness", () => {
     const report = await readiness(validRuntime(), { toolchain })
     expect(report.ready).toBe(false)
     expect(report.checks.find(check => check.id === "better-sqlite3")).toMatchObject({ status: "fail" })
+  })
+
+  it("aggregates every Feed source instead of letting the last source overwrite the first", () => {
+    const source = (id: string, status: string, enabled = true) => ({ id, providerId: id, capability: "feed_sync", enabled, status })
+    expect(aggregateRuntimeReadiness([source("the-loadstar", "failed"), source("shekou-official", "healthy")])).toBe("degraded")
+    expect(aggregateRuntimeReadiness([source("the-loadstar", "healthy"), source("shekou-official", "healthy")])).toBe("healthy")
+    expect(aggregateRuntimeReadiness([source("the-loadstar", "failed"), source("shekou-official", "failed")])).toBe("failed")
+    expect(aggregateRuntimeReadiness([source("the-loadstar", "never_succeeded"), source("shekou-official", "never_succeeded")])).toBe("never_succeeded")
+  })
+
+  it("retains source-level Feed state in the Readiness capability", async () => {
+    const previous = process.env.SHIPPING_FEED_PROVIDER
+    process.env.SHIPPING_FEED_PROVIDER = "public"
+    try {
+      const { database, native } = createNativeDatabase()
+      await initShippingTables(database, "real")
+      const jobs = approvedRuntimeJobKeys("real").map((key) => {
+        const separator = key.lastIndexOf(":")
+        const id = key.slice(0, separator)
+        const capability = key.slice(separator + 1)
+        return { id, providerId: id.startsWith("feed-sync:") ? id.slice("feed-sync:".length) : id, capability, enabled: true, status: "healthy" }
+      })
+      const feedJobs = jobs.filter(job => job.capability === "feed_sync")
+      feedJobs[0].status = "failed"
+      feedJobs[1].status = "healthy"
+      const report = await readV3Readiness(database, {
+        dataMode: "real",
+        profile: "REAL_OPERATIONAL",
+        runtime: { running: true, jobs },
+        toolchain: { packageManager: "pnpm@10.30.3", betterSqlite3Version: "12.6.2", betterSqlite3LoadError: undefined },
+      })
+      const feed = report.capabilities.find(capability => capability.capability === "feed")
+      expect(feed).toMatchObject({ runtime: "degraded", sources: [expect.objectContaining({ runtime: "failed" }), expect.objectContaining({ runtime: "healthy" })] })
+      native.close()
+    } finally {
+      if (previous === undefined) delete process.env.SHIPPING_FEED_PROVIDER
+      else process.env.SHIPPING_FEED_PROVIDER = previous
+    }
   })
 })

@@ -4,7 +4,7 @@
 
 Real Mode currently has no implemented real Voyage/ETA adapter. The Runtime registry therefore exposes `voyage-sync` with the existing Mock provider disabled when Real Mode is selected. `VESSELAPI_API_KEY` is not configured in the local environment.
 
-This is a credential/adapter gap, not an entitlement result: no VesselAPI ETA or Port Events request was made, and no endpoint availability or plan capability is inferred. VesselAPI Search/Discovery and Voyage/ETA are separate capability contracts.
+This is a credential/adapter gap, not an entitlement result: no VesselAPI ETA or Port Events request was made, and no endpoint availability or plan capability is inferred. VesselAPI ETA entitlement is **not verified**, not `entitlement_missing`. VesselAPI Search/Discovery and Voyage/ETA are separate capability contracts.
 
 Current consequences:
 

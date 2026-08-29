@@ -93,7 +93,10 @@ export function createVesselApiSearchProvider(options: VesselApiSearchProviderOp
       const response = await fetcher(url.toString(), {
         headers: { Accept: "application/json", Authorization: `Bearer ${options.apiKey}` },
       })
-      if (!response.ok) throw providerHttpError("VesselAPI", response.status, `VesselAPI search failed (${response.status})`)
+      if (!response.ok) {
+        const body = await response.json().catch(() => undefined)
+        throw providerHttpError("VesselAPI", response.status, `VesselAPI search failed (${response.status})`, body)
+      }
       const fetchedAt = new Date().toISOString()
       return responseRecords(await response.json())
         .map(record => normalizeVesselApiRecord(record, fetchedAt))

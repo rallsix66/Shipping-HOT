@@ -15,7 +15,7 @@ describe("open-meteo weather intelligence", () => {
   it("does not return Mock Weather as Open-Meteo first-failure last-known", async () => {
     const mockWeather = mockFeedItems.find(item => item.sourceId === "mock-weather")!
     const provider = createOpenMeteoWeatherProvider({ fetcher: async () => ({ ok: false, status: 503, json: async () => ({}) }) })
-    await expect(provider.getFeedItems([mockPorts[0]], [mockWeather])).rejects.toThrow("Open-Meteo marine request failed (503)")
+    await expect(provider.getFeedItems([mockPorts[0]], [mockWeather])).rejects.toMatchObject({ code: "provider_unavailable" })
   })
 
   it("normalizes independent 24-hour, 72-hour and 7-day windows with directions", async () => {

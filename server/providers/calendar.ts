@@ -1,9 +1,10 @@
 import { env } from "node:process"
 import type { DataEvidence, DataProvenance } from "@shared/shipping"
 import { type BusinessImpact, type CalendarCountryCode, type CalendarCoverage, type CalendarCoverageStatus, type CalendarEvent, type CalendarEventScope, type CalendarEventType, type CalendarProviderResult, type CalendarQuery, type CalendarSourceKind, calendarCountries, calendarEventId, calendarEventKey, calendarSeverity } from "@shared/calendar"
-import { providerHttpError } from "#/providers/contracts"
+import { providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
 
 export interface CalendarProvider {
+  readonly providerId: string
   getEvents: (query: CalendarQuery) => Promise<CalendarProviderResult>
 }
 
@@ -323,6 +324,7 @@ export function createCalendarificProvider(options: CalendarificProviderOptions)
   const fetcher = options.fetcher ?? calendarFetcher()
   const now = options.now ?? (() => new Date())
   return {
+    providerId: "calendarific",
     async getEvents(query) {
       const fetchedAt = now().toISOString()
       const events: CalendarEvent[] = []
@@ -334,13 +336,17 @@ export function createCalendarificProvider(options: CalendarificProviderOptions)
         url.searchParams.set("year", String(query.year))
         try {
           const response = await fetcher(url.toString())
-          if (!response.ok) throw providerHttpError("Calendarific", response.status, `Calendarific request failed (${response.status})`)
+          if (!response.ok) {
+            const body = await response.json().catch(() => undefined)
+            throw providerHttpError("Calendarific", response.status, `Calendarific request failed (${response.status})`, body)
+          }
           const payload = await response.json()
           const countryEvents = normalizeCalendarificPayload(payload, countryCode, query.year, fetchedAt)
           events.push(...countryEvents)
           coverage.push({ countryCode, year: query.year, status: calendarificCoverageStatus(payload, countryEvents.length), sourceId: "calendarific", lastCheckedAt: fetchedAt })
         } catch (error) {
-          coverage.push({ countryCode, year: query.year, status: "unknown", sourceId: "calendarific", lastCheckedAt: fetchedAt, error: sanitizeCalendarError(error) })
+          const failure = providerErrorFromUnknown("Calendarific", error, "provider_contract_changed")
+          coverage.push({ countryCode, year: query.year, status: "unknown", sourceId: "calendarific", lastCheckedAt: fetchedAt, error: sanitizeCalendarError(failure), errorCode: failure.code })
         }
       }
       return { events, coverage, fetchedAt }
@@ -376,7 +382,7 @@ export interface OfficialHolidayProviderOptions {
 }
 
 export function createOfficialHolidayProvider(options: OfficialHolidayProviderOptions = {}): CalendarProvider {
-  return { getEvents: async query => scopedEvents(options, query, "official-holiday-source") }
+  return { providerId: "official", getEvents: async query => scopedEvents(options, query, "official-holiday-source") }
 }
 
 export interface ManualHolidayProviderOptions {
@@ -385,7 +391,7 @@ export interface ManualHolidayProviderOptions {
 }
 
 export function createManualHolidayProvider(options: ManualHolidayProviderOptions = {}): CalendarProvider {
-  return { getEvents: async query => scopedEvents(options, query, "manual-holiday") }
+  return { providerId: "manual", getEvents: async query => scopedEvents(options, query, "manual-holiday") }
 }
 
 function mockDate(year: number, month: number, day: number): string {
@@ -401,6 +407,7 @@ export function createMockCalendarEvents(year: number, now = new Date().toISOStr
 
 export function createMockCalendarProvider(now = () => new Date()): CalendarProvider {
   return {
+    providerId: "mock-calendar",
     async getEvents(query) {
       const fetchedAt = now().toISOString()
       const events = createMockCalendarEvents(query.year, fetchedAt).filter(event => query.countries.includes(event.countryCode))
@@ -415,11 +422,12 @@ export function createMockCalendarProvider(now = () => new Date()): CalendarProv
 
 export function createUnavailableCalendarProvider(sourceId: string, error: string, now = () => new Date()): CalendarProvider {
   return {
+    providerId: "unavailable",
     async getEvents(query) {
       const fetchedAt = now().toISOString()
       return {
         events: [],
-        coverage: query.countries.map(countryCode => ({ countryCode, year: query.year, status: "unknown" as const, sourceId, lastCheckedAt: fetchedAt, error })),
+        coverage: query.countries.map(countryCode => ({ countryCode, year: query.year, status: "unknown" as const, sourceId, lastCheckedAt: fetchedAt, error, errorCode: "provider_unavailable" })),
         fetchedAt,
       }
     },
@@ -476,6 +484,7 @@ export function createCompositeCalendarProvider(options: CompositeCalendarProvid
   ]
   const sources = sourceOptions.filter((value): value is { sourceId: string, provider: CalendarProvider } => value !== undefined)
   return {
+    providerId: sources[0]?.provider.providerId ?? "unavailable",
     async getEvents(query) {
       const fetchedAt = new Date().toISOString()
       const results = await Promise.all(sources.map(async (source) => {
@@ -484,7 +493,7 @@ export function createCompositeCalendarProvider(options: CompositeCalendarProvid
         } catch (error) {
           return {
             events: [] as CalendarEvent[],
-            coverage: query.countries.map(countryCode => ({ countryCode, year: query.year, status: "unknown" as const, sourceId: source.sourceId, lastCheckedAt: fetchedAt, error: sanitizeCalendarError(error) })),
+            coverage: query.countries.map(countryCode => ({ countryCode, year: query.year, status: "unknown" as const, sourceId: source.sourceId, lastCheckedAt: fetchedAt, error: sanitizeCalendarError(error), errorCode: providerErrorFromUnknown(source.sourceId, error, "provider_unavailable").code })),
             fetchedAt,
           }
         }
@@ -594,7 +603,7 @@ export function configureCalendarProviders(environment: { [key: string]: string 
   const provider = mode === "mock"
     ? createMockCalendarProvider()
     : mode === "unavailable"
-      ? createUnavailableCalendarProvider("calendar", "Real Calendar provider not configured")
+      ? createUnavailableCalendarProvider("unavailable", "Real Calendar provider not configured")
       : createCompositeCalendarProvider(selected)
   const calendarSourceIds = mode === "mock"
     ? [calendarProviderSourceIds.mock]

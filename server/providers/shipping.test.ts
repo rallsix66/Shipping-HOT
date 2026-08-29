@@ -69,6 +69,7 @@ describe("shipping Provider failure boundaries", () => {
         return { ok: true, status: 200, text: async () => html }
       },
     })
+    expect(provider.providerId).toBe("portcast-public")
     const first = await provider.getPorts([mockPorts[0]])
     expect(first[0]).toMatchObject({ congestionLevel: "medium", waitingHours: 14.879999999999999, updatedAt: "2026-08-01T00:00:00.000Z", sourceUpdatedAt: "2026-08-01T00:00:00.000Z", fetchedAt: "2026-08-15T00:00:00.000Z", stale: false, sourceStatus: "healthy", provenance: { ...providerProvenances.portcastPublic, sourceUrl: portcastPublicPageUrls["port-shekou"] } })
     expect(first[0].waitingVessels).toBeUndefined()
@@ -118,7 +119,7 @@ describe("shipping Provider failure boundaries", () => {
     const [failed] = await failedProvider.getPorts([mockPorts[0]])
     now = new Date("2026-08-18T01:00:00.000Z")
     const [failedCached] = await failedProvider.getPorts([failed])
-    expect(failedCached).toMatchObject({ sourceStatus: "failed", stale: true, error: "Portcast public page failed (503)" })
+    expect(failedCached).toMatchObject({ sourceStatus: "failed", stale: true, error: "Portcast public page failed (503)", errorCode: "provider_unavailable" })
 
     now = new Date("2026-08-18T00:00:00.000Z")
     const noPublicProvider = createPortcastPublicPageProvider({ now: () => now, fetcher: async () => ({ ok: false, status: 404, text: async () => "" }) })
@@ -181,7 +182,7 @@ describe("shipping Provider failure boundaries", () => {
     expect(failed[0]).toMatchObject({ id: mockPorts[0].id, stale: true, sourceStatus: "failed", provenance: { sourceType: "third_party", sourceId: "portcast-public" } })
     expect(failed[0].congestionLevel).toBeUndefined()
     expect(failed[0].waitingHours).toBeUndefined()
-    expect(failed[0].error).toContain("empty or invalid")
+    expect(failed[0]).toMatchObject({ error: expect.stringContaining("empty or invalid"), errorCode: "provider_contract_changed" })
   })
 
   it("keeps only real Portcast dynamic last-known values after a later failure", async () => {
@@ -298,6 +299,7 @@ describe("shipping Provider failure boundaries", () => {
     const modelWeather = mockFeedItems.find(item => item.sourceId === "mock-weather")!
     const officialAlert = { ...modelWeather, id: "weather-alert:jma:test", sourceId: "jma" }
     const modelFailure = {
+      providerId: "mock-weather",
       getFeedItems: async () => {
         throw new Error("model unavailable")
       },
@@ -307,7 +309,7 @@ describe("shipping Provider failure boundaries", () => {
     expect(failedModel.status).toBe("rejected")
     expect(successfulAlert).toMatchObject({ status: "fulfilled", value: [expect.objectContaining({ sourceId: "jma" })] })
 
-    const modelSuccess = { getFeedItems: async () => [modelWeather] }
+    const modelSuccess = { providerId: "mock-weather", getFeedItems: async () => [modelWeather] }
     const alertFailure = {
       getFeedItems: async () => {
         throw new Error("alerts unavailable")
@@ -551,6 +553,7 @@ describe("shipping Provider failure boundaries", () => {
       },
     })
     const provider = createOpenMeteoWeatherProvider({ fetcher, now: () => new Date("2026-08-13T10:00:00.000Z") })
+    expect(provider.providerId).toBe("open-meteo-marine")
     const warning = await provider.getFeedItems([mockPorts[0]])
     expect(warning[0]).toMatchObject({ severity: "warning", relatedPortIds: ["port-shekou"], sourceStatus: "healthy", updatedAt: "2026-08-13T09:00:00.000Z", sourceUpdatedAt: undefined, fetchedAt: "2026-08-13T10:00:00.000Z", provenance: providerProvenances.openMeteo })
     expect(Object.keys(warning[0].weather?.windows ?? {})).toEqual(["h24", "h72", "d7"])
@@ -602,7 +605,7 @@ describe("shipping Provider failure boundaries", () => {
         return {}
       },
     }) })
-    await expect(malformed.getFeedItems([mockPorts[0]])).rejects.toThrow("malformed")
+    await expect(malformed.getFeedItems([mockPorts[0]])).rejects.toMatchObject({ code: "provider_contract_changed" })
     const failed = createOpenMeteoWeatherProvider({ fetcher: async () => ({
       ok: false,
       status: 503,
@@ -610,7 +613,7 @@ describe("shipping Provider failure boundaries", () => {
         return {}
       },
     }) })
-    await expect(failed.getFeedItems([mockPorts[0]])).rejects.toThrow("503")
+    await expect(failed.getFeedItems([mockPorts[0]])).rejects.toMatchObject({ code: "provider_unavailable" })
   })
 
   it("feeds normalized real vessel and weather signals into the existing Event/HOT pipeline", async () => {

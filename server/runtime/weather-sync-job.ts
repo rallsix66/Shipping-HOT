@@ -18,19 +18,20 @@ export interface WeatherSyncJobOptions {
 export function createWeatherSyncJob(options: WeatherSyncJobOptions): RuntimeJob {
   const repository = new ShippingRepository(options.database, options.dataMode)
   const now = options.now ?? (() => new Date())
+  const providerId = options.provider.providerId
   return {
     id: "weather-sync",
-    providerId: "open-meteo-marine",
+    providerId,
     capability: WEATHER_SYNC_CAPABILITY,
     intervalMs: options.intervalMs,
     enabled: options.enabled ?? true,
     run: async () => {
       const fetchedAt = now()
       const ports = await repository.listPorts()
-      const previous = (await repository.listFeedItems({ now: fetchedAt, view: "all" })).filter(item => item.sourceId === "open-meteo-marine")
+      const previous = (await repository.listFeedItems({ now: fetchedAt, view: "all" })).filter(item => item.sourceId === providerId)
       const received = await options.provider.getFeedItems(ports, previous)
       const retainedIds = new Set(received.map(item => item.id))
-      const archived = await repository.archiveFeedItemsNotIn(["open-meteo-marine"], retainedIds, fetchedAt)
+      const archived = await repository.archiveFeedItemsNotIn([providerId], retainedIds, fetchedAt)
       for (const item of received) await repository.upsertFeedItem(item)
       const failed = received.find(item => item.sourceStatus === "failed")
       const sourceUpdatedAt = received
@@ -42,7 +43,7 @@ export function createWeatherSyncJob(options: WeatherSyncJobOptions): RuntimeJob
         recordsRead: received.length,
         recordsWritten: received.length + archived,
         sourceUpdatedAt: sourceUpdatedAt === undefined ? undefined : new Date(sourceUpdatedAt).toISOString(),
-        errorCode: failed?.error,
+        errorCode: failed?.errorCode,
         errorMessage: failed?.error,
       }
     },

@@ -177,15 +177,16 @@ export class RuntimeRepository {
     const windowStart = `${calledAt.slice(0, 13)}:00:00.000Z`
     const id = `usage:${patch.providerId}:${patch.capability}:${windowStart}`
     await this.db.prepare(`
-      INSERT INTO provider_usage (id, provider_id, capability, window_start, request_count, success_count, failure_count, last_called_at, error_code)
-      VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?)
+      INSERT INTO provider_usage (id, provider_id, capability, window_start, request_count, success_count, failure_count, records_count, last_called_at, error_code)
+      VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         request_count = provider_usage.request_count + 1,
         success_count = provider_usage.success_count + excluded.success_count,
         failure_count = provider_usage.failure_count + excluded.failure_count,
+        records_count = provider_usage.records_count + excluded.records_count,
         last_called_at = excluded.last_called_at,
         error_code = excluded.error_code
-    `).run(id, patch.providerId, patch.capability, windowStart, patch.succeeded ? 1 : 0, patch.failed ? 1 : 0, calledAt, patch.errorCode ?? null)
+    `).run(id, patch.providerId, patch.capability, windowStart, patch.succeeded ? 1 : 0, patch.failed ? 1 : 0, patch.records ?? 0, calledAt, patch.errorCode ?? null)
   }
 
   async updateProviderRuntime(patch: ProviderRuntimePatch): Promise<ProviderRuntimeRecord> {

@@ -54,6 +54,7 @@ export interface RuntimeReadinessJob {
   lastSuccessAt?: string
   lastSourceUpdatedAt?: string
   nextSyncAt?: string
+  errorCode?: string
 }
 
 export interface RuntimeReadinessStatus {
@@ -92,6 +93,17 @@ export interface CapabilityReadiness {
   freshness: "fresh" | "stale" | "unknown"
   liveVerification: "verified_live" | "connection_verified" | "coverage_pending" | "not_verified"
   status: CapabilityReadinessStatus
+  sources?: ReadinessSource[]
+}
+
+export interface ReadinessSource {
+  id: string
+  provider: string
+  runtime: CapabilityReadiness["runtime"]
+  enabled: boolean
+  lastSuccessAt?: string
+  lastSourceUpdatedAt?: string
+  errorCode?: string
 }
 
 export interface V3ReadinessOptions {
@@ -112,9 +124,10 @@ function requestedValue(name: string, fallback: string): string {
 
 function providerBoundaryCheck(profile: ReadinessProfile, dataMode: ShippingDataMode): ReadinessCheck {
   if (profile === "REAL_OPERATIONAL") {
+    const effectiveAisProvider = configuredValue("SHIPPING_AIS_PROVIDER") ?? configuredValue("SHIPPING_VESSEL_PROVIDER")
     const values = [
       ["SHIPPING_DATA_MODE", process.env.SHIPPING_DATA_MODE?.trim().toLowerCase(), ["real"]],
-      ["SHIPPING_VESSEL_PROVIDER", process.env.SHIPPING_VESSEL_PROVIDER?.trim().toLowerCase(), ["aisstream"]],
+      ["SHIPPING_AIS_PROVIDER", effectiveAisProvider, ["aisstream"]],
       ["SHIPPING_VESSEL_SEARCH_PROVIDER", process.env.SHIPPING_VESSEL_SEARCH_PROVIDER?.trim().toLowerCase(), ["vesselapi"]],
       ["SHIPPING_PORT_PROVIDER", process.env.SHIPPING_PORT_PROVIDER?.trim().toLowerCase(), ["portcast"]],
       ["SHIPPING_WEATHER_PROVIDER", process.env.SHIPPING_WEATHER_PROVIDER?.trim().toLowerCase(), ["open-meteo"]],
@@ -295,12 +308,31 @@ function configuredValue(name: string): string | undefined {
   return value || undefined
 }
 
+function runtimeState(job: RuntimeReadinessJob): CapabilityReadiness["runtime"] {
+  if (!job.enabled) return "disabled"
+  return job.status === "healthy" || job.status === "degraded" || job.status === "failed" ? job.status : "never_succeeded"
+}
+
+export function aggregateRuntimeReadiness(jobs: RuntimeReadinessJob[]): CapabilityReadiness["runtime"] {
+  if (!jobs.length) return "not_registered"
+  const states = jobs.map(runtimeState)
+  if (states.every(state => state === "disabled")) return "disabled"
+  if (states.includes("disabled")) return "degraded"
+  if (states.every(state => state === "healthy")) return "healthy"
+  if (states.every(state => state === "failed")) return "failed"
+  if (states.every(state => state === "never_succeeded")) return "never_succeeded"
+  if (states.includes("healthy")) return "degraded"
+  if (states.includes("degraded")) return "degraded"
+  return "degraded"
+}
+
 function configuredAisProvider(): string | undefined {
   return configuredValue("SHIPPING_AIS_PROVIDER") ?? configuredValue("SHIPPING_VESSEL_PROVIDER")
 }
 
 function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadinessStatus | undefined): CapabilityReadiness[] {
-  const runtimeByCapability = new Map((runtime?.jobs ?? []).map(job => [job.capability, job]))
+  const runtimeByCapability = new Map<string, RuntimeReadinessJob[]>()
+  for (const job of runtime?.jobs ?? []) runtimeByCapability.set(job.capability, [...(runtimeByCapability.get(job.capability) ?? []), job])
   const safe = profile === "DEVELOPMENT_SAFE"
   const definitions: Array<{ capability: string, provider: string, configured: boolean, credential: CapabilityReadiness["credential"], status: CapabilityReadinessStatus, liveVerification?: CapabilityReadiness["liveVerification"] }> = safe
     ? [
@@ -323,7 +355,7 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
         { capability: "weather_alerts", provider: configuredValue("SHIPPING_WEATHER_ALERT_PROVIDER") ?? "off", configured: configuredValue("SHIPPING_WEATHER_ALERT_PROVIDER") === "public", credential: "not_required", status: configuredValue("SHIPPING_WEATHER_ALERT_PROVIDER") === "public" ? "coverage_pending" : "not_configured" },
         { capability: "feed", provider: configuredValue("SHIPPING_FEED_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_FEED_PROVIDER") === "public", credential: "not_required", status: configuredValue("SHIPPING_FEED_PROVIDER") === "public" ? "coverage_pending" : "not_configured" },
         { capability: "calendar", provider: configuredValue("SHIPPING_CALENDAR_PROVIDER") ?? "unavailable", configured: Boolean(configuredValue("SHIPPING_CALENDAR_PROVIDER")), credential: configuredValue("CALENDARIFIC_API_KEY") ? "available" : "missing", status: configuredValue("SHIPPING_CALENDAR_PROVIDER") === "calendarific" && configuredValue("CALENDARIFIC_API_KEY") ? "coverage_pending" : configuredValue("SHIPPING_CALENDAR_PROVIDER") === "calendarific" ? "credential_missing" : "not_configured" },
-        { capability: "voyage_eta", provider: configuredValue("SHIPPING_VOYAGE_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_VOYAGE_PROVIDER") === "vesselapi", credential: configuredValue("VESSELAPI_API_KEY") ? "available" : "missing", status: configuredValue("VESSELAPI_API_KEY") ? "entitlement_missing" : "credential_missing" },
+        { capability: "voyage_eta", provider: configuredValue("SHIPPING_VOYAGE_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_VOYAGE_PROVIDER") === "vesselapi", credential: configuredValue("VESSELAPI_API_KEY") ? "available" : "missing", status: configuredValue("VESSELAPI_API_KEY") ? "coverage_pending" : "credential_missing" },
       ]
   return definitions.map((definition) => {
     const runtimeCapability = definition.capability === "voyage_eta"
@@ -337,10 +369,18 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
             : definition.capability === "weather"
               ? "weather_sync"
               : definition.capability
-    const job = runtimeByCapability.get(runtimeCapability)
-    const runtimeState = job ? (job.enabled ? (job.status === "healthy" || job.status === "degraded" || job.status === "failed" ? job.status : "never_succeeded") : "disabled") : "not_registered"
-    const freshness = job?.lastSourceUpdatedAt ? (Date.parse(job.lastSourceUpdatedAt) > Date.now() - 24 * 60 * 60 * 1000 ? "fresh" : "stale") : "unknown"
-    return { ...definition, runtime: runtimeState, lastSuccessAt: job?.lastSuccessAt, lastSourceUpdatedAt: job?.lastSourceUpdatedAt, freshness, liveVerification: definition.liveVerification ?? (safe ? "not_verified" : "coverage_pending") }
+    const jobs = runtimeByCapability.get(runtimeCapability) ?? []
+    const job = jobs[0]
+    const aggregatedRuntime = aggregateRuntimeReadiness(jobs)
+    const sourceDetails = runtimeCapability === "feed_sync"
+      ? jobs.map(source => ({ id: source.id, provider: source.providerId, runtime: runtimeState(source), enabled: source.enabled, lastSuccessAt: source.lastSuccessAt, lastSourceUpdatedAt: source.lastSourceUpdatedAt, errorCode: source.errorCode }))
+      : undefined
+    const freshness = jobs.some(item => item.lastSourceUpdatedAt && Date.parse(item.lastSourceUpdatedAt) > Date.now() - 24 * 60 * 60 * 1000)
+      ? "fresh"
+      : jobs.some(item => item.lastSourceUpdatedAt)
+        ? "stale"
+        : "unknown"
+    return { ...definition, runtime: aggregatedRuntime, lastSuccessAt: job?.lastSuccessAt, lastSourceUpdatedAt: job?.lastSourceUpdatedAt, freshness, liveVerification: definition.liveVerification ?? (safe ? "not_verified" : "coverage_pending"), ...(sourceDetails ? { sources: sourceDetails } : {}) }
   })
 }
 

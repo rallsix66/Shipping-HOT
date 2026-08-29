@@ -48,10 +48,11 @@ export function createFeedSyncJob(options: FeedSyncJobOptions): RuntimeJob {
   const repository = new ShippingRepository(options.database, options.dataMode)
   const now = options.now ?? (() => new Date())
   const sourceId = options.source.id
+  const providerId = options.provider.providerId
   const context = createOperationalSourceContext({ ...providerModes, dataMode: options.dataMode })
   return {
     id: `feed-sync:${sourceId}`,
-    providerId: sourceId,
+    providerId,
     capability: FEED_SYNC_CAPABILITY,
     intervalMs: options.intervalMs,
     enabled: options.enabled ?? true,
@@ -77,7 +78,7 @@ export function createFeedSyncJob(options: FeedSyncJobOptions): RuntimeJob {
         recordsRead: received.length,
         recordsWritten: received.length + archived,
         sourceUpdatedAt: sourceUpdatedAt === undefined ? undefined : new Date(sourceUpdatedAt).toISOString(),
-        errorCode: failed ? "feed_source_failed" : undefined,
+        errorCode: failed?.errorCode,
         errorMessage: failed?.error,
       }
     },

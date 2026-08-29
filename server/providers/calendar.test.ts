@@ -124,6 +124,7 @@ describe("calendar providers", () => {
         return { ok: true, status: 200, json: async () => ({ response: { holidays: [] } }) }
       },
     })
+    expect(provider.providerId).toBe("calendarific")
     const result = await provider.getEvents({ year: 2026, countries: ["TH"] })
     expect(requestedUrl).toContain("api_key=secret-calendarific-key")
     expect(result.events).toEqual([])
@@ -182,9 +183,9 @@ describe("calendar providers", () => {
   it("combines Calendarific, Official and Manual providers", async () => {
     const event = createMockCalendarEvents(2026, "2026-08-15T00:00:00.000Z")[0]
     const provider = createCompositeCalendarProvider({
-      calendarific: { getEvents: async () => ({ events: [event], coverage: [{ countryCode: "TH", year: 2026, status: "partial", sourceId: "calendarific" }], fetchedAt: "2026-08-15T00:00:00.000Z" }) },
-      official: { getEvents: async () => ({ events: [{ ...event, sourceId: "official-holiday-source", sourceKind: "official", verified: true, provenance: calendarProvenances.official }], coverage: [{ countryCode: "TH", year: 2026, status: "partial", sourceId: "official-holiday-source" }], fetchedAt: "2026-08-15T00:00:00.000Z" }) },
-      manual: { getEvents: async () => ({ events: [], coverage: [{ countryCode: "TH", year: 2026, status: "unknown", sourceId: "manual-holiday" }], fetchedAt: "2026-08-15T00:00:00.000Z" }) },
+      calendarific: { providerId: "calendarific", getEvents: async () => ({ events: [event], coverage: [{ countryCode: "TH", year: 2026, status: "partial", sourceId: "calendarific" }], fetchedAt: "2026-08-15T00:00:00.000Z" }) },
+      official: { providerId: "official", getEvents: async () => ({ events: [{ ...event, sourceId: "official-holiday-source", sourceKind: "official", verified: true, provenance: calendarProvenances.official }], coverage: [{ countryCode: "TH", year: 2026, status: "partial", sourceId: "official-holiday-source" }], fetchedAt: "2026-08-15T00:00:00.000Z" }) },
+      manual: { providerId: "manual", getEvents: async () => ({ events: [], coverage: [{ countryCode: "TH", year: 2026, status: "unknown", sourceId: "manual-holiday" }], fetchedAt: "2026-08-15T00:00:00.000Z" }) },
     })
     const result = await provider.getEvents({ year: 2026, countries: ["TH"] })
     expect(result.events).toHaveLength(2)

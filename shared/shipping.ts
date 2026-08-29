@@ -35,6 +35,7 @@ export interface Freshness {
   stale: boolean
   sourceStatus: SourceStatus
   error?: string
+  errorCode?: string
 }
 
 export interface ProvenanceAware {

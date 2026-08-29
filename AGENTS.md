@@ -2,7 +2,7 @@
 
 ## Project
 
-- Current codebase: NewsNow foundation with a local Shipping HOT implementation and explicit V3 Readiness gate on the fixed Node `24.15.0` / ABI `137` toolchain (`better-sqlite3@12.6.2`, `.data/shipping-hot-v3.sqlite3`).
+- Current codebase: NewsNow foundation with a local Shipping HOT implementation and explicit V3 Readiness gate on the fixed Node `24.15.0` / ABI `137` toolchain (`better-sqlite3@12.6.2`, schema v11, `.data/shipping-hot-v3.sqlite3`). Real activation uses an actual eight-table zero-Mock SQL/Repository scan; `provider_usage.request_count` is a capability sync invocation count and `records_count` is persisted normalized-record count.
 - Shipping HOT Mock, approved V1 real-provider flows, V2.2–V2.5 local flows, and accepted V3 phases P0 Persistence, P1A Port Directory Foundation, P1B Mock Isolation, P2A Search Foundation, P2B Identity Seal, P2C Background Runtime Foundation, P3A AIS Tracking Runtime Foundation, P3B Voyage / ETA Foundation, P3 Feed Freshness Batch 1 and the controlled Feed/Calendar/Port/Weather Runtime activation slice are implemented and locally verified where stated in `docs/status.md`. Real Operational Readiness remains blocked by missing real Voyage/ETA capability, pending AIS observation and pending official weather-alert coverage; Translation and later business stages remain deferred until separately approved.
 
 ## Commands

@@ -9,7 +9,6 @@ import { createVoyageProviderForDatabase } from "#/providers/voyage"
 import { createVoyageSyncJob } from "#/runtime/voyage-sync-job"
 import { MockFeedProvider, activeShippingFeedSourceIds, createPublicFeedProvider, shippingFeedSources } from "#/providers/feed"
 import { createFeedSyncJob } from "#/runtime/feed-sync-job"
-import { calendarProviderModes } from "#/providers/calendar"
 import { createCalendarSyncJob } from "#/runtime/calendar-sync-job"
 import { createPortSyncJob } from "#/runtime/port-sync-job"
 import { createWeatherSyncJob } from "#/runtime/weather-sync-job"
@@ -89,11 +88,9 @@ function feedJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
 }
 
 function calendarJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
-  const providerId = calendarProviderModes.calendar === "unavailable" ? "calendar" : calendarProviderModes.calendar
   return [createCalendarSyncJob({
     database: options.database,
     dataMode: options.dataMode,
-    providerId,
     provider: providers.calendar,
     intervalMs: calendarIntervalMs(),
     enabled: true,

@@ -13,6 +13,7 @@ const { initShippingTables, ShippingRepository } = await import("#/database/ship
 const { RuntimeRepository } = await import("#/database/runtime-jobs")
 const { BackgroundRuntime } = await import("#/runtime/background-runtime")
 const { getDefaultRuntimeJobs } = await import("#/runtime/registry")
+const { assertZeroRealOperationalMockRows, scanRealOperationalMockRows } = await import("#/services/real-data-gate")
 
 function createNativeDatabase(path: string) {
   const native = new NativeDatabase(path)
@@ -54,14 +55,19 @@ try {
   const feed = await repository.listFeedItems()
   const ports = await repository.listPorts()
   const calendar = await repository.listCalendarEvents()
+  const actualMockRows = await scanRealOperationalMockRows(database)
   const runtimeStatus = runtime.getStatus()
-  process.stdout.write(`${JSON.stringify({
+  const output = {
     databasePath,
     jobs: runtimeStatus.jobs.map(job => ({ id: job.id, providerId: job.providerId, capability: job.capability, enabled: job.enabled, status: job.status, lastSuccessAt: job.lastSuccessAt, lastSourceUpdatedAt: job.lastSourceUpdatedAt, errorCode: job.errorCode })),
     results,
     persisted: { ports: ports.length, feed: feed.length, calendar: calendar.length },
-    mockRows: 0,
-  }, null, 2)}\n`)
+    actualMockRows,
+    mockRows: actualMockRows,
+    zeroMockGate: { passed: actualMockRows.total === 0 },
+  }
+  process.stdout.write(`${JSON.stringify(output, null, 2)}\n`)
+  assertZeroRealOperationalMockRows(actualMockRows)
 } finally {
   runtime.stop()
   native.close()

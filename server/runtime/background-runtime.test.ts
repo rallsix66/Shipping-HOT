@@ -6,6 +6,7 @@ import { RuntimeRepository } from "#/database/runtime-jobs"
 import { initShippingTables } from "#/database/shipping"
 import { bootstrapBackgroundRuntime, getBackgroundRuntime, shutdownBackgroundRuntime } from "#/runtime/bootstrap"
 import { BackgroundRuntime, type RuntimeJob } from "#/runtime/background-runtime"
+import { ProviderError } from "#/providers/contracts"
 
 function createNativeDatabase(path = ":memory:") {
   const native = new NativeDatabase(path)
@@ -133,6 +134,31 @@ describe("backgroundRuntime", () => {
     shouldFail = false
     await expect(runtime.runNow("failing-job")).resolves.toMatchObject({ status: "success" })
     expect(await repository.getProviderRuntime("provider-failing", "test")).toMatchObject({ status: "healthy", consecutiveFailures: 0, lastSuccessAt: expect.any(String) })
+    native.close()
+  })
+
+  it("propagates a ProviderError code through sync_runs, provider_runtime and provider_usage", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const repository = new RuntimeRepository(database)
+    const runtime = new BackgroundRuntime(repository)
+    runtime.register(job({
+      id: "provider-error-job",
+      providerId: "provider-error",
+      capability: "feed_sync",
+      run: async () => {
+        throw new ProviderError("rate_limited", "provider quota reached")
+      },
+    }))
+    await runtime.start()
+    await expect(runtime.runNow("provider-error-job")).resolves.toMatchObject({ status: "failed", errorCode: "rate_limited" })
+    runtime.stop()
+
+    expect(await repository.listSyncRuns("provider-error")).toEqual([expect.objectContaining({ status: "failed", errorCode: "rate_limited" })])
+    expect(await repository.getProviderRuntime("provider-error", "feed_sync")).toMatchObject({ status: "failed", errorCode: "rate_limited" })
+    expect(native.prepare("SELECT provider_id, capability, request_count, success_count, failure_count, records_count, error_code FROM provider_usage WHERE provider_id = 'provider-error'").all()).toEqual([
+      { provider_id: "provider-error", capability: "feed_sync", request_count: 1, success_count: 0, failure_count: 1, records_count: 0, error_code: "rate_limited" },
+    ])
     native.close()
   })
 

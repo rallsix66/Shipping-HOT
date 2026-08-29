@@ -70,7 +70,7 @@ describe("feed sync job", () => {
     await repository.upsertFeedItem(item({ id: "feed-runtime-old", title: "Old runtime update", sourceUrl: "https://theloadstar.com/runtime-old" }))
     await repository.upsertFeedItem(item({ id: "feed-runtime-other", sourceId: "other-source", title: "Other source item", sourceUrl: "https://example.test/other" }))
 
-    const provider: FeedProvider = { getFeedItems: vi.fn(async () => [item()]) }
+    const provider: FeedProvider = { providerId: "the-loadstar", getFeedItems: vi.fn(async () => [item()]) }
     const job = createFeedSyncJob({
       database,
       dataMode: "mock",
@@ -93,10 +93,10 @@ describe("feed sync job", () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
     const runtime = new BackgroundRuntime(new RuntimeRepository(database), { now: () => new Date("2026-08-15T00:00:00.000Z") })
-    const failedProvider: FeedProvider = { getFeedItems: vi.fn(async () => {
+    const failedProvider: FeedProvider = { providerId: "failed-source", getFeedItems: vi.fn(async () => {
       throw new Error("source unavailable")
     }) }
-    const healthyProvider: FeedProvider = { getFeedItems: vi.fn(async () => []) }
+    const healthyProvider: FeedProvider = { providerId: "healthy-source", getFeedItems: vi.fn(async () => []) }
     runtime.register(createFeedSyncJob({ database, dataMode: "mock", provider: failedProvider, source: { id: "failed-source", name: "Failed source" }, intervalMs: 60_000 }))
     runtime.register(createFeedSyncJob({ database, dataMode: "mock", provider: healthyProvider, source: { id: "healthy-source", name: "Healthy source" }, intervalMs: 60_000 }))
     await runtime.start()
@@ -127,6 +127,7 @@ describe("feed sync job", () => {
     })
     await repository.upsertFeedItem(historical)
     const provider: FeedProvider = {
+      providerId: "the-loadstar",
       getFeedItems: vi.fn(async (lastKnown: FeedItem[] = []) => lastKnown.map(previous => ({ ...previous, fetchedAt: "2026-08-15T00:00:00.000Z", stale: true, sourceStatus: "failed" as const, error: "source unavailable" }))),
     }
     const job = createFeedSyncJob({

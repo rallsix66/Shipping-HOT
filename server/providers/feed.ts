@@ -4,9 +4,10 @@ import { load } from "cheerio"
 import { type DataProvenance, type FeedCategory, type FeedFreshnessClass, type FeedItem, type Port, type SourceType, isMockProvenance } from "@shared/shipping"
 import { mockFeedItems } from "@shared/shipping-fixtures"
 import { applyFeedFreshnessPolicy } from "@shared/shipping-rules"
-import { providerHttpError } from "#/providers/contracts"
+import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
 
 export interface FeedProvider {
+  readonly providerId: string
   getFeedItems: (lastKnown?: FeedItem[], ports?: Port[]) => Promise<FeedItem[]>
 }
 
@@ -363,8 +364,8 @@ export function dedupeFeedItems(items: FeedItem[]): FeedItem[] {
   return [...new Set(byKey.values())].sort((a, b) => publishedTime(b) - publishedTime(a))
 }
 
-function markSourceFailed(item: FeedItem, fetchedAt: string, error: string): FeedItem {
-  return applyFeedFreshnessPolicy({ ...item, stale: true, sourceStatus: "failed", error, fetchedAt }, new Date(fetchedAt))
+function markSourceFailed(item: FeedItem, fetchedAt: string, failure: ProviderError): FeedItem {
+  return applyFeedFreshnessPolicy({ ...item, stale: true, sourceStatus: "failed", error: failure.message, errorCode: failure.code, fetchedAt }, new Date(fetchedAt))
 }
 
 export interface PublicFeedProviderOptions {
@@ -373,6 +374,7 @@ export interface PublicFeedProviderOptions {
   sources?: ShippingFeedSource[]
   timeoutMs?: number
   throwOnSourceFailureWithoutLastKnown?: boolean
+  providerId?: string
 }
 
 export const PUBLIC_FEED_TIMEOUT_MS = 10_000
@@ -395,7 +397,7 @@ async function withFeedSourceTimeout<T>(operation: (signal: AbortSignal) => Prom
       }),
     ])
   } catch (error) {
-    if (timedOut || controller.signal.aborted) throw new Error(`${sourceName} request timed out after ${timeoutMs}ms`)
+    if (timedOut || controller.signal.aborted) throw new ProviderError("provider_timeout", `${sourceName} request timed out after ${timeoutMs}ms`)
     throw error
   } finally {
     if (timer) clearTimeout(timer)
@@ -414,6 +416,7 @@ export function createPublicFeedProvider(options: PublicFeedProviderOptions = {}
   const sources = options.sources ?? shippingFeedSources
   const timeoutMs = Math.max(1, options.timeoutMs ?? PUBLIC_FEED_TIMEOUT_MS)
   return {
+    providerId: options.providerId ?? (sources.length === 1 ? sources[0].id : "shipping-feed"),
     async getFeedItems(lastKnown = [], ports: Port[] = []) {
       const fetchedAt = now().toISOString()
       const activeSourceIds = activeShippingFeedSourceIds(sources)
@@ -422,15 +425,22 @@ export function createPublicFeedProvider(options: PublicFeedProviderOptions = {}
         try {
           const parsed = await withFeedSourceTimeout(async (signal) => {
             const response = await fetcher(source.url, { signal })
-            if (!response.ok) throw providerHttpError(source.name, response.status, `${source.name} request failed (${response.status})`)
+            if (!response.ok) {
+              const body = await response.text().catch(() => "")
+              throw providerHttpError(source.name, response.status, `${source.name} request failed (${response.status})`, body)
+            }
             const body = await response.text()
-            return source.format === "rss" ? parseFeedRss(body, source, ports, fetchedAt) : parseFeedHtml(body, source, ports, fetchedAt)
+            try {
+              return source.format === "rss" ? parseFeedRss(body, source, ports, fetchedAt) : parseFeedHtml(body, source, ports, fetchedAt)
+            } catch (error) {
+              throw providerErrorFromUnknown(source.name, error, "provider_contract_changed")
+            }
           }, timeoutMs, source.name)
           return parsed
         } catch (error) {
-          const message = error instanceof Error ? error.message : `${source.name} feed failed`
-          if (options.throwOnSourceFailureWithoutLastKnown && previous.length === 0) throw error
-          return previous.map(item => markSourceFailed(item, fetchedAt, message))
+          const failure = providerErrorFromUnknown(source.name, error, "provider_unavailable")
+          if (options.throwOnSourceFailureWithoutLastKnown && previous.length === 0) throw failure
+          return previous.map(item => markSourceFailed(item, fetchedAt, failure))
         }
       }))
       return dedupeFeedItems(results.flat())
@@ -439,6 +449,7 @@ export function createPublicFeedProvider(options: PublicFeedProviderOptions = {}
 }
 
 export const MockFeedProvider: FeedProvider = {
+  providerId: "mock-port-notice",
   async getFeedItems() {
     return mockFeedItems.filter(item => item.sourceId !== "mock-weather").map(item => applyFeedFreshnessPolicy(structuredClone(item), new Date()))
   },
@@ -446,8 +457,9 @@ export const MockFeedProvider: FeedProvider = {
 
 export function createUnavailableFeedProvider(error: string): FeedProvider {
   return {
+    providerId: "unavailable",
     async getFeedItems() {
-      throw new Error(error)
+      throw new ProviderError("provider_unavailable", error)
     },
   }
 }
