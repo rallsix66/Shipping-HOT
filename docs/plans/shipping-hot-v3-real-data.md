@@ -790,10 +790,10 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | 修改文件 | `server/providers/ais/contracts.ts`、`server/providers/ais/aisstream-provider.ts`、`server/providers/ais/mock-provider.ts`、`server/providers/ais/index.ts`、`server/database/migrations/007-p3a-ais-tracking.ts`、`server/database/ais-positions.ts`、`server/runtime/ais-tracking-job.ts`、`server/runtime/registry.ts`、`server/api/shipping/vessels/[id]/position.get.ts`、`src/components/shipping/data.ts`、`src/components/shipping/pages.tsx`、`example.env.server` |
 | Provider Contract | `AisTrackingProvider` 提供 `subscribe(vessels)`、`unsubscribe(vessels)`、`getLatestPositions(vessels)`；本阶段只调用 bounded `getLatestPositions()`，AISStream key 通过 environment-first/FileSecretStore fallback 读取 |
 | 数据库 | migration v7 新增 append-only `ais_positions` 与 keyed `ais_latest_positions`；保留历史，latest 按 canonical `vessel_id` 快速读取；`source_type` 遵守 Real Mode `real/imported/derived` filter |
-| Job | `AisTrackingJob` 使用 `provider_id=aisstream|mock`、`capability=ais_tracking`，读取 `vessel_watchlist` 中 `ais_enabled=true` 且有 MMSI 的 canonical metadata；写 `sync_runs` 与 `provider_runtime`，不自动猜 MMSI、不通过船名搜索 AIS |
-| 异常 | 未知 MMSI 丢弃并记录 warning code；非法坐标拒绝保存；TTL 外 latest 标记 `stale` 但不删历史；Provider 失败保留 last-known position；Real Mode 拒绝 Mock position |
+| Job | `AisTrackingJob` 使用 `provider_id=aisstream|mock`、`capability=ais_tracking`，读取 `vessel_watchlist` 中 `ais_enabled=true` 且有有效 9 位 MMSI 的 canonical metadata；写 `sync_runs` 与 `provider_runtime`，不自动猜 MMSI、不通过船名搜索 AIS |
+| 异常 | 未知/非目标 MMSI、缺失可信 Provider timestamp 或非法坐标的 PositionReport 不进入规范化/保存；TTL 外 latest 标记 `stale` 但不删历史；Provider 失败保留 last-known position；Real Mode 拒绝 Mock position；本地 `fetchedAt` 不冒充 source timestamp |
 | API/UI | `GET /api/shipping/vessels/:id/position` 只读 SQLite；Watchlist/船舶详情显示 Tracking Active、Unavailable (No MMSI)、最新位置、更新时间、source/stale；不做地图或轨迹动画；`GET /api/shipping` 继续 legacy/deferred |
-| 测试 | Provider mapping、unknown MMSI、invalid coordinate、Mock isolation、watchlist filter、Runtime success/failure、last-known preservation、restart persistence、no duplicate execution、stale/latest view |
+| 测试 | Provider mapping、unknown/out-of-target MMSI、invalid coordinate、missing trusted timestamp、Mock isolation、valid-MMSI watchlist filter、Runtime success/failure、last-known preservation、restart persistence、no duplicate execution、stale/latest view |
 | 验收 | P3A targeted tests、full tests、typecheck、build、full lint、P0/P2C/P3A native SQLite restart smoke、git diff --check 与 Neat Freak Closeout；P3B 后 Feed Auto Sync、Calendar Auto Sync、Translation 继续 pending，real Voyage adapter coverage pending |
 
 ### P3 — Feed Freshness + Background Runtime（implemented / review pending）

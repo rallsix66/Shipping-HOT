@@ -64,10 +64,11 @@ function numberValue(value: unknown): number | undefined {
 function mmsiValue(value: unknown): string | undefined {
   const number = numberValue(value)
   if (number === undefined || !Number.isInteger(number) || number <= 0) return undefined
-  return String(number)
+  const mmsi = String(number)
+  return /^\d{9}$/.test(mmsi) ? mmsi : undefined
 }
 
-function timestampValue(value: unknown, fallback: string): string {
+function timestampValue(value: unknown): string | undefined {
   if (typeof value === "number" || (typeof value === "string" && /^\d+(?:\.\d+)?$/.test(value.trim()))) {
     const numeric = Number(value)
     const milliseconds = numeric < 100_000_000_000 ? numeric * 1000 : numeric
@@ -77,7 +78,7 @@ function timestampValue(value: unknown, fallback: string): string {
     const timestamp = Date.parse(value)
     if (Number.isFinite(timestamp)) return new Date(timestamp).toISOString()
   }
-  return fallback
+  return undefined
 }
 
 function navigationStatus(value: number | undefined): string | undefined {
@@ -120,15 +121,19 @@ function protocolError(message: AisStreamMessage): Error | undefined {
   return new Error(errorText(errorValue) ?? errorText(message.message) ?? "aisstream_unavailable")
 }
 
-export function mapAisStreamPosition(message: AisStreamMessage, fetchedAt: string, sourceType: AisPosition["sourceType"] = "real"): AisPosition | undefined {
+export function mapAisStreamPosition(message: AisStreamMessage, _fetchedAt: string, sourceType: AisPosition["sourceType"] = "real"): AisPosition | undefined {
   if (message.MessageType !== "PositionReport") return undefined
   const report = message.Message?.PositionReport
   if (!report) return undefined
   const metadata = message.MetaData ?? message.Metadata
-  const mmsi = mmsiValue(metadata?.MMSI ?? report.UserID)
+  const metadataMmsi = mmsiValue(metadata?.MMSI)
+  const reportMmsi = mmsiValue(report.UserID)
+  if (metadataMmsi && reportMmsi && metadataMmsi !== reportMmsi) return undefined
+  const mmsi = metadataMmsi ?? reportMmsi
   const latitude = numberValue(report.Latitude)
   const longitude = numberValue(report.Longitude)
-  if (!mmsi || latitude === undefined || longitude === undefined) return undefined
+  const timestamp = timestampValue(metadata?.time_utc)
+  if (!mmsi || latitude === undefined || longitude === undefined || !timestamp) return undefined
   if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) return undefined
   const heading = numberValue(report.TrueHeading ?? report.Heading)
   return {
@@ -139,7 +144,7 @@ export function mapAisStreamPosition(message: AisStreamMessage, fetchedAt: strin
     course: numberValue(report.Cog),
     heading: heading !== undefined && heading <= 360 ? heading : undefined,
     navigationStatus: navigationStatus(numberValue(report.NavigationalStatus)),
-    timestamp: timestampValue(metadata?.time_utc, fetchedAt),
+    timestamp,
     source: "aisstream",
     sourceType,
   }
@@ -239,7 +244,7 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
             return
           }
           const position = mapAisStreamPosition(message ?? {}, fetchedAt)
-          if (!position) return
+          if (!position || !trackedMmsi.includes(position.mmsi)) return
           positions.set(position.mmsi, position)
           if (trackedMmsi.every(mmsi => positions.has(mmsi))) finish()
         }

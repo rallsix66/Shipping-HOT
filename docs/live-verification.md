@@ -7,11 +7,30 @@
 
 `pnpm smoke:v3-real-activation` loaded the existing server environment and set `SHIPPING_DATA_MODE=real` for that process only. For this review it used a fresh process-scoped SQLite path so pre-existing Mock/Off local data could not contaminate the observation; it ran the registered Runtime Jobs, then a built Nitro process was smoke-tested separately with process-scoped Mock/Off configuration across the HTTP surfaces. Secret values are not recorded here.
 
+## V3 AIS Live PositionReport Verification — 2026-08-29
+
+| Check | Result |
+| --- | --- |
+| Capability / Provider | AIS Tracking / AISStream |
+| Credential | `configured: true`; `source: environment`; `maskedLast4: ****dbcf` |
+| Watched vessel / MMSI | None. The current SQLite `vessel_watchlist` has no eligible canonical real watched vessel with a valid MMSI. |
+| Connection | Not attempted; the no-target stop condition was met before opening a WebSocket. |
+| PositionReport | Not observed; valid count `0`. |
+| SQLite | `ais_positions` row count `0`; `ais_latest_positions` result `none`; no live write occurred. |
+| Restart persistence | Not run because no real PositionReport was written. |
+| Repository / API | Existing latest-position surface remains Repository → SQLite-only; no Provider call is made during API reads. No target row was available to return. |
+| UI | Existing Vessel detail AIS surface is wired to the latest-position API and can display source timestamp/source/stale state; no real position was available to display in this run. |
+| Last-known failure | Not simulated because this run produced no real last-known observation; no Mock fallback was used. |
+| Zero-Mock Gate | Isolated fresh Real activation smoke passed with `actualMockRows.total=0`, including `ais_positions=0` and `ais_latest_positions=0`. The same gate against the retained mixed local database failed with `total=16` from pre-existing Mock/Test rows outside the AIS tables; no cleanup was performed. |
+| Status | `coverage_pending`; Live Gate blocked until the user selects/provides a real watched MMSI. |
+
+The AISStream adapter hardening verified in this batch rejects non-9-digit MMSI values, ignores PositionReports outside the watched target set, and never promotes a local `fetchedAt` into a trusted source timestamp. These checks do not constitute live-provider evidence.
+
 ## Provider and persistence evidence
 
 | Capability | Provider | Observation | SQLite / API evidence | Status |
 | --- | --- | --- | --- | --- |
-| AIS tracking | AISStream | Runtime Job completed successfully with `recordsRead=0`; no eligible watched MMSI/PositionReport was available | Runtime health was healthy; no fabricated position row was written | `connection_verified / coverage_pending` |
+| AIS tracking | AISStream | No eligible watched MMSI was available; the batch stopped before opening a live socket | No AIS position row was written; the existing API/UI surface remains available for a future persisted observation | `coverage_pending` |
 | Voyage / ETA | None in Real Mode | Job was disabled because only the Mock Voyage adapter is available and no real key/adapter was configured | Readiness correctly blocks on the disabled Voyage Job; VesselAPI ETA entitlement is **not verified** and no ETA claim is made | `credential_missing` |
 | Feed — The Loadstar | Public RSS | 10 normalized items fetched | Real Feed rows persisted; current/history API available | `verified_live` |
 | Feed — Shekou official | Public HTML | 5 normalized items fetched | Real Feed rows persisted; publication/freshness policy controls current vs history visibility | `verified_live` |

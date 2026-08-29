@@ -40,6 +40,14 @@ describe("aisstream provider", () => {
     })
   })
 
+  it("does not normalize a PositionReport without a trusted source timestamp", () => {
+    expect(mapAisStreamPosition({
+      MessageType: "PositionReport",
+      MetaData: { MMSI: "413393620" },
+      Message: { PositionReport: { UserID: "413393620", Latitude: 22.48, Longitude: 113.91 } },
+    }, "2026-08-24T00:00:01.000Z")).toBeUndefined()
+  })
+
   it("opens a bounded read, subscribes MMSI values and closes after a complete response", async () => {
     const state = socketFor({
       MessageType: "PositionReport",
@@ -99,6 +107,23 @@ describe("aisstream provider", () => {
     expect(sent.map(payload => (payload.FiltersShipMMSI as string[]).length)).toEqual([50, 1])
     expect(sent.every(payload => JSON.stringify(payload.BoundingBoxes) === JSON.stringify([[[-90, -180], [90, 180]]]))).toBe(true)
     expect(positions).toHaveLength(51)
+  })
+
+  it("ignores a PositionReport whose MMSI is outside the watched target set", async () => {
+    const state = socketFor({
+      MessageType: "PositionReport",
+      MetaData: { MMSI: "413393621", time_utc: "2026-08-24T00:00:00.000Z" },
+      Message: { PositionReport: { UserID: "413393621", Latitude: 22.48, Longitude: 113.91 } },
+    })
+    const provider = createAisStreamTrackingProvider({
+      apiKey: "test-key",
+      timeoutMs: 20,
+      socketFactory: () => {
+        setTimeout(() => state.socket.onopen?.(), 0)
+        return state.socket
+      },
+    })
+    await expect(provider.getLatestPositions([{ vesselId: "vessel-1", mmsi: "413393620" }])).resolves.toEqual([])
   })
 
   it("rejects an AISStream protocol error with a safe error code", async () => {

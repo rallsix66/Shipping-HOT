@@ -35,11 +35,12 @@ async function seedWatchlist(database: ReturnType<typeof createNativeDatabase>["
   await database.prepare(`
     INSERT INTO vessel_metadata (id, name, mmsi, source, fetched_at, source_type, data)
     VALUES ('vessel-with-mmsi', 'WITH MMSI', '413393620', 'test', '2026-08-24T00:00:00.000Z', 'mock', '{}'),
-           ('vessel-without-mmsi', 'WITHOUT MMSI', NULL, 'test', '2026-08-24T00:00:00.000Z', 'mock', '{}')
+           ('vessel-without-mmsi', 'WITHOUT MMSI', NULL, 'test', '2026-08-24T00:00:00.000Z', 'mock', '{}'),
+           ('vessel-with-invalid-mmsi', 'INVALID MMSI', '123', 'test', '2026-08-24T00:00:00.000Z', 'mock', '{}')
   `).run()
   await database.prepare(`
     INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled)
-    VALUES ('vessel-with-mmsi', '2026-08-24T00:00:00.000Z', 1), ('vessel-without-mmsi', '2026-08-24T00:00:00.000Z', 1)
+    VALUES ('vessel-with-mmsi', '2026-08-24T00:00:00.000Z', 1), ('vessel-without-mmsi', '2026-08-24T00:00:00.000Z', 1), ('vessel-with-invalid-mmsi', '2026-08-24T00:00:00.000Z', 1)
   `).run()
 }
 
@@ -114,7 +115,9 @@ describe("ais tracking job", () => {
     }), intervalMs: 60 * 60 * 1000 }))
     await runtime.start()
     await expect(runtime.runNow("ais-tracking")).resolves.toMatchObject({ status: "failed" })
-    expect(await positions.getLatestPosition("vessel-real", new Date("2026-08-24T00:01:00.000Z"))).toMatchObject({ timestamp: "2026-08-24T00:00:00.000Z", latitude: 22.48 })
+    expect(await positions.getLatestPosition("vessel-real", new Date("2026-08-24T00:16:00.000Z"))).toMatchObject({ timestamp: "2026-08-24T00:00:00.000Z", latitude: 22.48, source: "aisstream", sourceType: "real", stale: true })
+    expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")).toMatchObject({ status: "failed", errorCode: "job_failed", consecutiveFailures: 1 })
+    expect(native.prepare("SELECT COUNT(*) AS count FROM ais_positions WHERE source_type = 'mock'").get()).toEqual({ count: 0 })
     runtime.stop()
     native.close()
   })

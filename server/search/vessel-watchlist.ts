@@ -33,7 +33,7 @@ interface WatchRow {
 }
 
 function trackingAvailable(metadata: Pick<VesselMetadata, "mmsi">): boolean {
-  return Boolean(metadata.mmsi)
+  return Boolean(metadata.mmsi && /^\d{9}$/.test(metadata.mmsi))
 }
 
 function toWatchlistItem(metadata: VesselMetadata, row: WatchRow): VesselWatchlistItem {
