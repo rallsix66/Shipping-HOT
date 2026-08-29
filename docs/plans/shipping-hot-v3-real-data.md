@@ -14,7 +14,7 @@
 
 > V3 Readiness：本轮只建立本地安全就绪门（观测 Node/ABI、CLI 实测 pnpm、实际安装的 better-sqlite3 版本/native load、SQLite schema/Port Directory、已批准 Runtime scope、Mock-only provider configuration），通过 `GET /api/shipping/readiness` 与 `pnpm smoke:v3-readiness` 验证；HTTP 缺少 pnpm 观测时标记 skipped 且严格 Readiness 不得 ready；不执行外部 Provider 请求，不进入下一阶段。
 
-> 当前执行状态：P3 Feed Freshness Batch 1 与来源独立 Feed Background Runtime 已完成；Calendar、Port、Weather Runtime 已纳入同一受控激活链路。Real Mode activation smoke 与生产 HTTP smoke 已验证真实写入/读取，且 `actualMockRows` 来自八张 operational 表的 SQL/Repository 扫描并要求总数为零。当前停止在 Real Operational Readiness：Voyage 仍无真实适配器/凭据，VesselAPI ETA entitlement 未验证，AIS 无 PositionReport 观测，官方天气预警仍 pending；不进入后续业务开发。
+> 当前执行状态：P3 Feed Freshness Batch 1 与来源独立 Feed Background Runtime 已完成；Calendar、Port、Weather Runtime 已纳入同一受控激活链路。Real Mode activation smoke 与生产 HTTP smoke 已验证真实写入/读取，且 `actualMockRows` 来自自动发现所有带 `source_type` 的 Shipping HOT 业务表的 SQL/Repository 扫描并要求总数为零。当前停止在 Real Operational Readiness：Voyage 仍无真实适配器/凭据，VesselAPI ETA entitlement 未验证，AIS 无 PositionReport 观测，官方天气预警仍 pending；不进入后续业务开发。
 
 ## 1. 背景与当前问题
 

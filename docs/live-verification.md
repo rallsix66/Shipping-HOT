@@ -20,7 +20,9 @@
 | Weather model | Open-Meteo Marine | 7 weather-risk Feed rows fetched with wind/gust/window fields | Real Feed rows persisted; `/api/shipping/feed` returned model fields | `verified_live` |
 | Weather alerts | JMA/TMD/BMKG | No live alert source was enabled or claimed | No alert coverage claim | `coverage_pending` |
 
-The activation result reported `actualMockRows` from a direct native SQLite scan of `vessels`, `ports`, `voyages`, `feed_items`, `events`, `calendar_events`, `ais_positions` and `ais_latest_positions`: `vessels=0`, `ports=0`, `voyages=0`, `feedItems=0`, `events=0`, `calendarEvents=0`, `aisPositions=0`, `aisLatestPositions=0`, `total=0`. The smoke asserts this total and exits non-zero if it is not zero; `mockRows` is retained only as a compatibility alias for the observed object. The real database read path accepts only `real/imported/derived` lineage. No Mock data was promoted into the Real operational read.
+The activation result reported `actualMockRows` from a direct native SQLite schema-discovered scan of every business table carrying `source_type`: `ais_latest_positions=0`, `ais_port_metrics=0`, `ais_positions=0`, `calendar_events=0`, `events=0`, `feed_item_history=0`, `feed_items=0`, `ports=0`, `vessel_metadata=0`, `vessel_search_cache=0`, `vessels=0`, `voyage_eta_history=0`, `voyages=0`, `total=0`. System/metadata tables are explicitly excluded. The smoke asserts this total and exits non-zero if it is not zero; `mockRows` is retained only as a compatibility alias for the observed object. The real database read path accepts only `real/imported/derived` lineage. No Mock data was promoted into the Real operational read.
+
+This seals zero-Mock gate coverage for the review only; it does not claim `Real Operational Ready` because AIS PositionReport, real Voyage/ETA, VesselAPI credentials and official weather-alert coverage remain pending.
 
 ## Built Nitro HTTP smoke
 

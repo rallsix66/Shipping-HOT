@@ -1,15 +1,13 @@
 import type { Database } from "db0"
 
 export interface ActualMockRows {
-  vessels: number
-  ports: number
-  voyages: number
-  feedItems: number
-  events: number
-  calendarEvents: number
-  aisPositions: number
-  aisLatestPositions: number
+  tables: Record<string, number>
   total: number
+}
+
+interface SchemaTable {
+  name: string
+  columns: Set<string>
 }
 
 interface LineageRow {
@@ -17,16 +15,28 @@ interface LineageRow {
   data?: unknown
 }
 
-const tableLabels = [
-  ["vessels", "vessels", true],
-  ["ports", "ports", true],
-  ["voyages", "voyages", true],
-  ["feed_items", "feedItems", true],
-  ["events", "events", true],
-  ["calendar_events", "calendarEvents", true],
-  ["ais_positions", "aisPositions", false],
-  ["ais_latest_positions", "aisLatestPositions", false],
-] as const
+const excludedTables = new Set([
+  "schema_migrations",
+  "app_metadata",
+  "port_directory_status",
+  "settings",
+  "user",
+  "vessel_watchlist",
+  "port_watchlist",
+  "translation_cache",
+  "provider_usage",
+  "provider_runtime",
+  "sync_runs",
+])
+
+function validIdentifier(value: string): boolean {
+  return /^[a-z_]\w*$/i.test(value)
+}
+
+function quoteIdentifier(value: string): string {
+  if (!validIdentifier(value)) throw new Error("real_zero_mock_gate_invalid_identifier")
+  return `"${value.replaceAll("\"", "\"\"")}"`
+}
 
 function parsedRecord(value: unknown): Record<string, unknown> | undefined {
   if (typeof value !== "string") return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined
@@ -46,29 +56,31 @@ function hasMockLineage(row: LineageRow): boolean {
   const provenance = parsedRecord(record.provenance)
   if (provenance?.sourceType === "mock") return true
   const evidence = Array.isArray(record.evidence) ? record.evidence : []
-  return evidence.some(item => parsedRecord(item)?.provenance && parsedRecord(parsedRecord(item)?.provenance)?.sourceType === "mock")
+  return evidence.some(item => parsedRecord(parsedRecord(item)?.provenance)?.sourceType === "mock")
+}
+
+async function discoverLineageTables(db: Database): Promise<SchemaTable[]> {
+  const tableRows = await db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all() as Array<{ name?: unknown }>
+  const tables: SchemaTable[] = []
+  for (const tableRow of tableRows) {
+    const name = typeof tableRow.name === "string" ? tableRow.name : undefined
+    if (!name || excludedTables.has(name) || name.startsWith("sqlite_") || !validIdentifier(name)) continue
+    const columnRows = await db.prepare(`PRAGMA table_info(${quoteIdentifier(name)})`).all() as Array<{ name?: unknown }>
+    const columns = new Set(columnRows.flatMap(column => typeof column.name === "string" ? [column.name] : []))
+    if (columns.has("source_type")) tables.push({ name, columns })
+  }
+  return tables
 }
 
 export async function scanRealOperationalMockRows(db: Database): Promise<ActualMockRows> {
-  const counts = {} as Record<ActualMockRowsKey, number>
-  for (const [table, label, hasData] of tableLabels) {
-    const rows = await db.prepare(`SELECT source_type${hasData ? ", data" : ""} FROM ${table}`).all() as LineageRow[]
-    counts[label] = rows.filter(hasMockLineage).length
+  const tables: Record<string, number> = {}
+  for (const table of await discoverLineageTables(db)) {
+    const dataColumn = table.columns.has("data")
+    const rows = await db.prepare(`SELECT ${quoteIdentifier("source_type")} AS source_type${dataColumn ? `, ${quoteIdentifier("data")} AS data` : ""} FROM ${quoteIdentifier(table.name)}`).all() as LineageRow[]
+    tables[table.name] = rows.filter(hasMockLineage).length
   }
-  return {
-    vessels: counts.vessels,
-    ports: counts.ports,
-    voyages: counts.voyages,
-    feedItems: counts.feedItems,
-    events: counts.events,
-    calendarEvents: counts.calendarEvents,
-    aisPositions: counts.aisPositions,
-    aisLatestPositions: counts.aisLatestPositions,
-    total: Object.values(counts).reduce((sum, count) => sum + count, 0),
-  }
+  return { tables, total: Object.values(tables).reduce((sum, count) => sum + count, 0) }
 }
-
-type ActualMockRowsKey = Exclude<keyof ActualMockRows, "total">
 
 export function assertZeroRealOperationalMockRows(rows: ActualMockRows): void {
   if (rows.total > 0) throw new Error(`real_zero_mock_gate_failed: ${JSON.stringify(rows)}`)
