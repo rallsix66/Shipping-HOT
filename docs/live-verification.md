@@ -1,6 +1,6 @@
 # V3 Real Data Live Verification
 
-> Verification date: 2026-08-29
+> Verification date: 2026-08-30 (review-gap closure; original activation evidence is dated 2026-08-29)
 > Scope: controlled local Real Mode process only. No deployment, provider account change, secret creation or new Provider was performed.
 
 ## Method
@@ -26,6 +26,24 @@
 
 The AISStream adapter hardening verified in this batch rejects non-9-digit MMSI values, ignores PositionReports outside the watched target set, and never promotes a local `fetchedAt` into a trusted source timestamp. These checks do not constitute live-provider evidence.
 
+## AIS Live Verification Review Gap Closure — 2026-08-30
+
+| Check | Result |
+| --- | --- |
+| No-target Runtime | Empty/invalid watchlist returns `skipped`, `errorCode=no_eligible_ais_targets`, and message `No eligible watched vessel with valid MMSI`; the Provider function was called `0` times. |
+| No-target runtime state | First-run `provider_runtime` remains `never_succeeded`, `lastSuccessAt` remains absent, `errorCode=no_eligible_ais_targets`; `sync_runs` is `skipped`. A prior success retains its `lastSuccessAt` and is not replaced by a no-target skip. |
+| Provider usage | No-target execution increments only capability sync `request_count`; `success_count` and `failure_count` remain unchanged. `request_count` is not an HTTP/WebSocket request count. |
+| Last-known failure | A persisted Real position remains available after `ProviderError(provider_timeout)`; the read service joins the current AIS runtime health without calling the Provider. |
+| Fresh at +1 minute | `stale=false`, `sourceStatus=degraded`, `errorCode=provider_timeout`. |
+| Freshness boundary at +16 minutes | `stale=true`, `sourceStatus=degraded`, `errorCode=provider_timeout`. Position freshness and Provider health remain separate dimensions. |
+| Healthy success | Valid target + PositionReport returns `sourceStatus=healthy` with no error code and preserves the Provider timestamp. |
+| UI | Vessel detail now uses `latestPosition.sourceStatus`; degraded/failed last-known data is labeled as the previous real position, with the AISStream source label retained. |
+| Live status | Still `coverage_pending`: the real watchlist has no eligible MMSI, so no live socket or fabricated PositionReport was introduced. |
+
+The retained development database remains unchanged with its 16 historical Mock/Test rows; the isolated fresh Real zero-Mock result remains the valid activation evidence. No later V3 workstream was started.
+
+Validation for this closure: AIS-targeted tests passed `18/18`, typecheck, lint and build passed, and P0/P2C/P3A smoke checks passed. The full suite reported `358/359` with one unrelated date-sensitive Feed test failure in `server/providers/feed.test.ts`; no Feed code or test was changed in this AIS-only scope.
+
 ## Provider and persistence evidence
 
 | Capability | Provider | Observation | SQLite / API evidence | Status |
@@ -48,7 +66,7 @@ This seals zero-Mock gate coverage for the review only; it does not claim `Real 
 The built Nitro HTTP smoke returned HTTP 200 for `/`, `/api/shipping/health`, `/api/shipping`, `/api/shipping/feed`, `/api/shipping/feed/history`, `/api/shipping/calendar`, `/api/shipping/runtime`, `/api/shipping/readiness`, `/api/shipping/search/ports` and `/api/shipping/search/vessels` under process-scoped Mock/Off configuration. Real Operational Readiness was checked separately through the API and remained blocked; an unconfigured real Vessel Search endpoint is not counted as a successful HTTP surface.
 
 - `/api/shipping` returned 8 persisted ports, 17 persisted Feed items and 259 persisted Calendar events, with no Mock rows; it did not trigger a Provider request.
-- `/api/shipping/runtime` showed the AISStream Job healthy, two Feed source Jobs healthy, Calendarific healthy, Portcast healthy and Open-Meteo healthy; Voyage was disabled.
+- `/api/shipping/runtime` showed the historical 2026-08-29 activation state (AISStream Job healthy, two Feed source Jobs healthy, Calendarific healthy, Portcast healthy and Open-Meteo healthy; Voyage disabled). The 2026-08-30 review-gap closure changes the no-target AIS state to skipped/never_succeeded and is covered by the Runtime regression tests above.
 - `/api/shipping/readiness` returned `profile=REAL_OPERATIONAL`, `overall=blocked`, `ready=false`. The blocking Runtime scope is the disabled Mock Voyage Job. Any unavailable HTTP pnpm observation is represented as `skipped`/unverified and cannot make Readiness ready. Feed retains source-level details and aggregates them rather than letting the last Feed Job overwrite the first.
 - `/` returned the built HTML shell. This is an HTTP surface check; no browser interaction or deployment verification is claimed.
 

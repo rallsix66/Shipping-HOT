@@ -3,6 +3,8 @@ import { createDatabase } from "db0"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { initShippingTables } from "#/database/shipping"
 import { AisPositionRepository } from "#/database/ais-positions"
+import { RuntimeRepository } from "#/database/runtime-jobs"
+import { AIS_TRACKING_CAPABILITY } from "#/providers/ais/contracts"
 
 function createNativeDatabase() {
   const native = new NativeDatabase(":memory:")
@@ -49,12 +51,19 @@ describe("latest AIS position API", () => {
         source: "aisstream",
         sourceType: "real",
       }], [{ vesselId: "vessel-real", mmsi: "413393620" }])
+      await new RuntimeRepository(database).updateProviderRuntime({
+        providerId: "aisstream",
+        capability: AIS_TRACKING_CAPABILITY,
+        status: "healthy",
+        lastSuccessAt: "2026-08-29T10:00:01.000Z",
+        updatedAt: "2026-08-29T10:00:01.000Z",
+      })
       vi.stubGlobal("defineEventHandler", (handler: unknown) => handler)
       vi.stubGlobal("useDatabase", () => database)
       vi.doMock("#/providers/ais", () => ({ createAisTrackingProviderForDatabase: providerCalls }))
       const { default: positionHandler } = await import("../api/shipping/vessels/[id]/position.get")
       const result = await positionHandler({ context: { params: { id: "vessel-real" } } } as never)
-      expect(result).toMatchObject({ vesselId: "vessel-real", mmsi: "413393620", latitude: 22.48, longitude: 113.91, source: "aisstream", sourceType: "real" })
+      expect(result).toMatchObject({ vesselId: "vessel-real", mmsi: "413393620", latitude: 22.48, longitude: 113.91, source: "aisstream", sourceType: "real", sourceStatus: "healthy", errorCode: undefined })
       expect(providerCalls).not.toHaveBeenCalled()
     } finally {
       if (previousDataMode === undefined) delete process.env.SHIPPING_DATA_MODE

@@ -4,9 +4,11 @@ import { describe, expect, it } from "vitest"
 import { AisPositionRepository } from "#/database/ais-positions"
 import { initShippingTables } from "#/database/shipping"
 import { RuntimeRepository } from "#/database/runtime-jobs"
-import type { AisPosition, AisTrackingProvider, AisTrackingVessel } from "#/providers/ais/contracts"
+import { AIS_TRACKING_CAPABILITY, type AisPosition, type AisTrackingProvider, type AisTrackingVessel } from "#/providers/ais/contracts"
+import { ProviderError } from "#/providers/contracts"
 import { createAisTrackingJob } from "#/runtime/ais-tracking-job"
 import { BackgroundRuntime } from "#/runtime/background-runtime"
+import { readAisLatestPosition } from "#/services/ais-position-read"
 
 function createNativeDatabase() {
   const native = new NativeDatabase(":memory:")
@@ -58,6 +60,71 @@ const validPosition: AisPosition = {
 }
 
 describe("ais tracking job", () => {
+  it("skips without eligible targets and does not count as Provider success or failure", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    let calls = 0
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database))
+    runtime.register(createAisTrackingJob({
+      database,
+      dataMode: "real",
+      provider: provider(async () => {
+        calls++
+        return []
+      }),
+      intervalMs: 60 * 60 * 1000,
+    }))
+    await runtime.start()
+    await expect(runtime.runNow("ais-tracking")).resolves.toMatchObject({
+      status: "skipped",
+      recordsRead: 0,
+      recordsWritten: 0,
+      errorCode: "no_eligible_ais_targets",
+      errorMessage: "No eligible watched vessel with valid MMSI",
+    })
+    expect(calls).toBe(0)
+    expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", AIS_TRACKING_CAPABILITY)).toMatchObject({
+      status: "never_succeeded",
+      lastSuccessAt: undefined,
+      errorCode: "no_eligible_ais_targets",
+    })
+    expect((await new RuntimeRepository(database).listSyncRuns("aisstream"))[0]).toMatchObject({ status: "skipped", errorCode: "no_eligible_ais_targets" })
+    expect(native.prepare("SELECT request_count, success_count, failure_count FROM provider_usage WHERE provider_id = 'aisstream' AND capability = 'ais_tracking'").get()).toEqual({ request_count: 1, success_count: 0, failure_count: 0 })
+    runtime.stop()
+    native.close()
+  })
+
+  it("preserves a previous success when a later run has no eligible targets", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    await database.prepare(`
+      INSERT INTO vessel_metadata (id, name, mmsi, source, fetched_at, source_type, data)
+      VALUES ('vessel-real', 'REAL VESSEL', '413393620', 'aisstream', '2026-08-24T00:00:00.000Z', 'real', '{}')
+    `).run()
+    await database.prepare("INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled) VALUES ('vessel-real', '2026-08-24T00:00:00.000Z', 1)").run()
+    let calls = 0
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database))
+    runtime.register(createAisTrackingJob({
+      database,
+      dataMode: "mock",
+      provider: provider(async () => {
+        calls++
+        return [validPosition]
+      }),
+      intervalMs: 60 * 60 * 1000,
+    }))
+    await runtime.start()
+    await expect(runtime.runNow("ais-tracking")).resolves.toMatchObject({ status: "success" })
+    const success = await new RuntimeRepository(database).getProviderRuntime("aisstream", AIS_TRACKING_CAPABILITY)
+    await database.prepare("DELETE FROM vessel_watchlist").run()
+    await expect(runtime.runNow("ais-tracking")).resolves.toMatchObject({ status: "skipped", errorCode: "no_eligible_ais_targets" })
+    expect(calls).toBe(1)
+    expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", AIS_TRACKING_CAPABILITY)).toMatchObject({ status: "healthy", lastSuccessAt: success?.lastSuccessAt, errorCode: "no_eligible_ais_targets" })
+    expect(native.prepare("SELECT request_count, success_count, failure_count FROM provider_usage WHERE provider_id = 'aisstream' AND capability = 'ais_tracking'").get()).toEqual({ request_count: 2, success_count: 1, failure_count: 0 })
+    runtime.stop()
+    native.close()
+  })
+
   it("filters watchlist to ais_enabled entries with MMSI and persists healthy runtime state", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
@@ -88,12 +155,12 @@ describe("ais tracking job", () => {
     await database.prepare("INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled) VALUES ('vessel-real', '2026-08-24T00:00:00.000Z', 1)").run()
     const runtime = new BackgroundRuntime(new RuntimeRepository(database))
     runtime.register(createAisTrackingJob({ database, dataMode: "real", provider: provider(async () => {
-      throw new Error("ais_timeout")
+      throw new ProviderError("provider_timeout", "aisstream_timeout")
     }), intervalMs: 60 * 60 * 1000 }))
     await runtime.start()
-    await expect(runtime.runNow("ais-tracking")).resolves.toMatchObject({ status: "failed" })
-    expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")).toMatchObject({ status: "failed", consecutiveFailures: 1 })
-    expect((await new RuntimeRepository(database).listSyncRuns("aisstream"))[0]).toMatchObject({ status: "failed", errorCode: "job_failed" })
+    await expect(runtime.runNow("ais-tracking")).resolves.toMatchObject({ status: "failed", errorCode: "provider_timeout" })
+    expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", AIS_TRACKING_CAPABILITY)).toMatchObject({ status: "failed", errorCode: "provider_timeout", consecutiveFailures: 1 })
+    expect((await new RuntimeRepository(database).listSyncRuns("aisstream"))[0]).toMatchObject({ status: "failed", errorCode: "provider_timeout" })
     expect(native.prepare("SELECT COUNT(*) AS count FROM ais_positions").get()).toEqual({ count: 0 })
     runtime.stop()
     native.close()
@@ -107,16 +174,30 @@ describe("ais tracking job", () => {
       VALUES ('vessel-real', 'REAL VESSEL', '413393620', 'aisstream', '2026-08-24T00:00:00.000Z', 'real', '{}')
     `).run()
     await database.prepare("INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled) VALUES ('vessel-real', '2026-08-24T00:00:00.000Z', 1)").run()
-    const positions = new AisPositionRepository(database, "real")
-    await positions.savePositions([{ ...validPosition, timestamp: "2026-08-24T00:00:00.000Z" }], [{ vesselId: "vessel-real", mmsi: "413393620" }])
+    let currentTime = new Date("2026-08-24T00:00:00.000Z")
+    let calls = 0
+    const now = () => new Date(currentTime)
     const runtime = new BackgroundRuntime(new RuntimeRepository(database))
-    runtime.register(createAisTrackingJob({ database, dataMode: "real", provider: provider(async () => {
-      throw new Error("ais_timeout")
-    }), intervalMs: 60 * 60 * 1000 }))
+    runtime.register(createAisTrackingJob({
+      database,
+      dataMode: "real",
+      provider: provider(async () => {
+        calls++
+        if (calls === 1) return [{ ...validPosition, timestamp: "2026-08-24T00:00:00.000Z" }]
+        throw new ProviderError("provider_timeout", "aisstream_timeout")
+      }),
+      intervalMs: 60 * 60 * 1000,
+      now,
+    }))
     await runtime.start()
-    await expect(runtime.runNow("ais-tracking")).resolves.toMatchObject({ status: "failed" })
-    expect(await positions.getLatestPosition("vessel-real", new Date("2026-08-24T00:16:00.000Z"))).toMatchObject({ timestamp: "2026-08-24T00:00:00.000Z", latitude: 22.48, source: "aisstream", sourceType: "real", stale: true })
-    expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")).toMatchObject({ status: "failed", errorCode: "job_failed", consecutiveFailures: 1 })
+    await expect(runtime.runNow("ais-tracking")).resolves.toMatchObject({ status: "success", recordsWritten: 1 })
+    currentTime = new Date("2026-08-24T00:01:00.000Z")
+    await expect(runtime.runNow("ais-tracking")).resolves.toMatchObject({ status: "failed", errorCode: "provider_timeout" })
+    const runtimeRepository = new RuntimeRepository(database)
+    expect(await runtimeRepository.getProviderRuntime("aisstream", AIS_TRACKING_CAPABILITY)).toMatchObject({ status: "degraded", errorCode: "provider_timeout", consecutiveFailures: 1 })
+    expect((await runtimeRepository.listSyncRuns("aisstream"))[0]).toMatchObject({ status: "failed", errorCode: "provider_timeout" })
+    expect(await readAisLatestPosition({ database, dataMode: "real", vesselId: "vessel-real", now: new Date("2026-08-24T00:01:00.000Z") })).toMatchObject({ timestamp: "2026-08-24T00:00:00.000Z", latitude: 22.48, source: "aisstream", sourceType: "real", stale: false, sourceStatus: "degraded", errorCode: "provider_timeout" })
+    expect(await readAisLatestPosition({ database, dataMode: "real", vesselId: "vessel-real", now: new Date("2026-08-24T00:16:00.000Z") })).toMatchObject({ timestamp: "2026-08-24T00:00:00.000Z", sourceType: "real", stale: true, sourceStatus: "degraded", errorCode: "provider_timeout" })
     expect(native.prepare("SELECT COUNT(*) AS count FROM ais_positions WHERE source_type = 'mock'").get()).toEqual({ count: 0 })
     runtime.stop()
     native.close()

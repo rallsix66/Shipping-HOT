@@ -1,7 +1,7 @@
 import process from "node:process"
 import { getRouterParam } from "h3"
-import { AIS_POSITION_DEFAULT_TTL_MS, AisPositionRepository } from "#/database/ais-positions"
 import { initShippingTables } from "#/database/shipping"
+import { readAisLatestPosition } from "#/services/ais-position-read"
 
 function positionTtlMs(): number {
   const minutes = Number(process.env.SHIPPING_AIS_POSITION_TTL_MINUTES ?? 15)
@@ -14,6 +14,5 @@ export default defineEventHandler(async (event) => {
   const dataMode = process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock"
   const database = useDatabase()
   await initShippingTables(database, dataMode)
-  const position = await new AisPositionRepository(database, dataMode).getLatestPosition(vesselId, new Date(), positionTtlMs() || AIS_POSITION_DEFAULT_TTL_MS)
-  return position ?? null
+  return await readAisLatestPosition({ database, dataMode, vesselId, now: new Date(), ttlMs: positionTtlMs() }) ?? null
 })

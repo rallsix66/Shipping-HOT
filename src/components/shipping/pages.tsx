@@ -723,7 +723,7 @@ export function VesselDetailPage({ id }: { id: string }) {
           <div className="mt-4 border-t border-white/10 pt-4">
             <div className="panel-h">
               <h3>AIS Tracking</h3>
-              <StatusBadge stale={latestPosition?.stale ?? true} sourceStatus={latestPosition ? "healthy" : "never_succeeded"} unknown={!latestPosition} />
+              <StatusBadge stale={latestPosition?.stale ?? true} sourceStatus={latestPosition?.sourceStatus ?? "never_succeeded"} unknown={!latestPosition} />
             </div>
             {!vessel.isWatched
               ? <p className="text-sm op-70">未加入关注列表。</p>
@@ -735,6 +735,14 @@ export function VesselDetailPage({ id }: { id: string }) {
                         ? <p className="text-sm op-70">暂无 AIS 位置。</p>
                         : (
                             <dl className="kv">
+                              {(latestPosition.sourceStatus === "degraded" || latestPosition.sourceStatus === "failed") && (
+                                <>
+                                  <dt>数据状态</dt>
+                                  <dd className="text-amber-700 dark:text-amber-300">
+                                    数据源异常，当前显示上次真实位置
+                                  </dd>
+                                </>
+                              )}
                               <dt>最新位置</dt>
                               <dd>
                                 {latestPosition.latitude.toFixed(4)}
@@ -746,7 +754,7 @@ export function VesselDetailPage({ id }: { id: string }) {
                               <dd>{formatDate(latestPosition.timestamp)}</dd>
                               <dt>数据来源</dt>
                               <dd>
-                                {latestPosition.source}
+                                {latestPosition.source === "aisstream" ? "AISStream" : latestPosition.source}
                                 {latestPosition.stale ? " · stale" : ""}
                               </dd>
                             </dl>

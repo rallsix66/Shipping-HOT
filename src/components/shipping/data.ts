@@ -18,6 +18,10 @@ export interface AisLatestPosition {
   source: string
   sourceType: "real" | "mock" | "imported" | "derived"
   stale: boolean
+  sourceStatus: "healthy" | "degraded" | "failed" | "never_succeeded" | "disabled"
+  errorCode?: string
+  lastProviderSuccessAt?: string
+  lastProviderFailureAt?: string
 }
 
 export function useShipping() {

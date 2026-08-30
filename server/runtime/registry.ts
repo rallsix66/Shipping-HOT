@@ -54,7 +54,7 @@ function weatherIntervalMs(): number {
   return Math.max(1, Number.isFinite(minutes) ? minutes : 60) * 60 * 1000
 }
 
-function aisProviderId(): string {
+export function getConfiguredAisProviderId(): string {
   return process.env.SHIPPING_AIS_PROVIDER?.trim().toLowerCase()
     || process.env.SHIPPING_VESSEL_PROVIDER?.trim().toLowerCase()
     || "mock"
@@ -124,7 +124,7 @@ function weatherJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
 }
 
 export function getDefaultRuntimeJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
-  const providerId = aisProviderId()
+  const providerId = getConfiguredAisProviderId()
   const provider = options.aisProvider ?? createAisTrackingProviderForDatabase(options.database, {
     providerId,
     dataMode: options.dataMode,

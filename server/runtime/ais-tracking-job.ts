@@ -36,7 +36,15 @@ export function createAisTrackingJob(options: AisTrackingJobOptions): RuntimeJob
       const vessels: AisTrackingVessel[] = watched
         .filter(item => item.aisEnabled && item.aisTrackingAvailable && item.mmsi)
         .map(item => ({ vesselId: item.id, mmsi: item.mmsi! }))
-      if (!vessels.length) return { status: "success", recordsRead: 0, recordsWritten: 0 }
+      if (!vessels.length) {
+        return {
+          status: "skipped",
+          recordsRead: 0,
+          recordsWritten: 0,
+          errorCode: "no_eligible_ais_targets",
+          errorMessage: "No eligible watched vessel with valid MMSI",
+        }
+      }
 
       const received = await options.provider.getLatestPositions(vessels)
       const saved = await positions.savePositions(received, vessels, now().toISOString())
