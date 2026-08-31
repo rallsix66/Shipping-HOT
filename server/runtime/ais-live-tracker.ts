@@ -217,10 +217,9 @@ export class AisLiveTracker {
 
   private handleSubscriptionConfirmed(generation: number): Promise<void> {
     if (!this.running || generation !== this.generation || this.closedGenerations.has(generation)) return Promise.resolve()
-    this.reconnectAttempt = 0
-    this.errorCode = undefined
     return this.enqueueWrite(async () => {
       const current = await this.runtime.getProviderRuntime(this.options.provider.providerId, AIS_TRACKING_CAPABILITY)
+      if (current?.errorCode !== "no_eligible_ais_targets") return
       const updated = await this.runtime.updateProviderRuntime({
         providerId: this.options.provider.providerId,
         capability: AIS_TRACKING_CAPABILITY,
@@ -252,8 +251,9 @@ export class AisLiveTracker {
         updatedAt: persistedAt,
       })
       this.lastPersistedAt = persistedAt
-      this.errorCode = undefined
       this.applyRuntime(updated)
+      this.reconnectAttempt = 0
+      this.errorCode = undefined
     }).catch(async (error) => {
       await this.handlePersistenceFailure(error)
     })

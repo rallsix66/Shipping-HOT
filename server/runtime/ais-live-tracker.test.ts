@@ -131,6 +131,13 @@ describe("aisLiveTracker", () => {
     expect(tracker.getStatus()).toMatchObject({ running: true, targetCount: 0, socketCount: 0, errorCode: "no_eligible_ais_targets", providerStatus: "never_succeeded" })
     expect(provider.streams).toHaveLength(0)
     expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")).toMatchObject({ status: "never_succeeded", errorCode: "no_eligible_ais_targets", lastSuccessAt: undefined })
+
+    await seedVessel(database, "imo:9155391", "538090733", "HANSA BREITENBURG")
+    await tracker.reconcileNow()
+    expect(provider.streams).toHaveLength(1)
+    await provider.streams[0].confirm()
+    expect(tracker.getStatus()).toMatchObject({ providerStatus: "never_succeeded", errorCode: undefined, reconnectAttempt: 0, lastSuccessAt: undefined })
+    expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")).toMatchObject({ status: "never_succeeded", errorCode: undefined, errorMessage: undefined, lastSuccessAt: undefined })
     await tracker.stop()
     native.close()
   })
@@ -176,30 +183,56 @@ describe("aisLiveTracker", () => {
     native.close()
   })
 
-  it("marks the runtime degraded after a post-success stream failure", async () => {
+  it("preserves historical success across reconnect confirmation until a new position is persisted", async () => {
+    vi.useFakeTimers()
     const { database, native } = createNativeDatabase()
-    await initShippingTables(database, "real")
-    await seedVessel(database, "imo:9951604", "563185100", "PSA SHURI CS08")
-    const provider = new FakeLiveProvider()
-    const tracker = new AisLiveTracker({ database, dataMode: "real", provider, refreshSeconds: 60 })
-    await tracker.start()
-    const stream = provider.streams[0]
-    await stream.position(realPosition("563185100"))
-    await flush()
-    const runtimeBeforeClose = await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")
+    try {
+      await initShippingTables(database, "real")
+      await seedVessel(database, "imo:9951604", "563185100", "PSA SHURI CS08")
+      const provider = new FakeLiveProvider()
+      const tracker = new AisLiveTracker({ database, dataMode: "real", provider, refreshSeconds: 60 })
+      await tracker.start()
+      const stream = provider.streams[0]
+      await stream.position(realPosition("563185100"))
+      await flush()
+      const runtimeBeforeClose = await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")
 
-    await stream.closeUnexpected(new ProviderError("provider_unavailable", "aisstream_connection_closed"))
+      await stream.closeUnexpected(new ProviderError("provider_unavailable", "aisstream_connection_closed"))
 
-    expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")).toMatchObject({
-      status: "degraded",
-      lastSuccessAt: runtimeBeforeClose?.lastSuccessAt,
-      lastSourceUpdatedAt: "2026-08-31T00:00:01.000Z",
-      errorCode: "provider_unavailable",
-    })
-    expect(tracker.getStatus()).toMatchObject({ providerStatus: "degraded", lastSuccessAt: runtimeBeforeClose?.lastSuccessAt, lastSourceUpdatedAt: "2026-08-31T00:00:01.000Z" })
+      expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")).toMatchObject({
+        status: "degraded",
+        lastSuccessAt: runtimeBeforeClose?.lastSuccessAt,
+        lastSourceUpdatedAt: "2026-08-31T00:00:01.000Z",
+        errorCode: "provider_unavailable",
+      })
+      expect(tracker.getStatus()).toMatchObject({ providerStatus: "degraded", errorCode: "provider_unavailable", reconnectAttempt: 1, lastSuccessAt: runtimeBeforeClose?.lastSuccessAt, lastSourceUpdatedAt: "2026-08-31T00:00:01.000Z" })
 
-    await tracker.stop()
-    native.close()
+      await vi.advanceTimersByTimeAsync(999)
+      expect(provider.streams).toHaveLength(1)
+      await vi.advanceTimersByTimeAsync(1)
+      await flush()
+      expect(provider.streams).toHaveLength(2)
+      await provider.streams[1].confirm()
+
+      expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")).toMatchObject({
+        status: "degraded",
+        lastSuccessAt: runtimeBeforeClose?.lastSuccessAt,
+        lastSourceUpdatedAt: "2026-08-31T00:00:01.000Z",
+        errorCode: "provider_unavailable",
+      })
+      expect(tracker.getStatus()).toMatchObject({ providerStatus: "degraded", errorCode: "provider_unavailable", reconnectAttempt: 1, lastSuccessAt: runtimeBeforeClose?.lastSuccessAt, lastSourceUpdatedAt: "2026-08-31T00:00:01.000Z" })
+
+      await provider.streams[1].position(realPosition("563185100", "2026-08-31T00:00:02.000Z"))
+      const recoveredRuntime = await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")
+      expect(recoveredRuntime).toMatchObject({ status: "healthy", consecutiveFailures: 0, errorCode: undefined, lastSourceUpdatedAt: "2026-08-31T00:00:02.000Z" })
+      expect(recoveredRuntime?.lastSuccessAt).not.toBe(runtimeBeforeClose?.lastSuccessAt)
+      expect(tracker.getStatus()).toMatchObject({ providerStatus: "healthy", errorCode: undefined, reconnectAttempt: 0, lastSuccessAt: recoveredRuntime?.lastSuccessAt, lastSourceUpdatedAt: "2026-08-31T00:00:02.000Z" })
+
+      await tracker.stop()
+    } finally {
+      native.close()
+      vi.useRealTimers()
+    }
   })
 
   it("keeps persistence failure observable without claiming provider health", async () => {
@@ -215,6 +248,10 @@ describe("aisLiveTracker", () => {
     expect(tracker.getStatus()).toMatchObject({ providerStatus: "failed", errorCode: "ais_persistence_failed" })
     expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")).toMatchObject({ status: "failed", errorCode: "ais_persistence_failed", lastSuccessAt: undefined })
     expect(native.prepare("SELECT COUNT(*) AS count FROM ais_positions").get()).toEqual({ count: 0 })
+
+    await provider.streams[0].confirm()
+    expect(tracker.getStatus()).toMatchObject({ providerStatus: "failed", errorCode: "ais_persistence_failed", lastSuccessAt: undefined })
+    expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")).toMatchObject({ status: "failed", errorCode: "ais_persistence_failed", errorMessage: expect.stringContaining("ais_persistence_failed") })
 
     await tracker.stop()
     native.close()
@@ -246,7 +283,7 @@ describe("aisLiveTracker", () => {
     native.close()
   })
 
-  it("backs off transient failures, waits at least a minute for rate limits and stops on terminal errors", async () => {
+  it("preserves reconnect state across confirmations and recovers only after persistence", async () => {
     vi.useFakeTimers()
     const { database, native } = createNativeDatabase()
     try {
@@ -263,15 +300,67 @@ describe("aisLiveTracker", () => {
       await flush()
       expect(provider.streams).toHaveLength(2)
       await provider.streams[1].confirm()
-      expect(tracker.getStatus()).toMatchObject({ providerStatus: "failed", lastSuccessAt: undefined, reconnectAttempt: 0 })
-      await provider.streams[1].closeUnexpected(new ProviderError("rate_limited", "aisstream_rate_limited"))
-      expect(tracker.getStatus().reconnectAttempt).toBe(1)
+      expect(tracker.getStatus()).toMatchObject({ providerStatus: "failed", errorCode: "provider_unavailable", lastSuccessAt: undefined, reconnectAttempt: 1 })
+      expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")).toMatchObject({ status: "failed", errorCode: "provider_unavailable", lastSuccessAt: undefined })
+
+      await provider.streams[1].closeUnexpected(new ProviderError("provider_unavailable", "aisstream_connection_closed"))
+      expect(tracker.getStatus()).toMatchObject({ reconnectAttempt: 2, errorCode: "provider_unavailable", providerStatus: "failed" })
+      await vi.advanceTimersByTimeAsync(1_999)
+      expect(provider.streams).toHaveLength(2)
+      await vi.advanceTimersByTimeAsync(1)
+      await flush()
+      expect(provider.streams).toHaveLength(3)
+      await provider.streams[2].confirm()
+      expect(tracker.getStatus()).toMatchObject({ providerStatus: "failed", errorCode: "provider_unavailable", lastSuccessAt: undefined, reconnectAttempt: 2 })
+
+      await provider.streams[2].closeUnexpected(new ProviderError("provider_unavailable", "aisstream_connection_closed"))
+      expect(tracker.getStatus()).toMatchObject({ reconnectAttempt: 3, errorCode: "provider_unavailable", providerStatus: "failed" })
+      await vi.advanceTimersByTimeAsync(4_999)
+      expect(provider.streams).toHaveLength(3)
+      await vi.advanceTimersByTimeAsync(1)
+      await flush()
+      expect(provider.streams).toHaveLength(4)
+      await provider.streams[3].confirm()
+      expect(tracker.getStatus()).toMatchObject({ providerStatus: "failed", errorCode: "provider_unavailable", lastSuccessAt: undefined, reconnectAttempt: 3 })
+
+      await provider.streams[3].position(realPosition("413393622", "2026-08-31T00:00:02.000Z"))
+      expect(tracker.getStatus()).toMatchObject({ providerStatus: "healthy", errorCode: undefined, reconnectAttempt: 0, lastSuccessAt: expect.any(String), lastSourceUpdatedAt: "2026-08-31T00:00:02.000Z" })
+      expect(await new RuntimeRepository(database).getProviderRuntime("aisstream", "ais_tracking")).toMatchObject({ status: "healthy", errorCode: undefined, consecutiveFailures: 0, lastSourceUpdatedAt: "2026-08-31T00:00:02.000Z" })
+      await tracker.stop()
+    } finally {
+      native.close()
+      vi.useRealTimers()
+    }
+  })
+
+  it("preserves reconnect state across rate-limit confirmations and keeps terminal errors terminal", async () => {
+    vi.useFakeTimers()
+    const { database, native } = createNativeDatabase()
+    try {
+      await initShippingTables(database, "real")
+      await seedVessel(database, "imo:1000005", "413393624", "FIVE")
+      const provider = new FakeLiveProvider()
+      const tracker = new AisLiveTracker({ database, dataMode: "real", provider, refreshSeconds: 60 })
+      await tracker.start()
+      await provider.streams[0].closeUnexpected(new ProviderError("rate_limited", "aisstream_rate_limited"))
+      expect(tracker.getStatus()).toMatchObject({ reconnectAttempt: 1, errorCode: "rate_limited", providerStatus: "failed" })
       await vi.advanceTimersByTimeAsync(59_999)
+      expect(provider.streams).toHaveLength(1)
+      await vi.advanceTimersByTimeAsync(1)
+      await flush()
+      expect(provider.streams).toHaveLength(2)
+      await provider.streams[1].confirm()
+      expect(tracker.getStatus()).toMatchObject({ providerStatus: "failed", errorCode: "rate_limited", reconnectAttempt: 1, lastSuccessAt: undefined })
+
+      await provider.streams[1].closeUnexpected(new ProviderError("provider_unavailable", "aisstream_connection_closed"))
+      expect(tracker.getStatus()).toMatchObject({ reconnectAttempt: 2, errorCode: "provider_unavailable", providerStatus: "failed" })
+      await vi.advanceTimersByTimeAsync(1_999)
       expect(provider.streams).toHaveLength(2)
       await vi.advanceTimersByTimeAsync(1)
       await flush()
       expect(provider.streams).toHaveLength(3)
       await provider.streams[2].closeUnexpected(new ProviderError("auth_failed", "aisstream_auth_failed"))
+      expect(tracker.getStatus()).toMatchObject({ reconnectAttempt: 2, errorCode: "auth_failed", providerStatus: "failed" })
       await vi.advanceTimersByTimeAsync(60_000)
       expect(provider.streams).toHaveLength(3)
       await tracker.stop()
