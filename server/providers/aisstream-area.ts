@@ -85,8 +85,12 @@ function sanitizeAreaError(error: unknown): string {
   return "AIS area stream unavailable"
 }
 
-function markMetricStale(metric: AisDerivedPortMetric, fetchedAt: string, error: string, errorCode?: string): AisDerivedPortMetric {
-  return { ...metric, fetchedAt, stale: true, sourceStatus: "failed", coverage: "stale", error, errorCode: errorCode ?? metric.errorCode, provenance: metric.provenance?.sourceId === AIS_AREA_SOURCE_ID ? metric.provenance : aisstreamAreaDerivedProvenance, trendProvenance: aisstreamAreaEstimatedProvenance }
+function markMetricObservationStale(metric: AisDerivedPortMetric, fetchedAt: string): AisDerivedPortMetric {
+  return { ...metric, fetchedAt, stale: true, sourceStatus: "degraded", coverage: "stale", error: "AIS area observations stale", errorCode: undefined, provenance: metric.provenance?.sourceId === AIS_AREA_SOURCE_ID ? metric.provenance : aisstreamAreaDerivedProvenance, trendProvenance: aisstreamAreaEstimatedProvenance }
+}
+
+function markMetricProviderFailure(metric: AisDerivedPortMetric, fetchedAt: string, error: string, errorCode: string): AisDerivedPortMetric {
+  return { ...metric, fetchedAt, stale: true, sourceStatus: "failed", coverage: "stale", error, errorCode, provenance: metric.provenance?.sourceId === AIS_AREA_SOURCE_ID ? metric.provenance : aisstreamAreaDerivedProvenance, trendProvenance: aisstreamAreaEstimatedProvenance }
 }
 
 function canReconnect(error: ProviderError): boolean {
@@ -327,10 +331,8 @@ export class AisAreaSession {
       }
       socket.onerror = (event) => {
         const error = aisStreamProviderError(event)
-        this.streamError = error
-        this.socketOpen = false
         if (!opened) finish(error)
-        else if (canReconnect(error)) this.scheduleReconnect()
+        else this.handleStreamError(socket, generation, error)
       }
       socket.onclose = () => {
         this.socketOpen = false
@@ -433,7 +435,7 @@ export class AisAreaSession {
         const previous = this.metrics.get(config.portId) ?? lastKnownByPort.get(config.portId)
         const observations = [...this.observations.values()].filter(observation => observation.portId === config.portId)
         const metric = observations.length === 0 && previous?.sampleSize
-          ? markMetricStale(previous, fetchedAt, "AIS area observations stale")
+          ? markMetricObservationStale(previous, fetchedAt)
           : aggregateAisPortMetric(config, observations, {
               now: fetchedAt,
               previous,
@@ -453,7 +455,7 @@ export class AisAreaSession {
       const fetchedAt = this.now().toISOString()
       const lastKnownByPort = new Map(lastKnown.filter(metric => metric.provenance?.sourceId === AIS_AREA_SOURCE_ID).map(metric => [metric.portId, metric]))
       const failure = aisStreamProviderError(error)
-      const stale = configs.map(config => lastKnownByPort.get(config.portId)).filter((metric): metric is AisDerivedPortMetric => metric !== undefined).map(metric => markMetricStale(metric, fetchedAt, sanitizeAreaError(failure), failure.code))
+      const stale = configs.map(config => lastKnownByPort.get(config.portId)).filter((metric): metric is AisDerivedPortMetric => metric !== undefined).map(metric => markMetricProviderFailure(metric, fetchedAt, sanitizeAreaError(failure), failure.code))
       if (canReconnect(failure)) this.scheduleReconnect()
       if (stale.length) return stale
       throw failure

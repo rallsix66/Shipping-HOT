@@ -224,6 +224,43 @@ describe("area stream boundary", () => {
     expect(result[0]).toMatchObject({ portId: "port-shekou", stale: true, sourceStatus: "failed", coverage: "stale", provenance: aisstreamAreaDerivedProvenance })
   })
 
+  it("marks a historical metric degraded when a healthy socket has no fresh observation", async () => {
+    const socket = socketWithPayloads([])
+    const session = new AisAreaSession({ apiKey: "test-key", initialObservationWaitMs: 0, socketFactory: () => {
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    const previous = {
+      portId: "port-shekou",
+      sampleSize: 5,
+      activeVesselCount: 5,
+      anchoredCount: 2,
+      mooredCount: 0,
+      lowSpeedCount: 5,
+      stationaryRatio: 0.4,
+      ambiguousSampleCount: 0,
+      trend: "stable" as const,
+      consecutiveRisingWindows: 0,
+      bbox: { south: 22, west: 113, north: 23, east: 114 },
+      boundarySource: "configured_heuristic" as const,
+      coverage: "usable" as const,
+      lowSpeedThresholdKnots: 1,
+      minimumSampleSize: 5,
+      sourceUpdatedAt: "2026-08-19T00:00:00.000Z",
+      updatedAt: "2026-08-19T00:00:00.000Z",
+      stale: false,
+      sourceStatus: "healthy" as const,
+      provenance: aisstreamAreaDerivedProvenance,
+      fetchedAt: "2026-08-19T00:00:01.000Z",
+    }
+
+    const [result] = await session.getPortMetrics([mockPorts[0]], [previous])
+    expect(result).toMatchObject({ coverage: "stale", stale: true, sourceStatus: "degraded", error: "AIS area observations stale", sourceUpdatedAt: previous.sourceUpdatedAt })
+    expect(result.errorCode).toBeUndefined()
+    expect(result.fetchedAt).not.toBe(previous.fetchedAt)
+    session.close()
+  })
+
   it("keeps watched AIS subscriptions separate from area subscriptions", () => {
     const payload = aisAreaSubscription("test-key", [])
     expect(payload).toEqual({ APIKey: "test-key", BoundingBoxes: [], FilterMessageTypes: ["PositionReport"] })
@@ -265,6 +302,55 @@ describe("area stream boundary", () => {
     expect(sockets).toHaveLength(2)
     await new Promise(resolve => setTimeout(resolve, 120))
     expect(sockets[1].closed).toBe(true)
+  })
+
+  it("closes an opened socket on error and schedules exactly one reconnect", async () => {
+    const sockets: ReturnType<typeof socketWithPayloads>[] = []
+    const provider = createAisStreamAreaProvider({ apiKey: "test-key", initialObservationWaitMs: 0, reconnectDelaysMs: [10], socketFactory: () => {
+      const socket = socketWithPayloads([])
+      const close = socket.close
+      socket.close = () => {
+        close.call(socket)
+        socket.onclose?.()
+      }
+      sockets.push(socket)
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+
+    await provider.getPortMetrics([mockPorts[0]])
+    sockets[0].onerror?.(new Error("network unavailable"))
+    expect(sockets[0].closed).toBe(true)
+    await new Promise(resolve => setTimeout(resolve, 5))
+    expect(sockets).toHaveLength(1)
+    await new Promise(resolve => setTimeout(resolve, 30))
+    expect(sockets).toHaveLength(2)
+    provider.close()
+  })
+
+  it.each([
+    ["auth_failed", new Error("unauthorized")],
+    ["provider_contract_changed", new Error("subscription failed")],
+  ] as const)("closes an opened socket without reconnecting for %s", async (_code, error) => {
+    const sockets: ReturnType<typeof socketWithPayloads>[] = []
+    const provider = createAisStreamAreaProvider({ apiKey: "test-key", initialObservationWaitMs: 0, reconnectDelaysMs: [10], socketFactory: () => {
+      const socket = socketWithPayloads([])
+      const close = socket.close
+      socket.close = () => {
+        close.call(socket)
+        socket.onclose?.()
+      }
+      sockets.push(socket)
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+
+    await provider.getPortMetrics([mockPorts[0]])
+    sockets[0].onerror?.(error)
+    expect(sockets[0].closed).toBe(true)
+    await new Promise(resolve => setTimeout(resolve, 30))
+    expect(sockets).toHaveLength(1)
+    provider.close()
   })
 
   it("stops automatic reconnects after the configured retry budget", async () => {
@@ -436,7 +522,8 @@ describe("area stream boundary", () => {
     now = new Date("2026-08-19T00:16:00.000Z")
     const stale = await session.getPortMetrics([mockPorts[0]])
     expect(session.observationCount).toBe(0)
-    expect(stale[0]).toMatchObject({ sourceStatus: "failed", coverage: "stale", stale: true })
+    expect(stale[0]).toMatchObject({ sourceStatus: "degraded", coverage: "stale", stale: true, error: "AIS area observations stale", sourceUpdatedAt: "2026-08-19T00:00:00.000Z" })
+    expect(stale[0].errorCode).toBeUndefined()
   })
 
   it("reports never_succeeded when the first connected window has no valid observation", async () => {

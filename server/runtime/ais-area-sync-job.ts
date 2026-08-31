@@ -5,6 +5,16 @@ import { ShippingRepository } from "#/database/shipping"
 import type { AisAreaProvider } from "#/providers/aisstream-area"
 import type { RuntimeJob } from "#/runtime/background-runtime"
 
+const aisAreaProviderFailureCodes = new Set([
+  "auth_failed",
+  "entitlement_missing",
+  "provider_forbidden",
+  "rate_limited",
+  "provider_timeout",
+  "provider_unavailable",
+  "provider_contract_changed",
+])
+
 export interface AisAreaSyncJobOptions {
   database: Database
   dataMode: ShippingDataMode
@@ -13,8 +23,22 @@ export interface AisAreaSyncJobOptions {
   enabled?: boolean
 }
 
-function latestSourceUpdatedAt(metrics: readonly { sourceUpdatedAt?: string }[]): string | undefined {
+function isAisAreaProviderFailureMetric(metric: Pick<AisDerivedPortMetric, "sourceStatus" | "errorCode">): boolean {
+  return metric.sourceStatus === "failed" && typeof metric.errorCode === "string" && aisAreaProviderFailureCodes.has(metric.errorCode)
+}
+
+function hasCurrentAisAreaObservation(metric: AisDerivedPortMetric): boolean {
+  return metric.sampleSize > 0
+    && !metric.stale
+    && metric.sourceStatus !== "failed"
+    && metric.coverage !== "no_observation"
+    && metric.sourceUpdatedAt !== undefined
+    && Number.isFinite(Date.parse(metric.sourceUpdatedAt))
+}
+
+function latestSourceUpdatedAt(metrics: readonly AisDerivedPortMetric[]): string | undefined {
   return metrics
+    .filter(hasCurrentAisAreaObservation)
     .map(metric => metric.sourceUpdatedAt)
     .filter((value): value is string => value !== undefined && Number.isFinite(Date.parse(value)))
     .sort((left, right) => Date.parse(right) - Date.parse(left))[0]
@@ -34,28 +58,29 @@ export function createAisAreaSyncJob(options: AisAreaSyncJobOptions): RuntimeJob
 
       const lastKnown = await repository.listAisPortMetrics()
       const metrics = await options.provider.getPortMetrics(ports, lastKnown)
-      const failed = metrics.filter(metric => metric.sourceStatus === "failed" || metric.coverage === "stale")
+      const failed = metrics.filter(isAisAreaProviderFailureMetric)
+      const observed = metrics.filter(hasCurrentAisAreaObservation)
+      const recordsRead = observed.reduce((total, metric) => total + metric.sampleSize, 0)
       for (const metric of metrics) await repository.upsertAisPortMetric(metric)
       if (failed.length) {
         const first = failed[0]
         return {
           status: "failed" as const,
-          recordsRead: metrics.reduce((total, metric) => total + metric.sampleSize, 0),
+          recordsRead,
           recordsWritten: metrics.length,
-          sourceUpdatedAt: latestSourceUpdatedAt(metrics),
+          sourceUpdatedAt: latestSourceUpdatedAt(observed),
           errorCode: first.errorCode ?? "provider_unavailable",
           errorMessage: first.error ?? "AIS area provider failed",
         }
       }
 
-      const observed = metrics.some(metric => metric.sampleSize > 0 && metric.coverage !== "no_observation")
-      if (!observed) return { status: "skipped", recordsRead: 0, recordsWritten: 0, errorCode: "no_ais_area_observation" }
+      if (!observed.length) return { status: "skipped", recordsRead: 0, recordsWritten: metrics.length, errorCode: "no_ais_area_observation" }
 
       return {
         status: "success" as const,
-        recordsRead: metrics.reduce((total, metric) => total + metric.sampleSize, 0),
+        recordsRead,
         recordsWritten: metrics.length,
-        sourceUpdatedAt: latestSourceUpdatedAt(metrics),
+        sourceUpdatedAt: latestSourceUpdatedAt(observed),
       }
     },
   }

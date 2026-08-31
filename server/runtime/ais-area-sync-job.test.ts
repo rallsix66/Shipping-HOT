@@ -43,6 +43,16 @@ const realPort: Port = {
   updatedAt: "2026-08-31T00:00:00.000Z",
 }
 
+const secondRealPort: Port = {
+  ...mockPorts[1],
+  source_type: "real",
+  provenance: { sourceType: "third_party", dataNature: "reported", sourceId: "test-port", verified: false },
+  stale: false,
+  sourceStatus: "healthy",
+  fetchedAt: "2026-08-31T00:00:00.000Z",
+  updatedAt: "2026-08-31T00:00:00.000Z",
+}
+
 function metric(overrides: Partial<AisDerivedPortMetric> = {}): AisDerivedPortMetric {
   return {
     portId: realPort.id,
@@ -74,12 +84,16 @@ function provider(run: AisAreaProvider["getPortMetrics"]): AisAreaProvider {
   return { providerId: "aisstream-area", getPortMetrics: run, close: () => undefined }
 }
 
-async function setup(watched = true) {
+async function setup(watched = true, includeSecondPort = false) {
   const { database, native } = createNativeDatabase()
   await initShippingTables(database, "real")
   const repository = new ShippingRepository(database, "real")
   await repository.upsertPort(realPort)
   if (watched) await repository.updateWatch("port", realPort.id, true)
+  if (includeSecondPort) {
+    await repository.upsertPort(secondRealPort)
+    if (watched) await repository.updateWatch("port", secondRealPort.id, true)
+  }
   return { database, native, repository }
 }
 
@@ -108,6 +122,70 @@ describe("ais area sync job", () => {
     await expect(runtime.runNow("ais-area-sync")).resolves.toMatchObject({ status: "skipped", errorCode: "no_ais_area_observation" })
     expect(await new RuntimeRepository(database).getProviderRuntime("aisstream-area", "ais_area")).toMatchObject({ status: "never_succeeded", lastSuccessAt: undefined, lastSourceUpdatedAt: undefined })
     expect(await new ShippingRepository(database, "real").listAisPortMetrics()).toHaveLength(1)
+    runtime.stop()
+    native.close()
+  })
+
+  it("skips one stale observation metric without treating it as Provider failure", async () => {
+    const { database, native } = await setup()
+    const stale = metric({ sampleSize: 5, coverage: "stale", stale: true, sourceStatus: "degraded", error: "AIS area observations stale", errorCode: undefined })
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database))
+    runtime.register(createAisAreaSyncJob({ database, dataMode: "real", provider: provider(async () => [stale]), intervalMs: 60_000 }))
+    await runtime.start()
+    await expect(runtime.runNow("ais-area-sync")).resolves.toMatchObject({ status: "skipped", recordsRead: 0, recordsWritten: 1, errorCode: "no_ais_area_observation" })
+    expect(await new RuntimeRepository(database).getProviderRuntime("aisstream-area", "ais_area")).toMatchObject({ status: "never_succeeded", errorCode: "no_ais_area_observation" })
+    runtime.stop()
+    native.close()
+  })
+
+  it("skips all stale metrics while preserving historical Runtime timestamps and health", async () => {
+    const { database, native } = await setup(true, true)
+    const healthyMetrics = [
+      metric({ sourceUpdatedAt: "2026-08-31T00:01:00.000Z" }),
+      metric({ portId: secondRealPort.id, sourceUpdatedAt: "2026-08-31T00:02:00.000Z" }),
+    ]
+    const staleMetrics = healthyMetrics.map(value => ({ ...value, coverage: "stale" as const, stale: true, sourceStatus: "degraded" as const, error: "AIS area observations stale", errorCode: undefined }))
+    let staleOnly = false
+    const runtimeRepository = new RuntimeRepository(database)
+    const runtime = new BackgroundRuntime(runtimeRepository)
+    runtime.register(createAisAreaSyncJob({ database, dataMode: "real", provider: provider(async () => staleOnly ? staleMetrics : healthyMetrics), intervalMs: 60_000 }))
+    await runtime.start()
+    await expect(runtime.runNow("ais-area-sync")).resolves.toMatchObject({ status: "success", recordsRead: 2, recordsWritten: 2, sourceUpdatedAt: "2026-08-31T00:02:00.000Z" })
+    const before = await runtimeRepository.getProviderRuntime("aisstream-area", "ais_area")
+    staleOnly = true
+    await expect(runtime.runNow("ais-area-sync")).resolves.toMatchObject({ status: "skipped", recordsRead: 0, recordsWritten: 2, errorCode: "no_ais_area_observation" })
+    const after = await runtimeRepository.getProviderRuntime("aisstream-area", "ais_area")
+    expect(after).toMatchObject({ status: "healthy", lastSuccessAt: before?.lastSuccessAt, lastSourceUpdatedAt: before?.lastSourceUpdatedAt, errorCode: "no_ais_area_observation" })
+    runtime.stop()
+    native.close()
+  })
+
+  it("succeeds when one port is usable and another has only stale observations", async () => {
+    const { database, native } = await setup(true, true)
+    const usable = metric({ sampleSize: 5, activeVesselCount: 5, coverage: "usable", sourceUpdatedAt: "2026-08-31T00:05:00.000Z" })
+    const stale = metric({ portId: secondRealPort.id, sampleSize: 5, coverage: "stale", stale: true, sourceStatus: "degraded", error: "AIS area observations stale", errorCode: undefined, sourceUpdatedAt: "2026-08-31T00:10:00.000Z" })
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database))
+    runtime.register(createAisAreaSyncJob({ database, dataMode: "real", provider: provider(async () => [usable, stale]), intervalMs: 60_000 }))
+    await runtime.start()
+    await expect(runtime.runNow("ais-area-sync")).resolves.toMatchObject({ status: "success", recordsRead: 5, recordsWritten: 2, sourceUpdatedAt: "2026-08-31T00:05:00.000Z" })
+    const persisted = await new ShippingRepository(database, "real").listAisPortMetrics()
+    expect(persisted).toEqual(expect.arrayContaining([
+      expect.objectContaining({ portId: realPort.id, coverage: "usable", sourceStatus: "healthy" }),
+      expect.objectContaining({ portId: secondRealPort.id, coverage: "stale", sourceStatus: "degraded" }),
+    ]))
+    expect(persisted.find(metric => metric.portId === secondRealPort.id)?.errorCode).toBeUndefined()
+    runtime.stop()
+    native.close()
+  })
+
+  it("counts only current insufficient samples when another port is stale", async () => {
+    const { database, native } = await setup(true, true)
+    const insufficient = metric({ sampleSize: 2, activeVesselCount: 2, coverage: "insufficient_samples", sourceUpdatedAt: "2026-08-31T00:05:00.000Z" })
+    const stale = metric({ portId: secondRealPort.id, sampleSize: 5, coverage: "stale", stale: true, sourceStatus: "degraded", error: "AIS area observations stale", errorCode: undefined, sourceUpdatedAt: "2026-08-31T00:10:00.000Z" })
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database))
+    runtime.register(createAisAreaSyncJob({ database, dataMode: "real", provider: provider(async () => [insufficient, stale]), intervalMs: 60_000 }))
+    await runtime.start()
+    await expect(runtime.runNow("ais-area-sync")).resolves.toMatchObject({ status: "success", recordsRead: 2, recordsWritten: 2, sourceUpdatedAt: "2026-08-31T00:05:00.000Z" })
     runtime.stop()
     native.close()
   })
@@ -147,7 +225,7 @@ describe("ais area sync job", () => {
     await runtime.start()
     await expect(runtime.runNow("ais-area-sync")).resolves.toMatchObject({ status: "success" })
     failed = true
-    await expect(runtime.runNow("ais-area-sync")).resolves.toMatchObject({ status: "failed", errorCode: "provider_unavailable", recordsWritten: 1 })
+    await expect(runtime.runNow("ais-area-sync")).resolves.toMatchObject({ status: "failed", errorCode: "provider_unavailable", recordsRead: 0, recordsWritten: 1 })
     expect(await new ShippingRepository(database, "real").listAisPortMetrics()).toMatchObject([{ coverage: "stale", sourceStatus: "failed", stale: true }])
     expect(await new RuntimeRepository(database).getProviderRuntime("aisstream-area", "ais_area")).toMatchObject({ status: "degraded", errorCode: "provider_unavailable" })
     runtime.stop()
