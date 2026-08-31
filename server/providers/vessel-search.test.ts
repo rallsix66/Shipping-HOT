@@ -174,15 +174,15 @@ describe("gfw vessel search adapter", () => {
 
   it("groups HANSA historical identities by IMO and selects the latest identity independent of response order", () => {
     const entries = [
-      gfwEntry(gfwIdentity({ id: "97db6280-e316-f58c-043d-1740bbb210f9", ssvid: "636090756", shipname: "HANSA BREITENBURG", callsign: "A8ET3", flag: "LBR", transmissionDateFrom: "2012-01-01T01:26:05Z", transmissionDateTo: "2026-06-08T00:50:04Z" })),
-      gfwEntry(gfwIdentity({ id: "6561869d3-3c29-f6bb-24ab-ff765f60e1a2", ssvid: "770308484", shipname: "HANSA BREITENB5RG", callsign: "A8ET3", flag: "URY", transmissionDateFrom: "2024-12-04T07:46:34Z", transmissionDateTo: "2024-12-04T10:28:07Z" })),
-      gfwEntry(gfwIdentity({ id: "c208e013b-bd7e-8fd3-126e-8c91e6958831", ssvid: "538090733", shipname: "HANSA BREITENBURG", callsign: "V7B3029", flag: "MHL", transmissionDateFrom: "2026-06-08T00:49:32Z", transmissionDateTo: "2026-08-28T23:59:58Z" })),
+      gfwEntry(gfwIdentity({ id: "97db6280-e316-f58c-043d-1740bbb210f9", shipname: "HANSA BREITENBURG", imo: 9155391, ssvid: "636090756", callsign: "A8ET3", flag: "LBR", transmissionDateFrom: "2012-01-01T01:26:05Z", transmissionDateTo: "2026-06-08T00:50:04Z" })),
+      gfwEntry(gfwIdentity({ id: "6561869d3-3c29-f6bb-24ab-ff765f60e1a2", shipname: "HANSA BREITENB5RG", imo: 9155391, ssvid: "770308484", callsign: "A8ET3", flag: "URY", transmissionDateFrom: "2024-12-04T07:46:34Z", transmissionDateTo: "2024-12-04T10:28:07Z" })),
+      gfwEntry(gfwIdentity({ id: "c208e013b-bd7e-8fd3-126e-8c91e6958831", shipname: "HANSA BREITENBURG", imo: 9155391, ssvid: "538090733", callsign: "V7B3029", flag: "MHL", transmissionDateFrom: "2026-06-08T00:49:32Z", transmissionDateTo: "2026-08-28T23:59:58Z" })),
     ]
     const normal = normalizeGfwSearchResponse({ entries }, { query: "HANSA BREITENBURG", field: "name" }, "2026-08-31T00:00:00.000Z")
     const reversed = normalizeGfwSearchResponse({ entries: [...entries].reverse() }, { query: "HANSA BREITENBURG", field: "name" }, "2026-08-31T00:00:00.000Z")
     expect(normal).toEqual(reversed)
     expect(normal).toHaveLength(1)
-    expect(normal[0]).toMatchObject({ id: "imo:9162423", name: "HANSA BREITENBURG", imo: "9162423", mmsi: "538090733", callsign: "V7B3029", flag: "MHL", type: "CARGO", providerRecordId: "c208e013b-bd7e-8fd3-126e-8c91e6958831" })
+    expect(normal[0]).toMatchObject({ id: "imo:9155391", name: "HANSA BREITENBURG", imo: "9155391", mmsi: "538090733", callsign: "V7B3029", flag: "MHL", type: "CARGO", providerRecordId: "c208e013b-bd7e-8fd3-126e-8c91e6958831" })
     expect(normal[0].identityHistory?.map(identity => identity.mmsi)).toEqual(["538090733", "636090756", "770308484"])
     expect(normal[0].identityHistory).toHaveLength(3)
   })

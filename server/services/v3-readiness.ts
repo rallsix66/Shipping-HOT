@@ -128,7 +128,7 @@ function providerBoundaryCheck(profile: ReadinessProfile, dataMode: ShippingData
     const values = [
       ["SHIPPING_DATA_MODE", process.env.SHIPPING_DATA_MODE?.trim().toLowerCase(), ["real"]],
       ["SHIPPING_AIS_PROVIDER", effectiveAisProvider, ["aisstream"]],
-      ["SHIPPING_VESSEL_SEARCH_PROVIDER", process.env.SHIPPING_VESSEL_SEARCH_PROVIDER?.trim().toLowerCase(), ["vesselapi"]],
+      ["SHIPPING_VESSEL_SEARCH_PROVIDER", process.env.SHIPPING_VESSEL_SEARCH_PROVIDER?.trim().toLowerCase(), ["gfw", "vesselapi"]],
       ["SHIPPING_PORT_PROVIDER", process.env.SHIPPING_PORT_PROVIDER?.trim().toLowerCase(), ["portcast"]],
       ["SHIPPING_WEATHER_PROVIDER", process.env.SHIPPING_WEATHER_PROVIDER?.trim().toLowerCase(), ["open-meteo"]],
       ["SHIPPING_WEATHER_ALERT_PROVIDER", process.env.SHIPPING_WEATHER_ALERT_PROVIDER?.trim().toLowerCase(), ["off", "public", "experimental"]],
@@ -330,6 +330,19 @@ function configuredAisProvider(): string | undefined {
   return configuredValue("SHIPPING_AIS_PROVIDER") ?? configuredValue("SHIPPING_VESSEL_PROVIDER")
 }
 
+function vesselSearchCapabilityDefinition(): { capability: string, provider: string, configured: boolean, credential: CapabilityReadiness["credential"], status: CapabilityReadinessStatus } {
+  const provider = configuredValue("SHIPPING_VESSEL_SEARCH_PROVIDER")
+  if (provider === "gfw") {
+    const available = Boolean(configuredValue("GFW_API_TOKEN"))
+    return { capability: "vessel_search", provider, configured: true, credential: available ? "available" : "missing", status: available ? "coverage_pending" : "credential_missing" }
+  }
+  if (provider === "vesselapi") {
+    const available = Boolean(configuredValue("VESSELAPI_API_KEY"))
+    return { capability: "vessel_search", provider, configured: true, credential: available ? "available" : "missing", status: available ? "coverage_pending" : "credential_missing" }
+  }
+  return { capability: "vessel_search", provider: provider ?? "unavailable", configured: false, credential: "unknown", status: "not_configured" }
+}
+
 function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadinessStatus | undefined): CapabilityReadiness[] {
   const runtimeByCapability = new Map<string, RuntimeReadinessJob[]>()
   for (const job of runtime?.jobs ?? []) runtimeByCapability.set(job.capability, [...(runtimeByCapability.get(job.capability) ?? []), job])
@@ -347,7 +360,7 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
         { capability: "voyage_eta", provider: "mock", configured: true, credential: "not_required", status: "safe_mock" },
       ]
     : [
-        { capability: "vessel_search", provider: configuredValue("SHIPPING_VESSEL_SEARCH_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_VESSEL_SEARCH_PROVIDER") === "vesselapi", credential: configuredValue("VESSELAPI_API_KEY") ? "available" : "missing", status: configuredValue("VESSELAPI_API_KEY") ? "coverage_pending" : "credential_missing" },
+        vesselSearchCapabilityDefinition(),
         { capability: "ais_tracking", provider: configuredAisProvider() ?? "unavailable", configured: configuredAisProvider() === "aisstream", credential: configuredValue("AISSTREAM_API_KEY") ? "available" : "missing", status: configuredValue("AISSTREAM_API_KEY") ? "coverage_pending" : "credential_missing" },
         { capability: "ais_area", provider: configuredValue("SHIPPING_AIS_AREA_PROVIDER") ?? "off", configured: configuredValue("SHIPPING_AIS_AREA_PROVIDER") === "aisstream", credential: configuredValue("AISSTREAM_API_KEY") ? "available" : "missing", status: configuredValue("SHIPPING_AIS_AREA_PROVIDER") === "aisstream" ? (configuredValue("AISSTREAM_API_KEY") ? "coverage_pending" : "credential_missing") : "not_configured" },
         { capability: "port_intelligence", provider: configuredValue("SHIPPING_PORT_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_PORT_PROVIDER") === "portcast", credential: "not_required", status: configuredValue("SHIPPING_PORT_PROVIDER") === "portcast" ? "coverage_pending" : "not_configured" },

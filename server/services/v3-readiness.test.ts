@@ -2,7 +2,7 @@ import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
 import { initShippingTables } from "#/database/shipping"
-import { type RuntimeReadinessStatus, type V3ToolchainObservation, aggregateRuntimeReadiness, approvedRuntimeJobKeys, readV3PackageManagerObservation, readV3Readiness, readV3ToolchainChecks } from "#/services/v3-readiness"
+import { type CapabilityReadiness, type RuntimeReadinessStatus, type V3ToolchainObservation, aggregateRuntimeReadiness, approvedRuntimeJobKeys, readV3PackageManagerObservation, readV3Readiness, readV3ToolchainChecks } from "#/services/v3-readiness"
 
 function createNativeDatabase() {
   const native = new NativeDatabase(":memory:")
@@ -49,6 +49,44 @@ async function readiness(runtime: RuntimeReadinessStatus | undefined, options: {
   })
   native.close()
   return report
+}
+
+async function realVesselSearchCapability(options: { provider?: string, gfwToken?: string, vesselApiKey?: string }): Promise<CapabilityReadiness> {
+  const environmentNames = ["SHIPPING_DATA_MODE", "SHIPPING_VESSEL_SEARCH_PROVIDER", "GFW_API_TOKEN", "VESSELAPI_API_KEY"]
+  const previous = new Map(environmentNames.map(name => [name, process.env[name]]))
+  const values: Record<string, string | undefined> = {
+    SHIPPING_DATA_MODE: "real",
+    SHIPPING_VESSEL_SEARCH_PROVIDER: options.provider,
+    GFW_API_TOKEN: options.gfwToken,
+    VESSELAPI_API_KEY: options.vesselApiKey,
+  }
+  for (const name of environmentNames) {
+    const value = values[name]
+    if (value === undefined) delete process.env[name]
+    else process.env[name] = value
+  }
+  try {
+    const { database, native } = createNativeDatabase()
+    try {
+      await initShippingTables(database, "real")
+      const report = await readV3Readiness(database, {
+        dataMode: "real",
+        profile: "REAL_OPERATIONAL",
+        toolchain: { packageManager: "pnpm@10.30.3", betterSqlite3Version: "12.6.2", betterSqlite3LoadError: undefined },
+      })
+      const capability = report.capabilities.find(item => item.capability === "vessel_search")
+      if (!capability) throw new Error("vessel_search readiness capability is missing")
+      return capability
+    } finally {
+      native.close()
+    }
+  } finally {
+    for (const name of environmentNames) {
+      const value = previous.get(name)
+      if (value === undefined) delete process.env[name]
+      else process.env[name] = value
+    }
+  }
 }
 
 describe("v3 readiness", () => {
@@ -156,5 +194,41 @@ describe("v3 readiness", () => {
       if (previous === undefined) delete process.env.SHIPPING_FEED_PROVIDER
       else process.env.SHIPPING_FEED_PROVIDER = previous
     }
+  })
+
+  it("reports GFW Vessel Search as configured with an available credential", async () => {
+    await expect(realVesselSearchCapability({ provider: "gfw", gfwToken: "test-secret" })).resolves.toMatchObject({
+      provider: "gfw",
+      configured: true,
+      credential: "available",
+      status: "coverage_pending",
+    })
+  })
+
+  it("reports GFW Vessel Search credential_missing when its token is absent", async () => {
+    await expect(realVesselSearchCapability({ provider: "gfw" })).resolves.toMatchObject({
+      provider: "gfw",
+      configured: true,
+      credential: "missing",
+      status: "credential_missing",
+    })
+  })
+
+  it("keeps VesselAPI Readiness behavior when VesselAPI is explicitly selected", async () => {
+    await expect(realVesselSearchCapability({ provider: "vesselapi", vesselApiKey: "test-secret" })).resolves.toMatchObject({
+      provider: "vesselapi",
+      configured: true,
+      credential: "available",
+      status: "coverage_pending",
+    })
+  })
+
+  it("uses GFW credential when GFW is selected even if VesselAPI is also configured", async () => {
+    await expect(realVesselSearchCapability({ provider: "gfw", vesselApiKey: "vesselapi-secret" })).resolves.toMatchObject({
+      provider: "gfw",
+      configured: true,
+      credential: "missing",
+      status: "credential_missing",
+    })
   })
 })
