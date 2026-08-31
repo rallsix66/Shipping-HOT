@@ -95,6 +95,26 @@ This repair changes only the Runtime interpretation of a normal empty AIS observ
 
 The diagnostic and re-probe used server-side credentials only and did not log an API key or raw AIS payload. No GFW, Watchlist, timeout, schema, migration, Feed, Voyage, Weather or Translation implementation was changed; the only implementation change was binary-frame parsing plus SubscriptionConfirmation handling.
 
+## V3 AIS Runtime Sampling Window Repair + Live Acceptance — 2026-08-31
+
+This was a formal isolated Real acceptance run after the binary-frame repair. It kept the normal Runtime cadence and did not widen the observation window.
+
+| Check | Result |
+| --- | --- |
+| Runtime configuration | `SHIPPING_DATA_MODE=real`, `SHIPPING_AIS_PROVIDER=aisstream`, `SHIPPING_VESSEL_SEARCH_PROVIDER=gfw`; connection timeout `5000` ms, observation window `30000` ms; cadence remained `15` minutes (`900000` ms) |
+| GFW identity | `PSA SHURI CS08`, GFW vessel `imo:9951604`, IMO `9951604`, current MMSI `563185100`, callsign `9V8666`, flag `SGP`; historical MMSIs `563185100`, `565282252`, `376000000` |
+| Watchlist | One canonical target added with `ais_enabled=true`, eligible MMSI `563185100` |
+| Runtime run 1 | `skipped/no_ais_position_observed`; `recordsRead=0`, `recordsWritten=0` |
+| Runtime run 2 | `skipped/no_ais_position_observed`; `recordsRead=0`, `recordsWritten=0` |
+| Provider Runtime / sync | `never_succeeded`; no success/source timestamps; sync status `skipped`; `provider_usage`: `request_count=2`, `success_count=0`, `failure_count=0`, `records_count=0` |
+| Persistence | Fresh temporary SQLite only; `ais_positions=0`, `ais_latest_positions=0`; retained `.data/shipping-hot-v3.sqlite3` was not opened or written |
+| Repository/API read | No position returned; service/API read caused `0` Provider calls; no source, stale or Runtime source-status position evidence existed because no position was persisted |
+| Restart | Metadata and watchlist were present; position/latest-position absent; GFW/AIS calls during read `0` |
+| Zero-Mock gate | Schema-discovered `actualMockRows.total=0` |
+| Acceptance gate | `coverage_pending`; canonical reason `active_target_not_observed_in_runtime_window` |
+
+The earlier independent 30-second diagnostic PositionReport was not used as formal acceptance evidence. The normal window was not enlarged, no manual position was inserted, and the temporary database was removed after the probe. No GFW, Watchlist, schema, migration, AIS interval, Voyage, AIS Area, Feed, Weather, Translation or UI implementation was changed beyond the approved sampling-window repair.
+
 ## Provider and persistence evidence
 
 | Capability | Provider | Observation | SQLite / API evidence | Status |

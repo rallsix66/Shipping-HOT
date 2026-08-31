@@ -19,6 +19,9 @@ export interface AisStreamProviderOptions {
   apiKeyResolver?: () => Promise<string | undefined>
   endpoint?: string
   socketFactory?: (endpoint: string) => AisStreamSocket
+  connectionTimeoutMs?: number
+  observationWindowMs?: number
+  /** @deprecated Use connectionTimeoutMs and observationWindowMs. */
   timeoutMs?: number
   now?: () => Date
 }
@@ -47,6 +50,8 @@ const aisStreamEndpoint = "wss://stream.aisstream.io/v0/stream"
 const aisStreamBoundingBoxes = [[[-90, -180], [90, 180]]] as const
 
 export const AISSTREAM_MAX_MMSI_PER_REQUEST = 50
+export const AISSTREAM_DEFAULT_CONNECTION_TIMEOUT_MS = 5_000
+export const AISSTREAM_DEFAULT_OBSERVATION_WINDOW_MS = 30_000
 
 function socketFromGlobal(endpoint: string): AisStreamSocket {
   const WebSocketCtor = (globalThis as typeof globalThis & { WebSocket?: new (url: string) => unknown }).WebSocket
@@ -182,7 +187,8 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
   readonly providerId = "aisstream"
   private readonly endpoint: string
   private readonly socketFactory: (endpoint: string) => AisStreamSocket
-  private readonly timeoutMs: number
+  private readonly connectionTimeoutMs: number
+  private readonly observationWindowMs: number
   private readonly now: () => Date
   private readonly apiKey?: string
   private readonly apiKeyResolver?: () => Promise<string | undefined>
@@ -190,7 +196,11 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
   constructor(options: AisStreamProviderOptions) {
     this.endpoint = options.endpoint ?? aisStreamEndpoint
     this.socketFactory = options.socketFactory ?? socketFromGlobal
-    this.timeoutMs = Math.max(1, options.timeoutMs ?? 2500)
+    const legacyTimeoutMs = options.timeoutMs
+    const connectionTimeoutMs = options.connectionTimeoutMs ?? legacyTimeoutMs ?? AISSTREAM_DEFAULT_CONNECTION_TIMEOUT_MS
+    const observationWindowMs = options.observationWindowMs ?? legacyTimeoutMs ?? AISSTREAM_DEFAULT_OBSERVATION_WINDOW_MS
+    this.connectionTimeoutMs = Number.isFinite(connectionTimeoutMs) && connectionTimeoutMs > 0 ? connectionTimeoutMs : AISSTREAM_DEFAULT_CONNECTION_TIMEOUT_MS
+    this.observationWindowMs = Number.isFinite(observationWindowMs) && observationWindowMs > 0 ? observationWindowMs : AISSTREAM_DEFAULT_OBSERVATION_WINDOW_MS
     this.now = options.now ?? (() => new Date())
     this.apiKey = options.apiKey
     this.apiKeyResolver = options.apiKeyResolver
@@ -221,7 +231,8 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
 
   private async getLatestPositionsBatch(apiKey: string, trackedMmsi: readonly string[], fetchedAt: string): Promise<readonly AisPosition[]> {
     let socket: AisStreamSocket | undefined
-    let timer: ReturnType<typeof setTimeout> | undefined
+    let connectionTimer: ReturnType<typeof setTimeout> | undefined
+    let observationTimer: ReturnType<typeof setTimeout> | undefined
     const positions = new Map<string, AisPosition>()
     try {
       socket = this.socketFactory(this.endpoint)
@@ -232,13 +243,17 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
         const finish = (error?: Error) => {
           if (settled) return
           settled = true
-          if (timer) clearTimeout(timer)
+          if (connectionTimer) clearTimeout(connectionTimer)
+          if (observationTimer) clearTimeout(observationTimer)
           if (error) reject(error)
           else resolve([...positions.values()])
         }
-        timer = setTimeout(() => finish(opened ? undefined : new Error("aisstream_timeout")), this.timeoutMs)
+        connectionTimer = setTimeout(() => {
+          if (!opened) finish(new Error("aisstream_timeout"))
+        }, this.connectionTimeoutMs)
         socket!.onopen = () => {
           opened = true
+          if (connectionTimer) clearTimeout(connectionTimer)
           try {
             socket!.send(JSON.stringify({
               APIKey: apiKey,
@@ -246,6 +261,7 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
               FiltersShipMMSI: [...trackedMmsi],
               FilterMessageTypes: ["PositionReport"],
             }))
+            if (!settled) observationTimer = setTimeout(() => finish(), this.observationWindowMs)
           } catch (error) {
             finish(safeProviderError(error))
           }
@@ -274,7 +290,8 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
         }
       })
     } finally {
-      if (timer) clearTimeout(timer)
+      if (connectionTimer) clearTimeout(connectionTimer)
+      if (observationTimer) clearTimeout(observationTimer)
       try {
         socket?.close()
       } catch {

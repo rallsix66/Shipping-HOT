@@ -1,9 +1,11 @@
+import process from "node:process"
 import type { Database } from "db0"
 import type { ShippingDataMode } from "#/database/runtime"
 import type { SecretStore } from "#/providers/contracts"
 import { ProviderError } from "#/providers/contracts"
 import type { AisTrackingProvider } from "#/providers/ais/contracts"
-import { createAisStreamTrackingProvider } from "#/providers/ais/aisstream-provider"
+import type { AisStreamSocket } from "#/providers/ais/aisstream-provider"
+import { AISSTREAM_DEFAULT_CONNECTION_TIMEOUT_MS, AISSTREAM_DEFAULT_OBSERVATION_WINDOW_MS, createAisStreamTrackingProvider } from "#/providers/ais/aisstream-provider"
 import { createMockAisTrackingProvider } from "#/providers/ais/mock-provider"
 import { FileSecretStore } from "#/secrets/file-secret-store"
 
@@ -11,7 +13,27 @@ export interface AisProviderFactoryOptions {
   providerId: string
   dataMode: ShippingDataMode
   secretStore?: SecretStore
+  socketFactory?: (endpoint: string) => AisStreamSocket
+  connectionTimeoutMs?: number
+  observationWindowMs?: number
   now?: () => Date
+}
+
+export interface AisStreamTiming {
+  connectionTimeoutMs: number
+  observationWindowMs: number
+}
+
+function positiveMilliseconds(value: string | undefined, fallback: number): number {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+}
+
+export function getConfiguredAisStreamTiming(environment: NodeJS.ProcessEnv = process.env): AisStreamTiming {
+  return {
+    connectionTimeoutMs: positiveMilliseconds(environment.SHIPPING_AIS_CONNECTION_TIMEOUT_MS, AISSTREAM_DEFAULT_CONNECTION_TIMEOUT_MS),
+    observationWindowMs: positiveMilliseconds(environment.SHIPPING_AIS_OBSERVATION_WINDOW_MS, AISSTREAM_DEFAULT_OBSERVATION_WINDOW_MS),
+  }
 }
 
 function unavailableAisProvider(providerId: string, error: string): AisTrackingProvider {
@@ -37,7 +59,14 @@ export function createAisTrackingProvider(options: AisProviderFactoryOptions): A
   }
   if (options.providerId === "aisstream") {
     const secretStore = options.secretStore ?? new FileSecretStore()
-    return createAisStreamTrackingProvider({ apiKeyResolver: () => secretStore.get("aisstream"), now: options.now })
+    const timing = getConfiguredAisStreamTiming()
+    return createAisStreamTrackingProvider({
+      apiKeyResolver: () => secretStore.get("aisstream"),
+      socketFactory: options.socketFactory,
+      connectionTimeoutMs: options.connectionTimeoutMs ?? timing.connectionTimeoutMs,
+      observationWindowMs: options.observationWindowMs ?? timing.observationWindowMs,
+      now: options.now,
+    })
   }
   return unavailableAisProvider(options.providerId, "ais_provider_unavailable")
 }

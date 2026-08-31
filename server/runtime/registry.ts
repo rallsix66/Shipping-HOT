@@ -2,7 +2,7 @@ import process from "node:process"
 import type { Database } from "db0"
 import type { ShippingDataMode } from "#/database/runtime"
 import type { AisTrackingProvider } from "#/providers/ais/contracts"
-import { createAisTrackingProviderForDatabase } from "#/providers/ais"
+import { createAisTrackingProviderForDatabase, getConfiguredAisStreamTiming } from "#/providers/ais"
 import { createAisTrackingJob } from "#/runtime/ais-tracking-job"
 import type { VoyageProvider } from "#/providers/voyage/contracts"
 import { createVoyageProviderForDatabase } from "#/providers/voyage"
@@ -125,9 +125,12 @@ function weatherJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
 
 export function getDefaultRuntimeJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
   const providerId = getConfiguredAisProviderId()
+  const aisTiming = getConfiguredAisStreamTiming()
   const provider = options.aisProvider ?? createAisTrackingProviderForDatabase(options.database, {
     providerId,
     dataMode: options.dataMode,
+    connectionTimeoutMs: aisTiming.connectionTimeoutMs,
+    observationWindowMs: aisTiming.observationWindowMs,
     now: options.now,
   })
   const voyageProviderId = process.env.SHIPPING_VOYAGE_PROVIDER?.trim().toLowerCase() || "mock"
