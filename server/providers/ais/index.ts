@@ -3,9 +3,10 @@ import type { Database } from "db0"
 import type { ShippingDataMode } from "#/database/runtime"
 import type { SecretStore } from "#/providers/contracts"
 import { ProviderError } from "#/providers/contracts"
-import type { AisTrackingProvider } from "#/providers/ais/contracts"
+import type { AisLiveStreamProvider, AisTrackingProvider } from "#/providers/ais/contracts"
 import type { AisStreamSocket } from "#/providers/ais/aisstream-provider"
 import { AISSTREAM_DEFAULT_CONNECTION_TIMEOUT_MS, AISSTREAM_DEFAULT_OBSERVATION_WINDOW_MS, createAisStreamTrackingProvider } from "#/providers/ais/aisstream-provider"
+import { createAisStreamLiveProvider } from "#/providers/ais/aisstream-live-provider"
 import { createMockAisTrackingProvider } from "#/providers/ais/mock-provider"
 import { FileSecretStore } from "#/secrets/file-secret-store"
 
@@ -17,6 +18,12 @@ export interface AisProviderFactoryOptions {
   connectionTimeoutMs?: number
   observationWindowMs?: number
   now?: () => Date
+}
+
+export interface AisLiveProviderFactoryOptions {
+  secretStore?: SecretStore
+  socketFactory?: (endpoint: string) => AisStreamSocket
+  connectionTimeoutMs?: number
 }
 
 export interface AisStreamTiming {
@@ -73,4 +80,18 @@ export function createAisTrackingProvider(options: AisProviderFactoryOptions): A
 
 export function createAisTrackingProviderForDatabase(_database: Database, options: AisProviderFactoryOptions): AisTrackingProvider {
   return createAisTrackingProvider(options)
+}
+
+export function createAisLiveStreamProvider(options: AisLiveProviderFactoryOptions = {}): AisLiveStreamProvider {
+  const secretStore = options.secretStore ?? new FileSecretStore()
+  const timing = getConfiguredAisStreamTiming()
+  return createAisStreamLiveProvider({
+    apiKeyResolver: () => secretStore.get("aisstream"),
+    socketFactory: options.socketFactory,
+    connectionTimeoutMs: options.connectionTimeoutMs ?? timing.connectionTimeoutMs,
+  })
+}
+
+export function createAisLiveStreamProviderForDatabase(_database: Database, options: AisLiveProviderFactoryOptions = {}): AisLiveStreamProvider {
+  return createAisLiveStreamProvider(options)
 }

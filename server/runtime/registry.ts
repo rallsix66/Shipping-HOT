@@ -15,6 +15,7 @@ import { createWeatherSyncJob } from "#/runtime/weather-sync-job"
 import { createOpenMeteoWeatherProvider, providerModes, providers } from "#/providers/shipping"
 import { PortDirectoryRepository } from "#/database/port-directory"
 import type { RuntimeJob } from "#/runtime/background-runtime"
+import { isAisStreamingEnabled } from "#/runtime/ais-streaming-config"
 
 export interface RuntimeRegistryOptions {
   database: Database
@@ -125,28 +126,35 @@ function weatherJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
 
 export function getDefaultRuntimeJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
   const providerId = getConfiguredAisProviderId()
+  const streamingEnabled = isAisStreamingEnabled(options.dataMode)
   const aisTiming = getConfiguredAisStreamTiming()
-  const provider = options.aisProvider ?? createAisTrackingProviderForDatabase(options.database, {
-    providerId,
-    dataMode: options.dataMode,
-    connectionTimeoutMs: aisTiming.connectionTimeoutMs,
-    observationWindowMs: aisTiming.observationWindowMs,
-    now: options.now,
-  })
+  const provider = streamingEnabled
+    ? undefined
+    : options.aisProvider ?? createAisTrackingProviderForDatabase(options.database, {
+      providerId,
+      dataMode: options.dataMode,
+      connectionTimeoutMs: aisTiming.connectionTimeoutMs,
+      observationWindowMs: aisTiming.observationWindowMs,
+      now: options.now,
+    })
   const voyageProviderId = process.env.SHIPPING_VOYAGE_PROVIDER?.trim().toLowerCase() || "mock"
   const voyageProvider = options.voyageProvider ?? createVoyageProviderForDatabase(options.database, {
     providerId: voyageProviderId,
     dataMode: options.dataMode,
     now: options.now,
   })
-  return [createAisTrackingJob({
-    database: options.database,
-    dataMode: options.dataMode,
-    provider,
-    intervalMs: intervalMs(),
-    enabled: !(options.dataMode === "real" && provider.providerId === "mock"),
-    now: options.now,
-  }), createVoyageSyncJob({
+  const jobs: RuntimeJob[] = []
+  if (provider) {
+    jobs.push(createAisTrackingJob({
+      database: options.database,
+      dataMode: options.dataMode,
+      provider,
+      intervalMs: intervalMs(),
+      enabled: !(options.dataMode === "real" && provider.providerId === "mock"),
+      now: options.now,
+    }))
+  }
+  return [...jobs, createVoyageSyncJob({
     database: options.database,
     dataMode: options.dataMode,
     provider: voyageProvider,

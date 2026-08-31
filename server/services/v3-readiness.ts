@@ -6,6 +6,7 @@ import type { Database } from "db0"
 import { latestSchemaVersion, readDatabaseMetadata } from "#/database/runtime"
 import type { ShippingDataMode } from "#/database/runtime"
 import { activeShippingFeedSourceIds, shippingFeedSources } from "#/providers/feed"
+import { isAisStreamingEnabled } from "#/runtime/ais-streaming-config"
 
 export const v3ToolchainContract = {
   nodeVersion: "24.15.0",
@@ -22,7 +23,9 @@ export const approvedRuntimeJobs = [
 export type ReadinessProfile = "DEVELOPMENT_SAFE" | "REAL_OPERATIONAL"
 
 export function approvedRuntimeJobKeys(dataMode: ShippingDataMode): string[] {
-  const keys = approvedRuntimeJobs.map(job => `${job.id}:${job.capability}`)
+  const keys = approvedRuntimeJobs
+    .filter(job => job.id !== "ais-tracking" || !isAisStreamingEnabled(dataMode))
+    .map(job => `${job.id}:${job.capability}`)
   const requestedFeed = process.env.SHIPPING_FEED_PROVIDER?.trim().toLowerCase()
   if (dataMode === "real" && requestedFeed === "public") {
     for (const source of shippingFeedSources) {
@@ -60,6 +63,12 @@ export interface RuntimeReadinessJob {
 export interface RuntimeReadinessStatus {
   running: boolean
   jobs: RuntimeReadinessJob[]
+  aisLiveTracker?: {
+    running: boolean
+    providerStatus?: CapabilityReadiness["runtime"]
+    lastSuccessAt?: string
+    lastSourceUpdatedAt?: string
+  }
 }
 
 export interface V3ToolchainObservation {
@@ -343,7 +352,7 @@ function vesselSearchCapabilityDefinition(): { capability: string, provider: str
   return { capability: "vessel_search", provider: provider ?? "unavailable", configured: false, credential: "unknown", status: "not_configured" }
 }
 
-function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadinessStatus | undefined): CapabilityReadiness[] {
+function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadinessStatus | undefined, dataMode: ShippingDataMode): CapabilityReadiness[] {
   const runtimeByCapability = new Map<string, RuntimeReadinessJob[]>()
   for (const job of runtime?.jobs ?? []) runtimeByCapability.set(job.capability, [...(runtimeByCapability.get(job.capability) ?? []), job])
   const safe = profile === "DEVELOPMENT_SAFE"
@@ -385,15 +394,20 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
     const jobs = runtimeByCapability.get(runtimeCapability) ?? []
     const job = jobs[0]
     const aggregatedRuntime = aggregateRuntimeReadiness(jobs)
+    const liveTracker = definition.capability === "ais_tracking" && isAisStreamingEnabled(dataMode) ? runtime?.aisLiveTracker : undefined
     const sourceDetails = runtimeCapability === "feed_sync"
       ? jobs.map(source => ({ id: source.id, provider: source.providerId, runtime: runtimeState(source), enabled: source.enabled, lastSuccessAt: source.lastSuccessAt, lastSourceUpdatedAt: source.lastSourceUpdatedAt, errorCode: source.errorCode }))
       : undefined
-    const freshness = jobs.some(item => item.lastSourceUpdatedAt && Date.parse(item.lastSourceUpdatedAt) > Date.now() - 24 * 60 * 60 * 1000)
+    const sourceUpdatedAt = liveTracker?.lastSourceUpdatedAt ?? job?.lastSourceUpdatedAt
+    const freshness = sourceUpdatedAt && Date.parse(sourceUpdatedAt) > Date.now() - 24 * 60 * 60 * 1000
       ? "fresh"
-      : jobs.some(item => item.lastSourceUpdatedAt)
+      : sourceUpdatedAt
         ? "stale"
         : "unknown"
-    return { ...definition, runtime: aggregatedRuntime, lastSuccessAt: job?.lastSuccessAt, lastSourceUpdatedAt: job?.lastSourceUpdatedAt, freshness, liveVerification: definition.liveVerification ?? (safe ? "not_verified" : "coverage_pending"), ...(sourceDetails ? { sources: sourceDetails } : {}) }
+    const capabilityRuntime = liveTracker
+      ? liveTracker.running ? (liveTracker.providerStatus ?? "registered") : "not_registered"
+      : aggregatedRuntime
+    return { ...definition, runtime: capabilityRuntime, lastSuccessAt: liveTracker?.lastSuccessAt ?? job?.lastSuccessAt, lastSourceUpdatedAt: liveTracker?.lastSourceUpdatedAt ?? job?.lastSourceUpdatedAt, freshness, liveVerification: definition.liveVerification ?? (safe ? "not_verified" : "coverage_pending"), ...(sourceDetails ? { sources: sourceDetails } : {}) }
   })
 }
 
@@ -413,7 +427,7 @@ export async function readV3Readiness(db: Database, options: V3ReadinessOptions 
     ...runtimeChecks(options.runtime, options.bootstrapFailed, dataMode),
     check("network-probes", "skipped", "Readiness performs no external Provider requests; live contract and coverage checks remain deferred"),
   ]
-  const capabilities = capabilityReadiness(profile, options.runtime)
+  const capabilities = capabilityReadiness(profile, options.runtime, dataMode)
   const hardChecksPass = checks.filter(item => item.id !== "network-probes").every(item => item.status === "pass")
   return {
     phase: "v3-readiness",

@@ -51,8 +51,8 @@ function job(overrides: Partial<RuntimeJob> = {}): RuntimeJob {
   }
 }
 
-afterEach(() => {
-  shutdownBackgroundRuntime()
+afterEach(async () => {
+  await shutdownBackgroundRuntime()
 })
 
 describe("backgroundRuntime", () => {
@@ -352,7 +352,7 @@ describe("runtimeRepository persistence", () => {
       expect(getBackgroundRuntime()).toBe(recovered)
       recovered.stop()
     } finally {
-      shutdownBackgroundRuntime()
+      await shutdownBackgroundRuntime()
       native.close()
       vi.useRealTimers()
     }

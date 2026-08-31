@@ -3,11 +3,15 @@ import type { Database } from "db0"
 import { initShippingTables } from "#/database/shipping"
 import { RuntimeRepository } from "#/database/runtime-jobs"
 import type { AisTrackingProvider } from "#/providers/ais/contracts"
+import { createAisLiveStreamProvider } from "#/providers/ais"
 import { BackgroundRuntime, type RuntimeJob } from "#/runtime/background-runtime"
 import { getDefaultRuntimeJobs } from "#/runtime/registry"
+import { AisLiveTracker } from "#/runtime/ais-live-tracker"
+import { isAisStreamingEnabled } from "#/runtime/ais-streaming-config"
 
 interface RuntimeGlobalState {
   runtime?: BackgroundRuntime
+  aisLiveTracker?: AisLiveTracker
   bootstrapPromise?: Promise<BackgroundRuntime>
   bootstrapFailed?: boolean
   signalHandlers?: { SIGINT: () => void, SIGTERM: () => void }
@@ -29,6 +33,7 @@ export interface BootstrapBackgroundRuntimeOptions {
   repository?: RuntimeRepository
   jobs?: RuntimeJob[]
   aisProvider?: AisTrackingProvider
+  aisLiveTracker?: AisLiveTracker
   enabled?: boolean
   installSignalHandlers?: boolean
 }
@@ -63,15 +68,33 @@ export async function bootstrapBackgroundRuntime(options: BootstrapBackgroundRun
     await initShippingTables(database, dataMode)
     const runtime = new BackgroundRuntime(options.repository ?? new RuntimeRepository(database))
     for (const job of options.jobs ?? getDefaultRuntimeJobs({ database, dataMode, aisProvider: options.aisProvider })) runtime.register(job)
-    if (options.enabled ?? runtimeEnabled()) await runtime.start()
-    state.runtime = runtime
-    if (options.installSignalHandlers ?? false) installSignalHandlers()
-    return runtime
+    const shouldStart = options.enabled ?? runtimeEnabled()
+    let aisLiveTracker: AisLiveTracker | undefined
+    try {
+      if (shouldStart && isAisStreamingEnabled(dataMode)) {
+        aisLiveTracker = options.aisLiveTracker ?? new AisLiveTracker({
+          database,
+          dataMode,
+          provider: createAisLiveStreamProvider(),
+        })
+        await aisLiveTracker.start()
+      }
+      if (shouldStart) await runtime.start()
+      state.runtime = runtime
+      state.aisLiveTracker = aisLiveTracker
+      if (options.installSignalHandlers ?? false) installSignalHandlers()
+      return runtime
+    } catch (error) {
+      await aisLiveTracker?.stop()
+      runtime.stop()
+      throw error
+    }
   })()
   try {
     return await state.bootstrapPromise
   } catch (error) {
     state.runtime = undefined
+    state.aisLiveTracker = undefined
     state.bootstrapFailed = true
     removeSignalHandlers()
     throw error
@@ -84,6 +107,10 @@ export function getBackgroundRuntime(): BackgroundRuntime | undefined {
   return globalState().runtime
 }
 
+export function getAisLiveTracker(): AisLiveTracker | undefined {
+  return globalState().aisLiveTracker
+}
+
 export function hasBackgroundRuntimeBootstrapFailed(): boolean {
   return globalState().bootstrapFailed === true
 }
@@ -92,8 +119,11 @@ export function isBackgroundRuntimeEnabled(): boolean {
   return runtimeEnabled()
 }
 
-export function shutdownBackgroundRuntime(): void {
+export async function shutdownBackgroundRuntime(): Promise<void> {
   const state = globalState()
+  const aisLiveTracker = state.aisLiveTracker
+  state.aisLiveTracker = undefined
+  await aisLiveTracker?.stop()
   state.runtime?.stop()
   state.runtime = undefined
   state.bootstrapPromise = undefined

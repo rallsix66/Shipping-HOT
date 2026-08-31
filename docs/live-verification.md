@@ -115,6 +115,27 @@ This was a formal isolated Real acceptance run after the binary-frame repair. It
 
 The earlier independent 30-second diagnostic PositionReport was not used as formal acceptance evidence. The normal window was not enlarged, no manual position was inserted, and the temporary database was removed after the probe. No GFW, Watchlist, schema, migration, AIS interval, Voyage, AIS Area, Feed, Weather, Translation or UI implementation was changed beyond the approved sampling-window repair.
 
+## V3 AIS Continuous Live Tracker — 2026-08-31
+
+This acceptance run validates the new long-lived AISStream lifecycle. It used only a fresh temporary Real SQLite database and the minimum GFW identity, Watchlist and `AisLiveTracker` dependencies; it did not open the retained database or start other external Runtime Jobs. Discovery frames were never injected into the formal tracker.
+
+| Check | Result |
+| --- | --- |
+| Runtime configuration | `SHIPPING_DATA_MODE=real`, `SHIPPING_AIS_PROVIDER=aisstream`, `SHIPPING_VESSEL_SEARCH_PROVIDER=gfw`, `SHIPPING_AIS_STREAMING_ENABLED=true`; connection timeout `5000` ms and legacy observation setting `30000` ms remained defaults; `SHIPPING_AIS_INTERVAL_MINUTES` remained `15` for fallback only |
+| Singapore discovery | Final 30-second run: raw frames `10`, `SubscriptionConfirmation=1`, `PositionReport=9`, unique valid MMSIs `9`; all observed decoded message types were `SubscriptionConfirmation` or `PositionReport` |
+| Selected active candidate | GFW identity `FU CHI`, canonical `imo:9611644`, IMO `9611644`, current MMSI `414720000`, call sign `BPGE`, flag `CHN`, type `OTHER`; discovery observed this MMSI once |
+| GFW identity history | One returned identity observation for MMSI `414720000`, transmission range `2012-07-30T02:50:08Z` to `2026-08-29T23:59:44Z`; no alternate MMSI was returned for this candidate |
+| Formal Watchlist | One canonical Watchlist target, `ais_enabled=true`, current MMSI `414720000` |
+| Formal continuous stream | One fresh socket opened, `SubscriptionConfirmation=1`; at the 120-second deadline Tracker remained `running=true`, `targetCount=1`, `socketCount=1`, `confirmedSocketCount=1` |
+| Formal PositionReport | `0`; no valid PositionReport for the selected target was re-observed in the formal 120-second stream |
+| SQLite / Runtime | `ais_positions=0`, `ais_latest_positions=0`; `provider_runtime.status=never_succeeded`, no `lastSuccessAt` or `lastSourceUpdatedAt`; `lastMessageAt` and `lastPersistedAt` absent |
+| Shutdown | Tracker stopped with `running=false`, target/socket/confirmed counts `0`; tracked socket handle reported closed and timers were cleared |
+| Restart / API read | Not run because no formal position existed to validate; existing provider-free API/repository read isolation remains covered by targeted tests |
+| Zero-Mock Gate | Schema-discovered `actualMockRows.total=0` across all lineage-bearing business tables |
+| Acceptance Gate | `coverage_pending`; canonical reason `active_candidate_not_reobserved_on_continuous_stream` |
+
+The run confirms the continuous lifecycle and subscription acceptance, but it does not establish `verified_live`: discovery coverage was not re-observed by the selected-MMSI formal stream. No AIS position was manually inserted, no Mock fallback was used, no database schema or retained SQLite was touched, and the temporary database was removed after the run.
+
 ## Provider and persistence evidence
 
 | Capability | Provider | Observation | SQLite / API evidence | Status |

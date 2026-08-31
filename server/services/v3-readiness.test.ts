@@ -231,4 +231,51 @@ describe("v3 readiness", () => {
       status: "credential_missing",
     })
   })
+
+  it("accepts the continuous AIS tracker as the AIS runtime without faking live coverage", async () => {
+    const previous = {
+      dataMode: process.env.SHIPPING_DATA_MODE,
+      aisProvider: process.env.SHIPPING_AIS_PROVIDER,
+      streaming: process.env.SHIPPING_AIS_STREAMING_ENABLED,
+      runtime: process.env.SHIPPING_RUNTIME_ENABLED,
+    }
+    try {
+      process.env.SHIPPING_DATA_MODE = "real"
+      process.env.SHIPPING_AIS_PROVIDER = "aisstream"
+      process.env.SHIPPING_AIS_STREAMING_ENABLED = "true"
+      process.env.SHIPPING_RUNTIME_ENABLED = "true"
+      const { database, native } = createNativeDatabase()
+      try {
+        await initShippingTables(database, "real")
+        const jobs = approvedRuntimeJobKeys("real").map((key) => {
+          const separator = key.lastIndexOf(":")
+          return { id: key.slice(0, separator), providerId: "test", capability: key.slice(separator + 1), enabled: true, status: "healthy" }
+        })
+        const report = await readV3Readiness(database, {
+          dataMode: "real",
+          profile: "REAL_OPERATIONAL",
+          runtime: {
+            running: true,
+            jobs,
+            aisLiveTracker: { running: true, providerStatus: "never_succeeded" },
+          },
+          toolchain: { packageManager: "pnpm@10.30.3", betterSqlite3Version: "12.6.2", betterSqlite3LoadError: undefined },
+        })
+        const ais = report.capabilities.find(capability => capability.capability === "ais_tracking")
+        expect(report.checks.find(check => check.id === "runtime-scope")).toMatchObject({ status: "pass" })
+        expect(ais).toMatchObject({ runtime: "never_succeeded", liveVerification: "coverage_pending" })
+      } finally {
+        native.close()
+      }
+    } finally {
+      if (previous.dataMode === undefined) delete process.env.SHIPPING_DATA_MODE
+      else process.env.SHIPPING_DATA_MODE = previous.dataMode
+      if (previous.aisProvider === undefined) delete process.env.SHIPPING_AIS_PROVIDER
+      else process.env.SHIPPING_AIS_PROVIDER = previous.aisProvider
+      if (previous.streaming === undefined) delete process.env.SHIPPING_AIS_STREAMING_ENABLED
+      else process.env.SHIPPING_AIS_STREAMING_ENABLED = previous.streaming
+      if (previous.runtime === undefined) delete process.env.SHIPPING_RUNTIME_ENABLED
+      else process.env.SHIPPING_RUNTIME_ENABLED = previous.runtime
+    }
+  })
 })

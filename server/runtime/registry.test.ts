@@ -62,9 +62,11 @@ describe("runtime registry", () => {
     await initShippingTables(database, "real")
     const previousAis = process.env.SHIPPING_AIS_PROVIDER
     const previousVessel = process.env.SHIPPING_VESSEL_PROVIDER
+    const previousStreaming = process.env.SHIPPING_AIS_STREAMING_ENABLED
     try {
       delete process.env.SHIPPING_AIS_PROVIDER
       process.env.SHIPPING_VESSEL_PROVIDER = "aisstream"
+      process.env.SHIPPING_AIS_STREAMING_ENABLED = "false"
       const jobs = getDefaultRuntimeJobs({ database, dataMode: "real", voyageProvider })
       expect(jobs.find(job => job.id === "ais-tracking")).toMatchObject({ providerId: "aisstream", enabled: true })
     } finally {
@@ -72,6 +74,63 @@ describe("runtime registry", () => {
       else process.env.SHIPPING_AIS_PROVIDER = previousAis
       if (previousVessel === undefined) delete process.env.SHIPPING_VESSEL_PROVIDER
       else process.env.SHIPPING_VESSEL_PROVIDER = previousVessel
+      if (previousStreaming === undefined) delete process.env.SHIPPING_AIS_STREAMING_ENABLED
+      else process.env.SHIPPING_AIS_STREAMING_ENABLED = previousStreaming
+      native.close()
+    }
+  })
+
+  it("omits the bounded AIS job when continuous streaming is enabled", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const previous = {
+      dataMode: process.env.SHIPPING_DATA_MODE,
+      aisProvider: process.env.SHIPPING_AIS_PROVIDER,
+      streaming: process.env.SHIPPING_AIS_STREAMING_ENABLED,
+      runtime: process.env.SHIPPING_RUNTIME_ENABLED,
+    }
+    try {
+      process.env.SHIPPING_DATA_MODE = "real"
+      process.env.SHIPPING_AIS_PROVIDER = "aisstream"
+      process.env.SHIPPING_AIS_STREAMING_ENABLED = "true"
+      process.env.SHIPPING_RUNTIME_ENABLED = "true"
+      const jobs = getDefaultRuntimeJobs({ database, dataMode: "real", voyageProvider })
+      expect(jobs.some(job => job.id === "ais-tracking")).toBe(false)
+      expect(jobs.some(job => job.id === "voyage-sync")).toBe(true)
+    } finally {
+      if (previous.dataMode === undefined) delete process.env.SHIPPING_DATA_MODE
+      else process.env.SHIPPING_DATA_MODE = previous.dataMode
+      if (previous.aisProvider === undefined) delete process.env.SHIPPING_AIS_PROVIDER
+      else process.env.SHIPPING_AIS_PROVIDER = previous.aisProvider
+      if (previous.streaming === undefined) delete process.env.SHIPPING_AIS_STREAMING_ENABLED
+      else process.env.SHIPPING_AIS_STREAMING_ENABLED = previous.streaming
+      if (previous.runtime === undefined) delete process.env.SHIPPING_RUNTIME_ENABLED
+      else process.env.SHIPPING_RUNTIME_ENABLED = previous.runtime
+      native.close()
+    }
+  })
+
+  it("retains the bounded AIS job when continuous streaming is disabled", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const previous = {
+      aisProvider: process.env.SHIPPING_AIS_PROVIDER,
+      streaming: process.env.SHIPPING_AIS_STREAMING_ENABLED,
+      runtime: process.env.SHIPPING_RUNTIME_ENABLED,
+    }
+    try {
+      process.env.SHIPPING_AIS_PROVIDER = "aisstream"
+      process.env.SHIPPING_AIS_STREAMING_ENABLED = "false"
+      process.env.SHIPPING_RUNTIME_ENABLED = "true"
+      const jobs = getDefaultRuntimeJobs({ database, dataMode: "real", voyageProvider })
+      expect(jobs.find(job => job.id === "ais-tracking")).toMatchObject({ providerId: "aisstream", intervalMs: 15 * 60 * 1000 })
+    } finally {
+      if (previous.aisProvider === undefined) delete process.env.SHIPPING_AIS_PROVIDER
+      else process.env.SHIPPING_AIS_PROVIDER = previous.aisProvider
+      if (previous.streaming === undefined) delete process.env.SHIPPING_AIS_STREAMING_ENABLED
+      else process.env.SHIPPING_AIS_STREAMING_ENABLED = previous.streaming
+      if (previous.runtime === undefined) delete process.env.SHIPPING_RUNTIME_ENABLED
+      else process.env.SHIPPING_RUNTIME_ENABLED = previous.runtime
       native.close()
     }
   })

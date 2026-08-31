@@ -26,7 +26,7 @@ export interface AisStreamProviderOptions {
   now?: () => Date
 }
 
-interface AisStreamMessage {
+export interface AisStreamMessage {
   MessageType?: string
   error?: unknown
   Error?: unknown
@@ -46,14 +46,14 @@ interface AisStreamMessage {
   } }
 }
 
-const aisStreamEndpoint = "wss://stream.aisstream.io/v0/stream"
-const aisStreamBoundingBoxes = [[[-90, -180], [90, 180]]] as const
+export const aisStreamEndpoint = "wss://stream.aisstream.io/v0/stream"
+export const aisStreamBoundingBoxes = [[[-90, -180], [90, 180]]] as const
 
 export const AISSTREAM_MAX_MMSI_PER_REQUEST = 50
 export const AISSTREAM_DEFAULT_CONNECTION_TIMEOUT_MS = 5_000
 export const AISSTREAM_DEFAULT_OBSERVATION_WINDOW_MS = 30_000
 
-function socketFromGlobal(endpoint: string): AisStreamSocket {
+export function createAisStreamSocket(endpoint: string): AisStreamSocket {
   const WebSocketCtor = (globalThis as typeof globalThis & { WebSocket?: new (url: string) => unknown }).WebSocket
   if (!WebSocketCtor) throw new Error("aisstream_websocket_unavailable")
   return new WebSocketCtor(endpoint) as AisStreamSocket
@@ -91,7 +91,7 @@ function navigationStatus(value: number | undefined): string | undefined {
   return value === 0 ? "under_way" : value === 1 ? "anchored" : value === 5 ? "moored" : value === 6 ? "aground" : "unknown"
 }
 
-async function parseMessage(data: unknown): Promise<AisStreamMessage | undefined> {
+export async function parseAisStreamMessage(data: unknown): Promise<AisStreamMessage | undefined> {
   try {
     let text: string | undefined
     if (typeof data === "string") {
@@ -129,7 +129,7 @@ function errorText(value: unknown): string | undefined {
   return undefined
 }
 
-function protocolError(message: AisStreamMessage): Error | undefined {
+export function aisStreamProtocolError(message: AisStreamMessage): Error | undefined {
   const record = message as Record<string, unknown>
   const hasError = Object.prototype.hasOwnProperty.call(record, "error")
     || Object.prototype.hasOwnProperty.call(record, "Error")
@@ -168,7 +168,7 @@ export function mapAisStreamPosition(message: AisStreamMessage, _fetchedAt: stri
   }
 }
 
-function safeProviderError(error: unknown): ProviderError {
+export function aisStreamProviderError(error: unknown): ProviderError {
   if (error instanceof ProviderError) return error
   const text = errorText(error)?.trim() ?? ""
   const directCode = text.toLowerCase()
@@ -195,7 +195,7 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
 
   constructor(options: AisStreamProviderOptions) {
     this.endpoint = options.endpoint ?? aisStreamEndpoint
-    this.socketFactory = options.socketFactory ?? socketFromGlobal
+    this.socketFactory = options.socketFactory ?? createAisStreamSocket
     const legacyTimeoutMs = options.timeoutMs
     const connectionTimeoutMs = options.connectionTimeoutMs ?? legacyTimeoutMs ?? AISSTREAM_DEFAULT_CONNECTION_TIMEOUT_MS
     const observationWindowMs = options.observationWindowMs ?? legacyTimeoutMs ?? AISSTREAM_DEFAULT_OBSERVATION_WINDOW_MS
@@ -225,7 +225,7 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
       }
       return [...positions.values()]
     } catch (error) {
-      throw safeProviderError(error)
+      throw aisStreamProviderError(error)
     }
   }
 
@@ -263,17 +263,17 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
             }))
             if (!settled) observationTimer = setTimeout(() => finish(), this.observationWindowMs)
           } catch (error) {
-            finish(safeProviderError(error))
+            finish(aisStreamProviderError(error))
           }
         }
         socket!.onmessage = (event) => {
           void (async () => {
-            const message = await parseMessage(event.data)
+            const message = await parseAisStreamMessage(event.data)
             if (message?.MessageType === "SubscriptionConfirmation") {
               subscriptionConfirmed = true
               return
             }
-            const error = message ? protocolError(message) : undefined
+            const error = message ? aisStreamProtocolError(message) : undefined
             if (error) {
               finish(error)
               return
@@ -284,7 +284,7 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
             if (trackedMmsi.every(mmsi => positions.has(mmsi))) finish()
           })()
         }
-        socket!.onerror = event => finish(safeProviderError(event))
+        socket!.onerror = event => finish(aisStreamProviderError(event))
         socket!.onclose = () => {
           if (!settled) finish(positions.size || subscriptionConfirmed ? undefined : new Error("aisstream_connection_closed"))
         }

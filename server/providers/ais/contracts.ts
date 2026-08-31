@@ -28,3 +28,26 @@ export interface AisTrackingProvider {
   unsubscribe: (vessels: readonly AisTrackingVessel[]) => Promise<void>
   getLatestPositions: (vessels: readonly AisTrackingVessel[]) => Promise<readonly AisPosition[]>
 }
+
+export interface AisLiveStreamCallbacks {
+  onPosition: (position: AisPosition) => void | Promise<void>
+  onSubscriptionConfirmed?: () => void | Promise<void>
+  onError?: (error: Error) => void | Promise<void>
+  onClose?: (error?: Error) => void | Promise<void>
+}
+
+export interface AisLiveStreamOptions {
+  vessels: readonly AisTrackingVessel[]
+  callbacks: AisLiveStreamCallbacks
+}
+
+export interface AisLiveStreamHandle {
+  readonly socketCount: number
+  readonly confirmedSocketCount: number
+  close: () => Promise<void>
+}
+
+export interface AisLiveStreamProvider {
+  readonly providerId: string
+  openStream: (options: AisLiveStreamOptions) => Promise<AisLiveStreamHandle>
+}

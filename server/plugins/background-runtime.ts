@@ -4,7 +4,5 @@ export default defineNitroPlugin((nitroApp) => {
   void bootstrapBackgroundRuntime({ installSignalHandlers: true }).catch((error: unknown) => {
     logger.error("background runtime bootstrap failed", { errorCode: error instanceof Error ? error.message : "bootstrap_failed" })
   })
-  nitroApp.hooks.hook("close", () => {
-    shutdownBackgroundRuntime()
-  })
+  nitroApp.hooks.hook("close", () => shutdownBackgroundRuntime())
 })
