@@ -17,6 +17,7 @@ const knownEnvironmentNames: Record<string, string> = {
   "deepl": "DEEPL_API_KEY",
   "azure": "AZURE_TRANSLATOR_API_KEY",
   "vesselapi": "VESSELAPI_API_KEY",
+  "gfw": "GFW_API_TOKEN",
   "aisstream": "AISSTREAM_API_KEY",
 }
 

@@ -509,9 +509,13 @@ function VesselSearchPanel() {
       const response = await myFetch<VesselSearchResponse>(`/shipping/search/vessels?q=${encodeURIComponent(query.trim())}`)
       setResults(response.results)
       if (!response.results.length) setMessage("没有找到匹配船舶")
-    } catch {
+    } catch (error) {
       setResults([])
-      setMessage("搜索暂时不可用，请检查 Provider 配置")
+      const responseError = error as { data?: { code?: unknown, data?: { code?: unknown } } }
+      const code = typeof responseError.data?.code === "string"
+        ? responseError.data.code
+        : typeof responseError.data?.data?.code === "string" ? responseError.data.data.code : undefined
+      setMessage(code ? `搜索数据源异常（${code}）` : "搜索暂时不可用，请检查 Provider 配置")
     } finally {
       setSearching(false)
     }
@@ -563,6 +567,8 @@ function VesselSearchPanel() {
         <div className="mt-4 grid gap-2">
           {results.map((result) => {
             const watched = watchlist.find(item => sameVessel(item, result))
+            const historicalMmsis = new Set((result.identityHistory ?? []).map(identity => identity.mmsi).filter((mmsi): mmsi is string => Boolean(mmsi)))
+            if (result.mmsi) historicalMmsis.add(result.mmsi)
             return (
               <div key={result.id} className="list-row flex-wrap gap-3">
                 <div className="min-w-0 flex-1">
@@ -574,8 +580,17 @@ function VesselSearchPanel() {
                     {" · "}
                     {result.callsign ?? "Call Sign —"}
                     {" · "}
+                    {result.flag ? `Flag ${result.flag}` : "Flag —"}
+                    {" · "}
                     {result.source}
                   </p>
+                  {historicalMmsis.size > 1 && (
+                    <p className="mt-1 text-xs op-60">
+                      <span>包含</span>
+                      <span>{historicalMmsis.size}</span>
+                      <span>个历史 MMSI</span>
+                    </p>
+                  )}
                   <p className="mt-1 text-xs op-60">{watched ? (result.mmsi ? "Tracking: Active" : "Unavailable (No MMSI)") : result.mmsi ? "MMSI 可用于 AIS lookup" : "暂无 MMSI，暂不可进行 AIS Tracking"}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">

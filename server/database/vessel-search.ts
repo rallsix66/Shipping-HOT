@@ -1,5 +1,5 @@
 import type { Database } from "db0"
-import type { VesselMetadata, VesselSearchQuery, VesselSearchResult } from "@shared/vessel-search"
+import type { VesselIdentityObservation, VesselMetadata, VesselSearchQuery, VesselSearchResult } from "@shared/vessel-search"
 import { normalizeVesselSearchQuery, normalizeVesselSearchTerm, stableVesselMetadataId, vesselSearchCacheKey } from "@shared/vessel-search"
 import type { ShippingDataMode } from "#/database/runtime"
 
@@ -60,6 +60,27 @@ function parseIds(value: unknown): string[] {
   } catch {
     return []
   }
+}
+
+function identityObservationKey(observation: VesselIdentityObservation): string {
+  return JSON.stringify([
+    observation.providerRecordId,
+    observation.name,
+    observation.imo,
+    observation.mmsi,
+    observation.callsign,
+    observation.flag,
+    observation.type,
+    observation.transmissionDateFrom,
+    observation.transmissionDateTo,
+    observation.source,
+  ])
+}
+
+function mergeIdentityHistory(existing: VesselMetadata | undefined, result: VesselSearchResult): VesselIdentityObservation[] | undefined {
+  const history = [...(existing?.identityHistory ?? []), ...(result.identityHistory ?? [])]
+  if (!history.length) return undefined
+  return [...new Map(history.map(observation => [identityObservationKey(observation), observation])).values()]
 }
 
 export class VesselIdentityConflictError extends Error {
@@ -133,16 +154,21 @@ export class VesselMetadataRepository {
     if (provisionalMatches.length > 1) throw new VesselIdentityConflictError()
     if (provisionalMatches[0]) return { id: provisionalMatches[0].id, existing: provisionalMatches[0] }
 
+    if (result.source === "gfw" && result.imo) return { id: `imo:${result.imo}` }
+    if (result.source === "gfw" && result.mmsi) return { id: `mmsi:${result.mmsi}` }
     return { id: stableVesselMetadataId(result.source, result) }
   }
 
-  async getCachedSearch(query: VesselSearchQuery, now = new Date()): Promise<CachedVesselSearch | undefined> {
+  async getCachedSearch(query: VesselSearchQuery, providerIdOrNow?: string | Date, maybeNow?: Date): Promise<CachedVesselSearch | undefined> {
     const normalized = normalizeVesselSearchQuery(query)
+    const providerId = typeof providerIdOrNow === "string" ? providerIdOrNow : undefined
+    const now = providerIdOrNow instanceof Date ? providerIdOrNow : maybeNow ?? new Date()
+    const searchKey = vesselSearchCacheKey(normalized, providerId)
     const row = await this.db.prepare(`
       SELECT result_ids, provider_id, fetched_at
       FROM vessel_search_cache
       WHERE search_key = ? AND expires_at > ?${sourceWhere(this.dataMode)}
-    `).get(vesselSearchCacheKey(normalized), now.toISOString()) as Row | undefined
+    `).get(searchKey, now.toISOString()) as Row | undefined
     if (!row) return undefined
     const ids = parseIds(row.result_ids)
     const results = await this.listByIds(ids)
@@ -194,6 +220,7 @@ export class VesselMetadataRepository {
           fetchedAt,
           source_type: sourceType,
           providerRecordId: result.providerRecordId ?? existing?.providerRecordId,
+          identityHistory: mergeIdentityHistory(existing, result),
         }
         canonicalResults.push(canonicalResult)
         await this.db.prepare(`
@@ -241,7 +268,7 @@ export class VesselMetadataRepository {
           fetched_at = excluded.fetched_at,
           expires_at = excluded.expires_at
       `).run(
-        vesselSearchCacheKey(normalized),
+        vesselSearchCacheKey(normalized, providerId),
         normalized.query,
         normalized.field,
         JSON.stringify(canonicalResults.map(result => result.id)),

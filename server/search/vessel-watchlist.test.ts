@@ -51,8 +51,8 @@ function searchResult(overrides: Partial<VesselSearchResult>): VesselSearchResul
   }
 }
 
-async function persistSearch(repository: VesselMetadataRepository, result: VesselSearchResult, query: string) {
-  return (await repository.saveSearch({ query, field: "name" }, [result], "vesselapi", "real", new Date(fetchedAt)))[0]
+async function persistSearch(repository: VesselMetadataRepository, result: VesselSearchResult, query: string, providerId = "vesselapi") {
+  return (await repository.saveSearch({ query, field: "name" }, [result], providerId, "real", new Date(fetchedAt)))[0]
 }
 
 describe("vessel search watchlist", () => {
@@ -229,6 +229,33 @@ describe("vessel search watchlist", () => {
     expect(await watchlist.list()).toEqual([expect.objectContaining({ id: provisional.id, imo: "9876543", mmsi: "222222222", providerRecordId: "A" })])
     expect(native.prepare("SELECT COUNT(*) AS count FROM vessel_metadata").get()).toEqual({ count: 1 })
     expect(native.prepare("SELECT COUNT(*) AS count FROM vessel_watchlist").get()).toEqual({ count: 1 })
+    native.close()
+  })
+
+  it("uses the current GFW MMSI for Watchlist/AIS eligibility while retaining historical MMSIs", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const metadata = new VesselMetadataRepository(database, "real")
+    const watchlist = new VesselWatchlistService(database, "real")
+    const hansa = await persistSearch(metadata, searchResult({
+      id: "imo:9155391",
+      name: "HANSA BREITENBURG",
+      imo: "9155391",
+      mmsi: "538090733",
+      callsign: "V7B3029",
+      flag: "MHL",
+      source: "gfw",
+      providerRecordId: "c208e013b-bd7e-8fd3-126e-8c91e6958831",
+      identityHistory: [
+        { providerRecordId: "97db6280-e316-f58c-043d-1740bbb210f9", name: "HANSA BREITENBURG", imo: "9155391", mmsi: "636090756", callsign: "A8ET3", flag: "LBR", source: "gfw", transmissionDateFrom: "2012-01-01T01:26:05Z", transmissionDateTo: "2026-06-08T00:50:04Z" },
+        { providerRecordId: "6561869d3-3c29-f6bb-24ab-ff765f60e1a2", name: "HANSA BREITENB5RG", imo: "9155391", mmsi: "770308484", callsign: "A8ET3", flag: "URY", source: "gfw", transmissionDateFrom: "2024-12-04T07:46:34Z", transmissionDateTo: "2024-12-04T10:28:07Z" },
+        { providerRecordId: "c208e013b-bd7e-8fd3-126e-8c91e6958831", name: "HANSA BREITENBURG", imo: "9155391", mmsi: "538090733", callsign: "V7B3029", flag: "MHL", source: "gfw", transmissionDateFrom: "2026-06-08T00:49:32Z", transmissionDateTo: "2026-08-28T23:59:58Z" },
+      ],
+    }), "HANSA BREITENBURG", "gfw")
+    const watched = await watchlist.add(hansa.id)
+    expect(watched).toMatchObject({ id: "imo:9155391", mmsi: "538090733", aisEnabled: true, aisTrackingAvailable: true })
+    expect(watched.identityHistory?.map(identity => identity.mmsi)).toEqual(["636090756", "770308484", "538090733"])
+    expect(native.prepare("SELECT vessel_id, ais_enabled FROM vessel_watchlist").get()).toEqual({ vessel_id: "imo:9155391", ais_enabled: 1 })
     native.close()
   })
 })

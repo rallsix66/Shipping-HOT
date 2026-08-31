@@ -7,6 +7,7 @@ describe("vessel search domain", () => {
     expect(detectVesselSearchField("9876543")).toBe("imo")
     expect(detectVesselSearchField("477123400")).toBe("mmsi")
     expect(vesselSearchCacheKey({ query: "EVER GLORY", field: "name" })).toBe("name:ever glory")
+    expect(vesselSearchCacheKey({ query: "EVER GLORY", field: "name" }, "gfw")).toBe("gfw:name:ever glory")
   })
 
   it("uses IMO first for a stable metadata identity", () => {

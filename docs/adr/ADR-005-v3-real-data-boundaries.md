@@ -17,6 +17,10 @@ The controlled Real Data Activation slice reuses the Providers already approved 
 
 The activation evidence is recorded in `docs/live-verification.md`. Real Voyage/ETA adapter coverage, VesselAPI credentials/entitlement, AIS PositionReport observation and official weather-alert coverage remain pending. `docs/voyage-provider-gap.md` records that the Voyage gap is not an entitlement result because no credentialed probe was made.
 
+## Current implementation note — 2026-08-31
+
+The approved server-side Vessel Search boundary now includes the optional GFW public vessel-identity provider alongside the retained VesselAPI adapter. GFW authentication/search was verified through an isolated temporary SQLite probe; same-IMO historical identities are normalized to one canonical vessel, identity history is retained in existing metadata JSON, and Watchlist/AIS target selection uses only the selected current MMSI. This does not add an AIS PositionReport provider, Voyage/ETA capability or any Feed/Weather/Translation behavior, and it does not change the safe Mock default.
+
 ## Accepted decision
 
 ### 0. P0 scope boundary

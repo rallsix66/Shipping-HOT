@@ -104,7 +104,8 @@ export class VesselWatchlistService {
     const existing = await this.findMatching(metadata)
     const targetId = existing?.id ?? metadata.id
     const watchedAt = existing?.watchedAt ?? new Date().toISOString()
-    const aisEnabled = Boolean(metadata.mmsi ?? existing?.mmsi)
+    const selectedMmsi = metadata.mmsi ?? existing?.mmsi
+    const aisEnabled = trackingAvailable({ mmsi: selectedMmsi })
 
     await transaction(this.db, async () => {
       await this.db.prepare(`

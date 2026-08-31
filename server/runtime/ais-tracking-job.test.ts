@@ -145,6 +145,48 @@ describe("ais tracking job", () => {
     native.close()
   })
 
+  it("uses only the persisted current MMSI when identity history contains older MMSIs", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    await database.prepare(`
+      INSERT INTO vessel_metadata (id, name, imo, mmsi, callsign, flag, source, fetched_at, source_type, provider_record_id, data)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      "imo:9155391",
+      "HANSA BREITENBURG",
+      "9155391",
+      "538090733",
+      "V7B3029",
+      "MHL",
+      "gfw",
+      "2026-08-28T23:59:58.000Z",
+      "real",
+      "gfw-current",
+      JSON.stringify({ identityHistory: [
+        { providerRecordId: "gfw-old-a", name: "HANSA BREITENBURG", imo: "9155391", mmsi: "636090756", source: "gfw", transmissionDateTo: "2026-06-08T00:50:04Z" },
+        { providerRecordId: "gfw-old-b", name: "HANSA BREITENB5RG", imo: "9155391", mmsi: "770308484", source: "gfw", transmissionDateTo: "2024-12-04T10:28:07Z" },
+        { providerRecordId: "gfw-current", name: "HANSA BREITENBURG", imo: "9155391", mmsi: "538090733", source: "gfw", transmissionDateTo: "2026-08-28T23:59:58Z" },
+      ] }),
+    )
+    await database.prepare("INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled) VALUES (?, ?, 1)").run("imo:9155391", "2026-08-31T00:00:00.000Z")
+    let requested: readonly AisTrackingVessel[] = []
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database))
+    runtime.register(createAisTrackingJob({
+      database,
+      dataMode: "real",
+      provider: provider(async (vessels) => {
+        requested = vessels
+        return []
+      }),
+      intervalMs: 60 * 60 * 1000,
+    }))
+    await runtime.start()
+    await expect(runtime.runNow("ais-tracking")).resolves.toMatchObject({ status: "success", recordsRead: 0 })
+    expect(requested).toEqual([{ vesselId: "imo:9155391", mmsi: "538090733" }])
+    runtime.stop()
+    native.close()
+  })
+
   it("records Provider failure in sync_runs and provider_runtime without writing positions", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "real")

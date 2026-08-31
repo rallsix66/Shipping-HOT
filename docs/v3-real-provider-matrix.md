@@ -1,7 +1,7 @@
 # V3 Real Data Provider Matrix
 
-> Audit date: 2026-08-29
-> Scope: local source, configuration, controlled Real Mode runtime smoke and built Nitro HTTP evidence only. No new secret, provider SDK, paid account or deployment activation was added.
+> Audit date: 2026-08-31
+> Scope: local source, configuration, isolated GFW Real Mode live probe, controlled Runtime smoke and built Nitro HTTP evidence only. No new secret, provider SDK, paid account or deployment activation was added.
 > Status vocabulary: `not_started`, `adapter_ready`, `credential_missing`, `entitlement_missing`, `connection_verified`, `coverage_pending`, `verified_live`, `failed`.
 
 ## Reading this matrix
@@ -19,8 +19,8 @@ The current `.env.local` does not define `SHIPPING_DATA_MODE`. The application t
 
 | Capability | Current Provider / effective mode | Real Provider | Adapter | API key required | Secret configured | Real request verified | Fee / quota | Current status | Evidence / gate |
 |---|---|---|---|---|---|---|---|---|---|
-| Vessel Search | `mock` by default; `SHIPPING_VESSEL_SEARCH_PROVIDER` is not set | VesselAPI | Yes: server-side `createVesselApiSearchProvider()` | Yes: `VESSELAPI_API_KEY` | No (`credential_missing`) | No | Account plan and quota not verified; may be paid | `credential_missing` | Search mapping and cache are locally tested; no live VesselAPI search was made in this inventory. |
-| Vessel Identity | Mock search identity when default mode is used | VesselAPI identity fields + existing canonical resolver | Resolver ready; no separate live identity adapter | Inherited from VesselAPI Search | No | No | Inherited from VesselAPI Search | `credential_missing` | Canonical identity/promotion is implemented, but live identity evidence cannot exist without a real search result. |
+| Vessel Search | `mock` by default; explicit `SHIPPING_VESSEL_SEARCH_PROVIDER` selects `gfw` or `vesselapi` in Real Mode | GFW (verified live), VesselAPI (optional) | Yes: server-side `createGfwVesselSearchProvider()` and existing `createVesselApiSearchProvider()` | GFW: `GFW_API_TOKEN`; VesselAPI: `VESSELAPI_API_KEY` | GFW yes, server-side `.env.local`; VesselAPI not verified | GFW yes; VesselAPI no | GFW public API terms/limits not reassessed here; VesselAPI account plan and quota not verified | GFW `verified_live`; VesselAPI `credential_missing` | GFW isolated probe returned HTTP 200, fresh/then cached HANSA results and provider-aware cache behavior. Mock Mode remains isolated and no live fallback is used. |
+| Vessel Identity | Mock search identity when default mode is used; GFW canonical identity in explicit Real Mode | GFW identity dataset + existing canonical resolver | Same-IMO grouping, latest identity selection and `identityHistory` persistence | Inherited from selected Vessel Search provider | GFW yes, server-side only | GFW yes | GFW identity history is retained in existing metadata JSON; no separate identity table or migration | `verified_live` | HANSA reduced from 3 raw identities to one `imo:9155391` candidate; current MMSI was selected by transmission dates and all three historical MMSIs were retained. |
 | AIS Position | `mock` by default; controlled Real Mode selected AISStream from `SHIPPING_VESSEL_PROVIDER=aisstream` | AISStream | Yes: bounded PositionReport adapter and tracking Job | Yes: `AISSTREAM_API_KEY` | Yes, server-side only (`environment`, masked in live-verification doc) | Credential is configured, but the current watchlist has no eligible canonical real watched MMSI; no live socket was opened. No-target Runtime is `skipped/no_eligible_ais_targets`, first-run health is `never_succeeded`, and usage success/failure counters do not increase | Account limits not verified in this audit | `coverage_pending` | `verified_live` requires a trusted-timestamp PositionReport for a watched MMSI persisted to `ais_positions` and `ais_latest_positions`. |
 | AIS Area / Port Traffic | `aisstream` requested; Real Mode still not active by default | AISStream area subscription | Yes: area session, Port Directory lookup and bounded aggregation | Yes: `AISSTREAM_API_KEY` | Yes, server-side only | No usable area observation recorded | Account limits not verified | `coverage_pending` | Previous probe reached connection without an observation; watched-vessel and area-AIS boundaries remain separate. |
 | Port Intelligence | `portcast` requested in `.env.local` | Portcast public pages | Yes: public-page parser for the eight Port Directory ports | No provider key for the public-page path | Not applicable | Controlled Runtime smoke persisted 8 Port Directory-aligned rows; built `/api/shipping` read them | Public-page availability and robots/legal basis remain operational caveats; no quota claim | `verified_live` | Live page evidence and persisted/API rows are recorded; no Mock enrichment was used. |
@@ -40,7 +40,7 @@ The current `.env.local` does not define `SHIPPING_DATA_MODE`. The application t
 ## Activation blockers and next probes
 
 1. Keep `SHIPPING_DATA_MODE=real` process-scoped for controlled operation; do not change the safe default or commit local secrets.
-2. Probe VesselAPI search and ETA/Port Events entitlement separately only after credentials are supplied and separately approved. A successful search does not imply ETA or Port Events entitlement.
+2. VesselAPI search and ETA/Port Events entitlement remain separate optional probes. A successful GFW or VesselAPI search does not imply ETA or Port Events entitlement.
 3. Keep Maritime Executive and all official weather-alert sources disabled until their real contract/coverage evidence is available.
 4. Keep AIS at `coverage_pending` until an eligible watched MMSI yields a PositionReport persisted to SQLite.
 5. Run each future live gate independently and record request, result, SQLite row and API surface in `docs/live-verification.md`; do not use `verified_live` for connection-only or fixture-only evidence.

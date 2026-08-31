@@ -25,7 +25,7 @@ export class VesselSearchService {
   async search(input: VesselSearchQuery): Promise<VesselSearchResponse> {
     const query = normalizeVesselSearchQuery(input)
     const now = this.now()
-    const cached = await this.repository.getCachedSearch(query, now)
+    const cached = await this.repository.getCachedSearch(query, this.provider.providerId, now)
     if (cached) {
       return { query, results: cached.results, cacheHit: true, providerId: cached.providerId, fetchedAt: cached.fetchedAt }
     }

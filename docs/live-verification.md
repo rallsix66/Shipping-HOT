@@ -1,11 +1,28 @@
 # V3 Real Data Live Verification
 
 > Verification date: 2026-08-30 (review-gap closure; original activation evidence is dated 2026-08-29)
-> Scope: controlled local Real Mode process only. No deployment, provider account change, secret creation or new Provider was performed.
+> Scope: controlled local Real Mode process only. No deployment, provider account change or secret creation was performed; the GFW Provider implementation and live probe are recorded separately below.
 
 ## Method
 
 `pnpm smoke:v3-real-activation` loaded the existing server environment and set `SHIPPING_DATA_MODE=real` for that process only. For this review it used a fresh process-scoped SQLite path so pre-existing Mock/Off local data could not contaminate the observation; it ran the registered Runtime Jobs, then a built Nitro process was smoke-tested separately with process-scoped Mock/Off configuration across the HTTP surfaces. Secret values are not recorded here.
+
+## GFW Vessel Search + Canonical Identity — 2026-08-31
+
+| Check | Result |
+| --- | --- |
+| Capability / Provider | Vessel Search / GFW (`providerId=gfw`) |
+| Credential | `configured: true`; loaded server-side from `.env.local`; only the redacted suffix was observed during the probe |
+| Isolated database | Fresh temporary SQLite only; deleted after the probe; retained `.data/shipping-hot-v3.sqlite3` was not opened for this verification |
+| HANSA first search | HTTP `200`, `cacheHit=false`, `resultsCount=1`; canonical `imo:9155391`, current MMSI `538090733`, Call Sign `V7B3029`, Flag `MHL` |
+| HANSA repeat | HTTP `200`, `cacheHit=true`; zero additional GFW fetches |
+| IMO search | HTTP `200`, `cacheHit=false`, one result pointing to the same `imo:9155391` canonical vessel |
+| HANSA identity history | Raw 3 identities → canonical 1; historical MMSIs retained: `636090756`, `770308484`, `538090733` |
+| DONG FANG FU | HTTP `200`, `cacheHit=false`, 16 canonical candidates; separate IMO examples `9162423` and `4837047` remained distinct |
+| Watchlist / AIS target smoke | Watchlist used `imo:9155391` and current MMSI `538090733`; AIS target selection emitted only that MMSI; no PositionReport was requested |
+| Status | `verified_live` for GFW authentication/search/normalization; this does not verify AIS PositionReport, Voyage/ETA or official weather-alert coverage |
+
+The probe used `loadServerEnv()` and the existing `FileSecretStore` mapping (`gfw` → `GFW_API_TOKEN`), with no token value in code, SQLite, logs or this document. The GFW adapter is separate from VesselAPI and provider-aware cache keys prevent an empty cache from one provider blocking another.
 
 ## V3 AIS Live PositionReport Verification — 2026-08-29
 

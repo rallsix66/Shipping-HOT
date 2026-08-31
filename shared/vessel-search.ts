@@ -7,6 +7,19 @@ export interface VesselSearchQuery {
   field?: VesselSearchField
 }
 
+export interface VesselIdentityObservation {
+  providerRecordId?: string
+  name: string
+  imo?: string
+  mmsi?: string
+  callsign?: string
+  flag?: string
+  type?: string
+  transmissionDateFrom?: string
+  transmissionDateTo?: string
+  source: string
+}
+
 export interface VesselMetadata {
   id: string
   name: string
@@ -19,6 +32,7 @@ export interface VesselMetadata {
   fetchedAt: string
   source_type?: SourceLineage
   providerRecordId?: string
+  identityHistory?: VesselIdentityObservation[]
 }
 
 export interface VesselSearchResult extends VesselMetadata {
@@ -56,9 +70,9 @@ export function normalizeVesselSearchQuery(query: VesselSearchQuery): VesselSear
   return { query: normalized, field: query.field ?? detectVesselSearchField(normalized) }
 }
 
-export function vesselSearchCacheKey(query: VesselSearchQuery): string {
+export function vesselSearchCacheKey(query: VesselSearchQuery, providerId?: string): string {
   const normalized = normalizeVesselSearchQuery(query)
-  return `${normalized.field}:${normalized.query}`
+  return `${providerId ? `${providerId}:` : ""}${normalized.field}:${normalized.query}`
 }
 
 export function stableVesselMetadataId(source: string, record: Pick<VesselMetadata, "imo" | "mmsi" | "providerRecordId" | "name">): string {

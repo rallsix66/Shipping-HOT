@@ -53,7 +53,7 @@ describe("vessel metadata persistence and search cache", () => {
     await expect(service.search({ query: "ever glory", field: "name" })).resolves.toMatchObject({ cacheHit: true, providerId: "vesselapi" })
     expect(provider.search).toHaveBeenCalledTimes(1)
     expect(native.prepare("SELECT name, imo, mmsi, callsign, type, flag, source, fetched_at FROM vessel_metadata WHERE id = ?").get(result.id)).toMatchObject({ name: "EVER GLORY", imo: "9876543", mmsi: "477123400", callsign: "9V1234", source: "vesselapi" })
-    expect(native.prepare("SELECT search_key, result_ids FROM vessel_search_cache").get()).toEqual({ search_key: "name:ever glory", result_ids: JSON.stringify([result.id]) })
+    expect(native.prepare("SELECT search_key, result_ids FROM vessel_search_cache").get()).toEqual({ search_key: "vesselapi:name:ever glory", result_ids: JSON.stringify([result.id]) })
     native.close()
   })
 
@@ -110,7 +110,7 @@ describe("vessel metadata persistence and search cache", () => {
     expect(changedMmsi.id).toBe("vesselapi:vessel-123")
     expect(native.prepare("SELECT COUNT(*) AS count FROM vessel_metadata").get()).toEqual({ count: 1 })
     expect(native.prepare("SELECT id, imo, mmsi, provider_record_id FROM vessel_metadata").get()).toEqual({ id: "vesselapi:vessel-123", imo: "9876543", mmsi: "222222222", provider_record_id: "vessel-123" })
-    await expect(repository.getCachedSearch({ query: "9876543", field: "imo" }, new Date(result.fetchedAt))).resolves.toMatchObject({ results: [expect.objectContaining({ id: "vesselapi:vessel-123", imo: "9876543", mmsi: "222222222" })] })
+    await expect(repository.getCachedSearch({ query: "9876543", field: "imo" }, "vesselapi", new Date(result.fetchedAt))).resolves.toMatchObject({ results: [expect.objectContaining({ id: "vesselapi:vessel-123", imo: "9876543", mmsi: "222222222" })] })
     native.close()
   })
 
@@ -164,6 +164,27 @@ describe("vessel metadata persistence and search cache", () => {
     expect(native.prepare("SELECT id, imo, mmsi, provider_record_id FROM vessel_metadata ORDER BY id").all()).toEqual([
       { id: "imo:1000001", imo: "1000001", mmsi: "111111111", provider_record_id: "a" },
       { id: "imo:1000002", imo: "1000002", mmsi: "222222222", provider_record_id: "b" },
+    ])
+    native.close()
+  })
+
+  it("does not let an empty cache from one provider block another provider", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const repository = new VesselMetadataRepository(database, "real")
+    const emptyProvider = { providerId: "vesselapi", search: vi.fn(async () => []) }
+    const realProvider = { providerId: "gfw", search: vi.fn(async () => [{ ...result, id: "imo:9876543", source: "gfw", providerRecordId: "gfw-vessel-1" }]) }
+    const now = new Date("2026-08-21T00:00:00.000Z")
+    const emptyService = new VesselSearchService(repository, emptyProvider, { now: () => now })
+    const realService = new VesselSearchService(repository, realProvider, { now: () => now })
+
+    await expect(emptyService.search({ query: "EVER GLORY" })).resolves.toMatchObject({ providerId: "vesselapi", cacheHit: false, results: [] })
+    await expect(realService.search({ query: "EVER GLORY" })).resolves.toMatchObject({ providerId: "gfw", cacheHit: false, results: [expect.objectContaining({ source: "gfw" })] })
+    expect(emptyProvider.search).toHaveBeenCalledTimes(1)
+    expect(realProvider.search).toHaveBeenCalledTimes(1)
+    expect(native.prepare("SELECT search_key, provider_id FROM vessel_search_cache ORDER BY provider_id").all()).toEqual([
+      { search_key: "gfw:name:ever glory", provider_id: "gfw" },
+      { search_key: "vesselapi:name:ever glory", provider_id: "vesselapi" },
     ])
     native.close()
   })
