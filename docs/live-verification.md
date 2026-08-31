@@ -61,6 +61,23 @@ The retained development database remains unchanged with its 16 historical Mock/
 
 Validation for this closure: AIS-targeted tests passed `18/18`, typecheck, lint and build passed, and P0/P2C/P3A smoke checks passed. The full suite reported `358/359` with one unrelated date-sensitive Feed test failure in `server/providers/feed.test.ts`; no Feed code or test was changed in this AIS-only scope.
 
+## AIS Zero-Observation Runtime Semantics Repair — 2026-08-31
+
+| Check | Result |
+| --- | --- |
+| Isolated database | Fresh temporary Real SQLite only; retained `.data/shipping-hot-v3.sqlite3` was not opened and the temporary database was cleaned after the probe |
+| Watched vessel / MMSI | HANSA BREITENBURG / IMO `9155391` / current MMSI `538090733` |
+| Production-default observation | AISStream socket opened and subscription sent; default window `2500ms`; PositionReport count `0` |
+| Runtime result | `skipped`, `errorCode=no_ais_position_observed`, `recordsRead=0`, `recordsWritten=0` |
+| Provider runtime | `status=never_succeeded`; `lastSuccessAt` and `lastSourceUpdatedAt` absent |
+| Provider usage | `request_count=1`, `success_count=0`, `failure_count=0`, `records_count=0` |
+| Sync run | `status=skipped`, `errorCode=no_ais_position_observed` |
+| SQLite positions | `ais_positions=0`; `ais_latest_positions=0` |
+| Extended probe | Not repeated; the prior 120-second probe already observed `0` PositionReports |
+| Gate | `coverage_pending`; no verified live PositionReport was obtained |
+
+This repair changes only the Runtime interpretation of a normal empty AIS observation. AISStream timeout, GFW, Watchlist, UI, schema and other V3 workstreams were not changed.
+
 ## Provider and persistence evidence
 
 | Capability | Provider | Observation | SQLite / API evidence | Status |

@@ -47,6 +47,16 @@ export function createAisTrackingJob(options: AisTrackingJobOptions): RuntimeJob
       }
 
       const received = await options.provider.getLatestPositions(vessels)
+      if (received.length === 0) {
+        return {
+          status: "skipped",
+          recordsRead: 0,
+          recordsWritten: 0,
+          errorCode: "no_ais_position_observed",
+          errorMessage: "No AIS PositionReport observed for eligible watched vessels",
+        }
+      }
+
       const saved = await positions.savePositions(received, vessels, now().toISOString())
       const sourceUpdatedAt = [...received]
         .map(position => Date.parse(position.timestamp))

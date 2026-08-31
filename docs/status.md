@@ -45,6 +45,13 @@ V3 Readiness is profile-aware: it checks observed Node `24.15.0` / ABI `137`, ac
 - The API remains Repository/RuntimeRepository → SQLite-only and makes zero Provider calls. Vessel detail now uses the API's real `sourceStatus` and labels degraded/failed last-known data without exposing the technical error code to ordinary users.
 - Review-gap tests cover no-target 0-call behavior, usage counters, healthy success, ProviderError root-code propagation, last-known TTL/health independence and API read isolation. Live AIS remains `coverage_pending`; no MMSI was guessed and no live WebSocket was opened.
 
+## AIS Zero-Observation Runtime Semantics Repair — 2026-08-31
+
+- An eligible watched AIS target whose Provider completes normally but returns no PositionReport now produces Runtime `skipped` with `errorCode=no_ais_position_observed` and message `No AIS PositionReport observed for eligible watched vessels`; it is neither `success` nor `failed`, and no position rows are written.
+- The first zero-observation run keeps `provider_runtime.status=never_succeeded` with no success/source timestamps; `sync_runs` records `skipped`; `provider_usage` increments only `request_count`, leaving success/failure counters unchanged and `records_count=0`.
+- After a prior real success, a zero-observation run keeps `provider_runtime.status=healthy`, `lastSuccessAt` and `lastSourceUpdatedAt`, while recording the current skipped error. Provider errors retain the existing `failed` path, and no-target runs remain distinct as `no_eligible_ais_targets`.
+- Verification: AIS Provider/Runtime/Watchlist/position/persistence targeted tests passed `40/40`. A fresh Real HANSA probe using the production-default 2500ms window opened the socket and sent the subscription but observed `0` PositionReports; the Runtime result is now `skipped/no_ais_position_observed`, with `provider_runtime=never_succeeded`, no success/source timestamps, `provider_usage request=1/success=0/failure=0`, and both AIS tables at `0` rows. No extended probe was repeated.
+
 ## V3 Activation Review Gap Repair — 2026-08-29
 
 - The Real activation smoke now inspects SQLite schema metadata and scans every non-system business table carrying `source_type` through the actual native SQLite database and existing lineage rules. The current discovered set is `ais_latest_positions`, `ais_port_metrics`, `ais_positions`, `calendar_events`, `events`, `feed_item_history`, `feed_items`, `ports`, `vessel_metadata`, `vessel_search_cache`, `vessels`, `voyage_eta_history` and `voyages`. It emits `actualMockRows.tables` and asserts `total === 0`; clean, JSON-mismatch, known-table and future-table regression tests cover pass and fail paths.
