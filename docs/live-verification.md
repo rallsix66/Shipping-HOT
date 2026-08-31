@@ -78,6 +78,23 @@ Validation for this closure: AIS-targeted tests passed `18/18`, typecheck, lint 
 
 This repair changes only the Runtime interpretation of a normal empty AIS observation. AISStream timeout, GFW, Watchlist, UI, schema and other V3 workstreams were not changed.
 
+## AISStream Binary Frame Diagnostic + Parser Repair — 2026-08-31
+
+| Check | Result |
+| --- | --- |
+| Raw diagnostic | Direct Node 24 WebSocket probe received `4` binary `Blob` frames: `SubscriptionConfirmation=1`, `PositionReport=3` |
+| Parser evidence | `binary_frame_verified=true`; all observed `event.data` values were `Blob` with UTF-8 JSON payloads |
+| Production repair | Parser now supports string, `ArrayBuffer`, `ArrayBufferView`/Node `Buffer` and `Blob`; malformed/unsupported frames fail closed |
+| Post-repair discovery | One Singapore run observed `11` binary frames (`SubscriptionConfirmation=1`, `PositionReport=10`); the integrated run observed `9` (`1`, `8`) |
+| GFW / Watchlist | Selected real candidate `PSA SHURI CS08`, `imo:9951604`, IMO `9951604`, current MMSI `563185100`, callsign `9V8666`, flag `SGP`; one eligible AIS target was created in the isolated temporary database |
+| Production-default AIS runs | Three runs opened the socket and sent the subscription but each returned `skipped/no_ais_position_observed`, with `recordsRead=0` and `recordsWritten=0` |
+| Extended same-target probe | A separate 30-second probe received one real PositionReport for MMSI `563185100`; this is evidence of coverage, not a successful production-default job run |
+| Gate | `changes_required/runtime_sampling_window_too_short`; no timeout/default was changed and no `verified_live` claim was made |
+| Persistence | Retained `.data/shipping-hot-v3.sqlite3` was not opened; the fresh temporary SQLite was cleaned after the probe and no formal AIS position persistence/restart/API proof was produced |
+| Verification | Provider tests `14/14`, AIS Runtime/Watchlist targets `33/33`, typecheck, lint and build passed; full suite `383/384` with only the existing date-sensitive Feed failure |
+
+The diagnostic and re-probe used server-side credentials only and did not log an API key or raw AIS payload. No GFW, Watchlist, timeout, schema, migration, Feed, Voyage, Weather or Translation implementation was changed; the only implementation change was binary-frame parsing plus SubscriptionConfirmation handling.
+
 ## Provider and persistence evidence
 
 | Capability | Provider | Observation | SQLite / API evidence | Status |

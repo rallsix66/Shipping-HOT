@@ -183,6 +183,14 @@ Remaining pending work: real data coverage / runtime follow-up.
 - `SHIPPING_AIS_PROVIDER=mock` is the safe default for Mock/Test Mode. Real Mode rejects Mock positions and uses the environment-first/FileSecretStore-fallback AISStream secret path.
 - Verification at the historical P3A boundary: targeted tests, native restart smoke, typecheck and build passed. The later activation slice adds source-level Feed/Calendar/Port/Weather Runtime jobs; Voyage and Translation remain pending, and AIS observation coverage is still pending.
 
+### AISStream Binary Frame Diagnostic + Parser Repair — 2026-08-31
+
+- A direct Node `24.15.0` WebSocket probe against AISStream received four binary `Blob` frames: one `SubscriptionConfirmation` and three `PositionReport` messages. No API key or raw payload was recorded.
+- `server/providers/ais/aisstream-provider.ts` now decodes UTF-8 JSON from strings, `ArrayBuffer`, `ArrayBufferView`/Node `Buffer` and `Blob`; unsupported or malformed data fails closed. `SubscriptionConfirmation` marks the subscription accepted but never becomes a position record, while protocol errors retain the existing ProviderError taxonomy.
+- Post-repair Singapore discovery again received binary `Blob` frames with `SubscriptionConfirmation=1` and `PositionReport` messages (`10` in one run; `8` in the integrated run). The selected real candidate was `PSA SHURI CS08`, IMO `9951604`, current MMSI `563185100`, callsign `9V8666`, flag `SGP`, GFW identity `imo:9951604`.
+- Three production-default AIS Tracking runs remained `skipped/no_ais_position_observed`; a separate 30-second same-target probe received one real PositionReport. The final live gate is `changes_required/runtime_sampling_window_too_short`, not `verified_live`; no retained SQLite database was opened or written.
+- Verification: AISStream provider tests `14/14`, AIS Runtime/Watchlist target tests `33/33`, typecheck, lint and build passed. Full suite: `383/384`; the only failure is the existing date-sensitive Shekou Feed test in `server/providers/feed.test.ts`, unrelated to this parser repair.
+
 ### Implemented V3 P3B Voyage / ETA Intelligence Foundation — 2026-08-24
 
 - Migration 008 extends the existing canonical `voyages` table and adds append-only `voyage_eta_history`; it does not create a second Vessel table or replace the existing Port Directory.

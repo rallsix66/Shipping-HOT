@@ -86,10 +86,23 @@ function navigationStatus(value: number | undefined): string | undefined {
   return value === 0 ? "under_way" : value === 1 ? "anchored" : value === 5 ? "moored" : value === 6 ? "aground" : "unknown"
 }
 
-function parseMessage(data: unknown): AisStreamMessage | undefined {
+async function parseMessage(data: unknown): Promise<AisStreamMessage | undefined> {
   try {
-    const parsed = typeof data === "string" ? JSON.parse(data) : data
-    return parsed && typeof parsed === "object" ? parsed as AisStreamMessage : undefined
+    let text: string | undefined
+    if (typeof data === "string") {
+      text = data
+    } else if (typeof Blob !== "undefined" && data instanceof Blob) {
+      text = await data.text()
+    } else if (typeof ArrayBuffer !== "undefined" && data instanceof ArrayBuffer) {
+      text = new TextDecoder("utf-8", { fatal: false }).decode(new Uint8Array(data))
+    } else if (typeof ArrayBuffer !== "undefined" && ArrayBuffer.isView(data)) {
+      const view = data as ArrayBufferView & { buffer: ArrayBufferLike }
+      text = new TextDecoder("utf-8", { fatal: false }).decode(new Uint8Array(view.buffer, view.byteOffset, view.byteLength))
+    } else {
+      return undefined
+    }
+    const parsed = JSON.parse(text)
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed as AisStreamMessage : undefined
   } catch {
     return undefined
   }
@@ -215,6 +228,7 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
       return await new Promise<readonly AisPosition[]>((resolve, reject) => {
         let settled = false
         let opened = false
+        let subscriptionConfirmed = false
         const finish = (error?: Error) => {
           if (settled) return
           settled = true
@@ -237,20 +251,26 @@ export class AisStreamTrackingProvider implements AisTrackingProvider {
           }
         }
         socket!.onmessage = (event) => {
-          const message = parseMessage(event.data)
-          const error = message ? protocolError(message) : undefined
-          if (error) {
-            finish(error)
-            return
-          }
-          const position = mapAisStreamPosition(message ?? {}, fetchedAt)
-          if (!position || !trackedMmsi.includes(position.mmsi)) return
-          positions.set(position.mmsi, position)
-          if (trackedMmsi.every(mmsi => positions.has(mmsi))) finish()
+          void (async () => {
+            const message = await parseMessage(event.data)
+            if (message?.MessageType === "SubscriptionConfirmation") {
+              subscriptionConfirmed = true
+              return
+            }
+            const error = message ? protocolError(message) : undefined
+            if (error) {
+              finish(error)
+              return
+            }
+            const position = mapAisStreamPosition(message ?? {}, fetchedAt)
+            if (!position || !trackedMmsi.includes(position.mmsi)) return
+            positions.set(position.mmsi, position)
+            if (trackedMmsi.every(mmsi => positions.has(mmsi))) finish()
+          })()
         }
         socket!.onerror = event => finish(safeProviderError(event))
         socket!.onclose = () => {
-          if (!settled) finish(positions.size ? undefined : new Error("aisstream_connection_closed"))
+          if (!settled) finish(positions.size || subscriptionConfirmed ? undefined : new Error("aisstream_connection_closed"))
         }
       })
     } finally {

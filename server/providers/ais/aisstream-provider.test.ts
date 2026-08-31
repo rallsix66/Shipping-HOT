@@ -1,8 +1,9 @@
+import { Buffer } from "node:buffer"
 import { describe, expect, it } from "vitest"
 import { AISSTREAM_MAX_MMSI_PER_REQUEST, createAisStreamTrackingProvider, mapAisStreamPosition } from "#/providers/ais/aisstream-provider"
 import type { AisStreamSocket } from "#/providers/ais/aisstream-provider"
 
-function socketFor(message: unknown): { socket: AisStreamSocket, sent?: Record<string, unknown> } {
+function socketForFrames(frames: readonly unknown[]): { socket: AisStreamSocket, sent?: Record<string, unknown> } {
   const state: { socket: AisStreamSocket, sent?: Record<string, unknown> } = {
     socket: {
       onopen: null,
@@ -11,12 +12,39 @@ function socketFor(message: unknown): { socket: AisStreamSocket, sent?: Record<s
       onclose: null,
       send: (data) => {
         state.sent = JSON.parse(data) as Record<string, unknown>
-        state.socket.onmessage?.({ data: JSON.stringify(message) })
+        for (const frame of frames) state.socket.onmessage?.({ data: frame })
       },
       close: () => undefined,
     },
   }
   return state
+}
+
+function socketFor(message: unknown): { socket: AisStreamSocket, sent?: Record<string, unknown> } {
+  return socketForFrames([JSON.stringify(message)])
+}
+
+function utf8(message: unknown): Uint8Array {
+  return new TextEncoder().encode(JSON.stringify(message))
+}
+
+const positionReportMessage = {
+  MessageType: "PositionReport",
+  MetaData: { MMSI: "413393620", time_utc: "2026-08-24T00:00:00.000Z" },
+  Message: { PositionReport: { UserID: "413393620", Latitude: 22.48, Longitude: 113.91 } },
+}
+
+function providerForFrames(frames: readonly unknown[], timeoutMs = 50): { provider: ReturnType<typeof createAisStreamTrackingProvider>, state: ReturnType<typeof socketForFrames> } {
+  const state = socketForFrames(frames)
+  const provider = createAisStreamTrackingProvider({
+    apiKey: "test-key",
+    timeoutMs,
+    socketFactory: () => {
+      setTimeout(() => state.socket.onopen?.(), 0)
+      return state.socket
+    },
+  })
+  return { provider, state }
 }
 
 describe("aisstream provider", () => {
@@ -71,6 +99,45 @@ describe("aisstream provider", () => {
     })
     expect(positions).toHaveLength(1)
     expect(positions[0]).toMatchObject({ mmsi: "413393620", latitude: 22.48, longitude: 113.91 })
+  })
+
+  it("decodes a Uint8Array UTF-8 PositionReport frame", async () => {
+    const { provider } = providerForFrames([utf8(positionReportMessage)])
+    await expect(provider.getLatestPositions([{ vesselId: "vessel-1", mmsi: "413393620" }])).resolves.toMatchObject([
+      { mmsi: "413393620", latitude: 22.48, longitude: 113.91, source: "aisstream", sourceType: "real" },
+    ])
+  })
+
+  it("decodes an ArrayBuffer UTF-8 PositionReport frame", async () => {
+    const { provider } = providerForFrames([utf8(positionReportMessage).buffer])
+    await expect(provider.getLatestPositions([{ vesselId: "vessel-1", mmsi: "413393620" }])).resolves.toMatchObject([
+      { mmsi: "413393620", latitude: 22.48, longitude: 113.91 },
+    ])
+  })
+
+  it("decodes a Node Buffer UTF-8 PositionReport frame", async () => {
+    const { provider } = providerForFrames([Buffer.from(JSON.stringify(positionReportMessage))])
+    await expect(provider.getLatestPositions([{ vesselId: "vessel-1", mmsi: "413393620" }])).resolves.toMatchObject([
+      { mmsi: "413393620", latitude: 22.48, longitude: 113.91 },
+    ])
+  })
+
+  it("decodes a Blob UTF-8 PositionReport frame when Blob is available", async () => {
+    if (typeof Blob === "undefined") return
+    const { provider } = providerForFrames([new Blob([JSON.stringify(positionReportMessage)])])
+    await expect(provider.getLatestPositions([{ vesselId: "vessel-1", mmsi: "413393620" }])).resolves.toMatchObject([
+      { mmsi: "413393620", latitude: 22.48, longitude: 113.91 },
+    ])
+  })
+
+  it("parses a binary SubscriptionConfirmation without creating a position", async () => {
+    const { provider } = providerForFrames([utf8({ MessageType: "SubscriptionConfirmation" })], 20)
+    await expect(provider.getLatestPositions([{ vesselId: "vessel-1", mmsi: "413393620" }])).resolves.toEqual([])
+  })
+
+  it("fails closed for malformed binary JSON without creating a position", async () => {
+    const { provider } = providerForFrames([new Uint8Array([0x7B, 0x6E, 0x6F, 0x74, 0x2D, 0x6A, 0x73, 0x6F, 0x6E])], 20)
+    await expect(provider.getLatestPositions([{ vesselId: "vessel-1", mmsi: "413393620" }])).resolves.toEqual([])
   })
 
   it("splits watchlist MMSI values into bounded subscription batches", async () => {
@@ -137,6 +204,11 @@ describe("aisstream provider", () => {
       },
     })
     await expect(provider.getLatestPositions([{ vesselId: "vessel-1", mmsi: "413393620" }])).rejects.toMatchObject({ message: "aisstream_auth_failed" })
+  })
+
+  it("preserves the ProviderError taxonomy for binary protocol errors", async () => {
+    const { provider } = providerForFrames([utf8({ error: "invalid API key: super-secret-key" })])
+    await expect(provider.getLatestPositions([{ vesselId: "vessel-1", mmsi: "413393620" }])).rejects.toMatchObject({ code: "auth_failed", message: "aisstream_auth_failed" })
   })
 
   it("rejects a missing API key before opening a socket", async () => {
