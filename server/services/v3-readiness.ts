@@ -26,6 +26,9 @@ export function approvedRuntimeJobKeys(dataMode: ShippingDataMode): string[] {
   const keys = approvedRuntimeJobs
     .filter(job => job.id !== "ais-tracking" || !isAisStreamingEnabled(dataMode))
     .map(job => `${job.id}:${job.capability}`)
+  if (dataMode === "real" && process.env.SHIPPING_AIS_AREA_PROVIDER?.trim().toLowerCase() === "aisstream") {
+    keys.push("ais-area-sync:ais_area")
+  }
   const requestedFeed = process.env.SHIPPING_FEED_PROVIDER?.trim().toLowerCase()
   if (dataMode === "real" && requestedFeed === "public") {
     for (const source of shippingFeedSources) {

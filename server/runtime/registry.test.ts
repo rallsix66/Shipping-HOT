@@ -3,6 +3,7 @@ import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
 import { initShippingTables } from "#/database/shipping"
 import type { AisTrackingProvider } from "#/providers/ais/contracts"
+import type { AisAreaProvider } from "#/providers/aisstream-area"
 import type { VoyageProvider } from "#/providers/voyage/contracts"
 import { getDefaultRuntimeJobs } from "#/runtime/registry"
 
@@ -39,6 +40,12 @@ const aisProvider: AisTrackingProvider = {
 const voyageProvider: VoyageProvider = {
   providerId: "mock-voyage",
   getVoyages: async () => [],
+}
+
+const aisAreaProvider: AisAreaProvider = {
+  providerId: "aisstream-area",
+  getPortMetrics: async () => [],
+  close: () => undefined,
 }
 
 describe("runtime registry", () => {
@@ -131,6 +138,50 @@ describe("runtime registry", () => {
       else process.env.SHIPPING_AIS_STREAMING_ENABLED = previous.streaming
       if (previous.runtime === undefined) delete process.env.SHIPPING_RUNTIME_ENABLED
       else process.env.SHIPPING_RUNTIME_ENABLED = previous.runtime
+      native.close()
+    }
+  })
+
+  it("registers exactly one AIS Area job for the explicit Real Area provider", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const previous = {
+      area: process.env.SHIPPING_AIS_AREA_PROVIDER,
+      interval: process.env.SHIPPING_AIS_AREA_INTERVAL_MINUTES,
+    }
+    try {
+      process.env.SHIPPING_AIS_AREA_PROVIDER = "aisstream"
+      process.env.SHIPPING_AIS_AREA_INTERVAL_MINUTES = "1"
+      const jobs = getDefaultRuntimeJobs({ database, dataMode: "real", aisAreaProvider, voyageProvider })
+      expect(jobs.filter(job => job.id === "ais-area-sync")).toHaveLength(1)
+      expect(jobs.find(job => job.id === "ais-area-sync")).toMatchObject({ providerId: "aisstream-area", capability: "ais_area", intervalMs: 60_000 })
+    } finally {
+      if (previous.area === undefined) delete process.env.SHIPPING_AIS_AREA_PROVIDER
+      else process.env.SHIPPING_AIS_AREA_PROVIDER = previous.area
+      if (previous.interval === undefined) delete process.env.SHIPPING_AIS_AREA_INTERVAL_MINUTES
+      else process.env.SHIPPING_AIS_AREA_INTERVAL_MINUTES = previous.interval
+      native.close()
+    }
+  })
+
+  it("omits AIS Area when the provider is off and clamps invalid Area cadence", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const previous = {
+      area: process.env.SHIPPING_AIS_AREA_PROVIDER,
+      interval: process.env.SHIPPING_AIS_AREA_INTERVAL_MINUTES,
+    }
+    try {
+      process.env.SHIPPING_AIS_AREA_PROVIDER = "off"
+      expect(getDefaultRuntimeJobs({ database, dataMode: "real", aisAreaProvider, voyageProvider }).some(job => job.id === "ais-area-sync")).toBe(false)
+      process.env.SHIPPING_AIS_AREA_PROVIDER = "aisstream"
+      process.env.SHIPPING_AIS_AREA_INTERVAL_MINUTES = "0"
+      expect(getDefaultRuntimeJobs({ database, dataMode: "real", aisAreaProvider, voyageProvider }).find(job => job.id === "ais-area-sync")).toMatchObject({ intervalMs: 60_000 })
+    } finally {
+      if (previous.area === undefined) delete process.env.SHIPPING_AIS_AREA_PROVIDER
+      else process.env.SHIPPING_AIS_AREA_PROVIDER = previous.area
+      if (previous.interval === undefined) delete process.env.SHIPPING_AIS_AREA_INTERVAL_MINUTES
+      else process.env.SHIPPING_AIS_AREA_INTERVAL_MINUTES = previous.interval
       native.close()
     }
   })

@@ -160,6 +160,26 @@ This is the current formal AIS evidence. It used a fresh filesystem temporary Re
 
 Readiness now derives AIS `verified_live` from the real continuous runtime evidence; it does not infer it from credential presence alone. Historical success remains visible when the current runtime is degraded/failed or the source timestamp is stale, while streaming-disabled, Mock, missing-credential and no-observation states remain unverified/coverage-pending as appropriate. This acceptance does not verify Voyage/ETA, AIS Area or official weather-alert coverage.
 
+## V3 AIS Area Background Runtime + Live Acceptance — 2026-08-31
+
+This is the isolated Area acceptance. It used a fresh temporary Real SQLite, the eight formal Port Directory ports and one persistent Area AISStream session; the retained database was not opened.
+
+| Check | Result |
+| --- | --- |
+| Runtime configuration | `SHIPPING_DATA_MODE=real`, `SHIPPING_AIS_AREA_PROVIDER=aisstream`, default interval `60000` ms; eight watched ports produced eight subscription bounding boxes and no `FiltersShipMMSI` |
+| Credential | Server-side `FileSecretStore` resolved the configured `AISSTREAM_API_KEY`; the value was not recorded |
+| Raw/decoded frames | `socketOpened=1`, `subscriptionsSent=1`, `subscriptionConfirmations=1`, `positionReportsReceived=9`, `validPositionReports=9`, `assignedPortSamples=9`, `ambiguousSamples=0`, `sourceTimestampPresent=9`, `distinctMmsi=8` |
+| Runtime Job | `ais-area-sync` / `aisstream-area` / `ais_area`; latest successful sync had `recordsRead=7`, `recordsWritten=8`; runtime `healthy`, `consecutiveFailures=0` |
+| Shekou metric | `port-shekou` / `CNSHK`; `sampleSize=6`, `activeVesselCount=6`, `anchoredCount=0`, `mooredCount=1`, `lowSpeedCount=3`, `stationaryRatio=0.1666666667`, `ambiguousSampleCount=0`, `coverage=usable`, `trend=unknown` |
+| Timestamp policy | Shekou trusted `sourceUpdatedAt=2026-08-31T14:32:12.983Z`; local `fetchedAt=2026-08-31T14:32:21.319Z` remained separate |
+| Persistence | Eight derived `ais_port_metrics` rows were persisted; Repository/snapshot reads had zero Provider stats delta |
+| Lifecycle / restart | Shutdown closed the socket; restart preserved all eight watched ports and eight metrics, including Shekou; post-close stats remained unchanged |
+| Zero-Mock gate | Fresh isolated database reported `actualMockRows.total=0`, including `ais_port_metrics`, ports and events; retained `.data/shipping-hot-v3.sqlite3` was unchanged |
+| Acceptance Gate | `verified_live`; canonical reason `real_ais_area_metric_persisted_and_restarted` |
+| Readiness | `provider=aisstream`, `credential=available`, `runtime=healthy`, `freshness=fresh`, but `liveVerification=coverage_pending` and `status=coverage_pending`; this is `readiness_alignment_pending` for a separate later scope |
+
+The Area path reuses the hardened AISStream binary/trust parser, treats `SubscriptionConfirmation` as connection evidence only, validates MMSI/metadata/coordinates/provider timestamps, and guards asynchronous Blob decoding against stale socket generations and configuration snapshots. No schema, migration, raw observation table, retained SQLite, UI, Vessel Tracking, Voyage, Weather or Feed behavior was changed.
+
 ## Provider and persistence evidence
 
 | Capability | Provider | Observation | SQLite / API evidence | Status |

@@ -2,11 +2,13 @@ import process from "node:process"
 import type { Database } from "db0"
 import type { ShippingDataMode } from "#/database/runtime"
 import type { AisTrackingProvider } from "#/providers/ais/contracts"
-import { createAisTrackingProviderForDatabase, getConfiguredAisStreamTiming } from "#/providers/ais"
+import { createAisAreaProviderForDatabase, createAisTrackingProviderForDatabase, getConfiguredAisStreamTiming } from "#/providers/ais"
 import { createAisTrackingJob } from "#/runtime/ais-tracking-job"
 import type { VoyageProvider } from "#/providers/voyage/contracts"
 import { createVoyageProviderForDatabase } from "#/providers/voyage"
 import { createVoyageSyncJob } from "#/runtime/voyage-sync-job"
+import type { AisAreaProvider } from "#/providers/aisstream-area"
+import { createAisAreaSyncJob } from "#/runtime/ais-area-sync-job"
 import { MockFeedProvider, activeShippingFeedSourceIds, createPublicFeedProvider, shippingFeedSources } from "#/providers/feed"
 import { createFeedSyncJob } from "#/runtime/feed-sync-job"
 import { createCalendarSyncJob } from "#/runtime/calendar-sync-job"
@@ -21,6 +23,7 @@ export interface RuntimeRegistryOptions {
   database: Database
   dataMode: ShippingDataMode
   aisProvider?: AisTrackingProvider
+  aisAreaProvider?: AisAreaProvider
   voyageProvider?: VoyageProvider
   now?: () => Date
 }
@@ -33,6 +36,11 @@ function intervalMs(): number {
 function voyageIntervalMs(): number {
   const minutes = Number(process.env.SHIPPING_VOYAGE_INTERVAL_MINUTES ?? 60)
   return Math.max(1, Number.isFinite(minutes) ? minutes : 60) * 60 * 1000
+}
+
+function aisAreaIntervalMs(): number {
+  const minutes = Number(process.env.SHIPPING_AIS_AREA_INTERVAL_MINUTES ?? 1)
+  return Math.max(1, Number.isFinite(minutes) && minutes > 0 ? minutes : 1) * 60 * 1000
 }
 
 function feedIntervalMs(): number {
@@ -143,6 +151,10 @@ export function getDefaultRuntimeJobs(options: RuntimeRegistryOptions): RuntimeJ
     dataMode: options.dataMode,
     now: options.now,
   })
+  const areaEnabled = options.dataMode === "real" && process.env.SHIPPING_AIS_AREA_PROVIDER?.trim().toLowerCase() === "aisstream"
+  const aisAreaProvider = areaEnabled
+    ? options.aisAreaProvider ?? createAisAreaProviderForDatabase(options.database, { dataMode: options.dataMode, now: options.now })
+    : undefined
   const jobs: RuntimeJob[] = []
   if (provider) {
     jobs.push(createAisTrackingJob({
@@ -152,6 +164,15 @@ export function getDefaultRuntimeJobs(options: RuntimeRegistryOptions): RuntimeJ
       intervalMs: intervalMs(),
       enabled: !(options.dataMode === "real" && provider.providerId === "mock"),
       now: options.now,
+    }))
+  }
+  if (aisAreaProvider) {
+    jobs.push(createAisAreaSyncJob({
+      database: options.database,
+      dataMode: options.dataMode,
+      provider: aisAreaProvider,
+      intervalMs: aisAreaIntervalMs(),
+      enabled: true,
     }))
   }
   return [...jobs, createVoyageSyncJob({

@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer"
 import { describe, expect, it } from "vitest"
 import { mockPorts } from "@shared/shipping-fixtures"
 import { AisAreaSession, aisAreaSubscription, aisstreamAreaDerivedProvenance, createAisStreamAreaProvider } from "./aisstream-area"
@@ -40,6 +41,22 @@ function socketWithPayloads(payloads: Record<string, unknown>[]) {
   }
 }
 
+function socketWithData(data: unknown[]) {
+  return {
+    onopen: null as (() => void) | null,
+    onmessage: null as ((event: { data: unknown }) => void) | null,
+    onerror: null as ((event: unknown) => void) | null,
+    onclose: null as (() => void) | null,
+    closed: false,
+    send() {
+      for (const value of data) this.onmessage?.({ data: value })
+    },
+    close() {
+      this.closed = true
+    },
+  }
+}
+
 function areaPosition(mmsi: string, time_utc: string, status = 1) {
   return {
     MessageType: "PositionReport",
@@ -59,6 +76,18 @@ describe("area stream boundary", () => {
     expect(socketCount).toBe(0)
   })
 
+  it("fails closed on a missing key without scheduling a socket retry", async () => {
+    let socketCount = 0
+    const session = new AisAreaSession({ apiKeyResolver: async () => undefined, reconnectDelaysMs: [10], socketFactory: () => {
+      socketCount++
+      throw new Error("socket must not be created")
+    } })
+    await expect(session.getPortMetrics([mockPorts[0]])).rejects.toMatchObject({ name: "ProviderError", code: "auth_failed" })
+    await new Promise(resolve => setTimeout(resolve, 30))
+    expect(socketCount).toBe(0)
+    session.close()
+  })
+
   it("uses only small watched-port boxes and never sends FiltersShipMMSI", async () => {
     const socket = socketWithMessage()
     let socketCount = 0
@@ -74,6 +103,77 @@ describe("area stream boundary", () => {
     expect((socket.sent[0].BoundingBoxes as unknown[]).length).toBe(2)
     expect(metrics[0]).toMatchObject({ portId: "port-shekou", sampleSize: 1, coverage: "usable", provenance: aisstreamAreaDerivedProvenance })
     expect(metrics[0]).not.toHaveProperty("waitingHours")
+  })
+
+  it.each([
+    ["Uint8Array", () => new TextEncoder().encode(JSON.stringify(areaPosition("477123400", "2026-08-19T00:00:00.000Z")))],
+    ["ArrayBuffer", () => new TextEncoder().encode(JSON.stringify(areaPosition("477123400", "2026-08-19T00:00:00.000Z"))).buffer],
+    ["Buffer", () => Buffer.from(JSON.stringify(areaPosition("477123400", "2026-08-19T00:00:00.000Z")))],
+  ] as const)("decodes %s PositionReport frames through the hardened parser", async (_name, frame) => {
+    const socket = socketWithData([frame()])
+    const session = new AisAreaSession({ apiKey: "test-key", now: () => new Date("2026-08-19T00:00:10.000Z"), initialObservationWaitMs: 25, minimumSampleSize: 1, socketFactory: () => {
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    const [metric] = await session.getPortMetrics([mockPorts[0]])
+    expect(metric).toMatchObject({ sampleSize: 1, coverage: "usable", sourceUpdatedAt: "2026-08-19T00:00:00.000Z" })
+    expect(session.liveStats).toMatchObject({ positionReportsReceived: 1, validPositionReports: 1, assignedPortSamples: 1, sourceTimestampPresent: 1 })
+    session.close()
+  })
+
+  it("decodes Blob PositionReport and SubscriptionConfirmation frames", async () => {
+    const socket = socketWithData([
+      new Blob([JSON.stringify({ MessageType: "SubscriptionConfirmation" })]),
+      new Blob([JSON.stringify(areaPosition("477123400", "2026-08-19T00:00:00.000Z"))]),
+    ])
+    const session = new AisAreaSession({ apiKey: "test-key", now: () => new Date("2026-08-19T00:00:10.000Z"), initialObservationWaitMs: 25, minimumSampleSize: 1, socketFactory: () => {
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    const [metric] = await session.getPortMetrics([mockPorts[0]])
+    expect(metric).toMatchObject({ sampleSize: 1, coverage: "usable" })
+    expect(session.liveStats).toMatchObject({ subscriptionConfirmations: 1, positionReportsReceived: 1, assignedPortSamples: 1 })
+    session.close()
+  })
+
+  it("ignores malformed binary JSON and does not create an observation", async () => {
+    const socket = socketWithData([new Uint8Array([123, 34, 77, 101, 115, 115, 97, 103, 101])])
+    const session = new AisAreaSession({ apiKey: "test-key", initialObservationWaitMs: 5, socketFactory: () => {
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    const [metric] = await session.getPortMetrics([mockPorts[0]])
+    expect(metric).toMatchObject({ sampleSize: 0, coverage: "no_observation" })
+    expect(session.liveStats).toMatchObject({ positionReportsReceived: 0, validPositionReports: 0, assignedPortSamples: 0 })
+    session.close()
+  })
+
+  it("enforces the shared AIS identity, coordinate, and source timestamp trust boundary", async () => {
+    const invalidFrames = [
+      areaPosition("12345678", "2026-08-19T00:00:00.000Z"),
+      { MessageType: "PositionReport", MetaData: { MMSI: "477123400", time_utc: "2026-08-19T00:00:00.000Z" }, Message: { PositionReport: { UserID: 477123401, Latitude: 22.48, Longitude: 113.91, Sog: 0.2 } } },
+      { MessageType: "PositionReport", MetaData: { MMSI: "477123400", time_utc: "2026-08-19T00:00:00.000Z" }, Message: { PositionReport: { UserID: 477123400, Latitude: 91, Longitude: 113.91, Sog: 0.2 } } },
+      { MessageType: "PositionReport", MetaData: { MMSI: "477123400" }, Message: { PositionReport: { UserID: 477123400, Latitude: 22.48, Longitude: 113.91, Sog: 0.2 } } },
+    ]
+    const socket = socketWithData(invalidFrames.map(frame => new TextEncoder().encode(JSON.stringify(frame))))
+    const session = new AisAreaSession({ apiKey: "test-key", now: () => new Date("2026-08-19T00:00:10.000Z"), initialObservationWaitMs: 25, minimumSampleSize: 1, socketFactory: () => {
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    const [metric] = await session.getPortMetrics([mockPorts[0]])
+    expect(metric).toMatchObject({ sampleSize: 0, coverage: "no_observation" })
+    expect(session.liveStats).toMatchObject({ positionReportsReceived: 4, validPositionReports: 0, assignedPortSamples: 0, sourceTimestampPresent: 0, distinctMmsi: 0 })
+    session.close()
+  })
+
+  it("maps binary protocol errors to the canonical ProviderError", async () => {
+    const socket = socketWithData([new Blob([JSON.stringify({ MessageType: "Error", error: { code: "subscription_failed" } })])])
+    const session = new AisAreaSession({ apiKey: "test-key", initialObservationWaitMs: 10, reconnectDelaysMs: [], socketFactory: () => {
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    await expect(session.getPortMetrics([mockPorts[0]])).rejects.toMatchObject({ name: "ProviderError", code: "provider_contract_changed" })
+    session.close()
   })
 
   it("uses the injected Port Directory coordinate for the area boundary", async () => {
@@ -194,7 +294,7 @@ describe("area stream boundary", () => {
       else setTimeout(() => socket.onopen?.(), 0)
       return socket
     } })
-    await expect(provider.getPortMetrics([mockPorts[0]])).rejects.toThrow("AIS area stream closed before subscription")
+    await expect(provider.getPortMetrics([mockPorts[0]])).rejects.toMatchObject({ name: "ProviderError", code: "provider_unavailable" })
     await new Promise(resolve => setTimeout(resolve, 35))
     expect(sockets).toHaveLength(2)
 
@@ -236,6 +336,72 @@ describe("area stream boundary", () => {
     sockets[1].onclose?.()
     await new Promise(resolve => setTimeout(resolve, 80))
     expect(sockets).toHaveLength(4)
+  })
+
+  it("does not reset retry backoff on an open without a valid PositionReport", async () => {
+    const sockets: ReturnType<typeof socketWithPayloads>[] = []
+    const provider = createAisStreamAreaProvider({ apiKey: "test-key", initialObservationWaitMs: 0, reconnectDelaysMs: [10, 20], socketFactory: () => {
+      const socket = socketWithPayloads([])
+      sockets.push(socket)
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    await provider.getPortMetrics([mockPorts[0]])
+    sockets[0].onclose?.()
+    await new Promise(resolve => setTimeout(resolve, 30))
+    expect(sockets).toHaveLength(2)
+    sockets[1].onclose?.()
+    await new Promise(resolve => setTimeout(resolve, 10))
+    expect(sockets).toHaveLength(2)
+    await new Promise(resolve => setTimeout(resolve, 30))
+    expect(sockets).toHaveLength(3)
+    provider.close()
+  })
+
+  it("ignores a Blob that finishes decoding after the session closes", async () => {
+    let release!: () => void
+    const blob = new Blob(["unused"])
+    Object.defineProperty(blob, "text", { value: async () => await new Promise<string>((resolve) => {
+      release = () => resolve(JSON.stringify(areaPosition("477123400", "2026-08-19T00:00:00.000Z")))
+    }) })
+    const socket = socketWithData([blob])
+    const session = new AisAreaSession({ apiKey: "test-key", initialObservationWaitMs: 0, socketFactory: () => {
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    await session.getPortMetrics([mockPorts[0]])
+    session.close()
+    release()
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(session.observationCount).toBe(0)
+  })
+
+  it("assigns a delayed frame to the config captured at arrival despite a later config", async () => {
+    let release!: () => void
+    let sends = 0
+    const blob = new Blob(["unused"])
+    Object.defineProperty(blob, "text", { value: async () => await new Promise<string>((resolve) => {
+      release = () => resolve(JSON.stringify(areaPosition("477123400", "2026-08-19T00:00:00.000Z")))
+    }) })
+    const socket = socketWithData([blob])
+    const originalSend = socket.send
+    socket.send = () => {
+      sends++
+      if (sends === 1) originalSend.call(socket)
+    }
+    const session = new AisAreaSession({ apiKey: "test-key", now: () => new Date("2026-08-19T00:00:10.000Z"), initialObservationWaitMs: 1_100, minimumSampleSize: 1, socketFactory: () => {
+      setTimeout(() => socket.onopen?.(), 0)
+      return socket
+    } })
+    const first = session.getPortMetrics([mockPorts[0]])
+    await new Promise(resolve => setTimeout(resolve, 1_050))
+    const second = session.getPortMetrics([mockPorts[1]])
+    release()
+    const [firstMetric] = await first
+    const [secondMetric] = await second
+    expect(firstMetric).toMatchObject({ portId: mockPorts[0].id, sampleSize: 1, coverage: "usable" })
+    expect(secondMetric).toMatchObject({ portId: mockPorts[1].id, sampleSize: 0, coverage: "no_observation" })
+    session.close()
   })
 
   it("cancels a pending reconnect when the session closes", async () => {

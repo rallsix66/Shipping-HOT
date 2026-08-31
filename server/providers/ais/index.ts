@@ -8,6 +8,9 @@ import type { AisStreamSocket } from "#/providers/ais/aisstream-provider"
 import { AISSTREAM_DEFAULT_CONNECTION_TIMEOUT_MS, AISSTREAM_DEFAULT_OBSERVATION_WINDOW_MS, createAisStreamTrackingProvider } from "#/providers/ais/aisstream-provider"
 import { createAisStreamLiveProvider } from "#/providers/ais/aisstream-live-provider"
 import { createMockAisTrackingProvider } from "#/providers/ais/mock-provider"
+import type { AisAreaProvider } from "#/providers/aisstream-area"
+import { createAisStreamAreaProvider } from "#/providers/aisstream-area"
+import { PortDirectoryRepository } from "#/database/port-directory"
 import { FileSecretStore } from "#/secrets/file-secret-store"
 
 export interface AisProviderFactoryOptions {
@@ -24,6 +27,14 @@ export interface AisLiveProviderFactoryOptions {
   secretStore?: SecretStore
   socketFactory?: (endpoint: string) => AisStreamSocket
   connectionTimeoutMs?: number
+}
+
+export interface AisAreaProviderFactoryOptions {
+  dataMode: ShippingDataMode
+  secretStore?: SecretStore
+  portDirectory?: { getPortCoordinate: (unlocode: string) => Promise<{ latitude: number, longitude: number } | undefined> }
+  socketFactory?: (endpoint: string) => AisStreamSocket
+  now?: () => Date
 }
 
 export interface AisStreamTiming {
@@ -94,4 +105,14 @@ export function createAisLiveStreamProvider(options: AisLiveProviderFactoryOptio
 
 export function createAisLiveStreamProviderForDatabase(_database: Database, options: AisLiveProviderFactoryOptions = {}): AisLiveStreamProvider {
   return createAisLiveStreamProvider(options)
+}
+
+export function createAisAreaProviderForDatabase(database: Database, options: AisAreaProviderFactoryOptions): AisAreaProvider {
+  const secretStore = options.secretStore ?? new FileSecretStore()
+  return createAisStreamAreaProvider({
+    apiKeyResolver: () => secretStore.get("aisstream"),
+    portDirectory: options.portDirectory ?? new PortDirectoryRepository(database, options.dataMode),
+    socketFactory: options.socketFactory,
+    now: options.now,
+  })
 }

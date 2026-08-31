@@ -491,4 +491,15 @@ describe("v3 readiness", () => {
       })
     })
   })
+
+  it("includes the explicit Real AIS Area Job in the approved runtime scope", async () => {
+    const previous = process.env.SHIPPING_AIS_AREA_PROVIDER
+    try {
+      process.env.SHIPPING_AIS_AREA_PROVIDER = "aisstream"
+      expect(approvedRuntimeJobKeys("real")).toContain("ais-area-sync:ais_area")
+    } finally {
+      if (previous === undefined) delete process.env.SHIPPING_AIS_AREA_PROVIDER
+      else process.env.SHIPPING_AIS_AREA_PROVIDER = previous
+    }
+  })
 })

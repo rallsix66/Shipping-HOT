@@ -1,14 +1,19 @@
-import type { AisAreaObservation, AisAreaObservationMessage, AisDerivedPortMetric, PortAisAreaConfig } from "@shared/ais-area"
-import { AIS_AREA_BUCKET_MS, AIS_AREA_DEFAULT_LOW_SPEED_KNOTS, AIS_AREA_DEFAULT_MINIMUM_SAMPLE_SIZE, AIS_AREA_DEFAULT_TTL_MS, AIS_AREA_MAX_OBSERVATIONS, AIS_AREA_SOURCE_ID, aggregateAisPortMetric, aisAreaObservationTimestamp, assignAisAreaObservation, createPortAisAreaConfig, normalizeAisAreaPositionReport, watchedPortAisAreaConfigs } from "@shared/ais-area"
+import type { AisAreaObservation, AisDerivedPortMetric, PortAisAreaConfig } from "@shared/ais-area"
+import { AIS_AREA_BUCKET_MS, AIS_AREA_DEFAULT_LOW_SPEED_KNOTS, AIS_AREA_DEFAULT_MINIMUM_SAMPLE_SIZE, AIS_AREA_DEFAULT_TTL_MS, AIS_AREA_MAX_OBSERVATIONS, AIS_AREA_SOURCE_ID, aggregateAisPortMetric, aisAreaObservationTimestamp, assignAisAreaObservation, createPortAisAreaConfig, watchedPortAisAreaConfigs } from "@shared/ais-area"
 import type { PortDirectoryCoordinateLookup } from "@shared/port-directory"
-import type { DataProvenance, Port } from "@shared/shipping"
+import type { DataProvenance, NavigationStatus, Port } from "@shared/shipping"
+import { aisStreamProtocolError, aisStreamProviderError, mapAisStreamPosition, parseAisStreamMessage } from "#/providers/ais/aisstream-provider"
+import { ProviderError } from "#/providers/contracts"
 
 export const aisstreamAreaObservedProvenance: DataProvenance = { sourceType: "third_party", dataNature: "observed", sourceId: AIS_AREA_SOURCE_ID, sourceUrl: "https://aisstream.io/", verified: false }
 export const aisstreamAreaDerivedProvenance: DataProvenance = { sourceType: "third_party", dataNature: "derived", sourceId: AIS_AREA_SOURCE_ID, sourceUrl: "https://aisstream.io/", verified: false }
 export const aisstreamAreaEstimatedProvenance: DataProvenance = { sourceType: "third_party", dataNature: "estimated", sourceId: AIS_AREA_SOURCE_ID, sourceUrl: "https://aisstream.io/", verified: false }
 
 export interface AisAreaProvider {
+  readonly providerId: string
   getPortMetrics: (ports?: Port[], lastKnown?: AisDerivedPortMetric[]) => Promise<AisDerivedPortMetric[]>
+  close: () => void | Promise<void>
+  getStats?: () => AisAreaSessionStats
 }
 
 export interface AisAreaSocketEvent {
@@ -25,7 +30,8 @@ export interface AisAreaSocket {
 }
 
 export interface AisAreaSessionOptions {
-  apiKey: string
+  apiKey?: string
+  apiKeyResolver?: () => Promise<string | undefined>
   endpoint?: string
   socketFactory?: (endpoint: string) => AisAreaSocket
   now?: () => Date
@@ -45,6 +51,7 @@ export interface AisAreaSessionStats {
   socketOpened: number
   subscriptionsSent: number
   subscriptionBboxCount: number
+  subscriptionConfirmations: number
   positionReportsReceived: number
   validPositionReports: number
   assignedPortSamples: number
@@ -59,16 +66,6 @@ function socketFromGlobal(endpoint: string): AisAreaSocket {
   const WebSocketCtor = (globalThis as typeof globalThis & { WebSocket?: new (url: string) => unknown }).WebSocket
   if (!WebSocketCtor) throw new Error("WebSocket runtime is unavailable")
   return new WebSocketCtor(endpoint) as AisAreaSocket
-}
-
-function parseMessage(data: unknown): AisAreaObservationMessage | undefined {
-  try {
-    const parsed = typeof data === "string" ? JSON.parse(data) : data
-    if (!parsed || typeof parsed !== "object") return undefined
-    return parsed as AisAreaObservationMessage
-  } catch {
-    return undefined
-  }
 }
 
 function bboxPayload(config: PortAisAreaConfig): [[number, number], [number, number]] {
@@ -88,8 +85,12 @@ function sanitizeAreaError(error: unknown): string {
   return "AIS area stream unavailable"
 }
 
-function markMetricStale(metric: AisDerivedPortMetric, fetchedAt: string, error: string): AisDerivedPortMetric {
-  return { ...metric, fetchedAt, stale: true, sourceStatus: "failed", coverage: "stale", error, provenance: metric.provenance?.sourceId === AIS_AREA_SOURCE_ID ? metric.provenance : aisstreamAreaDerivedProvenance, trendProvenance: aisstreamAreaEstimatedProvenance }
+function markMetricStale(metric: AisDerivedPortMetric, fetchedAt: string, error: string, errorCode?: string): AisDerivedPortMetric {
+  return { ...metric, fetchedAt, stale: true, sourceStatus: "failed", coverage: "stale", error, errorCode: errorCode ?? metric.errorCode, provenance: metric.provenance?.sourceId === AIS_AREA_SOURCE_ID ? metric.provenance : aisstreamAreaDerivedProvenance, trendProvenance: aisstreamAreaEstimatedProvenance }
+}
+
+function canReconnect(error: ProviderError): boolean {
+  return error.code !== "auth_failed" && error.code !== "provider_contract_changed"
 }
 
 export class AisAreaSession {
@@ -107,6 +108,7 @@ export class AisAreaSession {
     socketOpened: 0,
     subscriptionsSent: 0,
     subscriptionBboxCount: 0,
+    subscriptionConfirmations: 0,
     positionReportsReceived: 0,
     validPositionReports: 0,
     assignedPortSamples: 0,
@@ -128,6 +130,11 @@ export class AisAreaSession {
   private readonly maxObservations: number
   private readonly minimumSampleSize: number
   private readonly lowSpeedThresholdKnots: number
+  private readonly apiKey?: string
+  private readonly apiKeyResolver?: () => Promise<string | undefined>
+  private resolvedApiKey?: string
+  private streamError?: ProviderError
+  private generation = 0
 
   constructor(private readonly options: AisAreaSessionOptions) {
     this.endpoint = options.endpoint ?? aisAreaEndpoint
@@ -142,6 +149,8 @@ export class AisAreaSession {
     this.maxObservations = Math.max(1, options.maxObservations ?? AIS_AREA_MAX_OBSERVATIONS)
     this.minimumSampleSize = options.minimumSampleSize ?? AIS_AREA_DEFAULT_MINIMUM_SAMPLE_SIZE
     this.lowSpeedThresholdKnots = options.lowSpeedThresholdKnots ?? AIS_AREA_DEFAULT_LOW_SPEED_KNOTS
+    this.apiKey = options.apiKey
+    this.apiKeyResolver = options.apiKeyResolver
   }
 
   get currentSocket(): AisAreaSocket | undefined {
@@ -160,6 +169,13 @@ export class AisAreaSession {
     return { ...this.stats, distinctMmsi: this.observations.size }
   }
 
+  private async resolveApiKey(): Promise<string> {
+    const apiKey = this.apiKey ?? this.resolvedApiKey ?? await this.apiKeyResolver?.()
+    if (!apiKey) throw aisStreamProviderError(new Error("aisstream_api_key_missing"))
+    this.resolvedApiKey = apiKey
+    return apiKey
+  }
+
   private clearIdleTimer() {
     if (this.idleTimer) clearTimeout(this.idleTimer)
     this.idleTimer = undefined
@@ -175,7 +191,8 @@ export class AisAreaSession {
   private sendSubscription(configs: PortAisAreaConfig[]) {
     if (!this.socket || !this.socketOpen || !configs.length) return
     this.activeConfigs = [...configs]
-    this.socket.send(JSON.stringify(aisAreaSubscription(this.options.apiKey, configs)))
+    if (!this.resolvedApiKey) throw aisStreamProviderError(new Error("aisstream_api_key_missing"))
+    this.socket.send(JSON.stringify(aisAreaSubscription(this.resolvedApiKey, configs)))
     this.stats.subscriptionsSent++
     this.stats.subscriptionBboxCount = configs.length
   }
@@ -254,15 +271,18 @@ export class AisAreaSession {
         this.scheduleReconnect()
         return
       }
+      const generation = ++this.generation
       this.socket = socket
       this.socketOpen = false
+      this.streamError = undefined
       const finish = (error?: Error) => {
         if (settled) return
         settled = true
         if (timer) clearTimeout(timer)
         if (error) {
-          reject(error)
-          this.scheduleReconnect()
+          const failure = aisStreamProviderError(error)
+          reject(failure)
+          if (canReconnect(failure)) this.scheduleReconnect()
         } else {
           resolve()
         }
@@ -272,46 +292,111 @@ export class AisAreaSession {
           try {
             socket.close()
           } catch { /* Ignore close errors during timeout. */ }
-          finish(new Error("AIS area stream timed out"))
+          finish(new Error("aisstream_timeout"))
         }
       }, this.timeoutMs)
       socket.onopen = () => {
+        if (this.socket !== socket || this.generation !== generation) {
+          try {
+            socket.close()
+          } catch { /* Ignore stale socket close errors. */ }
+          return
+        }
         opened = true
         this.socketOpen = true
         this.stats.socketOpened++
-        this.reconnectAttempt = 0
         this.reconnectExhausted = false
-        this.sendSubscription(this.desiredConfigs)
-        finish()
+        try {
+          this.sendSubscription(this.desiredConfigs)
+          finish()
+        } catch (error) {
+          const failure = aisStreamProviderError(error)
+          this.streamError = failure
+          this.socketOpen = false
+          try {
+            socket.close()
+          } catch { /* Ignore close errors after subscription failure. */ }
+          finish(failure)
+        }
       }
       socket.onmessage = (event) => {
-        const message = parseMessage(event.data) ?? {}
-        if (message.MessageType === "PositionReport") this.stats.positionReportsReceived++
-        const normalized = normalizeAisAreaPositionReport(message, this.now().toISOString())
-        if (!normalized) return
-        this.stats.validPositionReports++
-        if (normalized.sourceUpdatedAt) this.stats.sourceTimestampPresent++
-        const assigned = assignAisAreaObservation(normalized, this.activeConfigs)
-        if (!assigned) return
-        this.stats.assignedPortSamples++
-        if (assigned.areaAmbiguous) this.stats.ambiguousSamples++
-        this.storeObservation(assigned)
+        const configsAtArrival = [...this.activeConfigs]
+        void this.handleMessage(socket, generation, configsAtArrival, event.data).catch((error) => {
+          this.handleStreamError(socket, generation, error)
+        })
       }
       socket.onerror = (event) => {
-        const error = new Error(sanitizeAreaError(event))
-        if (!opened) finish(error)
+        const error = aisStreamProviderError(event)
+        this.streamError = error
         this.socketOpen = false
-        this.scheduleReconnect()
+        if (!opened) finish(error)
+        else if (canReconnect(error)) this.scheduleReconnect()
       }
       socket.onclose = () => {
         this.socketOpen = false
-        if (!opened) finish(new Error("AIS area stream closed before subscription"))
-        this.scheduleReconnect()
+        if (this.socket !== socket || this.generation !== generation) return
+        if (!opened) {
+          finish(aisStreamProviderError(new Error("aisstream_connection_closed")))
+        } else {
+          this.streamError ??= aisStreamProviderError(new Error("aisstream_connection_closed"))
+          if (canReconnect(this.streamError)) this.scheduleReconnect()
+        }
       }
     }).finally(() => {
       this.connectPromise = undefined
     })
     return this.connectPromise
+  }
+
+  private isCurrentSocket(socket: AisAreaSocket, generation: number): boolean {
+    return this.socket === socket && this.generation === generation && this.socketOpen
+  }
+
+  private async handleMessage(socket: AisAreaSocket, generation: number, configsAtArrival: PortAisAreaConfig[], data: unknown): Promise<void> {
+    const message = await parseAisStreamMessage(data)
+    if (!this.isCurrentSocket(socket, generation)) return
+    if (!message) return
+    if (message.MessageType === "SubscriptionConfirmation") {
+      this.stats.subscriptionConfirmations++
+      return
+    }
+    const protocolFailure = aisStreamProtocolError(message)
+    if (protocolFailure) {
+      this.handleStreamError(socket, generation, protocolFailure)
+      return
+    }
+    if (message.MessageType === "PositionReport") this.stats.positionReportsReceived++
+    const position = mapAisStreamPosition(message, this.now().toISOString())
+    if (!position || !this.isCurrentSocket(socket, generation)) return
+    this.stats.validPositionReports++
+    this.stats.sourceTimestampPresent++
+    const observation: Omit<AisAreaObservation, "portId" | "areaAmbiguous"> = {
+      mmsi: position.mmsi,
+      latitude: position.latitude,
+      longitude: position.longitude,
+      speed: position.speed,
+      course: position.course,
+      navigationStatus: (position.navigationStatus ?? "unknown") as NavigationStatus,
+      sourceUpdatedAt: position.timestamp,
+      fetchedAt: this.now().toISOString(),
+    }
+    const assigned = assignAisAreaObservation(observation, configsAtArrival)
+    if (!assigned || !this.isCurrentSocket(socket, generation)) return
+    this.stats.assignedPortSamples++
+    if (assigned.areaAmbiguous) this.stats.ambiguousSamples++
+    this.storeObservation(assigned)
+    this.reconnectAttempt = 0
+    this.reconnectExhausted = false
+  }
+
+  private handleStreamError(socket: AisAreaSocket, generation: number, error: unknown): void {
+    if (!this.isCurrentSocket(socket, generation)) return
+    this.streamError = aisStreamProviderError(error)
+    this.socketOpen = false
+    try {
+      socket.close()
+    } catch { /* Ignore close errors after a stream failure. */ }
+    if (canReconnect(this.streamError)) this.scheduleReconnect()
   }
 
   private async resolvePortConfigs(ports: Port[]): Promise<PortAisAreaConfig[]> {
@@ -336,8 +421,10 @@ export class AisAreaSession {
       this.reconnectExhausted = false
     }
     try {
+      await this.resolveApiKey()
       await this.ensureConnected()
       if (this.initialObservationWaitMs > 0) await new Promise(resolve => setTimeout(resolve, this.initialObservationWaitMs))
+      if (this.streamError) throw this.streamError
       const now = this.now()
       this.pruneObservations(now)
       const fetchedAt = now.toISOString()
@@ -365,10 +452,11 @@ export class AisAreaSession {
     } catch (error) {
       const fetchedAt = this.now().toISOString()
       const lastKnownByPort = new Map(lastKnown.filter(metric => metric.provenance?.sourceId === AIS_AREA_SOURCE_ID).map(metric => [metric.portId, metric]))
-      const stale = configs.map(config => lastKnownByPort.get(config.portId)).filter((metric): metric is AisDerivedPortMetric => metric !== undefined).map(metric => markMetricStale(metric, fetchedAt, sanitizeAreaError(error)))
-      this.scheduleReconnect()
+      const failure = aisStreamProviderError(error)
+      const stale = configs.map(config => lastKnownByPort.get(config.portId)).filter((metric): metric is AisDerivedPortMetric => metric !== undefined).map(metric => markMetricStale(metric, fetchedAt, sanitizeAreaError(failure), failure.code))
+      if (canReconnect(failure)) this.scheduleReconnect()
       if (stale.length) return stale
-      throw new Error(sanitizeAreaError(error))
+      throw failure
     }
   }
 
@@ -380,6 +468,8 @@ export class AisAreaSession {
     this.reconnectTimer = undefined
     this.desiredConfigs = []
     this.activeConfigs = []
+    this.streamError = undefined
+    this.generation++
     this.socketOpen = false
     this.reconnectAttempt = 0
     this.reconnectExhausted = false
@@ -393,14 +483,23 @@ export class AisAreaSession {
 export function createAisStreamAreaProvider(options: AisAreaSessionOptions): AisAreaProvider {
   const session = new AisAreaSession(options)
   return {
+    providerId: "aisstream-area",
     getPortMetrics: (ports = [], lastKnown = []) => session.getPortMetrics(ports, lastKnown),
+    close: () => session.close(),
+    getStats: () => session.liveStats,
   }
 }
 
 export function createUnavailableAisAreaProvider(error: string): AisAreaProvider {
-  return { async getPortMetrics() {
-    throw new Error(error)
-  } }
+  return {
+    providerId: "unavailable",
+    async getPortMetrics() {
+      const failure = aisStreamProviderError(new Error(error))
+      throw new ProviderError(failure.code, error, failure.status)
+    },
+    close: () => undefined,
+    getStats: () => ({ socketOpened: 0, subscriptionsSent: 0, subscriptionBboxCount: 0, subscriptionConfirmations: 0, positionReportsReceived: 0, validPositionReports: 0, assignedPortSamples: 0, ambiguousSamples: 0, sourceTimestampPresent: 0, distinctMmsi: 0 }),
+  }
 }
 
 export const AisAreaProviderDefaults = {
