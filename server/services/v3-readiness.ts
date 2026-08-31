@@ -339,6 +339,40 @@ function configuredAisProvider(): string | undefined {
   return configuredValue("SHIPPING_AIS_PROVIDER") ?? configuredValue("SHIPPING_VESSEL_PROVIDER")
 }
 
+export interface AisLiveVerificationInput {
+  dataMode: ShippingDataMode
+  provider: string
+  streamingEnabled: boolean
+  credentialAvailable: boolean
+  tracker?: RuntimeReadinessStatus["aisLiveTracker"]
+  runtime: CapabilityReadiness["runtime"]
+  lastSuccessAt?: string
+  lastSourceUpdatedAt?: string
+  freshness: CapabilityReadiness["freshness"]
+}
+
+function parseableTimestamp(value: string | undefined): boolean {
+  return Boolean(value && Number.isFinite(Date.parse(value)))
+}
+
+function hasHistoricalAisEvidence(input: AisLiveVerificationInput): boolean {
+  return Boolean(input.lastSuccessAt) && parseableTimestamp(input.lastSourceUpdatedAt)
+}
+
+export function resolveAisLiveVerification(input: AisLiveVerificationInput): CapabilityReadiness["liveVerification"] {
+  if (input.dataMode !== "real" || input.provider !== "aisstream" || !input.streamingEnabled || !input.credentialAvailable) return "coverage_pending"
+  if (!input.tracker?.running || !hasHistoricalAisEvidence(input)) return "coverage_pending"
+  if (input.runtime === "healthy" && input.freshness === "fresh") return "verified_live"
+  if (input.runtime === "degraded" || input.runtime === "failed") return "verified_live"
+  if (input.freshness === "stale" && input.runtime === "healthy") return "verified_live"
+  return "coverage_pending"
+}
+
+export function resolveAisReadinessStatus(input: AisLiveVerificationInput, liveVerification: CapabilityReadiness["liveVerification"]): CapabilityReadinessStatus {
+  if (!input.credentialAvailable) return "credential_missing"
+  return liveVerification === "verified_live" ? "configured" : "coverage_pending"
+}
+
 function vesselSearchCapabilityDefinition(): { capability: string, provider: string, configured: boolean, credential: CapabilityReadiness["credential"], status: CapabilityReadinessStatus } {
   const provider = configuredValue("SHIPPING_VESSEL_SEARCH_PROVIDER")
   if (provider === "gfw") {
@@ -394,7 +428,8 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
     const jobs = runtimeByCapability.get(runtimeCapability) ?? []
     const job = jobs[0]
     const aggregatedRuntime = aggregateRuntimeReadiness(jobs)
-    const liveTracker = definition.capability === "ais_tracking" && isAisStreamingEnabled(dataMode) ? runtime?.aisLiveTracker : undefined
+    const streamingEnabled = isAisStreamingEnabled(dataMode)
+    const liveTracker = definition.capability === "ais_tracking" && streamingEnabled ? runtime?.aisLiveTracker : undefined
     const sourceDetails = runtimeCapability === "feed_sync"
       ? jobs.map(source => ({ id: source.id, provider: source.providerId, runtime: runtimeState(source), enabled: source.enabled, lastSuccessAt: source.lastSuccessAt, lastSourceUpdatedAt: source.lastSourceUpdatedAt, errorCode: source.errorCode }))
       : undefined
@@ -407,7 +442,35 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
     const capabilityRuntime = liveTracker
       ? liveTracker.running ? (liveTracker.providerStatus ?? "registered") : "not_registered"
       : aggregatedRuntime
-    return { ...definition, runtime: capabilityRuntime, lastSuccessAt: liveTracker?.lastSuccessAt ?? job?.lastSuccessAt, lastSourceUpdatedAt: liveTracker?.lastSourceUpdatedAt ?? job?.lastSourceUpdatedAt, freshness, liveVerification: definition.liveVerification ?? (safe ? "not_verified" : "coverage_pending"), ...(sourceDetails ? { sources: sourceDetails } : {}) }
+    const lastSuccessAt = liveTracker?.lastSuccessAt ?? job?.lastSuccessAt
+    const lastSourceUpdatedAt = liveTracker?.lastSourceUpdatedAt ?? job?.lastSourceUpdatedAt
+    const liveVerification = definition.capability === "ais_tracking" && !safe
+      ? resolveAisLiveVerification({
+          dataMode,
+          provider: definition.provider,
+          streamingEnabled,
+          credentialAvailable: definition.credential === "available",
+          tracker: liveTracker,
+          runtime: capabilityRuntime,
+          lastSuccessAt,
+          lastSourceUpdatedAt,
+          freshness,
+        })
+      : definition.liveVerification ?? (safe ? "not_verified" : "coverage_pending")
+    const status = definition.capability === "ais_tracking" && !safe
+      ? resolveAisReadinessStatus({
+          dataMode,
+          provider: definition.provider,
+          streamingEnabled,
+          credentialAvailable: definition.credential === "available",
+          tracker: liveTracker,
+          runtime: capabilityRuntime,
+          lastSuccessAt,
+          lastSourceUpdatedAt,
+          freshness,
+        }, liveVerification)
+      : definition.status
+    return { ...definition, status, runtime: capabilityRuntime, lastSuccessAt, lastSourceUpdatedAt, freshness, liveVerification, ...(sourceDetails ? { sources: sourceDetails } : {}) }
   })
 }
 

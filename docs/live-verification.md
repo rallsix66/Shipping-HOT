@@ -1,6 +1,6 @@
 # V3 Real Data Live Verification
 
-> Verification date: 2026-08-30 (review-gap closure; original activation evidence is dated 2026-08-29)
+> Verification date: 2026-08-31 (latest multi-target continuous AIS acceptance; earlier activation evidence remains historical)
 > Scope: controlled local Real Mode process only. No deployment, provider account change or secret creation was performed; the GFW Provider implementation and live probe are recorded separately below.
 
 ## Method
@@ -136,11 +136,35 @@ This acceptance run validates the new long-lived AISStream lifecycle. It used on
 
 The run confirms the continuous lifecycle and subscription acceptance, but it does not establish `verified_live`: discovery coverage was not re-observed by the selected-MMSI formal stream. No AIS position was manually inserted, no Mock fallback was used, no database schema or retained SQLite was touched, and the temporary database was removed after the run.
 
+## V3 AIS Multi-Target Continuous Live Acceptance — 2026-08-31
+
+This is the current formal AIS evidence. It used a fresh filesystem temporary Real SQLite database, closed discovery before formal tracking, and did not open or write the retained database.
+
+| Check | Result |
+| --- | --- |
+| Credentials | `AISSTREAM_API_KEY` and `GFW_API_TOKEN` configured from the server environment; secret values were not recorded |
+| Singapore discovery | 45.1 seconds; raw frames `7`; `SubscriptionConfirmation=1`; `PositionReport=6`; unique valid MMSIs `6` |
+| Discovery Top 10 | `572549220(1)`, `563080160(1)`, `269047000(1)`, `525121064(1)`, `564298000(1)`, `538012811(1)` |
+| GFW resolution | `6/6` discovery candidates resolved to current/latest MMSI matches |
+| Formal candidates | `6`: VALLIANZ PRESTIGE / IMO `9978846` / MMSI `572549220`; MPA GUARDIAN / no IMO / `563080160`; ST-CERGUE / IMO `9775373` / `269047000`; JENGGALA BANGO / IMO `9394208` / `525121064`; JET FLYTE II / IMO `9149615` / `564298000`; GRAND NEPTUNE / IMO `9303209` / `538012811` |
+| Canonical identities | `imo:9978846`, `mmsi:563080160`, `imo:9775373`, `imo:9394208`, `imo:9149615`, `imo:9303209` |
+| Formal subscription | One socket, `SubscriptionConfirmation=1`; `FiltersShipMMSI` contained exactly the six current candidate MMSIs |
+| First formal observation | VALLIANZ PRESTIGE / IMO `9978846` / MMSI `572549220`; PositionReport provider timestamp `2026-08-31T11:32:15.242Z`; latitude `1.2172833333`; longitude `103.7730733333` |
+| Persistence | `ais_positions=1`; winner `ais_latest_positions=1`; `source=aisstream`; `sourceType=real` |
+| Runtime / Tracker | `provider_runtime=healthy`, `lastSuccessAt=2026-08-31T11:32:16.568Z`, `lastSourceUpdatedAt=2026-08-31T11:32:15.242Z`, `consecutiveFailures=0`; Tracker `running=true`, `targetCount=6`, `socketCount=1`, `confirmedSocketCount=1` before clean shutdown |
+| Repository / API | Read-back succeeded with `sourceStatus=healthy`, `stale=false`; API/service read made zero AIS/GFW calls |
+| Restart | All six metadata records and Watchlist records persisted; winner position/latest-position persisted; restart Repository/API reads made zero Provider calls |
+| Zero-Mock Gate | Schema-discovered `actualMockRows.total=0` |
+| Readiness | With the real continuous Tracker evidence: `runtime=healthy`, `freshness=fresh`, `liveVerification=verified_live`, `status=configured` |
+| Acceptance Gate | `verified_live`; canonical reason `multi_target_continuous_ais_position_persisted_and_restarted` |
+
+Readiness now derives AIS `verified_live` from the real continuous runtime evidence; it does not infer it from credential presence alone. Historical success remains visible when the current runtime is degraded/failed or the source timestamp is stale, while streaming-disabled, Mock, missing-credential and no-observation states remain unverified/coverage-pending as appropriate. This acceptance does not verify Voyage/ETA, AIS Area or official weather-alert coverage.
+
 ## Provider and persistence evidence
 
 | Capability | Provider | Observation | SQLite / API evidence | Status |
 | --- | --- | --- | --- | --- |
-| AIS tracking | AISStream | No eligible watched MMSI was available; the batch stopped before opening a live socket | No AIS position row was written; the existing API/UI surface remains available for a future persisted observation | `coverage_pending` |
+| AIS tracking | AISStream | Latest multi-target continuous acceptance persisted a real PositionReport and survived SQLite restart; earlier no-target/no-observation runs remain historical | `ais_positions` and `ais_latest_positions` contain the accepted temporary-run evidence; Repository/API reads are provider-free | `verified_live` |
 | Voyage / ETA | None in Real Mode | Job was disabled because only the Mock Voyage adapter is available and no real key/adapter was configured | Readiness correctly blocks on the disabled Voyage Job; VesselAPI ETA entitlement is **not verified** and no ETA claim is made | `credential_missing` |
 | Feed — The Loadstar | Public RSS | 10 normalized items fetched | Real Feed rows persisted; current/history API available | `verified_live` |
 | Feed — Shekou official | Public HTML | 5 normalized items fetched | Real Feed rows persisted; publication/freshness policy controls current vs history visibility | `verified_live` |
@@ -151,7 +175,7 @@ The run confirms the continuous lifecycle and subscription acceptance, but it do
 
 The activation result reported `actualMockRows` from a direct native SQLite schema-discovered scan of every business table carrying `source_type`: `ais_latest_positions=0`, `ais_port_metrics=0`, `ais_positions=0`, `calendar_events=0`, `events=0`, `feed_item_history=0`, `feed_items=0`, `ports=0`, `vessel_metadata=0`, `vessel_search_cache=0`, `vessels=0`, `voyage_eta_history=0`, `voyages=0`, `total=0`. System/metadata tables are explicitly excluded. The smoke asserts this total and exits non-zero if it is not zero; `mockRows` is retained only as a compatibility alias for the observed object. The real database read path accepts only `real/imported/derived` lineage. No Mock data was promoted into the Real operational read.
 
-This seals zero-Mock gate coverage for the review only; it does not claim `Real Operational Ready` because AIS PositionReport, real Voyage/ETA, VesselAPI credentials and official weather-alert coverage remain pending.
+This seals zero-Mock gate coverage for the review and the current AIS PositionReport gate. It does not claim `Real Operational Ready` because real Voyage/ETA and official weather-alert coverage remain pending; VesselAPI remains optional and separately unverified.
 
 ## Built Nitro HTTP smoke
 
@@ -164,4 +188,4 @@ The built Nitro HTTP smoke returned HTTP 200 for `/`, `/api/shipping/health`, `/
 
 ## Boundary
 
-This document records observed requests and persisted/API evidence only. VesselAPI ETA entitlement is **not verified**: no credentialed ETA probe was made, so `entitlement_missing` is not asserted. The evidence also does not establish AIS PositionReport coverage, official weather-alert coverage, commercial Voyage/Schedule availability or permission to begin a later V3 phase.
+This document records observed requests and persisted/API evidence only. VesselAPI ETA entitlement is **not verified**: no credentialed ETA probe was made, so `entitlement_missing` is not asserted. The latest evidence establishes AIS PositionReport coverage for the accepted multi-target continuous path, but does not establish official weather-alert coverage, commercial Voyage/Schedule availability or permission to begin a later V3 phase.
