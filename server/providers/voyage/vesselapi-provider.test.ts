@@ -31,6 +31,7 @@ function eventPayload(event: "Arrival" | "Departure", overrides: Record<string, 
       event,
       timestamp: "2026-08-31T18:00:00Z",
       port: { unlo_code: "CNSHK", name: "Shekou" },
+      vessel: { imo: "9162423", mmsi: "413393620" },
       ...overrides,
     },
   }
@@ -91,6 +92,33 @@ describe("vesselapi voyage provider", () => {
     await mmsiProvider.getVoyages([{ vesselId: "mmsi-vessel", mmsi: "413393620" }])
     expect(new URL(mmsiQueue.urls[0]).pathname).toContain("/vessel/413393620/eta")
     expect(new URL(mmsiQueue.urls[0]).searchParams.get("filter.idType")).toBe("mmsi")
+  })
+
+  it.each([
+    [{ imo: "9162424" }, "provider_contract_changed"],
+    [{ mmsi: "413393621" }, "provider_contract_changed"],
+    [{ imo: "9162423", mmsi: "413393621" }, "provider_contract_changed"],
+    [{ imo: undefined, mmsi: undefined }, "provider_contract_changed"],
+  ] as const)("rejects an ETA response identity mismatch or absence: %j", async (identity, code) => {
+    const queue = fetchQueue([response(etaPayload(identity))])
+    const provider = createVesselApiVoyageProvider({ apiKey: "test-secret", fetcher: queue.fetcher, includeLastPortEvent: false })
+    await expect(provider.getVoyages([vessel])).rejects.toMatchObject({ code })
+  })
+
+  it("accepts an IMO-only response when the requested IMO matches", async () => {
+    const queue = fetchQueue([response(etaPayload({ mmsi: undefined }))])
+    const provider = createVesselApiVoyageProvider({ apiKey: "test-secret", fetcher: queue.fetcher, includeLastPortEvent: false })
+    await expect(provider.getVoyages([vessel])).resolves.toEqual([expect.objectContaining({ imo: "9162423", mmsi: "413393620" })])
+  })
+
+  it("accepts a matching MMSI-only request and rejects a mismatched MMSI", async () => {
+    const matchingQueue = fetchQueue([response(etaPayload({ imo: undefined }))])
+    const matchingProvider = createVesselApiVoyageProvider({ apiKey: "test-secret", fetcher: matchingQueue.fetcher, includeLastPortEvent: false })
+    await expect(matchingProvider.getVoyages([{ vesselId: "mmsi-vessel", mmsi: "413393620" }])).resolves.toHaveLength(1)
+
+    const mismatchQueue = fetchQueue([response(etaPayload({ imo: undefined, mmsi: "413393621" }))])
+    const mismatchProvider = createVesselApiVoyageProvider({ apiKey: "test-secret", fetcher: mismatchQueue.fetcher, includeLastPortEvent: false })
+    await expect(mismatchProvider.getVoyages([{ vesselId: "mmsi-vessel", mmsi: "413393620" }])).rejects.toMatchObject({ code: "provider_contract_changed" })
   })
 
   it("does not request a vessel without a legal IMO or MMSI", async () => {
@@ -209,5 +237,83 @@ describe("vesselapi voyage provider", () => {
       portDirectory: { resolvePortIdentity: async () => undefined },
     })
     await expect(missingEventProvider.getVoyages([vessel])).resolves.toEqual([expect.objectContaining({ originPortId: undefined })])
+  })
+
+  it.each([
+    [403, { error: { code: "feature_not_available", message: "Port events are not included" } }],
+    [403, { error: { code: "forbidden", message: "Port events forbidden" } }],
+    [500, { error: { code: "internal_error", message: "temporary" } }],
+  ] as const)("preserves ETA when the optional Port Event returns %s", async (status, body) => {
+    const queue = fetchQueue([response(etaPayload()), response(body, status)])
+    const provider = createVesselApiVoyageProvider({ apiKey: "test-secret", fetcher: queue.fetcher })
+    await expect(provider.getVoyages([vessel])).resolves.toEqual([expect.objectContaining({ source: "vesselapi", originPortId: undefined })])
+  })
+
+  it("preserves ETA when optional Port Event fails with network error or timeout", async () => {
+    const networkProvider = createVesselApiVoyageProvider({
+      apiKey: "test-secret",
+      fetcher: async (input) => {
+        if (input.includes("/eta")) return response(etaPayload())
+        throw new Error("network down")
+      },
+    })
+    await expect(networkProvider.getVoyages([vessel])).resolves.toEqual([expect.objectContaining({ source: "vesselapi", originPortId: undefined })])
+
+    const timeoutProvider = createVesselApiVoyageProvider({
+      apiKey: "test-secret",
+      timeoutMs: 5,
+      fetcher: async (input, init) => {
+        if (input.includes("/eta")) return response(etaPayload())
+        await new Promise<never>((_, reject) => init?.signal?.addEventListener("abort", () => reject(new Error("aborted")), { once: true }))
+        throw new Error("unreachable")
+      },
+    })
+    await expect(timeoutProvider.getVoyages([vessel])).resolves.toEqual([expect.objectContaining({ source: "vesselapi", originPortId: undefined })])
+  })
+
+  it("fails Port Event enrichment closed for malformed or mismatched identity", async () => {
+    const malformedQueue = fetchQueue([response(etaPayload()), response({ unexpected: true })])
+    const malformedProvider = createVesselApiVoyageProvider({ apiKey: "test-secret", fetcher: malformedQueue.fetcher })
+    await expect(malformedProvider.getVoyages([vessel])).resolves.toEqual([expect.objectContaining({ source: "vesselapi", originPortId: undefined })])
+
+    const mismatchQueue = fetchQueue([response(etaPayload()), response(eventPayload("Departure", { vessel: { imo: "9162424", mmsi: "413393620" } }))])
+    const mismatchProvider = createVesselApiVoyageProvider({ apiKey: "test-secret", fetcher: mismatchQueue.fetcher })
+    await expect(mismatchProvider.getVoyages([vessel])).resolves.toEqual([expect.objectContaining({ source: "vesselapi", originPortId: undefined })])
+  })
+
+  it("keeps the ETA timestamp authoritative and requires official destination_port", async () => {
+    const newerEventQueue = fetchQueue([response(etaPayload({ timestamp: "2026-09-01T08:00:00Z" })), response(eventPayload("Departure", { timestamp: "2026-09-02T08:00:00Z" }))])
+    const newerEventProvider = createVesselApiVoyageProvider({ apiKey: "test-secret", fetcher: newerEventQueue.fetcher, portDirectory: { resolvePortIdentity: async value => value } })
+    await expect(newerEventProvider.getVoyages([vessel])).resolves.toEqual([expect.objectContaining({ timestamp: "2026-09-01T08:00:00.000Z", lastUpdatedAt: "2026-09-01T08:00:00.000Z" })])
+
+    const missingTimestampQueue = fetchQueue([response(etaPayload({ timestamp: undefined })), response(eventPayload("Departure"))])
+    const missingTimestampProvider = createVesselApiVoyageProvider({ apiKey: "test-secret", fetcher: missingTimestampQueue.fetcher })
+    await expect(missingTimestampProvider.getVoyages([vessel])).resolves.toEqual([])
+
+    const missingDestinationQueue = fetchQueue([response(etaPayload({ destination_port: undefined }))])
+    const missingDestinationProvider = createVesselApiVoyageProvider({ apiKey: "test-secret", fetcher: missingDestinationQueue.fetcher, includeLastPortEvent: false })
+    await expect(missingDestinationProvider.getVoyages([vessel])).resolves.toEqual([])
+  })
+
+  it("uses a stable destination episode ID across ETA and Port Event changes", async () => {
+    const first = await normalizeVesselApiVoyageObservation({
+      vessel,
+      eta: { eta: "2026-09-03T08:00:00.000Z", timestamp: "2026-09-01T10:00:00.000Z", destinationPort: "PHMNL", imo: "9162423", mmsi: "413393620" },
+      resolvePortIdentity: async value => value,
+    })
+    const second = await normalizeVesselApiVoyageObservation({
+      vessel,
+      eta: { eta: "2026-09-04T08:00:00.000Z", timestamp: "2026-09-01T11:00:00.000Z", destinationPort: " phmnl ", imo: "9162423", mmsi: "413393620" },
+      portEvent: { event: "Departure", timestamp: "2026-09-01T12:00:00.000Z", port: "CNSHK", imo: "9162423", mmsi: "413393620" },
+      resolvePortIdentity: async value => value,
+    })
+    const otherDestination = await normalizeVesselApiVoyageObservation({
+      vessel,
+      eta: { eta: "2026-09-04T08:00:00.000Z", timestamp: "2026-09-01T12:00:00.000Z", destinationPort: "SGSIN", imo: "9162423", mmsi: "413393620" },
+    })
+    expect(first?.id).toBe("vesselapi:vessel-1:destination:PHMNL")
+    expect(second?.id).toBe(first?.id)
+    expect(second?.lastUpdatedAt).toBe("2026-09-01T11:00:00.000Z")
+    expect(otherDestination?.id).not.toBe(first?.id)
   })
 })

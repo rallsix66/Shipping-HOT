@@ -113,6 +113,26 @@ describe("runtime registry", () => {
     }
   })
 
+  it("forces Mock Voyage isolation for a dangerous vesselapi env in Mock Mode", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const previous = process.env.SHIPPING_VOYAGE_PROVIDER
+    try {
+      process.env.SHIPPING_VOYAGE_PROVIDER = "vesselapi"
+      const jobs = getDefaultRuntimeJobs({ database, dataMode: "mock", aisProvider })
+      expect(jobs.find(job => job.id === "voyage-sync")).toMatchObject({ providerId: "mock-voyage", enabled: true })
+      const provider = createVoyageProviderForDatabase(database, { providerId: "vesselapi", dataMode: "mock" })
+      await expect(provider.getVoyages([{ vesselId: "vessel-1", imo: "9162423" }])).rejects.toMatchObject({
+        code: "provider_unavailable",
+        message: "real_voyage_provider_not_allowed_in_mock_mode",
+      })
+    } finally {
+      if (previous === undefined) delete process.env.SHIPPING_VOYAGE_PROVIDER
+      else process.env.SHIPPING_VOYAGE_PROVIDER = previous
+      native.close()
+    }
+  })
+
   it("uses the existing vessel provider setting as the AIS provider alias", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "real")

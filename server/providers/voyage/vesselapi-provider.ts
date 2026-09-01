@@ -26,6 +26,10 @@ interface PortEventPayload {
     unlocode?: string
     name?: string
   }
+  vessel?: {
+    imo?: string | number
+    mmsi?: string | number
+  }
 }
 
 interface EtaObservation {
@@ -40,6 +44,8 @@ interface PortEventObservation {
   event: "Arrival" | "Departure"
   timestamp?: string
   port?: string
+  imo?: string
+  mmsi?: string
 }
 
 export interface VesselApiVoyageProviderOptions {
@@ -56,9 +62,11 @@ function objectRecord(value: unknown): Record<string, unknown> | undefined {
   return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined
 }
 
-function optionalIdentifier(value: unknown, pattern: RegExp): string | undefined {
+function optionalIdentifier(value: unknown, pattern: RegExp, field: string): string | undefined {
+  if (value === undefined || value === null || value === "") return undefined
   const candidate = typeof value === "number" && Number.isInteger(value) ? String(value) : typeof value === "string" ? value.trim() : ""
-  return pattern.test(candidate) ? candidate : undefined
+  if (!pattern.test(candidate)) throw new ProviderError("provider_contract_changed", `VesselAPI ${field} is invalid`, 200)
+  return candidate
 }
 
 function optionalTimestamp(value: unknown, field: string): string | undefined {
@@ -95,8 +103,8 @@ function parseEtaResponse(value: unknown): EtaObservation | undefined {
     eta: etaValue,
     timestamp: optionalTimestamp(eta.timestamp, "timestamp"),
     destinationPort: optionalString(eta.destination_port, "destination_port"),
-    imo: optionalIdentifier(eta.imo, /^\d{7}$/),
-    mmsi: optionalIdentifier(eta.mmsi, /^\d{9}$/),
+    imo: optionalIdentifier(eta.imo, /^\d{7}$/, "IMO"),
+    mmsi: optionalIdentifier(eta.mmsi, /^\d{9}$/, "MMSI"),
   }
 }
 
@@ -107,17 +115,42 @@ function parsePortEventResponse(value: unknown): PortEventObservation | undefine
   const event = objectRecord(root.portEvent) as PortEventPayload | undefined
   if (!event) throw new ProviderError("provider_contract_changed", "VesselAPI port event response schema is invalid", 200)
   if (event.event !== "Arrival" && event.event !== "Departure") throw new ProviderError("provider_contract_changed", "VesselAPI port event type is invalid", 200)
+  const vessel = event.vessel === undefined || event.vessel === null ? undefined : objectRecord(event.vessel)
+  if (event.vessel !== undefined && event.vessel !== null && !vessel) throw new ProviderError("provider_contract_changed", "VesselAPI port event vessel identity is invalid", 200)
+  const timestamp = optionalTimestamp(event.timestamp, "port event timestamp")
+  if (!timestamp) throw new ProviderError("provider_contract_changed", "VesselAPI port event timestamp is missing", 200)
   return {
     event: event.event,
-    timestamp: optionalTimestamp(event.timestamp, "port event timestamp"),
+    timestamp,
     port: optionalString(event.port?.unlo_code ?? event.port?.unlocode, "port UN/LOCODE"),
+    imo: optionalIdentifier(vessel?.imo, /^\d{7}$/, "port event IMO"),
+    mmsi: optionalIdentifier(vessel?.mmsi, /^\d{9}$/, "port event MMSI"),
   }
 }
 
-function latestTimestamp(...values: (string | undefined)[]): string | undefined {
-  return values
-    .filter((value): value is string => value !== undefined)
-    .sort((left, right) => Date.parse(right) - Date.parse(left))[0]
+function assertMatchingVesselIdentity(vessel: VoyageVesselIdentity, returned: { imo?: string, mmsi?: string }, idType: "imo" | "mmsi", source: string): void {
+  if (vessel.imo && returned.imo && vessel.imo !== returned.imo) {
+    throw new ProviderError("provider_contract_changed", `VesselAPI ${source} identity does not match the requested vessel`, 200)
+  }
+  if (vessel.mmsi && returned.mmsi && vessel.mmsi !== returned.mmsi) {
+    throw new ProviderError("provider_contract_changed", `VesselAPI ${source} identity does not match the requested vessel`, 200)
+  }
+  const requestedIdentifier = idType === "imo" ? vessel.imo : vessel.mmsi
+  const returnedIdentifier = idType === "imo" ? returned.imo : returned.mmsi
+  if (returnedIdentifier && requestedIdentifier && returnedIdentifier !== requestedIdentifier) {
+    throw new ProviderError("provider_contract_changed", `VesselAPI ${source} identity does not match the requested vessel`, 200)
+  }
+  if (!returned.imo && !returned.mmsi) {
+    throw new ProviderError("provider_contract_changed", `VesselAPI ${source} identity is missing`, 200)
+  }
+  if (!((vessel.imo && returned.imo === vessel.imo) || (vessel.mmsi && returned.mmsi === vessel.mmsi))) {
+    throw new ProviderError("provider_contract_changed", `VesselAPI ${source} identity does not match the requested vessel`, 200)
+  }
+}
+
+function stableDestinationKey(destinationPort: string): string | undefined {
+  const normalized = destinationPort.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "")
+  return normalized || undefined
 }
 
 export interface VoyageObservationParts {
@@ -128,18 +161,18 @@ export interface VoyageObservationParts {
 }
 
 export async function normalizeVesselApiVoyageObservation(parts: VoyageObservationParts): Promise<VoyageRecord | undefined> {
-  const lastUpdatedAt = latestTimestamp(parts.eta.timestamp, parts.portEvent?.timestamp)
-  if (!lastUpdatedAt) return undefined
-  const destinationPortId = parts.eta.destinationPort && parts.resolvePortIdentity
-    ? await parts.resolvePortIdentity(parts.eta.destinationPort)
+  const etaTimestamp = parts.eta.timestamp
+  const eta = parts.eta.eta
+  const destinationPort = parts.eta.destinationPort
+  const destinationKey = destinationPort ? stableDestinationKey(destinationPort) : undefined
+  if (!eta || !etaTimestamp || !destinationKey) return undefined
+  const destinationPortId = destinationPort && parts.resolvePortIdentity
+    ? await parts.resolvePortIdentity(destinationPort)
     : undefined
   const originPortId = parts.portEvent?.event === "Departure" && parts.portEvent.port && parts.resolvePortIdentity
     ? await parts.resolvePortIdentity(parts.portEvent.port)
     : undefined
-  const departureTimestamp = parts.portEvent?.event === "Departure" ? parts.portEvent.timestamp : undefined
-  const id = parts.portEvent?.event === "Departure" && departureTimestamp && parts.portEvent.port
-    ? `vesselapi:${parts.vessel.vesselId}:departure:${parts.portEvent.port}:${departureTimestamp}`
-    : `vesselapi:${parts.vessel.vesselId}:eta:${lastUpdatedAt}`
+  const id = `vesselapi:${parts.vessel.vesselId}:destination:${destinationKey}`
   return {
     id,
     vesselId: parts.vessel.vesselId,
@@ -149,12 +182,12 @@ export async function normalizeVesselApiVoyageObservation(parts: VoyageObservati
     destinationPortId,
     voyageNumber: undefined,
     status: "unknown",
-    eta: parts.eta.eta,
+    eta,
     etd: undefined,
     source: "vesselapi",
     sourceType: "real",
-    timestamp: lastUpdatedAt,
-    lastUpdatedAt,
+    timestamp: etaTimestamp,
+    lastUpdatedAt: etaTimestamp,
   }
 }
 
@@ -212,9 +245,24 @@ export function createVesselApiVoyageProvider(options: VesselApiVoyageProviderOp
         const eta = parseEtaResponse(etaRequest.body)
         if (!eta) continue
         let portEvent: PortEventObservation | undefined
+        assertMatchingVesselIdentity(vessel, eta, idType, "ETA")
         if (includeLastPortEvent) {
-          const eventRequest = await request(`/portevents/vessel/${encodeURIComponent(id)}/last`, idType, apiKey)
-          if (eventRequest.response.status !== 404) portEvent = parsePortEventResponse(eventRequest.body)
+          try {
+            const eventRequest = await request(`/portevents/vessel/${encodeURIComponent(id)}/last`, idType, apiKey)
+            if (eventRequest.response.status !== 404) {
+              const candidate = parsePortEventResponse(eventRequest.body)
+              if (candidate) {
+                try {
+                  assertMatchingVesselIdentity(vessel, candidate, idType, "port event")
+                  portEvent = candidate
+                } catch {
+                  portEvent = undefined
+                }
+              }
+            }
+          } catch {
+            portEvent = undefined
+          }
         }
         const normalized = await normalizeVesselApiVoyageObservation({
           vessel,

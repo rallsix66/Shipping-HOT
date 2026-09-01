@@ -33,6 +33,10 @@ interface VoyageRow {
 }
 
 interface ExistingVoyageRow {
+  imo?: string | null
+  mmsi?: string | null
+  origin_port_id?: string | null
+  destination_port_id?: string | null
   last_updated_at?: string | null
   baseline_etd?: string | null
   baseline_eta?: string | null
@@ -157,7 +161,7 @@ export class VoyageRepository {
           continue
         }
         if (this.dataMode === "real" && record.sourceType === "mock") throw new Error("mock_voyage_not_allowed_in_real_mode")
-        const existing = await this.db.prepare("SELECT last_updated_at, baseline_etd, baseline_eta, data FROM voyages WHERE id = ?").get(record.id) as ExistingVoyageRow | undefined
+        const existing = await this.db.prepare("SELECT imo, mmsi, origin_port_id, destination_port_id, last_updated_at, baseline_etd, baseline_eta, data FROM voyages WHERE id = ?").get(record.id) as ExistingVoyageRow | undefined
         if (existing?.last_updated_at && Date.parse(record.lastUpdatedAt) < Date.parse(existing.last_updated_at)) {
           staleSkipped++
           continue
@@ -175,15 +179,22 @@ export class VoyageRepository {
         const baselineEtdSource = existing?.baseline_etd !== undefined && existing?.baseline_etd !== null
           ? typeof previous.baselineEtdSource === "string" ? previous.baselineEtdSource : record.source
           : record.source
-        const data = JSON.stringify({
+        const persistedRecord: VoyageRecord = {
           ...record,
-          source_type: record.sourceType,
-          updatedAt: record.lastUpdatedAt,
-          latestEta: record.eta,
-          latestEtd: record.etd,
-          latestEtaSource: record.source,
-          latestEtdSource: record.source,
-          latestEtaObservedAt: record.lastUpdatedAt,
+          imo: record.imo ?? existing?.imo ?? undefined,
+          mmsi: record.mmsi ?? existing?.mmsi ?? undefined,
+          originPortId: record.originPortId ?? existing?.origin_port_id ?? undefined,
+          destinationPortId: record.destinationPortId ?? existing?.destination_port_id ?? undefined,
+        }
+        const data = JSON.stringify({
+          ...persistedRecord,
+          source_type: persistedRecord.sourceType,
+          updatedAt: persistedRecord.lastUpdatedAt,
+          latestEta: persistedRecord.eta,
+          latestEtd: persistedRecord.etd,
+          latestEtaSource: persistedRecord.source,
+          latestEtdSource: persistedRecord.source,
+          latestEtaObservedAt: persistedRecord.lastUpdatedAt,
           baselineEta,
           baselineEtd,
           baselineEtaSource,
@@ -206,10 +217,10 @@ export class VoyageRepository {
             latest_etd = excluded.latest_etd,
             latest_eta = excluded.latest_eta,
             delay_minutes = excluded.delay_minutes,
-            imo = excluded.imo,
-            mmsi = excluded.mmsi,
-            origin_port_id = excluded.origin_port_id,
-            destination_port_id = excluded.destination_port_id,
+            imo = COALESCE(excluded.imo, voyages.imo),
+            mmsi = COALESCE(excluded.mmsi, voyages.mmsi),
+            origin_port_id = COALESCE(excluded.origin_port_id, voyages.origin_port_id),
+            destination_port_id = COALESCE(excluded.destination_port_id, voyages.destination_port_id),
             voyage_number = excluded.voyage_number,
             status = excluded.status,
             eta = excluded.eta,
@@ -226,16 +237,16 @@ export class VoyageRepository {
           record.etd ?? null,
           record.eta ?? null,
           delayMinutes ?? null,
-          record.imo ?? null,
-          record.mmsi ?? null,
-          record.originPortId ?? null,
-          record.destinationPortId ?? null,
-          record.voyageNumber ?? null,
-          record.status,
-          record.eta ?? null,
-          record.etd ?? null,
-          record.source,
-          record.lastUpdatedAt,
+          persistedRecord.imo ?? null,
+          persistedRecord.mmsi ?? null,
+          persistedRecord.originPortId ?? null,
+          persistedRecord.destinationPortId ?? null,
+          persistedRecord.voyageNumber ?? null,
+          persistedRecord.status,
+          persistedRecord.eta ?? null,
+          persistedRecord.etd ?? null,
+          persistedRecord.source,
+          persistedRecord.lastUpdatedAt,
           createdAt,
         ) as { changes?: number }
         if ((result.changes ?? 0) > 0) written++

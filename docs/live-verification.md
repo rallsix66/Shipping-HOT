@@ -223,9 +223,11 @@ This seals zero-Mock gate coverage for the review and the current AIS PositionRe
 | Official contract | Base `https://api.vesselapi.com/v1`; ETA `GET /vessel/{id}/eta` with `filter.idType=imo|mmsi`; optional latest Port Event `GET /portevents/vessel/{id}/last`; Bearer authentication |
 | Adapter | `providerId=vesselapi`; server-side SecretStore only; IMO preferred and legal MMSI fallback; bounded requests; no Mock fallback |
 | Credential gate | `VESSELAPI_API_KEY configured=false`; checked through the existing server-side environment/FileSecretStore path; no live request was made |
-| Contract repair | Origin, destination, voyage number, ETA/ETD and status are safely optional/unknown where the provider does not supply trusted data; Port Directory resolution is fail-closed; `voyage_eta_history` remains append-only |
+| Contract repair | ETA and Port Event identities are validated against the requested vessel; Port Event is optional enrichment and fails closed on errors/mismatch; official `destination_port` plus local vessel ID form a stable episode key; Port Directory resolution is fail-closed; `voyage_eta_history` remains append-only |
 | Runtime gate | No eligible targets → `skipped/no_eligible_voyage_targets`; eligible targets with no ETA → `skipped/no_voyage_eta_observed`; only a persisted trusted real observation returns `success` |
-| Readiness | Key absent → `credential_missing`; key plus adapter without persisted evidence → `coverage_pending`; persisted VesselAPI ETA/destination evidence plus enabled Runtime → `verified_live/configured` |
+| Timestamp / identity | ETA `timestamp` alone owns Voyage freshness; Port Event timestamp is enrichment-only; missing ETA timestamp or destination yields no usable observation; requested canonical identity is never overwritten |
+| Mock isolation | Mock Mode force-selects `mock-voyage` even when `SHIPPING_VOYAGE_PROVIDER=vesselapi`; direct factory selection fails closed; Real Mode has no Mock fallback |
+| Readiness | Key absent → `credential_missing`; key plus adapter without persisted canonical-destination evidence → `coverage_pending`; persisted VesselAPI ETA/destination evidence plus enabled Runtime → `verified_live/configured` |
 | Persistence/API | No retained SQLite was opened or written; API remains Repository/SQLite-only and provider-call delta is zero for reads |
 | Live acceptance | Not executed because the credential was absent; no target, ETA, Port Event or `verified_live` claim is recorded |
 

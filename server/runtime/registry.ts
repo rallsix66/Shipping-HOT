@@ -176,12 +176,17 @@ export function getDefaultRuntimeJobs(options: RuntimeRegistryOptions): RuntimeJ
       observationWindowMs: aisTiming.observationWindowMs,
       now: options.now,
     })
-  const voyageProviderId = process.env.SHIPPING_VOYAGE_PROVIDER?.trim().toLowerCase() || "mock"
-  const voyageProvider = options.voyageProvider ?? createVoyageProviderForDatabase(options.database, {
-    providerId: voyageProviderId,
-    dataMode: options.dataMode,
-    now: options.now,
-  })
+  const requestedVoyageProviderId = process.env.SHIPPING_VOYAGE_PROVIDER?.trim().toLowerCase() || "mock"
+  let voyageProvider: VoyageProvider
+  if (options.dataMode === "real" && options.voyageProvider) {
+    voyageProvider = options.voyageProvider
+  } else {
+    voyageProvider = createVoyageProviderForDatabase(options.database, {
+      providerId: options.dataMode === "real" ? requestedVoyageProviderId : "mock",
+      dataMode: options.dataMode,
+      now: options.now,
+    })
+  }
   const areaEnabled = options.dataMode === "real" && process.env.SHIPPING_AIS_AREA_PROVIDER?.trim().toLowerCase() === "aisstream"
   const aisAreaProvider = areaEnabled
     ? options.aisAreaProvider ?? createAisAreaProviderForDatabase(options.database, { dataMode: options.dataMode, now: options.now })

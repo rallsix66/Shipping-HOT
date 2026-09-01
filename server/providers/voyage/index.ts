@@ -32,6 +32,7 @@ export function createVoyageProviderForDatabase(database: Database, options: Voy
     return createMockVoyageProvider({ portDirectory: new PortDirectoryRepository(database, options.dataMode), now: options.now })
   }
   if (options.providerId === "vesselapi") {
+    if (options.dataMode !== "real") return unavailableVoyageProvider("vesselapi", "real_voyage_provider_not_allowed_in_mock_mode")
     const secretStore = options.secretStore ?? new FileSecretStore()
     return createVesselApiVoyageProvider({
       apiKeyResolver: () => secretStore.get("vesselapi"),

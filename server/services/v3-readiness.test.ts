@@ -5,7 +5,7 @@ import type { AisDerivedPortMetric } from "@shared/ais-area"
 import type { VoyageRecord } from "@shared/voyage"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { VoyageRepository } from "#/database/voyages"
-import { type CapabilityReadiness, type RuntimeReadinessJob, type RuntimeReadinessStatus, type V3ToolchainObservation, aggregateRuntimeReadiness, approvedRuntimeJobKeys, hasVerifiedAisAreaMetric, readV3PackageManagerObservation, readV3Readiness, readV3ToolchainChecks, resolveAisAreaVerificationEvidence, resolveWeatherAlertLiveVerification, resolveWeatherAlertReadinessReason, resolveWeatherAlertReadinessStatus } from "#/services/v3-readiness"
+import { type CapabilityReadiness, type RuntimeReadinessJob, type RuntimeReadinessStatus, type V3ToolchainObservation, aggregateRuntimeReadiness, approvedRuntimeJobKeys, hasVerifiedAisAreaMetric, readV3PackageManagerObservation, readV3Readiness, readV3ToolchainChecks, resolveAisAreaVerificationEvidence, resolveVoyageLiveVerification, resolveVoyageReadinessStatus, resolveWeatherAlertLiveVerification, resolveWeatherAlertReadinessReason, resolveWeatherAlertReadinessStatus } from "#/services/v3-readiness"
 
 function createNativeDatabase() {
   const native = new NativeDatabase(":memory:")
@@ -92,7 +92,7 @@ async function realVesselSearchCapability(options: { provider?: string, gfwToken
   }
 }
 
-async function realVoyageCapability(options: { provider?: string, credential?: boolean, runtimeStatus?: string, evidence?: boolean, registered?: boolean } = {}): Promise<CapabilityReadiness> {
+async function realVoyageCapability(options: { provider?: string, credential?: boolean, runtimeStatus?: string, evidence?: boolean, registered?: boolean, evidenceOverrides?: Partial<VoyageRecord> } = {}): Promise<CapabilityReadiness> {
   const environmentNames = ["SHIPPING_DATA_MODE", "SHIPPING_VOYAGE_PROVIDER", "VESSELAPI_API_KEY"]
   const previous = new Map(environmentNames.map(name => [name, process.env[name]]))
   process.env.SHIPPING_DATA_MODE = "real"
@@ -104,7 +104,7 @@ async function realVoyageCapability(options: { provider?: string, credential?: b
   try {
     await initShippingTables(database, "real")
     const evidence: VoyageRecord = {
-      id: "vesselapi:vessel-1:eta:2026-08-31T10:00:00.000Z",
+      id: "vesselapi:vessel-1:destination:PHMNL",
       vesselId: "vessel-1",
       imo: "9162423",
       mmsi: "413393620",
@@ -115,6 +115,7 @@ async function realVoyageCapability(options: { provider?: string, credential?: b
       sourceType: "real",
       timestamp: "2026-08-31T10:00:00.000Z",
       lastUpdatedAt: "2026-08-31T10:00:00.000Z",
+      ...options.evidenceOverrides,
     }
     if (options.evidence) await new VoyageRepository(database, "real").saveVoyages([evidence])
     const runtime: RuntimeReadinessStatus = {
@@ -1038,6 +1039,27 @@ describe("v3 readiness", () => {
       liveVerification: "verified_live",
       status: "configured",
     })
+  })
+
+  it("does not verify Voyage evidence without an ETA-owned timestamp", () => {
+    const input = {
+      dataMode: "real" as const,
+      provider: "vesselapi",
+      credentialAvailable: true,
+      runtimeJobRegistered: true,
+      runtime: "healthy" as const,
+      historicalLiveEvidence: true,
+      sourceUpdatedAt: undefined,
+    }
+    const liveVerification = resolveVoyageLiveVerification(input)
+    expect(liveVerification).toBe("coverage_pending")
+    expect(resolveVoyageReadinessStatus(input, liveVerification)).toBe("coverage_pending")
+  })
+
+  it("does not verify a Voyage record without canonical destination evidence", async () => {
+    const capability = await realVoyageCapability({ provider: "vesselapi", evidence: true, evidenceOverrides: { destinationPortId: undefined } })
+    expect(capability.liveVerification).toBe("coverage_pending")
+    expect(capability.status).toBe("coverage_pending")
   })
 
   it("does not use a different Provider credential when VesselAPI is explicitly selected", async () => {
