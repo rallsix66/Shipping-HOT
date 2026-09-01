@@ -199,12 +199,37 @@ This is the isolated Area acceptance. It used a fresh temporary Real SQLite, the
 
 The Area path reuses the hardened AISStream binary/trust parser, treats `SubscriptionConfirmation` as connection evidence only, validates MMSI/metadata/coordinates/provider timestamps, and guards asynchronous Blob decoding against stale socket generations and configuration snapshots. The separate Readiness alignment reads existing Real `ais_port_metrics` evidence without opening a Provider or writing SQLite: a qualifying `aisstream-area` metric with positive sample/minimum thresholds and a parseable `sourceUpdatedAt` remains historical evidence when coverage is usable or stale; insufficient or malformed evidence stays pending. No schema, migration, raw observation table, retained SQLite, UI, Vessel Tracking, Voyage, Weather or Feed behavior was changed.
 
+## V3 VesselAPI Voyage / ETA — Accepted Live Verification Seal — 2026-09-01
+
+This section records previously accepted live evidence. This documentation seal performs no new Provider request and does not claim a new live run.
+
+| Check | Result |
+| --- | --- |
+| Engineering | VesselAPI Voyage/ETA `SEALED`; real adapter runs behind the existing Provider → factory → Runtime → Repository boundary, with no Mock fallback in Real Mode |
+| Target identity | HANSA BREITENBURG; local `vesselId=imo:9155391`; IMO `9155391`; MMSI `538090733` |
+| VesselAPI ETA | HTTP `200`; identity validation `PASSED`; official `destination_port=CNYPG`; official ETA `2026-08-31T21:00:00Z`; trusted provider timestamp `2026-08-29T16:07:07Z` |
+| Port Event | HTTP `200`; `Departure` at `THLCH`; `originPortId=THLCH` |
+| Production path | `VesselAPI Provider → factory → Voyage Runtime → VoyageRepository → SQLite`; `recordsRead=1`, `recordsWritten=1`, `voyages=1`, ETA history `1`, `newEpisodes=1` |
+| Persisted episode | `vesselapi:imo:9155391:destination:CNYPG:episode:20260829T160707000Z`; `episodeState=current`; `voyageNumber=undefined`; `status=unknown`; `etd=undefined` |
+| ETA state | `baselineEta=2026-08-31T21:00:00.000Z`; `latestEta=2026-08-31T21:00:00.000Z`; `delayMinutes=0` |
+| Runtime | `provider_runtime=healthy`; `lastSourceUpdatedAt=2026-08-29T16:07:07.000Z`; `sync_run=success` |
+| Persistence / reads | Voyage API read and `ShippingRepository` read passed without Provider calls; SQLite restart, restart Repository read, ETA-history read and API read passed; Provider calls during reads/restart `0` |
+| Zero-Mock | Isolated evidence reported `actualMockRows.total=0` |
+| Focus-port coverage | Official `CNYPG` is outside the current eight-port directory, so `canonical destinationPortId=undefined`; `focusPortCoverageObserved=false`; operational status `coverage_pending`; reason `vesselapi_focus_port_coverage_pending` |
+| Provider status | `liveVerification=VERIFIED_LIVE`; focus-port coverage is separate `PARTIAL / COVERAGE_PENDING` and does not invalidate Provider verification |
+
+IRIS MIKO is recorded only as a boundary check: IMO `9327566`, MMSI `548156600`; VesselAPI ETA HTTP `200` with matching identity, but no official `destination_port`. The Provider emitted no Voyage observation and Runtime returned `skipped/no_voyage_eta_observed`. PPA Manila pre-screen evidence is not official VesselAPI destination evidence.
+
+The accepted deterministic repairs are referenced by commit: PortDirectory binding `8fc97c0227c66acf7c7f0aab78edcb48d2e5213a`; Provider live verification/focus-port coverage split `720beff0b3d52892baecd1cfc0151c7b7df2bf9a`; stable Episode anchor validation against the first trusted ETA history `bf7df46b7095d51a37e316fcaddda2260663dfa4`.
+
+The formal focus directory remains `CNSHK`, `CNYTN`, `CNNSA`, `THLCH`, `MYPKG`, `PHMNL`, `IDJKT` and `VNSGN`; no Port Directory change is implied. No secret, Authorization header or raw provider payload is recorded.
+
 ## Provider and persistence evidence
 
 | Capability | Provider | Observation | SQLite / API evidence | Status |
 | --- | --- | --- | --- | --- |
 | AIS tracking | AISStream | Latest multi-target continuous acceptance persisted a real PositionReport and survived SQLite restart; earlier no-target/no-observation runs remain historical | `ais_positions` and `ais_latest_positions` contain the accepted temporary-run evidence; Repository/API reads are provider-free | `verified_live` |
-| Voyage / ETA | VesselAPI adapter implemented; not selected by the safe Mock default | No live request was made because the server-side `VESSELAPI_API_KEY` credential is absent | Real `voyage-sync` is enabled only for `SHIPPING_VOYAGE_PROVIDER=vesselapi`; Readiness requires persisted Repository evidence with a trusted ETA/destination before `verified_live` | `credential_missing` / `coverage_pending` |
+| Voyage / ETA | VesselAPI adapter, accepted live evidence for HANSA | ETA HTTP `200` plus Port Event HTTP `200`; identity passed; official destination `CNYPG`; origin `THLCH` | One real voyage and one ETA-history row persisted; provider-free API/Repository reads and SQLite restart passed; `actualMockRows.total=0` | Provider `verified_live`; focus coverage `partial/coverage_pending` |
 | Feed — The Loadstar | Public RSS | 10 normalized items fetched | Real Feed rows persisted; current/history API available | `verified_live` |
 | Feed — Shekou official | Public HTML | 5 normalized items fetched | Real Feed rows persisted; publication/freshness policy controls current vs history visibility | `verified_live` |
 | Calendar | Calendarific | 259 events fetched for CN, ID, MY, PH, TH and VN | Real Calendar rows persisted and Calendar API returned them; official/manual completeness remains separate | `coverage_pending` |
@@ -214,30 +239,30 @@ The Area path reuses the hardened AISStream binary/trust parser, treats `Subscri
 
 The activation result reported `actualMockRows` from a direct native SQLite schema-discovered scan of every business table carrying `source_type`: `ais_latest_positions=0`, `ais_port_metrics=0`, `ais_positions=0`, `calendar_events=0`, `events=0`, `feed_item_history=0`, `feed_items=0`, `ports=0`, `vessel_metadata=0`, `vessel_search_cache=0`, `vessels=0`, `voyage_eta_history=0`, `voyages=0`, `total=0`. System/metadata tables are explicitly excluded. The smoke asserts this total and exits non-zero if it is not zero; `mockRows` is retained only as a compatibility alias for the observed object. The real database read path accepts only `real/imported/derived` lineage. No Mock data was promoted into the Real operational read.
 
-This seals zero-Mock gate coverage for the review and the current AIS PositionReport gate. It does not claim `Real Operational Ready` because official weather-alert coverage remains pending and VesselAPI Voyage/ETA has no local credentialed evidence; the adapter is implemented but remains `credential_missing` / `coverage_pending`.
+This seals zero-Mock gate coverage for the review, the current AIS PositionReport gate and the accepted VesselAPI Voyage/ETA path. It does not claim `Real Operational Ready`: Voyage Provider live verification is complete, but focus-port coverage remains `coverage_pending` for `CNYPG` and other independent gates remain outside this seal.
 
-## V3 VesselAPI recurring Voyage episode repair — 2026-09-01
+## V3 VesselAPI recurring Voyage episode repair — 2026-09-01 (historical repair checkpoint)
 
-This was a deterministic Repository/Runtime repair only. No `VESSELAPI_API_KEY` was configured or used, no live VesselAPI or Port Event request was made, and no retained SQLite database was opened.
+This was a deterministic Repository/Runtime repair checkpoint before the later accepted live run. No `VESSELAPI_API_KEY` was configured or used in that repair, no live request was made in that repair, and no retained SQLite database was opened. The accepted live evidence is recorded in the seal above.
 
 - The stateless VesselAPI adapter now emits a candidate identity containing the normalized official destination and trusted ETA timestamp. The Repository resolves same-destination updates to the current persisted row, creates a new row only for a strictly newer destination transition, rejects stale/equal cross-destination transitions, and persists `episodeState=current|superseded` plus `supersededAt` in existing `voyages.data` JSON.
 - Regression coverage proves `PHMNL → SGSIN → PHMNL` yields three historical rows, resets the returning episode baseline, survives native SQLite restart, retains optional Port Event/canonical destination enrichment behavior, and keeps historical rows visible through `ShippingRepository` while excluding superseded VesselAPI episodes from Voyage delay Event/HOT detection.
-- `VESSELAPI_API_KEY` remains `configured=false`; the Voyage Live Gate remains `credential_missing` / `coverage_pending`. No migration, code outside the Voyage episode boundary or retained SQLite data was touched; this note records no live acceptance evidence.
+- No migration, code outside the Voyage episode boundary or retained SQLite data was touched by that repair; this historical note records deterministic hardening only, not the later live acceptance.
 
-## V3 Real Voyage / ETA — VesselAPI adapter contract alignment — 2026-09-01
+## V3 Real Voyage / ETA — VesselAPI adapter contract alignment — 2026-09-01 (pre-acceptance checkpoint)
 
 | Check | Result |
 | --- | --- |
 | Official contract | Base `https://api.vesselapi.com/v1`; ETA `GET /vessel/{id}/eta` with `filter.idType=imo|mmsi`; optional latest Port Event `GET /portevents/vessel/{id}/last`; Bearer authentication |
 | Adapter | `providerId=vesselapi`; server-side SecretStore only; IMO preferred and legal MMSI fallback; bounded requests; no Mock fallback |
-| Credential gate | `VESSELAPI_API_KEY configured=false`; checked through the existing server-side environment/FileSecretStore path; no live request was made |
+| Credential gate | Historical pre-acceptance checkpoint: `VESSELAPI_API_KEY configured=false`; no secret value was recorded and no live request was made at that checkpoint |
 | Contract repair | ETA and Port Event identities are validated against the requested vessel; Port Event is optional enrichment and fails closed on errors/mismatch; official `destination_port` plus local vessel ID form a stable episode key; Port Directory resolution is fail-closed; `voyage_eta_history` remains append-only |
 | Runtime gate | No eligible targets → `skipped/no_eligible_voyage_targets`; eligible targets with no ETA → `skipped/no_voyage_eta_observed`; only a persisted trusted real observation returns `success` |
 | Timestamp / identity | ETA `timestamp` alone owns Voyage freshness; Port Event timestamp is enrichment-only; missing ETA timestamp or destination yields no usable observation; requested canonical identity is never overwritten |
 | Mock isolation | Mock Mode force-selects `mock-voyage` even when `SHIPPING_VOYAGE_PROVIDER=vesselapi`; direct factory selection fails closed; Real Mode has no Mock fallback |
-| Readiness | Key absent → `credential_missing`; key plus adapter without persisted canonical-destination evidence → `coverage_pending`; persisted VesselAPI ETA/destination evidence plus enabled Runtime → `verified_live/configured` |
+| Readiness | Current semantics are split: accepted Provider evidence gives `liveVerification=verified_live`; focus-port mapping is separately observed. For HANSA, `CNYPG` has no canonical focus-port mapping, so operational status remains `coverage_pending` with reason `vesselapi_focus_port_coverage_pending` |
 | Persistence/API | No retained SQLite was opened or written; API remains Repository/SQLite-only and provider-call delta is zero for reads |
-| Live acceptance | Not executed because the credential was absent; no target, ETA, Port Event or `verified_live` claim is recorded |
+| Live acceptance | The later accepted HANSA live run is recorded in the VesselAPI seal above; this row is retained as a pre-acceptance historical checkpoint |
 
 VesselAPI documents describe ETA as an AIS/crew-reported observation rather than a commercial schedule. No ETA, origin, ETD or commercial voyage number was fabricated from missing fields. No new migration was added; migration 008 already supports nullable Voyage fields.
 
@@ -252,4 +277,4 @@ The built Nitro HTTP smoke returned HTTP 200 for `/`, `/api/shipping/health`, `/
 
 ## Boundary
 
-This document records observed requests and persisted/API evidence only. VesselAPI ETA entitlement is **not verified**: no credentialed ETA probe was made, so `entitlement_missing` is not asserted. The latest evidence establishes AIS PositionReport coverage for the accepted multi-target continuous path, but does not establish official weather-alert coverage, commercial Voyage/Schedule availability or permission to begin a later V3 phase.
+This document records observed requests and persisted/API evidence only. The accepted HANSA evidence verifies the VesselAPI ETA contract, identity trust, Port Event enrichment, Runtime persistence, provider-free reads and restart behavior. It does not claim full focus-port operational coverage: `CNYPG` remains outside the current directory, so Voyage status is `coverage_pending` with reason `vesselapi_focus_port_coverage_pending`. The next V3 capability is Translation, which is not entered by this seal.
