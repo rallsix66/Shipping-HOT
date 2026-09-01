@@ -37,6 +37,7 @@ interface VoyageRow {
   last_updated_at?: string | null
   created_at?: string | null
   data?: string | null
+  first_history_observed_at?: string | null
 }
 
 interface ExistingVoyageRow {
@@ -123,10 +124,11 @@ function isRealVesselApiRecord(record: VoyageRecord): boolean {
   return record.source === "vesselapi" && record.sourceType === "real"
 }
 
-function isVerifiedVesselApiVoyage(record: VoyageRecord): boolean {
+function isVerifiedVesselApiVoyage(record: VoyageRecord, firstHistoryObservedAt?: string | null): boolean {
   if (!isRealVesselApiRecord(record)) return false
   if (!record.eta || !Number.isFinite(Date.parse(record.eta))) return false
   if (!Number.isFinite(Date.parse(record.lastUpdatedAt))) return false
+  if (!firstHistoryObservedAt || !Number.isFinite(Date.parse(firstHistoryObservedAt))) return false
   if (!record.imo?.trim() && !record.mmsi?.trim()) return false
   const episode = parseVesselApiEpisodeId(record.id)
   return Boolean(
@@ -134,7 +136,7 @@ function isVerifiedVesselApiVoyage(record: VoyageRecord): boolean {
     && episode.vesselId === record.vesselId
     && /^[A-Z0-9]+(?:_[A-Z0-9]+)*$/.test(episode.destinationKey)
     && episode.anchor
-    && episode.anchor === compactEpisodeAnchor(record.lastUpdatedAt),
+    && episode.anchor === compactEpisodeAnchor(firstHistoryObservedAt),
   )
 }
 
@@ -437,14 +439,22 @@ export class VoyageRepository {
   async getLatestVerifiedRealVoyage(providerId: string): Promise<VoyageRecord | undefined> {
     const result = await this.db.prepare(`
       SELECT id, vessel_id, imo, mmsi, origin_port_id, destination_port_id, voyage_number, status,
-        eta, etd, source, source_type, last_updated_at, created_at, data
+        eta, etd, source, source_type, last_updated_at, created_at, data,
+        (
+          SELECT observed_at
+          FROM voyage_eta_history
+          WHERE voyage_id = voyages.id AND vessel_id = voyages.vessel_id
+            AND source = 'vesselapi' AND source_type = 'real'
+          ORDER BY observed_at ASC, id ASC
+          LIMIT 1
+        ) AS first_history_observed_at
       FROM voyages
       WHERE source = ? AND source_type = 'real' AND eta IS NOT NULL
       ORDER BY last_updated_at DESC, created_at DESC, id DESC
     `).all(providerId)
     for (const row of rows<VoyageRow>(result)) {
       const voyage = toVoyage(row)
-      if (voyage && isVerifiedVesselApiVoyage(voyage)) return voyage
+      if (voyage && isVerifiedVesselApiVoyage(voyage, row.first_history_observed_at)) return voyage
     }
     return undefined
   }

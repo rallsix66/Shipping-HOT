@@ -98,6 +98,24 @@ function insertRawVoyage(native: ReturnType<typeof createNativeDatabase>["native
   return record
 }
 
+function insertRawEtaHistory(native: ReturnType<typeof createNativeDatabase>["native"], voyage: VoyageRecord, overrides: { source?: string, sourceType?: VoyageRecord["sourceType"], observedAt?: string } = {}): void {
+  const observedAt = overrides.observedAt ?? voyage.lastUpdatedAt
+  native.prepare(`
+    INSERT INTO voyage_eta_history (id, voyage_id, vessel_id, eta, etd, source, source_type, observed_at, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    `${voyage.id}:history:${overrides.source ?? "vesselapi"}:${overrides.sourceType ?? "real"}`,
+    voyage.id,
+    voyage.vesselId,
+    voyage.eta ?? null,
+    voyage.etd ?? null,
+    overrides.source ?? "vesselapi",
+    overrides.sourceType ?? "real",
+    observedAt,
+    observedAt,
+  )
+}
+
 describe("voyage repository", () => {
   it("preserves ETA history and returns the latest voyage", async () => {
     const { database, native } = createNativeDatabase()
@@ -235,6 +253,7 @@ describe("voyage repository", () => {
       lastUpdatedAt: "2026-08-29T16:07:07.000Z",
       destinationPortId: undefined,
     })
+    insertRawEtaHistory(native, observation, { observedAt: "2026-08-29T16:07:07.000Z" })
     await expect(repository.getLatestVerifiedRealVoyage("vesselapi")).resolves.toMatchObject({
       id: observation.id,
       vesselId: "imo:9155391",
@@ -295,6 +314,85 @@ describe("voyage repository", () => {
     })
     expect(await repository.listEtaHistory(id)).toHaveLength(2)
     expect(await repository.getLatestVoyage("vessel-1")).toMatchObject({ id, eta: "2026-09-04T00:00:00.000Z" })
+    await expect(repository.getLatestVerifiedRealVoyage("vesselapi")).resolves.toMatchObject({
+      id,
+      lastUpdatedAt: "2026-09-01T11:00:00.000Z",
+      eta: "2026-09-04T00:00:00.000Z",
+    })
+    native.close()
+  })
+
+  it("keeps same-destination evidence verified after a native SQLite restart", async () => {
+    const root = mkdtempSync("shipping-hot-voyage-evidence-")
+    const path = join(root, "voyage.sqlite3")
+    const id = "vesselapi:vessel-1:destination:PHMNL:episode:20260901T100000000Z"
+    const first = voyage({
+      id,
+      vesselId: "vessel-1",
+      originPortId: undefined,
+      destinationPortId: "PHMNL",
+      voyageNumber: undefined,
+      status: "unknown",
+      etd: undefined,
+      eta: "2026-09-03T00:00:00.000Z",
+      source: "vesselapi",
+      sourceType: "real",
+      timestamp: "2026-09-01T10:00:00.000Z",
+      lastUpdatedAt: "2026-09-01T10:00:00.000Z",
+    })
+    const second = { ...first, id: "vesselapi:vessel-1:destination:PHMNL:episode:20260901T110000000Z", eta: "2026-09-04T00:00:00.000Z", timestamp: "2026-09-01T11:00:00.000Z", lastUpdatedAt: "2026-09-01T11:00:00.000Z" }
+    try {
+      const initial = createNativeDatabase(path)
+      await initShippingTables(initial.database, "real")
+      const repository = new VoyageRepository(initial.database, "real")
+      await repository.saveVoyages([first])
+      await repository.saveVoyages([second])
+      initial.native.close()
+
+      const restarted = createNativeDatabase(path)
+      await initShippingTables(restarted.database, "real")
+      await expect(new VoyageRepository(restarted.database, "real").getLatestVerifiedRealVoyage("vesselapi")).resolves.toMatchObject({
+        id: first.id,
+        lastUpdatedAt: second.lastUpdatedAt,
+        eta: second.eta,
+      })
+      await expect(new VoyageRepository(restarted.database, "real").listEtaHistory(first.id)).resolves.toHaveLength(2)
+      restarted.native.close()
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+
+  it("rejects an Episode whose anchor predates the first trusted ETA history", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const observation = insertRawVoyage(native, {
+      id: "vesselapi:vessel-1:destination:CNYPG:episode:20260901T100000000Z",
+      timestamp: "2026-09-01T11:00:00.000Z",
+      lastUpdatedAt: "2026-09-01T11:00:00.000Z",
+    })
+    insertRawEtaHistory(native, observation, { observedAt: "2026-09-01T09:00:00.000Z" })
+    await expect(new VoyageRepository(database, "real").getLatestVerifiedRealVoyage("vesselapi")).resolves.toBeUndefined()
+    native.close()
+  })
+
+  it("rejects a VesselAPI-shaped Voyage without ETA history", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    insertRawVoyage(native)
+    await expect(new VoyageRepository(database, "real").getLatestVerifiedRealVoyage("vesselapi")).resolves.toBeUndefined()
+    native.close()
+  })
+
+  it.each([
+    ["wrong history source", { source: "other-provider" }],
+    ["wrong history source type", { sourceType: "mock" as const }],
+  ] as const)("rejects %s as anchor evidence", async (_name, overrides) => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const observation = insertRawVoyage(native)
+    insertRawEtaHistory(native, observation, overrides)
+    await expect(new VoyageRepository(database, "real").getLatestVerifiedRealVoyage("vesselapi")).resolves.toBeUndefined()
     native.close()
   })
 
