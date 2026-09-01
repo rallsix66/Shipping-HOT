@@ -1,11 +1,30 @@
 # V3 Real Data Live Verification
 
-> Verification date: 2026-08-31 (latest multi-target continuous AIS acceptance; earlier activation evidence remains historical)
+> Verification date: 2026-09-01 (latest Official Weather Alert Runtime acceptance; earlier AIS and activation evidence remains historical)
 > Scope: controlled local Real Mode process only. No deployment, provider account change or secret creation was performed; the GFW Provider implementation and live probe are recorded separately below.
 
 ## Method
 
 `pnpm smoke:v3-real-activation` loaded the existing server environment and set `SHIPPING_DATA_MODE=real` for that process only. For this review it used a fresh process-scoped SQLite path so pre-existing Mock/Off local data could not contaminate the observation; it ran the registered Runtime Jobs, then a built Nitro process was smoke-tested separately with process-scoped Mock/Off configuration across the HTTP surfaces. Secret values are not recorded here.
+
+## Official Weather Alerts — Contract Gate and Runtime Acceptance — 2026-09-01
+
+| Check | Result |
+| --- | --- |
+| Contract gate | Three official index requests: JMA HTTP `200` with the official sea-warning container but no safely classified alert/explicit-empty result (`not_verified`); TMD HTTP `200` with recognized RSS/XML structure (`contract_verified_alerts`); BMKG HTTP `200` with recognized RSS/XML structure plus one linked official CAP detail HTTP `200` with CAP `alert`/`info` fields (`contract_verified_alerts`) |
+| Public source registry | `tmd` and `bmkg`: `enabled=true`, `liveStatus=verified_live`; `jma`: `enabled=false`, `liveStatus=live_pending` |
+| Isolated database | Fresh temporary Real SQLite only; 8 active Port Directory focus ports established through `ShippingRepository`; retained `.data/shipping-hot-v3.sqlite3` was not opened |
+| Runtime scope | Only `weather-alert-sync:tmd` and `weather-alert-sync:bmkg`; `capability=weather_alerts`; interval `900000` ms; no AIS, Voyage, Feed, Calendar, Port or model Weather Job executed |
+| TMD Job | HTTP `200` through the official registered RSS endpoint; `success`, `recordsRead=12`, `recordsWritten=12`, Runtime `healthy`, trusted `lastSourceUpdatedAt=2026-09-01T02:47:52.000Z` |
+| BMKG Job | HTTP `200` through the official registered RSS endpoint; `success`, `recordsRead=3`, `recordsWritten=3`, Runtime `healthy`, trusted `lastSourceUpdatedAt=2026-09-01T02:45:18.000Z` |
+| Normalized Feed | `15` total official items; TMD `12`, BMKG `3`; provenance/source IDs and source timestamps were retained; current payloads produced no safely provable focus-port association, so no `relatedPortIds` were fabricated |
+| Feed API before restart | HTTP handler read `15` persisted items from sources `tmd`/`bmkg`; no Provider call occurred during the API read |
+| SQLite restart | Repository read `15` Feed items; both `provider_runtime` rows were `healthy`; both `sync_runs` remained persisted; a separate post-restart Feed API read returned `15` items from `tmd`/`bmkg` |
+| Zero-Mock gate | `actualMockRows.total=0` across all schema-discovered Shipping HOT business tables carrying `source_type` |
+| Weather Alert Readiness | `provider=public`, `configured=true`, `credential=not_required`, `runtime=healthy`, `freshness=fresh`, `liveVerification=verified_live`, `status=configured` when both source histories are present |
+| Coverage boundary | TMD/BMKG contract/runtime is verified; JMA remains pending; current live items had no safe focus-port alias evidence, and geographic gaps remain explicit rather than inferred |
+
+The initial contract gate did not print response bodies or secrets. It recorded only bounded response metadata and parser-recognizable structure; the formal acceptance stored normalized records in the fresh temporary database, then verified repository/API/restart reads without another Provider call. The temporary database was isolated from the retained database.
 
 ## GFW Vessel Search + Canonical Identity — 2026-08-31
 

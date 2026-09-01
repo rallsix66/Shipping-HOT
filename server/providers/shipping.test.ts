@@ -265,8 +265,10 @@ describe("shipping Provider failure boundaries", () => {
   it("builds operational source activation from registry state instead of Provider mode alone", () => {
     const publicModes = { ...configureProviders({ SHIPPING_WEATHER_ALERT_PROVIDER: "public", SHIPPING_FEED_PROVIDER: "public" }).modes, calendar: "mock" as const, calendarSourceIds: ["mock-calendar"] as string[] }
     const publicContext = createOperationalSourceContext(publicModes)
-    expect(activeOfficialWeatherAlertSourceIds()).toEqual(new Set())
+    expect(activeOfficialWeatherAlertSourceIds()).toEqual(new Set(["tmd", "bmkg"]))
     expect(publicContext.activeSourceIds.has("jma")).toBe(false)
+    expect(publicContext.activeSourceIds.has("tmd")).toBe(true)
+    expect(publicContext.activeSourceIds.has("bmkg")).toBe(true)
     expect([...publicContext.activeSourceIds]).toEqual(expect.arrayContaining(["the-loadstar", "shekou-official"]))
     expect(publicContext.activeSourceIds.has("maritime-executive")).toBe(false)
     expect(publicContext.activeSourceIds.has("laem-chabang-official")).toBe(false)

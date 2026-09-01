@@ -3,8 +3,10 @@ import { XMLParser } from "fast-xml-parser"
 import { load } from "cheerio"
 import type { DataProvenance, FeedItem, Port, WeatherDetail } from "@shared/shipping"
 import { mockPorts } from "@shared/shipping-fixtures"
+import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
 
 export interface WeatherAlertProvider {
+  readonly providerId?: string
   getFeedItems: (lastKnown?: FeedItem[], ports?: Port[]) => Promise<FeedItem[]>
 }
 
@@ -49,8 +51,8 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
     sourceUrl: "https://www.tmd.go.th/en/service/rss",
     format: "rss",
     parser: "tmd",
-    enabled: false,
-    liveStatus: "live_pending",
+    enabled: true,
+    liveStatus: "verified_live",
   },
   {
     id: "bmkg",
@@ -59,8 +61,8 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
     sourceUrl: "https://data.bmkg.go.id/peringatan-dini-cuaca/",
     format: "rss",
     parser: "bmkg",
-    enabled: false,
-    liveStatus: "live_pending",
+    enabled: true,
+    liveStatus: "verified_live",
   },
 ]
 
@@ -346,8 +348,8 @@ function parseWeatherAlertHtmlStrict(html: string, source: WeatherAlertSource, p
   return result.items
 }
 
-function markFailed(item: FeedItem, fetchedAt: string, error: string): FeedItem {
-  return { ...item, stale: true, sourceStatus: "failed", error, fetchedAt }
+function markFailed(item: FeedItem, fetchedAt: string, failure: ProviderError): FeedItem {
+  return { ...item, stale: true, sourceStatus: "failed", error: failure.message, errorCode: failure.code, fetchedAt }
 }
 
 function markDisabled(item: FeedItem, fetchedAt: string, error: string): FeedItem {
@@ -374,6 +376,7 @@ export interface OfficialWeatherAlertProviderOptions {
   now?: () => Date
   sources?: WeatherAlertSource[]
   allowPending?: boolean
+  throwOnSourceFailureWithoutLastKnown?: boolean
 }
 
 function markMissingFromCurrentIndex(item: FeedItem, fetchedAt: string): FeedItem {
@@ -412,6 +415,7 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
   const sources = options.sources ?? officialWeatherAlertSources
   const enabledSources = sources.filter(source => activeOfficialWeatherAlertSourceIds({ allowPending: options.allowPending, sources }).has(source.id))
   return {
+    ...(enabledSources.length === 1 ? { providerId: enabledSources[0].id } : {}),
     async getFeedItems(lastKnown = [], ports = mockPorts) {
       const fetchedAt = now().toISOString()
       if (!enabledSources.length) {
@@ -419,9 +423,18 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
       }
       const results = await Promise.all(enabledSources.map(async (source) => {
         const previous = lastKnown.filter(item => item.sourceId === source.id)
+        let response: WeatherAlertResponse
         try {
-          const response = await fetcher(source.url)
-          if (!response.ok) throw new Error(`${source.name} request failed (${response.status})`)
+          response = await fetcher(source.url)
+          if (!response.ok) throw providerHttpError(source.name, response.status, `${source.name} request failed (${response.status})`)
+        } catch (error) {
+          const failure = error instanceof ProviderError
+            ? error
+            : providerErrorFromUnknown(source.name, error, "provider_unavailable")
+          if (!previous.length && options.throwOnSourceFailureWithoutLastKnown) throw failure
+          return previous.map(item => markFailed(item, fetchedAt, failure))
+        }
+        try {
           const body = await response.text()
           const parsed = source.format === "cap"
             ? parseWeatherAlertCap(body, source, ports, fetchedAt)
@@ -433,7 +446,11 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
           const cleared = disappeared.map(item => hasExpiredEvidence(item, fetchedAt) ? expiredAsInfo(item, fetchedAt) : markMissingFromCurrentIndex(item, fetchedAt))
           return [...parsed, ...cleared]
         } catch (error) {
-          return previous.map(item => markFailed(item, fetchedAt, error instanceof Error ? error.message : `${source.name} failed`))
+          const failure = error instanceof ProviderError
+            ? error
+            : providerErrorFromUnknown(source.name, error, "provider_contract_changed")
+          if (!previous.length && options.throwOnSourceFailureWithoutLastKnown) throw failure
+          return previous.map(item => markFailed(item, fetchedAt, failure))
         }
       }))
       const byId = new Map<string, FeedItem>()

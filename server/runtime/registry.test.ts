@@ -185,4 +185,55 @@ describe("runtime registry", () => {
       native.close()
     }
   })
+
+  it("registers one independent official alert job per active verified source", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const previous = {
+      dataMode: process.env.SHIPPING_DATA_MODE,
+      alerts: process.env.SHIPPING_WEATHER_ALERT_PROVIDER,
+      interval: process.env.SHIPPING_WEATHER_ALERT_INTERVAL_MINUTES,
+    }
+    try {
+      process.env.SHIPPING_DATA_MODE = "real"
+      process.env.SHIPPING_WEATHER_ALERT_PROVIDER = "public"
+      process.env.SHIPPING_WEATHER_ALERT_INTERVAL_MINUTES = "not-a-number"
+      const jobs = getDefaultRuntimeJobs({ database, dataMode: "real", aisProvider, voyageProvider })
+      expect(jobs.filter(job => job.capability === "weather_alerts")).toEqual([
+        expect.objectContaining({ id: "weather-alert-sync:tmd", providerId: "tmd", intervalMs: 15 * 60 * 1000, enabled: true }),
+        expect.objectContaining({ id: "weather-alert-sync:bmkg", providerId: "bmkg", intervalMs: 15 * 60 * 1000, enabled: true }),
+      ])
+    } finally {
+      if (previous.dataMode === undefined) delete process.env.SHIPPING_DATA_MODE
+      else process.env.SHIPPING_DATA_MODE = previous.dataMode
+      if (previous.alerts === undefined) delete process.env.SHIPPING_WEATHER_ALERT_PROVIDER
+      else process.env.SHIPPING_WEATHER_ALERT_PROVIDER = previous.alerts
+      if (previous.interval === undefined) delete process.env.SHIPPING_WEATHER_ALERT_INTERVAL_MINUTES
+      else process.env.SHIPPING_WEATHER_ALERT_INTERVAL_MINUTES = previous.interval
+      native.close()
+    }
+  })
+
+  it("does not register official alert jobs in off or Mock mode", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const previous = {
+      dataMode: process.env.SHIPPING_DATA_MODE,
+      alerts: process.env.SHIPPING_WEATHER_ALERT_PROVIDER,
+    }
+    try {
+      process.env.SHIPPING_DATA_MODE = "mock"
+      process.env.SHIPPING_WEATHER_ALERT_PROVIDER = "public"
+      expect(getDefaultRuntimeJobs({ database, dataMode: "mock", aisProvider, voyageProvider }).some(job => job.capability === "weather_alerts")).toBe(false)
+      process.env.SHIPPING_DATA_MODE = "real"
+      process.env.SHIPPING_WEATHER_ALERT_PROVIDER = "off"
+      expect(getDefaultRuntimeJobs({ database, dataMode: "real", aisProvider, voyageProvider }).some(job => job.capability === "weather_alerts")).toBe(false)
+    } finally {
+      if (previous.dataMode === undefined) delete process.env.SHIPPING_DATA_MODE
+      else process.env.SHIPPING_DATA_MODE = previous.dataMode
+      if (previous.alerts === undefined) delete process.env.SHIPPING_WEATHER_ALERT_PROVIDER
+      else process.env.SHIPPING_WEATHER_ALERT_PROVIDER = previous.alerts
+      native.close()
+    }
+  })
 })

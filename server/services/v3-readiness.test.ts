@@ -3,7 +3,7 @@ import { createDatabase } from "db0"
 import { describe, expect, it, vi } from "vitest"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
-import { type CapabilityReadiness, type RuntimeReadinessStatus, type V3ToolchainObservation, aggregateRuntimeReadiness, approvedRuntimeJobKeys, hasVerifiedAisAreaMetric, readV3PackageManagerObservation, readV3Readiness, readV3ToolchainChecks, resolveAisAreaVerificationEvidence } from "#/services/v3-readiness"
+import { type CapabilityReadiness, type RuntimeReadinessJob, type RuntimeReadinessStatus, type V3ToolchainObservation, aggregateRuntimeReadiness, approvedRuntimeJobKeys, hasVerifiedAisAreaMetric, readV3PackageManagerObservation, readV3Readiness, readV3ToolchainChecks, resolveAisAreaVerificationEvidence, resolveWeatherAlertLiveVerification, resolveWeatherAlertReadinessReason, resolveWeatherAlertReadinessStatus } from "#/services/v3-readiness"
 
 function createNativeDatabase() {
   const native = new NativeDatabase(":memory:")
@@ -88,6 +88,49 @@ async function realVesselSearchCapability(options: { provider?: string, gfwToken
       else process.env[name] = value
     }
   }
+}
+
+async function realWeatherAlertCapability(options: { provider?: string, jobs?: RuntimeReadinessStatus["jobs"] } = {}): Promise<CapabilityReadiness> {
+  const environmentNames = ["SHIPPING_DATA_MODE", "SHIPPING_WEATHER_ALERT_PROVIDER"]
+  const previous = new Map(environmentNames.map(name => [name, process.env[name]]))
+  process.env.SHIPPING_DATA_MODE = "real"
+  if (options.provider === undefined) delete process.env.SHIPPING_WEATHER_ALERT_PROVIDER
+  else process.env.SHIPPING_WEATHER_ALERT_PROVIDER = options.provider
+  try {
+    const { database, native } = createNativeDatabase()
+    try {
+      await initShippingTables(database, "real")
+      const report = await readV3Readiness(database, {
+        dataMode: "real",
+        profile: "REAL_OPERATIONAL",
+        runtime: { running: true, jobs: options.jobs ?? [] },
+        toolchain: { packageManager: "pnpm@10.30.3", betterSqlite3Version: "12.6.2", betterSqlite3LoadError: undefined },
+      })
+      const capability = report.capabilities.find(item => item.capability === "weather_alerts")
+      if (!capability) throw new Error("weather_alerts readiness capability is missing")
+      return capability
+    } finally {
+      native.close()
+    }
+  } finally {
+    for (const name of environmentNames) {
+      const value = previous.get(name)
+      if (value === undefined) delete process.env[name]
+      else process.env[name] = value
+    }
+  }
+}
+
+function weatherAlertJobs(status: string, lastSuccess = true): RuntimeReadinessStatus["jobs"] {
+  return ["tmd", "bmkg"].map(sourceId => ({
+    id: `weather-alert-sync:${sourceId}`,
+    providerId: sourceId,
+    capability: "weather_alerts",
+    enabled: true,
+    status,
+    ...(lastSuccess ? { lastSuccessAt: "2026-09-01T00:10:00.000Z" } : {}),
+    lastSourceUpdatedAt: "2026-09-01T00:00:00.000Z",
+  }))
 }
 
 function aisAreaMetric(overrides: Partial<AisDerivedPortMetric> = {}): AisDerivedPortMetric {
@@ -828,5 +871,81 @@ describe("v3 readiness", () => {
       if (previous === undefined) delete process.env.SHIPPING_AIS_AREA_PROVIDER
       else process.env.SHIPPING_AIS_AREA_PROVIDER = previous
     }
+  })
+
+  it("aggregates public official alert sources as configured after historical success", async () => {
+    await withPinnedAreaReadinessClock(async () => {
+      await expect(realWeatherAlertCapability({ provider: "public", jobs: weatherAlertJobs("healthy") })).resolves.toMatchObject({
+        provider: "public",
+        configured: true,
+        credential: "not_required",
+        runtime: "healthy",
+        liveVerification: "verified_live",
+        status: "configured",
+        sources: [
+          expect.objectContaining({ provider: "tmd", runtime: "healthy" }),
+          expect.objectContaining({ provider: "bmkg", runtime: "healthy" }),
+        ],
+      })
+    })
+  })
+
+  it("keeps official alert coverage pending until every active source has succeeded", async () => {
+    await withPinnedAreaReadinessClock(async () => {
+      const jobs = weatherAlertJobs("healthy", false)
+      jobs[0].lastSuccessAt = "2026-09-01T00:10:00.000Z"
+      jobs[1].lastSuccessAt = undefined
+      await expect(realWeatherAlertCapability({ provider: "public", jobs })).resolves.toMatchObject({
+        configured: true,
+        runtime: "healthy",
+        liveVerification: "coverage_pending",
+        status: "coverage_pending",
+      })
+    })
+  })
+
+  it("retains verified_live after a source fails following historical success", async () => {
+    await withPinnedAreaReadinessClock(async () => {
+      await expect(realWeatherAlertCapability({ provider: "public", jobs: weatherAlertJobs("failed") })).resolves.toMatchObject({
+        configured: true,
+        runtime: "failed",
+        liveVerification: "verified_live",
+        status: "configured",
+      })
+    })
+  })
+
+  it("keeps public alerts pending before Runtime registration and not_configured when off", async () => {
+    await withPinnedAreaReadinessClock(async () => {
+      await expect(realWeatherAlertCapability({ provider: "public" })).resolves.toMatchObject({
+        configured: true,
+        runtime: "not_registered",
+        liveVerification: "coverage_pending",
+        status: "coverage_pending",
+      })
+      await expect(realWeatherAlertCapability({ provider: "off" })).resolves.toMatchObject({
+        provider: "off",
+        configured: false,
+        runtime: "not_registered",
+        liveVerification: "coverage_pending",
+        status: "not_configured",
+      })
+    })
+  })
+
+  it("does not upgrade JMA-only evidence because it is outside focus-port coverage", () => {
+    const jobs: RuntimeReadinessJob[] = [{
+      id: "weather-alert-sync:jma",
+      providerId: "jma",
+      capability: "weather_alerts",
+      enabled: true,
+      status: "healthy",
+      lastSuccessAt: "2026-09-01T00:10:00.000Z",
+    }]
+    const input = { dataMode: "real" as const, provider: "public", activeSourceCount: 1, activeSourceIds: ["jma"], jobs }
+    const liveVerification = resolveWeatherAlertLiveVerification(input)
+    expect(liveVerification).toBe("coverage_pending")
+    expect(resolveWeatherAlertReadinessStatus(input, liveVerification)).toBe("coverage_pending")
+    expect(resolveWeatherAlertReadinessReason(input, liveVerification)).toBe("verified_source_not_in_focus_port_coverage")
   })
 })

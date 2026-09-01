@@ -14,7 +14,10 @@ import { createFeedSyncJob } from "#/runtime/feed-sync-job"
 import { createCalendarSyncJob } from "#/runtime/calendar-sync-job"
 import { createPortSyncJob } from "#/runtime/port-sync-job"
 import { createWeatherSyncJob } from "#/runtime/weather-sync-job"
+import { createWeatherAlertSyncJob } from "#/runtime/weather-alert-sync-job"
 import { createOpenMeteoWeatherProvider, providerModes, providers } from "#/providers/shipping"
+import { activeOfficialWeatherAlertSourceIds, createOfficialWeatherAlertProvider, officialWeatherAlertSources } from "#/providers/weather-alerts"
+import type { WeatherAlertProvider } from "#/providers/weather-alerts"
 import { PortDirectoryRepository } from "#/database/port-directory"
 import type { RuntimeJob } from "#/runtime/background-runtime"
 import { isAisStreamingEnabled } from "#/runtime/ais-streaming-config"
@@ -61,6 +64,11 @@ function portIntervalMs(): number {
 function weatherIntervalMs(): number {
   const minutes = Number(process.env.SHIPPING_WEATHER_INTERVAL_MINUTES ?? 60)
   return Math.max(1, Number.isFinite(minutes) ? minutes : 60) * 60 * 1000
+}
+
+function weatherAlertIntervalMs(): number {
+  const minutes = Number(process.env.SHIPPING_WEATHER_ALERT_INTERVAL_MINUTES ?? 15)
+  return (Number.isFinite(minutes) && minutes > 0 ? minutes : 15) * 60 * 1000
 }
 
 export function getConfiguredAisProviderId(): string {
@@ -132,6 +140,29 @@ function weatherJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
   })]
 }
 
+function weatherAlertJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
+  if (options.dataMode !== "real") return []
+  const mode = process.env.SHIPPING_WEATHER_ALERT_PROVIDER?.trim().toLowerCase()
+  if (mode !== "public" && mode !== "experimental") return []
+  const activeSourceIds = activeOfficialWeatherAlertSourceIds({ allowPending: mode === "experimental" })
+  return officialWeatherAlertSources
+    .filter(source => activeSourceIds.has(source.id))
+    .map(source => createWeatherAlertSyncJob({
+      database: options.database,
+      dataMode: options.dataMode,
+      sourceId: source.id,
+      provider: createOfficialWeatherAlertProvider({
+        sources: [source],
+        allowPending: mode === "experimental",
+        throwOnSourceFailureWithoutLastKnown: true,
+        now: options.now,
+      }) as WeatherAlertProvider & { readonly providerId: string },
+      intervalMs: weatherAlertIntervalMs(),
+      enabled: true,
+      now: options.now,
+    }))
+}
+
 export function getDefaultRuntimeJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
   const providerId = getConfiguredAisProviderId()
   const streamingEnabled = isAisStreamingEnabled(options.dataMode)
@@ -182,5 +213,5 @@ export function getDefaultRuntimeJobs(options: RuntimeRegistryOptions): RuntimeJ
     intervalMs: voyageIntervalMs(),
     enabled: !(options.dataMode === "real" && voyageProvider.providerId === "mock"),
     now: options.now,
-  }), ...feedJobs(options), ...calendarJobs(options), ...portJobs(options), ...weatherJobs(options)]
+  }), ...feedJobs(options), ...calendarJobs(options), ...portJobs(options), ...weatherJobs(options), ...weatherAlertJobs(options)]
 }

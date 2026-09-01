@@ -8,6 +8,7 @@ import { latestSchemaVersion, readDatabaseMetadata } from "#/database/runtime"
 import { ShippingRepository } from "#/database/shipping"
 import type { ShippingDataMode } from "#/database/runtime"
 import { activeShippingFeedSourceIds, shippingFeedSources } from "#/providers/feed"
+import { activeOfficialWeatherAlertSourceIds } from "#/providers/weather-alerts"
 import { isAisStreamingEnabled } from "#/runtime/ais-streaming-config"
 
 export const v3ToolchainContract = {
@@ -38,6 +39,9 @@ export function approvedRuntimeJobKeys(dataMode: ShippingDataMode): string[] {
     }
   } else if (dataMode !== "real" && requestedFeed !== "public") {
     keys.push("feed-sync:mock-port-notice:feed_sync")
+  }
+  if (dataMode === "real" && process.env.SHIPPING_WEATHER_ALERT_PROVIDER?.trim().toLowerCase() === "public") {
+    for (const sourceId of activeOfficialWeatherAlertSourceIds()) keys.push(`weather-alert-sync:${sourceId}:weather_alerts`)
   }
   keys.push("calendar-sync:calendar_sync")
   keys.push("port-sync:port_intelligence", "weather-sync:weather_sync")
@@ -107,6 +111,7 @@ export interface CapabilityReadiness {
   freshness: "fresh" | "stale" | "unknown"
   liveVerification: "verified_live" | "connection_verified" | "coverage_pending" | "not_verified"
   status: CapabilityReadinessStatus
+  reason?: string
   sources?: ReadinessSource[]
 }
 
@@ -340,6 +345,38 @@ export function aggregateRuntimeReadiness(jobs: RuntimeReadinessJob[]): Capabili
   return "degraded"
 }
 
+export interface WeatherAlertLiveVerificationInput {
+  dataMode: ShippingDataMode
+  provider: string
+  activeSourceCount: number
+  activeSourceIds: readonly string[]
+  jobs: RuntimeReadinessJob[]
+}
+
+function hasHistoricalWeatherAlertSuccess(job: RuntimeReadinessJob): boolean {
+  return Boolean(job.enabled && job.lastSuccessAt && runtimeState(job) !== "never_succeeded" && runtimeState(job) !== "disabled")
+}
+
+export function resolveWeatherAlertLiveVerification(input: WeatherAlertLiveVerificationInput): CapabilityReadiness["liveVerification"] {
+  if (input.dataMode !== "real" || input.provider !== "public" || input.activeSourceCount === 0) return "coverage_pending"
+  const focusSourceCount = input.activeSourceIds.filter(sourceId => sourceId === "tmd" || sourceId === "bmkg").length
+  const jobSourceIds = new Set(input.jobs.map(job => job.providerId))
+  if (focusSourceCount === 0 || input.jobs.length !== input.activeSourceCount || input.activeSourceIds.some(sourceId => !jobSourceIds.has(sourceId)) || !input.jobs.every(hasHistoricalWeatherAlertSuccess)) return "coverage_pending"
+  return "verified_live"
+}
+
+export function resolveWeatherAlertReadinessStatus(input: WeatherAlertLiveVerificationInput, liveVerification: CapabilityReadiness["liveVerification"]): CapabilityReadinessStatus {
+  if (input.dataMode !== "real" || input.provider !== "public" || input.activeSourceCount === 0) return "not_configured"
+  return liveVerification === "verified_live" ? "configured" : "coverage_pending"
+}
+
+export function resolveWeatherAlertReadinessReason(input: WeatherAlertLiveVerificationInput, liveVerification: CapabilityReadiness["liveVerification"]): string {
+  if (input.dataMode !== "real" || input.provider !== "public") return "official_weather_alert_provider_not_configured"
+  if (input.activeSourceCount === 0) return "official_weather_alert_source_unavailable"
+  if (!input.activeSourceIds.some(sourceId => sourceId === "tmd" || sourceId === "bmkg")) return "verified_source_not_in_focus_port_coverage"
+  return liveVerification === "verified_live" ? "official_weather_alert_runtime_verified" : "official_weather_alert_runtime_pending"
+}
+
 function configuredAisProvider(): string | undefined {
   return configuredValue("SHIPPING_AIS_PROVIDER") ?? configuredValue("SHIPPING_VESSEL_PROVIDER")
 }
@@ -453,6 +490,19 @@ function vesselSearchCapabilityDefinition(): { capability: string, provider: str
   return { capability: "vessel_search", provider: provider ?? "unavailable", configured: false, credential: "unknown", status: "not_configured" }
 }
 
+function weatherAlertCapabilityDefinition(): { capability: string, provider: string, configured: boolean, credential: CapabilityReadiness["credential"], status: CapabilityReadinessStatus } {
+  const provider = configuredValue("SHIPPING_WEATHER_ALERT_PROVIDER") ?? "off"
+  const activeSourceCount = provider === "public" ? activeOfficialWeatherAlertSourceIds().size : 0
+  const configured = provider === "public" && activeSourceCount > 0
+  return {
+    capability: "weather_alerts",
+    provider,
+    configured,
+    credential: "not_required",
+    status: configured ? "coverage_pending" : "not_configured",
+  }
+}
+
 function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadinessStatus | undefined, dataMode: ShippingDataMode, areaEvidence: AisAreaVerificationEvidence): CapabilityReadiness[] {
   const runtimeByCapability = new Map<string, RuntimeReadinessJob[]>()
   for (const job of runtime?.jobs ?? []) runtimeByCapability.set(job.capability, [...(runtimeByCapability.get(job.capability) ?? []), job])
@@ -475,7 +525,7 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
         { capability: "ais_area", provider: configuredValue("SHIPPING_AIS_AREA_PROVIDER") ?? "off", configured: configuredValue("SHIPPING_AIS_AREA_PROVIDER") === "aisstream", credential: configuredValue("AISSTREAM_API_KEY") ? "available" : "missing", status: configuredValue("SHIPPING_AIS_AREA_PROVIDER") === "aisstream" ? (configuredValue("AISSTREAM_API_KEY") ? "coverage_pending" : "credential_missing") : "not_configured" },
         { capability: "port_intelligence", provider: configuredValue("SHIPPING_PORT_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_PORT_PROVIDER") === "portcast", credential: "not_required", status: configuredValue("SHIPPING_PORT_PROVIDER") === "portcast" ? "coverage_pending" : "not_configured" },
         { capability: "weather", provider: configuredValue("SHIPPING_WEATHER_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_WEATHER_PROVIDER") === "open-meteo", credential: "not_required", status: configuredValue("SHIPPING_WEATHER_PROVIDER") === "open-meteo" ? "coverage_pending" : "not_configured" },
-        { capability: "weather_alerts", provider: configuredValue("SHIPPING_WEATHER_ALERT_PROVIDER") ?? "off", configured: configuredValue("SHIPPING_WEATHER_ALERT_PROVIDER") === "public", credential: "not_required", status: configuredValue("SHIPPING_WEATHER_ALERT_PROVIDER") === "public" ? "coverage_pending" : "not_configured" },
+        weatherAlertCapabilityDefinition(),
         { capability: "feed", provider: configuredValue("SHIPPING_FEED_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_FEED_PROVIDER") === "public", credential: "not_required", status: configuredValue("SHIPPING_FEED_PROVIDER") === "public" ? "coverage_pending" : "not_configured" },
         { capability: "calendar", provider: configuredValue("SHIPPING_CALENDAR_PROVIDER") ?? "unavailable", configured: Boolean(configuredValue("SHIPPING_CALENDAR_PROVIDER")), credential: configuredValue("CALENDARIFIC_API_KEY") ? "available" : "missing", status: configuredValue("SHIPPING_CALENDAR_PROVIDER") === "calendarific" && configuredValue("CALENDARIFIC_API_KEY") ? "coverage_pending" : configuredValue("SHIPPING_CALENDAR_PROVIDER") === "calendarific" ? "credential_missing" : "not_configured" },
         { capability: "voyage_eta", provider: configuredValue("SHIPPING_VOYAGE_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_VOYAGE_PROVIDER") === "vesselapi", credential: configuredValue("VESSELAPI_API_KEY") ? "available" : "missing", status: configuredValue("VESSELAPI_API_KEY") ? "coverage_pending" : "credential_missing" },
@@ -495,12 +545,20 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
     const jobs = runtimeByCapability.get(runtimeCapability) ?? []
     const job = jobs[0]
     const aggregatedRuntime = aggregateRuntimeReadiness(jobs)
+    const latestJobSourceUpdatedAt = jobs
+      .map(source => source.lastSourceUpdatedAt)
+      .filter((value): value is string => parseableTimestamp(value))
+      .sort((left, right) => Date.parse(right) - Date.parse(left))[0]
+    const latestJobSuccessAt = jobs
+      .map(source => source.lastSuccessAt)
+      .filter((value): value is string => parseableTimestamp(value))
+      .sort((left, right) => Date.parse(right) - Date.parse(left))[0]
     const streamingEnabled = isAisStreamingEnabled(dataMode)
     const liveTracker = definition.capability === "ais_tracking" && streamingEnabled ? runtime?.aisLiveTracker : undefined
-    const sourceDetails = runtimeCapability === "feed_sync"
+    const sourceDetails = runtimeCapability === "feed_sync" || definition.capability === "weather_alerts"
       ? jobs.map(source => ({ id: source.id, provider: source.providerId, runtime: runtimeState(source), enabled: source.enabled, lastSuccessAt: source.lastSuccessAt, lastSourceUpdatedAt: source.lastSourceUpdatedAt, errorCode: source.errorCode }))
       : undefined
-    const sourceUpdatedAt = liveTracker?.lastSourceUpdatedAt ?? job?.lastSourceUpdatedAt
+    const sourceUpdatedAt = liveTracker?.lastSourceUpdatedAt ?? (definition.capability === "weather_alerts" ? latestJobSourceUpdatedAt : job?.lastSourceUpdatedAt)
     const freshness = sourceUpdatedAt && Date.parse(sourceUpdatedAt) > Date.now() - 24 * 60 * 60 * 1000
       ? "fresh"
       : sourceUpdatedAt
@@ -509,8 +567,18 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
     const capabilityRuntime = liveTracker
       ? liveTracker.running ? (liveTracker.providerStatus ?? "registered") : "not_registered"
       : aggregatedRuntime
-    const lastSuccessAt = liveTracker?.lastSuccessAt ?? job?.lastSuccessAt
-    const lastSourceUpdatedAt = liveTracker?.lastSourceUpdatedAt ?? job?.lastSourceUpdatedAt
+    const lastSuccessAt = liveTracker?.lastSuccessAt ?? (definition.capability === "weather_alerts" ? latestJobSuccessAt : job?.lastSuccessAt)
+    const lastSourceUpdatedAt = liveTracker?.lastSourceUpdatedAt ?? (definition.capability === "weather_alerts" ? latestJobSourceUpdatedAt : job?.lastSourceUpdatedAt)
+    const activeWeatherAlertSourceIds = definition.capability === "weather_alerts" && definition.provider === "public"
+      ? [...activeOfficialWeatherAlertSourceIds()]
+      : []
+    const weatherAlertInput: WeatherAlertLiveVerificationInput = {
+      dataMode,
+      provider: definition.provider,
+      activeSourceCount: activeWeatherAlertSourceIds.length,
+      activeSourceIds: activeWeatherAlertSourceIds,
+      jobs,
+    }
     const areaInput: AisAreaLiveVerificationInput = {
       dataMode,
       provider: definition.provider,
@@ -533,7 +601,9 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
         })
       : definition.capability === "ais_area" && !safe
         ? resolveAisAreaLiveVerification(areaInput)
-        : definition.liveVerification ?? (safe ? "not_verified" : "coverage_pending")
+        : definition.capability === "weather_alerts" && !safe
+          ? resolveWeatherAlertLiveVerification(weatherAlertInput)
+          : definition.liveVerification ?? (safe ? "not_verified" : "coverage_pending")
     const status = definition.capability === "ais_tracking" && !safe
       ? resolveAisReadinessStatus({
           dataMode,
@@ -548,8 +618,13 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
         }, liveVerification)
       : definition.capability === "ais_area" && !safe
         ? resolveAisAreaReadinessStatus(areaInput, liveVerification)
-        : definition.status
-    return { ...definition, status, runtime: capabilityRuntime, lastSuccessAt, lastSourceUpdatedAt, freshness, liveVerification, ...(sourceDetails ? { sources: sourceDetails } : {}) }
+        : definition.capability === "weather_alerts" && !safe
+          ? resolveWeatherAlertReadinessStatus(weatherAlertInput, liveVerification)
+          : definition.status
+    const reason = definition.capability === "weather_alerts" && !safe
+      ? resolveWeatherAlertReadinessReason(weatherAlertInput, liveVerification)
+      : undefined
+    return { ...definition, status, runtime: capabilityRuntime, lastSuccessAt, lastSourceUpdatedAt, freshness, liveVerification, ...(reason ? { reason } : {}), ...(sourceDetails ? { sources: sourceDetails } : {}) }
   })
 }
 

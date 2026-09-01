@@ -81,10 +81,13 @@ describe("official weather alert provider", () => {
     expect(await provider.getFeedItems([], mockPorts)).toEqual([])
   })
 
-  it("does not enable unverified official parsers in public mode", async () => {
-    expect(officialWeatherAlertSources.every(source => source.enabled === false && source.liveStatus === "live_pending")).toBe(true)
+  it("does not enable the unverified JMA parser in public mode", async () => {
+    expect(jma).toMatchObject({ enabled: false, liveStatus: "live_pending" })
+    expect(tmd).toMatchObject({ enabled: true, liveStatus: "verified_live" })
+    expect(bmkg).toMatchObject({ enabled: true, liveStatus: "verified_live" })
     let requests = 0
     const provider = createOfficialWeatherAlertProvider({
+      sources: [jma],
       fetcher: async () => {
         requests += 1
         return { ok: true, status: 200, text: async () => "" }
@@ -94,6 +97,25 @@ describe("official weather alert provider", () => {
     const items = await provider.getFeedItems([previous], mockPorts)
     expect(requests).toBe(0)
     expect(items[0]).toMatchObject({ id: previous.id, stale: true, sourceStatus: "disabled", error: "official_weather_source_live_pending" })
+  })
+
+  it("exposes a source identity and fails closed when a verified source has no history", async () => {
+    const provider = createOfficialWeatherAlertProvider({
+      sources: [tmd],
+      throwOnSourceFailureWithoutLastKnown: true,
+      fetcher: async () => ({ ok: false, status: 503, text: async () => "" }),
+    })
+    expect(provider.providerId).toBe("tmd")
+    await expect(provider.getFeedItems([], mockPorts)).rejects.toMatchObject({ code: "provider_unavailable", status: 503 })
+  })
+
+  it("classifies a recognized HTTP response with an unknown payload as contract changed", async () => {
+    const provider = createOfficialWeatherAlertProvider({
+      sources: [tmd],
+      throwOnSourceFailureWithoutLastKnown: true,
+      fetcher: async () => ({ ok: true, status: 200, text: async () => "<html><body>changed</body></html>" }),
+    })
+    await expect(provider.getFeedItems([], mockPorts)).rejects.toMatchObject({ code: "provider_contract_changed" })
   })
 
   it("expires a disappeared warning without changing official timestamps, while failures stay stale", async () => {
