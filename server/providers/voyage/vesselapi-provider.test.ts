@@ -1,6 +1,42 @@
-import { describe, expect, it } from "vitest"
-import type { ProviderError } from "#/providers/contracts"
+import NativeDatabase from "better-sqlite3"
+import { createDatabase } from "db0"
+import { describe, expect, it, vi } from "vitest"
+import type { ProviderError, SecretStore } from "#/providers/contracts"
+import { PortDirectoryRepository } from "#/database/port-directory"
+import { initShippingTables } from "#/database/shipping"
+import { createVoyageProviderForDatabase } from "#/providers/voyage"
 import { createVesselApiVoyageProvider, normalizeVesselApiVoyageObservation } from "#/providers/voyage/vesselapi-provider"
+
+function createNativeDatabase() {
+  const native = new NativeDatabase(":memory:")
+  const database = createDatabase({
+    name: "sqlite",
+    dialect: "sqlite",
+    getInstance: () => native,
+    exec: (sql: string) => native.exec(sql),
+    prepare: (sql: string) => {
+      const statement = native.prepare(sql)
+      return {
+        all: async (...params: (string | number | boolean | null | undefined)[]) => statement.all(...params),
+        get: async (...params: (string | number | boolean | null | undefined)[]) => statement.get(...params),
+        run: async (...params: (string | number | boolean | null | undefined)[]) => {
+          const result = statement.run(...params)
+          return { success: result.changes > 0, changes: result.changes, lastInsertRowid: result.lastInsertRowid }
+        },
+      }
+    },
+    dispose: () => native.close(),
+  } as never)
+  return { database, native }
+}
+
+const testSecretStore: SecretStore = {
+  get: async providerId => providerId === "vesselapi" ? "test-secret" : undefined,
+  set: async () => undefined,
+  delete: async () => undefined,
+  has: async providerId => providerId === "vesselapi",
+  source: async providerId => providerId === "vesselapi" ? "environment" : "missing",
+}
 
 function response(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -54,6 +90,43 @@ function fetchQueue(responses: Response[]): { fetcher: (input: string, init?: Re
 const vessel = { vesselId: "vessel-1", imo: "9162423", mmsi: "413393620" }
 
 describe("vesselapi voyage provider", () => {
+  it("keeps PortDirectoryRepository instance binding for destination and origin resolution", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const portDirectory = new PortDirectoryRepository(database, "real")
+    const queue = fetchQueue([
+      response(etaPayload()),
+      response(eventPayload("Departure", { port: { unlo_code: "THLCH", name: "Laem Chabang" } })),
+    ])
+    const provider = createVesselApiVoyageProvider({ apiKey: "test-secret", fetcher: queue.fetcher, portDirectory })
+
+    await expect(provider.getVoyages([vessel])).resolves.toEqual([expect.objectContaining({
+      destinationPortId: "PHMNL",
+      originPortId: "THLCH",
+    })])
+    native.close()
+  })
+
+  it("keeps PortDirectoryRepository binding through the production factory", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const fetcher = vi.fn(async (input: string) => input.includes("/eta")
+      ? response(etaPayload())
+      : response(eventPayload("Departure", { port: { unlo_code: "THLCH", name: "Laem Chabang" } })))
+    vi.stubGlobal("fetch", fetcher)
+    try {
+      const provider = createVoyageProviderForDatabase(database, { providerId: "vesselapi", dataMode: "real", secretStore: testSecretStore })
+      await expect(provider.getVoyages([vessel])).resolves.toEqual([expect.objectContaining({
+        destinationPortId: "PHMNL",
+        originPortId: "THLCH",
+      })])
+      expect(fetcher).toHaveBeenCalledTimes(2)
+    } finally {
+      vi.unstubAllGlobals()
+      native.close()
+    }
+  })
+
   it("normalizes ETA, keeps the trusted source timestamp, and resolves destination through Port Directory", async () => {
     const queue = fetchQueue([response(etaPayload())])
     const provider = createVesselApiVoyageProvider({

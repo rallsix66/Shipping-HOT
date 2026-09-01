@@ -213,6 +213,9 @@ export function createVesselApiVoyageProvider(options: VesselApiVoyageProviderOp
   const fetcher = options.fetcher ?? ((input, init) => fetch(input, init))
   const resolveApiKey = options.apiKeyResolver ?? (async () => options.apiKey)
   const includeLastPortEvent = options.includeLastPortEvent ?? true
+  const resolvePortIdentity = options.portDirectory
+    ? (value: string) => options.portDirectory!.resolvePortIdentity(value)
+    : undefined
 
   async function request(path: string, idType: "imo" | "mmsi", apiKey: string): Promise<{ response: Response, body: unknown }> {
     const url = new URL(`${endpoint}${path}`)
@@ -276,7 +279,7 @@ export function createVesselApiVoyageProvider(options: VesselApiVoyageProviderOp
           vessel,
           eta,
           portEvent,
-          resolvePortIdentity: options.portDirectory?.resolvePortIdentity,
+          resolvePortIdentity,
         })
         if (normalized) results.push(normalized)
       }
