@@ -229,7 +229,7 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
   const labels = new Map<string, string>()
   vessels.forEach(v => labels.set(v.id, v.name))
   ports.forEach(p => labels.set(p.id, p.name))
-  voyages.forEach(v => labels.set(v.id, v.voyageNumber))
+  voyages.forEach(v => labels.set(v.id, v.voyageNumber ?? "未知航次"))
 
   const eventItems = operationalEvents
     .filter(event => event.status === ("active" as EventStatus))
@@ -277,7 +277,7 @@ export function rankHotItems(events: ShippingEvent[], ports: Port[], vessels: Ve
     ...vessels.filter(v => v.isWatched).map(v => v.id),
     ...ports.filter(p => p.isWatched).map(p => p.id),
   ])
-  const watchedVoyageIds = new Set(voyages.filter(voyage => watchedIds.has(voyage.vesselId) || watchedIds.has(voyage.originPortId) || watchedIds.has(voyage.destinationPortId)).map(voyage => voyage.id))
+  const watchedVoyageIds = new Set(voyages.filter(voyage => watchedIds.has(voyage.vesselId) || (voyage.originPortId !== undefined && watchedIds.has(voyage.originPortId)) || (voyage.destinationPortId !== undefined && watchedIds.has(voyage.destinationPortId))).map(voyage => voyage.id))
   const relevance = (item: HotItem) => {
     const event = item.eventId ? operationalEvents.find(candidate => candidate.id === item.eventId) : undefined
     const feed = item.feedItemId ? operationalFeedItems.find(candidate => candidate.id === item.feedItemId) : undefined

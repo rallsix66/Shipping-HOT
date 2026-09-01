@@ -1,15 +1,18 @@
-# Voyage / ETA Provider Gap
+# Voyage / ETA Provider Status
 
-> Recorded: 2026-08-29
+> Updated: 2026-09-01
 
-Real Mode currently has no implemented real Voyage/ETA adapter. The Runtime registry therefore exposes `voyage-sync` with the existing Mock provider disabled when Real Mode is selected. `VESSELAPI_API_KEY` is not configured in the local environment.
+The real VesselAPI Voyage/ETA adapter is implemented behind the existing server-side `VoyageProvider` boundary. It is selected only with `SHIPPING_DATA_MODE=real` and `SHIPPING_VOYAGE_PROVIDER=vesselapi`; Mock Mode continues to use the Mock Voyage provider and Real Mode never falls back to it.
 
-This is a credential/adapter gap, not an entitlement result: no VesselAPI ETA or Port Events request was made, and no endpoint availability or plan capability is inferred. VesselAPI ETA entitlement is **not verified**, not `entitlement_missing`. VesselAPI Search/Discovery and Voyage/ETA are separate capability contracts.
+Current local state:
 
-Current consequences:
+- Adapter: `implemented`
+- Credential: `credential_missing` (`VESSELAPI_API_KEY` was checked through the existing `FileSecretStore`/server environment loader; no key value is recorded here)
+- Live gate: `coverage_pending`
+- Live VesselAPI request: not made because the credential is absent
 
-- Real Operational Readiness remains `blocked` because the approved Voyage Job is disabled rather than a real enabled Job.
-- No ETA, ETD, Port Event or commercial Schedule data is presented as real.
-- No Mock Voyage row is promoted into Real Mode operational reads.
+The adapter uses `https://api.vesselapi.com/v1`, queries ETA by IMO first and legal MMSI otherwise, and optionally reads the latest Port Event. ETA source timestamps and explicit Departure event timestamps are retained. `destination_port` and a Departure event port are accepted only after exact/alias resolution through the existing Port Directory. Unknown origin, commercial `voyageNumber`, ETD and inferred status remain absent/`unknown`; no local fetch time is used as provider evidence.
 
-Any future ETA/Port Events probe requires a separately authorized credential and capability decision. Until then, this submodule remains stopped; no adapter, migration, secret or Provider contract change is introduced by this record.
+VesselAPI ETA is an AIS/crew-reported observation, not a commercial schedule. A missing ETA or 404 produces a skipped/no-observation Runtime result; provider errors remain typed as `auth_failed`, `entitlement_missing` only for explicit feature-entitlement evidence, `provider_forbidden`, `rate_limited`, `provider_timeout`, `provider_unavailable` or `provider_contract_changed`. Existing Repository guards, append-only `voyage_eta_history`, Real lineage filtering and provider-free API reads remain in force.
+
+No new migration was added. Migration 008 already makes the origin, destination, voyage number and ETA/ETD columns nullable. No retained SQLite database, secret, raw Provider payload or Mock row was modified by this milestone.

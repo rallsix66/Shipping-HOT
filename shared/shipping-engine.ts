@@ -83,7 +83,7 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
   for (const voyage of voyages.filter(isFreshEventEvidence)) {
     const delayMinutes = calculateDelayMinutes(voyage.baselineEta, voyage.latestEta)
     if (delayMinutes !== undefined && delayMinutes >= settings.eventThresholds.delayMinutes) {
-      candidates.push({ ...eventTrust(voyage), type: "voyage_delay", severity: delayMinutes >= settings.eventThresholds.delayMinutes * 2 ? "critical" : "warning", status: "active", title: `${voyage.voyageNumber} ETA 延误 ${delayMinutes} 分钟`, summary: "最新 ETA 晚于跟踪基准，延误已超过关注阈值。", occurredAt: voyage.latestEtaObservedAt ?? now, detectedAt: now, dedupeKey: voyageDelayEventKey(voyage), voyageId: voyage.id, evidenceJson: { delayMinutes, thresholdMinutes: settings.eventThresholds.delayMinutes } })
+      candidates.push({ ...eventTrust(voyage), type: "voyage_delay", severity: delayMinutes >= settings.eventThresholds.delayMinutes * 2 ? "critical" : "warning", status: "active", title: `${voyage.voyageNumber ?? "未知航次"} ETA 延误 ${delayMinutes} 分钟`, summary: "最新 ETA 晚于跟踪基准，延误已超过关注阈值。", occurredAt: voyage.latestEtaObservedAt ?? now, detectedAt: now, dedupeKey: voyageDelayEventKey(voyage), voyageId: voyage.id, evidenceJson: { delayMinutes, thresholdMinutes: settings.eventThresholds.delayMinutes } })
     }
   }
   for (const port of ports.filter(isFreshEventEvidence)) {

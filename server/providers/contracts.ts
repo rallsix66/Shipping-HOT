@@ -116,7 +116,7 @@ function contextText(context?: unknown): string {
 export function providerFailureCode(status: number, context?: unknown): ProviderFailureCode {
   if (status === 401) return "auth_failed"
   if (status === 403) {
-    return /feature\s+not\s+available|plan\s+restriction|endpoint\s+entitlement|subscription\s+required|entitlement/i.test(contextText(context))
+    return /feature[\s_-]+not[\s_-]+available|plan[\s_-]+restriction|endpoint[\s_-]+entitlement|subscription[\s_-]+required|entitlement/i.test(contextText(context))
       ? "entitlement_missing"
       : "provider_forbidden"
   }

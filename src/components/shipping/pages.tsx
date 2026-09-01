@@ -687,7 +687,7 @@ export function VesselDetailPage({ id }: { id: string }) {
   const relatedEvents = data.events.filter(e => e.vesselId === id)
   const relatedVoyages = data.voyages.filter(v => v.vesselId === id)
   const weatherItems = data.feedItems.filter(item => item.weather && item.relatedVesselIds.includes(id)).slice(0, 2)
-  const voyagePortName = (portId: string) => data.ports.find(port => port.id === portId || port.unlocode === portId)?.name ?? portId
+  const voyagePortName = (portId?: string) => portId ? data.ports.find(port => port.id === portId || port.unlocode === portId)?.name ?? portId : "暂无官方信息"
   return (
     <ShippingShell title={`船舶详情 · ${vessel.name}`}>
       <Link to="/vessels" className="back-link">
@@ -820,7 +820,7 @@ export function VesselDetailPage({ id }: { id: string }) {
               ? <p className="text-sm op-60">暂无关联航次</p>
               : relatedVoyages.map(voyage => (
                   <Link key={voyage.id} to="/voyages/$id" params={{ id: voyage.id }} className="list-row">
-                    <span className="font-bold">{voyage.voyageNumber}</span>
+                    <span className="font-bold">{voyage.voyageNumber ?? "未知航次"}</span>
                     <span className="flex items-center gap-2 op-70">
                       {delayCell(voyage.delayMinutes)}
                       <span className="i-ph-arrow-right" />
@@ -834,9 +834,11 @@ export function VesselDetailPage({ id }: { id: string }) {
   )
 }
 
-function VoyageSummary({ voyage, portName }: { voyage: VoyageRecord, portName: (portId: string) => string }) {
+function VoyageSummary({ voyage, portName }: { voyage: VoyageRecord, portName: (portId?: string) => string }) {
   return (
     <dl className="kv">
+      <dt>航次号</dt>
+      <dd>{voyage.voyageNumber ?? "暂无官方信息"}</dd>
       <dt>Origin</dt>
       <dd>{portName(voyage.originPortId)}</dd>
       <dt>Destination</dt>
@@ -1098,7 +1100,7 @@ export function VoyagesPage() {
               {voyages.map(v => (
                 <div key={v.id} className="vt-row">
                   <Link to="/voyages/$id" params={{ id: v.id }} className="nm c-no">
-                    {v.voyageNumber}
+                    {v.voyageNumber ?? "未知航次"}
                     <small>
                       基准
                       {" "}
@@ -1107,9 +1109,9 @@ export function VoyagesPage() {
                   </Link>
                   <span className="c-vessel">{vesselName(v.vesselId)}</span>
                   <span className="c-route">
-                    {portName(v.originPortId)}
+                    {v.originPortId ? portName(v.originPortId) : "暂无官方信息"}
                     {" → "}
-                    {portName(v.destinationPortId)}
+                    {v.destinationPortId ? portName(v.destinationPortId) : "暂无官方信息"}
                   </span>
                   <span className="eta c-eta">{v.status === "arrived" ? "已到港" : formatDate(v.latestEta)}</span>
                   <span className="c-delay">{delayCell(v.delayMinutes)}</span>
@@ -1138,7 +1140,7 @@ export function VoyageDetailPage({ id }: { id: string }) {
   const relatedEvents = data.events.filter(e => e.voyageId === id)
   const weatherItems = data.feedItems.filter(item => item.weather && item.relatedVoyageIds.includes(id)).slice(0, 2)
   return (
-    <ShippingShell title={`航次详情 · ${voyage.voyageNumber}`}>
+    <ShippingShell title={`航次详情 · ${voyage.voyageNumber ?? "未知航次"}`}>
       <Link to="/voyages" className="back-link">
         <span className="i-ph-arrow-left" />
         返回航次列表
@@ -1148,11 +1150,11 @@ export function VoyageDetailPage({ id }: { id: string }) {
           <div className="d-head">
             <span className="d-avatar"><span className="i-ph-compass" /></span>
             <div className="min-w-0 flex-1">
-              <h2 className="d-title">{voyage.voyageNumber}</h2>
+              <h2 className="d-title">{voyage.voyageNumber ?? "未知航次"}</h2>
               <p className="d-sub">
-                {origin?.name ?? voyage.originPortId}
+                {origin?.name ?? voyage.originPortId ?? "暂无官方信息"}
                 {" → "}
-                {destination?.name ?? voyage.destinationPortId}
+                {destination?.name ?? voyage.destinationPortId ?? "暂无官方信息"}
               </p>
             </div>
             <div className="d-chips">

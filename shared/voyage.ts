@@ -2,7 +2,7 @@ import type { SourceLineage } from "./shipping"
 
 export const VOYAGE_SYNC_CAPABILITY = "voyage_sync"
 
-export type VoyageStatus = "planned" | "departed" | "in_transit" | "arrived" | "cancelled"
+export type VoyageStatus = "planned" | "departed" | "in_transit" | "arrived" | "cancelled" | "unknown"
 
 export interface VoyageVesselIdentity {
   vesselId: string
@@ -12,9 +12,9 @@ export interface VoyageVesselIdentity {
 
 export interface VoyageRecord extends VoyageVesselIdentity {
   id: string
-  originPortId: string
-  destinationPortId: string
-  voyageNumber: string
+  originPortId?: string
+  destinationPortId?: string
+  voyageNumber?: string
   status: VoyageStatus
   eta?: string
   etd?: string

@@ -5,6 +5,7 @@ import { initShippingTables } from "#/database/shipping"
 import type { AisTrackingProvider } from "#/providers/ais/contracts"
 import type { AisAreaProvider } from "#/providers/aisstream-area"
 import type { VoyageProvider } from "#/providers/voyage/contracts"
+import { createVoyageProviderForDatabase } from "#/providers/voyage"
 import { getDefaultRuntimeJobs } from "#/runtime/registry"
 
 function createNativeDatabase() {
@@ -62,6 +63,54 @@ describe("runtime registry", () => {
       ["weather-sync", "weather_sync"],
     ])
     native.close()
+  })
+
+  it("selects the real VesselAPI Voyage provider without falling back to Mock", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const previous = {
+      provider: process.env.SHIPPING_VOYAGE_PROVIDER,
+      key: process.env.VESSELAPI_API_KEY,
+    }
+    try {
+      process.env.SHIPPING_VOYAGE_PROVIDER = "vesselapi"
+      delete process.env.VESSELAPI_API_KEY
+      const jobs = getDefaultRuntimeJobs({ database, dataMode: "real", aisProvider })
+      expect(jobs.find(job => job.id === "voyage-sync")).toMatchObject({ providerId: "vesselapi", enabled: true })
+      const provider = createVoyageProviderForDatabase(database, {
+        providerId: "vesselapi",
+        dataMode: "real",
+        secretStore: {
+          get: async () => undefined,
+          set: async () => undefined,
+          delete: async () => undefined,
+          has: async () => false,
+          source: async () => "missing",
+        },
+      })
+      await expect(provider.getVoyages([{ vesselId: "vessel-1", imo: "9162423" }])).rejects.toMatchObject({ code: "auth_failed" })
+      expect(provider.providerId).toBe("vesselapi")
+    } finally {
+      if (previous.provider === undefined) delete process.env.SHIPPING_VOYAGE_PROVIDER
+      else process.env.SHIPPING_VOYAGE_PROVIDER = previous.provider
+      if (previous.key === undefined) delete process.env.VESSELAPI_API_KEY
+      else process.env.VESSELAPI_API_KEY = previous.key
+      native.close()
+    }
+  })
+
+  it("keeps Mock Voyage selected in Mock Mode", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const previous = process.env.SHIPPING_VOYAGE_PROVIDER
+    try {
+      process.env.SHIPPING_VOYAGE_PROVIDER = "mock"
+      expect(getDefaultRuntimeJobs({ database, dataMode: "mock", aisProvider }).find(job => job.id === "voyage-sync")).toMatchObject({ providerId: "mock-voyage", enabled: true })
+    } finally {
+      if (previous === undefined) delete process.env.SHIPPING_VOYAGE_PROVIDER
+      else process.env.SHIPPING_VOYAGE_PROVIDER = previous
+      native.close()
+    }
   })
 
   it("uses the existing vessel provider setting as the AIS provider alias", async () => {

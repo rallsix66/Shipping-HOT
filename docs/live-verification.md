@@ -204,7 +204,7 @@ The Area path reuses the hardened AISStream binary/trust parser, treats `Subscri
 | Capability | Provider | Observation | SQLite / API evidence | Status |
 | --- | --- | --- | --- | --- |
 | AIS tracking | AISStream | Latest multi-target continuous acceptance persisted a real PositionReport and survived SQLite restart; earlier no-target/no-observation runs remain historical | `ais_positions` and `ais_latest_positions` contain the accepted temporary-run evidence; Repository/API reads are provider-free | `verified_live` |
-| Voyage / ETA | None in Real Mode | Job was disabled because only the Mock Voyage adapter is available and no real key/adapter was configured | Readiness correctly blocks on the disabled Voyage Job; VesselAPI ETA entitlement is **not verified** and no ETA claim is made | `credential_missing` |
+| Voyage / ETA | VesselAPI adapter implemented; not selected by the safe Mock default | No live request was made because the server-side `VESSELAPI_API_KEY` credential is absent | Real `voyage-sync` is enabled only for `SHIPPING_VOYAGE_PROVIDER=vesselapi`; Readiness requires persisted Repository evidence with a trusted ETA/destination before `verified_live` | `credential_missing` / `coverage_pending` |
 | Feed — The Loadstar | Public RSS | 10 normalized items fetched | Real Feed rows persisted; current/history API available | `verified_live` |
 | Feed — Shekou official | Public HTML | 5 normalized items fetched | Real Feed rows persisted; publication/freshness policy controls current vs history visibility | `verified_live` |
 | Calendar | Calendarific | 259 events fetched for CN, ID, MY, PH, TH and VN | Real Calendar rows persisted and Calendar API returned them; official/manual completeness remains separate | `coverage_pending` |
@@ -214,7 +214,22 @@ The Area path reuses the hardened AISStream binary/trust parser, treats `Subscri
 
 The activation result reported `actualMockRows` from a direct native SQLite schema-discovered scan of every business table carrying `source_type`: `ais_latest_positions=0`, `ais_port_metrics=0`, `ais_positions=0`, `calendar_events=0`, `events=0`, `feed_item_history=0`, `feed_items=0`, `ports=0`, `vessel_metadata=0`, `vessel_search_cache=0`, `vessels=0`, `voyage_eta_history=0`, `voyages=0`, `total=0`. System/metadata tables are explicitly excluded. The smoke asserts this total and exits non-zero if it is not zero; `mockRows` is retained only as a compatibility alias for the observed object. The real database read path accepts only `real/imported/derived` lineage. No Mock data was promoted into the Real operational read.
 
-This seals zero-Mock gate coverage for the review and the current AIS PositionReport gate. It does not claim `Real Operational Ready` because real Voyage/ETA and official weather-alert coverage remain pending; VesselAPI remains optional and separately unverified.
+This seals zero-Mock gate coverage for the review and the current AIS PositionReport gate. It does not claim `Real Operational Ready` because official weather-alert coverage remains pending and VesselAPI Voyage/ETA has no local credentialed evidence; the adapter is implemented but remains `credential_missing` / `coverage_pending`.
+
+## V3 Real Voyage / ETA — VesselAPI adapter contract alignment — 2026-09-01
+
+| Check | Result |
+| --- | --- |
+| Official contract | Base `https://api.vesselapi.com/v1`; ETA `GET /vessel/{id}/eta` with `filter.idType=imo|mmsi`; optional latest Port Event `GET /portevents/vessel/{id}/last`; Bearer authentication |
+| Adapter | `providerId=vesselapi`; server-side SecretStore only; IMO preferred and legal MMSI fallback; bounded requests; no Mock fallback |
+| Credential gate | `VESSELAPI_API_KEY configured=false`; checked through the existing server-side environment/FileSecretStore path; no live request was made |
+| Contract repair | Origin, destination, voyage number, ETA/ETD and status are safely optional/unknown where the provider does not supply trusted data; Port Directory resolution is fail-closed; `voyage_eta_history` remains append-only |
+| Runtime gate | No eligible targets → `skipped/no_eligible_voyage_targets`; eligible targets with no ETA → `skipped/no_voyage_eta_observed`; only a persisted trusted real observation returns `success` |
+| Readiness | Key absent → `credential_missing`; key plus adapter without persisted evidence → `coverage_pending`; persisted VesselAPI ETA/destination evidence plus enabled Runtime → `verified_live/configured` |
+| Persistence/API | No retained SQLite was opened or written; API remains Repository/SQLite-only and provider-call delta is zero for reads |
+| Live acceptance | Not executed because the credential was absent; no target, ETA, Port Event or `verified_live` claim is recorded |
+
+VesselAPI documents describe ETA as an AIS/crew-reported observation rather than a commercial schedule. No ETA, origin, ETD or commercial voyage number was fabricated from missing fields. No new migration was added; migration 008 already supports nullable Voyage fields.
 
 ## Built Nitro HTTP smoke
 

@@ -6,6 +6,7 @@ import type { Database } from "db0"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
 import { latestSchemaVersion, readDatabaseMetadata } from "#/database/runtime"
 import { ShippingRepository } from "#/database/shipping"
+import { VoyageRepository } from "#/database/voyages"
 import type { ShippingDataMode } from "#/database/runtime"
 import { activeShippingFeedSourceIds, shippingFeedSources } from "#/providers/feed"
 import { activeOfficialWeatherAlertSourceIds } from "#/providers/weather-alerts"
@@ -131,6 +132,11 @@ export interface V3ReadinessOptions {
   runtime?: RuntimeReadinessStatus
   bootstrapFailed?: boolean
   toolchain?: Partial<V3ToolchainObservation>
+}
+
+export interface VoyageVerificationEvidence {
+  historicalLiveEvidence: boolean
+  latestSourceUpdatedAt?: string
 }
 
 function check(id: string, status: ReadinessCheckStatus, detail: string, value?: unknown): ReadinessCheck {
@@ -477,6 +483,27 @@ export function resolveAisReadinessStatus(input: AisLiveVerificationInput, liveV
   return liveVerification === "verified_live" ? "configured" : "coverage_pending"
 }
 
+export interface VoyageLiveVerificationInput {
+  dataMode: ShippingDataMode
+  provider: string
+  credentialAvailable: boolean
+  runtimeJobRegistered: boolean
+  runtime: CapabilityReadiness["runtime"]
+  historicalLiveEvidence: boolean
+  sourceUpdatedAt?: string
+}
+
+export function resolveVoyageLiveVerification(input: VoyageLiveVerificationInput): CapabilityReadiness["liveVerification"] {
+  if (input.dataMode !== "real" || input.provider !== "vesselapi" || !input.credentialAvailable || !input.runtimeJobRegistered || !input.historicalLiveEvidence || !parseableTimestamp(input.sourceUpdatedAt)) return "coverage_pending"
+  return input.runtime === "healthy" || input.runtime === "degraded" || input.runtime === "failed" ? "verified_live" : "coverage_pending"
+}
+
+export function resolveVoyageReadinessStatus(input: VoyageLiveVerificationInput, liveVerification: CapabilityReadiness["liveVerification"]): CapabilityReadinessStatus {
+  if (input.dataMode !== "real" || input.provider !== "vesselapi") return "not_configured"
+  if (!input.credentialAvailable) return "credential_missing"
+  return liveVerification === "verified_live" ? "configured" : "coverage_pending"
+}
+
 function vesselSearchCapabilityDefinition(): { capability: string, provider: string, configured: boolean, credential: CapabilityReadiness["credential"], status: CapabilityReadinessStatus } {
   const provider = configuredValue("SHIPPING_VESSEL_SEARCH_PROVIDER")
   if (provider === "gfw") {
@@ -503,7 +530,16 @@ function weatherAlertCapabilityDefinition(): { capability: string, provider: str
   }
 }
 
-function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadinessStatus | undefined, dataMode: ShippingDataMode, areaEvidence: AisAreaVerificationEvidence): CapabilityReadiness[] {
+async function readVoyageVerificationEvidence(db: Database, dataMode: ShippingDataMode): Promise<VoyageVerificationEvidence> {
+  if (dataMode !== "real") return { historicalLiveEvidence: false }
+  const voyage = await new VoyageRepository(db, "real").getLatestVerifiedRealVoyage("vesselapi")
+  return {
+    historicalLiveEvidence: Boolean(voyage),
+    latestSourceUpdatedAt: voyage?.lastUpdatedAt,
+  }
+}
+
+function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadinessStatus | undefined, dataMode: ShippingDataMode, areaEvidence: AisAreaVerificationEvidence, voyageEvidence: VoyageVerificationEvidence): CapabilityReadiness[] {
   const runtimeByCapability = new Map<string, RuntimeReadinessJob[]>()
   for (const job of runtime?.jobs ?? []) runtimeByCapability.set(job.capability, [...(runtimeByCapability.get(job.capability) ?? []), job])
   const safe = profile === "DEVELOPMENT_SAFE"
@@ -528,7 +564,7 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
         weatherAlertCapabilityDefinition(),
         { capability: "feed", provider: configuredValue("SHIPPING_FEED_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_FEED_PROVIDER") === "public", credential: "not_required", status: configuredValue("SHIPPING_FEED_PROVIDER") === "public" ? "coverage_pending" : "not_configured" },
         { capability: "calendar", provider: configuredValue("SHIPPING_CALENDAR_PROVIDER") ?? "unavailable", configured: Boolean(configuredValue("SHIPPING_CALENDAR_PROVIDER")), credential: configuredValue("CALENDARIFIC_API_KEY") ? "available" : "missing", status: configuredValue("SHIPPING_CALENDAR_PROVIDER") === "calendarific" && configuredValue("CALENDARIFIC_API_KEY") ? "coverage_pending" : configuredValue("SHIPPING_CALENDAR_PROVIDER") === "calendarific" ? "credential_missing" : "not_configured" },
-        { capability: "voyage_eta", provider: configuredValue("SHIPPING_VOYAGE_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_VOYAGE_PROVIDER") === "vesselapi", credential: configuredValue("VESSELAPI_API_KEY") ? "available" : "missing", status: configuredValue("VESSELAPI_API_KEY") ? "coverage_pending" : "credential_missing" },
+        { capability: "voyage_eta", provider: configuredValue("SHIPPING_VOYAGE_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_VOYAGE_PROVIDER") === "vesselapi", credential: configuredValue("SHIPPING_VOYAGE_PROVIDER") === "vesselapi" && configuredValue("VESSELAPI_API_KEY") ? "available" : configuredValue("SHIPPING_VOYAGE_PROVIDER") === "vesselapi" ? "missing" : "unknown", status: configuredValue("SHIPPING_VOYAGE_PROVIDER") !== "vesselapi" ? "not_configured" : configuredValue("VESSELAPI_API_KEY") ? "coverage_pending" : "credential_missing" },
       ]
   return definitions.map((definition) => {
     const runtimeCapability = definition.capability === "voyage_eta"
@@ -558,7 +594,7 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
     const sourceDetails = runtimeCapability === "feed_sync" || definition.capability === "weather_alerts"
       ? jobs.map(source => ({ id: source.id, provider: source.providerId, runtime: runtimeState(source), enabled: source.enabled, lastSuccessAt: source.lastSuccessAt, lastSourceUpdatedAt: source.lastSourceUpdatedAt, errorCode: source.errorCode }))
       : undefined
-    const sourceUpdatedAt = liveTracker?.lastSourceUpdatedAt ?? (definition.capability === "weather_alerts" ? latestJobSourceUpdatedAt : job?.lastSourceUpdatedAt)
+    const sourceUpdatedAt = liveTracker?.lastSourceUpdatedAt ?? (definition.capability === "weather_alerts" ? latestJobSourceUpdatedAt : definition.capability === "voyage_eta" ? voyageEvidence.latestSourceUpdatedAt ?? job?.lastSourceUpdatedAt : job?.lastSourceUpdatedAt)
     const freshness = sourceUpdatedAt && Date.parse(sourceUpdatedAt) > Date.now() - 24 * 60 * 60 * 1000
       ? "fresh"
       : sourceUpdatedAt
@@ -568,7 +604,7 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
       ? liveTracker.running ? (liveTracker.providerStatus ?? "registered") : "not_registered"
       : aggregatedRuntime
     const lastSuccessAt = liveTracker?.lastSuccessAt ?? (definition.capability === "weather_alerts" ? latestJobSuccessAt : job?.lastSuccessAt)
-    const lastSourceUpdatedAt = liveTracker?.lastSourceUpdatedAt ?? (definition.capability === "weather_alerts" ? latestJobSourceUpdatedAt : job?.lastSourceUpdatedAt)
+    const lastSourceUpdatedAt = liveTracker?.lastSourceUpdatedAt ?? (definition.capability === "weather_alerts" ? latestJobSourceUpdatedAt : definition.capability === "voyage_eta" ? voyageEvidence.latestSourceUpdatedAt ?? job?.lastSourceUpdatedAt : job?.lastSourceUpdatedAt)
     const activeWeatherAlertSourceIds = definition.capability === "weather_alerts" && definition.provider === "public"
       ? [...activeOfficialWeatherAlertSourceIds()]
       : []
@@ -578,6 +614,15 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
       activeSourceCount: activeWeatherAlertSourceIds.length,
       activeSourceIds: activeWeatherAlertSourceIds,
       jobs,
+    }
+    const voyageInput: VoyageLiveVerificationInput = {
+      dataMode,
+      provider: definition.provider,
+      credentialAvailable: definition.credential === "available",
+      runtimeJobRegistered: jobs.some(voyageJob => voyageJob.id === "voyage-sync" && voyageJob.providerId === "vesselapi" && voyageJob.enabled),
+      runtime: capabilityRuntime,
+      historicalLiveEvidence: voyageEvidence.historicalLiveEvidence,
+      sourceUpdatedAt,
     }
     const areaInput: AisAreaLiveVerificationInput = {
       dataMode,
@@ -603,7 +648,9 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
         ? resolveAisAreaLiveVerification(areaInput)
         : definition.capability === "weather_alerts" && !safe
           ? resolveWeatherAlertLiveVerification(weatherAlertInput)
-          : definition.liveVerification ?? (safe ? "not_verified" : "coverage_pending")
+          : definition.capability === "voyage_eta" && !safe
+            ? resolveVoyageLiveVerification(voyageInput)
+            : definition.liveVerification ?? (safe ? "not_verified" : "coverage_pending")
     const status = definition.capability === "ais_tracking" && !safe
       ? resolveAisReadinessStatus({
           dataMode,
@@ -620,7 +667,9 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
         ? resolveAisAreaReadinessStatus(areaInput, liveVerification)
         : definition.capability === "weather_alerts" && !safe
           ? resolveWeatherAlertReadinessStatus(weatherAlertInput, liveVerification)
-          : definition.status
+          : definition.capability === "voyage_eta" && !safe
+            ? resolveVoyageReadinessStatus(voyageInput, liveVerification)
+            : definition.status
     const reason = definition.capability === "weather_alerts" && !safe
       ? resolveWeatherAlertReadinessReason(weatherAlertInput, liveVerification)
       : undefined
@@ -632,6 +681,7 @@ export async function readV3Readiness(db: Database, options: V3ReadinessOptions 
   const dataMode: ShippingDataMode = options.dataMode ?? (process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock")
   const profile = options.profile ?? (dataMode === "real" ? "REAL_OPERATIONAL" : "DEVELOPMENT_SAFE")
   const areaEvidence = await readAisAreaVerificationEvidence(db, dataMode)
+  const voyageEvidence = await readVoyageVerificationEvidence(db, dataMode)
   const checks = [
     ...readV3ToolchainChecks(options.toolchain),
     providerBoundaryCheck(profile, dataMode),
@@ -645,7 +695,7 @@ export async function readV3Readiness(db: Database, options: V3ReadinessOptions 
     ...runtimeChecks(options.runtime, options.bootstrapFailed, dataMode),
     check("network-probes", "skipped", "Readiness performs no external Provider requests; live contract and coverage checks remain deferred"),
   ]
-  const capabilities = capabilityReadiness(profile, options.runtime, dataMode, areaEvidence)
+  const capabilities = capabilityReadiness(profile, options.runtime, dataMode, areaEvidence, voyageEvidence)
   const hardChecksPass = checks.filter(item => item.id !== "network-probes").every(item => item.status === "pass")
   return {
     phase: "v3-readiness",

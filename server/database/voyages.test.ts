@@ -141,4 +141,41 @@ describe("voyage repository", () => {
       rmSync(root, { recursive: true, force: true })
     }
   })
+
+  it("round-trips a real ETA observation without fabricating origin or voyage number", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const repository = new VoyageRepository(database, "real")
+    const observation = voyage({
+      id: "vesselapi:vessel-1:eta:2026-09-01T08:00:00.000Z",
+      originPortId: undefined,
+      destinationPortId: "PHMNL",
+      voyageNumber: undefined,
+      status: "unknown",
+      etd: undefined,
+      source: "vesselapi",
+      sourceType: "real",
+      timestamp: "2026-09-01T08:00:00.000Z",
+      lastUpdatedAt: "2026-09-01T08:00:00.000Z",
+    })
+    await expect(repository.saveVoyages([observation])).resolves.toMatchObject({ written: 1, historyWritten: 1 })
+    await expect(repository.getLatestVoyage("vessel-1")).resolves.toMatchObject({
+      id: observation.id,
+      destinationPortId: "PHMNL",
+      originPortId: undefined,
+      voyageNumber: undefined,
+      status: "unknown",
+      sourceType: "real",
+    })
+    await expect(repository.getLatestVerifiedRealVoyage("vesselapi")).resolves.toMatchObject({ id: observation.id, destinationPortId: "PHMNL" })
+    expect(await repository.listEtaHistory(observation.id)).toHaveLength(1)
+    native.close()
+  })
+
+  it("retains the Real Mode Mock rejection guard", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    await expect(new VoyageRepository(database, "real").saveVoyages([voyage()])).rejects.toThrow("mock_voyage_not_allowed_in_real_mode")
+    native.close()
+  })
 })

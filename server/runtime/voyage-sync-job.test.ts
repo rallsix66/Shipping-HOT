@@ -49,10 +49,32 @@ const record: VoyageRecord = {
   lastUpdatedAt: "2026-08-24T00:00:00.000Z",
 }
 
+const realRecord: VoyageRecord = {
+  ...record,
+  id: "vesselapi:vessel-1:eta:2026-08-25T10:00:00.000Z",
+  originPortId: undefined,
+  destinationPortId: "PHMNL",
+  voyageNumber: undefined,
+  status: "unknown",
+  etd: undefined,
+  source: "vesselapi",
+  sourceType: "real",
+  timestamp: "2026-08-25T10:00:00.000Z",
+  lastUpdatedAt: "2026-08-25T10:00:00.000Z",
+}
+
 async function seedWatchlist(database: ReturnType<typeof createNativeDatabase>["database"]) {
   await database.prepare(`
     INSERT INTO vessel_metadata (id, name, imo, mmsi, source, fetched_at, source_type, data)
     VALUES ('vessel-1', 'TEST VESSEL', '9162423', '413393620', 'test', '2026-08-24T00:00:00.000Z', 'mock', '{}')
+  `).run()
+  await database.prepare("INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled) VALUES ('vessel-1', '2026-08-24T00:00:00.000Z', 1)").run()
+}
+
+async function seedRealWatchlist(database: ReturnType<typeof createNativeDatabase>["database"]) {
+  await database.prepare(`
+    INSERT INTO vessel_metadata (id, name, imo, mmsi, source, fetched_at, source_type, data)
+    VALUES ('vessel-1', 'REAL TEST VESSEL', '9162423', '413393620', 'vesselapi', '2026-08-24T00:00:00.000Z', 'real', '{}')
   `).run()
   await database.prepare("INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled) VALUES ('vessel-1', '2026-08-24T00:00:00.000Z', 1)").run()
 }
@@ -188,6 +210,100 @@ describe("voyage sync job", () => {
     await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({ status: "failed" })
     expect(await new RuntimeRepository(database).getProviderRuntime("mock-voyage", "voyage_sync")).toMatchObject({ status: "failed", consecutiveFailures: 1 })
     expect((await new RuntimeRepository(database).listSyncRuns("mock-voyage"))[0]).toMatchObject({ status: "failed", errorCode: "job_failed" })
+    runtime.stop()
+    native.close()
+  })
+
+  it("skips without eligible targets and does not create lastSuccessAt", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    let calls = 0
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database))
+    runtime.register(createVoyageSyncJob({
+      database,
+      dataMode: "real",
+      provider: {
+        providerId: "vesselapi",
+        getVoyages: async () => {
+          calls++
+          return []
+        },
+      },
+      intervalMs: 60 * 60 * 1000,
+    }))
+    await runtime.start()
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({ status: "skipped", errorCode: "no_eligible_voyage_targets" })
+    expect(calls).toBe(0)
+    expect(await new RuntimeRepository(database).getProviderRuntime("vesselapi", "voyage_sync")).toMatchObject({ status: "never_succeeded", lastSuccessAt: undefined })
+    expect((await new RuntimeRepository(database).listSyncRuns("vesselapi"))[0]).toMatchObject({ status: "skipped", errorCode: "no_eligible_voyage_targets" })
+    runtime.stop()
+    native.close()
+  })
+
+  it("skips an empty Provider observation without marking the first run healthy", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    await seedRealWatchlist(database)
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database))
+    runtime.register(createVoyageSyncJob({
+      database,
+      dataMode: "real",
+      provider: { providerId: "vesselapi", getVoyages: async () => [] },
+      intervalMs: 60 * 60 * 1000,
+    }))
+    await runtime.start()
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({ status: "skipped", errorCode: "no_voyage_eta_observed" })
+    expect(await new RuntimeRepository(database).getProviderRuntime("vesselapi", "voyage_sync")).toMatchObject({ status: "never_succeeded", lastSuccessAt: undefined })
+    runtime.stop()
+    native.close()
+  })
+
+  it("persists trusted real ETA output and uses the official timestamp for runtime evidence", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    await seedRealWatchlist(database)
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database), { now: () => new Date("2026-08-26T00:00:00.000Z") })
+    runtime.register(createVoyageSyncJob({
+      database,
+      dataMode: "real",
+      provider: { providerId: "vesselapi", getVoyages: async () => [realRecord] },
+      intervalMs: 60 * 60 * 1000,
+      now: () => new Date("2026-08-26T00:00:00.000Z"),
+    }))
+    await runtime.start()
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({ status: "success", recordsRead: 1, recordsWritten: 1, sourceUpdatedAt: realRecord.lastUpdatedAt })
+    expect(await new VoyageRepository(database, "real").getLatestVoyage("vessel-1")).toMatchObject({ source: "vesselapi", sourceType: "real", destinationPortId: "PHMNL", voyageNumber: undefined })
+    expect(await new RuntimeRepository(database).getProviderRuntime("vesselapi", "voyage_sync")).toMatchObject({ status: "healthy", lastSourceUpdatedAt: realRecord.lastUpdatedAt })
+    expect((await new RuntimeRepository(database).listSyncRuns("vesselapi"))[0]).toMatchObject({ status: "success", recordsWritten: 1 })
+    runtime.stop()
+    native.close()
+  })
+
+  it("keeps historical success degraded after a later Provider failure", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    await seedRealWatchlist(database)
+    let fail = false
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database))
+    runtime.register(createVoyageSyncJob({
+      database,
+      dataMode: "real",
+      provider: {
+        providerId: "vesselapi",
+        getVoyages: async () => {
+          if (fail) throw new Error("provider_unavailable")
+          return [realRecord]
+        },
+      },
+      intervalMs: 60 * 60 * 1000,
+      now: () => new Date("2026-08-26T00:00:00.000Z"),
+    }))
+    await runtime.start()
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({ status: "success" })
+    fail = true
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({ status: "failed" })
+    expect(await new RuntimeRepository(database).getProviderRuntime("vesselapi", "voyage_sync")).toMatchObject({ status: "degraded", lastSuccessAt: expect.any(String) })
+    expect(await new VoyageRepository(database, "real").getLatestVoyage("vessel-1")).toMatchObject({ source: "vesselapi", destinationPortId: "PHMNL" })
     runtime.stop()
     native.close()
   })

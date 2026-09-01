@@ -2,7 +2,9 @@ import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it, vi } from "vitest"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
+import type { VoyageRecord } from "@shared/voyage"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
+import { VoyageRepository } from "#/database/voyages"
 import { type CapabilityReadiness, type RuntimeReadinessJob, type RuntimeReadinessStatus, type V3ToolchainObservation, aggregateRuntimeReadiness, approvedRuntimeJobKeys, hasVerifiedAisAreaMetric, readV3PackageManagerObservation, readV3Readiness, readV3ToolchainChecks, resolveAisAreaVerificationEvidence, resolveWeatherAlertLiveVerification, resolveWeatherAlertReadinessReason, resolveWeatherAlertReadinessStatus } from "#/services/v3-readiness"
 
 function createNativeDatabase() {
@@ -82,6 +84,64 @@ async function realVesselSearchCapability(options: { provider?: string, gfwToken
       native.close()
     }
   } finally {
+    for (const name of environmentNames) {
+      const value = previous.get(name)
+      if (value === undefined) delete process.env[name]
+      else process.env[name] = value
+    }
+  }
+}
+
+async function realVoyageCapability(options: { provider?: string, credential?: boolean, runtimeStatus?: string, evidence?: boolean, registered?: boolean } = {}): Promise<CapabilityReadiness> {
+  const environmentNames = ["SHIPPING_DATA_MODE", "SHIPPING_VOYAGE_PROVIDER", "VESSELAPI_API_KEY"]
+  const previous = new Map(environmentNames.map(name => [name, process.env[name]]))
+  process.env.SHIPPING_DATA_MODE = "real"
+  if (options.provider === undefined) delete process.env.SHIPPING_VOYAGE_PROVIDER
+  else process.env.SHIPPING_VOYAGE_PROVIDER = options.provider
+  if (options.credential === false) delete process.env.VESSELAPI_API_KEY
+  else process.env.VESSELAPI_API_KEY = "test-secret"
+  const { database, native } = createNativeDatabase()
+  try {
+    await initShippingTables(database, "real")
+    const evidence: VoyageRecord = {
+      id: "vesselapi:vessel-1:eta:2026-08-31T10:00:00.000Z",
+      vesselId: "vessel-1",
+      imo: "9162423",
+      mmsi: "413393620",
+      destinationPortId: "PHMNL",
+      status: "unknown",
+      eta: "2026-09-03T08:00:00.000Z",
+      source: "vesselapi",
+      sourceType: "real",
+      timestamp: "2026-08-31T10:00:00.000Z",
+      lastUpdatedAt: "2026-08-31T10:00:00.000Z",
+    }
+    if (options.evidence) await new VoyageRepository(database, "real").saveVoyages([evidence])
+    const runtime: RuntimeReadinessStatus = {
+      running: true,
+      jobs: options.registered === false
+        ? []
+        : [{
+            id: "voyage-sync",
+            providerId: "vesselapi",
+            capability: "voyage_sync",
+            enabled: true,
+            status: options.runtimeStatus ?? "healthy",
+            lastSuccessAt: options.evidence ? "2026-08-31T10:01:00.000Z" : undefined,
+            lastSourceUpdatedAt: "2026-08-30T10:00:00.000Z",
+          }],
+    }
+    const report = await readV3Readiness(database, {
+      dataMode: "real",
+      profile: "REAL_OPERATIONAL",
+      runtime,
+      toolchain: { packageManager: "pnpm@10.30.3", betterSqlite3Version: "12.6.2", betterSqlite3LoadError: undefined },
+    })
+    const capability = report.capabilities.find(item => item.capability === "voyage_eta")
+    if (!capability) throw new Error("voyage_eta readiness capability is missing")
+    return capability
+  } finally {
+    native.close()
     for (const name of environmentNames) {
       const value = previous.get(name)
       if (value === undefined) delete process.env[name]
@@ -930,6 +990,86 @@ describe("v3 readiness", () => {
         liveVerification: "coverage_pending",
         status: "not_configured",
       })
+    })
+  })
+
+  it("keeps VesselAPI Voyage coverage pending when the adapter has no persisted live evidence", async () => {
+    await expect(realVoyageCapability({ provider: "vesselapi", evidence: false })).resolves.toMatchObject({
+      provider: "vesselapi",
+      configured: true,
+      credential: "available",
+      runtime: "healthy",
+      liveVerification: "coverage_pending",
+      status: "coverage_pending",
+    })
+  })
+
+  it("keeps skipped or empty Voyage runs unverified", async () => {
+    await expect(realVoyageCapability({ provider: "vesselapi", evidence: false, runtimeStatus: "never_succeeded" })).resolves.toMatchObject({
+      liveVerification: "coverage_pending",
+      status: "coverage_pending",
+    })
+  })
+
+  it("requires the VesselAPI credential for Voyage readiness", async () => {
+    await expect(realVoyageCapability({ provider: "vesselapi", credential: false, evidence: true })).resolves.toMatchObject({
+      configured: true,
+      credential: "missing",
+      liveVerification: "coverage_pending",
+      status: "credential_missing",
+    })
+  })
+
+  it("promotes persisted trusted VesselAPI ETA evidence to verified_live/configured", async () => {
+    await expect(realVoyageCapability({ provider: "vesselapi", evidence: true })).resolves.toMatchObject({
+      provider: "vesselapi",
+      configured: true,
+      credential: "available",
+      runtime: "healthy",
+      lastSourceUpdatedAt: "2026-08-31T10:00:00.000Z",
+      liveVerification: "verified_live",
+      status: "configured",
+    })
+  })
+
+  it("retains Voyage verified_live after a historical success becomes degraded", async () => {
+    await expect(realVoyageCapability({ provider: "vesselapi", evidence: true, runtimeStatus: "degraded" })).resolves.toMatchObject({
+      runtime: "degraded",
+      liveVerification: "verified_live",
+      status: "configured",
+    })
+  })
+
+  it("does not use a different Provider credential when VesselAPI is explicitly selected", async () => {
+    const environmentNames = ["SHIPPING_DATA_MODE", "SHIPPING_VOYAGE_PROVIDER", "VESSELAPI_API_KEY", "GFW_API_TOKEN"]
+    const previous = new Map(environmentNames.map(name => [name, process.env[name]]))
+    try {
+      process.env.SHIPPING_DATA_MODE = "real"
+      process.env.SHIPPING_VOYAGE_PROVIDER = "vesselapi"
+      delete process.env.VESSELAPI_API_KEY
+      process.env.GFW_API_TOKEN = "test-secret"
+      const { database, native } = createNativeDatabase()
+      await initShippingTables(database, "real")
+      const report = await readV3Readiness(database, { dataMode: "real", profile: "REAL_OPERATIONAL", runtime: { running: true, jobs: [] }, toolchain: { packageManager: "pnpm@10.30.3", betterSqlite3Version: "12.6.2", betterSqlite3LoadError: undefined } })
+      const voyage = report.capabilities.find(item => item.capability === "voyage_eta")
+      expect(voyage).toMatchObject({ provider: "vesselapi", configured: true, credential: "missing", status: "credential_missing" })
+      native.close()
+    } finally {
+      for (const name of environmentNames) {
+        const value = previous.get(name)
+        if (value === undefined) delete process.env[name]
+        else process.env[name] = value
+      }
+    }
+  })
+
+  it("keeps an unsupported Voyage provider not_configured", async () => {
+    await expect(realVoyageCapability({ provider: "mock", credential: true, evidence: true })).resolves.toMatchObject({
+      provider: "mock",
+      configured: false,
+      credential: "unknown",
+      liveVerification: "coverage_pending",
+      status: "not_configured",
     })
   })
 

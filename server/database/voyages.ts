@@ -51,7 +51,7 @@ interface HistoryRow {
   created_at: string
 }
 
-const voyageStatuses = new Set<VoyageStatus>(["planned", "departed", "in_transit", "arrived", "cancelled"])
+const voyageStatuses = new Set<VoyageStatus>(["planned", "departed", "in_transit", "arrived", "cancelled", "unknown"])
 const lineageValues = new Set(["real", "mock", "imported", "derived"])
 
 function rows<T>(value: unknown): T[] {
@@ -69,23 +69,23 @@ function storedFields(value: string | null | undefined): Record<string, unknown>
 }
 
 function validateRecord(record: VoyageRecord): void {
-  if (!record.id || !record.vesselId || !record.originPortId || !record.destinationPortId || !record.voyageNumber) throw new Error("voyage_identity_required")
+  if (!record.id || !record.vesselId) throw new Error("voyage_identity_required")
   if (!voyageStatuses.has(record.status)) throw new Error("voyage_status_invalid")
   if (!lineageValues.has(record.sourceType)) throw new Error("voyage_source_type_invalid")
   if (!Number.isFinite(Date.parse(record.lastUpdatedAt))) throw new Error("voyage_timestamp_invalid")
 }
 
 function toVoyage(row: VoyageRow): VoyageRecord | undefined {
-  if (!row.origin_port_id || !row.destination_port_id || !row.voyage_number || !row.status || !row.source || !row.last_updated_at) return undefined
+  if (!row.status || !row.source || !row.last_updated_at) return undefined
   if (!voyageStatuses.has(row.status as VoyageStatus) || !lineageValues.has(row.source_type)) return undefined
   return {
     id: row.id,
     vesselId: row.vessel_id,
     imo: row.imo ?? undefined,
     mmsi: row.mmsi ?? undefined,
-    originPortId: row.origin_port_id,
-    destinationPortId: row.destination_port_id,
-    voyageNumber: row.voyage_number,
+    originPortId: row.origin_port_id ?? undefined,
+    destinationPortId: row.destination_port_id ?? undefined,
+    voyageNumber: row.voyage_number ?? undefined,
     status: row.status as VoyageStatus,
     eta: row.eta ?? undefined,
     etd: row.etd ?? undefined,
@@ -163,8 +163,8 @@ export class VoyageRepository {
           continue
         }
         acceptedIds.push(record.id)
-        await this.assertPortIdentity(record.originPortId)
-        await this.assertPortIdentity(record.destinationPortId)
+        if (record.originPortId) await this.assertPortIdentity(record.originPortId)
+        if (record.destinationPortId) await this.assertPortIdentity(record.destinationPortId)
         const previous = storedFields(existing?.data)
         const baselineEta = existing?.baseline_eta ?? record.eta
         const baselineEtd = existing?.baseline_etd ?? record.etd
@@ -228,9 +228,9 @@ export class VoyageRepository {
           delayMinutes ?? null,
           record.imo ?? null,
           record.mmsi ?? null,
-          record.originPortId,
-          record.destinationPortId,
-          record.voyageNumber,
+          record.originPortId ?? null,
+          record.destinationPortId ?? null,
+          record.voyageNumber ?? null,
           record.status,
           record.eta ?? null,
           record.etd ?? null,
@@ -257,7 +257,7 @@ export class VoyageRepository {
       SELECT id, vessel_id, imo, mmsi, origin_port_id, destination_port_id, voyage_number, status,
         eta, etd, source, source_type, last_updated_at, created_at
       FROM voyages
-      WHERE vessel_id = ? AND voyage_number IS NOT NULL${this.sourceWhere()}
+      WHERE vessel_id = ?${this.sourceWhere()}
       ORDER BY last_updated_at DESC, created_at DESC, id DESC
       LIMIT 1
     `).get(vesselId) as VoyageRow | undefined
@@ -269,11 +269,27 @@ export class VoyageRepository {
       SELECT id, vessel_id, imo, mmsi, origin_port_id, destination_port_id, voyage_number, status,
         eta, etd, source, source_type, last_updated_at, created_at
       FROM voyages
-      WHERE vessel_id = ? AND voyage_number IS NOT NULL AND status NOT IN ('arrived', 'cancelled')${this.sourceWhere()}
+      WHERE vessel_id = ? AND status NOT IN ('arrived', 'cancelled')${this.sourceWhere()}
       ORDER BY last_updated_at DESC, created_at DESC, id DESC
       LIMIT 1
     `).get(vesselId) as VoyageRow | undefined
     return row ? toVoyage(row) : undefined
+  }
+
+  async getLatestVerifiedRealVoyage(providerId: string): Promise<VoyageRecord | undefined> {
+    const row = await this.db.prepare(`
+      SELECT id, vessel_id, imo, mmsi, origin_port_id, destination_port_id, voyage_number, status,
+        eta, etd, source, source_type, last_updated_at, created_at
+      FROM voyages
+      WHERE source = ? AND source_type IN ('real', 'imported', 'derived')
+        AND destination_port_id IS NOT NULL AND eta IS NOT NULL
+      ORDER BY last_updated_at DESC, created_at DESC, id DESC
+      LIMIT 1
+    `).get(providerId) as VoyageRow | undefined
+    const voyage = row ? toVoyage(row) : undefined
+    return voyage && voyage.destinationPortId && voyage.eta && Number.isFinite(Date.parse(voyage.lastUpdatedAt))
+      ? voyage
+      : undefined
   }
 
   async listEtaHistory(voyageId: string): Promise<VoyageEtaHistoryRecord[]> {

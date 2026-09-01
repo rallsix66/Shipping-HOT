@@ -299,9 +299,9 @@ export function filterEventsForOperationalContext(events: ShippingEvent[], conte
 export interface Voyage extends Freshness, ProvenanceAware {
   id: string
   vesselId: string
-  voyageNumber: string
-  originPortId: string
-  destinationPortId: string
+  voyageNumber?: string
+  originPortId?: string
+  destinationPortId?: string
   baselineEtd?: string
   baselineEta?: string
   baselineEtdSource?: string
@@ -312,7 +312,7 @@ export interface Voyage extends Freshness, ProvenanceAware {
   latestEtaSource?: string
   latestEtaObservedAt?: string
   delayMinutes?: number
-  status: "planned" | "in_transit" | "arrived" | "delayed"
+  status: "planned" | "in_transit" | "arrived" | "delayed" | "unknown"
 }
 
 export interface FeedItem extends Freshness, ProvenanceAware {

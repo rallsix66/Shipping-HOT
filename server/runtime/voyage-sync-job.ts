@@ -27,9 +27,12 @@ export function createVoyageSyncJob(options: VoyageSyncJobOptions): RuntimeJob {
     enabled: options.enabled ?? true,
     run: async () => {
       const watched = await watchlist.list()
-      const vessels = watched.map(item => ({ vesselId: item.id, imo: item.imo, mmsi: item.mmsi }))
-      if (!vessels.length) return { status: "success", recordsRead: 0, recordsWritten: 0 }
+      const vessels = watched
+        .filter(item => Boolean(item.imo || item.mmsi))
+        .map(item => ({ vesselId: item.id, imo: item.imo, mmsi: item.mmsi }))
+      if (!vessels.length) return { status: "skipped", recordsRead: 0, recordsWritten: 0, errorCode: "no_eligible_voyage_targets", errorMessage: "No watched vessels have an IMO or MMSI for Voyage/ETA lookup" }
       const received = await options.provider.getVoyages(vessels)
+      if (!received.length) return { status: "skipped", recordsRead: 0, recordsWritten: 0, errorCode: "no_voyage_eta_observed", errorMessage: "No VesselAPI ETA observation was available for eligible watched vessels" }
       const saved = await voyages.saveVoyages(received, now().toISOString(), { requestedVesselIds: vessels.map(vessel => vessel.vesselId) })
       const acceptedIds = new Set(saved.acceptedIds)
       const sourceUpdatedAt = received

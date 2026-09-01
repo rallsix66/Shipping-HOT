@@ -17,7 +17,9 @@ function normalizedString(value: string | null | undefined, fallback?: string): 
 function legacyStatus(status: VoyageStatus, delayMinutes?: number): Voyage["status"] {
   if (status === "arrived" || status === "cancelled") return "arrived"
   if (delayMinutes !== undefined && delayMinutes > 0) return "delayed"
-  return status === "planned" ? "planned" : "in_transit"
+  if (status === "planned") return "planned"
+  if (status === "unknown") return "unknown"
+  return "in_transit"
 }
 
 export function voyageRecordToShippingVoyage(record: VoyageRecord, fields: NormalizedVoyageFields = {}): Voyage {
