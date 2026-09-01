@@ -137,6 +137,7 @@ export interface V3ReadinessOptions {
 export interface VoyageVerificationEvidence {
   historicalLiveEvidence: boolean
   latestSourceUpdatedAt?: string
+  focusPortCoverageObserved: boolean
 }
 
 function check(id: string, status: ReadinessCheckStatus, detail: string, value?: unknown): ReadinessCheck {
@@ -490,6 +491,7 @@ export interface VoyageLiveVerificationInput {
   runtimeJobRegistered: boolean
   runtime: CapabilityReadiness["runtime"]
   historicalLiveEvidence: boolean
+  focusPortCoverageObserved: boolean
   sourceUpdatedAt?: string
 }
 
@@ -501,7 +503,15 @@ export function resolveVoyageLiveVerification(input: VoyageLiveVerificationInput
 export function resolveVoyageReadinessStatus(input: VoyageLiveVerificationInput, liveVerification: CapabilityReadiness["liveVerification"]): CapabilityReadinessStatus {
   if (input.dataMode !== "real" || input.provider !== "vesselapi") return "not_configured"
   if (!input.credentialAvailable) return "credential_missing"
-  return liveVerification === "verified_live" ? "configured" : "coverage_pending"
+  return liveVerification === "verified_live" && input.focusPortCoverageObserved ? "configured" : "coverage_pending"
+}
+
+export function resolveVoyageReadinessReason(input: VoyageLiveVerificationInput, liveVerification: CapabilityReadiness["liveVerification"]): string | undefined {
+  if (input.dataMode !== "real" || input.provider !== "vesselapi" || !input.credentialAvailable) return undefined
+  if (liveVerification !== "verified_live") return "vesselapi_live_verification_pending"
+  return input.focusPortCoverageObserved
+    ? "real_vesselapi_eta_persisted_and_restarted"
+    : "vesselapi_focus_port_coverage_pending"
 }
 
 function vesselSearchCapabilityDefinition(): { capability: string, provider: string, configured: boolean, credential: CapabilityReadiness["credential"], status: CapabilityReadinessStatus } {
@@ -531,11 +541,12 @@ function weatherAlertCapabilityDefinition(): { capability: string, provider: str
 }
 
 async function readVoyageVerificationEvidence(db: Database, dataMode: ShippingDataMode): Promise<VoyageVerificationEvidence> {
-  if (dataMode !== "real") return { historicalLiveEvidence: false }
+  if (dataMode !== "real") return { historicalLiveEvidence: false, focusPortCoverageObserved: false }
   const voyage = await new VoyageRepository(db, "real").getLatestVerifiedRealVoyage("vesselapi")
   return {
     historicalLiveEvidence: Boolean(voyage),
     latestSourceUpdatedAt: voyage?.lastUpdatedAt,
+    focusPortCoverageObserved: Boolean(voyage?.destinationPortId),
   }
 }
 
@@ -622,6 +633,7 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
       runtimeJobRegistered: jobs.some(voyageJob => voyageJob.id === "voyage-sync" && voyageJob.providerId === "vesselapi" && voyageJob.enabled),
       runtime: capabilityRuntime,
       historicalLiveEvidence: voyageEvidence.historicalLiveEvidence,
+      focusPortCoverageObserved: voyageEvidence.focusPortCoverageObserved,
       sourceUpdatedAt,
     }
     const areaInput: AisAreaLiveVerificationInput = {
@@ -672,7 +684,9 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
             : definition.status
     const reason = definition.capability === "weather_alerts" && !safe
       ? resolveWeatherAlertReadinessReason(weatherAlertInput, liveVerification)
-      : undefined
+      : definition.capability === "voyage_eta" && !safe
+        ? resolveVoyageReadinessReason(voyageInput, liveVerification)
+        : undefined
     return { ...definition, status, runtime: capabilityRuntime, lastSuccessAt, lastSourceUpdatedAt, freshness, liveVerification, ...(reason ? { reason } : {}), ...(sourceDetails ? { sources: sourceDetails } : {}) }
   })
 }

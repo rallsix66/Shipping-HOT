@@ -123,6 +123,21 @@ function isRealVesselApiRecord(record: VoyageRecord): boolean {
   return record.source === "vesselapi" && record.sourceType === "real"
 }
 
+function isVerifiedVesselApiVoyage(record: VoyageRecord): boolean {
+  if (!isRealVesselApiRecord(record)) return false
+  if (!record.eta || !Number.isFinite(Date.parse(record.eta))) return false
+  if (!Number.isFinite(Date.parse(record.lastUpdatedAt))) return false
+  if (!record.imo?.trim() && !record.mmsi?.trim()) return false
+  const episode = parseVesselApiEpisodeId(record.id)
+  return Boolean(
+    episode
+    && episode.vesselId === record.vesselId
+    && /^[A-Z0-9]+(?:_[A-Z0-9]+)*$/.test(episode.destinationKey)
+    && episode.anchor
+    && episode.anchor === compactEpisodeAnchor(record.lastUpdatedAt),
+  )
+}
+
 function destinationKeyForRecord(record: VoyageRecord): string | undefined {
   return parseVesselApiEpisodeId(record.id)?.destinationKey ?? (record.destinationPortId?.trim().toUpperCase() || undefined)
 }
@@ -420,19 +435,18 @@ export class VoyageRepository {
   }
 
   async getLatestVerifiedRealVoyage(providerId: string): Promise<VoyageRecord | undefined> {
-    const row = await this.db.prepare(`
+    const result = await this.db.prepare(`
       SELECT id, vessel_id, imo, mmsi, origin_port_id, destination_port_id, voyage_number, status,
         eta, etd, source, source_type, last_updated_at, created_at, data
       FROM voyages
-      WHERE source = ? AND source_type IN ('real', 'imported', 'derived')
-        AND destination_port_id IS NOT NULL AND eta IS NOT NULL
+      WHERE source = ? AND source_type = 'real' AND eta IS NOT NULL
       ORDER BY last_updated_at DESC, created_at DESC, id DESC
-      LIMIT 1
-    `).get(providerId) as VoyageRow | undefined
-    const voyage = row ? toVoyage(row) : undefined
-    return voyage && voyage.destinationPortId && voyage.eta && Number.isFinite(Date.parse(voyage.lastUpdatedAt))
-      ? voyage
-      : undefined
+    `).all(providerId)
+    for (const row of rows<VoyageRow>(result)) {
+      const voyage = toVoyage(row)
+      if (voyage && isVerifiedVesselApiVoyage(voyage)) return voyage
+    }
+    return undefined
   }
 
   async listEtaHistory(voyageId: string): Promise<VoyageEtaHistoryRecord[]> {

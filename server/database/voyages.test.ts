@@ -50,6 +50,54 @@ function voyage(overrides: Partial<VoyageRecord> = {}): VoyageRecord {
   }
 }
 
+function insertRawVoyage(native: ReturnType<typeof createNativeDatabase>["native"], overrides: Partial<VoyageRecord> = {}): VoyageRecord {
+  const record: VoyageRecord = {
+    id: "vesselapi:vessel-1:destination:CNYPG:episode:20260901T100000000Z",
+    vesselId: "vessel-1",
+    imo: "9155391",
+    mmsi: "538090733",
+    originPortId: undefined,
+    destinationPortId: undefined,
+    voyageNumber: undefined,
+    status: "unknown",
+    eta: "2026-09-04T00:00:00.000Z",
+    etd: undefined,
+    source: "vesselapi",
+    sourceType: "real",
+    timestamp: "2026-09-01T10:00:00.000Z",
+    lastUpdatedAt: "2026-09-01T10:00:00.000Z",
+    ...overrides,
+  }
+  native.prepare(`
+    INSERT INTO voyages (
+      id, data, source_type, vessel_id, baseline_etd, baseline_eta, latest_etd, latest_eta, delay_minutes,
+      imo, mmsi, origin_port_id, destination_port_id, voyage_number, status, eta, etd, source, last_updated_at, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    record.id,
+    JSON.stringify(record),
+    record.sourceType,
+    record.vesselId,
+    record.etd ?? null,
+    record.eta ?? null,
+    record.etd ?? null,
+    record.eta ?? null,
+    null,
+    record.imo ?? null,
+    record.mmsi ?? null,
+    record.originPortId ?? null,
+    record.destinationPortId ?? null,
+    record.voyageNumber ?? null,
+    record.status,
+    record.eta ?? null,
+    record.etd ?? null,
+    record.source,
+    record.lastUpdatedAt,
+    record.lastUpdatedAt,
+  )
+  return record
+}
+
 describe("voyage repository", () => {
   it("preserves ETA history and returns the latest voyage", async () => {
     const { database, native } = createNativeDatabase()
@@ -170,6 +218,51 @@ describe("voyage repository", () => {
     const persistedId = "vesselapi:vessel-1:destination:PHMNL:episode:20260901T080000000Z"
     await expect(repository.getLatestVerifiedRealVoyage("vesselapi")).resolves.toMatchObject({ id: persistedId, destinationPortId: "PHMNL" })
     expect(await repository.listEtaHistory(persistedId)).toHaveLength(1)
+    native.close()
+  })
+
+  it("accepts HANSA-shaped real VesselAPI evidence without canonical destination coverage", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const repository = new VoyageRepository(database, "real")
+    const observation = insertRawVoyage(native, {
+      id: "vesselapi:imo:9155391:destination:CNYPG:episode:20260829T160707000Z",
+      vesselId: "imo:9155391",
+      imo: "9155391",
+      mmsi: "538090733",
+      eta: "2026-09-04T00:00:00.000Z",
+      timestamp: "2026-08-29T16:07:07.000Z",
+      lastUpdatedAt: "2026-08-29T16:07:07.000Z",
+      destinationPortId: undefined,
+    })
+    await expect(repository.getLatestVerifiedRealVoyage("vesselapi")).resolves.toMatchObject({
+      id: observation.id,
+      vesselId: "imo:9155391",
+      imo: "9155391",
+      mmsi: "538090733",
+      destinationPortId: undefined,
+      source: "vesselapi",
+      sourceType: "real",
+    })
+    native.close()
+  })
+
+  it.each([
+    ["mock lineage", { sourceType: "mock" as const }],
+    ["imported lineage", { sourceType: "imported" as const }],
+    ["derived lineage", { sourceType: "derived" as const }],
+    ["wrong source", { source: "other-provider" }],
+    ["missing ETA", { eta: undefined }],
+    ["invalid ETA", { eta: "not-a-timestamp" }],
+    ["invalid timestamp", { lastUpdatedAt: "not-a-timestamp" }],
+    ["missing identity", { imo: undefined, mmsi: undefined }],
+    ["malformed episode ID", { id: "vesselapi:vessel-1:destination:CNYPG" }],
+    ["empty destination key", { id: "vesselapi:vessel-1:destination::episode:20260901T100000000Z" }],
+  ] as const)("rejects %s as VesselAPI live evidence", async (_name, overrides) => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    insertRawVoyage(native, overrides)
+    await expect(new VoyageRepository(database, "real").getLatestVerifiedRealVoyage("vesselapi")).resolves.toBeUndefined()
     native.close()
   })
 

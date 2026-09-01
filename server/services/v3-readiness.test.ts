@@ -230,9 +230,11 @@ function realAreaRuntime(options: { includeArea?: boolean, areaStatus?: string, 
       ? "aisstream-area"
       : id === "ais-tracking"
         ? "aisstream"
-        : id.startsWith("feed-sync:")
-          ? id.slice("feed-sync:".length)
-          : id
+        : id === "voyage-sync"
+          ? "vesselapi"
+          : id.startsWith("feed-sync:")
+            ? id.slice("feed-sync:".length)
+            : id
     return { id, providerId, capability, enabled: true, status: "healthy" }
   })
   const area = jobs.find(job => job.id === "ais-area-sync" && job.capability === "ais_area")
@@ -1030,6 +1032,7 @@ describe("v3 readiness", () => {
       lastSourceUpdatedAt: "2026-08-31T10:00:00.000Z",
       liveVerification: "verified_live",
       status: "configured",
+      reason: "real_vesselapi_eta_persisted_and_restarted",
     })
   })
 
@@ -1049,6 +1052,7 @@ describe("v3 readiness", () => {
       runtimeJobRegistered: true,
       runtime: "healthy" as const,
       historicalLiveEvidence: true,
+      focusPortCoverageObserved: true,
       sourceUpdatedAt: undefined,
     }
     const liveVerification = resolveVoyageLiveVerification(input)
@@ -1056,10 +1060,98 @@ describe("v3 readiness", () => {
     expect(resolveVoyageReadinessStatus(input, liveVerification)).toBe("coverage_pending")
   })
 
-  it("does not verify a Voyage record without canonical destination evidence", async () => {
-    const capability = await realVoyageCapability({ provider: "vesselapi", evidence: true, evidenceOverrides: { destinationPortId: undefined } })
-    expect(capability.liveVerification).toBe("coverage_pending")
-    expect(capability.status).toBe("coverage_pending")
+  it("verifies HANSA-shaped VesselAPI evidence while keeping unmapped focus coverage pending", async () => {
+    const capability = await realVoyageCapability({
+      provider: "vesselapi",
+      evidence: true,
+      evidenceOverrides: {
+        id: "vesselapi:imo:9155391:destination:CNYPG:episode:20260829T160707000Z",
+        vesselId: "imo:9155391",
+        imo: "9155391",
+        mmsi: "538090733",
+        destinationPortId: undefined,
+        timestamp: "2026-08-29T16:07:07.000Z",
+        lastUpdatedAt: "2026-08-29T16:07:07.000Z",
+      },
+    })
+    expect(capability).toMatchObject({
+      liveVerification: "verified_live",
+      status: "coverage_pending",
+      reason: "vesselapi_focus_port_coverage_pending",
+    })
+  })
+
+  it("keeps overall readiness degraded when VesselAPI is verified but focus coverage is pending", async () => {
+    const environmentNames = [
+      "SHIPPING_DATA_MODE",
+      "SHIPPING_VOYAGE_PROVIDER",
+      "VESSELAPI_API_KEY",
+      "SHIPPING_RUNTIME_ENABLED",
+      "SHIPPING_VESSEL_SEARCH_PROVIDER",
+      "GFW_API_TOKEN",
+      "SHIPPING_AIS_PROVIDER",
+      "SHIPPING_AIS_STREAMING_ENABLED",
+      "SHIPPING_AIS_AREA_PROVIDER",
+      "SHIPPING_PORT_PROVIDER",
+      "SHIPPING_WEATHER_PROVIDER",
+      "SHIPPING_WEATHER_ALERT_PROVIDER",
+      "SHIPPING_FEED_PROVIDER",
+      "SHIPPING_CALENDAR_PROVIDER",
+    ]
+    const previous = new Map(environmentNames.map(name => [name, process.env[name]]))
+    try {
+      process.env.SHIPPING_DATA_MODE = "real"
+      process.env.SHIPPING_VOYAGE_PROVIDER = "vesselapi"
+      process.env.VESSELAPI_API_KEY = "test-secret"
+      process.env.SHIPPING_RUNTIME_ENABLED = "true"
+      process.env.SHIPPING_VESSEL_SEARCH_PROVIDER = "gfw"
+      delete process.env.GFW_API_TOKEN
+      process.env.SHIPPING_AIS_PROVIDER = "aisstream"
+      process.env.SHIPPING_AIS_STREAMING_ENABLED = "false"
+      process.env.SHIPPING_AIS_AREA_PROVIDER = "off"
+      process.env.SHIPPING_PORT_PROVIDER = "portcast"
+      process.env.SHIPPING_WEATHER_PROVIDER = "open-meteo"
+      process.env.SHIPPING_WEATHER_ALERT_PROVIDER = "off"
+      process.env.SHIPPING_FEED_PROVIDER = "public"
+      process.env.SHIPPING_CALENDAR_PROVIDER = "manual"
+      const { database, native } = createNativeDatabase()
+      try {
+        await initShippingTables(database, "real")
+        await new VoyageRepository(database, "real").saveVoyages([{
+          id: "vesselapi:imo:9155391:destination:CNYPG:episode:20260829T160707000Z",
+          vesselId: "imo:9155391",
+          imo: "9155391",
+          mmsi: "538090733",
+          destinationPortId: undefined,
+          status: "unknown",
+          eta: "2026-09-04T00:00:00.000Z",
+          source: "vesselapi",
+          sourceType: "real",
+          timestamp: "2026-08-29T16:07:07.000Z",
+          lastUpdatedAt: "2026-08-29T16:07:07.000Z",
+        }])
+        const report = await readV3Readiness(database, {
+          dataMode: "real",
+          profile: "REAL_OPERATIONAL",
+          runtime: realAreaRuntime(),
+          toolchain: { packageManager: "pnpm@10.30.3", betterSqlite3Version: "12.6.2", betterSqlite3LoadError: undefined },
+        })
+        expect(report.capabilities.find(item => item.capability === "voyage_eta")).toMatchObject({
+          liveVerification: "verified_live",
+          status: "coverage_pending",
+          reason: "vesselapi_focus_port_coverage_pending",
+        })
+        expect(report.overall).toBe("degraded")
+      } finally {
+        native.close()
+      }
+    } finally {
+      for (const name of environmentNames) {
+        const value = previous.get(name)
+        if (value === undefined) delete process.env[name]
+        else process.env[name] = value
+      }
+    }
   })
 
   it("does not use a different Provider credential when VesselAPI is explicitly selected", async () => {
