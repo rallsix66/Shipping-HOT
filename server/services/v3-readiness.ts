@@ -3,7 +3,9 @@ import { join } from "node:path"
 import process from "node:process"
 import NativeDatabase from "better-sqlite3"
 import type { Database } from "db0"
+import type { AisDerivedPortMetric } from "@shared/ais-area"
 import { latestSchemaVersion, readDatabaseMetadata } from "#/database/runtime"
+import { ShippingRepository } from "#/database/shipping"
 import type { ShippingDataMode } from "#/database/runtime"
 import { activeShippingFeedSourceIds, shippingFeedSources } from "#/providers/feed"
 import { isAisStreamingEnabled } from "#/runtime/ais-streaming-config"
@@ -358,6 +360,68 @@ function parseableTimestamp(value: string | undefined): boolean {
   return Boolean(value && Number.isFinite(Date.parse(value)))
 }
 
+export interface AisAreaVerificationEvidence {
+  historicalLiveEvidence: boolean
+  verifiedMetricCount: number
+  latestVerifiedSourceUpdatedAt?: string
+}
+
+function finitePositiveNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0
+}
+
+export function hasVerifiedAisAreaMetric(metric: Pick<AisDerivedPortMetric, "provenance" | "sampleSize" | "minimumSampleSize" | "sourceUpdatedAt" | "coverage">): boolean {
+  return metric.provenance?.sourceId === "aisstream-area"
+    && finitePositiveNumber(metric.sampleSize)
+    && finitePositiveNumber(metric.minimumSampleSize)
+    && metric.sampleSize >= metric.minimumSampleSize
+    && (metric.coverage === "usable" || metric.coverage === "stale")
+    && parseableTimestamp(metric.sourceUpdatedAt)
+}
+
+export function resolveAisAreaVerificationEvidence(metrics: readonly AisDerivedPortMetric[]): AisAreaVerificationEvidence {
+  const verified = metrics.filter(hasVerifiedAisAreaMetric)
+  const latest = verified
+    .map(metric => metric.sourceUpdatedAt)
+    .filter((value): value is string => value !== undefined)
+    .sort((left, right) => Date.parse(right) - Date.parse(left))[0]
+  return {
+    historicalLiveEvidence: verified.length > 0,
+    verifiedMetricCount: verified.length,
+    latestVerifiedSourceUpdatedAt: latest,
+  }
+}
+
+async function readAisAreaVerificationEvidence(db: Database, dataMode: ShippingDataMode): Promise<AisAreaVerificationEvidence> {
+  if (dataMode !== "real") return { historicalLiveEvidence: false, verifiedMetricCount: 0 }
+  const repository = new ShippingRepository(db, "real")
+  return resolveAisAreaVerificationEvidence(await repository.listAisPortMetrics())
+}
+
+export interface AisAreaLiveVerificationInput {
+  dataMode: ShippingDataMode
+  provider: string
+  credentialAvailable: boolean
+  runtimeJobRegistered: boolean
+  runtime: CapabilityReadiness["runtime"]
+  historicalLiveEvidence: boolean
+}
+
+function supportsHistoricalAisAreaVerification(runtime: CapabilityReadiness["runtime"]): boolean {
+  return runtime === "healthy" || runtime === "degraded" || runtime === "failed"
+}
+
+export function resolveAisAreaLiveVerification(input: AisAreaLiveVerificationInput): CapabilityReadiness["liveVerification"] {
+  if (input.dataMode !== "real" || input.provider !== "aisstream" || !input.credentialAvailable || !input.runtimeJobRegistered || !input.historicalLiveEvidence) return "coverage_pending"
+  return supportsHistoricalAisAreaVerification(input.runtime) ? "verified_live" : "coverage_pending"
+}
+
+export function resolveAisAreaReadinessStatus(input: AisAreaLiveVerificationInput, liveVerification: CapabilityReadiness["liveVerification"]): CapabilityReadinessStatus {
+  if (input.dataMode !== "real" || input.provider !== "aisstream") return "not_configured"
+  if (!input.credentialAvailable) return "credential_missing"
+  return liveVerification === "verified_live" ? "configured" : "coverage_pending"
+}
+
 function hasHistoricalAisEvidence(input: AisLiveVerificationInput): boolean {
   return Boolean(input.lastSuccessAt) && parseableTimestamp(input.lastSourceUpdatedAt)
 }
@@ -389,7 +453,7 @@ function vesselSearchCapabilityDefinition(): { capability: string, provider: str
   return { capability: "vessel_search", provider: provider ?? "unavailable", configured: false, credential: "unknown", status: "not_configured" }
 }
 
-function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadinessStatus | undefined, dataMode: ShippingDataMode): CapabilityReadiness[] {
+function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadinessStatus | undefined, dataMode: ShippingDataMode, areaEvidence: AisAreaVerificationEvidence): CapabilityReadiness[] {
   const runtimeByCapability = new Map<string, RuntimeReadinessJob[]>()
   for (const job of runtime?.jobs ?? []) runtimeByCapability.set(job.capability, [...(runtimeByCapability.get(job.capability) ?? []), job])
   const safe = profile === "DEVELOPMENT_SAFE"
@@ -447,6 +511,14 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
       : aggregatedRuntime
     const lastSuccessAt = liveTracker?.lastSuccessAt ?? job?.lastSuccessAt
     const lastSourceUpdatedAt = liveTracker?.lastSourceUpdatedAt ?? job?.lastSourceUpdatedAt
+    const areaInput: AisAreaLiveVerificationInput = {
+      dataMode,
+      provider: definition.provider,
+      credentialAvailable: definition.credential === "available",
+      runtimeJobRegistered: jobs.some(areaJob => areaJob.id === "ais-area-sync" && areaJob.providerId === "aisstream-area" && areaJob.enabled),
+      runtime: capabilityRuntime,
+      historicalLiveEvidence: areaEvidence.historicalLiveEvidence,
+    }
     const liveVerification = definition.capability === "ais_tracking" && !safe
       ? resolveAisLiveVerification({
           dataMode,
@@ -459,7 +531,9 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
           lastSourceUpdatedAt,
           freshness,
         })
-      : definition.liveVerification ?? (safe ? "not_verified" : "coverage_pending")
+      : definition.capability === "ais_area" && !safe
+        ? resolveAisAreaLiveVerification(areaInput)
+        : definition.liveVerification ?? (safe ? "not_verified" : "coverage_pending")
     const status = definition.capability === "ais_tracking" && !safe
       ? resolveAisReadinessStatus({
           dataMode,
@@ -472,7 +546,9 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
           lastSourceUpdatedAt,
           freshness,
         }, liveVerification)
-      : definition.status
+      : definition.capability === "ais_area" && !safe
+        ? resolveAisAreaReadinessStatus(areaInput, liveVerification)
+        : definition.status
     return { ...definition, status, runtime: capabilityRuntime, lastSuccessAt, lastSourceUpdatedAt, freshness, liveVerification, ...(sourceDetails ? { sources: sourceDetails } : {}) }
   })
 }
@@ -480,6 +556,7 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
 export async function readV3Readiness(db: Database, options: V3ReadinessOptions = {}): Promise<V3ReadinessReport> {
   const dataMode: ShippingDataMode = options.dataMode ?? (process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock")
   const profile = options.profile ?? (dataMode === "real" ? "REAL_OPERATIONAL" : "DEVELOPMENT_SAFE")
+  const areaEvidence = await readAisAreaVerificationEvidence(db, dataMode)
   const checks = [
     ...readV3ToolchainChecks(options.toolchain),
     providerBoundaryCheck(profile, dataMode),
@@ -493,7 +570,7 @@ export async function readV3Readiness(db: Database, options: V3ReadinessOptions 
     ...runtimeChecks(options.runtime, options.bootstrapFailed, dataMode),
     check("network-probes", "skipped", "Readiness performs no external Provider requests; live contract and coverage checks remain deferred"),
   ]
-  const capabilities = capabilityReadiness(profile, options.runtime, dataMode)
+  const capabilities = capabilityReadiness(profile, options.runtime, dataMode, areaEvidence)
   const hardChecksPass = checks.filter(item => item.id !== "network-probes").every(item => item.status === "pass")
   return {
     phase: "v3-readiness",

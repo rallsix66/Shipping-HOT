@@ -176,9 +176,9 @@ This is the isolated Area acceptance. It used a fresh temporary Real SQLite, the
 | Lifecycle / restart | Shutdown closed the socket; restart preserved all eight watched ports and eight metrics, including Shekou; post-close stats remained unchanged |
 | Zero-Mock gate | Fresh isolated database reported `actualMockRows.total=0`, including `ais_port_metrics`, ports and events; retained `.data/shipping-hot-v3.sqlite3` was unchanged |
 | Acceptance Gate | `verified_live`; canonical reason `real_ais_area_metric_persisted_and_restarted` |
-| Readiness | `provider=aisstream`, `credential=available`, `runtime=healthy`, `freshness=fresh`, but `liveVerification=coverage_pending` and `status=coverage_pending`; this is `readiness_alignment_pending` for a separate later scope |
+| Readiness | `provider=aisstream`, `credential=available`, `runtime=healthy`, `freshness=fresh`, `liveVerification=verified_live`, `status=configured`; Readiness consumes the persisted qualifying `ais_port_metrics` row read-only |
 
-The Area path reuses the hardened AISStream binary/trust parser, treats `SubscriptionConfirmation` as connection evidence only, validates MMSI/metadata/coordinates/provider timestamps, and guards asynchronous Blob decoding against stale socket generations and configuration snapshots. No schema, migration, raw observation table, retained SQLite, UI, Vessel Tracking, Voyage, Weather or Feed behavior was changed.
+The Area path reuses the hardened AISStream binary/trust parser, treats `SubscriptionConfirmation` as connection evidence only, validates MMSI/metadata/coordinates/provider timestamps, and guards asynchronous Blob decoding against stale socket generations and configuration snapshots. The separate Readiness alignment reads existing Real `ais_port_metrics` evidence without opening a Provider or writing SQLite: a qualifying `aisstream-area` metric with positive sample/minimum thresholds and a parseable `sourceUpdatedAt` remains historical evidence when coverage is usable or stale; insufficient or malformed evidence stays pending. No schema, migration, raw observation table, retained SQLite, UI, Vessel Tracking, Voyage, Weather or Feed behavior was changed.
 
 ## Provider and persistence evidence
 

@@ -1,8 +1,9 @@
 import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it, vi } from "vitest"
-import { initShippingTables } from "#/database/shipping"
-import { type CapabilityReadiness, type RuntimeReadinessStatus, type V3ToolchainObservation, aggregateRuntimeReadiness, approvedRuntimeJobKeys, readV3PackageManagerObservation, readV3Readiness, readV3ToolchainChecks } from "#/services/v3-readiness"
+import type { AisDerivedPortMetric } from "@shared/ais-area"
+import { ShippingRepository, initShippingTables } from "#/database/shipping"
+import { type CapabilityReadiness, type RuntimeReadinessStatus, type V3ToolchainObservation, aggregateRuntimeReadiness, approvedRuntimeJobKeys, hasVerifiedAisAreaMetric, readV3PackageManagerObservation, readV3Readiness, readV3ToolchainChecks, resolveAisAreaVerificationEvidence } from "#/services/v3-readiness"
 
 function createNativeDatabase() {
   const native = new NativeDatabase(":memory:")
@@ -86,6 +87,121 @@ async function realVesselSearchCapability(options: { provider?: string, gfwToken
       if (value === undefined) delete process.env[name]
       else process.env[name] = value
     }
+  }
+}
+
+function aisAreaMetric(overrides: Partial<AisDerivedPortMetric> = {}): AisDerivedPortMetric {
+  return {
+    portId: "port-shekou",
+    sampleSize: 6,
+    activeVesselCount: 6,
+    anchoredCount: 1,
+    mooredCount: 1,
+    lowSpeedCount: 2,
+    stationaryRatio: 2 / 6,
+    ambiguousSampleCount: 0,
+    trend: "stable",
+    consecutiveRisingWindows: 0,
+    bbox: { south: 22.4, west: 113.8, north: 22.7, east: 114.1 },
+    boundarySource: "configured_heuristic",
+    coverage: "usable",
+    lowSpeedThresholdKnots: 1,
+    minimumSampleSize: 5,
+    updatedAt: "2026-08-31T14:32:12.983Z",
+    sourceUpdatedAt: "2026-08-31T14:32:12.983Z",
+    fetchedAt: "2026-08-31T14:32:21.335Z",
+    stale: false,
+    sourceStatus: "healthy",
+    provenance: { sourceType: "third_party", dataNature: "derived", sourceId: "aisstream-area", verified: true },
+    ...overrides,
+  }
+}
+
+function realAreaRuntime(options: { includeArea?: boolean, areaStatus?: string, areaEnabled?: boolean } = {}): RuntimeReadinessStatus {
+  const jobs: RuntimeReadinessStatus["jobs"] = approvedRuntimeJobKeys("real").map((key) => {
+    const separator = key.lastIndexOf(":")
+    const id = key.slice(0, separator)
+    const capability = key.slice(separator + 1)
+    const providerId = id === "ais-area-sync"
+      ? "aisstream-area"
+      : id === "ais-tracking"
+        ? "aisstream"
+        : id.startsWith("feed-sync:")
+          ? id.slice("feed-sync:".length)
+          : id
+    return { id, providerId, capability, enabled: true, status: "healthy" }
+  })
+  const area = jobs.find(job => job.id === "ais-area-sync" && job.capability === "ais_area")
+  if (area) {
+    area.status = options.areaStatus ?? "healthy"
+    area.enabled = options.areaEnabled ?? true
+    area.lastSuccessAt = "2026-08-31T14:32:21.335Z"
+    area.lastSourceUpdatedAt = "2026-08-31T14:32:12.983Z"
+  }
+  return { running: true, jobs: options.includeArea === false ? jobs.filter(job => job.capability !== "ais_area") : jobs }
+}
+
+async function realAisAreaCapability(options: {
+  provider?: string
+  credential?: boolean
+  metric?: Partial<AisDerivedPortMetric> | null
+  runtime?: RuntimeReadinessStatus
+  includeArea?: boolean
+  areaStatus?: string
+  areaEnabled?: boolean
+} = {}): Promise<CapabilityReadiness> {
+  const environmentNames = [
+    "SHIPPING_DATA_MODE",
+    "SHIPPING_AIS_AREA_PROVIDER",
+    "SHIPPING_AIS_PROVIDER",
+    "SHIPPING_AIS_STREAMING_ENABLED",
+    "SHIPPING_RUNTIME_ENABLED",
+    "AISSTREAM_API_KEY",
+  ]
+  const previous = new Map(environmentNames.map(name => [name, process.env[name]]))
+  const values: Record<string, string | undefined> = {
+    SHIPPING_DATA_MODE: "real",
+    SHIPPING_AIS_AREA_PROVIDER: options.provider ?? "aisstream",
+    SHIPPING_AIS_PROVIDER: "aisstream",
+    SHIPPING_AIS_STREAMING_ENABLED: "true",
+    SHIPPING_RUNTIME_ENABLED: "true",
+    AISSTREAM_API_KEY: options.credential === false ? undefined : "test-secret",
+  }
+  for (const name of environmentNames) {
+    const value = values[name]
+    if (value === undefined) delete process.env[name]
+    else process.env[name] = value
+  }
+  const { database, native } = createNativeDatabase()
+  try {
+    await initShippingTables(database, "real")
+    if (options.metric !== null) await new ShippingRepository(database, "real").upsertAisPortMetric(aisAreaMetric(options.metric))
+    const report = await readV3Readiness(database, {
+      dataMode: "real",
+      profile: "REAL_OPERATIONAL",
+      runtime: options.runtime ?? realAreaRuntime({ includeArea: options.includeArea, areaStatus: options.areaStatus, areaEnabled: options.areaEnabled }),
+      toolchain: { packageManager: "pnpm@10.30.3", betterSqlite3Version: "12.6.2", betterSqlite3LoadError: undefined },
+    })
+    const capability = report.capabilities.find(item => item.capability === "ais_area")
+    if (!capability) throw new Error("ais_area readiness capability is missing")
+    return capability
+  } finally {
+    native.close()
+    for (const name of environmentNames) {
+      const value = previous.get(name)
+      if (value === undefined) delete process.env[name]
+      else process.env[name] = value
+    }
+  }
+}
+
+async function withPinnedAreaReadinessClock<T>(work: () => Promise<T>): Promise<T> {
+  vi.useFakeTimers()
+  vi.setSystemTime(new Date("2026-08-31T14:35:00.000Z"))
+  try {
+    return await work()
+  } finally {
+    vi.useRealTimers()
   }
 }
 
@@ -489,6 +605,217 @@ describe("v3 readiness", () => {
         lastSuccessAt: "2026-08-31T11:32:16.568Z",
         lastSourceUpdatedAt: "2026-08-31T11:32:15.242Z",
       })
+    })
+  })
+
+  it("accepts only qualifying persisted AIS Area metrics and keeps the latest source timestamp", () => {
+    const usable = aisAreaMetric({ portId: "port-shekou", sourceUpdatedAt: "2026-08-31T14:32:12.983Z" })
+    const stale = aisAreaMetric({ portId: "port-yantian", coverage: "stale", stale: true, sourceStatus: "degraded", sourceUpdatedAt: "2026-08-31T14:34:12.983Z" })
+    const evidence = resolveAisAreaVerificationEvidence([
+      usable,
+      stale,
+      aisAreaMetric({ portId: "port-klang", sampleSize: 4, coverage: "insufficient_samples" }),
+      aisAreaMetric({ portId: "port-jakarta", provenance: { ...usable.provenance!, sourceId: "other-provider" } }),
+      aisAreaMetric({ portId: "port-hcm", sourceUpdatedAt: "not-a-timestamp" }),
+    ])
+    expect(hasVerifiedAisAreaMetric(usable)).toBe(true)
+    expect(evidence).toEqual({
+      historicalLiveEvidence: true,
+      verifiedMetricCount: 2,
+      latestVerifiedSourceUpdatedAt: "2026-08-31T14:34:12.983Z",
+    })
+  })
+
+  it("matches the exact persisted Shekou Area acceptance fixture", async () => {
+    await withPinnedAreaReadinessClock(async () => {
+      await expect(realAisAreaCapability({
+        metric: {
+          portId: "port-shekou",
+          sampleSize: 6,
+          minimumSampleSize: 5,
+          coverage: "usable",
+          stale: false,
+          sourceStatus: "healthy",
+          sourceUpdatedAt: "2026-08-31T14:32:12.983Z",
+        },
+        areaStatus: "healthy",
+        areaEnabled: true,
+      })).resolves.toMatchObject({
+        capability: "ais_area",
+        provider: "aisstream",
+        configured: true,
+        credential: "available",
+        runtime: "healthy",
+        freshness: "fresh",
+        liveVerification: "verified_live",
+        status: "configured",
+        lastSuccessAt: "2026-08-31T14:32:21.335Z",
+        lastSourceUpdatedAt: "2026-08-31T14:32:12.983Z",
+      })
+    })
+  })
+
+  it("reads persisted Area evidence without Provider activity or SQLite writes", async () => {
+    await withPinnedAreaReadinessClock(async () => {
+      const environmentNames = [
+        "SHIPPING_DATA_MODE",
+        "SHIPPING_AIS_AREA_PROVIDER",
+        "SHIPPING_AIS_PROVIDER",
+        "SHIPPING_AIS_STREAMING_ENABLED",
+        "SHIPPING_RUNTIME_ENABLED",
+        "AISSTREAM_API_KEY",
+      ]
+      const previous = new Map(environmentNames.map(name => [name, process.env[name]]))
+      for (const [name, value] of Object.entries({
+        SHIPPING_DATA_MODE: "real",
+        SHIPPING_AIS_AREA_PROVIDER: "aisstream",
+        SHIPPING_AIS_PROVIDER: "aisstream",
+        SHIPPING_AIS_STREAMING_ENABLED: "true",
+        SHIPPING_RUNTIME_ENABLED: "true",
+        AISSTREAM_API_KEY: "test-secret",
+      })) process.env[name] = value
+      const { database, native } = createNativeDatabase()
+      let providerCalls = 0
+      try {
+        await initShippingTables(database, "real")
+        await new ShippingRepository(database, "real").upsertAisPortMetric(aisAreaMetric())
+        const before = (native.prepare("SELECT total_changes() AS changes").get() as { changes: number }).changes
+        vi.stubGlobal("WebSocket", class {
+          constructor() {
+            providerCalls += 1
+          }
+        })
+        const report = await readV3Readiness(database, {
+          dataMode: "real",
+          profile: "REAL_OPERATIONAL",
+          runtime: realAreaRuntime(),
+          toolchain: { packageManager: "pnpm@10.30.3", betterSqlite3Version: "12.6.2", betterSqlite3LoadError: undefined },
+        })
+        const after = (native.prepare("SELECT total_changes() AS changes").get() as { changes: number }).changes
+        expect(report.capabilities.find(item => item.capability === "ais_area")).toMatchObject({ liveVerification: "verified_live", status: "configured" })
+        expect(providerCalls).toBe(0)
+        expect(after).toBe(before)
+      } finally {
+        vi.unstubAllGlobals()
+        native.close()
+        for (const name of environmentNames) {
+          const value = previous.get(name)
+          if (value === undefined) delete process.env[name]
+          else process.env[name] = value
+        }
+      }
+    })
+  })
+
+  it("does not verify a healthy Area Runtime with insufficient samples", async () => {
+    await withPinnedAreaReadinessClock(async () => {
+      await expect(realAisAreaCapability({ metric: { sampleSize: 4, coverage: "insufficient_samples" } })).resolves.toMatchObject({
+        runtime: "healthy",
+        liveVerification: "coverage_pending",
+        status: "coverage_pending",
+      })
+    })
+  })
+
+  it("keeps insufficient samples unverified after a stale transition", async () => {
+    await withPinnedAreaReadinessClock(async () => {
+      await expect(realAisAreaCapability({ metric: { sampleSize: 4, coverage: "stale", stale: true, sourceStatus: "degraded" } })).resolves.toMatchObject({
+        runtime: "healthy",
+        liveVerification: "coverage_pending",
+        status: "coverage_pending",
+      })
+    })
+  })
+
+  it("retains historical verification when a usable Area metric becomes stale", async () => {
+    await withPinnedAreaReadinessClock(async () => {
+      await expect(realAisAreaCapability({ metric: { coverage: "stale", stale: true, sourceStatus: "degraded" } })).resolves.toMatchObject({
+        runtime: "healthy",
+        liveVerification: "verified_live",
+        status: "configured",
+      })
+    })
+  })
+
+  it.each(["degraded", "failed"] as const)("retains historical Area verification when Runtime becomes %s", async (areaStatus) => {
+    await withPinnedAreaReadinessClock(async () => {
+      await expect(realAisAreaCapability({ areaStatus })).resolves.toMatchObject({
+        runtime: areaStatus,
+        liveVerification: "verified_live",
+        status: "configured",
+      })
+    })
+  })
+
+  it("keeps Area coverage pending for never_succeeded Runtime state", async () => {
+    await withPinnedAreaReadinessClock(async () => {
+      await expect(realAisAreaCapability({ areaStatus: "never_succeeded" })).resolves.toMatchObject({
+        runtime: "never_succeeded",
+        liveVerification: "coverage_pending",
+        status: "coverage_pending",
+      })
+    })
+  })
+
+  it("keeps Area coverage pending when the Runtime Job is not registered or is disabled", async () => {
+    await withPinnedAreaReadinessClock(async () => {
+      await expect(realAisAreaCapability({ includeArea: false })).resolves.toMatchObject({
+        runtime: "not_registered",
+        liveVerification: "coverage_pending",
+        status: "coverage_pending",
+      })
+      await expect(realAisAreaCapability({ areaEnabled: false })).resolves.toMatchObject({
+        runtime: "disabled",
+        liveVerification: "coverage_pending",
+        status: "coverage_pending",
+      })
+    })
+  })
+
+  it("keeps Area credential_missing despite qualifying historical evidence", async () => {
+    await withPinnedAreaReadinessClock(async () => {
+      await expect(realAisAreaCapability({ credential: false })).resolves.toMatchObject({
+        provider: "aisstream",
+        configured: true,
+        credential: "missing",
+        runtime: "healthy",
+        liveVerification: "coverage_pending",
+        status: "credential_missing",
+      })
+    })
+  })
+
+  it("keeps provider-off Area not_configured even when evidence exists", async () => {
+    await withPinnedAreaReadinessClock(async () => {
+      await expect(realAisAreaCapability({ provider: "off" })).resolves.toMatchObject({
+        provider: "off",
+        configured: false,
+        liveVerification: "coverage_pending",
+        status: "not_configured",
+      })
+    })
+  })
+
+  it.each([
+    ["wrong source", { provenance: { sourceType: "third_party" as const, dataNature: "derived" as const, sourceId: "wrong-source", verified: true } }],
+    ["invalid timestamp", { sourceUpdatedAt: "not-a-timestamp" }],
+  ])("fails closed for Area evidence with %s", async (_name, metric) => {
+    await withPinnedAreaReadinessClock(async () => {
+      await expect(realAisAreaCapability({ metric })).resolves.toMatchObject({
+        runtime: "healthy",
+        liveVerification: "coverage_pending",
+        status: "coverage_pending",
+      })
+    })
+  })
+
+  it("keeps Mock/Development Safe Area unverified", async () => {
+    const report = await readiness(validRuntime())
+    expect(report.capabilities.find(capability => capability.capability === "ais_area")).toMatchObject({
+      provider: "off",
+      configured: true,
+      status: "safe_mock",
+      liveVerification: "not_verified",
     })
   })
 
