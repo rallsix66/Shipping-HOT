@@ -34,17 +34,23 @@ export function createVoyageSyncJob(options: VoyageSyncJobOptions): RuntimeJob {
       const received = await options.provider.getVoyages(vessels)
       if (!received.length) return { status: "skipped", recordsRead: 0, recordsWritten: 0, errorCode: "no_voyage_eta_observed", errorMessage: "No VesselAPI ETA observation was available for eligible watched vessels" }
       const saved = await voyages.saveVoyages(received, now().toISOString(), { requestedVesselIds: vessels.map(vessel => vessel.vesselId) })
-      const acceptedIds = new Set(saved.acceptedIds)
-      const sourceUpdatedAt = received
-        .filter(voyage => acceptedIds.has(voyage.id))
-        .map(voyage => Date.parse(voyage.lastUpdatedAt))
+      const sourceUpdatedAt = saved.acceptedSourceUpdatedAt
+        .map(timestamp => Date.parse(timestamp))
         .filter(timestamp => Number.isFinite(timestamp))
         .sort((a, b) => b - a)[0]
+      if (sourceUpdatedAt === undefined) {
+        const errorCode = saved.episodeStaleSkipped > 0
+          ? "stale_voyage_episode_observation"
+          : saved.episodeTransitionConflicts > 0
+            ? "voyage_episode_transition_conflict"
+            : "no_voyage_eta_observed"
+        return { status: "skipped", recordsRead: received.length, recordsWritten: 0, errorCode, errorMessage: "No accepted VesselAPI ETA observation was available" }
+      }
       return {
         status: "success",
         recordsRead: received.length,
         recordsWritten: saved.historyWritten,
-        sourceUpdatedAt: sourceUpdatedAt === undefined ? undefined : new Date(sourceUpdatedAt).toISOString(),
+        sourceUpdatedAt: new Date(sourceUpdatedAt).toISOString(),
       }
     },
   }

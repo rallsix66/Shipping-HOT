@@ -104,7 +104,7 @@ async function realVoyageCapability(options: { provider?: string, credential?: b
   try {
     await initShippingTables(database, "real")
     const evidence: VoyageRecord = {
-      id: "vesselapi:vessel-1:destination:PHMNL",
+      id: "vesselapi:vessel-1:destination:PHMNL:episode:20260831T100000000Z",
       vesselId: "vessel-1",
       imo: "9162423",
       mmsi: "413393620",

@@ -216,6 +216,14 @@ The activation result reported `actualMockRows` from a direct native SQLite sche
 
 This seals zero-Mock gate coverage for the review and the current AIS PositionReport gate. It does not claim `Real Operational Ready` because official weather-alert coverage remains pending and VesselAPI Voyage/ETA has no local credentialed evidence; the adapter is implemented but remains `credential_missing` / `coverage_pending`.
 
+## V3 VesselAPI recurring Voyage episode repair — 2026-09-01
+
+This was a deterministic Repository/Runtime repair only. No `VESSELAPI_API_KEY` was configured or used, no live VesselAPI or Port Event request was made, and no retained SQLite database was opened.
+
+- The stateless VesselAPI adapter now emits a candidate identity containing the normalized official destination and trusted ETA timestamp. The Repository resolves same-destination updates to the current persisted row, creates a new row only for a strictly newer destination transition, rejects stale/equal cross-destination transitions, and persists `episodeState=current|superseded` plus `supersededAt` in existing `voyages.data` JSON.
+- Regression coverage proves `PHMNL → SGSIN → PHMNL` yields three historical rows, resets the returning episode baseline, survives native SQLite restart, retains optional Port Event/canonical destination enrichment behavior, and keeps historical rows visible through `ShippingRepository` while excluding superseded VesselAPI episodes from Voyage delay Event/HOT detection.
+- `VESSELAPI_API_KEY` remains `configured=false`; the Voyage Live Gate remains `credential_missing` / `coverage_pending`. No migration, code outside the Voyage episode boundary or retained SQLite data was touched; this note records no live acceptance evidence.
+
 ## V3 Real Voyage / ETA — VesselAPI adapter contract alignment — 2026-09-01
 
 | Check | Result |

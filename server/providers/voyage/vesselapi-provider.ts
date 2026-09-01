@@ -153,6 +153,12 @@ function stableDestinationKey(destinationPort: string): string | undefined {
   return normalized || undefined
 }
 
+function episodeAnchor(timestamp: string): string | undefined {
+  const parsed = Date.parse(timestamp)
+  if (!Number.isFinite(parsed)) return undefined
+  return new Date(parsed).toISOString().replace(/[.:-]/g, "")
+}
+
 export interface VoyageObservationParts {
   vessel: VoyageVesselIdentity
   eta: EtaObservation
@@ -172,7 +178,9 @@ export async function normalizeVesselApiVoyageObservation(parts: VoyageObservati
   const originPortId = parts.portEvent?.event === "Departure" && parts.portEvent.port && parts.resolvePortIdentity
     ? await parts.resolvePortIdentity(parts.portEvent.port)
     : undefined
-  const id = `vesselapi:${parts.vessel.vesselId}:destination:${destinationKey}`
+  const anchor = episodeAnchor(etaTimestamp)
+  if (!anchor) return undefined
+  const id = `vesselapi:${parts.vessel.vesselId}:destination:${destinationKey}:episode:${anchor}`
   return {
     id,
     vesselId: parts.vessel.vesselId,

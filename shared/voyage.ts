@@ -3,6 +3,7 @@ import type { SourceLineage } from "./shipping"
 export const VOYAGE_SYNC_CAPABILITY = "voyage_sync"
 
 export type VoyageStatus = "planned" | "departed" | "in_transit" | "arrived" | "cancelled" | "unknown"
+export type VoyageEpisodeState = "current" | "superseded"
 
 export interface VoyageVesselIdentity {
   vesselId: string
@@ -22,6 +23,8 @@ export interface VoyageRecord extends VoyageVesselIdentity {
   sourceType: SourceLineage
   timestamp: string
   lastUpdatedAt: string
+  episodeState?: VoyageEpisodeState
+  supersededAt?: string
 }
 
 export interface VoyageEtaHistoryRecord {

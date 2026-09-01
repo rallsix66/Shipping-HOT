@@ -182,10 +182,9 @@ describe("voyage sync job", () => {
       { ...record, id: "voyage-vessel-9-001", vesselId: "vessel-9", mmsi: "999999999", lastUpdatedAt: "2026-08-26T00:00:00.000Z", timestamp: "2026-08-26T00:00:00.000Z" },
     ]
     await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({
-      status: "success",
+      status: "skipped",
       recordsRead: 2,
       recordsWritten: 0,
-      sourceUpdatedAt: undefined,
     })
     expect(await new RuntimeRepository(database).getProviderRuntime("mock-voyage", "voyage_sync"))
       .toMatchObject({ status: "healthy", lastSourceUpdatedAt: "2026-08-25T10:00:00.000Z" })
@@ -275,6 +274,50 @@ describe("voyage sync job", () => {
     expect(await new VoyageRepository(database, "real").getLatestVoyage("vessel-1")).toMatchObject({ source: "vesselapi", sourceType: "real", destinationPortId: "PHMNL", voyageNumber: undefined })
     expect(await new RuntimeRepository(database).getProviderRuntime("vesselapi", "voyage_sync")).toMatchObject({ status: "healthy", lastSourceUpdatedAt: realRecord.lastUpdatedAt })
     expect((await new RuntimeRepository(database).listSyncRuns("vesselapi"))[0]).toMatchObject({ status: "success", recordsWritten: 1 })
+    runtime.stop()
+    native.close()
+  })
+
+  it("resolves recurring VesselAPI episodes through the runtime without reusing baselines", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    await seedRealWatchlist(database)
+    const observed = (destination: "PHMNL" | "SGSIN", timestamp: string, eta: string): VoyageRecord => ({
+      ...realRecord,
+      id: `vesselapi:vessel-1:destination:${destination}:episode:${new Date(timestamp).toISOString().replace(/[.:-]/g, "")}`,
+      destinationPortId: destination === "PHMNL" ? destination : undefined,
+      timestamp,
+      lastUpdatedAt: timestamp,
+      eta,
+    })
+    let next: VoyageRecord = observed("PHMNL", "2026-09-01T10:00:00.000Z", "2026-09-03T00:00:00.000Z")
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database), { now: () => new Date("2026-10-18T12:00:00.000Z") })
+    runtime.register(createVoyageSyncJob({
+      database,
+      dataMode: "real",
+      provider: { providerId: "vesselapi", getVoyages: async () => [next] },
+      intervalMs: 60 * 60 * 1000,
+      now: () => new Date("2026-10-18T12:00:00.000Z"),
+    }))
+    await runtime.start()
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({ status: "success", sourceUpdatedAt: "2026-09-01T10:00:00.000Z" })
+    next = observed("PHMNL", "2026-09-01T11:00:00.000Z", "2026-09-04T00:00:00.000Z")
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({ status: "success", sourceUpdatedAt: "2026-09-01T11:00:00.000Z" })
+    next = observed("SGSIN", "2026-09-02T10:00:00.000Z", "2026-09-08T00:00:00.000Z")
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({ status: "success", sourceUpdatedAt: "2026-09-02T10:00:00.000Z" })
+    next = observed("PHMNL", "2026-10-18T10:00:00.000Z", "2026-10-20T00:00:00.000Z")
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({ status: "success", sourceUpdatedAt: "2026-10-18T10:00:00.000Z" })
+    const returned = next.id
+    next = observed("PHMNL", "2026-10-18T11:00:00.000Z", "2026-10-21T00:00:00.000Z")
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({ status: "success", sourceUpdatedAt: "2026-10-18T11:00:00.000Z" })
+    expect(native.prepare("SELECT COUNT(*) AS count FROM voyages").get()).toEqual({ count: 3 })
+    expect(await new VoyageRepository(database, "real").getLatestVoyage("vessel-1")).toMatchObject({ id: returned, episodeState: "current" })
+    const latest = native.prepare("SELECT baseline_eta, latest_eta, delay_minutes FROM voyages WHERE id = ?").get(returned)
+    expect(latest).toEqual({ baseline_eta: "2026-10-20T00:00:00.000Z", latest_eta: "2026-10-21T00:00:00.000Z", delay_minutes: 1440 })
+
+    next = observed("SGSIN", "2026-10-18T09:00:00.000Z", "2026-10-22T00:00:00.000Z")
+    await expect(runtime.runNow("voyage-sync")).resolves.toMatchObject({ status: "skipped", errorCode: "stale_voyage_episode_observation", recordsWritten: 0 })
+    expect(native.prepare("SELECT COUNT(*) AS count FROM voyages").get()).toEqual({ count: 3 })
     runtime.stop()
     native.close()
   })

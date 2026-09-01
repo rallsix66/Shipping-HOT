@@ -47,6 +47,10 @@ export function voyageDelayEventKey(voyage: Pick<Voyage, "id" | "provenance">): 
   return sourceScopedEventDedupeKey(`voyage_delay:${voyage.id}`, voyage.provenance?.sourceId)
 }
 
+function isSupersededVesselApiVoyage(voyage: Pick<Voyage, "id" | "episodeState" | "provenance">): boolean {
+  return voyage.episodeState === "superseded" && (voyage.id.startsWith("vesselapi:") || voyage.provenance?.sourceId === "vesselapi")
+}
+
 export function aisPortCongestionTrendEventKey(metric: Pick<AisDerivedPortMetric, "portId" | "provenance">): string {
   return sourceScopedEventDedupeKey(`ais_port_congestion_trend:${metric.portId}`, metric.provenance?.sourceId)
 }
@@ -63,7 +67,8 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
   vessels.forEach(vessel => sourceTrust.set(vesselAnchoredEventKey(vessel), vessel))
   ports.forEach(port => sourceTrust.set(portCongestionEventKey(port), port))
   aisPortMetrics.forEach(metric => sourceTrust.set(aisPortCongestionTrendEventKey(metric), metric))
-  voyages.forEach(voyage => sourceTrust.set(voyageDelayEventKey(voyage), voyage))
+  const voyageById = new Map(voyages.map(voyage => [voyage.id, voyage]))
+  voyages.filter(voyage => !isSupersededVesselApiVoyage(voyage)).forEach(voyage => sourceTrust.set(voyageDelayEventKey(voyage), voyage))
   feedItems.forEach(feed => sourceTrust.set(`feed:${feed.id}`, feed))
   const today = now.slice(0, 10)
   for (const event of calendarEvents.filter(isCalendarOperationallyRelevant)) {
@@ -80,7 +85,7 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
       candidates.push({ ...eventTrust(vessel), type: "vessel_anchored", severity: durationMinutes >= settings.eventThresholds.anchoredHours * 120 ? "critical" : "warning", status: "active", title: `${vessel.name} 锚泊时间过长`, summary: `当前锚泊已持续 ${Math.round(durationMinutes / 60)} 小时。`, occurredAt: vessel.statusChangedAt ?? now, detectedAt: now, dedupeKey: vesselAnchoredEventKey(vessel), vesselId: vessel.id, evidenceJson: { durationMinutes, thresholdMinutes: settings.eventThresholds.anchoredHours * 60 } })
     }
   }
-  for (const voyage of voyages.filter(isFreshEventEvidence)) {
+  for (const voyage of voyages.filter(voyage => isFreshEventEvidence(voyage) && !isSupersededVesselApiVoyage(voyage))) {
     const delayMinutes = calculateDelayMinutes(voyage.baselineEta, voyage.latestEta)
     if (delayMinutes !== undefined && delayMinutes >= settings.eventThresholds.delayMinutes) {
       candidates.push({ ...eventTrust(voyage), type: "voyage_delay", severity: delayMinutes >= settings.eventThresholds.delayMinutes * 2 ? "critical" : "warning", status: "active", title: `${voyage.voyageNumber ?? "未知航次"} ETA 延误 ${delayMinutes} 分钟`, summary: "最新 ETA 晚于跟踪基准，延误已超过关注阈值。", occurredAt: voyage.latestEtaObservedAt ?? now, detectedAt: now, dedupeKey: voyageDelayEventKey(voyage), voyageId: voyage.id, evidenceJson: { delayMinutes, thresholdMinutes: settings.eventThresholds.delayMinutes } })
@@ -154,6 +159,11 @@ export function detectShippingEvents(vessels: Vessel[], ports: Port[], voyages: 
     if (existing.status === "active" && !activeKeys.has(existing.dedupeKey)) {
       const trust = sourceTrust.get(existing.dedupeKey)
       const { id: _id, firstDetectedAt: _first, lastDetectedAt: _last, resolvedAt: _resolved, ...incoming } = existing
+      const linkedVoyage = existing.voyageId ? voyageById.get(existing.voyageId) : undefined
+      if (existing.type === "voyage_delay" && linkedVoyage && isSupersededVesselApiVoyage(linkedVoyage)) {
+        reconciled.push(reconcileEvent(existing, { ...incoming, status: "resolved", detectedAt: existing.detectedAt }, now))
+        continue
+      }
       if (!trust) {
         if (existing.feedItemId) {
           reconciled.push(reconcileEvent(existing, {

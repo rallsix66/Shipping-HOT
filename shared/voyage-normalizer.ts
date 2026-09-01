@@ -53,6 +53,8 @@ export function voyageRecordToShippingVoyage(record: VoyageRecord, fields: Norma
     stale: false,
     sourceStatus: "healthy",
     source_type: record.sourceType as SourceLineage,
+    episodeState: record.episodeState,
+    supersededAt: record.supersededAt,
   }
 }
 

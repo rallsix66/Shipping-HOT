@@ -126,6 +126,35 @@ describe("shippingRepository", () => {
     native.close()
   })
 
+  it("keeps historical VesselAPI episodes visible with persisted episode state", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const voyageRepository = new VoyageRepository(database, "real")
+    const makeVoyage = (destination: "PHMNL" | "SGSIN", timestamp: string, eta: string): VoyageRecord => ({
+      id: `vesselapi:vessel-history:destination:${destination}:episode:${new Date(timestamp).toISOString().replace(/[.:-]/g, "")}`,
+      vesselId: "vessel-history",
+      imo: "9155391",
+      mmsi: "538090733",
+      destinationPortId: destination === "PHMNL" ? destination : undefined,
+      status: "unknown",
+      eta,
+      source: "vesselapi",
+      sourceType: "real",
+      timestamp,
+      lastUpdatedAt: timestamp,
+    })
+    const first = makeVoyage("PHMNL", "2026-09-01T10:00:00.000Z", "2026-09-03T00:00:00.000Z")
+    const second = makeVoyage("SGSIN", "2026-09-02T10:00:00.000Z", "2026-09-08T00:00:00.000Z")
+    const current = makeVoyage("PHMNL", "2026-10-18T10:00:00.000Z", "2026-10-20T00:00:00.000Z")
+    await voyageRepository.saveVoyages([first, second, current])
+    const voyages = await new ShippingRepository(database, "real").listVoyages()
+    expect(voyages).toHaveLength(3)
+    expect(voyages.find(item => item.id === first.id)).toMatchObject({ episodeState: "superseded", status: "unknown" })
+    expect(voyages.find(item => item.id === second.id)).toMatchObject({ episodeState: "superseded", status: "unknown" })
+    expect(voyages.find(item => item.id === current.id)).toMatchObject({ episodeState: "current", status: "unknown" })
+    native.close()
+  })
+
   it("backfills legacy Feed rows into append-only history during v9", async () => {
     const { database, native } = createNativeDatabase()
     native.exec(`

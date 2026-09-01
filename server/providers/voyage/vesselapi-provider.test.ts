@@ -295,7 +295,7 @@ describe("vesselapi voyage provider", () => {
     await expect(missingDestinationProvider.getVoyages([vessel])).resolves.toEqual([])
   })
 
-  it("uses a stable destination episode ID across ETA and Port Event changes", async () => {
+  it("uses a deterministic candidate ID from destination and trusted ETA timestamp", async () => {
     const first = await normalizeVesselApiVoyageObservation({
       vessel,
       eta: { eta: "2026-09-03T08:00:00.000Z", timestamp: "2026-09-01T10:00:00.000Z", destinationPort: "PHMNL", imo: "9162423", mmsi: "413393620" },
@@ -307,12 +307,19 @@ describe("vesselapi voyage provider", () => {
       portEvent: { event: "Departure", timestamp: "2026-09-01T12:00:00.000Z", port: "CNSHK", imo: "9162423", mmsi: "413393620" },
       resolvePortIdentity: async value => value,
     })
+    const secondWithoutEvent = await normalizeVesselApiVoyageObservation({
+      vessel,
+      eta: { eta: "2026-09-04T08:00:00.000Z", timestamp: "2026-09-01T11:00:00.000Z", destinationPort: " phmnl ", imo: "9162423", mmsi: "413393620" },
+      resolvePortIdentity: async value => value,
+    })
     const otherDestination = await normalizeVesselApiVoyageObservation({
       vessel,
       eta: { eta: "2026-09-04T08:00:00.000Z", timestamp: "2026-09-01T12:00:00.000Z", destinationPort: "SGSIN", imo: "9162423", mmsi: "413393620" },
     })
-    expect(first?.id).toBe("vesselapi:vessel-1:destination:PHMNL")
-    expect(second?.id).toBe(first?.id)
+    expect(first?.id).toBe("vesselapi:vessel-1:destination:PHMNL:episode:20260901T100000000Z")
+    expect(second?.id).toBe("vesselapi:vessel-1:destination:PHMNL:episode:20260901T110000000Z")
+    expect(second?.id).not.toBe(first?.id)
+    expect(second?.id).toBe(secondWithoutEvent?.id)
     expect(second?.lastUpdatedAt).toBe("2026-09-01T11:00:00.000Z")
     expect(otherDestination?.id).not.toBe(first?.id)
   })

@@ -43,6 +43,58 @@ describe("shipping HOT event engine", () => {
     expect(events.map(event => event.type)).toEqual(expect.arrayContaining(["vessel_anchored", "voyage_delay", "port_congestion", "port_disruption"]))
   })
 
+  it("excludes superseded VesselAPI episodes and resolves their old delay event", () => {
+    const snapshot = createMockSnapshot()
+    const firstEpisode = {
+      ...snapshot.voyages[0],
+      id: "vesselapi:vessel-1:destination:PHMNL:episode:20260901T100000000Z",
+      vesselId: "vessel-1",
+      baselineEta: "2026-09-03T00:00:00.000Z",
+      latestEta: "2026-09-04T00:00:00.000Z",
+      delayMinutes: 1440,
+      episodeState: "current" as const,
+      provenance: { sourceType: "third_party" as const, dataNature: "planned" as const, sourceId: "vesselapi" },
+      sourceStatus: "healthy" as const,
+      stale: false,
+    }
+    const secondEpisode = {
+      ...firstEpisode,
+      id: "vesselapi:vessel-1:destination:SGSIN:episode:20260902T100000000Z",
+      baselineEta: "2026-09-08T00:00:00.000Z",
+      latestEta: "2026-09-08T00:00:00.000Z",
+      delayMinutes: 0,
+      episodeState: "current" as const,
+    }
+    const returnedEpisode = {
+      ...firstEpisode,
+      id: "vesselapi:vessel-1:destination:PHMNL:episode:20261018T100000000Z",
+      baselineEta: "2026-10-20T00:00:00.000Z",
+      latestEta: "2026-10-20T00:00:00.000Z",
+      delayMinutes: 0,
+      episodeState: "current" as const,
+    }
+    const initial = detectShippingEvents([], [], [firstEpisode], [], snapshot.settings, [], "2026-09-05T00:00:00.000Z")
+    expect(initial).toHaveLength(1)
+    expect(initial[0]).toMatchObject({ type: "voyage_delay", voyageId: firstEpisode.id })
+
+    const superseded = detectShippingEvents([], [], [
+      { ...firstEpisode, episodeState: "superseded" as const },
+      secondEpisode,
+      returnedEpisode,
+    ], [], snapshot.settings, initial, "2026-10-19T00:00:00.000Z")
+    expect(superseded.find(event => event.voyageId === firstEpisode.id)).toMatchObject({ status: "resolved" })
+    expect(superseded.filter(event => event.type === "voyage_delay" && event.status === "active")).toEqual([])
+
+    const currentDelay = detectShippingEvents([], [], [
+      { ...firstEpisode, episodeState: "superseded" as const },
+      secondEpisode,
+      { ...returnedEpisode, latestEta: "2026-10-21T00:00:00.000Z", delayMinutes: 1440 },
+    ], [], snapshot.settings, superseded, "2026-10-20T00:00:00.000Z")
+    const currentEvent = currentDelay.find(event => event.type === "voyage_delay" && event.status === "active")
+    expect(currentEvent).toMatchObject({ voyageId: returnedEpisode.id })
+    expect(currentEvent?.dedupeKey).not.toBe(initial[0].dedupeKey)
+  })
+
   it("keeps derived Event provenance and the underlying evidence source", () => {
     const snapshot = createMockSnapshot()
     const feedItems = snapshot.feedItems.map(item => item.sourceId === "mock-weather" ? { ...item, severity: "warning" as const } : item)

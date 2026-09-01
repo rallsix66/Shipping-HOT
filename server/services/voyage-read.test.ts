@@ -74,7 +74,7 @@ describe("voyage read API boundary", () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch")
     const before = (native.prepare("SELECT total_changes() AS changes").get() as { changes: number }).changes
     await expect(readLatestVoyage(database, "real", "vessel-api-1")).resolves.toMatchObject({
-      id: real.id,
+      id: "vesselapi:vessel-api-1:destination:PHMNL:episode:20260831T100000000Z",
       originPortId: undefined,
       voyageNumber: undefined,
       destinationPortId: "PHMNL",
@@ -83,6 +83,33 @@ describe("voyage read API boundary", () => {
     const after = (native.prepare("SELECT total_changes() AS changes").get() as { changes: number }).changes
     expect(fetchSpy).not.toHaveBeenCalled()
     expect(after).toBe(before)
+    fetchSpy.mockRestore()
+    native.close()
+  })
+
+  it("returns the latest recurrent VesselAPI episode without invoking a Provider", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const makeVoyage = (destination: "PHMNL" | "SGSIN", timestamp: string, eta: string): VoyageRecord => ({
+      id: `vesselapi:vessel-api-1:destination:${destination}:episode:${new Date(timestamp).toISOString().replace(/[.:-]/g, "")}`,
+      vesselId: "vessel-api-1",
+      imo: "9155391",
+      mmsi: "538090733",
+      destinationPortId: destination === "PHMNL" ? destination : undefined,
+      status: "unknown",
+      eta,
+      source: "vesselapi",
+      sourceType: "real",
+      timestamp,
+      lastUpdatedAt: timestamp,
+    })
+    const first = makeVoyage("PHMNL", "2026-09-01T10:00:00.000Z", "2026-09-03T00:00:00.000Z")
+    const second = makeVoyage("SGSIN", "2026-09-02T10:00:00.000Z", "2026-09-08T00:00:00.000Z")
+    const returned = makeVoyage("PHMNL", "2026-10-18T10:00:00.000Z", "2026-10-20T00:00:00.000Z")
+    await new VoyageRepository(database, "real").saveVoyages([first, second, returned])
+    const fetchSpy = vi.spyOn(globalThis, "fetch")
+    await expect(readLatestVoyage(database, "real", "vessel-api-1")).resolves.toMatchObject({ id: returned.id, episodeState: "current" })
+    expect(fetchSpy).not.toHaveBeenCalled()
     fetchSpy.mockRestore()
     native.close()
   })

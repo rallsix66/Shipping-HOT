@@ -160,15 +160,16 @@ describe("voyage repository", () => {
     })
     await expect(repository.saveVoyages([observation])).resolves.toMatchObject({ written: 1, historyWritten: 1 })
     await expect(repository.getLatestVoyage("vessel-1")).resolves.toMatchObject({
-      id: observation.id,
+      id: "vesselapi:vessel-1:destination:PHMNL:episode:20260901T080000000Z",
       destinationPortId: "PHMNL",
       originPortId: undefined,
       voyageNumber: undefined,
       status: "unknown",
       sourceType: "real",
     })
-    await expect(repository.getLatestVerifiedRealVoyage("vesselapi")).resolves.toMatchObject({ id: observation.id, destinationPortId: "PHMNL" })
-    expect(await repository.listEtaHistory(observation.id)).toHaveLength(1)
+    const persistedId = "vesselapi:vessel-1:destination:PHMNL:episode:20260901T080000000Z"
+    await expect(repository.getLatestVerifiedRealVoyage("vesselapi")).resolves.toMatchObject({ id: persistedId, destinationPortId: "PHMNL" })
+    expect(await repository.listEtaHistory(persistedId)).toHaveLength(1)
     native.close()
   })
 
@@ -176,7 +177,7 @@ describe("voyage repository", () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "real")
     const repository = new VoyageRepository(database, "real")
-    const id = "vesselapi:vessel-1:destination:PHMNL"
+    const id = "vesselapi:vessel-1:destination:PHMNL:episode:20260901T100000000Z"
     const first = voyage({
       id,
       originPortId: undefined,
@@ -190,7 +191,7 @@ describe("voyage repository", () => {
       timestamp: "2026-09-01T10:00:00.000Z",
       lastUpdatedAt: "2026-09-01T10:00:00.000Z",
     })
-    const second = { ...first, eta: "2026-09-04T00:00:00.000Z", timestamp: "2026-09-01T11:00:00.000Z", lastUpdatedAt: "2026-09-01T11:00:00.000Z" }
+    const second = { ...first, id: "vesselapi:vessel-1:destination:PHMNL:episode:20260901T110000000Z", eta: "2026-09-04T00:00:00.000Z", timestamp: "2026-09-01T11:00:00.000Z", lastUpdatedAt: "2026-09-01T11:00:00.000Z" }
     await repository.saveVoyages([first])
     await repository.saveVoyages([second])
     expect(native.prepare("SELECT COUNT(*) AS count, baseline_eta, latest_eta, delay_minutes FROM voyages WHERE id = ?").get(id)).toEqual({
@@ -204,18 +205,137 @@ describe("voyage repository", () => {
     native.close()
   })
 
+  it("creates a fresh episode when a vessel returns to an earlier destination", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const repository = new VoyageRepository(database, "real")
+    const base = voyage({ source: "vesselapi", sourceType: "real", status: "unknown", voyageNumber: undefined, etd: undefined, originPortId: undefined })
+    const episode = (destination: "PHMNL" | "SGSIN", timestamp: string, eta: string): VoyageRecord => ({
+      ...base,
+      id: `vesselapi:vessel-1:destination:${destination}:episode:${new Date(timestamp).toISOString().replace(/[.:-]/g, "")}`,
+      destinationPortId: destination === "PHMNL" ? destination : undefined,
+      timestamp,
+      lastUpdatedAt: timestamp,
+      eta,
+    })
+    const first = episode("PHMNL", "2026-09-01T10:00:00.000Z", "2026-09-03T00:00:00.000Z")
+    const firstUpdate = episode("PHMNL", "2026-09-01T11:00:00.000Z", "2026-09-04T00:00:00.000Z")
+    const second = episode("SGSIN", "2026-09-02T10:00:00.000Z", "2026-09-08T00:00:00.000Z")
+    const returnObservation = episode("PHMNL", "2026-10-18T10:00:00.000Z", "2026-10-20T00:00:00.000Z")
+    const returnUpdate = episode("PHMNL", "2026-10-18T11:00:00.000Z", "2026-10-21T00:00:00.000Z")
+
+    await expect(repository.saveVoyages([first])).resolves.toMatchObject({ newEpisodes: 1, acceptedIds: [first.id] })
+    await expect(repository.saveVoyages([firstUpdate])).resolves.toMatchObject({ reusedEpisodes: 1, acceptedIds: [first.id] })
+    await expect(repository.saveVoyages([second])).resolves.toMatchObject({ newEpisodes: 1, supersededEpisodes: 1 })
+    await expect(repository.saveVoyages([returnObservation])).resolves.toMatchObject({ newEpisodes: 1, supersededEpisodes: 1 })
+    const returnResult = await repository.saveVoyages([returnUpdate])
+
+    const rows = native.prepare("SELECT id, baseline_eta, latest_eta, delay_minutes FROM voyages ORDER BY last_updated_at, id").all() as { id: string, baseline_eta: string, latest_eta: string, delay_minutes: number }[]
+    expect(rows).toHaveLength(3)
+    expect(rows.map(row => row.id)).toEqual([first.id, second.id, returnObservation.id])
+    expect(returnObservation.id).not.toBe(first.id)
+    expect(rows[0]).toMatchObject({ baseline_eta: "2026-09-03T00:00:00.000Z", latest_eta: "2026-09-04T00:00:00.000Z", delay_minutes: 1440 })
+    expect(rows[2]).toMatchObject({ baseline_eta: "2026-10-20T00:00:00.000Z", latest_eta: "2026-10-21T00:00:00.000Z", delay_minutes: 1440 })
+    expect(returnResult).toMatchObject({ reusedEpisodes: 1, acceptedIds: [returnObservation.id] })
+    expect(await repository.listEtaHistory(first.id)).toHaveLength(2)
+    expect(await repository.listEtaHistory(second.id)).toHaveLength(1)
+    expect(await repository.listEtaHistory(returnObservation.id)).toHaveLength(2)
+    expect(await repository.getLatestVoyage("vessel-1")).toMatchObject({ id: returnObservation.id, eta: "2026-10-21T00:00:00.000Z", episodeState: "current" })
+    const stateRows = native.prepare("SELECT id, data FROM voyages ORDER BY created_at, id").all() as { id: string, data: string }[]
+    expect(stateRows.map(row => JSON.parse(row.data))).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: first.id, episodeState: "superseded", supersededAt: second.lastUpdatedAt }),
+      expect.objectContaining({ id: second.id, episodeState: "superseded", supersededAt: returnObservation.lastUpdatedAt }),
+      expect.objectContaining({ id: returnObservation.id, episodeState: "current" }),
+    ]))
+    native.close()
+  })
+
+  it("rejects stale and equal-timestamp cross-destination transitions without switching current episode", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const repository = new VoyageRepository(database, "real")
+    const base = voyage({ source: "vesselapi", sourceType: "real", status: "unknown", voyageNumber: undefined, etd: undefined, originPortId: undefined })
+    const observation = (destination: "PHMNL" | "SGSIN", timestamp: string): VoyageRecord => ({
+      ...base,
+      id: `vesselapi:vessel-1:destination:${destination}:episode:${new Date(timestamp).toISOString().replace(/[.:-]/g, "")}`,
+      destinationPortId: destination === "PHMNL" ? destination : undefined,
+      timestamp,
+      lastUpdatedAt: timestamp,
+    })
+    const singapore = observation("SGSIN", "2026-09-01T12:00:00.000Z")
+    await repository.saveVoyages([singapore])
+    await expect(repository.saveVoyages([observation("PHMNL", "2026-09-01T11:00:00.000Z")])).resolves.toMatchObject({ episodeStaleSkipped: 1, acceptedIds: [], historyWritten: 0 })
+    await expect(repository.saveVoyages([observation("PHMNL", singapore.lastUpdatedAt)])).resolves.toMatchObject({ episodeTransitionConflicts: 1, acceptedIds: [], historyWritten: 0 })
+    expect(native.prepare("SELECT COUNT(*) AS count FROM voyages").get()).toEqual({ count: 1 })
+    expect(await repository.getLatestVoyage("vessel-1")).toMatchObject({ id: singapore.id, episodeState: "current" })
+    native.close()
+  })
+
+  it("preserves the transition boundary across a native SQLite restart", async () => {
+    const root = mkdtempSync("shipping-hot-voyage-episode-")
+    const path = join(root, "voyage.sqlite3")
+    const episode = (destination: "PHMNL" | "SGSIN", timestamp: string, eta: string): VoyageRecord => voyage({
+      id: `vesselapi:vessel-1:destination:${destination}:episode:${new Date(timestamp).toISOString().replace(/[.:-]/g, "")}`,
+      source: "vesselapi",
+      sourceType: "real",
+      status: "unknown",
+      voyageNumber: undefined,
+      originPortId: undefined,
+      destinationPortId: destination === "PHMNL" ? destination : undefined,
+      timestamp,
+      lastUpdatedAt: timestamp,
+      eta,
+      etd: undefined,
+    })
+    const first = episode("PHMNL", "2026-09-01T10:00:00.000Z", "2026-09-03T00:00:00.000Z")
+    const second = episode("SGSIN", "2026-09-02T10:00:00.000Z", "2026-09-08T00:00:00.000Z")
+    const returned = episode("PHMNL", "2026-10-18T10:00:00.000Z", "2026-10-20T00:00:00.000Z")
+    let initial: ReturnType<typeof createNativeDatabase> | undefined
+    let reopened: ReturnType<typeof createNativeDatabase> | undefined
+    try {
+      initial = createNativeDatabase(path)
+      await initShippingTables(initial.database, "real")
+      await new VoyageRepository(initial.database, "real").saveVoyages([first, second])
+      initial.native.close()
+      initial = undefined
+
+      reopened = createNativeDatabase(path)
+      await initShippingTables(reopened.database, "real")
+      await new VoyageRepository(reopened.database, "real").saveVoyages([returned])
+      expect(reopened.native.prepare("SELECT id FROM voyages ORDER BY last_updated_at, id").all()).toHaveLength(3)
+      expect(await new VoyageRepository(reopened.database, "real").getLatestVoyage("vessel-1")).toMatchObject({ id: returned.id, episodeState: "current" })
+    } finally {
+      initial?.native.close()
+      reopened?.native.close()
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+
+  it("uses existing staleSkipped for an older observation on the same destination episode", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const repository = new VoyageRepository(database, "real")
+    const id = "vesselapi:vessel-1:destination:PHMNL:episode:20260901T120000000Z"
+    const latest = voyage({ id, source: "vesselapi", sourceType: "real", status: "unknown", voyageNumber: undefined, etd: undefined, originPortId: undefined, destinationPortId: "PHMNL", timestamp: "2026-09-01T12:00:00.000Z", lastUpdatedAt: "2026-09-01T12:00:00.000Z" })
+    const older = { ...latest, id: "vesselapi:vessel-1:destination:PHMNL:episode:20260901T110000000Z", timestamp: "2026-09-01T11:00:00.000Z", lastUpdatedAt: "2026-09-01T11:00:00.000Z" }
+    await repository.saveVoyages([latest])
+    await expect(repository.saveVoyages([older])).resolves.toMatchObject({ staleSkipped: 1, episodeStaleSkipped: 0, historyWritten: 0 })
+    expect(await repository.listEtaHistory(id)).toHaveLength(1)
+    native.close()
+  })
+
   it("separates ETA episodes when the official destination changes", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "real")
     const repository = new VoyageRepository(database, "real")
     const base = voyage({ source: "vesselapi", sourceType: "real", status: "unknown", voyageNumber: undefined, etd: undefined, originPortId: undefined })
     await repository.saveVoyages([
-      { ...base, id: "vesselapi:vessel-1:destination:PHMNL", destinationPortId: "PHMNL", timestamp: "2026-09-01T10:00:00.000Z", lastUpdatedAt: "2026-09-01T10:00:00.000Z" },
-      { ...base, id: "vesselapi:vessel-1:destination:SGSIN", destinationPortId: undefined, timestamp: "2026-09-01T11:00:00.000Z", lastUpdatedAt: "2026-09-01T11:00:00.000Z" },
+      { ...base, id: "vesselapi:vessel-1:destination:PHMNL:episode:20260901T100000000Z", destinationPortId: "PHMNL", timestamp: "2026-09-01T10:00:00.000Z", lastUpdatedAt: "2026-09-01T10:00:00.000Z" },
+      { ...base, id: "vesselapi:vessel-1:destination:SGSIN:episode:20260901T110000000Z", destinationPortId: undefined, timestamp: "2026-09-01T11:00:00.000Z", lastUpdatedAt: "2026-09-01T11:00:00.000Z" },
     ])
     expect(native.prepare("SELECT COUNT(*) AS count FROM voyages").get()).toEqual({ count: 2 })
-    expect(await repository.listEtaHistory("vesselapi:vessel-1:destination:PHMNL")).toHaveLength(1)
-    expect(await repository.listEtaHistory("vesselapi:vessel-1:destination:SGSIN")).toHaveLength(1)
+    expect(await repository.listEtaHistory("vesselapi:vessel-1:destination:PHMNL:episode:20260901T100000000Z")).toHaveLength(1)
+    expect(await repository.listEtaHistory("vesselapi:vessel-1:destination:SGSIN:episode:20260901T110000000Z")).toHaveLength(1)
     native.close()
   })
 
@@ -223,7 +343,7 @@ describe("voyage repository", () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "real")
     const repository = new VoyageRepository(database, "real")
-    const id = "vesselapi:vessel-1:destination:PHMNL"
+    const id = "vesselapi:vessel-1:destination:PHMNL:episode:20260901T100000000Z"
     const first = voyage({ id, source: "vesselapi", sourceType: "real", status: "unknown", voyageNumber: undefined, etd: undefined, timestamp: "2026-09-01T10:00:00.000Z", lastUpdatedAt: "2026-09-01T10:00:00.000Z" })
     const second = { ...first, originPortId: undefined, destinationPortId: undefined, eta: "2026-09-02T00:00:00.000Z", timestamp: "2026-09-01T11:00:00.000Z", lastUpdatedAt: "2026-09-01T11:00:00.000Z" }
     await repository.saveVoyages([first])
@@ -238,7 +358,7 @@ describe("voyage repository", () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "real")
     const repository = new VoyageRepository(database, "real")
-    const id = "vesselapi:vessel-1:destination:PHMNL"
+    const id = "vesselapi:vessel-1:destination:PHMNL:episode:20260901T120000000Z"
     const latest = voyage({ id, source: "vesselapi", sourceType: "real", status: "unknown", voyageNumber: undefined, etd: undefined, timestamp: "2026-09-01T12:00:00.000Z", lastUpdatedAt: "2026-09-01T12:00:00.000Z" })
     const older = { ...latest, eta: "2026-09-01T00:00:00.000Z", timestamp: "2026-09-01T11:00:00.000Z", lastUpdatedAt: "2026-09-01T11:00:00.000Z" }
     await repository.saveVoyages([latest])

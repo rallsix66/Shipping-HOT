@@ -313,6 +313,8 @@ export interface Voyage extends Freshness, ProvenanceAware {
   latestEtaObservedAt?: string
   delayMinutes?: number
   status: "planned" | "in_transit" | "arrived" | "delayed" | "unknown"
+  episodeState?: "current" | "superseded"
+  supersededAt?: string
 }
 
 export interface FeedItem extends Freshness, ProvenanceAware {
