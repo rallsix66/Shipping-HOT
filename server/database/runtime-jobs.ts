@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto"
 import type { Database } from "db0"
-import type { ProviderRuntimeRecord, SyncRunRecord } from "#/providers/contracts"
+import type { ProviderRuntimeRecord, ProviderUsageRecord, SyncRunRecord } from "#/providers/contracts"
 
 type RuntimeStatus = ProviderRuntimeRecord["status"]
 
@@ -38,11 +38,32 @@ export interface ProviderRuntimePatch {
 export interface ProviderUsagePatch {
   providerId: string
   capability: string
+  request?: boolean
+  cacheHit?: boolean
   succeeded?: boolean
   failed?: boolean
   records?: number
+  charactersIn?: number
+  charactersOut?: number
+  tokensIn?: number
+  tokensOut?: number
+  promptCacheHitTokens?: number
+  promptCacheMissTokens?: number
+  completionTokens?: number
+  estimatedCost?: number
+  currency?: string
+  pricingReference?: string
+  sourceScope?: string
   calledAt?: string
   errorCode?: string
+}
+
+export interface ProviderUsageListOptions {
+  providerId?: string
+  capability?: string
+  windowStartFrom?: string
+  windowStartTo?: string
+  limit?: number
 }
 
 interface ProviderRuntimeRow {
@@ -71,6 +92,28 @@ interface SyncRunRow {
   records_written?: number | null
   error_code?: string | null
   error_message?: string | null
+}
+
+interface ProviderUsageRow {
+  id: string
+  provider_id: string
+  capability: string
+  window_start: string
+  request_count: number
+  success_count: number
+  failure_count: number
+  records_count?: number | null
+  cache_hit_count: number
+  characters_in?: number | null
+  characters_out?: number | null
+  tokens_in?: number | null
+  tokens_out?: number | null
+  estimated_cost?: number | null
+  currency?: string | null
+  pricing_reference?: string | null
+  source_scope?: string | null
+  last_called_at?: string | null
+  error_code?: string | null
 }
 
 function rows<T>(value: unknown): T[] {
@@ -114,6 +157,51 @@ function toSyncRun(row: SyncRunRow): SyncRunRecord {
     recordsWritten: row.records_written ?? undefined,
     errorCode: optionalString(row.error_code),
     errorMessage: optionalString(row.error_message),
+  }
+}
+
+function toProviderUsage(row: ProviderUsageRow): ProviderUsageRecord {
+  const promptCacheHitTokens = { value: 0 }
+  const promptCacheMissTokens = { value: 0 }
+  let sourceScope: string | undefined
+  if (row.source_scope) {
+    const entries = row.source_scope.split("\n")
+    const decoded: string[] = []
+    for (const entry of entries) {
+      try {
+        const value = JSON.parse(entry) as { sourceScope?: unknown, promptCacheHitTokens?: unknown, promptCacheMissTokens?: unknown }
+        if (typeof value.sourceScope === "string") decoded.push(value.sourceScope)
+        if (typeof value.promptCacheHitTokens === "number") promptCacheHitTokens.value += value.promptCacheHitTokens
+        if (typeof value.promptCacheMissTokens === "number") promptCacheMissTokens.value += value.promptCacheMissTokens
+      } catch {
+        decoded.push(entry)
+      }
+    }
+    sourceScope = decoded.at(-1)
+  }
+  return {
+    id: row.id,
+    providerId: row.provider_id,
+    capability: row.capability,
+    windowStart: row.window_start,
+    requestCount: Number(row.request_count),
+    successCount: Number(row.success_count),
+    failureCount: Number(row.failure_count),
+    recordsCount: Number(row.records_count ?? 0),
+    cacheHitCount: Number(row.cache_hit_count),
+    charactersIn: row.characters_in ?? undefined,
+    charactersOut: row.characters_out ?? undefined,
+    tokensIn: row.tokens_in ?? undefined,
+    tokensOut: row.tokens_out ?? undefined,
+    promptCacheHitTokens: promptCacheHitTokens.value || undefined,
+    promptCacheMissTokens: promptCacheMissTokens.value || undefined,
+    completionTokens: row.tokens_out ?? undefined,
+    estimatedCost: row.estimated_cost ?? undefined,
+    currency: row.currency ?? undefined,
+    pricingReference: row.pricing_reference ?? undefined,
+    sourceScope,
+    lastCalledAt: row.last_called_at ?? undefined,
+    errorCode: row.error_code ?? undefined,
   }
 }
 
@@ -172,21 +260,87 @@ export class RuntimeRepository {
     return rows<ProviderRuntimeRow>(result).map(toProviderRuntime)
   }
 
+  async listProviderUsage(options: ProviderUsageListOptions = {}): Promise<ProviderUsageRecord[]> {
+    const clauses: string[] = []
+    const params: (string | number)[] = []
+    if (options.providerId) {
+      clauses.push("provider_id = ?")
+      params.push(options.providerId)
+    }
+    if (options.capability) {
+      clauses.push("capability = ?")
+      params.push(options.capability)
+    }
+    if (options.windowStartFrom) {
+      clauses.push("window_start >= ?")
+      params.push(options.windowStartFrom)
+    }
+    if (options.windowStartTo) {
+      clauses.push("window_start < ?")
+      params.push(options.windowStartTo)
+    }
+    const boundedLimit = Math.max(1, Math.min(Math.floor(options.limit ?? 500), 5000))
+    params.push(boundedLimit)
+    const where = clauses.length ? ` WHERE ${clauses.join(" AND ")}` : ""
+    const result = await this.db.prepare(`SELECT * FROM provider_usage${where} ORDER BY window_start DESC, provider_id ASC, capability ASC LIMIT ?`).all(...params)
+    return rows<ProviderUsageRow>(result).map(toProviderUsage)
+  }
+
   async recordProviderUsage(patch: ProviderUsagePatch): Promise<void> {
     const calledAt = patch.calledAt ?? new Date().toISOString()
     const windowStart = `${calledAt.slice(0, 13)}:00:00.000Z`
     const id = `usage:${patch.providerId}:${patch.capability}:${windowStart}`
+    const request = patch.request !== false
+    const sourceScope = (patch.sourceScope || patch.promptCacheHitTokens !== undefined || patch.promptCacheMissTokens !== undefined)
+      ? JSON.stringify({ sourceScope: patch.sourceScope, promptCacheHitTokens: patch.promptCacheHitTokens, promptCacheMissTokens: patch.promptCacheMissTokens })
+      : undefined
     await this.db.prepare(`
-      INSERT INTO provider_usage (id, provider_id, capability, window_start, request_count, success_count, failure_count, records_count, last_called_at, error_code)
-      VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
+      INSERT INTO provider_usage (
+        id, provider_id, capability, window_start, request_count, success_count, failure_count, records_count,
+        cache_hit_count, characters_in, characters_out, tokens_in, tokens_out, estimated_cost, currency,
+        pricing_reference, source_scope, last_called_at, error_code
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
-        request_count = provider_usage.request_count + 1,
+        request_count = provider_usage.request_count + excluded.request_count,
         success_count = provider_usage.success_count + excluded.success_count,
         failure_count = provider_usage.failure_count + excluded.failure_count,
         records_count = provider_usage.records_count + excluded.records_count,
-        last_called_at = excluded.last_called_at,
+        cache_hit_count = provider_usage.cache_hit_count + excluded.cache_hit_count,
+        characters_in = COALESCE(provider_usage.characters_in, 0) + COALESCE(excluded.characters_in, 0),
+        characters_out = COALESCE(provider_usage.characters_out, 0) + COALESCE(excluded.characters_out, 0),
+        tokens_in = COALESCE(provider_usage.tokens_in, 0) + COALESCE(excluded.tokens_in, 0),
+        tokens_out = COALESCE(provider_usage.tokens_out, 0) + COALESCE(excluded.tokens_out, 0),
+        estimated_cost = COALESCE(provider_usage.estimated_cost, 0) + COALESCE(excluded.estimated_cost, 0),
+        currency = COALESCE(excluded.currency, provider_usage.currency),
+        pricing_reference = COALESCE(excluded.pricing_reference, provider_usage.pricing_reference),
+        source_scope = CASE
+          WHEN excluded.source_scope IS NULL THEN provider_usage.source_scope
+          WHEN provider_usage.source_scope IS NULL THEN excluded.source_scope
+          ELSE provider_usage.source_scope || char(10) || excluded.source_scope
+        END,
+        last_called_at = COALESCE(excluded.last_called_at, provider_usage.last_called_at),
         error_code = excluded.error_code
-    `).run(id, patch.providerId, patch.capability, windowStart, patch.succeeded ? 1 : 0, patch.failed ? 1 : 0, patch.records ?? 0, calledAt, patch.errorCode ?? null)
+    `).run(
+      id,
+      patch.providerId,
+      patch.capability,
+      windowStart,
+      request ? 1 : 0,
+      request && patch.succeeded ? 1 : 0,
+      request && patch.failed ? 1 : 0,
+      patch.records ?? 0,
+      patch.cacheHit ? 1 : 0,
+      patch.charactersIn ?? null,
+      patch.charactersOut ?? null,
+      patch.tokensIn ?? null,
+      patch.tokensOut ?? null,
+      patch.estimatedCost ?? null,
+      patch.currency ?? null,
+      patch.pricingReference ?? null,
+      sourceScope ?? null,
+      request ? calledAt : null,
+      patch.errorCode ?? null,
+    )
   }
 
   async updateProviderRuntime(patch: ProviderRuntimePatch): Promise<ProviderRuntimeRecord> {

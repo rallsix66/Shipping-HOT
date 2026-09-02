@@ -37,6 +37,15 @@ export interface TranslationRequest {
 
 export interface TranslationResult {
   translatedText: string
+  usage?: TranslationUsage
+}
+
+export interface TranslationUsage {
+  promptTokens?: number
+  promptCacheHitTokens?: number
+  promptCacheMissTokens?: number
+  completionTokens?: number
+  totalTokens?: number
 }
 
 /** The Provider returns content only; cache identity belongs to TranslationService. */
@@ -80,6 +89,9 @@ export interface ProviderUsageRecord {
   charactersOut?: number
   tokensIn?: number
   tokensOut?: number
+  promptCacheHitTokens?: number
+  promptCacheMissTokens?: number
+  completionTokens?: number
   estimatedCost?: number
   currency?: string
   pricingReference?: string

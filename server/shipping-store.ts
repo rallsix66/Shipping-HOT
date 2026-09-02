@@ -1,13 +1,14 @@
 import process from "node:process"
 import { filterEventsForOperationalContext, recordAllowedForDataMode, sourceAllowedForOperationalContext } from "@shared/shipping"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
-import type { DataEvidence, DatabasePersistenceStatus, FeedItem, ProvenanceAware, ShippingProviderModes, ShippingSettings, ShippingSnapshot } from "@shared/shipping"
+import type { DataEvidence, DatabasePersistenceStatus, FeedItem, ProvenanceAware, ShippingProviderModes, ShippingSettings, ShippingSnapshot, TranslationSettings } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries, calendarEventKey, calendarEventLegacyId } from "@shared/calendar"
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { filterCalendarCoverageForSourceIds, filterCalendarEventsForSourceIds, mergeCalendarSources } from "#/providers/calendar"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { defaultShippingSettings, healthyPersistenceStatus, persistenceUnavailableError } from "#/database/runtime"
+import { normalizeTranslationSettings } from "#/services/translation-settings"
 import { isWeatherFeedItem, operationalSourceContext, providerModes, providerProvenances, providers } from "#/providers/shipping"
 
 let repository: ShippingRepository | undefined
@@ -82,7 +83,8 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
   if (!repository) {
     return emptySnapshot()
   }
-  const settings = await repository.getSettings() ?? structuredClone(defaultShippingSettings)
+  const storedSettings = await repository.getSettings() ?? structuredClone(defaultShippingSettings)
+  const settings = { ...storedSettings, translation: normalizeTranslationSettings(storedSettings.translation) }
   const legacyDefaults = {
     vessel: providerModes.vessel === "mock" ? providerProvenances.mockVessel : undefined,
     port: providerModes.port === "mock" ? providerProvenances.mockPort : undefined,
@@ -245,7 +247,7 @@ export async function syncCalendarEvents(year = mockCalendarYear, countries?: Ca
   return { ...result, events: reconciled.events, coverage }
 }
 
-export async function updateShippingSettings(settings: Partial<Omit<ShippingSettings, "eventThresholds">> & { eventThresholds?: Partial<ShippingSettings["eventThresholds"]> }) {
+export async function updateShippingSettings(settings: Partial<Omit<ShippingSettings, "eventThresholds" | "translation">> & { eventThresholds?: Partial<ShippingSettings["eventThresholds"]>, translation?: Partial<TranslationSettings> }) {
   await initialize()
   const persistence = requireRepository()
   const current = await getShippingSnapshot()
@@ -253,6 +255,9 @@ export async function updateShippingSettings(settings: Partial<Omit<ShippingSett
     ...current.settings,
     ...settings,
     eventThresholds: { ...current.settings.eventThresholds, ...settings.eventThresholds },
+    translation: settings.translation === undefined
+      ? normalizeTranslationSettings(current.settings.translation)
+      : normalizeTranslationSettings({ ...current.settings.translation, ...settings.translation }),
   }
   try {
     await persistence.saveSettings(next)

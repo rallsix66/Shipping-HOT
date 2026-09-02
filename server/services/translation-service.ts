@@ -1,7 +1,9 @@
 import { createHash } from "node:crypto"
 import type { FeedItem } from "@shared/shipping"
-import type { TranslationCacheRecord, TranslationProvider } from "#/providers/contracts"
+import { ProviderError } from "#/providers/contracts"
+import type { TranslationCacheRecord, TranslationProvider, TranslationUsage } from "#/providers/contracts"
 import type { TranslationCacheExactLookup, TranslationCacheLookup, TranslationRepository } from "#/database/translation"
+import { protectTranslationText, restoreAndValidateProtectedTranslation } from "#/services/translation-protection"
 
 export const TRANSLATION_CONTRACT_VERSION = "translation-faithful-v1"
 export const DEFAULT_TRANSLATION_TARGET_LANGUAGE = "zh-CN"
@@ -17,6 +19,7 @@ export interface TranslationSource {
   sourceText: string
   sourceLanguage?: string
   targetLanguage?: string
+  protectedTerms?: string[]
 }
 
 export interface TranslationOutcome {
@@ -25,6 +28,9 @@ export interface TranslationOutcome {
   sourceHash: string
   status: TranslationOutcomeStatus
   cache?: TranslationCacheRecord
+  usage?: TranslationUsage
+  errorCode?: string
+  providerCalled?: boolean
 }
 
 export interface TranslationServiceOptions {
@@ -117,7 +123,7 @@ function errorMessage(error: unknown): string {
 }
 
 function emptyOutcome(sourceText: string, sourceHash: string, status: Exclude<TranslationOutcomeStatus, "succeeded">): TranslationOutcome {
-  return { sourceText, translatedText: sourceText, sourceHash, status }
+  return { sourceText, translatedText: sourceText, sourceHash, status, providerCalled: false }
 }
 
 export function isFeedItemTranslationEligible(item: FeedItem, now = new Date()): boolean {
@@ -196,7 +202,7 @@ export class TranslationService {
 
   private cacheOutcome(input: ReturnType<TranslationService["prepared"]>, cache: TranslationCacheRecord | undefined): TranslationOutcome {
     return cache
-      ? { sourceText: input.sourceText, translatedText: cache.translatedText ?? input.sourceText, sourceHash: input.sourceHash, status: "succeeded", cache }
+      ? { sourceText: input.sourceText, translatedText: cache.translatedText ?? input.sourceText, sourceHash: input.sourceHash, status: "succeeded", cache, providerCalled: false }
       : emptyOutcome(input.sourceText, input.sourceHash, "original")
   }
 
@@ -256,32 +262,39 @@ export class TranslationService {
     }
     await this.repository.save(base)
     try {
+      const protectedSource = protectTranslationText(input.sourceText, input.protectedTerms)
       const result = await provider.translate({
-        sourceText: input.sourceText,
+        sourceText: protectedSource.protectedText,
         sourceLanguage: input.sourceLanguage,
         targetLanguage: input.targetLanguage,
         entityType: input.entityType,
         entityId: input.entityId,
         fieldName: input.fieldName,
       })
-      if (!result.translatedText.trim()) throw new Error("translation_provider_empty_result")
+      if (!result.translatedText.trim()) throw new ProviderError("provider_contract_changed", "translation_provider_empty_result")
+      const translatedText = restoreAndValidateProtectedTranslation(protectedSource, result.translatedText)
       const saved = await this.repository.save({
         ...base,
-        translatedText: result.translatedText,
+        translatedText,
         translatedAt: nowFor(this.options),
         status: "succeeded",
         preferred: true,
         updatedAt: nowFor(this.options),
       })
-      return { sourceText: input.sourceText, translatedText: result.translatedText, sourceHash: input.sourceHash, status: "succeeded", cache: saved }
+      return { sourceText: input.sourceText, translatedText, sourceHash: input.sourceHash, status: "succeeded", cache: saved, usage: result.usage, providerCalled: true }
     } catch (error) {
+      const errorCode = error instanceof ProviderError
+        ? error.code
+        : error && typeof error === "object" && "code" in error && typeof (error as { code?: unknown }).code === "string"
+          ? (error as { code: string }).code
+          : undefined
       const saved = await this.repository.save({
         ...base,
         status: "failed",
         errorMessage: errorMessage(error),
         updatedAt: nowFor(this.options),
       })
-      return { sourceText: input.sourceText, translatedText: input.sourceText, sourceHash: input.sourceHash, status: "failed", cache: saved }
+      return { sourceText: input.sourceText, translatedText: input.sourceText, sourceHash: input.sourceHash, status: "failed", cache: saved, errorCode, providerCalled: true }
     }
   }
 }

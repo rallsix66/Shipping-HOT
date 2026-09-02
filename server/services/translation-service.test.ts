@@ -12,6 +12,7 @@ import {
   normalizeTranslationText,
   translationSourceHash,
 } from "./translation-service"
+import type { TranslationRequest } from "#/providers/contracts"
 import { initShippingTables } from "#/database/shipping"
 import { TranslationRepository } from "#/database/translation"
 import { FakeTranslationProvider } from "#/providers/translation/fake-provider"
@@ -191,6 +192,29 @@ describe("translation service T1 foundation", () => {
     expect(provider.calls).toHaveLength(1)
     expect(item).toEqual(originalItem)
     expect(originalEvent).toEqual(originalEventCopy)
+    native.close()
+  })
+
+  it("protects literals at the Provider boundary while hashing and persisting the original source", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const calls: string[] = []
+    const provider = {
+      providerId: "deepseek",
+      model: "deepseek-v4-flash",
+      translate: async (request: TranslationRequest) => {
+        calls.push(request.sourceText)
+        return { translatedText: `译文 ${request.sourceText}`, usage: { promptTokens: 12, completionTokens: 5, totalTokens: 17 } }
+      },
+    }
+    const source = { entityType: "feed_item", entityId: "feed-1", fieldName: "title", sourceText: "Voyage AB123 reaches SGSIN: https://example.com/1", targetLanguage: "zh-CN" }
+    const service = new TranslationService(new TranslationRepository(database), provider, { now: () => "2026-09-02T00:00:00.000Z" })
+    const result = await service.translate(source)
+    expect(result).toMatchObject({ status: "succeeded", translatedText: `译文 ${source.sourceText}`, providerCalled: true, usage: { promptTokens: 12, completionTokens: 5 } })
+    expect(calls).toHaveLength(1)
+    expect(calls[0]).not.toContain("AB123")
+    expect(calls[0]).not.toContain("https://example.com/1")
+    expect(result.sourceHash).toBe(translationSourceHash({ ...source, sourceText: source.sourceText }))
     native.close()
   })
 

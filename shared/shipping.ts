@@ -383,6 +383,23 @@ export interface ShippingSettings {
   }
   retentionDays: number
   calendarSync?: CalendarCoverage[]
+  translation?: TranslationSettings
+}
+
+export interface TranslationSettings {
+  enabled: boolean
+  providerId: "deepseek"
+  model: "deepseek-v4-flash"
+  targetLanguage: string
+  monthlyBudget: number
+}
+
+export const defaultTranslationSettings: TranslationSettings = {
+  enabled: false,
+  providerId: "deepseek",
+  model: "deepseek-v4-flash",
+  targetLanguage: "zh-CN",
+  monthlyBudget: 0,
 }
 
 export interface WeatherDetail {

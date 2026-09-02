@@ -1,4 +1,4 @@
-import type { DataProvenance, FeedItem, Port, ShippingEvent, ShippingSettings, ShippingSnapshot, Vessel, Voyage } from "./shipping"
+import { type DataProvenance, type FeedItem, type Port, type ShippingEvent, type ShippingSettings, type ShippingSnapshot, type Vessel, type Voyage, defaultTranslationSettings } from "./shipping"
 import { sourceScopedEventDedupeKey } from "./shipping"
 import { calculateDelayMinutes } from "./shipping-rules"
 
@@ -112,6 +112,7 @@ export const mockSettings: ShippingSettings = {
   providerEnabled: true,
   eventThresholds: { anchoredHours: 2, delayMinutes: 60, congestionLevel: "high" },
   retentionDays: 30,
+  translation: structuredClone(defaultTranslationSettings),
 }
 
 export function createMockSnapshot(): ShippingSnapshot {

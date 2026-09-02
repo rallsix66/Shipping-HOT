@@ -43,4 +43,11 @@ describe("fileSecretStore", () => {
     await expect(store.source("gfw")).resolves.toBe("environment")
     await expect(store.redacted("gfw")).resolves.toEqual({ providerId: "gfw", configured: true, source: "environment", maskedLast4: "****5678" })
   })
+
+  it("maps DeepSeek to DEEPSEEK_API_KEY", async () => {
+    const store = await testStore({ DEEPSEEK_API_KEY: "deepseek-key-5678" })
+    await expect(store.get("deepseek")).resolves.toBe("deepseek-key-5678")
+    await expect(store.source("deepseek")).resolves.toBe("environment")
+    await expect(store.redacted("deepseek")).resolves.toEqual({ providerId: "deepseek", configured: true, source: "environment", maskedLast4: "****5678" })
+  })
 })

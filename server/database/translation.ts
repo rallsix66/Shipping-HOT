@@ -14,6 +14,13 @@ export interface TranslationCacheExactLookup extends TranslationCacheLookup {
   model: string
 }
 
+export interface TranslationCacheStatistics {
+  total: number
+  succeeded: number
+  pending: number
+  failed: number
+}
+
 interface TranslationCacheRow {
   id: string
   entity_type: string
@@ -71,6 +78,21 @@ function toRecord(row: TranslationCacheRow): TranslationCacheRecord {
 /** SQLite boundary for Translation cache rows. It never calls a Provider. */
 export class TranslationRepository {
   constructor(private readonly db: Database) {}
+
+  async getStatistics(providerId?: string): Promise<TranslationCacheStatistics> {
+    const result = await this.db.prepare(`
+      SELECT status, COUNT(*) AS count
+      FROM translation_cache
+      ${providerId ? "WHERE provider = ?" : ""}
+      GROUP BY status
+    `).all(...(providerId ? [providerId] : []))
+    const counts = { total: 0, succeeded: 0, pending: 0, failed: 0 }
+    for (const row of rows<{ status?: string, count?: number }>(result)) {
+      if (row.status === "succeeded" || row.status === "pending" || row.status === "failed") counts[row.status] = Number(row.count ?? 0)
+    }
+    counts.total = counts.succeeded + counts.pending + counts.failed
+    return counts
+  }
 
   async findExactSuccessful(input: TranslationCacheExactLookup): Promise<TranslationCacheRecord | undefined> {
     const result = await this.db.prepare(`

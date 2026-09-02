@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto"
 import type { Database } from "db0"
-import type { DatabasePersistenceStatus, ShippingSettings } from "@shared/shipping"
+import { type DatabasePersistenceStatus, type ShippingSettings, defaultTranslationSettings } from "@shared/shipping"
 import { p0FoundationMigration } from "#/database/migrations/001-p0-foundation"
 import { watchlistIsolationMigration } from "#/database/migrations/002-watchlist-isolation"
 import { p1aPortDirectoryMigration } from "#/database/migrations/003-p1a-port-directory"
@@ -28,6 +28,7 @@ export const defaultShippingSettings: ShippingSettings = {
   },
   retentionDays: 30,
   calendarSync: [],
+  translation: structuredClone(defaultTranslationSettings),
 }
 
 interface AppMetadataRow {
