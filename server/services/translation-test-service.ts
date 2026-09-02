@@ -54,6 +54,7 @@ export async function runTranslationTest(input: TranslationTestInput): Promise<T
     fieldName: "summary",
     sourceText: TRANSLATION_TEST_SOURCE_TEXT,
     targetLanguage: gate.settings.targetLanguage,
+    protectedTerms: ["TEST STAR"],
   })
   const estimatedCost = outcome.providerCalled ? estimateDeepSeekCost(outcome.usage, now) : 0
   await new RuntimeRepository(input.database).recordProviderUsage({
@@ -67,8 +68,6 @@ export async function runTranslationTest(input: TranslationTestInput): Promise<T
     charactersOut: outcome.providerCalled ? outcome.translatedText.length : undefined,
     tokensIn: outcome.usage?.promptTokens,
     tokensOut: outcome.usage?.completionTokens,
-    promptCacheHitTokens: outcome.usage?.promptCacheHitTokens,
-    promptCacheMissTokens: outcome.usage?.promptCacheMissTokens,
     estimatedCost,
     currency: TRANSLATION_CURRENCY,
     pricingReference: "deepseek-official-2026-09-02",

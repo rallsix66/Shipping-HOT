@@ -84,25 +84,21 @@ export function translationBudgetWindow(now = new Date()): { from: string, to: s
   return { from: from.toISOString(), to: to.toISOString() }
 }
 
-function emptyUsage(): TranslationUsageAggregate {
-  return { requestCount: 0, successCount: 0, failureCount: 0, cacheHitCount: 0, charactersIn: 0, charactersOut: 0, tokensIn: 0, tokensOut: 0, estimatedCost: 0, currency: TRANSLATION_CURRENCY }
-}
-
 export async function currentTranslationUsage(database: Database, now = new Date()): Promise<TranslationUsageAggregate> {
   const window = translationBudgetWindow(now)
-  const rows = await new RuntimeRepository(database).listProviderUsage({ providerId: TRANSLATION_PROVIDER_ID, capability: TRANSLATION_CAPABILITY, windowStartFrom: window.from, windowStartTo: window.to })
-  return rows.reduce((aggregate, row) => ({
-    requestCount: aggregate.requestCount + row.requestCount,
-    successCount: aggregate.successCount + row.successCount,
-    failureCount: aggregate.failureCount + row.failureCount,
-    cacheHitCount: aggregate.cacheHitCount + row.cacheHitCount,
-    charactersIn: aggregate.charactersIn + (row.charactersIn ?? 0),
-    charactersOut: aggregate.charactersOut + (row.charactersOut ?? 0),
-    tokensIn: aggregate.tokensIn + (row.tokensIn ?? 0),
-    tokensOut: aggregate.tokensOut + (row.tokensOut ?? 0),
-    estimatedCost: aggregate.estimatedCost + (row.estimatedCost ?? 0),
-    currency: row.currency ?? aggregate.currency,
-  }), emptyUsage())
+  const aggregate = await new RuntimeRepository(database).aggregateProviderUsage({ providerId: TRANSLATION_PROVIDER_ID, capability: TRANSLATION_CAPABILITY, windowStartFrom: window.from, windowStartTo: window.to })
+  return {
+    requestCount: aggregate.requestCount,
+    successCount: aggregate.successCount,
+    failureCount: aggregate.failureCount,
+    cacheHitCount: aggregate.cacheHitCount,
+    charactersIn: aggregate.charactersIn,
+    charactersOut: aggregate.charactersOut,
+    tokensIn: aggregate.tokensIn,
+    tokensOut: aggregate.tokensOut,
+    estimatedCost: aggregate.estimatedCost,
+    currency: aggregate.currency ?? TRANSLATION_CURRENCY,
+  }
 }
 
 async function secretMetadata(secretStore: SecretStore) {
@@ -149,9 +145,16 @@ export async function readTranslationStatus(database: Database, settingsValue: S
     state = "secret_missing"
     gateCode = "translation_secret_missing"
   }
-  const rows = await new RuntimeRepository(database).listProviderUsage({ providerId: TRANSLATION_PROVIDER_ID, capability: TRANSLATION_CAPABILITY, limit: 5000 })
-  const lastErrorCode = rows.find(row => row.errorCode)?.errorCode
-  const lastCallAt = rows.map(row => row.lastCalledAt).filter((value): value is string => Boolean(value)).sort().at(-1)
+  const runtimeRepository = new RuntimeRepository(database)
+  const latestError = await runtimeRepository.findLatestProviderUsage({
+    providerId: TRANSLATION_PROVIDER_ID,
+    capability: TRANSLATION_CAPABILITY,
+    errorsOnly: true,
+  })
+  const latestUsage = await runtimeRepository.aggregateProviderUsage({
+    providerId: TRANSLATION_PROVIDER_ID,
+    capability: TRANSLATION_CAPABILITY,
+  })
   return {
     enabled: settings.enabled,
     providerId: TRANSLATION_PROVIDER_ID,
@@ -165,8 +168,8 @@ export async function readTranslationStatus(database: Database, settingsValue: S
     currency: usage.currency,
     cache,
     usage,
-    lastCallAt,
-    lastErrorCode,
+    lastCallAt: latestUsage.lastCalledAt,
+    lastErrorCode: latestError?.errorCode,
     state,
     gateCode,
   }

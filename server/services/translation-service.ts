@@ -122,6 +122,18 @@ function errorMessage(error: unknown): string {
   return message.replace(/\b(?:api[-_ ]?key|authorization|bearer|token|secret)\b[^\r\n]{0,256}/gi, "[redacted]").slice(0, 500)
 }
 
+const explicitTranslationWrappers = [
+  /^\s*Translation\s*:\s*/i,
+  /^\s*Here is (?:the )?translation\s*:\s*/i,
+  /^\s*Translated text\s*:\s*/i,
+  /^\s*翻译如下[:：]\s*/,
+  /^\s*译文[:：]\s*/,
+]
+
+function hasExplicitTranslationWrapper(value: string): boolean {
+  return explicitTranslationWrappers.some(pattern => pattern.test(value))
+}
+
 function emptyOutcome(sourceText: string, sourceHash: string, status: Exclude<TranslationOutcomeStatus, "succeeded">): TranslationOutcome {
   return { sourceText, translatedText: sourceText, sourceHash, status, providerCalled: false }
 }
@@ -272,6 +284,7 @@ export class TranslationService {
         fieldName: input.fieldName,
       })
       if (!result.translatedText.trim()) throw new ProviderError("provider_contract_changed", "translation_provider_empty_result")
+      if (hasExplicitTranslationWrapper(result.translatedText)) throw new ProviderError("provider_contract_changed", "translation_provider_wrapper_output")
       const translatedText = restoreAndValidateProtectedTranslation(protectedSource, result.translatedText)
       const saved = await this.repository.save({
         ...base,

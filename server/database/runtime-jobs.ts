@@ -47,9 +47,6 @@ export interface ProviderUsagePatch {
   charactersOut?: number
   tokensIn?: number
   tokensOut?: number
-  promptCacheHitTokens?: number
-  promptCacheMissTokens?: number
-  completionTokens?: number
   estimatedCost?: number
   currency?: string
   pricingReference?: string
@@ -64,6 +61,27 @@ export interface ProviderUsageListOptions {
   windowStartFrom?: string
   windowStartTo?: string
   limit?: number
+}
+
+export type ProviderUsageAggregateOptions = Omit<ProviderUsageListOptions, "limit">
+
+export interface ProviderUsageAggregate {
+  requestCount: number
+  successCount: number
+  failureCount: number
+  recordsCount: number
+  cacheHitCount: number
+  charactersIn: number
+  charactersOut: number
+  tokensIn: number
+  tokensOut: number
+  estimatedCost: number
+  currency?: string
+  lastCalledAt?: string
+}
+
+export interface ProviderUsageLatestOptions extends ProviderUsageAggregateOptions {
+  errorsOnly?: boolean
 }
 
 interface ProviderRuntimeRow {
@@ -116,6 +134,21 @@ interface ProviderUsageRow {
   error_code?: string | null
 }
 
+interface ProviderUsageAggregateRow {
+  request_count?: number | null
+  success_count?: number | null
+  failure_count?: number | null
+  records_count?: number | null
+  cache_hit_count?: number | null
+  characters_in?: number | null
+  characters_out?: number | null
+  tokens_in?: number | null
+  tokens_out?: number | null
+  estimated_cost?: number | null
+  currency?: string | null
+  last_called_at?: string | null
+}
+
 function rows<T>(value: unknown): T[] {
   if (Array.isArray(value)) return value as T[]
   if (value && typeof value === "object" && Array.isArray((value as { results?: unknown[] }).results)) {
@@ -161,24 +194,6 @@ function toSyncRun(row: SyncRunRow): SyncRunRecord {
 }
 
 function toProviderUsage(row: ProviderUsageRow): ProviderUsageRecord {
-  const promptCacheHitTokens = { value: 0 }
-  const promptCacheMissTokens = { value: 0 }
-  let sourceScope: string | undefined
-  if (row.source_scope) {
-    const entries = row.source_scope.split("\n")
-    const decoded: string[] = []
-    for (const entry of entries) {
-      try {
-        const value = JSON.parse(entry) as { sourceScope?: unknown, promptCacheHitTokens?: unknown, promptCacheMissTokens?: unknown }
-        if (typeof value.sourceScope === "string") decoded.push(value.sourceScope)
-        if (typeof value.promptCacheHitTokens === "number") promptCacheHitTokens.value += value.promptCacheHitTokens
-        if (typeof value.promptCacheMissTokens === "number") promptCacheMissTokens.value += value.promptCacheMissTokens
-      } catch {
-        decoded.push(entry)
-      }
-    }
-    sourceScope = decoded.at(-1)
-  }
   return {
     id: row.id,
     providerId: row.provider_id,
@@ -193,15 +208,73 @@ function toProviderUsage(row: ProviderUsageRow): ProviderUsageRecord {
     charactersOut: row.characters_out ?? undefined,
     tokensIn: row.tokens_in ?? undefined,
     tokensOut: row.tokens_out ?? undefined,
-    promptCacheHitTokens: promptCacheHitTokens.value || undefined,
-    promptCacheMissTokens: promptCacheMissTokens.value || undefined,
-    completionTokens: row.tokens_out ?? undefined,
     estimatedCost: row.estimated_cost ?? undefined,
     currency: row.currency ?? undefined,
     pricingReference: row.pricing_reference ?? undefined,
-    sourceScope,
+    sourceScope: decodeSourceScope(row.source_scope),
     lastCalledAt: row.last_called_at ?? undefined,
     errorCode: row.error_code ?? undefined,
+  }
+}
+
+function decodeSourceScope(value: string | null | undefined): string | undefined {
+  if (!value) return undefined
+  let latest: string | undefined
+  for (const entry of value.split("\n")) {
+    if (!entry) continue
+    if (entry.trimStart().startsWith("{")) {
+      try {
+        const legacy = JSON.parse(entry) as { sourceScope?: unknown }
+        if (legacy && typeof legacy === "object" && !Array.isArray(legacy) && typeof legacy.sourceScope === "string") {
+          latest = legacy.sourceScope
+        }
+        continue
+      } catch {
+        // Preserve malformed historical literals; valid legacy JSON is decoded above.
+      }
+    }
+    latest = entry
+  }
+  return latest
+}
+
+function usageWhere(options: ProviderUsageAggregateOptions | ProviderUsageLatestOptions): { where: string, params: (string | number)[] } {
+  const clauses: string[] = []
+  const params: (string | number)[] = []
+  if (options.providerId) {
+    clauses.push("provider_id = ?")
+    params.push(options.providerId)
+  }
+  if (options.capability) {
+    clauses.push("capability = ?")
+    params.push(options.capability)
+  }
+  if (options.windowStartFrom) {
+    clauses.push("window_start >= ?")
+    params.push(options.windowStartFrom)
+  }
+  if (options.windowStartTo) {
+    clauses.push("window_start < ?")
+    params.push(options.windowStartTo)
+  }
+  if ("errorsOnly" in options && options.errorsOnly) clauses.push("error_code IS NOT NULL")
+  return { where: clauses.length ? ` WHERE ${clauses.join(" AND ")}` : "", params }
+}
+
+function toProviderUsageAggregate(row?: ProviderUsageAggregateRow): ProviderUsageAggregate {
+  return {
+    requestCount: Number(row?.request_count ?? 0),
+    successCount: Number(row?.success_count ?? 0),
+    failureCount: Number(row?.failure_count ?? 0),
+    recordsCount: Number(row?.records_count ?? 0),
+    cacheHitCount: Number(row?.cache_hit_count ?? 0),
+    charactersIn: Number(row?.characters_in ?? 0),
+    charactersOut: Number(row?.characters_out ?? 0),
+    tokensIn: Number(row?.tokens_in ?? 0),
+    tokensOut: Number(row?.tokens_out ?? 0),
+    estimatedCost: Number(row?.estimated_cost ?? 0),
+    currency: row?.currency ?? undefined,
+    lastCalledAt: row?.last_called_at ?? undefined,
   }
 }
 
@@ -261,29 +334,42 @@ export class RuntimeRepository {
   }
 
   async listProviderUsage(options: ProviderUsageListOptions = {}): Promise<ProviderUsageRecord[]> {
-    const clauses: string[] = []
-    const params: (string | number)[] = []
-    if (options.providerId) {
-      clauses.push("provider_id = ?")
-      params.push(options.providerId)
-    }
-    if (options.capability) {
-      clauses.push("capability = ?")
-      params.push(options.capability)
-    }
-    if (options.windowStartFrom) {
-      clauses.push("window_start >= ?")
-      params.push(options.windowStartFrom)
-    }
-    if (options.windowStartTo) {
-      clauses.push("window_start < ?")
-      params.push(options.windowStartTo)
-    }
+    const { where, params } = usageWhere(options)
     const boundedLimit = Math.max(1, Math.min(Math.floor(options.limit ?? 500), 5000))
     params.push(boundedLimit)
-    const where = clauses.length ? ` WHERE ${clauses.join(" AND ")}` : ""
     const result = await this.db.prepare(`SELECT * FROM provider_usage${where} ORDER BY window_start DESC, provider_id ASC, capability ASC LIMIT ?`).all(...params)
     return rows<ProviderUsageRow>(result).map(toProviderUsage)
+  }
+
+  async aggregateProviderUsage(options: ProviderUsageAggregateOptions = {}): Promise<ProviderUsageAggregate> {
+    const { where, params } = usageWhere(options)
+    const row = await this.db.prepare(`
+      SELECT
+        COALESCE(SUM(request_count), 0) AS request_count,
+        COALESCE(SUM(success_count), 0) AS success_count,
+        COALESCE(SUM(failure_count), 0) AS failure_count,
+        COALESCE(SUM(records_count), 0) AS records_count,
+        COALESCE(SUM(cache_hit_count), 0) AS cache_hit_count,
+        COALESCE(SUM(characters_in), 0) AS characters_in,
+        COALESCE(SUM(characters_out), 0) AS characters_out,
+        COALESCE(SUM(tokens_in), 0) AS tokens_in,
+        COALESCE(SUM(tokens_out), 0) AS tokens_out,
+        COALESCE(SUM(estimated_cost), 0) AS estimated_cost,
+        MAX(currency) AS currency,
+        MAX(last_called_at) AS last_called_at
+      FROM provider_usage${where}
+    `).get(...params) as ProviderUsageAggregateRow | undefined
+    return toProviderUsageAggregate(row)
+  }
+
+  async findLatestProviderUsage(options: ProviderUsageLatestOptions = {}): Promise<ProviderUsageRecord | undefined> {
+    const { where, params } = usageWhere(options)
+    const row = await this.db.prepare(`
+      SELECT * FROM provider_usage${where}
+      ORDER BY window_start DESC, last_called_at DESC, provider_id ASC, capability ASC
+      LIMIT 1
+    `).get(...params) as ProviderUsageRow | undefined
+    return row ? toProviderUsage(row) : undefined
   }
 
   async recordProviderUsage(patch: ProviderUsagePatch): Promise<void> {
@@ -291,9 +377,7 @@ export class RuntimeRepository {
     const windowStart = `${calledAt.slice(0, 13)}:00:00.000Z`
     const id = `usage:${patch.providerId}:${patch.capability}:${windowStart}`
     const request = patch.request !== false
-    const sourceScope = (patch.sourceScope || patch.promptCacheHitTokens !== undefined || patch.promptCacheMissTokens !== undefined)
-      ? JSON.stringify({ sourceScope: patch.sourceScope, promptCacheHitTokens: patch.promptCacheHitTokens, promptCacheMissTokens: patch.promptCacheMissTokens })
-      : undefined
+    const sourceScope = patch.sourceScope
     await this.db.prepare(`
       INSERT INTO provider_usage (
         id, provider_id, capability, window_start, request_count, success_count, failure_count, records_count,
@@ -313,13 +397,9 @@ export class RuntimeRepository {
         estimated_cost = COALESCE(provider_usage.estimated_cost, 0) + COALESCE(excluded.estimated_cost, 0),
         currency = COALESCE(excluded.currency, provider_usage.currency),
         pricing_reference = COALESCE(excluded.pricing_reference, provider_usage.pricing_reference),
-        source_scope = CASE
-          WHEN excluded.source_scope IS NULL THEN provider_usage.source_scope
-          WHEN provider_usage.source_scope IS NULL THEN excluded.source_scope
-          ELSE provider_usage.source_scope || char(10) || excluded.source_scope
-        END,
+        source_scope = COALESCE(excluded.source_scope, provider_usage.source_scope),
         last_called_at = COALESCE(excluded.last_called_at, provider_usage.last_called_at),
-        error_code = excluded.error_code
+        error_code = COALESCE(excluded.error_code, provider_usage.error_code)
     `).run(
       id,
       patch.providerId,

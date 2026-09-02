@@ -89,9 +89,6 @@ export interface ProviderUsageRecord {
   charactersOut?: number
   tokensIn?: number
   tokensOut?: number
-  promptCacheHitTokens?: number
-  promptCacheMissTokens?: number
-  completionTokens?: number
   estimatedCost?: number
   currency?: string
   pricingReference?: string

@@ -218,6 +218,16 @@ describe("translation service T1 foundation", () => {
     native.close()
   })
 
+  it.each(["Translation: translated text", "Here is the translation: translated text", "Translated text: translated text", "翻译如下：译文", "译文：译文"])("rejects the explicit provider wrapper %s", async (wrapper) => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const provider = new FakeTranslationProvider({ translateText: () => wrapper })
+    const source = { entityType: "feed_item", entityId: "feed-1", fieldName: "title", sourceText: "Port delay", targetLanguage: "zh-CN" }
+    const result = await new TranslationService(new TranslationRepository(database), provider).translate(source)
+    expect(result).toMatchObject({ status: "failed", translatedText: source.sourceText, errorCode: "provider_contract_changed", cache: { status: "failed" } })
+    native.close()
+  })
+
   it("has a provider-free cache read path", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")

@@ -4,10 +4,12 @@ import { describe, expect, it } from "vitest"
 import type { ShippingSettings } from "@shared/shipping"
 import { assertTranslationReady, currentTranslationUsage, readTranslationStatus, translationBudgetWindow } from "./translation-settings"
 import { TRANSLATION_TEST_SOURCE_TEXT, isAllowedTranslationTestBody, runTranslationTest } from "./translation-test-service"
-import type { SecretSource, SecretStore } from "#/providers/contracts"
+import type { SecretSource, SecretStore, TranslationRequest } from "#/providers/contracts"
 import { FakeTranslationProvider } from "#/providers/translation/fake-provider"
 import { initShippingTables } from "#/database/shipping"
 import { RuntimeRepository } from "#/database/runtime-jobs"
+import { TranslationRepository } from "#/database/translation"
+import { TranslationService } from "#/services/translation-service"
 
 function createNativeDatabase() {
   const native = new NativeDatabase(":memory:")
@@ -82,11 +84,17 @@ describe("translation T2 settings, budget, usage, and safe test runner", () => {
   it("runs the fixed test only with positive budget and records success, then hits cache without provider work", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
-    const provider = new FakeTranslationProvider({ providerId: "deepseek", model: "deepseek-v4-flash", translateText: request => `[zh] ${request.sourceText}` })
+    let protectedRequest: TranslationRequest | undefined
+    const provider = new FakeTranslationProvider({ providerId: "deepseek", model: "deepseek-v4-flash", translateText: (request) => {
+      protectedRequest = request
+      return `[zh] ${request.sourceText}`
+    } })
     const input = { database, settings: settings(), secretStore: new TestSecretStore("secret-value"), provider, now: new Date("2026-09-02T12:00:00.000Z") }
     const first = await runTranslationTest(input)
     expect(first).toMatchObject({ ok: true, sourceText: TRANSLATION_TEST_SOURCE_TEXT, cacheHit: false, estimatedCost: 0 })
     expect(first.translatedText).toContain("AB123")
+    expect(first.translatedText).toContain("TEST STAR")
+    expect(protectedRequest?.sourceText).not.toContain("TEST STAR")
     expect(provider.calls).toHaveLength(1)
     const second = await runTranslationTest(input)
     expect(second).toMatchObject({ ok: true, cacheHit: true, translatedText: first.translatedText })
@@ -95,6 +103,64 @@ describe("translation T2 settings, budget, usage, and safe test runner", () => {
     const status = await readTranslationStatus(database, input.settings, input.secretStore, input.now)
     expect(status).toMatchObject({ enabled: true, configured: true, secretSource: "environment", maskedLast4: "****alue", state: "ready", cache: { succeeded: 1, failed: 0 } })
     expect(JSON.stringify(status)).not.toContain("secret-value")
+    native.close()
+  })
+
+  it("aggregates the complete month in SQL beyond the bounded detail-list limit and gates before a call", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const repository = new RuntimeRepository(database)
+    await repository.recordProviderUsage({ providerId: "deepseek", capability: "translation", calledAt: "2026-08-31T23:00:00.000Z", request: true, succeeded: true, estimatedCost: 10, currency: "USD", sourceScope: "translation_test" })
+    await repository.recordProviderUsage({ providerId: "deepseek", capability: "translation", calledAt: "2026-10-01T00:00:00.000Z", request: true, succeeded: true, estimatedCost: 10, currency: "USD", sourceScope: "translation_test" })
+    for (let index = 0; index < 600; index += 1) {
+      await repository.recordProviderUsage({
+        providerId: "deepseek",
+        capability: "translation",
+        calledAt: new Date(Date.UTC(2026, 8, 1, index)).toISOString(),
+        request: true,
+        succeeded: true,
+        estimatedCost: 0.25,
+        currency: "USD",
+        sourceScope: "translation_test",
+      })
+    }
+    const window = translationBudgetWindow(new Date("2026-09-20T12:00:00.000Z"))
+    const detailRows = await repository.listProviderUsage({ providerId: "deepseek", capability: "translation", windowStartFrom: window.from, windowStartTo: window.to })
+    const aggregate = await repository.aggregateProviderUsage({ providerId: "deepseek", capability: "translation", windowStartFrom: window.from, windowStartTo: window.to })
+    expect(detailRows).toHaveLength(500)
+    expect(aggregate).toMatchObject({ requestCount: 600, successCount: 600, failureCount: 0, estimatedCost: 150, currency: "USD" })
+    expect(await currentTranslationUsage(database, new Date("2026-09-20T12:00:00.000Z"))).toMatchObject({ requestCount: 600, successCount: 600, estimatedCost: 150 })
+
+    const provider = new FakeTranslationProvider({ providerId: "deepseek", model: "deepseek-v4-flash" })
+    await expect(runTranslationTest({
+      database,
+      settings: settings({ enabled: true, providerId: "deepseek", model: "deepseek-v4-flash", targetLanguage: "zh-CN", monthlyBudget: 150 }),
+      secretStore: new TestSecretStore("secret-value"),
+      provider,
+      now: new Date("2026-09-20T12:00:00.000Z"),
+    })).rejects.toMatchObject({ code: "translation_budget_exhausted" })
+    expect(provider.calls).toHaveLength(0)
+    native.close()
+  })
+
+  it("keeps provider-free successful cache readable after budget exhaustion while the fixed test gate stays closed", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const provider = new FakeTranslationProvider({ providerId: "deepseek", model: "deepseek-v4-flash" })
+    const now = new Date("2026-09-20T12:00:00.000Z")
+    const input = { database, settings: settings({ enabled: true, providerId: "deepseek", model: "deepseek-v4-flash", targetLanguage: "zh-CN", monthlyBudget: 1 }), secretStore: new TestSecretStore("secret-value"), provider, now }
+    const first = await runTranslationTest(input)
+    await new RuntimeRepository(database).recordProviderUsage({ providerId: "deepseek", capability: "translation", calledAt: now.toISOString(), request: true, succeeded: true, estimatedCost: 1, currency: "USD", sourceScope: "translation_test" })
+    const cacheRead = await new TranslationService(
+      new TranslationRepository(database),
+      undefined,
+      { preference: { providerId: "deepseek", model: "deepseek-v4-flash" } },
+    ).getCachedTranslation({ entityType: "translation_test", entityId: "shipping-hot-translation-test", fieldName: "summary", sourceText: first.sourceText, targetLanguage: "zh-CN" })
+    expect(cacheRead).toMatchObject({ status: "succeeded", translatedText: first.translatedText, providerCalled: false })
+
+    const secondProvider = new FakeTranslationProvider({ providerId: "deepseek", model: "deepseek-v4-flash" })
+    await expect(runTranslationTest({ ...input, provider: secondProvider })).rejects.toMatchObject({ code: "translation_budget_exhausted" })
+    expect(secondProvider.calls).toHaveLength(0)
     native.close()
   })
 
@@ -120,7 +186,14 @@ describe("translation T2 settings, budget, usage, and safe test runner", () => {
     await expect(assertTranslationReady(settings().translation, new TestSecretStore(), 0)).rejects.toMatchObject({ code: "translation_secret_missing" })
     const window = translationBudgetWindow(new Date("2026-09-02T12:00:00.000Z"))
     await new RuntimeRepository(database).recordProviderUsage({ providerId: "deepseek", capability: "translation", calledAt: "2026-09-02T12:00:00.000Z", succeeded: true, estimatedCost: 0.25, currency: "USD", sourceScope: "translation_test" })
-    expect(await new RuntimeRepository(database).listProviderUsage({ providerId: "deepseek", capability: "translation", windowStartFrom: window.from, windowStartTo: window.to })).toMatchObject([{ estimatedCost: 0.25, sourceScope: "translation_test" }])
+    const repository = new RuntimeRepository(database)
+    expect(await repository.listProviderUsage({ providerId: "deepseek", capability: "translation", windowStartFrom: window.from, windowStartTo: window.to })).toMatchObject([{ estimatedCost: 0.25, sourceScope: "translation_test" }])
+    expect(native.prepare("SELECT source_scope FROM provider_usage WHERE provider_id = 'deepseek'").get()).toEqual({ source_scope: "translation_test" })
+    native.prepare("INSERT INTO provider_usage (id, provider_id, capability, window_start, source_scope) VALUES (?, ?, ?, ?, ?)").run("legacy-usage", "deepseek", "translation", "2026-09-02T13:00:00.000Z", JSON.stringify({ sourceScope: "translation_test", promptCacheHitTokens: 4, promptCacheMissTokens: 6 }))
+    const legacy = (await repository.listProviderUsage({ providerId: "deepseek", capability: "translation", windowStartFrom: window.from, windowStartTo: window.to })).find(row => row.id === "legacy-usage")
+    expect(legacy).toMatchObject({ sourceScope: "translation_test" })
+    expect(legacy).not.toHaveProperty("promptCacheHitTokens")
+    expect(legacy).not.toHaveProperty("promptCacheMissTokens")
     native.close()
   })
 })
