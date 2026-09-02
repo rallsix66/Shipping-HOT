@@ -64,7 +64,7 @@ describe("translation repository", () => {
     await repository.save(record({ status: "succeeded", translatedText: "港口延误", translatedAt: "2026-09-02T00:01:00.000Z" }))
 
     expect(native.prepare("SELECT COUNT(*) AS count FROM translation_cache").get()).toEqual({ count: 1 })
-    await expect(repository.findSuccessful({ entityType: "feed_item", entityId: "feed-1", fieldName: "title", sourceHash: "hash-1", targetLanguage: "zh-CN" })).resolves.toMatchObject({
+    await expect(repository.findHistoricalSuccessful({ entityType: "feed_item", entityId: "feed-1", fieldName: "title", sourceHash: "hash-1", targetLanguage: "zh-CN" })).resolves.toMatchObject({
       status: "succeeded",
       translatedText: "港口延误",
     })
@@ -82,12 +82,28 @@ describe("translation repository", () => {
     await repository.save(record({ id: "translation:failed", provider: "a-provider", model: "a-model", status: "failed", translatedText: undefined, translatedAt: undefined }))
     await repository.save(record({ id: "translation:exact", provider: "current", model: "current-v2", translatedAt: "2026-09-02T00:02:00.000Z", translatedText: "当前" }))
 
-    await expect(repository.findSuccessful({ ...lookup, provider: "current", model: "current-v2" })).resolves.toMatchObject({ translatedText: "当前" })
-    await expect(repository.findSuccessful(lookup)).resolves.toMatchObject({ translatedText: "当前" })
+    await expect(repository.findExactSuccessful({ ...lookup, provider: "current", model: "current-v2" })).resolves.toMatchObject({ translatedText: "当前" })
+    await expect(repository.findHistoricalSuccessful(lookup)).resolves.toMatchObject({ translatedText: "当前" })
 
     await repository.save(record({ id: "translation:exact", provider: "current", model: "current-v2", status: "failed", translatedText: undefined, translatedAt: undefined }))
-    await expect(repository.findSuccessful({ ...lookup, provider: "current", model: "current-v2" })).resolves.toBeUndefined()
-    await expect(repository.findSuccessful(lookup)).resolves.toMatchObject({ provider: "z-provider", translatedText: "较早" })
+    await expect(repository.findExactSuccessful({ ...lookup, provider: "current", model: "current-v2" })).resolves.toBeUndefined()
+    await expect(repository.findHistoricalSuccessful(lookup)).resolves.toMatchObject({ provider: "z-provider", translatedText: "较早" })
+    native.close()
+  })
+
+  it("uses translated_at, provider and model for deterministic historical ordering, never updated_at", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const repository = new TranslationRepository(database)
+    const lookup = { entityType: "feed_item", entityId: "feed-1", fieldName: "title", sourceHash: "hash-1", targetLanguage: "zh-CN" }
+    const translatedAt = "2026-09-02T00:00:00.000Z"
+
+    await repository.save(record({ id: "translation:provider-b", provider: "provider-b", model: "model-a", translatedAt, updatedAt: "2026-09-02T00:02:00.000Z", translatedText: "B" }))
+    await repository.save(record({ id: "translation:provider-a", provider: "provider-a", model: "model-z", translatedAt, updatedAt: "2026-09-02T00:01:00.000Z", translatedText: "A" }))
+    await expect(repository.findHistoricalSuccessful(lookup)).resolves.toMatchObject({ provider: "provider-a", model: "model-z", translatedText: "A" })
+
+    await repository.save(record({ id: "translation:provider-b", provider: "provider-b", model: "model-a", translatedAt, updatedAt: "2026-09-02T00:03:00.000Z", translatedText: "B updated" }))
+    await expect(repository.findHistoricalSuccessful(lookup)).resolves.toMatchObject({ provider: "provider-a", model: "model-z", translatedText: "A" })
     native.close()
   })
 
@@ -101,7 +117,7 @@ describe("translation repository", () => {
 
     const restarted = createNativeDatabase(path)
     await initShippingTables(restarted.database, "mock")
-    await expect(new TranslationRepository(restarted.database).findSuccessful({ entityType: "feed_item", entityId: "feed-1", fieldName: "title", sourceHash: "hash-1", targetLanguage: "zh-CN" })).resolves.toMatchObject({ translatedText: "港口延误" })
+    await expect(new TranslationRepository(restarted.database).findHistoricalSuccessful({ entityType: "feed_item", entityId: "feed-1", fieldName: "title", sourceHash: "hash-1", targetLanguage: "zh-CN" })).resolves.toMatchObject({ translatedText: "港口延误" })
     restarted.native.close()
     rmSync(directory, { recursive: true, force: true })
   })

@@ -6,6 +6,7 @@ import {
   DEFAULT_TRANSLATION_TARGET_LANGUAGE,
   FEED_TRANSLATABLE_FIELDS,
   TranslationService,
+  canonicalLanguage,
   feedTranslationSources,
   isFeedItemTranslationEligible,
   normalizeTranslationText,
@@ -83,10 +84,15 @@ describe("translation service T1 foundation", () => {
     const base = { contractVersion: "translation-faithful-v1", entityType: "feed_item", fieldName: "title", sourceLanguage: "EN_us", targetLanguage: "zh_cn", sourceText: "Port\r\ndelay" }
     const normalized = { ...base, sourceText: "Port\ndelay", sourceLanguage: "en-US", targetLanguage: "zh-CN" }
     expect(normalizeTranslationText("Ａ\r\nB\rC")).toBe("A\nB\nC")
+    expect(canonicalLanguage("EN_us")).toBe("en-US")
+    expect(canonicalLanguage("zh-hans-cn")).toBe("zh-Hans-CN")
+    expect(canonicalLanguage("en__US", "auto")).toBe("auto")
+    expect(canonicalLanguage("en__US", DEFAULT_TRANSLATION_TARGET_LANGUAGE)).toBe(DEFAULT_TRANSLATION_TARGET_LANGUAGE)
     expect(translationSourceHash(base)).toBe(translationSourceHash(normalized))
     expect(translationSourceHash({ ...base, contractVersion: "translation-faithful-v2" })).not.toBe(translationSourceHash(base))
     expect(translationSourceHash({ ...base, entityId: "feed-1", provider: "provider-one", model: "model-one" })).toBe(translationSourceHash({ ...base, entityId: "feed-2", provider: "provider-two", model: "model-two" }))
     expect(translationSourceHash({ ...base, sourceText: "Port changed" })).not.toBe(translationSourceHash(base))
+    expect(translationSourceHash({ ...base, sourceLanguage: "en__US", targetLanguage: "en__US" })).toBe(translationSourceHash({ ...base, sourceLanguage: "auto", targetLanguage: DEFAULT_TRANSLATION_TARGET_LANGUAGE }))
   })
 
   it("limits automatic Feed scope to eligible current title and summary", () => {
@@ -125,7 +131,7 @@ describe("translation service T1 foundation", () => {
     native.close()
   })
 
-  it("keeps historical cache on provider/model changes and never selects pending or failed rows", async () => {
+  it("separates historical display fallback from provider/model translation execution", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
     const repository = new TranslationRepository(database)
@@ -136,8 +142,20 @@ describe("translation service T1 foundation", () => {
     await firstService.translate(source)
 
     const secondService = new TranslationService(repository, second, { now: () => "2026-09-02T00:01:00.000Z" })
-    await expect(secondService.translate(source)).resolves.toMatchObject({ status: "succeeded", translatedText: "历史译文" })
-    expect(second.calls).toHaveLength(0)
+    const providerFreeHistoricalRead = new TranslationService(repository, undefined, { preference: { providerId: "provider-two", model: "model-two" } })
+    await expect(providerFreeHistoricalRead.getCachedTranslation(source)).resolves.toMatchObject({ status: "succeeded", translatedText: "历史译文", cache: { provider: "provider-one", model: "model-one" } })
+    await expect(secondService.translate(source)).resolves.toMatchObject({ status: "succeeded", translatedText: "新译文", cache: { provider: "provider-two", model: "model-two" } })
+    expect(second.calls).toHaveLength(1)
+    await expect(repository.findExactSuccessful({ entityType: source.entityType, entityId: source.entityId, fieldName: source.fieldName, sourceHash: (await firstService.getCachedTranslation(source)).sourceHash, targetLanguage: source.targetLanguage, provider: "provider-one", model: "model-one" })).resolves.toMatchObject({ translatedText: "历史译文" })
+    await expect(secondService.translate(source)).resolves.toMatchObject({ translatedText: "新译文" })
+    expect(second.calls).toHaveLength(1)
+
+    const newerModel = new FakeTranslationProvider({ providerId: "provider-two", model: "model-three", translateText: () => "更新模型译文" })
+    const newerModelService = new TranslationService(repository, newerModel, { now: () => "2026-09-02T00:02:00.000Z" })
+    const newerModelRead = new TranslationService(repository, undefined, { preference: { providerId: "provider-two", model: "model-three" } })
+    await expect(newerModelRead.getCachedTranslation(source)).resolves.toMatchObject({ translatedText: "新译文", cache: { model: "model-two" } })
+    await expect(newerModelService.translate(source)).resolves.toMatchObject({ translatedText: "更新模型译文", cache: { provider: "provider-two", model: "model-three" } })
+    expect(newerModel.calls).toHaveLength(1)
 
     const failedProvider = new FakeTranslationProvider({
       providerId: "provider-failed",
@@ -179,14 +197,49 @@ describe("translation service T1 foundation", () => {
   it("has a provider-free cache read path", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
-    const provider = new FakeTranslationProvider()
     const repository = new TranslationRepository(database)
-    const service = new TranslationService(repository, provider)
     const source = { entityType: "feed_item", entityId: "feed-1", fieldName: "title", sourceText: "Port delay", targetLanguage: "zh-CN" }
-    await service.translate(source)
-    const callsBeforeRead = provider.calls.length
-    await expect(service.getCachedTranslation(source)).resolves.toMatchObject({ status: "succeeded", translatedText: "[zh-CN] Port delay" })
-    expect(provider.calls).toHaveLength(callsBeforeRead)
+    const sourceHash = translationSourceHash({ entityType: source.entityType, entityId: source.entityId, fieldName: source.fieldName, sourceLanguage: "auto", targetLanguage: source.targetLanguage, sourceText: source.sourceText })
+    await repository.save({
+      id: "translation:provider-a",
+      entityType: source.entityType,
+      entityId: source.entityId,
+      fieldName: source.fieldName,
+      sourceText: source.sourceText,
+      sourceHash,
+      sourceLanguage: "auto",
+      targetLanguage: source.targetLanguage,
+      provider: "provider-a",
+      model: "model-a",
+      translatedText: "A exact",
+      translatedAt: "2026-09-02T00:00:00.000Z",
+      status: "succeeded",
+      preferred: false,
+      createdAt: "2026-09-02T00:00:00.000Z",
+      updatedAt: "2026-09-02T00:00:00.000Z",
+    })
+    await repository.save({
+      id: "translation:provider-b",
+      entityType: source.entityType,
+      entityId: source.entityId,
+      fieldName: source.fieldName,
+      sourceText: source.sourceText,
+      sourceHash,
+      sourceLanguage: "auto",
+      targetLanguage: source.targetLanguage,
+      provider: "provider-b",
+      model: "model-b",
+      translatedText: "B historical",
+      translatedAt: "2026-09-02T00:01:00.000Z",
+      status: "succeeded",
+      preferred: false,
+      createdAt: "2026-09-02T00:01:00.000Z",
+      updatedAt: "2026-09-02T00:01:00.000Z",
+    })
+    const exactRead = new TranslationService(repository, undefined, { preference: { providerId: "provider-a", model: "model-a" } })
+    await expect(exactRead.getCachedTranslation(source)).resolves.toMatchObject({ status: "succeeded", translatedText: "A exact" })
+    const historicalRead = new TranslationService(repository, undefined, { preference: { providerId: "provider-c", model: "model-c" } })
+    await expect(historicalRead.getCachedTranslation(source)).resolves.toMatchObject({ status: "succeeded", translatedText: "B historical" })
     native.close()
   })
 })

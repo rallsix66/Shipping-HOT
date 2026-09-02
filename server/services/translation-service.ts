@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto"
 import type { FeedItem } from "@shared/shipping"
 import type { TranslationCacheRecord, TranslationProvider } from "#/providers/contracts"
-import type { TranslationCacheLookup, TranslationRepository } from "#/database/translation"
+import type { TranslationCacheExactLookup, TranslationCacheLookup, TranslationRepository } from "#/database/translation"
 
 export const TRANSLATION_CONTRACT_VERSION = "translation-faithful-v1"
 export const DEFAULT_TRANSLATION_TARGET_LANGUAGE = "zh-CN"
@@ -31,13 +31,19 @@ export interface TranslationServiceOptions {
   targetLanguage?: string
   sourceLanguage?: string
   contractVersion?: string
+  preference?: TranslationPreference
   now?: () => string
+}
+
+export interface TranslationPreference {
+  providerId?: string
+  model?: string
 }
 
 function stableJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`
   if (value && typeof value === "object") {
-    return `{${Object.entries(value as Record<string, unknown>).sort(([left], [right]) => left.localeCompare(right)).map(([key, child]) => `${JSON.stringify(key)}:${stableJson(child)}`).join(",")}}`
+    return `{${Object.entries(value as Record<string, unknown>).sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0).map(([key, child]) => `${JSON.stringify(key)}:${stableJson(child)}`).join(",")}}`
   }
   return JSON.stringify(value)
 }
@@ -47,10 +53,27 @@ export function normalizeTranslationText(sourceText: string): string {
 }
 
 export function canonicalLanguage(language: string | undefined, fallback = "auto"): string {
-  const value = (language?.trim() || fallback).replace(/_/g, "-")
-  const parts = value.split("-").filter(Boolean)
-  if (!parts.length) return fallback
-  return parts.map((part, index) => index === 0 ? part.toLocaleLowerCase() : /^[a-z]{2}$/i.test(part) ? part.toLocaleUpperCase() : part).join("-")
+  const candidate = language?.trim().replace(/_/g, "-")
+  if (!candidate) return canonicalLanguageFallback(fallback)
+  const sentinel = candidate.toLowerCase()
+  if (sentinel === "auto" || sentinel === "unknown") return sentinel
+  try {
+    return Intl.getCanonicalLocales(candidate)[0] ?? canonicalLanguageFallback(fallback)
+  } catch {
+    return canonicalLanguageFallback(fallback)
+  }
+}
+
+function canonicalLanguageFallback(fallback: string): string {
+  const candidate = fallback.trim().replace(/_/g, "-")
+  if (!candidate) return "auto"
+  const sentinel = candidate.toLowerCase()
+  if (sentinel === "auto" || sentinel === "unknown") return sentinel
+  try {
+    return Intl.getCanonicalLocales(candidate)[0] ?? candidate
+  } catch {
+    return candidate
+  }
 }
 
 export interface TranslationHashInput {
@@ -157,29 +180,49 @@ export class TranslationService {
     }
   }
 
+  private exactLookup(input: ReturnType<TranslationService["prepared"]>, provider: TranslationProvider): TranslationCacheExactLookup {
+    return {
+      ...this.lookup(input),
+      provider: provider.providerId,
+      model: provider.model,
+    }
+  }
+
+  private readPreference(): TranslationPreference | undefined {
+    if (this.options.preference) return this.options.preference
+    if (!this.provider) return undefined
+    return { providerId: this.provider.providerId, model: this.provider.model }
+  }
+
+  private cacheOutcome(input: ReturnType<TranslationService["prepared"]>, cache: TranslationCacheRecord | undefined): TranslationOutcome {
+    return cache
+      ? { sourceText: input.sourceText, translatedText: cache.translatedText ?? input.sourceText, sourceHash: input.sourceHash, status: "succeeded", cache }
+      : emptyOutcome(input.sourceText, input.sourceHash, "original")
+  }
+
   /** Provider-free read path. Failed/pending cache rows are intentionally ignored. */
   async getCachedTranslation(input: TranslationSource): Promise<TranslationOutcome> {
     const prepared = this.prepared(input)
     const lookup = this.lookup(prepared)
-    const exact = await this.repository.findSuccessful({
-      ...lookup,
-      provider: this.provider?.providerId,
-      model: this.provider?.model,
-    })
-    const cache = exact ?? await this.repository.findSuccessful(lookup)
-    return cache
-      ? { sourceText: prepared.sourceText, translatedText: cache.translatedText ?? prepared.sourceText, sourceHash: prepared.sourceHash, status: "succeeded", cache }
-      : emptyOutcome(prepared.sourceText, prepared.sourceHash, "original")
+    const preference = this.readPreference()
+    const exact = preference?.providerId && preference.model
+      ? await this.repository.findExactSuccessful({ ...lookup, provider: preference.providerId, model: preference.model })
+      : undefined
+    const cache = exact ?? await this.repository.findHistoricalSuccessful(lookup)
+    return this.cacheOutcome(prepared, cache)
   }
 
   async translate(input: TranslationSource): Promise<TranslationOutcome> {
     const prepared = this.prepared(input)
     if (!prepared.sourceText.trim()) return emptyOutcome(prepared.sourceText, prepared.sourceHash, "original")
-    const cached = await this.getCachedTranslation(prepared)
-    if (cached.status === "succeeded") return cached
-    if (!this.provider) return emptyOutcome(prepared.sourceText, prepared.sourceHash, "unconfigured")
+    const provider = this.provider
+    const exact = provider
+      ? await this.repository.findExactSuccessful(this.exactLookup(prepared, provider))
+      : undefined
+    if (exact) return this.cacheOutcome(prepared, exact)
+    if (!provider) return emptyOutcome(prepared.sourceText, prepared.sourceHash, "unconfigured")
 
-    const identity = cacheIdentity(prepared, prepared.sourceHash, prepared.targetLanguage, this.provider)
+    const identity = cacheIdentity(prepared, prepared.sourceHash, prepared.targetLanguage, provider)
     const running = this.inFlight.get(identity)
     if (running) return running
     const task = this.translateAndPersist(prepared)

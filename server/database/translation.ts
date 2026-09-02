@@ -7,8 +7,11 @@ export interface TranslationCacheLookup {
   fieldName: string
   sourceHash: string
   targetLanguage: string
-  provider?: string
-  model?: string
+}
+
+export interface TranslationCacheExactLookup extends TranslationCacheLookup {
+  provider: string
+  model: string
 }
 
 interface TranslationCacheRow {
@@ -69,27 +72,28 @@ function toRecord(row: TranslationCacheRow): TranslationCacheRecord {
 export class TranslationRepository {
   constructor(private readonly db: Database) {}
 
-  async findSuccessful(input: TranslationCacheLookup): Promise<TranslationCacheRecord | undefined> {
-    const identity = [
-      "entity_type = ?",
-      "entity_id = ?",
-      "field_name = ?",
-      "source_hash = ?",
-      "target_language = ?",
-      "status = 'succeeded'",
-    ]
-    const params: (string | number)[] = [input.entityType, input.entityId, input.fieldName, input.sourceHash, input.targetLanguage]
-    if (input.provider !== undefined && input.model !== undefined) {
-      identity.push("provider = ?", "model = ?")
-      params.push(input.provider, input.model)
-    }
+  async findExactSuccessful(input: TranslationCacheExactLookup): Promise<TranslationCacheRecord | undefined> {
     const result = await this.db.prepare(`
       SELECT *
       FROM translation_cache
-      WHERE ${identity.join(" AND ")}
+      WHERE entity_type = ? AND entity_id = ? AND field_name = ? AND source_hash = ?
+        AND target_language = ? AND provider = ? AND model = ? AND status = 'succeeded'
       ORDER BY translated_at DESC, updated_at DESC, provider ASC, model ASC, id ASC
       LIMIT 1
-    `).all(...params)
+    `).all(input.entityType, input.entityId, input.fieldName, input.sourceHash, input.targetLanguage, input.provider, input.model)
+    const row = rows<TranslationCacheRow>(result)[0]
+    return row ? toRecord(row) : undefined
+  }
+
+  async findHistoricalSuccessful(input: TranslationCacheLookup): Promise<TranslationCacheRecord | undefined> {
+    const result = await this.db.prepare(`
+      SELECT *
+      FROM translation_cache
+      WHERE entity_type = ? AND entity_id = ? AND field_name = ? AND source_hash = ?
+        AND target_language = ? AND status = 'succeeded'
+      ORDER BY translated_at DESC, provider ASC, model ASC, id ASC
+      LIMIT 1
+    `).all(input.entityType, input.entityId, input.fieldName, input.sourceHash, input.targetLanguage)
     const row = rows<TranslationCacheRow>(result)[0]
     return row ? toRecord(row) : undefined
   }

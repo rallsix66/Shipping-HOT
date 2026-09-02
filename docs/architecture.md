@@ -9,7 +9,7 @@
 ## V3 Translation T1 Foundation — 2026-09-02
 
 - `TranslationService` computes the versioned deterministic `sourceHash`; `TranslationRepository` is the SQLite boundary for the existing v11 `translation_cache` table; and `FakeTranslationProvider` returns deterministic local content without network access.
-- The Service checks exact successful provider/model cache entries before deterministic successful historical fallback, never selects pending/failed rows, returns original text when no successful cache exists, and preserves original Feed/Event/HOT facts. Automatic Feed scope is limited to eligible current `title` and `summary` fields.
+- Provider-free display reads accept only `Repository + TranslationPreference`: they select exact successful provider/model rows, then deterministic successful historical rows ordered by `translated_at DESC, provider ASC, model ASC, id ASC`; pending/failed rows are never selected. Translation execution checks only the current Provider/model exact row, calls the current Provider on a miss and persists a new row. Both paths return original text when no successful cache exists and preserve original Feed/Event/HOT facts. Automatic Feed scope is limited to eligible current `title` and `summary` fields.
 - T1 does not register a Runtime Job, add a migration, change SecretStore/settings, write provider usage, expose an API/UI, call a real Provider, or participate in Readiness. Real Providers and production Feed integration remain separately approved work.
 
 ## V3 Readiness Gate — 2026-08-29

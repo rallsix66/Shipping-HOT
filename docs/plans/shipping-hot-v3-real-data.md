@@ -2,19 +2,19 @@
 
 > 文档状态：`accepted / V3 Readiness gate implemented / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed + P3A AIS Tracking Runtime Foundation + P3B Voyage / ETA Foundation + P3 Feed Freshness Batch 1 + source-isolated Feed Runtime + Calendar/Port/Weather activation + Translation T1 Foundation implemented / Real Operational blocked on remaining capability evidence / real Translation Providers and later business phases pending`
 >
-> 审查日期：2026-08-24（Asia/Shanghai）
+> 审查日期：2026-09-02（Asia/Shanghai）
 >
-> 代码基线：`codex/shipping-hot-v3-real-data`（P3B 本轮；Node `24.15.0` / ABI `137` 基线）
+> 代码基线：`codex/shipping-hot-v3-real-data`（Translation T1 Review Repair；Node `24.15.0` / ABI `137` 基线）
 >
-> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 已完成封板，P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation 与 P3 Feed Freshness Batch 1 已实现并通过本地验证**。本阶段完成 migration v8 Voyage/ETA history、Mock VoyageProvider、`voyage_sync` Runtime Job、Repository/API/UI 和 SQLite restart persistence；P3B dual-model repair 新增 `shared/voyage-normalizer.ts`，使 P3B latest Voyage API 与 legacy Snapshot 统一读取 normalized baseline/latest/delay columns，且首个 ETA baseline 不被后续 ETA 覆盖；批次 1 新增 migration v9 Feed current/history/quarantine metadata 与 append-only history、migration v10 Feed 重分类与 observation 同步、current/history API、严格 invalid/future/expired/absent 日期边界和 Event/HOT expiry；不注册 Feed Runtime Job。Feed Background Runtime 批次 2、Calendar、Translation、AIS ETA prediction、地图、轨迹动画或商业 Voyage adapter 不在本批次实现。Closeout repair 追加两项 P3B 防护并已本地验证：Repository 拒绝非请求 `vesselId` 的 Provider 记录（`rejectedVesselIds` 计数），旧 `lastUpdatedAt` 观测不得覆盖最新航程或追加重复历史（`staleSkipped` 计数）；同日跟进修复使 Voyage Runtime `sourceUpdatedAt` 仅由被接受记录计算，且无接受记录的运行保留既有 `provider_runtime.last_source_updated_at`。Activation review repair 还新增实际 SQL/Repository zero-Mock gate、跨 Port/Weather/Feed/AIS/Voyage/Calendar 的 `providerId` identity contract、schema v11 `records_count` 与根因 failure-code propagation；不改变既有 migration。
+> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 已完成封板，P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation 与 P3 Feed Freshness Batch 1 已实现并通过本地验证**。本阶段完成 migration v8 Voyage/ETA history、Mock VoyageProvider、`voyage_sync` Runtime Job、Repository/API/UI 和 SQLite restart persistence；P3B dual-model repair 新增 `shared/voyage-normalizer.ts`，使 P3B latest Voyage API 与 legacy Snapshot 统一读取 normalized baseline/latest/delay columns，且首个 ETA baseline 不被后续 ETA 覆盖；批次 1 新增 migration v9 Feed current/history/quarantine metadata 与 append-only history、migration v10 Feed 重分类与 observation 同步、current/history API、严格 invalid/future/expired/absent 日期边界和 Event/HOT expiry；不注册 Feed Runtime Job。Feed Background Runtime 批次 2、AIS ETA prediction、地图、轨迹动画或商业 Voyage adapter 不在本批次实现；后续已单独批准并实现 Translation T1 Foundation，真实 Translation Provider 仍 deferred。Closeout repair 追加两项 P3B 防护并已本地验证：Repository 拒绝非请求 `vesselId` 的 Provider 记录（`rejectedVesselIds` 计数），旧 `lastUpdatedAt` 观测不得覆盖最新航程或追加重复历史（`staleSkipped` 计数）；同日跟进修复使 Voyage Runtime `sourceUpdatedAt` 仅由被接受记录计算，且无接受记录的运行保留既有 `provider_runtime.last_source_updated_at`。Activation review repair 还新增实际 SQL/Repository zero-Mock gate、跨 Port/Weather/Feed/AIS/Voyage/Calendar 的 `providerId` identity contract、schema v11 `records_count` 与根因 failure-code propagation；不改变既有 migration。
 >
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留。外部价格/额度是 2026-08-20 的公开页面快照；只有具体 endpoint entitlement、地区/账号资格等未确认事项保持 `unknown/pending`。
 >
-> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮 Real Data Activation 只复用已存在的 AISStream、公共 Feed、Calendarific、Portcast public-page 和 Open-Meteo 适配器，补齐 Runtime → SQLite → Repository → API 链路与 Readiness 事实状态；不创建账号、不购买服务、不添加密钥、不实现 Translation Adapter、AIS ETA prediction、地图/轨迹系统或商业 Voyage adapter。
+> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。本轮 Real Data Activation 只复用已存在的 AISStream、公共 Feed、Calendarific、Portcast public-page 和 Open-Meteo 适配器，补齐 Runtime → SQLite → Repository → API 链路与 Readiness 事实状态；不创建账号、不购买服务、不添加密钥、不实现真实 Translation Provider、AIS ETA prediction、地图/轨迹系统或商业 Voyage adapter。
 
 > V3 Readiness：本轮只建立本地安全就绪门（观测 Node/ABI、CLI 实测 pnpm、实际安装的 better-sqlite3 版本/native load、SQLite schema/Port Directory、已批准 Runtime scope、Mock-only provider configuration），通过 `GET /api/shipping/readiness` 与 `pnpm smoke:v3-readiness` 验证；HTTP 缺少 pnpm 观测时标记 skipped 且严格 Readiness 不得 ready；不执行外部 Provider 请求，不进入下一阶段。
 
-> 当前执行状态：P3 Feed Freshness Batch 1 与来源独立 Feed Background Runtime 已完成；Calendar、Port、Weather Runtime 已纳入同一受控激活链路；GFW Vessel Search、canonical identity normalization、provider-aware cache 和 Watchlist latest-MMSI target flow 已实现并通过隔离 Real live probe；Translation T1 Foundation 已实现但不进入生产 Feed 读取、Runtime、API、UI 或 Readiness。Real Mode activation smoke 与生产 HTTP smoke 已验证真实写入/读取，且 `actualMockRows` 来自自动发现所有带 `source_type` 的 Shipping HOT 业务表的 SQL/Repository 扫描并要求总数为零。当前停止在 Real Operational Readiness：Voyage 仍无真实适配器/凭据，VesselAPI search/ETA capability remains optional/unverified，AIS 无 PositionReport 观测，官方天气预警仍 pending；真实 Translation Provider 与后续业务开发仍需单独批准。
+> 当前执行状态：P3 Feed Freshness Batch 1 与来源独立 Feed Background Runtime 已完成；Calendar、Port、Weather Runtime 已纳入同一受控激活链路；GFW Vessel Search、canonical identity normalization、provider-aware cache 和 Watchlist latest-MMSI target flow 已实现并通过隔离 Real live probe；Translation T1 Foundation 已实现但不进入生产 Feed 读取、Runtime、API、UI 或 Readiness。Real Mode activation smoke 与生产 HTTP smoke 已验证真实写入/读取，且 `actualMockRows` 来自自动发现所有带 `source_type` 的 Shipping HOT 业务表的 SQL/Repository 扫描并要求总数为零。当前停止在 Real Operational Readiness：Voyage Provider path `liveVerification=verified_live`，但 focus-port coverage 为 `coverage_pending`；连续 AIS PositionReport 与 TMD/BMKG 官方天气预警均为 `verified_live`，JMA 仍 pending；真实 Translation Provider 与后续业务开发仍需单独批准。
 
 ## 1. 背景与当前问题
 
@@ -41,17 +41,17 @@ Shipping HOT V2 已经建立了 Provider、Domain、Repository、Event/HOT 和�
 
 | 模块 | 当前 Provider / 代码 | 当前真实度 | 是否持久化 | 当前问题 | V3 目标 |
 | --- | --- | --- | --- | --- | --- |
-| 船舶身份/搜索 | 无全球搜索；Real Mode 仅 `AISStreamVesselProvider`，初始 Watch Target 来自已存数据或 Mock fixture | 混合；AIS PositionReport 可真实，但默认身份种子是 Mock，当前实测无 PositionReport | 设计上写 `vessels`；当前 Node 24 实际为内存 | 无搜索；无观测时 `vessels=[]`；请求内短连接；重启可能重新 seed | VesselAPI 只负责低频 Vessel Discovery/静态元数据与已证实的补充事件；AISStream 只长期跟踪已关注 MMSI，不把 VesselAPI 当实时船位源 |
+| 船舶身份/搜索 | 无全球搜索；Real Mode 仅 `AISStreamVesselProvider`，初始 Watch Target 来自已存数据或 Mock fixture | 混合；AIS PositionReport 可真实；连续 Tracking 的最新正式 gate 已 `verified_live`，早期无观测仅为历史证据 | 设计上写 `vessels`；当前 Node 24 实际为内存 | 无搜索；无观测时 `vessels=[]`；请求内短连接；重启可能重新 seed | VesselAPI 只负责低频 Vessel Discovery/静态元数据与已证实的补充事件；AISStream 只长期跟踪已关注 MMSI，不把 VesselAPI 当实时船位源 |
 | 港口身份 | 八个 `mockPorts` 身份；Portcast 只覆盖硬编码的八个 public page URL | 混合；名称/UNLOCODE/坐标来自 fixture，部分拥堵字段真实 | 设计上写 `ports`；当前实际为内存 | provenance 被整体标为 Portcast，无法表达身份字段的 fixture 来源；全球搜索不存在 | 本地 UNECE UN/LOCODE + 中文别名 + 坐标补充目录为默认；VesselAPI Port API 只作可选 enrichment，不把 entitlement 写成默认前提 |
 | 港口拥堵 | `PortcastPublicPageProvider` | 八港部分真实 derived；7 fresh / 1 stale 是历史探测证据 | 同上 | 仅硬编码八港；公开页面脆弱；不能承诺新增港口均有拥堵数据 | 独立 Port Intelligence 能力；没有覆盖就显示“暂无真实拥堵数据” |
 | Watched AIS | AISStream | Provider 真实；连接已验证、观测仍 pending | Vessel 当前状态计划写库；当前实际为内存 | 每个 GET 打开最长 5 秒的全世界 bbox + MMSI WebSocket；多客户端会重复连接 | 长期 `AisTrackingService` 单例；只订阅已关注 MMSI，watchlist 变化增量重订阅，观测立即持久化 |
 | AIS Area | AISStream Area PositionReport + derived engine | 原始消息可真实，指标为 derived；当前外部观测 0 | `ais_port_metrics` 当前/last-known 设计，当前实际为内存 | bbox 从 fixture 坐标生成；只覆盖八港；不是官方拥堵 | 从真实 Port 坐标/配置生成并保留边界证据；只展示为 AIS 估算信号 |
 | 天气模型 | Open-Meteo Marine + Forecast | 响应真实 forecast；目标坐标来自 Mock fixture | 作为 `feed_items`；当前实际为内存 | `portWeatherConfig` 只含八港；无通用坐标路径 | 直接使用真实 Port 经纬度；30–60 分钟自动刷新；失败保留同 Provider last-known |
-| 官方气象预警 | JMA/TMD/BMKG adapters | Provider 边界存在，但 `public` 模式没有任何 `verified_live` active source | 作为 `feed_items` | 适配器存在不等于启用；当前 UI 只显示模式值 | 每源独立 live gate、生命周期、覆盖和 health；未启用明确显示“不可用/未验证” |
+| 官方气象预警 | JMA/TMD/BMKG adapters | TMD/BMKG `verified_live`，JMA `live_pending`；`public` 仅激活前两者 | 作为 `feed_items` | 适配器存在不等于启用；当前 UI 只显示模式值 | 每源独立 live gate、生命周期、覆盖和 health；未启用明确显示“不可用/未验证” |
 | 行业资讯 | The Loadstar active；Maritime Executive disabled；其他 registry 项未启用 | Loadstar 真实；Maritime Executive failed；无 Mock fallback 时边界正确 | `feed_items` 设计持久化；当前实际为内存 | 无发布时间年龄闸门、future/异常日期校验和 current/history 分层 | 拆成 Ingestion Gate、Current Feed Query Gate、HOT/Event Freshness Gate；默认 7 天，重大资讯最多 14 天，历史单独查询 |
 | 港口公告 | Shekou `/ywgg/` active；其他港口 registry 多为 pending/deferred | Shekou 页面真实；多数条目 publication time unknown | 同 Feed | 发布时间未知仍出现在 Feed；是否仍有效不可判断 | 官方公告与行业新闻分层；基于有效期/撤回状态，未知时间默认不进当前流 |
 | 国家日历 | Calendarific + 空的 Official/Manual composition | Calendarific transport/parser 真实且 partial；Official/Manual 当前没有实数据 | `calendar_events` + `settings.calendarSync` 设计；当前实际为内存 | 启动不自动同步；seed 可重置 coverage；只手工维护单年 | 启动先读库，后台维护当前年 + 下一年，约 7 天 TTL，失败保留 last-known |
-| 当前航程 | P3B `VoyageRecord` + Mock Voyage Provider；AIS Position 仍独立 | Current Voyage Foundation 已形成，真实 Voyage adapter pending | `voyages` + `voyage_eta_history` | AIS ETA 与 Provider ETA 仍不合并；无 ETA prediction/port-call enrichment | 只保存 Provider 提供的 ETA/ETD；后续另行批准真实 adapter 与 AIS/ETA 联动 |
+| 当前航程 | P3B `VoyageRecord` + Mock Voyage Provider；AIS Position 仍独立 | Voyage Provider path `verified_live`，focus-port coverage `coverage_pending` | `voyages` + `voyage_eta_history` | AIS ETA 与 Provider ETA 仍不合并；无 ETA prediction/port-call enrichment | 只保存 Provider 提供的 ETA/ETD；后续另行批准 AIS/ETA 联动与 focus-port coverage 扩展 |
 | 商业班期 | `MockScheduleProvider` | 全 Mock | `voyages` | Real Mode 也始终 operational；无真实 ScheduleProvider adapter | DCSA 规范化合同；按获准船公司逐个接入；无 Provider 时为空 |
 | Events | `detectShippingEvents()` | derived；显式 sourceId 过滤能排除多数 Mock，但 `mock-schedule` 被允许 | `events` 设计持久化；当前实际为内存 | orphan active Event 无当前 source trust 时不会 resolve/expire；混合 fixture lineage 未被识别 | 所有 evidence 必须是 real/user/derived-from-real；有明确有效期、source identity 和可追溯链 |
 | HOT | `rankHotItems()` | derived；可含 Mock schedule Event 和长期 active 的旧 Event | 查询结果，不单独持久化 | 没有强制 `all evidence real`；stale active Event 仍可出现 | 只消费通过 Real Evidence Gate 的 Event/Feed，逐条可追溯 |
@@ -72,11 +72,11 @@ Shipping HOT V2 已经建立了 Provider、Domain、Repository、Event/HOT 和�
 - `GET /api/shipping/calendar`：读取已缓存日历。
 - `POST /api/shipping/calendar/sync`：手工同步指定年/国家。
 
-Current Voyage latest API 已由 P3B 提供；Feed current/history API 与 source-isolated Feed Runtime 已由 P3 提供，Calendar、Port、Weather Runtime 已接入受控激活链路。P3A 的 bounded AIS latest-position API 与 P3B Voyage/ETA API 保持独立；真实 Voyage enrichment、官方天气预警、完整业务 Provider API、Translation 和后续业务阶段仍 deferred/pending。
+Current Voyage latest API 已由 P3B 提供；Feed current/history API 与 source-isolated Feed Runtime 已由 P3 提供，Calendar、Port、Weather Runtime 已接入受控激活链路。P3A 的 bounded AIS latest-position API 与 P3B Voyage/ETA API 保持独立；Voyage Provider path 已 `verified_live` 但 focus-port coverage 为 `coverage_pending`，TMD/BMKG 官方天气预警与连续 AIS PositionReport 已 `verified_live`，JMA 仍 pending；Translation T1 Foundation 已实现，真实 Translation Provider 和后续业务阶段仍 deferred/pending。
 
 ### 2.3 Provider 已存在但未真正启用的部分
 
-- JMA、TMD、BMKG：代码和 parser 存在，但 `public` 模式只激活 `verified_live`，当前三者均仍为 `live_pending`。
+- JMA、TMD、BMKG：代码和 parser 存在，`public` 模式当前激活已验证的 TMD/BMKG；两者为 `verified_live`，JMA 仍为 `live_pending`。
 - Maritime Executive：registry 存在但 `failed_live` 且 disabled。
 - Laem Chabang、Port Klang 官方港口公告：registry 存在但 parser pending。
 - Yantian、Nansha 官方公告：registry 存在但 deferred。
@@ -1135,7 +1135,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 
 ## 27. 实施门槛与文档后续
 
-`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation、P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation、P3 Feed Freshness Batch 1 与受控 Real Data Activation runtime slice 已获授权、实施并完成本地验证；Translation、real Voyage adapter/ETA entitlement、长期 AIS observation coverage 和官方 alert coverage 仍 pending/deferred。该 ADR 的 2026-08-29 implementation note 记录了现有 Provider 的 Runtime/SQLite/API 激活边界。该 ADR 至少覆盖：
+`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation、P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation、P3 Feed Freshness Batch 1、受控 Real Data Activation runtime slice 与 Translation T1 Foundation 已获授权、实施并完成本地验证；真实 Translation Provider 仍 deferred；Voyage Provider path 为 `verified_live` 但 focus-port coverage `coverage_pending`，连续 AIS PositionReport 与 TMD/BMKG official alerts 为 `verified_live`，JMA 仍 pending。该 ADR 的 2026-08-29 implementation note 记录了现有 Provider 的 Runtime/SQLite/API 激活边界。该 ADR 至少覆盖：
 
 - V3 real-only runtime、SQLite fail-closed/read-only 行为和已验证的单一 Node LTS。
 - VesselAPI 仅 Discovery/static metadata、AISStream 长期 tracking、UN/LOCODE 默认 Port Search，以及 provider-owned/user-owned/directory-owned/translation-owned 字段边界。
@@ -1144,7 +1144,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 - TranslationProvider 可切换合同、Settings AI 翻译中心、单一 `translation_cache` source of truth、server-only secret、`provider_usage` 和“本地统计/估算”标签。
 - Current Voyage 与 DCSA Commercial Schedule 的事实分层。
 
-后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation、P3A AIS Tracking Runtime Foundation 与 P3B Voyage / ETA Foundation 已完成；Feed、Calendar、Translation、real Voyage adapter 及后续 Provider/AI adapter 仍按单独批准范围实施。
+后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation、P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation 与 Translation T1 Foundation 已完成；真实 Translation Provider、real Voyage adapter 的 focus-port coverage 及后续 Provider/AI adapter 仍按单独批准范围实施。
 
 ## 28. 外部资料
 
