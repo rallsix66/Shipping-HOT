@@ -41,29 +41,29 @@ Shipping HOT V2 已经建立了 Provider、Domain、Repository、Event/HOT 和�
 
 | 模块 | 当前 Provider / 代码 | 当前真实度 | 是否持久化 | 当前问题 | V3 目标 |
 | --- | --- | --- | --- | --- | --- |
-| 船舶身份/搜索 | 无全球搜索；Real Mode 仅 `AISStreamVesselProvider`，初始 Watch Target 来自已存数据或 Mock fixture | 混合；AIS PositionReport 可真实；连续 Tracking 的最新正式 gate 已 `verified_live`，早期无观测仅为历史证据 | 设计上写 `vessels`；当前 Node 24 实际为内存 | 无搜索；无观测时 `vessels=[]`；请求内短连接；重启可能重新 seed | VesselAPI 只负责低频 Vessel Discovery/静态元数据与已证实的补充事件；AISStream 只长期跟踪已关注 MMSI，不把 VesselAPI 当实时船位源 |
-| 港口身份 | 八个 `mockPorts` 身份；Portcast 只覆盖硬编码的八个 public page URL | 混合；名称/UNLOCODE/坐标来自 fixture，部分拥堵字段真实 | 设计上写 `ports`；当前实际为内存 | provenance 被整体标为 Portcast，无法表达身份字段的 fixture 来源；全球搜索不存在 | 本地 UNECE UN/LOCODE + 中文别名 + 坐标补充目录为默认；VesselAPI Port API 只作可选 enrichment，不把 entitlement 写成默认前提 |
-| 港口拥堵 | `PortcastPublicPageProvider` | 八港部分真实 derived；7 fresh / 1 stale 是历史探测证据 | 同上 | 仅硬编码八港；公开页面脆弱；不能承诺新增港口均有拥堵数据 | 独立 Port Intelligence 能力；没有覆盖就显示“暂无真实拥堵数据” |
-| Watched AIS | AISStream | Provider 真实；连接已验证、观测仍 pending | Vessel 当前状态计划写库；当前实际为内存 | 每个 GET 打开最长 5 秒的全世界 bbox + MMSI WebSocket；多客户端会重复连接 | 长期 `AisTrackingService` 单例；只订阅已关注 MMSI，watchlist 变化增量重订阅，观测立即持久化 |
-| AIS Area | AISStream Area PositionReport + derived engine | 原始消息可真实，指标为 derived；当前外部观测 0 | `ais_port_metrics` 当前/last-known 设计，当前实际为内存 | bbox 从 fixture 坐标生成；只覆盖八港；不是官方拥堵 | 从真实 Port 坐标/配置生成并保留边界证据；只展示为 AIS 估算信号 |
-| 天气模型 | Open-Meteo Marine + Forecast | 响应真实 forecast；目标坐标来自 Mock fixture | 作为 `feed_items`；当前实际为内存 | `portWeatherConfig` 只含八港；无通用坐标路径 | 直接使用真实 Port 经纬度；30–60 分钟自动刷新；失败保留同 Provider last-known |
+| 船舶身份/搜索 | GFW Vessel Search + canonical identity；VesselAPI Search 可选；AISStream 只承担 AIS tracking | GFW Search/canonical identity 已完成隔离 Real live verification；VesselAPI Search 为可选能力；连续 AIS PositionReport gate 为 `verified_live` | `vessel_metadata`、`vessel_search_cache`、`vessel_watchlist` 与相关 Vessel rows 使用 SQLite | VesselAPI Search/ETA entitlement 仍按能力独立处理；AISStream 不承担全球 Vessel Search，AIS observation coverage 随关注目标变化 | GFW 负责当前真实 Vessel Search/canonical identity；VesselAPI 只作可选低频 Discovery/static metadata enrichment；AISStream 只长期跟踪已关注 MMSI，不把 VesselAPI 当实时船位源 |
+| 港口身份 | SQLite-backed Port Directory + `ShippingRepository`；Portcast 只作动态 enrichment | 初始 8 个 UN/LOCODE/坐标目录已导入；动态拥堵字段与目录身份分离 | `port_directory` 与 `ports` 使用 SQLite | Portcast public-page coverage 仍有限；没有覆盖就不能推断真实拥堵或身份字段 | 本地 UNECE UN/LOCODE + 中文别名 + 坐标补充目录为默认；VesselAPI Port API 只作可选 enrichment，不把 entitlement 写成默认前提 |
+| 港口拥堵 | `PortcastPublicPageProvider` | 八港动态字段为真实/derived，fresh/stale 由 source freshness 区分 | `ports` 使用 SQLite | 公开页面覆盖有限且脆弱；不能承诺新增港口均有拥堵数据 | 独立 Port Intelligence 能力；没有覆盖就显示“暂无真实拥堵数据” |
+| Watched AIS | AISStream continuous `AisTrackingService` / Tracker | 连续 PositionReport gate 为 `verified_live`；早期无 eligible target/no observation 仅作为历史 checkpoint | `ais_positions`、`ais_latest_positions`、`provider_runtime`、`sync_runs` 与 watchlist 使用 SQLite | 观测覆盖取决于已关注且有合法 MMSI 的目标；AISStream 不承担全球搜索或商业 ETA | 长期 `AisTrackingService` 单例；只订阅已关注 MMSI，watchlist 变化增量重订阅，观测立即持久化 |
+| AIS Area | AISStream Area PositionReport + derived engine | Area gate 有独立 `verified_live` 证据；早期 0 PositionReport probe 仅为历史 checkpoint | `ais_port_metrics` 使用 SQLite 持久化 bounded aggregate | bbox 仍只覆盖配置的关注港口；不是官方拥堵事实 | 从真实 Port 坐标/配置生成并保留边界证据；只展示为 AIS 估算信号 |
+| 天气模型 | Open-Meteo Marine + Forecast | 响应真实 forecast；目标坐标来自 SQLite Port Directory | 作为 `feed_items` / Port rows 使用 SQLite | coverage 仍取决于 Port Directory 与 provider response；没有覆盖就显示暂无真实数据 | 直接使用真实 Port 经纬度；30–60 分钟自动刷新；失败保留同 Provider last-known |
 | 官方气象预警 | JMA/TMD/BMKG adapters | TMD/BMKG `verified_live`，JMA `live_pending`；`public` 仅激活前两者 | 作为 `feed_items` | 适配器存在不等于启用；当前 UI 只显示模式值 | 每源独立 live gate、生命周期、覆盖和 health；未启用明确显示“不可用/未验证” |
-| 行业资讯 | The Loadstar active；Maritime Executive disabled；其他 registry 项未启用 | Loadstar 真实；Maritime Executive failed；无 Mock fallback 时边界正确 | `feed_items` 设计持久化；当前实际为内存 | 无发布时间年龄闸门、future/异常日期校验和 current/history 分层 | 拆成 Ingestion Gate、Current Feed Query Gate、HOT/Event Freshness Gate；默认 7 天，重大资讯最多 14 天，历史单独查询 |
-| 港口公告 | Shekou `/ywgg/` active；其他港口 registry 多为 pending/deferred | Shekou 页面真实；多数条目 publication time unknown | 同 Feed | 发布时间未知仍出现在 Feed；是否仍有效不可判断 | 官方公告与行业新闻分层；基于有效期/撤回状态，未知时间默认不进当前流 |
-| 国家日历 | Calendarific + 空的 Official/Manual composition | Calendarific transport/parser 真实且 partial；Official/Manual 当前没有实数据 | `calendar_events` + `settings.calendarSync` 设计；当前实际为内存 | 启动不自动同步；seed 可重置 coverage；只手工维护单年 | 启动先读库，后台维护当前年 + 下一年，约 7 天 TTL，失败保留 last-known |
+| 行业资讯 | The Loadstar active；Maritime Executive disabled；其他 registry 项未启用 | Loadstar 真实；Maritime Executive failed；无 Mock fallback 时边界正确 | `feed_items` 与 append-only history 使用 SQLite | source coverage、freshness 与 provider failure 仍逐源显示；无覆盖不能推断事实 | Ingestion Gate、Current Feed Query Gate、HOT/Event Freshness Gate 已分层；默认 7 天，重大资讯最多 14 天，历史单独查询 |
+| 港口公告 | Shekou `/ywgg/` active；其他港口 registry 多为 pending/deferred | Shekou 页面真实；publication time unknown 的条目保持 unknown/lifecycle-unknown | `feed_items` 与 history 使用 SQLite | 未知发布时间不能进入当前 Event/HOT 流，也不能推断是否已撤回 | 官方公告与行业新闻分层；基于有效期/撤回状态，未知时间默认不进当前流 |
+| 国家日历 | Calendarific + 空的 Official/Manual composition | Calendarific transport/parser 真实且 partial；Official/Manual 当前没有实数据 | `calendar_events`、`settings.calendarSync` 与 Runtime state 使用 SQLite | 官方/manual coverage 仍未完整验证；当前结果不宣称完整两年 coverage | 启动先读库，后台维护当前年 + 下一年，约 7 天 TTL，失败保留 last-known |
 | 当前航程 | P3B `VoyageRecord` + Mock Voyage Provider；AIS Position 仍独立 | Voyage Provider path `verified_live`，focus-port coverage `coverage_pending` | `voyages` + `voyage_eta_history` | AIS ETA 与 Provider ETA 仍不合并；无 ETA prediction/port-call enrichment | 只保存 Provider 提供的 ETA/ETD；后续另行批准 AIS/ETA 联动与 focus-port coverage 扩展 |
 | 商业班期 | `MockScheduleProvider` | 全 Mock | `voyages` | Real Mode 也始终 operational；无真实 ScheduleProvider adapter | DCSA 规范化合同；按获准船公司逐个接入；无 Provider 时为空 |
-| Events | `detectShippingEvents()` | derived；显式 sourceId 过滤能排除多数 Mock，但 `mock-schedule` 被允许 | `events` 设计持久化；当前实际为内存 | orphan active Event 无当前 source trust 时不会 resolve/expire；混合 fixture lineage 未被识别 | 所有 evidence 必须是 real/user/derived-from-real；有明确有效期、source identity 和可追溯链 |
-| HOT | `rankHotItems()` | derived；可含 Mock schedule Event 和长期 active 的旧 Event | 查询结果，不单独持久化 | 没有强制 `all evidence real`；stale active Event 仍可出现 | 只消费通过 Real Evidence Gate 的 Event/Feed，逐条可追溯 |
-| 关注/设置 | `POST /watch` toggle、`POST /settings` | 用户真实操作 | Repository 可用时写库；当前 Node 24 实际内存 | API 返回成功并不代表可跨重启保存；watch 与 Provider 行同表 | 独立 watchlist/settings 表，事务提交成功后才返回成功，DB 不可用时 503 |
-| 中文 UI | 大部分固定 UI 已中文 | UI chrome 多数中文；外部内容、船型、国家、标签和 Provider mode 仍英文 | 无翻译缓存 | 无 Translation Layer；原文/译文未分离 | zh-CN 默认；外部可翻译字段异步翻译并缓存；标准标识永不翻译 |
-| Provider Runtime | `providerFreshness` 临时对象 + sidebar mode | 请求级状态 | 不持久化 | sidebar 颜色主要看 mode，不看真实 health；无 last success/request/source update | `provider_runtime` + `sync_runs`，展示正常/降级/不可用、时间、缓存和原因 |
+| Events | `detectShippingEvents()` | derived；Real Mode 使用 lineage/source evidence gate，Mock 仅在显式 Mock 语境 | `events` 使用 SQLite | 当前 Event/HOT 仍必须维护 source-scoped lineage、expiry 与 evidence 可追溯性 | 所有 evidence 必须是 real/user/derived-from-real；有明确有效期、source identity 和可追溯链 |
+| HOT | `rankHotItems()` | derived；Real Mode 排除 Mock/mixed evidence，显式 Mock Mode 可保留 Mock schedule | 查询结果，不单独持久化 | HOT 仍需遵守 current Feed/Event freshness 与 Real Evidence Gate | 只消费通过 Real Evidence Gate 的 Event/Feed，逐条可追溯 |
+| 关注/设置 | `POST /watch` toggle、`POST /settings` | 用户真实操作 | watchlist/settings 通过 Repository 使用 SQLite，跨重启可读 | Provider-owned 与 user-owned 字段必须继续隔离；DB 不可用时返回 persistence error | 独立 watchlist/settings 表，事务提交成功后才返回成功，DB 不可用时 503 |
+| 中文 UI | 大部分固定 UI 已中文 | UI chrome 多数中文；外部内容、船型、国家、标签和 Provider mode 仍可能英文 | T1 `translation_cache` 已存在，但无生产 UI 集成 | Translation T1 仅为 optional Feed title/summary enrichment；原始事实不被覆盖，真实 Provider 仍 pending | zh-CN 默认；外部可翻译字段异步翻译并缓存；标准标识永不翻译 |
+| Provider Runtime | Background Runtime + `provider_runtime` / `sync_runs` / `provider_usage` | source-level Job 状态持久化；Readiness 与 Provider live evidence 分离 | Runtime/usage 表使用 SQLite | 当前 UI/Readiness 仍需区分 requested mode、runtime health、freshness、coverage 与 liveVerification | `provider_runtime` + `sync_runs`，展示正常/降级/不可用、时间、缓存和原因 |
 
 ### 2.2 已存在的 API
 
 当前 Shipping API 包括：
 
-- `GET /api/shipping`：读取、触发所有 Provider、写入快照、计算 Event/HOT。
+- `GET /api/shipping`：读取现有 SQLite snapshot，并通过 Repository 计算 Event/HOT；当前 legacy read path 不触发 Provider。
 - `POST /api/shipping/watch`：对既有 Vessel/Port 做 toggle。
 - `GET /api/shipping/search/vessels`：读取 Vessel Search 结果。
 - `GET /api/shipping/search/vessels/watchlist`：读取搜索 Vessel 的 user-owned Watchlist。
@@ -71,12 +71,17 @@ Shipping HOT V2 已经建立了 Provider、Domain、Repository、Event/HOT 和�
 - `POST /api/shipping/settings`：更新刷新/阈值/retention。
 - `GET /api/shipping/calendar`：读取已缓存日历。
 - `POST /api/shipping/calendar/sync`：手工同步指定年/国家。
+- `GET /api/shipping/feed` / `GET /api/shipping/feed/history`：读取当前 Feed 与 append-only history。
+- `GET /api/shipping/runtime` / `GET /api/shipping/readiness`：读取脱敏 Runtime 与 Readiness 状态。
+- `GET /api/shipping/vessels/:id/position` / `GET /api/shipping/vessels/:id/voyage`：读取持久化 AIS/Voyage facts，不在读取路径调用 Provider。
 
 Current Voyage latest API 已由 P3B 提供；Feed current/history API 与 source-isolated Feed Runtime 已由 P3 提供，Calendar、Port、Weather Runtime 已接入受控激活链路。P3A 的 bounded AIS latest-position API 与 P3B Voyage/ETA API 保持独立；Voyage Provider path 已 `verified_live` 但 focus-port coverage 为 `coverage_pending`，TMD/BMKG 官方天气预警与连续 AIS PositionReport 已 `verified_live`，JMA 仍 pending；Translation T1 Foundation 已实现，真实 Translation Provider 和后续业务阶段仍 deferred/pending。
 
-### 2.3 Provider 已存在但未真正启用的部分
+### 2.3 Provider 状态与仍未启用的部分
 
+- GFW Vessel Search：当前真实 Vessel Search / canonical identity provider，已完成隔离 Real live verification；VesselAPI Search 仍为可选能力，AISStream 不承担全球搜索。
 - JMA、TMD、BMKG：代码和 parser 存在，`public` 模式当前激活已验证的 TMD/BMKG；两者为 `verified_live`，JMA 仍为 `live_pending`。
+- VesselAPI Voyage/ETA：Provider path 已 `verified_live`；观察到的 `CNYPG` 仍在正式 focus-port directory 外，因此 focus-port coverage 为 `coverage_pending`。
 - Maritime Executive：registry 存在但 `failed_live` 且 disabled。
 - Laem Chabang、Port Klang 官方港口公告：registry 存在但 parser pending。
 - Yantian、Nansha 官方公告：registry 存在但 deferred。
@@ -91,7 +96,7 @@ Current Voyage latest API 已由 P3B 提供；Feed current/history API 与 sourc
 - Calendar 修复了 process-like restart 时的 persisted baseline 和 operational source isolation。
 - Feed/官方预警修复了单源 timeout、unknown publication time 和 warning lifecycle。
 - Real Mode 修复了环境变量加载和 requested provider mode 显示。
-- 这些提交封住了显式 Mock record 的 operational sourceId 泄漏，但没有改变 SQLite ABI fallback、请求触发刷新、fixture 坐标依赖、Mock Schedule 或全局搜索缺失。
+- 这些提交封住了显式 Mock record 的 operational sourceId 泄漏；随后 V3 已完成 SQLite persistence、source-isolated Background Runtime、GFW Vessel Search/canonical identity、continuous AIS PositionReport 与 Voyage/Weather live evidence。Mock Schedule、未验证的 JMA 与 focus-port coverage 仍保持独立 pending/limited 状态。
 
 因此 V3 应视为新的运行架构阶段，而不是 V2.5 的小型 follow-up。
 
@@ -99,11 +104,11 @@ Current Voyage latest API 已由 P3B 提供；Feed current/history API 与 sourc
 
 | 文档说法 | 当前代码证据 | V3 处理 |
 | --- | --- | --- |
-| `Mock isolation: complete` | 显式 Mock sourceId 的过滤基本成立，但 `shared/ais-area.ts` 和 Open-Meteo 生产路径仍引用 `shared/shipping-fixtures.ts` 的港口坐标；Portcast 身份也从 Mock Port 派生 | 将表述收窄为“显式 Mock record isolation 已实现”；P1 去除正式代码对 fixture 的依赖 |
-| Real Mode 不回退 Mock | Provider failure 的 same-source last-known 规则成立，但 SQLite 初始化失败会回到初始 Mock `fallbackSnapshot`，Schedule 也固定 Mock | P0 禁止静默 memory fallback；P1 Real Mode 禁止任何 Mock Provider/seed/schedule |
-| Provider Runtime 已显示 | UI 显示 requested mode 和一次请求的 freshness；不持久化 last success/request、错误次数或 next sync | P0 只保留 schema/interface/contract placeholder；P7 或单独批准的 Provider 阶段才建立完整 Runtime Health |
-| `README` 要求 Node `>=20` | 当前安装物只能在 ABI 127 运行，Node 24.15.0 实测加载失败 | P0 固定一个支持的 Node 24 LTS 工具链并重装原生依赖 |
-| Calendar restart persistence 已 sealed | Repository 可用时的 Calendar sync baseline 测试成立；当前实际运行因 native SQLite 失败仍无法跨进程保存，且空 vessels 会触发重复 seed | P0 先修真实数据库和 seed，再做 P4 自动同步 |
+| `Mock isolation: complete` | schema-discovered zero-Mock SQL/Repository gate 已通过，Real Mode 只读取允许 lineage；测试 fixtures 不作为 Real evidence | 保持显式 Mock record isolation 与 Real evidence gate；不要把 Fake/Mock 计入真实 readiness |
+| Real Mode 不回退 Mock | Real Mode provider/runtime/repository path 已 fail closed；same-source last-known 仍保留 freshness/status 语义，Mock 不作为 fallback | 保持 no-Mock fallback；新增 capability 必须单独获得架构批准 |
+| Provider Runtime 已显示 | `provider_runtime`、`sync_runs` 与 `provider_usage` 已持久化 source-level Job/runtime/usage 状态，Readiness 读取脱敏证据 | 继续区分 requested mode、runtime health、freshness、coverage 与 liveVerification |
+| `README` 要求 Node `>=20` | 当前项目固定并验证 Node `24.15.0` / ABI `137` / better-sqlite3 `12.6.2` | 继续使用固定 Node/ABI 工具链，不回到未验证的 ABI |
+| Calendar restart persistence 已 sealed | SQLite process-A write → close → process-B read 与 Runtime/API read-back 已验证；官方/manual coverage 仍独立 pending/partial | 保持 Repository-first persistence；coverage 不因 restart 证据而被夸大 |
 
 ## 3. V3 总体目标
 
@@ -316,7 +321,7 @@ AISStream 是 V3 唯一的 watched-vessel tracking session：它接收已关注 
 3. 结果缓存 24 小时，保留 provider record key，并将本次 request/cache hit 写入 usage ledger。
 4. 返回 normalized `VesselSearchResult`。如果结果已含建立 watch 所需的 identity/static 字段，用户选择后直接在同一事务中 watch，不默认再调用 Detail。
 5. 仅当必需字段缺失，或本地 Detail 缓存过期且需要确认时，才调用 `VesselDiscoveryProvider.detail()`；Search 与 Detail 不默认各调用一次。
-6. P2B 当前只持久化 Watchlist 关系并提供列表/变更 API；通知长期 AISStream `AisTrackingService` 增量重订阅属于后续 AIS Tracking Runtime，不在本轮实现。
+6. P2B 持久化 Watchlist 关系并提供列表/变更 API；P3A 已实现长期 AISStream `AisTrackingService` 增量重订阅与连续 PositionReport persistence。
 7. AIS 尚未观测时，仍保留真实搜索身份并显示“暂无 AIS 观测”，不能消失或变成 Mock。
 
 ### 8.3 身份规则
@@ -342,7 +347,7 @@ AISStream 是 V3 唯一的 watched-vessel tracking session：它接收已关注 
 - P2B 使用现有 user-owned `vessel_watchlist(vessel_id, watched_at, ais_enabled)`；静态 name/IMO/MMSI/callsign/source 继续由 P2A `vessel_metadata` 保存，不能把 `isWatched` 写回 Provider-owned 表。
 - `/api/shipping/search/vessels/watch` 提供 POST add / DELETE remove；`/api/shipping/search/vessels/watchlist` 提供 GET list。页面只调用这些 server API，不直接访问 SQLite。
 - Watch identity 优先使用 IMO identity；跨 name/IMO/MMSI 搜索按 IMO、MMSI、无标识时的 source+normalized-name 去重，同一真实船舶只保留一个 Watchlist entry。
-- 无 MMSI 的搜索结果允许关注，`aisTrackingAvailable=false`，不伪造 MMSI；AIS Tracking Runtime、WebSocket 和后台长连接保持 pending。
+- 无 MMSI 的搜索结果允许关注，`aisTrackingAvailable=false`，不伪造 MMSI；已实现的 AIS Tracking Runtime 仅对有合法 MMSI 的 watched target 建立订阅。
 
 ## 9. Port Search / Watch 方案
 
@@ -463,9 +468,11 @@ interface ScheduleProvider {
 
 若没有任何 Carrier entitlement，V3 可以完成已验证的 Current Voyage，但 Commercial Schedule 页面必须显示“未配置真实班期 Provider”，不能保留 `mock-schedule`。V3 不提前锁死某个商业 Schedule Provider，也不把 DCSA 标准误写成数据供应商。
 
-## 13. Translation 中文化方案
+## 13. Translation 中文化方案（T1 Foundation 已实现；T2+ 方案保留）
 
-### 13.1 可切换 TranslationProvider
+当前 T1 实现仅覆盖 FeedItem `title` / `summary` 的无网络 enrichment foundation：`TranslationService` 统一计算 versioned deterministic `sourceHash`，`TranslationRepository` 使用现有 schema v11 的 `translation_cache`，Provider-free read 只选择成功缓存，execution miss 才调用当前 Provider 并持久化结果，`FakeTranslationProvider` 仅用于本地测试。`pending`/`failed` 不参与展示，无成功缓存时返回原文；原始 Feed/Event/HOT/Voyage/Port facts、lineage、freshness、severity、ranking、dedupe 与 evidence 不被覆盖。T1 不新增 migration、SecretStore/Settings、usage/cost、Runtime Job、API/UI 或真实 Provider；真实 Translation Provider 和生产 Feed 集成必须另行批准为 T2。
+
+### 13.1 可切换 TranslationProvider（T2 设计）
 
 V3 只定义稳定的 `TranslationProvider` 合同，不把 Azure、OpenAI 或任何单一厂商写死为架构依赖。候选实现包括：
 
@@ -477,7 +484,7 @@ V3 只定义稳定的 `TranslationProvider` 合同，不把 Azure、OpenAI 或�
 
 OpenAI 官方价格页（2026-08-20 读取）按模型分别列 input、cached input、cache writes、output 的每 1M tokens 价格；方案只应保存 `provider/model/version` 并以实际 usage 估算，不应在文档中复制可能过期的单一模型价格。任何 LLM 翻译都必须有 prompt/version、术语保护和成本上限。
 
-### 13.2 字段策略
+### 13.2 字段策略（T2 设计；T1 仅执行 Feed title/summary）
 
 允许翻译：新闻 title/summary、公告、天气预警、日历名称、国家名、船型、航行状态、港口状态、Event/HOT 解释。
 
@@ -485,7 +492,7 @@ OpenAI 官方价格页（2026-08-20 读取）按模型分别列 input、cached i
 
 实体允许显示人工/可靠中文别名，例如：`东方福 / DONG FANG FU`，但 official registered name 永远保留。
 
-### 13.3 Settings 的 AI 翻译中心
+### 13.3 Settings 的 AI 翻译中心（T2+，当前未实现）
 
 Settings 增加“AI 翻译中心”，包括：
 
@@ -497,7 +504,7 @@ Settings 增加“AI 翻译中心”，包括：
 
 密钥只允许 server-only `.env.local`/`.env.server` 或等价 secret manager；禁止 LocalStorage、前端 bundle、Git、docs、fixture 和 SQLite 明文列。UI 只显示 `configured=true` 或掩码末四位；日志、错误和 provider_runtime 不得包含完整 key、Authorization header 或带 key 的 URL。
 
-### 13.4 两阶段持久化与单一事实源
+### 13.4 两阶段持久化与单一事实源（T2+ 设计；T1 不进入生产读取/Runtime）
 
 1. Normalizer 先保存原文事实，确保抓取成功不依赖翻译。
 2. Translation job 根据 allowlist 批量翻译。
@@ -838,11 +845,11 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | 风险 | Carrier onboarding/费用/条款；voyage number 不在 AIS；不同 Carrier DCSA 版本差异；VesselAPI ETA/port-event entitlement 未确认 |
 | 回滚 | 禁用单一 carrier adapter；保留已验证的 AIS/port-call Current Voyage；VesselAPI enrichment 可单独关闭；页面显示 schedule unavailable |
 
-### P6 — Translation
+### P6 — Translation（T2+，当前未开始）
 
 | 项目 | 内容 |
 | --- | --- |
-| 目标 | 外部文本自动中文化并缓存，原文永远可查，标识不翻译；TranslationProvider 可切换且有预算/usage/secret 合同 |
+| 目标 | T1 Foundation 已实现 Feed `title`/`summary` 的无网络缓存与原文 fallback；T2+ 才讨论真实 Provider、预算/usage/secret 与更广字段自动中文化 |
 | 修改文件 | shared DTO、Feed/Calendar/Event UI、Provider Runtime/settings |
 | 新增文件 | TranslationProvider、DeepSeek/Qwen-MT/Gemini/OpenAI/Claude/Google/DeepL/Azure/Custom adapters（按批准范围选其一或多项）、translation service/cache、字段 allowlist、i18n labels |
 | 数据库 | P0 预留的 `translation_cache`/`provider_usage`；各内容表只保留 original，中文与状态由通用缓存查询 |
