@@ -30,7 +30,25 @@ export interface TranslationOutcome {
   cache?: TranslationCacheRecord
   usage?: TranslationUsage
   errorCode?: string
+  errorMessage?: string
   providerCalled?: boolean
+}
+
+export interface PreparedTranslationSource extends TranslationSource {
+  sourceLanguage: string
+  targetLanguage: string
+  sourceHash: string
+}
+
+export interface TranslationExecutionResult {
+  sourceText: string
+  translatedText: string
+  sourceHash: string
+  status: "succeeded" | "failed" | "unconfigured"
+  usage?: TranslationUsage
+  errorCode?: string
+  errorMessage?: string
+  providerCalled: boolean
 }
 
 export interface TranslationServiceOptions {
@@ -174,7 +192,7 @@ export class TranslationService {
     private readonly options: TranslationServiceOptions = {},
   ) {}
 
-  private prepared(input: TranslationSource) {
+  public prepare(input: TranslationSource): PreparedTranslationSource {
     const sourceLanguage = canonicalLanguage(input.sourceLanguage ?? this.options.sourceLanguage)
     const targetLanguage = canonicalLanguage(input.targetLanguage ?? this.options.targetLanguage, DEFAULT_TRANSLATION_TARGET_LANGUAGE)
     const sourceHash = translationSourceHash({
@@ -188,7 +206,7 @@ export class TranslationService {
     return { ...input, sourceLanguage, targetLanguage, sourceHash }
   }
 
-  private lookup(input: ReturnType<TranslationService["prepared"]>): TranslationCacheLookup {
+  private lookup(input: PreparedTranslationSource): TranslationCacheLookup {
     return {
       entityType: input.entityType,
       entityId: input.entityId,
@@ -198,7 +216,7 @@ export class TranslationService {
     }
   }
 
-  private exactLookup(input: ReturnType<TranslationService["prepared"]>, provider: TranslationProvider): TranslationCacheExactLookup {
+  private exactLookup(input: PreparedTranslationSource, provider: TranslationProvider): TranslationCacheExactLookup {
     return {
       ...this.lookup(input),
       provider: provider.providerId,
@@ -212,7 +230,7 @@ export class TranslationService {
     return { providerId: this.provider.providerId, model: this.provider.model }
   }
 
-  private cacheOutcome(input: ReturnType<TranslationService["prepared"]>, cache: TranslationCacheRecord | undefined): TranslationOutcome {
+  private cacheOutcome(input: PreparedTranslationSource, cache: TranslationCacheRecord | undefined): TranslationOutcome {
     return cache
       ? { sourceText: input.sourceText, translatedText: cache.translatedText ?? input.sourceText, sourceHash: input.sourceHash, status: "succeeded", cache, providerCalled: false }
       : emptyOutcome(input.sourceText, input.sourceHash, "original")
@@ -220,7 +238,7 @@ export class TranslationService {
 
   /** Provider-free read path. Failed/pending cache rows are intentionally ignored. */
   async getCachedTranslation(input: TranslationSource): Promise<TranslationOutcome> {
-    const prepared = this.prepared(input)
+    const prepared = this.prepare(input)
     const lookup = this.lookup(prepared)
     const preference = this.readPreference()
     const exact = preference?.providerId && preference.model
@@ -231,7 +249,7 @@ export class TranslationService {
   }
 
   async translate(input: TranslationSource): Promise<TranslationOutcome> {
-    const prepared = this.prepared(input)
+    const prepared = this.prepare(input)
     if (!prepared.sourceText.trim()) return emptyOutcome(prepared.sourceText, prepared.sourceHash, "original")
     const provider = this.provider
     const exact = provider
@@ -252,7 +270,50 @@ export class TranslationService {
     }
   }
 
-  private async translateAndPersist(input: ReturnType<TranslationService["prepared"]>): Promise<TranslationOutcome> {
+  /**
+   * Provider execution only. Durable work state belongs to Translation Runtime + Repository.
+   * This method never claims, leases, persists cache/usage, retries or changes provider runtime.
+   */
+  async execute(input: TranslationSource): Promise<TranslationExecutionResult> {
+    return this.executePrepared(this.prepare(input))
+  }
+
+  private async executePrepared(input: PreparedTranslationSource): Promise<TranslationExecutionResult> {
+    const provider = this.provider
+    if (!provider) return { sourceText: input.sourceText, translatedText: input.sourceText, sourceHash: input.sourceHash, status: "unconfigured", providerCalled: false }
+    try {
+      const protectedSource = protectTranslationText(input.sourceText, input.protectedTerms)
+      const result = await provider.translate({
+        sourceText: protectedSource.protectedText,
+        sourceLanguage: input.sourceLanguage,
+        targetLanguage: input.targetLanguage,
+        entityType: input.entityType,
+        entityId: input.entityId,
+        fieldName: input.fieldName,
+      })
+      if (!result.translatedText.trim()) throw new ProviderError("provider_contract_changed", "translation_provider_empty_result")
+      if (hasExplicitTranslationWrapper(result.translatedText)) throw new ProviderError("provider_contract_changed", "translation_provider_wrapper_output")
+      const translatedText = restoreAndValidateProtectedTranslation(protectedSource, result.translatedText)
+      return { sourceText: input.sourceText, translatedText, sourceHash: input.sourceHash, status: "succeeded", usage: result.usage, providerCalled: true }
+    } catch (error) {
+      const errorCode = error instanceof ProviderError
+        ? error.code
+        : error && typeof error === "object" && "code" in error && typeof (error as { code?: unknown }).code === "string"
+          ? (error as { code: string }).code
+          : "provider_unavailable"
+      return {
+        sourceText: input.sourceText,
+        translatedText: input.sourceText,
+        sourceHash: input.sourceHash,
+        status: "failed",
+        errorCode,
+        errorMessage: errorMessage(error),
+        providerCalled: true,
+      }
+    }
+  }
+
+  private async translateAndPersist(input: PreparedTranslationSource): Promise<TranslationOutcome> {
     const provider = this.provider
     if (!provider) return emptyOutcome(input.sourceText, input.sourceHash, "unconfigured")
     const createdAt = nowFor(this.options)
@@ -268,46 +329,40 @@ export class TranslationService {
       provider: provider.providerId,
       model: provider.model,
       status: "pending",
+      retryCount: 0,
+      nextRetryAt: null,
+      retryable: false,
+      leaseUntil: null,
+      lastErrorCode: null,
       preferred: false,
       createdAt,
       updatedAt: createdAt,
     }
     await this.repository.save(base)
-    try {
-      const protectedSource = protectTranslationText(input.sourceText, input.protectedTerms)
-      const result = await provider.translate({
-        sourceText: protectedSource.protectedText,
-        sourceLanguage: input.sourceLanguage,
-        targetLanguage: input.targetLanguage,
-        entityType: input.entityType,
-        entityId: input.entityId,
-        fieldName: input.fieldName,
-      })
-      if (!result.translatedText.trim()) throw new ProviderError("provider_contract_changed", "translation_provider_empty_result")
-      if (hasExplicitTranslationWrapper(result.translatedText)) throw new ProviderError("provider_contract_changed", "translation_provider_wrapper_output")
-      const translatedText = restoreAndValidateProtectedTranslation(protectedSource, result.translatedText)
+    const execution = await this.executePrepared(input)
+    if (execution.status === "succeeded") {
+      const now = nowFor(this.options)
       const saved = await this.repository.save({
         ...base,
-        translatedText,
-        translatedAt: nowFor(this.options),
+        translatedText: execution.translatedText,
+        translatedAt: now,
         status: "succeeded",
+        retryable: false,
+        nextRetryAt: null,
+        leaseUntil: null,
+        lastErrorCode: null,
         preferred: true,
-        updatedAt: nowFor(this.options),
+        updatedAt: now,
       })
-      return { sourceText: input.sourceText, translatedText, sourceHash: input.sourceHash, status: "succeeded", cache: saved, usage: result.usage, providerCalled: true }
-    } catch (error) {
-      const errorCode = error instanceof ProviderError
-        ? error.code
-        : error && typeof error === "object" && "code" in error && typeof (error as { code?: unknown }).code === "string"
-          ? (error as { code: string }).code
-          : undefined
-      const saved = await this.repository.save({
-        ...base,
-        status: "failed",
-        errorMessage: errorMessage(error),
-        updatedAt: nowFor(this.options),
-      })
-      return { sourceText: input.sourceText, translatedText: input.sourceText, sourceHash: input.sourceHash, status: "failed", cache: saved, errorCode, providerCalled: true }
+      return { sourceText: input.sourceText, translatedText: execution.translatedText, sourceHash: input.sourceHash, status: "succeeded", cache: saved, usage: execution.usage, providerCalled: true }
     }
+    const saved = await this.repository.save({
+      ...base,
+      status: "failed",
+      errorMessage: execution.errorMessage,
+      lastErrorCode: execution.errorCode,
+      updatedAt: nowFor(this.options),
+    })
+    return { sourceText: input.sourceText, translatedText: input.sourceText, sourceHash: input.sourceHash, status: "failed", cache: saved, errorCode: execution.errorCode, errorMessage: execution.errorMessage, providerCalled: true }
   }
 }

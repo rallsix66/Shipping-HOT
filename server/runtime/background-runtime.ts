@@ -19,6 +19,8 @@ export interface RuntimeJob {
   capability: string
   intervalMs: number
   enabled: boolean
+  /** The job owns per-provider-call usage accounting and opts out of generic job-level counting. */
+  usageAlreadyRecorded?: boolean
   run: () => Promise<SyncResult>
 }
 
@@ -354,6 +356,7 @@ export class BackgroundRuntime {
   }
 
   private async recordUsage(state: JobState, result: SyncResult, calledAt: string): Promise<void> {
+    if (state.job.usageAlreadyRecorded) return
     try {
       await this.repository.recordProviderUsage({
         providerId: state.job.providerId,

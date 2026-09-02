@@ -276,4 +276,26 @@ describe("translation service T1 foundation", () => {
     await expect(historicalRead.getCachedTranslation(source)).resolves.toMatchObject({ status: "succeeded", translatedText: "B historical" })
     native.close()
   })
+
+  it("executes a Provider without claiming or persisting cache and usage state", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const repository = new TranslationRepository(database)
+    const provider = new FakeTranslationProvider({ providerId: "deepseek", model: "deepseek-v4-flash", translateText: request => `translated:${request.sourceText}` })
+    const service = new TranslationService(repository, provider, { now: () => "2026-09-02T00:00:00.000Z" })
+    const source = { entityType: "feed_item", entityId: "feed-execute-1", fieldName: "title", sourceText: "Port delay", targetLanguage: "zh-CN" }
+
+    await expect(service.execute(source)).resolves.toMatchObject({ status: "succeeded", translatedText: "translated:Port delay", providerCalled: true })
+    expect(provider.calls).toHaveLength(1)
+    await expect(repository.getStatistics()).resolves.toEqual({ total: 0, succeeded: 0, pending: 0, failed: 0 })
+    await expect(service.getCachedTranslation(source)).resolves.toMatchObject({ status: "original", translatedText: source.sourceText, providerCalled: false })
+
+    const failingProvider = new FakeTranslationProvider({ providerId: "deepseek", model: "deepseek-v4-flash", translateText: () => {
+      throw new Error("provider unavailable")
+    } })
+    const failingService = new TranslationService(repository, failingProvider)
+    await expect(failingService.execute({ ...source, entityId: "feed-execute-2" })).resolves.toMatchObject({ status: "failed", translatedText: source.sourceText, errorCode: "provider_unavailable", providerCalled: true })
+    await expect(repository.getStatistics()).resolves.toEqual({ total: 0, succeeded: 0, pending: 0, failed: 0 })
+    native.close()
+  })
 })

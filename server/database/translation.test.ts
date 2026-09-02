@@ -6,6 +6,7 @@ import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
 import { initShippingTables } from "./shipping"
 import { TranslationRepository } from "./translation"
+import { RuntimeRepository } from "./runtime-jobs"
 import type { TranslationCacheRecord } from "#/providers/contracts"
 
 function createNativeDatabase(path = ":memory:") {
@@ -68,7 +69,7 @@ describe("translation repository", () => {
       status: "succeeded",
       translatedText: "港口延误",
     })
-    expect(native.prepare("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1").get()).toEqual({ version: 11 })
+    expect(native.prepare("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1").get()).toEqual({ version: 12 })
     native.close()
   })
 
@@ -118,6 +119,125 @@ describe("translation repository", () => {
     const restarted = createNativeDatabase(path)
     await initShippingTables(restarted.database, "mock")
     await expect(new TranslationRepository(restarted.database).findHistoricalSuccessful({ entityType: "feed_item", entityId: "feed-1", fieldName: "title", sourceHash: "hash-1", targetLanguage: "zh-CN" })).resolves.toMatchObject({ translatedText: "港口延误" })
+    restarted.native.close()
+    rmSync(directory, { recursive: true, force: true })
+  })
+
+  it("claims one active owner, finalizes success atomically with usage, and skips the second claimant", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const repository = new TranslationRepository(database)
+    const identity = {
+      entityType: "feed_item",
+      entityId: "feed-work-1",
+      fieldName: "title",
+      sourceHash: "hash-work-1",
+      targetLanguage: "zh-CN",
+      provider: "deepseek",
+      model: "deepseek-v4-flash",
+    }
+    const claims = await Promise.all([
+      repository.claimTranslationWork({ ...identity, sourceText: "Port delay", sourceLanguage: "en", now: "2026-09-02T00:00:00.000Z", leaseUntil: "2026-09-02T00:01:00.000Z" }),
+      repository.claimTranslationWork({ ...identity, sourceText: "Port delay", sourceLanguage: "en", now: "2026-09-02T00:00:00.000Z", leaseUntil: "2026-09-02T00:02:00.000Z" }),
+    ])
+    expect(claims.filter(Boolean)).toHaveLength(1)
+    const claimed = claims.find(Boolean)
+    if (!claimed?.leaseUntil) throw new Error("translation claim missing lease")
+
+    await expect(repository.completeTranslationSuccess({
+      ...identity,
+      leaseUntil: claimed.leaseUntil,
+      translatedText: "港口延误",
+      translatedAt: "2026-09-02T00:00:30.000Z",
+      now: "2026-09-02T00:00:30.000Z",
+      providerUsage: {
+        providerId: "deepseek",
+        capability: "translation",
+        request: true,
+        succeeded: true,
+        records: 1,
+        sourceScope: "feed",
+        calledAt: "2026-09-02T00:00:30.000Z",
+      },
+    })).resolves.toMatchObject({ status: "succeeded", retryCount: 0, retryable: false, leaseUntil: undefined, lastErrorCode: undefined })
+    await expect(new RuntimeRepository(database).aggregateProviderUsage({ providerId: "deepseek", capability: "translation" })).resolves.toMatchObject({ requestCount: 1, successCount: 1, recordsCount: 1 })
+    expect(native.prepare("SELECT status, lease_until, last_error_code FROM translation_cache WHERE entity_id = 'feed-work-1'").get()).toEqual({ status: "succeeded", lease_until: null, last_error_code: null })
+    native.close()
+  })
+
+  it("persists retryable failures, respects next retry, blocks non-retryable rows, and supports explicit requeue", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const repository = new TranslationRepository(database)
+    const identity = {
+      entityType: "feed_item",
+      entityId: "feed-work-2",
+      fieldName: "summary",
+      sourceHash: "hash-work-2",
+      targetLanguage: "zh-CN",
+      provider: "deepseek",
+      model: "deepseek-v4-flash",
+    }
+    const first = await repository.claimTranslationWork({ ...identity, sourceText: "Port storm", now: "2026-09-02T00:00:00.000Z", leaseUntil: "2026-09-02T00:01:00.000Z" })
+    if (!first?.leaseUntil) throw new Error("translation claim missing lease")
+    await repository.completeRetryableFailure({
+      ...identity,
+      leaseUntil: first.leaseUntil,
+      errorCode: "rate_limited",
+      errorMessage: "provider rate limited",
+      nextRetryAt: "2026-09-02T00:02:00.000Z",
+      now: "2026-09-02T00:00:01.000Z",
+      providerUsage: { providerId: "deepseek", capability: "translation", request: true, failed: true, sourceScope: "feed", calledAt: "2026-09-02T00:00:01.000Z", errorCode: "rate_limited" },
+    })
+    await expect(repository.claimTranslationWork({ ...identity, sourceText: "Port storm", now: "2026-09-02T00:01:00.000Z", leaseUntil: "2026-09-02T00:03:00.000Z" })).resolves.toBeUndefined()
+    const second = await repository.claimTranslationWork({ ...identity, sourceText: "Port storm", now: "2026-09-02T00:02:00.000Z", leaseUntil: "2026-09-02T00:03:00.000Z" })
+    if (!second?.leaseUntil) throw new Error("translation retry claim missing lease")
+    await repository.completeNonRetryableFailure({ ...identity, leaseUntil: second.leaseUntil, errorCode: "auth_failed", errorMessage: "credential rejected", now: "2026-09-02T00:02:01.000Z" })
+    await expect(repository.claimTranslationWork({ ...identity, sourceText: "Port storm", now: "2026-09-02T00:03:00.000Z", leaseUntil: "2026-09-02T00:04:00.000Z" })).resolves.toBeUndefined()
+    await expect(repository.findWork(identity)).resolves.toMatchObject({ status: "failed", retryCount: 1, retryable: false, lastErrorCode: "auth_failed", nextRetryAt: undefined })
+
+    await expect(repository.requeueTranslationFailures({
+      provider: "deepseek",
+      model: "deepseek-v4-flash",
+      eligibleIdentities: [identity],
+      errorCodes: ["auth_failed"],
+      reason: "credential repaired",
+      now: "2026-09-02T00:05:00.000Z",
+    })).resolves.toMatchObject({ selected: 1, requeued: 1, skipped: 0 })
+    await expect(repository.findWork(identity)).resolves.toMatchObject({ status: "failed", retryCount: 0, retryable: true, nextRetryAt: "2026-09-02T00:05:00.000Z" })
+    await expect(new RuntimeRepository(database).aggregateProviderUsage({ providerId: "deepseek", capability: "translation" })).resolves.toMatchObject({ requestCount: 1, failureCount: 1 })
+    native.close()
+  })
+
+  it("marks expired pending work as provider-attempt-unknown without opening a provider circuit", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const repository = new TranslationRepository(database)
+    const identity = { entityType: "feed_item", entityId: "feed-work-3", fieldName: "title", sourceHash: "hash-work-3", targetLanguage: "zh-CN", provider: "deepseek", model: "deepseek-v4-flash" }
+    await repository.claimTranslationWork({ ...identity, sourceText: "Port unknown", now: "2026-09-02T00:00:00.000Z", leaseUntil: "2026-09-02T00:01:00.000Z" })
+    await expect(repository.recoverStaleLease({ ...identity, now: "2026-09-02T00:02:00.000Z" })).resolves.toBe(true)
+    await expect(repository.findWork(identity)).resolves.toMatchObject({ status: "failed", retryable: false, lastErrorCode: "provider_attempt_unknown" })
+    await expect(new RuntimeRepository(database).getProviderRuntime("deepseek", "translation")).resolves.toBeUndefined()
+    native.close()
+  })
+
+  it("restores retryable durable work after a database restart", async () => {
+    const directory = mkdtempSync(join(tmpdir(), "shipping-hot-translation-work-"))
+    const path = join(directory, "translation.sqlite3")
+    const identity = { entityType: "feed_item", entityId: "feed-restart", fieldName: "title", sourceHash: "hash-restart", targetLanguage: "zh-CN", provider: "deepseek", model: "deepseek-v4-flash" }
+    const first = createNativeDatabase(path)
+    await initShippingTables(first.database, "real")
+    const firstRepository = new TranslationRepository(first.database)
+    const claimed = await firstRepository.claimTranslationWork({ ...identity, sourceText: "Port restart", now: "2026-09-02T00:00:00.000Z", leaseUntil: "2026-09-02T00:01:00.000Z" })
+    if (!claimed?.leaseUntil) throw new Error("translation restart claim missing lease")
+    await firstRepository.completeRetryableFailure({ ...identity, leaseUntil: claimed.leaseUntil, errorCode: "provider_timeout", errorMessage: "timeout", nextRetryAt: "2026-09-02T00:02:00.000Z", now: "2026-09-02T00:00:01.000Z" })
+    first.native.close()
+
+    const restarted = createNativeDatabase(path)
+    await initShippingTables(restarted.database, "real")
+    const restartedRepository = new TranslationRepository(restarted.database)
+    await expect(restartedRepository.findWork(identity)).resolves.toMatchObject({ status: "failed", retryCount: 1, retryable: true, nextRetryAt: "2026-09-02T00:02:00.000Z", lastErrorCode: "provider_timeout" })
+    await expect(restartedRepository.claimTranslationWork({ ...identity, sourceText: "Port restart", now: "2026-09-02T00:02:00.000Z", leaseUntil: "2026-09-02T00:03:00.000Z" })).resolves.toMatchObject({ status: "pending", retryCount: 1 })
     restarted.native.close()
     rmSync(directory, { recursive: true, force: true })
   })

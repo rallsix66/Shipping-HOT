@@ -1,20 +1,20 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 文档状态：`accepted / V3 Readiness gate implemented / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed + P3A AIS Tracking Runtime Foundation + P3B Voyage / ETA Foundation + P3 Feed Freshness Batch 1 + source-isolated Feed Runtime + Calendar/Port/Weather activation + Translation T1 Foundation + approved DeepSeek Translation T2 Provider Foundation implemented / Real Operational blocked on remaining capability evidence / DeepSeek live verification, production Translation and T3 pending`
+> 文档状态：`accepted / V3 Readiness gate implemented / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed + P3A AIS Tracking Runtime Foundation + P3B Voyage / ETA Foundation + P3 Feed Freshness Batch 1 + source-isolated Feed Runtime + Calendar/Port/Weather activation + Translation T1/T2 + approved Translation T3A Runtime Foundation implemented / Real Operational blocked on remaining capability evidence / DeepSeek live verification and T3B/T3C/T3D pending`
 >
 > 审查日期：2026-09-02（Asia/Shanghai）
 >
 > 代码基线：`codex/shipping-hot-v3-real-data`（Translation T2 DeepSeek Provider Foundation + Review Repair；Node `24.15.0` / ABI `137` 基线）
 >
-> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 已完成封板，P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation、P3 Feed Freshness Batch 1、Translation T1 Foundation 与批准的 Translation T2 DeepSeek Provider Foundation 已实现并通过本地验证**。本阶段完成 migration v8 Voyage/ETA history、Mock VoyageProvider、`voyage_sync` Runtime Job、Repository/API/UI 和 SQLite restart persistence；P3B dual-model repair 新增 `shared/voyage-normalizer.ts`，使 P3B latest Voyage API 与 legacy Snapshot 统一读取 normalized baseline/latest/delay columns，且首个 ETA baseline 不被后续 ETA 覆盖；批次 1 新增 migration v9 Feed current/history/quarantine metadata 与 append-only history、migration v10 Feed 重分类与 observation 同步、current/history API、严格 invalid/future/expired/absent 日期边界和 Event/HOT expiry；不注册 Feed Runtime Job。Translation T2 仅新增 DeepSeek server-side Provider contract/foundation、placeholder protection、settings/SecretStore mapping、usage/cost/budget ledger、provider-free status 和 fixed-input test endpoint；不新增 migration、不修改 `.env.local`、不注册 translation Runtime Job、不接入生产 Feed/UI/Readiness。Feed Background Runtime 批次 2、AIS ETA prediction、地图、轨迹动画或商业 Voyage adapter 不在本批次实现。Closeout repair 追加两项 P3B 防护并已本地验证：Repository 拒绝非请求 `vesselId` 的 Provider 记录（`rejectedVesselIds` 计数），旧 `lastUpdatedAt` 观测不得覆盖最新航程或追加重复历史（`staleSkipped` 计数）；同日跟进修复使 Voyage Runtime `sourceUpdatedAt` 仅由被接受记录计算，且无接受记录的运行保留既有 `provider_runtime.last_source_updated_at`。Activation review repair 还新增实际 SQL/Repository zero-Mock gate、跨 Port/Weather/Feed/AIS/Voyage/Calendar 的 `providerId` identity contract、schema v11 `records_count` 与根因 failure-code propagation；不改变既有 migration。
+> 实施状态：**P0 Persistence、P1A Real Port Directory Foundation、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation 已完成封板，P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation、P3 Feed Freshness Batch 1、Translation T1/T2 与批准的 Translation T3A Runtime Foundation 已实现并通过本地验证**。本阶段完成 migration v8 Voyage/ETA history、Mock VoyageProvider、`voyage_sync` Runtime Job、Repository/API/UI 和 SQLite restart persistence；P3B dual-model repair 新增 `shared/voyage-normalizer.ts`，使 P3B latest Voyage API 与 legacy Snapshot 统一读取 normalized baseline/latest/delay columns，且首个 ETA baseline 不被后续 ETA 覆盖；批次 1 新增 migration v9 Feed current/history/quarantine metadata 与 append-only history、migration v10 Feed 重分类与 observation 同步、current/history API、严格 invalid/future/expired/absent 日期边界和 Event/HOT expiry；Translation T3A 新增 migration v12 的 `translation_cache` durable work-state、bounded `translation-sync` Runtime、transactional claim/finalize/usage、retry/circuit/recovery 和 execution-only Service，但不接入 Feed display/API/UI。Translation remains optional enrichment，Fake Provider 只存在测试边界，Real registry 只创建固定 DeepSeek adapter；不修改 `.env.local`、不调用真实 DeepSeek、Translation 不进入 Readiness hard gate。Feed Background Runtime 批次 2、AIS ETA prediction、地图、轨迹动画或商业 Voyage adapter 不在本批次实现。Closeout repair 追加两项 P3B 防护并已本地验证：Repository 拒绝非请求 `vesselId` 的 Provider 记录（`rejectedVesselIds` 计数），旧 `lastUpdatedAt` 观测不得覆盖最新航程或追加重复历史（`staleSkipped` 计数）；同日跟进修复使 Voyage Runtime `sourceUpdatedAt` 仅由被接受记录计算，且无接受记录的运行保留既有 `provider_runtime.last_source_updated_at`。Activation review repair 还新增实际 SQL/Repository zero-Mock gate、跨 Port/Weather/Feed/AIS/Voyage/Calendar 的 `providerId` identity contract、schema v11 `records_count` 与根因 failure-code propagation；T3A 的唯一新增 migration 是 v12 Translation work-state additive migration。
 >
 > 本轮修订：根据官方页面复核、代码边界复核和 V3 方案交叉审查，收窄 VesselAPI 能力边界、增加可切换 TranslationProvider/Usage/Secret 合同、补齐 Feed 三层 freshness gate、Calendar 启动链路和 P0 schema 预留；T2 仅批准 DeepSeek Foundation，官方当前价格按 2026-09-02 USD 页面快照记录，旧 CNY 规划快照不再作为计费依据。只有具体 endpoint entitlement、地区/账号资格和 DeepSeek live verification 等未确认事项保持 `unknown/pending`。
 >
-> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。T2 批准仅实现 DeepSeek Provider Foundation，不执行 live call；本轮 Real Data Activation 只复用已存在的 AISStream、公共 Feed、Calendarific、Portcast public-page 和 Open-Meteo 适配器，补齐 Runtime → SQLite → Repository → API 链路与 Readiness 事实状态；不创建账号、不购买服务、不添加/修改密钥、不实现其他真实 Translation Provider、生产 Feed 翻译、translation-sync、T3、AIS ETA prediction、地图/轨迹系统或商业 Voyage adapter。
+> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且用户已确认开始执行。T3A 批准仅实现固定 DeepSeek Translation Runtime Foundation，不执行 live call；本轮 Real Data Activation 只复用已存在的 AISStream、公共 Feed、Calendarific、Portcast public-page 和 Open-Meteo 适配器，补齐 Runtime → SQLite → Repository → API 链路与 Readiness 事实状态；不创建账号、不购买服务、不添加/修改密钥、不实现其他真实 Translation Provider、Feed display/API/UI、T3B/T3C/T3D、AIS ETA prediction、地图/轨迹系统或商业 Voyage adapter。
 
 > V3 Readiness：本轮只建立本地安全就绪门（观测 Node/ABI、CLI 实测 pnpm、实际安装的 better-sqlite3 版本/native load、SQLite schema/Port Directory、已批准 Runtime scope、Mock-only provider configuration），通过 `GET /api/shipping/readiness` 与 `pnpm smoke:v3-readiness` 验证；HTTP 缺少 pnpm 观测时标记 skipped 且严格 Readiness 不得 ready；不执行外部 Provider 请求，不进入下一阶段。
 
-> 当前执行状态：P3 Feed Freshness Batch 1 与来源独立 Feed Background Runtime 已完成；Calendar、Port、Weather Runtime 已纳入同一受控激活链路；GFW Vessel Search、canonical identity normalization、provider-aware cache 和 Watchlist latest-MMSI target flow 已实现并通过隔离 Real live probe；Translation T1 Foundation 与批准的 T2 DeepSeek Provider Foundation 及 Review Repair 已实现，但 T2 仍不进入生产 Feed 读取/自动翻译、Runtime、UI 或 Readiness。T2 的 `GET /api/shipping/translation/status` 为 provider-free，fixed-input test POST 默认关闭且无外部调用；真实 DeepSeek live verification 为 pending，当前 external Provider calls=`0`。Real Mode activation smoke 与生产 HTTP smoke 已验证真实写入/读取，且 `actualMockRows` 来自自动发现所有带 `source_type` 的 Shipping HOT 业务表的 SQL/Repository 扫描并要求总数为零。当前停止在 Real Operational Readiness：Voyage Provider path `liveVerification=verified_live`，但 focus-port coverage 为 `coverage_pending`；连续 AIS PositionReport 与 TMD/BMKG 官方天气预警均为 `verified_live`，JMA 仍 pending；Translation T3 及生产集成仍需单独批准。
+> 当前执行状态：P3 Feed Freshness Batch 1 与来源独立 Feed Background Runtime 已完成；Calendar、Port、Weather Runtime 已纳入同一受控激活链路；GFW Vessel Search、canonical identity normalization、provider-aware cache 和 Watchlist latest-MMSI target flow 已实现并通过隔离 Real live probe；Translation T1/T2 与批准的 T3A Runtime Foundation 已实现。T3A 的 `translation-sync` 只在 Real registry 注册、只扫描 current Feed `title`/`summary`，使用 v12 durable work state，并且其 per-call usage 不重复计入 generic job-level usage；Feed read/API/UI 仍保持原文，T3B/T3C/T3D 未开始。T2/T3A 的 status/fixed-input test 保持 provider-free gate，真实 DeepSeek live verification 为 pending，当前 external DeepSeek calls=`0`。Real Mode activation smoke 与生产 HTTP smoke 已验证真实写入/读取，且 `actualMockRows` 来自自动发现所有带 `source_type` 的 Shipping HOT 业务表的 SQL/Repository 扫描并要求总数为零。当前停止在 Real Operational Readiness：Voyage Provider path `liveVerification=verified_live`，但 focus-port coverage 为 `coverage_pending`；连续 AIS PositionReport 与 TMD/BMKG 官方天气预警均为 `verified_live`，JMA 仍 pending；Translation remains optional and outside the Readiness hard gate。
 
 ## 1. 背景与当前问题
 
@@ -56,7 +56,7 @@ Shipping HOT V2 已经建立了 Provider、Domain、Repository、Event/HOT 和�
 | Events | `detectShippingEvents()` | derived；Real Mode 使用 lineage/source evidence gate，Mock 仅在显式 Mock 语境 | `events` 使用 SQLite | 当前 Event/HOT 仍必须维护 source-scoped lineage、expiry 与 evidence 可追溯性 | 所有 evidence 必须是 real/user/derived-from-real；有明确有效期、source identity 和可追溯链 |
 | HOT | `rankHotItems()` | derived；Real Mode 排除 Mock/mixed evidence，显式 Mock Mode 可保留 Mock schedule | 查询结果，不单独持久化 | HOT 仍需遵守 current Feed/Event freshness 与 Real Evidence Gate | 只消费通过 Real Evidence Gate 的 Event/Feed，逐条可追溯 |
 | 关注/设置 | `POST /watch` toggle、`POST /settings` | 用户真实操作 | watchlist/settings 通过 Repository 使用 SQLite，跨重启可读 | Provider-owned 与 user-owned 字段必须继续隔离；DB 不可用时返回 persistence error | 独立 watchlist/settings 表，事务提交成功后才返回成功，DB 不可用时 503 |
-| 中文 UI | 大部分固定 UI 已中文 | UI chrome 多数中文；外部内容、船型、国家、标签和 Provider mode 仍可能英文 | T1 cache + T2 DeepSeek foundation/review repair exists, but no production UI integration | Translation remains optional Feed title/summary enrichment; T2 live verification and T3 production integration pending; original facts are not overwritten | zh-CN default; later approval required for broader async translation; standard identifiers remain unchanged |
+| 中文 UI | 大部分固定 UI 已中文 | UI chrome 多数中文；外部内容、船型、国家、标签和 Provider mode 仍可能英文 | T1/T2 cache + DeepSeek foundation/review repair and T3A runtime foundation exist, but no production UI integration | Translation remains optional Feed title/summary enrichment; DeepSeek live verification and T3B/T3C production read/UI integration pending; original facts are not overwritten | zh-CN default; later approval required for broader async translation; standard identifiers remain unchanged |
 | Provider Runtime | Background Runtime + `provider_runtime` / `sync_runs` / `provider_usage` | source-level Job 状态持久化；Readiness 与 Provider live evidence 分离 | Runtime/usage 表使用 SQLite | 当前 UI/Readiness 仍需区分 requested mode、runtime health、freshness、coverage 与 liveVerification | `provider_runtime` + `sync_runs`，展示正常/降级/不可用、时间、缓存和原因 |
 
 ### 2.2 已存在的 API
@@ -77,7 +77,7 @@ Shipping HOT V2 已经建立了 Provider、Domain、Repository、Event/HOT 和�
 - `POST /api/shipping/translation/test`：仅接受空 body，使用固定无害文本；默认 disabled 时不调用 Provider，任意 prompt/source 输入都会被拒绝。
 - `GET /api/shipping/vessels/:id/position` / `GET /api/shipping/vessels/:id/voyage`：读取持久化 AIS/Voyage facts，不在读取路径调用 Provider。
 
-Current Voyage latest API 已由 P3B 提供；Feed current/history API 与 source-isolated Feed Runtime 已由 P3 提供，Calendar、Port、Weather Runtime 已接入受控激活链路。P3A 的 bounded AIS latest-position API 与 P3B Voyage/ETA API 保持独立；Voyage Provider path 已 `verified_live` 但 focus-port coverage 为 `coverage_pending`，TMD/BMKG 官方天气预警与连续 AIS PositionReport 已 `verified_live`，JMA 仍 pending；Translation T1 与 T2 DeepSeek Provider Foundation 及 Review Repair 已实现，DeepSeek live verification pending，生产 Feed 翻译、runtime、UI 与 T3 仍 deferred/pending。
+Current Voyage latest API 已由 P3B 提供；Feed current/history API 与 source-isolated Feed Runtime 已由 P3 提供，Calendar、Port、Weather Runtime 已接入受控激活链路。P3A 的 bounded AIS latest-position API 与 P3B Voyage/ETA API 保持独立；Voyage Provider path 已 `verified_live` 但 focus-port coverage 为 `coverage_pending`，TMD/BMKG 官方天气预警与连续 AIS PositionReport 已 `verified_live`，JMA 仍 pending；Translation T1/T2 与 T3A Runtime Foundation 已实现，DeepSeek live verification pending，T3A 仅提供 real-mode `translation-sync` foundation，生产 Feed 翻译显示、T3B Feed Read、T3C UI 与 T3D live acceptance 仍 deferred/pending。
 
 ### 2.3 Provider 状态与仍未启用的部分
 
@@ -470,11 +470,11 @@ interface ScheduleProvider {
 
 若没有任何 Carrier entitlement，V3 可以完成已验证的 Current Voyage，但 Commercial Schedule 页面必须显示“未配置真实班期 Provider”，不能保留 `mock-schedule`。V3 不提前锁死某个商业 Schedule Provider，也不把 DCSA 标准误写成数据供应商。
 
-## 13. Translation 中文化方案（T1 Foundation + T2 DeepSeek Foundation / Review Repair 已实现；T3+ 方案保留）
+## 13. Translation 中文化方案（T1/T2 + T3A Runtime Foundation 已实现；T3B/T3C/T3D 保留）
 
-当前 T1 实现仅覆盖 FeedItem `title` / `summary` 的无网络 enrichment foundation：`TranslationService` 统一计算 versioned deterministic `sourceHash`，`TranslationRepository` 使用现有 schema v11 的 `translation_cache`，Provider-free read 只选择成功缓存，execution miss 才调用当前 Provider 并持久化结果，`FakeTranslationProvider` 仅用于本地测试。`pending`/`failed` 不参与展示，无成功缓存时返回原文；原始 Feed/Event/HOT/Voyage/Port facts、lineage、freshness、severity、ranking、dedupe 与 evidence 不被覆盖。T1 不新增 migration、SecretStore/Settings、usage/cost、Runtime Job、API/UI 或真实 Provider；真实 Translation Provider 和生产 Feed 集成必须另行批准为 T2。
+T1 实现了 FeedItem `title` / `summary` 的无网络 enrichment foundation：`TranslationService` 统一计算 versioned deterministic `sourceHash`，`TranslationRepository` 负责 `translation_cache`，Provider-free read 只选择成功缓存，`FakeTranslationProvider` 仅用于本地测试。当前 schema 为 v12；T3A 追加的 v12 只包含 Translation durable work-state columns/index，`pending`/`failed` 不参与展示，无成功缓存时返回原文；原始 Feed/Event/HOT/Voyage/Port facts、lineage、freshness、severity、ranking、dedupe 与 evidence 不被覆盖。T1 的“无 migration/无 Runtime”是历史阶段边界，当前 T3A 已按单独批准补齐固定 DeepSeek Runtime foundation，但仍未实现生产 Feed read/display/UI 集成。
 
-T2 已按独立批准完成，但严格停在 Foundation：只实现 DeepSeek server-side Provider、SecretStore mapping、JSON-backed translation settings、usage/cost/budget accounting、literal placeholder protection、provider-free status GET 和 fixed-input test POST。默认 `enabled=false`、provider=`deepseek`、model=`deepseek-v4-flash`、target=`zh-CN`、monthlyBudget=`0`；无 migration、无 `.env.local` 修改、无真实外部调用。T2 live verification remains `pending`，T3 仍未开始。`monthlyBudget` 的单位是 USD local estimated budget。
+T2 已按独立批准完成，提供 DeepSeek server-side Provider、SecretStore mapping、JSON-backed translation settings、usage/cost/budget accounting、literal placeholder protection、provider-free status GET 和 fixed-input test POST。默认 `enabled=false`、provider=`deepseek`、model=`deepseek-v4-flash`、target=`zh-CN`、monthlyBudget=`0`；T2 阶段没有 migration、没有 `.env.local` 修改、没有真实外部调用。T2 live verification remains `pending`；T3A 已实现并停止，T3B/T3C/T3D 仍未开始。`monthlyBudget` 的单位是 USD local estimated budget。
 
 T2 Review Repair 已完成：月度预算使用 `RuntimeRepository.aggregateProviderUsage()` 的 SQLite `SUM`/`MAX` 聚合，不受 500-row detail limit 影响；status 使用 bounded latest-row query。DeepSeek 成功 response 必须包含完整合法 usage，并严格校验 prompt cache breakdown 与 total-token arithmetic，失败则 `provider_contract_changed`，不持久化 succeeded。新写入 `provider_usage.source_scope` 只保存 literal `translation_test`，不再写 usage JSON；历史 JSON 仅 best-effort 提取真实 scope。Prompt source 改为 JSON string serialization，Service 继续校验 placeholder、显式 `TEST STAR` 和明确 provider wrapper。Review Repair 不新增 migration，不新增 Provider，不进入 T3。
 
@@ -506,10 +506,10 @@ T2 只提供 server-side settings/status boundary，不实现 Settings UI，包�
 
 密钥只允许 server-only `.env.local`/`.env.server` 或等价 secret manager；禁止 LocalStorage、前端 bundle、Git、docs、fixture 和 SQLite 明文列。UI 只显示 `configured=true` 或掩码末四位；日志、错误和 provider_runtime 不得包含完整 key、Authorization header 或带 key 的 URL。
 
-### 13.4 两阶段持久化与单一事实源（T2 Foundation；T3 生产集成 deferred）
+### 13.4 两阶段持久化与单一事实源（T2 Foundation + T3A Runtime；T3B/T3C/T3D deferred）
 
 1. Normalizer 先保存原文事实，确保抓取成功不依赖翻译。
-2. T2 仅允许 fixed-input test POST 验证 Provider Foundation；生产 Translation job 和批量翻译留到 T3。
+2. T2 仅允许 fixed-input test POST 验证 Provider Foundation；T3A 已实现 bounded `translation-sync` Runtime work foundation，但生产 Feed read/display 仍留到 T3B/T3C，live acceptance 留到 T3D。
 3. `translation_cache` key = entity + field + provider + model/version + source language + target language + content hash；缓存状态和 usage 统一写 ledger。
 4. 业务表只保存 `title_original`、`summary_original`、`name_original`、`content_original` 等原文事实；不再保存 `title_zh`/`summary_zh` 或其他业务表级中文列作为第二份 truth。
 5. UI 查询时返回原文并 join 当前 preferred translation。若 preferred 版本缺失，先显示最近成功的任意中文译文；随后后台按 preferred Provider/model 生成新版本，成功后切换显示。若没有任何成功中文译文，则显示原文并排队生成。
@@ -572,7 +572,7 @@ Usage ledger 只代表本机已发出的请求和按公开价/账号计划推算
 | `provider_runtime` | health + scheduler cursor | UI 和失败恢复真相 |
 | `settings` | 用户设置与 `ProviderConfig` | 可保存 provider/model/baseUrl/enabled/budget/preferred translation；绝不保存 API key |
 | `ais_port_metrics` | bounded aggregate | 继续 current/last-known，不存 raw AIS |
-| `translation_cache` | 唯一中文翻译事实源 | 至少包含 `id/entity_type/entity_id/field_name/source_text/source_hash/source_language/target_language/provider/model/translated_text/translated_at/status/error_message`；唯一键覆盖实体、字段、hash、语言、provider/model；保留 preferred 与最近成功选择所需索引 |
+| `translation_cache` | 唯一中文翻译事实源 | 至少包含 `id/entity_type/entity_id/field_name/source_text/source_hash/source_language/target_language/provider/model/translated_text/translated_at/status/error_message` 与 T3A work state `retry_count/next_retry_at/retryable/lease_until/last_error_code`；唯一键覆盖实体、字段、hash、语言、provider/model；保留 preferred 与最近成功选择所需索引 |
 | `provider_usage` | 本地请求/结果/估算账本 | request/success/failure/cache hit、字符/token、估算成本、币种、pricing reference、last called；余额未知时不伪造 |
 | `sync_runs` | 最近同步执行/错误 | 有界保留，例如 90 天/每源最近 N 次 |
 
@@ -847,17 +847,17 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | 风险 | Carrier onboarding/费用/条款；voyage number 不在 AIS；不同 Carrier DCSA 版本差异；VesselAPI ETA/port-event entitlement 未确认 |
 | 回滚 | 禁用单一 carrier adapter；保留已验证的 AIS/port-call Current Voyage；VesselAPI enrichment 可单独关闭；页面显示 schedule unavailable |
 
-### P6 — Translation（T1 + T2 Foundation 已完成；T3+ deferred）
+### P6 — Translation（T1 + T2 + T3A Foundation 已完成；T3B/T3C/T3D deferred）
 
 | 项目 | 内容 |
 | --- | --- |
-| 目标 | T1 Foundation 已实现 Feed `title`/`summary` 的无网络缓存与原文 fallback；已批准的 T2 仅完成 DeepSeek server-side Provider Foundation、SecretStore mapping、settings、usage/cost/budget、literal protection、provider-free status 与 fixed-input test boundary；T3 才讨论生产集成与更广字段自动中文化 |
-| 修改文件 | shared translation DTO/settings、Translation Provider/Service、SecretStore mapping、Runtime usage read/write、server-side status/test handlers |
-| 新增文件 | DeepSeek adapter、literal protection、translation settings/status/test services and tests；Qwen-MT/Gemini/OpenAI/Claude/Google/DeepL/Azure/Custom adapters remain deferred |
-| 数据库 | P0 预留的 `translation_cache`/`provider_usage`；各内容表只保留 original，中文与状态由通用缓存查询 |
-| API | T2 only adds provider-free `GET /api/shipping/translation/status` and fixed-input `POST /api/shipping/translation/test`; production zh + original response and locale integration remain T3 |
-| 测试 | T2 covers identifier/literal protection, cache key/version, failure original fallback, usage/budget gates, DeepSeek error/timeout/contract matrix, secret redaction and provider-free reads; batch/HTML/production integration remain T3 |
-| 验收 | T2 Foundation locally verified with no external calls; T3 separately reviews production Feed integration, fixed UI/locale behavior and broader fields |
+| 目标 | T1 Foundation 已实现 Feed `title`/`summary` 的无网络缓存与原文 fallback；T2 完成 DeepSeek server-side Provider Foundation、SecretStore mapping、settings、usage/cost/budget、literal protection、provider-free status 与 fixed-input test boundary；T3A 已完成固定 DeepSeek Runtime、durable claim/lease/retry/circuit/recovery 与 per-call usage，但不接入 Feed display/API/UI；T3B/T3C/T3D 才讨论生产读集成、UI 与 live acceptance |
+| 修改文件 | shared translation DTO/settings、Translation Provider/Service、SecretStore mapping、Runtime usage read/write、server-side status/test handlers；T3A additionally updates the Translation Repository, Runtime registry/runner and readiness scope |
+| 新增文件 | DeepSeek adapter、literal protection、translation settings/status/test services and tests；T3A adds migration v12, durable Translation Repository lifecycle, execution mutex and `translation-sync` Runtime tests；Qwen-MT/Gemini/OpenAI/Claude/Google/DeepL/Azure/Custom adapters remain deferred |
+| 数据库 | P0 预留的 `translation_cache`/`provider_usage`；T3A adds only v12 Translation work-state columns/index to `translation_cache`; 各内容表只保留 original，中文与状态由通用缓存查询 |
+| API | T2 adds provider-free `GET /api/shipping/translation/status` and fixed-input `POST /api/shipping/translation/test`; T3A does not add Translation API or Feed display DTO; production zh + original response and locale integration remain T3B/T3C |
+| 测试 | T2 covers identifier/literal protection, cache key/version, failure original fallback, usage/budget gates, DeepSeek error/timeout/contract matrix, secret redaction and provider-free reads; T3A adds migration/repository/runtime/registry/readiness lifecycle tests; Feed read/HTML/production display remain T3B/T3C |
+| 验收 | T3A locally verified with no external calls and stopped at Runtime Foundation; T3B/T3C/T3D separately review production Feed integration, fixed UI/locale behavior and DeepSeek live acceptance |
 | 风险 | 术语误译、供应商区域/额度、标题语义漂移 |
 | 回滚 | 关闭 translation job；继续显示已缓存 zh 或原文，采集不受影响 |
 
@@ -1144,7 +1144,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 
 ## 27. 实施门槛与文档后续
 
-`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation、P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation、P3 Feed Freshness Batch 1、受控 Real Data Activation runtime slice、Translation T1 Foundation 与批准的 Translation T2 DeepSeek Provider Foundation 及 Review Repair 已获授权、实施并完成本地验证；DeepSeek live verification、生产 Translation、Translation Runtime/UI/T3 仍 deferred；Voyage Provider path 为 `verified_live` 但 focus-port coverage `coverage_pending`，连续 AIS PositionReport 与 TMD/BMKG official alerts 为 `verified_live`，JMA 仍 pending。该 ADR 的 2026-08-29 implementation note 记录了现有 Provider 的 Runtime/SQLite/API 激活边界。该 ADR 至少覆盖：
+`docs/adr/ADR-005-v3-real-data-boundaries.md` 已于 2026-08-20 更新为 `Accepted`，P0、P1A、P1B Mock Isolation、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation、P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation、P3 Feed Freshness Batch 1、受控 Real Data Activation runtime slice、Translation T1/T2 与批准的 Translation T3A Runtime Foundation 已获授权、实施并完成本地验证；DeepSeek live verification、生产 Feed display、T3B/T3C/T3D 仍 deferred；Voyage Provider path 为 `verified_live` 但 focus-port coverage `coverage_pending`，连续 AIS PositionReport 与 TMD/BMKG official alerts 为 `verified_live`，JMA 仍 pending。该 ADR 的 2026-08-29 implementation note 记录了现有 Provider 的 Runtime/SQLite/API 激活边界。该 ADR 至少覆盖：
 
 - V3 real-only runtime、SQLite fail-closed/read-only 行为和已验证的单一 Node LTS。
 - VesselAPI 仅 Discovery/static metadata、AISStream 长期 tracking、UN/LOCODE 默认 Port Search，以及 provider-owned/user-owned/directory-owned/translation-owned 字段边界。
@@ -1153,7 +1153,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 - TranslationProvider 可切换合同、Settings AI 翻译中心、单一 `translation_cache` source of truth、server-only secret、`provider_usage` 和“本地统计/估算”标签。
 - Current Voyage 与 DCSA Commercial Schedule 的事实分层。
 
-后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation、P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation、Translation T1 Foundation 与批准的 Translation T2 DeepSeek Foundation/Review Repair 已完成；DeepSeek live verification、生产 Translation、T3、real Voyage adapter 的 focus-port coverage 及其他 Provider/AI adapter 仍按单独批准范围实施。
+后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation、P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation、Translation T1/T2 与批准的 Translation T3A Runtime Foundation 已完成；DeepSeek live verification、生产 Feed display、T3B/T3C/T3D、real Voyage adapter 的 focus-port coverage 及其他 Provider/AI adapter 仍按单独批准范围实施。
 
 ## 28. 外部资料
 

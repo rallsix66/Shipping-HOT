@@ -53,8 +53,8 @@ describe("shippingRepository", () => {
     const migration = native.prepare("SELECT version, name FROM schema_migrations ORDER BY version DESC LIMIT 1").get() as { version: number, name: string }
     const metadata = native.prepare("SELECT schema_version, bootstrap_completed_at, data_mode FROM app_metadata WHERE id = 'default'").get() as { schema_version: number, bootstrap_completed_at?: string, data_mode: string }
     const directory = native.prepare("SELECT port_directory_status, port_directory_version, port_directory_imported_at FROM port_directory_status WHERE id = 'default'").get() as { port_directory_status: string, port_directory_version?: string, port_directory_imported_at?: string }
-    expect(migration).toEqual({ version: 11, name: "provider-usage-records" })
-    expect(metadata).toMatchObject({ schema_version: 11, data_mode: "real" })
+    expect(migration).toEqual({ version: 12, name: "translation-runtime-work-state" })
+    expect(metadata).toMatchObject({ schema_version: 12, data_mode: "real" })
     expect(metadata.bootstrap_completed_at).toEqual(expect.any(String))
     expect(directory).toMatchObject({ port_directory_status: "ready", port_directory_version: "p1a-unlocode-baseline-v1", port_directory_imported_at: expect.any(String) })
     for (const table of ["translation_cache", "provider_usage", "provider_runtime", "sync_runs", "vessel_watchlist", "port_watchlist", "port_directory", "vessel_metadata", "vessel_search_cache", "ais_positions", "ais_latest_positions", "voyage_eta_history", "feed_item_history"]) {

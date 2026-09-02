@@ -21,6 +21,11 @@ import type { WeatherAlertProvider } from "#/providers/weather-alerts"
 import { PortDirectoryRepository } from "#/database/port-directory"
 import type { RuntimeJob } from "#/runtime/background-runtime"
 import { isAisStreamingEnabled } from "#/runtime/ais-streaming-config"
+import { TRANSLATION_PROVIDER_TIMEOUT_MS, createTranslationSyncJob } from "#/runtime/translation-sync-job"
+import type { SecretStore, TranslationProvider } from "#/providers/contracts"
+import { createDeepSeekTranslationProvider } from "#/providers/translation/deepseek-provider"
+import { TRANSLATION_PROVIDER_ID } from "#/services/translation-settings"
+import { FileSecretStore } from "#/secrets/file-secret-store"
 
 export interface RuntimeRegistryOptions {
   database: Database
@@ -28,6 +33,8 @@ export interface RuntimeRegistryOptions {
   aisProvider?: AisTrackingProvider
   aisAreaProvider?: AisAreaProvider
   voyageProvider?: VoyageProvider
+  translationProvider?: TranslationProvider
+  translationSecretStore?: SecretStore
   now?: () => Date
 }
 
@@ -163,6 +170,24 @@ function weatherAlertJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
     }))
 }
 
+function translationJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
+  if (options.dataMode !== "real") return []
+  const secretStore = options.translationSecretStore ?? new FileSecretStore()
+  const provider = options.translationProvider ?? createDeepSeekTranslationProvider({
+    apiKeyResolver: () => secretStore.get(TRANSLATION_PROVIDER_ID),
+    timeoutMs: TRANSLATION_PROVIDER_TIMEOUT_MS,
+  })
+  return [createTranslationSyncJob({
+    database: options.database,
+    dataMode: options.dataMode,
+    provider,
+    secretStore,
+    intervalMs: 60_000,
+    enabled: true,
+    now: options.now,
+  })]
+}
+
 export function getDefaultRuntimeJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
   const providerId = getConfiguredAisProviderId()
   const streamingEnabled = isAisStreamingEnabled(options.dataMode)
@@ -218,5 +243,5 @@ export function getDefaultRuntimeJobs(options: RuntimeRegistryOptions): RuntimeJ
     intervalMs: voyageIntervalMs(),
     enabled: !(options.dataMode === "real" && voyageProvider.providerId === "mock"),
     now: options.now,
-  }), ...feedJobs(options), ...calendarJobs(options), ...portJobs(options), ...weatherJobs(options), ...weatherAlertJobs(options)]
+  }), ...feedJobs(options), ...translationJobs(options), ...calendarJobs(options), ...portJobs(options), ...weatherJobs(options), ...weatherAlertJobs(options)]
 }

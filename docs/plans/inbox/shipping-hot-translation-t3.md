@@ -1,37 +1,37 @@
 # Shipping-HOT Translation T3 Architecture / Production Feed Integration Proposal
 
-> status: draft
+> status: approved / T3A active
 > proposal date: 2026-09-02
 > base branch: codex/shipping-hot-v3-real-data
-> base SHA: 8490868ea707db37a8799142dcea1edb03b0f1b4
-> scope: architecture proposal only; no T3 implementation is authorized by this document
+> base SHA: 74c16e62b010df99254311a7e9bcd0722fbda577
+> scope: T3A Translation Runtime Foundation implementation only; T3B/T3C/T3D remain not authorized
 
 ## 0. Review boundary
 
-本文件是 Translation T3 的架构候选方案，不是实施批准。它只覆盖 Feed 自动中文化的生产设计，不改变当前 active plan pointer，不宣称 T3 已开始。
+本文件已通过人工最终架构审批，当前只授权 T3A Translation Runtime Foundation 实施。它保持独立于 Feed ingestion，且不授权 T3B Feed Read、T3C Feed UI 或 T3D DeepSeek Live Acceptance；仓库没有 active-plan.md 或必须移动 inbox 文档的治理规则，因此保留当前路径并以本状态作为最小 plan reference。
 
 本轮明确不做：
 
-- 不修改 server/*、shared/*、src/* 或 package.json
-- 不创建或修改 migration
+- 不修改 shared/*、src/* 或 package.json
+- 不创建 translation 以外的 migration，不修改 retained .data/shipping-hot-v3.sqlite3
 - 不新增 Secret、环境变量、Provider SDK 或 Provider
 - 不执行 DeepSeek live call、Feed live sync、AIS/Voyage/Weather probe
-- 不注册 translation-sync
-- 不修改 Feed DTO、Feed UI、Event/HOT 或 Readiness implementation
+- 不实现 T3B Feed DTO/read/display、T3C Feed UI 或 T3D live acceptance
+- 不修改 Event/HOT、Voyage、AIS、Port、Weather 或 Readiness implementation
 
 当前结论先行：
 
 1. Feed ingestion 与 Translation 必须是两个独立的 Background Runtime workstream。
 2. 不引入 Redis、BullMQ、RabbitMQ、Kafka 或其他外部 queue；优先使用 SQLite 中的 translation_cache 作为 durable work state。
 3. 现有 schema v11 足够支持 cache read、batch read 和基础状态展示，但不足以安全承载生产级逐条 retry、next retry、retryability 与 crash-safe pending lease。
-4. 因此，完整 T3A 进入实施前需要单独批准一个最小 additive migration；本轮只列 proposal，不实施。
+4. 当前批准的 T3A 允许对 translation_cache 增加最小 additive migration；migration 不扩大到其他表。
 5. Feed API 保持 title / summary 的原文语义，新增 API/display-only 的 displayTitle、displaySummary 和翻译状态。原始事实不写回 Feed 业务表。
 6. Feed GET 只读 SQLite；任何 cache hit、historical fallback 或原文 fallback 都是 provider-free。
 7. DeepSeek live verification 必须先于 production translation enabled；engineering complete 与 verified_live 分开记录。
 
-## 1. Current implementation audit
+## 1. T3A implementation baseline (before this task)
 
-### 1.1 Translation boundary already present
+### 1.1 Translation boundary before T3A
 
 当前 T1/T2 实际代码已经提供以下基础：
 
@@ -159,7 +159,7 @@ server/runtime/registry.ts 当前注册 AIS、Voyage、Feed、Calendar、Port、
 - usage/cost 账单真相、官方余额、FX 转换；
 - 将 Translation healthy/verified_live 纳入 REAL_OPERATIONAL hard readiness gate；
 - DeepSeek live verification 本身；
-- T3A/T3B/T3C/T3D 的实现。
+- T3B/T3C/T3D 的实现。
 
 ## 3. Candidate generation decision
 
@@ -308,7 +308,7 @@ Provider call 结束后只更新这个 key 的 row。若 Feed 同时更新，旧
 | provider_usage | provider/capability/hour aggregate | total budget/accounting 可用；source 分项不精确 |
 | settings | JSON-backed Translation settings | enabled/provider/model/budget 可用 |
 
-结论：T3B provider-free batch read 可以使用 v11；T3C UI 也不需要 schema 变化；完整 T3A 的 crash-safe retry/lease 不能仅凭 v11 可靠实现。
+基线结论：T3B provider-free batch read 可以使用 v11；T3C UI 也不需要 schema 变化；完整 T3A 的 crash-safe retry/lease 不能仅凭 v11 可靠实现。T3A 已按批准新增 v12 additive work-state columns/index，仅服务 Translation Runtime。
 
 ## 6. Migration blocker and minimum proposal
 
@@ -324,7 +324,7 @@ Provider call 结束后只更新这个 key 的 row。若 Feed 同时更新，旧
 
 现有 provider_runtime.consecutive_failures 是 provider/capability/job 粒度，不能表达单个 Feed field 的 backoff。现有 sync_runs 没有 candidate key，provider_usage 是小时聚合，不能表达 work item retry state。把这些信息塞进 error_message 或 source_scope 会损坏数据边界，不接受。
 
-### 6.2 Minimal additive migration proposal (not implemented)
+### 6.2 T3A additive migration (implemented)
 
 若人工批准，建议对 translation_cache 只做 additive columns：
 
@@ -336,11 +336,11 @@ Provider call 结束后只更新这个 key 的 row。若 Feed 同时更新，旧
 | lease_until | TEXT NULL | pending lease expiry；用于 stale recovery |
 | last_error_code | TEXT NULL | 结构化 ProviderFailureCode / recovery code |
 
-建议增加一个覆盖 candidate scan 的 index，例如：
+实际增加的 work-state index 为：
 
-    (entity_type, target_language, provider, model, status, next_retry_at, lease_until)
+    idx_translation_cache_work_state(provider, model, target_language, status, retryable, next_retry_at, lease_until, updated_at)
 
-实际 index order 需在实现时依据 SQLite query plan 复核；不新增 queue table。
+SQLite query plan 已在临时 legacy DB 上复核；不新增 queue table。
 
 Backfill：
 
@@ -359,11 +359,11 @@ Backfill：
 - deployment rollback 采用 feature disable + 保留 additive columns，不做 destructive down migration；
 - 若 migration 尚未发布，可撤回 migration 文件；
 - 若已发布后必须物理回滚，需另一个经批准的 table rebuild/backup restore 方案；
-- 本 round 不创建 migration、不改 schema_version、不触碰 retained .data/shipping-hot-v3.sqlite3。
+- T3A 实际创建 migration v12，schema_version 从 11 升至 12；只对临时 legacy DB 做 upgrade smoke，未触碰 retained .data/shipping-hot-v3.sqlite3。
 
 ### 6.4 Architecture review repair: durable work-state ownership and controlled recovery
 
-本节是对 T3 draft 的强制边界修复，优先级高于后文任何未明确 owner 的简写。它不改变 T3 的 scope、schema blocker、provider boundary 或 plan status；只把 T3A 实施前必须批准的生命周期 ownership、原子性、崩溃恢复和 provider recovery contract 定义清楚。
+本节是对 T3 draft 的强制边界修复，优先级高于后文任何未明确 owner 的简写。T3A 已按本节实现；它保持 T3 scope、provider boundary 和 plan status，明确生命周期 ownership、原子性、崩溃恢复和 provider recovery contract。
 
 #### 6.4.1 Single durable work-state owner
 
@@ -483,9 +483,9 @@ unblock 必须是显式 server-side operation，例如：
 
 block/unblock、requeue、stale recovery 都必须进入可审计的 Runtime/sync run evidence；不能把 operator reason、secret、prompt 或完整 Provider response 写入 cache、provider_runtime、provider_usage 或普通 Feed DTO。
 
-#### 6.4.6 Review repair scope lock
+#### 6.4.6 T3A scope lock
 
-上述 owner/API/circuit 是 T3A 的 architecture contract，不是本轮实现。它不授权新增 migration，不改变现有 schema v11，不创建 translation-sync，不扩展 Feed API/UI，不把 Translation 加入 Real Readiness，也不改变 Event/HOT/Voyage/Port/Weather/source lineage/freshness/severity/ranking/dedupe/evidence 的原始事实边界。
+上述 owner/API/circuit 已在 T3A 实现。T3A 只新增 translation_cache v12 additive migration、translation-sync 和 execution-only/lifecycle boundary；不扩展 Feed API/UI，不把 Translation 加入 Real Readiness，也不改变 Event/HOT/Voyage/Port/Weather/source lineage/freshness/severity/ranking/dedupe/evidence 的原始事实边界。
 
 ## 7. Runtime state machine
 
@@ -683,7 +683,7 @@ Runtime registry 不得创建 Fake Provider。建议：
 - DeepSeek prompt cache hit：DeepSeek request 已发生，request_count += 1，按 returned hit/miss token usage 估算更低 input cost；
 - 两者不能共用 cacheHitCount 语义。
 
-T3A 应扩展 Runtime result/usage contract，使 TranslationRuntimeService 能逐真实 call 写 provider_usage，并让 generic BackgroundRuntime 跳过重复的“一次 job=一次 request”记录。成功/失败都记录 request；cache hit 不写 request usage。
+T3A 已扩展 Runtime result/usage contract：Translation Runtime 逐真实 call 写 provider_usage，generic BackgroundRuntime 对该 job 跳过重复的“一次 job=一次 request”记录。成功/失败都记录 request；cache hit 不写 request usage。
 
 ## 10. Cost, source scope and unknown cost
 
@@ -989,6 +989,8 @@ DeepSeek timeout/429/500/secret missing/budget exhausted/contract changed：
 
 ### T3A — Translation Runtime Foundation
 
+状态：**implemented / locally verified / stopped**
+
 前置批准：
 
 - 该 proposal；
@@ -1085,7 +1087,7 @@ DeepSeek timeout/429/500/secret missing/budget exhausted/contract changed：
 
 ## 19. Test matrix
 
-以下是 T3 实施验收矩阵；本轮不执行这些 T3 tests。
+以下矩阵是 T3 验收边界。本轮已执行 T3A 相关的 migration/repository/service/runtime/registry/readiness/compatibility tests；T3B/T3C/T3D 项目保持 pending，相关 Read/UI/live tests 未执行。
 
 ### 19.1 Candidate
 
@@ -1235,9 +1237,9 @@ If a provider contract change occurs：
 - review provider contract；
 - requeue only selected rows through a controlled internal operation after approval。
 
-## 23. Open architecture decisions for human approval
+## 23. Approved architecture decisions and deferred decisions
 
-进入 T3A 前必须明确批准：
+以下 T3A 决策已在本轮开始前获得人工批准并已实现；T3B/T3C/T3D 相关事项仍是 deferred，不因 T3A 完成而自动批准：
 
 1. 是否批准对 translation_cache 的最小 additive migration（retry_count、next_retry_at、retryable、lease_until、last_error_code）。
 2. 是否接受 stale pending 在未知外部请求状态下变成 provider_attempt_unknown/non-retryable，而不是自动重试。
@@ -1256,55 +1258,31 @@ If a provider contract change occurs：
 15. 是否批准 bounded server-side controlled requeue 的 error-code、sourceHash、eligibility、limit<=100 与 operator/code review gate。
 16. 是否批准基于现有 provider_runtime status/error_code 的 Translation provider circuit block/unblock contract；明确 auth/forbidden/entitlement/contract 为 provider-level block，而 provider_attempt_unknown 仅 row-level block。
 
-## 24. Proposal verification and governance state
+其中第 7、8 项属于 T3B Feed Read integration，未在本轮实施；第 11 项仅保留为 T3D 的前置 live-acceptance gate。T3A 的实际 schema、Runtime 和 lifecycle 结果以第 25 节为准。
 
-本文件只应以 draft、pending approval 或项目治理对应的待审批状态存在。不得标记 ready、accepted 或 active。
+## 24. Implementation verification and governance state
+
+本文件当前状态为 `approved / T3A active`；T3A 已完成并停止，T3B/T3C/T3D 仍未开始。
 
 本轮验证要求：
 
 - git diff --check；
 - git status；
-- 确认实现代码、migration、.env.local、SQLite retained data、Provider registry、Feed API/UI 均未被本 proposal 修改；
+- 确认实现代码、migration、Provider registry 与 T3A runtime 已按批准范围修改；`.env.local`、retained SQLite、Feed API/UI 与 Event/HOT 等业务事实边界未被修改；
 - 不执行任何 external Translation/Feed/AIS/Voyage/Weather call。
 
-## 25. Final proposal conclusion
+## 25. Final T3A implementation conclusion
 
-- Base SHA：8490868ea707db37a8799142dcea1edb03b0f1b4
-- Plan path：docs/plans/inbox/shipping-hot-translation-t3.md
-- Plan status：draft，等待人工架构审批
-- 当前 architecture：Feed 原文先持久化，Event/HOT 继续消费原始事实；Translation 通过 server-only Service/Provider/SQLite cache 独立存在；当前没有 Translation Runtime。
-- T3 scope：只做 current FeedItem title/summary 的异步 DeepSeek enrichment、provider-free API display 和后续 UI。
-- Candidate mechanism：独立 Translation Runtime periodic scan，复用 feedTranslationSources()/isFeedItemTranslationEligible()。
-- Queue/state：无 external queue；使用 translation_cache + durable lease/retry metadata proposal；schema v11 对完整 T3A 不足。
-- Migration：本轮 none；T3A 前置 minimum additive migration required，待人工批准。
-- Durable owner：T3A 仅由 Translation Runtime + TranslationRepository 持有 work-state；TranslationService.execute() 只做 execution/domain processing，现有 translate() 仅作 T1/T2 compatibility。
-- Lifecycle API：claimTranslationWork、completeTranslationSuccess、completeRetryableFailure、completeNonRetryableFailure、recoverStaleLease、requeueTranslationFailures；T3A production path 不依赖 generic save()。
-- Atomicity/crash：cache finalization 与 per-call usage 在同一 Runtime transaction boundary；claim/finalize/stale recovery 对应 A/B/C/D crash windows，unknown external request 默认不自动重试。
-- Pending lease/recovery：45s lease；stale pending 以 provider_attempt_unknown non-retryable recovery，避免未知外部请求的自动重复计费。
-- Runtime：translation-sync，60s，5 fields/run，concurrency 1，20s request timeout，bounded/no storm。
-- Retryable：rate_limited、provider_timeout、provider_unavailable。
-- Non-retryable：auth_failed、provider_forbidden、entitlement_missing、provider_contract_changed、provider_attempt_unknown。
-- provider_contract_changed：fail closed、request/failure +1、estimated cost=0 unknown、停止当前 run、禁止自动 retry，等待 review/requeue。
-- Controlled requeue：server-side bounded limit<=100，仅对显式 provider/model/sourceHash/errorCodes 且仍 eligible 的 rows；配置类错误需 harmless test + operator approval，contract/unknown 需额外 review，绝不由 interval 自动 requeue。
-- Provider circuit：auth_failed、provider_forbidden、entitlement_missing、provider_contract_changed 写入现有 provider_runtime block；provider_attempt_unknown 只阻断当前 row；clear block 不调用 Provider、不自动 requeue。
-- Budget：hard pre-call gate；monthlyBudget 是 local estimated USD ceiling；unknown cost 不伪造账单。
-- source_scope：literal feed/translation_test，同小时不同 scope 为 mixed，只作 informational。
-- Feed DTO：保留原始 title/summary，新增 displayTitle/displaySummary/status；推荐 API-only read model。
-- Feed GET：provider-free，batch translation-cache lookup，无 N+1，不调用 DeepSeek。
-- Event/HOT：完全隔离，继续使用原始事实。
-- Disabled/budget exhausted：停止新 call，但已有 successful cache 可继续展示；无 cache 则原文。
-- Milestones：T3A Runtime Foundation -> T3B Feed Read -> T3C Feed UI -> T3D Live Acceptance。
-- Live gate：T3D 前必须完成真实 DeepSeek harmless verification；当前仍 pending。
-- Tests：74 项矩阵，新增 ownership、execution-only、atomic lifecycle、crash recovery、controlled requeue、provider circuit block/unblock 覆盖。
-- Secret changes：none in this proposal。
-- External calls：0 in this proposal。
-- Blocker：T3A durable retry/lease requires approved additive migration and runtime accounting change；本轮只完成 architecture review repair，未实现任何 lifecycle/circuit code。
-- Open decisions：见第 23 节，等待人工架构审批。
-
-Translation T3 Architecture Review Repair 已完成并停止。
-Plan 仍为 draft。
-未开始 T3A 实现。
-未创建 migration。
-未修改生产代码。
-未执行 DeepSeek 外部调用。
-等待人工最终架构审批。
+- Base SHA：`74c16e62b010df99254311a7e9bcd0722fbda577`
+- Plan path：`docs/plans/inbox/shipping-hot-translation-t3.md`
+- Plan status：`approved / T3A active`；T3A implemented / locally verified / stopped。
+- Durable owner：Translation Runtime + TranslationRepository；`TranslationService.execute()` 仅执行规范化、hash、保护/校验和 Provider call，现有 `translate()` 仅保留 T1/T2 compatibility。
+- Schema：migration v12 `translation-runtime-work-state`，只向 `translation_cache` 增加 `retry_count`、`next_retry_at`、`retryable`、`lease_until`、`last_error_code` 和 work-state index；migration additive/idempotent，retained SQLite 未修改。
+- Lifecycle：`claimTranslationWork`、`completeTranslationSuccess`、`completeRetryableFailure`、`completeNonRetryableFailure`、`recoverStaleLease(s)`、`requeueTranslationFailures` 已实现；active lease 45s，单次最多 5 fields，Runtime concurrency 1。
+- Selection：current provider/model exact successful cache first；否则相同 sourceHash/targetLanguage 的 deterministic historical success；pending/failed 不作为显示译文；无成功缓存返回原文。
+- Retry/circuit：`rate_limited`、`provider_timeout`、`provider_unavailable` 仅 retry/backoff；`auth_failed`、`provider_forbidden`、`entitlement_missing`、`provider_contract_changed` 写现有 `provider_runtime` circuit；`provider_attempt_unknown` 仅 row-level block；clear/requeue 均显式、无自动 requeue。
+- Runtime：`translation-sync` 仅 Real Mode 注册，fixed DeepSeek adapter、20s timeout、settings/secret/monthly-budget hard gate、per-call usage、generic job-level usage opt-out；Mock Mode 不注册。
+- Isolation：Feed original title/summary、Event/HOT/Voyage/AIS/Port/Weather facts、lineage、freshness、severity、ranking、dedupe、evidence 和 Readiness hard gate 未被 Translation 改写或依赖。
+- Deferred：T3B Feed Read/display DTO、T3C UI、T3D DeepSeek live acceptance、production Chinese display、usage/cost dashboard、Translation test endpoint expansion、translation-sync beyond this foundation、additional Provider/fallback 均未实施。
+- Secrets/calls：Secret changes `none`；`.env.local` 未修改；external DeepSeek calls `0`；DeepSeek live verification `pending`。
+- Verification：T3A targeted tests、T1/T2 regressions、typecheck、lint、build 与 Neat Freak closeout 已通过；T3A targeted tests 为 `117/117`，full suite 当前 `629/630` tests，唯一失败是已存在且与本轮无关的 dated Shekou Event/HOT assertion。

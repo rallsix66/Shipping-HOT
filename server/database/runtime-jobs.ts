@@ -84,6 +84,15 @@ export interface ProviderUsageLatestOptions extends ProviderUsageAggregateOption
   errorsOnly?: boolean
 }
 
+export const PROVIDER_CIRCUIT_BLOCK_CODES = new Set([
+  "auth_failed",
+  "provider_forbidden",
+  "entitlement_missing",
+  "provider_contract_changed",
+] as const)
+
+export type ProviderCircuitBlockCode = "auth_failed" | "provider_forbidden" | "entitlement_missing" | "provider_contract_changed"
+
 interface ProviderRuntimeRow {
   provider_id: string
   capability: string
@@ -278,6 +287,67 @@ function toProviderUsageAggregate(row?: ProviderUsageAggregateRow): ProviderUsag
   }
 }
 
+export function isProviderCircuitBlocked(runtime?: ProviderRuntimeRecord): boolean {
+  return Boolean(runtime && (runtime.status === "failed" || runtime.status === "degraded") && runtime.errorCode && PROVIDER_CIRCUIT_BLOCK_CODES.has(runtime.errorCode as ProviderCircuitBlockCode))
+}
+
+/** Writes one usage delta. The caller owns the surrounding transaction when atomicity is required. */
+export async function recordProviderUsageInTransaction(db: Database, patch: ProviderUsagePatch): Promise<void> {
+  const calledAt = patch.calledAt ?? new Date().toISOString()
+  const windowStart = `${calledAt.slice(0, 13)}:00:00.000Z`
+  const id = `usage:${patch.providerId}:${patch.capability}:${windowStart}`
+  const request = patch.request !== false
+  await db.prepare(`
+    INSERT INTO provider_usage (
+      id, provider_id, capability, window_start, request_count, success_count, failure_count, records_count,
+      cache_hit_count, characters_in, characters_out, tokens_in, tokens_out, estimated_cost, currency,
+      pricing_reference, source_scope, last_called_at, error_code
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      request_count = provider_usage.request_count + excluded.request_count,
+      success_count = provider_usage.success_count + excluded.success_count,
+      failure_count = provider_usage.failure_count + excluded.failure_count,
+      records_count = provider_usage.records_count + excluded.records_count,
+      cache_hit_count = provider_usage.cache_hit_count + excluded.cache_hit_count,
+      characters_in = COALESCE(provider_usage.characters_in, 0) + COALESCE(excluded.characters_in, 0),
+      characters_out = COALESCE(provider_usage.characters_out, 0) + COALESCE(excluded.characters_out, 0),
+      tokens_in = COALESCE(provider_usage.tokens_in, 0) + COALESCE(excluded.tokens_in, 0),
+      tokens_out = COALESCE(provider_usage.tokens_out, 0) + COALESCE(excluded.tokens_out, 0),
+      estimated_cost = COALESCE(provider_usage.estimated_cost, 0) + COALESCE(excluded.estimated_cost, 0),
+      currency = COALESCE(excluded.currency, provider_usage.currency),
+      pricing_reference = COALESCE(excluded.pricing_reference, provider_usage.pricing_reference),
+      source_scope = CASE
+        WHEN excluded.source_scope IS NULL THEN provider_usage.source_scope
+        WHEN provider_usage.source_scope IS NULL THEN excluded.source_scope
+        WHEN provider_usage.source_scope = excluded.source_scope THEN provider_usage.source_scope
+        WHEN provider_usage.source_scope = 'mixed' OR excluded.source_scope = 'mixed' THEN 'mixed'
+        ELSE 'mixed'
+      END,
+      last_called_at = COALESCE(excluded.last_called_at, provider_usage.last_called_at),
+      error_code = COALESCE(excluded.error_code, provider_usage.error_code)
+  `).run(
+    id,
+    patch.providerId,
+    patch.capability,
+    windowStart,
+    request ? 1 : 0,
+    request && patch.succeeded ? 1 : 0,
+    request && patch.failed ? 1 : 0,
+    patch.records ?? 0,
+    patch.cacheHit ? 1 : 0,
+    patch.charactersIn ?? null,
+    patch.charactersOut ?? null,
+    patch.tokensIn ?? null,
+    patch.tokensOut ?? null,
+    patch.estimatedCost ?? null,
+    patch.currency ?? null,
+    patch.pricingReference ?? null,
+    patch.sourceScope ?? null,
+    request ? calledAt : null,
+    patch.errorCode ?? null,
+  )
+}
+
 export class RuntimeRepository {
   constructor(private readonly db: Database) {}
 
@@ -373,54 +443,34 @@ export class RuntimeRepository {
   }
 
   async recordProviderUsage(patch: ProviderUsagePatch): Promise<void> {
-    const calledAt = patch.calledAt ?? new Date().toISOString()
-    const windowStart = `${calledAt.slice(0, 13)}:00:00.000Z`
-    const id = `usage:${patch.providerId}:${patch.capability}:${windowStart}`
-    const request = patch.request !== false
-    const sourceScope = patch.sourceScope
-    await this.db.prepare(`
-      INSERT INTO provider_usage (
-        id, provider_id, capability, window_start, request_count, success_count, failure_count, records_count,
-        cache_hit_count, characters_in, characters_out, tokens_in, tokens_out, estimated_cost, currency,
-        pricing_reference, source_scope, last_called_at, error_code
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        request_count = provider_usage.request_count + excluded.request_count,
-        success_count = provider_usage.success_count + excluded.success_count,
-        failure_count = provider_usage.failure_count + excluded.failure_count,
-        records_count = provider_usage.records_count + excluded.records_count,
-        cache_hit_count = provider_usage.cache_hit_count + excluded.cache_hit_count,
-        characters_in = COALESCE(provider_usage.characters_in, 0) + COALESCE(excluded.characters_in, 0),
-        characters_out = COALESCE(provider_usage.characters_out, 0) + COALESCE(excluded.characters_out, 0),
-        tokens_in = COALESCE(provider_usage.tokens_in, 0) + COALESCE(excluded.tokens_in, 0),
-        tokens_out = COALESCE(provider_usage.tokens_out, 0) + COALESCE(excluded.tokens_out, 0),
-        estimated_cost = COALESCE(provider_usage.estimated_cost, 0) + COALESCE(excluded.estimated_cost, 0),
-        currency = COALESCE(excluded.currency, provider_usage.currency),
-        pricing_reference = COALESCE(excluded.pricing_reference, provider_usage.pricing_reference),
-        source_scope = COALESCE(excluded.source_scope, provider_usage.source_scope),
-        last_called_at = COALESCE(excluded.last_called_at, provider_usage.last_called_at),
-        error_code = COALESCE(excluded.error_code, provider_usage.error_code)
-    `).run(
-      id,
-      patch.providerId,
-      patch.capability,
-      windowStart,
-      request ? 1 : 0,
-      request && patch.succeeded ? 1 : 0,
-      request && patch.failed ? 1 : 0,
-      patch.records ?? 0,
-      patch.cacheHit ? 1 : 0,
-      patch.charactersIn ?? null,
-      patch.charactersOut ?? null,
-      patch.tokensIn ?? null,
-      patch.tokensOut ?? null,
-      patch.estimatedCost ?? null,
-      patch.currency ?? null,
-      patch.pricingReference ?? null,
-      sourceScope ?? null,
-      request ? calledAt : null,
-      patch.errorCode ?? null,
-    )
+    await recordProviderUsageInTransaction(this.db, patch)
+  }
+
+  async blockProviderCircuit(input: { providerId: string, capability: string, errorCode: ProviderCircuitBlockCode, errorMessage?: string, updatedAt?: string }): Promise<ProviderRuntimeRecord> {
+    return this.updateProviderRuntime({
+      providerId: input.providerId,
+      capability: input.capability,
+      status: "failed",
+      lastFailureAt: input.updatedAt ?? new Date().toISOString(),
+      errorCode: input.errorCode,
+      errorMessage: input.errorMessage ?? input.errorCode,
+      updatedAt: input.updatedAt,
+    })
+  }
+
+  async clearProviderCircuit(input: { providerId: string, capability: string, reason: string, updatedAt?: string }): Promise<ProviderRuntimeRecord | undefined> {
+    void input.reason
+    const current = await this.getProviderRuntime(input.providerId, input.capability)
+    if (!current || !isProviderCircuitBlocked(current)) return current
+    return this.updateProviderRuntime({
+      providerId: input.providerId,
+      capability: input.capability,
+      status: current.lastSuccessAt ? "degraded" : "never_succeeded",
+      consecutiveFailures: 0,
+      errorCode: null,
+      errorMessage: null,
+      updatedAt: input.updatedAt,
+    })
   }
 
   async updateProviderRuntime(patch: ProviderRuntimePatch): Promise<ProviderRuntimeRecord> {

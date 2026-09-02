@@ -306,7 +306,7 @@ function runtimeChecks(runtime: RuntimeReadinessStatus | undefined, bootstrapFai
   }
 
   const expected = new Map(approvedRuntimeJobKeys(dataMode).map(key => [key, key]))
-  const actual = runtime.jobs
+  const actual = runtime.jobs.filter(job => !(job.id === "translation-sync" && job.capability === "translation"))
   const actualKeys = actual.map(job => `${job.id}:${job.capability}`)
   const counts = new Map<string, number>()
   actualKeys.forEach(key => counts.set(key, (counts.get(key) ?? 0) + 1))

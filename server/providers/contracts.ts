@@ -70,6 +70,11 @@ export interface TranslationCacheRecord {
   translatedAt?: string
   status: "pending" | "succeeded" | "failed"
   errorMessage?: string
+  retryCount?: number
+  nextRetryAt?: string | null
+  retryable?: boolean
+  leaseUntil?: string | null
+  lastErrorCode?: string | null
   preferred: boolean
   createdAt: string
   updatedAt: string

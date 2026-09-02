@@ -65,6 +65,21 @@ describe("runtime registry", () => {
     native.close()
   })
 
+  it("registers only the fixed server-side DeepSeek Translation Runtime in Real Mode", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const jobs = getDefaultRuntimeJobs({ database, dataMode: "real", aisProvider, voyageProvider })
+    expect(jobs.find(job => job.id === "translation-sync")).toMatchObject({
+      providerId: "deepseek",
+      capability: "translation",
+      intervalMs: 60_000,
+      enabled: true,
+      usageAlreadyRecorded: true,
+    })
+    expect(jobs.filter(job => job.id === "translation-sync")).toHaveLength(1)
+    native.close()
+  })
+
   it("selects the real VesselAPI Voyage provider without falling back to Mock", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "real")

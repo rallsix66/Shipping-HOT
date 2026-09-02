@@ -5,6 +5,7 @@ import { RuntimeRepository } from "#/database/runtime-jobs"
 import type { SecretStore, TranslationProvider, TranslationUsage } from "#/providers/contracts"
 import { createDeepSeekTranslationProvider, estimateDeepSeekCost } from "#/providers/translation/deepseek-provider"
 import { TranslationService } from "#/services/translation-service"
+import { withTranslationExecutor } from "#/services/translation-executor"
 import { TRANSLATION_CAPABILITY, TRANSLATION_CURRENCY, TRANSLATION_PROVIDER_ID, assertTranslationReady, currentTranslationUsage } from "#/services/translation-settings"
 
 export const TRANSLATION_TEST_SOURCE_TEXT = "Vessel TEST STAR voyage AB123 arrived at SGSIN on 2026-09-02. Details: https://example.com/status"
@@ -38,7 +39,7 @@ export interface TranslationTestResult {
   errorCode?: string
 }
 
-export async function runTranslationTest(input: TranslationTestInput): Promise<TranslationTestResult> {
+async function runTranslationTestUnlocked(input: TranslationTestInput): Promise<TranslationTestResult> {
   const now = input.now ?? new Date()
   const currentUsage = await currentTranslationUsage(input.database, now)
   const gate = await assertTranslationReady(input.settings.translation, input.secretStore, currentUsage.estimatedCost)
@@ -90,4 +91,8 @@ export async function runTranslationTest(input: TranslationTestInput): Promise<T
     pricingReference: "deepseek-official-2026-09-02",
     errorCode: outcome.errorCode,
   }
+}
+
+export async function runTranslationTest(input: TranslationTestInput): Promise<TranslationTestResult> {
+  return withTranslationExecutor(() => runTranslationTestUnlocked(input))
 }

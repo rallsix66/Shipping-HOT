@@ -319,6 +319,16 @@ describe("v3 readiness", () => {
     expect(report.checks.find(check => check.id === "network-probes")).toMatchObject({ status: "skipped" })
   })
 
+  it("keeps the optional Translation Runtime outside the operational readiness job gate", async () => {
+    const report = await readiness({
+      running: true,
+      jobs: [...validRuntime().jobs, { id: "translation-sync", providerId: "deepseek", capability: "translation", enabled: true, status: "never_succeeded" }],
+    })
+    expect(report.ready).toBe(true)
+    expect(report.checks.find(check => check.id === "runtime-scope")).toMatchObject({ status: "pass" })
+    expect(report.capabilities.some(capability => capability.capability === "translation")).toBe(false)
+  })
+
   const failureCases: Array<[string, RuntimeReadinessStatus | undefined, { bootstrapFailed?: boolean }, string]> = [
     ["runtime undefined", undefined, {}, "runtime-scope"],
     ["bootstrap failed", undefined, { bootstrapFailed: true }, "runtime-scope"],

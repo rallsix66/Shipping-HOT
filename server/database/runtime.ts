@@ -12,8 +12,9 @@ import { p3bVoyageEtaMigration } from "#/database/migrations/008-p3b-voyage-eta"
 import { p3FeedFreshnessMigration } from "#/database/migrations/009-p3-feed-freshness"
 import { p3FeedFreshnessReclassificationMigration } from "#/database/migrations/010-p3-feed-freshness-reclassification"
 import { providerUsageRecordsMigration } from "#/database/migrations/011-provider-usage-records"
+import { translationRuntimeWorkStateMigration } from "#/database/migrations/012-translation-runtime-work-state"
 
-export const latestSchemaVersion = providerUsageRecordsMigration.version
+export const latestSchemaVersion = translationRuntimeWorkStateMigration.version
 
 export type ShippingDataMode = "mock" | "real"
 
@@ -82,7 +83,7 @@ async function runMigrations(db: Database) {
 
   const appliedRows = await db.prepare("SELECT version FROM schema_migrations ORDER BY version").all() as Array<{ version: number }>
   const applied = new Set(appliedRows.map(row => Number(row.version)))
-  const migrations = [p0FoundationMigration, watchlistIsolationMigration, p1aPortDirectoryMigration, p1bMockIsolationMigration, p2aSearchFoundationMigration, p2cRuntimeFoundationMigration, p3aAisTrackingMigration, p3bVoyageEtaMigration, p3FeedFreshnessMigration, p3FeedFreshnessReclassificationMigration, providerUsageRecordsMigration]
+  const migrations = [p0FoundationMigration, watchlistIsolationMigration, p1aPortDirectoryMigration, p1bMockIsolationMigration, p2aSearchFoundationMigration, p2cRuntimeFoundationMigration, p3aAisTrackingMigration, p3bVoyageEtaMigration, p3FeedFreshnessMigration, p3FeedFreshnessReclassificationMigration, providerUsageRecordsMigration, translationRuntimeWorkStateMigration]
   for (const migration of migrations) {
     if (applied.has(migration.version)) continue
     await transaction(db, async () => {
