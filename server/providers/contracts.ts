@@ -37,14 +37,12 @@ export interface TranslationRequest {
 
 export interface TranslationResult {
   translatedText: string
-  providerId: string
-  model: string
-  sourceHash: string
 }
 
-/** P0 contract only; concrete AI adapters belong to a separately approved phase. */
+/** The Provider returns content only; cache identity belongs to TranslationService. */
 export interface TranslationProvider {
   readonly providerId: string
+  readonly model: string
   translate: (request: TranslationRequest) => Promise<TranslationResult>
 }
 
@@ -64,6 +62,8 @@ export interface TranslationCacheRecord {
   status: "pending" | "succeeded" | "failed"
   errorMessage?: string
   preferred: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface ProviderUsageRecord {

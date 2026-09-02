@@ -1,6 +1,6 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 文档状态：`accepted / V3 Readiness gate implemented / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed + P3A AIS Tracking Runtime Foundation + P3B Voyage / ETA Foundation + P3 Feed Freshness Batch 1 + source-isolated Feed Runtime + Calendar/Port/Weather activation implemented / Real Operational blocked on remaining capability evidence / Translation and later business phases pending`
+> 文档状态：`accepted / V3 Readiness gate implemented / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed + P3A AIS Tracking Runtime Foundation + P3B Voyage / ETA Foundation + P3 Feed Freshness Batch 1 + source-isolated Feed Runtime + Calendar/Port/Weather activation + Translation T1 Foundation implemented / Real Operational blocked on remaining capability evidence / real Translation Providers and later business phases pending`
 >
 > 审查日期：2026-08-24（Asia/Shanghai）
 >
@@ -14,7 +14,7 @@
 
 > V3 Readiness：本轮只建立本地安全就绪门（观测 Node/ABI、CLI 实测 pnpm、实际安装的 better-sqlite3 版本/native load、SQLite schema/Port Directory、已批准 Runtime scope、Mock-only provider configuration），通过 `GET /api/shipping/readiness` 与 `pnpm smoke:v3-readiness` 验证；HTTP 缺少 pnpm 观测时标记 skipped 且严格 Readiness 不得 ready；不执行外部 Provider 请求，不进入下一阶段。
 
-> 当前执行状态：P3 Feed Freshness Batch 1 与来源独立 Feed Background Runtime 已完成；Calendar、Port、Weather Runtime 已纳入同一受控激活链路；GFW Vessel Search、canonical identity normalization、provider-aware cache 和 Watchlist latest-MMSI target flow 已实现并通过隔离 Real live probe。Real Mode activation smoke 与生产 HTTP smoke 已验证真实写入/读取，且 `actualMockRows` 来自自动发现所有带 `source_type` 的 Shipping HOT 业务表的 SQL/Repository 扫描并要求总数为零。当前停止在 Real Operational Readiness：Voyage 仍无真实适配器/凭据，VesselAPI search/ETA capability remains optional/unverified，AIS 无 PositionReport 观测，官方天气预警仍 pending；不进入后续业务开发。
+> 当前执行状态：P3 Feed Freshness Batch 1 与来源独立 Feed Background Runtime 已完成；Calendar、Port、Weather Runtime 已纳入同一受控激活链路；GFW Vessel Search、canonical identity normalization、provider-aware cache 和 Watchlist latest-MMSI target flow 已实现并通过隔离 Real live probe；Translation T1 Foundation 已实现但不进入生产 Feed 读取、Runtime、API、UI 或 Readiness。Real Mode activation smoke 与生产 HTTP smoke 已验证真实写入/读取，且 `actualMockRows` 来自自动发现所有带 `source_type` 的 Shipping HOT 业务表的 SQL/Repository 扫描并要求总数为零。当前停止在 Real Operational Readiness：Voyage 仍无真实适配器/凭据，VesselAPI search/ETA capability remains optional/unverified，AIS 无 PositionReport 观测，官方天气预警仍 pending；真实 Translation Provider 与后续业务开发仍需单独批准。
 
 ## 1. 背景与当前问题
 
