@@ -3,7 +3,7 @@
 > status: draft
 > proposal date: 2026-09-02
 > base branch: codex/shipping-hot-v3-real-data
-> base SHA: 1b916a1743801e4dd538f4b5573964263fabb6a0
+> base SHA: 8490868ea707db37a8799142dcea1edb03b0f1b4
 > scope: architecture proposal only; no T3 implementation is authorized by this document
 
 ## 0. Review boundary
@@ -361,7 +361,135 @@ Backfill：
 - 若已发布后必须物理回滚，需另一个经批准的 table rebuild/backup restore 方案；
 - 本 round 不创建 migration、不改 schema_version、不触碰 retained .data/shipping-hot-v3.sqlite3。
 
+### 6.4 Architecture review repair: durable work-state ownership and controlled recovery
+
+本节是对 T3 draft 的强制边界修复，优先级高于后文任何未明确 owner 的简写。它不改变 T3 的 scope、schema blocker、provider boundary 或 plan status；只把 T3A 实施前必须批准的生命周期 ownership、原子性、崩溃恢复和 provider recovery contract 定义清楚。
+
+#### 6.4.1 Single durable work-state owner
+
+T3A production translation work state 只有一个 durable owner：Translation Runtime 与 TranslationRepository 的组合。Runtime 负责 orchestration，Repository 负责 translation_cache 的事务性读写；任何其他层都不得独立创建、claim、lease、retry、finalize 或 requeue 同一个 translation work item。
+
+| Responsibility | 唯一 owner | 明确不负责 |
+| --- | --- | --- |
+| current Feed candidate discovery、eligibility、bounded batch | Translation Runtime | 不调用 Provider，不写 Feed 原始事实 |
+| claim、pending、lease、retry_count、next_retry_at、last_error_code | Translation Runtime + TranslationRepository | 不由 TranslationService 或 generic BackgroundRuntime 各自维护一份 |
+| Provider request preparation、sourceHash、placeholder/protected-term 处理、response validation、original fallback | TranslationService | 不 claim、不 lease、不写 cache、不决定 retry/circuit |
+| succeeded/failed finalization、stale lease recovery、controlled requeue | TranslationRepository，由 Runtime 调用 | 不由 Provider 或 Feed repository 直接 upsert |
+| provider-level circuit state | Translation Runtime + existing provider_runtime repository API | 不由单个 cache row 伪装成 provider circuit |
+| per-call provider usage 与 cache finalization 的提交边界 | T3A Runtime orchestration transaction | 不由 generic “one job = one request” fallback 代记 |
+
+T3A 必须引入 execution-only primitive，建议签名为：
+
+    TranslationService.execute(input): Promise<TranslationExecutionResult>
+
+execute() 只负责：canonical language/source normalization、versioned sourceHash、protected text preparation、调用已注入的 TranslationProvider、result/wrapper/usage contract validation、protected text restoration，并返回成功或结构化失败结果。execute() 不得执行 save、claim、lease、retry classification、provider block、provider usage persistence 或最终 status 写入。
+
+现有 TranslationService.translate() 可以保留为 T1/T2 兼容 convenience orchestration，因为现有 T1/T2 tests 与 fixed translation test service 仍使用它；但 production translation-sync 不得复用 translate() 作为 durable lifecycle owner。T3A 应让 Runtime 调用 execute()，再显式调用下列 Repository lifecycle API。这样可以避免一条 Service 同时拥有 domain execution 和 durable work-state 的双重事实源。
+
+#### 6.4.2 Atomic lifecycle API
+
+T3A 的 Repository API 必须表达完整生命周期，而不是让 Runtime 拼接通用 save() 字段。建议最小 API 如下；精确 TypeScript DTO 名称可在 T3A 实施时按项目命名规范调整，但语义不得缩减：
+
+    claimTranslationWork({
+      entityType, entityId, fieldName, sourceText, sourceLanguage,
+      targetLanguage, provider, model, sourceHash, now, leaseUntil
+    }): ClaimResult | null
+
+    completeTranslationSuccess({
+      identity, translatedText, translatedAt, providerUsage, now
+    }): void
+
+    completeRetryableFailure({
+      identity, errorCode, errorMessage, nextRetryAt, providerUsage, now
+    }): void
+
+    completeNonRetryableFailure({
+      identity, errorCode, errorMessage, providerUsage, now
+    }): void
+
+    recoverStaleLease({ identity, now, reason }): void
+
+    requeueTranslationFailures({
+      provider, model, sourceHash?, errorCodes, limit, reason, now
+    }): RequeueResult
+
+claimTranslationWork() 必须在一个 SQLite transaction 中完成最终 eligibility check、current provider/model exact succeeded check、未过期 retry state check、provider circuit/budget gate 的 durable 输入确认，以及 pending row + lease 的 claim。返回 null 表示没有可 claim work；并发或重启下不得产生两个有效 lease。claim 前后的 sourceHash 必须相同，sourceText 只能来自当前 Feed read，不接受 browser arbitrary sourceText。
+
+completeTranslationSuccess()、completeRetryableFailure() 和 completeNonRetryableFailure() 都必须是按一个 translation cache identity 的单次原子 finalize。一次 finalize 要同时写入该状态需要的全部字段：translated_text/translated_at、status、retry metadata、lease、last_error_code/error_message、preferred 以及 updated_at；不允许先写 status 再由另一条非原子 update 补字段。成功必须清空 lease、retryable、nextRetryAt 与错误字段；retryable failure 必须递增 retry_count、设置 nextRetryAt、清空 lease；non-retryable failure 必须清空 lease/nextRetryAt 并明确 retryable=false。
+
+T3A 不应使用现有 generic save() 作为 production lifecycle finalize，因为它没有 claim/lease/retry intent。若为 T1/T2 兼容保留 save()，它不得抹掉未来 work metadata；但所有 T3A production transitions 必须走上述专用 API。
+
+Provider call 已发生时，cache finalization 与这一真实 call 的 provider_usage patch 必须在同一个 SQLite transaction boundary 内提交，或在一次由 Runtime orchestration 持有的 BEGIN/COMMIT unit-of-work 内完成。这样不能消除外部网络与 SQLite 无法组成分布式事务的 exactly-once 限制，但可以避免“cache 已 succeeded、usage 没写”或“usage 已写、cache 仍 pending”的本地半状态。generic BackgroundRuntime 的 job-level fallback 不得再为同一真实 call 重复增加 request_count。
+
+#### 6.4.3 Crash windows and conservative recovery
+
+T3A 必须明确接受外部 Provider 与 SQLite 无法组成分布式事务，因此不宣称 exactly-once external billing：
+
+| Crash window | Durable observation after restart | Required action |
+| --- | --- | --- |
+| A. claim 已提交，Provider call 尚未发出 | pending + lease | lease 到期后 recoverStaleLease，写 provider_attempt_unknown/non-retryable；不自动重试 |
+| B. request 已发出但 response 丢失/进程 crash | pending + lease | 与 A 相同；不能假设 request 未到达，避免潜在重复计费 |
+| C. response 已收到，finalize transaction 尚未提交 | pending + lease | 与 A 相同；success response 不足以作为 durable success 证据 |
+| D. finalize + usage transaction 已提交，随后进程 crash | succeeded 或明确 failed | restart 读取 durable 终态；不得重复 call；retryable failed 仅按 nextRetryAt 重新 candidate |
+
+provider_attempt_unknown 只封锁当前 row，表示该次外部请求是否到达未知；它不是 provider-level circuit code。只有经人工/code review 的 controlled requeue 才能让该 row 再次进入 candidate。
+
+#### 6.4.4 Controlled requeue contract
+
+requeueTranslationFailures() 是 server-side internal operation，不是 public endpoint，不接受任意 entityId/sourceText/errorMessage，也不触发 Provider。它必须：
+
+- 使用显式 provider、model、可选 sourceHash、允许的 errorCodes 和 bounded limit；limit 第一版不得超过 100；
+- 只选择当前仍存在、仍 eligible、sourceHash 仍匹配且 status=failed 的 row；source 已变化的 row 不得复活旧译文；
+- 在一个 Repository transaction 内把选中 rows 置为 retryable=true、retry_count 按约定归零或保留审计计数、nextRetryAt=now、lease=null，并保存 redacted reason；
+- 返回 selected/requeued/skipped counts，供 run audit 使用；不扩大到未选中的历史 row；
+- auth_failed、provider_forbidden、entitlement_missing 只能在配置/权限修复后、fixed harmless translation test 成功并得到 operator approval 后 requeue；
+- provider_contract_changed 必须先完成 Provider contract review、代码/adapter review、targeted tests 与人工批准；
+- provider_attempt_unknown 必须逐 row 经过 operator/code review；若 Feed 已过期或 sourceHash 已变化则保持不可重试，不得为了清 backlog 强行 requeue；
+- 不允许 interval 自动 requeue non-retryable rows，不提供 arbitrary public requeue API。
+
+#### 6.4.5 Provider circuit block/unblock path
+
+T3A 使用现有 provider_runtime 的 provider + capability/job identity 保存 Translation provider-level block，不新增 circuit table。本第一版用现有 status 与 error_code 的约定表达 block：status=failed 或 degraded，error_code 为明确的 blocking ProviderFailureCode；blocked run 必须保留该 code，不得被普通 skipped run 清掉。若 T3A 证明现有 provider_runtime update 不能稳定保留这两个字段，必须在实施前停止并提出 additive schema/contract blocker，不能静默改用 cache row 代替 circuit。
+
+以下错误触发 provider-level block：
+
+- auth_failed；
+- provider_forbidden；
+- entitlement_missing；
+- provider_contract_changed。
+
+以下错误不触发永久 provider-level block：rate_limited、provider_timeout、provider_unavailable。它们只让当前 run 停止，并由各 row 的 retryable failure/backoff 控制下一次 candidate；Runtime 可以记录 degraded/consecutiveFailures，但不能把暂时网络错误误标成需要人工解锁的永久 circuit。
+
+provider_attempt_unknown 只阻断当前 translation cache row，不触发 provider-level block。这样一个 crash/未知请求不会把健康 Provider 的其他 eligible rows 一并永久冻结。
+
+Runtime 的每轮顺序必须是：
+
+    provider circuit allowed
+      -> settings/provider/model allowed
+      -> budget and secret gate
+      -> current Feed candidate scan
+      -> transactional claim
+      -> final exact/source/eligibility and budget recheck
+      -> TranslationService.execute()
+      -> atomic cache finalize + per-call usage
+
+当 circuit 已 blocked：translation-sync 只能写 redacted skipped/run status，不能 claim 新 row、不能执行 execute()、不能调用 DeepSeek；重启后仍保持 blocked。block operation 必须保存 provider/capability、blocking code、时间和 redacted reason；同一 run 首次命中上述 blocking error 后停止后续 Provider calls。
+
+unblock 必须是显式 server-side operation，例如：
+
+    clearTranslationProviderBlock({ provider, capability, reason })
+
+它只清理/恢复 provider_runtime 的 block 状态，不自动发请求、不自动 requeue row。配置类 block 的恢复顺序是：修复 server-only secret/account/config -> fixed harmless translation test 成功 -> clear block -> 对选定 config-error rows 做 bounded controlled requeue -> 等待正常 interval。provider_contract_changed 的恢复顺序还必须包括官方 contract review、adapter 修复、targeted tests 和人工批准。provider_attempt_unknown 的恢复顺序是逐 row review -> 仅对仍 eligible 的 row controlled requeue；它不需要也不允许通过 clear provider circuit 解锁。
+
+block/unblock、requeue、stale recovery 都必须进入可审计的 Runtime/sync run evidence；不能把 operator reason、secret、prompt 或完整 Provider response 写入 cache、provider_runtime、provider_usage 或普通 Feed DTO。
+
+#### 6.4.6 Review repair scope lock
+
+上述 owner/API/circuit 是 T3A 的 architecture contract，不是本轮实现。它不授权新增 migration，不改变现有 schema v11，不创建 translation-sync，不扩展 Feed API/UI，不把 Translation 加入 Real Readiness，也不改变 Event/HOT/Voyage/Port/Weather/source lineage/freshness/severity/ranking/dedupe/evidence 的原始事实边界。
+
 ## 7. Runtime state machine
+
+以下状态机必须由第 6.4 节定义的 Translation Runtime + TranslationRepository 唯一持有；TranslationService.execute() 只返回 execution result，不直接改变这些 durable states。
 
 第一版建议状态如下：
 
@@ -452,6 +580,8 @@ Gate failure before Provider call does not enter PROVIDER CALL and must produce 
 
 配置修复、provider/model 变化或 sourceHash 变化可以形成新的 candidate。对于同一 hash/provider/model 的旧 non-retryable row，必须使用受控 requeue；第一版不提供 public manual endpoint。
 
+其中 auth_failed、provider_forbidden、entitlement_missing、provider_contract_changed 还会触发 provider_runtime 的 Translation provider-level block；provider_attempt_unknown 只阻断当前 row。clearTranslationProviderBlock 与 requeueTranslationFailures 必须遵循第 6.4 节的显式 server-side recovery sequence，不得由 interval 自动调用。
+
 ### 8.3 Backoff
 
 使用确定性 exponential backoff：
@@ -524,6 +654,7 @@ Runtime registry 不得创建 Fake Provider。建议：
 
 每一次 production call 前按顺序检查：
 
+    provider_runtime Translation circuit is not blocked
     settings.enabled
     providerId == deepseek
     model == deepseek-v4-flash
@@ -535,6 +666,8 @@ Runtime registry 不得创建 Fake Provider。建议：
     Feed still current and sourceHash unchanged
 
 全部通过后才允许 Provider call。任何 gate 失败均为 0 external calls。
+
+其中 provider circuit 必须在 candidate claim 之前检查，并在 claim transaction 与真实 call 之间再次确认；blocked 状态下不得 claim 新 row。一次真实 call 的 cache finalization 与 provider_usage 由同一 Runtime transaction boundary 提交；TranslationService.execute() 不承担该提交。
 
 ### 9.6 Budget concurrency
 
@@ -868,9 +1001,14 @@ DeepSeek timeout/429/500/secret missing/budget exhausted/contract changed：
 - canonical current Feed candidate scanner；
 - translation-sync registry/job；
 - bounded scan/batch/concurrency=1；
+- Translation Runtime + TranslationRepository 作为唯一 durable work-state owner；
+- TranslationService.execute() execution-only primitive；现有 translate() 仅保留 T1/T2 compatibility；
+- 专用 SQLite claim/pending/finalize/recovery/requeue lifecycle API，禁止 production path 依赖 generic save()；
 - SQLite claim/pending lease；
+- atomic cache finalization + per-call usage transaction boundary；
 - retry classification/backoff；
 - stale pending recovery；
+- auth/forbidden/entitlement/contract provider circuit block、显式 unblock 与 controlled requeue；provider_attempt_unknown 仅 row-level block；
 - settings/secret/budget hard pre-call gate；
 - per-call usage accounting；
 - runtime/backlog/status read；
@@ -1020,6 +1158,33 @@ DeepSeek timeout/429/500/secret missing/budget exhausted/contract changed：
 49. freshness unaffected：translation does not change current/history/expiry/freshness。
 50. Real Readiness unaffected：Translation failure/disabled does not make Shipping core Real Readiness pass or fail incorrectly。
 
+### 19.8 Architecture ownership, atomicity and recovery
+
+51. single durable owner：只有 Translation Runtime + TranslationRepository 改变 T3 translation work state；TranslationService 与 generic BackgroundRuntime 不创建第二套 lifecycle。
+52. execution-only service：TranslationService.execute() 不 claim、不 lease、不 save、不写 usage、不 block provider，只返回 validated execution result。
+53. T1/T2 compatibility：现有 translate() 可继续服务旧调用，但 production translation-sync 只走 execute() + Repository lifecycle API。
+54. atomic claim：并发 claim 同一 identity 最多产生一个有效 pending lease。
+55. claim final recheck：claim 在最终事务内重新检查 current eligibility、sourceHash、exact success、retry due 与 gate 输入。
+56. atomic success finalize：success 一次性写 translated text、status、translatedAt、preferred、lease/retry/error 清理与 updatedAt。
+57. atomic retry finalize：retryable failure 一次性写 failure、retry_count、nextRetryAt、error code/message 与 lease 清理。
+58. atomic non-retry finalize：non-retryable failure 一次性写 failure、retryable=false、nextRetryAt/lease 清理与 error code/message。
+59. cache/usage unit-of-work：真实 Provider call 的 cache finalization 与 provider_usage 不产生本地半提交，generic job-level usage 不重复计数。
+60. crash A：claim 后尚未发 call 的 stale lease 恢复为 provider_attempt_unknown/non-retryable，0 次自动重试。
+61. crash B：request 已发出但 response 丢失时同样保守恢复，不假设外部 request 未到达。
+62. crash C：response 已收到但 finalize 未提交时同样恢复，不把内存 success 当 durable success。
+63. crash D：finalize + usage 已提交后重启读取终态，不重复 Provider call。
+64. stale no-auto-retry：provider_attempt_unknown 只阻断当前 row，不触发 provider-level circuit。
+65. bounded requeue：controlled requeue 仅 server-side、显式过滤、limit<=100、无 Provider call、返回 selected/requeued/skipped audit counts。
+66. config requeue gate：auth/forbidden/entitlement rows 只有配置修复、fixed harmless test 成功和 operator approval 后才能 requeue。
+67. contract requeue gate：provider_contract_changed rows 需要 contract review、adapter/code review、targeted tests 和人工批准后才能 requeue。
+68. stale requeue gate：provider_attempt_unknown 逐 row review，Feed 过期或 sourceHash 变化的 row 不得 requeue。
+69. auth circuit：auth_failed 触发 persisted provider-level block，当前 run 停止且后续 run 0 calls。
+70. forbidden circuit：provider_forbidden 触发 persisted provider-level block，当前 run 停止且后续 run 0 calls。
+71. entitlement circuit：entitlement_missing 触发 persisted provider-level block，当前 run 停止且后续 run 0 calls。
+72. contract circuit：provider_contract_changed 触发 persisted provider-level block、unknown cost/failure evidence 与 no-auto-retry。
+73. block persistence/unblock：blocked 状态跨重启保留；clearTranslationProviderBlock 不调用 Provider、不自动 requeue，需显式 recovery sequence。
+74. transient classification：rate_limited/provider_timeout/provider_unavailable 只进入 bounded retry/backoff，不被误标为永久 provider circuit。
+
 ## 20. Conservative performance target
 
 First production target：
@@ -1085,6 +1250,11 @@ If a provider contract change occurs：
 9. 是否接受第一版不提供 public POST /translation/sync 与 public requeue endpoint。
 10. 是否接受 Translation 始终不进入 Real Operational readiness hard gate。
 11. 是否在 T3D 前单独批准 DeepSeek harmless live verification，并将 production enable 与 verified_live 分开。
+12. 是否批准 Translation Runtime + TranslationRepository 作为唯一 durable work-state owner，并禁止 TranslationService/generic BackgroundRuntime 维护第二套 lifecycle。
+13. 是否批准 TranslationService.execute() execution-only primitive，并让现有 translate() 仅作为 T1/T2 compatibility path。
+14. 是否批准专用 claim/finalize/stale-recovery/requeue Repository API，以及 cache finalization + per-call provider_usage 的同一 SQLite transaction boundary。
+15. 是否批准 bounded server-side controlled requeue 的 error-code、sourceHash、eligibility、limit<=100 与 operator/code review gate。
+16. 是否批准基于现有 provider_runtime status/error_code 的 Translation provider circuit block/unblock contract；明确 auth/forbidden/entitlement/contract 为 provider-level block，而 provider_attempt_unknown 仅 row-level block。
 
 ## 24. Proposal verification and governance state
 
@@ -1099,7 +1269,7 @@ If a provider contract change occurs：
 
 ## 25. Final proposal conclusion
 
-- Base SHA：1b916a1743801e4dd538f4b5573964263fabb6a0
+- Base SHA：8490868ea707db37a8799142dcea1edb03b0f1b4
 - Plan path：docs/plans/inbox/shipping-hot-translation-t3.md
 - Plan status：draft，等待人工架构审批
 - 当前 architecture：Feed 原文先持久化，Event/HOT 继续消费原始事实；Translation 通过 server-only Service/Provider/SQLite cache 独立存在；当前没有 Translation Runtime。
@@ -1107,11 +1277,16 @@ If a provider contract change occurs：
 - Candidate mechanism：独立 Translation Runtime periodic scan，复用 feedTranslationSources()/isFeedItemTranslationEligible()。
 - Queue/state：无 external queue；使用 translation_cache + durable lease/retry metadata proposal；schema v11 对完整 T3A 不足。
 - Migration：本轮 none；T3A 前置 minimum additive migration required，待人工批准。
+- Durable owner：T3A 仅由 Translation Runtime + TranslationRepository 持有 work-state；TranslationService.execute() 只做 execution/domain processing，现有 translate() 仅作 T1/T2 compatibility。
+- Lifecycle API：claimTranslationWork、completeTranslationSuccess、completeRetryableFailure、completeNonRetryableFailure、recoverStaleLease、requeueTranslationFailures；T3A production path 不依赖 generic save()。
+- Atomicity/crash：cache finalization 与 per-call usage 在同一 Runtime transaction boundary；claim/finalize/stale recovery 对应 A/B/C/D crash windows，unknown external request 默认不自动重试。
 - Pending lease/recovery：45s lease；stale pending 以 provider_attempt_unknown non-retryable recovery，避免未知外部请求的自动重复计费。
 - Runtime：translation-sync，60s，5 fields/run，concurrency 1，20s request timeout，bounded/no storm。
 - Retryable：rate_limited、provider_timeout、provider_unavailable。
 - Non-retryable：auth_failed、provider_forbidden、entitlement_missing、provider_contract_changed、provider_attempt_unknown。
 - provider_contract_changed：fail closed、request/failure +1、estimated cost=0 unknown、停止当前 run、禁止自动 retry，等待 review/requeue。
+- Controlled requeue：server-side bounded limit<=100，仅对显式 provider/model/sourceHash/errorCodes 且仍 eligible 的 rows；配置类错误需 harmless test + operator approval，contract/unknown 需额外 review，绝不由 interval 自动 requeue。
+- Provider circuit：auth_failed、provider_forbidden、entitlement_missing、provider_contract_changed 写入现有 provider_runtime block；provider_attempt_unknown 只阻断当前 row；clear block 不调用 Provider、不自动 requeue。
 - Budget：hard pre-call gate；monthlyBudget 是 local estimated USD ceiling；unknown cost 不伪造账单。
 - source_scope：literal feed/translation_test，同小时不同 scope 为 mixed，只作 informational。
 - Feed DTO：保留原始 title/summary，新增 displayTitle/displaySummary/status；推荐 API-only read model。
@@ -1120,14 +1295,16 @@ If a provider contract change occurs：
 - Disabled/budget exhausted：停止新 call，但已有 successful cache 可继续展示；无 cache 则原文。
 - Milestones：T3A Runtime Foundation -> T3B Feed Read -> T3C Feed UI -> T3D Live Acceptance。
 - Live gate：T3D 前必须完成真实 DeepSeek harmless verification；当前仍 pending。
-- Tests：50 项矩阵，覆盖 candidate、runtime、retry、cost、API、UI、isolation。
+- Tests：74 项矩阵，新增 ownership、execution-only、atomic lifecycle、crash recovery、controlled requeue、provider circuit block/unblock 覆盖。
 - Secret changes：none in this proposal。
 - External calls：0 in this proposal。
-- Blocker：T3A durable retry/lease requires approved additive migration and runtime accounting change。
+- Blocker：T3A durable retry/lease requires approved additive migration and runtime accounting change；本轮只完成 architecture review repair，未实现任何 lifecycle/circuit code。
 - Open decisions：见第 23 节，等待人工架构审批。
 
-Translation T3 Architecture Plan 已完成并停止。
-未开始 T3 实现。
+Translation T3 Architecture Review Repair 已完成并停止。
+Plan 仍为 draft。
+未开始 T3A 实现。
+未创建 migration。
 未修改生产代码。
 未执行 DeepSeek 外部调用。
-等待人工架构审批。
+等待人工最终架构审批。
