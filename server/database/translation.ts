@@ -17,6 +17,17 @@ export interface TranslationCacheExactLookup extends TranslationCacheLookup {
   model: string
 }
 
+export interface TranslationCachePreference {
+  providerId: string
+  model: string
+}
+
+export interface TranslationCacheBatchResult {
+  cache?: TranslationCacheRecord
+  pending: boolean
+  failed: boolean
+}
+
 export interface TranslationWorkClaimInput extends TranslationCacheExactLookup {
   sourceText: string
   sourceLanguage?: string
@@ -115,6 +126,38 @@ function toRecord(row: TranslationCacheRow): TranslationCacheRecord {
   }
 }
 
+export function translationLookupKey(input: TranslationCacheLookup): string {
+  return JSON.stringify([input.entityType, input.entityId, input.fieldName, input.sourceHash, input.targetLanguage])
+}
+
+function compareNullableDescending(left: string | undefined, right: string | undefined): number {
+  if (left && right) return right.localeCompare(left)
+  if (left) return -1
+  if (right) return 1
+  return 0
+}
+
+function compareSuccessfulRows(left: TranslationCacheRecord, right: TranslationCacheRecord, exact: boolean): number {
+  const translatedAt = compareNullableDescending(left.translatedAt, right.translatedAt)
+  if (translatedAt) return translatedAt
+  if (!exact) {
+    const provider = left.provider.localeCompare(right.provider)
+    if (provider) return provider
+    const model = left.model.localeCompare(right.model)
+    if (model) return model
+  } else {
+    const updatedAt = compareNullableDescending(left.updatedAt, right.updatedAt)
+    if (updatedAt) return updatedAt
+    const provider = left.provider.localeCompare(right.provider)
+    if (provider) return provider
+    const model = left.model.localeCompare(right.model)
+    if (model) return model
+  }
+  return left.id.localeCompare(right.id)
+}
+
+const TRANSLATION_BATCH_CHUNK_SIZE = 100
+
 function workId(input: TranslationCacheExactLookup): string {
   const identity = [input.entityType, input.entityId, input.fieldName, input.sourceHash, input.targetLanguage, input.provider, input.model].join("\u0000")
   return `translation:${createHash("sha256").update(identity, "utf8").digest("hex")}`
@@ -212,6 +255,59 @@ export class TranslationRepository {
     `).all(input.entityType, input.entityId, input.fieldName, input.sourceHash, input.targetLanguage)
     const row = rows<TranslationCacheRow>(result)[0]
     return row ? toRecord(row) : undefined
+  }
+
+  /**
+   * Read the display candidates for a page in bounded batches. This method is
+   * intentionally provider-free: it only reads cache state and never claims
+   * work or invokes a TranslationProvider.
+   */
+  async findSuccessfulBatch(inputs: readonly TranslationCacheLookup[], preference?: TranslationCachePreference): Promise<Map<string, TranslationCacheBatchResult>> {
+    const uniqueInputs = [...new Map(inputs.map(input => [translationLookupKey(input), input])).values()]
+    const result = new Map<string, TranslationCacheBatchResult>()
+    for (const input of uniqueInputs) result.set(translationLookupKey(input), { pending: false, failed: false })
+    for (let offset = 0; offset < uniqueInputs.length; offset += TRANSLATION_BATCH_CHUNK_SIZE) {
+      const chunk = uniqueInputs.slice(offset, offset + TRANSLATION_BATCH_CHUNK_SIZE)
+      const clauses = chunk.map(() => "(entity_type = ? AND entity_id = ? AND field_name = ? AND source_hash = ? AND target_language = ?)").join(" OR ")
+      const params = chunk.flatMap(input => [input.entityType, input.entityId, input.fieldName, input.sourceHash, input.targetLanguage])
+      const cacheRows = rows<TranslationCacheRow>(await this.db.prepare(`
+        SELECT *
+        FROM translation_cache
+        WHERE ${clauses}
+        ORDER BY translated_at DESC, updated_at DESC, provider ASC, model ASC, id ASC
+      `).all(...params))
+      const grouped = new Map<string, TranslationCacheRecord[]>()
+      for (const row of cacheRows) {
+        const key = translationLookupKey({
+          entityType: row.entity_type,
+          entityId: row.entity_id,
+          fieldName: row.field_name,
+          sourceHash: row.source_hash,
+          targetLanguage: row.target_language,
+        })
+        const values = grouped.get(key) ?? []
+        values.push(toRecord(row))
+        grouped.set(key, values)
+      }
+      for (const input of chunk) {
+        const key = translationLookupKey(input)
+        const values = grouped.get(key) ?? []
+        const current = result.get(key) ?? { pending: false, failed: false }
+        const relevant = preference
+          ? values.filter(value => value.provider === preference.providerId && value.model === preference.model)
+          : values
+        const successful = values.filter(value => value.status === "succeeded" && Boolean(value.translatedText?.trim()))
+        const exactSuccessful = preference
+          ? successful.filter(value => value.provider === preference.providerId && value.model === preference.model)
+          : []
+        current.cache = [...exactSuccessful].sort((left, right) => compareSuccessfulRows(left, right, true))[0]
+          ?? [...successful].sort((left, right) => compareSuccessfulRows(left, right, false))[0]
+        current.pending = relevant.some(value => value.status === "pending")
+        current.failed = relevant.some(value => value.status === "failed")
+        result.set(key, current)
+      }
+    }
+    return result
   }
 
   async findWork(input: TranslationCacheExactLookup): Promise<TranslationCacheRecord | undefined> {

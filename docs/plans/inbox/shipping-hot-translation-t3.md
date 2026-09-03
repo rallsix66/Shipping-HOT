@@ -1,22 +1,21 @@
 # Shipping-HOT Translation T3 Architecture / Production Feed Integration Proposal
 
-> status: approved / T3A implemented + review repaired / T3B pending
+> status: approved / T3A-T3D engineering implemented / DeepSeek live pending
 > proposal date: 2026-09-03
 > base branch: codex/shipping-hot-v3-real-data
-> base SHA: 7b2488f8c7a27f714523892f682d13b4d12640eb
-> scope: T3A Translation Runtime Foundation implementation only; T3B/T3C/T3D remain not authorized
+> base SHA: 39ad21d845f64d68240d154f966cce6b3c86cd12
+> scope: T3A Runtime Foundation, T3B Feed Read, T3C Feed UI and T3D bounded acceptance engineering; no broader Translation expansion
 
 ## 0. Review boundary
 
-本文件已通过人工最终架构审批，当前只授权 T3A Translation Runtime Foundation 及本次 Review Repair。它保持独立于 Feed ingestion，且不授权 T3B Feed Read、T3C Feed UI 或 T3D DeepSeek Live Acceptance；仓库没有 active-plan.md 或必须移动 inbox 文档的治理规则，因此保留当前路径并以本状态作为最小 plan reference。
+本文件已通过人工最终架构审批，当前授权 T3A Translation Runtime Foundation、T3B Feed Read、T3C Feed UI 与 T3D bounded acceptance engineering。它保持独立于 Feed ingestion；真实 DeepSeek live verification 仍需满足固定输入、Secret/settings/budget/circuit gates 和最多一次外部调用的单独证据条件。仓库没有 active-plan.md 或必须移动 inbox 文档的治理规则，因此保留当前路径并以本状态作为最小 plan reference。
 
 本轮明确不做：
 
-- 不修改 shared/*、src/* 或 package.json
-- 不创建 translation 以外的 migration，不修改 retained .data/shipping-hot-v3.sqlite3
+- 不创建新的 migration，不修改 retained .data/shipping-hot-v3.sqlite3
 - 不新增 Secret、环境变量、Provider SDK 或 Provider
-- 不执行 DeepSeek live call、Feed live sync、AIS/Voyage/Weather probe
-- 不实现 T3B Feed DTO/read/display、T3C Feed UI 或 T3D live acceptance
+- 本轮不执行 DeepSeek live call、Feed live sync、AIS/Voyage/Weather probe
+- T3D 只实现只读 preflight/evidence model，不实现 production automatic translation/backlog runner
 - 不修改 Event/HOT、Voyage、AIS、Port、Weather 或 Readiness implementation
 
 当前结论先行：
@@ -754,15 +753,13 @@ source_scope 的最终语义是 informational last/mixed scope only。不得声�
       }
     }
 
-建议状态：
+实际状态：
 
     translated
-    historical_fallback
+    historical
     original
     pending
-    failed
-    disabled
-    budget_exhausted
+    unavailable
 
 具体内部 error code 不直接显示在普通 Feed 页面；status/settings 保留详细诊断。
 
@@ -803,12 +800,12 @@ source_scope 的最终语义是 informational last/mixed scope only。不得声�
 
 禁止 100 Feed × 2 fields 逐条调用 TranslationService.getCachedTranslation() 形成明显 N+1。
 
-建议 T3B 在 TranslationRepository 增加 batch API，例如：
+T3B 实际在 TranslationRepository 增加了 bounded batch API：
 
-    findSuccessfulForFeedItems(
+    findSuccessfulBatch(
       lookups: readonly TranslationCacheLookup[],
-      preference: TranslationPreference,
-    ): Promise<Map<FeedFieldKey, TranslationCacheRecord>>
+      preference: TranslationCachePreference,
+    ): Promise<Map<FeedFieldKey, TranslationCacheBatchResult>>
 
 实现原则：
 
@@ -818,13 +815,13 @@ source_scope 的最终语义是 informational last/mixed scope only。不得声�
 - exact current provider/model 优先；
 - historical 按 translated_at DESC, provider ASC, model ASC, id ASC deterministic 选择；
 - pending/failed 只用于 coarse status，不用于 display text；
-- 100 item 目标使用一个 bounded query；超过 SQLite parameter 安全上限时按稳定 chunks，不按每 field 一个 query。
+- 100 item 目标使用 bounded query；超过 SQLite parameter 安全上限时按稳定 chunks，不按每 field 一个 query。当前实现 chunk 上限为 100 lookups，200 个 Feed fields 使用 2 次 cache SELECT。
 
 API mapper 在一次 batch read 后生成 display DTO。Feed GET 与 legacy aggregate GET 可共用 mapper，但 mapper 只能读 SQLite/Repository，绝不能创建或调用 Translation Provider。
 
 ### 11.5 Endpoint compatibility
 
-当前 Feed UI 实际使用 /api/shipping，而专用 /api/shipping/feed 尚未被 FeedPage 消费。建议：
+当前 Feed UI 使用 /api/shipping，而专用 /api/shipping/feed 也提供同一 display DTO。两个 endpoint 共享 mapper：
 
 - T3B 在 /api/shipping/feed 增加 display DTO；
 - T3B 同时为 /api/shipping 的 FeedItem 部分调用同一个 provider-free display mapper，避免首页 Feed preview 与 Feed 页面语义不一致；
@@ -1027,6 +1024,8 @@ DeepSeek timeout/429/500/secret missing/budget exhausted/contract changed：
 
 ### T3B — Feed Read Integration
 
+状态：**implemented / locally verified**
+
 实现范围：
 
 - TranslationRepository batch successful lookup；
@@ -1036,9 +1035,11 @@ DeepSeek timeout/429/500/secret missing/budget exhausted/contract changed：
 - /api/shipping/feed 与 /api/shipping compatibility decision；
 - status/backlog redacted read integration。
 
-仍不改 Event/HOT semantics，不做 UI styling。
+实现结果：两个 Feed read endpoint 共享 provider-free display mapper；Event/HOT semantics 保持不变，Feed UI 由 T3C 消费 display DTO。
 
 ### T3C — Feed UI
+
+状态：**implemented / locally verified**
 
 实现范围：
 
@@ -1048,9 +1049,11 @@ DeepSeek timeout/429/500/secret missing/budget exhausted/contract changed：
 - translated/historical/original/pending/unavailable coarse presentation；
 - no-translation/error does not break Feed。
 
-不新增 Settings UI，不改 Event/HOT UI semantics。
+不新增 Settings UI，不改 Event/HOT UI semantics；“查看原文”使用同一 API DTO 的原始 `title`/`summary`。
 
 ### T3D — Live Acceptance
+
+状态：**acceptance engineering implemented / live pending**
 
 前置：
 
@@ -1059,12 +1062,12 @@ DeepSeek timeout/429/500/secret missing/budget exhausted/contract changed：
 - production enabled 的人工批准；
 - small bounded batch plan。
 
-只用 1 个小 batch 做：
+本轮只实现并测试固定输入的只读 preflight/evidence builder；它的未来 live 计划最多 1 次外部调用，不消费 production backlog：
 
     Runtime -> DeepSeek -> translation_cache -> restart read-back
         -> Feed API -> UI
 
-验证 auth、model、response/usage contract、placeholder/TEST STAR、cost persistence、cache hit no-call、restart、Feed original ingestion isolation。完成后才可将 Translation production 状态标记为 verified_live；Translation 仍不进入 Real Operational hard gate。
+验证模型覆盖 auth、model、response/usage contract、placeholder/TEST STAR、cost persistence、cache hit no-call、restart、Feed original ingestion isolation。只有真实 bounded sequence 完成后才可将 Translation live 状态标记为 `verified_live`；本轮 retained settings disabled/monthlyBudget `0`，external DeepSeek calls `0`，因此保持 `pending`。Translation 仍不进入 Real Operational hard gate。
 
 ## 18. DeepSeek live verification gate
 
@@ -1087,7 +1090,7 @@ DeepSeek timeout/429/500/secret missing/budget exhausted/contract changed：
 
 ## 19. Test matrix
 
-以下矩阵是 T3 验收边界。本轮已执行 T3A 相关的 migration/repository/service/runtime/registry/readiness/compatibility tests；T3B/T3C/T3D 项目保持 pending，相关 Read/UI/live tests 未执行。
+以下矩阵是 T3 验收边界。本轮已执行 T3A 相关的 migration/repository/service/runtime/registry/readiness/compatibility tests，以及 T3B/T3C/T3D 的 batch/read/UI/acceptance engineering tests；真实 DeepSeek live evidence 未执行并保持 pending。
 
 ### 19.1 Candidate
 
@@ -1239,7 +1242,7 @@ If a provider contract change occurs：
 
 ## 23. Approved architecture decisions and deferred decisions
 
-以下 T3A 决策已在本轮开始前获得人工批准并已实现；T3B/T3C/T3D 相关事项仍是 deferred，不因 T3A 完成而自动批准：
+以下 T3A 决策已在本轮开始前获得人工批准并已实现；T3B/T3C/T3D 本轮批准项已完成实现，后续阶段不因本轮完成而自动批准：
 
 1. 是否批准对 translation_cache 的最小 additive migration（retry_count、next_retry_at、retryable、lease_until、last_error_code）。
 2. 是否接受 stale pending 在未知外部请求状态下变成 provider_attempt_unknown/non-retryable，而不是自动重试。
@@ -1258,24 +1261,24 @@ If a provider contract change occurs：
 15. 是否批准 bounded server-side controlled requeue 的 error-code、sourceHash、eligibility、limit<=100 与 operator/code review gate。
 16. 是否批准基于现有 provider_runtime status/error_code 的 Translation provider circuit block/unblock contract；明确 auth/forbidden/entitlement/contract 为 provider-level block，而 provider_attempt_unknown 仅 row-level block。
 
-其中第 7、8 项属于 T3B Feed Read integration，未在本轮实施；第 11 项仅保留为 T3D 的前置 live-acceptance gate。T3A 的实际 schema、Runtime 和 lifecycle 结果以第 25 节为准。
+其中第 7、8 项已由 T3B 实施；第 11 项由 T3D 固化为 bounded acceptance 前置 gate，真实 live evidence 仍 pending。T3A 的实际 schema、Runtime 和 lifecycle 以及 T3B/T3C/T3D 结果以第 25 节为准。
 
 ## 24. Implementation verification and governance state
 
-本文件当前状态为 `approved / T3A implemented + review repaired / T3B pending`；T3A Review Repair 已完成并停止，T3B/T3C/T3D 仍未开始。
+本文件当前状态为 `approved / T3A-T3D engineering implemented / DeepSeek live pending`；T3A/T3B/T3C/T3D engineering 已完成并停止在本阶段边界。
 
 本轮验证要求：
 
 - git diff --check；
 - git status；
-- 确认实现代码、migration、Provider registry 与 T3A runtime 已按批准范围修改；`.env.local`、retained SQLite、Feed API/UI 与 Event/HOT 等业务事实边界未被修改；
-- 不执行任何 external Translation/Feed/AIS/Voyage/Weather call。
+- 确认实现代码、既有 migration、Provider registry 与 T3A runtime 已按批准范围保留；T3B/T3C/T3D 只修改 Feed display read boundary、UI 和 acceptance evidence；`.env.local`、retained SQLite、Event/HOT 等业务事实边界未被修改；
+- 不执行 deliberate external Translation/Feed/AIS/Voyage/Weather live probe；受控 Nitro 核验使用 `SHIPPING_RUNTIME_ENABLED=false`。首次开发服务器启动曾按既有默认插件自动启动非翻译 Runtime jobs 并尝试既有 Feed/Port/Weather/Calendar 路径，随后已停止；本轮 DeepSeek/AI Translation call 为 `0`。
 
-## 25. Final T3A implementation conclusion
+## 25. Final T3 implementation conclusion
 
-- Base SHA：`7b2488f8c7a27f714523892f682d13b4d12640eb`
+- Base SHA：`39ad21d845f64d68240d154f966cce6b3c86cd12`
 - Plan path：`docs/plans/inbox/shipping-hot-translation-t3.md`
-- Plan status：`approved / T3A implemented + review repaired / T3B pending`；T3A engineering implemented / locally verified / stopped。
+- Plan status：`approved / T3A-T3D engineering implemented / DeepSeek live pending`；T3A/T3B/T3C/T3D engineering implemented / locally verified / stopped。
 - Durable owner：Translation Runtime + TranslationRepository；`TranslationService.execute()` 仅执行规范化、hash、保护/校验和 Provider call，现有 `translate()` 仅保留 T1/T2 compatibility。
 - Schema：migration v12 `translation-runtime-work-state`，只向 `translation_cache` 增加 `retry_count`、`next_retry_at`、`retryable`、`lease_until`、`last_error_code` 和 work-state index；migration additive/idempotent，retained SQLite 未修改。
 - Lifecycle：`claimTranslationWork` 在每个 field 使用 fresh claim timestamp，active lease 为 claim time + 45s；retry 时间以 failure completion time 计算；`completeTranslationSuccess`、`completeRetryableFailure`、`completeNonRetryableFailure`、`recoverStaleLease(s)`、`requeueTranslationFailures` 已实现；单次最多 5 fields，Runtime concurrency 1。
@@ -1283,6 +1286,8 @@ If a provider contract change occurs：
 - Retry/circuit：`rate_limited`、`provider_timeout`、`provider_unavailable` 仅 retry/backoff；`auth_failed`、`provider_forbidden`、`entitlement_missing`、`provider_contract_changed` 写现有 `provider_runtime` circuit；`provider_attempt_unknown` 仅 row-level block；clear/requeue 均显式、无自动 requeue。
 - Runtime：`translation-sync` 仅 Real Mode 注册，fixed DeepSeek adapter、20s timeout、settings/secret/monthly-budget hard gate、per-call usage、generic job-level usage opt-out；Mock Mode 不注册。Diagnostic 在普通状态保留 cache hit；provider circuit blocked 时进入 fixed recovery mode，强制一次 `execute()` Provider attempt，不读旧成功 test cache、不写 translation cache、不自动 clear/requeue。
 - Isolation：Feed original title/summary、Event/HOT/Voyage/AIS/Port/Weather facts、lineage、freshness、severity、ranking、dedupe、evidence 和 Readiness hard gate 未被 Translation 改写或依赖。
-- Deferred：T3B Feed Read/display DTO、T3C UI、T3D DeepSeek live acceptance、production Chinese display、usage/cost dashboard、Translation test endpoint expansion、translation-sync beyond this foundation、additional Provider/fallback 均未实施。
+- T3B/T3C：两个 Feed read endpoint 使用 API-only `FeedItemDisplay` 和 bounded provider-free cache mapper；Feed UI 默认中文优先并提供“查看原文”，pending/unavailable 保持原文可读；HOT/Event facts 使用原始 Feed 输入。
+- T3D：`translation-live-acceptance.ts` 提供固定 input、固定 DeepSeek endpoint/model、settings/secret/budget/circuit/backlog gates、at-most-one-call plan 和 evidence builder；本轮未执行 live call，live verification `pending`。
+- Deferred：usage/cost dashboard、Translation test endpoint expansion、translation-sync beyond this foundation、additional Provider/fallback、Calendar/Event/HOT/Voyage/Port/Weather/AIS/Vessel translation 均未实施。
 - Secrets/calls：Secret changes `none`；`.env.local` 未修改；external DeepSeek calls `0`；DeepSeek live verification `pending`。
-- Verification：Review Repair targeted tests、T1/T2 regressions、typecheck、lint、build 与 `git diff --check` 已通过；最终测试计数与 full-suite 已在本轮完成后记录。Neat Freak official closeout 为 `pending`，原因是 Bash inventory script 在当前 Windows 环境不可用；Windows/manual audit 未发现 blocker。
+- Verification：T3A/T3B/T3C/T3D targeted tests passed `141/141` across 10 files；full Vitest passed `643/644` across `59/60` files. The only failure is the pre-existing date-sensitive `server/providers/feed.test.ts:156` Shekou Event/HOT assertion. `pnpm typecheck`、`pnpm lint`、`pnpm build` 与 `git diff --check` passed；Nitro browser `/feed` read verification passed with no page errors and original-text fallback. Neat Freak official closeout 为 `pending`，原因是 Bash inventory script 在当前 Windows 环境不可用；Windows/manual audit 未发现 code/docs/secret blocker。临时 ignored `.data/shipping-hot-v3-browser.sqlite3` 为浏览器核验副本，因删除需人工确认而保留。

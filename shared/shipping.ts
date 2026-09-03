@@ -343,6 +343,20 @@ export interface FeedItem extends Freshness, ProvenanceAware {
   relatedVoyageIds: string[]
 }
 
+export type TranslationDisplayState = "translated" | "historical" | "original" | "pending" | "unavailable"
+
+export interface FeedTranslationDisplayState {
+  title: TranslationDisplayState
+  summary: TranslationDisplayState
+}
+
+/** API-only enrichment DTO; FeedItem.title/summary remain the original facts. */
+export interface FeedItemDisplay extends FeedItem {
+  displayTitle: string
+  displaySummary: string
+  translation: FeedTranslationDisplayState
+}
+
 export interface ShippingEvent extends ProvenanceAware {
   id: string
   type: string

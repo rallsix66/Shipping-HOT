@@ -1,9 +1,15 @@
 import { useQuery } from "@tanstack/react-query"
-import type { HotItem, ShippingSnapshot } from "@shared/shipping"
+import type { FeedItemDisplay, HotItem, ShippingSnapshot } from "@shared/shipping"
 import type { VoyageRecord } from "@shared/voyage"
 import { myFetch } from "~/utils"
 
-export type ShippingResponse = ShippingSnapshot & { hot: HotItem[], provider: { vessel: string, port: string, schedule: string, weather: string, weatherAlerts: "off" | "public" | "experimental", feed: string, calendar: string, aisArea?: "off" | "aisstream", calendarSourceIds?: string[] }, realProviders: { vessel: string, port: string, schedule: string, weather: string, weatherAlerts: string, aisArea: string, feed: string, calendar: string }, calendarAttribution?: string }
+export interface ShippingResponse extends Omit<ShippingSnapshot, "feedItems"> {
+  feedItems: FeedItemDisplay[]
+  hot: HotItem[]
+  provider: { vessel: string, port: string, schedule: string, weather: string, weatherAlerts: "off" | "public" | "experimental", feed: string, calendar: string, aisArea?: "off" | "aisstream", calendarSourceIds?: string[] }
+  realProviders: { vessel: string, port: string, schedule: string, weather: string, weatherAlerts: string, aisArea: string, feed: string, calendar: string }
+  calendarAttribution?: string
+}
 
 export interface AisLatestPosition {
   vesselId: string

@@ -1,5 +1,7 @@
 import { renderToString } from "react-dom/server"
 import { describe, expect, it } from "vitest"
+import { createMockSnapshot } from "@shared/shipping-fixtures"
+import { FeedItemDisplayText } from "../src/components/shipping/feed-display"
 import { EmptyState, GradientText, ProvenanceBadge, ProviderChip, StatusDot } from "../src/components/shipping/ui"
 import { formatDataNature, formatDate, formatPortMetric, formatProvenance, formatSourceStatus, formatSourceType, formatStatus, navTone, providerSummary, severityTone, statusBadgePresentation, statusLabels } from "../src/components/shipping/format"
 
@@ -82,5 +84,28 @@ describe("shipping UI primitives smoke", () => {
   it("does not call a public alert source all Mock", () => {
     expect(providerSummary({ vessel: "mock", weather: "mock", port: "mock", schedule: "mock", feed: "mock", calendar: "mock", weatherAlerts: "off" })).toEqual({ allMock: true, label: "全 Mock" })
     expect(providerSummary({ vessel: "mock", weather: "mock", port: "mock", schedule: "mock", feed: "mock", calendar: "mock", weatherAlerts: "public" }).label).toContain("预警 public")
+  })
+
+  it("renders Chinese-first Feed text with an accessible original disclosure", () => {
+    const item = createMockSnapshot().feedItems[0]
+    const html = renderToString(FeedItemDisplayText({
+      item: { ...item, displayTitle: "蛇口港中文标题", displaySummary: "中文摘要", translation: { title: "translated", summary: "historical" } },
+    }))
+    expect(html).toContain("蛇口港中文标题")
+    expect(html).toContain("中文摘要")
+    expect(html).toContain("查看原文")
+    expect(html).toContain(item.title)
+    expect(html).toContain(item.summary)
+  })
+
+  it("renders original Feed text with safe pending status", () => {
+    const item = createMockSnapshot().feedItems[0]
+    const html = renderToString(FeedItemDisplayText({
+      item: { ...item, displayTitle: item.title, displaySummary: item.summary, translation: { title: "pending", summary: "unavailable" } },
+    }))
+    expect(html).toContain(item.title)
+    expect(html).toContain(item.summary)
+    expect(html).toContain("翻译中")
+    expect(html).not.toContain("provider_contract_changed")
   })
 })

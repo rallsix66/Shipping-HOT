@@ -9,7 +9,7 @@ import { TranslationRepository } from "./translation"
 import { RuntimeRepository } from "./runtime-jobs"
 import type { TranslationCacheRecord } from "#/providers/contracts"
 
-function createNativeDatabase(path = ":memory:") {
+function createNativeDatabase(path = ":memory:", onPrepare?: (sql: string) => void) {
   const native = new NativeDatabase(path)
   const database = createDatabase({
     name: "sqlite",
@@ -17,6 +17,7 @@ function createNativeDatabase(path = ":memory:") {
     getInstance: () => native,
     exec: (sql: string) => native.exec(sql),
     prepare: (sql: string) => {
+      onPrepare?.(sql)
       const statement = native.prepare(sql)
       return {
         all: async (...params: (string | number | boolean | null | undefined)[]) => statement.all(...params),
@@ -105,6 +106,49 @@ describe("translation repository", () => {
 
     await repository.save(record({ id: "translation:provider-b", provider: "provider-b", model: "model-a", translatedAt, updatedAt: "2026-09-02T00:03:00.000Z", translatedText: "B updated" }))
     await expect(repository.findHistoricalSuccessful(lookup)).resolves.toMatchObject({ provider: "provider-a", model: "model-z", translatedText: "A" })
+    native.close()
+  })
+
+  it("selects batch cache candidates with exact, historical, pending and failed states", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const repository = new TranslationRepository(database)
+    const preference = { providerId: "current", model: "current-v2" }
+    const exact = { entityType: "feed_item", entityId: "feed-exact", fieldName: "title", sourceHash: "hash-exact", targetLanguage: "zh-CN" }
+    const historical = { entityType: "feed_item", entityId: "feed-history", fieldName: "title", sourceHash: "hash-history", targetLanguage: "zh-CN" }
+    const pending = { entityType: "feed_item", entityId: "feed-pending", fieldName: "title", sourceHash: "hash-pending", targetLanguage: "zh-CN" }
+    const failed = { entityType: "feed_item", entityId: "feed-failed", fieldName: "title", sourceHash: "hash-failed", targetLanguage: "zh-CN" }
+
+    await repository.save(record({ id: "translation:batch-exact", ...exact, provider: "current", model: "current-v2", translatedText: "当前译文" }))
+    await repository.save(record({ id: "translation:batch-history", ...historical, provider: "old", model: "old-v1", translatedText: "历史译文" }))
+    await repository.save(record({ id: "translation:batch-pending", ...pending, provider: "current", model: "current-v2", status: "pending", translatedText: undefined, translatedAt: undefined }))
+    await repository.save(record({ id: "translation:batch-failed", ...failed, provider: "current", model: "current-v2", status: "failed", translatedText: undefined, translatedAt: undefined }))
+
+    const result = await repository.findSuccessfulBatch([exact, historical, pending, failed], preference)
+    expect(result.get(JSON.stringify([exact.entityType, exact.entityId, exact.fieldName, exact.sourceHash, exact.targetLanguage]))).toMatchObject({ cache: { translatedText: "当前译文" }, pending: false, failed: false })
+    expect(result.get(JSON.stringify([historical.entityType, historical.entityId, historical.fieldName, historical.sourceHash, historical.targetLanguage]))).toMatchObject({ cache: { translatedText: "历史译文", provider: "old" }, pending: false, failed: false })
+    expect(result.get(JSON.stringify([pending.entityType, pending.entityId, pending.fieldName, pending.sourceHash, pending.targetLanguage]))).toEqual({ pending: true, failed: false })
+    expect(result.get(JSON.stringify([failed.entityType, failed.entityId, failed.fieldName, failed.sourceHash, failed.targetLanguage]))).toEqual({ pending: false, failed: true })
+    native.close()
+  })
+
+  it("bounds batch reads instead of issuing one query per Feed field", async () => {
+    let translationSelects = 0
+    const { database, native } = createNativeDatabase(":memory:", (sql) => {
+      if (sql.includes("FROM translation_cache")) translationSelects += 1
+    })
+    await initShippingTables(database, "mock")
+    translationSelects = 0
+    const inputs = Array.from({ length: 200 }, (_, index) => ({
+      entityType: "feed_item",
+      entityId: `feed-${index}`,
+      fieldName: index % 2 ? "summary" : "title",
+      sourceHash: `hash-${index}`,
+      targetLanguage: "zh-CN",
+    }))
+    const result = await new TranslationRepository(database).findSuccessfulBatch(inputs, { providerId: "deepseek", model: "deepseek-v4-flash" })
+    expect(result.size).toBe(200)
+    expect(translationSelects).toBe(2)
     native.close()
   })
 

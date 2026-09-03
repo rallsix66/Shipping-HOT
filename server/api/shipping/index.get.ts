@@ -1,5 +1,6 @@
 import { rankHotItems } from "@shared/shipping-rules"
 import { getShippingSnapshot } from "#/shipping-store"
+import { mapFeedItemsForDisplay } from "#/services/feed-translation-display"
 import { operationalSourceContext, providerModes, realProviders } from "#/providers/shipping"
 import { calendarAttribution } from "#/providers/calendar"
 
@@ -8,9 +9,13 @@ export default defineEventHandler(async () => {
   // request-triggered Provider path. P2C adds no new request-triggered sync;
   // future workstreams must move each capability behind BackgroundRuntime.
   const snapshot = await getShippingSnapshot()
+  const hot = rankHotItems(snapshot.events, snapshot.ports, snapshot.vessels, snapshot.voyages, snapshot.feedItems, new Date(), operationalSourceContext)
   return {
     ...snapshot,
-    hot: rankHotItems(snapshot.events, snapshot.ports, snapshot.vessels, snapshot.voyages, snapshot.feedItems, new Date(), operationalSourceContext),
+    // HOT is deliberately ranked from original Feed facts; translation is
+    // optional API enrichment only.
+    feedItems: await mapFeedItemsForDisplay(useDatabase(), snapshot.feedItems, snapshot.settings.translation),
+    hot,
     provider: providerModes,
     realProviders,
     calendarAttribution: calendarAttribution({ provider: providerModes.calendar, events: snapshot.calendarEvents }),

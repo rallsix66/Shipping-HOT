@@ -8,6 +8,7 @@ import type { VoyageRecord } from "@shared/voyage"
 import type { VesselSearchResponse, VesselSearchResult, VesselWatchlistItem } from "@shared/vessel-search"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
 import { type ShippingResponse, useAisLatestPosition, useLatestVoyage, useShipping } from "./data"
+import { FeedItemDisplayText } from "./feed-display"
 import { formatDate, formatPortMetric, formatStatus, navTone, severityTone } from "./format"
 import { AnimatedNumber, EmptyState, Marquee, ProvenanceBadge, ProviderChip, Reveal, Segmented, StatusDot } from "./ui"
 import { myFetch } from "~/utils"
@@ -434,7 +435,7 @@ export function HotPage() {
                     {feed.map(item => (
                       <a key={item.id} href={item.sourceUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 whitespace-nowrap text-sm">
                         <StatusDot tone={severityTone(item.severity)} />
-                        <span className="font-semibold">{item.title}</span>
+                        <span className="font-semibold">{item.displayTitle ?? item.title}</span>
                         <span className="op-60">{item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}</span>
                       </a>
                     ))}
@@ -802,7 +803,7 @@ export function VesselDetailPage({ id }: { id: string }) {
               <div className="panel-h"><h3>关联天气资讯</h3></div>
               {weatherItems.map(item => (
                 <div key={item.id}>
-                  <h4 className="text-sm font-bold">{item.title}</h4>
+                  <h4 className="text-sm font-bold">{item.displayTitle ?? item.title}</h4>
                   {item.weather && <WeatherChips weather={item.weather} />}
                 </div>
               ))}
@@ -1049,7 +1050,7 @@ export function PortDetailPage({ id }: { id: string }) {
                   <a key={item.id} href={item.sourceUrl} target="_blank" rel="noreferrer" className="list-row">
                     <span className="flex min-w-0 items-center gap-2">
                       <StatusDot tone={severityTone(item.severity)} />
-                      <span className="truncate font-semibold">{item.title}</span>
+                      <span className="truncate font-semibold">{item.displayTitle ?? item.title}</span>
                     </span>
                     <span className="shrink-0 text-xs op-60">{item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}</span>
                   </a>
@@ -1223,7 +1224,7 @@ export function VoyageDetailPage({ id }: { id: string }) {
               <div className="panel-h"><h3>航线天气资讯</h3></div>
               {weatherItems.map(item => (
                 <div key={item.id}>
-                  <h4 className="text-sm font-bold">{item.title}</h4>
+                  <h4 className="text-sm font-bold">{item.displayTitle ?? item.title}</h4>
                   {item.weather && <WeatherChips weather={item.weather} />}
                 </div>
               ))}
@@ -1362,14 +1363,7 @@ export function FeedPage() {
                       <span className="tl-line" />
                     </div>
                     <div className="tl-body">
-                      <div className="tl-title-row">
-                        <h4>{item.title}</h4>
-                        <a className="src-link" href={item.sourceUrl} target="_blank" rel="noreferrer">
-                          打开来源
-                          <span className="i-ph-arrow-up-right" />
-                        </a>
-                      </div>
-                      <p className="tl-sum">{item.summary}</p>
+                      <FeedItemDisplayText item={item} />
                       <div className="tl-chips">
                         <span className="chip">{formatStatus(item.category)}</span>
                         <ProvenanceBadge provenance={item.provenance} />
