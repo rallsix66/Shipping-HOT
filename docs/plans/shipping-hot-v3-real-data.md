@@ -1,6 +1,6 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 文档状态：`accepted / V3 Readiness gate implemented / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed + P3A AIS Tracking Runtime Foundation + P3B Voyage / ETA Foundation + P3 Feed Freshness Batch 1 + source-isolated Feed Runtime + Calendar/Port/Weather activation + Translation T1/T2/T3A/T3B/T3C/T3D executable runner final boundary repaired / Real Operational blocked on remaining capability evidence / DeepSeek live verification pending`
+> 文档状态：`accepted / V3 Readiness gate implemented / P2A search foundation + P2B Identity Seal + P2C Background Runtime Foundation complete / sealed + P3A AIS Tracking Runtime Foundation + P3B Voyage / ETA Foundation + P3 Feed Freshness Batch 1 + source-isolated Feed Runtime + Calendar/Port/Weather activation + Translation T1/T2/T3A/T3B/T3C/T3D formally sealed / Real Operational blocked on remaining capability evidence / DeepSeek live verification pending`
 >
 > 审查日期：2026-09-03（Asia/Shanghai）
 >
@@ -14,7 +14,7 @@
 
 > V3 Readiness：本轮只建立本地安全就绪门（观测 Node/ABI、CLI 实测 pnpm、实际安装的 better-sqlite3 版本/native load、SQLite schema/Port Directory、已批准 Runtime scope、Mock-only provider configuration），通过 `GET /api/shipping/readiness` 与 `pnpm smoke:v3-readiness` 验证；HTTP 缺少 pnpm 观测时标记 skipped 且严格 Readiness 不得 ready；不执行外部 Provider 请求，不进入下一阶段。
 
-> 当前执行状态：P3 Feed Freshness Batch 1 与来源独立 Feed Background Runtime 已完成；Calendar、Port、Weather Runtime 已纳入同一受控激活链路；GFW Vessel Search、canonical identity normalization、provider-aware cache 和 Watchlist latest-MMSI target flow 已实现并通过隔离 Real live probe；Translation T1/T2/T3A Runtime Foundation 及 Review Repair、T3B Feed Read、T3C Feed UI、T3D executable acceptance runner final boundary repair 已实现。T3B 在 `/api/shipping/feed` 与 `/api/shipping` 共享 provider-free batch cache mapper，成功译文优先、历史成功回退、无成功时原文；T3C 默认中文显示并提供“查看原文”，pending/unavailable 不阻塞 Feed；T3D 固定输入 `TRANSLATION_TEST_SOURCE_TEXT`、固定 endpoint/model，Phase 1 diagnostic + Phase 2 current real Feed field，显式 settings/secret/budget/circuit/Real Mode gates，hard max 2，复用 T3A claim/finalize/restart，并由独立 browser finalizer 合并 UI evidence。Phase 1 只接受 per-call `translation_test` 或同小时聚合 `mixed` usage scope，blocking errors 写入现有 provider circuit，transient errors 不写入；T3A/T3D 共用 Translation retry schedule。当前 retained settings disabled/monthlyBudget=0，未执行 DeepSeek。真实 DeepSeek live verification 为 pending，当前 external DeepSeek calls=`0`。Real Mode activation smoke 与生产 HTTP smoke 已验证真实写入/读取，且 `actualMockRows` 来自自动发现所有带 `source_type` 的 Shipping HOT 业务表的 SQL/Repository 扫描并要求总数为零。当前停止在 Real Operational Readiness：Voyage Provider path `liveVerification=verified_live`，但 focus-port coverage 为 `coverage_pending`；连续 AIS PositionReport 与 TMD/BMKG 官方天气预警均为 `verified_live`，JMA 仍 pending；Translation remains optional and outside the Readiness hard gate。
+> 当前执行状态：P3 Feed Freshness Batch 1 与来源独立 Feed Background Runtime 已完成；Calendar、Port、Weather Runtime 已纳入同一受控激活链路；GFW Vessel Search、canonical identity normalization、provider-aware cache 和 Watchlist latest-MMSI target flow 已实现并通过隔离 Real live probe；Translation T1/T2/T3A Runtime Foundation 及 Review Repair、T3B Feed Read、T3C Feed UI、T3D executable acceptance runner 已实现并在本次正式封板。T3B 在 `/api/shipping/feed` 与 `/api/shipping` 共享 provider-free batch cache mapper，成功译文优先、历史成功回退、无成功时原文；T3C 默认中文显示并提供“查看原文”，pending/unavailable 不阻塞 Feed；T3D 固定输入 `TRANSLATION_TEST_SOURCE_TEXT`、固定 endpoint/model，Phase 1 diagnostic + Phase 2 current real Feed field，显式 settings/secret/budget/circuit/Real Mode gates，hard max 2，复用 T3A claim/finalize/restart，并由独立 browser finalizer 合并 UI evidence。Phase 1 只接受 per-call `translation_test` 或同小时聚合 `mixed` usage scope，blocking errors 写入现有 provider circuit，transient errors 不写入；T3A/T3D 共用 Translation retry schedule。当前 retained settings disabled/monthlyBudget=0，未执行 DeepSeek。真实 DeepSeek live verification 为 pending，当前 external DeepSeek calls=`0`。Real Mode activation smoke 与生产 HTTP smoke 已验证真实写入/读取，且 `actualMockRows` 来自自动发现所有带 `source_type` 的 Shipping HOT 业务表的 SQL/Repository 扫描并要求总数为零。当前停止在 Real Operational Readiness：Voyage Provider path `liveVerification=verified_live`，但 focus-port coverage 为 `coverage_pending`；连续 AIS PositionReport 与 TMD/BMKG 官方天气预警均为 `verified_live`，JMA 仍 pending；Translation remains optional and outside the Readiness hard gate。
 
 ## 1. 背景与当前问题
 
@@ -847,7 +847,7 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | 风险 | Carrier onboarding/费用/条款；voyage number 不在 AIS；不同 Carrier DCSA 版本差异；VesselAPI ETA/port-event entitlement 未确认 |
 | 回滚 | 禁用单一 carrier adapter；保留已验证的 AIS/port-call Current Voyage；VesselAPI enrichment 可单独关闭；页面显示 schedule unavailable |
 
-### P6 — Translation（T1 + T2 + T3A Foundation、T3B/T3C/T3D executable acceptance runner final boundary repair 已完成；DeepSeek live pending）
+### P6 — Translation（T1 + T2 + T3A Foundation、T3B/T3C/T3D formally sealed；DeepSeek live pending）
 
 | 项目 | 内容 |
 | --- | --- |
