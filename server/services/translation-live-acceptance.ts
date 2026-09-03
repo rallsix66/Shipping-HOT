@@ -10,6 +10,7 @@ import { TRANSLATION_LEASE_MS, TRANSLATION_PROVIDER_TIMEOUT_MS } from "#/runtime
 import { TRANSLATION_CAPABILITY, TRANSLATION_CURRENCY, TRANSLATION_MODEL, TRANSLATION_PROVIDER_ID, assertTranslationReady, currentTranslationUsage, normalizeTranslationSettings, readTranslationStatus } from "#/services/translation-settings"
 import { TRANSLATION_TEST_ENTITY_ID, TRANSLATION_TEST_SOURCE_TEXT } from "#/services/translation-test-service"
 import { withTranslationExecutor } from "#/services/translation-executor"
+import { type TranslationFailureCode, isTranslationCircuitBlockingFailure, isTranslationFailureCode, isTranslationRetryableFailure, translationRetryBackoffMs } from "#/services/translation-failure-policy"
 import { type PreparedTranslationSource, type TranslationExecutionResult, TranslationService, feedTranslationSources, isFeedItemTranslationEligible } from "#/services/translation-service"
 import { readCurrentFeedItemsForDisplay } from "#/services/feed-translation-display"
 
@@ -19,9 +20,6 @@ export const TRANSLATION_LIVE_ACCEPTANCE_MAX_EXTERNAL_CALLS = 2 as const
 export const TRANSLATION_LIVE_ACCEPTANCE_INPUT = TRANSLATION_TEST_SOURCE_TEXT
 
 const diagnosticProtectedTerms = ["TEST STAR", "AB123", "SGSIN", "2026-09-02", "https://example.com/status"]
-const translationAcceptanceFailureCodes = new Set(["auth_failed", "provider_forbidden", "entitlement_missing", "rate_limited", "provider_timeout", "provider_unavailable", "provider_contract_changed"])
-const retryableCodes = new Set(["rate_limited", "provider_timeout", "provider_unavailable"])
-const circuitBlockingCodes = new Set(["auth_failed", "provider_forbidden", "entitlement_missing", "provider_contract_changed"])
 
 export type TranslationAcceptanceObservationState = "verified" | "pending"
 export type TranslationAcceptancePhaseStatus = "succeeded" | "failed" | "pending"
@@ -310,8 +308,12 @@ function safeErrorCode(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
 
-function isKnownProviderFailureCode(value: string | undefined): value is string {
-  return Boolean(value && translationAcceptanceFailureCodes.has(value))
+function isKnownProviderFailureCode(value: string | undefined): value is TranslationFailureCode {
+  return isTranslationFailureCode(value)
+}
+
+export function isDiagnosticUsageScope(value: string | undefined): boolean {
+  return value === "translation_test" || value === "mixed"
 }
 
 function usageContractIsValid(usage: TranslationUsage | undefined): boolean {
@@ -496,13 +498,23 @@ async function runTranslationLiveAcceptanceUnlocked(options: TranslationLiveAcce
     externalCalls: providerCallCount,
     status: recordedDiagnostic.status === "failed" ? "failed" : "succeeded",
     sourceHash: diagnostic.sourceHash,
-    usageContract: diagnosticUsageValid && sameUsageDelta(diagnosticUsageBefore, diagnosticUsageAfter, diagnostic, diagnosticAt) && diagnosticLatestUsage?.sourceScope === "translation_test" ? "verified" : "pending",
+    usageContract: diagnosticUsageValid && sameUsageDelta(diagnosticUsageBefore, diagnosticUsageAfter, diagnostic, diagnosticAt) && isDiagnosticUsageScope(diagnosticLatestUsage?.sourceScope) ? "verified" : "pending",
     placeholderPreserved: diagnostic.status === "succeeded" && diagnostic.translatedText.includes("TEST STAR") && diagnostic.translatedText.includes("AB123") && diagnostic.translatedText.includes("SGSIN") && diagnostic.translatedText.includes("2026-09-02") && diagnostic.translatedText.includes("https://example.com/status") ? "verified" : "pending",
     wrapperBoundary: diagnostic.status === "succeeded" && !/^\s*(?:Translation|Here is the translation|Translated text|翻译如下|译文)\s*[:：]/i.test(diagnostic.translatedText) ? "verified" : "pending",
-    providerUsagePersisted: sameUsageDelta(diagnosticUsageBefore, diagnosticUsageAfter, recordedDiagnostic, diagnosticAt) && diagnosticLatestUsage?.sourceScope === "translation_test" ? "verified" : "pending",
+    providerUsagePersisted: sameUsageDelta(diagnosticUsageBefore, diagnosticUsageAfter, recordedDiagnostic, diagnosticAt) && isDiagnosticUsageScope(diagnosticLatestUsage?.sourceScope) ? "verified" : "pending",
     cacheIsolation: JSON.stringify(diagnosticBeforeCache) === JSON.stringify(diagnosticAfterCache) ? "verified" : "pending",
     errorCode: diagnostic.errorCode ?? recordedDiagnostic.errorCode,
   })
+
+  if (diagnosticEvidence.errorCode && isTranslationCircuitBlockingFailure(diagnosticEvidence.errorCode)) {
+    await runtimeRepository.blockProviderCircuit({
+      providerId: TRANSLATION_PROVIDER_ID,
+      capability: TRANSLATION_CAPABILITY,
+      errorCode: diagnosticEvidence.errorCode,
+      errorMessage: diagnostic.errorMessage ?? diagnosticEvidence.errorCode,
+      updatedAt: diagnosticAt,
+    })
+  }
 
   if (diagnosticEvidence.status !== "succeeded" || diagnosticEvidence.usageContract !== "verified" || diagnosticEvidence.placeholderPreserved !== "verified" || diagnosticEvidence.wrapperBoundary !== "verified" || diagnosticEvidence.providerUsagePersisted !== "verified" || diagnosticEvidence.cacheIsolation !== "verified") {
     const phase2 = emptyFeed({ errorCode: diagnosticEvidence.errorCode ?? "translation_phase1_failed" })
@@ -596,15 +608,15 @@ async function runTranslationLiveAcceptanceUnlocked(options: TranslationLiveAcce
   if (phase2Execution.status === "succeeded" && phase2UsageContractValid) {
     persisted = await translationRepository.completeTranslationSuccess({ ...identity, leaseUntil, translatedText: phase2Execution.translatedText, translatedAt: phase2At, now: phase2At, providerUsage: phase2Usage })
   } else {
-    const code = isKnownProviderFailureCode(phase2Execution.errorCode) ? phase2Execution.errorCode : "provider_contract_changed"
+    const code: TranslationFailureCode = isKnownProviderFailureCode(phase2Execution.errorCode) ? phase2Execution.errorCode : "provider_contract_changed"
     phase2ErrorCode = code
-    if (retryableCodes.has(code)) {
-      persisted = await translationRepository.completeRetryableFailure({ ...identity, leaseUntil, errorCode: code, errorMessage: phase2Execution.errorMessage ?? code, nextRetryAt: new Date(Date.parse(phase2At) + 60_000).toISOString(), now: phase2At, providerUsage: phase2Usage })
+    if (isTranslationRetryableFailure(code)) {
+      persisted = await translationRepository.completeRetryableFailure({ ...identity, leaseUntil, errorCode: code, errorMessage: phase2Execution.errorMessage ?? code, nextRetryAt: new Date(Date.parse(phase2At) + translationRetryBackoffMs(claimed.retryCount ?? 0)).toISOString(), now: phase2At, providerUsage: phase2Usage })
     } else {
       persisted = await translationRepository.completeNonRetryableFailure({ ...identity, leaseUntil, errorCode: code, errorMessage: phase2Execution.errorMessage ?? code, now: phase2At, providerUsage: phase2Usage })
     }
-    if (circuitBlockingCodes.has(code)) {
-      await runtimeRepository.blockProviderCircuit({ providerId: TRANSLATION_PROVIDER_ID, capability: TRANSLATION_CAPABILITY, errorCode: code as "auth_failed" | "provider_forbidden" | "entitlement_missing" | "provider_contract_changed", errorMessage: phase2Execution.errorMessage ?? code, updatedAt: phase2At })
+    if (isTranslationCircuitBlockingFailure(code)) {
+      await runtimeRepository.blockProviderCircuit({ providerId: TRANSLATION_PROVIDER_ID, capability: TRANSLATION_CAPABILITY, errorCode: code, errorMessage: phase2Execution.errorMessage ?? code, updatedAt: phase2At })
     }
   }
 

@@ -2,7 +2,7 @@ import type { Database } from "db0"
 import type { ShippingDataMode } from "#/database/runtime"
 import { ShippingRepository } from "#/database/shipping"
 import { type TranslationCacheExactLookup, TranslationRepository } from "#/database/translation"
-import { type ProviderCircuitBlockCode, RuntimeRepository, isProviderCircuitBlocked } from "#/database/runtime-jobs"
+import { RuntimeRepository, isProviderCircuitBlocked } from "#/database/runtime-jobs"
 import type { SecretStore, TranslationProvider } from "#/providers/contracts"
 import { DEEPSEEK_PRICING_REFERENCE, estimateDeepSeekCost } from "#/providers/translation/deepseek-provider"
 import {
@@ -14,6 +14,7 @@ import {
   currentTranslationUsage,
 } from "#/services/translation-settings"
 import { type PreparedTranslationSource, TranslationService, feedTranslationSources, isFeedItemTranslationEligible } from "#/services/translation-service"
+import { isTranslationCircuitBlockingFailure, isTranslationRetryableFailure, translationRetryBackoffMs } from "#/services/translation-failure-policy"
 import { withTranslationExecutor } from "#/services/translation-executor"
 import type { RuntimeJob, SyncResult } from "#/runtime/background-runtime"
 
@@ -22,20 +23,6 @@ export const TRANSLATION_SYNC_INTERVAL_MS = 60_000
 export const TRANSLATION_MAX_FIELDS_PER_RUN = 5
 export const TRANSLATION_PROVIDER_TIMEOUT_MS = 20_000
 export const TRANSLATION_LEASE_MS = 45_000
-
-const retryableCodes = new Set(["rate_limited", "provider_timeout", "provider_unavailable"])
-
-function backoffMs(retryCount: number): number {
-  const minutes = Math.min(60, 2 ** Math.max(0, retryCount))
-  return minutes * 60_000
-}
-
-function blockingCode(value: string | undefined): value is ProviderCircuitBlockCode {
-  return value === "auth_failed"
-    || value === "provider_forbidden"
-    || value === "entitlement_missing"
-    || value === "provider_contract_changed"
-}
 
 function errorCode(error: unknown): string {
   if (error instanceof Error && "code" in error && typeof (error as Error & { code?: unknown }).code === "string") return (error as Error & { code: string }).code
@@ -209,12 +196,12 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
             break
           }
           const code = execution.errorCode ?? "provider_unavailable"
-          if (retryableCodes.has(code)) {
-            await translationRepository.completeRetryableFailure({ ...identity, leaseUntil, now: completedAt, errorCode: code, errorMessage: execution.errorMessage ?? code, nextRetryAt: new Date(Date.parse(completedAt) + backoffMs(claimed.retryCount ?? 0)).toISOString(), providerUsage: usagePatch })
+          if (isTranslationRetryableFailure(code)) {
+            await translationRepository.completeRetryableFailure({ ...identity, leaseUntil, now: completedAt, errorCode: code, errorMessage: execution.errorMessage ?? code, nextRetryAt: new Date(Date.parse(completedAt) + translationRetryBackoffMs(claimed.retryCount ?? 0)).toISOString(), providerUsage: usagePatch })
           } else {
             await translationRepository.completeNonRetryableFailure({ ...identity, leaseUntil, now: completedAt, errorCode: code, errorMessage: execution.errorMessage ?? code, providerUsage: usagePatch })
           }
-          if (blockingCode(code)) await runtimeRepository.blockProviderCircuit({ providerId: TRANSLATION_PROVIDER_ID, capability: TRANSLATION_CAPABILITY, errorCode: code, errorMessage: execution.errorMessage ?? code, updatedAt: completedAt })
+          if (isTranslationCircuitBlockingFailure(code)) await runtimeRepository.blockProviderCircuit({ providerId: TRANSLATION_PROVIDER_ID, capability: TRANSLATION_CAPABILITY, errorCode: code, errorMessage: execution.errorMessage ?? code, updatedAt: completedAt })
           terminalStatus = "failed"
           terminalErrorCode = code
           stopAfterFailure = true

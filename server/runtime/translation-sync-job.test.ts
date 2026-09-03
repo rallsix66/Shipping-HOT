@@ -9,6 +9,7 @@ import { ProviderError, type SecretSource, type SecretStore, type TranslationReq
 import { FakeTranslationProvider } from "#/providers/translation/fake-provider"
 import { BackgroundRuntime } from "#/runtime/background-runtime"
 import { TRANSLATION_PROVIDER_TIMEOUT_MS, createTranslationSyncJob } from "#/runtime/translation-sync-job"
+import { translationRetryBackoffMs } from "#/services/translation-failure-policy"
 import { runTranslationTest } from "#/services/translation-test-service"
 import { TranslationService } from "#/services/translation-service"
 
@@ -164,7 +165,7 @@ describe("translation T3A Runtime Foundation", () => {
     await expect(job.run()).resolves.toMatchObject({ status: "failed", recordsWritten: 0, errorCode: "rate_limited" })
     expect(provider.calls).toHaveLength(1)
     const rows = state.native.prepare("SELECT status, retry_count, retryable, next_retry_at, last_error_code FROM translation_cache").all()
-    expect(rows).toEqual([{ status: "failed", retry_count: 1, retryable: 1, next_retry_at: "2026-09-02T00:31:00.000Z", last_error_code: "rate_limited" }])
+    expect(rows).toEqual([{ status: "failed", retry_count: 1, retryable: 1, next_retry_at: new Date(clock.getTime() + translationRetryBackoffMs(0)).toISOString(), last_error_code: "rate_limited" }])
     await expect(state.runtimeRepository.getProviderRuntime("deepseek", "translation")).resolves.toBeUndefined()
 
     clock = new Date("2026-09-02T00:31:01.000Z")

@@ -11,6 +11,7 @@ import {
   buildTranslationAcceptanceEvidence,
   buildTranslationAcceptancePlan,
   finalizeTranslationAcceptanceEvidence,
+  isDiagnosticUsageScope,
   runTranslationLiveAcceptance,
 } from "./translation-live-acceptance"
 import type { SecretSource, SecretStore, TranslationProvider, TranslationRequest, TranslationResult, TranslationUsage } from "#/providers/contracts"
@@ -18,6 +19,7 @@ import { ProviderError } from "#/providers/contracts"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { RuntimeRepository } from "#/database/runtime-jobs"
 import { TranslationRepository } from "#/database/translation"
+import { translationRetryBackoffMs } from "#/services/translation-failure-policy"
 import { TranslationService } from "#/services/translation-service"
 
 const now = new Date("2026-09-03T12:00:00.000Z")
@@ -210,6 +212,16 @@ describe("translation T3D bounded acceptance planning and evidence", () => {
     expect(buildTranslationAcceptanceEvidence(plan, { externalCalls: 2, providerCalled: true }).serverAcceptance).toBe("pending")
     expect(buildTranslationAcceptanceEvidence(plan, { externalCalls: 0 }).externalCalls).toBe(0)
   })
+
+  it.each([
+    ["translation_test", true],
+    ["mixed", true],
+    ["feed", false],
+    [undefined, false],
+    ["arbitrary", false],
+  ])("accepts only a diagnostic-compatible aggregate source scope: %s", (scope, expected) => {
+    expect(isDiagnosticUsageScope(scope)).toBe(expected)
+  })
 })
 
 describe("translation T3D executable acceptance runner", () => {
@@ -228,6 +240,30 @@ describe("translation T3D executable acceptance runner", () => {
     await expect(new ShippingRepository(state.database, "real").listFeedItems({ now, view: "current" })).resolves.toMatchObject([{ id: item.id, title: item.title, summary: item.summary }])
     await expect(new TranslationRepository(state.database).findExactSuccessful({ entityType: "feed_item", entityId: item.id, fieldName: "title", sourceHash: result.evidence.candidate?.sourceHash as string, targetLanguage: "zh-CN", provider: "deepseek", model: "deepseek-v4-flash" })).resolves.toMatchObject({ status: "succeeded", translatedText: expect.stringContaining("中文") })
     await expect(new RuntimeRepository(state.database).aggregateProviderUsage({ providerId: "deepseek", capability: "translation" })).resolves.toMatchObject({ requestCount: 2, successCount: 2, failureCount: 0, recordsCount: 1 })
+    expect(state.native.prepare("SELECT source_scope FROM provider_usage WHERE provider_id = 'deepseek' AND capability = 'translation'").get()).toEqual({ source_scope: "mixed" })
+    state.native.close()
+  })
+
+  it("accepts a mixed aggregate scope when a same-hour Feed usage already exists and continues to Phase 2", async () => {
+    const state = await initializedDatabase()
+    const item = await seedFeed(state.database)
+    await new RuntimeRepository(state.database).recordProviderUsage({
+      providerId: "deepseek",
+      capability: "translation",
+      request: true,
+      succeeded: true,
+      records: 1,
+      estimatedCost: 0.01,
+      currency: "USD",
+      sourceScope: "feed",
+      calledAt: now.toISOString(),
+    })
+    const result = await runTranslationLiveAcceptance({ ...runnerOptions(state.database, new AcceptanceProvider()), reopenDatabase: async () => ({ database: state.database }) })
+    expect(result.evidence.phase1).toMatchObject({ status: "succeeded", usageContract: "verified", providerUsagePersisted: "verified" })
+    expect(result.evidence.phase2).toMatchObject({ attempted: true, status: "succeeded" })
+    expect(result.evidence.externalCalls).toBe(2)
+    expect(result.evidence.candidate?.feedItemId).toBe(item.id)
+    await expect(new RuntimeRepository(state.database).aggregateProviderUsage({ providerId: "deepseek", capability: "translation" })).resolves.toMatchObject({ requestCount: 3, successCount: 3, recordsCount: 2 })
     expect(state.native.prepare("SELECT source_scope FROM provider_usage WHERE provider_id = 'deepseek' AND capability = 'translation'").get()).toEqual({ source_scope: "mixed" })
     state.native.close()
   })
@@ -264,6 +300,21 @@ describe("translation T3D executable acceptance runner", () => {
     expect(result.evidence.phase2.attempted).toBe(false)
     await expect(new ShippingRepository(state.database, "real").listFeedItems({ now, view: "current" })).resolves.toMatchObject([{ id: item.id, title: item.title, summary: item.summary }])
     await expect(new RuntimeRepository(state.database).aggregateProviderUsage({ providerId: "deepseek", capability: "translation" })).resolves.toMatchObject({ requestCount: 1, failureCount: 1 })
+    await expect(new RuntimeRepository(state.database).getProviderRuntime("deepseek", "translation")).resolves.toMatchObject({ status: "failed", errorCode: "auth_failed" })
+    state.native.close()
+  })
+
+  it.each(["provider_forbidden", "entitlement_missing"] as const)("opens the Phase 1 circuit for %s and stops before Feed", async (code) => {
+    const state = await initializedDatabase()
+    await seedFeed(state.database)
+    const provider = new AcceptanceProvider(() => {
+      throw new ProviderError(code, "provider rejected the request")
+    })
+    const result = await runTranslationLiveAcceptance(runnerOptions(state.database, provider))
+    expect(provider.calls).toHaveLength(1)
+    expect(result.evidence).toMatchObject({ externalCalls: 1, reason: code })
+    expect(result.evidence.phase2.attempted).toBe(false)
+    await expect(new RuntimeRepository(state.database).getProviderRuntime("deepseek", "translation")).resolves.toMatchObject({ status: "failed", errorCode: code })
     state.native.close()
   })
 
@@ -281,6 +332,21 @@ describe("translation T3D executable acceptance runner", () => {
     expect(provider.calls).toHaveLength(1)
     expect(result.evidence.phase1).toMatchObject({ status: "failed", providerUsagePersisted: "verified", cacheIsolation: "verified" })
     expect(result.evidence.phase2.attempted).toBe(false)
+    await expect(new RuntimeRepository(state.database).getProviderRuntime("deepseek", "translation")).resolves.toMatchObject({ status: "failed", errorCode: "provider_contract_changed" })
+    state.native.close()
+  })
+
+  it.each(["rate_limited", "provider_timeout", "provider_unavailable"] as const)("does not open a permanent circuit for Phase 1 %s", async (code) => {
+    const state = await initializedDatabase()
+    await seedFeed(state.database)
+    const provider = new AcceptanceProvider(() => {
+      throw new ProviderError(code, "transient provider failure")
+    })
+    const result = await runTranslationLiveAcceptance(runnerOptions(state.database, provider))
+    expect(provider.calls).toHaveLength(1)
+    expect(result.evidence).toMatchObject({ externalCalls: 1, reason: code })
+    expect(result.evidence.phase2.attempted).toBe(false)
+    await expect(new RuntimeRepository(state.database).getProviderRuntime("deepseek", "translation")).resolves.toBeUndefined()
     state.native.close()
   })
 
@@ -344,6 +410,44 @@ describe("translation T3D executable acceptance runner", () => {
     expect(result.evidence.phase2).toMatchObject({ status: "failed", cachePersistence: "verified", providerUsagePersisted: "verified", errorCode: "rate_limited" })
     await expect(new TranslationRepository(state.database).findWork({ entityType: "feed_item", entityId: item.id, fieldName: "title", sourceHash: result.evidence.candidate?.sourceHash as string, targetLanguage: "zh-CN", provider: "deepseek", model: "deepseek-v4-flash" })).resolves.toMatchObject({ status: "failed", retryable: true, lastErrorCode: "rate_limited", leaseUntil: undefined })
     await expect(new RuntimeRepository(state.database).aggregateProviderUsage({ providerId: "deepseek", capability: "translation" })).resolves.toMatchObject({ requestCount: 2, successCount: 1, failureCount: 1, recordsCount: 0 })
+    await expect(new RuntimeRepository(state.database).getProviderRuntime("deepseek", "translation")).resolves.toBeUndefined()
+    state.native.close()
+  })
+
+  it("uses the shared T3A backoff policy for an existing retry count and the failure completion time", async () => {
+    const state = await initializedDatabase()
+    const item = await seedFeed(state.database)
+    const service = new TranslationService(new TranslationRepository(state.database), new AcceptanceProvider(), { targetLanguage: "zh-CN" })
+    const prepared = service.prepare({ entityType: "feed_item", entityId: item.id, fieldName: "title", sourceText: item.title, targetLanguage: "zh-CN" })
+    const timestamp = "2026-09-03T11:00:00.000Z"
+    await new TranslationRepository(state.database).save({
+      id: "retry-seed",
+      entityType: prepared.entityType,
+      entityId: prepared.entityId,
+      fieldName: prepared.fieldName,
+      sourceText: prepared.sourceText,
+      sourceHash: prepared.sourceHash,
+      sourceLanguage: prepared.sourceLanguage,
+      targetLanguage: prepared.targetLanguage,
+      provider: "deepseek",
+      model: "deepseek-v4-flash",
+      translatedText: undefined,
+      translatedAt: undefined,
+      status: "failed",
+      retryCount: 1,
+      nextRetryAt: "2026-09-03T11:59:00.000Z",
+      retryable: true,
+      leaseUntil: null,
+      lastErrorCode: "rate_limited",
+      preferred: false,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    })
+    const provider = new AcceptanceProvider((_request, call) => call === 2 ? Promise.reject(new ProviderError("rate_limited", "slow down")) : { translatedText: `[中文] ${_request.sourceText}`, usage: validUsage })
+    const result = await runTranslationLiveAcceptance(runnerOptions(state.database, provider))
+    const failed = await new TranslationRepository(state.database).findWork({ entityType: "feed_item", entityId: item.id, fieldName: "title", sourceHash: prepared.sourceHash, targetLanguage: "zh-CN", provider: "deepseek", model: "deepseek-v4-flash" })
+    expect(result.evidence.phase2.errorCode).toBe("rate_limited")
+    expect(failed).toMatchObject({ status: "failed", retryCount: 2, retryable: true, nextRetryAt: new Date(now.getTime() + translationRetryBackoffMs(1)).toISOString() })
     state.native.close()
   })
 
