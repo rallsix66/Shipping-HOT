@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto"
+import { hasMockEvidence, isMockProvenance } from "@shared/shipping"
 import type { FeedItem } from "@shared/shipping"
 import { ProviderError } from "#/providers/contracts"
 import type { TranslationCacheRecord, TranslationProvider, TranslationUsage } from "#/providers/contracts"
@@ -167,6 +168,18 @@ export function isFeedItemTranslationEligible(item: FeedItem, now = new Date()):
     if (timestamp !== item.effectiveAt && parsed <= nowMs) return false
   }
   return true
+}
+
+/**
+ * Provider execution eligibility is stricter than the provider-free display
+ * eligibility above. A Feed row must carry an explicit non-mock persistence
+ * lineage and must not contain mock provenance/evidence anywhere in its
+ * source contract.
+ */
+export function isFeedItemProviderTranslationEligible(item: FeedItem, now = new Date()): boolean {
+  if (!isFeedItemTranslationEligible(item, now)) return false
+  if (item.source_type !== "real" && item.source_type !== "imported" && item.source_type !== "derived") return false
+  return !isMockProvenance(item.provenance) && !hasMockEvidence(item)
 }
 
 export function feedTranslationSources(item: FeedItem, targetLanguage = DEFAULT_TRANSLATION_TARGET_LANGUAGE, sourceLanguage?: string, now = new Date()): TranslationSource[] {

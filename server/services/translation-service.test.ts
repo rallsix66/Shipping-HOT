@@ -8,6 +8,7 @@ import {
   TranslationService,
   canonicalLanguage,
   feedTranslationSources,
+  isFeedItemProviderTranslationEligible,
   isFeedItemTranslationEligible,
   normalizeTranslationText,
   translationSourceHash,
@@ -100,6 +101,18 @@ describe("translation service T1 foundation", () => {
     const now = new Date("2026-09-02T12:00:00.000Z")
     expect(FEED_TRANSLATABLE_FIELDS).toEqual(["title", "summary"])
     expect(isFeedItemTranslationEligible(feed(), now)).toBe(true)
+    expect(isFeedItemProviderTranslationEligible(feed({ source_type: "real", provenance: { sourceType: "third_party", dataNature: "reported", sourceId: "public-feed" } }), now)).toBe(true)
+    expect(isFeedItemProviderTranslationEligible(feed({ source_type: "mock", provenance: { sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice" } }), now)).toBe(false)
+    expect(isFeedItemProviderTranslationEligible(feed({ source_type: "derived", provenance: { sourceType: "third_party", dataNature: "derived", sourceId: "derived-feed" } }), now)).toBe(true)
+    const mixedMockEvidence = {
+      ...feed({ source_type: "derived", provenance: { sourceType: "third_party", dataNature: "derived", sourceId: "derived-feed" } }),
+      evidence: [{ provenance: { sourceType: "mock" as const, dataNature: "reported" as const, sourceId: "mock-port-notice" } }],
+    }
+    expect(isFeedItemProviderTranslationEligible(mixedMockEvidence, now)).toBe(false)
+    expect(isFeedItemProviderTranslationEligible(feed({ source_type: "real", effectiveAt: "2026-09-02T13:00:00.000Z" }), now)).toBe(false)
+    expect(isFeedItemProviderTranslationEligible(feed({ source_type: "real", currentUntil: "2026-09-02T11:59:00.000Z" }), now)).toBe(false)
+    expect(isFeedItemProviderTranslationEligible(feed({ source_type: "real", visibility: "history" }), now)).toBe(false)
+    expect(isFeedItemProviderTranslationEligible(feed(), now)).toBe(false)
     expect(feedTranslationSources(feed(), DEFAULT_TRANSLATION_TARGET_LANGUAGE, undefined, now)).toEqual([
       expect.objectContaining({ entityType: "feed_item", entityId: "feed-1", fieldName: "title", sourceText: "Port delay" }),
       expect.objectContaining({ fieldName: "summary", sourceText: "Ships are delayed." }),

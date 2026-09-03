@@ -15,7 +15,7 @@
 - 不创建新的 migration，不修改 retained .data/shipping-hot-v3.sqlite3
 - 不新增 Secret、环境变量、Provider SDK 或 Provider
 - 本轮不执行 DeepSeek live call、Feed live sync、AIS/Voyage/Weather probe
-- T3D runner 不运行 ordinary `translation-sync`、不处理 backlog、不自动 retry/fallback；它只执行一次固定诊断和一次当前 real Feed 字段验收
+- T3D runner 不运行 ordinary `translation-sync`、不处理 backlog、不自动 retry/fallback；它只执行一次固定诊断和一次当前 real Feed 字段验收。T3D 的 current-real/Real Mode acceptance governance 与普通 Runtime 的全局模式解耦保持独立
 - 不修改 Event/HOT、Voyage、AIS、Port、Weather 或 Readiness implementation
 
 当前结论先行：
@@ -643,8 +643,8 @@ Gate failure before Provider call does not enter PROVIDER CALL and must produce 
 
 Runtime registry 不得创建 Fake Provider。建议：
 
-- 仅在 Real Mode 且配置请求为允许的 DeepSeek provider/model 时注册 production translation job；
-- Mock Mode 不调用任何 Translation Provider；可显示 disabled/off，但 Fake 不能作为 runtime evidence；
+ - ordinary production `translation-sync` 在全局 Mock/Real 两种模式都可以注册；Provider 调用仍必须通过 Translation settings/Secret/budget/circuit gates；
+ - Global Mock Mode 不得把 Mock Feed 发送给 Translation Provider；只有明确非 mock lineage 且无 Mock provenance/evidence 的 Feed 才能进入候选；Fake 不能作为 runtime evidence；
 - Translation settings disabled、budget zero、budget exhausted、secret missing 时，job 可以保持可观测但 run 必须是 no-call skipped；
 - 不得因缺少 secret 自动切换 Fake 或其他 Provider；
 - 不得因 DeepSeek failure 自动切换第二 Provider。
@@ -1284,7 +1284,7 @@ If a provider contract change occurs：
 - Lifecycle：`claimTranslationWork` 在每个 field 使用 fresh claim timestamp，active lease 为 claim time + 45s；retry 时间以 failure completion time 计算；`completeTranslationSuccess`、`completeRetryableFailure`、`completeNonRetryableFailure`、`recoverStaleLease(s)`、`requeueTranslationFailures` 已实现；单次最多 5 fields，Runtime concurrency 1。
 - Selection：current provider/model exact successful cache first；否则相同 sourceHash/targetLanguage 的 deterministic historical success；pending/failed 不作为显示译文；无成功缓存返回原文。
 - Retry/circuit：`rate_limited`、`provider_timeout`、`provider_unavailable` 仅 retry/backoff；T3A Runtime 与 T3D runner 共享 Translation-only failure policy，使用 `1m,2m,4m,8m,16m,32m,60m...` schedule、claimed `retryCount` 与 failure completion time；`auth_failed`、`provider_forbidden`、`entitlement_missing`、`provider_contract_changed` 写现有 `provider_runtime` circuit；Phase 1 blocking/contract failures 同样 block，transient codes 不 block；`provider_attempt_unknown` 仅 row-level block；clear/requeue 均显式、无自动 requeue。
-- Runtime：`translation-sync` 仅 Real Mode 注册，fixed DeepSeek adapter、20s timeout、settings/secret/monthly-budget hard gate、per-call usage、generic job-level usage opt-out；Mock Mode 不注册。Diagnostic 在普通状态保留 cache hit；provider circuit blocked 时进入 fixed recovery mode，强制一次 `execute()` Provider attempt，不读旧成功 test cache、不写 translation cache、不自动 clear/requeue。
+- Runtime：ordinary `translation-sync` 在全局 Mock/Real 两种模式注册，使用 fixed DeepSeek adapter、20s timeout、settings/secret/monthly-budget hard gate、per-call usage、generic job-level usage opt-out；每次 run 重新读取 settings/usage/Secret/circuit。Provider 候选先过滤 `source_type=mock`、Mock provenance/evidence，明确非 mock lineage 的 current Feed 才能进入 source/claim/call。Diagnostic 在普通状态保留 cache hit；provider circuit blocked 时进入 fixed recovery mode，强制一次 `execute()` Provider attempt，不读旧成功 test cache、不写 translation cache、不自动 clear/requeue。
 - Isolation：Feed original title/summary、Event/HOT/Voyage/AIS/Port/Weather facts、lineage、freshness、severity、ranking、dedupe、evidence 和 Readiness hard gate 未被 Translation 改写或依赖。
 - T3B/T3C：两个 Feed read endpoint 使用 API-only `FeedItemDisplay` 和 bounded provider-free cache mapper；Feed UI 默认中文优先并提供“查看原文”，pending/unavailable 保持原文可读；HOT/Event facts 使用原始 Feed 输入。
 - T3D：`translation-live-acceptance.ts` 提供固定 input、固定 DeepSeek endpoint/model、显式 settings/secret/budget/circuit/Real Mode gates 和 hard max 2 的 executable runner。Phase 1 固定 diagnostic 只走 `TranslationService.execute()` 并写 `translation_test` per-call usage；诊断校验接受 aggregate `translation_test` 或同小时 `mixed`，拒绝 `feed`、null 和任意值；blocking/invalid-wrapper/invalid-usage failures block existing provider circuit，transient failures do not。Phase 2 只选一个 current real Feed `title`/`summary`，复用 T3A claim/execute/atomic finalize 与共享 backoff policy，验证 cache、usage、原文、provider-free Feed read 和 restart。server evidence 与 browser evidence 分离，finalizer 只接受 matching candidate/hash、original disclosure、zero console errors、zero extra calls；本轮未执行 live call，live verification `pending`。T3D engineering 已在此处正式封板，后续 T4、SecretStore、usage/cost、test endpoint、translation-sync、Feed further integration 均不因本封板自动批准。

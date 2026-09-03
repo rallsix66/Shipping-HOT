@@ -171,7 +171,6 @@ function weatherAlertJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
 }
 
 function translationJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
-  if (options.dataMode !== "real") return []
   const secretStore = options.translationSecretStore ?? new FileSecretStore()
   const provider = options.translationProvider ?? createDeepSeekTranslationProvider({
     apiKeyResolver: () => secretStore.get(TRANSLATION_PROVIDER_ID),

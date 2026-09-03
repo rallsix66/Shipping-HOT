@@ -13,7 +13,7 @@ import {
   assertTranslationReady,
   currentTranslationUsage,
 } from "#/services/translation-settings"
-import { type PreparedTranslationSource, TranslationService, feedTranslationSources, isFeedItemTranslationEligible } from "#/services/translation-service"
+import { type PreparedTranslationSource, TranslationService, feedTranslationSources, isFeedItemProviderTranslationEligible } from "#/services/translation-service"
 import { isTranslationCircuitBlockingFailure, isTranslationRetryableFailure, translationRetryBackoffMs } from "#/services/translation-failure-policy"
 import { withTranslationExecutor } from "#/services/translation-executor"
 import type { RuntimeJob, SyncResult } from "#/runtime/background-runtime"
@@ -96,10 +96,9 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
     providerId: provider.providerId,
     capability: TRANSLATION_CAPABILITY,
     intervalMs: options.intervalMs ?? TRANSLATION_SYNC_INTERVAL_MS,
-    enabled: options.enabled ?? options.dataMode === "real",
+    enabled: options.enabled ?? true,
     usageAlreadyRecorded: true,
     run: async (): Promise<SyncResult> => {
-      if (options.dataMode !== "real") return { status: "skipped", errorCode: "translation_real_mode_required" }
       if (provider.providerId !== TRANSLATION_PROVIDER_ID || provider.model !== TRANSLATION_MODEL) {
         return { status: "skipped", errorCode: "translation_provider_or_model_not_allowed" }
       }
@@ -121,7 +120,9 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
 
         await translationRepository.recoverStaleLeases({ provider: provider.providerId, model: provider.model, now: nowIso, limit: 100 })
         const feedItems = sortedFeedItems(await shippingRepository.listFeedItems({ now: runAt, view: "current" }))
-        const sources = feedItems.flatMap(item => feedTranslationSources(item, settings?.translation?.targetLanguage, undefined, runAt))
+        const sources = feedItems
+          .filter(item => isFeedItemProviderTranslationEligible(item, runAt))
+          .flatMap(item => feedTranslationSources(item, settings?.translation?.targetLanguage, undefined, runAt))
         const service = new TranslationService(translationRepository, provider, {
           targetLanguage: settings?.translation?.targetLanguage,
           preference: { providerId: provider.providerId, model: provider.model },
@@ -146,7 +147,7 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
 
           const latestFeedItems = await shippingRepository.listFeedItems({ now: now(), view: "current" })
           const latestItem = latestFeedItems.find(item => item.id === source.entityId)
-          const latestSource = latestItem && isFeedItemTranslationEligible(latestItem, now())
+          const latestSource = latestItem && isFeedItemProviderTranslationEligible(latestItem, now())
             ? feedTranslationSources(latestItem, prepared.targetLanguage, prepared.sourceLanguage, now()).find(candidate => candidate.fieldName === source.fieldName)
             : undefined
           if (!latestSource) {

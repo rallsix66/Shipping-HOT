@@ -50,7 +50,7 @@ const aisAreaProvider: AisAreaProvider = {
 }
 
 describe("runtime registry", () => {
-  it("registers AIS, Voyage, Feed, and Calendar jobs without Translation jobs", async () => {
+  it("registers Translation alongside AIS, Voyage, Feed, and Calendar jobs in Mock Mode", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
     const jobs = getDefaultRuntimeJobs({ database, dataMode: "mock", aisProvider, voyageProvider })
@@ -58,6 +58,7 @@ describe("runtime registry", () => {
       ["ais-tracking", "ais_tracking"],
       ["voyage-sync", "voyage_sync"],
       ["feed-sync:mock-port-notice", "feed_sync"],
+      ["translation-sync", "translation"],
       ["calendar-sync", "calendar_sync"],
       ["port-sync", "port_intelligence"],
       ["weather-sync", "weather_sync"],

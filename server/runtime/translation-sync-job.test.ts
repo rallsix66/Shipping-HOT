@@ -10,6 +10,7 @@ import { FakeTranslationProvider } from "#/providers/translation/fake-provider"
 import { BackgroundRuntime } from "#/runtime/background-runtime"
 import { TRANSLATION_PROVIDER_TIMEOUT_MS, createTranslationSyncJob } from "#/runtime/translation-sync-job"
 import { translationRetryBackoffMs } from "#/services/translation-failure-policy"
+import { mapFeedItemsForDisplay } from "#/services/feed-translation-display"
 import { runTranslationTest } from "#/services/translation-test-service"
 import { TranslationService } from "#/services/translation-service"
 
@@ -37,7 +38,7 @@ function createNativeDatabase() {
 }
 
 class TestSecretStore implements SecretStore {
-  constructor(private readonly value = "test-secret") {}
+  constructor(private value = "test-secret") {}
 
   async get() {
     return this.value
@@ -51,6 +52,10 @@ class TestSecretStore implements SecretStore {
 
   async source(): Promise<SecretSource> {
     return this.value ? "environment" : "missing"
+  }
+
+  setValue(value: string) {
+    this.value = value
   }
 }
 
@@ -89,10 +94,10 @@ function feed(overrides: Partial<FeedItem> = {}): FeedItem {
   }
 }
 
-async function preparedState(inputFeed = feed()) {
+async function preparedState(inputFeed = feed(), dataMode: "mock" | "real" = "real") {
   const state = createNativeDatabase()
-  await initShippingTables(state.database, "real")
-  const shippingRepository = new ShippingRepository(state.database, "real")
+  await initShippingTables(state.database, dataMode)
+  const shippingRepository = new ShippingRepository(state.database, dataMode)
   await shippingRepository.saveSettings(settings())
   await shippingRepository.upsertFeedItem(inputFeed)
   return { ...state, shippingRepository, translationRepository: new TranslationRepository(state.database), runtimeRepository: new RuntimeRepository(state.database) }
@@ -238,8 +243,102 @@ describe("translation T3A Runtime Foundation", () => {
     await expect(disabledJob.run()).resolves.toMatchObject({ status: "skipped", errorCode: "translation_disabled" })
     expect(provider.calls).toHaveLength(0)
     const mockJob = createTranslationSyncJob({ database: state.database, dataMode: "mock", provider, secretStore: new TestSecretStore(), now: () => new Date("2026-09-02T00:30:00.000Z") })
-    await expect(mockJob.run()).resolves.toMatchObject({ status: "skipped", errorCode: "translation_real_mode_required" })
+    await expect(mockJob.run()).resolves.toMatchObject({ status: "skipped", errorCode: "translation_disabled" })
     expect(provider.calls).toHaveLength(0)
+    state.native.close()
+  })
+
+  it("registers and runs in Mock Mode without ever sending a Mock Feed to the Provider", async () => {
+    const state = await preparedState(feed({
+      sourceId: "mock-port-notice",
+      provenance: { sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice", verified: false },
+      source_type: "mock",
+    }), "mock")
+    const provider = translationProvider(request => `translated:${request.sourceText}`)
+    const job = createTranslationSyncJob({ database: state.database, dataMode: "mock", provider, secretStore: new TestSecretStore(), now: () => new Date("2026-09-02T00:30:00.000Z") })
+
+    expect(job).toMatchObject({ id: "translation-sync", intervalMs: 60_000, enabled: true })
+    await expect(job.run()).resolves.toMatchObject({ status: "success", recordsRead: 0, recordsWritten: 0 })
+    expect(provider.calls).toHaveLength(0)
+    await expect(state.translationRepository.getStatistics("deepseek")).resolves.toEqual({ total: 0, succeeded: 0, pending: 0, failed: 0 })
+    await expect(state.runtimeRepository.aggregateProviderUsage({ providerId: "deepseek", capability: "translation" })).resolves.toMatchObject({ requestCount: 0, successCount: 0, failureCount: 0, recordsCount: 0 })
+    expect(state.native.prepare("SELECT COUNT(*) AS count FROM translation_cache WHERE status = 'pending'").get()).toEqual({ count: 0 })
+    state.native.close()
+  })
+
+  it("translates an explicitly non-mock Feed while the global Shipping mode is Mock", async () => {
+    const state = await preparedState(feed({ source_type: "real" }), "mock")
+    const provider = translationProvider(request => `translated:${request.sourceText}`)
+    const now = new Date("2026-09-02T00:30:00.000Z")
+    const job = createTranslationSyncJob({ database: state.database, dataMode: "mock", provider, secretStore: new TestSecretStore(), now: () => now })
+
+    await expect(job.run()).resolves.toMatchObject({ status: "success", recordsRead: 2, recordsWritten: 2 })
+    expect(provider.calls).toHaveLength(2)
+    await expect(state.translationRepository.getStatistics("deepseek")).resolves.toMatchObject({ total: 2, succeeded: 2, pending: 0, failed: 0 })
+    await expect(state.runtimeRepository.aggregateProviderUsage({ providerId: "deepseek", capability: "translation" })).resolves.toMatchObject({ requestCount: 2, successCount: 2, recordsCount: 2 })
+    const items = await state.shippingRepository.listFeedItems({ now, view: "current" })
+    expect(items).toMatchObject([{ title: "Port delay", summary: "Ships are delayed." }])
+    await expect(mapFeedItemsForDisplay(state.database, items, settings(true).translation, now)).resolves.toMatchObject([{
+      displayTitle: "translated:Port delay",
+      displaySummary: "translated:Ships are delayed.",
+      translation: { title: "translated", summary: "translated" },
+    }])
+    state.native.close()
+  })
+
+  it("filters newer Mock Feed rows before ordering and max-field accounting", async () => {
+    const state = await preparedState(feed({
+      id: "feed-mock-newer",
+      sourceId: "mock-port-notice",
+      title: "Mock notice",
+      summary: "Mock summary",
+      publishedAt: "2026-09-02T00:20:00.000Z",
+      sourceUrl: "https://example.com/mock-newer",
+      provenance: { sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice", verified: false },
+      source_type: "mock",
+    }), "mock")
+    await state.shippingRepository.upsertFeedItem(feed({
+      id: "feed-non-mock-older",
+      publishedAt: "2026-09-02T00:10:00.000Z",
+      sourceUrl: "https://example.com/non-mock-older",
+      source_type: "real",
+    }))
+    const provider = translationProvider(request => `translated:${request.sourceText}`)
+    const job = createTranslationSyncJob({ database: state.database, dataMode: "mock", provider, secretStore: new TestSecretStore(), now: () => new Date("2026-09-02T00:30:00.000Z"), maxFieldsPerRun: 2 })
+
+    await expect(job.run()).resolves.toMatchObject({ status: "success", recordsRead: 2, recordsWritten: 2 })
+    expect(provider.calls.map(call => call.sourceText)).toEqual(["Port delay", "Ships are delayed."])
+    expect(state.native.prepare("SELECT COUNT(*) AS count FROM translation_cache WHERE entity_id = 'feed-mock-newer'").get()).toEqual({ count: 0 })
+    state.native.close()
+  })
+
+  it("re-reads settings, budget, and SecretStore on the same Job instance", async () => {
+    const state = await preparedState(feed({ summary: "Dynamic summary" }), "mock")
+    const secretStore = new TestSecretStore("")
+    const provider = translationProvider(request => `translated:${request.sourceText}`)
+    const clock = () => new Date("2026-09-02T00:30:00.000Z")
+    const job = createTranslationSyncJob({ database: state.database, dataMode: "mock", provider, secretStore, now: clock })
+
+    await state.shippingRepository.saveSettings(settings(false))
+    await expect(job.run()).resolves.toMatchObject({ status: "skipped", errorCode: "translation_disabled" })
+    await state.shippingRepository.saveSettings(settings(true))
+    await expect(job.run()).resolves.toMatchObject({ status: "skipped", errorCode: "translation_secret_missing" })
+    secretStore.setValue("test-secret")
+    await expect(job.run()).resolves.toMatchObject({ status: "success", recordsWritten: 2 })
+    expect(provider.calls).toHaveLength(2)
+    state.native.close()
+  })
+
+  it("re-reads a zero monthly budget on the same Job instance", async () => {
+    const state = await preparedState(feed(), "mock")
+    const provider = translationProvider(request => `translated:${request.sourceText}`)
+    const job = createTranslationSyncJob({ database: state.database, dataMode: "mock", provider, secretStore: new TestSecretStore(), now: () => new Date("2026-09-02T00:30:00.000Z") })
+
+    await state.shippingRepository.saveSettings({ ...settings(true), translation: { ...settings(true).translation!, monthlyBudget: 0 } })
+    await expect(job.run()).resolves.toMatchObject({ status: "skipped", errorCode: "translation_budget_zero" })
+    await state.shippingRepository.saveSettings(settings(true))
+    await expect(job.run()).resolves.toMatchObject({ status: "success", recordsWritten: 2 })
+    expect(provider.calls).toHaveLength(2)
     state.native.close()
   })
 
