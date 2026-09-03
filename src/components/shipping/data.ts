@@ -30,6 +30,43 @@ export interface AisLatestPosition {
   lastProviderFailureAt?: string
 }
 
+export interface TranslationStatusResponse {
+  enabled: boolean
+  providerId: "deepseek"
+  model: "deepseek-v4-flash"
+  targetLanguage: string
+  configured: boolean
+  secretSource: "environment" | "file" | "missing"
+  maskedLast4?: string
+  monthlyBudget: number
+  estimatedMonthSpend: number
+  currency: string
+  cache: { total: number, succeeded: number, pending: number, failed: number }
+  usage: { requestCount: number, successCount: number, failureCount: number, cacheHitCount: number, estimatedCost: number, currency: string }
+  lastCallAt?: string
+  lastErrorCode?: string
+  state: "disabled" | "budget_zero" | "budget_exhausted" | "secret_missing" | "provider_blocked" | "ready"
+  gateCode?: string
+  providerBlockCode?: string
+}
+
+export interface TranslationSecretResponse {
+  providerId: "deepseek"
+  configured: boolean
+  source: "environment" | "file" | "missing"
+  maskedLast4?: string
+}
+
+export interface TranslationTestResponse {
+  ok: boolean
+  providerId: "deepseek"
+  model: "deepseek-v4-flash"
+  cacheHit: boolean
+  diagnosticMode: boolean
+  providerCalled: boolean
+  errorCode?: string
+}
+
 export function useShipping() {
   return useQuery({
     queryKey: ["shipping"],
@@ -45,6 +82,22 @@ export function useAisLatestPosition(vesselId: string) {
     queryFn: () => myFetch<AisLatestPosition | null>(`/shipping/vessels/${encodeURIComponent(vesselId)}/position`),
     staleTime: 30_000,
     enabled: Boolean(vesselId),
+  })
+}
+
+export function useTranslationStatus() {
+  return useQuery({
+    queryKey: ["translation-status"],
+    queryFn: () => myFetch<TranslationStatusResponse>("/shipping/translation/status"),
+    staleTime: 10_000,
+  })
+}
+
+export function useTranslationSecret() {
+  return useQuery({
+    queryKey: ["translation-secret"],
+    queryFn: () => myFetch<TranslationSecretResponse>("/shipping/translation/secret"),
+    staleTime: 10_000,
   })
 }
 

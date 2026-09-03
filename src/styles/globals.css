@@ -336,6 +336,39 @@ button:disabled {
   border-color: rgba(20, 184, 166, 0.65);
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.16);
 }
+.translation-panel { margin-bottom: 2rem; }
+.translation-status-card {
+  border: 1px solid rgba(20, 184, 166, 0.22);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.08), rgba(14, 165, 233, 0.06));
+}
+.translation-control { display: flex; min-width: min(100%, 20rem); flex-direction: column; align-items: flex-end; gap: 0.5rem; }
+.translation-secret-input { width: min(100%, 18rem); }
+.translation-actions-row { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.5rem; }
+.setting-readonly { color: var(--sh-dim); font-size: 0.875rem; font-weight: 700; text-align: right; }
+.translation-switch {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  min-width: 4.8rem; justify-content: center;
+  border: 1px solid var(--sh-border-strong); border-radius: 9999px;
+  padding: 0.45rem 0.75rem; color: var(--sh-dim); font-size: 0.75rem; font-weight: 800;
+  background: var(--sh-panel); transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+.translation-switch.on { border-color: rgba(20, 184, 166, 0.58); background: rgba(20, 184, 166, 0.14); color: #0f766e; }
+.dark .translation-switch.on { color: #5eead4; }
+.translation-switch-thumb { width: 0.65rem; height: 0.65rem; border-radius: 9999px; background: #94a3b8; transition: background 0.2s, box-shadow 0.2s; }
+.translation-switch.on .translation-switch-thumb { background: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.16); }
+.translation-usage-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.7rem; margin-top: 1.25rem; }
+.translation-usage-grid > div { display: flex; min-width: 0; flex-direction: column; gap: 0.25rem; border: 1px solid var(--sh-border); border-radius: 0.9rem; padding: 0.75rem; background: var(--sh-panel); }
+.translation-usage-grid strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 1rem; }
+.translation-usage-grid small { color: var(--sh-dim); font-size: 0.72rem; }
+@media (max-width: 640px) {
+  .translation-usage-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .translation-control { min-width: 100%; align-items: stretch; }
+  .translation-secret-input { width: 100%; }
+  .translation-actions-row { justify-content: flex-start; }
+  .setting-readonly { text-align: left; }
+}
 
 /* --- buttons --- */
 .btn-gradient {

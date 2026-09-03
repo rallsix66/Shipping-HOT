@@ -2,7 +2,7 @@ import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
 import type { ShippingSettings } from "@shared/shipping"
-import { assertTranslationReady, currentTranslationUsage, readTranslationStatus, translationBudgetWindow } from "./translation-settings"
+import { type TranslationStatus, assertTranslationReady, currentTranslationUsage, readTranslationStatus, translationBudgetWindow } from "./translation-settings"
 import { TRANSLATION_TEST_SOURCE_TEXT, isAllowedTranslationTestBody, runTranslationTest } from "./translation-test-service"
 import { ProviderError, type SecretSource, type SecretStore, type TranslationRequest } from "#/providers/contracts"
 import { FakeTranslationProvider } from "#/providers/translation/fake-provider"
@@ -104,6 +104,29 @@ describe("translation T2 settings, budget, usage, and safe test runner", () => {
     expect(status).toMatchObject({ enabled: true, configured: true, secretSource: "environment", maskedLast4: "****alue", state: "ready", cache: { succeeded: 1, failed: 0 } })
     expect(JSON.stringify(status)).not.toContain("secret-value")
     native.close()
+  })
+
+  it("reports provider_blocked from the persisted provider runtime after normal gates", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    await new RuntimeRepository(database).blockProviderCircuit({ providerId: "deepseek", capability: "translation", errorCode: "auth_failed", errorMessage: "credential rejected", updatedAt: "2026-09-02T12:00:00.000Z" })
+    await expect(readTranslationStatus(database, settings(), new TestSecretStore("secret-value"))).resolves.toMatchObject({ state: "provider_blocked", providerBlockCode: "auth_failed" })
+    native.close()
+  })
+
+  it("keeps disabled, budget and missing-secret states ahead of a provider circuit block", async () => {
+    const cases: Array<[string, ShippingSettings["translation"], TestSecretStore, TranslationStatus["state"]]> = [
+      ["disabled", settings({ enabled: false, providerId: "deepseek", model: "deepseek-v4-flash", targetLanguage: "zh-CN", monthlyBudget: 1 }).translation, new TestSecretStore("secret-value"), "disabled"],
+      ["budget_zero", settings({ enabled: true, providerId: "deepseek", model: "deepseek-v4-flash", targetLanguage: "zh-CN", monthlyBudget: 0 }).translation, new TestSecretStore("secret-value"), "budget_zero"],
+      ["secret_missing", settings().translation, new TestSecretStore(), "secret_missing"],
+    ]
+    for (const [, translation, secretStore, expectedState] of cases) {
+      const { database, native } = createNativeDatabase()
+      await initShippingTables(database, "mock")
+      await new RuntimeRepository(database).blockProviderCircuit({ providerId: "deepseek", capability: "translation", errorCode: "auth_failed", errorMessage: "credential rejected", updatedAt: "2026-09-02T12:00:00.000Z" })
+      await expect(readTranslationStatus(database, settings(translation), secretStore)).resolves.toMatchObject({ state: expectedState })
+      native.close()
+    }
   })
 
   it("aggregates the complete month in SQL beyond the bounded detail-list limit and gates before a call", async () => {

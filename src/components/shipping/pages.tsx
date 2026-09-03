@@ -3,11 +3,11 @@ import { motion } from "framer-motion"
 import { type ReactNode, useEffect, useState } from "react"
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
-import type { Severity as SeverityValue, ShippingEvent, WeatherDetail } from "@shared/shipping"
+import { type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
 import type { VoyageRecord } from "@shared/voyage"
 import type { VesselSearchResponse, VesselSearchResult, VesselWatchlistItem } from "@shared/vessel-search"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
-import { type ShippingResponse, useAisLatestPosition, useLatestVoyage, useShipping } from "./data"
+import { type ShippingResponse, type TranslationStatusResponse, useAisLatestPosition, useLatestVoyage, useShipping, useTranslationSecret, useTranslationStatus } from "./data"
 import { FeedItemDisplayText } from "./feed-display"
 import { formatDate, formatPortMetric, formatStatus, navTone, severityTone } from "./format"
 import { AnimatedNumber, EmptyState, Marquee, ProvenanceBadge, ProviderChip, Reveal, Segmented, StatusDot } from "./ui"
@@ -1527,14 +1527,74 @@ const settingsCongestionOptions = [
   { value: "critical", label: "严重" },
 ]
 
+const translationStateLabels: Record<TranslationStatusResponse["state"], { label: string, tone: "fresh" | "watch" | "failed" | "dim" }> = {
+  disabled: { label: "已关闭", tone: "dim" },
+  budget_zero: { label: "未设置预算", tone: "watch" },
+  budget_exhausted: { label: "预算耗尽", tone: "watch" },
+  secret_missing: { label: "未配置", tone: "watch" },
+  provider_blocked: { label: "Provider 已阻断", tone: "failed" },
+  ready: { label: "可用", tone: "fresh" },
+}
+
+const translationErrorLabels: Record<string, string> = {
+  translation_disabled: "请先开启自动翻译",
+  translation_budget_zero: "请先设置月度预算",
+  translation_budget_exhausted: "本月预算已用完",
+  translation_secret_missing: "请先配置 DeepSeek API Key",
+  translation_provider_not_allowed: "当前仅支持 DeepSeek",
+  translation_model_not_allowed: "当前仅支持 deepseek-v4-flash",
+  auth_failed: "API Key 无效",
+  provider_forbidden: "服务权限不足",
+  entitlement_missing: "服务权限不足",
+  provider_timeout: "DeepSeek 请求超时",
+  provider_unavailable: "DeepSeek 暂时不可用",
+  provider_contract_changed: "DeepSeek 返回格式异常",
+  managed_by_environment: "API Key 已由服务器环境变量管理",
+  secret_required: "请输入 API Key",
+  secret_too_long: "API Key 长度超出限制",
+  secret_payload_invalid: "API Key 请求格式无效",
+  secret_store_failed: "API Key 保存失败",
+  request_failed: "请求失败，请稍后重试",
+}
+
+function translationErrorLabel(code?: string) {
+  return translationErrorLabels[code ?? "request_failed"] ?? translationErrorLabels.request_failed
+}
+
+function apiErrorCode(error: unknown): string {
+  if (error && typeof error === "object") {
+    const value = error as { data?: unknown, response?: { _data?: unknown } }
+    const payload = value.data ?? value.response?._data
+    if (payload && typeof payload === "object" && typeof (payload as { message?: unknown }).message === "string") {
+      const message = (payload as { message: string }).message
+      return /^[a-z0-9_]+$/.test(message) ? message : "request_failed"
+    }
+  }
+  return "request_failed"
+}
+
+function formatUsd(value: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number.isFinite(value) ? value : 0)
+}
+
 export function SettingsPage() {
   const { data, isLoading, isError, refetch } = useShipping()
+  const { data: translationStatus, isLoading: translationStatusLoading, isError: translationStatusError, refetch: refetchTranslationStatus } = useTranslationStatus()
+  const { data: translationSecret, isLoading: translationSecretLoading, refetch: refetchTranslationSecret } = useTranslationSecret()
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [refreshInterval, setRefreshInterval] = useState(15)
   const [anchoredHours, setAnchoredHours] = useState(2)
   const [delayMinutes, setDelayMinutes] = useState(60)
   const [retentionDays, setRetentionDays] = useState(30)
   const [congestionLevel, setCongestionLevel] = useState("high")
+  const [translationEnabled, setTranslationEnabled] = useState(defaultTranslationSettings.enabled)
+  const [translationMonthlyBudget, setTranslationMonthlyBudget] = useState(String(defaultTranslationSettings.monthlyBudget))
+  const [secretInput, setSecretInput] = useState("")
+  const [secretActionState, setSecretActionState] = useState<"idle" | "saving" | "saved" | "deleting" | "error">("idle")
+  const [deleteConfirmation, setDeleteConfirmation] = useState(false)
+  const [testState, setTestState] = useState<"idle" | "testing" | "success" | "error">("idle")
+  const [testResult, setTestResult] = useState<{ providerId: string, model: string, cacheHit: boolean, providerCalled: boolean }>()
+  const [testError, setTestError] = useState<string>()
   useEffect(() => {
     if (data) {
       setRefreshInterval(data.settings.refreshInterval)
@@ -1542,13 +1602,99 @@ export function SettingsPage() {
       setDelayMinutes(data.settings.eventThresholds.delayMinutes)
       setRetentionDays(data.settings.retentionDays)
       setCongestionLevel(data.settings.eventThresholds.congestionLevel)
+      const translation = data.settings.translation ?? defaultTranslationSettings
+      setTranslationEnabled(translation.enabled)
+      setTranslationMonthlyBudget(String(translation.monthlyBudget))
     }
   }, [data])
   if (isLoading) return <ShippingShell><LoadingState /></ShippingShell>
   if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
+  const saveSettings = async () => {
+    const monthlyBudget = Number(translationMonthlyBudget)
+    if (!translationMonthlyBudget.trim() || !Number.isFinite(monthlyBudget) || monthlyBudget < 0) {
+      setSaveState("error")
+      return
+    }
+    setSaveState("saving")
+    try {
+      await myFetch("/shipping/settings", {
+        method: "POST",
+        body: {
+          refreshInterval,
+          retentionDays,
+          eventThresholds: { anchoredHours, delayMinutes, congestionLevel },
+          translation: {
+            enabled: translationEnabled,
+            providerId: "deepseek",
+            model: "deepseek-v4-flash",
+            targetLanguage: "zh-CN",
+            monthlyBudget,
+          },
+        },
+      })
+      await Promise.all([refetch(), refetchTranslationStatus(), refetchTranslationSecret()])
+      setSaveState("saved")
+    } catch {
+      setSaveState("error")
+    }
+  }
+  const refreshTranslationData = async () => {
+    await Promise.all([refetchTranslationStatus(), refetchTranslationSecret()])
+  }
+  const saveSecret = async () => {
+    if (translationSecret?.source === "environment") return
+    setSecretActionState("saving")
+    try {
+      await myFetch("/shipping/translation/secret", { method: "POST", body: { apiKey: secretInput } })
+      setSecretInput("")
+      await refreshTranslationData()
+      setSecretActionState("saved")
+    } catch {
+      setSecretActionState("error")
+    }
+  }
+  const deleteSecret = async () => {
+    if (translationSecret?.source !== "file") return
+    if (!deleteConfirmation) {
+      setDeleteConfirmation(true)
+      return
+    }
+    setSecretActionState("deleting")
+    setDeleteConfirmation(false)
+    try {
+      await myFetch("/shipping/translation/secret", { method: "DELETE" })
+      setSecretInput("")
+      await refreshTranslationData()
+      setSecretActionState("saved")
+    } catch {
+      setSecretActionState("error")
+    }
+  }
+  const testTranslation = async () => {
+    setTestState("testing")
+    setTestResult(undefined)
+    setTestError(undefined)
+    try {
+      const result = await myFetch<{ ok: boolean, providerId: string, model: string, cacheHit: boolean, providerCalled: boolean }>("/shipping/translation/test", { method: "POST", body: {} })
+      setTestResult(result)
+      setTestState("success")
+      await refetchTranslationStatus()
+    } catch (error) {
+      setTestError(apiErrorCode(error))
+      setTestState("error")
+      await refetchTranslationStatus()
+    }
+  }
   const weatherAlertLabel = data.provider.weatherAlerts === "public" && data.providerFreshness?.weatherAlerts?.sourceStatus === "never_succeeded"
     ? "public · 无已验证来源"
     : data.provider.weatherAlerts
+  const currentTranslation = data.settings.translation ?? defaultTranslationSettings
+  const statusPresentation = translationStatus
+    ? translationStateLabels[translationStatus.state]
+    : { label: translationStatusLoading ? "读取中…" : "状态不可用", tone: "dim" as const }
+  const environmentManaged = translationSecret?.source === "environment"
+  const parsedBudget = Number(translationMonthlyBudget)
+  const budgetForDisplay = translationStatus?.monthlyBudget ?? (Number.isFinite(parsedBudget) ? parsedBudget : currentTranslation.monthlyBudget)
   return (
     <ShippingShell title="设置">
       <SecHead eyebrow="本地配置" title="设置" description="配置刷新间隔和确定性的事件阈值。船舶与港口的关注状态单独保存。" />
@@ -1593,16 +1739,7 @@ export function SettingsPage() {
             whileTap={{ scale: 0.96 }}
             disabled={saveState === "saving"}
             className={`btn-gradient ${saveState === "saved" ? "saved" : saveState === "error" ? "error" : ""}`}
-            onClick={async () => {
-              setSaveState("saving")
-              try {
-                await myFetch("/shipping/settings", { method: "POST", body: { refreshInterval, retentionDays, eventThresholds: { anchoredHours, delayMinutes, congestionLevel } } })
-                await refetch()
-                setSaveState("saved")
-              } catch {
-                setSaveState("error")
-              }
-            }}
+            onClick={saveSettings}
           >
             {saveState === "saved"
               ? (
@@ -1645,6 +1782,188 @@ export function SettingsPage() {
         </div>
         <p className="mt-4 text-xs op-60">数据源：AISStream（船位，可选 key）、AISStream 区域 PositionReport（显式开启后提供派生趋势）、Open-Meteo Marine（天气模型）、JMA / TMD / BMKG（官方天气预警，可选 public / experimental）、Portcast 公共港口页面（低频公开字段）、Shipping Feed（默认 Mock，可选公开 RSS/官方公告）与 Mock Schedule。</p>
       </div>
+      <SecHead eyebrow="可选增强" title="AI 翻译" description="为当前 Feed 资讯提供可控的 DeepSeek 翻译增强，原始事实始终保留。" />
+      <section className="glass-panel translation-panel max-w-2xl p-6" aria-label="AI 翻译设置">
+        <div className="translation-status-card">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider op-60">当前状态</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <StatusDot tone={statusPresentation.tone} />
+                <strong>{statusPresentation.label}</strong>
+                {translationStatus?.providerBlockCode && (
+                  <span className="text-xs op-65">
+                    ·
+                    {translationErrorLabel(translationStatus.providerBlockCode)}
+                  </span>
+                )}
+              </div>
+            </div>
+            <span className="chip">DeepSeek · deepseek-v4-flash</span>
+          </div>
+          {translationStatusError
+            ? <p className="mt-3 text-sm text-rose-600 dark:text-rose-300">翻译状态暂时无法读取。</p>
+            : translationStatus?.state === "provider_blocked"
+              ? (
+                  <p className="mt-3 text-sm text-rose-600 dark:text-rose-300">
+                    翻译服务已暂停：
+                    {translationErrorLabel(translationStatus.providerBlockCode)}
+                  </p>
+                )
+              : <p className="mt-3 text-xs op-65">状态来自服务端设置、预算、Secret metadata 与 Provider circuit；页面不会发起 Provider 请求。</p>}
+        </div>
+
+        <div className="setting-row">
+          <span>
+            <strong>自动翻译</strong>
+            <small>开启后，系统会按后台任务自动翻译当前可翻译的 Feed 资讯，并计入月度预算。</small>
+          </span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={translationEnabled}
+            aria-label="自动翻译"
+            className={`translation-switch${translationEnabled ? " on" : ""}`}
+            onClick={() => setTranslationEnabled(value => !value)}
+          >
+            <span className="translation-switch-thumb" />
+            <span>{translationEnabled ? "ON" : "OFF"}</span>
+          </button>
+        </div>
+        <div className="setting-row">
+          <span>
+            <strong>服务商</strong>
+            <small>当前产品版本固定使用 DeepSeek。</small>
+          </span>
+          <span className="setting-readonly">
+            DeepSeek
+            <small>deepseek</small>
+          </span>
+        </div>
+        <div className="setting-row">
+          <span>
+            <strong>模型</strong>
+            <small>固定模型，不支持自由输入。</small>
+          </span>
+          <span className="setting-readonly">deepseek-v4-flash</span>
+        </div>
+        <div className="setting-row">
+          <span>
+            <strong>目标语言</strong>
+            <small>当前仅支持简体中文。</small>
+          </span>
+          <span className="setting-readonly">简体中文（zh-CN）</span>
+        </div>
+        <div className="setting-row">
+          <span>
+            <strong>API Key</strong>
+            <small>{environmentManaged ? "API Key 已由服务器环境变量管理。" : "输入新的 Key 时才会提交，旧 Key 不会回填到输入框。"}</small>
+          </span>
+          <div className="translation-control">
+            <span className="text-sm font-semibold">{translationSecretLoading ? "读取中…" : translationSecret?.configured ? `已配置 · ${translationSecret.maskedLast4 ?? "****"}` : "未配置"}</span>
+            <input
+              className="setting-input translation-secret-input"
+              type="password"
+              value={secretInput}
+              autoComplete="new-password"
+              placeholder="输入新的 DeepSeek API Key"
+              aria-label="DeepSeek API Key"
+              disabled={environmentManaged || secretActionState === "saving" || secretActionState === "deleting"}
+              onChange={event => setSecretInput(event.target.value)}
+            />
+            <div className="translation-actions-row">
+              <button type="button" className="btn-ghost" disabled={environmentManaged || !secretInput.trim() || secretActionState === "saving"} onClick={saveSecret}>
+                {secretActionState === "saving" ? "保存中…" : "修改密钥"}
+              </button>
+              <button type="button" className="btn-ghost" disabled={environmentManaged || translationSecret?.source !== "file" || secretActionState === "deleting"} onClick={deleteSecret}>
+                {secretActionState === "deleting" ? "删除中…" : deleteConfirmation ? "确认删除" : "删除"}
+              </button>
+            </div>
+            {environmentManaged && <small className="text-xs op-65">网页不能修改或删除环境变量 Secret。</small>}
+            {secretActionState === "saved" && <small className="text-xs text-emerald-600 dark:text-emerald-300">API Key 状态已更新。</small>}
+            {secretActionState === "error" && <small className="text-xs text-rose-600 dark:text-rose-300">{translationErrorLabel("secret_store_failed")}</small>}
+          </div>
+        </div>
+        <div className="setting-row">
+          <span>
+            <strong>月度预算（USD）</strong>
+            <small>这是安全上限，不是预充值金额；达到预算后会停止新的 Provider 调用，已有缓存仍可显示。</small>
+          </span>
+          <input className="setting-input" value={translationMonthlyBudget} onChange={event => setTranslationMonthlyBudget(event.target.value)} type="number" min="0" step="0.01" inputMode="decimal" aria-label="月度预算（USD）" />
+        </div>
+
+        <div className="translation-usage-grid">
+          <div>
+            <strong>
+              {formatUsd(translationStatus?.estimatedMonthSpend ?? 0)}
+              {" "}
+              /
+              {" "}
+              {formatUsd(budgetForDisplay)}
+            </strong>
+            <small>本月已使用 / 月度预算</small>
+          </div>
+          <div>
+            <strong>{translationStatus?.usage.requestCount ?? 0}</strong>
+            <small>本月请求</small>
+          </div>
+          <div>
+            <strong>
+              {translationStatus?.usage.successCount ?? 0}
+              {" "}
+              /
+              {" "}
+              {translationStatus?.usage.failureCount ?? 0}
+            </strong>
+            <small>成功 / 失败</small>
+          </div>
+          <div>
+            <strong>
+              {translationStatus?.cache.succeeded ?? 0}
+              {" "}
+              /
+              {" "}
+              {translationStatus?.cache.pending ?? 0}
+              {" "}
+              /
+              {" "}
+              {translationStatus?.cache.failed ?? 0}
+            </strong>
+            <small>缓存成功 / 等待 / 失败</small>
+          </div>
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <motion.button
+            whileTap={{ scale: 0.96 }}
+            type="button"
+            className="btn-gradient"
+            disabled={saveState === "saving"}
+            onClick={saveSettings}
+          >
+            <span className={saveState === "saving" ? "i-ph-circle-notch animate-spin" : "i-ph-floppy-disk"} />
+            {saveState === "saving" ? "保存中…" : saveState === "saved" ? "翻译设置已保存" : "保存翻译设置"}
+          </motion.button>
+          <button type="button" className="btn-ghost" disabled={testState === "testing"} onClick={testTranslation}>
+            <span className={testState === "testing" ? "i-ph-circle-notch animate-spin" : "i-ph-plug"} />
+            {testState === "testing" ? "测试中…" : "测试连接"}
+          </button>
+        </div>
+        <p className="mt-3 text-xs op-60">测试连接只使用服务端固定 harmless diagnostic，不使用当前 Feed、不启动 translation-sync，也不会自动开启翻译。</p>
+        {testState === "success" && testResult && (
+          <p className="mt-2 text-sm text-emerald-600 dark:text-emerald-300">
+            连接测试成功 ·
+            {testResult.providerId}
+            {" "}
+            ·
+            {testResult.model}
+            {" "}
+            ·
+            {testResult.cacheHit ? "使用缓存测试结果" : testResult.providerCalled ? "已连接 Provider" : "测试完成"}
+          </p>
+        )}
+        {testState === "error" && <p className="mt-2 text-sm text-rose-600 dark:text-rose-300">{translationErrorLabel(testError)}</p>}
+      </section>
     </ShippingShell>
   )
 }

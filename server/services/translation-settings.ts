@@ -1,8 +1,9 @@
 import type { Database } from "db0"
 import { type ShippingSettings, type TranslationSettings, defaultTranslationSettings } from "@shared/shipping"
 import { TranslationRepository } from "#/database/translation"
-import { RuntimeRepository } from "#/database/runtime-jobs"
+import { RuntimeRepository, isProviderCircuitBlocked } from "#/database/runtime-jobs"
 import { canonicalLanguage } from "#/services/translation-service"
+import type { ProviderCircuitBlockCode } from "#/database/runtime-jobs"
 import type { SecretSource, SecretStore } from "#/providers/contracts"
 
 export const TRANSLATION_CAPABILITY = "translation"
@@ -57,8 +58,9 @@ export interface TranslationStatus {
   usage: TranslationUsageAggregate
   lastCallAt?: string
   lastErrorCode?: string
-  state: "disabled" | "budget_zero" | "budget_exhausted" | "secret_missing" | "ready"
+  state: "disabled" | "budget_zero" | "budget_exhausted" | "secret_missing" | "provider_blocked" | "ready"
   gateCode?: TranslationGateCode
+  providerBlockCode?: ProviderCircuitBlockCode
 }
 
 export function normalizeTranslationSettings(value?: Partial<TranslationSettings> | null): TranslationSettings {
@@ -155,6 +157,14 @@ export async function readTranslationStatus(database: Database, settingsValue: S
     providerId: TRANSLATION_PROVIDER_ID,
     capability: TRANSLATION_CAPABILITY,
   })
+  const runtime = await runtimeRepository.getProviderRuntime(TRANSLATION_PROVIDER_ID, TRANSLATION_CAPABILITY)
+  const providerBlocked = isProviderCircuitBlocked(runtime)
+  const providerBlockCode = providerBlocked && runtime?.errorCode
+    ? runtime.errorCode as ProviderCircuitBlockCode
+    : undefined
+  if (providerBlocked && state === "ready") {
+    state = "provider_blocked"
+  }
   return {
     enabled: settings.enabled,
     providerId: TRANSLATION_PROVIDER_ID,
@@ -172,5 +182,6 @@ export async function readTranslationStatus(database: Database, settingsValue: S
     lastErrorCode: latestError?.errorCode,
     state,
     gateCode,
+    providerBlockCode,
   }
 }
