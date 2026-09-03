@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import type { ShippingSettings } from "@shared/shipping"
 import { assertTranslationReady, currentTranslationUsage, readTranslationStatus, translationBudgetWindow } from "./translation-settings"
 import { TRANSLATION_TEST_SOURCE_TEXT, isAllowedTranslationTestBody, runTranslationTest } from "./translation-test-service"
-import type { SecretSource, SecretStore, TranslationRequest } from "#/providers/contracts"
+import { ProviderError, type SecretSource, type SecretStore, type TranslationRequest } from "#/providers/contracts"
 import { FakeTranslationProvider } from "#/providers/translation/fake-provider"
 import { initShippingTables } from "#/database/shipping"
 import { RuntimeRepository } from "#/database/runtime-jobs"
@@ -91,13 +91,13 @@ describe("translation T2 settings, budget, usage, and safe test runner", () => {
     } })
     const input = { database, settings: settings(), secretStore: new TestSecretStore("secret-value"), provider, now: new Date("2026-09-02T12:00:00.000Z") }
     const first = await runTranslationTest(input)
-    expect(first).toMatchObject({ ok: true, sourceText: TRANSLATION_TEST_SOURCE_TEXT, cacheHit: false, estimatedCost: 0 })
+    expect(first).toMatchObject({ ok: true, sourceText: TRANSLATION_TEST_SOURCE_TEXT, cacheHit: false, diagnosticMode: false, providerCalled: true, estimatedCost: 0 })
     expect(first.translatedText).toContain("AB123")
     expect(first.translatedText).toContain("TEST STAR")
     expect(protectedRequest?.sourceText).not.toContain("TEST STAR")
     expect(provider.calls).toHaveLength(1)
     const second = await runTranslationTest(input)
-    expect(second).toMatchObject({ ok: true, cacheHit: true, translatedText: first.translatedText })
+    expect(second).toMatchObject({ ok: true, cacheHit: true, diagnosticMode: false, providerCalled: false, translatedText: first.translatedText })
     expect(provider.calls).toHaveLength(1)
     expect(await currentTranslationUsage(database, input.now)).toMatchObject({ requestCount: 1, successCount: 1, failureCount: 0, cacheHitCount: 1 })
     const status = await readTranslationStatus(database, input.settings, input.secretStore, input.now)
@@ -162,6 +162,63 @@ describe("translation T2 settings, budget, usage, and safe test runner", () => {
     await expect(runTranslationTest({ ...input, provider: secondProvider })).rejects.toMatchObject({ code: "translation_budget_exhausted" })
     expect(secondProvider.calls).toHaveLength(0)
     native.close()
+  })
+
+  it("bypasses an old successful test cache in blocked recovery diagnostic mode without mutating cache or circuit", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const provider = new FakeTranslationProvider({ providerId: "deepseek", model: "deepseek-v4-flash", translateText: request => `[zh] ${request.sourceText}` })
+    const input = { database, settings: settings(), secretStore: new TestSecretStore("secret-value"), provider, now: new Date("2026-09-02T12:00:00.000Z") }
+    const first = await runTranslationTest(input)
+    expect(first.providerCalled).toBe(true)
+    await new RuntimeRepository(database).blockProviderCircuit({ providerId: "deepseek", capability: "translation", errorCode: "auth_failed", errorMessage: "credential rejected", updatedAt: input.now.toISOString() })
+
+    const callsBeforeRecovery = provider.calls.length
+    const recovery = await runTranslationTest(input)
+    expect(recovery).toMatchObject({ ok: true, cacheHit: false, diagnosticMode: true, providerCalled: true })
+    expect(provider.calls).toHaveLength(callsBeforeRecovery + 1)
+    expect(await new TranslationRepository(database).getStatistics("deepseek")).toMatchObject({ total: 1, succeeded: 1, failed: 0, pending: 0 })
+    await expect(new RuntimeRepository(database).getProviderRuntime("deepseek", "translation")).resolves.toMatchObject({ status: "failed", errorCode: "auth_failed" })
+    await expect(currentTranslationUsage(database, input.now)).resolves.toMatchObject({ requestCount: 2, successCount: 2, failureCount: 0 })
+    native.close()
+  })
+
+  it("keeps a blocked recovery diagnostic failure blocked and does not create a cache row", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const runtimeRepository = new RuntimeRepository(database)
+    const now = new Date("2026-09-02T12:00:00.000Z")
+    await runtimeRepository.blockProviderCircuit({ providerId: "deepseek", capability: "translation", errorCode: "auth_failed", errorMessage: "credential rejected", updatedAt: now.toISOString() })
+    const provider = new FakeTranslationProvider({ providerId: "deepseek", model: "deepseek-v4-flash", translateText: () => {
+      throw new ProviderError("auth_failed", "credential rejected")
+    } })
+
+    await expect(runTranslationTest({ database, settings: settings(), secretStore: new TestSecretStore("secret-value"), provider, now })).resolves.toMatchObject({ ok: false, cacheHit: false, diagnosticMode: true, providerCalled: true, errorCode: "auth_failed" })
+    expect(provider.calls).toHaveLength(1)
+    await expect(new TranslationRepository(database).getStatistics("deepseek")).resolves.toEqual({ total: 0, succeeded: 0, pending: 0, failed: 0 })
+    await expect(runtimeRepository.getProviderRuntime("deepseek", "translation")).resolves.toMatchObject({ status: "failed", errorCode: "auth_failed" })
+    await expect(currentTranslationUsage(database, now)).resolves.toMatchObject({ requestCount: 1, successCount: 0, failureCount: 1 })
+    native.close()
+  })
+
+  it("keeps budget and SecretStore gates active in blocked recovery diagnostic mode", async () => {
+    const budgetState = createNativeDatabase()
+    await initShippingTables(budgetState.database, "mock")
+    const budgetRuntime = new RuntimeRepository(budgetState.database)
+    await budgetRuntime.blockProviderCircuit({ providerId: "deepseek", capability: "translation", errorCode: "auth_failed", errorMessage: "credential rejected", updatedAt: "2026-09-02T12:00:00.000Z" })
+    const budgetProvider = new FakeTranslationProvider({ providerId: "deepseek", model: "deepseek-v4-flash" })
+    await expect(runTranslationTest({ database: budgetState.database, settings: settings({ enabled: true, providerId: "deepseek", model: "deepseek-v4-flash", targetLanguage: "zh-CN", monthlyBudget: 0 }), secretStore: new TestSecretStore("secret-value"), provider: budgetProvider, now: new Date("2026-09-02T12:00:00.000Z") })).rejects.toMatchObject({ code: "translation_budget_zero" })
+    expect(budgetProvider.calls).toHaveLength(0)
+    budgetState.native.close()
+
+    const secretState = createNativeDatabase()
+    await initShippingTables(secretState.database, "mock")
+    const secretRuntime = new RuntimeRepository(secretState.database)
+    await secretRuntime.blockProviderCircuit({ providerId: "deepseek", capability: "translation", errorCode: "auth_failed", errorMessage: "credential rejected", updatedAt: "2026-09-02T12:00:00.000Z" })
+    const secretProvider = new FakeTranslationProvider({ providerId: "deepseek", model: "deepseek-v4-flash" })
+    await expect(runTranslationTest({ database: secretState.database, settings: settings(), secretStore: new TestSecretStore(), provider: secretProvider, now: new Date("2026-09-02T12:00:00.000Z") })).rejects.toMatchObject({ code: "translation_secret_missing" })
+    expect(secretProvider.calls).toHaveLength(0)
+    secretState.native.close()
   })
 
   it("persists failures as usage and cache while returning the original text", async () => {

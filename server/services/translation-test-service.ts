@@ -1,7 +1,7 @@
 import type { Database } from "db0"
 import type { ShippingSettings } from "@shared/shipping"
 import { TranslationRepository } from "#/database/translation"
-import { RuntimeRepository } from "#/database/runtime-jobs"
+import { RuntimeRepository, isProviderCircuitBlocked } from "#/database/runtime-jobs"
 import type { SecretStore, TranslationProvider, TranslationUsage } from "#/providers/contracts"
 import { createDeepSeekTranslationProvider, estimateDeepSeekCost } from "#/providers/translation/deepseek-provider"
 import { TranslationService } from "#/services/translation-service"
@@ -32,6 +32,8 @@ export interface TranslationTestResult {
   model: string
   targetLanguage: string
   cacheHit: boolean
+  diagnosticMode: boolean
+  providerCalled: boolean
   usage?: TranslationUsage
   estimatedCost: number
   currency: string
@@ -41,6 +43,8 @@ export interface TranslationTestResult {
 
 async function runTranslationTestUnlocked(input: TranslationTestInput): Promise<TranslationTestResult> {
   const now = input.now ?? new Date()
+  const runtimeRepository = new RuntimeRepository(input.database)
+  const diagnosticMode = isProviderCircuitBlocked(await runtimeRepository.getProviderRuntime(TRANSLATION_PROVIDER_ID, TRANSLATION_CAPABILITY))
   const currentUsage = await currentTranslationUsage(input.database, now)
   const gate = await assertTranslationReady(input.settings.translation, input.secretStore, currentUsage.estimatedCost)
   const provider = input.provider ?? createDeepSeekTranslationProvider({ apiKey: gate.apiKey })
@@ -49,16 +53,19 @@ async function runTranslationTestUnlocked(input: TranslationTestInput): Promise<
     preference: { providerId: provider.providerId, model: provider.model },
     now: () => now.toISOString(),
   })
-  const outcome = await service.translate({
+  const fixedSource = {
     entityType: "translation_test",
     entityId: TRANSLATION_TEST_ENTITY_ID,
     fieldName: "summary",
     sourceText: TRANSLATION_TEST_SOURCE_TEXT,
     targetLanguage: gate.settings.targetLanguage,
     protectedTerms: ["TEST STAR"],
-  })
+  }
+  const outcome = diagnosticMode
+    ? await service.execute(fixedSource)
+    : await service.translate(fixedSource)
   const estimatedCost = outcome.providerCalled ? estimateDeepSeekCost(outcome.usage, now) : 0
-  await new RuntimeRepository(input.database).recordProviderUsage({
+  await runtimeRepository.recordProviderUsage({
     providerId: TRANSLATION_PROVIDER_ID,
     capability: TRANSLATION_CAPABILITY,
     request: Boolean(outcome.providerCalled),
@@ -85,6 +92,8 @@ async function runTranslationTestUnlocked(input: TranslationTestInput): Promise<
     model: provider.model,
     targetLanguage: gate.settings.targetLanguage,
     cacheHit: !outcome.providerCalled && outcome.status === "succeeded",
+    diagnosticMode,
+    providerCalled: Boolean(outcome.providerCalled),
     usage: outcome.usage,
     estimatedCost,
     currency: TRANSLATION_CURRENCY,

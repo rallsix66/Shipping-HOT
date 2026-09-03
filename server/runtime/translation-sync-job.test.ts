@@ -8,7 +8,7 @@ import { TranslationRepository } from "#/database/translation"
 import { ProviderError, type SecretSource, type SecretStore, type TranslationRequest } from "#/providers/contracts"
 import { FakeTranslationProvider } from "#/providers/translation/fake-provider"
 import { BackgroundRuntime } from "#/runtime/background-runtime"
-import { createTranslationSyncJob } from "#/runtime/translation-sync-job"
+import { TRANSLATION_PROVIDER_TIMEOUT_MS, createTranslationSyncJob } from "#/runtime/translation-sync-job"
 import { runTranslationTest } from "#/services/translation-test-service"
 import { TranslationService } from "#/services/translation-service"
 
@@ -128,6 +128,26 @@ describe("translation T3A Runtime Foundation", () => {
     const job = createTranslationSyncJob({ database: state.database, dataMode: "real", provider, secretStore: new TestSecretStore(), now: () => new Date("2026-09-02T00:30:00.000Z") })
     await expect(job.run()).resolves.toMatchObject({ status: "success", recordsRead: 6, recordsWritten: 5 })
     expect(provider.calls.map(call => call.sourceText)).toEqual(["Third notice", "Third summary", "Second notice", "Second summary", "Port delay"])
+    state.native.close()
+  })
+
+  it("assigns a complete independent lease to each field with an advancing clock", async () => {
+    const state = await preparedState(feed({ summary: "First summary" }))
+    await state.shippingRepository.upsertFeedItem(feed({ id: "feed-runtime-2", title: "Second notice", summary: "Second summary", publishedAt: "2026-09-02T00:10:00.000Z", sourceUrl: "https://example.com/feed-runtime-2" }))
+    let nowMs = Date.parse("2026-09-02T00:30:00.000Z")
+    const leaseDurations: number[] = []
+    const provider = translationProvider((request) => {
+      const row = state.native.prepare("SELECT lease_until FROM translation_cache WHERE status = 'pending' AND source_text = ?").get(request.sourceText) as { lease_until?: string }
+      leaseDurations.push(Date.parse(row.lease_until ?? "") - nowMs)
+      nowMs += 19_000
+      return `translated:${request.sourceText}`
+    })
+    const job = createTranslationSyncJob({ database: state.database, dataMode: "real", provider, secretStore: new TestSecretStore(), now: () => new Date(nowMs), maxFieldsPerRun: 3 })
+
+    await expect(job.run()).resolves.toMatchObject({ status: "success", recordsWritten: 3 })
+    expect(provider.calls).toHaveLength(3)
+    expect(leaseDurations).toEqual([45_000, 45_000, 45_000])
+    expect(TRANSLATION_PROVIDER_TIMEOUT_MS).toBe(20_000)
     state.native.close()
   })
 

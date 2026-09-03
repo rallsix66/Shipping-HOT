@@ -1,14 +1,14 @@
 # Shipping-HOT Translation T3 Architecture / Production Feed Integration Proposal
 
-> status: approved / T3A active
-> proposal date: 2026-09-02
+> status: approved / T3A implemented + review repaired / T3B pending
+> proposal date: 2026-09-03
 > base branch: codex/shipping-hot-v3-real-data
-> base SHA: 74c16e62b010df99254311a7e9bcd0722fbda577
+> base SHA: 7b2488f8c7a27f714523892f682d13b4d12640eb
 > scope: T3A Translation Runtime Foundation implementation only; T3B/T3C/T3D remain not authorized
 
 ## 0. Review boundary
 
-本文件已通过人工最终架构审批，当前只授权 T3A Translation Runtime Foundation 实施。它保持独立于 Feed ingestion，且不授权 T3B Feed Read、T3C Feed UI 或 T3D DeepSeek Live Acceptance；仓库没有 active-plan.md 或必须移动 inbox 文档的治理规则，因此保留当前路径并以本状态作为最小 plan reference。
+本文件已通过人工最终架构审批，当前只授权 T3A Translation Runtime Foundation 及本次 Review Repair。它保持独立于 Feed ingestion，且不授权 T3B Feed Read、T3C Feed UI 或 T3D DeepSeek Live Acceptance；仓库没有 active-plan.md 或必须移动 inbox 文档的治理规则，因此保留当前路径并以本状态作为最小 plan reference。
 
 本轮明确不做：
 
@@ -1262,7 +1262,7 @@ If a provider contract change occurs：
 
 ## 24. Implementation verification and governance state
 
-本文件当前状态为 `approved / T3A active`；T3A 已完成并停止，T3B/T3C/T3D 仍未开始。
+本文件当前状态为 `approved / T3A implemented + review repaired / T3B pending`；T3A Review Repair 已完成并停止，T3B/T3C/T3D 仍未开始。
 
 本轮验证要求：
 
@@ -1273,16 +1273,16 @@ If a provider contract change occurs：
 
 ## 25. Final T3A implementation conclusion
 
-- Base SHA：`74c16e62b010df99254311a7e9bcd0722fbda577`
+- Base SHA：`7b2488f8c7a27f714523892f682d13b4d12640eb`
 - Plan path：`docs/plans/inbox/shipping-hot-translation-t3.md`
-- Plan status：`approved / T3A active`；T3A implemented / locally verified / stopped。
+- Plan status：`approved / T3A implemented + review repaired / T3B pending`；T3A engineering implemented / locally verified / stopped。
 - Durable owner：Translation Runtime + TranslationRepository；`TranslationService.execute()` 仅执行规范化、hash、保护/校验和 Provider call，现有 `translate()` 仅保留 T1/T2 compatibility。
 - Schema：migration v12 `translation-runtime-work-state`，只向 `translation_cache` 增加 `retry_count`、`next_retry_at`、`retryable`、`lease_until`、`last_error_code` 和 work-state index；migration additive/idempotent，retained SQLite 未修改。
-- Lifecycle：`claimTranslationWork`、`completeTranslationSuccess`、`completeRetryableFailure`、`completeNonRetryableFailure`、`recoverStaleLease(s)`、`requeueTranslationFailures` 已实现；active lease 45s，单次最多 5 fields，Runtime concurrency 1。
+- Lifecycle：`claimTranslationWork` 在每个 field 使用 fresh claim timestamp，active lease 为 claim time + 45s；retry 时间以 failure completion time 计算；`completeTranslationSuccess`、`completeRetryableFailure`、`completeNonRetryableFailure`、`recoverStaleLease(s)`、`requeueTranslationFailures` 已实现；单次最多 5 fields，Runtime concurrency 1。
 - Selection：current provider/model exact successful cache first；否则相同 sourceHash/targetLanguage 的 deterministic historical success；pending/failed 不作为显示译文；无成功缓存返回原文。
 - Retry/circuit：`rate_limited`、`provider_timeout`、`provider_unavailable` 仅 retry/backoff；`auth_failed`、`provider_forbidden`、`entitlement_missing`、`provider_contract_changed` 写现有 `provider_runtime` circuit；`provider_attempt_unknown` 仅 row-level block；clear/requeue 均显式、无自动 requeue。
-- Runtime：`translation-sync` 仅 Real Mode 注册，fixed DeepSeek adapter、20s timeout、settings/secret/monthly-budget hard gate、per-call usage、generic job-level usage opt-out；Mock Mode 不注册。
+- Runtime：`translation-sync` 仅 Real Mode 注册，fixed DeepSeek adapter、20s timeout、settings/secret/monthly-budget hard gate、per-call usage、generic job-level usage opt-out；Mock Mode 不注册。Diagnostic 在普通状态保留 cache hit；provider circuit blocked 时进入 fixed recovery mode，强制一次 `execute()` Provider attempt，不读旧成功 test cache、不写 translation cache、不自动 clear/requeue。
 - Isolation：Feed original title/summary、Event/HOT/Voyage/AIS/Port/Weather facts、lineage、freshness、severity、ranking、dedupe、evidence 和 Readiness hard gate 未被 Translation 改写或依赖。
 - Deferred：T3B Feed Read/display DTO、T3C UI、T3D DeepSeek live acceptance、production Chinese display、usage/cost dashboard、Translation test endpoint expansion、translation-sync beyond this foundation、additional Provider/fallback 均未实施。
 - Secrets/calls：Secret changes `none`；`.env.local` 未修改；external DeepSeek calls `0`；DeepSeek live verification `pending`。
-- Verification：T3A targeted tests、T1/T2 regressions、typecheck、lint、build 与 Neat Freak closeout 已通过；T3A targeted tests 为 `117/117`，full suite 当前 `629/630` tests，唯一失败是已存在且与本轮无关的 dated Shekou Event/HOT assertion。
+- Verification：Review Repair targeted tests、T1/T2 regressions、typecheck、lint、build 与 `git diff --check` 已通过；最终测试计数与 full-suite 已在本轮完成后记录。Neat Freak official closeout 为 `pending`，原因是 Bash inventory script 在当前 Windows 环境不可用；Windows/manual audit 未发现 blocker。

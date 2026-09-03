@@ -138,7 +138,7 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
         const service = new TranslationService(translationRepository, provider, {
           targetLanguage: settings?.translation?.targetLanguage,
           preference: { providerId: provider.providerId, model: provider.model },
-          now: () => nowIso,
+          now: () => now().toISOString(),
         })
         let processed = 0
         let succeeded = 0
@@ -149,9 +149,11 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
         for (const source of sources) {
           if (processed >= maxFields || stopAfterFailure) break
           const prepared = service.prepare(source)
-          const leaseUntil = new Date(runAt.getTime() + TRANSLATION_LEASE_MS).toISOString()
+          const claimAt = now()
+          const claimAtIso = claimAt.toISOString()
+          const leaseUntil = new Date(claimAt.getTime() + TRANSLATION_LEASE_MS).toISOString()
           const identity = identityFrom(prepared, provider)
-          const claimed = await translationRepository.claimTranslationWork({ ...identity, sourceText: prepared.sourceText, sourceLanguage: prepared.sourceLanguage, now: nowIso, leaseUntil })
+          const claimed = await translationRepository.claimTranslationWork({ ...identity, sourceText: prepared.sourceText, sourceLanguage: prepared.sourceLanguage, now: claimAtIso, leaseUntil })
           if (!claimed) continue
           processed += 1
 
@@ -179,7 +181,8 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
           try {
             await assertTranslationReady((await shippingRepository.getSettings())?.translation, options.secretStore, latestUsage.estimatedCost)
           } catch (error) {
-            await translationRepository.releaseTranslationClaim({ ...identity, leaseUntil, errorCode: "translation_gate_changed", errorMessage: errorCode(error), retryable: true, nextRetryAt: nowIso })
+            const gateFailureAt = now().toISOString()
+            await translationRepository.releaseTranslationClaim({ ...identity, leaseUntil, errorCode: "translation_gate_changed", errorMessage: errorCode(error), retryable: true, nextRetryAt: gateFailureAt })
             terminalStatus = "skipped"
             terminalErrorCode = errorCode(error)
             break
