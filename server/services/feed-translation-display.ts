@@ -1,5 +1,8 @@
 import type { Database } from "db0"
-import type { FeedItem, FeedItemDisplay, FeedTranslationDisplayState, TranslationSettings } from "@shared/shipping"
+import type { FeedItem, FeedItemDisplay, FeedTranslationDisplayState, ShippingSettings, TranslationSettings } from "@shared/shipping"
+import { ShippingRepository } from "#/database/shipping"
+import type { ShippingDataMode } from "#/database/runtime"
+import { defaultShippingSettings } from "#/database/runtime"
 import { TranslationRepository, translationLookupKey } from "#/database/translation"
 import { TranslationService, feedTranslationSources } from "#/services/translation-service"
 import { normalizeTranslationSettings } from "#/services/translation-settings"
@@ -87,6 +90,19 @@ export async function mapFeedItemsForDisplay(
       translation: { title: title.state, summary: summary.state },
     }
   })
+}
+
+/** Formal provider-free current Feed read composition shared by API and acceptance. */
+export async function readCurrentFeedItemsForDisplay(
+  database: Database,
+  dataMode: ShippingDataMode,
+  settingsValue?: ShippingSettings | null,
+  now = new Date(),
+): Promise<FeedItemDisplay[]> {
+  const shippingRepository = new ShippingRepository(database, dataMode)
+  const settings = settingsValue ?? await shippingRepository.getSettings() ?? defaultShippingSettings
+  const items = await shippingRepository.listFeedItems({ now, view: "current" })
+  return mapFeedItemsForDisplay(database, items, settings.translation, now)
 }
 
 function hasDisplayText(value: string, original: string): boolean {
