@@ -16,6 +16,7 @@ export const TRANSLATION_CIRCUIT_BLOCKING_FAILURE_CODES = [
 export const TRANSLATION_FAILURE_CODES = [
   ...TRANSLATION_CIRCUIT_BLOCKING_FAILURE_CODES,
   ...TRANSLATION_RETRYABLE_FAILURE_CODES,
+  "translation_placeholder_changed",
 ] as const
 
 export type TranslationFailureCode = typeof TRANSLATION_FAILURE_CODES[number]

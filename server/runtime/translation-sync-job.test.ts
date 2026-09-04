@@ -3,7 +3,7 @@ import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
 import type { FeedItem, ShippingSettings } from "@shared/shipping"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
-import { RuntimeRepository } from "#/database/runtime-jobs"
+import { RuntimeRepository, isProviderCircuitBlocked } from "#/database/runtime-jobs"
 import { TranslationRepository } from "#/database/translation"
 import { ProviderError, type SecretSource, type SecretStore, type TranslationRequest } from "#/providers/contracts"
 import { FakeTranslationProvider } from "#/providers/translation/fake-provider"
@@ -208,6 +208,69 @@ describe("translation T3A Runtime Foundation", () => {
     await expect(runTranslationTest({ database: state.database, settings: settings(), secretStore, provider, now: clock })).resolves.toMatchObject({ ok: true, cacheHit: false })
     expect(provider.calls).toHaveLength(callsAfterFailure + 1)
     await expect(state.runtimeRepository.getProviderRuntime("deepseek", "translation")).resolves.toMatchObject({ status: "failed", errorCode: "auth_failed" })
+    state.native.close()
+  })
+
+  it("keeps placeholder corruption at row level and continues with another Feed on the next run", async () => {
+    const state = await preparedState(feed({ id: "feed-placeholder-a", title: "Notice 2026-09-02", summary: "", publishedAt: "2026-09-02T00:20:00.000Z", sourceUrl: "https://example.com/feed-placeholder-a" }))
+    await state.shippingRepository.upsertFeedItem(feed({ id: "feed-placeholder-b", title: "Normal notice", summary: "", publishedAt: "2026-09-02T00:10:00.000Z", sourceUrl: "https://example.com/feed-placeholder-b" }))
+    const provider = translationProvider(request => request.entityId === "feed-placeholder-a" ? request.sourceText.replace(/__SH/g, "__SX") : `translated:${request.sourceText}`)
+    const now = new Date("2026-09-02T00:30:00.000Z")
+    const job = createTranslationSyncJob({ database: state.database, dataMode: "mock", provider, secretStore: new TestSecretStore(), now: () => now, maxFieldsPerRun: 1 })
+
+    await expect(job.run()).resolves.toMatchObject({ status: "failed", recordsWritten: 0, errorCode: "translation_placeholder_changed" })
+    await expect(state.translationRepository.findWork({ entityType: "feed_item", entityId: "feed-placeholder-a", fieldName: "title", sourceHash: new TranslationService(state.translationRepository, provider).prepare({ entityType: "feed_item", entityId: "feed-placeholder-a", fieldName: "title", sourceText: "Notice 2026-09-02", targetLanguage: "zh-CN" }).sourceHash, targetLanguage: "zh-CN", provider: "deepseek", model: "deepseek-v4-flash" })).resolves.toMatchObject({ status: "failed", lastErrorCode: "translation_placeholder_changed", errorMessage: "translation placeholders changed", retryable: false, nextRetryAt: undefined })
+    await expect(job.run()).resolves.toMatchObject({ status: "success", recordsWritten: 1 })
+    expect(provider.calls.map(call => call.entityId)).toEqual(["feed-placeholder-a", "feed-placeholder-b"])
+    await expect(state.translationRepository.getStatistics("deepseek")).resolves.toEqual({ total: 2, succeeded: 1, pending: 0, failed: 1 })
+    await expect(state.runtimeRepository.aggregateProviderUsage({ providerId: "deepseek", capability: "translation" })).resolves.toMatchObject({ requestCount: 2, successCount: 1, failureCount: 1, recordsCount: 1 })
+    await expect(state.runtimeRepository.getProviderRuntime("deepseek", "translation")).resolves.toBeUndefined()
+    state.native.close()
+  })
+
+  it("keeps true Provider contract failures circuit-blocking", async () => {
+    const state = await preparedState(feed({ summary: "" }))
+    const provider = translationProvider(() => {
+      throw new ProviderError("provider_contract_changed", "DeepSeek response choices are invalid")
+    })
+    const now = new Date("2026-09-02T00:30:00.000Z")
+    const job = createTranslationSyncJob({ database: state.database, dataMode: "real", provider, secretStore: new TestSecretStore(), now: () => now })
+
+    await expect(job.run()).resolves.toMatchObject({ status: "failed", errorCode: "provider_contract_changed" })
+    await expect(state.runtimeRepository.getProviderRuntime("deepseek", "translation")).resolves.toMatchObject({ status: "failed", errorCode: "provider_contract_changed", errorMessage: "DeepSeek response choices are invalid" })
+    const runtime = await state.runtimeRepository.getProviderRuntime("deepseek", "translation")
+    expect(isProviderCircuitBlocked(runtime)).toBe(true)
+    state.native.close()
+  })
+
+  it("preserves a blocked circuit error message through periodic skipped runs", async () => {
+    const state = await preparedState(feed({ summary: "" }))
+    const now = new Date("2026-09-02T00:30:00.000Z")
+    await state.runtimeRepository.blockProviderCircuit({ providerId: "deepseek", capability: "translation", errorCode: "provider_contract_changed", errorMessage: "translation placeholders changed", updatedAt: now.toISOString() })
+    const provider = translationProvider(request => `translated:${request.sourceText}`)
+    const job = createTranslationSyncJob({ database: state.database, dataMode: "real", provider, secretStore: new TestSecretStore(), now: () => now })
+    const runtime = new BackgroundRuntime(state.runtimeRepository, { now: () => now })
+    runtime.register(job)
+    await runtime.start()
+    await expect(runtime.runNow("translation-sync")).resolves.toMatchObject({ status: "skipped", errorCode: "provider_contract_changed", errorMessage: "translation placeholders changed" })
+    runtime.stop()
+
+    expect(provider.calls).toHaveLength(0)
+    await expect(state.runtimeRepository.getProviderRuntime("deepseek", "translation")).resolves.toMatchObject({ errorCode: "provider_contract_changed", errorMessage: "translation placeholders changed" })
+    await expect(state.runtimeRepository.listSyncRuns("deepseek")).resolves.toMatchObject([{ status: "skipped", errorCode: "provider_contract_changed", errorMessage: "translation placeholders changed" }])
+    state.native.close()
+  })
+
+  it("keeps blocked diagnostic placeholder failure row-free and non-circuit-blocking", async () => {
+    const state = await preparedState(feed({ summary: "" }))
+    const now = new Date("2026-09-02T00:30:00.000Z")
+    await state.runtimeRepository.blockProviderCircuit({ providerId: "deepseek", capability: "translation", errorCode: "provider_contract_changed", errorMessage: "existing provider contract failure", updatedAt: now.toISOString() })
+    const provider = translationProvider(request => request.sourceText.replace(/__SH/g, "__SX"))
+
+    await expect(runTranslationTest({ database: state.database, settings: settings(), secretStore: new TestSecretStore(), provider, now })).resolves.toMatchObject({ ok: false, diagnosticMode: true, providerCalled: true, cacheHit: false, errorCode: "translation_placeholder_changed" })
+    await expect(state.translationRepository.getStatistics("deepseek")).resolves.toEqual({ total: 0, succeeded: 0, pending: 0, failed: 0 })
+    await expect(state.runtimeRepository.aggregateProviderUsage({ providerId: "deepseek", capability: "translation" })).resolves.toMatchObject({ requestCount: 1, successCount: 0, failureCount: 1 })
+    await expect(state.runtimeRepository.getProviderRuntime("deepseek", "translation")).resolves.toMatchObject({ errorCode: "provider_contract_changed", errorMessage: "existing provider contract failure" })
     state.native.close()
   })
 

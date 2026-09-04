@@ -44,6 +44,7 @@ describe("deepSeek translation provider foundation", () => {
     expect(captured?.init?.headers).toMatchObject({ "Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer secret-value" })
     const body = JSON.parse(String(captured?.init?.body)) as Record<string, unknown>
     expect(body).toMatchObject({ model: "deepseek-v4-flash", thinking: { type: "disabled" }, stream: false })
+    expect(String((body.messages as Array<{ content?: string }>)[0]?.content)).toContain("byte-for-byte")
     expect(body).not.toHaveProperty("tools")
     expect(body).not.toHaveProperty("reasoning_effort")
   })

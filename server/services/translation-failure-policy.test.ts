@@ -28,6 +28,12 @@ describe("translation failure policy", () => {
     expect(isTranslationCircuitBlockingFailure(code)).toBe(false)
   })
 
+  it("classifies placeholder corruption as known, non-retryable and non-circuit-blocking", () => {
+    expect(isTranslationFailureCode("translation_placeholder_changed")).toBe(true)
+    expect(isTranslationRetryableFailure("translation_placeholder_changed")).toBe(false)
+    expect(isTranslationCircuitBlockingFailure("translation_placeholder_changed")).toBe(false)
+  })
+
   it.each([undefined, "feed", "arbitrary"])("does not classify %s as a Translation failure", (code) => {
     expect(isTranslationFailureCode(code)).toBe(false)
     expect(isTranslationRetryableFailure(code)).toBe(false)

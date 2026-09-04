@@ -304,6 +304,21 @@ describe("translation T3D executable acceptance runner", () => {
     state.native.close()
   })
 
+  it("keeps a Phase 1 placeholder failure non-circuit-blocking", async () => {
+    const state = await initializedDatabase()
+    await seedFeed(state.database)
+    const provider = new AcceptanceProvider(request => ({ translatedText: request.sourceText.replace(/__SH/g, "__SX"), usage: validUsage }))
+
+    const result = await runTranslationLiveAcceptance(runnerOptions(state.database, provider))
+
+    expect(provider.calls).toHaveLength(1)
+    expect(result.evidence).toMatchObject({ externalCalls: 1, reason: "translation_placeholder_changed" })
+    expect(result.evidence.phase1).toMatchObject({ status: "failed", errorCode: "translation_placeholder_changed", providerUsagePersisted: "verified", cacheIsolation: "verified" })
+    expect(result.evidence.phase2.attempted).toBe(false)
+    await expect(new RuntimeRepository(state.database).getProviderRuntime("deepseek", "translation")).resolves.toBeUndefined()
+    state.native.close()
+  })
+
   it.each(["provider_forbidden", "entitlement_missing"] as const)("opens the Phase 1 circuit for %s and stops before Feed", async (code) => {
     const state = await initializedDatabase()
     await seedFeed(state.database)
@@ -410,6 +425,23 @@ describe("translation T3D executable acceptance runner", () => {
     expect(result.evidence.phase2).toMatchObject({ status: "failed", cachePersistence: "verified", providerUsagePersisted: "verified", errorCode: "rate_limited" })
     await expect(new TranslationRepository(state.database).findWork({ entityType: "feed_item", entityId: item.id, fieldName: "title", sourceHash: result.evidence.candidate?.sourceHash as string, targetLanguage: "zh-CN", provider: "deepseek", model: "deepseek-v4-flash" })).resolves.toMatchObject({ status: "failed", retryable: true, lastErrorCode: "rate_limited", leaseUntil: undefined })
     await expect(new RuntimeRepository(state.database).aggregateProviderUsage({ providerId: "deepseek", capability: "translation" })).resolves.toMatchObject({ requestCount: 2, successCount: 1, failureCount: 1, recordsCount: 0 })
+    await expect(new RuntimeRepository(state.database).getProviderRuntime("deepseek", "translation")).resolves.toBeUndefined()
+    state.native.close()
+  })
+
+  it("persists a Phase 2 placeholder failure without blocking the Provider circuit", async () => {
+    const state = await initializedDatabase()
+    const item = await seedFeed(state.database)
+    const provider = new AcceptanceProvider((request, call) => call === 2
+      ? { translatedText: request.sourceText.replace(/__SH/g, "__SX"), usage: validUsage }
+      : { translatedText: `[中文] ${request.sourceText}`, usage: validUsage })
+
+    const result = await runTranslationLiveAcceptance(runnerOptions(state.database, provider))
+
+    expect(provider.calls).toHaveLength(2)
+    expect(result.evidence).toMatchObject({ externalCalls: 2, liveVerification: "pending", reason: "translation_placeholder_changed" })
+    expect(result.evidence.phase2).toMatchObject({ status: "failed", errorCode: "translation_placeholder_changed", cachePersistence: "verified", providerUsagePersisted: "verified", retryStateCleared: "pending" })
+    await expect(new TranslationRepository(state.database).findWork({ entityType: "feed_item", entityId: item.id, fieldName: "title", sourceHash: result.evidence.candidate?.sourceHash as string, targetLanguage: "zh-CN", provider: "deepseek", model: "deepseek-v4-flash" })).resolves.toMatchObject({ status: "failed", errorMessage: "translation placeholders changed", lastErrorCode: "translation_placeholder_changed", retryable: false, nextRetryAt: undefined })
     await expect(new RuntimeRepository(state.database).getProviderRuntime("deepseek", "translation")).resolves.toBeUndefined()
     state.native.close()
   })

@@ -1,5 +1,16 @@
 import { createHash } from "node:crypto"
-import { ProviderError } from "#/providers/contracts"
+
+export const TRANSLATION_PLACEHOLDER_CHANGED = "translation_placeholder_changed" as const
+export const TRANSLATION_PLACEHOLDER_CHANGED_MESSAGE = "translation placeholders changed"
+
+export class TranslationValidationError extends Error {
+  readonly code = TRANSLATION_PLACEHOLDER_CHANGED
+
+  constructor(message = TRANSLATION_PLACEHOLDER_CHANGED_MESSAGE) {
+    super(message)
+    this.name = "TranslationValidationError"
+  }
+}
 
 export interface TranslationPlaceholder {
   marker: string
@@ -17,7 +28,11 @@ interface Span {
   literal: string
 }
 
+const placeholderMarkerPattern = /__SH_\d+_[A-F0-9]{10}__/g
+const placeholderMarkerLikePattern = /__SH_\w+__/gi
+
 const automaticPatterns = [
+  placeholderMarkerLikePattern,
   /https?:\/\/[^\s<>"']+/gi,
   /\b(?:IMO|MMSI)\s*(?:[:#-]\s*)?\d{7,9}\b/gi,
   /\b\d{4}[-/]\d{1,2}[-/]\d{1,2}\b/g,
@@ -38,6 +53,15 @@ function spansForPattern(sourceText: string, pattern: RegExp): Span[] {
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+function markerFor(sourceText: string, literal: string, index: number, collisionNonce: number): string {
+  const digest = createHash("sha256")
+    .update(`${sourceText}\u0000${literal}\u0000${index}\u0000${collisionNonce}`, "utf8")
+    .digest("hex")
+    .slice(0, 10)
+    .toUpperCase()
+  return `__SH_${index}_${digest}__`
 }
 
 function selectedSpans(sourceText: string, protectedTerms: string[]): Span[] {
@@ -62,9 +86,12 @@ export function protectTranslationText(sourceText: string, protectedTerms: strin
   let cursor = 0
   spans.forEach((span, index) => {
     protectedText += sourceText.slice(cursor, span.start)
-    const digest = createHash("sha256").update(`${sourceText}\u0000${span.literal}\u0000${index}`, "utf8").digest("hex").slice(0, 16)
-    let marker = `[[SHIPPING_HOT_LITERAL_${digest}_${index}]]`
-    while (sourceText.includes(marker) || placeholders.some(entry => entry.marker === marker)) marker = `[[SHIPPING_HOT_LITERAL_${digest}_${index}_${placeholders.length}]]`
+    let collisionNonce = 0
+    let marker = markerFor(sourceText, span.literal, index, collisionNonce)
+    while (sourceText.includes(marker) || placeholders.some(entry => entry.marker === marker)) {
+      collisionNonce += 1
+      marker = markerFor(sourceText, span.literal, index, collisionNonce)
+    }
     protectedText += marker
     placeholders.push({ marker, literal: span.literal })
     cursor = span.end
@@ -73,15 +100,16 @@ export function protectTranslationText(sourceText: string, protectedTerms: strin
   return { protectedText, placeholders }
 }
 
-const markerPattern = /\[\[SHIPPING_HOT_LITERAL_[a-f0-9]+_\d+(?:_\d+)?\]\]/g
-
 export function restoreAndValidateProtectedTranslation(protectedText: ProtectedTranslationText, translatedText: string): string {
   const expected = new Map(protectedText.placeholders.map(entry => [entry.marker, entry.literal]))
-  const actualMarkers = translatedText.match(markerPattern) ?? []
+  const actualMarkers = translatedText.match(placeholderMarkerPattern) ?? []
   const actualCounts = new Map<string, number>()
   for (const marker of actualMarkers) actualCounts.set(marker, (actualCounts.get(marker) ?? 0) + 1)
-  if (actualMarkers.length !== protectedText.placeholders.length || [...expected].some(([marker]) => actualCounts.get(marker) !== 1) || actualMarkers.some(marker => !expected.has(marker)) || /SHIPPING_HOT_LITERAL_/i.test(translatedText.replace(markerPattern, ""))) {
-    throw new ProviderError("provider_contract_changed", "translation placeholders changed", 200)
+  const restoredText = translatedText.replace(placeholderMarkerPattern, marker => expected.get(marker) as string)
+  const expectedLiterals = new Set(expected.values())
+  const unexpectedResidualMarker = (restoredText.match(placeholderMarkerLikePattern) ?? []).some(marker => !expectedLiterals.has(marker))
+  if (actualMarkers.length !== protectedText.placeholders.length || [...expected].some(([marker]) => actualCounts.get(marker) !== 1) || actualMarkers.some(marker => !expected.has(marker)) || unexpectedResidualMarker) {
+    throw new TranslationValidationError()
   }
-  return translatedText.replace(markerPattern, marker => expected.get(marker) as string)
+  return restoredText
 }

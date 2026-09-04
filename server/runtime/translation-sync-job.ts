@@ -107,7 +107,7 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
         const nowIso = runAt.toISOString()
         const currentRuntime = await runtimeRepository.getProviderRuntime(TRANSLATION_PROVIDER_ID, TRANSLATION_CAPABILITY)
         if (isProviderCircuitBlocked(currentRuntime)) {
-          return { status: "skipped", errorCode: currentRuntime?.errorCode ?? "translation_provider_circuit_blocked" }
+          return { status: "skipped", errorCode: currentRuntime?.errorCode ?? "translation_provider_circuit_blocked", errorMessage: currentRuntime?.errorMessage }
         }
 
         const settings = await shippingRepository.getSettings()

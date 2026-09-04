@@ -231,6 +231,40 @@ describe("translation service T1 foundation", () => {
     native.close()
   })
 
+  it("classifies a modified protected marker as a row-level failure and returns the original source", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const provider = {
+      providerId: "deepseek",
+      model: "deepseek-v4-flash",
+      translate: async (request: TranslationRequest) => ({
+        translatedText: request.sourceText.replace(/__SH/g, "__SX"),
+        usage: { promptTokens: 12, promptCacheHitTokens: 4, promptCacheMissTokens: 8, completionTokens: 5, totalTokens: 17 },
+      }),
+    }
+    const source = { entityType: "feed_item", entityId: "feed-placeholder-failure", fieldName: "summary", sourceText: "Voyage AB123 reaches SGSIN on 2026-09-02", targetLanguage: "zh-CN" }
+    const service = new TranslationService(new TranslationRepository(database), provider, { now: () => "2026-09-02T00:00:00.000Z" })
+
+    const result = await service.translate(source)
+
+    expect(result).toMatchObject({
+      status: "failed",
+      translatedText: source.sourceText,
+      errorCode: "translation_placeholder_changed",
+      errorMessage: "translation placeholders changed",
+      providerCalled: true,
+      cache: {
+        status: "failed",
+        lastErrorCode: "translation_placeholder_changed",
+        errorMessage: "translation placeholders changed",
+        retryable: false,
+        nextRetryAt: undefined,
+      },
+    })
+    expect(result.sourceHash).toBe(translationSourceHash({ ...source, sourceText: source.sourceText }))
+    native.close()
+  })
+
   it.each(["Translation: translated text", "Here is the translation: translated text", "Translated text: translated text", "翻译如下：译文", "译文：译文"])("rejects the explicit provider wrapper %s", async (wrapper) => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
