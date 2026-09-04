@@ -1,11 +1,29 @@
 # V3 Real Data Live Verification
 
-> Verification date: 2026-09-01 (latest Official Weather Alert Runtime acceptance; earlier AIS and activation evidence remains historical)
-> Scope: controlled local Real Mode process only. No deployment, provider account change or secret creation was performed; the GFW Provider implementation and live probe are recorded separately below.
+> Verification date: 2026-09-04 (current accepted-evidence rebaseline; no new Provider request was made)
+> Scope: previously accepted controlled local Real Mode processes, isolated live probes, persisted/restart evidence and confirmed browser/runtime results. This rebaseline does not replay live logs, create new evidence or change any secret/database/runtime setting.
 
 ## Method
 
 `pnpm smoke:v3-real-activation` loaded the existing server environment and set `SHIPPING_DATA_MODE=real` for that process only. For this review it used a fresh process-scoped SQLite path so pre-existing Mock/Off local data could not contaminate the observation; it ran the registered Runtime Jobs, then a built Nitro process was smoke-tested separately with process-scoped Mock/Off configuration across the HTTP surfaces. Secret values are not recorded here.
+
+## Current Accepted Live Evidence Summary — 2026-09-04
+
+This section is a current-state index over evidence already accepted in the dated sections below. It adds no request, response, counter, timestamp or probe result.
+
+| Capability | Current state | Accepted evidence summary | Evidence location |
+| --- | --- | --- | --- |
+| GFW Vessel Search / canonical identity | `VERIFIED_LIVE` | Credential loading, live search, canonical IMO/MMSI normalization, identity history persistence and provider-free cache/read behavior were accepted. | `GFW Vessel Search + Canonical Identity — 2026-08-31` |
+| AIS continuous PositionReport | `VERIFIED_LIVE` | Accepted multi-target continuous evidence persisted a real PositionReport, passed Repository/API reads and SQLite restart, and passed the isolated zero-Mock gate. | `V3 AIS Multi-Target Continuous Live Acceptance — 2026-08-31` |
+| AIS Area | `VERIFIED_LIVE` | Independent Area evidence persisted the bounded metric set, passed provider-free reads, clean shutdown and restart readback, and passed the isolated zero-Mock gate. | `V3 AIS Area Background Runtime + Live Acceptance — 2026-08-31` |
+| Port Intelligence / Portcast public-page | `VERIFIED_LIVE` | Existing controlled activation evidence persisted Port Directory-aligned public-page enrichment and exposed it through the Repository/API path; uncovered ports remain unavailable rather than inferred. | Historical controlled activation evidence in this document and `docs/status.md` |
+| Open-Meteo Weather | `VERIFIED_LIVE` | Existing controlled activation evidence persisted real weather-risk Feed rows with provider-owned weather fields and preserved provider-free reads. | Historical controlled activation evidence in this document and `docs/status.md` |
+| TMD official Weather Alerts | `VERIFIED_LIVE` | TMD contract and source-level Runtime evidence were accepted with persisted normalized Feed records, Runtime/sync state and restart readback. | `Official Weather Alerts — Contract Gate and Runtime Acceptance — 2026-09-01` |
+| BMKG official Weather Alerts | `VERIFIED_LIVE` | BMKG contract and source-level Runtime evidence were accepted with persisted normalized Feed records, Runtime/sync state and restart readback. | `Official Weather Alerts — Contract Gate and Runtime Acceptance — 2026-09-01` |
+| VesselAPI Voyage/ETA Provider path | `VERIFIED_LIVE` | Accepted HANSA evidence verified ETA/Port Event identity, Runtime → SQLite persistence, ETA history, provider-free reads, restart readback and zero-Mock evidence. Operational focus-port coverage remains `COVERAGE_PENDING` because `CNYPG` is outside the formal directory. | `V3 VesselAPI Voyage / ETA — Accepted Live Verification Seal — 2026-09-01` |
+| DeepSeek Translation Provider / Runtime | `VERIFIED_LIVE` (optional enrichment) | Translation Provider connectivity/model/credentials were proven live. Automatic Translation Runtime subsequently produced successful real DeepSeek calls and durable successful cache rows. After placeholder reliability repair and controlled circuit recovery, automatic translation resumed and success/cache counters increased without increasing failure count in the observed recovery cycle. Feed UI displayed cached Chinese translations with original disclosure. | Accepted Translation runtime/provider/browser evidence referenced by the 2026-09-03 Translation sections in `docs/status.md` and `docs/architecture.md` |
+
+Translation evidence above describes the live Production Translation Runtime and cached Feed display. It does not claim that the separate T3D server/browser final acceptance has completed beyond the evidence actually accepted by its own finalizer. Translation remains optional, FeedItem `title`/`summary`-only enrichment and outside the REAL_OPERATIONAL hard gate.
 
 ## Official Weather Alerts — Contract Gate and Runtime Acceptance — 2026-09-01
 
@@ -235,11 +253,12 @@ The formal focus directory remains `CNSHK`, `CNYTN`, `CNNSA`, `THLCH`, `MYPKG`, 
 | Calendar | Calendarific | 259 events fetched for CN, ID, MY, PH, TH and VN | Real Calendar rows persisted and Calendar API returned them; official/manual completeness remains separate | `coverage_pending` |
 | Port Intelligence | Portcast public pages | 8 Port Directory-aligned port rows fetched | Real Port rows persisted; legacy Shipping API returned 8 ports | `verified_live` |
 | Weather model | Open-Meteo Marine | 7 weather-risk Feed rows fetched with wind/gust/window fields | Real Feed rows persisted; `/api/shipping/feed` returned model fields | `verified_live` |
-| Weather alerts | JMA/TMD/BMKG | No live alert source was enabled or claimed | No alert coverage claim | `coverage_pending` |
+| Weather alerts | TMD/BMKG official source Jobs; JMA disabled | TMD/BMKG contract/runtime/restart evidence is accepted; JMA remains `LIVE_PENDING` and geographic/focus-port association coverage is partial | TMD/BMKG normalized Feed rows, Runtime/sync persistence and restart readback; no fabricated port relation | `PARTIAL / VERIFIED_LIVE for enabled TMD/BMKG` |
+| Translation | DeepSeek `deepseek-v4-flash` | Connectivity/model/credentials, automatic Runtime success/cache/usage, placeholder recovery, controlled circuit recovery and cached Chinese Feed UI with original disclosure are accepted | Durable Translation cache/usage evidence and provider-free Feed display; Translation remains optional and FeedItem-only | `VERIFIED_LIVE` |
 
 The activation result reported `actualMockRows` from a direct native SQLite schema-discovered scan of every business table carrying `source_type`: `ais_latest_positions=0`, `ais_port_metrics=0`, `ais_positions=0`, `calendar_events=0`, `events=0`, `feed_item_history=0`, `feed_items=0`, `ports=0`, `vessel_metadata=0`, `vessel_search_cache=0`, `vessels=0`, `voyage_eta_history=0`, `voyages=0`, `total=0`. System/metadata tables are explicitly excluded. The smoke asserts this total and exits non-zero if it is not zero; `mockRows` is retained only as a compatibility alias for the observed object. The real database read path accepts only `real/imported/derived` lineage. No Mock data was promoted into the Real operational read.
 
-This seals zero-Mock gate coverage for the review, the current AIS PositionReport gate and the accepted VesselAPI Voyage/ETA path. It does not claim `Real Operational Ready`: Voyage Provider live verification is complete, but focus-port coverage remains `coverage_pending` for `CNYPG` and other independent gates remain outside this seal.
+This seals zero-Mock gate coverage for the historical activation review, the accepted AIS PositionReport/AIS Area gates and the accepted VesselAPI Voyage/ETA Provider path. It does not claim `Real Operational Ready`: Voyage focus-port coverage remains `coverage_pending` for `CNYPG`, Calendar completeness and selected alert geography remain partial, and the final P7 full-system/Event-HOT/UI/restart/zero-Mock gates remain open.
 
 ## V3 VesselAPI recurring Voyage episode repair — 2026-09-01 (historical repair checkpoint)
 
@@ -277,4 +296,4 @@ The built Nitro HTTP smoke returned HTTP 200 for `/`, `/api/shipping/health`, `/
 
 ## Boundary
 
-This document records observed requests and persisted/API evidence only. The accepted HANSA evidence verifies the VesselAPI ETA contract, identity trust, Port Event enrichment, Runtime persistence, provider-free reads and restart behavior. It does not claim full focus-port operational coverage: `CNYPG` remains outside the current directory, so Voyage status is `coverage_pending` with reason `vesselapi_focus_port_coverage_pending`. The next V3 capability is Translation, which is not entered by this seal.
+This document records observed requests and persisted/API evidence only. The accepted HANSA evidence verifies the VesselAPI ETA contract, identity trust, Port Event enrichment, Runtime persistence, provider-free reads and restart behavior. It does not claim full focus-port operational coverage: `CNYPG` remains outside the current directory, so Voyage status is `coverage_pending` with reason `vesselapi_focus_port_coverage_pending`. The current project phase is `P7 — Final Real-data Seal`; the next action is `P7-B — Real Operational Capability Gap Review`.
