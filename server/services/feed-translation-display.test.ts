@@ -2,10 +2,10 @@ import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
-import type { FeedItem, TranslationSettings } from "@shared/shipping"
+import type { FeedItem, FeedItemDisplay, HotItem, TranslationSettings } from "@shared/shipping"
 import { initShippingTables } from "#/database/shipping"
 import { TranslationRepository } from "#/database/translation"
-import { mapFeedItemsForDisplay } from "#/services/feed-translation-display"
+import { mapFeedItemsForDisplay, mapHotItemsForDisplay } from "#/services/feed-translation-display"
 import { TranslationService } from "#/services/translation-service"
 
 function createNativeDatabase() {
@@ -55,6 +55,21 @@ function cacheRecord(source: ReturnType<TranslationService["prepare"]>, translat
 
 const enabledTranslation: TranslationSettings = { enabled: true, providerId: "deepseek", model: "deepseek-v4-flash", targetLanguage: "zh-CN", monthlyBudget: 1 }
 const disabledTranslation: TranslationSettings = { ...enabledTranslation, enabled: false, monthlyBudget: 0 }
+
+function feedHot(item: FeedItem, overrides: Partial<HotItem> = {}): HotItem {
+  return {
+    id: `hot:${item.id}`,
+    kind: "feed",
+    title: item.title,
+    summary: item.summary,
+    severity: item.severity,
+    freshness: "fresh",
+    sourceStatus: "healthy",
+    occurredAt: item.publishedAt,
+    feedItemId: item.id,
+    ...overrides,
+  }
+}
 
 describe("feed translation display mapper", () => {
   it("reads exact and historical successes while preserving original Feed facts", async () => {
@@ -108,5 +123,55 @@ describe("feed translation display mapper", () => {
     expect(cachedDisplay.displayTitle).toBe("旧标题")
     expect(cachedDisplay.translation.title).toBe("translated")
     native.close()
+  })
+
+  it("enriches Feed HOT title and summary from the existing display batch only", () => {
+    const item = createMockSnapshot().feedItems[0]
+    const display: FeedItemDisplay = { ...item, displayTitle: "中文标题", displaySummary: "中文摘要", translation: { title: "translated", summary: "translated" } }
+    const event: HotItem = {
+      id: "event-hot",
+      kind: "event",
+      title: "事件原文",
+      summary: "事件摘要",
+      severity: "critical",
+      freshness: "fresh",
+      sourceStatus: "healthy",
+      occurredAt: item.publishedAt,
+      eventId: "event-1",
+    }
+    const hot = [feedHot(item), event]
+
+    expect(mapHotItemsForDisplay(hot, [display])).toEqual([
+      { ...hot[0], title: "中文标题", summary: "中文摘要" },
+      event,
+    ])
+  })
+
+  it.each([
+    ["title only", { displayTitle: "中文标题", displaySummary: "原始摘要" }, "中文标题", "原始摘要"],
+    ["summary only", { displayTitle: "原始标题", displaySummary: "中文摘要" }, "原始标题", "中文摘要"],
+    ["no success", { displayTitle: "原始标题", displaySummary: "原始摘要" }, "原始标题", "原始摘要"],
+    ["pending", { displayTitle: "原始标题", displaySummary: "原始摘要" }, "原始标题", "原始摘要"],
+    ["failed", { displayTitle: "原始标题", displaySummary: "原始摘要" }, "原始标题", "原始摘要"],
+    ["source changed", { displayTitle: "更新后的原始标题", displaySummary: "更新后的原始摘要" }, "更新后的原始标题", "更新后的原始摘要"],
+  ] as const)("falls back safely for %s display state", (_, displayValues, expectedTitle, expectedSummary) => {
+    const item = createMockSnapshot().feedItems[0]
+    const display: FeedItemDisplay = { ...item, ...displayValues, translation: { title: "original", summary: "original" } }
+    const [result] = mapHotItemsForDisplay([feedHot(item)], [display])
+    expect(result).toMatchObject({ title: expectedTitle, summary: expectedSummary })
+  })
+
+  it("keeps HOT order, severity and dedupe identity independent from display text", () => {
+    const items = createMockSnapshot().feedItems.slice(0, 2)
+    const hot = [
+      feedHot(items[0], { id: "hot-a", severity: "critical" }),
+      feedHot(items[1], { id: "hot-b", severity: "warning" }),
+    ]
+    const display = items.map((item, index) => ({ ...item, displayTitle: `完全不同的翻译标题 ${index}`, displaySummary: `完全不同的翻译摘要 ${index}`, translation: { title: "translated" as const, summary: "translated" as const } }))
+    const result = mapHotItemsForDisplay(hot, display)
+
+    expect(result.map(item => item.id)).toEqual(hot.map(item => item.id))
+    expect(result.map(item => item.severity)).toEqual(hot.map(item => item.severity))
+    expect(result.map(item => item.feedItemId)).toEqual(hot.map(item => item.feedItemId))
   })
 })

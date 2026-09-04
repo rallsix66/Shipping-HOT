@@ -1,5 +1,5 @@
 import type { Database } from "db0"
-import type { FeedItem, FeedItemDisplay, FeedTranslationDisplayState, ShippingSettings, TranslationSettings } from "@shared/shipping"
+import type { FeedItem, FeedItemDisplay, FeedTranslationDisplayState, HotItem, ShippingSettings, TranslationSettings } from "@shared/shipping"
 import { ShippingRepository } from "#/database/shipping"
 import type { ShippingDataMode } from "#/database/runtime"
 import { defaultShippingSettings } from "#/database/runtime"
@@ -88,6 +88,27 @@ export async function mapFeedItemsForDisplay(
       displayTitle: title.value,
       displaySummary: summary.value,
       translation: { title: title.state, summary: summary.state },
+    }
+  })
+}
+
+/**
+ * Enriches only Feed-kind HOT presentation from an already materialized Feed
+ * display batch. Ranking and every other HOT fact remain owned by the
+ * original-fact HotItem returned from rankHotItems().
+ */
+export function mapHotItemsForDisplay(
+  hotItems: readonly HotItem[],
+  displayFeedItems: readonly FeedItemDisplay[],
+): HotItem[] {
+  const displayFeedById = new Map(displayFeedItems.map(item => [item.id, item]))
+  return hotItems.map((item) => {
+    if (item.kind !== "feed") return item
+    const matchingFeed = item.feedItemId ? displayFeedById.get(item.feedItemId) : undefined
+    return {
+      ...item,
+      title: matchingFeed?.displayTitle ?? item.title,
+      summary: matchingFeed?.displaySummary ?? item.summary,
     }
   })
 }
