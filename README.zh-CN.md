@@ -75,7 +75,9 @@ Shipping HOT 本地环境约定：
 4. `pnpm dev` 与 `pnpm start` 使用同一套环境优先级：`process env > .env.local > .env.server > code defaults`。
 5. 若使用生产构建启动本地 Nitro 服务，先运行 `pnpm build`，再运行 `pnpm start`。
 
-V3 Readiness 可运行 `pnpm smoke:v3-readiness`，检查固定 Node/ABI、SQLite schema、Port Directory 和已批准 Runtime 范围；该门禁不发起外部 Provider 请求，并要求 Mock/Off 配置。
+Shipping HOT V3 已 `FINAL SEALED`：P0–P3 基础和 P7-A 至 P7-G 均已完成。`pnpm smoke:v3-readiness` 检查固定 Node/ABI、SQLite schema、Port Directory 和已批准 Runtime 范围；该门禁本身不发起外部 Provider 请求。受控 Real Mode 激活仅使用现有批准适配器、进程级环境变量和临时 SQLite。
+
+最终受控 Real Mode Readiness 为 `ready=true / overall=degraded`，没有失败的 hard check；Voyage focus-port、Calendar、JMA/预警地理范围和公共源覆盖仍明确为部分覆盖边界。没有批准 carrier entitlement 时商业班期保持不可用；Translation 仅是可选的 Feed 标题/摘要增强，不进入 hard gate。详情见 [`docs/status.md`](docs/status.md)。
 
 真实 Provider 示例（仅在 `.env.local` 或本机配置中显式启用）：
 

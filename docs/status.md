@@ -7,14 +7,16 @@
 
 | Item | Current state |
 |---|---|
-| Current Project Phase | `P7 — Final Real-data Seal` |
-| Current Head | `f7281c7ea58444dc3b2d55930d0069c45055cab8` — `fix: preserve persisted feed lifecycle on reads` |
+| Current Project Phase | `V3 — FINAL SEALED` |
+| Current Git Head | Final P7 seal commit on `codex/shipping-hot-v3-real-data`; exact SHA is recorded in the completion report and verified against `origin` |
+| P7 Entry Git Head | `4824d63f8e135ff3c9eb0849d9ba49e832ae000c` — `docs: rebaseline v3 state for p7 entry` |
+| Business-code baseline | `f7281c7ea58444dc3b2d55930d0069c45055cab8` — `fix: preserve persisted feed lifecycle on reads` |
 | Branch | `codex/shipping-hot-v3-real-data` |
 | Schema | `v12`; migration changes in this review: none |
 | Toolchain | Node `24.15.0`, ABI `137`, `better-sqlite3@12.6.2` |
 | Operational Mode default | Mock; Real Mode remains explicit and fail-closed |
-| Retained DB / Secret / env | No retained SQLite, Secret or environment change in this review |
-| External Provider calls | `0` in this review; no live probe or background sync was started |
+| Retained DB / Secret / env | Retained `.data/shipping-hot-v3.sqlite3`, Secrets and committed env were not changed; P7 used only process-scoped env and `.data/p7-final-seal-20260904.sqlite3` |
+| External Provider calls | P7-D used only existing approved adapters; DeepSeek `0`; no Schedule endpoint, JMA, Maritime Executive or new Provider was called |
 
 ### Core Sealed Foundations
 
@@ -44,7 +46,7 @@
 - Calendar: `IMPLEMENTED / COVERAGE_PENDING`; Calendarific persistence is verified, while full current+next-year and official/manual completeness remain open.
 - Official Weather Alerts: enabled TMD/BMKG are live; JMA and geographic/focus-port association coverage remain partial.
 - Port Intelligence, Weather and Feed: provider paths are live, but public-source/geographic coverage remains bounded and must be accepted explicitly.
-- Full-system Real Operational readiness, final Event/HOT real-evidence gate, restart acceptance and final zero-Mock acceptance remain P7 gates.
+- P7 Final Real-data Seal: `SEALED`; controlled Real Mode readiness is `ready=true / overall=degraded` with no failed hard checks, and approved coverage gaps remain explicit rather than inferred.
 
 ### Optional / Out of Scope
 
@@ -53,40 +55,79 @@
 - Commercial Schedule is `NOT CONFIGURED / ENTITLEMENT-DEPENDENT`; AIS/VesselAPI ETA is not carrier schedule. The UI must remain explicitly unavailable without Mock schedule data.
 - Translation is outside the REAL_OPERATIONAL hard-readiness gate.
 
-### Current P7 Entry Status
+### Current P7 Final Seal Status
 
-`P7-A — Current State Rebaseline` is complete in this review. The project has entered P7, but P7 does not automatically fill coverage gaps, enable new Providers, switch Real Mode, or claim final operational readiness.
+`P7-A` through `P7-G` are complete. The final controlled Real Mode acceptance passed the required Runtime → SQLite → Repository → API → Readiness boundaries; Event/HOT evidence, restart persistence, schema-discovered zero-Mock scans and the required browser routes passed. Readiness is intentionally `overall=degraded` only for approved coverage-pending capabilities; no hard check is blocked.
 
-### P7 Blocker Matrix
+### P7 Final Real-data Seal — 2026-09-04
 
-| Capability | Current State | Hard Blocker? | Coverage Gap? | Required Before Final Seal? | Next Action |
-|---|---|---|---|---|---|
-| Vessel Search | `VERIFIED_LIVE` (GFW) | No | No for accepted provider path | Include in full-system evidence | Reconfirm zero-Mock/provider-free read |
-| AIS Position | `VERIFIED_LIVE` | No | Yes, watchlist/target dependent | Yes, final Real Mode acceptance | Recheck accepted continuous path in P7-D |
-| AIS Area | `VERIFIED_LIVE` | No | Yes, bounded focus-port sampling | Yes, final Real Mode acceptance | Recheck persisted metric/readback in P7-D |
-| Port Directory | `SEALED` | No | No for current eight-port baseline | Yes, baseline integrity check | Keep directory unchanged; review in P7-B |
-| Port Intelligence | `VERIFIED_LIVE` | No | Yes, public-page coverage limited | Yes, coverage decision | Define unavailable boundary for uncovered ports |
-| Weather | `VERIFIED_LIVE` | No | Yes, provider/port coverage bounded | Yes, coverage decision | Define accepted geographic boundary |
-| Official Weather Alerts | `PARTIAL / VERIFIED_LIVE for TMD/BMKG` | No, unless JMA is in product scope | Yes, JMA/geographic association | Yes, source-scope decision | Keep JMA disabled; decide scope in P7-C |
-| Feed | `SEALED` | No | Yes, source coverage remains bounded | Yes, final evidence | Run controlled full-system read/sync acceptance |
-| Calendar | `IMPLEMENTED / COVERAGE_PENDING` | No, coverage gap only | Yes, current+next-year and official/manual completeness | Yes, coverage decision and acceptance | Review completeness/quota/account boundary |
-| Current Voyage | `VERIFIED_LIVE` provider path / `PARTIAL` coverage | No, provider path is live | Yes, `CNYPG` focus mapping | Yes, coverage decision | Review focus-port mapping in P7-C; do not add port here |
-| Commercial Schedule | `NOT CONFIGURED / ENTITLEMENT-DEPENDENT` | No if explicitly unavailable and Mock-free | Yes | Yes, UI/entitlement decision | Keep unavailable; decide entitlement in P7-C |
-| Translation | `SEALED + VERIFIED_LIVE` optional enrichment | No | No for approved Feed scope | Yes, final UI evidence only | Keep outside hard gate; include in P7-F |
-| Event/HOT | Derived original-fact path | Yes for final evidence gate | Yes, final real evidence not sealed | Yes | Execute P7-E evidence gate |
-| Readiness | Implemented profile-aware gate; final Real Mode not sealed | Yes for Final Seal | Inherits capability gaps | Yes | Execute P7-D full-system acceptance |
-| Restart Persistence | Foundation verified; final full-system acceptance pending | Yes for Final Seal | No foundation gap; final evidence gap | Yes | Execute P7-F restart acceptance |
-| Zero-Mock | Isolated gate accepted | Yes for Final Seal | No isolated gate gap; final-system evidence gap | Yes | Execute P7-F schema-discovered scan |
+`V3 — FINAL SEALED` is the current project state. P7-A through P7-G are complete on branch `codex/shipping-hot-v3-real-data`.
+
+| Gate | Final evidence |
+|---|---|
+| P7-B capability review | Voyage Provider path `VERIFIED_LIVE`; Voyage focus-port `COVERAGE_PENDING / PARTIAL`; Calendar `IMPLEMENTED / COVERAGE_PENDING`; TMD/BMKG `VERIFIED_LIVE`, JMA `LIVE_PENDING / disabled`; Commercial Schedule `NOT CONFIGURED / ENTITLEMENT-DEPENDENT`; Portcast public coverage limited; Translation `SEALED + VERIFIED_LIVE` optional; Event/HOT Translation `OUT_OF_SCOPE`. |
+| P7-C decisions | No Port Directory expansion, no `destinationPortId` fabricated for `CNYPG`, no Schedule entitlement assumed, no JMA activation, no new Provider/schema/Secret. Approved gaps are non-blocking coverage boundaries. |
+| P7-D activation | Existing `pnpm smoke:v3-real-activation` in process-scoped `SHIPPING_DATA_MODE=real`, `SHIPPING_VOYAGE_PROVIDER=vesselapi`, and temporary `.data/p7-final-seal-20260904.sqlite3`: 10 Jobs registered, Voyage safely skipped with `no_eligible_voyage_targets`, AIS Area safely skipped with `no_eligible_ais_area_ports`, Loadstar 10, Shekou 5, Calendar 259, Port 8, Weather 5, TMD 8 and BMKG 3 records written; Translation skipped `translation_disabled`. Exit `0`. |
+| REAL_OPERATIONAL readiness | Existing `pnpm smoke:v3-readiness` against the same temporary DB: `ready=true`, `overall=degraded`, all hard checks pass, exact approved Job set, Node `24.15.0` / ABI `137`, pnpm `10.30.3`, better-sqlite3 `12.6.2`, schema `v12`. The degraded result is only approved capability coverage. |
+| Event/HOT Real Evidence Gate | Provider-free API read returned 14 derived Events / 5 active Events and 2 HOT items. Active Event evidence was real third-party/derived (`open-meteo-marine` and `the-loadstar`); no Mock or mixed lineage entered operational Event/HOT. Original Feed facts remain ranking inputs. |
+| Restart + read-only boundary | A new process read back Port 8, Feed 31, Feed history 62, Events 13 and Calendar 259 from the temporary DB; GET/API/UI reads did not add sync runs or call Providers. |
+| Zero-Mock before/after | Schema-discovered scan before shutdown, after restart and after UI/API reads reported `actualMockRows.total=0` across all 13 `source_type` business tables. Retained `.data/shipping-hot-v3.sqlite3` was not opened. |
+| UI acceptance | `/`, `/vessels`, `/ports`, `/voyages`, `/feed`, `/calendar`, `/settings` and `/events` rendered without loading/error state. Feed showed 33 `查看原文` disclosures and simulated count `0`; Schedule was `unavailable`; Settings exposed fixed DeepSeek metadata with redacted Secret only. Browser console errors/warnings: `0`; React Query/TanStack Devtools: `0`. |
+| Translation boundary | Temporary Real DB settings remained `enabled=false`, monthly budget `0`; DeepSeek usage `0`. No new DeepSeek call was required or made by the final acceptance. Feed title/summary enrichment remains optional; Event/HOT translation remains out of scope. |
+| Verification | P7 targeted suite: 20 files / 207 tests passed. Full Vitest: 726/727 tests, 63/64 files; the only failure is the pre-existing isolated dated Shekou assertion at `server/providers/feed.test.ts:156`, not changed in P7. `pnpm typecheck`, `pnpm lint`, `pnpm build` and Neat Freak closeout are recorded below. |
+
+Known coverage gaps remain explicit:
+
+- Voyage focus-port coverage is partial for destinations outside the approved Port Directory.
+- Calendar official/manual completeness remains partial.
+- JMA remains disabled/live-pending.
+- Commercial Schedule remains unavailable without approved carrier entitlement.
+- Public Port/Weather/Feed coverage remains source-bounded.
+
+These coverage boundaries do not use Mock fallback and do not fabricate operational facts. Translation is `VERIFIED_LIVE` optional FeedItem title/summary enrichment and remains outside the Real Operational hard-readiness gate. No new Provider, paid entitlement, schema migration or Secret was introduced. Post-V3 enhancements require separate approval.
+
+### P7 Final Blocker Matrix
+
+| Capability | Current State | Hard Blocker? | Coverage Gap? | Final Decision |
+|---|---|---|---|---|
+| Vessel Search | `VERIFIED_LIVE` (GFW) | No | No for accepted provider path | Included in final provider-free evidence |
+| AIS Position | `VERIFIED_LIVE` | No | Yes, watchlist/target dependent | Accepted historical live evidence retained |
+| AIS Area | `VERIFIED_LIVE` | No | Yes, bounded focus-port sampling | Accepted historical live evidence retained; current empty target is explicit |
+| Port Directory | `SEALED` | No | No for current eight-port baseline | Eight-port directory unchanged |
+| Port Intelligence | `VERIFIED_LIVE` | No | Yes, public-page coverage limited | Uncovered ports remain unavailable |
+| Weather | `VERIFIED_LIVE` | No | Yes, provider/port coverage bounded | Source-bounded data only |
+| Official Weather Alerts | `PARTIAL / VERIFIED_LIVE for TMD/BMKG` | No | Yes, JMA/geographic association | TMD/BMKG enabled; JMA disabled/live-pending |
+| Feed | `SEALED / VERIFIED_LIVE` source Runtime | No | Yes, public-source coverage bounded | Loadstar/Shekou accepted; no Mock fallback |
+| Calendar | `IMPLEMENTED / COVERAGE_PENDING` | No | Yes, current+next-year and official/manual completeness | Calendarific transport/persistence accepted; completeness remains partial |
+| Current Voyage | `VERIFIED_LIVE` provider path / `PARTIAL` coverage | No | Yes, `CNYPG` focus mapping | No port expansion; no fabricated destination ID |
+| Commercial Schedule | `NOT CONFIGURED / ENTITLEMENT-DEPENDENT` | No | Yes | UI/API unavailable; no Mock schedule |
+| Translation | `SEALED + VERIFIED_LIVE` optional enrichment | No | No for approved Feed scope | Outside hard gate; Event/HOT translation out of scope |
+| Event/HOT | Real evidence gate passed | No | Source-bounded | Original facts/evidence/ranking accepted |
+| Readiness | `ready=true / overall=degraded` | No | Inherits approved coverage gaps | No failed hard checks |
+| Restart Persistence | Final temporary DB readback passed | No | No | Runtime → SQLite → Repository readback accepted |
+| Zero-Mock | Final scans passed | No | No | `actualMockRows.total=0` before/after restart/UI |
 
 ### P7 Execution Order
 
-1. `P7-A — Current State Rebaseline` — complete in this review.
-2. `P7-B — Real Operational Capability Gap Review` — next action.
-3. `P7-C — Remaining Coverage Decisions` — Voyage focus-port, Calendar, Weather Alert geography and Commercial Schedule entitlement.
-4. `P7-D — Controlled Real Mode Full-System Acceptance` — only after approved gap decisions.
-5. `P7-E — Event / HOT Real Evidence Gate`.
-6. `P7-F — Final Chinese UI + Restart + Zero-Mock Acceptance`.
-7. `P7-G — V3 Final Seal` — only when all required evidence and docs are sealed.
+1. `P7-A — Current State Rebaseline` — complete.
+2. `P7-B — Real Operational Capability Gap Review` — complete.
+3. `P7-C — Remaining Coverage Decisions` — complete.
+4. `P7-D — Controlled Real Mode Full-System Acceptance` — complete.
+5. `P7-E — Event / HOT Real Evidence Gate` — complete.
+6. `P7-F — Final Chinese UI + Restart + Zero-Mock Acceptance` — complete.
+7. `P7-G — V3 Final Seal` — complete; post-V3 enhancements require separate approval.
+
+### P7-G Closeout Evidence — 2026-09-04
+
+| Closeout item | Result |
+|---|---|
+| `git diff --check` | Passed; only normal Git LF→CRLF warnings were emitted for existing text files |
+| Typecheck | `pnpm typecheck` passed |
+| Lint | `pnpm lint` passed |
+| Test | Targeted P7 suite: `20 files / 207 tests passed`; full Vitest: `63/64 files`, `726/727 tests`; only the pre-existing isolated dated Shekou Event/HOT assertion at `server/providers/feed.test.ts:156` fails |
+| Build | `pnpm build` passed through Vite/PWA/Nitro; existing npm config, Browserslist and Node dependency deprecation warnings are non-blocking |
+| Neat Freak | Manual Windows-equivalent audit completed for rules, code/status alignment, Markdown surfaces, ADR/roadmap state, secrets, local databases, temporary residue and Git/worktree. Official Bash inventory remains `pending/unavailable` because `bash` and `scripts/audit-inventory.sh` are unavailable; no cleanup was performed |
+| Cleanup boundary | `.data/p7-final-seal-20260904.sqlite3` and `.data/shipping-hot-v3-browser.sqlite3` remain ignored cleanup candidates pending explicit confirmation; retained `.data/shipping-hot-v3.sqlite3`, `.env.local`, provider secret metadata, `dist/`, `prototypes/` and `screenshots/` were preserved |
 
 > Historical snapshots below preserve the facts that were true at their checkpoint dates. They do not override the current state above; in particular, older `DeepSeek live verification pending`, zero-call and disabled-budget statements are historical, not current-state claims.
 
@@ -192,9 +233,9 @@
 
 ## 1. One-Sentence Status
 
-P0 Persistence, P1 Port/Mock Isolation and P2 Search/Identity/Runtime are sealed; P3 AIS Position and AIS Area have accepted live evidence; P3 Feed lifecycle is sealed; the VesselAPI Voyage Provider path, Port Intelligence, Open-Meteo, TMD/BMKG and DeepSeek Translation Runtime have accepted live evidence with their independent coverage/scope boundaries. Voyage focus-port coverage, Calendar operational coverage, selected official-alert geography, final Event/HOT real evidence and full-system Real Mode acceptance remain explicit P7 gates. Translation is live optional enrichment limited to Feed title/summary display and does not enter the REAL_OPERATIONAL hard gate.
+P0 Persistence, P1 Port/Mock Isolation, P2 Search/Identity/Runtime, P3 Feed lifecycle and P7 Final Real-data Seal are sealed; the VesselAPI Voyage Provider path, Port Intelligence, Open-Meteo, TMD/BMKG and DeepSeek Translation Runtime retain their accepted live boundaries. Voyage focus-port coverage, Calendar completeness, selected official-alert geography and public-source coverage remain explicit partial boundaries, not Mock fallback or fabricated facts. Translation is live optional enrichment limited to Feed title/summary display and does not enter the REAL_OPERATIONAL hard gate.
 
-V3 Readiness remains profile-aware: it checks Node `24.15.0` / ABI `137`, pnpm `10.30.3`, better-sqlite3 `12.6.2`, schema/Port Directory and the exact approved Runtime Job set. Development Safe requires Mock/Off; Real Operational rejects Mock and reports capability coverage separately. The final multi-target AIS, AIS Area, HANSA Voyage and TMD/BMKG evidence are independent gates; none is inferred from credentials alone. P7 is now the current project phase, and the unique next action is `P7-B — Real Operational Capability Gap Review`.
+V3 Readiness remains profile-aware: it checks Node `24.15.0` / ABI `137`, pnpm `10.30.3`, better-sqlite3 `12.6.2`, schema/Port Directory and the exact approved Runtime Job set. Development Safe requires Mock/Off; Real Operational rejects Mock and reports capability coverage separately. The final multi-target AIS, AIS Area, HANSA Voyage and TMD/BMKG evidence are independent gates; none is inferred from credentials alone. P7-A through P7-G are complete; final controlled Real Mode Readiness is `ready=true / overall=degraded` with no failed hard checks.
 
 ## V3 Official Weather Alerts — Live Contract Gate and Runtime — 2026-09-01
 
@@ -302,7 +343,7 @@ Remaining pending work: real data coverage / runtime follow-up.
 - Database / external services: P0 uses fixed Node `24.15.0` / ABI `137`, `better-sqlite3@12.6.2`, db0 path `.data/shipping-hot-v3.sqlite3`, and passed native read/write plus process-A-write → close → process-B-read smoke. The current workspace inventory found no legacy `.data/db.sqlite3`; it is not the V3 runtime path. AISStream, Portcast public pages and Open-Meteo remain optional server-side sources.
 - Mock fixture timestamps: generated relative to the runtime clock when a snapshot is created; deterministic fixed time is limited to `shared/shipping-engine.test.ts`
 - V1 focus-port seed: all eight requested ports are present in the shared fixture and Repository seed path: Shekou, Yantian, Nansha, Laem Chabang, Port Klang, Manila, Jakarta and Ho Chi Minh City
-- Last verified surface: 2026-09-04 V3 Current State Rebaseline / P7 Entry Review — current Translation Runtime and DeepSeek Provider live evidence are accepted, Feed lifecycle read semantics are sealed, and the final P7 gates remain separate. Historical test, browser and evidence details remain in their dated sections below. Neat Freak Closeout for this review records the Windows manual equivalent; the official Bash inventory sub-step is `pending/unavailable` because Bash is unavailable on Windows.
+ - Last verified surface: 2026-09-04 P7 Final Real-data Seal — controlled Real Mode activation, Readiness, SQLite/Repository/API, Event/HOT, restart, zero-Mock and browser routes were verified. Historical test and evidence details remain in their dated sections below. Neat Freak Closeout records the Windows manual equivalent; the official Bash inventory sub-step is `pending/unavailable` because Bash is unavailable on Windows.
 
 ## 3. Current Architecture Summary
 
@@ -335,15 +376,15 @@ Remaining pending work: real data coverage / runtime follow-up.
 | Shipping HOT V3 P3A AIS Tracking Runtime Foundation | `SEALED` / continuous AIS PositionReport `VERIFIED_LIVE` (bounded fallback remains separate) | `server/database/migrations/007-p3a-ais-tracking.ts`, `server/database/ais-positions.ts`, `server/providers/ais/`, `server/runtime/ais-tracking-job.ts`, `server/runtime/ais-live-tracker.ts`, `server/runtime/registry.ts`, `server/services/ais-position-read.ts`, `server/api/shipping/vessels/[id]/position.get.ts`, `src/components/shipping/data.ts`, `src/components/shipping/pages.tsx`, `scripts/p3a-ais-sqlite-smoke.ts` | `ais_positions` preserves history and `ais_latest_positions` serves fast latest reads. AIS Runtime reads only `vessel_watchlist` entries with `ais_enabled=true` and valid MMSI, returns `skipped/no_eligible_ais_targets` without a Provider call when no target exists, rejects unknown/invalid positions, keeps last-known data on Provider failure, isolates Mock positions from Real Mode, persists `sync_runs`/`provider_runtime`, and exposes a minimal latest-position API/UI with independent `stale` and Runtime `sourceStatus` fields. AISStream now supports bounded and continuous PositionReport paths; the continuous Tracker persists valid real observations, reconnects within bounded policy, and exposes runtime evidence used by Readiness. No map or trajectory scope was added |
 | Shipping HOT V3 P3A AIS Area Background Runtime | implemented / locally verified; dedicated Area Live Gate `verified_live`; Readiness aligned | `server/providers/aisstream-area.ts`, `server/providers/aisstream-area.test.ts`, `server/providers/ais/index.ts`, `server/runtime/ais-area-sync-job.ts`, `server/runtime/ais-area-sync-job.test.ts`, `server/runtime/registry.ts`, `server/runtime/bootstrap.ts`, `server/services/v3-readiness.ts`, `server/services/v3-readiness.test.ts`, `example.env.server` | `ais-area-sync` persists existing `ais_port_metrics` aggregates for watched Real Port Directory ports through a persistent `aisstream-area` session. Readiness reads that table read-only and promotes only a qualifying `aisstream-area` metric with positive sample/minimum thresholds and a parseable source timestamp; usable and stale metrics preserve historical verification, while insufficient, malformed or wrong-source metrics do not. It reuses the hardened binary/trusted timestamp parser, validates MMSI/metadata/coordinates, treats SubscriptionConfirmation as connection evidence only, preserves last-known failures, and keeps API/snapshot reads provider-free. No schema, migration or raw observation table was added; Area remains separate from Vessel Tracking |
 | Shipping HOT V3 P3B Voyage / ETA Foundation + VesselAPI Adapter | engineering sealed; Provider `verified_live`; focus coverage `partial / coverage_pending` | `shared/voyage.ts`, `server/database/migrations/008-p3b-voyage-eta.ts`, `server/database/voyages.ts`, `server/providers/voyage/`, `server/runtime/voyage-sync-job.ts`, `server/runtime/registry.ts`, `server/services/v3-readiness.ts`, `server/api/shipping/vessels/[id]/voyage.get.ts`, `src/components/shipping/data.ts`, `src/components/shipping/pages.tsx` | `VoyageRecord` permits provider-unknown origin, voyage number, ETD and movement status; accepted HANSA evidence validates official ETA/Port Event identity and timestamps, persists one Voyage plus one append-only ETA history row, survives provider-free API/Repository reads and SQLite restart, and reports `actualMockRows.total=0`. Official `destination_port=CNYPG` is valid Provider observation but has no canonical focus-port mapping in the current eight-port directory; `originPortId=THLCH`; no new migration was added. Recurring VesselAPI episodes use Repository-owned candidate resolution, cross-destination ordering guards and JSON-only `episodeState` supersession. |
-| Shipping HOT V3 P3 Feed Freshness + Runtime | `SEALED` | `server/database/migrations/009-p3-feed-freshness.ts`, `server/database/migrations/010-p3-feed-freshness-reclassification.ts`, `server/providers/feed.ts`, `server/runtime/feed-sync-job.ts`, `server/runtime/registry.ts`, `server/database/shipping.ts`, `server/api/shipping/feed.get.ts`, `server/api/shipping/feed/history.get.ts`, `shared/shipping-rules.ts`, `shared/shipping-engine.ts`, `scripts/p3-feed-freshness-sqlite-smoke.ts`, `scripts/v3-real-activation-smoke.ts` | 7/14-day policy, strict date quarantine, source-isolated Feed jobs, and the persisted current/history/quarantine lifecycle are accepted; final full-system evidence remains a P7 gate |
+| Shipping HOT V3 P3 Feed Freshness + Runtime | `SEALED` | `server/database/migrations/009-p3-feed-freshness.ts`, `server/database/migrations/010-p3-feed-freshness-reclassification.ts`, `server/providers/feed.ts`, `server/runtime/feed-sync-job.ts`, `server/runtime/registry.ts`, `server/database/shipping.ts`, `server/api/shipping/feed.get.ts`, `server/api/shipping/feed/history.get.ts`, `shared/shipping-rules.ts`, `shared/shipping-engine.ts`, `scripts/p3-feed-freshness-sqlite-smoke.ts`, `scripts/v3-real-activation-smoke.ts` | 7/14-day policy, strict date quarantine, source-isolated Feed jobs, and the persisted current/history/quarantine lifecycle are accepted; P7 final full-system evidence is recorded above |
 | Shipping HOT V3 Translation T3B/T3C/T3D + Post-T3 Settings | `SEALED + VERIFIED_LIVE` for approved Feed scope | `server/database/translation.ts`, `server/services/feed-translation-display.ts`, `server/services/translation-failure-policy.ts`, `server/services/translation-live-acceptance.ts`, `server/runtime/translation-sync-job.ts`, `server/api/shipping/feed.get.ts`, `server/api/shipping/index.get.ts`, `src/components/shipping/feed-display.tsx`, `src/components/shipping/pages.tsx`, `shared/shipping.ts` | Accepted live evidence covers DeepSeek connectivity/model/credentials, automatic Runtime success/cache/usage, placeholder recovery, controlled circuit recovery and cached Chinese Feed UI with original disclosure. Scope remains FeedItem title/summary only; Event/HOT Translation is out of scope and Translation is not a Readiness hard gate |
-| Shipping HOT V3 Real Data Activation Runtime | `IMPLEMENTED / VERIFIED_LIVE` source paths; final P7 acceptance pending | `server/runtime/calendar-sync-job.ts`, `server/runtime/port-sync-job.ts`, `server/runtime/weather-sync-job.ts`, `server/runtime/background-runtime.ts`, `server/database/runtime-jobs.ts`, `server/shipping-store.ts`, `server/api/shipping/**`, `server/services/real-data-gate.ts` | Calendarific, Portcast public pages, Open-Meteo and public Feed run through Background Runtime → SQLite → Repository → API; Calendar 259 rows, Port 8 rows, weather-risk Feed 7 rows, observed `actualMockRows.total=0`; legacy `/api/shipping` is repository-only; no new Provider or secret; Voyage focus-port coverage and other P7 gates remain explicit |
-| Shipping HOT V3 Readiness Gate | `IMPLEMENTED` / final P7 acceptance pending | `server/services/v3-readiness.ts`, `server/api/shipping/readiness.get.ts`, `scripts/v3-readiness.ts`, `server/services/v3-readiness.test.ts`, `server/database/voyages.ts` | Two profiles, fixed toolchain/schema checks, exact profile-specific Runtime Job set, capability/runtime/credential/freshness state, Feed source aggregation and schema-discovered Mock isolation are implemented. AIS Position, AIS Area, Weather Alerts and Voyage Provider live evidence are separate; Voyage focus coverage remains `COVERAGE_PENDING`. Translation is ignored by the REAL_OPERATIONAL core scope |
+| Shipping HOT V3 Real Data Activation Runtime | `SEALED / VERIFIED_LIVE` source paths; P7 final acceptance complete | `server/runtime/calendar-sync-job.ts`, `server/runtime/port-sync-job.ts`, `server/runtime/weather-sync-job.ts`, `server/runtime/background-runtime.ts`, `server/database/runtime-jobs.ts`, `server/shipping-store.ts`, `server/api/shipping/**`, `server/services/real-data-gate.ts` | Calendarific, Portcast public pages, Open-Meteo and public Feed run through Background Runtime → SQLite → Repository → API; final controlled activation recorded Calendar 259 rows, Port 8 rows, weather 5 rows, Feed Loadstar 10 and Shekou 5, with `actualMockRows.total=0`; legacy `/api/shipping` is repository-only; no new Provider or secret; approved coverage gaps remain explicit |
+| Shipping HOT V3 Readiness Gate | `SEALED / VERIFIED` | `server/services/v3-readiness.ts`, `server/api/shipping/readiness.get.ts`, `scripts/v3-readiness.ts`, `server/services/v3-readiness.test.ts`, `server/database/voyages.ts` | Two profiles, fixed toolchain/schema checks, exact profile-specific Runtime Job set, capability/runtime/credential/freshness state, Feed source aggregation and schema-discovered Mock isolation are implemented. Final Real Operational result is `ready=true / overall=degraded` with no failed hard checks; Voyage focus coverage remains `COVERAGE_PENDING`. Translation is ignored by the REAL_OPERATIONAL core scope |
 | Shipping HOT UI/routes | `IMPLEMENTED / VERIFIED` | `src/routes/**`, `src/components/shipping/**`, `src/routes/__root.tsx` | `/`, `/vessels`, `/ports`, `/voyages`, `/events`, `/feed`, `/calendar`, `/settings` and detail routes; Feed is Chinese-first when cached translation exists with `查看原文`, Settings exposes fixed DeepSeek controls and redacted Secret metadata, Home HOT enriches Feed-kind display only, and root floating React Query/TanStack devtools were removed |
 | Shipping HOT V2.0 Data Trust Foundation | sealed | `shared/shipping.ts`, `server/database/shipping.ts`, `server/providers/shipping.ts`, `server/shipping-store.ts`, `shared/shipping-engine.ts`, `src/components/shipping/format.ts`, `src/components/shipping/ui.tsx` | `sourceType`/`dataNature` provenance, independent freshness timestamps/status, deterministic legacy backfill, source-aware Event reconciliation/evidence and explicit Mock/Chinese UI labels |
 | Shipping HOT V2.1 Port Intelligence | implemented / verified | `server/providers/shipping.ts`, `server/shipping-store.ts`, `shared/shipping.ts`, `src/components/shipping/pages.tsx` | Opt-in `PortcastPublicPageProvider`, eight public-page mappings, visible-field parser, 24-hour cache/fingerprint, `public`/`no_public_data` detail and source attribution; Mock remains default |
-| Shipping HOT V2.2 Country Calendar | `IMPLEMENTED / COVERAGE_PENDING` | `shared/calendar.ts`, `server/providers/calendar.ts`, `server/database/shipping.ts`, `server/api/shipping/calendar/**`, `src/routes/calendar.tsx`, `src/components/shipping/pages.tsx` | Calendarific transport/persistence/API path is accepted; full current+next-year and official/manual completeness remain a separate P7 coverage decision |
-| Shipping HOT V2.3 Shipping Information Feed | `SEALED` / `VERIFIED_LIVE` source runtime | `server/providers/feed.ts`, `server/shipping-store.ts`, `shared/shipping.ts`, `shared/shipping-engine.ts`, `src/components/shipping/**` | Source-isolated public Feed runtime and persisted current/history/quarantine lifecycle are accepted; bounded source/geographic coverage remains a P7 decision |
+| Shipping HOT V2.2 Country Calendar | `IMPLEMENTED / COVERAGE_PENDING` | `shared/calendar.ts`, `server/providers/calendar.ts`, `server/database/shipping.ts`, `server/api/shipping/calendar/**`, `src/routes/calendar.tsx`, `src/components/shipping/pages.tsx` | Calendarific transport/persistence/API path is accepted; full current+next-year and official/manual completeness remain an explicit post-seal coverage boundary |
+| Shipping HOT V2.3 Shipping Information Feed | `SEALED` / `VERIFIED_LIVE` source runtime | `server/providers/feed.ts`, `server/shipping-store.ts`, `shared/shipping.ts`, `shared/shipping-engine.ts`, `src/components/shipping/**` | Source-isolated public Feed runtime and persisted current/history/quarantine lifecycle are accepted; bounded source/geographic coverage remains an explicit post-seal boundary |
 | Shipping HOT V2.4 Weather Intelligence | `IMPLEMENTED / VERIFIED_LIVE` for Open-Meteo; official alerts `PARTIAL / VERIFIED_LIVE` for TMD/BMKG, JMA pending | `server/providers/shipping.ts`, `server/providers/weather-alerts.ts`, `server/shipping-store.ts`, `shared/shipping.ts`, `src/components/shipping/app.tsx` | Open-Meteo 24-hour/72-hour/7-day windows and direction fields are implemented; model weather and JMA/TMD/BMKG official alerts are independently selected and composed with failure isolation; TMD/BMKG run through the verified source-level alert runtime, while JMA remains disabled/live-pending and alert geography remains bounded; Mock remains default |
 | Shipping HOT V2.5 AIS / Port Derived Intelligence | implemented / locally verified; dedicated Area gate `verified_live` | `shared/ais-area.ts`, `server/providers/aisstream-area.ts`, `server/database/shipping.ts`, `server/shipping-store.ts`, `shared/shipping-engine.ts`, `src/components/shipping/pages.tsx` | Explicit `SHIPPING_AIS_AREA_PROVIDER=off|aisstream` area session, configured heuristic watched-port boxes, PositionReport-only bounded observations, reliable timestamp separation, five-minute bucket/gap-reset trend metrics, TTL prune + 5000 hard cap, separate `ais_port_metrics` aggregate persistence, finite automatic reconnect budget (default 4 attempts) and warning-only Event/HOT path; the earlier 60-second Shekou probe with 0 PositionReports is historical; the dedicated Area acceptance is `verified_live`; no Portcast field mutation or raw track table; Mock remains default |
 
@@ -717,7 +758,7 @@ No source was upgraded to `verified_live` in this pass. V2.2 remains `implemente
 
 ## 8. Current Work and Blockers
 
-- Current status: P7 is the active phase. P0–P3 core foundations are sealed; GFW Search/canonical identity, continuous AIS PositionReport, AIS Area, Portcast public-page, Open-Meteo, TMD/BMKG Weather Alerts, VesselAPI Voyage Provider path and DeepSeek Translation Runtime have accepted live evidence. Feed lifecycle reads use the persisted SQLite projection; Translation remains optional Feed title/summary enrichment, with placeholder reliability and mode decoupling sealed. Voyage focus-port coverage, Calendar operational completeness, selected weather-alert geography, final Event/HOT evidence and full-system Real Mode acceptance remain P7 gates. The next action is `P7-B — Real Operational Capability Gap Review`.
+- Current status: `V3 — FINAL SEALED`. P0–P3 foundations and P7-A through P7-G are complete; GFW Search/canonical identity, continuous AIS PositionReport, AIS Area, Portcast public-page, Open-Meteo, TMD/BMKG Weather Alerts, VesselAPI Voyage Provider path and DeepSeek Translation Runtime retain their accepted live boundaries. Feed lifecycle reads use the persisted SQLite projection; Translation remains optional Feed title/summary enrichment, with placeholder reliability and mode decoupling sealed. Voyage focus-port coverage, Calendar completeness, selected weather-alert geography and public-source coverage remain explicit partial boundaries, while final Event/HOT, full-system Real Mode, UI, restart and zero-Mock acceptance passed.
 - The dated entries below are historical closeout records and do not override the current status above.
 - 2026-08-14 frontend redesign round (completed): all seven pages plus navigation rebuilt with the aurora glass/bento design system — `src/components/shipping/aurora.tsx` (CSS gradient-blob background + grid/noise/vignette), `src/components/shipping/ui.tsx` (Reveal, SpotlightCard, AnimatedNumber, Segmented, Marquee, ProviderChip, StatusDot, EmptyState), rewritten `app.tsx` (floating glass nav with layoutId active pill, route transitions, dark-first theme toggle, restyled badges/StatCard/VoyageCard/EventCard/FeedCard) and `pages.tsx` (bento hero dashboard, segmented filters, congestion gauges, staggered reveals). Data flow, API calls and routes are unchanged; no new dependencies. A follow-up smoothness pass removed per-frame GPU hotspots (blob `filter: blur(90px)`, dark-mode `mix-blend-mode: screen`, per-card `backdrop-filter`) in favor of pre-feathered gradients and opaque frosted fills; only the sticky nav keeps a reduced backdrop blur. An adversarial review round then fixed: watch/save busy-state reset via try/finally, `MotionConfig reducedMotion="user"` for JS animations, route-transition remount removal (hero-only entrance), dark-mode secondary-text contrast tier bump, settings save error state machine, `freshness=unknown` status label, mobile nav active-pill scrollIntoView, anti-FOUC theme script in `index.html`, react-refresh warnings eliminated by splitting `format.ts`/`data.ts`, and a `test/ui-smoke.test.ts` renderToString guard (86/86 tests). Verification: `pnpm typecheck` passed, eslint on changed files 0 errors / 0 warnings, full test suite passed (86/86), `pnpm build` passed.
 - 2026-08-15 frontend console-layout round (completed, locally verified): user-approved plan A (指挥台化) implemented — `app.tsx` left collapsible sidebar (localStorage memory) + global status topbar (活跃 HOT / 最后刷新 / 数据源混合度) + mobile bottom tab; `pages.tsx` dashboard HOT-first with stat strip, vessels/ports (inline congestion gauge)/voyages (delay column) as dense tables, feed (filter panel + source counts) and events (status × severity combined filters) as timelines, vessel/port/voyage details as two columns with related events/weather/voyages, calendar as left filter panel + 3-column cards; `globals.css` gained the console layout system and dropped the legacy glass-nav/hero-sheen/spotlight/detail-grid styles; `ui.tsx` no longer exports unused SpotlightCard/SectionHeading; `format.ts` added voyage status labels; brand logo background changed to sky blue `#0ea5e9` (`public/shipping-hot-icon.svg` and sidebar glow); standalone comparison prototypes live under `prototypes/` (offline HTML, outside the build). Data flow, API calls, routes, database and dependencies are unchanged. The current tree passes `pnpm typecheck`, targeted eslint and `pnpm test --run` after this closeout batch; `pnpm build` also passed (client + PWA + Nitro, `shared/updated-sources.ts` unchanged). Neat Freak skill instructions were loaded; its Bash-only inventory script remains pending because Bash is unavailable in this Windows environment, while the required manual equivalent audit found no secrets/database artifacts. The `.baseline-typecheck-fdf3191/` and matching temporary baseline worktree named at that historical checkpoint are absent from the 2026-08-25 inventory; `prototypes/` remains user/other-agent content.
@@ -813,19 +854,19 @@ No source was upgraded to `verified_live` in this pass. V2.2 remains `implemente
 - Deterministic repairs sealed after the live run remain referenced: PortDirectory binding `8fc97c0227c66acf7c7f0aab78edcb48d2e5213a`, Provider/focus split `720beff0b3d52892baecd1cfc0151c7b7df2bf9a`, and stable Episode anchor evidence `bf7df46b7095d51a37e316fcaddda2260663dfa4`.
 - No new migration was added: migration 008 already allows affected Voyage columns to be nullable. The API remains provider-free. This seal records prior accepted evidence; it does not perform a new live request.
 
-## 9. Recommended Next Action
+## 9. Post-V3 Boundary
 
-P7-B — Real Operational Capability Gap Review
+P7-A through P7-G are complete. Post-V3 enhancements require separate approval.
 
-Review the rebaselined capability matrix and classify each capability as ready, coverage-pending, optional, out-of-scope or hard-blocked. Decide which gaps must be closed before P7-D full-system Real Mode acceptance. The first decisions are Voyage focus-port coverage, Calendar operational coverage, Weather Alert geographic coverage and Commercial Schedule entitlement. Do not treat the accepted DeepSeek runtime evidence as the next checkpoint; Translation is live optional enrichment outside the Real Operational hard gate.
+The final seal keeps Voyage focus-port coverage, Calendar completeness, JMA/geographic alert coverage, Commercial Schedule entitlement and bounded public-source coverage explicit. Translation is live optional Feed title/summary enrichment outside the Real Operational hard gate; Event/HOT Translation remains out of scope.
 
 ## 10. Knowledge Closeout Surface
 
 | Fact surface | State | Evidence / limitation | Action |
 |---|---|---|---|
 | Code | verified-current | No business code changed in this review; the current implementation was checked for schema v12, persisted Feed lifecycle reads, Real Evidence/zero-Mock discovery, Translation boundaries, Settings UI and Home Feed-HOT display ordering | Treat code/config as authority for current implementation |
-| Runtime | verified-current with explicit P7 gates | Accepted live evidence covers GFW, continuous AIS, AIS Area, Portcast, Open-Meteo, TMD/BMKG, VesselAPI Voyage Provider path and DeepSeek Translation Runtime; Voyage focus-port, Calendar, alert geography and final full-system evidence remain bounded/partial | Keep coverage gaps separate from hard blockers and complete P7-B through P7-G |
-| Documentation | changed-and-verified | This rebaseline updates status, architecture, V3 plan, Provider Matrix and live verification; dated checkpoint sections remain historical and are not rewritten | Use the current rebaseline sections as authority; preserve historical evidence |
+| Runtime | verified-current with explicit coverage boundaries | Final P7 evidence covers GFW, continuous AIS, AIS Area, Portcast, Open-Meteo, TMD/BMKG, VesselAPI Voyage Provider path and the provider-free Real Mode Runtime/API/UI boundaries; Voyage focus-port, Calendar, alert geography and public-source coverage remain bounded/partial | Keep coverage gaps separate from hard blockers; post-V3 changes require separate approval |
+| Documentation | changed-and-verified | The P7 final seal updates status, architecture, V3 plan, Provider Matrix and live verification; dated checkpoint sections remain historical and are not rewritten | Use the final seal sections as authority; preserve historical evidence |
 | Rules | verified-current | Root `AGENTS.md` defines docs-only guardrails, verification rules, architecture-change workflow and mandatory Closeout; no project `CLAUDE.md` or override was found | Use `AGENTS.md` as the project entry point |
 | Memory | not-applicable | No project memory store or user-authorized memory write was identified | No memory files changed |
 | Workspace | verified-current; cleanup candidate retained | Active ignored `.env.local`, retained `.data/shipping-hot-v3.sqlite3`, `dist/`, user `prototypes/`/`screenshots/` and the temporary `.data/shipping-hot-v3-browser.sqlite3` remain untouched; no deletion was performed. Official Bash inventory is unavailable on Windows, so the required manual equivalent audit is used | Keep active/user artifacts; seek explicit confirmation before deleting the browser verification copy |

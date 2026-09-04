@@ -1,20 +1,30 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 文档状态：`accepted / P7 Entry / P0–P3 core foundations sealed / AIS Position + AIS Area + GFW Search + Port Intelligence + Open-Meteo + TMD/BMKG Weather Alerts + VesselAPI Voyage Provider path + DeepSeek Translation Runtime VERIFIED_LIVE / remaining operational coverage and final evidence are explicit P7 gates`
+> 文档状态：`accepted / V3 FINAL SEALED / P7-A through P7-G complete / P0–P3 core foundations sealed / accepted live Provider boundaries and explicit coverage gaps`
 >
 > 审查日期：2026-09-04（Asia/Shanghai）
 >
-> 代码基线：`codex/shipping-hot-v3-real-data` @ `f7281c7ea58444dc3b2d55930d0069c45055cab8`（`fix: preserve persisted feed lifecycle on reads`；Node `24.15.0` / ABI `137` / `better-sqlite3@12.6.2`）
+> 代码基线：P7 entry `4824d63f8e135ff3c9eb0849d9ba49e832ae000c`；业务基线 `f7281c7ea58444dc3b2d55930d0069c45055cab8`（`fix: preserve persisted feed lifecycle on reads`）；最终 seal commit SHA 记录于 completion report；Node `24.15.0` / ABI `137` / `better-sqlite3@12.6.2`
 >
-> 实施状态：**P0 Persistence、P1A Port Directory、P1B Mock Isolation、P2 Search/Identity/Runtime、P3 Feed Freshness 已 SEALED；P3A AIS Position、AIS Area、GFW Search/canonical identity、Port Intelligence、Open-Meteo、TMD/BMKG Weather Alerts、VesselAPI Voyage Provider path 与 DeepSeek Translation Provider/Runtime 已有 accepted `VERIFIED_LIVE` evidence**。Feed persisted lifecycle read semantics 已修复并纳入正式合同；Translation mode decoupling、placeholder reliability、post-T3 Settings UI、Home Feed-HOT display boundary 已实现/封板。Schema 保持 v12；本轮不新增 migration、不改 retained SQLite、不改 Secret/env、不调用外部 Provider。Voyage focus-port coverage、Calendar completeness、Weather Alert geography、Event/HOT final evidence、full-system Real Mode、restart 和 zero-Mock final acceptance 仍由 P7 处理。
+> 实施状态：**P0 Persistence、P1A Port Directory、P1B Mock Isolation、P2 Search/Identity/Runtime、P3 Feed Freshness、P7 Final Real-data Seal 已 SEALED；P3A AIS Position、AIS Area、GFW Search/canonical identity、Port Intelligence、Open-Meteo、TMD/BMKG Weather Alerts、VesselAPI Voyage Provider path 与 DeepSeek Translation Provider/Runtime 已有 accepted `VERIFIED_LIVE` evidence**。Feed persisted lifecycle read semantics、Translation mode decoupling、placeholder reliability、post-T3 Settings UI、Home Feed-HOT display boundary 已实现/封板。Schema 保持 v12；P7 只使用现有批准 adapters、process-scoped env 和临时 SQLite，未改 retained SQLite、Secret/env，未新增 Provider、entitlement 或 migration；DeepSeek final acceptance usage 为 0。Voyage focus-port coverage、Calendar completeness、JMA 和公共源覆盖仍以显式边界保留，不被 Mock fallback 或事实推断掩盖。
 >
-> 本次重基线：基于当前 HEAD、Git 历史、既有 accepted evidence 与已确认 retained runtime/browser 结果，统一当前状态词和 P7 Entry 判断；不重跑 live probe，不改变历史 evidence，不自动补齐 coverage。
+> 本次最终封板：基于 P7 controlled Real Mode activation、Readiness、SQLite/Repository/API、restart、zero-Mock、UI 和回归验证结果，统一当前状态词和覆盖边界；不扩充 Port Directory，不假造 `destinationPortId`，不启用 JMA，不假定商业 Schedule entitlement。
 >
-> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`，且本轮为 docs-only rebaseline。既有 T3A–T3D engineering 与 post-T3 Settings boundary 保持不变；生产 Translation Runtime 的 accepted live evidence 仅用于状态同步，Translation 仍是 optional enrichment。真实 Provider、数据库、Secret、env、Runtime 配置与业务代码均不在本轮范围。
+> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`。P7-A–P7-G 已完成；既有 T3A–T3D engineering 与 post-T3 Settings boundary 保持不变，Translation 仍是 FeedItem title/summary-only optional enrichment。后续 Provider、paid entitlement、schema、Secret、Port Directory 扩展和更广 Translation 均需单独批准。
 
-> V3 Readiness：本轮只建立本地安全就绪门（观测 Node/ABI、CLI 实测 pnpm、实际安装的 better-sqlite3 版本/native load、SQLite schema/Port Directory、已批准 Runtime scope、Mock-only provider configuration），通过 `GET /api/shipping/readiness` 与 `pnpm smoke:v3-readiness` 验证；HTTP 缺少 pnpm 观测时标记 skipped 且严格 Readiness 不得 ready；不执行外部 Provider 请求，不进入下一阶段。
+> V3 Readiness：最终 P7-D 在 process-scoped Real Mode 临时 SQLite 上通过 `GET /api/shipping/readiness` 与 `pnpm smoke:v3-readiness` 验证 Node/ABI、CLI pnpm、better-sqlite3/native load、SQLite schema/Port Directory、批准的 Runtime scope 和实际 Mode。结果为 `ready=true / overall=degraded`，无失败 hard check；degraded 仅反映已批准 coverage gaps。保留数据库未打开。
 
-> 当前执行状态：项目已进入 `P7 — Final Real-data Seal`。P7-A 重基线已完成；下一步为 P7-B 能力缺口审查，随后再进行 coverage decisions、controlled Real Mode acceptance、Event/HOT evidence、最终中文 UI/restart/zero-Mock acceptance 和 Final Seal。Feed read/display 是 provider-free；Home HOT 排序与 Event/HOT facts 仍基于原始数据。DeepSeek Provider 与 Translation Runtime 已有 accepted `VERIFIED_LIVE` evidence，Translation 仍不进入 Readiness hard gate；商业 Schedule 没有真实 entitlement 时保持 unavailable，不得以 AIS/VesselAPI ETA 冒充官方班期。
+> 当前执行状态：项目已完成 `P7 — Final Real-data Seal`。P7-A–P7-G、coverage decisions、controlled Real Mode acceptance、Event/HOT evidence、中文 UI/restart/zero-Mock acceptance 和 Final Seal 均已记录。Feed read/display 是 provider-free；Home HOT 排序与 Event/HOT facts 仍基于原始数据。Translation 不进入 Readiness hard gate；商业 Schedule 没有真实 entitlement 时保持 unavailable，不得以 AIS/VesselAPI ETA 冒充官方班期。
+
+## P7 Final Real-data Seal — 2026-09-04
+
+P7-A–P7-G 已完成。最终受控 Real Mode 使用 `SHIPPING_DATA_MODE=real`、`SHIPPING_VOYAGE_PROVIDER=vesselapi` 和临时 `.data/p7-final-seal-20260904.sqlite3`；保留 `.data/shipping-hot-v3.sqlite3` 未打开。10 个批准范围内 Jobs 完成注册，Feed Loadstar/Shekou 写入 `10/10`、`5/5`，Calendar `259/259`，Port `8/8`，Weather `5/5`，TMD `8/8`，BMKG `3/3`；Voyage/AIS Area 因没有合资格目标安全 skipped，Translation 因设置 disabled skipped。最终 Readiness 为 `ready=true / overall=degraded`，无 hard-check failure；降级仅来自 Voyage focus-port、Calendar、JMA 和公共源 coverage 边界。
+
+Event/HOT Real Evidence Gate、进程重启读回和 schema-discovered zero-Mock gate 均通过。最终 API 读取返回 14 个 derived Events（5 active）和 2 个 HOT；active evidence 为真实第三方/derived，未进入 Mock/mixed operational lineage。重启后临时库读回 Port `8`、Feed `31`、Feed history `62`、Events `13`、Calendar `259`；UI/API 读取没有新增 sync run 或 Provider 调用。13 个携带 `source_type` 的业务表在 activation 前后、重启后和 UI/API 读取后均为 `actualMockRows.total=0`。
+
+`/`、`/vessels`、`/ports`、`/voyages`、`/feed`、`/calendar`、`/settings`、`/events` 均通过浏览器验证；Feed 有 33 个 `查看原文` disclosure、simulated count 为 `0`，Schedule 明确 unavailable，Settings 仅展示 fixed DeepSeek/model/target 与 redacted Secret。浏览器 console errors/warnings、React Query/TanStack Devtools 均为 `0`。最终验收未发起 DeepSeek、JMA、Maritime Executive 或 Schedule 请求；未新增 Provider、entitlement、schema migration 或 Secret。
+
+P7 targeted suite 为 `20 files / 207 tests passed`。Full Vitest 为 `63/64 files`、`726/727 tests`；唯一失败是既有日期敏感的 `server/providers/feed.test.ts:156` Shekou Event/HOT assertion，已被 isolated repro 确认，P7 未修改业务逻辑。`typecheck`、`lint`、`build` 和 Neat Freak closeout 结果在本轮完成后补录于 `docs/status.md` 与 `docs/live-verification.md`。
 
 ## 1. 背景与当前问题
 
@@ -863,17 +873,17 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | 风险 | 术语误译、供应商区域/额度、标题语义漂移 |
 | 回滚 | 关闭 translation job；继续显示已缓存 zh 或原文，采集不受影响 |
 
-### P7 — Final Real-data Seal（当前阶段：`P7 Entry`）
+### P7 — Final Real-data Seal（当前阶段：`V3 — FINAL SEALED`）
 
 | 项目 | 内容 |
 | --- | --- |
-| 目标 | 全链路自动同步、Provider Health、Event/HOT Real Evidence Gate 和最终中文 UI 验收 |
+| 目标 | 全链路自动同步、Provider Health、Event/HOT Real Evidence Gate、最终中文 UI、restart、zero-Mock 与文档封板 |
 | 修改文件 | shipping query service、Event/HOT engine、Provider status UI、docs/status/architecture/ADR/env |
 | 新增文件 | end-to-end acceptance、provenance trace API/组件、Real Mode bundle guard |
 | 数据库 | evidence/health/sync retention 最终索引和清理任务 |
 | API | HOT detail trace、provider runtime、sync runs |
 | 测试 | 全 Provider failure matrix、Mock contamination scan、重启、A–J E2E、rate-limit/backoff |
-| 验收 | 验收 G/J；每条 HOT 能追到 Event→Evidence→Provider→URL/API→timestamps；production bundle 无 Mock |
+| 验收 | P7-A–P7-G 完成；Real Mode `ready=true / overall=degraded` 且无 hard-check failure；Event/HOT、UI、restart、zero-Mock 与 provider-free read 边界通过；每条 active HOT 可追到 Event→Evidence→Provider→timestamps |
 | 风险 | 旧 orphan Event、部分 Provider coverage、长周期 rate-limit 测试 |
 | 回滚 | 逐 Provider disable + same-source last-known；Real Evidence Gate 不回滚 |
 
@@ -881,15 +891,15 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 
 | 子阶段 | 状态 | 目标 / 边界 |
 | --- | --- | --- |
-| P7-A — Current State Rebaseline | `IMPLEMENTED` | 本轮统一 status、plan、Provider Matrix 与 accepted live evidence 的当前视图；不重跑 Provider、不补 coverage、不改业务代码 |
-| P7-B — Real Operational Capability Gap Review | `NEXT` | 逐项区分 ready、coverage-pending、optional、out-of-scope 与 hard-blocked，确定 Final Real Mode acceptance 前的必要项 |
-| P7-C — Remaining Coverage Decisions | `PENDING` | 决定 Voyage focus-port coverage、Calendar coverage、Weather Alert geographic coverage 与 Commercial Schedule entitlement；不得默认扩展目录或 Provider |
-| P7-D — Controlled Real Mode Full-System Acceptance | `PENDING` | 在 P7-C 决策获批后执行全链路 Runtime、Provider Health、SQLite/API/readback 与 Real Mode 验收 |
-| P7-E — Event / HOT Real Evidence Gate | `PENDING` | 验证每条当前 Event/HOT 的原始事实、freshness、lineage、evidence、Provider 与时间链路；不翻译事实、不替换 ETA/班期语义 |
-| P7-F — Final Chinese UI + Restart + Zero-Mock Acceptance | `PENDING` | 验证 Feed/HOT 中文展示与原文 disclosure、全系统重启读回、schema-discovered zero-Mock，Translation 仍是 optional enrichment |
-| P7-G — V3 Final Seal | `PENDING` | 仅在 required coverage decisions、full-system evidence、Event/HOT gate、UI/restart/zero-Mock 与最终文档均满足后封板 |
+| P7-A — Current State Rebaseline | `COMPLETE` | 统一当前状态、Provider Matrix 与 accepted evidence 视图；保留历史 checkpoint，不扩充 coverage |
+| P7-B — Real Operational Capability Gap Review | `COMPLETE` | 已区分 ready、coverage-pending、optional、out-of-scope 与 hard-blocked；批准 coverage gaps 不阻塞 final seal |
+| P7-C — Remaining Coverage Decisions | `COMPLETE` | Voyage focus-port、Calendar、Weather Alert geography、Commercial Schedule、Portcast 与 Translation 边界已明确，不扩展目录或 Provider |
+| P7-D — Controlled Real Mode Full-System Acceptance | `COMPLETE` | 临时 SQLite 上执行 Runtime、Provider Health、SQLite/API/readback 与 Readiness 验收；保留库未打开 |
+| P7-E — Event / HOT Real Evidence Gate | `COMPLETE` | 当前 Event/HOT 的原始事实、freshness、lineage、evidence、Provider 与时间链路通过；不翻译事实、不替换 ETA/班期语义 |
+| P7-F — Final Chinese UI + Restart + Zero-Mock Acceptance | `COMPLETE` | Feed/HOT 中文展示与原文 disclosure、重启读回、schema-discovered zero-Mock 和浏览器 hygiene 通过 |
+| P7-G — V3 Final Seal | `COMPLETE` | Coverage decisions、全链路 evidence、Event/HOT、UI/restart/zero-Mock 与最终文档均已封板 |
 
-P7 保持现有业务定义：全链路自动同步、Provider Health、Event/HOT Real Evidence Gate、最终中文 UI 验收、Real Operational Readiness、zero-Mock、restart persistence 与 final docs/evidence seal。P7 Entry 本身不会自动打开 Real Mode、启用 JMA、扩充 Port Directory、接入 Carrier API、购买 Provider 或执行最终验收。
+P7 保持现有业务定义：全链路自动同步、Provider Health、Event/HOT Real Evidence Gate、最终中文 UI 验收、Real Operational Readiness、zero-Mock、restart persistence 与 final docs/evidence seal。P7 已完成；Voyage focus-port、Calendar、JMA/geographic alert、Commercial Schedule entitlement 和公共源 coverage gaps 均明确为边界。后续扩充 Port Directory、接入 Carrier API、购买 Provider、启用 JMA 或扩大 Translation 均需单独批准。
 
 ## 21. Provider / API 选型比较
 
@@ -1171,7 +1181,7 @@ Cloud Mode 只使用部署平台环境变量/Secret Manager；不为个人项目
 - TranslationProvider 可切换合同、Settings AI 翻译中心、单一 `translation_cache` source of truth、server-only secret、`provider_usage` 和“本地统计/估算”标签。
 - Current Voyage 与 DCSA Commercial Schedule 的事实分层。
 
-后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation、P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation、P3 Feed Freshness、Translation T1/T2、批准的 Translation T3A Runtime Foundation 及本次 Review Repair、T3B Feed Read、T3C Feed UI、T3D executable acceptance runner、post-T3 Settings 与 Home Feed-HOT display boundary 已完成；当前进入 P7，后续处理 focus-port/coverage decisions、full-system Real Mode、Event/HOT evidence、最终 UI/restart/zero-Mock 与 Final Seal。Translation live evidence 已接受，但生产启用仍由用户设置控制。
+后续每个获批阶段都严格执行项目 Closeout：Implementation → Verification → typecheck → lint → test → build → Neat Freak Closeout → Status Update → Completion Report。P0/P1A/P1B、P2A Search Foundation、P2B Identity Seal、P2C Background Runtime Foundation、P3A AIS Tracking Runtime Foundation、P3B Voyage / ETA Foundation、P3 Feed Freshness、Translation T1/T2、批准的 Translation T3A Runtime Foundation 及本次 Review Repair、T3B Feed Read、T3C Feed UI、T3D executable acceptance runner、post-T3 Settings、Home Feed-HOT display boundary 和 P7 Final Real-data Seal 已完成。当前项目状态为 `V3 — FINAL SEALED`；Translation live evidence 已接受但仍由用户设置控制，后续 Provider、entitlement、目录、schema、Secret 或更广 Translation 变更需单独批准。
 
 ## 28. 外部资料
 

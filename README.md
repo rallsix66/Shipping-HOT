@@ -102,11 +102,11 @@ You can also set Environment Variables in `docker-compose.yml`.
 
 ## Shipping HOT (Local Implementation)
 
-This repository carries a local **Shipping HOT** implementation on top of the NewsNow foundation. Accepted V3 phases — P0 Persistence, P1A Port Directory Foundation, P1B Mock Isolation, P2A Search Foundation, P2B Identity Seal, P2C Background Runtime Foundation, P3A AIS Tracking Runtime Foundation and P3B Voyage / ETA Foundation — are implemented and locally verified on the pinned Node `24.15.0` / SQLite baseline (`.data/shipping-hot-v3.sqlite3`).
+This repository carries a local **Shipping HOT** implementation on top of the NewsNow foundation. V3 is **FINAL SEALED**: P0–P3 foundations and P7-A through P7-G are implemented and locally verified on the pinned Node `24.15.0` / SQLite baseline (`.data/shipping-hot-v3.sqlite3`).
 
 - Safe defaults: Mock providers everywhere; real providers stay key/adapter-gated.
-- V3 Readiness: run `pnpm smoke:v3-readiness` to verify the local Node/ABI, SQLite schema, Port Directory and approved Runtime scope; the gate makes no external Provider requests and requires Mock/Off configuration.
-- Pending / deferred: Information Feed auto sync, Calendar auto sync, Translation, real Voyage adapter coverage and live AIS observation.
+- V3 Readiness: run `pnpm smoke:v3-readiness` to verify the local Node/ABI, SQLite schema, Port Directory and approved Runtime scope; this gate makes no external Provider requests. Controlled Real Mode activation uses existing approved adapters and a process-scoped temporary SQLite database.
+- Final boundary: controlled Real Mode Readiness is `ready=true / overall=degraded` with no failed hard checks; Voyage focus-port, Calendar, JMA/geographic alert and public-source coverage remain explicit partial gaps. Commercial Schedule is unavailable without approved carrier entitlement, and Translation is optional Feed title/summary enrichment outside the hard gate.
 - Current status: see [`docs/status.md`](docs/status.md); architecture: [`docs/architecture.md`](docs/architecture.md); V3 plan: [`docs/plans/shipping-hot-v3-real-data.md`](docs/plans/shipping-hot-v3-real-data.md).
 
 ## Development

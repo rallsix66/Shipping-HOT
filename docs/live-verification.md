@@ -1,11 +1,26 @@
 # V3 Real Data Live Verification
 
-> Verification date: 2026-09-04 (current accepted-evidence rebaseline; no new Provider request was made)
-> Scope: previously accepted controlled local Real Mode processes, isolated live probes, persisted/restart evidence and confirmed browser/runtime results. This rebaseline does not replay live logs, create new evidence or change any secret/database/runtime setting.
+> Verification date: 2026-09-04 (P7 Final Real-data Seal)
+> Scope: controlled local Real Mode activation, persisted/restart evidence, provider-free Repository/API reads, Readiness, browser routes and regression verification. The retained SQLite, Secret values and committed env were not changed.
 
 ## Method
 
-`pnpm smoke:v3-real-activation` loaded the existing server environment and set `SHIPPING_DATA_MODE=real` for that process only. For this review it used a fresh process-scoped SQLite path so pre-existing Mock/Off local data could not contaminate the observation; it ran the registered Runtime Jobs, then a built Nitro process was smoke-tested separately with process-scoped Mock/Off configuration across the HTTP surfaces. Secret values are not recorded here.
+`pnpm smoke:v3-real-activation` ran with process-scoped `SHIPPING_DATA_MODE=real`, `SHIPPING_VOYAGE_PROVIDER=vesselapi` and a fresh temporary SQLite path, so retained local data could not contaminate the observation. It exercised the existing registered Runtime Jobs and approved adapters only. `pnpm smoke:v3-readiness` and the provider-free Repository/API paths were verified against the same temporary database; browser routes were checked through a local Nitro dev server. No DeepSeek, JMA, Maritime Executive or Commercial Schedule request was made, and secret values are not recorded here.
+
+## P7 Final Real-data Seal — 2026-09-04
+
+| Check | Result |
+| --- | --- |
+| Activation | 10 approved Jobs registered; Loadstar `10/10`, Shekou `5/5`, Calendar `259/259`, Port `8/8`, Weather `5/5`, TMD `8/8`, BMKG `3/3`; Voyage and AIS Area safely skipped for no eligible targets; Translation skipped because disabled; exit `0` |
+| Readiness | `ready=true`, `overall=degraded`, no failed hard checks; Node `24.15.0`, ABI `137`, pnpm `10.30.3`, better-sqlite3 `12.6.2`, schema `v12`, exact approved core Job set |
+| API / Event / HOT | Provider-free API read returned 14 derived Events / 5 active Events and 2 HOT; active evidence was real third-party/derived, with no Mock or mixed operational lineage |
+| Restart persistence | New process read Port `8`, Feed `31`, Feed history `62`, Events `13`, Calendar `259`; GET/API/UI reads did not add sync runs or call Providers |
+| Zero-Mock | Schema-discovered scan before/after activation, after restart and after UI/API reads reported `actualMockRows.total=0` across all 13 `source_type` business tables |
+| UI | `/`, `/vessels`, `/ports`, `/voyages`, `/feed`, `/calendar`, `/settings` and `/events` rendered without loading/error state; Feed showed 33 `查看原文` disclosures and simulated count `0`; Schedule was unavailable; Settings showed fixed DeepSeek metadata and redacted Secret |
+| Browser hygiene | Console errors/warnings `0`; React Query Devtools `0`; TanStack Devtools `0` |
+| Translation boundary | Temporary settings were disabled with monthly budget `0`; DeepSeek usage was `0`; Translation remains optional Feed title/summary enrichment and Event/HOT Translation is out of scope |
+| Full regression | Targeted suite `20 files / 207 tests passed`; full Vitest `63/64 files`, `726/727 tests`; only failure is the pre-existing isolated dated Shekou assertion at `server/providers/feed.test.ts:156` |
+| Scope | Retained `.data/shipping-hot-v3.sqlite3` untouched; no new Provider, entitlement, migration, Secret or committed env change |
 
 ## Current Accepted Live Evidence Summary — 2026-09-04
 
@@ -242,7 +257,7 @@ The accepted deterministic repairs are referenced by commit: PortDirectory bindi
 
 The formal focus directory remains `CNSHK`, `CNYTN`, `CNNSA`, `THLCH`, `MYPKG`, `PHMNL`, `IDJKT` and `VNSGN`; no Port Directory change is implied. No secret, Authorization header or raw provider payload is recorded.
 
-## Provider and persistence evidence
+## Historical Provider and persistence evidence
 
 | Capability | Provider | Observation | SQLite / API evidence | Status |
 | --- | --- | --- | --- | --- |
@@ -258,7 +273,7 @@ The formal focus directory remains `CNSHK`, `CNYTN`, `CNNSA`, `THLCH`, `MYPKG`, 
 
 The activation result reported `actualMockRows` from a direct native SQLite schema-discovered scan of every business table carrying `source_type`: `ais_latest_positions=0`, `ais_port_metrics=0`, `ais_positions=0`, `calendar_events=0`, `events=0`, `feed_item_history=0`, `feed_items=0`, `ports=0`, `vessel_metadata=0`, `vessel_search_cache=0`, `vessels=0`, `voyage_eta_history=0`, `voyages=0`, `total=0`. System/metadata tables are explicitly excluded. The smoke asserts this total and exits non-zero if it is not zero; `mockRows` is retained only as a compatibility alias for the observed object. The real database read path accepts only `real/imported/derived` lineage. No Mock data was promoted into the Real operational read.
 
-This seals zero-Mock gate coverage for the historical activation review, the accepted AIS PositionReport/AIS Area gates and the accepted VesselAPI Voyage/ETA Provider path. It does not claim `Real Operational Ready`: Voyage focus-port coverage remains `coverage_pending` for `CNYPG`, Calendar completeness and selected alert geography remain partial, and the final P7 full-system/Event-HOT/UI/restart/zero-Mock gates remain open.
+This historical section seals zero-Mock gate coverage for its activation review and the accepted AIS/Voyage evidence. The current P7 Final Real-data Seal above supersedes its earlier readiness statement: Voyage focus-port coverage remains `coverage_pending` for `CNYPG`, Calendar completeness and selected alert geography remain partial, while the final controlled Readiness result is `ready=true / overall=degraded` with no failed hard checks.
 
 ## V3 VesselAPI recurring Voyage episode repair — 2026-09-01 (historical repair checkpoint)
 
@@ -285,7 +300,7 @@ This was a deterministic Repository/Runtime repair checkpoint before the later a
 
 VesselAPI documents describe ETA as an AIS/crew-reported observation rather than a commercial schedule. No ETA, origin, ETD or commercial voyage number was fabricated from missing fields. No new migration was added; migration 008 already supports nullable Voyage fields.
 
-## Built Nitro HTTP smoke
+## Historical Built Nitro HTTP smoke
 
 The built Nitro HTTP smoke returned HTTP 200 for `/`, `/api/shipping/health`, `/api/shipping`, `/api/shipping/feed`, `/api/shipping/feed/history`, `/api/shipping/calendar`, `/api/shipping/runtime`, `/api/shipping/readiness`, `/api/shipping/search/ports` and `/api/shipping/search/vessels` under process-scoped Mock/Off configuration. Real Operational Readiness was checked separately through the API and remained blocked; an unconfigured real Vessel Search endpoint is not counted as a successful HTTP surface.
 
@@ -296,4 +311,4 @@ The built Nitro HTTP smoke returned HTTP 200 for `/`, `/api/shipping/health`, `/
 
 ## Boundary
 
-This document records observed requests and persisted/API evidence only. The accepted HANSA evidence verifies the VesselAPI ETA contract, identity trust, Port Event enrichment, Runtime persistence, provider-free reads and restart behavior. It does not claim full focus-port operational coverage: `CNYPG` remains outside the current directory, so Voyage status is `coverage_pending` with reason `vesselapi_focus_port_coverage_pending`. The current project phase is `P7 — Final Real-data Seal`; the next action is `P7-B — Real Operational Capability Gap Review`.
+This document records observed requests and persisted/API evidence only. The accepted HANSA evidence verifies the VesselAPI ETA contract, identity trust, Port Event enrichment, Runtime persistence, provider-free reads and restart behavior. It does not claim full focus-port operational coverage: `CNYPG` remains outside the current directory, so Voyage status is `coverage_pending` with reason `vesselapi_focus_port_coverage_pending`. The current project phase is `V3 — FINAL SEALED`; P7-A through P7-G are complete and post-V3 enhancements require separate approval.
