@@ -84,7 +84,7 @@ describe("feed sync job", () => {
     expect(provider.getFeedItems).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ id: "feed-runtime-old" })]), expect.any(Array))
     expect((await repository.listFeedItems({ now: new Date("2026-08-15T00:00:00.000Z") })).map(feed => feed.id)).toEqual(expect.arrayContaining(["feed-runtime-new", "feed-runtime-other"]))
     expect((await repository.listFeedItems({ now: new Date("2026-08-15T00:00:00.000Z") })).map(feed => feed.id)).toHaveLength(2)
-    expect((await repository.listFeedItems({ view: "history" })).map(feed => feed.id)).toEqual(["feed-runtime-old"])
+    expect((await repository.listFeedItems({ view: "history", now: new Date("2026-08-15T00:00:00.000Z") })).map(feed => feed.id)).toEqual(["feed-runtime-old"])
     expect((await repository.listFeedHistory({ query: "runtime", limit: 20 })).map(record => record.item.id)).toEqual(expect.arrayContaining(["feed-runtime-old", "feed-runtime-new"]))
     native.close()
   })

@@ -420,7 +420,91 @@ describe("shippingRepository", () => {
 
     expect(await repository.archiveFeedItemsNotIn([current.sourceId], new Set(), now)).toBe(1)
     expect(await repository.listFeedItems({ now })).toEqual([])
+    expect((await repository.listFeedItems({ view: "history", now })).find(item => item.id === current.id)).toMatchObject({ visibility: "history", currentUntil: expect.any(String) })
+    await repository.upsertFeedItem({ ...current, fetchedAt: "2026-01-11T01:00:00.000Z" })
+    expect((await repository.listFeedItems({ now })).map(item => item.id)).toContain(current.id)
     expect((await repository.listFeedHistory({ query: "updated observation", limit: 10 })).map(record => record.item.id)).toContain(current.id)
+    native.close()
+  })
+
+  it("hydrates Feed lifecycle from canonical columns and projects natural expiry without writes", async () => {
+    const { repository, native } = await preparedRepository()
+    const snapshot = createMockSnapshot()
+    const now = new Date("2026-09-04T12:00:00.000Z")
+    const future = "2026-09-05T00:00:00.000Z"
+    const alternateFuture = "2026-09-06T00:00:00.000Z"
+    const expired = "2026-09-04T11:00:00.000Z"
+    const add = async (id: string) => repository.upsertFeedItem({
+      ...snapshot.feedItems[0],
+      id,
+      publishedAt: "2026-09-04T00:00:00.000Z",
+      fetchedAt: "2026-09-04T00:01:00.000Z",
+    })
+    const persist = (id: string, visibility: string, currentUntil: string | null, jsonPatch: Record<string, unknown> = {}, sourceType = "mock") => {
+      const row = native.prepare("SELECT data FROM feed_items WHERE id = ?").get(id) as { data: string }
+      const data = { ...JSON.parse(row.data) as Record<string, unknown>, ...jsonPatch }
+      native.prepare("UPDATE feed_items SET visibility = ?, current_until = ?, source_type = ?, data = ? WHERE id = ?")
+        .run(visibility, currentUntil, sourceType, JSON.stringify(data), id)
+    }
+
+    await add("feed-lifecycle-current")
+    await add("feed-lifecycle-history")
+    await add("feed-lifecycle-quarantine")
+    await add("feed-lifecycle-expired")
+    await add("feed-lifecycle-equal")
+    await add("feed-lifecycle-null")
+    await add("feed-lifecycle-invalid")
+    await add("feed-lifecycle-column-current")
+    await add("feed-lifecycle-canonical-until")
+    await add("feed-lifecycle-unknown-visibility")
+
+    persist("feed-lifecycle-current", "current", future)
+    persist("feed-lifecycle-history", "history", future, { visibility: "current", eventEligibility: true, stale: false })
+    persist("feed-lifecycle-quarantine", "quarantine", future, { visibility: "current", eventEligibility: true, stale: false })
+    persist("feed-lifecycle-expired", "current", expired, { visibility: "current", eventEligibility: true, stale: false })
+    persist("feed-lifecycle-equal", "current", now.toISOString(), { visibility: "current", eventEligibility: true, stale: false })
+    persist("feed-lifecycle-null", "current", null, { visibility: "current", eventEligibility: true, stale: false })
+    persist("feed-lifecycle-invalid", "current", "not-a-date", { visibility: "current", eventEligibility: true, stale: false })
+    persist("feed-lifecycle-column-current", "current", future, { visibility: "history", currentUntil: expired }, "imported")
+    persist("feed-lifecycle-canonical-until", "current", alternateFuture, { visibility: "current", currentUntil: expired })
+    persist("feed-lifecycle-unknown-visibility", "unsupported", future, { visibility: "current" })
+
+    const beforeExpired = native.prepare("SELECT visibility, current_until, data FROM feed_items WHERE id = ?").get("feed-lifecycle-expired")
+    const current = await repository.listFeedItems({ view: "current", now })
+    expect(current.map(item => item.id)).toEqual(expect.arrayContaining([
+      "feed-lifecycle-current",
+      "feed-lifecycle-column-current",
+      "feed-lifecycle-canonical-until",
+    ]))
+    expect(current).toHaveLength(3)
+    expect(current.every(item => item.visibility === "current")).toBe(true)
+    expect(current.find(item => item.id === "feed-lifecycle-column-current")).toMatchObject({ visibility: "current", source_type: "imported", currentUntil: future })
+    expect(current.find(item => item.id === "feed-lifecycle-canonical-until")).toMatchObject({ visibility: "current", currentUntil: alternateFuture })
+
+    const history = await repository.listFeedItems({ view: "history", now })
+    expect(history.map(item => item.id)).toEqual(expect.arrayContaining([
+      "feed-lifecycle-history",
+      "feed-lifecycle-quarantine",
+      "feed-lifecycle-expired",
+      "feed-lifecycle-equal",
+      "feed-lifecycle-null",
+      "feed-lifecycle-invalid",
+      "feed-lifecycle-unknown-visibility",
+    ]))
+    expect(history.every(item => item.visibility !== "current")).toBe(true)
+    expect(history.find(item => item.id === "feed-lifecycle-history")).toMatchObject({ visibility: "history", currentUntil: future })
+    expect(history.find(item => item.id === "feed-lifecycle-quarantine")).toMatchObject({ visibility: "quarantine", currentUntil: future })
+    expect(history.find(item => item.id === "feed-lifecycle-expired")).toMatchObject({ visibility: "history", currentUntil: expired, eventEligibility: false, stale: true })
+    expect(history.find(item => item.id === "feed-lifecycle-equal")).toMatchObject({ visibility: "history", eventEligibility: false, stale: true })
+    expect(history.find(item => item.id === "feed-lifecycle-null")).toMatchObject({ visibility: "history", currentUntil: undefined, eventEligibility: false, stale: true })
+    expect(history.find(item => item.id === "feed-lifecycle-invalid")).toMatchObject({ visibility: "history", currentUntil: "not-a-date", eventEligibility: false, stale: true })
+
+    const all = await repository.listFeedItems({ view: "all", now })
+    expect(all.find(item => item.id === "feed-lifecycle-history")).toMatchObject({ visibility: "history" })
+    expect(all.find(item => item.id === "feed-lifecycle-quarantine")).toMatchObject({ visibility: "quarantine" })
+    expect(all.find(item => item.id === "feed-lifecycle-expired")).toMatchObject({ visibility: "history" })
+    expect(all.find(item => item.id === "feed-lifecycle-canonical-until")).toMatchObject({ visibility: "current", currentUntil: alternateFuture })
+    expect(native.prepare("SELECT visibility, current_until, data FROM feed_items WHERE id = ?").get("feed-lifecycle-expired")).toEqual(beforeExpired)
     native.close()
   })
 

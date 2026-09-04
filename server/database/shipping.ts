@@ -5,7 +5,7 @@ import type { AisDerivedPortMetric } from "@shared/ais-area"
 import { mergeNormalizedVoyageFields, voyageRecordToShippingVoyage } from "@shared/voyage-normalizer"
 import type { NormalizedVoyageFields } from "@shared/voyage-normalizer"
 import type { VoyageRecord } from "@shared/voyage"
-import type { DataEvidence, DataProvenance, FeedItem, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, SourceLineage, Vessel, Voyage } from "@shared/shipping"
+import type { DataEvidence, DataProvenance, FeedItem, FeedVisibility, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, SourceLineage, Vessel, Voyage } from "@shared/shipping"
 import type { CalendarEvent } from "@shared/calendar"
 import { applyFeedFreshnessPolicy } from "@shared/shipping-rules"
 import { type DatabaseMetadata, type ShippingDataMode, initializeShippingDatabase } from "#/database/runtime"
@@ -19,6 +19,61 @@ interface VoyageStorageRow extends Row {
   latest_etd?: string | null
   latest_eta?: string | null
   delay_minutes?: number | null
+}
+
+interface FeedStorageRow extends Row {
+  data: string
+  visibility?: unknown
+  current_until?: unknown
+  source_type?: unknown
+}
+
+const feedVisibilities = new Set<FeedVisibility>(["current", "history", "quarantine"])
+const sourceLineages = new Set<SourceLineage>(["real", "mock", "imported", "derived"])
+
+function persistedFeedVisibility(value: unknown): FeedVisibility {
+  return typeof value === "string" && feedVisibilities.has(value as FeedVisibility)
+    ? value as FeedVisibility
+    : "history"
+}
+
+function persistedSourceLineage(value: unknown): SourceLineage {
+  return typeof value === "string" && sourceLineages.has(value as SourceLineage)
+    ? value as SourceLineage
+    : "mock"
+}
+
+function timestampMs(value: unknown): number | undefined {
+  if (typeof value !== "string" || value.trim() === "") return undefined
+  const parsed = Date.parse(value)
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+/** Hydrates a FeedItem from SQLite's canonical lifecycle projection without re-running incoming freshness policy. */
+function hydratePersistedFeedItem(row: FeedStorageRow, now: Date): FeedItem {
+  const stored = parse<FeedItem>(row.data)
+  const visibility = persistedFeedVisibility(row.visibility)
+  const currentUntil = typeof row.current_until === "string" && row.current_until.trim() !== ""
+    ? row.current_until
+    : undefined
+  const source_type = persistedSourceLineage(row.source_type)
+  const hydrated = { ...stored, visibility, currentUntil, source_type }
+
+  if (visibility !== "current") return hydrated
+
+  // A persisted current row is only effective while its canonical window is valid and in the future.
+  // Missing/invalid timestamps fail closed as effective history; this is a read-time projection only.
+  const currentUntilMs = timestampMs(currentUntil)
+  if (currentUntilMs === undefined || currentUntilMs <= now.getTime()) {
+    return {
+      ...hydrated,
+      visibility: "history",
+      eventEligibility: false,
+      stale: true,
+      error: hydrated.error ?? "expired",
+    }
+  }
+  return hydrated
 }
 
 interface LegacyTrustDefaults {
@@ -319,15 +374,33 @@ export class ShippingRepository {
     const clauses = [this.dataMode === "real" ? "source_type IN ('real', 'imported', 'derived')" : "1 = 1"]
     const params: (string | number)[] = []
     if (view === "current") {
-      clauses.push("visibility = 'current'", "current_until > ?")
+      clauses.push("visibility = 'current'", "julianday(current_until) > julianday(?)")
       params.push(now.toISOString())
     } else if (view === "history") {
-      clauses.push("visibility <> 'current'")
+      clauses.push(`(
+        visibility <> 'current'
+        OR (
+          visibility = 'current'
+          AND (
+            current_until IS NULL
+            OR julianday(current_until) IS NULL
+            OR julianday(current_until) <= julianday(?)
+          )
+        )
+      )`)
+      params.push(now.toISOString())
     }
-    const records = rows<Row>(await this.db.prepare(`SELECT data FROM feed_items WHERE ${clauses.join(" AND ")} ORDER BY published_at DESC`).all(...params)).map((row) => {
-      const item = parse<FeedItem>(row.data)
-      return normalizeLegacyTrust(applyFeedFreshnessPolicy(item, now), knownMockProvenanceFor(item.sourceId))
-    }).filter(item => recordAllowedForDataMode(item, this.dataMode))
+    const records = rows<FeedStorageRow>(await this.db.prepare(`
+      SELECT data, visibility, current_until, source_type
+      FROM feed_items
+      WHERE ${clauses.join(" AND ")}
+      ORDER BY published_at DESC
+    `).all(...params))
+      .map(row => hydratePersistedFeedItem(row, now))
+      .filter(item => view !== "current" || item.visibility === "current")
+      .filter(item => view !== "history" || item.visibility !== "current")
+      .map(item => normalizeLegacyTrust(item, knownMockProvenanceFor(item.sourceId)))
+      .filter(item => recordAllowedForDataMode(item, this.dataMode))
     return records
   }
 
