@@ -4,7 +4,9 @@
 >
 > 审查日期：2026-09-04（Asia/Shanghai）
 >
-> 代码基线：P7 entry `4824d63f8e135ff3c9eb0849d9ba49e832ae000c`；业务基线 `f7281c7ea58444dc3b2d55930d0069c45055cab8`（`fix: preserve persisted feed lifecycle on reads`）；最终 seal commit SHA 记录于 completion report；Node `24.15.0` / ABI `137` / `better-sqlite3@12.6.2`
+> 代码基线：P7 entry `4824d63f8e135ff3c9eb0849d9ba49e832ae000c`；业务基线 `f7281c7ea58444dc3b2d55930d0069c45055cab8`（`fix: preserve persisted feed lifecycle on reads`）；最终 seal commit `ed2c8448699971328b23247508a7b91fb537ab6b`；Node `24.15.0` / ABI `137` / `better-sqlite3@12.6.2`
+>
+> 分支状态：当前工作分支为 `main`；P7 验收事实产生于历史封板分支 `codex/shipping-hot-v3-real-data`。两者当前指向同一 seal commit；本次知识同步不重新验证真实接口，也不改写历史验收事实。
 >
 > 实施状态：**P0 Persistence、P1A Port Directory、P1B Mock Isolation、P2 Search/Identity/Runtime、P3 Feed Freshness、P7 Final Real-data Seal 已 SEALED；P3A AIS Position、AIS Area、GFW Search/canonical identity、Port Intelligence、Open-Meteo、TMD/BMKG Weather Alerts、VesselAPI Voyage Provider path 与 DeepSeek Translation Provider/Runtime 已有 accepted `VERIFIED_LIVE` evidence**。Feed persisted lifecycle read semantics、Translation mode decoupling、placeholder reliability、post-T3 Settings UI、Home Feed-HOT display boundary 已实现/封板。Schema 保持 v12；P7 只使用现有批准 adapters、process-scoped env 和临时 SQLite，未改 retained SQLite、Secret/env，未新增 Provider、entitlement 或 migration；DeepSeek final acceptance usage 为 0。Voyage focus-port coverage、Calendar completeness、JMA 和公共源覆盖仍以显式边界保留，不被 Mock fallback 或事实推断掩盖。
 >

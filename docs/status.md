@@ -1,6 +1,7 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
-> Snapshot date: 2026-09-04
+> Evidence snapshot date: 2026-09-04
+> Knowledge sync date: 2026-09-07 (documentation/rules only; no business-code or real-Provider re-verification)
 > Current state authority: this rebaseline section. Dated sections below are historical checkpoints unless explicitly marked current.
 
 ## Current V3 State — 2026-09-04
@@ -8,10 +9,12 @@
 | Item | Current state |
 |---|---|
 | Current Project Phase | `V3 — FINAL SEALED` |
-| Current Git Head | Final P7 seal commit on `codex/shipping-hot-v3-real-data`; exact SHA is recorded in the completion report and verified against `origin` |
+| Current Git Head | `ed2c8448699971328b23247508a7b91fb537ab6b` — `docs: seal v3 real-data acceptance` |
 | P7 Entry Git Head | `4824d63f8e135ff3c9eb0849d9ba49e832ae000c` — `docs: rebaseline v3 state for p7 entry` |
 | Business-code baseline | `f7281c7ea58444dc3b2d55930d0069c45055cab8` — `fix: preserve persisted feed lifecycle on reads` |
-| Branch | `codex/shipping-hot-v3-real-data` |
+| Current working branch | `main` (tracking `origin/main`) |
+| Historical P7 acceptance branch | `codex/shipping-hot-v3-real-data` (same seal commit; historical evidence branch, not the current checkout) |
+| Local origin refs observed | `origin/main` and `origin/codex/shipping-hot-v3-real-data` both point to `ed2c8448699971328b23247508a7b91fb537ab6b`; direct `git ls-remote origin` refresh was unavailable because the SSH connection was denied |
 | Schema | `v12`; migration changes in this review: none |
 | Toolchain | Node `24.15.0`, ABI `137`, `better-sqlite3@12.6.2` |
 | Operational Mode default | Mock; Real Mode remains explicit and fail-closed |
@@ -61,7 +64,7 @@
 
 ### P7 Final Real-data Seal — 2026-09-04
 
-`V3 — FINAL SEALED` is the current project state. P7-A through P7-G are complete on branch `codex/shipping-hot-v3-real-data`.
+`V3 — FINAL SEALED` is the current project state. P7-A through P7-G were accepted on the historical branch `codex/shipping-hot-v3-real-data`; the current checkout is `main` at the same seal commit.
 
 | Gate | Final evidence |
 |---|---|
@@ -128,6 +131,12 @@ These coverage boundaries do not use Mock fallback and do not fabricate operatio
 | Build | `pnpm build` passed through Vite/PWA/Nitro; existing npm config, Browserslist and Node dependency deprecation warnings are non-blocking |
 | Neat Freak | Manual Windows-equivalent audit completed for rules, code/status alignment, Markdown surfaces, ADR/roadmap state, secrets, local databases, temporary residue and Git/worktree. Official Bash inventory remains `pending/unavailable` because `bash` and `scripts/audit-inventory.sh` are unavailable; no cleanup was performed |
 | Cleanup boundary | `.data/p7-final-seal-20260904.sqlite3` and `.data/shipping-hot-v3-browser.sqlite3` remain ignored cleanup candidates pending explicit confirmation; retained `.data/shipping-hot-v3.sqlite3`, `.env.local`, provider secret metadata, `dist/`, `prototypes/` and `screenshots/` were preserved |
+
+### Documentation / Rules Sync — 2026-09-07
+
+- This closeout changed documentation and rules only. No business code, database, environment configuration, Secret, Provider, or runtime state was modified; no external Provider was called or re-verified.
+- The current checkout is `main` at `ed2c8448699971328b23247508a7b91fb537ab6b`; the historical P7 acceptance branch is `codex/shipping-hot-v3-real-data`, and both local refs currently point to that same seal commit. A direct `git ls-remote origin` refresh was attempted but denied by the configured SSH connection, so the local remote-tracking refs are the latest observed origin state, not a newly fetched proof.
+- Historical verification remains unchanged: full Vitest `726/727` across `63/64` files with the isolated date-sensitive Shekou assertion at `server/providers/feed.test.ts:156`; the official Bash inventory remains `pending/unavailable` because Bash and `scripts/audit-inventory.sh` are unavailable. Existing ignored cleanup candidates were inspected and retained pending explicit confirmation.
 
 > Historical snapshots below preserve the facts that were true at their checkpoint dates. They do not override the current state above; in particular, older `DeepSeek live verification pending`, zero-call and disabled-budget statements are historical, not current-state claims.
 
@@ -336,8 +345,8 @@ Remaining pending work: real data coverage / runtime follow-up.
 
 ## 2. Current Environment
 
-- Active branch: `codex/shipping-hot-v3-real-data`; package version: `0.0.41`
-- Git remotes: `origin=https://github.com/rallsix66/Shipping-HOT.git` and `upstream=https://github.com/ourongxing/newsnow.git`; `gh auth status` and `gh repo view` are currently verified, while `gh run list` returned no remote workflow runs (`no remote CI evidence`)
+- Current working branch: `main` at `ed2c8448699971328b23247508a7b91fb537ab6b`; historical P7 acceptance branch: `codex/shipping-hot-v3-real-data` at the same seal commit; package version: `0.0.41`
+- Git remotes: `origin=ssh://git@ssh.github.com:443/rallsix66/Shipping-HOT.git` and `upstream=https://github.com/ourongxing/newsnow.git`; local `origin/main` and `origin/codex/shipping-hot-v3-real-data` both point to the seal commit. Direct `git ls-remote origin` refresh is `pending` after SSH permission denial; no fresh remote proof is claimed here.
 - Local run status: Vite development smoke returned 200 for `/`, `/feed` and `/api/shipping`; default `provider.feed=mock`, `provider.weather=mock` and `provider.weatherAlerts=off`, one non-weather Feed item and one Mock weather item were returned without external weather calls; current process-scoped Mock/Off production Nitro smoke returns 200 for `/`, `/api/shipping/health`, `/api/shipping/runtime`, `/api/shipping/readiness`, `/api/shipping/search/ports`, `/api/shipping/search/vessels` and `/api/shipping`, with no `#nitro/index` subroute error observed
 - Deployment status: `out-of-scope`; repository contains optional Cloudflare/Vercel/Bun/Docker configuration, but no deployment was performed
 - Database / external services: P0 uses fixed Node `24.15.0` / ABI `137`, `better-sqlite3@12.6.2`, db0 path `.data/shipping-hot-v3.sqlite3`, and passed native read/write plus process-A-write → close → process-B-read smoke. The current workspace inventory found no legacy `.data/db.sqlite3`; it is not the V3 runtime path. AISStream, Portcast public pages and Open-Meteo remain optional server-side sources.

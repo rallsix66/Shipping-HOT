@@ -1,14 +1,17 @@
 # Shipping-HOT Translation T3 Architecture / Production Feed Integration Proposal
 
-> status: approved / T3A-T3D engineering implemented / Translation T3 formally sealed at T3D / DeepSeek live pending
+> status: accepted / T3A-T3D engineering implemented / Translation T3 formally sealed at T3D / DeepSeek Provider and Runtime evidence accepted as `VERIFIED_LIVE` optional FeedItem enrichment
 > proposal date: 2026-09-03
-> base branch: codex/shipping-hot-v3-real-data
+> base branch: codex/shipping-hot-v3-real-data (historical T3/P7 acceptance branch)
 > base SHA: f397670da1f4ec497c3fbb336ef6e36b7185bc1f
+> current working branch: `main`; current V3 status and accepted live evidence: `docs/status.md` and `docs/live-verification.md`
 > scope: T3A Runtime Foundation, T3B Feed Read, T3C Feed UI and T3D executable acceptance runner; no broader Translation expansion
+
+> Historical checkpoint note: detailed `pending`, disabled-budget and zero-call statements below describe the 2026-09-03 engineering checkpoint captured by this proposal. They are retained as history and do not override the accepted current state above.
 
 ## 0. Review boundary
 
-本文件已通过人工最终架构审批，当前授权 T3A Translation Runtime Foundation、T3B Feed Read、T3C Feed UI 与 T3D executable acceptance runner。它保持独立于 Feed ingestion；真实 DeepSeek live verification 仍需满足固定输入、Secret/settings/budget/circuit gates、Phase 1 + Phase 2 两次调用硬上限和独立浏览器证据。仓库没有 active-plan.md 或必须移动 inbox 文档的治理规则，因此保留当前路径并以本状态作为最小 plan reference。
+本文件已通过人工最终架构审批，当前授权 T3A Translation Runtime Foundation、T3B Feed Read、T3C Feed UI 与 T3D executable acceptance runner。它保持独立于 Feed ingestion；DeepSeek live verification 的固定输入、Secret/settings/budget/circuit gates、Phase 1 + Phase 2 两次调用硬上限和独立浏览器证据仍是 acceptance contract，已接受的 live evidence 以 `docs/status.md` 与 `docs/live-verification.md` 为准。仓库没有 active-plan.md 或必须移动 inbox 文档的治理规则，因此保留当前路径并以本状态作为最小 plan reference。
 
 本轮明确不做：
 
@@ -50,7 +53,7 @@
 - server/providers/translation/deepseek-provider.ts
   - 只有 server-side DeepSeek adapter，fixed endpoint/model，20 秒 timeout，thinking.type=disabled、stream=false、无 tools。
   - usage contract 缺失/非法时 fail closed 为 provider_contract_changed。
-  - 当前 live verification 仍为 pending。
+  - 在本 proposal 的 pre-T3 baseline checkpoint，live verification 仍为 pending。
 - server/providers/translation/fake-provider.ts
   - 仅供测试使用。
   - 不得进入 Real Mode、Readiness 或 production Runtime registry。
@@ -1053,7 +1056,7 @@ DeepSeek timeout/429/500/secret missing/budget exhausted/contract changed：
 
 ### T3D — Executable Live Acceptance Runner
 
-状态：**acceptance engineering implemented / live pending**
+状态：**acceptance engineering implemented / DeepSeek Provider and Runtime evidence accepted as `VERIFIED_LIVE`; optional enrichment; T3D finalizer remains separately bounded**
 
 前置：
 
@@ -1067,7 +1070,7 @@ DeepSeek timeout/429/500/secret missing/budget exhausted/contract changed：
     Phase 2: current real Feed title/summary -> claim -> execute -> atomic cache+usage finalize
         -> provider-free Feed read -> restart read-back -> separate browser evidence finalizer
 
-Phase 1 必须验证 auth/model、response/usage contract、token arithmetic、placeholder/`TEST STAR`/`AB123`/`SGSIN`/date/URL、wrapper boundary、cost 和 usage persistence；失败、timeout、rate limit、unavailable 或 contract failure 立即停止，不执行 Phase 2。Phase 2 只能选择一个 deterministic current Feed `title`/`summary`，优先 title、回退 summary；复用 T3A claim、fresh lease、source re-read/hash check、re-gate、success/failure finalize，失败不 retry。成功后验证 cache、usage、lease/retry state、Feed 原文不变、provider-free read 和 restart read-back。runner 永远不把 server DTO 当作 UI evidence；只有匹配 candidate/hash、原文 disclosure、零 UI console error 且零额外 Provider call 的浏览器 evidence 才能由 finalizer 合并为 `verified_live`。本轮 retained settings disabled/monthlyBudget `0`，external DeepSeek calls `0`，因此仍为 `pending`。Translation 仍不进入 Real Operational hard gate。
+Phase 1 必须验证 auth/model、response/usage contract、token arithmetic、placeholder/`TEST STAR`/`AB123`/`SGSIN`/date/URL、wrapper boundary、cost 和 usage persistence；失败、timeout、rate limit、unavailable 或 contract failure 立即停止，不执行 Phase 2。Phase 2 只能选择一个 deterministic current Feed `title`/`summary`，优先 title、回退 summary；复用 T3A claim、fresh lease、source re-read/hash check、re-gate、success/failure finalize，失败不 retry。成功后验证 cache、usage、lease/retry state、Feed 原文不变、provider-free read 和 restart read-back。runner 永远不把 server DTO 当作 UI evidence；只有匹配 candidate/hash、原文 disclosure、零 UI console error 且零额外 Provider call 的浏览器 evidence 才能由 finalizer 合并为 `verified_live`。本 proposal 记录的 2026-09-03 checkpoint 中 retained settings 为 disabled/monthlyBudget `0`、external DeepSeek calls 为 `0`，因此当时为 `pending`；后续 accepted live evidence 见 current status。Translation 仍不进入 Real Operational hard gate。
 
 ## 18. DeepSeek live verification gate
 
@@ -1090,7 +1093,7 @@ Phase 1 必须验证 auth/model、response/usage contract、token arithmetic、p
 
 ## 19. Test matrix
 
-以下矩阵是 T3 验收边界。本轮已执行 T3A 相关的 migration/repository/service/runtime/registry/readiness/compatibility tests，以及 T3B/T3C/T3D 的 batch/read/UI/executable-runner/acceptance tests；真实 DeepSeek live evidence 未执行并保持 pending。
+以下矩阵是 T3 验收边界。本轮已执行 T3A 相关的 migration/repository/service/runtime/registry/readiness/compatibility tests，以及 T3B/T3C/T3D 的 batch/read/UI/executable-runner/acceptance tests；本 proposal checkpoint 未执行真实 DeepSeek live evidence，后续 accepted live evidence 以 `docs/status.md` 与 `docs/live-verification.md` 为准。
 
 ### 19.1 Candidate
 
@@ -1261,11 +1264,11 @@ If a provider contract change occurs：
 15. 是否批准 bounded server-side controlled requeue 的 error-code、sourceHash、eligibility、limit<=100 与 operator/code review gate。
 16. 是否批准基于现有 provider_runtime status/error_code 的 Translation provider circuit block/unblock contract；明确 auth/forbidden/entitlement/contract 为 provider-level block，而 provider_attempt_unknown 仅 row-level block。
 
-其中第 7、8 项已由 T3B 实施；第 11 项由 T3D 固化为 bounded acceptance 前置 gate，真实 live evidence 仍 pending。T3A 的实际 schema、Runtime 和 lifecycle 以及 T3B/T3C/T3D 结果以第 25 节为准。
+其中第 7、8 项已由 T3B 实施；第 11 项由 T3D 固化为 bounded acceptance 前置 gate，后续 accepted live evidence 以 `docs/status.md` 与 `docs/live-verification.md` 为准。T3A 的实际 schema、Runtime 和 lifecycle 以及 T3B/T3C/T3D 结果以第 25 节为准。
 
 ## 24. Implementation verification and governance state
 
-本文件当前状态为 `approved / T3A-T3D engineering implemented / Translation T3 formally sealed at T3D / DeepSeek live pending`；T3A/T3B/T3C/T3D engineering 已完成并在本阶段正式封板。
+本文件当前状态为 `accepted / T3A-T3D engineering implemented / Translation T3 formally sealed at T3D / DeepSeek Provider and Runtime evidence accepted as VERIFIED_LIVE optional enrichment`；T3A/T3B/T3C/T3D engineering 已完成并在本阶段正式封板。T3D runner/server-browser evidence boundary remains separate; historical checkpoint 的 pending/zero-call 记录不覆盖当前状态。
 
 本轮验证要求：
 
@@ -1278,7 +1281,7 @@ If a provider contract change occurs：
 
 - Base SHA：`f397670da1f4ec497c3fbb336ef6e36b7185bc1f`
 - Plan path：`docs/plans/inbox/shipping-hot-translation-t3.md`
-- Plan status：`approved / T3A-T3D engineering implemented / Translation T3 formally sealed at T3D / DeepSeek live pending`；T3A/T3B/T3C/T3D engineering implemented / locally verified / formally sealed。
+- Plan status：`accepted / T3A-T3D engineering implemented / Translation T3 formally sealed at T3D / DeepSeek Provider and Runtime evidence accepted as VERIFIED_LIVE optional enrichment`；T3A/T3B/T3C/T3D engineering implemented / locally verified / formally sealed；T3D runner/server-browser evidence boundary remains separate。
 - Durable owner：Translation Runtime + TranslationRepository；`TranslationService.execute()` 仅执行规范化、hash、保护/校验和 Provider call，现有 `translate()` 仅保留 T1/T2 compatibility。
 - Schema：migration v12 `translation-runtime-work-state`，只向 `translation_cache` 增加 `retry_count`、`next_retry_at`、`retryable`、`lease_until`、`last_error_code` 和 work-state index；migration additive/idempotent，retained SQLite 未修改。
 - Lifecycle：`claimTranslationWork` 在每个 field 使用 fresh claim timestamp，active lease 为 claim time + 45s；retry 时间以 failure completion time 计算；`completeTranslationSuccess`、`completeRetryableFailure`、`completeNonRetryableFailure`、`recoverStaleLease(s)`、`requeueTranslationFailures` 已实现；单次最多 5 fields，Runtime concurrency 1。
@@ -1287,8 +1290,8 @@ If a provider contract change occurs：
 - Runtime：ordinary `translation-sync` 在全局 Mock/Real 两种模式注册，使用 fixed DeepSeek adapter、20s timeout、settings/secret/monthly-budget hard gate、per-call usage、generic job-level usage opt-out；每次 run 重新读取 settings/usage/Secret/circuit。Provider 候选先过滤 `source_type=mock`、Mock provenance/evidence，明确非 mock lineage 的 current Feed 才能进入 source/claim/call。Diagnostic 在普通状态保留 cache hit；provider circuit blocked 时进入 fixed recovery mode，强制一次 `execute()` Provider attempt，不读旧成功 test cache、不写 translation cache、不自动 clear/requeue。
 - Isolation：Feed original title/summary、Event/HOT/Voyage/AIS/Port/Weather facts、lineage、freshness、severity、ranking、dedupe、evidence 和 Readiness hard gate 未被 Translation 改写或依赖。
 - T3B/T3C：两个 Feed read endpoint 使用 API-only `FeedItemDisplay` 和 bounded provider-free cache mapper；Feed UI 默认中文优先并提供“查看原文”，pending/unavailable 保持原文可读；HOT/Event facts 使用原始 Feed 输入。
-- T3D：`translation-live-acceptance.ts` 提供固定 input、固定 DeepSeek endpoint/model、显式 settings/secret/budget/circuit/Real Mode gates 和 hard max 2 的 executable runner。Phase 1 固定 diagnostic 只走 `TranslationService.execute()` 并写 `translation_test` per-call usage；诊断校验接受 aggregate `translation_test` 或同小时 `mixed`，拒绝 `feed`、null 和任意值；blocking/invalid-wrapper/invalid-usage failures block existing provider circuit，transient failures do not。Phase 2 只选一个 current real Feed `title`/`summary`，复用 T3A claim/execute/atomic finalize 与共享 backoff policy，验证 cache、usage、原文、provider-free Feed read 和 restart。server evidence 与 browser evidence 分离，finalizer 只接受 matching candidate/hash、original disclosure、zero console errors、zero extra calls；本轮未执行 live call，live verification `pending`。T3D engineering 已在此处正式封板，后续 T4、SecretStore、usage/cost、test endpoint、translation-sync、Feed further integration 均不因本封板自动批准。
+- T3D：`translation-live-acceptance.ts` 提供固定 input、固定 DeepSeek endpoint/model、显式 settings/secret/budget/circuit/Real Mode gates 和 hard max 2 的 executable runner。Phase 1 固定 diagnostic 只走 `TranslationService.execute()` 并写 `translation_test` per-call usage；诊断校验接受 aggregate `translation_test` 或同小时 `mixed`，拒绝 `feed`、null 和任意值；blocking/invalid-wrapper/invalid-usage failures block existing provider circuit，transient failures do not。Phase 2 只选一个 current real Feed `title`/`summary`，复用 T3A claim/execute/atomic finalize 与共享 backoff policy，验证 cache、usage、原文、provider-free Feed read 和 restart。server evidence 与 browser evidence 分离，finalizer 只接受 matching candidate/hash、original disclosure、zero console errors、zero extra calls；本 proposal 的历史 checkpoint 未执行 live call，live verification 当时为 `pending`，后续 accepted live evidence 见 current status。T3D engineering 已在此处正式封板，后续 T4、SecretStore、usage/cost、test endpoint、translation-sync、Feed further integration 均不因本封板自动批准。
 - Deferred：T2/T3 已有 usage/cost accounting 仍无 dashboard；Translation test endpoint expansion、T4、additional Provider/fallback、Calendar/Event/HOT/Voyage/Port/Weather/AIS/Vessel translation 均未实施。普通 `translation-sync` 未用于本次验收。
-- Secrets/calls：Secret changes `none`；`.env.local` 未修改；external DeepSeek calls `0`；DeepSeek live verification `pending`。
-- Verification：T3D runner targeted tests、T3A/T3B/T3C/T3D 相关回归与 full Vitest 的最终结果以本次实施报告和 `docs/status.md` 为准；覆盖 aggregate scope、shared backoff/circuit classification、success/failure/restart/provider-free/browser boundaries。真实 settings disabled/monthlyBudget `0`，本轮 external DeepSeek calls `0`、live verification `pending`；Fake/mocked runner 的“verified”仅证明 runner logic，不构成 DeepSeek live evidence。Neat Freak official closeout 在 Bash 不可用时保持 `pending`，并补充 Windows/manual audit 结果。临时 ignored `.data/shipping-hot-v3-browser.sqlite3` 为浏览器核验副本，因删除需人工确认而保留。
-- Post-T3 product layer：Translation T3 保持正式封板；`/settings` 的 Translation Settings UI 与 `GET`/`POST`/`DELETE /api/shipping/translation/secret` 仅提供固定 DeepSeek 配置、redacted Secret metadata、预算/用量/缓存状态和现有 fixed test gate。该层不修改 T3 core semantics，不暴露 T3D，不自动启用，不新增 Provider/fallback/migration，且本次 external DeepSeek calls `0`。
+- Secrets/calls（2026-09-03 checkpoint）：Secret changes `none`；`.env.local` 未修改；external DeepSeek calls `0`；DeepSeek live verification 当时为 `pending`。
+- Verification：T3D runner targeted tests、T3A/T3B/T3C/T3D 相关回归与 full Vitest 的最终结果以本次实施报告和 `docs/status.md` 为准；覆盖 aggregate scope、shared backoff/circuit classification、success/failure/restart/provider-free/browser boundaries。历史 checkpoint 的 settings disabled/monthlyBudget `0`、external DeepSeek calls `0` 和 pending live status 不覆盖后续 accepted evidence。Fake/mocked runner 的“verified”仅证明 runner logic，不构成 DeepSeek live evidence。Neat Freak official closeout 在 Bash 不可用时保持 `pending`，并补充 Windows/manual audit 结果。临时 ignored `.data/shipping-hot-v3-browser.sqlite3` 为浏览器核验副本，因删除需人工确认而保留。
+- Post-T3 product layer：Translation T3 保持正式封板；`/settings` 的 Translation Settings UI 与 `GET`/`POST`/`DELETE /api/shipping/translation/secret` 仅提供固定 DeepSeek 配置、redacted Secret metadata、预算/用量/缓存状态和现有 fixed test gate。该层不修改 T3 core semantics，不暴露 T3D，不自动启用，不新增 Provider/fallback/migration；该 implementation checkpoint 的 external DeepSeek calls 为 `0`。
