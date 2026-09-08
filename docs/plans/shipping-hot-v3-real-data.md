@@ -2,11 +2,11 @@
 
 > 文档状态：`accepted / V3 FINAL SEALED / P7-A through P7-G complete / P0–P3 core foundations sealed / accepted live Provider boundaries and explicit coverage gaps`
 >
-> P7 审查日期：2026-09-04（Asia/Shanghai）；Phase 1 implementation/review checkpoints：2026-09-07–2026-09-08（Asia/Shanghai）；当前独立复审仍待完成
+> P7 审查日期：2026-09-04（Asia/Shanghai）；Phase 1 implementation/review checkpoints：2026-09-07–2026-09-08（Asia/Shanghai）；当前独立复审已完成
 >
 > 代码基线：P7 entry `4824d63f8e135ff3c9eb0849d9ba49e832ae000c`；业务基线 `f7281c7ea58444dc3b2d55930d0069c45055cab8`（`fix: preserve persisted feed lifecycle on reads`）；最终 seal commit `ed2c8448699971328b23247508a7b91fb537ab6b`；Node `24.15.0` / ABI `137` / `better-sqlite3@12.6.2`
 >
-> 分支状态：当前工作分支为 `main`，当前 HEAD 为 `e1a73c3bd964a7ade368051ef1807228c5bc8abe`；P7 验收事实产生于历史封板分支 `codex/shipping-hot-v3-real-data`，该分支仍指向 `ed2c8448699971328b23247508a7b91fb537ab6b`。Phase 1 是已获批准的后续工作，不改写历史封板事实；本次离线计数修复和 Web 诊断均未调用或重新验证真实接口。
+> 分支状态：当前工作分支为 `main`，当前 HEAD 为 `4f29a9549deaa7614dca306838a9e110d058667e`；P7 验收事实产生于历史封板分支 `codex/shipping-hot-v3-real-data`，该分支仍指向 `ed2c8448699971328b23247508a7b91fb537ab6b`。Phase 1 是已获批准的后续工作，不改写历史封板事实；本次离线计数修复、复审和 Web 诊断均未调用或重新验证真实接口。
 >
 > 实施状态：**P0 Persistence、P1A Port Directory、P1B Mock Isolation、P2 Search/Identity/Runtime、P3 Feed Freshness、P7 Final Real-data Seal 已 SEALED；P3A AIS Position、AIS Area、GFW Search/canonical identity、Port Intelligence、Open-Meteo、TMD/BMKG Weather Alerts、VesselAPI Voyage Provider path 与 DeepSeek Translation Provider/Runtime 已有 accepted `VERIFIED_LIVE` evidence**。Feed persisted lifecycle read semantics、Translation mode decoupling、placeholder reliability、post-T3 Settings UI、Home Feed-HOT display boundary 已实现/封板。Schema 保持 v12；P7 只使用现有批准 adapters、process-scoped env 和临时 SQLite，未改 retained SQLite、Secret/env，未新增 Provider、entitlement 或 migration；DeepSeek final acceptance usage 为 0。Voyage focus-port coverage、Calendar completeness、JMA 和公共源覆盖仍以显式边界保留，不被 Mock fallback 或事实推断掩盖。
 >
@@ -453,6 +453,11 @@ Calendarific Free 官方公开额度为 500 calls/月。默认约 7 天 TTL 下�
 - 当当前年和下一年均命中有效 TTL 缓存时，`calendar-sync` 返回 `skipped/calendar_cache_fresh`、`recordsRead=0`、`recordsWritten=0`，不伪造 `sourceUpdatedAt`；BackgroundRuntime 只在该显式 cache-only 结果下保留既有 `lastSuccessAt`、`lastSourceUpdatedAt` 及健康/失败证据，其他 Job 的 skipped 语义不变。
 - 部分缓存命中仍只同步必要 country/year，并按实际 Provider 结果判定 `success` 或 `failed`；成功的合法零记录仍是实际成功，不等同于缓存跳过。未新增 Provider、依赖、Secret、schema/migration、数据库或环境配置。
 - 离线回归使用内存 SQLite、实际 Shipping/Runtime Repository、BackgroundRuntime 和计数型假 Provider；定向 Calendar/Runtime 回归 34/34，完整 Vitest 738/738（64/64），不构成真实 Provider 覆盖证据。官方 Bash inventory 在 Windows 主机仍为 `pending/unavailable`，手工等价审计不删除任何候选。
+
+### 11.5 独立复审修复：合成来源缓存永久 miss — 2026-09-08
+
+- 根因是 Registry 把合成 Calendar 的全部激活 provenance 来源同时作为缓存必需来源；Calendarific 模式中空占位的 official/manual 从不产生 coverage，导致七日缓存内仍永久 miss。修复后 Provider 明确声明 `cacheRequiredSourceIds`：占位 official/manual 为显式空集合，实际配置的数据集使用各自真实 provenance source ID；未知的旧式/自定义 Provider 仍保守回退到自身 Provider/source ID。
+- 实际 Registry 组合、Fake Calendarific、固定时钟和内存 SQLite 的两轮回归中，首轮为六国 × 当前/下一年共 12 次 Fake 请求，第二轮为 `skipped/calendar_cache_fresh` 且新增请求为 0。已配置 official/manual 数据集在所有必需来源新鲜时可跳过，任一来源缺失、陈旧或失败时只修复受影响 country/year；official 占位组合不会永久 miss。完整覆盖与真实 official/manual 数据仍为 `coverage_pending`，未调用真实 Provider。
 
 ## 12. Voyage / Schedule 真实数据方案
 

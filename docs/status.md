@@ -1,7 +1,7 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
 > P7 evidence snapshot date: 2026-09-04
-> Phase 1 local verification date: 2026-09-08 (offline calendar/runtime tests, full tests, typecheck, lint and build; no real-Provider re-verification)
+> Phase 1 local verification date: 2026-09-08 (offline calendar/runtime tests, full tests, typecheck, lint, build and independent review; no real-Provider re-verification)
 > Knowledge sync date: 2026-09-08
 > Current state authority: this rebaseline section. Dated sections below are historical checkpoints unless explicitly marked current.
 
@@ -9,13 +9,13 @@
 
 | Item | Current state |
 |---|---|
-| Current Project Phase | `V3 — FINAL SEALED` historical P7 baseline; approved Phase 1 calendar/test repair and count-contract fix implemented locally on `main`, awaiting independent review |
-| Current Git Head | `e1a73c3bd964a7ade368051ef1807228c5bc8abe` — `fix: complete phase 1 calendar sync and preserve runtime evidence` |
+| Current Project Phase | `V3 — FINAL SEALED` historical P7 baseline; approved Phase 1 calendar/test repair and count-contract fix implemented and locally verified on `main`; independent review completed with two findings fixed and re-verified locally; remaining business coverage is bounded below |
+| Current Git Head | `4f29a9549deaa7614dca306838a9e110d058667e` — `fix: count only current calendar sync records` |
 | P7 Entry Git Head | `4824d63f8e135ff3c9eb0849d9ba49e832ae000c` — `docs: rebaseline v3 state for p7 entry` |
 | Business-code baseline | `f7281c7ea58444dc3b2d55930d0069c45055cab8` — `fix: preserve persisted feed lifecycle on reads` |
-| Current working branch | `main` (tracking `origin/main`; Phase 1 changes and retained Web-diagnosis artifacts are currently uncommitted) |
+| Current working branch | `main` (tracking `origin/main`; committed Phase 1 changes; retained `.tmp/ShippingHot-WebDiagnosis-20260908/` remains untracked by instruction) |
 | Historical P7 acceptance branch | `codex/shipping-hot-v3-real-data` at `ed2c8448699971328b23247508a7b91fb537ab6b`; historical evidence branch, not the current checkout |
-| Local origin refs observed | `origin/main` points to `e1a73c3bd964a7ade368051ef1807228c5bc8abe`; `origin/codex/shipping-hot-v3-real-data` remains at historical `ed2c8448699971328b23247508a7b91fb537ab6b` |
+| Local origin refs observed | `origin/main` points to `4f29a9549deaa7614dca306838a9e110d058667e`; `origin/codex/shipping-hot-v3-real-data` remains at historical `ed2c8448699971328b23247508a7b91fb537ab6b` |
 | Schema | `v12`; migration changes in this review: none |
 | Toolchain | Node `24.15.0`, ABI `137`, `better-sqlite3@12.6.2` |
 | Operational Mode default | Mock; Real Mode remains explicit and fail-closed |
@@ -67,7 +67,26 @@
 
 > This section is a historical snapshot; its `main` SHA is not the current checkout. The current state is recorded in the rebaseline table above.
 
-`V3 — FINAL SEALED` remains the P7 acceptance state. P7-A through P7-G were accepted on the historical branch `codex/shipping-hot-v3-real-data` at `ed2c8448699971328b23247508a7b91fb537ab6b`; the current checkout is `main` at `f338ccffb5943c269102afaba41d520e2cf4121e` with the separately approved Phase 1 changes uncommitted.
+`V3 — FINAL SEALED` remains the P7 acceptance state. P7-A through P7-G were accepted on the historical branch `codex/shipping-hot-v3-real-data` at `ed2c8448699971328b23247508a7b91fb537ab6b`. The historical sentence formerly naming `main@f338ccf` with uncommitted Phase 1 changes described that earlier checkpoint only; the current checkout is recorded in the rebaseline table above.
+
+## Remaining Business Scope Rebaseline — 2026-09-08
+
+This rebaseline is deliberately bounded to the approved eight-port product scope and the six Calendar countries (`CN`, `TH`, `ID`, `MY`, `PH`, `VN`). “Complete” below never means global port, carrier, warning or news coverage.
+
+| Item | Current fact state | Finite acceptance boundary | Next authority |
+|---|---|---|---|
+| Six-country current + next-year Calendar runtime | `VERIFIED` offline for independent country/year cache checks, partial/all failure isolation, source-accurate coverage, provider-free GET and current-sync-only counts; live business completeness remains `COVERAGE_PENDING` | For each of 12 country/year cells, expose checked sources, cache/sync/provider state and event count; a cell is not complete while Calendarific is partial/unknown or official/manual evidence is absent. A real verification, if separately authorized, is capped at 12 Calendarific requests including retries and must stop on unknown quota, auth/rate-limit or contract change. | Existing boundary may be re-verified; adding an official live parser/source or bundled official/manual dataset requires architecture approval. |
+| Current Voyage ↔ focus Port | VesselAPI ETA path is `VERIFIED_LIVE`; canonical focus-port association is `PARTIAL`. Directory matches resolve only through exact verified alias/UNLOCODE identity. `CNYPG` remains an official destination observation with no `destinationPortId`. | Preserve the raw official destination key and trusted ETA time; set a canonical port relation only when the active directory resolves it exactly; directory-external destinations remain visible/unmapped and keep focus coverage pending. | Expanding the formal Port Directory, including adding `CNYPG`, requires architecture approval. |
+| JMA official warnings and geographic association | Parser contract is `IMPLEMENTED`; public activation is `LIVE_PENDING` and disabled. TMD/BMKG are `VERIFIED_LIVE` only for their enabled source paths. Port association is evidence-only string/alias/UNLOCODE matching; no coordinates or polygon relation exists. | Enable JMA only after an isolated official-payload probe proves stable source structure, timestamps/severity/lifecycle fields and fail-closed empty/changed responses. An alert may link to an approved focus port only from reliable alert geography mapped to that port; otherwise `relatedPortIds=[]` and uncertain time/severity/expiry remain explicit. | JMA activation and any new geospatial warning model/source require architecture approval; current eight-port scope contains no Japanese port. |
+| Port / Weather / Feed coverage | `VERIFIED_LIVE` but source-bounded: Portcast public pages and Open-Meteo cover the eight directory ports only; active Feed is The Loadstar plus Shekou `/ywgg/`; Maritime Executive is disabled after connectivity failure; Yantian/Nansha sources are deferred and Laem Chabang/Port Klang parsers remain pending. | Each source must keep independent runtime evidence, same-source last-known behavior, source/update/fetch times and zero Mock in Real Mode. Unavailable pages, ports or publications remain unavailable; a successful request or non-empty result is not complete coverage. | New/replacement source, provider, SDK or dependency requires architecture approval. Existing parser defect fixes need no new architecture decision. |
+| Commercial Schedule | `EXTERNAL_ACCESS_RESTRICTED / NOT CONFIGURED`. DCSA is a normalization/API standard, not a schedule data provider; current official guidance directs consumers to obtain access from a publishing carrier. No existing repository evidence proves an entitled carrier Schedule API or a legally reusable anonymous feed. | Accept only carrier-published planned calls/routes through an approved server-side adapter with documented access/terms/quota, exact vessel/service/voyage and port identities, timestamps and provider evidence. AIS/VesselAPI ETA, Mock, inferred rotation and scraped gated portals cannot satisfy this item. | Requires proof of existing carrier entitlement or a separately approved lawful free Provider; then architecture approval before implementation. |
+
+### 2026-09-08 Scope Verification
+
+- No application Provider, retained SQLite database or real Secret was opened. Public documentation research used no credentials or business API calls.
+- Targeted offline verification: 8 files / 193 tests passed (Calendar, Voyage, official warning and Readiness boundaries).
+- The first independent Bugbot review found two actionable issues: composite Calendar cache eligibility checked only the primary Provider ID, and the Calendar page description omitted China. After those fixes, a second independent review found the production Registry still treated all active provenance sources as cache-required, so empty official/manual placeholders caused a permanent cache miss. The cache contract now distinguishes readable provenance from configured required sources; the final independent review first requested documentation reconciliation, then re-reviewed the reconciled diff and found no actionable defect.
+- Final cache-fix targeted verification: 3 files / 52 tests passed (actual Registry composition, Calendar Provider and Runtime). Fake Calendarific made 12 calls on the first six-country/two-year run and 0 additional calls on the fresh second run. Final full verification: 64 files / 744 tests passed; `pnpm typecheck`, `pnpm lint`, `pnpm build` and `git diff --check` passed. Build emitted only the recorded large-chunk, stale Browserslist and dependency deprecation warnings; performance work is explicitly paused. No real Provider, Web server, retained database or Secret was used.
 
 | Gate | Final evidence |
 |---|---|
@@ -100,6 +119,13 @@
 - In the Mock diagnosis, the Translation Job was scheduled but returned `translation_disabled`; the reported `provider_unavailable` loop was not reproduced. Browser long-task, request-waterfall and render-timing evidence remains `pending` because a suitable browser Performance/Network capture was unavailable. The measured evidence therefore does not identify a Shipping HOT root cause; the extra page working set is consistent with development-server/browser loading, while other system activity remains a confounder. No performance code, Runtime default, Translation strategy or Vite watch configuration was changed.
 - Diagnostic residue remains intentionally retained for review at `.tmp/ShippingHot-WebDiagnosis-20260908` (including its isolated temporary database); the failed initial Temp-path copy is also retained. No cleanup candidate, database, Secret or environment configuration was deleted or modified.
 - Verification for this continuation: Calendar targeted tests `9/9`; full Vitest `739/739` across `64/64` files; typecheck, lint, build and `git diff --check` passed. The historical P7 `726/727` result and its date-sensitive Shekou limitation remain historical evidence and were not rewritten as a P7 rerun. Neat Freak manual Windows-equivalent audit is complete; the Bash inventory remains `pending/unavailable` because Bash and `scripts/audit-inventory.sh` are unavailable.
+
+## Phase 1 Continuation — Calendar Composite Cache Requirement Repair — 2026-09-08
+
+- Root cause: `calendarSourceIds` correctly listed every active/readable provenance, but Registry incorrectly reused that list as the full-cache requirement. Placeholder official/manual adapters had no configured business dataset and therefore could never write coverage, permanently forcing Calendarific to run again inside the seven-day TTL.
+- Minimal repair: `CalendarProvider.cacheRequiredSourceIds` is now an explicit Provider contract. Placeholder official/manual adapters declare `[]`; adapters with an explicitly configured dataset declare their actual `official-holiday-source` / `manual-holiday` provenance ID, including a configured empty dataset. Composite providers union those contracts; missing metadata on legacy/custom providers conservatively falls back to the provider/source ID. No source isolation, coverage, last-known, schema, dependency, Provider, Secret or deployment boundary changed.
+- Fixed-clock Registry-path regressions use Fake Calendarific and in-memory SQLite. Calendarific first run: 12 invocations and 12 current-run records; fresh second run: 0 additional Provider invocations, `skipped/calendar_cache_fresh`, zero records and unchanged Runtime success/failure/source-time evidence. Configured official/manual data requires both sources, and missing/stale/failed coverage prevents a full skip while successful data and current-run counts remain intact. `provider_usage.request_count` continues to count Runtime capability invocations (2 across the two Calendarific runs), not outbound country requests.
+- Verification for this repair: targeted 3 files / 52 tests and full Vitest 64 files / 744 tests passed; typecheck, full lint, build and `git diff --check` were rerun after documentation reconciliation and passed. Real Provider calls: 0. Calendar remains `IMPLEMENTED / COVERAGE_PENDING`; historical P7 evidence is unchanged.
 
 Known coverage gaps remain explicit:
 
@@ -367,8 +393,8 @@ Remaining pending work: real data coverage / runtime follow-up.
 
 ## 2. Current Environment
 
-- Current working branch: `main` at `e1a73c3bd964a7ade368051ef1807228c5bc8abe`; historical P7 acceptance branch: `codex/shipping-hot-v3-real-data` at `ed2c8448699971328b23247508a7b91fb537ab6b`; package version: `0.0.41`
-- Git remotes: `origin=ssh://git@ssh.github.com:443/rallsix66/Shipping-HOT.git` and `upstream=https://github.com/ourongxing/newsnow.git`; local `origin/main` points to `e1a73c3bd964a7ade368051ef1807228c5bc8abe` and `origin/codex/shipping-hot-v3-real-data` remains at the historical seal. No remote refresh was performed in this continuation; these are the latest observed local remote-tracking refs.
+- Current working branch: `main` at `4f29a9549deaa7614dca306838a9e110d058667e`; historical P7 acceptance branch: `codex/shipping-hot-v3-real-data` at `ed2c8448699971328b23247508a7b91fb537ab6b`; package version: `0.0.41`. The 2026-09-08 remaining-scope review and Bugbot repairs are intentionally uncommitted.
+- Git remotes: `origin=ssh://git@ssh.github.com:443/rallsix66/Shipping-HOT.git` and `upstream=https://github.com/ourongxing/newsnow.git`; local `origin/main` points to `4f29a9549deaa7614dca306838a9e110d058667e` and `origin/codex/shipping-hot-v3-real-data` remains at the historical seal. No remote refresh was performed in this continuation; these are the latest observed local remote-tracking refs.
 - Local run status: Vite development smoke returned 200 for `/`, `/feed` and `/api/shipping`; default `provider.feed=mock`, `provider.weather=mock` and `provider.weatherAlerts=off`, one non-weather Feed item and one Mock weather item were returned without external weather calls; current process-scoped Mock/Off production Nitro smoke returns 200 for `/`, `/api/shipping/health`, `/api/shipping/runtime`, `/api/shipping/readiness`, `/api/shipping/search/ports`, `/api/shipping/search/vessels` and `/api/shipping`, with no `#nitro/index` subroute error observed
 - Deployment status: `out-of-scope`; repository contains optional Cloudflare/Vercel/Bun/Docker configuration, but no deployment was performed
 - Database / external services: P0 uses fixed Node `24.15.0` / ABI `137`, `better-sqlite3@12.6.2`, db0 path `.data/shipping-hot-v3.sqlite3`, and passed native read/write plus process-A-write → close → process-B-read smoke. The current workspace inventory found no legacy `.data/db.sqlite3`; it is not the V3 runtime path. AISStream, Portcast public pages and Open-Meteo remain optional server-side sources.

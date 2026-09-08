@@ -15,6 +15,8 @@ export interface CalendarSyncJobOptions {
   database: Database
   dataMode: ShippingDataMode
   providerId?: string
+  /** Provenance source IDs whose coverage must all be fresh before cache-only skip. */
+  sourceIds?: readonly string[]
   provider?: CalendarProvider
   intervalMs: number
   enabled?: boolean
@@ -86,18 +88,20 @@ function aggregateCalendarSyncResults(results: readonly CalendarYearSyncResult[]
   }
 }
 
-async function countriesDueForSync(repository: ShippingRepository, year: number, countries: readonly CalendarCountryCode[], providerId: string, nowMs: number, ttlMs: number): Promise<CalendarCountryCode[]> {
+async function countriesDueForSync(repository: ShippingRepository, year: number, countries: readonly CalendarCountryCode[], sourceIds: readonly string[], nowMs: number, ttlMs: number): Promise<CalendarCountryCode[]> {
   try {
     const settings = await repository.getSettings()
     const coverage = settings?.calendarSync ?? []
     return countries.filter((countryCode) => {
-      const row = coverage
-        .filter(item => item.countryCode === countryCode && item.year === year && item.sourceId === providerId)
-        .sort((a, b) => (b.lastCheckedAt ?? "").localeCompare(a.lastCheckedAt ?? ""))
-        .at(0)
-      if (!row || row.error || row.status === "unknown" || !row.lastCheckedAt) return true
-      const checkedAt = Date.parse(row.lastCheckedAt)
-      return !Number.isFinite(checkedAt) || checkedAt < nowMs - ttlMs
+      return sourceIds.some((sourceId) => {
+        const row = coverage
+          .filter(item => item.countryCode === countryCode && item.year === year && item.sourceId === sourceId)
+          .sort((a, b) => (b.lastCheckedAt ?? "").localeCompare(a.lastCheckedAt ?? ""))
+          .at(0)
+        if (!row || row.error || row.status === "unknown" || !row.lastCheckedAt) return true
+        const checkedAt = Date.parse(row.lastCheckedAt)
+        return !Number.isFinite(checkedAt) || checkedAt < nowMs - ttlMs
+      })
     })
   } catch {
     // If the read-side cache check is unavailable, attempt the sync and let its
@@ -112,6 +116,8 @@ export function createCalendarSyncJob(options: CalendarSyncJobOptions): RuntimeJ
   const now = options.now ?? (() => new Date())
   const repository = new ShippingRepository(options.database, options.dataMode)
   const providerId = options.provider?.providerId ?? options.providerId ?? "unavailable"
+  const configuredSourceIds = options.sourceIds ?? options.provider?.cacheRequiredSourceIds
+  const sourceIds = [...new Set(configuredSourceIds === undefined ? [providerId] : configuredSourceIds)]
   const sync: (year: number, requestedCountries: readonly CalendarCountryCode[]) => Promise<CalendarYearSyncResult> = options.sync
     ? async (year, requestedCountries) => options.sync!(year, requestedCountries)
     : async (year, requestedCountries) => {
@@ -145,7 +151,7 @@ export function createCalendarSyncJob(options: CalendarSyncJobOptions): RuntimeJ
       const coverageTtlMs = options.coverageTtlMs ?? CALENDAR_COVERAGE_TTL_MS
       const results: CalendarYearSyncResult[] = []
       for (const year of calendarSyncYears(currentYear)) {
-        const countriesToSync = await countriesDueForSync(repository, year, countries, providerId, runAt.getTime(), coverageTtlMs)
+        const countriesToSync = await countriesDueForSync(repository, year, countries, sourceIds, runAt.getTime(), coverageTtlMs)
         if (!countriesToSync.length) continue
         const fetchedAt = runAt.toISOString()
         try {

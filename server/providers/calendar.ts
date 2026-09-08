@@ -5,6 +5,12 @@ import { providerErrorFromUnknown, providerHttpError } from "#/providers/contrac
 
 export interface CalendarProvider {
   readonly providerId: string
+  /**
+   * Provenance sources whose coverage must be fresh before Runtime may use a
+   * cache-only skip. An empty list is an explicit placeholder-only contract;
+   * undefined is reserved for legacy/custom providers that use providerId.
+   */
+  readonly cacheRequiredSourceIds?: readonly string[]
   getEvents: (query: CalendarQuery) => Promise<CalendarProviderResult>
 }
 
@@ -325,6 +331,7 @@ export function createCalendarificProvider(options: CalendarificProviderOptions)
   const now = options.now ?? (() => new Date())
   return {
     providerId: "calendarific",
+    cacheRequiredSourceIds: [calendarProviderSourceIds.calendarific],
     async getEvents(query) {
       const fetchedAt = now().toISOString()
       const events: CalendarEvent[] = []
@@ -382,7 +389,11 @@ export interface OfficialHolidayProviderOptions {
 }
 
 export function createOfficialHolidayProvider(options: OfficialHolidayProviderOptions = {}): CalendarProvider {
-  return { providerId: "official", getEvents: async query => scopedEvents(options, query, "official-holiday-source") }
+  return {
+    providerId: "official",
+    cacheRequiredSourceIds: options.events === undefined ? [] : [calendarProviderSourceIds.official],
+    getEvents: async query => scopedEvents(options, query, calendarProviderSourceIds.official),
+  }
 }
 
 export interface ManualHolidayProviderOptions {
@@ -391,7 +402,11 @@ export interface ManualHolidayProviderOptions {
 }
 
 export function createManualHolidayProvider(options: ManualHolidayProviderOptions = {}): CalendarProvider {
-  return { providerId: "manual", getEvents: async query => scopedEvents(options, query, "manual-holiday") }
+  return {
+    providerId: "manual",
+    cacheRequiredSourceIds: options.events === undefined ? [] : [calendarProviderSourceIds.manual],
+    getEvents: async query => scopedEvents(options, query, calendarProviderSourceIds.manual),
+  }
 }
 
 function mockDate(year: number, month: number, day: number): string {
@@ -408,6 +423,7 @@ export function createMockCalendarEvents(year: number, now = new Date().toISOStr
 export function createMockCalendarProvider(now = () => new Date()): CalendarProvider {
   return {
     providerId: "mock-calendar",
+    cacheRequiredSourceIds: [calendarProviderSourceIds.mock],
     async getEvents(query) {
       const fetchedAt = now().toISOString()
       const events = createMockCalendarEvents(query.year, fetchedAt).filter(event => query.countries.includes(event.countryCode))
@@ -423,6 +439,7 @@ export function createMockCalendarProvider(now = () => new Date()): CalendarProv
 export function createUnavailableCalendarProvider(sourceId: string, error: string, now = () => new Date()): CalendarProvider {
   return {
     providerId: "unavailable",
+    cacheRequiredSourceIds: [sourceId],
     async getEvents(query) {
       const fetchedAt = now().toISOString()
       return {
@@ -485,6 +502,7 @@ export function createCompositeCalendarProvider(options: CompositeCalendarProvid
   const sources = sourceOptions.filter((value): value is { sourceId: string, provider: CalendarProvider } => value !== undefined)
   return {
     providerId: sources[0]?.provider.providerId ?? "unavailable",
+    cacheRequiredSourceIds: [...new Set(sources.flatMap(source => source.provider.cacheRequiredSourceIds ?? [source.sourceId]))],
     async getEvents(query) {
       const fetchedAt = new Date().toISOString()
       const results = await Promise.all(sources.map(async (source) => {

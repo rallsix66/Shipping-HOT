@@ -1474,7 +1474,7 @@ export function CalendarPage() {
       <SecHead
         eyebrow="市场日历"
         title="国家日历"
-        description="缓存 TH / ID / MY / PH / VN 的国家假日与运营提醒；宗教日期不默认等同于停工。"
+        description="缓存 CN / TH / ID / MY / PH / VN 的国家假日与运营提醒；宗教日期不默认等同于停工。"
         right={(
           <button type="button" className="btn-gradient" disabled={syncState === "syncing"} onClick={sync}>
             <span className="i-ph-cloud-arrow-down" />

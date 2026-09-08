@@ -1,12 +1,16 @@
 import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
-import { describe, expect, it } from "vitest"
-import { initShippingTables } from "#/database/shipping"
+import { afterEach, describe, expect, it, vi } from "vitest"
+import type { CalendarEvent } from "@shared/calendar"
+import { ShippingRepository, initShippingTables } from "#/database/shipping"
+import { calendarProvenances, createCompositeCalendarProvider, createManualHolidayProvider, createOfficialHolidayProvider } from "#/providers/calendar"
 import type { AisTrackingProvider } from "#/providers/ais/contracts"
 import type { AisAreaProvider } from "#/providers/aisstream-area"
 import type { VoyageProvider } from "#/providers/voyage/contracts"
 import { createVoyageProviderForDatabase } from "#/providers/voyage"
 import { getDefaultRuntimeJobs } from "#/runtime/registry"
+import { BackgroundRuntime } from "#/runtime/background-runtime"
+import { RuntimeRepository } from "#/database/runtime-jobs"
 
 function createNativeDatabase() {
   const native = new NativeDatabase(":memory:")
@@ -50,6 +54,185 @@ const aisAreaProvider: AisAreaProvider = {
 }
 
 describe("runtime registry", () => {
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+    vi.resetModules()
+  })
+
+  it("cache-skips a second production Calendarific composite run when placeholder sources are empty", async () => {
+    const { database, native } = createNativeDatabase()
+    const previous = {
+      dataMode: process.env.SHIPPING_DATA_MODE,
+      calendar: process.env.SHIPPING_CALENDAR_PROVIDER,
+      key: process.env.CALENDARIFIC_API_KEY,
+    }
+    let calendarificCalls = 0
+    try {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date("2030-09-01T00:00:00.000Z"))
+      process.env.SHIPPING_DATA_MODE = "real"
+      process.env.SHIPPING_CALENDAR_PROVIDER = "calendarific"
+      process.env.CALENDARIFIC_API_KEY = "fake-calendarific-key"
+      vi.stubGlobal("fetch", async (input: string | URL) => {
+        const url = new URL(String(input))
+        calendarificCalls++
+        const country = url.searchParams.get("country") ?? "CN"
+        const year = Number(url.searchParams.get("year"))
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ response: { coverage: "partial", holidays: [{ name: `${country} Holiday`, date: { iso: `${year}-01-01` }, type: ["National holiday"] }] } }),
+        }
+      })
+      vi.resetModules()
+      const [{ getDefaultRuntimeJobs: getConfiguredRuntimeJobs }, { initShippingTables: initConfiguredTables }, { configureCalendarProviders }] = await Promise.all([
+        import("#/runtime/registry"),
+        import("#/database/shipping"),
+        import("#/providers/calendar"),
+      ])
+      await initConfiguredTables(database, "real")
+      const calendarConfiguration = configureCalendarProviders({
+        SHIPPING_DATA_MODE: "real",
+        SHIPPING_CALENDAR_PROVIDER: "calendarific",
+        CALENDARIFIC_API_KEY: "fake-calendarific-key",
+      })
+      expect(calendarConfiguration.modes.calendarSourceIds).toEqual(["calendarific", "official-holiday-source", "manual-holiday"])
+      expect(calendarConfiguration.provider.cacheRequiredSourceIds).toEqual(["calendarific"])
+      const calendarJob = getConfiguredRuntimeJobs({ database, dataMode: "real", aisProvider, voyageProvider, calendarProvider: calendarConfiguration.provider, now: () => new Date("2030-09-01T00:00:00.000Z") })
+        .find(job => job.id === "calendar-sync")
+      if (!calendarJob) throw new Error("calendar_job_missing")
+      const runtime = new BackgroundRuntime(new RuntimeRepository(database), { now: () => new Date("2030-09-01T00:00:00.000Z") })
+      const runtimeRepository = new RuntimeRepository(database)
+      runtime.register(calendarJob)
+      await runtime.start()
+
+      await expect(runtime.runNow("calendar-sync")).resolves.toMatchObject({ status: "success", recordsRead: 12, recordsWritten: 12 })
+      expect(calendarificCalls).toBe(12)
+      const firstRuntime = await runtimeRepository.getProviderRuntime("calendarific", "calendar_sync")
+      await expect(runtime.runNow("calendar-sync")).resolves.toMatchObject({ status: "skipped", errorCode: "calendar_cache_fresh", recordsRead: 0, recordsWritten: 0 })
+      expect(calendarificCalls).toBe(12)
+      expect(await runtimeRepository.getProviderRuntime("calendarific", "calendar_sync")).toMatchObject({
+        status: firstRuntime?.status,
+        lastSuccessAt: firstRuntime?.lastSuccessAt,
+        lastFailureAt: firstRuntime?.lastFailureAt,
+        lastSourceUpdatedAt: firstRuntime?.lastSourceUpdatedAt,
+        consecutiveFailures: firstRuntime?.consecutiveFailures,
+      })
+      expect(await runtimeRepository.findLatestProviderUsage({ providerId: "calendarific", capability: "calendar_sync" })).toMatchObject({ requestCount: 2, recordsCount: 12 })
+      runtime.stop()
+    } finally {
+      if (previous.dataMode === undefined) delete process.env.SHIPPING_DATA_MODE
+      else process.env.SHIPPING_DATA_MODE = previous.dataMode
+      if (previous.calendar === undefined) delete process.env.SHIPPING_CALENDAR_PROVIDER
+      else process.env.SHIPPING_CALENDAR_PROVIDER = previous.calendar
+      if (previous.key === undefined) delete process.env.CALENDARIFIC_API_KEY
+      else process.env.CALENDARIFIC_API_KEY = previous.key
+      native.close()
+    }
+  })
+
+  it("requires configured official/manual datasets while allowing each repaired coverage state to cache", async () => {
+    const { database, native } = createNativeDatabase()
+    const now = new Date("2030-09-01T00:00:00.000Z")
+    const years = [2030, 2031]
+    const countryCodes = ["CN", "TH", "ID", "MY", "PH", "VN"] as const
+    const eventsFor = (sourceId: "official-holiday-source" | "manual-holiday", sourceKind: "official" | "user", provenance: typeof calendarProvenances.official | typeof calendarProvenances.manual): CalendarEvent[] => years.flatMap(year => countryCodes.map(countryCode => ({
+      id: `${sourceId}:${countryCode}:${year}`,
+      countryCode,
+      name: `${countryCode} configured holiday`,
+      date: `${year}-01-01`,
+      type: sourceKind === "user" ? "company_custom" : "public_holiday",
+      isPublicHoliday: sourceKind === "official",
+      businessImpact: "medium",
+      sourceId,
+      sourceKind,
+      verified: true,
+      lastCheckedAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+      fetchedAt: now.toISOString(),
+      stale: false,
+      sourceStatus: "healthy",
+      provenance,
+      source_type: "real",
+    })))
+    const official = createOfficialHolidayProvider({ events: eventsFor("official-holiday-source", "official", calendarProvenances.official), now: () => now })
+    const manual = createManualHolidayProvider({ events: eventsFor("manual-holiday", "user", calendarProvenances.manual), now: () => now })
+    const composite = createCompositeCalendarProvider({ official, manual })
+    let compositeCalls = 0
+    const provider = {
+      ...composite,
+      getEvents: async (...args: Parameters<typeof composite.getEvents>) => {
+        compositeCalls++
+        return composite.getEvents(...args)
+      },
+    }
+    const runtime = new BackgroundRuntime(new RuntimeRepository(database), { now: () => now })
+    try {
+      await initShippingTables(database, "real")
+      const calendarJob = getDefaultRuntimeJobs({ database, dataMode: "real", aisProvider, voyageProvider, calendarProvider: provider, now: () => now }).find(job => job.id === "calendar-sync")
+      if (!calendarJob) throw new Error("calendar_job_missing")
+      runtime.register(calendarJob)
+      await runtime.start()
+      await expect(runtime.runNow("calendar-sync")).resolves.toMatchObject({ status: "success", recordsRead: 24, recordsWritten: 24 })
+      expect(compositeCalls).toBe(2)
+      await expect(runtime.runNow("calendar-sync")).resolves.toMatchObject({ status: "skipped", errorCode: "calendar_cache_fresh" })
+      expect(compositeCalls).toBe(2)
+
+      const repository = new ShippingRepository(database, "real")
+      for (const state of ["missing", "stale", "failed"] as const) {
+        const settings = await repository.getSettings()
+        if (!settings) throw new Error("settings_missing")
+        const calendarSync = settings.calendarSync ?? []
+        const target = calendarSync.find(item => item.countryCode === "CN" && item.year === 2030 && item.sourceId === "manual-holiday")
+        if (!target) throw new Error("manual_coverage_missing")
+        const remaining = calendarSync.filter(item => item !== target)
+        await repository.saveSettings({
+          ...settings,
+          calendarSync: state === "missing"
+            ? remaining
+            : [...remaining, {
+                ...target,
+                lastCheckedAt: state === "stale" ? "2030-08-01T00:00:00.000Z" : target.lastCheckedAt,
+                ...(state === "failed" ? { error: "manual_failed", errorCode: "provider_unavailable" } : { error: undefined, errorCode: undefined }),
+              }],
+        })
+        const callsBeforeRepair = compositeCalls
+        await expect(runtime.runNow("calendar-sync")).resolves.toMatchObject({ status: "success", recordsRead: 2, recordsWritten: 2 })
+        expect(compositeCalls).toBe(callsBeforeRepair + 1)
+        await expect(runtime.runNow("calendar-sync")).resolves.toMatchObject({ status: "skipped", errorCode: "calendar_cache_fresh" })
+      }
+    } finally {
+      runtime.stop()
+      native.close()
+    }
+  })
+
+  it("cache-skips the actual official placeholder composition without requiring empty sources", async () => {
+    const { database, native } = createNativeDatabase()
+    let providerCalls = 0
+    try {
+      const { configureCalendarProviders } = await import("#/providers/calendar")
+      const configured = configureCalendarProviders({ SHIPPING_DATA_MODE: "real", SHIPPING_CALENDAR_PROVIDER: "official" })
+      expect(configured.modes.calendarSourceIds).toEqual(["official-holiday-source", "manual-holiday"])
+      expect(configured.provider.cacheRequiredSourceIds).toEqual([])
+      const provider = {
+        ...configured.provider,
+        getEvents: async (...args: Parameters<typeof configured.provider.getEvents>) => {
+          providerCalls++
+          return configured.provider.getEvents(...args)
+        },
+      }
+      await initShippingTables(database, "real")
+      const job = getDefaultRuntimeJobs({ database, dataMode: "real", aisProvider, voyageProvider, calendarProvider: provider, now: () => new Date("2030-09-01T00:00:00.000Z") }).find(item => item.id === "calendar-sync")
+      if (!job) throw new Error("calendar_job_missing")
+      await expect(job.run()).resolves.toMatchObject({ status: "skipped", errorCode: "calendar_cache_fresh", recordsRead: 0, recordsWritten: 0 })
+      expect(providerCalls).toBe(0)
+    } finally {
+      native.close()
+    }
+  })
+
   it("registers Translation alongside AIS, Voyage, Feed, and Calendar jobs in Mock Mode", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")

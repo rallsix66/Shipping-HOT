@@ -2,7 +2,7 @@ import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
 import type { CalendarCountryCode, CalendarEvent } from "@shared/calendar"
-import { CALENDAR_SYNC_CAPABILITY, createCalendarSyncJob } from "./calendar-sync-job"
+import { CALENDAR_SYNC_CAPABILITY, calendarSyncYears, createCalendarSyncJob } from "./calendar-sync-job"
 import { BackgroundRuntime } from "./background-runtime"
 import type { CalendarProvider } from "#/providers/calendar"
 import { RuntimeRepository } from "#/database/runtime-jobs"
@@ -400,6 +400,91 @@ describe("calendar sync job", () => {
       })
     } finally {
       runtime.stop()
+      native.close()
+    }
+  })
+
+  it("requires every configured composite source to be fresh before cache-only skip", async () => {
+    const { database, native } = createNativeDatabase()
+    const shippingRepository = new ShippingRepository(database, "real")
+    const syncYears: number[] = []
+    try {
+      await initShippingTables(database, "real")
+      const settings = await shippingRepository.getSettings()
+      if (!settings) throw new Error("settings_missing")
+      await shippingRepository.saveSettings({
+        ...settings,
+        calendarSync: calendarSyncYears(TEST_YEAR).flatMap(year => countries.flatMap(countryCode => [
+          { countryCode, year, status: "partial" as const, sourceId: "calendarific", lastCheckedAt: TEST_CACHED_AT },
+          { countryCode, year, status: "unknown" as const, sourceId: "official-holiday-source", lastCheckedAt: TEST_CACHED_AT, error: "official_pending" },
+          { countryCode, year, status: "partial" as const, sourceId: "manual-holiday", lastCheckedAt: TEST_CACHED_AT },
+        ])),
+      })
+
+      const job = createCalendarSyncJob({
+        database,
+        dataMode: "real",
+        providerId: "calendarific",
+        sourceIds: ["calendarific", "official-holiday-source", "manual-holiday"],
+        intervalMs: 86_400_000,
+        countries,
+        year: () => TEST_YEAR,
+        now: () => TEST_NOW,
+        sync: async (year, requestedCountries) => {
+          syncYears.push(year)
+          return {
+            events: [],
+            coverage: requestedCountries.flatMap(countryCode => [
+              { countryCode, year, status: "partial" as const, sourceId: "calendarific", lastCheckedAt: TEST_FETCHED_AT },
+              { countryCode, year, status: "unknown" as const, sourceId: "official-holiday-source", lastCheckedAt: TEST_FETCHED_AT },
+              { countryCode, year, status: "partial" as const, sourceId: "manual-holiday", lastCheckedAt: TEST_FETCHED_AT },
+            ]),
+            fetchedAt: TEST_FETCHED_AT,
+          }
+        },
+      })
+
+      await expect(job.run()).resolves.toMatchObject({ status: "success" })
+      expect(syncYears).toEqual([TEST_YEAR, TEST_NEXT_YEAR])
+    } finally {
+      native.close()
+    }
+  })
+
+  it("uses provenance source IDs for official/manual cache-only mode", async () => {
+    const { database, native } = createNativeDatabase()
+    const shippingRepository = new ShippingRepository(database, "real")
+    let syncCalls = 0
+    try {
+      await initShippingTables(database, "real")
+      const settings = await shippingRepository.getSettings()
+      if (!settings) throw new Error("settings_missing")
+      await shippingRepository.saveSettings({
+        ...settings,
+        calendarSync: calendarSyncYears(TEST_YEAR).flatMap(year => countries.flatMap(countryCode => [
+          { countryCode, year, status: "partial" as const, sourceId: "official-holiday-source", lastCheckedAt: TEST_CACHED_AT },
+          { countryCode, year, status: "partial" as const, sourceId: "manual-holiday", lastCheckedAt: TEST_CACHED_AT },
+        ])),
+      })
+
+      const job = createCalendarSyncJob({
+        database,
+        dataMode: "real",
+        providerId: "official",
+        sourceIds: ["official-holiday-source", "manual-holiday"],
+        intervalMs: 86_400_000,
+        countries,
+        year: () => TEST_YEAR,
+        now: () => TEST_NOW,
+        sync: async () => {
+          syncCalls++
+          throw new Error("must_not_sync")
+        },
+      })
+
+      await expect(job.run()).resolves.toMatchObject({ status: "skipped", errorCode: "calendar_cache_fresh" })
+      expect(syncCalls).toBe(0)
+    } finally {
       native.close()
     }
   })

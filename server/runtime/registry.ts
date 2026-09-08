@@ -12,6 +12,7 @@ import { createAisAreaSyncJob } from "#/runtime/ais-area-sync-job"
 import { MockFeedProvider, activeShippingFeedSourceIds, createPublicFeedProvider, shippingFeedSources } from "#/providers/feed"
 import { createFeedSyncJob } from "#/runtime/feed-sync-job"
 import { createCalendarSyncJob } from "#/runtime/calendar-sync-job"
+import type { CalendarProvider } from "#/providers/calendar"
 import { createPortSyncJob } from "#/runtime/port-sync-job"
 import { createWeatherSyncJob } from "#/runtime/weather-sync-job"
 import { createWeatherAlertSyncJob } from "#/runtime/weather-alert-sync-job"
@@ -33,6 +34,7 @@ export interface RuntimeRegistryOptions {
   aisProvider?: AisTrackingProvider
   aisAreaProvider?: AisAreaProvider
   voyageProvider?: VoyageProvider
+  calendarProvider?: CalendarProvider
   translationProvider?: TranslationProvider
   translationSecretStore?: SecretStore
   now?: () => Date
@@ -112,10 +114,11 @@ function feedJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
 }
 
 function calendarJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
+  const provider = options.calendarProvider ?? providers.calendar
   return [createCalendarSyncJob({
     database: options.database,
     dataMode: options.dataMode,
-    provider: providers.calendar,
+    provider,
     intervalMs: calendarIntervalMs(),
     enabled: true,
     now: options.now,
