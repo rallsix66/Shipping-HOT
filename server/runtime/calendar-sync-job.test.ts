@@ -1,7 +1,7 @@
 import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
-import type { CalendarCountryCode } from "@shared/calendar"
+import type { CalendarCountryCode, CalendarEvent } from "@shared/calendar"
 import { CALENDAR_SYNC_CAPABILITY, createCalendarSyncJob } from "./calendar-sync-job"
 import { BackgroundRuntime } from "./background-runtime"
 import type { CalendarProvider } from "#/providers/calendar"
@@ -213,6 +213,62 @@ describe("calendar sync job", () => {
     }
   })
 
+  it("counts only the records returned by each year through the default Provider path", async () => {
+    const { database, native } = createNativeDatabase()
+    const shippingRepository = new ShippingRepository(database, "real")
+    const runtimeRepository = new RuntimeRepository(database)
+    const runtime = new BackgroundRuntime(runtimeRepository, { now: () => TEST_NOW })
+    let providerCalls = 0
+    try {
+      await initShippingTables(database, "real")
+      await shippingRepository.upsertCalendarEvent(calendarRecord("CN", TEST_YEAR - 1, 1))
+      await shippingRepository.upsertCalendarEvent(calendarRecord("MY", TEST_YEAR - 1, 2))
+
+      const provider: CalendarProvider = {
+        providerId: "calendarific",
+        getEvents: async (query) => {
+          providerCalls += 1
+          const count = query.year === TEST_YEAR ? 2 : 3
+          return {
+            events: Array.from({ length: count }, (_, index) => calendarRecord("CN", query.year, index + 1)),
+            coverage: query.countries.map(countryCode => ({
+              countryCode,
+              year: query.year,
+              status: "partial" as const,
+              sourceId: "calendarific",
+              lastCheckedAt: TEST_FETCHED_AT,
+            })),
+            fetchedAt: TEST_FETCHED_AT,
+          }
+        },
+      }
+      runtime.register(createCalendarSyncJob({
+        database,
+        dataMode: "real",
+        provider,
+        intervalMs: 60 * 60 * 1000,
+        countries,
+        year: () => TEST_YEAR,
+        now: () => TEST_NOW,
+      }))
+      await runtime.start()
+
+      await expect(runtime.runNow("calendar-sync")).resolves.toMatchObject({
+        status: "success",
+        recordsRead: 5,
+        recordsWritten: 5,
+        sourceUpdatedAt: TEST_FETCHED_AT,
+      })
+      expect(providerCalls).toBe(2)
+      expect(await shippingRepository.listCalendarEvents()).toHaveLength(7)
+      expect((await runtimeRepository.listSyncRuns("calendarific"))[0]).toMatchObject({ recordsRead: 5, recordsWritten: 5 })
+      expect((await runtimeRepository.findLatestProviderUsage({ providerId: "calendarific", capability: CALENDAR_SYNC_CAPABILITY }))).toMatchObject({ requestCount: 1, recordsCount: 5 })
+    } finally {
+      runtime.stop()
+      native.close()
+    }
+  })
+
   it("skips a fully fresh two-year cache without advancing Runtime evidence", async () => {
     const { database, native } = createNativeDatabase()
     const shippingRepository = new ShippingRepository(database, "real")
@@ -311,7 +367,7 @@ describe("calendar sync job", () => {
         getEvents: async (query) => {
           syncYears.push(query.year)
           return {
-            events: [],
+            events: Array.from({ length: 3 }, (_, index) => calendarRecord("CN", query.year, index + 1)),
             coverage: query.countries.map(countryCode => ({
               countryCode,
               year: query.year,
@@ -334,7 +390,7 @@ describe("calendar sync job", () => {
       }))
       await runtime.start()
 
-      await expect(runtime.runNow("calendar-sync")).resolves.toMatchObject({ status: "success", recordsRead: 0, recordsWritten: 0, sourceUpdatedAt: TEST_FETCHED_AT })
+      await expect(runtime.runNow("calendar-sync")).resolves.toMatchObject({ status: "success", recordsRead: 3, recordsWritten: 3, sourceUpdatedAt: TEST_FETCHED_AT })
       expect(syncYears).toEqual([TEST_NEXT_YEAR])
       expect(await shippingRepository.getSettings()).toMatchObject({
         calendarSync: expect.arrayContaining([
@@ -396,4 +452,27 @@ function calendarSyncCoverage(countryCode: CalendarCountryCode) {
     sourceId: "calendarific",
     lastCheckedAt: TEST_CACHED_AT,
   }))
+}
+
+function calendarRecord(countryCode: CalendarCountryCode, year: number, index: number): CalendarEvent {
+  const date = `${year}-10-${String(index).padStart(2, "0")}`
+  return {
+    id: `calendar:${countryCode}:${date}:provider-record-${index}:public_holiday:calendarific`,
+    countryCode,
+    name: `Provider record ${index}`,
+    date,
+    type: "public_holiday",
+    isPublicHoliday: true,
+    businessImpact: "medium",
+    sourceId: "calendarific",
+    sourceKind: "third_party",
+    sourceUrl: "https://calendarific.com/",
+    verified: false,
+    lastCheckedAt: TEST_FETCHED_AT,
+    updatedAt: TEST_FETCHED_AT,
+    fetchedAt: TEST_FETCHED_AT,
+    stale: false,
+    sourceStatus: "healthy",
+    provenance: { sourceType: "third_party", dataNature: "reported", sourceId: "calendarific", verified: false },
+  }
 }

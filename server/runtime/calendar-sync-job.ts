@@ -25,6 +25,12 @@ export interface CalendarSyncJobOptions {
   sync?: (year: number, countries: readonly CalendarCountryCode[]) => Promise<CalendarProviderResult>
 }
 
+interface CalendarYearSyncResult extends CalendarProviderResult {
+  /** Counts for this year only; `events` may be a retained full business snapshot. */
+  syncRecordsRead?: number
+  syncRecordsWritten?: number
+}
+
 export function calendarSyncYears(currentYear: number): [number, number] {
   return [currentYear, currentYear + 1]
 }
@@ -66,7 +72,7 @@ function calendarCoverageKey(item: CalendarCoverage): string {
   return `${item.countryCode}/${item.year}/${item.sourceId}`
 }
 
-function aggregateCalendarSyncResults(results: readonly CalendarProviderResult[], fallbackFetchedAt: string): CalendarProviderResult {
+function aggregateCalendarSyncResults(results: readonly CalendarYearSyncResult[], fallbackFetchedAt: string): CalendarYearSyncResult {
   const coverage = new Map<string, CalendarCoverage>()
   for (const result of results) {
     for (const item of result.coverage) coverage.set(calendarCoverageKey(item), item)
@@ -75,6 +81,8 @@ function aggregateCalendarSyncResults(results: readonly CalendarProviderResult[]
     events: results.flatMap(item => item.events),
     coverage: [...coverage.values()],
     fetchedAt: results.map(item => item.fetchedAt).sort().at(-1) ?? fallbackFetchedAt,
+    syncRecordsRead: results.reduce((total, item) => total + (item.syncRecordsRead ?? item.events.length), 0),
+    syncRecordsWritten: results.reduce((total, item) => total + (item.syncRecordsWritten ?? item.events.length), 0),
   }
 }
 
@@ -104,19 +112,27 @@ export function createCalendarSyncJob(options: CalendarSyncJobOptions): RuntimeJ
   const now = options.now ?? (() => new Date())
   const repository = new ShippingRepository(options.database, options.dataMode)
   const providerId = options.provider?.providerId ?? options.providerId ?? "unavailable"
-  const sync = options.sync ?? (async (year, requestedCountries) => {
-    if (!options.provider) throw new Error("calendar_provider_missing")
-    const result = await options.provider.getEvents({ year, countries: [...requestedCountries] })
-    const existing = await repository.listCalendarEvents()
-    const reconciled = reconcileCalendarEvents(existing, result.events, result.coverage, year)
-    if (reconciled.removedIds.length) await repository.deleteCalendarEvents(reconciled.removedIds)
-    for (const event of reconciled.events) await repository.upsertCalendarEvent(event)
-    const settings = await repository.getSettings() ?? structuredClone(defaultShippingSettings)
-    const previousCoverage = settings.calendarSync ?? []
-    const coverage = [...previousCoverage.filter(item => !(requestedCountries.includes(item.countryCode) && item.year === year)), ...result.coverage]
-    await repository.saveSettings({ ...settings, calendarSync: coverage })
-    return { ...result, events: reconciled.events, coverage }
-  })
+  const sync: (year: number, requestedCountries: readonly CalendarCountryCode[]) => Promise<CalendarYearSyncResult> = options.sync
+    ? async (year, requestedCountries) => options.sync!(year, requestedCountries)
+    : async (year, requestedCountries) => {
+      if (!options.provider) throw new Error("calendar_provider_missing")
+      const result = await options.provider.getEvents({ year, countries: [...requestedCountries] })
+      const existing = await repository.listCalendarEvents()
+      const reconciled = reconcileCalendarEvents(existing, result.events, result.coverage, year)
+      if (reconciled.removedIds.length) await repository.deleteCalendarEvents(reconciled.removedIds)
+      for (const event of reconciled.events) await repository.upsertCalendarEvent(event)
+      const settings = await repository.getSettings() ?? structuredClone(defaultShippingSettings)
+      const previousCoverage = settings.calendarSync ?? []
+      const coverage = [...previousCoverage.filter(item => !(requestedCountries.includes(item.countryCode) && item.year === year)), ...result.coverage]
+      await repository.saveSettings({ ...settings, calendarSync: coverage })
+      return {
+        ...result,
+        events: reconciled.events,
+        coverage,
+        syncRecordsRead: result.events.length,
+        syncRecordsWritten: result.events.length,
+      }
+    }
   return {
     id: "calendar-sync",
     providerId,
@@ -127,7 +143,7 @@ export function createCalendarSyncJob(options: CalendarSyncJobOptions): RuntimeJ
       const runAt = now()
       const currentYear = options.year?.() ?? runAt.getUTCFullYear()
       const coverageTtlMs = options.coverageTtlMs ?? CALENDAR_COVERAGE_TTL_MS
-      const results: CalendarProviderResult[] = []
+      const results: CalendarYearSyncResult[] = []
       for (const year of calendarSyncYears(currentYear)) {
         const countriesToSync = await countriesDueForSync(repository, year, countries, providerId, runAt.getTime(), coverageTtlMs)
         if (!countriesToSync.length) continue
@@ -163,8 +179,8 @@ export function createCalendarSyncJob(options: CalendarSyncJobOptions): RuntimeJ
       const failedYears = [...new Set(failed.map(item => `${item.countryCode}/${item.year}`))]
       return {
         status: failed.length ? "failed" : "success",
-        recordsRead: result.events.length,
-        recordsWritten: result.events.length,
+        recordsRead: result.syncRecordsRead ?? 0,
+        recordsWritten: result.syncRecordsWritten ?? 0,
         sourceUpdatedAt: result.fetchedAt,
         errorCode: failed[0]?.errorCode ?? (failed.length ? "calendar_coverage_failed" : undefined),
         errorMessage: failed.length ? `${failed.length} calendar country/year sync(s) failed: ${failedYears.join(", ")}` : undefined,
