@@ -1,4 +1,4 @@
-import type { CalendarCountryCode, CalendarProviderResult } from "@shared/calendar"
+import type { CalendarCountryCode, CalendarCoverage, CalendarProviderResult } from "@shared/calendar"
 import { calendarCountries } from "@shared/calendar"
 import type { Database } from "db0"
 import type { ShippingDataMode } from "#/database/runtime"
@@ -6,9 +6,10 @@ import type { RuntimeJob } from "#/runtime/background-runtime"
 import { ShippingRepository } from "#/database/shipping"
 import { defaultShippingSettings } from "#/database/runtime"
 import { reconcileCalendarEvents } from "#/shipping-store"
-import type { CalendarProvider } from "#/providers/calendar"
+import { type CalendarProvider, sanitizeCalendarError } from "#/providers/calendar"
 
 export const CALENDAR_SYNC_CAPABILITY = "calendar_sync" as const
+export const CALENDAR_COVERAGE_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
 export interface CalendarSyncJobOptions {
   database: Database
@@ -20,7 +21,81 @@ export interface CalendarSyncJobOptions {
   now?: () => Date
   countries?: readonly CalendarCountryCode[]
   year?: () => number
+  coverageTtlMs?: number
   sync?: (year: number, countries: readonly CalendarCountryCode[]) => Promise<CalendarProviderResult>
+}
+
+export function calendarSyncYears(currentYear: number): [number, number] {
+  return [currentYear, currentYear + 1]
+}
+
+function failedCalendarYearResult(year: number, countries: readonly CalendarCountryCode[], sourceId: string, error: unknown, fetchedAt: string): CalendarProviderResult {
+  return {
+    events: [],
+    coverage: countries.map(countryCode => ({
+      countryCode,
+      year,
+      status: "unknown" as const,
+      sourceId,
+      lastCheckedAt: fetchedAt,
+      error: sanitizeCalendarError(error),
+      errorCode: "provider_unavailable",
+    })),
+    fetchedAt,
+  }
+}
+
+function ensureCalendarYearCoverage(result: CalendarProviderResult, year: number, countries: readonly CalendarCountryCode[], sourceId: string, fallbackFetchedAt: string): CalendarProviderResult {
+  const fetchedAt = result.fetchedAt || fallbackFetchedAt
+  const coveredCountries = new Set(result.coverage.filter(item => item.year === year).map(item => item.countryCode))
+  const missing = countries
+    .filter(countryCode => !coveredCountries.has(countryCode))
+    .map(countryCode => ({
+      countryCode,
+      year,
+      status: "unknown" as const,
+      sourceId,
+      lastCheckedAt: fetchedAt,
+      error: "calendar_coverage_missing",
+      errorCode: "calendar_coverage_missing",
+    }))
+  return { ...result, fetchedAt, coverage: [...result.coverage, ...missing] }
+}
+
+function calendarCoverageKey(item: CalendarCoverage): string {
+  return `${item.countryCode}/${item.year}/${item.sourceId}`
+}
+
+function aggregateCalendarSyncResults(results: readonly CalendarProviderResult[], fallbackFetchedAt: string): CalendarProviderResult {
+  const coverage = new Map<string, CalendarCoverage>()
+  for (const result of results) {
+    for (const item of result.coverage) coverage.set(calendarCoverageKey(item), item)
+  }
+  return {
+    events: results.flatMap(item => item.events),
+    coverage: [...coverage.values()],
+    fetchedAt: results.map(item => item.fetchedAt).sort().at(-1) ?? fallbackFetchedAt,
+  }
+}
+
+async function countriesDueForSync(repository: ShippingRepository, year: number, countries: readonly CalendarCountryCode[], providerId: string, nowMs: number, ttlMs: number): Promise<CalendarCountryCode[]> {
+  try {
+    const settings = await repository.getSettings()
+    const coverage = settings?.calendarSync ?? []
+    return countries.filter((countryCode) => {
+      const row = coverage
+        .filter(item => item.countryCode === countryCode && item.year === year && item.sourceId === providerId)
+        .sort((a, b) => (b.lastCheckedAt ?? "").localeCompare(a.lastCheckedAt ?? ""))
+        .at(0)
+      if (!row || row.error || row.status === "unknown" || !row.lastCheckedAt) return true
+      const checkedAt = Date.parse(row.lastCheckedAt)
+      return !Number.isFinite(checkedAt) || checkedAt < nowMs - ttlMs
+    })
+  } catch {
+    // If the read-side cache check is unavailable, attempt the sync and let its
+    // normal Repository failure/coverage policy report the result.
+    return [...countries]
+  }
 }
 
 /** Calendar refresh belongs to Runtime; the Calendar page remains read-only. */
@@ -49,16 +124,50 @@ export function createCalendarSyncJob(options: CalendarSyncJobOptions): RuntimeJ
     intervalMs: options.intervalMs,
     enabled: options.enabled ?? true,
     run: async () => {
-      const year = options.year?.() ?? now().getUTCFullYear()
-      const result = await sync(year, countries)
-      const failed = result.coverage.filter(item => item.sourceId === providerId && (item.status === "unknown" || item.error))
+      const runAt = now()
+      const currentYear = options.year?.() ?? runAt.getUTCFullYear()
+      const coverageTtlMs = options.coverageTtlMs ?? CALENDAR_COVERAGE_TTL_MS
+      const results: CalendarProviderResult[] = []
+      for (const year of calendarSyncYears(currentYear)) {
+        const countriesToSync = await countriesDueForSync(repository, year, countries, providerId, runAt.getTime(), coverageTtlMs)
+        if (!countriesToSync.length) continue
+        const fetchedAt = runAt.toISOString()
+        try {
+          results.push(ensureCalendarYearCoverage(await sync(year, countriesToSync), year, countriesToSync, providerId, fetchedAt))
+        } catch (error) {
+          const failed = failedCalendarYearResult(year, countriesToSync, providerId, error, fetchedAt)
+          results.push(failed)
+          try {
+            const settings = await repository.getSettings() ?? structuredClone(defaultShippingSettings)
+            const previousCoverage = settings.calendarSync ?? []
+            await repository.saveSettings({
+              ...settings,
+              calendarSync: [...previousCoverage.filter(item => !(countriesToSync.includes(item.countryCode) && item.year === year && item.sourceId === providerId)), ...failed.coverage],
+            })
+          } catch {
+            // The Runtime result remains the source of failure evidence if the failure row cannot be persisted.
+          }
+        }
+      }
+      if (!results.length) {
+        return {
+          status: "skipped",
+          recordsRead: 0,
+          recordsWritten: 0,
+          errorCode: "calendar_cache_fresh",
+          preserveRuntimeEvidence: true,
+        }
+      }
+      const result = aggregateCalendarSyncResults(results, runAt.toISOString())
+      const failed = result.coverage.filter(item => Boolean(item.error) || (item.sourceId === providerId && item.status === "unknown"))
+      const failedYears = [...new Set(failed.map(item => `${item.countryCode}/${item.year}`))]
       return {
         status: failed.length ? "failed" : "success",
         recordsRead: result.events.length,
         recordsWritten: result.events.length,
         sourceUpdatedAt: result.fetchedAt,
         errorCode: failed[0]?.errorCode ?? (failed.length ? "calendar_coverage_failed" : undefined),
-        errorMessage: failed.length ? `${failed.length} calendar country sync(s) failed` : undefined,
+        errorMessage: failed.length ? `${failed.length} calendar country/year sync(s) failed: ${failedYears.join(", ")}` : undefined,
       }
     },
   }

@@ -1,4 +1,4 @@
-import { type CalendarCountryCode, calendarCountries } from "@shared/calendar"
+import { type CalendarCountryCode, calendarCountries, summarizeCalendarCoverage } from "@shared/calendar"
 import { calendarAttribution } from "#/providers/calendar"
 import { calendarProviderModes } from "#/providers/shipping"
 import { syncCalendarEvents } from "#/shipping-store"
@@ -10,5 +10,15 @@ export default defineEventHandler(async (event) => {
     ? body.countries.filter((country): country is CalendarCountryCode => typeof country === "string" && Object.prototype.hasOwnProperty.call(calendarCountries, country))
     : undefined
   const result = await syncCalendarEvents(year, countries)
-  return { ...result, attribution: calendarAttribution({ provider: calendarProviderModes.calendar, events: result.events }) }
+  return {
+    ...result,
+    coverageStatus: summarizeCalendarCoverage({
+      coverage: result.coverage,
+      events: result.events,
+      year,
+      countries: countries ?? undefined,
+      sourceIds: calendarProviderModes.calendarSourceIds ?? [],
+    }),
+    attribution: calendarAttribution({ provider: calendarProviderModes.calendar, events: result.events }),
+  }
 })

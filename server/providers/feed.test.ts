@@ -153,7 +153,7 @@ describe("shipping feed provider", () => {
     const events = detectShippingEvents([], [], [], [item], snapshot.settings, [], "2026-08-18T00:00:00.000Z")
     const event = events.find(candidate => candidate.feedItemId === item.id)
     expect(event).toMatchObject({ type: "port_notice", severity: "critical", status: "active" })
-    expect(rankHotItems(events, [], [], [], [item]).some(hot => hot.kind === "event" && hot.eventId === event?.id)).toBe(true)
+    expect(rankHotItems(events, [], [], [], [item], new Date("2026-08-18T00:00:00.000Z")).some(hot => hot.kind === "event" && hot.eventId === event?.id)).toBe(true)
   })
 
   it("deduplicates reposts and prefers an official source", () => {

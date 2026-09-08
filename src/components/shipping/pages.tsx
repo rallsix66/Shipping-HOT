@@ -1425,6 +1425,24 @@ const calendarVerificationOptions = [
   { value: "unverified", label: "待核验" },
 ]
 
+const calendarSyncStatusLabels: Record<string, string> = {
+  synced: "已同步",
+  partial_failure: "部分失败",
+  uncovered: "未覆盖",
+}
+
+const calendarCacheStatusLabels: Record<string, string> = {
+  fresh: "缓存新鲜",
+  stale: "缓存过期",
+  missing: "无缓存",
+}
+
+const calendarProviderStatusLabels: Record<string, string> = {
+  complete: "Provider 完整",
+  partial: "Provider 部分覆盖",
+  unknown: "Provider 覆盖未知",
+}
+
 export function CalendarPage() {
   const { data, isLoading, isError, refetch } = useShipping()
   const [country, setCountry] = useState("all")
@@ -1440,6 +1458,7 @@ export function CalendarPage() {
   if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
   const today = new Date().toISOString().slice(0, 10)
   const events = (data.calendarEvents ?? []).filter(event => event.date.startsWith(String(year)) && (month === "all" || event.date.slice(5, 7) === month) && (country === "all" || event.countryCode === country) && (type === "all" || event.type === type) && (impact === "all" || event.businessImpact === impact) && (verification === "all" || (verification === "verified" ? event.verified : !event.verified)) && (!publicOnly || event.isPublicHoliday))
+  const coverageStatus = (data.calendarCoverageStatus ?? []).filter(item => item.year === year && (country === "all" || item.countryCode === country))
   const sync = async () => {
     setSyncState("syncing")
     try {
@@ -1468,6 +1487,53 @@ export function CalendarPage() {
         {data.calendarAttribution && <a className="text-teal-600 underline decoration-teal-500/40 underline-offset-3 dark:text-teal-300" href="https://calendarific.com/" target="_blank" rel="noreferrer">{data.calendarAttribution}</a>}
       </div>
       {syncState === "error" && <p className="mb-4 text-sm text-rose-600 dark:text-rose-300">同步失败，继续显示本地缓存。</p>}
+      <div className="mb-4 rounded-xl border border-slate-200/70 bg-white/50 p-3 text-xs dark:border-white/10 dark:bg-white/5">
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <strong>覆盖状态</strong>
+          <span className="op-65">自动维护当前年＋下一年；Calendarific 的 Provider 覆盖不等同于官方 / Manual 完整覆盖。</span>
+        </div>
+        {coverageStatus.length === 0
+          ? <p className="op-65">当前年份尚无覆盖记录；显示为未覆盖，不代表已验证接口失败。</p>
+          : (
+              <div className="flex flex-wrap gap-2">
+                {coverageStatus.map(item => (
+                  <span key={`${item.countryCode}-${item.year}`} className="chip">
+                    <span>{item.countryCode}</span>
+                    <span>
+                      ：
+                      {calendarSyncStatusLabels[item.syncStatus] ?? item.syncStatus}
+                    </span>
+                    <span>
+                      {" "}
+                      ·
+                      {calendarCacheStatusLabels[item.cacheStatus] ?? item.cacheStatus}
+                    </span>
+                    <span>
+                      {" "}
+                      ·
+                      {calendarProviderStatusLabels[item.providerStatus] ?? item.providerStatus}
+                    </span>
+                    <span>
+                      {" "}
+                      ·
+                      {item.eventCount}
+                      {" "}
+                      条
+                    </span>
+                    {item.errors.length > 0 && (
+                      <span>
+                        {" "}
+                        ·
+                        {item.errors.length}
+                        {" "}
+                        个错误
+                      </span>
+                    )}
+                  </span>
+                ))}
+              </div>
+            )}
+      </div>
       <div className="cal-wrap">
         <aside className="filter-panel">
           <h4>国家</h4>

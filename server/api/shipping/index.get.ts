@@ -1,4 +1,5 @@
 import { rankHotItems } from "@shared/shipping-rules"
+import { summarizeCalendarCoverage } from "@shared/calendar"
 import { getShippingSnapshot } from "#/shipping-store"
 import { mapFeedItemsForDisplay, mapHotItemsForDisplay } from "#/services/feed-translation-display"
 import { operationalSourceContext, providerModes, realProviders } from "#/providers/shipping"
@@ -20,5 +21,11 @@ export default defineEventHandler(async () => {
     provider: providerModes,
     realProviders,
     calendarAttribution: calendarAttribution({ provider: providerModes.calendar, events: snapshot.calendarEvents }),
+    calendarCoverageStatus: [new Date().getUTCFullYear(), new Date().getUTCFullYear() + 1].flatMap(year => summarizeCalendarCoverage({
+      coverage: snapshot.calendarCoverage ?? [],
+      events: snapshot.calendarEvents ?? [],
+      year,
+      sourceIds: providerModes.calendarSourceIds ?? [],
+    })),
   }
 })

@@ -4,6 +4,8 @@ export type CalendarCountryCode = "CN" | "TH" | "ID" | "MY" | "PH" | "VN"
 export type CalendarEventType = "public_holiday" | "observance" | "religious" | "commercial" | "government_special" | "company_custom"
 export type BusinessImpact = "low" | "medium" | "high" | "critical"
 export type CalendarCoverageStatus = "complete" | "partial" | "unknown"
+export type CalendarSyncStatus = "synced" | "partial_failure" | "uncovered"
+export type CalendarCacheStatus = "fresh" | "stale" | "missing"
 export type CalendarSourceKind = "official" | "third_party" | "user" | "mock"
 export type CalendarEventScope = "national" | "subdivision" | "unknown"
 
@@ -53,6 +55,96 @@ export interface CalendarCoverage {
   lastCheckedAt?: string
   error?: string
   errorCode?: string
+}
+
+export interface CalendarCoverageStatusSummary {
+  countryCode: CalendarCountryCode
+  year: number
+  syncStatus: CalendarSyncStatus
+  cacheStatus: CalendarCacheStatus
+  providerStatus: CalendarCoverageStatus
+  sourceIds: string[]
+  checkedSourceIds: string[]
+  failedSourceIds: string[]
+  lastCheckedAt?: string
+  eventCount: number
+  errors: Array<{ sourceId: string, error?: string, errorCode?: string }>
+}
+
+export interface CalendarCoverageStatusOptions {
+  coverage: CalendarCoverage[]
+  events: CalendarEvent[]
+  year: number
+  countries?: readonly CalendarCountryCode[]
+  sourceIds?: readonly string[]
+  now?: Date | string
+  staleAfterMs?: number
+}
+
+/**
+ * The provider-free read contract for Calendar coverage. Raw Provider rows keep
+ * their `complete|partial|unknown` meaning; this summary adds operational sync
+ * and cache states without treating partial Provider coverage as a failure.
+ */
+export function summarizeCalendarCoverage(options: CalendarCoverageStatusOptions): CalendarCoverageStatusSummary[] {
+  const countries = options.countries ?? Object.keys(calendarCountries) as CalendarCountryCode[]
+  const configuredSourceIds = options.sourceIds ? [...new Set(options.sourceIds)] : undefined
+  const now = typeof options.now === "string" ? Date.parse(options.now) : (options.now ?? new Date()).getTime()
+  const nowMs = Number.isFinite(now) ? now : Date.now()
+  const staleAfterMs = options.staleAfterMs ?? 7 * 24 * 60 * 60 * 1000
+
+  return countries.map((countryCode) => {
+    const rowsByKey = new Map<string, CalendarCoverage>()
+    for (const item of options.coverage) {
+      if (item.countryCode !== countryCode || item.year !== options.year || (configuredSourceIds && !configuredSourceIds.includes(item.sourceId))) continue
+      rowsByKey.set(`${item.countryCode}/${item.year}/${item.sourceId}`, item)
+    }
+    const rows = [...rowsByKey.values()]
+    const events = options.events.filter(item => item.countryCode === countryCode && item.date.startsWith(String(options.year)) && (!configuredSourceIds || configuredSourceIds.includes(item.sourceId)))
+    const sourceIds = configuredSourceIds ?? [...new Set(rows.map(item => item.sourceId))]
+    const checkedSourceIds = [...new Set(rows.filter(item => item.lastCheckedAt).map(item => item.sourceId))]
+    const failedRows = rows.filter(item => Boolean(item.error))
+    const failedSourceIds = [...new Set(failedRows.map(item => item.sourceId))]
+    const timestamps = rows
+      .map(item => item.lastCheckedAt ? Date.parse(item.lastCheckedAt) : Number.NaN)
+      .filter(timestamp => Number.isFinite(timestamp))
+    const lastCheckedAt = timestamps.length ? new Date(Math.max(...timestamps)).toISOString() : undefined
+    const successfulTimestamps = rows
+      .filter(item => !item.error && item.status !== "unknown")
+      .map(item => item.lastCheckedAt ? Date.parse(item.lastCheckedAt) : Number.NaN)
+      .filter(timestamp => Number.isFinite(timestamp))
+    const providerStatus: CalendarCoverageStatus = rows.length === 0
+      ? "unknown"
+      : rows.every(item => item.status === "complete")
+        ? "complete"
+        : rows.some(item => item.status === "partial" || item.status === "complete")
+          ? "partial"
+          : "unknown"
+    const syncStatus: CalendarSyncStatus = rows.length === 0
+      ? "uncovered"
+      : failedRows.length > 0
+        ? "partial_failure"
+        : rows.every(item => item.status === "unknown")
+          ? "uncovered"
+          : "synced"
+    const cacheStatus: CalendarCacheStatus = rows.length === 0 || successfulTimestamps.length === 0
+      ? (events.length ? "stale" : "missing")
+      : Math.max(...successfulTimestamps) >= nowMs - staleAfterMs ? "fresh" : "stale"
+
+    return {
+      countryCode,
+      year: options.year,
+      syncStatus,
+      cacheStatus,
+      providerStatus,
+      sourceIds,
+      checkedSourceIds,
+      failedSourceIds,
+      lastCheckedAt,
+      eventCount: events.length,
+      errors: failedRows.map(item => ({ sourceId: item.sourceId, error: item.error, errorCode: item.errorCode })),
+    }
+  })
 }
 
 export interface CalendarSnapshot {

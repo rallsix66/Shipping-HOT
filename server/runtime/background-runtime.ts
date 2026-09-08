@@ -11,6 +11,8 @@ export interface SyncResult {
   sourceUpdatedAt?: string
   errorCode?: string
   errorMessage?: string
+  /** A cache-only skip must not replace the Provider's existing health evidence. */
+  preserveRuntimeEvidence?: boolean
 }
 
 export interface RuntimeJob {
@@ -296,13 +298,18 @@ export class BackgroundRuntime {
         this.log.info("job success", { jobId: state.job.id, providerId: state.job.providerId })
       } else if (result.status === "skipped") {
         await this.repository.completeSyncRun({ id: syncRun.id, completedAt, status: "skipped", recordsRead: result.recordsRead, recordsWritten: result.recordsWritten, errorCode: result.errorCode, errorMessage: result.errorMessage })
+        const runtimeEvidencePatch = result.preserveRuntimeEvidence
+          ? {}
+          : {
+              errorCode: result.errorCode ?? null,
+              errorMessage: result.errorMessage ? safeErrorMessage(result.errorMessage) : null,
+            }
         const runtime = await this.repository.updateProviderRuntime({
           providerId: state.job.providerId,
           capability: state.job.capability,
           lastRequestAt: startedAt,
           nextSyncAt,
-          errorCode: result.errorCode ?? null,
-          errorMessage: result.errorMessage ? safeErrorMessage(result.errorMessage) : null,
+          ...runtimeEvidencePatch,
           updatedAt: completedAt,
         })
         this.applyRuntimeState(state, runtime, "skipped")

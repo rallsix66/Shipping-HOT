@@ -2,17 +2,17 @@
 
 > 文档状态：`accepted / V3 FINAL SEALED / P7-A through P7-G complete / P0–P3 core foundations sealed / accepted live Provider boundaries and explicit coverage gaps`
 >
-> 审查日期：2026-09-04（Asia/Shanghai）
+> P7 审查日期：2026-09-04（Asia/Shanghai）；Phase 1 implementation review：2026-09-07（Asia/Shanghai）
 >
 > 代码基线：P7 entry `4824d63f8e135ff3c9eb0849d9ba49e832ae000c`；业务基线 `f7281c7ea58444dc3b2d55930d0069c45055cab8`（`fix: preserve persisted feed lifecycle on reads`）；最终 seal commit `ed2c8448699971328b23247508a7b91fb537ab6b`；Node `24.15.0` / ABI `137` / `better-sqlite3@12.6.2`
 >
-> 分支状态：当前工作分支为 `main`；P7 验收事实产生于历史封板分支 `codex/shipping-hot-v3-real-data`。两者当前指向同一 seal commit；本次知识同步不重新验证真实接口，也不改写历史验收事实。
+> 分支状态：当前工作分支为 `main`，当前 HEAD 为 `f338ccffb5943c269102afaba41d520e2cf4121e`；P7 验收事实产生于历史封板分支 `codex/shipping-hot-v3-real-data`，该分支仍指向 `ed2c8448699971328b23247508a7b91fb537ab6b`。Phase 1 是已获批准的后续工作，不改写历史封板事实；本次未重新验证真实接口。
 >
 > 实施状态：**P0 Persistence、P1A Port Directory、P1B Mock Isolation、P2 Search/Identity/Runtime、P3 Feed Freshness、P7 Final Real-data Seal 已 SEALED；P3A AIS Position、AIS Area、GFW Search/canonical identity、Port Intelligence、Open-Meteo、TMD/BMKG Weather Alerts、VesselAPI Voyage Provider path 与 DeepSeek Translation Provider/Runtime 已有 accepted `VERIFIED_LIVE` evidence**。Feed persisted lifecycle read semantics、Translation mode decoupling、placeholder reliability、post-T3 Settings UI、Home Feed-HOT display boundary 已实现/封板。Schema 保持 v12；P7 只使用现有批准 adapters、process-scoped env 和临时 SQLite，未改 retained SQLite、Secret/env，未新增 Provider、entitlement 或 migration；DeepSeek final acceptance usage 为 0。Voyage focus-port coverage、Calendar completeness、JMA 和公共源覆盖仍以显式边界保留，不被 Mock fallback 或事实推断掩盖。
 >
 > 本次最终封板：基于 P7 controlled Real Mode activation、Readiness、SQLite/Repository/API、restart、zero-Mock、UI 和回归验证结果，统一当前状态词和覆盖边界；不扩充 Port Directory，不假造 `destinationPortId`，不启用 JMA，不假定商业 Schedule entitlement。
 >
-> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`。P7-A–P7-G 已完成；既有 T3A–T3D engineering 与 post-T3 Settings boundary 保持不变，Translation 仍是 FeedItem title/summary-only optional enrichment。后续 Provider、paid entitlement、schema、Secret、Port Directory 扩展和更广 Translation 均需单独批准。
+> 实施门槛：Architecture Approval 已完成，ADR-005 状态为 `Accepted`。P7-A–P7-G 已完成；既有 T3A–T3D engineering 与 post-T3 Settings boundary 保持不变，Translation 仍是 FeedItem title/summary-only optional enrichment。2026-09-07 已单独批准 Phase 1 日历完整性及既有测试修复；它只复用现有 Calendarific/Runtime/API/UI 边界，不新增 Provider、依赖、schema、Secret、Port Directory、JMA、商业班期或更广 Translation。
 
 > V3 Readiness：最终 P7-D 在 process-scoped Real Mode 临时 SQLite 上通过 `GET /api/shipping/readiness` 与 `pnpm smoke:v3-readiness` 验证 Node/ABI、CLI pnpm、better-sqlite3/native load、SQLite schema/Port Directory、批准的 Runtime scope 和实际 Mode。结果为 `ready=true / overall=degraded`，无失败 hard check；degraded 仅反映已批准 coverage gaps。保留数据库未打开。
 
@@ -430,17 +430,29 @@ Calendar 按国家/年份 coverage 和同步成功时间独立维护；Feed 的 
 
 1. **Server Start**：打开 SQLite、执行 migration，并读取 `app_metadata.bootstrap_completed_at`；Port Directory 另读自身的 `port_directory_status/version/imported_at`，两条状态链不互相替代。
 2. **SQLite → UI**：先读取已持久化日历和 coverage；页面无需等待外部 API，显示 last-known/coverage/status。
-3. **后台检查**：scheduler 检查当前年和下一年 × TH/ID/MY/PH/VN；coverage 缺失、`lastSuccessAt` 超过约 7 天、年份变化或 provider version 变化时入队。年份变化是强制检查，不受 TTL 抑制。
+3. **后台检查**：scheduler 检查当前年和下一年 × CN/TH/ID/MY/PH/VN；coverage 缺失、失败/`unknown`、成功 coverage 的 `lastCheckedAt` 无效或超过约 7 天时入队。年份变化是强制检查，不受 TTL 抑制；最终同一 country/year/source 的本轮结果以后写入者为准，失败不会被成功之外的旧快照隐藏。
 4. **同步**：每个 country/year 独立成功或失败；成功事务更新 events + coverage + `provider_usage`，失败保留同源 last-known 并写 runtime/sync_runs。
 5. **UI 更新**：通过 React Query invalidation/SSE 可选通知刷新；手工“立即刷新”保留但有 rate limit 和 cooldown。
 
-Calendarific Free 官方公开额度为 500 calls/月。默认约 7 天 TTL 下，五国 × 两年 × 每月约 4.3 次检查约 43 calls/月（约 40–50 calls/月），为首次启动、失败重试和手工刷新保留足够余量。数据集按较低频率更新，coverage 仍必须标 partial/unknown，不能宣称完整；手工“立即刷新”保留并受 cooldown 限制。
+Calendarific Free 官方公开额度为 500 calls/月。默认约 7 天 TTL 下，六国 × 两年 × 每月约 4.3 次检查约 52 calls/月（约 50–60 calls/月），为首次启动、失败重试和手工刷新保留足够余量。数据集按较低频率更新，coverage 仍必须标 partial/unknown，不能宣称完整；手工“立即刷新”保留并受 cooldown 限制。
 
 ### 11.2 年份滚动
 
 - 2026 年维护 2026 + 2027。
 - 进入 2027 年后维护 2027 + 2028；2026 保留为 history，不再日常刷新。
 - 下一年若 Free entitlement 暂无数据，记录 `partial/unknown`，不删除当前 last-known，也不创建 Mock。
+
+### 11.3 Phase 1 实施记录 — 2026-09-07
+
+- 现有 `calendar-sync` Job 已按当前年和下一年逐年检查；每个 country/year 以 `settings.calendarSync` 的同源 `lastCheckedAt`、错误和 `unknown` 状态执行约七天缓存门。新年份无 coverage 时强制检查，当前年和下一年不会互相阻塞。
+- 失败行保留 `calendar_events` 中的同源 last-known 事实；API/UI 只读取持久化快照，并通过共享 `CalendarCoverageStatusSummary` 展示同步状态、Provider partial/unknown 覆盖和缓存状态。Calendarific partial 不被标为官方/manual 完整。
+- Shekou 日期敏感测试只固定 HOT 评估时间，未放宽业务 freshness 规则。Phase 1 本地证据为离线定向/完整测试和 typecheck；没有重新调用 Calendarific、DeepSeek 或其他外部 Provider。完整覆盖、官方/manual 数据和真实接口复验仍为 `pending`。
+
+### 11.4 独立复审 P2 修复：缓存全命中来源时间 — 2026-09-08
+
+- 当当前年和下一年均命中有效 TTL 缓存时，`calendar-sync` 返回 `skipped/calendar_cache_fresh`、`recordsRead=0`、`recordsWritten=0`，不伪造 `sourceUpdatedAt`；BackgroundRuntime 只在该显式 cache-only 结果下保留既有 `lastSuccessAt`、`lastSourceUpdatedAt` 及健康/失败证据，其他 Job 的 skipped 语义不变。
+- 部分缓存命中仍只同步必要 country/year，并按实际 Provider 结果判定 `success` 或 `failed`；成功的合法零记录仍是实际成功，不等同于缓存跳过。未新增 Provider、依赖、Secret、schema/migration、数据库或环境配置。
+- 离线回归使用内存 SQLite、实际 Shipping/Runtime Repository、BackgroundRuntime 和计数型假 Provider；定向 Calendar/Runtime 回归 34/34，完整 Vitest 738/738（64/64），不构成真实 Provider 覆盖证据。官方 Bash inventory 在 Windows 主机仍为 `pending/unavailable`，手工等价审计不删除任何候选。
 
 ## 12. Voyage / Schedule 真实数据方案
 
@@ -608,7 +620,7 @@ Usage ledger 只代表本机已发出的请求和按公开价/账号计划推算
 | Official weather alerts | 10–30 分钟 | source-specific lifecycle/expiry |
 | Industry news | 15–30 分钟 | ETag/Last-Modified；7/14 天 current gate |
 | Official notices | 10–30 分钟 | 有效状态优先；未知时间不进 current |
-| Calendar | 启动检查 + 约 7 天 TTL；年份变化强制检查 | 5 国 × 2 年约 40–50 calls/月；同源 last-known；手工刷新保留 |
+| Calendar | 启动检查 + 约 7 天 TTL；年份变化强制检查 | 6 国 × 2 年约 50–60 calls/月；同源 last-known；手工刷新保留 |
 | Translation | ingestion 后批处理；最多每分钟一批 | cache hit 不调用；失败指数退避，不阻塞 ingestion |
 | Provider health | 每次 job 写入 | 保留最近 success/failure 和 next due |
 
@@ -796,7 +808,7 @@ Real Mode 可以读取 `real`、获准的 `imported` 和满足 lineage/freshness
 | --- | --- |
 | 目标 | 建立单 Node 进程内的 Background Runtime singleton，为后续 Provider Workstream 提供统一 Job、调度、失败隔离、运行历史和 Provider health 边界 |
 | 修改文件 | `server/database/migrations/006-p2c-runtime-foundation.ts`、`server/database/runtime.ts`、`server/runtime/background-runtime.ts`、`server/runtime/bootstrap.ts`、`server/runtime/registry.ts`、`server/plugins/background-runtime.ts`、`server/database/runtime-jobs.ts`、`server/api/shipping/runtime.get.ts`、`server/providers/contracts.ts` |
-| Runtime Contract | `RuntimeJob { id, providerId, capability, intervalMs, enabled, run }`；`SyncResult` 只包含 status、recordsRead、recordsWritten、sourceUpdatedAt、errorCode、errorMessage |
+| Runtime Contract | `RuntimeJob { id, providerId, capability, intervalMs, enabled, run }`；`SyncResult` 包含 status、recordsRead、recordsWritten、sourceUpdatedAt、errorCode、errorMessage，以及仅供 cache-only skip 保留既有 Runtime evidence 的可选标记 |
 | 调度 | Node timer；同一 Job in-flight 时下一次触发 skip；`runNow()` 取消旧 timer 并从本次完成时间重启 cadence；Job 返回 `skipped` 也持久化新的 `next_sync_at`；失败只影响当前 Job；`stop()` 清理 timer 并阻止新执行；启动从 SQLite `next_sync_at`/health cursor 恢复 |
 | 数据库 | migration v6 安全 rebuild `provider_runtime` 为 `PRIMARY KEY(provider_id, capability)` 并保留现有列/数据；`RuntimeRepository` 集中 SQL 且所有读写使用复合 identity。运行状态为 `healthy/degraded/failed/disabled/never_succeeded`，失败按下一次正常 schedule 继续，不实现复杂 retry queue |
 | Bootstrap | Nitro server plugin 初始化 DB/migrations、创建单例、注册当前 Registry、启动 Runtime；仅成功启动后发布 singleton/安装 signal handlers；失败时清理 timer、running state、singleton、bootstrap promise 和 signal handlers；SIGTERM/SIGINT/Nitro close 都调用 stop；`SHIPPING_RUNTIME_ENABLED=false` 可关闭 |
@@ -985,7 +997,7 @@ Qwen-MT 的输入/输出价格与 Lite 的 RPM/TPM 是该日期快照；免费�
 | AISStream | watched MMSI 实时 AIS PositionReport + Static/Voyage messages | 当前公开免费、Beta；无 uptime guarantee/SLA；`FiltersShipMMSI` 单订阅最多 50 MMSI | 非商业 SLA/未来政策可能变化；消息/连接计费未声明 | 服务端 API key；正式接入前复核条款与覆盖 | 初始连接 3 秒内订阅；订阅更新约 1 次/秒；50 MMSI | 1 个长期单例 session；消息数取决于船舶活动，不按 HTTP call 轮询 | $0 目标；Beta/no SLA |
 | Open-Meteo Marine/Forecast | 港口天气模型 | Free/Open-Access：600 calls/min、5,000/hour、10,000/day、300,000/month；含 Marine API；通常无需 key | 非商业使用；无 uptime guarantee；超过变量/范围可能按 fractional calls；需 CC BY 4.0 attribution | 个人非商业；商业需 Standard €29/月起（1M calls/月）等计划 | 官方限额如左 | 8 港按小时刷新约 5,760 calls/月，远低于 300,000/月；可按 cache/批量更低 | 个人非商业预计 ¥0/月；商业另评估 |
 | Portcast public page | 已覆盖港口拥堵/derived 页面 | 页面无公开 API 套餐承诺 | 不是稳定 API 额度；超额/计费/重置 unknown | 公开页面可达不等于个人抓取许可；robots/条款待审 | 页面/IP 限制 unknown | 8 港 × 30 ≈ 240 次条件请求 | $0 目标但不可保证；无覆盖即 unavailable |
-| Calendarific | 国家节假日 | Free 500 calls/月（官方页面快照） | 约 7 天 TTL；约 40–50 calls/月；月度重置日、超额/Starter 需账号确认 | Free 资格/attribution 按计划确认 | 计划限额 unknown | 5 国 × 2 年 × 每 7 天检查约 43 calls/月 | $0 在 quota 内 |
+| Calendarific | 国家节假日 | Free 500 calls/月（官方页面快照） | 约 7 天 TTL；约 50–60 calls/月；月度重置日、超额/Starter 需账号确认 | Free 资格/attribution 按计划确认 | 计划限额 unknown | 6 国 × 2 年 × 每 7 天检查约 52 calls/月 | $0 在 quota 内 |
 | The Loadstar / Public RSS | 行业资讯 | 公共 RSS/页面，无固定 API 费用 | 按 robots/站点条款；无月度 quota 承诺 | 无 key；抓取许可需逐源审查 | 站点/IP 限制 unknown | 约 5 源 × 15–30 分钟条件检查；ETag 后传输更低 | $0 目标 |
 | Official weather sources | JMA/TMD/BMKG 等预警 | 公共源，固定价/额度多为 unknown | 按站点/机构条款；无统一 reset | 通常无需 key；live enablement/资格逐源确认 | source-specific unknown | 3 源 × 10–30 分钟检查 | $0 目标 |
 | VesselAPI | Discovery/static metadata，可选已验证 enrichment | quota per account；billing-date monthly window；Free 150 calls；Basic $14.99/月、1,500 calls、Port data | 成功 2xx 计入；错误/404/429 不计；可读 `X-RateLimit-Remaining` 作为官方剩余额度；仅具体 endpoint entitlement pending | Free 公开快照显示无信用卡；接入时只对具体 endpoint entitlement 做 contract test | 约 500/5m/IP、3,000/5m/key、location 300/5m、并发 20（快照，接入时复核） | 低频搜索/metadata 约 20–80 calls/月；不做实时轮询 | $0 Free PoC；Basic 公开基线 $14.99/月 |
@@ -1011,7 +1023,7 @@ Qwen-MT 的输入/输出价格与 Lite 的 RPM/TPM 是该日期快照；免费�
 
 ### 22.2 用量预算与估算规则
 
-- Calendarific Free 500 calls/月的公开额度和五国 × 两年 × 约 7 天 TTL 的 40–50 calls/月只是 2026-08-20 的方案估算；失败重试、手工刷新和官方 coverage 限制必须留余量。
+- Calendarific Free 500 calls/月的公开额度和五国 × 两年 × 约 7 天 TTL 的 40–50 calls/月只是 2026-08-20 的历史方案估算；当前六国口径约为 50–60 calls/月（见当前 Calendar 刷新策略），失败重试、手工刷新和官方 coverage 限制必须留余量。
 - 翻译预算按 `provider_usage` 记录的字符/token 估算，cache hit 不计外部请求；预算超限时暂停后台翻译，不阻塞 ingestion。
 - VesselAPI 的 quota 口径按 account、billing-date monthly window 和成功 2xx 计数；错误/404/429 不计，官方 `X-RateLimit-Remaining` 优先。只有具体 endpoint entitlement 仍需账号 contract test，不能把可搜索能力直接等同于 Port/ETA/事件可用。
 

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import type { FeedItemDisplay, HotItem, ShippingSnapshot } from "@shared/shipping"
+import type { CalendarCoverageStatusSummary } from "@shared/calendar"
 import type { VoyageRecord } from "@shared/voyage"
 import { myFetch } from "~/utils"
 
@@ -9,6 +10,7 @@ export interface ShippingResponse extends Omit<ShippingSnapshot, "feedItems"> {
   provider: { vessel: string, port: string, schedule: string, weather: string, weatherAlerts: "off" | "public" | "experimental", feed: string, calendar: string, aisArea?: "off" | "aisstream", calendarSourceIds?: string[] }
   realProviders: { vessel: string, port: string, schedule: string, weather: string, weatherAlerts: string, aisArea: string, feed: string, calendar: string }
   calendarAttribution?: string
+  calendarCoverageStatus: CalendarCoverageStatusSummary[]
 }
 
 export interface AisLatestPosition {

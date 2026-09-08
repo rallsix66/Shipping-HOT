@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { type CalendarEvent, calendarCountries, calendarEventId, calendarEventKey, calendarEventLegacyId, calendarLeadDays } from "@shared/calendar"
+import { type CalendarEvent, calendarCountries, calendarEventId, calendarEventKey, calendarEventLegacyId, calendarLeadDays, summarizeCalendarCoverage } from "@shared/calendar"
 import { calendarAttribution, calendarProvenances, calendarProviderSourceIds, calendarificCoverageStatus, configureCalendarProviders, createCalendarificProvider, createCompositeCalendarProvider, createMockCalendarEvents, filterCalendarEventsForMode, mergeCalendarSources, normalizeCalendarificPayload, normalizeCalendarificPayloadWithStats, officialHolidaySources, sanitizeCalendarError } from "./calendar"
 
 describe("calendar providers", () => {
@@ -136,6 +136,82 @@ describe("calendar providers", () => {
   it("covers the six-country official source registry without pretending unsupported live formats are complete", () => {
     expect(Object.keys(officialHolidaySources).sort()).toEqual(["CN", "ID", "MY", "PH", "TH", "VN"])
     expect(Object.keys(calendarCountries).sort()).toEqual(["CN", "ID", "MY", "PH", "TH", "VN"])
+  })
+
+  it("derives provider-free sync, coverage and cache states without upgrading partial data", () => {
+    const [cached] = createMockCalendarEvents(2026, "2026-08-29T00:00:00.000Z")
+    const event = { ...cached, sourceId: "calendarific", sourceKind: "third_party" as const }
+    const status = summarizeCalendarCoverage({
+      coverage: [
+        { countryCode: "CN", year: 2026, status: "partial", sourceId: "calendarific", lastCheckedAt: "2026-08-29T00:00:00.000Z" },
+        { countryCode: "TH", year: 2026, status: "unknown", sourceId: "calendarific", lastCheckedAt: "2026-08-29T00:00:00.000Z", error: "provider_unavailable", errorCode: "provider_timeout" },
+      ],
+      events: [event],
+      year: 2026,
+      countries: ["CN", "TH", "MY"],
+      sourceIds: ["calendarific"],
+      now: "2026-08-29T00:00:00.000Z",
+    })
+
+    expect(status).toEqual(expect.arrayContaining([
+      expect.objectContaining({ countryCode: "CN", syncStatus: "synced", cacheStatus: "fresh", providerStatus: "partial", eventCount: 1 }),
+      expect.objectContaining({ countryCode: "TH", syncStatus: "partial_failure", cacheStatus: "missing", providerStatus: "unknown", failedSourceIds: ["calendarific"] }),
+      expect.objectContaining({ countryCode: "MY", syncStatus: "uncovered", cacheStatus: "missing", providerStatus: "unknown" }),
+    ]))
+  })
+
+  it("keeps a failed first check missing when no calendar event cache exists", () => {
+    const [status] = summarizeCalendarCoverage({
+      coverage: [{ countryCode: "CN", year: 2026, status: "unknown", sourceId: "calendarific", lastCheckedAt: "2026-09-01T00:00:00.000Z", error: "provider_unavailable" }],
+      events: [],
+      year: 2026,
+      countries: ["CN"],
+      sourceIds: ["calendarific"],
+      now: "2026-09-01T00:00:00.000Z",
+    })
+
+    expect(status).toMatchObject({ syncStatus: "partial_failure", cacheStatus: "missing", lastCheckedAt: "2026-09-01T00:00:00.000Z" })
+  })
+
+  it("marks old last-known calendar events stale after a failed refresh", () => {
+    const [cached] = createMockCalendarEvents(2026, "2026-08-01T00:00:00.000Z")
+    const [status] = summarizeCalendarCoverage({
+      coverage: [{ countryCode: "CN", year: 2026, status: "unknown", sourceId: "calendarific", lastCheckedAt: "2026-09-01T00:00:00.000Z", error: "provider_unavailable" }],
+      events: [{ ...cached, countryCode: "CN", sourceId: "calendarific", sourceKind: "third_party" }],
+      year: 2026,
+      countries: ["CN"],
+      sourceIds: ["calendarific"],
+      now: "2026-09-01T00:00:00.000Z",
+    })
+
+    expect(status).toMatchObject({ syncStatus: "partial_failure", cacheStatus: "stale", eventCount: 1 })
+  })
+
+  it("marks a successful non-empty refresh fresh", () => {
+    const [cached] = createMockCalendarEvents(2026, "2026-09-01T00:00:00.000Z")
+    const [status] = summarizeCalendarCoverage({
+      coverage: [{ countryCode: "CN", year: 2026, status: "partial", sourceId: "calendarific", lastCheckedAt: "2026-09-01T00:00:00.000Z" }],
+      events: [{ ...cached, countryCode: "CN", sourceId: "calendarific", sourceKind: "third_party" }],
+      year: 2026,
+      countries: ["CN"],
+      sourceIds: ["calendarific"],
+      now: "2026-09-01T00:00:00.000Z",
+    })
+
+    expect(status).toMatchObject({ syncStatus: "synced", cacheStatus: "fresh", providerStatus: "partial", eventCount: 1 })
+  })
+
+  it("marks a successful refresh with legitimate zero records fresh", () => {
+    const [status] = summarizeCalendarCoverage({
+      coverage: [{ countryCode: "CN", year: 2026, status: "complete", sourceId: "calendarific", lastCheckedAt: "2026-09-01T00:00:00.000Z" }],
+      events: [],
+      year: 2026,
+      countries: ["CN"],
+      sourceIds: ["calendarific"],
+      now: "2026-09-01T00:00:00.000Z",
+    })
+
+    expect(status).toMatchObject({ syncStatus: "synced", cacheStatus: "fresh", providerStatus: "complete", eventCount: 0 })
   })
 
   it("preserves official facts and records a Manual Override conflict", () => {

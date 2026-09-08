@@ -1,25 +1,26 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
-> Evidence snapshot date: 2026-09-04
-> Knowledge sync date: 2026-09-07 (documentation/rules only; no business-code or real-Provider re-verification)
+> P7 evidence snapshot date: 2026-09-04
+> Phase 1 local verification date: 2026-09-08 (offline tests/typecheck only; no real-Provider re-verification)
+> Knowledge sync date: 2026-09-08
 > Current state authority: this rebaseline section. Dated sections below are historical checkpoints unless explicitly marked current.
 
 ## Current V3 State — 2026-09-04
 
 | Item | Current state |
 |---|---|
-| Current Project Phase | `V3 — FINAL SEALED` |
-| Current Git Head | `ed2c8448699971328b23247508a7b91fb537ab6b` — `docs: seal v3 real-data acceptance` |
+| Current Project Phase | `V3 — FINAL SEALED` historical P7 baseline; approved Phase 1 calendar/test repair implemented locally on `main`, awaiting independent review |
+| Current Git Head | `f338ccffb5943c269102afaba41d520e2cf4121e` — `docs: reconcile v3 sealed status and historical evidence` |
 | P7 Entry Git Head | `4824d63f8e135ff3c9eb0849d9ba49e832ae000c` — `docs: rebaseline v3 state for p7 entry` |
 | Business-code baseline | `f7281c7ea58444dc3b2d55930d0069c45055cab8` — `fix: preserve persisted feed lifecycle on reads` |
-| Current working branch | `main` (tracking `origin/main`) |
-| Historical P7 acceptance branch | `codex/shipping-hot-v3-real-data` (same seal commit; historical evidence branch, not the current checkout) |
-| Local origin refs observed | `origin/main` and `origin/codex/shipping-hot-v3-real-data` both point to `ed2c8448699971328b23247508a7b91fb537ab6b`; direct `git ls-remote origin` refresh was unavailable because the SSH connection was denied |
+| Current working branch | `main` (tracking `origin/main`; Phase 1 changes are currently uncommitted) |
+| Historical P7 acceptance branch | `codex/shipping-hot-v3-real-data` at `ed2c8448699971328b23247508a7b91fb537ab6b`; historical evidence branch, not the current checkout |
+| Local origin refs observed | `origin/main` points to `f338ccffb5943c269102afaba41d520e2cf4121e`; `origin/codex/shipping-hot-v3-real-data` remains at historical `ed2c8448699971328b23247508a7b91fb537ab6b` |
 | Schema | `v12`; migration changes in this review: none |
 | Toolchain | Node `24.15.0`, ABI `137`, `better-sqlite3@12.6.2` |
 | Operational Mode default | Mock; Real Mode remains explicit and fail-closed |
 | Retained DB / Secret / env | Retained `.data/shipping-hot-v3.sqlite3`, Secrets and committed env were not changed; P7 used only process-scoped env and `.data/p7-final-seal-20260904.sqlite3` |
-| External Provider calls | P7-D used only existing approved adapters; DeepSeek `0`; no Schedule endpoint, JMA, Maritime Executive or new Provider was called |
+| External Provider calls | P7-D used only existing approved adapters; Phase 1 made `0` external calls; DeepSeek remains uncalled in this Phase 1; no Schedule endpoint, JMA, Maritime Executive or new Provider was called |
 
 ### Core Sealed Foundations
 
@@ -64,7 +65,7 @@
 
 ### P7 Final Real-data Seal — 2026-09-04
 
-`V3 — FINAL SEALED` is the current project state. P7-A through P7-G were accepted on the historical branch `codex/shipping-hot-v3-real-data`; the current checkout is `main` at the same seal commit.
+`V3 — FINAL SEALED` remains the P7 acceptance state. P7-A through P7-G were accepted on the historical branch `codex/shipping-hot-v3-real-data` at `ed2c8448699971328b23247508a7b91fb537ab6b`; the current checkout is `main` at `f338ccffb5943c269102afaba41d520e2cf4121e` with the separately approved Phase 1 changes uncommitted.
 
 | Gate | Final evidence |
 |---|---|
@@ -78,6 +79,16 @@
 | UI acceptance | `/`, `/vessels`, `/ports`, `/voyages`, `/feed`, `/calendar`, `/settings` and `/events` rendered without loading/error state. Feed showed 33 `查看原文` disclosures and simulated count `0`; Schedule was `unavailable`; Settings exposed fixed DeepSeek metadata with redacted Secret only. Browser console errors/warnings: `0`; React Query/TanStack Devtools: `0`. |
 | Translation boundary | Temporary Real DB settings remained `enabled=false`, monthly budget `0`; DeepSeek usage `0`. No new DeepSeek call was required or made by the final acceptance. Feed title/summary enrichment remains optional; Event/HOT translation remains out of scope. |
 | Verification | P7 targeted suite: 20 files / 207 tests passed. Full Vitest: 726/727 tests, 63/64 files; the only failure is the pre-existing isolated dated Shekou assertion at `server/providers/feed.test.ts:156`, not changed in P7. `pnpm typecheck`, `pnpm lint`, `pnpm build` and Neat Freak closeout are recorded below. |
+
+## Phase 1 — Calendar Integrity and Existing Test Repair — 2026-09-07
+
+- Scope is limited to the existing Calendarific → Runtime → SQLite/Repository → provider-free API → UI boundary plus one deterministic Shekou test fixture. No Provider, dependency, Secret, schema/migration, database, environment, authentication or deployment change was made.
+- Calendar Runtime now checks the current year and next year independently. A seven-day cache preflight skips fresh country/year rows, missing or stale rows are checked, and a year rollover naturally forces the new next-year rows. When both years are fresh, it returns `skipped/calendar_cache_fresh` with zero records and no new `sourceUpdatedAt`; BackgroundRuntime preserves the existing Provider health/failure evidence. Partial cache hits still use the actual sync result. Country/year failures produce explicit coverage errors, continue the other year, and retain same-source last-known Calendar facts. The final Runtime result deduplicates `country/year/sourceId` coverage with later same-run results winning, so a stale failure from an earlier full snapshot cannot survive a successful later-year refresh; a later failure still remains visible.
+- `shared/calendar.ts` is the single read contract for `CalendarCoverageStatusSummary`: `syncStatus` distinguishes `synced`, `partial_failure` and `uncovered`; `cacheStatus` distinguishes `fresh`, `stale` and `missing`; only a no-error, non-`unknown` coverage row with a valid `lastCheckedAt` can make cache status `fresh`. Raw Provider `partial` remains partial coverage, not complete coverage or a failure. `/api/shipping`, `/api/shipping/calendar` and the Calendar UI consume this provider-free summary.
+- Calendar remains `IMPLEMENTED / COVERAGE_PENDING`: historical Calendarific evidence is transport/parser/persistence `VERIFIED_LIVE` with partial country coverage; official/manual completeness and complete two-year business coverage remain pending. This Phase 1 did not call Calendarific and does not upgrade live evidence.
+- The dated Shekou Event/HOT test was reproduced failing on 2026-09-07 because `rankHotItems()` used the host clock after the fixture's 2026-08-16 publication had expired. The test now passes the existing deterministic `2026-08-18T00:00:00Z` evaluation time; freshness rules and assertions are unchanged.
+- P2 repair verification: Calendar Runtime/provider regression suite `34/34`; full Vitest `738/738` across `64/64` files; Node and App typecheck, full ESLint, build and final `git diff --check` passed. The new cache-only regression uses in-memory SQLite, the actual Shipping/Runtime Repositories, BackgroundRuntime and an offline Provider counter; no real Provider was re-verified. The historical P7 `726/727` record remains unchanged as historical evidence and is not rewritten as a P7 rerun.
+- Bash-based Neat Freak inventory remains `pending/unavailable` on this Windows host; the required manual equivalent audit was completed during this closeout. Retained SQLite, secrets, environment configuration, temporary/user artifacts and cleanup candidates remain untouched.
 
 Known coverage gaps remain explicit:
 
@@ -132,10 +143,10 @@ These coverage boundaries do not use Mock fallback and do not fabricate operatio
 | Neat Freak | Manual Windows-equivalent audit completed for rules, code/status alignment, Markdown surfaces, ADR/roadmap state, secrets, local databases, temporary residue and Git/worktree. Official Bash inventory remains `pending/unavailable` because `bash` and `scripts/audit-inventory.sh` are unavailable; no cleanup was performed |
 | Cleanup boundary | `.data/p7-final-seal-20260904.sqlite3` and `.data/shipping-hot-v3-browser.sqlite3` remain ignored cleanup candidates pending explicit confirmation; retained `.data/shipping-hot-v3.sqlite3`, `.env.local`, provider secret metadata, `dist/`, `prototypes/` and `screenshots/` were preserved |
 
-### Documentation / Rules Sync — 2026-09-07
+### Previous Documentation / Rules Sync — 2026-09-07 (historical checkpoint)
 
 - This closeout changed documentation and rules only. No business code, database, environment configuration, Secret, Provider, or runtime state was modified; no external Provider was called or re-verified.
-- The current checkout is `main` at `ed2c8448699971328b23247508a7b91fb537ab6b`; the historical P7 acceptance branch is `codex/shipping-hot-v3-real-data`, and both local refs currently point to that same seal commit. A direct `git ls-remote origin` refresh was attempted but denied by the configured SSH connection, so the local remote-tracking refs are the latest observed origin state, not a newly fetched proof.
+- At that previous docs-only checkpoint the checkout was `main` at `f338ccffb5943c269102afaba41d520e2cf4121e`; the historical P7 acceptance branch remained `codex/shipping-hot-v3-real-data` at `ed2c8448699971328b23247508a7b91fb537ab6b`. This paragraph preserves that historical checkpoint and does not describe the current Phase 1 worktree.
 - Historical verification remains unchanged: full Vitest `726/727` across `63/64` files with the isolated date-sensitive Shekou assertion at `server/providers/feed.test.ts:156`; the official Bash inventory remains `pending/unavailable` because Bash and `scripts/audit-inventory.sh` are unavailable. Existing ignored cleanup candidates were inspected and retained pending explicit confirmation.
 
 > Historical snapshots below preserve the facts that were true at their checkpoint dates. They do not override the current state above; in particular, older `DeepSeek live verification pending`, zero-call and disabled-budget statements are historical, not current-state claims.
@@ -345,8 +356,8 @@ Remaining pending work: real data coverage / runtime follow-up.
 
 ## 2. Current Environment
 
-- Current working branch: `main` at `ed2c8448699971328b23247508a7b91fb537ab6b`; historical P7 acceptance branch: `codex/shipping-hot-v3-real-data` at the same seal commit; package version: `0.0.41`
-- Git remotes: `origin=ssh://git@ssh.github.com:443/rallsix66/Shipping-HOT.git` and `upstream=https://github.com/ourongxing/newsnow.git`; local `origin/main` and `origin/codex/shipping-hot-v3-real-data` both point to the seal commit. Direct `git ls-remote origin` refresh is `pending` after SSH permission denial; no fresh remote proof is claimed here.
+- Current working branch: `main` at `f338ccffb5943c269102afaba41d520e2cf4121e`; historical P7 acceptance branch: `codex/shipping-hot-v3-real-data` at `ed2c8448699971328b23247508a7b91fb537ab6b`; package version: `0.0.41`
+- Git remotes: `origin=ssh://git@ssh.github.com:443/rallsix66/Shipping-HOT.git` and `upstream=https://github.com/ourongxing/newsnow.git`; local `origin/main` points to `f338ccffb5943c269102afaba41d520e2cf4121e` and `origin/codex/shipping-hot-v3-real-data` remains at the historical seal. No remote refresh was performed in Phase 1; these are the latest observed local remote-tracking refs.
 - Local run status: Vite development smoke returned 200 for `/`, `/feed` and `/api/shipping`; default `provider.feed=mock`, `provider.weather=mock` and `provider.weatherAlerts=off`, one non-weather Feed item and one Mock weather item were returned without external weather calls; current process-scoped Mock/Off production Nitro smoke returns 200 for `/`, `/api/shipping/health`, `/api/shipping/runtime`, `/api/shipping/readiness`, `/api/shipping/search/ports`, `/api/shipping/search/vessels` and `/api/shipping`, with no `#nitro/index` subroute error observed
 - Deployment status: `out-of-scope`; repository contains optional Cloudflare/Vercel/Bun/Docker configuration, but no deployment was performed
 - Database / external services: P0 uses fixed Node `24.15.0` / ABI `137`, `better-sqlite3@12.6.2`, db0 path `.data/shipping-hot-v3.sqlite3`, and passed native read/write plus process-A-write → close → process-B-read smoke. The current workspace inventory found no legacy `.data/db.sqlite3`; it is not the V3 runtime path. AISStream, Portcast public pages and Open-Meteo remain optional server-side sources.
