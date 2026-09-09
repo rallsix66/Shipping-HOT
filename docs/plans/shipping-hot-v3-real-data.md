@@ -1,6 +1,6 @@
 # Shipping HOT V3 — Real Data Migration
 
-> 2026-09-09 additive display scope: the approved fixed annual reference month calendar is separate from operational Calendar migration/sync. See `docs/status.md` → Annual Reference Calendar and `docs/architecture.md` → Fixed Annual Reference Calendar. The old large six-country proposal is paused; no new schema/Provider is part of the reference UI.
+> 2026-09-09 additive display scope: the approved fixed annual reference month calendar is separate from operational Calendar migration/sync. Five countries / 100 reference items (ID 25, TH 23, MY 15, PH 21, VN 16) are committed at the verified business-code baseline `main@e34115870804c0ef0040a568968c9ecce81af786`. `/calendar` mounts only the new reference view; its old operational UI entry is removed while the legacy component, backend and historical data remain. See `docs/status.md` → Annual Reference Calendar for current status and `docs/architecture.md` → Fixed Annual Reference Calendar for the boundary. The large six-country auto-sync/source-table/migration proposal is paused and is not an implementation requirement for the reference UI.
 
 > 文档状态：`accepted / V3 FINAL SEALED / P7-A through P7-G complete / P0–P3 core foundations sealed / accepted live Provider boundaries and explicit coverage gaps`
 >
@@ -8,7 +8,7 @@
 >
 > 代码基线：P7 entry `4824d63f8e135ff3c9eb0849d9ba49e832ae000c`；业务基线 `f7281c7ea58444dc3b2d55930d0069c45055cab8`（`fix: preserve persisted feed lifecycle on reads`）；最终 seal commit `ed2c8448699971328b23247508a7b91fb537ab6b`；Node `24.15.0` / ABI `137` / `better-sqlite3@12.6.2`
 >
-> 分支状态：当前工作分支为 `main`，当前 HEAD 为 `4f29a9549deaa7614dca306838a9e110d058667e`；P7 验收事实产生于历史封板分支 `codex/shipping-hot-v3-real-data`，该分支仍指向 `ed2c8448699971328b23247508a7b91fb537ab6b`。Phase 1 是已获批准的后续工作，不改写历史封板事实；本次离线计数修复、复审和 Web 诊断均未调用或重新验证真实接口。
+> 分支状态：当前工作分支为 `main`，本轮文档同步核实的业务代码 HEAD 为 `e34115870804c0ef0040a568968c9ecce81af786`；P7 验收事实产生于历史封板分支 `codex/shipping-hot-v3-real-data`，该分支证据仍为 `ed2c8448699971328b23247508a7b91fb537ab6b`。Phase 1 与后续年度参考月历提交不改写历史封板事实；当前状态以 `docs/status.md` 顶部权威段为准。本轮未重新运行历史真实接口验收。
 >
 > 实施状态：**P0 Persistence、P1A Port Directory、P1B Mock Isolation、P2 Search/Identity/Runtime、P3 Feed Freshness、P7 Final Real-data Seal 已 SEALED；P3A AIS Position、AIS Area、GFW Search/canonical identity、Port Intelligence、Open-Meteo、TMD/BMKG Weather Alerts、VesselAPI Voyage Provider path 与 DeepSeek Translation Provider/Runtime 已有 accepted `VERIFIED_LIVE` evidence**。Feed persisted lifecycle read semantics、Translation mode decoupling、placeholder reliability、post-T3 Settings UI、Home Feed-HOT display boundary 已实现/封板。Schema 保持 v12；P7 只使用现有批准 adapters、process-scoped env 和临时 SQLite，未改 retained SQLite、Secret/env，未新增 Provider、entitlement 或 migration；DeepSeek final acceptance usage 为 0。Voyage focus-port coverage、Calendar completeness、JMA 和公共源覆盖仍以显式边界保留，不被 Mock fallback 或事实推断掩盖。
 >
