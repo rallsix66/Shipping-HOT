@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate_awaiting_user_confirmation",
+  "year": 2026,
+  "review": {
+    "aiCheckedAt": "2026-09-09",
+    "humanReviewStatus": "pending",
+    "userConfirmationStatus": "pending"
+  },
+  "datasetId": "calendar-candidate-TH-2026",
+  "countryCode": "TH",
+  "dateSemantics": "Thailand local civil date (YYYY-MM-DD); no UTC conversion",
+  "scope": "Verified government-office dates only; complete annual nationwide list pending; banking calendar excluded from events",
+  "coverageStatus": "partial_evidence_pending",
+  "counts": {
+    "governmentOfficeHolidayDates": 2,
+    "regionalGovernmentHolidayDates": 1,
+    "events": 3
+  },
+  "sourceDocuments": [
+    {
+      "id": "TH-CABINET-SPECIAL-2026",
+      "officialInstitutions": [
+        "Royal Thai Government"
+      ],
+      "documentNumbers": [
+        "Cabinet resolution reported 12 November 2024"
+      ],
+      "publishedAt": "2024-11-12",
+      "url": "https://www.bot.or.th/en/news-and-media/news/news-20241127.html",
+      "evidenceStatus": "official_summary_verified",
+      "relationshipToAnnualCalendar": "government_special_holiday_basis",
+      "acquiredAt": "2026-09-09"
+    },
+    {
+      "id": "TH-GOV-AUG12-2026",
+      "officialInstitutions": [
+        "Royal Thai Government"
+      ],
+      "documentNumbers": [
+        "Cabinet resolution 21 July 2026"
+      ],
+      "publishedAt": "2026-07-21",
+      "url": "https://www.thaigov.go.th/th/news/166703",
+      "evidenceStatus": "official_body_verified",
+      "relationshipToAnnualCalendar": "annual_government_holiday_confirmation",
+      "acquiredAt": "2026-09-09"
+    },
+    {
+      "id": "TH-GOV-BKK-OCT16-2026",
+      "officialInstitutions": [
+        "Royal Thai Government"
+      ],
+      "documentNumbers": [
+        "Cabinet resolution for IMF-WBG meeting"
+      ],
+      "publishedAt": "2026-05-19",
+      "url": "https://www.thaigov.go.th/th/news/164228",
+      "evidenceStatus": "official_body_verified",
+      "relationshipToAnnualCalendar": "bangkok_only_special_government_holiday",
+      "acquiredAt": "2026-09-09"
+    },
+    {
+      "id": "TH-BOT-31-2568",
+      "officialInstitutions": [
+        "Bank of Thailand"
+      ],
+      "documentNumbers": [
+        "Notification No. 31/2568"
+      ],
+      "publishedAt": "2025-08-05",
+      "url": "https://www.bot.or.th/content/dam/bot/fipcs/documents/FPG/2568/EngPDF/25680162.pdf",
+      "evidenceStatus": "official_original_verified",
+      "relationshipToAnnualCalendar": "banking_sector_reference_not_used_as_national_calendar",
+      "acquiredAt": "2026-09-09"
+    }
+  ],
+  "events": [
+    {
+      "id": "TH-2026-GO-01-2026-01-02",
+      "countryCode": "TH",
+      "date": "2026-01-02",
+      "nameZh": "政府机关特别休假日",
+      "shortNameZh": "特别休假",
+      "nameLocal": "วันหยุดราชการเพิ่มเป็นกรณีพิเศษ",
+      "type": "government_office_holiday",
+      "geographicScope": "Thailand; government offices",
+      "subjectAndConditionsZh": "内阁增设的政府机关特别休假；金融机构是否休假由央行另行决定。",
+      "sourceDocumentIds": [
+        "TH-CABINET-SPECIAL-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "TH-2026-GO-02-2026-08-12",
+      "countryCode": "TH",
+      "date": "2026-08-12",
+      "nameZh": "王太后诞辰暨母亲节政府假日",
+      "shortNameZh": "母亲节",
+      "nameLocal": "วันคล้ายวันพระราชสมภพสมเด็จพระนางเจ้าสิริกิติ์ฯ และวันแม่แห่งชาติ",
+      "type": "government_office_holiday",
+      "geographicScope": "Thailand; government offices",
+      "subjectAndConditionsZh": "政府机关年度假日；不推定所有私营企业或金融机构停业。",
+      "sourceDocumentIds": [
+        "TH-GOV-AUG12-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "TH-2026-RG-01-2026-10-16",
+      "countryCode": "TH",
+      "date": "2026-10-16",
+      "nameZh": "曼谷特别政府假日",
+      "shortNameZh": "曼谷特别假日",
+      "nameLocal": "วันหยุดราชการเป็นกรณีพิเศษในพื้นที่กรุงเทพมหานคร",
+      "type": "regional_government_holiday",
+      "geographicScope": "Bangkok only; government offices",
+      "subjectAndConditionsZh": "仅曼谷政府机关，因 IMF-WBG 年会设置；不是全国假日。",
+      "sourceDocumentIds": [
+        "TH-GOV-BKK-OCT16-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    }
+  ]
+}

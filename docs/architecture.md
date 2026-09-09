@@ -1,5 +1,9 @@
 # Architecture — NewsNow Foundation / Shipping HOT Proposal
 
+## Fixed Annual Reference Calendar — approved 2026-09-09
+
+The user approved a display-only Southeast Asia annual calendar with explicit incomplete/applicability labels. Its read path is bundled annual JSON → `server/services/annual-calendar.ts` → GET `/api/shipping/calendar/reference` → React month grid at `/calendar`. No external API, SQLite, Secret or Runtime is involved in this reference endpoint. The existing shell still reads the existing provider-free Shipping snapshot; the user removed the operational-cache UI entry, so `/calendar` mounts only the reference view. Existing backend/data and the unmounted legacy component remain unchanged. Reference files do not enter operational Calendar, Event/HOT, readiness or Provider usage. Candidate review documents are not runtime imports. No new dependency, migration, framework or background job is authorized by this change. The larger source-snapshot/hybrid/writer-generation proposal remains paused, not an implementation requirement.
+
 > Last verified: 2026-09-08
 > Architecture status: `V3 — FINAL SEALED` for the existing modular monolith. P0–P3 foundations and P7-A–P7-G are sealed; GFW Vessel Search/canonical identity, continuous AIS PositionReport, AIS Area, Portcast public-page, Open-Meteo, TMD/BMKG official Weather Alerts, the VesselAPI Voyage/ETA Provider path and the fixed DeepSeek Translation Provider/Runtime retain their accepted live boundaries. Final Real Mode, Event/HOT, UI, restart and zero-Mock evidence passed with explicit coverage gaps: Voyage focus-port coverage, Calendar completeness, JMA/geographic alert coverage and bounded public-source coverage. No new Provider, entitlement, schema migration or Secret was introduced.
 > Source of truth for: the current retained system structure and approved boundaries

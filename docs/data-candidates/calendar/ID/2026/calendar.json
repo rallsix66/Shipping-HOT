@@ -1,0 +1,494 @@
+{
+  "schemaVersion": 1,
+  "datasetId": "calendar-candidate-ID-2026",
+  "status": "candidate_awaiting_user_confirmation",
+  "countryCode": "ID",
+  "year": 2026,
+  "dateSemantics": "Indonesia local civil date (YYYY-MM-DD); no UTC conversion",
+  "scope": "Nationwide calendar dates only; not proof of port, customs, carrier, bank, or private-company closure",
+  "counts": {
+    "nationalHolidayDates": 17,
+    "collectiveLeaveDates": 8,
+    "events": 25
+  },
+  "review": {
+    "aiCheckedAt": "2026-09-09",
+    "humanReviewStatus": "pending",
+    "userConfirmationStatus": "pending"
+  },
+  "sourceDocuments": [
+    {
+      "id": "SKB-3-MENTERI-2025-ID-2026",
+      "officialInstitutions": [
+        "Kementerian Agama Republik Indonesia",
+        "Kementerian Ketenagakerjaan Republik Indonesia",
+        "Kementerian Pendayagunaan Aparatur Negara dan Reformasi Birokrasi Republik Indonesia"
+      ],
+      "documentNumbers": [
+        "1497 Tahun 2025",
+        "2 Tahun 2025",
+        "5 Tahun 2025"
+      ],
+      "publishedAt": "2025-09-19",
+      "url": "https://jdih.kemnaker.go.id/asset/data_puu/2025kb002.pdf",
+      "evidenceStatus": "official_original_verified",
+      "relationshipToAnnualCalendar": "primary_annual_decision"
+    },
+    {
+      "id": "KEPPRES-42-2025-ASN",
+      "officialInstitutions": [
+        "Presiden Republik Indonesia"
+      ],
+      "documentNumbers": [
+        "Keputusan Presiden Nomor 42 Tahun 2025"
+      ],
+      "publishedAt": "2025-12-31",
+      "url": "https://data-jdih.menpan.go.id/dokumen/2025keppres042.pdf",
+      "evidenceStatus": "official_original_verified",
+      "relationshipToAnnualCalendar": "applicability_supplement_consistent_with_annual_decision",
+      "scope": "ASN collective leave only"
+    },
+    {
+      "id": "KEMENAG-IDULFITRI-1447H",
+      "officialInstitutions": [
+        "Kementerian Agama Republik Indonesia"
+      ],
+      "documentNumbers": [
+        "Sidang Isbat 1 Syawal 1447 H"
+      ],
+      "publishedAt": "2026-03-19",
+      "url": "https://kemenag.go.id/pers-rilis/pemerintah-tetapkan-1-syawal-1447-h-bertepatan-21-maret-2026-HZfDD",
+      "evidenceStatus": "official_body_verified",
+      "relationshipToAnnualCalendar": "subsequent_date_confirmation_verified_consistent_with_annual_decision",
+      "acquiredAt": "2026-09-09",
+      "evidenceLocator": "Official Kemenag press-release body: headline and decision paragraph state 1 Syawal 1447 H falls on 21 March 2026."
+    },
+    {
+      "id": "KEMENAG-IDULADHA-1447H",
+      "officialInstitutions": [
+        "Kementerian Agama Republik Indonesia"
+      ],
+      "documentNumbers": [
+        "Sidang Isbat 1 Zulhijah 1447 H"
+      ],
+      "publishedAt": "2026-05-17",
+      "url": "https://kemenag.go.id/pers-rilis/1-zulhijah-1447-h-jatuh-pada-18-mei-2026-iduladha-27-mei-2026-xARut",
+      "evidenceStatus": "official_body_verified",
+      "relationshipToAnnualCalendar": "subsequent_date_confirmation_verified_consistent_with_annual_decision",
+      "acquiredAt": "2026-09-09",
+      "evidenceLocator": "Official Kemenag press-release body: headline and isbat result state Eid al-Adha falls on 27 May 2026."
+    }
+  ],
+  "events": [
+    {
+      "id": "ID-2026-NH-2026-01-01",
+      "countryCode": "ID",
+      "date": "2026-01-01",
+      "nameZh": "2026年公历新年",
+      "shortNameZh": "公历新年",
+      "nameLocal": "Tahun Baru 2026 Masehi",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按印尼当地民用日期记录。"
+    },
+    {
+      "id": "ID-2026-NH-2026-01-16",
+      "countryCode": "ID",
+      "date": "2026-01-16",
+      "nameZh": "先知穆罕默德夜行登霄纪念日",
+      "shortNameZh": "夜行登霄日",
+      "nameLocal": "Isra Mikraj Nabi Muhammad saw.",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按印尼当地民用日期记录。"
+    },
+    {
+      "id": "ID-2026-CL-2026-02-16",
+      "countryCode": "ID",
+      "date": "2026-02-16",
+      "nameZh": "农历新年集体休假",
+      "shortNameZh": "农历新年",
+      "nameLocal": "Tahun Baru Imlek 2577 Kongzili",
+      "type": "collective_leave",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国集体休假安排；私营机构/企业是否执行由其负责人决定，公共服务单位依法安排值守，ASN另受总统决定约束。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026",
+        "KEPPRES-42-2025-ASN"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "一般劳动者按适用规则计入年假；不等于港口或海关统一停工。"
+    },
+    {
+      "id": "ID-2026-NH-2026-02-17",
+      "countryCode": "ID",
+      "date": "2026-02-17",
+      "nameZh": "2577孔子纪年农历新年",
+      "shortNameZh": "农历新年",
+      "nameLocal": "Tahun Baru Imlek 2577 Kongzili",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按印尼当地民用日期记录。"
+    },
+    {
+      "id": "ID-2026-CL-2026-03-18",
+      "countryCode": "ID",
+      "date": "2026-03-18",
+      "nameZh": "宁静日集体休假",
+      "shortNameZh": "宁静日",
+      "nameLocal": "Hari Suci Nyepi (Tahun Baru Saka 1948)",
+      "type": "collective_leave",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国集体休假安排；私营机构/企业是否执行由其负责人决定，公共服务单位依法安排值守，ASN另受总统决定约束。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026",
+        "KEPPRES-42-2025-ASN"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "一般劳动者按适用规则计入年假；不等于港口或海关统一停工。"
+    },
+    {
+      "id": "ID-2026-NH-2026-03-19",
+      "countryCode": "ID",
+      "date": "2026-03-19",
+      "nameZh": "宁静日（萨卡历1948年新年）",
+      "shortNameZh": "宁静日",
+      "nameLocal": "Hari Suci Nyepi (Tahun Baru Saka 1948)",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按印尼当地民用日期记录。"
+    },
+    {
+      "id": "ID-2026-CL-2026-03-20",
+      "countryCode": "ID",
+      "date": "2026-03-20",
+      "nameZh": "开斋节集体休假",
+      "shortNameZh": "开斋节",
+      "nameLocal": "Hari Raya Idulfitri 1447 Hijriah",
+      "type": "collective_leave",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国集体休假安排；私营机构/企业是否执行由其负责人决定，公共服务单位依法安排值守，ASN另受总统决定约束。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026",
+        "KEPPRES-42-2025-ASN"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "一般劳动者按适用规则计入年假；不等于港口或海关统一停工。"
+    },
+    {
+      "id": "ID-2026-NH-2026-03-21",
+      "countryCode": "ID",
+      "date": "2026-03-21",
+      "nameZh": "开斋节（伊斯兰历1447年，第一天）",
+      "shortNameZh": "开斋节",
+      "nameLocal": "Hari Raya Idulfitri 1447 Hijriah",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026",
+        "KEMENAG-IDULFITRI-1447H"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "宗教事务部另于2026-03-19确认1 Shawwal为2026-03-21。"
+    },
+    {
+      "id": "ID-2026-NH-2026-03-22",
+      "countryCode": "ID",
+      "date": "2026-03-22",
+      "nameZh": "开斋节（伊斯兰历1447年，第二天）",
+      "shortNameZh": "开斋节",
+      "nameLocal": "Hari Raya Idulfitri 1447 Hijriah",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "SKB列明开斋节第二天。"
+    },
+    {
+      "id": "ID-2026-CL-2026-03-23",
+      "countryCode": "ID",
+      "date": "2026-03-23",
+      "nameZh": "开斋节集体休假",
+      "shortNameZh": "开斋节",
+      "nameLocal": "Hari Raya Idulfitri 1447 Hijriah",
+      "type": "collective_leave",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国集体休假安排；私营机构/企业是否执行由其负责人决定，公共服务单位依法安排值守，ASN另受总统决定约束。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026",
+        "KEPPRES-42-2025-ASN"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "一般劳动者按适用规则计入年假；不等于港口或海关统一停工。"
+    },
+    {
+      "id": "ID-2026-CL-2026-03-24",
+      "countryCode": "ID",
+      "date": "2026-03-24",
+      "nameZh": "开斋节集体休假",
+      "shortNameZh": "开斋节",
+      "nameLocal": "Hari Raya Idulfitri 1447 Hijriah",
+      "type": "collective_leave",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国集体休假安排；私营机构/企业是否执行由其负责人决定，公共服务单位依法安排值守，ASN另受总统决定约束。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026",
+        "KEPPRES-42-2025-ASN"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "一般劳动者按适用规则计入年假；不等于港口或海关统一停工。"
+    },
+    {
+      "id": "ID-2026-NH-2026-04-03",
+      "countryCode": "ID",
+      "date": "2026-04-03",
+      "nameZh": "耶稣受难日",
+      "shortNameZh": "耶稣受难日",
+      "nameLocal": "Wafat Yesus Kristus",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按印尼当地民用日期记录。"
+    },
+    {
+      "id": "ID-2026-NH-2026-04-05",
+      "countryCode": "ID",
+      "date": "2026-04-05",
+      "nameZh": "耶稣复活节",
+      "shortNameZh": "复活节",
+      "nameLocal": "Kebangkitan Yesus Kristus (Paskah)",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按印尼当地民用日期记录。"
+    },
+    {
+      "id": "ID-2026-NH-2026-05-01",
+      "countryCode": "ID",
+      "date": "2026-05-01",
+      "nameZh": "国际劳动节",
+      "shortNameZh": "劳动节",
+      "nameLocal": "Hari Buruh Internasional",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按印尼当地民用日期记录。"
+    },
+    {
+      "id": "ID-2026-NH-2026-05-14",
+      "countryCode": "ID",
+      "date": "2026-05-14",
+      "nameZh": "耶稣升天节",
+      "shortNameZh": "耶稣升天节",
+      "nameLocal": "Kenaikan Yesus Kristus",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按印尼当地民用日期记录。"
+    },
+    {
+      "id": "ID-2026-CL-2026-05-15",
+      "countryCode": "ID",
+      "date": "2026-05-15",
+      "nameZh": "耶稣升天节集体休假",
+      "shortNameZh": "耶稣升天节",
+      "nameLocal": "Kenaikan Yesus Kristus",
+      "type": "collective_leave",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国集体休假安排；私营机构/企业是否执行由其负责人决定，公共服务单位依法安排值守，ASN另受总统决定约束。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026",
+        "KEPPRES-42-2025-ASN"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "一般劳动者按适用规则计入年假；不等于港口或海关统一停工。"
+    },
+    {
+      "id": "ID-2026-NH-2026-05-27",
+      "countryCode": "ID",
+      "date": "2026-05-27",
+      "nameZh": "宰牲节（伊斯兰历1447年）",
+      "shortNameZh": "宰牲节",
+      "nameLocal": "Hari Raya Iduladha 1447 Hijriah",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026",
+        "KEMENAG-IDULADHA-1447H"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "宗教事务部另于2026-05-17确认宰牲节为2026-05-27。"
+    },
+    {
+      "id": "ID-2026-CL-2026-05-28",
+      "countryCode": "ID",
+      "date": "2026-05-28",
+      "nameZh": "宰牲节集体休假",
+      "shortNameZh": "宰牲节",
+      "nameLocal": "Hari Raya Iduladha 1447 Hijriah",
+      "type": "collective_leave",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国集体休假安排；私营机构/企业是否执行由其负责人决定，公共服务单位依法安排值守，ASN另受总统决定约束。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026",
+        "KEPPRES-42-2025-ASN"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "一般劳动者按适用规则计入年假；不等于港口或海关统一停工。"
+    },
+    {
+      "id": "ID-2026-NH-2026-05-31",
+      "countryCode": "ID",
+      "date": "2026-05-31",
+      "nameZh": "卫塞节（佛历2570年）",
+      "shortNameZh": "卫塞节",
+      "nameLocal": "Hari Raya Waisak 2570 BE",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按印尼当地民用日期记录。"
+    },
+    {
+      "id": "ID-2026-NH-2026-06-01",
+      "countryCode": "ID",
+      "date": "2026-06-01",
+      "nameZh": "潘查希拉诞生日",
+      "shortNameZh": "潘查希拉日",
+      "nameLocal": "Hari Lahir Pancasila",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按印尼当地民用日期记录。"
+    },
+    {
+      "id": "ID-2026-NH-2026-06-16",
+      "countryCode": "ID",
+      "date": "2026-06-16",
+      "nameZh": "伊斯兰历1448年新年（穆哈兰月1日）",
+      "shortNameZh": "伊斯兰新年",
+      "nameLocal": "1 Muharam Tahun Baru Islam 1448 Hijriah",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按印尼当地民用日期记录。"
+    },
+    {
+      "id": "ID-2026-NH-2026-08-17",
+      "countryCode": "ID",
+      "date": "2026-08-17",
+      "nameZh": "印度尼西亚独立宣言纪念日",
+      "shortNameZh": "独立日",
+      "nameLocal": "Proklamasi Kemerdekaan",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按印尼当地民用日期记录。"
+    },
+    {
+      "id": "ID-2026-NH-2026-08-25",
+      "countryCode": "ID",
+      "date": "2026-08-25",
+      "nameZh": "先知穆罕默德诞辰",
+      "shortNameZh": "先知诞辰",
+      "nameLocal": "Maulid Nabi Muhammad saw.",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按印尼当地民用日期记录。"
+    },
+    {
+      "id": "ID-2026-CL-2026-12-24",
+      "countryCode": "ID",
+      "date": "2026-12-24",
+      "nameZh": "圣诞节集体休假",
+      "shortNameZh": "圣诞节",
+      "nameLocal": "Kelahiran Yesus Kristus",
+      "type": "collective_leave",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国集体休假安排；私营机构/企业是否执行由其负责人决定，公共服务单位依法安排值守，ASN另受总统决定约束。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026",
+        "KEPPRES-42-2025-ASN"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "一般劳动者按适用规则计入年假；不等于港口或海关统一停工。"
+    },
+    {
+      "id": "ID-2026-NH-2026-12-25",
+      "countryCode": "ID",
+      "date": "2026-12-25",
+      "nameZh": "圣诞节（耶稣诞辰）",
+      "shortNameZh": "圣诞节",
+      "nameLocal": "Kelahiran Yesus Kristus",
+      "type": "national_holiday",
+      "geographicScope": "nationwide",
+      "subjectAndConditionsZh": "全国日历假日；公共服务、交通等单位依法安排值守，不据此推定港口、海关或企业停工。",
+      "sourceDocumentIds": [
+        "SKB-3-MENTERI-2025-ID-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按印尼当地民用日期记录。"
+    }
+  ]
+}

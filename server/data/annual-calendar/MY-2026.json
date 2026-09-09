@@ -1,0 +1,335 @@
+{
+  "schemaVersion": 1,
+  "status": "reference_display",
+  "year": 2026,
+  "review": {
+    "aiCheckedAt": "2026-09-09",
+    "humanReviewStatus": "pending",
+    "userConfirmationStatus": "approved_for_reference_display_2026-09-09"
+  },
+  "datasetId": "calendar-candidate-MY-2026",
+  "countryCode": "MY",
+  "dateSemantics": "Malaysia local civil date (YYYY-MM-DD); no UTC conversion",
+  "scope": "Federal schedule plus expressly gazetted 2026 addition; state-only holidays excluded",
+  "coverageStatus": "candidate_scope_complete_subject_to_human_review",
+  "counts": {
+    "federalPublicHolidayDates": 14,
+    "additionalPublicHolidayDates": 1,
+    "events": 15
+  },
+  "sourceDocuments": [
+    {
+      "id": "MY-GAZETTE-33499-33501-2026",
+      "officialInstitutions": [
+        "BKPP, Jabatan Perdana Menteri"
+      ],
+      "documentNumbers": [
+        "Federal Gazette Nos. 33499-33501"
+      ],
+      "publishedAt": "2025-08-28",
+      "url": "https://www.kabinet.gov.my/storage/2025/09/GN-33499-GN-33501-TS-28-8-2025-JABATAN-PERDANA-MENTERIBHG-KABINETPERLEMBAGAAN-PERHUBUNGAN-ANTARA-KERAJAAN-AGJ971.pdf",
+      "evidenceStatus": "official_original_verified",
+      "relationshipToAnnualCalendar": "primary_federal_and_state_schedule",
+      "acquiredAt": "2026-09-09"
+    },
+    {
+      "id": "MY-HKA-2026",
+      "officialInstitutions": [
+        "BKPP, Jabatan Perdana Menteri"
+      ],
+      "documentNumbers": [
+        "Jadual Hari Kelepasan Am Persekutuan dan Negeri 2026"
+      ],
+      "publishedAt": "2025-08-28",
+      "url": "https://www.kabinet.gov.my/storage/2025/08/HKA-2026.pdf",
+      "evidenceStatus": "official_original_verified",
+      "relationshipToAnnualCalendar": "official_readable_schedule",
+      "acquiredAt": "2026-09-09"
+    },
+    {
+      "id": "MY-PUB-111-2026",
+      "officialInstitutions": [
+        "Prime Minister of Malaysia"
+      ],
+      "documentNumbers": [
+        "P.U. (B) 111"
+      ],
+      "publishedAt": "2026-03-17",
+      "url": "https://www.kabinet.gov.my/storage/2026/03/PUB-111_2026.pdf",
+      "evidenceStatus": "official_original_verified",
+      "relationshipToAnnualCalendar": "additional_holiday_peninsular_malaysia",
+      "acquiredAt": "2026-09-09"
+    },
+    {
+      "id": "MY-PUB-112-2026",
+      "officialInstitutions": [
+        "Prime Minister of Malaysia"
+      ],
+      "documentNumbers": [
+        "P.U. (B) 112"
+      ],
+      "publishedAt": "2026-03-17",
+      "url": "https://www.kabinet.gov.my/storage/2026/03/PUB-112_2026.pdf",
+      "evidenceStatus": "official_original_verified",
+      "relationshipToAnnualCalendar": "additional_holiday_labuan",
+      "acquiredAt": "2026-09-09"
+    }
+  ],
+  "events": [
+    {
+      "id": "MY-2026-FH-01-2026-02-17",
+      "countryCode": "MY",
+      "date": "2026-02-17",
+      "nameZh": "农历新年（第一天）",
+      "shortNameZh": "农历新年",
+      "nameLocal": "Tahun Baharu Cina",
+      "type": "federal_public_holiday",
+      "geographicScope": "All Malaysian states and federal territories",
+      "subjectAndConditionsZh": "联邦假日仍须按州/联邦直辖区适用列及当地周休日规则执行；不据此推定港口停运。",
+      "sourceDocumentIds": [
+        "MY-GAZETTE-33499-33501-2026",
+        "MY-HKA-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "MY-2026-FH-02-2026-02-18",
+      "countryCode": "MY",
+      "date": "2026-02-18",
+      "nameZh": "农历新年（第二天）",
+      "shortNameZh": "农历新年",
+      "nameLocal": "Tahun Baharu Cina (Hari Kedua)",
+      "type": "federal_public_holiday",
+      "geographicScope": "All Malaysian states and federal territories",
+      "subjectAndConditionsZh": "联邦假日仍须按州/联邦直辖区适用列及当地周休日规则执行；不据此推定港口停运。",
+      "sourceDocumentIds": [
+        "MY-GAZETTE-33499-33501-2026",
+        "MY-HKA-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "MY-2026-AH-01-2026-03-20",
+      "countryCode": "MY",
+      "date": "2026-03-20",
+      "nameZh": "开斋节追加公共假日",
+      "shortNameZh": "开斋节追加假日",
+      "nameLocal": "Hari Kelepasan Am Tambahan Sempena Hari Raya Puasa",
+      "type": "additional_public_holiday",
+      "geographicScope": "Peninsular Malaysia and W.P. Labuan",
+      "subjectAndConditionsZh": "因开斋节落在3月21日触发；不扩展至沙巴、砂拉越。",
+      "sourceDocumentIds": [
+        "MY-PUB-111-2026",
+        "MY-PUB-112-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "MY-2026-FH-03-2026-03-21",
+      "countryCode": "MY",
+      "date": "2026-03-21",
+      "nameZh": "开斋节（第一天）",
+      "shortNameZh": "开斋节",
+      "nameLocal": "Hari Raya Puasa",
+      "type": "federal_public_holiday",
+      "geographicScope": "All Malaysian states and federal territories",
+      "subjectAndConditionsZh": "联邦假日仍须按州/联邦直辖区适用列及当地周休日规则执行；不据此推定港口停运。",
+      "sourceDocumentIds": [
+        "MY-GAZETTE-33499-33501-2026",
+        "MY-HKA-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "MY-2026-FH-04-2026-03-22",
+      "countryCode": "MY",
+      "date": "2026-03-22",
+      "nameZh": "开斋节（第二天）",
+      "shortNameZh": "开斋节",
+      "nameLocal": "Hari Raya Puasa (Hari Kedua)",
+      "type": "federal_public_holiday",
+      "geographicScope": "All Malaysian states and federal territories",
+      "subjectAndConditionsZh": "联邦假日仍须按州/联邦直辖区适用列及当地周休日规则执行；不据此推定港口停运。",
+      "sourceDocumentIds": [
+        "MY-GAZETTE-33499-33501-2026",
+        "MY-HKA-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "MY-2026-FH-05-2026-05-01",
+      "countryCode": "MY",
+      "date": "2026-05-01",
+      "nameZh": "劳动节",
+      "shortNameZh": "劳动节",
+      "nameLocal": "Hari Pekerja",
+      "type": "federal_public_holiday",
+      "geographicScope": "All Malaysian states and federal territories",
+      "subjectAndConditionsZh": "联邦假日仍须按州/联邦直辖区适用列及当地周休日规则执行；不据此推定港口停运。",
+      "sourceDocumentIds": [
+        "MY-GAZETTE-33499-33501-2026",
+        "MY-HKA-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "MY-2026-FH-06-2026-05-27",
+      "countryCode": "MY",
+      "date": "2026-05-27",
+      "nameZh": "哈芝节（宰牲节）",
+      "shortNameZh": "哈芝节",
+      "nameLocal": "Hari Raya Qurban",
+      "type": "federal_public_holiday",
+      "geographicScope": "All Malaysian states and federal territories",
+      "subjectAndConditionsZh": "各州后续日及替代休假规则不同；本条仅记录联邦表首日。",
+      "sourceDocumentIds": [
+        "MY-GAZETTE-33499-33501-2026",
+        "MY-HKA-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "MY-2026-FH-07-2026-05-31",
+      "countryCode": "MY",
+      "date": "2026-05-31",
+      "nameZh": "卫塞节",
+      "shortNameZh": "卫塞节",
+      "nameLocal": "Hari Wesak",
+      "type": "federal_public_holiday",
+      "geographicScope": "All Malaysian states and federal territories",
+      "subjectAndConditionsZh": "日期为周日；替代日依各州周休日规则，不能统一推定。",
+      "sourceDocumentIds": [
+        "MY-GAZETTE-33499-33501-2026",
+        "MY-HKA-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "MY-2026-FH-08-2026-06-01",
+      "countryCode": "MY",
+      "date": "2026-06-01",
+      "nameZh": "最高元首诞辰",
+      "shortNameZh": "元首诞辰",
+      "nameLocal": "Hari Keputeraan Rasmi Yang di-Pertuan Agong",
+      "type": "federal_public_holiday",
+      "geographicScope": "All Malaysian states and federal territories",
+      "subjectAndConditionsZh": "联邦假日仍须按州/联邦直辖区适用列及当地周休日规则执行；不据此推定港口停运。",
+      "sourceDocumentIds": [
+        "MY-GAZETTE-33499-33501-2026",
+        "MY-HKA-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "MY-2026-FH-09-2026-06-17",
+      "countryCode": "MY",
+      "date": "2026-06-17",
+      "nameZh": "回历元旦",
+      "shortNameZh": "回历元旦",
+      "nameLocal": "Awal Muharam (Maal Hijrah)",
+      "type": "federal_public_holiday",
+      "geographicScope": "All Malaysian states and federal territories",
+      "subjectAndConditionsZh": "联邦假日仍须按州/联邦直辖区适用列及当地周休日规则执行；不据此推定港口停运。",
+      "sourceDocumentIds": [
+        "MY-GAZETTE-33499-33501-2026",
+        "MY-HKA-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "MY-2026-FH-10-2026-08-25",
+      "countryCode": "MY",
+      "date": "2026-08-25",
+      "nameZh": "先知穆罕默德诞辰",
+      "shortNameZh": "先知诞辰",
+      "nameLocal": "Maulidur Rasul",
+      "type": "federal_public_holiday",
+      "geographicScope": "All Malaysian states and federal territories",
+      "subjectAndConditionsZh": "联邦假日仍须按州/联邦直辖区适用列及当地周休日规则执行；不据此推定港口停运。",
+      "sourceDocumentIds": [
+        "MY-GAZETTE-33499-33501-2026",
+        "MY-HKA-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "MY-2026-FH-11-2026-08-31",
+      "countryCode": "MY",
+      "date": "2026-08-31",
+      "nameZh": "国庆日",
+      "shortNameZh": "国庆日",
+      "nameLocal": "Hari Kebangsaan",
+      "type": "federal_public_holiday",
+      "geographicScope": "All Malaysian states and federal territories",
+      "subjectAndConditionsZh": "联邦假日仍须按州/联邦直辖区适用列及当地周休日规则执行；不据此推定港口停运。",
+      "sourceDocumentIds": [
+        "MY-GAZETTE-33499-33501-2026",
+        "MY-HKA-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "MY-2026-FH-12-2026-09-16",
+      "countryCode": "MY",
+      "date": "2026-09-16",
+      "nameZh": "马来西亚日",
+      "shortNameZh": "马来西亚日",
+      "nameLocal": "Hari Malaysia",
+      "type": "federal_public_holiday",
+      "geographicScope": "All Malaysian states and federal territories",
+      "subjectAndConditionsZh": "联邦假日仍须按州/联邦直辖区适用列及当地周休日规则执行；不据此推定港口停运。",
+      "sourceDocumentIds": [
+        "MY-GAZETTE-33499-33501-2026",
+        "MY-HKA-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "MY-2026-FH-13-2026-11-08",
+      "countryCode": "MY",
+      "date": "2026-11-08",
+      "nameZh": "屠妖节",
+      "shortNameZh": "屠妖节",
+      "nameLocal": "Hari Deepavali",
+      "type": "federal_public_holiday",
+      "geographicScope": "All states and federal territories except Sarawak",
+      "subjectAndConditionsZh": "砂拉越不适用；周日替代日依各适用州规则。",
+      "sourceDocumentIds": [
+        "MY-GAZETTE-33499-33501-2026",
+        "MY-HKA-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "MY-2026-FH-14-2026-12-25",
+      "countryCode": "MY",
+      "date": "2026-12-25",
+      "nameZh": "圣诞节",
+      "shortNameZh": "圣诞节",
+      "nameLocal": "Hari Krismas",
+      "type": "federal_public_holiday",
+      "geographicScope": "All Malaysian states and federal territories",
+      "subjectAndConditionsZh": "联邦假日仍须按州/联邦直辖区适用列及当地周休日规则执行；不据此推定港口停运。",
+      "sourceDocumentIds": [
+        "MY-GAZETTE-33499-33501-2026",
+        "MY-HKA-2026"
+      ],
+      "verificationStatus": "official_primary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    }
+  ]
+}

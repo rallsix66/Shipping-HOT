@@ -1,5 +1,7 @@
 # Shipping HOT V3 — Real Data Migration
 
+> 2026-09-09 additive display scope: the approved fixed annual reference month calendar is separate from operational Calendar migration/sync. See `docs/status.md` → Annual Reference Calendar and `docs/architecture.md` → Fixed Annual Reference Calendar. The old large six-country proposal is paused; no new schema/Provider is part of the reference UI.
+
 > 文档状态：`accepted / V3 FINAL SEALED / P7-A through P7-G complete / P0–P3 core foundations sealed / accepted live Provider boundaries and explicit coverage gaps`
 >
 > P7 审查日期：2026-09-04（Asia/Shanghai）；Phase 1 implementation/review checkpoints：2026-09-07–2026-09-08（Asia/Shanghai）；当前独立复审已完成

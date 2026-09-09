@@ -1,0 +1,335 @@
+{
+  "schemaVersion": 1,
+  "status": "reference_display",
+  "year": 2026,
+  "review": {
+    "aiCheckedAt": "2026-09-09",
+    "humanReviewStatus": "pending",
+    "userConfirmationStatus": "approved_for_reference_display_2026-09-09"
+  },
+  "datasetId": "calendar-candidate-VN-2026",
+  "countryCode": "VN",
+  "dateSemantics": "Vietnam local civil date (YYYY-MM-DD); no UTC conversion",
+  "scope": "Statutory dates plus separately typed civil-service schedules and swaps",
+  "coverageStatus": "partial_primary_text_pending",
+  "counts": {
+    "statutoryHolidayDates": 5,
+    "civilServiceStatutoryScheduleDates": 6,
+    "civilServiceSwappedDaysOff": 2,
+    "civilServiceMakeupWorkdays": 2,
+    "events": 16,
+    "conditionalSubstituteDates": 1
+  },
+  "sourceDocuments": [
+    {
+      "id": "VN-LABOUR-CODE-45-2019",
+      "officialInstitutions": [
+        "National Assembly of Vietnam"
+      ],
+      "documentNumbers": [
+        "Labour Code No. 45/2019/QH14, Articles 111-112"
+      ],
+      "publishedAt": "2019-11-20",
+      "url": "https://xaydungchinhsach.chinhphu.vn/lich-nghi-le-gio-to-hung-vuong-30-4-1-5-quoc-khanh-2-9-nam-2026-119260222115822151.htm",
+      "evidenceStatus": "official_body_summary_verified",
+      "relationshipToAnnualCalendar": "statutory_holiday_basis",
+      "acquiredAt": "2026-09-09",
+      "notes": "Official Government portal summarizes Labour Code Article 112; a government-hosted promulgated full-text file remains pending."
+    },
+    {
+      "id": "VN-BNV-9441-2025",
+      "officialInstitutions": [
+        "Ministry of Home Affairs of Vietnam"
+      ],
+      "documentNumbers": [
+        "Thông báo số 9441/TB-BNV"
+      ],
+      "publishedAt": "2025-10-16",
+      "url": "https://xaydungchinhsach.chinhphu.vn/de-xuat-phuong-an-nghi-tet-am-lich-nghi-le-quoc-khanh-nam-2026-119251002130522291.htm",
+      "evidenceStatus": "official_body_summary_verified",
+      "relationshipToAnnualCalendar": "2026_civil_service_schedule_and_employer_options",
+      "acquiredAt": "2026-09-09"
+    },
+    {
+      "id": "VN-VPCP-12729-2025",
+      "officialInstitutions": [
+        "Government Office of Vietnam"
+      ],
+      "documentNumbers": [
+        "Văn bản số 12729/VPCP-KGVX"
+      ],
+      "publishedAt": "2025-12-25",
+      "url": "https://xaydungchinhsach.chinhphu.vn/lich-nghi-tet-duong-lich-2026-119251225111725138.htm",
+      "evidenceStatus": "official_body_summary_verified",
+      "relationshipToAnnualCalendar": "new_year_civil_service_swap",
+      "acquiredAt": "2026-09-09"
+    }
+  ],
+  "events": [
+    {
+      "id": "VN-2026-SH-01-2026-01-01",
+      "countryCode": "VN",
+      "date": "2026-01-01",
+      "nameZh": "公历新年法定假日",
+      "shortNameZh": "公历新年",
+      "nameLocal": "Tết Dương lịch",
+      "type": "statutory_holiday",
+      "geographicScope": "nationwide workers",
+      "subjectAndConditionsZh": "劳动法规定1日法定假日。",
+      "sourceDocumentIds": [
+        "VN-LABOUR-CODE-45-2019",
+        "VN-VPCP-12729-2025"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "VN-2026-CS-01-2026-01-02",
+      "countryCode": "VN",
+      "date": "2026-01-02",
+      "nameZh": "公职人员元旦调休日",
+      "shortNameZh": "元旦调休",
+      "nameLocal": "Nghỉ hoán đổi dịp Tết Dương lịch",
+      "type": "civil_service_swapped_day_off",
+      "geographicScope": "civil servants and public employees",
+      "subjectAndConditionsZh": "公职人员与1月10日调换；企业仅获鼓励采用。",
+      "sourceDocumentIds": [
+        "VN-VPCP-12729-2025"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "VN-2026-CW-01-2026-01-10",
+      "countryCode": "VN",
+      "date": "2026-01-10",
+      "nameZh": "公职人员元旦补班日",
+      "shortNameZh": "元旦补班",
+      "nameLocal": "Ngày làm bù dịp Tết Dương lịch",
+      "type": "civil_service_makeup_workday",
+      "geographicScope": "civil servants and public employees",
+      "subjectAndConditionsZh": "仅对应1月2日调休的补班日，不是假日。",
+      "sourceDocumentIds": [
+        "VN-VPCP-12729-2025"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "VN-2026-TH-01-2026-02-16",
+      "countryCode": "VN",
+      "date": "2026-02-16",
+      "nameZh": "春节法定休假安排（第1天）",
+      "shortNameZh": "春节",
+      "nameLocal": "Tết Âm lịch",
+      "type": "civil_service_statutory_schedule",
+      "geographicScope": "civil servants and public employees",
+      "subjectAndConditionsZh": "公职固定为2月16日至20日；其他用人单位依法在三种5日方案中选择。",
+      "sourceDocumentIds": [
+        "VN-LABOUR-CODE-45-2019",
+        "VN-BNV-9441-2025"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "VN-2026-TH-02-2026-02-17",
+      "countryCode": "VN",
+      "date": "2026-02-17",
+      "nameZh": "春节法定休假安排（第2天）",
+      "shortNameZh": "春节",
+      "nameLocal": "Tết Âm lịch",
+      "type": "civil_service_statutory_schedule",
+      "geographicScope": "civil servants and public employees",
+      "subjectAndConditionsZh": "公职固定为2月16日至20日；其他用人单位依法在三种5日方案中选择。",
+      "sourceDocumentIds": [
+        "VN-LABOUR-CODE-45-2019",
+        "VN-BNV-9441-2025"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "VN-2026-TH-03-2026-02-18",
+      "countryCode": "VN",
+      "date": "2026-02-18",
+      "nameZh": "春节法定休假安排（第3天）",
+      "shortNameZh": "春节",
+      "nameLocal": "Tết Âm lịch",
+      "type": "civil_service_statutory_schedule",
+      "geographicScope": "civil servants and public employees",
+      "subjectAndConditionsZh": "公职固定为2月16日至20日；其他用人单位依法在三种5日方案中选择。",
+      "sourceDocumentIds": [
+        "VN-LABOUR-CODE-45-2019",
+        "VN-BNV-9441-2025"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "VN-2026-TH-04-2026-02-19",
+      "countryCode": "VN",
+      "date": "2026-02-19",
+      "nameZh": "春节法定休假安排（第4天）",
+      "shortNameZh": "春节",
+      "nameLocal": "Tết Âm lịch",
+      "type": "civil_service_statutory_schedule",
+      "geographicScope": "civil servants and public employees",
+      "subjectAndConditionsZh": "公职固定为2月16日至20日；其他用人单位依法在三种5日方案中选择。",
+      "sourceDocumentIds": [
+        "VN-LABOUR-CODE-45-2019",
+        "VN-BNV-9441-2025"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "VN-2026-TH-05-2026-02-20",
+      "countryCode": "VN",
+      "date": "2026-02-20",
+      "nameZh": "春节法定休假安排（第5天）",
+      "shortNameZh": "春节",
+      "nameLocal": "Tết Âm lịch",
+      "type": "civil_service_statutory_schedule",
+      "geographicScope": "civil servants and public employees",
+      "subjectAndConditionsZh": "公职固定为2月16日至20日；其他用人单位依法在三种5日方案中选择。",
+      "sourceDocumentIds": [
+        "VN-LABOUR-CODE-45-2019",
+        "VN-BNV-9441-2025"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "VN-2026-SH-02-2026-04-26",
+      "countryCode": "VN",
+      "date": "2026-04-26",
+      "nameZh": "雄王祭祖日",
+      "shortNameZh": "雄王祭祖日",
+      "nameLocal": "Giỗ Tổ Hùng Vương",
+      "type": "statutory_holiday",
+      "geographicScope": "nationwide workers",
+      "subjectAndConditionsZh": "落在周日；与周休重合时依法于下一工作日补休。",
+      "sourceDocumentIds": [
+        "VN-LABOUR-CODE-45-2019",
+        "VN-BNV-9441-2025"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "VN-2026-SUB-2026-04-27",
+      "countryCode": "VN",
+      "date": "2026-04-27",
+      "nameZh": "雄王祭祖日条件性补休",
+      "shortNameZh": "雄王祭祖日补休",
+      "nameLocal": "Nghỉ bù Giỗ Tổ Hùng Vương",
+      "type": "conditional_substitute_day",
+      "geographicScope": "workers whose weekly rest day coincides with 26 April",
+      "subjectAndConditionsZh": "适用于4月26日与周休日重合且下一工作日为4月27日的人员；其他轮班安排应按实际下一工作日确定。",
+      "sourceDocumentIds": [
+        "VN-LABOUR-CODE-45-2019"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "官方政府说明列出4月27日补休；不是普通周末，不推定所有企业或港口统一停工。"
+    },
+    {
+      "id": "VN-2026-SH-03-2026-04-30",
+      "countryCode": "VN",
+      "date": "2026-04-30",
+      "nameZh": "南方解放日",
+      "shortNameZh": "解放日",
+      "nameLocal": "Ngày Chiến thắng",
+      "type": "statutory_holiday",
+      "geographicScope": "nationwide workers",
+      "subjectAndConditionsZh": "劳动法规定1日法定假日。",
+      "sourceDocumentIds": [
+        "VN-LABOUR-CODE-45-2019"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "VN-2026-SH-04-2026-05-01",
+      "countryCode": "VN",
+      "date": "2026-05-01",
+      "nameZh": "国际劳动节",
+      "shortNameZh": "劳动节",
+      "nameLocal": "Ngày Quốc tế lao động",
+      "type": "statutory_holiday",
+      "geographicScope": "nationwide workers",
+      "subjectAndConditionsZh": "劳动法规定1日法定假日。",
+      "sourceDocumentIds": [
+        "VN-LABOUR-CODE-45-2019"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "VN-2026-CS-02-2026-08-22",
+      "countryCode": "VN",
+      "date": "2026-08-22",
+      "nameZh": "公职人员国庆调休补班日",
+      "shortNameZh": "国庆补班",
+      "nameLocal": "Ngày làm bù dịp Quốc khánh",
+      "type": "civil_service_makeup_workday",
+      "geographicScope": "civil servants and public employees",
+      "subjectAndConditionsZh": "公职人员将8月31日工作日调至本日补班；不是假日。",
+      "sourceDocumentIds": [
+        "VN-BNV-9441-2025"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "VN-2026-CS-03-2026-08-31",
+      "countryCode": "VN",
+      "date": "2026-08-31",
+      "nameZh": "公职人员国庆调休日",
+      "shortNameZh": "国庆调休",
+      "nameLocal": "Nghỉ hoán đổi dịp Quốc khánh",
+      "type": "civil_service_swapped_day_off",
+      "geographicScope": "civil servants and public employees",
+      "subjectAndConditionsZh": "仅公职人员统一调休；企业安排另行决定。",
+      "sourceDocumentIds": [
+        "VN-BNV-9441-2025"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "VN-2026-SH-05-2026-09-01",
+      "countryCode": "VN",
+      "date": "2026-09-01",
+      "nameZh": "国庆法定休假相邻日（公职安排）",
+      "shortNameZh": "国庆假日",
+      "nameLocal": "Ngày nghỉ liền kề Quốc khánh",
+      "type": "civil_service_statutory_schedule",
+      "geographicScope": "civil servants and public employees",
+      "subjectAndConditionsZh": "公职选择9月1日；其他用人单位可选9月1日或9月3日。",
+      "sourceDocumentIds": [
+        "VN-LABOUR-CODE-45-2019",
+        "VN-BNV-9441-2025"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "VN-2026-SH-06-2026-09-02",
+      "countryCode": "VN",
+      "date": "2026-09-02",
+      "nameZh": "越南国庆日",
+      "shortNameZh": "国庆日",
+      "nameLocal": "Ngày Quốc khánh",
+      "type": "statutory_holiday",
+      "geographicScope": "nationwide workers",
+      "subjectAndConditionsZh": "劳动法规定国庆日，另有一个相邻日由适用方案确定。",
+      "sourceDocumentIds": [
+        "VN-LABOUR-CODE-45-2019",
+        "VN-BNV-9441-2025"
+      ],
+      "verificationStatus": "official_summary_verified",
+      "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    }
+  ]
+}
