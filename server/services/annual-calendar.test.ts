@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { annualEventScope, annualMonthDays, annualTypes } from "@shared/annual-calendar"
+import { annualEventScope, annualMonthDays, annualSourceLabel, annualSourcePublishedLabel, annualTypes } from "@shared/annual-calendar"
 import { getAnnualCalendar } from "./annual-calendar"
 
 describe("annual reference calendar", () => {
@@ -7,7 +7,8 @@ describe("annual reference calendar", () => {
     const fetch = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("network forbidden"))
     try {
       const data = getAnnualCalendar(2026)
-      expect(data.datasets.map(d => d.events.length)).toEqual([25, 3, 15, 21, 16])
+      expect(data.datasets.map(d => d.events.length)).toEqual([25, 23, 15, 21, 16])
+      expect(data.datasets.flatMap(d => d.events)).toHaveLength(100)
       expect(fetch).not.toHaveBeenCalled()
       data.datasets[0].events.length = 0
       expect(getAnnualCalendar(2026).datasets[0].events).toHaveLength(25)
@@ -20,6 +21,7 @@ describe("annual reference calendar", () => {
     const ids = new Set<string>()
     for (const dataset of getAnnualCalendar(2026).datasets) {
       const sources = new Set(dataset.sourceDocuments.map(s => s.id))
+      expect(sources.size).toBe(dataset.sourceDocuments.length)
       for (const event of dataset.events) {
         expect(ids.has(event.id)).toBe(false)
         ids.add(event.id)
@@ -35,7 +37,18 @@ describe("annual reference calendar", () => {
   })
   it("keeps applicability, incomplete coverage and non-holidays explicit", () => {
     const data = getAnnualCalendar(2026).datasets
-    expect(data.find(d => d.countryCode === "TH")?.warning).toContain("资料不完整")
+    const thailand = data.find(d => d.countryCode === "TH")!
+    expect(thailand.warning).toContain("23 条参考事项，全国主依据仍待核验")
+    expect(thailand.events.map(event => event.date)).toEqual(expect.arrayContaining(["2026-05-31", "2026-06-01", "2026-12-05", "2026-12-07"]))
+    expect(thailand.events.find(event => event.date === "2026-06-01")?.type).toBe("government_office_substitute_holiday")
+    expect(thailand.events.find(event => event.date === "2026-05-31")?.holidaySubtype).toBe("weekend_original")
+    expect(thailand.events.find(event => event.date === "2026-10-16")?.geographicScope).toContain("Bangkok only")
+    expect(thailand.events.some(event => event.verificationStatus.includes("primary_pending"))).toBe(true)
+    expect(annualTypes.government_office_substitute_holiday.label).toBe("政府机关补休")
+    const soc = thailand.sourceDocuments.find(source => source.id === "TH-SOC-HOLIDAYS-2569")!
+    expect(soc.publishedAt).toBeNull()
+    expect(annualSourceLabel(soc)).toBe("待核验入口")
+    expect(annualSourcePublishedLabel(soc)).toBe("发布日期未知")
     const substitute = data.find(d => d.countryCode === "VN")?.events.find(e => e.date === "2026-04-27")
     expect(substitute?.type).toBe("conditional_substitute_day")
     expect(substitute?.subjectAndConditionsZh).toContain("周休日重合")

@@ -2,7 +2,8 @@
 
 ## 最新需求澄清 — 2026-09-09（优先于下方旧提案）
 
-- 用户已批准先以有明确限制说明的年度参考月历接入五国资料。80 条展示快照位于 `server/data/annual-calendar/`；候选目录保留作录入证据。`/calendar` 仅显示只读月历；用户已要求移除运营缓存切换入口，既有后台和历史数据不删除。TH 资料不完整，VN 4 月 27 日以条件性补休录入；不宣称完整覆盖。实际验证以 `docs/status.md` 当前年度参考日历小节为准。
+- 用户已批准先以有明确限制说明的年度参考月历接入五国资料。当前本地展示快照为 100 条，位于 `server/data/annual-calendar/`；候选目录保留作录入证据。`/calendar` 仅显示只读月历；用户已要求移除运营缓存切换入口，既有后台和历史数据不删除。TH 现为 23 条参考事项但全国 SOC 主依据正文仍待核验，VN 4 月 27 日以条件性补休录入；不宣称完整覆盖。实际验证以 `docs/status.md` 当前年度参考日历小节为准。
+- 年度参考月历基线已提交为 `main@ce904192784ba6fe010c8f0afdcf531836c41b04` 并在推送时实时核对远端一致。此后泰国 23 条候选资料已在本地提升到正式展示快照并通过独立复审，当前尚未提交；这不改变 partial/pending 结论，也不代表完成人工双人复核。
 
 - 当前先完成印度尼西亚（ID）2026 年候选样本，采用固定年度 JSON 文件；样本只用于确认内容和格式，不接入现役数据加载路径。
 - FullCalendar 仅作前端展示参考，不安装依赖、不复制源码；复杂自动同步、来源表和 schema migration 继续暂停。
@@ -26,7 +27,7 @@
 
 ## 1. 基线与边界
 
-实际 Git 基线为 `main` / `87d18c5c39725112ddf58d993c8fe1433f42234e`。2026-09-09 已用 `git ls-remote origin refs/heads/main` 实时核对远端 `main` 为同一 SHA。工作区只有未跟踪 `.tmp/`；本文创建前没有已跟踪文件变更。`AGENTS.md` 和 `docs/status.md` 中仍有 `4f29a95...` 的旧 HEAD 描述，这是文档元数据滞后，不改变实际 Git 基线；本提案不顺带改写现有状态文档。
+当前提交基线为 `main` / `ce904192784ba6fe010c8f0afdcf531836c41b04`；该年度参考月历提交已推送，并在推送后用 `git ls-remote origin refs/heads/main` 实时核对一致。工作区保留 `pages.tsx` 的换行状态与未跟踪 `.tmp/`；泰国 23 条候选与展示提升是其后的未提交改动。
 
 以下能力已经存在，本方案不重复开发：六国、当前年与下一年分别同步；Calendar 本轮记录计数；全缓存命中 `skipped/calendar_cache_fresh`；`cacheRequiredSourceIds` 区分占位来源与真正配置来源；缓存跳过不覆写 Runtime 历史证据；Calendarific、official、manual 的合成和 last-known 保留。
 

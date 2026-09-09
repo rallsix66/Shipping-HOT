@@ -10,14 +10,75 @@
   "datasetId": "calendar-candidate-TH-2026",
   "countryCode": "TH",
   "dateSemantics": "Thailand local civil date (YYYY-MM-DD); no UTC conversion",
-  "scope": "Verified government-office dates only; complete annual nationwide list pending; banking calendar excluded from events",
+  "scope": "Government-office date candidates cross-checked against PSU HR; nationwide SOC body remains unavailable; campus-only and financial-sector dates excluded from events",
   "coverageStatus": "partial_evidence_pending",
   "counts": {
-    "governmentOfficeHolidayDates": 2,
+    "governmentOfficeHolidayDates": 22,
+    "governmentOfficeRegularHolidayDates": 17,
+    "governmentOfficeSpecialHolidayDates": 1,
+    "governmentOfficeSubstituteHolidayDates": 2,
+    "governmentOfficeWeekendOriginalHolidayDates": 2,
     "regionalGovernmentHolidayDates": 1,
-    "events": 3
+    "events": 23
   },
   "sourceDocuments": [
+    {
+      "id": "TH-SOC-HOLIDAYS-2569",
+      "officialInstitutions": [
+        "Secretariat of the Cabinet"
+      ],
+      "documentNumbers": [
+        "วันหยุดราชการ ปี 2569"
+      ],
+      "publishedAt": null,
+      "url": "https://www.soc.go.th/?p=33672",
+      "evidenceStatus": "official_entry_body_access_pending_403",
+      "relationshipToAnnualCalendar": "nationwide_government_calendar_primary_pending",
+      "acquiredAt": "2026-09-09"
+    },
+    {
+      "id": "TH-PSU-HR-HOLIDAYS-2569",
+      "officialInstitutions": [
+        "Prince of Songkla University Human Resources Division"
+      ],
+      "documentNumbers": [
+        "วันหยุดราชการ ประจำปี 2569"
+      ],
+      "publishedAt": null,
+      "url": "https://hr.psu.ac.th/component/sppagebuilder/?id=169&view=page",
+      "evidenceStatus": "official_institution_body_verified_crosscheck_only",
+      "relationshipToAnnualCalendar": "government_university_calendar_crosscheck_campus_exceptions_excluded",
+      "acquiredAt": "2026-09-09"
+    },
+    {
+      "id": "TH-SEC-HOLIDAYS-2569",
+      "officialInstitutions": [
+        "Securities and Exchange Commission Thailand"
+      ],
+      "documentNumbers": [
+        "สธ. 32/2568",
+        "สธ. 6/2569"
+      ],
+      "publishedAt": null,
+      "url": "https://www.sec.or.th/TH/Pages/AboutUs/Holiday.aspx",
+      "evidenceStatus": "official_sector_body_verified_reference_only",
+      "relationshipToAnnualCalendar": "securities_sector_reference_not_used_as_government_or_enterprise_calendar",
+      "acquiredAt": "2026-09-09"
+    },
+    {
+      "id": "TH-PRD-BKK-OCT16-2569",
+      "officialInstitutions": [
+        "Government Public Relations Department"
+      ],
+      "documentNumbers": [
+        "Cabinet resolution reported 19 May 2026"
+      ],
+      "publishedAt": "2026-05-19",
+      "url": "https://www.prd.go.th/th/content/category/detail/id/39/iid/504557",
+      "evidenceStatus": "official_body_verified",
+      "relationshipToAnnualCalendar": "bangkok_special_holiday_scope_and_wfh_crosscheck",
+      "acquiredAt": "2026-09-09"
+    },
     {
       "id": "TH-CABINET-SPECIAL-2026",
       "officialInstitutions": [
@@ -77,6 +138,25 @@
   ],
   "events": [
     {
+      "id": "TH-2026-GO-03-2026-01-01",
+      "countryCode": "TH",
+      "date": "2026-01-01",
+      "nameZh": "元旦政府假日",
+      "shortNameZh": "元旦",
+      "nameLocal": "วันขึ้นปีใหม่",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "PSU 人事年度清单已核实，SEC 行业清单同日交叉一致；SOC 全国年度正文仍待取得。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "不推定所有企业、港口、海关或金融机构统一停工。"
+    },
+    {
       "id": "TH-2026-GO-01-2026-01-02",
       "countryCode": "TH",
       "date": "2026-01-02",
@@ -84,6 +164,7 @@
       "shortNameZh": "特别休假",
       "nameLocal": "วันหยุดราชการเพิ่มเป็นกรณีพิเศษ",
       "type": "government_office_holiday",
+      "holidaySubtype": "special",
       "geographicScope": "Thailand; government offices",
       "subjectAndConditionsZh": "内阁增设的政府机关特别休假；金融机构是否休假由央行另行决定。",
       "sourceDocumentIds": [
@@ -93,6 +174,251 @@
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
     },
     {
+      "id": "TH-2026-GO-04-2026-03-03",
+      "countryCode": "TH",
+      "date": "2026-03-03",
+      "nameZh": "万佛节政府假日",
+      "shortNameZh": "万佛节",
+      "nameLocal": "วันมาฆบูชา",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "PSU 人事年度清单已核实，SEC 行业清单同日交叉一致；SOC 全国年度正文仍待取得。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "按当地民用日期记录。"
+    },
+    {
+      "id": "TH-2026-GO-05-2026-04-06",
+      "countryCode": "TH",
+      "date": "2026-04-06",
+      "nameZh": "却克里王朝纪念日政府假日",
+      "shortNameZh": "却克里纪念日",
+      "nameLocal": "วันพระบาทสมเด็จพระพุทธยอดฟ้าจุฬาโลกมหาราช และวันที่ระลึกมหาจักรีบรมราชวงศ์",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "PSU 与 SEC 官方机构年度清单同日交叉一致；全国主依据正文待取得。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "不等于全国所有单位统一停工。"
+    },
+    {
+      "id": "TH-2026-GO-06-2026-04-13",
+      "countryCode": "TH",
+      "date": "2026-04-13",
+      "nameZh": "宋干节政府假日（第一日）",
+      "shortNameZh": "宋干节",
+      "nameLocal": "วันสงกรานต์",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "PSU 与 SEC 官方机构年度清单同日交叉一致；全国主依据正文待取得。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "相邻三日分别记录，不把周末拼成官方假期。"
+    },
+    {
+      "id": "TH-2026-GO-07-2026-04-14",
+      "countryCode": "TH",
+      "date": "2026-04-14",
+      "nameZh": "宋干节政府假日（第二日）",
+      "shortNameZh": "宋干节",
+      "nameLocal": "วันสงกรานต์",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "PSU 与 SEC 官方机构年度清单同日交叉一致；全国主依据正文待取得。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "相邻三日分别记录。"
+    },
+    {
+      "id": "TH-2026-GO-08-2026-04-15",
+      "countryCode": "TH",
+      "date": "2026-04-15",
+      "nameZh": "宋干节政府假日（第三日）",
+      "shortNameZh": "宋干节",
+      "nameLocal": "วันสงกรานต์",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "PSU 与 SEC 官方机构年度清单同日交叉一致；全国主依据正文待取得。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "相邻三日分别记录。"
+    },
+    {
+      "id": "TH-2026-GO-09-2026-05-04",
+      "countryCode": "TH",
+      "date": "2026-05-04",
+      "nameZh": "加冕纪念日政府假日",
+      "shortNameZh": "加冕纪念日",
+      "nameLocal": "วันฉัตรมงคล",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "PSU 与 SEC 官方机构年度清单同日交叉一致；全国主依据正文待取得。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "不等于全国所有单位统一停工。"
+    },
+    {
+      "id": "TH-2026-GO-10-2026-05-13",
+      "countryCode": "TH",
+      "date": "2026-05-13",
+      "nameZh": "春耕节政府机关假日",
+      "shortNameZh": "春耕节",
+      "nameLocal": "วันพืชมงคล",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "PSU government-university list; broader government-office scope pending SOC body",
+      "subjectAndConditionsZh": "PSU 人事年度清单已核实；SEC 行业清单不列为停业日，不能外推至金融机构或企业。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_institution_verified_nationwide_primary_pending",
+      "notesZh": "行业适用差异明确保留。"
+    },
+    {
+      "id": "TH-2026-GO-ORIGINAL-01-2026-05-31",
+      "countryCode": "TH",
+      "date": "2026-05-31",
+      "nameZh": "卫塞节原日期",
+      "shortNameZh": "卫塞节",
+      "nameLocal": "วันวิสาขบูชา",
+      "type": "government_office_holiday",
+      "holidaySubtype": "weekend_original",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "节日原日期为星期日；另于 2026-06-01 记录政府机关补休。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "补休日事件：TH-2026-GO-11-2026-06-01。原日期与补休日分别保留。"
+    },
+    {
+      "id": "TH-2026-GO-11-2026-06-01",
+      "countryCode": "TH",
+      "date": "2026-06-01",
+      "nameZh": "卫塞节补休",
+      "shortNameZh": "卫塞节补休",
+      "nameLocal": "วันหยุดชดเชยวันวิสาขบูชา",
+      "type": "government_office_substitute_holiday",
+      "holidaySubtype": "substitute",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "原假日为 5 月 31 日（星期日），PSU 与 SEC 清单均列 6 月 1 日补休。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "补休对应原日期事件 TH-2026-GO-ORIGINAL-01-2026-05-31；不批量新增普通周末。"
+    },
+    {
+      "id": "TH-2026-GO-12-2026-06-03",
+      "countryCode": "TH",
+      "date": "2026-06-03",
+      "nameZh": "王后诞辰政府假日",
+      "shortNameZh": "王后诞辰",
+      "nameLocal": "วันเฉลิมพระชนมพรรษาสมเด็จพระนางเจ้าฯ พระบรมราชินี",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "PSU 与 SEC 官方机构年度清单同日交叉一致。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "全国主依据正文待取得。"
+    },
+    {
+      "id": "TH-2026-GO-13-2026-07-28",
+      "countryCode": "TH",
+      "date": "2026-07-28",
+      "nameZh": "泰王诞辰政府假日",
+      "shortNameZh": "泰王诞辰",
+      "nameLocal": "วันเฉลิมพระชนมพรรษาพระบาทสมเด็จพระเจ้าอยู่หัว",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "PSU 与 SEC 官方机构年度清单同日交叉一致。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "不推定港口、海关或企业必然停工。"
+    },
+    {
+      "id": "TH-2026-GO-14-2026-07-29",
+      "countryCode": "TH",
+      "date": "2026-07-29",
+      "nameZh": "三宝佛节政府假日",
+      "shortNameZh": "三宝佛节",
+      "nameLocal": "วันอาสาฬหบูชา",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "PSU 与 SEC 官方机构年度清单同日交叉一致。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "全国主依据正文待取得。"
+    },
+    {
+      "id": "TH-2026-GO-15-2026-07-30",
+      "countryCode": "TH",
+      "date": "2026-07-30",
+      "nameZh": "守夏节政府机关假日",
+      "shortNameZh": "守夏节",
+      "nameLocal": "วันเข้าพรรษา",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "PSU government-university list; broader government-office scope pending SOC body",
+      "subjectAndConditionsZh": "PSU 人事年度清单已核实；SEC 行业清单未列，不能外推至金融机构或企业。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_institution_verified_nationwide_primary_pending",
+      "notesZh": "行业适用差异明确保留。"
+    },
+    {
       "id": "TH-2026-GO-02-2026-08-12",
       "countryCode": "TH",
       "date": "2026-08-12",
@@ -100,6 +426,7 @@
       "shortNameZh": "母亲节",
       "nameLocal": "วันคล้ายวันพระราชสมภพสมเด็จพระนางเจ้าสิริกิติ์ฯ และวันแม่แห่งชาติ",
       "type": "government_office_holiday",
+      "holidaySubtype": "regular",
       "geographicScope": "Thailand; government offices",
       "subjectAndConditionsZh": "政府机关年度假日；不推定所有私营企业或金融机构停业。",
       "sourceDocumentIds": [
@@ -109,6 +436,25 @@
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
     },
     {
+      "id": "TH-2026-GO-16-2026-10-13",
+      "countryCode": "TH",
+      "date": "2026-10-13",
+      "nameZh": "普密蓬国王逝世纪念日政府假日",
+      "shortNameZh": "九世王纪念日",
+      "nameLocal": "วันนวมินทรมหาราช",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "PSU 与 SEC 官方机构年度清单同日交叉一致。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "全国主依据正文待取得。"
+    },
+    {
       "id": "TH-2026-RG-01-2026-10-16",
       "countryCode": "TH",
       "date": "2026-10-16",
@@ -116,13 +462,110 @@
       "shortNameZh": "曼谷特别假日",
       "nameLocal": "วันหยุดราชการเป็นกรณีพิเศษในพื้นที่กรุงเทพมหานคร",
       "type": "regional_government_holiday",
+      "holidaySubtype": "regional_special",
       "geographicScope": "Bangkok only; government offices",
       "subjectAndConditionsZh": "仅曼谷政府机关，因 IMF-WBG 年会设置；不是全国假日。",
       "sourceDocumentIds": [
-        "TH-GOV-BKK-OCT16-2026"
+        "TH-GOV-BKK-OCT16-2026",
+        "TH-PRD-BKK-OCT16-2569"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
+    },
+    {
+      "id": "TH-2026-GO-17-2026-10-23",
+      "countryCode": "TH",
+      "date": "2026-10-23",
+      "nameZh": "朱拉隆功纪念日政府假日",
+      "shortNameZh": "朱拉隆功纪念日",
+      "nameLocal": "วันปิยมหาราช",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "PSU 与 SEC 官方机构年度清单同日交叉一致。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "全国主依据正文待取得。"
+    },
+    {
+      "id": "TH-2026-GO-ORIGINAL-02-2026-12-05",
+      "countryCode": "TH",
+      "date": "2026-12-05",
+      "nameZh": "九世王诞辰、国庆暨父亲节原日期",
+      "shortNameZh": "父亲节／国庆",
+      "nameLocal": "วันคล้ายวันพระบรมราชสมภพ วันชาติ และวันพ่อแห่งชาติ",
+      "type": "government_office_holiday",
+      "holidaySubtype": "weekend_original",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "节日原日期为星期六；另于 2026-12-07 记录政府机关补休。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "补休日事件：TH-2026-GO-18-2026-12-07。原日期与补休日分别保留。"
+    },
+    {
+      "id": "TH-2026-GO-18-2026-12-07",
+      "countryCode": "TH",
+      "date": "2026-12-07",
+      "nameZh": "国家、父亲节暨九世王诞辰补休",
+      "shortNameZh": "父亲节补休",
+      "nameLocal": "วันหยุดชดเชยวันคล้ายวันพระบรมราชสมภพ วันชาติ และวันพ่อแห่งชาติ",
+      "type": "government_office_substitute_holiday",
+      "holidaySubtype": "substitute",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "原假日为 12 月 5 日（星期六），PSU 与 SEC 清单均列 12 月 7 日补休。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "补休对应原日期事件 TH-2026-GO-ORIGINAL-02-2026-12-05；不批量新增普通周末。"
+    },
+    {
+      "id": "TH-2026-GO-19-2026-12-10",
+      "countryCode": "TH",
+      "date": "2026-12-10",
+      "nameZh": "宪法纪念日政府假日",
+      "shortNameZh": "宪法纪念日",
+      "nameLocal": "วันรัฐธรรมนูญ",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "PSU 与 SEC 官方机构年度清单同日交叉一致。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "全国主依据正文待取得。"
+    },
+    {
+      "id": "TH-2026-GO-20-2026-12-31",
+      "countryCode": "TH",
+      "date": "2026-12-31",
+      "nameZh": "岁末政府假日",
+      "shortNameZh": "岁末",
+      "nameLocal": "วันสิ้นปี",
+      "type": "government_office_holiday",
+      "holidaySubtype": "regular",
+      "geographicScope": "Thailand government-office date candidate; nationwide SOC body pending",
+      "subjectAndConditionsZh": "PSU 与 SEC 官方机构年度清单同日交叉一致。",
+      "sourceDocumentIds": [
+        "TH-PSU-HR-HOLIDAYS-2569",
+        "TH-SEC-HOLIDAYS-2569",
+        "TH-SOC-HOLIDAYS-2569"
+      ],
+      "verificationStatus": "official_crosscheck_verified_primary_pending",
+      "notesZh": "不与 2027 年元旦或普通周末拼成官方连休。"
     }
   ]
 }

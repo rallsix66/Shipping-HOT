@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { annualCountries, annualEventScope, annualMonthDays, annualTypes } from "@shared/annual-calendar"
+import { annualCountries, annualEventScope, annualEvidenceLabel, annualMonthDays, annualSourceLabel, annualSourcePublishedLabel, annualTypes } from "@shared/annual-calendar"
 import type { AnnualCalendarResponse, AnnualCountry } from "@shared/annual-calendar"
 import { ShippingShell } from "./app"
 import { myFetch } from "~/utils"
@@ -214,6 +214,7 @@ export function AnnualCalendarPage() {
                     )
                   : details.map((event) => {
                       const dataset = datasets.find(d => d.countryCode === event.countryCode)
+                      const evidenceLabel = annualEvidenceLabel(event.verificationStatus)
                       return (
                         <article key={event.id}>
                           <div className="annual-detail-label">
@@ -226,6 +227,7 @@ export function AnnualCalendarPage() {
                           <h3>{event.nameZh}</h3>
                           <p>{event.nameLocal}</p>
                           <strong className="annual-scope">{annualEventScope(event)}</strong>
+                          {evidenceLabel && <strong className="annual-evidence-pending">{evidenceLabel}</strong>}
                           <p>{event.subjectAndConditionsZh}</p>
                           <p>{event.notesZh}</p>
                           {event.sourceDocumentIds.map((sourceId) => {
@@ -233,8 +235,10 @@ export function AnnualCalendarPage() {
                             return source
                               ? (
                                   <a key={sourceId} href={source.url} target="_blank" rel="noreferrer">
-                                    来源：
+                                    {`${annualSourceLabel(source)}：`}
                                     {source.documentNumbers.join(" / ")}
+                                    {" · "}
+                                    {annualSourcePublishedLabel(source)}
                                     {" "}
                                     ↗
                                   </a>

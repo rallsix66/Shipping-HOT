@@ -12,6 +12,7 @@ export const annualTypes: Record<string, { label: string, scope: string, work?: 
   regular_holiday: { label: "常规假日", scope: "全国" },
   special_non_working_day: { label: "特别非工作日", scope: "全国" },
   special_working_day: { label: "特别工作日", scope: "非休假", work: true },
+  government_office_substitute_holiday: { label: "政府机关补休", scope: "仅政府机关" },
   statutory_holiday: { label: "法定假日", scope: "全国劳动者" },
   civil_service_statutory_schedule: { label: "公职休假", scope: "公职固定安排" },
   civil_service_swapped_day_off: { label: "公职调休", scope: "仅公职安排" },
@@ -25,7 +26,7 @@ export interface AnnualSource {
   officialInstitutions: string[]
   documentNumbers: string[]
   evidenceStatus: string
-  publishedAt: string
+  publishedAt: string | null
 }
 export interface AnnualEvent {
   id: string
@@ -35,6 +36,7 @@ export interface AnnualEvent {
   shortNameZh: string
   nameLocal: string
   type: string
+  holidaySubtype?: string
   geographicScope: string
   subjectAndConditionsZh: string
   sourceDocumentIds: string[]
@@ -68,4 +70,17 @@ export function annualMonthDays(year: number, month: number) {
 export function annualEventScope(event: AnnualEvent): string {
   if (event.countryCode === "MY" && /except Sarawak/i.test(event.geographicScope)) return "不含砂拉越"
   return annualTypes[event.type]?.scope ?? "适用范围待核对"
+}
+
+export function annualEvidenceLabel(status: string): string | null {
+  if (status.includes("primary_pending")) return "交叉核对，主依据待核验"
+  return null
+}
+
+export function annualSourceLabel(source: AnnualSource): string {
+  return source.evidenceStatus.includes("access_pending") ? "待核验入口" : "来源"
+}
+
+export function annualSourcePublishedLabel(source: AnnualSource): string {
+  return source.publishedAt ?? "发布日期未知"
 }
