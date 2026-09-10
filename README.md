@@ -43,14 +43,16 @@ docker compose up --build
 
 ## 验证
 
+全新检出需先生成 Nitro 声明：`tsconfig.node.json` 包含 `dist/.nitro/types`，直接在没有该目录的环境运行 TypeScript 会缺少自动导入声明。
+
 ```sh
+pnpm build
 pnpm typecheck
 pnpm lint
 pnpm exec vitest run -c vitest.config.ts
-pnpm build
 ```
 
-本分支新增 PR 质量检查，不调用付费供应商或部署生产。实际结果以对应提交的 Actions 日志为准，不继承之前提交的测试结论。
+本分支新增 PR 质量检查，不调用付费供应商或部署生产。首次 CI 已安装依赖，但在未生成 Nitro 声明时类型检查失败；工作流现已调整为先构建，并独立收集 lint/测试结果。修正后的实际结果仍以对应提交的 Actions 日志为准，不继承之前提交的测试结论。
 
 ## 本轮状态
 
