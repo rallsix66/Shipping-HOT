@@ -1,11 +1,13 @@
 services:
-  newsnow:
-    image: ghcr.io/ourongxing/newsnow:latest
-    container_name: newsnow
+  shipping-hot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shipping-hot:local
     ports:
-      - '4444:4444'
+      - '127.0.0.1:4444:4444'
     volumes:
-      - newsnow_data:/usr/app/.data
+      - shipping_hot_data:/usr/app/.data
     environment:
       - HOST=0.0.0.0
       - PORT=4444
@@ -15,8 +17,8 @@ services:
       - JWT_SECRET=
       - INIT_TABLE=true
       - ENABLE_CACHE=true
-      - PRODUCTHUNT_API_TOKEN=
 
 volumes:
-  newsnow_data:
+  shipping_hot_data:
+    # Preserve the existing physical volume. Renaming it is a separate data migration.
     name: newsnow_data

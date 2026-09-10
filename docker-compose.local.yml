@@ -1,11 +1,18 @@
+# Kept as a compatible local entrypoint. Both compose files build this repository.
 services:
-  newsnow:
-    build: .
+  shipping-hot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shipping-hot:local
     ports:
-      - '4444:4444'
+      - '127.0.0.1:4444:4444'
     volumes:
-      - newsnow_data:/usr/app/.data
+      - shipping_hot_data:/usr/app/.data
     environment:
+      - HOST=0.0.0.0
+      - PORT=4444
+      - NODE_ENV=production
       - G_CLIENT_ID=
       - G_CLIENT_SECRET=
       - JWT_SECRET=
@@ -13,5 +20,6 @@ services:
       - ENABLE_CACHE=true
 
 volumes:
-  newsnow_data:
+  shipping_hot_data:
+    # Compatibility only: never drop the existing volume during product cleanup.
     name: newsnow_data
