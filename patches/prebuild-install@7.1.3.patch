@@ -1,0 +1,13 @@
+diff --git a/download.js b/download.js
+index 26f04b0565be922ed68f9ecf815f212db39b49bf..952b31f855faf255f63b99db4911869c4941e9f4 100644
+--- a/download.js
++++ b/download.js
+@@ -67,7 +67,7 @@ function downloadPrebuild (downloadUrl, opts, cb) {
+           })
+         })
+
+-        req.setTimeout(30 * 1000, function () {
++        req.setTimeout(Number(process.env.PREBUILD_INSTALL_TIMEOUT_MS) || 180 * 1000, function () {
+           req.abort()
+         })
+       })
