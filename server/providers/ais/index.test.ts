@@ -76,4 +76,14 @@ describe("ais provider factory timing", () => {
       vi.useRealTimers()
     }
   })
+
+  it("never constructs a real AIS adapter in Mock Mode and keeps Mock out of Real Mode", async () => {
+    const mockInMockMode = createAisTrackingProvider({ providerId: "aisstream", dataMode: "mock", secretStore, socketFactory: () => emptySocket() })
+    expect(mockInMockMode.providerId).toBe("mock")
+    await expect(mockInMockMode.getLatestPositions([{ vesselId: "vessel-1", mmsi: "413393620" }])).resolves.toHaveLength(1)
+
+    const mockInRealMode = createAisTrackingProvider({ providerId: "mock", dataMode: "real" })
+    expect(mockInRealMode.providerId).toBe("mock")
+    await expect(mockInRealMode.getLatestPositions([{ vesselId: "vessel-1", mmsi: "413393620" }])).rejects.toMatchObject({ code: "provider_unavailable" })
+  })
 })

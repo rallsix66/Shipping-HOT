@@ -286,4 +286,46 @@ describe("calendar providers", () => {
     const [mockEvent] = createMockCalendarEvents(2026, "2026-08-15T00:00:00.000Z")
     expect(mergeCalendarSources([mockEvent], [], [])).toEqual([mockEvent])
   })
+
+  it("maps Calendarific HTTP failures to the provider failure taxonomy without overclaiming", async () => {
+    const cases: Array<{ status: number, body: unknown, code: string }> = [
+      { status: 401, body: {}, code: "auth_failed" },
+      { status: 403, body: {}, code: "provider_forbidden" },
+      { status: 403, body: { error: "feature not available on this plan" }, code: "entitlement_missing" },
+      { status: 429, body: {}, code: "rate_limited" },
+      { status: 503, body: {}, code: "provider_unavailable" },
+      { status: 504, body: {}, code: "provider_timeout" },
+    ]
+    for (const item of cases) {
+      const provider = createCalendarificProvider({
+        apiKey: "test-key",
+        fetcher: async () => ({ ok: false, status: item.status, json: async () => item.body }),
+      })
+      const result = await provider.getEvents({ year: 2026, countries: ["TH"] })
+      expect(result.events).toEqual([])
+      expect(result.coverage[0]).toMatchObject({ sourceId: "calendarific", status: "unknown", errorCode: item.code })
+    }
+  })
+
+  it("maps a malformed Calendarific response and a network timeout to safe contract codes", async () => {
+    const malformed = createCalendarificProvider({
+      apiKey: "test-key",
+      fetcher: async () => ({ ok: true, status: 200, json: async () => {
+        throw new Error("invalid json")
+      } }),
+    })
+    await expect(malformed.getEvents({ year: 2026, countries: ["TH"] })).resolves.toMatchObject({
+      coverage: [expect.objectContaining({ sourceId: "calendarific", status: "unknown", errorCode: "provider_contract_changed" })],
+    })
+
+    const timedOut = createCalendarificProvider({
+      apiKey: "test-key",
+      fetcher: async () => {
+        throw new Error("Calendarific request timed out")
+      },
+    })
+    await expect(timedOut.getEvents({ year: 2026, countries: ["TH"] })).resolves.toMatchObject({
+      coverage: [expect.objectContaining({ sourceId: "calendarific", status: "unknown", errorCode: "provider_timeout" })],
+    })
+  })
 })

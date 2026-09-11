@@ -39,6 +39,60 @@ Final accepted gaps are explicit: Voyage focus-port coverage is partial outside 
 | Calendar / Holidays | `calendarific` in explicit Real Mode; app default remains Mock | Calendarific v2 plus separately tracked official/manual sources | Yes: Calendarific v2 adapter, country/year normalization and `calendar-sync` Job | Yes: `CALENDARIFIC_API_KEY` | Yes, server-side only | Controlled Runtime smoke persisted Calendarific events across CN and five overseas countries; provider-free Calendar API and restart reads returned them | Free/paid account quota and official/manual completeness remain unconfirmed | `COVERAGE_PENDING` | Transport/parser/cache/persistence is accepted; official/manual and full current+next-year completeness remain explicitly partial. |
 | Translation | Optional `translation-sync` in Mock and Real data modes; fixed server-side DeepSeek provider/model | DeepSeek `deepseek-v4-flash` | Yes: fixed adapter, settings/Secret gates, durable cache and provider-free Feed display | Yes: `DEEPSEEK_API_KEY` | Accepted server-side credential/connectivity evidence; values are never recorded | Accepted evidence covers connectivity/model/credentials, automatic Runtime success, usage/cache growth, placeholder repair, controlled circuit recovery and cached Chinese Feed UI with original disclosure | Local USD estimate and account quota remain bounded follow-up concerns | `VERIFIED_LIVE` (optional enrichment) | Scope is FeedItem `title`/`summary`; Home HOT enriches only `kind="feed"`; Event/HOT Translation is `OUT_OF_SCOPE`; Translation is excluded from REAL_OPERATIONAL hard readiness. |
 
+## S2 Offline Inventory and Eight-Port Coverage — 2026-09-11
+
+> This section updates the matrix in place for the S2 round. Rows above remain the historical `V3 — FINAL SEALED` evidence and are not rewritten. No new real Provider request was made while producing this section; it records code/config inventory, accepted historical evidence, and explicit gaps.
+
+### Credential presence (existence and loader only; no values recorded)
+
+| Credential | Present | Loader location | Note |
+|---|---|---|---|
+| `GFW_API_TOKEN` | Yes | `.env.local` → `FileSecretStore` (`gfw`) | Vessel Search / canonical identity |
+| `VESSELAPI_API_KEY` | Yes | `.env.local` → `FileSecretStore` (`vesselapi`) | Voyage/ETA + optional VesselAPI search |
+| `AISSTREAM_API_KEY` | Yes | `.env.local` → `FileSecretStore` (`aisstream`) | AIS tracking, AIS Area |
+| `CALENDARIFIC_API_KEY` | Yes | `.env.local` → `FileSecretStore` (`calendarific`) | Operational Calendar transport |
+| `deepseek` | Yes | `.data/provider-secrets.json` → `FileSecretStore` | Optional Feed title/summary translation |
+
+Presence of a configured credential does **not** mean this round has new authorization for paid calls or higher quota. Local `.env.local` requests `SHIPPING_VESSEL_PROVIDER=aisstream`, `SHIPPING_PORT_PROVIDER=portcast`, `SHIPPING_WEATHER_PROVIDER=open-meteo`, `SHIPPING_FEED_PROVIDER=public`, `SHIPPING_CALENDAR_PROVIDER=calendarific`, `SHIPPING_AIS_AREA_PROVIDER=aisstream`, `SHIPPING_WEATHER_ALERT_PROVIDER=public`; the default data mode remains `mock`.
+
+### Classification of each capability (S2)
+
+- **Implemented with historical real evidence (not re-verified this round):** Vessel Search / canonical identity (GFW); AIS continuous PositionReport; AIS Area; Port Intelligence (Portcast public page); Open-Meteo weather; official Weather Alerts (TMD/BMKG); VesselAPI Voyage/ETA provider path; Feed Loadstar + Shekou official; Calendarific transport/parser/persistence; DeepSeek translation (optional).
+- **Configured but not re-verified:** all of the above; no new real request or activation was run in S2.
+- **Genuinely missing credentials:** none among the currently selected providers. JMA needs no key but is intentionally disabled; no missing credential blocks the current focus scope.
+- **No credential but access conditions must be checked:** Portcast public pages (robots/legal basis), Open-Meteo hosted free tier (non-commercial terms), TMD/BMKG public feeds, public Feed sources.
+- **Requires fee/quota confirmation:** Calendarific account plan/free quota; VesselAPI account plan/quota; AISStream connection limits; GFW public API terms; DeepSeek budget.
+- **Out of S2 scope:** Commercial Schedule (S6), broader Translation (S5), Event/HOT translation, Port Directory expansion, new Providers.
+
+### Eight-port coverage matrix (actual source / implementation / evidence / gap / next)
+
+Ports: `CNSHK` Shekou, `CNYTN` Yantian, `CNNSA` Nansha, `THLCH` Laem Chabang, `MYPKG` Port Klang, `PHMNL` Manila, `IDJKT` Jakarta (Tanjung Priok), `VNSGN` Ho Chi Minh City.
+
+| Capability | Source / mode | Implementation | Historical evidence | Current gap (all 8 ports) | Next step |
+|---|---|---|---|---|---|
+| Directory identity | UN/LOCODE baseline (`source=unlocode`), SQLite `port_directory` | `shared/port-directory.ts`, `server/database/port-directory.ts`, migration v3 | `port-directory.test.ts` resolves UN/LOCODE/name/alias for the baseline; Real Mode excludes `source=mock` | Not re-verified live; no port added or renamed. Granularity caveat: Manila is city/port-level (not a specific terminal), Jakarta uses the `Tanjung Priok` alias, HCMC may cover multiple terminals. `CNYPG` has no directory identity and is kept raw | Keep raw for unresolved identifiers; any new port/alias is a scope change requiring approval |
+| Congestion | Portcast public pages | `server/providers/shipping.ts` (`createPortcastPublicPageProvider`) | Historical controlled activation persisted 8/8 Port Directory-aligned rows; stale/`no_public_data`/failure semantics tested | Source-bounded public-page coverage; no per-terminal congestion; not re-verified | Re-verify reads under a controlled Real run (Portcast public availability/terms) |
+| AIS observation / estimate | AISStream bounded + continuous tracking; AIS Area aggregation | `server/providers/ais/*`, `server/providers/aisstream-area.ts`, runtime jobs | Continuous PositionReport acceptance (watchlist-dependent); Area acceptance persisted 8 metrics incl. Shekou `usable` | Tracking requires a watched vessel with valid MMSI; Area depends on live signal; current targets may be empty. No estimate for all 8 ports at all times | Re-verify with a controlled target/area run; keep `no_eligible_*`/`no_ais_position_observed` as non-success |
+| Weather forecast | Open-Meteo Marine + Forecast | `server/providers/shipping.ts` (`createOpenMeteoWeatherProvider`), `PortDirectoryRepository` coordinates | Historical controlled activation persisted bounded weather records with wind/gust/window fields | Hosted free tier is non-commercial; coverage is forecast-model based, not official; not re-verified | Re-verify bounded reads and confirm Open-Meteo terms for this use |
+| Official warnings | TMD (TH), BMKG (ID) official; JMA disabled | `server/providers/weather-alerts.ts`, per-source jobs | TMD/BMKG contract/runtime/restart acceptance | No official warning source mapped for CN/MY/PH/VN; JP/`JMA` not in scope; focus-port association is evidence-only (often empty) | Keep JMA disabled; any new official source needs approval and an isolated probe |
+| Official notices / port announcements | Shekou official `/ywgg/`; The Loadstar (general shipping) | `server/providers/feed.ts` sources; feed source jobs | Shekou official 5/5 and Loadstar 10/10 persisted historically | No dedicated official notice source for Yantian/Nansha/Laem Chabang/Port Klang/Manila/Jakarta/HCMC; Laem Chabang/Port Klang parsers pending | Add/replace only with approved sources; uncovered ports stay explicitly unavailable |
+| Voyage association | VesselAPI ETA (+ optional Port Events) for watched vessels | `server/providers/voyage/vesselapi-provider.ts`, `VoyageRepository`, voyage-sync job | Accepted HANSA evidence; provider `verified_live` | Focus-port coverage `PARTIAL`: `CNYPG` (Yantian-area official key) is outside the directory; association only for watched vessels with trusted ETA | Keep `CNYPG` raw; expanding the directory requires approval |
+
+### S2 offline verification added this round (no real request)
+
+- `server/providers/calendar.test.ts`: Calendarific HTTP failure taxonomy (401/403/entitlement/429/503/504) + malformed/network-timeout mapping.
+- `server/providers/feed.test.ts`: public-feed HTTP failure taxonomy (401/403/429/503/504).
+- `server/providers/shipping.test.ts`: Portcast and Open-Meteo HTTP failure taxonomy.
+- `server/database/port-directory.test.ts`: exact identity resolution, unmapped `CNYPG` kept unresolved, and ambiguous alias kept unresolved (no first-match guessing).
+- `server/providers/ais/index.test.ts`: AIS factory never constructs a real adapter in Mock Mode; Mock AIS fails closed in Real Mode.
+- Code repair: `server/database/port-directory.ts` `resolvePortIdentity()` now returns `undefined` when an exact value matches more than one distinct UN/LOCODE (previously first match); `server/providers/ais/index.ts` `createAisTrackingProvider()` now force-selects the Mock AIS provider in non-Real modes (previously, with `SHIPPING_VESSEL_PROVIDER=aisstream`, default Mock Mode could register an enabled real AISStream job).
+
+Offline tests prove logic only. They do not count as real-data or zero-Mock live acceptance.
+
+### Real part — pending / conditions
+
+This round listed but did not execute real requests. Before any controlled Real run, enumerate and restrict the registered Jobs so no unauthorized translation, full-calendar sync, commercial schedule or unbounded AIS subscription starts. Only sources with confirmed authorization/terms/quota should be probed; each real check must record request, source/time, local persistence, API/page read-back, restart read-back and the zero-Mock scan. Missing real evidence stays unverified/`BLOCKED`.
+
 ## Non-provider foundations
 
 - Port identity is owned by the SQLite-backed UNECE UN/LOCODE Port Directory. Providers must resolve `Shekou`, `SHEKOU`, `CNSHK` and aliases to `CNSHK`; they must not create a second port identity.
