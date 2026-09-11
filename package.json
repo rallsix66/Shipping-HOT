@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.app.json",
     "prepare": "simple-git-hooks",
     "test": "vitest -c vitest.config.ts",
+    "test:e2e": "node scripts/e2e-smoke.mjs",
     "smoke:p0-native": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p0-native-sqlite-smoke.ts",
     "smoke:p2c-runtime": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p2c-runtime-sqlite-smoke.ts",
     "smoke:p3a-ais": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p3a-ais-sqlite-smoke.ts",
