@@ -53,6 +53,8 @@ Final accepted gaps are explicit: Voyage focus-port coverage is partial outside 
 | `CALENDARIFIC_API_KEY` | Yes | `.env.local` → `FileSecretStore` (`calendarific`) | Operational Calendar transport |
 | `deepseek` | Yes | `.data/provider-secrets.json` → `FileSecretStore` | Optional Feed title/summary translation |
 
+Reconciliation: the historical capability row above still shows VesselAPI `CREDENTIAL_MISSING` because it describes the earlier pre-acceptance checkpoint; a `VESSELAPI_API_KEY` is present now and was used for the accepted HANSA run (row 37, "Available for the accepted server-side live run"). The two statements are not contradictory.
+
 Presence of a configured credential does **not** mean this round has new authorization for paid calls or higher quota. Local `.env.local` requests `SHIPPING_VESSEL_PROVIDER=aisstream`, `SHIPPING_PORT_PROVIDER=portcast`, `SHIPPING_WEATHER_PROVIDER=open-meteo`, `SHIPPING_FEED_PROVIDER=public`, `SHIPPING_CALENDAR_PROVIDER=calendarific`, `SHIPPING_AIS_AREA_PROVIDER=aisstream`, `SHIPPING_WEATHER_ALERT_PROVIDER=public`; the default data mode remains `mock`.
 
 ### Classification of each capability (S2)

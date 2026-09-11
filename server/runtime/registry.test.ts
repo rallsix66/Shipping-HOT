@@ -332,6 +332,29 @@ describe("runtime registry", () => {
     }
   })
 
+  it("forces Mock AIS isolation for a real vessel provider env in Mock Mode", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const previousAis = process.env.SHIPPING_AIS_PROVIDER
+    const previousVessel = process.env.SHIPPING_VESSEL_PROVIDER
+    const previousStreaming = process.env.SHIPPING_AIS_STREAMING_ENABLED
+    try {
+      delete process.env.SHIPPING_AIS_PROVIDER
+      process.env.SHIPPING_VESSEL_PROVIDER = "aisstream"
+      process.env.SHIPPING_AIS_STREAMING_ENABLED = "false"
+      const jobs = getDefaultRuntimeJobs({ database, dataMode: "mock" })
+      expect(jobs.find(job => job.id === "ais-tracking")).toMatchObject({ providerId: "mock", enabled: true })
+    } finally {
+      if (previousAis === undefined) delete process.env.SHIPPING_AIS_PROVIDER
+      else process.env.SHIPPING_AIS_PROVIDER = previousAis
+      if (previousVessel === undefined) delete process.env.SHIPPING_VESSEL_PROVIDER
+      else process.env.SHIPPING_VESSEL_PROVIDER = previousVessel
+      if (previousStreaming === undefined) delete process.env.SHIPPING_AIS_STREAMING_ENABLED
+      else process.env.SHIPPING_AIS_STREAMING_ENABLED = previousStreaming
+      native.close()
+    }
+  })
+
   it("uses the existing vessel provider setting as the AIS provider alias", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "real")

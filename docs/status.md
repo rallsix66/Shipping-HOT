@@ -23,7 +23,7 @@ Active plan: `docs/plans/shipping-hot-standalone-content-2026-09-10.md` (S0–S8
 - 交付提交：`87f477293e6f5e259ed0ad8d538faea241e98378`（`chore: S0 establish standalone execution baseline and CI policy`，9 files changed）+ `3f166b47bb0117abb7e5f8a30d00656d260ca131`（`docs: record S0 push verification and stage result`）。分支头与 `origin` 一致。
 - 数据模式：本轮为 Mock/隔离；无真实 Provider 调用；无付费调用。
 
-## Standalone & Content Completion — S1 Standalone Product & Legacy Retirement — 2026-09-11 (current authority)
+## Standalone & Content Completion — S1 Standalone Product & Legacy Retirement — 2026-09-11 (historical stage record; S2 below is current)
 
 - 阶段 / 验收 ID：S1 / A1-01–A1-08。
 - 时间：2026-09-11（Asia/Shanghai）。
@@ -52,14 +52,14 @@ Active plan: `docs/plans/shipping-hot-standalone-content-2026-09-10.md` (S0–S8
 - A2-01 运行模式：离线通过——Real Mode 拒绝 Mock 血缘的既有覆盖保留；**修复** `server/providers/ais/index.ts` 在非 Real 模式不再构造真实 AIS 适配器（此前 `.env.local` 的 `SHIPPING_VESSEL_PROVIDER=aisstream` 会让默认 Mock 模式注册启用的真实 AISStream Job）；新增离线测试覆盖。
 - A2-02 来源完整：已填八港覆盖矩阵（`docs/v3-real-provider-matrix.md` S2 区块），逐港区分来源/实现位置/历史证据/缺口/下一步；未接入港口显式未覆盖，不显示正常/0。
 - A2-03 港口匹配：离线通过——`resolvePortIdentity` 对未映射 `CNYPG` 返回 `undefined`（不猜配）；对歧义别名（同值匹配多个 UN/LOCODE）返回 `undefined`（**修复**：原先取首个匹配）；新增测试覆盖别名/未映射/歧义。
-- A2-04 失败与时效：离线通过——新增 Calendarific、Feed、Portcast、Open-Meteo 的 HTTP 失败分类测试（401/403/entitlement/429/503/504 + 结构变化/超时）；401/403/429/超时/结构变化/正常空结果/过期/同来源 last-known 的既有覆盖见矩阵清单。
+- A2-04 失败与时效：离线通过——新增 Calendarific、Feed、Portcast、Open-Meteo 的 HTTP 失败分类测试（401/403/429/503/504 + 结构变化/超时；其中 `entitlement_missing` 仅 Calendarific 的 403 分支有测试）；401/403/429/超时/结构变化/正常空结果/过期/同来源 last-known 的既有覆盖见矩阵清单。
 - A2-05 阅读无副作用：既有覆盖（`shipping-store.read-only.test.ts`、`voyage-read.test.ts`、`ais-position-api.test.ts`、`v3-readiness.test.ts`）证明 GET/Repository 读不调用 Provider；本区块未新增真实调用。
 - A2-06 真实闭环：**未执行**——本区块无 Provider→SQLite→API→UI 新证据。
 - A2-07 零 Mock / 重启：**未执行真实扫描**；离线 gate 测试（`real-data-gate.test.ts`）覆盖 schema 发现与 Mock 行判定。
 - A2-08 覆盖验收：八港必需能力仍有缺口（公告仅 Shekou；官方预警仅 TMD/BMKG；Voyage focus-port `CNYPG` 未映射；无新增 Provider），需用户决定接受范围或授权。
 - 在线/真实部分：**待授权与待条件**，见矩阵 “Real part — pending / conditions”。启动 Real 前必须枚举并限制已注册 Job（不得顺带启动未授权翻译、日历全量同步、商业船期或无界 AIS 订阅），逐项记录请求/来源时间/持久化/API 回读/重启回读/零 Mock 扫描。
 - 离线测试新增：`calendar.test.ts`、`feed.test.ts`、`shipping.test.ts`、`port-directory.test.ts`、`ais/index.test.ts`；另修复 `server/database/port-directory.ts` 与 `server/providers/ais/index.ts` 两处隔离/匹配缺陷。
-- G 门禁（本地，隔离库 `.tmp/s2-gate.sqlite3`）：`pnpm build`/`typecheck`/`lint` exit 0；Vitest `65 files / 732 tests passed`（S1 724 + S2 新增 8）；`git diff --check` exit 0。
+- G 门禁（本地，隔离库 `.tmp/s2-gate.sqlite3`）：`pnpm build`/`typecheck`/`lint` exit 0；Vitest `65 files / 733 tests passed`（S1 724 + S2 新增 9）；`git diff --check` exit 0。
 - 结论与推进：S2 离线项通过；真实项未验，**S2 保持未通过**，不把离线结果当真实接入。等待确定可验来源与授权后执行受控 Real 验收。
 
 > 以下 “Current Project State — verified 2026-09-09” 及更早的带日期段落为上一轮历史快照，不再描述本轮现役分支；其 “Current working branch = main” 等表述只对应 2026-09-09 当时状态。本轮现役入口见上方 S0 记录与活动计划。
