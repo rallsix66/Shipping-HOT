@@ -228,6 +228,16 @@ Invoke-Checked -File 'git' -Arguments @('diff','--cached','--check')
 
 删除的旧 NewsNow 测试：无（`test/common.test.ts` 之外，无测试引用旧 sources/UI；`server/utils/date.test.ts` 随其模块退役）。测试文件 `server/api/shipping/index.test.ts`、`translation/secret.test.ts` 是 Shipping 测试，只从路由扫描排除，不删除。
 
+#### S1 补修与补验结论（2026-09-11 续）
+
+- **A1-06 重开并收紧**：`server/middleware/security.ts` 现拒绝 `Origin: null`、把来源按协议+主机+端口精确比对（同源或 `SHIPPING_ALLOWED_ORIGINS` 白名单），媒体类型按 `;` 解析后精确匹配 `application/json`，chunked 写体拒绝、声明体积上限 1 MB；`SHIPPING_ALLOWED_HOSTS` / `SHIPPING_ALLOW_NO_ORIGIN` 可配置。15 项单测 + 真实 Nitro HTTP 实测；被拒请求不写隔离库。
+- **A1-05/A1-07 数据兼容**：pre-S1 worktree（`f1116a5`）写隔离库（settings/关注/翻译缓存），S1 读取与重启读回一致；生产与 dev 的绝对库路径分别实测；容器路径未验证（Docker 受阻）。
+- **A1-04/A1-08 浏览器与构建**：新增 `scripts/e2e-smoke.mjs`（`pnpm test:e2e`，headless Chrome + CDP），覆盖 8 路由、深链接/刷新/前进后退、设置与关注写入读回与重启读回、日历月切换与详情、零未处理错误；`pnpm dev` 与生产启动均单独验证。干净 worktree + `--frozen-lockfile --ignore-scripts` 确认补丁自动应用。
+- **环境受阻（需用户操作，未擅自执行）**：
+  - Docker：Windows 10 Pro 19045；无 Docker/podman/nerdctl/containerd；WSL 无发行版；`HypervisorPresent=False`；当前会话非管理员。可执行方案——(A) 管理员安装 Docker Desktop（需启用 WSL2/VirtualMachinePlatform 或 Hyper-V 并重启；许可：个人/教育/员工<250 且年收入<1000 万美元的小型商业免费，否则需付费订阅）；(B) 管理员启用 WSL2、安装发行版后在发行版内安装 Docker Engine；(C) 在具备 Docker 的 Linux/CI 上执行容器验收。以上任一均需用户确认后由有权限者执行。
+  - 干净原生安装：`better-sqlite3@12.6.2` 的 `prebuild-install` 下载 EOF 后回退 `node-gyp`，失败于缺少可用 Visual Studio "Desktop development with C++" 工作负载；需用户安装该工作负载或修复 prebuild 下载后，方可验证完整干净安装。
+- **仍不标 PASS**：容器验收与完整干净安装未通过前，S1 保持 `BLOCKED`；不把非容器项概括为“全部通过”。
+
 ### S2 真实数据、港口身份和覆盖矩阵
 
 涉及：`shared/port-directory.ts`、`server/database/port-directory.ts`、现有 Provider/Runtime/Repository、`server/services/real-data-gate.ts`、`server/services/v3-readiness.ts`、`server/shipping-store.ts`、Shipping API 与页面来源显示。

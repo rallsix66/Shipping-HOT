@@ -50,6 +50,8 @@ pnpm build
 pnpm typecheck
 pnpm lint
 pnpm exec vitest run -c vitest.config.ts
+# Browser acceptance: start the built server against an isolated DB first.
+E2E_BASE_URL=http://127.0.0.1:4444 pnpm test:e2e
 ```
 
 阶段验收在本地执行（CI 在本轮保持静默，只有最终合并到 `main` 才运行唯一检查工作流）。真实 Provider、付费翻译与发布相关验收分别归入后续阶段，未获授权前不执行。
