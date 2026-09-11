@@ -39,7 +39,7 @@ docker compose up --build
 - 逻辑卷名称改为 `shipping_hot_data`，但底层仍使用已有的 `newsnow_data` 卷，避免改名后读不到旧数据库。这只是数据兼容标识，不是外部镜像或服务依赖。
 - 切换已有部署前，应先核对原容器的挂载位置并备份；不要运行 `docker compose down -v`。本改动没有停止或删除任何现有容器。
 - 镜像不会包含本机 `.env.*`、`.data`、`.tmp` 或 `.git`。容器不会自动继承宿主机的 `.env.local`；真实供应商配置须通过未提交的 compose override / 运行环境显式注入。
-- Dockerfile 的构建和运行阶段均对齐 Node `24.15.0`。本机当前未安装 Docker CLI，Docker 构建/容器验收按实际记录为受阻，不能据此宣称已完成容器验收或可部署。
+- Dockerfile 的构建和运行阶段均对齐 Node `24.15.0`。**容器验收不属于本轮 Windows 本地交付范围**：本机未安装 Docker，容器构建/启动保持“未验证”状态，后续采用 Docker 时再补验；这不是本轮通过项，也不是本地开发的阻塞项（本地用 `pnpm dev` / `pnpm start`）。
 
 ## 验证
 
@@ -56,9 +56,11 @@ E2E_BASE_URL=http://127.0.0.1:4444 pnpm test:e2e
 
 阶段验收在本地执行（CI 在本轮保持静默，只有最终合并到 `main` 才运行唯一检查工作流）。真实 Provider、付费翻译与发布相关验收分别归入后续阶段，未获授权前不执行。
 
+干净环境完整安装是本地必需项：请用全新检出运行 `pnpm install --frozen-lockfile`，不要用 `--ignore-scripts`、旧 `node_modules` 或手工复制原生模块。本机官方 `better-sqlite3` 预编译包下载较慢，已通过 `patches/prebuild-install@7.1.3.patch` 把 30s 硬编码超时改为可配置/180s，避免回退到需要 Visual Studio C++ 工作负载的源码构建。
+
 ## 本轮状态
 
-S1 已完成产品独立化与旧资讯业务退役：移除 NewsNow 资讯源、旧资讯路由、OAuth/用户同步与旧缓存模块，改为仅保留 Shipping HOT 的 `shipping/**` 路由、SQLite 底座和共享工具；包名、PWA/页面元数据与图标改用 Shipping HOT 身份；旧 Cloudflare/Vercel/Bun 部署入口退出。`newsnow_data` 物理卷、留存的旧 `user` 表数据和 MIT 许可未被删除。旧资讯业务与内容完善（真实数据、日历、全文翻译、商业船期）仍按计划在 S2–S6 推进。详见 [独立化与内容完善工作单](docs/plans/shipping-hot-standalone-content-2026-09-10.md)。
+交付范围为 **Windows 本地完善与验收**；服务器部署/实机发布为后续待授权范围（本轮不连接服务器、不部署、不切换服务）。S1 已完成产品独立化与旧资讯业务退役：移除 NewsNow 资讯源、旧资讯路由、OAuth/用户同步与旧缓存模块，改为仅保留 Shipping HOT 的 `shipping/**` 路由、SQLite 底座和共享工具；包名、PWA/页面元数据与图标改用 Shipping HOT 身份；旧 Cloudflare/Vercel/Bun 部署入口退出。`newsnow_data` 物理卷、留存的旧 `user` 表数据和 MIT 许可未被删除。旧资讯业务与内容完善（真实数据、日历、全文翻译、商业船期）仍按计划在 S2–S6 推进。详见 [独立化与内容完善工作单](docs/plans/shipping-hot-standalone-content-2026-09-10.md)。
 
 ## 许可证
 
