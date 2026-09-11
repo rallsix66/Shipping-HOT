@@ -1,10 +1,27 @@
+import process from "node:process"
 import { createError, defineEventHandler, getHeader, getMethod, getRequestURL } from "h3"
 
 // Shipping HOT is a local, single-user tool. There is no account system; access
 // control here is a loopback/host boundary, not user authentication. It must not
 // be described as safe to expose to a public network.
-const ALLOWED_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "[::1]"])
+//
+// Configuration (no secrets):
+//   SHIPPING_ALLOWED_HOSTS       comma-separated Host hostnames (default loopback set)
+//   SHIPPING_ALLOWED_ORIGINS     comma-separated full origins allowed beyond same-origin
+//                                (for an explicit dev-proxy exception; scheme+host+port)
+//   SHIPPING_ALLOW_NO_ORIGIN     "false" rejects state-changing requests without Origin
+//                                (default: allowed, for approved local non-browser clients)
+const DEFAULT_ALLOWED_HOSTS = ["localhost", "127.0.0.1", "::1", "[::1]"]
 const MAX_BODY_BYTES = 1024 * 1024
+
+function splitList(value: string | undefined): string[] {
+  return (value ?? "").split(",").map(item => item.trim()).filter(Boolean)
+}
+
+const envHosts = splitList(process.env.SHIPPING_ALLOWED_HOSTS)
+const ALLOWED_HOSTS = new Set(envHosts.length > 0 ? envHosts : DEFAULT_ALLOWED_HOSTS)
+const EXPLICIT_ORIGINS = new Set(splitList(process.env.SHIPPING_ALLOWED_ORIGINS))
+const ALLOW_MISSING_ORIGIN = process.env.SHIPPING_ALLOW_NO_ORIGIN !== "false"
 
 function hostnameOf(value: string | undefined): string | undefined {
   if (!value) return undefined
@@ -15,6 +32,29 @@ function hostnameOf(value: string | undefined): string | undefined {
   }
 }
 
+function normalizedOrigin(value: string): string | undefined {
+  try {
+    const url = new URL(value)
+    if (url.protocol !== "http:" && url.protocol !== "https:") return undefined
+    return url.origin
+  } catch {
+    return undefined
+  }
+}
+
+function sameOriginOf(event: Parameters<typeof getMethod>[0], hostHeader: string): string {
+  const forwarded = getHeader(event, "x-forwarded-proto")?.split(",")[0]?.trim()
+  const socketEncrypted = Boolean((event.node?.req?.socket as { encrypted?: boolean } | undefined)?.encrypted)
+  const protocol = forwarded || (socketEncrypted ? "https" : "http")
+  return `${protocol}://${hostHeader}`
+}
+
+function mediaTypeOf(value: string | undefined): string | undefined {
+  if (!value) return undefined
+  const mediaType = value.split(";")[0]?.trim().toLowerCase()
+  return mediaType || undefined
+}
+
 export default defineEventHandler((event) => {
   const url = getRequestURL(event)
   if (!url.pathname.startsWith("/api/") && url.pathname !== "/api") {
@@ -22,11 +62,9 @@ export default defineEventHandler((event) => {
   }
 
   const hostHeader = getHeader(event, "host")
-  if (hostHeader) {
-    const host = hostnameOf(hostHeader)
-    if (!host || !ALLOWED_HOSTS.has(host)) {
-      throw createError({ statusCode: 403, statusMessage: "forbidden_host" })
-    }
+  const host = hostnameOf(hostHeader)
+  if (!hostHeader || !host || !ALLOWED_HOSTS.has(host)) {
+    throw createError({ statusCode: 403, statusMessage: "forbidden_host" })
   }
 
   const method = getMethod(event).toUpperCase()
@@ -34,11 +72,17 @@ export default defineEventHandler((event) => {
     return
   }
 
-  // Non-browser local clients may omit Origin; a present Origin must be same-host.
-  const origin = getHeader(event, "origin")
-  if (origin && origin !== "null") {
-    const originHost = hostnameOf(origin)
-    if (!originHost || !ALLOWED_HOSTS.has(originHost)) {
+  const originHeader = getHeader(event, "origin")
+  if (originHeader === undefined || originHeader === null || originHeader.trim() === "") {
+    if (!ALLOW_MISSING_ORIGIN) {
+      throw createError({ statusCode: 403, statusMessage: "origin_required" })
+    }
+  } else {
+    const rawOrigin = originHeader.trim()
+    // `Origin: null` is never equivalent to a missing Origin; reject by default.
+    const origin = rawOrigin.toLowerCase() === "null" ? undefined : normalizedOrigin(rawOrigin)
+    const sameOrigin = sameOriginOf(event, hostHeader)
+    if (!origin || (origin !== sameOrigin && !EXPLICIT_ORIGINS.has(origin))) {
       throw createError({ statusCode: 403, statusMessage: "forbidden_origin" })
     }
   }
@@ -56,8 +100,7 @@ export default defineEventHandler((event) => {
   }
 
   if (Number.isFinite(contentLength) && contentLength > 0) {
-    const contentType = getHeader(event, "content-type") ?? ""
-    if (!contentType.toLowerCase().includes("application/json")) {
+    if (mediaTypeOf(getHeader(event, "content-type")) !== "application/json") {
       throw createError({ statusCode: 415, statusMessage: "unsupported_media_type" })
     }
   }
