@@ -35,11 +35,11 @@ docker compose up --build
 
 本地兼容入口为 `docker compose -f docker-compose.local.yml up --build`。不要同时启动两个入口占用同一个端口。
 
-- 宿主机只映射 `127.0.0.1:4444`，不直接向局域网或公网开放。旧 OAuth 配置不能当成 Shipping HOT 写接口已受到保护的证据。
+- 宿主机只映射 `127.0.0.1:4444`，不直接向局域网或公网开放。服务端已移除旧 GitHub OAuth/JWT 登录，改为回环 Host/Origin 与请求方法/类型/体积校验的本地访问边界；这不是完整用户鉴权，不能据此把服务暴露到公网。
 - 逻辑卷名称改为 `shipping_hot_data`，但底层仍使用已有的 `newsnow_data` 卷，避免改名后读不到旧数据库。这只是数据兼容标识，不是外部镜像或服务依赖。
 - 切换已有部署前，应先核对原容器的挂载位置并备份；不要运行 `docker compose down -v`。本改动没有停止或删除任何现有容器。
 - 镜像不会包含本机 `.env.*`、`.data`、`.tmp` 或 `.git`。容器不会自动继承宿主机的 `.env.local`；真实供应商配置须通过未提交的 compose override / 运行环境显式注入。
-- Dockerfile 的构建和运行阶段均对齐 Node `24.15.0`。本次修改未完成 Docker 构建和容器验收，不能据此宣称已可部署。
+- Dockerfile 的构建和运行阶段均对齐 Node `24.15.0`。本机当前未安装 Docker CLI，Docker 构建/容器验收按实际记录为受阻，不能据此宣称已完成容器验收或可部署。
 
 ## 验证
 
@@ -52,11 +52,11 @@ pnpm lint
 pnpm exec vitest run -c vitest.config.ts
 ```
 
-本分支新增 PR 质量检查，不调用付费供应商或部署生产。首次 CI 已安装依赖，但在未生成 Nitro 声明时类型检查失败；工作流现已调整为先构建，并独立收集 lint/测试结果。修正后的实际结果仍以对应提交的 Actions 日志为准，不继承之前提交的测试结论。
+阶段验收在本地执行（CI 在本轮保持静默，只有最终合并到 `main` 才运行唯一检查工作流）。真实 Provider、付费翻译与发布相关验收分别归入后续阶段，未获授权前不执行。
 
 ## 本轮状态
 
-2026-09-10 的独立化首批改动仅处理部署入口和根说明，并记录后续内容目标。包元数据、其他语言 README、旧资讯业务模块、旧路由和历史部署分支尚未全部清理；根 AGENTS 与完整状态文档同步也仍待完成。详见 [独立化与内容完善工作单](docs/plans/shipping-hot-standalone-content-2026-09-10.md)。本分支不是完整清理或全量运行验收的完成证明。
+S1 已完成产品独立化与旧资讯业务退役：移除 NewsNow 资讯源、旧资讯路由、OAuth/用户同步与旧缓存模块，改为仅保留 Shipping HOT 的 `shipping/**` 路由、SQLite 底座和共享工具；包名、PWA/页面元数据与图标改用 Shipping HOT 身份；旧 Cloudflare/Vercel/Bun 部署入口退出。`newsnow_data` 物理卷、留存的旧 `user` 表数据和 MIT 许可未被删除。旧资讯业务与内容完善（真实数据、日历、全文翻译、商业船期）仍按计划在 S2–S6 推进。详见 [独立化与内容完善工作单](docs/plans/shipping-hot-standalone-content-2026-09-10.md)。
 
 ## 许可证
 

@@ -13,11 +13,8 @@ services:
       - HOST=0.0.0.0
       - PORT=4444
       - NODE_ENV=production
-      - G_CLIENT_ID=
-      - G_CLIENT_SECRET=
-      - JWT_SECRET=
-      - INIT_TABLE=true
-      - ENABLE_CACHE=true
+      - SHIPPING_DATA_MODE=mock
+      - SHIPPING_RUNTIME_ENABLED=true
 
 volumes:
   shipping_hot_data:

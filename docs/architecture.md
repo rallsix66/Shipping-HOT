@@ -1,4 +1,6 @@
-# Architecture — NewsNow Foundation / Shipping HOT Proposal
+# Architecture — Shipping HOT
+
+> Origin note: this project began as a fork of the NewsNow codebase. S1 (2026-09-11) retired the unrelated NewsNow news business and product identity. Dated sections further down preserve historical checkpoint facts (including NewsNow sources/getters/cache/user, OAuth/JWT and Cloudflare/Vercel/Bun adapters) and are **historical**, not current capability. The current approved structure is the S0–S8 contract below plus the S1 cleanup record.
 
 ## Standalone & Content Completion — approved 2026-09-10 (S0–S8 change contract)
 
@@ -7,6 +9,14 @@
 - Full-article enrichment must not rewrite original Feed facts, Event severity, dedupe, freshness or HOT ranking; automatic risk-analysis of article content is out of scope. External article content is data, never executable instructions; fetching must enforce source allowlist, redirect/IP checks (no loopback/private/link-local/cloud-metadata), size/timeout/concurrency limits and HTML sanitization, and must not bypass login/paywall/access restrictions.
 - The annual reference calendar remains a bundled, provider-free GET (`server/data/annual-calendar/` → service → `/api/shipping/calendar/reference` → `/calendar`); the new S3 work only refreshes its official evidence and year/range contract. It must not write operational Calendar, invoke Providers or affect Runtime/Event/HOT/readiness. Candidate documents stay review evidence, not runtime inputs.
 - The NewsNow foundation is historically `V3 — FINAL SEALED`; the archived plan `docs/archive/shipping-hot-v3-real-data.md` retains its exceptions, failures and coverage gaps. Archiving does not promote any gap to complete. Retained data (`vessels/watchlist`, settings, original text/translation history, secrets, Git history, MIT license) is preserved; no DROP of legacy tables and no physical-volume rename as part of cleanup. Current record counts, evidence limitations and per-stage verification status live only in `docs/status.md`.
+
+### S1 standalone cleanup — implemented 2026-09-11 (stage acceptance tracked in `docs/status.md`)
+
+- Retired the unrelated NewsNow news business by reference analysis: `server/sources/**`, `server/getters.ts`, `server/glob.d.ts`, `server/api/{latest,login,enable-login}.ts`, `server/api/me/**`, `server/api/oauth/**`, `server/api/s/**`, `server/database/{cache,user}.ts`, `server/types.ts`, the news source utils (`source`/`rss2json`/`date`/`crypto`/`base64`/`fetch`), the shared news model (`shared/{types,pre-sources,sources,sources.json,updated-sources,metadata,verify,utils}.ts`, `shared/pinyin.json`), the news UI cluster (column/navbar/header/footer/search-bar/dnd/overlay-scrollbar, related atoms/hooks/utils) and unused tooling/assets (`scripts/{source,favicon}.ts`, `presource`/`preview`/`deploy`/`log`/`release`, `example.wrangler.toml`, `public/icons/**`, NewsNow public images/sitemap/sw). Legacy SQLite `user` data and the physical `newsnow_data` volume are retained, not dropped or renamed.
+- Product identity: package `name` is `shipping-hot`; author/homepage removed; `index.html`/`pwa.config.ts` use Shipping HOT meta (robots `noindex`), the NewsNow Google Analytics property and login query-param handler are removed; PWA capability is retained (only re-branded), not deleted.
+- Access boundary: the GitHub OAuth/JWT `server/middleware/auth.ts` (which also mis-matched `/api/s` against `/api/shipping/**`) is replaced by `server/middleware/security.ts`: loopback Host allowlist, same-host Origin for state-changing requests, JSON content-type for non-empty bodies and a body-size cap. This is a local boundary, **not** user authentication; the service must not be exposed to a public network for that reason.
+- Build/runtime: `nitro.config.ts` drops the Vercel/CF/Bun presets, adds `ignore: ["**/*.test.ts", "**/*.spec.ts"]` (test files no longer become production routes) and resolves the SQLite path against the runtime working directory (`pnpm dev`, `pnpm start` and the container all use `<cwd>/.data/shipping-hot-v3.sqlite3`; `SHIPPING_DATABASE_PATH` remains CLI-smoke-only). A minimal pnpm patch for `vite-plugin-with-nitro` fixes its production SPA renderer (it imported an unresolvable `#nitro/index`) so unmatched non-API routes serve `index.html` while unmatched `/api/*` returns 404.
+- The article/translation/calendar/schedule capabilities remain `approved` targets, not implemented; S1 did not add them.
 
 ## Fixed Annual Reference Calendar — approved 2026-09-09
 

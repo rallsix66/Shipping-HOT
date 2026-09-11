@@ -23,6 +23,25 @@ Active plan: `docs/plans/shipping-hot-standalone-content-2026-09-10.md` (S0–S8
 - 交付提交：`87f477293e6f5e259ed0ad8d538faea241e98378`（`chore: S0 establish standalone execution baseline and CI policy`，9 files changed）+ `3f166b47bb0117abb7e5f8a30d00656d260ca131`（`docs: record S0 push verification and stage result`）。分支头与 `origin` 一致。
 - 数据模式：本轮为 Mock/隔离；无真实 Provider 调用；无付费调用。
 
+## Standalone & Content Completion — S1 Standalone Product & Legacy Retirement — 2026-09-11 (current authority)
+
+- 阶段 / 验收 ID：S1 / A1-01–A1-08。
+- 时间：2026-09-11（Asia/Shanghai）。
+- 被测基础：S0 头 `f1116a5…` + 本轮 S1 变更（同一阶段提交内受测；PR #1 记录最终 SHA）。
+- 环境：Windows (win32-x64)；Node `v24.15.0` ABI `137`；pnpm `10.30.3`；`better-sqlite3@12.6.2`；schema `v12`；`SHIPPING_DATA_MODE=mock`；隔离库 + 隔离服务 cwd。**Docker：本机未安装（`docker --version` 报“无法将 docker 识别为 cmdlet”；无 `com.docker.service`；WSL 内无 `docker`）。**
+- 执行项：`pnpm install` exit 0；`pnpm build` exit 0；`pnpm typecheck` exit 0；`pnpm lint` exit 0；`pnpm exec vitest run -c vitest.config.ts` → `65 files / 717 tests passed` exit 0；`git diff --check` exit 0。测试数量变化：S0 `65/748` → S1 `65/717`，减少 31 项来自随旧模块退役的 `server/utils/date.test.ts`，新增 `server/middleware/security.test.ts`（8 项）。无有效 Shipping 断言被删除或降低。
+- A1-01 产品独立：包名 `shipping-hot`；`index.html`/`pwa.config.ts` Shipping 元信息；移除 NewsNow GA/登录回调/旧域名；真实 Chrome 渲染的 DOM 无 `newsnow` 残留；PWA 能力保留、仅换品牌。
+- A1-02 引用与依赖：按只读引用分析先解引用再删除；删除 175 个跟踪条目（旧 news sources、旧路由/OAuth/用户同步/缓存、共享 news model、旧资讯 UI、source/favicon 工具、NewsNow 资产）；`pnpm install` 移除 20 个不再使用依赖；锁文件与 manifest 一致；生产路由表只剩 `shipping/**`。
+- A1-03 工具链：Node/pnpm/`better-sqlite3` 与项目一致（health schema v12，原生加载成功）。**Docker 内工具链验证 BLOCKED。**
+- A1-04 运行产物：`pnpm build` 成功（体积 7.48 MB → 5.66 MB）；内建 Nitro 在隔离 cwd 启动成功并返回 `/api/shipping/health` 200；`ignore: **/*.test.ts` 生效，生产包不再产出 `index.test.mjs`/`secret.test.mjs` 路由。**Docker 构建/启动 BLOCKED。**
+- A1-05 数据路径：修正 Nitro 数据库解析为运行时 cwd（`<cwd>/.data/shipping-hot-v3.sqlite3`），dev/start/container 一致；实测隔离 cwd 启动会创建并使用隔离库；保留库 `.data/shipping-hot-v3.sqlite3` mtime 操作前后均为 `2026-09-10T14:51:51Z`（未打开/未改写）。`SHIPPING_DATABASE_PATH` 仅 CLI smoke 使用，已在 `nitro.config.ts` 注明。
+- A1-06 访问边界：新增 `server/middleware/security.ts`：非许可 Host→403、跨站 Origin→403、非 JSON 非空写体→415；正常本地 GET→200；compose 绑定 `127.0.0.1`。明确记录：无 Origin 的本地非浏览器调用在 Host 允许时放行。该边界不是用户鉴权，不能据此暴露公网。
+- A1-07 数据不丢：保留 `newsnow_data` 物理卷名与旧 `user` 表数据，未 DROP；隔离测试未触碰保留库/密钥。
+- A1-08 回归与收尾：G 全过；headless Chrome（真实浏览器执行 JS）对 `/`、`/vessels`、`/ports`、`/voyages`、`/feed`、`/calendar`、`/settings`、`/events` 均 200，DOM 渲染 Shipping HOT 外壳与全部 8 条导航，未知 `/api/*`→404。文档/规则/运行行为同步（architecture/AGENTS/README）。**Docker 相关回归 BLOCKED。**
+- 发现与修复：`vite-plugin-with-nitro@0.0.3` 生产 renderer 引用无法解析的 `#nitro/index`，导致所有非 `/` 的 SPA 路由 500；用 `patches/vite-plugin-with-nitro@0.0.3.patch` 修复为读取内建 `index.html`，并对未匹配 `/api/*` 返回 404。属构建/运行缺陷修复，非新增业务。
+- 审查与收尾（独立审查，general subagent）：发现并已处理——`docs/status.md` 与 `docs/architecture.md` 旧 “current” 段落与 S1 矛盾（已标注历史/加 origin note）；`patches/` 与 `server/middleware/` 一度未跟踪（已纳入提交）；`content-length` 缺失/chunked 可绕过体积与类型校验（已加 chunked→411 并新增 `security.test.ts`）；`.gitignore` 遗留 wrangler 项（已移除）。残留不确定项：dev 模式 SPA fallback 未单独取证（仅构建产物已验）；Docker 未执行；第三方补丁与插件 `0.0.3` 强耦合（升级需重生成）；`security.ts` 边界明确非用户鉴权。
+- 结论与推进：S1 非 Docker 子项均通过；Docker 容器验收 `BLOCKED`（受影响 A1-03/A1-04/A1-08 的容器部分）。按计划“必需项未通过时 S1 不能标 PASS”，**S1 记为 `BLOCKED (Docker unavailable)`，不标 PASS**；S2/S3 等依赖阶段暂不推进，S3/S4 等可离线开展的独立工作可在受限范围内继续。等待用户提供 Docker 环境或明确接受该限制。
+
 > 以下 “Current Project State — verified 2026-09-09” 及更早的带日期段落为上一轮历史快照，不再描述本轮现役分支；其 “Current working branch = main” 等表述只对应 2026-09-09 当时状态。本轮现役入口见上方 S0 记录与活动计划。
 
 ## Annual Reference Calendar — 2026-09-09 (additive slice; see S0 record above for current round)
@@ -425,6 +444,8 @@ V2.0–V2.5 development plan is archived as completed.
 Archive file: `docs/archive/shipping-hot-v2-completion.md`
 
 Remaining pending work: real data coverage / runtime follow-up.
+
+> **Historical snapshot (pre-S1).** Sections 2–4 below are an earlier environment / architecture / feature summary. They describe modules (NewsNow sources/getters/cache/user, OAuth/JWT, Cloudflare/Vercel/Bun adapters) that S1 retired and must not be read as current capability. Current state is the S0/S1 records at the top of this file and `docs/architecture.md`.
 
 ## 2. Current Environment
 

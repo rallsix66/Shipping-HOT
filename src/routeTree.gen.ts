@@ -20,7 +20,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as VoyagesIdRouteImport } from './routes/voyages.$id'
 import { Route as VesselsIdRouteImport } from './routes/vessels.$id'
 import { Route as PortsIdRouteImport } from './routes/ports.$id'
-import { Route as CColumnRouteImport } from './routes/c.$column'
 
 const VoyagesRoute = VoyagesRouteImport.update({
   id: '/voyages',
@@ -77,11 +76,6 @@ const PortsIdRoute = PortsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => PortsRoute,
 } as any)
-const CColumnRoute = CColumnRouteImport.update({
-  id: '/c/$column',
-  path: '/c/$column',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -92,7 +86,6 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/vessels': typeof VesselsRouteWithChildren
   '/voyages': typeof VoyagesRouteWithChildren
-  '/c/$column': typeof CColumnRoute
   '/ports/$id': typeof PortsIdRoute
   '/vessels/$id': typeof VesselsIdRoute
   '/voyages/$id': typeof VoyagesIdRoute
@@ -106,7 +99,6 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/vessels': typeof VesselsRouteWithChildren
   '/voyages': typeof VoyagesRouteWithChildren
-  '/c/$column': typeof CColumnRoute
   '/ports/$id': typeof PortsIdRoute
   '/vessels/$id': typeof VesselsIdRoute
   '/voyages/$id': typeof VoyagesIdRoute
@@ -121,7 +113,6 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/vessels': typeof VesselsRouteWithChildren
   '/voyages': typeof VoyagesRouteWithChildren
-  '/c/$column': typeof CColumnRoute
   '/ports/$id': typeof PortsIdRoute
   '/vessels/$id': typeof VesselsIdRoute
   '/voyages/$id': typeof VoyagesIdRoute
@@ -137,7 +128,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/vessels'
     | '/voyages'
-    | '/c/$column'
     | '/ports/$id'
     | '/vessels/$id'
     | '/voyages/$id'
@@ -151,7 +141,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/vessels'
     | '/voyages'
-    | '/c/$column'
     | '/ports/$id'
     | '/vessels/$id'
     | '/voyages/$id'
@@ -165,7 +154,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/vessels'
     | '/voyages'
-    | '/c/$column'
     | '/ports/$id'
     | '/vessels/$id'
     | '/voyages/$id'
@@ -180,7 +168,6 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   VesselsRoute: typeof VesselsRouteWithChildren
   VoyagesRoute: typeof VoyagesRouteWithChildren
-  CColumnRoute: typeof CColumnRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -262,13 +249,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortsIdRouteImport
       parentRoute: typeof PortsRoute
     }
-    '/c/$column': {
-      id: '/c/$column'
-      path: '/c/$column'
-      fullPath: '/c/$column'
-      preLoaderRoute: typeof CColumnRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -313,7 +293,6 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   VesselsRoute: VesselsRouteWithChildren,
   VoyagesRoute: VoyagesRouteWithChildren,
-  CColumnRoute: CColumnRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

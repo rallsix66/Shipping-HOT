@@ -199,6 +199,35 @@ Invoke-Checked -File 'git' -Arguments @('diff','--cached','--check')
 
 失败处理：先修引用或隔离，不用 `--force` 安装、关闭类型检查或删数据库。回退只恢复本轮代码/config，不删原卷。阶段提交 `refactor: S1 make Shipping HOT standalone`。
 
+#### S1 引用分析结论（2026-09-11，实施前写回）
+
+方法：对 `server`、`src`、`shared`、`scripts`、配置与测试做只读 import/引用分析，区分 Nitro 文件发现（`server/api`/`middleware`/`plugins`）、unimport 自动导入（`server/utils`、`shared`、`src/hooks|utils|atoms`）与真实 import；排除 `.tmp/` 诊断副本。
+
+**删除（旧 NewsNow 业务，解引用后执行）**
+- Server：`server/sources/**`（48 文件，含 `aihot.ts`）、`server/getters.ts`、`server/glob.d.ts`、`server/api/{latest,login,enable-login}.ts`、`server/api/me/**`、`server/api/oauth/**`、`server/api/s/**`、`server/database/{cache,user}.ts`、`server/types.ts`、`server/utils/{source,rss2json,date,crypto,base64,fetch}.ts` 与其测试 `server/utils/date.test.ts`。
+- Client：`src/routes/c.$column.tsx`；`src/components/{column/**,navbar.tsx,header/**,footer.tsx,common/search-bar/**,common/dnd/**,common/overlay-scrollbar/**}`；`src/atoms/{index.ts,primitiveMetadataAtom.ts}`；`src/hooks/{useSync,useLogin,useRefetch,useSearch,useFocus,useRelativeTime,query}.ts`；`src/utils/data.ts`。
+- Shared：`shared/{types,pre-sources,sources,sources.json,updated-sources,metadata,verify,utils}.ts`、`shared/pinyin.json`。
+- 构建/部署/资产：`scripts/{source,favicon}.ts`、`presource`/`preview`/`deploy`/`log`/`release` 脚本、`example.wrangler.toml`、`wrangler`/`workerd`、`public/icons/**`、NewsNow `public/{icon.svg,og-image.png,pwa-192x192.png,pwa-512x512.png,apple-touch-icon.png,sitemap.xml,sw.js}`、`screenshots/reward.gif`；`README.zh-CN.md`/`README.ja-JP.md`。
+- package 依赖（仅旧 NewsNow 使用）：`@atlaskit/pragmatic-drag-and-drop*`、`@iconify-json/si`、`@tanstack/react-query-devtools`、`@tanstack/router-devtools`、`ahooks`、`cmdk`、`cookie-es`、`iconv-lite`、`jose`、`md5`/`@types/md5`、`pnpm`(runtime)、`react-device-detect`、`uncrypto`、`@napi-rs/pinyin`、`bumpp`、`favicons-scraper`、`mlly`、`pnpm-patch-i`、`overlayscrollbars`、`defu`（若 overlay-scrollbar 删除后无他用）。
+
+**保留（Shipping HOT / 底座 / 共享）**
+- Server：`server/api/shipping/**`、`server/database/**`（Shipping/migrations/runtime）、`server/providers/**`、`server/runtime/**`、`server/services/**`、`server/search/**`、`server/secrets/**`、`server/shipping-store.ts`、`server/plugins/background-runtime.ts`、`server/utils/logger.ts`。
+- Client：`src/components/shipping/**`、Sharing 路由、`src/components/common/toast.tsx`、`src/hooks/{useDark,useToast,useOnReload}.ts`、`src/utils/index.ts`（`myFetch`/`Timer`，移除 NewsNow-only helper）。
+- Shared/工具：`shared/dir.ts`、`shared/type.util.ts`、`shared/shipping*.ts`、`shared/voyage*.ts`、`shared/ais-area*.ts`、`shared/port-directory.ts`、`shared/annual-calendar.ts`、`shared/calendar.ts`、`shared/vessel-search.ts` 等 Shipping 契约；`scripts/load-env.ts`、`scripts/tsx-alias-loader.mjs`。实施时补充结论：`tools/rollup-glob.ts` 只为 `server/getters.ts` 的 `glob:` 导入服务，随 getters 删除后成为死代码，故连同 `fast-glob`/`@rollup/pluginutils` 一并删除（此前分析曾标保留，以本实施结论为准）。
+- 保留数据与卷：`newsnow_data` 物理卷与旧 `user` 表数据不 DROP；用户 `.tmp/`、`pages.tsx` 行尾状态、`.data/` 保留库与密钥不动。
+
+**替换/修改（不是简单删除）**
+- `server/middleware/auth.ts`：含 `/api/s` 前缀误判（同时匹配 `/api/shipping/**`）。删除旧 OAuth 后用 Shipping 访问边界替代：消除前缀误判、保留本地访问与敏感写入校验（A1-06），不保留 GitHub/JWT 登录。
+- `src/routes/__root.tsx`：移除 `useSync()`；`usePWA()` 去掉对已删 `/api/latest` 与 NewsNow release 链接的依赖，仅保留 PWA 注册/更新提示能力（不删整个 PWA）。
+- `vite.config.ts`：unimport dirs 去掉 `metadata/sources/verify` 等已删项。
+- `uno.config.ts`：移除对 `shared/sources` 的 safelist 依赖。
+- `nitro.config.ts`：保留 `node-server` + `better-sqlite3`；去掉 Vercel/CF/Bun 分支；加 `ignore: ["**/*.test.ts","**/*.spec.ts"]` 防止测试文件被打成生产路由。
+- `package.json`：改 `name`/`author`/`homepage`，`dev`/`build` 去掉 `presource`。
+- `index.html`/`pwa.config.ts`/`public`：改 Shipping 身份 meta/OG/theme-color，移除 NewsNow GA 与旧域名；保留 PWA 能力。
+- `shared/consts.ts`：移除仅旧业务使用的 `TTL`/`Interval`，保留/改造 `Version` 等仍有用途项。
+
+删除的旧 NewsNow 测试：无（`test/common.test.ts` 之外，无测试引用旧 sources/UI；`server/utils/date.test.ts` 随其模块退役）。测试文件 `server/api/shipping/index.test.ts`、`translation/secret.test.ts` 是 Shipping 测试，只从路由扫描排除，不删除。
+
 ### S2 真实数据、港口身份和覆盖矩阵
 
 涉及：`shared/port-directory.ts`、`server/database/port-directory.ts`、现有 Provider/Runtime/Repository、`server/services/real-data-gate.ts`、`server/services/v3-readiness.ts`、`server/shipping-store.ts`、Shipping API 与页面来源显示。
