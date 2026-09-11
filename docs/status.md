@@ -17,7 +17,9 @@ Active plan: `docs/plans/shipping-hot-standalone-content-2026-09-10.md` (S0–S8
 - A0-06 基线工程检查：G 门禁全过，数量与环境见上；无未解释失败；构建仍输出既有 large-chunk/Browserslist/deprecation 警告。发现（留待 S1）：生产构建仍包含旧 NewsNow 路由（`api/oauth/github`、`api/login`、`api/enable-login`、`api/me/sync`、`api/s/*`）且把 `api/shipping/index.test.mjs`、`translation/secret.test.mjs` 等测试文件打成路由，属 A1-02/A1-04 目标。
 - A0-07 测试隔离：`vitest.config.ts` 不加载 `.env.local`；仅 `scripts/load-env.ts`（dev/build/start 与两个 smoke 脚本）读取 `.env*`。两个真实 smoke 脚本默认指向保留库，本轮未运行；测试全程隔离库，保留 `.data/` 与 `provider-secrets.json` 未改动。
 - 审查与收尾：独立审查（general subagent，`review-bugbot` 命名 subagent 在当前环境不可用）发现：新增 status 段存在“过早宣告阶段通过”和与旧 “Current Project State” 冲突；均已修复（本节结论改为收尾后才标 PASS；旧表标注为历史）。`.tmp/` 未被 ignore 且含诊断库副本，列为清理候选，未删除。真实 Neat Freak 已执行：bash 不可用，`scripts/audit-inventory.sh` 子步骤 `pending/unavailable`，改用 Windows 手动等价审计（规则链、Markdown 引用、CI YAML、秘密/数据库/临时文件、git status）。无秘密或保留库被写入。
-- 结论与推进：S0 `PASS`（A0-01–A0-07 满足）；A0-05 远端静默在推送后按 7.4 复核（预期新增运行 0）。允许进入 S1（独立化）。
+- A0-05 推送复核（已实测）：阶段提交 `87f477293e6f5e259ed0ad8d538faea241e98378` 推送到 `origin/codex/shipping-hot-standalone-first-pass`（`4b5ff00..87f4772`）后，实际 Actions 运行列表最新仍为 `34428408421`（2026-09-10），**本阶段 push 新增 CI/发布运行 = 0**；三个 workflow 仍为 `disabled_manually`。
+- 结论与推进：S0 `PASS`（A0-01–A0-07 满足，A0-05 已推送实测 0 运行）。允许进入 S1（独立化）。
+- 交付提交：`87f477293e6f5e259ed0ad8d538faea241e98378`（`chore: S0 establish standalone execution baseline and CI policy`，9 files changed）。
 - 数据模式：本轮为 Mock/隔离；无真实 Provider 调用；无付费调用。
 
 > 以下 “Current Project State — verified 2026-09-09” 及更早的带日期段落为上一轮历史快照，不再描述本轮现役分支；其 “Current working branch = main” 等表述只对应 2026-09-09 当时状态。本轮现役入口见上方 S0 记录与活动计划。
