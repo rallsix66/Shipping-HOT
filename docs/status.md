@@ -1,6 +1,28 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
-## Annual Reference Calendar — 2026-09-09 (current additive slice)
+## Standalone & Content Completion — S0 Baseline, Docs承接 and CI Policy — 2026-09-10 (current authority)
+
+Active plan: `docs/plans/shipping-hot-standalone-content-2026-09-10.md` (S0–S8). Archived historical plan: `docs/archive/shipping-hot-v3-real-data.md`.
+
+- 阶段 / 验收 ID：S0 / A0-01–A0-07。
+- 时间：2026-09-10（Asia/Shanghai）。
+- 被测基础：draft 头 `4b5ff00a01aae9e8298ad088261440d2218e668b` 加本轮 S0 文档/CI 变更（同一阶段提交内受测；本节不预写该提交自身 SHA，PR #1 记录最终 SHA）。
+- 环境：Windows (win32-x64)；Node `v24.15.0` ABI `137`；pnpm `10.30.3`；`better-sqlite3@12.6.2`；schema `v12`；`SHIPPING_DATA_MODE=mock`，隔离库 `SHIPPING_DATABASE_PATH=.tmp/s0-gate.sqlite3`（保留库未打开）。
+- 执行项：`pnpm install --frozen-lockfile` exit 0；`pnpm build` exit 0；`pnpm typecheck` exit 0；`pnpm lint` exit 0；`pnpm exec vitest run -c vitest.config.ts` → `65 files / 748 tests passed` exit 0；`git diff --check origin/main...HEAD`、`git diff --check`、`git diff --cached --check` 均 exit 0（仅 LF→CRLF 正常警告）。
+- A0-01 现场基线：远端 `origin/main@6f0a22cb…`；实施分支 `codex/shipping-hot-standalone-first-pass` 远端存在（本地初始未 fetch，已 fetch）头 `4b5ff00a…`；PR #1 `DRAFT` 未合并，头一致；未提交 `pages.tsx` 仅行尾差异（0 内容行），未跟踪 `.tmp/` 且未被 Git 忽略；未覆盖任何用户改动。现场与编制假设一致，无回退。
+- A0-02 V3 归档：`git mv docs/plans/shipping-hot-v3-real-data.md docs/archive/shipping-hot-v3-real-data.md`；归档文件新增归档状态/日期/承接入口 banner，封版例外/失败/覆盖缺口原样保留；修复 `AGENTS.md` 与 `docs/plans/inbox/shipping-hot-six-country-official-calendar-completion.md` 的路径引用。历史 P7 事实未改写。
+- A0-03 唯一计划：本计划整合进草稿既有工作单，成为唯一现役计划；未新增 PLAN/阶段报告/验收报告/交接副本；V3 遗留项在计划第 12 节有承接表。
+- A0-04 架构与规则：`AGENTS.md` 更新产品定位、真实命令、S0–S8 授权边界、CI/提交规则与计划入口；`docs/architecture.md` 新增 “Standalone & Content Completion (S0–S8) change contract”，新目标一律标 `approved`，未实现项不当现有能力；旧 title/summary-only 边界保留为历史。
+- A0-05 CI 静默准备：初始 active workflows 三个（`shipping-hot-checks.yml`、`docker.yml`、`release.yml`），运行基线记录到 `34428408421`（PR 检查）。已 `gh workflow disable` 三个 workflow（现 `disabled_manually`）；`shipping-hot-checks.yml` 改为仅 `push: branches: [main]` + `concurrency`；`docker.yml`、`release.yml` 作为计划内清理删除（Git 历史保留）。分支 push/PR 更新预期新增 CI 运行 `0`。`main` 无 branch protection、rulesets 为空。
+- A0-06 基线工程检查：G 门禁全过，数量与环境见上；无未解释失败；构建仍输出既有 large-chunk/Browserslist/deprecation 警告。发现（留待 S1）：生产构建仍包含旧 NewsNow 路由（`api/oauth/github`、`api/login`、`api/enable-login`、`api/me/sync`、`api/s/*`）且把 `api/shipping/index.test.mjs`、`translation/secret.test.mjs` 等测试文件打成路由，属 A1-02/A1-04 目标。
+- A0-07 测试隔离：`vitest.config.ts` 不加载 `.env.local`；仅 `scripts/load-env.ts`（dev/build/start 与两个 smoke 脚本）读取 `.env*`。两个真实 smoke 脚本默认指向保留库，本轮未运行；测试全程隔离库，保留 `.data/` 与 `provider-secrets.json` 未改动。
+- 审查与收尾：独立审查（general subagent，`review-bugbot` 命名 subagent 在当前环境不可用）发现：新增 status 段存在“过早宣告阶段通过”和与旧 “Current Project State” 冲突；均已修复（本节结论改为收尾后才标 PASS；旧表标注为历史）。`.tmp/` 未被 ignore 且含诊断库副本，列为清理候选，未删除。真实 Neat Freak 已执行：bash 不可用，`scripts/audit-inventory.sh` 子步骤 `pending/unavailable`，改用 Windows 手动等价审计（规则链、Markdown 引用、CI YAML、秘密/数据库/临时文件、git status）。无秘密或保留库被写入。
+- 结论与推进：S0 `PASS`（A0-01–A0-07 满足）；A0-05 远端静默在推送后按 7.4 复核（预期新增运行 0）。允许进入 S1（独立化）。
+- 数据模式：本轮为 Mock/隔离；无真实 Provider 调用；无付费调用。
+
+> 以下 “Current Project State — verified 2026-09-09” 及更早的带日期段落为上一轮历史快照，不再描述本轮现役分支；其 “Current working branch = main” 等表述只对应 2026-09-09 当时状态。本轮现役入口见上方 S0 记录与活动计划。
+
+## Annual Reference Calendar — 2026-09-09 (additive slice; see S0 record above for current round)
 
 - User-approved scope is a fixed-file Southeast Asia annual reference calendar, not the historical six-country automatic-source migration proposal. `/calendar` exclusively displays the reference month grid. At the user's request, the operational-cache switch was removed; the old unmounted component and backend/data remain untouched. No existing Calendarific/Runtime, database schema, Secret, Event/HOT or China capability was changed.
 - `GET /api/shipping/calendar/reference?year=2026` reads only bundled `server/data/annual-calendar/*-2026.json` through a dedicated service. It does not access the database or any Provider. These five files are the display snapshot authority; `docs/data-candidates/calendar/` remains preparation/review evidence, not a runtime dependency. Updates require explicit manual review and a new build, not polling.
@@ -15,7 +37,7 @@
 > Knowledge sync date: 2026-09-08
 > Current state authority: this rebaseline section. Dated sections below are historical checkpoints unless explicitly marked current.
 
-## Current Project State — verified 2026-09-09
+## Project State Snapshot — 2026-09-09 (historical; see S0 record above for the current round)
 
 | Item | Current state |
 |---|---|

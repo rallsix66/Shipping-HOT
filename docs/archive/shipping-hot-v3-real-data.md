@@ -1,4 +1,12 @@
-# Shipping HOT V3 — Real Data Migration
+# [ARCHIVED] Shipping HOT V3 — Real Data Migration
+
+> **归档状态：`ARCHIVED`（退出当前执行入口）。归档日期：2026-09-10（Asia/Shanghai）。**
+>
+> 本文件由 `docs/plans/shipping-hot-v3-real-data.md` 可追溯迁移至 `docs/archive/shipping-hot-v3-real-data.md`，作为 V3 封版历史证据保留。归档只表示它不再是现役执行计划，**不表示下列 coverage gaps、失败记录、例外和未完成项已经消失或通过**。
+>
+> 承接入口（现役唯一计划）：`docs/plans/shipping-hot-standalone-content-2026-09-10.md`。现役状态权威：`docs/status.md`。当前批准结构：`docs/architecture.md`。
+>
+> 本文件内封版时的条件、例外、失败记录和覆盖缺口按原样保留；后续带日期的历史补充不改写当时事实。
 
 > 2026-09-09 additive display scope: the approved fixed annual reference month calendar is separate from operational Calendar migration/sync. Five countries / 100 reference items (ID 25, TH 23, MY 15, PH 21, VN 16) are committed at the verified business-code baseline `main@e34115870804c0ef0040a568968c9ecce81af786`. `/calendar` mounts only the new reference view; its old operational UI entry is removed while the legacy component, backend and historical data remain. See `docs/status.md` → Annual Reference Calendar for current status and `docs/architecture.md` → Fixed Annual Reference Calendar for the boundary. The large six-country auto-sync/source-table/migration proposal is paused and is not an implementation requirement for the reference UI.
 
