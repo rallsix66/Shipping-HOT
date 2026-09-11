@@ -250,6 +250,23 @@ Invoke-Checked -File 'git' -Arguments @('diff','--cached','--check')
 - **服务器部署（后续待授权）**：不连接服务器、不安装服务器软件、不部署或切换服务；只有用户在本地版本可用后另行授权才考虑。
 - **S1 本地范围结论**：A1-01/A1-02/A1-06/A1-07 通过；A1-05 的本地（dev/start/CLI）部分通过；A1-03/A1-04/A1-08 的 Windows 本地项通过（含干净完整安装）；Docker 未验证、不属本轮。完成审查与收尾后记录“S1 本地范围 PASS；Docker 未验证，不属于本轮交付范围”。
 
+#### S2 first controlled real-verification batch — 2026-09-11 (written before execution)
+
+Scope: implemented sources only, current eight ports, local isolated database. No new paid call, no unknown-fee source, no retry.
+
+| Source | Endpoint | Type | Adapter-internal requests (cap) | Target |
+|---|---|---|---|---|
+| TMD official CAP | `https://www.tmd.go.th/en/api/xml/CAP` | weather-alert sync | 1 GET | TH focus ports (evidence-only association) |
+| BMKG official CAP | `https://www.bmkg.go.id/alerts/nowcast/en` | weather-alert sync | 1 GET | ID focus ports (evidence-only association) |
+| Shekou official notices | `https://www.portshekou.com/ywgg/` | feed sync | 1 GET (index only; no article-body fetch) | `CNSHK` |
+| The Loadstar RSS | `https://theloadstar.com/feed/` | feed sync | 1 GET | general shipping news (headline/link/excerpt only) |
+
+- Total expected external requests: **4** (one per source). No article-body fetches, no pagination.
+- Disabled for this batch (no external call): GFW (non-commercial terms), Portcast (paid SaaS), Open-Meteo (non-commercial free tier), Calendarific full sync (non-commercial + 30-day cache term), VesselAPI (quota held), AIS streaming/area (off this batch), DeepSeek translation (settings disabled/budget 0), Commercial Schedule (not implemented).
+- Execution: one run per Job, serial, **no automatic retry**; existing provider timeout applies. Stop the source immediately on auth/permission/rate-limit/contract change/unknown fee.
+- Isolation: explicit isolated `SHIPPING_DATABASE_PATH` and test address; credentials only via the existing server-side loader; never printed, uploaded, logged or committed.
+- Acceptance record per source: request/source time → persistence → Repository/API read → browser page → restart read-back → zero-Mock scan. A valid empty result yields no fabricated data.
+
 ### S2 真实数据、港口身份和覆盖矩阵
 
 涉及：`shared/port-directory.ts`、`server/database/port-directory.ts`、现有 Provider/Runtime/Repository、`server/services/real-data-gate.ts`、`server/services/v3-readiness.ts`、`server/shipping-store.ts`、Shipping API 与页面来源显示。

@@ -91,9 +91,49 @@ Ports: `CNSHK` Shekou, `CNYTN` Yantian, `CNNSA` Nansha, `THLCH` Laem Chabang, `M
 
 Offline tests prove logic only. They do not count as real-data or zero-Mock live acceptance.
 
-### Real part — pending / conditions
+### Real part — executed first batch (2026-09-11) and remaining conditions
 
-This round listed but did not execute real requests. Before any controlled Real run, enumerate and restrict the registered Jobs so no unauthorized translation, full-calendar sync, commercial schedule or unbounded AIS subscription starts. Only sources with confirmed authorization/terms/quota should be probed; each real check must record request, source/time, local persistence, API/page read-back, restart read-back and the zero-Mock scan. Missing real evidence stays unverified/`BLOCKED`.
+A bounded first controlled batch ran (isolated DB, one run per Job, no retry, paused sources disabled): The Loadstar 10/10, Shekou official 5/5, BMKG 18/18 succeeded; **TMD failed** (`provider_unavailable`, fetch failed). Persistence, API, page, restart read-back and the zero-Mock scan passed for the persisted real rows (details in `docs/live-verification.md` → S2 First Controlled Real Batch — 2026-09-11).
+
+Still unverified this round / `BLOCKED` by licence or quota, not by adapter absence:
+
+- **GFW** — non-commercial terms; company use needs a custom licence. Vessel identity/search paused.
+- **Open-Meteo** — free tier is non-commercial; company use needs a paid plan or self-hosting. Weather paused.
+- **Portcast** — paid SaaS; public pages are not a licence. Congestion paused.
+- **Calendarific** — free plan is non-commercial and caps cached data to 30 days; operational Calendar sync paused.
+- **VesselAPI** — free quota exists but the exact remaining quota is account-private; Voyage paused this batch.
+- **BMKG** — verified live, but company production use needs written permission.
+- **TMD** — endpoint unreachable from this environment; re-check before any claim.
+- **AIS (AISStream)** — free/fair-use, eligible for a bounded one-connection check; not run in this batch.
+- **Commercial Schedule** — not implemented (S6).
+
+Each future step must be justified (why, how many additional calls) and still record request/source time, persistence, API/page, restart and zero-Mock.
+
+### Public terms verification — 2026-09-11 (official pages checked; no account login)
+
+| Source | Official condition (verified) | Company/commercial use | Free range / quota | Attribution | Decision this round | Source checked |
+|---|---|---|---|---|---|---|
+| Global Fishing Watch | APIs are **non-commercial only** (CC BY-NC 4.0). Commercial integration and private/internal use supporting a commercial product "are not sufficient" under current terms; no public commercial license/pricing | **Not permitted** without a custom license (contact `apis@globalfishingwatch.org`) | 50,000/day, 1,500,000/month across ≤5 tokens | Required (CC BY-NC 4.0) | **Pause for company use.** Vessel identity/search needs an alternative or a GFW commercial license | globalfishingwatch.org/our-apis/documentation/docs/license-rate-limits ; /faqs/can-i-use-global-fishing-watch-apis-for-commercial-purposes/ |
+| Open-Meteo | Free tier is **non-commercial** (CC BY 4.0 data, AGPLv3 server); commercial use ❌ on free; paid plans grant a commercial licence | **Not permitted** on the free tier; needs a paid plan or self-hosting | Free: ≤10,000/day, 5,000/hour, 600/min | Required (CC BY 4.0) | **Pause company use of the hosted free tier.** Alternatives: self-host Open-Meteo (AGPLv3) or an approved commercial weather source | open-meteo.com/en/terms ; /en/pricing ; /en/licence |
+| Portcast | Paid SaaS; Port Congestion is a documented commercial API. Terms of Use govern purchased Services; derived Outputs are Portcast IP. Public congestion pages are not a data licence (robots ≠ licence) | **Not permitted** without a Portcast agreement | Paid; no public free data licence | Per agreement | **Pause public-page ingestion.** Alternative: official port-authority / terminal data + AIS-derived metrics | portcast.io/terms-of-use ; portcast.stoplight.io/docs/portcast-api (Port Congestion API) |
+| Calendarific | Free plan: 500 calls/month, **attribution required, non-commercial**, limited historical/upcoming; terms also cap cached/stored data to **30 days** and forbid systematic extraction. Commercial use requires a paid plan | **Not permitted** on free; and the current indefinite SQLite caching violates the 30-day cache term | Free 500/month (1,000/day soft cap) | "Powered by Calendarific" | **Pause operational Calendar sync.** Alternative: the provider-free bundled annual reference calendar (already implemented) with official evidence | calendarific.com/pricing ; /terms ; /api-documentation |
+| The Loadstar | RSS is for links back only; limited quotation allowed (≤2 articles/week, ≤first 3 paragraphs or 150 words, attribution + direct link); **no copying/republishing full articles**; subscription terms forbid storing content in a database | Full text/DB storage needs a licence | RSS link + limited excerpt only | "The Loadstar" + link | **Keep headline/link/short excerpt only; pause full-text ingestion.** | theloadstar.com/licencing-and-copyright/ ; /about-us/ ; /loadstar-subscription-terms-and-conditions/ |
+| Shekou official (portshekou.com/ywgg/) | Official operator business-announcements page (SCT/CCT/MCT, China Merchants Port). Public announcements | Public official notices | Public page | Source link | **Eligible** for bounded first verification (title/summary/source link) | portshekou.com/ywgg/ (page reachable 2026-09-11) |
+| TMD (Thailand) | Official CAP warning feed registered with WMO; general TMD terms: data is TMD copyright, no false endorsement, compliance with Thai law. No explicit commercial-prohibition clause found | Use with attribution; no explicit commercial clause | Public CAP endpoint, no key; no published CAP quota | Source: TMD | **Eligible** for bounded first verification with attribution | data.tmd.go.th/api/index1.php ; alertingauthority.wmo.int (CAP URL) |
+| BMKG (Indonesia) | Free, worldwide, non-exclusive with attribution and citation; **"republishing, integration into third-party applications, or commercial use requires official written permission from BMKG"**; limit 60 requests/min/IP | **Company production use needs written permission** | 60 req/min/IP | "Sumber: BMKG" + logo + citation | **Evaluation fetch only, with attribution.** Company production needs BMKG written permission | data.bmkg.go.id/peringatan-dini-cuaca/ ; bmkg.go.id/ketentuan-penggunaan |
+| VesselAPI | Subscription service with a free tier and monthly quota; commercial governed by Terms; free tier permitted within quota; only 2xx responses count | Permitted within plan terms | Free tier with small monthly quota (exact tier/quota is account-private) | Per terms | **Eligible within free quota**; asks user only if we need to exceed the free quota | vesselapi.com/pricing ; /terms-and-conditions ; /docs |
+| AISStream | Free; free API key; fair-use WebSocket, single stream product; ≤3 open connections/IP, ≤3 subscribed/account; no published numeric quota; no commercial-restriction clause found | Permitted (fair use) | Free (fair use) | Source: AISStream | **Eligible** for one bounded connection (≤1 target or small area, ≤120s) | aisstream.io/documentation ; aisstream.io |
+
+Account-private information that cannot be verified from public pages (only these are user-specific): Calendarific remaining monthly calls; VesselAPI current plan/remaining quota; AISStream account connection usage; DeepSeek remaining budget. No other condition is returned to the user.
+
+### Alternatives under evaluation for paused sources (research, no implementation yet)
+
+- **Vessel identity/search without GFW:** AISStream static/identity data (free) and the VesselAPI free search quota (150/month tier) are candidates; no adapter change is authorized yet.
+- **Weather without Open-Meteo free tier:** self-host Open-Meteo (AGPLv3, attribution) or an approved commercial weather source; official meteorological services (e.g. TMD/Malaysia MET) are candidates for bounded fields.
+- **Congestion without Portcast:** official port-authority / terminal notices plus the existing AIS-derived `ais_port_metrics` are the candidates.
+- **Operational Calendar without Calendarific:** the provider-free bundled annual reference calendar with official evidence (S3) is the primary alternative.
+
+Any new adapter (interface, licence, dependency, architecture impact) requires the existing change process before implementation; no port expansion and no paid service.
 
 ## Non-provider foundations
 

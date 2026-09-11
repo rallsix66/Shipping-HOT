@@ -313,6 +313,25 @@ The built Nitro HTTP smoke returned HTTP 200 for `/`, `/api/shipping/health`, `/
 
 This document records observed requests and persisted/API evidence only. The accepted HANSA evidence verifies the VesselAPI ETA contract, identity trust, Port Event enrichment, Runtime persistence, provider-free reads and restart behavior. It does not claim full focus-port operational coverage: `CNYPG` remains outside the current directory, so Voyage status is `coverage_pending` with reason `vesselapi_focus_port_coverage_pending`. The current project phase is `V3 — FINAL SEALED`; P7-A through P7-G are complete and post-V3 enhancements require separate approval.
 
-## S2 offline inventory note — 2026-09-11
+## S2 First Controlled Real Batch — 2026-09-11
 
-S2 began with offline inventory and deterministic verification: no new Provider request, activation, socket or retained/operational database open was performed (the S2 local gate used only isolated `.tmp` databases), and no new live evidence is claimed here. The eight-port coverage inventory, credential-presence summary (values never recorded) and per-capability classification are in `docs/v3-real-provider-matrix.md` → “S2 Offline Inventory and Eight-Port Coverage — 2026-09-11”. Offline determinism added Calendarific/Feed/Portcast/Open-Meteo failure-taxonomy tests, port-identity ambiguity/unmapped tests and an AIS Mock-Mode isolation test, and repaired `resolvePortIdentity` (ambiguous → unresolved) and `createAisTrackingProvider` (no real adapter in non-Real modes). Real acceptance remains pending: before any controlled Real run, the registered Jobs must be enumerated and restricted, and each check must record request, source/time, persistence, API/page read-back, restart read-back and the zero-Mock scan.
+Method: `pnpm smoke:v3-real-activation` with process-scoped env overrides restricting the run to eligible sources; isolated DB `.tmp/s2-real-batch1.sqlite3`; one run per Job, serial, no retry; the retained `.data/shipping-hot-v3.sqlite3` was not opened. Public terms were verified first (see `docs/v3-real-provider-matrix.md` → Public terms verification — 2026-09-11); only sources with verified use conditions and no new charge were enabled.
+
+| Source | Endpoint | Requests | Result | Records | Source time | Basis |
+|---|---|---|---|---|---|---|
+| The Loadstar | `https://theloadstar.com/feed/` | 1 GET | success | 10/10 | `2026-09-11T12:15:26.000Z` | RSS link + limited excerpt only |
+| Shekou official | `https://www.portshekou.com/ywgg/` | 1 GET | success | 5/5 | — | official public notices (source link) |
+| BMKG | `https://www.bmkg.go.id/alerts/nowcast/en` | 1 GET | success | 18/18 | `2026-09-11T13:17:48.000Z` | attribution required; company production use needs written permission |
+| TMD | `https://www.tmd.go.th/en/api/xml/CAP` | 1 GET | **failed** `provider_unavailable` (`Thai Meteorological Department: fetch failed`) | 0 | — | official CAP endpoint not reachable from this environment; re-check |
+
+Disabled for this batch (no external request): `ais-tracking` and `voyage-sync` (Mock-selected → disabled), `translation-sync` (`translation_disabled`), and `calendar-sync`/`port-sync`/`weather-sync` (unavailable provider → failed without any call). AIS streaming/area, VesselAPI and DeepSeek were not invoked.
+
+| Check | Result |
+|---|---|
+| Persistence | `feed_items` 33 rows, all `source_type=real` (BMKG 18, The Loadstar 10, Shekou official 5); `feed_item_history` 33; Mock Feed rows 0; `PRAGMA integrity_check=ok` |
+| API read | `GET /api/shipping/feed` returned 28 current items (BMKG 18 + The Loadstar 10) with real `sourceUrl`; the 5 Shekou rows are persisted but not in the current view under the freshness/date policy |
+| Page | `/feed` rendered (45,928-byte DOM) with real source links (`theloadstar.com`, `bmkg.go.id`) and the Shipping HOT shell |
+| Restart read-back | A separate process read the same file: counts stable, integrity `ok`, no Mock rows |
+| Zero-Mock | `actualMockRows.total=0` across all 13 `source_type` business tables; `zeroMockGate.passed=true` |
+
+Boundaries: this is a bounded first batch, not eight-port coverage completion. Port/weather/calendar/voyage/AIS/GFW remain unverified this round (paused by licence/quota terms). TMD's English CAP fetch failed, so TH official warnings stay unverified. BMKG and The Loadstar use conditions require written permission / limited excerpt respectively for ongoing company use.

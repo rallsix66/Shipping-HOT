@@ -54,9 +54,10 @@ Active plan: `docs/plans/shipping-hot-standalone-content-2026-09-10.md` (S0–S8
 - A2-03 港口匹配：离线通过——`resolvePortIdentity` 对未映射 `CNYPG` 返回 `undefined`（不猜配）；对歧义别名（同值匹配多个 UN/LOCODE）返回 `undefined`（**修复**：原先取首个匹配）；新增测试覆盖别名/未映射/歧义。
 - A2-04 失败与时效：离线通过——新增 Calendarific、Feed、Portcast、Open-Meteo 的 HTTP 失败分类测试（401/403/429/503/504 + 结构变化/超时；其中 `entitlement_missing` 仅 Calendarific 的 403 分支有测试）；401/403/429/超时/结构变化/正常空结果/过期/同来源 last-known 的既有覆盖见矩阵清单。
 - A2-05 阅读无副作用：既有覆盖（`shipping-store.read-only.test.ts`、`voyage-read.test.ts`、`ais-position-api.test.ts`、`v3-readiness.test.ts`）证明 GET/Repository 读不调用 Provider；本区块未新增真实调用。
-- A2-06 真实闭环：**未执行**——本区块无 Provider→SQLite→API→UI 新证据。
-- A2-07 零 Mock / 重启：**未执行真实扫描**；离线 gate 测试（`real-data-gate.test.ts`）覆盖 schema 发现与 Mock 行判定。
-- A2-08 覆盖验收：八港必需能力仍有缺口（公告仅 Shekou；官方预警仅 TMD/BMKG；Voyage focus-port `CNYPG` 未映射；无新增 Provider），需用户决定接受范围或授权。
+- 公开条款核查（2026-09-11，官网）：GFW 仅限非商业（公司用途需自定义许可，`apis@globalfishingwatch.org`）；Open-Meteo 免费层仅非商业（公司用途需付费/自建）；Portcast 为付费 SaaS（公开页非许可）；Calendarific 免费层非商业且缓存限 30 天；The Loadstar 仅允许 RSS 链接+有限摘录、禁止全文入库；BMKG 免费需署名、**商业用途需书面许可**；TMD 为 WMO 注册 CAP 公共源；VesselAPI 有免费额度（剩余额度为账户私有）；AISStream 免费 fair-use。详见矩阵。
+- A2-06 真实闭环（首批受控）：**已执行**——The Loadstar `10/10`、Shekou official `5/5`、BMKG `18/18` 成功；**TMD 失败**（`provider_unavailable`，fetch failed，英文 CAP 端点在本环境不可达）。持久化：`feed_items` 33 条全 `source_type=real`（BMKG 18、Loadstar 10、Shekou 5）、`feed_item_history` 33、Mock 0；`GET /api/shipping/feed` 返回 28 条 current（BMKG + Loadstar；Shekou 5 条已持久化但按日期/时效不在 current 视图）；`/feed` 页面渲染真实来源链接；重启读回稳定；零 Mock 通过。未调用 GFW/Open-Meteo/Portcast/Calendarific/VesselAPI/AIS/DeepSeek。
+- A2-07 零 Mock / 重启：本批通过——schema 发现 13 表 `actualMockRows.total=0`、`zeroMockGate.passed=true`；重启后 `PRAGMA integrity_check=ok` 且无 Mock 行。
+- A2-08 覆盖验收：八港必需能力仍有缺口——公告仅 Shekou（且未入 current 视图）；官方预警仅 BMKG 成功、TMD 失败；Portcast/Open-Meteo/Calendarific 因许可/费用暂停；Voyage focus-port `CNYPG` 未映射；无新增 Provider。不因空状态显示正确而改为覆盖通过。
 - 在线/真实部分：**待授权与待条件**，见矩阵 “Real part — pending / conditions”。启动 Real 前必须枚举并限制已注册 Job（不得顺带启动未授权翻译、日历全量同步、商业船期或无界 AIS 订阅），逐项记录请求/来源时间/持久化/API 回读/重启回读/零 Mock 扫描。
 - 离线测试新增：`calendar.test.ts`、`feed.test.ts`、`shipping.test.ts`、`port-directory.test.ts`、`ais/index.test.ts`；另修复 `server/database/port-directory.ts` 与 `server/providers/ais/index.ts` 两处隔离/匹配缺陷。
 - G 门禁（本地，隔离库 `.tmp/s2-gate.sqlite3`）：`pnpm build`/`typecheck`/`lint` exit 0；Vitest `65 files / 733 tests passed`（S1 724 + S2 新增 9）；`git diff --check` exit 0。
