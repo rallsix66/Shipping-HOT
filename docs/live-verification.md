@@ -341,20 +341,21 @@ Boundaries: this is a bounded first batch, not eight-port coverage completion. P
 ### TMD endpoint/TLS repair
 
 - Root cause: the TMD CAP endpoint was **not** stale. `https://www.tmd.go.th/en/api/xml/CAP` returns HTTP `200` `text/xml` (18,532 bytes) to `curl`, but Node's fetch failed with `unable to verify the first certificate` — TMD sends an incomplete TLS chain. `node --use-system-ca` fetches it successfully (HTTP `200`, 18,532 bytes).
-- Fix (no new dependency): the real-runtime scripts now run with `NODE_OPTIONS=--use-system-ca` (`dev`, `start`, `smoke:v3-real-activation`). Adapter code was not changed.
+- Fix (no new dependency): the real-runtime scripts now run with `NODE_USE_SYSTEM_CA=1` (`dev`, `start`, `smoke:v3-real-activation`), which makes the process trust the Windows system CA store. `dev` keeps its original `NODE_OPTIONS=--use-env-proxy` (the CA setting is a separate variable, so no existing `NODE_OPTIONS` is overridden). Adapter code was not changed. This is process-level OS-CA trust, **not** disabling TLS verification and **not** a TMD-specific bypass.
 - Re-run of the controlled batch (isolated `.tmp/s2-real-batch2.sqlite3`): The Loadstar `10/10`, Shekou official `5/5`, **TMD `12/12`** (`sourceUpdatedAt=2026-09-12T01:31:28.000Z`), BMKG `3/3` (`2026-09-12T01:30:07.000Z`); `actualMockRows.total=0`, `zeroMockGate.passed=true`. TH official warnings are now verified live (with attribution); the company-use caveat for BMKG still applies.
 
-### VesselAPI controlled verification (within the authorized free quota)
+### VesselAPI controlled verification (final, within the authorized free quota)
 
-- Account quota: the first authenticated request returned HTTP `200` with `x-ratelimit-remaining: 144` (free-tier calls remaining; exact plan is account-private).
-- Search/identity path: `createVesselApiSearchProvider` returned `1` real result — HANSA BREITENBURG, `imo:9155391`, `mmsi:538090733`, callsign `V7B3029`, flag `Marshall Is`, `source_type=real`.
-- ETA/voyage path: `createVesselApiVoyageProvider.getVoyages([...])` returned **no observation** today (valid empty result; nothing fabricated or persisted).
-- Requests made: **3** (quota probe + search + one ETA request). No Port Event call was needed (the ETA step short-circuited). No purchase, no auto-recharge, no retry.
-- Isolated DB `.tmp/s2-vesselapi.sqlite3`: `voyages=0`/`voyage_eta_history=0`, `actualMockRows.total=0`.
+- Account quota observed: `x-ratelimit-remaining` went `144 → 137` across this verification (free-tier calls remaining; exact plan is account-private). No purchase, no auto-recharge, no retry.
+- Search/identity: HANSA BREITENBURG `imo:9155391` (`source_type=real`) first; then two active targets (`operating_status=Active`) selected for the ETA path: **MSC AMY** `imo:9242651` and **MSC ILLINOIS VII** `imo:9197545`.
+- ETA path (non-empty this time): MSC AMY → `destination_port=LTKLJ`, `eta=2026-09-12T18:00:00Z`, `timestamp=2026-09-12T01:53:28Z`; MSC ILLINOIS VII → `destination_port=CNTXG`, `eta=2026-09-26T12:00:00Z`, `timestamp=2026-09-11T22:59:16Z`.
+- Voyage persistence through the app adapter (`createVesselApiVoyageProvider`, `includeLastPortEvent:false`): one real record `vesselapi:imo:9197545:destination:CNTXG:episode:20260911T225916000Z`, `sourceType=real`, `newEpisodes=1`, `written=1`, `historyWritten=1`; Repository read-back and `getLatestVerifiedRealVoyage("vesselapi")` both returned it; isolated DB `actualMockRows.total=0`.
+- API read: built Nitro `GET /api/shipping/vessels/imo:9197545/voyage` returned HTTP `200` with the real persisted voyage (`source=vesselapi`, `sourceType=real`).
+- Requests made this pass: **5** (quota/search probe `MAERSK`, search `MSC`, ETA MSC AMY, ETA MSC ILLINOIS VII, app ETA for MSC ILLINOIS VII). Destination `CNTXG`/`LTKLJ` are outside the eight-port directory → `destinationPortId=undefined` and focus-port coverage stays pending.
 
-### AISStream bounded verification
+### AISStream bounded verification (final)
 
-- One connection to `wss://stream.aisstream.io/v0/stream`, one small Shekou area (`22.2–22.8 N, 113.6–114.2 E`), `FilterMessageTypes=["PositionReport"]`, 120-second window, cleanly closed at the deadline.
-- Result: **0 PositionReports** observed (`distinctMmsi=0`) — an honest empty observation; no position was fabricated, no reconnect. The connection/subscription/close lifecycle worked.
+- One connection to `wss://stream.aisstream.io/v0/stream`, `FiltersShipMMSI=["636021995"]`, small Shekou area (`22.2–22.8 N, 113.6–114.2 E`), `FilterMessageTypes=["PositionReport"]`, 120-second window, cleanly closed. VesselAPI does not expose a current position, so the bbox could not be sized from it; a fixed eight-port area was used.
+- Result: **0 PositionReports** observed — an honest empty observation; no fabrication, no reconnect, no scope/time widening (stopped per the authorized rule).
 
-Boundaries: VesselAPI ETA and AIS observation are empty results this run; they do not prove non-empty business paths. The eight-port coverage gaps (Portcast/Open-Meteo/Calendarific paused; official notices only Shekou) remain.
+Boundaries: VesselAPI search/identity and the non-empty ETA path are now verified live; AIS observation is still empty this run. Focus-port coverage (`CNTXG`) and the eight-port gaps (Portcast/Open-Meteo/Calendarific paused; official notices only Shekou) remain.

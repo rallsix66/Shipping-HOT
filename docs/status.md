@@ -56,7 +56,7 @@ Active plan: `docs/plans/shipping-hot-standalone-content-2026-09-10.md` (S0–S8
 - A2-05 阅读无副作用：既有覆盖（`shipping-store.read-only.test.ts`、`voyage-read.test.ts`、`ais-position-api.test.ts`、`v3-readiness.test.ts`）证明 GET/Repository 读不调用 Provider；本区块未新增真实调用。
 - 公开条款核查（2026-09-11，官网）：GFW 仅限非商业（公司用途需自定义许可，`apis@globalfishingwatch.org`）；Open-Meteo 免费层仅非商业（公司用途需付费/自建）；Portcast 为付费 SaaS（公开页非许可）；Calendarific 免费层非商业且缓存限 30 天；The Loadstar 仅允许 RSS 链接+有限摘录、禁止全文入库；BMKG 免费需署名、**商业用途需书面许可**；TMD 为 WMO 注册 CAP 公共源；VesselAPI 有免费额度（剩余额度为账户私有）；AISStream 免费 fair-use。详见矩阵。
 - A2-06 真实闭环（首批受控）：**已执行**——The Loadstar `10/10`、Shekou official `5/5`、BMKG `18/18` 成功；**TMD 失败**（`provider_unavailable`，fetch failed，英文 CAP 端点在本环境不可达）。持久化：`feed_items` 33 条全 `source_type=real`（BMKG 18、Loadstar 10、Shekou 5）、`feed_item_history` 33、Mock 0；`GET /api/shipping/feed` 返回 28 条 current（BMKG + Loadstar；Shekou 5 条已持久化但按日期/时效不在 current 视图）；`/feed` 页面渲染真实来源链接；重启读回稳定；零 Mock 通过。未调用 GFW/Open-Meteo/Portcast/Calendarific/VesselAPI/AIS/DeepSeek。
-- A2-06 第二批 + TMD 修复 + VesselAPI/AIS（2026-09-12）：**TMD 根因是 Node 拒绝 TMD 不完整 TLS 链**（endpoint 正确，curl 200/text-xml）；用 `NODE_OPTIONS=--use-system-ca` 修复 `dev`/`start`/`smoke:v3-real-activation` 后重跑：TMD `12/12`、BMKG `3/3`、Loadstar `10/10`、Shekou `5/5`，零 Mock 通过。**VesselAPI 受控**（授权额度内）：`x-ratelimit-remaining: 144`，搜索/身份命中 HANSA（`source_type=real`），ETA/航次本次无观测，共 **3** 次请求，无重试/购买。**AISStream 受控**：1 连接、蛇口小区域、120s、结束关闭，**0 观测**。GFW/Open-Meteo/Portcast/Calendarific 仍暂停；DeepSeek/商业船期未启动。
+- A2-06 TMD 修复 + VesselAPI/AIS 最终受控（2026-09-12）：**TMD 根因是 Node 拒绝 TMD 不完整 TLS 链**（endpoint 正确，curl 200/text-xml）。修复改为 **`NODE_USE_SYSTEM_CA=1`**（进程使用 Windows 系统 CA，`dev` 保留原 `NODE_OPTIONS=--use-env-proxy`，不覆盖 `NODE_OPTIONS`，不关闭 TLS 验证、非 TMD 专属绕过）；重跑 TMD `12/12`、BMKG `3/3`、Loadstar `10/10`、Shekou `5/5`，零 Mock 通过。**VesselAPI 最终受控**（本批 5 次成功请求，额度 `144→137`）：搜索/身份命中 HANSA；选中 2 个 Active 目标；**ETA 非空**（MSC AMY→LTKLJ、MSC ILLINOIS VII→CNTXG）；经应用适配器持久化 `CNTXG` 航次（`newEpisodes=1`、`sourceType=real`），API `GET /api/shipping/vessels/imo:9197545/voyage` 返回 200，零 Mock。`CNTXG` 不在八港 → focus 覆盖仍 pending。**AISStream 最终受控**：1 连接、单一 MMSI `636021995`、蛇口小区域、120s、结束关闭，**0 观测**（VesselAPI 无当前位置，bbox 取八港区域；按要求 0 条即停止）。GFW/Open-Meteo/Portcast/Calendarific 仍暂停；DeepSeek/商业船期未启动。
 - A2-07 零 Mock / 重启：两批均通过——schema 发现 13 表 `actualMockRows.total=0`、`zeroMockGate.passed=true`；重启后 `PRAGMA integrity_check=ok` 且无 Mock 行。
 - A2-08 覆盖验收：八港必需能力仍有缺口——公告仅 Shekou（且未入 current 视图）；官方预警仅 BMKG 成功、TMD 失败；Portcast/Open-Meteo/Calendarific 因许可/费用暂停；Voyage focus-port `CNYPG` 未映射；无新增 Provider。不因空状态显示正确而改为覆盖通过。
 - 在线/真实部分：**待授权与待条件**，见矩阵 “Real part — pending / conditions”。启动 Real 前必须枚举并限制已注册 Job（不得顺带启动未授权翻译、日历全量同步、商业船期或无界 AIS 订阅），逐项记录请求/来源时间/持久化/API 回读/重启回读/零 Mock 扫描。
@@ -70,7 +70,16 @@ Active plan: `docs/plans/shipping-hot-standalone-content-2026-09-10.md` (S0–S8
 - 范围：TH/ID/MY/PH/VN 的 **2026 与 2027** 官方年度资料，核对全国/地区/机构、补休/补班、条件性休假与临时公告；不作为全国完整性结论。
 - 官方来源目标（待逐项抓取正文并写入 `docs/data-candidates/calendar/`，验证后晋级 `server/data/annual-calendar/`）：TH `thaigov.go.th` / 内阁及内阁秘书处公告；ID `kemenkopmk.go.id` / `setkab.go.id`；MY `kabinet.gov.my` 及各州官方；PH `officialgazette.gov.ph` 年度公告与后续特别公告；VN `baochinhphu.vn` / `vanban.chinhphu.vn`。
 - 流程：官方正文 → 结构化候选 → 日期/来源/地区/冲突校验 → 差异 → 满足规则晋级年度 JSON → 构建后展示。未公布年份显示“尚未公布”，已公布未采集显示缺口。
-- 下一步：逐国/年核对现有 `sourceDocuments`、补齐缺失正文与发布日期、记录候选差异；当年已公布主表与发现修订逐项 diff。
+- 逐国×年官方资料核查状态（2026-09-12 首次上网核对；来源为官方政府/内阁/劳动或气象金融公告）：
+  | 国家 | 2026 | 2027 |
+  | --- | --- | --- |
+  | TH | **已公布、已取得官方依据**：泰国央行（BOT）B.E. 2569/2026 金融机构假日公告（含 1/2 追加假、12/5 补休 Visakha、7/12 国庆补休等）；MFA 领事馆官方假日表可交叉核对。现有 `TH-2026.json` 的 23 条与官方表需逐条 diff | **尚未见正式公布**（待核） |
+  | ID | **已公布、已取得官方依据**：SKB 三部长 2025 年第 1497/2/5 号（17 国家假日 + 8 集体休假，2025-09-19 签署），kemenkopmk/setneg/menpan 官方正文与完整日期清单 | **尚未见正式公布**（待核） |
+  | MY | **已公布、已取得官方依据**：内阁/首相署 `kabinet.gov.my` 2026 联邦与州假日表（HKA-2026.pdf，联轴+州别、周末补假规则） | **已公布**：内阁 2027 联邦 15 日 + 州别（2026-08-25 报道）；**待取 kabinet.gov.my 2027 官方 PDF 后逐项核对** |
+  | PH | **抓取失败（搜索引擎 429）**：本轮未取得官方 Gazette/公告正文；现有 `PH-2026.json` 依据 `lawphil.net` 法务镜像，主依据仍需 Official Gazette 核对 | **尚未见正式公布**（待核） |
+  | VN | **已公布、已取得官方依据**：政府办公厅 9859/VPCP-KGVX（2025-10-13）与内务部 Thông báo——公职春节 16–20/02/2026、国庆 01–02/09/2026 且 31/08 与 22/08 调班；企业适用条件单列 | **仅部委提案、尚未生效**：内务部 2026-09-11 提交 7 天春节方案（04–10/02/2027），待总理审批，不能当作已定 |
+- 分类：TH/ID/MY/VN 的 2026 属“已公布已取得官方依据、待结构化晋级与 diff”；MY 2027 属“已公布、待取官方 PDF”；VN 2027 属“提案未定”；TH/ID/PH 2027 属“尚未见正式公布”；PH 2026 属“抓取失败、主依据待核”。
+- 下一步：逐国取官方正文 → 结构化候选 → 日期/范围/机构校验 → 与现有 JSON diff → 符合条件者晋级 `server/data/annual-calendar/`；本报告仅为核查状态，尚未执行晋级。
 
 > 以下 “Current Project State — verified 2026-09-09” 及更早的带日期段落为上一轮历史快照，不再描述本轮现役分支；其 “Current working branch = main” 等表述只对应 2026-09-09 当时状态。本轮现役入口见上方 S0 记录与活动计划。
 
