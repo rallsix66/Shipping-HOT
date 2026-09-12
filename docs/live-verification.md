@@ -335,3 +335,26 @@ Disabled for this batch (no external request): `ais-tracking` and `voyage-sync` 
 | Zero-Mock | `actualMockRows.total=0` across all 13 `source_type` business tables; `zeroMockGate.passed=true` |
 
 Boundaries: this is a bounded first batch, not eight-port coverage completion. Port/weather/calendar/voyage/AIS/GFW remain unverified this round (paused by licence/quota terms). TMD's English CAP fetch failed, so TH official warnings stay unverified. BMKG and The Loadstar use conditions require written permission / limited excerpt respectively for ongoing company use.
+
+## S2 TMD Repair + VesselAPI/AIS Controlled Verification — 2026-09-12
+
+### TMD endpoint/TLS repair
+
+- Root cause: the TMD CAP endpoint was **not** stale. `https://www.tmd.go.th/en/api/xml/CAP` returns HTTP `200` `text/xml` (18,532 bytes) to `curl`, but Node's fetch failed with `unable to verify the first certificate` — TMD sends an incomplete TLS chain. `node --use-system-ca` fetches it successfully (HTTP `200`, 18,532 bytes).
+- Fix (no new dependency): the real-runtime scripts now run with `NODE_OPTIONS=--use-system-ca` (`dev`, `start`, `smoke:v3-real-activation`). Adapter code was not changed.
+- Re-run of the controlled batch (isolated `.tmp/s2-real-batch2.sqlite3`): The Loadstar `10/10`, Shekou official `5/5`, **TMD `12/12`** (`sourceUpdatedAt=2026-09-12T01:31:28.000Z`), BMKG `3/3` (`2026-09-12T01:30:07.000Z`); `actualMockRows.total=0`, `zeroMockGate.passed=true`. TH official warnings are now verified live (with attribution); the company-use caveat for BMKG still applies.
+
+### VesselAPI controlled verification (within the authorized free quota)
+
+- Account quota: the first authenticated request returned HTTP `200` with `x-ratelimit-remaining: 144` (free-tier calls remaining; exact plan is account-private).
+- Search/identity path: `createVesselApiSearchProvider` returned `1` real result — HANSA BREITENBURG, `imo:9155391`, `mmsi:538090733`, callsign `V7B3029`, flag `Marshall Is`, `source_type=real`.
+- ETA/voyage path: `createVesselApiVoyageProvider.getVoyages([...])` returned **no observation** today (valid empty result; nothing fabricated or persisted).
+- Requests made: **3** (quota probe + search + one ETA request). No Port Event call was needed (the ETA step short-circuited). No purchase, no auto-recharge, no retry.
+- Isolated DB `.tmp/s2-vesselapi.sqlite3`: `voyages=0`/`voyage_eta_history=0`, `actualMockRows.total=0`.
+
+### AISStream bounded verification
+
+- One connection to `wss://stream.aisstream.io/v0/stream`, one small Shekou area (`22.2–22.8 N, 113.6–114.2 E`), `FilterMessageTypes=["PositionReport"]`, 120-second window, cleanly closed at the deadline.
+- Result: **0 PositionReports** observed (`distinctMmsi=0`) — an honest empty observation; no position was fabricated, no reconnect. The connection/subscription/close lifecycle worked.
+
+Boundaries: VesselAPI ETA and AIS observation are empty results this run; they do not prove non-empty business paths. The eight-port coverage gaps (Portcast/Open-Meteo/Calendarific paused; official notices only Shekou) remain.

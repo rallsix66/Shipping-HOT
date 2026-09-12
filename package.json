@@ -9,10 +9,10 @@
     "pnpm": "10.30.3"
   },
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=--use-env-proxy vite dev",
+    "dev": "cross-env NODE_OPTIONS=\"--use-env-proxy --use-system-ca\" vite dev",
     "build": "vite build",
     "lint": "eslint",
-    "start": "tsx ./scripts/start.ts",
+    "start": "cross-env NODE_OPTIONS=--use-system-ca tsx ./scripts/start.ts",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.app.json",
     "prepare": "simple-git-hooks",
     "test": "vitest -c vitest.config.ts",
@@ -23,7 +23,7 @@
     "smoke:p3b-voyage": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p3b-voyage-sqlite-smoke.ts",
     "smoke:p3-feed": "pnpm smoke:p3-feed-freshness",
     "smoke:p3-feed-freshness": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p3-feed-freshness-sqlite-smoke.ts",
-    "smoke:v3-real-activation": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/v3-real-activation-smoke.ts",
+    "smoke:v3-real-activation": "cross-env NODE_OPTIONS=--use-system-ca node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/v3-real-activation-smoke.ts",
     "smoke:v3-readiness": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/v3-readiness.ts"
   },
   "dependencies": {
