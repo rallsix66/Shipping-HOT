@@ -101,9 +101,9 @@ Still unverified this round / `BLOCKED` by licence or quota, not by adapter abse
 - **Open-Meteo** — free tier is non-commercial; company use needs a paid plan or self-hosting. Weather paused.
 - **Portcast** — paid SaaS; public pages are not a licence. Congestion paused.
 - **Calendarific** — free plan is non-commercial and caps cached data to 30 days; operational Calendar sync paused.
-- **VesselAPI** — authorised controlled verification done: `x-ratelimit-remaining: 144`; search/identity live (HANSA, `imo:9155391`, `source_type=real`); ETA/voyage path returned no observation today; **3 requests** total. ETA non-empty path remains unverified.
+- **VesselAPI** — authorised controlled verification done: quota `x-ratelimit-remaining` `144 → 137`; search/identity live (HANSA `imo:9155391`, `source_type=real`); **ETA non-empty** for two `Active` targets (MSC AMY→`LTKLJ`, MSC ILLINOIS VII→`CNTXG`); app adapter persisted the `CNTXG` voyage (`newEpisodes=1`) and the built API returned it; **5 successful requests** this pass. Destinations outside the eight ports keep focus coverage pending.
 - **BMKG** — verified live (18/18, then 3/3 on the current payload), but company production use needs written permission; local evaluation only.
-- **TMD** — **repaired and verified live** (`12/12`, `sourceUpdatedAt=2026-09-12T01:31:28Z`). Endpoint was correct; the failure was Node rejecting TMD's incomplete TLS chain. Fixed with `NODE_OPTIONS=--use-system-ca` in the real-runtime scripts; company use with attribution; no explicit commercial-prohibition clause found.
+- **TMD** — **repaired and verified live** (`12/12`). Endpoint was correct; the failure was Node rejecting TMD's incomplete TLS chain. Fixed with `NODE_USE_SYSTEM_CA=1` (process trusts the Windows system CA store; `dev` keeps its `NODE_OPTIONS=--use-env-proxy`; TLS verification is not disabled and this is not a TMD-specific bypass). Company use with attribution; no explicit commercial-prohibition clause found.
 - **AIS (AISStream)** — bounded one-connection check done (Shekou area, 120 s, closed): **0 observations** (honest empty). Free/fair-use.
 - **Commercial Schedule** — not implemented (S6).
 
