@@ -30,8 +30,9 @@ describe("annual calendar validator and diff", () => {
       countryCode: "MY",
       year: 2026,
       sourceDocuments: [source],
-      events: [event(), event(), event({ id: "x2", date: "2026-13-40" }), event({ id: "x3", date: "2027-01-01" }), event({ id: "x4", sourceDocumentIds: ["MISSING"] })],
+      events: [event(), event(), event({ id: "x2", date: "2026-13-40" }), event({ id: "x3", date: "2027-01-01" }), event({ id: "x4", sourceDocumentIds: ["MISSING"] }), event({ id: "x5", type: "not_a_type" })],
     }, "MY", 2026)
+    expect(issues.some(i => i.includes("unknown event type"))).toBe(true)
     expect(issues.some(i => i.includes("duplicate event id"))).toBe(true)
     expect(issues.some(i => i.includes("duplicate fact"))).toBe(true)
     expect(issues.some(i => i.includes("invalid date"))).toBe(true)

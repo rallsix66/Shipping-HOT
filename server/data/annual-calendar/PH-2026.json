@@ -62,50 +62,50 @@
       "acquiredAt": "2026-09-09"
     },
     {
-      "id": "PH-OG-PROC-1006-2025",
+      "id": "PH-PCO-PROC-1006-2025",
       "officialInstitutions": [
-        "Office of the President",
         "Presidential Communications Office (PCO)",
-        "Official Gazette"
+        "Philippine Information Agency (PIA)",
+        "Office of the President"
       ],
       "documentNumbers": [
         "Proclamation No. 1006, s. 2025"
       ],
       "publishedAt": "2025-09-03",
-      "url": "https://www.officialgazette.gov.ph/section/proclamations/",
-      "evidenceStatus": "official_gazette_original_pending",
+      "url": "https://pia.gov.ph/news/pbbm-issues-proclamation-declaring-regular-holidays-special-non-working-days-for-2026/",
+      "evidenceStatus": "official_pco_release_verified",
       "relationshipToAnnualCalendar": "primary_annual_proclamation",
       "acquiredAt": "2026-09-12"
     },
     {
-      "id": "PH-OG-PROC-1189-2026",
+      "id": "PH-PCO-PROC-1189-2026",
       "officialInstitutions": [
-        "Office of the President",
         "Presidential Communications Office (PCO)",
-        "Official Gazette"
+        "Philippine Information Agency (PIA)",
+        "Office of the President"
       ],
       "documentNumbers": [
         "Proclamation No. 1189, s. 2026"
       ],
       "publishedAt": "2026-03-12",
-      "url": "https://www.officialgazette.gov.ph/section/proclamations/",
-      "evidenceStatus": "official_gazette_original_pending",
+      "url": "https://pia.gov.ph/news/proclamation-no-1189-s-2026-declaring-friday-20-march-2026-a-regular-holiday-throughout-the-country-in-observance-of-eidl-fitr-feast-of-ramadhan/",
+      "evidenceStatus": "official_pco_release_verified",
       "relationshipToAnnualCalendar": "subsequent_eid_date_proclamation",
       "acquiredAt": "2026-09-12"
     },
     {
-      "id": "PH-OG-PROC-1264-2026",
+      "id": "PH-PCO-PROC-1264-2026",
       "officialInstitutions": [
-        "Office of the President",
         "Presidential Communications Office (PCO)",
-        "Official Gazette"
+        "Philippine Information Agency (PIA)",
+        "Office of the President"
       ],
       "documentNumbers": [
         "Proclamation No. 1264, s. 2026"
       ],
       "publishedAt": "2026-05-21",
-      "url": "https://www.officialgazette.gov.ph/section/proclamations/",
-      "evidenceStatus": "official_gazette_original_pending",
+      "url": "https://pia.gov.ph/news/proclamation-no-1264-s-2026/",
+      "evidenceStatus": "official_pco_release_verified",
       "relationshipToAnnualCalendar": "subsequent_eid_date_proclamation",
       "acquiredAt": "2026-09-12"
     }
@@ -123,7 +123,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -140,7 +140,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -157,7 +157,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -174,7 +174,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1189-2026",
-        "PH-OG-PROC-1189-2026"
+        "PH-PCO-PROC-1189-2026"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -191,7 +191,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -208,7 +208,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -225,7 +225,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -242,7 +242,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -259,7 +259,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -276,7 +276,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1264-2026",
-        "PH-OG-PROC-1264-2026"
+        "PH-PCO-PROC-1264-2026"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -293,7 +293,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -310,7 +310,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -327,7 +327,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -344,7 +344,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -361,7 +361,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -378,7 +378,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -395,7 +395,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -412,7 +412,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -429,7 +429,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -446,7 +446,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"
@@ -463,7 +463,7 @@
       "subjectAndConditionsZh": "总统公告全国适用；工资、值班及持续服务安排依劳动规则和单位安排。",
       "sourceDocumentIds": [
         "PH-PROC-1006-2025",
-        "PH-OG-PROC-1006-2025"
+        "PH-PCO-PROC-1006-2025"
       ],
       "verificationStatus": "official_primary_verified",
       "notesZh": "按当地民用日期记录；不等于港口、海关或企业必然停工。"

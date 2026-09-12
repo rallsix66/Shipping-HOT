@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs"
-import type { AnnualEvent, AnnualSource } from "@shared/annual-calendar"
+import { type AnnualEvent, type AnnualSource, annualTypes } from "@shared/annual-calendar"
 
 /**
  * Deterministic, source-aware validator and diff for the annual reference calendar.
@@ -84,6 +84,7 @@ export function validateAnnualDataset(file: AnnualFile, expectedCountry?: string
     if (countryCode && event.countryCode !== countryCode) issues.push(`${event.id}: country mismatch`)
     if (!validDate(event.date)) issues.push(`${event.id}: invalid date ${event.date}`)
     if (year && !event.date.startsWith(`${year}-`)) issues.push(`${event.id}: date outside year ${year}`)
+    if (!annualTypes[event.type]) issues.push(`${event.id}: unknown event type ${event.type}`)
     if (!event.geographicScope || !event.geographicScope.trim()) issues.push(`${event.id}: empty geographicScope`)
     if (!event.sourceDocumentIds || event.sourceDocumentIds.length === 0) issues.push(`${event.id}: no sourceDocumentIds`)
     for (const ref of event.sourceDocumentIds ?? []) {

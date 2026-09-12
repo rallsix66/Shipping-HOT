@@ -19,3 +19,10 @@
 1. 取得官方 HKA-2027 / 宪报文件（kabinet.gov.my）。
 2. 逐项解析 federal/state applicability、替代休假规则、发布日期。
 3. 结构化候选 → `calendar:diff` 校验 → 通过后才晋级运行时 JSON。
+
+## 官方文件获取尝试（2026-09-12，均未取得）
+
+- https://www.kabinet.gov.my/hari-kelepasan-am/ → 连接超时（Connect Timeout Error, 443）。
+- https://www.kabinet.gov.my/storage/2026/08/HKA-2027.pdf → 连接超时。
+- https://www.malaysia.gov.my/en/calendar → HTTP 200，但为 JS 应用，未返回 2027/HKA 直链。
+- 结论：保持 `published_not_imported`；未用新闻报道替代官方文件，未生成 MY-2027.json。取得官方文件后按 candidate→calendar:diff→语义核对→runtime 晋级。

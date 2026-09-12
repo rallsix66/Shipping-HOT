@@ -13,9 +13,12 @@
 
 ## 官方来源
 
-- PH-PROC-1006-2025：Proclamation No. 1006, s. 2025；证据状态 official_original_verified；[官方定位](https://lawphil.net/executive/proc/proc2025/pdf/proc_1006_2025.pdf)。
-- PH-PROC-1189-2026：Proclamation No. 1189, s. 2026；证据状态 official_body_verified；[官方定位](https://lawphil.net/executive/proc/proc2026/proc_1189_2026.html)。
-- PH-PROC-1264-2026：Proclamation No. 1264, s. 2026；证据状态 official_body_verified；[官方定位](https://lawphil.net/executive/proc/proc2026/proc_1264_2026.html)。
+- PH-PROC-1006-2025：Proclamation No. 1006, s. 2025；法律文本镜像 `legal_text_mirror_cross_reference`；[Lawphil 镜像](https://lawphil.net/executive/proc/proc2025/pdf/proc_1006_2025.pdf)。
+- PH-PROC-1189-2026：Proclamation No. 1189, s. 2026；法律文本镜像 `legal_text_mirror_cross_reference`；[Lawphil 镜像](https://lawphil.net/executive/proc/proc2026/proc_1189_2026.html)。
+- PH-PROC-1264-2026：Proclamation No. 1264, s. 2026；法律文本镜像 `legal_text_mirror_cross_reference`；[Lawphil 镜像](https://lawphil.net/executive/proc/proc2026/proc_1264_2026.html)。
+- PH-PCO-PROC-1006-2025：PCO/PIA 官方发布页 `official_pco_release_verified`；[PCO/PIA](https://pia.gov.ph/news/pbbm-issues-proclamation-declaring-regular-holidays-special-non-working-days-for-2026/)。注意：该片正文可能含“2025”年份笔误，须以 Official Gazette 签署原件为准。
+- PH-PCO-PROC-1189-2026：PCO/PIA 官方发布页 `official_pco_release_verified`；[PCO/PIA](https://pia.gov.ph/news/proclamation-no-1189-s-2026-declaring-friday-20-march-2026-a-regular-holiday-throughout-the-country-in-observance-of-eidl-fitr-feast-of-ramadhan/)。
+- PH-PCO-PROC-1264-2026：PCO/PIA 官方发布页 `official_pco_release_verified`；[PCO/PIA](https://pia.gov.ph/news/proclamation-no-1264-s-2026/)。
 
 ## 日期清单
 
@@ -46,3 +49,11 @@
 ## 复核状态
 
 本候选由 AI 依据上述官方资料整理，未完成人工双人复核，也未接入生产。缺少原件或适用范围仍需确认的部分保持 pending。
+
+## 证据升级（2026-09-12）
+
+- Proclamation 1006/1189/1264 已补 Presidential Communications Office（PCO / Philippine Information Agency）具体官方页面，证据状态 official_pco_release_verified；事件来源引用已由 Official Gazette 通用目录页改为上述 PCO 页面。
+- Official Gazette 通用目录页引用已移除。
+- Official Gazette 签署原件（signed original / gazette permalink）仍为 original/gazette pending：本机访问返回 403，未取得原件；不代表官方依据缺失。
+- Lawphil 保留为法律文本镜像/交叉来源（legal_text_mirror_cross_reference），不再标为 official_original_verified。
+- 事实未变：source-aware calendar:diff 显示 fact 0 变化、evidence-reference 21 项变化、source-document 3 新增/3 移除；晋级后 diff=0。

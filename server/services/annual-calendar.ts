@@ -16,7 +16,7 @@ const warnings: Record<string, string> = {
   "ID-2026": "年度公告 17 个全国假日、8 个集体休假日期；企业执行条件不同。",
   "TH-2026": "23 条参考事项，全国主依据仍待核验；政府机关、金融机构、地区和企业适用范围不得混用。",
   "MY-2026": "联邦表及已核查追加日期；州别例外和替代休假未全部展开，不是全州完整日历。",
-  "PH-2026": "年度及后续公告参考（已补 Official Gazette 官方定位，签署原件待取；Lawphil 为法律文本镜像）；特别工作日不是休假。",
+  "PH-2026": "年度及后续公告参考（已补 PCO/PIA 官方页面，Official Gazette 签署原件待取；Lawphil 为法律文本镜像）；特别工作日不是休假。",
   "VN-2026": "参考政府说明；公职安排与企业方案不同，劳动法正式全文核验仍待补齐。",
   "MY-2027": "马来西亚 2027 联邦与州别公共假日；替代休假规则须逐项核对，不等于港口停工。",
 }
@@ -30,7 +30,7 @@ const countries: AnnualCountry[] = ["ID", "TH", "MY", "PH", "VN"]
 // Years selectable in the existing /calendar page.
 const supportedYears = [2026, 2027]
 
-// Lightweight hints for country-years without a formal snapshot (2017 not imported yet).
+// Lightweight hints for country-years without a formal snapshot (2027 not imported yet).
 const status2027: Record<AnnualCountry, { status: AnnualCountryStatus, detailZh: string }> = {
   TH: { status: "sector_evidence_only", detailZh: "仅泰国央行（BOT）公告 No. 37/2569 金融机构范围证据；未取得全国政府机关主依据。" },
   ID: { status: "not_published", detailZh: "截至 2026-09-12 未找到 2027 官方年度公告。" },
