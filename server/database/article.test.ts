@@ -4,7 +4,7 @@ import { join } from "node:path"
 import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
-import type { ArticleBlock, ArticleVersion } from "@shared/article"
+import { type ArticleBlock, type ArticleVersion, canonicalizeArticleUrl } from "@shared/article"
 import { computeArticleContentHash } from "../services/article-content-hash"
 import { ArticleRepository } from "./article"
 import { ShippingRepository, initShippingTables } from "./shipping"
@@ -174,6 +174,30 @@ describe("article content migration and repository", () => {
     expect((native.prepare("SELECT COUNT(*) AS c FROM article_versions").get() as { c: number }).c).toBe(0)
     expect((native.prepare("SELECT COUNT(*) AS c FROM article_blocks").get() as { c: number }).c).toBe(0)
     native.close()
+  })
+
+  it("updates current completeness on same-hash observation while keeping the version immutable", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const repository = new ArticleRepository(database)
+    await repository.saveFetchState({ feedItemId: FEED_ITEM, sourceId: "shekou-official", originalUrl: "https://www.portshekou.com/ywgg/1", completenessStatus: "summary_only", lastAttemptAt: BASE, updatedAt: BASE })
+    await repository.saveVersionWithBlocks(version({ id: "version-a", contentHash: "hash-a", completenessStatus: "incomplete" }), blocks("Body"))
+    expect((await repository.getArticle(FEED_ITEM))?.state.completenessStatus).toBe("incomplete")
+    const complete = version({ id: "version-a2", contentHash: "hash-a", completenessStatus: "complete", createdAt: "2026-09-12T04:00:00.000Z", fetchedAt: "2026-09-12T04:00:00.000Z" })
+    expect(await repository.saveVersionWithBlocks(complete, blocks("Body"))).toEqual({ created: false, versionId: "version-a" })
+    expect((await repository.getArticle(FEED_ITEM))?.state.completenessStatus).toBe("complete")
+    const snapshot = native.prepare("SELECT completeness_status FROM article_versions WHERE id = 'version-a'").get() as { completeness_status: string }
+    expect(snapshot.completeness_status).toBe("incomplete")
+    native.close()
+  })
+
+  it("canonicalizes block links and ignores tracking-only differences", () => {
+    expect(canonicalizeArticleUrl("HTTPS://Example.com/News?utm_source=x&id=7#frag")).toBe("https://example.com/News?id=7")
+    expect(canonicalizeArticleUrl("https://example.com/a?utm_source=x&fbclid=y")).toBe("https://example.com/a")
+    expect(canonicalizeArticleUrl("/rel?gclid=1", "https://example.com/base/page")).toBe("https://example.com/rel")
+    expect(canonicalizeArticleUrl("javascript:alert(1)")).toBeNull()
+    expect(canonicalizeArticleUrl("https://user:pass@example.com/a")).toBeNull()
+    expect(canonicalizeArticleUrl("ftp://example.com/a")).toBeNull()
   })
 
   it("hashes canonical content with SHA-256 and ignores fetch time or debug metadata", () => {

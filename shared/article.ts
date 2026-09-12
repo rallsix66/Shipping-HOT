@@ -111,3 +111,33 @@ export function canonicalArticleBlocks(blocks: readonly ArticleBlock[]): string 
     }))
   return JSON.stringify(canonical)
 }
+
+const TRACKING_PARAM_PATTERN = /^(?:utm_.+|fbclid|gclid|dclid|msclkid|igshid|mc_cid|mc_eid|yclid|_hsenc|_hsmi|spm|scm|ref_src)$/i
+
+/**
+ * Canonicalizes a candidate link before it may enter block metadata: resolves
+ * against a base, drops the fragment and tracking query parameters (utm_*,
+ * fbclid, gclid, ...), lowercases the host and sorts query params. Returns a
+ * safe absolute http/https URL, or null for credentials/non-web/relative-unsafe
+ * input. Keeping this stable prevents tracking-only changes from creating a new
+ * article version.
+ */
+export function canonicalizeArticleUrl(raw: string, base?: string): string | null {
+  let url: URL
+  try {
+    url = base ? new URL(raw, base) : new URL(raw)
+  } catch {
+    return null
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return null
+  if (url.username || url.password) return null
+  if (!url.hostname) return null
+  url.hash = ""
+  url.hostname = url.hostname.toLowerCase()
+  const kept = [...url.searchParams.entries()]
+    .filter(([key]) => !TRACKING_PARAM_PATTERN.test(key))
+    .sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0)
+  url.search = ""
+  for (const [key, value] of kept) url.searchParams.append(key, value)
+  return url.toString()
+}

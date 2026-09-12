@@ -154,17 +154,19 @@ export class ArticleRepository {
     ).get(version.feedItemId) as never)
     if (!state) throw new Error("article_state_missing")
 
-    const existing = row<{ id: string, completeness_status: string }>(await this.db.prepare(
-      "SELECT id, completeness_status FROM article_versions WHERE feed_item_id = ? AND content_hash = ?",
+    const existing = row<{ id: string }>(await this.db.prepare(
+      "SELECT id FROM article_versions WHERE feed_item_id = ? AND content_hash = ?",
     ).get(version.feedItemId, version.contentHash) as never)
     if (existing?.id) {
       // Same content re-observed: no new version, but re-point current_version_id
       // (handles A → B → A), refresh success time and clear the previous error.
+      // `article_versions` stays an immutable snapshot; the mutable completeness
+      // reflects this latest successful observation.
       const result = await this.db.prepare(`
         UPDATE feed_articles
         SET current_version_id = ?, completeness_status = ?, last_success_at = ?, error_code = NULL, error_message = NULL, updated_at = ?
         WHERE feed_item_id = ?
-      `).run(existing.id, existing.completeness_status, version.fetchedAt, version.createdAt, version.feedItemId) as { changes?: number }
+      `).run(existing.id, version.completenessStatus, version.fetchedAt, version.createdAt, version.feedItemId) as { changes?: number }
       if (result?.changes !== 1) throw new Error("article_state_update_failed")
       return { created: false, versionId: existing.id }
     }
