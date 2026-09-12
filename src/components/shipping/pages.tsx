@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router"
 import { motion } from "framer-motion"
 import { type ReactNode, useEffect, useState } from "react"
+import type { ArticleBlock, ArticleCompletenessStatus } from "@shared/article"
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
 import { type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
 import type { VoyageRecord } from "@shared/voyage"
 import type { VesselSearchResponse, VesselSearchResult, VesselWatchlistItem } from "@shared/vessel-search"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
-import { type ShippingResponse, type TranslationStatusResponse, useAisLatestPosition, useLatestVoyage, useShipping, useTranslationSecret, useTranslationStatus } from "./data"
+import { type ShippingResponse, type TranslationStatusResponse, useAisLatestPosition, useFeedArticle, useLatestVoyage, useShipping, useTranslationSecret, useTranslationStatus } from "./data"
 import { FeedItemDisplayText } from "./feed-display"
 import { formatDate, formatPortMetric, formatStatus, navTone, severityTone } from "./format"
 import { AnimatedNumber, EmptyState, Marquee, ProvenanceBadge, ProviderChip, Reveal, Segmented, StatusDot } from "./ui"
@@ -1365,6 +1366,8 @@ export function FeedPage() {
                     <div className="tl-body">
                       <FeedItemDisplayText item={item} />
                       <div className="tl-chips">
+                        <Link to="/feed/$id" params={{ id: item.id }} className="chip">查看详情</Link>
+                        <a href={item.sourceUrl} target="_blank" rel="noreferrer" className="chip">打开来源</a>
                         <span className="chip">{formatStatus(item.category)}</span>
                         <ProvenanceBadge provenance={item.provenance} />
                         <StatusBadge stale={item.stale} sourceStatus={item.sourceStatus} />
@@ -1385,6 +1388,117 @@ export function FeedPage() {
                 ))}
               </div>
             )}
+      </div>
+    </ShippingShell>
+  )
+}
+
+/* ================= 资讯详情（原文阅读，仅结构化 React 渲染） ================= */
+
+const articleCompletenessCopy: Record<ArticleCompletenessStatus, { label: string, tone: string }> = {
+  complete: { label: "完整原文", tone: "text-emerald-600 dark:text-emerald-300" },
+  summary_only: { label: "仅保存有限摘录（未持久化全文）", tone: "text-amber-600 dark:text-amber-300" },
+  incomplete: { label: "正文提取不完整", tone: "text-amber-600 dark:text-amber-300" },
+  policy_disallowed: { label: "来源政策未保存正文", tone: "text-rose-600 dark:text-rose-300" },
+  authorization_required: { label: "需要授权后才能保存正文", tone: "text-rose-600 dark:text-rose-300" },
+  unsupported: { label: "当前内容格式不支持", tone: "text-rose-600 dark:text-rose-300" },
+  source_unavailable: { label: "本次无法获取或解析", tone: "text-rose-600 dark:text-rose-300" },
+}
+
+function ArticleBlockView({ block }: { block: ArticleBlock }) {
+  const href = typeof block.metadata?.href === "string" ? block.metadata.href : undefined
+  switch (block.type) {
+    case "heading": {
+      const level = Number(block.metadata?.level ?? 2)
+      if (level <= 1) return <h1 className="article-h">{block.text}</h1>
+      if (level === 2) return <h2 className="article-h">{block.text}</h2>
+      if (level === 3) return <h3 className="article-h">{block.text}</h3>
+      return <h4 className="article-h">{block.text}</h4>
+    }
+    case "list":
+      return <ul className="article-list"><li>{block.text}</li></ul>
+    case "table":
+      return <div className="article-table">{block.text.split("\n").map((row, index) => <div key={index}>{row}</div>)}</div>
+    case "caption":
+      return (
+        <p className="article-caption">
+          {block.text}
+          {href && (
+            <>
+              {" "}
+              <a href={href} target="_blank" rel="noreferrer">链接</a>
+            </>
+          )}
+        </p>
+      )
+    default:
+      return (
+        <p className="article-p">
+          {block.text}
+          {href && (
+            <>
+              {" "}
+              <a href={href} target="_blank" rel="noreferrer">链接</a>
+            </>
+          )}
+        </p>
+      )
+  }
+}
+
+export function FeedArticlePage({ id }: { id: string }) {
+  const [versionId, setVersionId] = useState<string | undefined>(undefined)
+  const { data, isLoading, isError } = useFeedArticle(id, versionId)
+  if (isLoading) return <ShippingShell><LoadingState /></ShippingShell>
+  if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
+  const item = data.feedItem
+  const article = data.article
+  const status = article?.state.completenessStatus
+  const copy = status ? articleCompletenessCopy[status] : undefined
+  const showingCurrent = !versionId || versionId === article?.currentVersion?.id
+  const blocks = article?.blocks ?? []
+  const version = article?.currentVersion
+  return (
+    <ShippingShell title={item.title}>
+      <SecHead eyebrow="资讯详情" title={item.title} description={item.summary} />
+      <div className="glass-panel article-detail">
+        <div className="tl-chips">
+          <Link to="/feed" className="chip">返回列表</Link>
+          <a href={item.sourceUrl} target="_blank" rel="noreferrer" className="chip">打开来源</a>
+          <span className="chip">{formatStatus(item.category)}</span>
+          <ProvenanceBadge provenance={item.provenance} />
+          <span className="tl-time">{item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}</span>
+        </div>
+        {copy
+          ? (
+              <p className={copy.tone}>
+                正文状态：
+                {copy.label}
+              </p>
+            )
+          : <p className="muted">正文尚未获取/未配置，以下为 Feed 摘要。</p>}
+        {article && (
+          <p className="muted">
+            {`抓取时间 ${version ? formatDate(version.fetchedAt) : "-"} · extractor ${version?.extractorVersion ?? "-"} · hash ${(version?.contentHash ?? "").slice(0, 16)}`}
+            {!showingCurrent ? " · 正在查看历史版本" : ""}
+          </p>
+        )}
+        {version && status === "source_unavailable" && (
+          <p className="text-rose-600 dark:text-rose-300">当前抓取失败，以下仍显示上一次成功版本，并非最新成功结果。</p>
+        )}
+        {blocks.length > 0
+          ? <article className="article-body">{blocks.map(block => <ArticleBlockView key={`${block.blockKey}-${block.order}`} block={block} />)}</article>
+          : <p className="article-p">{item.summary}</p>}
+        {article && article.versions.length > 0 && (
+          <div className="tl-chips">
+            <button type="button" className={`fbtn${!versionId ? " active" : ""}`} onClick={() => setVersionId(undefined)}>当前版本</button>
+            {article.versions.map(entry => (
+              <button key={entry.id} type="button" className={`fbtn${versionId === entry.id ? " active" : ""}`} onClick={() => setVersionId(entry.id)}>
+                {`${formatDate(entry.fetchedAt)} · ${entry.completenessStatus}`}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </ShippingShell>
   )

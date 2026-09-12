@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import type { FeedItemDisplay, HotItem, ShippingSnapshot } from "@shared/shipping"
+import type { ArticleBlock, ArticleState, ArticleVersion, ArticleVersionSummary } from "@shared/article"
+import type { FeedItem, FeedItemDisplay, HotItem, ShippingSnapshot } from "@shared/shipping"
 import type { CalendarCoverageStatusSummary } from "@shared/calendar"
 import type { VoyageRecord } from "@shared/voyage"
 import { myFetch } from "~/utils"
@@ -75,6 +76,27 @@ export function useShipping() {
     queryFn: () => myFetch<ShippingResponse>("/shipping"),
     staleTime: 10_000,
     refetchInterval: data => data.state.data ? data.state.data.settings.refreshInterval * 60 * 1000 : false,
+  })
+}
+
+export interface FeedArticleResponse {
+  feedItem: FeedItem
+  article: {
+    feedItemId: string
+    state: ArticleState
+    currentVersion?: ArticleVersion
+    blocks: ArticleBlock[]
+    versions: ArticleVersionSummary[]
+  } | null
+}
+
+export function useFeedArticle(id: string, versionId?: string) {
+  return useQuery({
+    queryKey: ["feed-article", id, versionId ?? null],
+    queryFn: () => myFetch<FeedArticleResponse>(`/shipping/feed/${encodeURIComponent(id)}${versionId ? `?versionId=${encodeURIComponent(versionId)}` : ""}`),
+    staleTime: 30_000,
+    enabled: Boolean(id),
+    retry: false,
   })
 }
 

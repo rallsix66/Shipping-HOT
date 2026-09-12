@@ -20,6 +20,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as VoyagesIdRouteImport } from './routes/voyages.$id'
 import { Route as VesselsIdRouteImport } from './routes/vessels.$id'
 import { Route as PortsIdRouteImport } from './routes/ports.$id'
+import { Route as FeedIdRouteImport } from './routes/feed.$id'
 
 const VoyagesRoute = VoyagesRouteImport.update({
   id: '/voyages',
@@ -76,16 +77,22 @@ const PortsIdRoute = PortsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => PortsRoute,
 } as any)
+const FeedIdRoute = FeedIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => FeedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
-  '/feed': typeof FeedRoute
+  '/feed': typeof FeedRouteWithChildren
   '/ports': typeof PortsRouteWithChildren
   '/settings': typeof SettingsRoute
   '/vessels': typeof VesselsRouteWithChildren
   '/voyages': typeof VoyagesRouteWithChildren
+  '/feed/$id': typeof FeedIdRoute
   '/ports/$id': typeof PortsIdRoute
   '/vessels/$id': typeof VesselsIdRoute
   '/voyages/$id': typeof VoyagesIdRoute
@@ -94,11 +101,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
-  '/feed': typeof FeedRoute
+  '/feed': typeof FeedRouteWithChildren
   '/ports': typeof PortsRouteWithChildren
   '/settings': typeof SettingsRoute
   '/vessels': typeof VesselsRouteWithChildren
   '/voyages': typeof VoyagesRouteWithChildren
+  '/feed/$id': typeof FeedIdRoute
   '/ports/$id': typeof PortsIdRoute
   '/vessels/$id': typeof VesselsIdRoute
   '/voyages/$id': typeof VoyagesIdRoute
@@ -108,11 +116,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
-  '/feed': typeof FeedRoute
+  '/feed': typeof FeedRouteWithChildren
   '/ports': typeof PortsRouteWithChildren
   '/settings': typeof SettingsRoute
   '/vessels': typeof VesselsRouteWithChildren
   '/voyages': typeof VoyagesRouteWithChildren
+  '/feed/$id': typeof FeedIdRoute
   '/ports/$id': typeof PortsIdRoute
   '/vessels/$id': typeof VesselsIdRoute
   '/voyages/$id': typeof VoyagesIdRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/vessels'
     | '/voyages'
+    | '/feed/$id'
     | '/ports/$id'
     | '/vessels/$id'
     | '/voyages/$id'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/vessels'
     | '/voyages'
+    | '/feed/$id'
     | '/ports/$id'
     | '/vessels/$id'
     | '/voyages/$id'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/vessels'
     | '/voyages'
+    | '/feed/$id'
     | '/ports/$id'
     | '/vessels/$id'
     | '/voyages/$id'
@@ -163,7 +175,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalendarRoute: typeof CalendarRoute
   EventsRoute: typeof EventsRoute
-  FeedRoute: typeof FeedRoute
+  FeedRoute: typeof FeedRouteWithChildren
   PortsRoute: typeof PortsRouteWithChildren
   SettingsRoute: typeof SettingsRoute
   VesselsRoute: typeof VesselsRouteWithChildren
@@ -249,8 +261,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortsIdRouteImport
       parentRoute: typeof PortsRoute
     }
+    '/feed/$id': {
+      id: '/feed/$id'
+      path: '/$id'
+      fullPath: '/feed/$id'
+      preLoaderRoute: typeof FeedIdRouteImport
+      parentRoute: typeof FeedRoute
+    }
   }
 }
+
+interface FeedRouteChildren {
+  FeedIdRoute: typeof FeedIdRoute
+}
+
+const FeedRouteChildren: FeedRouteChildren = {
+  FeedIdRoute: FeedIdRoute,
+}
+
+const FeedRouteWithChildren = FeedRoute._addFileChildren(FeedRouteChildren)
 
 interface PortsRouteChildren {
   PortsIdRoute: typeof PortsIdRoute
@@ -288,7 +317,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalendarRoute: CalendarRoute,
   EventsRoute: EventsRoute,
-  FeedRoute: FeedRoute,
+  FeedRoute: FeedRouteWithChildren,
   PortsRoute: PortsRouteWithChildren,
   SettingsRoute: SettingsRoute,
   VesselsRoute: VesselsRouteWithChildren,
