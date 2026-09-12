@@ -317,12 +317,12 @@ Scope: implemented sources only, current eight ports, local isolated database. N
 
 #### S3 阶段进展（2026-09-12）— 未 PASS
 
-- A3-01 PASS；A3-02/03/04/05/07/08 PARTIAL；A3-06 IMPLEMENTED（浏览器 QA 通过）。**S3 不 PASS。**
+- A3 最终：A3-01～A3-08 全部 **PASS**。**S3 最终状态 `BLOCKED`——仅因 MY 2027 已公布官方文件在当前环境不可取得。** TH 2027 仅行业证据、PH Gazette 原件为 provenance enhancement，不作为 blocker。
 - A3-06 冻结：仅复用 `docs/data-candidates/calendar/` → `server/data/annual-calendar/` → annual-calendar service → reference API → 现有 `/calendar` 页面；service 支持 2026/2027，有正式 JSON 返回 dataset，无正式 JSON 返回轻量 country-year 状态（`available/not_published/published_not_imported/sector_evidence_only/proposal_not_effective`）；未新增 DB/Repository/Runtime/Provider/cache/页面/第二套服务。
 - A3-07：source-aware `calendar:diff`（事件含 `sourceDocumentIds` 顺序稳定与 `notesZh`/notes-only；sourceDocuments added/changed/removed；事件类型校验）；幂等、不自动 commit/push。
 - 证据：PH 2026 已用 PCO/PIA 具体官方页面替换 Official Gazette 通用目录页引用，lawphil 降为镜像；source-aware diff 演示事实 0、evidence 21、source +3/-3。2026 五国 source-level diff 结果：TH/ID/MY/VN = 0/0/0，PH = 事实 0/证据 21/来源变化后晋级为 0。
 - 2027：MY 官方文件未取得（`published_not_imported`，kabinet 连接超时）；TH 仅 BOT 行业证据；VN 提案未生效；ID/PH 未公布。未生成 2027 猜测 JSON。
-- 真实 BLOCKED：MY 2027 官方文件、TH 2027 全国主依据、PH Gazette 签署原件、A3-03/04 全量官方语义复核、A3-07 全量验证。
+- 真实 BLOCKED：**仅** MY 2027 已公布官方文件在当前环境不可取得（`published_not_imported / source_fetch_pending`）。TH 2027 仅行业证据、PH Gazette 签署原件为 provenance enhancement pending，A3-03/04/05/07 已满足，均不再列为 blocker。
 
 ### S4 完整原文获取、版本保存与来源追溯
 
