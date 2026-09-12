@@ -4,7 +4,8 @@ import { join } from "node:path"
 import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
-import { type ArticleBlock, type ArticleVersion, computeArticleContentHash } from "@shared/article"
+import type { ArticleBlock, ArticleVersion } from "@shared/article"
+import { computeArticleContentHash } from "../services/article-content-hash"
 import { ArticleRepository } from "./article"
 import { ShippingRepository, initShippingTables } from "./shipping"
 import { readDatabaseMetadata } from "./runtime"
@@ -175,15 +176,24 @@ describe("article content migration and repository", () => {
     native.close()
   })
 
-  it("hashes canonical content without fetch time and detects real text/structure changes", () => {
+  it("hashes canonical content with SHA-256 and ignores fetch time or debug metadata", () => {
     const base = blocks("Body text")
-    expect(computeArticleContentHash(base)).toBe(computeArticleContentHash(blocks("  Body   text  ")))
-    expect(computeArticleContentHash(base)).not.toBe(computeArticleContentHash(blocks("Changed body")))
+    const hash = computeArticleContentHash(base)
+    expect(hash).toMatch(/^[0-9a-f]{64}$/)
+    expect(hash).toBe(computeArticleContentHash(blocks("  Body   text  ")))
+    expect(hash).not.toBe(computeArticleContentHash(blocks("Changed body")))
     const reordered = base.map(block => ({ ...block, order: block.order === 0 ? 5 : block.order }))
-    expect(computeArticleContentHash(base)).not.toBe(computeArticleContentHash(reordered))
-    const withMeta = [{ ...base[0], metadata: { level: 1 } }, base[1]]
-    expect(computeArticleContentHash(base)).not.toBe(computeArticleContentHash(withMeta))
+    expect(hash).not.toBe(computeArticleContentHash(reordered))
+    const retyped = base.map((block, index) => (index === 1 ? { ...block, type: "caption" as const } : block))
+    expect(hash).not.toBe(computeArticleContentHash(retyped))
+    const withSemantic = [{ ...base[0], metadata: { level: 1 } }, base[1]]
+    expect(hash).not.toBe(computeArticleContentHash(withSemantic))
+    const withDebug = base.map(block => ({
+      ...block,
+      metadata: { ...(block.metadata ?? {}), fetchedAt: "2026-09-12T00:00:00.000Z", selector: ".ad", requestId: "run-1" },
+    }))
+    expect(hash).toBe(computeArticleContentHash(withDebug))
     const withIds = base.map((block, index) => ({ ...block, id: `other-${index}` }))
-    expect(computeArticleContentHash(base)).toBe(computeArticleContentHash(withIds))
+    expect(hash).toBe(computeArticleContentHash(withIds))
   })
 })

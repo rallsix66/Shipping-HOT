@@ -62,6 +62,19 @@ export function normalizeArticleBlockText(text: string): string {
   return text.replace(/\s+/g, " ").trim()
 }
 
+/**
+ * Only these metadata fields may influence the content hash, per block type.
+ * They must describe body semantics (structure, safe canonical links). Debug,
+ * fetch-run, policy or request/response metadata must never be added here.
+ */
+export const SEMANTIC_BLOCK_METADATA_KEYS: Readonly<Record<ArticleBlockType, readonly string[]>> = {
+  heading: ["level"],
+  paragraph: ["href"],
+  list: ["ordered"],
+  table: ["header", "columns"],
+  caption: ["href"],
+}
+
 function stableJson(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "null"
   if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`
@@ -69,32 +82,32 @@ function stableJson(value: unknown): string {
   return `{${Object.keys(record).sort().map(key => `${JSON.stringify(key)}:${stableJson(record[key])}`).join(",")}}`
 }
 
-function fnv1a(input: string, seed: number): number {
-  let hash = seed >>> 0
-  for (let index = 0; index < input.length; index++) {
-    hash ^= input.charCodeAt(index)
-    hash = Math.imul(hash, 0x01000193) >>> 0
+/** Projection of block metadata down to the hash-relevant semantic allowlist. */
+export function semanticBlockMetadata(block: ArticleBlock): string | null {
+  const allowed = SEMANTIC_BLOCK_METADATA_KEYS[block.type] ?? []
+  const source = block.metadata
+  if (!source || allowed.length === 0) return null
+  const picked: Record<string, unknown> = {}
+  for (const key of allowed) {
+    if (Object.prototype.hasOwnProperty.call(source, key) && source[key] !== undefined) picked[key] = source[key]
   }
-  return hash
+  return Object.keys(picked).length > 0 ? stableJson(picked) : null
 }
 
 /**
- * Canonical content hash of cleaned/extracted blocks. Inputs are block type,
- * order, whitespace-normalized text and semantic metadata only — never
- * `fetchedAt`, policy or random ids. Identical extracted content hashes the
- * same (no false version); a real text/structure change hashes differently.
+ * Canonical, deterministic serialization of extracted blocks used as the
+ * SHA-256 input. Contains block type, order, whitespace-normalized text and the
+ * semantic metadata allowlist only — never `fetchedAt`, policy, run/debug ids or
+ * raw HTML. The server computes the actual SHA-256 from this string.
  */
-export function computeArticleContentHash(blocks: readonly ArticleBlock[]): string {
+export function canonicalArticleBlocks(blocks: readonly ArticleBlock[]): string {
   const canonical = [...blocks]
     .sort((a, b) => a.order - b.order)
     .map(block => ({
       type: block.type,
       order: block.order,
       text: normalizeArticleBlockText(block.text),
-      metadata: block.metadata ? stableJson(block.metadata) : null,
+      metadata: semanticBlockMetadata(block),
     }))
-  const serialized = JSON.stringify(canonical)
-  const low = fnv1a(serialized, 0x811C9DC5)
-  const high = fnv1a(serialized, 0x9E3779B9)
-  return `${low.toString(16).padStart(8, "0")}${high.toString(16).padStart(8, "0")}`
+  return JSON.stringify(canonical)
 }
