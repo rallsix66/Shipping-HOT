@@ -1413,12 +1413,33 @@ function ArticleBlockView({ block }: { block: ArticleBlock }) {
       if (level <= 1) return <h1 className="article-h">{block.text}</h1>
       if (level === 2) return <h2 className="article-h">{block.text}</h2>
       if (level === 3) return <h3 className="article-h">{block.text}</h3>
-      return <h4 className="article-h">{block.text}</h4>
+      if (level === 4) return <h4 className="article-h">{block.text}</h4>
+      if (level === 5) return <h5 className="article-h">{block.text}</h5>
+      return <h6 className="article-h">{block.text}</h6>
     }
-    case "list":
-      return <ul className="article-list"><li>{block.text}</li></ul>
-    case "table":
-      return <div className="article-table">{block.text.split("\n").map((row, index) => <div key={index}>{row}</div>)}</div>
+    case "list": {
+      const items = block.text.split(" • ").filter(Boolean)
+      const ordered = block.metadata?.ordered === true
+      if (ordered) return <ol className="article-list">{items.map((entry, index) => <li key={index}>{entry}</li>)}</ol>
+      return <ul className="article-list">{items.map((entry, index) => <li key={index}>{entry}</li>)}</ul>
+    }
+    case "table": {
+      const rows = block.text.split("\n").filter(Boolean).map(row => row.split(" | "))
+      const hasHeader = block.metadata?.header === true
+      return (
+        <table className="article-table">
+          <tbody>
+            {rows.map((cells, rowIndex) => (
+              <tr key={rowIndex}>
+                {cells.map((cell, cellIndex) => hasHeader && rowIndex === 0
+                  ? <th key={cellIndex}>{cell}</th>
+                  : <td key={cellIndex}>{cell}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )
+    }
     case "caption":
       return (
         <p className="article-caption">
@@ -1453,9 +1474,9 @@ export function FeedArticlePage({ id }: { id: string }) {
   if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
   const item = data.feedItem
   const article = data.article
-  const status = article?.state.completenessStatus
-  const copy = status ? articleCompletenessCopy[status] : undefined
-  const showingCurrent = !versionId || versionId === article?.currentVersion?.id
+  const isCurrent = !versionId || versionId === article?.state.currentVersionId
+  const displayedStatus = article ? (isCurrent ? article.state.completenessStatus : article.currentVersion?.completenessStatus) : undefined
+  const copy = displayedStatus ? articleCompletenessCopy[displayedStatus] : undefined
   const blocks = article?.blocks ?? []
   const version = article?.currentVersion
   return (
@@ -1480,10 +1501,10 @@ export function FeedArticlePage({ id }: { id: string }) {
         {article && (
           <p className="muted">
             {`抓取时间 ${version ? formatDate(version.fetchedAt) : "-"} · extractor ${version?.extractorVersion ?? "-"} · hash ${(version?.contentHash ?? "").slice(0, 16)}`}
-            {!showingCurrent ? " · 正在查看历史版本" : ""}
+            {!isCurrent ? " · 正在查看历史版本" : ""}
           </p>
         )}
-        {version && status === "source_unavailable" && (
+        {isCurrent && article?.state.completenessStatus === "source_unavailable" && version && (
           <p className="text-rose-600 dark:text-rose-300">当前抓取失败，以下仍显示上一次成功版本，并非最新成功结果。</p>
         )}
         {blocks.length > 0
@@ -1492,7 +1513,7 @@ export function FeedArticlePage({ id }: { id: string }) {
         {article && article.versions.length > 0 && (
           <div className="tl-chips">
             <button type="button" className={`fbtn${!versionId ? " active" : ""}`} onClick={() => setVersionId(undefined)}>当前版本</button>
-            {article.versions.map(entry => (
+            {article.versions.filter(entry => entry.id !== article.state.currentVersionId).map(entry => (
               <button key={entry.id} type="button" className={`fbtn${versionId === entry.id ? " active" : ""}`} onClick={() => setVersionId(entry.id)}>
                 {`${formatDate(entry.fetchedAt)} · ${entry.completenessStatus}`}
               </button>
