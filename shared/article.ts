@@ -57,6 +57,48 @@ export interface ArticleDetail {
   blocks: ArticleBlock[]
 }
 
+export type ArticlePersistencePolicy = "full" | "excerpt_only" | "disallowed"
+export type ArticlePolicyStatus = "allowed" | "excerpt_only" | "disallowed" | "unconfigured"
+
+/**
+ * Optional article-full-text policy attached to an existing Feed / official
+ * weather source definition. There is no separate source registry: the thin
+ * resolver merges `shippingFeedSources` and `officialWeatherAlertSources`.
+ */
+export interface ArticleSourcePolicy {
+  sourceId: string
+  status: ArticlePolicyStatus
+  fetchAllowed: boolean
+  persistence: ArticlePersistencePolicy
+  allowedHosts: string[]
+  allowedContentTypes: string[]
+  allowHttp?: boolean
+  policyCheckedAt?: string | null
+  selectors?: { container?: string, title?: string, remove?: string[] }
+  completeness?: { minParagraphs?: number, minCharacters?: number, requireHeading?: boolean }
+  notes?: string
+}
+
+/** Policy as authored on a source definition; the resolver fills in `sourceId`. */
+export type ArticleSourcePolicyConfig = Omit<ArticleSourcePolicy, "sourceId">
+
+export interface ArticleVersionSummary {
+  id: string
+  contentHash: string
+  fetchedAt: string
+  createdAt: string
+  extractorVersion: string
+  completenessStatus: ArticleCompletenessStatus
+}
+
+export interface FeedArticleDetail {
+  feedItemId: string
+  state: ArticleState
+  currentVersion?: ArticleVersion
+  blocks: ArticleBlock[]
+  versions: ArticleVersionSummary[]
+}
+
 /** Whitespace-normalized block text used for content hashing. */
 export function normalizeArticleBlockText(text: string): string {
   return text.replace(/\s+/g, " ").trim()

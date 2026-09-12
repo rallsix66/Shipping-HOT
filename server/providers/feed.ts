@@ -2,6 +2,7 @@ import { createHash } from "node:crypto"
 import { XMLParser } from "fast-xml-parser"
 import { load } from "cheerio"
 import { type DataProvenance, type FeedCategory, type FeedFreshnessClass, type FeedItem, type Port, type SourceType, isMockProvenance } from "@shared/shipping"
+import type { ArticleSourcePolicyConfig } from "@shared/article"
 import { mockFeedItems } from "@shared/shipping-fixtures"
 import { applyFeedFreshnessPolicy } from "@shared/shipping-rules"
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
@@ -32,6 +33,7 @@ export interface ShippingFeedSource {
   freshnessPolicy?: FeedFreshnessClass
   status?: "enabled" | "registered_parser_pending" | "deferred" | "failed_live"
   description?: string
+  articlePolicy?: ArticleSourcePolicyConfig
 }
 
 export const shippingFeedSources: ShippingFeedSource[] = [
@@ -45,6 +47,15 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     category: "shipping_news",
     freshnessPolicy: "ordinary",
     enabled: true,
+    articlePolicy: {
+      status: "disallowed",
+      fetchAllowed: false,
+      persistence: "disallowed",
+      allowedHosts: ["theloadstar.com"],
+      allowedContentTypes: ["text/html"],
+      policyCheckedAt: "2026-09-12",
+      notes: "Third-party news: link plus limited Feed excerpt only; full-text fetch/persistence is not permitted.",
+    },
   },
   {
     id: "maritime-executive",
@@ -72,6 +83,17 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     enabled: true,
     status: "enabled",
     description: "Official Shekou Port operational announcements; company news is excluded.",
+    articlePolicy: {
+      status: "allowed",
+      fetchAllowed: true,
+      persistence: "full",
+      allowedHosts: ["www.portshekou.com"],
+      allowedContentTypes: ["text/html"],
+      policyCheckedAt: "2026-09-12",
+      selectors: { container: ".article, .content, .news-content, #content, article", remove: [".share", ".related", ".recommend", ".footer", "script", "style", "nav"] },
+      completeness: { minParagraphs: 2, minCharacters: 120 },
+      notes: "Official port-authority operational notice; full text allowed within the authority's own announcement pages.",
+    },
   },
   {
     id: "laem-chabang-official",
