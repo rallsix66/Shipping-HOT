@@ -30,10 +30,7 @@ for (const country of readdirSync(candidateRoot).sort()) {
 
     const runtimePath = join(runtimeRoot, `${country}-${yearDir}.json`)
     const runtime = existsSync(runtimePath) ? parseAnnualFile(runtimePath) : undefined
-    const diff = diffAnnualDatasets(
-      candidate.events ?? [],
-      runtime?.events ?? [],
-    )
+    const diff = diffAnnualDatasets(candidate, runtime ?? {})
     const label = `${country}-${yearDir}${runtime ? "" : " (no runtime snapshot)"}`
     reports.push(formatAnnualDiff(label, diff, issues))
   }

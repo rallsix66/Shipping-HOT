@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs"
 import type { AnnualEvent, AnnualSource } from "@shared/annual-calendar"
 
 /**
- * Deterministic validator and diff for the annual reference calendar.
+ * Deterministic, source-aware validator and diff for the annual reference calendar.
  * Candidate work files live under `docs/data-candidates/calendar/<COUNTRY>/<YEAR>/`;
  * runtime snapshots live under `server/data/annual-calendar/<COUNTRY>-<YEAR>.json`.
  * This module only reads files and returns a report; it never writes, commits or pushes.
@@ -14,14 +14,28 @@ export interface AnnualFile {
   events?: AnnualEvent[]
 }
 
+export interface AnnualSourceDiff {
+  added: string[]
+  changed: string[]
+  removed: string[]
+}
+
 export interface AnnualDiffResult {
+  /** Fact-level or notes-level event changes (ids). */
   added: string[]
   changed: string[]
   removed: string[]
   unchanged: number
+  /** Events whose evidence references (`sourceDocumentIds`) changed (ids). */
+  evidenceChanged: string[]
+  /** Events whose only difference is `notesZh` (ids, subset of `changed`). */
+  notesOnly: string[]
+  /** Source-document-level diff. */
+  sources: AnnualSourceDiff
 }
 
-const COMPARED_FIELDS: Array<keyof AnnualEvent> = [
+// Fact fields: a change here changes the recorded fact.
+const FACT_FIELDS: Array<keyof AnnualEvent> = [
   "countryCode",
   "date",
   "nameZh",
@@ -33,6 +47,8 @@ const COMPARED_FIELDS: Array<keyof AnnualEvent> = [
   "subjectAndConditionsZh",
   "verificationStatus",
 ]
+// Provenance-inspection fields for source documents (order-stable collections are sorted).
+const SOURCE_FIELDS = ["url", "officialInstitutions", "documentNumbers", "publishedAt", "evidenceStatus", "relationshipToAnnualCalendar"] as const
 
 function validDate(date: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false
@@ -80,25 +96,79 @@ export function validateAnnualDataset(file: AnnualFile, expectedCountry?: string
   return issues
 }
 
-function comparable(event: AnnualEvent): string {
-  return JSON.stringify(COMPARED_FIELDS.map(field => event[field] ?? null))
+function factSignature(event: AnnualEvent): string {
+  return JSON.stringify(FACT_FIELDS.map(field => event[field] ?? null))
 }
 
-/** Stable-ID diff between a candidate dataset and the current runtime dataset. */
-export function diffAnnualDatasets(candidate: AnnualEvent[], runtime: AnnualEvent[]): AnnualDiffResult {
-  const runtimeById = new Map(runtime.map(event => [event.id, event]))
+/** Order-stable evidence signature, so reordering `sourceDocumentIds` is not a diff. */
+function evidenceSignature(event: AnnualEvent): string {
+  return JSON.stringify([...(event.sourceDocumentIds ?? [])].sort())
+}
+
+function notesSignature(event: AnnualEvent): string {
+  return String(event.notesZh ?? "")
+}
+
+function sourceSignature(source: AnnualSource): string {
+  const record = source as unknown as Record<string, unknown>
+  return JSON.stringify(SOURCE_FIELDS.map((field) => {
+    const value = record[field]
+    return Array.isArray(value) ? [...value].sort() : value ?? null
+  }))
+}
+
+/** Stable-ID, source-aware diff between a candidate dataset and the current runtime dataset. */
+export function diffAnnualDatasets(
+  candidate: { events?: AnnualEvent[], sourceDocuments?: AnnualSource[] },
+  runtime: { events?: AnnualEvent[], sourceDocuments?: AnnualSource[] },
+): AnnualDiffResult {
+  const candidateEvents = candidate.events ?? []
+  const candidateSources = candidate.sourceDocuments ?? []
+  const runtimeById = new Map((runtime.events ?? []).map(event => [event.id, event]))
   const remaining = new Set(runtimeById.keys())
+
   const added: string[] = []
   const changed: string[] = []
+  const evidenceChanged: string[] = []
+  const notesOnly: string[] = []
   let unchanged = 0
-  for (const event of candidate) {
+
+  for (const event of candidateEvents) {
     remaining.delete(event.id)
     const current = runtimeById.get(event.id)
-    if (!current) added.push(event.id)
-    else if (comparable(current) !== comparable(event)) changed.push(event.id)
-    else unchanged += 1
+    if (!current) {
+      added.push(event.id)
+      continue
+    }
+    const factChanged = factSignature(current) !== factSignature(event)
+    const evidence = evidenceSignature(current) !== evidenceSignature(event)
+    const notes = notesSignature(current) !== notesSignature(event)
+    if (evidence) evidenceChanged.push(event.id)
+    if (factChanged || notes) changed.push(event.id)
+    if (!factChanged && notes && !evidence) notesOnly.push(event.id)
+    if (!factChanged && !notes && !evidence) unchanged += 1
   }
-  return { added: added.sort(), changed: changed.sort(), removed: [...remaining].sort(), unchanged }
+
+  const runtimeSources = new Map((runtime.sourceDocuments ?? []).map(source => [source.id, source]))
+  const sourceAdded: string[] = []
+  const sourceChanged: string[] = []
+  const sourceRemaining = new Set(runtimeSources.keys())
+  for (const source of candidateSources) {
+    sourceRemaining.delete(source.id)
+    const current = runtimeSources.get(source.id)
+    if (!current) sourceAdded.push(source.id)
+    else if (sourceSignature(current) !== sourceSignature(source)) sourceChanged.push(source.id)
+  }
+
+  return {
+    added: added.sort(),
+    changed: changed.sort(),
+    removed: [...remaining].sort(),
+    unchanged,
+    evidenceChanged: evidenceChanged.sort(),
+    notesOnly: notesOnly.sort(),
+    sources: { added: sourceAdded.sort(), changed: sourceChanged.sort(), removed: [...sourceRemaining].sort() },
+  }
 }
 
 export function parseAnnualFile(path: string): AnnualFile {
@@ -109,11 +179,17 @@ export function formatAnnualDiff(label: string, result: AnnualDiffResult, issues
   const lines = [
     `# ${label}`,
     `valid=${issues.length === 0}`,
-    `added=${result.added.length} changed=${result.changed.length} removed=${result.removed.length} unchanged=${result.unchanged}`,
+    `events added=${result.added.length} changed=${result.changed.length} removed=${result.removed.length} unchanged=${result.unchanged}`,
+    `evidence-changed=${result.evidenceChanged.length} notes-only=${result.notesOnly.length}`,
+    `sources added=${result.sources.added.length} changed=${result.sources.changed.length} removed=${result.sources.removed.length}`,
   ]
   for (const issue of issues) lines.push(`issue: ${issue}`)
   for (const id of result.added) lines.push(`+ ${id}`)
   for (const id of result.changed) lines.push(`~ ${id}`)
   for (const id of result.removed) lines.push(`- ${id}`)
+  for (const id of result.evidenceChanged) lines.push(`~evidence ${id}`)
+  for (const id of result.sources.added) lines.push(`+source ${id}`)
+  for (const id of result.sources.changed) lines.push(`~source ${id}`)
+  for (const id of result.sources.removed) lines.push(`-source ${id}`)
   return lines.join("\n")
 }
