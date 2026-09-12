@@ -148,10 +148,26 @@ export class ArticleRepository {
    * duplicate versions or blocks.
    */
   async saveVersionWithBlocks(version: ArticleVersion, blocks: readonly ArticleBlock[]): Promise<{ created: boolean, versionId: string }> {
-    const existing = row<{ id: string }>(await this.db.prepare(
-      "SELECT id FROM article_versions WHERE feed_item_id = ? AND content_hash = ?",
-    ).get(version.feedItemId, version.contentHash))
-    if (existing?.id) return { created: false, versionId: existing.id }
+    // Fail closed when there is no article state row: never write an orphan version.
+    const state = row<StateRow>(await this.db.prepare(
+      "SELECT * FROM feed_articles WHERE feed_item_id = ?",
+    ).get(version.feedItemId) as never)
+    if (!state) throw new Error("article_state_missing")
+
+    const existing = row<{ id: string, completeness_status: string }>(await this.db.prepare(
+      "SELECT id, completeness_status FROM article_versions WHERE feed_item_id = ? AND content_hash = ?",
+    ).get(version.feedItemId, version.contentHash) as never)
+    if (existing?.id) {
+      // Same content re-observed: no new version, but re-point current_version_id
+      // (handles A → B → A), refresh success time and clear the previous error.
+      const result = await this.db.prepare(`
+        UPDATE feed_articles
+        SET current_version_id = ?, completeness_status = ?, last_success_at = ?, error_code = NULL, error_message = NULL, updated_at = ?
+        WHERE feed_item_id = ?
+      `).run(existing.id, existing.completeness_status, version.fetchedAt, version.createdAt, version.feedItemId) as { changes?: number }
+      if (result?.changes !== 1) throw new Error("article_state_update_failed")
+      return { created: false, versionId: existing.id }
+    }
 
     await this.db.prepare("BEGIN").run()
     try {
@@ -190,11 +206,12 @@ export class ArticleRepository {
           block.metadata ? JSON.stringify(block.metadata) : null,
         )
       }
-      await this.db.prepare(`
+      const updated = await this.db.prepare(`
         UPDATE feed_articles
         SET current_version_id = ?, completeness_status = ?, last_success_at = ?, error_code = NULL, error_message = NULL, updated_at = ?
         WHERE feed_item_id = ?
-      `).run(version.id, version.completenessStatus, version.fetchedAt, version.createdAt, version.feedItemId)
+      `).run(version.id, version.completenessStatus, version.fetchedAt, version.createdAt, version.feedItemId) as { changes?: number }
+      if (updated?.changes !== 1) throw new Error("article_state_update_failed")
       await this.db.prepare("COMMIT").run()
     } catch (error) {
       await this.db.prepare("ROLLBACK").run()

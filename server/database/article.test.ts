@@ -4,7 +4,7 @@ import { join } from "node:path"
 import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
-import type { ArticleBlock, ArticleVersion } from "@shared/article"
+import { type ArticleBlock, type ArticleVersion, computeArticleContentHash } from "@shared/article"
 import { ArticleRepository } from "./article"
 import { ShippingRepository, initShippingTables } from "./shipping"
 import { readDatabaseMetadata } from "./runtime"
@@ -139,5 +139,51 @@ describe("article content migration and repository", () => {
         // Windows may briefly retain a handle; the OS temp directory is disposable.
       }
     }
+  })
+
+  it("re-points current_version_id on A → B → A without creating a duplicate version", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const repository = new ArticleRepository(database)
+    await repository.saveFetchState({ feedItemId: FEED_ITEM, sourceId: "shekou-official", originalUrl: "https://www.portshekou.com/ywgg/1", completenessStatus: "summary_only", lastAttemptAt: BASE, updatedAt: BASE })
+
+    const a = version({ id: "version-a", contentHash: "hash-a" })
+    const b = version({ id: "version-b", contentHash: "hash-b", createdAt: "2026-09-12T02:00:00.000Z", fetchedAt: "2026-09-12T02:00:00.000Z" })
+    expect(await repository.saveVersionWithBlocks(a, blocks("A body"))).toEqual({ created: true, versionId: "version-a" })
+    expect(await repository.saveVersionWithBlocks(b, blocks("B body"))).toEqual({ created: true, versionId: "version-b" })
+    expect((await repository.getArticle(FEED_ITEM))?.currentVersion?.id).toBe("version-b")
+
+    const revisited = version({ id: "version-a2", contentHash: "hash-a", createdAt: "2026-09-12T03:00:00.000Z", fetchedAt: "2026-09-12T03:00:00.000Z" })
+    expect(await repository.saveVersionWithBlocks(revisited, blocks("A body"))).toEqual({ created: false, versionId: "version-a" })
+    const detail = await repository.getArticle(FEED_ITEM)
+    expect(detail?.currentVersion?.id).toBe("version-a")
+    expect(await repository.listVersions(FEED_ITEM)).toHaveLength(2)
+    expect((await repository.listVersionBlocks("version-b")).map(block => block.text)).toEqual(["Title", "B body"])
+    const blockCount = native.prepare("SELECT COUNT(*) AS c FROM article_blocks").get() as { c: number }
+    expect(blockCount.c).toBe(4)
+    expect((await repository.getArticle(FEED_ITEM))?.state.errorCode ?? null).toBeNull()
+    native.close()
+  })
+
+  it("fails closed with no orphan version when the article state row is missing", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const repository = new ArticleRepository(database)
+    await expect(repository.saveVersionWithBlocks(version(), blocks())).rejects.toThrow("article_state_missing")
+    expect((native.prepare("SELECT COUNT(*) AS c FROM article_versions").get() as { c: number }).c).toBe(0)
+    expect((native.prepare("SELECT COUNT(*) AS c FROM article_blocks").get() as { c: number }).c).toBe(0)
+    native.close()
+  })
+
+  it("hashes canonical content without fetch time and detects real text/structure changes", () => {
+    const base = blocks("Body text")
+    expect(computeArticleContentHash(base)).toBe(computeArticleContentHash(blocks("  Body   text  ")))
+    expect(computeArticleContentHash(base)).not.toBe(computeArticleContentHash(blocks("Changed body")))
+    const reordered = base.map(block => ({ ...block, order: block.order === 0 ? 5 : block.order }))
+    expect(computeArticleContentHash(base)).not.toBe(computeArticleContentHash(reordered))
+    const withMeta = [{ ...base[0], metadata: { level: 1 } }, base[1]]
+    expect(computeArticleContentHash(base)).not.toBe(computeArticleContentHash(withMeta))
+    const withIds = base.map((block, index) => ({ ...block, id: `other-${index}` }))
+    expect(computeArticleContentHash(base)).toBe(computeArticleContentHash(withIds))
   })
 })
