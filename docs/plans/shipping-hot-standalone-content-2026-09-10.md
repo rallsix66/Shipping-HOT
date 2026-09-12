@@ -343,6 +343,13 @@ Scope: implemented sources only, current eight ports, local isolated database. N
 
 阶段提交 `feat: S4 add article versions and source traceability`。
 
+#### S4 实施进展（2026-09-12）— 进行中
+
+- **已实现（schema 变更已获批准）**：migration `013-article-content` 增加且仅增加三表 `feed_articles` / `article_versions` / `article_blocks`（schema v12→v13），已在 `server/database/runtime.ts` 注册；`shared/article.ts` DTO；`server/database/article.ts` Repository（fetch 状态 upsert、按 `(feed_item_id, content_hash)` 去重的不可变版本+块原子写入、读取当前版本/块、列版本）。
+- **测试（`server/database/article.test.ts`，3 项通过）**：全新空库→v13 且三表存在、重复初始化幂等；v12-equivalent（移除 v13 表与迁移行）→ 重新升级到 v13 且既有设置数据不丢；同正文重复处理不新增版本/块、块顺序跨重启稳定、改一段产生新版本且旧版本/块仍可读。
+- **未实现（后续延续）**：`shippingFeedSources` 策略字段扩展（访问/再分发/content-type/host/核查时间）；出站抓取安全 `article-fetch-security`；正文提取器；`article-service`；`article-fetch` RuntimeJob（复用唯一 BackgroundRuntime）；provider-free 详情 API；Feed 详情阅读 UI；A4 实际样本。
+- **边界**：未新建第二套 Feed/Provider/Secret/Usage/Runtime/阅读；**未改翻译执行链**（留待 S5）；The Loadstar 仅允许链接/有限摘录，不得抓取/持久化其全文。
+
 ### S5 全文分块翻译、双语阅读与费用控制
 
 涉及：`server/services/translation-service.ts`、translation 相关服务、`server/database/translation.ts`、`server/runtime/translation-sync-job.ts`、现有 DeepSeek Provider/用量/密钥边界、`server/services/feed-translation-display.ts`、Feed API 和 `src/components/shipping/` 阅读组件。
