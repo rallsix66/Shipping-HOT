@@ -24,7 +24,7 @@ function transportReturning(overrides: Partial<{ status: number, headers: Record
 describe("article source policy resolver", () => {
   it("fails closed for unconfigured sources and marks The Loadstar as disallowed", () => {
     expect(resolveArticleSourcePolicy("the-loadstar")).toMatchObject({ status: "disallowed", fetchAllowed: false, persistence: "disallowed" })
-    expect(resolveArticleSourcePolicy("shekou-official")).toMatchObject({ status: "allowed", fetchAllowed: true, persistence: "full" })
+    expect(resolveArticleSourcePolicy("shekou-official")).toMatchObject({ status: "excerpt_only", fetchAllowed: true, persistence: "excerpt_only" })
     expect(resolveArticleSourcePolicy("does-not-exist")).toMatchObject({ status: "unconfigured", fetchAllowed: false })
   })
 })
@@ -104,6 +104,23 @@ describe("secureFetchArticle", () => {
       transport: redirectTo("https://news.example.com/a"),
       maxRedirects: 2,
     })).resolves.toMatchObject({ ok: false, code: "redirect_limit" })
+  })
+
+  it("enforces allowedContentTypes on the final response", async () => {
+    const ok = await secureFetchArticle("https://news.example.com/a", { policy: policy(), lookup: publicLookup, transport: transportReturning({ headers: { "content-type": "text/html; charset=utf-8" } }) })
+    expect(ok).toMatchObject({ ok: true, contentType: "text/html; charset=utf-8" })
+    for (const type of ["application/json", "application/pdf", "image/png", "text/plain"]) {
+      await expect(secureFetchArticle("https://news.example.com/a", {
+        policy: policy(),
+        lookup: publicLookup,
+        transport: transportReturning({ headers: { "content-type": type } }),
+      })).resolves.toMatchObject({ ok: false, code: "content_type_unsupported" })
+    }
+    await expect(secureFetchArticle("https://news.example.com/a", {
+      policy: policy(),
+      lookup: publicLookup,
+      transport: transportReturning({ headers: {} }),
+    })).resolves.toMatchObject({ ok: false, code: "content_type_missing" })
   })
 
   it("surfaces oversized body and timeout transport failures", async () => {

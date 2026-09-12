@@ -245,7 +245,12 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
       continue
     }
     if (response.status >= 400) return failure("http_error", `Article request failed with status ${response.status}`)
-    return { ok: true, status: response.status, finalUrl: current.toString(), contentType: headerValue(response.headers, "content-type"), body: response.body, hops: hop }
+    const contentType = headerValue(response.headers, "content-type")
+    const mime = contentType?.split(";")[0]?.trim().toLowerCase()
+    const allowed = options.policy.allowedContentTypes.map(type => type.toLowerCase())
+    if (!mime) return failure("content_type_missing", "Response had no Content-Type header")
+    if (!allowed.includes(mime)) return failure("content_type_unsupported", `Unsupported content type: ${mime}`)
+    return { ok: true, status: response.status, finalUrl: current.toString(), contentType, body: response.body, hops: hop }
   }
   return failure("redirect_limit", "Too many redirects")
 }

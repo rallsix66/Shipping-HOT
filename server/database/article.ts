@@ -242,6 +242,13 @@ export class ArticleRepository {
     }
   }
 
+  async getState(feedItemId: string): Promise<ArticleState | undefined> {
+    const stateRow = row<StateRow>(await this.db.prepare(
+      "SELECT * FROM feed_articles WHERE feed_item_id = ?",
+    ).get(feedItemId) as never)
+    return stateRow ? mapState(stateRow) : undefined
+  }
+
   async listVersionBlocks(versionId: string): Promise<ArticleBlock[]> {
     const values = rows<BlockRow>(await this.db.prepare(
       "SELECT * FROM article_blocks WHERE version_id = ? ORDER BY block_order",

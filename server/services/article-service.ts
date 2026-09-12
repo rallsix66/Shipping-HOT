@@ -1,6 +1,6 @@
 import process from "node:process"
 import type { Database } from "db0"
-import type { ArticleBlock, ArticleCompletenessStatus, ArticleVersion, FeedArticleDetail } from "@shared/article"
+import type { ArticleBlock, ArticleCompletenessStatus, ArticleSourcePolicy, ArticleVersion, FeedArticleDetail } from "@shared/article"
 import type { ShippingDataMode } from "#/database/runtime"
 import { ArticleRepository } from "#/database/article"
 import { ShippingRepository } from "#/database/shipping"
@@ -14,6 +14,7 @@ export interface ArticleServiceOptions {
   dataMode: ShippingDataMode
   now?: () => Date
   fetchOptions?: Pick<SecureFetchOptions, "lookup" | "transport" | "maxBytes" | "timeoutMs" | "maxRedirects">
+  resolvePolicy?: (sourceId: string) => ArticleSourcePolicy
 }
 
 export interface ArticleProcessResult {
@@ -38,11 +39,13 @@ export class ArticleService {
   private readonly article: ArticleRepository
   private readonly shipping: ShippingRepository
   private readonly now: () => Date
+  private readonly resolvePolicy: (sourceId: string) => ArticleSourcePolicy
 
   constructor(private readonly options: ArticleServiceOptions) {
     this.article = new ArticleRepository(options.database)
     this.shipping = new ShippingRepository(options.database, options.dataMode)
     this.now = options.now ?? (() => new Date())
+    this.resolvePolicy = options.resolvePolicy ?? resolveArticleSourcePolicy
   }
 
   private async findFeedItem(feedItemId: string) {
@@ -53,7 +56,7 @@ export class ArticleService {
   async process(feedItemId: string): Promise<ArticleProcessResult> {
     const item = await this.findFeedItem(feedItemId)
     if (!item) return { feedItemId, status: "unsupported", fetched: false }
-    const policy = resolveArticleSourcePolicy(item.sourceId)
+    const policy = this.resolvePolicy(item.sourceId)
     const nowIso = this.now().toISOString()
     const sourceUrl = item.canonicalUrl || item.sourceUrl
 
@@ -73,20 +76,37 @@ export class ArticleService {
 
     const result = await secureFetchArticle(sourceUrl, { policy, ...this.options.fetchOptions })
     if (!result.ok) {
+      const failureStatus: ArticleCompletenessStatus
+        = result.code === "content_type_unsupported" || result.code === "content_type_missing" ? "unsupported" : "source_unavailable"
       await this.article.saveFetchState({
         feedItemId,
         sourceId: item.sourceId,
         originalUrl: sourceUrl,
-        completenessStatus: "source_unavailable",
+        completenessStatus: failureStatus,
         lastAttemptAt: nowIso,
         updatedAt: nowIso,
         errorCode: result.code,
         errorMessage: result.message.slice(0, 200),
       })
-      return { feedItemId, status: "source_unavailable", fetched: true }
+      return { feedItemId, status: failureStatus, fetched: true }
     }
 
     const extracted = extractArticle(result.body, sourceUrl, policy)
+    if (extracted.blocks.length === 0 && extracted.status === "source_unavailable") {
+      await this.article.saveFetchState({
+        feedItemId,
+        sourceId: item.sourceId,
+        originalUrl: sourceUrl,
+        canonicalUrl: result.finalUrl,
+        contentType: result.contentType ?? null,
+        completenessStatus: "source_unavailable",
+        lastAttemptAt: nowIso,
+        updatedAt: nowIso,
+        errorCode: "extraction_structure_failed",
+        errorMessage: "No article content extracted for the configured source structure.",
+      })
+      return { feedItemId, status: "source_unavailable", fetched: true }
+    }
     const limited = policy.persistence === "excerpt_only"
     const blocks = limited ? excerpt(extracted.blocks) : extracted.blocks
     const status: ArticleCompletenessStatus = limited ? "summary_only" : extracted.status

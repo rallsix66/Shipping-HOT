@@ -159,12 +159,21 @@ export function extractArticle(html: string, sourceUrl: string, policy: ArticleS
     }
   }
   const containerSelector = policy.selectors?.container
-  let root = containerSelector ? $(containerSelector).first() : $("article").first()
-  if (!root.length) root = $("main").first()
-  if (!root.length) root = $("body")
   const context: WalkContext = { blocks: [], order: 0, sourceUrl, $ }
+  let root = containerSelector ? $(containerSelector).first() : $("article").first()
+  if (containerSelector && !root.length) {
+    // A configured container that no longer matches is a structure failure; do
+    // not fall back to the whole page and never mark it complete.
+    return { blocks: [], status: "source_unavailable" }
+  }
+  if (!containerSelector) {
+    if (!root.length) root = $("main").first()
+    if (!root.length) root = $("body")
+  }
   walk(context, root.get(0))
-  if (context.blocks.length === 0) {
+  if (containerSelector) {
+    if (context.blocks.length === 0) return { blocks: [], status: "source_unavailable" }
+  } else if (context.blocks.length === 0) {
     context.order = 0
     walk(context, $("body").get(0))
   }

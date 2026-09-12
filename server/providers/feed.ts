@@ -84,15 +84,15 @@ export const shippingFeedSources: ShippingFeedSource[] = [
     status: "enabled",
     description: "Official Shekou Port operational announcements; company news is excluded.",
     articlePolicy: {
-      status: "allowed",
+      status: "excerpt_only",
       fetchAllowed: true,
-      persistence: "full",
+      persistence: "excerpt_only",
       allowedHosts: ["www.portshekou.com"],
       allowedContentTypes: ["text/html"],
       policyCheckedAt: "2026-09-12",
       selectors: { container: ".article, .content, .news-content, #content, article", remove: [".share", ".related", ".recommend", ".footer", "script", "style", "nav"] },
       completeness: { minParagraphs: 2, minCharacters: 120 },
-      notes: "Official port-authority operational notice; full text allowed within the authority's own announcement pages.",
+      notes: "Public web access confirmed, but no explicit full-text reproduction/persistence authorization is on file. Persist a single excerpt only until written permission is recorded.",
     },
   },
   {

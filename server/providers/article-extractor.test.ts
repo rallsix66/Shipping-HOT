@@ -53,6 +53,13 @@ describe("extractArticle", () => {
     expect(result.blocks.some(block => block.type === "caption" && block.text === "Figure caption")).toBe(true)
   })
 
+  it("does not fall back to the whole page when the configured container is missing", () => {
+    const bodyOnly = `<body>${Array.from({ length: 12 }, (_, index) => `<p>Paragraph ${index + 1} body text body text body text.</p>`).join("")}</body>`
+    const result = extractArticle(bodyOnly, "https://www.portshekou.com/ywgg/1", policy)
+    expect(result.status).toBe("source_unavailable")
+    expect(result.blocks).toHaveLength(0)
+  })
+
   it("canonicalizes link metadata and marks thin pages incomplete", () => {
     const result = extractArticle(html, "https://www.portshekou.com/ywgg/1", policy)
     const linked = result.blocks.find(block => block.metadata?.href !== undefined)

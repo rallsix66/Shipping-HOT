@@ -4,6 +4,7 @@ import { join } from "node:path"
 import NativeDatabase from "better-sqlite3"
 import { type Database, createDatabase } from "db0"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import type { ArticleSourcePolicy } from "@shared/article"
 import type { FeedItem } from "@shared/shipping"
 import { ArticleService } from "./article-service"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
@@ -38,6 +39,18 @@ function feedItem(id: string, sourceId: string, sourceUrl: string): FeedItem {
 }
 
 const articleHtml = `<div class="content"><h1>Notice</h1>${Array.from({ length: 4 }, (_, index) => `<p>Paragraph ${index + 1} body text for the operational notice page.</p>`).join("")}</div>`
+const noContainerHtml = `<body>${Array.from({ length: 12 }, (_, index) => `<p>Paragraph ${index + 1} body text without the configured container.</p>`).join("")}</body>`
+
+const fullPolicy: ArticleSourcePolicy = {
+  sourceId: "shekou-official",
+  status: "allowed",
+  fetchAllowed: true,
+  persistence: "full",
+  allowedHosts: ["www.portshekou.com"],
+  allowedContentTypes: ["text/html"],
+  selectors: { container: ".content" },
+  completeness: { minParagraphs: 2, minCharacters: 120 },
+}
 
 describe("articleService orchestration", () => {
   let dir: string
@@ -77,9 +90,10 @@ describe("articleService orchestration", () => {
     const service = new ArticleService({
       database,
       dataMode: "mock",
+      resolvePolicy: () => fullPolicy,
       fetchOptions: {
         lookup: async () => [{ address: "93.184.216.34", family: 4 }],
-        transport: async () => ({ status: 200, headers: { "content-type": "text/html" }, body: articleHtml }),
+        transport: async () => ({ status: 200, headers: { "content-type": "text/html; charset=utf-8" }, body: articleHtml }),
       },
     })
     const first = await service.process("feed:shekou-official:1")
@@ -127,5 +141,66 @@ describe("articleService orchestration", () => {
     const result = await job.run()
     expect(result.status).toBe("success")
     expect(calls).toBe(1)
+  })
+
+  it("rotates through all allowed articles across bounded batches", async () => {
+    const repository = new ShippingRepository(database, "mock")
+    for (let index = 0; index < 8; index += 1) {
+      await repository.upsertFeedItem(feedItem(`feed:shekou-official:r${index}`, "shekou-official", `https://www.portshekou.com/ywgg/${index}`))
+    }
+    let clock = Date.parse("2026-09-12T00:00:00.000Z")
+    const service = new ArticleService({
+      database,
+      dataMode: "mock",
+      now: () => new Date(clock),
+      fetchOptions: {
+        lookup: async () => [{ address: "93.184.216.34", family: 4 }],
+        transport: async () => ({ status: 200, headers: { "content-type": "text/html" }, body: articleHtml }),
+      },
+    })
+    const job = createArticleFetchJob({ database, dataMode: "mock", intervalMs: 60_000, batchSize: 3, service, now: () => new Date(clock) })
+    for (let run = 0; run < 4; run += 1) {
+      clock += 60_000
+      await job.run()
+    }
+    const attempted = native.prepare("SELECT COUNT(*) AS c FROM feed_articles").get() as { c: number }
+    expect(attempted.c).toBeGreaterThanOrEqual(8)
+  })
+
+  it("maps unsupported content types to unsupported without creating a version", async () => {
+    const service = new ArticleService({
+      database,
+      dataMode: "mock",
+      resolvePolicy: () => fullPolicy,
+      fetchOptions: {
+        lookup: async () => [{ address: "93.184.216.34", family: 4 }],
+        transport: async () => ({ status: 200, headers: { "content-type": "application/pdf" }, body: "%PDF-1.7" }),
+      },
+    })
+    const result = await service.process("feed:shekou-official:1")
+    expect(result).toMatchObject({ status: "unsupported", fetched: true })
+    expect((await service.getDetail("feed:shekou-official:1"))?.versions).toHaveLength(0)
+  })
+
+  it("keeps the last complete version when a later extraction structure fails", async () => {
+    let body = articleHtml
+    const service = new ArticleService({
+      database,
+      dataMode: "mock",
+      resolvePolicy: () => fullPolicy,
+      fetchOptions: {
+        lookup: async () => [{ address: "93.184.216.34", family: 4 }],
+        transport: async () => ({ status: 200, headers: { "content-type": "text/html" }, body }),
+      },
+    })
+    expect((await service.process("feed:shekou-official:1")).created).toBe(true)
+    const currentId = (await service.getDetail("feed:shekou-official:1"))?.currentVersion?.id
+    body = noContainerHtml
+    const second = await service.process("feed:shekou-official:1")
+    expect(second.status).toBe("source_unavailable")
+    const after = await service.getDetail("feed:shekou-official:1")
+    expect(after?.versions).toHaveLength(1)
+    expect(after?.currentVersion?.id).toBe(currentId)
+    expect(after?.state.completenessStatus).toBe("source_unavailable")
   })
 })
