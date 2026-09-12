@@ -10,7 +10,7 @@ import { ArticleService } from "./article-service"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { createArticleFetchJob } from "#/runtime/article-fetch-job"
 
-function feedItem(id: string, sourceId: string, sourceUrl: string): FeedItem {
+function feedItem(id: string, sourceId: string, sourceUrl: string, canonicalUrl = sourceUrl): FeedItem {
   const now = "2026-09-12T00:00:00.000Z"
   return {
     id,
@@ -20,7 +20,7 @@ function feedItem(id: string, sourceId: string, sourceUrl: string): FeedItem {
     title: `${sourceId} notice`,
     summary: "Feed summary",
     sourceUrl,
-    canonicalUrl: sourceUrl,
+    canonicalUrl,
     publishedAt: now,
     publicationTimeKnown: true,
     eventEligibility: true,
@@ -165,6 +165,46 @@ describe("articleService orchestration", () => {
     }
     const attempted = native.prepare("SELECT COUNT(*) AS c FROM feed_articles").get() as { c: number }
     expect(attempted.c).toBeGreaterThanOrEqual(8)
+  })
+
+  it("keeps originalUrl separate and extracts relative links against the final redirect URL", async () => {
+    const repository = new ShippingRepository(database, "mock")
+    await repository.upsertFeedItem(feedItem("feed:shekou-official:urls", "shekou-official", "https://www.portshekou.com/ywgg/original", "https://www.portshekou.com/ywgg/canonical"))
+    const bodyHtml = `<div class="content"><h1>Notice</h1><p>Paragraph one body text body text body text body text body text <a href="/attachment?id=1&utm_source=x">link</a>.</p><p>Paragraph two body text body text body text body text body text.</p></div>`
+    const service = new ArticleService({
+      database,
+      dataMode: "mock",
+      resolvePolicy: () => fullPolicy,
+      fetchOptions: {
+        lookup: async () => [{ address: "93.184.216.34", family: 4 }],
+        transport: async url => url.pathname.endsWith("/canonical")
+          ? { status: 302, headers: { location: "https://www.portshekou.com/ywgg/final" }, body: "" }
+          : { status: 200, headers: { "content-type": "text/html" }, body: bodyHtml },
+      },
+    })
+    expect((await service.process("feed:shekou-official:urls")).status).toBe("complete")
+    const detail = await service.getDetail("feed:shekou-official:urls")
+    expect(detail?.state.originalUrl).toBe("https://www.portshekou.com/ywgg/original")
+    expect(detail?.state.canonicalUrl).toBe("https://www.portshekou.com/ywgg/final")
+    expect(detail?.blocks.find(block => block.metadata?.href !== undefined)?.metadata?.href).toBe("https://www.portshekou.com/attachment?id=1")
+  })
+
+  it("caps excerpt_only persistence near the Feed excerpt limit", async () => {
+    const repository = new ShippingRepository(database, "mock")
+    const long = "A".repeat(1500)
+    await repository.upsertFeedItem(feedItem("feed:shekou-official:long", "shekou-official", "https://www.portshekou.com/ywgg/long"))
+    const service = new ArticleService({
+      database,
+      dataMode: "mock",
+      fetchOptions: {
+        lookup: async () => [{ address: "93.184.216.34", family: 4 }],
+        transport: async () => ({ status: 200, headers: { "content-type": "text/html" }, body: `<div class="content"><p>${long}</p></div>` }),
+      },
+    })
+    expect((await service.process("feed:shekou-official:long")).status).toBe("summary_only")
+    const persisted = (native.prepare("SELECT text FROM article_blocks").all() as Array<{ text: string }>).map(row => row.text).join("")
+    expect(persisted.length).toBeLessThanOrEqual(280)
+    expect(persisted).not.toContain(long)
   })
 
   it("maps unsupported content types to unsupported without creating a version", async () => {

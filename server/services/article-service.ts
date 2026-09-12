@@ -24,9 +24,15 @@ export interface ArticleProcessResult {
   fetched: boolean
 }
 
+export const EXCERPT_MAX_CHARACTERS = 280
+
 function excerpt(blocks: readonly ArticleBlock[]): ArticleBlock[] {
   const first = blocks.find(block => block.type === "paragraph") ?? blocks[0]
-  return first ? [first] : []
+  if (!first) return []
+  const text = first.text.length <= EXCERPT_MAX_CHARACTERS
+    ? first.text
+    : `${first.text.slice(0, EXCERPT_MAX_CHARACTERS - 1).trimEnd()}…`
+  return [{ ...first, text }]
 }
 
 /**
@@ -58,14 +64,17 @@ export class ArticleService {
     if (!item) return { feedItemId, status: "unsupported", fetched: false }
     const policy = this.resolvePolicy(item.sourceId)
     const nowIso = this.now().toISOString()
-    const sourceUrl = item.canonicalUrl || item.sourceUrl
+    // originalUrl is the FeedItem's own source; fetchUrl is what we actually
+    // request (canonical when present). They are never conflated in storage.
+    const originalUrl = item.sourceUrl
+    const fetchUrl = item.canonicalUrl ?? item.sourceUrl
 
     if (!policy.fetchAllowed || policy.persistence === "disallowed") {
       const status: ArticleCompletenessStatus = policy.persistence === "disallowed" ? "policy_disallowed" : "authorization_required"
       await this.article.saveFetchState({
         feedItemId,
         sourceId: item.sourceId,
-        originalUrl: sourceUrl,
+        originalUrl,
         completenessStatus: status,
         lastAttemptAt: nowIso,
         updatedAt: nowIso,
@@ -74,14 +83,14 @@ export class ArticleService {
       return { feedItemId, status, fetched: false }
     }
 
-    const result = await secureFetchArticle(sourceUrl, { policy, ...this.options.fetchOptions })
+    const result = await secureFetchArticle(fetchUrl, { policy, ...this.options.fetchOptions })
     if (!result.ok) {
       const failureStatus: ArticleCompletenessStatus
         = result.code === "content_type_unsupported" || result.code === "content_type_missing" ? "unsupported" : "source_unavailable"
       await this.article.saveFetchState({
         feedItemId,
         sourceId: item.sourceId,
-        originalUrl: sourceUrl,
+        originalUrl,
         completenessStatus: failureStatus,
         lastAttemptAt: nowIso,
         updatedAt: nowIso,
@@ -91,12 +100,12 @@ export class ArticleService {
       return { feedItemId, status: failureStatus, fetched: true }
     }
 
-    const extracted = extractArticle(result.body, sourceUrl, policy)
+    const extracted = extractArticle(result.body, result.finalUrl, policy)
     if (extracted.blocks.length === 0 && extracted.status === "source_unavailable") {
       await this.article.saveFetchState({
         feedItemId,
         sourceId: item.sourceId,
-        originalUrl: sourceUrl,
+        originalUrl,
         canonicalUrl: result.finalUrl,
         contentType: result.contentType ?? null,
         completenessStatus: "source_unavailable",
@@ -128,7 +137,7 @@ export class ArticleService {
     await this.article.saveFetchState({
       feedItemId,
       sourceId: item.sourceId,
-      originalUrl: sourceUrl,
+      originalUrl,
       canonicalUrl: result.finalUrl,
       contentType: result.contentType ?? null,
       completenessStatus: status,
