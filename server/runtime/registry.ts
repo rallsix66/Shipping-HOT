@@ -11,6 +11,7 @@ import type { AisAreaProvider } from "#/providers/aisstream-area"
 import { createAisAreaSyncJob } from "#/runtime/ais-area-sync-job"
 import { MockFeedProvider, activeShippingFeedSourceIds, createPublicFeedProvider, shippingFeedSources } from "#/providers/feed"
 import { createFeedSyncJob } from "#/runtime/feed-sync-job"
+import { articleFetchEnabled, articleFetchIntervalMs, createArticleFetchJob } from "#/runtime/article-fetch-job"
 import { createCalendarSyncJob } from "#/runtime/calendar-sync-job"
 import type { CalendarProvider } from "#/providers/calendar"
 import { createPortSyncJob } from "#/runtime/port-sync-job"
@@ -111,6 +112,17 @@ function feedJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
       enabled: true,
       now: options.now,
     }))
+}
+
+function articleJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
+  if (!articleFetchEnabled()) return []
+  return [createArticleFetchJob({
+    database: options.database,
+    dataMode: options.dataMode,
+    intervalMs: articleFetchIntervalMs(),
+    enabled: true,
+    now: options.now,
+  })]
 }
 
 function calendarJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
@@ -245,5 +257,5 @@ export function getDefaultRuntimeJobs(options: RuntimeRegistryOptions): RuntimeJ
     intervalMs: voyageIntervalMs(),
     enabled: !(options.dataMode === "real" && voyageProvider.providerId === "mock"),
     now: options.now,
-  }), ...feedJobs(options), ...translationJobs(options), ...calendarJobs(options), ...portJobs(options), ...weatherJobs(options), ...weatherAlertJobs(options)]
+  }), ...feedJobs(options), ...articleJobs(options), ...translationJobs(options), ...calendarJobs(options), ...portJobs(options), ...weatherJobs(options), ...weatherAlertJobs(options)]
 }
