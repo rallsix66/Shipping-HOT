@@ -1,6 +1,92 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
-## Annual Reference Calendar — 2026-09-09 (current additive slice)
+## Standalone & Content Completion — S0 Baseline, Docs承接 and CI Policy — 2026-09-11 (historical stage record; see S1 below for current round)
+
+Active plan: `docs/plans/shipping-hot-standalone-content-2026-09-10.md` (S0–S8). Archived historical plan: `docs/archive/shipping-hot-v3-real-data.md`.
+
+- 阶段 / 验收 ID：S0 / A0-01–A0-07。
+- 时间：2026-09-11（Asia/Shanghai；实际执行与提交时间，非方案编制日期）。
+- 被测基础：draft 头 `4b5ff00a01aae9e8298ad088261440d2218e668b` 加本轮 S0 文档/CI 变更（同一阶段提交内受测；本节不预写该提交自身 SHA，PR #1 记录最终 SHA）。
+- 环境：Windows (win32-x64)；Node `v24.15.0` ABI `137`；pnpm `10.30.3`；`better-sqlite3@12.6.2`；schema `v12`；`SHIPPING_DATA_MODE=mock`，隔离库 `SHIPPING_DATABASE_PATH=.tmp/s0-gate.sqlite3`（保留库未打开）。
+- 执行项：`pnpm install --frozen-lockfile` exit 0；`pnpm build` exit 0；`pnpm typecheck` exit 0；`pnpm lint` exit 0；`pnpm exec vitest run -c vitest.config.ts` → `65 files / 748 tests passed` exit 0；`git diff --check origin/main...HEAD`、`git diff --check`、`git diff --cached --check` 均 exit 0（仅 LF→CRLF 正常警告）。
+- A0-01 现场基线：远端 `origin/main@6f0a22cb…`；实施分支 `codex/shipping-hot-standalone-first-pass` 远端存在（本地初始未 fetch，已 fetch）头 `4b5ff00a…`；PR #1 `DRAFT` 未合并，头一致；未提交 `pages.tsx` 仅行尾差异（0 内容行），未跟踪 `.tmp/` 且未被 Git 忽略；未覆盖任何用户改动。现场与编制假设一致，无回退。
+- A0-02 V3 归档：`git mv docs/plans/shipping-hot-v3-real-data.md docs/archive/shipping-hot-v3-real-data.md`；归档文件新增归档状态/日期/承接入口 banner，封版例外/失败/覆盖缺口原样保留；修复 `AGENTS.md` 与 `docs/plans/inbox/shipping-hot-six-country-official-calendar-completion.md` 的路径引用。历史 P7 事实未改写。
+- A0-03 唯一计划：本计划整合进草稿既有工作单，成为唯一现役计划；未新增 PLAN/阶段报告/验收报告/交接副本；V3 遗留项在计划第 12 节有承接表。
+- A0-04 架构与规则：`AGENTS.md` 更新产品定位、真实命令、S0–S8 授权边界、CI/提交规则与计划入口；`docs/architecture.md` 新增 “Standalone & Content Completion (S0–S8) change contract”，新目标一律标 `approved`，未实现项不当现有能力；旧 title/summary-only 边界保留为历史。
+- A0-05 CI 静默准备：初始 active workflows 三个（`shipping-hot-checks.yml`、`docker.yml`、`release.yml`），运行基线记录到 `34428408421`（PR 检查）。已 `gh workflow disable` 三个 workflow（现 `disabled_manually`）；`shipping-hot-checks.yml` 改为仅 `push: branches: [main]` + `concurrency`；`docker.yml`、`release.yml` 作为计划内清理删除（Git 历史保留）。分支 push/PR 更新预期新增 CI 运行 `0`。`main` 无 branch protection、rulesets 为空。
+- A0-06 基线工程检查：G 门禁全过，数量与环境见上；无未解释失败；构建仍输出既有 large-chunk/Browserslist/deprecation 警告。发现（留待 S1）：生产构建仍包含旧 NewsNow 路由（`api/oauth/github`、`api/login`、`api/enable-login`、`api/me/sync`、`api/s/*`）且把 `api/shipping/index.test.mjs`、`translation/secret.test.mjs` 等测试文件打成路由，属 A1-02/A1-04 目标。
+- A0-07 测试隔离：`vitest.config.ts` 不加载 `.env.local`；仅 `scripts/load-env.ts`（dev/build/start 与两个 smoke 脚本）读取 `.env*`。两个真实 smoke 脚本默认指向保留库，本轮未运行；测试全程隔离库，保留 `.data/` 与 `provider-secrets.json` 未改动。
+- 审查证据定位：独立审查由 `general` subagent 执行（当前环境无 `bugbot`/`review-bugbot` 命名 subagent），任务 ID `ses_f71afccacffelgtFCWA6cJfkpf`；发现“过早宣告阶段通过”与 status 双 current 冲突，均已修复。原始 CI 运行日志定位在 GitHub Actions：`34427819949`、`34427971620`、`34428408421`（均 `pull_request`，针对 `4b5ff00` 及更早提交）；本地 `install`/`build`/`typecheck`/`lint`/`vitest`/`git diff --check` 的原始输出在 2026-09-11 会话中生成，命令与退出码见上；仓库未新增平行报告文件，结论以本区块为权威。
+- Neat Freak 手动等价检查覆盖：`git status`/未跟踪与忽略情况；规则链（`AGENTS.md` 与 `docs/` 入口一致性）；Markdown 跟踪清单与 `shipping-hot-v3-real-data.md` 旧路径引用扫描（仅归档 banner 与 `.tmp/` 副本保留）；CI YAML 触发/权限/并发静态核对；秘密与本地数据库定位（`.env.local`、`.data/*.sqlite3`、`provider-secrets.json` 均未进入提交）。**未覆盖（`pending/unavailable`）**：`scripts/audit-inventory.sh` 全量机械枚举（Bash 与脚本在本机不可用），故不使用“全部已同步”结论。无秘密或保留库被写入。
+- A0-05 推送复核（已实测）：阶段提交 `87f477293e6f5e259ed0ad8d538faea241e98378` 推送到 `origin/codex/shipping-hot-standalone-first-pass`（`4b5ff00..87f4772`）后，实际 Actions 运行列表最新仍为 `34428408421`（2026-09-10），**本阶段 push 新增 CI/发布运行 = 0**；三个 workflow 仍为 `disabled_manually`。
+- 结论与推进：S0 `PASS`（A0-01–A0-07 满足，A0-05 已推送实测 0 运行）。允许进入 S1（独立化）。
+- 交付提交：`87f477293e6f5e259ed0ad8d538faea241e98378`（`chore: S0 establish standalone execution baseline and CI policy`，9 files changed）+ `3f166b47bb0117abb7e5f8a30d00656d260ca131`（`docs: record S0 push verification and stage result`）。分支头与 `origin` 一致。
+- 数据模式：本轮为 Mock/隔离；无真实 Provider 调用；无付费调用。
+
+## Standalone & Content Completion — S1 Standalone Product & Legacy Retirement — 2026-09-11 (historical stage record; S2 below is current)
+
+- 阶段 / 验收 ID：S1 / A1-01–A1-08。
+- 时间：2026-09-11（Asia/Shanghai）。
+- 被测基础：S0 头 `f1116a5…` + 本轮 S1 变更（同一阶段提交内受测；PR #1 记录最终 SHA）。
+- 交付范围：**Windows 本地完善与验收**（用户 2026-09-11 澄清）。服务器部署/实机发布为后续待授权范围；Docker 容器验收不属本轮本地必需项。
+- 环境：Windows 10 Pro build `19045` (win32-x64)；Node `v24.15.0` ABI `137`；pnpm `10.30.3`；`better-sqlite3@12.6.2`；schema `v12`；`SHIPPING_DATA_MODE=mock`；隔离库 + 隔离服务 cwd。Docker：本机未安装（`docker --version` 不可用；无 `com.docker.service`/podman/nerdctl/containerd；WSL 无发行版；`HypervisorPresent=False`；当前会话非管理员）——**保留“未验证”，不属本轮**。
+- 执行项：干净 worktree 冷启动（清空预编译缓存、无 `node_modules`）`pnpm install --frozen-lockfile` exit 0（**未使用** `--ignore-scripts`/旧 `node_modules`/手工复制），`better-sqlite3` 原生加载通过；`pnpm build` exit 0；`pnpm typecheck` exit 0；`pnpm lint` exit 0；`pnpm exec vitest run -c vitest.config.ts` → `65 files / 724 tests passed` exit 0；`pnpm test:e2e` → `E2E PASS`（写入 21 项 + 重启读回阶段）；`git diff --check` exit 0。测试数量变化：S0 `65/748` → S1 `65/724`（退役 `server/utils/date.test.ts` −39；新增 `server/middleware/security.test.ts` +15）。
+- A1-01 产品独立：包名 `shipping-hot`；`index.html`/`pwa.config.ts` Shipping 元信息；移除 NewsNow GA/登录回调/旧域名；真实 Chrome 渲染的 DOM 无 `newsnow` 残留；PWA 能力保留、仅换品牌。
+- A1-02 引用与依赖：按只读引用分析先解引用再删除；删除 175 个跟踪条目（旧 news sources、旧路由/OAuth/用户同步/缓存、共享 news model、旧资讯 UI、source/favicon 工具、NewsNow 资产）；`pnpm install` 移除 20 个不再使用依赖；锁文件与 manifest 一致；生产路由表只剩 `shipping/**`。
+- A1-03 工具链：Node/pnpm/`better-sqlite3` 与项目一致（health schema v12、原生加载成功）。**Windows 干净环境完整安装已解决**：根因是 `prebuild-install@7.1.3` 硬编码 30s 下载超时，本机官方预编译包下载约 20–40s，超时即 `unexpected end of file` 并回退 `node-gyp`（缺 VS C++ 工作负载）；用 `patches/prebuild-install@7.1.3.patch` 改为可配置/180s 后，全新 worktree 冷安装成功（无 `--ignore-scripts`、无手工复制），`vite-plugin-with-nitro` 补丁亦自动应用。Docker 内工具链验证不属本轮（保留未验证）。
+- A1-04 运行产物：`pnpm build` 成功（7.48 MB → 5.66 MB）；产品构建在隔离 cwd 启动成功、`/api/shipping/health` 200；`pnpm dev` 在独立 worktree 启动成功、8 路由 200；`ignore: **/*.test.ts` 生效（不再产出 `index.test.mjs`/`secret.test.mjs` 路由）。Docker 构建/启动不属本轮（保留未验证）。
+- A1-05 数据路径（本地入口已实测）：Nitro 数据库解析为运行时 cwd。生产启动 = `<启动 cwd>/.data/shipping-hot-v3.sqlite3`；`pnpm dev` = `<worktree>/.data/shipping-hot-v3.sqlite3`；CLI smoke 用 `SHIPPING_DATABASE_PATH`。容器路径未验证（不属本轮）。保留库 `.data/shipping-hot-v3.sqlite3` mtime 操作前后恒为 `2026-09-10T14:51:51Z`。
+- A1-06 访问边界：`server/middleware/security.ts` 要求 Host 在允许列表；写请求 `Origin: null`→403、跨站→403、不同本地端口→403、缺失 Origin 默认放行（`SHIPPING_ALLOW_NO_ORIGIN=false` 可关闭）；媒体类型按 `;` 解析后必须精确等于 `application/json`（`application/jsonp`→415）；chunked→411；声明体积超 1 MB→413。同源浏览器写与 `application/json; charset=utf-8` 放行。15 项单测 + 真实 Nitro HTTP 实测；被拒请求不改变隔离库（settings 读回不变），重启后仍可读。可选 `SHIPPING_ALLOWED_HOSTS`/`SHIPPING_ALLOWED_ORIGINS` 显式白名单（完整源含协议/主机/端口）。该边界不是用户鉴权，不能暴露公网。
+- A1-07 数据兼容（旧→新，已实测）：用 pre-S1 代码（worktree `f1116a5`）在隔离库写入 settings(`refreshInterval=42`,`retentionDays=45`)、关注 `vessel-cosco-harmony`/`port-shekou`、翻译缓存（`succeeded`,`蛇口港公告`,`old-seed-hash`，schema v12）；S1 代码读取到完全相同的值，第二进程重启后再次一致；保留库未打开。`newsnow_data` 物理卷名与旧 `user` 表数据保留、未 DROP。
+- A1-08 浏览器与回归：`scripts/e2e-smoke.mjs`（headless Chrome + CDP，`pnpm test:e2e`）对真实 Nitro + 隔离库执行：8 路由渲染外壳与标题、导航含 8 路由；深链接直达、刷新、前进/后退；浏览器同源写入 settings/watch 后读回、重启读回；日历月切换与日详情；全程未处理运行时/API 错误 = 0；未知 `/api/*`→404。G 全过。Docker 容器回归不属本轮（保留未验证）。
+- 发现与修复：①`vite-plugin-with-nitro@0.0.3` 生产 renderer 引用无法解析的 `#nitro/index`，导致非 `/` 的 SPA 路由 500 → `patches/vite-plugin-with-nitro@0.0.3.patch` 修复为读取内建 `index.html`、未匹配 `/api/*` 返回 404；②`prebuild-install@7.1.3` 30s 硬编码超时阻塞干净安装 → `patches/prebuild-install@7.1.3.patch`。均属构建/运行缺陷修复，非新增业务。
+- 审查与收尾（独立审查 + 真实 Neat Freak）：独立审查发现的 status 双 current 标签、架构旧章节 present-tense、计划 §7.6 Docker 必需项矛盾均已修复（架构加历史 banner；计划 §7.6 移除 Docker 必需项；status 合并为单一当前权威）。`git status` 干净；跟踪清单无密钥/数据库（仅 `example.env.server` 模板）；live 代码/配置无已删模块引用、仅余允许例外（`newsnow_data` 卷名、`@ourongxing/eslint-config`、`LICENSE`）。Bash 不可用，`scripts/audit-inventory.sh` 子步骤 `pending/unavailable`。
+- 残留项：① Docker 容器未验证（保留真实状态，后续采用 Docker 时补验）；② 第三方补丁与 `vite-plugin-with-nitro@0.0.3`、`prebuild-install@7.1.3` 强耦合（升级需重生成）；③ `security.ts` 明确非用户鉴权。
+- 结论与推进：**S1 本地范围 `PASS`；Docker 未验证，不属于本轮交付范围。** A1-01/A1-02/A1-06/A1-07 通过；A1-05 本地入口通过；A1-03/A1-04/A1-08 的 Windows 本地项通过（含干净完整安装与浏览器交互）。服务器部署/实机发布 `NOT_RUN / 后续待授权`。可按既定方案继续后续本地功能阶段（S2 起），不重复申请已批准的功能范围。
+
+## Standalone & Content Completion — S2 Real Data & Eight-Port Coverage (offline inventory) — 2026-09-11
+
+- 阶段 / 验收 ID：S2 / A2-01–A2-08。**结论：`S2 BLOCKED / coverage pending`（不能 PASS）。** 离线确定性验证与首批受控真实验证已完成；八港必需能力仍有覆盖缺口（公告仅 Shekou；官方预警 TMD/BMKG 已验证但无 CN/MY/PH/VN 官方源；Voyage focus-port 未完成；GFW/Open-Meteo/Portcast/Calendarific 因许可/商业条件暂停），因此不满足 A2-08，阶段为 BLOCKED/coverage pending，而非笼统“部分/未通过”。
+- 范围：Windows 本地；凭据仅检查存在与加载位置，未输出任何值。
+- 凭据存在（不输出值）：`.env.local` 有 `GFW_API_TOKEN`、`VESSELAPI_API_KEY`、`AISSTREAM_API_KEY`、`CALENDARIFIC_API_KEY`；`.data/provider-secrets.json` 有 `deepseek`。存在不等于获得新的付费调用或扩大调用量授权。
+- A2-01 运行模式：离线通过——Real Mode 拒绝 Mock 血缘的既有覆盖保留；**修复** `server/providers/ais/index.ts` 在非 Real 模式不再构造真实 AIS 适配器（此前 `.env.local` 的 `SHIPPING_VESSEL_PROVIDER=aisstream` 会让默认 Mock 模式注册启用的真实 AISStream Job）；新增离线测试覆盖。
+- A2-02 来源完整：已填八港覆盖矩阵（`docs/v3-real-provider-matrix.md` S2 区块），逐港区分来源/实现位置/历史证据/缺口/下一步；未接入港口显式未覆盖，不显示正常/0。
+- A2-03 港口匹配：离线通过——`resolvePortIdentity` 对未映射 `CNYPG` 返回 `undefined`（不猜配）；对歧义别名（同值匹配多个 UN/LOCODE）返回 `undefined`（**修复**：原先取首个匹配）；新增测试覆盖别名/未映射/歧义。
+- A2-04 失败与时效：离线通过——新增 Calendarific、Feed、Portcast、Open-Meteo 的 HTTP 失败分类测试（401/403/429/503/504 + 结构变化/超时；其中 `entitlement_missing` 仅 Calendarific 的 403 分支有测试）；401/403/429/超时/结构变化/正常空结果/过期/同来源 last-known 的既有覆盖见矩阵清单。
+- A2-05 阅读无副作用：既有覆盖（`shipping-store.read-only.test.ts`、`voyage-read.test.ts`、`ais-position-api.test.ts`、`v3-readiness.test.ts`）证明 GET/Repository 读不调用 Provider；本区块未新增真实调用。
+- 公开条款核查（2026-09-11，官网）：GFW 仅限非商业（公司用途需自定义许可，`apis@globalfishingwatch.org`）；Open-Meteo 免费层仅非商业（公司用途需付费/自建）；Portcast 为付费 SaaS（公开页非许可）；Calendarific 免费层非商业且缓存限 30 天；The Loadstar 仅允许 RSS 链接+有限摘录、禁止全文入库；BMKG 免费需署名、**商业用途需书面许可**；TMD 为 WMO 注册 CAP 公共源；VesselAPI 有免费额度（剩余额度为账户私有）；AISStream 免费 fair-use。详见矩阵。
+- A2-06 真实闭环（首批受控，2026-09-11）：**已执行**——The Loadstar `10/10`、Shekou official `5/5`、BMKG `18/18` 成功；该轮 **TMD 失败**（`provider_unavailable`，fetch failed），已由下一条修复并重验为 `12/12`；此处的“失败”仅描述该轮，被后续证据取代。持久化：`feed_items` 33 条全 `source_type=real`（BMKG 18、Loadstar 10、Shekou 5）、`feed_item_history` 33、Mock 0；`GET /api/shipping/feed` 返回 28 条 current（BMKG + Loadstar；Shekou 5 条已持久化但按日期/时效不在 current 视图）；`/feed` 页面渲染真实来源链接；重启读回稳定；零 Mock 通过。未调用 GFW/Open-Meteo/Portcast/Calendarific/VesselAPI/AIS/DeepSeek。
+- A2-06 TMD 修复 + VesselAPI/AIS 最终受控（2026-09-12）：**TMD 根因是 Node 拒绝 TMD 不完整 TLS 链**（endpoint 正确，curl 200/text-xml）。修复改为 **`NODE_USE_SYSTEM_CA=1`**（进程使用 Windows 系统 CA，`dev` 保留原 `NODE_OPTIONS=--use-env-proxy`，不覆盖 `NODE_OPTIONS`，不关闭 TLS 验证、非 TMD 专属绕过）；重跑 TMD `12/12`、BMKG `3/3`、Loadstar `10/10`、Shekou `5/5`，零 Mock 通过。**VesselAPI 最终受控**（本批 5 次成功请求，额度 `144→137`）：搜索/身份命中 HANSA；选中 2 个 Active 目标；**ETA 非空**（MSC AMY→LTKLJ、MSC ILLINOIS VII→CNTXG）；经应用适配器持久化 `CNTXG` 航次（`newEpisodes=1`、`sourceType=real`），API `GET /api/shipping/vessels/imo:9197545/voyage` 返回 200，零 Mock。`CNTXG` 不在八港 → focus 覆盖仍 pending。**AISStream 最终受控**：1 连接、单一 MMSI `636021995`、蛇口小区域、120s、结束关闭，**0 观测**（VesselAPI 无当前位置，bbox 取八港区域；按要求 0 条即停止）。GFW/Open-Meteo/Portcast/Calendarific 仍暂停；DeepSeek/商业船期未启动。
+- A2-07 零 Mock / 重启：两批均通过——schema 发现 13 表 `actualMockRows.total=0`、`zeroMockGate.passed=true`；重启后 `PRAGMA integrity_check=ok` 且无 Mock 行。
+- A2-08 覆盖验收：**未通过（coverage pending）**——八港必需能力仍有缺口：公告仅 Shekou（且未入 current 视图）；官方预警 TMD/BMKG 均已 `12/12` verified live，但 CN/MY/PH/VN 无官方预警源；Portcast/Open-Meteo/Calendarific 因许可/费用暂停；VesselAPI Provider 路径已验证（含非空 ETA 与 SQLite/API 闭环），但 focus-port 覆盖仍未完成（`CNTXG`/`LTKLJ` 不在八港，`CNYPG` 未映射）；无新增 Provider。不因空状态显示正确而改为覆盖通过。
+- 在线/真实部分：首批受控已执行（TMD/BMKG/Loadstar/Shekou 持久化闭环；VesselAPI 搜索/身份/ETA/航次闭环；AIS 本轮 0 观测），逐项记录了请求/来源时间/持久化/API 回读/重启回读/零 Mock。启动 Real 时仍须枚举并限制已注册 Job（不得顺带启动未授权翻译、日历全量同步、商业船期或无界 AIS 订阅）。剩余暂停来源见矩阵 “Real part”。
+- 离线测试新增：`calendar.test.ts`、`feed.test.ts`、`shipping.test.ts`、`port-directory.test.ts`、`ais/index.test.ts`；另修复 `server/database/port-directory.ts` 与 `server/providers/ais/index.ts` 两处隔离/匹配缺陷。
+- G 门禁（本地，隔离库 `.tmp/s2-gate.sqlite3`）：`pnpm build`/`typecheck`/`lint` exit 0；Vitest `65 files / 733 tests passed`（S1 724 + S2 新增 9）；`git diff --check` exit 0。
+- 结论与推进：**S2 `BLOCKED / coverage pending`**（能力矩阵内部仍可用 `PARTIAL / COVERAGE_PENDING`）。已验证并继承：TMD `12/12` verified live、BMKG、Loadstar、Shekou 真实数据；VesselAPI 搜索/身份 + 非空 ETA + SQLite/API 闭环；AISStream 本轮受控订阅 0 observation。仍缺口/暂停：八港 focus coverage 未完成；GFW/Open-Meteo/Portcast/Calendarific 因许可/商业条件暂停。S2 不 PASS，八港最终目标不缩减。停止重复 Provider 验收，历史 V3 + 本轮针对性复验作为现有证据继承。
+
+## Standalone & Content Completion — S3 Annual Calendar Official Evidence (kickoff) — 2026-09-12
+
+- 状态：**正式启动**；官方资料搜集/核对尚未完成；S3 未通过。不启用 Calendarific 全量同步；不调用付费模型替代查证。
+- 范围：TH/ID/MY/PH/VN 的 **2026 与 2027** 官方年度资料，核对全国/地区/机构、补休/补班、条件性休假与临时公告；不作为全国完整性结论。
+- 官方来源目标（待逐项抓取正文并写入 `docs/data-candidates/calendar/`，验证后晋级 `server/data/annual-calendar/`）：TH `thaigov.go.th` / 内阁及内阁秘书处公告；ID `kemenkopmk.go.id` / `setkab.go.id`；MY `kabinet.gov.my` 及各州官方；PH `officialgazette.gov.ph` 年度公告与后续特别公告；VN `baochinhphu.vn` / `vanban.chinhphu.vn`。
+- 流程：官方正文 → 结构化候选 → 日期/来源/地区/冲突校验 → 差异 → 满足规则晋级年度 JSON → 构建后展示。未公布年份显示“尚未公布”，已公布未采集显示缺口。
+- 逐国×年官方资料核查状态（2026-09-12 首次上网核对；来源为官方政府/内阁/劳动或气象金融公告）：
+  | 国家 | 2026 | 2027 |
+  | --- | --- | --- |
+  | TH | **已公布、已取得官方依据**：BOT B.E. 2569/2026 金融机构假日公告 + MFA 领事馆官方表可交叉核对；现有 `TH-2026.json` 23 条与官方表 **diff=0**（stable ID 保持，见 `pnpm calendar:diff`） | **有行业依据、非全国主依据**：BOT 公告 **No. 37/2569**（2026-08-17 签署，2026-08-25 宪报）金融机构 2027 假日 18 天；**仅为金融机构行业范围**，未取得全国政府机关主日历前不晋级；已建 `TH/2027/review.md`（sector evidence only） |
+  | ID | **已公布、已取得官方依据**：SKB 三部长 2025 年第 1497/2/5 号（17 国家假日 + 8 集体休假，2025-09-19 签署）；`ID-2026.json` diff=0 | `not_published_found_as_of_2026-09-12`（未找到 2027 正式公告；已建 `ID/2027/review.md`，不猜日期） |
+  | MY | **已公布、已取得官方依据**：内阁/首相署 HKA-2026 + 联邦公报 33499-33501 + P.U.(B) 111/112；`MY-2026.json` diff=0 | **已正式公布、官方文件待取**：BKPP/JPM 已列 Hari Kelepasan Am Tahun 2027；2026-09-12 直连 kabinet.gov.my 发生 transport error，尚未取得官方 PDF；**未晋级**，不依赖新闻报道；已建 `MY/2027/review.md` |
+  | PH | **官方政府来源已补、镜像降级**：年度主表 Proclamation 1006 s.2025 + 后续 Eid（1189 于 2026-03-20、1264 于 2026-05-27）均已在 runtime；lawphil 由 `official_original_verified` 降为 `legal_text_mirror_cross_reference`，事件来源引用改为 PCO/PIA 具体官方页面（`official_pco_release_verified`）；Official Gazette 通用目录页引用已移除，签署原件在 `PH/2026/review.md` 记 `original/gazette pending`（原页返回 403，未取得，但不等于“官方依据缺失”）；source-aware diff 显示 **事实 0 变化、`evidence-changed=21`、`sources +3/-3`**，晋级后 diff=0 | `not_published_found_as_of_2026-09-12`（已建 `PH/2027/review.md`） |
+  | VN | **已公布、已取得官方依据**：政府 9859/VPCP-KGVX 与内务部 Thông báo——公职春节 16–20/02/2026、国庆 01–02/09/2026 且 31/08↔22/08 调班；`VN-2026.json` diff=0 | **仅提案、未生效**：内务部 2026-09-11 提交 7 天春节（04–10/02/2027），待总理审批；**不晋级**；已建 `VN/2027/review.md` |
+- 分类（10 格）：TH/ID/MY/PH/VN 2026 = 已取得官方依据且与候选 **diff=0**；PH 2026 = 官方原件待取（`gazette_original_pending`）；TH 2027 = 行业依据、非全国主依据；MY 2027 = 已公布、官方文件待取；VN 2027 = 提案未生效；ID 2027 / PH 2027 = `not_published_found_as_of_2026-09-12`。
+- 已实现**source-aware**校验/diff 入口 `pnpm calendar:diff`（`server/services/annual-calendar-diff.ts` + 脚本 + 测试）：除日期/country-year/stable ID/sourceDocument 引用/重复/范围外，事件级 diff 纳入 `sourceDocumentIds`（顺序稳定化）与 `notesZh`（并单列 `notes-only`），另出 sourceDocuments 级 added/changed/removed（比较 id/url/officialInstitutions/documentNumbers/publishedAt/evidenceStatus/relationshipToAnnualCalendar）；重复执行稳定、不自动 commit/push。**2026 五国最终 diff=0**；PH 2026 证据升级过程演示了“事实 0 变化、evidence-changed=21、sources +3/~3”。
+- A3-06 最小实现（复用现有链路，未建第二套系统）：`annual-calendar` service 支持 2026/2027——有正式 `<COUNTRY>-<YEAR>.json` 就返回 dataset，无正式 JSON 就返回轻量 country-year 状态（`available`/`not_published`/`published_not_imported`/`sector_evidence_only`/`proposal_not_effective`），状态直接维护在 `server/services/annual-calendar.ts` 附近；无数据库/Repository/Runtime Job/第二套同步/缓存/Provider；前端复用现有 `/calendar` 页面（有数据渲染事件、无数据显示状态），未新建 2027 页面或模块。API 实测：2026 = 5 datasets + 全 available；2027 = 0 datasets + `ID:not_published / TH:sector_evidence_only / MY:published_not_imported / PH:not_published / VN:proposal_not_effective`；reference GET 仍 provider-free。MY-2027.json 一旦按 candidate→diff→runtime 晋级，在 registry 显式注册后即被服务加载。
+- A3 最终结论（仅 PASS / BLOCKED）：A3-01 **PASS**；A3-02 **PASS**；A3-03 **BLOCKED**（MY 2027 已由 BKPP/JPM 正式发布，但当前环境无法取得官方年度文件，无法完成“已发布年度主表逐项 diff”这一强制验收要求；TH/ID/MY/PH/VN 2026 已完成 `reviewed / no change`，PH 后续 Eid 1189/1264 已含，validator `invalidDatasets=0`）；A3-04 **PASS**（scope/work 类型经 `calendar:diff` validator 与既有 targeted tests 校验，未混用、工作日不标休假、无港口停运结论）；A3-05 **PASS**（日期/stable ID/引用/类型经 validator；补休/替代日/补班/条件性休假/跨月/同日不同事项由既有 `annual-calendar.test.ts` 语义断言覆盖）；A3-06 **PASS**（service 支持 2026/2027 + 状态；浏览器 QA：年份/月份切换、国家切换、状态显示、working-day filter、来源展开、console errors 0）；A3-07 **PASS**（source-aware `calendar:diff` 验收：identical→0、改一条只报该条、引用重排→0 假 diff、source URL/evidenceStatus 改→source diff；不写文件/不 commit/push；证据版本用 Git 历史）；A3-08 **PASS**（reference GET provider-free、不写 Calendarific 缓存、不影响 Event/HOT；full tests/typecheck/lint/build 全过；浏览器 0 console/API error）。
+- **S3 最终状态：`BLOCKED` — solely by A3-03 / MY 2027 official annual file published but not retrievable in the current environment.** A3-01/02/04/05/06/07/08 均 `PASS`；TH 2027 仅行业证据、PH Official Gazette 签署原件为 provenance enhancement，不再列为 blocker。
+
+> 以下 “Current Project State — verified 2026-09-09” 及更早的带日期段落为上一轮历史快照，不再描述本轮现役分支；其 “Current working branch = main” 等表述只对应 2026-09-09 当时状态。本轮现役入口见上方 S0 记录与活动计划。
+
+## Annual Reference Calendar — 2026-09-09 (additive slice; see S0 record above for current round)
 
 - User-approved scope is a fixed-file Southeast Asia annual reference calendar, not the historical six-country automatic-source migration proposal. `/calendar` exclusively displays the reference month grid. At the user's request, the operational-cache switch was removed; the old unmounted component and backend/data remain untouched. No existing Calendarific/Runtime, database schema, Secret, Event/HOT or China capability was changed.
 - `GET /api/shipping/calendar/reference?year=2026` reads only bundled `server/data/annual-calendar/*-2026.json` through a dedicated service. It does not access the database or any Provider. These five files are the display snapshot authority; `docs/data-candidates/calendar/` remains preparation/review evidence, not a runtime dependency. Updates require explicit manual review and a new build, not polling.
@@ -15,7 +101,7 @@
 > Knowledge sync date: 2026-09-08
 > Current state authority: this rebaseline section. Dated sections below are historical checkpoints unless explicitly marked current.
 
-## Current Project State — verified 2026-09-09
+## Project State Snapshot — 2026-09-09 (historical; see S0 record above for the current round)
 
 | Item | Current state |
 |---|---|
@@ -400,6 +486,8 @@ V2.0–V2.5 development plan is archived as completed.
 Archive file: `docs/archive/shipping-hot-v2-completion.md`
 
 Remaining pending work: real data coverage / runtime follow-up.
+
+> **Historical snapshot (pre-S1).** Sections 2–4 below are an earlier environment / architecture / feature summary. They describe modules (NewsNow sources/getters/cache/user, OAuth/JWT, Cloudflare/Vercel/Bun adapters) that S1 retired and must not be read as current capability. Current state is the S0/S1 records at the top of this file and `docs/architecture.md`.
 
 ## 2. Current Environment
 

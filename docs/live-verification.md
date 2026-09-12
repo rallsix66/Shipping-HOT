@@ -312,3 +312,50 @@ The built Nitro HTTP smoke returned HTTP 200 for `/`, `/api/shipping/health`, `/
 ## Boundary
 
 This document records observed requests and persisted/API evidence only. The accepted HANSA evidence verifies the VesselAPI ETA contract, identity trust, Port Event enrichment, Runtime persistence, provider-free reads and restart behavior. It does not claim full focus-port operational coverage: `CNYPG` remains outside the current directory, so Voyage status is `coverage_pending` with reason `vesselapi_focus_port_coverage_pending`. The current project phase is `V3 — FINAL SEALED`; P7-A through P7-G are complete and post-V3 enhancements require separate approval.
+
+## S2 First Controlled Real Batch — 2026-09-11
+
+Method: `pnpm smoke:v3-real-activation` with process-scoped env overrides restricting the run to eligible sources; isolated DB `.tmp/s2-real-batch1.sqlite3`; one run per Job, serial, no retry; the retained `.data/shipping-hot-v3.sqlite3` was not opened. Public terms were verified first (see `docs/v3-real-provider-matrix.md` → Public terms verification — 2026-09-11); only sources with verified use conditions and no new charge were enabled.
+
+| Source | Endpoint | Requests | Result | Records | Source time | Basis |
+|---|---|---|---|---|---|---|
+| The Loadstar | `https://theloadstar.com/feed/` | 1 GET | success | 10/10 | `2026-09-11T12:15:26.000Z` | RSS link + limited excerpt only |
+| Shekou official | `https://www.portshekou.com/ywgg/` | 1 GET | success | 5/5 | — | official public notices (source link) |
+| BMKG | `https://www.bmkg.go.id/alerts/nowcast/en` | 1 GET | success | 18/18 | `2026-09-11T13:17:48.000Z` | attribution required; company production use needs written permission |
+| TMD | `https://www.tmd.go.th/en/api/xml/CAP` | 1 GET | **failed** `provider_unavailable` (`Thai Meteorological Department: fetch failed`) | 0 | — | official CAP endpoint not reachable from this environment; re-check |
+
+Disabled for this batch (no external request): `ais-tracking` and `voyage-sync` (Mock-selected → disabled), `translation-sync` (`translation_disabled`), and `calendar-sync`/`port-sync`/`weather-sync` (unavailable provider → failed without any call). AIS streaming/area, VesselAPI and DeepSeek were not invoked.
+
+| Check | Result |
+|---|---|
+| Persistence | `feed_items` 33 rows, all `source_type=real` (BMKG 18, The Loadstar 10, Shekou official 5); `feed_item_history` 33; Mock Feed rows 0; `PRAGMA integrity_check=ok` |
+| API read | `GET /api/shipping/feed` returned 28 current items (BMKG 18 + The Loadstar 10) with real `sourceUrl`; the 5 Shekou rows are persisted but not in the current view under the freshness/date policy |
+| Page | `/feed` rendered (45,928-byte DOM) with real source links (`theloadstar.com`, `bmkg.go.id`) and the Shipping HOT shell |
+| Restart read-back | A separate process read the same file: counts stable, integrity `ok`, no Mock rows |
+| Zero-Mock | `actualMockRows.total=0` across all 13 `source_type` business tables; `zeroMockGate.passed=true` |
+
+Boundaries: this is a bounded first batch, not eight-port coverage completion. Port/weather/calendar/voyage/AIS/GFW remain unverified this round (paused by licence/quota terms). TMD's English CAP fetch failed, so TH official warnings stay unverified. BMKG and The Loadstar use conditions require written permission / limited excerpt respectively for ongoing company use.
+
+## S2 TMD Repair + VesselAPI/AIS Controlled Verification — 2026-09-12
+
+### TMD endpoint/TLS repair
+
+- Root cause: the TMD CAP endpoint was **not** stale. `https://www.tmd.go.th/en/api/xml/CAP` returns HTTP `200` `text/xml` (18,532 bytes) to `curl`, but Node's fetch failed with `unable to verify the first certificate` — TMD sends an incomplete TLS chain. `node --use-system-ca` fetches it successfully (HTTP `200`, 18,532 bytes).
+- Fix (no new dependency): the real-runtime scripts now run with `NODE_USE_SYSTEM_CA=1` (`dev`, `start`, `smoke:v3-real-activation`), which makes the process trust the Windows system CA store. `dev` keeps its original `NODE_OPTIONS=--use-env-proxy` (the CA setting is a separate variable, so no existing `NODE_OPTIONS` is overridden). Adapter code was not changed. This is process-level OS-CA trust, **not** disabling TLS verification and **not** a TMD-specific bypass.
+- Re-run of the controlled batch (isolated `.tmp/s2-real-batch2.sqlite3`): The Loadstar `10/10`, Shekou official `5/5`, **TMD `12/12`** (`sourceUpdatedAt=2026-09-12T01:31:28.000Z`), BMKG `3/3` (`2026-09-12T01:30:07.000Z`); `actualMockRows.total=0`, `zeroMockGate.passed=true`. TH official warnings are now verified live (with attribution); the company-use caveat for BMKG still applies.
+
+### VesselAPI controlled verification (final, within the authorized free quota)
+
+- Account quota observed: `x-ratelimit-remaining` went `144 → 137` across this verification (free-tier calls remaining; exact plan is account-private). No purchase, no auto-recharge, no retry.
+- Search/identity: HANSA BREITENBURG `imo:9155391` (`source_type=real`) first; then two active targets (`operating_status=Active`) selected for the ETA path: **MSC AMY** `imo:9242651` and **MSC ILLINOIS VII** `imo:9197545`.
+- ETA path (non-empty this time): MSC AMY → `destination_port=LTKLJ`, `eta=2026-09-12T18:00:00Z`, `timestamp=2026-09-12T01:53:28Z`; MSC ILLINOIS VII → `destination_port=CNTXG`, `eta=2026-09-26T12:00:00Z`, `timestamp=2026-09-11T22:59:16Z`.
+- Voyage persistence through the app adapter (`createVesselApiVoyageProvider`, `includeLastPortEvent:false`): one real record `vesselapi:imo:9197545:destination:CNTXG:episode:20260911T225916000Z`, `sourceType=real`, `newEpisodes=1`, `written=1`, `historyWritten=1`; Repository read-back and `getLatestVerifiedRealVoyage("vesselapi")` both returned it; isolated DB `actualMockRows.total=0`.
+- API read: built Nitro `GET /api/shipping/vessels/imo:9197545/voyage` returned HTTP `200` with the real persisted voyage (`source=vesselapi`, `sourceType=real`).
+- Requests made this pass: **5** (quota/search probe `MAERSK`, search `MSC`, ETA MSC AMY, ETA MSC ILLINOIS VII, app ETA for MSC ILLINOIS VII). Destination `CNTXG`/`LTKLJ` are outside the eight-port directory → `destinationPortId=undefined` and focus-port coverage stays pending.
+
+### AISStream bounded verification (final)
+
+- One connection to `wss://stream.aisstream.io/v0/stream`, `FiltersShipMMSI=["636021995"]`, small Shekou area (`22.2–22.8 N, 113.6–114.2 E`), `FilterMessageTypes=["PositionReport"]`, 120-second window, cleanly closed. VesselAPI does not expose a current position, so the bbox could not be sized from it; a fixed eight-port area was used.
+- Result: **0 PositionReports** observed — an honest empty observation; no fabrication, no reconnect, no scope/time widening (stopped per the authorized rule).
+
+Boundaries: VesselAPI search/identity and the non-empty ETA path are now verified live; AIS observation is still empty this run. Focus-port coverage (`CNTXG`) and the eight-port gaps (Portcast/Open-Meteo/Calendarific paused; official notices only Shekou) remain.

@@ -93,14 +93,16 @@ export class PortDirectoryRepository implements PortDirectoryCoordinateLookup {
     const direct = await this.getPortByUNLocode(normalized)
     if (direct) return direct.unlocode
     const lowered = normalized.toLocaleLowerCase()
-    const matches = await this.searchPorts(normalized, 200)
-    const match = matches.find(port => (
+    const matches = (await this.searchPorts(normalized, 200)).filter(port => (
       port.nameEn.toLocaleLowerCase() === lowered
       || port.nameZh === normalized
       || port.unlocode.toLocaleLowerCase() === lowered
       || port.aliases.some(alias => alias.toLocaleLowerCase() === lowered)
     ))
-    return match?.unlocode
+    // An exact value matching more than one distinct UN/LOCODE is ambiguous:
+    // keep the raw identifier rather than guessing the first candidate.
+    const unlocodes = new Set(matches.map(port => port.unlocode))
+    return unlocodes.size === 1 ? [...unlocodes][0] : undefined
   }
 
   async listActivePorts(): Promise<PortDirectoryRecord[]> {

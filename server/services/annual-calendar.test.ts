@@ -57,6 +57,25 @@ describe("annual reference calendar", () => {
     const deepavali = data.find(d => d.countryCode === "MY")!.events.find(e => e.date === "2026-11-08")!
     expect(annualEventScope(deepavali)).toBe("不含砂拉越")
   })
+  it("exposes 2026 and 2027 as selectable years with formal datasets and lightweight country-year statuses", () => {
+    const asked2026 = getAnnualCalendar(2026)
+    expect(asked2026.availableYears).toEqual([2026, 2027])
+    expect(asked2026.datasets).toHaveLength(5)
+    expect(asked2026.statuses.every(status => status.status === "available")).toBe(true)
+
+    const asked2027 = getAnnualCalendar(2027)
+    expect(asked2027.datasets).toEqual([])
+    const byCountry = new Map(asked2027.statuses.map(status => [status.countryCode, status.status]))
+    expect(byCountry).toEqual(new Map([
+      ["ID", "not_published"],
+      ["TH", "sector_evidence_only"],
+      ["MY", "published_not_imported"],
+      ["PH", "not_published"],
+      ["VN", "proposal_not_effective"],
+    ]))
+    expect(asked2027.statuses.every(status => status.detailZh.length > 0)).toBe(true)
+  })
+
   it("constructs Monday-first grids without timezone offsets including leap years", () => {
     expect(annualMonthDays(2026, 1)[0].date).toBe("2026-01-26")
     expect(annualMonthDays(2026, 1).filter(d => !d.outside)).toHaveLength(28)

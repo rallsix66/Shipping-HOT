@@ -1,0 +1,54 @@
+name: Shipping HOT checks
+
+# Intentional policy: this is the single final check. It runs only when `main`
+# receives the final merged PR, not on phase-branch pushes or draft-PR updates.
+# Stage CI is intentionally silent; each phase is verified locally first.
+# Do not add pull_request / workflow_dispatch / schedule / tag triggers here.
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shipping-hot-main
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SHIPPING_DATA_MODE: mock
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+      - name: Activate pinned pnpm
+        run: corepack enable && corepack prepare pnpm@10.30.3 --activate
+      - name: Install locked dependencies
+        id: install
+        run: pnpm install --frozen-lockfile
+      # A clean checkout has no dist/.nitro/types. Build generates the declarations
+      # included by tsconfig.node.json; do not bypass TypeScript with fake globals.
+      - name: Build and generate Nitro declarations
+        id: build
+        run: pnpm build
+      - name: Typecheck
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: pnpm typecheck
+      - name: Lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm lint
+      - name: Tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        # The native restart test creates its isolated database under this parent.
+        run: |
+          mkdir -p .tmp
+          pnpm exec vitest run -c vitest.config.ts
+      - name: Whitespace check
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: git diff --check

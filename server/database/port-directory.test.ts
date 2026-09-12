@@ -65,4 +65,38 @@ describe("portDirectoryRepository", () => {
     await expect(mockRepository.getPortByUNLocode("ZZMOCK")).resolves.toMatchObject({ source: "mock" })
     native.close()
   })
+
+  it("resolves exact UN/LOCODE, name and alias identity and keeps unmapped identifiers raw", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    const repository = new PortDirectoryRepository(database, "real")
+
+    await expect(repository.resolvePortIdentity("CNSHK")).resolves.toBe("CNSHK")
+    await expect(repository.resolvePortIdentity("Shekou")).resolves.toBe("CNSHK")
+    await expect(repository.resolvePortIdentity("蛇口港")).resolves.toBe("CNSHK")
+    await expect(repository.resolvePortIdentity("丹戎不碌")).resolves.toBe("IDJKT")
+    await expect(repository.resolvePortIdentity("MYPKG")).resolves.toBe("MYPKG")
+    // Unmapped destinations must not be guessed onto an existing port.
+    await expect(repository.resolvePortIdentity("CNYPG")).resolves.toBeUndefined()
+    await expect(repository.resolvePortIdentity("")).resolves.toBeUndefined()
+    native.close()
+  })
+
+  it("keeps an ambiguous alias unresolved instead of guessing the first match", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "real")
+    // A second active official port sharing the alias "Shekou" creates ambiguity.
+    await database.prepare(`
+      INSERT INTO port_directory (unlocode, name_en, name_zh, country_code, latitude, longitude, timezone, aliases, source, verified_at, is_active)
+      VALUES ('ZZAMB', 'Shekou', '蛇口', 'ZZ', 3, 4, 'UTC', ?, 'official', NULL, 1)
+    `).run(JSON.stringify(["Shekou", "蛇口", "ZZAMB"]))
+    const repository = new PortDirectoryRepository(database, "real")
+
+    await expect(repository.resolvePortIdentity("Shekou")).resolves.toBeUndefined()
+    await expect(repository.resolvePortIdentity("蛇口")).resolves.toBeUndefined()
+    // A value that is still unique keeps resolving.
+    await expect(repository.resolvePortIdentity("CNSHK")).resolves.toBe("CNSHK")
+    await expect(repository.resolvePortIdentity("MYPKG")).resolves.toBe("MYPKG")
+    native.close()
+  })
 })
