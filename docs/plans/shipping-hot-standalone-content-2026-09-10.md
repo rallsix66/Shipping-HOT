@@ -317,7 +317,7 @@ Scope: implemented sources only, current eight ports, local isolated database. N
 
 #### S3 阶段进展（2026-09-12）— 未 PASS
 
-- A3 最终：A3-01～A3-08 全部 **PASS**。**S3 最终状态 `BLOCKED`——仅因 MY 2027 已公布官方文件在当前环境不可取得。** TH 2027 仅行业证据、PH Gazette 原件为 provenance enhancement，不作为 blocker。
+- A3 最终：A3-01 PASS、A3-02 PASS、A3-03 **BLOCKED**（MY 2027 已由 BKPP/JPM 正式发布，但当前环境无法取得官方年度文件，无法完成“已发布年度主表逐项 diff”）；A3-04 PASS、A3-05 PASS、A3-06 PASS、A3-07 PASS、A3-08 PASS。**S3 最终 `BLOCKED` — solely by A3-03 / MY 2027 official annual file published but not retrievable。** TH 2027 仅行业证据、PH Gazette 原件为 provenance enhancement，不作为 blocker。
 - A3-06 冻结：仅复用 `docs/data-candidates/calendar/` → `server/data/annual-calendar/` → annual-calendar service → reference API → 现有 `/calendar` 页面；service 支持 2026/2027，有正式 JSON 返回 dataset，无正式 JSON 返回轻量 country-year 状态（`available/not_published/published_not_imported/sector_evidence_only/proposal_not_effective`）；未新增 DB/Repository/Runtime/Provider/cache/页面/第二套服务。
 - A3-07：source-aware `calendar:diff`（事件含 `sourceDocumentIds` 顺序稳定与 `notesZh`/notes-only；sourceDocuments added/changed/removed；事件类型校验）；幂等、不自动 commit/push。
 - 证据：PH 2026 已用 PCO/PIA 具体官方页面替换 Official Gazette 通用目录页引用，lawphil 降为镜像；source-aware diff 演示事实 0、evidence 21、source +3/-3。2026 五国 source-level diff 结果：TH/ID/MY/VN = 0/0/0，PH = 事实 0/证据 21/来源变化后晋级为 0。
