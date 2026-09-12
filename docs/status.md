@@ -62,7 +62,15 @@ Active plan: `docs/plans/shipping-hot-standalone-content-2026-09-10.md` (S0–S8
 - 在线/真实部分：**待授权与待条件**，见矩阵 “Real part — pending / conditions”。启动 Real 前必须枚举并限制已注册 Job（不得顺带启动未授权翻译、日历全量同步、商业船期或无界 AIS 订阅），逐项记录请求/来源时间/持久化/API 回读/重启回读/零 Mock 扫描。
 - 离线测试新增：`calendar.test.ts`、`feed.test.ts`、`shipping.test.ts`、`port-directory.test.ts`、`ais/index.test.ts`；另修复 `server/database/port-directory.ts` 与 `server/providers/ais/index.ts` 两处隔离/匹配缺陷。
 - G 门禁（本地，隔离库 `.tmp/s2-gate.sqlite3`）：`pnpm build`/`typecheck`/`lint` exit 0；Vitest `65 files / 733 tests passed`（S1 724 + S2 新增 9）；`git diff --check` exit 0。
-- 结论与推进：S2 离线项通过；真实项未验，**S2 保持未通过**，不把离线结果当真实接入。等待确定可验来源与授权后执行受控 Real 验收。
+- 结论与推进：S2 离线项通过；TMD/BMKG/Loadstar/Shekou 首批通过，VesselAPI/AIS 受控结果为空；Port/Weather/Calendar/Voyage/GFW 仍暂停。**S2 保持 `PARTIAL / 未通过`**，八港最终目标不缩减。
+
+## Standalone & Content Completion — S3 Annual Calendar Official Evidence (kickoff) — 2026-09-12
+
+- 状态：**正式启动**；官方资料搜集/核对尚未完成；S3 未通过。不启用 Calendarific 全量同步；不调用付费模型替代查证。
+- 范围：TH/ID/MY/PH/VN 的 **2026 与 2027** 官方年度资料，核对全国/地区/机构、补休/补班、条件性休假与临时公告；不作为全国完整性结论。
+- 官方来源目标（待逐项抓取正文并写入 `docs/data-candidates/calendar/`，验证后晋级 `server/data/annual-calendar/`）：TH `thaigov.go.th` / 内阁及内阁秘书处公告；ID `kemenkopmk.go.id` / `setkab.go.id`；MY `kabinet.gov.my` 及各州官方；PH `officialgazette.gov.ph` 年度公告与后续特别公告；VN `baochinhphu.vn` / `vanban.chinhphu.vn`。
+- 流程：官方正文 → 结构化候选 → 日期/来源/地区/冲突校验 → 差异 → 满足规则晋级年度 JSON → 构建后展示。未公布年份显示“尚未公布”，已公布未采集显示缺口。
+- 下一步：逐国/年核对现有 `sourceDocuments`、补齐缺失正文与发布日期、记录候选差异；当年已公布主表与发现修订逐项 diff。
 
 > 以下 “Current Project State — verified 2026-09-09” 及更早的带日期段落为上一轮历史快照，不再描述本轮现役分支；其 “Current working branch = main” 等表述只对应 2026-09-09 当时状态。本轮现役入口见上方 S0 记录与活动计划。
 
