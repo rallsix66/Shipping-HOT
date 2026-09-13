@@ -160,7 +160,13 @@ function defaultTransport(url: URL, address: ResolvedAddress, options: { timeout
       method: "GET",
       headers: options.headers,
       timeout: options.timeoutMs,
-      lookup: (_hostname, _options, callback) => callback(null, address.address, address.family),
+      lookup: (_hostname, lookupOptions, callback) => {
+        // Node's Happy Eyeballs passes { all: true } and expects an array of
+        // addresses; the legacy form expects (err, address, family).
+        const wantsAll = Boolean((lookupOptions as { all?: boolean } | undefined)?.all)
+        if (wantsAll) (callback as unknown as (error: null, addresses: Array<{ address: string, family: number }>) => void)(null, [{ address: address.address, family: address.family }])
+        else (callback as unknown as (error: null, resolved: string, family: number) => void)(null, address.address, address.family)
+      },
     }, (response) => {
       const chunks: Buffer[] = []
       let total = 0
