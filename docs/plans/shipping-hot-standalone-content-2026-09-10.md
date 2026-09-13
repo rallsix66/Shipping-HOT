@@ -349,6 +349,7 @@ Scope: implemented sources only, current eight ports, local isolated database. N
 - **测试（`server/database/article.test.ts`，3 项通过）**：全新空库→v13 且三表存在、重复初始化幂等；v12-equivalent（移除 v13 表与迁移行）→ 重新升级到 v13 且既有设置数据不丢；同正文重复处理不新增版本/块、块顺序跨重启稳定、改一段产生新版本且旧版本/块仍可读。
 - **未实现（后续延续）**：`shippingFeedSources` 策略字段扩展（访问/再分发/content-type/host/核查时间）；出站抓取安全 `article-fetch-security`；正文提取器；`article-service`；`article-fetch` RuntimeJob（复用唯一 BackgroundRuntime）；provider-free 详情 API；Feed 详情阅读 UI；A4 实际样本。
 - **边界**：未新建第二套 Feed/Provider/Secret/Usage/Runtime/阅读；**未改翻译执行链**（留待 S5）；The Loadstar 仅允许链接/有限摘录，不得抓取/持久化其全文。
+- **S4 closeout（2026-09-13）**：功能实现冻结；A4-01～A4-07 `PASS`，A4-08 `BLOCKED`（允许处理且成功的真实样本=0）；`S4 = BLOCKED — implementation complete; A4-08 lacks sufficient approved real-world article samples under current source policies.` 门禁 full Vitest 767 passed / typecheck / lint / build / git diff --check 均 exit 0；真实 v12→v13（`c0ef24c` worktree）与 targeted browser smoke 40/40 通过；真实 defect 修复 `3b5ce95`、`26f7740`、`bf99749`。**独立审查未单独执行；真实 Neat Freak = pending/unavailable。** 详见 `docs/status.md`。
 
 ### S5 全文分块翻译、双语阅读与费用控制
 

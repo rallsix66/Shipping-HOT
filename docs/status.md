@@ -1038,3 +1038,22 @@ The final seal keeps Voyage focus-port coverage, Calendar completeness, JMA/geog
 - Fixed NewsNow updated-source metadata generation side effect: normal `dev`/`build`/`presource` no longer rewrites `shared/updated-sources.ts`; explicit `--updated-sources` generation is required.
 - Historical V2 closeout: official `audit-inventory.sh` execution was pending because Bash was unavailable; the current 2026-08-25 Neat Freak matrix is authoritative for workspace residue and cleanup state.
 - Final local V2 state with explicit live caveat: `V2.0 sealed`; `V2.1 implemented`; `V2.2 implemented / locally verified / live pending`; `V2.3 implemented / locally verified / live pending`; `V2.4 implemented / locally verified / live pending`; `V2.5 implemented / locally verified / live pending`.
+
+## Standalone & Content Completion — S4 原文抓取 / 版本 / 阅读（BLOCKED；A4-08 受限）— 2026-09-13
+
+- 阶段 / 验收 ID：S4 / A4-01–A4-08（按现役编号：01 获取主体、02 完整性状态、03 来源与版本、04 更新和追溯、05 安全、06 持久化、07 读取效率、08 实际样本）。
+- 被测基础：draft 分支 `codex/shipping-hot-standalone-first-pass`；交付提交含 `bf99749`（多地址 validated transport）等；本阶段未合并、未部署。
+- 环境：Windows (win32-x64)；Node `v24.15.0` ABI `137`；pnpm `10.30.3`；`better-sqlite3@12.6.2`；schema `v13`；`SHIPPING_DATA_MODE=mock`；隔离库 / 隔离服务 cwd；保留库 `.data/shipping-hot-v3.sqlite3` 全程未打开。
+- 门禁：full Vitest `767 tests passed` exit 0；`pnpm typecheck` exit 0；`pnpm lint` exit 0；`pnpm build` exit 0；`git diff --check` exit 0；stage push 新增 CI = 0。
+- A4-01 获取主体（主体抽取）`PASS`：cheerio extractor 对 >10 段长文 fixture 产出 heading / paragraph / list / table / caption，逐块核对首/中/尾结构；配置 container 缺失即 fail，不 fallback、不因 HTTP 200 判 complete。**主体证据为上述长文结构化抽取，不以 source-policy 充当。**
+- A4-02 完整性状态 `PASS`：complete/summary_only/incomplete/authorization_required/policy_disallowed/unsupported/source_unavailable 与来源规则判定；`complete` 需来源完整性规则证明。
+- A4-03 来源与版本 `PASS`：不可变 `article_versions`、`UNIQUE(feed_item_id, content_hash)`、SHA-256 仅取正文语义输入、A/B 与 A→B→A current 切换、canonicalize 链接。
+- A4-04 更新和追溯 `PASS`（范围仅限 S4 已验证的原文版本追溯）：same-hash 再观测刷新当前 completeness、失败保留 last currentVersion/lastSuccess、`ShippingEvent.feedItemId → FeedItem → article/version/source`；direct official source 记为一手来源，third-party/reprint 无法核实上游者 `relationship = unknown`（不编造、未加表）。**article 全文译文与原版本绑定属 S5 / A5-05，本阶段未验证、不冒充。**
+- A4-05 安全 `PASS`：连接级 SSRF（exact host、http/https、DNS 双栈、回环/私网/link-local/metadata/multicast、IPv4-mapped、逐跳重校验、HTTPS→HTTP 拒绝、redirect/body/timeout/concurrency 上限、不透传 secret、TLS 校验保持、不第二次自由 DNS）；多地址 validated transport。
+- A4-06 持久化 `PASS`：以真实 pre-v13 代码 `c0ef24c`（worktree）生成隔离 v12 库并写入 settings/feed/translation/port；当前 S4 代码打开自动升 v13（`schema_version=13`、migration 13 恰 1 条、三张 article 表存在、旧数据值/数量不变、二次初始化不重复、重启可读）。`V12_RESULT {"schemaVersion":12,"feedItems":1,"translationCache":1,"ports":1,"refreshInterval":42,"articleTablesAbsent":true}`；`V13_RESULT {"before":12,"after":13,"migration13Rows":1,"migration13RowsAfterSecondInit":1,"metaSchemaVersion":13,"feedItems":1,"translationCache":1,"ports":1,"refreshInterval":42,"articleTables":true}`。
+- A4-07 读取效率 `PASS`：provider-free `GET /api/shipping/feed/[id]`（含 `?versionId`，无效版本 404 `article_version_not_found`）；`/feed/$id` 结构化 React 渲染（无 `dangerouslySetInnerHTML`、无 iframe，href 带 `target=_blank rel=noreferrer`）；targeted browser smoke（CDP）40/40；阅读期间 external article HTTP=0、DeepSeek/model=0、article_fetch sync run=0、console/API error=0。
+- A4-08 实际样本 `BLOCKED`：允许处理且成功的真实样本 = 0。The Loadstar 真实 FeedItem → `policy_disallowed`、正文 transport 调用 0（仅拒绝路径，不计入）；Shekou `excerpt_only` 单次有界尝试 → `fetch_timeout`/`source_unavailable`（不计入）；其余来源无已核实 article policy（fail closed）。未新增 Provider、未扩大许可。
+- 结论：`S4 = BLOCKED — implementation complete; A4-08 lacks sufficient approved real-world article samples under current source policies.`
+- 本阶段发现并修复的真实 defect：详情 API `%3A` id 解码（`3b5ce95`）；`https.request` lookup Happy-Eyeballs `{all:true}`（`26f7740`）；多地址 validated transport（`bf99749`）。
+- 真实样本台账：The Loadstar→资讯→disallowed→无正文抓取→`policy_disallowed`→none→**不计**；Shekou→公告→excerpt_only→1 次→`fetch_timeout`→**不计**；其他→无 policy→不处理→不计。
+- Closeout 状态：S4 功能冻结；`docs/status.md` 已更新；**独立审查 = 未在本阶段单独执行；真实 Neat Freak Skill = `pending/unavailable`（未加载运行，不用手动等价冒充）**；`docs/status.md` + active plan + PR #1 同步。
