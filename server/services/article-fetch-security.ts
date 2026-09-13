@@ -125,6 +125,7 @@ export function isBlockedAddress(address: ResolvedAddress): boolean {
     return ipv4Blocked(((groups[6] << 16) | groups[7]) >>> 0)
   }
   // IPv4-translated ::ffff:0:a.b.c.d and IPv4-compatible ::a.b.c.d
+  if (groups[0] === 0 && groups[1] === 0 && groups[2] === 0 && groups[3] === 0 && groups[4] === 0xFFFF && groups[5] === 0) return true
   if (groups.slice(0, 5).every(group => group === 0)) return true
   if (groups.every(group => group === 0)) return true
   if (groups.slice(0, 7).every(group => group === 0) && groups[7] === 1) return true
