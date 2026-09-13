@@ -62,7 +62,7 @@ export function createArticleFetchJob(options: ArticleFetchJobOptions): RuntimeJ
       for (const candidate of candidates.slice(0, batchSize)) {
         read += 1
         const result = await service.process(candidate.id)
-        if (result.fetched && result.created !== false) written += 1
+        if (result.created === true) written += 1
       }
       return { status: "success", recordsRead: read, recordsWritten: written, sourceUpdatedAt: currentIso }
     },

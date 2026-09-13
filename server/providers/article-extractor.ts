@@ -100,8 +100,9 @@ function walk(context: WalkContext, element: unknown): void {
     const tag = String((child as { tagName?: string }).tagName ?? "").toLowerCase()
     if (HEADING_TAGS.has(tag)) {
       const level = Number(tag.slice(1))
-      const meta = firstHref(context, child)
-      pushBlock(context, "heading", context.$(child).text(), { level, ...(meta ?? {}) })
+      // Heading href is not part of the semantic hash allowlist, so it is not
+      // persisted (avoiding silently dropped data on dedupe).
+      pushBlock(context, "heading", context.$(child).text(), { level })
       return
     }
     if (tag === "p") {

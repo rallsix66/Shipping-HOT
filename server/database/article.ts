@@ -117,8 +117,8 @@ export class ArticleRepository {
       ON CONFLICT(feed_item_id) DO UPDATE SET
         source_id = excluded.source_id,
         original_url = excluded.original_url,
-        canonical_url = excluded.canonical_url,
-        content_type = excluded.content_type,
+        canonical_url = COALESCE(excluded.canonical_url, feed_articles.canonical_url),
+        content_type = COALESCE(excluded.content_type, feed_articles.content_type),
         completeness_status = excluded.completeness_status,
         current_version_id = COALESCE(excluded.current_version_id, feed_articles.current_version_id),
         last_attempt_at = COALESCE(excluded.last_attempt_at, feed_articles.last_attempt_at),

@@ -120,9 +120,12 @@ export function isBlockedAddress(address: ResolvedAddress): boolean {
   }
   const groups = expandIpv6(address.address)
   if (!groups) return true
+  // IPv4-mapped ::ffff:a.b.c.d
   if (groups.slice(0, 5).every(group => group === 0) && groups[5] === 0xFFFF) {
     return ipv4Blocked(((groups[6] << 16) | groups[7]) >>> 0)
   }
+  // IPv4-translated ::ffff:0:a.b.c.d and IPv4-compatible ::a.b.c.d
+  if (groups.slice(0, 5).every(group => group === 0)) return true
   if (groups.every(group => group === 0)) return true
   if (groups.slice(0, 7).every(group => group === 0) && groups[7] === 1) return true
   const first = groups[0]
@@ -130,7 +133,10 @@ export function isBlockedAddress(address: ResolvedAddress): boolean {
   if ((first & 0xFFC0) === 0xFE80) return true
   if ((first & 0xFF00) === 0xFF00) return true
   if (first === 0x2001 && groups[1] === 0x0DB8) return true
+  if (first === 0x2001 && (groups[1] === 0x0000 || groups[1] === 0x0010 || groups[1] === 0x0002)) return true
   if (first === 0x2002) return true
+  if (first === 0x0064 && groups[1] === 0xFF9B) return true
+  if (first === 0x0100 && groups[1] === 0 && groups[2] === 0 && groups[3] === 0) return true
   return false
 }
 

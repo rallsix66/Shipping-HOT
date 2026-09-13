@@ -43,6 +43,11 @@ describe("isBlockedAddress", () => {
       { address: "fc00::1", family: 6 as const },
       { address: "ff02::1", family: 6 as const },
       { address: "::ffff:127.0.0.1", family: 6 as const },
+      { address: "::ffff:0:127.0.0.1", family: 6 as const },
+      { address: "::127.0.0.1", family: 6 as const },
+      { address: "64:ff9b::7f00:1", family: 6 as const },
+      { address: "2001::1", family: 6 as const },
+      { address: "100::1", family: 6 as const },
     ]) {
       expect(isBlockedAddress(address), address.address).toBe(true)
     }
