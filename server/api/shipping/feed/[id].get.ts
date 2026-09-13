@@ -6,7 +6,13 @@ export default defineEventHandler(async (event) => {
   const database = useDatabase()
   const dataMode = process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock"
   await initShippingTables(database, dataMode)
-  const id = getRouterParam(event, "id") ?? ""
+  const rawId = getRouterParam(event, "id") ?? ""
+  let id = rawId
+  try {
+    id = decodeURIComponent(rawId)
+  } catch {
+    id = rawId
+  }
   const query = getQuery(event)
   const versionId = typeof query.versionId === "string" && query.versionId ? query.versionId : undefined
   const repository = new ShippingRepository(database, dataMode)
