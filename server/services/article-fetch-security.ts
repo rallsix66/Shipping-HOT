@@ -26,7 +26,7 @@ export interface ArticleHttpResponse {
 export type ArticleLookup = (hostname: string) => Promise<ResolvedAddress[]>
 export type ArticleTransport = (
   url: URL,
-  address: ResolvedAddress,
+  addresses: ResolvedAddress[],
   options: { timeoutMs: number, maxBytes: number, headers: Record<string, string> },
 ) => Promise<ArticleHttpResponse>
 
@@ -154,19 +154,28 @@ async function defaultLookup(hostname: string): Promise<ResolvedAddress[]> {
   return results.map(entry => ({ address: entry.address, family: entry.family as 4 | 6 }))
 }
 
-function defaultTransport(url: URL, address: ResolvedAddress, options: { timeoutMs: number, maxBytes: number, headers: Record<string, string> }): Promise<ArticleHttpResponse> {
+/**
+ * Builds a `lookup` that only ever returns already-validated addresses, so the
+ * socket never performs a second, unchecked DNS resolution. Node's Happy
+ * Eyeballs passes `{ all: true }` and expects the full address array; the legacy
+ * form expects a single `(err, address, family)`.
+ */
+export function validatedLookup(addresses: readonly ResolvedAddress[]) {
+  const list = addresses.map(address => ({ address: address.address, family: address.family as number }))
+  return (_hostname: string, lookupOptions: unknown, callback: (...args: unknown[]) => void): void => {
+    const wantsAll = Boolean((lookupOptions as { all?: boolean } | undefined)?.all)
+    if (wantsAll) (callback as (error: null, resolved: Array<{ address: string, family: number }>) => void)(null, list)
+    else (callback as (error: null, resolved: string, family: number) => void)(null, list[0].address, list[0].family)
+  }
+}
+
+function defaultTransport(url: URL, addresses: ResolvedAddress[], options: { timeoutMs: number, maxBytes: number, headers: Record<string, string> }): Promise<ArticleHttpResponse> {
   return new Promise((resolve, reject) => {
     const request = (url.protocol === "https:" ? httpsRequest : httpRequest)(url, {
       method: "GET",
       headers: options.headers,
       timeout: options.timeoutMs,
-      lookup: (_hostname, lookupOptions, callback) => {
-        // Node's Happy Eyeballs passes { all: true } and expects an array of
-        // addresses; the legacy form expects (err, address, family).
-        const wantsAll = Boolean((lookupOptions as { all?: boolean } | undefined)?.all)
-        if (wantsAll) (callback as unknown as (error: null, addresses: Array<{ address: string, family: number }>) => void)(null, [{ address: address.address, family: address.family }])
-        else (callback as unknown as (error: null, resolved: string, family: number) => void)(null, address.address, address.family)
-      },
+      lookup: validatedLookup(addresses) as never,
     }, (response) => {
       const chunks: Buffer[] = []
       let total = 0
@@ -231,7 +240,7 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
     if (blocked) return failure("blocked_address", `Resolved address is not a public address: ${blocked.address}`)
     let response: ArticleHttpResponse
     try {
-      response = await transport(current, addresses[0], { timeoutMs, maxBytes, headers })
+      response = await transport(current, addresses, { timeoutMs, maxBytes, headers })
     } catch (error) {
       const message = error instanceof Error ? error.message : "fetch failed"
       return failure(message === "body_too_large" ? "body_too_large" : message === "fetch_timeout" ? "fetch_timeout" : "fetch_failed", message)

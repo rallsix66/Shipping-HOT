@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { ArticleSourcePolicy } from "@shared/article"
-import { type ArticleTransport, type ResolvedAddress, isBlockedAddress, secureFetchArticle } from "./article-fetch-security"
+import { type ArticleTransport, type ResolvedAddress, isBlockedAddress, secureFetchArticle, validatedLookup } from "./article-fetch-security"
 import { resolveArticleSourcePolicy } from "./source-policy"
 
 function policy(overrides: Partial<ArticleSourcePolicy> = {}): ArticleSourcePolicy {
@@ -69,7 +69,51 @@ describe("secureFetchArticle", () => {
 
   it("rejects DNS results that include any private or special address", async () => {
     const mixed = async (): Promise<ResolvedAddress[]> => [{ address: "93.184.216.34", family: 4 }, { address: "10.0.0.2", family: 4 }]
-    await expect(secureFetchArticle("https://news.example.com/a", { policy: policy(), lookup: mixed, transport: transportReturning() })).resolves.toMatchObject({ ok: false, code: "blocked_address" })
+    let calls = 0
+    await expect(secureFetchArticle("https://news.example.com/a", {
+      policy: policy(),
+      lookup: mixed,
+      transport: async () => {
+        calls += 1
+        throw new Error("must not connect")
+      },
+    })).resolves.toMatchObject({ ok: false, code: "blocked_address" })
+    expect(calls).toBe(0)
+  })
+
+  it("passes every validated public address to the transport without re-resolving", async () => {
+    const two = async (): Promise<ResolvedAddress[]> => [{ address: "93.184.216.34", family: 4 }, { address: "2606:2800:220:1:248:1893:25c8:1946", family: 6 }]
+    let seen: ResolvedAddress[] = []
+    let lookups = 0
+    const result = await secureFetchArticle("https://news.example.com/a", {
+      policy: policy(),
+      lookup: async () => {
+        lookups += 1
+        return two()
+      },
+      transport: async (_url, addresses) => {
+        seen = addresses
+        return { status: 200, headers: { "content-type": "text/html" }, body: "ok" }
+      },
+    })
+    expect(result.ok).toBe(true)
+    expect(seen.map(address => address.address)).toEqual(["93.184.216.34", "2606:2800:220:1:248:1893:25c8:1946"])
+    expect(lookups).toBe(1)
+  })
+
+  it("validatedLookup returns all addresses for {all:true} and one for the legacy form", () => {
+    const addresses: ResolvedAddress[] = [{ address: "93.184.216.34", family: 4 }, { address: "1.1.1.1", family: 4 }]
+    const lookup = validatedLookup(addresses)
+    let all: unknown
+    let legacy: unknown
+    lookup("h", { all: true }, (...args: unknown[]) => {
+      all = args[1]
+    })
+    lookup("h", {}, (...args: unknown[]) => {
+      legacy = args.slice(1)
+    })
+    expect(Array.isArray(all) && (all as unknown[]).length === 2).toBe(true)
+    expect(legacy).toEqual(["93.184.216.34", 4])
   })
 
   it("re-checks every redirect hop and rejects HTTPS to HTTP downgrade or redirect loops", async () => {
