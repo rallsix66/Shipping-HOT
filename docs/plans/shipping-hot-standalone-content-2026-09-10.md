@@ -167,7 +167,7 @@ Invoke-Checked -File 'git' -Arguments @('diff','--cached','--check')
 | S4 | 原文获取、完整性、版本与来源追溯 | S1；使用已批准资讯来源 | 文章主体与来源证据可持久化、可读取 |
 | S5 | 完整正文翻译与双语阅读 | S4 | 全文翻译可恢复、可对照、不冒充完整 |
 | S6 | ~~商业船期研究决定及条件满足后的接入~~ → **`DEFERRED / NOT_REQUIRED_FOR_CURRENT_SCOPE`**（2026-09-14 业务范围调整：订舱/排船/承运人选择由货代负责） | 无需前置 | 明确延期并与业务边界一致；不阻塞 S7 |
-| S7 | 干净环境完整验收、文档与收尾 | 所有纳入交付的阶段 | 形成待合并候选版本，等待合并授权 |
+| S7 | 干净环境完整验收、文档与收尾 | 所有纳入交付的阶段 | ✅ **`PASS`**（2026-09-14；干净本地集成验收完成，见本节 S7 执行结果与 `docs/status.md`），形成待合并候选版本，等待合并授权 |
 | S8 | 最终合并 CI（本地范围内）；服务器部署/实机发布为后续独立授权 | S7、单独合并授权 | 记录 merged / CI passed；deployed / live verified 未授权则 `NOT_RUN / 后续待授权` |
 
 默认按顺序推进；上游授权受阻时只允许先做不依赖该授权的阶段。任何被延期的原需求必须在最终交付清楚列出。
@@ -443,6 +443,18 @@ Scope: implemented sources only, current eight ports, local isolated database. N
 | A7-08 | 已封存 blocker 保持 | S2 coverage、S3 MY 2027、S4 real samples、S5 real long-form 的 BLOCKED 项继续保持 BLOCKED，并被正确呈现为外部 blocker；不得为了让 S7 变绿去修改它们，它们也不阻止 S7 本地集成 PASS |
 | A7-09 | S7 gate（只跑一次 closeout） | clean install / dependency sanity、build、typecheck、lint、full Vitest、`git diff --check`、clean isolated DB initialization、restart persistence、production browser acceptance。开发/修复期间只跑 impacted tests；**若未影响 S5 代码，禁止重新跑 S5 专项 acceptance** |
 | A7-10 | 判定与收尾 | 上述 clean start/restart/build/核心路由/船名闭环/集成/zero Mock leakage/zero unexpected errors/retained DB 未动全部成立 → `S7 = PASS`；否则 `FAIL`（修复后重跑）或 `BLOCKED`（缺授权/环境，不做无关工作）。收尾：`docs/status.md` 写回 S7 记录、唯一现役计划/架构/AGENTS 边界一致、历史事实未改写、独立审查与真实 Neat Freak 按项目约定执行（无法执行标 `pending`）、清理只列候选、PR #1 记录本地最终结果/已接受限制/回退步骤且仍未合并未部署（CI 静默） |
+
+#### S7 执行结果（2026-09-14，**`S7 = PASS`**）
+
+- **判定：`S7 = PASS`。** 干净本地集成验收在隔离目录 `.tmp/s7-local` 上完成（全新隔离 SQLite + schema v13 migration + restart persistence + production build/server + Windows localhost + System Chrome/CDP），全程未使用保留库 `.data/shipping-hot-v3.sqlite3`，保留库哈希/尺寸前后一致。
+- **S7 发现并修复的真实缺陷（2 处，均属 IMPACTED）**：
+  1. **详情路由不可达**：`src/routes/{vessels,ports,voyages}.$id.tsx` 未使用 `_` 前缀，被 TanStack Router 生成为对应列表路由的子路由，而列表页不渲染 `<Outlet/>`，导致 `/vessels/$id`、`/ports/$id`、`/voyages/$id` 永远只渲染列表页（`/feed/$id` 因既有 `feed_.$id.tsx` 命名而正常）。修复：重命名为 `vessels_.$id.tsx` / `ports_.$id.tsx` / `voyages_.$id.tsx` 并同步 route id（`/vessels_/$id` 等），`src/routeTree.gen.ts` 重新生成；URL 与页面内 `<Link>` 不变。
+  2. **Real Mode 船名搜索返回 500**：`createUnavailableVesselSearchProvider` 抛裸 `Error`，绕过 `server/api/shipping/search/vessels.get.ts` 的 `ProviderError` 映射。修复：改抛 `ProviderError("provider_unavailable", …, 503)`，API 与 UI 走既有如实失败路径（`搜索数据源异常（provider_unavailable）`），仍 fail-closed、不伪造结果、不触发 Provider。
+- **验收资产（新增）**：`scripts/s7-local-seed.ts`（deterministic、provider-free、拒绝 `.tmp` 之外运行目录）+ `scripts/e2e-s7-integrated.mjs`（`pnpm seed:s7-local` / `pnpm test:e2e:s7`）。
+- **browser acceptance 结果**：**136 checks / 0 FAIL，连续 3 次 `PASS`**（Flow A 35 / Flow B 22 / Flow C 25），覆盖首页、船舶搜索与详情、AIS 位置、Voyage/ETA/目的港、Feed list/detail、原文/中文/双语/历史缓存标注、港口与拥堵、Weather 窗口切换、年度参考日历（月份/年份/国家切换）、deep-link refresh、back navigation；`console errors = 0`、`uncaught = 0`、`API unexpected 5xx = 0`、`Mock 泄漏 = 0`、外发 HTTP(S) = 0、保留库写入 = 0；窗口内 `provider_usage`/`deepseek`/`translation`/`sync_runs`/`translation_cache`/`provider_runtime`/`ais_positions`/`article_*`/`voyages`/`vessels`/`ports`/`feed_items` 增量全部为 0；刻意的未配置 Provider 探针按预期记录 2 条 503（单独计数，不计入 unexpected）。
+- **closeout gate 结果（只跑一次）**：`pnpm install --frozen-lockfile` ✅、`pnpm build` ✅、`pnpm typecheck` ✅、`pnpm lint` ✅、full Vitest `76 files / 824 tests passed` ✅、`git diff --check` ✅、clean isolated DB initialization / migration / restart persistence ✅、production browser acceptance ✅。S5 未受影响，未重跑 S5 专项 acceptance，未重跑 S5 gate。
+- **未改动的封存 blocker**：S2 coverage、S3 MY 2027、S4 real samples、S5 real long-form 保持 `BLOCKED`，既未修改也未阻塞 S7；Docker 保持 `UNVERIFIED / FUTURE`。
+- **如实记录（不作为通过项、S7 未改）**：`/calendar` 渲染的是 bundled 年度参考日历；`pages.tsx` 中 provider 运营日历页 `CalendarPage` 在本版本**没有任何路由**（导出但未挂载）。这与 2026-09-09 已记录的决定（用户移除运营缓存 UI 入口、`/calendar` 只挂载参考视图、legacy 组件保留未挂载）一致，S7 属复核既知状态而非新发现；是否恢复该页面属产品/范围决策，S7 只记录不改。详见 `docs/status.md` 的 S7 观察项。
 
 ### S8 最终合并 CI（需单独授权）；服务器部署/实机发布为后续独立授权范围
 
