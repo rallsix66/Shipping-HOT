@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import type { ArticleBlock, ArticleState, ArticleVersion, ArticleVersionSummary } from "@shared/article"
+import type { ArticleBlock, ArticleState, ArticleTranslationView, ArticleVersion, ArticleVersionSummary } from "@shared/article"
 import type { FeedItem, FeedItemDisplay, HotItem, ShippingSnapshot } from "@shared/shipping"
 import type { CalendarCoverageStatusSummary } from "@shared/calendar"
 import type { VoyageRecord } from "@shared/voyage"
@@ -87,6 +87,7 @@ export interface FeedArticleResponse {
     currentVersion?: ArticleVersion
     blocks: ArticleBlock[]
     versions: ArticleVersionSummary[]
+    translation?: ArticleTranslationView | null
   } | null
 }
 

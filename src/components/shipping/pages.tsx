@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { motion } from "framer-motion"
 import { type ReactNode, useEffect, useState } from "react"
-import type { ArticleBlock, ArticleCompletenessStatus } from "@shared/article"
+import type { ArticleBlock, ArticleCompletenessStatus, ArticleTranslationBlockSource, ArticleTranslationViewStatus } from "@shared/article"
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
 import { type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
@@ -1405,26 +1405,49 @@ const articleCompletenessCopy: Record<ArticleCompletenessStatus, { label: string
   source_unavailable: { label: "本次无法获取或解析", tone: "text-rose-600 dark:text-rose-300" },
 }
 
-function ArticleBlockView({ block }: { block: ArticleBlock }) {
+const articleTranslationStatusCopy: Record<ArticleTranslationViewStatus, { label: string, tone: string }> = {
+  complete: { label: "全文翻译完成", tone: "text-emerald-600 dark:text-emerald-300" },
+  partial: { label: "部分翻译（全文尚未完成）", tone: "text-amber-600 dark:text-amber-300" },
+  untranslated: { label: "尚未翻译", tone: "text-slate-600 dark:text-slate-300" },
+  ineligible: { label: "当前正文不参与翻译", tone: "text-slate-600 dark:text-slate-300" },
+}
+
+// Same-language reuse is original text, never a model translation; each fallback
+// keeps the original visible instead of hiding or faking a translated block.
+const articleBlockSourceCopy: Record<ArticleTranslationBlockSource, string | undefined> = {
+  translation: undefined,
+  original: "原文已是目标语言",
+  pending: "翻译中",
+  failed: "翻译失败",
+  missing: "尚未翻译",
+}
+
+/**
+ * Renders one block from its original ArticleBlock metadata (heading level,
+ * list ordering, table header, caption/href). `text` only substitutes the
+ * displayed string, so a translated block keeps the exact source structure.
+ */
+function ArticleBlockView({ block, text }: { block: ArticleBlock, text?: string }) {
   const href = typeof block.metadata?.href === "string" ? block.metadata.href : undefined
+  const display = text ?? block.text
   switch (block.type) {
     case "heading": {
       const level = Number(block.metadata?.level ?? 2)
-      if (level <= 1) return <h1 className="article-h">{block.text}</h1>
-      if (level === 2) return <h2 className="article-h">{block.text}</h2>
-      if (level === 3) return <h3 className="article-h">{block.text}</h3>
-      if (level === 4) return <h4 className="article-h">{block.text}</h4>
-      if (level === 5) return <h5 className="article-h">{block.text}</h5>
-      return <h6 className="article-h">{block.text}</h6>
+      if (level <= 1) return <h1 className="article-h">{display}</h1>
+      if (level === 2) return <h2 className="article-h">{display}</h2>
+      if (level === 3) return <h3 className="article-h">{display}</h3>
+      if (level === 4) return <h4 className="article-h">{display}</h4>
+      if (level === 5) return <h5 className="article-h">{display}</h5>
+      return <h6 className="article-h">{display}</h6>
     }
     case "list": {
-      const items = block.text.split(" • ").filter(Boolean)
+      const items = display.split(" • ").filter(Boolean)
       const ordered = block.metadata?.ordered === true
       if (ordered) return <ol className="article-list">{items.map((entry, index) => <li key={index}>{entry}</li>)}</ol>
       return <ul className="article-list">{items.map((entry, index) => <li key={index}>{entry}</li>)}</ul>
     }
     case "table": {
-      const rows = block.text.split("\n").filter(Boolean).map(row => row.split(" | "))
+      const rows = display.split("\n").filter(Boolean).map(row => row.split(" | "))
       const hasHeader = block.metadata?.header === true
       return (
         <table className="article-table">
@@ -1443,7 +1466,7 @@ function ArticleBlockView({ block }: { block: ArticleBlock }) {
     case "caption":
       return (
         <p className="article-caption">
-          {block.text}
+          {display}
           {href && (
             <>
               {" "}
@@ -1455,7 +1478,7 @@ function ArticleBlockView({ block }: { block: ArticleBlock }) {
     default:
       return (
         <p className="article-p">
-          {block.text}
+          {display}
           {href && (
             <>
               {" "}
@@ -1467,18 +1490,25 @@ function ArticleBlockView({ block }: { block: ArticleBlock }) {
   }
 }
 
+type ArticleReadingMode = "original" | "zh" | "bilingual"
+
 export function FeedArticlePage({ id }: { id: string }) {
   const [versionId, setVersionId] = useState<string | undefined>(undefined)
+  const [mode, setMode] = useState<ArticleReadingMode>("original")
   const { data, isLoading, isError } = useFeedArticle(id, versionId)
   if (isLoading) return <ShippingShell><LoadingState /></ShippingShell>
   if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
   const item = data.feedItem
   const article = data.article
+  const translation = article?.translation ?? null
+  const translationByKey = new Map((translation?.blocks ?? []).map(block => [block.blockKey, block]))
   const isCurrent = !versionId || versionId === article?.state.currentVersionId
   const displayedStatus = article ? (isCurrent ? article.state.completenessStatus : article.currentVersion?.completenessStatus) : undefined
   const copy = displayedStatus ? articleCompletenessCopy[displayedStatus] : undefined
   const blocks = article?.blocks ?? []
   const version = article?.currentVersion
+  const statusCopy = translation ? articleTranslationStatusCopy[translation.status] : undefined
+  const readingMode: ArticleReadingMode = translation ? mode : "original"
   return (
     <ShippingShell title={item.title}>
       <SecHead eyebrow="资讯详情" title={item.title} description={item.summary} />
@@ -1507,8 +1537,47 @@ export function FeedArticlePage({ id }: { id: string }) {
         {isCurrent && article?.state.completenessStatus === "source_unavailable" && version && (
           <p className="text-rose-600 dark:text-rose-300">当前抓取失败，以下仍显示上一次成功版本，并非最新成功结果。</p>
         )}
+        {article && blocks.length > 0 && (
+          <div className="tl-chips">
+            <button type="button" className={`fbtn${readingMode === "original" ? " active" : ""}`} onClick={() => setMode("original")}>原文</button>
+            <button type="button" className={`fbtn${readingMode === "zh" ? " active" : ""}`} onClick={() => setMode("zh")}>中文</button>
+            <button type="button" className={`fbtn${readingMode === "bilingual" ? " active" : ""}`} onClick={() => setMode("bilingual")}>原文 / 中文</button>
+          </div>
+        )}
+        {translation && statusCopy && (
+          <p className={statusCopy.tone}>
+            {`翻译进度：已完成 ${translation.completedCount} / ${translation.total} · ${statusCopy.label}`}
+            {translation.originalSameLanguage > 0 ? ` · 其中原文已是目标语言 ${translation.originalSameLanguage}` : ""}
+          </p>
+        )}
         {blocks.length > 0
-          ? <article className="article-body">{blocks.map(block => <ArticleBlockView key={`${block.blockKey}-${block.order}`} block={block} />)}</article>
+          ? (
+              <article className="article-body">
+                {blocks.map((block) => {
+                  const blockView = translationByKey.get(block.blockKey)
+                  const source: ArticleTranslationBlockSource = blockView?.source ?? "missing"
+                  const badge = translation ? articleBlockSourceCopy[source] : undefined
+                  if (readingMode === "zh" && translation) {
+                    return (
+                      <div className="article-block" key={`${block.blockKey}-${block.order}`}>
+                        <ArticleBlockView block={block} text={blockView?.translatedText ?? block.text} />
+                        {badge && <p className="muted article-block-status">{badge}</p>}
+                      </div>
+                    )
+                  }
+                  if (readingMode === "bilingual" && translation) {
+                    return (
+                      <div className="article-block" key={`${block.blockKey}-${block.order}`}>
+                        <ArticleBlockView block={block} />
+                        <ArticleBlockView block={block} text={blockView?.translatedText ?? block.text} />
+                        {badge && <p className="muted article-block-status">{badge}</p>}
+                      </div>
+                    )
+                  }
+                  return <ArticleBlockView key={`${block.blockKey}-${block.order}`} block={block} />
+                })}
+              </article>
+            )
           : <p className="article-p">{item.summary}</p>}
         {article && article.versions.length > 0 && (
           <div className="tl-chips">
