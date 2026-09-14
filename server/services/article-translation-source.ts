@@ -28,7 +28,7 @@ export interface ArticleTranslationPlan {
  */
 export function articleBlockProtectedTerms(block: ArticleBlock): string[] | undefined {
   if (block.type === "list") return [" • "]
-  if (block.type === "table") return [" | "]
+  if (block.type === "table") return [" | ", "\n"]
   return undefined
 }
 

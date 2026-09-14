@@ -53,6 +53,13 @@ describe("extractArticle", () => {
     expect(result.blocks.some(block => block.type === "caption" && block.text === "Figure caption")).toBe(true)
   })
 
+  it("reads language provenance from <html lang> and never guesses", () => {
+    const wrap = (lang: string) => `<html ${lang}><body><div class="content"><h1>T</h1><p>Body body body body body body body.</p><p>More more more more more more more.</p></div></body></html>`
+    expect(extractArticle(wrap("lang=\"en\""), "https://www.portshekou.com/ywgg/1", policy).language).toBe("en")
+    expect(extractArticle(wrap("lang=\"zh-CN\""), "https://www.portshekou.com/ywgg/1", policy).language).toBe("zh-CN")
+    expect(extractArticle("<html><body><div class='content'><p>Body body body body body body.</p><p>More more more more more more.</p></div></body></html>", "https://www.portshekou.com/ywgg/1", policy).language).toBeUndefined()
+  })
+
   it("does not fall back to the whole page when the configured container is missing", () => {
     const bodyOnly = `<body>${Array.from({ length: 12 }, (_, index) => `<p>Paragraph ${index + 1} body text body text body text.</p>`).join("")}</body>`
     const result = extractArticle(bodyOnly, "https://www.portshekou.com/ywgg/1", policy)

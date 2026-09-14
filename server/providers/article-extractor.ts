@@ -14,6 +14,8 @@ export interface ExtractedArticle {
   blocks: ArticleBlock[]
   status: ArticleCompletenessStatus
   title?: string
+  /** Provenance only: read from `<html lang>`; undefined when absent. Never guessed. */
+  language?: string
 }
 
 const NON_CONTENT_SELECTORS = [
@@ -181,5 +183,6 @@ export function extractArticle(html: string, sourceUrl: string, policy: ArticleS
   const titleSelector = policy.selectors?.title
   const titleText = titleSelector ? $(titleSelector).first().text() : root.find("h1").first().text() || $("title").text()
   const title = titleText ? normalizeArticleBlockText(titleText) : undefined
-  return { blocks: context.blocks, status: completenessOf(context.blocks, policy), title }
+  const htmlLang = $("html").attr("lang")?.trim()
+  return { blocks: context.blocks, status: completenessOf(context.blocks, policy), title, language: htmlLang || undefined }
 }

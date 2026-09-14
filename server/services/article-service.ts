@@ -124,7 +124,7 @@ export class ArticleService {
       id: `article-version:${feedItemId}:${contentHash.slice(0, 16)}`,
       feedItemId,
       contentHash,
-      language: null,
+      language: extracted.language ?? null,
       sourcePublishedAt: item.publishedAt || null,
       sourceUpdatedAt: item.sourceUpdatedAt ?? null,
       fetchedAt: nowIso,

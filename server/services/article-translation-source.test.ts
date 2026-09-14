@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import type { ArticleBlock, ArticleVersion } from "@shared/article"
 import { ARTICLE_TRANSLATION_CONTRACT_VERSION, planArticleTranslation } from "./article-translation-source"
+import { protectTranslationText, restoreAndValidateProtectedTranslation } from "#/services/translation-protection"
 import { TranslationService } from "#/services/translation-service"
 
 function version(overrides: Partial<ArticleVersion> = {}): ArticleVersion {
@@ -46,7 +47,7 @@ describe("article translation source planner", () => {
     const list = result.pending.find(source => source.fieldName === "2")
     const table = result.pending.find(source => source.fieldName === "3")
     expect(list?.protectedTerms).toEqual([" • "])
-    expect(table?.protectedTerms).toEqual([" | "])
+    expect(table?.protectedTerms).toEqual([" | ", "\n"])
     expect(result.pending.every(source => source.entityType === "article_block" && source.entityId === "version-1")).toBe(true)
     const expected = service.prepare({ entityType: "article_block", entityId: "version-1", fieldName: "1", sourceText: "Body paragraph", sourceLanguage: "en", targetLanguage: "zh-CN" })
     expect(result.pending.find(source => source.fieldName === "1")?.sourceHash).toBe(expected.sourceHash)
@@ -81,5 +82,12 @@ describe("article translation source planner", () => {
       prepare: ({ entityType, entityId, fieldName, sourceText, sourceLanguage, targetLanguage }) => ({ entityType, entityId, fieldName, sourceText, sourceLanguage: sourceLanguage ?? "auto", targetLanguage: targetLanguage ?? "zh-CN", sourceHash: "h" }),
     })
     expect(empty).toMatchObject({ eligible: false, reason: "no_blocks" })
+  })
+
+  it("protects table newlines so multi-row boundaries survive translation", () => {
+    const multiline = "Berth | Status\n1 | Closed"
+    const protectedText = protectTranslationText(multiline, [" | ", "\n"])
+    expect(protectedText.protectedText.includes("\n")).toBe(false)
+    expect(restoreAndValidateProtectedTranslation(protectedText, protectedText.protectedText)).toBe(multiline)
   })
 })
