@@ -421,7 +421,12 @@ export function createUnavailableVesselSearchProvider(error: string): VesselSear
   return {
     providerId: "unavailable",
     async search() {
-      throw new Error(error)
+      // S7 integration finding: a bare Error escaped the route's ProviderError
+      // mapping, so Real Mode without a Vessel Search credential answered 500
+      // instead of an honest, coded fail-closed response. The provider stays
+      // unavailable, but the failure now carries the shared taxonomy and the
+      // 503 status the search UI already knows how to display.
+      throw new ProviderError("provider_unavailable", error, 503)
     },
   }
 }
