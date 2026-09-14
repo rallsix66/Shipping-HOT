@@ -108,6 +108,7 @@ export interface ProviderUsageRecord {
 }
 
 export type ProviderFailureCode = "auth_failed" | "entitlement_missing" | "provider_forbidden" | "rate_limited" | "provider_timeout" | "provider_unavailable" | "provider_contract_changed"
+  | "translation_output_truncated" | "translation_content_filtered" | "translation_tool_calls_not_supported" | "insufficient_system_resource"
 
 export class ProviderError extends Error {
   readonly code: ProviderFailureCode

@@ -18,7 +18,7 @@ import {
 import {
   ARTICLE_TRANSLATION_CONTRACT_VERSION,
   articleBlockProtectedTerms,
-  articleProjectedUpperBoundUsd,
+  articleConservativeProjectedCostUsd,
   isArticleVersionTranslationComplete,
   planArticleTranslation,
 } from "#/services/article-translation-source"
@@ -251,11 +251,11 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
             terminalErrorCode = latestRuntime?.errorCode ?? "translation_provider_circuit_blocked"
             break
           }
-          // C-9: article-only projected budget guard. projectedUpperBound is a
+          // C-9: article-only projected budget guard. The projected cost is a
           // local conservative estimate and is never recorded as actual spend.
-          if (item.scope === "article" && latestUsage.estimatedCost + articleProjectedUpperBoundUsd(latestSource.sourceText) > gateSettings.monthlyBudget) {
+          if (item.scope === "article" && latestUsage.estimatedCost + articleConservativeProjectedCostUsd(latestSource.sourceText, latestSource.targetLanguage) > gateSettings.monthlyBudget) {
             const blockedAt = now().toISOString()
-            await translationRepository.releaseTranslationClaim({ ...identity, leaseUntil, errorCode: "translation_budget_projected_exceeded", errorMessage: "projected upper bound would exceed monthly budget", retryable: true, nextRetryAt: new Date(Date.parse(blockedAt) + translationRetryBackoffMs(claimed.retryCount ?? 0)).toISOString() })
+            await translationRepository.releaseTranslationClaim({ ...identity, leaseUntil, errorCode: "translation_budget_projected_exceeded", errorMessage: "projected cost would exceed monthly budget", retryable: true, nextRetryAt: new Date(Date.parse(blockedAt) + translationRetryBackoffMs(claimed.retryCount ?? 0)).toISOString() })
             terminalStatus = "skipped"
             terminalErrorCode = "translation_budget_projected_exceeded"
             break

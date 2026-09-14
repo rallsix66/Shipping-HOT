@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { DEEPSEEK_DEFAULT_MODEL, DEEPSEEK_PRICING_REFERENCE, createDeepSeekTranslationProvider, estimateDeepSeekCost, isDeepSeekPeakHour } from "./deepseek-provider"
+import { DEEPSEEK_DEFAULT_MODEL, DEEPSEEK_PRICING_REFERENCE, DEEPSEEK_PRICING_USD_PER_MILLION, buildDeepSeekChatRequestBody, createDeepSeekTranslationProvider, estimateConservativeDeepSeekProjectedCost, estimateDeepSeekCost, isDeepSeekPeakHour } from "./deepseek-provider"
 import { ProviderError } from "#/providers/contracts"
 
 const request = {
@@ -24,7 +24,7 @@ const validUsage = {
 }
 
 function completionBody(usage: unknown, includeUsage = true): Record<string, unknown> {
-  const body: Record<string, unknown> = { choices: [{ message: { content: "港口延误" } }] }
+  const body: Record<string, unknown> = { choices: [{ message: { content: "港口延误" }, finish_reason: "stop" }] }
   if (includeUsage) body.usage = usage
   return body
 }
@@ -34,7 +34,7 @@ describe("deepSeek translation provider foundation", () => {
     let captured: { input: string, init?: RequestInit } | undefined
     const provider = createDeepSeekTranslationProvider({ apiKey: "secret-value", fetcher: async (input, init) => {
       captured = { input, init }
-      return response({ choices: [{ message: { content: "港口延误" } }], usage: { prompt_tokens: 10, prompt_cache_hit_tokens: 4, prompt_cache_miss_tokens: 6, completion_tokens: 8, total_tokens: 18 } })
+      return response({ choices: [{ message: { content: "港口延误" }, finish_reason: "stop" }], usage: { prompt_tokens: 10, prompt_cache_hit_tokens: 4, prompt_cache_miss_tokens: 6, completion_tokens: 8, total_tokens: 18 } })
     } })
     await expect(provider.translate(request)).resolves.toEqual({ translatedText: "港口延误", usage: { promptTokens: 10, promptCacheHitTokens: 4, promptCacheMissTokens: 6, completionTokens: 8, totalTokens: 18 } })
     expect(provider.providerId).toBe("deepseek")
@@ -127,5 +127,41 @@ describe("deepSeek translation provider foundation", () => {
     expect(estimateDeepSeekCost({ promptCacheHitTokens: 1_000_000, promptCacheMissTokens: 1_000_000, completionTokens: 1_000_000 }, offPeak)).toBeCloseTo(0.887)
     expect(estimateDeepSeekCost({ promptCacheHitTokens: 1_000_000, promptCacheMissTokens: 1_000_000, completionTokens: 1_000_000 }, peak)).toBeCloseTo(1.774)
     expect(DEEPSEEK_PRICING_REFERENCE).toBe("deepseek-official-2026-09-02")
+  })
+
+  it.each([
+    ["stop", undefined],
+    ["length", "translation_output_truncated"],
+    ["content_filter", "translation_content_filtered"],
+    ["tool_calls", "translation_tool_calls_not_supported"],
+    ["function_call", "translation_tool_calls_not_supported"],
+    ["insufficient_system_resource", "insufficient_system_resource"],
+    [undefined, "provider_contract_changed"],
+  ] as const)("maps finish_reason %s to %s", async (finishReason, code) => {
+    const provider = createDeepSeekTranslationProvider({ apiKey: "secret-value", fetcher: async () => response({ choices: [{ message: { content: "港口延误" }, finish_reason: finishReason }], usage: validUsage }) })
+    if (!code) {
+      await expect(provider.translate(request)).resolves.toEqual({ translatedText: "港口延误", usage: { promptTokens: 10, promptCacheHitTokens: 4, promptCacheMissTokens: 6, completionTokens: 8, totalTokens: 18 } })
+      return
+    }
+    await expect(provider.translate(request)).rejects.toMatchObject({ code })
+  })
+
+  it("never accepts a truncated non-empty body as a successful translation", async () => {
+    const provider = createDeepSeekTranslationProvider({ apiKey: "secret-value", fetcher: async () => response({ choices: [{ message: { content: "被 max_tokens 截断的部分译文" }, finish_reason: "length" }], usage: validUsage }) })
+    await expect(provider.translate({ ...request, maxTokens: 4096 })).rejects.toMatchObject({ code: "translation_output_truncated" })
+  })
+
+  it("projects cost from the exact request payload including prompt overhead and placeholder inflation", () => {
+    const base = estimateConservativeDeepSeekProjectedCost({ sourceText: "Port delay", targetLanguage: "zh-CN", maxTokens: 4096 })
+    // The system prompt + wrappers dominate even a tiny source, so projection is
+    // far above a source-only estimate.
+    const sourceOnly = (JSON.stringify("Port delay").length * DEEPSEEK_PRICING_USD_PER_MILLION.peak.promptCacheMiss + 4096 * DEEPSEEK_PRICING_USD_PER_MILLION.peak.output) / 1_000_000
+    expect(base).toBeGreaterThan(sourceOnly)
+    // Escaping inflation (more serialized characters) must raise the projection.
+    const inflated = estimateConservativeDeepSeekProjectedCost({ sourceText: "\"\\\n".repeat(50), targetLanguage: "zh-CN", maxTokens: 4096 })
+    const plain = estimateConservativeDeepSeekProjectedCost({ sourceText: "a".repeat(150), targetLanguage: "zh-CN", maxTokens: 4096 })
+    expect(inflated).toBeGreaterThan(plain)
+    // The request body builder and the estimator share the same shape.
+    expect(buildDeepSeekChatRequestBody({ sourceText: "x", targetLanguage: "zh-CN", maxTokens: 4096 })).toHaveProperty("max_tokens", 4096)
   })
 })

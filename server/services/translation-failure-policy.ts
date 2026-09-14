@@ -4,6 +4,7 @@ export const TRANSLATION_RETRYABLE_FAILURE_CODES = [
   "rate_limited",
   "provider_timeout",
   "provider_unavailable",
+  "insufficient_system_resource",
 ] as const
 
 export const TRANSLATION_CIRCUIT_BLOCKING_FAILURE_CODES = [
@@ -13,10 +14,19 @@ export const TRANSLATION_CIRCUIT_BLOCKING_FAILURE_CODES = [
   "provider_contract_changed",
 ] as const
 
+// Deterministic, non-retryable translation failures: retrying under the same
+// settings/cap cannot help, so the block is marked failed rather than looped.
+export const TRANSLATION_NON_RETRYABLE_FAILURE_CODES = [
+  "translation_placeholder_changed",
+  "translation_output_truncated",
+  "translation_content_filtered",
+  "translation_tool_calls_not_supported",
+] as const
+
 export const TRANSLATION_FAILURE_CODES = [
   ...TRANSLATION_CIRCUIT_BLOCKING_FAILURE_CODES,
   ...TRANSLATION_RETRYABLE_FAILURE_CODES,
-  "translation_placeholder_changed",
+  ...TRANSLATION_NON_RETRYABLE_FAILURE_CODES,
 ] as const
 
 export type TranslationFailureCode = typeof TRANSLATION_FAILURE_CODES[number]
