@@ -1,5 +1,5 @@
 import type { ArticleBlock, ArticleBlockType, ArticleVersion } from "@shared/article"
-import type { TranslationRepository } from "#/database/translation"
+import { type TranslationRepository, translationLookupKey } from "#/database/translation"
 import { ARTICLE_TRANSLATION_CONTRACT_VERSION, planArticleTranslation } from "#/services/article-translation-source"
 import { TranslationService, canonicalLanguage } from "#/services/translation-service"
 
@@ -30,12 +30,6 @@ export interface ArticleTranslationView {
   missing: number
   completedCount: number
   blocks: ArticleTranslationBlockView[]
-}
-
-interface CachedTranslation {
-  translatedText?: string
-  pending: boolean
-  failed: boolean
 }
 
 /**
@@ -75,7 +69,17 @@ export async function buildArticleTranslationView(input: {
   }
 
   const reuse = new Set(plan.originalReuseBlockKeys)
-  const pendingByKey = new Map(plan.pending.map(source => [source.fieldName, source]))
+  // One batch cache read for every block still needing translation (no N+1).
+  const lookups = plan.pending.map(source => ({
+    entityType: source.entityType,
+    entityId: source.entityId,
+    fieldName: source.fieldName,
+    sourceHash: source.sourceHash,
+    targetLanguage: source.targetLanguage,
+  }))
+  const batch = lookups.length > 0 ? await repository.findSuccessfulBatch(lookups) : new Map<string, { pending: boolean, failed: boolean, cache?: { translatedText?: string } }>()
+  const lookupByBlockKey = new Map(lookups.map(lookup => [lookup.fieldName, translationLookupKey(lookup)]))
+
   const blockViews: ArticleTranslationBlockView[] = []
   let translated = 0
   let originalSameLanguage = 0
@@ -89,11 +93,11 @@ export async function buildArticleTranslationView(input: {
       blockViews.push({ blockKey: block.blockKey, order: block.order, type: block.type, text: block.text, translatedText: block.text, source: "original" })
       continue
     }
-    const source = pendingByKey.get(block.blockKey)
-    const cached = source ? await lookup(repository, source) : undefined
-    if (cached?.translatedText) {
+    const key = lookupByBlockKey.get(block.blockKey)
+    const cached = key ? batch.get(key) : undefined
+    if (cached?.cache?.translatedText) {
       translated += 1
-      blockViews.push({ blockKey: block.blockKey, order: block.order, type: block.type, text: block.text, translatedText: cached.translatedText, source: "translation" })
+      blockViews.push({ blockKey: block.blockKey, order: block.order, type: block.type, text: block.text, translatedText: cached.cache.translatedText, source: "translation" })
     } else if (cached?.pending) {
       pending += 1
       blockViews.push({ blockKey: block.blockKey, order: block.order, type: block.type, text: block.text, source: "pending" })
@@ -126,17 +130,4 @@ export async function buildArticleTranslationView(input: {
     completedCount,
     blocks: blockViews,
   }
-}
-
-async function lookup(repository: TranslationRepository, source: { entityType: string, entityId: string, fieldName: string, sourceHash: string, targetLanguage: string }): Promise<CachedTranslation | undefined> {
-  const batch = await repository.findSuccessfulBatch([{
-    entityType: source.entityType,
-    entityId: source.entityId,
-    fieldName: source.fieldName,
-    sourceHash: source.sourceHash,
-    targetLanguage: source.targetLanguage,
-  }])
-  const entry = [...batch.values()][0]
-  if (!entry) return undefined
-  return { translatedText: entry.cache?.translatedText, pending: entry.pending, failed: entry.failed }
 }

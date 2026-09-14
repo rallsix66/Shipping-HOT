@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import NativeDatabase from "better-sqlite3"
 import { type Database, createDatabase } from "db0"
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import type { ArticleBlock, ArticleVersion } from "@shared/article"
 import { ARTICLE_TRANSLATION_CONTRACT_VERSION } from "./article-translation-source"
 import { buildArticleTranslationView } from "./article-translation-view"
@@ -104,6 +104,15 @@ describe("buildArticleTranslationView", () => {
     const view = await buildArticleTranslationView({ version: v, blocks: blocks(), targetLanguage: "zh-CN", repository })
     expect(view).toMatchObject({ status: "complete", total: N, translated: N, completedCount: N, pending: 0, failed: 0, missing: 0 })
     expect(view.blocks.every(block => block.source === "translation" && block.translatedText?.startsWith("中:"))).toBe(true)
+  })
+
+  it("reads the cache in a single batch call (no N+1)", async () => {
+    const spy = vi.spyOn(repository, "findSuccessfulBatch")
+    const v = version("version-n")
+    for (const block of blocks()) await saveCache(v.id, block, "zh-CN", "succeeded")
+    const view = await buildArticleTranslationView({ version: v, blocks: blocks(), targetLanguage: "zh-CN", repository })
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(view).toMatchObject({ status: "complete", translated: N })
   })
 
   it("reports partial at 19/20", async () => {
