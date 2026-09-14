@@ -166,7 +166,7 @@ Invoke-Checked -File 'git' -Arguments @('diff','--cached','--check')
 | S3 | 日历官方资料更新与年度数据闭环 | S1 | 五国参考日历可追溯、可更新 |
 | S4 | 原文获取、完整性、版本与来源追溯 | S1；使用已批准资讯来源 | 文章主体与来源证据可持久化、可读取 |
 | S5 | 完整正文翻译与双语阅读 | S4 | 全文翻译可恢复、可对照、不冒充完整 |
-| S6 | 商业船期研究决定及条件满足后的接入 | 研究从 S0 开始；实现依赖 S1/S2 | 真实接入通过，或明确受阻/经批准延期 |
+| S6 | ~~商业船期研究决定及条件满足后的接入~~ → **`DEFERRED / NOT_REQUIRED_FOR_CURRENT_SCOPE`**（2026-09-14 业务范围调整：订舱/排船/承运人选择由货代负责） | 无需前置 | 明确延期并与业务边界一致；不阻塞 S7 |
 | S7 | 干净环境完整验收、文档与收尾 | 所有纳入交付的阶段 | 形成待合并候选版本，等待合并授权 |
 | S8 | 最终合并 CI（本地范围内）；服务器部署/实机发布为后续独立授权 | S7、单独合并授权 | 记录 merged / CI passed；deployed / live verified 未授权则 `NOT_RUN / 后续待授权` |
 
@@ -384,11 +384,25 @@ Scope: implemented sources only, current eight ports, local isolated database. N
 - **结论**：`S5 core implementation = COMPLETE`（两轮独立审查发现的缺陷已修复并复查）。`S5 = BLOCKED — implementation complete; A5-03/A5-08 lack approved real-world long-article samples and budget authorization.`（与 S4 同类；不放宽 S4 policy，不阻塞无关的 S6 研究）。
 - 阶段提交：`09e7f7c`、`ff0fa2f`、`b1f3834`、`53fc21a`、`b72857a`、`8be1980`、`6cc718b` + 两轮审查修复与验收 harness 提交 `493f93e`（30 files changed / +2412 −68）及其后的文档提交；未合并、未部署，stage push 保持 0 CI（PR #1 head 上 `statusCheckRollup` 为 0）。详细逐项证据、两轮审查记录、环境与隔离库标识见 `docs/status.md`（唯一权威记录）。
 
-### S6 商业船期数据入口与条件性实施
+### S6 商业船期数据入口与条件性实施 — `DEFERRED / NOT_REQUIRED_FOR_CURRENT_SCOPE`（2026-09-14）
 
-研究从 S0 开始，结论维护在 `docs/voyage-provider-gap.md` 和供应商矩阵，不新增研究报告。先从事先提供的业务资料确认实际承运人/起讫港；资料未提供则不按船名猜。初筛检查实际承运人官网及 Maersk、Hapag-Lloyd、CMA CGM 等官方开发者门户的船期类产品（仅候选，非确认免费/覆盖承诺）；DCSA 仅作字段/接口规范。逐个核对：数据类型、生产/样例、账户资格、费用/试用、商业使用条件、配额、目标航线与未来时间窗、更新时间、取消/变更、请求示例、失败方式；免费网页/试用套餐/永久免费 API 分开列；不为网页可打开就调用未公开接口。
+**状态：`S6 = DEFERRED / NOT_REQUIRED_FOR_CURRENT_SCOPE`。** 正式原因（业务范围调整，不是失败，也不是 blocker）：
 
-**S6-A 研究与范围决定**
+> 当前业务由货代负责订舱、排船和承运人选择。Shipping HOT 不承担商业班期搜索或订舱决策。系统的责任边界从货代提供船名/航次后开始，通过既有 Vessel Search、canonical vessel identity、AIS tracking、Voyage/ETA 等能力进行在途跟踪。因此 Commercial Schedule 不属于当前本地 V1 完成条件。
+
+真实工作流与责任边界：
+
+```text
+货主 → 货代（订舱 / 排船 / 选择承运人）→ 船名（有时含航次）
+     → Shipping HOT（vessel identity → tracking / voyage / ETA）
+```
+
+- **不再执行**（本轮立即停止）：承运人名单收集、lane-first Provider 调研、COSCO / SITC / RCL / OOCL 等逐家船期 API 调研、Commercial Schedule aggregator 调研、商业班期 entitlement 调研、S6-B 实现。不为关闭 S6 重新研究 VesselAPI / AISStream / GFW / ETA / CNYPG / Commercial Schedule 与 ETA 的概念区别，这些既有结论全部 `INHERITED`。
+- **`DEFERRED` 不等于能力永久删除。** 只有业务出现“在交给货代之前，也想提前查看未来可订船期”这类需求时才重新开启 S6；重新开启需要新的业务输入与独立授权，不沿用本轮的研究冲动。
+- 下方 A6-01～A6-08 保留为“若将来重新开启时的验收定义”，**当前不作为待执行工作**，不计入本轮完成条件，也不产生新的研究计划。
+- 既有边界不变：Commercial Schedule 保持 `NOT CONFIGURED / ENTITLEMENT-DEPENDENT`，AIS/VesselAPI ETA 不冒充商业班期；Real Mode 下没有 `mock-schedule` 占位数据。
+
+**S6-A 研究与范围决定（仅在重新开启时需要）**
 
 | ID | 必须达到的结果 |
 | --- | --- |
@@ -396,7 +410,7 @@ Scope: implemented sources only, current eight ports, local isolated database. N
 | A6-02 | 每个候选给出采用/不采用/待授权及原因，标核查日期；未确认免费不写免费 |
 | A6-03 | 确定本轮目标承运人/航线/时间窗并记录是否已获可用访问；全部无入口时明确 BLOCKED |
 
-**S6-B 条件满足后实施**（复用现有 Provider/Runtime/SQLite/API 边界，单独保存承运人计划数据与来源；不覆盖 AIS/VesselAPI ETA；不把空班/取消/改港与未知混成同一状态）
+**S6-B 条件满足后实施（仅在重新开启时需要）**（复用现有 Provider/Runtime/SQLite/API 边界，单独保存承运人计划数据与来源；不覆盖 AIS/VesselAPI ETA；不把空班/取消/改港与未知混成同一状态）
 
 | ID | 验收项目 | 必须达到的结果/证据 |
 | --- | --- | --- |
@@ -406,24 +420,29 @@ Scope: implemented sources only, current eight ports, local isolated database. N
 | A6-07 | 跨层持久化 | 数据经 Runtime→SQLite→API→页面；重启不丢；计划与实时 ETA 同屏区分来源和时间 |
 | A6-08 | 预算与回归 | 配额/限流/费用受控，无自动付费升级；G、相关航次回归及浏览器验证通过 |
 
-研究提交不冒充功能提交；实现通过标 `feat: S6 integrate approved carrier schedules`。
+研究提交不冒充功能提交；若将来实现通过，标 `feat: S6 integrate approved carrier schedules`。
 
-### S7 最终干净环境验收与知识收尾
+### S7 干净本地集成验收（Clean Local Integrated Acceptance）
 
-前置：纳入交付的 S0–S6 必需项均通过；延期/覆盖限制有明确批准。
+前置：S5 已冻结（`S5 = permanently frozen unless impacted by later code changes`）；S6 已 `DEFERRED / NOT_REQUIRED_FOR_CURRENT_SCOPE`。**S7 不重新验证 V3/S4/S5**，严格按 `evidence inheritance + change-impact revalidation` 执行：
+
+- **INHERITED**（已封存且本轮未修改，不重跑逐项 Provider 实验）：GFW Vessel Search / canonical vessel identity、AIS tracking、Voyage / ETA、Feed、Weather、Calendar、Article 原文、S5 全文翻译、Provider/Secret/Runtime/Cache/Usage，以及 S5 的 gate / browser 证据。
+- **S7 NEW**：整个 Windows 本地产品作为完整 App 能否干净运行——clean start、clean restart、production build、核心路由、船名 → 船舶身份 → 跟踪/ETA 闭环、Feed/Article/Translation 集成、zero Mock leakage、zero unexpected browser/runtime/API errors、retained DB 未动。
+- **IMPACTED**：只对 S7 集成过程中真实改动到的代码跑 impacted tests。若 S7 发现真实 defect：修 defect + impacted tests，全部稳定后只跑一次完整 S7 closeout gate。
+- 真实业务工作流（S6 延期后的责任边界）：`货主 → 货代（订舱/排船/选承运人）→ 船名（有时含航次）→ Shipping HOT（vessel identity → tracking / voyage / ETA）`。
 
 | ID | 验收项目 | 必须达到的结果/证据 |
 | --- | --- | --- |
-| A7-01 | 准确版本 | 受测 HEAD/树与待合并版本一致；没有测试后未验证的代码/数据改动 |
-| A7-02 | 完整工程 | G 全过；新增/退役测试数量可解释；必需项没有跳过 |
-| A7-03 | 平台 | Windows 启动/核心流通过；Linux 构建可在最终 CI 或后续 Linux 环境验证。**Docker/Alpine 容器验收不属本轮本地范围**，保留“未验证”状态，后续采用 Docker 时补验 |
-| A7-04 | 页面/API/数据 | 第 8 节最终使用流程全部执行；真实浏览器连真实 Nitro 和隔离库，不用整站假 API |
-| A7-05 | 业务数据 | 来源矩阵、五国年份格、全文状态、船期状态与真实证据一致；真实模式零 Mock 检查通过 |
-| A7-06 | 数据保护 | 隔离副本的关注/设置/原文/译文/用量重启/备份恢复通过；原库和密钥未误操作 |
-| A7-07 | 性能与错误 | 同环境固定数据下比较前后响应/列表/详情体积和交互；全文不进首页大载荷；无新增可重复卡顿/无限刷新 |
-| A7-08 | 文档与规则 | 唯一现役计划、归档引用、README 命令、AGENTS 边界、状态、来源和验证记录一致；历史事实未改写 |
-| A7-09 | 审查和收尾 | 独立审查无未解决阻塞项；真实 Neat Freak 按项目约定执行，无法执行部分明确 pending；清理只列候选 |
-| A7-10 | 合并准备 | 现有 PR 含完整阶段索引、本地最终结果、已接受限制与回退步骤；尚未合并/部署；CI 静默规则仍满足 |
+| A7-01 | 准确版本 | 受测 HEAD/树与待合并版本一致；测试后没有未验证的代码/数据改动；`git status` 干净 |
+| A7-02 | 干净本地环境 | 全新隔离目录 + 隔离 SQLite（**禁止使用保留 `.data/shipping-hot-v3.sqlite3`**）：fresh local initialization、schema migration、restart persistence、production build、production server、Windows localhost 全部通过；隔离库的关注/设置/原文/译文/用量重启后可读；原库与密钥未误操作。**Docker `UNVERIFIED / FUTURE`，不是 S7 blocker** |
+| A7-03 | Flow A — 船名开始跟踪 | 输入/搜索船名 → canonical vessel identity（展示 IMO/MMSI 等稳定身份）→ 避免同名船错误绑定 → 查看已有 AIS/位置数据 → 查看 Voyage / Destination / ETA → 数据缺失明确 `unknown`/`unavailable` → 不伪造 ETA/航次/目的港。Real Provider 无可调用授权或外部环境不稳定时，使用已封存的真实证据 + deterministic integration fixture，**不为 S7 重打真实 Provider** |
+| A7-04 | Flow B — 航运资讯集成 | Feed list → detail → 原文 → 中文 → 双语 → historical version 集成未坏。**S5 已冻结，不重新做 S5 acceptance** |
+| A7-05 | Flow C — 港口/天气/日历 | Port / Weather / Calendar 主要页面正常加载、切换并读取已有数据；**不重新追** MY 2027、TH 2027、PH Gazette、JMA、八港 Provider coverage（这些 blocker 保持继承） |
+| A7-06 | 浏览器验收 | 使用现有 System Chrome + CDP（**不安装 Playwright**），覆盖：首页、船舶搜索/详情、Voyage/ETA、Feed list/detail、Article 原文/中文/对照、Weather、Calendar、history/deep-link refresh、back navigation；**console errors = 0、uncaught runtime errors = 0、API unexpected 5xx = 0、Mock 泄漏到 Real Mode = 0、页面读取不得意外触发付费 Provider、retained DB writes = 0**；无无限刷新/重复抓取 |
+| A7-07 | Real Mode 边界 | Real Mode 仍 fail-closed、无 Mock fallback、已有真实证据继续有效、当前外部 unavailable 时 UI/API 如实表达、不伪造业务数据。**不要求“所有外部 Provider 此刻在线并重跑一次”** |
+| A7-08 | 已封存 blocker 保持 | S2 coverage、S3 MY 2027、S4 real samples、S5 real long-form 的 BLOCKED 项继续保持 BLOCKED，并被正确呈现为外部 blocker；不得为了让 S7 变绿去修改它们，它们也不阻止 S7 本地集成 PASS |
+| A7-09 | S7 gate（只跑一次 closeout） | clean install / dependency sanity、build、typecheck、lint、full Vitest、`git diff --check`、clean isolated DB initialization、restart persistence、production browser acceptance。开发/修复期间只跑 impacted tests；**若未影响 S5 代码，禁止重新跑 S5 专项 acceptance** |
+| A7-10 | 判定与收尾 | 上述 clean start/restart/build/核心路由/船名闭环/集成/zero Mock leakage/zero unexpected errors/retained DB 未动全部成立 → `S7 = PASS`；否则 `FAIL`（修复后重跑）或 `BLOCKED`（缺授权/环境，不做无关工作）。收尾：`docs/status.md` 写回 S7 记录、唯一现役计划/架构/AGENTS 边界一致、历史事实未改写、独立审查与真实 Neat Freak 按项目约定执行（无法执行标 `pending`）、清理只列候选、PR #1 记录本地最终结果/已接受限制/回退步骤且仍未合并未部署（CI 静默） |
 
 ### S8 最终合并 CI（需单独授权）；服务器部署/实机发布为后续独立授权范围
 
@@ -514,7 +533,7 @@ concurrency:
 | F06 | 打开完整长文并切换中文/原文/对照 | 段落/表格/图注对应，末尾内容存在；部分翻译有明确计数，不显示完整成功 |
 | F07 | 翻译中断/0 预算/限流/重启后重复阅读 | 已完成缓存可读；无即时重复收费/无界重试；缺失原文不被 AI 补写 |
 | F08 | 切换五国 2026/2027、跨月、地区和工作日筛选 | 日期/适用性/补休一致；未公布与采集缺口分开；不生成“港口必定停运” |
-| F09 | 查看商业计划与当前 ETA | 两类数据来源和含义明确；已接入计划可与承运人核对；未接入不用演示计划填充 |
+| F09 | 查看当前 ETA（商业班期已延期） | `S6 = DEFERRED / NOT_REQUIRED_FOR_CURRENT_SCOPE`：不要求商业班期页面或数据；当前 ETA 的来源与含义明确（AIS/crew-reported observation，不冒充商业班期）；不得用演示计划填充 |
 | F10 | 保存设置/关注/原文/译文后重启 | 核对关键行/版本/状态/用量/关注信息，不只看首页能打开 |
 | F11 | 从隔离数据备份恢复到新隔离库 | 完整性检查成功、关系正确、关键数据一致；不覆盖原库 |
 | F12 | 检查外部访问/跨站写入/原文恶意内容/密钥与产物 | 按 S1/S4 边界拒绝危险请求；无密钥泄露或测试路由 |
@@ -522,6 +541,8 @@ concurrency:
 | F14 | 最终 SHA 的 Actions 和发布版本核对 | 对同一 merge SHA 所有必需 job 通过，发布后实际版本一致；不借用旧分支/旧 CI 结果 |
 
 对无付费/外部权限的 F03/F06/F09 等可先完成离线确定性测试，但真实验收字段单列 `BLOCKED`。至少一次实际浏览器验收使用真正 Nitro 服务和隔离数据库。
+
+S7 在这张表之上按真实使用方式收敛为三条集成流程：**Flow A 船名开始跟踪**（船名/可选航次 → canonical identity → AIS/位置 → Voyage/ETA，缺失明确 unknown，不伪造）、**Flow B 航运资讯**（Feed list → detail → 原文 → 中文 → 双语 → historical version，只验证集成未坏，不重做 S5 acceptance）、**Flow C 港口/天气/日历**（Port/Weather/Calendar 正常加载与切换，不重追已封存 blocker）。
 
 ### 8.3 测试数据与错误场景
 
@@ -552,9 +573,8 @@ concurrency:
 | S3 | 五国两年资料状态/来源/日期/展示更新通过 | 待执行 | 当前 100 条不是新增验收 |
 | S4 | 完整正文、版本、来源、安全、持久化通过 | 待执行 | — |
 | S5 | 全文分块/对照、缓存恢复、预算和真实样本通过 | 待执行 | — |
-| S6-A | 船期入口研究和范围决定明确 | 待执行 | 不代表 S6-B 完成 |
-| S6-B | 获准计划数据接入与真实闭环通过 | 待执行 | 准入不足则 BLOCKED |
-| S7 | 干净环境最终检查及知识收尾通过 | 待执行 | — |
+| S6 | ~~商业船期研究决定及条件满足后的接入~~ **`DEFERRED / NOT_REQUIRED_FOR_CURRENT_SCOPE`**（2026-09-14） | 见 S6 节业务边界记录 | 不阻塞 S7；重新开启需新业务需求与授权 |
+| S7 | 干净本地集成验收（Clean Local Integrated Acceptance）与知识收尾 | S0–S5 已封存证据 + S6 明确延期 | 形成待合并候选版本，等待合并授权 |
 | S8 | 最终 merge CI（授权后）；服务器部署/实机发布 | 待执行 | 合并需单独授权；部署/实机为后续独立授权，本轮 `NOT_RUN` |
 
 最终汇报必须回答：实际改了什么；退役了哪些旧业务；哪些共享能力和数据被保留；每阶段测试和验收结果；失败与修复；覆盖缺口和经批准延期；最终分支、PR、merge SHA 与 CI 运行；数据备份恢复结果；文档维护情况；尚未执行的检查与未清理对象。本轮不发布：服务器部署/实机发布状态记 `NOT_RUN / 后续待授权`。合并前 `docs/status.md` 记录准确候选本地验收，并把“合并后 CI 结果”指向现有 PR；合并后把 merge SHA 与 CI run 补在该 PR，**不再自动提交“CI 已通过”的文档改动到 main 造成新 CI**。
@@ -577,7 +597,7 @@ concurrency:
 | Voyage focus-port coverage（CNYPG 未映射） | S2 核验身份/映射；无确凿关系保留未映射，不假造 `destinationPortId` |
 | Calendar official/manual completeness | S3 官方资料与年度数据闭环 |
 | JMA disabled / live-pending | 本轮不自动启用；如需启用须单独授权并满足隔离探针条件 |
-| Commercial Schedule entitlement-dependent | S6-A 研究；无入口则 BLOCKED，不用 AIS/ETA 冒充 |
+| Commercial Schedule entitlement-dependent | **S6 = `DEFERRED / NOT_REQUIRED_FOR_CURRENT_SCOPE`**（2026-09-14 业务范围调整：订舱/排船/承运人选择由货代负责，系统从船名/航次开始跟踪）；不研究、不实现、不用 AIS/ETA 冒充；重新开启需新业务需求 |
 | Public Port/Weather/Feed source-bounded coverage | S2 覆盖矩阵逐项记录，Mock 不补位 |
 | Translation title/summary-only，Event/HOT translation out of scope | S4/S5 扩展为完整正文翻译；Event/HOT 翻译仍不在本轮 |
 | 旧 NewsNow 业务/身份/OAuth/部署入口 | S1 按引用分析退役，保留许可与历史 |
