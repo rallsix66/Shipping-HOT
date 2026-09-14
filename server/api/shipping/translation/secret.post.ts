@@ -1,5 +1,6 @@
 import { FileSecretStore, SecretManagedByEnvironmentError } from "#/secrets/file-secret-store"
 import { TRANSLATION_PROVIDER_ID } from "#/services/translation-settings"
+import { clearBlockedTranslationCircuitBestEffort } from "#/services/translation-recovery"
 import { parseTranslationSecretBody } from "#/services/translation-secret"
 
 export default defineEventHandler(async (event) => {
@@ -13,6 +14,11 @@ export default defineEventHandler(async (event) => {
   const store = new FileSecretStore()
   try {
     await store.set(TRANSLATION_PROVIDER_ID, apiKey)
+    // A rotated key must be able to retry a capability that a previous
+    // credential failure blocked; a still-bad key simply re-blocks on the next
+    // call. Best-effort: the key is already stored, so a recovery failure must not
+    // be reported as a failed secret write.
+    await clearBlockedTranslationCircuitBestEffort(useDatabase(), "translation_secret_updated")
     return await store.redacted(TRANSLATION_PROVIDER_ID)
   } catch (error) {
     if (error instanceof SecretManagedByEnvironmentError) throw createError({ statusCode: 409, message: "managed_by_environment" })

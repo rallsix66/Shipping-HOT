@@ -153,4 +153,25 @@ describe("readArticleTranslationView", () => {
     const usage = native.prepare("select count(*) as n from provider_usage").get() as { n: number }
     expect(usage.n).toBe(0)
   })
+
+  it("reports ineligible when the current version's mutable completeness is no longer complete", async () => {
+    const a = version("version-a")
+    for (const block of blocks("A")) await saveCache(a.id, block)
+    const stale = detail(a, blocks("A"))
+    // The immutable version row still says complete, but the source was
+    // re-observed and is now incomplete, which is what the page displays.
+    stale.state.completenessStatus = "incomplete"
+    await expect(readArticleTranslationView(database, stale)).resolves.toMatchObject({ eligible: false, status: "ineligible" })
+  })
+
+  it("judges a history version by its own completeness, not the current state's", async () => {
+    const a = version("version-a")
+    for (const block of blocks("A")) await saveCache(a.id, block)
+    const history = detail(a, blocks("A"))
+    // A newer version B is current and is incomplete; the displayed A version is
+    // still complete and its cached translation stays readable.
+    history.state.currentVersionId = "version-b"
+    history.state.completenessStatus = "incomplete"
+    await expect(readArticleTranslationView(database, history)).resolves.toMatchObject({ versionId: "version-a", status: "complete", translated: 2 })
+  })
 })

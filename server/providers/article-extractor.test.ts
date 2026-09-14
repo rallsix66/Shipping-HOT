@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import type { ArticleSourcePolicy } from "@shared/article"
+import { type ArticleSourcePolicy, canonicalArticleBlocks, normalizeArticleBlockText } from "@shared/article"
 import { extractArticle } from "./article-extractor"
 
 const policy: ArticleSourcePolicy = {
@@ -75,5 +75,39 @@ describe("extractArticle", () => {
     expect(thin.status).toBe("incomplete")
     const empty = extractArticle("<div class='content'></div>", "https://www.portshekou.com/ywgg/1", policy)
     expect(empty.status).toBe("source_unavailable")
+  })
+
+  it("keeps one line per table row so a real multi-row table survives extraction", () => {
+    const table = "<table><thead><tr><th>Berth</th><th>Status</th></tr></thead><tbody><tr><td>1</td><td>Closed</td></tr><tr><td>2</td><td>Open</td></tr><tr><td>3</td><td>Open</td></tr></tbody></table>"
+    const page = `<div class="content"><h1>Berth table</h1>${paragraphs}${table}</div>`
+    const block = extractArticle(page, "https://www.portshekou.com/ywgg/1", policy).blocks.find(candidate => candidate.type === "table")
+    // One line per row: the reader splits on "\n" to build the rows, so a
+    // collapsed text would render a real 4-row table as a single row.
+    expect(block?.text.split("\n")).toEqual(["Berth | Status", "1 | Closed", "2 | Open", "3 | Open"])
+    expect(block?.metadata).toMatchObject({ header: true, columns: 2 })
+  })
+
+  it("never turns a newline inside a table cell into a phantom row", () => {
+    // Pretty-printed markup puts newlines inside a `<td>`; row boundaries are
+    // stored as "\n", so an un-normalized cell newline would render as an extra
+    // row holding a stray "|".
+    const table = "<table><thead><tr><th>Berth</th><th>Status</th></tr></thead><tbody>"
+      + "<tr><td>\n  <p>AE7</p>\n  <p>since 06:00</p>\n</td><td>Open</td></tr>"
+      + "<tr><td>MD2</td><td>\n Closed\n for dredging \n</td></tr></tbody></table>"
+    const page = `<div class="content"><h1>Berth table</h1>${paragraphs}${table}</div>`
+    const block = extractArticle(page, "https://www.portshekou.com/ywgg/1", policy).blocks.find(candidate => candidate.type === "table")
+    expect(block?.text.split("\n")).toEqual(["Berth | Status", "AE7 since 06:00 | Open", "MD2 | Closed for dredging"])
+    // Every rendered row must have exactly the declared column count.
+    expect(block?.text.split("\n").every(row => row.split(" | ").length === 2)).toBe(true)
+  })
+
+  it("preserving table row lines does not change the content hash input", () => {
+    // Content hashing collapses every whitespace run, so a row-preserving table
+    // hashes exactly like the previously row-collapsed text: no stored article
+    // version is invalidated by this normalization.
+    const rowPreserved = [{ id: "b0", blockKey: "0", order: 0, type: "table" as const, text: "Berth | Status\n1 | Closed", metadata: { header: true, columns: 2 } }]
+    const rowCollapsed = [{ id: "b0", blockKey: "0", order: 0, type: "table" as const, text: "Berth | Status 1 | Closed", metadata: { header: true, columns: 2 } }]
+    expect(normalizeArticleBlockText(rowPreserved[0].text)).toBe(normalizeArticleBlockText(rowCollapsed[0].text))
+    expect(canonicalArticleBlocks(rowPreserved)).toBe(canonicalArticleBlocks(rowCollapsed))
   })
 })

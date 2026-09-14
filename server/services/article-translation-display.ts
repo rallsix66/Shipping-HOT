@@ -18,10 +18,16 @@ export async function readArticleTranslationView(
 ): Promise<ArticleTranslationView | null> {
   if (!detail.currentVersion) return null
   const settings = normalizeTranslationSettings(settingsValue)
+  // The page renders `state.completenessStatus` for the current version and the
+  // version row for a history version, so the translation view judges
+  // eligibility on the same fact it displays.
+  const isCurrent = detail.state.currentVersionId === detail.currentVersion.id
   return buildArticleTranslationView({
     version: detail.currentVersion,
     blocks: detail.blocks,
     targetLanguage: settings.targetLanguage,
+    completenessStatus: isCurrent ? detail.state.completenessStatus : detail.currentVersion.completenessStatus,
+    preference: { providerId: settings.providerId, model: settings.model },
     repository: new TranslationRepository(database),
   })
 }

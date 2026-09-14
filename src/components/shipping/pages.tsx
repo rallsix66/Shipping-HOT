@@ -1414,11 +1414,17 @@ const articleTranslationStatusCopy: Record<ArticleTranslationViewStatus, { label
 
 // Same-language reuse is original text, never a model translation; each fallback
 // keeps the original visible instead of hiding or faking a translated block.
+// `historical` marks a cached string produced by a different provider/model than
+// the one now configured, so it is never presented as the current model's output.
+// `rejected` marks a cached string whose list/table skeleton no longer matches the
+// stored block: the original is shown and the badge must not claim the call failed.
 const articleBlockSourceCopy: Record<ArticleTranslationBlockSource, string | undefined> = {
   translation: undefined,
+  historical: "历史缓存（非当前模型）",
   original: "原文已是目标语言",
   pending: "翻译中",
   failed: "翻译失败",
+  rejected: "译文结构不符",
   missing: "尚未翻译",
 }
 
@@ -1501,14 +1507,17 @@ export function FeedArticlePage({ id }: { id: string }) {
   const item = data.feedItem
   const article = data.article
   const translation = article?.translation ?? null
-  const translationByKey = new Map((translation?.blocks ?? []).map(block => [block.blockKey, block]))
+  const version = article?.currentVersion
+  // Defence in depth: only pair block translations that belong to the version
+  // actually being displayed, so a server-side mixing bug cannot render another
+  // version's string inside this version's structure.
+  const translationByKey = new Map((translation && version && translation.versionId === version.id ? translation.blocks : []).map(block => [block.blockKey, block]))
   const isCurrent = !versionId || versionId === article?.state.currentVersionId
   const displayedStatus = article ? (isCurrent ? article.state.completenessStatus : article.currentVersion?.completenessStatus) : undefined
   const copy = displayedStatus ? articleCompletenessCopy[displayedStatus] : undefined
   const blocks = article?.blocks ?? []
-  const version = article?.currentVersion
-  const statusCopy = translation ? articleTranslationStatusCopy[translation.status] : undefined
-  const readingMode: ArticleReadingMode = translation ? mode : "original"
+  const statusCopy = translation && translation.eligible ? articleTranslationStatusCopy[translation.status] : undefined
+  const readingMode: ArticleReadingMode = translation?.eligible ? mode : "original"
   return (
     <ShippingShell title={item.title}>
       <SecHead eyebrow="资讯详情" title={item.title} description={item.summary} />
@@ -1537,17 +1546,22 @@ export function FeedArticlePage({ id }: { id: string }) {
         {isCurrent && article?.state.completenessStatus === "source_unavailable" && version && (
           <p className="text-rose-600 dark:text-rose-300">当前抓取失败，以下仍显示上一次成功版本，并非最新成功结果。</p>
         )}
-        {article && blocks.length > 0 && (
-          <div className="tl-chips">
-            <button type="button" className={`fbtn${readingMode === "original" ? " active" : ""}`} onClick={() => setMode("original")}>原文</button>
-            <button type="button" className={`fbtn${readingMode === "zh" ? " active" : ""}`} onClick={() => setMode("zh")}>中文</button>
-            <button type="button" className={`fbtn${readingMode === "bilingual" ? " active" : ""}`} onClick={() => setMode("bilingual")}>原文 / 中文</button>
-          </div>
-        )}
+        {article && blocks.length > 0 && (translation?.eligible
+          ? (
+              <div className="tl-chips">
+                <button type="button" className={`fbtn${readingMode === "original" ? " active" : ""}`} onClick={() => setMode("original")}>原文</button>
+                <button type="button" className={`fbtn${readingMode === "zh" ? " active" : ""}`} onClick={() => setMode("zh")}>中文</button>
+                <button type="button" className={`fbtn${readingMode === "bilingual" ? " active" : ""}`} onClick={() => setMode("bilingual")}>原文 / 中文</button>
+              </div>
+            )
+          : translation && (
+            <p className="muted">本版本不参与翻译：正文不完整或来源仅允许摘录，以下始终显示原文。</p>
+          ))}
         {translation && statusCopy && (
           <p className={statusCopy.tone}>
             {`翻译进度：已完成 ${translation.completedCount} / ${translation.total} · ${statusCopy.label}`}
             {translation.originalSameLanguage > 0 ? ` · 其中原文已是目标语言 ${translation.originalSameLanguage}` : ""}
+            {translation.historical > 0 ? ` · 其中历史缓存（非当前模型）${translation.historical}` : ""}
           </p>
         )}
         {blocks.length > 0
@@ -1557,7 +1571,7 @@ export function FeedArticlePage({ id }: { id: string }) {
                   const blockView = translationByKey.get(block.blockKey)
                   const source: ArticleTranslationBlockSource = blockView?.source ?? "missing"
                   const badge = translation ? articleBlockSourceCopy[source] : undefined
-                  if (readingMode === "zh" && translation) {
+                  if (readingMode === "zh" && translation?.eligible) {
                     return (
                       <div className="article-block" key={`${block.blockKey}-${block.order}`}>
                         <ArticleBlockView block={block} text={blockView?.translatedText ?? block.text} />
@@ -1565,7 +1579,7 @@ export function FeedArticlePage({ id }: { id: string }) {
                       </div>
                     )
                   }
-                  if (readingMode === "bilingual" && translation) {
+                  if (readingMode === "bilingual" && translation?.eligible) {
                     return (
                       <div className="article-block" key={`${block.blockKey}-${block.order}`}>
                         <ArticleBlockView block={block} />

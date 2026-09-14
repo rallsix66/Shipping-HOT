@@ -92,7 +92,7 @@ export interface ArticleVersionSummary {
 }
 
 export type ArticleTranslationViewStatus = "complete" | "partial" | "untranslated" | "ineligible"
-export type ArticleTranslationBlockSource = "translation" | "original" | "pending" | "failed" | "missing"
+export type ArticleTranslationBlockSource = "translation" | "historical" | "original" | "pending" | "failed" | "rejected" | "missing"
 
 /**
  * Translation state for one article block. Carries no block metadata: the UI
@@ -117,9 +117,13 @@ export interface ArticleTranslationView {
   status: ArticleTranslationViewStatus
   total: number
   translated: number
+  /** Successful cache rows produced by a different provider/model than the one now configured. */
+  historical: number
   originalSameLanguage: number
   pending: number
   failed: number
+  /** Successful cache rows whose string does not match this block's list/table skeleton. */
+  rejected: number
   missing: number
   completedCount: number
   blocks: ArticleTranslationBlockView[]
@@ -138,6 +142,22 @@ export interface FeedArticleDetail {
 /** Whitespace-normalized block text used for content hashing. */
 export function normalizeArticleBlockText(text: string): string {
   return text.replace(/\s+/g, " ").trim()
+}
+
+/**
+ * Line-preserving block text normalization. Table blocks store one row per
+ * line, so each line is normalized independently and empty lines are dropped.
+ * This keeps row boundaries in the *stored* text while leaving content hashing
+ * on `normalizeArticleBlockText`, which collapses every whitespace run — so a
+ * table that previously lost its row separators keeps the exact same content
+ * hash and no new article version is created by this normalization.
+ */
+export function normalizeArticleBlockLines(text: string): string {
+  return text
+    .split("\n")
+    .map(line => normalizeArticleBlockText(line))
+    .filter(Boolean)
+    .join("\n")
 }
 
 /**

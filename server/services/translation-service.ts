@@ -308,7 +308,10 @@ export class TranslationService {
       })
       if (!result.translatedText.trim()) throw new ProviderError("provider_contract_changed", "translation_provider_empty_result")
       if (hasExplicitTranslationWrapper(result.translatedText)) throw new ProviderError("provider_contract_changed", "translation_provider_wrapper_output")
-      const translatedText = restoreAndValidateProtectedTranslation(protectedSource, result.translatedText)
+      // Only the terms this caller explicitly asked to protect are rejected when
+      // they appear literally: the Provider was handed a marker for each of them,
+      // so a literal occurrence means the response added or moved structure.
+      const translatedText = restoreAndValidateProtectedTranslation(protectedSource, result.translatedText, input.protectedTerms ?? [])
       return { sourceText: input.sourceText, translatedText, sourceHash: input.sourceHash, status: "succeeded", usage: result.usage, providerCalled: true }
     } catch (error) {
       const errorCode = error instanceof ProviderError

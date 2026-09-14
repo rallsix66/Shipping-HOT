@@ -5,6 +5,7 @@ import {
   type ArticleCompletenessStatus,
   type ArticleSourcePolicy,
   canonicalizeArticleUrl,
+  normalizeArticleBlockLines,
   normalizeArticleBlockText,
 } from "@shared/article"
 
@@ -60,8 +61,10 @@ interface WalkContext {
   $: ReturnType<typeof load>
 }
 
-function pushBlock(context: WalkContext, type: ArticleBlockType, text: string, metadata?: Record<string, unknown>): void {
-  const normalized = normalizeArticleBlockText(text)
+function pushBlock(context: WalkContext, type: ArticleBlockType, text: string, metadata?: Record<string, unknown>, options?: { preserveLines?: boolean }): void {
+  // Multi-row tables store one row per line; collapsing every whitespace run
+  // would merge all rows into a single line and destroy the rendered structure.
+  const normalized = options?.preserveLines ? normalizeArticleBlockLines(text) : normalizeArticleBlockText(text)
   if (!normalized) return
   const order = context.order++
   context.blocks.push({
@@ -89,12 +92,16 @@ function listBlock(context: WalkContext, element: unknown, ordered: boolean): vo
 
 function tableBlock(context: WalkContext, element: unknown): void {
   const $table = context.$(element as never)
-  const rows = $table.find("tr").map((_, row) => context.$(row).find("th, td").map((__, cell) => context.$(cell).text()).get().join(" | ")).get() as string[]
-  const text = rows.map(row => normalizeArticleBlockText(row)).filter(Boolean).join("\n")
-  if (!text) return
+  // A cell's own text is whitespace-normalized (a pretty-printed `<td>` contains
+  // newlines around its child elements), because row boundaries are stored as
+  // "\n": an un-normalized cell newline would be indistinguishable from a row
+  // boundary and would render as a phantom row containing a stray "|".
+  const rows = $table.find("tr").map((_, row) => context.$(row).find("th, td").map((__, cell) => normalizeArticleBlockText(context.$(cell).text())).get().join(" | ")).get() as string[]
+  const text = rows.join("\n")
+  if (!text.trim()) return
   const headers = $table.find("thead th").length
   const columns = $table.find("tr").first().find("th, td").length
-  pushBlock(context, "table", text, { header: headers > 0, columns: columns || undefined })
+  pushBlock(context, "table", text, { header: headers > 0, columns: columns || undefined }, { preserveLines: true })
 }
 
 function walk(context: WalkContext, element: unknown): void {

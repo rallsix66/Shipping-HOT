@@ -190,7 +190,10 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
           // Historical/superseded, incomplete, restricted and same-language
           // versions are excluded here; they remain readable from cache.
           const plan = planArticleTranslation({
-            version: detail.currentVersion,
+            // Eligibility uses the mutable current completeness, matching what the
+            // reader is shown, so a version whose source is no longer complete is
+            // never paid for or reported as fully translated.
+            version: { ...detail.currentVersion, completenessStatus: detail.state.completenessStatus },
             blocks: detail.blocks,
             targetLanguage: targetLanguage ?? "zh-CN",
             prepare: articleService.prepare.bind(articleService),
@@ -224,7 +227,19 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
             ? await revalidateArticle(shippingRepository, articleRepository, item, articleService, now)
             : await revalidateFeed(shippingRepository, item, feedService, now)
           if (!revalidated.ok) {
-            await translationRepository.releaseTranslationClaim({ ...identity, leaseUntil, errorCode: revalidated.errorCode, errorMessage: revalidated.errorMessage, retryable: revalidated.retryable })
+            // A deferral is retryable by design (the version can come back, e.g. an
+            // A -> B -> A revert), but it must still back off: without nextRetryAt the
+            // same row would be re-claimed and re-released on every run while
+            // retry_count grew without ever throttling anything.
+            const deferredAt = now()
+            await translationRepository.releaseTranslationClaim({
+              ...identity,
+              leaseUntil,
+              errorCode: revalidated.errorCode,
+              errorMessage: revalidated.errorMessage,
+              retryable: revalidated.retryable,
+              nextRetryAt: revalidated.retryable ? translationDeferralRetryAt(claimed.retryCount ?? 0, deferredAt) : undefined,
+            })
             continue
           }
           const latestSource = revalidated.latest
@@ -252,8 +267,10 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
             break
           }
           // C-9: article-only projected budget guard. The projected cost is a
-          // local conservative estimate and is never recorded as actual spend.
-          if (item.scope === "article" && latestUsage.estimatedCost + articleConservativeProjectedCostUsd(latestSource.sourceText, latestSource.targetLanguage) > gateSettings.monthlyBudget) {
+          // local conservative estimate and is never recorded as actual spend. It is
+          // measured on the placeholder-protected text, which is what the Provider
+          // actually receives.
+          if (item.scope === "article" && latestUsage.estimatedCost + articleConservativeProjectedCostUsd(latestSource.sourceText, latestSource.targetLanguage, latestSource.maxTokens, latestSource.protectedTerms ?? []) > gateSettings.monthlyBudget) {
             const blockedAt = now().toISOString()
             await translationRepository.releaseTranslationClaim({ ...identity, leaseUntil, errorCode: "translation_budget_projected_exceeded", errorMessage: "projected cost would exceed monthly budget", retryable: true, nextRetryAt: new Date(Date.parse(blockedAt) + translationRetryBackoffMs(claimed.retryCount ?? 0)).toISOString() })
             terminalStatus = "skipped"
@@ -306,6 +323,28 @@ interface RevalidationFailure {
 }
 type RevalidationResult = { ok: true, latest: PreparedTranslationSource } | RevalidationFailure
 
+/**
+ * Article revalidation deferrals. "The state moved underneath this claim" is not
+ * a poison input: a superseded version can become current again (the supported
+ * A -> B -> A revert) and a tightened/loosened completeness rule can flip back,
+ * so these codes stay retryable with the normal growing backoff. A non-retryable
+ * release would make the block untranslatable for the life of the version with
+ * no in-product recovery.
+ */
+function articleDeferral(errorCode: string, errorMessage: string): RevalidationFailure {
+  return { ok: false, errorCode, errorMessage, retryable: true }
+}
+
+/**
+ * Retry time for a retryable deferral release. A deferral must still back off:
+ * releasing without `nextRetryAt` leaves `next_retry_at` NULL, so every 60s run
+ * re-claims and re-releases the same row while `retry_count` grows without ever
+ * throttling anything.
+ */
+export function translationDeferralRetryAt(retryCount: number, at: Date): string {
+  return new Date(at.getTime() + translationRetryBackoffMs(retryCount)).toISOString()
+}
+
 /** C-6 Feed revalidation: eligibility + field + sourceHash must be unchanged. */
 export async function revalidateFeed(shippingRepository: ShippingRepository, item: TranslationWorkItem, service: TranslationService, now: () => Date): Promise<RevalidationResult> {
   const latestItem = (await shippingRepository.listFeedItems({ now: now(), view: "current" })).find(candidate => candidate.id === item.feedItemId)
@@ -327,18 +366,22 @@ export async function revalidateFeed(shippingRepository: ShippingRepository, ite
 export async function revalidateArticle(shippingRepository: ShippingRepository, articleRepository: ArticleRepository, item: TranslationWorkItem, service: TranslationService, now: () => Date): Promise<RevalidationResult> {
   const latestItem = (await shippingRepository.listFeedItems({ now: now(), view: "current" })).find(candidate => candidate.id === item.feedItemId)
   if (!latestItem || !isFeedItemProviderTranslationEligible(latestItem, now())) {
-    return { ok: false, errorCode: "translation_source_no_longer_eligible", errorMessage: "source is no longer eligible", retryable: false }
+    // Article-scoped: a stale/expired Feed item can become current again (the same
+    // reasoning as the version deferrals), so this stays retryable-with-backoff
+    // rather than poisoning every block of the article for the life of the version.
+    // The Feed title/summary path keeps its existing terminal semantics.
+    return articleDeferral("translation_source_no_longer_eligible", "source is no longer eligible")
   }
   const detail = await articleRepository.getArticle(item.feedItemId)
   if (!detail?.currentVersion || detail.state.currentVersionId !== item.source.entityId || detail.currentVersion.id !== item.source.entityId) {
-    return { ok: false, errorCode: "translation_article_version_changed", errorMessage: "article version is no longer current", retryable: false }
+    return articleDeferral("translation_article_version_changed", "article version is no longer current")
   }
-  if (!isArticleVersionTranslationComplete(detail.currentVersion, detail.currentVersion.redistributionPolicy)) {
-    return { ok: false, errorCode: "translation_article_version_changed", errorMessage: "article version is no longer translatable", retryable: false }
+  if (!isArticleVersionTranslationComplete(detail.state, detail.currentVersion.redistributionPolicy)) {
+    return articleDeferral("translation_article_version_changed", "article version is no longer translatable")
   }
   const block = detail.blocks.find(candidate => candidate.blockKey === item.source.fieldName)
   if (!block) {
-    return { ok: false, errorCode: "translation_article_block_missing", errorMessage: "article block no longer exists", retryable: false }
+    return articleDeferral("translation_article_block_missing", "article block no longer exists")
   }
   const latest = service.prepare({
     entityType: "article_block",
@@ -351,7 +394,7 @@ export async function revalidateArticle(shippingRepository: ShippingRepository, 
     maxTokens: item.source.maxTokens,
   })
   if (latest.sourceHash !== item.source.sourceHash) {
-    return { ok: false, errorCode: "translation_source_changed", errorMessage: "source hash changed before call", retryable: false }
+    return articleDeferral("translation_source_changed", "source hash changed before call")
   }
   return { ok: true, latest }
 }

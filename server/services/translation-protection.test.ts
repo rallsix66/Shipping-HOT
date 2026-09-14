@@ -18,11 +18,23 @@ describe("translation literal protection", () => {
     expect(restoreAndValidateProtectedTranslation(protectedText, protectedText.protectedText)).toBe(source)
   })
 
-  it("restores reordered placeholders by marker identity", () => {
+  it("rejects reordered placeholders instead of silently re-pairing literals", () => {
     const protectedText = protectTranslationText("Voyage AB123 reaches SGSIN on 2026-09-02")
     const reordered = [...protectedText.placeholders].reverse().map(item => item.marker).join(" ")
-    const restored = restoreAndValidateProtectedTranslation(protectedText, reordered)
-    expect(restored).toBe([...protectedText.placeholders].reverse().map(item => item.literal).join(" "))
+    // Every marker is still present exactly once, so a count-based check would
+    // accept this and re-pair e.g. the port with the date's position.
+    expect(() => restoreAndValidateProtectedTranslation(protectedText, reordered)).toThrowError(new TranslationValidationError())
+  })
+
+  it("rejects caller-declared protected literals that reappear in the response", () => {
+    const source = "First item • Second item"
+    const protectedText = protectTranslationText(source, [" • "])
+    expect(protectedText.placeholders.map(item => item.literal)).toEqual([" • "])
+    const withInjectedSeparator = `第一项 • 额外${protectedText.protectedText}`
+    expect(() => restoreAndValidateProtectedTranslation(protectedText, withInjectedSeparator, [" • "]))
+      .toThrowError(new TranslationValidationError())
+    // Without the caller declaring it, the same literal is not treated as structure.
+    expect(restoreAndValidateProtectedTranslation(protectedText, withInjectedSeparator)).toContain(" • ")
   })
 
   it.each([

@@ -6,6 +6,8 @@ const secretStore = {
   delete: vi.fn(),
 }
 
+const recovery = { clearBlockedTranslationCircuitBestEffort: vi.fn() }
+
 class MockSecretManagedByEnvironmentError extends Error {
   statusCode = 409
   statusMessage = "managed_by_environment"
@@ -26,9 +28,11 @@ async function loadSecretHandler(kind: "get" | "post" | "delete"): Promise<Secre
     },
     SecretManagedByEnvironmentError: MockSecretManagedByEnvironmentError,
   }))
+  vi.doMock("#/services/translation-recovery", () => recovery)
   vi.stubGlobal("defineEventHandler", (handler: unknown) => handler)
   vi.stubGlobal("createError", (input: { statusCode: number, message: string }) => Object.assign(new Error(input.message), input))
   vi.stubGlobal("readBody", async (event: { body?: unknown }) => event.body)
+  vi.stubGlobal("useDatabase", () => ({}))
   const module = kind === "get"
     ? await import("./secret.get")
     : kind === "post"
@@ -47,6 +51,7 @@ describe("translation Secret API routes", () => {
   afterEach(() => {
     vi.unstubAllGlobals()
     vi.doUnmock("#/secrets/file-secret-store")
+    vi.doUnmock("#/services/translation-recovery")
     vi.resetModules()
   })
 
@@ -66,6 +71,8 @@ describe("translation Secret API routes", () => {
     expect(secretStore.set).toHaveBeenCalledWith("deepseek", "deepseek-key-1234")
     expect(result).toEqual(masked)
     expect(JSON.stringify(result)).not.toContain("deepseek-key-1234")
+    // A rotated key must be able to retry a capability a previous failure blocked.
+    expect(recovery.clearBlockedTranslationCircuitBestEffort).toHaveBeenCalledWith(expect.anything(), "translation_secret_updated")
   })
 
   it("post rejects empty and unexpected payloads without echoing submitted values", async () => {
@@ -74,6 +81,7 @@ describe("translation Secret API routes", () => {
       await expect(handler({ body })).rejects.toMatchObject({ statusCode: 400 })
     }
     expect(secretStore.set).not.toHaveBeenCalled()
+    expect(recovery.clearBlockedTranslationCircuitBestEffort).not.toHaveBeenCalled()
   })
 
   it("delete removes a file-managed secret and returns refreshed metadata", async () => {

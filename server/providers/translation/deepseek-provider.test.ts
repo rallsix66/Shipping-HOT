@@ -161,6 +161,12 @@ describe("deepSeek translation provider foundation", () => {
     const inflated = estimateConservativeDeepSeekProjectedCost({ sourceText: "\"\\\n".repeat(50), targetLanguage: "zh-CN", maxTokens: 4096 })
     const plain = estimateConservativeDeepSeekProjectedCost({ sourceText: "a".repeat(150), targetLanguage: "zh-CN", maxTokens: 4096 })
     expect(inflated).toBeGreaterThan(plain)
+    // This only bounds the payload it is handed: the caller must pass the
+    // placeholder-protected text (see articleConservativeProjectedCostUsd), because
+    // a marker-heavy table serializes up to ~3.8x longer than its raw text.
+    const raw = estimateConservativeDeepSeekProjectedCost({ sourceText: "AE7", targetLanguage: "zh-CN", maxTokens: 4096 })
+    const marked = estimateConservativeDeepSeekProjectedCost({ sourceText: "〔T1〕AE7〔T2〕〔T3〕", targetLanguage: "zh-CN", maxTokens: 4096 })
+    expect(marked).toBeGreaterThan(raw)
     // The request body builder and the estimator share the same shape.
     expect(buildDeepSeekChatRequestBody({ sourceText: "x", targetLanguage: "zh-CN", maxTokens: 4096 })).toHaveProperty("max_tokens", 4096)
   })

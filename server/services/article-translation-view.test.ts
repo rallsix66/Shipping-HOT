@@ -75,21 +75,21 @@ describe("buildArticleTranslationView", () => {
     } catch { /* disposable */ }
   })
 
-  async function saveCache(versionId: string, block: ArticleBlock, targetLanguage: string, status: "succeeded" | "pending" | "failed") {
+  async function saveCache(versionId: string, block: ArticleBlock, targetLanguage: string, status: "succeeded" | "pending" | "failed", overrides: { provider?: string, model?: string, translatedText?: string } = {}) {
     const service = new TranslationService(repository, undefined, { targetLanguage, contractVersion: ARTICLE_TRANSLATION_CONTRACT_VERSION })
     const prepared = service.prepare({ entityType: "article_block", entityId: versionId, fieldName: block.blockKey, sourceText: block.text, sourceLanguage: "en", targetLanguage })
     const now = "2026-09-12T01:00:00.000Z"
     await repository.save({
-      id: `c:${versionId}:${block.blockKey}`,
+      id: `c:${versionId}:${block.blockKey}:${overrides.provider ?? "deepseek"}`,
       entityType: "article_block",
       entityId: versionId,
       fieldName: block.blockKey,
       sourceText: block.text,
       sourceHash: prepared.sourceHash,
       targetLanguage,
-      provider: "deepseek",
-      model: "deepseek-v4-flash",
-      translatedText: status === "succeeded" ? `中:${block.text}` : undefined,
+      provider: overrides.provider ?? "deepseek",
+      model: overrides.model ?? "deepseek-v4-flash",
+      translatedText: status === "succeeded" ? overrides.translatedText ?? `中:${block.text}` : undefined,
       translatedAt: status === "succeeded" ? now : undefined,
       status,
       preferred: false,
@@ -151,5 +151,56 @@ describe("buildArticleTranslationView", () => {
     expect(view).toMatchObject({ status: "partial", translated: 1, pending: 1, failed: 1, missing: N - 3 })
     const ineligible = await buildArticleTranslationView({ version: version("v-i", { completenessStatus: "summary_only" }), blocks: all, targetLanguage: "zh-CN", repository })
     expect(ineligible).toMatchObject({ eligible: false, status: "ineligible", translated: 0 })
+  })
+
+  it("labels a string cached by another provider/model as historical, never as the current model's translation", async () => {
+    const v = version("version-h")
+    const all = blocks()
+    await saveCache(v.id, all[0], "zh-CN", "succeeded", { provider: "deepseek", model: "deepseek-v3-legacy" })
+    const view = await buildArticleTranslationView({
+      version: v,
+      blocks: all,
+      targetLanguage: "zh-CN",
+      repository,
+      preference: { providerId: "deepseek", model: "deepseek-v4-flash" },
+    })
+    expect(view).toMatchObject({ translated: 0, historical: 1, completedCount: 1, status: "partial" })
+    expect(view.blocks[0]).toMatchObject({ source: "historical", translatedText: "中:Paragraph 0 original body text." })
+  })
+
+  it("reports a cached string whose rendered list/table structure would change as rejected", async () => {
+    const v = version("version-shape")
+    const list: ArticleBlock = { id: "l0", blockKey: "0", order: 0, type: "list", text: "One • Two", metadata: { ordered: false } }
+    const table: ArticleBlock = { id: "t1", blockKey: "1", order: 1, type: "table", text: "Berth | Status\n1 | Closed", metadata: { header: true, columns: 2 } }
+    await saveCache(v.id, list, "zh-CN", "succeeded", { translatedText: "一 • 额外 • 二" })
+    await saveCache(v.id, table, "zh-CN", "succeeded", { translatedText: "泊位 | 状态 1 | 关闭" })
+    const view = await buildArticleTranslationView({ version: v, blocks: [list, table], targetLanguage: "zh-CN", repository })
+    // Counted separately from `failed` so the badge does not claim a Provider call
+    // failed; both keep the block out of the completed count.
+    expect(view).toMatchObject({ translated: 0, failed: 0, rejected: 2, status: "untranslated" })
+    expect(view.blocks.map(block => block.source)).toEqual(["rejected", "rejected"])
+    expect(view.blocks.every(block => block.translatedText === undefined)).toBe(true)
+  })
+
+  it("keeps a legacy single-line table translation that still matches its own skeleton", async () => {
+    const v = version("version-legacy")
+    // Pre-fix stored blocks collapsed every whitespace run, so this block is one
+    // line of cells; its own cached translation has the same skeleton.
+    const legacy: ArticleBlock = { id: "t0", blockKey: "0", order: 0, type: "table", text: "Berth | Status | Draft AE7 | Open | 16.5", metadata: { header: true, columns: 7 } }
+    await saveCache(v.id, legacy, "zh-CN", "succeeded", { translatedText: "ZH:Berth | ZH:Status | ZH:Draft AE7 | ZH:Open | ZH:16.5" })
+    const view = await buildArticleTranslationView({ version: v, blocks: [legacy], targetLanguage: "zh-CN", repository })
+    expect(view).toMatchObject({ translated: 1, failed: 0, status: "complete" })
+    expect(view.blocks[0]).toMatchObject({ source: "translation", translatedText: "ZH:Berth | ZH:Status | ZH:Draft AE7 | ZH:Open | ZH:16.5" })
+  })
+
+  it("judges eligibility on the mutable state completeness the page shows", async () => {
+    const v = version("version-stale")
+    for (const block of blocks()) await saveCache(v.id, block, "zh-CN", "succeeded")
+    const asComplete = await buildArticleTranslationView({ version: v, blocks: blocks(), targetLanguage: "zh-CN", repository })
+    expect(asComplete).toMatchObject({ eligible: true, status: "complete" })
+    // Same immutable version row, but the source was re-observed and is no longer
+    // complete: the view must not claim full translation beside "正文提取不完整".
+    const asIncomplete = await buildArticleTranslationView({ version: v, blocks: blocks(), targetLanguage: "zh-CN", repository, completenessStatus: "incomplete" })
+    expect(asIncomplete).toMatchObject({ eligible: false, status: "ineligible", translated: 0 })
   })
 })

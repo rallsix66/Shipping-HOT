@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { ArticleBlock, ArticleVersion } from "@shared/article"
-import { ARTICLE_TRANSLATION_CONTRACT_VERSION, planArticleTranslation } from "./article-translation-source"
+import { ARTICLE_TRANSLATION_CONTRACT_VERSION, articleBlockShape, articleConservativeProjectedCostUsd, isSameTranslationLanguage, planArticleTranslation, preservesArticleBlockShape } from "./article-translation-source"
 import { protectTranslationText, restoreAndValidateProtectedTranslation } from "#/services/translation-protection"
 import { TranslationService } from "#/services/translation-service"
 
@@ -89,5 +89,92 @@ describe("article translation source planner", () => {
     const protectedText = protectTranslationText(multiline, [" | ", "\n"])
     expect(protectedText.protectedText.includes("\n")).toBe(false)
     expect(restoreAndValidateProtectedTranslation(protectedText, protectedText.protectedText)).toBe(multiline)
+  })
+
+  it("treats region/script variants of the source language as same-language reuse", () => {
+    // Full-tag equality would treat a Simplified-Chinese page declaring `zh` or
+    // `zh-Hans` as a foreign language and pay for a Chinese->Chinese call.
+    const cases: Array<[string, boolean]> = [
+      ["zh", true],
+      ["zh-Hans", true],
+      ["zh-CN", true],
+      ["zh-SG", true],
+      ["zh-TW", false],
+      ["zh-HK", false],
+      ["zh-Hant", false],
+      ["en", false],
+      ["en-US", false],
+      ["ja", false],
+      ["auto", false],
+    ]
+    for (const [language, expected] of cases) {
+      const { result } = plan("zh-CN", version({ language }))
+      expect(result.eligible).toBe(true)
+      if (!result.eligible) continue
+      expect([language, result.sameLanguage, result.pending.length]).toEqual([language, expected, expected ? 0 : 4])
+    }
+  })
+
+  it("treats region-only variants of a non-Chinese language as the same language", () => {
+    expect(isSameTranslationLanguage("en", "en-US")).toBe(true)
+    expect(isSameTranslationLanguage("en-GB", "en-US")).toBe(true)
+    expect(isSameTranslationLanguage("en", "zh-CN")).toBe(false)
+    expect(isSameTranslationLanguage("zh-Hant", "zh-Hant")).toBe(true)
+    expect(isSameTranslationLanguage("de", "en")).toBe(false)
+    expect(isSameTranslationLanguage("auto", "auto")).toBe(false)
+    expect(isSameTranslationLanguage("unknown", "zh-CN")).toBe(false)
+  })
+
+  it("never reuses a variant or extlang tag as the bare language", () => {
+    // `yue`/`cmn` are 3-letter extlangs, not regions: treating them as regions
+    // made Cantonese look like Simplified Chinese, so the source was shown as
+    // "already the target language" and never translated.
+    expect(isSameTranslationLanguage("zh-yue", "zh-CN")).toBe(false)
+    expect(isSameTranslationLanguage("zh-cmn", "zh-CN")).toBe(false)
+    expect(isSameTranslationLanguage("zh-yue", "zh-Hant")).toBe(false)
+    expect(isSameTranslationLanguage("en-GB-oxendict", "en-GB")).toBe(false)
+    expect(isSameTranslationLanguage("en-GB-oxendict", "en-US-oxendict")).toBe(true)
+    expect(isSameTranslationLanguage("de-CH-1901", "de-DE")).toBe(false)
+    // A numeric UN M.49 region is still a region, not a variant.
+    expect(isSameTranslationLanguage("es-419", "es-MX")).toBe(true)
+    expect(isSameTranslationLanguage("zh-Hans-CN", "zh-CN")).toBe(true)
+    expect(isSameTranslationLanguage("zh-Hant-CN", "zh-CN")).toBe(false)
+  })
+
+  it("detects a translated block whose rendered structure no longer matches the source", () => {
+    const list = { type: "list" as const, text: "One • Two" }
+    expect(preservesArticleBlockShape(list, "一 • 二")).toBe(true)
+    // An extra model-inserted separator would render a third <li>.
+    expect(preservesArticleBlockShape(list, "一 • 额外 • 二")).toBe(false)
+    const table = { type: "table" as const, text: "Berth | Status\n1 | Closed" }
+    expect(preservesArticleBlockShape(table, "泊位 | 状态\n1 | 关闭")).toBe(true)
+    // Losing the row boundary collapses the table into a single row.
+    expect(preservesArticleBlockShape(table, "泊位 | 状态 1 | 关闭")).toBe(false)
+    // An extra model-inserted newline adds a phantom row.
+    expect(preservesArticleBlockShape(table, "泊位 | 状态\n1 | 关闭\n2 | 开放")).toBe(false)
+    // An extra model-inserted cell shifts every column.
+    expect(preservesArticleBlockShape(table, "泊位 | 状态 | 备注\n1 | 关闭 | -")).toBe(false)
+    expect(preservesArticleBlockShape({ type: "paragraph" as const, text: "Body" }, "正文")).toBe(true)
+    expect(articleBlockShape(table)).toEqual({ rows: 2, cells: [2, 2] })
+  })
+
+  it("projects the article cost from the placeholder-protected payload, not the raw text", () => {
+    // A marker-heavy table serializes far longer than its raw text, so projecting
+    // from the raw source under-estimated the real request by ~3.8x. Protecting the
+    // structural separators and the caller's terms only lengthens the payload, so the
+    // projection must grow in that order.
+    const table = "AE7 | Open | 16.5\nMD2 | Closed | 11.0"
+    const terms = ["AE7", "MD2", "16.5", "11.0"]
+    const raw = articleConservativeProjectedCostUsd(table, "zh-CN", 4096)
+    const separatorsOnly = articleConservativeProjectedCostUsd(table, "zh-CN", 4096, [])
+    const projected = articleConservativeProjectedCostUsd(table, "zh-CN", 4096, terms)
+    // No terms means no placeholders, so the projection is unchanged...
+    expect(separatorsOnly).toBe(raw)
+    // ...while the article path's real terms lengthen the serialized payload.
+    expect(projected).toBeGreaterThan(raw)
+    // The provider is handed exactly protectTranslationText(...).protectedText, so the
+    // guard is measured on the payload that is really serialized.
+    const protectedText = protectTranslationText(table, terms).protectedText
+    expect(protectedText.length).toBeGreaterThan(table.length)
   })
 })

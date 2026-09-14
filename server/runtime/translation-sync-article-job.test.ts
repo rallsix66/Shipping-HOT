@@ -11,7 +11,7 @@ import type { SecretSource, SecretStore, TranslationRequest } from "#/providers/
 import { FakeTranslationProvider } from "#/providers/translation/fake-provider"
 import { ARTICLE_TRANSLATION_CONTRACT_VERSION } from "#/services/article-translation-source"
 import { TranslationService } from "#/services/translation-service"
-import { type TranslationWorkItem, createTranslationSyncJob, orderTranslationWork, revalidateArticle } from "#/runtime/translation-sync-job"
+import { type TranslationWorkItem, createTranslationSyncJob, orderTranslationWork, revalidateArticle, translationDeferralRetryAt } from "#/runtime/translation-sync-job"
 
 function createNativeDatabase() {
   const native = new NativeDatabase(":memory:")
@@ -221,6 +221,52 @@ describe("translation-sync article blocks (C-5..C-10)", () => {
 
     const currentItem: TranslationWorkItem = { scope: "article", feedItemId: "feed-art-1", source: service.prepare({ entityType: "article_block", entityId: "version-b", fieldName: "0", sourceText: "A different body.", sourceLanguage: "en", targetLanguage: "zh-CN" }) }
     await expect(revalidateArticle(state.shippingRepository, state.articleRepository, currentItem, service, () => CLOCK)).resolves.toMatchObject({ ok: false, errorCode: "translation_source_changed" })
+  })
+
+  it("treats a superseded version as a retryable, backed-off deferral so an A -> B -> A revert recovers", async () => {
+    const state = await preparedState()
+    await seedVersion(state.articleRepository, { feedItemId: "feed-art-1", versionId: "version-a" })
+    await seedVersion(state.articleRepository, { feedItemId: "feed-art-1", versionId: "version-b" })
+    const provider = translationProvider()
+    const service = new TranslationService(state.translationRepository, provider, { targetLanguage: "zh-CN", contractVersion: ARTICLE_TRANSLATION_CONTRACT_VERSION })
+    const item: TranslationWorkItem = { scope: "article", feedItemId: "feed-art-1", source: service.prepare({ entityType: "article_block", entityId: "version-a", fieldName: "0", sourceText: "Paragraph zero.", sourceLanguage: "en", targetLanguage: "zh-CN" }) }
+    await expect(revalidateArticle(state.shippingRepository, state.articleRepository, item, service, () => CLOCK)).resolves.toMatchObject({ ok: false, errorCode: "translation_article_version_changed", retryable: true })
+
+    // The job's own deferral release shape: retryable AND backed off, so the row is
+    // not re-claimed on every run while retry_count grows.
+    const identity = { entityType: "article_block", entityId: "version-a", fieldName: "0", sourceHash: item.source.sourceHash, targetLanguage: "zh-CN", provider: "deepseek", model: "deepseek-v4-flash" }
+    const claimed = await state.translationRepository.claimTranslationWork({ ...identity, sourceText: item.source.sourceText, sourceLanguage: "en", now: NOW_ISO, leaseUntil: "2026-09-02T00:31:00.000Z" })
+    if (!claimed?.leaseUntil) throw new Error("deferral claim missing lease")
+    const retryAt = translationDeferralRetryAt(claimed.retryCount ?? 0, CLOCK)
+    expect(Date.parse(retryAt)).toBeGreaterThan(Date.parse(NOW_ISO))
+    await expect(state.translationRepository.releaseTranslationClaim({
+      ...identity,
+      leaseUntil: claimed.leaseUntil,
+      errorCode: "translation_article_version_changed",
+      errorMessage: "article version is no longer current",
+      retryable: true,
+      nextRetryAt: retryAt,
+    })).resolves.toMatchObject({ status: "failed", retryable: true, lastErrorCode: "translation_article_version_changed" })
+    await expect(state.translationRepository.claimTranslationWork({ ...identity, sourceText: item.source.sourceText, sourceLanguage: "en", now: NOW_ISO, leaseUntil: "2026-09-02T00:32:00.000Z" })).resolves.toBeUndefined()
+    const reclaimed = await state.translationRepository.claimTranslationWork({ ...identity, sourceText: item.source.sourceText, sourceLanguage: "en", now: new Date(Date.parse(retryAt) + 1000).toISOString(), leaseUntil: "2026-09-02T00:33:00.000Z" })
+    expect(reclaimed).toMatchObject({ retryCount: 1 })
+    if (!reclaimed?.leaseUntil) throw new Error("reclaim missing lease")
+    // Hand the row back to the same deferred state so the assertions below see the
+    // real job behaviour (a live lease would simply look like another worker).
+    await state.translationRepository.releaseTranslationClaim({ ...identity, leaseUntil: reclaimed.leaseUntil, errorCode: "translation_article_version_changed", errorMessage: "article version is no longer current", retryable: true, nextRetryAt: retryAt })
+
+    // The supported A -> B -> A revert makes version A current again, and the job
+    // then translates it instead of leaving the block terminal. The deferred block
+    // waits for its own backoff, so the two blocks are translated 1 then 2.
+    await seedVersion(state.articleRepository, { feedItemId: "feed-art-1", versionId: "version-a" })
+    await expect(revalidateArticle(state.shippingRepository, state.articleRepository, item, service, () => CLOCK)).resolves.toMatchObject({ ok: true })
+    await expect(jobFor(state, provider).run()).resolves.toMatchObject({ recordsWritten: 1 })
+    expect(provider.calls.map(call => `${call.entityId}:${call.fieldName}`)).toEqual(["version-a:1"])
+
+    const afterBackoff = () => new Date(Date.parse(retryAt) + 1000)
+    const recovered = createTranslationSyncJob({ database: state.database, dataMode: "real", provider, secretStore: new TestSecretStore(), now: afterBackoff, maxFieldsPerRun: 5 })
+    await expect(recovered.run()).resolves.toMatchObject({ recordsWritten: 1 })
+    expect(provider.calls.map(call => `${call.entityId}:${call.fieldName}`).sort()).toEqual(["version-a:0", "version-a:1"])
   })
 
   it("orders Feed before Article and interleaves without starvation", () => {
