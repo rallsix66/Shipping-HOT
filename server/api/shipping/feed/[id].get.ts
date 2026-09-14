@@ -1,6 +1,8 @@
 import process from "node:process"
+import { defaultShippingSettings } from "#/database/runtime"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { ArticleService } from "#/services/article-service"
+import { readArticleTranslationView } from "#/services/article-translation-display"
 
 export default defineEventHandler(async (event) => {
   const database = useDatabase()
@@ -27,8 +29,11 @@ export default defineEventHandler(async (event) => {
     setResponseStatus(event, 404)
     return { error: "article_version_not_found" }
   }
+  if (!article) return { feedItem: item, article: null }
+  const settings = await repository.getSettings() ?? defaultShippingSettings
+  const translation = await readArticleTranslationView(database, article, settings.translation)
   return {
     feedItem: item,
-    article: article ?? null,
+    article: { ...article, translation },
   }
 })

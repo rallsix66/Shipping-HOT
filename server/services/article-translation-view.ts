@@ -1,36 +1,9 @@
-import type { ArticleBlock, ArticleBlockType, ArticleVersion } from "@shared/article"
+import type { ArticleBlock, ArticleTranslationBlockView, ArticleTranslationView, ArticleTranslationViewStatus, ArticleVersion } from "@shared/article"
 import { type TranslationRepository, translationLookupKey } from "#/database/translation"
 import { ARTICLE_TRANSLATION_CONTRACT_VERSION, planArticleTranslation } from "#/services/article-translation-source"
 import { TranslationService, canonicalLanguage } from "#/services/translation-service"
 
-export type ArticleTranslationViewStatus = "complete" | "partial" | "untranslated" | "ineligible"
-export type ArticleTranslationBlockSource = "translation" | "original" | "pending" | "failed" | "missing"
-
-export interface ArticleTranslationBlockView {
-  blockKey: string
-  order: number
-  type: ArticleBlockType
-  text: string
-  translatedText?: string
-  /** `original` for same-language reuse; never disguised as a model translation. */
-  source: ArticleTranslationBlockSource
-}
-
-export interface ArticleTranslationView {
-  versionId: string
-  targetLanguage: string
-  sourceLanguage: string
-  eligible: boolean
-  status: ArticleTranslationViewStatus
-  total: number
-  translated: number
-  originalSameLanguage: number
-  pending: number
-  failed: number
-  missing: number
-  completedCount: number
-  blocks: ArticleTranslationBlockView[]
-}
+export type { ArticleTranslationBlockSource, ArticleTranslationBlockView, ArticleTranslationView, ArticleTranslationViewStatus } from "@shared/article"
 
 /**
  * Provider-free derivation of the translation state for one article version.

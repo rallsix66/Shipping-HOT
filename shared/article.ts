@@ -91,12 +91,48 @@ export interface ArticleVersionSummary {
   completenessStatus: ArticleCompletenessStatus
 }
 
+export type ArticleTranslationViewStatus = "complete" | "partial" | "untranslated" | "ineligible"
+export type ArticleTranslationBlockSource = "translation" | "original" | "pending" | "failed" | "missing"
+
+/**
+ * Translation state for one article block. Carries no block metadata: the UI
+ * reuses the original ArticleBlock (heading/list/table/caption/href) and pairs
+ * translation purely by blockKey/order.
+ */
+export interface ArticleTranslationBlockView {
+  blockKey: string
+  order: number
+  type: ArticleBlockType
+  text: string
+  translatedText?: string
+  /** `original` for same-language reuse; never disguised as a model translation. */
+  source: ArticleTranslationBlockSource
+}
+
+export interface ArticleTranslationView {
+  versionId: string
+  targetLanguage: string
+  sourceLanguage: string
+  eligible: boolean
+  status: ArticleTranslationViewStatus
+  total: number
+  translated: number
+  originalSameLanguage: number
+  pending: number
+  failed: number
+  missing: number
+  completedCount: number
+  blocks: ArticleTranslationBlockView[]
+}
+
 export interface FeedArticleDetail {
   feedItemId: string
   state: ArticleState
   currentVersion?: ArticleVersion
   blocks: ArticleBlock[]
   versions: ArticleVersionSummary[]
+  /** Provider-free translation view for the version actually displayed. */
+  translation?: ArticleTranslationView | null
 }
 
 /** Whitespace-normalized block text used for content hashing. */
