@@ -1,5 +1,6 @@
 import type { Database } from "db0"
 import type { ShippingDataMode } from "#/database/runtime"
+import { ArticleRepository } from "#/database/article"
 import { ShippingRepository } from "#/database/shipping"
 import { type TranslationCacheExactLookup, TranslationRepository } from "#/database/translation"
 import { RuntimeRepository, isProviderCircuitBlocked } from "#/database/runtime-jobs"
@@ -12,7 +13,15 @@ import {
   TRANSLATION_PROVIDER_ID,
   assertTranslationReady,
   currentTranslationUsage,
+  normalizeTranslationSettings,
 } from "#/services/translation-settings"
+import {
+  ARTICLE_TRANSLATION_CONTRACT_VERSION,
+  articleBlockProtectedTerms,
+  articleProjectedUpperBoundUsd,
+  isArticleVersionTranslationComplete,
+  planArticleTranslation,
+} from "#/services/article-translation-source"
 import { type PreparedTranslationSource, TranslationService, feedTranslationSources, isFeedItemProviderTranslationEligible } from "#/services/translation-service"
 import { isTranslationCircuitBlockingFailure, isTranslationRetryableFailure, translationRetryBackoffMs } from "#/services/translation-failure-policy"
 import { withTranslationExecutor } from "#/services/translation-executor"
@@ -23,6 +32,14 @@ export const TRANSLATION_SYNC_INTERVAL_MS = 60_000
 export const TRANSLATION_MAX_FIELDS_PER_RUN = 5
 export const TRANSLATION_PROVIDER_TIMEOUT_MS = 20_000
 export const TRANSLATION_LEASE_MS = 45_000
+
+export type TranslationWorkScope = "feed" | "article"
+
+export interface TranslationWorkItem {
+  scope: TranslationWorkScope
+  feedItemId: string
+  source: PreparedTranslationSource
+}
 
 function errorCode(error: unknown): string {
   if (error instanceof Error && "code" in error && typeof (error as Error & { code?: unknown }).code === "string") return (error as Error & { code: string }).code
@@ -41,10 +58,12 @@ function identityFrom(source: PreparedTranslationSource, provider: TranslationPr
   }
 }
 
-function usageFor(source: PreparedTranslationSource, result: { status: "succeeded" | "failed" | "unconfigured", usage?: { promptTokens?: number, completionTokens?: number }, errorCode?: string, translatedText: string, providerCalled: boolean }, now: string) {
+function usageFor(source: PreparedTranslationSource, scope: TranslationWorkScope, result: { status: "succeeded" | "failed" | "unconfigured", usage?: { promptTokens?: number, completionTokens?: number }, errorCode?: string, translatedText: string, providerCalled: boolean }, now: string) {
   return {
     providerId: TRANSLATION_PROVIDER_ID,
     capability: TRANSLATION_CAPABILITY,
+    // Only a real Provider call produces request/cost; cache, same-language,
+    // stale/version/hash releases and budget blocks never reach this function.
     request: result.providerCalled,
     succeeded: result.providerCalled && result.status === "succeeded",
     failed: result.providerCalled && result.status === "failed",
@@ -56,7 +75,7 @@ function usageFor(source: PreparedTranslationSource, result: { status: "succeede
     estimatedCost: result.providerCalled ? estimateDeepSeekCost(result.usage, new Date(now)) : 0,
     currency: TRANSLATION_CURRENCY,
     pricingReference: DEEPSEEK_PRICING_REFERENCE,
-    sourceScope: "feed",
+    sourceScope: scope,
     calledAt: now,
     errorCode: result.errorCode,
   }
@@ -72,6 +91,27 @@ function sortedFeedItems(items: Awaited<ReturnType<ShippingRepository["listFeedI
   })
 }
 
+/**
+ * Deterministic fairness order. When both kinds have pending work the first two
+ * positions are Feed then Article, so neither can starve the other, and the rest
+ * alternate. A single kind keeps its natural order. The run applies
+ * TRANSLATION_MAX_FIELDS_PER_RUN to *processed* work, not to this ordering, so a
+ * source that cannot be claimed never burns another source's slot.
+ */
+export function orderTranslationWork(feed: TranslationWorkItem[], article: TranslationWorkItem[]): TranslationWorkItem[] {
+  if (feed.length === 0 || article.length === 0) return [...feed, ...article]
+  const queues: [TranslationWorkItem[], TranslationWorkItem[]] = [feed.slice(), article.slice()]
+  const ordered: TranslationWorkItem[] = []
+  let turn = 0
+  while (queues[0].length > 0 || queues[1].length > 0) {
+    const index = queues[turn % 2].length > 0 ? turn % 2 : (turn + 1) % 2
+    const next = queues[index].shift()
+    if (next) ordered.push(next)
+    turn += 1
+  }
+  return ordered
+}
+
 export interface TranslationSyncJobOptions {
   database: Database
   dataMode: ShippingDataMode
@@ -85,6 +125,7 @@ export interface TranslationSyncJobOptions {
 
 export function createTranslationSyncJob(options: TranslationSyncJobOptions): RuntimeJob {
   const shippingRepository = new ShippingRepository(options.database, options.dataMode)
+  const articleRepository = new ArticleRepository(options.database)
   const translationRepository = new TranslationRepository(options.database)
   const runtimeRepository = new RuntimeRepository(options.database)
   const now = options.now ?? (() => new Date())
@@ -120,23 +161,56 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
 
         await translationRepository.recoverStaleLeases({ provider: provider.providerId, model: provider.model, now: nowIso, limit: 100 })
         const feedItems = sortedFeedItems(await shippingRepository.listFeedItems({ now: runAt, view: "current" }))
-        const sources = feedItems
-          .filter(item => isFeedItemProviderTranslationEligible(item, runAt))
-          .flatMap(item => feedTranslationSources(item, settings?.translation?.targetLanguage, undefined, runAt))
-        const service = new TranslationService(translationRepository, provider, {
-          targetLanguage: settings?.translation?.targetLanguage,
+        const targetLanguage = settings?.translation?.targetLanguage
+        const feedService = new TranslationService(translationRepository, provider, {
+          targetLanguage,
           preference: { providerId: provider.providerId, model: provider.model },
           now: () => now().toISOString(),
         })
+        const articleService = new TranslationService(translationRepository, provider, {
+          targetLanguage,
+          preference: { providerId: provider.providerId, model: provider.model },
+          now: () => now().toISOString(),
+          contractVersion: ARTICLE_TRANSLATION_CONTRACT_VERSION,
+        })
+
+        // C-5: Feed title/summary plus eligible current ArticleVersion blocks.
+        const feedWork: TranslationWorkItem[] = []
+        for (const item of feedItems) {
+          if (!isFeedItemProviderTranslationEligible(item, runAt)) continue
+          for (const source of feedTranslationSources(item, targetLanguage, undefined, runAt)) {
+            feedWork.push({ scope: "feed", feedItemId: item.id, source: feedService.prepare(source) })
+          }
+        }
+        const articleWork: TranslationWorkItem[] = []
+        for (const item of feedItems) {
+          if (!isFeedItemProviderTranslationEligible(item, runAt)) continue
+          const detail = await articleRepository.getArticle(item.id)
+          if (!detail?.currentVersion || detail.state.currentVersionId !== detail.currentVersion.id) continue
+          // Historical/superseded, incomplete, restricted and same-language
+          // versions are excluded here; they remain readable from cache.
+          const plan = planArticleTranslation({
+            version: detail.currentVersion,
+            blocks: detail.blocks,
+            targetLanguage: targetLanguage ?? "zh-CN",
+            prepare: articleService.prepare.bind(articleService),
+          })
+          if (!plan.eligible) continue
+          for (const source of plan.pending) articleWork.push({ scope: "article", feedItemId: item.id, source })
+        }
+        const candidateCount = feedWork.length + articleWork.length
+        const work = orderTranslationWork(feedWork, articleWork)
+
         let processed = 0
         let succeeded = 0
         let stopAfterFailure = false
         let terminalStatus: SyncResult["status"] = "success"
         let terminalErrorCode: string | undefined
 
-        for (const source of sources) {
+        for (const item of work) {
           if (processed >= maxFields || stopAfterFailure) break
-          const prepared = service.prepare(source)
+          const service = item.scope === "article" ? articleService : feedService
+          const prepared = item.source
           const claimAt = now()
           const claimAtIso = claimAt.toISOString()
           const leaseUntil = new Date(claimAt.getTime() + TRANSLATION_LEASE_MS).toISOString()
@@ -145,20 +219,15 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
           if (!claimed) continue
           processed += 1
 
-          const latestFeedItems = await shippingRepository.listFeedItems({ now: now(), view: "current" })
-          const latestItem = latestFeedItems.find(item => item.id === source.entityId)
-          const latestSource = latestItem && isFeedItemProviderTranslationEligible(latestItem, now())
-            ? feedTranslationSources(latestItem, prepared.targetLanguage, prepared.sourceLanguage, now()).find(candidate => candidate.fieldName === source.fieldName)
-            : undefined
-          if (!latestSource) {
-            await translationRepository.releaseTranslationClaim({ ...identity, leaseUntil, errorCode: "translation_source_no_longer_eligible", errorMessage: "source is no longer eligible", retryable: false })
+          // C-6: re-read real state after claiming, before any Provider call.
+          const revalidated = item.scope === "article"
+            ? await revalidateArticle(shippingRepository, articleRepository, item, articleService, now)
+            : await revalidateFeed(shippingRepository, item, feedService, now)
+          if (!revalidated.ok) {
+            await translationRepository.releaseTranslationClaim({ ...identity, leaseUntil, errorCode: revalidated.errorCode, errorMessage: revalidated.errorMessage, retryable: revalidated.retryable })
             continue
           }
-          const latestPrepared = service.prepare(latestSource)
-          if (latestPrepared.sourceHash !== claimed.sourceHash) {
-            await translationRepository.releaseTranslationClaim({ ...identity, leaseUntil, errorCode: "translation_source_changed", errorMessage: "source hash changed before call", retryable: false })
-            continue
-          }
+          const latestSource = revalidated.latest
           if (await translationRepository.findExactSuccessful(identity)) {
             await translationRepository.releaseTranslationClaim({ ...identity, leaseUntil, errorCode: "translation_exact_cache_appeared", errorMessage: "exact success appeared before call", retryable: false })
             continue
@@ -166,8 +235,9 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
 
           const latestRuntime = await runtimeRepository.getProviderRuntime(TRANSLATION_PROVIDER_ID, TRANSLATION_CAPABILITY)
           const latestUsage = await currentTranslationUsage(options.database, now())
+          const gateSettings = normalizeTranslationSettings((await shippingRepository.getSettings())?.translation)
           try {
-            await assertTranslationReady((await shippingRepository.getSettings())?.translation, options.secretStore, latestUsage.estimatedCost)
+            await assertTranslationReady(gateSettings, options.secretStore, latestUsage.estimatedCost)
           } catch (error) {
             const gateFailureAt = now().toISOString()
             await translationRepository.releaseTranslationClaim({ ...identity, leaseUntil, errorCode: "translation_gate_changed", errorMessage: errorCode(error), retryable: true, nextRetryAt: gateFailureAt })
@@ -181,10 +251,19 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
             terminalErrorCode = latestRuntime?.errorCode ?? "translation_provider_circuit_blocked"
             break
           }
+          // C-9: article-only projected budget guard. projectedUpperBound is a
+          // local conservative estimate and is never recorded as actual spend.
+          if (item.scope === "article" && latestUsage.estimatedCost + articleProjectedUpperBoundUsd(latestSource.sourceText) > gateSettings.monthlyBudget) {
+            const blockedAt = now().toISOString()
+            await translationRepository.releaseTranslationClaim({ ...identity, leaseUntil, errorCode: "translation_budget_projected_exceeded", errorMessage: "projected upper bound would exceed monthly budget", retryable: true, nextRetryAt: new Date(Date.parse(blockedAt) + translationRetryBackoffMs(claimed.retryCount ?? 0)).toISOString() })
+            terminalStatus = "skipped"
+            terminalErrorCode = "translation_budget_projected_exceeded"
+            break
+          }
 
           const execution = await service.execute(latestSource)
           const completedAt = now().toISOString()
-          const usagePatch = usageFor(latestPrepared, execution, completedAt)
+          const usagePatch = usageFor(latestSource, item.scope, execution, completedAt)
           if (execution.status === "succeeded") {
             await translationRepository.completeTranslationSuccess({ ...identity, leaseUntil, now: completedAt, translatedText: execution.translatedText, translatedAt: completedAt, providerUsage: usagePatch })
             succeeded += 1
@@ -210,11 +289,69 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
 
         return {
           status: terminalStatus,
-          recordsRead: sources.length,
+          recordsRead: candidateCount,
           recordsWritten: succeeded,
           errorCode: terminalErrorCode,
         }
       })
     },
   }
+}
+
+interface RevalidationFailure {
+  ok: false
+  errorCode: string
+  errorMessage: string
+  retryable: boolean
+}
+type RevalidationResult = { ok: true, latest: PreparedTranslationSource } | RevalidationFailure
+
+/** C-6 Feed revalidation: eligibility + field + sourceHash must be unchanged. */
+export async function revalidateFeed(shippingRepository: ShippingRepository, item: TranslationWorkItem, service: TranslationService, now: () => Date): Promise<RevalidationResult> {
+  const latestItem = (await shippingRepository.listFeedItems({ now: now(), view: "current" })).find(candidate => candidate.id === item.feedItemId)
+  if (!latestItem || !isFeedItemProviderTranslationEligible(latestItem, now())) {
+    return { ok: false, errorCode: "translation_source_no_longer_eligible", errorMessage: "source is no longer eligible", retryable: false }
+  }
+  const latestSource = feedTranslationSources(latestItem, item.source.targetLanguage, item.source.sourceLanguage, now()).find(candidate => candidate.fieldName === item.source.fieldName)
+  if (!latestSource) {
+    return { ok: false, errorCode: "translation_source_no_longer_eligible", errorMessage: "source is no longer eligible", retryable: false }
+  }
+  const latest = service.prepare(latestSource)
+  if (latest.sourceHash !== item.source.sourceHash) {
+    return { ok: false, errorCode: "translation_source_changed", errorMessage: "source hash changed before call", retryable: false }
+  }
+  return { ok: true, latest }
+}
+
+/** C-6 Article revalidation: current version, policy, block and hash unchanged. */
+export async function revalidateArticle(shippingRepository: ShippingRepository, articleRepository: ArticleRepository, item: TranslationWorkItem, service: TranslationService, now: () => Date): Promise<RevalidationResult> {
+  const latestItem = (await shippingRepository.listFeedItems({ now: now(), view: "current" })).find(candidate => candidate.id === item.feedItemId)
+  if (!latestItem || !isFeedItemProviderTranslationEligible(latestItem, now())) {
+    return { ok: false, errorCode: "translation_source_no_longer_eligible", errorMessage: "source is no longer eligible", retryable: false }
+  }
+  const detail = await articleRepository.getArticle(item.feedItemId)
+  if (!detail?.currentVersion || detail.state.currentVersionId !== item.source.entityId || detail.currentVersion.id !== item.source.entityId) {
+    return { ok: false, errorCode: "translation_article_version_changed", errorMessage: "article version is no longer current", retryable: false }
+  }
+  if (!isArticleVersionTranslationComplete(detail.currentVersion, detail.currentVersion.redistributionPolicy)) {
+    return { ok: false, errorCode: "translation_article_version_changed", errorMessage: "article version is no longer translatable", retryable: false }
+  }
+  const block = detail.blocks.find(candidate => candidate.blockKey === item.source.fieldName)
+  if (!block) {
+    return { ok: false, errorCode: "translation_article_block_missing", errorMessage: "article block no longer exists", retryable: false }
+  }
+  const latest = service.prepare({
+    entityType: "article_block",
+    entityId: detail.currentVersion.id,
+    fieldName: block.blockKey,
+    sourceText: block.text,
+    sourceLanguage: item.source.sourceLanguage,
+    targetLanguage: item.source.targetLanguage,
+    protectedTerms: articleBlockProtectedTerms(block),
+    maxTokens: item.source.maxTokens,
+  })
+  if (latest.sourceHash !== item.source.sourceHash) {
+    return { ok: false, errorCode: "translation_source_changed", errorMessage: "source hash changed before call", retryable: false }
+  }
+  return { ok: true, latest }
 }

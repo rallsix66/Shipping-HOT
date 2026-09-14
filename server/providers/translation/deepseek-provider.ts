@@ -164,6 +164,7 @@ export function createDeepSeekTranslationProvider(options: DeepSeekTranslationPr
             ],
             thinking: { type: "disabled" },
             stream: false,
+            ...(typeof request.maxTokens === "number" && request.maxTokens > 0 ? { max_tokens: request.maxTokens } : {}),
           }),
           signal: controller.signal,
         })

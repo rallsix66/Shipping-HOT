@@ -33,6 +33,11 @@ export interface TranslationRequest {
   entityType: string
   entityId: string
   fieldName: string
+  /**
+   * Optional output cap. Only the article-block path sets it, so the local
+   * projected budget upper bound has a real ceiling; Feed is unchanged.
+   */
+  maxTokens?: number
 }
 
 export interface TranslationResult {

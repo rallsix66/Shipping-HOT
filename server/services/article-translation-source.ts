@@ -1,5 +1,24 @@
 import type { ArticleBlock, ArticleVersion } from "@shared/article"
+import { DEEPSEEK_PRICING_USD_PER_MILLION } from "#/providers/translation/deepseek-provider"
 import { type PreparedTranslationSource, type TranslationSource, canonicalLanguage } from "#/services/translation-service"
+
+/**
+ * Optional output cap for the article path only; gives the projected budget
+ * bound a real ceiling. Feed title/summary keeps its default request shape.
+ */
+export const ARTICLE_TRANSLATION_MAX_OUTPUT_TOKENS = 4096
+
+/**
+ * Local conservative pre-call budget upper bound (NOT provider actual usage).
+ * Uses 1 token per input character and the higher peak rate, so it over-estimates
+ * rather than under-budgets. Actual spend always comes from estimateDeepSeekCost()
+ * on the Provider-returned usage.
+ */
+export function articleProjectedUpperBoundUsd(sourceText: string): number {
+  const promptTokens = sourceText.length
+  const rates = DEEPSEEK_PRICING_USD_PER_MILLION.peak
+  return (promptTokens * rates.promptCacheMiss + ARTICLE_TRANSLATION_MAX_OUTPUT_TOKENS * rates.output) / 1_000_000
+}
 
 /**
  * Independent, stable contract for article-block translation. Bump this when
@@ -69,6 +88,7 @@ export function planArticleTranslation(input: {
       sourceLanguage,
       targetLanguage,
       protectedTerms: articleBlockProtectedTerms(block),
+      maxTokens: ARTICLE_TRANSLATION_MAX_OUTPUT_TOKENS,
     }))
   }
   return { eligible: true, versionId: version.id, targetLanguage, sourceLanguage, sameLanguage, total: usable.length, pending, originalReuseBlockKeys }

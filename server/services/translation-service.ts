@@ -21,6 +21,7 @@ export interface TranslationSource {
   sourceLanguage?: string
   targetLanguage?: string
   protectedTerms?: string[]
+  maxTokens?: number
 }
 
 export interface TranslationOutcome {
@@ -303,6 +304,7 @@ export class TranslationService {
         entityType: input.entityType,
         entityId: input.entityId,
         fieldName: input.fieldName,
+        maxTokens: input.maxTokens,
       })
       if (!result.translatedText.trim()) throw new ProviderError("provider_contract_changed", "translation_provider_empty_result")
       if (hasExplicitTranslationWrapper(result.translatedText)) throw new ProviderError("provider_contract_changed", "translation_provider_wrapper_output")
