@@ -19,7 +19,7 @@
 ## Commands
 
 - Install: `pnpm install --frozen-lockfile`
-- Run (dev): `pnpm dev`
+- Run (dev): `pnpm dev` — **it opens and continuously writes the retained database** `.data/shipping-hot-v3.sqlite3`, because `db0` resolves `.data/<name>.sqlite3` against the process **working directory** (`nitro.config.ts`) and the background Runtime keeps syncing. `SHIPPING_DATABASE_PATH` does **not** override this for `pnpm dev`/`pnpm start` (it is honored by the CLI smoke tools only); to isolate, run from an isolated **cwd** instead (the S5/S7 harnesses do this with the production server). While a dev server is running against the retained DB, the S7 harness's "retained database unchanged" assertion will always FAIL, so stop it before running S7.
 - Build: `pnpm build` (generates `dist/.nitro/types`, required before typecheck on a clean checkout)
 - Typecheck: `pnpm typecheck`
 - Lint: `pnpm lint`
