@@ -167,7 +167,7 @@ Invoke-Checked -File 'git' -Arguments @('diff','--cached','--check')
 | S4 | 原文获取、完整性、版本与来源追溯 | S1；使用已批准资讯来源 | 文章主体与来源证据可持久化、可读取 |
 | S5 | 完整正文翻译与双语阅读 | S4 | 全文翻译可恢复、可对照、不冒充完整 |
 | S6 | ~~商业船期研究决定及条件满足后的接入~~ → **`DEFERRED / NOT_REQUIRED_FOR_CURRENT_SCOPE`**（2026-09-14 业务范围调整：订舱/排船/承运人选择由货代负责） | 无需前置 | 明确延期并与业务边界一致；不阻塞 S7 |
-| S7 | 干净环境完整验收、文档与收尾 | 所有纳入交付的阶段 | ✅ **`PASS`**（2026-09-14；干净本地集成验收完成，见本节 S7 执行结果与 `docs/status.md`），形成待合并候选版本，等待合并授权 |
+| S7 | 干净环境完整验收、文档与收尾 | 所有纳入交付的阶段 | ✅ **`PASS / FROZEN`**（2026-09-14 验收；2026-09-15 closeout 封口，见本节 S7 执行结果与 `docs/status.md`），形成待合并候选版本，等待合并授权 |
 | S8 | 最终合并 CI（本地范围内）；服务器部署/实机发布为后续独立授权 | S7、单独合并授权 | 记录 merged / CI passed；deployed / live verified 未授权则 `NOT_RUN / 后续待授权` |
 
 默认按顺序推进；上游授权受阻时只允许先做不依赖该授权的阶段。任何被延期的原需求必须在最终交付清楚列出。
@@ -444,15 +444,32 @@ Scope: implemented sources only, current eight ports, local isolated database. N
 | A7-09 | S7 gate（只跑一次 closeout） | clean install / dependency sanity、build、typecheck、lint、full Vitest、`git diff --check`、clean isolated DB initialization、restart persistence、production browser acceptance。开发/修复期间只跑 impacted tests；**若未影响 S5 代码，禁止重新跑 S5 专项 acceptance** |
 | A7-10 | 判定与收尾 | 上述 clean start/restart/build/核心路由/船名闭环/集成/zero Mock leakage/zero unexpected errors/retained DB 未动全部成立 → `S7 = PASS`；否则 `FAIL`（修复后重跑）或 `BLOCKED`（缺授权/环境，不做无关工作）。收尾：`docs/status.md` 写回 S7 记录、唯一现役计划/架构/AGENTS 边界一致、历史事实未改写、独立审查与真实 Neat Freak 按项目约定执行（无法执行标 `pending`）、清理只列候选、PR #1 记录本地最终结果/已接受限制/回退步骤且仍未合并未部署（CI 静默） |
 
-#### S7 执行结果（2026-09-14，**`S7 = PASS`**）
+#### S7 执行结果（2026-09-14 验收；2026-09-15 closeout 封口，**`S7 = PASS / FROZEN`**）
 
-- **判定：`S7 = PASS`。** 干净本地集成验收在隔离目录 `.tmp/s7-local` 上完成（全新隔离 SQLite + schema v13 migration + restart persistence + production build/server + Windows localhost + System Chrome/CDP），全程未使用保留库 `.data/shipping-hot-v3.sqlite3`，保留库哈希/尺寸前后一致。
+- **判定（2026-09-14 验收，2026-09-15 封口）：`S7 = PASS / FROZEN`。** 干净本地集成验收在隔离目录 `.tmp/s7-local` 上完成（全新隔离 SQLite + schema v13 migration + restart persistence + production build/server + Windows localhost + System Chrome/CDP），全程未使用保留库 `.data/shipping-hot-v3.sqlite3`，保留库哈希/尺寸前后一致。
 - **S7 发现并修复的真实缺陷（2 处，均属 IMPACTED）**：
   1. **详情路由不可达**：`src/routes/{vessels,ports,voyages}.$id.tsx` 未使用 `_` 前缀，被 TanStack Router 生成为对应列表路由的子路由，而列表页不渲染 `<Outlet/>`，导致 `/vessels/$id`、`/ports/$id`、`/voyages/$id` 永远只渲染列表页（`/feed/$id` 因既有 `feed_.$id.tsx` 命名而正常）。修复：重命名为 `vessels_.$id.tsx` / `ports_.$id.tsx` / `voyages_.$id.tsx` 并同步 route id（`/vessels_/$id` 等），`src/routeTree.gen.ts` 重新生成；URL 与页面内 `<Link>` 不变。
   2. **Real Mode 船名搜索返回 500**：`createUnavailableVesselSearchProvider` 抛裸 `Error`，绕过 `server/api/shipping/search/vessels.get.ts` 的 `ProviderError` 映射。修复：改抛 `ProviderError("provider_unavailable", …, 503)`，API 与 UI 走既有如实失败路径（`搜索数据源异常（provider_unavailable）`），仍 fail-closed、不伪造结果、不触发 Provider。
 - **验收资产（新增）**：`scripts/s7-local-seed.ts`（deterministic、provider-free、拒绝 `.tmp` 之外运行目录）+ `scripts/e2e-s7-integrated.mjs`（`pnpm seed:s7-local` / `pnpm test:e2e:s7`）。
-- **browser acceptance 结果**：**137 checks / 0 FAIL**（Flow A 35 / Flow B 22 / Flow C 26），最终 harness 版本连续 2 次 `PASS`（含提交后在受测 tree 上的复核运行），S7 期间累计连续 5 次 `PASS`；覆盖首页、船舶搜索与详情、AIS 位置、Voyage/ETA/目的港、Feed list/detail、原文/中文/双语/历史缓存标注、港口与拥堵、Weather 窗口切换、年度参考日历（月份/年份/国家切换）、deep-link refresh、back navigation；`console errors = 0`、`uncaught = 0`、`API unexpected 5xx = 0`、`Mock 泄漏 = 0`、外发 HTTP(S) = 0、保留库写入 = 0；窗口内 `provider_usage`/`deepseek`/`translation`/`sync_runs`/`translation_cache`/`provider_runtime`/`ais_positions`/`article_*`/`voyages`/`vessels`/`ports`/`feed_items` 增量全部为 0；刻意的未配置 Provider 探针按预期记录 2 条 503（单独计数，不计入 unexpected）。
-- **closeout gate 结果（只跑一次）**：`pnpm install --frozen-lockfile` ✅、`pnpm build` ✅、`pnpm typecheck` ✅、`pnpm lint` ✅、full Vitest `76 files / 824 tests passed` ✅、`git diff --check` ✅、clean isolated DB initialization / migration / restart persistence ✅、production browser acceptance ✅。S5 未受影响，未重跑 S5 专项 acceptance，未重跑 S5 gate。
+- **browser acceptance 结果（2026-09-14 版本）**：**137 checks / 0 FAIL**（Flow A 35 / Flow B 22 / Flow C 26），最终 harness 版本连续 2 次 `PASS`（含提交后在受测 tree 上的复核运行），S7 期间累计连续 5 次 `PASS`；覆盖首页、船舶搜索与详情、AIS 位置、Voyage/ETA/目的港、Feed list/detail、原文/中文/双语/历史缓存标注、港口与拥堵、Weather 窗口切换、年度参考日历（月份/年份/国家切换）、deep-link refresh、back navigation；`console errors = 0`、`uncaught = 0`、`API unexpected 5xx = 0`、`Mock 泄漏 = 0`、外发 HTTP(S) = 0、保留库写入 = 0；窗口内 `provider_usage`/`deepseek`/`translation`/`sync_runs`/`translation_cache`/`provider_runtime`/`ais_positions`/`article_*`/`voyages`/`vessels`/`ports`/`feed_items` 增量全部为 0；刻意的未配置 Provider 探针按预期记录 2 条 503（单独计数，不计入 unexpected）。**该版本的计数在 2026-09-15 closeout 修复后更新为 147 checks（Flow A 40 / B 22 / C 27），见下。**
+- **closeout gate 结果（2026-09-14，只跑一次）**：`pnpm install --frozen-lockfile` ✅、`pnpm build` ✅、`pnpm typecheck` ✅、`pnpm lint` ✅、full Vitest `76 files / 824 tests passed` ✅、`git diff --check` ✅、clean isolated DB initialization / migration / restart persistence ✅、production browser acceptance ✅。S5 未受影响，未重跑 S5 专项 acceptance，未重跑 S5 gate。
+
+#### S7 closeout 封口记录（2026-09-15）
+
+- **判定：`S7 = PASS / FROZEN`。** 只做最后一次 closeout，未重做 S7 技术验收、未重审 S5、未重跑 S5 gate、未重新研究 VesselAPI/AIS/GFW/ETA。
+- **Independent Review = `PASS`**（独立、只读，未修改任何文件）：首次审查对 IMPACTED/NEW 面提出 **6 项真实缺陷 + 1 项其自身修复引入的新缺陷**，全部修复后经同一审查者限定范围复核，逐项 `CLOSED`，且无其他新缺陷。审查者明确未复核的边界：计数声明、`/voyages/$id` 实际渲染与“本机是否导出 GFW_API_TOKEN”由本次修复与证据 JSON 覆盖。
+- **修复的 6 项真实缺陷（全部在验收资产/seed，产品代码未改动）**：
+  1. **`E2E_S7_DIR` 无隔离校验（High，破坏性）**：`E2E_S7_DIR=<repo root>` 会让 `DB_PATH` 等于保留库，Phase 1 的 `rmSync` 会删除保留库，而保留库哈希校验只能在事后报告。修复：模块加载期强制 `RUN_DIR` 位于 `<ROOT>/.tmp` 之下（逃生阀 `E2E_S7_ALLOW_OUTSIDE_TMP=1`），并在任何 `rmSync` 之前拒绝 `RETAINED_DATABASES` 中的路径；已用 `E2E_S7_DIR=<repo root>` 反向验证：harness 退出码 1 且保留库哈希不变。
+  2. **`/voyages/$id` 从未被访问（Medium）**：Flow C 的详情分支为死代码，列表断言 `routeText.length > 0` 在详情路由回归时仍会通过。修复：Flow A 实际导航 `/voyages/<voyageId>` 并断言 URL 保持、`.detail-two` + `返回航次列表` + `航次详情`、航次号 `S7E`、存储的 `CNYTN`/`CNSHK` 身份、且不落入列表/空态。
+  3. **子进程继承 Provider 凭证（Medium）**：`startServer` 直接展开 `process.env`，本机若导出凭证，未配置探针会真实调用付费 Provider，而浏览器 CDP 外发断言看不到服务端外发。修复：删除全部 11 个 Provider 凭证环境变量、固定 `SHIPPING_VESSEL_SEARCH_PROVIDER=gfw`，并把外发覆盖边界写入 `evidence.hermeticity`。
+  4. **计数覆盖面不足（Low）**：`snapshotCounters` 只统计 4 张表，漏掉 `events`、`calendar_events`、`article_blocks`、`vessel_metadata`、`vessel_search_cache`、`voyage_eta_history`、`port_directory`、`app_metadata`。修复：补齐这 8 张表并新增 3 条零增量断言（现覆盖 22 个计数键，全部为 0）。
+  5. **72h 天气断言恒真（Low）**：断言等待的是静态按钮文案 `72 小时`。修复：点击切回 72h 并断言存储值 `浪高3.1` / `风速51.0`。
+  6. **seed 隔离守卫过弱（Low）**：`.includes(".tmp")` 子串判断会接受 `C:\anything\.tmp\prod`、`<repo>\.data\.tmp\x` 等路径，且不拒绝已存在的数据。修复：改为 `<ROOT>/.tmp` 前缀校验，并在目标库已有业务数据（或不是 Shipping HOT 库）且无 `s7-local-manifest.json` 时拒绝（只读探测；逃生阀 `S7_SEED_ALLOW_OVERWRITE=1`），harness 的“Phase 1 全新空库”仍被允许。三项反向用例已逐条验证。
+- **修复引入的 1 项新缺陷**：`s7-local-seed.ts` 的只读探测变量误用 `NativeDatabase.Database` 命名空间导致 `pnpm typecheck` 失败（`tsx` 运行不受影响，故此前 harness 仍 147/147）。修复：改为 `InstanceType<typeof NativeDatabase>`，`pnpm typecheck` 退出码 0；审查者复核 `CLOSED`。
+- **计数更新（137 → 147，Flow A 35→40 / B 22 / C 26→27）**：新增覆盖来自缺陷 2（+5 A）、缺陷 5（+1 C）与缺陷 4（+4 零增量断言）；计数变化本身就是“修复后覆盖面更大”的证据，不是把既有断言的通过数改写。
+- **closeout gate 结果（2026-09-15，修复后只跑一次）**：`pnpm install --frozen-lockfile` ✅、`pnpm build` ✅、`pnpm typecheck` ✅、`pnpm lint` ✅、`git diff --check` ✅、S7 production browser acceptance ✅ **147 checks / 0 FAIL**（Flow A 40 / B 22 / C 27，22 个计数键零增量、外发 0、unexpected 5xx 0、预期 503 2、uncaught 0、保留库哈希与尺寸前后一致）。**full Vitest：`76 files / 823 passed / 1 failed`** —— 失败项与 S7 无关且**先于本次改动存在**：`server/runtime/weather-alert-sync-job.test.ts > returns failed with stale last-known data without archiving it`（把本次两处脚本改动 stash 回 HEAD 后同一测试同样失败，可复现）。机制：该测试 fixture 使用固定时间 `publishedAt = 2026-09-01`，official 类新鲜度窗口为 14 天（`shared/shipping-rules.ts` 的 `maxAgeDays`），`current_until = 2026-09-15T00:00:00Z`，读路径 `visibility='current' AND julianday(current_until) > julianday(now)`（`server/database/shipping.ts`）在 2026-09-15 当天把该条降级为 history，于是 `listFeedItems({ view: "current" })` 返回空数组。这是**日期边界型时间炸弹，属预先存在的外部缺陷**，不在 S7 授权修复范围（未修改任何测试或产品代码），按规则记录为待决项：需要单独授权才可把该 fixture 的时间改为相对时间。
+- **已接受的非阻塞限制（审查建议，按规则不修）**：`runSeed` 无超时、`stopServer` 未清理 5 秒计时器、`navigate` 的 `reload` 参数当前未被使用、evidence 中 `expectedProviderResponses` 直接引用活动数组、`未知` 接受条件较宽、5xx 仅按 URL 子串分类且非 `/api/` 的 5xx 不计入。均为可读性与严格度改进，不影响本次判定。
+- **交付与边界**：closeout 修复提交 + `docs: freeze S7 after final closeout` 记录提交推送到当前 `codex/shipping-hot-standalone-first-pass` 分支与 draft PR #1；**未合并、未部署、未推送 `main`、未操作保留库**，stage push 新增 CI = 0。
 - **未改动的封存 blocker**：S2 coverage、S3 MY 2027、S4 real samples、S5 real long-form 保持 `BLOCKED`，既未修改也未阻塞 S7；Docker 保持 `UNVERIFIED / FUTURE`。
 - **如实记录（不作为通过项、S7 未改）**：`/calendar` 渲染的是 bundled 年度参考日历；`pages.tsx` 中 provider 运营日历页 `CalendarPage` 在本版本**没有任何路由**（导出但未挂载）。这与 2026-09-09 已记录的决定（用户移除运营缓存 UI 入口、`/calendar` 只挂载参考视图、legacy 组件保留未挂载）一致，S7 属复核既知状态而非新发现；是否恢复该页面属产品/范围决策，S7 只记录不改。详见 `docs/status.md` 的 S7 观察项。
 
