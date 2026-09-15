@@ -6,6 +6,7 @@ import { providerSummary, severityTone, statusBadgePresentation, statusLabels } 
 import { GradientText, StatusDot } from "./ui"
 import { useShipping } from "./data"
 import { useDark } from "~/hooks/useDark"
+import { useReduceMotion } from "~/hooks/useReduceMotion"
 
 export { ProvenanceBadge } from "./ui"
 
@@ -79,6 +80,7 @@ const providerRows = [
 
 export function ShippingShell({ children, title }: { children: ReactNode, title?: string }) {
   const { isDark, toggleDark } = useDark()
+  const { reduced: reduceMotion, toggle: toggleReduceMotion } = useReduceMotion()
   const { data } = useShipping()
   const [collapsed, setCollapsed] = useState(() => {
     try {
@@ -121,9 +123,9 @@ export function ShippingShell({ children, title }: { children: ReactNode, title?
   const providerLabel = summary?.label ?? "—"
 
   return (
-    <MotionConfig reducedMotion="user">
+    <MotionConfig reducedMotion={reduceMotion ? "always" : "user"}>
       <div className={`shipping-shell min-h-dvh${collapsed ? " side-collapsed" : ""}`}>
-        <AuroraBackground />
+        <AuroraBackground enabled={!reduceMotion} />
         <aside className={`console-sidebar${roVisible ? " ro-visible" : ""}`}>
           <div
             className="side-head"
@@ -194,6 +196,16 @@ export function ShippingShell({ children, title }: { children: ReactNode, title?
               {" "}
               {providerLabel}
             </span>
+            <button
+              type="button"
+              aria-label="关闭动效"
+              aria-pressed={reduceMotion}
+              title={reduceMotion ? "动效已关闭，点击恢复背景动画与滚动光环" : "关闭重绘类动效（降低滚动卡顿与 GPU 占用）"}
+              onClick={toggleReduceMotion}
+              className="icon-btn"
+            >
+              <span className={`${reduceMotion ? "i-ph-lightning-slash" : "i-ph-lightning"} block`} />
+            </button>
             <button
               type="button"
               aria-label="切换明暗主题"
