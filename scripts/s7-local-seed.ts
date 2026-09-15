@@ -16,8 +16,9 @@
 // Provider data and this script makes no Provider, Secret, Runtime or network
 // call. The S7 evidence therefore proves integration (SQLite -> API -> browser),
 // never live-provider accuracy.
-import { mkdirSync, writeFileSync } from "node:fs"
-import { dirname, join, resolve, sep } from "node:path"
+import { existsSync, mkdirSync, writeFileSync } from "node:fs"
+import { basename, dirname, join, resolve, sep } from "node:path"
+import { fileURLToPath } from "node:url"
 import process from "node:process"
 import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
@@ -89,14 +90,46 @@ function createNativeDatabase(path: string) {
   return { database, native }
 }
 
-function assertIsolatedRunDir(runDir: string): void {
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
+const ISOLATED_ROOT = resolve(join(ROOT, ".tmp"))
+const MANIFEST_FILE = "s7-local-manifest.json"
+
+function assertIsolatedRunDir(runDir: string, databasePath: string): void {
   if (process.env.S7_SEED_ALLOW_OUTSIDE_TMP === "1") return
-  const inTmp = runDir.toLowerCase().includes(`${sep}.tmp${sep}`)
-  if (!inTmp) {
+  // Prefix check on the resolved path, not a substring test: `includes(".tmp")`
+  // would also accept `C:\anything\.tmp\prod` and `<repo>\.data\.tmp\x`.
+  if (!runDir.startsWith(ISOLATED_ROOT + sep)) {
     throw new Error(
-      `refusing to seed ${runDir}: S7 fixtures must not be written outside .tmp `
+      `refusing to seed ${runDir}: S7 fixtures must be written inside ${ISOLATED_ROOT} `
       + "(set S7_SEED_ALLOW_OUTSIDE_TMP=1 only for a throwaway database)",
     )
+  }
+  // Never migrate or overwrite a database this fixture does not own: an existing
+  // database that already holds business rows (or is not a Shipping HOT database at
+  // all) is somebody else's data. An empty database is the harness's own fresh-start
+  // state, so it is allowed.
+  if (existsSync(databasePath) && !existsSync(join(runDir, MANIFEST_FILE)) && process.env.S7_SEED_ALLOW_OVERWRITE !== "1") {
+    if (existingBusinessRows(databasePath) !== 0) {
+      throw new Error(
+        `refusing to seed ${runDir}: it already contains ${basename(databasePath)} with data and no ${MANIFEST_FILE}, `
+        + "so it is not an S7 fixture directory (set S7_SEED_ALLOW_OVERWRITE=1 to replace it deliberately)",
+      )
+    }
+  }
+}
+
+/** Total rows in the three business tables, or -1 when the database is not ours/unreadable. */
+function existingBusinessRows(databasePath: string): number {
+  let probe: InstanceType<typeof NativeDatabase> | undefined
+  try {
+    probe = new NativeDatabase(databasePath, { readonly: true })
+    const tables = probe.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('vessels', 'ports', 'feed_items')").all() as { name: string }[]
+    if (tables.length === 0) return -1
+    return tables.reduce((total, table) => total + (probe!.prepare(`SELECT COUNT(*) AS count FROM ${table.name}`).get() as { count: number }).count, 0)
+  } catch {
+    return -1
+  } finally {
+    probe?.close()
   }
 }
 
@@ -310,8 +343,8 @@ async function seedArticle(input: {
 
 async function main() {
   const runDir = resolve(process.argv[2] ?? join(process.cwd(), ".tmp", "s7-local"))
-  assertIsolatedRunDir(runDir)
   const databasePath = join(runDir, ".data", DB_FILE)
+  assertIsolatedRunDir(runDir, databasePath)
   mkdirSync(dirname(databasePath), { recursive: true })
 
   const { database, native } = createNativeDatabase(databasePath)
@@ -601,7 +634,7 @@ async function main() {
       "/settings",
     ],
   }
-  writeFileSync(join(runDir, "s7-local-manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8")
+  writeFileSync(join(runDir, MANIFEST_FILE), `${JSON.stringify(manifest, null, 2)}\n`, "utf8")
 
   native.close()
   console.log(`S7 seed complete: ${databasePath}`)

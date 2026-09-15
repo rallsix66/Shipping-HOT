@@ -25,7 +25,7 @@ import { spawn } from "node:child_process"
 import { createHash } from "node:crypto"
 import { existsSync, mkdirSync, mkdtempSync, openSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { dirname, join, resolve } from "node:path"
+import { dirname, join, resolve, sep } from "node:path"
 import process from "node:process"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import Database from "better-sqlite3"
@@ -70,6 +70,40 @@ const RETAINED_DATABASES = [
   join(ROOT, ".data", "shipping-hot-v3-browser.sqlite3"),
   join(ROOT, ".data", "p7-final-seal-20260904.sqlite3"),
   join(ROOT, ".data", "provider-secrets.json"),
+]
+
+/**
+ * `E2E_S7_DIR` exists to reuse an isolated run directory, never to point the run at
+ * real data. Phase 1 deletes `<RUN_DIR>/.data/shipping-hot-v3.sqlite3` to force a
+ * fresh start, so without this guard `E2E_S7_DIR=<repo root>` would delete the
+ * retained production database before the retained-file check could only report it.
+ */
+const ISOLATED_ROOT = resolve(join(ROOT, ".tmp"))
+if (!RUN_DIR.startsWith(ISOLATED_ROOT + sep) && process.env.E2E_S7_ALLOW_OUTSIDE_TMP !== "1") {
+  throw new Error(`refusing to run: E2E_S7_DIR must stay inside ${ISOLATED_ROOT} (got ${RUN_DIR}); set E2E_S7_ALLOW_OUTSIDE_TMP=1 only for a throwaway directory`)
+}
+if (RETAINED_DATABASES.includes(DB_PATH)) {
+  throw new Error(`refusing to run: ${DB_PATH} is a retained database and must never be deleted or written`)
+}
+
+/**
+ * Provider credentials this machine may hold in the environment. The isolated
+ * server must not be able to reach a real paid provider, otherwise the deliberate
+ * unconfigured-provider probe would spend money and the "no egress" assertion
+ * (which only sees browser traffic) would still pass.
+ */
+const PROVIDER_SECRET_ENV_KEYS = [
+  "GFW_API_TOKEN",
+  "VESSELAPI_API_KEY",
+  "AISSTREAM_API_KEY",
+  "CALENDARIFIC_API_KEY",
+  "DEEPSEEK_API_KEY",
+  "QWEN_MT_API_KEY",
+  "GEMINI_API_KEY",
+  "OPENAI_API_KEY",
+  "ANTHROPIC_API_KEY",
+  "DEEPL_API_KEY",
+  "AZURE_TRANSLATOR_API_KEY",
 ]
 
 const failures = []
@@ -160,15 +194,23 @@ function startServer(tag) {
   serverLogPath = join(RUN_DIR, `server-${tag}-${Date.now()}.log`)
   mkdirSync(dirname(serverLogPath), { recursive: true })
   serverLogFd = openSync(serverLogPath, "a")
+  // The isolated server reads secrets from `<RUN_DIR>/.data/provider-secrets.json`
+  // (absent) and from the environment (present on a machine with real credentials),
+  // so the environment is scrubbed instead of inherited blindly.
+  const env = { ...process.env }
+  for (const key of PROVIDER_SECRET_ENV_KEYS) delete env[key]
   return spawn(process.execPath, [SERVER_ENTRY], {
     cwd: RUN_DIR,
     env: {
-      ...process.env,
+      ...env,
       HOST: "127.0.0.1",
       NITRO_HOST: "127.0.0.1",
       PORT: String(PORT),
       NITRO_PORT: String(PORT),
       SHIPPING_DATA_MODE: "real",
+      // Pin the search provider so the unconfigured branch is deterministic once
+      // its credential has been scrubbed.
+      SHIPPING_VESSEL_SEARCH_PROVIDER: "gfw",
       // Nothing but the browser may touch the database during the browse window,
       // so any counter delta is attributable to the browsing itself.
       SHIPPING_RUNTIME_ENABLED: "false",
@@ -255,6 +297,14 @@ function snapshotCounters(db) {
     vesselRows: count(db, "SELECT COUNT(*) AS count FROM vessels"),
     portRows: count(db, "SELECT COUNT(*) AS count FROM ports"),
     feedRows: count(db, "SELECT COUNT(*) AS count FROM feed_items"),
+    eventRows: count(db, "SELECT COUNT(*) AS count FROM events"),
+    calendarEventRows: count(db, "SELECT COUNT(*) AS count FROM calendar_events"),
+    articleBlockRows: count(db, "SELECT COUNT(*) AS count FROM article_blocks"),
+    vesselMetadataRows: count(db, "SELECT COUNT(*) AS count FROM vessel_metadata"),
+    vesselSearchCacheRows: count(db, "SELECT COUNT(*) AS count FROM vessel_search_cache"),
+    voyageEtaHistoryRows: count(db, "SELECT COUNT(*) AS count FROM voyage_eta_history"),
+    portDirectoryRows: count(db, "SELECT COUNT(*) AS count FROM port_directory"),
+    appMetadataRows: count(db, "SELECT COUNT(*) AS count FROM app_metadata"),
   }
 }
 
@@ -282,6 +332,13 @@ async function main() {
     coverage: "clean local integration acceptance: fresh isolated DB init/migration, restart persistence, Real-Mode boundary, Flow A/B/C over the production build in system Chrome",
     fixtureDataProvenance: "synthetic deterministic fixture (see scripts/s7-local-seed.ts); not captured real Provider data",
     inheritedNotReVerified: "S2 coverage, S3 MY/TH/PH calendar, S4 real samples and S5 real long-article acceptance stay BLOCKED and are not re-run here",
+    hermeticity: {
+      isolatedRoot: ISOLATED_ROOT,
+      scrubbedProviderEnvKeys: PROVIDER_SECRET_ENV_KEYS,
+      forcedVesselSearchProvider: "gfw",
+      browserEgressInterception: "CDP Network.requestWillBeSent for http/https requests whose host is not the loopback server",
+      serverEgressBound: "SHIPPING_RUNTIME_ENABLED=false, provider credentials deleted from the child environment, and zero provider/usage/runtime/cache deltas across the browse window",
+    },
     phases: {},
     flows: [],
     counters: {},
@@ -602,6 +659,28 @@ async function main() {
     const voyageApi = await api(`/api/shipping/vessels/${expectations.vesselId}/voyage`)
     pushA(voyageApi.status === 200 && voyageApi.body?.eta === expectations.vesselEta, "voyage API returns the ETA for the vessel")
 
+    // `/voyages/$id` is one of the three detail routes this stage repaired, so the
+    // page itself must be visited: a regression back to "detail URL renders the
+    // list page" has to fail here.
+    await navigate(`/voyages/${expectations.voyageId}`)
+    const voyageDetail = await evaluate(`(() => {
+      const text = document.body.innerText
+      return {
+        url: location.pathname,
+        detailLayout: document.querySelectorAll('.detail-two').length,
+        backLink: text.includes('返回航次列表'),
+        pageTitle: text.includes('航次详情'),
+      }
+    })()`)
+    pushA(voyageDetail.url === `/voyages/${expectations.voyageId}`, `voyage detail URL is kept (${voyageDetail.url})`)
+    pushA(voyageDetail.detailLayout > 0 && voyageDetail.backLink && voyageDetail.pageTitle, "the voyage detail component renders instead of the list page")
+    const voyageDetailText = await bodyText()
+    pushA(voyageDetailText.includes(expectations.voyageNumber), `voyage detail renders the voyage number ${expectations.voyageNumber}`)
+    // The voyage record carries UN/LOCODE identities, so assert those rather than
+    // port display names: the page must show the stored identities, not invent one.
+    pushA(voyageDetailText.includes("CNYTN") && voyageDetailText.includes("CNSHK"), "voyage detail shows the stored origin/destination identities")
+    pushA(!voyageDetailText.includes("当前筛选条件下没有航次"), "voyage detail does not fall back to the list/empty state")
+
     // Identity-only vessel: explicit unknown, never fabricated.
     await navigate(`/vessels/${expectations.identityOnlyVesselId}`)
     text = await bodyText()
@@ -753,11 +832,24 @@ async function main() {
       return value.includes("风速42.0") ? value : false
     }, 10000)
     pushC(Boolean(weatherWindowFull), "the 24h wind value is recomputed alongside the wave value")
-    const weatherReload = await waitFor(async () => evaluate(`(() => {
+    // The 72h button label is static, so it proves nothing; switch back and assert
+    // the 72h numbers themselves.
+    const weatherBack = await evaluate(`(() => {
       const card = [...document.querySelectorAll('.tl-item')].find(node => node.textContent.includes('Swell and wind risk window'))
-      return card ? card.textContent.replace(/\\s+/g, ' ').trim() : false
-    })()`), 10000)
-    pushC(Boolean(weatherReload) && weatherReload.includes("72 小时"), "the 72h window remains available alongside the 24h selection")
+      const button = card ? [...card.querySelectorAll('button.chip')].find(node => node.textContent.trim() === '72 小时') : undefined
+      if (!button) return false
+      button.click()
+      return true
+    })()`)
+    pushC(weatherBack === true, "the weather card still offers the 72h window after switching")
+    const weatherReload = await waitFor(async () => {
+      const value = await evaluate(`(() => {
+        const card = [...document.querySelectorAll('.tl-item')].find(node => node.textContent.includes('Swell and wind risk window'))
+        return card ? card.textContent.replace(/\\s+/g, ' ').trim() : ''
+      })()`)
+      return value.includes("浪高3.1") && value.includes("风速51.0") ? value : false
+    }, 10000)
+    pushC(Boolean(weatherReload), `switching back restores the stored 72h wave/wind values (${String(weatherReload).slice(0, 100)})`)
 
     // `/calendar` is the bundled annual reference calendar (provider-free). The
     // operational provider-calendar page in pages.tsx has no route in this build;
@@ -847,6 +939,10 @@ async function main() {
     check(delta.aisPositionRows === 0 && delta.aisLatestRows === 0, `AIS store is read-only during browsing (${delta.aisPositionRows}/${delta.aisLatestRows})`)
     check(delta.articleVersionRows === 0 && delta.articleFetchRows === 0, "article store is read-only during browsing")
     check(delta.voyageRows === 0 && delta.vesselRows === 0 && delta.portRows === 0 && delta.feedRows === 0, "operational stores are read-only during browsing")
+    check(delta.eventRows === 0 && delta.calendarEventRows === 0, `event/calendar stores are read-only during browsing (${delta.eventRows}/${delta.calendarEventRows})`)
+    check(delta.articleBlockRows === 0, `article block store is read-only during browsing (${delta.articleBlockRows})`)
+    check(delta.vesselMetadataRows === 0 && delta.vesselSearchCacheRows === 0, `vessel metadata/search-cache stores are read-only during browsing (${delta.vesselMetadataRows}/${delta.vesselSearchCacheRows})`)
+    check(delta.voyageEtaHistoryRows === 0 && delta.portDirectoryRows === 0 && delta.appMetadataRows === 0, `voyage history/port directory/metadata stores are read-only during browsing (${delta.voyageEtaHistoryRows}/${delta.portDirectoryRows}/${delta.appMetadataRows})`)
 
     section("Phase 5 — browser and API cleanliness")
     check(runtimeErrors.length === 0, `unhandled runtime/console errors = ${runtimeErrors.length}`)
@@ -854,7 +950,7 @@ async function main() {
     check(unexpectedApiServerErrors.length === 0, `unexpected API 5xx responses = ${unexpectedApiServerErrors.length}`)
     for (const error of unexpectedApiServerErrors.slice(0, 10)) console.log(`      ${error}`)
     check(expectedProviderResponses.length > 0, `the deliberate unconfigured-provider probe returned its coded failure (${expectedProviderResponses.length} expected 5xx recorded separately)`)
-    check(externalRequests.length === 0, `no outbound request left the machine during browsing (${externalRequests.length}${externalRequests.length ? `: ${externalHosts().join(", ")}` : ""})`)
+    check(externalRequests.length === 0, `no outbound browser request left the machine during browsing (${externalRequests.length}${externalRequests.length ? `: ${externalHosts().join(", ")}` : ""}); server-side egress is bounded by the scrubbed provider credentials, the disabled Runtime and the zero provider/usage/cache deltas`)
     for (const url of externalRequests.slice(0, 10)) console.log(`      external: ${url}`)
 
     section("Phase 6 — retained data untouched")
