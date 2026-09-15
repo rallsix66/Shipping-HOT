@@ -168,7 +168,7 @@ Invoke-Checked -File 'git' -Arguments @('diff','--cached','--check')
 | S5 | 完整正文翻译与双语阅读 | S4 | 全文翻译可恢复、可对照、不冒充完整 |
 | S6 | ~~商业船期研究决定及条件满足后的接入~~ → **`DEFERRED / NOT_REQUIRED_FOR_CURRENT_SCOPE`**（2026-09-14 业务范围调整：订舱/排船/承运人选择由货代负责） | 无需前置 | 明确延期并与业务边界一致；不阻塞 S7 |
 | S7 | 干净环境完整验收、文档与收尾 | 所有纳入交付的阶段 | ✅ **`PASS / FROZEN`**（2026-09-14 验收；2026-09-15 closeout 封口，见本节 S7 执行结果与 `docs/status.md`），形成待合并候选版本，等待合并授权 |
-| S8 | 最终合并 CI（本地范围内）；服务器部署/实机发布为后续独立授权 | S7、单独合并授权 | 🔶 **`PREPARED / WAITING_FOR_MERGE_AUTHORIZATION`**（2026-09-15：final workflow 已补 Windows S7 E2E、trigger 仍仅 `push: main`、PR #1 已转 READY，stage push 新增 CI = 0）；merge / final main CI / deployed / live verified 尚未执行，记录 merged / CI passed；deployed / live verified 未授权则 `NOT_RUN / 后续待授权` |
+| S8 | 最终合并 CI（本地范围内）；服务器部署/实机发布为后续独立授权 | S7、单独合并授权 | 🔶 **`S8 merge preparation = COMPLETE / WAITING_FOR_FINAL_MERGE_AUTHORIZATION`**（2026-09-15：final workflow 已补 Windows S7 E2E、唯一 workflow 已重新启用为 `active`、trigger 仍仅 `push: main`、PR #1 已 READY、stage push 新增 CI = 0）；merge / final main CI / deployed / live verified 尚未执行，记录 merged / CI passed；deployed / live verified 未授权则 `NOT_RUN / 后续待授权` |
 
 默认按顺序推进；上游授权受阻时只允许先做不依赖该授权的阶段。任何被延期的原需求必须在最终交付清楚列出。
 
@@ -487,7 +487,7 @@ Scope: implemented sources only, current eight ports, local isolated database. N
 | A8-06 | 实际运行（后续范围） | `NOT_RUN / 后续待授权`：本轮不做实机发布与服务切换；本地版本可用性以 S7 本地验收为准 |
 | A8-07 | 结论分层 | 分别给出 merged/CI passed；deployed/live verified 若未授权则明确 `NOT_RUN / 后续待授权` 及未清理项，不写含糊“完成” |
 
-#### S8 准备结果（2026-09-15，**`S8 = PREPARED / WAITING_FOR_MERGE_AUTHORIZATION`**）
+#### S8 准备结果（2026-09-15，**`S8 merge preparation = COMPLETE / WAITING_FOR_FINAL_MERGE_AUTHORIZATION`**）
 
 - **本轮授权范围**：final docs consistency、final workflow readiness、PR #1 readiness、DRAFT → READY 决策、merge 前最终静态核对。**本轮不授权 merge**，也不 push `main`、不 deploy、不操作服务器、不触发 final CI。
 - **基线（无 drift）**：`main` = `6f0a22cb271c4504237798f806d6695ee49bdd08`；PR #1 base = 同一 SHA（`baseRefOid` 一致）；stage branch = `codex/shipping-hot-standalone-first-pass`；head = `7de3c62`；PR #1 = OPEN / DRAFT / MERGEABLE / `mergeStateStatus = CLEAN` / `statusCheckRollup = []`；`S7 = PASS / FROZEN`；full Vitest `824/824`；保留库哈希未变。执行期间若 `main` 变化即停止准备并报告 base drift，不自行 rebase/merge `main`。
@@ -498,7 +498,8 @@ Scope: implemented sources only, current eight ports, local isolated database. N
   - 证据：`actions/upload-artifact@v4`（`if: always()`）只上传 `.tmp/s7-local/s7-integrated-evidence.json` 与 `.tmp/s7-local/s7-local-manifest.json`；不上传 SQLite 库、Provider 秘密、全量 server log、`.env`、S5 保留证据或用户本地诊断目录。
   - 触发与安全不变量保持不变：`on: push: branches: [main]` 是唯一触发（无 `pull_request`/`pull_request_target`/`workflow_dispatch`/`schedule`/`workflow_run`/标签触发/阶段分支 push、无 `[skip ci]`）；`permissions: contents: read`、`concurrency: group: shipping-hot-main / cancel-in-progress: false` 原样保留；两个 job 同属**一个 final CI run**，不是两次 CI。
 - **本地静态核对（未重跑 S7 本地验收，也未重跑 full local gate，原因：只改 workflow）**：YAML 解析通过；trigger keys = `["push"]`、`push.branches = ["main"]`；禁用触发列表为空、无 `tags:`；`permissions`/`concurrency` 未变；`.github/workflows/` 下仍只有一个文件；文件内无 `secrets.*` 引用、无任何 Provider 凭证名；`e2e-windows` 调用既有 `pnpm test:e2e:s7`；`git diff --check` 通过。
-- **已完成**：main/base 无 drift；S7 保持 FROZEN；final workflow 单入口；final CI 内容 = Ubuntu `checks` + Windows 隔离 S7 E2E；server deploy = `NOT_RUN`；Docker = `UNVERIFIED / FUTURE`。
+- **已完成**：main/base 无 drift；S7 保持 FROZEN；final workflow 单入口；final CI 内容 = Ubuntu `checks` + Windows 隔离 S7 E2E；server deploy = `NOT_RUN`；Docker = `UNVERIFIED / FUTURE`；PR #1 已 DRAFT → READY FOR REVIEW 且仍 unmerged；stage push 新增 CI = 0。
+- **本轮发现并修好的 readiness 缺口（重要）**：唯一 final workflow `Shipping HOT checks` 在 GitHub 上仍是 `disabled_manually`，直接合并会导致 `push → main` **不触发任何 final CI**（静默通过，违反 A8-02/A8-03 与 §7.3.5 的“合并前确认唯一最终检查 workflow 已重新启用”）。已 `gh workflow enable shipping-hot-checks.yml` 启用为 `active`；启用不等于测试、不补跑中途 CI，实测启用后 Actions run 无新增（最新仍为 2026-09-10 `34428408421`）。旧入口 `docker.yml` / `release.yml` 保持 `disabled_manually` 并由本分支合并删除，合并后 `main` 只有一个 workflow 文件。其他前置条件实测：`main` 无 protection（API 404）、rulesets 为空、`actions/permissions.enabled = true`（`allowed_actions = all`）、`.github` 下无其他自动化文件；启用后触发仍只有 `on: push: branches: [main]`。
 - **尚未执行**：merge；final main CI；deploy；live verification。
 - **如实限制（重要）**：因为 workflow 仅监听 `push: main`，`e2e-windows` **无法在合并前预演**，其可行性依据是静态核对 + 已冻结的本地 Windows S7 证据（147 checks / 0 FAIL）；首次真实运行发生在合并之后。若 final CI 失败：立即停止、不 deploy、不重跑碰运气、不删测试，先诊断真实原因。
 - **合并（用户下一次明确授权后才执行）**：先复核 `main` 仍为原 base、PR head 未变、PR mergeable、workflow enabled 且仅 `push: main`、无其他自动发布 workflow；然后使用 **merge commit**（不 squash、不 rebase，保留阶段提交历史）；合并后记录 merge SHA，等待该 SHA 的唯一 `Shipping HOT checks` run，确认 `checks` 与 `e2e-windows` 均 PASS、artifact/证据正常、无第二个 release/docker workflow。只有 merge + final CI 全绿后才可写 `merged = PASS` / `final CI = PASS`；`deployed` 与 `live verified` 必须继续写 `NOT_RUN / 后续待授权`，Docker 保持 `UNVERIFIED / FUTURE`，不写笼统“全部完成”。
@@ -620,7 +621,7 @@ S7 在这张表之上按真实使用方式收敛为三条集成流程：**Flow A
 | S5 | 全文分块/对照、缓存恢复、预算和真实样本通过 | 待执行 | — |
 | S6 | ~~商业船期研究决定及条件满足后的接入~~ **`DEFERRED / NOT_REQUIRED_FOR_CURRENT_SCOPE`**（2026-09-14） | 见 S6 节业务边界记录 | 不阻塞 S7；重新开启需新业务需求与授权 |
 | S7 | 干净本地集成验收（Clean Local Integrated Acceptance）与知识收尾 | S0–S5 已封存证据 + S6 明确延期 | 形成待合并候选版本，等待合并授权 |
-| S8 | 最终 merge CI（授权后）；服务器部署/实机发布 | 已准备（`PREPARED / WAITING_FOR_MERGE_AUTHORIZATION`，2026-09-15），merge 待单独授权 | 合并需单独授权；部署/实机为后续独立授权，本轮 `NOT_RUN` |
+| S8 | 最终 merge CI（授权后）；服务器部署/实机发布 | merge preparation 已 COMPLETE（2026-09-15），`WAITING_FOR_FINAL_MERGE_AUTHORIZATION` | 合并需单独授权；部署/实机为后续独立授权，本轮 `NOT_RUN` |
 
 最终汇报必须回答：实际改了什么；退役了哪些旧业务；哪些共享能力和数据被保留；每阶段测试和验收结果；失败与修复；覆盖缺口和经批准延期；最终分支、PR、merge SHA 与 CI 运行；数据备份恢复结果；文档维护情况；尚未执行的检查与未清理对象。本轮不发布：服务器部署/实机发布状态记 `NOT_RUN / 后续待授权`。合并前 `docs/status.md` 记录准确候选本地验收，并把“合并后 CI 结果”指向现有 PR；合并后把 merge SHA 与 CI run 补在该 PR，**不再自动提交“CI 已通过”的文档改动到 main 造成新 CI**。
 
