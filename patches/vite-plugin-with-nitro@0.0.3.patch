@@ -1,0 +1,22 @@
+diff --git a/dist/runtime/renderer.mjs b/dist/runtime/renderer.mjs
+index a717eafaaac30745891bb7f268a4aeeb9d9a8dc4..cdf9eb93d38821e893eb336c9c5c239b1990969f 100644
+--- a/dist/runtime/renderer.mjs
++++ b/dist/runtime/renderer.mjs
+@@ -1,5 +1,13 @@
+-import { eventHandler } from "h3";
+-import template from "#nitro/index";
+-export default eventHandler(async () => {
+-  return template;
++import { readFile } from "node:fs/promises";
++import { dirname, resolve } from "node:path";
++import { fileURLToPath } from "node:url";
++import { createError, eventHandler } from "h3";
++const serverDir = dirname(fileURLToPath((globalThis._importMeta_ && globalThis._importMeta_.url) || import.meta.url));
++const indexHtmlPath = resolve(serverDir, "../public/index.html");
++export default eventHandler(async (event) => {
++  const path = event.path || "";
++  if (path.startsWith("/api/") || path === "/api") {
++    throw createError({ statusCode: 404, statusMessage: "Not Found" });
++  }
++  return await readFile(indexHtmlPath, "utf8");
+ });

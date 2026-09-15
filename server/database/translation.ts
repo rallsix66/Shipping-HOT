@@ -487,15 +487,21 @@ export class TranslationRepository {
     return saved
   }
 
+  /**
+   * Releases a claim without a Provider result. A retryable release increments
+   * `retry_count` so the caller's `translationRetryBackoffMs(retryCount)` grows
+   * instead of re-claiming and re-releasing at a constant interval forever.
+   */
   async releaseTranslationClaim(input: TranslationLeaseIdentity & { errorCode: string, errorMessage: string, retryable: boolean, nextRetryAt?: string }): Promise<TranslationCacheRecord | undefined> {
     const updatedAt = input.nextRetryAt ?? new Date().toISOString()
     const where = whereIdentity(input)
     await this.db.prepare(`
       UPDATE translation_cache SET
         status = 'failed', error_message = ?, retryable = ?, next_retry_at = ?, lease_until = NULL,
+        retry_count = CASE WHEN ? = 1 THEN retry_count + 1 ELSE retry_count END,
         last_error_code = ?, preferred = 0, updated_at = ?
       WHERE ${where.sql} AND status = 'pending' AND lease_until = ?
-    `).run(safeReason(input.errorMessage), input.retryable ? 1 : 0, input.nextRetryAt ?? null, input.errorCode, updatedAt, ...where.params, input.leaseUntil)
+    `).run(safeReason(input.errorMessage), input.retryable ? 1 : 0, input.nextRetryAt ?? null, input.retryable ? 1 : 0, input.errorCode, updatedAt, ...where.params, input.leaseUntil)
     return this.findWork(input)
   }
 

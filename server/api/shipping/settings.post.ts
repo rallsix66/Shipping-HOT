@@ -1,5 +1,6 @@
 import type { Port, ShippingSettings, TranslationSettings } from "@shared/shipping"
 import { updateShippingSettings } from "#/shipping-store"
+import { clearBlockedTranslationCircuitBestEffort } from "#/services/translation-recovery"
 
 const congestionLevels: Port["congestionLevel"][] = ["low", "medium", "high", "critical"]
 type SettingsPatch = Partial<Omit<ShippingSettings, "eventThresholds" | "translation">> & { eventThresholds?: Partial<ShippingSettings["eventThresholds"]>, translation?: Partial<TranslationSettings> }
@@ -43,5 +44,13 @@ export default defineEventHandler(async (event) => {
     if (translation.monthlyBudget !== undefined && (typeof translation.monthlyBudget !== "number" || !Number.isFinite(translation.monthlyBudget) || translation.monthlyBudget < 0)) throw createError({ statusCode: 400, message: "translation.monthlyBudget is invalid" })
     next.translation = translation
   }
-  return updateShippingSettings(next)
+  const updated = await updateShippingSettings(next)
+  // Saving Translation settings is the operator's deliberate "try translation
+  // again" action, so it also releases a blocked Translation circuit. Only a patch
+  // that actually carries a translation field counts: an empty `translation: {}`
+  // is a no-op read-back and each clear buys one paid retry. Best-effort: the
+  // settings write is already committed, so a recovery failure must not turn a
+  // successful save into an error response.
+  if (next.translation && Object.keys(next.translation).length > 0) await clearBlockedTranslationCircuitBestEffort(useDatabase(), "translation_settings_updated")
+  return updated
 })

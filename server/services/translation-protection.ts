@@ -100,15 +100,41 @@ export function protectTranslationText(sourceText: string, protectedTerms: strin
   return { protectedText, placeholders }
 }
 
-export function restoreAndValidateProtectedTranslation(protectedText: ProtectedTranslationText, translatedText: string): string {
+/**
+ * Restores protected literals and fails closed when the response cannot be
+ * trusted to keep the source skeleton:
+ * - every expected marker must appear exactly once and no unknown marker may appear;
+ * - markers must keep their original relative order, so a reordered response can
+ *   never silently re-pair protected values with the wrong positions;
+ * - caller-declared `forbiddenLiterals` (the `protectedTerms` this caller asked
+ *   to protect, e.g. article list/table separators) must not appear literally in
+ *   the response, because the model was given a marker instead and a literal
+ *   occurrence would add structure the source never had.
+ */
+export function restoreAndValidateProtectedTranslation(
+  protectedText: ProtectedTranslationText,
+  translatedText: string,
+  forbiddenLiterals: readonly string[] = [],
+): string {
   const expected = new Map(protectedText.placeholders.map(entry => [entry.marker, entry.literal]))
+  const expectedOrder = protectedText.placeholders.map(entry => entry.marker)
   const actualMarkers = translatedText.match(placeholderMarkerPattern) ?? []
   const actualCounts = new Map<string, number>()
   for (const marker of actualMarkers) actualCounts.set(marker, (actualCounts.get(marker) ?? 0) + 1)
   const restoredText = translatedText.replace(placeholderMarkerPattern, marker => expected.get(marker) as string)
   const expectedLiterals = new Set(expected.values())
   const unexpectedResidualMarker = (restoredText.match(placeholderMarkerLikePattern) ?? []).some(marker => !expectedLiterals.has(marker))
-  if (actualMarkers.length !== protectedText.placeholders.length || [...expected].some(([marker]) => actualCounts.get(marker) !== 1) || actualMarkers.some(marker => !expected.has(marker)) || unexpectedResidualMarker) {
+  const trimmed = translatedText.trim()
+  const injectedLiteral = forbiddenLiterals.some(term => term.length > 0 && trimmed.includes(term))
+  const reorderedMarkers = actualMarkers.length === expectedOrder.length && actualMarkers.some((marker, index) => marker !== expectedOrder[index])
+  if (
+    actualMarkers.length !== protectedText.placeholders.length
+    || reorderedMarkers
+    || [...expected].some(([marker]) => actualCounts.get(marker) !== 1)
+    || actualMarkers.some(marker => !expected.has(marker))
+    || unexpectedResidualMarker
+    || injectedLiteral
+  ) {
     throw new TranslationValidationError()
   }
   return restoredText

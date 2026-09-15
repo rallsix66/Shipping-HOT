@@ -9,7 +9,7 @@ const pwaOption: Partial<VitePWAOptions> = {
     name: "Shipping HOT",
     short_name: "Shipping HOT",
     description: "本地航运态势与热点信号工作台",
-    theme_color: "#F14D42",
+    theme_color: "#0F2A43",
     icons: [
       {
         src: "shipping-hot-icon.svg",

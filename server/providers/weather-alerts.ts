@@ -3,6 +3,7 @@ import { XMLParser } from "fast-xml-parser"
 import { load } from "cheerio"
 import type { DataProvenance, FeedItem, Port, WeatherDetail } from "@shared/shipping"
 import { mockPorts } from "@shared/shipping-fixtures"
+import type { ArticleSourcePolicyConfig } from "@shared/article"
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
 
 export interface WeatherAlertProvider {
@@ -31,6 +32,7 @@ export interface WeatherAlertSource {
   parser: WeatherAlertParser
   enabled: boolean
   liveStatus: WeatherAlertSourceStatus
+  articlePolicy?: ArticleSourcePolicyConfig
 }
 
 export const officialWeatherAlertSources: WeatherAlertSource[] = [

@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router"
 import { motion } from "framer-motion"
 import { type ReactNode, useEffect, useState } from "react"
+import type { ArticleBlock, ArticleCompletenessStatus, ArticleTranslationBlockSource, ArticleTranslationViewStatus } from "@shared/article"
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
 import type { AisDerivedPortMetric } from "@shared/ais-area"
 import { type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
 import type { VoyageRecord } from "@shared/voyage"
 import type { VesselSearchResponse, VesselSearchResult, VesselWatchlistItem } from "@shared/vessel-search"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
-import { type ShippingResponse, type TranslationStatusResponse, useAisLatestPosition, useLatestVoyage, useShipping, useTranslationSecret, useTranslationStatus } from "./data"
+import { type ShippingResponse, type TranslationStatusResponse, useAisLatestPosition, useFeedArticle, useLatestVoyage, useShipping, useTranslationSecret, useTranslationStatus } from "./data"
 import { FeedItemDisplayText } from "./feed-display"
 import { formatDate, formatPortMetric, formatStatus, navTone, severityTone } from "./format"
 import { AnimatedNumber, EmptyState, Marquee, ProvenanceBadge, ProviderChip, Reveal, Segmented, StatusDot } from "./ui"
@@ -1365,6 +1366,8 @@ export function FeedPage() {
                     <div className="tl-body">
                       <FeedItemDisplayText item={item} />
                       <div className="tl-chips">
+                        <Link to="/feed/$id" params={{ id: item.id }} className="chip">查看详情</Link>
+                        <a href={item.sourceUrl} target="_blank" rel="noreferrer" className="chip">打开来源</a>
                         <span className="chip">{formatStatus(item.category)}</span>
                         <ProvenanceBadge provenance={item.provenance} />
                         <StatusBadge stale={item.stale} sourceStatus={item.sourceStatus} />
@@ -1385,6 +1388,221 @@ export function FeedPage() {
                 ))}
               </div>
             )}
+      </div>
+    </ShippingShell>
+  )
+}
+
+/* ================= 资讯详情（原文阅读，仅结构化 React 渲染） ================= */
+
+const articleCompletenessCopy: Record<ArticleCompletenessStatus, { label: string, tone: string }> = {
+  complete: { label: "完整原文", tone: "text-emerald-600 dark:text-emerald-300" },
+  summary_only: { label: "仅保存有限摘录（未持久化全文）", tone: "text-amber-600 dark:text-amber-300" },
+  incomplete: { label: "正文提取不完整", tone: "text-amber-600 dark:text-amber-300" },
+  policy_disallowed: { label: "来源政策未保存正文", tone: "text-rose-600 dark:text-rose-300" },
+  authorization_required: { label: "需要授权后才能保存正文", tone: "text-rose-600 dark:text-rose-300" },
+  unsupported: { label: "当前内容格式不支持", tone: "text-rose-600 dark:text-rose-300" },
+  source_unavailable: { label: "本次无法获取或解析", tone: "text-rose-600 dark:text-rose-300" },
+}
+
+const articleTranslationStatusCopy: Record<ArticleTranslationViewStatus, { label: string, tone: string }> = {
+  complete: { label: "全文翻译完成", tone: "text-emerald-600 dark:text-emerald-300" },
+  partial: { label: "部分翻译（全文尚未完成）", tone: "text-amber-600 dark:text-amber-300" },
+  untranslated: { label: "尚未翻译", tone: "text-slate-600 dark:text-slate-300" },
+  ineligible: { label: "当前正文不参与翻译", tone: "text-slate-600 dark:text-slate-300" },
+}
+
+// Same-language reuse is original text, never a model translation; each fallback
+// keeps the original visible instead of hiding or faking a translated block.
+// `historical` marks a cached string produced by a different provider/model than
+// the one now configured, so it is never presented as the current model's output.
+// `rejected` marks a cached string whose list/table skeleton no longer matches the
+// stored block: the original is shown and the badge must not claim the call failed.
+const articleBlockSourceCopy: Record<ArticleTranslationBlockSource, string | undefined> = {
+  translation: undefined,
+  historical: "历史缓存（非当前模型）",
+  original: "原文已是目标语言",
+  pending: "翻译中",
+  failed: "翻译失败",
+  rejected: "译文结构不符",
+  missing: "尚未翻译",
+}
+
+/**
+ * Renders one block from its original ArticleBlock metadata (heading level,
+ * list ordering, table header, caption/href). `text` only substitutes the
+ * displayed string, so a translated block keeps the exact source structure.
+ */
+function ArticleBlockView({ block, text }: { block: ArticleBlock, text?: string }) {
+  const href = typeof block.metadata?.href === "string" ? block.metadata.href : undefined
+  const display = text ?? block.text
+  switch (block.type) {
+    case "heading": {
+      const level = Number(block.metadata?.level ?? 2)
+      if (level <= 1) return <h1 className="article-h">{display}</h1>
+      if (level === 2) return <h2 className="article-h">{display}</h2>
+      if (level === 3) return <h3 className="article-h">{display}</h3>
+      if (level === 4) return <h4 className="article-h">{display}</h4>
+      if (level === 5) return <h5 className="article-h">{display}</h5>
+      return <h6 className="article-h">{display}</h6>
+    }
+    case "list": {
+      const items = display.split(" • ").filter(Boolean)
+      const ordered = block.metadata?.ordered === true
+      if (ordered) return <ol className="article-list">{items.map((entry, index) => <li key={index}>{entry}</li>)}</ol>
+      return <ul className="article-list">{items.map((entry, index) => <li key={index}>{entry}</li>)}</ul>
+    }
+    case "table": {
+      const rows = display.split("\n").filter(Boolean).map(row => row.split(" | "))
+      const hasHeader = block.metadata?.header === true
+      return (
+        <table className="article-table">
+          <tbody>
+            {rows.map((cells, rowIndex) => (
+              <tr key={rowIndex}>
+                {cells.map((cell, cellIndex) => hasHeader && rowIndex === 0
+                  ? <th key={cellIndex}>{cell}</th>
+                  : <td key={cellIndex}>{cell}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )
+    }
+    case "caption":
+      return (
+        <p className="article-caption">
+          {display}
+          {href && (
+            <>
+              {" "}
+              <a href={href} target="_blank" rel="noreferrer">链接</a>
+            </>
+          )}
+        </p>
+      )
+    default:
+      return (
+        <p className="article-p">
+          {display}
+          {href && (
+            <>
+              {" "}
+              <a href={href} target="_blank" rel="noreferrer">链接</a>
+            </>
+          )}
+        </p>
+      )
+  }
+}
+
+type ArticleReadingMode = "original" | "zh" | "bilingual"
+
+export function FeedArticlePage({ id }: { id: string }) {
+  const [versionId, setVersionId] = useState<string | undefined>(undefined)
+  const [mode, setMode] = useState<ArticleReadingMode>("original")
+  const { data, isLoading, isError } = useFeedArticle(id, versionId)
+  if (isLoading) return <ShippingShell><LoadingState /></ShippingShell>
+  if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
+  const item = data.feedItem
+  const article = data.article
+  const translation = article?.translation ?? null
+  const version = article?.currentVersion
+  // Defence in depth: only pair block translations that belong to the version
+  // actually being displayed, so a server-side mixing bug cannot render another
+  // version's string inside this version's structure.
+  const translationByKey = new Map((translation && version && translation.versionId === version.id ? translation.blocks : []).map(block => [block.blockKey, block]))
+  const isCurrent = !versionId || versionId === article?.state.currentVersionId
+  const displayedStatus = article ? (isCurrent ? article.state.completenessStatus : article.currentVersion?.completenessStatus) : undefined
+  const copy = displayedStatus ? articleCompletenessCopy[displayedStatus] : undefined
+  const blocks = article?.blocks ?? []
+  const statusCopy = translation && translation.eligible ? articleTranslationStatusCopy[translation.status] : undefined
+  const readingMode: ArticleReadingMode = translation?.eligible ? mode : "original"
+  return (
+    <ShippingShell title={item.title}>
+      <SecHead eyebrow="资讯详情" title={item.title} description={item.summary} />
+      <div className="glass-panel article-detail">
+        <div className="tl-chips">
+          <Link to="/feed" className="chip">返回列表</Link>
+          <a href={item.sourceUrl} target="_blank" rel="noreferrer" className="chip">打开来源</a>
+          <span className="chip">{formatStatus(item.category)}</span>
+          <ProvenanceBadge provenance={item.provenance} />
+          <span className="tl-time">{item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}</span>
+        </div>
+        {copy
+          ? (
+              <p className={copy.tone}>
+                正文状态：
+                {copy.label}
+              </p>
+            )
+          : <p className="muted">正文尚未获取/未配置，以下为 Feed 摘要。</p>}
+        {article && (
+          <p className="muted">
+            {`抓取时间 ${version ? formatDate(version.fetchedAt) : "-"} · extractor ${version?.extractorVersion ?? "-"} · hash ${(version?.contentHash ?? "").slice(0, 16)}`}
+            {!isCurrent ? " · 正在查看历史版本" : ""}
+          </p>
+        )}
+        {isCurrent && article?.state.completenessStatus === "source_unavailable" && version && (
+          <p className="text-rose-600 dark:text-rose-300">当前抓取失败，以下仍显示上一次成功版本，并非最新成功结果。</p>
+        )}
+        {article && blocks.length > 0 && (translation?.eligible
+          ? (
+              <div className="tl-chips">
+                <button type="button" className={`fbtn${readingMode === "original" ? " active" : ""}`} onClick={() => setMode("original")}>原文</button>
+                <button type="button" className={`fbtn${readingMode === "zh" ? " active" : ""}`} onClick={() => setMode("zh")}>中文</button>
+                <button type="button" className={`fbtn${readingMode === "bilingual" ? " active" : ""}`} onClick={() => setMode("bilingual")}>原文 / 中文</button>
+              </div>
+            )
+          : translation && (
+            <p className="muted">本版本不参与翻译：正文不完整或来源仅允许摘录，以下始终显示原文。</p>
+          ))}
+        {translation && statusCopy && (
+          <p className={statusCopy.tone}>
+            {`翻译进度：已完成 ${translation.completedCount} / ${translation.total} · ${statusCopy.label}`}
+            {translation.originalSameLanguage > 0 ? ` · 其中原文已是目标语言 ${translation.originalSameLanguage}` : ""}
+            {translation.historical > 0 ? ` · 其中历史缓存（非当前模型）${translation.historical}` : ""}
+          </p>
+        )}
+        {blocks.length > 0
+          ? (
+              <article className="article-body">
+                {blocks.map((block) => {
+                  const blockView = translationByKey.get(block.blockKey)
+                  const source: ArticleTranslationBlockSource = blockView?.source ?? "missing"
+                  const badge = translation ? articleBlockSourceCopy[source] : undefined
+                  if (readingMode === "zh" && translation?.eligible) {
+                    return (
+                      <div className="article-block" key={`${block.blockKey}-${block.order}`}>
+                        <ArticleBlockView block={block} text={blockView?.translatedText ?? block.text} />
+                        {badge && <p className="muted article-block-status">{badge}</p>}
+                      </div>
+                    )
+                  }
+                  if (readingMode === "bilingual" && translation?.eligible) {
+                    return (
+                      <div className="article-block" key={`${block.blockKey}-${block.order}`}>
+                        <ArticleBlockView block={block} />
+                        <ArticleBlockView block={block} text={blockView?.translatedText ?? block.text} />
+                        {badge && <p className="muted article-block-status">{badge}</p>}
+                      </div>
+                    )
+                  }
+                  return <ArticleBlockView key={`${block.blockKey}-${block.order}`} block={block} />
+                })}
+              </article>
+            )
+          : <p className="article-p">{item.summary}</p>}
+        {article && article.versions.length > 0 && (
+          <div className="tl-chips">
+            <button type="button" className={`fbtn${!versionId ? " active" : ""}`} onClick={() => setVersionId(undefined)}>当前版本</button>
+            {article.versions.filter(entry => entry.id !== article.state.currentVersionId).map(entry => (
+              <button key={entry.id} type="button" className={`fbtn${versionId === entry.id ? " active" : ""}`} onClick={() => setVersionId(entry.id)}>
+                {`${formatDate(entry.fetchedAt)} · ${entry.completenessStatus}`}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </ShippingShell>
   )

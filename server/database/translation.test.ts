@@ -70,7 +70,7 @@ describe("translation repository", () => {
       status: "succeeded",
       translatedText: "港口延误",
     })
-    expect(native.prepare("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1").get()).toEqual({ version: 12 })
+    expect(native.prepare("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1").get()).toEqual({ version: 13 })
     native.close()
   })
 

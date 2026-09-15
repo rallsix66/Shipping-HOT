@@ -618,6 +618,34 @@ describe("shipping Provider failure boundaries", () => {
     await expect(failed.getFeedItems([mockPorts[0]])).rejects.toMatchObject({ code: "provider_unavailable" })
   })
 
+  it("maps Portcast public-page HTTP failures to the provider failure taxonomy", async () => {
+    const cases: Array<[number, string]> = [
+      [401, "auth_failed"],
+      [403, "provider_forbidden"],
+      [429, "rate_limited"],
+      [503, "provider_unavailable"],
+      [504, "provider_timeout"],
+    ]
+    for (const [status, code] of cases) {
+      const provider = createPortcastPublicPageProvider({ fetcher: async () => ({ ok: false, status, text: async () => "" }) })
+      const [port] = await provider.getPorts([mockPorts[0]])
+      expect(port).toMatchObject({ errorCode: code })
+    }
+  })
+
+  it("maps Open-Meteo HTTP failures to the provider failure taxonomy", async () => {
+    const cases: Array<[number, string]> = [
+      [401, "auth_failed"],
+      [403, "provider_forbidden"],
+      [429, "rate_limited"],
+      [504, "provider_timeout"],
+    ]
+    for (const [status, code] of cases) {
+      const provider = createOpenMeteoWeatherProvider({ fetcher: async () => ({ ok: false, status, json: async () => ({}) }) })
+      await expect(provider.getFeedItems([mockPorts[0]])).rejects.toMatchObject({ code })
+    }
+  })
+
   it("feeds normalized real vessel and weather signals into the existing Event/HOT pipeline", async () => {
     const vessel = (await createAisStreamVesselProvider({ apiKey: "test-key", timeoutMs: 100, socketFactory: () => {
       const socket = {

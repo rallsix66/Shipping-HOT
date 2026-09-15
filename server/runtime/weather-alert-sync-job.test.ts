@@ -9,6 +9,15 @@ import { ProviderError } from "#/providers/contracts"
 import { BackgroundRuntime } from "#/runtime/background-runtime"
 import { RuntimeRepository } from "#/database/runtime-jobs"
 
+/**
+ * The fixtures carry a fixed publication time (2026-09-01), so the freshness window
+ * they belong to closes at a fixed instant too. Any code path that defaulted to the
+ * wall clock would read those fixtures differently depending on the day the suite
+ * runs, so the tests below inject this same clock into both the job runtime and the
+ * assertions: business clock and assertion clock must be identical.
+ */
+const TEST_NOW = new Date("2026-09-01T00:10:00.000Z")
+
 function createNativeDatabase() {
   const native = new NativeDatabase(":memory:")
   const database = createDatabase({
@@ -148,9 +157,10 @@ describe("official weather alert sync job", () => {
         getFeedItems: async (lastKnown = []) => lastKnown.map(item => ({ ...item, stale: true, sourceStatus: "failed" as const, errorCode: "rate_limited", error: "TMD rate limited" })),
       },
       intervalMs: 15 * 60 * 1000,
+      now: () => TEST_NOW,
     })
     await expect(job.run()).resolves.toMatchObject({ status: "failed", recordsRead: 1, recordsWritten: 1, errorCode: "rate_limited" })
-    expect(await repository.listFeedItems({ view: "current" })).toEqual([expect.objectContaining({ id: "tmd-alert-1", sourceStatus: "failed", errorCode: "rate_limited" })])
+    expect(await repository.listFeedItems({ now: TEST_NOW, view: "current" })).toEqual([expect.objectContaining({ id: "tmd-alert-1", sourceStatus: "failed", errorCode: "rate_limited" })])
     native.close()
   })
 })

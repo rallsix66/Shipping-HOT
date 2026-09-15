@@ -50,10 +50,34 @@ export interface AnnualDataset {
   sourceDocuments: AnnualSource[]
   events: AnnualEvent[]
 }
+export type AnnualCountryStatus =
+  | "available"
+  | "not_published"
+  | "published_not_imported"
+  | "sector_evidence_only"
+  | "proposal_not_effective"
+
+/** Lightweight country-year hint shown when no formal annual dataset exists. Not a second calendar system. */
+export interface AnnualCountryStatusRecord {
+  countryCode: AnnualCountry
+  year: number
+  status: AnnualCountryStatus
+  detailZh: string
+}
+
+export const annualCountryStatusLabels: Record<AnnualCountryStatus, string> = {
+  available: "已录入",
+  not_published: "尚未公布",
+  published_not_imported: "已公布，尚未导入",
+  sector_evidence_only: "仅有行业/机构依据，非全国主依据",
+  proposal_not_effective: "仅有提案，尚未生效",
+}
+
 export interface AnnualCalendarResponse {
   year: number
   availableYears: number[]
   datasets: AnnualDataset[]
+  statuses: AnnualCountryStatusRecord[]
 }
 
 /** UTC is used only for arithmetic; the resulting strings are civil dates. */

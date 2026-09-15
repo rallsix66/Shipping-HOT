@@ -70,10 +70,13 @@ function unavailableAisProvider(providerId: string, error: string): AisTrackingP
 }
 
 export function createAisTrackingProvider(options: AisProviderFactoryOptions): AisTrackingProvider {
+  // Mock/Test Mode must never construct a real AIS adapter even when the
+  // environment requests one; the env is authoritative only in Real Mode.
+  if (options.dataMode !== "real") {
+    return createMockAisTrackingProvider(options.now)
+  }
   if (options.providerId === "mock") {
-    return options.dataMode === "real"
-      ? unavailableAisProvider("mock", "mock_ais_not_allowed_in_real_mode")
-      : createMockAisTrackingProvider(options.now)
+    return unavailableAisProvider("mock", "mock_ais_not_allowed_in_real_mode")
   }
   if (options.providerId === "aisstream") {
     const secretStore = options.secretStore ?? new FileSecretStore()

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { annualCountries, annualEventScope, annualEvidenceLabel, annualMonthDays, annualSourceLabel, annualSourcePublishedLabel, annualTypes } from "@shared/annual-calendar"
+import { annualCountries, annualCountryStatusLabels, annualEventScope, annualEvidenceLabel, annualMonthDays, annualSourceLabel, annualSourcePublishedLabel, annualTypes } from "@shared/annual-calendar"
 import type { AnnualCalendarResponse, AnnualCountry } from "@shared/annual-calendar"
 import { ShippingShell } from "./app"
 import { myFetch } from "~/utils"
@@ -33,6 +33,9 @@ export function AnnualCalendarPage() {
   const details = eventsByDay.get(selectedDate) ?? []
   const monthCount = events.filter(e => e.date.startsWith(`${year}-${String(month + 1).padStart(2, "0")}`)).length
   const unavailable = !isPending && !isError && data?.datasets.length === 0
+  const availableYears = data?.availableYears ?? [2026, 2027]
+  const statuses = data?.statuses ?? []
+  const visibleStatuses = statuses.filter(status => status.status !== "available")
 
   function moveMonth(offset: number) {
     const next = new Date(Date.UTC(year, month + offset, 1))
@@ -78,11 +81,15 @@ export function AnnualCalendarPage() {
                 <br />
                 集体休假、政府机关安排和地区限定不会泛化为全国停工。
               </p>
-              <p>
-                2026 已录入参考资料
-                <br />
-                2027 尚未录入
-              </p>
+              <ul className="annual-status-list">
+                {statuses.map(status => (
+                  <li key={status.countryCode}>
+                    {annualCountries[status.countryCode]}
+                    ：
+                    {annualCountryStatusLabels[status.status]}
+                  </li>
+                ))}
+              </ul>
             </div>
           </aside>
           <section className="annual-panel annual-month" aria-label="年度参考月历">
@@ -106,7 +113,7 @@ export function AnnualCalendarPage() {
                     setSelected("")
                   }}
                 >
-                  {[...new Set([2026, 2027, year])].sort().map(y => (
+                  {[...new Set([...availableYears, year])].sort().map(y => (
                     <option key={y} value={y}>
                       {y}
                       {" "}
@@ -152,7 +159,12 @@ export function AnnualCalendarPage() {
               <div className="annual-notice">
                 {year}
                 {" "}
-                年资料尚未录入，不能据此判断当地工作安排。
+                年暂无已录入的正式年度数据：
+                {" "}
+                {visibleStatuses.length > 0
+                  ? visibleStatuses.map(status => `${annualCountries[status.countryCode]}（${annualCountryStatusLabels[status.status]}）`).join("；")
+                  : "判断当地工作安排请以官方来源为准"}
+                。
               </div>
             )}
             {!countries.length && <p className="annual-notice">请至少选择一个国家。</p>}

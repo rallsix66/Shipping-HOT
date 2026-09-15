@@ -1,0 +1,103 @@
+name: Shipping HOT checks
+
+# Intentional policy: this is the single final check. It runs only when `main`
+# receives the final merged PR, not on phase-branch pushes or draft-PR updates.
+# Stage CI is intentionally silent; each phase is verified locally first.
+# Do not add pull_request / workflow_dispatch / schedule / tag triggers here.
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shipping-hot-main
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SHIPPING_DATA_MODE: mock
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+      - name: Activate pinned pnpm
+        run: corepack enable && corepack prepare pnpm@10.30.3 --activate
+      - name: Install locked dependencies
+        id: install
+        run: pnpm install --frozen-lockfile
+      # A clean checkout has no dist/.nitro/types. Build generates the declarations
+      # included by tsconfig.node.json; do not bypass TypeScript with fake globals.
+      - name: Build and generate Nitro declarations
+        id: build
+        run: pnpm build
+      - name: Typecheck
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: pnpm typecheck
+      - name: Lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm lint
+      - name: Tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        # The native restart test creates its isolated database under this parent.
+        run: |
+          mkdir -p .tmp
+          pnpm exec vitest run -c vitest.config.ts
+      - name: Whitespace check
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: git diff --check
+
+  # Replays the frozen S7 isolated acceptance on a clean Windows runner, so the final
+  # merge is checked in the actual delivery environment (Windows + system Chrome).
+  # It reuses `pnpm test:e2e:s7` as-is: no second harness, no second fixture and no
+  # provider credential. The harness owns isolation (run directory confined to
+  # <repo>/.tmp, retained database paths refused, every provider credential scrubbed
+  # from the isolated server's environment, deterministic provider-free seed) and
+  # asserts zero provider/usage/runtime/cache delta plus zero external egress, so
+  # injecting a provider secret here would invalidate the evidence.
+  e2e-windows:
+    needs: checks
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+      - name: Activate pinned pnpm
+        shell: pwsh
+        run: corepack enable && corepack prepare pnpm@10.30.3 --activate
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build production server
+        run: pnpm build
+      - name: Report the browser used by the S7 acceptance
+        shell: pwsh
+        run: |
+          $candidates = @(
+            'C:\Program Files\Google\Chrome\Application\chrome.exe',
+            'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe',
+            'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe',
+            'C:\Program Files\Microsoft\Edge\Application\msedge.exe'
+          ) | Where-Object { Test-Path $_ }
+          if ($candidates) { "browser: $($candidates[0])" } else { Write-Warning 'No Chrome or Edge executable found; the S7 acceptance fails closed on the missing browser' }
+      - name: S7 isolated acceptance (production build + system Chrome)
+        run: pnpm test:e2e:s7
+      # CI evidence only: the two JSON records, never the isolated SQLite database,
+      # provider secrets, full server logs, .env files or retained S5 evidence.
+      - name: Upload S7 isolated acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s7-isolated-acceptance-evidence
+          path: |
+            .tmp/s7-local/s7-integrated-evidence.json
+            .tmp/s7-local/s7-local-manifest.json
+          if-no-files-found: warn
+          retention-days: 14

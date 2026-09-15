@@ -1,5 +1,4 @@
 @import url(@unocss/reset/tailwind.css);
-@import url(overlayscrollbars/overlayscrollbars.css);
 
 html,
 body,
@@ -33,13 +32,6 @@ button:disabled {
 
 ::-webkit-scrollbar-thumb {
   border-radius: 8px;
-}
-
-/* https://github.com/KingSora/OverlayScrollbars/blob/master/packages/overlayscrollbars/src/styles/themes.scss */
-.dark .os-theme-dark {
-  --os-handle-bg: rgba(255, 255, 255, 0.44);
-  --os-handle-bg-hover: rgba(255, 255, 255, 0.55);
-  --os-handle-bg-active: rgba(255, 255, 255, 0.66);
 }
 
 

@@ -360,7 +360,7 @@ additive migration 完成时，新的来源表没有任何可信原始快照，�
 - `server/api/shipping/calendar.get.ts`：返回业务完整性、装载、刷新和操作错误的分离 DTO；
 - `server/providers/calendar.test.ts`、`server/runtime/registry.test.ts`、`server/runtime/calendar-sync-job.test.ts`：真实生产组合的离线回归；
 - `src/components/shipping/pages.tsx`：三轴状态、partial/pending、last-known 及范围免责声明；
-- `docs/status.md`、`docs/architecture.md`、`docs/plans/shipping-hot-v3-real-data.md`、`AGENTS.md`：实施与验证完成后才同步实际状态；必要时更新 ADR-004/ADR-005 或新增数据治理 ADR。
+- `docs/status.md`、`docs/architecture.md`、`docs/archive/shipping-hot-v3-real-data.md`（历史归档）、`AGENTS.md`：实施与验证完成后才同步实际状态；必要时更新 ADR-004/ADR-005 或新增数据治理 ADR。本 proposal 保持暂停，现役计划见 `docs/plans/shipping-hot-standalone-content-2026-09-10.md`。
 
 本提案明确包含 Calendar Provider/cache 核心接口、共享 DTO、JSON coverage 内容，以及 `calendar_source_events`、legacy baseline、writer generation/fingerprint 所需的 additive migration。预计不新增网络 Provider、依赖、SDK、Secret 或认证变化；正常前向运行不改变部署拓扑，但代码回退需要一个可验证的数据库只读启动/文件权限流程，该运维变化也须批准和验证。schema 未获单独明确批准前不得实施。
 

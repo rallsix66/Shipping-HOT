@@ -83,6 +83,24 @@ describe("shipping feed provider", () => {
     await expect(provider.getFeedItems([], mockPorts)).rejects.toThrow("source unavailable")
   })
 
+  it("maps public-feed HTTP failures to the provider failure taxonomy", async () => {
+    const cases: Array<[number, string]> = [
+      [401, "auth_failed"],
+      [403, "provider_forbidden"],
+      [429, "rate_limited"],
+      [503, "provider_unavailable"],
+      [504, "provider_timeout"],
+    ]
+    for (const [status, code] of cases) {
+      const provider = createPublicFeedProvider({
+        sources: [rssSource],
+        throwOnSourceFailureWithoutLastKnown: true,
+        fetcher: async () => ({ ok: false, status, text: async () => "" }),
+      })
+      await expect(provider.getFeedItems([], mockPorts)).rejects.toMatchObject({ code })
+    }
+  })
+
   it("normalizes RSS entries and attaches source and port provenance", () => {
     const [item] = parseFeedRss(`
       <rss><channel>
