@@ -188,15 +188,16 @@ button:disabled {
   box-shadow: 0 8px 22px -8px rgba(14, 165, 233, 0.55);
 }
 .brand-mark { position: relative; z-index: 0; }
+/* 静止光晕：原实现是 conic-gradient + filter: blur(12px) + 9s 无限旋转，
+   等于每一帧都要重新模糊一个大面积图层，且该动画在所有路由常驻。
+   改成自带柔边的径向渐变后视觉接近，但完全静态、不再持续重绘。 */
 .brand-mark::after {
   content: "";
   position: absolute; inset: -7px; border-radius: 1.1rem; z-index: -1;
-  background: conic-gradient(from 0deg, rgba(56, 189, 248, 0.9), rgba(14, 165, 233, 0.9), rgba(99, 102, 241, 0.9), rgba(56, 189, 248, 0.9));
-  filter: blur(12px);
-  opacity: 0.5;
-  animation: spin-slow 9s linear infinite;
+  background: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.7), rgba(14, 165, 233, 0.42) 45%, rgba(99, 102, 241, 0.22) 68%, transparent 78%);
+  opacity: 0.55;
+  pointer-events: none;
 }
-@keyframes spin-slow { to { transform: rotate(360deg); } }
 
 /* --- chips / pills / dots --- */
 .chip {
@@ -207,16 +208,27 @@ button:disabled {
   padding: 0.35rem 0.85rem;
   font-size: 0.78rem;
 }
-.status-dot { display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 9999px; }
-.status-dot.fresh { background: #10b981; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
-.status-dot.watch { background: #f59e0b; box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.55); }
-.status-dot.failed { background: #f43f5e; box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.55); }
-.status-dot.info { background: #0ea5e9; box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.55); }
+.status-dot { position: relative; display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 9999px; }
+.status-dot.fresh { background: #10b981; }
+.status-dot.watch { background: #f59e0b; }
+.status-dot.failed { background: #f43f5e; }
+.status-dot.info { background: #0ea5e9; }
 .status-dot.dim { background: #94a3b8; }
-.status-dot.pulse { animation: pulse-dot 2.2s ease-out infinite; }
-@keyframes pulse-dot {
-  70% { box-shadow: 0 0 0 8px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
+/* 呼吸光环：原来动画的是 box-shadow（非合成器属性，每帧重绘）。
+   改为独立的 ::after 光环，只动 transform / opacity，交给合成器处理。
+   首页 6 个、资讯页 14 个呼吸点，原先等于每帧多出十几次重绘。 */
+.status-dot.pulse::after {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: 9999px;
+  background: inherit;
+  opacity: 0.55;
+  animation: pulse-ring 2.2s ease-out infinite;
+}
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.55; }
+  70% { transform: scale(2.6); opacity: 0; }
+  100% { transform: scale(2.6); opacity: 0; }
 }
 
 /* --- severity / status badges --- */
@@ -429,14 +441,21 @@ button:disabled {
 
 /* --- reduced motion --- */
 @media (prefers-reduced-motion: reduce) {
-  .brand-mark::after,
   .marquee-track,
-  .status-dot.pulse {
+  .status-dot.pulse::after {
     animation: none !important;
   }
   .marquee-track {
     will-change: auto;
   }
+}
+/* 顶栏「关闭动效」按钮：与系统 prefers-reduced-motion 等效，见 src/hooks/useReduceMotion.ts */
+.reduce-motion .marquee-track,
+.reduce-motion .status-dot.pulse::after {
+  animation: none !important;
+}
+.reduce-motion .marquee-track {
+  will-change: auto;
 }
 
 /* ============ Shipping HOT · Console layout (指挥台化) ============ */
