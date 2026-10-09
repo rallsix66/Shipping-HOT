@@ -389,7 +389,7 @@ export interface PortWeatherForecastRow {
   portId: string
   unlocode?: string
   forecastAt: string
-  horizon: "hourly"
+  horizon: "hourly" | "current"
   waveHeightM?: number
   swellWaveHeightM?: number
   windSpeedKmh?: number
@@ -424,11 +424,25 @@ export interface PortWeatherOfficialAlertSummary {
   provenance?: DataProvenance
 }
 
+export type PortWeatherPanelState =
+  | "ready"
+  | "no_rule_hits"
+  | "data_stale"
+  | "data_empty"
+  | "sync_failed"
+
 export interface PortWeatherPanelResponse {
   portId: string
+  state: PortWeatherPanelState
+  asOf: string
   forecasts: PortWeatherForecastRow[]
   impacts: PortWeatherImpactRow[]
   officialAlerts: PortWeatherOfficialAlertSummary[]
+  impactMeta: {
+    totalMatched: number
+    returned: number
+    truncated: boolean
+  }
   sources: {
     forecast: string
     impacts: "system"

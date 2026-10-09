@@ -23,6 +23,7 @@ export interface WeatherProvider {
   readonly providerId: string
   getFeedItems: (ports?: Port[], lastKnown?: FeedItem[]) => Promise<FeedItem[]>
   drainForecastPersistence?: () => WeatherForecastPersistenceBatch
+  ackForecastPersistence?: () => void
 }
 
 export async function fetchWeatherProviderResults(
@@ -619,29 +620,37 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
   const now = options.now ?? (() => new Date())
   const minIntervalMs = options.minIntervalMs ?? 30 * 60 * 1000
   const portDirectory = options.portDirectory ?? createBaselinePortDirectoryLookup()
-  const cache = new Map<string, { checkedAt: number, items: FeedItem[] }>()
+  const cache = new Map<string, {
+    checkedAt: number
+    items: FeedItem[]
+    forecasts: PortWeatherForecastRow[]
+    impacts: PortWeatherImpactRow[]
+  }>()
   const forecastsByPortId = new Map<string, PortWeatherForecastRow[]>()
   const impactsByPortId = new Map<string, PortWeatherImpactRow[]>()
   return {
     providerId: "open-meteo-marine",
     drainForecastPersistence() {
-      const batch: WeatherForecastPersistenceBatch = {
+      return {
         forecastsByPortId: new Map(forecastsByPortId),
         impactsByPortId: new Map(impactsByPortId),
       }
+    },
+    ackForecastPersistence() {
       forecastsByPortId.clear()
       impactsByPortId.clear()
-      return batch
     },
     async getFeedItems(ports: Port[] = [], lastKnown = []) {
-      forecastsByPortId.clear()
-      impactsByPortId.clear()
       const checkedAt = now()
       const modelLastKnown = lastKnown.filter(item => item.sourceId === "open-meteo-marine")
       const failures: ProviderError[] = []
       const results = await Promise.all(ports.map(async (port) => {
         const cached = cache.get(port.id)
-        if (cached && checkedAt.getTime() - cached.checkedAt < minIntervalMs) return structuredClone(cached.items)
+        if (cached && checkedAt.getTime() - cached.checkedAt < minIntervalMs) {
+          forecastsByPortId.set(port.id, structuredClone(cached.forecasts))
+          impactsByPortId.set(port.id, structuredClone(cached.impacts))
+          return structuredClone(cached.items)
+        }
         const previous = modelLastKnown.filter(item => item.relatedPortIds.includes(port.id))
         let coordinates
         try {
@@ -693,7 +702,14 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
           impactsByPortId.set(port.id, computePortWeatherImpacts(port.id, mergedPoints, fetchedAt))
           const item = weatherFeedItem({ id: port.id, name: port.name, nameEn: port.nameEn, latitude: coordinates.latitude, longitude: coordinates.longitude }, marinePayload, weatherPayload, fetchedAt)
           const items = item ? [{ ...item, fetchedAt }] : []
-          cache.set(port.id, { checkedAt: checkedAt.getTime(), items })
+          const forecastRows = forecastsByPortId.get(port.id) ?? []
+          const impactRows = impactsByPortId.get(port.id) ?? []
+          cache.set(port.id, {
+            checkedAt: checkedAt.getTime(),
+            items,
+            forecasts: structuredClone(forecastRows),
+            impacts: structuredClone(impactRows),
+          })
           return items
         } catch (error) {
           const message = error instanceof Error ? error.message : "Open-Meteo port request failed"

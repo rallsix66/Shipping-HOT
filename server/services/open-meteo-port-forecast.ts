@@ -1,6 +1,7 @@
 import { windGustKmhToMs } from "@shared/weather-units"
 import type { PortWeatherForecastRow, PortWeatherImpactRow } from "@shared/shipping"
 import { evaluateWeatherImpactRules } from "#/services/weather-impact-engine"
+import { precipitation24hEndingAt } from "#/services/precipitation-window"
 
 function normalizeProviderTimestamp(value: unknown): string | undefined {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -22,6 +23,7 @@ interface OpenMeteoPayload {
 
 export interface OpenMeteoPortPoint {
   timestamp: string
+  horizon: "hourly" | "current"
   waveHeightM?: number
   swellWaveHeightM?: number
   windSpeedKmh?: number
@@ -34,43 +36,55 @@ function numberValue(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined
 }
 
+function upsertPoint(
+  points: Map<string, OpenMeteoPortPoint>,
+  timestamp: string,
+  horizon: "hourly" | "current",
+  patch: Partial<Omit<OpenMeteoPortPoint, "timestamp" | "horizon">>,
+) {
+  const key = `${timestamp}|${horizon}`
+  const existing = points.get(key)
+  const next: OpenMeteoPortPoint = existing ?? { timestamp, horizon }
+  Object.assign(next, patch)
+  points.set(key, next)
+}
+
 export function mergeOpenMeteoPortPoints(marine: OpenMeteoPayload, land: OpenMeteoPayload): OpenMeteoPortPoint[] {
   const points = new Map<string, OpenMeteoPortPoint>()
-  const ensure = (value: unknown) => {
-    const timestamp = normalizeProviderTimestamp(value)
-    if (!timestamp) return undefined
-    const point = points.get(timestamp) ?? { timestamp }
-    points.set(timestamp, point)
-    return point
-  }
   const marineHourly = marine.hourly
   marineHourly?.time?.forEach((time, index) => {
-    const point = ensure(time)
-    if (!point) return
-    point.waveHeightM = numberValue((marineHourly as { wave_height?: number[] }).wave_height?.[index])
-    point.swellWaveHeightM = numberValue((marineHourly as { swell_wave_height?: number[] }).swell_wave_height?.[index])
+    const timestamp = normalizeProviderTimestamp(time)
+    if (!timestamp) return
+    upsertPoint(points, timestamp, "hourly", {
+      waveHeightM: numberValue((marineHourly as { wave_height?: number[] }).wave_height?.[index]),
+      swellWaveHeightM: numberValue((marineHourly as { swell_wave_height?: number[] }).swell_wave_height?.[index]),
+    })
   })
   const landHourly = land.hourly
   landHourly?.time?.forEach((time, index) => {
-    const point = ensure(time)
-    if (!point) return
-    point.windSpeedKmh = numberValue((landHourly as { wind_speed_10m?: number[] }).wind_speed_10m?.[index])
-    point.windGustKmh = numberValue((landHourly as { wind_gusts_10m?: number[] }).wind_gusts_10m?.[index])
-    point.precipitationMm = numberValue((landHourly as { precipitation?: number[] }).precipitation?.[index])
-    point.visibilityM = numberValue((landHourly as { visibility?: number[] }).visibility?.[index])
+    const timestamp = normalizeProviderTimestamp(time)
+    if (!timestamp) return
+    upsertPoint(points, timestamp, "hourly", {
+      windSpeedKmh: numberValue((landHourly as { wind_speed_10m?: number[] }).wind_speed_10m?.[index]),
+      windGustKmh: numberValue((landHourly as { wind_gusts_10m?: number[] }).wind_gusts_10m?.[index]),
+      precipitationMm: numberValue((landHourly as { precipitation?: number[] }).precipitation?.[index]),
+      visibilityM: numberValue((landHourly as { visibility?: number[] }).visibility?.[index]),
+    })
   })
   const marineCurrent = marine.current
   const landCurrent = land.current
-  const currentPoint = ensure(marineCurrent?.time ?? landCurrent?.time)
-  if (currentPoint) {
-    currentPoint.waveHeightM ??= numberValue(marineCurrent?.wave_height)
-    currentPoint.swellWaveHeightM ??= numberValue(marineCurrent?.swell_wave_height)
-    currentPoint.windSpeedKmh ??= numberValue(landCurrent?.wind_speed_10m)
-    currentPoint.windGustKmh ??= numberValue(landCurrent?.wind_gusts_10m)
-    currentPoint.precipitationMm ??= numberValue(landCurrent?.precipitation)
-    currentPoint.visibilityM ??= numberValue(landCurrent?.visibility)
+  const currentTimestamp = normalizeProviderTimestamp(marineCurrent?.time ?? landCurrent?.time)
+  if (currentTimestamp) {
+    upsertPoint(points, currentTimestamp, "current", {
+      waveHeightM: numberValue(marineCurrent?.wave_height),
+      swellWaveHeightM: numberValue(marineCurrent?.swell_wave_height),
+      windSpeedKmh: numberValue(landCurrent?.wind_speed_10m),
+      windGustKmh: numberValue(landCurrent?.wind_gusts_10m),
+      precipitationMm: numberValue(landCurrent?.precipitation),
+      visibilityM: numberValue(landCurrent?.visibility),
+    })
   }
-  return [...points.values()].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp)).slice(0, 7 * 24 + 1)
+  return [...points.values()].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp)).slice(0, 7 * 24 + 2)
 }
 
 export function openMeteoPointsToForecastRows(
@@ -81,13 +95,13 @@ export function openMeteoPointsToForecastRows(
   sourceId = "open-meteo-marine",
 ): PortWeatherForecastRow[] {
   return points.map((point) => {
-    const id = `wf-${portId}-${Date.parse(point.timestamp)}`
+    const id = `wf-${portId}-${point.horizon}-${Date.parse(point.timestamp)}`
     return {
       id,
       portId,
       unlocode,
       forecastAt: point.timestamp,
-      horizon: "hourly" as const,
+      horizon: point.horizon,
       waveHeightM: point.waveHeightM,
       swellWaveHeightM: point.swellWaveHeightM,
       windSpeedKmh: point.windSpeedKmh,
@@ -100,31 +114,26 @@ export function openMeteoPointsToForecastRows(
   })
 }
 
-function precipitation24hAt(points: OpenMeteoPortPoint[], index: number): number | undefined {
-  const window = points.slice(Math.max(0, index - 23), index + 1)
-  const values = window.map(p => p.precipitationMm).filter((v): v is number => v !== undefined)
-  if (!values.length) return undefined
-  return values.reduce((sum, v) => sum + v, 0)
-}
-
 export function computePortWeatherImpacts(
   portId: string,
   points: OpenMeteoPortPoint[],
   computedAt: string,
 ): PortWeatherImpactRow[] {
+  const sorted = [...points].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
+  const precipSamples = sorted.map(p => ({ timestamp: p.timestamp, precipitationMm: p.precipitationMm, horizon: p.horizon }))
   const impacts: PortWeatherImpactRow[] = []
-  points.forEach((point, index) => {
+  for (const point of sorted) {
     const gustMs = point.windGustKmh === undefined ? undefined : windGustKmhToMs(point.windGustKmh)
     const waveM = point.waveHeightM ?? point.swellWaveHeightM
     const hits = evaluateWeatherImpactRules({
       windGustMs: gustMs,
       waveHeightM: waveM,
       visibilityM: point.visibilityM,
-      precipitationMm24h: precipitation24hAt(points, index),
+      precipitationMm24h: precipitation24hEndingAt(precipSamples, point.timestamp),
     })
     for (const hit of hits) {
       impacts.push({
-        id: `wi-${portId}-${hit.ruleId}-${Date.parse(point.timestamp)}`,
+        id: `wi-${portId}-${hit.ruleId}-${point.horizon}-${Date.parse(point.timestamp)}`,
         portId,
         validFrom: point.timestamp,
         validUntil: point.timestamp,
@@ -139,6 +148,6 @@ export function computePortWeatherImpacts(
         computedAt,
       })
     }
-  })
+  }
   return impacts
 }

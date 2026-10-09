@@ -446,10 +446,11 @@ export class ShippingRepository {
     })
   }
 
-  async replaceWeatherForecastsForPort(portId: string, rows: PortWeatherForecastRow[]) {
+  async replaceWeatherPortBatch(portId: string, forecasts: PortWeatherForecastRow[], impacts: PortWeatherImpactRow[]) {
     await transaction(this.db, async () => {
       await this.db.prepare("DELETE FROM weather_forecast WHERE port_id = ?").run(portId)
-      for (const row of rows) {
+      await this.db.prepare("DELETE FROM weather_impact WHERE port_id = ?").run(portId)
+      for (const row of forecasts) {
         await this.db.prepare(`
           INSERT INTO weather_forecast (
             id, port_id, unlocode, forecast_at, horizon,
@@ -472,13 +473,7 @@ export class ShippingRepository {
           row.fetchedAt,
         )
       }
-    })
-  }
-
-  async replaceWeatherImpactsForPort(portId: string, rows: PortWeatherImpactRow[]) {
-    await transaction(this.db, async () => {
-      await this.db.prepare("DELETE FROM weather_impact WHERE port_id = ?").run(portId)
-      for (const row of rows) {
+      for (const row of impacts) {
         await this.db.prepare(`
           INSERT INTO weather_impact (
             id, port_id, valid_from, valid_until, impact_object, severity, status,
@@ -501,7 +496,7 @@ export class ShippingRepository {
     })
   }
 
-  async listWeatherForecastsForPort(portId: string, limit = 7 * 24): Promise<PortWeatherForecastRow[]> {
+  async listWeatherForecastsForPort(portId: string, limit = 7 * 24 + 2): Promise<PortWeatherForecastRow[]> {
     const result = await this.db.prepare(`
       SELECT id, port_id, unlocode, forecast_at, horizon,
         wave_height_m, swell_wave_height_m, wind_speed_kmh, wind_gust_kmh,
@@ -516,7 +511,7 @@ export class ShippingRepository {
       portId: String(row.port_id),
       unlocode: row.unlocode ? String(row.unlocode) : undefined,
       forecastAt: String(row.forecast_at),
-      horizon: "hourly" as const,
+      horizon: (row.horizon === "current" ? "current" : "hourly") as PortWeatherForecastRow["horizon"],
       waveHeightM: typeof row.wave_height_m === "number" ? row.wave_height_m : undefined,
       swellWaveHeightM: typeof row.swell_wave_height_m === "number" ? row.swell_wave_height_m : undefined,
       windSpeedKmh: typeof row.wind_speed_kmh === "number" ? row.wind_speed_kmh : undefined,
@@ -528,15 +523,42 @@ export class ShippingRepository {
     }))
   }
 
-  async listWeatherImpactsForPort(portId: string, limit = 48): Promise<PortWeatherImpactRow[]> {
+  async countWeatherImpactsForPortInWindow(portId: string, windowStartIso: string, windowEndIso: string): Promise<number> {
+    const result = await this.db.prepare(`
+      SELECT COUNT(*) AS count
+      FROM weather_impact
+      WHERE port_id = ?
+        AND julianday(valid_from) >= julianday(?)
+        AND julianday(valid_from) <= julianday(?)
+    `).get(portId, windowStartIso, windowEndIso) as Row | undefined
+    return Number(result?.count ?? 0)
+  }
+
+  async listWeatherImpactsForPortRanked(
+    portId: string,
+    asOfIso: string,
+    windowStartIso: string,
+    windowEndIso: string,
+    limit = 48,
+  ): Promise<PortWeatherImpactRow[]> {
     const result = await this.db.prepare(`
       SELECT id, port_id, valid_from, valid_until, rule_id, severity, status,
         input_values_json, provenance, summary_zh, computed_at
       FROM weather_impact
       WHERE port_id = ?
-      ORDER BY valid_from DESC
+        AND julianday(valid_from) >= julianday(?)
+        AND julianday(valid_from) <= julianday(?)
+      ORDER BY
+        CASE severity
+          WHEN 'critical' THEN 4
+          WHEN 'warning' THEN 3
+          WHEN 'watch' THEN 2
+          ELSE 1
+        END DESC,
+        ABS(julianday(valid_from) - julianday(?)) ASC,
+        valid_from ASC
       LIMIT ?
-    `).all(portId, limit)
+    `).all(portId, windowStartIso, windowEndIso, asOfIso, limit)
     return rows<Row>(result).map((row) => {
       const inputValues = parse<Record<string, number>>(row.input_values_json)
       return {

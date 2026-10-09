@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { evaluateWeatherImpactRules } from "./weather-impact-engine"
 import { computePortWeatherImpacts, mergeOpenMeteoPortPoints, openMeteoPointsToForecastRows } from "./open-meteo-port-forecast"
 
 describe("open-meteo port forecast normalize", () => {
@@ -25,5 +26,22 @@ describe("open-meteo port forecast normalize", () => {
     expect(rows[0].portId).toBe("port-shekou")
     const impacts = computePortWeatherImpacts("port-shekou", points, "2026-08-15T00:00:00.000Z")
     expect(impacts.some(i => i.ruleId === "WR-S04")).toBe(true)
+  })
+
+  it("computes WR-S05 from rolling 24h precipitation ending at current horizon", () => {
+    const base = Date.parse("2026-08-14T13:00:00.000Z")
+    const hourly = Array.from({ length: 24 }, (_, index) => ({
+      timestamp: new Date(base + index * 60 * 60 * 1000).toISOString(),
+      horizon: "hourly" as const,
+      precipitationMm: index === 23 ? 100 : 0,
+    }))
+    const points = [...hourly, {
+      timestamp: "2026-08-15T12:00:00.000Z",
+      horizon: "current" as const,
+      precipitationMm: 100,
+    }]
+    const impacts = computePortWeatherImpacts("port-shekou", points, "2026-08-15T12:00:00.000Z")
+    expect(impacts.some(i => i.ruleId === "WR-S05")).toBe(true)
+    expect(evaluateWeatherImpactRules({ precipitationMm24h: 99.9 }).some(h => h.ruleId === "WR-S05")).toBe(false)
   })
 })

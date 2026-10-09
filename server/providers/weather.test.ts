@@ -90,6 +90,23 @@ describe("open-meteo weather intelligence", () => {
     expect(batch?.impactsByPortId.get("port-shekou")?.length).toBeGreaterThan(0)
   })
 
+  it("keeps persistence batch on TTL cache hits until ack", async () => {
+    let now = new Date("2026-08-15T00:00:00.000Z")
+    const provider = createOpenMeteoWeatherProvider({
+      now: () => now,
+      minIntervalMs: 30 * 60 * 1000,
+      fetcher: async url => ({ ok: true, status: 200, json: async () => weatherPayload(url) }),
+    })
+    await provider.getFeedItems([mockPorts[0]])
+    const firstBatch = provider.drainForecastPersistence?.()
+    expect(firstBatch?.forecastsByPortId.get("port-shekou")?.length).toBeGreaterThan(0)
+    provider.ackForecastPersistence?.()
+    now = new Date("2026-08-15T00:10:00.000Z")
+    await provider.getFeedItems([mockPorts[0]])
+    const cachedBatch = provider.drainForecastPersistence?.()
+    expect(cachedBatch?.forecastsByPortId.get("port-shekou")?.length).toBeGreaterThan(0)
+  })
+
   it("records Open-Meteo fetchedAt after response parsing and keeps it on cache hits", async () => {
     const times = ["2026-08-18T10:00:00.000Z", "2026-08-18T10:00:02.000Z", "2026-08-18T10:00:30.000Z"]
     const provider = createOpenMeteoWeatherProvider({

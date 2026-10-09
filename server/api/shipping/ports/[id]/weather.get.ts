@@ -21,5 +21,10 @@ export default defineEventHandler(async (event) => {
     : providerModes.weatherAlerts === "experimental"
       ? "官方预警 experimental"
       : "官方预警 off"
-  return getPortWeatherPanel(repository, portId, snapshot.feedItems, forecastLabel, alertsLabel)
+  const query = getQuery(event)
+  const asOf = typeof query.asOf === "string" && query.asOf.trim() ? query.asOf.trim() : undefined
+  const now = asOf ? new Date(asOf) : new Date()
+  if (Number.isNaN(now.getTime())) throw createError({ statusCode: 400, statusMessage: "invalid asOf" })
+  const weatherSourceId = providerModes.weather === "open-meteo" ? "open-meteo-marine" : "mock-weather"
+  return getPortWeatherPanel(repository, portId, snapshot.feedItems, forecastLabel, alertsLabel, { now, weatherSourceId })
 })

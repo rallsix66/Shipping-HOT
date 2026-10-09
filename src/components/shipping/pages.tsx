@@ -3,7 +3,7 @@ import { motion } from "framer-motion"
 import { type ReactNode, useEffect, useState } from "react"
 import type { ArticleBlock, ArticleCompletenessStatus, ArticleTranslationBlockSource, ArticleTranslationViewStatus } from "@shared/article"
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
-import { type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
+import { type PortWeatherPanelResponse, type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
 import { type ShippingResponse, type TranslationStatusResponse, useFeedArticle, usePortWeather, useShipping, useTranslationSecret, useTranslationStatus } from "./data"
 import { FeedItemDisplayText } from "./feed-display"
@@ -437,12 +437,32 @@ export function PortsPage() {
   )
 }
 
+function portWeatherImpactEmptyCopy(state: PortWeatherPanelResponse["state"]): string {
+  switch (state) {
+    case "sync_failed":
+      return "天气同步失败或数据源不可用；潜在影响暂不可信。"
+    case "data_empty":
+      return "暂无有效窗口内的持久化预报；请等待 Open-Meteo 同步。"
+    case "data_stale":
+      return "预报数据已过期；请触发同步后再查看潜在影响。"
+    case "no_rule_hits":
+      return "有效窗口内无规则命中（⚙ 潜在影响）；不含已实施封港结论。"
+    default:
+      return "当前无规则命中；仅展示 ⚙ 潜在影响，不含已实施封港结论。"
+  }
+}
+
 function PortWeatherPanelSection({ portId }: { portId: string }) {
   const { data, isLoading, isError } = usePortWeather(portId)
   if (isLoading) return <div className="glass-panel d-panel"><p className="text-sm op-60">加载港口天气…</p></div>
-  if (isError || !data) return <div className="glass-panel d-panel"><p className="text-sm op-60">港口天气暂不可用</p></div>
+  if (isError || !data) return <div className="glass-panel d-panel"><p className="text-sm op-60">港口天气 API 不可用（同步失败或网络错误）。</p></div>
   const nextForecasts = data.forecasts.slice(0, 8)
   const nextImpacts = data.impacts.slice(0, 6)
+  const forecastEmptyCopy = data.state === "data_stale"
+    ? "预报数据已过期，请重新同步。"
+    : data.state === "sync_failed"
+      ? "天气同步失败，暂无可靠预报数值。"
+      : "暂无 7 天持久化预报；Open-Meteo 同步后会写入 SQLite。"
   return (
     <div className="mt-4 grid gap-4 lg:grid-cols-3">
       <div className="glass-panel d-panel">
@@ -451,7 +471,7 @@ function PortWeatherPanelSection({ portId }: { portId: string }) {
           <span className="text-xs op-60">{data.sources.forecast}</span>
         </div>
         {nextForecasts.length === 0
-          ? <p className="text-sm op-60">暂无 7 天持久化预报；Open-Meteo 同步后会写入 SQLite。</p>
+          ? <p className="text-sm op-60">{forecastEmptyCopy}</p>
           : (
               <ul className="space-y-2 text-sm">
                 {nextForecasts.map(row => (
@@ -480,9 +500,22 @@ function PortWeatherPanelSection({ portId }: { portId: string }) {
           </span>
         </div>
         {nextImpacts.length === 0
-          ? <p className="text-sm op-60">当前无规则命中；仅展示 ⚙ 潜在影响，不含已实施封港结论。</p>
+          ? <p className="text-sm op-60">{portWeatherImpactEmptyCopy(data.state)}</p>
           : (
               <ul className="space-y-2 text-sm">
+                {data.impactMeta.truncated && (
+                  <li className="text-xs op-60">
+                    共
+                    {" "}
+                    {data.impactMeta.totalMatched}
+                    {" "}
+                    条命中，展示优先级最高的
+                    {" "}
+                    {data.impactMeta.returned}
+                    {" "}
+                    条（近期高等级优先）。
+                  </li>
+                )}
                 {nextImpacts.map(row => (
                   <li key={row.id} className="flex items-start gap-2">
                     <StatusDot tone={severityTone(row.severity)} />

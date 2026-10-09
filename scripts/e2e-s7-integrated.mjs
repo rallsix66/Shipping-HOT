@@ -17,10 +17,9 @@
 // accuracy, and it does not re-verify S2/S3/S4/S5 sealed scope.
 //
 // Usage:
-//   node scripts/e2e-s7-integrated.mjs           (default .tmp/s7-local-r1-5 for R1.5+ schema; override with E2E_S7_DIR)
+//   node scripts/e2e-s7-integrated.mjs           (default .tmp/s7-local — matches CI artifact upload path)
 //
-// Evidence policy: pre-R1 S7 PASS remains on merged main CI artifacts / frozen `.tmp/s7-local` records.
-// Do not backfill old evidence into a reused R1.5 run directory — note the runDir in each evidence JSON.
+// Evidence policy: CI uploads `.tmp/s7-local/s7-integrated-evidence.json` only; override with E2E_S7_DIR inside `.tmp/`.
 //
 // Exit code 0 only when every check passes.
 import { spawn } from "node:child_process"
@@ -33,7 +32,7 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import Database from "better-sqlite3"
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)))
-const RUN_DIR = resolve(process.env.E2E_S7_DIR ?? join(ROOT, ".tmp", "s7-local-r1-5"))
+const RUN_DIR = resolve(process.env.E2E_S7_DIR ?? join(ROOT, ".tmp", "s7-local"))
 const DB_PATH = join(RUN_DIR, ".data", "shipping-hot-v3.sqlite3")
 const MANIFEST_PATH = join(RUN_DIR, "s7-local-manifest.json")
 const SERVER_ENTRY = join(ROOT, "dist", "output", "server", "index.mjs")
@@ -721,6 +720,15 @@ async function main() {
     pushC(portNorm.includes(norm("蛇口")) && portNorm.includes("CNSHK"), "port detail shows name and UN/LOCODE")
     pushC(/拥堵|等待|high|高/.test(text), "port detail surfaces congestion information")
     pushC(text.includes("Swell and wind risk window"), "port detail lists the related weather item")
+    const portWeatherApi = await api(`/api/shipping/ports/${encodeURIComponent(expectations.portId)}/weather`)
+    pushC(portWeatherApi.status === 200 && portWeatherApi.body?.portId === expectations.portId, "port weather API returns panel payload")
+    pushC(
+      typeof portWeatherApi.body?.state === "string" && Array.isArray(portWeatherApi.body?.forecasts) && Array.isArray(portWeatherApi.body?.impacts),
+      "port weather API exposes state, forecasts and impacts arrays",
+    )
+    await navigate(`/ports/${expectations.portId}`, { reload: true })
+    text = await bodyText()
+    pushC(text.includes("预报数值") && text.includes("潜在影响") && text.includes("官方预警"), "port detail renders the three weather blocks")
 
     await navigate("/feed")
     const weatherClicked = await evaluate(`(() => {

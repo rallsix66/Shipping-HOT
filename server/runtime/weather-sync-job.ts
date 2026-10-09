@@ -13,10 +13,12 @@ export interface WeatherSyncJobOptions {
   intervalMs: number
   enabled?: boolean
   now?: () => Date
+  /** Test-only override */
+  repository?: ShippingRepository
 }
 
 export function createWeatherSyncJob(options: WeatherSyncJobOptions): RuntimeJob {
-  const repository = new ShippingRepository(options.database, options.dataMode)
+  const repository = options.repository ?? new ShippingRepository(options.database, options.dataMode)
   const now = options.now ?? (() => new Date())
   const providerId = options.provider.providerId
   return {
@@ -35,12 +37,18 @@ export function createWeatherSyncJob(options: WeatherSyncJobOptions): RuntimeJob
       for (const item of received) await repository.upsertFeedItem(item)
       const forecastBatch = options.provider.drainForecastPersistence?.()
       if (forecastBatch) {
-        for (const [portId, rows] of forecastBatch.forecastsByPortId) {
-          await repository.replaceWeatherForecastsForPort(portId, rows)
+        const portIds = new Set([
+          ...forecastBatch.forecastsByPortId.keys(),
+          ...forecastBatch.impactsByPortId.keys(),
+        ])
+        for (const portId of portIds) {
+          await repository.replaceWeatherPortBatch(
+            portId,
+            forecastBatch.forecastsByPortId.get(portId) ?? [],
+            forecastBatch.impactsByPortId.get(portId) ?? [],
+          )
         }
-        for (const [portId, rows] of forecastBatch.impactsByPortId) {
-          await repository.replaceWeatherImpactsForPort(portId, rows)
-        }
+        options.provider.ackForecastPersistence?.()
       }
       const failed = received.find(item => item.sourceStatus === "failed")
       const sourceUpdatedAt = received

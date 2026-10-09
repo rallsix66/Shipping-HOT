@@ -64,11 +64,12 @@
   - **R1.5-2：** **NOT_RUN**（整项）— 说明：§4.8 **WR-S01..WR-S05** 命中/不命中/边界已落地（`weather-impact-engine.test.ts`）；**官方预警表行未实现**。
   - **R1.5-3：** **NOT_RUN**（整项）— 说明：已验证范围仅为当前规则的 `potential`/`system` 输出（同上）；不含官方预警升级语义。
   - **R1.5-4：** **BLOCKED** — 合格 **0/10**；回放命中口径 **warning/critical**（watch 不计）；≥10 样本且 **≥80% 回放** 才解除 blocked，**不**自动标 PASS。候选 `port-closure-replay-candidates.ts` 含 `verificationAudit` 初核记录，仍 **blocked**。
-  - **R1.5-1（切片）：** Open-Meteo 陆地 **precipitation/visibility** 请求 + `weather_forecast`/`weather_impact` 持久化（weather-sync）+ 港口页三块 UI + `GET /api/shipping/ports/:id/weather` — **NOT_RUN**（待本批门禁证据）。
-  - **S7：** 默认目录 **`.tmp/s7-local-r1-5`**（R1.5+）；**2026-10-09** 回归 **PASS**（124 checks，证据 `.tmp/s7-local-r1-5/s7-integrated-evidence.json`，无 `E2E_S7_DIR` 覆盖）。**pre-R1** 仍以 **main 合并 CI / 封存 `.tmp/s7-local`** 为准；`.tmp/s7-local-r1-review-4` 为 foundation 批调试复用，**不**回填 R1 证据。
-- **仍 NOT_RUN / pending：** R1.5-1 全量（8 港 7 天 UI 验收、JMA 台风路径）、R1.5-5/6/7；R1.5 阶段完整门禁 G 与 **R1.5-1 浏览器/CDP**；Neat Freak **R1.5 产品 live 面** pending。
-- **定向验证（2026-10-09 补正 + R1.5-1 切片，commit 待写）：** Vitest **62 files / 504 passed | 3 skipped**；`pnpm build` / `typecheck` / `smoke:p0-native` / S7（上）；**未**申请合并。
-- **Neat Freak（2026-10-09 补正批）：** 技能 `C:\Users\Administrator\.claude\skills\neat-freak\SKILL.md`（v3.0.0）；`"C:\Program Files\Git\bin\bash.exe" scripts/audit-inventory.sh "<repo>"` exit **0**（仓库 `scripts/audit-inventory.sh` 与 skill bundle 同源，**非**「Bash 不可用」）。**pending：** 清场候选删除须用户确认；R1.5-4 合格库；R1.5-1 全量 UI/Runtime。
+  - **R1.5-1（整项）：** **NOT_RUN** — 说明：已实现 Open-Meteo 陆地字段、同批 `replaceWeatherPortBatch` 持久化、固定 `asOf` 面板状态（`data_empty` / `data_stale` / `no_rule_hits` / `sync_failed`）、港口页三块 + 天气 API；**8 港 7 天/JMA/全量浏览器 仍 NOT_RUN**。
+  - **天气链路补正（2026-10-09 审查批）：** 影响排序（严重度 + 距 `asOf` 近优先，>48 截断元数据）；24h 降水按真实时间窗；缓存命中仍 `drain` 待持久化批次，`ack` 仅在写入成功后；单测含故障注入/恢复。
+  - **S7：** 默认 **`.tmp/s7-local`**（与 CI artifact 路径一致）；**2026-10-09** **PASS**（**127** checks / Flow C +3 天气 API/三块 UI，证据 `.tmp/s7-local/s7-integrated-evidence.json`）。
+- **仍 NOT_RUN / pending：** R1.5-1 全量、R1.5-5/6/7；R1.5-4 合格库 **0/10 BLOCKED**；清场删除须用户确认。
+- **定向验证（2026-10-09 天气链路批）：** Vitest **64 files / 512 passed | 3 skipped**；`pnpm build` / `typecheck` / `lint` / `smoke:p0-native` / S7（上）；**未**申请合并。
+- **Neat Freak（2026-10-09 天气链路批）：** `neat-freak@3.0.0` + `scripts/audit-inventory.sh`（Git Bash）exit **0**（`generated_at=2026-10-09T10:16:58Z`）；文档/PR 矩阵与本 commit 对齐。**pending：** 全量 R1.5 阶段 live 面、R1.5-4 样本核实完成前不得标 PASS。
 - **结论：** **R1.5 = IN PROGRESS / BLOCKED on R1.5-4**（**非**阶段 PASS）。
 
 ### R0 — 门禁 G 执行记录
