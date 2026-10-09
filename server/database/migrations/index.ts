@@ -13,6 +13,7 @@ import { providerUsageRecordsMigration } from "#/database/migrations/011-provide
 import { translationRuntimeWorkStateMigration } from "#/database/migrations/012-translation-runtime-work-state"
 import { articleContentMigration } from "#/database/migrations/013-article-content"
 import { retireVesselVoyageMigration } from "#/database/migrations/014-retire-vessel-voyage"
+import { opsWeatherCalendarPolicyMigration } from "#/database/migrations/015-ops-weather-calendar-policy"
 
 export interface ShippingMigration {
   readonly version: number
@@ -38,6 +39,7 @@ export const shippingMigrations: readonly ShippingMigration[] = [
   translationRuntimeWorkStateMigration,
   articleContentMigration,
   retireVesselVoyageMigration,
+  opsWeatherCalendarPolicyMigration,
 ]
 
 export const latestShippingSchemaVersion = shippingMigrations[shippingMigrations.length - 1].version

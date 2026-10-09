@@ -67,17 +67,17 @@ async function tables(native: NativeDatabase): Promise<Set<string>> {
 }
 
 describe("article content migration and repository", () => {
-  it("applies to a fresh database as schema v13 with the three article tables and is idempotent", async () => {
+  it("applies to a fresh database with article tables through latest schema and is idempotent", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(14)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(15)
     const names = await tables(native)
     expect(["feed_articles", "article_versions", "article_blocks"].every(name => names.has(name))).toBe(true)
 
     await initShippingTables(database, "mock")
-    const applied = native.prepare("SELECT COUNT(*) AS c FROM schema_migrations WHERE version = 14").get() as { c: number }
+    const applied = native.prepare("SELECT COUNT(*) AS c FROM schema_migrations WHERE version = 15").get() as { c: number }
     expect(applied.c).toBe(1)
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(14)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(15)
     native.close()
   })
 
@@ -87,11 +87,11 @@ describe("article content migration and repository", () => {
     await new ShippingRepository(database, "mock").saveSettings({ ...(await new ShippingRepository(database, "mock").getSettings())!, refreshInterval: 42, retentionDays: 45 })
     // Simulate a v12 database: remove the article tables and recorded post-v12 migrations.
     native.exec("DROP TABLE article_blocks; DROP TABLE article_versions; DROP TABLE feed_articles;")
-    native.prepare("DELETE FROM schema_migrations WHERE version IN (13, 14)").run()
+    native.prepare("DELETE FROM schema_migrations WHERE version IN (13, 14, 15)").run()
     native.prepare("UPDATE app_metadata SET schema_version = 12").run()
 
     await initShippingTables(database, "mock")
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(14)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(15)
     const settings = await new ShippingRepository(database, "mock").getSettings()
     expect(settings).toMatchObject({ refreshInterval: 42, retentionDays: 45 })
     const names = await tables(native)

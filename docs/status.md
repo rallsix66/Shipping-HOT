@@ -47,16 +47,24 @@
   - **R1-6 标签与恢复抽查：** origin 标签 `pre-r1-vessel-removal` 存在；`git worktree add .tmp/pre-r1-verify pre-r1-vessel-removal` + `pnpm exec vitest run server/providers/ais/index.test.ts` → **4/4 PASS**；worktree 已删除 → **PASS**。
   - **Neat Freak closeout（R1 收尾）：** 技能 `C:\Users\Administrator\.claude\skills\neat-freak\SKILL.md`（v3.0.0）；配套脚本原缺失于 `<repo>/scripts/audit-inventory.sh`，已从 skill bundle **同内容补齐** 于本分支 closeout commit。盘点执行：`"C:\Program Files\Git\bin\bash.exe" scripts/audit-inventory.sh "<repo>"` → exit **0**（`generated_at=2026-10-09T07:53:15Z`，`head=8d6cba2`，`status_entries=0`）；closeout 前亦曾用 skill 绝对路径跑通同一脚本。**未**删除清理候选（`.tmp/` 诊断副本、未跟踪 patch 等保留）。知识同步：本 commit 更新 `docs/status.md`、`docs/plans/*` R1-1 口径、`AGENTS.md` R1 状态 → **PASS（R1 范围 inventory + 文档对齐）**。
   - **R1 closeout 复验（2026-10-09）：** `test/r1-retired-surface.contract.test.ts` **9/9**；`scripts/r1-migration-copy-guard.test.ts` **9 pass | 3 skipped**（文件 symlink **未验证**，本机 `EPERM`；**未**放宽断言、**未**新增 CI）。
-- **合并后 CI（2026-10-09）：** [Shipping HOT checks `37903089115`](https://github.com/rallsix66/Shipping-HOT/actions/runs/37903089115) @ merge `39561d8` → **`checks` failure**（Ubuntu Tests：`rg` exit **127**，`test/r1-retired-surface.contract.test.ts` 2 failed）；**`e2e-windows` skipped**。根因：runner 未装 ripgrep；契约/白名单逻辑未改。
-- **结论：** **R1 = PASS（已合并 main）**——实现与本地验收见上；**post-merge CI 待 ripgrep 修复 PR**；**R1.5 未开始**；保留库未动。
+- **合并后 CI：** PR #5 首次 run [`37903089115`](https://github.com/rallsix66/Shipping-HOT/actions/runs/37903089115)（`rg` 缺失）→ PR #6 修复 merge **`b9281749c81aa1f8bca6473a029b04876afe8d64`** → [`37909305808`](https://github.com/rallsix66/Shipping-HOT/actions/runs/37909305808) **`checks` + `e2e-windows` 均 success**（Ubuntu **484/484** 测试；S7 证据 artifact 已上传）。
+- **结论：** **R1 = PASS（已合并 main；CI 全绿 @ `b928174`）**；**R1.5 进行中**（见下）；保留库未动。
 
 ## CI — Ubuntu ripgrep for R1-1 contract tests — 2026-10-09
 
-- **分支 / PR：** `codex/shipping-hot-ci-ripgrep`（自 `main@39561d8`）；独立 PR，**未合并**。
-- **范围：** 仅在 `.github/workflows/shipping-hot-checks.yml` 的 `checks` job、**Tests** 前 `apt-get install ripgrep` 并 `command -v rg` / `rg --version`；单 workflow、仅 push `main`、`e2e-windows` 仍 `needs: checks`。
-- **不变：** 契约测试、五行白名单、无 skip/continue-on-error。
-- **门禁 G（2026-10-09，本分支）：** install/build/typecheck/lint PASS；Vitest **481 passed | 3 skipped**（Windows 守卫 3 skip 不变）；`smoke:p0-native` PASS。
-- **Neat Freak：** `bash scripts/audit-inventory.sh` → exit **0**（Git Bash；提交前 `status_entries=3` 为在途文档/workflow 变更）；**未**删除清理候选。
+- **状态：** **已合并** [PR #6](https://github.com/rallsix66/Shipping-HOT/pull/6) → `main@b928174`；CI [`37909305808`](https://github.com/rallsix66/Shipping-HOT/actions/runs/37909305808) 两 job 全绿。
+
+## Shipping Risk Intelligence — R1.5 基础功能增强 — 2026-10-09（进行中）
+
+- **基线 / 分支：** `main@b928174`；开发分支 `codex/shipping-hot-r1-5`（独立 PR，**未合并**）。
+- **依据：** 9/29 主方案 §4.8、§6 R1.5；ADR-008；`docs/intel-source-catalog.md`。
+- **本批已交付（foundation）：**
+  - 迁移 **015** `ops-weather-calendar-policy`（`weather_forecast`、`weather_impact`、`tropical_cyclone`、`ops_calendar_event`、`policy_record`、`policy_version`）。
+  - §4.8 规则引擎 `server/services/weather-impact-engine.ts` + 配置 `server/config/weather-impact-rules.ts`。
+  - **R1.5-2 / R1.5-3：** Vitest **6/6**（每条规则 hit/miss；仅 `potential` / `system`）。
+  - **R1.5-4：** **11** 条有来源引用的历史封港样本 `server/data/weather-calibration/port-closure-replay-events.ts`；回放 **≥80%** 门禁测试 **PASS**（`weather-calibration-replay.test.ts`）。
+- **仍 **NOT_RUN / 待续**（同一 PR 或后续 commit）：** R1.5-1 八港 7 天 UI+Runtime 持久化、Open-Meteo 陆地降水/能见度扩展、JMA 台风 job、官方预警信源扩展（MY/PH/VN/CN 等保持关闭/夹具）、CN-H01 年历、`ops_calendar_event` 大促生成与日历图层、政策库 CRUD/UI/导出、港口页三块、R1.5-6 浏览器验收、S7 schema **15** 回归、本阶段 Neat Freak 完整收尾。
+- **结论：** **R1.5 = IN PROGRESS**（**非**阶段 PASS）。
 
 ### R0 — 门禁 G 执行记录
 
