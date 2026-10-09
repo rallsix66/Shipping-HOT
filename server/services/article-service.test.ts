@@ -27,7 +27,6 @@ function feedItem(id: string, sourceId: string, sourceUrl: string, canonicalUrl 
     severity: "info",
     relatedPortIds: [],
     relatedVesselIds: [],
-    relatedVoyageIds: [],
     tags: ["test"],
     updatedAt: now,
     sourceUpdatedAt: now,

@@ -43,7 +43,7 @@ Approved to add when first needed (not in R0): `zod`, `@mozilla/readability`, `l
 
 ### 5. Schema naming (R1.5+)
 
-Operational weather/intel/policy tables use names in plan §3: `weather_forecast`, `weather_impact`, `tropical_cyclone`, `ops_calendar_event`, `policy_record`, `policy_version`, plus intel `intel_*` set in ADR-007. First migration tranche: **`014-ops-weather-calendar-policy`** (exact split may be refined in R1.5 PR; must remain additive from v13).
+Operational weather/intel/policy tables use names in plan §3: `weather_forecast`, `weather_impact`, `tropical_cyclone`, `ops_calendar_event`, `policy_record`, `policy_version`, plus intel `intel_*` set in ADR-007. First migration tranche: **`015-ops-weather-calendar-policy`** (exact split may be refined in R1.5 PR; must remain additive from v13; **after** R1 migration **014**).
 
 ## Consequences
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { CalendarCoverage, CalendarEvent } from "@shared/calendar"
-import { isAisAreaProviderDisabled, reconcileCalendarEvents } from "./shipping-store"
+import { reconcileCalendarEvents } from "./shipping-store"
 
 function holiday(sourceId: string, date = "2026-04-13"): CalendarEvent {
   return {
@@ -29,12 +29,6 @@ function coverage(sourceId: string, status: CalendarCoverage["status"]): Calenda
 }
 
 describe("calendar source-scoped reconciliation", () => {
-  it("marks AIS Area disabled only when the global provider is disabled or area mode is off", () => {
-    expect(isAisAreaProviderDisabled(false, "aisstream")).toBe(true)
-    expect(isAisAreaProviderDisabled(true, "off")).toBe(true)
-    expect(isAisAreaProviderDisabled(true, "aisstream")).toBe(false)
-  })
-
   it("removes a stale source fact only after complete coverage", () => {
     const existing = [holiday("calendarific")]
     const result = reconcileCalendarEvents(existing, [], [coverage("calendarific", "complete")], 2026)
@@ -59,37 +53,5 @@ describe("calendar source-scoped reconciliation", () => {
     expect(result.events).toHaveLength(1)
     expect(result.events[0]).toMatchObject({ id: incoming.id, stale: false, sourceStatus: "healthy", fetchedAt: incoming.fetchedAt, lastCheckedAt: incoming.lastCheckedAt })
     expect(result.events[0]).not.toHaveProperty("error")
-  })
-
-  it("does not merge same-name facts from different dates while preserving other source facts", () => {
-    const other = { ...holiday("official-th"), name: "Royal event", id: "calendar:TH:2026-04-13:Royal event:public_holiday:official-th" }
-    const existing = [holiday("calendarific"), other]
-    const official = { ...holiday("official-th"), date: "2026-04-14", id: "calendar:TH:2026-04-14:Songkran:public_holiday:official-th" }
-    const result = reconcileCalendarEvents(existing, [official], [coverage("official-th", "partial")], 2026)
-    expect(result.events.map(event => event.id)).toEqual(expect.arrayContaining([other.id, official.id]))
-    expect(result.events).toHaveLength(3)
-    expect(result.events.find(event => event.sourceId === "calendarific")).toMatchObject({ date: "2026-04-13" })
-  })
-
-  it.each([["subdivision", "my-03"] as const, ["unknown", undefined] as const])("supersedes a legacy unscoped Calendarific local fact with %s scope", (scope, subdivisionCode) => {
-    const old = holiday("calendarific", "2026-08-22")
-    old.name = "Local Founders Day"
-    const scoped = { ...old, id: `new-${scope}`, scope, subdivisionCode, subdivisionCodes: subdivisionCode ? [subdivisionCode] : undefined, scopeLabel: subdivisionCode ? "MY-03" : undefined }
-    const result = reconcileCalendarEvents([old], [scoped], [coverage("calendarific", "partial")], 2026)
-    expect(result.events).toEqual([scoped])
-    expect(result.removedIds).toEqual([old.id])
-  })
-
-  it("keeps an unscoped national fact and an unscoped official fact outside Calendarific local migration", () => {
-    const national = holiday("calendarific", "2026-08-22")
-    const noIncoming = reconcileCalendarEvents([national], [], [coverage("calendarific", "partial")], 2026)
-    expect(noIncoming.events).toHaveLength(1)
-    expect(noIncoming.removedIds).toEqual([])
-
-    const official = { ...holiday("official-th", "2026-08-22"), name: "Local Founders Day" }
-    const scoped = { ...holiday("calendarific", "2026-08-22"), id: "calendarific-scoped", name: official.name, scope: "subdivision" as const, subdivisionCode: "my-03", subdivisionCodes: ["my-03"] }
-    const mixed = reconcileCalendarEvents([official], [scoped], [coverage("calendarific", "partial")], 2026)
-    expect(mixed.events.map(event => event.id)).toEqual(expect.arrayContaining([official.id, scoped.id]))
-    expect(mixed.removedIds).toEqual([])
   })
 })

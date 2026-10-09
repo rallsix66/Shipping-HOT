@@ -19,7 +19,7 @@ export const TRANSLATION_LIVE_ACCEPTANCE_PHASE2_EXTERNAL_CALLS = 1 as const
 export const TRANSLATION_LIVE_ACCEPTANCE_MAX_EXTERNAL_CALLS = 2 as const
 export const TRANSLATION_LIVE_ACCEPTANCE_INPUT = TRANSLATION_TEST_SOURCE_TEXT
 
-const diagnosticProtectedTerms = ["TEST STAR", "AB123", "SGSIN", "2026-09-02", "https://example.com/status"]
+const diagnosticProtectedTerms = ["SGSIN", "2026-09-02", "https://example.com/status"]
 
 export type TranslationAcceptanceObservationState = "verified" | "pending"
 export type TranslationAcceptancePhaseStatus = "succeeded" | "failed" | "pending"
@@ -499,7 +499,7 @@ async function runTranslationLiveAcceptanceUnlocked(options: TranslationLiveAcce
     status: recordedDiagnostic.status === "failed" ? "failed" : "succeeded",
     sourceHash: diagnostic.sourceHash,
     usageContract: diagnosticUsageValid && sameUsageDelta(diagnosticUsageBefore, diagnosticUsageAfter, diagnostic, diagnosticAt) && isDiagnosticUsageScope(diagnosticLatestUsage?.sourceScope) ? "verified" : "pending",
-    placeholderPreserved: diagnostic.status === "succeeded" && diagnostic.translatedText.includes("TEST STAR") && diagnostic.translatedText.includes("AB123") && diagnostic.translatedText.includes("SGSIN") && diagnostic.translatedText.includes("2026-09-02") && diagnostic.translatedText.includes("https://example.com/status") ? "verified" : "pending",
+    placeholderPreserved: diagnostic.status === "succeeded" && diagnostic.translatedText.includes("SGSIN") && diagnostic.translatedText.includes("2026-09-02") && diagnostic.translatedText.includes("https://example.com/status") ? "verified" : "pending",
     wrapperBoundary: diagnostic.status === "succeeded" && !/^\s*(?:Translation|Here is the translation|Translated text|翻译如下|译文)\s*[:：]/i.test(diagnostic.translatedText) ? "verified" : "pending",
     providerUsagePersisted: sameUsageDelta(diagnosticUsageBefore, diagnosticUsageAfter, recordedDiagnostic, diagnosticAt) && isDiagnosticUsageScope(diagnosticLatestUsage?.sourceScope) ? "verified" : "pending",
     cacheIsolation: JSON.stringify(diagnosticBeforeCache) === JSON.stringify(diagnosticAfterCache) ? "verified" : "pending",

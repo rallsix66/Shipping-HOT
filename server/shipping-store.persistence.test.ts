@@ -26,16 +26,8 @@ class FakeRepository {
     return structuredClone(state.settings)
   }
 
-  async listVessels() {
-    return structuredClone(state.vessels)
-  }
-
   async listPorts() {
     return structuredClone(state.ports)
-  }
-
-  async listVoyages() {
-    return structuredClone(state.voyages)
   }
 
   async listFeedItems() {
@@ -74,7 +66,6 @@ function realOperationalSnapshot(): ShippingSnapshot {
   const snapshot = createMockSnapshot()
   return {
     ...snapshot,
-    vessels: snapshot.vessels.map(vessel => ({ ...vessel, provenance: { sourceType: "third_party", dataNature: "observed", sourceId: "aisstream" } })),
     ports: snapshot.ports.map(port => ({ ...port, congestionLevel: undefined, provenance: { sourceType: "third_party", dataNature: "reported", sourceId: "portcast-public" } })),
     feedItems: snapshot.feedItems.map(item => ({ ...item, severity: "info" as const, eventEligibility: false, provenance: { sourceType: "third_party", dataNature: "reported", sourceId: "the-loadstar" } })),
     events: [],
@@ -110,7 +101,7 @@ function installStoreMocks() {
   vi.doMock("#/database/shipping", () => ({ ShippingRepository: FakeRepository, initShippingTables: async () => undefined }))
   vi.doMock("#/providers/shipping", async () => {
     const actual = await vi.importActual<typeof import("#/providers/shipping")>("#/providers/shipping")
-    const modes = { ...actual.providerModes, vessel: "aisstream", port: "portcast", weather: "open-meteo", feed: "public", calendar: "calendarific", calendarSourceIds: ["calendarific"] }
+    const modes = { ...actual.providerModes, port: "portcast", weather: "open-meteo", feed: "public", calendar: "calendarific", calendarSourceIds: ["calendarific"] }
     return {
       ...actual,
       providerModes: modes,
@@ -169,22 +160,17 @@ describe("calendar sync persisted baseline", () => {
     expect(state.upsertedEvents.every(event => event.provenance?.sourceId === "mock-schedule")).toBe(true)
   })
 
-  it("filters mixed persisted sources at the operational Event boundary while retaining history", async () => {
+  it("filters mixed persisted Mock sources at the operational Event boundary while retaining history", async () => {
     const persistedFixture = createMockSnapshot()
-    const mockVessel = { ...persistedFixture.vessels[0], id: "historical-mock-vessel", navigationStatus: "anchored" as const, statusChangedAt: "2026-08-17T00:00:00.000Z", provenance: { sourceType: "mock" as const, dataNature: "observed" as const, sourceId: "mock-vessel" } }
     const mockPort = { ...persistedFixture.ports[0], id: "historical-mock-port", congestionLevel: "critical" as const, provenance: { sourceType: "mock" as const, dataNature: "derived" as const, sourceId: "mock-port" } }
     const mockNotice = { ...(persistedFixture.feedItems.find(item => item.provenance?.sourceId === "mock-port-notice") ?? persistedFixture.feedItems[0]), id: "historical-mock-notice", severity: "critical" as const, eventEligibility: true, publicationTimeKnown: true, provenance: { sourceType: "mock" as const, dataNature: "reported" as const, sourceId: "mock-port-notice" } }
-    const mockWeather = { ...(persistedFixture.feedItems.find(item => item.provenance?.sourceId === "mock-weather") ?? persistedFixture.feedItems[0]), id: "historical-mock-weather", severity: "critical" as const, eventEligibility: true, publicationTimeKnown: true, provenance: { sourceType: "mock" as const, dataNature: "forecast" as const, sourceId: "mock-weather" } }
     const mockCalendar = { ...createMockCalendarEvents(2026, "2026-08-18T00:00:00.000Z")[0], id: "historical-mock-calendar" }
-    const realVessel = { ...state.vessels[0], navigationStatus: "anchored" as const, statusChangedAt: "2026-08-17T00:00:00.000Z", updatedAt: "2026-08-18T00:00:00.000Z", fetchedAt: "2026-08-18T00:00:00.000Z", stale: false, sourceStatus: "healthy" as const }
-    const historicalMockVesselEvent = { ...persistedFixture.events[0], id: "historical-mock-vessel-event", type: "vessel_anchored", vesselId: mockVessel.id, dedupeKey: `vessel_anchored:${mockVessel.id}:mock-vessel`, provenance: { sourceType: "mock" as const, dataNature: "derived" as const, sourceId: "mock-vessel" } }
+    const realPort = { ...state.ports[0], congestionLevel: "high" as const, updatedAt: "2026-08-18T00:00:00.000Z", fetchedAt: "2026-08-18T00:00:00.000Z", stale: false, sourceStatus: "healthy" as const }
     const historicalMockFeedEvent = { ...persistedFixture.events[0], id: "historical-mock-feed-event", type: "shipping_notice", feedItemId: mockNotice.id, dedupeKey: `feed:${mockNotice.id}`, provenance: { sourceType: "mock" as const, dataNature: "reported" as const, sourceId: "mock-port-notice" } }
-    const activeRealEvent = { ...persistedFixture.events[0], id: "active-real-vessel-event", type: "vessel_anchored", vesselId: realVessel.id, dedupeKey: `vessel_anchored:${realVessel.id}:aisstream`, provenance: { sourceType: "third_party" as const, dataNature: "derived" as const, sourceId: "aisstream" } }
-    state.vessels = [...state.vessels.map(item => item.id === realVessel.id ? realVessel : item), mockVessel]
-    state.ports = [...state.ports, mockPort]
-    state.feedItems = [...state.feedItems, mockNotice, mockWeather]
+    state.ports = [...state.ports.map(item => item.id === realPort.id ? realPort : item), mockPort]
+    state.feedItems = [...state.feedItems, mockNotice]
     state.calendarEvents = [mockCalendar]
-    state.events = [historicalMockVesselEvent, historicalMockFeedEvent, activeRealEvent]
+    state.events = [historicalMockFeedEvent]
     const national = { ...calendarificEvent("national", "national-id"), name: "National Day", date: "2026-08-25", businessImpact: "medium" as const }
     calendarResult = {
       events: [national],
@@ -195,19 +181,13 @@ describe("calendar sync persisted baseline", () => {
     const { syncCalendarEvents } = await import("./shipping-store")
     await syncCalendarEvents(2026, ["MY"])
 
-    expect(state.vessels.some(item => item.id === mockVessel.id)).toBe(true)
     expect(state.ports.some(item => item.id === mockPort.id)).toBe(true)
     expect(state.feedItems.some(item => item.id === mockNotice.id)).toBe(true)
-    expect(state.feedItems.some(item => item.id === mockWeather.id)).toBe(true)
     expect(state.calendarEvents?.some(item => item.id === mockCalendar.id)).toBe(true)
-    expect(state.events.some(event => event.id === historicalMockVesselEvent.id)).toBe(true)
     expect(state.events.some(event => event.id === historicalMockFeedEvent.id)).toBe(true)
-    expect(state.events.find(event => event.id === historicalMockVesselEvent.id)?.resolvedAt).toBeUndefined()
-    expect(state.upsertedEvents.some(event => event.id === activeRealEvent.id)).toBe(true)
     expect(state.upsertedEvents.length).toBeGreaterThan(0)
-    expect(state.upsertedEvents.every(event => event.provenance?.sourceId !== "mock-vessel" && event.provenance?.sourceId !== "mock-port" && event.provenance?.sourceId !== "mock-port-notice" && event.provenance?.sourceId !== "mock-weather" && event.provenance?.sourceId !== "mock-calendar")).toBe(true)
-    expect(state.upsertedEvents.some(event => event.provenance?.sourceId === "mock-schedule")).toBe(true)
-    expect(state.upsertedEvents.some(event => event.provenance?.sourceId === "calendarific")).toBe(true)
+    expect(state.upsertedEvents.every(event => event.provenance?.sourceId !== "mock-port" && event.provenance?.sourceId !== "mock-port-notice" && event.provenance?.sourceId !== "mock-calendar")).toBe(true)
+    expect(state.upsertedEvents.some(event => event.provenance?.sourceId === "calendarific" || event.provenance?.sourceId === "mock-schedule")).toBe(true)
   })
 
   it("fails mutations explicitly when Repository is unavailable", async () => {

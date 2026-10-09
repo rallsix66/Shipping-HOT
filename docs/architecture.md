@@ -1,13 +1,13 @@
 # Architecture — Shipping HOT
 
-> Origin note: this project began as a fork of the NewsNow codebase. S1 (2026-09-11) retired the unrelated NewsNow news business and product identity. Dated sections further down preserve historical checkpoint facts (including NewsNow sources/getters/cache/user, OAuth/JWT and Cloudflare/Vercel/Bun adapters) and are **historical**, not current capability. **Current approved direction (2026-09-30):** risk intelligence plan R0–R5 (`docs/plans/shipping-hot-risk-intelligence-2026-09-29.md`) with ADR-006/007/008; until R1 lands, vessel/AIS/voyage code on `main` is **legacy, scheduled for removal**, not new feature work.
+> Origin note: this project began as a fork of the NewsNow codebase. S1 (2026-09-11) retired the unrelated NewsNow news business and product identity. Dated sections further down preserve historical checkpoint facts (including NewsNow sources/getters/cache/user, OAuth/JWT and Cloudflare/Vercel/Bun adapters) and are **historical**, not current capability. **Current approved direction (2026-09-30):** risk intelligence plan R0–R5 with ADR-006/007/008. **R1 (in progress on branch `codex/shipping-hot-r1-retire-vessel`):** vessel search/watch, AIS tracking, and voyage/ETA are **retired** from routes, APIs, Runtime, and Providers; SQLite data archived as `_retired_*` (migration 014). Recovery: `docs/archive/vessel-capability-recovery.md`.
 
 ## Risk Intelligence — approved 2026-09-30 (R0–R5 change contract; R0 = decisions only)
 
 - **Target product:** eight-port risk dashboard—weather (forecast + official alerts + rule-based “potential” impacts), annual reference calendar plus operational promo/policy calendar layers, policy library, intel pipeline (prefilter/extract/group/impact cards), optional LLM enrichment with zero paid calls on GET browse paths.
 - **Retire (R1, ADR-006):** vessel search/watch, AIS tracking, voyage/ETA UI and Providers; archive SQLite tables with `_retired_` prefix; tag `pre-r1-vessel-removal` before deletion; recovery doc in R1.
 - **Intel stack (R2+, ADR-007):** `server/intel/**` on existing `BackgroundRuntime`, `SecretStore`, extended `provider_usage`, `paid_receipt`, step-bound LLM registry (DeepSeek chat default; Bailian embeddings; optional Qwen second opinion); AIHOT@`44578fa` file copy list in plan §5.3 only.
-- **External data (R1.5+, ADR-008):** catalog-driven `intel_source`; Open-Meteo land forecast; JMA/JTWC cyclones; CAP/API alerts; `ops_calendar_event`, `policy_record`/`policy_version`; schema additive from **v13** starting **`014-*`**. Sole catalog: `docs/intel-source-catalog.md`.
+- **External data (R1.5+, ADR-008):** catalog-driven `intel_source`; Open-Meteo land forecast; JMA/JTWC cyclones; CAP/API alerts; `ops_calendar_event`, `policy_record`/`policy_version`; schema additive from **v13**, with **v14 = R1 vessel retirement**; intel/ops tables from **`015-*`**. Sole catalog: `docs/intel-source-catalog.md`.
 - **Unchanged boundaries:** Vite + React + Nitro + db0/SQLite monolith; no PostgreSQL/pg-boss; information feed vs operational data separation; annual reference calendar provider-free; S5 article translation contract frozen until explicitly reopened; S6 commercial schedule `DEFERRED`.
 - **Implementation truth:** only items marked implemented in `docs/status.md` are current capability; everything here is `approved` until stage evidence says otherwise.
 
@@ -61,8 +61,7 @@
 
 ## Client route naming convention — S7 finding, 2026-09-14
 
-- The list routes (`/vessels`, `/ports`, `/voyages`, `/feed`) and their detail routes are **siblings, not nested**. Under TanStack Router's file-based routing a file pair `vessels.tsx` + `vessels.$id.tsx` makes the list route the *parent* of the detail route; because the list page renders no `<Outlet/>`, the detail component can then never mount. Detail route files therefore use the `_` suffix (`vessels_.$id.tsx`, `ports_.$id.tsx`, `voyages_.$id.tsx`, and the pre-existing `feed_.$id.tsx`) so the URL path stays `/vessels/$id` while the route id is `/vessels_/$id`.
-- This was a real defect until S7: `/vessels/$id`, `/ports/$id` and `/voyages/$id` rendered the list page only, while `/feed/$id` worked because of the `_` suffix. Any new list/detail pair must follow the same convention, and S7's browser acceptance (`scripts/e2e-s7-integrated.mjs`) now covers the detail routes so a regression is caught locally.
+- **Current routes (post-R1):** `/`, `/ports`, `/ports/$id`, `/feed`, `/feed/$id`, `/events`, `/calendar`, `/settings`. `/vessels` and `/voyages` (and detail URLs) are **removed**; deep links should 404. **Historical (pre-R1):** list/detail pairs used the `_` suffix (`ports_.$id.tsx`, `feed_.$id.tsx`) so detail routes were not nested under list routes without an `<Outlet/>`. Port and feed detail routing still follows that convention; S7 covers `/ports/$id` and `/feed/$id`.
 
 ## Fixed Annual Reference Calendar — approved 2026-09-09
 

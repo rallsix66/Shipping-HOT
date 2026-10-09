@@ -447,7 +447,7 @@ timeliness     = 按事件有效期衰减；最新证据超过 48 小时且事�
 
 **验收**
 
-- R1-1 在 `src/` 和 `server/` 中执行 `rg -i "aisstream|vesselapi|gfw|voyage|watchlist"`，结果为零（迁移文件和归档说明除外）。
+- R1-1 在 `src/` 和 `server/` 中执行 `rg -i "aisstream|vesselapi|gfw|voyage|watchlist"`（glob 排除 `server/database/migrations/**`；归档说明 `docs/archive/vessel-capability-recovery.md` 在扫描外）。**`src/`** 必须零命中（`rg` exit **1**、stdout 空）。**`server/`** 仅允许用户批准的五行最小例外（精确路径 + 行号 + 整行正文，三文件；禁止整文件豁免）——见 `docs/plans/r1-1-grep-exception-proposal.md`（**APPROVED @ `8d6cba2`**）。**不得**将验收记为“原始全树零命中”。
 - R1-2 门禁 G 全部通过；测试数量的减少与被删除的测试文件一一对应（附清单）。
 - R1-3 迁移在保留数据库的**副本**上可以执行，并且可以重复执行。
 - R1-4 首页、港口、日历、预警、设置页都能在浏览器中正常使用；已下线的路由返回 404，没有死链接。

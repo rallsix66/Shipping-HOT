@@ -4,7 +4,7 @@
 - Status: **Accepted (user sign-off 2026-10-09)**
 - Decision owners: User
 - Related: ADR-008 (external fetch/embeddings sources); active plan §4–§5; `docs/intel-source-catalog.md`
-- Schema baseline before intel migrations: **v13** (article content). Intel and ops tables begin at **`014-*` and upward**, one migration per approved slice (R1.5/R2/R3…), additive and idempotent.
+- Schema baseline before intel migrations: **v13** (article content); **v14** is R1 vessel retirement (`014-retire-vessel-voyage`). Intel and ops tables begin at **`015-*` and upward**, one migration per approved slice (R1.5/R2/R3…), additive and idempotent.
 
 ## Context
 

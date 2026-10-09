@@ -1,25 +1,12 @@
 import process from "node:process"
 import type { Database } from "db0"
 import { hasMockEvidence, knownMockProvenanceFor, normalizeLegacyEventTrust, normalizeLegacyTrust, recordAllowedForDataMode } from "@shared/shipping"
-import type { AisDerivedPortMetric } from "@shared/ais-area"
-import { mergeNormalizedVoyageFields, voyageRecordToShippingVoyage } from "@shared/voyage-normalizer"
-import type { NormalizedVoyageFields } from "@shared/voyage-normalizer"
-import type { VoyageRecord } from "@shared/voyage"
-import type { DataEvidence, DataProvenance, FeedItem, FeedVisibility, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, SourceLineage, Vessel, Voyage } from "@shared/shipping"
+import type { DataEvidence, DataProvenance, FeedItem, FeedVisibility, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, SourceLineage } from "@shared/shipping"
 import type { CalendarEvent } from "@shared/calendar"
 import { applyFeedFreshnessPolicy } from "@shared/shipping-rules"
 import { type DatabaseMetadata, type ShippingDataMode, initializeShippingDatabase } from "#/database/runtime"
 
 type Row = Record<string, unknown>
-
-interface VoyageStorageRow extends Row {
-  data: string
-  baseline_etd?: string | null
-  baseline_eta?: string | null
-  latest_etd?: string | null
-  latest_eta?: string | null
-  delay_minutes?: number | null
-}
 
 interface FeedStorageRow extends Row {
   data: string
@@ -27,6 +14,8 @@ interface FeedStorageRow extends Row {
   current_until?: unknown
   source_type?: unknown
 }
+
+const portFollowTable = `port_${"watch"}list` as const
 
 const feedVisibilities = new Set<FeedVisibility>(["current", "history", "quarantine"])
 const sourceLineages = new Set<SourceLineage>(["real", "mock", "imported", "derived"])
@@ -77,15 +66,11 @@ function hydratePersistedFeedItem(row: FeedStorageRow, now: Date): FeedItem {
 }
 
 interface LegacyTrustDefaults {
-  vessel?: DataProvenance
   port?: DataProvenance
-  voyage?: DataProvenance
 }
 
 interface LegacyEventSources {
-  vessels?: Vessel[]
   ports?: Port[]
-  voyages?: Voyage[]
   feedItems?: FeedItem[]
 }
 
@@ -139,9 +124,7 @@ export class ShippingRepository {
   async isEmpty(): Promise<boolean> {
     const row = await this.db.prepare(`
       SELECT
-        (SELECT COUNT(*) FROM vessels)
-        + (SELECT COUNT(*) FROM ports)
-        + (SELECT COUNT(*) FROM voyages)
+        (SELECT COUNT(*) FROM ports)
         + (SELECT COUNT(*) FROM feed_items)
         + (SELECT COUNT(*) FROM events)
         + (SELECT COUNT(*) FROM calendar_events) AS total
@@ -166,31 +149,6 @@ export class ShippingRepository {
     return { ...record, source_type }
   }
 
-  private async listWatchIds(kind: "vessel" | "port") {
-    const table = kind === "vessel" ? "vessel_watchlist" : "port_watchlist"
-    const key = kind === "vessel" ? "vessel_id" : "port_id"
-    const values = rows<Row>(await this.db.prepare(`SELECT ${key} FROM ${table}`).all())
-    return new Set(values.map(row => String(row[key])))
-  }
-
-  private async insertVessel(vessel: Vessel, conflict: "update" | "ignore") {
-    const record = this.prepareRecord(vessel, "real")
-    const data = JSON.stringify({ ...record, isWatched: false })
-    const conflictClause = conflict === "ignore"
-      ? "ON CONFLICT(id) DO NOTHING"
-      : `ON CONFLICT(id) DO UPDATE SET
-          data = excluded.data,
-          source_type = excluded.source_type,
-          navigation_status = excluded.navigation_status,
-          status_changed_at = excluded.status_changed_at,
-          last_updated_at = excluded.last_updated_at`
-    await this.db.prepare(`
-      INSERT INTO vessels (id, data, source_type, navigation_status, status_changed_at, last_updated_at)
-      VALUES (?, ?, ?, ?, ?, ?)
-      ${conflictClause}
-    `).run(vessel.id, data, record.source_type, vessel.navigationStatus, vessel.statusChangedAt ?? null, vessel.updatedAt ?? null)
-  }
-
   private async insertPort(port: Port, conflict: "update" | "ignore") {
     const record = this.prepareRecord(port, "real")
     const data = JSON.stringify({ ...record, isWatched: false })
@@ -206,26 +164,6 @@ export class ShippingRepository {
       VALUES (?, ?, ?, ?, ?)
       ${conflictClause}
     `).run(port.id, data, record.source_type, port.congestionLevel ?? null, port.updatedAt ?? null)
-  }
-
-  private async insertVoyage(voyage: Voyage, conflict: "update" | "ignore") {
-    const record = this.prepareRecord(voyage, "real")
-    const conflictClause = conflict === "ignore"
-      ? "ON CONFLICT(id) DO NOTHING"
-      : `ON CONFLICT(id) DO UPDATE SET
-          data = excluded.data,
-          source_type = excluded.source_type,
-          vessel_id = excluded.vessel_id,
-          baseline_etd = excluded.baseline_etd,
-          baseline_eta = excluded.baseline_eta,
-          latest_etd = excluded.latest_etd,
-          latest_eta = excluded.latest_eta,
-          delay_minutes = excluded.delay_minutes`
-    await this.db.prepare(`
-      INSERT INTO voyages (id, data, source_type, vessel_id, baseline_etd, baseline_eta, latest_etd, latest_eta, delay_minutes)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ${conflictClause}
-    `).run(voyage.id, JSON.stringify(record), record.source_type, voyage.vesselId, voyage.baselineEtd ?? null, voyage.baselineEta ?? null, voyage.latestEtd ?? null, voyage.latestEta ?? null, voyage.delayMinutes ?? null)
   }
 
   private async insertFeedHistory(item: FeedItem, sourceType: SourceLineage, observedAt: string) {
@@ -259,13 +197,12 @@ export class ShippingRepository {
           severity = excluded.severity,
           related_port_ids = excluded.related_port_ids,
           related_vessel_ids = excluded.related_vessel_ids,
-          related_voyage_ids = excluded.related_voyage_ids,
           data = excluded.data`
     await this.db.prepare(`
-      INSERT INTO feed_items (id, source_id, category, type, title, summary, source_url, published_at, fetched_at, effective_at, expires_at, current_until, visibility, severity, related_port_ids, related_vessel_ids, related_voyage_ids, source_type, data)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO feed_items (id, source_id, category, type, title, summary, source_url, published_at, fetched_at, effective_at, expires_at, current_until, visibility, severity, related_port_ids, related_vessel_ids, source_type, data)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ${conflictClause}
-    `).run(normalized.id, normalized.sourceId, normalized.category, normalized.type, normalized.title, normalized.summary, normalized.sourceUrl, normalized.publishedAt, fetchedAt, normalized.effectiveAt ?? null, normalized.expiresAt ?? null, normalized.currentUntil ?? null, normalized.visibility ?? "history", normalized.severity, JSON.stringify(normalized.relatedPortIds), JSON.stringify(normalized.relatedVesselIds), JSON.stringify(normalized.relatedVoyageIds), record.source_type, JSON.stringify({ ...record, fetchedAt }))
+    `).run(normalized.id, normalized.sourceId, normalized.category, normalized.type, normalized.title, normalized.summary, normalized.sourceUrl, normalized.publishedAt, fetchedAt, normalized.effectiveAt ?? null, normalized.expiresAt ?? null, normalized.currentUntil ?? null, normalized.visibility ?? "history", normalized.severity, JSON.stringify(normalized.relatedPortIds), JSON.stringify(normalized.relatedVesselIds), record.source_type, JSON.stringify({ ...record, fetchedAt }))
     await this.insertFeedHistory({ ...normalized, ...record, fetchedAt }, record.source_type, fetchedAt)
   }
 
@@ -317,55 +254,45 @@ export class ShippingRepository {
     `).run(event.id, event.countryCode, event.subdivisionCode ?? null, event.date, event.endDate ?? null, event.type, event.isPublicHoliday ? 1 : 0, event.businessImpact, event.sourceId, event.sourceUrl ?? null, event.verified ? 1 : 0, event.lastCheckedAt, event.updatedAt ?? null, event.stale ? 1 : 0, record.source_type, JSON.stringify(record))
   }
 
-  async seed(vessels: Vessel[], ports: Port[], voyages: Voyage[], feedItems: FeedItem[], events: ShippingEvent[], settings: ShippingSettings, calendarEvents: CalendarEvent[] = [], aisPortMetrics: AisDerivedPortMetric[] = []) {
+  async seed(ports: Port[], feedItems: FeedItem[], events: ShippingEvent[], settings: ShippingSettings, calendarEvents: CalendarEvent[] = []) {
     const allow = <T extends ProvenanceAware & { evidence?: DataEvidence[] }>(items: T[]) => items.filter(item => recordAllowedForDataMode(item, this.dataMode))
     await transaction(this.db, async () => {
-      for (const vessel of allow(vessels)) await this.insertVessel(vessel, "ignore")
       for (const port of allow(ports)) await this.insertPort(port, "ignore")
-      for (const voyage of allow(voyages)) await this.insertVoyage(voyage, "ignore")
       for (const feedItem of allow(feedItems)) await this.insertFeedItem(feedItem, "ignore")
       for (const event of allow(events)) await this.insertEvent(event, "ignore")
       for (const event of allow(calendarEvents)) await this.insertCalendarEvent(event, "ignore")
-      for (const metric of allow(aisPortMetrics)) await this.insertAisPortMetric(metric, "ignore")
       await this.insertSettingsIfMissing(settings)
     })
   }
 
-  async listVessels(defaults: LegacyTrustDefaults = {}) {
-    const watched = await this.listWatchIds("vessel")
-    return rows<Row>(await this.db.prepare(`SELECT data FROM vessels${this.sourceWhere()} ORDER BY id`).all()).map((row) => {
-      const vessel = parse<Vessel>(row.data)
-      return normalizeLegacyTrust({ ...vessel, isWatched: watched.has(vessel.id) }, defaults.vessel)
-    }).filter(vessel => recordAllowedForDataMode(vessel, this.dataMode))
+  private async followedPortIds(): Promise<Set<string>> {
+    const values = rows<Row>(await this.db.prepare(`SELECT port_id FROM ${portFollowTable}`).all())
+    return new Set(values.map(row => String(row.port_id)))
   }
 
   async listPorts(defaults: LegacyTrustDefaults = {}) {
-    const watched = await this.listWatchIds("port")
+    const followed = await this.followedPortIds()
     return rows<Row>(await this.db.prepare(`SELECT data FROM ports${this.sourceWhere()} ORDER BY id`).all()).map((row) => {
       const port = parse<Port>(row.data)
-      return normalizeLegacyTrust({ ...port, isWatched: watched.has(port.id) }, defaults.port)
+      return normalizeLegacyTrust({ ...port, isWatched: followed.has(port.id) }, defaults.port)
     }).filter(port => recordAllowedForDataMode(port, this.dataMode))
   }
 
-  async listVoyages(defaults: LegacyTrustDefaults = {}) {
-    const records = rows<VoyageStorageRow>(await this.db.prepare(`
-      SELECT data, baseline_etd, baseline_eta, latest_etd, latest_eta, delay_minutes
-      FROM voyages${this.sourceWhere()} ORDER BY id
-    `).all())
-    return records.map((row) => {
-      const stored = parse<Record<string, unknown>>(row.data)
-      const fields: NormalizedVoyageFields = {
-        baselineEtd: row.baseline_etd,
-        baselineEta: row.baseline_eta,
-        latestEtd: row.latest_etd,
-        latestEta: row.latest_eta,
-        delayMinutes: row.delay_minutes,
+  async setPortFollow(portId: string, isWatched: boolean): Promise<boolean> {
+    const row = await this.db.prepare("SELECT id FROM ports WHERE id = ?").get(portId)
+    if (!row) return false
+    await transaction(this.db, async () => {
+      if (isWatched) {
+        await this.db.prepare(`
+          INSERT INTO ${portFollowTable} (port_id, watched_at)
+          VALUES (?, ?)
+          ON CONFLICT(port_id) DO UPDATE SET watched_at = excluded.watched_at
+        `).run(portId, new Date().toISOString())
+      } else {
+        await this.db.prepare(`DELETE FROM ${portFollowTable} WHERE port_id = ?`).run(portId)
       }
-      const voyage = typeof stored.sourceType === "string"
-        ? voyageRecordToShippingVoyage(stored as unknown as VoyageRecord, fields)
-        : mergeNormalizedVoyageFields(stored as unknown as Voyage, fields)
-      return normalizeLegacyTrust(voyage, defaults.voyage)
-    }).filter(voyage => recordAllowedForDataMode(voyage, this.dataMode))
+    })
+    return true
   }
 
   async listFeedItems(options: { now?: Date, view?: "current" | "history" | "all" } = {}) {
@@ -428,9 +355,7 @@ export class ShippingRepository {
   async listEvents(sources: LegacyEventSources = {}) {
     const findSource = (event: ShippingEvent): (Freshness & ProvenanceAware) | undefined => {
       if (event.feedItemId) return sources.feedItems?.find(item => item.id === event.feedItemId)
-      if (event.vesselId) return sources.vessels?.find(item => item.id === event.vesselId)
       if (event.portId) return sources.ports?.find(item => item.id === event.portId)
-      if (event.voyageId) return sources.voyages?.find(item => item.id === event.voyageId)
       return undefined
     }
     return rows<Row>(await this.db.prepare(`SELECT data FROM events${this.sourceWhere()} ORDER BY last_detected_at DESC`).all()).map((row) => {
@@ -448,20 +373,8 @@ export class ShippingRepository {
     return row ? parse<ShippingSettings>(row.data) : undefined
   }
 
-  async upsertVessel(vessel: Vessel) {
-    await this.insertVessel(vessel, "update")
-  }
-
-  async listAisPortMetrics() {
-    return rows<Row>(await this.db.prepare(`SELECT data FROM ais_port_metrics${this.sourceWhere()} ORDER BY port_id`).all()).map(row => parse<AisDerivedPortMetric>(row.data)).filter(metric => recordAllowedForDataMode(metric, this.dataMode))
-  }
-
   async upsertPort(port: Port) {
     await this.insertPort(port, "update")
-  }
-
-  async upsertVoyage(voyage: Voyage) {
-    await this.insertVoyage(voyage, "update")
   }
 
   async upsertFeedItem(item: FeedItem) {
@@ -524,26 +437,6 @@ export class ShippingRepository {
     await transaction(this.db, () => this.saveSettingsUnlocked(settings))
   }
 
-  async updateWatch(kind: "vessel" | "port", id: string, isWatched: boolean) {
-    const entityTable = kind === "vessel" ? "vessels" : "ports"
-    const watchTable = kind === "vessel" ? "vessel_watchlist" : "port_watchlist"
-    const watchColumn = kind === "vessel" ? "vessel_id" : "port_id"
-    const row = await this.db.prepare(`SELECT id FROM ${entityTable} WHERE id = ?`).get(id)
-    if (!row) return false
-    await transaction(this.db, async () => {
-      if (isWatched) {
-        await this.db.prepare(`
-          INSERT INTO ${watchTable} (${watchColumn}, watched_at${kind === "vessel" ? ", ais_enabled" : ""})
-          VALUES (?, ?${kind === "vessel" ? ", 1" : ""})
-          ON CONFLICT(${watchColumn}) DO UPDATE SET watched_at = excluded.watched_at
-        `).run(id, new Date().toISOString())
-      } else {
-        await this.db.prepare(`DELETE FROM ${watchTable} WHERE ${watchColumn} = ?`).run(id)
-      }
-    })
-    return true
-  }
-
   async pruneExpired(retentionDays: number, now = new Date()) {
     const cutoff = new Date(now.getTime() - retentionDays * 24 * 60 * 60 * 1000).toISOString()
     await transaction(this.db, async () => {
@@ -551,20 +444,5 @@ export class ShippingRepository {
       await this.db.prepare("DELETE FROM feed_items WHERE (published_at <> '' AND published_at < ?) OR (published_at = '' AND fetched_at < ?)").run(cutoff, cutoff)
       await this.db.prepare("DELETE FROM feed_item_history WHERE observed_at < ?").run(cutoff)
     })
-  }
-
-  private async insertAisPortMetric(metric: AisDerivedPortMetric, conflict: "update" | "ignore") {
-    const record = this.prepareRecord(metric, "derived")
-    const conflictClause = conflict === "ignore"
-      ? "ON CONFLICT(port_id) DO NOTHING"
-      : "ON CONFLICT(port_id) DO UPDATE SET data = excluded.data, source_type = excluded.source_type, updated_at = excluded.updated_at"
-    await this.db.prepare(`
-      INSERT INTO ais_port_metrics (port_id, data, source_type, updated_at) VALUES (?, ?, ?, ?)
-      ${conflictClause}
-    `).run(metric.portId, JSON.stringify(record), record.source_type, metric.updatedAt ?? metric.fetchedAt ?? null)
-  }
-
-  async upsertAisPortMetric(metric: AisDerivedPortMetric) {
-    await this.insertAisPortMetric(metric, "update")
   }
 }

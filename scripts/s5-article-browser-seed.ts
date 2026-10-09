@@ -222,7 +222,6 @@ function feedItem(id: string, title: string, category: FeedCategory): FeedItem {
     severity: "watch",
     relatedPortIds: [],
     relatedVesselIds: [],
-    relatedVoyageIds: [],
   }
 }
 
@@ -334,7 +333,7 @@ async function main() {
     },
   }
   const shipping = new ShippingRepository(database, "mock")
-  await shipping.seed([], [], [], [], [], settings)
+  await shipping.seed([], [], [], settings)
 
   // One non-blocked Runtime row so the harness's provider_runtime snapshot is not
   // trivially empty: an accidental in-place UPDATE (for example an unconditional
@@ -507,7 +506,7 @@ async function main() {
 
   for (const scenario of scenarios) {
     const item = feedItem(scenario.id, scenario.title, scenario.category)
-    await shipping.seed([], [], [], [item], [], settings)
+    await shipping.seed([], [item], [], settings)
     const sourceUrl = item.sourceUrl
     const sourceId = item.sourceId
 

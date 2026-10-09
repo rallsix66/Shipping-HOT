@@ -32,7 +32,7 @@ function createNativeDatabase() {
 
 async function seedPorts(database: Parameters<typeof initShippingTables>[0]) {
   const snapshot = createMockSnapshot()
-  await new ShippingRepository(database, "mock").seed([], snapshot.ports, [], [], [], snapshot.settings)
+  await new ShippingRepository(database, "mock").seed(snapshot.ports, [], [], snapshot.settings)
 }
 
 describe("port sync job", () => {

@@ -82,8 +82,8 @@ describe("shipping UI primitives smoke", () => {
   })
 
   it("does not call a public alert source all Mock", () => {
-    expect(providerSummary({ vessel: "mock", weather: "mock", port: "mock", schedule: "mock", feed: "mock", calendar: "mock", weatherAlerts: "off" })).toEqual({ allMock: true, label: "全 Mock" })
-    expect(providerSummary({ vessel: "mock", weather: "mock", port: "mock", schedule: "mock", feed: "mock", calendar: "mock", weatherAlerts: "public" }).label).toContain("预警 public")
+    expect(providerSummary({ weather: "mock", port: "mock", feed: "mock", calendar: "mock", weatherAlerts: "off" })).toEqual({ allMock: true, label: "全 Mock" })
+    expect(providerSummary({ weather: "mock", port: "mock", feed: "mock", calendar: "mock", weatherAlerts: "public" }).label).toContain("预警 public")
   })
 
   it("renders Chinese-first Feed text with an accessible original disclosure", () => {

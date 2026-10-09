@@ -19,7 +19,7 @@ describe("translation literal protection", () => {
   })
 
   it("rejects reordered placeholders instead of silently re-pairing literals", () => {
-    const protectedText = protectTranslationText("Voyage AB123 reaches SGSIN on 2026-09-02")
+    const protectedText = protectTranslationText("Shipment AB123 reaches SGSIN on 2026-09-02")
     const reordered = [...protectedText.placeholders].reverse().map(item => item.marker).join(" ")
     // Every marker is still present exactly once, so a count-based check would
     // accept this and re-pair e.g. the port with the date's position.
@@ -44,7 +44,7 @@ describe("translation literal protection", () => {
     ["unknown", (markers: string[]): string => [...markers, "__SH_99_FFFFFFFFFF__"].join(" ")],
     ["residual", (_markers: string[]): string => "__SH_BAD__"],
   ] as const)("rejects %s markers with a Translation validation error", (_label, output) => {
-    const protectedText = protectTranslationText("Voyage AB123 reaches SGSIN on 2026-09-02")
+    const protectedText = protectTranslationText("Shipment AB123 reaches SGSIN on 2026-09-02")
     expect(() => restoreAndValidateProtectedTranslation(protectedText, output(protectedText.placeholders.map(item => item.marker))))
       .toThrowError(new TranslationValidationError())
   })

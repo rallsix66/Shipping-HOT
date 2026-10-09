@@ -1,7 +1,6 @@
 import process from "node:process"
 import { filterEventsForOperationalContext, recordAllowedForDataMode, sourceAllowedForOperationalContext } from "@shared/shipping"
-import type { AisDerivedPortMetric } from "@shared/ais-area"
-import type { DataEvidence, DatabasePersistenceStatus, FeedItem, ProvenanceAware, ShippingProviderModes, ShippingSettings, ShippingSnapshot, TranslationSettings } from "@shared/shipping"
+import type { DataEvidence, DatabasePersistenceStatus, FeedItem, ProvenanceAware, ShippingSettings, ShippingSnapshot, TranslationSettings } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries, calendarEventKey, calendarEventLegacyId } from "@shared/calendar"
 import { detectShippingEvents } from "@shared/shipping-engine"
@@ -9,7 +8,7 @@ import { filterCalendarCoverageForSourceIds, filterCalendarEventsForSourceIds, m
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { defaultShippingSettings, healthyPersistenceStatus, persistenceUnavailableError } from "#/database/runtime"
 import { normalizeTranslationSettings } from "#/services/translation-settings"
-import { isWeatherFeedItem, operationalSourceContext, providerModes, providerProvenances, providers } from "#/providers/shipping"
+import { isWeatherFeedItem, operationalSourceContext, providerModes, providers } from "#/providers/shipping"
 
 let repository: ShippingRepository | undefined
 const mockCalendarYear = new Date().getUTCFullYear()
@@ -18,15 +17,12 @@ let persistenceStatus: DatabasePersistenceStatus = { status: "unavailable", sche
 
 function emptySnapshot(): ShippingSnapshot {
   return {
-    vessels: [],
     ports: [],
-    voyages: [],
     events: [],
     feedItems: [],
     settings: structuredClone(defaultShippingSettings),
     calendarEvents: [],
     calendarCoverage: [],
-    aisPortMetrics: [],
     database: structuredClone(persistenceStatus),
   }
 }
@@ -39,16 +35,6 @@ function requireRepository(): ShippingRepository {
 function markWriteFailure(error: unknown): never {
   persistenceStatus = { ...persistenceStatus, status: "read_only_degraded", errorCode: "persistence_write_failed" }
   throw persistenceUnavailableError(error)
-}
-
-function filterOperationalAisAreaMetrics(metrics: AisDerivedPortMetric[]): AisDerivedPortMetric[] {
-  return providerModes.aisArea === "aisstream"
-    ? metrics.filter(metric => sourceAllowedForOperationalContext(metric.provenance?.sourceId, operationalSourceContext))
-    : []
-}
-
-export function isAisAreaProviderDisabled(providerEnabled: boolean, areaMode: ShippingProviderModes["aisArea"]): boolean {
-  return !providerEnabled || areaMode !== "aisstream"
 }
 
 export function mergeWeatherFeedItems(existing: FeedItem[], weather: FeedItem[]): FeedItem[] {
@@ -65,7 +51,7 @@ async function initialize() {
       repository = new ShippingRepository(db, dataMode)
       if (dataMode === "mock" && await repository.isEmpty()) {
         const fixture = createMockSnapshot()
-        await repository.seed(fixture.vessels, fixture.ports, fixture.voyages, fixture.feedItems, fixture.events, fixture.settings, fixture.calendarEvents ?? [], fixture.aisPortMetrics ?? [])
+        await repository.seed(fixture.ports, fixture.feedItems, fixture.events, fixture.settings, fixture.calendarEvents ?? [])
       }
       persistenceStatus = metadata
         ? healthyPersistenceStatus(metadata)
@@ -86,43 +72,31 @@ async function readStoredSnapshot(): Promise<ShippingSnapshot> {
   const storedSettings = await repository.getSettings() ?? structuredClone(defaultShippingSettings)
   const settings = { ...storedSettings, translation: normalizeTranslationSettings(storedSettings.translation) }
   const legacyDefaults = {
-    vessel: providerModes.vessel === "mock" ? providerProvenances.mockVessel : undefined,
-    port: providerModes.port === "mock" ? providerProvenances.mockPort : undefined,
-    voyage: providerModes.schedule === "mock" ? providerProvenances.mockSchedule : undefined,
+    port: providerModes.port === "mock" ? { sourceType: "mock" as const, dataNature: "derived" as const, sourceId: "mock-port", verified: false } : undefined,
   }
-  const vessels = await repository.listVessels(legacyDefaults)
   const ports = await repository.listPorts(legacyDefaults)
-  const voyages = await repository.listVoyages(legacyDefaults)
   const feedItems = await repository.listFeedItems({ now: new Date() })
   const storedCalendarEvents = filterCalendarEventsForSourceIds(await repository.listCalendarEvents(), providerModes.calendarSourceIds ?? [])
   const calendarEvents = storedCalendarEvents
   const calendarCoverage = filterCalendarCoverageForSourceIds(settings.calendarSync ?? [], providerModes.calendarSourceIds ?? [])
-  const aisPortMetrics = providerModes.aisArea === "aisstream"
-    ? filterOperationalAisAreaMetrics(await repository.listAisPortMetrics())
-    : []
   return {
-    vessels,
     ports,
-    voyages,
     feedItems,
-    events: filterEventsForOperationalContext(await repository.listEvents({ vessels, ports, voyages, feedItems }), operationalSourceContext),
+    events: filterEventsForOperationalContext(await repository.listEvents({ ports, feedItems }), operationalSourceContext),
     settings,
     calendarEvents,
     calendarCoverage,
-    aisPortMetrics,
     database: structuredClone(persistenceStatus),
   }
 }
 
-function filterOperationalSnapshotInputs(snapshot: ShippingSnapshot): Pick<ShippingSnapshot, "vessels" | "ports" | "voyages" | "feedItems"> {
+function filterOperationalSnapshotInputs(snapshot: ShippingSnapshot): Pick<ShippingSnapshot, "ports" | "feedItems"> {
   const isOperational = (record: ProvenanceAware & { evidence?: DataEvidence[], sourceId?: string }, sourceIdOverride?: string) => {
     return recordAllowedForDataMode(record, operationalSourceContext.modes.dataMode ?? "mock")
       && sourceAllowedForOperationalContext(sourceIdOverride ?? record.provenance?.sourceId ?? record.sourceId, operationalSourceContext)
   }
   return {
-    vessels: snapshot.vessels.filter(item => isOperational(item)),
     ports: snapshot.ports.filter(item => isOperational(item)),
-    voyages: snapshot.voyages.filter(item => isOperational(item)),
     feedItems: snapshot.feedItems.filter(item => isOperational(item, item.provenance?.sourceId ?? item.sourceId)),
   }
 }
@@ -135,15 +109,12 @@ export async function getShippingSnapshot(): Promise<ShippingSnapshot> {
   return {
     ...stored,
     events: detectShippingEvents(
-      operational.vessels,
       operational.ports,
-      operational.voyages,
       operational.feedItems,
       stored.settings,
       filterEventsForOperationalContext(stored.events, operationalSourceContext),
       new Date().toISOString(),
       stored.calendarEvents ?? [],
-      filterOperationalAisAreaMetrics(stored.aisPortMetrics ?? []),
     ),
   }
 }
@@ -235,7 +206,7 @@ export async function syncCalendarEvents(year = mockCalendarYear, countries?: Ca
   const settings = { ...stored.settings, calendarSync: coverage }
   const snapshot = { ...stored, settings, calendarEvents: reconciled.events, calendarCoverage: coverage }
   const operational = filterOperationalSnapshotInputs(stored)
-  snapshot.events = detectShippingEvents(operational.vessels, operational.ports, operational.voyages, operational.feedItems, snapshot.settings, filterEventsForOperationalContext(stored.events, operationalSourceContext), result.fetchedAt, snapshot.calendarEvents, filterOperationalAisAreaMetrics(stored.aisPortMetrics ?? []))
+  snapshot.events = detectShippingEvents(operational.ports, operational.feedItems, snapshot.settings, filterEventsForOperationalContext(stored.events, operationalSourceContext), result.fetchedAt, snapshot.calendarEvents)
   try {
     if (reconciled.removedIds.length) await persistence.deleteCalendarEvents(reconciled.removedIds)
     for (const event of reconciled.events) await persistence.upsertCalendarEvent(event)
@@ -245,6 +216,23 @@ export async function syncCalendarEvents(year = mockCalendarYear, countries?: Ca
     markWriteFailure(error)
   }
   return { ...result, events: reconciled.events, coverage }
+}
+
+export async function togglePortFollow(id: string) {
+  await initialize()
+  const persistence = requireRepository()
+  const current = await getShippingSnapshot()
+  const port = current.ports.find(entry => entry.id === id)
+  if (!port) throw createError({ statusCode: 404, message: "port not found" })
+  const isWatched = !port.isWatched
+  try {
+    const updated = await persistence.setPortFollow(id, isWatched)
+    if (!updated) throw createError({ statusCode: 404, message: "port not found" })
+  } catch (error) {
+    if (typeof error === "object" && error && "statusCode" in error && (error as { statusCode?: number }).statusCode === 404) throw error
+    markWriteFailure(error)
+  }
+  return { id, isWatched }
 }
 
 export async function updateShippingSettings(settings: Partial<Omit<ShippingSettings, "eventThresholds" | "translation">> & { eventThresholds?: Partial<ShippingSettings["eventThresholds"]>, translation?: Partial<TranslationSettings> }) {
@@ -265,22 +253,4 @@ export async function updateShippingSettings(settings: Partial<Omit<ShippingSett
     markWriteFailure(error)
   }
   return structuredClone(next)
-}
-
-export async function toggleWatch(kind: "vessel" | "port", id: string) {
-  await initialize()
-  const persistence = requireRepository()
-  const current = await getShippingSnapshot()
-  const collection = kind === "vessel" ? current.vessels : current.ports
-  const item = collection.find(entry => entry.id === id)
-  if (!item) throw createError({ statusCode: 404, message: `${kind} not found` })
-  item.isWatched = !item.isWatched
-  try {
-    const updated = await persistence.updateWatch(kind, id, item.isWatched)
-    if (!updated) throw createError({ statusCode: 404, message: `${kind} not found` })
-  } catch (error) {
-    if (typeof error === "object" && error && "statusCode" in error && (error as { statusCode?: number }).statusCode === 404) throw error
-    markWriteFailure(error)
-  }
-  return { id, isWatched: item.isWatched }
 }

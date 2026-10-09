@@ -121,7 +121,6 @@ function feedItem(overrides: Partial<FeedItem> = {}): FeedItem {
     sourceStatus: "healthy",
     relatedPortIds: [],
     relatedVesselIds: [],
-    relatedVoyageIds: [],
     ...overrides,
   }
 }

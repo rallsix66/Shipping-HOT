@@ -45,7 +45,6 @@ function weatherItem(overrides: Partial<FeedItem> = {}): FeedItem {
     severity: "warning",
     relatedPortIds: ["port-shekou"],
     relatedVesselIds: [],
-    relatedVoyageIds: [],
     updatedAt: "2026-08-29T00:00:00.000Z",
     sourceUpdatedAt: "2026-08-29T00:00:00.000Z",
     fetchedAt: "2026-08-29T00:00:00.000Z",
@@ -58,7 +57,7 @@ function weatherItem(overrides: Partial<FeedItem> = {}): FeedItem {
 
 async function seedPorts(database: Parameters<typeof initShippingTables>[0]) {
   const snapshot = createMockSnapshot()
-  await new ShippingRepository(database, "mock").seed([], snapshot.ports, [], [], [], snapshot.settings)
+  await new ShippingRepository(database, "mock").seed(snapshot.ports, [], [], snapshot.settings)
 }
 
 describe("weather sync job", () => {

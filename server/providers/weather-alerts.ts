@@ -215,7 +215,6 @@ function normalizeAlert(raw: RawAlert, source: WeatherAlertSource, ports: Port[]
     weather,
     relatedPortIds: relatedPorts(`${title} ${summary} ${region ?? ""}`, ports),
     relatedVesselIds: [],
-    relatedVoyageIds: [],
     updatedAt: sourceUpdatedAt,
     sourceUpdatedAt,
     fetchedAt,

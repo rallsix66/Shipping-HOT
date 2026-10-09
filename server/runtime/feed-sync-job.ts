@@ -20,22 +20,16 @@ export interface FeedSyncJobOptions {
 }
 
 export async function refreshFeedEvents(repository: ShippingRepository, settings: ShippingSettings, now: Date, context: OperationalSourceContext): Promise<void> {
-  const vessels = await repository.listVessels()
   const ports = await repository.listPorts()
-  const voyages = await repository.listVoyages()
   const feedItems = await repository.listFeedItems({ now })
-  const aisPortMetrics = await repository.listAisPortMetrics()
-  const storedEvents = await repository.listEvents({ vessels, ports, voyages, feedItems })
+  const storedEvents = await repository.listEvents({ ports, feedItems })
   const events = detectShippingEvents(
-    vessels,
     ports,
-    voyages,
     feedItems,
     settings,
     filterEventsForOperationalContext(storedEvents, context),
     now.toISOString(),
     await repository.listCalendarEvents(),
-    aisPortMetrics,
   )
   for (const event of events) await repository.upsertEvent(event)
 }

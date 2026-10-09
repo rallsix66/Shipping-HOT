@@ -16,9 +16,6 @@ const knownEnvironmentNames: Record<string, string> = {
   "claude": "ANTHROPIC_API_KEY",
   "deepl": "DEEPL_API_KEY",
   "azure": "AZURE_TRANSLATOR_API_KEY",
-  "vesselapi": "VESSELAPI_API_KEY",
-  "gfw": "GFW_API_TOKEN",
-  "aisstream": "AISSTREAM_API_KEY",
 }
 
 export class SecretManagedByEnvironmentError extends Error {

@@ -59,7 +59,6 @@ function feedItemFromRow(row: FeedRow, sourceType: SourceLineage): FeedItem {
     severity: row.severity as FeedItem["severity"],
     relatedPortIds: parseIds(row.related_port_ids),
     relatedVesselIds: parseIds(row.related_vessel_ids),
-    relatedVoyageIds: parseIds(row.related_voyage_ids),
     source_type: sourceType,
   } as FeedItem
 }

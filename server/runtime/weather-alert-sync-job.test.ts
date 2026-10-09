@@ -64,7 +64,6 @@ function alertItem(overrides: Partial<FeedItem> = {}): FeedItem {
     severity: "warning",
     relatedPortIds: ["port-shekou"],
     relatedVesselIds: [],
-    relatedVoyageIds: [],
     updatedAt: "2026-09-01T00:00:00.000Z",
     sourceUpdatedAt: "2026-09-01T00:00:00.000Z",
     fetchedAt: "2026-09-01T00:00:00.000Z",
@@ -79,7 +78,7 @@ describe("official weather alert sync job", () => {
   it("treats a valid empty response as a successful zero-record run", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "real")
-    await new ShippingRepository(database, "real").seed([], [realPort()], [], [], [], createMockSnapshot().settings)
+    await new ShippingRepository(database, "real").seed([realPort()], [], [], createMockSnapshot().settings)
     const job = createWeatherAlertSyncJob({
       database,
       dataMode: "real",
@@ -97,7 +96,7 @@ describe("official weather alert sync job", () => {
   it("persists official feed data and Runtime health across the normal Runtime path", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "real")
-    await new ShippingRepository(database, "real").seed([], [realPort()], [], [], [], createMockSnapshot().settings)
+    await new ShippingRepository(database, "real").seed([realPort()], [], [], createMockSnapshot().settings)
     const job = createWeatherAlertSyncJob({
       database,
       dataMode: "real",
@@ -147,7 +146,7 @@ describe("official weather alert sync job", () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "real")
     const repository = new ShippingRepository(database, "real")
-    await repository.seed([], [realPort()], [], [alertItem()], [], createMockSnapshot().settings)
+    await repository.seed([realPort()], [alertItem()], [], createMockSnapshot().settings)
     const job = createWeatherAlertSyncJob({
       database,
       dataMode: "real",

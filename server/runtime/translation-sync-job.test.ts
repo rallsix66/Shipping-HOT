@@ -87,7 +87,6 @@ function feed(overrides: Partial<FeedItem> = {}): FeedItem {
     severity: "warning",
     relatedPortIds: [],
     relatedVesselIds: [],
-    relatedVoyageIds: [],
     provenance: { sourceType: "official", dataNature: "reported", sourceId: "public-feed", verified: false },
     source_type: "real",
     ...overrides,

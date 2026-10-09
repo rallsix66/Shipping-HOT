@@ -25,6 +25,30 @@
 - **交付提交：** 单 commit `docs: record R0 baseline decisions and ADR-006/007/008`（2026-10-09；分支 tip 见 `git log -1 --stat`；7 files，+220/−6；含 ADR-006/007/008、`AGENTS.md`、`docs/architecture.md`、本区块、`article-service.test.ts` 墙钟夹具）。
 - **数据模式：** 无 schema/Provider/Runtime 变更；无付费调用。
 
+## Shipping Risk Intelligence — R1 Retire Vessel / AIS / Voyage — 2026-10-09
+
+- **阶段 / 验收 ID：** R1 / R1-1–R1-6（`docs/plans/shipping-hot-risk-intelligence-2026-09-29.md` §6 R1）。
+- **分支 / PR：** `codex/shipping-hot-r1-retire-vessel` → [PR #5](https://github.com/rallsix66/Shipping-HOT/pull/5)（自 `main@8609cb5`）；**未合并**。
+- **标签：** `pre-r1-vessel-removal` @ `8609cb5` 已推送 origin（仅标签，未推 main）。
+- **范围：** ADR-006 执行——迁移 014 归档表、删除 vessel/AIS/voyage 代码与路由、port-only `POST /api/shipping/watch`、S7 夹具/验收改写、恢复文档 `docs/archive/vessel-capability-recovery.md`。
+- **验收证据：**
+  - **R1-1 残留 grep：** **PASS（按批准的五行例外）**——用户 **2026-10-09** 确认 `8d6cba2` 提案：仅 **3 文件 / 5 行**（精确路径 + 行号 + 整行正文；**非**整文件豁免、**非**原始全树零命中）。权威表：`docs/plans/r1-1-grep-exception-proposal.md`（**APPROVED**）；9/29 主方案 §6 R1-1 口径已同步。**`src/`** 严格零命中 **PASS**；**`server/`** 仅上述五行。机械检查 `test/r1-retired-surface.contract.test.ts`：**9/9**（closeout 复跑 2026-10-09 @ `8d6cba2` 基线；实现 commit `8d6cba2`）。
+  - **R1-2 门禁 G（PR #5 round-3，2026-10-09）：** `pnpm install --frozen-lockfile`、`pnpm build`、`pnpm typecheck`、`pnpm lint`、Vitest → **58 files / 475 passed | 3 skipped**；`pnpm smoke:p0-native` → **PASS**。基线 `main@8609cb5`：**76 files / 824 tests**。相对 main 的 `*.test.ts` 差异（`git diff 8609cb5..HEAD --name-status`）：**删除 21**、**新增 3**（`scripts/r1-migration-copy-guard.test.ts`、`server/middleware/retired-spa-routes.test.ts`、`test/r1-retired-surface.contract.test.ts`），其余为港口化 **修改**；现役合计 **58** 个测试文件，**不以恢复 824 条为目标**。
+  - **R1-2b 删除测试 → 现役断言映射（main@8609cb5 → 本分支）：**
+    - Readiness 现役 Job 集合 / 缺失·禁用 / 工具链 / 多源 Feed / Translation 不参与硬门禁 / 官方天气边界 → `server/services/v3-readiness.test.ts`（原 `v3-readiness.test.ts` 中船舶/AIS/航次/Vessel Search 用例**未**恢复）。
+    - 日历跨重启迁移、来源隔离、DB 不可用拒绝写入 → `server/shipping-store.persistence.test.ts`（Mock 事件边界港口化；原 vessel 混合用例删除）。
+    - Feed 过期投影、history 筛选顺序 → `server/database/shipping.test.ts`（原同文件用例迁回）；Feed 只读 + history 读边界 + 无 vessels 字段 → `server/shipping-store.read-only.test.ts`。
+    - 日历 reconcile → `server/shipping-store.test.ts`；日历缓存 skip/覆盖 → **保留** `server/runtime/calendar-sync-job.test.ts`；官方天气任务边界 → **保留** `server/runtime/weather-alert-sync-job.test.ts` + `v3-readiness.test.ts` 天气告警段。
+    - Runtime 单例 bootstrap（无 AIS Job）→ `server/runtime/bootstrap.test.ts`；迁移副本路径 → `scripts/r1-migration-copy-guard.test.ts` + `resolveDatabaseFileIdentity`。
+    - `server/services/real-data-gate.test.ts` **仅**覆盖 Real 零 Mock 扫描，**不**替代 Readiness/Repository/Runtime 上表职责。
+  - **R1-3 迁移 014：** 守卫断言已对齐真实拒绝顺序（symlink→保留库先 **escapes .tmp**；hard link / symlink→hardlink 组合 → **hard link**）。**2026-10-09 round-4：** Vitest 守卫 **9 passed | 3 skipped**（文件 symlink 用例 **未验证**，本机 `EPERM`）；迁移副本验收 **沿用** round-3（`.tmp/r1-migration-gate` 双 pass，schema **14**）——本次补丁未改迁移逻辑。
+  - **R1-4 浏览器 / S7：** **沿用** round-3 证据 `E2E_S7_DIR=.tmp/s7-local-r1-review-4` → **124 / 0 FAIL**（`.tmp/s7-local-r1-review-4/s7-integrated-evidence.json`）；本次补丁未改 `retired-spa-routes` / S7 脚本。
+  - **R1-5 启动日志：** 隔离 cwd 启动 `dist/output/server/index.mjs`，日志仅 `runtime started { jobs: 5 }`，**无** `ais-tracking` / `voyage-sync` / `ais-area` 等已下线任务名 → **PASS**。
+  - **R1-6 标签与恢复抽查：** origin 标签 `pre-r1-vessel-removal` 存在；`git worktree add .tmp/pre-r1-verify pre-r1-vessel-removal` + `pnpm exec vitest run server/providers/ais/index.test.ts` → **4/4 PASS**；worktree 已删除 → **PASS**。
+  - **Neat Freak closeout（R1 收尾）：** 技能 `C:\Users\Administrator\.claude\skills\neat-freak\SKILL.md`（v3.0.0）；配套脚本原缺失于 `<repo>/scripts/audit-inventory.sh`，已从 skill bundle **同内容补齐** 于本分支 closeout commit。盘点执行：`"C:\Program Files\Git\bin\bash.exe" scripts/audit-inventory.sh "<repo>"` → exit **0**（`generated_at=2026-10-09T07:53:15Z`，`head=8d6cba2`，`status_entries=0`）；closeout 前亦曾用 skill 绝对路径跑通同一脚本。**未**删除清理候选（`.tmp/` 诊断副本、未跟踪 patch 等保留）。知识同步：本 commit 更新 `docs/status.md`、`docs/plans/*` R1-1 口径、`AGENTS.md` R1 状态 → **PASS（R1 范围 inventory + 文档对齐）**。
+  - **R1 closeout 复验（2026-10-09）：** `test/r1-retired-surface.contract.test.ts` **9/9**；`scripts/r1-migration-copy-guard.test.ts` **9 pass | 3 skipped**（文件 symlink **未验证**，本机 `EPERM`；**未**放宽断言、**未**新增 CI）。
+- **结论：** **R1 = PASS（本地验收）**——R1-1–R1-6 证据见上（S7 / 全量门禁 G **沿用** round-3：`8d6cba2` 之前提交与运行记录）；**R1-3** 守卫 3 项文件 symlink **未验证**；**未合并 main**；**未开始 R1.5**；**未**操作保留库。
+
 ### R0 — 门禁 G 执行记录
 
 - 时间：2026-10-09（Asia/Shanghai）。

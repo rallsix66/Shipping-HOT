@@ -302,7 +302,6 @@ function rawFeedItem(raw: RawFeedItem, source: ShippingFeedSource, ports: Port[]
     hotReason: classification.hotReason,
     relatedPortIds: classification.relatedPortIds,
     relatedVesselIds: [],
-    relatedVoyageIds: [],
     tags: [source.sourceKind, source.category],
     updatedAt: sourceUpdatedAt,
     sourceUpdatedAt,

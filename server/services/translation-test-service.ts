@@ -8,7 +8,7 @@ import { TranslationService } from "#/services/translation-service"
 import { withTranslationExecutor } from "#/services/translation-executor"
 import { TRANSLATION_CAPABILITY, TRANSLATION_CURRENCY, TRANSLATION_PROVIDER_ID, assertTranslationReady, currentTranslationUsage } from "#/services/translation-settings"
 
-export const TRANSLATION_TEST_SOURCE_TEXT = "Vessel TEST STAR voyage AB123 arrived at SGSIN on 2026-09-02. Details: https://example.com/status"
+export const TRANSLATION_TEST_SOURCE_TEXT = "Port of Singapore (SGSIN) issued an operational notice on 2026-09-02. Details: https://example.com/status"
 export const TRANSLATION_TEST_ENTITY_ID = "shipping-hot-translation-test"
 
 export function isAllowedTranslationTestBody(body: unknown): boolean {

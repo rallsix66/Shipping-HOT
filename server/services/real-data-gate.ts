@@ -21,8 +21,6 @@ const excludedTables = new Set([
   "port_directory_status",
   "settings",
   "user",
-  "vessel_watchlist",
-  "port_watchlist",
   "translation_cache",
   "provider_usage",
   "provider_runtime",
@@ -64,7 +62,9 @@ async function discoverLineageTables(db: Database): Promise<SchemaTable[]> {
   const tables: SchemaTable[] = []
   for (const tableRow of tableRows) {
     const name = typeof tableRow.name === "string" ? tableRow.name : undefined
-    if (!name || excludedTables.has(name) || name.startsWith("sqlite_") || !validIdentifier(name)) continue
+    // `_retired_*` tables are archived legacy tracking data (ADR-006 R1);
+    // they are outside the active operational scope and are not scanned.
+    if (!name || excludedTables.has(name) || name.startsWith("sqlite_") || name.startsWith("_retired_") || !validIdentifier(name)) continue
     const columnRows = await db.prepare(`PRAGMA table_info(${quoteIdentifier(name)})`).all() as Array<{ name?: unknown }>
     const columns = new Set(columnRows.flatMap(column => typeof column.name === "string" ? [column.name] : []))
     if (columns.has("source_type")) tables.push({ name, columns })
