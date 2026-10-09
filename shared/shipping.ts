@@ -384,6 +384,58 @@ export interface WeatherWindows {
   d7: WeatherWindow
 }
 
+export interface PortWeatherForecastRow {
+  id: string
+  portId: string
+  unlocode?: string
+  forecastAt: string
+  horizon: "hourly"
+  waveHeightM?: number
+  swellWaveHeightM?: number
+  windSpeedKmh?: number
+  windGustKmh?: number
+  precipitationMm?: number
+  visibilityM?: number
+  sourceId: string
+  fetchedAt: string
+}
+
+export interface PortWeatherImpactRow {
+  id: string
+  portId: string
+  validFrom: string
+  validUntil: string
+  ruleId: string
+  severity: Severity
+  status: "potential"
+  provenance: "system"
+  summaryZh: string
+  inputValues: Record<string, number>
+  computedAt: string
+}
+
+export interface PortWeatherOfficialAlertSummary {
+  id: string
+  title: string
+  summary: string
+  severity: Severity
+  publishedAt: string
+  sourceId: string
+  provenance?: DataProvenance
+}
+
+export interface PortWeatherPanelResponse {
+  portId: string
+  forecasts: PortWeatherForecastRow[]
+  impacts: PortWeatherImpactRow[]
+  officialAlerts: PortWeatherOfficialAlertSummary[]
+  sources: {
+    forecast: string
+    impacts: "system"
+    alerts: string
+  }
+}
+
 export interface ShippingSnapshot {
   ports: Port[]
   events: ShippingEvent[]

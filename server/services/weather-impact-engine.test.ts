@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest"
-import { windGustKmhToMs } from "@shared/weather-units"
+import { windGustKmhMeetsMsThreshold, windGustKmhToMs } from "@shared/weather-units"
 import { assertNoImplementedWeatherImpact, evaluateWeatherImpactRules, listWeatherImpactRuleIds } from "./weather-impact-engine"
 import { PLAN_WIND_GUST_MS } from "#/config/weather-impact-rules"
 
-describe("weather impact rules — shipping-port subset (R1.5-2 partial / R1.5-3)", () => {
+describe("weather impact rules — shipping-port subset (R1.5-2 / R1.5-3 implemented scope)", () => {
   it("lists WR-S01..WR-S05 only (official-alert table row not implemented)", () => {
     expect(listWeatherImpactRuleIds()).toEqual(["WR-S01", "WR-S02", "WR-S03", "WR-S04", "WR-S05"])
   })
@@ -18,6 +18,14 @@ describe("weather impact rules — shipping-port subset (R1.5-2 partial / R1.5-3
     })
     it("does not hit at 30 km/h (~8.33 m/s)", () => {
       expect(evaluateWeatherImpactRules({ windGustMs: windGustKmhToMs(30) }).some(h => h.ruleId === "WR-S01")).toBe(false)
+    })
+    it("hits at exact km/h conversion to WR-S01 threshold (50.04 km/h → 13.9 m/s)", () => {
+      expect(windGustKmhMeetsMsThreshold(50.04, PLAN_WIND_GUST_MS.wrS01)).toBe(true)
+      expect(evaluateWeatherImpactRules({ windGustMs: windGustKmhToMs(50.04) }).some(h => h.ruleId === "WR-S01")).toBe(true)
+    })
+    it("misses just below converted threshold (50.039 km/h)", () => {
+      expect(windGustKmhMeetsMsThreshold(50.039, PLAN_WIND_GUST_MS.wrS01)).toBe(false)
+      expect(evaluateWeatherImpactRules({ windGustMs: windGustKmhToMs(50.039) }).some(h => h.ruleId === "WR-S01")).toBe(false)
     })
   })
 

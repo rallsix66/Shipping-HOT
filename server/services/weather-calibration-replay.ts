@@ -1,5 +1,6 @@
 import type { QualifiedPortClosureReplayEvent } from "@shared/weather-impact"
 import {
+  R1_5_4_MIN_HIT_RATE,
   R1_5_4_REQUIRED_QUALIFIED_SAMPLES,
   qualifiedPortClosureReplayEvents,
 } from "#/data/weather-calibration/qualified-port-closure-replay"
@@ -30,7 +31,11 @@ export function replayQualifiedPortClosureEvent(event: QualifiedPortClosureRepla
     return false
   }
   const hits = evaluateWeatherImpactRules(event.inputs)
-  return hits.some(h => h.object === "shipping_port" && (h.severity === "critical" || h.severity === "warning" || h.severity === "watch"))
+  return hits.some(h => h.object === "shipping_port" && (h.severity === "critical" || h.severity === "warning"))
+}
+
+export function isR15_4ReplayRuleHit(hit: { object: string, severity: string }): boolean {
+  return hit.object === "shipping_port" && (hit.severity === "critical" || hit.severity === "warning")
 }
 
 export function getR15_4CalibrationStatus(): R15_4CalibrationStatus {
@@ -41,6 +46,15 @@ export function getR15_4CalibrationStatus(): R15_4CalibrationStatus {
       qualifiedCount,
       requiredCount: R1_5_4_REQUIRED_QUALIFIED_SAMPLES,
       reason: `Need ${R1_5_4_REQUIRED_QUALIFIED_SAMPLES} independently verified samples with official closure locator and traceable inputs; have ${qualifiedCount}.`,
+    }
+  }
+  const replay = replayAllQualifiedPortClosureEvents()
+  if (replay.hitRate < R1_5_4_MIN_HIT_RATE) {
+    return {
+      status: "blocked",
+      qualifiedCount,
+      requiredCount: R1_5_4_REQUIRED_QUALIFIED_SAMPLES,
+      reason: `Qualified corpus replay hit rate ${(replay.hitRate * 100).toFixed(1)}% is below ${R1_5_4_MIN_HIT_RATE * 100}% (${replay.hits}/${replay.total}).`,
     }
   }
   return { status: "ready", qualifiedCount, requiredCount: R1_5_4_REQUIRED_QUALIFIED_SAMPLES }

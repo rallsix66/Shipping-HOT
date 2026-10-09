@@ -5,7 +5,7 @@ import type { ArticleBlock, ArticleCompletenessStatus, ArticleTranslationBlockSo
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
 import { type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
-import { type ShippingResponse, type TranslationStatusResponse, useFeedArticle, useShipping, useTranslationSecret, useTranslationStatus } from "./data"
+import { type ShippingResponse, type TranslationStatusResponse, useFeedArticle, usePortWeather, useShipping, useTranslationSecret, useTranslationStatus } from "./data"
 import { FeedItemDisplayText } from "./feed-display"
 import { formatDate, formatPortMetric, formatStatus, severityTone } from "./format"
 import { AnimatedNumber, EmptyState, Marquee, ProvenanceBadge, ProviderChip, Reveal, Segmented, StatusDot } from "./ui"
@@ -437,6 +437,101 @@ export function PortsPage() {
   )
 }
 
+function PortWeatherPanelSection({ portId }: { portId: string }) {
+  const { data, isLoading, isError } = usePortWeather(portId)
+  if (isLoading) return <div className="glass-panel d-panel"><p className="text-sm op-60">加载港口天气…</p></div>
+  if (isError || !data) return <div className="glass-panel d-panel"><p className="text-sm op-60">港口天气暂不可用</p></div>
+  const nextForecasts = data.forecasts.slice(0, 8)
+  const nextImpacts = data.impacts.slice(0, 6)
+  return (
+    <div className="mt-4 grid gap-4 lg:grid-cols-3">
+      <div className="glass-panel d-panel">
+        <div className="panel-h">
+          <h3>预报数值</h3>
+          <span className="text-xs op-60">{data.sources.forecast}</span>
+        </div>
+        {nextForecasts.length === 0
+          ? <p className="text-sm op-60">暂无 7 天持久化预报；Open-Meteo 同步后会写入 SQLite。</p>
+          : (
+              <ul className="space-y-2 text-sm">
+                {nextForecasts.map(row => (
+                  <li key={row.id} className="flex flex-col gap-0.5 border-b border-white/5 pb-2 last:border-0">
+                    <span className="font-medium">{formatDate(row.forecastAt)}</span>
+                    <span className="op-80">
+                      {row.windGustKmh !== undefined ? `阵风 ${Math.round(row.windGustKmh)} km/h` : "阵风 —"}
+                      {" · "}
+                      {row.waveHeightM !== undefined ? `浪 ${row.waveHeightM.toFixed(1)} m` : "浪 —"}
+                      {" · "}
+                      {row.precipitationMm !== undefined ? `降水 ${row.precipitationMm.toFixed(1)} mm/h` : "降水 —"}
+                      {" · "}
+                      {row.visibilityM !== undefined ? `能见度 ${Math.round(row.visibilityM)} m` : "能见度 —"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+      </div>
+      <div className="glass-panel d-panel">
+        <div className="panel-h">
+          <h3>潜在影响</h3>
+          <span className="text-xs op-60">
+            ⚙
+            {data.sources.impacts}
+          </span>
+        </div>
+        {nextImpacts.length === 0
+          ? <p className="text-sm op-60">当前无规则命中；仅展示 ⚙ 潜在影响，不含已实施封港结论。</p>
+          : (
+              <ul className="space-y-2 text-sm">
+                {nextImpacts.map(row => (
+                  <li key={row.id} className="flex items-start gap-2">
+                    <StatusDot tone={severityTone(row.severity)} />
+                    <div>
+                      <p className="font-medium">{row.summaryZh}</p>
+                      <p className="text-xs op-60">
+                        {row.ruleId}
+                        {" "}
+                        ·
+                        {" "}
+                        {formatDate(row.validFrom)}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+      </div>
+      <div className="glass-panel d-panel">
+        <div className="panel-h">
+          <h3>官方预警</h3>
+          <span className="text-xs op-60">{data.sources.alerts}</span>
+        </div>
+        {data.officialAlerts.length === 0
+          ? <p className="text-sm op-60">未配置或未同步到本港相关官方预警。</p>
+          : (
+              <ul className="space-y-2 text-sm">
+                {data.officialAlerts.map(alert => (
+                  <li key={alert.id} className="flex items-start gap-2">
+                    <StatusDot tone={severityTone(alert.severity)} />
+                    <div>
+                      <p className="font-medium">{alert.title}</p>
+                      <p className="text-xs op-60">
+                        {formatDate(alert.publishedAt)}
+                        {" "}
+                        ·
+                        {" "}
+                        {alert.sourceId}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+      </div>
+    </div>
+  )
+}
+
 export function PortDetailPage({ id }: { id: string }) {
   const { data, isLoading, isError, refetch } = useShipping()
   if (isLoading) return <ShippingShell><LoadingState /></ShippingShell>
@@ -561,6 +656,7 @@ export function PortDetailPage({ id }: { id: string }) {
           </div>
         </div>
       </div>
+      <PortWeatherPanelSection portId={id} />
     </ShippingShell>
   )
 }

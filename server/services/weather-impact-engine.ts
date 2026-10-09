@@ -1,4 +1,5 @@
 import type { WeatherImpactRuleHit, WeatherRuleInputs } from "@shared/weather-impact"
+import { weatherValueGte, weatherValueLt } from "@shared/weather-units"
 import { type WeatherImpactRuleWhen, weatherImpactRules } from "#/config/weather-impact-rules"
 
 function finiteInput(value: number | undefined): number | undefined {
@@ -15,10 +16,10 @@ function evalWhen(when: WeatherImpactRuleWhen, inputs: WeatherRuleInputs): boole
   const precip = finiteInput(inputs.precipitationMm24h)
   const typhoonKm = finiteInput(inputs.typhoonDistanceKm)
 
-  if (when.windGustMsGte !== undefined && (gustMs === undefined || gustMs < when.windGustMsGte)) return false
-  if (when.waveHeightMGte !== undefined && (waveM === undefined || waveM < when.waveHeightMGte)) return false
-  if (when.visibilityMLt !== undefined && (visibilityM === undefined || visibilityM >= when.visibilityMLt)) return false
-  if (when.precipitationMm24hGte !== undefined && (precip === undefined || precip < when.precipitationMm24hGte)) return false
+  if (when.windGustMsGte !== undefined && (gustMs === undefined || !weatherValueGte(gustMs, when.windGustMsGte))) return false
+  if (when.waveHeightMGte !== undefined && (waveM === undefined || !weatherValueGte(waveM, when.waveHeightMGte))) return false
+  if (when.visibilityMLt !== undefined && (visibilityM === undefined || !weatherValueLt(visibilityM, when.visibilityMLt))) return false
+  if (when.precipitationMm24hGte !== undefined && (precip === undefined || !weatherValueGte(precip, when.precipitationMm24hGte))) return false
   if (when.typhoonDistanceKmLte !== undefined && (typhoonKm === undefined || typhoonKm > when.typhoonDistanceKmLte)) return false
   if (when.windGustMsGte !== undefined || when.waveHeightMGte !== undefined || when.visibilityMLt !== undefined
     || when.precipitationMm24hGte !== undefined || when.typhoonDistanceKmLte !== undefined) {

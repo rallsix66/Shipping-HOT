@@ -1,11 +1,12 @@
 import { env } from "node:process"
-import type { DataProvenance, FeedItem, Freshness, OperationalSourceContext, Port, PortCongestionDetail, ProviderResult, Severity, ShippingProviderModes, SourceStatus, WeatherWindow, WeatherWindows } from "@shared/shipping"
+import type { DataProvenance, FeedItem, Freshness, OperationalSourceContext, Port, PortCongestionDetail, PortWeatherForecastRow, PortWeatherImpactRow, ProviderResult, Severity, ShippingProviderModes, SourceStatus, WeatherWindow, WeatherWindows } from "@shared/shipping"
 import { createBaselinePortDirectoryLookup } from "@shared/port-directory"
 import type { PortDirectoryCoordinateLookup } from "@shared/port-directory"
 import { mockFeedItems, mockPorts } from "@shared/shipping-fixtures"
 import { type CalendarProvider, configureCalendarProviders } from "./calendar"
 import { activeShippingFeedSourceIds, configureFeedProviders } from "./feed"
 import { type WeatherAlertProvider, activeOfficialWeatherAlertSourceIds, createOfficialWeatherAlertProvider, officialWeatherAlertSourceIds } from "./weather-alerts"
+import { computePortWeatherImpacts, mergeOpenMeteoPortPoints, openMeteoPointsToForecastRows } from "#/services/open-meteo-port-forecast"
 import { createRuntimePortDirectoryLookup } from "#/database/port-directory"
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
 
@@ -13,9 +14,15 @@ export interface PortProvider {
   readonly providerId: string
   getPorts: (lastKnown?: Port[]) => Promise<Port[]>
 }
+export interface WeatherForecastPersistenceBatch {
+  forecastsByPortId: Map<string, PortWeatherForecastRow[]>
+  impactsByPortId: Map<string, PortWeatherImpactRow[]>
+}
+
 export interface WeatherProvider {
   readonly providerId: string
   getFeedItems: (ports?: Port[], lastKnown?: FeedItem[]) => Promise<FeedItem[]>
+  drainForecastPersistence?: () => WeatherForecastPersistenceBatch
 }
 
 export async function fetchWeatherProviderResults(
@@ -419,8 +426,8 @@ interface WeatherPortConfig {
 }
 
 interface OpenMeteoPayload {
-  current?: { time?: number | string, wave_height?: number, wave_direction?: number, swell_wave_height?: number, swell_wave_direction?: number, swell_wave_period?: number, wind_speed_10m?: number, wind_gusts_10m?: number }
-  hourly?: { time?: Array<number | string>, wave_height?: Array<number | undefined>, wave_direction?: Array<number | undefined>, swell_wave_height?: Array<number | undefined>, swell_wave_direction?: Array<number | undefined>, swell_wave_period?: Array<number | undefined>, wind_speed_10m?: Array<number | undefined>, wind_gusts_10m?: Array<number | undefined> }
+  current?: { time?: number | string, wave_height?: number, wave_direction?: number, swell_wave_height?: number, swell_wave_direction?: number, swell_wave_period?: number, wind_speed_10m?: number, wind_gusts_10m?: number, precipitation?: number, visibility?: number }
+  hourly?: { time?: Array<number | string>, wave_height?: Array<number | undefined>, wave_direction?: Array<number | undefined>, swell_wave_height?: Array<number | undefined>, swell_wave_direction?: Array<number | undefined>, swell_wave_period?: Array<number | undefined>, wind_speed_10m?: Array<number | undefined>, wind_gusts_10m?: Array<number | undefined>, precipitation?: Array<number | undefined>, visibility?: Array<number | undefined> }
 }
 
 export const weatherRiskThresholds = {
@@ -613,9 +620,22 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
   const minIntervalMs = options.minIntervalMs ?? 30 * 60 * 1000
   const portDirectory = options.portDirectory ?? createBaselinePortDirectoryLookup()
   const cache = new Map<string, { checkedAt: number, items: FeedItem[] }>()
+  const forecastsByPortId = new Map<string, PortWeatherForecastRow[]>()
+  const impactsByPortId = new Map<string, PortWeatherImpactRow[]>()
   return {
     providerId: "open-meteo-marine",
+    drainForecastPersistence() {
+      const batch: WeatherForecastPersistenceBatch = {
+        forecastsByPortId: new Map(forecastsByPortId),
+        impactsByPortId: new Map(impactsByPortId),
+      }
+      forecastsByPortId.clear()
+      impactsByPortId.clear()
+      return batch
+    },
     async getFeedItems(ports: Port[] = [], lastKnown = []) {
+      forecastsByPortId.clear()
+      impactsByPortId.clear()
       const checkedAt = now()
       const modelLastKnown = lastKnown.filter(item => item.sourceId === "open-meteo-marine")
       const failures: ProviderError[] = []
@@ -647,8 +667,8 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
         const weatherUrl = new URL(weatherEndpoint)
         weatherUrl.searchParams.set("latitude", String(coordinates.latitude))
         weatherUrl.searchParams.set("longitude", String(coordinates.longitude))
-        weatherUrl.searchParams.set("current", "wind_speed_10m,wind_gusts_10m")
-        weatherUrl.searchParams.set("hourly", "wind_speed_10m,wind_gusts_10m")
+        weatherUrl.searchParams.set("current", "wind_speed_10m,wind_gusts_10m,precipitation,visibility")
+        weatherUrl.searchParams.set("hourly", "wind_speed_10m,wind_gusts_10m,precipitation,visibility")
         weatherUrl.searchParams.set("forecast_days", String(weatherRiskThresholds.forecastDays))
         weatherUrl.searchParams.set("timeformat", "unixtime")
         weatherUrl.searchParams.set("wind_speed_unit", "kmh")
@@ -665,6 +685,12 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
           const marinePayload = validWeatherPayload(await marineResponse.json())
           const weatherPayload = validWeatherPayload(await weatherResponse.json())
           const fetchedAt = now().toISOString()
+          const mergedPoints = mergeOpenMeteoPortPoints(marinePayload, weatherPayload)
+          forecastsByPortId.set(
+            port.id,
+            openMeteoPointsToForecastRows(port.id, port.unlocode, mergedPoints, fetchedAt),
+          )
+          impactsByPortId.set(port.id, computePortWeatherImpacts(port.id, mergedPoints, fetchedAt))
           const item = weatherFeedItem({ id: port.id, name: port.name, nameEn: port.nameEn, latitude: coordinates.latitude, longitude: coordinates.longitude }, marinePayload, weatherPayload, fetchedAt)
           const items = item ? [{ ...item, fetchedAt }] : []
           cache.set(port.id, { checkedAt: checkedAt.getTime(), items })

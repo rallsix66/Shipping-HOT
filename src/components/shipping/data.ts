@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import type { ArticleBlock, ArticleState, ArticleTranslationView, ArticleVersion, ArticleVersionSummary } from "@shared/article"
-import type { FeedItem, FeedItemDisplay, HotItem, ShippingSnapshot } from "@shared/shipping"
+import type { FeedItem, FeedItemDisplay, HotItem, PortWeatherPanelResponse, ShippingSnapshot } from "@shared/shipping"
 import type { CalendarCoverageStatusSummary } from "@shared/calendar"
 import { myFetch } from "~/utils"
 
@@ -69,6 +69,15 @@ export interface FeedArticleResponse {
     versions: ArticleVersionSummary[]
     translation?: ArticleTranslationView | null
   } | null
+}
+
+export function usePortWeather(portId: string) {
+  return useQuery({
+    queryKey: ["port-weather", portId],
+    queryFn: () => myFetch<PortWeatherPanelResponse>(`/shipping/ports/${encodeURIComponent(portId)}/weather`),
+    staleTime: 30_000,
+    enabled: Boolean(portId),
+  })
 }
 
 export function useFeedArticle(id: string, versionId?: string) {

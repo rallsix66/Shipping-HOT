@@ -33,6 +33,15 @@ export function createWeatherSyncJob(options: WeatherSyncJobOptions): RuntimeJob
       const retainedIds = new Set(received.map(item => item.id))
       const archived = await repository.archiveFeedItemsNotIn([providerId], retainedIds, fetchedAt)
       for (const item of received) await repository.upsertFeedItem(item)
+      const forecastBatch = options.provider.drainForecastPersistence?.()
+      if (forecastBatch) {
+        for (const [portId, rows] of forecastBatch.forecastsByPortId) {
+          await repository.replaceWeatherForecastsForPort(portId, rows)
+        }
+        for (const [portId, rows] of forecastBatch.impactsByPortId) {
+          await repository.replaceWeatherImpactsForPort(portId, rows)
+        }
+      }
       const failed = received.find(item => item.sourceStatus === "failed")
       const sourceUpdatedAt = received
         .map(item => Date.parse(item.sourceUpdatedAt ?? item.updatedAt ?? item.publishedAt))

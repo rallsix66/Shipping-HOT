@@ -8,3 +8,6 @@ import type { QualifiedPortClosureReplayEvent } from "@shared/weather-impact"
 export const qualifiedPortClosureReplayEvents: readonly QualifiedPortClosureReplayEvent[] = []
 
 export const R1_5_4_REQUIRED_QUALIFIED_SAMPLES = 10
+
+/** Plan R1.5-4: replay must meet this rate before acceptance; sample count alone does not PASS. */
+export const R1_5_4_MIN_HIT_RATE = 0.8

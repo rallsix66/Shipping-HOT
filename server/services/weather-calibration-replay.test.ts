@@ -2,9 +2,11 @@ import type { QualifiedPortClosureReplayEvent } from "@shared/weather-impact"
 import { describe, expect, it } from "vitest"
 import {
   getR15_4CalibrationStatus,
+  isR15_4ReplayRuleHit,
   observationWithinClosureWindow,
   replayQualifiedPortClosureEvent,
 } from "./weather-calibration-replay"
+import { PLAN_WIND_GUST_MS } from "#/config/weather-impact-rules"
 import { portClosureReplayCandidates } from "#/data/weather-calibration/port-closure-replay-candidates"
 import { qualifiedPortClosureReplayEvents } from "#/data/weather-calibration/qualified-port-closure-replay"
 
@@ -41,7 +43,28 @@ describe("r1.5-4 port closure calibration replay", () => {
     expect(replayQualifiedPortClosureEvent(fixture)).toBe(false)
   })
 
-  it("counts a hit only when observation overlaps closure and rules fire", () => {
+  it("watch-only WR-S01 does not count as calibration hit", () => {
+    const fixture: QualifiedPortClosureReplayEvent = {
+      id: "fixture-watch-only",
+      portUnlocode: "CNSHK",
+      closureStartUtc: "2024-09-05T12:00:00.000Z",
+      closureEndUtc: "2024-09-07T00:00:00.000Z",
+      observationAtUtc: "2024-09-06T00:00:00.000Z",
+      inputs: { windGustMs: PLAN_WIND_GUST_MS.wrS01 },
+      inputProvenance: {
+        source: "test-fixture",
+        unit: "m/s",
+        location: "port",
+        referencedAtUtc: "2024-09-06T00:00:00.000Z",
+      },
+      closureProvenance: { source: "test-fixture" },
+    }
+    expect(replayQualifiedPortClosureEvent(fixture)).toBe(false)
+    expect(isR15_4ReplayRuleHit({ object: "shipping_port", severity: "watch" })).toBe(false)
+    expect(isR15_4ReplayRuleHit({ object: "shipping_port", severity: "warning" })).toBe(true)
+  })
+
+  it("counts a hit only when observation overlaps closure and warning/critical rules fire", () => {
     const fixture: QualifiedPortClosureReplayEvent = {
       id: "fixture-inside-window",
       portUnlocode: "CNSHK",

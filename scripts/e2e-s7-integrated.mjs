@@ -17,7 +17,10 @@
 // accuracy, and it does not re-verify S2/S3/S4/S5 sealed scope.
 //
 // Usage:
-//   node scripts/e2e-s7-integrated.mjs           (E2E_S7_DIR overrides .tmp/s7-local)
+//   node scripts/e2e-s7-integrated.mjs           (default .tmp/s7-local-r1-5 for R1.5+ schema; override with E2E_S7_DIR)
+//
+// Evidence policy: pre-R1 S7 PASS remains on merged main CI artifacts / frozen `.tmp/s7-local` records.
+// Do not backfill old evidence into a reused R1.5 run directory — note the runDir in each evidence JSON.
 //
 // Exit code 0 only when every check passes.
 import { spawn } from "node:child_process"
@@ -30,7 +33,7 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import Database from "better-sqlite3"
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)))
-const RUN_DIR = resolve(process.env.E2E_S7_DIR ?? join(ROOT, ".tmp", "s7-local"))
+const RUN_DIR = resolve(process.env.E2E_S7_DIR ?? join(ROOT, ".tmp", "s7-local-r1-5"))
 const DB_PATH = join(RUN_DIR, ".data", "shipping-hot-v3.sqlite3")
 const MANIFEST_PATH = join(RUN_DIR, "s7-local-manifest.json")
 const SERVER_ENTRY = join(ROOT, "dist", "output", "server", "index.mjs")

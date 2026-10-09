@@ -1,7 +1,7 @@
 import process from "node:process"
 import type { Database } from "db0"
 import { hasMockEvidence, knownMockProvenanceFor, normalizeLegacyEventTrust, normalizeLegacyTrust, recordAllowedForDataMode } from "@shared/shipping"
-import type { DataEvidence, DataProvenance, FeedItem, FeedVisibility, Freshness, Port, ProvenanceAware, ShippingEvent, ShippingSettings, SourceLineage } from "@shared/shipping"
+import type { DataEvidence, DataProvenance, FeedItem, FeedVisibility, Freshness, Port, PortWeatherForecastRow, PortWeatherImpactRow, ProvenanceAware, ShippingEvent, ShippingSettings, SourceLineage } from "@shared/shipping"
 import type { CalendarEvent } from "@shared/calendar"
 import { applyFeedFreshnessPolicy } from "@shared/shipping-rules"
 import { type DatabaseMetadata, type ShippingDataMode, initializeShippingDatabase } from "#/database/runtime"
@@ -443,6 +443,115 @@ export class ShippingRepository {
       await this.db.prepare("DELETE FROM events WHERE last_detected_at < ? AND status = 'resolved'").run(cutoff)
       await this.db.prepare("DELETE FROM feed_items WHERE (published_at <> '' AND published_at < ?) OR (published_at = '' AND fetched_at < ?)").run(cutoff, cutoff)
       await this.db.prepare("DELETE FROM feed_item_history WHERE observed_at < ?").run(cutoff)
+    })
+  }
+
+  async replaceWeatherForecastsForPort(portId: string, rows: PortWeatherForecastRow[]) {
+    await transaction(this.db, async () => {
+      await this.db.prepare("DELETE FROM weather_forecast WHERE port_id = ?").run(portId)
+      for (const row of rows) {
+        await this.db.prepare(`
+          INSERT INTO weather_forecast (
+            id, port_id, unlocode, forecast_at, horizon,
+            wave_height_m, swell_wave_height_m, wind_speed_kmh, wind_gust_kmh,
+            precipitation_mm, visibility_m, source_id, fetched_at, payload_json
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+        `).run(
+          row.id,
+          row.portId,
+          row.unlocode ?? null,
+          row.forecastAt,
+          row.horizon,
+          row.waveHeightM ?? null,
+          row.swellWaveHeightM ?? null,
+          row.windSpeedKmh ?? null,
+          row.windGustKmh ?? null,
+          row.precipitationMm ?? null,
+          row.visibilityM ?? null,
+          row.sourceId,
+          row.fetchedAt,
+        )
+      }
+    })
+  }
+
+  async replaceWeatherImpactsForPort(portId: string, rows: PortWeatherImpactRow[]) {
+    await transaction(this.db, async () => {
+      await this.db.prepare("DELETE FROM weather_impact WHERE port_id = ?").run(portId)
+      for (const row of rows) {
+        await this.db.prepare(`
+          INSERT INTO weather_impact (
+            id, port_id, valid_from, valid_until, impact_object, severity, status,
+            rule_id, input_values_json, provenance, summary_zh, computed_at
+          ) VALUES (?, ?, ?, ?, 'shipping_port', ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          row.id,
+          row.portId,
+          row.validFrom,
+          row.validUntil,
+          row.severity,
+          row.status,
+          row.ruleId,
+          JSON.stringify(row.inputValues),
+          row.provenance,
+          row.summaryZh,
+          row.computedAt,
+        )
+      }
+    })
+  }
+
+  async listWeatherForecastsForPort(portId: string, limit = 7 * 24): Promise<PortWeatherForecastRow[]> {
+    const result = await this.db.prepare(`
+      SELECT id, port_id, unlocode, forecast_at, horizon,
+        wave_height_m, swell_wave_height_m, wind_speed_kmh, wind_gust_kmh,
+        precipitation_mm, visibility_m, source_id, fetched_at
+      FROM weather_forecast
+      WHERE port_id = ?
+      ORDER BY forecast_at ASC
+      LIMIT ?
+    `).all(portId, limit)
+    return rows<Row>(result).map(row => ({
+      id: String(row.id),
+      portId: String(row.port_id),
+      unlocode: row.unlocode ? String(row.unlocode) : undefined,
+      forecastAt: String(row.forecast_at),
+      horizon: "hourly" as const,
+      waveHeightM: typeof row.wave_height_m === "number" ? row.wave_height_m : undefined,
+      swellWaveHeightM: typeof row.swell_wave_height_m === "number" ? row.swell_wave_height_m : undefined,
+      windSpeedKmh: typeof row.wind_speed_kmh === "number" ? row.wind_speed_kmh : undefined,
+      windGustKmh: typeof row.wind_gust_kmh === "number" ? row.wind_gust_kmh : undefined,
+      precipitationMm: typeof row.precipitation_mm === "number" ? row.precipitation_mm : undefined,
+      visibilityM: typeof row.visibility_m === "number" ? row.visibility_m : undefined,
+      sourceId: String(row.source_id),
+      fetchedAt: String(row.fetched_at),
+    }))
+  }
+
+  async listWeatherImpactsForPort(portId: string, limit = 48): Promise<PortWeatherImpactRow[]> {
+    const result = await this.db.prepare(`
+      SELECT id, port_id, valid_from, valid_until, rule_id, severity, status,
+        input_values_json, provenance, summary_zh, computed_at
+      FROM weather_impact
+      WHERE port_id = ?
+      ORDER BY valid_from DESC
+      LIMIT ?
+    `).all(portId, limit)
+    return rows<Row>(result).map((row) => {
+      const inputValues = parse<Record<string, number>>(row.input_values_json)
+      return {
+        id: String(row.id),
+        portId: String(row.port_id),
+        validFrom: String(row.valid_from),
+        validUntil: String(row.valid_until),
+        ruleId: String(row.rule_id),
+        severity: String(row.severity) as PortWeatherImpactRow["severity"],
+        status: "potential" as const,
+        provenance: "system" as const,
+        summaryZh: String(row.summary_zh),
+        inputValues,
+        computedAt: String(row.computed_at),
+      }
     })
   }
 }
