@@ -43,6 +43,13 @@ jobs:
       - name: Lint
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm lint
+      - name: Install ripgrep for R1-1 contract tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+          command -v rg
+          rg --version
       - name: Tests
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         # The native restart test creates its isolated database under this parent.
