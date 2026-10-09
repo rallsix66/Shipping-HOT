@@ -9,7 +9,8 @@ export interface WeatherImpactRuleConfig {
 }
 
 export interface WeatherImpactRuleWhen {
-  windGustKmhGte?: number
+  /** Gust threshold in m/s (plan §4.8). */
+  windGustMsGte?: number
   waveHeightMGte?: number
   visibilityMLt?: number
   precipitationMm24hGte?: number
@@ -17,11 +18,17 @@ export interface WeatherImpactRuleWhen {
   any?: WeatherImpactRuleWhen[]
 }
 
-/** Plan §4.8 initial thresholds — calibrate in R1.5-4 replay. */
+/** Plan §4.8 initial thresholds (m/s for wind). Official-alert row not implemented yet. */
 export const weatherImpactRules: readonly WeatherImpactRuleConfig[] = [
-  { id: "WR-S01", object: "shipping_port", when: { windGustKmhGte: 13.9 }, severity: "watch", summaryZh: "港口作业可能放缓" },
-  { id: "WR-S02", object: "shipping_port", when: { any: [{ windGustKmhGte: 17.2 }, { waveHeightMGte: 2.5 }] }, severity: "warning", summaryZh: "靠离泊和装卸可能受限" },
-  { id: "WR-S03", object: "shipping_port", when: { any: [{ windGustKmhGte: 24.5 }, { waveHeightMGte: 4 }, { typhoonDistanceKmLte: 300 }] }, severity: "critical", summaryZh: "可能停工或封港" },
+  { id: "WR-S01", object: "shipping_port", when: { windGustMsGte: 13.9 }, severity: "watch", summaryZh: "港口作业可能放缓" },
+  { id: "WR-S02", object: "shipping_port", when: { any: [{ windGustMsGte: 17.2 }, { waveHeightMGte: 2.5 }] }, severity: "warning", summaryZh: "靠离泊和装卸可能受限" },
+  { id: "WR-S03", object: "shipping_port", when: { any: [{ windGustMsGte: 24.5 }, { waveHeightMGte: 4 }, { typhoonDistanceKmLte: 300 }] }, severity: "critical", summaryZh: "可能停工或封港" },
   { id: "WR-S04", object: "shipping_port", when: { visibilityMLt: 1000 }, severity: "warning", summaryZh: "可能实施进出港管制" },
   { id: "WR-S05", object: "shipping_port", when: { precipitationMm24hGte: 100 }, severity: "warning", summaryZh: "堆场积水，作业可能放缓" },
 ]
+
+export const PLAN_WIND_GUST_MS = {
+  wrS01: 13.9,
+  wrS02: 17.2,
+  wrS03: 24.5,
+} as const

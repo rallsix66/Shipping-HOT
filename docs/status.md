@@ -58,13 +58,17 @@
 
 - **基线 / 分支：** `main@b928174`；开发分支 `codex/shipping-hot-r1-5`（独立 PR，**未合并**）。
 - **依据：** 9/29 主方案 §4.8、§6 R1.5；ADR-008；`docs/intel-source-catalog.md`。
-- **本批已交付（foundation）：**
-  - 迁移 **015** `ops-weather-calendar-policy`（`weather_forecast`、`weather_impact`、`tropical_cyclone`、`ops_calendar_event`、`policy_record`、`policy_version`）。
-  - §4.8 规则引擎 `server/services/weather-impact-engine.ts` + 配置 `server/config/weather-impact-rules.ts`。
-  - **R1.5-2 / R1.5-3：** Vitest **6/6**（每条规则 hit/miss；仅 `potential` / `system`）。
-  - **R1.5-4：** **11** 条有来源引用的历史封港样本 `server/data/weather-calibration/port-closure-replay-events.ts`；回放 **≥80%** 门禁测试 **PASS**（`weather-calibration-replay.test.ts`）。
-- **仍 **NOT_RUN / 待续**（同一 PR 或后续 commit）：** R1.5-1 八港 7 天 UI+Runtime 持久化、Open-Meteo 陆地降水/能见度扩展、JMA 台风 job、官方预警信源扩展（MY/PH/VN/CN 等保持关闭/夹具）、CN-H01 年历、`ops_calendar_event` 大促生成与日历图层、政策库 CRUD/UI/导出、港口页三块、R1.5-6 浏览器验收、S7 schema **15** 回归、本阶段 Neat Freak 完整收尾。
-- **结论：** **R1.5 = IN PROGRESS**（**非**阶段 PASS）。
+- **Foundation（PR #7，`codex/shipping-hot-r1-5`）：**
+  - 迁移 **015** + Vitest `015-ops-weather-calendar-policy.test.ts`（fresh **v15**、v14→v15 升级保留 `ports` 行、重复执行 idempotent）。
+  - §4.8 规则引擎：**阵风阈值统一为 m/s**（13.9 / 17.2 / 24.5）；输入 `windGustMs`；NaN/Infinity 视为缺失；边界与 **30 km/h 不误报** 单测。
+  - **R1.5-2：** **PARTIAL PASS** — 已实现 **WR-S01..WR-S05** 命中/不命中/边界（`weather-impact-engine.test.ts`）；**官方预警表行未实现**，整项 **不得**标 PASS。
+  - **R1.5-3：** **PARTIAL PASS** — 当前规则输出仅 `potential`/`system`（同上）；不含官方预警升级语义。
+  - **R1.5-4：** **BLOCKED** — 合格样本 **0/10**（`qualified-port-closure-replay.ts` 空）；旧候选迁至 `port-closure-replay-candidates.ts`（**blocked**，非“真实历史验收数据”）；回放要求观测时刻 ∈ 官方封港窗口 + 规则命中；含窗口不重叠反例测试。**未**为凑通过率调整阈值。
+  - **S7：** `EXPECTED_SCHEMA_VERSION=15` + 六张新表列入 `REQUIRED_TABLES`；**2026-10-09 回归 PASS**（`.tmp/s7-local-r1-review-4`，124 checks / 0 FAIL；fresh init **schema v15**；保留库指纹未变）。
+- **仍 NOT_RUN：** R1.5-1、R1.5-5、R1.5-7、R1.5-6 浏览器四页；R1.5 阶段完整门禁 G 全量 Vitest 计数与 `main` 基线对照（本批已跑 **61 files / 499 passed | 3 skipped**）、Neat Freak 完整路径（见下）。
+- **定向验证（2026-10-09 foundation 修复批）：** `pnpm build` + `pnpm typecheck` + `pnpm lint` + 全量 Vitest + `pnpm smoke:p0-native` + S7（上）；**未**申请合并。
+- **Neat Freak（轻量，2026-10-09）：** 代码 vs `status.md` / PR #7 矩阵一致；R1.5-4 无伪“历史验收”样本；`audit-inventory.sh` 仍不可用 → 工作区残留仅列报（未删）。**knowledge closed** for foundation scope；**not** R1.5 stage PASS。
+- **结论：** **R1.5 = IN PROGRESS / BLOCKED on R1.5-4**（**非**阶段 PASS）。
 
 ### R0 — 门禁 G 执行记录
 

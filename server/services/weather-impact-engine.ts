@@ -1,14 +1,26 @@
 import type { WeatherImpactRuleHit, WeatherRuleInputs } from "@shared/weather-impact"
 import { type WeatherImpactRuleWhen, weatherImpactRules } from "#/config/weather-impact-rules"
 
+function finiteInput(value: number | undefined): number | undefined {
+  if (value === undefined) return undefined
+  if (typeof value !== "number" || !Number.isFinite(value)) return undefined
+  return value
+}
+
 function evalWhen(when: WeatherImpactRuleWhen, inputs: WeatherRuleInputs): boolean {
   if (when.any?.length) return when.any.some(clause => evalWhen(clause, inputs))
-  if (when.windGustKmhGte !== undefined && (inputs.windGustKmh ?? -Infinity) < when.windGustKmhGte) return false
-  if (when.waveHeightMGte !== undefined && (inputs.waveHeightM ?? -Infinity) < when.waveHeightMGte) return false
-  if (when.visibilityMLt !== undefined && (inputs.visibilityM ?? Infinity) >= when.visibilityMLt) return false
-  if (when.precipitationMm24hGte !== undefined && (inputs.precipitationMm24h ?? -Infinity) < when.precipitationMm24hGte) return false
-  if (when.typhoonDistanceKmLte !== undefined && (inputs.typhoonDistanceKm ?? Infinity) > when.typhoonDistanceKmLte) return false
-  if (when.windGustKmhGte !== undefined || when.waveHeightMGte !== undefined || when.visibilityMLt !== undefined
+  const gustMs = finiteInput(inputs.windGustMs)
+  const waveM = finiteInput(inputs.waveHeightM)
+  const visibilityM = finiteInput(inputs.visibilityM)
+  const precip = finiteInput(inputs.precipitationMm24h)
+  const typhoonKm = finiteInput(inputs.typhoonDistanceKm)
+
+  if (when.windGustMsGte !== undefined && (gustMs === undefined || gustMs < when.windGustMsGte)) return false
+  if (when.waveHeightMGte !== undefined && (waveM === undefined || waveM < when.waveHeightMGte)) return false
+  if (when.visibilityMLt !== undefined && (visibilityM === undefined || visibilityM >= when.visibilityMLt)) return false
+  if (when.precipitationMm24hGte !== undefined && (precip === undefined || precip < when.precipitationMm24hGte)) return false
+  if (when.typhoonDistanceKmLte !== undefined && (typhoonKm === undefined || typhoonKm > when.typhoonDistanceKmLte)) return false
+  if (when.windGustMsGte !== undefined || when.waveHeightMGte !== undefined || when.visibilityMLt !== undefined
     || when.precipitationMm24hGte !== undefined || when.typhoonDistanceKmLte !== undefined) {
     return true
   }
@@ -18,12 +30,12 @@ function evalWhen(when: WeatherImpactRuleWhen, inputs: WeatherRuleInputs): boole
 function inputSnapshot(inputs: WeatherRuleInputs): Record<string, number | string | boolean> {
   const out: Record<string, number | string | boolean> = {}
   for (const [key, value] of Object.entries(inputs)) {
-    if (value !== undefined) out[key] = value
+    if (value !== undefined && typeof value === "number" && Number.isFinite(value)) out[key] = value
   }
   return out
 }
 
-/** Evaluate §4.8 rules — outputs are **potential** only (`status: potential`, provenance `system`). */
+/** Evaluate §4.8 shipping-port rules — outputs are **potential** only. Official-alert row: not implemented. */
 export function evaluateWeatherImpactRules(inputs: WeatherRuleInputs): WeatherImpactRuleHit[] {
   const hits: WeatherImpactRuleHit[] = []
   for (const rule of weatherImpactRules) {

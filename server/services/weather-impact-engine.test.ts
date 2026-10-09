@@ -1,40 +1,72 @@
 import { describe, expect, it } from "vitest"
+import { windGustKmhToMs } from "@shared/weather-units"
 import { assertNoImplementedWeatherImpact, evaluateWeatherImpactRules, listWeatherImpactRuleIds } from "./weather-impact-engine"
+import { PLAN_WIND_GUST_MS } from "#/config/weather-impact-rules"
 
-describe("weather impact rules (R1.5-2 / R1.5-3)", () => {
-  it("lists configured rule ids from plan §4.8 initial table", () => {
+describe("weather impact rules — shipping-port subset (R1.5-2 partial / R1.5-3)", () => {
+  it("lists WR-S01..WR-S05 only (official-alert table row not implemented)", () => {
     expect(listWeatherImpactRuleIds()).toEqual(["WR-S01", "WR-S02", "WR-S03", "WR-S04", "WR-S05"])
   })
 
-  it("wR-S01 hit and miss", () => {
-    const hit = evaluateWeatherImpactRules({ windGustKmh: 14 })
-    expect(hit.some(h => h.ruleId === "WR-S01" && h.status === "potential" && h.provenance === "system")).toBe(true)
-    const miss = evaluateWeatherImpactRules({ windGustKmh: 10 })
-    expect(miss.some(h => h.ruleId === "WR-S01")).toBe(false)
+  describe("wR-S01 wind gust m/s", () => {
+    it("hits at threshold and just above", () => {
+      expect(evaluateWeatherImpactRules({ windGustMs: PLAN_WIND_GUST_MS.wrS01 }).some(h => h.ruleId === "WR-S01")).toBe(true)
+      expect(evaluateWeatherImpactRules({ windGustMs: PLAN_WIND_GUST_MS.wrS01 + 0.01 }).some(h => h.ruleId === "WR-S01")).toBe(true)
+    })
+    it("misses just below threshold", () => {
+      expect(evaluateWeatherImpactRules({ windGustMs: PLAN_WIND_GUST_MS.wrS01 - 0.01 }).some(h => h.ruleId === "WR-S01")).toBe(false)
+    })
+    it("does not hit at 30 km/h (~8.33 m/s)", () => {
+      expect(evaluateWeatherImpactRules({ windGustMs: windGustKmhToMs(30) }).some(h => h.ruleId === "WR-S01")).toBe(false)
+    })
   })
 
-  it("wR-S02 hit via gust and miss below thresholds", () => {
-    expect(evaluateWeatherImpactRules({ windGustKmh: 18 }).some(h => h.ruleId === "WR-S02")).toBe(true)
-    expect(evaluateWeatherImpactRules({ waveHeightM: 2.6 }).some(h => h.ruleId === "WR-S02")).toBe(true)
-    expect(evaluateWeatherImpactRules({ windGustKmh: 16, waveHeightM: 2 }).some(h => h.ruleId === "WR-S02")).toBe(false)
+  describe("wR-S02", () => {
+    it("hits at gust and wave boundaries", () => {
+      expect(evaluateWeatherImpactRules({ windGustMs: PLAN_WIND_GUST_MS.wrS02 }).some(h => h.ruleId === "WR-S02")).toBe(true)
+      expect(evaluateWeatherImpactRules({ waveHeightM: 2.5 }).some(h => h.ruleId === "WR-S02")).toBe(true)
+    })
+    it("misses below both branches", () => {
+      expect(evaluateWeatherImpactRules({ windGustMs: PLAN_WIND_GUST_MS.wrS02 - 0.01, waveHeightM: 2.4 }).some(h => h.ruleId === "WR-S02")).toBe(false)
+    })
   })
 
-  it("wR-S03 typhoon proximity hit", () => {
-    const hit = evaluateWeatherImpactRules({ typhoonDistanceKm: 250 })
-    const row = hit.find(h => h.ruleId === "WR-S03")
-    expect(row?.severity).toBe("critical")
-    expect(row?.inputValues.typhoonDistanceKm).toBe(250)
+  describe("wR-S03", () => {
+    it("hits typhoon distance boundary", () => {
+      expect(evaluateWeatherImpactRules({ typhoonDistanceKm: 300 }).some(h => h.ruleId === "WR-S03")).toBe(true)
+      expect(evaluateWeatherImpactRules({ typhoonDistanceKm: 300.1 }).some(h => h.ruleId === "WR-S03")).toBe(false)
+    })
+    it("hits gust and wave branches", () => {
+      expect(evaluateWeatherImpactRules({ windGustMs: PLAN_WIND_GUST_MS.wrS03 }).some(h => h.ruleId === "WR-S03")).toBe(true)
+      expect(evaluateWeatherImpactRules({ waveHeightM: 4 }).some(h => h.ruleId === "WR-S03")).toBe(true)
+    })
   })
 
-  it("wR-S04 visibility and WR-S05 precipitation", () => {
-    expect(evaluateWeatherImpactRules({ visibilityM: 800 }).some(h => h.ruleId === "WR-S04")).toBe(true)
-    expect(evaluateWeatherImpactRules({ visibilityM: 1500 }).some(h => h.ruleId === "WR-S04")).toBe(false)
-    expect(evaluateWeatherImpactRules({ precipitationMm24h: 120 }).some(h => h.ruleId === "WR-S05")).toBe(true)
+  describe("wR-S04 visibility", () => {
+    it("hits below 1000 m and misses at/above", () => {
+      expect(evaluateWeatherImpactRules({ visibilityM: 999 }).some(h => h.ruleId === "WR-S04")).toBe(true)
+      expect(evaluateWeatherImpactRules({ visibilityM: 1000 }).some(h => h.ruleId === "WR-S04")).toBe(false)
+    })
   })
 
-  it("never produces implemented status (R1.5-3)", () => {
+  describe("wR-S05 precipitation", () => {
+    it("hits at 100 mm and misses below", () => {
+      expect(evaluateWeatherImpactRules({ precipitationMm24h: 100 }).some(h => h.ruleId === "WR-S05")).toBe(true)
+      expect(evaluateWeatherImpactRules({ precipitationMm24h: 99.9 }).some(h => h.ruleId === "WR-S05")).toBe(false)
+    })
+  })
+
+  describe("invalid numeric inputs", () => {
+    it("treats NaN/Infinity as missing (no false hit)", () => {
+      expect(evaluateWeatherImpactRules({ windGustMs: Number.NaN }).length).toBe(0)
+      expect(evaluateWeatherImpactRules({ windGustMs: Number.POSITIVE_INFINITY }).length).toBe(0)
+      expect(evaluateWeatherImpactRules({ waveHeightM: Number.NaN, visibilityM: Number.NaN }).length).toBe(0)
+    })
+  })
+
+  it("r1.5-3: configured rules only emit potential status", () => {
     const hits = evaluateWeatherImpactRules({
-      windGustKmh: 30,
+      windGustMs: 30,
       waveHeightM: 5,
       typhoonDistanceKm: 100,
       visibilityM: 500,
@@ -42,6 +74,6 @@ describe("weather impact rules (R1.5-2 / R1.5-3)", () => {
     })
     expect(hits.length).toBeGreaterThan(0)
     expect(() => assertNoImplementedWeatherImpact(hits)).not.toThrow()
-    expect(hits.every(h => h.status === "potential")).toBe(true)
+    expect(hits.every(h => h.status === "potential" && h.provenance === "system")).toBe(true)
   })
 })

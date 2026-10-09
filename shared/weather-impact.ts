@@ -15,12 +15,35 @@ export interface WeatherImpactRuleHit {
   summaryZh: string
 }
 
+/** Canonical rule inputs — wind gust in m/s (plan §4.8). */
 export interface WeatherRuleInputs {
-  windGustKmh?: number
+  windGustMs?: number
   waveHeightM?: number
   visibilityM?: number
   precipitationMm24h?: number
   typhoonDistanceKm?: number
-  hasOfficialAlert?: boolean
-  officialAlertSeverity?: Severity
+}
+
+export interface WeatherInputProvenance {
+  source: string
+  unit: string
+  location: string
+  referencedAtUtc: string
+}
+
+export interface OfficialClosureProvenance {
+  source: string
+  locator?: string
+}
+
+/** R1.5-4: only rows with full closure + input provenance may enter qualified replay set. */
+export interface QualifiedPortClosureReplayEvent {
+  id: string
+  portUnlocode: string
+  closureStartUtc: string
+  closureEndUtc: string
+  observationAtUtc: string
+  inputs: WeatherRuleInputs
+  inputProvenance: WeatherInputProvenance
+  closureProvenance: OfficialClosureProvenance
 }

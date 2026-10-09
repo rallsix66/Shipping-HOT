@@ -38,7 +38,7 @@ const SEED_ENTRY = join(ROOT, "scripts", "s7-local-seed.ts")
 const PORT = Number(process.env.E2E_S7_PORT ?? "4477")
 const BASE = (process.env.E2E_BASE_URL ?? `http://127.0.0.1:${PORT}`).replace(/\/$/, "")
 const DEBUG_PORT = Number(process.env.E2E_DEBUG_PORT ?? "9345")
-const EXPECTED_SCHEMA_VERSION = 14
+const EXPECTED_SCHEMA_VERSION = 15
 
 const REQUIRED_TABLES = [
   "app_metadata",
@@ -54,6 +54,12 @@ const REQUIRED_TABLES = [
   "feed_articles",
   "article_versions",
   "article_blocks",
+  "weather_forecast",
+  "weather_impact",
+  "tropical_cyclone",
+  "ops_calendar_event",
+  "policy_record",
+  "policy_version",
 ]
 
 /** Retained (never-seeded, never-written) databases this run must not touch. */

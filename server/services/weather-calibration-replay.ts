@@ -1,29 +1,54 @@
-import { portClosureReplayEvents } from "#/data/weather-calibration/port-closure-replay-events"
+import type { QualifiedPortClosureReplayEvent } from "@shared/weather-impact"
+import {
+  R1_5_4_REQUIRED_QUALIFIED_SAMPLES,
+  qualifiedPortClosureReplayEvents,
+} from "#/data/weather-calibration/qualified-port-closure-replay"
 import { evaluateWeatherImpactRules } from "#/services/weather-impact-engine"
 
-export interface ReplayHitResult {
-  eventId: string
-  portUnlocode: string
-  hit: boolean
-  topRuleId?: string
-  evidence: string
+export interface R15_4CalibrationStatus {
+  status: "blocked" | "ready"
+  qualifiedCount: number
+  requiredCount: number
+  reason?: string
 }
 
-/** True when peak inputs would trigger at least one high/medium port shipping rule during the cited closure window. */
-export function replayPortClosureEvent(event: typeof portClosureReplayEvents[number]): ReplayHitResult {
-  const hits = evaluateWeatherImpactRules(event.peakInputs)
-  const portRules = hits.filter(h => h.object === "shipping_port" && (h.severity === "critical" || h.severity === "warning"))
-  return {
-    eventId: event.id,
-    portUnlocode: event.portUnlocode,
-    hit: portRules.length > 0,
-    topRuleId: portRules[0]?.ruleId,
-    evidence: event.evidence,
+export function observationWithinClosureWindow(
+  observationAtUtc: string,
+  closureStartUtc: string,
+  closureEndUtc: string,
+): boolean {
+  const t = Date.parse(observationAtUtc)
+  const start = Date.parse(closureStartUtc)
+  const end = Date.parse(closureEndUtc)
+  if (!Number.isFinite(t) || !Number.isFinite(start) || !Number.isFinite(end)) return false
+  return t >= start && t <= end
+}
+
+/** Calibration hit: observation overlaps official closure **and** shipping-port rules fire at that instant. */
+export function replayQualifiedPortClosureEvent(event: QualifiedPortClosureReplayEvent): boolean {
+  if (!observationWithinClosureWindow(event.observationAtUtc, event.closureStartUtc, event.closureEndUtc)) {
+    return false
   }
+  const hits = evaluateWeatherImpactRules(event.inputs)
+  return hits.some(h => h.object === "shipping_port" && (h.severity === "critical" || h.severity === "warning" || h.severity === "watch"))
 }
 
-export function replayAllPortClosureEvents(): { results: ReplayHitResult[], hitRate: number } {
-  const results = portClosureReplayEvents.map(replayPortClosureEvent)
-  const hitRate = results.filter(r => r.hit).length / results.length
-  return { results, hitRate }
+export function getR15_4CalibrationStatus(): R15_4CalibrationStatus {
+  const qualifiedCount = qualifiedPortClosureReplayEvents.length
+  if (qualifiedCount < R1_5_4_REQUIRED_QUALIFIED_SAMPLES) {
+    return {
+      status: "blocked",
+      qualifiedCount,
+      requiredCount: R1_5_4_REQUIRED_QUALIFIED_SAMPLES,
+      reason: `Need ${R1_5_4_REQUIRED_QUALIFIED_SAMPLES} independently verified samples with official closure locator and traceable inputs; have ${qualifiedCount}.`,
+    }
+  }
+  return { status: "ready", qualifiedCount, requiredCount: R1_5_4_REQUIRED_QUALIFIED_SAMPLES }
+}
+
+export function replayAllQualifiedPortClosureEvents(): { hitRate: number, hits: number, total: number } {
+  const total = qualifiedPortClosureReplayEvents.length
+  if (total === 0) return { hitRate: 0, hits: 0, total: 0 }
+  const hits = qualifiedPortClosureReplayEvents.filter(replayQualifiedPortClosureEvent).length
+  return { hitRate: hits / total, hits, total }
 }
