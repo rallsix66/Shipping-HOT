@@ -411,6 +411,7 @@ async function main() {
     seededAt: NOW.toISOString(),
     expectations: {
       portId: S7.port,
+      portSecondaryId: S7.portSecondary,
       portUnlocode: "CNSHK",
       watchedPortId: S7.port,
       weatherFeedId: S7.feedWeather,

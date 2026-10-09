@@ -1195,8 +1195,6 @@ export function SettingsPage() {
   const { data: translationSecret, isLoading: translationSecretLoading, refetch: refetchTranslationSecret } = useTranslationSecret()
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [refreshInterval, setRefreshInterval] = useState(15)
-  const [anchoredHours, setAnchoredHours] = useState(2)
-  const [delayMinutes, setDelayMinutes] = useState(60)
   const [retentionDays, setRetentionDays] = useState(30)
   const [congestionLevel, setCongestionLevel] = useState("high")
   const [translationEnabled, setTranslationEnabled] = useState(defaultTranslationSettings.enabled)
@@ -1210,8 +1208,6 @@ export function SettingsPage() {
   useEffect(() => {
     if (data) {
       setRefreshInterval(data.settings.refreshInterval)
-      setAnchoredHours(data.settings.eventThresholds.anchoredHours)
-      setDelayMinutes(data.settings.eventThresholds.delayMinutes)
       setRetentionDays(data.settings.retentionDays)
       setCongestionLevel(data.settings.eventThresholds.congestionLevel)
       const translation = data.settings.translation ?? defaultTranslationSettings
@@ -1234,7 +1230,11 @@ export function SettingsPage() {
         body: {
           refreshInterval,
           retentionDays,
-          eventThresholds: { anchoredHours, delayMinutes, congestionLevel },
+          eventThresholds: {
+            anchoredHours: data.settings.eventThresholds.anchoredHours,
+            delayMinutes: data.settings.eventThresholds.delayMinutes,
+            congestionLevel,
+          },
           translation: {
             enabled: translationEnabled,
             providerId: "deepseek",
@@ -1309,7 +1309,7 @@ export function SettingsPage() {
   const budgetForDisplay = translationStatus?.monthlyBudget ?? (Number.isFinite(parsedBudget) ? parsedBudget : currentTranslation.monthlyBudget)
   return (
     <ShippingShell title="设置">
-      <SecHead eyebrow="本地配置" title="设置" description="配置刷新间隔和确定性的事件阈值。船舶与港口的关注状态单独保存。" />
+      <SecHead eyebrow="本地配置" title="设置" description="配置刷新间隔、港口拥堵事件阈值与数据保留。港口关注在港口列表/详情中单独保存。" />
       <div className="glass-panel max-w-2xl p-6">
         <label className="setting-row">
           <span>
@@ -1317,20 +1317,6 @@ export function SettingsPage() {
             <small>本地数据刷新间隔（分钟）</small>
           </span>
           <input className="setting-input" value={refreshInterval} onChange={e => setRefreshInterval(Number(e.target.value))} type="number" min="1" />
-        </label>
-        <label className="setting-row">
-          <span>
-            <strong>锚泊告警阈值</strong>
-            <small>锚泊多少小时后生成事件</small>
-          </span>
-          <input className="setting-input" value={anchoredHours} onChange={e => setAnchoredHours(Number(e.target.value))} type="number" min="1" />
-        </label>
-        <label className="setting-row">
-          <span>
-            <strong>ETA 延误阈值</strong>
-            <small>航次延误多少分钟后升级提醒</small>
-          </span>
-          <input className="setting-input" value={delayMinutes} onChange={e => setDelayMinutes(Number(e.target.value))} type="number" min="1" />
         </label>
         <label className="setting-row">
           <span>

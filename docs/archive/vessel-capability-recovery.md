@@ -4,8 +4,9 @@ R1 (ADR-006) retired vessel search/watch, AIS tracking, and voyage/ETA from the 
 
 ## Git restore point
 
-- **Tag (planned / branch workflow):** `pre-r1-vessel-removal` — checkout or diff this tag against `codex/shipping-hot-r1-retire-vessel` to recover deleted source files.
+- **Tag:** `pre-r1-vessel-removal` @ `8609cb5` (on origin) — checkout or diff against `codex/shipping-hot-r1-retire-vessel` to recover deleted source files.
 - **Migration that archives DB tables:** `server/database/migrations/014-retire-vessel-voyage.ts` (schema **v14**).
+- **Safe migration replay on a copy:** `scripts/r1-migration-copy-test.ts` with `scripts/r1-migration-copy-guard.ts` — only accepts databases under `<repo>/.tmp/**`; never opens the retained `.data/shipping-hot-v3.sqlite3` in place.
 
 ## Environment variables (no longer read by product code after R1)
 

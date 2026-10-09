@@ -28,18 +28,18 @@
 ## Shipping Risk Intelligence — R1 Retire Vessel / AIS / Voyage — 2026-10-09
 
 - **阶段 / 验收 ID：** R1 / R1-1–R1-6（`docs/plans/shipping-hot-risk-intelligence-2026-09-29.md` §6 R1）。
-- **分支：** `codex/shipping-hot-r1-retire-vessel`（自 `main@8609cb5`）；**PR 待开、未合并**。
+- **分支 / PR：** `codex/shipping-hot-r1-retire-vessel` → [PR #5](https://github.com/rallsix66/Shipping-HOT/pull/5)（自 `main@8609cb5`）；**未合并**。
 - **标签：** `pre-r1-vessel-removal` @ `8609cb5` 已推送 origin（仅标签，未推 main）。
 - **范围：** ADR-006 执行——迁移 014 归档表、删除 vessel/AIS/voyage 代码与路由、port-only `POST /api/shipping/watch`、S7 夹具/验收改写、恢复文档 `docs/archive/vessel-capability-recovery.md`。
 - **验收证据：**
   - **R1-1 残留 grep：** `src/` + `server/` 执行 `rg -i "aisstream|vesselapi|gfw|voyage|watchlist"`（排除 `server/database/migrations/**`）→ **0 行**；允许例外：`server/database/migrations/**`、`docs/archive/vessel-capability-recovery.md` → **PASS**（2026-10-09）。
-  - **R1-2 门禁 G：** `pnpm install --frozen-lockfile`、`pnpm build`、`pnpm typecheck`、`pnpm lint`、`.tmp/` 下 `pnpm exec vitest run -c vitest.config.ts` → **50 files / 422 tests PASS**（2026-10-09）；`main@8609cb5` 基线 **76 files / 824 tests**；减少 **402** 条，与删除的 **25** 个 `*.test.ts` 文件一致（见 PR 正文清单）。
-  - **R1-3 迁移 014：** 保留库 `.data/shipping-hot-v3.sqlite3` **只读复制**到 `.tmp/r1-migration/.data/`，`node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/r1-migration-copy-test.ts .tmp/r1-migration` 连续两次 → schema **14**，九张 `_retired_*` 表（见 PR）；原库未打开写入 → **PASS**。
-  - **R1-4 浏览器 / S7：** 生产构建 + 隔离目录 S7：`node scripts/e2e-s7-integrated.mjs` → **108 checks / 0 FAIL**（Flow A 8 / B 22 / C 27；`/vessels`、`/voyages` 404、导航无死链；证据 `.tmp/s7-local/s7-integrated-evidence.json`）→ **PASS**。
+  - **R1-2 门禁 G（PR #5 审查修复后，2026-10-09）：** `pnpm install --frozen-lockfile`、`pnpm build`、`pnpm typecheck`、`pnpm lint`、`.tmp/` 下 `pnpm exec vitest run -c vitest.config.ts` → **54 files / 431 tests PASS**；`pnpm smoke:p0-native` → **PASS**（合成 Real-lineage 港口 + Mock 港口 decoy 隔离，跨进程关注状态保留）。基线 `main@8609cb5`：**76 files / 824 tests**（**−393** 条）。**永久删除 25** 个船舶/AIS/航次专属 `*.test.ts`；**恢复/新增 4** 个：`server/shipping-store.test.ts`（日历 reconcile）、`server/shipping-store.read-only.test.ts`（Feed 只读边界）、`server/runtime/bootstrap.test.ts`（Runtime 单例）、`scripts/r1-migration-copy-guard.test.ts`（迁移副本路径保护）。净 **−22** 个测试文件（76→54），不要求机械恢复到 824 条。
+  - **R1-3 迁移 014：** `scripts/r1-migration-copy-test.ts` 在打开 DB 前经 `resolveAllowedCopyDatabasePath` 拒绝 repo 根、`.tmp` 外与保留库硬链接；保留库**只读复制**到 `.tmp/r1-migration/.data/` 后连续两次迁移 → schema **14**、九张 `_retired_*` 表、行数与迁移前一致（示例：vessels 3、metadata 48 等）；`scripts/r1-migration-copy-guard.test.ts` **4/4** → **PASS**。
+  - **R1-4 浏览器 / S7：** `node scripts/e2e-s7-integrated.mjs`（`E2E_S7_DIR=.tmp/s7-local-r1-review-gate`）→ **124 checks / 0 FAIL**（Flow A **16** / B **22** / C **35**）：退役列表/详情 **HTTP 200（SPA shell）+ 浏览器「页面不存在」**；退役 vessel position/voyage API **404**；设置页无锚泊/ETA/AISStream 文案；港口 `POST /api/shipping/watch` + 首页往返后关注持久；证据 `.tmp/s7-local-r1-review-gate/s7-integrated-evidence.json` → **PASS**（2026-10-09 门禁复跑）。
   - **R1-5 启动日志：** 隔离 cwd 启动 `dist/output/server/index.mjs`，日志仅 `runtime started { jobs: 5 }`，**无** `ais-tracking` / `voyage-sync` / `ais-area` 等已下线任务名 → **PASS**。
   - **R1-6 标签与恢复抽查：** origin 标签 `pre-r1-vessel-removal` 存在；`git worktree add .tmp/pre-r1-verify pre-r1-vessel-removal` + `pnpm exec vitest run server/providers/ais/index.test.ts` → **4/4 PASS**；worktree 已删除 → **PASS**。
-  - **Neat Freak closeout：** **pending**——本机无 Git Bash，`scripts/audit-inventory.sh` 未执行（不得标 PASS）。
-- **结论：** **R1 = PASS（Neat Freak pending：audit-inventory.sh）**；**未合并**；**未开始 R1.5**。
+  - **Neat Freak closeout：** **pending**——仓库内无 `scripts/audit-inventory.sh`（Git `bash.exe` 存在但脚本缺失），未执行真实 Neat Freak 机械盘点（不得标 PASS）。
+- **结论：** **R1 = PASS（Neat Freak pending：仓库无 `scripts/audit-inventory.sh`）**；**未合并**；**未开始 R1.5**。
 
 ### R0 — 门禁 G 执行记录
 

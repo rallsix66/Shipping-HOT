@@ -564,13 +564,32 @@ async function main() {
     pushA(text.includes("HOT") || text.includes("热点") || text.includes("事件"), "home renders the HOT console surface")
     pushA(await navHasRetiredLinks() === false, "home navigation has no vessel or voyage links")
 
+    const retiredHttpStatus = async path => evaluate(`fetch(${JSON.stringify(`${BASE}${path}`)}).then(r => r.status)`, true)
+
     await navigateBare("/vessels")
     text = await bodyText()
-    pushA(text.includes("页面不存在"), "/vessels renders the not-found page in the browser")
+    pushA((await retiredHttpStatus("/vessels")) === 200, "GET /vessels HTTP 200 (SPA shell; client router shows not-found)")
+    pushA(text.includes("页面不存在"), "/vessels list renders the not-found page in the browser")
 
     await navigateBare("/voyages")
     text = await bodyText()
-    pushA(text.includes("页面不存在"), "/voyages renders the not-found page in the browser")
+    pushA((await retiredHttpStatus("/voyages")) === 200, "GET /voyages HTTP 200 (SPA shell; client router shows not-found)")
+    pushA(text.includes("页面不存在"), "/voyages list renders the not-found page in the browser")
+
+    await navigateBare("/vessels/s7-retired-example")
+    text = await bodyText()
+    pushA((await retiredHttpStatus("/vessels/s7-retired-example")) === 200, "GET /vessels/$id HTTP 200 (SPA shell; client router shows not-found)")
+    pushA(text.includes("页面不存在"), "/vessels/$id renders the not-found page in the browser")
+
+    await navigateBare("/voyages/s7-retired-example")
+    text = await bodyText()
+    pushA((await retiredHttpStatus("/voyages/s7-retired-example")) === 200, "GET /voyages/$id HTTP 200 (SPA shell; client router shows not-found)")
+    pushA(text.includes("页面不存在"), "/voyages/$id renders the not-found page in the browser")
+
+    const positionApi = await api(`/api/shipping/vessels/s7-retired-example/position`)
+    pushA(positionApi.status === 404, `vessel position API removed (got ${positionApi.status})`)
+    const voyageApi = await api(`/api/shipping/vessels/s7-retired-example/voyage`)
+    pushA(voyageApi.status === 404, `vessel voyage API removed (got ${voyageApi.status})`)
 
     await navigate("/ports")
     pushA(await navHasRetiredLinks() === false, "ports navigation has no vessel or voyage links")
@@ -666,6 +685,23 @@ async function main() {
     pushC(text.includes("蛇口") && text.includes("盐田"), "port list renders both seeded ports")
     pushC(text.includes("CNSHK") && text.includes("CNYTN"), "port list keeps the UN/LOCODE identities")
     pushC(!text.includes("MOCK DECOY PORT"), "port list shows no mock-source port")
+
+    const watchApiStatus = await evaluate(`fetch('/api/shipping/watch', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: 'port', id: ${JSON.stringify(expectations.portSecondaryId)} }) }).then(r => r.status)`, true)
+    pushC(watchApiStatus === 200, `port watch API accepts follow (${watchApiStatus})`)
+    const snapshotAfterWatch = await api("/api/shipping")
+    const secondaryWatched = (snapshotAfterWatch.body?.ports ?? []).find(port => port.id === expectations.portSecondaryId)?.isWatched === true
+    pushC(snapshotAfterWatch.status === 200 && secondaryWatched, "port follow persisted to SQLite/API after watch POST")
+    await navigate("/ports", { reload: true })
+    const watchedInList = await waitFor(async () => evaluate(`(() => {
+      const row = [...document.querySelectorAll('.vt-row')].find(node => node.textContent.includes('盐田'))
+      return row ? row.textContent.includes('已关注') : false
+    })()`), 20000)
+    pushC(Boolean(watchedInList), "port list renders 已关注 after API follow")
+    await navigate("/")
+    await navigate("/ports", { reload: true })
+    const snapshotAfterRefresh = await api("/api/shipping")
+    const secondaryStillWatched = (snapshotAfterRefresh.body?.ports ?? []).find(port => port.id === expectations.portSecondaryId)?.isWatched === true
+    pushC(snapshotAfterRefresh.status === 200 && secondaryStillWatched, "port follow state survives a home round-trip refresh")
 
     await navigate(`/ports/${expectations.portId}`)
     text = await bodyText()
@@ -777,6 +813,12 @@ async function main() {
       const routeText = await bodyText()
       pushC(routeText.length > 0 && !routeText.includes("MOCK DECOY"), `${route} loads with real-data-only content`)
     }
+    await navigate("/settings")
+    text = await bodyText()
+    pushC(!text.includes("锚泊告警阈值"), "settings no longer exposes anchored-hours controls")
+    pushC(!text.includes("ETA 延误阈值"), "settings no longer exposes voyage delay controls")
+    pushC(!text.includes("AISStream"), "settings footer no longer advertises retired AIS providers")
+    pushC(text.includes("拥堵阈值"), "settings still exposes port congestion threshold")
     await navigateBare("/voyages")
     pushC((await bodyText()).includes("页面不存在"), "/voyages stays retired after visiting settings")
     await navigateBare("/vessels")
