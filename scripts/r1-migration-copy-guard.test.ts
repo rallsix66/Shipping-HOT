@@ -10,6 +10,7 @@ import {
 import { join } from "node:path"
 import process from "node:process"
 import { afterEach, beforeAll, describe, expect, it } from "vitest"
+import type { TestContext } from "vitest"
 import {
   R1MigrationCopyPathError,
   R1_MIGRATION_DB_RELATIVE,
@@ -20,7 +21,6 @@ import {
 
 const realRepoRoot = shippingRepoRoot()
 
-/** Exclusive fixture tree under real repo `.tmp` only; never touches retained DB or fixed paths outside. */
 interface FakeRepoFixture {
   root: string
   fakeRepo: string
@@ -28,20 +28,51 @@ interface FakeRepoFixture {
   isolatedRoot: string
 }
 
-let symlinkProbe: "supported" | "unsupported" = "unsupported"
+interface LinkProbe {
+  ok: boolean
+  error: string
+}
 
-beforeAll(() => {
-  const probeParent = mkdtempSync(join(realRepoRoot, ".tmp", "r1-guard-probe-"))
+let fileSymlinkProbe: LinkProbe = { ok: false, error: "not probed" }
+let dirLinkProbe: LinkProbe = { ok: false, error: "not probed" }
+
+function probeFileSymlink(): LinkProbe {
+  const probeParent = mkdtempSync(join(realRepoRoot, ".tmp", "r1-guard-file-probe-"))
   try {
     const target = join(probeParent, "target")
     writeFileSync(target, "probe")
     symlinkSync(target, join(probeParent, "link"))
-    symlinkProbe = "supported"
-  } catch {
-    symlinkProbe = "unsupported"
+    return { ok: true, error: "" }
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : String(error) }
   } finally {
     if (existsSync(probeParent)) rmSync(probeParent, { recursive: true, force: true })
   }
+}
+
+function probeDirLink(): LinkProbe {
+  const probeParent = mkdtempSync(join(realRepoRoot, ".tmp", "r1-guard-dir-probe-"))
+  try {
+    const targetDir = join(probeParent, "target-dir")
+    mkdirSync(targetDir)
+    writeFileSync(join(targetDir, "inside"), "probe")
+    const linkPath = join(probeParent, "dir-link")
+    if (process.platform === "win32") {
+      symlinkSync(targetDir, linkPath, "junction")
+    } else {
+      symlinkSync(targetDir, linkPath, "dir")
+    }
+    return { ok: true, error: "" }
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : String(error) }
+  } finally {
+    if (existsSync(probeParent)) rmSync(probeParent, { recursive: true, force: true })
+  }
+}
+
+beforeAll(() => {
+  fileSymlinkProbe = probeFileSymlink()
+  dirLinkProbe = probeDirLink()
 })
 
 function createFakeRepoFixture(): FakeRepoFixture {
@@ -66,10 +97,6 @@ function touchCopyDb(copyDir: string, body = "copy-db") {
 
 const activeFixtures: FakeRepoFixture[] = []
 
-function itSymlink(name: string, fn: () => void) {
-  return (symlinkProbe === "supported" ? it : it.skip)(name, fn)
-}
-
 afterEach(() => {
   while (activeFixtures.length) {
     const fixture = activeFixtures.pop()
@@ -82,7 +109,32 @@ function track(fixture: FakeRepoFixture) {
   return fixture
 }
 
+function skipUnlessFileSymlink(context: TestContext) {
+  if (!fileSymlinkProbe.ok) context.skip(`file symlink unsupported: ${fileSymlinkProbe.error}`)
+}
+
+function skipUnlessDirLink(context: TestContext) {
+  if (!dirLinkProbe.ok) context.skip(`directory link unsupported: ${dirLinkProbe.error}`)
+}
+
+function expectRetainedLinkRejection(run: () => unknown) {
+  let thrown: unknown
+  try {
+    run()
+  } catch (error) {
+    thrown = error
+  }
+  expect(thrown).toBeInstanceOf(R1MigrationCopyPathError)
+  const message = (thrown as R1MigrationCopyPathError).message
+  expect(message.includes("hard link") || message.includes("retained production database")).toBe(true)
+}
+
 describe("r1 migration copy path guard", () => {
+  it("records link probe results for the test run", () => {
+    expect(fileSymlinkProbe.ok || fileSymlinkProbe.error.length > 0).toBe(true)
+    expect(dirLinkProbe.ok || dirLinkProbe.error.length > 0).toBe(true)
+  })
+
   it("accepts an isolated copy under fake repo .tmp", () => {
     const fx = track(createFakeRepoFixture())
     const copyDir = join(fx.isolatedRoot, "allowed-copy")
@@ -103,14 +155,14 @@ describe("r1 migration copy path guard", () => {
     const outsideTmp = join(fx.fakeRepo, "outside-tmp")
     mkdirSync(outsideTmp, { recursive: true })
     touchCopyDb(outsideTmp)
-    expect(() => resolveAllowedCopyDatabasePath(outsideTmp, fx.fakeRepo)).toThrow(/outside/)
+    expect(() => resolveAllowedCopyDatabasePath(outsideTmp, fx.fakeRepo)).toThrow(R1MigrationCopyPathError)
   })
 
   it("rejects a missing database file", () => {
     const fx = track(createFakeRepoFixture())
     const emptyDir = join(fx.isolatedRoot, "no-db")
     mkdirSync(emptyDir, { recursive: true })
-    expect(() => resolveAllowedCopyDatabasePath(emptyDir, fx.fakeRepo)).toThrow(/missing database copy/)
+    expect(() => resolveAllowedCopyDatabasePath(emptyDir, fx.fakeRepo)).toThrow(R1MigrationCopyPathError)
   })
 
   it("rejects a hard link to the retained database file", () => {
@@ -119,17 +171,18 @@ describe("r1 migration copy path guard", () => {
     mkdirSync(join(copyDir, ".data"), { recursive: true })
     const dbAtCopy = join(copyDir, R1_MIGRATION_DB_RELATIVE)
     linkSync(fx.retainedDb, dbAtCopy)
-    expect(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo)).toThrow(/hard link/)
+    expectRetainedLinkRejection(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo))
   })
 
   it("rejects a directory at the database path", () => {
     const fx = track(createFakeRepoFixture())
     const copyDir = join(fx.isolatedRoot, "dir-as-db")
     mkdirSync(join(copyDir, ".data", "shipping-hot-v3.sqlite3"), { recursive: true })
-    expect(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo)).toThrow(/directory/)
+    expect(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo)).toThrow(R1MigrationCopyPathError)
   })
 
-  itSymlink("rejects when database realpath escapes .tmp via symlink", () => {
+  it("rejects when database realpath escapes .tmp via file symlink", (context) => {
+    skipUnlessFileSymlink(context)
     const fx = track(createFakeRepoFixture())
     const outside = join(fx.root, "outside-isolated")
     mkdirSync(outside, { recursive: true })
@@ -137,26 +190,40 @@ describe("r1 migration copy path guard", () => {
     const copyDir = join(fx.isolatedRoot, "symlink-out")
     mkdirSync(join(copyDir, ".data"), { recursive: true })
     symlinkSync(outsideDb, join(copyDir, R1_MIGRATION_DB_RELATIVE))
-    expect(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo)).toThrow(/escapes/)
+    expect(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo)).toThrow(R1MigrationCopyPathError)
   })
 
-  itSymlink("rejects symlink directly to retained database file", () => {
+  it("rejects file symlink directly to retained database file", (context) => {
+    skipUnlessFileSymlink(context)
     const fx = track(createFakeRepoFixture())
     const copyDir = join(fx.isolatedRoot, "symlink-retained")
     mkdirSync(join(copyDir, ".data"), { recursive: true })
     symlinkSync(fx.retainedDb, join(copyDir, R1_MIGRATION_DB_RELATIVE))
-    expect(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo)).toThrow(/retained production database/)
+    expectRetainedLinkRejection(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo))
   })
 
-  itSymlink("rejects copy directory symlink that resolves outside .tmp", () => {
+  it("rejects copy directory directory-link that resolves outside .tmp", (context) => {
+    skipUnlessDirLink(context)
     const fx = track(createFakeRepoFixture())
     const outside = join(fx.root, "outside-copy-root")
     mkdirSync(outside, { recursive: true })
     touchCopyDb(outside)
     const linkDir = join(fx.isolatedRoot, "dir-link")
     mkdirSync(fx.isolatedRoot, { recursive: true })
-    symlinkSync(outside, linkDir, process.platform === "win32" ? "junction" : "dir")
-    expect(() => resolveAllowedCopyDatabasePath(linkDir, fx.fakeRepo)).toThrow(/outside/)
+    if (process.platform === "win32") symlinkSync(outside, linkDir, "junction")
+    else symlinkSync(outside, linkDir, "dir")
+    expect(() => resolveAllowedCopyDatabasePath(linkDir, fx.fakeRepo)).toThrow(R1MigrationCopyPathError)
+  })
+
+  it("rejects symlink to a hard link of the retained database (combo)", (context) => {
+    skipUnlessFileSymlink(context)
+    const fx = track(createFakeRepoFixture())
+    const hardLink = join(fx.isolatedRoot, "retained-hardlink")
+    linkSync(fx.retainedDb, hardLink)
+    const copyDir = join(fx.isolatedRoot, "symlink-hardlink-copy")
+    mkdirSync(join(copyDir, ".data"), { recursive: true })
+    symlinkSync(hardLink, join(copyDir, R1_MIGRATION_DB_RELATIVE))
+    expectRetainedLinkRejection(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo))
   })
 
   it("resolveDatabaseFileIdentity matches stat and realpath for a normal file", () => {

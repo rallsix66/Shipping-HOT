@@ -537,17 +537,22 @@ async function main() {
       await new Promise(resolve => setTimeout(resolve, 400))
     }
 
-    const navigateBare = async (path) => {
-      const loaded = cdp.once("Page.loadEventFired")
-      await cdp.send("Page.navigate", { url: `${BASE}${path}` })
-      await loaded
-      await new Promise(resolve => setTimeout(resolve, 400))
-    }
-
     const navHasRetiredLinks = async () => evaluate(`(() => {
       const hrefs = [...document.querySelectorAll('a[href]')].map(node => node.getAttribute('href') ?? '')
       return hrefs.some(href => href === '/vessels' || href.startsWith('/vessels/') || href === '/voyages' || href.startsWith('/voyages/'))
     })()`)
+
+    const retiredHttpStatus = async path => evaluate(`fetch(${JSON.stringify(`${BASE}${path}`)}).then(r => r.status)`, true)
+
+    const navigateRetiredClient = async (path) => {
+      await navigate("/")
+      await waitFor(async () => evaluate(`(() => {
+        window.history.pushState({}, '', ${JSON.stringify(path)})
+        window.dispatchEvent(new PopStateEvent('popstate', { state: history.state }))
+        return true
+      })()`), 5000)
+      await waitFor(async () => (await evaluate(`document.body.innerText`)).includes("页面不存在"), 15000)
+    }
 
     /* ------------------------------------------------------------- Flow A */
 
@@ -564,27 +569,25 @@ async function main() {
     pushA(text.includes("HOT") || text.includes("热点") || text.includes("事件"), "home renders the HOT console surface")
     pushA(await navHasRetiredLinks() === false, "home navigation has no vessel or voyage links")
 
-    const retiredHttpStatus = async path => evaluate(`fetch(${JSON.stringify(`${BASE}${path}`)}).then(r => r.status)`, true)
-
-    await navigateBare("/vessels")
+    pushA((await retiredHttpStatus("/vessels")) === 404, `GET /vessels direct HTTP 404 (got ${await retiredHttpStatus("/vessels")})`)
+    await navigateRetiredClient("/vessels")
     text = await bodyText()
-    pushA((await retiredHttpStatus("/vessels")) === 200, "GET /vessels HTTP 200 (SPA shell; client router shows not-found)")
-    pushA(text.includes("页面不存在"), "/vessels list renders the not-found page in the browser")
+    pushA(text.includes("页面不存在"), "/vessels list renders the not-found page in the browser (client router)")
 
-    await navigateBare("/voyages")
+    pushA((await retiredHttpStatus("/voyages")) === 404, `GET /voyages direct HTTP 404 (got ${await retiredHttpStatus("/voyages")})`)
+    await navigateRetiredClient("/voyages")
     text = await bodyText()
-    pushA((await retiredHttpStatus("/voyages")) === 200, "GET /voyages HTTP 200 (SPA shell; client router shows not-found)")
-    pushA(text.includes("页面不存在"), "/voyages list renders the not-found page in the browser")
+    pushA(text.includes("页面不存在"), "/voyages list renders the not-found page in the browser (client router)")
 
-    await navigateBare("/vessels/s7-retired-example")
+    pushA((await retiredHttpStatus("/vessels/s7-retired-example")) === 404, `GET /vessels/$id direct HTTP 404 (got ${await retiredHttpStatus("/vessels/s7-retired-example")})`)
+    await navigateRetiredClient("/vessels/s7-retired-example")
     text = await bodyText()
-    pushA((await retiredHttpStatus("/vessels/s7-retired-example")) === 200, "GET /vessels/$id HTTP 200 (SPA shell; client router shows not-found)")
-    pushA(text.includes("页面不存在"), "/vessels/$id renders the not-found page in the browser")
+    pushA(text.includes("页面不存在"), "/vessels/$id renders the not-found page in the browser (client router)")
 
-    await navigateBare("/voyages/s7-retired-example")
+    pushA((await retiredHttpStatus("/voyages/s7-retired-example")) === 404, `GET /voyages/$id direct HTTP 404 (got ${await retiredHttpStatus("/voyages/s7-retired-example")})`)
+    await navigateRetiredClient("/voyages/s7-retired-example")
     text = await bodyText()
-    pushA((await retiredHttpStatus("/voyages/s7-retired-example")) === 200, "GET /voyages/$id HTTP 200 (SPA shell; client router shows not-found)")
-    pushA(text.includes("页面不存在"), "/voyages/$id renders the not-found page in the browser")
+    pushA(text.includes("页面不存在"), "/voyages/$id renders the not-found page in the browser (client router)")
 
     const positionApi = await api(`/api/shipping/vessels/s7-retired-example/position`)
     pushA(positionApi.status === 404, `vessel position API removed (got ${positionApi.status})`)
@@ -819,9 +822,9 @@ async function main() {
     pushC(!text.includes("ETA 延误阈值"), "settings no longer exposes voyage delay controls")
     pushC(!text.includes("AISStream"), "settings footer no longer advertises retired AIS providers")
     pushC(text.includes("拥堵阈值"), "settings still exposes port congestion threshold")
-    await navigateBare("/voyages")
+    await navigateRetiredClient("/voyages")
     pushC((await bodyText()).includes("页面不存在"), "/voyages stays retired after visiting settings")
-    await navigateBare("/vessels")
+    await navigateRetiredClient("/vessels")
     pushC((await bodyText()).includes("页面不存在"), "/vessels stays retired after visiting settings")
 
     evidence.flows.push({ flow: "C", checks: flowC.length, failed: flowC.filter(item => !item.ok).length })

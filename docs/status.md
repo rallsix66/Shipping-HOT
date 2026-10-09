@@ -32,8 +32,8 @@
 - **标签：** `pre-r1-vessel-removal` @ `8609cb5` 已推送 origin（仅标签，未推 main）。
 - **范围：** ADR-006 执行——迁移 014 归档表、删除 vessel/AIS/voyage 代码与路由、port-only `POST /api/shipping/watch`、S7 夹具/验收改写、恢复文档 `docs/archive/vessel-capability-recovery.md`。
 - **验收证据：**
-  - **R1-1 残留 grep：** `src/` + `server/` 执行 `rg -i "aisstream|vesselapi|gfw|voyage|watchlist"`（排除 `server/database/migrations/**`）→ **0 行**；允许例外：`server/database/migrations/**`、`docs/archive/vessel-capability-recovery.md` → **PASS**（2026-10-09）。
-  - **R1-2 门禁 G（PR #5 复审修复，2026-10-09）：** `pnpm install --frozen-lockfile`、`pnpm build`、`pnpm typecheck`、`pnpm lint`、Vitest → **56 files / 465 passed | 3 skipped**（`scripts/r1-migration-copy-guard.test.ts` 符号链接用例在本机 **supported** 时全跑，否则 **3 skipped**）；`pnpm smoke:p0-native` → **PASS**。基线 `main@8609cb5`：**76 files / 824 tests**。**永久删除 25** 个船舶/AIS/航次专属 `*.test.ts`；**恢复/新增 6** 个有效测试文件（见下表）。净 **−20** 测试文件（76→56），**不以恢复 824 条为目标**。
+  - **R1-1 残留 grep（2026-10-09，PR #5 round-3）：** 命令与输出见 `.tmp/r1-1-grep-evidence.txt`。`src/` **零匹配**（rg exit 1）；`server/` 仅命中 R1 退役面允许文件（`retired-spa-routes*`、`shipping-store.read-only.test.ts` 反向断言）。机械复验：`test/r1-retired-surface.contract.test.ts` → **PASS**。
+  - **R1-2 门禁 G（PR #5 round-3，2026-10-09）：** `pnpm install --frozen-lockfile`、`pnpm build`、`pnpm typecheck`、`pnpm lint`、Vitest → **58 files / 475 passed | 3 skipped**；`pnpm smoke:p0-native` → **PASS**。基线 `main@8609cb5`：**76 files / 824 tests**。相对 main 的 `*.test.ts` 差异（`git diff 8609cb5..HEAD --name-status`）：**删除 21**、**新增 3**（`scripts/r1-migration-copy-guard.test.ts`、`server/middleware/retired-spa-routes.test.ts`、`test/r1-retired-surface.contract.test.ts`），其余为港口化 **修改**；现役合计 **58** 个测试文件，**不以恢复 824 条为目标**。
   - **R1-2b 删除测试 → 现役断言映射（main@8609cb5 → 本分支）：**
     - Readiness 现役 Job 集合 / 缺失·禁用 / 工具链 / 多源 Feed / Translation 不参与硬门禁 / 官方天气边界 → `server/services/v3-readiness.test.ts`（原 `v3-readiness.test.ts` 中船舶/AIS/航次/Vessel Search 用例**未**恢复）。
     - 日历跨重启迁移、来源隔离、DB 不可用拒绝写入 → `server/shipping-store.persistence.test.ts`（Mock 事件边界港口化；原 vessel 混合用例删除）。
