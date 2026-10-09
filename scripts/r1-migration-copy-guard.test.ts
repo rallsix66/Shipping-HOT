@@ -117,7 +117,7 @@ function skipUnlessDirLink(context: TestContext) {
   if (!dirLinkProbe.ok) context.skip(`directory link unsupported: ${dirLinkProbe.error}`)
 }
 
-function expectRetainedLinkRejection(run: () => unknown) {
+function expectGuardRejection(run: () => unknown, messagePart: string) {
   let thrown: unknown
   try {
     run()
@@ -125,14 +125,16 @@ function expectRetainedLinkRejection(run: () => unknown) {
     thrown = error
   }
   expect(thrown).toBeInstanceOf(R1MigrationCopyPathError)
-  const message = (thrown as R1MigrationCopyPathError).message
-  expect(message.includes("hard link") || message.includes("retained production database")).toBe(true)
+  expect((thrown as R1MigrationCopyPathError).message).toContain(messagePart)
 }
 
 describe("r1 migration copy path guard", () => {
   it("records link probe results for the test run", () => {
     expect(fileSymlinkProbe.ok || fileSymlinkProbe.error.length > 0).toBe(true)
     expect(dirLinkProbe.ok || dirLinkProbe.error.length > 0).toBe(true)
+    if (!fileSymlinkProbe.ok) {
+      expect(fileSymlinkProbe.error).toMatch(/EPERM|operation not permitted|privilege/i)
+    }
   })
 
   it("accepts an isolated copy under fake repo .tmp", () => {
@@ -171,7 +173,7 @@ describe("r1 migration copy path guard", () => {
     mkdirSync(join(copyDir, ".data"), { recursive: true })
     const dbAtCopy = join(copyDir, R1_MIGRATION_DB_RELATIVE)
     linkSync(fx.retainedDb, dbAtCopy)
-    expectRetainedLinkRejection(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo))
+    expectGuardRejection(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo), "hard link")
   })
 
   it("rejects a directory at the database path", () => {
@@ -190,7 +192,7 @@ describe("r1 migration copy path guard", () => {
     const copyDir = join(fx.isolatedRoot, "symlink-out")
     mkdirSync(join(copyDir, ".data"), { recursive: true })
     symlinkSync(outsideDb, join(copyDir, R1_MIGRATION_DB_RELATIVE))
-    expect(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo)).toThrow(R1MigrationCopyPathError)
+    expectGuardRejection(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo), "escapes .tmp")
   })
 
   it("rejects file symlink directly to retained database file", (context) => {
@@ -199,7 +201,7 @@ describe("r1 migration copy path guard", () => {
     const copyDir = join(fx.isolatedRoot, "symlink-retained")
     mkdirSync(join(copyDir, ".data"), { recursive: true })
     symlinkSync(fx.retainedDb, join(copyDir, R1_MIGRATION_DB_RELATIVE))
-    expectRetainedLinkRejection(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo))
+    expectGuardRejection(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo), "escapes .tmp")
   })
 
   it("rejects copy directory directory-link that resolves outside .tmp", (context) => {
@@ -223,7 +225,7 @@ describe("r1 migration copy path guard", () => {
     const copyDir = join(fx.isolatedRoot, "symlink-hardlink-copy")
     mkdirSync(join(copyDir, ".data"), { recursive: true })
     symlinkSync(hardLink, join(copyDir, R1_MIGRATION_DB_RELATIVE))
-    expectRetainedLinkRejection(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo))
+    expectGuardRejection(() => resolveAllowedCopyDatabasePath(copyDir, fx.fakeRepo), "hard link")
   })
 
   it("resolveDatabaseFileIdentity matches stat and realpath for a normal file", () => {

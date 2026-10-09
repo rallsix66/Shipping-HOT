@@ -8,13 +8,12 @@ const repoRoot = resolve(process.cwd())
 /** R1-1: same ripgrep contract as acceptance (do not split keywords to force zero). */
 const R1_1_RG_COMMAND = `rg -i "aisstream|vesselapi|gfw|voyage|watchlist" src server --glob "!server/database/migrations/**"`
 
-const R1_1_ALLOWED_PATH_SUFFIXES = [
-  "server/database/migrations/",
-  "docs/archive/vessel-capability-recovery.md",
+/** Mirrors docs/plans/r1-1-grep-exception-proposal.md (PROPOSED, not confirmed PASS). */
+const R1_1_PROPOSED_ALLOWLIST_SUFFIXES = [
   "server/middleware/retired-spa-routes.ts",
   "server/middleware/retired-spa-routes.test.ts",
   "server/shipping-store.read-only.test.ts",
-]
+] as const
 
 function normalizePath(file: string): string {
   return file.replace(/\\/g, "/")
@@ -38,9 +37,23 @@ describe("r1 retired surface contract", () => {
     const violations = lines.filter((line) => {
       const pathPart = line.split(":")[0] ?? line
       const normalized = normalizePath(pathPart)
-      return !R1_1_ALLOWED_PATH_SUFFIXES.some(suffix => normalized.includes(suffix))
+      return !R1_1_PROPOSED_ALLOWLIST_SUFFIXES.some(suffix => normalized.includes(suffix))
     })
-    expect(violations, `R1-1 grep violations:\n${violations.join("\n")}\ncommand: ${R1_1_RG_COMMAND}`).toEqual([])
+    expect(violations, `R1-1 proposed-allowlist violations:\n${violations.join("\n")}\ncommand: ${R1_1_RG_COMMAND}\nsee docs/plans/r1-1-grep-exception-proposal.md`).toEqual([])
+  })
+
+  it("src/ has zero R1-1 keyword matches (strict, no allowlist)", () => {
+    let output = ""
+    let exitCode = 0
+    try {
+      output = execSync(`rg -i "aisstream|vesselapi|gfw|voyage|watchlist" src`, { cwd: repoRoot, encoding: "utf8" })
+    } catch (error) {
+      const failed = error as { status?: number, stdout?: string }
+      exitCode = failed.status ?? 1
+      output = failed.stdout ?? ""
+    }
+    expect(exitCode).not.toBe(0)
+    expect(output.trim()).toBe("")
   })
 
   it("generated client route tree excludes vessel and voyage routes", () => {

@@ -32,7 +32,7 @@
 - **标签：** `pre-r1-vessel-removal` @ `8609cb5` 已推送 origin（仅标签，未推 main）。
 - **范围：** ADR-006 执行——迁移 014 归档表、删除 vessel/AIS/voyage 代码与路由、port-only `POST /api/shipping/watch`、S7 夹具/验收改写、恢复文档 `docs/archive/vessel-capability-recovery.md`。
 - **验收证据：**
-  - **R1-1 残留 grep（2026-10-09，PR #5 round-3）：** 命令与输出见 `.tmp/r1-1-grep-evidence.txt`。`src/` **零匹配**（rg exit 1）；`server/` 仅命中 R1 退役面允许文件（`retired-spa-routes*`、`shipping-store.read-only.test.ts` 反向断言）。机械复验：`test/r1-retired-surface.contract.test.ts` → **PASS**。
+  - **R1-1 残留 grep：** **BLOCKED（例外未确认）**——严格命令 `rg -i "aisstream|vesselapi|gfw|voyage|watchlist" src server --glob "!server/database/migrations/**"` 在 `server/` 仍有命中（退役 HTTP 404 路径名 + 反向断言）；`src/` **零匹配**（严格 **PASS**）。最小例外提案（仅 3 个文件、禁止 Provider/Runtime/业务入口）：`docs/plans/r1-1-grep-exception-proposal.md`（**PROPOSED**）。提案内机械扫描由 `test/r1-retired-surface.contract.test.ts`  enforcement；**不得**在提案确认前记为原 R1-1 **PASS**。
   - **R1-2 门禁 G（PR #5 round-3，2026-10-09）：** `pnpm install --frozen-lockfile`、`pnpm build`、`pnpm typecheck`、`pnpm lint`、Vitest → **58 files / 475 passed | 3 skipped**；`pnpm smoke:p0-native` → **PASS**。基线 `main@8609cb5`：**76 files / 824 tests**。相对 main 的 `*.test.ts` 差异（`git diff 8609cb5..HEAD --name-status`）：**删除 21**、**新增 3**（`scripts/r1-migration-copy-guard.test.ts`、`server/middleware/retired-spa-routes.test.ts`、`test/r1-retired-surface.contract.test.ts`），其余为港口化 **修改**；现役合计 **58** 个测试文件，**不以恢复 824 条为目标**。
   - **R1-2b 删除测试 → 现役断言映射（main@8609cb5 → 本分支）：**
     - Readiness 现役 Job 集合 / 缺失·禁用 / 工具链 / 多源 Feed / Translation 不参与硬门禁 / 官方天气边界 → `server/services/v3-readiness.test.ts`（原 `v3-readiness.test.ts` 中船舶/AIS/航次/Vessel Search 用例**未**恢复）。
@@ -41,12 +41,12 @@
     - 日历 reconcile → `server/shipping-store.test.ts`；日历缓存 skip/覆盖 → **保留** `server/runtime/calendar-sync-job.test.ts`；官方天气任务边界 → **保留** `server/runtime/weather-alert-sync-job.test.ts` + `v3-readiness.test.ts` 天气告警段。
     - Runtime 单例 bootstrap（无 AIS Job）→ `server/runtime/bootstrap.test.ts`；迁移副本路径 → `scripts/r1-migration-copy-guard.test.ts` + `resolveDatabaseFileIdentity`。
     - `server/services/real-data-gate.test.ts` **仅**覆盖 Real 零 Mock 扫描，**不**替代 Readiness/Repository/Runtime 上表职责。
-  - **R1-3 迁移 014：** `resolveDatabaseFileIdentity` + 保留库 dev/ino；夹具 mkdtemp 于 `.tmp/r1-guard-*/fake-repo`。`.tmp/r1-migration-gate` 双 pass → schema **14** → **PASS**；守卫 **9 passed | 3 skipped**——跳过原因：**文件 symlink** 探针 `EPERM: operation not permitted`（Windows 未开开发者模式/权限）；**目录 junction** 探针 **通过**，对应用例已执行。
-  - **R1-4 浏览器 / S7（方案 R1-4：退役 URL 直接 HTTP 404）：** `server/middleware/retired-spa-routes.ts`；S7 对 `/vessels*`、`/voyages*` **fetch 期望 404**，浏览器经客户端路由验证「页面不存在」，现役 `/ports` 等仍正常。`E2E_S7_DIR=.tmp/s7-local-r1-review-4` → **124 checks / 0 FAIL**；证据 `.tmp/s7-local-r1-review-4/s7-integrated-evidence.json` → **PASS**（2026-10-09）。
+  - **R1-3 迁移 014：** 守卫断言已对齐真实拒绝顺序（symlink→保留库先 **escapes .tmp**；hard link / symlink→hardlink 组合 → **hard link**）。**2026-10-09 round-4：** Vitest 守卫 **9 passed | 3 skipped**（文件 symlink 用例 **未验证**，本机 `EPERM`）；迁移副本验收 **沿用** round-3（`.tmp/r1-migration-gate` 双 pass，schema **14**）——本次补丁未改迁移逻辑。
+  - **R1-4 浏览器 / S7：** **沿用** round-3 证据 `E2E_S7_DIR=.tmp/s7-local-r1-review-4` → **124 / 0 FAIL**（`.tmp/s7-local-r1-review-4/s7-integrated-evidence.json`）；本次补丁未改 `retired-spa-routes` / S7 脚本。
   - **R1-5 启动日志：** 隔离 cwd 启动 `dist/output/server/index.mjs`，日志仅 `runtime started { jobs: 5 }`，**无** `ais-tracking` / `voyage-sync` / `ais-area` 等已下线任务名 → **PASS**。
   - **R1-6 标签与恢复抽查：** origin 标签 `pre-r1-vessel-removal` 存在；`git worktree add .tmp/pre-r1-verify pre-r1-vessel-removal` + `pnpm exec vitest run server/providers/ais/index.test.ts` → **4/4 PASS**；worktree 已删除 → **PASS**。
-  - **Neat Freak closeout：** **pending**——已从实际加载的 `C:\Users\Administrator\.claude\skills\neat-freak\SKILL.md` 解析机械盘点命令为 `<project-root>/scripts/audit-inventory.sh`；在仓库根、`neat-freak` skill 目录、`C:\Users\Administrator\.claude\skills` 均未找到该脚本；`C:\Program Files\Git\bin\bash.exe` 存在但无脚本可跑。已做 skill 要求的文档/状态对齐与只读复核，**未**自编替代 skill，**未**删除任何清理候选。
-- **结论：** **R1 = PASS（Neat Freak pending：仓库无 `scripts/audit-inventory.sh`）**；**未合并**；**未开始 R1.5**。
+  - **Neat Freak closeout：** **BLOCKED**——技能路径 `C:\Users\Administrator\.claude\skills\neat-freak\SKILL.md` 要求 `bash scripts/audit-inventory.sh <project-root>`；仓库根、`neat-freak/`、`C:\Users\Administrator\.claude\skills` **均无该脚本**；**未**自编替代盘点流程，**未**删除清理候选。文档/状态与提案同步属手工对齐，**不**等于 Neat Freak PASS。
+- **结论：** **R1 = BLOCKED**（**R1-1** 严格 grep 待例外确认；**Neat Freak** 脚本缺失）。产品门禁（R1-2–R1-6、S7 沿用、smoke 见 round-3/4 记录）已实现；**未合并**；**未开始 R1.5**。
 
 ### R0 — 门禁 G 执行记录
 
