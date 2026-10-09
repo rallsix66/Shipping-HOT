@@ -1,6 +1,6 @@
 # R1-1 ripgrep exception proposal (PR #5)
 
-**Status:** **PROPOSED — not confirmed.** Until a maintainer accepts this list, the adjusted mechanical scan must **not** be recorded as the original **R1-1 PASS** (zero disallowed matches in `src/` + `server/` without carve-outs).
+**Status:** **PROPOSED — not confirmed.** Maintainer acceptance is required before recording **R1-1 PASS**. Technical review passing the mechanical check is **not** user authorization.
 
 ## Baseline command (unchanged)
 
@@ -8,35 +8,42 @@
 rg -i "aisstream|vesselapi|gfw|voyage|watchlist" src server --glob "!server/database/migrations/**"
 ```
 
-## Always allowed (no proposal needed)
+Vitest enforcement adds `-n` (line numbers) so allowlist rows are **exact path + line + full body**; pattern and globs are unchanged.
+
+## Always excluded (glob / docs)
 
 | Location | Reason |
 | --- | --- |
-| `server/database/migrations/**` | Excluded by glob; historical schema only |
-| `docs/archive/vessel-capability-recovery.md` | Recovery documentation (not runtime) |
+| `server/database/migrations/**` | Glob exclude; historical schema |
+| `docs/archive/vessel-capability-recovery.md` | Recovery doc (outside `src`/`server` scan) |
 
-## Proposed minimal allowlist (tight, line-scoped)
+## Proposed allowlist — exact path + full line (no `includes`, no whole-file)
 
-Only these **files** and **purposes** — not whole-repo wildcards:
+Mechanical enforcement: `test/r1-retired-surface.contract.test.ts` → `R1_1_PROPOSED_ALLOWED_HITS`.
 
-| File | Matching lines (2026-10-09) | Purpose |
-| --- | --- | --- |
-| `server/middleware/retired-spa-routes.ts` | Path literals `/voyages`, `/voyages/` | R1-4: HTTP **404** for retired SPA URLs (route names only) |
-| `server/middleware/retired-spa-routes.test.ts` | `"/voyages"`, `"/voyages/example-id"` | Assert 404 middleware for retired URLs |
-| `server/shipping-store.read-only.test.ts` | `not.toHaveProperty("voyages")` | Reverse contract: port-only snapshot has no voyage collection |
+| Relative path | Line | Full line body (must match exactly after trimEnd) |
+| --- | ---: | --- |
+| `server/middleware/retired-spa-routes.ts` | 7 | `    \|\| pathname === "/voyages"` |
+| `server/middleware/retired-spa-routes.ts` | 8 | `    \|\| pathname.startsWith("/voyages/")` |
+| `server/middleware/retired-spa-routes.test.ts` | 25 | `    "/voyages",` |
+| `server/middleware/retired-spa-routes.test.ts` | 26 | `    "/voyages/example-id",` |
+| `server/shipping-store.read-only.test.ts` | 126 | `    expect(result).not.toHaveProperty("voyages")` |
 
-**Not allowed under this proposal:** Provider names, Runtime job names, business APIs, scripts/e2e harness copy, migration table renames (`_retired_*`, `voyage_eta_history` in `scripts/r1-migration-copy-test.ts`), or any restored AIS/vessel/voyage **entry points**.
+**Not allowlisted:** `/vessels` literals (no `voyage` keyword match), Provider env keys, Runtime job names, scripts/e2e, migration strings, or any extra text on the same line (e.g. `// aisstream`).
 
-## Current scan result (with proposal applied)
+## `src/` strict rule (no allowlist)
 
-- **`src/`:** zero matches (rg exit 1) — satisfies original R1-1 intent for product UI.
-- **`server/`:** only the three rows above — no Provider/Runtime/business code.
+- **Pass:** `rg … src` → **exit code 1** and **stdout empty** (stderr may contain diagnostics).
+- **Fail:** exit **0** (matches found), **2+** (rg error), **127** (missing binary), or exit 1 with non-empty stdout.
 
-Mechanical enforcement: `test/r1-retired-surface.contract.test.ts` (allowlist = this table only).
+## Current mechanical result (2026-10-09, branch `codex/shipping-hot-r1-retire-vessel`)
+
+- **`src/`:** strict rule **PASS** in Vitest.
+- **`src` + `server`:** all rg hits match the five rows above; counterexamples in tests reject same-file Provider keywords and partial-line matches.
 
 ## Decision requested
 
-Confirm, narrow, or reject the three-file allowlist. Until then:
+Confirm, narrow, or reject the five-line allowlist. Until then:
 
-- **R1-1 (strict original):** **BLOCKED** on `server/` substring matches.
-- **R1-1 (proposed carve-out):** implemented in tests/docs only; **not PASS**.
+- **R1-1 (original zero-hit):** **BLOCKED** on `server/` keyword hits.
+- **R1-1 (proposed carve-out):** mechanical check only; **not PASS**.
