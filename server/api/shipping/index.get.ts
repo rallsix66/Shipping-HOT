@@ -10,7 +10,7 @@ export default defineEventHandler(async () => {
   // request-triggered Provider path. P2C adds no new request-triggered sync;
   // future workstreams must move each capability behind BackgroundRuntime.
   const snapshot = await getShippingSnapshot()
-  const hot = rankHotItems(snapshot.events, snapshot.ports, snapshot.vessels, snapshot.voyages, snapshot.feedItems, new Date(), operationalSourceContext)
+  const hot = rankHotItems(snapshot.events, snapshot.ports, snapshot.feedItems, new Date(), operationalSourceContext)
   const displayFeedItems = await mapFeedItemsForDisplay(useDatabase(), snapshot.feedItems, snapshot.settings.translation)
   return {
     ...snapshot,

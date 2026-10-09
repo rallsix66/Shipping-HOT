@@ -44,7 +44,6 @@ const current: FeedItem = {
   severity: "warning",
   relatedPortIds: [],
   relatedVesselIds: [],
-  relatedVoyageIds: [],
   fetchedAt: "2026-01-10T00:01:00.000Z",
   stale: false,
   sourceStatus: "healthy",

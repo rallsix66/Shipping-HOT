@@ -92,8 +92,7 @@ describe("translation T2 settings, budget, usage, and safe test runner", () => {
     const input = { database, settings: settings(), secretStore: new TestSecretStore("secret-value"), provider, now: new Date("2026-09-02T12:00:00.000Z") }
     const first = await runTranslationTest(input)
     expect(first).toMatchObject({ ok: true, sourceText: TRANSLATION_TEST_SOURCE_TEXT, cacheHit: false, diagnosticMode: false, providerCalled: true, estimatedCost: 0 })
-    expect(first.translatedText).toContain("AB123")
-    expect(first.translatedText).toContain("TEST STAR")
+    expect(first.translatedText).toContain("SGSIN")
     expect(protectedRequest?.sourceText).not.toContain("TEST STAR")
     expect(provider.calls).toHaveLength(1)
     const second = await runTranslationTest(input)

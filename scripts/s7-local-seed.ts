@@ -23,14 +23,11 @@ import process from "node:process"
 import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import type { ArticleBlock, ArticleVersion } from "@shared/article"
-import type { DataProvenance, FeedItem, Port, ShippingEvent, ShippingSettings, Vessel } from "@shared/shipping"
+import type { DataProvenance, FeedItem, Port, ShippingEvent, ShippingSettings } from "@shared/shipping"
 import { ArticleRepository } from "#/database/article"
-import { AisPositionRepository } from "#/database/ais-positions"
 import { defaultShippingSettings } from "#/database/runtime"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { TranslationRepository } from "#/database/translation"
-import { VesselMetadataRepository } from "#/database/vessel-search"
-import { VoyageRepository } from "#/database/voyages"
 import { computeArticleContentHash } from "#/services/article-content-hash"
 import { ARTICLE_TRANSLATION_CONTRACT_VERSION, planArticleTranslation } from "#/services/article-translation-source"
 import { TranslationService } from "#/services/translation-service"
@@ -48,19 +45,11 @@ const iso = (offsetMs: number) => new Date(NOW.getTime() + offsetMs).toISOString
 const PUBLISHED_AT = iso(-6 * 60 * 60 * 1000)
 const FETCHED_AT = iso(-60 * 60 * 1000)
 const TRANSLATED_AT = iso(-30 * 60 * 1000)
-const ETD_AT = iso(-36 * 60 * 60 * 1000)
-const ETA_AT = iso(3 * 24 * 60 * 60 * 1000)
 
 const S7 = {
-  vessel: "vessel-s7-anhui-88",
-  vesselDecoy: "vessel-s7-anhui-88-other-imo",
-  vesselNoMmsi: "vessel-s7-identity-only",
-  vesselMockDecoy: "vessel-s7-mock-decoy",
   port: "port-s7-shekou",
   portSecondary: "port-s7-yantian",
   portMockDecoy: "port-s7-mock-decoy",
-  voyage: "voyage-s7-anhui-88-current",
-  voyageUnknown: "voyage-s7-identity-only-unknown",
   feedArticle: "feed-s7-article",
   feedWeather: "feed-s7-weather",
   feedMockDecoy: "feed-s7-mock-decoy",
@@ -96,18 +85,12 @@ const MANIFEST_FILE = "s7-local-manifest.json"
 
 function assertIsolatedRunDir(runDir: string, databasePath: string): void {
   if (process.env.S7_SEED_ALLOW_OUTSIDE_TMP === "1") return
-  // Prefix check on the resolved path, not a substring test: `includes(".tmp")`
-  // would also accept `C:\anything\.tmp\prod` and `<repo>\.data\.tmp\x`.
   if (!runDir.startsWith(ISOLATED_ROOT + sep)) {
     throw new Error(
       `refusing to seed ${runDir}: S7 fixtures must be written inside ${ISOLATED_ROOT} `
       + "(set S7_SEED_ALLOW_OUTSIDE_TMP=1 only for a throwaway database)",
     )
   }
-  // Never migrate or overwrite a database this fixture does not own: an existing
-  // database that already holds business rows (or is not a Shipping HOT database at
-  // all) is somebody else's data. An empty database is the harness's own fresh-start
-  // state, so it is allowed.
   if (existsSync(databasePath) && !existsSync(join(runDir, MANIFEST_FILE)) && process.env.S7_SEED_ALLOW_OVERWRITE !== "1") {
     if (existingBusinessRows(databasePath) !== 0) {
       throw new Error(
@@ -118,12 +101,12 @@ function assertIsolatedRunDir(runDir: string, databasePath: string): void {
   }
 }
 
-/** Total rows in the three business tables, or -1 when the database is not ours/unreadable. */
+/** Total rows in ports and feed_items, or -1 when the database is not ours/unreadable. */
 function existingBusinessRows(databasePath: string): number {
   let probe: InstanceType<typeof NativeDatabase> | undefined
   try {
     probe = new NativeDatabase(databasePath, { readonly: true })
-    const tables = probe.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('vessels', 'ports', 'feed_items')").all() as { name: string }[]
+    const tables = probe.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('ports', 'feed_items')").all() as { name: string }[]
     if (tables.length === 0) return -1
     return tables.reduce((total, table) => total + (probe!.prepare(`SELECT COUNT(*) AS count FROM ${table.name}`).get() as { count: number }).count, 0)
   } catch {
@@ -146,37 +129,6 @@ function thirdParty(sourceId: string, sourceUrl: string, evidence: string[] = [s
   }
 }
 
-function vessel(input: {
-  id: string
-  name: string
-  imo?: string
-  mmsi?: string
-  callSign?: string
-  carrier?: string
-  shipType?: string
-  isWatched?: boolean
-  navigationStatus: Vessel["navigationStatus"]
-  latitude?: number
-  longitude?: number
-  speed?: number
-  course?: number
-  destination?: string
-  eta?: string
-}): Vessel {
-  const trust = thirdParty("gfw", "https://api.globalfishingwatch.org/v3/vessels/search")
-  return {
-    ...input,
-    isWatched: input.isWatched ?? false,
-    statusChangedAt: iso(-4 * 60 * 60 * 1000),
-    updatedAt: FETCHED_AT,
-    fetchedAt: FETCHED_AT,
-    sourceUpdatedAt: FETCHED_AT,
-    stale: false,
-    sourceStatus: "healthy",
-    ...trust,
-  }
-}
-
 function port(input: {
   id: string
   name: string
@@ -186,12 +138,13 @@ function port(input: {
   waitingVessels: number
   waitingHours: number
   operationalStatus: NonNullable<Port["operationalStatus"]>
+  isWatched?: boolean
 }): Port {
   const trust = thirdParty("portcast", `https://api.portcast.io/v1/ports/${input.unlocode}`)
   return {
     ...input,
     country: "CN",
-    isWatched: false,
+    isWatched: input.isWatched ?? false,
     congestionDetail: { coverageStatus: "public", congestionCategory: input.congestionLevel, medianWaitingHours: input.waitingHours, longTailCongestion: false },
     updatedAt: FETCHED_AT,
     fetchedAt: FETCHED_AT,
@@ -218,7 +171,6 @@ function feedItem(input: Partial<FeedItem> & { id: string, title: string, catego
     severity: "watch",
     relatedPortIds: [],
     relatedVesselIds: [],
-    relatedVoyageIds: [],
     ...thirdParty(S7.sourceId, `https://example.com/s7/${input.id}`),
     ...input,
   }
@@ -261,7 +213,7 @@ async function seedArticle(input: {
     contractVersion: ARTICLE_TRANSLATION_CONTRACT_VERSION,
   })
   const item = feedItem({ id: S7.feedArticle, title: "Shekou berth congestion eases after schedule recovery", category: "shipping_news" })
-  await shipping.seed([], [], [], [item], [], settings)
+  await shipping.seed([], [item], [], settings)
 
   const blocks = articleBlocks()
   const hash = computeArticleContentHash(blocks)
@@ -298,9 +250,6 @@ async function seedArticle(input: {
   })
   if (!plan.eligible) throw new Error("s7 article fixture is not translation-eligible")
 
-  // Blocks 0..4 come from the current model; the last block only has a legacy
-  // model row, so the view must label it 历史缓存（非当前模型）rather than claim
-  // it as the configured model's output.
   let translatedBlocks = 0
   let historicalBlocks = 0
   for (const source of plan.pending) {
@@ -364,51 +313,8 @@ async function main() {
     },
   }
 
-  const vessels: Vessel[] = [
-    vessel({
-      id: S7.vessel,
-      name: "AN HUI 88",
-      imo: "9876543",
-      mmsi: "413000111",
-      callSign: "BQXS7",
-      carrier: "COSCO SHIPPING",
-      shipType: "Container Ship",
-      isWatched: true,
-      navigationStatus: "under_way",
-      latitude: 22.4707,
-      longitude: 113.9207,
-      speed: 14.2,
-      course: 118,
-      destination: "SHEKOU",
-      eta: ETA_AT,
-    }),
-    vessel({
-      id: S7.vesselDecoy,
-      name: "AN HUI 88",
-      imo: "9876551",
-      mmsi: "413000222",
-      callSign: "BQXS8",
-      carrier: "SITC",
-      shipType: "General Cargo",
-      navigationStatus: "moored",
-      latitude: 31.2304,
-      longitude: 121.4737,
-      speed: 0,
-      course: 0,
-      destination: "SHANGHAI",
-    }),
-    vessel({
-      id: S7.vesselNoMmsi,
-      name: "IDENTITY ONLY TRADER",
-      imo: "9111111",
-      shipType: "Bulk Carrier",
-      isWatched: true,
-      navigationStatus: "unknown",
-    }),
-  ]
-
   const ports: Port[] = [
-    port({ id: S7.port, name: "蛇口", nameEn: "SHEKOU", unlocode: "CNSHK", congestionLevel: "high", waitingVessels: 7, waitingHours: 18, operationalStatus: "disrupted" }),
+    port({ id: S7.port, name: "蛇口", nameEn: "SHEKOU", unlocode: "CNSHK", congestionLevel: "high", waitingVessels: 7, waitingHours: 18, operationalStatus: "disrupted", isWatched: true }),
     port({ id: S7.portSecondary, name: "盐田", nameEn: "YANTIAN", unlocode: "CNYTN", congestionLevel: "low", waitingVessels: 2, waitingHours: 4, operationalStatus: "normal" }),
   ]
 
@@ -449,7 +355,6 @@ async function main() {
     firstDetectedAt: FETCHED_AT,
     lastDetectedAt: FETCHED_AT,
     portId: S7.port,
-    vesselId: S7.vessel,
     evidenceJson: { waitingVessels: 7, waitingHours: 18 },
     updatedAt: FETCHED_AT,
     sourceUpdatedAt: FETCHED_AT,
@@ -457,116 +362,45 @@ async function main() {
     stale: false,
     sourceStatus: "healthy",
     ...thirdParty("portcast", "https://api.portcast.io/v1/ports/CNSHK"),
-  } as ShippingEvent]
+  }]
 
-  await shipping.seed(vessels, ports, [], [weatherItem], events, settings)
-
-  const voyages = new VoyageRepository(database, "real")
-  const voyageWrite = await voyages.saveVoyages([
-    {
-      id: S7.voyage,
-      vesselId: S7.vessel,
-      imo: "9876543",
-      mmsi: "413000111",
-      voyageNumber: "S7E",
-      originPortId: "CNYTN",
-      destinationPortId: "CNSHK",
-      status: "in_transit",
-      etd: ETD_AT,
-      eta: ETA_AT,
-      source: "vesselapi",
-      sourceType: "real",
-      timestamp: FETCHED_AT,
-      lastUpdatedAt: FETCHED_AT,
-      episodeState: "current",
-    },
-    {
-      id: S7.voyageUnknown,
-      vesselId: S7.vesselNoMmsi,
-      imo: "9111111",
-      status: "unknown",
-      source: "vesselapi",
-      sourceType: "real",
-      timestamp: FETCHED_AT,
-      lastUpdatedAt: FETCHED_AT,
-      episodeState: "current",
-    },
-  ], FETCHED_AT)
-
-  // `saveVoyages` owns the episode id shape, so the manifest records the id the
-  // repository actually accepted rather than the requested one.
-  const currentVoyageId = voyageWrite.acceptedIds.find(id => id.includes(S7.vessel)) ?? S7.voyage
-
-  const ais = new AisPositionRepository(database, "real")
-  await ais.savePositions(
-    [
-      { id: `${S7.vessel}:3`, vesselId: S7.vessel, mmsi: "413000111", latitude: 22.1804, longitude: 113.5402, speed: 15.8, course: 62, heading: 60, navigationStatus: "under_way", timestamp: iso(-3 * 60 * 60 * 1000), source: "aisstream", sourceType: "real" },
-      { id: `${S7.vessel}:2`, vesselId: S7.vessel, mmsi: "413000111", latitude: 22.3105, longitude: 113.7103, speed: 15.1, course: 74, heading: 72, navigationStatus: "under_way", timestamp: iso(-2 * 60 * 60 * 1000), source: "aisstream", sourceType: "real" },
-      { id: `${S7.vessel}:1`, vesselId: S7.vessel, mmsi: "413000111", latitude: 22.4707, longitude: 113.9207, speed: 14.2, course: 118, heading: 116, navigationStatus: "under_way", timestamp: iso(-2 * 60 * 1000), source: "aisstream", sourceType: "real" },
-    ],
-    [{ vesselId: S7.vessel, mmsi: "413000111" }],
-    FETCHED_AT,
-  )
+  await shipping.seed(ports, [weatherItem], events, settings)
 
   const article = await seedArticle({ database, shipping, settings })
 
-  // Provider-free canonical-identity path. This machine holds no Vessel Search
-  // credential, so `configureVesselSearchProvider()` reports the `unavailable`
-  // provider and a live search can only fail closed. The cache row below stands
-  // in for an already-captured provider result: the search endpoint must serve
-  // it without any live call, and it must merge with the seeded canonical vessel
-  // identity instead of creating a second vessel for the same ship.
-  const searchCache = await new VesselMetadataRepository(database, "real").saveSearch(
-    { query: "AN HUI 88", field: "name" },
-    [{
-      id: S7.vessel,
-      name: "AN HUI 88",
-      imo: "9876543",
-      mmsi: "413000111",
-      callsign: "BQXS7",
-      type: "Container Ship",
-      flag: "CN",
-      source: "GFW",
-      fetchedAt: FETCHED_AT,
-      source_type: "real",
-      providerRecordId: "s7-fixture-gfw-9876543",
-      matchField: "name",
-    }],
-    "unavailable",
-    "real",
-    NOW,
-    24 * 60 * 60 * 1000,
-  )
+  native.prepare("INSERT INTO port_watchlist (port_id, watched_at) VALUES (?, ?)")
+    .run(S7.port, FETCHED_AT)
 
-  // User-owned follow state. `insertVessel` deliberately resets `isWatched` on
-  // write and the read path derives it from `vessel_watchlist`, so a fixture that
-  // must render the tracking panel has to own that row. This is local user state,
-  // not Provider evidence.
-  native.prepare("INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled) VALUES (?, ?, 1)")
-    .run(S7.vessel, FETCHED_AT)
-  native.prepare("INSERT INTO vessel_watchlist (vessel_id, watched_at, ais_enabled) VALUES (?, ?, 0)")
-    .run(S7.vesselNoMmsi, FETCHED_AT)
-
-  // Real-Mode contamination decoys: inserted with raw SQL so the write-time
-  // guard cannot drop them. The read path must still keep them invisible.
-  const decoyData = (id: string, name: string) => JSON.stringify({
-    id,
-    name,
+  const decoyPortData = JSON.stringify({
+    id: S7.portMockDecoy,
+    name: "MOCK DECOY PORT",
+    nameEn: "MOCK DECOY PORT",
+    country: "CN",
+    unlocode: "CNXXX",
     isWatched: false,
-    navigationStatus: "unknown",
     source_type: "mock",
-    provenance: { sourceType: "mock", dataNature: "estimated", sourceId: "mock-vessel", verified: false },
-    updatedAt: FETCHED_AT,
-    fetchedAt: FETCHED_AT,
-    sourceUpdatedAt: FETCHED_AT,
+    provenance: { sourceType: "mock", dataNature: "estimated", sourceId: "mock-port", verified: false },
   })
-  native.prepare("INSERT INTO vessels (id, data, source_type, navigation_status, status_changed_at, last_updated_at) VALUES (?, ?, 'mock', 'unknown', NULL, ?)")
-    .run(S7.vesselMockDecoy, decoyData(S7.vesselMockDecoy, "MOCK DECOY VESSEL"), FETCHED_AT)
   native.prepare("INSERT INTO ports (id, data, source_type, congestion_level, last_updated_at) VALUES (?, ?, 'mock', 'low', ?)")
-    .run(S7.portMockDecoy, JSON.stringify({ id: S7.portMockDecoy, name: "MOCK DECOY PORT", nameEn: "MOCK DECOY PORT", country: "CN", unlocode: "CNXXX", isWatched: false, source_type: "mock", provenance: { sourceType: "mock", dataNature: "estimated", sourceId: "mock-port", verified: false } }), FETCHED_AT)
-  native.prepare(`INSERT INTO feed_items (id, source_id, category, type, title, summary, source_url, published_at, fetched_at, severity, related_port_ids, related_vessel_ids, related_voyage_ids, data, source_type)
-    VALUES (?, 'mock-feed', 'shipping_news', 'advisory', ?, ?, ?, ?, ?, 'info', '[]', '[]', '[]', ?, 'mock')`)
-    .run(S7.feedMockDecoy, "MOCK DECOY FEED ITEM", "decoy row for the zero-Mock-leakage assertion", "https://example.com/s7/mock-decoy", PUBLISHED_AT, FETCHED_AT, JSON.stringify({ id: S7.feedMockDecoy, sourceId: "mock-feed", category: "shipping_news", title: "MOCK DECOY FEED ITEM", source_type: "mock", provenance: { sourceType: "mock", dataNature: "estimated", sourceId: "mock-feed", verified: false } }))
+    .run(S7.portMockDecoy, decoyPortData, FETCHED_AT)
+  native.prepare(`INSERT INTO feed_items (id, source_id, category, type, title, summary, source_url, published_at, fetched_at, severity, related_port_ids, related_vessel_ids, data, source_type)
+    VALUES (?, 'mock-feed', 'shipping_news', 'advisory', ?, ?, ?, ?, ?, 'info', '[]', '[]', ?, 'mock')`)
+    .run(
+      S7.feedMockDecoy,
+      "MOCK DECOY FEED ITEM",
+      "decoy row for the zero-Mock-leakage assertion",
+      "https://example.com/s7/mock-decoy",
+      PUBLISHED_AT,
+      FETCHED_AT,
+      JSON.stringify({
+        id: S7.feedMockDecoy,
+        sourceId: "mock-feed",
+        category: "shipping_news",
+        title: "MOCK DECOY FEED ITEM",
+        source_type: "mock",
+        provenance: { sourceType: "mock", dataNature: "estimated", sourceId: "mock-feed", verified: false },
+      }),
+    )
 
   const manifest = {
     generatedAt: new Date().toISOString(),
@@ -576,25 +410,9 @@ async function main() {
     fixtureDataProvenance: "synthetic deterministic fixture with real-lineage source_type (exercises Real-Mode read filters); not captured real Provider data, and no Provider/Secret/Runtime/network call was made",
     seededAt: NOW.toISOString(),
     expectations: {
-      vesselId: S7.vessel,
-      vesselName: "AN HUI 88",
-      vesselImo: "9876543",
-      vesselMmsi: "413000111",
-      vesselDestination: "SHEKOU",
-      vesselEta: ETA_AT,
-      decoyVesselId: S7.vesselDecoy,
-      decoyVesselName: "AN HUI 88",
-      decoyVesselImo: "9876551",
-      identityOnlyVesselId: S7.vesselNoMmsi,
-      identityOnlyVesselName: "IDENTITY ONLY TRADER",
       portId: S7.port,
       portUnlocode: "CNSHK",
-      voyageId: currentVoyageId,
-      voyageNumber: "S7E",
-      voyageEta: ETA_AT,
-      unknownVoyageVesselId: S7.vesselNoMmsi,
-      aisPositionCount: 3,
-      aisLatestTimestamp: iso(-2 * 60 * 1000),
+      watchedPortId: S7.port,
       weatherFeedId: S7.feedWeather,
       articleFeedId: S7.feedArticle,
       articleVersionId: article.versionId,
@@ -602,30 +420,13 @@ async function main() {
       translationSentinel: article.sentinel,
       translatedBlocks: article.translatedBlocks,
       historicalBlocks: article.historicalBlocks,
-      mockDecoyVesselId: S7.vesselMockDecoy,
       mockDecoyPortId: S7.portMockDecoy,
       mockDecoyFeedId: S7.feedMockDecoy,
-      searchFixture: {
-        query: "AN HUI 88",
-        providerId: "unavailable",
-        canonicalVesselId: searchCache[0]?.id ?? S7.vessel,
-        canonicalImo: searchCache[0]?.imo ?? "9876543",
-        canonicalMmsi: searchCache[0]?.mmsi ?? "413000111",
-        cacheHitExpected: true,
-        note: "cache fixture under the provider id an unconfigured Real-Mode Vessel Search reports; serves a previously captured identity with no live call",
-      },
-      providerUnavailableQuery: "ZZZ NOPE S7",
     },
     requestedPaths: [
       "/",
-      "/vessels",
-      `/vessels/${S7.vessel}`,
-      `/vessels/${S7.vesselDecoy}`,
-      `/vessels/${S7.vesselNoMmsi}`,
       "/ports",
       `/ports/${S7.port}`,
-      "/voyages",
-      `/voyages/${currentVoyageId}`,
       "/feed",
       `/feed/${S7.feedArticle}`,
       `/feed/${S7.feedWeather}`,
@@ -638,7 +439,7 @@ async function main() {
 
   native.close()
   console.log(`S7 seed complete: ${databasePath}`)
-  console.log(`S7 fixtures: vessels=3(+1 decoy) ports=2(+1 decoy) voyages=2 ais=3 feed=2(+1 decoy) article=${article.versionId}`)
+  console.log(`S7 fixtures: ports=2(+1 decoy) feed=2(+1 decoy) article=${article.versionId}`)
 }
 
 main().catch((error) => {

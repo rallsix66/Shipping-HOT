@@ -25,6 +25,22 @@
 - **交付提交：** 单 commit `docs: record R0 baseline decisions and ADR-006/007/008`（2026-10-09；分支 tip 见 `git log -1 --stat`；7 files，+220/−6；含 ADR-006/007/008、`AGENTS.md`、`docs/architecture.md`、本区块、`article-service.test.ts` 墙钟夹具）。
 - **数据模式：** 无 schema/Provider/Runtime 变更；无付费调用。
 
+## Shipping Risk Intelligence — R1 Retire Vessel / AIS / Voyage — 2026-10-09
+
+- **阶段 / 验收 ID：** R1 / R1-1–R1-6（`docs/plans/shipping-hot-risk-intelligence-2026-09-29.md` §6 R1）。
+- **分支：** `codex/shipping-hot-r1-retire-vessel`（自 `main@8609cb5`）；**PR 待开、未合并**。
+- **标签：** `pre-r1-vessel-removal` @ `8609cb5` 已推送 origin（仅标签，未推 main）。
+- **范围：** ADR-006 执行——迁移 014 归档表、删除 vessel/AIS/voyage 代码与路由、port-only `POST /api/shipping/watch`、S7 夹具/验收改写、恢复文档 `docs/archive/vessel-capability-recovery.md`。
+- **验收证据：**
+  - **R1-1 残留 grep：** `src/` + `server/` 执行 `rg -i "aisstream|vesselapi|gfw|voyage|watchlist"`（排除 `server/database/migrations/**`）→ **0 行**；允许例外：`server/database/migrations/**`、`docs/archive/vessel-capability-recovery.md` → **PASS**（2026-10-09）。
+  - **R1-2 门禁 G：** `pnpm install --frozen-lockfile`、`pnpm build`、`pnpm typecheck`、`pnpm lint`、`.tmp/` 下 `pnpm exec vitest run -c vitest.config.ts` → **50 files / 422 tests PASS**（2026-10-09）；`main@8609cb5` 基线 **76 files / 824 tests**；减少 **402** 条，与删除的 **25** 个 `*.test.ts` 文件一致（见 PR 正文清单）。
+  - **R1-3 迁移 014：** 保留库 `.data/shipping-hot-v3.sqlite3` **只读复制**到 `.tmp/r1-migration/.data/`，`node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/r1-migration-copy-test.ts .tmp/r1-migration` 连续两次 → schema **14**，九张 `_retired_*` 表（见 PR）；原库未打开写入 → **PASS**。
+  - **R1-4 浏览器 / S7：** 生产构建 + 隔离目录 S7：`node scripts/e2e-s7-integrated.mjs` → **108 checks / 0 FAIL**（Flow A 8 / B 22 / C 27；`/vessels`、`/voyages` 404、导航无死链；证据 `.tmp/s7-local/s7-integrated-evidence.json`）→ **PASS**。
+  - **R1-5 启动日志：** 隔离 cwd 启动 `dist/output/server/index.mjs`，日志仅 `runtime started { jobs: 5 }`，**无** `ais-tracking` / `voyage-sync` / `ais-area` 等已下线任务名 → **PASS**。
+  - **R1-6 标签与恢复抽查：** origin 标签 `pre-r1-vessel-removal` 存在；`git worktree add .tmp/pre-r1-verify pre-r1-vessel-removal` + `pnpm exec vitest run server/providers/ais/index.test.ts` → **4/4 PASS**；worktree 已删除 → **PASS**。
+  - **Neat Freak closeout：** **pending**——本机无 Git Bash，`scripts/audit-inventory.sh` 未执行（不得标 PASS）。
+- **结论：** **R1 = PASS（Neat Freak pending：audit-inventory.sh）**；**未合并**；**未开始 R1.5**。
+
 ### R0 — 门禁 G 执行记录
 
 - 时间：2026-10-09（Asia/Shanghai）。

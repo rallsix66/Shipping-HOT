@@ -48,7 +48,6 @@ function item(overrides: Partial<FeedItem> = {}): FeedItem {
     severity: "info",
     relatedPortIds: [],
     relatedVesselIds: [],
-    relatedVoyageIds: [],
     tags: ["third_party", "shipping_news"],
     updatedAt: "2026-08-14T00:00:00.000Z",
     sourceUpdatedAt: "2026-08-14T00:00:00.000Z",
@@ -66,7 +65,7 @@ describe("feed sync job", () => {
     await initShippingTables(database, "mock")
     const repository = new ShippingRepository(database, "mock")
     const snapshot = createMockSnapshot()
-    await repository.seed(snapshot.vessels, snapshot.ports, snapshot.voyages, [], snapshot.events, snapshot.settings)
+    await repository.seed(snapshot.ports, [], snapshot.events, snapshot.settings)
     await repository.upsertFeedItem(item({ id: "feed-runtime-old", title: "Old runtime update", sourceUrl: "https://theloadstar.com/runtime-old" }))
     await repository.upsertFeedItem(item({ id: "feed-runtime-other", sourceId: "other-source", title: "Other source item", sourceUrl: "https://example.test/other" }))
 
@@ -119,7 +118,7 @@ describe("feed sync job", () => {
     await initShippingTables(database, "mock")
     const repository = new ShippingRepository(database, "mock")
     const snapshot = createMockSnapshot()
-    await repository.seed(snapshot.vessels, snapshot.ports, snapshot.voyages, [], snapshot.events, snapshot.settings)
+    await repository.seed(snapshot.ports, [], snapshot.events, snapshot.settings)
     const historical = item({
       id: "feed-runtime-historical",
       publishedAt: "2026-08-01T00:00:00.000Z",

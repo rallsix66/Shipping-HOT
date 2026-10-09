@@ -12,9 +12,7 @@ export { ProvenanceBadge } from "./ui"
 
 const navLinks = [
   { to: "/", label: "首页", icon: "i-ph-fire" },
-  { to: "/vessels", label: "船舶", icon: "i-ph-anchor" },
   { to: "/ports", label: "港口", icon: "i-ph-lighthouse" },
-  { to: "/voyages", label: "航次", icon: "i-ph-compass" },
   { to: "/events", label: "事件", icon: "i-ph-bell-ringing" },
   { to: "/feed", label: "资讯", icon: "i-ph-newspaper" },
   { to: "/calendar", label: "国家日历", icon: "i-ph-calendar-blank" },
@@ -23,7 +21,7 @@ const navLinks = [
 
 const bottomTabLinks = [
   { to: "/", label: "首页", icon: "i-ph-fire" },
-  { to: "/vessels", label: "船舶", icon: "i-ph-anchor" },
+  { to: "/ports", label: "港口", icon: "i-ph-lighthouse" },
   { to: "/feed", label: "资讯", icon: "i-ph-newspaper" },
   { to: "/calendar", label: "日历", icon: "i-ph-calendar-blank" },
   { to: "/settings", label: "设置", icon: "i-ph-gear" },
@@ -70,11 +68,9 @@ function formatClock(value?: string) {
 }
 
 const providerRows = [
-  { key: "vessel", label: "船位" },
   { key: "weather", label: "天气" },
   { key: "weatherAlerts", label: "官方预警" },
   { key: "port", label: "港口" },
-  { key: "schedule", label: "班期" },
   { key: "feed", label: "资讯" },
 ] as const
 
@@ -226,7 +222,7 @@ export function ShippingShell({ children, title }: { children: ReactNode, title?
             {children}
           </main>
           <footer className="mt-8 text-center text-xs op-55">
-            Shipping HOT · 本地指挥台 V2 · AISStream / Open-Meteo Marine / Calendar / Mock
+            Shipping HOT · 本地指挥台 · Open-Meteo Marine / Calendar / Mock
           </footer>
         </div>
         <nav className="console-bottom-tab">

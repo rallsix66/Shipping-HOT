@@ -73,7 +73,7 @@ describe("/api/shipping Home HOT display boundary", () => {
     const handler = await loadHandler()
     const result = await handler()
 
-    expect(rankHotItems).toHaveBeenCalledWith(apiSnapshot.events, apiSnapshot.ports, apiSnapshot.vessels, apiSnapshot.voyages, apiSnapshot.feedItems, expect.any(Date), expect.anything())
+    expect(rankHotItems).toHaveBeenCalledWith(apiSnapshot.events, apiSnapshot.ports, apiSnapshot.feedItems, expect.any(Date), expect.anything())
     expect(mapFeedItemsForDisplay).toHaveBeenCalledTimes(1)
     expect(mapFeedItemsForDisplay).toHaveBeenCalledWith(expect.anything(), apiSnapshot.feedItems, apiSnapshot.settings.translation)
     expect(result.hot).toEqual([

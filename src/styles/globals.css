@@ -599,7 +599,6 @@ button:disabled {
 .vt-row .eta { font-weight: 600; }
 .vt-row .fr { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .vt.ports .vt-head, .vt.ports .vt-row { grid-template-columns: 2fr 1.1fr 1.7fr 0.85fr 1fr 1.3fr; }
-.vt.voyages .vt-head, .vt.voyages .vt-row { grid-template-columns: 1.55fr 1.35fr 1.9fr 1.15fr 0.95fr 1.25fr; }
 .gauge-cell { display: flex; align-items: center; gap: 8px; }
 .gauge-cell .gauge-track { width: 86px; flex: none; margin-top: 0; }
 .g-lbl { font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; }
@@ -704,11 +703,9 @@ button:disabled {
   .feed-wrap, .cal-wrap, .detail-two { grid-template-columns: 1fr; }
   .filter-panel { position: static; }
   .vt-head, .vt-row { grid-template-columns: 2.1fr 1fr 1.5fr 1.35fr; }
-  .vt:not(.ports):not(.voyages) .c-speed, .vt:not(.ports):not(.voyages) .c-eta { display: none; }
+  .vt:not(.ports) .c-speed, .vt:not(.ports) .c-eta { display: none; }
   .vt.ports .vt-head, .vt.ports .vt-row { grid-template-columns: 2fr 1.7fr 1fr 1.3fr; }
   .vt.ports .c-vessels, .vt.ports .c-watch { display: none; }
-  .vt.voyages .vt-head, .vt.voyages .vt-row { grid-template-columns: 1.5fr 1.9fr 1.15fr 0.95fr 1.25fr; }
-  .vt.voyages .c-vessel { display: none; }
 }
 @media (max-width: 900px) {
   .console-sidebar { display: none; }
@@ -731,11 +728,9 @@ button:disabled {
   .cal-grid { grid-template-columns: 1fr; }
   .stat-strip { grid-template-columns: 1fr 1fr; }
   .vt-head, .vt-row { grid-template-columns: 2fr 1fr 1.4fr; }
-  .vt:not(.ports):not(.voyages) .c-fresh { display: none; }
+  .vt:not(.ports) .c-fresh { display: none; }
   .vt.ports .vt-head, .vt.ports .vt-row { grid-template-columns: 2fr 1.5fr 1.2fr; }
   .vt.ports .c-country, .vt.ports .c-vessels, .vt.ports .c-watch { display: none; }
-  .vt.voyages .vt-head, .vt.voyages .vt-row { grid-template-columns: 1.6fr 2fr 0.95fr; }
-  .vt.voyages .c-vessel, .vt.voyages .c-eta, .vt.voyages .c-fresh { display: none; }
   .w-cells { flex-wrap: wrap; }
   .w-cell { min-width: calc(50% - 4px); }
 }

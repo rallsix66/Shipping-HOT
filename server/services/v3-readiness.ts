@@ -3,14 +3,10 @@ import { join } from "node:path"
 import process from "node:process"
 import NativeDatabase from "better-sqlite3"
 import type { Database } from "db0"
-import type { AisDerivedPortMetric } from "@shared/ais-area"
 import { latestSchemaVersion, readDatabaseMetadata } from "#/database/runtime"
-import { ShippingRepository } from "#/database/shipping"
-import { VoyageRepository } from "#/database/voyages"
 import type { ShippingDataMode } from "#/database/runtime"
 import { activeShippingFeedSourceIds, shippingFeedSources } from "#/providers/feed"
 import { activeOfficialWeatherAlertSourceIds } from "#/providers/weather-alerts"
-import { isAisStreamingEnabled } from "#/runtime/ais-streaming-config"
 
 export const v3ToolchainContract = {
   nodeVersion: "24.15.0",
@@ -19,20 +15,12 @@ export const v3ToolchainContract = {
   betterSqlite3: "12.6.2",
 } as const
 
-export const approvedRuntimeJobs = [
-  { id: "ais-tracking", capability: "ais_tracking" },
-  { id: "voyage-sync", capability: "voyage_sync" },
-] as const
-
 export type ReadinessProfile = "DEVELOPMENT_SAFE" | "REAL_OPERATIONAL"
 
+// R1 retired legacy tracking runtime jobs (ADR-006). The approved Job set
+// now covers reference and weather/feed/calendar capabilities only.
 export function approvedRuntimeJobKeys(dataMode: ShippingDataMode): string[] {
-  const keys = approvedRuntimeJobs
-    .filter(job => job.id !== "ais-tracking" || !isAisStreamingEnabled(dataMode))
-    .map(job => `${job.id}:${job.capability}`)
-  if (dataMode === "real" && process.env.SHIPPING_AIS_AREA_PROVIDER?.trim().toLowerCase() === "aisstream") {
-    keys.push("ais-area-sync:ais_area")
-  }
+  const keys: string[] = []
   const requestedFeed = process.env.SHIPPING_FEED_PROVIDER?.trim().toLowerCase()
   if (dataMode === "real" && requestedFeed === "public") {
     for (const source of shippingFeedSources) {
@@ -73,12 +61,6 @@ export interface RuntimeReadinessJob {
 export interface RuntimeReadinessStatus {
   running: boolean
   jobs: RuntimeReadinessJob[]
-  aisLiveTracker?: {
-    running: boolean
-    providerStatus?: CapabilityReadiness["runtime"]
-    lastSuccessAt?: string
-    lastSourceUpdatedAt?: string
-  }
 }
 
 export interface V3ToolchainObservation {
@@ -134,12 +116,6 @@ export interface V3ReadinessOptions {
   toolchain?: Partial<V3ToolchainObservation>
 }
 
-export interface VoyageVerificationEvidence {
-  historicalLiveEvidence: boolean
-  latestSourceUpdatedAt?: string
-  focusPortCoverageObserved: boolean
-}
-
 function check(id: string, status: ReadinessCheckStatus, detail: string, value?: unknown): ReadinessCheck {
   return { id, status, detail, ...(value === undefined ? {} : { value }) }
 }
@@ -150,18 +126,13 @@ function requestedValue(name: string, fallback: string): string {
 
 function providerBoundaryCheck(profile: ReadinessProfile, dataMode: ShippingDataMode): ReadinessCheck {
   if (profile === "REAL_OPERATIONAL") {
-    const effectiveAisProvider = configuredValue("SHIPPING_AIS_PROVIDER") ?? configuredValue("SHIPPING_VESSEL_PROVIDER")
     const values = [
       ["SHIPPING_DATA_MODE", process.env.SHIPPING_DATA_MODE?.trim().toLowerCase(), ["real"]],
-      ["SHIPPING_AIS_PROVIDER", effectiveAisProvider, ["aisstream"]],
-      ["SHIPPING_VESSEL_SEARCH_PROVIDER", process.env.SHIPPING_VESSEL_SEARCH_PROVIDER?.trim().toLowerCase(), ["gfw", "vesselapi"]],
       ["SHIPPING_PORT_PROVIDER", process.env.SHIPPING_PORT_PROVIDER?.trim().toLowerCase(), ["portcast"]],
       ["SHIPPING_WEATHER_PROVIDER", process.env.SHIPPING_WEATHER_PROVIDER?.trim().toLowerCase(), ["open-meteo"]],
       ["SHIPPING_WEATHER_ALERT_PROVIDER", process.env.SHIPPING_WEATHER_ALERT_PROVIDER?.trim().toLowerCase(), ["off", "public", "experimental"]],
       ["SHIPPING_FEED_PROVIDER", process.env.SHIPPING_FEED_PROVIDER?.trim().toLowerCase(), ["public"]],
       ["SHIPPING_CALENDAR_PROVIDER", process.env.SHIPPING_CALENDAR_PROVIDER?.trim().toLowerCase(), ["calendarific", "official", "manual"]],
-      ["SHIPPING_AIS_AREA_PROVIDER", process.env.SHIPPING_AIS_AREA_PROVIDER?.trim().toLowerCase(), ["off", "aisstream"]],
-      ["SHIPPING_VOYAGE_PROVIDER", process.env.SHIPPING_VOYAGE_PROVIDER?.trim().toLowerCase(), ["vesselapi"]],
     ] as const
     const unsafe = values.filter(([, actual]) => actual === "mock")
     if (dataMode !== "real") return check("provider-boundary", "fail", "REAL_OPERATIONAL requires SHIPPING_DATA_MODE=real", { actual: dataMode, expected: "real" })
@@ -170,20 +141,15 @@ function providerBoundaryCheck(profile: ReadinessProfile, dataMode: ShippingData
   }
   const requested = [
     ["SHIPPING_DATA_MODE", requestedValue("SHIPPING_DATA_MODE", "mock"), "mock"],
-    ["SHIPPING_VESSEL_PROVIDER", requestedValue("SHIPPING_VESSEL_PROVIDER", "mock"), "mock"],
-    ["SHIPPING_VESSEL_SEARCH_PROVIDER", requestedValue("SHIPPING_VESSEL_SEARCH_PROVIDER", "mock"), "mock"],
     ["SHIPPING_PORT_PROVIDER", requestedValue("SHIPPING_PORT_PROVIDER", "mock"), "mock"],
     ["SHIPPING_WEATHER_PROVIDER", requestedValue("SHIPPING_WEATHER_PROVIDER", "mock"), "mock"],
     ["SHIPPING_WEATHER_ALERT_PROVIDER", requestedValue("SHIPPING_WEATHER_ALERT_PROVIDER", "off"), "off"],
     ["SHIPPING_FEED_PROVIDER", requestedValue("SHIPPING_FEED_PROVIDER", "mock"), "mock"],
     ["SHIPPING_CALENDAR_PROVIDER", requestedValue("SHIPPING_CALENDAR_PROVIDER", "mock"), "mock"],
-    ["SHIPPING_AIS_PROVIDER", requestedValue("SHIPPING_AIS_PROVIDER", "mock"), "mock"],
-    ["SHIPPING_AIS_AREA_PROVIDER", requestedValue("SHIPPING_AIS_AREA_PROVIDER", "off"), "off"],
-    ["SHIPPING_VOYAGE_PROVIDER", requestedValue("SHIPPING_VOYAGE_PROVIDER", "mock"), "mock"],
   ] as const
   const unsafe = requested.filter(([, actual, safe]) => actual !== safe)
   return unsafe.length
-    ? check("local-provider-boundary", "fail", "V3 Readiness requires Mock-only providers and Area AIS off; no real Provider is activated", unsafe.map(([name, actual]) => ({ name, requested: actual })))
+    ? check("local-provider-boundary", "fail", "V3 Readiness requires Mock-only providers; no real Provider is activated", unsafe.map(([name, actual]) => ({ name, requested: actual })))
     : check("local-provider-boundary", "pass", "Mock-only provider configuration is active; no new real or paid Provider is activated")
 }
 
@@ -384,147 +350,8 @@ export function resolveWeatherAlertReadinessReason(input: WeatherAlertLiveVerifi
   return liveVerification === "verified_live" ? "official_weather_alert_runtime_verified" : "official_weather_alert_runtime_pending"
 }
 
-function configuredAisProvider(): string | undefined {
-  return configuredValue("SHIPPING_AIS_PROVIDER") ?? configuredValue("SHIPPING_VESSEL_PROVIDER")
-}
-
-export interface AisLiveVerificationInput {
-  dataMode: ShippingDataMode
-  provider: string
-  streamingEnabled: boolean
-  credentialAvailable: boolean
-  tracker?: RuntimeReadinessStatus["aisLiveTracker"]
-  runtime: CapabilityReadiness["runtime"]
-  lastSuccessAt?: string
-  lastSourceUpdatedAt?: string
-  freshness: CapabilityReadiness["freshness"]
-}
-
 function parseableTimestamp(value: string | undefined): boolean {
   return Boolean(value && Number.isFinite(Date.parse(value)))
-}
-
-export interface AisAreaVerificationEvidence {
-  historicalLiveEvidence: boolean
-  verifiedMetricCount: number
-  latestVerifiedSourceUpdatedAt?: string
-}
-
-function finitePositiveNumber(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value) && value > 0
-}
-
-export function hasVerifiedAisAreaMetric(metric: Pick<AisDerivedPortMetric, "provenance" | "sampleSize" | "minimumSampleSize" | "sourceUpdatedAt" | "coverage">): boolean {
-  return metric.provenance?.sourceId === "aisstream-area"
-    && finitePositiveNumber(metric.sampleSize)
-    && finitePositiveNumber(metric.minimumSampleSize)
-    && metric.sampleSize >= metric.minimumSampleSize
-    && (metric.coverage === "usable" || metric.coverage === "stale")
-    && parseableTimestamp(metric.sourceUpdatedAt)
-}
-
-export function resolveAisAreaVerificationEvidence(metrics: readonly AisDerivedPortMetric[]): AisAreaVerificationEvidence {
-  const verified = metrics.filter(hasVerifiedAisAreaMetric)
-  const latest = verified
-    .map(metric => metric.sourceUpdatedAt)
-    .filter((value): value is string => value !== undefined)
-    .sort((left, right) => Date.parse(right) - Date.parse(left))[0]
-  return {
-    historicalLiveEvidence: verified.length > 0,
-    verifiedMetricCount: verified.length,
-    latestVerifiedSourceUpdatedAt: latest,
-  }
-}
-
-async function readAisAreaVerificationEvidence(db: Database, dataMode: ShippingDataMode): Promise<AisAreaVerificationEvidence> {
-  if (dataMode !== "real") return { historicalLiveEvidence: false, verifiedMetricCount: 0 }
-  const repository = new ShippingRepository(db, "real")
-  return resolveAisAreaVerificationEvidence(await repository.listAisPortMetrics())
-}
-
-export interface AisAreaLiveVerificationInput {
-  dataMode: ShippingDataMode
-  provider: string
-  credentialAvailable: boolean
-  runtimeJobRegistered: boolean
-  runtime: CapabilityReadiness["runtime"]
-  historicalLiveEvidence: boolean
-}
-
-function supportsHistoricalAisAreaVerification(runtime: CapabilityReadiness["runtime"]): boolean {
-  return runtime === "healthy" || runtime === "degraded" || runtime === "failed"
-}
-
-export function resolveAisAreaLiveVerification(input: AisAreaLiveVerificationInput): CapabilityReadiness["liveVerification"] {
-  if (input.dataMode !== "real" || input.provider !== "aisstream" || !input.credentialAvailable || !input.runtimeJobRegistered || !input.historicalLiveEvidence) return "coverage_pending"
-  return supportsHistoricalAisAreaVerification(input.runtime) ? "verified_live" : "coverage_pending"
-}
-
-export function resolveAisAreaReadinessStatus(input: AisAreaLiveVerificationInput, liveVerification: CapabilityReadiness["liveVerification"]): CapabilityReadinessStatus {
-  if (input.dataMode !== "real" || input.provider !== "aisstream") return "not_configured"
-  if (!input.credentialAvailable) return "credential_missing"
-  return liveVerification === "verified_live" ? "configured" : "coverage_pending"
-}
-
-function hasHistoricalAisEvidence(input: AisLiveVerificationInput): boolean {
-  return Boolean(input.lastSuccessAt) && parseableTimestamp(input.lastSourceUpdatedAt)
-}
-
-export function resolveAisLiveVerification(input: AisLiveVerificationInput): CapabilityReadiness["liveVerification"] {
-  if (input.dataMode !== "real" || input.provider !== "aisstream" || !input.streamingEnabled || !input.credentialAvailable) return "coverage_pending"
-  if (!input.tracker?.running || !hasHistoricalAisEvidence(input)) return "coverage_pending"
-  if (input.runtime === "healthy" && input.freshness === "fresh") return "verified_live"
-  if (input.runtime === "degraded" || input.runtime === "failed") return "verified_live"
-  if (input.freshness === "stale" && input.runtime === "healthy") return "verified_live"
-  return "coverage_pending"
-}
-
-export function resolveAisReadinessStatus(input: AisLiveVerificationInput, liveVerification: CapabilityReadiness["liveVerification"]): CapabilityReadinessStatus {
-  if (!input.credentialAvailable) return "credential_missing"
-  return liveVerification === "verified_live" ? "configured" : "coverage_pending"
-}
-
-export interface VoyageLiveVerificationInput {
-  dataMode: ShippingDataMode
-  provider: string
-  credentialAvailable: boolean
-  runtimeJobRegistered: boolean
-  runtime: CapabilityReadiness["runtime"]
-  historicalLiveEvidence: boolean
-  focusPortCoverageObserved: boolean
-  sourceUpdatedAt?: string
-}
-
-export function resolveVoyageLiveVerification(input: VoyageLiveVerificationInput): CapabilityReadiness["liveVerification"] {
-  if (input.dataMode !== "real" || input.provider !== "vesselapi" || !input.credentialAvailable || !input.runtimeJobRegistered || !input.historicalLiveEvidence || !parseableTimestamp(input.sourceUpdatedAt)) return "coverage_pending"
-  return input.runtime === "healthy" || input.runtime === "degraded" || input.runtime === "failed" ? "verified_live" : "coverage_pending"
-}
-
-export function resolveVoyageReadinessStatus(input: VoyageLiveVerificationInput, liveVerification: CapabilityReadiness["liveVerification"]): CapabilityReadinessStatus {
-  if (input.dataMode !== "real" || input.provider !== "vesselapi") return "not_configured"
-  if (!input.credentialAvailable) return "credential_missing"
-  return liveVerification === "verified_live" && input.focusPortCoverageObserved ? "configured" : "coverage_pending"
-}
-
-export function resolveVoyageReadinessReason(input: VoyageLiveVerificationInput, liveVerification: CapabilityReadiness["liveVerification"]): string | undefined {
-  if (input.dataMode !== "real" || input.provider !== "vesselapi" || !input.credentialAvailable) return undefined
-  if (liveVerification !== "verified_live") return "vesselapi_live_verification_pending"
-  return input.focusPortCoverageObserved
-    ? "real_vesselapi_eta_persisted_and_restarted"
-    : "vesselapi_focus_port_coverage_pending"
-}
-
-function vesselSearchCapabilityDefinition(): { capability: string, provider: string, configured: boolean, credential: CapabilityReadiness["credential"], status: CapabilityReadinessStatus } {
-  const provider = configuredValue("SHIPPING_VESSEL_SEARCH_PROVIDER")
-  if (provider === "gfw") {
-    const available = Boolean(configuredValue("GFW_API_TOKEN"))
-    return { capability: "vessel_search", provider, configured: true, credential: available ? "available" : "missing", status: available ? "coverage_pending" : "credential_missing" }
-  }
-  if (provider === "vesselapi") {
-    const available = Boolean(configuredValue("VESSELAPI_API_KEY"))
-    return { capability: "vessel_search", provider, configured: true, credential: available ? "available" : "missing", status: available ? "coverage_pending" : "credential_missing" }
-  }
-  return { capability: "vessel_search", provider: provider ?? "unavailable", configured: false, credential: "unknown", status: "not_configured" }
 }
 
 function weatherAlertCapabilityDefinition(): { capability: string, provider: string, configured: boolean, credential: CapabilityReadiness["credential"], status: CapabilityReadinessStatus } {
@@ -540,55 +367,35 @@ function weatherAlertCapabilityDefinition(): { capability: string, provider: str
   }
 }
 
-async function readVoyageVerificationEvidence(db: Database, dataMode: ShippingDataMode): Promise<VoyageVerificationEvidence> {
-  if (dataMode !== "real") return { historicalLiveEvidence: false, focusPortCoverageObserved: false }
-  const voyage = await new VoyageRepository(db, "real").getLatestVerifiedRealVoyage("vesselapi")
-  return {
-    historicalLiveEvidence: Boolean(voyage),
-    latestSourceUpdatedAt: voyage?.lastUpdatedAt,
-    focusPortCoverageObserved: Boolean(voyage?.destinationPortId),
-  }
-}
-
-function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadinessStatus | undefined, dataMode: ShippingDataMode, areaEvidence: AisAreaVerificationEvidence, voyageEvidence: VoyageVerificationEvidence): CapabilityReadiness[] {
+function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadinessStatus | undefined, dataMode: ShippingDataMode): CapabilityReadiness[] {
   const runtimeByCapability = new Map<string, RuntimeReadinessJob[]>()
   for (const job of runtime?.jobs ?? []) runtimeByCapability.set(job.capability, [...(runtimeByCapability.get(job.capability) ?? []), job])
   const safe = profile === "DEVELOPMENT_SAFE"
   const definitions: Array<{ capability: string, provider: string, configured: boolean, credential: CapabilityReadiness["credential"], status: CapabilityReadinessStatus, liveVerification?: CapabilityReadiness["liveVerification"] }> = safe
     ? [
-        { capability: "vessel_search", provider: "mock", configured: true, credential: "not_required", status: "safe_mock" },
-        { capability: "ais_tracking", provider: "mock", configured: true, credential: "not_required", status: "safe_mock" },
-        { capability: "ais_area", provider: "off", configured: true, credential: "not_required", status: "safe_mock" },
         { capability: "port_intelligence", provider: "mock", configured: true, credential: "not_required", status: "safe_mock" },
         { capability: "weather", provider: "mock", configured: true, credential: "not_required", status: "safe_mock" },
         { capability: "weather_alerts", provider: "off", configured: true, credential: "not_required", status: "safe_mock" },
         { capability: "feed", provider: "mock", configured: true, credential: "not_required", status: "safe_mock" },
         { capability: "calendar", provider: "mock", configured: true, credential: "not_required", status: "safe_mock" },
-        { capability: "voyage_eta", provider: "mock", configured: true, credential: "not_required", status: "safe_mock" },
       ]
     : [
-        vesselSearchCapabilityDefinition(),
-        { capability: "ais_tracking", provider: configuredAisProvider() ?? "unavailable", configured: configuredAisProvider() === "aisstream", credential: configuredValue("AISSTREAM_API_KEY") ? "available" : "missing", status: configuredValue("AISSTREAM_API_KEY") ? "coverage_pending" : "credential_missing" },
-        { capability: "ais_area", provider: configuredValue("SHIPPING_AIS_AREA_PROVIDER") ?? "off", configured: configuredValue("SHIPPING_AIS_AREA_PROVIDER") === "aisstream", credential: configuredValue("AISSTREAM_API_KEY") ? "available" : "missing", status: configuredValue("SHIPPING_AIS_AREA_PROVIDER") === "aisstream" ? (configuredValue("AISSTREAM_API_KEY") ? "coverage_pending" : "credential_missing") : "not_configured" },
         { capability: "port_intelligence", provider: configuredValue("SHIPPING_PORT_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_PORT_PROVIDER") === "portcast", credential: "not_required", status: configuredValue("SHIPPING_PORT_PROVIDER") === "portcast" ? "coverage_pending" : "not_configured" },
         { capability: "weather", provider: configuredValue("SHIPPING_WEATHER_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_WEATHER_PROVIDER") === "open-meteo", credential: "not_required", status: configuredValue("SHIPPING_WEATHER_PROVIDER") === "open-meteo" ? "coverage_pending" : "not_configured" },
         weatherAlertCapabilityDefinition(),
         { capability: "feed", provider: configuredValue("SHIPPING_FEED_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_FEED_PROVIDER") === "public", credential: "not_required", status: configuredValue("SHIPPING_FEED_PROVIDER") === "public" ? "coverage_pending" : "not_configured" },
         { capability: "calendar", provider: configuredValue("SHIPPING_CALENDAR_PROVIDER") ?? "unavailable", configured: Boolean(configuredValue("SHIPPING_CALENDAR_PROVIDER")), credential: configuredValue("CALENDARIFIC_API_KEY") ? "available" : "missing", status: configuredValue("SHIPPING_CALENDAR_PROVIDER") === "calendarific" && configuredValue("CALENDARIFIC_API_KEY") ? "coverage_pending" : configuredValue("SHIPPING_CALENDAR_PROVIDER") === "calendarific" ? "credential_missing" : "not_configured" },
-        { capability: "voyage_eta", provider: configuredValue("SHIPPING_VOYAGE_PROVIDER") ?? "unavailable", configured: configuredValue("SHIPPING_VOYAGE_PROVIDER") === "vesselapi", credential: configuredValue("SHIPPING_VOYAGE_PROVIDER") === "vesselapi" && configuredValue("VESSELAPI_API_KEY") ? "available" : configuredValue("SHIPPING_VOYAGE_PROVIDER") === "vesselapi" ? "missing" : "unknown", status: configuredValue("SHIPPING_VOYAGE_PROVIDER") !== "vesselapi" ? "not_configured" : configuredValue("VESSELAPI_API_KEY") ? "coverage_pending" : "credential_missing" },
       ]
   return definitions.map((definition) => {
-    const runtimeCapability = definition.capability === "voyage_eta"
-      ? "voyage_sync"
-      : definition.capability === "feed"
-        ? "feed_sync"
-        : definition.capability === "calendar"
-          ? "calendar_sync"
-          : definition.capability === "port_intelligence"
-            ? "port_intelligence"
-            : definition.capability === "weather"
-              ? "weather_sync"
-              : definition.capability
+    const runtimeCapability = definition.capability === "feed"
+      ? "feed_sync"
+      : definition.capability === "calendar"
+        ? "calendar_sync"
+        : definition.capability === "port_intelligence"
+          ? "port_intelligence"
+          : definition.capability === "weather"
+            ? "weather_sync"
+            : definition.capability
     const jobs = runtimeByCapability.get(runtimeCapability) ?? []
     const job = jobs[0]
     const aggregatedRuntime = aggregateRuntimeReadiness(jobs)
@@ -600,22 +407,18 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
       .map(source => source.lastSuccessAt)
       .filter((value): value is string => parseableTimestamp(value))
       .sort((left, right) => Date.parse(right) - Date.parse(left))[0]
-    const streamingEnabled = isAisStreamingEnabled(dataMode)
-    const liveTracker = definition.capability === "ais_tracking" && streamingEnabled ? runtime?.aisLiveTracker : undefined
     const sourceDetails = runtimeCapability === "feed_sync" || definition.capability === "weather_alerts"
       ? jobs.map(source => ({ id: source.id, provider: source.providerId, runtime: runtimeState(source), enabled: source.enabled, lastSuccessAt: source.lastSuccessAt, lastSourceUpdatedAt: source.lastSourceUpdatedAt, errorCode: source.errorCode }))
       : undefined
-    const sourceUpdatedAt = liveTracker?.lastSourceUpdatedAt ?? (definition.capability === "weather_alerts" ? latestJobSourceUpdatedAt : definition.capability === "voyage_eta" ? voyageEvidence.latestSourceUpdatedAt ?? job?.lastSourceUpdatedAt : job?.lastSourceUpdatedAt)
+    const sourceUpdatedAt = definition.capability === "weather_alerts" ? latestJobSourceUpdatedAt : job?.lastSourceUpdatedAt
     const freshness = sourceUpdatedAt && Date.parse(sourceUpdatedAt) > Date.now() - 24 * 60 * 60 * 1000
       ? "fresh"
       : sourceUpdatedAt
         ? "stale"
         : "unknown"
-    const capabilityRuntime = liveTracker
-      ? liveTracker.running ? (liveTracker.providerStatus ?? "registered") : "not_registered"
-      : aggregatedRuntime
-    const lastSuccessAt = liveTracker?.lastSuccessAt ?? (definition.capability === "weather_alerts" ? latestJobSuccessAt : job?.lastSuccessAt)
-    const lastSourceUpdatedAt = liveTracker?.lastSourceUpdatedAt ?? (definition.capability === "weather_alerts" ? latestJobSourceUpdatedAt : definition.capability === "voyage_eta" ? voyageEvidence.latestSourceUpdatedAt ?? job?.lastSourceUpdatedAt : job?.lastSourceUpdatedAt)
+    const capabilityRuntime = aggregatedRuntime
+    const lastSuccessAt = definition.capability === "weather_alerts" ? latestJobSuccessAt : job?.lastSuccessAt
+    const lastSourceUpdatedAt = definition.capability === "weather_alerts" ? latestJobSourceUpdatedAt : job?.lastSourceUpdatedAt
     const activeWeatherAlertSourceIds = definition.capability === "weather_alerts" && definition.provider === "public"
       ? [...activeOfficialWeatherAlertSourceIds()]
       : []
@@ -626,67 +429,15 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
       activeSourceIds: activeWeatherAlertSourceIds,
       jobs,
     }
-    const voyageInput: VoyageLiveVerificationInput = {
-      dataMode,
-      provider: definition.provider,
-      credentialAvailable: definition.credential === "available",
-      runtimeJobRegistered: jobs.some(voyageJob => voyageJob.id === "voyage-sync" && voyageJob.providerId === "vesselapi" && voyageJob.enabled),
-      runtime: capabilityRuntime,
-      historicalLiveEvidence: voyageEvidence.historicalLiveEvidence,
-      focusPortCoverageObserved: voyageEvidence.focusPortCoverageObserved,
-      sourceUpdatedAt,
-    }
-    const areaInput: AisAreaLiveVerificationInput = {
-      dataMode,
-      provider: definition.provider,
-      credentialAvailable: definition.credential === "available",
-      runtimeJobRegistered: jobs.some(areaJob => areaJob.id === "ais-area-sync" && areaJob.providerId === "aisstream-area" && areaJob.enabled),
-      runtime: capabilityRuntime,
-      historicalLiveEvidence: areaEvidence.historicalLiveEvidence,
-    }
-    const liveVerification = definition.capability === "ais_tracking" && !safe
-      ? resolveAisLiveVerification({
-          dataMode,
-          provider: definition.provider,
-          streamingEnabled,
-          credentialAvailable: definition.credential === "available",
-          tracker: liveTracker,
-          runtime: capabilityRuntime,
-          lastSuccessAt,
-          lastSourceUpdatedAt,
-          freshness,
-        })
-      : definition.capability === "ais_area" && !safe
-        ? resolveAisAreaLiveVerification(areaInput)
-        : definition.capability === "weather_alerts" && !safe
-          ? resolveWeatherAlertLiveVerification(weatherAlertInput)
-          : definition.capability === "voyage_eta" && !safe
-            ? resolveVoyageLiveVerification(voyageInput)
-            : definition.liveVerification ?? (safe ? "not_verified" : "coverage_pending")
-    const status = definition.capability === "ais_tracking" && !safe
-      ? resolveAisReadinessStatus({
-          dataMode,
-          provider: definition.provider,
-          streamingEnabled,
-          credentialAvailable: definition.credential === "available",
-          tracker: liveTracker,
-          runtime: capabilityRuntime,
-          lastSuccessAt,
-          lastSourceUpdatedAt,
-          freshness,
-        }, liveVerification)
-      : definition.capability === "ais_area" && !safe
-        ? resolveAisAreaReadinessStatus(areaInput, liveVerification)
-        : definition.capability === "weather_alerts" && !safe
-          ? resolveWeatherAlertReadinessStatus(weatherAlertInput, liveVerification)
-          : definition.capability === "voyage_eta" && !safe
-            ? resolveVoyageReadinessStatus(voyageInput, liveVerification)
-            : definition.status
+    const liveVerification = definition.capability === "weather_alerts" && !safe
+      ? resolveWeatherAlertLiveVerification(weatherAlertInput)
+      : definition.liveVerification ?? (safe ? "not_verified" : "coverage_pending")
+    const status = definition.capability === "weather_alerts" && !safe
+      ? resolveWeatherAlertReadinessStatus(weatherAlertInput, liveVerification)
+      : definition.status
     const reason = definition.capability === "weather_alerts" && !safe
       ? resolveWeatherAlertReadinessReason(weatherAlertInput, liveVerification)
-      : definition.capability === "voyage_eta" && !safe
-        ? resolveVoyageReadinessReason(voyageInput, liveVerification)
-        : undefined
+      : undefined
     return { ...definition, status, runtime: capabilityRuntime, lastSuccessAt, lastSourceUpdatedAt, freshness, liveVerification, ...(reason ? { reason } : {}), ...(sourceDetails ? { sources: sourceDetails } : {}) }
   })
 }
@@ -694,8 +445,6 @@ function capabilityReadiness(profile: ReadinessProfile, runtime: RuntimeReadines
 export async function readV3Readiness(db: Database, options: V3ReadinessOptions = {}): Promise<V3ReadinessReport> {
   const dataMode: ShippingDataMode = options.dataMode ?? (process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock")
   const profile = options.profile ?? (dataMode === "real" ? "REAL_OPERATIONAL" : "DEVELOPMENT_SAFE")
-  const areaEvidence = await readAisAreaVerificationEvidence(db, dataMode)
-  const voyageEvidence = await readVoyageVerificationEvidence(db, dataMode)
   const checks = [
     ...readV3ToolchainChecks(options.toolchain),
     providerBoundaryCheck(profile, dataMode),
@@ -709,7 +458,7 @@ export async function readV3Readiness(db: Database, options: V3ReadinessOptions 
     ...runtimeChecks(options.runtime, options.bootstrapFailed, dataMode),
     check("network-probes", "skipped", "Readiness performs no external Provider requests; live contract and coverage checks remain deferred"),
   ]
-  const capabilities = capabilityReadiness(profile, options.runtime, dataMode, areaEvidence, voyageEvidence)
+  const capabilities = capabilityReadiness(profile, options.runtime, dataMode)
   const hardChecksPass = checks.filter(item => item.id !== "network-probes").every(item => item.status === "pass")
   return {
     phase: "v3-readiness",

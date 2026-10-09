@@ -37,13 +37,6 @@ describe("fileSecretStore", () => {
     await expect(store.delete("openai")).rejects.toBeInstanceOf(SecretManagedByEnvironmentError)
   })
 
-  it("maps the GFW provider to GFW_API_TOKEN", async () => {
-    const store = await testStore({ GFW_API_TOKEN: "gfw-token-5678" })
-    await expect(store.get("gfw")).resolves.toBe("gfw-token-5678")
-    await expect(store.source("gfw")).resolves.toBe("environment")
-    await expect(store.redacted("gfw")).resolves.toEqual({ providerId: "gfw", configured: true, source: "environment", maskedLast4: "****5678" })
-  })
-
   it("maps DeepSeek to DEEPSEEK_API_KEY", async () => {
     const store = await testStore({ DEEPSEEK_API_KEY: "deepseek-key-5678" })
     await expect(store.get("deepseek")).resolves.toBe("deepseek-key-5678")

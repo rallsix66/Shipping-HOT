@@ -9,7 +9,7 @@ const officialSource = shippingFeedSources.find(source => source.id === "shekou-
 
 describe("shipping feed provider", () => {
   it("does not use Mock Feed records as public last-known data", async () => {
-    const mock = { id: "mock-feed", sourceId: "mock-port-notice", category: "port_notice" as const, type: "port_notice", title: "Mock notice", summary: "Mock", sourceUrl: "https://example.com/mock", publishedAt: "2026-08-14T00:00:00.000Z", relatedPortIds: [], relatedVesselIds: [], relatedVoyageIds: [], severity: "warning" as const, stale: false, sourceStatus: "healthy" as const }
+    const mock = { id: "mock-feed", sourceId: "mock-port-notice", category: "port_notice" as const, type: "port_notice", title: "Mock notice", summary: "Mock", sourceUrl: "https://example.com/mock", publishedAt: "2026-08-14T00:00:00.000Z", relatedPortIds: [], relatedVesselIds: [], severity: "warning" as const, stale: false, sourceStatus: "healthy" as const }
     expect(filterFeedLastKnownForMode([mock], "public")).toEqual([])
     const provider = createPublicFeedProvider({
       sources: [rssSource],
@@ -168,10 +168,10 @@ describe("shipping feed provider", () => {
   it("carries a dated Shekou operational warning through Event and HOT", () => {
     const [item] = parseFeedHtml(`<article><a href="/ywgg/2026/08/16/gate-closure">Shekou terminal gate closure advisory</a><time>2026-08-16</time></article>`, officialSource, mockPorts, "2026-08-18T00:00:00.000Z")
     const snapshot = createMockSnapshot()
-    const events = detectShippingEvents([], [], [], [item], snapshot.settings, [], "2026-08-18T00:00:00.000Z")
+    const events = detectShippingEvents([], [item], snapshot.settings, [], "2026-08-18T00:00:00.000Z")
     const event = events.find(candidate => candidate.feedItemId === item.id)
     expect(event).toMatchObject({ type: "port_notice", severity: "critical", status: "active" })
-    expect(rankHotItems(events, [], [], [], [item], new Date("2026-08-18T00:00:00.000Z")).some(hot => hot.kind === "event" && hot.eventId === event?.id)).toBe(true)
+    expect(rankHotItems(events, [], [item], new Date("2026-08-18T00:00:00.000Z")).some(hot => hot.kind === "event" && hot.eventId === event?.id)).toBe(true)
   })
 
   it("deduplicates reposts and prefers an official source", () => {

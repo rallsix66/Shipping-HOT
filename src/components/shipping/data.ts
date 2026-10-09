@@ -2,35 +2,15 @@ import { useQuery } from "@tanstack/react-query"
 import type { ArticleBlock, ArticleState, ArticleTranslationView, ArticleVersion, ArticleVersionSummary } from "@shared/article"
 import type { FeedItem, FeedItemDisplay, HotItem, ShippingSnapshot } from "@shared/shipping"
 import type { CalendarCoverageStatusSummary } from "@shared/calendar"
-import type { VoyageRecord } from "@shared/voyage"
 import { myFetch } from "~/utils"
 
 export interface ShippingResponse extends Omit<ShippingSnapshot, "feedItems"> {
   feedItems: FeedItemDisplay[]
   hot: HotItem[]
-  provider: { vessel: string, port: string, schedule: string, weather: string, weatherAlerts: "off" | "public" | "experimental", feed: string, calendar: string, aisArea?: "off" | "aisstream", calendarSourceIds?: string[] }
-  realProviders: { vessel: string, port: string, schedule: string, weather: string, weatherAlerts: string, aisArea: string, feed: string, calendar: string }
+  provider: { port: string, weather: string, weatherAlerts: "off" | "public" | "experimental", feed: string, calendar: string, calendarSourceIds?: string[] }
+  realProviders: { port: string, weather: string, weatherAlerts: string, feed: string, calendar: string }
   calendarAttribution?: string
   calendarCoverageStatus: CalendarCoverageStatusSummary[]
-}
-
-export interface AisLatestPosition {
-  vesselId: string
-  mmsi: string
-  latitude: number
-  longitude: number
-  speed?: number
-  course?: number
-  heading?: number
-  navigationStatus?: string
-  timestamp: string
-  source: string
-  sourceType: "real" | "mock" | "imported" | "derived"
-  stale: boolean
-  sourceStatus: "healthy" | "degraded" | "failed" | "never_succeeded" | "disabled"
-  errorCode?: string
-  lastProviderSuccessAt?: string
-  lastProviderFailureAt?: string
 }
 
 export interface TranslationStatusResponse {
@@ -101,15 +81,6 @@ export function useFeedArticle(id: string, versionId?: string) {
   })
 }
 
-export function useAisLatestPosition(vesselId: string) {
-  return useQuery({
-    queryKey: ["ais-position", vesselId],
-    queryFn: () => myFetch<AisLatestPosition | null>(`/shipping/vessels/${encodeURIComponent(vesselId)}/position`),
-    staleTime: 30_000,
-    enabled: Boolean(vesselId),
-  })
-}
-
 export function useTranslationStatus() {
   return useQuery({
     queryKey: ["translation-status"],
@@ -123,14 +94,5 @@ export function useTranslationSecret() {
     queryKey: ["translation-secret"],
     queryFn: () => myFetch<TranslationSecretResponse>("/shipping/translation/secret"),
     staleTime: 10_000,
-  })
-}
-
-export function useLatestVoyage(vesselId: string) {
-  return useQuery({
-    queryKey: ["voyage", vesselId],
-    queryFn: () => myFetch<VoyageRecord | null>(`/shipping/vessels/${encodeURIComponent(vesselId)}/voyage`),
-    staleTime: 30_000,
-    enabled: Boolean(vesselId),
   })
 }

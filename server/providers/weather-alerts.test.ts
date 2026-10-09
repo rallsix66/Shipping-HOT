@@ -147,7 +147,7 @@ describe("official weather alert provider", () => {
     })
     const [item] = await provider.getFeedItems([previous], mockPorts)
     expect(item).toMatchObject({ id: previous.id, severity: "warning", stale: true, sourceStatus: "degraded", error: "warning_missing_from_current_index", eventEligibility: false, hotReason: undefined, weather: { alertState: "unknown" } })
-    expect(rankHotItems([], [], [], [], [item])).toEqual([])
+    expect(rankHotItems([], [], [item])).toEqual([])
   })
 
   it("rejects a generic main element as a JMA empty-result structure", async () => {

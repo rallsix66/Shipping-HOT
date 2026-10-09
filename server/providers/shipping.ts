@@ -1,32 +1,21 @@
 import { env } from "node:process"
-import type { AisDerivedPortMetric } from "@shared/ais-area"
-import type { DataProvenance, FeedItem, Freshness, OperationalSourceContext, Port, PortCongestionDetail, ProviderResult, Severity, ShippingProviderModes, SourceStatus, Vessel, VesselWatchTarget, Voyage, WeatherWindow, WeatherWindows } from "@shared/shipping"
+import type { DataProvenance, FeedItem, Freshness, OperationalSourceContext, Port, PortCongestionDetail, ProviderResult, Severity, ShippingProviderModes, SourceStatus, WeatherWindow, WeatherWindows } from "@shared/shipping"
 import { createBaselinePortDirectoryLookup } from "@shared/port-directory"
 import type { PortDirectoryCoordinateLookup } from "@shared/port-directory"
-import { mockFeedItems, mockPorts, mockVessels, mockVoyages } from "@shared/shipping-fixtures"
+import { mockFeedItems, mockPorts } from "@shared/shipping-fixtures"
 import { type CalendarProvider, configureCalendarProviders } from "./calendar"
 import { activeShippingFeedSourceIds, configureFeedProviders } from "./feed"
 import { type WeatherAlertProvider, activeOfficialWeatherAlertSourceIds, createOfficialWeatherAlertProvider, officialWeatherAlertSourceIds } from "./weather-alerts"
-import { aisstreamAreaDerivedProvenance, aisstreamAreaEstimatedProvenance, createAisStreamAreaProvider, createUnavailableAisAreaProvider } from "./aisstream-area"
 import { createRuntimePortDirectoryLookup } from "#/database/port-directory"
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
 
-export interface VesselProvider {
-  getVessels: (targets?: VesselWatchTarget[], lastKnown?: Vessel[]) => Promise<Vessel[]>
-}
 export interface PortProvider {
   readonly providerId: string
   getPorts: (lastKnown?: Port[]) => Promise<Port[]>
 }
-export interface ScheduleProvider {
-  getVoyages: () => Promise<Voyage[]>
-}
 export interface WeatherProvider {
   readonly providerId: string
   getFeedItems: (ports?: Port[], lastKnown?: FeedItem[]) => Promise<FeedItem[]>
-}
-export interface AisAreaProviderResult {
-  getPortMetrics: (ports?: Port[], lastKnown?: AisDerivedPortMetric[]) => Promise<AisDerivedPortMetric[]>
 }
 
 export async function fetchWeatherProviderResults(
@@ -43,22 +32,15 @@ export async function fetchWeatherProviderResults(
 }
 
 export const providerProvenances = {
-  aisstream: { sourceType: "third_party", dataNature: "observed", sourceId: "aisstream", sourceUrl: "https://aisstream.io/", verified: false },
-  aisstreamAreaObserved: { sourceType: "third_party", dataNature: "observed", sourceId: "aisstream-area", sourceUrl: "https://aisstream.io/", verified: false },
-  aisstreamAreaDerived: aisstreamAreaDerivedProvenance,
-  aisstreamAreaEstimated: aisstreamAreaEstimatedProvenance,
   openMeteo: { sourceType: "third_party", dataNature: "forecast", sourceId: "open-meteo-marine", sourceUrl: "https://open-meteo.com/", verified: false },
   portcastPublic: { sourceType: "third_party", dataNature: "derived", sourceId: "portcast-public", sourceUrl: "https://www.portcast.io/port-congestion", verified: false },
-  mockVessel: { sourceType: "mock", dataNature: "observed", sourceId: "mock-vessel", verified: false },
   mockPort: { sourceType: "mock", dataNature: "derived", sourceId: "mock-port", verified: false },
-  mockSchedule: { sourceType: "mock", dataNature: "planned", sourceId: "mock-schedule", verified: false },
   mockWeather: { sourceType: "mock", dataNature: "forecast", sourceId: "mock-weather", verified: false },
   officialWeatherAlerts: { sourceType: "official", dataNature: "reported", sourceId: "official-weather-alerts", verified: true },
   shippingFeed: { sourceType: "third_party", dataNature: "reported", sourceId: "shipping-feed", sourceUrl: "https://theloadstar.com/", verified: false },
   mockFeed: { sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice", sourceUrl: "https://example.com/mock/feed", verified: false },
 } as const satisfies Record<string, DataProvenance>
 
-const aisstreamProvenance: DataProvenance = providerProvenances.aisstream
 const openMeteoProvenance: DataProvenance = providerProvenances.openMeteo
 
 export function toProviderResult<T extends Freshness>(data: T[], provenance: DataProvenance, fetchedAt = new Date().toISOString(), sourceStatusOverride?: SourceStatus, errorOverride?: string): ProviderResult<T> {
@@ -107,16 +89,6 @@ export function isOfficialWeatherAlertFeedItem(item: FeedItem): boolean {
   return officialWeatherAlertSourceIds.has(item.sourceId)
 }
 
-export const MockVesselProvider: VesselProvider = { async getVessels() {
-  return structuredClone(mockVessels)
-} }
-export function createUnavailableVesselProvider(error: string): VesselProvider {
-  return {
-    async getVessels() {
-      throw new ProviderError("provider_unavailable", error)
-    },
-  }
-}
 export const MockPortProvider: PortProvider = { providerId: "mock-port", async getPorts() {
   return structuredClone(mockPorts)
 } }
@@ -124,16 +96,6 @@ export function createUnavailablePortProvider(error: string): PortProvider {
   return {
     providerId: "unavailable",
     async getPorts() {
-      throw new ProviderError("provider_unavailable", error)
-    },
-  }
-}
-export const MockScheduleProvider: ScheduleProvider = { async getVoyages() {
-  return structuredClone(mockVoyages)
-} }
-export function createUnavailableScheduleProvider(error: string): ScheduleProvider {
-  return {
-    async getVoyages() {
       throw new ProviderError("provider_unavailable", error)
     },
   }
@@ -424,58 +386,8 @@ export function createPortcastPublicPageProvider(options: PortcastPublicPageProv
   }
 }
 
-interface AisSocketEvent {
-  data: unknown
-}
-interface AisSocket {
-  onopen: (() => void) | null
-  onmessage: ((event: AisSocketEvent) => void) | null
-  onerror: ((event: unknown) => void) | null
-  onclose: (() => void) | null
-  send: (data: string) => void
-  close: () => void
-}
-
-interface AisPositionReport {
-  UserID?: number
-  Latitude?: number
-  Longitude?: number
-  Sog?: number
-  Cog?: number
-  NavigationalStatus?: number
-}
-
-interface AisStreamMessage {
-  MessageType?: string
-  MetaData?: { MMSI?: number | string, ShipName?: string, time_utc?: string }
-  Metadata?: { MMSI?: number | string, ShipName?: string, time_utc?: string }
-  Message?: { PositionReport?: AisPositionReport }
-}
-
-export interface AisStreamVesselProviderOptions {
-  apiKey: string
-  endpoint?: string
-  timeoutMs?: number
-  socketFactory?: (endpoint: string) => AisSocket
-}
-
-const aisEndpoint = "wss://stream.aisstream.io/v0/stream"
-
 function numberValue(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined
-}
-
-function stringValue(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim() ? value.trim() : undefined
-}
-
-function mmsiValue(value: unknown): string | undefined {
-  if (typeof value === "number" && Number.isFinite(value)) return String(value)
-  return stringValue(value)
-}
-
-function aisMetaData(message: AisStreamMessage) {
-  return message.MetaData ?? message.Metadata
 }
 
 export function normalizeProviderTimestamp(value: unknown): string | undefined {
@@ -489,169 +401,6 @@ export function normalizeProviderTimestamp(value: unknown): string | undefined {
   if (!/(?:Z|[+-]\d{2}:?\d{2})$/i.test(text)) return undefined
   const timestamp = Date.parse(text)
   return Number.isNaN(timestamp) ? undefined : new Date(timestamp).toISOString()
-}
-
-function navigationStatus(value: number | undefined): Vessel["navigationStatus"] {
-  return value === 1 ? "anchored" : value === 5 ? "moored" : value === 6 ? "aground" : value === 0 ? "under_way" : "unknown"
-}
-
-function parseAisMessage(data: unknown): AisStreamMessage | undefined {
-  try {
-    const parsed = typeof data === "string" ? JSON.parse(data) : data
-    if (!parsed || typeof parsed !== "object") return undefined
-    return parsed as AisStreamMessage
-  } catch {
-    return undefined
-  }
-}
-
-function socketFromGlobal(endpoint: string): AisSocket {
-  const WebSocketCtor = (globalThis as typeof globalThis & { WebSocket?: new (url: string) => unknown }).WebSocket
-  if (!WebSocketCtor) throw new Error("WebSocket runtime is unavailable")
-  return new WebSocketCtor(endpoint) as AisSocket
-}
-
-function aisIdentity(target: VesselWatchTarget) {
-  return {
-    id: target.id,
-    name: target.name,
-    mmsi: target.mmsi,
-    imo: target.imo,
-    isWatched: target.isWatched,
-  }
-}
-
-export function sanitizeAisVessel(vessel: Vessel, target?: VesselWatchTarget): Vessel {
-  const identity = target ? aisIdentity(target) : aisIdentity(vessel)
-  return {
-    ...identity,
-    latitude: vessel.latitude,
-    longitude: vessel.longitude,
-    speed: vessel.speed,
-    course: vessel.course,
-    navigationStatus: vessel.navigationStatus,
-    statusChangedAt: vessel.statusChangedAt,
-    updatedAt: vessel.updatedAt,
-    sourceUpdatedAt: vessel.sourceUpdatedAt,
-    fetchedAt: vessel.fetchedAt,
-    stale: vessel.stale,
-    sourceStatus: vessel.sourceStatus,
-    error: vessel.error,
-    provenance: aisstreamProvenance,
-  }
-}
-
-function identityOnlyAisVessel(target: VesselWatchTarget, fetchedAt: string, sourceStatus: SourceStatus = "degraded", error = "AIS observation unavailable"): Vessel {
-  return {
-    ...aisIdentity(target),
-    navigationStatus: "unknown",
-    fetchedAt,
-    stale: true,
-    sourceStatus,
-    error,
-    provenance: aisstreamProvenance,
-  }
-}
-
-function normalizeAisPosition(message: AisStreamMessage, watched: VesselWatchTarget, previous: Vessel | undefined, fetchedAt: string): Vessel | undefined {
-  const position = message.Message?.PositionReport
-  const metadata = aisMetaData(message)
-  const mmsi = mmsiValue(metadata?.MMSI) ?? (position?.UserID === undefined ? undefined : String(position.UserID))
-  if (!position || !mmsi || mmsi !== watched.mmsi) return undefined
-  const updatedAt = normalizeProviderTimestamp(metadata?.time_utc)
-  const hasTrustedTimestamp = updatedAt !== undefined
-  const currentNavigationStatus = navigationStatus(numberValue(position.NavigationalStatus))
-  const statusChangedAt = currentNavigationStatus === "unknown"
-    ? undefined
-    : previous?.navigationStatus === currentNavigationStatus && previous.statusChangedAt
-      ? previous.statusChangedAt
-      : updatedAt ?? fetchedAt
-  return {
-    ...aisIdentity({ ...watched, name: stringValue(metadata?.ShipName) ?? watched.name }),
-    mmsi,
-    latitude: numberValue(position.Latitude),
-    longitude: numberValue(position.Longitude),
-    speed: numberValue(position.Sog),
-    course: numberValue(position.Cog),
-    navigationStatus: currentNavigationStatus,
-    statusChangedAt,
-    updatedAt,
-    sourceUpdatedAt: updatedAt,
-    fetchedAt,
-    stale: !hasTrustedTimestamp,
-    sourceStatus: hasTrustedTimestamp ? "healthy" : "degraded",
-    error: hasTrustedTimestamp ? undefined : "Provider timestamp unavailable",
-    provenance: aisstreamProvenance,
-  }
-}
-
-export function createAisStreamVesselProvider(options: AisStreamVesselProviderOptions): VesselProvider {
-  const endpoint = options.endpoint ?? aisEndpoint
-  const timeoutMs = options.timeoutMs ?? 5000
-  const socketFactory = options.socketFactory ?? socketFromGlobal
-  return {
-    async getVessels(targets = [], lastKnown = []) {
-      const fetchedAt = new Date().toISOString()
-      const lastKnownById = new Map(lastKnown
-        .filter(vessel => vessel.provenance?.sourceId === "aisstream")
-        .map(vessel => [vessel.id, sanitizeAisVessel(vessel)]))
-      const watchedVessels = targets.filter(vessel => vessel.isWatched && vessel.mmsi)
-      if (!watchedVessels.length) {
-        return targets.map(target => identityOnlyAisVessel(target, fetchedAt, "degraded", target.isWatched ? "MMSI unavailable for real vessel lookup" : "AIS observation unavailable"))
-      }
-      const watchedByMmsi = new Map(watchedVessels.map(vessel => [vessel.mmsi!, vessel]))
-      const received = new Map<string, Vessel>()
-      await new Promise<void>((resolve, reject) => {
-        let settled = false
-        const socket = socketFactory(endpoint)
-        let timer: ReturnType<typeof setTimeout> | undefined
-        const finish = (error?: Error) => {
-          if (settled) return
-          settled = true
-          if (timer) clearTimeout(timer)
-          socket.close()
-          if (error) reject(error)
-          else resolve()
-        }
-        timer = setTimeout(() => finish(received.size > 0 ? undefined : new Error("AISStream request timed out")), timeoutMs)
-        socket.onopen = () => {
-          socket.send(JSON.stringify({
-            APIKey: options.apiKey,
-            BoundingBoxes: [[[-90, -180], [90, 180]]],
-            FiltersShipMMSI: [...watchedByMmsi.keys()],
-            FilterMessageTypes: ["PositionReport"],
-          }))
-        }
-        socket.onmessage = (event) => {
-          const message = parseAisMessage(event.data)
-          if (!message || message.MessageType !== "PositionReport") return
-          const metadata = aisMetaData(message)
-          const mmsi = mmsiValue(metadata?.MMSI) ?? (message.Message?.PositionReport?.UserID === undefined ? undefined : String(message.Message.PositionReport.UserID))
-          const vessel = mmsi ? watchedByMmsi.get(mmsi) : undefined
-          if (!vessel) return
-          const normalized = normalizeAisPosition(message, vessel, lastKnownById.get(vessel.id), fetchedAt)
-          if (!normalized) return
-          received.set(normalized.id, normalized)
-          if (received.size === watchedByMmsi.size) finish()
-        }
-        socket.onerror = () => finish(received.size > 0 ? undefined : new Error("AISStream request failed"))
-        socket.onclose = () => {
-          if (!settled && received.size === 0) finish(new Error("AISStream connection closed"))
-          else if (!settled) finish()
-        }
-      })
-      return targets.map((target) => {
-        if (!target.isWatched) return identityOnlyAisVessel(target, fetchedAt)
-        if (!target.mmsi) return identityOnlyAisVessel(target, fetchedAt, "degraded", "MMSI unavailable for real vessel lookup")
-        const receivedVessel = received.get(target.id)
-        if (receivedVessel) return receivedVessel
-        const previous = lastKnownById.get(target.id)
-        return previous
-          ? { ...previous, ...aisIdentity(target), stale: true, sourceStatus: "degraded" as const, error: "AIS update unavailable", fetchedAt, provenance: aisstreamProvenance }
-          : identityOnlyAisVessel(target, fetchedAt)
-      })
-    },
-  }
 }
 
 export interface WeatherFetchResponse {
@@ -836,7 +585,6 @@ function weatherFeedItem(port: WeatherPortConfig, marine: OpenMeteoPayload, wind
     severity: overall.severity,
     relatedPortIds: [port.id],
     relatedVesselIds: [],
-    relatedVoyageIds: [],
     weather: { riskSource: "model", forecastWindowHours: weatherRiskThresholds.forecastWindowHours, forecastStartAt: h72.forecastStartAt, forecastEndAt: h72.forecastEndAt, waveHeightM: h72.maxWaveHeightM, waveDirectionDeg: h72.waveDirectionDeg, swellWaveHeightM: h72.maxSwellWaveHeightM, swellDirectionDeg: h72.swellDirectionDeg, swellWaveDirectionDeg: h72.swellWaveDirectionDeg, swellPeriodSeconds: h72.maxSwellPeriodSeconds, windSpeedKmh: h72.maxWindSpeedKmh, windGustKmh: h72.maxWindGustKmh, windows },
     tags: ["model", "weather_risk"],
     updatedAt,
@@ -939,10 +687,7 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
 
 interface ProviderEnvironment {
   [key: string]: string | undefined
-  SHIPPING_VESSEL_PROVIDER?: string
   SHIPPING_DATA_MODE?: string
-  SHIPPING_AIS_AREA_PROVIDER?: string
-  AISSTREAM_API_KEY?: string
   SHIPPING_PORT_PROVIDER?: string
   SHIPPING_WEATHER_PROVIDER?: string
   SHIPPING_WEATHER_ALERT_PROVIDER?: string
@@ -951,8 +696,6 @@ interface ProviderEnvironment {
 
 export function configureProviders(environment: ProviderEnvironment = { ...env }) {
   const dataMode: "mock" | "real" = environment.SHIPPING_DATA_MODE === "real" ? "real" : "mock"
-  const vesselMode = environment.SHIPPING_VESSEL_PROVIDER === "aisstream" ? "aisstream" : dataMode === "real" ? "unavailable" : "mock"
-  const aisAreaMode: ShippingProviderModes["aisArea"] = environment.SHIPPING_AIS_AREA_PROVIDER === "aisstream" ? "aisstream" : "off"
   const portMode = environment.SHIPPING_PORT_PROVIDER === "portcast" ? "portcast" : dataMode === "real" ? "unavailable" : "mock"
   const weatherMode = environment.SHIPPING_WEATHER_PROVIDER === "open-meteo" ? "open-meteo" : dataMode === "real" ? "unavailable" : "mock"
   const configuredFeed = configureFeedProviders({ SHIPPING_DATA_MODE: environment.SHIPPING_DATA_MODE, SHIPPING_FEED_PROVIDER: environment.SHIPPING_FEED_PROVIDER })
@@ -965,28 +708,14 @@ export function configureProviders(environment: ProviderEnvironment = { ...env }
   const portDirectory = createRuntimePortDirectoryLookup(environment.SHIPPING_DATA_MODE === "real" ? "real" : "mock")
   return {
     providers: {
-      vessel: vesselMode === "aisstream"
-        ? environment.AISSTREAM_API_KEY
-          ? createAisStreamVesselProvider({ apiKey: environment.AISSTREAM_API_KEY })
-          : createUnavailableVesselProvider("AISSTREAM_API_KEY missing")
-        : vesselMode === "mock" ? MockVesselProvider : createUnavailableVesselProvider("Real Vessel provider not configured"),
       port: portMode === "portcast" ? createPortcastPublicPageProvider() : portMode === "mock" ? MockPortProvider : createUnavailablePortProvider("Real Port provider not configured"),
-      aisArea: aisAreaMode === "aisstream"
-        ? environment.AISSTREAM_API_KEY
-          ? createAisStreamAreaProvider({ apiKey: environment.AISSTREAM_API_KEY, portDirectory })
-          : createUnavailableAisAreaProvider("AISSTREAM_API_KEY missing")
-        : createUnavailableAisAreaProvider("AIS area provider disabled"),
-      schedule: dataMode === "real" ? createUnavailableScheduleProvider("Real Schedule provider not configured") : MockScheduleProvider,
       weather: weatherMode === "open-meteo" ? createOpenMeteoWeatherProvider({ portDirectory }) : weatherMode === "mock" ? MockWeatherProvider : createUnavailableWeatherProvider("Real Weather provider not configured"),
       weatherAlerts: weatherAlertProvider,
       feed: configuredFeed.provider,
     },
     modes: {
       dataMode,
-      vessel: vesselMode,
-      aisArea: aisAreaMode,
       port: portMode,
-      schedule: dataMode === "real" ? "unavailable" as const : "mock" as const,
       weather: weatherMode,
       weatherAlerts: weatherAlertMode,
       feed: configuredFeed.modes.feed,
@@ -1003,12 +732,8 @@ export const calendarProviderModes = configuredCalendar.modes
 export function createOperationalSourceContext(modes: ShippingProviderModes): OperationalSourceContext {
   const activeSourceIds = new Set<string>()
   const allowMock = modes.dataMode !== "real"
-  if (allowMock && modes.vessel === "mock") activeSourceIds.add("mock-vessel")
-  if (modes.vessel === "aisstream") activeSourceIds.add("aisstream")
-  if (modes.aisArea === "aisstream") activeSourceIds.add("aisstream-area")
   if (allowMock && modes.port === "mock") activeSourceIds.add("mock-port")
   if (modes.port === "portcast") activeSourceIds.add("portcast-public")
-  if (allowMock && modes.schedule === "mock") activeSourceIds.add("mock-schedule")
   if (allowMock && modes.weather === "mock") activeSourceIds.add("mock-weather")
   if (modes.weather === "open-meteo") activeSourceIds.add("open-meteo-marine")
   if (modes.weatherAlerts === "public" || modes.weatherAlerts === "experimental") {
@@ -1029,10 +754,7 @@ export function createOperationalSourceContext(modes: ShippingProviderModes): Op
 export const operationalSourceContext = createOperationalSourceContext(providerModes)
 
 export const realProviders = {
-  vessel: "AISStream",
-  aisArea: "AISStream area PositionReport",
   port: "Portcast public page",
-  schedule: "deferred",
   weather: "Open-Meteo Marine API",
   weatherAlerts: "JMA / TMD / BMKG official weather alerts",
   feed: "The Loadstar / The Maritime Executive / official port notices",

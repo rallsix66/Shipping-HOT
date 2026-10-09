@@ -3,14 +3,11 @@ import { motion } from "framer-motion"
 import { type ReactNode, useEffect, useState } from "react"
 import type { ArticleBlock, ArticleCompletenessStatus, ArticleTranslationBlockSource, ArticleTranslationViewStatus } from "@shared/article"
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
-import type { AisDerivedPortMetric } from "@shared/ais-area"
 import { type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
-import type { VoyageRecord } from "@shared/voyage"
-import type { VesselSearchResponse, VesselSearchResult, VesselWatchlistItem } from "@shared/vessel-search"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
-import { type ShippingResponse, type TranslationStatusResponse, useAisLatestPosition, useFeedArticle, useLatestVoyage, useShipping, useTranslationSecret, useTranslationStatus } from "./data"
+import { type ShippingResponse, type TranslationStatusResponse, useFeedArticle, useShipping, useTranslationSecret, useTranslationStatus } from "./data"
 import { FeedItemDisplayText } from "./feed-display"
-import { formatDate, formatPortMetric, formatStatus, navTone, severityTone } from "./format"
+import { formatDate, formatPortMetric, formatStatus, severityTone } from "./format"
 import { AnimatedNumber, EmptyState, Marquee, ProvenanceBadge, ProviderChip, Reveal, Segmented, StatusDot } from "./ui"
 import { myFetch } from "~/utils"
 
@@ -207,7 +204,7 @@ function WeatherChips({ weather }: { weather: WeatherDetail }) {
   )
 }
 
-function WatchChip({ kind, id, watched, onSaved }: { kind: "vessel" | "port", id: string, watched: boolean, onSaved: () => void }) {
+function WatchChip({ id, watched, onSaved }: { id: string, watched: boolean, onSaved: () => void }) {
   const [busy, setBusy] = useState(false)
   return (
     <motion.button
@@ -217,7 +214,7 @@ function WatchChip({ kind, id, watched, onSaved }: { kind: "vessel" | "port", id
       onClick={async () => {
         setBusy(true)
         try {
-          await myFetch("/shipping/watch", { method: "POST", body: { kind, id } })
+          await myFetch("/shipping/watch", { method: "POST", body: { kind: "port", id } })
           await onSaved()
         } finally {
           setBusy(false)
@@ -230,75 +227,8 @@ function WatchChip({ kind, id, watched, onSaved }: { kind: "vessel" | "port", id
   )
 }
 
-function delayCell(delay?: number) {
-  if (delay === undefined) return <span className="delay op-50">未知</span>
-  if (delay > 0) return <span className="delay on">{`+${delay} 分钟`}</span>
-  return <span className="delay ok">准点</span>
-}
-
-function AisAreaPanel({ metric }: { metric?: AisDerivedPortMetric }) {
-  const usable = metric?.coverage === "usable" && !metric.stale && metric.sourceStatus === "healthy"
-  const trendLabel = metric?.trend === "rising" ? "上升" : metric?.trend === "falling" ? "下降" : metric?.trend === "stable" ? "稳定" : "未知"
-  return (
-    <div className="glass-panel d-panel">
-      <div className="panel-h">
-        <div>
-          <span className="eyebrow-sh">AIS 衍生信息</span>
-          <h3>AIS 区域估算</h3>
-        </div>
-        <StatusBadge stale={!usable} sourceStatus={metric?.sourceStatus ?? "never_succeeded"} unknown={!metric || metric.coverage !== "usable"} />
-      </div>
-      {!usable
-        ? <p className="text-sm op-70">当前 AIS 区域样本不足，不能判断趋势。</p>
-        : (
-            <dl className="kv">
-              <dt>区域趋势</dt>
-              <dd>{trendLabel}</dd>
-              <dt>区域活跃船舶</dt>
-              <dd>
-                {metric.activeVesselCount}
-                {" "}
-                艘
-              </dd>
-              <dt>锚泊 / 靠泊</dt>
-              <dd>
-                {metric.anchoredCount}
-                {" "}
-                /
-                {" "}
-                {metric.mooredCount}
-              </dd>
-              <dt>低速船舶</dt>
-              <dd>
-                {metric.lowSpeedCount}
-                {" "}
-                艘（≤
-                {" "}
-                {metric.lowSpeedThresholdKnots}
-                {" "}
-                kn）
-              </dd>
-              <dt>样本 / 歧义样本</dt>
-              <dd>
-                {metric.sampleSize}
-                {" "}
-                /
-                {" "}
-                {metric.ambiguousSampleCount}
-              </dd>
-              <dt>观察窗口</dt>
-              <dd>{formatDate(metric.observationWindow?.endAt)}</dd>
-            </dl>
-          )}
-      <p className="mt-3 text-xs op-55">区域观察范围：配置启发式 bbox；非港口官方统计，不等同等待时间或港口拥堵等级。</p>
-    </div>
-  )
-}
-
 function relatedLabel(event: ShippingEvent, data: ShippingResponse) {
-  if (event.vesselId) return data.vessels.find(v => v.id === event.vesselId)?.name
   if (event.portId) return data.ports.find(p => p.id === event.portId)?.name
-  if (event.voyageId) return data.voyages.find(v => v.id === event.voyageId)?.voyageNumber
   return undefined
 }
 
@@ -308,8 +238,7 @@ export function HotPage() {
   const { data, isLoading, isError } = useShipping()
   if (isLoading) return <ShippingShell><LoadingState /></ShippingShell>
   if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
-  const watchedVessels = data.vessels.filter(v => v.isWatched)
-  const watchedPorts = data.ports.filter(p => p.isWatched)
+  const portList = data.ports.slice(0, 8)
   const feed = data.feedItems.slice(0, 10)
   const today = new Date().toISOString().slice(0, 10)
   const upcomingCalendar = (data.calendarEvents ?? []).filter((event) => {
@@ -318,9 +247,9 @@ export function HotPage() {
   }).slice(0, 5)
   const stats = [
     { label: "活跃 HOT", value: data.hot.length as number, tone: "stat-critical" as const },
-    { label: "关注船舶", value: watchedVessels.length as number, tone: "" as const },
-    { label: "关注港口", value: watchedPorts.length as number, tone: "stat-warning" as const },
-    { label: "数据源", value: `${data.provider.vessel} / ${data.provider.weather} / 预警 ${data.provider.weatherAlerts}` as string, tone: "" as const },
+    { label: "港口", value: data.ports.length as number, tone: "" as const },
+    { label: "资讯", value: data.feedItems.length as number, tone: "stat-warning" as const },
+    { label: "数据源", value: `港口 ${data.provider.port} / 天气 ${data.provider.weather} / 预警 ${data.provider.weatherAlerts}` as string, tone: "" as const },
   ]
   return (
     <ShippingShell title="运营态势 · 首页">
@@ -371,41 +300,18 @@ export function HotPage() {
           {stats.map(stat => <StatCell key={stat.label} label={stat.label} value={stat.value} tone={stat.tone} />)}
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Reveal className="glass-panel p-5">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-lg font-bold">关注的船舶</h2>
-              <Link to="/vessels" className="link-more">
-                查看全部
-                <span className="i-ph-arrow-right" />
-              </Link>
-            </div>
-            {watchedVessels.length === 0
-              ? <EmptyState icon="i-ph-anchor" text="还没有关注的船舶" />
-              : watchedVessels.map(v => (
-                  <Link key={v.id} to="/vessels/$id" params={{ id: v.id }} className="list-row group">
-                    <span className="flex min-w-0 items-center gap-2 font-semibold">
-                      <StatusDot tone={navTone(v.navigationStatus)} />
-                      <span className="truncate">{v.name}</span>
-                    </span>
-                    <span className="flex shrink-0 items-center gap-2 op-70">
-                      <span className="hidden sm:inline">{formatStatus(v.navigationStatus)}</span>
-                      <span className="i-ph-arrow-right transition-transform group-hover:translate-x-0.5" />
-                    </span>
-                  </Link>
-                ))}
-          </Reveal>
+        <div className="grid gap-4">
           <Reveal delay={0.08} className="glass-panel p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-lg font-bold">关注的港口</h2>
+              <h2 className="text-lg font-bold">港口概览</h2>
               <Link to="/ports" className="link-more">
                 查看全部
                 <span className="i-ph-arrow-right" />
               </Link>
             </div>
-            {watchedPorts.length === 0
-              ? <EmptyState icon="i-ph-lighthouse" text="还没有关注的港口" />
-              : watchedPorts.map(p => (
+            {portList.length === 0
+              ? <EmptyState icon="i-ph-lighthouse" text="暂无港口数据" />
+              : portList.map(p => (
                   <Link key={p.id} to="/ports/$id" params={{ id: p.id }} className="list-row group">
                     <span className="flex min-w-0 items-center gap-2 font-semibold">
                       <StatusDot tone={p.congestionLevel === undefined ? "dim" : p.congestionLevel === "critical" ? "failed" : p.congestionLevel === "high" ? "watch" : "fresh"} />
@@ -461,402 +367,6 @@ export function HotPage() {
   )
 }
 
-/* ================= 船舶 ================= */
-
-const vesselStatusOptions = [
-  { value: "all", label: "全部" },
-  { value: "under_way", label: "航行中" },
-  { value: "anchored", label: "锚泊" },
-  { value: "moored", label: "靠泊" },
-  { value: "aground", label: "搁浅" },
-  { value: "unknown", label: "未知" },
-]
-
-function sameVessel(left: Pick<VesselSearchResult, "id" | "imo" | "mmsi">, right: Pick<VesselSearchResult, "id" | "imo" | "mmsi">) {
-  return left.id === right.id
-    || Boolean(left.imo && right.imo && left.imo === right.imo)
-    || Boolean(left.mmsi && right.mmsi && left.mmsi === right.mmsi)
-}
-
-function VesselSearchPanel() {
-  const [query, setQuery] = useState("")
-  const [results, setResults] = useState<VesselSearchResult[]>([])
-  const [watchlist, setWatchlist] = useState<VesselWatchlistItem[]>([])
-  const [searching, setSearching] = useState(false)
-  const [busyId, setBusyId] = useState<string>()
-  const [message, setMessage] = useState("")
-
-  useEffect(() => {
-    let active = true
-    myFetch<VesselWatchlistItem[]>("/shipping/search/vessels/watchlist")
-      .then((items) => {
-        if (active) setWatchlist(items)
-      })
-      .catch(() => {
-        if (active) setMessage("关注列表暂时无法加载")
-      })
-    return () => {
-      active = false
-    }
-  }, [])
-
-  async function search() {
-    if (!query.trim()) {
-      setMessage("请输入船名、IMO、MMSI 或 Call Sign")
-      return
-    }
-    setSearching(true)
-    setMessage("")
-    try {
-      const response = await myFetch<VesselSearchResponse>(`/shipping/search/vessels?q=${encodeURIComponent(query.trim())}`)
-      setResults(response.results)
-      if (!response.results.length) setMessage("没有找到匹配船舶")
-    } catch (error) {
-      setResults([])
-      const responseError = error as { data?: { code?: unknown, data?: { code?: unknown } } }
-      const code = typeof responseError.data?.code === "string"
-        ? responseError.data.code
-        : typeof responseError.data?.data?.code === "string" ? responseError.data.data.code : undefined
-      setMessage(code ? `搜索数据源异常（${code}）` : "搜索暂时不可用，请检查 Provider 配置")
-    } finally {
-      setSearching(false)
-    }
-  }
-
-  async function toggleWatch(result: VesselSearchResult, watched?: VesselWatchlistItem) {
-    setBusyId(result.id)
-    setMessage("")
-    try {
-      if (watched) {
-        await myFetch(`/shipping/search/vessels/watch`, { method: "DELETE", body: { id: watched.id } })
-        setWatchlist(items => items.filter(item => !sameVessel(item, result)))
-      } else {
-        const added = await myFetch<VesselWatchlistItem>("/shipping/search/vessels/watch", { method: "POST", body: { id: result.id } })
-        setWatchlist(items => [...items.filter(item => !sameVessel(item, added)), added])
-      }
-    } catch {
-      setMessage("关注操作失败，请稍后重试")
-    } finally {
-      setBusyId(undefined)
-    }
-  }
-
-  return (
-    <div className="glass-panel mb-4 p-5">
-      <div className="mb-4">
-        <p className="eyebrow-sh">Vessel Search</p>
-        <h3 className="text-lg font-bold">搜索并关注船舶</h3>
-        <p className="mt-1 text-sm op-65">搜索结果写入 user-owned 关注列表；没有 MMSI 的船舶可保存，但暂不可进行 AIS Tracking。</p>
-      </div>
-      <form
-        className="flex flex-wrap gap-2"
-        onSubmit={(event) => {
-          event.preventDefault()
-          void search()
-        }}
-      >
-        <input
-          className="setting-input min-w-0 flex-1"
-          value={query}
-          onChange={event => setQuery(event.target.value)}
-          placeholder="DONG FANG FU / IMO / MMSI"
-          aria-label="搜索船舶"
-        />
-        <button type="submit" className="btn-gradient" disabled={searching}>{searching ? "搜索中…" : "搜索"}</button>
-      </form>
-      {message && <p className="mt-3 text-sm op-70">{message}</p>}
-      {results.length > 0 && (
-        <div className="mt-4 grid gap-2">
-          {results.map((result) => {
-            const watched = watchlist.find(item => sameVessel(item, result))
-            const historicalMmsis = new Set((result.identityHistory ?? []).map(identity => identity.mmsi).filter((mmsi): mmsi is string => Boolean(mmsi)))
-            if (result.mmsi) historicalMmsis.add(result.mmsi)
-            return (
-              <div key={result.id} className="list-row flex-wrap gap-3">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold">{result.name}</p>
-                  <p className="text-xs op-65">
-                    {result.imo ? `IMO ${result.imo}` : "IMO —"}
-                    {" · "}
-                    {result.mmsi ? `MMSI ${result.mmsi}` : "MMSI —"}
-                    {" · "}
-                    {result.callsign ?? "Call Sign —"}
-                    {" · "}
-                    {result.flag ? `Flag ${result.flag}` : "Flag —"}
-                    {" · "}
-                    {result.source}
-                  </p>
-                  {historicalMmsis.size > 1 && (
-                    <p className="mt-1 text-xs op-60">
-                      <span>包含</span>
-                      <span>{historicalMmsis.size}</span>
-                      <span>个历史 MMSI</span>
-                    </p>
-                  )}
-                  <p className="mt-1 text-xs op-60">{watched ? (result.mmsi ? "Tracking: Active" : "Unavailable (No MMSI)") : result.mmsi ? "MMSI 可用于 AIS lookup" : "暂无 MMSI，暂不可进行 AIS Tracking"}</p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  {watched && <span className="chip">已关注</span>}
-                  <button
-                    type="button"
-                    className={watched ? "btn-ghost" : "watch-chip"}
-                    disabled={busyId === result.id}
-                    onClick={() => void toggleWatch(result, watched)}
-                  >
-                    {watched ? "取消关注" : "关注"}
-                  </button>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
-
-export function VesselsPage() {
-  const { data, isLoading, isError } = useShipping()
-  const [filter, setFilter] = useState("all")
-  if (isLoading) return <ShippingShell><LoadingState /></ShippingShell>
-  if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
-  const vessels = data.vessels.filter(v => filter === "all" || v.navigationStatus === filter)
-  return (
-    <ShippingShell title="我的船舶">
-      <SecHead
-        eyebrow="运营数据"
-        title="我的船舶"
-        description="关注船队的航行状态、目的港与数据新鲜度，一行一船快速扫描。"
-        right={<Segmented id="vessel-status" options={vesselStatusOptions} value={filter} onChange={setFilter} />}
-      />
-      <VesselSearchPanel />
-      {vessels.length === 0
-        ? <div className="glass-panel"><EmptyState icon="i-ph-anchor" text="当前筛选条件下没有船舶" /></div>
-        : (
-            <div className="glass-panel vt">
-              <div className="vt-head">
-                <span className="c-name">船舶</span>
-                <span className="c-status">状态</span>
-                <span className="c-speed">航速</span>
-                <span className="c-dest">目的港</span>
-                <span className="c-eta">ETA</span>
-                <span className="c-fresh">数据</span>
-              </div>
-              {vessels.map(v => (
-                <div key={v.id} className="vt-row">
-                  <Link to="/vessels/$id" params={{ id: v.id }} className="nm c-name">
-                    {v.name}
-                    <small>
-                      {v.carrier ?? "未知船公司"}
-                      {" · "}
-                      {v.shipType ?? "船舶"}
-                      {v.isWatched && (
-                        <>
-                          {" · "}
-                          {v.mmsi ? "Tracking: Active" : "Unavailable (No MMSI)"}
-                        </>
-                      )}
-                    </small>
-                  </Link>
-                  <span className="st-c c-status">
-                    <StatusDot tone={navTone(v.navigationStatus)} />
-                    {formatStatus(v.navigationStatus)}
-                  </span>
-                  <span className="c-speed">{v.speed === undefined ? "—" : `${v.speed} 节`}</span>
-                  <span className="c-dest">{v.destination ?? "—"}</span>
-                  <span className="eta c-eta">{formatDate(v.eta)}</span>
-                  <span className="fr c-fresh">
-                    <ProvenanceBadge provenance={v.provenance} />
-                    <StatusBadge stale={v.stale} sourceStatus={v.sourceStatus} />
-                    <span className="i-ph-arrow-right op-50" />
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-    </ShippingShell>
-  )
-}
-
-export function VesselDetailPage({ id }: { id: string }) {
-  const { data, isLoading, isError, refetch } = useShipping()
-  const { data: latestPosition, isLoading: isPositionLoading } = useAisLatestPosition(id)
-  const { data: latestVoyage, isLoading: isVoyageLoading } = useLatestVoyage(id)
-  if (isLoading) return <ShippingShell><LoadingState /></ShippingShell>
-  if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
-  const vessel = data.vessels.find(v => v.id === id)
-  if (!vessel) return <ShippingShell><ErrorState /></ShippingShell>
-  const relatedEvents = data.events.filter(e => e.vesselId === id)
-  const relatedVoyages = data.voyages.filter(v => v.vesselId === id)
-  const weatherItems = data.feedItems.filter(item => item.weather && item.relatedVesselIds.includes(id)).slice(0, 2)
-  const voyagePortName = (portId?: string) => portId ? data.ports.find(port => port.id === portId || port.unlocode === portId)?.name ?? portId : "暂无官方信息"
-  return (
-    <ShippingShell title={`船舶详情 · ${vessel.name}`}>
-      <Link to="/vessels" className="back-link">
-        <span className="i-ph-arrow-left" />
-        返回船舶列表
-      </Link>
-      <div className="detail-two">
-        <div className="glass-panel d-panel">
-          <div className="d-head">
-            <span className="d-avatar"><span className="i-ph-anchor" /></span>
-            <div className="min-w-0 flex-1">
-              <h2 className="d-title">{vessel.name}</h2>
-              <p className="d-sub">
-                {vessel.carrier ?? "未知船公司"}
-                {" · "}
-                {vessel.shipType ?? "船舶"}
-                {vessel.imo ? ` · IMO ${vessel.imo}` : ""}
-              </p>
-            </div>
-            <div className="d-chips">
-              <StatusBadge stale={vessel.stale} sourceStatus={vessel.sourceStatus} />
-              <ProvenanceBadge provenance={vessel.provenance} />
-              <WatchChip kind="vessel" id={vessel.id} watched={vessel.isWatched} onSaved={() => refetch()} />
-            </div>
-          </div>
-          <dl className="kv">
-            <dt>MMSI</dt>
-            <dd>{vessel.mmsi ?? "—"}</dd>
-            <dt>呼号</dt>
-            <dd>{vessel.callSign ?? "—"}</dd>
-            <dt>位置</dt>
-            <dd>
-              {vessel.latitude ?? "—"}
-              {", "}
-              {vessel.longitude ?? "—"}
-            </dd>
-            <dt>航向</dt>
-            <dd>{vessel.course === undefined ? "—" : `${vessel.course}°`}</dd>
-            <dt>航速</dt>
-            <dd>{vessel.speed === undefined ? "—" : `${vessel.speed} 节`}</dd>
-            <dt>目的港</dt>
-            <dd>{vessel.destination ?? "—"}</dd>
-            <dt>ETA</dt>
-            <dd>{formatDate(vessel.eta)}</dd>
-            <dt>状态开始于</dt>
-            <dd>{formatDate(vessel.statusChangedAt)}</dd>
-          </dl>
-          <div className="mt-4 border-t border-white/10 pt-4">
-            <div className="panel-h">
-              <h3>AIS Tracking</h3>
-              <StatusBadge stale={latestPosition?.stale ?? true} sourceStatus={latestPosition?.sourceStatus ?? "never_succeeded"} unknown={!latestPosition} />
-            </div>
-            {!vessel.isWatched
-              ? <p className="text-sm op-70">未加入关注列表。</p>
-              : !vessel.mmsi
-                  ? <p className="text-sm op-70">Unavailable (No MMSI)</p>
-                  : isPositionLoading
-                    ? <p className="text-sm op-70">正在读取最新位置…</p>
-                    : !latestPosition
-                        ? <p className="text-sm op-70">暂无 AIS 位置。</p>
-                        : (
-                            <dl className="kv">
-                              {(latestPosition.sourceStatus === "degraded" || latestPosition.sourceStatus === "failed") && (
-                                <>
-                                  <dt>数据状态</dt>
-                                  <dd className="text-amber-700 dark:text-amber-300">
-                                    数据源异常，当前显示上次真实位置
-                                  </dd>
-                                </>
-                              )}
-                              <dt>最新位置</dt>
-                              <dd>
-                                {latestPosition.latitude.toFixed(4)}
-                                ,
-                                {" "}
-                                {latestPosition.longitude.toFixed(4)}
-                              </dd>
-                              <dt>更新时间</dt>
-                              <dd>{formatDate(latestPosition.timestamp)}</dd>
-                              <dt>数据来源</dt>
-                              <dd>
-                                {latestPosition.source === "aisstream" ? "AISStream" : latestPosition.source}
-                                {latestPosition.stale ? " · stale" : ""}
-                              </dd>
-                            </dl>
-                          )}
-          </div>
-        </div>
-        <div className="flex flex-col gap-4">
-          <div className="glass-panel d-panel">
-            <div className="panel-h"><h3>Voyage</h3></div>
-            {isVoyageLoading
-              ? <p className="text-sm op-60">正在读取航次…</p>
-              : !latestVoyage
-                  ? <p className="text-sm op-60">暂无航次数据</p>
-                  : <VoyageSummary voyage={latestVoyage} portName={voyagePortName} />}
-          </div>
-          <div className="glass-panel d-panel">
-            <div className="panel-h">
-              <h3>关联事件</h3>
-              <Link to="/events" className="link-more">
-                全部
-                <span className="i-ph-arrow-right" />
-              </Link>
-            </div>
-            {relatedEvents.length === 0
-              ? <p className="text-sm op-60">暂无关联事件</p>
-              : relatedEvents.slice(0, 3).map(event => <EventMini key={event.id} event={event} />)}
-          </div>
-          {weatherItems.length > 0 && (
-            <div className="glass-panel d-panel">
-              <div className="panel-h"><h3>关联天气资讯</h3></div>
-              {weatherItems.map(item => (
-                <div key={item.id}>
-                  <h4 className="text-sm font-bold">{item.displayTitle ?? item.title}</h4>
-                  {item.weather && <WeatherChips weather={item.weather} />}
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="glass-panel d-panel">
-            <div className="panel-h">
-              <h3>关联航次</h3>
-              <Link to="/voyages" className="link-more">
-                航次
-                <span className="i-ph-arrow-right" />
-              </Link>
-            </div>
-            {relatedVoyages.length === 0
-              ? <p className="text-sm op-60">暂无关联航次</p>
-              : relatedVoyages.map(voyage => (
-                  <Link key={voyage.id} to="/voyages/$id" params={{ id: voyage.id }} className="list-row">
-                    <span className="font-bold">{voyage.voyageNumber ?? "未知航次"}</span>
-                    <span className="flex items-center gap-2 op-70">
-                      {delayCell(voyage.delayMinutes)}
-                      <span className="i-ph-arrow-right" />
-                    </span>
-                  </Link>
-                ))}
-          </div>
-        </div>
-      </div>
-    </ShippingShell>
-  )
-}
-
-function VoyageSummary({ voyage, portName }: { voyage: VoyageRecord, portName: (portId?: string) => string }) {
-  return (
-    <dl className="kv">
-      <dt>航次号</dt>
-      <dd>{voyage.voyageNumber ?? "暂无官方信息"}</dd>
-      <dt>Origin</dt>
-      <dd>{portName(voyage.originPortId)}</dd>
-      <dt>Destination</dt>
-      <dd>{portName(voyage.destinationPortId)}</dd>
-      <dt>ETA</dt>
-      <dd>{formatDate(voyage.eta)}</dd>
-      <dt>Status</dt>
-      <dd>{formatStatus(voyage.status)}</dd>
-      <dt>Source</dt>
-      <dd>{voyage.source}</dd>
-      <dt>更新时间</dt>
-      <dd>{formatDate(voyage.lastUpdatedAt)}</dd>
-    </dl>
-  )
-}
-
 /* ================= 港口 ================= */
 
 const congestionOptions = [
@@ -902,12 +412,6 @@ export function PortsPage() {
                       {" · "}
                       {p.unlocode}
                     </small>
-                    {data.aisPortMetrics?.find(metric => metric.portId === p.id) && (
-                      <small>
-                        AIS 区域：
-                        {data.aisPortMetrics.find(metric => metric.portId === p.id)?.trend === "rising" ? "上升" : data.aisPortMetrics.find(metric => metric.portId === p.id)?.trend === "falling" ? "下降" : "未知"}
-                      </small>
-                    )}
                   </Link>
                   <span className="c-country">{p.country}</span>
                   <span className="gauge-cell c-cong">
@@ -918,7 +422,7 @@ export function PortsPage() {
                     {formatPortMetric(p.waitingVessels, "艘")}
                   </span>
                   <span className="c-watch">
-                    <WatchChip kind="port" id={p.id} watched={p.isWatched} onSaved={() => refetch()} />
+                    <WatchChip id={p.id} watched={p.isWatched} onSaved={() => refetch()} />
                   </span>
                   <span className="fr c-fresh">
                     <ProvenanceBadge provenance={p.provenance} />
@@ -941,7 +445,6 @@ export function PortDetailPage({ id }: { id: string }) {
   if (!port) return <ShippingShell><ErrorState /></ShippingShell>
   const relatedEvents = data.events.filter(e => e.portId === id)
   const relatedFeed = data.feedItems.filter(item => item.relatedPortIds.includes(id)).slice(0, 4)
-  const aisAreaMetric = data.aisPortMetrics?.find(metric => metric.portId === id)
   return (
     <ShippingShell title={`港口详情 · ${port.name}`}>
       <Link to="/ports" className="back-link">
@@ -965,7 +468,7 @@ export function PortDetailPage({ id }: { id: string }) {
             <div className="d-chips">
               <StatusBadge stale={port.stale} sourceStatus={port.sourceStatus} />
               <ProvenanceBadge provenance={port.provenance} />
-              <WatchChip kind="port" id={port.id} watched={port.isWatched} onSaved={() => refetch()} />
+              <WatchChip id={port.id} watched={port.isWatched} onSaved={() => refetch()} />
             </div>
           </div>
           <dl className="kv">
@@ -1024,7 +527,6 @@ export function PortDetailPage({ id }: { id: string }) {
           </dl>
         </div>
         <div className="flex flex-col gap-4">
-          <AisAreaPanel metric={aisAreaMetric} />
           <div className="glass-panel d-panel">
             <div className="panel-h">
               <h3>关联事件</h3>
@@ -1057,180 +559,6 @@ export function PortDetailPage({ id }: { id: string }) {
                   </a>
                 ))}
           </div>
-        </div>
-      </div>
-    </ShippingShell>
-  )
-}
-
-/* ================= 航次 ================= */
-
-const voyageDelayOptions = [
-  { value: "all", label: "全部" },
-  { value: "delay", label: "延误" },
-  { value: "ontime", label: "准点" },
-]
-
-export function VoyagesPage() {
-  const { data, isLoading, isError } = useShipping()
-  const [filter, setFilter] = useState("all")
-  if (isLoading) return <ShippingShell><LoadingState /></ShippingShell>
-  if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
-  const voyages = data.voyages.filter(v => filter === "all" || (filter === "delay" ? v.delayMinutes !== undefined && v.delayMinutes > 0 : v.delayMinutes !== undefined && v.delayMinutes <= 0))
-  const vesselName = (vesselId: string) => data.vessels.find(v => v.id === vesselId)?.name ?? vesselId
-  const portName = (portId: string) => data.ports.find(p => p.id === portId)?.name ?? portId
-  return (
-    <ShippingShell title="航次">
-      <SecHead
-        eyebrow="航次计划"
-        title="航次"
-        description="对比跟踪基线与本地可用的最新计划时间，延误内联展示、一键筛选。"
-        right={<Segmented id="voyage-delay" options={voyageDelayOptions} value={filter} onChange={setFilter} />}
-      />
-      {voyages.length === 0
-        ? <div className="glass-panel"><EmptyState icon="i-ph-compass" text="当前筛选条件下没有航次" /></div>
-        : (
-            <div className="glass-panel vt voyages">
-              <div className="vt-head">
-                <span className="c-no">航次</span>
-                <span className="c-vessel">船舶</span>
-                <span className="c-route">航线</span>
-                <span className="c-eta">最新 ETA</span>
-                <span className="c-delay">延误</span>
-                <span className="c-fresh">数据</span>
-              </div>
-              {voyages.map(v => (
-                <div key={v.id} className="vt-row">
-                  <Link to="/voyages/$id" params={{ id: v.id }} className="nm c-no">
-                    {v.voyageNumber ?? "未知航次"}
-                    <small>
-                      基准
-                      {" "}
-                      {formatDate(v.baselineEta)}
-                    </small>
-                  </Link>
-                  <span className="c-vessel">{vesselName(v.vesselId)}</span>
-                  <span className="c-route">
-                    {v.originPortId ? portName(v.originPortId) : "暂无官方信息"}
-                    {" → "}
-                    {v.destinationPortId ? portName(v.destinationPortId) : "暂无官方信息"}
-                  </span>
-                  <span className="eta c-eta">{v.status === "arrived" ? "已到港" : formatDate(v.latestEta)}</span>
-                  <span className="c-delay">{delayCell(v.delayMinutes)}</span>
-                  <span className="fr c-fresh">
-                    <ProvenanceBadge provenance={v.provenance} />
-                    <StatusBadge stale={v.stale} sourceStatus={v.sourceStatus} />
-                    <span className="i-ph-arrow-right op-50" />
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-    </ShippingShell>
-  )
-}
-
-export function VoyageDetailPage({ id }: { id: string }) {
-  const { data, isLoading, isError } = useShipping()
-  if (isLoading) return <ShippingShell><LoadingState /></ShippingShell>
-  if (isError || !data) return <ShippingShell><ErrorState /></ShippingShell>
-  const voyage = data.voyages.find(v => v.id === id)
-  if (!voyage) return <ShippingShell><ErrorState /></ShippingShell>
-  const vessel = data.vessels.find(v => v.id === voyage.vesselId)
-  const origin = data.ports.find(p => p.id === voyage.originPortId)
-  const destination = data.ports.find(p => p.id === voyage.destinationPortId)
-  const relatedEvents = data.events.filter(e => e.voyageId === id)
-  const weatherItems = data.feedItems.filter(item => item.weather && item.relatedVoyageIds.includes(id)).slice(0, 2)
-  return (
-    <ShippingShell title={`航次详情 · ${voyage.voyageNumber ?? "未知航次"}`}>
-      <Link to="/voyages" className="back-link">
-        <span className="i-ph-arrow-left" />
-        返回航次列表
-      </Link>
-      <div className="detail-two">
-        <div className="glass-panel d-panel">
-          <div className="d-head">
-            <span className="d-avatar"><span className="i-ph-compass" /></span>
-            <div className="min-w-0 flex-1">
-              <h2 className="d-title">{voyage.voyageNumber ?? "未知航次"}</h2>
-              <p className="d-sub">
-                {origin?.name ?? voyage.originPortId ?? "暂无官方信息"}
-                {" → "}
-                {destination?.name ?? voyage.destinationPortId ?? "暂无官方信息"}
-              </p>
-            </div>
-            <div className="d-chips">
-              <StatusBadge stale={voyage.stale} sourceStatus={voyage.sourceStatus} />
-              <ProvenanceBadge provenance={voyage.provenance} />
-              <span className="chip">{formatStatus(voyage.status)}</span>
-            </div>
-          </div>
-          <dl className="kv">
-            <dt>船舶</dt>
-            <dd>
-              {vessel
-                ? (
-                    <Link to="/vessels/$id" params={{ id: vessel.id }} className="link-more">
-                      {vessel.name}
-                      <span className="i-ph-arrow-right" />
-                    </Link>
-                  )
-                : voyage.vesselId}
-            </dd>
-            <dt>基准 ETD</dt>
-            <dd>
-              {formatDate(voyage.baselineEtd)}
-              {" · "}
-              {voyage.baselineEtdSource ?? "—"}
-            </dd>
-            <dt>基准 ETA</dt>
-            <dd>
-              {formatDate(voyage.baselineEta)}
-              {" · "}
-              {voyage.baselineEtaSource ?? "—"}
-            </dd>
-            <dt>最新 ETD</dt>
-            <dd>
-              {formatDate(voyage.latestEtd)}
-              {" · "}
-              {voyage.latestEtdSource ?? "—"}
-            </dd>
-            <dt>最新 ETA</dt>
-            <dd>
-              {formatDate(voyage.latestEta)}
-              {" · "}
-              {voyage.latestEtaSource ?? "—"}
-            </dd>
-            <dt>延误</dt>
-            <dd>{delayCell(voyage.delayMinutes)}</dd>
-            <dt>观测时间</dt>
-            <dd>{formatDate(voyage.latestEtaObservedAt)}</dd>
-          </dl>
-        </div>
-        <div className="flex flex-col gap-4">
-          <div className="glass-panel d-panel">
-            <div className="panel-h">
-              <h3>关联事件</h3>
-              <Link to="/events" className="link-more">
-                全部
-                <span className="i-ph-arrow-right" />
-              </Link>
-            </div>
-            {relatedEvents.length === 0
-              ? <p className="text-sm op-60">暂无关联事件</p>
-              : relatedEvents.slice(0, 3).map(event => <EventMini key={event.id} event={event} />)}
-          </div>
-          {weatherItems.length > 0 && (
-            <div className="glass-panel d-panel">
-              <div className="panel-h"><h3>航线天气资讯</h3></div>
-              {weatherItems.map(item => (
-                <div key={item.id}>
-                  <h4 className="text-sm font-bold">{item.displayTitle ?? item.title}</h4>
-                  {item.weather && <WeatherChips weather={item.weather} />}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </ShippingShell>
@@ -2054,17 +1382,14 @@ export function SettingsPage() {
                     )}
           </motion.button>
           <div className="flex flex-wrap gap-2">
-            <ProviderChip label="船位" value={data.provider.vessel} />
             <ProviderChip label="天气" value={data.provider.weather} />
             <ProviderChip label="官方预警" value={weatherAlertLabel} />
             <ProviderChip label="港口" value={data.provider.port} />
-            <ProviderChip label="AIS 区域" value={data.provider.aisArea ?? "off"} />
-            <ProviderChip label="班期" value={data.provider.schedule} />
             <ProviderChip label="资讯" value={data.provider.feed} />
             <ProviderChip label="日历" value={data.provider.calendar} />
           </div>
         </div>
-        <p className="mt-4 text-xs op-60">数据源：AISStream（船位，可选 key）、AISStream 区域 PositionReport（显式开启后提供派生趋势）、Open-Meteo Marine（天气模型）、JMA / TMD / BMKG（官方天气预警，可选 public / experimental）、Portcast 公共港口页面（低频公开字段）、Shipping Feed（默认 Mock，可选公开 RSS/官方公告）与 Mock Schedule。</p>
+        <p className="mt-4 text-xs op-60">数据源：Open-Meteo Marine（天气模型）、JMA / TMD / BMKG（官方天气预警，可选 public / experimental）、Portcast 公共港口页面（低频公开字段）、Shipping Feed（默认 Mock，可选公开 RSS/官方公告）与内置国家日历参考。</p>
       </div>
       <SecHead eyebrow="可选增强" title="AI 翻译" description="为当前 Feed 资讯提供可控的 DeepSeek 翻译增强，原始事实始终保留。" />
       <section className="glass-panel translation-panel max-w-2xl p-6" aria-label="AI 翻译设置">

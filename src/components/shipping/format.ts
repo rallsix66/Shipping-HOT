@@ -95,8 +95,8 @@ export function formatPortMetric(value: number | undefined, unit: string) {
   return value === undefined ? "暂无数据" : `${value} ${unit}`
 }
 
-export function providerSummary(provider: { vessel: string, weather: string, port: string, schedule: string, feed: string, calendar: string, weatherAlerts: string }) {
-  const providers = [provider.vessel, provider.weather, provider.port, provider.schedule, provider.feed, provider.calendar]
+export function providerSummary(provider: { weather: string, port: string, feed: string, calendar: string, weatherAlerts: string }) {
+  const providers = [provider.weather, provider.port, provider.feed, provider.calendar]
   const allMock = providers.every(value => value === "mock") && provider.weatherAlerts === "off"
   return {
     allMock,

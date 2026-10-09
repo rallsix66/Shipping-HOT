@@ -1,17 +1,16 @@
 // S7 Clean Local Integrated Acceptance harness.
 //
 // SCOPE: end-to-end integration acceptance on this Windows machine for the
-// finished local V1 — fresh isolated SQLite initialization + schema migration,
-// restart persistence, production build served on 127.0.0.1, and the three
-// primary user flows over the real production build in Real Mode:
+// port-only product (R1 retired vessel/AIS/voyage) — fresh isolated SQLite
+// initialization + schema migration, restart persistence, production build
+// served on 127.0.0.1, and three browser flows in Real Mode:
 //
-//   Flow A  vessel identity -> tracking: name search (provider-free cache hit),
-//           canonical IMO/MMSI, no same-name mis-binding, AIS latest position,
-//           Voyage/Destination/ETA, and explicit unknown instead of fabrication
-//   Flow B  feed -> article: list, detail, 原文 / 中文 / 原文 / 中文 reading,
-//           historical-version labelling (integration only; S5 acceptance is NOT
-//           re-run and its BLOCKED real-long-article items stay BLOCKED)
-//   Flow C  ports / weather / calendar: load, scope switching, weather windows
+//   Flow A  home / retired routes: HOT loads; /vessels and /voyages 404 with no
+//           dead nav links; optional vessel search API gone; port list still works
+//   Flow B  feed -> article: list, detail, 原文 / 中文 / bilingual / historical
+//           labelling (integration only; S5 real-long-article stays BLOCKED)
+//   Flow C  ports / weather / calendar / settings / events: load, scope switching,
+//           weather windows, settings; retired routes stay 404
 //
 // HONESTY: fixtures are synthetic (see scripts/s7-local-seed.ts). This harness
 // proves integration and Real-Mode boundary behavior, never live-provider
@@ -39,13 +38,11 @@ const SEED_ENTRY = join(ROOT, "scripts", "s7-local-seed.ts")
 const PORT = Number(process.env.E2E_S7_PORT ?? "4477")
 const BASE = (process.env.E2E_BASE_URL ?? `http://127.0.0.1:${PORT}`).replace(/\/$/, "")
 const DEBUG_PORT = Number(process.env.E2E_DEBUG_PORT ?? "9345")
-const EXPECTED_SCHEMA_VERSION = 13
+const EXPECTED_SCHEMA_VERSION = 14
 
 const REQUIRED_TABLES = [
   "app_metadata",
-  "vessels",
   "ports",
-  "voyages",
   "feed_items",
   "events",
   "calendar_events",
@@ -54,11 +51,6 @@ const REQUIRED_TABLES = [
   "provider_runtime",
   "sync_runs",
   "port_directory",
-  "vessel_metadata",
-  "vessel_search_cache",
-  "ais_positions",
-  "ais_latest_positions",
-  "voyage_eta_history",
   "feed_articles",
   "article_versions",
   "article_blocks",
@@ -109,7 +101,6 @@ const PROVIDER_SECRET_ENV_KEYS = [
 const failures = []
 const runtimeErrors = []
 const unexpectedApiServerErrors = []
-const expectedProviderResponses = []
 const externalRequests = []
 let passCount = 0
 
@@ -145,12 +136,6 @@ function externalHosts() {
 
 function isBenign(message) {
   return message.includes("favicon") || message.includes("swx.js") || message.includes("service-worker")
-}
-
-/** Local-calendar date fragment, matching how the UI formats timestamps. */
-function localDateFragment(iso) {
-  const date = new Date(iso)
-  return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
 }
 
 function sha256Prefix(path) {
@@ -208,9 +193,6 @@ function startServer(tag) {
       PORT: String(PORT),
       NITRO_PORT: String(PORT),
       SHIPPING_DATA_MODE: "real",
-      // Pin the search provider so the unconfigured branch is deterministic once
-      // its credential has been scrubbed.
-      SHIPPING_VESSEL_SEARCH_PROVIDER: "gfw",
       // Nothing but the browser may touch the database during the browse window,
       // so any counter delta is attributable to the browsing itself.
       SHIPPING_RUNTIME_ENABLED: "false",
@@ -275,6 +257,10 @@ function count(db, sql, ...params) {
   return Number(row?.count ?? 0)
 }
 
+function tableExists(db, name) {
+  return Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?").get(name))
+}
+
 /**
  * The browse window must be read-only. `provider_runtime` state is compared as
  * a whole because row counts cannot see an in-place UPDATE.
@@ -289,20 +275,13 @@ function snapshotCounters(db) {
     translationCacheRows: count(db, "SELECT COUNT(*) AS count FROM translation_cache"),
     providerRuntimeRows: count(db, "SELECT COUNT(*) AS count FROM provider_runtime"),
     providerRuntimeState: JSON.stringify(runtimeState),
-    aisPositionRows: count(db, "SELECT COUNT(*) AS count FROM ais_positions"),
-    aisLatestRows: count(db, "SELECT COUNT(*) AS count FROM ais_latest_positions"),
     articleVersionRows: count(db, "SELECT COUNT(*) AS count FROM article_versions"),
     articleFetchRows: count(db, "SELECT COUNT(*) AS count FROM feed_articles"),
-    voyageRows: count(db, "SELECT COUNT(*) AS count FROM voyages"),
-    vesselRows: count(db, "SELECT COUNT(*) AS count FROM vessels"),
     portRows: count(db, "SELECT COUNT(*) AS count FROM ports"),
     feedRows: count(db, "SELECT COUNT(*) AS count FROM feed_items"),
     eventRows: count(db, "SELECT COUNT(*) AS count FROM events"),
     calendarEventRows: count(db, "SELECT COUNT(*) AS count FROM calendar_events"),
     articleBlockRows: count(db, "SELECT COUNT(*) AS count FROM article_blocks"),
-    vesselMetadataRows: count(db, "SELECT COUNT(*) AS count FROM vessel_metadata"),
-    vesselSearchCacheRows: count(db, "SELECT COUNT(*) AS count FROM vessel_search_cache"),
-    voyageEtaHistoryRows: count(db, "SELECT COUNT(*) AS count FROM voyage_eta_history"),
     portDirectoryRows: count(db, "SELECT COUNT(*) AS count FROM port_directory"),
     appMetadataRows: count(db, "SELECT COUNT(*) AS count FROM app_metadata"),
   }
@@ -311,6 +290,7 @@ function snapshotCounters(db) {
 function diffCounters(before, after) {
   const delta = {}
   for (const key of Object.keys(before)) {
+    if (before[key] === undefined || after[key] === undefined) continue
     if (typeof before[key] === "number" && typeof after[key] === "number") delta[key] = after[key] - before[key]
     else if (before[key] !== after[key]) delta[key] = "changed"
   }
@@ -335,14 +315,12 @@ async function main() {
     hermeticity: {
       isolatedRoot: ISOLATED_ROOT,
       scrubbedProviderEnvKeys: PROVIDER_SECRET_ENV_KEYS,
-      forcedVesselSearchProvider: "gfw",
       browserEgressInterception: "CDP Network.requestWillBeSent for http/https requests whose host is not the loopback server",
       serverEgressBound: "SHIPPING_RUNTIME_ENABLED=false, provider credentials deleted from the child environment, and zero provider/usage/runtime/cache deltas across the browse window",
     },
     phases: {},
     flows: [],
     counters: {},
-    expectedProviderResponses: [],
     retainedDatabases: {},
   }
 
@@ -378,8 +356,9 @@ async function main() {
     const tables = new Set(db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all().map(row => String(row.name)))
     const missingTables = REQUIRED_TABLES.filter(table => !tables.has(table))
     check(missingTables.length === 0, `all ${REQUIRED_TABLES.length} required business tables exist${missingTables.length ? ` (missing: ${missingTables.join(", ")})` : ""}`)
-    const seedIsolation = { vessels: count(db, "SELECT COUNT(*) AS count FROM vessels"), ports: count(db, "SELECT COUNT(*) AS count FROM ports"), feedItems: count(db, "SELECT COUNT(*) AS count FROM feed_items") }
-    check(seedIsolation.vessels === 0 && seedIsolation.ports === 0 && seedIsolation.feedItems === 0, `fresh database carries no business rows (vessels ${seedIsolation.vessels}, ports ${seedIsolation.ports}, feed ${seedIsolation.feedItems})`)
+    check(tableExists(db, "_retired_vessels"), "migration 014 archived vessel tables as _retired_vessels on fresh init")
+    const seedIsolation = { ports: count(db, "SELECT COUNT(*) AS count FROM ports"), feedItems: count(db, "SELECT COUNT(*) AS count FROM feed_items") }
+    check(seedIsolation.ports === 0 && seedIsolation.feedItems === 0, `fresh database carries no business rows (ports ${seedIsolation.ports}, feed ${seedIsolation.feedItems})`)
     check(count(db, "SELECT COUNT(*) AS count FROM port_directory") > 0, "port_directory baseline was migrated in")
     evidence.phases.freshInit = { schemaVersion: metadata?.schema_version, tables: tables.size, seedIsolation }
     await stopServer(server)
@@ -398,29 +377,23 @@ async function main() {
 
     db = openDatabase()
     const seeded = {
-      realVessels: count(db, "SELECT COUNT(*) AS count FROM vessels WHERE source_type IN ('real','imported','derived')"),
-      mockVessels: count(db, "SELECT COUNT(*) AS count FROM vessels WHERE source_type = 'mock'"),
+      realPorts: count(db, "SELECT COUNT(*) AS count FROM ports WHERE source_type IN ('real','imported','derived')"),
       mockPorts: count(db, "SELECT COUNT(*) AS count FROM ports WHERE source_type = 'mock'"),
       mockFeed: count(db, "SELECT COUNT(*) AS count FROM feed_items WHERE source_type = 'mock'"),
-      voyages: count(db, "SELECT COUNT(*) AS count FROM voyages"),
-      aisPositions: count(db, "SELECT COUNT(*) AS count FROM ais_positions"),
-      aisLatest: count(db, "SELECT COUNT(*) AS count FROM ais_latest_positions"),
+      realFeed: count(db, "SELECT COUNT(*) AS count FROM feed_items WHERE source_type IN ('real','imported','derived')"),
       articleVersions: count(db, "SELECT COUNT(*) AS count FROM article_versions"),
       articleBlocks: count(db, "SELECT COUNT(*) AS count FROM article_blocks"),
       translationCache: count(db, "SELECT COUNT(*) AS count FROM translation_cache"),
       legacyCache: count(db, "SELECT COUNT(*) AS count FROM translation_cache WHERE model <> 'deepseek-v4-flash'"),
-      searchCache: count(db, "SELECT COUNT(*) AS count FROM vessel_search_cache"),
+      portWatchlist: count(db, "SELECT COUNT(*) AS count FROM port_watchlist"),
     }
-    check(seeded.realVessels === 3, `3 real-lineage vessels seeded (got ${seeded.realVessels})`)
-    check(seeded.voyages === 2, `2 voyage records seeded (got ${seeded.voyages})`)
-    check(seeded.aisPositions === 3 && seeded.aisLatest === 1, `AIS history 3 / latest 1 seeded (got ${seeded.aisPositions}/${seeded.aisLatest})`)
+    check(seeded.realPorts === 2, `2 real-lineage ports seeded (got ${seeded.realPorts})`)
+    check(seeded.realFeed === 2, `2 real-lineage feed items seeded (got ${seeded.realFeed})`)
     check(seeded.articleVersions === 1 && seeded.articleBlocks === 6, `article version 1 / 6 blocks seeded (got ${seeded.articleVersions}/${seeded.articleBlocks})`)
     check(seeded.translationCache === 6, `6 translated blocks seeded (got ${seeded.translationCache})`)
     check(seeded.legacyCache === 1, `1 historical-model cache row seeded (got ${seeded.legacyCache})`)
-    check(seeded.searchCache === 1, `provider-free vessel search cache row seeded (got ${seeded.searchCache})`)
-    // The decoys must really be in the database, otherwise the Real-Mode
-    // read-filter checks below would pass vacuously.
-    check(seeded.mockVessels === 1 && seeded.mockPorts === 1 && seeded.mockFeed === 1, `mock-source decoy rows are present in the database (${seeded.mockVessels}/${seeded.mockPorts}/${seeded.mockFeed})`)
+    check(seeded.portWatchlist >= 1, `port watchlist row seeded (got ${seeded.portWatchlist})`)
+    check(seeded.mockPorts === 1 && seeded.mockFeed === 1, `mock-source decoy rows are present in the database (${seeded.mockPorts}/${seeded.mockFeed})`)
     evidence.phases.seed = seeded
     db.close()
     db = undefined
@@ -434,23 +407,19 @@ async function main() {
     const snapshotResponse = await fetch(`${BASE}/api/shipping`)
     check(snapshotResponse.status === 200, `GET /api/shipping after restart -> ${snapshotResponse.status}`)
     const snapshot = await snapshotResponse.json()
-    const vesselIds = (snapshot.vessels ?? []).map(vessel => vessel.id)
     const portIds = (snapshot.ports ?? []).map(port => port.id)
     const feedIds = (snapshot.feedItems ?? []).map(item => item.id)
-    check(vesselIds.includes(expectations.vesselId), `canonical vessel survived the restart (${expectations.vesselId})`)
-    check(vesselIds.includes(expectations.identityOnlyVesselId), "identity-only vessel survived the restart")
     check(portIds.includes(expectations.portId), `port survived the restart (${expectations.portId})`)
     check(feedIds.includes(expectations.articleFeedId) && feedIds.includes(expectations.weatherFeedId), "both feed items survived the restart")
-    check((snapshot.voyages ?? []).length === 2, `both voyage records are readable after restart (${(snapshot.voyages ?? []).length})`)
+    check(!("vessels" in snapshot) || (snapshot.vessels ?? []).length === 0, "snapshot carries no vessel records after R1")
+    check(!("voyages" in snapshot) || (snapshot.voyages ?? []).length === 0, "snapshot carries no voyage records after R1")
 
     section("Phase 3b — Real-Mode boundary: no Mock leakage, no Mock fallback")
-    const allIds = [...vesselIds, ...portIds, ...feedIds, ...(snapshot.voyages ?? []).map(voyage => voyage.id)]
-    check(!allIds.includes(expectations.mockDecoyVesselId) && !allIds.includes(expectations.mockDecoyPortId) && !allIds.includes(expectations.mockDecoyFeedId), "mock-source decoy rows stay invisible in Real Mode even though they exist in SQLite")
+    const allIds = [...portIds, ...feedIds]
+    check(!allIds.includes(expectations.mockDecoyPortId) && !allIds.includes(expectations.mockDecoyFeedId), "mock-source decoy rows stay invisible in Real Mode even though they exist in SQLite")
     const provenanceSources = [
-      ...(snapshot.vessels ?? []).map(item => item.provenance?.sourceType),
       ...(snapshot.ports ?? []).map(item => item.provenance?.sourceType),
       ...(snapshot.feedItems ?? []).map(item => item.provenance?.sourceType),
-      ...(snapshot.voyages ?? []).map(item => item.provenance?.sourceType),
       ...(snapshot.events ?? []).map(item => item.provenance?.sourceType),
     ]
     check(provenanceSources.every(value => value !== "mock"), `no payload record carries mock provenance (${provenanceSources.filter(value => value === "mock").length} mock of ${provenanceSources.length})`)
@@ -460,11 +429,8 @@ async function main() {
     const mockStrings = JSON.stringify(snapshot).match(/MOCK DECOY/g) ?? []
     check(mockStrings.length === 0, `no decoy content leaked into the snapshot payload (${mockStrings.length})`)
 
-    const searchCacheResponse = await (await fetch(`${BASE}/api/shipping/search/vessels?q=${encodeURIComponent(expectations.searchFixture.query)}`)).json()
-    check(searchCacheResponse?.cacheHit === true, `cached identity lookup is served without a live provider call (cacheHit=${searchCacheResponse?.cacheHit})`)
-    check(searchCacheResponse?.providerId === expectations.searchFixture.providerId, `cache answer attributed to provider ${searchCacheResponse?.providerId}`)
-    check((searchCacheResponse?.results ?? []).length === 1, `one canonical identity returned for the shared name (${(searchCacheResponse?.results ?? []).length})`)
-    check(searchCacheResponse?.results?.[0]?.imo === expectations.searchFixture.canonicalImo && searchCacheResponse?.results?.[0]?.mmsi === expectations.searchFixture.canonicalMmsi, `canonical identity carries IMO ${searchCacheResponse?.results?.[0]?.imo} / MMSI ${searchCacheResponse?.results?.[0]?.mmsi}`)
+    const vesselSearchStatus = (await fetch(`${BASE}/api/shipping/search/vessels?q=test`)).status
+    check(vesselSearchStatus === 404, `retired vessel search endpoint returns 404 (got ${vesselSearchStatus})`)
 
     const countersStart = snapshotCounters(db)
 
@@ -510,10 +476,7 @@ async function main() {
       if (msg.method === "Network.responseReceived") {
         const { url, status } = msg.params.response
         if (url.includes("/api/") && status >= 500) {
-          const expected = url.includes(encodeURIComponent(expectations.providerUnavailableQuery))
-          const record = `api ${status}: ${url}`
-          if (expected) expectedProviderResponses.push(record)
-          else unexpectedApiServerErrors.push(record)
+          unexpectedApiServerErrors.push(`api ${status}: ${url}`)
         }
       }
       if (msg.method === "Network.requestWillBeSent") {
@@ -544,7 +507,7 @@ async function main() {
       // The shell paints immediately with a loading state, so content assertions
       // must wait for the data query to settle.
       await waitFor(async () => !(await evaluate(`document.body.innerText`)).includes("正在加载 Shipping HOT 数据"), 20000)
-      if (path.startsWith("/vessels/") || path.startsWith("/ports/") || path.startsWith("/voyages/")) {
+      if (path.startsWith("/ports/")) {
         await waitFor(async () => (await evaluate(`document.querySelectorAll('.d-title').length`)) > 0, 20000)
       }
       if (path.startsWith("/feed/")) {
@@ -574,146 +537,50 @@ async function main() {
       await new Promise(resolve => setTimeout(resolve, 400))
     }
 
+    const navigateBare = async (path) => {
+      const loaded = cdp.once("Page.loadEventFired")
+      await cdp.send("Page.navigate", { url: `${BASE}${path}` })
+      await loaded
+      await new Promise(resolve => setTimeout(resolve, 400))
+    }
+
+    const navHasRetiredLinks = async () => evaluate(`(() => {
+      const hrefs = [...document.querySelectorAll('a[href]')].map(node => node.getAttribute('href') ?? '')
+      return hrefs.some(href => href === '/vessels' || href.startsWith('/vessels/') || href === '/voyages' || href.startsWith('/voyages/'))
+    })()`)
+
     /* ------------------------------------------------------------- Flow A */
 
-    section("Flow A — vessel name -> canonical identity -> tracking -> voyage/ETA")
+    section("Flow A — home, retired routes, navigation boundary")
     const flowA = []
     const pushA = (ok, message) => {
       flowA.push({ ok, message })
       check(ok, `[A] ${message}`)
     }
 
-    await navigate("/vessels")
+    await navigate("/")
     let text = await bodyText()
-    pushA(norm(text).includes("搜索并关注船舶"), "vessel page renders the search panel")
-    pushA(text.includes(expectations.vesselName) && text.includes(expectations.decoyVesselName), "both same-name vessels are listed by distinct records")
+    pushA(text.length > 0 && !text.includes("MOCK DECOY"), "home HOT loads with real-data-only content")
+    pushA(text.includes("HOT") || text.includes("热点") || text.includes("事件"), "home renders the HOT console surface")
+    pushA(await navHasRetiredLinks() === false, "home navigation has no vessel or voyage links")
 
-    // Same name must never collapse the two identities.
-    const duplicateNames = (snapshot.vessels ?? []).filter(vessel => vessel.name === expectations.vesselName)
-    pushA(duplicateNames.length === 2 && new Set(duplicateNames.map(vessel => vessel.id)).size === 2, `same vessel name maps to 2 distinct ids (${duplicateNames.map(v => `${v.id}:${v.imo}`).join(", ")})`)
-    pushA(duplicateNames.some(vessel => vessel.imo === expectations.vesselImo) && duplicateNames.some(vessel => vessel.imo === expectations.decoyVesselImo), `the two records keep distinct IMOs ${expectations.vesselImo} / ${expectations.decoyVesselImo}`)
-
-    // Search input: cached, provider-free identity answer.
-    const typed = await evaluate(`(() => {
-      const input = document.querySelector('input[aria-label="搜索船舶"]')
-      if (!input) return false
-      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-      setter.call(input, ${JSON.stringify(expectations.searchFixture.query)})
-      input.dispatchEvent(new Event('input', { bubbles: true }))
-      return true
-    })()`)
-    pushA(typed === true, "search box accepts the vessel name")
-    await clickByText("button", "搜索")
-    const searchRow = await waitFor(async () => evaluate(`(() => {
-      const row = [...document.querySelectorAll('.list-row')].find(node => node.textContent.includes('IMO ${expectations.searchFixture.canonicalImo}'))
-      return row ? row.textContent.replace(/\\s+/g, ' ').trim() : false
-    })()`), 15000)
-    pushA(Boolean(searchRow), `search returns the canonical identity IMO ${expectations.searchFixture.canonicalImo}`)
-    pushA(Boolean(searchRow) && searchRow.includes(`MMSI ${expectations.searchFixture.canonicalMmsi}`), `search result carries MMSI ${expectations.searchFixture.canonicalMmsi}`)
-    pushA(Boolean(searchRow) && !searchRow.includes(`IMO ${expectations.decoyVesselImo}`), "the same-name vessel with a different IMO is not mis-bound to this identity")
-
-    // Honest provider-unavailable path: no fabrication, coded failure.
-    const unavailable = await api(`/api/shipping/search/vessels?q=${encodeURIComponent(expectations.providerUnavailableQuery)}`)
-    pushA(unavailable.status === 503, `unconfigured Vessel Search fails closed with 503 (got ${unavailable.status})`)
-    pushA(unavailable.body?.data?.code === "provider_unavailable", `fail-closed response carries code provider_unavailable (got ${unavailable.body?.data?.code ?? unavailable.body?.message})`)
-    await evaluate(`(() => {
-      const input = document.querySelector('input[aria-label="搜索船舶"]')
-      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-      setter.call(input, ${JSON.stringify(expectations.providerUnavailableQuery)})
-      input.dispatchEvent(new Event('input', { bubbles: true }))
-    })()`)
-    await clickByText("button", "搜索")
-    const searchPanelState = await waitFor(async () => evaluate(`(() => {
-      const input = document.querySelector('input[aria-label="搜索船舶"]')
-      const panel = input?.closest('.glass-panel')
-      if (!panel) return false
-      const message = panel.textContent.includes('搜索数据源异常') || panel.textContent.includes('搜索暂时不可用')
-      if (!message) return false
-      const fabricated = [...panel.querySelectorAll('.list-row')].filter(row => /IMO\\s+\\d{7}/.test(row.textContent)).length
-      return { message, fabricated, text: panel.textContent.replace(/\\s+/g, ' ').trim() }
-    })()`), 15000)
-    pushA(Boolean(searchPanelState?.message), "the UI reports an honest unavailable state instead of inventing a vessel")
-    pushA(searchPanelState?.fabricated === 0, `no result row is fabricated for an unresolved query (${searchPanelState?.fabricated})`)
-    const unresolvedPanel = searchPanelState?.text ?? ""
-    pushA(!/MMSI\s+\d{9}/.test(unresolvedPanel), "the unresolved query leaves the search panel free of invented MMSI identities")
-    evidence.expectedProviderResponses = expectedProviderResponses
-
-    // Vessel detail: identity, AIS, voyage/ETA.
-    await navigate(`/vessels/${expectations.vesselId}`)
+    await navigateBare("/vessels")
     text = await bodyText()
-    const pageNorm = norm(text)
-    pushA(pageNorm.includes(norm(`IMO ${expectations.vesselImo}`)), `detail shows IMO ${expectations.vesselImo}`)
-    pushA(pageNorm.includes(norm(expectations.vesselMmsi)), `detail shows MMSI ${expectations.vesselMmsi}`)
-    pushA(pageNorm.includes(norm(expectations.vesselDestination)), `detail shows the reported destination ${expectations.vesselDestination}`)
-    pushA(pageNorm.includes("22.4707") && pageNorm.includes("113.9207"), "AIS latest position from the tracking store is displayed")
-    pushA(pageNorm.includes("AISStream"), "AIS position is attributed to its real source")
-    pushA(pageNorm.includes("未加入关注列表") === false, "the followed vessel exposes its tracking panel")
-    const etaFragment = localDateFragment(expectations.vesselEta)
-    pushA(pageNorm.includes(norm(etaFragment)), `voyage ETA date ${etaFragment} is rendered from the voyage record`)
-    pushA(pageNorm.includes("ETA"), "the ETA field is present on the vessel detail")
-    pushA(pageNorm.includes(expectations.voyageNumber), `voyage number ${expectations.voyageNumber} is rendered`)
-    pushA(pageNorm.includes(norm("蛇口")), "voyage destination is resolved to the port identity")
+    pushA(text.includes("页面不存在"), "/vessels renders the not-found page in the browser")
 
-    const positionApi = await api(`/api/shipping/vessels/${expectations.vesselId}/position`)
-    pushA(positionApi.status === 200 && positionApi.body?.latitude === 22.4707, `latest-position API returns the seeded fix (${positionApi.status})`)
-    const voyageApi = await api(`/api/shipping/vessels/${expectations.vesselId}/voyage`)
-    pushA(voyageApi.status === 200 && voyageApi.body?.eta === expectations.vesselEta, "voyage API returns the ETA for the vessel")
-
-    // `/voyages/$id` is one of the three detail routes this stage repaired, so the
-    // page itself must be visited: a regression back to "detail URL renders the
-    // list page" has to fail here.
-    await navigate(`/voyages/${expectations.voyageId}`)
-    const voyageDetail = await evaluate(`(() => {
-      const text = document.body.innerText
-      return {
-        url: location.pathname,
-        detailLayout: document.querySelectorAll('.detail-two').length,
-        backLink: text.includes('返回航次列表'),
-        pageTitle: text.includes('航次详情'),
-      }
-    })()`)
-    pushA(voyageDetail.url === `/voyages/${expectations.voyageId}`, `voyage detail URL is kept (${voyageDetail.url})`)
-    pushA(voyageDetail.detailLayout > 0 && voyageDetail.backLink && voyageDetail.pageTitle, "the voyage detail component renders instead of the list page")
-    const voyageDetailText = await bodyText()
-    pushA(voyageDetailText.includes(expectations.voyageNumber), `voyage detail renders the voyage number ${expectations.voyageNumber}`)
-    // The voyage record carries UN/LOCODE identities, so assert those rather than
-    // port display names: the page must show the stored identities, not invent one.
-    pushA(voyageDetailText.includes("CNYTN") && voyageDetailText.includes("CNSHK"), "voyage detail shows the stored origin/destination identities")
-    pushA(!voyageDetailText.includes("当前筛选条件下没有航次"), "voyage detail does not fall back to the list/empty state")
-
-    // Identity-only vessel: explicit unknown, never fabricated.
-    await navigate(`/vessels/${expectations.identityOnlyVesselId}`)
+    await navigateBare("/voyages")
     text = await bodyText()
-    const unknownNorm = norm(text)
-    pushA(unknownNorm.includes(norm("Unavailable (No MMSI)")), "identity-only vessel reports that AIS tracking is unavailable without MMSI")
-    pushA(unknownNorm.includes("暂无航次数据") || unknownNorm.includes("暂无官方信息") || unknownNorm.includes("未知"), "an unknown voyage/destination is shown as unknown")
-    const unknownVoyage = await api(`/api/shipping/vessels/${expectations.identityOnlyVesselId}/voyage`)
-    pushA(unknownVoyage.status === 200 && !unknownVoyage.body?.eta, `unknown-ETA voyage returns no fabricated ETA (status ${unknownVoyage.status})`)
-    const unknownFields = await evaluate(`(() => {
-      const value = label => [...document.querySelectorAll('dt')]
-        .filter(node => node.textContent.trim() === label)
-        .map(node => node.nextElementSibling?.textContent.trim() ?? null)
-      return { eta: value('ETA'), destination: value('目的港'), voyageNumber: value('航次号') }
-    })()`)
-    pushA((unknownFields.eta ?? []).length > 0 && unknownFields.eta.every(cell => cell === "—"), `every ETA field on the unknown vessel reads as an explicit placeholder (${JSON.stringify(unknownFields.eta)})`)
-    pushA((unknownFields.destination ?? []).length > 0 && unknownFields.destination.every(cell => cell === "—" || cell === "暂无官方信息"), `destination is never invented for the unknown vessel (${JSON.stringify(unknownFields.destination)})`)
-    pushA(unknownNorm.includes("未知") || unknownNorm.includes("暂无"), "unknown values are labelled instead of hidden")
+    pushA(text.includes("页面不存在"), "/voyages renders the not-found page in the browser")
 
-    // List -> detail -> back navigation, and deep-link refresh.
-    await navigate("/vessels")
-    const openedDetail = await waitFor(async () => evaluate(`(() => {
-      const link = [...document.querySelectorAll('a')].find(node => (node.getAttribute('href') ?? '').includes(${JSON.stringify(expectations.vesselId)}))
-      if (!link) return false
-      link.click()
-      return true
-    })()`), 15000)
-    pushA(openedDetail === true, "vessel list links into the detail page")
-    await waitFor(async () => (await pageUrl()).includes(expectations.vesselId), 10000)
-    pushA((await pageUrl()).includes(`/vessels/${expectations.vesselId}`), `in-app navigation reached /vessels/${expectations.vesselId}`)
-    await evaluate(`window.history.back()`)
-    await waitFor(async () => (await pageUrl()) === "/vessels", 10000)
-    pushA((await pageUrl()) === "/vessels", "browser back returns to the vessel list")
-    pushA(norm(await bodyText()).includes(norm(expectations.vesselName)), "the returned-to list is fully rendered")
+    await navigate("/ports")
+    pushA(await navHasRetiredLinks() === false, "ports navigation has no vessel or voyage links")
+
+    const vesselSearchApi = await api("/api/shipping/search/vessels?q=S7")
+    pushA(vesselSearchApi.status === 404, `vessel search API is removed (got ${vesselSearchApi.status})`)
+
+    await navigate("/ports")
+    text = await bodyText()
+    pushA(text.includes("蛇口") && text.includes("盐田"), "port list still works after R1 retirement")
 
     evidence.flows.push({ flow: "A", checks: flowA.length, failed: flowA.filter(item => !item.ok).length })
 
@@ -905,13 +772,15 @@ async function main() {
     const calendarApi = await api("/api/shipping/calendar/reference")
     pushC(calendarApi.status === 200, `bundled calendar reference API -> ${calendarApi.status}`)
 
-    for (const route of ["/", "/events", "/settings", "/voyages"]) {
+    for (const route of ["/", "/events", "/settings"]) {
       await navigate(route)
       const routeText = await bodyText()
       pushC(routeText.length > 0 && !routeText.includes("MOCK DECOY"), `${route} loads with real-data-only content`)
     }
-    const voyagesApi = await api(`/api/shipping/vessels/${expectations.vesselId}/voyage`)
-    pushC(voyagesApi.body?.destinationPortId === "CNSHK", "voyage destination identity resolves to CNSHK")
+    await navigateBare("/voyages")
+    pushC((await bodyText()).includes("页面不存在"), "/voyages stays retired after visiting settings")
+    await navigateBare("/vessels")
+    pushC((await bodyText()).includes("页面不存在"), "/vessels stays retired after visiting settings")
 
     evidence.flows.push({ flow: "C", checks: flowC.length, failed: flowC.filter(item => !item.ok).length })
     evidence.observations = [
@@ -936,20 +805,17 @@ async function main() {
     check(delta.translationCacheRows === 0, `translation_cache writes delta = ${delta.translationCacheRows}`)
     check(delta.providerRuntimeRows === 0, `provider_runtime row delta = ${delta.providerRuntimeRows}`)
     check(delta.providerRuntimeState === undefined, `provider_runtime state unchanged${delta.providerRuntimeState ? `: ${String(delta.providerRuntimeState)}` : ""}`)
-    check(delta.aisPositionRows === 0 && delta.aisLatestRows === 0, `AIS store is read-only during browsing (${delta.aisPositionRows}/${delta.aisLatestRows})`)
     check(delta.articleVersionRows === 0 && delta.articleFetchRows === 0, "article store is read-only during browsing")
-    check(delta.voyageRows === 0 && delta.vesselRows === 0 && delta.portRows === 0 && delta.feedRows === 0, "operational stores are read-only during browsing")
+    check(delta.portRows === 0 && delta.feedRows === 0, "operational stores are read-only during browsing")
     check(delta.eventRows === 0 && delta.calendarEventRows === 0, `event/calendar stores are read-only during browsing (${delta.eventRows}/${delta.calendarEventRows})`)
     check(delta.articleBlockRows === 0, `article block store is read-only during browsing (${delta.articleBlockRows})`)
-    check(delta.vesselMetadataRows === 0 && delta.vesselSearchCacheRows === 0, `vessel metadata/search-cache stores are read-only during browsing (${delta.vesselMetadataRows}/${delta.vesselSearchCacheRows})`)
-    check(delta.voyageEtaHistoryRows === 0 && delta.portDirectoryRows === 0 && delta.appMetadataRows === 0, `voyage history/port directory/metadata stores are read-only during browsing (${delta.voyageEtaHistoryRows}/${delta.portDirectoryRows}/${delta.appMetadataRows})`)
+    check(delta.portDirectoryRows === 0 && delta.appMetadataRows === 0, `port directory/metadata stores are read-only during browsing (${delta.portDirectoryRows}/${delta.appMetadataRows})`)
 
     section("Phase 5 — browser and API cleanliness")
     check(runtimeErrors.length === 0, `unhandled runtime/console errors = ${runtimeErrors.length}`)
     for (const error of runtimeErrors.slice(0, 10)) console.log(`      ${error}`)
     check(unexpectedApiServerErrors.length === 0, `unexpected API 5xx responses = ${unexpectedApiServerErrors.length}`)
     for (const error of unexpectedApiServerErrors.slice(0, 10)) console.log(`      ${error}`)
-    check(expectedProviderResponses.length > 0, `the deliberate unconfigured-provider probe returned its coded failure (${expectedProviderResponses.length} expected 5xx recorded separately)`)
     check(externalRequests.length === 0, `no outbound browser request left the machine during browsing (${externalRequests.length}${externalRequests.length ? `: ${externalHosts().join(", ")}` : ""}); server-side egress is bounded by the scrubbed provider credentials, the disabled Runtime and the zero provider/usage/cache deltas`)
     for (const url of externalRequests.slice(0, 10)) console.log(`      external: ${url}`)
 
@@ -967,7 +833,6 @@ async function main() {
       failed: failures.length,
       runtimeErrors: runtimeErrors.length,
       unexpectedApi5xx: unexpectedApiServerErrors.length,
-      expectedProvider5xx: expectedProviderResponses.length,
       externalRequests: externalRequests.length,
     }
     evidence.failedChecks = failures

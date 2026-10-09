@@ -58,7 +58,6 @@ function feed(overrides: Partial<FeedItem> = {}): FeedItem {
     severity: "warning",
     relatedPortIds: [],
     relatedVesselIds: [],
-    relatedVoyageIds: [],
     ...overrides,
   }
 }
@@ -220,7 +219,7 @@ describe("translation service T1 foundation", () => {
         return { translatedText: `译文 ${request.sourceText}`, usage: { promptTokens: 12, completionTokens: 5, totalTokens: 17 } }
       },
     }
-    const source = { entityType: "feed_item", entityId: "feed-1", fieldName: "title", sourceText: "Voyage AB123 reaches SGSIN: https://example.com/1", targetLanguage: "zh-CN" }
+    const source = { entityType: "feed_item", entityId: "feed-1", fieldName: "title", sourceText: "Shipment AB123 reaches SGSIN: https://example.com/1", targetLanguage: "zh-CN" }
     const service = new TranslationService(new TranslationRepository(database), provider, { now: () => "2026-09-02T00:00:00.000Z" })
     const result = await service.translate(source)
     expect(result).toMatchObject({ status: "succeeded", translatedText: `译文 ${source.sourceText}`, providerCalled: true, usage: { promptTokens: 12, completionTokens: 5 } })
@@ -242,7 +241,7 @@ describe("translation service T1 foundation", () => {
         usage: { promptTokens: 12, promptCacheHitTokens: 4, promptCacheMissTokens: 8, completionTokens: 5, totalTokens: 17 },
       }),
     }
-    const source = { entityType: "feed_item", entityId: "feed-placeholder-failure", fieldName: "summary", sourceText: "Voyage AB123 reaches SGSIN on 2026-09-02", targetLanguage: "zh-CN" }
+    const source = { entityType: "feed_item", entityId: "feed-placeholder-failure", fieldName: "summary", sourceText: "Shipment AB123 reaches SGSIN on 2026-09-02", targetLanguage: "zh-CN" }
     const service = new TranslationService(new TranslationRepository(database), provider, { now: () => "2026-09-02T00:00:00.000Z" })
 
     const result = await service.translate(source)

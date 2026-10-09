@@ -1,5 +1,4 @@
 import type { CalendarCoverage, CalendarEvent } from "./calendar"
-import type { AisDerivedPortMetric } from "./ais-area"
 
 export type SourceStatus = "healthy" | "degraded" | "failed" | "disabled" | "never_succeeded"
 export type SourceType = "official" | "third_party" | "user" | "mock"
@@ -44,24 +43,6 @@ export interface ProvenanceAware {
   source_type?: SourceLineage
 }
 
-export interface VesselWatchTarget {
-  id: string
-  name: string
-  mmsi?: string
-  imo?: string
-  isWatched: boolean
-}
-
-export function toVesselWatchTarget(vessel: Pick<Vessel, "id" | "name" | "mmsi" | "imo" | "isWatched">): VesselWatchTarget {
-  return {
-    id: vessel.id,
-    name: vessel.name,
-    mmsi: vessel.mmsi,
-    imo: vessel.imo,
-    isWatched: vessel.isWatched,
-  }
-}
-
 export type PortCongestionCoverage = "public" | "no_public_data"
 
 export interface PortCongestionDetail {
@@ -82,13 +63,10 @@ export interface ProviderResult<T> {
 }
 
 export interface ShippingProviderFreshness {
-  vessel: Freshness
   port: Freshness
-  schedule: Freshness
   weather: Freshness
   weatherAlerts: Freshness
   feed?: Freshness
-  aisArea?: Freshness
 }
 
 export type DatabasePersistenceState = "healthy" | "read_only_degraded" | "unavailable"
@@ -109,9 +87,7 @@ export function provenanceEvidence(source?: DataProvenance, sourceUpdatedAt?: st
 }
 
 const knownMockProvenance: Record<string, DataProvenance> = {
-  "mock-vessel": { sourceType: "mock", dataNature: "observed", sourceId: "mock-vessel", verified: false },
   "mock-port": { sourceType: "mock", dataNature: "derived", sourceId: "mock-port", verified: false },
-  "mock-schedule": { sourceType: "mock", dataNature: "planned", sourceId: "mock-schedule", verified: false },
   "mock-weather": { sourceType: "mock", dataNature: "forecast", sourceId: "mock-weather", verified: false },
   "mock-port-notice": { sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice", verified: false },
 }
@@ -160,25 +136,6 @@ export function normalizeLegacyEventTrust(event: ShippingEvent, source?: Freshne
   }
 }
 
-export interface Vessel extends Freshness, ProvenanceAware {
-  id: string
-  name: string
-  imo?: string
-  mmsi?: string
-  callSign?: string
-  carrier?: string
-  shipType?: string
-  isWatched: boolean
-  latitude?: number
-  longitude?: number
-  speed?: number
-  course?: number
-  navigationStatus: NavigationStatus
-  statusChangedAt?: string
-  destination?: string
-  eta?: string
-}
-
 export interface Port extends Freshness, ProvenanceAware {
   id: string
   name: string
@@ -196,14 +153,11 @@ export interface Port extends Freshness, ProvenanceAware {
 
 export interface ShippingProviderModes {
   dataMode?: "mock" | "real"
-  vessel?: string
   port?: string
-  schedule?: string
   weather?: string
   weatherAlerts?: string
   feed?: string
   calendar?: string
-  aisArea?: "off" | "aisstream"
   calendarSourceIds?: readonly string[]
 }
 
@@ -227,9 +181,6 @@ const officialWeatherAlertSourceIds = new Set(["official-weather-alerts", "jma",
 
 export function sourceAllowedForProviderModes(sourceId: string | undefined, modes: ShippingProviderModes): boolean {
   if (!sourceId) return false
-  if (sourceId === "mock-vessel") return modes.dataMode !== "real" && modes.vessel === "mock"
-  if (sourceId === "aisstream") return modes.vessel === "aisstream"
-  if (sourceId === "aisstream-area") return modes.aisArea === "aisstream"
   if (sourceId === "mock-port") return modes.dataMode !== "real" && modes.port === "mock"
   if (sourceId === "portcast-public") return modes.port === "portcast"
   if (sourceId === "mock-weather") return modes.dataMode !== "real" && modes.weather === "mock"
@@ -241,11 +192,10 @@ export function sourceAllowedForProviderModes(sourceId: string | undefined, mode
   if (sourceId === "calendarific") return modes.calendar === "calendarific"
   if (sourceId === "official-holiday-source" || ["official-th", "official-id", "official-my", "official-ph", "official-vn"].includes(sourceId)) return modes.calendar === "calendarific" || modes.calendar === "official"
   if (sourceId === "manual-holiday") return modes.calendar === "calendarific" || modes.calendar === "official" || modes.calendar === "manual"
-  if (sourceId === "mock-schedule") return modes.dataMode !== "real" && modes.schedule === "mock"
   return false
 }
 
-const sourceScopedEventTypes = new Set(["vessel_anchored", "port_congestion", "voyage_delay", "ais_port_congestion_trend"])
+const sourceScopedEventTypes = new Set(["port_congestion"])
 
 export function sourceScopedEventDedupeKey(logicalDedupeKey: string, sourceId?: string): string {
   return `${logicalDedupeKey}:${sourceId ?? "unknown"}`
@@ -255,14 +205,12 @@ function sourceScopeForEvent(event: Pick<ShippingEvent, "provenance" | "evidence
   return event.provenance?.sourceId ?? event.evidence?.[0]?.provenance.sourceId
 }
 
-function entityIdForSourceScopedEvent(event: Pick<ShippingEvent, "type" | "vesselId" | "portId" | "voyageId">): string | undefined {
-  if (event.type === "vessel_anchored") return event.vesselId
-  if (event.type === "port_congestion" || event.type === "ais_port_congestion_trend") return event.portId
-  if (event.type === "voyage_delay") return event.voyageId
+function entityIdForSourceScopedEvent(event: Pick<ShippingEvent, "type" | "portId">): string | undefined {
+  if (event.type === "port_congestion") return event.portId
   return undefined
 }
 
-export function eventHasSourceScopedIdentity(event: Pick<ShippingEvent, "type" | "dedupeKey" | "provenance" | "evidence" | "vesselId" | "portId" | "voyageId">): boolean {
+export function eventHasSourceScopedIdentity(event: Pick<ShippingEvent, "type" | "dedupeKey" | "provenance" | "evidence" | "portId">): boolean {
   if (!sourceScopedEventTypes.has(event.type)) return true
   const entityId = entityIdForSourceScopedEvent(event)
   const sourceId = sourceScopeForEvent(event)
@@ -273,7 +221,7 @@ export function sourceAllowedForOperationalContext(sourceId: string | undefined,
   return Boolean(sourceId && context.activeSourceIds.has(sourceId) && sourceAllowedForProviderModes(sourceId, context.modes))
 }
 
-export function eventIsCompatibleWithCurrentProviders(event: Pick<ShippingEvent, "type" | "dedupeKey" | "provenance" | "evidence" | "vesselId" | "portId" | "voyageId">, modes: ShippingProviderModes): boolean {
+export function eventIsCompatibleWithCurrentProviders(event: Pick<ShippingEvent, "type" | "dedupeKey" | "provenance" | "evidence" | "portId">, modes: ShippingProviderModes): boolean {
   if (!eventHasSourceScopedIdentity(event)) return false
   if (!recordAllowedForDataMode(event, modes.dataMode ?? "mock")) return false
   const sourceId = event.provenance?.sourceId
@@ -294,27 +242,6 @@ export function eventIsCompatibleWithOperationalContext(event: ShippingEvent, co
 
 export function filterEventsForOperationalContext(events: ShippingEvent[], context: OperationalSourceContext): ShippingEvent[] {
   return events.filter(event => eventIsCompatibleWithOperationalContext(event, context))
-}
-
-export interface Voyage extends Freshness, ProvenanceAware {
-  id: string
-  vesselId: string
-  voyageNumber?: string
-  originPortId?: string
-  destinationPortId?: string
-  baselineEtd?: string
-  baselineEta?: string
-  baselineEtdSource?: string
-  baselineEtaSource?: string
-  latestEtd?: string
-  latestEta?: string
-  latestEtdSource?: string
-  latestEtaSource?: string
-  latestEtaObservedAt?: string
-  delayMinutes?: number
-  status: "planned" | "in_transit" | "arrived" | "delayed" | "unknown"
-  episodeState?: "current" | "superseded"
-  supersededAt?: string
 }
 
 export interface FeedItem extends Freshness, ProvenanceAware {
@@ -340,7 +267,6 @@ export interface FeedItem extends Freshness, ProvenanceAware {
   weather?: WeatherDetail
   relatedPortIds: string[]
   relatedVesselIds: string[]
-  relatedVoyageIds: string[]
 }
 
 export type TranslationDisplayState = "translated" | "historical" | "original" | "pending" | "unavailable"
@@ -371,9 +297,7 @@ export interface ShippingEvent extends ProvenanceAware {
   lastDetectedAt: string
   resolvedAt?: string
   feedItemId?: string
-  vesselId?: string
   portId?: string
-  voyageId?: string
   calendarEventId?: string
   evidenceJson: Record<string, unknown>
   evidence?: DataEvidence[]
@@ -461,14 +385,11 @@ export interface WeatherWindows {
 }
 
 export interface ShippingSnapshot {
-  vessels: Vessel[]
   ports: Port[]
-  voyages: Voyage[]
   events: ShippingEvent[]
   feedItems: FeedItem[]
   settings: ShippingSettings
   providerFreshness?: ShippingProviderFreshness
-  aisPortMetrics?: AisDerivedPortMetric[]
   calendarEvents?: CalendarEvent[]
   calendarCoverage?: CalendarCoverage[]
   database?: DatabasePersistenceStatus
