@@ -1,5 +1,56 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
+## Shipping Risk Intelligence — R0 Baseline, Decisions & Authorization — 2026-10-09
+
+- **阶段 / 验收 ID：** R0 / R0-1–R0-3（`docs/plans/shipping-hot-risk-intelligence-2026-09-29.md` §6）。
+- **现役计划：** `docs/plans/shipping-hot-risk-intelligence-2026-09-29.md`（`APPROVED` 2026-09-30）；信源目录 `docs/intel-source-catalog.md`。
+- **分支：** `codex/shipping-hot-r0-baseline-decisions`（自 `main@88990f3`）；**未合并**（按用户指令）。
+- **环境（门禁 G）：** Windows 10；Node `v24.15.0` / ABI `137`；pnpm `10.30.3`；`SHIPPING_DATA_MODE=mock`；隔离 cwd 下 `.tmp/` 父目录已创建；未打开保留库做写入验收。
+- **R0 实现（文档）：** ADR-006/007/008 新增；`AGENTS.md` 现役计划指针与 R0 边界；`docs/architecture.md` 风险情报 change contract；本区块决策摘要。9/15–9/18 未提交船舶关注改动已按 2026-09-30 放弃；备份 `.tmp/backup/uncommitted-vessel-work-2026-09-30.patch` 存在（未跟踪，本机）。
+- **已确认决策（2026-09-30，写入 ADR/status）：**
+  - 下线船舶搜索/关注、AIS、航次/ETA（执行在 R1，ADR-006）。
+  - 港口维持现有 8 个，不扩展；不做末端城市粒度。
+  - 对话模型 DeepSeek；向量阿里云百炼（方案 A）；合并二次确认可用另一家（通义千问/Bailian 绑定）。
+  - 计划 §5.4 依赖（`zod`、`@mozilla/readability`+`linkedom`、`undici`、`p-limit`）**批准在后续阶段按需加入**，R0 不安装。
+  - LLM 月度预算由用户在设置页填写；未配置则零调用（R3-5）。
+  - S6 商业船期维持 `DEFERRED / NOT_REQUIRED_FOR_CURRENT_SCOPE`。
+  - 演示/开发阶段 Open-Meteo 等免费层可继续；**上线前 L 阶段**逐源商业授权（见 ADR-008）。
+- **验收证据：**
+  - **R0-1 工作区干净：** 阶段开始前 `main` `git status` → `nothing to commit, working tree clean`（2026-10-09）。R0 交付提交后 `git status` 见下「R0-1 提交后工作区」→ **PASS**（仅已知未跟踪本机路径，无意外修改/暂存）。
+  - **R0-2 三份 ADR 用户批准：** 用户 **2026-10-09** 明示批准 ADR-006/007/008；三份 ADR 状态 **Accepted (user sign-off 2026-10-09)** → **PASS**。
+  - **R0-3 决策写入 status：** 本区块 + ADR 正文 → **PASS**（以本文件为权威）。
+- **门禁 G：** **PASS（沿用）**——全量 G 已于 2026-10-09 在本分支跑通（76 files / 824 tests）；**此后仅文档/ADR/规则改动**，收尾只重跑 `pnpm lint` 与 `git diff --check`（见下「R0 收尾增量检查」），**未**重跑 build/typecheck/Vitest。
+- **Neat Freak：** **pending**——`scripts/audit-inventory.sh` 需要 Bash，本机无 Bash，**未执行**真实 Neat Freak 机械盘点；按 `AGENTS.md` 不得以「手动等价检查」替代后宣称 PASS。手动文档/规则一致性核对见下，仅作**补充证据**。
+- **结论：** **R0 = PASS（洁癖收尾 pending：audit-inventory.sh 不可用）**。**不得进入 R1** 直至用户另授权 R1 实施（含迁移与删代码）；未推送、未合并。
+- **交付提交：** 单 commit `docs: record R0 baseline decisions and ADR-006/007/008`（2026-10-09；分支 tip 见 `git log -1 --stat`；7 files，+220/−6；含 ADR-006/007/008、`AGENTS.md`、`docs/architecture.md`、本区块、`article-service.test.ts` 墙钟夹具）。
+- **数据模式：** 无 schema/Provider/Runtime 变更；无付费调用。
+
+### R0 — 门禁 G 执行记录
+
+- 时间：2026-10-09（Asia/Shanghai）。
+- Node `v24.15.0` / modules `137`；pnpm `10.30.3`；`SHIPPING_DATA_MODE=mock`；`.tmp/` 已创建。
+- `pnpm install --frozen-lockfile` exit 0（锁文件已是最新，prepare hooks 正常）。
+- `pnpm build` exit 0（既有 chunk/Browserslist 警告，未新增失败）。
+- `pnpm typecheck` exit 0；`pnpm lint` exit 0。
+- `pnpm exec vitest run -c vitest.config.ts` → **76 files / 824 tests passed** exit 0。
+  - 首次全量跑 **823/824**：`server/services/article-service.test.ts`「bounded runtime job」因 job 默认 `now()` 读墙钟，fixture `publishedAt/current_until` 在 2026-10-09 已出 current 视图 → 0 次 HTTP；已用固定 `2026-09-12T00:00:00.000Z` 注入 job+service（同文件「rotates」用例模式），重跑全绿。
+- `git diff --check`、`git diff --check origin/main...HEAD`、`git diff --cached --check` exit 0（仅 LF→CRLF 正常警告）。
+- 结论：**GATE_G_SEQUENCE_ALL_PASS**（PowerShell 下 plan §4.3 的 `node -e require("node:fs")` 步骤需改引号或改用 `New-Item .tmp`，与 S5 脚本记录一致）。
+
+### R0 — 收尾增量检查（2026-10-09，仅文档/ADR 改动后）
+
+- `pnpm lint` exit 0（提交前执行）。
+- `git diff --check`、`git diff --check origin/main...HEAD`、`git diff --cached --check` exit 0。
+
+### R0 — R0-1 提交后工作区
+
+- 2026-10-09 R0 交付提交后：`git status` → **On branch codex/shipping-hot-r0-baseline-decisions**, **nothing to commit, working tree clean**（无暂存/修改；`.tmp/**` 等本机路径由 ignore 或未出现在未跟踪列表中）。
+
+### R0 — 洁癖收尾
+
+- **结论：pending**（未执行 `scripts/audit-inventory.sh`：需要 Bash，本机不可用；不能标 PASS。）
+- **补充证据（非替代）：** 已核对 `AGENTS.md` / `docs/architecture.md` / `docs/status.md` / ADR-006–008 与 `docs/plans/shipping-hot-risk-intelligence-2026-09-29.md`、`docs/intel-source-catalog.md` 入口一致；未删除 `.tmp/backup/uncommitted-vessel-work-2026-09-30.patch`；提交范围未含 `.env*`、保留库或日志。
+
 ## Standalone & Content Completion — S0 Baseline, Docs承接 and CI Policy — 2026-09-11 (historical stage record; see S1 below for current round)
 
 Active plan: `docs/plans/shipping-hot-standalone-content-2026-09-10.md` (S0–S8). Archived historical plan: `docs/archive/shipping-hot-v3-real-data.md`.
