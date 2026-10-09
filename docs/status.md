@@ -28,7 +28,7 @@
 ## Shipping Risk Intelligence — R1 Retire Vessel / AIS / Voyage — 2026-10-09
 
 - **阶段 / 验收 ID：** R1 / R1-1–R1-6（`docs/plans/shipping-hot-risk-intelligence-2026-09-29.md` §6 R1）。
-- **分支 / PR：** `codex/shipping-hot-r1-retire-vessel` → [PR #5](https://github.com/rallsix66/Shipping-HOT/pull/5)（自 `main@8609cb5`）；**未合并**。
+- **分支 / PR：** [PR #5](https://github.com/rallsix66/Shipping-HOT/pull/5) 已 **merge commit** 合入 `main`（**`39561d89ba723ad8442a1a4323667591a61a57d1`**，2026-10-09；自 `main@8609cb5`）。
 - **标签：** `pre-r1-vessel-removal` @ `8609cb5` 已推送 origin（仅标签，未推 main）。
 - **范围：** ADR-006 执行——迁移 014 归档表、删除 vessel/AIS/voyage 代码与路由、port-only `POST /api/shipping/watch`、S7 夹具/验收改写、恢复文档 `docs/archive/vessel-capability-recovery.md`。
 - **验收证据：**
@@ -41,13 +41,22 @@
     - 日历 reconcile → `server/shipping-store.test.ts`；日历缓存 skip/覆盖 → **保留** `server/runtime/calendar-sync-job.test.ts`；官方天气任务边界 → **保留** `server/runtime/weather-alert-sync-job.test.ts` + `v3-readiness.test.ts` 天气告警段。
     - Runtime 单例 bootstrap（无 AIS Job）→ `server/runtime/bootstrap.test.ts`；迁移副本路径 → `scripts/r1-migration-copy-guard.test.ts` + `resolveDatabaseFileIdentity`。
     - `server/services/real-data-gate.test.ts` **仅**覆盖 Real 零 Mock 扫描，**不**替代 Readiness/Repository/Runtime 上表职责。
-  - **R1-3 迁移 014：** 守卫断言已对齐真实拒绝顺序（symlink→保留库先 **escapes .tmp**；hard link / symlink→hardlink 组合 → **hard link**）。**2026-10-09 round-4：** Vitest 守卫 **9 passed | 3 skipped**（文件 symlink 用例 **未验证**，本机 `EPERM`）；迁移副本验收 **沿用** round-3（`.tmp/r1-migration-gate` 双 pass，schema **14**）——本次补丁未改迁移逻辑。
+  - **R1-3 迁移 014：** 守卫断言已对齐真实拒绝顺序（symlink→保留库先 **escapes .tmp**；hard link / symlink→hardlink 组合 → **hard link**）。**Windows 本地：** Vitest 守卫 **9 passed | 3 skipped**（文件 symlink **未验证**，`EPERM`）。**Linux CI（PR #5 合并后失败 run，仍有效子集证据）：** [run `37903089115`](https://github.com/rallsix66/Shipping-HOT/actions/runs/37903089115) → `scripts/r1-migration-copy-guard.test.ts` **12/12**（ubuntu-latest，无 skip）。迁移副本验收 **沿用** round-3（`.tmp/r1-migration-gate` 双 pass，schema **14**）。
   - **R1-4 浏览器 / S7：** **沿用** round-3 证据 `E2E_S7_DIR=.tmp/s7-local-r1-review-4` → **124 / 0 FAIL**（`.tmp/s7-local-r1-review-4/s7-integrated-evidence.json`）；本次补丁未改 `retired-spa-routes` / S7 脚本。
   - **R1-5 启动日志：** 隔离 cwd 启动 `dist/output/server/index.mjs`，日志仅 `runtime started { jobs: 5 }`，**无** `ais-tracking` / `voyage-sync` / `ais-area` 等已下线任务名 → **PASS**。
   - **R1-6 标签与恢复抽查：** origin 标签 `pre-r1-vessel-removal` 存在；`git worktree add .tmp/pre-r1-verify pre-r1-vessel-removal` + `pnpm exec vitest run server/providers/ais/index.test.ts` → **4/4 PASS**；worktree 已删除 → **PASS**。
   - **Neat Freak closeout（R1 收尾）：** 技能 `C:\Users\Administrator\.claude\skills\neat-freak\SKILL.md`（v3.0.0）；配套脚本原缺失于 `<repo>/scripts/audit-inventory.sh`，已从 skill bundle **同内容补齐** 于本分支 closeout commit。盘点执行：`"C:\Program Files\Git\bin\bash.exe" scripts/audit-inventory.sh "<repo>"` → exit **0**（`generated_at=2026-10-09T07:53:15Z`，`head=8d6cba2`，`status_entries=0`）；closeout 前亦曾用 skill 绝对路径跑通同一脚本。**未**删除清理候选（`.tmp/` 诊断副本、未跟踪 patch 等保留）。知识同步：本 commit 更新 `docs/status.md`、`docs/plans/*` R1-1 口径、`AGENTS.md` R1 状态 → **PASS（R1 范围 inventory + 文档对齐）**。
   - **R1 closeout 复验（2026-10-09）：** `test/r1-retired-surface.contract.test.ts` **9/9**；`scripts/r1-migration-copy-guard.test.ts` **9 pass | 3 skipped**（文件 symlink **未验证**，本机 `EPERM`；**未**放宽断言、**未**新增 CI）。
-- **结论：** **R1 = PASS（本地验收）**——R1-1–R1-6 证据见上（S7 / 全量门禁 G **沿用** round-3：`8d6cba2` 之前提交与运行记录）；**R1-3** 守卫 3 项文件 symlink **未验证**；**未合并 main**；**未开始 R1.5**；**未**操作保留库。
+- **合并后 CI（2026-10-09）：** [Shipping HOT checks `37903089115`](https://github.com/rallsix66/Shipping-HOT/actions/runs/37903089115) @ merge `39561d8` → **`checks` failure**（Ubuntu Tests：`rg` exit **127**，`test/r1-retired-surface.contract.test.ts` 2 failed）；**`e2e-windows` skipped**。根因：runner 未装 ripgrep；契约/白名单逻辑未改。
+- **结论：** **R1 = PASS（已合并 main）**——实现与本地验收见上；**post-merge CI 待 ripgrep 修复 PR**；**R1.5 未开始**；保留库未动。
+
+## CI — Ubuntu ripgrep for R1-1 contract tests — 2026-10-09
+
+- **分支 / PR：** `codex/shipping-hot-ci-ripgrep`（自 `main@39561d8`）；独立 PR，**未合并**。
+- **范围：** 仅在 `.github/workflows/shipping-hot-checks.yml` 的 `checks` job、**Tests** 前 `apt-get install ripgrep` 并 `command -v rg` / `rg --version`；单 workflow、仅 push `main`、`e2e-windows` 仍 `needs: checks`。
+- **不变：** 契约测试、五行白名单、无 skip/continue-on-error。
+- **门禁 G（2026-10-09，本分支）：** install/build/typecheck/lint PASS；Vitest **481 passed | 3 skipped**（Windows 守卫 3 skip 不变）；`smoke:p0-native` PASS。
+- **Neat Freak：** `bash scripts/audit-inventory.sh` → exit **0**（Git Bash；提交前 `status_entries=3` 为在途文档/workflow 变更）；**未**删除清理候选。
 
 ### R0 — 门禁 G 执行记录
 
