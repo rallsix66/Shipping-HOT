@@ -41,7 +41,7 @@
     - 日历 reconcile → `server/shipping-store.test.ts`；日历缓存 skip/覆盖 → **保留** `server/runtime/calendar-sync-job.test.ts`；官方天气任务边界 → **保留** `server/runtime/weather-alert-sync-job.test.ts` + `v3-readiness.test.ts` 天气告警段。
     - Runtime 单例 bootstrap（无 AIS Job）→ `server/runtime/bootstrap.test.ts`；迁移副本路径 → `scripts/r1-migration-copy-guard.test.ts` + `resolveDatabaseFileIdentity`。
     - `server/services/real-data-gate.test.ts` **仅**覆盖 Real 零 Mock 扫描，**不**替代 Readiness/Repository/Runtime 上表职责。
-  - **R1-3 迁移 014：** `resolveAllowedCopyDatabasePath` 对**最终打开**的 DB 做 `lstat`/`realpath`/`stat` 身份检查，与保留库比 dev+ino；夹具均在 `.tmp/r1-guard-*/fake-repo`（mkdtemp），不写入仓库外固定路径。`.tmp/r1-migration-gate` 复制验收双 pass → schema **14**、九表、行数保留 → **PASS**；守卫 **10 passed | 3 skipped**（平台不支持 symlink 时跳过 3 项，不冒充 PASS）。
+  - **R1-3 迁移 014：** `resolveAllowedCopyDatabasePath` 对**最终打开**的 DB 做 `lstat`/`realpath`/`stat` 身份检查，与保留库比 dev+ino；夹具均在 `.tmp/r1-guard-*/fake-repo`（mkdtemp），不写入仓库外固定路径。`.tmp/r1-migration-gate` 复制验收双 pass → schema **14**、九表、行数保留 → **PASS**；守卫 **7 passed | 3 skipped**（本机 symlink 探针 **unsupported**，3 个符号链接/目录链接用例 **skipped**，不冒充 PASS）。
   - **R1-4 浏览器 / S7：** `E2E_S7_DIR=.tmp/s7-local-r1-review-2` → **124 checks / 0 FAIL**（Flow A **16** / B **22** / C **35**）；证据 `.tmp/s7-local-r1-review-2/s7-integrated-evidence.json` → **PASS**（2026-10-09 复审复跑）。
   - **R1-5 启动日志：** 隔离 cwd 启动 `dist/output/server/index.mjs`，日志仅 `runtime started { jobs: 5 }`，**无** `ais-tracking` / `voyage-sync` / `ais-area` 等已下线任务名 → **PASS**。
   - **R1-6 标签与恢复抽查：** origin 标签 `pre-r1-vessel-removal` 存在；`git worktree add .tmp/pre-r1-verify pre-r1-vessel-removal` + `pnpm exec vitest run server/providers/ais/index.test.ts` → **4/4 PASS**；worktree 已删除 → **PASS**。
