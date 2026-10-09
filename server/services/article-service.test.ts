@@ -125,10 +125,12 @@ describe("articleService orchestration", () => {
   })
 
   it("skips disallowed sources and processes allowed ones in the bounded runtime job", async () => {
+    const testNow = () => new Date("2026-09-12T00:00:00.000Z")
     let calls = 0
     const service = new ArticleService({
       database,
       dataMode: "mock",
+      now: testNow,
       fetchOptions: {
         lookup: async () => [{ address: "93.184.216.34", family: 4 }],
         transport: async () => {
@@ -137,7 +139,7 @@ describe("articleService orchestration", () => {
         },
       },
     })
-    const job = createArticleFetchJob({ database, dataMode: "mock", intervalMs: 60_000, batchSize: 5, service })
+    const job = createArticleFetchJob({ database, dataMode: "mock", intervalMs: 60_000, batchSize: 5, service, now: testNow })
     const result = await job.run()
     expect(result.status).toBe("success")
     expect(calls).toBe(1)
