@@ -1,4 +1,4 @@
-import { existsSync, lstatSync, realpathSync } from "node:fs"
+import { existsSync, lstatSync, realpathSync, statSync } from "node:fs"
 import { join, resolve, sep } from "node:path"
 import process from "node:process"
 
@@ -17,6 +17,51 @@ export function shippingRepoRoot(cwd = process.cwd()): string {
 
 function realPathSafe(path: string): string {
   return realpathSync.native ? realpathSync.native(path) : realpathSync(path)
+}
+
+export interface FileIdentity {
+  realPath: string
+  dev: number
+  ino: number
+}
+
+/** Stat the path SQLite will open (symlink-aware) and return canonical file identity. */
+export function resolveDatabaseFileIdentity(dbPath: string): FileIdentity {
+  let linkStat: ReturnType<typeof lstatSync>
+  try {
+    linkStat = lstatSync(dbPath)
+  } catch (error) {
+    throw new R1MigrationCopyPathError(`database path lstat failed: ${error instanceof Error ? error.message : String(error)}`)
+  }
+  if (linkStat.isDirectory()) {
+    throw new R1MigrationCopyPathError("refusing directory as database path")
+  }
+  let realPath: string
+  try {
+    realPath = realPathSafe(dbPath)
+  } catch (error) {
+    throw new R1MigrationCopyPathError(`database realpath failed: ${error instanceof Error ? error.message : String(error)}`)
+  }
+  let fileStat: ReturnType<typeof statSync>
+  try {
+    fileStat = statSync(realPath)
+  } catch (error) {
+    throw new R1MigrationCopyPathError(`resolved database stat failed: ${error instanceof Error ? error.message : String(error)}`)
+  }
+  if (!fileStat.isFile()) {
+    throw new R1MigrationCopyPathError("refusing non-file resolved database path")
+  }
+  return { realPath, dev: fileStat.dev, ino: fileStat.ino }
+}
+
+function sameFileIdentity(left: FileIdentity, right: FileIdentity): boolean {
+  return left.dev === right.dev && left.ino === right.ino
+}
+
+function retainedDatabaseIdentity(repoRoot: string): FileIdentity | undefined {
+  const retainedDb = join(repoRoot, R1_MIGRATION_DB_RELATIVE)
+  if (!existsSync(retainedDb)) return undefined
+  return resolveDatabaseFileIdentity(retainedDb)
 }
 
 /** R1-3: only open migration copies under repo/.tmp (isolated copy dirs). */
@@ -43,28 +88,20 @@ export function resolveAllowedCopyDatabasePath(copyDirArg: string, repoRoot = sh
     throw new R1MigrationCopyPathError(`missing database copy: ${dbPath}`)
   }
 
-  const realDb = realPathSafe(dbPath)
-  if (!realDb.startsWith(`${realIsolated}${sep}`)) {
-    throw new R1MigrationCopyPathError(`database realpath escapes .tmp (${realDb})`)
+  const dbIdentity = resolveDatabaseFileIdentity(dbPath)
+  if (!dbIdentity.realPath.startsWith(`${realIsolated}${sep}`)) {
+    throw new R1MigrationCopyPathError(`database realpath escapes .tmp (${dbIdentity.realPath})`)
   }
 
-  const retainedDb = join(repoRoot, R1_MIGRATION_DB_RELATIVE)
-  if (existsSync(retainedDb)) {
-    const realRetained = realPathSafe(retainedDb)
-    if (realDb === realRetained) {
+  const retainedIdentity = retainedDatabaseIdentity(repoRoot)
+  if (retainedIdentity) {
+    if (dbIdentity.realPath === retainedIdentity.realPath) {
       throw new R1MigrationCopyPathError("refusing the retained production database; copy to .tmp/ first")
     }
-  }
-
-  try {
-    const dbStat = lstatSync(dbPath)
-    const retainedStat = existsSync(retainedDb) ? lstatSync(retainedDb) : undefined
-    if (retainedStat && dbStat.dev === retainedStat.dev && dbStat.ino === retainedStat.ino) {
+    if (sameFileIdentity(dbIdentity, retainedIdentity)) {
       throw new R1MigrationCopyPathError("refusing hard link to the retained production database")
     }
-  } catch (error) {
-    if (error instanceof R1MigrationCopyPathError) throw error
   }
 
-  return { copyDir: realCopyDir, dbPath: realDb }
+  return { copyDir: realCopyDir, dbPath: dbIdentity.realPath }
 }

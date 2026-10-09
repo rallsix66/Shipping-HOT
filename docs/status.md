@@ -33,12 +33,19 @@
 - **范围：** ADR-006 执行——迁移 014 归档表、删除 vessel/AIS/voyage 代码与路由、port-only `POST /api/shipping/watch`、S7 夹具/验收改写、恢复文档 `docs/archive/vessel-capability-recovery.md`。
 - **验收证据：**
   - **R1-1 残留 grep：** `src/` + `server/` 执行 `rg -i "aisstream|vesselapi|gfw|voyage|watchlist"`（排除 `server/database/migrations/**`）→ **0 行**；允许例外：`server/database/migrations/**`、`docs/archive/vessel-capability-recovery.md` → **PASS**（2026-10-09）。
-  - **R1-2 门禁 G（PR #5 审查修复后，2026-10-09）：** `pnpm install --frozen-lockfile`、`pnpm build`、`pnpm typecheck`、`pnpm lint`、`.tmp/` 下 `pnpm exec vitest run -c vitest.config.ts` → **54 files / 431 tests PASS**；`pnpm smoke:p0-native` → **PASS**（合成 Real-lineage 港口 + Mock 港口 decoy 隔离，跨进程关注状态保留）。基线 `main@8609cb5`：**76 files / 824 tests**（**−393** 条）。**永久删除 25** 个船舶/AIS/航次专属 `*.test.ts`；**恢复/新增 4** 个：`server/shipping-store.test.ts`（日历 reconcile）、`server/shipping-store.read-only.test.ts`（Feed 只读边界）、`server/runtime/bootstrap.test.ts`（Runtime 单例）、`scripts/r1-migration-copy-guard.test.ts`（迁移副本路径保护）。净 **−22** 个测试文件（76→54），不要求机械恢复到 824 条。
-  - **R1-3 迁移 014：** `scripts/r1-migration-copy-test.ts` 在打开 DB 前经 `resolveAllowedCopyDatabasePath` 拒绝 repo 根、`.tmp` 外与保留库硬链接；保留库**只读复制**到 `.tmp/r1-migration/.data/` 后连续两次迁移 → schema **14**、九张 `_retired_*` 表、行数与迁移前一致（示例：vessels 3、metadata 48 等）；`scripts/r1-migration-copy-guard.test.ts` **4/4** → **PASS**。
-  - **R1-4 浏览器 / S7：** `node scripts/e2e-s7-integrated.mjs`（`E2E_S7_DIR=.tmp/s7-local-r1-review-gate`）→ **124 checks / 0 FAIL**（Flow A **16** / B **22** / C **35**）：退役列表/详情 **HTTP 200（SPA shell）+ 浏览器「页面不存在」**；退役 vessel position/voyage API **404**；设置页无锚泊/ETA/AISStream 文案；港口 `POST /api/shipping/watch` + 首页往返后关注持久；证据 `.tmp/s7-local-r1-review-gate/s7-integrated-evidence.json` → **PASS**（2026-10-09 门禁复跑）。
+  - **R1-2 门禁 G（PR #5 复审修复，2026-10-09）：** `pnpm install --frozen-lockfile`、`pnpm build`、`pnpm typecheck`、`pnpm lint`、Vitest → **56 files / 465 passed | 3 skipped**（`scripts/r1-migration-copy-guard.test.ts` 符号链接用例在本机 **supported** 时全跑，否则 **3 skipped**）；`pnpm smoke:p0-native` → **PASS**。基线 `main@8609cb5`：**76 files / 824 tests**。**永久删除 25** 个船舶/AIS/航次专属 `*.test.ts`；**恢复/新增 6** 个有效测试文件（见下表）。净 **−20** 测试文件（76→56），**不以恢复 824 条为目标**。
+  - **R1-2b 删除测试 → 现役断言映射（main@8609cb5 → 本分支）：**
+    - Readiness 现役 Job 集合 / 缺失·禁用 / 工具链 / 多源 Feed / Translation 不参与硬门禁 / 官方天气边界 → `server/services/v3-readiness.test.ts`（原 `v3-readiness.test.ts` 中船舶/AIS/航次/Vessel Search 用例**未**恢复）。
+    - 日历跨重启迁移、来源隔离、DB 不可用拒绝写入 → `server/shipping-store.persistence.test.ts`（Mock 事件边界港口化；原 vessel 混合用例删除）。
+    - Feed 过期投影、history 筛选顺序 → `server/database/shipping.test.ts`（原同文件用例迁回）；Feed 只读 + history 读边界 + 无 vessels 字段 → `server/shipping-store.read-only.test.ts`。
+    - 日历 reconcile → `server/shipping-store.test.ts`；日历缓存 skip/覆盖 → **保留** `server/runtime/calendar-sync-job.test.ts`；官方天气任务边界 → **保留** `server/runtime/weather-alert-sync-job.test.ts` + `v3-readiness.test.ts` 天气告警段。
+    - Runtime 单例 bootstrap（无 AIS Job）→ `server/runtime/bootstrap.test.ts`；迁移副本路径 → `scripts/r1-migration-copy-guard.test.ts` + `resolveDatabaseFileIdentity`。
+    - `server/services/real-data-gate.test.ts` **仅**覆盖 Real 零 Mock 扫描，**不**替代 Readiness/Repository/Runtime 上表职责。
+  - **R1-3 迁移 014：** `resolveAllowedCopyDatabasePath` 对**最终打开**的 DB 做 `lstat`/`realpath`/`stat` 身份检查，与保留库比 dev+ino；夹具均在 `.tmp/r1-guard-*/fake-repo`（mkdtemp），不写入仓库外固定路径。`.tmp/r1-migration-gate` 复制验收双 pass → schema **14**、九表、行数保留 → **PASS**；守卫 **10 passed | 3 skipped**（平台不支持 symlink 时跳过 3 项，不冒充 PASS）。
+  - **R1-4 浏览器 / S7：** `E2E_S7_DIR=.tmp/s7-local-r1-review-2` → **124 checks / 0 FAIL**（Flow A **16** / B **22** / C **35**）；证据 `.tmp/s7-local-r1-review-2/s7-integrated-evidence.json` → **PASS**（2026-10-09 复审复跑）。
   - **R1-5 启动日志：** 隔离 cwd 启动 `dist/output/server/index.mjs`，日志仅 `runtime started { jobs: 5 }`，**无** `ais-tracking` / `voyage-sync` / `ais-area` 等已下线任务名 → **PASS**。
   - **R1-6 标签与恢复抽查：** origin 标签 `pre-r1-vessel-removal` 存在；`git worktree add .tmp/pre-r1-verify pre-r1-vessel-removal` + `pnpm exec vitest run server/providers/ais/index.test.ts` → **4/4 PASS**；worktree 已删除 → **PASS**。
-  - **Neat Freak closeout：** **pending**——仓库内无 `scripts/audit-inventory.sh`（Git `bash.exe` 存在但脚本缺失），未执行真实 Neat Freak 机械盘点（不得标 PASS）。
+  - **Neat Freak closeout：** **pending**——已从实际加载的 `C:\Users\Administrator\.claude\skills\neat-freak\SKILL.md` 解析机械盘点命令为 `<project-root>/scripts/audit-inventory.sh`；在仓库根、`neat-freak` skill 目录、`C:\Users\Administrator\.claude\skills` 均未找到该脚本；`C:\Program Files\Git\bin\bash.exe` 存在但无脚本可跑。已做 skill 要求的文档/状态对齐与只读复核，**未**自编替代 skill，**未**删除任何清理候选。
 - **结论：** **R1 = PASS（Neat Freak pending：仓库无 `scripts/audit-inventory.sh`）**；**未合并**；**未开始 R1.5**。
 
 ### R0 — 门禁 G 执行记录
