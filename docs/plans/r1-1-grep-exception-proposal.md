@@ -1,6 +1,6 @@
-# R1-1 ripgrep exception proposal (PR #5)
+# R1-1 ripgrep exception (PR #5)
 
-**Status:** **PROPOSED — not confirmed.** Maintainer acceptance is required before recording **R1-1 PASS**. Technical review passing the mechanical check is **not** user authorization.
+**Status:** **APPROVED** (2026-10-09). User confirmed the five-line minimal allowlist at commit **`8d6cba2`** — **three files only**, fixed line numbers and **full line bodies**. **No** whole-file exemption and **no** automatic expansion beyond this table.
 
 ## Baseline command (unchanged)
 
@@ -17,7 +17,7 @@ Vitest enforcement adds `-n` (line numbers) so allowlist rows are **exact path +
 | `server/database/migrations/**` | Glob exclude; historical schema |
 | `docs/archive/vessel-capability-recovery.md` | Recovery doc (outside `src`/`server` scan) |
 
-## Proposed allowlist — exact path + full line (no `includes`, no whole-file)
+## Approved allowlist — exact path + full line (no `includes`, no whole-file)
 
 Mechanical enforcement: `test/r1-retired-surface.contract.test.ts` → `R1_1_PROPOSED_ALLOWED_HITS`.
 
@@ -36,14 +36,7 @@ Mechanical enforcement: `test/r1-retired-surface.contract.test.ts` → `R1_1_PRO
 - **Pass:** `rg … src` → **exit code 1** and **stdout empty** (stderr may contain diagnostics).
 - **Fail:** exit **0** (matches found), **2+** (rg error), **127** (missing binary), or exit 1 with non-empty stdout.
 
-## Current mechanical result (2026-10-09, branch `codex/shipping-hot-r1-retire-vessel`)
+## R1-1 acceptance record (not “original zero-hit”)
 
-- **`src/`:** strict rule **PASS** in Vitest.
-- **`src` + `server`:** all rg hits match the five rows above; counterexamples in tests reject same-file Provider keywords and partial-line matches.
-
-## Decision requested
-
-Confirm, narrow, or reject the five-line allowlist. Until then:
-
-- **R1-1 (original zero-hit):** **BLOCKED** on `server/` keyword hits.
-- **R1-1 (proposed carve-out):** mechanical check only; **not PASS**.
+- **Original criterion** (zero hits in `src/` + `server/` without carve-out): **not claimed** — `server/` has five approved lines only.
+- **Approved criterion:** baseline scan + **`src/` strict rule** + every other hit must match **exactly one** approved row; Vitest **9/9** on `test/r1-retired-surface.contract.test.ts` at **`8d6cba2`** (re-run on closeout: **9/9**, 2026-10-09).

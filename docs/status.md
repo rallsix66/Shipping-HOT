@@ -32,7 +32,7 @@
 - **标签：** `pre-r1-vessel-removal` @ `8609cb5` 已推送 origin（仅标签，未推 main）。
 - **范围：** ADR-006 执行——迁移 014 归档表、删除 vessel/AIS/voyage 代码与路由、port-only `POST /api/shipping/watch`、S7 夹具/验收改写、恢复文档 `docs/archive/vessel-capability-recovery.md`。
 - **验收证据：**
-  - **R1-1 残留 grep：** **BLOCKED（例外未确认）**——基线命令 `rg -i "aisstream|vesselapi|gfw|voyage|watchlist" src server --glob "!server/database/migrations/**"` 在 `server/` 仍有 **5** 行命中（退役 `/voyages` 字面量 + `not.toHaveProperty("voyages")`）；`src/` 严格规则 **PASS**（`rg … src` → exit **1**、stdout 空；exit 0/2/127 或扫描报错 **不得**通过）。最小例外提案：`docs/plans/r1-1-grep-exception-proposal.md`（**PROPOSED**，**非**用户授权）。机械检查 `test/r1-retired-surface.contract.test.ts`：**精确相对路径 + 行号 + 整行正文**（禁止 `includes`/整文件/行内子串）；含 Provider/Runtime 反例与 rg 失败回归；Vitest 加 `-n` 与提案表一致。**提案机械检查 PASS ≠ R1-1 PASS**；须用户确认五行白名单前不得记原 R1-1 **PASS**。
+  - **R1-1 残留 grep：** **PASS（按批准的五行例外）**——用户 **2026-10-09** 确认 `8d6cba2` 提案：仅 **3 文件 / 5 行**（精确路径 + 行号 + 整行正文；**非**整文件豁免、**非**原始全树零命中）。权威表：`docs/plans/r1-1-grep-exception-proposal.md`（**APPROVED**）；9/29 主方案 §6 R1-1 口径已同步。**`src/`** 严格零命中 **PASS**；**`server/`** 仅上述五行。机械检查 `test/r1-retired-surface.contract.test.ts`：**9/9**（closeout 复跑 2026-10-09 @ `8d6cba2` 基线；实现 commit `8d6cba2`）。
   - **R1-2 门禁 G（PR #5 round-3，2026-10-09）：** `pnpm install --frozen-lockfile`、`pnpm build`、`pnpm typecheck`、`pnpm lint`、Vitest → **58 files / 475 passed | 3 skipped**；`pnpm smoke:p0-native` → **PASS**。基线 `main@8609cb5`：**76 files / 824 tests**。相对 main 的 `*.test.ts` 差异（`git diff 8609cb5..HEAD --name-status`）：**删除 21**、**新增 3**（`scripts/r1-migration-copy-guard.test.ts`、`server/middleware/retired-spa-routes.test.ts`、`test/r1-retired-surface.contract.test.ts`），其余为港口化 **修改**；现役合计 **58** 个测试文件，**不以恢复 824 条为目标**。
   - **R1-2b 删除测试 → 现役断言映射（main@8609cb5 → 本分支）：**
     - Readiness 现役 Job 集合 / 缺失·禁用 / 工具链 / 多源 Feed / Translation 不参与硬门禁 / 官方天气边界 → `server/services/v3-readiness.test.ts`（原 `v3-readiness.test.ts` 中船舶/AIS/航次/Vessel Search 用例**未**恢复）。
@@ -45,8 +45,9 @@
   - **R1-4 浏览器 / S7：** **沿用** round-3 证据 `E2E_S7_DIR=.tmp/s7-local-r1-review-4` → **124 / 0 FAIL**（`.tmp/s7-local-r1-review-4/s7-integrated-evidence.json`）；本次补丁未改 `retired-spa-routes` / S7 脚本。
   - **R1-5 启动日志：** 隔离 cwd 启动 `dist/output/server/index.mjs`，日志仅 `runtime started { jobs: 5 }`，**无** `ais-tracking` / `voyage-sync` / `ais-area` 等已下线任务名 → **PASS**。
   - **R1-6 标签与恢复抽查：** origin 标签 `pre-r1-vessel-removal` 存在；`git worktree add .tmp/pre-r1-verify pre-r1-vessel-removal` + `pnpm exec vitest run server/providers/ais/index.test.ts` → **4/4 PASS**；worktree 已删除 → **PASS**。
-  - **Neat Freak closeout：** **BLOCKED**——技能路径 `C:\Users\Administrator\.claude\skills\neat-freak\SKILL.md` 要求 `bash scripts/audit-inventory.sh <project-root>`；仓库根、`neat-freak/`、`C:\Users\Administrator\.claude\skills` **均无该脚本**；**未**自编替代盘点流程，**未**删除清理候选。文档/状态与提案同步属手工对齐，**不**等于 Neat Freak PASS。
-- **结论：** **R1 = BLOCKED**（**R1-1** 严格 grep 待例外确认；**Neat Freak** 脚本缺失）。产品门禁（R1-2–R1-6、S7 沿用、smoke 见 round-3/4 记录）已实现；**未合并**；**未开始 R1.5**。
+  - **Neat Freak closeout（R1 收尾）：** 技能 `C:\Users\Administrator\.claude\skills\neat-freak\SKILL.md`（v3.0.0）；配套脚本原缺失于 `<repo>/scripts/audit-inventory.sh`，已从 skill bundle **同内容补齐** 于本分支 closeout commit。盘点执行：`"C:\Program Files\Git\bin\bash.exe" scripts/audit-inventory.sh "<repo>"` → exit **0**（`generated_at=2026-10-09T07:53:15Z`，`head=8d6cba2`，`status_entries=0`）；closeout 前亦曾用 skill 绝对路径跑通同一脚本。**未**删除清理候选（`.tmp/` 诊断副本、未跟踪 patch 等保留）。知识同步：本 commit 更新 `docs/status.md`、`docs/plans/*` R1-1 口径、`AGENTS.md` R1 状态 → **PASS（R1 范围 inventory + 文档对齐）**。
+  - **R1 closeout 复验（2026-10-09）：** `test/r1-retired-surface.contract.test.ts` **9/9**；`scripts/r1-migration-copy-guard.test.ts` **9 pass | 3 skipped**（文件 symlink **未验证**，本机 `EPERM`；**未**放宽断言、**未**新增 CI）。
+- **结论：** **R1 = PASS（本地验收）**——R1-1–R1-6 证据见上（S7 / 全量门禁 G **沿用** round-3：`8d6cba2` 之前提交与运行记录）；**R1-3** 守卫 3 项文件 symlink **未验证**；**未合并 main**；**未开始 R1.5**；**未**操作保留库。
 
 ### R0 — 门禁 G 执行记录
 
