@@ -357,6 +357,12 @@ export async function collectNchmfNotices(listHtml: string, fetcher: NchmfFetche
     }
   }
   if (report.candidates === 0) report.noMatchZh = NCHMF_NO_MATCH_ZH
+  if (report.requested > 0 && report.received === 0) {
+    // Every selected article failed: a source failure, never "zero matches". The caller keeps prior records (failed).
+    const error = new Error(`nchmf_articles_all_failed: received 0/${report.requested}; failed postIds ${report.failed.map(f => f.postId).join(",")}`) as Error & { nchmfReport?: NchmfRunReport }
+    error.nchmfReport = report
+    throw error
+  }
   for (const item of previous) {
     if (!out.has(item.id)) out.set(item.id, markNotListed(item, fetchedAt))
   }

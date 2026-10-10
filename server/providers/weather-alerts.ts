@@ -11,9 +11,19 @@ import { type NchmfRunReport, collectNchmfNotices, isPinnedNchmfListUrl } from "
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
 import { type CapSourceContext, capBodyUrlRejection, capIndexLinks, isRetiredBy, parseCapMessage, resolveCapBatch } from "#/providers/cap-alerts"
 
+export interface WeatherAlertRunIssue {
+  errorCode: string
+  errorMessage: string
+  failedIds: string[]
+  failedCount: number
+  receivedCount: number
+}
+
 export interface WeatherAlertProvider {
   readonly providerId?: string
   getFeedItems: (lastKnown?: FeedItem[], ports?: Port[]) => Promise<FeedItem[]>
+  /** Partial failure of the last getFeedItems run (VN-W01 article failures) that items alone cannot express. */
+  lastRunIssue?: () => WeatherAlertRunIssue | undefined
 }
 
 export const officialWeatherAlertSourceIds = new Set(["jma", "tmd", "bmkg", "metmalaysia", "nchmf"])
@@ -473,9 +483,12 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
   const now = options.now ?? (() => new Date())
   const sources = options.sources ?? officialWeatherAlertSources
   const enabledSources = sources.filter(source => activeOfficialWeatherAlertSourceIds({ allowPending: options.allowPending, sources }).has(source.id))
+  let runIssue: WeatherAlertRunIssue | undefined
   return {
     ...(enabledSources.length === 1 ? { providerId: enabledSources[0].id } : {}),
+    lastRunIssue: () => runIssue,
     async getFeedItems(lastKnown = [], ports = mockPorts) {
+      runIssue = undefined
       const fetchedAt = now().toISOString()
       if (!enabledSources.length) {
         return lastKnown.filter(item => officialWeatherAlertSourceIds.has(item.sourceId)).map(item => markDisabled(item, fetchedAt, "official_weather_source_live_pending"))
@@ -538,6 +551,10 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
                 throw error
               })
             options.onNchmfReport?.(report)
+            if (report.failed.length) {
+              const ids = report.failed.map(f => f.postId)
+              runIssue = { errorCode: "nchmf_partial_article_failure", errorMessage: `${source.name}: received ${report.received}, failed ${ids.length} (postIds ${ids.join(",")})`, failedIds: ids, failedCount: ids.length, receivedCount: report.received }
+            }
             return items
           }
           if (source.format === "json_warning") {

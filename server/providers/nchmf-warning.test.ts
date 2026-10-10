@@ -9,6 +9,8 @@ import { NCHMF_LIST_URL, NCHMF_MAX_ARTICLES, NCHMF_NO_MATCH_ZH, type NchmfRunRep
 import { activeOfficialWeatherAlertSourceIds, createOfficialWeatherAlertProvider, officialWeatherAlertSources, weatherAlertProvenance } from "./weather-alerts"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { createWeatherAlertSyncJob } from "#/runtime/weather-alert-sync-job"
+import { BackgroundRuntime } from "#/runtime/background-runtime"
+import { RuntimeRepository } from "#/database/runtime-jobs"
 import { evaluateOfficialAlertImpactRules } from "#/services/official-alert-impact"
 
 /**
@@ -262,5 +264,111 @@ describe("vN-W01 persistence through the sync job", () => {
     expect(b.map(i => i.id).sort()).toEqual(a.map(i => i.id).sort())
     expect(b.find(i => i.id === "weather-alert:nchmf:54353")?.publishedAt).toBe(FETCHED)
     native.close()
+  })
+})
+
+describe("vN-W01 failure status on the normal registry -> runtime -> sync job path (dots P2, 35a5c8b)", () => {
+  async function setup() {
+    const native = new NativeDatabase(":memory:")
+    const database = createDatabase({
+      name: "sqlite",
+      dialect: "sqlite",
+      getInstance: () => native,
+      exec: (sql: string) => native.exec(sql),
+      prepare: (sql: string) => {
+        const statement = native.prepare(sql)
+        return {
+          all: async (...params: unknown[]) => statement.all(...params as never[]),
+          get: async (...params: unknown[]) => statement.get(...params as never[]),
+          run: async (...params: unknown[]) => {
+            const result = statement.run(...params as never[])
+            return { success: result.changes > 0, changes: result.changes, lastInsertRowid: result.lastInsertRowid }
+          },
+        }
+      },
+      dispose: () => native.close(),
+    } as never)
+    await initShippingTables(database, "real")
+    const repository = new ShippingRepository(database, "real")
+    await repository.seed(createMockSnapshot().ports, [], [], createMockSnapshot().settings)
+    const runtimeRepository = new RuntimeRepository(database)
+    let fetcher = siteFetcher().fetcher
+    let clock = new Date(FETCHED)
+    const runtime = new BackgroundRuntime(runtimeRepository)
+    // Same provider options as server/runtime/registry.ts weatherAlertJobs (no report callback wired).
+    const provider = createOfficialWeatherAlertProvider({ sources: [vn], allowPending: true, throwOnSourceFailureWithoutLastKnown: true, now: () => clock, fetcher: (url, init) => fetcher(url, init) })
+    runtime.register(createWeatherAlertSyncJob({ database, dataMode: "real", sourceId: "nchmf", provider: provider as typeof provider & { providerId: string }, intervalMs: 3_600_000, now: () => clock }))
+    await runtime.start()
+    const run = async (iso: string, next: ReturnType<typeof siteFetcher>["fetcher"]) => {
+      clock = new Date(iso)
+      fetcher = next
+      const result = await runtime.runNow("weather-alert-sync:nchmf")
+      const records = (await repository.listFeedItems({ now: clock, view: "all" })).filter((i: FeedItem) => i.sourceId === "nchmf")
+      const runs = await runtimeRepository.listSyncRuns("nchmf")
+      const health = await runtimeRepository.getProviderRuntime("nchmf", "weather_alerts")
+      return { result, records, lastRun: runs[0], health }
+    }
+    return { run, close: () => {
+      runtime.stop()
+      native.close()
+    } }
+  }
+  const all503 = () => siteFetcher(url => url === NCHMF_LIST_URL ? undefined : { ok: false, status: 503, body: "" })
+
+  it("partial success/failure: successful articles stored, run + source status failed with failed postIds/count", async () => {
+    const s = await setup()
+    // The fixture site serves 3 real articles; the other 9 candidates answer 200 + empty shell (failures).
+    const { result, records, lastRun, health } = await s.run(FETCHED, siteFetcher().fetcher)
+    expect(result).toMatchObject({ status: "failed", errorCode: "nchmf_partial_article_failure" })
+    expect(result.errorMessage).toMatch(/received 3, failed 9 \(postIds [\d,]+\)/)
+    expect(result.errorMessage).toContain("54546")
+    expect(lastRun).toMatchObject({ status: "failed", errorCode: "nchmf_partial_article_failure" })
+    expect(health?.status).not.toBe("healthy")
+    expect(records.map(r => r.id).sort()).toEqual(["weather-alert:nchmf:54353", "weather-alert:nchmf:54492", "weather-alert:nchmf:54547"])
+    expect(records.every(r => r.sourceStatus === "healthy" && !r.stale)).toBe(true)
+    // Next partial run where 54547 now fails: its prior record is kept, marked stale, old values unchanged.
+    const second = await s.run("2026-10-10T11:00:00.000Z", siteFetcher(url => url.includes("post54547") ? { ok: false, status: 503, body: "" } : undefined).fetcher)
+    expect(second.result.status).toBe("failed")
+    expect(second.result.errorMessage).toContain("54547")
+    const flood = second.records.find(r => r.id === "weather-alert:nchmf:54547")!
+    expect(flood).toMatchObject({ stale: true, sourceStatus: "degraded" })
+    expect(flood.weather?.originalRiskLevel).toBe("Cấp 1")
+    expect(flood.publishedAt).toBe(FETCHED)
+    s.close()
+  })
+
+  it("first run, all articles failed: run reports failure (not success/0)", async () => {
+    const s = await setup()
+    const { result, records, lastRun, health } = await s.run(FETCHED, all503().fetcher)
+    expect(result.status).toBe("failed")
+    expect(result.errorMessage).toMatch(/nchmf_articles_all_failed: received 0\/12/)
+    expect(lastRun?.status).toBe("failed")
+    expect(health?.status).not.toBe("healthy")
+    expect(records).toHaveLength(0)
+    s.close()
+  })
+
+  it("all articles failed after existing records: failure, every prior record retained and stale", async () => {
+    const s = await setup()
+    const first = await s.run(FETCHED, siteFetcher().fetcher)
+    const { result, records, lastRun } = await s.run("2026-10-10T11:00:00.000Z", all503().fetcher)
+    expect(result.status).toBe("failed")
+    expect(lastRun?.status).toBe("failed")
+    expect(records.map(r => r.id).sort()).toEqual(first.records.map(r => r.id).sort())
+    expect(records.every(r => r.stale && r.sourceStatus === "failed")).toBe(true)
+    expect(records.find(r => r.id === "weather-alert:nchmf:54547")?.weather?.originalRiskLevel).toBe("Cấp 1")
+    s.close()
+  })
+
+  it("true zero-match (valid structure, no matching title) stays success with 0 records", async () => {
+    const s = await setup()
+    const html = listHtml([{ href: `${BASE}ban-tin-du-bao-song-10-ngay-post9.html`, title: "Bản tin dự báo sóng 10 ngày tới" }])
+    const f = siteFetcher(url => url === NCHMF_LIST_URL ? { ok: true, status: 200, body: html } : undefined)
+    const { result, records, lastRun } = await s.run(FETCHED, f.fetcher)
+    expect(result).toMatchObject({ status: "success", recordsRead: 0 })
+    expect(lastRun?.status).toBe("success")
+    expect(records).toHaveLength(0)
+    expect(f.calls).toHaveLength(1)
+    s.close()
   })
 })
