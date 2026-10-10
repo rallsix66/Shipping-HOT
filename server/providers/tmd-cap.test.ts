@@ -5,7 +5,7 @@ import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
 import type { FeedItem, Port } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
-import { capIndexLinks, capSeverity, parseCapMessage, parseCapReferences, resolveCapBatch } from "./cap-alerts"
+import { capBodyUrlRejection, capIndexLinks, capSeverity, parseCapMessage, parseCapReferences, resolveCapBatch } from "./cap-alerts"
 import { capSourceContext, createOfficialWeatherAlertProvider, officialWeatherAlertSources, parseWeatherAlertCap } from "./weather-alerts"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { createWeatherAlertSyncJob } from "#/runtime/weather-alert-sync-job"
@@ -30,15 +30,18 @@ const LIVE_DOCS = [
   "TMD20261007164420_2-en.xml",
 ]
 
-function cap(fields: { id: string, status?: string, msgType?: string, references?: string, sent?: string, expires?: string | null, severity?: string, geocodes?: string[] }): string {
+function cap(fields: { id: string, status?: string, msgType?: string, references?: string, sent?: string | null, expires?: string | null, severity?: string, geocodes?: string[], noInfo?: boolean }): string {
   const geocodes = (fields.geocodes ?? ["TH-20"]).map(code => `<geocode><valueName>ISO3166-2</valueName><value>${code}</value></geocode>`).join("")
   const expires = fields.expires === null ? "" : `<expires>${fields.expires ?? "2026-10-10T18:00:00+07:00"}</expires>`
-  return `<?xml version="1.0"?><alert xmlns="urn:oasis:names:tc:emergency:cap:1.2"><identifier>${fields.id}-en</identifier><sender>TMD</sender><sent>${fields.sent ?? "2026-10-10T06:00:00+07:00"}</sent><status>${fields.status ?? "Actual"}</status><msgType>${fields.msgType ?? "Alert"}</msgType><scope>Public</scope>${fields.references ? `<references>${fields.references}</references>` : ""}<info><language>en-US</language><category>Met</category><event>Heavy Rain</event><urgency>Expected</urgency><severity>${fields.severity ?? "Severe"}</severity><certainty>Likely</certainty><effective>2026-10-10T06:00:00+07:00</effective>${expires}<senderName>TMD</senderName><headline>Heavy Rain Risk Area</headline><description>SYNTHETIC test alert.</description><area><areaDesc>Synthetic area</areaDesc>${geocodes}</area></info></alert>`
+  return `<?xml version="1.0"?><alert xmlns="urn:oasis:names:tc:emergency:cap:1.2"><identifier>${fields.id}-en</identifier><sender>TMD</sender>${fields.sent === null ? "" : `<sent>${fields.sent ?? "2026-10-10T06:00:00+07:00"}</sent>`}<status>${fields.status ?? "Actual"}</status><msgType>${fields.msgType ?? "Alert"}</msgType><scope>Public</scope>${fields.references ? `<references>${fields.references}</references>` : ""}${fields.noInfo ? "" : `<info><language>en-US</language><category>Met</category><event>Heavy Rain</event><urgency>Expected</urgency><severity>${fields.severity ?? "Severe"}</severity><certainty>Likely</certainty><effective>2026-10-10T06:00:00+07:00</effective>${expires}<senderName>TMD</senderName><headline>Heavy Rain Risk Area</headline><description>SYNTHETIC test alert.</description><area><areaDesc>Synthetic area</areaDesc>${geocodes}</area></info>`}</alert>`
 }
 
-function fetcherFor(index: string, docs: Record<string, string>) {
-  return async (url: string) => {
+const fetchInits: { url: string, redirect?: string }[] = []
+function fetcherFor(index: string, docs: Record<string, string>, redirects: Record<string, string> = {}) {
+  return async (url: string, init?: { redirect?: "error" | "manual" | "follow" }) => {
+    fetchInits.push({ url, redirect: init?.redirect })
     if (url === tmd.url) return { ok: true, status: 200, text: async () => index }
+    if (redirects[url]) return { ok: true, status: 200, redirected: true, url: redirects[url], text: async () => cap({ id: "R0" }) }
     const body = docs[url]
     return body ? { ok: true, status: 200, text: async () => body } : { ok: false, status: 404, text: async () => "" }
   }
@@ -127,6 +130,60 @@ describe("cAP lifecycle (synthetic)", () => {
   })
 })
 
+describe("cAP body source restriction (unit)", () => {
+  it("accepts only https://www.tmd.go.th/uploads/CAP/en/<name>.xml", () => {
+    expect(capBodyUrlRejection("https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261010062912_2.xml")).toBeUndefined()
+  })
+
+  it.each([
+    ["https://evil.example/uploads/CAP/en/CAPX.xml", "host"],
+    ["https://tmd.go.th/uploads/CAP/en/CAPX.xml", "host"],
+    ["https://www.tmd.go.th.evil.example/uploads/CAP/en/CAPX.xml", "host"],
+    ["http://www.tmd.go.th/uploads/CAP/en/CAPX.xml", "scheme"],
+    ["https://user:pw@www.tmd.go.th/uploads/CAP/en/CAPX.xml", "credentials"],
+    ["https://www.tmd.go.th@evil.example/uploads/CAP/en/CAPX.xml", "credentials"],
+    ["https://www.tmd.go.th:8443/uploads/CAP/en/CAPX.xml", "port"],
+    ["https://www.tmd.go.th/uploads/CAP/th/CAPX.xml", "path"],
+    ["https://www.tmd.go.th/uploads/CAP/en/sub/CAPX.xml", "path"],
+    ["https://www.tmd.go.th/uploads/CAP/en/CAPX.xml?x=1", "query_or_fragment"],
+    ["https://www.tmd.go.th/uploads/CAP/en/../../admin/CAPX.xml", "path_disguise"],
+    ["https://www.tmd.go.th/uploads/CAP/en/%2e%2e/%2e%2e/CAPX.xml", "path_disguise"],
+    ["https://www.tmd.go.th/uploads/CAP/en/..%2fCAPX.xml", "path_disguise"],
+    ["https://www.tmd.go.th/uploads/CAP/en/..\\CAPX.xml", "path_disguise"],
+    ["https://www.tmd.go.th/other/../uploads/CAP/en/CAPX.xml", "path_disguise"],
+  ])("rejects %s (%s)", (url, reason) => {
+    expect(capBodyUrlRejection(url)).toBe(reason)
+  })
+
+  it("non-empty index with any invalid or missing link throws instead of filtering", () => {
+    expect(() => capIndexLinks(indexFor([DOC("A"), "https://evil.example/uploads/CAP/en/CAPX.xml"]))).toThrow(/structural/)
+    expect(() => capIndexLinks(`<rss><channel><item><title>x</title></item></channel></rss>`)).toThrow(/structural/)
+    expect(capIndexLinks(indexFor([]))).toEqual([])
+  })
+})
+
+describe("cAP control-message time gating (unit, same batch)", () => {
+  const ctx = capSourceContext(tmd)
+  const at = "2026-10-10T05:00:00.000Z"
+  it.each([
+    ["future", "2026-10-11T06:00:00+07:00"],
+    ["unparseable", "not-a-date"],
+    ["missing", null],
+  ])("cancel/Update with %s sent does not revoke or supersede", (_label, sent) => {
+    const cancel = resolveCapBatch([parseCapMessage(cap({ id: "G0" })), parseCapMessage(cap({ id: "G1", msgType: "Cancel", noInfo: true, sent, references: "TMD,G0,2026-10-10T06:00:00+07:00" }))], ctx, at)
+    expect(cancel.items.map(i => i.weather?.alertId)).toEqual(["tmd:G0-en"])
+    expect(cancel.ignored).toContainEqual({ identifier: "G1-en", reason: "control_sent_missing_invalid_or_future" })
+    const update = resolveCapBatch([parseCapMessage(cap({ id: "H0" })), parseCapMessage(cap({ id: "H1", msgType: "Update", sent, references: "TMD,H0,2026-10-10T06:00:00+07:00" }))], ctx, at)
+    expect(update.items.map(i => i.weather?.alertId)).toEqual(["tmd:H0-en", "tmd:H1-en"])
+    expect(update.items[1]).toMatchObject({ eventEligibility: false, weather: { alertState: "unknown" } })
+  })
+
+  it("cancel without info/expires and a valid sent revokes in the same batch", () => {
+    const batch = resolveCapBatch([parseCapMessage(cap({ id: "J0" })), parseCapMessage(cap({ id: "J1", msgType: "Cancel", noInfo: true, references: "TMD,J0,2026-10-10T06:00:00+07:00" }))], ctx, "2026-10-10T00:00:00.000Z")
+    expect(batch.items).toEqual([])
+  })
+})
+
 function db() {
   const native = new NativeDatabase(":memory:")
   const database = createDatabase({
@@ -163,8 +220,9 @@ describe("tMD CAP → provider → SQLite (sync job) → panel service layer", (
     await repository.seed([laemChabang()], [], [], createMockSnapshot().settings)
     return { database, native, repository }
   }
-  async function runOnce(database: ReturnType<typeof db>["database"], index: string, docs: Record<string, string>, nowIso: string) {
-    const provider = createOfficialWeatherAlertProvider({ sources: [tmd], fetcher: fetcherFor(index, docs), now: () => new Date(nowIso) })
+  // Same provider options as server/runtime/registry.ts weatherAlertJobs (throwOnSourceFailureWithoutLastKnown: true).
+  async function runOnce(database: ReturnType<typeof db>["database"], index: string, docs: Record<string, string>, nowIso: string, redirects: Record<string, string> = {}) {
+    const provider = createOfficialWeatherAlertProvider({ sources: [tmd], fetcher: fetcherFor(index, docs, redirects), now: () => new Date(nowIso), throwOnSourceFailureWithoutLastKnown: true })
     const job = createWeatherAlertSyncJob({ database, dataMode: "real", sourceId: "tmd", provider: provider as typeof provider & { providerId: string }, intervalMs: 900_000, now: () => new Date(nowIso) })
     return job.run()
   }
@@ -231,12 +289,55 @@ describe("tMD CAP → provider → SQLite (sync job) → panel service layer", (
     native.close()
   })
 
-  it("a CAP document failure fails the run without inventing alerts", async () => {
+  it("first-time CAP document failure fails the whole run (production config) and stores nothing", async () => {
     const { database, native, repository } = await setup()
-    // existing provider contract: with no last-known items a failed source yields an empty list (no fabricated alerts)
-    await runOnce(database, indexFor([DOC("F0")]), {}, T0)
+    await expect(runOnce(database, indexFor([DOC("F0")]), {}, T0)).rejects.toThrow()
     expect(await repository.listFeedItems({ view: "all" })).toEqual([])
-    expect((await panel(repository, T0)).officialAlertImpacts).toEqual([])
+    native.close()
+  })
+
+  it("cAP document failure with existing records keeps them as stale/failed instead of dropping them", async () => {
+    const { database, native, repository } = await setup()
+    await runOnce(database, indexFor([DOC("S0")]), { [DOC("S0")]: cap({ id: "S0" }) }, T0)
+    const result = await runOnce(database, indexFor([DOC("S0"), DOC("S1")]), { [DOC("S0")]: cap({ id: "S0" }) }, "2026-10-10T00:15:00.000Z")
+    expect(result.status).toBe("failed")
+    const stored = (await repository.listFeedItems({ view: "all" })).filter(item => item.sourceId === "tmd")
+    expect(stored).toEqual([expect.objectContaining({ weather: expect.objectContaining({ alertId: "tmd:S0-en" }), stale: true, sourceStatus: "failed" })])
+    expect((await panel(repository, "2026-10-10T00:15:00.000Z")).officialAlertImpacts).toEqual([])
+    native.close()
+  })
+
+  it("an out-of-scope body link in a non-empty index is a structural failure, not 'no alerts'", async () => {
+    const { database, native, repository } = await setup()
+    await expect(runOnce(database, indexFor([DOC("G0"), "https://evil.example/uploads/CAP/en/CAPX.xml"]), { [DOC("G0")]: cap({ id: "G0" }) }, T0)).rejects.toThrow(/structural/)
+    expect(await repository.listFeedItems({ view: "all" })).toEqual([])
+    native.close()
+  })
+
+  it("cross-host redirect of a CAP body is rejected; bodies are requested with redirect=error", async () => {
+    const { database, native, repository } = await setup()
+    fetchInits.length = 0
+    await expect(runOnce(database, indexFor([DOC("H0")]), {}, T0, { [DOC("H0")]: "https://evil.example/CAP.xml" })).rejects.toThrow(/redirect/)
+    expect(fetchInits.find(call => call.url === DOC("H0"))?.redirect).toBe("error")
+    expect(await repository.listFeedItems({ view: "all" })).toEqual([])
+    native.close()
+  })
+
+  it("cancel with a future sent does not revoke a stored alert (cross-run)", async () => {
+    const { database, native, repository } = await setup()
+    await runOnce(database, indexFor([DOC("W0")]), { [DOC("W0")]: cap({ id: "W0" }) }, T0)
+    await runOnce(database, indexFor([DOC("W1")]), { [DOC("W1")]: cap({ id: "W1", msgType: "Cancel", noInfo: true, sent: "2026-10-12T06:00:00+07:00", references: "TMD,W0,2026-10-10T06:00:00+07:00" }) }, "2026-10-10T00:15:00.000Z")
+    const stored = (await repository.listFeedItems({ view: "all" })).find(item => item.weather?.alertId === "tmd:W0-en")
+    expect(stored?.weather?.alertState).not.toBe("expired")
+    native.close()
+  })
+
+  it("cancel without info/expires but with a valid sent revokes a stored alert (cross-run)", async () => {
+    const { database, native, repository } = await setup()
+    await runOnce(database, indexFor([DOC("Y0")]), { [DOC("Y0")]: cap({ id: "Y0" }) }, T0)
+    await runOnce(database, indexFor([DOC("Y1")]), { [DOC("Y1")]: cap({ id: "Y1", msgType: "Cancel", noInfo: true, sent: "2026-10-10T07:10:00+07:00", references: "TMD,Y0,2026-10-10T06:00:00+07:00" }) }, "2026-10-10T00:15:00.000Z")
+    const stored = (await repository.listFeedItems({ view: "all" })).find(item => item.weather?.alertId === "tmd:Y0-en")
+    expect(stored).toMatchObject({ eventEligibility: false, weather: { alertState: "expired" } })
     native.close()
   })
 })

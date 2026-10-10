@@ -58,6 +58,15 @@ export interface CapParseResult {
   ignored: { identifier: string, reason: string }[]
 }
 
+/** Clock-skew tolerance for "not obviously in the future". */
+export const CAP_SENT_FUTURE_SKEW_MS = 5 * 60 * 1000
+
+/** A control message (Update/Cancel) may revoke/supersede only when its `sent` parses and is not in the future. */
+export function capSentUsable(sent: string | undefined, fetchedAt: string): boolean {
+  const sentMs = sent ? Date.parse(sent) : Number.NaN
+  return Number.isFinite(sentMs) && sentMs <= Date.parse(fetchedAt) + CAP_SENT_FUTURE_SKEW_MS
+}
+
 const capParser = new XMLParser({ ignoreAttributes: true, removeNSPrefix: true, parseTagValue: false, trimValues: true })
 
 function asArray<T>(value: T | T[] | undefined): T[] {
@@ -142,7 +151,8 @@ export function capMessageToFeedItem(message: CapMessage, source: CapSourceConte
   const effectiveAt = iso(message.effective) ?? iso(message.onset)
   const fetchedMs = Date.parse(fetchedAt)
   const expired = expiresAt !== undefined && Date.parse(expiresAt) <= fetchedMs
-  const alertState: WeatherDetail["alertState"] = expired ? "expired" : sentAt && expiresAt ? "active" : "unknown"
+  const sentUsable = capSentUsable(message.sent, fetchedAt)
+  const alertState: WeatherDetail["alertState"] = expired ? "expired" : sentAt && sentUsable && expiresAt ? "active" : "unknown"
   const eventEligibility = alertState === "active"
   const ownCodes = message.geocodes.filter(code => code.toUpperCase().startsWith(`${source.countryCode.toUpperCase()}-`))
   const relatedPortIds = [...new Set(ownCodes.flatMap(code => capSubdivisionPorts[code.toUpperCase()] ?? []))]
@@ -206,9 +216,12 @@ export function resolveCapBatch(messages: readonly CapMessage[], source: CapSour
   })
   const retired = new Set<string>()
   for (const message of actual) {
-    if (message.msgType === "Update" || message.msgType === "Cancel") {
-      for (const key of message.references) retired.add(key)
+    if (message.msgType !== "Update" && message.msgType !== "Cancel") continue
+    if (!capSentUsable(message.sent, fetchedAt)) {
+      ignored.push({ identifier: message.identifier, reason: "control_sent_missing_invalid_or_future" })
+      continue
     }
+    for (const key of message.references) retired.add(key)
   }
   const items: FeedItem[] = []
   for (const message of actual) {
@@ -225,15 +238,45 @@ export function resolveCapBatch(messages: readonly CapMessage[], source: CapSour
   return { items, retiredKeys: [...retired], ignored }
 }
 
-/** CAP document links from an RSS index (TMD `/en/api/xml/CAP`). */
+/** The only place TMD CAP bodies may be fetched from (TH-W01). */
+export const TMD_CAP_BODY_ORIGIN = "https://www.tmd.go.th"
+export const TMD_CAP_BODY_PATH_PREFIX = "/uploads/CAP/en/"
+
+/** Why a CAP body URL is not allowed; undefined when allowed. Checked on the raw string before URL normalisation. */
+export function capBodyUrlRejection(raw: string): string | undefined {
+  if (/\\|%2e|%2f|%5c|%00|\/\.{1,2}(?:\/|$)/i.test(raw)) return "path_disguise"
+  let url: URL
+  try {
+    url = new URL(raw)
+  } catch {
+    return "unparseable"
+  }
+  if (url.protocol !== "https:") return "scheme"
+  if (url.username || url.password) return "credentials"
+  if (url.port !== "") return "port"
+  if (url.origin !== TMD_CAP_BODY_ORIGIN) return "host"
+  if (url.search || url.hash) return "query_or_fragment"
+  if (!url.pathname.startsWith(TMD_CAP_BODY_PATH_PREFIX) || !/^\/uploads\/CAP\/en\/[\w-]+\.xml$/.test(url.pathname)) return "path"
+  if (url.href !== raw) return "non_canonical"
+  return undefined
+}
+
+/**
+ * CAP document links from the TMD RSS index (`/en/api/xml/CAP`). Any item without a link or with a link outside
+ * https://www.tmd.go.th/uploads/CAP/en/ is a structural anomaly and throws — it is never filtered into "no alerts".
+ */
 export function capIndexLinks(xml: string, limit = 20): string[] {
   const parsed = capParser.parse(xml) as { rss?: { channel?: { item?: unknown } } }
   const channel = parsed.rss?.channel
-  if (!channel) throw new Error("CAP index payload has no RSS channel")
-  return asArray(channel.item as Record<string, unknown> | Record<string, unknown>[] | undefined)
-    .map(item => text(item.link))
-    .filter((link): link is string => Boolean(link && /^https:\/\//i.test(link)))
-    .slice(0, limit)
+  if (!channel) throw new Error("cap_index_structural_anomaly: no RSS channel")
+  const items = asArray(channel.item as Record<string, unknown> | Record<string, unknown>[] | undefined)
+  return items.slice(0, limit).map((item, index) => {
+    const link = text(item.link)
+    if (!link) throw new Error(`cap_index_structural_anomaly: item ${index} has no link`)
+    const rejection = capBodyUrlRejection(link)
+    if (rejection) throw new Error(`cap_index_structural_anomaly: item ${index} body link rejected (${rejection})`)
+    return link
+  })
 }
 
 /** Previously stored item retired by an Update/Cancel in the current batch (identifier from `weather.alertId`). */

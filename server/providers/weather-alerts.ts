@@ -5,7 +5,7 @@ import type { DataProvenance, FeedItem, Port, WeatherDetail } from "@shared/ship
 import { mockPorts } from "@shared/shipping-fixtures"
 import type { ArticleSourcePolicyConfig } from "@shared/article"
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
-import { type CapSourceContext, capIndexLinks, isRetiredBy, parseCapMessage, resolveCapBatch } from "#/providers/cap-alerts"
+import { type CapSourceContext, capBodyUrlRejection, capIndexLinks, isRetiredBy, parseCapMessage, resolveCapBatch } from "#/providers/cap-alerts"
 
 export interface WeatherAlertProvider {
   readonly providerId?: string
@@ -18,9 +18,13 @@ export interface WeatherAlertResponse {
   ok: boolean
   status: number
   text: () => Promise<string>
+  /** Set by fetch when a redirect was followed. */
+  redirected?: boolean
+  /** Final URL after redirects (fetch Response.url). */
+  url?: string
 }
 
-export type WeatherAlertFetcher = (url: string) => Promise<WeatherAlertResponse>
+export type WeatherAlertFetcher = (url: string, init?: { redirect?: "error" | "manual" | "follow" }) => Promise<WeatherAlertResponse>
 export type WeatherAlertParser = "jma" | "tmd" | "bmkg"
 export type WeatherAlertSourceStatus = "verified_live" | "experimental" | "live_pending" | "disabled"
 
@@ -439,7 +443,11 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
           if (source.format === "cap_index") {
             const messages: ReturnType<typeof parseCapMessage>[] = []
             for (const link of capIndexLinks(body)) {
-              const document = await fetcher(link)
+              // Redirects are refused (fetch rejects on any redirect); a fetcher that still followed one is re-checked.
+              const document = await fetcher(link, { redirect: "error" })
+              if (document.redirected || (document.url && (document.url !== link || capBodyUrlRejection(document.url)))) {
+                throw new Error(`${source.name} CAP document redirect rejected`)
+              }
               if (!document.ok) throw providerHttpError(source.name, document.status, `${source.name} CAP document request failed (${document.status})`)
               messages.push(parseCapMessage(await document.text(), link))
             }
