@@ -1,0 +1,2 @@
+audit 说明（be78026）：gate 脚本的审计在 diff 5e439a7..HEAD 中发现 2 行类密钥内容，均来自 35a5c8b 提交的 docs/evidence/nchmf-integration-2026-10-10/raw/index.html 中站点内嵌的地图 token（真实运行 raw 的脱敏函数漏了这一项；首轮只读样本已脱敏）。随后的文档提交已把当前文件中的值替换为 <redacted>；按规则不改写历史，35a5c8b 历史中仍含该值。代码门禁 install/build/typecheck/lint/vitest/smoke/S7 全部 exit 0；脱敏后对当前树重跑审计结果见 audit-after-redaction.txt。
+本轮无上游重抓、无八港天气 live、无 PDF 抓取。

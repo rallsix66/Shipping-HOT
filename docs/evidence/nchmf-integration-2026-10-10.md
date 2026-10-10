@@ -22,6 +22,8 @@
 - 8 条中原文级别 5 条（Cấp 1 ×4、cấp 2 ×1），未提供 3 条；事件资格 0，关联港口 0，VNSGN 规则命中 0。分类 `received_with_partial_failures`。
 
 ## 展示核验（`display-evidence.json`，PASS 17/17，HEAD `c064e5a` 干净）
+
+> 范围更正（dots P2，2026-10-10 18:32）：这 17/17 只证明**预警记录的展示**（API 字段与 /feed 渲染），**不证明来源失败状态**。`c064e5a` 下真实运行 8 成功 / 4 失败，但 `live-evidence.json` 的 `jobResult` 仍为 `success`，即当时失败没有传到运行状态；已在 `be78026` 修复，见下节。
 - 服务：生产构建 `dist/output/server`（Nitro），隔离库，Runtime 关闭，`SHIPPING_WEATHER_ALERT_PROVIDER` 未设，无 provider 密钥。
 - API：`GET /api/shipping/feed`（8 条，原文字段齐全、生命周期未知、级别未映射、无港口）与 `GET /api/shipping`。GET 前后：Runtime 关闭、预警开关未设，所检查的 feed_items / provider_usage 计数及 id+长度指纹未变；runtimeRows=-1 表示该表不可用（未检查 runtime 表）。这不证明没有网络或 LLM 调用。
 - 浏览器：系统 Chrome headless（CDP）`/feed`：摘要措辞、生命周期未知/时区未确认/有效性待确认/预警状态：未知、原文级别（Cấp 1，未映射）与“未提供”、列表时间与“下一期发布时间（不等于有效期）”、来源/抓取时间/首次接收、发布国家分组、每条原文块 8 个；无“生效”字样。
@@ -31,3 +33,18 @@
 - 只覆盖列表页当前展示的两个块（每块约最新 10 条）与上述标题族；不是全国全量，不代表“越南无其他预警”。每次最多 12 篇，正文最多保存 8000 字符（`bodyTruncated`）。
 - 只有 PDF 附件的公报（如 LHC 水库公报）正文为空 → 记为失败，不抓 PDF。
 - 原文时间/级别均为原文文本，未换算、未映射。八港天气 live 未重跑；未动天气基线与 VNSGN。
+
+## P2 修复：文章失败传到正常同步路径（代码 `be78026`，dots 18:32）
+- 问题：文章失败只经 `onNchmfReport` 回调上报；正常 registry 没接这个回调，sync job 只看 `sourceStatus=failed`，所以部分失败记成 success，首次全部失败也记成 success/0，与真正的零匹配混在一起。
+- 修复（不加通用框架、不整体回滚）：
+  - `WeatherAlertProvider.lastRunIssue()`：provider 在本次运行有文章失败时给出 `errorCode: nchmf_partial_article_failure`、失败 postId 列表和数量、成功数量。
+  - sync job：照常写入成功记录；有 issue 时返回 `status: failed`（带 postId/数量的 errorMessage），不归档任何记录；BackgroundRuntime 据此写 sync_runs 和 provider_runtime（来源状态非 healthy）。失败文章的旧记录保留、标 stale/degraded，旧值不变。
+  - 本次所选文章全部失败（received 0）→ provider 抛错：首次运行 → 运行失败，无记录；已有记录 → 旧记录全部保留并标 failed/stale，运行失败。
+  - 结构有效、没有匹配标题 → 仍是 success、0 条，含义未确认。
+- 固定样本测试（走正常 registry 同款 provider 配置 → BackgroundRuntime.runNow → sync job → SQLite，不依赖回调），`server/providers/nchmf-warning.test.ts` 新增 4 个：
+  1. 部分成功/失败：job 与 sync_runs 为 failed（`received 3, failed 9 (postIds …)`），来源状态非 healthy，3 条成功记录入库且 healthy；下一轮 54547 失败时其旧记录保留、标 stale/degraded，原文级别和首次接收时间不变。
+  2. 首次运行全部失败：failed（`nchmf_articles_all_failed: received 0/12`），无记录。
+  3. 已有记录后全部失败：failed，旧记录全部保留并标 stale/failed。
+  4. 真零匹配：success、recordsRead 0、只请求列表页 1 次。
+- 证据：`docs/evidence/gate-be78026/p2-fixture-tests.txt`（4/4 通过）；门禁 `docs/evidence/gate-be78026/`（install/build/typecheck/lint/vitest 755 通过 3 跳过/smoke:p0-native/S7 exit 0；审计说明见 `live-note.txt`）。本轮没有重抓上游、没有重跑八港天气、没有扩展 PDF 抓取。
+- 脱敏补充：35a5c8b 的真实运行 raw `index.html` 含站点地图 token，已在当前文件替换为 `<redacted>`；历史不改写。

@@ -556,8 +556,8 @@ Icon_28.options.iconSize = [1, 1], Icon_29.options.iconSize = [1, 1], Icon_30.op
     map.addControl(osmGeocoder);
     L.control.scale({ maxWidth: 80, metric: true, imperial: false }).addTo(map);
     
-    //var token ="dnnIGOa3jUtVBSgCUiNPLAnVHYVABmu1NvP8Waq6t5st8p731kDwS3nkvU2spYx0MyXPwjdVutl8zHWa7o2NuXVUo7-L-udiKh62dE9OhmU.";
-    var token ="dnnIGOa3jUtVBSgCUiNPLAnVHYVABmu1NvP8Waq6t5st8p731kDwS3nkvU2spYx0MyXPwjdVutl8zHWa7o2NuXVUo7-L-udiKh62dE9OhmU.";   
+    //var token ="<redacted>";
+    var token ="<redacted>";   
     var urlbandonen = "https://vnsdi.mae.gov.vn/basemap/rest/services/BanDoNenTyLeNho/MapServer/tile/{z}/{y}/{x}?token=" + token;
     L.esri.tiledMapLayer({ url: urlbandonen, maxNativeZoom: imaxNativeZoom, maxZoom: imaxZoom }).addTo(map);
     
