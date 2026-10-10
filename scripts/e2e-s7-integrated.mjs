@@ -22,7 +22,7 @@
 // Evidence policy: CI uploads `.tmp/s7-local/s7-integrated-evidence.json` only; override with E2E_S7_DIR inside `.tmp/`.
 //
 // Exit code 0 only when every check passes.
-import { spawn } from "node:child_process"
+import { execSync, spawn } from "node:child_process"
 import { createHash } from "node:crypto"
 import { existsSync, mkdirSync, mkdtempSync, openSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
@@ -307,6 +307,14 @@ function diffCounters(before, after) {
 
 /* --------------------------------------------------------------- main */
 
+function gitOutput(args) {
+  try {
+    return execSync(`git ${args}`, { cwd: ROOT, encoding: "utf8" }).trim()
+  } catch (error) {
+    return `ERROR: ${String(error?.message ?? error).slice(0, 200)}`
+  }
+}
+
 async function main() {
   const chrome = findChrome()
   if (!chrome) throw new Error("No Chrome/Edge executable found; set E2E_CHROME")
@@ -317,6 +325,8 @@ async function main() {
     databasePath: DB_PATH,
     baseUrl: BASE,
     productionBuild: SERVER_ENTRY,
+    gitHead: gitOutput("rev-parse HEAD"),
+    workspaceClean: gitOutput("status --porcelain --untracked-files=normal") === "",
     coverage: "clean local integration acceptance: fresh isolated DB init/migration, restart persistence, Real-Mode boundary, Flow A/B/C over the production build in system Chrome",
     fixtureDataProvenance: "synthetic deterministic fixture (see scripts/s7-local-seed.ts); not captured real Provider data",
     inheritedNotReVerified: "S2 coverage, S3 MY/TH/PH calendar, S4 real samples and S5 real long-article acceptance stay BLOCKED and are not re-run here",

@@ -136,8 +136,9 @@ async function main() {
     ports,
     jma: {
       syncMeta: jmaMeta,
-      cycloneCount: cyclones.length,
-      cycloneIds: cyclones.map(c => c.id),
+      // Stored/archived normalized JMA records; NOT the focus-area active count (see panel activeCount).
+      storedCycloneCount: cyclones.length,
+      storedCycloneIds: cyclones.map(c => c.id),
     },
   }
   process.stdout.write(`${JSON.stringify(output, null, 2)}\n`)
