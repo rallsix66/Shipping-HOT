@@ -105,12 +105,14 @@ export function parseCapReferences(value: string | undefined): string[] {
   return value.split(/\s+/).map(triplet => triplet.split(",")).filter(parts => parts.length >= 2 && parts[0] && parts[1]).map(([sender, identifier]) => capMessageKey(sender, identifier))
 }
 
-/** CAP polygon: whitespace-separated "lat,lon" pairs. Invalid pairs make the whole ring unusable. */
+/** CAP polygon: whitespace-separated "lat,lon" pairs. Each pair needs exactly two non-empty finite components within range; any invalid pair drops the whole ring. */
 export function parseCapPolygon(value: string | undefined): [number, number][] {
   if (!value) return []
   const ring: [number, number][] = []
   for (const pair of value.trim().split(/\s+/)) {
-    const [lat, lon] = pair.split(",").map(Number)
+    const parts = pair.split(",")
+    if (parts.length !== 2 || parts.some(part => part.trim() === "")) return []
+    const [lat, lon] = parts.map(Number)
     if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return []
     ring.push([lat, lon])
   }

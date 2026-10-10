@@ -178,6 +178,25 @@ describe("bMKG CAP -> provider -> SQLite (sync job) -> panel service layer (fixe
     native.close()
   })
 
+  it("malformed polygon coordinates (empty lat, empty lon, third component) drop the ring: no association, no WR-O01", async () => {
+    expect(parseCapPolygon("-6.2,106.8 ,106.95 -6.0,106.95 -6.0,106.8")).toEqual([])
+    expect(parseCapPolygon("-6.2,106.8 -6.2, -6.0,106.95 -6.0,106.8")).toEqual([])
+    expect(parseCapPolygon("-6.2,106.8,0 -6.2,106.95 -6.0,106.95 -6.0,106.8")).toEqual([])
+    const malformed = {
+      EL: "-6.20,106.80 ,106.95 -6.00,106.95 -6.00,106.80 -6.20,106.80",
+      EO: "-6.20,106.80 -6.20, -6.00,106.95 -6.00,106.80 -6.20,106.80",
+      TC: "-6.20,106.80,5 -6.20,106.95 -6.00,106.95 -6.00,106.80 -6.20,106.80",
+    }
+    for (const [id, polygon] of Object.entries(malformed)) {
+      const { database, native, repository } = await setup()
+      await expect(runOnce(database, indexFor([DOC(id)]), { [DOC(id)]: cap({ id, polygon }) }, T0)).resolves.toMatchObject({ status: "success", recordsRead: 1 })
+      expect((await stored(repository))[0].relatedPortIds).toEqual([])
+      const view = await panel(repository, T0)
+      expect(view.officialAlerts).toEqual([])
+      expect(view.officialAlertImpacts.filter(hit => hit.ruleId === "WR-O01")).toEqual([])
+      native.close()
+    }
+  })
   it("normal no-alert: empty official index succeeds with zero records (not a failure)", async () => {
     const { database, native, repository } = await setup()
     await expect(runOnce(database, indexFor([]), {}, T0)).resolves.toMatchObject({ status: "success", recordsRead: 0 })
