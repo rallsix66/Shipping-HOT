@@ -4,8 +4,11 @@
 // Usage: node scripts/r1-5-1-live-acceptance.mjs
 // Env: E2E_R151_DIR (default .tmp/r1-5-1-live-<timestamp>), E2E_CHROME, E2E_R151_PORT, E2E_R151_DEBUG_PORT
 //
-// Verdicts (9/29 plan R1.5-1 is the business bar; no exceptions):
-//   PASS    harness chain ran end-to-end AND every port has full seven-day marine + land coverage.
+// Verdicts (9/29 plan R1.5-1 as mapped by ADR-009; approved dots 2026-10-10 14:11 UTC+8, Slack ts 1791612673.820639):
+//   PASS    harness chain ran end-to-end AND the seven other ports have full seven-day origin marine + land coverage
+//           AND VNSGN has full seven-day origin land + a fresh, complete, labelled, isolated independent reference
+//           marine (SQLite, restart API, browser) with the origin marine disclosed as unavailable.
+//   (Superseded wording, kept for history: "every port has full seven-day marine + land coverage, no exceptions".)
 //   BLOCKED harness chain ran but business coverage is not met, or a prerequisite (Chrome, S7 evidence) is missing.
 //   FAIL    the harness chain itself broke (seed/sync/server/API/browser assertion failure).
 // Exit codes: PASS 0, FAIL 1, BLOCKED 2.
@@ -36,7 +39,8 @@ const RETAINED = [
   join(ROOT, ".data", "p7-final-seal-20260904.sqlite3"),
 ]
 
-// ADR-009 independent area-reference marine (stored under its own key; never counted as the port's own marine).
+// ADR-009 independent area-reference marine (stored under its own key; never counted as the port's own marine;
+// counted in the verdict only through the approved ADR-009 mapping checks in step 7b).
 const REFERENCE_KEYS = { "port-ho-chi-minh": "marine-ref:port-ho-chi-minh:ganh-rai-eng" }
 
 const PORT_IDS = [
@@ -545,7 +549,8 @@ async function main() {
     await stopServer(serverB)
   }
 
-  // 7) Business coverage (9/29 plan R1.5-1): every port, seven-day marine + land, no exceptions.
+  // 7) Business coverage: origin seven-day land for every port; origin marine for every port except ADR-009 reference
+  //    ports (VNSGN), whose marine requirement is checked by the ADR-009 mapping in 7b. (Superseded: "no exceptions".)
   const portCoverage = {}
   for (const portId of PORT_IDS) {
     const sqlite = sqliteCoverage[portId]

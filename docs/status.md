@@ -68,7 +68,7 @@
   - **VNSGN 独立区域参考海况（ADR-009，2026-10-10）：** 「胡志明关联海域海况参考（工程取点）」10.2917N 107.0417E，best_match，约 62 km，非官方代表点，不代表泊位条件。它与港口自身海况、陆地数据分开存储、分开计算规则、分开展示。港口自身海况仍按缺测显示。授权：用户 guoyong lai 2026-10-10 13:47 UTC+8「可以啊」；dots 2026-10-10 13:33 UTC+8 线程规定了实现边界。R1.5-1 仍为 **BLOCKED**：9/29 标准要求港口自身海况，参考点不能自动替代，是否接受需用户/dots 明确决定。见 `docs/evidence/vnsgn-area-reference-marine-2026-10-10.md`，门禁记录 `docs/evidence/gate-3e25a45/`（参考海况 169/169 整点完整；港口自身海况仍缺测）。
   - **ADR-009 验收映射（dots 2026-10-10 14:11 UTC+8，Slack ts 1791612673.820639 批准）：** 其他 7 个港口不变；VNSGN 按「原点 7 天陆地 + 独立参考点 7 天海况（fresh、完整，SQLite/API/浏览器三段链路，有标注，数据隔离），并披露原点海况缺测」判定，相关检查计入最终判定。参考状态（not_run/failed/fresh/stale/insufficient）、最近尝试与最近成功时间分开记录；实际返回网格已记录并展示。本轮（50bad03）：**R1.5-1按ADR-009映射PASS；VNSGN原点海况不可用**。R1.5 整体**未通过**。
   - **R1.5-4：** **BLOCKED** — 合格 **0/10**；回放命中口径 **warning/critical**（watch 不计）；≥10 样本且 **≥80% 回放** 才解除 blocked，**不**自动标 PASS。候选 `port-closure-replay-candidates.ts` 含 `verificationAudit` 初核记录，仍 **blocked**。
-  - **R1.5-1（整项）：** **BLOCKED**（2026-10-10 第二轮复审后；PR #7 未合并）。原因只剩一项：VNSGN 海况（浪/涌浪）缺测。其余七港七天海况 + 陆地覆盖已 PASS。
+  - 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 **R1.5-1（整项）：** **BLOCKED**（2026-10-10 第二轮复审后；PR #7 未合并）。原因只剩一项：VNSGN 海况（浪/涌浪）缺测。其余七港七天海况 + 陆地覆盖已 PASS。
     - **口径来源（分开写）：** 「7 天」来自 9/29 主方案 R1.5-1（8 个港口都要有 7 天的海况和陆地预报）；具体滚动窗口 `[now−1h, now+7d]` 来自现有 `server/services/weather-panel-policy.ts`（`isForecastInstantInWindow` / `WEATHER_FORECAST_HORIZON_MS`）。验收按窗口内每个 UTC 整点逐一核验（唯一、首尾、无缺口、陆地 + 海况字段），current 单列。
     - **本轮修复（代码 `356e6fec9431747aa42624daf8f01cff9f971f76`）：** Open-Meteo marine + weather 两个现有端点改为 `forecast_days=8`、`past_days=1`（坐标、`cell_selection=sea`、数据源未改）；normalizer 原来只保留最早 170 条，改为先按保留窗口 `[now−1h−24h 降水回看, now+7d]` 过滤，再按上限 `7*24+24+8` 截断（截断时先丢最旧的）；仓储新增按窗口读取（截断保留最新）和陈旧回退读取；面板先读窗口；live-sync 诊断不再只读最早 176 条。固定时间测试覆盖下午、23:59:30、UTC 整零点、旧小时超过上限、current 与 hourly 并存、窗口末尾未来小时不被挤掉（`server/services/forecast-retention-window.test.ts`）。
     - **证据（运行 SHA `356e6fe…`，工作区干净，build 晚于提交）：** 隔离目录 `.tmp/r1-5-1-live-2026-10-10T03-58-38-568Z`；脱敏副本 `docs/evidence/r1-5-1-live-2026-10-10-356e6fe/`；摘要 `docs/evidence/r1-5-1-live-eight-port-2026-10-10.md`。`pnpm test:r1-5-1-live` exit **2 = BLOCKED**（84 项检查，83 通过，唯一 BLOCKED：`coverage_port-ho-chi-minh`）。
@@ -84,10 +84,10 @@
   - **链式测试：** `typhoon-position-validity.test.ts`（12:00 定位→12:15 天气、整点 TTL、稀疏预报）；`tropical-cyclone-wr-s03-impact-chain.test.ts`（**Job→SQLite→Panel**：当日距远不命中、48h 近场命中、TTL 过期后 WR-S03 **unevaluated**；受控时间 **≤ now**）。
   - **天气链路：** `computePortWeatherImpacts(..., resolveTyphoon(interval))` + 港口面板同口径（见上双时钟解析）。
   - **S7：** **2026-10-10 PASS**（**151** checks / 0 FAIL；重跑绑定 `356e6fe`，见 R1.5-1 证据）。
-- **仍 NOT_RUN / pending：** R1.5-5/6/7 **NOT_RUN**；R1.5-4 **BLOCKED 0/10**；R1.5-1 **BLOCKED**（仅 VNSGN 海况）。
+- 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 **仍 NOT_RUN / pending：** R1.5-5/6/7 **NOT_RUN**；R1.5-4 **BLOCKED 0/10**；R1.5-1 **BLOCKED**（仅 VNSGN 海况）。
   - **门禁（`356e6fe`，2026-10-10，Windows 10 19045 / Node v24.15.0 / pnpm 10.30.3）：** `pnpm install --frozen-lockfile` 0；`pnpm build` 0；`pnpm typecheck` 0；`pnpm lint` 0；Vitest **84 files / 587 passed / 3 skipped** exit 0；`pnpm smoke:p0-native` 0；S7 **151/151** exit 0；`pnpm test:r1-5-1-live` exit **2（BLOCKED）**；Neat Freak `scripts/audit-inventory.sh .` exit 0。**未**合并 / **未**部署 / **未**开始 R2。
 - **Neat Freak（本批）：** Git Bash `scripts/audit-inventory.sh .` exit **0**。
-- **结论：** **R1.5 = IN PROGRESS**；R1.5-1 **BLOCKED**（VNSGN 海况）、R1.5-4 **BLOCKED**；**非**阶段 PASS。
+- 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 **结论：** **R1.5 = IN PROGRESS**；R1.5-1 **BLOCKED**（VNSGN 海况）、R1.5-4 **BLOCKED**；**非**阶段 PASS。
 
 ### R0 — 门禁 G 执行记录
 

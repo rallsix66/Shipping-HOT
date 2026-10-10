@@ -3,6 +3,7 @@ import { XMLParser } from "fast-xml-parser"
 import { load } from "cheerio"
 import type { DataProvenance, FeedItem, Port, WeatherDetail } from "@shared/shipping"
 import { mockPorts } from "@shared/shipping-fixtures"
+import { portDirectoryBaseline } from "@shared/port-directory"
 import type { ArticleSourcePolicyConfig } from "@shared/article"
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
 import { type CapSourceContext, capBodyUrlRejection, capIndexLinks, isRetiredBy, parseCapMessage, resolveCapBatch } from "#/providers/cap-alerts"
@@ -37,6 +38,11 @@ export interface WeatherAlertSource {
   format: "rss" | "cap" | "cap_index" | "html"
   /** Issuing country (ISO 3166-1 alpha-2) for CAP structured-area checks. */
   countryCode?: string
+  /** CAP area association: ISO 3166-2 geocode (default) or polygon containment of same-country port coordinates. */
+  capAreaMatch?: "geocode" | "polygon"
+  /** Max CAP index items fetched; with overflow "anomaly" more items fail the source instead of truncating. */
+  capIndexLimit?: number
+  capIndexOverflow?: "truncate" | "anomaly"
   parser: WeatherAlertParser
   enabled: boolean
   liveStatus: WeatherAlertSourceStatus
@@ -70,7 +76,12 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
     name: "Indonesia Agency for Meteorology, Climatology and Geophysics",
     url: "https://www.bmkg.go.id/alerts/nowcast/en",
     sourceUrl: "https://data.bmkg.go.id/peringatan-dini-cuaca/",
-    format: "rss",
+    // BMKG nowcast: RSS index whose items link to CAP 1.2 bodies (verified 2026-10-10); polygons, no geocodes.
+    format: "cap_index",
+    countryCode: "ID",
+    capAreaMatch: "polygon",
+    capIndexLimit: 100,
+    capIndexOverflow: "anomaly",
     parser: "bmkg",
     enabled: true,
     liveStatus: "verified_live",
@@ -247,7 +258,10 @@ export function parseWeatherAlertRss(xml: string, source: WeatherAlertSource, po
 }
 
 export function capSourceContext(source: WeatherAlertSource): CapSourceContext {
-  return { id: source.id, name: source.name, sourceUrl: source.sourceUrl, countryCode: source.countryCode ?? "", provenance: weatherAlertProvenance(source) }
+  const polygonPorts = source.capAreaMatch === "polygon"
+    ? portDirectoryBaseline.filter(row => row.countryCode === source.countryCode).map(row => ({ portId: row.shippingPortId, latitude: row.latitude, longitude: row.longitude }))
+    : undefined
+  return { id: source.id, name: source.name, sourceUrl: source.sourceUrl, countryCode: source.countryCode ?? "", provenance: weatherAlertProvenance(source), areaMatch: source.capAreaMatch ?? "geocode", polygonPorts }
 }
 
 /**
@@ -442,10 +456,10 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
           const body = await response.text()
           if (source.format === "cap_index") {
             const messages: ReturnType<typeof parseCapMessage>[] = []
-            for (const link of capIndexLinks(body)) {
+            for (const link of capIndexLinks(body, source.capIndexLimit ?? 20, source.id, source.capIndexOverflow ?? "truncate")) {
               // Redirects are refused (fetch rejects on any redirect); a fetcher that still followed one is re-checked.
               const document = await fetcher(link, { redirect: "error" })
-              if (document.redirected || (document.url && (document.url !== link || capBodyUrlRejection(document.url)))) {
+              if (document.redirected || (document.url && (document.url !== link || capBodyUrlRejection(document.url, source.id)))) {
                 throw new Error(`${source.name} CAP document redirect rejected`)
               }
               if (!document.ok) throw providerHttpError(source.name, document.status, `${source.name} CAP document request failed (${document.status})`)

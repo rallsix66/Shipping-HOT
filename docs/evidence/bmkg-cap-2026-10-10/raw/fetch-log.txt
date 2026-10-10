@@ -1,0 +1,16 @@
+request: GET https://www.bmkg.go.id/alerts/nowcast/en (box, curl, no redirects followed) at 2026-10-10T06:48:32Z
+HTTP/2 200 
+date: Sat, 10 Oct 2026 06:48:32 GMT
+content-type: application/xml
+2026-10-10T06:49:12Z GET https://www.bmkg.go.id/alerts/nowcast/en/CSR20261010002_alert.xml -> 200 redirects=0 final=https://www.bmkg.go.id/alerts/nowcast/en/CSR20261010002_alert.xml bytes=2773
+2026-10-10T06:49:12Z GET https://www.bmkg.go.id/alerts/nowcast/en/CKT20261010004_alert.xml -> 200 redirects=0 final=https://www.bmkg.go.id/alerts/nowcast/en/CKT20261010004_alert.xml bytes=12245
+2026-10-10T06:49:12Z GET https://www.bmkg.go.id/alerts/nowcast/en/CBL20261010002_alert.xml -> 200 redirects=0 final=https://www.bmkg.go.id/alerts/nowcast/en/CBL20261010002_alert.xml bytes=2125
+2026-10-10T06:49:14Z GET https://www.bmkg.go.id/alerts/nowcast/en/CKR20261010003_alert.xml -> 200 redirects=0 final=https://www.bmkg.go.id/alerts/nowcast/en/CKR20261010003_alert.xml bytes=19856
+2026-10-10T06:49:15Z GET https://www.bmkg.go.id/alerts/nowcast/en/CRU20261010003_alert.xml -> 200 redirects=0 final=https://www.bmkg.go.id/alerts/nowcast/en/CRU20261010003_alert.xml bytes=36172
+2026-10-10T06:49:16Z GET https://www.bmkg.go.id/alerts/nowcast/en/CKG20261010002_alert.xml -> 200 redirects=0 final=https://www.bmkg.go.id/alerts/nowcast/en/CKG20261010002_alert.xml bytes=3462
+2026-10-10T06:49:18Z GET https://www.bmkg.go.id/alerts/nowcast/en/CPU20261010002_alert.xml -> 200 redirects=0 final=https://www.bmkg.go.id/alerts/nowcast/en/CPU20261010002_alert.xml bytes=10930
+2026-10-10T06:49:19Z GET https://www.bmkg.go.id/alerts/nowcast/en/CSB20261010003_alert.xml -> 200 redirects=0 final=https://www.bmkg.go.id/alerts/nowcast/en/CSB20261010003_alert.xml bytes=46482
+2026-10-10T06:49:21Z GET https://www.bmkg.go.id/alerts/nowcast/en/CSU20261010002_alert.xml -> 200 redirects=0 final=https://www.bmkg.go.id/alerts/nowcast/en/CSU20261010002_alert.xml bytes=82651
+2026-10-10T06:49:22Z GET https://www.bmkg.go.id/alerts/nowcast/en/CSR20261010001_alert.xml -> 200 redirects=0 final=https://www.bmkg.go.id/alerts/nowcast/en/CSR20261010001_alert.xml bytes=2403
+2026-10-10T06:49:24Z GET https://www.bmkg.go.id/alerts/nowcast/en/CKU20261010003_alert.xml -> 200 redirects=0 final=https://www.bmkg.go.id/alerts/nowcast/en/CKU20261010003_alert.xml bytes=10148
+2026-10-10T06:49:26Z GET https://www.bmkg.go.id/alerts/nowcast/en/CAH20261010003_alert.xml -> 200 redirects=0 final=https://www.bmkg.go.id/alerts/nowcast/en/CAH20261010003_alert.xml bytes=3923

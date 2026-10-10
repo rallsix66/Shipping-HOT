@@ -13,6 +13,9 @@ import type { DataProvenance, FeedItem, Severity, WeatherDetail } from "@shared/
  * - severity: Extreme→critical, Severe→warning, Moderate→watch, Minor/Unknown/missing→info;
  * - coverage: only structured `<geocode>` ISO3166-2 values of the source's country become `alertRegion`;
  *   foreign or missing geocodes => no region and no port association (areaDesc text is not used).
+ * - BMKG (ID) bodies carry no geocode; for sources configured with areaMatch "polygon" a port is associated only
+ *   when its directory coordinate lies inside a CAP <polygon> of the message, and only for ports of the
+ *   issuing country. <areaDesc> is shown as alertRegion but never used for association; description text never is.
  */
 
 export interface CapSourceContext {
@@ -22,6 +25,10 @@ export interface CapSourceContext {
   /** ISO 3166-1 alpha-2 country of the issuing agency (from docs/intel-source-catalog.md). */
   countryCode: string
   provenance: DataProvenance
+  /** How CAP areas associate ports: ISO 3166-2 geocodes (TMD, default) or polygon containment (BMKG). */
+  areaMatch?: "geocode" | "polygon"
+  /** Same-country port coordinates for polygon containment (from the port directory). */
+  polygonPorts?: readonly { portId: string, latitude: number, longitude: number }[]
 }
 
 /** Structured subdivision → focus port. Only mappings checked against the port directory are listed. */
@@ -48,6 +55,8 @@ export interface CapMessage {
   urgency?: string
   certainty?: string
   geocodes: string[]
+  /** Structured CAP <area> blocks: areaDesc and polygons as [lat, lon] rings. */
+  areas: { areaDesc?: string, polygons: [number, number][][] }[]
   documentUrl?: string
 }
 
@@ -96,6 +105,29 @@ export function parseCapReferences(value: string | undefined): string[] {
   return value.split(/\s+/).map(triplet => triplet.split(",")).filter(parts => parts.length >= 2 && parts[0] && parts[1]).map(([sender, identifier]) => capMessageKey(sender, identifier))
 }
 
+/** CAP polygon: whitespace-separated "lat,lon" pairs. Invalid pairs make the whole ring unusable. */
+export function parseCapPolygon(value: string | undefined): [number, number][] {
+  if (!value) return []
+  const ring: [number, number][] = []
+  for (const pair of value.trim().split(/\s+/)) {
+    const [lat, lon] = pair.split(",").map(Number)
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return []
+    ring.push([lat, lon])
+  }
+  return ring
+}
+
+/** Ray casting on [lat, lon] rings (adequate for the small CAP nowcast polygons). */
+export function pointInCapPolygon(latitude: number, longitude: number, ring: readonly [number, number][]): boolean {
+  let inside = false
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [yi, xi] = ring[i]
+    const [yj, xj] = ring[j]
+    if ((yi > latitude) !== (yj > latitude) && longitude < (xj - xi) * (latitude - yi) / (yj - yi) + xi) inside = !inside
+  }
+  return inside
+}
+
 export function parseCapMessage(xml: string, documentUrl?: string): CapMessage {
   const parsed = capParser.parse(xml) as { alert?: Record<string, unknown> }
   const alert = parsed.alert
@@ -128,6 +160,10 @@ export function parseCapMessage(xml: string, documentUrl?: string): CapMessage {
     urgency: text(info.urgency),
     certainty: text(info.certainty),
     geocodes: [...new Set(geocodes)],
+    areas: areas.map(area => ({
+      areaDesc: text(area.areaDesc),
+      polygons: asArray(area.polygon as unknown).map(ring => parseCapPolygon(text(ring))).filter(ring => ring.length >= 3),
+    })),
     documentUrl,
   }
 }
@@ -154,8 +190,14 @@ export function capMessageToFeedItem(message: CapMessage, source: CapSourceConte
   const sentUsable = capSentUsable(message.sent, fetchedAt)
   const alertState: WeatherDetail["alertState"] = expired ? "expired" : sentAt && sentUsable && expiresAt ? "active" : "unknown"
   const eventEligibility = alertState === "active"
-  const ownCodes = message.geocodes.filter(code => code.toUpperCase().startsWith(`${source.countryCode.toUpperCase()}-`))
-  const relatedPortIds = [...new Set(ownCodes.flatMap(code => capSubdivisionPorts[code.toUpperCase()] ?? []))]
+  const ownCodes = source.areaMatch === "polygon" ? [] : message.geocodes.filter(code => code.toUpperCase().startsWith(`${source.countryCode.toUpperCase()}-`))
+  const polygonRegions = source.areaMatch === "polygon"
+    ? [...new Set(message.areas.filter(area => area.polygons.length > 0).map(area => area.areaDesc).filter((value): value is string => Boolean(value)))]
+    : []
+  const relatedPortIds = source.areaMatch === "polygon"
+    ? (source.polygonPorts ?? []).filter(port => message.areas.some(area => area.polygons.some(ring => pointInCapPolygon(port.latitude, port.longitude, ring)))).map(port => port.portId)
+    : [...new Set(ownCodes.flatMap(code => capSubdivisionPorts[code.toUpperCase()] ?? []))]
+  const regionLabel = source.areaMatch === "polygon" ? polygonRegions : ownCodes
   const severity = expired ? "info" : capSeverity(message.severity)
   const alertId = `${source.id}:${message.identifier}`
   const title = message.headline ?? message.event ?? message.identifier
@@ -182,7 +224,7 @@ export function capMessageToFeedItem(message: CapMessage, source: CapSourceConte
       riskSource: "official",
       alertState,
       alertId,
-      alertRegion: ownCodes.length ? ownCodes.join(", ") : undefined,
+      alertRegion: regionLabel.length ? regionLabel.join(", ") : undefined,
       alertIssuedAt: sentAt,
       alertEffectiveAt: effectiveAt,
       alertExpiresAt: expiresAt,
@@ -242,8 +284,17 @@ export function resolveCapBatch(messages: readonly CapMessage[], source: CapSour
 export const TMD_CAP_BODY_ORIGIN = "https://www.tmd.go.th"
 export const TMD_CAP_BODY_PATH_PREFIX = "/uploads/CAP/en/"
 
+/** Per-source CAP body allow-list (verified official host + path), same checks for every source. */
+export const CAP_BODY_RULES: Readonly<Record<string, { origin: string, pathPattern: RegExp }>> = {
+  tmd: { origin: TMD_CAP_BODY_ORIGIN, pathPattern: /^\/uploads\/CAP\/en\/[\w-]+\.xml$/ },
+  // BMKG nowcast CAP bodies linked from https://www.bmkg.go.id/alerts/nowcast/en (verified 2026-10-10)
+  bmkg: { origin: "https://www.bmkg.go.id", pathPattern: /^\/alerts\/nowcast\/en\/[A-Za-z0-9]+_alert\.xml$/ },
+}
+
 /** Why a CAP body URL is not allowed; undefined when allowed. Checked on the raw string before URL normalisation. */
-export function capBodyUrlRejection(raw: string): string | undefined {
+export function capBodyUrlRejection(raw: string, sourceId = "tmd"): string | undefined {
+  const rule = CAP_BODY_RULES[sourceId]
+  if (!rule) return "no_body_rule"
   if (/\\|%2e|%2f|%5c|%00|\/\.{1,2}(?:\/|$)/i.test(raw)) return "path_disguise"
   let url: URL
   try {
@@ -254,9 +305,9 @@ export function capBodyUrlRejection(raw: string): string | undefined {
   if (url.protocol !== "https:") return "scheme"
   if (url.username || url.password) return "credentials"
   if (url.port !== "") return "port"
-  if (url.origin !== TMD_CAP_BODY_ORIGIN) return "host"
+  if (url.origin !== rule.origin) return "host"
   if (url.search || url.hash) return "query_or_fragment"
-  if (!url.pathname.startsWith(TMD_CAP_BODY_PATH_PREFIX) || !/^\/uploads\/CAP\/en\/[\w-]+\.xml$/.test(url.pathname)) return "path"
+  if (!rule.pathPattern.test(url.pathname)) return "path"
   if (url.href !== raw) return "non_canonical"
   return undefined
 }
@@ -265,15 +316,16 @@ export function capBodyUrlRejection(raw: string): string | undefined {
  * CAP document links from the TMD RSS index (`/en/api/xml/CAP`). Any item without a link or with a link outside
  * https://www.tmd.go.th/uploads/CAP/en/ is a structural anomaly and throws — it is never filtered into "no alerts".
  */
-export function capIndexLinks(xml: string, limit = 20): string[] {
+export function capIndexLinks(xml: string, limit = 20, sourceId = "tmd", overflow: "truncate" | "anomaly" = "truncate"): string[] {
   const parsed = capParser.parse(xml) as { rss?: { channel?: { item?: unknown } } }
   const channel = parsed.rss?.channel
   if (!channel) throw new Error("cap_index_structural_anomaly: no RSS channel")
   const items = asArray(channel.item as Record<string, unknown> | Record<string, unknown>[] | undefined)
+  if (overflow === "anomaly" && items.length > limit) throw new Error(`cap_index_structural_anomaly: ${items.length} items exceed limit ${limit}`)
   return items.slice(0, limit).map((item, index) => {
     const link = text(item.link)
     if (!link) throw new Error(`cap_index_structural_anomaly: item ${index} has no link`)
-    const rejection = capBodyUrlRejection(link)
+    const rejection = capBodyUrlRejection(link, sourceId)
     if (rejection) throw new Error(`cap_index_structural_anomaly: item ${index} body link rejected (${rejection})`)
     return link
   })

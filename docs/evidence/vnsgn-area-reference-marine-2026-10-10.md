@@ -27,7 +27,7 @@
   - 参考请求失败时被隔离；
   - 其他港口不发参考请求；
   - 面板分块正确，缺测说明仍然存在。
-- **live 验收**（`scripts/r1-5-1-live-acceptance.mjs`）新增 `kind=reference` 的检查项，不计入最终判定：
+- 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 **live 验收**（`scripts/r1-5-1-live-acceptance.mjs`）新增 `kind=reference` 的检查项，不计入最终判定：
   - `reference_marine_7d_port-ho-chi-minh`：参考点 SQLite 和重启后 API 的 7 天海况，按滚动窗口逐小时检查，只看海况字段；
   - `reference_labelled_port-ho-chi-minh`；
   - `reference_not_substituted_port-ho-chi-minh`：港口行不是参考来源；港口海况仍缺测时，缺测说明必须存在；
@@ -36,17 +36,17 @@
 ## 按 9/29 标准如实判定 R1.5-1
 
 - 9/29 方案 R1.5-1 的原文是「8 个港口都有 7 天的海况和陆地预报」。这里说的是**港口的**海况。现行验收（`coverage_port-ho-chi-minh`）也按港口自身数据判定。
-- 带标注的区域参考海况在 62 km 外的海上点，不是港口海况。方案原文没有说可以用参考点代替。所以本轮**不宣称 R1.5-1 通过**。
+- 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 带标注的区域参考海况在 62 km 外的海上点，不是港口海况。方案原文没有说可以用参考点代替。所以本轮**不宣称 R1.5-1 通过**。
 - **已满足**：
   - 7 个港口完整通过；
   - VNSGN 的陆地数据完整；
   - VNSGN 已有一份独立的区域参考海况：工程取点，按 live 证据检查 7 天是否完整；单独展示、单独存储，规则单独计算。
 - **仍未满足**：VNSGN **自身**海况（港口坐标）仍然缺测。
-- R1.5-1 保持 **BLOCKED**。要变成 PASS，必须由用户或审查方明确决定：「VNSGN 以带标注的区域参考海况满足 R1.5-1 的海况要求」，并相应修改方案或 ADR。在没有这个决定之前，验收标准不变。
+- 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 R1.5-1 保持 **BLOCKED**。要变成 PASS，必须由用户或审查方明确决定：「VNSGN 以带标注的区域参考海况满足 R1.5-1 的海况要求」，并相应修改方案或 ADR。在没有这个决定之前，验收标准不变。
 
 ## live 证据（代码 SHA 3e25a4571c04f8adcab3747ae52565ba12e6ab7b，工作区干净）
 
-- `pnpm test:r1-5-1-live` exit 2，判定 BLOCKED，87 项检查中 86 项通过。唯一阻塞项是 `coverage_port-ho-chi-minh`，原因 `marine_wave_or_swell_present`：港口自身海况缺测，如实保留。
+- 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 `pnpm test:r1-5-1-live` exit 2，判定 BLOCKED，87 项检查中 86 项通过。唯一阻塞项是 `coverage_port-ho-chi-minh`，原因 `marine_wave_or_swell_present`：港口自身海况缺测，如实保留。
 - 参考海况：SQLite 同步时的数据和重启后 API 返回的数据，都覆盖了 169/169 个整点（2026-10-10T06:00:00.000Z 到 2026-10-17T06:00:00.000Z），没有缺测。本次 7 天最大浪高 0.66 m，参考规则命中 0 条。
 - 检查项全部通过：`reference_labelled`（engineering_reference_point、非官方、非泊位、best_match、62 km）；`reference_not_substituted`（港口海况仍缺测，缺测说明仍然存在）；浏览器能看到参考块的名称和「非官方代表点」标注。
 - 证据：`docs/evidence/gate-3e25a45/vnsgn-reference-marine-summary.json`、`r1-5-1-evidence.json`、`summary.txt`。
