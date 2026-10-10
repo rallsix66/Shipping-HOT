@@ -1,74 +1,63 @@
-# R1.5-1 八港实网验收证据（2026-10-10，复审修复后）
+# R1.5-1 八港实网验收证据（2026-10-10，第二轮复审修复后）
 
-> 结论：**BLOCKED**（harness 已修复；业务验收未达 9/29 主方案 R1.5-1 标准）。不合并、不部署。
+> 结论：**BLOCKED**。七港七天海况和陆地预报覆盖 PASS，**VNSGN 海况缺测**，所以 R1.5-1 整体仍 BLOCKED。不合并、不部署。
 
-## 版本绑定
+## 口径来源
+
+- 「7 天」：9/29 主方案 R1.5-1，要求 8 个港口都有 7 天的海况和陆地预报。
+- 具体滚动窗口 `[now−1h, now+7d]`：现有 `server/services/weather-panel-policy.ts`（`isForecastInstantInWindow`、`WEATHER_FORECAST_HORIZON_MS`）。
+- 核验方式：窗口内每个 UTC 整点都要恰好出现一次（唯一、首尾都在、无缺口），并带陆地字段（阵风、降水、能见度）和海况字段（浪高或涌浪）；current 单独统计。覆盖说明只是降级展示，不算达标。
+
+## 版本与环境
 
 | 项 | 值 |
 |----|----|
-| 代码提交（运行 SHA） | `be5f2e4b14258404f769eb68ff07130cc2361732`（分支 `codex/shipping-hot-r1-5`） |
-| 工作区 | 运行时干净（`git status --porcelain` 为空） |
-| build 来源 | 在该提交上执行 `pnpm build`；`dist/output/server/index.mjs` 生成于 2026-10-10T03:39:01Z，晚于提交时间 03:38:31Z |
-| Node | v24.15.0 |
-| 隔离运行目录 | `.tmp/r1-5-1-live-2026-10-10T03-40-07-858Z`（未触碰保留库） |
-| 脱敏原始证据 | `docs/evidence/r1-5-1-live-2026-10-10/r1-5-1-evidence.json`、`r1-5-1-sync-live.json`、`live.log`、`gate-summary.txt` |
+| 运行 SHA | `356e6fec9431747aa42624daf8f01cff9f971f76`（`codex/shipping-hot-r1-5`） |
+| 工作区 | 干净 |
+| build | 在该提交上执行 `pnpm build`，产物时间 03:55:48Z，晚于提交时间 03:55:13Z |
+| 环境 | Windows 10（NT 10.0.19045），Node v24.15.0，pnpm 10.30.3 |
+| 隔离运行目录 | `.tmp/r1-5-1-live-2026-10-10T03-58-38-568Z`（未触碰保留库） |
+| 脱敏证据 | `docs/evidence/r1-5-1-live-2026-10-10-356e6fe/`（`r1-5-1-evidence.json`、`r1-5-1-sync-live.json`、`live.log`、`gate-summary.txt`） |
+| 上一轮证据（`be5f2e4`，历史） | `docs/evidence/r1-5-1-live-2026-10-10/` |
 
-本文件与 `docs/status.md` 在其后的纯文档提交中更新；代码与证据绑定以上 SHA。
-
-## 命令与退出码（全部在 `be5f2e4` 上顺序执行）
+## 命令与退出码（`356e6fe`，顺序执行）
 
 | 命令 | exit | 结果 |
-|------|------|------|
+|---|---|---|
 | `pnpm install --frozen-lockfile` | 0 | |
 | `pnpm build` | 0 | |
 | `pnpm typecheck` | 0 | |
 | `pnpm lint` | 0 | |
-| `pnpm exec vitest run -c vitest.config.ts` | 0 | 83 files，572 passed / 3 skipped |
+| vitest | 0 | 84 个文件，587 通过 / 3 跳过 |
 | `pnpm smoke:p0-native` | 0 | |
-| `node scripts/e2e-s7-integrated.mjs` | 0 | 151/151，Flow A 16 / B 22 / C 62，外部请求 0，gitHead = 运行 SHA |
-| `pnpm test:r1-5-1-live` | **2** | **BLOCKED**（68 项检查，60 通过；harness 失败 0，前置缺失 0，业务 BLOCKED 8） |
-| `bash scripts/audit-inventory.sh .`（Neat Freak） | 0 | |
+| S7 | 0 | 151/151，gitHead 与运行 SHA 一致 |
+| `pnpm test:r1-5-1-live`（第 3 次，作为证据） | 2 | BLOCKED：84 项检查，83 通过，唯一 BLOCKED 为 `coverage_port-ho-chi-minh` |
+| Neat Freak `audit-inventory.sh .` | 0 | |
 
-## 验收口径（9/29 主方案 R1.5-1）
+同一 SHA 的前两次实网运行有网络瞬断，不作为证据：`03-56-58`（巴生、林查班的 api.open-meteo.com fetch failed）、`03-57-56`（雅加达的 marine-api fetch failed）。第三次运行 19/19 个请求全部 200。
 
-8 个港口都要有 7 天的海况和陆地预报。窗口 `[now−1h, now+7d]`，只计 `hourly`；网格内每个 UTC 整点必须恰好出现一次（唯一、首尾都在、无缺口），并带陆地字段（阵风、降水、能见度）和海况字段（浪高或涌浪）。`current` 单独统计，不参与计数。覆盖说明（`marineCoverageNote`）只是降级展示，**不算**达标。
+## 逐港覆盖（同步时 SQLite + 重启后 API）
 
-## 结果
+| 港口 | hourly | 首 / 末 | current | 缺测 | 结果 |
+|---|---|---|---|---|---|
+| 蛇口、盐田、南沙、林查班、巴生、马尼拉、雅加达 | 169/169 | 2026-10-10T03:00Z / 2026-10-17T03:00Z | 1 | 0 | **PASS** |
+| 胡志明（VNSGN） | 169/169 | 同上 | 1 | 浪/涌浪 169/169 | **BLOCKED** |
 
-### 已验证子链路
+截断检查：八港 DB 窗口内 hourly 与 API hourlyReturned 都是 169，没有被挤掉。
 
-| 子链路 | 状态 |
-|--------|------|
-| 种子 → 隔离库 | VERIFIED |
-| 实网 Open-Meteo → SQLite（egress：marine 8×200，weather 8×200，JMA 3×200） | VERIFIED |
-| 八港重启后 API 持久化 | VERIFIED |
-| API 未被截断（DB 窗口内 hourly = API hourlyReturned） | VERIFIED（八港均 165 = 165） |
-| 浏览器八港 `/ports/:id`，逐港断言 `port-weather-forecast-meta` 与重启后 API 一致 | VERIFIED |
-| JMA 实网归档 | VERIFIED（outcome=`ok`） |
-| 夹具浏览器 S7（同 SHA、全量检查集） | VERIFIED |
+## 重启前后一致性（字段级，API 对 SQLite）
 
-### 逐港七天覆盖
+在重启前后两个窗口的公共部分，按 `portId+horizon+forecastAt` 逐条比对浪、涌浪、风速、阵风、降水、能见度：八港重启前、后各 170 行（169 hourly + 1 current），字段不一致 0，API 缺行 0，DB 缺行 0。
 
-| 港口 | 窗口内 hourly / 应有 | 首 / 末 | current | 结果 |
-|------|------|------|------|------|
-| 八港（蛇口、盐田、南沙、林查班、巴生、马尼拉、雅加达、胡志明） | 165 / 169 | 2026-10-10T03:00Z / 2026-10-16T23:00Z | 1 | **BLOCKED**：`window_end_covered`、`no_missing_hours`（2026-10-17T00:00–03:00Z 缺失） |
-| 胡志明（VNSGN）另有 | 浪/涌浪 165/165 缺测 | | | **BLOCKED**：`marine_wave_or_swell_present` |
+## 浏览器（范围声明）
 
-原因：Open-Meteo `forecast_days=7` 按 UTC 自然日返回，到第 7 天 23:00 为止，覆盖不到滚动的 `now+7d`。之前的 `hourly ≥ 140` 判定掩盖了这一点。
+只核验了**页面元数据和覆盖信息**：页面能加载、文字非空、`port-weather-forecast-meta` 中的 total/hourly/current 与 API 一致、VNSGN 的海况说明已显示。**没有**逐字段核验 UI 上的数值。
 
-截断检查：面板读取是 `ORDER BY forecast_at ASC LIMIT 172`。每港目前只存 168 条 hourly + 1 条 current，所以本次没有挤掉未来小时（已逐港核对）。但如果把 `forecast_days` 加到 8，或者库里留着过去的小时，这个上限就会把未来预报挤出去，所以两处要一起改。
+## JMA
 
-### JMA（分开报告）
+- 归档（SQLite 存储）：2 条（TC2634、TC2635），outcome=`ok`
+- 关注海域活跃数：0
 
-- 归档（SQLite 存储）：**2** 条（`tc-jma-TC2634`、`tc-jma-TC2635`），outcome=`ok`
-- 关注海域活跃数：**0**（面板可见性规则：关注海域 / 1000 km）
+## VNSGN
 
-## 最小后续（需批准，本批未实现）
-
-1. 评估 `forecast_days=8`，同时把港口面板改为按窗口读取，不再取最早 N 条。
-2. VNSGN：评估近海格点或获批替代源。本批未改 `cell_selection=sea`、坐标和数据源。
-
-## 同日其他运行（不作为证据）
-
-- `03-33-53`：南沙 0 行；`03-37-32`：南沙、巴生 0 行。原因是 Open-Meteo 单港请求失败，`weather-sync` 容忍了这些失败，job 仍报 success。现已加 egress 记录，并把 0 行港口判为 BLOCKED。
-- `03-35-08` / `03-35-31`：两次并发误启动（同一端口），作废。
+诊断见 `docs/evidence/vnsgn-marine-coverage-diagnosis-2026-10-10.md`（只读，含方案对比）。

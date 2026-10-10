@@ -1,0 +1,13 @@
+HEAD 356e6fec9431747aa42624daf8f01cff9f971f76 started 2026-10-10T11:55:27.5903422+08:00 node v24.15.0 pnpm 10.30.3 os Microsoft Windows NT 10.0.19045.0
+install exit=0
+build exit=0
+typecheck exit=0
+lint exit=0
+vitest exit=0
+smoke exit=0
+s7 exit=0
+live exit=2
+audit exit=0
+status-after: []
+live-run2 exit=2 (sequential rerun after transient fetch failed on 2 ports)
+live-run3 exit=2 (sequential rerun)
