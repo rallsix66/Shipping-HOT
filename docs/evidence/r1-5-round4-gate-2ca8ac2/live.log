@@ -1,0 +1,54 @@
+
+> shipping-hot@0.0.41 test:r1-5-1-live <repo>
+> node scripts/r1-5-1-live-acceptance.mjs
+
+Evidence: <repo>\.tmp\r1-5-1-live-2026-10-10T04-39-56-581Z\r1-5-1-evidence.json
+{
+  "total": 84,
+  "passed": 66,
+  "harnessFailed": [
+    "weather_job_success",
+    "sqlite_weather_forecast_rows"
+  ],
+  "prerequisiteMissing": [],
+  "businessBlocked": [
+    "sqlite_rows_port-shekou",
+    "sqlite_rows_port-yantian",
+    "sqlite_rows_port-nansha",
+    "sqlite_rows_port-laem-chabang",
+    "sqlite_rows_port-klang",
+    "sqlite_rows_port-manila",
+    "sqlite_rows_port-jakarta",
+    "sqlite_rows_port-ho-chi-minh",
+    "coverage_port-shekou",
+    "coverage_port-yantian",
+    "coverage_port-nansha",
+    "coverage_port-laem-chabang",
+    "coverage_port-klang",
+    "coverage_port-manila",
+    "coverage_port-jakarta",
+    "coverage_port-ho-chi-minh"
+  ]
+}
+{
+  "seedToIsolatedDb": "VERIFIED",
+  "liveWeatherSyncToSqlite": "FAIL",
+  "restartPersistenceApiEightPorts": "VERIFIED",
+  "apiSqliteFieldConsistencyBeforeAfterRestart": "VERIFIED",
+  "browserPageMetadataAndCoverage": "VERIFIED",
+  "apiNotTruncated": "VERIFIED",
+  "jmaLiveArchive": "VERIFIED",
+  "fixtureTropicalBrowserS7": "VERIFIED",
+  "sevenDayCoveragePerPort": {
+    "port-shekou": "BLOCKED: window_start_covered, window_end_covered, no_missing_hours, land_windGustKmh_present, land_precipitationMm_present, land_visibilityM_present, marine_wave_or_swell_present",
+    "port-yantian": "BLOCKED: window_start_covered, window_end_covered, no_missing_hours, land_windGustKmh_present, land_precipitationMm_present, land_visibilityM_present, marine_wave_or_swell_present",
+    "port-nansha": "BLOCKED: window_start_covered, window_end_covered, no_missing_hours, land_windGustKmh_present, land_precipitationMm_present, land_visibilityM_present, marine_wave_or_swell_present",
+    "port-laem-chabang": "BLOCKED: window_start_covered, window_end_covered, no_missing_hours, land_windGustKmh_present, land_precipitationMm_present, land_visibilityM_present, marine_wave_or_swell_present",
+    "port-klang": "BLOCKED: window_start_covered, window_end_covered, no_missing_hours, land_windGustKmh_present, land_precipitationMm_present, land_visibilityM_present, marine_wave_or_swell_present",
+    "port-manila": "BLOCKED: window_start_covered, window_end_covered, no_missing_hours, land_windGustKmh_present, land_precipitationMm_present, land_visibilityM_present, marine_wave_or_swell_present",
+    "port-jakarta": "BLOCKED: window_start_covered, window_end_covered, no_missing_hours, land_windGustKmh_present, land_precipitationMm_present, land_visibilityM_present, marine_wave_or_swell_present",
+    "port-ho-chi-minh": "BLOCKED: window_start_covered, window_end_covered, no_missing_hours, land_windGustKmh_present, land_precipitationMm_present, land_visibilityM_present, marine_wave_or_swell_present"
+  }
+}
+R1.5-1 live acceptance: FAIL
+ ELIFECYCLE  Command failed with exit code 1.

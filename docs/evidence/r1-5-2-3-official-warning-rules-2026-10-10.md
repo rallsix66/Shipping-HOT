@@ -48,3 +48,9 @@
 4. **用户决定（原话）：** 用户 guoyong lai，在 Grok Bot 聊天中，2026-10-10 12:21 UTC+8，被问到"提供 WR-O02 主要城市清单还是保持为空"时回答「先保持空值」。所以 `deliveryMajorCities = {}`，WR-O02 线上不会触发。
    - **仍待办：** 把官方预警的区域名称或代码映射到城市（范围映射），本轮没做。
 5. 本轮没有新增信源，没有改生产开关，GET 请求不会触发网络或 LLM（面板只计算已入库的预警）。TMD CAP 和 BMKG 的接入留到后续轮次。
+
+## 第四轮门禁（代码提交 `2ca8ac2dbe383fd05d63ab8a5d96a068e2e685b2`，Windows 10 19045，Node v24.15.0，pnpm 10.30.3，顺序执行，工作区干净）
+
+- install / build / typecheck / lint：均 exit 0；Vitest：86 个文件，**632 通过 / 3 跳过**，exit 0；smoke：exit 0；S7：exit 0；Neat Freak audit：exit 0。
+- `pnpm test:r1-5-1-live` 共跑 3 次：第 1、2 次 exit 1（`Open-Meteo: fetch failed`，上游网络偶发，所有港口都拉取失败），只记录，不作证据；第 3 次 exit **2 = BLOCKED**（84 项检查，83 项通过，唯一 BLOCKED 是 `coverage_port-ho-chi-minh`）。
+- 已入库的脱敏证据：`docs/evidence/r1-5-round4-gate-2ca8ac2/`，包括 gate-summary.txt、各步日志尾部、第 3 次运行的 r1-5-1-live-evidence.json（本地路径已替换为 <repo>/<home>）。

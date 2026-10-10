@@ -1,0 +1,59 @@
+PASS  [C] tropical cyclone UI ok_empty shows zero active and no path chart
+PASS  [C] tropical cyclone UI partial sync shows partial notice
+PASS  [C] tropical cyclone UI stale sync shows expiry copy
+PASS  [C] port weather UI renders precip/rule coverage notice
+PASS  [C] port weather UI impact row count matches API displayMeta
+PASS  [C] weather item exposes its forecast window switch
+PASS  [C] switching to the 24h window recomputes the stored wave value
+PASS  [C] the 24h wind value is recomputed alongside the wave value
+PASS  [C] the weather card still offers the 72h window after switching
+PASS  [C] switching back restores the stored 72h wave/wind values (Swell and wind risk window for Shekou approaches打开来源Swell and wind risk window for Shekou approaches)
+PASS  [C] the calendar route renders the annual reference calendar
+PASS  [C] country-specific incompleteness is stated instead of implied completeness
+PASS  [C] all five reference countries are offered
+PASS  [C] advancing a month changes the calendar period (2026 年 10 月 -> 2026 年 11 月)
+PASS  [C] stepping back restores the original period
+PASS  [C] the year selector is available
+PASS  [C] switching the year reloads the 2027 calendar (2027 年 10 月)
+PASS  [C] country selection is offered
+PASS  [C] deselecting 泰国 narrows the reference scope (4 个国家已选 · 0 项本月参考安排 · 周一开始)
+PASS  [C] 全选 restores the full reference scope
+PASS  [C] bundled calendar reference API -> 200
+PASS  [C] / loads with real-data-only content
+PASS  [C] /events loads with real-data-only content
+PASS  [C] /settings loads with real-data-only content
+PASS  [C] settings no longer exposes anchored-hours controls
+PASS  [C] settings no longer exposes voyage delay controls
+PASS  [C] settings footer no longer advertises retired AIS providers
+PASS  [C] settings still exposes port congestion threshold
+PASS  [C] /voyages stays retired after visiting settings
+PASS  [C] /vessels stays retired after visiting settings
+
+--- Phase 4 — read-only browse window, zero external egress ---
+PASS  provider_usage delta = 0
+PASS  DeepSeek usage delta = 0
+PASS  translation usage delta = 0
+PASS  sync_runs delta = 0
+PASS  translation_cache writes delta = 0
+PASS  provider_runtime row delta = 0
+PASS  provider_runtime state unchanged
+PASS  article store is read-only during browsing
+PASS  operational stores are read-only during browsing
+PASS  event/calendar stores are read-only during browsing (0/0)
+PASS  article block store is read-only during browsing (0)
+PASS  port directory/metadata stores are read-only during browsing (0/0)
+
+--- Phase 5 — browser and API cleanliness ---
+PASS  unhandled runtime/console errors = 0
+PASS  unexpected API 5xx responses = 0
+PASS  no outbound browser request left the machine during browsing (0); server-side egress is bounded by the scrubbed provider credentials, the disabled Runtime and the zero provider/usage/cache deltas
+
+--- Phase 6 — retained data untouched ---
+PASS  retained .data\shipping-hot-v3.sqlite3 unchanged (af1a62291c75a714|8425472:1790663050789.5464)
+PASS  retained .data\shipping-hot-v3-browser.sqlite3 unchanged (3dbb014c94b500a8|1572864:1788406513543.2524)
+PASS  retained .data\p7-final-seal-20260904.sqlite3 unchanged (ca0efa0cabe3c85a|978944:1788510203224.2683)
+PASS  retained .data\provider-secrets.json unchanged (843c54062551d938|56:1788417973720.671)
+
+Evidence: <repo>\.tmp\s7-local\s7-integrated-evidence.json
+
+S7 CLEAN LOCAL INTEGRATED ACCEPTANCE PASS

@@ -1,0 +1,13 @@
+HEAD 2ca8ac2dbe383fd05d63ab8a5d96a068e2e685b2 started 2026-10-10T12:38:38.3558162+08:00 node v24.15.0 pnpm 10.30.3 os Microsoft Windows NT 10.0.19045.0
+install exit=0
+build exit=0
+typecheck exit=0
+lint exit=0
+vitest exit=0
+smoke exit=0
+s7 exit=0
+live exit=1
+audit exit=0
+status-after: []
+live-run2 exit=1
+live-run3 exit=2
