@@ -32,4 +32,4 @@ export interface CoverageResult {
   pass: boolean
 }
 export declare function sevenDayWindow(nowMs: number): { startMs: number, endMs: number }
-export declare function evaluateForecastWindowCoverage(rows: CoverageRow[], nowMs: number, options?: { requireMarine?: boolean }): CoverageResult
+export declare function evaluateForecastWindowCoverage(rows: CoverageRow[], nowMs: number, options?: { requireMarine?: boolean, requireLand?: boolean }): CoverageResult
