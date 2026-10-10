@@ -41,10 +41,11 @@
   - sync job：照常写入成功记录；有 issue 时返回 `status: failed`（带 postId/数量的 errorMessage），不归档任何记录；BackgroundRuntime 据此写 sync_runs 和 provider_runtime（来源状态非 healthy）。失败文章的旧记录保留、标 stale/degraded，旧值不变。
   - 本次所选文章全部失败（received 0）→ provider 抛错：首次运行 → 运行失败，无记录；已有记录 → 旧记录全部保留并标 failed/stale，运行失败。
   - 结构有效、没有匹配标题 → 仍是 success、0 条，含义未确认。
-- 固定样本测试（走正常 registry 同款 provider 配置 → BackgroundRuntime.runNow → sync job → SQLite，不依赖回调），`server/providers/nchmf-warning.test.ts` 新增 4 个：
+- 固定样本测试（措辞更正 2026-10-10 19:03：测试**没有调用 registry 工厂** `weatherAlertJobs`，而是在测试里用与 registry 相同的配置直接创建 provider 和 sync job，再注册到 BackgroundRuntime → runNow → SQLite，不依赖回调），`server/providers/nchmf-warning.test.ts` 新增 4 个：
   1. 部分成功/失败：job 与 sync_runs 为 failed（`received 3, failed 9 (postIds …)`），来源状态非 healthy，3 条成功记录入库且 healthy；下一轮 54547 失败时其旧记录保留、标 stale/degraded，原文级别和首次接收时间不变。
   2. 首次运行全部失败：failed（`nchmf_articles_all_failed: received 0/12`），无记录。
   3. 已有记录后全部失败：failed，旧记录全部保留并标 stale/failed。
   4. 真零匹配：success、recordsRead 0、只请求列表页 1 次。
-- 证据：`docs/evidence/gate-be78026/p2-fixture-tests.txt`（4/4 通过）；门禁 `docs/evidence/gate-be78026/`（install/build/typecheck/lint/vitest 755 通过 3 跳过/smoke:p0-native/S7 exit 0；审计说明见 `live-note.txt`）。本轮没有重抓上游、没有重跑八港天气、没有扩展 PDF 抓取。
-- 脱敏补充：35a5c8b 的真实运行 raw `index.html` 含站点地图 token，已在当前文件替换为 `<redacted>`；历史不改写。
+- 证据：`docs/evidence/gate-be78026/p2-fixture-tests.txt`（4/4 通过）；门禁 `docs/evidence/gate-be78026/`（install/build/typecheck/lint/vitest 755 通过 3 跳过/smoke:p0-native/S7 exit 0；审计 exit 1，说明见 `live-note.txt`）。本轮没有重抓上游、没有重跑八港天气、没有扩展 PDF 抓取。
+- 脱敏补充：35a5c8b 的真实运行 raw `index.html` 含站点地图 token，已在当前文件替换为 `<redacted>`；历史不改写，**35a5c8b 历史中仍含该值，未清理**。
+- 审计措辞更正（2026-10-10 19:03）：`be78026` 的门禁审计第一次是 **exit 1**；之后只对 NCHMF 样本/夹具目录做了一次类密钥扫描，0 命中。这**不是**完整审计重新通过，也**不代表**历史已清理。
