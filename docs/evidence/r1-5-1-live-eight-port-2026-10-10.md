@@ -10,7 +10,8 @@
 | Isolated run dir | `.tmp/r1-5-1-live-2026-10-10T02-49-03-058Z` |
 | Machine JSON | `<runDir>/r1-5-1-evidence.json` + `r1-5-1-sync-live.json` |
 | Live sync window | `2026-10-10T02:49:03.445Z` → `2026-10-10T02:49:10.082Z` |
-| Git HEAD at run | record `git rev-parse HEAD` on the commit that contains this doc + harness fixes |
+| Git HEAD (harness) | **`5c69e674db3b1d989d0db184b3a03a9b22c05499`** |
+| Live evidence run | executed on **`6d8b232`** (pre-harness); re-run `pnpm test:r1-5-1-live` on **`5c69e67`** to bind JSON to harness commit |
 
 ## Seven-day time口径
 
