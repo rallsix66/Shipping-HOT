@@ -65,8 +65,20 @@ export const officialAlertHazardKeywords: Readonly<Record<OfficialAlertHazard, r
 }
 
 /**
+ * Issuing country of each official-alert source, from docs/intel-source-catalog.md (TH-W01 TMD, ID-W01 BMKG,
+ * XX-W01 JMA). The aggregate id "official-weather-alerts" has no single country and is unresolvable on purpose.
+ */
+export const officialAlertSourceCountry: Readonly<Record<string, string>> = {
+  tmd: "TH",
+  bmkg: "ID",
+  jma: "JP",
+}
+
+/**
  * WR-O02 "major cities" per country. Plan §4.8 does not enumerate them and last-mile cities are out of scope
- * this round (plan §245), so the list is intentionally EMPTY until the user approves one: WR-O02 cannot fire in
- * production and is verified by fixtures only.
+ * this round. Kept EMPTY by user decision: user guoyong lai, Grok Bot chat, 2026-10-10 12:21 UTC+8, original
+ * words "先保持空值", in reply to whether to provide the WR-O02 major-city list or keep it empty.
+ * Mapping alert coverage areas (official area names / codes) to cities is still pending. With this config
+ * WR-O02 cannot fire in production; it is verified by fixtures only.
  */
 export const deliveryMajorCities: Readonly<Record<string, readonly string[]>> = {}

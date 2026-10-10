@@ -7,19 +7,20 @@ import {
   deliveryMajorCities,
   officialAlertHazardKeywords,
   officialAlertImpactRules,
+  officialAlertSourceCountry,
 } from "#/config/weather-impact-rules"
 
 /**
- * Plan §4.8 official-warning rows (WR-O01 any official warning hit; WR-O02 delivery-region warning).
- * Outputs are always status "potential" with provenance "system" for the judgement; the official alert itself
- * is attached as `officialBasis` (provenance "official"). Nothing in an alert's text can upgrade the status to
- * implemented/port-closed — that requires a separate official or operator notice, which rules never produce.
+ * Plan §4.8 official-warning rows (WR-O01 any official warning associated with the port; WR-O02 delivery
+ * region). Outputs are always status "potential" with provenance "system" for the judgement; the official
+ * alert itself is attached as `officialBasis` (provenance "official"). Nothing in an alert's text can upgrade
+ * the status to implemented/port-closed. Fail closed: any missing, unknown or invalid field means no impact.
  */
 
 export interface OfficialAlertImpactContext {
-  /** Port the panel/evaluation is for (WR-O01 requires the alert to be associated with this port). */
+  /** Port the evaluation is for (WR-O01 requires the alert to be associated with this port). */
   portId: string
-  /** Country of the port; WR-O02 only uses major cities configured for this country. */
+  /** Country of the port; WR-O02 requires the alert's issuing country to equal it. */
   countryCode?: string
   nowMs: number
   /** Override of the configured delivery major-city list (tests / future approved config). */
@@ -28,64 +29,82 @@ export interface OfficialAlertImpactContext {
 
 export type OfficialAlertIneligibleReason =
   | "not_official_source"
+  | "source_status_invalid"
   | "stale"
-  | "event_ineligible"
+  | "event_eligibility_not_true"
+  | "weather_detail_missing"
+  | "risk_source_not_official"
+  | "alert_state_not_active"
+  | "severity_invalid"
+  | "expiry_invalid"
   | "alert_expired"
-  | "alert_lifecycle_unknown"
 
-/** Only current, official, lifecycle-known alerts may drive a potential impact. */
+const VALID_SEVERITIES: ReadonlySet<Severity> = new Set(["info", "watch", "warning", "critical"])
+
+/** Only current, official, lifecycle-known alerts may drive a potential impact. Missing info => ineligible. */
 export function officialAlertIneligibility(item: FeedItem, nowMs: number): OfficialAlertIneligibleReason | undefined {
   if (!isOfficialWeatherAlertFeedItem(item)) return "not_official_source"
-  if (item.stale) return "stale"
-  if (item.eventEligibility === false) return "event_ineligible"
-  if (item.weather?.alertState === "expired") return "alert_expired"
-  if (item.weather?.alertState === "unknown") return "alert_lifecycle_unknown"
-  if (item.expiresAt) {
-    const expires = Date.parse(item.expiresAt)
-    if (Number.isFinite(expires) && expires <= nowMs) return "alert_expired"
+  if (item.sourceStatus !== "healthy") return "source_status_invalid"
+  if (item.stale !== false) return "stale"
+  if (item.eventEligibility !== true) return "event_eligibility_not_true"
+  if (!item.weather) return "weather_detail_missing"
+  if (item.weather.riskSource !== "official") return "risk_source_not_official"
+  if (item.weather.alertState !== "active") return "alert_state_not_active"
+  if (!VALID_SEVERITIES.has(item.severity)) return "severity_invalid"
+  for (const expiry of [item.expiresAt, item.weather.alertExpiresAt]) {
+    if (expiry === undefined) continue
+    const expires = Date.parse(expiry)
+    if (!Number.isFinite(expires)) return "expiry_invalid"
+    if (expires <= nowMs) return "alert_expired"
   }
   return undefined
 }
 
-function alertText(item: FeedItem): string {
-  return [item.title, item.summary, item.weather?.alertRegion].filter(Boolean).join(" \n ").toLowerCase()
+function hazardText(item: FeedItem): string {
+  return [item.title, item.summary].filter(Boolean).join(" \n ").toLowerCase()
 }
 
 export function matchOfficialAlertHazard(item: FeedItem, hazards: readonly OfficialAlertHazard[]): OfficialAlertHazard | undefined {
-  const text = alertText(item)
+  const text = hazardText(item)
   return hazards.find(hazard => officialAlertHazardKeywords[hazard].some(keyword => text.includes(keyword.toLowerCase())))
 }
 
-function matchMajorCity(item: FeedItem, cities: readonly string[]): string | undefined {
-  const text = alertText(item)
-  return cities.find(city => city.trim().length > 0 && text.includes(city.toLowerCase()))
+/** Issuing country from the source catalog (sourceId). Aggregate/unknown sources are unresolvable. */
+export function officialAlertIssuingCountry(item: FeedItem): string | undefined {
+  return officialAlertSourceCountry[item.sourceId]
+}
+
+/**
+ * Coverage comes ONLY from the structured area field (`weather.alertRegion`), split into area names and
+ * compared exactly (case-insensitive). A city merely mentioned in title/summary is not coverage.
+ */
+export function officialAlertCoveredCity(item: FeedItem, cities: readonly string[]): string | undefined {
+  const region = item.weather?.alertRegion
+  if (!region) return undefined
+  const areas = new Set(region.split(/[,;|/\n]+/).map(part => part.trim().toLowerCase()).filter(Boolean))
+  return cities.find(city => city.trim().length > 0 && areas.has(city.trim().toLowerCase()))
 }
 
 function hitFor(rule: OfficialAlertImpactRuleConfig, item: FeedItem, extra: Record<string, string>): WeatherImpactRuleHit {
   const severity: Severity = item.severity
+  const alertId = item.weather?.alertId ?? item.id
   return {
     ruleId: rule.id,
     object: rule.object,
-    // §4.8: level is taken from the official warning
     severity,
     status: "potential",
     provenance: "system",
-    inputValues: {
-      officialSourceId: item.sourceId,
-      officialAlertId: item.weather?.alertId ?? item.id,
-      officialSeverity: severity,
-      ...extra,
-    },
+    inputValues: { officialSourceId: item.sourceId, officialAlertId: alertId, officialSeverity: severity, ...extra },
     summaryZh: rule.summaryZh.replace("{title}", item.title),
     officialBasis: {
       provenance: "official",
       sourceId: item.sourceId,
-      alertId: item.weather?.alertId ?? item.id,
+      alertId,
       title: item.title,
       sourceUrl: item.sourceUrl,
       severity,
       publishedAt: item.publishedAt,
-      expiresAt: item.expiresAt,
+      expiresAt: item.expiresAt ?? item.weather?.alertExpiresAt,
     },
   }
 }
@@ -98,15 +117,16 @@ export function evaluateOfficialAlertImpactRules(alerts: readonly FeedItem[], co
     if (officialAlertIneligibility(item, context.nowMs)) continue
     for (const rule of officialAlertImpactRules) {
       if (rule.kind === "official_alert_port") {
-        if (!item.relatedPortIds.includes(context.portId)) continue
-        hits.push(hitFor(rule, item, {}))
+        if (item.relatedPortIds.includes(context.portId)) hits.push(hitFor(rule, item, {}))
         continue
       }
+      const country = officialAlertIssuingCountry(item)
+      if (!country || !context.countryCode || country !== context.countryCode) continue
       const hazard = matchOfficialAlertHazard(item, rule.hazards)
       if (!hazard) continue
-      const city = matchMajorCity(item, cities)
+      const city = officialAlertCoveredCity(item, cities)
       if (!city) continue
-      hits.push(hitFor(rule, item, { matchedHazard: hazard, matchedCity: city }))
+      hits.push(hitFor(rule, item, { issuingCountry: country, matchedHazard: hazard, matchedCity: city, coverageField: "weather.alertRegion" }))
     }
   }
   return hits

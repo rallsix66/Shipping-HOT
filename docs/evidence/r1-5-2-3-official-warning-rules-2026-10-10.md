@@ -28,7 +28,7 @@
 
 ## 用户决定（2026-10-10）
 
-- WR-O02 的「主要城市」清单**暂时保持为空**（用户决定）。生产配置 `deliveryMajorCities = {}`，WR-O02 线上不会触发，只由夹具验证。
+- WR-O02 的「主要城市」清单**暂时保持为空**：用户 guoyong lai，Grok Bot 聊天，2026-10-10 12:21 UTC+8，原话「先保持空值」（回答「提供 WR-O02 主要城市清单还是保持为空」）。范围映射仍待办。生产配置 `deliveryMajorCities = {}`，WR-O02 线上不会触发，只由夹具验证。
 
 ## 门禁（代码提交 `aa1d12aad578f3370c2340d97deca94ba32813c3`，Windows 10 19045，Node v24.15.0，pnpm 10.30.3，顺序执行，工作区干净）
 
@@ -36,3 +36,15 @@
 - `pnpm test:r1-5-1-live`：第 1 次 exit 1（JMA `fetch failed`，偶发）；第 2 次 exit 2（Manila/Jakarta 上游偶发失败）；第 3 次 exit **2 = BLOCKED**（84 项，83 通过，唯一 BLOCKED：`coverage_port-ho-chi-minh`；JMA 存储 TC2634/TC2635）。前两次只记录，不作证据。
 - 本地证据目录：`.tmp/gate-aa1d12a/`、`.tmp/r1-5-1-live-2026-10-10T04-14-00-808Z/`。
 - R1.5-1 结论不变：**BLOCKED**（只剩 VNSGN 海况）。
+
+## 第四轮修正（dots round-3 小修，2026-10-10）
+
+1. **有效性改为白名单、缺信息不命中**（`officialAlertIneligibility`）。只有同时满足以下全部条件才算有效：官方源，`sourceStatus=healthy`，`stale=false`，`eventEligibility=true`，有 `weather` 且 `riskSource=official`，`alertState=active`，严重度合法；`expiresAt` 和 `alertExpiresAt` 如果存在，都必须能解析且晚于当前时间。下列每种情况都有反例夹具：字段缺失、未知、过期、源状态降级/失败/停用、到期时间无法解析。
+2. **WR-O02 不再因为标题或正文提到城市就算覆盖。**
+   - 发布国：只按信源目录对应（`officialAlertSourceCountry`：tmd→TH、bmkg→ID、jma→JP）。聚合源 `official-weather-alerts` 无法判定国家，**不命中**。发布国必须等于港口所在国。
+   - 覆盖范围：只看结构化区域字段 `weather.alertRegion`，按分隔符拆开后逐项精确匹配。标题和正文只用来判断危险类型。
+   - 夹具覆盖：跨国源、城市只出现在标题/正文（包括"Bangkok is not affected"）、真实覆盖区域的正例和反例、区域字段缺失、港口国家未知。
+3. **面板/API 测试**（`server/services/port-weather-panel-official.test.ts`）：有效预警会出现在 `officialAlertImpacts` 里；过期、生命周期未知、已从索引消失、陈旧、源降级、已到期、属于其他港口的预警都会从结果中消失；没有预警时返回空数组。
+4. **用户决定（原话）：** 用户 guoyong lai，在 Grok Bot 聊天中，2026-10-10 12:21 UTC+8，被问到"提供 WR-O02 主要城市清单还是保持为空"时回答「先保持空值」。所以 `deliveryMajorCities = {}`，WR-O02 线上不会触发。
+   - **仍待办：** 把官方预警的区域名称或代码映射到城市（范围映射），本轮没做。
+5. 本轮没有新增信源，没有改生产开关，GET 请求不会触发网络或 LLM（面板只计算已入库的预警）。TMD CAP 和 BMKG 的接入留到后续轮次。
