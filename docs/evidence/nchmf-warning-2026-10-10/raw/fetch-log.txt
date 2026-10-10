@@ -1,0 +1,11 @@
+﻿fetchedAt(UTC+8) | http | url | content_type | bytes | seconds
+2026-10-10T17:07:03+08:00 | 200 | https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html | text/html; charset=utf-8 | 259279 | 4.20
+2026-10-10T17:07:16+08:00 | 200 | https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-du-bao-trieu-cuong-vung-ven-bien-nam-bo-post54492.html | text/html; charset=utf-8 | 109358 | 1.313946
+2026-10-10T17:07:18+08:00 | 200 | https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-khong-ton-tai-post99999999.html | text/html; charset=utf-8 | 49545 | 1.218187
+2026-10-10T17:07:19+08:00 | 200 | https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-tren-song-dong-nai-post54547.html | text/html; charset=utf-8 | 62326 | 1.164740
+2026-10-10T17:07:20+08:00 | 200 | https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-du-bao-gio-manh-song-lon-va-mua-dong-tren-bien-post54353.html | text/html; charset=utf-8 | 52538 | 1.062875
+2026-10-10T17:08:12+08:00 | 000 | https://kttv.gov.vn//upload/thoitiet/2026/10/10/dbqg_hvnh_20261010_1600.pdf |  | 0 | 5.667303
+2026-10-10T17:08:18+08:00 | 404 | https://kttv.gov.vn//upload/haivan/2026/10/10/dbqg_hvnh_20261010_15h30.pdf | text/html | 1245 | 6.118886
+2026-10-10T17:08:42+08:00 | 404 | https://kttv.gov.vn//upload/thoitiet/2026/10/10/dbqg_hvnh_20261010_1600.pdf | text/html | 1245 | 0.647445
+2026-10-10T17:09:58+08:00 | 404 | https://kttv.gov.vn//upload/thoitiet/2026/10/10/dbqg_hvnh_20261010_1600.pdf | text/html | 1245 | 0.852602
+2026-10-10T17:09:58+08:00 | 404 | https://kttv.gov.vn//upload/haivan/2026/10/10/dbqg_hvnh_20261010_15h30.pdf | text/html | 1245 | 0.703822
