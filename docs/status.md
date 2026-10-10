@@ -61,7 +61,7 @@
 - **Foundation（PR #7，`codex/shipping-hot-r1-5`）：**
   - 迁移 **015** + Vitest `015-ops-weather-calendar-policy.test.ts`（fresh **v15**、v14→v15 升级保留 `ports` 行、重复执行 idempotent）。
   - §4.8 规则引擎：**阵风阈值统一为 m/s**（13.9 / 17.2 / 24.5）；输入 `windGustMs`；NaN/Infinity 视为缺失；边界与 **30 km/h 不误报** 单测。
-  - **R1.5-2：** **PASS（夹具/测试范围）**（2026-10-10 第三轮）— §4.8 官方预警两行已实现：**WR-O01**（与港口关联的官方预警，等级取官方，以原文为准）、**WR-O02**（暴雨/洪水/热带气旋预警覆盖主要城市 → 派送潜在影响）；WR-S01..S05 + WR-O01/O02 都有命中/不命中夹具（`weather-impact-engine.test.ts`、`official-alert-impact.test.ts`）。**真实官方预警证据 NOT_RUN**：TMD/BMKG/JMA 仍 `live_pending`，MetMalaysia/NCHMF/PAGASA/中央气象台未接入；WR-O02 主要城市清单待确认，生产配置为空、线上不触发。清单与证据：`docs/evidence/r1-5-2-3-official-warning-rules-2026-10-10.md`。
+  - **R1.5-2：** **PASS（夹具/测试范围）**（2026-10-10 第三轮）— §4.8 官方预警两行已实现：**WR-O01**（与港口关联的官方预警，等级取官方，以原文为准）、**WR-O02**（暴雨/洪水/热带气旋预警覆盖主要城市 → 派送潜在影响）；WR-S01..S05 + WR-O01/O02 都有命中/不命中夹具（`weather-impact-engine.test.ts`、`official-alert-impact.test.ts`）。**真实官方预警证据 NOT_RUN**：TMD/BMKG/JMA 仍 `live_pending`，MetMalaysia/NCHMF/PAGASA/中央气象台未接入；WR-O02 主要城市清单**按用户决定暂时保持为空**（2026-10-10），线上不触发。门禁（`aa1d12a`）：install/build/typecheck/lint/Vitest(606/3 skip)/smoke/S7/audit 均 exit 0；live 第 3 次 exit 2 = BLOCKED（83/84，仅 VNSGN）。清单与证据：`docs/evidence/r1-5-2-3-official-warning-rules-2026-10-10.md`。
   - **R1.5-3：** **PASS（测试）** — 预警原文写「港口关闭/已停工」时也只产出 `potential`/`system`；7 条规则在极端输入下都只产出 `potential`；守卫拒绝伪造的 `implemented`。
   - **R1.5-4：** **BLOCKED** — 合格 **0/10**；回放命中口径 **warning/critical**（watch 不计）；≥10 样本且 **≥80% 回放** 才解除 blocked，**不**自动标 PASS。候选 `port-closure-replay-candidates.ts` 含 `verificationAudit` 初核记录，仍 **blocked**。
   - **R1.5-1（整项）：** **BLOCKED**（2026-10-10 第二轮复审后；PR #7 未合并）。原因只剩一项：VNSGN 海况（浪/涌浪）缺测。其余七港七天海况 + 陆地覆盖已 PASS。

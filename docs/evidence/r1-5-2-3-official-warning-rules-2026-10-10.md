@@ -25,3 +25,14 @@
 
 - R1.5-2：**PASS（夹具/测试范围）**；真实官方预警证据 **NOT_RUN**。
 - R1.5-3：**PASS（测试）**。
+
+## 用户决定（2026-10-10）
+
+- WR-O02 的「主要城市」清单**暂时保持为空**（用户决定）。生产配置 `deliveryMajorCities = {}`，WR-O02 线上不会触发，只由夹具验证。
+
+## 门禁（代码提交 `aa1d12aad578f3370c2340d97deca94ba32813c3`，Windows 10 19045，Node v24.15.0，pnpm 10.30.3，顺序执行，工作区干净）
+
+- install 0 · build 0 · typecheck 0 · lint 0 · Vitest 85 个文件 **606 通过 / 3 跳过** exit 0 · smoke:p0-native 0 · S7 exit 0（PASS，保留库未改动）· Neat Freak audit 0
+- `pnpm test:r1-5-1-live`：第 1 次 exit 1（JMA `fetch failed`，偶发）；第 2 次 exit 2（Manila/Jakarta 上游偶发失败）；第 3 次 exit **2 = BLOCKED**（84 项，83 通过，唯一 BLOCKED：`coverage_port-ho-chi-minh`；JMA 存储 TC2634/TC2635）。前两次只记录，不作证据。
+- 本地证据目录：`.tmp/gate-aa1d12a/`、`.tmp/r1-5-1-live-2026-10-10T04-14-00-808Z/`。
+- R1.5-1 结论不变：**BLOCKED**（只剩 VNSGN 海况）。
