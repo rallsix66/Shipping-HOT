@@ -64,14 +64,19 @@
   - **R1.5-2：** **NOT_RUN**（整项）— 说明：§4.8 **WR-S01..WR-S05** 命中/不命中/边界已落地（`weather-impact-engine.test.ts`）；**官方预警表行未实现**。
   - **R1.5-3：** **NOT_RUN**（整项）— 说明：已验证范围仅为当前规则的 `potential`/`system` 输出（同上）；不含官方预警升级语义。
   - **R1.5-4：** **BLOCKED** — 合格 **0/10**；回放命中口径 **warning/critical**（watch 不计）；≥10 样本且 **≥80% 回放** 才解除 blocked，**不**自动标 PASS。候选 `port-closure-replay-candidates.ts` 含 `verificationAudit` 初核记录，仍 **blocked**。
-  - **R1.5-1（整项）：** **NOT_RUN（子项未全量 live）** — **八港 7 天 + JMA 闭环批（2026-10-10，PR #7 未合并）：** **`forecastMeta.targetWindow` / `actualCoverage`**；**VNSGN** 海况缺口（`cell_selection=sea`，不填 0）如实记录；JMA **`parseJmaTargetTcListStrict`**（仅 `[]` → `ok_empty`；非法/混合列表 → failed/partial，不静默全成功）；SQLite **按路径保留 `pathFetchedAt`**，区分 **`lastCheckedAt`（最近尝试）/ `lastFullSuccessAt`（完整列表成功）/ `lastPathFetchAt`**；WR-S03 **按每条 impact 的 `validFrom`–`validUntil` 区间**内预报/当前时刻算距（**非**整周最小、**非** hourly+7d）；**活跃 vs 历史摘要** 分栏计数，missing/dissipated **不参与**规则；Job→Repository→Panel 链式测试 + S7 **保留路径后 failed 刷新 UI**（ok_empty/partial/stale 页面断言）。**仍 NOT_RUN：** 八港 live 矩阵、完整浏览器 sign-off、真实 JMA 归档。
+  - **R1.5-1（整项）：** **PASS（2026-10-10，PR #7 未合并）** — 隔离目录 **`.tmp/r1-5-1-live-2026-10-10T02-49-03-058Z`**：`scripts/r1-5-1-live-acceptance.mjs` + 机器证据 **`r1-5-1-evidence.json`** / **`r1-5-1-sync-live.json`**；摘要 **`docs/evidence/r1-5-1-live-eight-port-2026-10-10.md`**（绑定 commit 见该文档，以下 SHA 在 closeout commit 后补全）。
+    - **实网 Open-Meteo（八港）：** `weather-sync` **success** → SQLite **1352** 行 `weather_forecast`；七口径 **hourly only** 在 `[now−1h, now+7d]` 内 **≈166/港**（**不含** current 凑数）；重启后 API + 浏览器 **forecastMeta.hourlyReturned** 一致。
+    - **VNSGN 海况：** **BLOCKED（覆盖未达标）** — 166/166 hourly **浪/涌浪缺测**；API/UI **`marineCoverageNote`** 已展示（**≠** 满足 §4.8 海况覆盖）；最小后续：L 阶段评估近海格点或获批替代源（本批 **未改**取点）。
+    - **实网 JMA：** **success**，归档 **outcome=`ok`**、**2** 气旋（运行日真实列表，**非** ok_empty）；面板按可见性规则可显示 **activeCount=0**（关注海域/1000 km 过滤），与 SQLite 归档并存。
+    - **夹具浏览器（partial/failed/stale/ok_empty/多路径）：** **PASS** — **`scripts/e2e-s7-integrated.mjs`**，**.tmp/s7-local/s7-integrated-evidence.json**（**151** / `failedChecks: []`），与实网证据 **分列**。
+    - **继承（非 R1.5-1 重验）：** 双时钟 WR-S03、partial Runtime 映射、单元/链式测试见 **`6d8b232`** 批。
   - **双时钟 WR-S03（2026-10-10，PR #7）：** **数据新鲜度**仅相对计算 **`now`**（`isJmaTyphoonSyncTrustworthyForWrS03` / `lastFullSuccessAt` TTL）；**台风位置适用性**相对每条 impact 的 **`validFrom`–`validUntil`** 与有界当前中心（3h）/预报点窗口求交，未知区间 → `unavailable`（不延伸整周、不用未来 `validUntil` 刷新 TTL）。Runtime **`weather-sync`** 与 **`getPortWeatherPanel`** 共用 `resolveTyphoonInputForImpactInterval`。
   - **JMA partial → Runtime：** `mapJmaSyncResultToRuntimeResult` 对 **`partial`** 一律 **`status: failed`**（`jma_detail_partial_failure` / `jma_detail_total_failure`）；SQLite 保留路径与 **`lastFullSuccessAt`**，BackgroundRuntime **不**刷新 `lastSuccessAt`、递增 **`consecutiveFailures`**（`tropical-cyclone-background-runtime.test.ts`）。
   - **链式测试：** `typhoon-position-validity.test.ts`（12:00 定位→12:15 天气、整点 TTL、稀疏预报）；`tropical-cyclone-wr-s03-impact-chain.test.ts`（**Job→SQLite→Panel**：当日距远不命中、48h 近场命中、TTL 过期后 WR-S03 **unevaluated**；受控时间 **≤ now**）。
   - **天气链路：** `computePortWeatherImpacts(..., resolveTyphoon(interval))` + 港口面板同口径（见上双时钟解析）。
   - **S7：** **2026-10-10 PASS**（**151** checks / 0 FAIL；`.tmp/s7-local/s7-integrated-evidence.json`）。
-- **仍 NOT_RUN / pending：** R1.5-1 全量 live、R1.5-5/6/7；R1.5-4 **BLOCKED 0/10**。
-  - **定向验证（本批 commit）：** Vitest **82 files / 561 passed | 3 skipped**；G（install frozen/build/typecheck/lint）+ **`pnpm smoke:p0-native`** + S7 **151/0**；**未**合并 / **未**部署 / **未** R2。
+- **仍 NOT_RUN / pending：** R1.5-5/6/7；R1.5-4 **BLOCKED 0/10**。
+  - **定向验证（R1.5-1 closeout）：** Vitest **561/564**；G（typecheck/lint/build）+ **`pnpm smoke:p0-native`** + S7 **151/0** + **`pnpm test:r1-5-1-live`**（隔离 **`.tmp/r1-5-1-live-2026-10-10T02-49-03-058Z`**）+ Neat Freak **audit exit 0**；**未**合并 / **未**部署 / **未** R2。
 - **Neat Freak（本批）：** Git Bash `scripts/audit-inventory.sh` exit **0**；**pending：** R1.5-4、R1.5-1 live。
 - **结论：** **R1.5 = IN PROGRESS / BLOCKED on R1.5-4**（**非**阶段 PASS）。
 

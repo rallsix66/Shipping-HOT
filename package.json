@@ -23,6 +23,7 @@
     "seed:s7-local": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/s7-local-seed.ts",
     "calendar:diff": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/annual-calendar-diff.ts",
     "smoke:p0-native": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p0-native-sqlite-smoke.ts",
+    "test:r1-5-1-live": "node scripts/r1-5-1-live-acceptance.mjs",
     "smoke:p2c-runtime": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p2c-runtime-sqlite-smoke.ts",
     "smoke:p3a-ais": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p3a-ais-sqlite-smoke.ts",
     "smoke:p3b-voyage": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p3b-voyage-sqlite-smoke.ts",
