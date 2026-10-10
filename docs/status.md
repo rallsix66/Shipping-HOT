@@ -65,11 +65,11 @@
   - **R1.5-3：** **NOT_RUN**（整项）— 说明：已验证范围仅为当前规则的 `potential`/`system` 输出（同上）；不含官方预警升级语义。
   - **R1.5-4：** **BLOCKED** — 合格 **0/10**；回放命中口径 **warning/critical**（watch 不计）；≥10 样本且 **≥80% 回放** 才解除 blocked，**不**自动标 PASS。候选 `port-closure-replay-candidates.ts` 含 `verificationAudit` 初核记录，仍 **blocked**。
   - **R1.5-1（整项）：** **NOT_RUN** — 说明：已实现 Open-Meteo 陆地字段、同批 `replaceWeatherPortBatch` 持久化、固定 `asOf` 面板状态（`data_empty` / `data_stale` / `no_rule_hits` / `sync_failed`）、港口页三块 + 天气 API；**8 港 7 天/JMA/全量浏览器 仍 NOT_RUN**。
-  - **天气链路补正（2026-10-09 审查批）：** 影响排序（严重度 + 距 `asOf` 近优先，>48 截断元数据）；24h 降水按真实时间窗；缓存命中仍 `drain` 待持久化批次，`ack` 仅在写入成功后；单测含故障注入/恢复。
-  - **S7：** 默认 **`.tmp/s7-local`**（与 CI artifact 路径一致）；**2026-10-09** **PASS**（**127** checks / Flow C +3 天气 API/三块 UI，证据 `.tmp/s7-local/s7-integrated-evidence.json`）。
-- **仍 NOT_RUN / pending：** R1.5-1 全量、R1.5-5/6/7；R1.5-4 合格库 **0/10 BLOCKED**；清场删除须用户确认。
-- **定向验证（2026-10-09 天气链路批）：** Vitest **64 files / 512 passed | 3 skipped**；`pnpm build` / `typecheck` / `lint` / `smoke:p0-native` / S7（上）；**未**申请合并。
-- **Neat Freak（2026-10-09 天气链路批）：** `neat-freak@3.0.0` + `scripts/audit-inventory.sh`（Git Bash）exit **0**（`generated_at=2026-10-09T10:16:58Z`）；文档/PR 矩阵与本 commit 对齐。**pending：** 全量 R1.5 阶段 live 面、R1.5-4 样本核实完成前不得标 PASS。
+  - **天气链路补正（2026-10-09 审查批 + 2026-10-10 遗漏批）：** 24h 降水仅累计 **hourly**（current 不叠入）；≥18 小时覆盖门槛；99≠101 反例；影响有效区间 `[validFrom, validUntil]` 查询；`data_insufficient` / 旧数据 `panelNotice`；API/UI `displayMeta` 与截断计数一致；`replaceWeatherPortBatch` 事务回滚回归。
+  - **S7：** 默认 **`.tmp/s7-local`**；种子含非空 `weather_forecast`/`weather_impact`；Flow C 验收状态文案、规则行、展示条数（非仅标题）。
+- **仍 NOT_RUN / pending：** R1.5-1 全量、R1.5-5/6/7；R1.5-4 **BLOCKED 0/10**；清场删除须用户确认。
+- **定向验证（2026-10-10 遗漏批）：** Vitest **66 files / 516 passed | 3 skipped**；完整 G + smoke + S7（见 commit）；**未**申请合并。
+- **Neat Freak（2026-10-10）：** `neat-freak@3.0.0` + `scripts/audit-inventory.sh`（Git Bash）与本批同 commit 记录；**pending：** R1.5-4 合格库、R1.5 阶段全量 live。
 - **结论：** **R1.5 = IN PROGRESS / BLOCKED on R1.5-4**（**非**阶段 PASS）。
 
 ### R0 — 门禁 G 执行记录

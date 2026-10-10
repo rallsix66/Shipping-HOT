@@ -523,22 +523,21 @@ export class ShippingRepository {
     }))
   }
 
-  async countWeatherImpactsForPortInWindow(portId: string, windowStartIso: string, windowEndIso: string): Promise<number> {
+  async countWeatherImpactsActiveInHorizon(portId: string, asOfIso: string, horizonEndIso: string): Promise<number> {
     const result = await this.db.prepare(`
       SELECT COUNT(*) AS count
       FROM weather_impact
       WHERE port_id = ?
-        AND julianday(valid_from) >= julianday(?)
+        AND julianday(valid_until) >= julianday(?)
         AND julianday(valid_from) <= julianday(?)
-    `).get(portId, windowStartIso, windowEndIso) as Row | undefined
+    `).get(portId, asOfIso, horizonEndIso) as Row | undefined
     return Number(result?.count ?? 0)
   }
 
   async listWeatherImpactsForPortRanked(
     portId: string,
     asOfIso: string,
-    windowStartIso: string,
-    windowEndIso: string,
+    horizonEndIso: string,
     limit = 48,
   ): Promise<PortWeatherImpactRow[]> {
     const result = await this.db.prepare(`
@@ -546,7 +545,7 @@ export class ShippingRepository {
         input_values_json, provenance, summary_zh, computed_at
       FROM weather_impact
       WHERE port_id = ?
-        AND julianday(valid_from) >= julianday(?)
+        AND julianday(valid_until) >= julianday(?)
         AND julianday(valid_from) <= julianday(?)
       ORDER BY
         CASE severity
@@ -558,7 +557,7 @@ export class ShippingRepository {
         ABS(julianday(valid_from) - julianday(?)) ASC,
         valid_from ASC
       LIMIT ?
-    `).all(portId, windowStartIso, windowEndIso, asOfIso, limit)
+    `).all(portId, asOfIso, horizonEndIso, asOfIso, limit)
     return rows<Row>(result).map((row) => {
       const inputValues = parse<Record<string, number>>(row.input_values_json)
       return {

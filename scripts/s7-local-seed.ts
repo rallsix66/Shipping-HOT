@@ -366,6 +366,34 @@ async function main() {
 
   await shipping.seed(ports, [weatherItem], events, settings)
 
+  const portWeatherForecastAt = iso(2 * 60 * 60 * 1000)
+  const portWeatherValidUntil = iso(3 * 60 * 60 * 1000)
+  await shipping.replaceWeatherPortBatch(S7.port, [{
+    id: "wf-s7-shekou-hourly",
+    portId: S7.port,
+    unlocode: "CNSHK",
+    forecastAt: portWeatherForecastAt,
+    horizon: "hourly",
+    windGustKmh: 62,
+    waveHeightM: 2.8,
+    precipitationMm: 2.4,
+    visibilityM: 8000,
+    sourceId: "open-meteo-marine",
+    fetchedAt: FETCHED_AT,
+  }], [{
+    id: "wi-s7-shekou-wr-s02",
+    portId: S7.port,
+    validFrom: portWeatherForecastAt,
+    validUntil: portWeatherValidUntil,
+    ruleId: "WR-S02",
+    severity: "warning",
+    status: "potential",
+    provenance: "system",
+    summaryZh: "靠离泊和装卸可能受限",
+    inputValues: { windGustMs: 17.2 },
+    computedAt: FETCHED_AT,
+  }])
+
   const article = await seedArticle({ database, shipping, settings })
 
   native.prepare("INSERT INTO port_watchlist (port_id, watched_at) VALUES (?, ?)")
@@ -423,6 +451,9 @@ async function main() {
       historicalBlocks: article.historicalBlocks,
       mockDecoyPortId: S7.portMockDecoy,
       mockDecoyFeedId: S7.feedMockDecoy,
+      portWeatherImpactSummary: "靠离泊和装卸可能受限",
+      portWeatherRuleId: "WR-S02",
+      portWeatherGustKmh: 62,
     },
     requestedPaths: [
       "/",

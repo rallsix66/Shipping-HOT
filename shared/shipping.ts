@@ -429,7 +429,16 @@ export type PortWeatherPanelState =
   | "no_rule_hits"
   | "data_stale"
   | "data_empty"
+  | "data_insufficient"
   | "sync_failed"
+
+export interface PortWeatherPanelNotice {
+  code: PortWeatherPanelState
+  messageZh: string
+  referenceFetchedAt?: string
+  referenceComputedAt?: string
+  showingHistoricalData: boolean
+}
 
 export interface PortWeatherPanelResponse {
   portId: string
@@ -438,6 +447,13 @@ export interface PortWeatherPanelResponse {
   forecasts: PortWeatherForecastRow[]
   impacts: PortWeatherImpactRow[]
   officialAlerts: PortWeatherOfficialAlertSummary[]
+  panelNotice?: PortWeatherPanelNotice
+  displayMeta: {
+    forecastLimit: number
+    impactLimit: number
+    forecastsReturned: number
+    impactsReturned: number
+  }
   impactMeta: {
     totalMatched: number
     returned: number

@@ -1,8 +1,9 @@
-import type { FeedItem, PortWeatherPanelState } from "@shared/shipping"
+import type { FeedItem, PortWeatherForecastRow, PortWeatherPanelState } from "@shared/shipping"
 
 export const WEATHER_FORECAST_HORIZON_MS = 7 * 24 * 60 * 60 * 1000
 export const WEATHER_FORECAST_STALE_MS = 6 * 60 * 60 * 1000
 export const WEATHER_IMPACT_DISPLAY_LIMIT = 48
+export const PORT_WEATHER_FORECAST_DISPLAY_LIMIT = 8
 
 const severityRank = { critical: 4, warning: 3, watch: 2, info: 1 } as const
 
@@ -14,23 +15,54 @@ export function isForecastInstantInWindow(instantMs: number, nowMs: number): boo
   return instantMs >= nowMs - 60 * 60 * 1000 && instantMs <= nowMs + WEATHER_FORECAST_HORIZON_MS
 }
 
-export function isImpactInstantInWindow(instantMs: number, nowMs: number): boolean {
-  return instantMs >= nowMs - 60 * 60 * 1000 && instantMs <= nowMs + WEATHER_FORECAST_HORIZON_MS
+/** Impact is active when asOf ∈ [validFrom, validUntil]. */
+export function isWeatherImpactActiveAt(asOfMs: number, validFromIso: string, validUntilIso: string): boolean {
+  const from = Date.parse(validFromIso)
+  const until = Date.parse(validUntilIso)
+  if (!Number.isFinite(from) || !Number.isFinite(until)) return false
+  return asOfMs >= from && asOfMs <= until
+}
+
+export function impactValidUntilForPoint(
+  pointTimestamp: string,
+  sortedTimestamps: string[],
+  index: number,
+): string {
+  const next = sortedTimestamps[index + 1]
+  if (next) {
+    const nextMs = Date.parse(next)
+    if (Number.isFinite(nextMs)) return new Date(nextMs - 1).toISOString()
+  }
+  const fromMs = Date.parse(pointTimestamp)
+  return new Date(fromMs + 60 * 60 * 1000).toISOString()
+}
+
+export function forecastHasMeasurableFields(row: PortWeatherForecastRow): boolean {
+  return row.windGustKmh !== undefined
+    || row.windSpeedKmh !== undefined
+    || row.waveHeightM !== undefined
+    || row.swellWaveHeightM !== undefined
+    || row.precipitationMm !== undefined
+    || row.visibilityM !== undefined
 }
 
 export function resolvePortWeatherPanelState(input: {
   nowMs: number
-  forecastCount: number
-  matchedImpactCount: number
+  inWindowForecastCount: number
+  storedForecastCount: number
+  measurableForecastCount: number
+  activeImpactCount: number
   latestFetchedAtMs?: number
   weatherFeedHealthy: boolean
 }): PortWeatherPanelState {
   if (!input.weatherFeedHealthy) return "sync_failed"
-  if (input.forecastCount === 0) return "data_empty"
+  if (input.storedForecastCount === 0) return "data_empty"
+  if (input.measurableForecastCount === 0) return "data_insufficient"
   if (input.latestFetchedAtMs === undefined || input.nowMs - input.latestFetchedAtMs > WEATHER_FORECAST_STALE_MS) {
     return "data_stale"
   }
-  if (input.matchedImpactCount === 0) return "no_rule_hits"
+  if (input.inWindowForecastCount === 0) return "data_stale"
+  if (input.activeImpactCount === 0) return "no_rule_hits"
   return "ready"
 }
 

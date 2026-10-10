@@ -726,9 +726,24 @@ async function main() {
       typeof portWeatherApi.body?.state === "string" && Array.isArray(portWeatherApi.body?.forecasts) && Array.isArray(portWeatherApi.body?.impacts),
       "port weather API exposes state, forecasts and impacts arrays",
     )
+    pushC(
+      (portWeatherApi.body?.forecasts?.length ?? 0) >= 1
+      && (portWeatherApi.body?.impacts?.length ?? 0) >= 1
+      && portWeatherApi.body?.displayMeta?.forecastsReturned === portWeatherApi.body?.forecasts?.length
+      && portWeatherApi.body?.displayMeta?.impactsReturned === portWeatherApi.body?.impacts?.length,
+      "port weather API returns non-empty forecasts/impacts with aligned displayMeta counts",
+    )
+    pushC(
+      portWeatherApi.body?.impacts?.some(row => row.ruleId === expectations.portWeatherRuleId && row.summaryZh?.includes(expectations.portWeatherImpactSummary.slice(0, 4))),
+      `port weather API includes seeded ${expectations.portWeatherRuleId} impact row`,
+    )
     await navigate(`/ports/${expectations.portId}`, { reload: true })
     text = await bodyText()
     pushC(text.includes("预报数值") && text.includes("潜在影响") && text.includes("官方预警"), "port detail renders the three weather blocks")
+    pushC(text.includes(String(expectations.portWeatherGustKmh)) || text.includes("阵风 62"), "port weather block shows seeded gust value")
+    pushC(text.includes(expectations.portWeatherRuleId) && text.includes("靠离泊"), "port weather block shows rule id and impact summary")
+    const impactRows = await evaluate(`document.querySelectorAll('[data-testid="port-weather-impacts"] li').length`)
+    pushC(Number(impactRows) >= 1 && Number(impactRows) === (portWeatherApi.body?.displayMeta?.impactsReturned ?? 0), "port weather UI impact row count matches API displayMeta")
 
     await navigate("/feed")
     const weatherClicked = await evaluate(`(() => {

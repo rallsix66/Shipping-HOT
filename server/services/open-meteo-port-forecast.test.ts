@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { PRECIP_24H_MIN_HOURLY_SAMPLES } from "./precipitation-window"
 import { evaluateWeatherImpactRules } from "./weather-impact-engine"
 import { computePortWeatherImpacts, mergeOpenMeteoPortPoints, openMeteoPointsToForecastRows } from "./open-meteo-port-forecast"
 
@@ -30,10 +31,10 @@ describe("open-meteo port forecast normalize", () => {
 
   it("computes WR-S05 from rolling 24h precipitation ending at current horizon", () => {
     const base = Date.parse("2026-08-14T13:00:00.000Z")
-    const hourly = Array.from({ length: 24 }, (_, index) => ({
+    const hourly = Array.from({ length: PRECIP_24H_MIN_HOURLY_SAMPLES }, (_, index) => ({
       timestamp: new Date(base + index * 60 * 60 * 1000).toISOString(),
       horizon: "hourly" as const,
-      precipitationMm: index === 23 ? 100 : 0,
+      precipitationMm: index === PRECIP_24H_MIN_HOURLY_SAMPLES - 1 ? 100 : 0,
     }))
     const points = [...hourly, {
       timestamp: "2026-08-15T12:00:00.000Z",

@@ -2,6 +2,7 @@ import { windGustKmhToMs } from "@shared/weather-units"
 import type { PortWeatherForecastRow, PortWeatherImpactRow } from "@shared/shipping"
 import { evaluateWeatherImpactRules } from "#/services/weather-impact-engine"
 import { precipitation24hEndingAt } from "#/services/precipitation-window"
+import { impactValidUntilForPoint } from "#/services/weather-panel-policy"
 
 function normalizeProviderTimestamp(value: unknown): string | undefined {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -120,9 +121,10 @@ export function computePortWeatherImpacts(
   computedAt: string,
 ): PortWeatherImpactRow[] {
   const sorted = [...points].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
+  const timestamps = sorted.map(p => p.timestamp)
   const precipSamples = sorted.map(p => ({ timestamp: p.timestamp, precipitationMm: p.precipitationMm, horizon: p.horizon }))
   const impacts: PortWeatherImpactRow[] = []
-  for (const point of sorted) {
+  sorted.forEach((point, index) => {
     const gustMs = point.windGustKmh === undefined ? undefined : windGustKmhToMs(point.windGustKmh)
     const waveM = point.waveHeightM ?? point.swellWaveHeightM
     const hits = evaluateWeatherImpactRules({
@@ -136,7 +138,7 @@ export function computePortWeatherImpacts(
         id: `wi-${portId}-${hit.ruleId}-${point.horizon}-${Date.parse(point.timestamp)}`,
         portId,
         validFrom: point.timestamp,
-        validUntil: point.timestamp,
+        validUntil: impactValidUntilForPoint(point.timestamp, timestamps, index),
         ruleId: hit.ruleId,
         severity: hit.severity,
         status: "potential",
@@ -148,6 +150,6 @@ export function computePortWeatherImpacts(
         computedAt,
       })
     }
-  }
+  })
   return impacts
 }

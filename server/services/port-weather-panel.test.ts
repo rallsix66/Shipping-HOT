@@ -49,7 +49,7 @@ describe("port weather panel", () => {
         id: `wi-watch-${index}`,
         portId: "port-shekou",
         validFrom: new Date(now.getTime() + (48 + index) * 60 * 60 * 1000).toISOString(),
-        validUntil: new Date(now.getTime() + (48 + index) * 60 * 60 * 1000).toISOString(),
+        validUntil: new Date(now.getTime() + (48 + index) * 60 * 60 * 1000 + 60 * 60 * 1000).toISOString(),
         ruleId: "WR-S01",
         severity: "watch",
         status: "potential",
@@ -63,7 +63,7 @@ describe("port weather panel", () => {
       id: "wi-critical-near",
       portId: "port-shekou",
       validFrom: "2026-08-15T13:00:00.000Z",
-      validUntil: "2026-08-15T13:00:00.000Z",
+      validUntil: "2026-08-15T14:00:00.000Z",
       ruleId: "WR-S03",
       severity: "critical",
       status: "potential",
@@ -78,6 +78,26 @@ describe("port weather panel", () => {
     expect(panel.impactMeta.truncated).toBe(true)
     expect(panel.impacts[0]?.severity).toBe("critical")
     expect(panel.impacts[0]?.summaryZh).toContain("critical")
+    expect(panel.displayMeta.impactsReturned).toBe(panel.impacts.length)
+    native.close()
+  })
+
+  it("returns data_insufficient when rows exist but all fields missing", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const repository = new ShippingRepository(database, "mock")
+    const now = new Date("2026-08-15T12:00:00.000Z")
+    await repository.replaceWeatherPortBatch("port-shekou", [{
+      id: "wf-empty",
+      portId: "port-shekou",
+      forecastAt: "2026-08-15T13:00:00.000Z",
+      horizon: "hourly",
+      sourceId: "open-meteo-marine",
+      fetchedAt: now.toISOString(),
+    }], [])
+    const panel = await getPortWeatherPanel(repository, "port-shekou", [], "test", "alerts", { now })
+    expect(panel.state).toBe("data_insufficient")
+    expect(panel.panelNotice?.showingHistoricalData).toBe(true)
     native.close()
   })
 })
