@@ -24,6 +24,7 @@ import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import type { ArticleBlock, ArticleVersion } from "@shared/article"
 import type { DataProvenance, FeedItem, Port, ShippingEvent, ShippingSettings } from "@shared/shipping"
+import { portDirectoryBaseline } from "@shared/port-directory"
 import { ArticleRepository } from "#/database/article"
 import { defaultShippingSettings } from "#/database/runtime"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
@@ -368,11 +369,28 @@ async function main() {
 
   const portWeatherForecastAt = iso(2 * 60 * 60 * 1000)
   const portWeatherValidUntil = iso(3 * 60 * 60 * 1000)
-  await shipping.saveTropicalCycloneSyncMeta({
+  const s7Ports = portDirectoryBaseline.map(row => ({
+    portId: row.shippingPortId,
+    unlocode: row.unlocode,
+    latitude: row.latitude,
+    longitude: row.longitude,
+  }))
+  await shipping.replaceTropicalCyclones([{
+    id: "tc-s7-koguma",
+    basin: "NW_PACIFIC",
+    jmaId: "TC2634",
+    nameEn: "Koguma",
+    typhoonNumber: "2629",
+    current: { lat: 22.52, lon: 114.35, at: FETCHED_AT },
+    trackHistory: [{ lat: 22.0, lon: 118.0 }, { lat: 22.3, lon: 116.0 }],
+    forecast: [{ lat: 22.8, lon: 113.9, at: iso(24 * 60 * 60 * 1000) }],
+    lifecycleStatus: "active",
+    rawForecastJson: [],
+  }], {
     sourceId: "jma-typhoon",
-    outcome: "ok_empty",
     lastCheckedAt: FETCHED_AT,
-  })
+    outcome: "ok",
+  }, s7Ports)
 
   await shipping.replaceWeatherPortBatch(S7.port, [{
     id: "wf-s7-shekou-hourly",
@@ -460,6 +478,10 @@ async function main() {
       portWeatherImpactSummary: "靠离泊和装卸可能受限",
       portWeatherRuleId: "WR-S02",
       portWeatherGustKmh: 62,
+      tropicalCycloneId: "tc-s7-koguma",
+      tropicalCycloneName: "Koguma",
+      tropicalCycloneCurrentLon: "114.3",
+      tropicalCycloneForecastLat: "22.8",
     },
     requestedPaths: [
       "/",

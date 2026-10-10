@@ -64,12 +64,12 @@
   - **R1.5-2：** **NOT_RUN**（整项）— 说明：§4.8 **WR-S01..WR-S05** 命中/不命中/边界已落地（`weather-impact-engine.test.ts`）；**官方预警表行未实现**。
   - **R1.5-3：** **NOT_RUN**（整项）— 说明：已验证范围仅为当前规则的 `potential`/`system` 输出（同上）；不含官方预警升级语义。
   - **R1.5-4：** **BLOCKED** — 合格 **0/10**；回放命中口径 **warning/critical**（watch 不计）；≥10 样本且 **≥80% 回放** 才解除 blocked，**不**自动标 PASS。候选 `port-closure-replay-candidates.ts` 含 `verificationAudit` 初核记录，仍 **blocked**。
-  - **R1.5-1（整项）：** **NOT_RUN（子项未全量 live）** — **八港 7 天（开发批）：** Open-Meteo 海况+陆地 **7×24h** 持久化/重启读取；港口 API/UI **`forecastMeta` + 全窗口 hourly 列表**（非 8 条预览）；**JMA** `targetTc`/`forecast.json` 规范化、`tropical_cyclone` 表、`tropical-cyclone-sync` Runtime、**`GET /api/shipping/tropical-cyclones`** 与港口页路径面板（1000 km / 关注海域 / 48h 摘要规则）；WR-S03 **≤300 km** 在 JMA 同步成功且距离可算时接入，区分 **`ok_empty` vs `failed/not_run`**；JTWC 仅夹具单测。 **仍 NOT_RUN：** 八港逐港 live 7 天验收、浏览器全量、重启+真实 JMA 全链路证据归档。
-  - **天气链路补正（2026-10-09 审查批 + 2026-10-10 遗漏批 + 2026-10-10 区间/覆盖批 + 2026-10-10 规则覆盖批）：** 24h 降水 **full/partial/insufficient** 与影响区间封顶（见上批）；**WR-S01～S03** 按实际输入/OR 分支评估（缺失/NaN/Infinity **不得** `evaluated+no_hit`）；OR **单肢命中保留 hit**、未知肢/未接入 **台风距离**（`typhoon_distance_not_covered`，本批不含 JMA）时不宣称完整排除；API/UI **`ruleCoverageReasonLabelZh`** 按缺测项展示原因；`weather-rule-coverage.test.ts` + chain 四类反例。
-  - **S7：** 默认 **`.tmp/s7-local`**；**2026-10-10 PASS**（**141** checks / 0 FAIL；Flow C 增验 `forecastMeta`、JMA 台风面板 API/UI、`ok_empty` 种子）。
-- **仍 NOT_RUN / pending：** R1.5-1 全量、R1.5-5/6/7；R1.5-4 **BLOCKED 0/10**；清场删除须用户确认。
-  - **定向验证（2026-10-10 R1.5-1 八港七天/JMA 批）：** Vitest **72 files / 538 passed | 3 skipped**；完整 G + smoke + S7（见 commit）；JMA live 探测仅开发机 `targetTc.json` 抽样，**未**写入阶段 PASS；**未**申请合并。
-- **Neat Freak（2026-10-10 规则覆盖批）：** `neat-freak@3.0.0` + `scripts/audit-inventory.sh`（Git Bash）与本批同 commit；**pending：** R1.5-4 合格库、R1.5 阶段全量 live。
+  - **R1.5-1（整项）：** **NOT_RUN（子项未全量 live）** — **八港 7 天 + JMA 闭环批（2026-10-10，PR #7 未合并）：** **`forecastMeta.targetWindow` / `actualCoverage`**；**VNSGN** 海况缺口（`cell_selection=sea`，不填 0）如实记录；JMA **`parseJmaTargetTcListStrict`**（仅 `[]` → `ok_empty`；非法/混合列表 → failed/partial，不静默全成功）；SQLite **按路径保留 `pathFetchedAt`**，区分 **`lastCheckedAt`（最近尝试）/ `lastFullSuccessAt`（完整列表成功）/ `lastPathFetchAt`**；WR-S03 **按每条 impact 的 `validFrom`–`validUntil` 区间**内预报/当前时刻算距（**非**整周最小、**非** hourly+7d）；**活跃 vs 历史摘要** 分栏计数，missing/dissipated **不参与**规则；Job→Repository→Panel 链式测试 + S7 **保留路径后 failed 刷新 UI**（ok_empty/partial/stale 页面断言）。**仍 NOT_RUN：** 八港 live 矩阵、完整浏览器 sign-off、真实 JMA 归档。
+  - **天气链路：** `computePortWeatherImpacts(..., resolveTyphoon(interval))` + 港口面板同口径。
+  - **S7：** **2026-10-10 PASS**（**151** checks / 0 FAIL；`.tmp/s7-local/s7-integrated-evidence.json`）。
+- **仍 NOT_RUN / pending：** R1.5-1 全量 live、R1.5-5/6/7；R1.5-4 **BLOCKED 0/10**。
+  - **定向验证（本批 commit）：** Vitest **80 files / 557 passed | 3 skipped**；G（typecheck/lint/build）+ **`pnpm smoke:p0-native`** + S7 **151/0**；**未**合并 / **未**部署 / **未** R2。
+- **Neat Freak（本批）：** Git Bash `scripts/audit-inventory.sh` exit **0**；**pending：** R1.5-4、R1.5-1 live。
 - **结论：** **R1.5 = IN PROGRESS / BLOCKED on R1.5-4**（**非**阶段 PASS）。
 
 ### R0 — 门禁 G 执行记录

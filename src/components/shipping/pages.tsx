@@ -457,6 +457,76 @@ function portWeatherImpactEmptyCopy(state: PortWeatherPanelResponse["state"]): s
   }
 }
 
+function TropicalCyclonePathChart({ cycloneId, trackHistory, current, forecast }: {
+  cycloneId: string
+  trackHistory: Array<{ lat: number, lon: number }>
+  current?: { lat: number, lon: number, at: string }
+  forecast: Array<{ lat: number, lon: number, at: string }>
+}) {
+  const points = [
+    ...trackHistory.map(p => ({ ...p, kind: "history" as const })),
+    ...(current ? [{ lat: current.lat, lon: current.lon, kind: "current" as const, at: current.at }] : []),
+    ...forecast.map(p => ({ ...p, kind: "forecast" as const })),
+  ]
+  if (!points.length) return null
+  const lats = points.map(p => p.lat)
+  const lons = points.map(p => p.lon)
+  const pad = 0.8
+  const minLat = Math.min(...lats) - pad
+  const maxLat = Math.max(...lats) + pad
+  const minLon = Math.min(...lons) - pad
+  const maxLon = Math.max(...lons) + pad
+  const w = 280
+  const h = 140
+  const project = (lat: number, lon: number) => {
+    const x = ((lon - minLon) / (maxLon - minLon || 1)) * (w - 16) + 8
+    const y = ((maxLat - lat) / (maxLat - minLat || 1)) * (h - 16) + 8
+    return { x, y }
+  }
+  const historyLine = trackHistory.map(p => project(p.lat, p.lon))
+  const historyPath = historyLine.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")
+  return (
+    <div className="mt-2" data-testid={`tropical-cyclone-path-${cycloneId}`}>
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full max-w-sm h-auto rounded bg-black/20" role="img" aria-label="台风路径示意">
+        {historyPath && <path d={historyPath} fill="none" stroke="currentColor" strokeOpacity={0.35} strokeWidth={1.5} strokeDasharray="4 3" />}
+        {points.map((p, index) => {
+          const { x, y } = project(p.lat, p.lon)
+          const fill = p.kind === "current" ? "#f59e0b" : p.kind === "forecast" ? "#38bdf8" : "#94a3b8"
+          return <circle key={`${p.kind}-${index}`} cx={x} cy={y} r={p.kind === "current" ? 4 : 3} fill={fill} />
+        })}
+      </svg>
+      <ul className="text-xs op-60 mt-1 space-y-0.5">
+        {current && (
+          <li data-testid={`tropical-cyclone-current-${cycloneId}`}>
+            当前中心
+            {" "}
+            {current.lat.toFixed(1)}
+            °N
+            {" "}
+            {current.lon.toFixed(1)}
+            °E ·
+            {" "}
+            {formatDate(current.at)}
+          </li>
+        )}
+        {forecast.map((p, index) => (
+          <li key={`fc-${index}`} data-testid={`tropical-cyclone-forecast-${cycloneId}`}>
+            预报
+            {" "}
+            {formatDate(p.at)}
+            ：
+            {p.lat.toFixed(1)}
+            °N
+            {" "}
+            {p.lon.toFixed(1)}
+            °E
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 function TropicalCyclonePanelSection() {
   const { data, isLoading, isError } = useTropicalCyclones()
   if (isLoading) return <div className="glass-panel d-panel mt-4"><p className="text-sm op-60">加载台风路径…</p></div>
@@ -468,35 +538,59 @@ function TropicalCyclonePanelSection() {
         <span className="text-xs op-60">路径 · 距港参考</span>
       </div>
       <p className="text-sm op-80">{data.messageZh}</p>
+      <p className="text-xs op-65 mt-1" data-testid="tropical-cyclone-counts">
+        活跃
+        {" "}
+        {data.activeCount}
+        {" · 历史摘要 "}
+        {data.historicalSummaryCount}
+        {data.sync.lastCheckedAt ? ` · 最近尝试 ${formatDate(data.sync.lastCheckedAt)}` : null}
+        {data.sync.lastFullSuccessAt ? ` · 完整成功 ${formatDate(data.sync.lastFullSuccessAt)}` : null}
+      </p>
       {data.seasonHintZh && <p className="text-xs op-60 mt-1">{data.seasonHintZh}</p>}
-      {data.sync.outcome === "failed" && (
-        <p className="text-xs op-70 mt-2">
-          同步状态：失败（
-          {data.sync.errorMessage ?? data.sync.errorCode ?? "未知"}
-          ）
+      {(data.sync.outcome === "failed" || data.sync.outcome === "partial" || data.sync.stale) && (
+        <p className="text-xs op-70 mt-2" data-testid="tropical-cyclone-sync-notice">
+          {data.sync.outcome === "failed" && `同步失败：${data.sync.errorMessage ?? data.sync.errorCode ?? "未知"}`}
+          {data.sync.outcome === "partial" && `部分气旋详情失败${data.sync.failedTcIds?.length ? `（${data.sync.failedTcIds.join(", ")}）` : ""}`}
+          {data.sync.stale && ` · 数据过期（完整成功 ${data.sync.lastFullSuccessAt ?? data.sync.lastSuccessAt ?? "—"}）`}
         </p>
       )}
       {data.cyclones.length === 0
         ? null
         : (
-            <ul className="mt-3 space-y-3 text-sm">
+            <ul className="mt-3 space-y-4 text-sm">
               {data.cyclones.map(cyclone => (
-                <li key={cyclone.id} className="border-t border-white/5 pt-2">
+                <li
+                  key={cyclone.id}
+                  className="border-t border-white/5 pt-2"
+                  data-testid={cyclone.lifecycleStatus === "active" || !cyclone.lifecycleStatus
+                    ? `tropical-cyclone-active-${cyclone.id}`
+                    : `tropical-cyclone-historical-${cyclone.id}`}
+                >
                   <p className="font-medium">
                     {cyclone.nameEn ?? cyclone.nameJp ?? cyclone.jmaId}
                     {cyclone.typhoonNumber ? ` (#${cyclone.typhoonNumber})` : ""}
                   </p>
                   {cyclone.summaryZh && <p className="text-xs op-70">{cyclone.summaryZh}</p>}
                   <p className="text-xs op-60">
-                    最近距八港约
+                    显示距八港约
                     {" "}
                     {cyclone.minDistanceKm !== undefined ? `${Math.round(cyclone.minDistanceKm)} km` : "—"}
-                    {" · "}
-                    路径点
-                    {cyclone.track.length}
-                    {" / 预报点"}
+                    {" · WR-S03 参考 "}
+                    {cyclone.wrS03DistanceKm !== undefined ? `${Math.round(cyclone.wrS03DistanceKm)} km` : "未评估"}
+                    {" · 历史点 "}
+                    {cyclone.trackHistory.length}
+                    {" / 预报点 "}
                     {cyclone.forecast.length}
+                    {" · 路径获取 "}
+                    {formatDate(cyclone.pathFetchedAt)}
                   </p>
+                  <TropicalCyclonePathChart
+                    cycloneId={cyclone.id}
+                    trackHistory={cyclone.trackHistory}
+                    current={cyclone.current}
+                    forecast={cyclone.forecast}
+                  />
                 </li>
               ))}
             </ul>
@@ -570,18 +664,29 @@ function PortWeatherPanelSection({ portId }: { portId: string }) {
           </div>
           {data.forecastMeta && (
             <p className="text-xs op-65 mb-2" data-testid="port-weather-forecast-meta">
-              {formatDate(data.forecastMeta.windowStart)}
-              {" → "}
-              {formatDate(data.forecastMeta.windowEnd)}
-              {" · "}
-              hourly
+              目标窗口
               {" "}
-              {data.forecastMeta.hourlyInWindow}
-              /
-              {data.displayMeta.forecastLimit}
+              {formatDate(data.forecastMeta.targetWindow.start)}
+              {" → "}
+              {formatDate(data.forecastMeta.targetWindow.end)}
+              {" · 实际返回 "}
+              {data.forecastMeta.actualCoverage.totalReturned}
+              {" 条（hourly "}
+              {data.forecastMeta.actualCoverage.hourlyReturned}
+              {" / current "}
+              {data.forecastMeta.actualCoverage.currentReturned}
+              ）
+              {data.forecastMeta.actualCoverage.firstInstant && data.forecastMeta.actualCoverage.lastInstant
+                ? ` · 覆盖 ${formatDate(data.forecastMeta.actualCoverage.firstInstant)} → ${formatDate(data.forecastMeta.actualCoverage.lastInstant)}`
+                : null}
               {data.forecastMeta.fetchedAt ? ` · 更新 ${formatDate(data.forecastMeta.fetchedAt)}` : null}
               {(data.forecastMeta.missingCounts.windGust > 0 || data.forecastMeta.missingCounts.wave > 0)
-                ? ` · 缺测 阵风${data.forecastMeta.missingCounts.windGust} 浪${data.forecastMeta.missingCounts.wave}`
+                ? ` · 缺测 阵风${data.forecastMeta.missingCounts.windGust} 浪${data.forecastMeta.missingCounts.wave} 降水${data.forecastMeta.missingCounts.precipitation} 能见度${data.forecastMeta.missingCounts.visibility}`
+                : null}
+              {data.forecastMeta.marineCoverageNote
+                ? (
+                    <span className="block mt-1 op-70">{data.forecastMeta.marineCoverageNote}</span>
+                  )
                 : null}
             </p>
           )}

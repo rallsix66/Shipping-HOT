@@ -747,11 +747,25 @@ async function main() {
       "port weather API marks WR-S05 unevaluated when 24h precip is incomplete",
     )
     pushC(
-      portWeatherApi.body?.forecastMeta && typeof portWeatherApi.body.forecastMeta.hourlyInWindow === "number",
-      "port weather API exposes 7-day forecastMeta",
+      portWeatherApi.body?.forecastMeta?.targetWindow
+      && typeof portWeatherApi.body.forecastMeta.actualCoverage?.hourlyReturned === "number"
+      && portWeatherApi.body.forecastMeta.actualCoverage.totalReturned === portWeatherApi.body.displayMeta?.forecastsReturned,
+      "port weather API forecastMeta splits target window vs actual coverage aligned with displayMeta",
     )
     const tropicalApi = await api("/api/shipping/tropical-cyclones")
     pushC(tropicalApi.status === 200 && tropicalApi.body?.sync?.sourceId === "jma-typhoon", "tropical cyclone API returns JMA sync panel")
+    pushC(
+      tropicalApi.body?.sync?.outcome === "ok"
+      && tropicalApi.body?.cyclones?.some(row => row.id === expectations.tropicalCycloneId),
+      "tropical cyclone API returns seeded ok sync with cyclone row",
+    )
+    pushC(
+      tropicalApi.body?.cyclones?.some(row =>
+        row.forecast?.length >= 1
+        && row.trackHistory?.length >= 1
+        && row.current?.lon !== undefined),
+      "tropical cyclone API exposes current, history and forecast points separately",
+    )
     pushC(
       portWeatherApi.body?.state === "partial_rule_coverage",
       "port weather API state reflects partial rule coverage with other rules still evaluated",
@@ -767,6 +781,110 @@ async function main() {
     pushC(text.includes(expectations.portWeatherRuleId) && text.includes("靠离泊"), "port weather block shows rule id and impact summary")
     pushC(text.includes("WR-S05") && text.includes("未评估"), "port weather coverage block shows WR-S05 unevaluated notice")
     pushC(await evaluate(`Boolean(document.querySelector('[data-testid="tropical-cyclone-panel"]'))`) === true, "port detail renders tropical cyclone panel")
+    pushC(
+      await evaluate(`(() => {
+        const chart = document.querySelector('[data-testid="tropical-cyclone-path-${expectations.tropicalCycloneId}"]')
+        const svg = chart ? chart.querySelector('svg circle') : null
+        const text = document.querySelector('[data-testid="tropical-cyclone-panel"]')?.textContent ?? ''
+        return Boolean(svg) && text.includes('${expectations.tropicalCycloneName}') && text.includes('${expectations.tropicalCycloneCurrentLon}')
+      })()`),
+      "tropical cyclone panel renders path chart and seeded current longitude",
+    )
+    pushC(
+      await evaluate(`(() => {
+        const node = document.querySelector('[data-testid="tropical-cyclone-forecast-${expectations.tropicalCycloneId}"]')
+        return node ? node.textContent.includes('${expectations.tropicalCycloneForecastLat}') : false
+      })()`),
+      "tropical cyclone panel shows forecast position latitude",
+    )
+    const patchTropicalSyncMeta = (meta) => {
+      const db = openDatabase()
+      db.prepare("UPDATE tropical_cyclone SET track_json = ? WHERE id = '_jma_sync_meta'").run(JSON.stringify(meta))
+      db.close()
+    }
+    const fullSuccessAt = tropicalApi.body?.sync?.lastFullSuccessAt ?? tropicalApi.body?.sync?.lastCheckedAt
+    patchTropicalSyncMeta({
+      sourceId: "jma-typhoon",
+      outcome: "failed",
+      lastCheckedAt: new Date().toISOString(),
+      lastFullSuccessAt: fullSuccessAt,
+      lastSuccessAt: fullSuccessAt,
+      errorCode: "provider_unavailable",
+      errorMessage: "S7 injected failure",
+    })
+    const tropicalFailed = await api("/api/shipping/tropical-cyclones")
+    pushC(
+      tropicalFailed.body?.sync?.outcome === "failed"
+      && tropicalFailed.body?.messageZh?.includes("暂不可用")
+      && tropicalFailed.body?.cyclones?.some(row => row.id === expectations.tropicalCycloneId),
+      "tropical cyclone API failed sync retains stored path rows",
+    )
+    await navigate(`/ports/${expectations.portId}`, { reload: true })
+    pushC(
+      await evaluate(`(() => {
+        const chart = document.querySelector('[data-testid="tropical-cyclone-path-${expectations.tropicalCycloneId}"] svg circle')
+        const notice = document.querySelector('[data-testid="tropical-cyclone-sync-notice"]')?.textContent ?? ''
+        return Boolean(chart) && notice.includes('同步失败')
+      })()`),
+      "tropical cyclone UI keeps path chart after failed sync with failure notice",
+    )
+    patchTropicalSyncMeta({
+      sourceId: "jma-typhoon",
+      outcome: "ok_empty",
+      lastCheckedAt: new Date().toISOString(),
+      lastFullSuccessAt: fullSuccessAt,
+      lastSuccessAt: fullSuccessAt,
+    })
+    const dbEmpty = openDatabase()
+    dbEmpty.prepare("DELETE FROM tropical_cyclone WHERE id <> '_jma_sync_meta'").run()
+    dbEmpty.close()
+    const tropicalEmpty = await api("/api/shipping/tropical-cyclones")
+    pushC(
+      tropicalEmpty.body?.sync?.outcome === "ok_empty"
+      && tropicalEmpty.body?.activeCount === 0
+      && tropicalEmpty.body?.cyclones?.length === 0,
+      "tropical cyclone API ok_empty reports zero active cyclones",
+    )
+    await navigate(`/ports/${expectations.portId}`, { reload: true })
+    pushC(
+      await evaluate(`(() => {
+        const counts = document.querySelector('[data-testid="tropical-cyclone-counts"]')?.textContent ?? ''
+        return counts.includes('活跃 0') && !document.querySelector('[data-testid="tropical-cyclone-path-${expectations.tropicalCycloneId}"]')
+      })()`),
+      "tropical cyclone UI ok_empty shows zero active and no path chart",
+    )
+    patchTropicalSyncMeta({
+      sourceId: "jma-typhoon",
+      outcome: "partial",
+      lastCheckedAt: new Date().toISOString(),
+      lastFullSuccessAt: fullSuccessAt,
+      failedTcIds: ["TC9999"],
+      listInvalidCount: 1,
+    })
+    await navigate(`/ports/${expectations.portId}`, { reload: true })
+    pushC(
+      await evaluate(`(() => {
+        const notice = document.querySelector('[data-testid="tropical-cyclone-sync-notice"]')?.textContent ?? ''
+        return notice.includes('部分气旋')
+      })()`),
+      "tropical cyclone UI partial sync shows partial notice",
+    )
+    patchTropicalSyncMeta({
+      sourceId: "jma-typhoon",
+      outcome: "ok",
+      lastCheckedAt: "2020-01-01T00:00:00.000Z",
+      lastFullSuccessAt: "2020-01-01T00:00:00.000Z",
+      lastSuccessAt: "2020-01-01T00:00:00.000Z",
+      stale: true,
+    })
+    await navigate(`/ports/${expectations.portId}`, { reload: true })
+    pushC(
+      await evaluate(`(() => {
+        const panel = document.querySelector('[data-testid="tropical-cyclone-panel"]')?.textContent ?? ''
+        return panel.includes('过期') || panel.includes('数据过期')
+      })()`),
+      "tropical cyclone UI stale sync shows expiry copy",
+    )
     const coverageVisible = await evaluate(`Boolean(document.querySelector('[data-testid="port-weather-coverage"]'))`)
     pushC(coverageVisible === true, "port weather UI renders precip/rule coverage notice")
     const impactRows = await evaluate(`document.querySelectorAll('[data-testid="port-weather-impacts"] li').length`)

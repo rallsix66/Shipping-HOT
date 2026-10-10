@@ -5,11 +5,19 @@ export interface JmaTargetTcEntry {
   issue?: string
 }
 
-export interface NormalizedTyphoonTrackPoint {
+export type JmaTargetTcListParseResult =
+  | { status: "empty" }
+  | { status: "ok", entries: JmaTargetTcEntry[] }
+  | { status: "list_invalid", message: string }
+  | { status: "mixed", entries: JmaTargetTcEntry[], invalidCount: number }
+
+export interface NormalizedTyphoonPosition {
   lat: number
   lon: number
-  at: string
+  at?: string
 }
+
+export type TropicalCycloneLifecycleStatus = "active" | "dissipated" | "missing_from_list"
 
 export interface NormalizedTropicalCyclone {
   id: string
@@ -20,25 +28,69 @@ export interface NormalizedTropicalCyclone {
   nameJp?: string
   category?: string
   issuedAt?: string
-  track: NormalizedTyphoonTrackPoint[]
-  forecast: NormalizedTyphoonTrackPoint[]
+  current?: NormalizedTyphoonPosition & { at: string }
+  trackHistory: NormalizedTyphoonPosition[]
+  forecast: Array<NormalizedTyphoonPosition & { at: string }>
   dissipatedAt?: string
+  dissipatedReason?: string
+  lifecycleStatus?: TropicalCycloneLifecycleStatus
+  missingFromListAt?: string
+  summaryZhPersisted?: string
+  /** Per-row path snapshot time (distinct from sync attempt). */
+  pathFetchedAt?: string
   rawForecastJson: unknown
 }
 
-export function parseJmaTargetTcList(payload: unknown): JmaTargetTcEntry[] {
-  if (!Array.isArray(payload)) return []
-  return payload.filter((entry): entry is JmaTargetTcEntry => {
-    return Boolean(entry && typeof entry === "object" && typeof (entry as JmaTargetTcEntry).tropicalCyclone === "string")
-  })
+function isValidTargetEntry(entry: unknown): entry is JmaTargetTcEntry {
+  return Boolean(entry && typeof entry === "object" && typeof (entry as JmaTargetTcEntry).tropicalCyclone === "string")
 }
 
-function pointFromCenter(center: unknown, at: string): NormalizedTyphoonTrackPoint | undefined {
+/** Strict list parse — only `[]` is ok_empty; mixed/invalid non-empty arrays are not silent success. */
+export function parseJmaTargetTcListStrict(payload: unknown): JmaTargetTcListParseResult {
+  if (!Array.isArray(payload)) {
+    return { status: "list_invalid", message: "JMA targetTc payload is not an array" }
+  }
+  if (payload.length === 0) {
+    return { status: "empty" }
+  }
+  const entries: JmaTargetTcEntry[] = []
+  let invalidCount = 0
+  for (const entry of payload) {
+    if (isValidTargetEntry(entry)) entries.push(entry)
+    else invalidCount += 1
+  }
+  if (!entries.length) {
+    return { status: "list_invalid", message: "JMA targetTc array has no valid tropicalCyclone entries" }
+  }
+  if (invalidCount > 0) {
+    return { status: "mixed", entries, invalidCount }
+  }
+  return { status: "ok", entries }
+}
+
+/** @deprecated Use parseJmaTargetTcListStrict */
+export function parseJmaTargetTcList(payload: unknown): JmaTargetTcEntry[] | "invalid_format" {
+  const parsed = parseJmaTargetTcListStrict(payload)
+  if (parsed.status === "list_invalid") return "invalid_format"
+  if (parsed.status === "empty") return []
+  if (parsed.status === "mixed") return parsed.entries
+  return parsed.entries
+}
+
+function pointFromCenter(center: unknown, at?: string): NormalizedTyphoonPosition | undefined {
   if (!Array.isArray(center) || center.length < 2) return undefined
   const lat = Number(center[0])
   const lon = Number(center[1])
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return undefined
-  return { lat, lon, at }
+  return at === undefined ? { lat, lon } : { lat, lon, at }
+}
+
+function partLabel(part: unknown): string {
+  if (typeof part === "string") return part
+  if (part && typeof part === "object" && typeof (part as { en?: string }).en === "string") {
+    return (part as { en: string }).en
+  }
+  return ""
 }
 
 export function parseJmaForecastJson(jmaId: string, payload: unknown): NormalizedTropicalCyclone | undefined {
@@ -47,8 +99,11 @@ export function parseJmaForecastJson(jmaId: string, payload: unknown): Normalize
   let nameEn: string | undefined
   let nameJp: string | undefined
   let issuedAt: string | undefined
-  const track: NormalizedTyphoonTrackPoint[] = []
-  const forecast: NormalizedTyphoonTrackPoint[] = []
+  let current: (NormalizedTyphoonPosition & { at: string }) | undefined
+  const trackHistory: NormalizedTyphoonPosition[] = []
+  const forecast: Array<NormalizedTyphoonPosition & { at: string }> = []
+  let dissipatedAt: string | undefined
+  let dissipatedReason: string | undefined
 
   for (const block of payload) {
     if (!block || typeof block !== "object") continue
@@ -63,26 +118,37 @@ export function parseJmaForecastJson(jmaId: string, payload: unknown): Normalize
       issuedAt = (block as { issue?: { UTC?: string } }).issue?.UTC ?? issuedAt
       continue
     }
-    if (!part || typeof part !== "object") continue
-    const validtime = (block as { validtime?: { UTC?: string } }).validtime?.UTC ?? issuedAt ?? new Date(0).toISOString()
-    const center = pointFromCenter((block as { center?: unknown }).center, validtime)
+    const label = partLabel(part)
+    const validtime = (block as { validtime?: { UTC?: string } }).validtime?.UTC
     const advancedHours = Number((block as { advancedHours?: number }).advancedHours)
-    if (!center) continue
+    const centerRaw = (block as { center?: unknown }).center
+
+    if (/dissipat|extratropical|transformed/i.test(label) && validtime) {
+      dissipatedAt = validtime
+      dissipatedReason = "jma_dissipation_block"
+    }
+
+    if (!Number.isFinite(advancedHours)) continue
+
     if (advancedHours === 0) {
-      track.push(center)
+      if (!validtime) continue
+      const center = pointFromCenter(centerRaw, validtime)
+      if (!center) continue
+      current = { lat: center.lat, lon: center.lon, at: validtime }
       const typhoonTrack = (block as { track?: { typhoon?: unknown[] } }).track?.typhoon
       if (Array.isArray(typhoonTrack)) {
         for (const pair of typhoonTrack) {
-          const pt = pointFromCenter(pair, validtime)
-          if (pt) track.push(pt)
+          const pt = pointFromCenter(pair)
+          if (pt) trackHistory.push(pt)
         }
       }
-    } else {
-      forecast.push(center)
+    } else if (validtime) {
+      const center = pointFromCenter(centerRaw, validtime)
+      if (center?.at) forecast.push({ lat: center.lat, lon: center.lon, at: center.at })
     }
   }
 
-  if (!track.length && !forecast.length) return undefined
+  if (!current && !trackHistory.length && !forecast.length) return undefined
   return {
     id: `tc-jma-${jmaId}`,
     basin: "NW_PACIFIC",
@@ -92,8 +158,53 @@ export function parseJmaForecastJson(jmaId: string, payload: unknown): Normalize
     nameJp,
     category: undefined,
     issuedAt,
-    track,
+    current,
+    trackHistory,
     forecast,
+    dissipatedAt,
+    dissipatedReason,
+    lifecycleStatus: dissipatedAt ? "dissipated" : "active",
     rawForecastJson: payload,
+  }
+}
+
+/** Legacy SQLite rows stored `track` instead of `trackHistory`. */
+export function normalizeStoredTropicalCyclonePayload(payload: {
+  track?: Array<{ lat: number, lon: number, at?: string }>
+  trackHistory?: NormalizedTyphoonPosition[]
+  forecast?: Array<{ lat: number, lon: number, at: string }>
+  current?: NormalizedTyphoonPosition & { at: string }
+  typhoonNumber?: string
+  nameEn?: string
+  nameJp?: string
+  category?: string
+  issuedAt?: string
+  lifecycleStatus?: TropicalCycloneLifecycleStatus
+  missingFromListAt?: string
+  dissipatedReason?: string
+  summaryZhPersisted?: string
+  pathFetchedAt?: string
+} | undefined): Pick<NormalizedTropicalCyclone, "current" | "trackHistory" | "forecast" | "typhoonNumber" | "nameEn" | "nameJp" | "category" | "issuedAt" | "lifecycleStatus" | "missingFromListAt" | "dissipatedReason" | "summaryZhPersisted" | "pathFetchedAt"> {
+  if (!payload) {
+    return { trackHistory: [], forecast: [] }
+  }
+  const trackHistory = payload.trackHistory ?? (payload.track ?? []).map((point) => {
+    if (point.at) return { lat: point.lat, lon: point.lon, at: point.at }
+    return { lat: point.lat, lon: point.lon }
+  })
+  return {
+    current: payload.current,
+    trackHistory,
+    forecast: payload.forecast ?? [],
+    typhoonNumber: payload.typhoonNumber,
+    nameEn: payload.nameEn,
+    nameJp: payload.nameJp,
+    category: payload.category,
+    issuedAt: payload.issuedAt,
+    lifecycleStatus: payload.lifecycleStatus,
+    missingFromListAt: payload.missingFromListAt,
+    dissipatedReason: payload.dissipatedReason,
+    summaryZhPersisted: payload.summaryZhPersisted,
+    pathFetchedAt: payload.pathFetchedAt,
   }
 }

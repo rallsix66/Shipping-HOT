@@ -9,13 +9,19 @@ import type {
 import { portDirectoryBaseline } from "@shared/port-directory"
 import { isOfficialWeatherAlertFeedItem } from "#/providers/shipping"
 import type { ShippingRepository } from "#/database/shipping"
-import { minTyphoonDistanceKmForPort } from "#/services/tropical-cyclone-display"
+import {
+  filterActiveCyclonesForRules,
+  minTyphoonDistanceKmForPortInInterval,
+} from "#/services/tropical-cyclone-display"
+import type { TyphoonInputState } from "#/services/weather-rule-coverage"
+import { TYPHOON_NO_STORM_DISTANCE_KM } from "#/services/weather-rule-coverage"
 import {
   PRECIP_24H_FULL_HOURLY_SAMPLES,
   PRECIP_24H_PARTIAL_MIN_HOURLY_SAMPLES,
   type Precipitation24hResult,
 } from "#/services/precipitation-window"
-import { evaluatePortWeatherCoverageAt, typhoonInputFromDistanceKm } from "#/services/weather-rule-evaluation"
+import { isJmaTyphoonSyncTrustworthyForWrS03 } from "#/services/tropical-cyclone-freshness"
+import { evaluatePortWeatherCoverageAt, typhoonInputFromSyncAndDistance } from "#/services/weather-rule-evaluation"
 import {
   PORT_WEATHER_FORECAST_DISPLAY_LIMIT,
   WEATHER_FORECAST_HORIZON_MS,
@@ -89,6 +95,7 @@ export async function getPortWeatherPanel(
   const asOf = now.toISOString()
   const horizonEnd = new Date(nowMs + WEATHER_FORECAST_HORIZON_MS).toISOString()
   const weatherSourceId = options.weatherSourceId ?? "open-meteo-marine"
+  const portBaseline = portDirectoryBaseline.find(row => row.shippingPortId === portId)
 
   const storedForecasts = await repository.listWeatherForecastsForPort(portId, 7 * 24 + 4)
   const inWindowForecasts = storedForecasts.filter((row) => {
@@ -112,20 +119,40 @@ export async function getPortWeatherPanel(
     .length
 
   const hourlyInWindow = displayForecasts.filter(row => row.horizon === "hourly")
+  const currentInWindow = displayForecasts.filter(row => row.horizon === "current")
   const missingCounts = {
     windGust: hourlyInWindow.filter(row => row.windGustKmh === undefined).length,
     wave: hourlyInWindow.filter(row => row.waveHeightM === undefined && row.swellWaveHeightM === undefined).length,
     precipitation: hourlyInWindow.filter(row => row.precipitationMm === undefined).length,
     visibility: hourlyInWindow.filter(row => row.visibilityM === undefined).length,
   }
+  const sortedInstants = displayForecasts
+    .map(row => Date.parse(row.forecastAt))
+    .filter(ms => Number.isFinite(ms))
+    .sort((a, b) => a - b)
+  const marineAllMissing = hourlyInWindow.length > 0
+    && hourlyInWindow.every(row => row.waveHeightM === undefined && row.swellWaveHeightM === undefined)
+    && hourlyInWindow.some(row => row.windGustKmh !== undefined)
   const forecastMeta: PortWeatherForecastMeta = {
-    windowStart: new Date(nowMs - 60 * 60 * 1000).toISOString(),
-    windowEnd: horizonEnd,
+    targetWindow: {
+      start: new Date(nowMs - 60 * 60 * 1000).toISOString(),
+      end: horizonEnd,
+    },
+    actualCoverage: {
+      firstInstant: sortedInstants.length ? new Date(sortedInstants[0]).toISOString() : undefined,
+      lastInstant: sortedInstants.length ? new Date(sortedInstants[sortedInstants.length - 1]).toISOString() : undefined,
+      totalReturned: displayForecasts.length,
+      hourlyReturned: hourlyInWindow.length,
+      currentReturned: currentInWindow.length,
+    },
     sourceId: displayForecasts[0]?.sourceId,
     fetchedAt: referenceFetchedAt,
-    totalInWindow: displayForecasts.length,
-    hourlyInWindow: hourlyInWindow.length,
     missingCounts,
+    marineCoverageNote: marineAllMissing && portBaseline?.unlocode === "VNSGN"
+      ? "Open-Meteo marine（cell_selection=sea）在胡志明市坐标未返回浪高/涌浪；非填 0，WR-S02 等海况分支可能缺测。"
+      : marineAllMissing
+        ? "Open-Meteo marine 未返回浪高/涌浪测值（cell_selection=sea 近岸/内河坐标常见）。"
+        : undefined,
   }
   const totalMatched = await repository.countWeatherImpactsActiveInHorizon(portId, asOf, horizonEnd)
   const impacts = await repository.listWeatherImpactsForPortRanked(
@@ -135,22 +162,32 @@ export async function getPortWeatherPanel(
     WEATHER_IMPACT_DISPLAY_LIMIT,
   )
 
-  const typhoonSync = await repository.getTropicalCycloneSyncMeta()
-  const portBaseline = portDirectoryBaseline.find(row => row.shippingPortId === portId)
-  const cyclones = await repository.listNormalizedTropicalCyclones()
-  const typhoonChecked = typhoonSync.outcome === "ok" || typhoonSync.outcome === "ok_empty"
-  const typhoonDistanceKm = portBaseline && typhoonChecked
-    ? minTyphoonDistanceKmForPort(cyclones, {
+  const typhoonSync = await repository.getTropicalCycloneSyncMeta({ nowMs })
+  const cyclones = filterActiveCyclonesForRules(await repository.listNormalizedTropicalCyclones())
+  const portCoord = portBaseline
+    ? {
         portId,
         unlocode: portBaseline.unlocode,
         latitude: portBaseline.latitude,
         longitude: portBaseline.longitude,
-      }, true)
+      }
     : undefined
+  const resolveTyphoon = (validFrom: string, validUntil: string): TyphoonInputState => {
+    if (!portCoord) return { status: "unavailable" }
+    if (typhoonSync.outcome === "ok_empty" && isJmaTyphoonSyncTrustworthyForWrS03(typhoonSync, nowMs)) {
+      return { status: "checked", distanceKm: TYPHOON_NO_STORM_DISTANCE_KM }
+    }
+    const fromMs = Date.parse(validFrom)
+    const untilMs = Date.parse(validUntil)
+    if (!Number.isFinite(fromMs) || !Number.isFinite(untilMs)) return { status: "unavailable" }
+    const distanceKm = minTyphoonDistanceKmForPortInInterval(cyclones, portCoord, fromMs, untilMs, true)
+    return typhoonInputFromSyncAndDistance(distanceKm, typhoonSync, untilMs)
+  }
   const coverageEval = evaluatePortWeatherCoverageAt(
     storedForecasts,
     asOf,
-    typhoonInputFromDistanceKm(typhoonDistanceKm, typhoonChecked),
+    { status: "unavailable" },
+    resolveTyphoon,
   )
   const ruleCoverage = coverageEval?.ruleCoverage ?? []
   const precipCoverage = coverageEval ? toPanelPrecipCoverage(coverageEval.precipCoverage) : emptyPrecipCoverage

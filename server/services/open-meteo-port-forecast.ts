@@ -1,5 +1,6 @@
 import { windGustKmhToMs } from "@shared/weather-units"
 import type { PortWeatherForecastRow, PortWeatherImpactRow } from "@shared/shipping"
+import type { TyphoonInputState } from "#/services/weather-rule-coverage"
 import { impactValidityInterval } from "#/services/weather-impact-interval"
 import { evaluatePointWeatherRules } from "#/services/weather-rule-evaluation"
 
@@ -132,6 +133,7 @@ export function computePortWeatherImpacts(
   points: OpenMeteoPortPoint[],
   computedAt: string,
   typhoonDistanceKm?: number,
+  resolveTyphoon?: (validFrom: string, validUntil: string) => TyphoonInputState,
 ): PortWeatherImpactRow[] {
   const sorted = [...points].sort((a, b) => {
     const delta = Date.parse(a.timestamp) - Date.parse(b.timestamp)
@@ -143,14 +145,17 @@ export function computePortWeatherImpacts(
   sorted.forEach((point, index) => {
     const gustMs = point.windGustKmh === undefined ? undefined : windGustKmhToMs(point.windGustKmh)
     const waveM = point.waveHeightM ?? point.swellWaveHeightM
+    const interval = impactValidityInterval(point, sorted, index)
+    const typhoon = resolveTyphoon
+      ? resolveTyphoon(interval.validFrom, interval.validUntil)
+      : typhoonDistanceKm === undefined
+        ? { status: "unavailable" as const }
+        : { status: "checked" as const, distanceKm: typhoonDistanceKm }
     const { hits } = evaluatePointWeatherRules({
       windGustMs: gustMs,
       waveHeightM: waveM,
       visibilityM: point.visibilityM,
-    }, precipSamples, point.timestamp, typhoonDistanceKm === undefined
-      ? { status: "unavailable" }
-      : { status: "checked", distanceKm: typhoonDistanceKm })
-    const interval = impactValidityInterval(point, sorted, index)
+    }, precipSamples, point.timestamp, typhoon)
     for (const hit of hits) {
       impacts.push({
         id: `wi-${portId}-${hit.ruleId}-${point.horizon}-${Date.parse(point.timestamp)}`,

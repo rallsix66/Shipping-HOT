@@ -38,14 +38,14 @@ export function createTropicalCycloneSyncJob(options: TropicalCycloneSyncJobOpti
         return { status: "skipped", recordsRead: 0, recordsWritten: 0 }
       }
       const result = await syncJmaTropicalCyclones(fetcher, now())
+      const ports = portDirectoryBaseline.map(row => ({
+        portId: row.shippingPortId,
+        unlocode: row.unlocode,
+        latitude: row.latitude,
+        longitude: row.longitude,
+      }))
+      await repository.applyJmaTropicalCycloneSync(result, ports)
       if (result.outcome === "failed") {
-        await repository.saveTropicalCycloneSyncMeta({
-          sourceId: JMA_TYPHOON_SOURCE_ID,
-          lastCheckedAt: result.fetchedAt,
-          outcome: "failed",
-          errorCode: result.errorCode,
-          errorMessage: result.errorMessage,
-        })
         return {
           status: "failed",
           recordsRead: 0,
@@ -54,22 +54,14 @@ export function createTropicalCycloneSyncJob(options: TropicalCycloneSyncJobOpti
           errorMessage: result.errorMessage,
         }
       }
-      const ports = portDirectoryBaseline.map(row => ({
-        portId: row.shippingPortId,
-        unlocode: row.unlocode,
-        latitude: row.latitude,
-        longitude: row.longitude,
-      }))
-      await repository.replaceTropicalCyclones(result.cyclones, {
-        sourceId: JMA_TYPHOON_SOURCE_ID,
-        lastCheckedAt: result.fetchedAt,
-        outcome: result.outcome,
-      }, ports)
       return {
         status: "success",
-        recordsRead: result.cyclones.length,
+        recordsRead: result.cyclones.length + result.failedTcIds.length,
         recordsWritten: result.cyclones.length,
         sourceUpdatedAt: result.fetchedAt,
+        errorMessage: result.failedTcIds.length
+          ? `Partial JMA detail failures: ${result.failedTcIds.join(", ")}`
+          : undefined,
       }
     },
   }

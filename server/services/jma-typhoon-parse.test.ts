@@ -15,8 +15,10 @@ describe("jma typhoon parse and display", () => {
   it("parses forecast.json track and centers", () => {
     const payload = JSON.parse(readFileSync(join(fixtureDir, "TC2634-forecast.sample.json"), "utf8"))
     const parsed = parseJmaForecastJson("TC2634", payload)
-    expect(parsed?.track.length).toBeGreaterThan(0)
+    expect(parsed?.trackHistory.length).toBeGreaterThan(0)
     expect(parsed?.forecast.length).toBeGreaterThan(0)
+    expect(parsed?.current?.at).toBe("2026-10-10T00:00:00Z")
+    expect(parsed?.trackHistory.every(point => point.at === undefined)).toBe(true)
   })
 
   it("filters display by 1000 km port proximity and computes WR-S03 distance", () => {

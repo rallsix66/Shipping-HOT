@@ -459,26 +459,53 @@ export interface PortWeatherPanelNotice {
 }
 
 export interface PortWeatherForecastMeta {
-  windowStart: string
-  windowEnd: string
+  /** Target evaluation/display window (product policy). */
+  targetWindow: { start: string, end: string }
+  /** Instants actually present in persisted rows returned to the client. */
+  actualCoverage: {
+    firstInstant?: string
+    lastInstant?: string
+    totalReturned: number
+    hourlyReturned: number
+    currentReturned: number
+  }
   sourceId?: string
   fetchedAt?: string
-  totalInWindow: number
-  hourlyInWindow: number
   missingCounts: {
     windGust: number
     wave: number
     precipitation: number
     visibility: number
   }
+  /** When Open-Meteo marine `cell_selection=sea` yields no wave/swell at inland coordinates. */
+  marineCoverageNote?: string
 }
+
+export type TropicalCycloneSyncOutcome = "ok" | "ok_empty" | "partial" | "failed" | "not_run"
 
 export interface TropicalCycloneSyncMeta {
   sourceId: "jma-typhoon" | "jtwc-typhoon-fixture"
+  /** Most recent sync attempt (any outcome). */
   lastCheckedAt?: string
-  outcome: "ok" | "ok_empty" | "failed" | "not_run"
+  /** Last ok / ok_empty list outcome (full list success). */
+  lastFullSuccessAt?: string
+  /** Last time at least one TC detail was persisted (partial or ok). */
+  lastPathFetchAt?: string
+  /** @deprecated Use lastFullSuccessAt — kept for readers */
+  lastSuccessAt?: string
+  dataValidUntil?: string
+  outcome: TropicalCycloneSyncOutcome
   errorCode?: string
   errorMessage?: string
+  failedTcIds?: string[]
+  listInvalidCount?: number
+  stale?: boolean
+}
+
+export interface TropicalCycloneGeoPoint {
+  lat: number
+  lon: number
+  at?: string
 }
 
 export interface TropicalCycloneSummary {
@@ -489,11 +516,17 @@ export interface TropicalCycloneSummary {
   typhoonNumber?: string
   category?: string
   sourceId: string
+  /** Per-path snapshot time from SQLite row. */
+  pathFetchedAt: string
+  /** @deprecated Alias of pathFetchedAt */
   fetchedAt: string
   dissipatedAt?: string
+  lifecycleStatus?: "active" | "dissipated" | "missing_from_list"
   minDistanceKm?: number
-  track: Array<{ lat: number, lon: number, at: string }>
-  forecast: Array<{ lat: number, lon: number, at: string }>
+  wrS03DistanceKm?: number
+  current?: TropicalCycloneGeoPoint & { at: string }
+  trackHistory: TropicalCycloneGeoPoint[]
+  forecast: Array<TropicalCycloneGeoPoint & { at: string }>
   summaryZh?: string
 }
 
@@ -501,6 +534,8 @@ export interface TropicalCyclonePanelResponse {
   asOf: string
   sync: TropicalCycloneSyncMeta
   cyclones: TropicalCycloneSummary[]
+  activeCount: number
+  historicalSummaryCount: number
   messageZh: string
   seasonHintZh?: string
 }

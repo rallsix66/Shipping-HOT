@@ -4,7 +4,9 @@ import { hasMockEvidence, knownMockProvenanceFor, normalizeLegacyEventTrust, nor
 import type { DataEvidence, DataProvenance, FeedItem, FeedVisibility, Freshness, Port, PortWeatherForecastRow, PortWeatherImpactRow, ProvenanceAware, ShippingEvent, ShippingSettings, SourceLineage, TropicalCycloneSyncMeta } from "@shared/shipping"
 import type { CalendarEvent } from "@shared/calendar"
 import { applyFeedFreshnessPolicy } from "@shared/shipping-rules"
-import type { NormalizedTropicalCyclone } from "#/services/jma-typhoon-parse"
+import { JMA_TYPHOON_SOURCE_ID, type JmaTropicalCycloneSyncFailure, type JmaTropicalCycloneSyncResult } from "#/providers/jma-tropical-cyclone"
+import { type NormalizedTropicalCyclone, normalizeStoredTropicalCyclonePayload } from "#/services/jma-typhoon-parse"
+import { enrichTropicalCycloneSyncMeta, jmaDataValidUntil } from "#/services/tropical-cyclone-freshness"
 import type { PortCoordinate } from "#/services/tropical-cyclone-display"
 import { minTyphoonDistanceKmForPort } from "#/services/tropical-cyclone-display"
 import { type DatabaseMetadata, type ShippingDataMode, initializeShippingDatabase } from "#/database/runtime"
@@ -597,7 +599,7 @@ export class ShippingRepository {
     )
   }
 
-  async getTropicalCycloneSyncMeta(): Promise<TropicalCycloneSyncMeta> {
+  async getTropicalCycloneSyncMeta(options: { nowMs?: number } = {}): Promise<TropicalCycloneSyncMeta> {
     const row = await this.db.prepare(`
       SELECT track_json, source_id, fetched_at
       FROM tropical_cyclone
@@ -608,54 +610,174 @@ export class ShippingRepository {
     }
     try {
       const parsed = parse<TropicalCycloneSyncMeta>(row.track_json)
-      return parsed ?? { sourceId: String(row.source_id) as TropicalCycloneSyncMeta["sourceId"], outcome: "not_run" }
+      const base = parsed ?? { sourceId: String(row.source_id) as TropicalCycloneSyncMeta["sourceId"], outcome: "not_run" as const }
+      const nowMs = options.nowMs ?? Date.now()
+      return enrichTropicalCycloneSyncMeta({
+        ...base,
+        dataValidUntil: base.dataValidUntil ?? jmaDataValidUntil(base.lastSuccessAt ?? base.lastCheckedAt),
+      }, nowMs)
     } catch {
       return { sourceId: "jma-typhoon", outcome: "not_run" }
     }
   }
 
+  private static cyclonePayload(cyclone: NormalizedTropicalCyclone) {
+    return {
+      current: cyclone.current,
+      trackHistory: cyclone.trackHistory,
+      forecast: cyclone.forecast,
+      typhoonNumber: cyclone.typhoonNumber,
+      nameEn: cyclone.nameEn,
+      nameJp: cyclone.nameJp,
+      category: cyclone.category,
+      issuedAt: cyclone.issuedAt,
+      lifecycleStatus: cyclone.lifecycleStatus,
+      missingFromListAt: cyclone.missingFromListAt,
+      dissipatedReason: cyclone.dissipatedReason,
+      summaryZhPersisted: cyclone.summaryZhPersisted,
+      pathFetchedAt: cyclone.pathFetchedAt,
+    }
+  }
+
+  private async upsertTropicalCycloneRow(cyclone: NormalizedTropicalCyclone, sourceId: string, rowFetchedAt: string) {
+    const pathFetchedAt = cyclone.pathFetchedAt ?? rowFetchedAt
+    cyclone.pathFetchedAt = pathFetchedAt
+    await this.db.prepare(`
+      INSERT INTO tropical_cyclone (id, basin, name, jma_id, track_json, forecast_json, source_id, fetched_at, dissipated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        basin = excluded.basin,
+        name = excluded.name,
+        jma_id = excluded.jma_id,
+        track_json = excluded.track_json,
+        forecast_json = excluded.forecast_json,
+        source_id = excluded.source_id,
+        fetched_at = excluded.fetched_at,
+        dissipated_at = excluded.dissipated_at
+    `).run(
+      cyclone.id,
+      cyclone.basin,
+      cyclone.nameEn ?? cyclone.nameJp ?? null,
+      cyclone.jmaId,
+      JSON.stringify(ShippingRepository.cyclonePayload(cyclone)),
+      JSON.stringify(cyclone.rawForecastJson),
+      sourceId,
+      pathFetchedAt,
+      cyclone.dissipatedAt ?? null,
+    )
+  }
+
+  async applyJmaTropicalCycloneSync(
+    result: JmaTropicalCycloneSyncResult | JmaTropicalCycloneSyncFailure,
+    ports: readonly PortCoordinate[],
+  ) {
+    void ports
+    const previous = await this.listNormalizedTropicalCyclones()
+    const prevMeta = await this.getTropicalCycloneSyncMeta({ nowMs: Date.parse(result.fetchedAt) })
+
+    if (result.outcome === "failed") {
+      await this.saveTropicalCycloneSyncMeta({
+        sourceId: JMA_TYPHOON_SOURCE_ID,
+        lastCheckedAt: result.fetchedAt,
+        lastFullSuccessAt: prevMeta.lastFullSuccessAt ?? prevMeta.lastSuccessAt,
+        lastPathFetchAt: prevMeta.lastPathFetchAt,
+        lastSuccessAt: prevMeta.lastFullSuccessAt ?? prevMeta.lastSuccessAt,
+        dataValidUntil: jmaDataValidUntil(prevMeta.lastFullSuccessAt ?? prevMeta.lastSuccessAt),
+        outcome: "failed",
+        errorCode: result.errorCode,
+        errorMessage: result.errorMessage,
+        failedTcIds: prevMeta.failedTcIds,
+        listInvalidCount: prevMeta.listInvalidCount,
+      })
+      return
+    }
+
+    const pathFetchedThisRun = result.cyclones.length > 0
+    const fullListSuccess = result.outcome === "ok" || result.outcome === "ok_empty"
+    const lastFullSuccessAt = fullListSuccess
+      ? result.fetchedAt
+      : (prevMeta.lastFullSuccessAt ?? prevMeta.lastSuccessAt)
+    const lastPathFetchAt = pathFetchedThisRun
+      ? result.fetchedAt
+      : prevMeta.lastPathFetchAt
+    const syncMetaBase: TropicalCycloneSyncMeta = {
+      sourceId: JMA_TYPHOON_SOURCE_ID,
+      lastCheckedAt: result.fetchedAt,
+      lastFullSuccessAt,
+      lastPathFetchAt,
+      lastSuccessAt: lastFullSuccessAt,
+      dataValidUntil: jmaDataValidUntil(lastFullSuccessAt),
+      outcome: result.outcome,
+      failedTcIds: result.failedTcIds.length ? result.failedTcIds : undefined,
+      listInvalidCount: result.listInvalidCount,
+    }
+
+    await transaction(this.db, async () => {
+      const syncedIds = new Set(result.cyclones.map(c => c.id))
+
+      if (result.outcome === "ok_empty" && result.listConfirmedEmpty) {
+        for (const cyclone of previous) {
+          if (cyclone.lifecycleStatus === "dissipated" && cyclone.dissipatedAt) continue
+          await this.upsertTropicalCycloneRow({
+            ...cyclone,
+            lifecycleStatus: "missing_from_list",
+            missingFromListAt: cyclone.missingFromListAt ?? result.fetchedAt,
+            pathFetchedAt: cyclone.pathFetchedAt,
+            summaryZhPersisted: cyclone.summaryZhPersisted
+              ?? `${cyclone.nameEn ?? cyclone.nameJp ?? cyclone.jmaId} 自最新 JMA 列表消失 · 不等于已登陆/减弱 · 48h 内保留路径摘要`,
+          }, JMA_TYPHOON_SOURCE_ID, cyclone.pathFetchedAt ?? cyclone.issuedAt ?? result.fetchedAt)
+        }
+      } else {
+        for (const cyclone of result.cyclones) {
+          await this.upsertTropicalCycloneRow({
+            ...cyclone,
+            lifecycleStatus: cyclone.dissipatedAt ? "dissipated" : "active",
+            pathFetchedAt: cyclone.pathFetchedAt ?? result.fetchedAt,
+          }, JMA_TYPHOON_SOURCE_ID, cyclone.pathFetchedAt ?? result.fetchedAt)
+        }
+        if (result.outcome === "ok") {
+          for (const cyclone of previous) {
+            if (syncedIds.has(cyclone.id)) continue
+            if (cyclone.lifecycleStatus === "dissipated") {
+              await this.upsertTropicalCycloneRow(cyclone, JMA_TYPHOON_SOURCE_ID, cyclone.pathFetchedAt ?? cyclone.dissipatedAt ?? result.fetchedAt)
+              continue
+            }
+            await this.upsertTropicalCycloneRow({
+              ...cyclone,
+              lifecycleStatus: "missing_from_list",
+              missingFromListAt: cyclone.missingFromListAt ?? result.fetchedAt,
+              pathFetchedAt: cyclone.pathFetchedAt,
+              summaryZhPersisted: cyclone.summaryZhPersisted
+                ?? `${cyclone.nameEn ?? cyclone.nameJp ?? cyclone.jmaId} 自最新 JMA 列表消失 · 不等于已登陆/减弱 · 48h 内保留路径摘要`,
+            }, JMA_TYPHOON_SOURCE_ID, cyclone.pathFetchedAt ?? result.fetchedAt)
+          }
+        }
+      }
+
+      await this.saveTropicalCycloneSyncMeta(syncMetaBase)
+    })
+  }
+
+  /** @deprecated Use applyJmaTropicalCycloneSync — retained for tests/fixtures. */
   async replaceTropicalCyclones(
     cyclones: readonly NormalizedTropicalCyclone[],
     sync: Pick<TropicalCycloneSyncMeta, "sourceId" | "lastCheckedAt" | "outcome">,
     ports: readonly PortCoordinate[],
   ) {
-    await transaction(this.db, async () => {
-      await this.db.prepare(`
-        DELETE FROM tropical_cyclone
-        WHERE id <> ?
-      `).run(ShippingRepository.TROPICAL_CYCLONE_SYNC_ROW_ID)
-      for (const cyclone of cyclones) {
-        const payload = {
-          track: cyclone.track,
-          forecast: cyclone.forecast,
-          typhoonNumber: cyclone.typhoonNumber,
-          nameEn: cyclone.nameEn,
-          nameJp: cyclone.nameJp,
-          category: cyclone.category,
-          issuedAt: cyclone.issuedAt,
-        }
-        await this.db.prepare(`
-          INSERT INTO tropical_cyclone (id, basin, name, jma_id, track_json, forecast_json, source_id, fetched_at, dissipated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(
-          cyclone.id,
-          cyclone.basin,
-          cyclone.nameEn ?? cyclone.nameJp ?? null,
-          cyclone.jmaId,
-          JSON.stringify(payload),
-          JSON.stringify(cyclone.rawForecastJson),
-          sync.sourceId,
-          sync.lastCheckedAt ?? new Date().toISOString(),
-          cyclone.dissipatedAt ?? null,
-        )
-      }
-      await this.saveTropicalCycloneSyncMeta({
-        sourceId: sync.sourceId,
-        lastCheckedAt: sync.lastCheckedAt,
-        outcome: sync.outcome === "ok_empty" ? "ok_empty" : "ok",
-      })
-    })
     void ports
+    const outcome = sync.outcome === "ok_empty"
+      ? "ok_empty"
+      : sync.outcome === "partial"
+        ? "partial"
+        : "ok"
+    await this.applyJmaTropicalCycloneSync({
+      cyclones: [...cyclones],
+      outcome,
+      fetchedAt: sync.lastCheckedAt ?? new Date().toISOString(),
+      listConfirmedEmpty: sync.outcome === "ok_empty",
+      failedTcIds: [],
+      parseErrorCount: 0,
+    }, ports)
   }
 
   async listNormalizedTropicalCyclones(): Promise<NormalizedTropicalCyclone[]> {
@@ -666,27 +788,26 @@ export class ShippingRepository {
       ORDER BY fetched_at DESC
     `).all(ShippingRepository.TROPICAL_CYCLONE_SYNC_ROW_ID)
     return rows<Row>(result).map((row) => {
-      const payload = parse<{
-        track?: NormalizedTropicalCyclone["track"]
-        forecast?: NormalizedTropicalCyclone["forecast"]
-        typhoonNumber?: string
-        nameEn?: string
-        nameJp?: string
-        category?: string
-        issuedAt?: string
-      }>(row.track_json)
+      const payload = parse<Parameters<typeof normalizeStoredTropicalCyclonePayload>[0]>(row.track_json)
+      const normalized = normalizeStoredTropicalCyclonePayload(payload)
       return {
         id: String(row.id),
         basin: String(row.basin),
         jmaId: String(row.jma_id ?? ""),
-        typhoonNumber: payload.typhoonNumber,
-        nameEn: payload.nameEn ?? (row.name ? String(row.name) : undefined),
-        nameJp: payload.nameJp,
-        category: payload.category,
-        issuedAt: payload.issuedAt,
-        track: payload.track ?? [],
-        forecast: payload.forecast ?? [],
+        typhoonNumber: normalized.typhoonNumber,
+        nameEn: normalized.nameEn ?? (row.name ? String(row.name) : undefined),
+        nameJp: normalized.nameJp,
+        category: normalized.category,
+        issuedAt: normalized.issuedAt,
+        current: normalized.current,
+        trackHistory: normalized.trackHistory,
+        forecast: normalized.forecast,
         dissipatedAt: row.dissipated_at ? String(row.dissipated_at) : undefined,
+        dissipatedReason: normalized.dissipatedReason,
+        lifecycleStatus: normalized.lifecycleStatus,
+        missingFromListAt: normalized.missingFromListAt,
+        summaryZhPersisted: normalized.summaryZhPersisted,
+        pathFetchedAt: normalized.pathFetchedAt ?? String(row.fetched_at ?? ""),
         rawForecastJson: parse<unknown>(row.forecast_json),
       }
     })

@@ -1,15 +1,18 @@
-import type { PortWeatherForecastRow } from "@shared/shipping"
+import type { PortWeatherForecastRow, TropicalCycloneSyncMeta } from "@shared/shipping"
 import type { WeatherImpactRuleHit, WeatherRuleInputs } from "@shared/weather-impact"
 import { windGustKmhToMs } from "@shared/weather-units"
 import { evaluateWeatherImpactRules } from "#/services/weather-impact-engine"
 import type { Precipitation24hResult, PrecipitationSample } from "#/services/precipitation-window"
 import { precipitation24hEndingAtDetailed } from "#/services/precipitation-window"
+import { impactValidityInterval } from "#/services/weather-impact-interval"
+import { forecastRowsToOpenMeteoPoints } from "#/services/open-meteo-port-forecast"
 import {
   TYPHOON_NO_STORM_DISTANCE_KM,
   type TyphoonInputState,
   buildRuleCoverageEntries,
   sanitizeWeatherRuleInputs,
 } from "#/services/weather-rule-coverage"
+import { isJmaTyphoonSyncTrustworthyForWrS03 } from "#/services/tropical-cyclone-freshness"
 
 export type RuleEvaluationStatus = "evaluated" | "unevaluated"
 
@@ -76,6 +79,7 @@ export function evaluatePortWeatherCoverageAt(
   forecasts: readonly PortWeatherForecastRow[],
   asOf: string,
   typhoon: TyphoonInputState = { status: "unavailable" },
+  resolveTyphoon?: (validFrom: string, validUntil: string) => TyphoonInputState,
 ): PointRuleEvaluation | undefined {
   const asOfMs = Date.parse(asOf)
   if (!Number.isFinite(asOfMs)) return undefined
@@ -83,16 +87,47 @@ export function evaluatePortWeatherCoverageAt(
   if (!row) return undefined
   const gustMs = row.windGustKmh === undefined ? undefined : windGustKmhToMs(row.windGustKmh)
   const waveM = row.waveHeightM ?? row.swellWaveHeightM
+  let typhoonInput = typhoon
+  if (resolveTyphoon) {
+    const points = forecastRowsToOpenMeteoPoints(forecasts)
+    const sorted = [...points].sort((a, b) => {
+      const delta = Date.parse(a.timestamp) - Date.parse(b.timestamp)
+      if (delta !== 0) return delta
+      return a.horizon === "current" ? 1 : -1
+    })
+    const index = sorted.findIndex(point => point.timestamp === row.forecastAt && point.horizon === row.horizon)
+    if (index >= 0) {
+      const interval = impactValidityInterval(sorted[index], sorted, index)
+      typhoonInput = resolveTyphoon(interval.validFrom, interval.validUntil)
+    }
+  }
   return evaluatePointWeatherRules({
     windGustMs: gustMs,
     waveHeightM: waveM,
     visibilityM: row.visibilityM,
-  }, forecastRowsToPrecipSamples(forecasts), asOf, typhoon)
+  }, forecastRowsToPrecipSamples(forecasts), asOf, typhoonInput)
 }
 
 export function typhoonInputFromDistanceKm(distanceKm: number | undefined, syncChecked: boolean): TyphoonInputState {
   if (!syncChecked) return { status: "unavailable" }
   return { status: "checked", distanceKm: distanceKm ?? TYPHOON_NO_STORM_DISTANCE_KM }
+}
+
+export function typhoonInputFromSyncAndDistance(
+  distanceKm: number | undefined,
+  sync: TropicalCycloneSyncMeta,
+  nowMs: number,
+): TyphoonInputState {
+  if (!isJmaTyphoonSyncTrustworthyForWrS03(sync, nowMs)) {
+    return { status: "unavailable" }
+  }
+  if (sync.outcome === "ok_empty") {
+    return { status: "checked", distanceKm: TYPHOON_NO_STORM_DISTANCE_KM }
+  }
+  if (distanceKm === undefined) {
+    return { status: "unavailable" }
+  }
+  return { status: "checked", distanceKm }
 }
 
 export function mergeRuleCoverageSummaries(entries: readonly WeatherRuleCoverageEntry[]): WeatherRuleCoverageEntry[] {
