@@ -50,3 +50,16 @@
 - 参考海况：SQLite 同步时的数据和重启后 API 返回的数据，都覆盖了 169/169 个整点（2026-10-10T06:00:00.000Z 到 2026-10-17T06:00:00.000Z），没有缺测。本次 7 天最大浪高 0.66 m，参考规则命中 0 条。
 - 检查项全部通过：`reference_labelled`（engineering_reference_point、非官方、非泊位、best_match、62 km）；`reference_not_substituted`（港口海况仍缺测，缺测说明仍然存在）；浏览器能看到参考块的名称和「非官方代表点」标注。
 - 证据：`docs/evidence/gate-3e25a45/vnsgn-reference-marine-summary.json`、`r1-5-1-evidence.json`、`summary.txt`。
+
+## 已批准的验收映射与本轮结果（代码 SHA 50bad03ee3560c7ff8fb398bee170b9b2368e7bd）
+
+- **映射**：依据 ADR-009「验收映射」一节（dots 2026-10-10 14:11 UTC+8，Slack ts 1791612673.820639）。
+- **本次判定**：live exit 0，判定 **PASS**，95 项检查中 95 项通过。
+- **结论**：R1.5-1按ADR-009映射PASS；VNSGN原点海况不可用
+- **参考状态**：fresh；最近尝试 2026-10-10T06:42:04.550Z（success）；最近成功 2026-10-10T06:42:04.550Z。
+- **网格**：
+  - 请求点：10.2917N 107.0417E，请求模型 best_match；
+  - 实际返回网格：10.291664N 107.04167E，距请求点 0.01 km；获取于 2026-10-10T06:42:04.550Z。
+- **覆盖**：7 天窗口内含海况的整点 169/169。
+- **原点海况**：可用 = false，即**原点海况不可用**，已披露。
+- **证据**：`docs/evidence/gate-50bad03/`（`adr009-mapping-summary.json`、`r1-5-1-evidence.json`、`summary.txt`）。
