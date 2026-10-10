@@ -1,6 +1,8 @@
 import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { describe, expect, it } from "vitest"
+import { CURRENT_IMPACT_DURATION_MS, HOURLY_IMPACT_DURATION_MS, assertValidImpactInterval, impactValidityInterval } from "./weather-impact-interval"
+import type { OpenMeteoPortPoint } from "./open-meteo-port-forecast"
 import { isWeatherImpactActiveAt } from "./weather-panel-policy"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 
@@ -28,6 +30,21 @@ function createNativeDatabase() {
 }
 
 describe("weather impact validity interval", () => {
+  it("uses capped hourly/current horizons and strict ordering at same timestamp", () => {
+    const ts = "2026-08-15T12:30:00.000Z"
+    const sorted: OpenMeteoPortPoint[] = [
+      { timestamp: ts, horizon: "hourly", windGustKmh: 40 },
+      { timestamp: ts, horizon: "current", windGustKmh: 45 },
+      { timestamp: "2026-08-15T13:00:00.000Z", horizon: "hourly", windGustKmh: 30 },
+    ]
+    const hourlyInterval = impactValidityInterval(sorted[0], sorted, 0)
+    const currentInterval = impactValidityInterval(sorted[1], sorted, 1)
+    expect(assertValidImpactInterval(hourlyInterval)).toBe(true)
+    expect(assertValidImpactInterval(currentInterval)).toBe(true)
+    expect(Date.parse(hourlyInterval.validUntil) - Date.parse(hourlyInterval.validFrom)).toBeLessThanOrEqual(HOURLY_IMPACT_DURATION_MS)
+    expect(Date.parse(currentInterval.validUntil) - Date.parse(currentInterval.validFrom)).toBeLessThanOrEqual(CURRENT_IMPACT_DURATION_MS)
+  })
+
   it("treats asOf inside [validFrom, validUntil] as active", () => {
     const from = "2026-08-15T12:00:00.000Z"
     const until = "2026-08-15T13:00:00.000Z"

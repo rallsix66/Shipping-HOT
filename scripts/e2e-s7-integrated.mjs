@@ -734,6 +734,23 @@ async function main() {
       "port weather API returns non-empty forecasts/impacts with aligned displayMeta counts",
     )
     pushC(
+      portWeatherApi.body?.impacts?.every(row => Date.parse(row.validUntil) > Date.parse(row.validFrom)),
+      "port weather API impact rows have validUntil strictly after validFrom",
+    )
+    pushC(
+      portWeatherApi.body?.precipCoverage?.status === "insufficient"
+      && (portWeatherApi.body?.precipCoverage?.hourlySamplesInWindow ?? 0) < portWeatherApi.body?.precipCoverage?.partialMinimum,
+      "port weather API exposes insufficient 24h precip coverage for seeded sparse forecast",
+    )
+    pushC(
+      portWeatherApi.body?.ruleCoverage?.some(row => row.ruleId === "WR-S05" && row.evaluation === "unevaluated"),
+      "port weather API marks WR-S05 unevaluated when 24h precip is incomplete",
+    )
+    pushC(
+      portWeatherApi.body?.state === "partial_rule_coverage",
+      "port weather API state reflects partial rule coverage with other rules still evaluated",
+    )
+    pushC(
       portWeatherApi.body?.impacts?.some(row => row.ruleId === expectations.portWeatherRuleId && row.summaryZh?.includes(expectations.portWeatherImpactSummary.slice(0, 4))),
       `port weather API includes seeded ${expectations.portWeatherRuleId} impact row`,
     )
@@ -742,6 +759,9 @@ async function main() {
     pushC(text.includes("预报数值") && text.includes("潜在影响") && text.includes("官方预警"), "port detail renders the three weather blocks")
     pushC(text.includes(String(expectations.portWeatherGustKmh)) || text.includes("阵风 62"), "port weather block shows seeded gust value")
     pushC(text.includes(expectations.portWeatherRuleId) && text.includes("靠离泊"), "port weather block shows rule id and impact summary")
+    pushC(text.includes("WR-S05") && text.includes("未评估"), "port weather coverage block shows WR-S05 unevaluated notice")
+    const coverageVisible = await evaluate(`Boolean(document.querySelector('[data-testid="port-weather-coverage"]'))`)
+    pushC(coverageVisible === true, "port weather UI renders precip/rule coverage notice")
     const impactRows = await evaluate(`document.querySelectorAll('[data-testid="port-weather-impacts"] li').length`)
     pushC(Number(impactRows) >= 1 && Number(impactRows) === (portWeatherApi.body?.displayMeta?.impactsReturned ?? 0), "port weather UI impact row count matches API displayMeta")
 

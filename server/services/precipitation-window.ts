@@ -6,13 +6,20 @@ export interface PrecipitationSample {
   horizon?: "hourly" | "current"
 }
 
-/** Minimum hourly readings inside the 24 h window — sparse gaps must not fake a full total. */
-export const PRECIP_24H_MIN_HOURLY_SAMPLES = 18
+/** Minimum hourly readings to expose a **partial** sum (display / coverage only). */
+export const PRECIP_24H_PARTIAL_MIN_HOURLY_SAMPLES = 18
+/** Required hourly readings for a **full** 24 h cumulative (WR-S05 evaluation). */
+export const PRECIP_24H_FULL_HOURLY_SAMPLES = 24
+
+export type Precip24hCoverageStatus = "full" | "partial" | "insufficient"
 
 export interface Precipitation24hResult {
-  totalMm?: number
+  status: Precip24hCoverageStatus
   hourlySamplesInWindow: number
-  coverageSufficient: boolean
+  /** Sum when status is `full` — valid for rule WR-S05. */
+  totalMm?: number
+  /** Sum when status is `partial` — display only, must not drive WR-S05. */
+  partialSumMm?: number
 }
 
 export function precipitation24hEndingAtDetailed(
@@ -21,12 +28,11 @@ export function precipitation24hEndingAtDetailed(
 ): Precipitation24hResult {
   const endMs = Date.parse(atTimestamp)
   if (!Number.isFinite(endMs)) {
-    return { hourlySamplesInWindow: 0, coverageSufficient: false }
+    return { status: "insufficient", hourlySamplesInWindow: 0 }
   }
   const startMs = endMs - 24 * 60 * 60 * 1000
   const byTime = new Map<number, number>()
   for (const sample of samples) {
-    if (sample.horizon === "current") continue
     if (sample.horizon !== "hourly") continue
     const t = Date.parse(sample.timestamp)
     if (!Number.isFinite(t) || t > endMs || t <= startMs) continue
@@ -34,16 +40,18 @@ export function precipitation24hEndingAtDetailed(
     byTime.set(t, sample.precipitationMm)
   }
   const hourlySamplesInWindow = byTime.size
-  const coverageSufficient = hourlySamplesInWindow >= PRECIP_24H_MIN_HOURLY_SAMPLES
-  if (!coverageSufficient) {
-    return { hourlySamplesInWindow, coverageSufficient: false }
+  if (hourlySamplesInWindow < PRECIP_24H_PARTIAL_MIN_HOURLY_SAMPLES) {
+    return { status: "insufficient", hourlySamplesInWindow }
   }
   let sum = 0
   for (const mm of byTime.values()) sum += mm
-  return { totalMm: sum, hourlySamplesInWindow, coverageSufficient: true }
+  if (hourlySamplesInWindow >= PRECIP_24H_FULL_HOURLY_SAMPLES) {
+    return { status: "full", hourlySamplesInWindow, totalMm: sum }
+  }
+  return { status: "partial", hourlySamplesInWindow, partialSumMm: sum }
 }
 
 export function precipitation24hEndingAt(samples: readonly PrecipitationSample[], atTimestamp: string): number | undefined {
   const result = precipitation24hEndingAtDetailed(samples, atTimestamp)
-  return result.coverageSufficient ? result.totalMm : undefined
+  return result.status === "full" ? result.totalMm : undefined
 }

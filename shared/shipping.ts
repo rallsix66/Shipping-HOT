@@ -427,10 +427,28 @@ export interface PortWeatherOfficialAlertSummary {
 export type PortWeatherPanelState =
   | "ready"
   | "no_rule_hits"
+  | "partial_rule_coverage"
   | "data_stale"
   | "data_empty"
   | "data_insufficient"
   | "sync_failed"
+
+export type Precip24hCoverageStatus = "full" | "partial" | "insufficient"
+
+export interface PortWeatherPrecipCoverage {
+  hourlySamplesInWindow: number
+  fullRequired: number
+  partialMinimum: number
+  status: Precip24hCoverageStatus
+  totalMm?: number
+  partialSumMm?: number
+}
+
+export interface PortWeatherRuleCoverageEntry {
+  ruleId: string
+  evaluation: "evaluated" | "unevaluated"
+  reason?: string
+}
 
 export interface PortWeatherPanelNotice {
   code: PortWeatherPanelState
@@ -446,6 +464,8 @@ export interface PortWeatherPanelResponse {
   asOf: string
   forecasts: PortWeatherForecastRow[]
   impacts: PortWeatherImpactRow[]
+  ruleCoverage: PortWeatherRuleCoverageEntry[]
+  precipCoverage: PortWeatherPrecipCoverage
   officialAlerts: PortWeatherOfficialAlertSummary[]
   panelNotice?: PortWeatherPanelNotice
   displayMeta: {

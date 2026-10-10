@@ -64,12 +64,12 @@
   - **R1.5-2：** **NOT_RUN**（整项）— 说明：§4.8 **WR-S01..WR-S05** 命中/不命中/边界已落地（`weather-impact-engine.test.ts`）；**官方预警表行未实现**。
   - **R1.5-3：** **NOT_RUN**（整项）— 说明：已验证范围仅为当前规则的 `potential`/`system` 输出（同上）；不含官方预警升级语义。
   - **R1.5-4：** **BLOCKED** — 合格 **0/10**；回放命中口径 **warning/critical**（watch 不计）；≥10 样本且 **≥80% 回放** 才解除 blocked，**不**自动标 PASS。候选 `port-closure-replay-candidates.ts` 含 `verificationAudit` 初核记录，仍 **blocked**。
-  - **R1.5-1（整项）：** **NOT_RUN** — 说明：已实现 Open-Meteo 陆地字段、同批 `replaceWeatherPortBatch` 持久化、固定 `asOf` 面板状态（`data_empty` / `data_stale` / `no_rule_hits` / `sync_failed`）、港口页三块 + 天气 API；**8 港 7 天/JMA/全量浏览器 仍 NOT_RUN**。
-  - **天气链路补正（2026-10-09 审查批 + 2026-10-10 遗漏批）：** 24h 降水仅累计 **hourly**（current 不叠入）；≥18 小时覆盖门槛；99≠101 反例；影响有效区间 `[validFrom, validUntil]` 查询；`data_insufficient` / 旧数据 `panelNotice`；API/UI `displayMeta` 与截断计数一致；`replaceWeatherPortBatch` 事务回滚回归。
-  - **S7：** 默认 **`.tmp/s7-local`**；**2026-10-10 PASS**（**132** checks；种子含非空天气持久化；Flow C 验收状态/规则行/条数）。
+  - **R1.5-1（整项）：** **NOT_RUN** — 说明：已实现 Open-Meteo 陆地字段、同批 `replaceWeatherPortBatch` 持久化、固定 `asOf` 面板状态（含 `partial_rule_coverage` / `data_empty` / `data_stale` / `no_rule_hits` / `sync_failed`）、港口页三块 + 天气 API + **`ruleCoverage` / `precipCoverage`**；**8 港 7 天/JMA/全量浏览器 仍 NOT_RUN**。
+  - **天气链路补正（2026-10-09 审查批 + 2026-10-10 遗漏批 + 2026-10-10 区间/覆盖批）：** 24h 降水仅累计 **hourly**；**24/24 = full（WR-S05 可评估）**、**18–23/24 = partial（仅展示累计）**、**&lt;18 = insufficient**；同时间戳 hourly/current 影响区间按粒度封顶（hourly ≤1h、current 更短），保证 **validUntil &gt; validFrom**、稀疏小时不无限延长；`weather-impact-chain.test.ts` 覆盖 merge→compute→SQLite→panel；API/UI 贯通缺测与部分覆盖；保留事务/`panelNotice`/displayMeta。
+  - **S7：** 默认 **`.tmp/s7-local`**；**2026-10-10 PASS**（**138** checks / 0 FAIL；Flow C 增验影响区间、`partial_rule_coverage`、WR-S05 未评估与 UI 覆盖提示）。
 - **仍 NOT_RUN / pending：** R1.5-1 全量、R1.5-5/6/7；R1.5-4 **BLOCKED 0/10**；清场删除须用户确认。
-- **定向验证（2026-10-10 遗漏批）：** Vitest **66 files / 516 passed | 3 skipped**；完整 G + smoke + S7（见 commit）；**未**申请合并。
-- **Neat Freak（2026-10-10）：** `neat-freak@3.0.0` + `scripts/audit-inventory.sh`（Git Bash）与本批同 commit 记录；**pending：** R1.5-4 合格库、R1.5 阶段全量 live。
+- **定向验证（2026-10-10 区间/覆盖批）：** Vitest **68 files / 524 passed | 3 skipped**；完整 G + smoke + S7（见 commit）；**未**申请合并。
+- **Neat Freak（2026-10-10 区间/覆盖批）：** `neat-freak@3.0.0` + `scripts/audit-inventory.sh`（Git Bash，`Program Files/Git/bin/bash.exe`）与本批同 commit；**pending：** R1.5-4 合格库、R1.5 阶段全量 live。
 - **结论：** **R1.5 = IN PROGRESS / BLOCKED on R1.5-4**（**非**阶段 PASS）。
 
 ### R0 — 门禁 G 执行记录

@@ -23,20 +23,6 @@ export function isWeatherImpactActiveAt(asOfMs: number, validFromIso: string, va
   return asOfMs >= from && asOfMs <= until
 }
 
-export function impactValidUntilForPoint(
-  pointTimestamp: string,
-  sortedTimestamps: string[],
-  index: number,
-): string {
-  const next = sortedTimestamps[index + 1]
-  if (next) {
-    const nextMs = Date.parse(next)
-    if (Number.isFinite(nextMs)) return new Date(nextMs - 1).toISOString()
-  }
-  const fromMs = Date.parse(pointTimestamp)
-  return new Date(fromMs + 60 * 60 * 1000).toISOString()
-}
-
 export function forecastHasMeasurableFields(row: PortWeatherForecastRow): boolean {
   return row.windGustKmh !== undefined
     || row.windSpeedKmh !== undefined
@@ -54,6 +40,8 @@ export function resolvePortWeatherPanelState(input: {
   activeImpactCount: number
   latestFetchedAtMs?: number
   weatherFeedHealthy: boolean
+  unevaluatedRuleCount: number
+  evaluatedRuleCount: number
 }): PortWeatherPanelState {
   if (!input.weatherFeedHealthy) return "sync_failed"
   if (input.storedForecastCount === 0) return "data_empty"
@@ -62,7 +50,14 @@ export function resolvePortWeatherPanelState(input: {
     return "data_stale"
   }
   if (input.inWindowForecastCount === 0) return "data_stale"
-  if (input.activeImpactCount === 0) return "no_rule_hits"
+  const hasUnevaluated = input.unevaluatedRuleCount > 0
+  const hasEvaluated = input.evaluatedRuleCount > 0
+  if (input.activeImpactCount === 0) {
+    if (hasUnevaluated && hasEvaluated) return "partial_rule_coverage"
+    if (hasUnevaluated && !hasEvaluated) return "partial_rule_coverage"
+    return "no_rule_hits"
+  }
+  if (hasUnevaluated) return "partial_rule_coverage"
   return "ready"
 }
 

@@ -1,6 +1,18 @@
-import type { FeedItem, PortWeatherPanelNotice, PortWeatherPanelResponse, PortWeatherPanelState } from "@shared/shipping"
+import type {
+  FeedItem,
+  PortWeatherPanelNotice,
+  PortWeatherPanelResponse,
+  PortWeatherPanelState,
+  PortWeatherPrecipCoverage,
+} from "@shared/shipping"
 import { isOfficialWeatherAlertFeedItem } from "#/providers/shipping"
 import type { ShippingRepository } from "#/database/shipping"
+import {
+  PRECIP_24H_FULL_HOURLY_SAMPLES,
+  PRECIP_24H_PARTIAL_MIN_HOURLY_SAMPLES,
+  type Precipitation24hResult,
+} from "#/services/precipitation-window"
+import { evaluatePortWeatherCoverageAt } from "#/services/weather-rule-evaluation"
 import {
   PORT_WEATHER_FORECAST_DISPLAY_LIMIT,
   WEATHER_FORECAST_HORIZON_MS,
@@ -28,6 +40,7 @@ function panelNoticeForState(
   const messages: Record<PortWeatherPanelState, string> = {
     ready: `以下为历史结果（${fetchedLabel}），当前状态：可用。`,
     no_rule_hits: `有效窗口内无规则命中（${fetchedLabel}）；不含已实施封港结论。`,
+    partial_rule_coverage: `部分规则因缺测未评估（${fetchedLabel}）；18–23/24 小时降水仅作参考，不能当作完整 24 小时累计。`,
     data_stale: `预报已过期（${fetchedLabel}）；以下为旧结果，请重新同步。`,
     data_empty: "暂无持久化预报。",
     data_insufficient: `测值不足（${fetchedLabel}）；无法判断规则命中。`,
@@ -40,6 +53,24 @@ function panelNoticeForState(
     referenceComputedAt,
     showingHistoricalData,
   }
+}
+
+function toPanelPrecipCoverage(result: Precipitation24hResult): PortWeatherPrecipCoverage {
+  return {
+    hourlySamplesInWindow: result.hourlySamplesInWindow,
+    fullRequired: PRECIP_24H_FULL_HOURLY_SAMPLES,
+    partialMinimum: PRECIP_24H_PARTIAL_MIN_HOURLY_SAMPLES,
+    status: result.status,
+    totalMm: result.totalMm,
+    partialSumMm: result.partialSumMm,
+  }
+}
+
+const emptyPrecipCoverage: PortWeatherPrecipCoverage = {
+  hourlySamplesInWindow: 0,
+  fullRequired: PRECIP_24H_FULL_HOURLY_SAMPLES,
+  partialMinimum: PRECIP_24H_PARTIAL_MIN_HOURLY_SAMPLES,
+  status: "insufficient",
 }
 
 export async function getPortWeatherPanel(
@@ -81,6 +112,12 @@ export async function getPortWeatherPanel(
     WEATHER_IMPACT_DISPLAY_LIMIT,
   )
 
+  const coverageEval = evaluatePortWeatherCoverageAt(storedForecasts, asOf)
+  const ruleCoverage = coverageEval?.ruleCoverage ?? []
+  const precipCoverage = coverageEval ? toPanelPrecipCoverage(coverageEval.precipCoverage) : emptyPrecipCoverage
+  const unevaluatedRuleCount = ruleCoverage.filter(entry => entry.evaluation === "unevaluated").length
+  const evaluatedRuleCount = ruleCoverage.filter(entry => entry.evaluation === "evaluated").length
+
   const state = resolvePortWeatherPanelState({
     nowMs,
     inWindowForecastCount: inWindowForecasts.length,
@@ -89,6 +126,8 @@ export async function getPortWeatherPanel(
     activeImpactCount: totalMatched,
     latestFetchedAtMs,
     weatherFeedHealthy: portWeatherFeedHealthy(feedItems, portId, weatherSourceId),
+    unevaluatedRuleCount,
+    evaluatedRuleCount,
   })
 
   const showingHistoricalData = displayForecasts.length > 0
@@ -122,6 +161,8 @@ export async function getPortWeatherPanel(
     asOf,
     forecasts: displayForecasts,
     impacts,
+    ruleCoverage,
+    precipCoverage,
     panelNotice,
     displayMeta: {
       forecastLimit: PORT_WEATHER_FORECAST_DISPLAY_LIMIT,

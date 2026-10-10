@@ -32,3 +32,7 @@ export const PLAN_WIND_GUST_MS = {
   wrS02: 17.2,
   wrS03: 24.5,
 } as const
+
+export function listWeatherImpactRuleIds(): string[] {
+  return weatherImpactRules.map(rule => rule.id)
+}

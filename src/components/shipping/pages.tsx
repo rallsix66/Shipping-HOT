@@ -447,6 +447,8 @@ function portWeatherImpactEmptyCopy(state: PortWeatherPanelResponse["state"]): s
       return "预报数据已过期；请触发同步后再查看潜在影响。"
     case "no_rule_hits":
       return "有效窗口内无规则命中（⚙ 潜在影响）；不含已实施封港结论。"
+    case "partial_rule_coverage":
+      return "部分规则因降水缺测未评估；18–23/24 小时累计仅作参考，不能当作完整 24 小时 WR-S05 判定。"
     case "data_insufficient":
       return "测值不足，无法判断规则命中；请等待完整预报同步。"
     default:
@@ -470,6 +472,30 @@ function PortWeatherPanelSection({ portId }: { portId: string }) {
       {data.panelNotice && (
         <p className="text-sm op-80 glass-panel d-panel py-2 px-3" data-testid="port-weather-notice">
           {data.panelNotice.messageZh}
+        </p>
+      )}
+      {(data.precipCoverage.status !== "full" || data.ruleCoverage.some(r => r.evaluation === "unevaluated")) && (
+        <p className="text-sm op-75 glass-panel d-panel py-2 px-3" data-testid="port-weather-coverage">
+          24h 降水覆盖
+          {" "}
+          {data.precipCoverage.hourlySamplesInWindow}
+          /
+          {data.precipCoverage.fullRequired}
+          {" "}
+          小时（
+          {data.precipCoverage.status === "full" ? "完整" : data.precipCoverage.status === "partial" ? "部分" : "不足"}
+          ）
+          {data.precipCoverage.status === "partial" && data.precipCoverage.partialSumMm !== undefined
+            ? ` · 参考累计 ${data.precipCoverage.partialSumMm.toFixed(1)} mm（不可用于 WR-S05）`
+            : null}
+          {data.ruleCoverage.filter(r => r.evaluation === "unevaluated").map(r => (
+            <span key={r.ruleId} className="block text-xs op-70 mt-1">
+              {r.ruleId}
+              {" "}
+              未评估：
+              {r.reason ?? "缺测"}
+            </span>
+          ))}
         </p>
       )}
       {data.impactMeta.truncated && (
