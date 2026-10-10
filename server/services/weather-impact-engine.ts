@@ -1,6 +1,6 @@
 import type { WeatherImpactRuleHit, WeatherRuleInputs } from "@shared/weather-impact"
 import { weatherValueGte, weatherValueLt } from "@shared/weather-units"
-import { type WeatherImpactRuleWhen, weatherImpactRules } from "#/config/weather-impact-rules"
+import { type WeatherImpactRuleWhen, officialAlertImpactRules, weatherImpactRules } from "#/config/weather-impact-rules"
 
 function finiteInput(value: number | undefined): number | undefined {
   if (value === undefined) return undefined
@@ -36,7 +36,7 @@ function inputSnapshot(inputs: WeatherRuleInputs): Record<string, number | strin
   return out
 }
 
-/** Evaluate §4.8 shipping-port rules — outputs are **potential** only. Official-alert row: not implemented. */
+/** Evaluate §4.8 shipping-port forecast rules — outputs are **potential** only. Official-warning rows: `official-alert-impact.ts`. */
 export function evaluateWeatherImpactRules(inputs: WeatherRuleInputs): WeatherImpactRuleHit[] {
   const hits: WeatherImpactRuleHit[] = []
   for (const rule of weatherImpactRules) {
@@ -65,4 +65,9 @@ export function assertNoImplementedWeatherImpact(hits: WeatherImpactRuleHit[]): 
 
 export function listWeatherImpactRuleIds(): string[] {
   return weatherImpactRules.map(rule => rule.id)
+}
+
+/** Every §4.8 automatic rule: forecast rows WR-S01..S05 then official-warning rows WR-O01/O02. */
+export function listAllWeatherImpactRuleIds(): string[] {
+  return [...weatherImpactRules.map(rule => rule.id), ...officialAlertImpactRules.map(rule => rule.id)]
 }

@@ -551,6 +551,8 @@ export interface PortWeatherPanelResponse {
   precipCoverage: PortWeatherPrecipCoverage
   typhoonSync?: TropicalCycloneSyncMeta
   officialAlerts: PortWeatherOfficialAlertSummary[]
+  /** §4.8 WR-O01/WR-O02 potential impacts derived from current official alerts (⚙ judgement, 🏛 basis). */
+  officialAlertImpacts: import("./weather-impact").WeatherImpactRuleHit[]
   panelNotice?: PortWeatherPanelNotice
   displayMeta: {
     forecastLimit: number

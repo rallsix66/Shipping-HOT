@@ -13,6 +13,19 @@ export interface WeatherImpactRuleHit {
   provenance: "system"
   inputValues: Record<string, number | string | boolean>
   summaryZh: string
+  /** 🏛 Official warning the judgement is based on (WR-O01/WR-O02 only). Never implies an implemented state. */
+  officialBasis?: OfficialAlertBasis
+}
+
+export interface OfficialAlertBasis {
+  provenance: "official"
+  sourceId: string
+  alertId: string
+  title: string
+  sourceUrl: string
+  severity: Severity
+  publishedAt: string
+  expiresAt?: string
 }
 
 /** Canonical rule inputs — wind gust in m/s (plan §4.8). */

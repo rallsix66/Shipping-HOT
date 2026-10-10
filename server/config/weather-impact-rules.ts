@@ -18,7 +18,7 @@ export interface WeatherImpactRuleWhen {
   any?: WeatherImpactRuleWhen[]
 }
 
-/** Plan §4.8 initial thresholds (m/s for wind). Official-alert row not implemented yet. */
+/** Plan §4.8 initial thresholds (m/s for wind). Official-warning rows: see `officialAlertImpactRules` below. */
 export const weatherImpactRules: readonly WeatherImpactRuleConfig[] = [
   { id: "WR-S01", object: "shipping_port", when: { windGustMsGte: 13.9 }, severity: "watch", summaryZh: "港口作业可能放缓" },
   { id: "WR-S02", object: "shipping_port", when: { any: [{ windGustMsGte: 17.2 }, { waveHeightMGte: 2.5 }] }, severity: "warning", summaryZh: "靠离泊和装卸可能受限" },
@@ -36,3 +36,37 @@ export const PLAN_WIND_GUST_MS = {
 export function listWeatherImpactRuleIds(): string[] {
   return weatherImpactRules.map(rule => rule.id)
 }
+
+export type OfficialAlertHazard = "rainstorm" | "flood" | "tropical_cyclone"
+
+export interface OfficialAlertImpactRuleConfig {
+  id: string
+  kind: "official_alert_port" | "official_alert_delivery_region"
+  object: "shipping_port" | "delivery_region"
+  /** WR-O02 only: hazards named by plan §4.8 (暴雨 / 洪水 / 热带气旋). */
+  hazards: readonly OfficialAlertHazard[]
+  summaryZh: string
+}
+
+/**
+ * Plan §4.8 official-warning rows. Severity is always the official warning's level; the impact stays
+ * "potential" (⚙ judgement) with the official alert attached as 🏛 basis.
+ */
+export const officialAlertImpactRules: readonly OfficialAlertImpactRuleConfig[] = [
+  { id: "WR-O01", kind: "official_alert_port", object: "shipping_port", hazards: [], summaryZh: "以官方原文为准：{title}" },
+  { id: "WR-O02", kind: "official_alert_delivery_region", object: "delivery_region", hazards: ["rainstorm", "flood", "tropical_cyclone"], summaryZh: "⚙ 潜在影响：该地区派送可能受影响（依据为 🏛 官方预警）" },
+]
+
+/** Keyword classifier for the hazard named in an official alert (title/summary/region; case-insensitive). */
+export const officialAlertHazardKeywords: Readonly<Record<OfficialAlertHazard, readonly string[]>> = {
+  rainstorm: ["heavy rain", "rainstorm", "torrential rain", "暴雨", "hujan lebat", "hujan sangat lebat", "mưa lớn", "ฝนตกหนัก"],
+  flood: ["flood", "洪水", "banjir", "lũ", "ngập", "น้ำท่วม"],
+  tropical_cyclone: ["tropical cyclone", "typhoon", "tropical storm", "tropical depression", "台风", "热带气旋", "siklon tropis", "bão", "áp thấp nhiệt đới", "พายุ"],
+}
+
+/**
+ * WR-O02 "major cities" per country. Plan §4.8 does not enumerate them and last-mile cities are out of scope
+ * this round (plan §245), so the list is intentionally EMPTY until the user approves one: WR-O02 cannot fire in
+ * production and is verified by fixtures only.
+ */
+export const deliveryMajorCities: Readonly<Record<string, readonly string[]>> = {}

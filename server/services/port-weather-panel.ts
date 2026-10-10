@@ -14,6 +14,7 @@ import {
   PRECIP_24H_PARTIAL_MIN_HOURLY_SAMPLES,
   type Precipitation24hResult,
 } from "#/services/precipitation-window"
+import { evaluateOfficialAlertImpactRules } from "#/services/official-alert-impact"
 import { resolveTyphoonInputForImpactInterval } from "#/services/typhoon-wr-s03-resolve"
 import { evaluatePortWeatherCoverageAt } from "#/services/weather-rule-evaluation"
 import {
@@ -224,6 +225,12 @@ export async function getPortWeatherPanel(
       provenance: item.provenance,
     }))
 
+  const officialAlertImpacts = evaluateOfficialAlertImpactRules(feedItems, {
+    portId,
+    countryCode: portBaseline?.countryCode,
+    nowMs,
+  })
+
   const panelNotice = panelNoticeForState(
     state,
     showingHistoricalData || (state !== "ready" && state !== "data_empty"),
@@ -254,6 +261,7 @@ export async function getPortWeatherPanel(
       truncated: totalMatched > impacts.length,
     },
     officialAlerts,
+    officialAlertImpacts,
     sources: {
       forecast: displayForecasts.length ? forecastSourceLabel : "暂无有效窗口内预报",
       impacts: "system",
