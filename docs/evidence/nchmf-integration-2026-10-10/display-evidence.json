@@ -1,0 +1,132 @@
+{
+  "kind": "VN-W01 display verification",
+  "ranAt": "2026-10-10T09:54:09.069Z",
+  "gitHead": "c064e5a649c007e8d50d156d086cdfcca4283f22",
+  "workspaceClean": true,
+  "liveRunGitHead": "c064e5a649c007e8d50d156d086cdfcca4283f22",
+  "runDir": "D:\\try one\\Shipping HOT\\.tmp\\nchmf-live-c064e5a",
+  "verdict": "PASS",
+  "coverage": {
+    "service": "production build dist/output/server (Nitro), Runtime disabled, SHIPPING_WEATHER_ALERT_PROVIDER unset",
+    "api": [
+      "GET /api/shipping/feed",
+      "GET /api/shipping"
+    ],
+    "browser": "system Chrome headless over CDP: /feed"
+  },
+  "api": {
+    "feedStatus": 200,
+    "indexStatus": 200,
+    "nchmfItems": 8,
+    "before": {
+      "feedItems": 8,
+      "providerUsageRows": 0,
+      "providerUsageRequests": 0,
+      "runtimeRows": -1,
+      "feedHash": "weather-alert:nchmf:54290:4638,weather-alert:nchmf:54353:3584,weather-alert:nchmf:54492:3694,weather-alert:nchmf:54527:3262,weather-alert:nchmf:54534:3171,weather-alert:nchmf:54546:3966,weather-alert:nchmf:54547:3257,weather-alert:nchmf:54549:3171"
+    },
+    "after": {
+      "feedItems": 8,
+      "providerUsageRows": 0,
+      "providerUsageRequests": 0,
+      "runtimeRows": -1,
+      "feedHash": "weather-alert:nchmf:54290:4638,weather-alert:nchmf:54353:3584,weather-alert:nchmf:54492:3694,weather-alert:nchmf:54527:3262,weather-alert:nchmf:54534:3171,weather-alert:nchmf:54546:3966,weather-alert:nchmf:54547:3257,weather-alert:nchmf:54549:3171"
+    }
+  },
+  "browser": {
+    "status": "RAN",
+    "chrome": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    "url": "http://127.0.0.1:4492/feed",
+    "rawBlocks": 8,
+    "countryRows": "发布国家 VN\n8",
+    "screenshot": "feed-nchmf.png",
+    "excerpt": "通知\n0\n天气\n8\n港口通知\n0\n来源\n官方\n8\n第三方\n0\n模拟数据\n0\n官方预警·发布国家（实验）\n发布国家 VN\n8\nTIN CẢNH BÁO LŨ QUÉT SẠT LỞ ĐẤT, SỤT LÚN ĐẤT DO MƯA LŨ HOẶC DÒNG CHẢY TRÊN KHU VỰC CÁC TỈNH/THÀNH PHỐ TỪ NGHỆ AN ĐẾN QUẢNG NGÃI\n打开来源\n\n已接收 NCHMF（越南）官方预警原文记录：生命周期未知（不推断更新/取代/取消），时区未确认，未关联港口，无影响推断。原文风险级别：未提供。原文：🚨 [Cảnh báo nguy cơ]: Trong 6 giờ tới, có nguy cơ xảy ra lũ quét, sạt lở đất, sụt lún đất trên sườn dốc, suối nhỏ tại các tỉnh: - Nghệ An, Hà Tĩnh, Quảng Trị, TP. Huế, TP. Đà Nẵng, Quảng Ngãi 📌 Chi tiết trong bản tin đính kèm 🗺️ [Bản đồ nguy cơ được cập nhật chi tiết tại]: 👉 http://luquetsatlo.…\n\n查看详情\n打开来源\n天气\nnchmf · 官方 · 报告\n最新\n发布国家：VN\n首次接收 2026/10/10 17:52\nofficial\nissuing_country_VN\nlifecycle_unknown\nvalidity_pending_confirmation\ntimezone_unconfirmed\nofficial_severity_not_provided\nstandardized_severity_unmapped\nno_port_association\n官方预警\n预警状态：未知\n有效性待确认\n时区未确认\n原文风险级别：未提供\n生命周期未知\n官方原始时间（原文文本，时区未确认，未换算）：列表时间 10/10/2026 16:27:01 · 正文发布时间 未提供\n下一期发布时间（不等于有效期）：未提供\n来源 https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-quet-sat-lo-dat-sut-lun-dat-do-mua-lu-hoac-dong-chay-tren-khu-vuc-cac-tinh-thanh-pho-tu-nghe-an-den-quang"
+  },
+  "checks": [
+    {
+      "id": "server_healthy",
+      "pass": true,
+      "detail": "http://127.0.0.1:4492"
+    },
+    {
+      "id": "api_feed_returns_records",
+      "pass": true,
+      "detail": "8 vs stored 8"
+    },
+    {
+      "id": "api_records_unknown_lifecycle",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "api_records_raw_preserved",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "api_records_level_unmapped",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "api_records_no_port",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "get_no_side_effects",
+      "pass": true,
+      "detail": "before {\"feedItems\":8,\"providerUsageRows\":0,\"providerUsageRequests\":0,\"runtimeRows\":-1,\"feedHash\":\"weather-alert:nchmf:54290:4638,weather-alert:nchmf:54353:3584,weathe after {\"feedItems\":8,\"providerUsageRows\":0,\"providerUsageRequests\":0,\"runtimeRows\":-1,\"feedHash\":\"weather-alert:nchmf:54290:4638,weather-alert:nchmf:54353:3584,weathe"
+    },
+    {
+      "id": "browser_feed_rendered",
+      "pass": true,
+      "detail": "/feed contains NCHMF"
+    },
+    {
+      "id": "browser_summary_wording",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_no_active_claim",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_lifecycle_timezone_chips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_original_level_unmapped",
+      "pass": true,
+      "detail": "Cấp 1"
+    },
+    {
+      "id": "browser_level_not_provided",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_raw_times",
+      "pass": true,
+      "detail": "10/10/2026"
+    },
+    {
+      "id": "browser_source_and_first_received",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_grouped_by_issuing_country",
+      "pass": true,
+      "detail": "发布国家 VN\n8"
+    },
+    {
+      "id": "browser_raw_block_per_record",
+      "pass": true,
+      "detail": "8 raw blocks"
+    }
+  ]
+}
