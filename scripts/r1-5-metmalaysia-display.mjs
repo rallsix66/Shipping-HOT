@@ -4,7 +4,7 @@
 // and the GETs cause zero provider_usage / runtime / feed_items row changes (no network, no LLM);
 // (b) system Chrome over CDP renders /feed with the required wording and raw fields.
 // Usage: node scripts/r1-5-metmalaysia-display.mjs <runDir>
-import { spawn } from "node:child_process"
+import { execSync, spawn } from "node:child_process"
 import { existsSync, mkdirSync, openSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -103,7 +103,7 @@ async function main() {
     const indexRes = await fetch(`${BASE}/api/shipping`)
     await indexRes.text()
     const after = dbCounts()
-    const items = (Array.isArray(feedBody) ? feedBody : feedBody?.items ?? []).filter(item => item.sourceId === "metmalaysia")
+    const items = (Array.isArray(feedBody) ? feedBody : feedBody?.feedItems ?? []).filter(item => item.sourceId === "metmalaysia")
     api = { feedStatus: feedRes.status, indexStatus: indexRes.status, metmalaysiaItems: items.length, before, after }
     add("api_feed_returns_records", items.length === live.recordsStored && items.length > 0, `${items.length} vs stored ${live.recordsStored}`)
     add("api_records_unknown_validity", items.every(i => i.weather?.validityStatus === "unknown" && i.weather?.alertState === "unknown" && i.eventEligibility === false), "")
@@ -152,7 +152,7 @@ async function main() {
     server.kill("SIGKILL")
   }
   const pass = checks.every(c => c.pass) && browser.status === "RAN"
-  const evidence = { kind: "MY-W01 display verification", ranAt: new Date().toISOString(), gitHead: live.gitHead, runDir: RUN_DIR, verdict: pass ? "PASS" : browser.status === "BLOCKED" ? "BLOCKED" : "FAIL", coverage: { service: "production build dist/output/server (Nitro), Runtime disabled, SHIPPING_WEATHER_ALERT_PROVIDER unset", api: ["GET /api/shipping/feed", "GET /api/shipping"], browser: "system Chrome headless over CDP: /feed" }, api, browser, checks }
+  const evidence = { kind: "MY-W01 display verification", ranAt: new Date().toISOString(), gitHead: execSync("git rev-parse HEAD", { cwd: ROOT }).toString().trim(), workspaceClean: execSync("git status --porcelain", { cwd: ROOT }).toString().trim() === "", liveRunGitHead: live.gitHead, runDir: RUN_DIR, verdict: pass ? "PASS" : browser.status === "BLOCKED" ? "BLOCKED" : "FAIL", coverage: { service: "production build dist/output/server (Nitro), Runtime disabled, SHIPPING_WEATHER_ALERT_PROVIDER unset", api: ["GET /api/shipping/feed", "GET /api/shipping"], browser: "system Chrome headless over CDP: /feed" }, api, browser, checks }
   writeFileSync(join(RUN_DIR, "metmalaysia-display-evidence.json"), `${JSON.stringify(evidence, null, 2)}\n`)
   console.log(JSON.stringify({ verdict: evidence.verdict, failed: checks.filter(c => !c.pass) }))
   process.exitCode = pass ? 0 : 1

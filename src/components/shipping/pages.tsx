@@ -931,7 +931,7 @@ export function PortDetailPage({ id }: { id: string }) {
                       <StatusDot tone={severityTone(item.severity)} />
                       <span className="truncate font-semibold">{item.displayTitle ?? item.title}</span>
                     </span>
-                    <span className="shrink-0 text-xs op-60">{item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}</span>
+                    <span className="shrink-0 text-xs op-60">{item.publicationTimeKnown === false ? "发布时间未知" : item.weather?.timeBasis === "received_at" ? `首次接收 ${formatDate(item.publishedAt)}` : formatDate(item.publishedAt)}</span>
                   </a>
                 ))}
           </div>
@@ -1078,7 +1078,7 @@ export function FeedPage() {
                         <ProvenanceBadge provenance={item.provenance} />
                         <StatusBadge stale={item.stale} sourceStatus={item.sourceStatus} />
                         <span className="tl-time">
-                          {item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}
+                          {item.publicationTimeKnown === false ? "发布时间未知" : item.weather?.timeBasis === "received_at" ? `首次接收 ${formatDate(item.publishedAt)}` : formatDate(item.publishedAt)}
                         </span>
                         {item.hotReason && (
                           <span className="chip text-amber-600 dark:text-amber-300">
@@ -1233,7 +1233,7 @@ export function FeedArticlePage({ id }: { id: string }) {
           <a href={item.sourceUrl} target="_blank" rel="noreferrer" className="chip">打开来源</a>
           <span className="chip">{formatStatus(item.category)}</span>
           <ProvenanceBadge provenance={item.provenance} />
-          <span className="tl-time">{item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}</span>
+          <span className="tl-time">{item.publicationTimeKnown === false ? "发布时间未知" : item.weather?.timeBasis === "received_at" ? `首次接收 ${formatDate(item.publishedAt)}` : formatDate(item.publishedAt)}</span>
         </div>
         {copy
           ? (
