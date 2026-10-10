@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useState } from "react"
 import type { ArticleBlock, ArticleCompletenessStatus, ArticleTranslationBlockSource, ArticleTranslationViewStatus } from "@shared/article"
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
 import { type PortWeatherPanelResponse, type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
+import { ruleCoverageReasonLabelZh } from "@shared/weather-rule-coverage-display"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
 import { type ShippingResponse, type TranslationStatusResponse, useFeedArticle, usePortWeather, useShipping, useTranslationSecret, useTranslationStatus } from "./data"
 import { FeedItemDisplayText } from "./feed-display"
@@ -448,7 +449,7 @@ function portWeatherImpactEmptyCopy(state: PortWeatherPanelResponse["state"]): s
     case "no_rule_hits":
       return "有效窗口内无规则命中（⚙ 潜在影响）；不含已实施封港结论。"
     case "partial_rule_coverage":
-      return "部分规则因降水缺测未评估；18–23/24 小时累计仅作参考，不能当作完整 24 小时 WR-S05 判定。"
+      return "部分规则因阵风/浪高/能见度/降水缺测或台风分支未接入而未评估；已评估规则的无命中不代表完整排除风险。"
     case "data_insufficient":
       return "测值不足，无法判断规则命中；请等待完整预报同步。"
     default:
@@ -493,7 +494,7 @@ function PortWeatherPanelSection({ portId }: { portId: string }) {
               {r.ruleId}
               {" "}
               未评估：
-              {r.reason ?? "缺测"}
+              {ruleCoverageReasonLabelZh(r.reason)}
             </span>
           ))}
         </p>

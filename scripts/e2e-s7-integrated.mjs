@@ -747,6 +747,10 @@ async function main() {
       "port weather API marks WR-S05 unevaluated when 24h precip is incomplete",
     )
     pushC(
+      portWeatherApi.body?.ruleCoverage?.some(row => row.ruleId === "WR-S03" && row.evaluation === "unevaluated" && String(row.reason ?? "").includes("typhoon_distance_not_covered")),
+      "port weather API marks WR-S03 typhoon limb as not covered",
+    )
+    pushC(
       portWeatherApi.body?.state === "partial_rule_coverage",
       "port weather API state reflects partial rule coverage with other rules still evaluated",
     )
@@ -760,6 +764,7 @@ async function main() {
     pushC(text.includes(String(expectations.portWeatherGustKmh)) || text.includes("阵风 62"), "port weather block shows seeded gust value")
     pushC(text.includes(expectations.portWeatherRuleId) && text.includes("靠离泊"), "port weather block shows rule id and impact summary")
     pushC(text.includes("WR-S05") && text.includes("未评估"), "port weather coverage block shows WR-S05 unevaluated notice")
+    pushC(text.includes("WR-S03") && (text.includes("台风") || text.includes("尚未接入")), "port weather coverage block shows WR-S03 typhoon not-covered reason")
     const coverageVisible = await evaluate(`Boolean(document.querySelector('[data-testid="port-weather-coverage"]'))`)
     pushC(coverageVisible === true, "port weather UI renders precip/rule coverage notice")
     const impactRows = await evaluate(`document.querySelectorAll('[data-testid="port-weather-impacts"] li').length`)

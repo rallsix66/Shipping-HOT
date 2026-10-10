@@ -40,7 +40,7 @@ function panelNoticeForState(
   const messages: Record<PortWeatherPanelState, string> = {
     ready: `以下为历史结果（${fetchedLabel}），当前状态：可用。`,
     no_rule_hits: `有效窗口内无规则命中（${fetchedLabel}）；不含已实施封港结论。`,
-    partial_rule_coverage: `部分规则因缺测未评估（${fetchedLabel}）；18–23/24 小时降水仅作参考，不能当作完整 24 小时累计。`,
+    partial_rule_coverage: `部分规则因输入缺测或未接入分支尚未评估（${fetchedLabel}）；18–23/24 小时降水仅作参考，不能当作完整 24 小时 WR-S05 判定。`,
     data_stale: `预报已过期（${fetchedLabel}）；以下为旧结果，请重新同步。`,
     data_empty: "暂无持久化预报。",
     data_insufficient: `测值不足（${fetchedLabel}）；无法判断规则命中。`,

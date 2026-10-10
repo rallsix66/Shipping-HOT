@@ -1,10 +1,10 @@
 import type { PortWeatherForecastRow } from "@shared/shipping"
 import type { WeatherImpactRuleHit, WeatherRuleInputs } from "@shared/weather-impact"
 import { windGustKmhToMs } from "@shared/weather-units"
-import { weatherImpactRules } from "#/config/weather-impact-rules"
 import { evaluateWeatherImpactRules } from "#/services/weather-impact-engine"
 import type { Precipitation24hResult, PrecipitationSample } from "#/services/precipitation-window"
 import { precipitation24hEndingAtDetailed } from "#/services/precipitation-window"
+import { buildRuleCoverageEntries, sanitizeWeatherRuleInputs } from "#/services/weather-rule-coverage"
 
 export type RuleEvaluationStatus = "evaluated" | "unevaluated"
 
@@ -20,51 +20,22 @@ export interface PointRuleEvaluation {
   precipCoverage: Precipitation24hResult
 }
 
-const RULES_REQUIRING_FULL_PRECIP = new Set(["WR-S05"])
-const RULES_REQUIRING_VISIBILITY = new Set(["WR-S04"])
-
 export function evaluatePointWeatherRules(
   inputs: Omit<WeatherRuleInputs, "precipitationMm24h">,
   precipSamples: readonly PrecipitationSample[],
   atTimestamp: string,
 ): PointRuleEvaluation {
   const precipCoverage = precipitation24hEndingAtDetailed(precipSamples, atTimestamp)
-  const ruleCoverage: WeatherRuleCoverageEntry[] = []
-  const blockedRuleIds = new Set<string>()
-
-  for (const rule of weatherImpactRules) {
-    if (RULES_REQUIRING_FULL_PRECIP.has(rule.id)) {
-      if (precipCoverage.status !== "full") {
-        blockedRuleIds.add(rule.id)
-        ruleCoverage.push({
-          ruleId: rule.id,
-          evaluation: "unevaluated",
-          reason: precipCoverage.status === "partial"
-            ? `precip_24h_partial_${precipCoverage.hourlySamplesInWindow}_of_24`
-            : `precip_24h_insufficient_${precipCoverage.hourlySamplesInWindow}_of_24`,
-        })
-        continue
-      }
-    }
-    if (RULES_REQUIRING_VISIBILITY.has(rule.id) && inputs.visibilityM === undefined) {
-      blockedRuleIds.add(rule.id)
-      ruleCoverage.push({ ruleId: rule.id, evaluation: "unevaluated", reason: "visibility_missing" })
-      continue
-    }
-    ruleCoverage.push({ ruleId: rule.id, evaluation: "evaluated" })
-  }
-
-  const fullInputs: WeatherRuleInputs = {
+  const rawInputs: WeatherRuleInputs = {
     ...inputs,
     precipitationMm24h: precipCoverage.status === "full" ? precipCoverage.totalMm : undefined,
   }
-  const hits = evaluateWeatherImpactRules(fullInputs).filter(h => !blockedRuleIds.has(h.ruleId))
-
-  for (const entry of ruleCoverage) {
-    if (entry.evaluation === "evaluated") {
-      entry.reason = hits.some(h => h.ruleId === entry.ruleId) ? "hit" : "no_hit"
-    }
-  }
+  const sanitized = sanitizeWeatherRuleInputs(rawInputs)
+  const engineHits = evaluateWeatherImpactRules(sanitized)
+  const hitRuleIds = new Set(engineHits.map(hit => hit.ruleId))
+  const ruleCoverage = buildRuleCoverageEntries(sanitized, rawInputs, precipCoverage, hitRuleIds)
+  const blockedRuleIds = new Set(ruleCoverage.filter(entry => entry.evaluation === "unevaluated").map(entry => entry.ruleId))
+  const hits = engineHits.filter(hit => !blockedRuleIds.has(hit.ruleId))
 
   return { hits, ruleCoverage, precipCoverage }
 }
