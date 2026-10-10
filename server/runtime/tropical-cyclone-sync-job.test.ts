@@ -69,6 +69,21 @@ describe("tropical cyclone sync job", () => {
       repository,
       fetcher: async () => new Response("", { status: 503 }),
     })
+    const partialResult = await createTropicalCycloneSyncJob({
+      database,
+      dataMode: "real",
+      intervalMs: 60_000,
+      useLiveJma: true,
+      now: () => new Date("2026-08-15T10:30:00.000Z"),
+      repository,
+      fetcher: async (url) => {
+        if (url.includes("targetTc")) return new Response(list, { status: 200 })
+        return new Response("", { status: 503 })
+      },
+    }).run()
+    expect(partialResult.status).toBe("failed")
+    expect(partialResult.errorCode).toBe("jma_detail_total_failure")
+
     await failJob.run()
     const afterFail = await getTropicalCyclonePanel(repository, { now: new Date("2026-08-15T11:30:00.000Z") })
     expect(afterFail.sync.outcome).toBe("failed")

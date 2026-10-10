@@ -113,12 +113,13 @@ export function typhoonInputFromDistanceKm(distanceKm: number | undefined, syncC
   return { status: "checked", distanceKm: distanceKm ?? TYPHOON_NO_STORM_DISTANCE_KM }
 }
 
+/** @deprecated Use resolveTyphoonInputForImpactInterval — freshness must use evaluation now, not validUntil. */
 export function typhoonInputFromSyncAndDistance(
   distanceKm: number | undefined,
   sync: TropicalCycloneSyncMeta,
-  nowMs: number,
+  evaluationNowMs: number,
 ): TyphoonInputState {
-  if (!isJmaTyphoonSyncTrustworthyForWrS03(sync, nowMs)) {
+  if (!isJmaTyphoonSyncTrustworthyForWrS03(sync, evaluationNowMs)) {
     return { status: "unavailable" }
   }
   if (sync.outcome === "ok_empty") {

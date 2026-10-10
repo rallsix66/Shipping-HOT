@@ -3,7 +3,7 @@ import { portDirectoryBaseline } from "@shared/port-directory"
 import type { ShippingDataMode } from "#/database/runtime"
 import { ShippingRepository } from "#/database/shipping"
 import { JMA_TYPHOON_SOURCE_ID, syncJmaTropicalCyclones } from "#/providers/jma-tropical-cyclone"
-import type { RuntimeJob } from "#/runtime/background-runtime"
+import type { RuntimeJob, SyncResult } from "#/runtime/background-runtime"
 
 export const TROPICAL_CYCLONE_SYNC_CAPABILITY = "tropical_cyclone_sync" as const
 
@@ -16,6 +16,40 @@ export interface TropicalCycloneSyncJobOptions {
   fetcher?: (url: string) => Promise<Response>
   repository?: ShippingRepository
   useLiveJma?: boolean
+}
+
+function mapJmaSyncResultToRuntimeResult(
+  result: Awaited<ReturnType<typeof syncJmaTropicalCyclones>>,
+): SyncResult {
+  if (result.outcome === "failed") {
+    return {
+      status: "failed",
+      recordsRead: 0,
+      recordsWritten: 0,
+      errorCode: result.errorCode,
+      errorMessage: result.errorMessage,
+    }
+  }
+  if (result.outcome === "partial") {
+    const detailFailures = result.failedTcIds.length + result.parseErrorCount
+    const attempted = result.cyclones.length + result.failedTcIds.length
+    return {
+      status: "failed",
+      recordsRead: attempted,
+      recordsWritten: result.cyclones.length,
+      sourceUpdatedAt: result.cyclones.length ? result.fetchedAt : undefined,
+      errorCode: result.cyclones.length ? "jma_detail_partial_failure" : "jma_detail_total_failure",
+      errorMessage: result.cyclones.length
+        ? `JMA partial detail sync (${detailFailures} failed): ${result.failedTcIds.join(", ") || "parse errors"}`
+        : `JMA detail sync failed for all ${result.failedTcIds.length || attempted} listed cyclone(s)`,
+    }
+  }
+  return {
+    status: "success",
+    recordsRead: result.cyclones.length,
+    recordsWritten: result.cyclones.length,
+    sourceUpdatedAt: result.fetchedAt,
+  }
 }
 
 export function createTropicalCycloneSyncJob(options: TropicalCycloneSyncJobOptions): RuntimeJob {
@@ -45,24 +79,7 @@ export function createTropicalCycloneSyncJob(options: TropicalCycloneSyncJobOpti
         longitude: row.longitude,
       }))
       await repository.applyJmaTropicalCycloneSync(result, ports)
-      if (result.outcome === "failed") {
-        return {
-          status: "failed",
-          recordsRead: 0,
-          recordsWritten: 0,
-          errorCode: result.errorCode,
-          errorMessage: result.errorMessage,
-        }
-      }
-      return {
-        status: "success",
-        recordsRead: result.cyclones.length + result.failedTcIds.length,
-        recordsWritten: result.cyclones.length,
-        sourceUpdatedAt: result.fetchedAt,
-        errorMessage: result.failedTcIds.length
-          ? `Partial JMA detail failures: ${result.failedTcIds.join(", ")}`
-          : undefined,
-      }
+      return mapJmaSyncResultToRuntimeResult(result)
     },
   }
 }

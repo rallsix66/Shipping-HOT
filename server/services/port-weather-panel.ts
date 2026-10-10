@@ -10,18 +10,12 @@ import { portDirectoryBaseline } from "@shared/port-directory"
 import { isOfficialWeatherAlertFeedItem } from "#/providers/shipping"
 import type { ShippingRepository } from "#/database/shipping"
 import {
-  filterActiveCyclonesForRules,
-  minTyphoonDistanceKmForPortInInterval,
-} from "#/services/tropical-cyclone-display"
-import type { TyphoonInputState } from "#/services/weather-rule-coverage"
-import { TYPHOON_NO_STORM_DISTANCE_KM } from "#/services/weather-rule-coverage"
-import {
   PRECIP_24H_FULL_HOURLY_SAMPLES,
   PRECIP_24H_PARTIAL_MIN_HOURLY_SAMPLES,
   type Precipitation24hResult,
 } from "#/services/precipitation-window"
-import { isJmaTyphoonSyncTrustworthyForWrS03 } from "#/services/tropical-cyclone-freshness"
-import { evaluatePortWeatherCoverageAt, typhoonInputFromSyncAndDistance } from "#/services/weather-rule-evaluation"
+import { resolveTyphoonInputForImpactInterval } from "#/services/typhoon-wr-s03-resolve"
+import { evaluatePortWeatherCoverageAt } from "#/services/weather-rule-evaluation"
 import {
   PORT_WEATHER_FORECAST_DISPLAY_LIMIT,
   WEATHER_FORECAST_HORIZON_MS,
@@ -163,7 +157,7 @@ export async function getPortWeatherPanel(
   )
 
   const typhoonSync = await repository.getTropicalCycloneSyncMeta({ nowMs })
-  const cyclones = filterActiveCyclonesForRules(await repository.listNormalizedTropicalCyclones())
+  const storedCyclones = await repository.listNormalizedTropicalCyclones()
   const portCoord = portBaseline
     ? {
         portId,
@@ -172,16 +166,9 @@ export async function getPortWeatherPanel(
         longitude: portBaseline.longitude,
       }
     : undefined
-  const resolveTyphoon = (validFrom: string, validUntil: string): TyphoonInputState => {
-    if (!portCoord) return { status: "unavailable" }
-    if (typhoonSync.outcome === "ok_empty" && isJmaTyphoonSyncTrustworthyForWrS03(typhoonSync, nowMs)) {
-      return { status: "checked", distanceKm: TYPHOON_NO_STORM_DISTANCE_KM }
-    }
-    const fromMs = Date.parse(validFrom)
-    const untilMs = Date.parse(validUntil)
-    if (!Number.isFinite(fromMs) || !Number.isFinite(untilMs)) return { status: "unavailable" }
-    const distanceKm = minTyphoonDistanceKmForPortInInterval(cyclones, portCoord, fromMs, untilMs, true)
-    return typhoonInputFromSyncAndDistance(distanceKm, typhoonSync, untilMs)
+  const resolveTyphoon = (validFrom: string, validUntil: string) => {
+    if (!portCoord) return { status: "unavailable" as const }
+    return resolveTyphoonInputForImpactInterval(typhoonSync, storedCyclones, portCoord, validFrom, validUntil, nowMs)
   }
   const coverageEval = evaluatePortWeatherCoverageAt(
     storedForecasts,

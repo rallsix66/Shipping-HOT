@@ -1,5 +1,8 @@
 import { haversineDistanceKm } from "#/services/geo-distance"
 import type { NormalizedTropicalCyclone, NormalizedTyphoonPosition } from "#/services/jma-typhoon-parse"
+import { minTyphoonDistanceKmForWrS03InInterval } from "#/services/typhoon-position-validity"
+
+export { minTyphoonDistanceKmForWrS03InInterval } from "#/services/typhoon-position-validity"
 
 /** Plan §R1.5 focus sea area (approx.). */
 export const TROPICAL_CYCLONE_FOCUS_BBOX = {
@@ -54,32 +57,6 @@ export function minDistanceKmToCyclone(
     best = Math.min(best, haversineDistanceKm(lat, lon, point.lat, point.lon))
   }
   return Number.isFinite(best) ? best : undefined
-}
-
-/** WR-S03: only positions whose valid time falls inside the impact interval. */
-export function minTyphoonDistanceKmForWrS03InInterval(
-  cyclone: NormalizedTropicalCyclone,
-  lat: number,
-  lon: number,
-  validFromMs: number,
-  validUntilMs: number,
-): number | undefined {
-  const candidates: number[] = []
-  if (cyclone.current?.at) {
-    const currentMs = Date.parse(cyclone.current.at)
-    if (Number.isFinite(currentMs) && currentMs >= validFromMs && currentMs <= validUntilMs) {
-      candidates.push(haversineDistanceKm(lat, lon, cyclone.current.lat, cyclone.current.lon))
-    }
-  }
-  for (const point of cyclone.forecast) {
-    const t = Date.parse(point.at)
-    if (!Number.isFinite(t)) continue
-    if (t >= validFromMs && t <= validUntilMs) {
-      candidates.push(haversineDistanceKm(lat, lon, point.lat, point.lon))
-    }
-  }
-  if (!candidates.length) return undefined
-  return Math.min(...candidates)
 }
 
 /** @deprecated Interval-based WR-S03 — use minTyphoonDistanceKmForWrS03InInterval */

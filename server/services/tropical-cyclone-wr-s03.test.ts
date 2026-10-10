@@ -21,7 +21,7 @@ describe("wr-s03 typhoon distance time validity", () => {
   it("does not use undated history min distance for WR-S03 in interval", () => {
     const sample = cyclone({
       trackHistory: [{ lat: 22.49, lon: 113.92 }],
-      current: { lat: 21.0, lon: 150.0, at: "2026-08-15T11:00:00.000Z" },
+      current: { lat: 21.0, lon: 150.0, at: "2026-08-15T08:00:00.000Z" },
     })
     const hourEnd = asOfMs + 60 * 60 * 1000 - 1
     expect(minTyphoonDistanceKmForWrS03InInterval(sample, shekou.latitude, shekou.longitude, asOfMs, hourEnd)).toBeUndefined()
@@ -31,7 +31,7 @@ describe("wr-s03 typhoon distance time validity", () => {
   it("uses forecast point only when its valid time falls inside the impact interval", () => {
     const forecastAt = Date.parse("2026-08-16T12:00:00.000Z")
     const sample = cyclone({
-      current: { lat: 21.0, lon: 150.0, at: "2026-08-15T11:00:00.000Z" },
+      current: { lat: 21.0, lon: 150.0, at: "2026-08-15T08:00:00.000Z" },
       forecast: [{ lat: 22.49, lon: 113.92, at: "2026-08-16T12:00:00.000Z" }],
     })
     const miss = minTyphoonDistanceKmForWrS03InInterval(sample, shekou.latitude, shekou.longitude, asOfMs, asOfMs + 60 * 60 * 1000)
