@@ -6,7 +6,7 @@
 - 信源目录 `docs/intel-source-catalog.md` VN-W01：`https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html`（web_list，vi），ADR-008 官方预警行列出 NCHMF。
 - 抓取时间 2026-10-10 17:07–17:10（UTC+8），UA `ShippingHOT-readonly/1.0`，curl 跟随跳转。日志：`raw/fetch-log.txt`；响应头：`raw/*-headers.txt`。
 
-## 样本（`raw/`，已脱敏：ASP.NET_SessionId、__VIEWSTATE、地图 token 均替换为 `<redacted>`）
+## 样本（`raw/`，已脱敏：ASP.NET_SessionId、__VIEWSTATE、地图 token 均替换为 `<redacted>`；2026-10-10 dots 17:14 复核后补充：详情页内嵌的第三方天气挂件脚本含其 API key（APPID），该脚本块已整段移除、残留参数值替换为 `<redacted>`，不使用、不复述该值。注意：此前提交 `5e439a7` 的 Git 历史中仍含原样本，按规则不做强推改写）
 | 文件 | URL | HTTP |
 |---|---|---|
 | index.html | 入口首页 | 200，259279 B |
@@ -22,12 +22,12 @@
 3. **发布时间/时区**：正文末尾为自由文本，如 `Tin phát lúc: 16h00`（post54353 只有时刻无日期，日期只能取自列表标题）、`Tin phát lúc 15h30' ngày 10/10/2026`。**原文不标时区**（越南当地时间为常识推断，未经原文证实 → 记为未确认）。响应头无 Last-Modified。
 4. **有效期**：没有结构化 valid_from/valid_to。正文只有“预报 24 小时内 / 24–48 小时”及“下一期发布时间”（如 `Tin phát tiếp theo lúc: 04h00 ngày 11/10`、`Bản tin tiếp theo được phát lúc: 15h30 ngày 11/10/2026`）。有效期 = **未知**；下一期时间只能作为参考文本保存。
 5. **影响区域**：只在正文自由文本中，例如 post54353“vùng biển từ Nam Quảng Trị đến Cà Mau … vịnh Thái Lan … Bắc Biển Đông”；post54492“ven biển Nam Bộ”，站点 Vũng Tàu（TP. Hồ Chí Minh）。没有多边形、坐标、行政编码。原文**未提及** Cát Lái / Sài Gòn 港或任何港口名。
-6. **级别**：没有 CAP 式 severity。部分正文有官方文字“Cấp độ rủi ro thiên tai trên biển: cấp 2”（海上灾害风险等级 2，post54353），这是原文字段，可原样保存；其他样本（洪水、潮汛）未见同类字段 → 未提供。不推断 severity。
+6. **级别**：没有 CAP 式 severity。正文中有官方原文风险级别：海上 post54353“Cấp độ rủi ro thiên tai trên biển: cấp 2”；洪水 post54547“Cảnh báo cấp độ rủi ro thiên tai do lũ: Cấp 1”。潮汛 post54492 正文未给出级别 → 未提供。原文级别按“原始级别，标准化严重度未映射”原样保存展示，**不映射到 CAP 或系统级别**，不推断 severity。（更正：此前写“洪水样本未见同类字段”有误。）
 7. **附件**：页面内 PDF 链接（kttv.gov.vn）本次均 404，PDF 不可作为依赖。
 8. **空数据 vs 抓取失败**：不存在的 post 返回 **HTTP 200 + 空正文**（标题区为空）。因此 HTTP 200 不能证明拿到预警；需以“正文标题/内容区非空”判定。网络错误/非 200 = 抓取失败；首页列表无预警类链接 = 空（但不能区分“确无预警”与“页面改版”）。
 9. 列表混有非预警内容（10 天趋势、水文日报、10 天浪/流预报），需按标题/栏目白名单区分预警类（`TIN CẢNH BÁO`、`TIN DỰ BÁO GIÓ MẠNH, SÓNG LỚN`、`TIN DỰ BÁO MƯA LỚN`、台风等）。
 
 ## 未知（如实记录）
-时区、有效期、结构化区域、官方 severity（除个别正文“灾害风险等级”外）、取消/替代关系、港口覆盖：均为**未知**。不编造级别，不推断 VNSGN/港口覆盖。
+时区、有效期、结构化区域、官方 severity（仅部分正文有原文“灾害风险等级”，如 post54353 cấp 2、post54547 Cấp 1，原样保留、不映射）、取消/替代关系、港口覆盖：均为**未知**。不编造级别，不推断 VNSGN/港口覆盖。
 
 集成建议见 `docs/evidence/nchmf-warning-2026-10-10-integration-proposal.md`。

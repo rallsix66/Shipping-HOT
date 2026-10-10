@@ -188,7 +188,7 @@
                      <iframe src="//www.facebook.com/plugins/like.php?locale=en_US
                         &amp;href=https://www.facebook.com/congdongvnexpress&amp;width&amp;
                         layout=button&amp;action=like&amp;show_faces=false&amp;
-                        share=false&amp;height=21&amp;appId=283547481836738" 
+                        share=false&amp;height=21&amp;appId=<redacted>" 
                         scrolling="no" frameborder="0" style="border:none; 
                         overflow:hidden; height:21px; width:50px;" allowtransparency="true">
                         </iframe>
@@ -392,53 +392,7 @@
                 </div>
 
             </div>
-            <script>
-                function LoadDataLondon() {
-                    $.ajax({
-                        url: "http://api.openweathermap.org/data/2.5/weather?q=London,uk&units=metric&APPID=0764da218a7267a82edda73b6843bb19",
-                        dataType: 'jsonp',
-                        success: function (results) {
-                            var title = ' ' + results.main.temp + ' °C' ;
-                            $('#idLondon').append(title);
-                        }
-                    });
-                }
-                function LoadDataTokyo() {
-                    $.ajax({
-                        url: "http://api.openweathermap.org/data/2.5/weather?q=Tokyo,jp&units=metric&APPID=0764da218a7267a82edda73b6843bb19",
-                        dataType: 'jsonp',
-                        success: function (results) {
-                            var title = ' ' + results.main.temp + ' °C' ;
-                            $('#idTokyo').append(title);
-                        }
-                    });
-                }
-                function LoadDataNewYork() {
-                    $.ajax({
-                        url: "http://api.openweathermap.org/data/2.5/weather?q=New York,US&units=metric&APPID=0764da218a7267a82edda73b6843bb19",
-                        dataType: 'jsonp',
-                        success: function (results) {
-                            console.log(results);
-                            var title = ' ' + results.main.temp + ' °C' ;
-
-                            $('#idNewYork').append(title);
-                        }
-                    });
-                }
-                function LoadDataParis() {
-                    $.ajax({
-                        url: "http://api.openweathermap.org/data/2.5/weather?q=Paris,FR&units=metric&APPID=0764da218a7267a82edda73b6843bb19",
-                        dataType: 'jsonp',
-                        success: function (results) {
-                            var title = ' ' + results.main.temp + ' °C' ;
-                            $('#idParis').append(title);
-                        }
-                    });
-                }
-
-               
-
-            </script>
+            <!-- third-party weather widget script removed (contained API key; redacted) -->
         </article>
 
       
