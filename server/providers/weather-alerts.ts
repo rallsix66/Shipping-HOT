@@ -5,6 +5,7 @@ import type { DataProvenance, FeedItem, Port, WeatherDetail } from "@shared/ship
 import { mockPorts } from "@shared/shipping-fixtures"
 import type { ArticleSourcePolicyConfig } from "@shared/article"
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
+import { type CapSourceContext, capIndexLinks, isRetiredBy, parseCapMessage, resolveCapBatch } from "#/providers/cap-alerts"
 
 export interface WeatherAlertProvider {
   readonly providerId?: string
@@ -28,7 +29,10 @@ export interface WeatherAlertSource {
   name: string
   url: string
   sourceUrl: string
-  format: "rss" | "cap" | "html"
+  /** "cap_index": RSS index whose items link to CAP 1.2 documents (TMD TH-W01); lifecycle comes from CAP. */
+  format: "rss" | "cap" | "cap_index" | "html"
+  /** Issuing country (ISO 3166-1 alpha-2) for CAP structured-area checks. */
+  countryCode?: string
   parser: WeatherAlertParser
   enabled: boolean
   liveStatus: WeatherAlertSourceStatus
@@ -51,7 +55,8 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
     name: "Thai Meteorological Department",
     url: "https://www.tmd.go.th/en/api/xml/CAP",
     sourceUrl: "https://www.tmd.go.th/en/service/rss",
-    format: "rss",
+    format: "cap_index",
+    countryCode: "TH",
     parser: "tmd",
     enabled: true,
     liveStatus: "verified_live",
@@ -237,39 +242,33 @@ export function parseWeatherAlertRss(xml: string, source: WeatherAlertSource, po
   return normalized
 }
 
-function capInfoAlerts(xml: string): RawAlert[] {
-  const parsed = parser.parse(xml) as { alert?: unknown }
-  const alerts = asArray<Record<string, unknown>>(parsed.alert as Record<string, unknown> | Record<string, unknown>[] | undefined)
-  return alerts.flatMap((alert) => {
-    const info = asArray<Record<string, unknown>>(alert.info as Record<string, unknown> | Record<string, unknown>[] | undefined)[0]
-    if (!info) return []
-    const area = asArray<Record<string, unknown>>(info.area as Record<string, unknown> | Record<string, unknown>[] | undefined)[0]
-    return [{
-      identifier: alert.identifier,
-      title: info.headline ?? info.event,
-      summary: info.description ?? info.instruction,
-      link: info.web,
-      issuedAt: alert.sent,
-      updated: alert.sent,
-      effectiveAt: info.effective ?? info.onset,
-      onsetAt: info.onset,
-      expiresAt: info.expires,
-      severity: info.severity,
-      urgency: info.urgency,
-      certainty: info.certainty,
-      region: area?.areaDesc,
-      active: true,
-    } satisfies RawAlert]
-  })
+export function capSourceContext(source: WeatherAlertSource): CapSourceContext {
+  return { id: source.id, name: source.name, sourceUrl: source.sourceUrl, countryCode: source.countryCode ?? "", provenance: weatherAlertProvenance(source) }
 }
 
-export function parseWeatherAlertCap(xml: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
+/**
+ * Single CAP document(s). Lifecycle derives from CAP fields (status/msgType/references/expires) via
+ * resolveCapBatch — there is no unconditional active=true any more. Ports come only from structured geocodes.
+ */
+export function parseWeatherAlertCap(xml: string, source: WeatherAlertSource, _ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
   const parsed = parser.parse(xml) as { alert?: unknown }
   if (parsed.alert === undefined) throw new Error(`${source.name} CAP payload has no alert root`)
-  const alertCount = asArray(parsed.alert as Record<string, unknown> | Record<string, unknown>[]).length
-  const normalized = capInfoAlerts(xml).slice(0, 20).map((item, index) => normalizeAlert(item, source, ports, fetchedAt, index)).filter((item): item is FeedItem => item !== undefined)
-  if (alertCount > 0 && normalized.length === 0) throw new Error(`${source.name} CAP payload has no valid alert entries`)
-  return normalized
+  return resolveCapBatch([parseCapMessage(xml)], capSourceContext(source), fetchedAt).items
+}
+
+function retiredByOfficialUpdate(item: FeedItem, fetchedAt: string): FeedItem {
+  return {
+    ...item,
+    severity: "info",
+    hotReason: undefined,
+    summary: `${item.summary} 该预警已被官方更新或取消。`,
+    weather: item.weather ? { ...item.weather, alertState: "expired" } : item.weather,
+    eventEligibility: false,
+    fetchedAt,
+    stale: false,
+    sourceStatus: "healthy",
+    error: undefined,
+  }
 }
 
 interface ParsedHtmlAlerts {
@@ -437,6 +436,23 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
         }
         try {
           const body = await response.text()
+          if (source.format === "cap_index") {
+            const messages: ReturnType<typeof parseCapMessage>[] = []
+            for (const link of capIndexLinks(body)) {
+              const document = await fetcher(link)
+              if (!document.ok) throw providerHttpError(source.name, document.status, `${source.name} CAP document request failed (${document.status})`)
+              messages.push(parseCapMessage(await document.text(), link))
+            }
+            const batch = resolveCapBatch(messages, capSourceContext(source), fetchedAt)
+            const currentIds = new Set(batch.items.map(item => item.id))
+            const carried = previous.filter(item => !currentIds.has(item.id))
+            const cleared = carried.map(item => isRetiredBy(item, source.id, batch.retiredKeys)
+              ? retiredByOfficialUpdate(item, fetchedAt)
+              : hasExpiredEvidence(item, fetchedAt)
+                ? expiredAsInfo(item, fetchedAt)
+                : item.weather?.alertState === "expired" ? item : markMissingFromCurrentIndex(item, fetchedAt))
+            return [...batch.items, ...cleared]
+          }
           const parsed = source.format === "cap"
             ? parseWeatherAlertCap(body, source, ports, fetchedAt)
             : source.format === "rss"

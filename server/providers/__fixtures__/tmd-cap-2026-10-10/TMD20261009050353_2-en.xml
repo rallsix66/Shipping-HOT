@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+  <identifier>TMD20261009050353_2-en</identifier>
+  <sender>TMD</sender>
+  <sent>2026-10-09T04:58:00+07:00</sent>
+  <status>Actual</status>
+  <msgType>Update</msgType>
+  <scope>Public</scope>
+  <references>TMD,TMD20261008161413_2,2026-10-08T16:10:00+07:00</references>
+  <info>
+    <language>en-US</language>
+    <category>Met</category>
+    <event>Heavy Rain</event>
+    <urgency>Immediate</urgency>
+    <severity>Severe</severity>
+    <certainty>Likely</certainty>
+    <effective>2026-10-09T05:00:00+07:00</effective>
+    <expires>2026-10-09T18:00:00+07:00</expires>
+    <senderName>TMD</senderName>
+    <headline>Heavy Rain Risk Area</headline>
+    <description>The high-pressure system covers upper North and the upper Northeast while the southeasterly wind bring the moisture from the South China Sea to the eastern part of the Northeast and the East. Meanwhile, the monsoon trough lies across the Gulf and the South. 
+Isolated heavy rains are forecast in the South while less rains and isolated heavy rain are forecast in the eastern part of the Northeast and the East.
+For the Andaman Sea and the Gulf, waves will be higher than 2 meters high in thundershower areas. 
+</description>
+    <instruction> People in these area should beware of heavy rains and accumulations that may cause flash flood and overflows, especially along the waterways near foothills and lowlands.  All ships should keep off thundershowers. </instruction>
+    <web>https://www.tmd.go.th/en/forecast/daily</web>
+    <area>
+      <areaDesc>Chantaburi Trad Surin Sri Saked Ubon Ratcha Thani Amnat Chareon Nakhon Phanom Phetburi Prachaup Khiri Kan Nakhon Sri Thammarat Surat Thani Songkhla Pattalung Yala Narathiwat</areaDesc>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 505 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 41 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 12 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 41 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 119 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 321 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 238 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 277 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 147 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 172 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 304 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 390 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 202 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 12 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 16 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 30 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 9 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 261 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 24 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 17 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 9 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 325 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 50 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 23 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 114 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 779 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 328 vertices omitted --></polygon>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-22</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-23</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-32</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-33</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-34</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-37</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-38</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-48</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-76</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-77</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-80</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-84</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-90</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-93</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-95</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-96</value>
+      </geocode>
+    </area>
+  </info>
+  <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+    <SignedInfo>
+      <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+      <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
+      <Reference URI="">
+        <Transforms>
+          <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+        </Transforms>
+        <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+        <DigestValue>Vgd8+MzLWEHaok9EYRIuj84KM1CChAW6jO8B53mv5bI=</DigestValue>
+      </Reference>
+    </SignedInfo>
+    <SignatureValue>JAIJ7bV0tcmPn4gJbbyCPQMcoi7up9y7xHzkkTzb4K3BW71q1hdN3XSZovbQjZNEYvz7G+YRRNRGWzx4WzuBCvP/26L3u1c8e4QwfTFD0z3uI4ArlbJoBNHo20spGhf2F3X96vUsEmaHCes8PQA7RDF2FLXJinqngzAUoftu1HWb+V+A75JbPEOg7jOS3RJoRrMFfzhhBA8YUK+crZP/LFSMq1DfYRTgqsTZZDC++05Lxyoa6JMMLbwcnSn4nmRvhgZIlp2sQ+rKU8INV+M+Bog/tmfOgrnSsQ3kM+Tl0RsUX2YjsVFTCRFIm3PP6QWAcTaj4oSTShir3GqJ5KT/uQ+8miI9CxVWnowqWP0loSX2A0fdZKvtB3i/4kA/8JG6a0lnQd2jdnrbcQ4ZStWLnM5dT5hwcP1siJ6l+Y6yEjSgOYXQ/ThomMrRtArJLyngmi6/WziV/0oA/XvvDBrOfPTm3/BMuT4xfCvQS1/l2jfqdYlHTan5URmIlt2wMBRYd2Ku5JD/p3cu5F7dXMagQ81JqVStpvi7cwAoU0TMIiyvEL3hyKFyaSK0Dtax2cV55mvpdXiHo7DO4Sus6cicAkzFl1eUBO8g1rmC8g1x83zh6AJWa/VL036bFiVCzCOnC1jnuvsuQQdwy/aflIATzGb1GcbadHcXxmP+uBhj9b0=</SignatureValue>
+    <KeyInfo>
+      <X509Data>
+        <X509Certificate>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</X509Certificate>
+      </X509Data>
+    </KeyInfo>
+  </Signature>
+</alert>

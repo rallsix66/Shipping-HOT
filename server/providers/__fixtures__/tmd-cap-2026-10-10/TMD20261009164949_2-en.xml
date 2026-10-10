@@ -1,0 +1,286 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+  <identifier>TMD20261009164949_2-en</identifier>
+  <sender>TMD</sender>
+  <sent>2026-10-09T16:28:00+07:00</sent>
+  <status>Actual</status>
+  <msgType>Update</msgType>
+  <scope>Public</scope>
+  <references>TMD,TMD20261009050353_2,2026-10-09T04:58:00+07:00</references>
+  <info>
+    <language>en-US</language>
+    <category>Met</category>
+    <event>Heavy Rain</event>
+    <urgency>Immediate</urgency>
+    <severity>Severe</severity>
+    <certainty>Likely</certainty>
+    <effective>2026-10-09T16:45:00+07:00</effective>
+    <expires>2026-10-10T06:00:00+07:00</expires>
+    <senderName>TMD</senderName>
+    <headline>Heavy Rain Risk Area</headline>
+    <description>The high-pressure system covers the upper North and the upper Northeast while the easterly wind and the southeasterly wind bring the moisture from the South China Sea to the eastern part of the Northeast and the East. Meanwhile, the monsoon trough lies across the Gulf and the South. 
+
+Less rains is likely in the upper country while isolated heavy rains are forecast in the eastern part of the Northeast and the East the South while and isolated heavy rain are forecast in. 
+
+For the Andaman Sea and the Gulf, waves will be higher than 2 meters high in thundershower areas. 
+
+</description>
+    <instruction> People in these area should beware of heavy rains and accumulations that may cause flash flood and overflows, especially along the waterways near foothills and lowlands.  All ships should keep off thundershowers. </instruction>
+    <web>https://www.tmd.go.th/en/forecast/daily</web>
+    <area>
+      <areaDesc>Chantaburi Trad Sakaeo Sri Saked Ubon Ratcha Thani Amnat Chareon Nakhon Phanom Mookdahan Phetburi Prachaup Khiri Kan Nakhon Sri Thammarat Krabi Pang Nga Phuket Surat Thani Songkhla Satun Trang Pattalung Yala Narathiwat</areaDesc>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 505 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 41 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 12 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 41 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 119 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 362 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 238 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 277 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 147 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 172 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 116 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 304 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 390 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 202 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 25 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 10 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 12 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 7 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 7 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 213 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 34 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 19 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 14 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 30 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 7 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 10 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 190 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 7 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 89 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 12 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 16 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 30 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 9 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 261 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 24 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 17 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 9 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 325 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 50 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 7 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 8 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 7 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 7 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 22 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 11 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 7 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 106 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 13 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 6 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 5 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 9 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 173 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 23 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 114 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 779 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 4 vertices omitted --></polygon>
+      <polygon><!-- sanitized: 328 vertices omitted --></polygon>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-22</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-23</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-27</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-33</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-34</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-37</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-38</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-48</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-49</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-76</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-77</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-80</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-81</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-82</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-83</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-84</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-90</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-91</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-92</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-93</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-95</value>
+      </geocode>
+      <geocode>
+        <valueName>ISO3166-2</valueName>
+        <value>TH-96</value>
+      </geocode>
+    </area>
+  </info>
+  <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+    <SignedInfo>
+      <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+      <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
+      <Reference URI="">
+        <Transforms>
+          <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+        </Transforms>
+        <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+        <DigestValue>MBighDB2Z/3XNFJVAwobtl5EH5NfIHVsSaqj+AjJ974=</DigestValue>
+      </Reference>
+    </SignedInfo>
+    <SignatureValue>IzRcURq/YyE6PnRao/JtbBD56v4njfSEqzONcdd4BSYd7AQj7OA778vwis8P69QIBEYr/6vHhzP0WaNsmngcDoLWhyzK43wh6iArH07QaPHgUgR38T/pCsx1yoXCkyHI9Hn9hLgVvjoO2tGHPZnOvdzXKC0gC2h1qpeDuEqHq4LVjUqqm+KXeWQzWzBlFSp1SjXJ/oupbynyqvQ1Rlr994clQe0RPH5sPH7+2RWh+0K0xzsLxgm0ChovvEgWNlkmizfi+AP+iepeV/uO99eDUL0oCC6RWxVy0XTLZjRhNDoJwmjyR37eXHzdA3XAK2iBcnD3+zT7uoG7Lo4hwmcZHvxGl1ZC9ZlIwb/xJFkVu4/Ec5jChKRcwli9MJZEa8KjMo/FMw0XcFfmKzhqZQMXS0c3Abuk8lVF1I1MHGTszN2E/6RFXimupRfT+wrxhWtXowPFlbIRA6swrH6ZZAkdWPx5yhJ6gziwMpgu6Zz+0UROsEZUwdIACNqN4hBqNhAdehu6r9DbXl/k8chWII9XCAnBFc8t7a0Df6M7qmzlyeoYfptUpuvFu+8EgXk99iXBR5GKRocE31TT9OEV0vkHdm2k+Ylt9fYA8i7Rd/IhcqO7SEuHmM0YWvxE8chKUexWyha4AgKwNNrxAGJyhwrL61pBfwaEPmtHWNUo8DX+PNY=</SignatureValue>
+    <KeyInfo>
+      <X509Data>
+        <X509Certificate>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</X509Certificate>
+      </X509Data>
+    </KeyInfo>
+  </Signature>
+</alert>
