@@ -64,21 +64,23 @@
   - **R1.5-2：** **NOT_RUN**（整项）— 说明：§4.8 **WR-S01..WR-S05** 命中/不命中/边界已落地（`weather-impact-engine.test.ts`）；**官方预警表行未实现**。
   - **R1.5-3：** **NOT_RUN**（整项）— 说明：已验证范围仅为当前规则的 `potential`/`system` 输出（同上）；不含官方预警升级语义。
   - **R1.5-4：** **BLOCKED** — 合格 **0/10**；回放命中口径 **warning/critical**（watch 不计）；≥10 样本且 **≥80% 回放** 才解除 blocked，**不**自动标 PASS。候选 `port-closure-replay-candidates.ts` 含 `verificationAudit` 初核记录，仍 **blocked**。
-  - **R1.5-1（整项）：** **PASS（2026-10-10，PR #7 未合并）** — 隔离目录 **`.tmp/r1-5-1-live-2026-10-10T02-49-03-058Z`**：`scripts/r1-5-1-live-acceptance.mjs` + 机器证据 **`r1-5-1-evidence.json`** / **`r1-5-1-sync-live.json`**；摘要 **`docs/evidence/r1-5-1-live-eight-port-2026-10-10.md`**（绑定 commit 见该文档，以下 SHA 在 closeout commit 后补全）。
-    - **实网 Open-Meteo（八港）：** `weather-sync` **success** → SQLite **1352** 行 `weather_forecast`；七口径 **hourly only** 在 `[now−1h, now+7d]` 内 **≈166/港**（**不含** current 凑数）；重启后 API + 浏览器 **forecastMeta.hourlyReturned** 一致。
-    - **VNSGN 海况：** **BLOCKED（覆盖未达标）** — 166/166 hourly **浪/涌浪缺测**；API/UI **`marineCoverageNote`** 已展示（**≠** 满足 §4.8 海况覆盖）；最小后续：L 阶段评估近海格点或获批替代源（本批 **未改**取点）。
-    - **实网 JMA：** **success**，归档 **outcome=`ok`**、**2** 气旋（运行日真实列表，**非** ok_empty）；面板按可见性规则可显示 **activeCount=0**（关注海域/1000 km 过滤），与 SQLite 归档并存。
-    - **夹具浏览器（partial/failed/stale/ok_empty/多路径）：** **PASS** — **`scripts/e2e-s7-integrated.mjs`**，**.tmp/s7-local/s7-integrated-evidence.json**（**151** / `failedChecks: []`），与实网证据 **分列**。
-    - **继承（非 R1.5-1 重验）：** 双时钟 WR-S03、partial Runtime 映射、单元/链式测试见 **`6d8b232`** 批。
+  - **R1.5-1（整项）：** **BLOCKED**（2026-10-10 复审修复后；PR #7 未合并）。按 9/29 主方案 R1.5-1「8 个港口都有 7 天的海况和陆地预报」，**无例外**：VNSGN 浪/涌浪缺测即使有说明也**不算**覆盖达标；7 天窗口终点未覆盖同样不达标。结论：**harness 已修复，业务验收仍 BLOCKED**。
+    - **证据（绑定代码提交 `be5f2e4b14258404f769eb68ff07130cc2361732`，工作区干净，build 晚于该提交）：** 隔离目录 `.tmp/r1-5-1-live-2026-10-10T03-40-07-858Z`；脱敏副本 `docs/evidence/r1-5-1-live-2026-10-10/`（`r1-5-1-evidence.json`、`r1-5-1-sync-live.json`、`gate-summary.txt`、`live.log`）；摘要 `docs/evidence/r1-5-1-live-eight-port-2026-10-10.md`。`pnpm test:r1-5-1-live` exit **2 = BLOCKED**（0 = PASS，1 = FAIL）。
+    - **已验证子链路（VERIFIED）：** 种子→隔离库；实网 Open-Meteo（8 港 marine+weather 共 16 请求全 200）→ SQLite；**八港**重启后 API 持久化；API 未被截断（八港 DB 窗口内 hourly = API hourlyReturned = 165）；浏览器八港 `/ports/:id` 页面逐港断言 `port-weather-forecast-meta` 与重启后 API 一致；JMA 实网归档 outcome=`ok`；S7 夹具（同一 SHA、151/151、Flow A/B/C、外部请求 0）。
+    - **七天覆盖（逐港 BLOCKED）：** 窗口 `[now−1h, now+7d]`，只计 hourly、逐整点网格（唯一、首尾、无缺口、陆地字段 + 海况字段），current 单列（每港 1）。八港均 165/169：Open-Meteo `forecast_days=7` 只返回到第 7 天 23:00 UTC，`now+7d` 末尾 4 个整点缺失（`window_end_covered`、`no_missing_hours` 失败）。VNSGN 另有 165/165 浪/涌浪缺测（`marineCoverageNote` 仅为降级展示）。最小后续（需批准，本批**未改**）：评估 `forecast_days=8`（同时须把面板 `ORDER BY forecast_at ASC LIMIT 172` 改为按窗口读取，否则未来小时会被挤出）；VNSGN 近海格点或获批替代源（未改 `cell_selection=sea`、坐标、数据源）。
+    - **JMA：** 归档（SQLite 存储）**2** 条（`tc-jma-TC2634`、`tc-jma-TC2635`）；关注海域活跃数 **0**（面板可见性规则）；两者分开报告，不再用库内总数当活跃数。
+    - **harness 修复（复审 1–5）：** 重启后的服务保持到八港浏览器检查结束、finally 清理；CDP 协议错误/超时会失败，evaluate 读 `result.result.value`；缺 Chrome → NOT_RUN/BLOCKED；种子失败立即中止；S7 必须同 SHA + 工作区干净 + 全量检查集；删除「缺失但有说明即通过」与「延后到 L 阶段所以通过」。
+    - **同日早先运行（不作为证据）：** `03-33-53`（南沙 0 行）、`03-37-32`（南沙、巴生 0 行）为 Open-Meteo 单港失败被 `weather-sync` 容忍（job 仍 success）——已加 egress 记录并判为 BLOCKED；`03-35-08` / `03-35-31` 为两次并发误启动，作废。
+  - **继承（非 R1.5-1 重验）：** 双时钟 WR-S03、partial Runtime 映射、单测/链式测试见 **`6d8b232`** 批次。
   - **双时钟 WR-S03（2026-10-10，PR #7）：** **数据新鲜度**仅相对计算 **`now`**（`isJmaTyphoonSyncTrustworthyForWrS03` / `lastFullSuccessAt` TTL）；**台风位置适用性**相对每条 impact 的 **`validFrom`–`validUntil`** 与有界当前中心（3h）/预报点窗口求交，未知区间 → `unavailable`（不延伸整周、不用未来 `validUntil` 刷新 TTL）。Runtime **`weather-sync`** 与 **`getPortWeatherPanel`** 共用 `resolveTyphoonInputForImpactInterval`。
   - **JMA partial → Runtime：** `mapJmaSyncResultToRuntimeResult` 对 **`partial`** 一律 **`status: failed`**（`jma_detail_partial_failure` / `jma_detail_total_failure`）；SQLite 保留路径与 **`lastFullSuccessAt`**，BackgroundRuntime **不**刷新 `lastSuccessAt`、递增 **`consecutiveFailures`**（`tropical-cyclone-background-runtime.test.ts`）。
   - **链式测试：** `typhoon-position-validity.test.ts`（12:00 定位→12:15 天气、整点 TTL、稀疏预报）；`tropical-cyclone-wr-s03-impact-chain.test.ts`（**Job→SQLite→Panel**：当日距远不命中、48h 近场命中、TTL 过期后 WR-S03 **unevaluated**；受控时间 **≤ now**）。
   - **天气链路：** `computePortWeatherImpacts(..., resolveTyphoon(interval))` + 港口面板同口径（见上双时钟解析）。
-  - **S7：** **2026-10-10 PASS**（**151** checks / 0 FAIL；`.tmp/s7-local/s7-integrated-evidence.json`）。
-- **仍 NOT_RUN / pending：** R1.5-5/6/7；R1.5-4 **BLOCKED 0/10**。
-  - **定向验证（R1.5-1 closeout）：** Vitest **561/564**；G（typecheck/lint/build）+ **`pnpm smoke:p0-native`** + S7 **151/0** + **`pnpm test:r1-5-1-live`**（隔离 **`.tmp/r1-5-1-live-2026-10-10T02-49-03-058Z`**）+ Neat Freak **audit exit 0**；**未**合并 / **未**部署 / **未** R2。
-- **Neat Freak（本批）：** Git Bash `scripts/audit-inventory.sh` exit **0**；**pending：** R1.5-4、R1.5-1 live。
-- **结论：** **R1.5 = IN PROGRESS / BLOCKED on R1.5-4**（**非**阶段 PASS）。
+  - **S7：** **2026-10-10 PASS**（**151** checks / 0 FAIL；重跑绑定 `be5f2e4`，见 R1.5-1 证据）。
+- **仍 NOT_RUN / pending：** R1.5-5/6/7 **NOT_RUN**；R1.5-4 **BLOCKED 0/10**；R1.5-1 **BLOCKED**（见上）。
+  - **门禁（`be5f2e4`，2026-10-10）：** `pnpm install --frozen-lockfile` 0；`pnpm build` 0；`pnpm typecheck` 0；`pnpm lint` 0；Vitest **83 files / 572 passed / 3 skipped** exit 0；`pnpm smoke:p0-native` 0；S7 **151/151** exit 0；`pnpm test:r1-5-1-live` exit **2（BLOCKED）**；Neat Freak `scripts/audit-inventory.sh .` exit 0。**未**合并 / **未**部署 / **未**开始 R2。
+- **Neat Freak（本批）：** Git Bash `scripts/audit-inventory.sh .` exit **0**。
+- **结论：** **R1.5 = IN PROGRESS**；R1.5-1 **BLOCKED**（harness 已修复）、R1.5-4 **BLOCKED**；**非**阶段 PASS。
 
 ### R0 — 门禁 G 执行记录
 

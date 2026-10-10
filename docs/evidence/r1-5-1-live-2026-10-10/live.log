@@ -1,0 +1,42 @@
+
+> shipping-hot@0.0.41 test:r1-5-1-live D:\try one\Shipping HOT
+> node scripts/r1-5-1-live-acceptance.mjs
+
+Evidence: D:\try one\Shipping HOT\.tmp\r1-5-1-live-2026-10-10T03-40-07-858Z\r1-5-1-evidence.json
+{
+  "total": 68,
+  "passed": 60,
+  "harnessFailed": [],
+  "prerequisiteMissing": [],
+  "businessBlocked": [
+    "coverage_port-shekou",
+    "coverage_port-yantian",
+    "coverage_port-nansha",
+    "coverage_port-laem-chabang",
+    "coverage_port-klang",
+    "coverage_port-manila",
+    "coverage_port-jakarta",
+    "coverage_port-ho-chi-minh"
+  ]
+}
+{
+  "seedToIsolatedDb": "VERIFIED",
+  "liveWeatherSyncToSqlite": "VERIFIED",
+  "restartPersistenceApiEightPorts": "VERIFIED",
+  "browserEightPortPages": "VERIFIED",
+  "apiNotTruncated": "VERIFIED",
+  "jmaLiveArchive": "VERIFIED",
+  "fixtureTropicalBrowserS7": "VERIFIED",
+  "sevenDayCoveragePerPort": {
+    "port-shekou": "BLOCKED: window_end_covered, no_missing_hours",
+    "port-yantian": "BLOCKED: window_end_covered, no_missing_hours",
+    "port-nansha": "BLOCKED: window_end_covered, no_missing_hours",
+    "port-laem-chabang": "BLOCKED: window_end_covered, no_missing_hours",
+    "port-klang": "BLOCKED: window_end_covered, no_missing_hours",
+    "port-manila": "BLOCKED: window_end_covered, no_missing_hours",
+    "port-jakarta": "BLOCKED: window_end_covered, no_missing_hours",
+    "port-ho-chi-minh": "BLOCKED: window_end_covered, no_missing_hours, marine_wave_or_swell_present"
+  }
+}
+R1.5-1 live acceptance: BLOCKED
+ ELIFECYCLE  Command failed with exit code 2.
