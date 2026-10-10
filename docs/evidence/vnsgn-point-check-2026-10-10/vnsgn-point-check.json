@@ -1,0 +1,48 @@
+{
+ "inside_HCM_seaward_envelope": true,
+ "natural_earth_10m_on_land": false,
+ "osm_nearest_coastline_way": 269739594,
+ "osm_nearest_coast_km": 5.57,
+ "osm_side": "water(right)",
+ "osm_timestamp": "2026-10-10T05:30:20Z",
+ "dist_official_VNSGN_km": 61.8,
+ "dist_HCM1_km": 5.5,
+ "probes": [
+  {
+   "model": "best_match",
+   "url": "https://marine-api.open-meteo.com/v1/marine?latitude=10.2917&longitude=107.0417&hourly=wave_height,swell_wave_height&forecast_days=8&past_days=1&timeformat=unixtime&cell_selection=sea&models=best_match",
+   "requested_at_utc": "2026-10-10T05:31:34+00:00",
+   "cell": [
+    10.291664,
+    107.04167
+   ],
+   "request_to_cell_km": 0.01,
+   "cell_to_official_km": 61.8,
+   "cell_inside_envelope": true,
+   "total_hours": 216,
+   "rolling7d": "169/169",
+   "window": [
+    "2026-10-10T05:00:00+00:00",
+    "2026-10-17T05:00:00+00:00"
+   ]
+  },
+  {
+   "model": "ncep_gfswave025",
+   "url": "https://marine-api.open-meteo.com/v1/marine?latitude=10.2917&longitude=107.0417&hourly=wave_height,swell_wave_height&forecast_days=8&past_days=1&timeformat=unixtime&cell_selection=sea&models=ncep_gfswave025",
+   "requested_at_utc": "2026-10-10T05:31:34+00:00",
+   "cell": [
+    10.25,
+    107.0
+   ],
+   "request_to_cell_km": 6.49,
+   "cell_to_official_km": 63.7,
+   "cell_inside_envelope": true,
+   "total_hours": 216,
+   "rolling7d": "169/169",
+   "window": [
+    "2026-10-10T05:00:00+00:00",
+    "2026-10-17T05:00:00+00:00"
+   ]
+  }
+ ]
+}

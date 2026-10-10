@@ -104,3 +104,29 @@
 - 第三轮写的「官方没有固定代表点」改为：**本轮尚未核实到官方代表海况点**。
 - 官方能证明的只有一片**区域**（Gành Rái / Đồng Tranh 湾港口水域）。以后如果在这片区域里选一个点，只能标注为「**工程参考点**」，不能说成 VNSGN 官方海况点；而且要先经过批准、补 ADR。
 - VNSGN 继续按方案 A 处理，R1.5-1 保持 **BLOCKED**。
+
+## 第五轮补充：单点核查 10.2917N 107.0417E（只读，2026-10-10 13:31 UTC+8）
+
+文件位置：`docs/evidence/vnsgn-point-check-2026-10-10/`。其中 `vnsgn-point-check.png` 是示意图，`vnsgn-point-check.json` 是原始结果，`vchk.py` 是可复现脚本。
+
+**是否在水域、是否在港口水域内：**
+
+- **01/2026/TT-BXD 边界：** 用附录 II 的 WGS-84 坐标连成 HCM1–HCM7 海向边界线，该点在线以内（`inside_HCM_seaward_envelope=true`），距 HCM1（头顿岬）5.5 km。
+- **海岸线：** 用 OpenStreetMap 的 `natural=coastline`（Overpass 查询，数据时间 2026-10-10T05:30:20Z）。最近的海岸线是 way 269739594，距离 5.57 km。按 OSM 约定（陆地在线的左侧）判断，该点在**水域一侧**。用 Natural Earth 10m 陆地图层交叉检查，也**不在陆地上**。
+- 结论：该点位于 01/2026/TT-BXD 公布的胡志明市港口水域（Gành Rái 湾区域）内的水面上。两点说明：一是海岸线只用了 OSM 和 Natural Earth，没有用越南官方海图（VN3GR001 等）核对；二是边界只按海向连线判断，陆向一侧以海岸线为界。
+
+**重新请求该点**（`hourly=wave_height,swell_wave_height&forecast_days=8&past_days=1&timeformat=unixtime&cell_selection=sea`，数据源 Open-Meteo Marine API，`marine-api.open-meteo.com`；请求时间 2026-10-10T05:31:34Z）：
+
+| 模型 | 实际返回格点 | 请求点→格点 | 格点→VNSGN 官方坐标（10.77N 106.75E） | 格点在边界内 | 返回总小时数 | 滚动 7 天窗口（05:00Z → +7d 05:00Z） |
+|---|---|---|---|---|---|---|
+| best_match | 10.291664N 107.04167E | 0.01 km | 61.8 km | 是 | 216 | **169/169** |
+| ncep_gfswave025（0.25°） | 10.25N 107.00E | 6.49 km | 63.7 km | 是 | 216 | **169/169** |
+
+请求链接（可直接复查）：
+- https://marine-api.open-meteo.com/v1/marine?latitude=10.2917&longitude=107.0417&hourly=wave_height,swell_wave_height&forecast_days=8&past_days=1&timeformat=unixtime&cell_selection=sea&models=best_match
+- https://marine-api.open-meteo.com/v1/marine?latitude=10.2917&longitude=107.0417&hourly=wave_height,swell_wave_height&forecast_days=8&past_days=1&timeformat=unixtime&cell_selection=sea&models=ncep_gfswave025
+
+**候选名称（仅写在文档里，业务取点没有改）：**「**胡志明关联海域海况参考（工程取点）**」，距 VNSGN 官方坐标约 62 km。
+
+- 这只是工程取点，不是官方代表点。它只说明该点在官方公布的港口水域内、数据齐全，**不代表**吉莱、协福等码头的作业条件。
+- 要启用它，需要先批准、补 ADR，并在界面上标注上面的名称。在那之前，VNSGN 继续按方案 A 处理，R1.5-1 保持 **BLOCKED**。

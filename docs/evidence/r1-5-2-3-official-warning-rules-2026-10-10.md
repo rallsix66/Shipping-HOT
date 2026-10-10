@@ -54,3 +54,7 @@
 - install / build / typecheck / lint：均 exit 0；Vitest：86 个文件，**632 通过 / 3 跳过**，exit 0；smoke：exit 0；S7：exit 0；Neat Freak audit：exit 0。
 - `pnpm test:r1-5-1-live` 共跑 3 次：第 1、2 次 exit 1（`Open-Meteo: fetch failed`，上游网络偶发，所有港口都拉取失败），只记录，不作证据；第 3 次 exit **2 = BLOCKED**（84 项检查，83 项通过，唯一 BLOCKED 是 `coverage_port-ho-chi-minh`）。
 - 已入库的脱敏证据：`docs/evidence/r1-5-round4-gate-2ca8ac2/`，包括 gate-summary.txt、各步日志尾部、第 3 次运行的 r1-5-1-live-evidence.json（本地路径已替换为 <repo>/<home>）。
+
+## 测试范围说明
+
+`server/services/port-weather-panel-official.test.ts` 只在服务层调用 `getPortWeatherPanel`（内存 SQLite）并检查返回值，**不是** HTTP 接口或浏览器端到端测试。HTTP 和页面层面的 `officialAlertImpacts` 都还没有验证。
