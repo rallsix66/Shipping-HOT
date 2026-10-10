@@ -386,7 +386,8 @@ async function main() {
   const sqliteCoverage = {}
   for (const portId of PORT_IDS) {
     sqliteCoverage[portId] = evaluateForecastWindowCoverage(dbRows.byPort[portId], syncNowMs)
-    push(`sqlite_rows_${portId}`, dbRows.byPort[portId].length > 0, `${dbRows.byPort[portId].length} rows`)
+    // Zero rows for a port is an upstream/live-data gap (see syncEvidence.egress), not a harness defect: BLOCKED, never PASS.
+    push(`sqlite_rows_${portId}`, dbRows.byPort[portId].length > 0, `${dbRows.byPort[portId].length} rows`, "business")
   }
 
   let serverA
@@ -423,9 +424,11 @@ async function main() {
       apiAfterRestartRows[portId] = rows
       const before = apiBeforeRestart[portId]?.forecastMeta?.actualCoverage
       const after = res.body?.forecastMeta?.actualCoverage
-      push(`restart_persistence_${portId}`, res.status === 200 && rows.length > 0, `status=${res.status} forecasts=${rows.length}`)
+      const dbCount = dbRows.byPort[portId].length
+      // Persistence: what SQLite holds must come back after restart (a port with no stored rows must not invent any).
+      push(`restart_persistence_${portId}`, res.status === 200 && (dbCount === 0 ? rows.length === 0 : rows.length > 0), `status=${res.status} forecasts=${rows.length} dbRows=${dbCount}`)
       // lastInstant is the end of stored data and must survive the restart; firstInstant may legitimately roll with now-1h.
-      push(`restart_meta_stable_${portId}`, Boolean(before && after) && before.lastInstant === after.lastInstant && after.hourlyReturned > 0, `before last=${before?.lastInstant} after last=${after?.lastInstant} hourly=${after?.hourlyReturned}`)
+      push(`restart_meta_stable_${portId}`, Boolean(before && after) && before.lastInstant === after.lastInstant && (dbCount === 0 || after.hourlyReturned > 0), `before last=${before?.lastInstant} after last=${after?.lastInstant} hourly=${after?.hourlyReturned}`)
     }
 
     // 6) Browser: all eight port pages against the restarted server.

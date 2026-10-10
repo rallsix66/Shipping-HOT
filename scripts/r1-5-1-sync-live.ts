@@ -52,6 +52,23 @@ async function main() {
   if (!existsSync(databasePath)) throw new Error(`missing database: ${databasePath}`)
 
   loadServerEnv()
+  // Diagnostic egress log (no credentials: Open-Meteo/JMA URLs carry none). Wraps fetch before providers are created
+  // so a per-port upstream failure that the weather job tolerates is visible in the evidence.
+  const egress: { host: string, latitude?: string, longitude?: string, status?: number, error?: string, at: string }[] = []
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+    const url = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url)
+    const entry = { host: url.host, latitude: url.searchParams.get("latitude") ?? undefined, longitude: url.searchParams.get("longitude") ?? undefined, at: new Date().toISOString() } as (typeof egress)[number]
+    egress.push(entry)
+    try {
+      const res = await originalFetch(input, init)
+      entry.status = res.status
+      return res
+    } catch (error) {
+      entry.error = error instanceof Error ? error.message : String(error)
+      throw error
+    }
+  }) as typeof fetch
   process.env.SHIPPING_DATA_MODE = "real"
   process.env.SHIPPING_WEATHER_PROVIDER = "open-meteo"
   process.chdir(runDir)
@@ -128,6 +145,15 @@ async function main() {
     syncStartedAt: syncStartedAt.toISOString(),
     syncCompletedAt: new Date().toISOString(),
     jobResults,
+    egress: {
+      requests: egress.length,
+      nonOk: egress.filter(e => e.error !== undefined || (e.status !== undefined && e.status >= 400)),
+      byHostStatus: egress.reduce<Record<string, number>>((acc, e) => {
+        const key = `${e.host} ${e.status ?? "error"}`
+        acc[key] = (acc[key] ?? 0) + 1
+        return acc
+      }, {}),
+    },
     sevenDayWindow: {
       note: "Hourly counts use horizon=hourly only within [now-1h, now+7d]; current rows are reported separately and never pad hourlyReturned.",
       start: new Date(nowMs - 60 * 60 * 1000).toISOString(),
