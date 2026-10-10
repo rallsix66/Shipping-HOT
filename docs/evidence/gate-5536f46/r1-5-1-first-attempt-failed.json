@@ -1,0 +1,3492 @@
+{
+  "acceptanceId": "R1.5-1",
+  "startedAt": "2026-10-10T05:38:55.451Z",
+  "runDir": ".tmp/r1-5-1-live-2026-10-10T05-38-55-449Z",
+  "versionBinding": {
+    "gitHead": "5536f4630d3c504fb5287723d970f497b39065c3",
+    "branch": "codex/shipping-hot-r1-5",
+    "workspaceClean": true,
+    "workspaceStatus": [],
+    "buildSource": {
+      "serverEntry": "dist/output/server/index.mjs",
+      "builtAt": "2026-10-10T05:37:39.783Z",
+      "headCommittedAt": "2026-10-10T05:37:07.000Z",
+      "builtAfterHeadCommit": true
+    },
+    "node": "v24.15.0"
+  },
+  "completedAt": "2026-10-10T05:39:12.530Z",
+  "liveNetwork": {
+    "openMeteo": true,
+    "jma": true
+  },
+  "criteria": "9/29 plan R1.5-1: all eight ports need seven-day marine and land forecasts. Window [now-1h, now+7d], hourly only, every whole UTC hour present once with land fields (windGust, precipitation, visibility) and marine (wave or swell). current rows reported separately. A coverage note is degradation display, not coverage.",
+  "syncEvidence": {
+    "kind": "r1-5-1-live-sync",
+    "runDir": ".tmp/r1-5-1-live-2026-10-10T05-38-55-449Z",
+    "databasePath": ".tmp/r1-5-1-live-2026-10-10T05-38-55-449Z/.data/shipping-hot-v3.sqlite3",
+    "syncStartedAt": "2026-10-10T05:38:56.119Z",
+    "syncCompletedAt": "2026-10-10T05:39:08.805Z",
+    "jobResults": {
+      "tropical-cyclone-sync": {
+        "status": "failed",
+        "recordsRead": 2,
+        "recordsWritten": 1,
+        "sourceUpdatedAt": "2026-10-10T05:38:56.119Z",
+        "errorCode": "jma_detail_partial_failure",
+        "errorMessage": "JMA partial detail sync (1 failed): TC2634"
+      },
+      "weather-sync": {
+        "status": "success",
+        "recordsRead": 1,
+        "recordsWritten": 1,
+        "sourceUpdatedAt": "2026-10-10T05:30:00.000Z"
+      }
+    },
+    "egress": {
+      "requests": 19,
+      "nonOk": [
+        {
+          "host": "www.jma.go.jp",
+          "at": "2026-10-10T05:38:56.854Z",
+          "error": "fetch failed"
+        }
+      ],
+      "byHostStatus": {
+        "www.jma.go.jp 200": 2,
+        "www.jma.go.jp error": 1,
+        "marine-api.open-meteo.com 200": 8,
+        "api.open-meteo.com 200": 8
+      }
+    },
+    "sevenDayWindow": {
+      "note": "Hourly counts use horizon=hourly only within [now-1h, now+7d]; current rows are reported separately and never pad hourlyReturned.",
+      "start": "2026-10-10T04:38:56.119Z",
+      "end": "2026-10-17T05:38:56.119Z"
+    },
+    "ports": {
+      "port-shekou": {
+        "unlocode": "CNSHK",
+        "sqlite": {
+          "totalRows": 194,
+          "hourlyRows": 193,
+          "currentRows": 1,
+          "hourlyInSevenDayWindow": 169,
+          "firstHourlyInWindow": "2026-10-10T05:00:00.000Z",
+          "lastHourlyInWindow": "2026-10-17T05:00:00.000Z",
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingInWindow": {
+            "windGust": 0,
+            "wave": 0,
+            "precip": 0,
+            "visibility": 0
+          }
+        },
+        "forecastMeta": {
+          "targetWindow": {
+            "start": "2026-10-10T04:38:56.119Z",
+            "end": "2026-10-17T05:38:56.119Z"
+          },
+          "actualCoverage": {
+            "firstInstant": "2026-10-10T05:00:00.000Z",
+            "lastInstant": "2026-10-17T05:00:00.000Z",
+            "totalReturned": 170,
+            "hourlyReturned": 169,
+            "currentReturned": 1
+          },
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingCounts": {
+            "windGust": 0,
+            "wave": 0,
+            "precipitation": 0,
+            "visibility": 0
+          }
+        },
+        "panelState": "partial_rule_coverage"
+      },
+      "port-yantian": {
+        "unlocode": "CNYTN",
+        "sqlite": {
+          "totalRows": 194,
+          "hourlyRows": 193,
+          "currentRows": 1,
+          "hourlyInSevenDayWindow": 169,
+          "firstHourlyInWindow": "2026-10-10T05:00:00.000Z",
+          "lastHourlyInWindow": "2026-10-17T05:00:00.000Z",
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingInWindow": {
+            "windGust": 0,
+            "wave": 0,
+            "precip": 0,
+            "visibility": 0
+          }
+        },
+        "forecastMeta": {
+          "targetWindow": {
+            "start": "2026-10-10T04:38:56.119Z",
+            "end": "2026-10-17T05:38:56.119Z"
+          },
+          "actualCoverage": {
+            "firstInstant": "2026-10-10T05:00:00.000Z",
+            "lastInstant": "2026-10-17T05:00:00.000Z",
+            "totalReturned": 170,
+            "hourlyReturned": 169,
+            "currentReturned": 1
+          },
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingCounts": {
+            "windGust": 0,
+            "wave": 0,
+            "precipitation": 0,
+            "visibility": 0
+          }
+        },
+        "panelState": "partial_rule_coverage"
+      },
+      "port-nansha": {
+        "unlocode": "CNNSA",
+        "sqlite": {
+          "totalRows": 194,
+          "hourlyRows": 193,
+          "currentRows": 1,
+          "hourlyInSevenDayWindow": 169,
+          "firstHourlyInWindow": "2026-10-10T05:00:00.000Z",
+          "lastHourlyInWindow": "2026-10-17T05:00:00.000Z",
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingInWindow": {
+            "windGust": 0,
+            "wave": 0,
+            "precip": 0,
+            "visibility": 0
+          }
+        },
+        "forecastMeta": {
+          "targetWindow": {
+            "start": "2026-10-10T04:38:56.119Z",
+            "end": "2026-10-17T05:38:56.119Z"
+          },
+          "actualCoverage": {
+            "firstInstant": "2026-10-10T05:00:00.000Z",
+            "lastInstant": "2026-10-17T05:00:00.000Z",
+            "totalReturned": 170,
+            "hourlyReturned": 169,
+            "currentReturned": 1
+          },
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingCounts": {
+            "windGust": 0,
+            "wave": 0,
+            "precipitation": 0,
+            "visibility": 0
+          }
+        },
+        "panelState": "partial_rule_coverage"
+      },
+      "port-laem-chabang": {
+        "unlocode": "THLCH",
+        "sqlite": {
+          "totalRows": 194,
+          "hourlyRows": 193,
+          "currentRows": 1,
+          "hourlyInSevenDayWindow": 169,
+          "firstHourlyInWindow": "2026-10-10T05:00:00.000Z",
+          "lastHourlyInWindow": "2026-10-17T05:00:00.000Z",
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingInWindow": {
+            "windGust": 0,
+            "wave": 0,
+            "precip": 0,
+            "visibility": 0
+          }
+        },
+        "forecastMeta": {
+          "targetWindow": {
+            "start": "2026-10-10T04:38:56.119Z",
+            "end": "2026-10-17T05:38:56.119Z"
+          },
+          "actualCoverage": {
+            "firstInstant": "2026-10-10T05:00:00.000Z",
+            "lastInstant": "2026-10-17T05:00:00.000Z",
+            "totalReturned": 170,
+            "hourlyReturned": 169,
+            "currentReturned": 1
+          },
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingCounts": {
+            "windGust": 0,
+            "wave": 0,
+            "precipitation": 0,
+            "visibility": 0
+          }
+        },
+        "panelState": "partial_rule_coverage"
+      },
+      "port-klang": {
+        "unlocode": "MYPKG",
+        "sqlite": {
+          "totalRows": 194,
+          "hourlyRows": 193,
+          "currentRows": 1,
+          "hourlyInSevenDayWindow": 169,
+          "firstHourlyInWindow": "2026-10-10T05:00:00.000Z",
+          "lastHourlyInWindow": "2026-10-17T05:00:00.000Z",
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingInWindow": {
+            "windGust": 0,
+            "wave": 0,
+            "precip": 0,
+            "visibility": 0
+          }
+        },
+        "forecastMeta": {
+          "targetWindow": {
+            "start": "2026-10-10T04:38:56.119Z",
+            "end": "2026-10-17T05:38:56.119Z"
+          },
+          "actualCoverage": {
+            "firstInstant": "2026-10-10T05:00:00.000Z",
+            "lastInstant": "2026-10-17T05:00:00.000Z",
+            "totalReturned": 170,
+            "hourlyReturned": 169,
+            "currentReturned": 1
+          },
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingCounts": {
+            "windGust": 0,
+            "wave": 0,
+            "precipitation": 0,
+            "visibility": 0
+          }
+        },
+        "panelState": "partial_rule_coverage"
+      },
+      "port-manila": {
+        "unlocode": "PHMNL",
+        "sqlite": {
+          "totalRows": 194,
+          "hourlyRows": 193,
+          "currentRows": 1,
+          "hourlyInSevenDayWindow": 169,
+          "firstHourlyInWindow": "2026-10-10T05:00:00.000Z",
+          "lastHourlyInWindow": "2026-10-17T05:00:00.000Z",
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingInWindow": {
+            "windGust": 0,
+            "wave": 0,
+            "precip": 0,
+            "visibility": 0
+          }
+        },
+        "forecastMeta": {
+          "targetWindow": {
+            "start": "2026-10-10T04:38:56.119Z",
+            "end": "2026-10-17T05:38:56.119Z"
+          },
+          "actualCoverage": {
+            "firstInstant": "2026-10-10T05:00:00.000Z",
+            "lastInstant": "2026-10-17T05:00:00.000Z",
+            "totalReturned": 170,
+            "hourlyReturned": 169,
+            "currentReturned": 1
+          },
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingCounts": {
+            "windGust": 0,
+            "wave": 0,
+            "precipitation": 0,
+            "visibility": 0
+          }
+        },
+        "panelState": "partial_rule_coverage"
+      },
+      "port-jakarta": {
+        "unlocode": "IDJKT",
+        "sqlite": {
+          "totalRows": 194,
+          "hourlyRows": 193,
+          "currentRows": 1,
+          "hourlyInSevenDayWindow": 169,
+          "firstHourlyInWindow": "2026-10-10T05:00:00.000Z",
+          "lastHourlyInWindow": "2026-10-17T05:00:00.000Z",
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingInWindow": {
+            "windGust": 0,
+            "wave": 0,
+            "precip": 0,
+            "visibility": 0
+          }
+        },
+        "forecastMeta": {
+          "targetWindow": {
+            "start": "2026-10-10T04:38:56.119Z",
+            "end": "2026-10-17T05:38:56.119Z"
+          },
+          "actualCoverage": {
+            "firstInstant": "2026-10-10T05:00:00.000Z",
+            "lastInstant": "2026-10-17T05:00:00.000Z",
+            "totalReturned": 170,
+            "hourlyReturned": 169,
+            "currentReturned": 1
+          },
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingCounts": {
+            "windGust": 0,
+            "wave": 0,
+            "precipitation": 0,
+            "visibility": 0
+          }
+        },
+        "panelState": "partial_rule_coverage"
+      },
+      "port-ho-chi-minh": {
+        "unlocode": "VNSGN",
+        "sqlite": {
+          "totalRows": 194,
+          "hourlyRows": 193,
+          "currentRows": 1,
+          "hourlyInSevenDayWindow": 169,
+          "firstHourlyInWindow": "2026-10-10T05:00:00.000Z",
+          "lastHourlyInWindow": "2026-10-17T05:00:00.000Z",
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingInWindow": {
+            "windGust": 0,
+            "wave": 169,
+            "precip": 0,
+            "visibility": 0
+          }
+        },
+        "forecastMeta": {
+          "targetWindow": {
+            "start": "2026-10-10T04:38:56.119Z",
+            "end": "2026-10-17T05:38:56.119Z"
+          },
+          "actualCoverage": {
+            "firstInstant": "2026-10-10T05:00:00.000Z",
+            "lastInstant": "2026-10-17T05:00:00.000Z",
+            "totalReturned": 170,
+            "hourlyReturned": 169,
+            "currentReturned": 1
+          },
+          "sourceId": "open-meteo-marine",
+          "fetchedAt": "2026-10-10T05:38:56.119Z",
+          "missingCounts": {
+            "windGust": 0,
+            "wave": 169,
+            "precipitation": 0,
+            "visibility": 0
+          },
+          "marineCoverageNote": "Open-Meteo marine（cell_selection=sea）在胡志明市坐标未返回浪高/涌浪；非填 0，WR-S02 等海况分支可能缺测。"
+        },
+        "panelState": "partial_rule_coverage"
+      }
+    },
+    "jma": {
+      "syncMeta": {
+        "sourceId": "jma-typhoon",
+        "lastCheckedAt": "2026-10-10T05:38:56.119Z",
+        "lastPathFetchAt": "2026-10-10T05:38:56.119Z",
+        "outcome": "partial",
+        "failedTcIds": [
+          "TC2634"
+        ],
+        "dataValidUntil": "2026-10-10T11:38:56.119Z",
+        "stale": false
+      },
+      "storedCycloneCount": 1,
+      "storedCycloneIds": [
+        "tc-jma-TC2635"
+      ]
+    }
+  },
+  "apiBeforeRestart": {
+    "port-shekou": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.205Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.205Z",
+          "end": "2026-10-17T05:39:09.205Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      }
+    },
+    "port-yantian": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.215Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.215Z",
+          "end": "2026-10-17T05:39:09.215Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      }
+    },
+    "port-nansha": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.220Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.220Z",
+          "end": "2026-10-17T05:39:09.220Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      }
+    },
+    "port-laem-chabang": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.224Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.224Z",
+          "end": "2026-10-17T05:39:09.224Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      }
+    },
+    "port-klang": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.230Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.230Z",
+          "end": "2026-10-17T05:39:09.230Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      }
+    },
+    "port-manila": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.235Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.235Z",
+          "end": "2026-10-17T05:39:09.235Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      }
+    },
+    "port-jakarta": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.239Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.239Z",
+          "end": "2026-10-17T05:39:09.239Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      }
+    },
+    "port-ho-chi-minh": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.247Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.247Z",
+          "end": "2026-10-17T05:39:09.247Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 169,
+          "precipitation": 0,
+          "visibility": 0
+        },
+        "marineCoverageNote": "Open-Meteo marine（cell_selection=sea）在胡志明市坐标未返回浪高/涌浪；非填 0，WR-S02 等海况分支可能缺测。"
+      }
+    }
+  },
+  "apiAfterRestart": {
+    "port-shekou": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.583Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.583Z",
+          "end": "2026-10-17T05:39:09.583Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      }
+    },
+    "port-yantian": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.589Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.589Z",
+          "end": "2026-10-17T05:39:09.589Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      }
+    },
+    "port-nansha": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.593Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.593Z",
+          "end": "2026-10-17T05:39:09.593Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      }
+    },
+    "port-laem-chabang": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.597Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.597Z",
+          "end": "2026-10-17T05:39:09.597Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      }
+    },
+    "port-klang": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.602Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.602Z",
+          "end": "2026-10-17T05:39:09.602Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      }
+    },
+    "port-manila": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.606Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.606Z",
+          "end": "2026-10-17T05:39:09.606Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      }
+    },
+    "port-jakarta": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.610Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.610Z",
+          "end": "2026-10-17T05:39:09.610Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      }
+    },
+    "port-ho-chi-minh": {
+      "status": 200,
+      "state": "partial_rule_coverage",
+      "asOf": "2026-10-10T05:39:09.614Z",
+      "forecastsReturned": 170,
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T04:39:09.614Z",
+          "end": "2026-10-17T05:39:09.614Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T05:00:00.000Z",
+          "lastInstant": "2026-10-17T05:00:00.000Z",
+          "totalReturned": 170,
+          "hourlyReturned": 169,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T05:38:56.119Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 169,
+          "precipitation": 0,
+          "visibility": 0
+        },
+        "marineCoverageNote": "Open-Meteo marine（cell_selection=sea）在胡志明市坐标未返回浪高/涌浪；非填 0，WR-S02 等海况分支可能缺测。"
+      }
+    }
+  },
+  "apiDbConsistency": {
+    "port-shekou": {
+      "before": {
+        "range": {
+          "from": "2026-10-10T04:39:09.583Z",
+          "to": "2026-10-17T05:39:09.205Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      },
+      "after": {
+        "range": {
+          "from": "2026-10-10T04:39:09.583Z",
+          "to": "2026-10-17T05:39:09.205Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      }
+    },
+    "port-yantian": {
+      "before": {
+        "range": {
+          "from": "2026-10-10T04:39:09.589Z",
+          "to": "2026-10-17T05:39:09.215Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      },
+      "after": {
+        "range": {
+          "from": "2026-10-10T04:39:09.589Z",
+          "to": "2026-10-17T05:39:09.215Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      }
+    },
+    "port-nansha": {
+      "before": {
+        "range": {
+          "from": "2026-10-10T04:39:09.593Z",
+          "to": "2026-10-17T05:39:09.220Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      },
+      "after": {
+        "range": {
+          "from": "2026-10-10T04:39:09.593Z",
+          "to": "2026-10-17T05:39:09.220Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      }
+    },
+    "port-laem-chabang": {
+      "before": {
+        "range": {
+          "from": "2026-10-10T04:39:09.597Z",
+          "to": "2026-10-17T05:39:09.224Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      },
+      "after": {
+        "range": {
+          "from": "2026-10-10T04:39:09.597Z",
+          "to": "2026-10-17T05:39:09.224Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      }
+    },
+    "port-klang": {
+      "before": {
+        "range": {
+          "from": "2026-10-10T04:39:09.602Z",
+          "to": "2026-10-17T05:39:09.230Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      },
+      "after": {
+        "range": {
+          "from": "2026-10-10T04:39:09.602Z",
+          "to": "2026-10-17T05:39:09.230Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      }
+    },
+    "port-manila": {
+      "before": {
+        "range": {
+          "from": "2026-10-10T04:39:09.606Z",
+          "to": "2026-10-17T05:39:09.235Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      },
+      "after": {
+        "range": {
+          "from": "2026-10-10T04:39:09.606Z",
+          "to": "2026-10-17T05:39:09.235Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      }
+    },
+    "port-jakarta": {
+      "before": {
+        "range": {
+          "from": "2026-10-10T04:39:09.610Z",
+          "to": "2026-10-17T05:39:09.239Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      },
+      "after": {
+        "range": {
+          "from": "2026-10-10T04:39:09.610Z",
+          "to": "2026-10-17T05:39:09.239Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      }
+    },
+    "port-ho-chi-minh": {
+      "before": {
+        "range": {
+          "from": "2026-10-10T04:39:09.614Z",
+          "to": "2026-10-17T05:39:09.247Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      },
+      "after": {
+        "range": {
+          "from": "2026-10-10T04:39:09.614Z",
+          "to": "2026-10-17T05:39:09.247Z"
+        },
+        "comparedRows": 170,
+        "sqliteRowsInRange": 170,
+        "fieldsCompared": [
+          "waveHeightM",
+          "swellWaveHeightM",
+          "windSpeedKmh",
+          "windGustKmh",
+          "precipitationMm",
+          "visibilityM"
+        ],
+        "fieldMismatchCount": 0,
+        "fieldMismatchSample": [],
+        "missingInDb": [],
+        "missingInDbCount": 0,
+        "missingInApiCount": 0,
+        "missingInApiSample": [],
+        "pass": true
+      }
+    }
+  },
+  "browserScope": "page metadata and coverage verified (load, non-empty, forecast-meta total/hourly/current vs API, marine note); field-level UI values are NOT checked",
+  "portCoverage": {
+    "port-shekou": {
+      "pass": true,
+      "sqliteAtSync": {
+        "window": {
+          "start": "2026-10-10T04:38:56.119Z",
+          "end": "2026-10-17T05:38:56.119Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 0
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": true,
+            "detail": "0/169 missing wave+swell"
+          }
+        ],
+        "failed": [],
+        "pass": true
+      },
+      "apiAfterRestart": {
+        "window": {
+          "start": "2026-10-10T04:39:09.583Z",
+          "end": "2026-10-17T05:39:09.583Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 0
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": true,
+            "detail": "0/169 missing wave+swell"
+          }
+        ],
+        "failed": [],
+        "pass": true
+      },
+      "truncation": {
+        "dbHourlyInWindow": 169,
+        "apiHourlyReturned": 169,
+        "squeezed": false
+      }
+    },
+    "port-yantian": {
+      "pass": true,
+      "sqliteAtSync": {
+        "window": {
+          "start": "2026-10-10T04:38:56.119Z",
+          "end": "2026-10-17T05:38:56.119Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 0
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": true,
+            "detail": "0/169 missing wave+swell"
+          }
+        ],
+        "failed": [],
+        "pass": true
+      },
+      "apiAfterRestart": {
+        "window": {
+          "start": "2026-10-10T04:39:09.589Z",
+          "end": "2026-10-17T05:39:09.589Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 0
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": true,
+            "detail": "0/169 missing wave+swell"
+          }
+        ],
+        "failed": [],
+        "pass": true
+      },
+      "truncation": {
+        "dbHourlyInWindow": 169,
+        "apiHourlyReturned": 169,
+        "squeezed": false
+      }
+    },
+    "port-nansha": {
+      "pass": true,
+      "sqliteAtSync": {
+        "window": {
+          "start": "2026-10-10T04:38:56.119Z",
+          "end": "2026-10-17T05:38:56.119Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 0
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": true,
+            "detail": "0/169 missing wave+swell"
+          }
+        ],
+        "failed": [],
+        "pass": true
+      },
+      "apiAfterRestart": {
+        "window": {
+          "start": "2026-10-10T04:39:09.593Z",
+          "end": "2026-10-17T05:39:09.593Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 0
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": true,
+            "detail": "0/169 missing wave+swell"
+          }
+        ],
+        "failed": [],
+        "pass": true
+      },
+      "truncation": {
+        "dbHourlyInWindow": 169,
+        "apiHourlyReturned": 169,
+        "squeezed": false
+      }
+    },
+    "port-laem-chabang": {
+      "pass": true,
+      "sqliteAtSync": {
+        "window": {
+          "start": "2026-10-10T04:38:56.119Z",
+          "end": "2026-10-17T05:38:56.119Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 0
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": true,
+            "detail": "0/169 missing wave+swell"
+          }
+        ],
+        "failed": [],
+        "pass": true
+      },
+      "apiAfterRestart": {
+        "window": {
+          "start": "2026-10-10T04:39:09.597Z",
+          "end": "2026-10-17T05:39:09.597Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 0
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": true,
+            "detail": "0/169 missing wave+swell"
+          }
+        ],
+        "failed": [],
+        "pass": true
+      },
+      "truncation": {
+        "dbHourlyInWindow": 169,
+        "apiHourlyReturned": 169,
+        "squeezed": false
+      }
+    },
+    "port-klang": {
+      "pass": true,
+      "sqliteAtSync": {
+        "window": {
+          "start": "2026-10-10T04:38:56.119Z",
+          "end": "2026-10-17T05:38:56.119Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 0
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": true,
+            "detail": "0/169 missing wave+swell"
+          }
+        ],
+        "failed": [],
+        "pass": true
+      },
+      "apiAfterRestart": {
+        "window": {
+          "start": "2026-10-10T04:39:09.602Z",
+          "end": "2026-10-17T05:39:09.602Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 0
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": true,
+            "detail": "0/169 missing wave+swell"
+          }
+        ],
+        "failed": [],
+        "pass": true
+      },
+      "truncation": {
+        "dbHourlyInWindow": 169,
+        "apiHourlyReturned": 169,
+        "squeezed": false
+      }
+    },
+    "port-manila": {
+      "pass": true,
+      "sqliteAtSync": {
+        "window": {
+          "start": "2026-10-10T04:38:56.119Z",
+          "end": "2026-10-17T05:38:56.119Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 0
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": true,
+            "detail": "0/169 missing wave+swell"
+          }
+        ],
+        "failed": [],
+        "pass": true
+      },
+      "apiAfterRestart": {
+        "window": {
+          "start": "2026-10-10T04:39:09.606Z",
+          "end": "2026-10-17T05:39:09.606Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 0
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": true,
+            "detail": "0/169 missing wave+swell"
+          }
+        ],
+        "failed": [],
+        "pass": true
+      },
+      "truncation": {
+        "dbHourlyInWindow": 169,
+        "apiHourlyReturned": 169,
+        "squeezed": false
+      }
+    },
+    "port-jakarta": {
+      "pass": true,
+      "sqliteAtSync": {
+        "window": {
+          "start": "2026-10-10T04:38:56.119Z",
+          "end": "2026-10-17T05:38:56.119Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 0
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": true,
+            "detail": "0/169 missing wave+swell"
+          }
+        ],
+        "failed": [],
+        "pass": true
+      },
+      "apiAfterRestart": {
+        "window": {
+          "start": "2026-10-10T04:39:09.610Z",
+          "end": "2026-10-17T05:39:09.610Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 0
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": true,
+            "detail": "0/169 missing wave+swell"
+          }
+        ],
+        "failed": [],
+        "pass": true
+      },
+      "truncation": {
+        "dbHourlyInWindow": 169,
+        "apiHourlyReturned": 169,
+        "squeezed": false
+      }
+    },
+    "port-ho-chi-minh": {
+      "pass": false,
+      "sqliteAtSync": {
+        "window": {
+          "start": "2026-10-10T04:38:56.119Z",
+          "end": "2026-10-17T05:38:56.119Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 169
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": false,
+            "detail": "169/169 missing wave+swell"
+          }
+        ],
+        "failed": [
+          "marine_wave_or_swell_present"
+        ],
+        "pass": false
+      },
+      "apiAfterRestart": {
+        "window": {
+          "start": "2026-10-10T04:39:09.614Z",
+          "end": "2026-10-17T05:39:09.614Z",
+          "gridStart": "2026-10-10T05:00:00.000Z",
+          "gridEnd": "2026-10-17T05:00:00.000Z",
+          "expectedHours": 169
+        },
+        "hourlyInWindow": 169,
+        "uniqueHourlyInWindow": 169,
+        "currentRows": 1,
+        "firstHourly": "2026-10-10T05:00:00.000Z",
+        "lastHourly": "2026-10-17T05:00:00.000Z",
+        "maxGapHours": 1,
+        "missingHoursCount": 0,
+        "missingHoursSample": [],
+        "duplicateTimestamps": [],
+        "fieldMissing": {
+          "windGustKmh": 0,
+          "precipitationMm": 0,
+          "visibilityM": 0,
+          "marineWaveOrSwell": 169
+        },
+        "checks": [
+          {
+            "id": "hourly_timestamps_valid",
+            "pass": true,
+            "detail": "0 unparseable hourly timestamps"
+          },
+          {
+            "id": "hourly_timestamps_unique",
+            "pass": true,
+            "detail": "unique"
+          },
+          {
+            "id": "hourly_on_hour_grid",
+            "pass": true,
+            "detail": "aligned"
+          },
+          {
+            "id": "window_start_covered",
+            "pass": true,
+            "detail": "first grid hour 2026-10-10T05:00:00.000Z; first returned 2026-10-10T05:00:00.000Z"
+          },
+          {
+            "id": "window_end_covered",
+            "pass": true,
+            "detail": "last grid hour 2026-10-17T05:00:00.000Z; last returned 2026-10-17T05:00:00.000Z"
+          },
+          {
+            "id": "no_missing_hours",
+            "pass": true,
+            "detail": "169/169"
+          },
+          {
+            "id": "land_windGustKmh_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_precipitationMm_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "land_visibilityM_present",
+            "pass": true,
+            "detail": "0/169 missing"
+          },
+          {
+            "id": "marine_wave_or_swell_present",
+            "pass": false,
+            "detail": "169/169 missing wave+swell"
+          }
+        ],
+        "failed": [
+          "marine_wave_or_swell_present"
+        ],
+        "pass": false
+      },
+      "truncation": {
+        "dbHourlyInWindow": 169,
+        "apiHourlyReturned": 169,
+        "squeezed": false
+      }
+    }
+  },
+  "jma": {
+    "syncOutcome": "partial",
+    "archivedStoredCycloneCount": 1,
+    "archivedCycloneIds": [
+      "tc-jma-TC2635"
+    ],
+    "focusAreaActiveCount": 0,
+    "historicalSummaryCount": 0,
+    "panelMessageZh": "JMA 部分同步 · 部分气旋详情失败：TC2634；WR-S03 仅在列表完整且新鲜时排除风险。",
+    "note": "archivedStoredCycloneCount counts JMA records persisted by this sync; focusAreaActiveCount is the panel's active cyclones after focus-area / 1000 km visibility rules. They are not interchangeable."
+  },
+  "tropicalPanel": {
+    "asOf": "2026-10-10T05:39:09.253Z",
+    "sync": {
+      "sourceId": "jma-typhoon",
+      "lastCheckedAt": "2026-10-10T05:38:56.119Z",
+      "lastPathFetchAt": "2026-10-10T05:38:56.119Z",
+      "outcome": "partial",
+      "failedTcIds": [
+        "TC2634"
+      ],
+      "dataValidUntil": "2026-10-10T11:38:56.119Z",
+      "stale": false
+    },
+    "activeCount": 0,
+    "historicalSummaryCount": 0,
+    "messageZh": "JMA 部分同步 · 部分气旋详情失败：TC2634；WR-S03 仅在列表完整且新鲜时排除风险。"
+  },
+  "browserEvidence": {
+    "status": "RAN",
+    "chrome": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    "ports": {
+      "port-shekou": {
+        "pass": true,
+        "checks": [
+          {
+            "id": "navigate_no_error",
+            "pass": true,
+            "detail": "ok"
+          },
+          {
+            "id": "document_complete",
+            "pass": true,
+            "detail": "complete"
+          },
+          {
+            "id": "forecast_meta_rendered",
+            "pass": true,
+            "detail": "data-testid=port-weather-forecast-meta"
+          },
+          {
+            "id": "page_text_non_empty",
+            "pass": true,
+            "detail": "body 12217 chars"
+          },
+          {
+            "id": "browser_hourly_current_match_api",
+            "pass": true,
+            "detail": "expected \"hourly 169 / current 1\""
+          },
+          {
+            "id": "browser_total_match_api",
+            "pass": true,
+            "detail": "expected total 170"
+          }
+        ],
+        "forecastMetaText": "目标窗口 2026/10/10 12:39 → 2026/10/17 13:39 · 实际返回 170 条（hourly 169 / current 1） · 覆盖 2026/10/10 13:00 → 2026/10/17 13:00 · 更新 2026/10/10 13:38"
+      },
+      "port-yantian": {
+        "pass": true,
+        "checks": [
+          {
+            "id": "navigate_no_error",
+            "pass": true,
+            "detail": "ok"
+          },
+          {
+            "id": "document_complete",
+            "pass": true,
+            "detail": "complete"
+          },
+          {
+            "id": "forecast_meta_rendered",
+            "pass": true,
+            "detail": "data-testid=port-weather-forecast-meta"
+          },
+          {
+            "id": "page_text_non_empty",
+            "pass": true,
+            "detail": "body 12175 chars"
+          },
+          {
+            "id": "browser_hourly_current_match_api",
+            "pass": true,
+            "detail": "expected \"hourly 169 / current 1\""
+          },
+          {
+            "id": "browser_total_match_api",
+            "pass": true,
+            "detail": "expected total 170"
+          }
+        ],
+        "forecastMetaText": "目标窗口 2026/10/10 12:39 → 2026/10/17 13:39 · 实际返回 170 条（hourly 169 / current 1） · 覆盖 2026/10/10 13:00 → 2026/10/17 13:00 · 更新 2026/10/10 13:38"
+      },
+      "port-nansha": {
+        "pass": true,
+        "checks": [
+          {
+            "id": "navigate_no_error",
+            "pass": true,
+            "detail": "ok"
+          },
+          {
+            "id": "document_complete",
+            "pass": true,
+            "detail": "complete"
+          },
+          {
+            "id": "forecast_meta_rendered",
+            "pass": true,
+            "detail": "data-testid=port-weather-forecast-meta"
+          },
+          {
+            "id": "page_text_non_empty",
+            "pass": true,
+            "detail": "body 12291 chars"
+          },
+          {
+            "id": "browser_hourly_current_match_api",
+            "pass": true,
+            "detail": "expected \"hourly 169 / current 1\""
+          },
+          {
+            "id": "browser_total_match_api",
+            "pass": true,
+            "detail": "expected total 170"
+          }
+        ],
+        "forecastMetaText": "目标窗口 2026/10/10 12:39 → 2026/10/17 13:39 · 实际返回 170 条（hourly 169 / current 1） · 覆盖 2026/10/10 13:00 → 2026/10/17 13:00 · 更新 2026/10/10 13:38"
+      },
+      "port-laem-chabang": {
+        "pass": true,
+        "checks": [
+          {
+            "id": "navigate_no_error",
+            "pass": true,
+            "detail": "ok"
+          },
+          {
+            "id": "document_complete",
+            "pass": true,
+            "detail": "complete"
+          },
+          {
+            "id": "forecast_meta_rendered",
+            "pass": true,
+            "detail": "data-testid=port-weather-forecast-meta"
+          },
+          {
+            "id": "page_text_non_empty",
+            "pass": true,
+            "detail": "body 12126 chars"
+          },
+          {
+            "id": "browser_hourly_current_match_api",
+            "pass": true,
+            "detail": "expected \"hourly 169 / current 1\""
+          },
+          {
+            "id": "browser_total_match_api",
+            "pass": true,
+            "detail": "expected total 170"
+          }
+        ],
+        "forecastMetaText": "目标窗口 2026/10/10 12:39 → 2026/10/17 13:39 · 实际返回 170 条（hourly 169 / current 1） · 覆盖 2026/10/10 13:00 → 2026/10/17 13:00 · 更新 2026/10/10 13:38"
+      },
+      "port-klang": {
+        "pass": true,
+        "checks": [
+          {
+            "id": "navigate_no_error",
+            "pass": true,
+            "detail": "ok"
+          },
+          {
+            "id": "document_complete",
+            "pass": true,
+            "detail": "complete"
+          },
+          {
+            "id": "forecast_meta_rendered",
+            "pass": true,
+            "detail": "data-testid=port-weather-forecast-meta"
+          },
+          {
+            "id": "page_text_non_empty",
+            "pass": true,
+            "detail": "body 13390 chars"
+          },
+          {
+            "id": "browser_hourly_current_match_api",
+            "pass": true,
+            "detail": "expected \"hourly 169 / current 1\""
+          },
+          {
+            "id": "browser_total_match_api",
+            "pass": true,
+            "detail": "expected total 170"
+          }
+        ],
+        "forecastMetaText": "目标窗口 2026/10/10 12:39 → 2026/10/17 13:39 · 实际返回 170 条（hourly 169 / current 1） · 覆盖 2026/10/10 13:00 → 2026/10/17 13:00 · 更新 2026/10/10 13:38"
+      },
+      "port-manila": {
+        "pass": true,
+        "checks": [
+          {
+            "id": "navigate_no_error",
+            "pass": true,
+            "detail": "ok"
+          },
+          {
+            "id": "document_complete",
+            "pass": true,
+            "detail": "complete"
+          },
+          {
+            "id": "forecast_meta_rendered",
+            "pass": true,
+            "detail": "data-testid=port-weather-forecast-meta"
+          },
+          {
+            "id": "page_text_non_empty",
+            "pass": true,
+            "detail": "body 12165 chars"
+          },
+          {
+            "id": "browser_hourly_current_match_api",
+            "pass": true,
+            "detail": "expected \"hourly 169 / current 1\""
+          },
+          {
+            "id": "browser_total_match_api",
+            "pass": true,
+            "detail": "expected total 170"
+          }
+        ],
+        "forecastMetaText": "目标窗口 2026/10/10 12:39 → 2026/10/17 13:39 · 实际返回 170 条（hourly 169 / current 1） · 覆盖 2026/10/10 13:00 → 2026/10/17 13:00 · 更新 2026/10/10 13:38"
+      },
+      "port-jakarta": {
+        "pass": true,
+        "checks": [
+          {
+            "id": "navigate_no_error",
+            "pass": true,
+            "detail": "ok"
+          },
+          {
+            "id": "document_complete",
+            "pass": true,
+            "detail": "complete"
+          },
+          {
+            "id": "forecast_meta_rendered",
+            "pass": true,
+            "detail": "data-testid=port-weather-forecast-meta"
+          },
+          {
+            "id": "page_text_non_empty",
+            "pass": true,
+            "detail": "body 12105 chars"
+          },
+          {
+            "id": "browser_hourly_current_match_api",
+            "pass": true,
+            "detail": "expected \"hourly 169 / current 1\""
+          },
+          {
+            "id": "browser_total_match_api",
+            "pass": true,
+            "detail": "expected total 170"
+          }
+        ],
+        "forecastMetaText": "目标窗口 2026/10/10 12:39 → 2026/10/17 13:39 · 实际返回 170 条（hourly 169 / current 1） · 覆盖 2026/10/10 13:00 → 2026/10/17 13:00 · 更新 2026/10/10 13:38"
+      },
+      "port-ho-chi-minh": {
+        "pass": true,
+        "checks": [
+          {
+            "id": "navigate_no_error",
+            "pass": true,
+            "detail": "ok"
+          },
+          {
+            "id": "document_complete",
+            "pass": true,
+            "detail": "complete"
+          },
+          {
+            "id": "forecast_meta_rendered",
+            "pass": true,
+            "detail": "data-testid=port-weather-forecast-meta"
+          },
+          {
+            "id": "page_text_non_empty",
+            "pass": true,
+            "detail": "body 11566 chars"
+          },
+          {
+            "id": "browser_hourly_current_match_api",
+            "pass": true,
+            "detail": "expected \"hourly 169 / current 1\""
+          },
+          {
+            "id": "browser_total_match_api",
+            "pass": true,
+            "detail": "expected total 170"
+          },
+          {
+            "id": "browser_shows_marine_note",
+            "pass": true,
+            "detail": "marine coverage note rendered"
+          }
+        ],
+        "forecastMetaText": "目标窗口 2026/10/10 12:39 → 2026/10/17 13:39 · 实际返回 170 条（hourly 169 / current 1） · 覆盖 2026/10/10 13:00 → 2026/10/17 13:00 · 更新 2026/10/10 13:38 · 缺测 阵风0 浪169 降水0 能见度0\nOpen-Meteo marine（cell_selection=sea）在胡志明市坐标未返回浪高/涌浪；非填 0，WR-S02 等海况分支可能缺测。"
+      }
+    }
+  },
+  "fixtureS7": {
+    "status": "PASS",
+    "pass": true,
+    "evidencePath": ".tmp/s7-local/s7-integrated-evidence.json",
+    "totals": {
+      "checks": 151,
+      "passed": 151,
+      "failed": 0,
+      "runtimeErrors": 0,
+      "unexpectedApi5xx": 0,
+      "externalRequests": 0
+    },
+    "flows": [
+      {
+        "flow": "A",
+        "checks": 16,
+        "failed": 0
+      },
+      {
+        "flow": "B",
+        "checks": 22,
+        "failed": 0
+      },
+      {
+        "flow": "C",
+        "checks": 62,
+        "failed": 0
+      }
+    ],
+    "checks": [
+      {
+        "id": "s7_git_head_matches",
+        "pass": true,
+        "detail": "s7 5536f4630d3c504fb5287723d970f497b39065c3 vs run 5536f4630d3c504fb5287723d970f497b39065c3"
+      },
+      {
+        "id": "s7_workspace_clean",
+        "pass": true,
+        "detail": "workspaceClean=true"
+      },
+      {
+        "id": "s7_full_check_set",
+        "pass": true,
+        "detail": "checks=151 (min 151)"
+      },
+      {
+        "id": "s7_all_passed",
+        "pass": true,
+        "detail": "passed=151/151 failed=0"
+      },
+      {
+        "id": "s7_flows_abc",
+        "pass": true,
+        "detail": "[{\"flow\":\"A\",\"checks\":16,\"failed\":0},{\"flow\":\"B\",\"checks\":22,\"failed\":0},{\"flow\":\"C\",\"checks\":62,\"failed\":0}]"
+      },
+      {
+        "id": "s7_failed_checks_empty",
+        "pass": true,
+        "detail": "failedChecks=0"
+      },
+      {
+        "id": "s7_hermetic",
+        "pass": true,
+        "detail": "ext=0 rtErr=0 5xx=0"
+      }
+    ]
+  },
+  "subChains": {
+    "seedToIsolatedDb": "VERIFIED",
+    "liveWeatherSyncToSqlite": "VERIFIED",
+    "restartPersistenceApiEightPorts": "VERIFIED",
+    "apiSqliteFieldConsistencyBeforeAfterRestart": "VERIFIED",
+    "browserPageMetadataAndCoverage": "VERIFIED",
+    "apiNotTruncated": "VERIFIED",
+    "jmaLiveArchive": "FAIL",
+    "fixtureTropicalBrowserS7": "VERIFIED",
+    "sevenDayCoveragePerPort": {
+      "port-shekou": "PASS",
+      "port-yantian": "PASS",
+      "port-nansha": "PASS",
+      "port-laem-chabang": "PASS",
+      "port-klang": "PASS",
+      "port-manila": "PASS",
+      "port-jakarta": "PASS",
+      "port-ho-chi-minh": "BLOCKED: marine_wave_or_swell_present"
+    }
+  },
+  "checks": [
+    {
+      "name": "version_workspace_clean",
+      "kind": "prerequisite",
+      "pass": true,
+      "detail": "clean"
+    },
+    {
+      "name": "version_build_after_head_commit",
+      "kind": "prerequisite",
+      "pass": true,
+      "detail": "2026-10-10T05:37:39.783Z >= 2026-10-10T05:37:07.000Z"
+    },
+    {
+      "name": "port_seed",
+      "kind": "harness",
+      "pass": true,
+      "detail": "exit=0"
+    },
+    {
+      "name": "live_sync_exit",
+      "kind": "harness",
+      "pass": true,
+      "detail": "exit=0"
+    },
+    {
+      "name": "weather_job_success",
+      "kind": "harness",
+      "pass": true,
+      "detail": "{\"status\":\"success\",\"recordsRead\":1,\"recordsWritten\":1,\"sourceUpdatedAt\":\"2026-10-10T05:30:00.000Z\"}"
+    },
+    {
+      "name": "jma_job_success",
+      "kind": "harness",
+      "pass": false,
+      "detail": "{\"status\":\"failed\",\"recordsRead\":2,\"recordsWritten\":1,\"sourceUpdatedAt\":\"2026-10-10T05:38:56.119Z\",\"errorCode\":\"jma_detail_partial_failure\",\"errorMessage\":\"JMA partial detail sync (1 failed): TC2634\"}"
+    },
+    {
+      "name": "sqlite_weather_forecast_rows",
+      "kind": "harness",
+      "pass": true,
+      "detail": "1552"
+    },
+    {
+      "name": "sqlite_rows_port-shekou",
+      "kind": "business",
+      "pass": true,
+      "detail": "194 rows"
+    },
+    {
+      "name": "sqlite_rows_port-yantian",
+      "kind": "business",
+      "pass": true,
+      "detail": "194 rows"
+    },
+    {
+      "name": "sqlite_rows_port-nansha",
+      "kind": "business",
+      "pass": true,
+      "detail": "194 rows"
+    },
+    {
+      "name": "sqlite_rows_port-laem-chabang",
+      "kind": "business",
+      "pass": true,
+      "detail": "194 rows"
+    },
+    {
+      "name": "sqlite_rows_port-klang",
+      "kind": "business",
+      "pass": true,
+      "detail": "194 rows"
+    },
+    {
+      "name": "sqlite_rows_port-manila",
+      "kind": "business",
+      "pass": true,
+      "detail": "194 rows"
+    },
+    {
+      "name": "sqlite_rows_port-jakarta",
+      "kind": "business",
+      "pass": true,
+      "detail": "194 rows"
+    },
+    {
+      "name": "sqlite_rows_port-ho-chi-minh",
+      "kind": "business",
+      "pass": true,
+      "detail": "194 rows"
+    },
+    {
+      "name": "server_first_start",
+      "kind": "harness",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "api_weather_port-shekou",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "api_weather_port-yantian",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "api_weather_port-nansha",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "api_weather_port-laem-chabang",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "api_weather_port-klang",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "api_weather_port-manila",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "api_weather_port-jakarta",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "api_weather_port-ho-chi-minh",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "api_jma_panel",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200 outcome=partial"
+    },
+    {
+      "name": "server_restart",
+      "kind": "harness",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "restart_persistence_port-shekou",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200 forecasts=170 dbRows=194"
+    },
+    {
+      "name": "restart_meta_stable_port-shekou",
+      "kind": "harness",
+      "pass": true,
+      "detail": "before last=2026-10-17T05:00:00.000Z after last=2026-10-17T05:00:00.000Z hourly=169"
+    },
+    {
+      "name": "restart_persistence_port-yantian",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200 forecasts=170 dbRows=194"
+    },
+    {
+      "name": "restart_meta_stable_port-yantian",
+      "kind": "harness",
+      "pass": true,
+      "detail": "before last=2026-10-17T05:00:00.000Z after last=2026-10-17T05:00:00.000Z hourly=169"
+    },
+    {
+      "name": "restart_persistence_port-nansha",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200 forecasts=170 dbRows=194"
+    },
+    {
+      "name": "restart_meta_stable_port-nansha",
+      "kind": "harness",
+      "pass": true,
+      "detail": "before last=2026-10-17T05:00:00.000Z after last=2026-10-17T05:00:00.000Z hourly=169"
+    },
+    {
+      "name": "restart_persistence_port-laem-chabang",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200 forecasts=170 dbRows=194"
+    },
+    {
+      "name": "restart_meta_stable_port-laem-chabang",
+      "kind": "harness",
+      "pass": true,
+      "detail": "before last=2026-10-17T05:00:00.000Z after last=2026-10-17T05:00:00.000Z hourly=169"
+    },
+    {
+      "name": "restart_persistence_port-klang",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200 forecasts=170 dbRows=194"
+    },
+    {
+      "name": "restart_meta_stable_port-klang",
+      "kind": "harness",
+      "pass": true,
+      "detail": "before last=2026-10-17T05:00:00.000Z after last=2026-10-17T05:00:00.000Z hourly=169"
+    },
+    {
+      "name": "restart_persistence_port-manila",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200 forecasts=170 dbRows=194"
+    },
+    {
+      "name": "restart_meta_stable_port-manila",
+      "kind": "harness",
+      "pass": true,
+      "detail": "before last=2026-10-17T05:00:00.000Z after last=2026-10-17T05:00:00.000Z hourly=169"
+    },
+    {
+      "name": "restart_persistence_port-jakarta",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200 forecasts=170 dbRows=194"
+    },
+    {
+      "name": "restart_meta_stable_port-jakarta",
+      "kind": "harness",
+      "pass": true,
+      "detail": "before last=2026-10-17T05:00:00.000Z after last=2026-10-17T05:00:00.000Z hourly=169"
+    },
+    {
+      "name": "restart_persistence_port-ho-chi-minh",
+      "kind": "harness",
+      "pass": true,
+      "detail": "status=200 forecasts=170 dbRows=194"
+    },
+    {
+      "name": "restart_meta_stable_port-ho-chi-minh",
+      "kind": "harness",
+      "pass": true,
+      "detail": "before last=2026-10-17T05:00:00.000Z after last=2026-10-17T05:00:00.000Z hourly=169"
+    },
+    {
+      "name": "api_db_fields_before_port-shekou",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_after_port-shekou",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_before_port-yantian",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_after_port-yantian",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_before_port-nansha",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_after_port-nansha",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_before_port-laem-chabang",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_after_port-laem-chabang",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_before_port-klang",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_after_port-klang",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_before_port-manila",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_after_port-manila",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_before_port-jakarta",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_after_port-jakarta",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_before_port-ho-chi-minh",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "api_db_fields_after_port-ho-chi-minh",
+      "kind": "harness",
+      "pass": true,
+      "detail": "rows=170/170 mism=0 missDb=0 missApi=0"
+    },
+    {
+      "name": "browser_port-shekou",
+      "kind": "harness",
+      "pass": true,
+      "detail": "all assertions pass"
+    },
+    {
+      "name": "browser_port-yantian",
+      "kind": "harness",
+      "pass": true,
+      "detail": "all assertions pass"
+    },
+    {
+      "name": "browser_port-nansha",
+      "kind": "harness",
+      "pass": true,
+      "detail": "all assertions pass"
+    },
+    {
+      "name": "browser_port-laem-chabang",
+      "kind": "harness",
+      "pass": true,
+      "detail": "all assertions pass"
+    },
+    {
+      "name": "browser_port-klang",
+      "kind": "harness",
+      "pass": true,
+      "detail": "all assertions pass"
+    },
+    {
+      "name": "browser_port-manila",
+      "kind": "harness",
+      "pass": true,
+      "detail": "all assertions pass"
+    },
+    {
+      "name": "browser_port-jakarta",
+      "kind": "harness",
+      "pass": true,
+      "detail": "all assertions pass"
+    },
+    {
+      "name": "browser_port-ho-chi-minh",
+      "kind": "harness",
+      "pass": true,
+      "detail": "all assertions pass"
+    },
+    {
+      "name": "api_not_truncated_port-shekou",
+      "kind": "harness",
+      "pass": true,
+      "detail": "{\"dbHourlyInWindow\":169,\"apiHourlyReturned\":169,\"squeezed\":false}"
+    },
+    {
+      "name": "coverage_port-shekou",
+      "kind": "business",
+      "pass": true,
+      "detail": "full seven-day marine + land"
+    },
+    {
+      "name": "api_not_truncated_port-yantian",
+      "kind": "harness",
+      "pass": true,
+      "detail": "{\"dbHourlyInWindow\":169,\"apiHourlyReturned\":169,\"squeezed\":false}"
+    },
+    {
+      "name": "coverage_port-yantian",
+      "kind": "business",
+      "pass": true,
+      "detail": "full seven-day marine + land"
+    },
+    {
+      "name": "api_not_truncated_port-nansha",
+      "kind": "harness",
+      "pass": true,
+      "detail": "{\"dbHourlyInWindow\":169,\"apiHourlyReturned\":169,\"squeezed\":false}"
+    },
+    {
+      "name": "coverage_port-nansha",
+      "kind": "business",
+      "pass": true,
+      "detail": "full seven-day marine + land"
+    },
+    {
+      "name": "api_not_truncated_port-laem-chabang",
+      "kind": "harness",
+      "pass": true,
+      "detail": "{\"dbHourlyInWindow\":169,\"apiHourlyReturned\":169,\"squeezed\":false}"
+    },
+    {
+      "name": "coverage_port-laem-chabang",
+      "kind": "business",
+      "pass": true,
+      "detail": "full seven-day marine + land"
+    },
+    {
+      "name": "api_not_truncated_port-klang",
+      "kind": "harness",
+      "pass": true,
+      "detail": "{\"dbHourlyInWindow\":169,\"apiHourlyReturned\":169,\"squeezed\":false}"
+    },
+    {
+      "name": "coverage_port-klang",
+      "kind": "business",
+      "pass": true,
+      "detail": "full seven-day marine + land"
+    },
+    {
+      "name": "api_not_truncated_port-manila",
+      "kind": "harness",
+      "pass": true,
+      "detail": "{\"dbHourlyInWindow\":169,\"apiHourlyReturned\":169,\"squeezed\":false}"
+    },
+    {
+      "name": "coverage_port-manila",
+      "kind": "business",
+      "pass": true,
+      "detail": "full seven-day marine + land"
+    },
+    {
+      "name": "api_not_truncated_port-jakarta",
+      "kind": "harness",
+      "pass": true,
+      "detail": "{\"dbHourlyInWindow\":169,\"apiHourlyReturned\":169,\"squeezed\":false}"
+    },
+    {
+      "name": "coverage_port-jakarta",
+      "kind": "business",
+      "pass": true,
+      "detail": "full seven-day marine + land"
+    },
+    {
+      "name": "api_not_truncated_port-ho-chi-minh",
+      "kind": "harness",
+      "pass": true,
+      "detail": "{\"dbHourlyInWindow\":169,\"apiHourlyReturned\":169,\"squeezed\":false}"
+    },
+    {
+      "name": "coverage_port-ho-chi-minh",
+      "kind": "business",
+      "pass": false,
+      "detail": "marine_wave_or_swell_present"
+    },
+    {
+      "name": "jma_archived_live",
+      "kind": "harness",
+      "pass": false,
+      "detail": "outcome=partial archived=1 active=0"
+    },
+    {
+      "name": "fixture_s7_bound",
+      "kind": "harness",
+      "pass": true,
+      "detail": "bound + full set pass"
+    }
+  ],
+  "summary": {
+    "total": 84,
+    "passed": 81,
+    "harnessFailed": [
+      "jma_job_success",
+      "jma_archived_live"
+    ],
+    "prerequisiteMissing": [],
+    "businessBlocked": [
+      "coverage_port-ho-chi-minh"
+    ]
+  },
+  "verdict": "FAIL"
+}
