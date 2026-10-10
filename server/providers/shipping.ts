@@ -7,6 +7,7 @@ import { type CalendarProvider, configureCalendarProviders } from "./calendar"
 import { activeShippingFeedSourceIds, configureFeedProviders } from "./feed"
 import { type WeatherAlertProvider, activeOfficialWeatherAlertSourceIds, createOfficialWeatherAlertProvider, officialWeatherAlertSourceIds } from "./weather-alerts"
 import { computePortWeatherImpacts, mergeOpenMeteoPortPoints, openMeteoPointsToForecastRows } from "#/services/open-meteo-port-forecast"
+import { MARINE_REFERENCE_SOURCE_ID, type PortMarineReference, marineReferenceForPort } from "#/config/port-marine-reference"
 import { createRuntimePortDirectoryLookup } from "#/database/port-directory"
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
 
@@ -629,7 +630,34 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
     items: FeedItem[]
     forecasts: PortWeatherForecastRow[]
     impacts: PortWeatherImpactRow[]
+    reference?: { refKey: string, forecasts: PortWeatherForecastRow[], impacts: PortWeatherImpactRow[] }
   }>()
+  /**
+   * Area-reference marine (ADR-009): separate request at the reference point, rows/impacts stored under
+   * reference.refKey with their own sourceId. Failure here never fails or alters the port's own forecast.
+   */
+  async function fetchMarineReference(reference: PortMarineReference, checkedAtMs: number, fetchedAt: string) {
+    const url = new URL(marineEndpoint)
+    url.searchParams.set("latitude", String(reference.latitude))
+    url.searchParams.set("longitude", String(reference.longitude))
+    url.searchParams.set("current", "wave_height,wave_direction,swell_wave_height,swell_wave_direction,swell_wave_period")
+    url.searchParams.set("hourly", "wave_height,wave_direction,swell_wave_height,swell_wave_direction,swell_wave_period")
+    url.searchParams.set("forecast_days", String(weatherRiskThresholds.forecastDays))
+    url.searchParams.set("past_days", String(weatherRiskThresholds.pastDays))
+    url.searchParams.set("timeformat", "unixtime")
+    url.searchParams.set("cell_selection", "sea")
+    url.searchParams.set("models", reference.model)
+    try {
+      const response = await fetcher(url.toString())
+      if (!response.ok) return undefined
+      const payload = validWeatherPayload(await response.json())
+      const points = mergeOpenMeteoPortPoints(payload, {}, checkedAtMs)
+      const forecasts = openMeteoPointsToForecastRows(reference.refKey, undefined, points, fetchedAt, MARINE_REFERENCE_SOURCE_ID)
+      return { refKey: reference.refKey, forecasts, impacts: computePortWeatherImpacts(reference.refKey, points, fetchedAt) }
+    } catch {
+      return undefined
+    }
+  }
   const forecastsByPortId = new Map<string, PortWeatherForecastRow[]>()
   const impactsByPortId = new Map<string, PortWeatherImpactRow[]>()
   return {
@@ -653,6 +681,10 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
         if (cached && checkedAt.getTime() - cached.checkedAt < minIntervalMs) {
           forecastsByPortId.set(port.id, structuredClone(cached.forecasts))
           impactsByPortId.set(port.id, structuredClone(cached.impacts))
+          if (cached.reference) {
+            forecastsByPortId.set(cached.reference.refKey, structuredClone(cached.reference.forecasts))
+            impactsByPortId.set(cached.reference.refKey, structuredClone(cached.reference.impacts))
+          }
           return structuredClone(cached.items)
         }
         const previous = modelLastKnown.filter(item => item.relatedPortIds.includes(port.id))
@@ -710,11 +742,18 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
           const items = item ? [{ ...item, fetchedAt }] : []
           const forecastRows = forecastsByPortId.get(port.id) ?? []
           const impactRows = impactsByPortId.get(port.id) ?? []
+          const marineReference = marineReferenceForPort(port.id)
+          const reference = marineReference ? await fetchMarineReference(marineReference, checkedAt.getTime(), fetchedAt) : undefined
+          if (reference) {
+            forecastsByPortId.set(reference.refKey, reference.forecasts)
+            impactsByPortId.set(reference.refKey, reference.impacts)
+          }
           cache.set(port.id, {
             checkedAt: checkedAt.getTime(),
             items,
             forecasts: structuredClone(forecastRows),
             impacts: structuredClone(impactRows),
+            reference: reference ? structuredClone(reference) : undefined,
           })
           return items
         } catch (error) {

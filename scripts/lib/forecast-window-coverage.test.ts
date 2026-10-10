@@ -106,4 +106,12 @@ describe("evaluateForecastWindowCoverage", () => {
     rows[3] = { ...rows[3], visibilityM: undefined }
     expect(evaluateForecastWindowCoverage(rows, NOW).failed).toEqual(["land_visibilityM_present"])
   })
+
+  it("requireLand=false evaluates marine-only reference rows (land fields not required)", () => {
+    const nowMs = Date.parse("2026-10-10T04:30:00Z")
+    const rows = []
+    for (let t = Date.parse("2026-10-10T04:00:00Z"); t <= nowMs + 7 * 24 * 3600 * 1000; t += 3600 * 1000) rows.push({ forecastAt: new Date(t).toISOString(), horizon: "hourly", waveHeightM: 1 })
+    expect(evaluateForecastWindowCoverage(rows, nowMs, { requireLand: false }).pass).toBe(true)
+    expect(evaluateForecastWindowCoverage(rows, nowMs).pass).toBe(false)
+  })
 })

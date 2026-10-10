@@ -9,6 +9,7 @@ import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import type { FeedItem } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
+import { type RecordedRequest, createRecordingFetcher } from "./lib/recording-fetcher"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { createOfficialWeatherAlertProvider, officialWeatherAlertSources } from "#/providers/weather-alerts"
 import { getPortWeatherPanel } from "#/services/port-weather-panel"
@@ -38,19 +39,10 @@ const database = createDatabase({
   dispose: () => native.close(),
 } as never)
 
-const egress: { url: string, status?: number, bytes?: number, error?: string, at: string }[] = []
-async function fetcher(url: string) {
-  const at = new Date().toISOString()
-  try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(30_000) })
-    const body = await response.text()
-    egress.push({ url, status: response.status, bytes: body.length, at })
-    return { ok: response.ok, status: response.status, text: async () => body }
-  } catch (error) {
-    egress.push({ url, error: error instanceof Error ? error.message : String(error), at })
-    throw error
-  }
-}
+// Pass-through recording fetcher: keeps the provider's RequestInit (redirect: "error" for CAP bodies), adds a
+// 30 s timeout and preserves response url/redirected so the provider's redirect checks apply in this harness too.
+const egress: RecordedRequest[] = []
+const fetcher = createRecordingFetcher((url, init) => fetch(url, init), egress)
 
 async function main() {
   const now = new Date()
@@ -89,6 +81,14 @@ async function main() {
     classification,
     failure,
     egress,
+    redirectSummary: {
+      requests: egress.length,
+      bodyRequestsWithRedirectError: egress.filter(entry => entry.url !== tmd.url && entry.requestedRedirect === "error").length,
+      bodyRequests: egress.filter(entry => entry.url !== tmd.url).length,
+      redirectedResponses: egress.filter(entry => entry.redirected === true).length,
+      finalUrlDiffersFromRequest: egress.filter(entry => entry.finalUrl !== undefined && entry.finalUrl !== entry.url).length,
+      errors: egress.filter(entry => entry.error).length,
+    },
     storedCount: stored.length,
     activeCount: active.length,
     alerts: stored.map(item => ({

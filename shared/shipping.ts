@@ -540,6 +540,32 @@ export interface TropicalCyclonePanelResponse {
   seasonHintZh?: string
 }
 
+/**
+ * Independent area-reference marine (ADR-009). Never the port's own marine; shown separately and labelled as an
+ * engineering point (not an official representative point, not berth conditions).
+ */
+export interface PortMarineReferencePanel {
+  refKey: string
+  nameZh: string
+  kind: "engineering_reference_point"
+  latitude: number
+  longitude: number
+  model: "best_match"
+  approxDistanceKm: number
+  officialRepresentativePoint: false
+  berthConditions: false
+  labelZh: string
+  sourceId: string
+  fetchedAt?: string
+  hourlyReturned: number
+  hourlyWithMarine: number
+  firstInstant?: string
+  lastInstant?: string
+  maxWaveHeightM?: number
+  forecasts: PortWeatherForecastRow[]
+  impacts: PortWeatherImpactRow[]
+}
+
 export interface PortWeatherPanelResponse {
   portId: string
   state: PortWeatherPanelState
@@ -570,6 +596,8 @@ export interface PortWeatherPanelResponse {
     impacts: "system"
     alerts: string
   }
+  /** Separate area-reference marine block; the port's own marine (forecasts/forecastMeta) is unaffected. */
+  marineReference?: PortMarineReferencePanel
 }
 
 export interface ShippingSnapshot {

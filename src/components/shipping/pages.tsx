@@ -690,6 +690,19 @@ function PortWeatherPanelSection({ portId }: { portId: string }) {
                 : null}
             </p>
           )}
+          {data.marineReference
+            ? (
+                <div className="mb-3 rounded border border-amber-400/30 p-2 text-xs" data-testid="port-weather-marine-reference">
+                  <p className="font-medium">{data.marineReference.nameZh}</p>
+                  <p className="op-70">{data.marineReference.labelZh}</p>
+                  <p className="op-80">
+                    {`参考点 ${data.marineReference.latitude}N ${data.marineReference.longitude}E · 约 ${data.marineReference.approxDistanceKm} km · 模型 ${data.marineReference.model} · hourly ${data.marineReference.hourlyReturned}（含海况 ${data.marineReference.hourlyWithMarine}）`}
+                    {data.marineReference.maxWaveHeightM !== undefined ? ` · 7 天最大浪高 ${data.marineReference.maxWaveHeightM.toFixed(1)} m` : " · 暂无参考海况测值"}
+                    {` · 参考规则命中 ${data.marineReference.impacts.length}`}
+                  </p>
+                </div>
+              )
+            : null}
           {nextForecasts.length === 0
             ? <p className="text-sm op-60">{forecastEmptyCopy}</p>
             : (

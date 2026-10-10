@@ -1,5 +1,6 @@
 import type {
   FeedItem,
+  PortMarineReferencePanel,
   PortWeatherForecastMeta,
   PortWeatherPanelNotice,
   PortWeatherPanelResponse,
@@ -15,6 +16,7 @@ import {
   type Precipitation24hResult,
 } from "#/services/precipitation-window"
 import { evaluateOfficialAlertImpactRules } from "#/services/official-alert-impact"
+import { MARINE_REFERENCE_SOURCE_ID, marineReferenceForPort } from "#/config/port-marine-reference"
 import { resolveTyphoonInputForImpactInterval } from "#/services/typhoon-wr-s03-resolve"
 import { evaluatePortWeatherCoverageAt } from "#/services/weather-rule-evaluation"
 import {
@@ -231,6 +233,47 @@ export async function getPortWeatherPanel(
     nowMs,
   })
 
+  // ADR-009: independent area-reference marine, read from its own key; never merged into the port's rows/impacts.
+  const reference = marineReferenceForPort(portId)
+  let marineReference: PortMarineReferencePanel | undefined
+  if (reference) {
+    const referenceRows = (await repository.listWeatherForecastsForPortInRange(
+      reference.refKey,
+      new Date(retention.startMs).toISOString(),
+      new Date(retention.endMs).toISOString(),
+      FORECAST_RETENTION_LIMIT,
+    )).filter((row) => {
+      const t = Date.parse(row.forecastAt)
+      return Number.isFinite(t) && isForecastInstantInWindow(t, nowMs)
+    })
+    const referenceHourly = referenceRows.filter(row => row.horizon === "hourly")
+    const waves = referenceHourly
+      .map(row => row.waveHeightM ?? row.swellWaveHeightM)
+      .filter((value): value is number => typeof value === "number" && Number.isFinite(value))
+    const fetchedTimes = referenceRows.map(row => Date.parse(row.fetchedAt)).filter(Number.isFinite)
+    marineReference = {
+      refKey: reference.refKey,
+      nameZh: reference.nameZh,
+      kind: reference.kind,
+      latitude: reference.latitude,
+      longitude: reference.longitude,
+      model: reference.model,
+      approxDistanceKm: reference.approxDistanceKm,
+      officialRepresentativePoint: false,
+      berthConditions: false,
+      labelZh: reference.labelZh,
+      sourceId: MARINE_REFERENCE_SOURCE_ID,
+      fetchedAt: fetchedTimes.length ? new Date(Math.max(...fetchedTimes)).toISOString() : undefined,
+      hourlyReturned: referenceHourly.length,
+      hourlyWithMarine: waves.length,
+      firstInstant: referenceHourly[0]?.forecastAt,
+      lastInstant: referenceHourly.at(-1)?.forecastAt,
+      maxWaveHeightM: waves.length ? Math.max(...waves) : undefined,
+      forecasts: referenceRows,
+      impacts: await repository.listWeatherImpactsForPortRanked(reference.refKey, asOf, horizonEnd, WEATHER_IMPACT_DISPLAY_LIMIT),
+    }
+  }
+
   const panelNotice = panelNoticeForState(
     state,
     showingHistoricalData || (state !== "ready" && state !== "data_empty"),
@@ -262,6 +305,7 @@ export async function getPortWeatherPanel(
     },
     officialAlerts,
     officialAlertImpacts,
+    ...(marineReference ? { marineReference } : {}),
     sources: {
       forecast: displayForecasts.length ? forecastSourceLabel : "暂无有效窗口内预报",
       impacts: "system",

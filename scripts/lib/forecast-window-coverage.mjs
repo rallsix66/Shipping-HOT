@@ -29,10 +29,11 @@ export const LAND_FIELDS = ["windGustKmh", "precipitationMm", "visibilityM"]
 /**
  * @param {Array<{forecastAt: string, horizon?: string, windGustKmh?: number, precipitationMm?: number, visibilityM?: number, waveHeightM?: number, swellWaveHeightM?: number}>} rows
  * @param {number} nowMs
- * @param {{ requireMarine?: boolean }} [options]
+ * @param {{ requireMarine?: boolean, requireLand?: boolean }} [options]
  */
 export function evaluateForecastWindowCoverage(rows, nowMs, options = {}) {
   const requireMarine = options.requireMarine ?? true
+  const requireLand = options.requireLand ?? true
   const { startMs, endMs } = sevenDayWindow(nowMs)
   const gridStart = ceilHour(startMs)
   const gridEnd = floorHour(endMs)
@@ -73,7 +74,7 @@ export function evaluateForecastWindowCoverage(rows, nowMs, options = {}) {
     { id: "window_start_covered", pass: seen.has(gridStart), detail: `first grid hour ${iso(gridStart)}; first returned ${iso(sorted[0]) ?? "none"}` },
     { id: "window_end_covered", pass: seen.has(gridEnd), detail: `last grid hour ${iso(gridEnd)}; last returned ${iso(sorted[sorted.length - 1]) ?? "none"}` },
     { id: "no_missing_hours", pass: missingHours.length === 0, detail: missingHours.length ? `${missingHours.length}/${expectedHours} grid hours missing (first ${missingHours[0]}, last ${missingHours[missingHours.length - 1]})` : `${expectedHours}/${expectedHours}` },
-    ...LAND_FIELDS.map(field => ({ id: `land_${field}_present`, pass: inWindow.length > 0 && fieldMissing[field] === 0, detail: `${fieldMissing[field]}/${inWindow.length} missing` })),
+    ...(requireLand ? LAND_FIELDS : []).map(field => ({ id: `land_${field}_present`, pass: inWindow.length > 0 && fieldMissing[field] === 0, detail: `${fieldMissing[field]}/${inWindow.length} missing` })),
   ]
   if (requireMarine) {
     checks.push({ id: "marine_wave_or_swell_present", pass: inWindow.length > 0 && marineMissing === 0, detail: `${marineMissing}/${inWindow.length} missing wave+swell` })
