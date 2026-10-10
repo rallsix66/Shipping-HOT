@@ -43,3 +43,10 @@
   - VNSGN 已有一份独立的区域参考海况：工程取点，按 live 证据检查 7 天是否完整；单独展示、单独存储，规则单独计算。
 - **仍未满足**：VNSGN **自身**海况（港口坐标）仍然缺测。
 - R1.5-1 保持 **BLOCKED**。要变成 PASS，必须由用户或审查方明确决定：「VNSGN 以带标注的区域参考海况满足 R1.5-1 的海况要求」，并相应修改方案或 ADR。在没有这个决定之前，验收标准不变。
+
+## live 证据（代码 SHA 3e25a4571c04f8adcab3747ae52565ba12e6ab7b，工作区干净）
+
+- `pnpm test:r1-5-1-live` exit 2，判定 BLOCKED，87 项检查中 86 项通过。唯一阻塞项是 `coverage_port-ho-chi-minh`，原因 `marine_wave_or_swell_present`：港口自身海况缺测，如实保留。
+- 参考海况：SQLite 同步时的数据和重启后 API 返回的数据，都覆盖了 169/169 个整点（2026-10-10T06:00:00.000Z 到 2026-10-17T06:00:00.000Z），没有缺测。本次 7 天最大浪高 0.66 m，参考规则命中 0 条。
+- 检查项全部通过：`reference_labelled`（engineering_reference_point、非官方、非泊位、best_match、62 km）；`reference_not_substituted`（港口海况仍缺测，缺测说明仍然存在）；浏览器能看到参考块的名称和「非官方代表点」标注。
+- 证据：`docs/evidence/gate-3e25a45/vnsgn-reference-marine-summary.json`、`r1-5-1-evidence.json`、`summary.txt`。

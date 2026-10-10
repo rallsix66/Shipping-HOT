@@ -1,0 +1,121 @@
+{
+  "gitHead": "3e25a4571c04f8adcab3747ae52565ba12e6ab7b",
+  "workspaceClean": true,
+  "verdict": "BLOCKED",
+  "summary": {
+    "total": 87,
+    "passed": 86,
+    "harnessFailed": [],
+    "prerequisiteMissing": [],
+    "businessBlocked": [
+      "coverage_port-ho-chi-minh"
+    ]
+  },
+  "coverage_port_ho_chi_minh": {
+    "name": "coverage_port-ho-chi-minh",
+    "kind": "business",
+    "pass": false,
+    "detail": "marine_wave_or_swell_present"
+  },
+  "referenceChecks": [
+    {
+      "name": "reference_marine_7d_port-ho-chi-minh",
+      "kind": "reference",
+      "pass": true,
+      "detail": "sqlite full; api full"
+    },
+    {
+      "name": "reference_labelled_port-ho-chi-minh",
+      "kind": "reference",
+      "pass": true,
+      "detail": "{\"kind\":\"engineering_reference_point\",\"official\":false,\"berth\":false,\"model\":\"best_match\",\"km\":62}"
+    },
+    {
+      "name": "reference_not_substituted_port-ho-chi-minh",
+      "kind": "reference",
+      "pass": true,
+      "detail": "portMarineStillMissing=true coverageNote=true"
+    }
+  ],
+  "browserChecks": [
+    {
+      "id": "navigate_no_error",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "id": "document_complete",
+      "pass": true,
+      "detail": "complete"
+    },
+    {
+      "id": "forecast_meta_rendered",
+      "pass": true,
+      "detail": "data-testid=port-weather-forecast-meta"
+    },
+    {
+      "id": "page_text_non_empty",
+      "pass": true,
+      "detail": "body 11801 chars"
+    },
+    {
+      "id": "browser_hourly_current_match_api",
+      "pass": true,
+      "detail": "expected \"hourly 169 / current 1\""
+    },
+    {
+      "id": "browser_total_match_api",
+      "pass": true,
+      "detail": "expected total 170"
+    },
+    {
+      "id": "browser_shows_marine_note",
+      "pass": true,
+      "detail": "marine coverage note rendered"
+    },
+    {
+      "id": "browser_shows_marine_reference_label",
+      "pass": true,
+      "detail": "reference block name + engineering-point label rendered"
+    }
+  ],
+  "label": {
+    "refKey": "marine-ref:port-ho-chi-minh:ganh-rai-eng",
+    "nameZh": "胡志明关联海域海况参考（工程取点）",
+    "kind": "engineering_reference_point",
+    "latitude": 10.2917,
+    "longitude": 107.0417,
+    "model": "best_match",
+    "approxDistanceKm": 62,
+    "officialRepresentativePoint": false,
+    "berthConditions": false,
+    "labelZh": "工程取点：01/2026/TT-BXD 胡志明港水域 Gành Rái/Đồng Tranh 湾区（HCM1–HCM7）内海上点，距港口坐标约 62 km；非官方代表点，不代表泊位/港内条件；港口自身海况仍按缺测显示。",
+    "sourceId": "open-meteo-marine-reference",
+    "fetchedAt": "2026-10-10T06:06:05.802Z",
+    "hourlyReturned": 169,
+    "hourlyWithMarine": 169,
+    "firstInstant": "2026-10-10T06:00:00.000Z",
+    "lastInstant": "2026-10-17T06:00:00.000Z",
+    "maxWaveHeightM": 0.66,
+    "forecastsReturned": 170,
+    "impactsReturned": 0
+  },
+  "sqliteAtSync": {
+    "hourly": 169,
+    "expected": 169,
+    "first": "2026-10-10T06:00:00.000Z",
+    "last": "2026-10-17T06:00:00.000Z",
+    "marineMissing": 0,
+    "failed": []
+  },
+  "apiAfterRestart": {
+    "hourly": 169,
+    "expected": 169,
+    "first": "2026-10-10T06:00:00.000Z",
+    "last": "2026-10-17T06:00:00.000Z",
+    "marineMissing": 0,
+    "failed": []
+  },
+  "portMarineStillMissing": true,
+  "portCoverageNote": "Open-Meteo marine（cell_selection=sea）在胡志明市坐标未返回浪高/涌浪；非填 0，WR-S02 等海况分支可能缺测。"
+}
