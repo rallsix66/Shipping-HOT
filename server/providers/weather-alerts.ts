@@ -5,6 +5,7 @@ import type { DataProvenance, FeedItem, Port, WeatherDetail } from "@shared/ship
 import { mockPorts } from "@shared/shipping-fixtures"
 import { portDirectoryBaseline } from "@shared/port-directory"
 import type { ArticleSourcePolicyConfig } from "@shared/article"
+import { METMALAYSIA_MIN_REQUEST_INTERVAL_MS, isPinnedMetMalaysiaUrl, parseMetMalaysiaWarnings } from "#/providers/metmalaysia-warning"
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
 import { type CapSourceContext, capBodyUrlRejection, capIndexLinks, isRetiredBy, parseCapMessage, resolveCapBatch } from "#/providers/cap-alerts"
 
@@ -13,7 +14,7 @@ export interface WeatherAlertProvider {
   getFeedItems: (lastKnown?: FeedItem[], ports?: Port[]) => Promise<FeedItem[]>
 }
 
-export const officialWeatherAlertSourceIds = new Set(["jma", "tmd", "bmkg"])
+export const officialWeatherAlertSourceIds = new Set(["jma", "tmd", "bmkg", "metmalaysia"])
 
 export interface WeatherAlertResponse {
   ok: boolean
@@ -26,7 +27,7 @@ export interface WeatherAlertResponse {
 }
 
 export type WeatherAlertFetcher = (url: string, init?: { redirect?: "error" | "manual" | "follow" }) => Promise<WeatherAlertResponse>
-export type WeatherAlertParser = "jma" | "tmd" | "bmkg"
+export type WeatherAlertParser = "jma" | "tmd" | "bmkg" | "metmalaysia"
 export type WeatherAlertSourceStatus = "verified_live" | "experimental" | "live_pending" | "disabled"
 
 export interface WeatherAlertSource {
@@ -35,7 +36,7 @@ export interface WeatherAlertSource {
   url: string
   sourceUrl: string
   /** "cap_index": RSS index whose items link to CAP 1.2 documents (TMD TH-W01); lifecycle comes from CAP. */
-  format: "rss" | "cap" | "cap_index" | "html"
+  format: "rss" | "cap" | "cap_index" | "html" | "json_warning"
   /** Issuing country (ISO 3166-1 alpha-2) for CAP structured-area checks. */
   countryCode?: string
   /** CAP area association: ISO 3166-2 geocode (default) or polygon containment of same-country port coordinates. */
@@ -86,7 +87,28 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
     enabled: true,
     liveStatus: "verified_live",
   },
+  {
+    // MY-W01 (ADR-008): limited "official notices" integration. Pinned host+path (trailing slash; redirects refused),
+    // 4 req/min ceiling, one request per run. Records only: validity/timezone unknown, no severity, no region,
+    // no port association and no WR-O01/WR-O02. Runs only under the existing SHIPPING_WEATHER_ALERT_PROVIDER=experimental.
+    id: "metmalaysia",
+    name: "Malaysian Meteorological Department (data.gov.my)",
+    url: "https://api.data.gov.my/weather/warning/",
+    sourceUrl: "https://api.data.gov.my/weather/warning/",
+    format: "json_warning",
+    countryCode: "MY",
+    parser: "metmalaysia",
+    enabled: false,
+    liveStatus: "experimental",
+  },
 ]
+
+const lastJsonWarningRequestAt = new Map<string, number>()
+
+/** Test hook: forget the per-source request clock used by the json_warning rate limit. */
+export function resetWeatherAlertRateLimit(): void {
+  lastJsonWarningRequestAt.clear()
+}
 
 export function activeOfficialWeatherAlertSourceIds(options: { allowPending?: boolean, sources?: WeatherAlertSource[] } = {}): Set<string> {
   const sources = options.sources ?? officialWeatherAlertSources
@@ -437,13 +459,23 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
     async getFeedItems(lastKnown = [], ports = mockPorts) {
       const fetchedAt = now().toISOString()
       if (!enabledSources.length) {
-        return lastKnown.filter(item => item.sourceId === "jma" || item.sourceId === "tmd" || item.sourceId === "bmkg").map(item => markDisabled(item, fetchedAt, "official_weather_source_live_pending"))
+        return lastKnown.filter(item => officialWeatherAlertSourceIds.has(item.sourceId)).map(item => markDisabled(item, fetchedAt, "official_weather_source_live_pending"))
       }
       const results = await Promise.all(enabledSources.map(async (source) => {
         const previous = lastKnown.filter(item => item.sourceId === source.id)
         let response: WeatherAlertResponse
         try {
-          response = await fetcher(source.url)
+          if (source.format === "json_warning") {
+            if (!isPinnedMetMalaysiaUrl(source.url)) throw new Error(`${source.name} url is not the pinned host/path`)
+            const nowMs = now().getTime()
+            const last = lastJsonWarningRequestAt.get(source.id)
+            if (last !== undefined && nowMs - last < METMALAYSIA_MIN_REQUEST_INTERVAL_MS) throw new Error(`${source.name} local rate limit (4 req/min) not yet elapsed`)
+            lastJsonWarningRequestAt.set(source.id, nowMs)
+            response = await fetcher(source.url, { redirect: "error" })
+            if (response.redirected || (response.url && response.url !== source.url)) throw new Error(`${source.name} redirect rejected`)
+          } else {
+            response = await fetcher(source.url)
+          }
           if (!response.ok) throw providerHttpError(source.name, response.status, `${source.name} request failed (${response.status})`)
         } catch (error) {
           const failure = error instanceof ProviderError
@@ -474,6 +506,13 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
                 ? expiredAsInfo(item, fetchedAt)
                 : item.weather?.alertState === "expired" ? item : markMissingFromCurrentIndex(item, fetchedAt))
             return [...batch.items, ...cleared]
+          }
+          if (source.format === "json_warning") {
+            const parsed = parseMetMalaysiaWarnings(body, { id: source.id, sourceUrl: source.sourceUrl, provenance: weatherAlertProvenance(source) }, fetchedAt, previous)
+            const currentIds = new Set(parsed.map(item => item.id))
+            // A record no longer listed is NOT declared expired (validity is unknown); it is only marked missing.
+            const missing = previous.filter(item => !currentIds.has(item.id)).map(item => markMissingFromCurrentIndex(item, fetchedAt))
+            return [...parsed, ...missing]
           }
           const parsed = source.format === "cap"
             ? parseWeatherAlertCap(body, source, ports, fetchedAt)

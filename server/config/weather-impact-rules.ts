@@ -72,6 +72,8 @@ export const officialAlertSourceCountry: Readonly<Record<string, string>> = {
   tmd: "TH",
   bmkg: "ID",
   jma: "JP",
+  // Issuing country only (never nationwide impact); MY-W01 has no structured region so it never associates a port.
+  metmalaysia: "MY",
 }
 
 /**

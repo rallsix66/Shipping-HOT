@@ -362,6 +362,32 @@ export interface WeatherDetail {
   alertExpiresAt?: string
   alertUrgency?: string
   alertCertainty?: string
+  /** Validity of the official record; "unknown" when the source times cannot be interpreted (MY-W01). */
+  validityStatus?: "unknown"
+  /** Source datetimes carry no confirmed timezone (MY-W01); raw strings are kept and never converted. */
+  timezoneStatus?: "unconfirmed"
+  /** The source publishes no official severity field. */
+  officialSeverity?: "not_provided"
+  /** publishedAt is the time the record was first received, not an official issue time. */
+  timeBasis?: "received_at"
+  /** Raw official strings exactly as received (MY-W01 data.gov.my warning row). */
+  alertRaw?: WeatherAlertRaw
+}
+
+export interface WeatherAlertRaw {
+  issued: string | null
+  validFrom: string | null
+  validTo: string | null
+  titleEn: string
+  titleBm?: string
+  headingEn?: string
+  headingBm?: string
+  textEn?: string
+  textBm?: string
+  instructionEn?: string
+  instructionBm?: string
+  sourceUrl: string
+  fetchedAt: string
 }
 
 export interface WeatherWindow {

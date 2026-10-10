@@ -129,6 +129,20 @@ function WeatherChips({ weather }: { weather: WeatherDetail }) {
             {weather.alertState === "active" ? "生效" : weather.alertState === "expired" ? "已过期" : "未知"}
           </span>
         )}
+        {weather.validityStatus === "unknown" && <span className="chip">有效性待确认</span>}
+        {weather.timezoneStatus === "unconfirmed" && <span className="chip">时区未确认</span>}
+        {weather.officialSeverity === "not_provided" && <span className="chip">官方级别：未提供</span>}
+      </div>
+      {weather.alertRaw && (
+        <div className="flex flex-col gap-0.5 text-xs op-70" data-testid="official-alert-raw">
+          <span>
+            {`官方原始时间（时区未确认，未换算）：issued ${weather.alertRaw.issued ?? "null"} · valid_from ${weather.alertRaw.validFrom ?? "null"} · valid_to ${weather.alertRaw.validTo ?? "null"}`}
+          </span>
+          <span>{`来源 ${weather.alertRaw.sourceUrl} · 抓取时间 ${formatDate(weather.alertRaw.fetchedAt)}`}</span>
+          {weather.alertRaw.textEn && <span>{`原文：${weather.alertRaw.textEn}`}</span>}
+        </div>
+      )}
+      <div className="flex flex-wrap items-center gap-1.5">
       </div>
       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs op-70">
         {waveHeightM !== undefined && (
@@ -344,7 +358,7 @@ export function HotPage() {
                       <a key={item.id} href={item.sourceUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 whitespace-nowrap text-sm">
                         <StatusDot tone={severityTone(item.severity)} />
                         <span className="font-semibold">{item.displayTitle ?? item.title}</span>
-                        <span className="op-60">{item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}</span>
+                        <span className="op-60">{item.publicationTimeKnown === false ? "发布时间未知" : item.weather?.timeBasis === "received_at" ? `首次接收 ${formatDate(item.publishedAt)}` : formatDate(item.publishedAt)}</span>
                       </a>
                     ))}
                   </Marquee>
