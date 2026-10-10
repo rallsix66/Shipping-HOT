@@ -74,6 +74,8 @@ describe("open-meteo weather intelligence", () => {
   it("requests land forecast fields and exposes persistence batch for SQLite", async () => {
     const urls: string[] = []
     const provider = createOpenMeteoWeatherProvider({
+      // fixture hours are 2026-08-15; rows are retained relative to the provider clock
+      now: () => new Date("2026-08-15T00:00:00.000Z"),
       fetcher: async (url) => {
         urls.push(url)
         return { ok: true, status: 200, json: async () => weatherPayload(url) }

@@ -2,6 +2,30 @@ import type { FeedItem, PortWeatherForecastRow, PortWeatherPanelState } from "@s
 
 export const WEATHER_FORECAST_HORIZON_MS = 7 * 24 * 60 * 60 * 1000
 export const WEATHER_FORECAST_STALE_MS = 6 * 60 * 60 * 1000
+const HOUR_MS = 60 * 60 * 1000
+/** History kept behind the display window so rolling 24h precipitation (WR-S05) can be evaluated near `now`. */
+export const PRECIP_HISTORY_LOOKBACK_MS = 24 * HOUR_MS
+/**
+ * Hard cap on stored/read forecast rows per port (hourly + current) for the retention window
+ * [now - 1h - 24h, now + 7d] (= 193 whole hours + current). Applied only AFTER window filtering and
+ * always drops the oldest rows first, so future hours at the window end are never squeezed out.
+ */
+export const FORECAST_RETENTION_LIMIT = 7 * 24 + 24 + 8
+
+export function forecastRetentionWindow(nowMs: number): { startMs: number, endMs: number } {
+  return { startMs: nowMs - HOUR_MS - PRECIP_HISTORY_LOOKBACK_MS, endMs: nowMs + WEATHER_FORECAST_HORIZON_MS }
+}
+
+/** Filter to the retention window first, sort ascending, then cap by dropping the OLDEST rows. */
+export function selectForecastRetention<T>(items: readonly T[], instantOf: (item: T) => string, nowMs: number, limit = FORECAST_RETENTION_LIMIT): T[] {
+  const { startMs, endMs } = forecastRetentionWindow(nowMs)
+  const inWindow = items
+    .map(item => ({ item, t: Date.parse(instantOf(item)) }))
+    .filter(({ t }) => Number.isFinite(t) && t >= startMs && t <= endMs)
+    .sort((a, b) => a.t - b.t)
+    .map(({ item }) => item)
+  return inWindow.length > limit ? inWindow.slice(inWindow.length - limit) : inWindow
+}
 export const WEATHER_IMPACT_DISPLAY_LIMIT = 48
 /** Max hourly steps returned for the 7-day port panel (full window, not a preview cap). */
 export const PORT_WEATHER_FORECAST_DISPLAY_LIMIT = 7 * 24 + 4

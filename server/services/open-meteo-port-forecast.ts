@@ -3,6 +3,7 @@ import type { PortWeatherForecastRow, PortWeatherImpactRow } from "@shared/shipp
 import type { TyphoonInputState } from "#/services/weather-rule-coverage"
 import { impactValidityInterval } from "#/services/weather-impact-interval"
 import { evaluatePointWeatherRules } from "#/services/weather-rule-evaluation"
+import { FORECAST_RETENTION_LIMIT, selectForecastRetention } from "#/services/weather-panel-policy"
 
 function normalizeProviderTimestamp(value: unknown): string | undefined {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -50,7 +51,12 @@ function upsertPoint(
   points.set(key, next)
 }
 
-export function mergeOpenMeteoPortPoints(marine: OpenMeteoPayload, land: OpenMeteoPayload): OpenMeteoPortPoint[] {
+/**
+ * Merge marine + land payloads. With `nowMs` the points are filtered to the retention window
+ * ([now-1h-24h precip lookback, now+7d]) before the cap; the cap always drops the oldest rows,
+ * never future hours at the window end. Without `nowMs` only the (oldest-first-dropping) cap applies.
+ */
+export function mergeOpenMeteoPortPoints(marine: OpenMeteoPayload, land: OpenMeteoPayload, nowMs?: number): OpenMeteoPortPoint[] {
   const points = new Map<string, OpenMeteoPortPoint>()
   const marineHourly = marine.hourly
   marineHourly?.time?.forEach((time, index) => {
@@ -85,7 +91,9 @@ export function mergeOpenMeteoPortPoints(marine: OpenMeteoPayload, land: OpenMet
       visibilityM: numberValue(landCurrent?.visibility),
     })
   }
-  return [...points.values()].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp)).slice(0, 7 * 24 + 2)
+  const sorted = [...points.values()].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
+  if (nowMs !== undefined && Number.isFinite(nowMs)) return selectForecastRetention(sorted, p => p.timestamp, nowMs)
+  return sorted.length > FORECAST_RETENTION_LIMIT ? sorted.slice(sorted.length - FORECAST_RETENTION_LIMIT) : sorted
 }
 
 export function openMeteoPointsToForecastRows(

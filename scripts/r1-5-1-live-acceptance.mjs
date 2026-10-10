@@ -155,7 +155,7 @@ function readDbRowsByPort() {
   const db = new Database(DB_PATH, { readonly: true })
   try {
     const total = db.prepare("SELECT COUNT(*) AS count FROM weather_forecast").get().count
-    const stmt = db.prepare(`SELECT forecast_at, horizon, wave_height_m, swell_wave_height_m, wind_gust_kmh, precipitation_mm, visibility_m
+    const stmt = db.prepare(`SELECT forecast_at, horizon, wave_height_m, swell_wave_height_m, wind_speed_kmh, wind_gust_kmh, precipitation_mm, visibility_m
       FROM weather_forecast WHERE port_id = ? ORDER BY forecast_at ASC`)
     const byPort = {}
     for (const portId of PORT_IDS) {
@@ -164,6 +164,7 @@ function readDbRowsByPort() {
         horizon: r.horizon === "current" ? "current" : "hourly",
         waveHeightM: r.wave_height_m ?? undefined,
         swellWaveHeightM: r.swell_wave_height_m ?? undefined,
+        windSpeedKmh: r.wind_speed_kmh ?? undefined,
         windGustKmh: r.wind_gust_kmh ?? undefined,
         precipitationMm: r.precipitation_mm ?? undefined,
         visibilityM: r.visibility_m ?? undefined,
@@ -172,6 +173,49 @@ function readDbRowsByPort() {
     return { total, byPort }
   } finally {
     db.close()
+  }
+}
+
+const KEY_FIELDS = ["waveHeightM", "swellWaveHeightM", "windSpeedKmh", "windGustKmh", "precipitationMm", "visibilityM"]
+const rowKey = (portId, r) => `${portId}|${r.horizon === "current" ? "current" : "hourly"}|${new Date(Date.parse(r.forecastAt)).toISOString()}`
+const norm = v => (typeof v === "number" && Number.isFinite(v) ? v : null)
+
+/**
+ * Field-level API vs SQLite comparison keyed by portId+horizon+forecastAt over [fromMs, toMs].
+ * Every API row must exist in SQLite with identical key fields, and every SQLite row in the range must be returned.
+ */
+function compareApiToDb(portId, apiRows, dbRows, fromMs, toMs) {
+  const inRange = (r) => {
+    const t = Date.parse(r.forecastAt)
+    return Number.isFinite(t) && t >= fromMs && t <= toMs
+  }
+  const db = new Map(dbRows.filter(inRange).map(r => [rowKey(portId, r), r]))
+  const api = new Map(apiRows.filter(inRange).map(r => [rowKey(portId, r), r]))
+  const fieldMismatches = []
+  const missingInDb = []
+  for (const [key, a] of api) {
+    const d = db.get(key)
+    if (!d) {
+      missingInDb.push(key)
+      continue
+    }
+    for (const f of KEY_FIELDS) {
+      if (norm(a[f]) !== norm(d[f])) fieldMismatches.push({ key, field: f, api: norm(a[f]), sqlite: norm(d[f]) })
+    }
+  }
+  const missingInApi = [...db.keys()].filter(k => !api.has(k))
+  return {
+    range: { from: new Date(fromMs).toISOString(), to: new Date(toMs).toISOString() },
+    comparedRows: api.size,
+    sqliteRowsInRange: db.size,
+    fieldsCompared: KEY_FIELDS,
+    fieldMismatchCount: fieldMismatches.length,
+    fieldMismatchSample: fieldMismatches.slice(0, 5),
+    missingInDb: missingInDb.slice(0, 5),
+    missingInDbCount: missingInDb.length,
+    missingInApiCount: missingInApi.length,
+    missingInApiSample: missingInApi.slice(0, 5),
+    pass: api.size > 0 && fieldMismatches.length === 0 && missingInDb.length === 0 && missingInApi.length === 0,
   }
 }
 
@@ -393,6 +437,8 @@ async function main() {
   let serverA
   let serverB
   const apiBeforeRestart = {}
+  const apiBeforeRestartRows = {}
+  const apiDbConsistency = {}
   const apiAfterRestart = {}
   const apiAfterRestartRows = {}
   let tropical
@@ -406,6 +452,7 @@ async function main() {
     for (const portId of PORT_IDS) {
       const res = await fetchJson(`/api/shipping/ports/${portId}/weather`)
       apiBeforeRestart[portId] = compactApi(res)
+      apiBeforeRestartRows[portId] = Array.isArray(res.body?.forecasts) ? res.body.forecasts : []
       push(`api_weather_${portId}`, res.status === 200 && Boolean(res.body?.forecastMeta), `status=${res.status}`)
     }
     tropical = await fetchJson("/api/shipping/tropical-cyclones")
@@ -429,6 +476,24 @@ async function main() {
       push(`restart_persistence_${portId}`, res.status === 200 && (dbCount === 0 ? rows.length === 0 : rows.length > 0), `status=${res.status} forecasts=${rows.length} dbRows=${dbCount}`)
       // lastInstant is the end of stored data and must survive the restart; firstInstant may legitimately roll with now-1h.
       push(`restart_meta_stable_${portId}`, Boolean(before && after) && before.lastInstant === after.lastInstant && (dbCount === 0 || after.hourlyReturned > 0), `before last=${before?.lastInstant} after last=${after?.lastInstant} hourly=${after?.hourlyReturned}`)
+    }
+
+    // 5b) Field-level consistency: API before and after restart vs SQLite over the common window.
+    for (const portId of PORT_IDS) {
+      const metaA = apiBeforeRestart[portId]?.forecastMeta?.targetWindow
+      const metaB = apiAfterRestart[portId]?.forecastMeta?.targetWindow
+      if (!metaA || !metaB) {
+        push(`api_db_fields_${portId}`, false, "missing targetWindow")
+        continue
+      }
+      const fromMs = Math.max(Date.parse(metaA.start), Date.parse(metaB.start))
+      const toMs = Math.min(Date.parse(metaA.end), Date.parse(metaB.end))
+      const before = compareApiToDb(portId, apiBeforeRestartRows[portId], dbRows.byPort[portId], fromMs, toMs)
+      const after = compareApiToDb(portId, apiAfterRestartRows[portId] ?? [], dbRows.byPort[portId], fromMs, toMs)
+      apiDbConsistency[portId] = { before, after }
+      const dbEmpty = dbRows.byPort[portId].length === 0
+      push(`api_db_fields_before_${portId}`, dbEmpty ? before.comparedRows === 0 : before.pass, `rows=${before.comparedRows}/${before.sqliteRowsInRange} mism=${before.fieldMismatchCount} missDb=${before.missingInDbCount} missApi=${before.missingInApiCount}`)
+      push(`api_db_fields_after_${portId}`, dbEmpty ? after.comparedRows === 0 : after.pass, `rows=${after.comparedRows}/${after.sqliteRowsInRange} mism=${after.fieldMismatchCount} missDb=${after.missingInDbCount} missApi=${after.missingInApiCount}`)
     }
 
     // 6) Browser: all eight port pages against the restarted server.
@@ -498,7 +563,9 @@ async function main() {
     seedToIsolatedDb: checks.find(c => c.name === "port_seed")?.pass ? "VERIFIED" : "FAIL",
     liveWeatherSyncToSqlite: PORT_IDS.every(p => checks.find(c => c.name === `sqlite_rows_${p}`)?.pass) && checks.find(c => c.name === "weather_job_success")?.pass ? "VERIFIED" : "FAIL",
     restartPersistenceApiEightPorts: PORT_IDS.every(p => checks.find(c => c.name === `restart_persistence_${p}`)?.pass && checks.find(c => c.name === `restart_meta_stable_${p}`)?.pass) ? "VERIFIED" : "FAIL",
-    browserEightPortPages: browserEvidence.status !== "RAN" ? browserEvidence.status === "NOT_RUN" ? "NOT_RUN" : "FAIL" : PORT_IDS.every(p => browserEvidence.ports[p]?.pass) ? "VERIFIED" : "FAIL",
+    apiSqliteFieldConsistencyBeforeAfterRestart: PORT_IDS.every(p => checks.find(c => c.name === `api_db_fields_before_${p}`)?.pass && checks.find(c => c.name === `api_db_fields_after_${p}`)?.pass) ? "VERIFIED" : "FAIL",
+    // Browser scope: page loads + forecast metadata/coverage text matches the API. No field-level UI value checks are claimed.
+    browserPageMetadataAndCoverage: browserEvidence.status !== "RAN" ? browserEvidence.status === "NOT_RUN" ? "NOT_RUN" : "FAIL" : PORT_IDS.every(p => browserEvidence.ports[p]?.pass) ? "VERIFIED" : "FAIL",
     apiNotTruncated: PORT_IDS.every(p => !portCoverage[p].truncation.squeezed) ? "VERIFIED" : "FAIL",
     jmaLiveArchive: checks.find(c => c.name === "jma_archived_live")?.pass ? "VERIFIED" : "FAIL",
     fixtureTropicalBrowserS7: s7.status === "PASS" ? "VERIFIED" : s7.status,
@@ -512,6 +579,8 @@ async function main() {
     syncEvidence,
     apiBeforeRestart,
     apiAfterRestart,
+    apiDbConsistency,
+    browserScope: "page metadata and coverage verified (load, non-empty, forecast-meta total/hourly/current vs API, marine note); field-level UI values are NOT checked",
     portCoverage,
     jma,
     tropicalPanel: tropical?.body ? { asOf: tropical.body.asOf, sync: tropical.body.sync, activeCount: tropical.body.activeCount, historicalSummaryCount: tropical.body.historicalSummaryCount, messageZh: tropical.body.messageZh } : undefined,

@@ -437,7 +437,11 @@ export const weatherRiskThresholds = {
   warningWaveHeightM: 2.5,
   criticalWaveHeightM: 4,
   forecastWindowHours: 72,
-  forecastDays: 7,
+  // 8 calendar days so the rolling [now-1h, now+7d] window (weather-panel-policy) is fully covered;
+  // Open-Meteo returns whole UTC days, so 7 stops at day-7 23:00 and misses the window end.
+  forecastDays: 8,
+  // 1 past day so the window start (now-1h) exists right after UTC midnight and rolling 24h precipitation has history.
+  pastDays: 1,
 } as const
 
 const weatherWindowHours = { h24: 24, h72: 72, d7: 168 } as const
@@ -671,6 +675,7 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
         marineUrl.searchParams.set("current", "wave_height,wave_direction,swell_wave_height,swell_wave_direction,swell_wave_period")
         marineUrl.searchParams.set("hourly", "wave_height,wave_direction,swell_wave_height,swell_wave_direction,swell_wave_period")
         marineUrl.searchParams.set("forecast_days", String(weatherRiskThresholds.forecastDays))
+        marineUrl.searchParams.set("past_days", String(weatherRiskThresholds.pastDays))
         marineUrl.searchParams.set("timeformat", "unixtime")
         marineUrl.searchParams.set("cell_selection", "sea")
         const weatherUrl = new URL(weatherEndpoint)
@@ -679,6 +684,7 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
         weatherUrl.searchParams.set("current", "wind_speed_10m,wind_gusts_10m,precipitation,visibility")
         weatherUrl.searchParams.set("hourly", "wind_speed_10m,wind_gusts_10m,precipitation,visibility")
         weatherUrl.searchParams.set("forecast_days", String(weatherRiskThresholds.forecastDays))
+        weatherUrl.searchParams.set("past_days", String(weatherRiskThresholds.pastDays))
         weatherUrl.searchParams.set("timeformat", "unixtime")
         weatherUrl.searchParams.set("wind_speed_unit", "kmh")
         try {
@@ -694,7 +700,7 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
           const marinePayload = validWeatherPayload(await marineResponse.json())
           const weatherPayload = validWeatherPayload(await weatherResponse.json())
           const fetchedAt = now().toISOString()
-          const mergedPoints = mergeOpenMeteoPortPoints(marinePayload, weatherPayload)
+          const mergedPoints = mergeOpenMeteoPortPoints(marinePayload, weatherPayload, checkedAt.getTime())
           forecastsByPortId.set(
             port.id,
             openMeteoPointsToForecastRows(port.id, port.unlocode, mergedPoints, fetchedAt),

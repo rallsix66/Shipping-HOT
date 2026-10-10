@@ -501,7 +501,8 @@ export class ShippingRepository {
     })
   }
 
-  async listWeatherForecastsForPort(portId: string, limit = 7 * 24 + 2): Promise<PortWeatherForecastRow[]> {
+  /** Diagnostics/tests only: every stored row for a port, oldest first (no truncation unless `limit` is given). */
+  async listWeatherForecastsForPort(portId: string, limit?: number): Promise<PortWeatherForecastRow[]> {
     const result = await this.db.prepare(`
       SELECT id, port_id, unlocode, forecast_at, horizon,
         wave_height_m, swell_wave_height_m, wind_speed_kmh, wind_gust_kmh,
@@ -510,8 +511,43 @@ export class ShippingRepository {
       WHERE port_id = ?
       ORDER BY forecast_at ASC
       LIMIT ?
+    `).all(portId, limit ?? -1)
+    return this.mapWeatherForecastRows(result)
+  }
+
+  /**
+   * Rows with forecast_at in [fromIso, toIso] (ISO-8601 UTC strings as written by the normalizer).
+   * The cap keeps the LATEST rows so future hours at the window end are never squeezed out by old ones.
+   */
+  async listWeatherForecastsForPortInRange(portId: string, fromIso: string, toIso: string, limit: number): Promise<PortWeatherForecastRow[]> {
+    const result = await this.db.prepare(`
+      SELECT id, port_id, unlocode, forecast_at, horizon,
+        wave_height_m, swell_wave_height_m, wind_speed_kmh, wind_gust_kmh,
+        precipitation_mm, visibility_m, source_id, fetched_at
+      FROM weather_forecast
+      WHERE port_id = ? AND forecast_at >= ? AND forecast_at <= ?
+      ORDER BY forecast_at DESC
+      LIMIT ?
+    `).all(portId, fromIso, toIso, limit)
+    return this.mapWeatherForecastRows(result).reverse()
+  }
+
+  /** Most recent `limit` rows (any age), oldest first; used only for the stale/historical fallback display. */
+  async listLatestWeatherForecastsForPort(portId: string, limit: number): Promise<PortWeatherForecastRow[]> {
+    const result = await this.db.prepare(`
+      SELECT id, port_id, unlocode, forecast_at, horizon,
+        wave_height_m, swell_wave_height_m, wind_speed_kmh, wind_gust_kmh,
+        precipitation_mm, visibility_m, source_id, fetched_at
+      FROM weather_forecast
+      WHERE port_id = ?
+      ORDER BY forecast_at DESC
+      LIMIT ?
     `).all(portId, limit)
-    return rows<Row>(result).map(row => ({
+    return this.mapWeatherForecastRows(result).reverse()
+  }
+
+  private mapWeatherForecastRows(result: unknown): PortWeatherForecastRow[] {
+    return rows<Row>(result as never).map(row => ({
       id: String(row.id),
       portId: String(row.port_id),
       unlocode: row.unlocode ? String(row.unlocode) : undefined,

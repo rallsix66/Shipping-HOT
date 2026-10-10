@@ -17,10 +17,12 @@ import {
 import { resolveTyphoonInputForImpactInterval } from "#/services/typhoon-wr-s03-resolve"
 import { evaluatePortWeatherCoverageAt } from "#/services/weather-rule-evaluation"
 import {
+  FORECAST_RETENTION_LIMIT,
   PORT_WEATHER_FORECAST_DISPLAY_LIMIT,
   WEATHER_FORECAST_HORIZON_MS,
   WEATHER_IMPACT_DISPLAY_LIMIT,
   forecastHasMeasurableFields,
+  forecastRetentionWindow,
   isForecastInstantInWindow,
   portWeatherFeedHealthy,
   resolvePortWeatherPanelState,
@@ -91,7 +93,18 @@ export async function getPortWeatherPanel(
   const weatherSourceId = options.weatherSourceId ?? "open-meteo-marine"
   const portBaseline = portDirectoryBaseline.find(row => row.shippingPortId === portId)
 
-  const storedForecasts = await repository.listWeatherForecastsForPort(portId, 7 * 24 + 4)
+  // Window first ([now-1h-24h precip lookback, now+7d]), then cap (drops oldest). Only when nothing is in
+  // that window do we fall back to the most recent stored rows for the stale/historical display.
+  const retention = forecastRetentionWindow(nowMs)
+  const windowedForecasts = await repository.listWeatherForecastsForPortInRange(
+    portId,
+    new Date(retention.startMs).toISOString(),
+    new Date(retention.endMs).toISOString(),
+    FORECAST_RETENTION_LIMIT,
+  )
+  const storedForecasts = windowedForecasts.length > 0
+    ? windowedForecasts
+    : await repository.listLatestWeatherForecastsForPort(portId, PORT_WEATHER_FORECAST_DISPLAY_LIMIT)
   const inWindowForecasts = storedForecasts.filter((row) => {
     const t = Date.parse(row.forecastAt)
     return Number.isFinite(t) && isForecastInstantInWindow(t, nowMs)

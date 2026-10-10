@@ -98,7 +98,8 @@ async function main() {
 
   for (const row of portDirectoryBaseline) {
     const portId = row.shippingPortId
-    const stored = await repository.listWeatherForecastsForPort(portId, 7 * 24 + 8)
+    // Diagnostics read every stored row (no earliest-N truncation); window filtering happens below.
+    const stored = await repository.listWeatherForecastsForPort(portId)
     const hourly = stored.filter(r => r.horizon === "hourly")
     const current = stored.filter(r => r.horizon === "current")
     const inWindowHourly = hourly.filter((r) => {
