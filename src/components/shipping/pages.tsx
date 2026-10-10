@@ -3,7 +3,7 @@ import { motion } from "framer-motion"
 import { type ReactNode, useEffect, useState } from "react"
 import type { ArticleBlock, ArticleCompletenessStatus, ArticleTranslationBlockSource, ArticleTranslationViewStatus } from "@shared/article"
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
-import { type PortWeatherPanelResponse, type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
+import { type FeedItem, type PortWeatherPanelResponse, type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
 import { ruleCoverageReasonLabelZh } from "@shared/weather-rule-coverage-display"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
 import { type ShippingResponse, type TranslationStatusResponse, useFeedArticle, usePortWeather, useShipping, useTranslationSecret, useTranslationStatus, useTropicalCyclones } from "./data"
@@ -131,8 +131,19 @@ function WeatherChips({ weather }: { weather: WeatherDetail }) {
         )}
         {weather.validityStatus === "unknown" && <span className="chip">有效性待确认</span>}
         {weather.timezoneStatus === "unconfirmed" && <span className="chip">时区未确认</span>}
-        {weather.officialSeverity === "not_provided" && <span className="chip">官方级别：未提供</span>}
+        {weather.officialSeverity === "not_provided" && <span className="chip">{weather.noticeRaw ? "原文风险级别：未提供" : "官方级别：未提供"}</span>}
+        {weather.lifecycleStatus === "unknown" && <span className="chip">生命周期未知</span>}
+        {weather.originalRiskLevel && <span className="chip">{`原文风险级别：${weather.originalRiskLevel}（原始级别，标准化严重度未映射；非系统级别）`}</span>}
       </div>
+      {weather.noticeRaw && (
+        <div className="flex flex-col gap-0.5 text-xs op-70" data-testid="official-notice-raw">
+          <span>{`官方原始时间（原文文本，时区未确认，未换算）：列表时间 ${weather.noticeRaw.listTimeText ?? "未提供"} · 正文发布时间 ${weather.noticeRaw.bodyPublishText ?? "未提供"}`}</span>
+          <span>{`下一期发布时间（不等于有效期）：${weather.noticeRaw.nextIssueText ?? "未提供"}`}</span>
+          {weather.noticeRaw.originalLevelText && <span>{`原文级别句：${weather.noticeRaw.originalLevelText}`}</span>}
+          <span>{`来源 ${weather.noticeRaw.sourceUrl} · postId ${weather.noticeRaw.postId} · 抓取时间 ${formatDate(weather.noticeRaw.fetchedAt)} · 首次接收 ${formatDate(weather.noticeRaw.firstReceivedAt)}${weather.noticeRaw.contentUpdatedAt ? ` · 内容更新于 ${formatDate(weather.noticeRaw.contentUpdatedAt)}` : ""}`}</span>
+          <span>{`原文：${weather.noticeRaw.bodyText.length > 400 ? `${weather.noticeRaw.bodyText.slice(0, 400)}…` : weather.noticeRaw.bodyText}`}</span>
+        </div>
+      )}
       {weather.alertRaw && (
         <div className="flex flex-col gap-0.5 text-xs op-70" data-testid="official-alert-raw">
           <span>
@@ -1034,6 +1045,14 @@ export function FeedPage() {
     { label: "第三方", tone: "info" as const, count: data.feedItems.filter(item => item.provenance?.sourceType === "third_party").length },
     { label: "模拟数据", tone: "dim" as const, count: data.feedItems.filter(item => item.provenance?.sourceType === "mock").length },
   ]
+  const issuingCountryOf = (item: FeedItem) => item.tags?.find(tag => tag.startsWith("issuing_country_"))?.slice("issuing_country_".length)
+  const issuingCountryRows = Object.entries(data.feedItems.reduce<Record<string, number>>((acc, item) => {
+    const code = issuingCountryOf(item)
+    if (code) acc[code] = (acc[code] ?? 0) + 1
+    return acc
+  }, {})).sort(([a], [b]) => a.localeCompare(b))
+  // Experimental official notices are grouped by issuing country (country of the issuing agency, never impact area).
+  const sortedItems = [...items].sort((a, b) => (issuingCountryOf(a) ?? "~").localeCompare(issuingCountryOf(b) ?? "~"))
   return (
     <ShippingShell title="航运资讯">
       <SecHead
@@ -1058,12 +1077,19 @@ export function FeedPage() {
               <span className="val">{row.count}</span>
             </div>
           ))}
+          {issuingCountryRows.length > 0 && <h4>官方预警·发布国家（实验）</h4>}
+          {issuingCountryRows.map(([code, count]) => (
+            <div key={code} className="sf-row frow" data-testid="issuing-country-row">
+              <span className="lbl grow">{`发布国家 ${code}`}</span>
+              <span className="val">{count}</span>
+            </div>
+          ))}
         </aside>
         {items.length === 0
           ? <div className="glass-panel"><EmptyState icon="i-ph-newspaper" text="当前分类下暂无资讯" /></div>
           : (
               <div className="glass-panel tl">
-                {items.map(item => (
+                {sortedItems.map(item => (
                   <div key={item.id} className="tl-item">
                     <div className="tl-sev">
                       <StatusDot tone={severityTone(item.severity)} pulse={item.severity === "critical"} />
@@ -1077,6 +1103,7 @@ export function FeedPage() {
                         <span className="chip">{formatStatus(item.category)}</span>
                         <ProvenanceBadge provenance={item.provenance} />
                         <StatusBadge stale={item.stale} sourceStatus={item.sourceStatus} />
+                        {issuingCountryOf(item) && <span className="chip" data-testid="issuing-country-chip">{`发布国家：${issuingCountryOf(item)}`}</span>}
                         <span className="tl-time">
                           {item.publicationTimeKnown === false ? "发布时间未知" : item.weather?.timeBasis === "received_at" ? `首次接收 ${formatDate(item.publishedAt)}` : formatDate(item.publishedAt)}
                         </span>

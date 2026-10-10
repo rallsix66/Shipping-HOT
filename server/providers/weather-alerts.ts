@@ -6,6 +6,8 @@ import { mockPorts } from "@shared/shipping-fixtures"
 import { portDirectoryBaseline } from "@shared/port-directory"
 import type { ArticleSourcePolicyConfig } from "@shared/article"
 import { METMALAYSIA_MIN_REQUEST_INTERVAL_MS, isPinnedMetMalaysiaUrl, parseMetMalaysiaWarnings } from "#/providers/metmalaysia-warning"
+import { type NchmfRunReport, collectNchmfNotices, isPinnedNchmfListUrl } from "#/providers/nchmf-warning"
+
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
 import { type CapSourceContext, capBodyUrlRejection, capIndexLinks, isRetiredBy, parseCapMessage, resolveCapBatch } from "#/providers/cap-alerts"
 
@@ -14,7 +16,7 @@ export interface WeatherAlertProvider {
   getFeedItems: (lastKnown?: FeedItem[], ports?: Port[]) => Promise<FeedItem[]>
 }
 
-export const officialWeatherAlertSourceIds = new Set(["jma", "tmd", "bmkg", "metmalaysia"])
+export const officialWeatherAlertSourceIds = new Set(["jma", "tmd", "bmkg", "metmalaysia", "nchmf"])
 
 export interface WeatherAlertResponse {
   ok: boolean
@@ -27,7 +29,7 @@ export interface WeatherAlertResponse {
 }
 
 export type WeatherAlertFetcher = (url: string, init?: { redirect?: "error" | "manual" | "follow" }) => Promise<WeatherAlertResponse>
-export type WeatherAlertParser = "jma" | "tmd" | "bmkg" | "metmalaysia"
+export type WeatherAlertParser = "jma" | "tmd" | "bmkg" | "metmalaysia" | "nchmf"
 export type WeatherAlertSourceStatus = "verified_live" | "experimental" | "live_pending" | "disabled"
 
 export interface WeatherAlertSource {
@@ -36,7 +38,7 @@ export interface WeatherAlertSource {
   url: string
   sourceUrl: string
   /** "cap_index": RSS index whose items link to CAP 1.2 documents (TMD TH-W01); lifecycle comes from CAP. */
-  format: "rss" | "cap" | "cap_index" | "html" | "json_warning"
+  format: "rss" | "cap" | "cap_index" | "html" | "json_warning" | "html_notice_list"
   /** Issuing country (ISO 3166-1 alpha-2) for CAP structured-area checks. */
   countryCode?: string
   /** CAP area association: ISO 3166-2 geocode (default) or polygon containment of same-country port coordinates. */
@@ -98,6 +100,21 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
     format: "json_warning",
     countryCode: "MY",
     parser: "metmalaysia",
+    enabled: false,
+    liveStatus: "experimental",
+  },
+  {
+    // VN-W01 (ADR-008): limited "official notices" integration (dots 17:14). Pinned HTTPS list page + same-host
+    // `-post<digits>.html` articles only, redirects refused, <= 1 + NCHMF_MAX_ARTICLES requests per run. Raw text
+    // only: lifecycle/validity/timezone unknown, original level unmapped, no port association, no WR-O01/WR-O02.
+    // Runs only under the existing SHIPPING_WEATHER_ALERT_PROVIDER=experimental switch.
+    id: "nchmf",
+    name: "National Center for Hydro-Meteorological Forecasting (NCHMF, Vietnam)",
+    url: "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html",
+    sourceUrl: "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html",
+    format: "html_notice_list",
+    countryCode: "VN",
+    parser: "nchmf",
     enabled: false,
     liveStatus: "experimental",
   },
@@ -417,6 +434,8 @@ export interface OfficialWeatherAlertProviderOptions {
   sources?: WeatherAlertSource[]
   allowPending?: boolean
   throwOnSourceFailureWithoutLastKnown?: boolean
+  /** Receives the per-run NCHMF report (counts received/filtered/failed/truncated) for evidence. */
+  onNchmfReport?: (report: NchmfRunReport) => void
 }
 
 function markMissingFromCurrentIndex(item: FeedItem, fetchedAt: string): FeedItem {
@@ -473,6 +492,10 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
             lastJsonWarningRequestAt.set(source.id, nowMs)
             response = await fetcher(source.url, { redirect: "error" })
             if (response.redirected || (response.url && response.url !== source.url)) throw new Error(`${source.name} redirect rejected`)
+          } else if (source.format === "html_notice_list") {
+            if (!isPinnedNchmfListUrl(source.url)) throw new Error(`${source.name} url is not the pinned list page`)
+            response = await fetcher(source.url, { redirect: "error" })
+            if (response.redirected || (response.url && response.url !== source.url)) throw new Error(`${source.name} redirect rejected`)
           } else {
             response = await fetcher(source.url)
           }
@@ -506,6 +529,16 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
                 ? expiredAsInfo(item, fetchedAt)
                 : item.weather?.alertState === "expired" ? item : markMissingFromCurrentIndex(item, fetchedAt))
             return [...batch.items, ...cleared]
+          }
+          if (source.format === "html_notice_list") {
+            const { items, report } = await collectNchmfNotices(body, fetcher, { id: source.id, listUrl: source.sourceUrl, provenance: weatherAlertProvenance(source) }, fetchedAt, previous)
+              .catch((error: unknown) => {
+                const report = (error as { nchmfReport?: NchmfRunReport }).nchmfReport
+                if (report) options.onNchmfReport?.(report)
+                throw error
+              })
+            options.onNchmfReport?.(report)
+            return items
           }
           if (source.format === "json_warning") {
             const parsed = parseMetMalaysiaWarnings(body, { id: source.id, sourceUrl: source.sourceUrl, provenance: weatherAlertProvenance(source) }, fetchedAt, previous)

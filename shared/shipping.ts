@@ -372,6 +372,36 @@ export interface WeatherDetail {
   timeBasis?: "received_at"
   /** Raw official strings exactly as received (MY-W01 data.gov.my warning row). */
   alertRaw?: WeatherAlertRaw
+  /** Lifecycle (update/replace/cancel) of the official notice is not published structurally (VN-W01). */
+  lifecycleStatus?: "unknown"
+  /** Original official risk level text exactly as stated by the source (VN-W01); never a system/CAP level. */
+  originalRiskLevel?: string
+  /** The original level is not mapped to any standardized (CAP/system) severity. */
+  standardizedSeverity?: "unmapped"
+  /** Raw official notice fields (VN-W01 NCHMF HTML article). */
+  noticeRaw?: OfficialNoticeRaw
+}
+
+export interface OfficialNoticeRaw {
+  postId: string
+  title: string
+  listTitle: string
+  /** List-page time label, raw text (no timezone assumed). */
+  listTimeText: string | null
+  /** Body "issued at" line, raw text (no timezone assumed). */
+  bodyPublishText: string | null
+  /** Body "next issue at" line, raw text; NOT a validity/expiry time. */
+  nextIssueText: string | null
+  /** Body line stating the original risk level, raw text. */
+  originalLevelText: string | null
+  bodyText: string
+  bodyTruncated: boolean
+  contentHash: string
+  sourceUrl: string
+  listUrl: string
+  fetchedAt: string
+  firstReceivedAt: string
+  contentUpdatedAt?: string
 }
 
 export interface WeatherAlertRaw {
