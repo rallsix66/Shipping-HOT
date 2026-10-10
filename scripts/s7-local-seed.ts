@@ -368,6 +368,12 @@ async function main() {
 
   const portWeatherForecastAt = iso(2 * 60 * 60 * 1000)
   const portWeatherValidUntil = iso(3 * 60 * 60 * 1000)
+  await shipping.saveTropicalCycloneSyncMeta({
+    sourceId: "jma-typhoon",
+    outcome: "ok_empty",
+    lastCheckedAt: FETCHED_AT,
+  })
+
   await shipping.replaceWeatherPortBatch(S7.port, [{
     id: "wf-s7-shekou-hourly",
     portId: S7.port,

@@ -114,10 +114,24 @@ export function openMeteoPointsToForecastRows(
   })
 }
 
+export function forecastRowsToOpenMeteoPoints(rows: readonly PortWeatherForecastRow[]): OpenMeteoPortPoint[] {
+  return rows.map(row => ({
+    timestamp: row.forecastAt,
+    horizon: row.horizon,
+    waveHeightM: row.waveHeightM,
+    swellWaveHeightM: row.swellWaveHeightM,
+    windSpeedKmh: row.windSpeedKmh,
+    windGustKmh: row.windGustKmh,
+    precipitationMm: row.precipitationMm,
+    visibilityM: row.visibilityM,
+  }))
+}
+
 export function computePortWeatherImpacts(
   portId: string,
   points: OpenMeteoPortPoint[],
   computedAt: string,
+  typhoonDistanceKm?: number,
 ): PortWeatherImpactRow[] {
   const sorted = [...points].sort((a, b) => {
     const delta = Date.parse(a.timestamp) - Date.parse(b.timestamp)
@@ -133,7 +147,9 @@ export function computePortWeatherImpacts(
       windGustMs: gustMs,
       waveHeightM: waveM,
       visibilityM: point.visibilityM,
-    }, precipSamples, point.timestamp)
+    }, precipSamples, point.timestamp, typhoonDistanceKm === undefined
+      ? { status: "unavailable" }
+      : { status: "checked", distanceKm: typhoonDistanceKm })
     const interval = impactValidityInterval(point, sorted, index)
     for (const hit of hits) {
       impacts.push({

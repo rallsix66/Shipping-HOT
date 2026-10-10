@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import type { ArticleBlock, ArticleState, ArticleTranslationView, ArticleVersion, ArticleVersionSummary } from "@shared/article"
-import type { FeedItem, FeedItemDisplay, HotItem, PortWeatherPanelResponse, ShippingSnapshot } from "@shared/shipping"
+import type { FeedItem, FeedItemDisplay, HotItem, PortWeatherPanelResponse, ShippingSnapshot, TropicalCyclonePanelResponse } from "@shared/shipping"
 import type { CalendarCoverageStatusSummary } from "@shared/calendar"
 import { myFetch } from "~/utils"
 
@@ -77,6 +77,14 @@ export function usePortWeather(portId: string) {
     queryFn: () => myFetch<PortWeatherPanelResponse>(`/shipping/ports/${encodeURIComponent(portId)}/weather`),
     staleTime: 30_000,
     enabled: Boolean(portId),
+  })
+}
+
+export function useTropicalCyclones() {
+  return useQuery({
+    queryKey: ["tropical-cyclones"],
+    queryFn: () => myFetch<TropicalCyclonePanelResponse>("/shipping/tropical-cyclones"),
+    staleTime: 60_000,
   })
 }
 

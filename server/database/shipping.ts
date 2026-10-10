@@ -1,9 +1,12 @@
 import process from "node:process"
 import type { Database } from "db0"
 import { hasMockEvidence, knownMockProvenanceFor, normalizeLegacyEventTrust, normalizeLegacyTrust, recordAllowedForDataMode } from "@shared/shipping"
-import type { DataEvidence, DataProvenance, FeedItem, FeedVisibility, Freshness, Port, PortWeatherForecastRow, PortWeatherImpactRow, ProvenanceAware, ShippingEvent, ShippingSettings, SourceLineage } from "@shared/shipping"
+import type { DataEvidence, DataProvenance, FeedItem, FeedVisibility, Freshness, Port, PortWeatherForecastRow, PortWeatherImpactRow, ProvenanceAware, ShippingEvent, ShippingSettings, SourceLineage, TropicalCycloneSyncMeta } from "@shared/shipping"
 import type { CalendarEvent } from "@shared/calendar"
 import { applyFeedFreshnessPolicy } from "@shared/shipping-rules"
+import type { NormalizedTropicalCyclone } from "#/services/jma-typhoon-parse"
+import type { PortCoordinate } from "#/services/tropical-cyclone-display"
+import { minTyphoonDistanceKmForPort } from "#/services/tropical-cyclone-display"
 import { type DatabaseMetadata, type ShippingDataMode, initializeShippingDatabase } from "#/database/runtime"
 
 type Row = Record<string, unknown>
@@ -574,5 +577,125 @@ export class ShippingRepository {
         computedAt: String(row.computed_at),
       }
     })
+  }
+
+  private static readonly TROPICAL_CYCLONE_SYNC_ROW_ID = "_jma_sync_meta"
+
+  async saveTropicalCycloneSyncMeta(meta: TropicalCycloneSyncMeta) {
+    await this.db.prepare(`
+      INSERT INTO tropical_cyclone (id, basin, name, jma_id, track_json, forecast_json, source_id, fetched_at, dissipated_at)
+      VALUES (?, 'META', NULL, NULL, ?, NULL, ?, ?, NULL)
+      ON CONFLICT(id) DO UPDATE SET
+        track_json = excluded.track_json,
+        source_id = excluded.source_id,
+        fetched_at = excluded.fetched_at
+    `).run(
+      ShippingRepository.TROPICAL_CYCLONE_SYNC_ROW_ID,
+      JSON.stringify(meta),
+      meta.sourceId,
+      meta.lastCheckedAt ?? new Date().toISOString(),
+    )
+  }
+
+  async getTropicalCycloneSyncMeta(): Promise<TropicalCycloneSyncMeta> {
+    const row = await this.db.prepare(`
+      SELECT track_json, source_id, fetched_at
+      FROM tropical_cyclone
+      WHERE id = ?
+    `).get(ShippingRepository.TROPICAL_CYCLONE_SYNC_ROW_ID) as Row | undefined
+    if (!row) {
+      return { sourceId: "jma-typhoon", outcome: "not_run" }
+    }
+    try {
+      const parsed = parse<TropicalCycloneSyncMeta>(row.track_json)
+      return parsed ?? { sourceId: String(row.source_id) as TropicalCycloneSyncMeta["sourceId"], outcome: "not_run" }
+    } catch {
+      return { sourceId: "jma-typhoon", outcome: "not_run" }
+    }
+  }
+
+  async replaceTropicalCyclones(
+    cyclones: readonly NormalizedTropicalCyclone[],
+    sync: Pick<TropicalCycloneSyncMeta, "sourceId" | "lastCheckedAt" | "outcome">,
+    ports: readonly PortCoordinate[],
+  ) {
+    await transaction(this.db, async () => {
+      await this.db.prepare(`
+        DELETE FROM tropical_cyclone
+        WHERE id <> ?
+      `).run(ShippingRepository.TROPICAL_CYCLONE_SYNC_ROW_ID)
+      for (const cyclone of cyclones) {
+        const payload = {
+          track: cyclone.track,
+          forecast: cyclone.forecast,
+          typhoonNumber: cyclone.typhoonNumber,
+          nameEn: cyclone.nameEn,
+          nameJp: cyclone.nameJp,
+          category: cyclone.category,
+          issuedAt: cyclone.issuedAt,
+        }
+        await this.db.prepare(`
+          INSERT INTO tropical_cyclone (id, basin, name, jma_id, track_json, forecast_json, source_id, fetched_at, dissipated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          cyclone.id,
+          cyclone.basin,
+          cyclone.nameEn ?? cyclone.nameJp ?? null,
+          cyclone.jmaId,
+          JSON.stringify(payload),
+          JSON.stringify(cyclone.rawForecastJson),
+          sync.sourceId,
+          sync.lastCheckedAt ?? new Date().toISOString(),
+          cyclone.dissipatedAt ?? null,
+        )
+      }
+      await this.saveTropicalCycloneSyncMeta({
+        sourceId: sync.sourceId,
+        lastCheckedAt: sync.lastCheckedAt,
+        outcome: sync.outcome === "ok_empty" ? "ok_empty" : "ok",
+      })
+    })
+    void ports
+  }
+
+  async listNormalizedTropicalCyclones(): Promise<NormalizedTropicalCyclone[]> {
+    const result = await this.db.prepare(`
+      SELECT id, basin, name, jma_id, track_json, forecast_json, source_id, fetched_at, dissipated_at
+      FROM tropical_cyclone
+      WHERE id <> ?
+      ORDER BY fetched_at DESC
+    `).all(ShippingRepository.TROPICAL_CYCLONE_SYNC_ROW_ID)
+    return rows<Row>(result).map((row) => {
+      const payload = parse<{
+        track?: NormalizedTropicalCyclone["track"]
+        forecast?: NormalizedTropicalCyclone["forecast"]
+        typhoonNumber?: string
+        nameEn?: string
+        nameJp?: string
+        category?: string
+        issuedAt?: string
+      }>(row.track_json)
+      return {
+        id: String(row.id),
+        basin: String(row.basin),
+        jmaId: String(row.jma_id ?? ""),
+        typhoonNumber: payload.typhoonNumber,
+        nameEn: payload.nameEn ?? (row.name ? String(row.name) : undefined),
+        nameJp: payload.nameJp,
+        category: payload.category,
+        issuedAt: payload.issuedAt,
+        track: payload.track ?? [],
+        forecast: payload.forecast ?? [],
+        dissipatedAt: row.dissipated_at ? String(row.dissipated_at) : undefined,
+        rawForecastJson: parse<unknown>(row.forecast_json),
+      }
+    })
+  }
+
+  async minTyphoonDistanceKmForPortId(portId: string, ports: readonly PortCoordinate[]): Promise<number | undefined> {
+    const port = ports.find(item => item.portId === portId)
+    if (!port) return undefined
+    const cyclones = await this.listNormalizedTropicalCyclones()
+    return minTyphoonDistanceKmForPort(cyclones, port, true)
   }
 }

@@ -6,7 +6,7 @@ import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@
 import { type PortWeatherPanelResponse, type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
 import { ruleCoverageReasonLabelZh } from "@shared/weather-rule-coverage-display"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
-import { type ShippingResponse, type TranslationStatusResponse, useFeedArticle, usePortWeather, useShipping, useTranslationSecret, useTranslationStatus } from "./data"
+import { type ShippingResponse, type TranslationStatusResponse, useFeedArticle, usePortWeather, useShipping, useTranslationSecret, useTranslationStatus, useTropicalCyclones } from "./data"
 import { FeedItemDisplayText } from "./feed-display"
 import { formatDate, formatPortMetric, formatStatus, severityTone } from "./format"
 import { AnimatedNumber, EmptyState, Marquee, ProvenanceBadge, ProviderChip, Reveal, Segmented, StatusDot } from "./ui"
@@ -457,6 +457,54 @@ function portWeatherImpactEmptyCopy(state: PortWeatherPanelResponse["state"]): s
   }
 }
 
+function TropicalCyclonePanelSection() {
+  const { data, isLoading, isError } = useTropicalCyclones()
+  if (isLoading) return <div className="glass-panel d-panel mt-4"><p className="text-sm op-60">加载台风路径…</p></div>
+  if (isError || !data) return null
+  return (
+    <div className="glass-panel d-panel mt-4" data-testid="tropical-cyclone-panel">
+      <div className="panel-h">
+        <h3>热带气旋（JMA）</h3>
+        <span className="text-xs op-60">路径 · 距港参考</span>
+      </div>
+      <p className="text-sm op-80">{data.messageZh}</p>
+      {data.seasonHintZh && <p className="text-xs op-60 mt-1">{data.seasonHintZh}</p>}
+      {data.sync.outcome === "failed" && (
+        <p className="text-xs op-70 mt-2">
+          同步状态：失败（
+          {data.sync.errorMessage ?? data.sync.errorCode ?? "未知"}
+          ）
+        </p>
+      )}
+      {data.cyclones.length === 0
+        ? null
+        : (
+            <ul className="mt-3 space-y-3 text-sm">
+              {data.cyclones.map(cyclone => (
+                <li key={cyclone.id} className="border-t border-white/5 pt-2">
+                  <p className="font-medium">
+                    {cyclone.nameEn ?? cyclone.nameJp ?? cyclone.jmaId}
+                    {cyclone.typhoonNumber ? ` (#${cyclone.typhoonNumber})` : ""}
+                  </p>
+                  {cyclone.summaryZh && <p className="text-xs op-70">{cyclone.summaryZh}</p>}
+                  <p className="text-xs op-60">
+                    最近距八港约
+                    {" "}
+                    {cyclone.minDistanceKm !== undefined ? `${Math.round(cyclone.minDistanceKm)} km` : "—"}
+                    {" · "}
+                    路径点
+                    {cyclone.track.length}
+                    {" / 预报点"}
+                    {cyclone.forecast.length}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+    </div>
+  )
+}
+
 function PortWeatherPanelSection({ portId }: { portId: string }) {
   const { data, isLoading, isError } = usePortWeather(portId)
   if (isLoading) return <div className="glass-panel d-panel"><p className="text-sm op-60">加载港口天气…</p></div>
@@ -517,13 +565,30 @@ function PortWeatherPanelSection({ portId }: { portId: string }) {
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="glass-panel d-panel">
           <div className="panel-h">
-            <h3>预报数值</h3>
+            <h3>预报数值（7 天）</h3>
             <span className="text-xs op-60">{data.sources.forecast}</span>
           </div>
+          {data.forecastMeta && (
+            <p className="text-xs op-65 mb-2" data-testid="port-weather-forecast-meta">
+              {formatDate(data.forecastMeta.windowStart)}
+              {" → "}
+              {formatDate(data.forecastMeta.windowEnd)}
+              {" · "}
+              hourly
+              {" "}
+              {data.forecastMeta.hourlyInWindow}
+              /
+              {data.displayMeta.forecastLimit}
+              {data.forecastMeta.fetchedAt ? ` · 更新 ${formatDate(data.forecastMeta.fetchedAt)}` : null}
+              {(data.forecastMeta.missingCounts.windGust > 0 || data.forecastMeta.missingCounts.wave > 0)
+                ? ` · 缺测 阵风${data.forecastMeta.missingCounts.windGust} 浪${data.forecastMeta.missingCounts.wave}`
+                : null}
+            </p>
+          )}
           {nextForecasts.length === 0
             ? <p className="text-sm op-60">{forecastEmptyCopy}</p>
             : (
-                <ul className="space-y-2 text-sm">
+                <ul className="space-y-2 text-sm max-h-96 overflow-y-auto pr-1" data-testid="port-weather-forecast-list">
                   {nextForecasts.map(row => (
                     <li key={row.id} className="flex flex-col gap-0.5 border-b border-white/5 pb-2 last:border-0">
                       <span className="font-medium">{formatDate(row.forecastAt)}</span>
@@ -728,6 +793,7 @@ export function PortDetailPage({ id }: { id: string }) {
         </div>
       </div>
       <PortWeatherPanelSection portId={id} />
+      <TropicalCyclonePanelSection />
     </ShippingShell>
   )
 }

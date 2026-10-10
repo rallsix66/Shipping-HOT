@@ -70,7 +70,7 @@ describe("weather impact full chain", () => {
     expect(panel.impacts.some(i => i.ruleId === "WR-S02")).toBe(true)
     expect(panel.state).toBe("partial_rule_coverage")
     expect(panel.impacts.length).toBeGreaterThan(0)
-    expect(panel.ruleCoverage.find(r => r.ruleId === "WR-S03")?.reason).toContain("typhoon_distance_not_covered")
+    expect(panel.ruleCoverage.find(r => r.ruleId === "WR-S03")?.reason).toContain("typhoon_data_unavailable")
 
     native.close()
   })

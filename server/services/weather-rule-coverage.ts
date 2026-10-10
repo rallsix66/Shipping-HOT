@@ -7,6 +7,12 @@ import type { WeatherRuleCoverageEntry } from "#/services/weather-rule-evaluatio
 
 export type SanitizedWeatherRuleInputs = WeatherRuleInputs
 
+export type TyphoonInputState =
+  | { status: "unavailable" }
+  | { status: "checked", distanceKm: number }
+
+export const TYPHOON_NO_STORM_DISTANCE_KM = 50_000
+
 export function sanitizeWeatherRuleInputs(inputs: WeatherRuleInputs): SanitizedWeatherRuleInputs {
   const out: WeatherRuleInputs = {}
   for (const key of ["windGustMs", "waveHeightM", "visibilityM", "precipitationMm24h", "typhoonDistanceKm"] as const) {
@@ -37,9 +43,19 @@ function visibilityReason(raw: number | undefined): string {
   return raw === undefined ? "visibility_missing" : "visibility_invalid"
 }
 
-function evaluateLeafLimb(when: WeatherImpactRuleWhen, inputs: SanitizedWeatherRuleInputs, rawInputs: WeatherRuleInputs): LimbEvaluation {
+function evaluateLeafLimb(
+  when: WeatherImpactRuleWhen,
+  inputs: SanitizedWeatherRuleInputs,
+  rawInputs: WeatherRuleInputs,
+  typhoon: TyphoonInputState,
+): LimbEvaluation {
   if (when.typhoonDistanceKmLte !== undefined) {
-    return { outcome: "unknown", reasons: ["typhoon_distance_not_covered"] }
+    if (typhoon.status === "unavailable") {
+      return { outcome: "unknown", reasons: ["typhoon_data_unavailable"] }
+    }
+    return typhoon.distanceKm <= when.typhoonDistanceKmLte
+      ? { outcome: "hit", reasons: [] }
+      : { outcome: "miss", reasons: [] }
   }
   if (when.windGustMsGte !== undefined) {
     const gust = inputs.windGustMs
@@ -80,15 +96,20 @@ function evaluateLeafLimb(when: WeatherImpactRuleWhen, inputs: SanitizedWeatherR
   return { outcome: "unknown", reasons: ["rule_limb_unsupported"] }
 }
 
-function evaluateWhenLimb(when: WeatherImpactRuleWhen, inputs: SanitizedWeatherRuleInputs, rawInputs: WeatherRuleInputs): LimbEvaluation {
+function evaluateWhenLimb(
+  when: WeatherImpactRuleWhen,
+  inputs: SanitizedWeatherRuleInputs,
+  rawInputs: WeatherRuleInputs,
+  typhoon: TyphoonInputState,
+): LimbEvaluation {
   if (when.any?.length) {
-    const limbs = when.any.map(clause => evaluateWhenLimb(clause, inputs, rawInputs))
+    const limbs = when.any.map(clause => evaluateWhenLimb(clause, inputs, rawInputs, typhoon))
     if (limbs.some(l => l.outcome === "hit")) return { outcome: "hit", reasons: [] }
     const unknownReasons = limbs.filter(l => l.outcome === "unknown").flatMap(l => l.reasons)
     if (unknownReasons.length) return { outcome: "unknown", reasons: [...new Set(unknownReasons)] }
     return { outcome: "miss", reasons: [] }
   }
-  return evaluateLeafLimb(when, inputs, rawInputs)
+  return evaluateLeafLimb(when, inputs, rawInputs, typhoon)
 }
 
 function precipRuleReason(precipCoverage: Precipitation24hResult): string {
@@ -103,12 +124,13 @@ export function coverageForRuleWithoutEngineHit(
   sanitized: SanitizedWeatherRuleInputs,
   rawInputs: WeatherRuleInputs,
   precipCoverage: Precipitation24hResult,
+  typhoon: TyphoonInputState,
 ): WeatherRuleCoverageEntry {
   if (rule.id === "WR-S05" && precipCoverage.status !== "full") {
     return { ruleId: rule.id, evaluation: "unevaluated", reason: precipRuleReason(precipCoverage) }
   }
 
-  const limb = evaluateWhenLimb(rule.when, sanitized, rawInputs)
+  const limb = evaluateWhenLimb(rule.when, sanitized, rawInputs, typhoon)
   if (limb.outcome === "unknown") {
     return { ruleId: rule.id, evaluation: "unevaluated", reason: limb.reasons.join(",") }
   }
@@ -120,12 +142,13 @@ export function buildRuleCoverageEntries(
   rawInputs: WeatherRuleInputs,
   precipCoverage: Precipitation24hResult,
   hitRuleIds: ReadonlySet<string>,
+  typhoon: TyphoonInputState,
 ): WeatherRuleCoverageEntry[] {
   return weatherImpactRules.map((rule) => {
     if (hitRuleIds.has(rule.id)) {
       return { ruleId: rule.id, evaluation: "evaluated", reason: "hit" }
     }
-    return coverageForRuleWithoutEngineHit(rule, sanitized, rawInputs, precipCoverage)
+    return coverageForRuleWithoutEngineHit(rule, sanitized, rawInputs, precipCoverage, typhoon)
   })
 }
 

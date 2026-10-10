@@ -19,7 +19,7 @@ describe("weather rule coverage (WR-S01..S03 OR limbs)", () => {
     expect(result.ruleCoverage.find(r => r.ruleId === "WR-S01")).toMatchObject({ evaluation: "unevaluated", reason: "wind_gust_missing" })
     expect(result.ruleCoverage.find(r => r.ruleId === "WR-S02")).toMatchObject({ evaluation: "unevaluated" })
     expect(result.ruleCoverage.find(r => r.ruleId === "WR-S02")?.reason).toContain("wind_gust_missing")
-    expect(result.ruleCoverage.find(r => r.ruleId === "WR-S03")?.reason).toContain("typhoon_distance_not_covered")
+    expect(result.ruleCoverage.find(r => r.ruleId === "WR-S03")?.reason).toContain("typhoon_data_unavailable")
     expect(result.ruleCoverage.find(r => r.ruleId === "WR-S04")?.reason).toBe("no_hit")
     expect(result.hits).toHaveLength(0)
   })
@@ -36,7 +36,7 @@ describe("weather rule coverage (WR-S01..S03 OR limbs)", () => {
     expect(result.ruleCoverage.find(r => r.ruleId === "WR-S02")).toMatchObject({ evaluation: "evaluated", reason: "no_hit" })
     const s03 = result.ruleCoverage.find(r => r.ruleId === "WR-S03")
     expect(s03?.evaluation).toBe("unevaluated")
-    expect(s03?.reason).toContain("typhoon_distance_not_covered")
+    expect(s03?.reason).toContain("typhoon_data_unavailable")
   })
 
   it("no hit with missing wave on WR-S02 is unevaluated, not no_hit", () => {
@@ -50,6 +50,24 @@ describe("weather rule coverage (WR-S01..S03 OR limbs)", () => {
     expect(result.ruleCoverage.find(r => r.ruleId === "WR-S01")).toMatchObject({ evaluation: "evaluated", reason: "no_hit" })
     expect(result.ruleCoverage.find(r => r.ruleId === "WR-S02")).toMatchObject({ evaluation: "evaluated", reason: "no_hit" })
     expect(result.hits).toHaveLength(0)
+  })
+
+  it("evaluates WR-S03 typhoon limb when JMA distance is checked", () => {
+    const full = fullPrecip24()
+    const near = evaluatePointWeatherRules(
+      { windGustMs: 5, waveHeightM: 0.5, visibilityM: 5000 },
+      full,
+      end,
+      { status: "checked", distanceKm: 250 },
+    )
+    expect(near.hits.some(h => h.ruleId === "WR-S03")).toBe(true)
+    const far = evaluatePointWeatherRules(
+      { windGustMs: 5, waveHeightM: 0.5, visibilityM: 5000 },
+      full,
+      end,
+      { status: "checked", distanceKm: 500 },
+    )
+    expect(far.ruleCoverage.find(r => r.ruleId === "WR-S03")?.reason).toBe("no_hit")
   })
 
   it("nan gust is unevaluated invalid, not evaluated no_hit", () => {

@@ -64,11 +64,11 @@
   - **R1.5-2：** **NOT_RUN**（整项）— 说明：§4.8 **WR-S01..WR-S05** 命中/不命中/边界已落地（`weather-impact-engine.test.ts`）；**官方预警表行未实现**。
   - **R1.5-3：** **NOT_RUN**（整项）— 说明：已验证范围仅为当前规则的 `potential`/`system` 输出（同上）；不含官方预警升级语义。
   - **R1.5-4：** **BLOCKED** — 合格 **0/10**；回放命中口径 **warning/critical**（watch 不计）；≥10 样本且 **≥80% 回放** 才解除 blocked，**不**自动标 PASS。候选 `port-closure-replay-candidates.ts` 含 `verificationAudit` 初核记录，仍 **blocked**。
-  - **R1.5-1（整项）：** **NOT_RUN** — 说明：已实现 Open-Meteo 陆地字段、同批 `replaceWeatherPortBatch` 持久化、固定 `asOf` 面板状态（含 `partial_rule_coverage` / `data_empty` / `data_stale` / `no_rule_hits` / `sync_failed`）、港口页三块 + 天气 API + **`ruleCoverage` / `precipCoverage`**；**8 港 7 天/JMA/全量浏览器 仍 NOT_RUN**。
+  - **R1.5-1（整项）：** **NOT_RUN（子项未全量 live）** — **八港 7 天（开发批）：** Open-Meteo 海况+陆地 **7×24h** 持久化/重启读取；港口 API/UI **`forecastMeta` + 全窗口 hourly 列表**（非 8 条预览）；**JMA** `targetTc`/`forecast.json` 规范化、`tropical_cyclone` 表、`tropical-cyclone-sync` Runtime、**`GET /api/shipping/tropical-cyclones`** 与港口页路径面板（1000 km / 关注海域 / 48h 摘要规则）；WR-S03 **≤300 km** 在 JMA 同步成功且距离可算时接入，区分 **`ok_empty` vs `failed/not_run`**；JTWC 仅夹具单测。 **仍 NOT_RUN：** 八港逐港 live 7 天验收、浏览器全量、重启+真实 JMA 全链路证据归档。
   - **天气链路补正（2026-10-09 审查批 + 2026-10-10 遗漏批 + 2026-10-10 区间/覆盖批 + 2026-10-10 规则覆盖批）：** 24h 降水 **full/partial/insufficient** 与影响区间封顶（见上批）；**WR-S01～S03** 按实际输入/OR 分支评估（缺失/NaN/Infinity **不得** `evaluated+no_hit`）；OR **单肢命中保留 hit**、未知肢/未接入 **台风距离**（`typhoon_distance_not_covered`，本批不含 JMA）时不宣称完整排除；API/UI **`ruleCoverageReasonLabelZh`** 按缺测项展示原因；`weather-rule-coverage.test.ts` + chain 四类反例。
-  - **S7：** 默认 **`.tmp/s7-local`**；**2026-10-10 PASS**（**140** checks / 0 FAIL；Flow C 增验 WR-S03 台风未覆盖文案与 WR-S05 缺测分项原因）。
+  - **S7：** 默认 **`.tmp/s7-local`**；**2026-10-10 PASS**（**141** checks / 0 FAIL；Flow C 增验 `forecastMeta`、JMA 台风面板 API/UI、`ok_empty` 种子）。
 - **仍 NOT_RUN / pending：** R1.5-1 全量、R1.5-5/6/7；R1.5-4 **BLOCKED 0/10**；清场删除须用户确认。
-- **定向验证（2026-10-10 规则覆盖批）：** Vitest **69 files / 530 passed | 3 skipped**；完整 G + smoke + S7（见 commit）；**未**申请合并。
+  - **定向验证（2026-10-10 R1.5-1 八港七天/JMA 批）：** Vitest **72 files / 538 passed | 3 skipped**；完整 G + smoke + S7（见 commit）；JMA live 探测仅开发机 `targetTc.json` 抽样，**未**写入阶段 PASS；**未**申请合并。
 - **Neat Freak（2026-10-10 规则覆盖批）：** `neat-freak@3.0.0` + `scripts/audit-inventory.sh`（Git Bash）与本批同 commit；**pending：** R1.5-4 合格库、R1.5 阶段全量 live。
 - **结论：** **R1.5 = IN PROGRESS / BLOCKED on R1.5-4**（**非**阶段 PASS）。
 

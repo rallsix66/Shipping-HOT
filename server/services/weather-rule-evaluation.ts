@@ -4,7 +4,12 @@ import { windGustKmhToMs } from "@shared/weather-units"
 import { evaluateWeatherImpactRules } from "#/services/weather-impact-engine"
 import type { Precipitation24hResult, PrecipitationSample } from "#/services/precipitation-window"
 import { precipitation24hEndingAtDetailed } from "#/services/precipitation-window"
-import { buildRuleCoverageEntries, sanitizeWeatherRuleInputs } from "#/services/weather-rule-coverage"
+import {
+  TYPHOON_NO_STORM_DISTANCE_KM,
+  type TyphoonInputState,
+  buildRuleCoverageEntries,
+  sanitizeWeatherRuleInputs,
+} from "#/services/weather-rule-coverage"
 
 export type RuleEvaluationStatus = "evaluated" | "unevaluated"
 
@@ -24,16 +29,18 @@ export function evaluatePointWeatherRules(
   inputs: Omit<WeatherRuleInputs, "precipitationMm24h">,
   precipSamples: readonly PrecipitationSample[],
   atTimestamp: string,
+  typhoon: TyphoonInputState = { status: "unavailable" },
 ): PointRuleEvaluation {
   const precipCoverage = precipitation24hEndingAtDetailed(precipSamples, atTimestamp)
   const rawInputs: WeatherRuleInputs = {
     ...inputs,
     precipitationMm24h: precipCoverage.status === "full" ? precipCoverage.totalMm : undefined,
+    typhoonDistanceKm: typhoon.status === "checked" ? typhoon.distanceKm : undefined,
   }
   const sanitized = sanitizeWeatherRuleInputs(rawInputs)
   const engineHits = evaluateWeatherImpactRules(sanitized)
   const hitRuleIds = new Set(engineHits.map(hit => hit.ruleId))
-  const ruleCoverage = buildRuleCoverageEntries(sanitized, rawInputs, precipCoverage, hitRuleIds)
+  const ruleCoverage = buildRuleCoverageEntries(sanitized, rawInputs, precipCoverage, hitRuleIds, typhoon)
   const blockedRuleIds = new Set(ruleCoverage.filter(entry => entry.evaluation === "unevaluated").map(entry => entry.ruleId))
   const hits = engineHits.filter(hit => !blockedRuleIds.has(hit.ruleId))
 
@@ -68,6 +75,7 @@ function pickNearestForecastRow(rows: readonly PortWeatherForecastRow[], asOfMs:
 export function evaluatePortWeatherCoverageAt(
   forecasts: readonly PortWeatherForecastRow[],
   asOf: string,
+  typhoon: TyphoonInputState = { status: "unavailable" },
 ): PointRuleEvaluation | undefined {
   const asOfMs = Date.parse(asOf)
   if (!Number.isFinite(asOfMs)) return undefined
@@ -79,7 +87,12 @@ export function evaluatePortWeatherCoverageAt(
     windGustMs: gustMs,
     waveHeightM: waveM,
     visibilityM: row.visibilityM,
-  }, forecastRowsToPrecipSamples(forecasts), asOf)
+  }, forecastRowsToPrecipSamples(forecasts), asOf, typhoon)
+}
+
+export function typhoonInputFromDistanceKm(distanceKm: number | undefined, syncChecked: boolean): TyphoonInputState {
+  if (!syncChecked) return { status: "unavailable" }
+  return { status: "checked", distanceKm: distanceKm ?? TYPHOON_NO_STORM_DISTANCE_KM }
 }
 
 export function mergeRuleCoverageSummaries(entries: readonly WeatherRuleCoverageEntry[]): WeatherRuleCoverageEntry[] {

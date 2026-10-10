@@ -1,18 +1,21 @@
 import type {
   FeedItem,
+  PortWeatherForecastMeta,
   PortWeatherPanelNotice,
   PortWeatherPanelResponse,
   PortWeatherPanelState,
   PortWeatherPrecipCoverage,
 } from "@shared/shipping"
+import { portDirectoryBaseline } from "@shared/port-directory"
 import { isOfficialWeatherAlertFeedItem } from "#/providers/shipping"
 import type { ShippingRepository } from "#/database/shipping"
+import { minTyphoonDistanceKmForPort } from "#/services/tropical-cyclone-display"
 import {
   PRECIP_24H_FULL_HOURLY_SAMPLES,
   PRECIP_24H_PARTIAL_MIN_HOURLY_SAMPLES,
   type Precipitation24hResult,
 } from "#/services/precipitation-window"
-import { evaluatePortWeatherCoverageAt } from "#/services/weather-rule-evaluation"
+import { evaluatePortWeatherCoverageAt, typhoonInputFromDistanceKm } from "#/services/weather-rule-evaluation"
 import {
   PORT_WEATHER_FORECAST_DISPLAY_LIMIT,
   WEATHER_FORECAST_HORIZON_MS,
@@ -101,9 +104,29 @@ export async function getPortWeatherPanel(
 
   const displayForecasts = (inWindowForecasts.length > 0
     ? inWindowForecasts
-    : storedForecasts.slice(-PORT_WEATHER_FORECAST_DISPLAY_LIMIT)).slice(0, PORT_WEATHER_FORECAST_DISPLAY_LIMIT)
+    : storedForecasts.slice(-PORT_WEATHER_FORECAST_DISPLAY_LIMIT))
+    .sort((a, b) => Date.parse(a.forecastAt) - Date.parse(b.forecastAt))
 
-  const measurableForecastCount = displayForecasts.filter(forecastHasMeasurableFields).length
+  const measurableForecastCount = (inWindowForecasts.length > 0 ? inWindowForecasts : displayForecasts)
+    .filter(forecastHasMeasurableFields)
+    .length
+
+  const hourlyInWindow = displayForecasts.filter(row => row.horizon === "hourly")
+  const missingCounts = {
+    windGust: hourlyInWindow.filter(row => row.windGustKmh === undefined).length,
+    wave: hourlyInWindow.filter(row => row.waveHeightM === undefined && row.swellWaveHeightM === undefined).length,
+    precipitation: hourlyInWindow.filter(row => row.precipitationMm === undefined).length,
+    visibility: hourlyInWindow.filter(row => row.visibilityM === undefined).length,
+  }
+  const forecastMeta: PortWeatherForecastMeta = {
+    windowStart: new Date(nowMs - 60 * 60 * 1000).toISOString(),
+    windowEnd: horizonEnd,
+    sourceId: displayForecasts[0]?.sourceId,
+    fetchedAt: referenceFetchedAt,
+    totalInWindow: displayForecasts.length,
+    hourlyInWindow: hourlyInWindow.length,
+    missingCounts,
+  }
   const totalMatched = await repository.countWeatherImpactsActiveInHorizon(portId, asOf, horizonEnd)
   const impacts = await repository.listWeatherImpactsForPortRanked(
     portId,
@@ -112,7 +135,23 @@ export async function getPortWeatherPanel(
     WEATHER_IMPACT_DISPLAY_LIMIT,
   )
 
-  const coverageEval = evaluatePortWeatherCoverageAt(storedForecasts, asOf)
+  const typhoonSync = await repository.getTropicalCycloneSyncMeta()
+  const portBaseline = portDirectoryBaseline.find(row => row.shippingPortId === portId)
+  const cyclones = await repository.listNormalizedTropicalCyclones()
+  const typhoonChecked = typhoonSync.outcome === "ok" || typhoonSync.outcome === "ok_empty"
+  const typhoonDistanceKm = portBaseline && typhoonChecked
+    ? minTyphoonDistanceKmForPort(cyclones, {
+        portId,
+        unlocode: portBaseline.unlocode,
+        latitude: portBaseline.latitude,
+        longitude: portBaseline.longitude,
+      }, true)
+    : undefined
+  const coverageEval = evaluatePortWeatherCoverageAt(
+    storedForecasts,
+    asOf,
+    typhoonInputFromDistanceKm(typhoonDistanceKm, typhoonChecked),
+  )
   const ruleCoverage = coverageEval?.ruleCoverage ?? []
   const precipCoverage = coverageEval ? toPanelPrecipCoverage(coverageEval.precipCoverage) : emptyPrecipCoverage
   const unevaluatedRuleCount = ruleCoverage.filter(entry => entry.evaluation === "unevaluated").length
@@ -160,9 +199,11 @@ export async function getPortWeatherPanel(
     state,
     asOf,
     forecasts: displayForecasts,
+    forecastMeta,
     impacts,
     ruleCoverage,
     precipCoverage,
+    typhoonSync,
     panelNotice,
     displayMeta: {
       forecastLimit: PORT_WEATHER_FORECAST_DISPLAY_LIMIT,

@@ -458,14 +458,63 @@ export interface PortWeatherPanelNotice {
   showingHistoricalData: boolean
 }
 
+export interface PortWeatherForecastMeta {
+  windowStart: string
+  windowEnd: string
+  sourceId?: string
+  fetchedAt?: string
+  totalInWindow: number
+  hourlyInWindow: number
+  missingCounts: {
+    windGust: number
+    wave: number
+    precipitation: number
+    visibility: number
+  }
+}
+
+export interface TropicalCycloneSyncMeta {
+  sourceId: "jma-typhoon" | "jtwc-typhoon-fixture"
+  lastCheckedAt?: string
+  outcome: "ok" | "ok_empty" | "failed" | "not_run"
+  errorCode?: string
+  errorMessage?: string
+}
+
+export interface TropicalCycloneSummary {
+  id: string
+  jmaId?: string
+  nameEn?: string
+  nameJp?: string
+  typhoonNumber?: string
+  category?: string
+  sourceId: string
+  fetchedAt: string
+  dissipatedAt?: string
+  minDistanceKm?: number
+  track: Array<{ lat: number, lon: number, at: string }>
+  forecast: Array<{ lat: number, lon: number, at: string }>
+  summaryZh?: string
+}
+
+export interface TropicalCyclonePanelResponse {
+  asOf: string
+  sync: TropicalCycloneSyncMeta
+  cyclones: TropicalCycloneSummary[]
+  messageZh: string
+  seasonHintZh?: string
+}
+
 export interface PortWeatherPanelResponse {
   portId: string
   state: PortWeatherPanelState
   asOf: string
   forecasts: PortWeatherForecastRow[]
+  forecastMeta: PortWeatherForecastMeta
   impacts: PortWeatherImpactRow[]
   ruleCoverage: PortWeatherRuleCoverageEntry[]
   precipCoverage: PortWeatherPrecipCoverage
+  typhoonSync?: TropicalCycloneSyncMeta
   officialAlerts: PortWeatherOfficialAlertSummary[]
   panelNotice?: PortWeatherPanelNotice
   displayMeta: {

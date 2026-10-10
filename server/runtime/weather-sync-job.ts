@@ -1,8 +1,12 @@
 import type { Database } from "db0"
+import { portDirectoryBaseline } from "@shared/port-directory"
 import type { ShippingDataMode } from "#/database/runtime"
 import type { WeatherProvider } from "#/providers/shipping"
 import { ShippingRepository } from "#/database/shipping"
 import type { RuntimeJob } from "#/runtime/background-runtime"
+import { computePortWeatherImpacts, forecastRowsToOpenMeteoPoints } from "#/services/open-meteo-port-forecast"
+import { TYPHOON_NO_STORM_DISTANCE_KM } from "#/services/weather-rule-coverage"
+import { minTyphoonDistanceKmForPort } from "#/services/tropical-cyclone-display"
 
 export const WEATHER_SYNC_CAPABILITY = "weather_sync" as const
 
@@ -41,12 +45,32 @@ export function createWeatherSyncJob(options: WeatherSyncJobOptions): RuntimeJob
           ...forecastBatch.forecastsByPortId.keys(),
           ...forecastBatch.impactsByPortId.keys(),
         ])
+        const syncMeta = await repository.getTropicalCycloneSyncMeta()
+        const cyclones = await repository.listNormalizedTropicalCyclones()
+        const portCoords = portDirectoryBaseline.map(row => ({
+          portId: row.shippingPortId,
+          unlocode: row.unlocode,
+          latitude: row.latitude,
+          longitude: row.longitude,
+        }))
+        const typhoonChecked = syncMeta.outcome === "ok" || syncMeta.outcome === "ok_empty"
         for (const portId of portIds) {
-          await repository.replaceWeatherPortBatch(
-            portId,
-            forecastBatch.forecastsByPortId.get(portId) ?? [],
-            forecastBatch.impactsByPortId.get(portId) ?? [],
-          )
+          const forecasts = forecastBatch.forecastsByPortId.get(portId) ?? []
+          let impacts = forecastBatch.impactsByPortId.get(portId) ?? []
+          if (typhoonChecked && forecasts.length) {
+            const coord = portCoords.find(item => item.portId === portId)
+            const typhoonKm = coord
+              ? (minTyphoonDistanceKmForPort(cyclones, coord, true) ?? TYPHOON_NO_STORM_DISTANCE_KM)
+              : TYPHOON_NO_STORM_DISTANCE_KM
+            const computedAt = impacts[0]?.computedAt ?? forecasts[0]?.fetchedAt ?? fetchedAt.toISOString()
+            impacts = computePortWeatherImpacts(
+              portId,
+              forecastRowsToOpenMeteoPoints(forecasts),
+              computedAt,
+              typhoonKm,
+            )
+          }
+          await repository.replaceWeatherPortBatch(portId, forecasts, impacts)
         }
         options.provider.ackForecastPersistence?.()
       }

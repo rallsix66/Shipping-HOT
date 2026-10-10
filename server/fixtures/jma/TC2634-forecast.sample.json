@@ -1,0 +1,5 @@
+[
+  {"part":"title","issue":{"UTC":"2026-10-10T01:10:00Z"},"typhoonNumber":"2629","name":{"jp":"Test","en":"Koguma"}},
+  {"part":{"en":"Analysis"},"advancedHours":0,"validtime":{"UTC":"2026-10-10T00:00:00Z"},"center":[21.5,151.5],"track":{"typhoon":[[20.0,150.0],[21.0,151.0]]}},
+  {"part":{"en":"Forecast for 24 hours ahead"},"advancedHours":24,"validtime":{"UTC":"2026-10-11T00:00:00Z"},"center":[23.0,149.6]}
+]

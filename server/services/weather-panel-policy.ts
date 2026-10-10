@@ -3,7 +3,8 @@ import type { FeedItem, PortWeatherForecastRow, PortWeatherPanelState } from "@s
 export const WEATHER_FORECAST_HORIZON_MS = 7 * 24 * 60 * 60 * 1000
 export const WEATHER_FORECAST_STALE_MS = 6 * 60 * 60 * 1000
 export const WEATHER_IMPACT_DISPLAY_LIMIT = 48
-export const PORT_WEATHER_FORECAST_DISPLAY_LIMIT = 8
+/** Max hourly steps returned for the 7-day port panel (full window, not a preview cap). */
+export const PORT_WEATHER_FORECAST_DISPLAY_LIMIT = 7 * 24 + 4
 
 const severityRank = { critical: 4, warning: 3, watch: 2, info: 1 } as const
 
