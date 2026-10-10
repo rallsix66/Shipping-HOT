@@ -74,6 +74,7 @@ export function createWeatherSyncJob(options: WeatherSyncJobOptions): RuntimeJob
           }
           await repository.replaceWeatherPortBatch(portId, forecasts, impacts)
         }
+        for (const attempt of forecastBatch.marineReferenceAttempts ?? []) await repository.recordMarineReferenceAttempt(attempt)
         options.provider.ackForecastPersistence?.()
       }
       const failed = received.find(item => item.sourceStatus === "failed")

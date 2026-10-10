@@ -1,12 +1,14 @@
 import process from "node:process"
 import type { Database } from "db0"
 import { hasMockEvidence, knownMockProvenanceFor, normalizeLegacyEventTrust, normalizeLegacyTrust, recordAllowedForDataMode } from "@shared/shipping"
-import type { DataEvidence, DataProvenance, FeedItem, FeedVisibility, Freshness, Port, PortWeatherForecastRow, PortWeatherImpactRow, ProvenanceAware, ShippingEvent, ShippingSettings, SourceLineage, TropicalCycloneSyncMeta } from "@shared/shipping"
+import type { DataEvidence, DataProvenance, FeedItem, FeedVisibility, Freshness, MarineReferenceAttempt, MarineReferenceSyncMeta, Port, PortWeatherForecastRow, PortWeatherImpactRow, ProvenanceAware, ShippingEvent, ShippingSettings, SourceLineage, TropicalCycloneSyncMeta } from "@shared/shipping"
 import type { CalendarEvent } from "@shared/calendar"
 import { applyFeedFreshnessPolicy } from "@shared/shipping-rules"
 import { JMA_TYPHOON_SOURCE_ID, type JmaTropicalCycloneSyncFailure, type JmaTropicalCycloneSyncResult } from "#/providers/jma-tropical-cyclone"
 import { type NormalizedTropicalCyclone, normalizeStoredTropicalCyclonePayload } from "#/services/jma-typhoon-parse"
 import { enrichTropicalCycloneSyncMeta, jmaDataValidUntil } from "#/services/tropical-cyclone-freshness"
+import { marineReferenceSyncMetaId } from "#/config/port-marine-reference"
+
 import type { PortCoordinate } from "#/services/tropical-cyclone-display"
 import { minTyphoonDistanceKmForPort } from "#/services/tropical-cyclone-display"
 import { type DatabaseMetadata, type ShippingDataMode, initializeShippingDatabase } from "#/database/runtime"
@@ -449,6 +451,26 @@ export class ShippingRepository {
       await this.db.prepare("DELETE FROM feed_items WHERE (published_at <> '' AND published_at < ?) OR (published_at = '' AND fetched_at < ?)").run(cutoff, cutoff)
       await this.db.prepare("DELETE FROM feed_item_history WHERE observed_at < ?").run(cutoff)
     })
+  }
+
+  /**
+   * ADR-009 reference sync meta (last attempt + last success kept separately). Stored as a dedicated row in the
+   * key/value `settings` table (id `marine-ref-sync:<refKey>`); the user settings row ('default') is untouched.
+   */
+  async recordMarineReferenceAttempt(attempt: MarineReferenceAttempt) {
+    const previous = await this.getMarineReferenceSyncMeta(attempt.refKey)
+    const next: MarineReferenceSyncMeta = attempt.outcome === "success"
+      ? { refKey: attempt.refKey, lastAttemptAt: attempt.attemptedAt, lastAttemptOutcome: "success", lastSuccessAt: attempt.attemptedAt, grid: attempt.grid }
+      : { refKey: attempt.refKey, lastAttemptAt: attempt.attemptedAt, lastAttemptOutcome: "failed", lastAttemptError: attempt.error, lastSuccessAt: previous?.lastSuccessAt, grid: previous?.grid }
+    await this.db.prepare(`
+      INSERT INTO settings (id, data, updated_at) VALUES (?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at
+    `).run(marineReferenceSyncMetaId(attempt.refKey), JSON.stringify(next), attempt.attemptedAt)
+  }
+
+  async getMarineReferenceSyncMeta(refKey: string): Promise<MarineReferenceSyncMeta | undefined> {
+    const row = await this.db.prepare("SELECT data FROM settings WHERE id = ?").get(marineReferenceSyncMetaId(refKey)) as Row | undefined
+    return row ? parse<MarineReferenceSyncMeta>(row.data) ?? undefined : undefined
   }
 
   async replaceWeatherPortBatch(portId: string, forecasts: PortWeatherForecastRow[], impacts: PortWeatherImpactRow[]) {

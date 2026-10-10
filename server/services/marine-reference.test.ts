@@ -131,6 +131,7 @@ describe("panel service: separate marineReference block, port marine still repor
     expect(refImpacts.length).toBeGreaterThan(0)
     await repository.replaceWeatherPortBatch(ref.refKey, openMeteoPointsToForecastRows(ref.refKey, undefined, refPoints, fetchedAt, MARINE_REFERENCE_SOURCE_ID), refImpacts)
 
+    await repository.recordMarineReferenceAttempt({ refKey: ref.refKey, attemptedAt: fetchedAt, outcome: "success" })
     const panel = await getPortWeatherPanel(repository, "port-ho-chi-minh", [], "Open-Meteo", "alerts", { now: NOW })
     expect(panel.forecasts.length).toBeGreaterThan(0)
     expect(panel.forecasts.every(row => row.waveHeightM === undefined && row.sourceId === "open-meteo-marine")).toBe(true)

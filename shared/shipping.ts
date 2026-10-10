@@ -544,6 +544,41 @@ export interface TropicalCyclonePanelResponse {
  * Independent area-reference marine (ADR-009). Never the port's own marine; shown separately and labelled as an
  * engineering point (not an official representative point, not berth conditions).
  */
+export type MarineReferenceStatus = "not_run" | "failed" | "fresh" | "stale" | "insufficient"
+
+/** Grid metadata of one reference batch, as returned by the provider (never back-filled from diagnosis docs). */
+export interface MarineReferenceGridMeta {
+  requestedLatitude: number
+  requestedLongitude: number
+  /** Provider-returned grid cell centre; undefined when the provider did not return it. */
+  returnedLatitude?: number
+  returnedLongitude?: number
+  /** Great-circle km between requested point and returned grid cell. */
+  requestedToReturnedKm?: number
+  /** Model requested (Open-Meteo does not echo the resolved model for best_match). */
+  modelRequested: string
+  providerGenerationTimeMs?: number
+  fetchedAt: string
+}
+
+export interface MarineReferenceAttempt {
+  refKey: string
+  attemptedAt: string
+  outcome: "success" | "failed"
+  error?: string
+  grid?: MarineReferenceGridMeta
+}
+
+export interface MarineReferenceSyncMeta {
+  refKey: string
+  lastAttemptAt: string
+  lastAttemptOutcome: "success" | "failed"
+  lastAttemptError?: string
+  lastSuccessAt?: string
+  /** Grid of the last successful batch (the batch whose rows are stored). */
+  grid?: MarineReferenceGridMeta
+}
+
 export interface PortMarineReferencePanel {
   refKey: string
   nameZh: string
@@ -563,7 +598,20 @@ export interface PortMarineReferencePanel {
   lastInstant?: string
   maxWaveHeightM?: number
   forecasts: PortWeatherForecastRow[]
+  /** Currently active reference rule hits; empty unless status is fresh or insufficient. */
   impacts: PortWeatherImpactRow[]
+  status: MarineReferenceStatus
+  statusNoteZh: string
+  lastAttemptAt?: string
+  lastAttemptOutcome?: "success" | "failed"
+  lastAttemptError?: string
+  lastSuccessAt?: string
+  /** True when the values shown are an older (historical) reference batch, not current. */
+  showingHistoricalData: boolean
+  /** Stored reference rule hits NOT counted as currently active (failed/stale/not_run). */
+  historicalImpactCount: number
+  grid?: MarineReferenceGridMeta
+  coverage: { expectedHours: number, hourlyWithMarine: number, missingHours: number, complete: boolean }
 }
 
 export interface PortWeatherPanelResponse {

@@ -57,3 +57,15 @@ export function marineReferenceForPort(portId: string): PortMarineReference | un
 export function isMarineReferenceKey(key: string): boolean {
   return key.startsWith("marine-ref:")
 }
+
+export function greatCircleKm(aLat: number, aLon: number, bLat: number, bLon: number): number {
+  const rad = (deg: number) => deg * Math.PI / 180
+  const dLat = rad(bLat - aLat)
+  const dLon = rad(bLon - aLon)
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(rad(aLat)) * Math.cos(rad(bLat)) * Math.sin(dLon / 2) ** 2
+  return 2 * 6371 * Math.asin(Math.sqrt(x))
+}
+
+export function marineReferenceSyncMetaId(refKey: string): string {
+  return `marine-ref-sync:${refKey}`
+}

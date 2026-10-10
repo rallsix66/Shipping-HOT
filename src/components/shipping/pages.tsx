@@ -695,10 +695,23 @@ function PortWeatherPanelSection({ portId }: { portId: string }) {
                 <div className="mb-3 rounded border border-amber-400/30 p-2 text-xs" data-testid="port-weather-marine-reference">
                   <p className="font-medium">{data.marineReference.nameZh}</p>
                   <p className="op-70">{data.marineReference.labelZh}</p>
+                  <p data-testid="port-weather-marine-reference-status">
+                    {`参考状态：${data.marineReference.status} · ${data.marineReference.statusNoteZh}`}
+                    {` · 最近尝试 ${data.marineReference.lastAttemptAt ? formatDate(data.marineReference.lastAttemptAt) : "无"}（${data.marineReference.lastAttemptOutcome ?? "未运行"}）`}
+                    {` · 最近成功 ${data.marineReference.lastSuccessAt ? formatDate(data.marineReference.lastSuccessAt) : "无"}`}
+                  </p>
+                  <p className="op-80" data-testid="port-weather-marine-reference-grid">
+                    {`请求点 ${data.marineReference.latitude}N ${data.marineReference.longitude}E（距港口约 ${data.marineReference.approxDistanceKm} km） · 请求模型 ${data.marineReference.model}`}
+                    {data.marineReference.grid?.returnedLatitude !== undefined && data.marineReference.grid?.returnedLongitude !== undefined
+                      ? ` · 实际返回网格 ${data.marineReference.grid.returnedLatitude}N ${data.marineReference.grid.returnedLongitude}E（距请求点 ${data.marineReference.grid.requestedToReturnedKm ?? "?"} km，获取于 ${formatDate(data.marineReference.grid.fetchedAt)}）`
+                      : " · 实际返回网格：无记录"}
+                  </p>
                   <p className="op-80">
-                    {`参考点 ${data.marineReference.latitude}N ${data.marineReference.longitude}E · 约 ${data.marineReference.approxDistanceKm} km · 模型 ${data.marineReference.model} · hourly ${data.marineReference.hourlyReturned}（含海况 ${data.marineReference.hourlyWithMarine}）`}
+                    {data.marineReference.showingHistoricalData ? `历史参考（更新于 ${data.marineReference.lastSuccessAt ? formatDate(data.marineReference.lastSuccessAt) : "未知"}）：` : ""}
+                    {`7 天整点含海况 ${data.marineReference.coverage.hourlyWithMarine}/${data.marineReference.coverage.expectedHours}`}
                     {data.marineReference.maxWaveHeightM !== undefined ? ` · 7 天最大浪高 ${data.marineReference.maxWaveHeightM.toFixed(1)} m` : " · 暂无参考海况测值"}
-                    {` · 参考规则命中 ${data.marineReference.impacts.length}`}
+                    {` · 当前参考规则命中 ${data.marineReference.impacts.length}`}
+                    {data.marineReference.historicalImpactCount > 0 ? ` · 历史命中 ${data.marineReference.historicalImpactCount}（不计入当前）` : ""}
                   </p>
                 </div>
               )

@@ -1,5 +1,6 @@
 import type {
   FeedItem,
+  MarineReferenceStatus,
   PortMarineReferencePanel,
   PortWeatherForecastMeta,
   PortWeatherPanelNotice,
@@ -23,6 +24,7 @@ import {
   FORECAST_RETENTION_LIMIT,
   PORT_WEATHER_FORECAST_DISPLAY_LIMIT,
   WEATHER_FORECAST_HORIZON_MS,
+  WEATHER_FORECAST_STALE_MS,
   WEATHER_IMPACT_DISPLAY_LIMIT,
   forecastHasMeasurableFields,
   forecastRetentionWindow,
@@ -30,6 +32,28 @@ import {
   portWeatherFeedHealthy,
   resolvePortWeatherPanelState,
 } from "#/services/weather-panel-policy"
+
+const HOUR_MS = 60 * 60 * 1000
+
+/** Rolling [now-1h, now+7d] whole-hour grid, marine (wave or swell) only. */
+function referenceWindowCoverage(rows: { forecastAt: string, horizon: string, waveHeightM?: number, swellWaveHeightM?: number }[], nowMs: number) {
+  const gridStart = Math.ceil((nowMs - HOUR_MS) / HOUR_MS) * HOUR_MS
+  const gridEnd = Math.floor((nowMs + WEATHER_FORECAST_HORIZON_MS) / HOUR_MS) * HOUR_MS
+  const expectedHours = Math.floor((gridEnd - gridStart) / HOUR_MS) + 1
+  const withMarine = new Set(rows
+    .filter(row => row.horizon === "hourly" && (row.waveHeightM !== undefined || row.swellWaveHeightM !== undefined))
+    .map(row => Date.parse(row.forecastAt))
+    .filter(t => Number.isFinite(t) && t >= gridStart && t <= gridEnd && t % HOUR_MS === 0))
+  return { expectedHours, hourlyWithMarine: withMarine.size, missingHours: expectedHours - withMarine.size, complete: withMarine.size === expectedHours }
+}
+
+const referenceStatusNotes: Record<MarineReferenceStatus, string> = {
+  not_run: "参考海况尚未同步。",
+  failed: "最近一次参考海况同步失败；如有数值，均为历史参考，规则命中不计入当前。",
+  stale: "参考海况已过期（超过 6 小时未更新）；数值为历史参考，规则命中不计入当前。",
+  insufficient: "参考海况已更新，但滚动 7 天窗口内有缺测小时或缺测值。",
+  fresh: "参考海况为最新且 7 天完整。",
+}
 
 export interface PortWeatherPanelOptions {
   now?: Date
@@ -251,6 +275,18 @@ export async function getPortWeatherPanel(
       .map(row => row.waveHeightM ?? row.swellWaveHeightM)
       .filter((value): value is number => typeof value === "number" && Number.isFinite(value))
     const fetchedTimes = referenceRows.map(row => Date.parse(row.fetchedAt)).filter(Number.isFinite)
+    const syncMeta = await repository.getMarineReferenceSyncMeta(reference.refKey)
+    const coverage = referenceWindowCoverage(referenceRows, nowMs)
+    const lastSuccessMs = syncMeta?.lastSuccessAt ? Date.parse(syncMeta.lastSuccessAt) : Number.NaN
+    const status: MarineReferenceStatus = !syncMeta
+      ? "not_run"
+      : syncMeta.lastAttemptOutcome === "failed"
+        ? "failed"
+        : !Number.isFinite(lastSuccessMs) || nowMs - lastSuccessMs > WEATHER_FORECAST_STALE_MS
+            ? "stale"
+            : coverage.complete ? "fresh" : "insufficient"
+    const current = status === "fresh" || status === "insufficient"
+    const storedImpacts = await repository.listWeatherImpactsForPortRanked(reference.refKey, asOf, horizonEnd, WEATHER_IMPACT_DISPLAY_LIMIT)
     marineReference = {
       refKey: reference.refKey,
       nameZh: reference.nameZh,
@@ -270,7 +306,17 @@ export async function getPortWeatherPanel(
       lastInstant: referenceHourly.at(-1)?.forecastAt,
       maxWaveHeightM: waves.length ? Math.max(...waves) : undefined,
       forecasts: referenceRows,
-      impacts: await repository.listWeatherImpactsForPortRanked(reference.refKey, asOf, horizonEnd, WEATHER_IMPACT_DISPLAY_LIMIT),
+      impacts: current ? storedImpacts : [],
+      status,
+      statusNoteZh: referenceStatusNotes[status],
+      lastAttemptAt: syncMeta?.lastAttemptAt,
+      lastAttemptOutcome: syncMeta?.lastAttemptOutcome,
+      lastAttemptError: syncMeta?.lastAttemptError,
+      lastSuccessAt: syncMeta?.lastSuccessAt,
+      showingHistoricalData: !current && referenceRows.length > 0,
+      historicalImpactCount: current ? 0 : storedImpacts.length,
+      grid: syncMeta?.grid,
+      coverage,
     }
   }
 

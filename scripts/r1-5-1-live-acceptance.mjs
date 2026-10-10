@@ -16,6 +16,7 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import process from "node:process"
 import Database from "better-sqlite3"
 import { evaluateForecastWindowCoverage } from "./lib/forecast-window-coverage.mjs"
+import { ADR009_CONCLUSION_ZH, evaluateAdr009Mapping } from "./lib/adr009-mapping.mjs"
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)))
 const ISOLATED_ROOT = resolve(join(ROOT, ".tmp"))
@@ -337,8 +338,13 @@ async function runBrowserChecks(chromePath, apiAfterRestart) {
           add("browser_hourly_current_match_api", text.includes(expected), `expected "${expected}"`)
           add("browser_total_match_api", text.includes(`实际返回 ${meta.actualCoverage.totalReturned}`), `expected total ${meta.actualCoverage.totalReturned}`)
           if (meta.marineCoverageNote) add("browser_shows_marine_note", text.includes(meta.marineCoverageNote.slice(0, 12)), "marine coverage note rendered")
-          const reference = apiAfterRestart[portId]?.marineReference
-          if (reference) add("browser_shows_marine_reference_label", bodyText.includes(reference.nameZh) && bodyText.includes("非官方代表点"), "reference block name + engineering-point label rendered")
+          if (REFERENCE_KEYS[portId]) {
+            const reference = apiAfterRestart[portId]?.marineReference
+            const refText = String(await cdp.evaluate(`document.querySelector('[data-testid="port-weather-marine-reference"]')?.innerText ?? ""`) ?? "")
+            add("browser_shows_marine_reference_label", Boolean(reference) && refText.includes(reference.nameZh) && refText.includes("非官方代表点"), reference ? "reference block name + engineering-point label" : "API returned no marineReference")
+            add("browser_shows_marine_reference_status", Boolean(reference) && refText.includes(`参考状态：${reference.status}`) && refText.includes("最近成功"), reference ? `status ${reference.status} + update time` : "API returned no marineReference")
+            add("browser_shows_marine_reference_grid", Boolean(reference?.grid?.returnedLatitude !== undefined) && refText.includes("实际返回网格") && refText.includes(String(reference.grid.returnedLatitude)), "requested vs returned grid shown")
+          }
         }
       } catch (error) {
         add("browser_protocol", false, String(error?.message ?? error))
@@ -446,7 +452,7 @@ async function main() {
   push("sqlite_weather_forecast_rows", dbRows.total > 0, String(dbRows.total))
   const sqliteCoverage = {}
   for (const portId of PORT_IDS) {
-    sqliteCoverage[portId] = evaluateForecastWindowCoverage(dbRows.byPort[portId], syncNowMs)
+    sqliteCoverage[portId] = evaluateForecastWindowCoverage(dbRows.byPort[portId], syncNowMs, { requireMarine: !REFERENCE_KEYS[portId] })
     // Zero rows for a port is an upstream/live-data gap (see syncEvidence.egress), not a harness defect: BLOCKED, never PASS.
     push(`sqlite_rows_${portId}`, dbRows.byPort[portId].length > 0, `${dbRows.byPort[portId].length} rows`, "business")
   }
@@ -544,7 +550,7 @@ async function main() {
   for (const portId of PORT_IDS) {
     const sqlite = sqliteCoverage[portId]
     const apiNowMs = Date.parse(apiAfterRestart[portId]?.asOf ?? "")
-    const api = Number.isFinite(apiNowMs) ? evaluateForecastWindowCoverage(apiAfterRestartRows[portId] ?? [], apiNowMs) : undefined
+    const api = Number.isFinite(apiNowMs) ? evaluateForecastWindowCoverage(apiAfterRestartRows[portId] ?? [], apiNowMs, { requireMarine: !REFERENCE_KEYS[portId] }) : undefined
     const dbHourlyInApiWindow = Number.isFinite(apiNowMs) ? evaluateForecastWindowCoverage(dbRows.byPort[portId], apiNowMs).hourlyInWindow : undefined
     const truncation = {
       dbHourlyInWindow: dbHourlyInApiWindow,
@@ -557,21 +563,27 @@ async function main() {
     push(`coverage_${portId}`, pass, [...new Set([...(sqlite?.failed ?? []), ...(api?.failed ?? ["api_unavailable"])])].join(", ") || "full seven-day marine + land", "business")
   }
 
-  // 7b) ADR-009 area-reference marine: reported separately, never changes the port's own coverage verdict above.
+  // 7b) ADR-009 acceptance mapping (approved: dots 2026-10-10 14:11 UTC+8, Slack ts 1791612673.820639).
+  // VNSGN = origin 7-day land (coverage_ check above, marine not required there) + independent reference 7-day marine
+  // (fresh, complete, SQLite -> restart API -> browser, labelled, isolated) + explicit origin-marine-missing disclosure.
+  // These are business checks and count in the verdict.
   const marineReference = {}
   for (const [portId, refKey] of Object.entries(REFERENCE_KEYS)) {
-    const apiNowMs = Date.parse(apiAfterRestart[portId]?.asOf ?? "")
-    const apiRef = apiAfterRestart[portId]?.marineReference
-    const sqliteAtSync = evaluateForecastWindowCoverage(dbRows.byRef?.[portId] ?? [], syncNowMs, { requireLand: false })
-    const apiRows = apiAfterRestartRefRows[portId] ?? []
-    const api = Number.isFinite(apiNowMs) ? evaluateForecastWindowCoverage(apiRows, apiNowMs, { requireLand: false }) : undefined
-    const portRows = apiAfterRestartRows[portId] ?? []
-    const portMarineStillMissing = portRows.filter(r => r.horizon !== "current").every(r => r.waveHeightM === undefined && r.swellWaveHeightM === undefined)
-    const portRowsNotFromReference = portRows.every(r => r.sourceId !== "open-meteo-marine-reference")
-    marineReference[portId] = { refKey, label: apiRef, sqliteAtSync, apiAfterRestart: api, portMarineStillMissing, portRowsNotFromReference, portCoverageNote: apiAfterRestart[portId]?.forecastMeta?.marineCoverageNote }
-    push(`reference_marine_7d_${portId}`, Boolean(sqliteAtSync.pass && api?.pass), `sqlite ${sqliteAtSync.failed.join(",") || "full"}; api ${api?.failed.join(",") || (api ? "full" : "unavailable")}`, "reference")
-    push(`reference_labelled_${portId}`, apiRef?.kind === "engineering_reference_point" && apiRef?.officialRepresentativePoint === false && apiRef?.berthConditions === false && apiRef?.model === "best_match", JSON.stringify({ kind: apiRef?.kind, official: apiRef?.officialRepresentativePoint, berth: apiRef?.berthConditions, model: apiRef?.model, km: apiRef?.approxDistanceKm }), "reference")
-    push(`reference_not_substituted_${portId}`, portRowsNotFromReference && (portMarineStillMissing ? Boolean(apiAfterRestart[portId]?.forecastMeta?.marineCoverageNote) : true), `portMarineStillMissing=${portMarineStillMissing} coverageNote=${Boolean(apiAfterRestart[portId]?.forecastMeta?.marineCoverageNote)}`, "reference")
+    const mapping = evaluateAdr009Mapping({
+      refKey,
+      syncNowMs,
+      apiNowMs: Date.parse(apiAfterRestart[portId]?.asOf ?? ""),
+      refSqliteRows: dbRows.byRef?.[portId] ?? [],
+      apiRef: apiAfterRestart[portId]?.marineReference,
+      apiRefRows: apiAfterRestartRefRows[portId] ?? [],
+      apiPortRows: apiAfterRestartRows[portId] ?? [],
+      apiPortMeta: apiAfterRestart[portId]?.forecastMeta,
+      browserChecks: browserEvidence.ports?.[portId]?.checks,
+    })
+    marineReference[portId] = mapping
+    for (const check of mapping.checks) push(`adr009_${check.id}_${portId}`, check.pass, check.detail, "business")
+    const cov = portCoverage[portId]
+    if (cov) cov.adr009 = { pass: mapping.pass, originMarineAvailable: mapping.originMarineAvailable }
   }
 
   // 8) JMA: archived (stored) records vs focus-area active count, reported separately.
@@ -606,14 +618,14 @@ async function main() {
     jmaLiveArchive: checks.find(c => c.name === "jma_archived_live")?.pass ? "VERIFIED" : "FAIL",
     fixtureTropicalBrowserS7: s7.status === "PASS" ? "VERIFIED" : s7.status,
     // Reference marine is reported separately and does NOT change sevenDayCoveragePerPort or the verdict.
-    vnsgnAreaReferenceMarine: Object.keys(REFERENCE_KEYS).every(p => ["reference_marine_7d_", "reference_labelled_", "reference_not_substituted_"].every(prefix => checks.find(c => c.name === `${prefix}${p}`)?.pass)) ? "VERIFIED (engineering reference, not port marine)" : "FAIL",
+    vnsgnAdr009Mapping: Object.keys(REFERENCE_KEYS).every(p => marineReference[p]?.pass) ? "PASS (origin land + independent reference marine; origin marine unavailable)" : "BLOCKED",
     sevenDayCoveragePerPort: Object.fromEntries(PORT_IDS.map(p => [p, portCoverage[p].pass ? "PASS" : `BLOCKED: ${[...new Set([...(portCoverage[p].sqliteAtSync?.failed ?? []), ...(portCoverage[p].apiAfterRestart?.failed ?? [])])].join(", ")}`])),
   }
 
   Object.assign(evidence, {
     completedAt: new Date().toISOString(),
     liveNetwork: { openMeteo: true, jma: true },
-    criteria: "9/29 plan R1.5-1: all eight ports need seven-day marine and land forecasts. Window [now-1h, now+7d], hourly only, every whole UTC hour present once with land fields (windGust, precipitation, visibility) and marine (wave or swell). current rows reported separately. A coverage note is degradation display, not coverage. ADR-009 area-reference marine (engineering point) is reported separately under marineReference and is NOT counted as the port's own marine coverage.",
+    criteria: "9/29 plan R1.5-1: all eight ports need seven-day marine and land forecasts. Window [now-1h, now+7d], hourly only, every whole UTC hour present once with land fields (windGust, precipitation, visibility) and marine (wave or swell). current rows reported separately. A coverage note is degradation display, not coverage. ADR-009 acceptance mapping (dots 2026-10-10 14:11 UTC+8, Slack ts 1791612673.820639): other seven ports unchanged (origin land + marine); VNSGN = origin 7-day land + independent reference 7-day marine (fresh, complete, SQLite/API/browser, labelled, isolated), origin marine disclosed as unavailable. The origin marine is NOT filled.",
     marineReference,
     syncEvidence,
     apiBeforeRestart,
@@ -629,12 +641,14 @@ async function main() {
     checks,
     summary: { total: checks.length, passed: checks.filter(c => c.pass).length, harnessFailed: harnessFailed.map(c => c.name), prerequisiteMissing: prereqMissing.map(c => c.name), businessBlocked: businessFailed.map(c => c.name) },
     verdict,
+    conclusionZh: verdict === "PASS" ? ADR009_CONCLUSION_ZH : undefined,
   })
   writeEvidence()
   console.log(`Evidence: ${join(RUN_DIR, "r1-5-1-evidence.json")}`)
   console.log(JSON.stringify(evidence.summary, null, 2))
   console.log(JSON.stringify(subChains, null, 2))
   console.log(`R1.5-1 live acceptance: ${verdict}`)
+  if (verdict === "PASS") console.log(ADR009_CONCLUSION_ZH)
   process.exit(verdict === "PASS" ? 0 : verdict === "BLOCKED" ? 2 : 1)
 }
 

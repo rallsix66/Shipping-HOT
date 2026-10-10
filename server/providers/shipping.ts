@@ -1,5 +1,6 @@
 import { env } from "node:process"
-import type { DataProvenance, FeedItem, Freshness, OperationalSourceContext, Port, PortCongestionDetail, PortWeatherForecastRow, PortWeatherImpactRow, ProviderResult, Severity, ShippingProviderModes, SourceStatus, WeatherWindow, WeatherWindows } from "@shared/shipping"
+import type { DataProvenance, FeedItem, Freshness, MarineReferenceAttempt, OperationalSourceContext, Port, PortCongestionDetail, PortWeatherForecastRow, PortWeatherImpactRow, ProviderResult, Severity, ShippingProviderModes, SourceStatus, WeatherWindow, WeatherWindows } from "@shared/shipping"
+
 import { createBaselinePortDirectoryLookup } from "@shared/port-directory"
 import type { PortDirectoryCoordinateLookup } from "@shared/port-directory"
 import { mockFeedItems, mockPorts } from "@shared/shipping-fixtures"
@@ -7,7 +8,7 @@ import { type CalendarProvider, configureCalendarProviders } from "./calendar"
 import { activeShippingFeedSourceIds, configureFeedProviders } from "./feed"
 import { type WeatherAlertProvider, activeOfficialWeatherAlertSourceIds, createOfficialWeatherAlertProvider, officialWeatherAlertSourceIds } from "./weather-alerts"
 import { computePortWeatherImpacts, mergeOpenMeteoPortPoints, openMeteoPointsToForecastRows } from "#/services/open-meteo-port-forecast"
-import { MARINE_REFERENCE_SOURCE_ID, type PortMarineReference, marineReferenceForPort } from "#/config/port-marine-reference"
+import { MARINE_REFERENCE_SOURCE_ID, type PortMarineReference, greatCircleKm, marineReferenceForPort } from "#/config/port-marine-reference"
 import { createRuntimePortDirectoryLookup } from "#/database/port-directory"
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
 
@@ -18,6 +19,8 @@ export interface PortProvider {
 export interface WeatherForecastPersistenceBatch {
   forecastsByPortId: Map<string, PortWeatherForecastRow[]>
   impactsByPortId: Map<string, PortWeatherImpactRow[]>
+  /** ADR-009: every reference attempt of this run (success or failure), recorded separately from rows. */
+  marineReferenceAttempts?: MarineReferenceAttempt[]
 }
 
 export interface WeatherProvider {
@@ -636,6 +639,7 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
    * Area-reference marine (ADR-009): separate request at the reference point, rows/impacts stored under
    * reference.refKey with their own sourceId. Failure here never fails or alters the port's own forecast.
    */
+  const referenceAttempts: MarineReferenceAttempt[] = []
   async function fetchMarineReference(reference: PortMarineReference, checkedAtMs: number, fetchedAt: string) {
     const url = new URL(marineEndpoint)
     url.searchParams.set("latitude", String(reference.latitude))
@@ -649,12 +653,34 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
     url.searchParams.set("models", reference.model)
     try {
       const response = await fetcher(url.toString())
-      if (!response.ok) return undefined
-      const payload = validWeatherPayload(await response.json())
+      if (!response.ok) throw new Error(`Open-Meteo reference marine request failed (${response.status})`)
+      const raw = await response.json()
+      const payload = validWeatherPayload(raw)
+      const top = raw as { latitude?: unknown, longitude?: unknown, generationtime_ms?: unknown }
+      const returnedLatitude = typeof top.latitude === "number" && Number.isFinite(top.latitude) ? top.latitude : undefined
+      const returnedLongitude = typeof top.longitude === "number" && Number.isFinite(top.longitude) ? top.longitude : undefined
       const points = mergeOpenMeteoPortPoints(payload, {}, checkedAtMs)
       const forecasts = openMeteoPointsToForecastRows(reference.refKey, undefined, points, fetchedAt, MARINE_REFERENCE_SOURCE_ID)
+      referenceAttempts.push({
+        refKey: reference.refKey,
+        attemptedAt: fetchedAt,
+        outcome: "success",
+        grid: {
+          requestedLatitude: reference.latitude,
+          requestedLongitude: reference.longitude,
+          returnedLatitude,
+          returnedLongitude,
+          requestedToReturnedKm: returnedLatitude !== undefined && returnedLongitude !== undefined
+            ? Math.round(greatCircleKm(reference.latitude, reference.longitude, returnedLatitude, returnedLongitude) * 100) / 100
+            : undefined,
+          modelRequested: reference.model,
+          providerGenerationTimeMs: typeof top.generationtime_ms === "number" ? top.generationtime_ms : undefined,
+          fetchedAt,
+        },
+      })
       return { refKey: reference.refKey, forecasts, impacts: computePortWeatherImpacts(reference.refKey, points, fetchedAt) }
-    } catch {
+    } catch (error) {
+      referenceAttempts.push({ refKey: reference.refKey, attemptedAt: fetchedAt, outcome: "failed", error: error instanceof Error ? error.message : String(error) })
       return undefined
     }
   }
@@ -666,11 +692,13 @@ export function createOpenMeteoWeatherProvider(options: OpenMeteoWeatherProvider
       return {
         forecastsByPortId: new Map(forecastsByPortId),
         impactsByPortId: new Map(impactsByPortId),
+        marineReferenceAttempts: [...referenceAttempts],
       }
     },
     ackForecastPersistence() {
       forecastsByPortId.clear()
       impactsByPortId.clear()
+      referenceAttempts.length = 0
     },
     async getFeedItems(ports: Port[] = [], lastKnown = []) {
       const checkedAt = now()
