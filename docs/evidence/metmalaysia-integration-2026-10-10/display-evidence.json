@@ -31,7 +31,8 @@
       "providerUsageRequests": 0,
       "runtimeRows": -1,
       "feedHash": "weather-alert:metmalaysia:1085cd3aec39f7e4:1948,weather-alert:metmalaysia:468debfe0e6d17a5:4349,weather-alert:metmalaysia:85e8ecb33970658b:4349,weather-alert:metmalaysia:c839053dda1e9e11:3726"
-    }
+    },
+    "sideEffectNote": "Runtime 关闭、预警开关未设，所检查的 feed/provider_usage 计数及指纹未变。runtimeRows=-1 表示该表不可用（未检查 runtime 表）。"
   },
   "browser": {
     "status": "RAN",
@@ -70,7 +71,8 @@
     {
       "id": "get_no_side_effects",
       "pass": true,
-      "detail": "before {\"feedItems\":4,\"providerUsageRows\":0,\"providerUsageRequests\":0,\"runtimeRows\":-1,\"feedHash\":\"weather-alert:metmalaysia:1085cd3aec39f7e4:1948,weather-alert:metmal after {\"feedItems\":4,\"providerUsageRows\":0,\"providerUsageRequests\":0,\"runtimeRows\":-1,\"feedHash\":\"weather-alert:metmalaysia:1085cd3aec39f7e4:1948,weather-alert:metmal"
+      "detail": "before {\"feedItems\":4,\"providerUsageRows\":0,\"providerUsageRequests\":0,\"runtimeRows\":-1,\"feedHash\":\"weather-alert:metmalaysia:1085cd3aec39f7e4:1948,weather-alert:metmal after {\"feedItems\":4,\"providerUsageRows\":0,\"providerUsageRequests\":0,\"runtimeRows\":-1,\"feedHash\":\"weather-alert:metmalaysia:1085cd3aec39f7e4:1948,weather-alert:metmal",
+      "scope": "Runtime 关闭、预警开关未设，所检查的 feed/provider_usage 计数及指纹未变；runtimeRows=-1 表示该表不可用（未检查 runtime 表）。"
     },
     {
       "id": "browser_feed_rendered",

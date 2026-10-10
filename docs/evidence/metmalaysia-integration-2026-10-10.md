@@ -17,7 +17,7 @@ The shelved draft (`.tmp/my-w01-shelved/`) was reviewed against the bounds and N
 
 ## Display verification (`display-evidence.json`, PASS 14/14, HEAD `b946bcd` clean)
 - Service: production build `dist/output/server` (Nitro) on the isolated DB, Runtime disabled, `SHIPPING_WEATHER_ALERT_PROVIDER` unset, no provider secrets.
-- API: `GET /api/shipping/feed` (4 records, raw fields, unknown validity, no port) and `GET /api/shipping`; DB feed_items / provider_usage identical before/after the GETs (no network, no LLM).
+- API: `GET /api/shipping/feed` (4 records, raw fields, unknown validity, no port) and `GET /api/shipping`; GET 前后：Runtime 关闭、预警开关未设，所检查的 feed/provider_usage 计数及指纹未变（feed_items / provider_usage 计数及 id+长度指纹）；runtimeRows=-1 表示该表不可用（未检查 runtime 表）。这不证明没有网络或 LLM 调用。
 - Browser: system Chrome headless over CDP, `/feed`: summary wording, 预警状态：未知 / 有效性待确认 / 时区未确认 / 官方级别：未提供, raw issued/valid_from/valid_to, source + 抓取时间, 首次接收, No Advisory scope text, 4 raw blocks; no "生效" claim.
 - Not covered: port pages (no association by design), Runtime scheduler under the experimental switch (covered by service-layer sync-job tests only).
 
