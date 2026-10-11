@@ -40,7 +40,7 @@ const SEED_ENTRY = join(ROOT, "scripts", "s7-local-seed.ts")
 const PORT = Number(process.env.E2E_S7_PORT ?? "4477")
 const BASE = (process.env.E2E_BASE_URL ?? `http://127.0.0.1:${PORT}`).replace(/\/$/, "")
 const DEBUG_PORT = Number(process.env.E2E_DEBUG_PORT ?? "9345")
-const EXPECTED_SCHEMA_VERSION = 15
+const EXPECTED_SCHEMA_VERSION = 16
 
 const REQUIRED_TABLES = [
   "app_metadata",

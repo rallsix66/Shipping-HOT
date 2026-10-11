@@ -70,14 +70,14 @@ describe("article content migration and repository", () => {
   it("applies to a fresh database with article tables through latest schema and is idempotent", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(15)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(16)
     const names = await tables(native)
     expect(["feed_articles", "article_versions", "article_blocks"].every(name => names.has(name))).toBe(true)
 
     await initShippingTables(database, "mock")
     const applied = native.prepare("SELECT COUNT(*) AS c FROM schema_migrations WHERE version = 15").get() as { c: number }
     expect(applied.c).toBe(1)
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(15)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(16)
     native.close()
   })
 
@@ -91,7 +91,7 @@ describe("article content migration and repository", () => {
     native.prepare("UPDATE app_metadata SET schema_version = 12").run()
 
     await initShippingTables(database, "mock")
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(15)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(16)
     const settings = await new ShippingRepository(database, "mock").getSettings()
     expect(settings).toMatchObject({ refreshInterval: 42, retentionDays: 45 })
     const names = await tables(native)

@@ -45,7 +45,7 @@ describe("migration 015 ops-weather-calendar-policy", () => {
   it("applies on fresh database to schema v15 with six new tables (idempotent)", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(15)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(16)
     const names = tableNames(native)
     expect(V15_TABLES.every(t => names.has(t))).toBe(true)
 
@@ -65,7 +65,7 @@ describe("migration 015 ops-weather-calendar-policy", () => {
     native.prepare("UPDATE app_metadata SET schema_version = 14").run()
 
     await initShippingTables(database, "mock")
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(15)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(16)
     expect(V15_TABLES.every(t => tableNames(native).has(t))).toBe(true)
     const port = native.prepare("SELECT id FROM ports WHERE id = 'p-test'").get()
     expect(port).toEqual({ id: "p-test" })
