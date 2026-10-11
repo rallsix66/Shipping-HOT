@@ -1,9 +1,14 @@
 # R1.5-5 日历 / 大促图层验收（2026-10-11）
 
-结论：**已实现（限定范围），等待 dots 审查**。替代本文件上一版的「BLOCKED（未实现）」结论（`e6b77ce`）。dots 10:59 批准在 9.29 计划 + ADR-008 范围内实现，不另需用户授权。
+结论：**已实现（限定范围），等待 dots 审查**。规则覆盖并不完整：E-R01/02/03/05 生成了具体日期；E-R04/E-R06 只生成节日锚点，促销窗口仍待定，不能说六条规则已经完全覆盖。替代本文件上一版的「BLOCKED（未实现）」结论（`e6b77ce`）。dots 10:59 批准在 9.29 计划 + ADR-008 范围内实现，不另需用户授权。
 
 - 代码 SHA：`339e49e39b7c433b6fdcb17f14680db180f5dea5`（实现）+ `fdfe238caa67e338fc96beb59955c707e60bd8fb`（translation.test 迁移版本期望 15→16）。门禁与浏览器验收都绑定在干净的 `fdfe238…`。
 - 没有登录卖家后台，没有新增信源，没有调用 LLM，也没有抓取上游。
+
+## 0. dots 审查 P2 修复（代码 `5a7c9d2db3ff6bc5702d3c8fbc705208c0ca0a0e`）
+1. **XX-E03 域名校验**：删除原来的 `hostname.includes("shopee.")`，改为按国家精确映射域名。信源目录只给出 `shopee.ph` 这一个例子，所以 XX-E03 只接受 PH 记录配 `shopee.ph`，子域名必须以完整标签结尾（`*.shopee.ph`）。VN/TH/MY/ID 的 Shopee 国家域名目录没写，XX-E03 对这四国返回 not_applicable；这些国家可以用 XX-E01/E04（仅 VN）或 manual_url。manual_url 始终记为人工证据，显示「已由人工证据确认」，不会冒充 XX-E03。测试覆盖：假域名 `shopee.evil.example`、`evilshopee.ph`、`shopee.ph.evil.example`；错国家域名（PH 记录配 shopee.vn、TH 记录配 shopee.ph）；有效域名 `shopee.ph`。
+2. **人工编辑后的确认状态**：对已确认记录改了日期或标题后，状态退回待确认，旧证据只作为 `previousConfirmation` 历史保留，不再算作已确认；没有实际变化的编辑不会降级。新增测试「确认 → 改日期 → 再生成」：人工改动保留，旧确认失效。只改了仓库层，没有新增 UI/API。
+3. 测试从 9 项增加到 11 项。之前的生成/API/24-24 证据（`fdfe238`）没有重跑：本轮改动只涉及确认校验和编辑逻辑，那次运行中唯一的确认用的是 XX-E01（shopee.vn），新规则下依然有效。
 
 ## 1. 实现范围
 | 项 | 做法 |
@@ -48,7 +53,16 @@ install --frozen-lockfile 0 · build 0 · typecheck 0 · lint 0 · vitest 0（96
 - `audit-inventory.sh .` exit 0，**它只是目录/规则/Git/Markdown 清单脚本，不是密钥扫描或安全审计**；
 - 人工复核新增文件：没有密钥。
 
-同一 SHA 上第一次 vitest 因 translation.test 的版本期望仍为 15 而失败（`339e49e` 上 exit 1），已在 `fdfe238` 修复后整组重跑。
+**更正，按原始 exit code 记录**：
+- vitest 第一次失败发生在 `339e49e`（exit 1，原因是 translation.test 的版本期望还是 15）；修复后整组重跑在**另一个** SHA `fdfe238` 上才通过。两次不是同一个 SHA。
+- 自写扫描的 exit 1 是 rg 的「无匹配」，不代表扫描失败（rg 的约定：0 = 有匹配，1 = 无匹配，2 = 出错）。
+- `audit-inventory.sh` 在 `fdfe238` 上第一次调用漏了 project-root 参数，exit 64（只打印 usage）；改正为 `audit-inventory.sh .` 后才是 exit 0。
+
+### P2 修复门禁（干净 SHA `5a7c9d2db3ff6bc5702d3c8fbc705208c0ca0a0e`，`docs/evidence/gate-5a7c9d2/`）
+install 0 · build 0 · typecheck 0 · lint 0 · vitest 0（782 通过 / 3 跳过）· smoke:p0-native 0 · S7 0。
+- `audit-inventory.sh .`：一次调用即 exit 0，只是清单脚本，不是密钥扫描；
+- 自写扫描（rg，`git diff 5af8056..5a7c9d2`）原始 exit 1，表示无匹配；
+- 人工复核：没有密钥。
 
 ## 6. 限制 / 未做
 - 生成和确认目前只能通过 API 调用；页面只读展示，没有确认表单。人工录入和人工编辑只有仓库方法（经测试覆盖），没有页面入口。
