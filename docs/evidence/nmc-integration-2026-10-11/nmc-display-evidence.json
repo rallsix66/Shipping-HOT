@@ -1,0 +1,142 @@
+{
+  "kind": "CN-W01/CN-W02 display verification",
+  "ranAt": "2026-10-11T01:38:53.844Z",
+  "gitHead": "a6c00bc70de78a0e4d0a129947f69c8878445aa0",
+  "workspaceClean": true,
+  "liveRunGitHead": "a6c00bc70de78a0e4d0a129947f69c8878445aa0",
+  "runDir": "D:\\try one\\Shipping HOT\\.tmp\\nmc-live-a6c00bc",
+  "verdict": "PASS",
+  "coverage": {
+    "service": "production build dist/output/server (Nitro), Runtime disabled, SHIPPING_WEATHER_ALERT_PROVIDER unset",
+    "api": [
+      "GET /api/shipping/feed",
+      "GET /api/shipping"
+    ],
+    "browser": "system Chrome headless over CDP: /feed"
+  },
+  "api": {
+    "feedStatus": 200,
+    "indexStatus": 200,
+    "nmcItems": 6,
+    "before": {
+      "feedItems": 6,
+      "providerUsageRows": 0,
+      "providerUsageRequests": 0,
+      "runtimeRows": -1,
+      "feedHash": "weather-alert:nmc:typhoon_bulletin:2026-10-11T10:2530,weather-alert:nmc:typhoon_flash:2026-1873:3019,weather-alert:nmc:warning_downpour:2026-09-10T06:2836,weather-alert:nmc:warning_index:2026-10-05T06:2868,weather-alert:nmc:warning_strong_convection:2026-09-29T18:3059,weather-alert:nmc:warning_typhoon:2026-09-06T10:2955"
+    },
+    "after": {
+      "feedItems": 6,
+      "providerUsageRows": 0,
+      "providerUsageRequests": 0,
+      "runtimeRows": -1,
+      "feedHash": "weather-alert:nmc:typhoon_bulletin:2026-10-11T10:2530,weather-alert:nmc:typhoon_flash:2026-1873:3019,weather-alert:nmc:warning_downpour:2026-09-10T06:2836,weather-alert:nmc:warning_index:2026-10-05T06:2868,weather-alert:nmc:warning_strong_convection:2026-09-29T18:3059,weather-alert:nmc:warning_typhoon:2026-09-06T10:2955"
+    }
+  },
+  "browser": {
+    "status": "RAN",
+    "chrome": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    "url": "http://127.0.0.1:4493/feed",
+    "rawBlocks": 6,
+    "countryRows": "发布国家 CN\n6",
+    "screenshot": "feed-nmc.png",
+    "excerpt": "unavailable / unavailable / unavailable\n\n信息资讯\n\n航运资讯\n\n普通航运资讯留在 Feed；明确运营影响的官方公告和预警才会进入 HOT。\n\n分类\n全部\n6\n航运新闻\n0\n船公司通知\n0\n天气\n6\n港口通知\n0\n来源\n官方\n6\n第三方\n0\n模拟数据\n0\n官方预警·发布国家（实验）\n发布国家 CN\n6\n台风快讯（10月11日08时27分）\n打开来源\n\n已接收中央气象台（中国）官方产品原文：台风快讯（栏目：台风快讯）。发布不代表当前生效；生命周期与有效期未知，时区未确认，原始等级未映射，未关联港口，无影响推断。原文：时 间： 11 日 08 时 命 名： “小熊”，KOGUMA 编 号： 2629 号 中心位置： 北纬24.5度、东经148.2度 强度等级： 超强台风级 最大风力： 17级， 58米/秒（约209公里/小时） 中心气压： 925 hPa 参考位置： 距离日本东京东南方向约1490公里 风圈半径： 七级风圈半径 东北方向350公里；东南方向320公里；西南方向250公里；西北方向280公里 十级风圈半径 东北方向120公里；东南方向120公里；西南方向100公里；西北方向…\n\n查看详情\n打开来源\n天气\nnmc · 官方 · 报告\n最新\n发布国家：CN\n首次接收 2026/10/11 09:38\nofficial\nissuing_country_CN\nlifecycle_unknown\nvalidity_pending_confirmation\ntimezone_unconfirmed\nstandardized_severity_unmapped\nno_port_association\n官方预警\n预警状态：未知\n有效性待确认\n时区未确认\n生命周期未知\n官方原始发布时间（原文文本，时区未确认，未换算）：10月11日08时27分 · 期号 2026年总1873期\n下次更新时间（不等于有效期）：11日11时30分\n原文颜色等级：未提供 · 台风强度等级原文：超强台风级 · 中心位置原文：北纬24.5度、东经148.2度（均未映射为系统级别，不代表港口覆盖）\n涉及台风对象（各自原文分段）：“小熊”，KOGUMA\n关联港口：0 · 来源 https://www.nmc.cn/publish/typhoon/typhoon_new.html · 身份 typhoon_flash:2026-1873 · 最近抓取 2026/10/11 09:38 · 首次接收 2026/10/11 09:38\n原文：时 间： 11 日 08 时 命 名： “小熊”，KOGUMA 编 号： 2629 号 中心位置： 北纬24.5度、东经148.2度 强度等级： 超强台风级 最大风力： 17级， 58米/秒（约209公里/小时） 中心气压： 925 hPa 参考位置： 距离日本东京东南方向约1490公里 风圈半径： 七级风圈半径 东北方向350公里；东南方向320公里；西南方向250公里；西北方向280公里 十级风圈半径 东北方向120公里；东南方向120公里；西南方向100公里；西北方向100公里 十二级风圈半径 东北方向70公里；东南方向70公里；西南方向70公里；西北方向70公里 预报结论： “小熊”将以每小时20公里左右的速度向北偏西方向移动，强度逐渐减弱 （下次更新时间为11日11时30分）\n台风公报（2026 年 10 月 11 日 10 时）\n打开来源\n\n已接收中央气象台（中国）官方产品原文：台风公报（栏目：台风公报）。发布不代表当前生效；生命周期与有效期未知，时区未确认，原始等级未映射，未关联港口，无影响推断。原文：“小熊”向北偏西方向移动 今年第29号台风“小熊”（超强台风级）的中心今天（11日）上午8点钟位于日本东京东南方向约1490公里的西北太平洋洋面上，就是北纬24.5度，东经148.2度，中心附近最大风力17级（58米/秒），中心最低气压为925百帕，七级风圈半径250-350公里，十级风圈半径1"
+  },
+  "checks": [
+    {
+      "id": "server_healthy",
+      "pass": true,
+      "detail": "http://127.0.0.1:4493"
+    },
+    {
+      "id": "api_feed_returns_records",
+      "pass": true,
+      "detail": "6 vs stored 6"
+    },
+    {
+      "id": "api_records_unknown_lifecycle",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "api_records_raw_times",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "api_records_level_unmapped",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "api_records_no_port",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "api_historical_and_lift_match_live",
+      "pass": true,
+      "detail": "historical 4 lift 4"
+    },
+    {
+      "id": "get_no_side_effects",
+      "pass": true,
+      "detail": "before {\"feedItems\":6,\"providerUsageRows\":0,\"providerUsageRequests\":0,\"runtimeRows\":-1,\"feedHash\":\"weather-alert:nmc:typhoon_bulletin:2026-10-11T10:2530,weather-alert: after {\"feedItems\":6,\"providerUsageRows\":0,\"providerUsageRequests\":0,\"runtimeRows\":-1,\"feedHash\":\"weather-alert:nmc:typhoon_bulletin:2026-10-11T10:2530,weather-alert:"
+    },
+    {
+      "id": "browser_feed_rendered",
+      "pass": true,
+      "detail": "/feed contains 中央气象台"
+    },
+    {
+      "id": "browser_summary_wording",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_no_active_claim",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_lifecycle_timezone_chips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_raw_times",
+      "pass": true,
+      "detail": "2026 年 09 月 29 日 18 时"
+    },
+    {
+      "id": "browser_historical_notice",
+      "pass": true,
+      "detail": "4"
+    },
+    {
+      "id": "browser_lift_statement",
+      "pass": true,
+      "detail": "中央气象台9月29日18时解除强对流天气蓝色预警"
+    },
+    {
+      "id": "browser_raw_levels_unmapped",
+      "pass": true,
+      "detail": "超强台风级"
+    },
+    {
+      "id": "browser_zero_port",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_grouped_by_issuing_country",
+      "pass": true,
+      "detail": "发布国家 CN\n6"
+    },
+    {
+      "id": "browser_raw_block_per_record",
+      "pass": true,
+      "detail": "6 raw blocks"
+    }
+  ]
+}

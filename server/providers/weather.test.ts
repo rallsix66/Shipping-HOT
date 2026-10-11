@@ -8,7 +8,7 @@ function weatherPayload(url: string, severe = true) {
   const wind = times.map((_, index) => severe ? index < 25 ? 20 : index < 73 ? 50 : 70 : 20)
   return url.includes("marine-api")
     ? { current: { time: times[0], wave_height: 1, wave_direction: 90, swell_wave_height: 1, swell_wave_direction: 180, swell_wave_period: 8 }, hourly: { time: times, wave_height: wave, wave_direction: times.map(() => 90), swell_wave_height: times.map((_, index) => index < 25 ? 1 : index < 73 ? 2 : 3), swell_wave_direction: times.map(() => 180), swell_wave_period: times.map((_, index) => index < 25 ? 8 : index < 73 ? 10 : 12) } }
-    : { current: { time: times[0], wind_speed_10m: 20, wind_gusts_10m: 25 }, hourly: { time: times, wind_speed_10m: wind, wind_gusts_10m: wind.map(value => value + 5) } }
+    : { current: { time: times[0], wind_speed_10m: 20, wind_gusts_10m: 25, precipitation: 0, visibility: 8000 }, hourly: { time: times, wind_speed_10m: wind, wind_gusts_10m: wind.map(value => value + 5), precipitation: times.map((_, index) => index % 24), visibility: times.map(() => 8000) } }
 }
 
 describe("open-meteo weather intelligence", () => {
@@ -69,6 +69,44 @@ describe("open-meteo weather intelligence", () => {
     await provider.getFeedItems([mockPorts[0]])
     expect(urls).toHaveLength(2)
     expect(urls.every(url => url.includes("latitude=1.23") && url.includes("longitude=4.56"))).toBe(true)
+  })
+
+  it("requests land forecast fields and exposes persistence batch for SQLite", async () => {
+    const urls: string[] = []
+    const provider = createOpenMeteoWeatherProvider({
+      // fixture hours are 2026-08-15; rows are retained relative to the provider clock
+      now: () => new Date("2026-08-15T00:00:00.000Z"),
+      fetcher: async (url) => {
+        urls.push(url)
+        return { ok: true, status: 200, json: async () => weatherPayload(url) }
+      },
+    })
+    await provider.getFeedItems([mockPorts[0]])
+    const forecastUrl = urls.find(url => url.includes("/v1/forecast") && !url.includes("marine-api"))
+    expect(forecastUrl).toBeDefined()
+    expect(forecastUrl).toContain("precipitation")
+    expect(forecastUrl).toContain("visibility")
+    const batch = provider.drainForecastPersistence?.()
+    expect(batch?.forecastsByPortId.get("port-shekou")?.length).toBeGreaterThan(0)
+    expect(batch?.forecastsByPortId.get("port-shekou")?.[0]).toMatchObject({ precipitationMm: expect.any(Number), visibilityM: expect.any(Number) })
+    expect(batch?.impactsByPortId.get("port-shekou")?.length).toBeGreaterThan(0)
+  })
+
+  it("keeps persistence batch on TTL cache hits until ack", async () => {
+    let now = new Date("2026-08-15T00:00:00.000Z")
+    const provider = createOpenMeteoWeatherProvider({
+      now: () => now,
+      minIntervalMs: 30 * 60 * 1000,
+      fetcher: async url => ({ ok: true, status: 200, json: async () => weatherPayload(url) }),
+    })
+    await provider.getFeedItems([mockPorts[0]])
+    const firstBatch = provider.drainForecastPersistence?.()
+    expect(firstBatch?.forecastsByPortId.get("port-shekou")?.length).toBeGreaterThan(0)
+    provider.ackForecastPersistence?.()
+    now = new Date("2026-08-15T00:10:00.000Z")
+    await provider.getFeedItems([mockPorts[0]])
+    const cachedBatch = provider.drainForecastPersistence?.()
+    expect(cachedBatch?.forecastsByPortId.get("port-shekou")?.length).toBeGreaterThan(0)
   })
 
   it("records Open-Meteo fetchedAt after response parsing and keeps it on cache hits", async () => {

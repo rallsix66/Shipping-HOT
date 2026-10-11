@@ -1,0 +1,383 @@
+{
+  "kind": "r1-5-1-live-sync",
+  "runDir": ".tmp/r1-5-1-live-2026-10-10T03-40-07-858Z",
+  "databasePath": ".tmp/r1-5-1-live-2026-10-10T03-40-07-858Z/.data/shipping-hot-v3.sqlite3",
+  "syncStartedAt": "2026-10-10T03:40:08.507Z",
+  "syncCompletedAt": "2026-10-10T03:40:14.081Z",
+  "jobResults": {
+    "tropical-cyclone-sync": {
+      "status": "success",
+      "recordsRead": 2,
+      "recordsWritten": 2,
+      "sourceUpdatedAt": "2026-10-10T03:40:08.507Z"
+    },
+    "weather-sync": {
+      "status": "success",
+      "recordsRead": 2,
+      "recordsWritten": 2,
+      "sourceUpdatedAt": "2026-10-10T03:30:00.000Z"
+    }
+  },
+  "egress": {
+    "requests": 19,
+    "nonOk": [],
+    "byHostStatus": {
+      "www.jma.go.jp 200": 3,
+      "marine-api.open-meteo.com 200": 8,
+      "api.open-meteo.com 200": 8
+    }
+  },
+  "sevenDayWindow": {
+    "note": "Hourly counts use horizon=hourly only within [now-1h, now+7d]; current rows are reported separately and never pad hourlyReturned.",
+    "start": "2026-10-10T02:40:08.507Z",
+    "end": "2026-10-17T03:40:08.507Z"
+  },
+  "ports": {
+    "port-shekou": {
+      "unlocode": "CNSHK",
+      "sqlite": {
+        "totalRows": 169,
+        "hourlyRows": 168,
+        "currentRows": 1,
+        "hourlyInSevenDayWindow": 165,
+        "firstHourlyInWindow": "2026-10-10T03:00:00.000Z",
+        "lastHourlyInWindow": "2026-10-16T23:00:00.000Z",
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingInWindow": {
+          "windGust": 0,
+          "wave": 0,
+          "precip": 0,
+          "visibility": 0
+        }
+      },
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T02:40:08.507Z",
+          "end": "2026-10-17T03:40:08.507Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T03:00:00.000Z",
+          "lastInstant": "2026-10-16T23:00:00.000Z",
+          "totalReturned": 166,
+          "hourlyReturned": 165,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      },
+      "panelState": "partial_rule_coverage"
+    },
+    "port-yantian": {
+      "unlocode": "CNYTN",
+      "sqlite": {
+        "totalRows": 169,
+        "hourlyRows": 168,
+        "currentRows": 1,
+        "hourlyInSevenDayWindow": 165,
+        "firstHourlyInWindow": "2026-10-10T03:00:00.000Z",
+        "lastHourlyInWindow": "2026-10-16T23:00:00.000Z",
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingInWindow": {
+          "windGust": 0,
+          "wave": 0,
+          "precip": 0,
+          "visibility": 0
+        }
+      },
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T02:40:08.507Z",
+          "end": "2026-10-17T03:40:08.507Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T03:00:00.000Z",
+          "lastInstant": "2026-10-16T23:00:00.000Z",
+          "totalReturned": 166,
+          "hourlyReturned": 165,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      },
+      "panelState": "partial_rule_coverage"
+    },
+    "port-nansha": {
+      "unlocode": "CNNSA",
+      "sqlite": {
+        "totalRows": 169,
+        "hourlyRows": 168,
+        "currentRows": 1,
+        "hourlyInSevenDayWindow": 165,
+        "firstHourlyInWindow": "2026-10-10T03:00:00.000Z",
+        "lastHourlyInWindow": "2026-10-16T23:00:00.000Z",
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingInWindow": {
+          "windGust": 0,
+          "wave": 0,
+          "precip": 0,
+          "visibility": 0
+        }
+      },
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T02:40:08.507Z",
+          "end": "2026-10-17T03:40:08.507Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T03:00:00.000Z",
+          "lastInstant": "2026-10-16T23:00:00.000Z",
+          "totalReturned": 166,
+          "hourlyReturned": 165,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      },
+      "panelState": "partial_rule_coverage"
+    },
+    "port-laem-chabang": {
+      "unlocode": "THLCH",
+      "sqlite": {
+        "totalRows": 169,
+        "hourlyRows": 168,
+        "currentRows": 1,
+        "hourlyInSevenDayWindow": 165,
+        "firstHourlyInWindow": "2026-10-10T03:00:00.000Z",
+        "lastHourlyInWindow": "2026-10-16T23:00:00.000Z",
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingInWindow": {
+          "windGust": 0,
+          "wave": 0,
+          "precip": 0,
+          "visibility": 0
+        }
+      },
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T02:40:08.507Z",
+          "end": "2026-10-17T03:40:08.507Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T03:00:00.000Z",
+          "lastInstant": "2026-10-16T23:00:00.000Z",
+          "totalReturned": 166,
+          "hourlyReturned": 165,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      },
+      "panelState": "partial_rule_coverage"
+    },
+    "port-klang": {
+      "unlocode": "MYPKG",
+      "sqlite": {
+        "totalRows": 169,
+        "hourlyRows": 168,
+        "currentRows": 1,
+        "hourlyInSevenDayWindow": 165,
+        "firstHourlyInWindow": "2026-10-10T03:00:00.000Z",
+        "lastHourlyInWindow": "2026-10-16T23:00:00.000Z",
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingInWindow": {
+          "windGust": 0,
+          "wave": 0,
+          "precip": 0,
+          "visibility": 0
+        }
+      },
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T02:40:08.507Z",
+          "end": "2026-10-17T03:40:08.507Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T03:00:00.000Z",
+          "lastInstant": "2026-10-16T23:00:00.000Z",
+          "totalReturned": 166,
+          "hourlyReturned": 165,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      },
+      "panelState": "partial_rule_coverage"
+    },
+    "port-manila": {
+      "unlocode": "PHMNL",
+      "sqlite": {
+        "totalRows": 169,
+        "hourlyRows": 168,
+        "currentRows": 1,
+        "hourlyInSevenDayWindow": 165,
+        "firstHourlyInWindow": "2026-10-10T03:00:00.000Z",
+        "lastHourlyInWindow": "2026-10-16T23:00:00.000Z",
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingInWindow": {
+          "windGust": 0,
+          "wave": 0,
+          "precip": 0,
+          "visibility": 0
+        }
+      },
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T02:40:08.507Z",
+          "end": "2026-10-17T03:40:08.507Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T03:00:00.000Z",
+          "lastInstant": "2026-10-16T23:00:00.000Z",
+          "totalReturned": 166,
+          "hourlyReturned": 165,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      },
+      "panelState": "partial_rule_coverage"
+    },
+    "port-jakarta": {
+      "unlocode": "IDJKT",
+      "sqlite": {
+        "totalRows": 169,
+        "hourlyRows": 168,
+        "currentRows": 1,
+        "hourlyInSevenDayWindow": 165,
+        "firstHourlyInWindow": "2026-10-10T03:00:00.000Z",
+        "lastHourlyInWindow": "2026-10-16T23:00:00.000Z",
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingInWindow": {
+          "windGust": 0,
+          "wave": 0,
+          "precip": 0,
+          "visibility": 0
+        }
+      },
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T02:40:08.507Z",
+          "end": "2026-10-17T03:40:08.507Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T03:00:00.000Z",
+          "lastInstant": "2026-10-16T23:00:00.000Z",
+          "totalReturned": 166,
+          "hourlyReturned": 165,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 0,
+          "precipitation": 0,
+          "visibility": 0
+        }
+      },
+      "panelState": "partial_rule_coverage"
+    },
+    "port-ho-chi-minh": {
+      "unlocode": "VNSGN",
+      "sqlite": {
+        "totalRows": 169,
+        "hourlyRows": 168,
+        "currentRows": 1,
+        "hourlyInSevenDayWindow": 165,
+        "firstHourlyInWindow": "2026-10-10T03:00:00.000Z",
+        "lastHourlyInWindow": "2026-10-16T23:00:00.000Z",
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingInWindow": {
+          "windGust": 0,
+          "wave": 165,
+          "precip": 0,
+          "visibility": 0
+        }
+      },
+      "forecastMeta": {
+        "targetWindow": {
+          "start": "2026-10-10T02:40:08.507Z",
+          "end": "2026-10-17T03:40:08.507Z"
+        },
+        "actualCoverage": {
+          "firstInstant": "2026-10-10T03:00:00.000Z",
+          "lastInstant": "2026-10-16T23:00:00.000Z",
+          "totalReturned": 166,
+          "hourlyReturned": 165,
+          "currentReturned": 1
+        },
+        "sourceId": "open-meteo-marine",
+        "fetchedAt": "2026-10-10T03:40:08.507Z",
+        "missingCounts": {
+          "windGust": 0,
+          "wave": 165,
+          "precipitation": 0,
+          "visibility": 0
+        },
+        "marineCoverageNote": "Open-Meteo marine（cell_selection=sea）在胡志明市坐标未返回浪高/涌浪；非填 0，WR-S02 等海况分支可能缺测。"
+      },
+      "panelState": "partial_rule_coverage"
+    }
+  },
+  "jma": {
+    "syncMeta": {
+      "sourceId": "jma-typhoon",
+      "lastCheckedAt": "2026-10-10T03:40:08.507Z",
+      "lastFullSuccessAt": "2026-10-10T03:40:08.507Z",
+      "lastPathFetchAt": "2026-10-10T03:40:08.507Z",
+      "lastSuccessAt": "2026-10-10T03:40:08.507Z",
+      "dataValidUntil": "2026-10-10T09:40:08.507Z",
+      "outcome": "ok",
+      "stale": false
+    },
+    "storedCycloneCount": 2,
+    "storedCycloneIds": [
+      "tc-jma-TC2634",
+      "tc-jma-TC2635"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+HEAD 50bad03ee3560c7ff8fb398bee170b9b2368e7bd started 2026-10-10T14:34:32.2110426+08:00 node v24.15.0 pnpm 10.30.3 os Microsoft Windows NT 10.0.19045.0
+install exit=0
+build exit=0
+typecheck exit=0
+lint exit=0
+vitest exit=0
+smoke exit=0
+s7 exit=0
+live exit=2
+audit exit=0
+status-after: []
+DONE
+live-attempt2 exit=1
+live-attempt3 exit=1
+live-attempt4 exit=0
+note: attempt1 exit=2 (Laem Chabang api.open-meteo.com 'fetch failed', VNSGN ADR-009 mapping passed); attempt2 exit=1 and attempt3 exit=1 = upstream/network fetch failures (JMA, Jakarta, then all sources) on this machine - not evidence; attempt4 exit=0 PASS 95/95 is the evidence run (.tmp/r1-5-1-live-2026-10-10T06-42-03-941Z). Same SHA, clean tree, no code change between attempts.

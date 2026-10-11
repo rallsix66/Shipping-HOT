@@ -1,0 +1,12 @@
+HEAD be5f2e4b14258404f769eb68ff07130cc2361732 started 2026-10-10T11:38:40.2860623+08:00
+install exit=0
+build exit=0
+typecheck exit=0
+lint exit=0
+vitest exit=0
+smoke exit=0
+s7 exit=0
+live exit=2
+audit exit=64
+status: 
+audit(rerun with root) exit=0

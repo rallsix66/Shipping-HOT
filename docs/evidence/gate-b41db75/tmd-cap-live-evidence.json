@@ -1,0 +1,148 @@
+{
+  "probe": "TH-W01 TMD CAP live (isolated)",
+  "gitHead": "b41db750fb85eecc16accae25965cf149e503e93",
+  "workspaceClean": true,
+  "ranAt": "2026-10-10T07:02:58.016Z",
+  "entry": "https://www.tmd.go.th/en/api/xml/CAP",
+  "format": "cap_index",
+  "classification": "alerts_present",
+  "egress": [
+    {
+      "url": "https://www.tmd.go.th/en/api/xml/CAP",
+      "requestedRedirect": "follow (fetch default)",
+      "status": 200,
+      "finalUrl": "https://www.tmd.go.th/en/api/xml/CAP",
+      "redirected": false,
+      "bytes": 9846,
+      "at": "2026-10-10T07:02:58.077Z"
+    },
+    {
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261010062912_2.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261010062912_2.xml",
+      "redirected": false,
+      "bytes": 228044,
+      "at": "2026-10-10T07:02:59.473Z"
+    },
+    {
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261010061852_2.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261010061852_2.xml",
+      "redirected": false,
+      "bytes": 29763,
+      "at": "2026-10-10T07:03:00.040Z"
+    },
+    {
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261009164949_2.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261009164949_2.xml",
+      "redirected": false,
+      "bytes": 138497,
+      "at": "2026-10-10T07:03:00.221Z"
+    },
+    {
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261009050353_2.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261009050353_2.xml",
+      "redirected": false,
+      "bytes": 106983,
+      "at": "2026-10-10T07:03:00.427Z"
+    },
+    {
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261008161413_2.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261008161413_2.xml",
+      "redirected": false,
+      "bytes": 67089,
+      "at": "2026-10-10T07:03:00.636Z"
+    },
+    {
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261008054542_2.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261008054542_2.xml",
+      "redirected": false,
+      "bytes": 69617,
+      "at": "2026-10-10T07:03:00.817Z"
+    },
+    {
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261007164420_2.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261007164420_2.xml",
+      "redirected": false,
+      "bytes": 93728,
+      "at": "2026-10-10T07:03:00.995Z"
+    }
+  ],
+  "redirectSummary": {
+    "requests": 8,
+    "bodyRequestsWithRedirectError": 7,
+    "bodyRequests": 7,
+    "redirectedResponses": 0,
+    "finalUrlDiffersFromRequest": 0,
+    "errors": 0
+  },
+  "storedCount": 4,
+  "activeCount": 2,
+  "alerts": [
+    {
+      "alertId": "tmd:TMD20261010061852_2-en",
+      "title": "Very Heavy Rain Risk Area",
+      "severity": "critical",
+      "state": "active",
+      "eventEligibility": true,
+      "sentAt": "2026-10-09T23:00:00.000Z",
+      "expiresAt": "2026-10-10T11:00:00.000Z",
+      "region": "TH-21, TH-22, TH-23, TH-71",
+      "relatedPortIds": [],
+      "sourceUrl": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261010061852_2.xml"
+    },
+    {
+      "alertId": "tmd:TMD20261010062912_2-en",
+      "title": "Heavy Rain Risk Area",
+      "severity": "warning",
+      "state": "active",
+      "eventEligibility": true,
+      "sentAt": "2026-10-09T23:00:00.000Z",
+      "expiresAt": "2026-10-10T11:00:00.000Z",
+      "region": "TH-30, TH-31, TH-32, TH-33, TH-34, TH-36, TH-38, TH-40, TH-42, TH-47, TH-48, TH-50, TH-51, TH-52, TH-54, TH-55, TH-56, TH-57, TH-62, TH-63, TH-64, TH-67, TH-76, TH-77, TH-80, TH-81, TH-82, TH-83, TH-84, TH-85, TH-86, TH-90, TH-92, TH-93, TH-96",
+      "relatedPortIds": [],
+      "sourceUrl": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261010062912_2.xml"
+    },
+    {
+      "alertId": "tmd:TMD20261009164949_2-en",
+      "title": "Heavy Rain Risk Area",
+      "severity": "info",
+      "state": "expired",
+      "eventEligibility": false,
+      "sentAt": "2026-10-09T09:28:00.000Z",
+      "expiresAt": "2026-10-09T23:00:00.000Z",
+      "region": "TH-22, TH-23, TH-27, TH-33, TH-34, TH-37, TH-38, TH-48, TH-49, TH-76, TH-77, TH-80, TH-81, TH-82, TH-83, TH-84, TH-90, TH-91, TH-92, TH-93, TH-95, TH-96",
+      "relatedPortIds": [],
+      "sourceUrl": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261009164949_2.xml"
+    },
+    {
+      "alertId": "tmd:TMD20261007164420_2-en",
+      "title": "Heavy Rain Risk Area",
+      "severity": "info",
+      "state": "expired",
+      "eventEligibility": false,
+      "sentAt": "2026-10-07T09:31:00.000Z",
+      "expiresAt": "2026-10-07T23:00:00.000Z",
+      "region": "TH-77, TH-80, TH-81, TH-82, TH-84, TH-85, TH-86, TH-90, TH-93, TH-94, TH-95, TH-96",
+      "relatedPortIds": [],
+      "sourceUrl": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261007164420_2.xml"
+    }
+  ],
+  "laemChabangPanel": {
+    "officialAlerts": 0,
+    "officialAlertImpacts": []
+  },
+  "scope": "parser → provider → isolated SQLite → panel service layer; not HTTP route, not browser"
+}

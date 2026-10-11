@@ -362,6 +362,97 @@ export interface WeatherDetail {
   alertExpiresAt?: string
   alertUrgency?: string
   alertCertainty?: string
+  /** Validity of the official record; "unknown" when the source times cannot be interpreted (MY-W01). */
+  validityStatus?: "unknown"
+  /** Source datetimes carry no confirmed timezone (MY-W01); raw strings are kept and never converted. */
+  timezoneStatus?: "unconfirmed"
+  /** The source publishes no official severity field. */
+  officialSeverity?: "not_provided"
+  /** publishedAt is the time the record was first received, not an official issue time. */
+  timeBasis?: "received_at"
+  /** Raw official strings exactly as received (MY-W01 data.gov.my warning row). */
+  alertRaw?: WeatherAlertRaw
+  /** Lifecycle (update/replace/cancel) of the official notice is not published structurally (VN-W01). */
+  lifecycleStatus?: "unknown"
+  /** Original official risk level text exactly as stated by the source (VN-W01); never a system/CAP level. */
+  originalRiskLevel?: string
+  /** The original level is not mapped to any standardized (CAP/system) severity. */
+  standardizedSeverity?: "unmapped"
+  /** Raw official notice fields (VN-W01 NCHMF HTML article). */
+  noticeRaw?: OfficialNoticeRaw
+  /** Raw official product fields (CN-W01/CN-W02 NMC HTML pages). */
+  cnNoticeRaw?: CnNoticeRaw
+}
+
+/** CN-W01/CN-W02 NMC page product, raw text only (no timezone, validity, severity mapping or port coverage). */
+export interface CnNoticeRaw {
+  column: string
+  productName: string
+  pageTitle: string
+  /** Fixed column + normalized raw publish-time text, or (flash report) the full annual issue number. */
+  identityKey: string
+  identityBasis: "issue_number" | "publish_time"
+  authorText: string | null
+  numberText: string | null
+  ctitleText: string | null
+  /** Raw publish-time text exactly as printed; the page states no timezone. */
+  publishTimeText: string | null
+  /** "下次更新时间" raw text; NOT a validity/expiry time. */
+  nextIssueText: string | null
+  /** Page notice that the column shows past products (no new product in this period). */
+  historicalProductNotice: string | null
+  /** Only from an explicit official main sentence; marks this item only, revokes nothing else. */
+  liftStatement: { sentence: string, object: string } | null
+  /** Raw colour word from the main sentence; never mapped to a system/CAP severity. */
+  rawColorLevel: string | null
+  typhoonIntensityText: string | null
+  centerPositionText: string | null
+  typhoonObjects: { object: string, text: string }[]
+  bodyText: string
+  bodyTruncated: boolean
+  contentHash: string
+  sourceUrl: string
+  fetchedAt: string
+  firstReceivedAt: string
+  contentUpdatedAt?: string
+}
+
+export interface OfficialNoticeRaw {
+  postId: string
+  title: string
+  listTitle: string
+  /** List-page time label, raw text (no timezone assumed). */
+  listTimeText: string | null
+  /** Body "issued at" line, raw text (no timezone assumed). */
+  bodyPublishText: string | null
+  /** Body "next issue at" line, raw text; NOT a validity/expiry time. */
+  nextIssueText: string | null
+  /** Body line stating the original risk level, raw text. */
+  originalLevelText: string | null
+  bodyText: string
+  bodyTruncated: boolean
+  contentHash: string
+  sourceUrl: string
+  listUrl: string
+  fetchedAt: string
+  firstReceivedAt: string
+  contentUpdatedAt?: string
+}
+
+export interface WeatherAlertRaw {
+  issued: string | null
+  validFrom: string | null
+  validTo: string | null
+  titleEn: string
+  titleBm?: string
+  headingEn?: string
+  headingBm?: string
+  textEn?: string
+  textBm?: string
+  instructionEn?: string
+  instructionBm?: string
+  sourceUrl: string
+  fetchedAt: string
 }
 
 export interface WeatherWindow {
@@ -382,6 +473,270 @@ export interface WeatherWindows {
   h24: WeatherWindow
   h72: WeatherWindow
   d7: WeatherWindow
+}
+
+export interface PortWeatherForecastRow {
+  id: string
+  portId: string
+  unlocode?: string
+  forecastAt: string
+  horizon: "hourly" | "current"
+  waveHeightM?: number
+  swellWaveHeightM?: number
+  windSpeedKmh?: number
+  windGustKmh?: number
+  precipitationMm?: number
+  visibilityM?: number
+  sourceId: string
+  fetchedAt: string
+}
+
+export interface PortWeatherImpactRow {
+  id: string
+  portId: string
+  validFrom: string
+  validUntil: string
+  ruleId: string
+  severity: Severity
+  status: "potential"
+  provenance: "system"
+  summaryZh: string
+  inputValues: Record<string, number>
+  computedAt: string
+}
+
+export interface PortWeatherOfficialAlertSummary {
+  id: string
+  title: string
+  summary: string
+  severity: Severity
+  publishedAt: string
+  sourceId: string
+  provenance?: DataProvenance
+}
+
+export type PortWeatherPanelState =
+  | "ready"
+  | "no_rule_hits"
+  | "partial_rule_coverage"
+  | "data_stale"
+  | "data_empty"
+  | "data_insufficient"
+  | "sync_failed"
+
+export type Precip24hCoverageStatus = "full" | "partial" | "insufficient"
+
+export interface PortWeatherPrecipCoverage {
+  hourlySamplesInWindow: number
+  fullRequired: number
+  partialMinimum: number
+  status: Precip24hCoverageStatus
+  totalMm?: number
+  partialSumMm?: number
+}
+
+export interface PortWeatherRuleCoverageEntry {
+  ruleId: string
+  evaluation: "evaluated" | "unevaluated"
+  reason?: string
+}
+
+export interface PortWeatherPanelNotice {
+  code: PortWeatherPanelState
+  messageZh: string
+  referenceFetchedAt?: string
+  referenceComputedAt?: string
+  showingHistoricalData: boolean
+}
+
+export interface PortWeatherForecastMeta {
+  /** Target evaluation/display window (product policy). */
+  targetWindow: { start: string, end: string }
+  /** Instants actually present in persisted rows returned to the client. */
+  actualCoverage: {
+    firstInstant?: string
+    lastInstant?: string
+    totalReturned: number
+    hourlyReturned: number
+    currentReturned: number
+  }
+  sourceId?: string
+  fetchedAt?: string
+  missingCounts: {
+    windGust: number
+    wave: number
+    precipitation: number
+    visibility: number
+  }
+  /** When Open-Meteo marine `cell_selection=sea` yields no wave/swell at inland coordinates. */
+  marineCoverageNote?: string
+}
+
+export type TropicalCycloneSyncOutcome = "ok" | "ok_empty" | "partial" | "failed" | "not_run"
+
+export interface TropicalCycloneSyncMeta {
+  sourceId: "jma-typhoon" | "jtwc-typhoon-fixture"
+  /** Most recent sync attempt (any outcome). */
+  lastCheckedAt?: string
+  /** Last ok / ok_empty list outcome (full list success). */
+  lastFullSuccessAt?: string
+  /** Last time at least one TC detail was persisted (partial or ok). */
+  lastPathFetchAt?: string
+  /** @deprecated Use lastFullSuccessAt — kept for readers */
+  lastSuccessAt?: string
+  dataValidUntil?: string
+  outcome: TropicalCycloneSyncOutcome
+  errorCode?: string
+  errorMessage?: string
+  failedTcIds?: string[]
+  listInvalidCount?: number
+  stale?: boolean
+}
+
+export interface TropicalCycloneGeoPoint {
+  lat: number
+  lon: number
+  at?: string
+}
+
+export interface TropicalCycloneSummary {
+  id: string
+  jmaId?: string
+  nameEn?: string
+  nameJp?: string
+  typhoonNumber?: string
+  category?: string
+  sourceId: string
+  /** Per-path snapshot time from SQLite row. */
+  pathFetchedAt: string
+  /** @deprecated Alias of pathFetchedAt */
+  fetchedAt: string
+  dissipatedAt?: string
+  lifecycleStatus?: "active" | "dissipated" | "missing_from_list"
+  minDistanceKm?: number
+  wrS03DistanceKm?: number
+  current?: TropicalCycloneGeoPoint & { at: string }
+  trackHistory: TropicalCycloneGeoPoint[]
+  forecast: Array<TropicalCycloneGeoPoint & { at: string }>
+  summaryZh?: string
+}
+
+export interface TropicalCyclonePanelResponse {
+  asOf: string
+  sync: TropicalCycloneSyncMeta
+  cyclones: TropicalCycloneSummary[]
+  activeCount: number
+  historicalSummaryCount: number
+  messageZh: string
+  seasonHintZh?: string
+}
+
+/**
+ * Independent area-reference marine (ADR-009). Never the port's own marine; shown separately and labelled as an
+ * engineering point (not an official representative point, not berth conditions).
+ */
+export type MarineReferenceStatus = "not_run" | "failed" | "fresh" | "stale" | "insufficient"
+
+/** Grid metadata of one reference batch, as returned by the provider (never back-filled from diagnosis docs). */
+export interface MarineReferenceGridMeta {
+  requestedLatitude: number
+  requestedLongitude: number
+  /** Provider-returned grid cell centre; undefined when the provider did not return it. */
+  returnedLatitude?: number
+  returnedLongitude?: number
+  /** Great-circle km between requested point and returned grid cell. */
+  requestedToReturnedKm?: number
+  /** Model requested (Open-Meteo does not echo the resolved model for best_match). */
+  modelRequested: string
+  providerGenerationTimeMs?: number
+  fetchedAt: string
+}
+
+export interface MarineReferenceAttempt {
+  refKey: string
+  attemptedAt: string
+  outcome: "success" | "failed"
+  error?: string
+  grid?: MarineReferenceGridMeta
+}
+
+export interface MarineReferenceSyncMeta {
+  refKey: string
+  lastAttemptAt: string
+  lastAttemptOutcome: "success" | "failed"
+  lastAttemptError?: string
+  lastSuccessAt?: string
+  /** Grid of the last successful batch (the batch whose rows are stored). */
+  grid?: MarineReferenceGridMeta
+}
+
+export interface PortMarineReferencePanel {
+  refKey: string
+  nameZh: string
+  kind: "engineering_reference_point"
+  latitude: number
+  longitude: number
+  model: "best_match"
+  approxDistanceKm: number
+  officialRepresentativePoint: false
+  berthConditions: false
+  labelZh: string
+  sourceId: string
+  fetchedAt?: string
+  hourlyReturned: number
+  hourlyWithMarine: number
+  firstInstant?: string
+  lastInstant?: string
+  maxWaveHeightM?: number
+  forecasts: PortWeatherForecastRow[]
+  /** Currently active reference rule hits; empty unless status is fresh or insufficient. */
+  impacts: PortWeatherImpactRow[]
+  status: MarineReferenceStatus
+  statusNoteZh: string
+  lastAttemptAt?: string
+  lastAttemptOutcome?: "success" | "failed"
+  lastAttemptError?: string
+  lastSuccessAt?: string
+  /** True when the values shown are an older (historical) reference batch, not current. */
+  showingHistoricalData: boolean
+  /** Stored reference rule hits NOT counted as currently active (failed/stale/not_run). */
+  historicalImpactCount: number
+  grid?: MarineReferenceGridMeta
+  coverage: { expectedHours: number, hourlyWithMarine: number, missingHours: number, complete: boolean }
+}
+
+export interface PortWeatherPanelResponse {
+  portId: string
+  state: PortWeatherPanelState
+  asOf: string
+  forecasts: PortWeatherForecastRow[]
+  forecastMeta: PortWeatherForecastMeta
+  impacts: PortWeatherImpactRow[]
+  ruleCoverage: PortWeatherRuleCoverageEntry[]
+  precipCoverage: PortWeatherPrecipCoverage
+  typhoonSync?: TropicalCycloneSyncMeta
+  officialAlerts: PortWeatherOfficialAlertSummary[]
+  /** §4.8 WR-O01/WR-O02 potential impacts derived from current official alerts (⚙ judgement, 🏛 basis). */
+  officialAlertImpacts: import("./weather-impact").WeatherImpactRuleHit[]
+  panelNotice?: PortWeatherPanelNotice
+  displayMeta: {
+    forecastLimit: number
+    impactLimit: number
+    forecastsReturned: number
+    impactsReturned: number
+  }
+  impactMeta: {
+    totalMatched: number
+    returned: number
+    truncated: boolean
+  }
+  sources: {
+    forecast: string
+    impacts: "system"
+    alerts: string
+  }
+  /** Separate area-reference marine block; the port's own marine (forecasts/forecastMeta) is unaffected. */
+  marineReference?: PortMarineReferencePanel
 }
 
 export interface ShippingSnapshot {

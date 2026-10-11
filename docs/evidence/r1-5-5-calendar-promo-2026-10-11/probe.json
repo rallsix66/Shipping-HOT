@@ -1,0 +1,35 @@
+{
+  "opsCalendarColumns": [
+    "id",
+    "country_code",
+    "title",
+    "starts_at",
+    "ends_at",
+    "category",
+    "basis_kind",
+    "basis_ref",
+    "confirmation_status",
+    "rule_id",
+    "notes",
+    "created_at",
+    "updated_at"
+  ],
+  "opsCalendarRows": 0,
+  "/api/shipping/calendar": {
+    "status": 200,
+    "bytes": 1247,
+    "mentions": []
+  },
+  "/api/shipping/calendar/reference": {
+    "status": 200,
+    "bytes": 57959,
+    "mentions": []
+  },
+  "/api/shipping": {
+    "status": 200,
+    "bytes": 23675,
+    "mentions": []
+  },
+  "ranAt": "2026-10-11T02:55:57.716Z",
+  "gitHead": "743889247e9640b7765f29ef2a08cc77a4f8fc03"
+}

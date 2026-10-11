@@ -95,4 +95,52 @@ describe("weather sync job", () => {
   it("exposes the built-in Mock Weather identity", () => {
     expect(MockWeatherProvider.providerId).toBe("mock-weather")
   })
+
+  it("persists forecast batch atomically per port and retries after failure without ack", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    await seedPorts(database)
+    const repository = new ShippingRepository(database, "mock")
+    let acked = false
+    let persistAttempts = 0
+    const forecastRow = {
+      id: "wf-retry",
+      portId: "port-shekou",
+      forecastAt: "2026-08-29T01:00:00.000Z",
+      horizon: "hourly" as const,
+      sourceId: "open-meteo-marine",
+      fetchedAt: "2026-08-29T01:00:00.000Z",
+    }
+    const provider = {
+      providerId: "open-meteo-marine",
+      getFeedItems: async () => [],
+      drainForecastPersistence: () => ({
+        forecastsByPortId: new Map([["port-shekou", [forecastRow]]]),
+        impactsByPortId: new Map([["port-shekou", []]]),
+      }),
+      ackForecastPersistence: () => {
+        acked = true
+      },
+    }
+    const original = repository.replaceWeatherPortBatch.bind(repository)
+    repository.replaceWeatherPortBatch = async (...args) => {
+      persistAttempts += 1
+      if (persistAttempts === 1) throw new Error("injected persistence failure")
+      return original(...args)
+    }
+    const job = createWeatherSyncJob({
+      database,
+      dataMode: "mock",
+      provider,
+      repository,
+      intervalMs: 60_000,
+      now: () => new Date("2026-08-29T01:00:00.000Z"),
+    })
+    await expect(job.run()).rejects.toThrow("injected persistence failure")
+    expect(acked).toBe(false)
+    await job.run()
+    expect(acked).toBe(true)
+    expect(await repository.listWeatherForecastsForPort("port-shekou")).toEqual([expect.objectContaining({ id: "wf-retry" })])
+    native.close()
+  })
 })

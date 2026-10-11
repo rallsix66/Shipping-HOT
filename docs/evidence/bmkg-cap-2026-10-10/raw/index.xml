@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <?xml-stylesheet type="text/xsl" href="/cap/nowcast-rss-style.xsl"?>
+    <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+        <channel>
+            <title>BMKG Weather Alerts</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/en/rss.xml</link>
+            <description>Weather Alerts from BMKG (Indonesia Agency for Meteorology, Climatology, and Geophysics)</description>
+            <atom:link href="https://www.bmkg.go.id/alerts/nowcast/en/rss.xml" rel="self" type="application/rss+xml"/>
+            <language>en</language>
+            <copyright>public domain</copyright>
+            <pubDate>Sat, 10 Oct 2026 06:45:33 +0000</pubDate>
+            <lastBuildDate>Sat, 10 Oct 2026 06:45:33 +0000</lastBuildDate>
+            <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+            
+        <item>
+            <title>Thunderstorm This Afternoon in Sulawesi Utara</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/en/CSR20261010002_alert.xml</link>
+            <description>Thunderstorms and heavy rainfall are forecasted to occur starting from 10 October 2026, 14:35 WITA in parts of Sulawesi Utara especially in: DIMEMBE, MANGANITU, TABUKAN TENGAH.
+ These conditions may lead to reduced visibility, strong winds, and localized flooding.
+ The public is strongly advised to remain vigilant during this period, limit outdoor activities, and take all necessary precautions to ensure safety.
+ Conditions are expected to gradually improve by 10 October 2026, 16:30 WITA.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.10.10.06.71.002</guid>
+            <pubDate>Sat, 10 Oct 2026 14:33:00 +0800</pubDate>
+        </item>
+
+        <item>
+            <title>Thunderstorm This Afternoon in Kalimantan Timur</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/en/CKT20261010004_alert.xml</link>
+            <description>Thunderstorms and heavy rainfall are forecasted to occur starting from 10 October 2026, 14:43 WITA in parts of Kalimantan Timur especially in: BUSANG, GUNUNG TABUR, LONG BAGUN, MUARA MUNTAI, MUARA WIS, SEGAH, TABALAR, TABANG.
+ These conditions may lead to reduced visibility, strong winds, and localized flooding.
+ The public is strongly advised to remain vigilant during this period, limit outdoor activities, and take all necessary precautions to ensure safety.
+ Conditions are expected to gradually improve by 10 October 2026, 17:00 WITA.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.10.10.06.64.004</guid>
+            <pubDate>Sat, 10 Oct 2026 14:31:00 +0800</pubDate>
+        </item>
+
+        <item>
+            <title>Thunderstorm This Afternoon in Bali</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/en/CBL20261010002_alert.xml</link>
+            <description>Thunderstorms and heavy rainfall are forecasted to occur starting from 10 October 2026, 14:35 WITA in parts of Bali especially in: PENEBEL.
+ These conditions may lead to reduced visibility, strong winds, and localized flooding.
+ The public is strongly advised to remain vigilant during this period, limit outdoor activities, and take all necessary precautions to ensure safety.
+ Conditions are expected to gradually improve by 10 October 2026, 16:30 WITA.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.10.10.06.51.002</guid>
+            <pubDate>Sat, 10 Oct 2026 14:30:00 +0800</pubDate>
+        </item>
+
+        <item>
+            <title>Thunderstorm This Afternoon in Kep. Riau</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/en/CKR20261010003_alert.xml</link>
+            <description>Thunderstorms and heavy rainfall are forecasted to occur starting from 10 October 2026, 12:57 WIB in parts of Kep. Riau especially in: BATU AJI, BELAKANG PADANG, BINTAN UTARA, BULANG, KUNDUR, KUNDUR UTARA, LINGGA, LINGGA UTARA, MORO, SEKUPANG, TELOK SEBONG, UNGAR.
+ These conditions may lead to reduced visibility, strong winds, and localized flooding.
+ The public is strongly advised to remain vigilant during this period, limit outdoor activities, and take all necessary precautions to ensure safety.
+ Conditions are expected to gradually improve by 10 October 2026, 15:00 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.10.10.06.21.003</guid>
+            <pubDate>Sat, 10 Oct 2026 12:56:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Thunderstorm This Afternoon in Riau</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/en/CRU20261010003_alert.xml</link>
+            <description>Thunderstorms and heavy rainfall are forecasted to occur starting from 10 October 2026, 13:00 WIB in parts of Riau especially in: BAGAN SINEMBAH, BANDAR PETALANGAN, BATANG CENAKU, BATANG GANGSAL, BATANG PERANAP, BONAI DARUSSALAM, BUKIT BATU, BUKIT BATU, BUNUT, CONCONG, DAYUN, GAUNG, GAUNG ANAK SERKA, KAMPAR KIRI HILIR, KAMPAR KIRI HULU, KANDIS, KATEMAN, KEMUNING, KEPENUHAN, KERUMUTAN, KUALA CENAKU, KUBU BABUSSALAM, LANGGAM, MANDAH, MERBAU, PANGKALAN KURAS, PASIR PENYU, PEKAITAN, PELALAWAN, PELANGIRAN, PERANAP, PINGGIR, PINGGIR, PUCUK RANTAU, PUJUD, PULAU BURUNG, PUSAKO, RAKIT KULIM, RENGAT, RENGAT BARAT, RIMBA MELINTANG, SIAK KECIL, SIBERIDA, SIMPANG KANAN, SUNGAI APIT, SUNGAI LALA, SUNGAI SEMBILAN, TANAH PUTIH TANJUNG MELAWAN, TASIK PUTRI PUYU, TEBING TINGGI BARAT, TELUK BELENGKONG, TELUK MERANTI, TEMPULING, UKUI.
+ These conditions may lead to reduced visibility, strong winds, and localized flooding.
+ The public is strongly advised to remain vigilant during this period, limit outdoor activities, and take all necessary precautions to ensure safety.
+ Conditions are expected to gradually improve by 10 October 2026, 15:00 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.10.10.06.14.003</guid>
+            <pubDate>Sat, 10 Oct 2026 12:50:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Thunderstorm This Afternoon in Kalimantan Tengah</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/en/CKG20261010002_alert.xml</link>
+            <description>Thunderstorms and heavy rainfall are forecasted to occur starting from 10 October 2026, 12:40 WIB in parts of Kalimantan Tengah especially in: UUT MURUNG.
+ These conditions may lead to reduced visibility, strong winds, and localized flooding.
+ The public is strongly advised to remain vigilant during this period, limit outdoor activities, and take all necessary precautions to ensure safety.
+ Conditions are expected to gradually improve by 10 October 2026, 14:30 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.10.10.06.62.002</guid>
+            <pubDate>Sat, 10 Oct 2026 12:30:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Thunderstorm This Afternoon in Papua</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/en/CPU20261010002_alert.xml</link>
+            <description>Thunderstorms and heavy rainfall are forecasted to occur starting from 10 October 2026, 14:45 WIT in parts of Papua especially in: BENUKI, MAMBERAMO TENGAH, UNURUM GUAY, WAROPEN ATAS.
+ These conditions may lead to reduced visibility, strong winds, and localized flooding.
+ The public is strongly advised to remain vigilant during this period, limit outdoor activities, and take all necessary precautions to ensure safety.
+ Conditions are expected to gradually improve by 10 October 2026, 16:00 WIT.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.10.10.06.91.002</guid>
+            <pubDate>Sat, 10 Oct 2026 14:30:00 +0900</pubDate>
+        </item>
+
+        <item>
+            <title>Thunderstorm This Afternoon in Sumatera Barat</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/en/CSB20261010003_alert.xml</link>
+            <description>Thunderstorms and heavy rainfall are forecasted to occur starting from 10 October 2026, 12:30 WIB in parts of Sumatera Barat especially in: 2 X 11 ENAM LINGKUANG, 2 X 11 KAYU TANAM, AMPEK NAGARI, BATANG ANAI, BATANG GASAN, BATIPUH, BAYANG, BONJOL, BUNGUS TELUK KABUNG, DUO KOTO, ENAM LINGKUNG, GUNUANG OMEH, GUNUNG TALANG, GUNUNGTULEH, IV JURAI, IV KOTO AUR MALINTANG, IV NAGARI BAYANG UTARA, JUNJUNG SIRIH, KAMANG MAGEK, KINALI, KOTO TANGAH, KOTO XI TARUSAN, KUBUNG, KURANJI, LEMBAH MELINTANG, LENGAYANG, LUBUK ALUNG, LUBUK BASUNG, LUBUK BEGALUNG, LUBUK KILANGAN, LUBUK SIKAPING, LUBUK SIKARAH, LUHAK NAN DUO, MALALAK, MAPAT TUNGGUL, MAPAT TUNGGUL SELATAN, MATUR, NAN SABARIS, NANGGALO, PADANG BARAT, PADANG PANJANG BARAT, PADANG PANJANG TIMUR, PADANG SAGO, PADANG SELATAN, PADANG TIMUR, PADANG UTARA, PALUPUH, PARIAMAN SELATAN, PARIAMAN TENGAH, PARIAMAN TIMUR, PARIAMAN UTARA, PASAMAN, PATAMUAN, PAUH, PELEMBAYAN, RANAH BATAHAN, RAO SELATAN, SASAK RANAH PESISIR, SIBERUT BARAT, SIBERUT BARAT DAYA, SIBERUT SELATAN, SIBERUT TENGAH, SIBERUT UTARA, SILAUT, SIMPANG ALAHAN MATI, SINTUAK TOBOH GADANG, SIPORA SELATAN, SIPORA UTARA, SULIKI, SUNGAI GARINGGING, SUNGAI LIMAU, SUNGAIAUR, SUTERA, TANJUNG HARAPAN, TANJUNG MUTIARA, TANJUNG RAYA, TIGO NAGARI, ULAKAN TAPAKIH, V KOTO KAMPUNG DALAM, V KOTO TIMUR, VII KOTO SUNGAI SARIK, X KOTO, X KOTO DIATAS, X KOTO SINGKARAK.
+ These conditions may lead to reduced visibility, strong winds, and localized flooding.
+ The public is strongly advised to remain vigilant during this period, limit outdoor activities, and take all necessary precautions to ensure safety.
+ Conditions are expected to gradually improve by 10 October 2026, 14:30 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.10.10.06.13.003</guid>
+            <pubDate>Sat, 10 Oct 2026 12:15:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Thunderstorm This Afternoon in Sumatera Utara</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/en/CSU20261010002_alert.xml</link>
+            <description>Thunderstorms and heavy rainfall are forecasted to occur starting from 10 October 2026, 12:45 WIB in parts of Sumatera Utara especially in: ADIAN KOTING, AFULU, AIR JOMAN, ALASA, ALASA TALUMUZOI, AMANDRAYA, ANDAM DEWI, ANGKOLA SANGKUNUR, ANGKOLA SELATAN, ANGKOLA TIMUR, ARAMO, BADIRI, BAKTIRAJA, BALIGE, BANDAR, BANDAR PASIR MANDOGE, BARUS, BARUS UTARA, BARUSJAHE, BATANG NATAL, BATANG TORU, BAWOLATO, BILAH HULU, BINTANG BAYU, BORBOR, BORONADU, BOTOMUZOI, DANAU TOBA, DOLAT RAYAT, DOLOK MASIHUL, DOLOK PANRIBUAN, DOLOK SANGGUL, DOLOK SILAU, FANAYAMA, GALANG, GIDO, GIRSANG SIPANGAN BOLON, GOMO, GUNUNGSITOLI, GUNUNGSITOLI ALO'OA, GUNUNGSITOLI BARAT, GUNUNGSITOLI IDANOI, GUNUNGSITOLI SELATAN, GUNUNGSITOLI UTARA, HABINSARAN, HARIAN, HATONDUHAN, HIBALA, HILIDUHO, HILIMEGAI, HILISALAWA'AHE, HILISERANGKAI, HURUNA, IDANOGAWO, IDANOTAE, KAMPUNG RAKYAT, KOLANG, KOTA KISARAN TIMUR, KOTANOPAN, KOTAPINANG, KUALA, KUALUH HILIR, KUALUH LEIDONG, KUTALIMBARU, KUTAMBARU, LAGUBOTI, LAHEWA, LAHEWA TIMUR, LAHOMI, LAHUSA, LINGGA BAYU, LINTONG NIHUTA, LOLOFITU MOI, LOLOMATUA, LOLOWAU, LOTU, LUAHAGUNDRE MANIAMOLO, LUBUK PAKAM, LUMBAN JULU, LUMUT, MA'U, MANDREHE, MANDREHE BARAT, MANDREHE UTARA, MANIAMOLO, MARANCAR, MAZINO, MAZO, MEREK, MORO'O, MUARA, MUARA BATANG GADIS, MUARA BATANG TORU, MUARA SIPONGI, NAMOHALU ESIWA, O'O'U, ONAN GANJANG, ONOHAZUMBA, ONOLALU, PAGAR MERBAU, PAGARAN, PAKANTAN, PAKKAT, PALIPI, PAMATANG SILIMA HUTA, PANGARIBUAN, PANGKATAN, PANGURURAN, PANYABUNGAN TIMUR, PARANGINAN, PARLILITAN, PARMONANGAN, PASARIBU TOBING, PEMATANG BANDAR, PEMATANG SIDAMANIK, PINANGSORI, POLLUNG, PULAU-PULAU BATU, PULAU-PULAU BATU BARAT, PULAU-PULAU BATU TIMUR, PULAU-PULAU BATU UTARA, PURBA TUA, RANTO BAEK, RAWANG PANCA ARGA, RONGGUR NIHUTA, SALAPIAN, SAWO, SEI BAMBAN, SEI BINGEI, SEI KEPAYANG, SEI. RAMPAH, SERBA JADI, SIANJAR MULA MULA, SIBABANGUN, SIBOLANGIT, SIBORONG-BORONG, SIDUA'ORI, SIJAMAPOLANG, SILAEN, SIMANINDO, SIPAHUTAR, SIPIROK, SIPOHOLON, SIRANDORUNG, SIROMBU, SITIO-TIO, SITOLU ORI, SOGAE'ADU, SOMAMBAWA, SOMOLO-MOLO, SORKAM, SORKAM BARAT, SOSOR GADONG, SUKA BANGUN, SUSUA, TANAH MASA, TANJUNG MORAWA, TARABINTANG, TEBING TINGGI, TELUK DALAM, TIGAPANAH, TOMA, TORGAMBA, TUGALA OYO, TUHEMBERUA, TUKKA, ULU IDANOTAE, ULU MORO'O, ULU PUNGKUT, ULUGAWO, ULUNOYO, ULUSUSUA, UMBUNASI.
+ These conditions may lead to reduced visibility, strong winds, and localized flooding.
+ The public is strongly advised to remain vigilant during this period, limit outdoor activities, and take all necessary precautions to ensure safety.
+ Conditions are expected to gradually improve by 10 October 2026, 16:45 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.10.10.06.12.002</guid>
+            <pubDate>Sat, 10 Oct 2026 12:15:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Thunderstorm This Afternoon in Sulawesi Utara</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/en/CSR20261010001_alert.xml</link>
+            <description>Thunderstorms and heavy rainfall are forecasted to occur starting from 10 October 2026, 13:10 WITA in parts of Sulawesi Utara especially in: MANGANITU, TABUKAN TENGAH.
+ These conditions may lead to reduced visibility, strong winds, and localized flooding.
+ The public is strongly advised to remain vigilant during this period, limit outdoor activities, and take all necessary precautions to ensure safety.
+ Conditions are expected to gradually improve by 10 October 2026, 15:15 WITA.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.10.10.06.71.001</guid>
+            <pubDate>Sat, 10 Oct 2026 13:04:00 +0800</pubDate>
+        </item>
+
+        <item>
+            <title>Thunderstorm This Afternoon in Kalimantan Utara</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/en/CKU20261010003_alert.xml</link>
+            <description>Thunderstorms and heavy rainfall are forecasted to occur starting from 10 October 2026, 13:00 WITA in parts of Kalimantan Utara especially in: PESO, PESO HILIR, TANJUNG PALAS TIMUR, TANJUNG SELOR, TARAKAN TENGAH, TARAKAN TIMUR.
+ These conditions may lead to reduced visibility, strong winds, and localized flooding.
+ The public is strongly advised to remain vigilant during this period, limit outdoor activities, and take all necessary precautions to ensure safety.
+ Conditions are expected to gradually improve by 10 October 2026, 15:00 WITA.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.10.10.06.65.003</guid>
+            <pubDate>Sat, 10 Oct 2026 12:55:00 +0800</pubDate>
+        </item>
+
+        <item>
+            <title>Thunderstorm This Afternoon in Aceh</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/en/CAH20261010003_alert.xml</link>
+            <description>Thunderstorms and heavy rainfall are forecasted to occur starting from 10 October 2026, 11:30 WIB in parts of Aceh especially in: DARUL IMARAH, LHOONG, LUENG BATA, SEULIMEUM, TRUMON TENGAH, TRUMON TIMUR.
+ These conditions may lead to reduced visibility, strong winds, and localized flooding.
+ The public is strongly advised to remain vigilant during this period, limit outdoor activities, and take all necessary precautions to ensure safety.
+ Conditions are expected to gradually improve by 10 October 2026, 13:30 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.10.10.06.11.003</guid>
+            <pubDate>Sat, 10 Oct 2026 11:20:00 +0700</pubDate>
+        </item>
+        </channel>
+    </rss>

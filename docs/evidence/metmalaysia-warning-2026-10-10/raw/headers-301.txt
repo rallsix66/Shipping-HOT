@@ -1,0 +1,17 @@
+HTTP/2 301 
+date: Sat, 10 Oct 2026 07:54:42 GMT
+content-type: text/html; charset=utf-8
+server: cloudflare
+location: /weather/warning/
+vary: Origin
+x-content-type-options: nosniff
+referrer-policy: same-origin
+cross-origin-opener-policy: same-origin
+x-do-app-origin: 404fac77-61ff-48b1-8339-787252035e9b
+cache-control: private
+x-do-orig-status: 301
+set-cookie: __cf_bm=_F2VzC81x9fX3AO5tKH.5BCszgPhS15lasdoiA_c53Q-1791618882.1652198-1.0.1.1-bWvVtioas0wDMWffVWcYsKRghGSox2fzme0NTfveS5yA3b2C0BA9Q19I6wK59Mn1JuCVWhc.w4scx7nRqTEi4nS1B1xDcq_Fv3OmXAQ.d_NIolhkJO4Sa33eAY6QeKTS; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.data.gov.my; Expires=Sat, 10 Oct 2026 08:24:42 GMT
+cf-cache-status: BYPASS
+cf-ray: a4840efd8a6ac105-IAD
+alt-svc: h3=":443"; ma=86400
+

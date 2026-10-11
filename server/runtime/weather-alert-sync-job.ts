@@ -56,6 +56,20 @@ export function createWeatherAlertSyncJob(options: WeatherAlertSyncJobOptions): 
         }
       }
 
+      // Partial source failure (e.g. some VN-W01 articles failed): successful records are stored above, failed ones
+      // keep their prior (stale) records; the run is reported as failed, never as an unconditional success, and
+      // nothing is archived.
+      const issue = options.provider.lastRunIssue?.()
+      if (issue) {
+        return {
+          status: "failed",
+          recordsRead: received.length,
+          recordsWritten: received.length,
+          errorCode: issue.errorCode,
+          errorMessage: issue.errorMessage,
+        }
+      }
+
       const retainedIds = new Set(received.map(item => item.id))
       const archived = await repository.archiveFeedItemsNotIn([options.sourceId], retainedIds, fetchedAt)
       return {

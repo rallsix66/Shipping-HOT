@@ -17,10 +17,12 @@
 // accuracy, and it does not re-verify S2/S3/S4/S5 sealed scope.
 //
 // Usage:
-//   node scripts/e2e-s7-integrated.mjs           (E2E_S7_DIR overrides .tmp/s7-local)
+//   node scripts/e2e-s7-integrated.mjs           (default .tmp/s7-local — matches CI artifact upload path)
+//
+// Evidence policy: CI uploads `.tmp/s7-local/s7-integrated-evidence.json` only; override with E2E_S7_DIR inside `.tmp/`.
 //
 // Exit code 0 only when every check passes.
-import { spawn } from "node:child_process"
+import { execSync, spawn } from "node:child_process"
 import { createHash } from "node:crypto"
 import { existsSync, mkdirSync, mkdtempSync, openSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
@@ -38,7 +40,7 @@ const SEED_ENTRY = join(ROOT, "scripts", "s7-local-seed.ts")
 const PORT = Number(process.env.E2E_S7_PORT ?? "4477")
 const BASE = (process.env.E2E_BASE_URL ?? `http://127.0.0.1:${PORT}`).replace(/\/$/, "")
 const DEBUG_PORT = Number(process.env.E2E_DEBUG_PORT ?? "9345")
-const EXPECTED_SCHEMA_VERSION = 14
+const EXPECTED_SCHEMA_VERSION = 16
 
 const REQUIRED_TABLES = [
   "app_metadata",
@@ -54,6 +56,12 @@ const REQUIRED_TABLES = [
   "feed_articles",
   "article_versions",
   "article_blocks",
+  "weather_forecast",
+  "weather_impact",
+  "tropical_cyclone",
+  "ops_calendar_event",
+  "policy_record",
+  "policy_version",
 ]
 
 /** Retained (never-seeded, never-written) databases this run must not touch. */
@@ -299,6 +307,14 @@ function diffCounters(before, after) {
 
 /* --------------------------------------------------------------- main */
 
+function gitOutput(args) {
+  try {
+    return execSync(`git ${args}`, { cwd: ROOT, encoding: "utf8" }).trim()
+  } catch (error) {
+    return `ERROR: ${String(error?.message ?? error).slice(0, 200)}`
+  }
+}
+
 async function main() {
   const chrome = findChrome()
   if (!chrome) throw new Error("No Chrome/Edge executable found; set E2E_CHROME")
@@ -309,6 +325,8 @@ async function main() {
     databasePath: DB_PATH,
     baseUrl: BASE,
     productionBuild: SERVER_ENTRY,
+    gitHead: gitOutput("rev-parse HEAD"),
+    workspaceClean: gitOutput("status --porcelain --untracked-files=normal") === "",
     coverage: "clean local integration acceptance: fresh isolated DB init/migration, restart persistence, Real-Mode boundary, Flow A/B/C over the production build in system Chrome",
     fixtureDataProvenance: "synthetic deterministic fixture (see scripts/s7-local-seed.ts); not captured real Provider data",
     inheritedNotReVerified: "S2 coverage, S3 MY/TH/PH calendar, S4 real samples and S5 real long-article acceptance stay BLOCKED and are not re-run here",
@@ -712,6 +730,175 @@ async function main() {
     pushC(portNorm.includes(norm("蛇口")) && portNorm.includes("CNSHK"), "port detail shows name and UN/LOCODE")
     pushC(/拥堵|等待|high|高/.test(text), "port detail surfaces congestion information")
     pushC(text.includes("Swell and wind risk window"), "port detail lists the related weather item")
+    const portWeatherApi = await api(`/api/shipping/ports/${encodeURIComponent(expectations.portId)}/weather`)
+    pushC(portWeatherApi.status === 200 && portWeatherApi.body?.portId === expectations.portId, "port weather API returns panel payload")
+    pushC(
+      typeof portWeatherApi.body?.state === "string" && Array.isArray(portWeatherApi.body?.forecasts) && Array.isArray(portWeatherApi.body?.impacts),
+      "port weather API exposes state, forecasts and impacts arrays",
+    )
+    pushC(
+      (portWeatherApi.body?.forecasts?.length ?? 0) >= 1
+      && (portWeatherApi.body?.impacts?.length ?? 0) >= 1
+      && portWeatherApi.body?.displayMeta?.forecastsReturned === portWeatherApi.body?.forecasts?.length
+      && portWeatherApi.body?.displayMeta?.impactsReturned === portWeatherApi.body?.impacts?.length,
+      "port weather API returns non-empty forecasts/impacts with aligned displayMeta counts",
+    )
+    pushC(
+      portWeatherApi.body?.impacts?.every(row => Date.parse(row.validUntil) > Date.parse(row.validFrom)),
+      "port weather API impact rows have validUntil strictly after validFrom",
+    )
+    pushC(
+      portWeatherApi.body?.precipCoverage?.status === "insufficient"
+      && (portWeatherApi.body?.precipCoverage?.hourlySamplesInWindow ?? 0) < portWeatherApi.body?.precipCoverage?.partialMinimum,
+      "port weather API exposes insufficient 24h precip coverage for seeded sparse forecast",
+    )
+    pushC(
+      portWeatherApi.body?.ruleCoverage?.some(row => row.ruleId === "WR-S05" && row.evaluation === "unevaluated"),
+      "port weather API marks WR-S05 unevaluated when 24h precip is incomplete",
+    )
+    pushC(
+      portWeatherApi.body?.forecastMeta?.targetWindow
+      && typeof portWeatherApi.body.forecastMeta.actualCoverage?.hourlyReturned === "number"
+      && portWeatherApi.body.forecastMeta.actualCoverage.totalReturned === portWeatherApi.body.displayMeta?.forecastsReturned,
+      "port weather API forecastMeta splits target window vs actual coverage aligned with displayMeta",
+    )
+    const tropicalApi = await api("/api/shipping/tropical-cyclones")
+    pushC(tropicalApi.status === 200 && tropicalApi.body?.sync?.sourceId === "jma-typhoon", "tropical cyclone API returns JMA sync panel")
+    pushC(
+      tropicalApi.body?.sync?.outcome === "ok"
+      && tropicalApi.body?.cyclones?.some(row => row.id === expectations.tropicalCycloneId),
+      "tropical cyclone API returns seeded ok sync with cyclone row",
+    )
+    pushC(
+      tropicalApi.body?.cyclones?.some(row =>
+        row.forecast?.length >= 1
+        && row.trackHistory?.length >= 1
+        && row.current?.lon !== undefined),
+      "tropical cyclone API exposes current, history and forecast points separately",
+    )
+    pushC(
+      portWeatherApi.body?.state === "partial_rule_coverage",
+      "port weather API state reflects partial rule coverage with other rules still evaluated",
+    )
+    pushC(
+      portWeatherApi.body?.impacts?.some(row => row.ruleId === expectations.portWeatherRuleId && row.summaryZh?.includes(expectations.portWeatherImpactSummary.slice(0, 4))),
+      `port weather API includes seeded ${expectations.portWeatherRuleId} impact row`,
+    )
+    await navigate(`/ports/${expectations.portId}`, { reload: true })
+    text = await bodyText()
+    pushC(text.includes("预报数值") && text.includes("潜在影响") && text.includes("官方预警"), "port detail renders the three weather blocks")
+    pushC(text.includes(String(expectations.portWeatherGustKmh)) || text.includes("阵风 62"), "port weather block shows seeded gust value")
+    pushC(text.includes(expectations.portWeatherRuleId) && text.includes("靠离泊"), "port weather block shows rule id and impact summary")
+    pushC(text.includes("WR-S05") && text.includes("未评估"), "port weather coverage block shows WR-S05 unevaluated notice")
+    pushC(await evaluate(`Boolean(document.querySelector('[data-testid="tropical-cyclone-panel"]'))`) === true, "port detail renders tropical cyclone panel")
+    pushC(
+      await evaluate(`(() => {
+        const chart = document.querySelector('[data-testid="tropical-cyclone-path-${expectations.tropicalCycloneId}"]')
+        const svg = chart ? chart.querySelector('svg circle') : null
+        const text = document.querySelector('[data-testid="tropical-cyclone-panel"]')?.textContent ?? ''
+        return Boolean(svg) && text.includes('${expectations.tropicalCycloneName}') && text.includes('${expectations.tropicalCycloneCurrentLon}')
+      })()`),
+      "tropical cyclone panel renders path chart and seeded current longitude",
+    )
+    pushC(
+      await evaluate(`(() => {
+        const node = document.querySelector('[data-testid="tropical-cyclone-forecast-${expectations.tropicalCycloneId}"]')
+        return node ? node.textContent.includes('${expectations.tropicalCycloneForecastLat}') : false
+      })()`),
+      "tropical cyclone panel shows forecast position latitude",
+    )
+    const patchTropicalSyncMeta = (meta) => {
+      const db = openDatabase()
+      db.prepare("UPDATE tropical_cyclone SET track_json = ? WHERE id = '_jma_sync_meta'").run(JSON.stringify(meta))
+      db.close()
+    }
+    const fullSuccessAt = tropicalApi.body?.sync?.lastFullSuccessAt ?? tropicalApi.body?.sync?.lastCheckedAt
+    patchTropicalSyncMeta({
+      sourceId: "jma-typhoon",
+      outcome: "failed",
+      lastCheckedAt: new Date().toISOString(),
+      lastFullSuccessAt: fullSuccessAt,
+      lastSuccessAt: fullSuccessAt,
+      errorCode: "provider_unavailable",
+      errorMessage: "S7 injected failure",
+    })
+    const tropicalFailed = await api("/api/shipping/tropical-cyclones")
+    pushC(
+      tropicalFailed.body?.sync?.outcome === "failed"
+      && tropicalFailed.body?.messageZh?.includes("暂不可用")
+      && tropicalFailed.body?.cyclones?.some(row => row.id === expectations.tropicalCycloneId),
+      "tropical cyclone API failed sync retains stored path rows",
+    )
+    await navigate(`/ports/${expectations.portId}`, { reload: true })
+    pushC(
+      await evaluate(`(() => {
+        const chart = document.querySelector('[data-testid="tropical-cyclone-path-${expectations.tropicalCycloneId}"] svg circle')
+        const notice = document.querySelector('[data-testid="tropical-cyclone-sync-notice"]')?.textContent ?? ''
+        return Boolean(chart) && notice.includes('同步失败')
+      })()`),
+      "tropical cyclone UI keeps path chart after failed sync with failure notice",
+    )
+    patchTropicalSyncMeta({
+      sourceId: "jma-typhoon",
+      outcome: "ok_empty",
+      lastCheckedAt: new Date().toISOString(),
+      lastFullSuccessAt: fullSuccessAt,
+      lastSuccessAt: fullSuccessAt,
+    })
+    const dbEmpty = openDatabase()
+    dbEmpty.prepare("DELETE FROM tropical_cyclone WHERE id <> '_jma_sync_meta'").run()
+    dbEmpty.close()
+    const tropicalEmpty = await api("/api/shipping/tropical-cyclones")
+    pushC(
+      tropicalEmpty.body?.sync?.outcome === "ok_empty"
+      && tropicalEmpty.body?.activeCount === 0
+      && tropicalEmpty.body?.cyclones?.length === 0,
+      "tropical cyclone API ok_empty reports zero active cyclones",
+    )
+    await navigate(`/ports/${expectations.portId}`, { reload: true })
+    pushC(
+      await evaluate(`(() => {
+        const counts = document.querySelector('[data-testid="tropical-cyclone-counts"]')?.textContent ?? ''
+        return counts.includes('活跃 0') && !document.querySelector('[data-testid="tropical-cyclone-path-${expectations.tropicalCycloneId}"]')
+      })()`),
+      "tropical cyclone UI ok_empty shows zero active and no path chart",
+    )
+    patchTropicalSyncMeta({
+      sourceId: "jma-typhoon",
+      outcome: "partial",
+      lastCheckedAt: new Date().toISOString(),
+      lastFullSuccessAt: fullSuccessAt,
+      failedTcIds: ["TC9999"],
+      listInvalidCount: 1,
+    })
+    await navigate(`/ports/${expectations.portId}`, { reload: true })
+    pushC(
+      await evaluate(`(() => {
+        const notice = document.querySelector('[data-testid="tropical-cyclone-sync-notice"]')?.textContent ?? ''
+        return notice.includes('部分气旋')
+      })()`),
+      "tropical cyclone UI partial sync shows partial notice",
+    )
+    patchTropicalSyncMeta({
+      sourceId: "jma-typhoon",
+      outcome: "ok",
+      lastCheckedAt: "2020-01-01T00:00:00.000Z",
+      lastFullSuccessAt: "2020-01-01T00:00:00.000Z",
+      lastSuccessAt: "2020-01-01T00:00:00.000Z",
+      stale: true,
+    })
+    await navigate(`/ports/${expectations.portId}`, { reload: true })
+    pushC(
+      await evaluate(`(() => {
+        const panel = document.querySelector('[data-testid="tropical-cyclone-panel"]')?.textContent ?? ''
+        return panel.includes('过期') || panel.includes('数据过期')
+      })()`),
+      "tropical cyclone UI stale sync shows expiry copy",
+    )
+    const coverageVisible = await evaluate(`Boolean(document.querySelector('[data-testid="port-weather-coverage"]'))`)
+    pushC(coverageVisible === true, "port weather UI renders precip/rule coverage notice")
+    const impactRows = await evaluate(`document.querySelectorAll('[data-testid="port-weather-impacts"] li').length`)
+    pushC(Number(impactRows) >= 1 && Number(impactRows) === (portWeatherApi.body?.displayMeta?.impactsReturned ?? 0), "port weather UI impact row count matches API displayMeta")
 
     await navigate("/feed")
     const weatherClicked = await evaluate(`(() => {

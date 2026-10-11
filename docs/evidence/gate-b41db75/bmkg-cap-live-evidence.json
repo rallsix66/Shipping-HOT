@@ -1,0 +1,227 @@
+{
+  "probe": "BMKG nowcast CAP live (isolated)",
+  "gitHead": "b41db750fb85eecc16accae25965cf149e503e93",
+  "workspaceClean": true,
+  "ranAt": "2026-10-10T07:02:49.235Z",
+  "entry": "https://www.bmkg.go.id/alerts/nowcast/en",
+  "format": "cap_index",
+  "classification": "alerts_present",
+  "egress": [
+    {
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en",
+      "requestedRedirect": "follow (fetch default)",
+      "status": 200,
+      "finalUrl": "https://www.bmkg.go.id/alerts/nowcast/en",
+      "redirected": false,
+      "bytes": 13688,
+      "at": "2026-10-10T07:02:49.291Z"
+    },
+    {
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CPU20261010003_alert.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CPU20261010003_alert.xml",
+      "redirected": false,
+      "bytes": 25053,
+      "at": "2026-10-10T07:02:51.392Z"
+    },
+    {
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CSR20261010002_alert.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CSR20261010002_alert.xml",
+      "redirected": false,
+      "bytes": 2773,
+      "at": "2026-10-10T07:02:51.530Z"
+    },
+    {
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CKT20261010004_alert.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CKT20261010004_alert.xml",
+      "redirected": false,
+      "bytes": 12245,
+      "at": "2026-10-10T07:02:51.674Z"
+    },
+    {
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CBL20261010002_alert.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CBL20261010002_alert.xml",
+      "redirected": false,
+      "bytes": 2125,
+      "at": "2026-10-10T07:02:52.367Z"
+    },
+    {
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CKR20261010003_alert.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CKR20261010003_alert.xml",
+      "redirected": false,
+      "bytes": 19856,
+      "at": "2026-10-10T07:02:53.069Z"
+    },
+    {
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CRU20261010003_alert.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CRU20261010003_alert.xml",
+      "redirected": false,
+      "bytes": 36172,
+      "at": "2026-10-10T07:02:53.834Z"
+    },
+    {
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CKG20261010002_alert.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CKG20261010002_alert.xml",
+      "redirected": false,
+      "bytes": 3462,
+      "at": "2026-10-10T07:02:54.571Z"
+    },
+    {
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CSB20261010003_alert.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CSB20261010003_alert.xml",
+      "redirected": false,
+      "bytes": 46482,
+      "at": "2026-10-10T07:02:55.282Z"
+    },
+    {
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CSU20261010002_alert.xml",
+      "requestedRedirect": "error",
+      "status": 200,
+      "finalUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CSU20261010002_alert.xml",
+      "redirected": false,
+      "bytes": 82651,
+      "at": "2026-10-10T07:02:56.138Z"
+    }
+  ],
+  "redirectSummary": {
+    "requests": 10,
+    "bodyRequestsWithRedirectError": 9,
+    "bodyRequests": 9,
+    "redirectedResponses": 0,
+    "finalUrlDiffersFromRequest": 0,
+    "errors": 0
+  },
+  "targetPortCoverage": "not_covered_zero_impact",
+  "storedCount": 9,
+  "activeCount": 9,
+  "alerts": [
+    {
+      "alertId": "bmkg:2.49.0.1.360.0.2026.10.10.07.91.003",
+      "title": "Thunderstorm This Evening in Papua",
+      "severity": "watch",
+      "state": "active",
+      "eventEligibility": true,
+      "sentAt": "2026-10-10T06:40:00.000Z",
+      "expiresAt": "2026-10-10T09:00:00.000Z",
+      "region": "Papua",
+      "relatedPortIds": [],
+      "sourceUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CPU20261010003_alert.xml"
+    },
+    {
+      "alertId": "bmkg:2.49.0.1.360.0.2026.10.10.07.71.002",
+      "title": "Thunderstorm This Afternoon in Sulawesi Utara",
+      "severity": "watch",
+      "state": "active",
+      "eventEligibility": true,
+      "sentAt": "2026-10-10T06:33:00.000Z",
+      "expiresAt": "2026-10-10T08:30:00.000Z",
+      "region": "Sulawesi Utara",
+      "relatedPortIds": [],
+      "sourceUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CSR20261010002_alert.xml"
+    },
+    {
+      "alertId": "bmkg:2.49.0.1.360.0.2026.10.10.07.64.004",
+      "title": "Thunderstorm This Afternoon in Kalimantan Timur",
+      "severity": "watch",
+      "state": "active",
+      "eventEligibility": true,
+      "sentAt": "2026-10-10T06:31:00.000Z",
+      "expiresAt": "2026-10-10T09:00:00.000Z",
+      "region": "Kalimantan Timur",
+      "relatedPortIds": [],
+      "sourceUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CKT20261010004_alert.xml"
+    },
+    {
+      "alertId": "bmkg:2.49.0.1.360.0.2026.10.10.07.51.002",
+      "title": "Thunderstorm This Afternoon in Bali",
+      "severity": "watch",
+      "state": "active",
+      "eventEligibility": true,
+      "sentAt": "2026-10-10T06:30:00.000Z",
+      "expiresAt": "2026-10-10T08:30:00.000Z",
+      "region": "Bali",
+      "relatedPortIds": [],
+      "sourceUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CBL20261010002_alert.xml"
+    },
+    {
+      "alertId": "bmkg:2.49.0.1.360.0.2026.10.10.07.21.003",
+      "title": "Thunderstorm This Afternoon in Kep. Riau",
+      "severity": "watch",
+      "state": "active",
+      "eventEligibility": true,
+      "sentAt": "2026-10-10T05:56:00.000Z",
+      "expiresAt": "2026-10-10T08:00:00.000Z",
+      "region": "Kep. Riau",
+      "relatedPortIds": [],
+      "sourceUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CKR20261010003_alert.xml"
+    },
+    {
+      "alertId": "bmkg:2.49.0.1.360.0.2026.10.10.07.14.003",
+      "title": "Thunderstorm This Afternoon in Riau",
+      "severity": "watch",
+      "state": "active",
+      "eventEligibility": true,
+      "sentAt": "2026-10-10T05:50:00.000Z",
+      "expiresAt": "2026-10-10T08:00:00.000Z",
+      "region": "Riau",
+      "relatedPortIds": [],
+      "sourceUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CRU20261010003_alert.xml"
+    },
+    {
+      "alertId": "bmkg:2.49.0.1.360.0.2026.10.10.07.62.002",
+      "title": "Thunderstorm This Afternoon in Kalimantan Tengah",
+      "severity": "watch",
+      "state": "active",
+      "eventEligibility": true,
+      "sentAt": "2026-10-10T05:30:00.000Z",
+      "expiresAt": "2026-10-10T07:30:00.000Z",
+      "region": "Kalimantan Tengah",
+      "relatedPortIds": [],
+      "sourceUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CKG20261010002_alert.xml"
+    },
+    {
+      "alertId": "bmkg:2.49.0.1.360.0.2026.10.10.07.12.002",
+      "title": "Thunderstorm This Afternoon in Sumatera Utara",
+      "severity": "watch",
+      "state": "active",
+      "eventEligibility": true,
+      "sentAt": "2026-10-10T05:15:00.000Z",
+      "expiresAt": "2026-10-10T09:45:00.000Z",
+      "region": "Sumatera Utara",
+      "relatedPortIds": [],
+      "sourceUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CSU20261010002_alert.xml"
+    },
+    {
+      "alertId": "bmkg:2.49.0.1.360.0.2026.10.10.07.13.003",
+      "title": "Thunderstorm This Afternoon in Sumatera Barat",
+      "severity": "watch",
+      "state": "active",
+      "eventEligibility": true,
+      "sentAt": "2026-10-10T05:15:00.000Z",
+      "expiresAt": "2026-10-10T07:30:00.000Z",
+      "region": "Sumatera Barat",
+      "relatedPortIds": [],
+      "sourceUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CSB20261010003_alert.xml"
+    }
+  ],
+  "jakartaPanel": {
+    "officialAlerts": 0,
+    "officialAlertImpacts": []
+  },
+  "scope": "parser → provider → isolated SQLite → panel service layer; not HTTP route, not browser"
+}

@@ -1,0 +1,184 @@
+{
+  "gitHead": "50bad03ee3560c7ff8fb398bee170b9b2368e7bd",
+  "workspaceClean": true,
+  "verdict": "PASS",
+  "conclusionZh": "R1.5-1按ADR-009映射PASS；VNSGN原点海况不可用",
+  "summary": {
+    "total": 95,
+    "passed": 95,
+    "harnessFailed": [],
+    "prerequisiteMissing": [],
+    "businessBlocked": []
+  },
+  "coverage_vnsgn_origin_land": {
+    "name": "coverage_port-ho-chi-minh",
+    "kind": "business",
+    "pass": true,
+    "detail": "full seven-day marine + land"
+  },
+  "adr009Checks": [
+    {
+      "name": "adr009_reference_present_port-ho-chi-minh",
+      "kind": "business",
+      "pass": true,
+      "detail": "marineReference returned after restart"
+    },
+    {
+      "name": "adr009_reference_labelled_port-ho-chi-minh",
+      "kind": "business",
+      "pass": true,
+      "detail": "{\"name\":\"胡志明关联海域海况参考（工程取点）\",\"kind\":\"engineering_reference_point\",\"official\":false,\"berth\":false,\"model\":\"best_match\"}"
+    },
+    {
+      "name": "adr009_reference_fresh_port-ho-chi-minh",
+      "kind": "business",
+      "pass": true,
+      "detail": "status=fresh historical=false lastSuccess=2026-10-10T06:42:04.550Z"
+    },
+    {
+      "name": "adr009_reference_sqlite_7d_port-ho-chi-minh",
+      "kind": "business",
+      "pass": true,
+      "detail": "169/169"
+    },
+    {
+      "name": "adr009_reference_api_7d_port-ho-chi-minh",
+      "kind": "business",
+      "pass": true,
+      "detail": "169/169"
+    },
+    {
+      "name": "adr009_reference_grid_recorded_port-ho-chi-minh",
+      "kind": "business",
+      "pass": true,
+      "detail": "{\"requestedLatitude\":10.2917,\"requestedLongitude\":107.0417,\"returnedLatitude\":10.291664,\"returnedLongitude\":107.04167,\"requestedToReturnedKm\":0.01,\"modelRequested\":\"best_match\",\"providerGenerationTimeMs\":0.2321004867553711,\"fetchedAt\":\"2026-10-10T06:42:04.550Z\"}"
+    },
+    {
+      "name": "adr009_reference_isolated_port-ho-chi-minh",
+      "kind": "business",
+      "pass": true,
+      "detail": "originRowsFromReference=0 referenceRowsNotPureReference=0"
+    },
+    {
+      "name": "adr009_origin_marine_disclosed_port-ho-chi-minh",
+      "kind": "business",
+      "pass": true,
+      "detail": "originMarineAvailable=false coverageNote=true"
+    },
+    {
+      "name": "adr009_browser_shows_marine_reference_label_port-ho-chi-minh",
+      "kind": "business",
+      "pass": true,
+      "detail": "reference block name + engineering-point label"
+    },
+    {
+      "name": "adr009_browser_shows_marine_reference_status_port-ho-chi-minh",
+      "kind": "business",
+      "pass": true,
+      "detail": "status fresh + update time"
+    },
+    {
+      "name": "adr009_browser_shows_marine_reference_grid_port-ho-chi-minh",
+      "kind": "business",
+      "pass": true,
+      "detail": "requested vs returned grid shown"
+    }
+  ],
+  "originMarineAvailable": false,
+  "apiReference": {
+    "refKey": "marine-ref:port-ho-chi-minh:ganh-rai-eng",
+    "nameZh": "胡志明关联海域海况参考（工程取点）",
+    "kind": "engineering_reference_point",
+    "latitude": 10.2917,
+    "longitude": 107.0417,
+    "model": "best_match",
+    "approxDistanceKm": 62,
+    "officialRepresentativePoint": false,
+    "berthConditions": false,
+    "labelZh": "工程取点：01/2026/TT-BXD 胡志明港水域 Gành Rái/Đồng Tranh 湾区（HCM1–HCM7）内海上点，距港口坐标约 62 km；非官方代表点，不代表泊位/港内条件；港口自身海况仍按缺测显示。",
+    "sourceId": "open-meteo-marine-reference",
+    "fetchedAt": "2026-10-10T06:42:04.550Z",
+    "hourlyReturned": 169,
+    "hourlyWithMarine": 169,
+    "firstInstant": "2026-10-10T06:00:00.000Z",
+    "lastInstant": "2026-10-17T06:00:00.000Z",
+    "maxWaveHeightM": 0.66,
+    "status": "fresh",
+    "statusNoteZh": "参考海况为最新且 7 天完整。",
+    "lastAttemptAt": "2026-10-10T06:42:04.550Z",
+    "lastAttemptOutcome": "success",
+    "lastSuccessAt": "2026-10-10T06:42:04.550Z",
+    "showingHistoricalData": false,
+    "historicalImpactCount": 0,
+    "grid": {
+      "requestedLatitude": 10.2917,
+      "requestedLongitude": 107.0417,
+      "returnedLatitude": 10.291664,
+      "returnedLongitude": 107.04167,
+      "requestedToReturnedKm": 0.01,
+      "modelRequested": "best_match",
+      "providerGenerationTimeMs": 0.2321004867553711,
+      "fetchedAt": "2026-10-10T06:42:04.550Z"
+    },
+    "coverage": {
+      "expectedHours": 169,
+      "hourlyWithMarine": 169,
+      "missingHours": 0,
+      "complete": true
+    },
+    "forecastsReturned": 170,
+    "impactsReturned": 0
+  },
+  "browser": [
+    {
+      "id": "navigate_no_error",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "id": "document_complete",
+      "pass": true,
+      "detail": "complete"
+    },
+    {
+      "id": "forecast_meta_rendered",
+      "pass": true,
+      "detail": "data-testid=port-weather-forecast-meta"
+    },
+    {
+      "id": "page_text_non_empty",
+      "pass": true,
+      "detail": "body 11956 chars"
+    },
+    {
+      "id": "browser_hourly_current_match_api",
+      "pass": true,
+      "detail": "expected \"hourly 169 / current 1\""
+    },
+    {
+      "id": "browser_total_match_api",
+      "pass": true,
+      "detail": "expected total 170"
+    },
+    {
+      "id": "browser_shows_marine_note",
+      "pass": true,
+      "detail": "marine coverage note rendered"
+    },
+    {
+      "id": "browser_shows_marine_reference_label",
+      "pass": true,
+      "detail": "reference block name + engineering-point label"
+    },
+    {
+      "id": "browser_shows_marine_reference_status",
+      "pass": true,
+      "detail": "status fresh + update time"
+    },
+    {
+      "id": "browser_shows_marine_reference_grid",
+      "pass": true,
+      "detail": "requested vs returned grid shown"
+    }
+  ]
+}

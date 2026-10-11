@@ -1,0 +1,164 @@
+# command: "C:\Program Files\Git\bin\bash.exe" scripts/audit-inventory.sh .
+# run at: 2026-10-10T11:06:28Z (19:06:28 UTC+8, from generated_at below)
+# repo HEAD: ba0126d3f6754071474969d671acdd24a7f882d8 (head= line below)
+# exit code: 0
+# nature: Neat Freak directory/rules/Git/Markdown inventory only. NOT a secret scan or security audit.
+# output (verbatim, from .tmp/pagasa/audit-inventory.log):
+# neat-freak inventory v2
+project_root=/d/try one/Shipping HOT
+generated_at=2026-10-10T11:06:28Z
+
+## platform-directories
+/c/Users/Administrator/.claude
+/c/Users/Administrator/.codex
+/c/Users/Administrator/.cursor
+/c/Users/Administrator/.trae
+/c/Users/Administrator/.codebuddy
+
+## other-agent-rule-artifacts
+
+## git
+git_root=D:/try one/Shipping HOT
+branch=codex/shipping-hot-r1-5
+head=ba0126d3f6754071474969d671acdd24a7f882d8
+status_entries=0
+worktrees=1
+
+## rule-chain-candidates
+/d/try one/Shipping HOT/AGENTS.md	lines=105	bytes=24862
+/c/Users/Administrator/.codex/AGENTS.md	lines=0	bytes=0
+
+## project-markdown
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/AGENTS.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/CONTRIBUTING.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/README.ja-JP.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/README.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/README.zh-CN.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/adr/ADR-001-use-newsnow-as-shipping-hot-foundation.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/adr/ADR-002-local-first-single-user-architecture.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/adr/ADR-003-separate-information-and-operational-data.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/adr/ADR-004-v1-real-provider-adapters.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/adr/ADR-005-v3-real-data-boundaries.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/architecture.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/archive/shipping-hot-v2-completion.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/live-verification.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/plans/inbox/shipping-hot-translation-t3.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/plans/shipping-hot-v1.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/plans/shipping-hot-v2.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/plans/shipping-hot-v3-real-data.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/status.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/v3-real-provider-matrix.md
+/d/try one/Shipping HOT/.tmp/ShippingHot-WebDiagnosis-20260908/docs/voyage-provider-gap.md
+/d/try one/Shipping HOT/.tmp/pr5-body-r1-closeout.md
+/d/try one/Shipping HOT/.tmp/pr5-body-r1-rereview.md
+/d/try one/Shipping HOT/.tmp/pr5-body-round3.md
+/d/try one/Shipping HOT/.tmp/pr5-body-round4.md
+/d/try one/Shipping HOT/.tmp/pr5-body.md
+/d/try one/Shipping HOT/.tmp/pr7-body-dual-clock.md
+/d/try one/Shipping HOT/.tmp/pr7-body-r151.md
+/d/try one/Shipping HOT/.tmp/pr7-body.md
+/d/try one/Shipping HOT/.tmp/pr7-fixed.md
+/d/try one/Shipping HOT/.tmp/pr7-prev.md
+/d/try one/Shipping HOT/.tmp/pr7-snap0.md
+/d/try one/Shipping HOT/AGENTS.md
+/d/try one/Shipping HOT/README.md
+/d/try one/Shipping HOT/docs/adr/ADR-001-use-newsnow-as-shipping-hot-foundation.md
+/d/try one/Shipping HOT/docs/adr/ADR-002-local-first-single-user-architecture.md
+/d/try one/Shipping HOT/docs/adr/ADR-003-separate-information-and-operational-data.md
+/d/try one/Shipping HOT/docs/adr/ADR-004-v1-real-provider-adapters.md
+/d/try one/Shipping HOT/docs/adr/ADR-005-v3-real-data-boundaries.md
+/d/try one/Shipping HOT/docs/adr/ADR-006-retire-vessel-and-voyage-capabilities.md
+/d/try one/Shipping HOT/docs/adr/ADR-007-intel-pipeline-llm-providers-and-paid-boundary.md
+/d/try one/Shipping HOT/docs/adr/ADR-008-external-intel-and-weather-data-sources.md
+/d/try one/Shipping HOT/docs/adr/ADR-009-vnsgn-area-reference-marine.md
+/d/try one/Shipping HOT/docs/architecture.md
+/d/try one/Shipping HOT/docs/archive/shipping-hot-v2-completion.md
+/d/try one/Shipping HOT/docs/archive/shipping-hot-v3-real-data.md
+/d/try one/Shipping HOT/docs/archive/vessel-capability-recovery.md
+/d/try one/Shipping HOT/docs/data-candidates/calendar/ID/2026/review.md
+/d/try one/Shipping HOT/docs/data-candidates/calendar/ID/2027/review.md
+/d/try one/Shipping HOT/docs/data-candidates/calendar/MY/2026/review.md
+/d/try one/Shipping HOT/docs/data-candidates/calendar/MY/2027/review.md
+/d/try one/Shipping HOT/docs/data-candidates/calendar/PH/2026/review.md
+/d/try one/Shipping HOT/docs/data-candidates/calendar/PH/2027/review.md
+/d/try one/Shipping HOT/docs/data-candidates/calendar/TH/2026/review.md
+/d/try one/Shipping HOT/docs/data-candidates/calendar/TH/2027/review.md
+/d/try one/Shipping HOT/docs/data-candidates/calendar/VN/2026/review.md
+/d/try one/Shipping HOT/docs/data-candidates/calendar/VN/2027/review.md
+/d/try one/Shipping HOT/docs/evidence/bmkg-cap-2026-10-10.md
+/d/try one/Shipping HOT/docs/evidence/metmalaysia-integration-2026-10-10.md
+/d/try one/Shipping HOT/docs/evidence/metmalaysia-warning-2026-10-10.md
+/d/try one/Shipping HOT/docs/evidence/nchmf-integration-2026-10-10.md
+/d/try one/Shipping HOT/docs/evidence/nchmf-warning-2026-10-10-integration-proposal.md
+/d/try one/Shipping HOT/docs/evidence/nchmf-warning-2026-10-10.md
+/d/try one/Shipping HOT/docs/evidence/pagasa-warning-2026-10-10-integration-proposal.md
+/d/try one/Shipping HOT/docs/evidence/pagasa-warning-2026-10-10.md
+/d/try one/Shipping HOT/docs/evidence/r1-5-1-live-eight-port-2026-10-10.md
+/d/try one/Shipping HOT/docs/evidence/r1-5-2-3-official-warning-rules-2026-10-10.md
+/d/try one/Shipping HOT/docs/evidence/th-w01-tmd-cap-2026-10-10.md
+/d/try one/Shipping HOT/docs/evidence/vnsgn-area-reference-marine-2026-10-10.md
+/d/try one/Shipping HOT/docs/evidence/vnsgn-marine-coverage-diagnosis-2026-10-10.md
+/d/try one/Shipping HOT/docs/intel-source-catalog.md
+/d/try one/Shipping HOT/docs/live-verification.md
+/d/try one/Shipping HOT/docs/plans/inbox/shipping-hot-six-country-official-calendar-completion.md
+/d/try one/Shipping HOT/docs/plans/inbox/shipping-hot-translation-t3.md
+/d/try one/Shipping HOT/docs/plans/r1-1-grep-exception-proposal.md
+/d/try one/Shipping HOT/docs/plans/shipping-hot-risk-intelligence-2026-09-29.md
+/d/try one/Shipping HOT/docs/plans/shipping-hot-standalone-content-2026-09-10.md
+/d/try one/Shipping HOT/docs/plans/shipping-hot-v1.md
+/d/try one/Shipping HOT/docs/plans/shipping-hot-v2.md
+/d/try one/Shipping HOT/docs/status.md
+/d/try one/Shipping HOT/docs/v3-real-provider-matrix.md
+/d/try one/Shipping HOT/docs/voyage-provider-gap.md
+
+## project-markdown-count
+81
+
+## root-entries
+/d/try one/Shipping HOT/.cursorindexingignore
+/d/try one/Shipping HOT/.data
+/d/try one/Shipping HOT/.dockerignore
+/d/try one/Shipping HOT/.env.local
+/d/try one/Shipping HOT/.git
+/d/try one/Shipping HOT/.github
+/d/try one/Shipping HOT/.gitignore
+/d/try one/Shipping HOT/.nvmrc
+/d/try one/Shipping HOT/.pnpm-store
+/d/try one/Shipping HOT/.tanstack
+/d/try one/Shipping HOT/.tmp
+/d/try one/Shipping HOT/.vscode
+/d/try one/Shipping HOT/AGENTS.md
+/d/try one/Shipping HOT/Dockerfile
+/d/try one/Shipping HOT/LICENSE
+/d/try one/Shipping HOT/README.md
+/d/try one/Shipping HOT/dist
+/d/try one/Shipping HOT/docker-compose.local.yml
+/d/try one/Shipping HOT/docker-compose.yml
+/d/try one/Shipping HOT/docs
+/d/try one/Shipping HOT/eslint.config.mjs
+/d/try one/Shipping HOT/example.env.server
+/d/try one/Shipping HOT/imports.app.d.ts
+/d/try one/Shipping HOT/index.html
+/d/try one/Shipping HOT/nitro.config.ts
+/d/try one/Shipping HOT/node_modules
+/d/try one/Shipping HOT/package.json
+/d/try one/Shipping HOT/patches
+/d/try one/Shipping HOT/pnpm-lock.yaml
+/d/try one/Shipping HOT/prototypes
+/d/try one/Shipping HOT/public
+/d/try one/Shipping HOT/pwa.config.ts
+/d/try one/Shipping HOT/screenshots
+/d/try one/Shipping HOT/scripts
+/d/try one/Shipping HOT/server
+/d/try one/Shipping HOT/shared
+/d/try one/Shipping HOT/src
+/d/try one/Shipping HOT/test
+/d/try one/Shipping HOT/tsconfig.app.json
+/d/try one/Shipping HOT/tsconfig.app.tsbuildinfo
+/d/try one/Shipping HOT/tsconfig.base.json
+/d/try one/Shipping HOT/tsconfig.json
+/d/try one/Shipping HOT/tsconfig.node.json
+/d/try one/Shipping HOT/tsconfig.node.tsbuildinfo
+/d/try one/Shipping HOT/uno.config.ts
+/d/try one/Shipping HOT/vite.config.ts
+/d/try one/Shipping HOT/vitest.config.ts

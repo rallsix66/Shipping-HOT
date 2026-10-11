@@ -1,0 +1,13 @@
+﻿HEAD be7802625430d9fa560100ba245822378df52ab9 started 2026-10-10T18:56:08.3999046+08:00 node v24.15.0 pnpm 10.30.3 os Microsoft Windows NT 10.0.19045.0
+status-before: []
+install exit=0
+build exit=0
+typecheck exit=0
+lint exit=0
+vitest exit=0
+smoke exit=0
+s7 exit=0
+audit-findings: [secret-like added lines: 2]
+audit exit=1
+status-after: []
+DONE

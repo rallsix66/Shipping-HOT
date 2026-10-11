@@ -31,13 +31,14 @@ describe("official weather alert provider", () => {
 
   it("maps official CAP timestamps and provenance without relying on HTML", () => {
     const [item] = parseWeatherAlertCap(`
-      <alert><identifier>tmd-123</identifier><sent>2026-08-15T00:00:00Z</sent><info><event>Gale Warning</event><effective>2026-08-15T01:00:00Z</effective><onset>2026-08-15T02:00:00Z</onset><expires>2026-08-15T06:00:00Z</expires><severity>Severe</severity><urgency>Immediate</urgency><certainty>Likely</certainty><headline>Gale warning near Laem Chabang</headline><description>Strong wind is expected.</description><area><areaDesc>Laem Chabang</areaDesc></area></info></alert>
+      <alert><identifier>tmd-123</identifier><sender>TMD</sender><sent>2026-08-15T00:00:00Z</sent><status>Actual</status><msgType>Alert</msgType><info><event>Gale Warning</event><effective>2026-08-15T01:00:00Z</effective><onset>2026-08-15T02:00:00Z</onset><expires>2026-08-15T06:00:00Z</expires><severity>Severe</severity><urgency>Immediate</urgency><certainty>Likely</certainty><headline>Gale warning near Laem Chabang</headline><description>Strong wind is expected.</description><area><areaDesc>Laem Chabang</areaDesc></area></info></alert>
     `, tmd, mockPorts, "2026-08-15T03:00:00.000Z")
     expect(item).toMatchObject({ sourceId: "tmd", publishedAt: "2026-08-15T00:00:00.000Z", sourceUpdatedAt: "2026-08-15T00:00:00.000Z", eventEligibility: true, severity: "warning", weather: { alertEffectiveAt: "2026-08-15T01:00:00.000Z", alertExpiresAt: "2026-08-15T06:00:00.000Z", alertUrgency: "Immediate", alertCertainty: "Likely" }, provenance: { sourceType: "official", dataNature: "reported", sourceId: "tmd" } })
   })
 
   it("parses the TMD public endpoint as RSS", () => {
-    expect(tmd.format).toBe("rss")
+    // The official entry is an RSS index of CAP documents (TH-W01); the RSS parser still reads the index shape.
+    expect(tmd.format).toBe("cap_index")
     const [item] = parseWeatherAlertRss(`
       <rss version="2.0"><channel><lastBuildDate>Tue, 18 Aug 2026 04:38:29 GMT</lastBuildDate><item><title>Heavy Rain</title><description>Heavy rain warning for the eastern region.</description><link>https://www.tmd.go.th/uploads/CAP/en/CAPTMD20260818054147_2.xml</link><pubDate>Mon, 17 Aug 2026 15:33:00 GMT</pubDate></item></channel></rss>
     `, tmd, mockPorts, "2026-08-18T05:00:00.000Z")

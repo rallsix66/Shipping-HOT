@@ -1,0 +1,4 @@
+
+Evidence: D:\try one\Shipping HOT\.tmp\s7-local\s7-integrated-evidence.json
+
+S7 CLEAN LOCAL INTEGRATED ACCEPTANCE PASS
