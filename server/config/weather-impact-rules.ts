@@ -76,6 +76,8 @@ export const officialAlertSourceCountry: Readonly<Record<string, string>> = {
   metmalaysia: "MY",
   // Issuing country only; VN-W01 notices carry no structured region and never associate a port.
   nchmf: "VN",
+  // Issuing country only; CN-W01/CN-W02 NMC products carry no structured region and never associate a port.
+  nmc: "CN",
 }
 
 /**

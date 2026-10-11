@@ -144,6 +144,18 @@ function WeatherChips({ weather }: { weather: WeatherDetail }) {
           <span>{`原文：${weather.noticeRaw.bodyText.length > 400 ? `${weather.noticeRaw.bodyText.slice(0, 400)}…` : weather.noticeRaw.bodyText}`}</span>
         </div>
       )}
+      {weather.cnNoticeRaw && (
+        <div className="flex flex-col gap-0.5 text-xs op-70" data-testid="cn-notice-raw">
+          {weather.cnNoticeRaw.historicalProductNotice && <span className="chip" data-testid="cn-historical-notice">{`历史产品提示（页面原文）：${weather.cnNoticeRaw.historicalProductNotice}。这是过去时刻产品，不是新生效预警。`}</span>}
+          {weather.cnNoticeRaw.liftStatement && <span data-testid="cn-lift-statement">{`官方主句：“${weather.cnNoticeRaw.liftStatement.sentence}” → 本条为解除通知（对象：${weather.cnNoticeRaw.liftStatement.object}），不撤销其他记录`}</span>}
+          <span>{`官方原始发布时间（原文文本，时区未确认，未换算）：${weather.cnNoticeRaw.publishTimeText ?? "未提供"}${weather.cnNoticeRaw.numberText ? ` · 期号 ${weather.cnNoticeRaw.numberText}` : ""}`}</span>
+          {weather.cnNoticeRaw.nextIssueText && <span>{`下次更新时间（不等于有效期）：${weather.cnNoticeRaw.nextIssueText}`}</span>}
+          <span data-testid="cn-raw-levels">{`原文颜色等级：${weather.cnNoticeRaw.rawColorLevel ?? "未提供"} · 台风强度等级原文：${weather.cnNoticeRaw.typhoonIntensityText ?? "未提供"} · 中心位置原文：${weather.cnNoticeRaw.centerPositionText ?? "未提供"}（均未映射为系统级别，不代表港口覆盖）`}</span>
+          {weather.cnNoticeRaw.typhoonObjects.length > 0 && <span>{`涉及台风对象（各自原文分段）：${weather.cnNoticeRaw.typhoonObjects.map(o => o.object).join("、")}`}</span>}
+          <span>{`关联港口：0 · 来源 ${weather.cnNoticeRaw.sourceUrl} · 身份 ${weather.cnNoticeRaw.column}:${weather.cnNoticeRaw.identityKey} · 最近抓取 ${formatDate(weather.cnNoticeRaw.fetchedAt)} · 首次接收 ${formatDate(weather.cnNoticeRaw.firstReceivedAt)}${weather.cnNoticeRaw.contentUpdatedAt ? ` · 内容更新于 ${formatDate(weather.cnNoticeRaw.contentUpdatedAt)}` : ""}`}</span>
+          <span>{`原文：${weather.cnNoticeRaw.bodyText.length > 400 ? `${weather.cnNoticeRaw.bodyText.slice(0, 400)}…` : weather.cnNoticeRaw.bodyText}`}</span>
+        </div>
+      )}
       {weather.alertRaw && (
         <div className="flex flex-col gap-0.5 text-xs op-70" data-testid="official-alert-raw">
           <span>

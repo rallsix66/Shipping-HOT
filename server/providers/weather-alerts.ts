@@ -7,6 +7,7 @@ import { portDirectoryBaseline } from "@shared/port-directory"
 import type { ArticleSourcePolicyConfig } from "@shared/article"
 import { METMALAYSIA_MIN_REQUEST_INTERVAL_MS, isPinnedMetMalaysiaUrl, parseMetMalaysiaWarnings } from "#/providers/metmalaysia-warning"
 import { type NchmfRunReport, collectNchmfNotices, isPinnedNchmfListUrl } from "#/providers/nchmf-warning"
+import { type NmcRunReport, collectNmcNotices } from "#/providers/nmc-warning"
 
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
 import { type CapSourceContext, capBodyUrlRejection, capIndexLinks, isRetiredBy, parseCapMessage, resolveCapBatch } from "#/providers/cap-alerts"
@@ -26,7 +27,7 @@ export interface WeatherAlertProvider {
   lastRunIssue?: () => WeatherAlertRunIssue | undefined
 }
 
-export const officialWeatherAlertSourceIds = new Set(["jma", "tmd", "bmkg", "metmalaysia", "nchmf"])
+export const officialWeatherAlertSourceIds = new Set(["jma", "tmd", "bmkg", "metmalaysia", "nchmf", "nmc"])
 
 export interface WeatherAlertResponse {
   ok: boolean
@@ -39,7 +40,7 @@ export interface WeatherAlertResponse {
 }
 
 export type WeatherAlertFetcher = (url: string, init?: { redirect?: "error" | "manual" | "follow" }) => Promise<WeatherAlertResponse>
-export type WeatherAlertParser = "jma" | "tmd" | "bmkg" | "metmalaysia" | "nchmf"
+export type WeatherAlertParser = "jma" | "tmd" | "bmkg" | "metmalaysia" | "nchmf" | "nmc"
 export type WeatherAlertSourceStatus = "verified_live" | "experimental" | "live_pending" | "disabled"
 
 export interface WeatherAlertSource {
@@ -48,7 +49,7 @@ export interface WeatherAlertSource {
   url: string
   sourceUrl: string
   /** "cap_index": RSS index whose items link to CAP 1.2 documents (TMD TH-W01); lifecycle comes from CAP. */
-  format: "rss" | "cap" | "cap_index" | "html" | "json_warning" | "html_notice_list"
+  format: "rss" | "cap" | "cap_index" | "html" | "json_warning" | "html_notice_list" | "html_page_set"
   /** Issuing country (ISO 3166-1 alpha-2) for CAP structured-area checks. */
   countryCode?: string
   /** CAP area association: ISO 3166-2 geocode (default) or polygon containment of same-country port coordinates. */
@@ -125,6 +126,21 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
     format: "html_notice_list",
     countryCode: "VN",
     parser: "nchmf",
+    enabled: false,
+    liveStatus: "experimental",
+  },
+  {
+    // CN-W01/CN-W02 (dots approved 76b39fc): limited official-product integration. Exactly six pinned NMC pages
+    // (nmc-warning.ts NMC_PAGES), one plain GET each, redirects refused; no link expansion / REST / PDFs. Raw text only:
+    // lifecycle/validity/timezone unknown, raw level unmapped, no port association, no HOT / WR-O01 / WR-O02.
+    // Runs only under the existing SHIPPING_WEATHER_ALERT_PROVIDER=experimental switch.
+    id: "nmc",
+    name: "National Meteorological Center (NMC, China Meteorological Administration)",
+    url: "https://www.nmc.cn/publish/country/warning/index.html",
+    sourceUrl: "https://www.nmc.cn/publish/country/warning/index.html",
+    format: "html_page_set",
+    countryCode: "CN",
+    parser: "nmc",
     enabled: false,
     liveStatus: "experimental",
   },
@@ -446,6 +462,7 @@ export interface OfficialWeatherAlertProviderOptions {
   throwOnSourceFailureWithoutLastKnown?: boolean
   /** Receives the per-run NCHMF report (counts received/filtered/failed/truncated) for evidence. */
   onNchmfReport?: (report: NchmfRunReport) => void
+  onNmcReport?: (report: NmcRunReport) => void
 }
 
 function markMissingFromCurrentIndex(item: FeedItem, fetchedAt: string): FeedItem {
@@ -495,6 +512,23 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
       }
       const results = await Promise.all(enabledSources.map(async (source) => {
         const previous = lastKnown.filter(item => item.sourceId === source.id)
+        if (source.format === "html_page_set") {
+          try {
+            const { items, report } = await collectNmcNotices(fetcher, { id: source.id, provenance: weatherAlertProvenance(source) }, fetchedAt, previous)
+            options.onNmcReport?.(report)
+            if (report.failed.length) {
+              const ids = report.failed.map(f => f.column)
+              runIssue = { errorCode: "nmc_partial_page_failure", errorMessage: `${source.name}: received ${report.received}, failed ${ids.length} (columns ${report.failed.map(f => `${f.column}: ${f.reason}`).join("; ")})`, failedIds: ids, failedCount: ids.length, receivedCount: report.received }
+            }
+            return items
+          } catch (error) {
+            const report = (error as { nmcReport?: NmcRunReport }).nmcReport
+            if (report) options.onNmcReport?.(report)
+            const failure = error instanceof ProviderError ? error : providerErrorFromUnknown(source.name, error, "provider_contract_changed")
+            if (!previous.length && options.throwOnSourceFailureWithoutLastKnown) throw failure
+            return previous.map(item => markFailed(item, fetchedAt, failure))
+          }
+        }
         let response: WeatherAlertResponse
         try {
           if (source.format === "json_warning") {

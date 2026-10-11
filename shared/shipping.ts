@@ -380,6 +380,41 @@ export interface WeatherDetail {
   standardizedSeverity?: "unmapped"
   /** Raw official notice fields (VN-W01 NCHMF HTML article). */
   noticeRaw?: OfficialNoticeRaw
+  /** Raw official product fields (CN-W01/CN-W02 NMC HTML pages). */
+  cnNoticeRaw?: CnNoticeRaw
+}
+
+/** CN-W01/CN-W02 NMC page product, raw text only (no timezone, validity, severity mapping or port coverage). */
+export interface CnNoticeRaw {
+  column: string
+  productName: string
+  pageTitle: string
+  /** Fixed column + normalized raw publish-time text, or (flash report) the full annual issue number. */
+  identityKey: string
+  identityBasis: "issue_number" | "publish_time"
+  authorText: string | null
+  numberText: string | null
+  ctitleText: string | null
+  /** Raw publish-time text exactly as printed; the page states no timezone. */
+  publishTimeText: string | null
+  /** "下次更新时间" raw text; NOT a validity/expiry time. */
+  nextIssueText: string | null
+  /** Page notice that the column shows past products (no new product in this period). */
+  historicalProductNotice: string | null
+  /** Only from an explicit official main sentence; marks this item only, revokes nothing else. */
+  liftStatement: { sentence: string, object: string } | null
+  /** Raw colour word from the main sentence; never mapped to a system/CAP severity. */
+  rawColorLevel: string | null
+  typhoonIntensityText: string | null
+  centerPositionText: string | null
+  typhoonObjects: { object: string, text: string }[]
+  bodyText: string
+  bodyTruncated: boolean
+  contentHash: string
+  sourceUrl: string
+  fetchedAt: string
+  firstReceivedAt: string
+  contentUpdatedAt?: string
 }
 
 export interface OfficialNoticeRaw {
