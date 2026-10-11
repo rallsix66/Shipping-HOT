@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto"
 import type { Database } from "db0"
-import { type PromoCalendarEvent, type PromoCountry, type PromoPlatform, isCivilDate, promoCountries, promoEvidenceSources, promoPlatforms } from "@shared/promo-calendar"
+import { type PromoCalendarEvent, type PromoCountry, type PromoPlatform, isCivilDate, promoCountries, promoEvidenceSource, promoPlatforms } from "@shared/promo-calendar"
 import type { PromoCandidate } from "#/services/promo-calendar"
 
 interface Row {
@@ -80,7 +80,7 @@ function toEvent(row: Row): PromoCalendarEvent {
   else if (!isCountry(row.country_code)) dataIssue = "invalid_country"
   else if (row.platform && !isPlatform(row.platform)) dataIssue = "invalid_platform"
   const storedConfirmed = row.confirmation_status === "confirmed"
-  const evidenceOk = Boolean(row.confirmation_source_id && promoEvidenceSources[row.confirmation_source_id] && httpsUrl(row.confirmation_evidence_ref) && row.confirmed_at)
+  const evidenceOk = Boolean(row.confirmation_source_id && promoEvidenceSource(row.confirmation_source_id) && httpsUrl(row.confirmation_evidence_ref) && row.confirmed_at)
   if (storedConfirmed && !evidenceOk && !dataIssue) dataIssue = "confirmed_without_evidence"
   const confirmed = storedConfirmed && evidenceOk && !dataIssue
   const entryKind = row.entry_kind === "rule" || row.entry_kind === "manual" ? row.entry_kind : "legacy"
@@ -161,7 +161,7 @@ export class PromoCalendarRepository {
     if (input.countryCode !== row.country_code || input.platform !== current.platform) throw new PromoCalendarError("country_platform_mismatch", 422)
     if (current.windowStatus === "pending") throw new PromoCalendarError("window_pending_not_confirmable", 409)
     const sourceId = typeof input.evidenceSourceId === "string" ? input.evidenceSourceId : ""
-    const source = promoEvidenceSources[sourceId]
+    const source = promoEvidenceSource(sourceId)
     if (!source) throw new PromoCalendarError("evidence_source_required", 422)
     const url = httpsUrl(input.evidenceRef)
     if (!url) throw new PromoCalendarError("evidence_ref_required", 422)

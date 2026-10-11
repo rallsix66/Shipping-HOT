@@ -25,6 +25,11 @@ export const promoEvidenceSources: Record<string, { label: string, host?: string
   "manual_url": { label: "人工证据（HTTPS 链接）" },
 }
 
+/** Own-key-only whitelist lookup shared by write and read validation (rejects inherited keys like toString / __proto__). */
+export function promoEvidenceSource(id: unknown): (typeof promoEvidenceSources)[string] | undefined {
+  return typeof id === "string" && Object.prototype.hasOwnProperty.call(promoEvidenceSources, id) ? promoEvidenceSources[id] : undefined
+}
+
 export interface PromoConfirmation {
   sourceId: string
   evidenceRef: string

@@ -151,6 +151,24 @@ describe("r1.5-5 persistence, regeneration and confirmation", () => {
     native.close()
   })
 
+  it("evidence source lookup is own-key only: inherited keys rejected on write, anomalous legacy rows read as pending", async () => {
+    const { native, repo } = await setup()
+    await repo.upsertGenerated(generatePromoCandidates(2026).candidates, NOW)
+    const base = { id: promoCandidateId("E-R01", 2026, "TH", "shopee", "m07"), countryCode: "TH", platform: "shopee", evidenceRef: "https://evil.example.com/x" }
+    for (const key of ["toString", "__proto__", "constructor", "hasOwnProperty", "unknown-src"]) {
+      await expect(repo.confirm({ ...base, evidenceSourceId: key }, NOW)).rejects.toMatchObject({ code: "evidence_source_required" })
+    }
+    expect((await repo.get(base.id))?.confirmationStatus).toBe("pending")
+    native.prepare("UPDATE ops_calendar_event SET confirmation_status = 'confirmed', confirmation_source_id = '__proto__', confirmation_evidence_ref = 'https://evil.example.com/x', confirmed_at = ? WHERE id = ?").run(NOW, base.id)
+    native.prepare("INSERT INTO ops_calendar_event (id, country_code, title, starts_at, ends_at, category, basis_kind, basis_ref, confirmation_status, rule_id, notes, created_at, updated_at, confirmation_source_id, confirmation_evidence_ref, confirmed_at) VALUES ('legacy-tostring','VN','旧记录','2026-05-05','2026-05-05','promo','manual',NULL,'confirmed',NULL,NULL,?,?,'toString','https://evil.example.com/y',?)").run(NOW, NOW, NOW)
+    for (const id of [base.id, "legacy-tostring"]) {
+      const row = await repo.get(id)
+      expect(row).toMatchObject({ confirmationStatus: "pending", confirmation: null, dataIssue: "confirmed_without_evidence" })
+      expect(promoStatusLabel(row!)).toBe("数据异常（待确认）")
+    }
+    native.close()
+  })
+
   it("xX-E03 accepts only the catalog-supported country host on a full label boundary; manual_url stays manual", async () => {
     const { native, repo } = await setup()
     await repo.upsertGenerated(generatePromoCandidates(2026).candidates, NOW)
