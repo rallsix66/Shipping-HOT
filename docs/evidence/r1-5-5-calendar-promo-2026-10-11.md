@@ -10,6 +10,13 @@
 2. **人工编辑后的确认状态**：对已确认记录改了日期或标题后，状态退回待确认，旧证据只作为 `previousConfirmation` 历史保留，不再算作已确认；没有实际变化的编辑不会降级。新增测试「确认 → 改日期 → 再生成」：人工改动保留，旧确认失效。只改了仓库层，没有新增 UI/API。
 3. 测试从 9 项增加到 11 项。之前的生成/API/24-24 证据（`fdfe238`）没有重跑：本轮改动只涉及确认校验和编辑逻辑，那次运行中唯一的确认用的是 XX-E01（shopee.vn），新规则下依然有效。
 
+## 0b. dots P2：信源白名单查找（代码 `11269fd9e9877beffb2074e7a849547ff9e1307f`）
+- 原问题：用 evidenceSourceId 直接索引普通对象，再做真值判断。`toString`/`__proto__` 等键会命中继承属性，从而绕过国家和域名校验，读出时还显示为已确认。
+- 修复：新增 `promoEvidenceSource()`，只查对象自身的键，写入和读出校验共用这一个函数。写入时，继承键（toString、__proto__、constructor、hasOwnProperty）和未知信源一律以 `evidence_source_required` 拒绝。库里已有的此类异常行，读出为「数据异常（待确认）」，confirmation 为 null。
+- 测试：写入负例覆盖 toString、__proto__ 等 5 个键；读出负例 2 条（直接写入的 `__proto__` 行和旧记录 `toString` 行）。现在共 12 项。没有扩展接口或页面。
+- 门禁（干净 SHA `11269fd`，`docs/evidence/gate-11269fd/`）：install 0 · build 0 · typecheck 0 · lint 0 · vitest 0（783 通过 / 3 跳过）· smoke:p0-native 0 · S7 0。`audit-inventory.sh .` exit 0，只是清单脚本，不是密钥扫描；自写 rg 扫描（`git diff b0fe880..11269fd`）原始 exit 1，表示无匹配；人工复核没有密钥。
+- 各轮证据对应的 SHA 不同，不能混用：24/24 隔离验证在 `fdfe238`；P2 门禁在 `5a7c9d2`；本轮门禁在 `11269fd`。上游抓取和天气测试都没有重跑。E-R04/E-R06 的缺口不变：只有节日锚点，促销窗口待定。
+
 ## 1. 实现范围
 | 项 | 做法 |
 |---|---|
@@ -34,7 +41,7 @@
 
 2026 年共 488 条候选。2027 年只生成 E-R01/02/03，E-R04/05/06 全部作为缺口（待定）。
 
-## 3. 测试（fixture，`server/services/promo-calendar.test.ts`，9 项）
+## 3. 测试（fixture，`server/services/promo-calendar.test.ts`，当前 12 项：`fdfe238` 时 9 项，`5a7c9d2` 时 11 项，信源查找修复后 12 项）
 覆盖：适用范围（平台/国家/规则）；闰年、月底、跨年；非法日期 / start>end / 非法国家与平台；重复生成幂等；同日多平台；确认后再生成不覆盖（原生成依据保留）；人工改过和人工录入不被覆盖、可以区分；缺证据、只传 confirmed、http 链接、国家或平台不符、信源不适用、域名不符、锚点行、未知 id 都被拒绝；旧记录标为 confirmed 但没有证据的，显示为「数据异常（待确认）」。迁移 016 让 schema 升到 v16，因此 015/article/translation 测试和 S7 的版本期望同步改为 16。
 
 ## 4. 隔离 SQLite → 重启 → API → 真实 /calendar（`fdfe238`，工作区干净）
