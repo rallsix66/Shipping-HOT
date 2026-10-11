@@ -1,0 +1,11 @@
+﻿sha fdfe238caa67e338fc96beb59955c707e60bd8fb clean=[] start 2026-10-11T11:53:25.9031961+08:00
+pnpm install --frozen-lockfile => exit 0  2026-10-11T11:53:28.0697379+08:00
+pnpm build => exit 0  2026-10-11T11:53:42.0432949+08:00
+pnpm typecheck => exit 0  2026-10-11T11:53:45.1937318+08:00
+pnpm lint => exit 0  2026-10-11T11:54:02.2603055+08:00
+pnpm exec vitest run => exit 0  2026-10-11T11:54:11.5189961+08:00
+pnpm smoke:p0-native => exit 0  2026-10-11T11:54:12.5419011+08:00
+node scripts/e2e-s7-integrated.mjs => exit 0  2026-10-11T11:54:51.5665121+08:00
+"C:\Program Files\Git\bin\bash.exe" scripts/audit-inventory.sh => exit 64  2026-10-11T11:54:51.6161772+08:00
+bash scripts/audit-inventory.sh . => exit 0  2026-10-11T11:55:01.1246931+08:00 (inventory only; NOT a secret scan)
+self key-like scan (git diff e6b77ce..fdfe238) => exit 1
