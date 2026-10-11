@@ -100,6 +100,7 @@ function toEvent(row: Row): PromoCalendarEvent {
     basisRef: row.basis_ref,
     confirmationStatus: confirmed ? "confirmed" : "pending",
     confirmation: confirmed ? { sourceId: row.confirmation_source_id!, evidenceRef: row.confirmation_evidence_ref!, note: row.confirmation_note, confirmedAt: row.confirmed_at! } : null,
+    previousConfirmation: !storedConfirmed && row.confirmation_source_id && row.confirmation_evidence_ref && row.confirmed_at ? { sourceId: row.confirmation_source_id, evidenceRef: row.confirmation_evidence_ref, note: row.confirmation_note, confirmedAt: row.confirmed_at } : null,
     manualEditedAt: row.manual_edited_at,
     notes: row.notes,
     dataIssue,
@@ -164,7 +165,10 @@ export class PromoCalendarRepository {
     if (!source) throw new PromoCalendarError("evidence_source_required", 422)
     const url = httpsUrl(input.evidenceRef)
     if (!url) throw new PromoCalendarError("evidence_ref_required", 422)
-    if (source.host && !(url.hostname === source.host || url.hostname.endsWith(`.${source.host}`) || (source.host.endsWith(".") && url.hostname.includes(source.host)))) throw new PromoCalendarError("evidence_host_mismatch", 422)
+    const expectedHost = source.hostsByCountry ? source.hostsByCountry[row.country_code as PromoCountry] : source.host
+    if (source.hostsByCountry && !expectedHost) throw new PromoCalendarError("evidence_not_applicable", 422)
+    // Exact host, or a subdomain on a full label boundary only.
+    if (expectedHost && !(url.hostname === expectedHost || url.hostname.endsWith(`.${expectedHost}`))) throw new PromoCalendarError("evidence_host_mismatch", 422)
     if (source.platforms && !source.platforms.includes(current.platform)) throw new PromoCalendarError("evidence_not_applicable", 422)
     if (source.countries && !source.countries.includes(row.country_code as PromoCountry)) throw new PromoCalendarError("evidence_not_applicable", 422)
     if (source.ruleIds && !source.ruleIds.includes(row.rule_id as never)) throw new PromoCalendarError("evidence_not_applicable", 422)
@@ -191,7 +195,11 @@ export class PromoCalendarRepository {
     const next = { countryCode: current.countryCode, platform: current.platform, startsAt: patch.startsAt ?? current.startsAt, endsAt: patch.endsAt ?? current.endsAt }
     const issue = validatePromoFields(next)
     if (issue) throw new PromoCalendarError(issue, 422)
-    await this.db.prepare("UPDATE ops_calendar_event SET title = ?, starts_at = ?, ends_at = ?, manual_edited_at = ?, updated_at = ? WHERE id = ?").run(patch.title ?? current.title, next.startsAt, next.endsAt, now, now, id)
+    const title = patch.title ?? current.title
+    const substantive = title !== current.title || next.startsAt !== current.startsAt || next.endsAt !== current.endsAt
+    if (!substantive) return current
+    // A substantive edit invalidates any confirmation: status reverts to pending; old evidence columns stay as history only.
+    await this.db.prepare("UPDATE ops_calendar_event SET title = ?, starts_at = ?, ends_at = ?, manual_edited_at = ?, updated_at = ?, confirmation_status = 'pending' WHERE id = ?").run(title, next.startsAt, next.endsAt, now, now, id)
     return (await this.get(id))!
   }
 }

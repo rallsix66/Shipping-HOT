@@ -151,6 +151,41 @@ describe("r1.5-5 persistence, regeneration and confirmation", () => {
     native.close()
   })
 
+  it("xX-E03 accepts only the catalog-supported country host on a full label boundary; manual_url stays manual", async () => {
+    const { native, repo } = await setup()
+    await repo.upsertGenerated(generatePromoCandidates(2026).candidates, NOW)
+    const ph = { id: promoCandidateId("E-R01", 2026, "PH", "shopee", "m10"), countryCode: "PH", platform: "shopee", evidenceSourceId: "XX-E03" }
+    await expect(repo.confirm({ ...ph, evidenceRef: "https://shopee.evil.example/m/10-10" }, NOW)).rejects.toMatchObject({ code: "evidence_host_mismatch" })
+    await expect(repo.confirm({ ...ph, evidenceRef: "https://evilshopee.ph/m/10-10" }, NOW)).rejects.toMatchObject({ code: "evidence_host_mismatch" })
+    await expect(repo.confirm({ ...ph, evidenceRef: "https://shopee.ph.evil.example/m/10-10" }, NOW)).rejects.toMatchObject({ code: "evidence_host_mismatch" })
+    await expect(repo.confirm({ ...ph, evidenceRef: "https://shopee.vn/m/10-10" }, NOW)).rejects.toMatchObject({ code: "evidence_host_mismatch" })
+    const th = { id: promoCandidateId("E-R01", 2026, "TH", "shopee", "m10"), countryCode: "TH", platform: "shopee", evidenceSourceId: "XX-E03" }
+    await expect(repo.confirm({ ...th, evidenceRef: "https://shopee.ph/m/10-10" }, NOW)).rejects.toMatchObject({ code: "evidence_not_applicable" })
+    expect((await repo.confirm({ ...ph, evidenceRef: "https://shopee.ph/m/10-10" }, NOW)).confirmation?.sourceId).toBe("XX-E03")
+    const manual = await repo.confirm({ ...th, evidenceSourceId: "manual_url", evidenceRef: "https://shopee.co.th/m/10-10" }, NOW)
+    expect(manual.confirmation?.sourceId).toBe("manual_url")
+    expect(promoStatusLabel(manual)).toBe("已由人工证据确认")
+    native.close()
+  })
+
+  it("confirm, edit date, regenerate: manual edit preserved, old confirmation invalid (history only)", async () => {
+    const { native, repo } = await setup()
+    await repo.upsertGenerated(generatePromoCandidates(2026).candidates, NOW)
+    const id = promoCandidateId("E-R02", 2026, "VN", "shopee", "m09")
+    await repo.confirm({ id, countryCode: "VN", platform: "shopee", evidenceSourceId: "XX-E01", evidenceRef: "https://shopee.vn/blog/9-15" }, NOW)
+    const same = await repo.editManually(id, { startsAt: "2026-09-15" }, LATER)
+    expect(same.confirmationStatus).toBe("confirmed")
+    const edited = await repo.editManually(id, { startsAt: "2026-09-14" }, LATER)
+    expect(edited).toMatchObject({ confirmationStatus: "pending", confirmation: null, previousConfirmation: { sourceId: "XX-E01", evidenceRef: "https://shopee.vn/blog/9-15" }, dataIssue: null })
+    const regen = await repo.upsertGenerated(generatePromoCandidates(2026).candidates, LATER)
+    expect(regen.protected).toBe(1)
+    expect(await repo.get(id)).toMatchObject({ startsAt: "2026-09-14", confirmationStatus: "pending", confirmation: null })
+    const titled = await repo.confirm({ id, countryCode: "VN", platform: "shopee", evidenceSourceId: "XX-E01", evidenceRef: "https://shopee.vn/blog/9-14" }, LATER)
+    expect(titled.confirmationStatus).toBe("confirmed")
+    expect((await repo.editManually(id, { title: "改名" }, LATER)).confirmationStatus).toBe("pending")
+    native.close()
+  })
+
   it("manual edits and manual entries are never overwritten and stay distinguishable", async () => {
     const { native, repo } = await setup()
     await repo.upsertGenerated(generatePromoCandidates(2026).candidates, NOW)

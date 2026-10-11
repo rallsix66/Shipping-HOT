@@ -14,10 +14,11 @@ export type PromoEntryKind = "rule" | "manual" | "legacy"
 export type PromoWindowStatus = "determined" | "pending"
 
 /** Evidence sources allowed for an explicit confirmation (catalog §9 XX-E01..E06) plus a manual HTTPS reference. */
-export const promoEvidenceSources: Record<string, { label: string, host?: string, platforms?: PromoPlatform[], countries?: PromoCountry[], ruleIds?: PromoRuleId[] }> = {
+export const promoEvidenceSources: Record<string, { label: string, host?: string, hostsByCountry?: Partial<Record<PromoCountry, string>>, platforms?: PromoPlatform[], countries?: PromoCountry[], ruleIds?: PromoRuleId[] }> = {
   "XX-E01": { label: "Shopee 越南博客", host: "shopee.vn", platforms: ["shopee"], countries: ["VN"] },
   "XX-E02": { label: "Lazada Solutions 活动公告", host: "lazadasolutions.com", platforms: ["lazada"] },
-  "XX-E03": { label: "Shopee 各国活动页", host: "shopee.", platforms: ["shopee"] },
+  // Catalog §9 only documents shopee.ph (e.g. https://shopee.ph/m/10-10); other country domains are not catalog-supported.
+  "XX-E03": { label: "Shopee 各国活动页", hostsByCountry: { PH: "shopee.ph" }, platforms: ["shopee"] },
   "XX-E04": { label: "Shopee 卖家学习中心", host: "banhang.shopee.vn", platforms: ["shopee"], countries: ["VN"] },
   "XX-E05": { label: "TikTok Shop 卖家大学", host: "tiktok.com", platforms: ["tiktok_shop"] },
   "XX-E06": { label: "Harbolnas 官网", host: "harbolnas.com", countries: ["ID"], ruleIds: ["E-R05"] },
@@ -49,6 +50,8 @@ export interface PromoCalendarEvent {
   /** Effective status: "confirmed" only when stored as confirmed AND evidence + dates are valid. */
   confirmationStatus: "pending" | "confirmed"
   confirmation: PromoConfirmation | null
+  /** Earlier confirmation invalidated by a substantive manual edit; history only, never counts as confirmed. */
+  previousConfirmation: PromoConfirmation | null
   manualEditedAt: string | null
   notes: string | null
   /** Set when stored data is abnormal (invalid date / platform / missing evidence); never shown as confirmed. */
