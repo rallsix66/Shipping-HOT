@@ -4,7 +4,7 @@
 
 1. **可可靠确认的字段**
    - 入口状态：HTTP 状态、是否重定向、抓取时间。
-   - 空状态：PH-W01 固定原文 “No Active Tropical Cyclone within the Philippine Area of Responsibility”；PH-W02 固定原文 “As of today, there is no Weather Advisory issued.”。两者都只表示**该页面此刻没有发布内容**，不代表“全国无天气风险”。
+   - 空状态：PH-W01 固定原文 “No Active Tropical Cyclone within the Philippine Area of Responsibility”；PH-W02 固定原文 “As of today, there is no Weather Advisory issued.”。两者都只表示**该页面此刻没有发布内容**，不代表“菲律宾无预警”或“无天气风险”。
 2. **必须标为未知（直到有正样本证实）**：公报身份/编号、修订与取消关系、原文发布时间与时区、有效期、官方等级体系、影响区域、PDF 链接与 PDF 字段、历史保留时长。
 3. **三种状态必须分开**
    - 无公报：结构完整，且出现上面的固定空状态原文 → 成功、空，含义按原文表述，不扩大。

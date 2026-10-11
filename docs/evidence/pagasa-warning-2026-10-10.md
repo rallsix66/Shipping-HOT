@@ -29,4 +29,9 @@
 - 提交前扫描 raw：类密钥赋值 0 处；32 位十六进制串每页 2 处，均为站点 `/combine/<hash>-<ts>.css/.js` 静态资源合并文件名，不是密钥，保留。
 
 ## 结论
-入口结构可读，但本次快照中 PAGASA 没有活动公报或预警，**缺少正样本，不能据此设计字段级解析**。接入建议见 `docs/evidence/pagasa-warning-2026-10-10-integration-proposal.md`。
+抓取时（2026-10-10 19:03–19:04 UTC+8）三个页面分别只显示：PH-W01 “No Active Tropical Cyclone within the Philippine Area of Responsibility”（PAR 内无活动热带气旋）；TC Advisory 页 “No Active Tropical Cyclone outside the Philippine Area of Responsibility”（PAR 外无活动热带气旋）；PH-W02 “As of today, there is no Weather Advisory issued.”（今天未发布 Weather Advisory）。这只是这三个页面当时的原文，**不能**解读为“菲律宾无预警”或“无天气风险”。缺少正样本，不能据此设计字段级解析。
+
+## 检查类型区分（2026-10-11 补充）
+- 自写扫描：抓取脚本的脱敏 + 提交前对 raw 的类密钥正则扫描（0 处）。仅覆盖本目录 raw。
+- 盘点脚本：Neat Freak `scripts/audit-inventory.sh` 只是目录/规则链/Git/Markdown 盘点，exit 0 **不是**密钥扫描或安全审计。本次运行：2026-10-10 19:06:28 UTC+8，HEAD `ba0126d3f6754071474969d671acdd24a7f882d8`，exit 0，完整输出 `audit-inventory-ba0126d.log`。
+- 人工复核：对页面结构、空状态原文的人工阅读。接入建议见 `docs/evidence/pagasa-warning-2026-10-10-integration-proposal.md`。

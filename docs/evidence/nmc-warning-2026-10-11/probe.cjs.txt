@@ -1,0 +1,17 @@
+// PAGASA read-only probe (PH-W01/PH-W02). One request per URL, no redirect following (manual), logs + redacted raw.
+const fs=require('fs');const out='.tmp/nmc/raw/';fs.mkdirSync(out,{recursive:true});
+const urls=process.argv.slice(2);
+function redact(s){return s
+ .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,m=>/appid|api[_-]?key|token|openweathermap|gtag|googletagmanager/i.test(m)?'<!-- script removed (contained key/token/tracker; redacted) -->':m)
+ .replace(/((?:appid|api[_-]?key|key|token|access_token|csrf[-_]?token|_token)\s*[=:]\s*["']?)[A-Za-z0-9_\-\.]{12,}/gi,'$1<redacted>')
+ .replace(/(name="(?:_token|csrf-token|__VIEWSTATE|__EVENTVALIDATION)"[^>]*(?:value|content)=")[^"]*/gi,'$1<redacted>')
+ .replace(/(<meta[^>]+name="csrf-token"[^>]+content=")[^"]*/gi,'$1<redacted>')}
+(async()=>{for(const u of urls){const t0=Date.now();const at=new Date().toISOString();let line;
+ try{const r=await fetch(u,{redirect:'manual',headers:{'user-agent':'ShippingHOT-readonly/1.0'},signal:AbortSignal.timeout(40000)});
+  const buf=Buffer.from(await r.arrayBuffer());const name=u.replace(/^https?:\/\//,'').replace(/[^A-Za-z0-9.]+/g,'_').slice(-120);
+  const ct=r.headers.get('content-type')||'';
+  if(/pdf/i.test(ct))fs.writeFileSync(out+name+(name.endsWith('.pdf')?'':'.pdf'),buf);else fs.writeFileSync(out+name+'.html',redact(buf.toString('utf8')));
+  fs.writeFileSync(out+name+'.headers.txt',[...r.headers].filter(([k])=>!/set-cookie|cookie/i.test(k)).map(([k,v])=>k+': '+v).join('\n'));
+  line=[at,r.status,u,ct,buf.length,r.headers.get('location')||'',(Date.now()-t0)+'ms'].join(' | ');
+ }catch(e){line=[at,'ERR',u,String(e.message||e),'',(Date.now()-t0)+'ms'].join(' | ')}
+ fs.appendFileSync('.tmp/nmc/fetch-log.txt',line+'\n');console.log(line)}})();
