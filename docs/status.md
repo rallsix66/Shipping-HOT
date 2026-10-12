@@ -87,7 +87,7 @@
     - **R2-3 复审返修（dots 17:06）**：unknown 恢复按尝试幂等记入 provider_usage，不释放预留（迁移 025，schema 25）；费用校验非负、有限、币种一致。预算门禁只称为预估预算门禁。见计划 §6。
     - **R2 现有 Feed 统一安全抓取（dots 17:16）**：R2-3 离线回执切片已关闭（保留限制：遗留 unknown 的保守预留可能重复占用；实际费用对账和真实调用方仍未完成）。本片让 Feed 列表请求改走 secureFetchArticle（只允许列表主机、2 MiB 上限），解析仍只用 feed.ts；默认开关和白名单不变；没有实网验证。见 `docs/plans/r2-feed-safe-fetch-2026-10-12.md`。R2 整体仍未完成。
     - **dots 17:29 复审 P2 修复**：defaultTransport 之前没有调用 `request.end()`，GET 不会发出、只会超时；已修复并补 timeout/error/超限清理，加 Node request 边界离线回归（`article-fetch-transport.test.ts`）。另勘误 gate-85e3c0c targeted 覆盖范围（feed-sync-job 是 4 项；没跑 article-fetch-job/article-extractor）。仍没有实网验证。
-    - **R2 原始字节/编码切片（2026-10-12，Codex 执行，待父会话审查）**：代码 `b8528e9494f4e3706b01dc0e0cce7def59887bd3`。transport 保留字节，解码前上限；BOM → HTTP charset → XML 声明/HTML meta → UTF-8，记录选择/冲突，严格解码失败保留旧数据。支持 GBK、TIS-620/windows-874、windows-1258，保留组合字符。原始字节仅在抓取结果中保留，不新增落库。Node request mock → Feed/intel SQLite 合成编码字节回归；非历史抓取/当次实网。干净代码 SHA 全门禁 **PASS**：install/build/typecheck/lint、定向 Feed **71/71**、全量 **103 files / 902 passed / 3 skipped**、P0/P2C/P3 Feed smoke、Neat Freak inventory 均 exit 0；日志 `docs/evidence/gate-b8528e9/`。Neat Freak 见该目录 closeout（盘点不等于安全审计）。无 UI/路由变化，浏览器/S7 **NOT_RUN**；实网/LLM **NOT_RUN**。CA、web_list/json_list、日期规则、registry/GET 接线及 R2 其他缺口不变；本切片待审，**R2 整体未完成**。
+    - **R2 原始字节/编码切片（2026-10-12，Codex 执行，父会话审查通过）**：代码 `b8528e9494f4e3706b01dc0e0cce7def59887bd3`。transport 保留字节，解码前上限；BOM → HTTP charset → XML 声明/HTML meta → UTF-8，记录选择/冲突，严格解码失败保留旧数据。支持 GBK、TIS-620/windows-874、windows-1258，保留组合字符。原始字节仅在抓取结果中保留，不新增落库。Node request mock → Feed/intel SQLite 合成编码字节回归；非历史抓取/当次实网。干净代码 SHA 全门禁 **PASS**：install/build/typecheck/lint、定向 Feed **71/71**、全量 **103 files / 902 passed / 3 skipped**、P0/P2C/P3 Feed smoke、Neat Freak inventory 均 exit 0；日志 `docs/evidence/gate-b8528e9/`。Neat Freak 见该目录 closeout（盘点不等于安全审计）。无 UI/路由变化，浏览器/S7 **NOT_RUN**；实网/LLM **NOT_RUN**。CA、web_list/json_list、日期规则、registry/GET 接线及 R2 其他缺口不变；编码切片已由父会话只读审查通过（未独立重跑），**R2 整体未完成**。
   - 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 **R1.5-1（整项）：** **BLOCKED**（2026-10-10 第二轮复审后；PR #7 未合并）。原因只剩一项：VNSGN 海况（浪/涌浪）缺测。其余七港七天海况 + 陆地覆盖已 PASS。
     - **口径来源（分开写）：** 「7 天」来自 9/29 主方案 R1.5-1（8 个港口都要有 7 天的海况和陆地预报）；具体滚动窗口 `[now−1h, now+7d]` 来自现有 `server/services/weather-panel-policy.ts`（`isForecastInstantInWindow` / `WEATHER_FORECAST_HORIZON_MS`）。验收按窗口内每个 UTC 整点逐一核验（唯一、首尾、无缺口、陆地 + 海况字段），current 单列。
     - **本轮修复（代码 `356e6fec9431747aa42624daf8f01cff9f971f76`）：** Open-Meteo marine + weather 两个现有端点改为 `forecast_days=8`、`past_days=1`（坐标、`cell_selection=sea`、数据源未改）；normalizer 原来只保留最早 170 条，改为先按保留窗口 `[now−1h−24h 降水回看, now+7d]` 过滤，再按上限 `7*24+24+8` 截断（截断时先丢最旧的）；仓储新增按窗口读取（截断保留最新）和陈旧回退读取；面板先读窗口；live-sync 诊断不再只读最早 176 条。固定时间测试覆盖下午、23:59:30、UTC 整零点、旧小时超过上限、current 与 hourly 并存、窗口末尾未来小时不被挤掉（`server/services/forecast-retention-window.test.ts`）。
@@ -108,6 +108,13 @@
   - **门禁（`356e6fe`，2026-10-10，Windows 10 19045 / Node v24.15.0 / pnpm 10.30.3）：** `pnpm install --frozen-lockfile` 0；`pnpm build` 0；`pnpm typecheck` 0；`pnpm lint` 0；Vitest **84 files / 587 passed / 3 skipped** exit 0；`pnpm smoke:p0-native` 0；S7 **151/151** exit 0；`pnpm test:r1-5-1-live` exit **2（BLOCKED）**；Neat Freak `scripts/audit-inventory.sh .` exit 0。**未**合并 / **未**部署 / **未**开始 R2。
 - **Neat Freak（本批）：** Git Bash `scripts/audit-inventory.sh .` exit **0**。
 - 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 **结论：** **R1.5 = IN PROGRESS**；R1.5-1 **BLOCKED**（VNSGN 海况）、R1.5-4 **BLOCKED**；**非**阶段 PASS。
+
+### R2 web_list — 独立解析器已验证，持久化接线待确认（2026-10-12）
+
+- 代码 `6c5e1515173f4d35a7c7d1b4f17176d4e813e725`：固定 AIHOT `44578fa` HTML 解析与配置白名单适配；严格日期规则，明确原文/精度/时区依据；复用 URL/安全策略。已有 NCHMF HTML 存档 + 合成日期 HTML 离线测试；无新生产来源、无业务实网请求。
+- 干净 SHA 门禁：install/build/typecheck/lint、三个 smoke 均 exit 0；web_list 定向 **34/34**；全量 **104 files / 936 passed / 3 skipped**。原始 UTF-8 日志、命令、SHA、raw exit 见 `docs/evidence/gate-6c5e151/`；真实 Neat Freak 收尾见该目录，inventory exit 0 不等于安全审计。
+- **整片 BLOCKED，非 PASS**：当前 `intel_source.kind` CHECK 不支持 web_list，版本表没有日期依据字段。按 AGENTS.md Confirm Before 已请求最小迁移 026 确认，尚未获得；因此未改 schema/种子，也未接 collector/storage。旧数据保留的 web_list 持久化闭环 **NOT_RUN**，不以纯解析测试替代。具体迁移范围和上游差异：`docs/plans/r2-web-list-2026-10-12.md`。
+- 浏览器/S7 **NOT_RUN**（无 UI/路由变更）；业务信源实网、付费、LLM **NOT_RUN**。CA、json_list、R3 不在本轮。父会话审查 pending，R2 整体未完成。
 
 ### R0 — 门禁 G 执行记录
 
