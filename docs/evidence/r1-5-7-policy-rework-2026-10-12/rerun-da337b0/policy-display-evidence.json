@@ -1,0 +1,459 @@
+{
+  "kind": "R1.5-7 policy library isolated SQLite -> restart -> API -> form -> /policies -> /calendar -> restart(next TEST_NOW)",
+  "ranAt": "2026-10-12T03:42:01.901Z",
+  "gitHead": "da337b0894ac6cd1ff517df38e42ab5c64dacd98",
+  "workspaceClean": true,
+  "runDir": "D:\\try one\\Shipping HOT\\.tmp\\r1-5-7-policy-2026-10-12T03-41-39-704Z",
+  "clock": {
+    "phase1and2": "2026-10-31T12:00:00+08:00",
+    "phase3": "2026-11-01T00:00:00+08:00",
+    "phase4": "2026-11-01T00:00:00+07:00",
+    "gate": "SHIPPING_TEST_CLOCK=1"
+  },
+  "fixtureNotice": "All policies are fixtures (isFixture=true, example.org links); none is a real official notice.",
+  "verdict": "PASS",
+  "writes": {
+    "negatives": {
+      "foreignOrigin": 403,
+      "officialWithoutFullText": "official_full_text_required",
+      "mediaNotRumor": "media_source_must_be_rumor",
+      "effectiveBeforeDate": "effective_status_before_effective_date",
+      "noEntrant": "entered_by_required"
+    },
+    "supersessionNegatives": {
+      "rumor": "supersession_requires_published_or_effective",
+      "draft": "supersession_requires_published_or_effective",
+      "fixtureToFormal": "fixture_flag_mismatch",
+      "idWithoutTimezone": "timezone_required",
+      "vnWrongTimezone": "timezone_country_mismatch"
+    },
+    "ids": {
+      "A": "policy:3f46b0f2-76a5-4465-bf7b-ee36419dd543",
+      "B": "policy:88075d58-2df0-4ae7-b43d-9f66e89eb3fb",
+      "C": "policy:667e5a51-a87c-4d2b-9901-e1e7a4d1d8e4",
+      "E": "policy:99161b98-97f6-4737-bf02-aa5a077c3954",
+      "X": "policy:3183cb99-a538-4aa4-b132-b37ae1d05240",
+      "Y": "policy:00243e7e-8774-4ed0-a8a6-3bbf0bbf1365",
+      "Z": "policy:6ec0db52-0f23-4006-8aaa-6cb5c42094f8",
+      "P": "policy:af8f8ea4-86a6-4a30-add7-0360b0a44951",
+      "Q": "policy:5b56e5c3-7816-428d-b933-7e035cbd2afd"
+    }
+  },
+  "api": {
+    "today": "2026-10-31",
+    "clock": "test",
+    "total": 9,
+    "statuses": {
+      "A": {
+        "status": "published",
+        "displayStatus": "published",
+        "autoActivated": false,
+        "datePosition": "future"
+      },
+      "B": {
+        "status": "published",
+        "displayStatus": "effective",
+        "autoActivated": true,
+        "datePosition": "in_effect"
+      },
+      "C": {
+        "status": "rumor",
+        "displayStatus": "rumor",
+        "autoActivated": false,
+        "datePosition": "not_applicable"
+      },
+      "E": {
+        "status": "published",
+        "displayStatus": "published",
+        "autoActivated": false,
+        "datePosition": "future"
+      },
+      "X": {
+        "status": "effective",
+        "displayStatus": "revised",
+        "autoActivated": false,
+        "datePosition": "superseded"
+      },
+      "Y": {
+        "status": "effective",
+        "displayStatus": "repealed",
+        "autoActivated": false,
+        "datePosition": "superseded"
+      },
+      "Z": {
+        "status": "effective",
+        "displayStatus": "effective",
+        "autoActivated": false,
+        "datePosition": "in_effect"
+      },
+      "P": {
+        "status": "effective",
+        "displayStatus": "effective",
+        "autoActivated": false,
+        "datePosition": "in_effect"
+      },
+      "Q": {
+        "status": "published",
+        "displayStatus": "published",
+        "autoActivated": false,
+        "datePosition": "future"
+      }
+    },
+    "detailAVersions": [
+      {
+        "n": 1,
+        "basis": "fixture 依据 v1：示例原文第 1 条",
+        "supersededBy": "policy:3f46b0f2-76a5-4465-bf7b-ee36419dd543:v2"
+      },
+      {
+        "n": 2,
+        "basis": "fixture 依据 v2：示例原文第 1 条（更正）",
+        "supersededBy": null
+      }
+    ],
+    "csvThLines": 2,
+    "listThTotal": 1,
+    "before": {
+      "records": 9,
+      "versions": 10,
+      "log": 16,
+      "providerUsage": 0,
+      "hash": "3641267988"
+    },
+    "after": {
+      "records": 9,
+      "versions": 10,
+      "log": 16,
+      "providerUsage": 0,
+      "hash": "3641267988"
+    },
+    "chain": {
+      "X": [
+        "revised",
+        "revised"
+      ],
+      "Y": [
+        "revised",
+        "repealed",
+        "repealed"
+      ],
+      "Z": [
+        "repealed",
+        "effective"
+      ],
+      "P": [
+        "effective",
+        "2026-11-01",
+        false
+      ],
+      "E": "published"
+    },
+    "phase3": {
+      "today": "2026-11-01",
+      "A": "published",
+      "AlocalToday": "2026-10-31",
+      "E": "effective",
+      "P": "effective",
+      "C": "rumor",
+      "D": "published",
+      "Deffective": "2026-11-05"
+    },
+    "phase4": {
+      "A": [
+        "effective",
+        "2026-11-01"
+      ],
+      "P": [
+        "revised",
+        true
+      ],
+      "Q": "effective"
+    }
+  },
+  "browser": {
+    "status": "RAN",
+    "relY": "本条修订：policy:3183cb99-a538-4aa4-b132-b37ae1d05240。 已被 policy:6ec0db52-0f23-4006-8aaa-6cb5c42094f8 废止",
+    "relP": "将于 2026-11-01（Asia/Ho_Chi_Minh）起被 policy:5b56e5c3-7816-428d-b933-7e035cbd2afd 修订（尚未生效，当前状态不变）",
+    "chrome": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    "screenshots": [
+      "policies-detail.png",
+      "calendar-cn-policy-2026-11-01.png",
+      "calendar-policy-2026-10-20.png"
+    ],
+    "nov1cn": {
+      "text": "政策生效日（参考，非停工事实）· 3 项\nVN\n[示例 fixture，非真实公告] [FIXTURE] 示例越南海关公告 A\n已发布待生效\n\n生效日 2026-11-01 · v2\n\n在政策库查看 →\nVN\n[示例 fixture，非真实公告] [FIXTURE] 示例 未来替代 Q\n已发布待生效\n\n生效日 2026-11-01 · v1\n\n在政策库查看 →\nCN\n[示例 fixture，非真实公告] [FIXTURE] 示例 中国海关公告 E\n已发布待生效\n\n生效日 2026-11-01 · v1\n\n在政策库查看 →",
+      "chip": "政策生效 3 项",
+      "promoShown": 0
+    },
+    "rows": [
+      {
+        "status": "revised",
+        "text": "[示例 fixture，非真实公告]\n[FIXTURE] 示例 链条 X\tVN\t—\t海关与税收\t已修订\t2026-10-01 · 已被替代 · Asia/Ho_Chi_Minh\t🏛 官方原文\tv1"
+      },
+      {
+        "status": "effective",
+        "text": "[示例 fixture，非真实公告]\n[FIXTURE] 示例 被未来替代 P\tVN\t—\t海关与税收\t已生效\t2026-10-01 · 生效期内 · Asia/Ho_Chi_Minh\t🏛 官方原文\tv1"
+      },
+      {
+        "status": "repealed",
+        "text": "[示例 fixture，非真实公告]\n[FIXTURE] 示例 链条 Y\tVN\t—\t海关与税收\t已废止\t2026-10-10 · 已被替代 · Asia/Ho_Chi_Minh\t🏛 官方原文\tv1"
+      },
+      {
+        "status": "rumor",
+        "text": "[示例 fixture，非真实公告]\n[FIXTURE] 示例传闻 C\tID\t—\t贸易与出口\t传闻\t2026-10-15 · 不适用自动生效 · Asia/Jakarta\t媒体报道\tv1"
+      },
+      {
+        "status": "effective",
+        "text": "[示例 fixture，非真实公告]\n[FIXTURE] 示例 链条 Z\tVN\t—\t海关与税收\t已生效\t2026-10-20 · 生效期内 · Asia/Ho_Chi_Minh\t🏛 官方原文\tv1"
+      },
+      {
+        "status": "effective",
+        "text": "[示例 fixture，非真实公告]\n[FIXTURE] 示例 Shopee 泰国平台规则 B\tTH\tShopee\t电商平台\t已生效（⚙ 到生效日自动）\t2026-10-20 · 生效期内 · Asia/Bangkok\t📰 平台原文（当事"
+      },
+      {
+        "status": "published",
+        "text": "[示例 fixture，非真实公告]\n[FIXTURE] 示例越南海关公告 A\tVN\t—\t海关与税收\t已发布待生效\t2026-11-01 · 未来生效 · Asia/Ho_Chi_Minh\t🏛 官方原文\tv2"
+      },
+      {
+        "status": "published",
+        "text": "[示例 fixture，非真实公告]\n[FIXTURE] 示例 未来替代 Q\tVN\t—\t海关与税收\t已发布待生效\t2026-11-01 · 未来生效 · Asia/Ho_Chi_Minh\t🏛 官方原文\tv1"
+      },
+      {
+        "status": "published",
+        "text": "[示例 fixture，非真实公告]\n[FIXTURE] 示例 中国海关公告 E\tCN\t—\t海关与税收\t已发布待生效\t2026-11-01 · 未来生效 · Asia/Shanghai\t🏛 官方原文\tv1"
+      },
+      {
+        "status": "published",
+        "text": "[示例 fixture，非真实公告]\n[FIXTURE] 表单录入示例 D\tMY\t—\t海关与税收\t已发布待生效\t2026-11-05 · 未来生效 · Asia/Kuala_Lumpur\t🏛 官方原文\tv2"
+      }
+    ],
+    "detailExcerpt": "[FIXTURE] 表单录入示例 D\n\n示例（fixture）：仅用于验收，不是真实官方公告。\n\n马来西亚 · 无平台 · 海关与税收 · 文号 FIXTURE-MY-D · 发布方 示例机关（fixture）\n\n录入状态：已发布待生效 · 当前状态：已发布待生效 · 发布日 2026-10-20 · 生效日 2026-11-05（Asia/Kuala_Lumpur，当地判断日 2026-10-31） · 失效日 未填\n\n来源类型：🏛 官方原文 · 录入方式：人工 · 录入人：browser-tester-2\n\n来源链接 ↗ https://example.org/fixture/my-d\n\n依据：fixture 表单依据 v2\n\n政府公告全文副本（25 字）\n版本（2，旧版本永久保留）\nv1 · 已发布待生效 · 生效日 2026-11-01 · 2026-10-31T04:00:00Z · browser-tester · 已被新版本取代\n\n标题：[FIXTURE] 表单录入示例 D · 变更：人工录入新建\n\n该版本依据：fixture 表单依据 v1 · 来源：https://example.org/fixture/my-d\n\nv2 · 已发布待生效 · 生效日 2026-11-05 · 2026-10-31T04:00:00Z · browser-tester-2 · 当前版本\n\n标题：[FIXTURE] 表单录入示例 D · 变更：生效日改为 11-05（fixture）\n\n该版本依据：fixture 表单依据 v2 · 来源：https://example.org/fixture/my-d\n\n变更记录\n2026-10-31T04:00:00Z · create · browser-tester · 人工录入新建\n2026-10-31T04:00:00Z · revise · browser-tester-2 · 生效日改为 11-05（fixture）\n修订（新增版本）\n废止（无替代）",
+    "nov1": {
+      "text": "政策生效日（参考，非停工事实）· 2 项\nVN\n[示例 fixture，非真实公告] [FIXTURE] 示例越南海关公告 A\n已发布待生效\n\n生效日 2026-11-01 · v2\n\n在政策库查看 →\nVN\n[示例 fixture，非真实公告] [FIXTURE] 示例 未来替代 Q\n已发布待生效\n\n生效日 2026-11-01 · v1\n\n在政策库查看 →",
+      "chip": "政策生效 2 项",
+      "promoShown": 0
+    },
+    "oct20": {
+      "text": "政策生效日（参考，非停工事实）· 2 项\nVN\n[示例 fixture，非真实公告] [FIXTURE] 示例 链条 Z\n已生效\n\n生效日 2026-10-20 · v1\n\n在政策库查看 →\nTH · shopee\n[示例 fixture，非真实公告] [FIXTURE] 示例 Shopee 泰国平台规则 B\n已生效（⚙ 到生效日自动）\n\n生效日 2026-10-20 · v1\n\n在政策库查看 →",
+      "chip": "政策生效 2 项",
+      "promoShown": 0
+    }
+  },
+  "checks": [
+    {
+      "id": "server1_healthy",
+      "pass": true,
+      "detail": "http://127.0.0.1:4497"
+    },
+    {
+      "id": "fresh_db_empty",
+      "pass": true,
+      "detail": "{\"total\":0,\"clock\":\"test\",\"today\":\"2026-10-31\"}"
+    },
+    {
+      "id": "write_negatives_rejected",
+      "pass": true,
+      "detail": "{\"foreignOrigin\":403,\"officialWithoutFullText\":\"official_full_text_required\",\"mediaNotRumor\":\"media_source_must_be_rumor\",\"effectiveBeforeDate\":\"effective_status_before_effective_date\",\"noEntrant\":\"entered_by_required\"}"
+    },
+    {
+      "id": "create_A",
+      "pass": true,
+      "detail": "200 policy:3f46b0f2-76a5-4465-bf7b-ee36419dd543"
+    },
+    {
+      "id": "create_B",
+      "pass": true,
+      "detail": "200 policy:88075d58-2df0-4ae7-b43d-9f66e89eb3fb"
+    },
+    {
+      "id": "create_C",
+      "pass": true,
+      "detail": "200 policy:667e5a51-a87c-4d2b-9901-e1e7a4d1d8e4"
+    },
+    {
+      "id": "api_revise_A_v2",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "id": "supersession_negatives_rejected",
+      "pass": true,
+      "detail": "{\"rumor\":\"supersession_requires_published_or_effective\",\"draft\":\"supersession_requires_published_or_effective\",\"fixtureToFormal\":\"fixture_flag_mismatch\",\"idWithoutTimezone\":\"timezone_required\",\"vnWrongTimezone\":\"timezone_country_mismatch\"}"
+    },
+    {
+      "id": "future_supersession_created",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "id": "server2_healthy_after_restart",
+      "pass": true,
+      "detail": "http://127.0.0.1:4497"
+    },
+    {
+      "id": "api_persisted_after_restart",
+      "pass": true,
+      "detail": "{\"total\":9,\"today\":\"2026-10-31\"}"
+    },
+    {
+      "id": "api_A_future_published",
+      "pass": true,
+      "detail": "{\"status\":\"published\",\"displayStatus\":\"published\",\"autoActivated\":false,\"datePosition\":\"future\"}"
+    },
+    {
+      "id": "api_B_auto_effective",
+      "pass": true,
+      "detail": "{\"status\":\"published\",\"displayStatus\":\"effective\",\"autoActivated\":true,\"datePosition\":\"in_effect\"}"
+    },
+    {
+      "id": "api_C_rumor_never_activates",
+      "pass": true,
+      "detail": "{\"status\":\"rumor\",\"displayStatus\":\"rumor\",\"autoActivated\":false,\"datePosition\":\"not_applicable\"}"
+    },
+    {
+      "id": "api_A_versions_retained",
+      "pass": true,
+      "detail": "[{\"n\":1,\"basis\":\"fixture 依据 v1：示例原文第 1 条\",\"supersededBy\":\"policy:3f46b0f2-76a5-4465-bf7b-ee36419dd543:v2\"},{\"n\":2,\"basis\":\"fixture 依据 v2：示例原文第 1 条（更正）\",\"supersededBy\":null}]"
+    },
+    {
+      "id": "api_export_matches_filter",
+      "pass": true,
+      "detail": "2 lines vs 1"
+    },
+    {
+      "id": "api_chain_both_directions",
+      "pass": true,
+      "detail": "{\"X\":[\"revised\",\"revised\"],\"Y\":[\"revised\",\"repealed\",\"repealed\"],\"Z\":[\"repealed\",\"effective\"],\"P\":[\"effective\",\"2026-11-01\",false],\"E\":\"published\"}"
+    },
+    {
+      "id": "api_future_supersession_pending",
+      "pass": true,
+      "detail": "[\"effective\",\"2026-11-01\",false]"
+    },
+    {
+      "id": "api_export_chain_and_timezone",
+      "pass": true,
+      "detail": "policy:00243e7e-8774-4ed0-a8a6-3bbf0bbf1365,示例（fixture，非真实公告）,VN,,海关与税收,[FIXTURE] 示例 链条 Y,FIXTURE-链条 Y,示例机关（fixture）,2026-09-01,2026-10-10,,Asia/Ho_Chi_Minh,2026-10-31,已生效,已废止,🏛 官方原文,https://example.org/fixture/%E9%93%BE%E6%9D%A1%20y,acceptance-tester,v1,修订 policy:3183cb99-a538-4aa4-b132-b37ae1d052"
+    },
+    {
+      "id": "api_cn_filter",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "id": "get_checked_fingerprint_unchanged",
+      "pass": true,
+      "detail": "{\"records\":9,\"versions\":10,\"log\":16,\"providerUsage\":0,\"hash\":\"3641267988\"} / {\"records\":9,\"versions\":10,\"log\":16,\"providerUsage\":0,\"hash\":\"3641267988\"}"
+    },
+    {
+      "id": "browser_policies_rendered",
+      "pass": true,
+      "detail": "/policies 9 rows"
+    },
+    {
+      "id": "browser_test_clock_banner",
+      "pass": true,
+      "detail": "当前时刻按各政策「适用时区」的当地日历日判断（UTC+8 参考日 2026-10-31） · 测试时钟 TEST_NOW。只有「已发布待生效」会在生效日自动显示为已生效；传闻、征求意见、已修订、已废止不会自动生效。"
+    },
+    {
+      "id": "browser_form_create_D",
+      "pass": true,
+      "detail": "已保存：[FIXTURE] 表单录入示例 D（v1）"
+    },
+    {
+      "id": "browser_form_revise_D_keeps_v1",
+      "pass": true,
+      "detail": "[FIXTURE] 表单录入示例 D\n\n示例（fixture）：仅用于验收，不是真实官方公告。\n\n马来西亚 · 无平台 · 海关与税收 · 文号 FIXTURE-MY-D · 发布方 示例机关（fixture）\n\n录入状态：已发布待生效 · 当前状态：已发布待生效 · 发布日 2026-10-20 · 生效日 2026-11-05（Asia/Kuala_Lumpur，当地判断日 2026-10-3"
+    },
+    {
+      "id": "browser_fixture_label_and_fulltext",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_page_statuses_consistent_with_api",
+      "pass": true,
+      "detail": "[[\"revised\",\"[示例 fixture，非真实公告]\\n[FIXTURE] 示例 链条 X\\tVN\\t—\\t海关与税收\\t已修订\\t2026-10-\"],[\"effective\",\"[示例 fixture，非真实公告]\\n[FIXTURE] 示例 被未来替代 P\\tVN\\t—\\t海关与税收\\t已生效\\t2026-\"],[\"repealed\",\"[示例 fixture，非真实公告]\\n[FIXTURE] 示例 链条 Y\\tVN\\t—\\t海关与税收\\t已废止\\t2026-10-\"],[\"rumor\",\"[示例 fixture，非真实公告]\\n[FIXTURE] 示例传闻 C\\tID\\t—"
+    },
+    {
+      "id": "browser_filter_and_export_match",
+      "pass": true,
+      "detail": "1 row, href http://127.0.0.1:4497/api/shipping/policies/export?country=TH"
+    },
+    {
+      "id": "browser_cn_country_filter",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_chain_relation_display",
+      "pass": true,
+      "detail": "本条修订：policy:3183cb99-a538-4aa4-b132-b37ae1d05240。 已被 policy:6ec0db52-0f23-4006-8aaa-6cb5c42094f8 废止"
+    },
+    {
+      "id": "browser_pending_supersession_display",
+      "pass": true,
+      "detail": "将于 2026-11-01（Asia/Ho_Chi_Minh）起被 policy:5b56e5c3-7816-428d-b933-7e035cbd2afd 修订（尚未生效，当前状态不变）"
+    },
+    {
+      "id": "browser_calendar_policy_layer_separate",
+      "pass": true,
+      "detail": "{\"text\":\"政策生效日（参考，非停工事实）· 2 项\\nVN\\n[示例 fixture，非真实公告] [FIXTURE] 示例越南海关公告 A\\n已发布待生效\\n\\n生效日 2026-11-01 · v2\\n\\n在政策库查看 →\\nVN\\n[示例 fixture，非真实公告] [FIXTURE] 示例 未来替代 Q\\n已发布待生效\\n\\n生效日 2026-11-01 · v1\\n\\n在政策库查看 →\",\"chip\":\"政策生效 2 项\",\"promoShown\":0}"
+    },
+    {
+      "id": "browser_calendar_cn_layer_positive",
+      "pass": true,
+      "detail": "{\"text\":\"政策生效日（参考，非停工事实）· 3 项\\nVN\\n[示例 fixture，非真实公告] [FIXTURE] 示例越南海关公告 A\\n已发布待生效\\n\\n生效日 2026-11-01 · v2\\n\\n在政策库查看 →\\nVN\\n[示例 fixture，非真实公告] [FIXTURE] 示例 未来替代 Q\\n已发布待生效\\n\\n生效日 2026-11-01 · v1\\n\\n在政策库查看 →\\nCN\\n[示例 fixture，非真实公告] [FIXTURE] 示例 中国海关公告 E\\n已发布待生效\\n\\n生效日 2026-11-01 · v1\\n\\n在政策库查看 →\",\"chip"
+    },
+    {
+      "id": "browser_calendar_auto_effective_consistent",
+      "pass": true,
+      "detail": "政策生效日（参考，非停工事实）· 2 项\nVN\n[示例 fixture，非真实公告] [FIXTURE] 示例 链条 Z\n已生效\n\n生效日 2026-10-20 · v1\n\n在政策库查看 →\nTH · shopee\n[示例 fixture，非真实公告] [FIXTURE] 示例 Shopee 泰国平台规则 B\n已生效（⚙ 到生效日自动）\n\n生效日 2026-10-20 · v1\n\n在政策库查看 →"
+    },
+    {
+      "id": "server3_healthy",
+      "pass": true,
+      "detail": "http://127.0.0.1:4497"
+    },
+    {
+      "id": "cn_midnight_E_effective",
+      "pass": true,
+      "detail": "{\"today\":\"2026-11-01\",\"A\":\"published\",\"AlocalToday\":\"2026-10-31\",\"E\":\"effective\",\"P\":\"effective\",\"C\":\"rumor\",\"D\":\"published\",\"Deffective\":\"2026-11-05\"}"
+    },
+    {
+      "id": "vn_before_local_midnight_A_still_published",
+      "pass": true,
+      "detail": "{\"today\":\"2026-11-01\",\"A\":\"published\",\"AlocalToday\":\"2026-10-31\",\"E\":\"effective\",\"P\":\"effective\",\"C\":\"rumor\",\"D\":\"published\",\"Deffective\":\"2026-11-05\"}"
+    },
+    {
+      "id": "filter_export_consistent_at_cn_midnight",
+      "pass": true,
+      "detail": "4"
+    },
+    {
+      "id": "revised_D_still_future_at_11_01",
+      "pass": true,
+      "detail": "{\"today\":\"2026-11-01\",\"A\":\"published\",\"AlocalToday\":\"2026-10-31\",\"E\":\"effective\",\"P\":\"effective\",\"C\":\"rumor\",\"D\":\"published\",\"Deffective\":\"2026-11-05\"}"
+    },
+    {
+      "id": "rumor_still_rumor",
+      "pass": true,
+      "detail": "{\"today\":\"2026-11-01\",\"A\":\"published\",\"AlocalToday\":\"2026-10-31\",\"E\":\"effective\",\"P\":\"effective\",\"C\":\"rumor\",\"D\":\"published\",\"Deffective\":\"2026-11-05\"}"
+    },
+    {
+      "id": "server4_healthy",
+      "pass": true,
+      "detail": "http://127.0.0.1:4497"
+    },
+    {
+      "id": "vn_local_midnight_A_effective",
+      "pass": true,
+      "detail": "{\"A\":[\"effective\",\"2026-11-01\"],\"P\":[\"revised\",true],\"Q\":\"effective\"}"
+    },
+    {
+      "id": "supersession_switches_on_effective_date",
+      "pass": true,
+      "detail": "{\"A\":[\"effective\",\"2026-11-01\"],\"P\":[\"revised\",true],\"Q\":\"effective\"}"
+    }
+  ]
+}
