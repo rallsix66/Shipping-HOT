@@ -3,7 +3,9 @@ import { lookup as dnsLookup } from "node:dns/promises"
 import { request as httpRequest } from "node:http"
 import { request as httpsRequest } from "node:https"
 import type { ArticleSourcePolicy } from "@shared/article"
+import { consola } from "consola"
 import { articlePolicyHostResolves } from "#/services/source-policy"
+import { type ResponseDecoding, decodeResponse } from "#/services/response-decoding"
 
 export const ARTICLE_FETCH_DEFAULTS = {
   maxBytes: 512 * 1024,
@@ -20,7 +22,8 @@ export interface ResolvedAddress {
 export interface ArticleHttpResponse {
   status: number
   headers: Record<string, string | string[] | undefined>
-  body: string
+  /** Production transport returns bytes. Strings remain supported for existing UTF-8 test transports. */
+  body: string | Uint8Array
 }
 
 export type ArticleLookup = (hostname: string) => Promise<ResolvedAddress[]>
@@ -48,6 +51,8 @@ export interface SecureFetchSuccess {
   finalUrl: string
   contentType?: string
   body: string
+  rawBody: Uint8Array
+  decoding: ResponseDecoding
   hops: number
 }
 
@@ -216,7 +221,7 @@ export function defaultTransport(url: URL, addresses: ResolvedAddress[], options
       response.on("end", () => {
         if (settled) return
         settled = true
-        resolve({ status: response.statusCode ?? 0, headers: response.headers, body: Buffer.concat(chunks).toString("utf8") })
+        resolve({ status: response.statusCode ?? 0, headers: response.headers, body: Buffer.concat(chunks) })
       })
       response.on("error", fail)
     })
@@ -297,7 +302,18 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
     const allowed = options.policy.allowedContentTypes.map(type => type.toLowerCase())
     if (!mime) return failure("content_type_missing", "Response had no Content-Type header")
     if (!allowed.includes(mime)) return failure("content_type_unsupported", `Unsupported content type: ${mime}`)
-    return { ok: true, status: response.status, finalUrl: current.toString(), contentType, body: response.body, hops: hop }
+    const rawBody = typeof response.body === "string" ? Buffer.from(response.body, "utf8") : response.body
+    // Enforce the same pre-decode limit for injected transports as the Node transport.
+    if (rawBody.byteLength > maxBytes) return failure("body_too_large", "Response exceeds the byte limit")
+    try {
+      const decoded = decodeResponse(rawBody, contentType!)
+      // Metadata only: no response body, URL, cookies or credentials in the audit record.
+      consola.info("source response decoded", { sourceId: options.policy.sourceId, ...decoded.decoding })
+      return { ok: true, status: response.status, finalUrl: current.toString(), contentType, ...decoded, rawBody, hops: hop }
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "encoding_invalid"
+      return failure(code, "Response encoding is unsupported or the byte sequence is invalid")
+    }
   }
   return failure("redirect_limit", "Too many redirects")
 }

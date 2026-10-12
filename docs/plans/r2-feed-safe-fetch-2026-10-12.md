@@ -40,7 +40,7 @@
 
 ## 4. 未覆盖项和风险
 - 没有用实网验证（本片不运行上游抓取）。真实站点如果跳到 www 或其他主机，或返回列表之外的 Content-Type，会表现为该来源失败并保留 last-known，不会放宽规则；需要以后另行授权的实网探测来确认。
-- 不在本片：来源专属 CA、三种编码、web_list/json_list。
+- 首片未覆盖：来源专属 CA、三种编码、web_list/json_list。三种编码的后续离线实现见下节；CA 和 web_list/json_list 仍未实现。
 - 天气预警等非 Feed 抓取器仍然各自实现，未统一。
 - 之前的缺口照旧：历史回放 1/10、PAGASA、促销缺口，以及 R2-3 的限制（遗留 unknown 的保守预留、实际费用对账和真实调用方仍未完成）。
 
@@ -50,3 +50,12 @@
 - **回归测试** `server/services/article-fetch-transport.test.ts`（5 项）：在 Node request 边界 mock node:http/node:https，不替换 ArticleTransport，不开 socket。覆盖：end 被调用一次、响应分块读取、Feed 经 feed.ts 解析出条目、socket lookup 只返回已校验地址；超时 → fetch_timeout 并 destroy；请求错误 → fetch_failed、只 destroy 一次、迟到 timeout 被忽略；超限 → body_too_large 并销毁 response 和 request；私网地址根本不进入 Node request。去掉 `request.end()` 后本地复跑：5 项中 4 项失败（私网那项本来就不发请求），确认它能抓到这个缺陷。
 - **勘误（gate-85e3c0c 的 targeted 75）**：按日志实际是 8 个文件 / 75 项：feed.test 24、feed-sync-job **4**（原 3 项 + 本片新增 1 项；收尾记录误写为 5）、article-fetch-security 10、registry 2、article-service 8、article-translation-source 10、article-translation-display 7、article-translation-view 10。该命令**没有**跑 article-fetch-job（仓库里没有它的单测文件）或 article-extractor；article-extractor 的 7 项来自全量测试。上面“已覆盖”里 article-fetch-job 是按代码调用点核查得出，不是由 targeted 测试证明的。
 - 本轮 targeted 命令改为显式文件列表：feed.test、feed-sync-job.test、article-fetch-security.test、article-fetch-transport.test、article-extractor.test、article-service.test、registry.test。实际跑了哪些以日志为准。
+
+## 原始字节与编码兼容后续切片（2026-10-12，待审）
+
+- `defaultTransport` 返回原始 `Uint8Array`，流读取按字节累计上限；`secureFetchArticle` 对注入 transport 同样先检查字节上限，再调用唯一的 `response-decoding.ts`。成功结果同时保留 `rawBody`、解码文本和 `decoding` 元数据。原始字节不新增落库，不改变许可范围。
+- 编码优先级：BOM → HTTP charset → XML 开头声明（XML MIME）或 HTML meta（HTML MIME）→ UTF-8。重复的同级声明取首个，记录所有发现的声明和冲突，不做失败后猜测/重试。声明扫描限前 4096 字节；HTML 注释和 script/style/title/textarea 内的伪 meta 忽略。UTF-16 BOM 可决定解码，但不扫描其内嵌声明。无 BOM 的 UTF-16 不在本片承诺内。
+- Node 24.15.0 原生 `TextDecoder`，`fatal: true`；GBK、TIS-620（规范名称 windows-874）、windows-1258 支持，不增加依赖。未知选中编码返回 `encoding_unsupported`；损坏字节返回 `encoding_invalid`。保留组合字符，不擅自 NFC 规范化。已知且字节合法的错误编码声明不能保证被识别，需以后真实样本核查。
+- `decoding` 记录规范编码、选择依据、声明、冲突和字节数；成功抓取写结构化元数据日志，不记响应正文、URL、cookie 或凭据。现有字符串测试 transport 保持兼容，只代表 UTF-8 字节；新增 legacy 测试全部使用独立指定的 hex 字节。
+- 新增离线测试通过 Node request mock（不开 socket）读取逐字节 chunk，覆盖三种编码 → Feed 标题/摘要/链接/已有时间字段，以及 → intel SQLite 标题/链接/版本时间和正文块。未知/损坏编码时 Feed 保留 last-known、intel 保留旧条目。另覆盖 BOM/HTTP/XML/meta 冲突、UTF-8 默认、组合字符、字节上限、现有 HTML Feed 及 UTF-8 Article 提取。
+- 这些是合成编码夹具，不是当次实网、历史抓取或 P1 全来源验收。没有 CA、web_list/json_list、新日期规则、registry/GET 接线、生产开关或 LLM 改动。全门禁与 Neat Freak 状态以对应代码 SHA 的 `docs/evidence/gate-*/` 及 `docs/status.md` 为准；R2 整体仍未完成。
