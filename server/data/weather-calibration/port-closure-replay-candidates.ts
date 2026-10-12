@@ -13,6 +13,7 @@ export interface PortClosureReplayCandidate {
 }
 
 export const portClosureReplayCandidates: readonly PortClosureReplayCandidate[] = [
+  { id: "2022-nalgae-shekou-gate", portUnlocode: "CNSHK", verificationStatus: "blocked", blockReason: "Operator notices (portshekou.com/ywgg/1200, /1199) give gate pickup/drop-off stop 11-01 07:00 and resume 11-03 14:00 (no stated zone; UTC+8 inferred). Only weather input is HKO six-hourly best-track distance, a product pending separate user approval (offline replay only) — not admissible yet.", verificationAudit: "2026-10-12: docs/evidence/r1-5-4-eligibility-round2-2026-10-12.md" },
   { id: "2024-yagi-shekou", portUnlocode: "CNSHK", verificationStatus: "blocked", blockReason: "No archived official port suspension bulletin URL/time; peak gust inputs not tied to observation timestamp/source.", verificationAudit: "2026-10-09: 待补码头/港区封港通告 URL 与 UTC 起止；天气输入需绑定观测时刻与来源。" },
   { id: "2023-saola-hongkong", portUnlocode: "CNHKG", verificationStatus: "blocked", blockReason: "HKO signal period ≠ terminal closure window without separate terminal ops notice; inputs not traceable." },
   { id: "2022-noru-laem-chabang", portUnlocode: "THLCH", verificationStatus: "blocked", blockReason: "Closure window and peak inputs not sourced from a single official document." },
