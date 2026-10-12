@@ -1,0 +1,20 @@
+full_sha=b8a91049f1106e999a64fde3e2ce6ac52f3891d6
+worktree_clean_before_gates=true
+node=v24.15.0
+runner=docs/evidence/run-gates.cjs (spawnSync, UTF-8 capture)
+install raw_exit_code=0  cmd: pnpm install --frozen-lockfile
+build raw_exit_code=0  cmd: pnpm build
+typecheck raw_exit_code=0  cmd: pnpm typecheck
+lint raw_exit_code=0  cmd: pnpm lint
+targeted-intel raw_exit_code=0  cmd: npx vitest run server/intel
+targeted-web-list raw_exit_code=0  cmd: npx vitest run server/intel/sources/web-list.test.ts
+targeted-paid-receipt raw_exit_code=0  cmd: npx vitest run server/intel/llm server/services/translation
+targeted-feed-safe-fetch raw_exit_code=0  cmd: npx vitest run server/providers/feed.test.ts server/runtime/feed-sync-job.test.ts server/services/article-fetch-security.test.ts server/services/article-fetch-transport.test.ts server/services/response-decoding.test.ts server/providers/article-extractor.test.ts server/services/article-service.test.ts server/runtime/registry.test.ts
+test raw_exit_code=0  cmd: pnpm test --run
+smoke-p0-native raw_exit_code=0  cmd: pnpm smoke:p0-native
+smoke-p2c-runtime raw_exit_code=0  cmd: pnpm smoke:p2c-runtime
+smoke-p3-feed-freshness raw_exit_code=0  cmd: pnpm smoke:p3-feed-freshness
+scan-network-llm raw_exit_code=0  cmd: rg -n -i "fetch\(|https?://|openai|anthropic|llm" server/intel server/runtime/intel-collect-job.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts server/database/migrations/024-paid-receipt.ts server/database/migrations/025-paid-receipt-usage-booking.ts server/services/paid-budget.ts server/providers/feed.ts server/services/article-fetch-security.ts
+scan-secrets raw_exit_code=1  cmd: rg -n -i "(api[_-]?key|secret|token|password)\s*[:=]\s*.[A-Za-z0-9_-]{12,}" server/intel server/runtime/intel-collect-job.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts server/database/migrations/024-paid-receipt.ts server/database/migrations/025-paid-receipt-usage-booking.ts server/services/paid-budget.ts server/providers/feed.ts server/services/article-fetch-security.ts
+neat-freak-inventory raw_exit_code=0  cmd: "C:\Program Files\Git\bin\bash.exe" scripts/audit-inventory.sh .
+note: rg exit 1 = no match; audit-inventory.sh is an inventory only, not a security audit.

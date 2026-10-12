@@ -111,6 +111,7 @@
 
 ### R2 web_list — 独立解析器已验证，持久化接线待确认（2026-10-12）
 
+- **P2 URL 自身链接返修（2026-10-12）**：代码 `b8a91049f1106e999a64fde3e2ce6ac52f3891d6`。`listingItself` 改为复用 `canonicalizeFeedUrl` 比较完整 URL，保留同路径业务 query 身份，排除纯锚点/tracking-only 自身链接。web_list **35/35**，完整门禁均 exit 0、全量 **104 files / 937 passed / 3 skipped**，原始证据 `docs/evidence/gate-b8a9104/`；父会话复审 pending。未改 schema/collector/storage，下面整片 BLOCKED 状态不变。
 - 代码 `6c5e1515173f4d35a7c7d1b4f17176d4e813e725`：固定 AIHOT `44578fa` HTML 解析与配置白名单适配；严格日期规则，明确原文/精度/时区依据；复用 URL/安全策略。已有 NCHMF HTML 存档 + 合成日期 HTML 离线测试；无新生产来源、无业务实网请求。
 - 干净 SHA 门禁：install/build/typecheck/lint、三个 smoke 均 exit 0；web_list 定向 **34/34**；全量 **104 files / 936 passed / 3 skipped**。原始 UTF-8 日志、命令、SHA、raw exit 见 `docs/evidence/gate-6c5e151/`；真实 Neat Freak 收尾见该目录，inventory exit 0 不等于安全审计。
 - **整片 BLOCKED，非 PASS**：当前 `intel_source.kind` CHECK 不支持 web_list，版本表没有日期依据字段。按 AGENTS.md Confirm Before 已请求最小迁移 026 确认，尚未获得；因此未改 schema/种子，也未接 collector/storage。旧数据保留的 web_list 持久化闭环 **NOT_RUN**，不以纯解析测试替代。具体迁移范围和上游差异：`docs/plans/r2-web-list-2026-10-12.md`。
