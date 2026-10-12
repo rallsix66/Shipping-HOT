@@ -9,7 +9,7 @@ import { RuntimeRepository } from "#/database/runtime-jobs"
 import { INTEL_BACKOFF_BASE_MS, INTEL_BACKOFF_MAX_MS, type IntelFetchDeps, collectIntelSource, computeBackoffMs } from "#/intel/collect"
 import { type IntelSourceSeed, intelSourceSeeds } from "#/intel/sources"
 import { BackgroundRuntime } from "#/runtime/background-runtime"
-import { INTEL_COLLECT_JOB_ID, createIntelCollectJob } from "#/runtime/intel-collect-job"
+import { INTEL_COLLECT_JOB_ID, createIntelCollectJob, recoverIntelRunsAtExclusiveStartup } from "#/runtime/intel-collect-job"
 import type { ArticleHttpResponse, ResolvedAddress } from "#/services/article-fetch-security"
 
 // Real archived fixtures from approved catalog sources (TH-W01 TMD CAP 2026-10-10, ID-W01 BMKG nowcast 2026-10-10).
@@ -20,7 +20,11 @@ const BMKG = intelSourceSeeds.find(seed => seed.catalogId === "ID-W01")!
 const PUBLIC_ADDRESS: ResolvedAddress = { address: "93.184.216.34", family: 4 }
 const T0 = new Date("2026-10-12T08:00:00.000Z")
 
+/** Storage fault injection: statements whose SQL matches `faults.when` throw at run time (simulated I/O error). */
+const faults: { when?: (sql: string) => boolean } = {}
+
 function createNativeDatabase() {
+  faults.when = undefined
   const native = new NativeDatabase(":memory:")
   const database = createDatabase({
     name: "sqlite",
@@ -33,6 +37,7 @@ function createNativeDatabase() {
         all: async (...params: (string | number | boolean | null | undefined)[]) => statement.all(...params),
         get: async (...params: (string | number | boolean | null | undefined)[]) => statement.get(...params),
         run: async (...params: (string | number | boolean | null | undefined)[]) => {
+          if (faults.when?.(sql)) throw new Error("SQLITE_IOERR: simulated storage failure")
           const result = statement.run(...params)
           return { success: result.changes > 0, changes: result.changes, lastInsertRowid: result.lastInsertRowid }
         },
@@ -74,16 +79,16 @@ function offline(routes: Record<string, () => Reply>, addresses: ResolvedAddress
 const xml = (body: string): ArticleHttpResponse => ({ status: 200, headers: { "content-type": "application/rss+xml; charset=utf-8" }, body })
 const minutes = (from: Date, iso: string | null) => (Date.parse(iso!) - from.getTime()) / 60_000
 
-describe("migrations 021/022 (intel)", () => {
-  it("apply on a fresh isolated database to schema v22 and are idempotent", async () => {
+describe("migrations 021/022/023 (intel)", () => {
+  it("apply on a fresh isolated database to schema v23 and are idempotent", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
     await initShippingTables(database, "mock")
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(22)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(23)
     const tables = new Set((native.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>).map(row => row.name))
     for (const table of ["intel_source", "intel_fetch_run", "intel_item", "intel_item_version", "intel_item_block"]) expect(tables.has(table)).toBe(true)
-    const applied = native.prepare("SELECT version, COUNT(*) AS c FROM schema_migrations WHERE version IN (21, 22) GROUP BY version").all() as Array<{ c: number }>
-    expect(applied.map(row => row.c)).toEqual([1, 1])
+    const applied = native.prepare("SELECT version, COUNT(*) AS c FROM schema_migrations WHERE version IN (21, 22, 23) GROUP BY version").all() as Array<{ c: number }>
+    expect(applied.map(row => row.c)).toEqual([1, 1, 1])
     native.close()
   })
 })
@@ -130,6 +135,93 @@ describe("intel collect offline loop", () => {
     const newText = (await repository.readVersionBlocks(revised[0].currentVersionId!)).map(block => block.text).join(" ")
     expect(newText).toContain("REVISED BULLETIN.")
     expect(oldBlocks.map(block => block.text).join(" ")).not.toContain("REVISED BULLETIN.")
+    native.close()
+  })
+
+  it("a→B→A rollback restores the current pointer and metadata to the existing A version and records the change", async () => {
+    const { native, repository } = await setup()
+    let body = TMD_XML
+    const net = offline({ [TMD.url]: () => xml(body) })
+    const firstDescription = /<item>[\s\S]*?<description>([\s\S]*?)<\/description>/.exec(TMD_XML)![1]
+    const firstTitle = /<item>\s*<title>([^<]*)<\/title>/.exec(TMD_XML)![1]
+    await collectIntelSource(repository, TMD, net.deps, T0)
+    const firstLink = /<item>[\s\S]*?<link>([^<]*)<\/link>/.exec(TMD_XML)![1]
+    const a = (await repository.listItems(TMD.id)).find(item => item.canonicalUrl === firstLink)!
+    expect(a.title).toBe(firstTitle)
+    const versionA = a.currentVersionId!
+    const blocksA = await repository.readVersionBlocks(versionA)
+    const counts = () => native.prepare("SELECT (SELECT COUNT(*) FROM intel_item_version) AS v, (SELECT COUNT(*) FROM intel_item_block) AS b").get() as { v: number, b: number }
+
+    body = TMD_XML.replace(`<title>${firstTitle}</title>`, `<title>B-${firstTitle}</title>`).replace(firstDescription, `B BODY. ${firstDescription}`)
+    expect(await collectIntelSource(repository, TMD, net.deps, new Date(T0.getTime() + 3_600_000))).toMatchObject({ itemsRevised: 1 })
+    const b = (await repository.listItems(TMD.id)).find(item => item.id === a.id)!
+    expect(b.title).toBe(`B-${firstTitle}`)
+    const versionB = b.currentVersionId!
+    expect(versionB).not.toBe(versionA)
+    const afterB = counts()
+
+    body = TMD_XML
+    const back = await collectIntelSource(repository, TMD, net.deps, new Date(T0.getTime() + 7_200_000))
+    expect(back).toMatchObject({ status: "ok_items", itemsNew: 0, itemsRevised: 1 })
+    const restored = (await repository.listItems(TMD.id)).find(item => item.id === a.id)!
+    expect(restored.currentVersionId).toBe(versionA)
+    expect(restored.title).toBe(a.title)
+    expect(restored.publishedAt).toBe(a.publishedAt)
+    expect(counts()).toEqual(afterB)
+    expect(await repository.readVersionBlocks(versionA)).toEqual(blocksA)
+    expect((await repository.listVersions(a.id)).map(version => version.id).sort()).toEqual([versionA, versionB].sort())
+    expect((await repository.listCurrentChanges(a.id)).map(change => [change.reason, change.fromVersionId, change.toVersionId])).toEqual([
+      ["new_version", null, versionA],
+      ["new_version", versionA, versionB],
+      ["restored_version", versionB, versionA],
+    ])
+    // Seeing A again while A is current is unchanged: no further change row.
+    await collectIntelSource(repository, TMD, net.deps, new Date(T0.getTime() + 10_800_000))
+    expect(await repository.listCurrentChanges(a.id)).toHaveLength(3)
+    native.close()
+  })
+
+  it("a single write failure closes the run as failed with backoff, keeps committed entries, lets later sources run, and is retryable", async () => {
+    const { database, native, repository } = await setup([TMD, BMKG])
+    const net = offline({ [TMD.url]: () => xml(TMD_XML), [BMKG.url]: () => xml(BMKG_XML) })
+    let blockInserts = 0
+    faults.when = (sql) => {
+      if (!sql.includes("INSERT INTO intel_item_block")) return false
+      blockInserts++
+      return blockInserts === 5
+    }
+    const job = createIntelCollectJob({ db: database, enabled: true, fetch: net.deps, seeds: [TMD, BMKG], now: () => T0 })
+    expect((await job.run()).status).toBe("success")
+    const tmdRuns = await repository.listRuns(TMD.id)
+    expect(tmdRuns.map(run => [run.status, run.errorCode])).toEqual([["failed", "store_failed"]])
+    const committed = await repository.listItems(TMD.id)
+    expect(committed.length).toBeGreaterThan(0)
+    expect(committed.every(item => item.currentVersionId)).toBe(true)
+    const tmd = (await repository.getSource(TMD.id))!
+    expect(tmd).toMatchObject({ status: "failing", consecutiveFailures: 1, lastErrorCode: "store_failed" })
+    expect(minutes(T0, tmd.nextSyncAt)).toBe(15)
+    expect((await repository.listRuns(BMKG.id)).map(run => run.status)).toEqual(["ok_items"])
+    expect(native.prepare("SELECT COUNT(*) AS c FROM intel_fetch_run WHERE status = 'running'").get()).toEqual({ c: 0 })
+
+    faults.when = undefined
+    const later = new Date(T0.getTime() + 16 * 60_000)
+    const retry = createIntelCollectJob({ db: database, enabled: true, fetch: net.deps, seeds: [TMD, BMKG], now: () => later })
+    expect((await retry.run()).status).toBe("success")
+    expect((await repository.listRuns(TMD.id)).map(run => run.status)).toEqual(["failed", "ok_items"])
+    expect((await repository.listItems(TMD.id)).length).toBeGreaterThan(committed.length)
+    expect(await repository.getSource(TMD.id)).toMatchObject({ status: "ok", consecutiveFailures: 0 })
+    native.close()
+  })
+
+  it("reports storage that cannot record the outcome explicitly instead of claiming the run finished", async () => {
+    const { database, native, repository } = await setup()
+    const net = offline({ [TMD.url]: () => xml(TMD_XML) })
+    faults.when = sql => sql.includes("INSERT INTO intel_item_block") || sql.startsWith("UPDATE intel_fetch_run") || sql.trim().startsWith("UPDATE intel_source")
+    const outcome = await collectIntelSource(repository, TMD, net.deps, T0)
+    expect(outcome).toMatchObject({ status: "storage_unavailable", errorCode: "store_failed" })
+    const job = createIntelCollectJob({ db: database, enabled: true, fetch: net.deps, seeds: [{ ...TMD, id: "intel:test-second" }], now: () => T0 })
+    expect(await job.run()).toMatchObject({ status: "failed", errorCode: "intel_storage_unavailable" })
+    faults.when = undefined
     native.close()
   })
 
@@ -245,20 +337,73 @@ describe("intel collect job on the single BackgroundRuntime", () => {
     native.close()
   })
 
-  it("closes runs interrupted by a restart and blocks a second in-flight run of the same source", async () => {
-    const { database, native, repository } = await setup()
-    const staleRun = await repository.beginRun(TMD.id, "2026-10-12T07:00:00.000Z")
-    expect(staleRun).not.toBeNull()
+  it("blocks a second in-flight run of the same source at the DB level", async () => {
+    const { native, repository } = await setup()
+    expect(await repository.beginRun(TMD.id, "2026-10-12T07:00:00.000Z")).not.toBeNull()
     expect(await repository.beginRun(TMD.id, "2026-10-12T07:00:01.000Z")).toBeNull()
     const net = offline({ [TMD.url]: () => xml(TMD_XML) })
     expect(await collectIntelSource(repository, TMD, net.deps, T0)).toEqual({ status: "skipped", errorCode: "source_run_in_flight" })
     expect(net.calls).toEqual([])
+    native.close()
+  })
 
-    // "Restart": a new job instance created after the stale run recovers it before collecting.
+  it("negative: a second job instance created while the first is mid-fetch does not interrupt it or collect twice", async () => {
+    const { database, native, repository } = await setup()
+    let release!: () => void
+    let entered!: () => void
+    const gate = new Promise<void>(resolve => (release = resolve))
+    const inTransport = new Promise<void>(resolve => (entered = resolve))
+    const netA = offline({ [TMD.url]: () => xml(TMD_XML) })
+    const paused: IntelFetchDeps = {
+      lookup: netA.deps.lookup,
+      transport: async (...args) => {
+        entered()
+        await gate
+        return netA.deps.transport(...args)
+      },
+    }
+    const first = createIntelCollectJob({ db: database, enabled: true, fetch: paused, seeds: [TMD], now: () => T0 })
+    const firstRun = first.run()
+    await inTransport
+    const later = new Date(T0.getTime() + 60_000)
+    const netB = offline({ [TMD.url]: () => xml(TMD_XML) })
+    const second = createIntelCollectJob({ db: database, enabled: true, fetch: netB.deps, seeds: [TMD], now: () => later })
+    expect(await second.run()).toMatchObject({ status: "success", recordsRead: 0 })
+    expect(netB.calls).toEqual([])
+    expect((await repository.listRuns(TMD.id)).map(run => run.status)).toEqual(["running"])
+    release()
+    expect((await firstRun).status).toBe("success")
+    expect((await repository.listRuns(TMD.id)).map(run => [run.status, run.errorCode])).toEqual([["ok_items", null]])
+    native.close()
+  })
+
+  it("genuine restart leftovers stay blocked until the explicit exclusive startup step, then collection resumes", async () => {
+    const { database, native, repository } = await setup()
+    await repository.registerExecutor("crashed-executor", "2026-10-12T07:00:00.000Z")
+    expect(await repository.beginRun(TMD.id, "2026-10-12T07:00:00.000Z", "crashed-executor")).not.toBeNull()
+    const net = offline({ [TMD.url]: () => xml(TMD_XML) })
+    const job = createIntelCollectJob({ db: database, enabled: true, fetch: net.deps, seeds: [TMD], now: () => T0 })
+    expect(await job.run()).toMatchObject({ status: "success", recordsRead: 0 })
+    expect((await repository.listRuns(TMD.id)).map(run => run.status)).toEqual(["running"])
+    expect(net.calls).toEqual([])
+
+    expect(await recoverIntelRunsAtExclusiveStartup(database, T0)).toBe(1)
+    const restarted = createIntelCollectJob({ db: database, enabled: true, fetch: net.deps, seeds: [TMD], now: () => T0 })
+    expect((await restarted.run()).status).toBe("success")
+    expect((await repository.listRuns(TMD.id)).map(run => [run.status, run.errorCode])).toEqual([["failed", "interrupted"], ["ok_items", null]])
+    native.close()
+  })
+
+  it("recovers leftovers of an executor confirmed ended without the startup step", async () => {
+    const { database, native, repository } = await setup()
+    const net = offline({ [TMD.url]: () => xml(TMD_XML) })
+    const old = createIntelCollectJob({ db: database, enabled: true, fetch: net.deps, seeds: [], now: () => T0 })
+    await old.run()
+    expect(await repository.beginRun(TMD.id, "2026-10-12T07:59:00.000Z", old.executorId)).not.toBeNull()
+    await old.end()
     const job = createIntelCollectJob({ db: database, enabled: true, fetch: net.deps, seeds: [TMD], now: () => T0 })
     expect((await job.run()).status).toBe("success")
-    const runs = await repository.listRuns(TMD.id)
-    expect(runs.map(run => [run.status, run.errorCode])).toEqual([["failed", "interrupted"], ["ok_items", null]])
+    expect((await repository.listRuns(TMD.id)).map(run => [run.status, run.errorCode])).toEqual([["failed", "interrupted"], ["ok_items", null]])
     native.close()
   })
 

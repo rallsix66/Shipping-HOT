@@ -19,8 +19,13 @@ export interface IntelFetchDeps {
 
 export type IntelCollectOutcome =
   | { status: "ok_items" | "ok_empty", runId: string, itemsSeen: number, itemsNew: number, itemsRevised: number }
-  | { status: "failed", runId: string, errorCode: string }
+  /** Finalized failure: the run row is closed as failed and the source entered backoff. Committed entries are kept. */
+  | { status: "failed", runId: string, errorCode: string, itemsCommitted: number }
+  /** Storage could not record the outcome: the run may still read 'running'. Reported explicitly, never as finished. */
+  | { status: "storage_unavailable", runId: string | null, errorCode: string, storageError: string }
   | { status: "skipped", errorCode: "source_run_in_flight" }
+
+const message = (error: unknown, fallback: string) => (error instanceof Error ? error.message : fallback).slice(0, 300)
 
 /** Exponential backoff: base * 2^(failures-1), capped. */
 export function computeBackoffMs(consecutiveFailures: number, baseMs = INTEL_BACKOFF_BASE_MS, maxMs = INTEL_BACKOFF_MAX_MS): number {
@@ -62,22 +67,32 @@ export function sourcePolicy(seed: IntelSourceSeed): ArticleSourcePolicy {
  * One source: secure fetch (existing article-fetch-security, all protections kept) → feed.ts parse →
  * dedupe / license-scoped version → SQLite → per-source run result and health. Failure never deletes items.
  */
-export async function collectIntelSource(repository: IntelRepository, seed: IntelSourceSeed, deps: IntelFetchDeps, now: Date): Promise<IntelCollectOutcome> {
+export async function collectIntelSource(repository: IntelRepository, seed: IntelSourceSeed, deps: IntelFetchDeps, now: Date, executorId: string | null = null): Promise<IntelCollectOutcome> {
   const nowIso = now.toISOString()
-  const runId = await repository.beginRun(seed.id, nowIso)
+  let runId: string | null
+  try {
+    runId = await repository.beginRun(seed.id, nowIso, executorId)
+  } catch (error) {
+    return { status: "storage_unavailable", runId: null, errorCode: "run_start_failed", storageError: message(error, "beginRun failed") }
+  }
   if (!runId) return { status: "skipped", errorCode: "source_run_in_flight" }
+  const activeRunId = runId
 
-  const fail = async (errorCode: string, errorMessage: string): Promise<IntelCollectOutcome> => {
-    const current = await repository.getSource(seed.id)
-    const failures = (current?.consecutiveFailures ?? 0) + 1
-    await repository.completeRun(runId, { status: "failed", finishedAt: nowIso, errorCode, errorMessage: errorMessage.slice(0, 300) })
-    await repository.recordSourceFailure(seed.id, {
-      now: nowIso,
-      consecutiveFailures: failures,
-      errorCode,
-      nextSyncAt: new Date(now.getTime() + computeBackoffMs(failures)).toISOString(),
-    })
-    return { status: "failed", runId, errorCode }
+  const fail = async (errorCode: string, errorMessage: string, itemsCommitted = 0, counts: { seen?: number, created?: number, revised?: number } = {}): Promise<IntelCollectOutcome> => {
+    try {
+      const current = await repository.getSource(seed.id)
+      const failures = (current?.consecutiveFailures ?? 0) + 1
+      await repository.completeRun(activeRunId, { status: "failed", finishedAt: nowIso, errorCode, errorMessage: errorMessage.slice(0, 300), itemsSeen: counts.seen, itemsNew: counts.created, itemsRevised: counts.revised })
+      await repository.recordSourceFailure(seed.id, {
+        now: nowIso,
+        consecutiveFailures: failures,
+        errorCode,
+        nextSyncAt: new Date(now.getTime() + computeBackoffMs(failures)).toISOString(),
+      })
+      return { status: "failed", runId: activeRunId, errorCode, itemsCommitted }
+    } catch (storageError) {
+      return { status: "storage_unavailable", runId: activeRunId, errorCode, storageError: message(storageError, "failure could not be recorded") }
+    }
   }
 
   let body: string
@@ -88,42 +103,53 @@ export async function collectIntelSource(repository: IntelRepository, seed: Inte
     body = response.body
     finalUrl = response.finalUrl
   } catch (error) {
-    return await fail("fetch_failed", error instanceof Error ? error.message : "fetch failed")
+    return await fail("fetch_failed", message(error, "fetch failed"))
   }
 
   let entries: ReturnType<typeof parseFeedEntries>["entries"]
   try {
     entries = parseFeedEntries(body, finalUrl).entries
   } catch (error) {
-    return await fail("parse_failed", error instanceof Error ? error.message : "parse failed")
+    return await fail("parse_failed", message(error, "parse failed"))
   }
 
   const scope = contentScopeFor(seed.persistence)
   let itemsNew = 0
   let itemsRevised = 0
+  let committed = 0
   for (const entry of entries) {
     const contentHash = createHash("sha256").update(`${entry.title}\n${entry.bodyText}`).digest("hex")
-    const written = await repository.writeEntry({
-      sourceId: seed.id,
-      canonicalUrl: entry.canonicalUrl,
-      title: entry.title,
-      publishedAt: entry.publishedAt,
-      sourceUpdatedAt: entry.sourceUpdatedAt,
-      contentHash,
-      contentScope: scope,
-      extractorVersion: INTEL_EXTRACTOR_VERSION,
-      blocks: licensedBlocks(scope, entry.title, entry.bodyText),
-      fetchedAt: nowIso,
-    })
-    if (written.created) itemsNew++
-    else if (written.revised) itemsRevised++
+    try {
+      const written = await repository.writeEntry({
+        sourceId: seed.id,
+        canonicalUrl: entry.canonicalUrl,
+        title: entry.title,
+        publishedAt: entry.publishedAt,
+        sourceUpdatedAt: entry.sourceUpdatedAt,
+        contentHash,
+        contentScope: scope,
+        extractorVersion: INTEL_EXTRACTOR_VERSION,
+        blocks: licensedBlocks(scope, entry.title, entry.bodyText),
+        fetchedAt: nowIso,
+      })
+      committed++
+      if (written.created) itemsNew++
+      else if (written.revised) itemsRevised++
+    } catch (error) {
+      // Each entry is its own transaction: entries committed before this one stay; the run closes as failed.
+      return await fail("store_failed", message(error, "write failed"), committed, { seen: entries.length, created: itemsNew, revised: itemsRevised })
+    }
   }
   const status = entries.length === 0 ? "ok_empty" : "ok_items"
-  await repository.completeRun(runId, { status, finishedAt: nowIso, itemsSeen: entries.length, itemsNew, itemsRevised })
-  await repository.recordSourceSuccess(seed.id, {
-    status: status === "ok_empty" ? "ok_empty" : "ok",
-    now: nowIso,
-    nextSyncAt: new Date(now.getTime() + seed.intervalMs).toISOString(),
-  })
-  return { status, runId, itemsSeen: entries.length, itemsNew, itemsRevised }
+  try {
+    await repository.completeRun(activeRunId, { status, finishedAt: nowIso, itemsSeen: entries.length, itemsNew, itemsRevised })
+    await repository.recordSourceSuccess(seed.id, {
+      status: status === "ok_empty" ? "ok_empty" : "ok",
+      now: nowIso,
+      nextSyncAt: new Date(now.getTime() + seed.intervalMs).toISOString(),
+    })
+  } catch (error) {
+    return await fail("finalize_failed", message(error, "finalize failed"), committed, { seen: entries.length, created: itemsNew, revised: itemsRevised })
+  }
+  return { status, runId: activeRunId, itemsSeen: entries.length, itemsNew, itemsRevised }
 }

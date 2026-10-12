@@ -21,6 +21,7 @@ import { policyRelationBackfillRepairMigration } from "#/database/migrations/019
 import { policyRelationMixedVersionRepairMigration } from "#/database/migrations/020-policy-relation-mixed-version-repair"
 import { intelSourceRunsMigration } from "#/database/migrations/021-intel-source-runs"
 import { intelItemsMigration } from "#/database/migrations/022-intel-items"
+import { intelExecutorCurrentMigration } from "#/database/migrations/023-intel-executor-current"
 
 export interface ShippingMigration {
   readonly version: number
@@ -54,6 +55,7 @@ export const shippingMigrations: readonly ShippingMigration[] = [
   policyRelationMixedVersionRepairMigration,
   intelSourceRunsMigration,
   intelItemsMigration,
+  intelExecutorCurrentMigration,
 ]
 
 export const latestShippingSchemaVersion = shippingMigrations[shippingMigrations.length - 1].version

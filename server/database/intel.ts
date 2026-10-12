@@ -52,6 +52,16 @@ export interface IntelBlock {
   text: string
 }
 
+export interface IntelCurrentChange {
+  itemId: string
+  fromVersionId: string | null
+  toVersionId: string
+  reason: "new_version" | "restored_version"
+  changedAt: string
+}
+
+export type IntelWriteOutcome = "created" | "unchanged" | "revised" | "restored"
+
 export interface IntelItemRecord {
   id: string
   sourceId: string
@@ -151,11 +161,20 @@ export class IntelRepository {
     return rows.map(mapSource)
   }
 
+  async registerExecutor(id: string, now: string): Promise<void> {
+    await this.db.prepare("INSERT INTO intel_executor (id, started_at) VALUES (?, ?) ON CONFLICT(id) DO NOTHING").run(id, now)
+  }
+
+  /** Confirms an executor has stopped; only then may its leftover runs be recovered by another executor. */
+  async endExecutor(id: string, now: string): Promise<void> {
+    await this.db.prepare("UPDATE intel_executor SET ended_at = ? WHERE id = ? AND ended_at IS NULL").run(now, id)
+  }
+
   /** Returns null when this source already has a run in flight (unique partial index). */
-  async beginRun(sourceId: string, now: string): Promise<string | null> {
+  async beginRun(sourceId: string, now: string, executorId: string | null = null): Promise<string | null> {
     const id = randomUUID()
     try {
-      await this.db.prepare("INSERT INTO intel_fetch_run (id, source_id, started_at, status) VALUES (?, ?, ?, 'running')").run(id, sourceId, now)
+      await this.db.prepare("INSERT INTO intel_fetch_run (id, source_id, started_at, status, executor_id) VALUES (?, ?, ?, 'running', ?)").run(id, sourceId, now, executorId)
       return id
     } catch (error) {
       if (error instanceof Error && /UNIQUE constraint failed/i.test(error.message)) return null
@@ -170,13 +189,29 @@ export class IntelRepository {
     `).run(result.status, result.finishedAt, result.itemsSeen ?? 0, result.itemsNew ?? 0, result.itemsRevised ?? 0, result.errorCode ?? null, result.errorMessage ?? null, id)
   }
 
-  /** After a restart, runs left 'running' by a previous process are closed as failed/interrupted. */
-  async recoverInterruptedRuns(startedBefore: string, now: string): Promise<number> {
+  /** Closes runs left 'running' by executors that are confirmed ended (ended_at set). Safe while other executors are live. */
+  async recoverRunsOfEndedExecutors(now: string): Promise<number> {
     const result = await this.db.prepare(`
-      UPDATE intel_fetch_run SET status = 'failed', finished_at = ?, error_code = 'interrupted', error_message = 'process restarted while run was in flight'
-      WHERE status = 'running' AND started_at < ?
-    `).run(now, startedBefore) as { changes?: number }
+      UPDATE intel_fetch_run SET status = 'failed', finished_at = ?, error_code = 'interrupted', error_message = 'executor ended while run was in flight'
+      WHERE status = 'running' AND executor_id IN (SELECT id FROM intel_executor WHERE ended_at IS NOT NULL)
+    `).run(now) as { changes?: number }
     return Number(result.changes ?? 0)
+  }
+
+  /**
+   * Explicit, exclusive startup recovery: closes every leftover 'running' run and marks every unended executor as
+   * ended. The caller must guarantee exclusivity (process startup, before any intel executor of this deployment runs;
+   * the current deployment is a single local process). It is never called implicitly by a job instance.
+   */
+  async recoverAllRunsAtExclusiveStartup(now: string): Promise<number> {
+    return this.transaction(async () => {
+      const result = await this.db.prepare(`
+        UPDATE intel_fetch_run SET status = 'failed', finished_at = ?, error_code = 'interrupted', error_message = 'recovered by exclusive startup step'
+        WHERE status = 'running'
+      `).run(now) as { changes?: number }
+      await this.db.prepare("UPDATE intel_executor SET ended_at = ? WHERE ended_at IS NULL").run(now)
+      return Number(result.changes ?? 0)
+    })
   }
 
   async listRuns(sourceId: string): Promise<IntelRunRecord[]> {
@@ -198,21 +233,41 @@ export class IntelRepository {
     `).run(input.consecutiveFailures, input.nextSyncAt, input.now, input.errorCode, input.now, sourceId)
   }
 
-  /** Dedupe on (source, canonical URL); a new version only when the content hash changes. Old versions are never touched. */
-  async writeEntry(entry: IntelEntryWrite): Promise<{ created: boolean, revised: boolean, itemId: string, versionId: string }> {
+  private async recordCurrentChange(itemId: string, fromVersionId: string | null, toVersionId: string, reason: IntelCurrentChange["reason"], changedAt: string): Promise<void> {
+    await this.db.prepare(`
+      INSERT INTO intel_item_current_change (id, item_id, from_version_id, to_version_id, reason, changed_at) VALUES (?, ?, ?, ?, ?, ?)
+    `).run(randomUUID(), itemId, fromVersionId, toVersionId, reason, changedAt)
+  }
+
+  /**
+   * Dedupe on (source, canonical URL); versions are immutable and unique per content hash.
+   * - same hash as the current version → unchanged (only last_seen_at moves)
+   * - same hash as an older version (A→B→A) → current pointer and current metadata restored to that version,
+   *   change recorded; no duplicate version or blocks
+   * - new hash → new version, change recorded; old versions untouched
+   */
+  async writeEntry(entry: IntelEntryWrite): Promise<{ outcome: IntelWriteOutcome, created: boolean, revised: boolean, itemId: string, versionId: string }> {
     return this.transaction(async () => {
       const existing = await this.db.prepare("SELECT * FROM intel_item WHERE source_id = ? AND canonical_url = ?").get(entry.sourceId, entry.canonicalUrl) as Row | undefined
       const itemId = existing ? String(existing.id) : randomUUID()
+      const currentVersionId = existing ? str(existing.current_version_id) : null
       if (!existing) {
         await this.db.prepare(`
           INSERT INTO intel_item (id, source_id, canonical_url, title, published_at, first_seen_at, last_seen_at)
           VALUES (?, ?, ?, ?, ?, ?, ?)
         `).run(itemId, entry.sourceId, entry.canonicalUrl, entry.title, entry.publishedAt ?? null, entry.fetchedAt, entry.fetchedAt)
       }
-      const sameVersion = await this.db.prepare("SELECT id FROM intel_item_version WHERE item_id = ? AND content_hash = ?").get(itemId, entry.contentHash) as Row | undefined
-      if (sameVersion) {
-        await this.db.prepare("UPDATE intel_item SET last_seen_at = ? WHERE id = ?").run(entry.fetchedAt, itemId)
-        return { created: false, revised: false, itemId, versionId: String(sameVersion.id) }
+      const matched = await this.db.prepare("SELECT id FROM intel_item_version WHERE item_id = ? AND content_hash = ?").get(itemId, entry.contentHash) as Row | undefined
+      if (matched) {
+        const versionId = String(matched.id)
+        if (versionId === currentVersionId) {
+          await this.db.prepare("UPDATE intel_item SET last_seen_at = ? WHERE id = ?").run(entry.fetchedAt, itemId)
+          return { outcome: "unchanged", created: false, revised: false, itemId, versionId }
+        }
+        await this.db.prepare("UPDATE intel_item SET title = ?, published_at = ?, last_seen_at = ?, current_version_id = ? WHERE id = ?")
+          .run(entry.title, entry.publishedAt ?? null, entry.fetchedAt, versionId, itemId)
+        await this.recordCurrentChange(itemId, currentVersionId, versionId, "restored_version", entry.fetchedAt)
+        return { outcome: "restored", created: false, revised: true, itemId, versionId }
       }
       const versionId = randomUUID()
       await this.db.prepare(`
@@ -224,9 +279,22 @@ export class IntelRepository {
           INSERT INTO intel_item_block (id, version_id, block_key, block_order, block_type, text) VALUES (?, ?, ?, ?, ?, ?)
         `).run(randomUUID(), versionId, block.blockKey, block.order, block.type, block.text)
       }
-      await this.db.prepare("UPDATE intel_item SET title = ?, last_seen_at = ?, current_version_id = ? WHERE id = ?").run(entry.title, entry.fetchedAt, versionId, itemId)
-      return { created: !existing, revised: Boolean(existing), itemId, versionId }
+      await this.db.prepare("UPDATE intel_item SET title = ?, published_at = ?, last_seen_at = ?, current_version_id = ? WHERE id = ?")
+        .run(entry.title, entry.publishedAt ?? null, entry.fetchedAt, versionId, itemId)
+      await this.recordCurrentChange(itemId, currentVersionId, versionId, "new_version", entry.fetchedAt)
+      return { outcome: existing ? "revised" : "created", created: !existing, revised: Boolean(existing), itemId, versionId }
     })
+  }
+
+  async listCurrentChanges(itemId: string): Promise<IntelCurrentChange[]> {
+    const rows = await this.db.prepare("SELECT * FROM intel_item_current_change WHERE item_id = ? ORDER BY changed_at, rowid").all(itemId) as Row[]
+    return rows.map(row => ({
+      itemId: String(row.item_id),
+      fromVersionId: str(row.from_version_id),
+      toVersionId: String(row.to_version_id),
+      reason: row.reason as IntelCurrentChange["reason"],
+      changedAt: String(row.changed_at),
+    }))
   }
 
   async listItems(sourceId: string): Promise<IntelItemRecord[]> {

@@ -60,3 +60,11 @@ RSS/Atom/RDF 测试表（`server/providers/feed-formats.test.ts`）：
 - R2-4 P1 目录实网核验：未安排。R2-5 P1 全量夹具回放：只有 2 个源。R2-7 人工录入：未做。R2-8 24 小时实网：需用户单独确认。
 - job 未接入 `registry.ts`，没有真实 fetcher，没有 GET 接口。
 - 其他未关闭事项照旧：历史回放 Nalgae 1/10 为未完成验证（用户延后，不阻塞 R2，不再补样）；PAGASA 正样本；E-R04/E-R06 促销窗口。
+
+## 8. P2 返修（dots 2026-10-12 16:34，ts 1791793201.331149）
+
+1. **A→B→A 回滚**：`writeEntry` 命中历史 hash 但非当前版本时，恢复 `current_version_id` 与当前元数据（title/published_at/last_seen_at），不复制正文（版本内容不可变），并在 `intel_item_current_change` 记录 `restored_version`；新版本记录 `new_version`。返回 outcome：created/unchanged/revised/restored。
+2. **写入失败**：beginRun / 单条 writeEntry（`store_failed`）/ finalize（`finalize_failed`）异常均被捕获。存储仍可用：本 run 记为 failed、源进入退避、已提交条目保留（每条独立 BEGIN IMMEDIATE），其他源继续；连失败都记录不了：返回 `storage_unavailable`，job 返回 failed `intel_storage_unavailable`，不假装完成。
+3. **第二个 job 实例**：迁移 023 新增 `intel_executor` 与 `intel_fetch_run.executor_id`。每次运行仅回收**已确认结束**的 executor 的 running run（`recoverRunsOfEndedExecutors`）；崩溃遗留只能通过显式独占启动步骤 `recoverIntelRunsAtExclusiveStartup` 回收。绝不按时长判死；活跃实例的 run 由唯一 running 索引阻挡。
+4. 测试：`server/intel/collect.test.ts` 18 项（新增回滚、单条写失败+后续源继续+可重试、storage_unavailable、DB 级在途保护、双实例负向、重启遗留经独占启动回收、已结束 executor 回收）。schema 版本期望 22→23。
+5. 仍未完成：registry 接线、GET 端点；job 默认关闭、零网络、零 LLM；paid_receipt 切片未开始。
