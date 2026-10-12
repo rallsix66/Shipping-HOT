@@ -16,6 +16,7 @@ const commands = [
   ["typecheck", "pnpm typecheck"],
   ["lint", "pnpm lint"],
   ["targeted-intel", "npx vitest run server/intel"],
+  ["targeted-web-list", "npx vitest run server/intel/sources/web-list.test.ts"],
   ["targeted-paid-receipt", "npx vitest run server/intel/llm server/services/translation"],
   ["targeted-feed-safe-fetch", "npx vitest run server/providers/feed.test.ts server/runtime/feed-sync-job.test.ts server/services/article-fetch-security.test.ts server/services/article-fetch-transport.test.ts server/services/response-decoding.test.ts server/providers/article-extractor.test.ts server/services/article-service.test.ts server/runtime/registry.test.ts"],
   ["test", "pnpm test --run"],
