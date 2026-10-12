@@ -83,3 +83,10 @@
   2. **生成依据和确认证据分开存放**：规则或开源计算出的日期只能进 `generationBasis`。只有 `sourceClass` 为 official_campaign_page 或 official_blog，并且原文写明了这个年份、国家、活动名和起止日期，才能变成“已由 … 确认”。media、seller_tool、open_source_rule 只能标为“线索（未确认）”。
   3. **不覆盖 E-R04/E-R06 的锚点**：有据活动作为单独的一条显示，和锚点并列，互相引用。
   4. 按这个口径，目前**可以录入的只有** VN Shopee 2026 年的「15.1 Siêu Sale Năm Mới」26.12.2025 到 17.01.2026、「25.1 Sale Năm Mới」18.1 到 25.1、「Mua Hàng Xuyên Tết」14/2 到 22/2、「25.2 Sale Khai Xuân」23/2 到 25/2（都来自官方博客，只有日期，没有时刻和时区）。ID 的 Big Ramadan Sale 只能作为媒体线索。这四条是**有原文支持的候选**，**本轮不新增字段，也没有录入任何一条。**
+
+## 5. 存档脱敏补救（dots ts 1791791688.152539，2026-10-12 16:01 UTC+8）
+- **此前的扫描漏了**：上一轮脱敏只针对 cookie/header 类字段，扫描目录范围和正则都没有覆盖 HTML 内嵌 JSON 配置里的 key 字段。因此**撤回“这些存档已通过完整扫描”的说法**。
+- **发现**：两个 Shopee `/m/` 外壳页各有 6 个 Google Maps key 形态的值，字段为 `googleMapsApiKey`、`googleMapsBuyerApiKey`、`googleMapsOrderOpsApiKey` 的 `_Live` / `_NonLive` 变体（`shopee_vn_m_tet-sieu-sale.html` 第 38 行；`shopee_co_id_m_big-ramadan-sale.html` 同样有 6 个）。这是**第三方网页嵌入的公开前端配置**，不是用户凭据泄漏，也不代表账户被入侵。
+- **处理**：12 个值全部替换为 `[REDACTED]`，字段名和活动正文保留。没有测试这些 key，没有关闭 GitHub 告警，没有轮换，没有改写历史（旧提交里仍有原值，是否处理由用户决定）。
+- **扫描**：新脚本 `scripts/evidence-secret-scan.mjs`，覆盖带引号 JSON、转义引号 JSON、带后缀的字段名、一行多个值，以及 Google/AWS/JWT/GitHub/Slack/私钥等形态；只输出文件/字段/数量，不打印值。合成阳性对照 `--self-test`：7/7 命中，脱敏后残留为 0。范围：`docs/evidence/` 下全部 9 个 `*2026-10-12*` 存档目录。脱敏前 24 次命中（12 个字段 + 同样 12 个值的形态匹配，重复计数），脱敏后为 0。日志见 `r1-5-promo-research-2026-10-12/secret-scan-log.txt`。
+- **哈希**：`hashes.txt` 已改为分列，原始抓取哈希、第一轮脱敏哈希（已作废）和第二轮脱敏哈希（当前）分开记录。
