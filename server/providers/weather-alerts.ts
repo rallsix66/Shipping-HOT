@@ -3,24 +3,44 @@ import { XMLParser } from "fast-xml-parser"
 import { load } from "cheerio"
 import type { DataProvenance, FeedItem, Port, WeatherDetail } from "@shared/shipping"
 import { mockPorts } from "@shared/shipping-fixtures"
+import { portDirectoryBaseline } from "@shared/port-directory"
 import type { ArticleSourcePolicyConfig } from "@shared/article"
+import { METMALAYSIA_MIN_REQUEST_INTERVAL_MS, isPinnedMetMalaysiaUrl, parseMetMalaysiaWarnings } from "#/providers/metmalaysia-warning"
+import { type NchmfRunReport, collectNchmfNotices, isPinnedNchmfListUrl } from "#/providers/nchmf-warning"
+import { type NmcRunReport, collectNmcNotices } from "#/providers/nmc-warning"
+
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
+import { type CapSourceContext, capBodyUrlRejection, capIndexLinks, isRetiredBy, parseCapMessage, resolveCapBatch } from "#/providers/cap-alerts"
+
+export interface WeatherAlertRunIssue {
+  errorCode: string
+  errorMessage: string
+  failedIds: string[]
+  failedCount: number
+  receivedCount: number
+}
 
 export interface WeatherAlertProvider {
   readonly providerId?: string
   getFeedItems: (lastKnown?: FeedItem[], ports?: Port[]) => Promise<FeedItem[]>
+  /** Partial failure of the last getFeedItems run (VN-W01 article failures) that items alone cannot express. */
+  lastRunIssue?: () => WeatherAlertRunIssue | undefined
 }
 
-export const officialWeatherAlertSourceIds = new Set(["jma", "tmd", "bmkg"])
+export const officialWeatherAlertSourceIds = new Set(["jma", "tmd", "bmkg", "metmalaysia", "nchmf", "nmc"])
 
 export interface WeatherAlertResponse {
   ok: boolean
   status: number
   text: () => Promise<string>
+  /** Set by fetch when a redirect was followed. */
+  redirected?: boolean
+  /** Final URL after redirects (fetch Response.url). */
+  url?: string
 }
 
-export type WeatherAlertFetcher = (url: string) => Promise<WeatherAlertResponse>
-export type WeatherAlertParser = "jma" | "tmd" | "bmkg"
+export type WeatherAlertFetcher = (url: string, init?: { redirect?: "error" | "manual" | "follow" }) => Promise<WeatherAlertResponse>
+export type WeatherAlertParser = "jma" | "tmd" | "bmkg" | "metmalaysia" | "nchmf" | "nmc"
 export type WeatherAlertSourceStatus = "verified_live" | "experimental" | "live_pending" | "disabled"
 
 export interface WeatherAlertSource {
@@ -28,7 +48,15 @@ export interface WeatherAlertSource {
   name: string
   url: string
   sourceUrl: string
-  format: "rss" | "cap" | "html"
+  /** "cap_index": RSS index whose items link to CAP 1.2 documents (TMD TH-W01); lifecycle comes from CAP. */
+  format: "rss" | "cap" | "cap_index" | "html" | "json_warning" | "html_notice_list" | "html_page_set"
+  /** Issuing country (ISO 3166-1 alpha-2) for CAP structured-area checks. */
+  countryCode?: string
+  /** CAP area association: ISO 3166-2 geocode (default) or polygon containment of same-country port coordinates. */
+  capAreaMatch?: "geocode" | "polygon"
+  /** Max CAP index items fetched; with overflow "anomaly" more items fail the source instead of truncating. */
+  capIndexLimit?: number
+  capIndexOverflow?: "truncate" | "anomaly"
   parser: WeatherAlertParser
   enabled: boolean
   liveStatus: WeatherAlertSourceStatus
@@ -51,7 +79,8 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
     name: "Thai Meteorological Department",
     url: "https://www.tmd.go.th/en/api/xml/CAP",
     sourceUrl: "https://www.tmd.go.th/en/service/rss",
-    format: "rss",
+    format: "cap_index",
+    countryCode: "TH",
     parser: "tmd",
     enabled: true,
     liveStatus: "verified_live",
@@ -61,12 +90,68 @@ export const officialWeatherAlertSources: WeatherAlertSource[] = [
     name: "Indonesia Agency for Meteorology, Climatology and Geophysics",
     url: "https://www.bmkg.go.id/alerts/nowcast/en",
     sourceUrl: "https://data.bmkg.go.id/peringatan-dini-cuaca/",
-    format: "rss",
+    // BMKG nowcast: RSS index whose items link to CAP 1.2 bodies (verified 2026-10-10); polygons, no geocodes.
+    format: "cap_index",
+    countryCode: "ID",
+    capAreaMatch: "polygon",
+    capIndexLimit: 100,
+    capIndexOverflow: "anomaly",
     parser: "bmkg",
     enabled: true,
     liveStatus: "verified_live",
   },
+  {
+    // MY-W01 (ADR-008): limited "official notices" integration. Pinned host+path (trailing slash; redirects refused),
+    // 4 req/min ceiling, one request per run. Records only: validity/timezone unknown, no severity, no region,
+    // no port association and no WR-O01/WR-O02. Runs only under the existing SHIPPING_WEATHER_ALERT_PROVIDER=experimental.
+    id: "metmalaysia",
+    name: "Malaysian Meteorological Department (data.gov.my)",
+    url: "https://api.data.gov.my/weather/warning/",
+    sourceUrl: "https://api.data.gov.my/weather/warning/",
+    format: "json_warning",
+    countryCode: "MY",
+    parser: "metmalaysia",
+    enabled: false,
+    liveStatus: "experimental",
+  },
+  {
+    // VN-W01 (ADR-008): limited "official notices" integration (dots 17:14). Pinned HTTPS list page + same-host
+    // `-post<digits>.html` articles only, redirects refused, <= 1 + NCHMF_MAX_ARTICLES requests per run. Raw text
+    // only: lifecycle/validity/timezone unknown, original level unmapped, no port association, no WR-O01/WR-O02.
+    // Runs only under the existing SHIPPING_WEATHER_ALERT_PROVIDER=experimental switch.
+    id: "nchmf",
+    name: "National Center for Hydro-Meteorological Forecasting (NCHMF, Vietnam)",
+    url: "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html",
+    sourceUrl: "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html",
+    format: "html_notice_list",
+    countryCode: "VN",
+    parser: "nchmf",
+    enabled: false,
+    liveStatus: "experimental",
+  },
+  {
+    // CN-W01/CN-W02 (dots approved 76b39fc): limited official-product integration. Exactly six pinned NMC pages
+    // (nmc-warning.ts NMC_PAGES), one plain GET each, redirects refused; no link expansion / REST / PDFs. Raw text only:
+    // lifecycle/validity/timezone unknown, raw level unmapped, no port association, no HOT / WR-O01 / WR-O02.
+    // Runs only under the existing SHIPPING_WEATHER_ALERT_PROVIDER=experimental switch.
+    id: "nmc",
+    name: "National Meteorological Center (NMC, China Meteorological Administration)",
+    url: "https://www.nmc.cn/publish/country/warning/index.html",
+    sourceUrl: "https://www.nmc.cn/publish/country/warning/index.html",
+    format: "html_page_set",
+    countryCode: "CN",
+    parser: "nmc",
+    enabled: false,
+    liveStatus: "experimental",
+  },
 ]
+
+const lastJsonWarningRequestAt = new Map<string, number>()
+
+/** Test hook: forget the per-source request clock used by the json_warning rate limit. */
+export function resetWeatherAlertRateLimit(): void {
+  lastJsonWarningRequestAt.clear()
+}
 
 export function activeOfficialWeatherAlertSourceIds(options: { allowPending?: boolean, sources?: WeatherAlertSource[] } = {}): Set<string> {
   const sources = options.sources ?? officialWeatherAlertSources
@@ -237,39 +322,36 @@ export function parseWeatherAlertRss(xml: string, source: WeatherAlertSource, po
   return normalized
 }
 
-function capInfoAlerts(xml: string): RawAlert[] {
-  const parsed = parser.parse(xml) as { alert?: unknown }
-  const alerts = asArray<Record<string, unknown>>(parsed.alert as Record<string, unknown> | Record<string, unknown>[] | undefined)
-  return alerts.flatMap((alert) => {
-    const info = asArray<Record<string, unknown>>(alert.info as Record<string, unknown> | Record<string, unknown>[] | undefined)[0]
-    if (!info) return []
-    const area = asArray<Record<string, unknown>>(info.area as Record<string, unknown> | Record<string, unknown>[] | undefined)[0]
-    return [{
-      identifier: alert.identifier,
-      title: info.headline ?? info.event,
-      summary: info.description ?? info.instruction,
-      link: info.web,
-      issuedAt: alert.sent,
-      updated: alert.sent,
-      effectiveAt: info.effective ?? info.onset,
-      onsetAt: info.onset,
-      expiresAt: info.expires,
-      severity: info.severity,
-      urgency: info.urgency,
-      certainty: info.certainty,
-      region: area?.areaDesc,
-      active: true,
-    } satisfies RawAlert]
-  })
+export function capSourceContext(source: WeatherAlertSource): CapSourceContext {
+  const polygonPorts = source.capAreaMatch === "polygon"
+    ? portDirectoryBaseline.filter(row => row.countryCode === source.countryCode).map(row => ({ portId: row.shippingPortId, latitude: row.latitude, longitude: row.longitude }))
+    : undefined
+  return { id: source.id, name: source.name, sourceUrl: source.sourceUrl, countryCode: source.countryCode ?? "", provenance: weatherAlertProvenance(source), areaMatch: source.capAreaMatch ?? "geocode", polygonPorts }
 }
 
-export function parseWeatherAlertCap(xml: string, source: WeatherAlertSource, ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
+/**
+ * Single CAP document(s). Lifecycle derives from CAP fields (status/msgType/references/expires) via
+ * resolveCapBatch — there is no unconditional active=true any more. Ports come only from structured geocodes.
+ */
+export function parseWeatherAlertCap(xml: string, source: WeatherAlertSource, _ports: Port[] = mockPorts, fetchedAt = new Date().toISOString()): FeedItem[] {
   const parsed = parser.parse(xml) as { alert?: unknown }
   if (parsed.alert === undefined) throw new Error(`${source.name} CAP payload has no alert root`)
-  const alertCount = asArray(parsed.alert as Record<string, unknown> | Record<string, unknown>[]).length
-  const normalized = capInfoAlerts(xml).slice(0, 20).map((item, index) => normalizeAlert(item, source, ports, fetchedAt, index)).filter((item): item is FeedItem => item !== undefined)
-  if (alertCount > 0 && normalized.length === 0) throw new Error(`${source.name} CAP payload has no valid alert entries`)
-  return normalized
+  return resolveCapBatch([parseCapMessage(xml)], capSourceContext(source), fetchedAt).items
+}
+
+function retiredByOfficialUpdate(item: FeedItem, fetchedAt: string): FeedItem {
+  return {
+    ...item,
+    severity: "info",
+    hotReason: undefined,
+    summary: `${item.summary} 该预警已被官方更新或取消。`,
+    weather: item.weather ? { ...item.weather, alertState: "expired" } : item.weather,
+    eventEligibility: false,
+    fetchedAt,
+    stale: false,
+    sourceStatus: "healthy",
+    error: undefined,
+  }
 }
 
 interface ParsedHtmlAlerts {
@@ -378,6 +460,9 @@ export interface OfficialWeatherAlertProviderOptions {
   sources?: WeatherAlertSource[]
   allowPending?: boolean
   throwOnSourceFailureWithoutLastKnown?: boolean
+  /** Receives the per-run NCHMF report (counts received/filtered/failed/truncated) for evidence. */
+  onNchmfReport?: (report: NchmfRunReport) => void
+  onNmcReport?: (report: NmcRunReport) => void
 }
 
 function markMissingFromCurrentIndex(item: FeedItem, fetchedAt: string): FeedItem {
@@ -415,18 +500,52 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
   const now = options.now ?? (() => new Date())
   const sources = options.sources ?? officialWeatherAlertSources
   const enabledSources = sources.filter(source => activeOfficialWeatherAlertSourceIds({ allowPending: options.allowPending, sources }).has(source.id))
+  let runIssue: WeatherAlertRunIssue | undefined
   return {
     ...(enabledSources.length === 1 ? { providerId: enabledSources[0].id } : {}),
+    lastRunIssue: () => runIssue,
     async getFeedItems(lastKnown = [], ports = mockPorts) {
+      runIssue = undefined
       const fetchedAt = now().toISOString()
       if (!enabledSources.length) {
-        return lastKnown.filter(item => item.sourceId === "jma" || item.sourceId === "tmd" || item.sourceId === "bmkg").map(item => markDisabled(item, fetchedAt, "official_weather_source_live_pending"))
+        return lastKnown.filter(item => officialWeatherAlertSourceIds.has(item.sourceId)).map(item => markDisabled(item, fetchedAt, "official_weather_source_live_pending"))
       }
       const results = await Promise.all(enabledSources.map(async (source) => {
         const previous = lastKnown.filter(item => item.sourceId === source.id)
+        if (source.format === "html_page_set") {
+          try {
+            const { items, report } = await collectNmcNotices(fetcher, { id: source.id, provenance: weatherAlertProvenance(source) }, fetchedAt, previous)
+            options.onNmcReport?.(report)
+            if (report.failed.length) {
+              const ids = report.failed.map(f => f.column)
+              runIssue = { errorCode: "nmc_partial_page_failure", errorMessage: `${source.name}: received ${report.received}, failed ${ids.length} (columns ${report.failed.map(f => `${f.column}: ${f.reason}`).join("; ")})`, failedIds: ids, failedCount: ids.length, receivedCount: report.received }
+            }
+            return items
+          } catch (error) {
+            const report = (error as { nmcReport?: NmcRunReport }).nmcReport
+            if (report) options.onNmcReport?.(report)
+            const failure = error instanceof ProviderError ? error : providerErrorFromUnknown(source.name, error, "provider_contract_changed")
+            if (!previous.length && options.throwOnSourceFailureWithoutLastKnown) throw failure
+            return previous.map(item => markFailed(item, fetchedAt, failure))
+          }
+        }
         let response: WeatherAlertResponse
         try {
-          response = await fetcher(source.url)
+          if (source.format === "json_warning") {
+            if (!isPinnedMetMalaysiaUrl(source.url)) throw new Error(`${source.name} url is not the pinned host/path`)
+            const nowMs = now().getTime()
+            const last = lastJsonWarningRequestAt.get(source.id)
+            if (last !== undefined && nowMs - last < METMALAYSIA_MIN_REQUEST_INTERVAL_MS) throw new Error(`${source.name} local rate limit (4 req/min) not yet elapsed`)
+            lastJsonWarningRequestAt.set(source.id, nowMs)
+            response = await fetcher(source.url, { redirect: "error" })
+            if (response.redirected || (response.url && response.url !== source.url)) throw new Error(`${source.name} redirect rejected`)
+          } else if (source.format === "html_notice_list") {
+            if (!isPinnedNchmfListUrl(source.url)) throw new Error(`${source.name} url is not the pinned list page`)
+            response = await fetcher(source.url, { redirect: "error" })
+            if (response.redirected || (response.url && response.url !== source.url)) throw new Error(`${source.name} redirect rejected`)
+          } else {
+            response = await fetcher(source.url)
+          }
           if (!response.ok) throw providerHttpError(source.name, response.status, `${source.name} request failed (${response.status})`)
         } catch (error) {
           const failure = error instanceof ProviderError
@@ -437,6 +556,48 @@ export function createOfficialWeatherAlertProvider(options: OfficialWeatherAlert
         }
         try {
           const body = await response.text()
+          if (source.format === "cap_index") {
+            const messages: ReturnType<typeof parseCapMessage>[] = []
+            for (const link of capIndexLinks(body, source.capIndexLimit ?? 20, source.id, source.capIndexOverflow ?? "truncate")) {
+              // Redirects are refused (fetch rejects on any redirect); a fetcher that still followed one is re-checked.
+              const document = await fetcher(link, { redirect: "error" })
+              if (document.redirected || (document.url && (document.url !== link || capBodyUrlRejection(document.url, source.id)))) {
+                throw new Error(`${source.name} CAP document redirect rejected`)
+              }
+              if (!document.ok) throw providerHttpError(source.name, document.status, `${source.name} CAP document request failed (${document.status})`)
+              messages.push(parseCapMessage(await document.text(), link))
+            }
+            const batch = resolveCapBatch(messages, capSourceContext(source), fetchedAt)
+            const currentIds = new Set(batch.items.map(item => item.id))
+            const carried = previous.filter(item => !currentIds.has(item.id))
+            const cleared = carried.map(item => isRetiredBy(item, source.id, batch.retiredKeys)
+              ? retiredByOfficialUpdate(item, fetchedAt)
+              : hasExpiredEvidence(item, fetchedAt)
+                ? expiredAsInfo(item, fetchedAt)
+                : item.weather?.alertState === "expired" ? item : markMissingFromCurrentIndex(item, fetchedAt))
+            return [...batch.items, ...cleared]
+          }
+          if (source.format === "html_notice_list") {
+            const { items, report } = await collectNchmfNotices(body, fetcher, { id: source.id, listUrl: source.sourceUrl, provenance: weatherAlertProvenance(source) }, fetchedAt, previous)
+              .catch((error: unknown) => {
+                const report = (error as { nchmfReport?: NchmfRunReport }).nchmfReport
+                if (report) options.onNchmfReport?.(report)
+                throw error
+              })
+            options.onNchmfReport?.(report)
+            if (report.failed.length) {
+              const ids = report.failed.map(f => f.postId)
+              runIssue = { errorCode: "nchmf_partial_article_failure", errorMessage: `${source.name}: received ${report.received}, failed ${ids.length} (postIds ${ids.join(",")})`, failedIds: ids, failedCount: ids.length, receivedCount: report.received }
+            }
+            return items
+          }
+          if (source.format === "json_warning") {
+            const parsed = parseMetMalaysiaWarnings(body, { id: source.id, sourceUrl: source.sourceUrl, provenance: weatherAlertProvenance(source) }, fetchedAt, previous)
+            const currentIds = new Set(parsed.map(item => item.id))
+            // A record no longer listed is NOT declared expired (validity is unknown); it is only marked missing.
+            const missing = previous.filter(item => !currentIds.has(item.id)).map(item => markMissingFromCurrentIndex(item, fetchedAt))
+            return [...parsed, ...missing]
+          }
           const parsed = source.format === "cap"
             ? parseWeatherAlertCap(body, source, ports, fetchedAt)
             : source.format === "rss"

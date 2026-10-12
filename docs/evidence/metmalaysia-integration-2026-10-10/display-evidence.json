@@ -1,0 +1,118 @@
+{
+  "kind": "MY-W01 display verification",
+  "ranAt": "2026-10-10T08:38:34.909Z",
+  "gitHead": "b946bcdb58203ea6d8cefaad161cb05e30ab7549",
+  "workspaceClean": true,
+  "liveRunGitHead": "eab30a761ddf25907ee884134eda3a5e79c048a1",
+  "runDir": "D:\\try one\\Shipping HOT\\.tmp\\metmalaysia-live-eab30a7",
+  "verdict": "PASS",
+  "coverage": {
+    "service": "production build dist/output/server (Nitro), Runtime disabled, SHIPPING_WEATHER_ALERT_PROVIDER unset",
+    "api": [
+      "GET /api/shipping/feed",
+      "GET /api/shipping"
+    ],
+    "browser": "system Chrome headless over CDP: /feed"
+  },
+  "api": {
+    "feedStatus": 200,
+    "indexStatus": 200,
+    "metmalaysiaItems": 4,
+    "before": {
+      "feedItems": 4,
+      "providerUsageRows": 0,
+      "providerUsageRequests": 0,
+      "runtimeRows": -1,
+      "feedHash": "weather-alert:metmalaysia:1085cd3aec39f7e4:1948,weather-alert:metmalaysia:468debfe0e6d17a5:4349,weather-alert:metmalaysia:85e8ecb33970658b:4349,weather-alert:metmalaysia:c839053dda1e9e11:3726"
+    },
+    "after": {
+      "feedItems": 4,
+      "providerUsageRows": 0,
+      "providerUsageRequests": 0,
+      "runtimeRows": -1,
+      "feedHash": "weather-alert:metmalaysia:1085cd3aec39f7e4:1948,weather-alert:metmalaysia:468debfe0e6d17a5:4349,weather-alert:metmalaysia:85e8ecb33970658b:4349,weather-alert:metmalaysia:c839053dda1e9e11:3726"
+    },
+    "sideEffectNote": "Runtime 关闭、预警开关未设，所检查的 feed/provider_usage 计数及指纹未变。runtimeRows=-1 表示该表不可用（未检查 runtime 表）。"
+  },
+  "browser": {
+    "status": "RAN",
+    "chrome": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    "url": "http://127.0.0.1:4491/feed",
+    "rawBlocks": 4,
+    "screenshot": "feed-metmalaysia.png",
+    "excerpt": "ble / unavailable / unavailable / unavailable\n\n信息资讯\n\n航运资讯\n\n普通航运资讯留在 Feed；明确运营影响的官方公告和预警才会进入 HOT。\n\n分类\n全部\n4\n航运新闻\n0\n船公司通知\n0\n天气\n4\n港口通知\n0\n来源\n官方\n4\n第三方\n0\n模拟数据\n0\nStrong Winds and Rough Seas Warning\n打开来源\n\n已接收 MetMalaysia 官方预警记录，有效性待确认（时区未确认，未计算是否生效；无官方级别字段；无结构化区域，未关联港口）。 原文：SECTION A: FOR MALAYSIAN WATERS [WITHIN 24 NAUTICAL MILES] 1) LOW HORIZONTAL VISIBILITY WARNING Low horizontal visibility is expected over the waters of Perak • Selangor • N. Sembilan • Melaka • Johor • Pahang until Saturday, 10 October 2026. 2) THUNDERSTORMS WARNING Thunderstorms, heavy rain and strong winds are expected over the waters of Perlis & Kedah • Pahang • Terengganu • Lahad Datu until 6:00 PM; S…\n\n查看详情\n打开来源\n天气\nmetmalaysia · 官方 · 报告\n最新\n首次接收 2026/10/10 16:30\nofficial\nissuing_country_MY\nweather_warning\nvalidity_pending_confirmation\ntimezone_unconfirmed\nofficial_severity_not_provided\nno_structured_region\n官方预警\n预警状态：未知\n有效性待确认\n时区未确认\n官方级别：未提供\n官方原始时间（时区未确认，未换算）：issued 2026-10-10T14:00:00 · valid_from 2026-10-08T00:00:00 · valid_to 2026-10-10T23:59:00\n来源 https://api.data.gov.my/weather/warning/ · 抓取时间 2026/10/10 16:30\n原文："
+  },
+  "checks": [
+    {
+      "id": "server_healthy",
+      "pass": true,
+      "detail": "http://127.0.0.1:4491"
+    },
+    {
+      "id": "api_feed_returns_records",
+      "pass": true,
+      "detail": "4 vs stored 4"
+    },
+    {
+      "id": "api_records_unknown_validity",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "api_records_raw_preserved",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "api_records_no_port",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "get_no_side_effects",
+      "pass": true,
+      "detail": "before {\"feedItems\":4,\"providerUsageRows\":0,\"providerUsageRequests\":0,\"runtimeRows\":-1,\"feedHash\":\"weather-alert:metmalaysia:1085cd3aec39f7e4:1948,weather-alert:metmal after {\"feedItems\":4,\"providerUsageRows\":0,\"providerUsageRequests\":0,\"runtimeRows\":-1,\"feedHash\":\"weather-alert:metmalaysia:1085cd3aec39f7e4:1948,weather-alert:metmal",
+      "scope": "Runtime 关闭、预警开关未设，所检查的 feed/provider_usage 计数及指纹未变；runtimeRows=-1 表示该表不可用（未检查 runtime 表）。"
+    },
+    {
+      "id": "browser_feed_rendered",
+      "pass": true,
+      "detail": "/feed contains MetMalaysia"
+    },
+    {
+      "id": "browser_summary_wording",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_no_active_claim",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_validity_timezone_severity_chips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_raw_times",
+      "pass": true,
+      "detail": "2026-10-10T15:50:00 / 2026-10-10T15:00:00 / 2026-10-10T20:00:00"
+    },
+    {
+      "id": "browser_source_and_fetch_time",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_no_advisory_scope",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_raw_block_per_record",
+      "pass": true,
+      "detail": "4 raw blocks"
+    }
+  ]
+}

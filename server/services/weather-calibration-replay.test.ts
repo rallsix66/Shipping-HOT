@@ -1,0 +1,313 @@
+import type { PortClosureReplayEvent, ReplayWeatherSample } from "@shared/weather-impact"
+import { describe, expect, it } from "vitest"
+import { admitReplayEvents, getR15_4CalibrationStatus, isR15_4ReplayRuleHit, parseStrictUtc, runR15_4Replay } from "./weather-calibration-replay"
+import { PLAN_WIND_GUST_MS } from "#/config/weather-impact-rules"
+import { portClosureReplayCandidates } from "#/data/weather-calibration/port-closure-replay-candidates"
+import { NALGAE_HKO_FIXES_IN_WINDOW, NALGAE_SHEKOU_POINT, qualifiedPortClosureReplayEvents } from "#/data/weather-calibration/qualified-port-closure-replay"
+
+// All events below are SYNTHETIC test fixtures (example.org); they are never part of the real corpus.
+const START = "2030-01-01T00:00:00Z"
+const END = "2030-01-02T00:00:00Z"
+
+function sample(atUtc: string, inputs: ReplayWeatherSample["inputs"], over: Partial<ReplayWeatherSample["provenance"]> = {}): ReplayWeatherSample {
+  const units: ReplayWeatherSample["provenance"]["units"] = {}
+  if (inputs.windGustMs !== undefined) units.windGustMs = "m/s"
+  if (inputs.typhoonDistanceKm !== undefined) units.typhoonDistanceKm = "km"
+  if (inputs.waveHeightM !== undefined) units.waveHeightM = "m"
+  return {
+    atUtc,
+    inputs,
+    provenance: { productId: "fixture-product", productApproved: true, source: "fixture", kind: "observation", locationLabel: "fixture station", latitude: 22.5, longitude: 113.9, units, ...over },
+  }
+}
+
+function event(id: string, over: Partial<PortClosureReplayEvent> = {}): PortClosureReplayEvent {
+  return {
+    eventId: id,
+    portUnlocode: "CNSHK",
+    operationScope: "fixture gate pickup/drop-off",
+    stopSource: { url: "https://example.org/stop", publisher: "operator", quote: "fixture stop 08:00" },
+    resumeSource: { url: "https://example.org/resume", publisher: "operator", quote: "fixture resume 08:00" },
+    timeZoneBasis: { statedOffset: null, inferredOffset: "UTC+8", inferenceReason: "fixture: local operator, local clock", ambiguous: false },
+    closureStartUtc: START,
+    closureEndUtc: END,
+    samples: [sample("2030-01-01T06:00:00Z", { windGustMs: 30 })],
+    ...over,
+  }
+}
+
+describe("r1.5-4 replay: real corpus", () => {
+  it("real corpus has only the Nalgae trial event and stays blocked (no PASS)", () => {
+    expect(qualifiedPortClosureReplayEvents.length).toBe(1)
+    const status = getR15_4CalibrationStatus()
+    expect(status.status).toBe("blocked")
+    expect(status.qualifiedCount).toBe(1)
+  })
+
+  it("candidates (incl. HKO/Nalgae) are not qualified", () => {
+    expect(portClosureReplayCandidates.every(c => c.verificationStatus === "blocked")).toBe(true)
+    expect(portClosureReplayCandidates.some(c => c.id === "2022-nalgae-shekou-gate")).toBe(true)
+  })
+})
+
+describe("r1.5-4 replay: C1–C8 admission", () => {
+  it("rejects out-of-scope port, missing scope, non-https locator, missing quote, missing tz basis, invalid window", () => {
+    const [a, b, c, d, e] = admitReplayEvents([
+      event("e-port", { portUnlocode: "CNSHA" }),
+      event("e-scope", { operationScope: " " }),
+      event("e-url", { stopSource: { url: "http://example.org/x", publisher: "operator", quote: "q" } }),
+      event("e-tz", { timeZoneBasis: { statedOffset: null, ambiguous: false } }),
+      event("e-window", { closureStartUtc: END, closureEndUtc: START }),
+    ])
+    expect(a.reasons).toContain("C2:port_outside_eight_ports")
+    expect(b.reasons).toContain("C3:missing_operation_scope")
+    expect(c.reasons).toContain("C4:stop_locator_invalid")
+    expect(d.reasons).toContain("C5:time_zone_basis_missing")
+    expect(e.reasons).toContain("C5:invalid_utc_window")
+    expect([a, b, c, d, e].every(x => x.status === "rejected")).toBe(true)
+  })
+
+  it("rejects unapproved product, wrong unit, untimed/non-UTC point, and centre wind used as gust", () => {
+    const [a, b, c, d] = admitReplayEvents([
+      event("s-unapproved", { samples: [sample("2030-01-01T06:00:00Z", { typhoonDistanceKm: 50 }, { productApproved: false, kind: "derived_distance" })] }),
+      event("s-unit", { samples: [sample("2030-01-01T06:00:00Z", { windGustMs: 30 }, { units: { windGustMs: "km/h" } })] }),
+      event("s-time", { samples: [sample("2030-01-01 06:00", { windGustMs: 30 })] }),
+      event("s-centre", { samples: [sample("2030-01-01T06:00:00Z", { windGustMs: 40 }, { kind: "post_analysis" })] }),
+    ])
+    expect(a.sampleChecks[0].reasons).toContain("C6:product_not_approved")
+    expect(b.sampleChecks[0].reasons).toContain("C6:unit_mismatch:windGustMs")
+    expect(c.sampleChecks[0].reasons).toContain("C6:sample_time_not_utc_iso")
+    expect(d.sampleChecks[0].reasons).toContain("C6:gust_not_point_observation_or_forecast")
+    for (const x of [a, b, c, d]) {
+      expect(x.status).toBe("rejected")
+      expect(x.reasons).toContain("C6:no_valid_samples_in_window")
+    }
+  })
+
+  it("rejects duplicate event id and duplicate weather-system/port pair (no splitting one event)", () => {
+    const r = admitReplayEvents([
+      event("dup", { weatherSystemId: "TC-X" }),
+      event("dup"),
+      event("dup-2", { weatherSystemId: "TC-X" }),
+    ])
+    expect(r[0].status).toBe("eligible")
+    expect(r[1].reasons).toContain("C1:duplicate_event_id")
+    expect(r[2].reasons).toContain("C1:duplicate_event_port")
+  })
+
+  it("ambiguous time zone → pending manual review, not eligible", () => {
+    const [a] = admitReplayEvents([event("tz-amb", { timeZoneBasis: { statedOffset: null, inferredOffset: "UTC+7", inferenceReason: "Indonesia multi-zone", ambiguous: true } })])
+    expect(a.status).toBe("pending_review")
+    const report = runR15_4Replay([event("tz-amb", { timeZoneBasis: { statedOffset: null, inferredOffset: "UTC+7", inferenceReason: "x", ambiguous: true } })])
+    expect(report.eligibleCount).toBe(0)
+    expect(report.pendingReview).toHaveLength(1)
+  })
+
+  it("window boundaries are inclusive; points outside are excluded, not counted", () => {
+    const samples = [
+      sample("2029-12-31T23:59:59Z", { windGustMs: 30 }),
+      sample(START, { windGustMs: 10 }),
+      sample(END, { windGustMs: 10 }),
+      sample("2030-01-02T00:00:01Z", { windGustMs: 30 }),
+    ]
+    const [a] = admitReplayEvents([event("bounds", { samples })])
+    expect(a.status).toBe("eligible")
+    expect(a.validSamples.map(s => s.atUtc)).toEqual([START, END])
+    expect(a.sampleChecks.filter(c => !c.valid).every(c => c.reasons.includes("C7:outside_closure_window"))).toBe(true)
+    const report = runR15_4Replay([event("bounds", { samples })])
+    expect(report.events[0].hit).toBe(false)
+    expect(report.events[0].validSampleCount).toBe(2)
+  })
+})
+
+describe("r1.5-4 replay: event-level metric", () => {
+  it("evaluates every valid point, counts the event once, reports first hit time and rule id", () => {
+    const report = runR15_4Replay([event("multi", { samples: [
+      sample("2030-01-01T18:00:00Z", { windGustMs: 30 }),
+      sample("2030-01-01T00:00:00Z", { windGustMs: 10 }),
+      sample("2030-01-01T06:00:00Z", { windGustMs: 18 }),
+    ] })])
+    const r = report.events[0]
+    expect(report.eligibleCount).toBe(1)
+    expect(report.hits).toBe(1)
+    expect(r.validSampleCount).toBe(3)
+    expect(r.points.map(p => p.atUtc)).toEqual(["2030-01-01T00:00:00Z", "2030-01-01T06:00:00Z", "2030-01-01T18:00:00Z"])
+    expect(r.points.map(p => p.counted)).toEqual([false, true, true])
+    expect(r.hitAtUtc).toBe("2030-01-01T06:00:00Z")
+    expect(r.hitRuleIds).toEqual(["WR-S02"])
+  })
+
+  it("watch-only stays a miss; eligible misses remain in the denominator", () => {
+    const report = runR15_4Replay([
+      event("miss", { samples: [sample("2030-01-01T06:00:00Z", { windGustMs: PLAN_WIND_GUST_MS.wrS01 })] }),
+      event("hit"),
+    ])
+    expect(report.eligibleCount).toBe(2)
+    expect(report.hits).toBe(1)
+    expect(report.hitRate).toBe(0.5)
+    expect(report.events.find(e => e.eventId === "miss")?.missReason).toBe("no_shipping_port_warning_or_critical_in_window")
+    expect(isR15_4ReplayRuleHit({ object: "shipping_port", severity: "watch" })).toBe(false)
+  })
+
+  it("wR-S03 may use cyclone distance from an approved derived-distance product", () => {
+    const report = runR15_4Replay([event("tc", { samples: [sample("2030-01-01T06:00:00Z", { typhoonDistanceKm: 120 }, { kind: "derived_distance" })] })])
+    expect(report.events[0].hitRuleIds).toContain("WR-S03")
+  })
+
+  it("rejected events are listed separately and never enter the denominator", () => {
+    const report = runR15_4Replay([event("ok"), event("bad", { portUnlocode: "TWKHH" })])
+    expect(report.eligibleCount).toBe(1)
+    expect(report.rejected.map(r => r.eventId)).toEqual(["bad"])
+  })
+
+  it("cross-port events of one typhoon are disclosed as a correlated group", () => {
+    const report = runR15_4Replay([event("a", { weatherSystemId: "TC-Y" }), event("b", { weatherSystemId: "TC-Y", portUnlocode: "CNYTN" })])
+    expect(report.correlatedGroups).toEqual([{ weatherSystemId: "TC-Y", eventIds: ["a", "b"] }])
+  })
+
+  const miss = (id: string) => event(id, { samples: [sample("2030-01-01T06:00:00Z", { windGustMs: 5 })] })
+  const ids = (n: number, p: string) => Array.from({ length: n }, (_, i) => `${p}-${i}`)
+
+  it("decision: 9 eligible all hit → blocked (count)", () => {
+    const r = runR15_4Replay(ids(9, "h").map(id => event(id)))
+    expect(r.status).toBe("blocked")
+    expect(r.reason).toContain("Need 10")
+  })
+
+  it("decision: 10 eligible with 8 hits (80%) → ready (still not PASS)", () => {
+    const r = runR15_4Replay([...ids(8, "h").map(id => event(id)), ...ids(2, "m").map(miss)])
+    expect(r.hitRate).toBe(0.8)
+    expect(r.status).toBe("ready")
+  })
+
+  it("decision: 10 eligible with 7 hits (70%) → blocked (rate)", () => {
+    const r = runR15_4Replay([...ids(7, "h").map(id => event(id)), ...ids(3, "m").map(miss)])
+    expect(r.status).toBe("blocked")
+    expect(r.reason).toContain("below 80%")
+  })
+
+  it("decision: 9 eligible + 1 rejected does not reach 10", () => {
+    const r = runR15_4Replay([...ids(9, "h").map(id => event(id)), event("x", { portUnlocode: "CNSHA" })])
+    expect(r.eligibleCount).toBe(9)
+    expect(r.status).toBe("blocked")
+  })
+})
+
+describe("r1.5-4 replay: P2 value and time strictness", () => {
+  it("negative values and missing-value sentinels never become eligible hits", () => {
+    const cases: ReplayWeatherSample["inputs"][] = [
+      { typhoonDistanceKm: -1 },
+      { visibilityM: -999 },
+      { windGustMs: -999 },
+      { waveHeightM: -1 },
+      { precipitationMm24h: -9999 },
+    ]
+    for (const inputs of cases) {
+      const s = sample("2030-01-01T06:00:00Z", inputs, { units: { typhoonDistanceKm: "km", visibilityM: "m", windGustMs: "m/s", waveHeightM: "m", precipitationMm24h: "mm" }, kind: "observation" })
+      const r = runR15_4Replay([event("neg", { samples: [s] })])
+      expect(r.eligibleCount).toBe(0)
+      expect(r.hits).toBe(0)
+      expect(r.rejected[0].reasons).toContain("C6:no_valid_samples_in_window")
+    }
+    const [mixed] = admitReplayEvents([event("mixed", { samples: [sample("2030-01-01T06:00:00Z", { windGustMs: 5, typhoonDistanceKm: -1 }, { units: { windGustMs: "m/s", typhoonDistanceKm: "km" } })] })])
+    expect(mixed.sampleChecks[0].reasons).toContain("C6:invalid_value:typhoonDistanceKm")
+    expect(mixed.status).toBe("rejected")
+  })
+
+  it("legitimate zeros are kept; optional fields may be absent", () => {
+    const r = runR15_4Replay([event("zero", { samples: [sample("2030-01-01T06:00:00Z", { precipitationMm24h: 0, waveHeightM: 0 }, { units: { precipitationMm24h: "mm", waveHeightM: "m" } })] })])
+    expect(r.eligibleCount).toBe(1)
+    expect(r.events[0].hit).toBe(false)
+    const v0 = runR15_4Replay([event("vis0", { samples: [sample("2030-01-01T06:00:00Z", { visibilityM: 0 }, { units: { visibilityM: "m" } })] })])
+    expect(v0.events[0].hitRuleIds).toEqual(["WR-S04"])
+  })
+
+  it("strict UTC parser rejects impossible dates and accepts a valid leap day", () => {
+    expect(parseStrictUtc("2023-02-30T00:00:00Z")).toBeUndefined()
+    expect(parseStrictUtc("2023-02-29T00:00:00Z")).toBeUndefined()
+    expect(parseStrictUtc("2100-02-29T00:00:00Z")).toBeUndefined()
+    expect(parseStrictUtc("2030-04-31T00:00:00Z")).toBeUndefined()
+    expect(parseStrictUtc("2030-01-01T24:00:00Z")).toBeUndefined()
+    expect(parseStrictUtc("2030-01-01T23:60:00Z")).toBeUndefined()
+    expect(parseStrictUtc("2030-13-01T00:00:00Z")).toBeUndefined()
+    expect(parseStrictUtc("2024-02-29T12:00:00Z")).toBe(Date.UTC(2024, 1, 29, 12))
+    expect(parseStrictUtc("2000-02-29T00:00:00.5Z")).toBe(Date.UTC(2000, 1, 29, 0, 0, 0, 500))
+  })
+
+  it("invalid closure window dates are rejected", () => {
+    const [a] = admitReplayEvents([event("win", { closureStartUtc: "2023-02-30T00:00:00Z", closureEndUtc: "2023-03-02T00:00:00Z" })])
+    expect(a.reasons).toContain("C5:invalid_utc_window")
+    expect(a.status).toBe("rejected")
+  })
+
+  it("invalid sample time (non-leap Feb 29) is excluded", () => {
+    const [a] = admitReplayEvents([event("st", { closureStartUtc: "2023-02-28T00:00:00Z", closureEndUtc: "2023-03-02T00:00:00Z", samples: [sample("2023-02-29T06:00:00Z", { windGustMs: 30 })] })])
+    expect(a.sampleChecks[0].reasons).toContain("C6:sample_time_not_utc_iso")
+    expect(a.status).toBe("rejected")
+  })
+
+  it("valid leap-day window and sample are eligible and hit", () => {
+    const r = runR15_4Replay([event("leap", { closureStartUtc: "2024-02-28T00:00:00Z", closureEndUtc: "2024-03-01T00:00:00Z", samples: [sample("2024-02-29T06:00:00Z", { windGustMs: 30 })] })])
+    expect(r.eligibleCount).toBe(1)
+    expect(r.events[0].hitAtUtc).toBe("2024-02-29T06:00:00Z")
+  })
+})
+
+describe("r1.5-4 replay: real corpus Nalgae single-event post-hoc trial (fixed regression)", () => {
+  const nalgae = qualifiedPortClosureReplayEvents.find(e => e.eventId === "2022-nalgae-shekou-gate")!
+
+  it("corpus holds only the Nalgae Shekou gate event with gate-only scope and operator HTTPS locators", () => {
+    expect(qualifiedPortClosureReplayEvents.map(e => e.eventId)).toEqual(["2022-nalgae-shekou-gate"])
+    expect(nalgae.portUnlocode).toBe("CNSHK")
+    expect(nalgae.operationScope).toMatch(/SCT\/CCT\/MCT.*gate/)
+    expect(nalgae.operationScope).not.toMatch(/port-wide|全港/)
+    expect(nalgae.stopSource.url).toBe("https://www.portshekou.com/ywgg/1200")
+    expect(nalgae.resumeSource.url).toBe("https://www.portshekou.com/ywgg/1199")
+    expect(nalgae.stopSource.hashes?.map(h => h.kind)).toEqual(["fetch_raw_pre_redaction", "archive_git_blob_redacted"])
+    expect(nalgae.resumeSource.hashes?.map(h => h.kind)).toEqual(["fetch_raw_pre_redaction", "archive_git_blob_redacted"])
+    expect(nalgae.timeZoneBasis).toMatchObject({ statedOffset: null, inferredOffset: "UTC+8", ambiguous: false })
+    expect(nalgae.closureStartUtc).toBe("2022-10-31T23:00:00Z")
+    expect(nalgae.closureEndUtc).toBe("2022-11-03T06:00:00Z")
+  })
+
+  it("all nine in-window HKO fixes are entered; only typhoonDistanceKm is mapped; distances recompute by haversine R=6371", () => {
+    expect(NALGAE_HKO_FIXES_IN_WINDOW).toHaveLength(9)
+    expect(nalgae.samples).toHaveLength(9)
+    const rad = (d: number) => d * Math.PI / 180
+    for (const [i, s] of nalgae.samples.entries()) {
+      const f = NALGAE_HKO_FIXES_IN_WINDOW[i]
+      expect(s.atUtc).toBe(f.atUtc)
+      expect(Object.keys(s.inputs)).toEqual(["typhoonDistanceKm"])
+      expect(s.provenance.kind).toBe("derived_distance")
+      expect(s.provenance.derivation).toMatchObject({ method: "haversine", earthRadiusKm: 6371, fixLatitude: f.latitude, fixLongitude: f.longitude, fixKind: "post_analysis", interpolated: false })
+      expect([s.provenance.latitude, s.provenance.longitude]).toEqual([NALGAE_SHEKOU_POINT.latitude, NALGAE_SHEKOU_POINT.longitude])
+      const dLat = rad(f.latitude - NALGAE_SHEKOU_POINT.latitude)
+      const dLon = rad(f.longitude - NALGAE_SHEKOU_POINT.longitude)
+      const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(f.latitude)) * Math.cos(rad(NALGAE_SHEKOU_POINT.latitude)) * Math.sin(dLon / 2) ** 2
+      const km = 2 * 6371 * Math.asin(Math.sqrt(h))
+      expect(Math.round(km * 10) / 10).toBe(s.inputs.typhoonDistanceKm)
+    }
+  })
+
+  it("admission is eligible; all points evaluated; first hit 2022-11-02T00:00Z by WR-S03; status BLOCKED 1/10", () => {
+    const [adm] = admitReplayEvents(qualifiedPortClosureReplayEvents)
+    expect(adm.status).toBe("eligible")
+    expect(adm.reasons).toEqual([])
+    expect(adm.sampleChecks.every(c => c.valid)).toBe(true)
+    const report = runR15_4Replay(qualifiedPortClosureReplayEvents)
+    expect(report.rejected).toEqual([])
+    expect(report.pendingReview).toEqual([])
+    const [ev] = report.events
+    expect(ev.validSampleCount).toBe(9)
+    expect(ev.points.map(p => p.counted)).toEqual([false, false, false, false, true, true, true, true, true])
+    expect(ev.hit).toBe(true)
+    expect(ev.hitAtUtc).toBe("2022-11-02T00:00:00Z")
+    expect(ev.hitRuleIds).toEqual(["WR-S03"])
+    expect(report.eligibleCount).toBe(1)
+    expect(report.hits).toBe(1)
+    expect(report.status).toBe("blocked")
+    expect(report.reason).toBe("Need 10 eligible events; have 1.")
+    const status = getR15_4CalibrationStatus()
+    expect(status).toMatchObject({ status: "blocked", qualifiedCount: 1, requiredCount: 10 })
+  })
+})

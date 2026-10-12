@@ -1,0 +1,10 @@
+﻿sha 7312f17aa8b6d94dc57f437554954ba62a00f7f9 clean=[] start 2026-10-12T10:25:15.4176601+08:00 (run 2; run 1 interrupted by machine disconnect after typecheck)
+pnpm install --frozen-lockfile => exit 0  2026-10-12T10:25:17.4287215+08:00
+pnpm build => exit 0  2026-10-12T10:25:35.8422551+08:00
+pnpm typecheck => exit 0  2026-10-12T10:25:38.7152754+08:00
+pnpm lint => exit 0  2026-10-12T10:26:01.0921467+08:00
+pnpm exec vitest run => exit 0  2026-10-12T10:26:09.2340433+08:00
+pnpm smoke:p0-native => exit 0  2026-10-12T10:26:10.1931173+08:00
+node scripts/e2e-s7-integrated.mjs => exit 0  2026-10-12T10:26:48.6994230+08:00
+"C:\Program Files\Git\bin\bash.exe" scripts/audit-inventory.sh . => exit 0  2026-10-12T10:26:51.4080188+08:00
+self key-like scan rg (git diff f43ec9c..7312f17aa8b6d94dc57f437554954ba62a00f7f9) => raw exit 1 (rg: 1 = no match, 0 = match, 2 = error)

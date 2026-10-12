@@ -1,0 +1,3 @@
+GET https://api.data.gov.my/weather/warning (no redirect follow) at 2026-10-10T07:54:41Z -> HTTP 301, location: /weather/warning/ (same host), body 0 bytes
+GET https://api.data.gov.my/weather/warning/ (no redirect follow) at 2026-10-10T07:54:44Z -> HTTP 200, content-type: application/json, 7688 bytes, 4 rows
+Docs: https://developer.data.gov.my/realtime-api/weather (Warning Forecast): fields warning_issue{issued,title_bm,title_en}, valid_from, valid_to, heading_*, text_*, instruction_*. No region field, no severity field, no timezone stated for these datetimes.

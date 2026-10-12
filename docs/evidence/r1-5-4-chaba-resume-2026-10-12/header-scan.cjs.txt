@@ -1,0 +1,12 @@
+// Bounded check: response-header files under docs/evidence (name matches /hdr|header/i, .txt). Prints only file:line:header:classification; never values.
+const fs=require("fs"),path=require("path");const fix=process.argv[2]==="--fix";
+const files=[];(function w(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())w(p);else if(/(hdr|header)/i.test(e.name)&&/\.txt$/i.test(e.name))files.push(p)}})("docs/evidence");
+const SAFE=/^(\[REDACTED\]|<redacted>|deleted|)$/i;let bad=0,out=[`scope: ${files.length} header files under docs/evidence matching /(hdr|header)/i *.txt`];
+for(const f of files.sort()){let t=fs.readFileSync(f,"utf8");let changed=false;const lines=t.split(/(\r?\n)/);
+for(let i=0;i<lines.length;i+=2){const l=lines[i];let m;
+ if((m=/^(set-cookie|cookie):\s*(.*)$/i.exec(l))){const parts=m[2].split(";");const kv=m[1].toLowerCase()==="cookie"?parts:[parts[0]];
+  const nk=kv.map(p=>{const j=p.indexOf("=");if(j<0)return p;const k=p.slice(0,j),v=p.slice(j+1).trim();const cls=SAFE.test(v)?"ok":"VALUE";out.push(`${f}:${i/2+1}:${m[1]}:${k.trim()}:${cls==="ok"?"redacted-or-deleted":"UNREDACTED"}`);if(cls==="VALUE"){bad++;return `${k}=[REDACTED]`}return p});
+  const nl=`${l.slice(0,l.indexOf(":")+1)} ${(m[1].toLowerCase()==="cookie"?nk:[nk[0],...parts.slice(1)]).join(";")}`;if(nl!==l){lines[i]=nl;changed=true}}
+ else if((m=/^(authorization|proxy-authorization|x-api-key|x-auth-token|x-csrf-token|x-xsrf-token):\s*(.*)$/i.exec(l))){const ok=SAFE.test(m[2].trim());out.push(`${f}:${i/2+1}:${m[1]}:${ok?"redacted":"UNREDACTED"}`);if(!ok){bad++;lines[i]=`${m[1]}: [REDACTED]`;changed=true}}}
+if(fix&&changed){fs.writeFileSync(f,lines.join(""));out.push(`fixed: ${f}`)}}
+out.push(`unredacted_found=${bad} mode=${fix?"fix":"check"}`);console.log(out.join("\n"));process.exitCode=bad?1:0;

@@ -1,0 +1,4 @@
+fetched 2026-10-12T15:22:32+08:00 curl -A Mozilla/5.0 https://portcalls.com/super-typhoon-hobbles-ph-supply-chain/ -> 200 no redirect
+pre-redaction sha256 93660c86dc59f0243ae574f51b5679d44bfce0d7415ec43a48690e5ef972b16b
+redacted (one JS nonce value -> [REDACTED]) sha256 aa215239b0be3ae5e551564c67d2a588bdf82f421623aac0d2f0d9d2720dd80e (git may normalise line endings; see blob hash in commit)
+response Set-Cookie headers: 0

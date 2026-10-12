@@ -1,0 +1,1 @@
+﻿positive control: same evidence-scan pattern on pre-redaction blob 9d70d63:.../hdr-https-1200.txt -> match lines=2 rg exit=0 (0 = pattern detects unredacted values; values not printed)

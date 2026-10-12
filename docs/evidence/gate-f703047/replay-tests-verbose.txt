@@ -1,0 +1,50 @@
+﻿
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+node.exe : Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignor
+ed and "D:/try one/Shipping HOT/shared/calendar.ts" is used
+所在位置 C:\Program Files\nodejs\pnpm.ps1:16 字符: 5
++     & "$basedir/node$exe"  "$basedir/node_modules/corepack/dist/pnpm. ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Duplicated impo...dar.ts" is used:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try 
+one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try 
+one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try 
+one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try 
+one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/calendar.ts" has been ignored and "D:/try one
+/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/S
+hipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try 
+one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/S
+hipping HOT/shared/promo-calendar.ts" is used
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: real corpus > real qualified corpus stays empty and blocked (no synthetic events, no PASS) 1ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: real corpus > candidates (incl. HKO/Nalgae) are not qualified 0ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: C1鈥揅8 admission > rejects out-of-scope port, missing scope, non-https locator, missing quote, missing tz basis, invalid window 1ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: C1鈥揅8 admission > rejects unapproved product, wrong unit, untimed/non-UTC point, and centre wind used as gust 1ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: C1鈥揅8 admission > rejects duplicate event id and duplicate weather-system/port pair (no splitting one event) 0ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: C1鈥揅8 admission > ambiguous time zone 鈫?pending manual review, not eligible 0ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: C1鈥揅8 admission > window boundaries are inclusive; points outside are excluded, not counted 1ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > evaluates every valid point, counts the event once, reports first hit time and rule id 0ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > watch-only stays a miss; eligible misses remain in the denominator 0ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > wR-S03 may use cyclone distance from an approved derived-distance product 0ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > rejected events are listed separately and never enter the denominator 0ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > cross-port events of one typhoon are disclosed as a correlated group 0ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > decision: 9 eligible all hit 鈫?blocked (count) 0ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > decision: 10 eligible with 8 hits (80%) 鈫?ready (still not PASS) 0ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > decision: 10 eligible with 7 hits (70%) 鈫?blocked (rate) 0ms
+ 鉁?server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > decision: 9 eligible + 1 rejected does not reach 10 0ms
+
+ Test Files  1 passed (1)
+      Tests  16 passed (16)
+   Start at  14:17:48
+   Duration  229ms (transform 68ms, setup 0ms, import 83ms, tests 7ms, environment 0ms)
+
+replay verbose exit=0

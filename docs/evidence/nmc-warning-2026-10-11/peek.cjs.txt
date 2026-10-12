@@ -1,0 +1,10 @@
+const fs=require('fs');const cheerio=require('cheerio');
+for(const f of fs.readdirSync('.tmp/nmc/raw').filter(f=>f.endsWith('.html'))){
+ const raw=fs.readFileSync('.tmp/nmc/raw/'+f,'utf8');const $=cheerio.load(raw);
+ const t=$('#text').first();
+ console.log('=====',f);
+ console.log('structure:', t.children().map((_,e)=>e.tagName+(e.attribs.class?'.'+e.attribs.class:'')+(e.attribs.id?'#'+e.attribs.id:'')).get().join(' > ').slice(0,300));
+ t.find('script,style').remove();
+ console.log(t.text().replace(/[ \t\u3000]+/g,' ').replace(/\n\s*\n+/g,'\n').slice(0,900));
+ const dataIds=(raw.match(/dataId|getContent|\/f\/rest/g)||[]).length;console.log('dataId/getContent refs:',dataIds, 'img:', t.find('img').length, 'pdf:', (raw.match(/\.pdf/gi)||[]).length);
+}

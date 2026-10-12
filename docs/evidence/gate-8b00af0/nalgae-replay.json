@@ -1,0 +1,168 @@
+{
+  "note": "Post-hoc consistency trial on 1 event; not proof of predictive ability. ready would still not be PASS.",
+  "corpusEventIds": [
+    "2022-nalgae-shekou-gate"
+  ],
+  "admissions": [
+    {
+      "eventId": "2022-nalgae-shekou-gate",
+      "portUnlocode": "CNSHK",
+      "status": "eligible",
+      "reasons": [],
+      "sampleChecks": [
+        {
+          "atUtc": "2022-11-01T00:00:00Z",
+          "valid": true,
+          "reasons": []
+        },
+        {
+          "atUtc": "2022-11-01T06:00:00Z",
+          "valid": true,
+          "reasons": []
+        },
+        {
+          "atUtc": "2022-11-01T12:00:00Z",
+          "valid": true,
+          "reasons": []
+        },
+        {
+          "atUtc": "2022-11-01T18:00:00Z",
+          "valid": true,
+          "reasons": []
+        },
+        {
+          "atUtc": "2022-11-02T00:00:00Z",
+          "valid": true,
+          "reasons": []
+        },
+        {
+          "atUtc": "2022-11-02T06:00:00Z",
+          "valid": true,
+          "reasons": []
+        },
+        {
+          "atUtc": "2022-11-02T12:00:00Z",
+          "valid": true,
+          "reasons": []
+        },
+        {
+          "atUtc": "2022-11-02T18:00:00Z",
+          "valid": true,
+          "reasons": []
+        },
+        {
+          "atUtc": "2022-11-03T00:00:00Z",
+          "valid": true,
+          "reasons": []
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "eventId": "2022-nalgae-shekou-gate",
+      "hit": true,
+      "hitAtUtc": "2022-11-02T00:00:00Z",
+      "hitRuleIds": [
+        "WR-S03"
+      ],
+      "validSampleCount": 9,
+      "missReason": null,
+      "points": [
+        {
+          "atUtc": "2022-11-01T00:00:00Z",
+          "counted": false,
+          "ruleHits": []
+        },
+        {
+          "atUtc": "2022-11-01T06:00:00Z",
+          "counted": false,
+          "ruleHits": []
+        },
+        {
+          "atUtc": "2022-11-01T12:00:00Z",
+          "counted": false,
+          "ruleHits": []
+        },
+        {
+          "atUtc": "2022-11-01T18:00:00Z",
+          "counted": false,
+          "ruleHits": []
+        },
+        {
+          "atUtc": "2022-11-02T00:00:00Z",
+          "counted": true,
+          "ruleHits": [
+            {
+              "ruleId": "WR-S03",
+              "severity": "critical",
+              "object": "shipping_port"
+            }
+          ]
+        },
+        {
+          "atUtc": "2022-11-02T06:00:00Z",
+          "counted": true,
+          "ruleHits": [
+            {
+              "ruleId": "WR-S03",
+              "severity": "critical",
+              "object": "shipping_port"
+            }
+          ]
+        },
+        {
+          "atUtc": "2022-11-02T12:00:00Z",
+          "counted": true,
+          "ruleHits": [
+            {
+              "ruleId": "WR-S03",
+              "severity": "critical",
+              "object": "shipping_port"
+            }
+          ]
+        },
+        {
+          "atUtc": "2022-11-02T18:00:00Z",
+          "counted": true,
+          "ruleHits": [
+            {
+              "ruleId": "WR-S03",
+              "severity": "critical",
+              "object": "shipping_port"
+            }
+          ]
+        },
+        {
+          "atUtc": "2022-11-03T00:00:00Z",
+          "counted": true,
+          "ruleHits": [
+            {
+              "ruleId": "WR-S03",
+              "severity": "critical",
+              "object": "shipping_port"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "rejected": [],
+  "pendingReview": [],
+  "correlatedGroups": [],
+  "summary": {
+    "status": "blocked",
+    "eligibleCount": 1,
+    "hits": 1,
+    "hitRate": 1,
+    "requiredCount": 10,
+    "minHitRate": 0.8,
+    "reason": "Need 10 eligible events; have 1."
+  },
+  "calibrationStatus": {
+    "status": "blocked",
+    "qualifiedCount": 1,
+    "requiredCount": 10,
+    "reason": "Need 10 eligible events; have 1."
+  }
+}

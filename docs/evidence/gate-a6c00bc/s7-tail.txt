@@ -1,0 +1,8 @@
+﻿PASS  retained .data\shipping-hot-v3.sqlite3 unchanged (af1a62291c75a714|8425472:1790663050789.5464)
+PASS  retained .data\shipping-hot-v3-browser.sqlite3 unchanged (3dbb014c94b500a8|1572864:1788406513543.2524)
+PASS  retained .data\p7-final-seal-20260904.sqlite3 unchanged (ca0efa0cabe3c85a|978944:1788510203224.2683)
+PASS  retained .data\provider-secrets.json unchanged (843c54062551d938|56:1788417973720.671)
+
+Evidence: D:\try one\Shipping HOT\.tmp\s7-local\s7-integrated-evidence.json
+
+S7 CLEAN LOCAL INTEGRATED ACCEPTANCE PASS

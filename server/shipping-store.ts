@@ -6,6 +6,8 @@ import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResu
 import { detectShippingEvents } from "@shared/shipping-engine"
 import { filterCalendarCoverageForSourceIds, filterCalendarEventsForSourceIds, mergeCalendarSources } from "#/providers/calendar"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
+import { PromoCalendarRepository } from "#/database/promo-calendar"
+import { PolicyRepository } from "#/database/policy"
 import { defaultShippingSettings, healthyPersistenceStatus, persistenceUnavailableError } from "#/database/runtime"
 import { normalizeTranslationSettings } from "#/services/translation-settings"
 import { isWeatherFeedItem, operationalSourceContext, providerModes, providers } from "#/providers/shipping"
@@ -35,6 +37,20 @@ function requireRepository(): ShippingRepository {
 function markWriteFailure(error: unknown): never {
   persistenceStatus = { ...persistenceStatus, status: "read_only_degraded", errorCode: "persistence_write_failed" }
   throw persistenceUnavailableError(error)
+}
+
+/** R1.5-5 promo calendar repository on the same initialized SQLite database (no separate store). */
+export async function getPromoCalendarRepository(): Promise<PromoCalendarRepository> {
+  await initialize()
+  requireRepository()
+  return new PromoCalendarRepository(useDatabase())
+}
+
+/** R1.5-7 policy repository on the same initialized SQLite database. */
+export async function getPolicyRepository(): Promise<PolicyRepository> {
+  await initialize()
+  requireRepository()
+  return new PolicyRepository(useDatabase())
 }
 
 export function mergeWeatherFeedItems(existing: FeedItem[], weather: FeedItem[]): FeedItem[] {

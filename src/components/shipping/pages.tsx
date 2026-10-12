@@ -3,9 +3,10 @@ import { motion } from "framer-motion"
 import { type ReactNode, useEffect, useState } from "react"
 import type { ArticleBlock, ArticleCompletenessStatus, ArticleTranslationBlockSource, ArticleTranslationViewStatus } from "@shared/article"
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
-import { type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
+import { type FeedItem, type PortWeatherPanelResponse, type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
+import { ruleCoverageReasonLabelZh } from "@shared/weather-rule-coverage-display"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
-import { type ShippingResponse, type TranslationStatusResponse, useFeedArticle, useShipping, useTranslationSecret, useTranslationStatus } from "./data"
+import { type ShippingResponse, type TranslationStatusResponse, useFeedArticle, usePortWeather, useShipping, useTranslationSecret, useTranslationStatus, useTropicalCyclones } from "./data"
 import { FeedItemDisplayText } from "./feed-display"
 import { formatDate, formatPortMetric, formatStatus, severityTone } from "./format"
 import { AnimatedNumber, EmptyState, Marquee, ProvenanceBadge, ProviderChip, Reveal, Segmented, StatusDot } from "./ui"
@@ -128,6 +129,43 @@ function WeatherChips({ weather }: { weather: WeatherDetail }) {
             {weather.alertState === "active" ? "生效" : weather.alertState === "expired" ? "已过期" : "未知"}
           </span>
         )}
+        {weather.validityStatus === "unknown" && <span className="chip">有效性待确认</span>}
+        {weather.timezoneStatus === "unconfirmed" && <span className="chip">时区未确认</span>}
+        {weather.officialSeverity === "not_provided" && <span className="chip">{weather.noticeRaw ? "原文风险级别：未提供" : "官方级别：未提供"}</span>}
+        {weather.lifecycleStatus === "unknown" && <span className="chip">生命周期未知</span>}
+        {weather.originalRiskLevel && <span className="chip">{`原文风险级别：${weather.originalRiskLevel}（原始级别，标准化严重度未映射；非系统级别）`}</span>}
+      </div>
+      {weather.noticeRaw && (
+        <div className="flex flex-col gap-0.5 text-xs op-70" data-testid="official-notice-raw">
+          <span>{`官方原始时间（原文文本，时区未确认，未换算）：列表时间 ${weather.noticeRaw.listTimeText ?? "未提供"} · 正文发布时间 ${weather.noticeRaw.bodyPublishText ?? "未提供"}`}</span>
+          <span>{`下一期发布时间（不等于有效期）：${weather.noticeRaw.nextIssueText ?? "未提供"}`}</span>
+          {weather.noticeRaw.originalLevelText && <span>{`原文级别句：${weather.noticeRaw.originalLevelText}`}</span>}
+          <span>{`来源 ${weather.noticeRaw.sourceUrl} · postId ${weather.noticeRaw.postId} · 抓取时间 ${formatDate(weather.noticeRaw.fetchedAt)} · 首次接收 ${formatDate(weather.noticeRaw.firstReceivedAt)}${weather.noticeRaw.contentUpdatedAt ? ` · 内容更新于 ${formatDate(weather.noticeRaw.contentUpdatedAt)}` : ""}`}</span>
+          <span>{`原文：${weather.noticeRaw.bodyText.length > 400 ? `${weather.noticeRaw.bodyText.slice(0, 400)}…` : weather.noticeRaw.bodyText}`}</span>
+        </div>
+      )}
+      {weather.cnNoticeRaw && (
+        <div className="flex flex-col gap-0.5 text-xs op-70" data-testid="cn-notice-raw">
+          {weather.cnNoticeRaw.historicalProductNotice && <span className="chip" data-testid="cn-historical-notice">{`历史产品提示（页面原文）：${weather.cnNoticeRaw.historicalProductNotice}。这是过去时刻产品，不是新生效预警。`}</span>}
+          {weather.cnNoticeRaw.liftStatement && <span data-testid="cn-lift-statement">{`官方主句：“${weather.cnNoticeRaw.liftStatement.sentence}” → 本条为解除通知（对象：${weather.cnNoticeRaw.liftStatement.object}），不撤销其他记录`}</span>}
+          <span>{`官方原始发布时间（原文文本，时区未确认，未换算）：${weather.cnNoticeRaw.publishTimeText ?? "未提供"}${weather.cnNoticeRaw.numberText ? ` · 期号 ${weather.cnNoticeRaw.numberText}` : ""}`}</span>
+          {weather.cnNoticeRaw.nextIssueText && <span>{`下次更新时间（不等于有效期）：${weather.cnNoticeRaw.nextIssueText}`}</span>}
+          <span data-testid="cn-raw-levels">{`原文颜色等级：${weather.cnNoticeRaw.rawColorLevel ?? "未提供"} · 台风强度等级原文：${weather.cnNoticeRaw.typhoonIntensityText ?? "未提供"} · 中心位置原文：${weather.cnNoticeRaw.centerPositionText ?? "未提供"}（均未映射为系统级别，不代表港口覆盖）`}</span>
+          {weather.cnNoticeRaw.typhoonObjects.length > 0 && <span>{`涉及台风对象（各自原文分段）：${weather.cnNoticeRaw.typhoonObjects.map(o => o.object).join("、")}`}</span>}
+          <span>{`关联港口：0 · 来源 ${weather.cnNoticeRaw.sourceUrl} · 身份 ${weather.cnNoticeRaw.column}:${weather.cnNoticeRaw.identityKey} · 最近抓取 ${formatDate(weather.cnNoticeRaw.fetchedAt)} · 首次接收 ${formatDate(weather.cnNoticeRaw.firstReceivedAt)}${weather.cnNoticeRaw.contentUpdatedAt ? ` · 内容更新于 ${formatDate(weather.cnNoticeRaw.contentUpdatedAt)}` : ""}`}</span>
+          <span>{`原文：${weather.cnNoticeRaw.bodyText.length > 400 ? `${weather.cnNoticeRaw.bodyText.slice(0, 400)}…` : weather.cnNoticeRaw.bodyText}`}</span>
+        </div>
+      )}
+      {weather.alertRaw && (
+        <div className="flex flex-col gap-0.5 text-xs op-70" data-testid="official-alert-raw">
+          <span>
+            {`官方原始时间（时区未确认，未换算）：issued ${weather.alertRaw.issued ?? "null"} · valid_from ${weather.alertRaw.validFrom ?? "null"} · valid_to ${weather.alertRaw.validTo ?? "null"}`}
+          </span>
+          <span>{`来源 ${weather.alertRaw.sourceUrl} · 抓取时间 ${formatDate(weather.alertRaw.fetchedAt)}`}</span>
+          {weather.alertRaw.textEn && <span>{`原文：${weather.alertRaw.textEn}`}</span>}
+        </div>
+      )}
+      <div className="flex flex-wrap items-center gap-1.5">
       </div>
       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs op-70">
         {waveHeightM !== undefined && (
@@ -343,7 +381,7 @@ export function HotPage() {
                       <a key={item.id} href={item.sourceUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 whitespace-nowrap text-sm">
                         <StatusDot tone={severityTone(item.severity)} />
                         <span className="font-semibold">{item.displayTitle ?? item.title}</span>
-                        <span className="op-60">{item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}</span>
+                        <span className="op-60">{item.publicationTimeKnown === false ? "发布时间未知" : item.weather?.timeBasis === "received_at" ? `首次接收 ${formatDate(item.publishedAt)}` : formatDate(item.publishedAt)}</span>
                       </a>
                     ))}
                   </Marquee>
@@ -434,6 +472,367 @@ export function PortsPage() {
             </div>
           )}
     </ShippingShell>
+  )
+}
+
+function portWeatherImpactEmptyCopy(state: PortWeatherPanelResponse["state"]): string {
+  switch (state) {
+    case "sync_failed":
+      return "天气同步失败或数据源不可用；潜在影响暂不可信。"
+    case "data_empty":
+      return "暂无有效窗口内的持久化预报；请等待 Open-Meteo 同步。"
+    case "data_stale":
+      return "预报数据已过期；请触发同步后再查看潜在影响。"
+    case "no_rule_hits":
+      return "有效窗口内无规则命中（⚙ 潜在影响）；不含已实施封港结论。"
+    case "partial_rule_coverage":
+      return "部分规则因阵风/浪高/能见度/降水缺测或台风分支未接入而未评估；已评估规则的无命中不代表完整排除风险。"
+    case "data_insufficient":
+      return "测值不足，无法判断规则命中；请等待完整预报同步。"
+    default:
+      return "当前无规则命中；仅展示 ⚙ 潜在影响，不含已实施封港结论。"
+  }
+}
+
+function TropicalCyclonePathChart({ cycloneId, trackHistory, current, forecast }: {
+  cycloneId: string
+  trackHistory: Array<{ lat: number, lon: number }>
+  current?: { lat: number, lon: number, at: string }
+  forecast: Array<{ lat: number, lon: number, at: string }>
+}) {
+  const points = [
+    ...trackHistory.map(p => ({ ...p, kind: "history" as const })),
+    ...(current ? [{ lat: current.lat, lon: current.lon, kind: "current" as const, at: current.at }] : []),
+    ...forecast.map(p => ({ ...p, kind: "forecast" as const })),
+  ]
+  if (!points.length) return null
+  const lats = points.map(p => p.lat)
+  const lons = points.map(p => p.lon)
+  const pad = 0.8
+  const minLat = Math.min(...lats) - pad
+  const maxLat = Math.max(...lats) + pad
+  const minLon = Math.min(...lons) - pad
+  const maxLon = Math.max(...lons) + pad
+  const w = 280
+  const h = 140
+  const project = (lat: number, lon: number) => {
+    const x = ((lon - minLon) / (maxLon - minLon || 1)) * (w - 16) + 8
+    const y = ((maxLat - lat) / (maxLat - minLat || 1)) * (h - 16) + 8
+    return { x, y }
+  }
+  const historyLine = trackHistory.map(p => project(p.lat, p.lon))
+  const historyPath = historyLine.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")
+  return (
+    <div className="mt-2" data-testid={`tropical-cyclone-path-${cycloneId}`}>
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full max-w-sm h-auto rounded bg-black/20" role="img" aria-label="台风路径示意">
+        {historyPath && <path d={historyPath} fill="none" stroke="currentColor" strokeOpacity={0.35} strokeWidth={1.5} strokeDasharray="4 3" />}
+        {points.map((p, index) => {
+          const { x, y } = project(p.lat, p.lon)
+          const fill = p.kind === "current" ? "#f59e0b" : p.kind === "forecast" ? "#38bdf8" : "#94a3b8"
+          return <circle key={`${p.kind}-${index}`} cx={x} cy={y} r={p.kind === "current" ? 4 : 3} fill={fill} />
+        })}
+      </svg>
+      <ul className="text-xs op-60 mt-1 space-y-0.5">
+        {current && (
+          <li data-testid={`tropical-cyclone-current-${cycloneId}`}>
+            当前中心
+            {" "}
+            {current.lat.toFixed(1)}
+            °N
+            {" "}
+            {current.lon.toFixed(1)}
+            °E ·
+            {" "}
+            {formatDate(current.at)}
+          </li>
+        )}
+        {forecast.map((p, index) => (
+          <li key={`fc-${index}`} data-testid={`tropical-cyclone-forecast-${cycloneId}`}>
+            预报
+            {" "}
+            {formatDate(p.at)}
+            ：
+            {p.lat.toFixed(1)}
+            °N
+            {" "}
+            {p.lon.toFixed(1)}
+            °E
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function TropicalCyclonePanelSection() {
+  const { data, isLoading, isError } = useTropicalCyclones()
+  if (isLoading) return <div className="glass-panel d-panel mt-4"><p className="text-sm op-60">加载台风路径…</p></div>
+  if (isError || !data) return null
+  return (
+    <div className="glass-panel d-panel mt-4" data-testid="tropical-cyclone-panel">
+      <div className="panel-h">
+        <h3>热带气旋（JMA）</h3>
+        <span className="text-xs op-60">路径 · 距港参考</span>
+      </div>
+      <p className="text-sm op-80">{data.messageZh}</p>
+      <p className="text-xs op-65 mt-1" data-testid="tropical-cyclone-counts">
+        活跃
+        {" "}
+        {data.activeCount}
+        {" · 历史摘要 "}
+        {data.historicalSummaryCount}
+        {data.sync.lastCheckedAt ? ` · 最近尝试 ${formatDate(data.sync.lastCheckedAt)}` : null}
+        {data.sync.lastFullSuccessAt ? ` · 完整成功 ${formatDate(data.sync.lastFullSuccessAt)}` : null}
+      </p>
+      {data.seasonHintZh && <p className="text-xs op-60 mt-1">{data.seasonHintZh}</p>}
+      {(data.sync.outcome === "failed" || data.sync.outcome === "partial" || data.sync.stale) && (
+        <p className="text-xs op-70 mt-2" data-testid="tropical-cyclone-sync-notice">
+          {data.sync.outcome === "failed" && `同步失败：${data.sync.errorMessage ?? data.sync.errorCode ?? "未知"}`}
+          {data.sync.outcome === "partial" && `部分气旋详情失败${data.sync.failedTcIds?.length ? `（${data.sync.failedTcIds.join(", ")}）` : ""}`}
+          {data.sync.stale && ` · 数据过期（完整成功 ${data.sync.lastFullSuccessAt ?? data.sync.lastSuccessAt ?? "—"}）`}
+        </p>
+      )}
+      {data.cyclones.length === 0
+        ? null
+        : (
+            <ul className="mt-3 space-y-4 text-sm">
+              {data.cyclones.map(cyclone => (
+                <li
+                  key={cyclone.id}
+                  className="border-t border-white/5 pt-2"
+                  data-testid={cyclone.lifecycleStatus === "active" || !cyclone.lifecycleStatus
+                    ? `tropical-cyclone-active-${cyclone.id}`
+                    : `tropical-cyclone-historical-${cyclone.id}`}
+                >
+                  <p className="font-medium">
+                    {cyclone.nameEn ?? cyclone.nameJp ?? cyclone.jmaId}
+                    {cyclone.typhoonNumber ? ` (#${cyclone.typhoonNumber})` : ""}
+                  </p>
+                  {cyclone.summaryZh && <p className="text-xs op-70">{cyclone.summaryZh}</p>}
+                  <p className="text-xs op-60">
+                    显示距八港约
+                    {" "}
+                    {cyclone.minDistanceKm !== undefined ? `${Math.round(cyclone.minDistanceKm)} km` : "—"}
+                    {" · WR-S03 参考 "}
+                    {cyclone.wrS03DistanceKm !== undefined ? `${Math.round(cyclone.wrS03DistanceKm)} km` : "未评估"}
+                    {" · 历史点 "}
+                    {cyclone.trackHistory.length}
+                    {" / 预报点 "}
+                    {cyclone.forecast.length}
+                    {" · 路径获取 "}
+                    {formatDate(cyclone.pathFetchedAt)}
+                  </p>
+                  <TropicalCyclonePathChart
+                    cycloneId={cyclone.id}
+                    trackHistory={cyclone.trackHistory}
+                    current={cyclone.current}
+                    forecast={cyclone.forecast}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+    </div>
+  )
+}
+
+function PortWeatherPanelSection({ portId }: { portId: string }) {
+  const { data, isLoading, isError } = usePortWeather(portId)
+  if (isLoading) return <div className="glass-panel d-panel"><p className="text-sm op-60">加载港口天气…</p></div>
+  if (isError || !data) return <div className="glass-panel d-panel"><p className="text-sm op-60">港口天气 API 不可用（同步失败或网络错误）。</p></div>
+  const nextForecasts = data.forecasts
+  const nextImpacts = data.impacts
+  const forecastEmptyCopy = data.state === "data_stale"
+    ? "预报数据已过期，请重新同步。"
+    : data.state === "sync_failed"
+      ? "天气同步失败，暂无可靠预报数值。"
+      : "暂无 7 天持久化预报；Open-Meteo 同步后会写入 SQLite。"
+  return (
+    <div className="mt-4 flex flex-col gap-4">
+      {data.panelNotice && (
+        <p className="text-sm op-80 glass-panel d-panel py-2 px-3" data-testid="port-weather-notice">
+          {data.panelNotice.messageZh}
+        </p>
+      )}
+      {(data.precipCoverage.status !== "full" || data.ruleCoverage.some(r => r.evaluation === "unevaluated")) && (
+        <p className="text-sm op-75 glass-panel d-panel py-2 px-3" data-testid="port-weather-coverage">
+          24h 降水覆盖
+          {" "}
+          {data.precipCoverage.hourlySamplesInWindow}
+          /
+          {data.precipCoverage.fullRequired}
+          {" "}
+          小时（
+          {data.precipCoverage.status === "full" ? "完整" : data.precipCoverage.status === "partial" ? "部分" : "不足"}
+          ）
+          {data.precipCoverage.status === "partial" && data.precipCoverage.partialSumMm !== undefined
+            ? ` · 参考累计 ${data.precipCoverage.partialSumMm.toFixed(1)} mm（不可用于 WR-S05）`
+            : null}
+          {data.ruleCoverage.filter(r => r.evaluation === "unevaluated").map(r => (
+            <span key={r.ruleId} className="block text-xs op-70 mt-1">
+              {r.ruleId}
+              {" "}
+              未评估：
+              {ruleCoverageReasonLabelZh(r.reason)}
+            </span>
+          ))}
+        </p>
+      )}
+      {data.impactMeta.truncated && (
+        <p className="text-xs op-60">
+          共
+          {" "}
+          {data.impactMeta.totalMatched}
+          {" "}
+          条命中，展示
+          {" "}
+          {data.displayMeta.impactsReturned}
+          /
+          {data.displayMeta.impactLimit}
+          {" "}
+          条（近期高等级优先）。
+        </p>
+      )}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="glass-panel d-panel">
+          <div className="panel-h">
+            <h3>预报数值（7 天）</h3>
+            <span className="text-xs op-60">{data.sources.forecast}</span>
+          </div>
+          {data.forecastMeta && (
+            <p className="text-xs op-65 mb-2" data-testid="port-weather-forecast-meta">
+              目标窗口
+              {" "}
+              {formatDate(data.forecastMeta.targetWindow.start)}
+              {" → "}
+              {formatDate(data.forecastMeta.targetWindow.end)}
+              {" · 实际返回 "}
+              {data.forecastMeta.actualCoverage.totalReturned}
+              {" 条（hourly "}
+              {data.forecastMeta.actualCoverage.hourlyReturned}
+              {" / current "}
+              {data.forecastMeta.actualCoverage.currentReturned}
+              ）
+              {data.forecastMeta.actualCoverage.firstInstant && data.forecastMeta.actualCoverage.lastInstant
+                ? ` · 覆盖 ${formatDate(data.forecastMeta.actualCoverage.firstInstant)} → ${formatDate(data.forecastMeta.actualCoverage.lastInstant)}`
+                : null}
+              {data.forecastMeta.fetchedAt ? ` · 更新 ${formatDate(data.forecastMeta.fetchedAt)}` : null}
+              {(data.forecastMeta.missingCounts.windGust > 0 || data.forecastMeta.missingCounts.wave > 0)
+                ? ` · 缺测 阵风${data.forecastMeta.missingCounts.windGust} 浪${data.forecastMeta.missingCounts.wave} 降水${data.forecastMeta.missingCounts.precipitation} 能见度${data.forecastMeta.missingCounts.visibility}`
+                : null}
+              {data.forecastMeta.marineCoverageNote
+                ? (
+                    <span className="block mt-1 op-70">{data.forecastMeta.marineCoverageNote}</span>
+                  )
+                : null}
+            </p>
+          )}
+          {data.marineReference
+            ? (
+                <div className="mb-3 rounded border border-amber-400/30 p-2 text-xs" data-testid="port-weather-marine-reference">
+                  <p className="font-medium">{data.marineReference.nameZh}</p>
+                  <p className="op-70">{data.marineReference.labelZh}</p>
+                  <p data-testid="port-weather-marine-reference-status">
+                    {`参考状态：${data.marineReference.status} · ${data.marineReference.statusNoteZh}`}
+                    {` · 最近尝试 ${data.marineReference.lastAttemptAt ? formatDate(data.marineReference.lastAttemptAt) : "无"}（${data.marineReference.lastAttemptOutcome ?? "未运行"}）`}
+                    {` · 最近成功 ${data.marineReference.lastSuccessAt ? formatDate(data.marineReference.lastSuccessAt) : "无"}`}
+                  </p>
+                  <p className="op-80" data-testid="port-weather-marine-reference-grid">
+                    {`请求点 ${data.marineReference.latitude}N ${data.marineReference.longitude}E（距港口约 ${data.marineReference.approxDistanceKm} km） · 请求模型 ${data.marineReference.model}`}
+                    {data.marineReference.grid?.returnedLatitude !== undefined && data.marineReference.grid?.returnedLongitude !== undefined
+                      ? ` · 实际返回网格 ${data.marineReference.grid.returnedLatitude}N ${data.marineReference.grid.returnedLongitude}E（距请求点 ${data.marineReference.grid.requestedToReturnedKm ?? "?"} km，获取于 ${formatDate(data.marineReference.grid.fetchedAt)}）`
+                      : " · 实际返回网格：无记录"}
+                  </p>
+                  <p className="op-80">
+                    {data.marineReference.showingHistoricalData ? `历史参考（更新于 ${data.marineReference.lastSuccessAt ? formatDate(data.marineReference.lastSuccessAt) : "未知"}）：` : ""}
+                    {`7 天整点含海况 ${data.marineReference.coverage.hourlyWithMarine}/${data.marineReference.coverage.expectedHours}`}
+                    {data.marineReference.maxWaveHeightM !== undefined ? ` · 7 天最大浪高 ${data.marineReference.maxWaveHeightM.toFixed(1)} m` : " · 暂无参考海况测值"}
+                    {` · 当前参考规则命中 ${data.marineReference.impacts.length}`}
+                    {data.marineReference.historicalImpactCount > 0 ? ` · 历史命中 ${data.marineReference.historicalImpactCount}（不计入当前）` : ""}
+                  </p>
+                </div>
+              )
+            : null}
+          {nextForecasts.length === 0
+            ? <p className="text-sm op-60">{forecastEmptyCopy}</p>
+            : (
+                <ul className="space-y-2 text-sm max-h-96 overflow-y-auto pr-1" data-testid="port-weather-forecast-list">
+                  {nextForecasts.map(row => (
+                    <li key={row.id} className="flex flex-col gap-0.5 border-b border-white/5 pb-2 last:border-0">
+                      <span className="font-medium">{formatDate(row.forecastAt)}</span>
+                      <span className="op-80">
+                        {row.windGustKmh !== undefined ? `阵风 ${Math.round(row.windGustKmh)} km/h` : "阵风 —"}
+                        {" · "}
+                        {row.waveHeightM !== undefined ? `浪 ${row.waveHeightM.toFixed(1)} m` : "浪 —"}
+                        {" · "}
+                        {row.precipitationMm !== undefined ? `降水 ${row.precipitationMm.toFixed(1)} mm/h` : "降水 —"}
+                        {" · "}
+                        {row.visibilityM !== undefined ? `能见度 ${Math.round(row.visibilityM)} m` : "能见度 —"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+        </div>
+        <div className="glass-panel d-panel">
+          <div className="panel-h">
+            <h3>潜在影响</h3>
+            <span className="text-xs op-60">
+              ⚙
+              {data.sources.impacts}
+            </span>
+          </div>
+          {nextImpacts.length === 0
+            ? <p className="text-sm op-60">{portWeatherImpactEmptyCopy(data.state)}</p>
+            : (
+                <ul className="space-y-2 text-sm" data-testid="port-weather-impacts">
+                  {nextImpacts.map(row => (
+                    <li key={row.id} className="flex items-start gap-2">
+                      <StatusDot tone={severityTone(row.severity)} />
+                      <div>
+                        <p className="font-medium">{row.summaryZh}</p>
+                        <p className="text-xs op-60">
+                          {row.ruleId}
+                          {" "}
+                          ·
+                          {" "}
+                          {formatDate(row.validFrom)}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+        </div>
+        <div className="glass-panel d-panel">
+          <div className="panel-h">
+            <h3>官方预警</h3>
+            <span className="text-xs op-60">{data.sources.alerts}</span>
+          </div>
+          {data.officialAlerts.length === 0
+            ? <p className="text-sm op-60">未配置或未同步到本港相关官方预警。</p>
+            : (
+                <ul className="space-y-2 text-sm">
+                  {data.officialAlerts.map(alert => (
+                    <li key={alert.id} className="flex items-start gap-2">
+                      <StatusDot tone={severityTone(alert.severity)} />
+                      <div>
+                        <p className="font-medium">{alert.title}</p>
+                        <p className="text-xs op-60">
+                          {formatDate(alert.publishedAt)}
+                          {" "}
+                          ·
+                          {" "}
+                          {alert.sourceId}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -555,12 +954,14 @@ export function PortDetailPage({ id }: { id: string }) {
                       <StatusDot tone={severityTone(item.severity)} />
                       <span className="truncate font-semibold">{item.displayTitle ?? item.title}</span>
                     </span>
-                    <span className="shrink-0 text-xs op-60">{item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}</span>
+                    <span className="shrink-0 text-xs op-60">{item.publicationTimeKnown === false ? "发布时间未知" : item.weather?.timeBasis === "received_at" ? `首次接收 ${formatDate(item.publishedAt)}` : formatDate(item.publishedAt)}</span>
                   </a>
                 ))}
           </div>
         </div>
       </div>
+      <PortWeatherPanelSection portId={id} />
+      <TropicalCyclonePanelSection />
     </ShippingShell>
   )
 }
@@ -656,6 +1057,14 @@ export function FeedPage() {
     { label: "第三方", tone: "info" as const, count: data.feedItems.filter(item => item.provenance?.sourceType === "third_party").length },
     { label: "模拟数据", tone: "dim" as const, count: data.feedItems.filter(item => item.provenance?.sourceType === "mock").length },
   ]
+  const issuingCountryOf = (item: FeedItem) => item.tags?.find(tag => tag.startsWith("issuing_country_"))?.slice("issuing_country_".length)
+  const issuingCountryRows = Object.entries(data.feedItems.reduce<Record<string, number>>((acc, item) => {
+    const code = issuingCountryOf(item)
+    if (code) acc[code] = (acc[code] ?? 0) + 1
+    return acc
+  }, {})).sort(([a], [b]) => a.localeCompare(b))
+  // Experimental official notices are grouped by issuing country (country of the issuing agency, never impact area).
+  const sortedItems = [...items].sort((a, b) => (issuingCountryOf(a) ?? "~").localeCompare(issuingCountryOf(b) ?? "~"))
   return (
     <ShippingShell title="航运资讯">
       <SecHead
@@ -680,12 +1089,19 @@ export function FeedPage() {
               <span className="val">{row.count}</span>
             </div>
           ))}
+          {issuingCountryRows.length > 0 && <h4>官方预警·发布国家（实验）</h4>}
+          {issuingCountryRows.map(([code, count]) => (
+            <div key={code} className="sf-row frow" data-testid="issuing-country-row">
+              <span className="lbl grow">{`发布国家 ${code}`}</span>
+              <span className="val">{count}</span>
+            </div>
+          ))}
         </aside>
         {items.length === 0
           ? <div className="glass-panel"><EmptyState icon="i-ph-newspaper" text="当前分类下暂无资讯" /></div>
           : (
               <div className="glass-panel tl">
-                {items.map(item => (
+                {sortedItems.map(item => (
                   <div key={item.id} className="tl-item">
                     <div className="tl-sev">
                       <StatusDot tone={severityTone(item.severity)} pulse={item.severity === "critical"} />
@@ -699,8 +1115,9 @@ export function FeedPage() {
                         <span className="chip">{formatStatus(item.category)}</span>
                         <ProvenanceBadge provenance={item.provenance} />
                         <StatusBadge stale={item.stale} sourceStatus={item.sourceStatus} />
+                        {issuingCountryOf(item) && <span className="chip" data-testid="issuing-country-chip">{`发布国家：${issuingCountryOf(item)}`}</span>}
                         <span className="tl-time">
-                          {item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}
+                          {item.publicationTimeKnown === false ? "发布时间未知" : item.weather?.timeBasis === "received_at" ? `首次接收 ${formatDate(item.publishedAt)}` : formatDate(item.publishedAt)}
                         </span>
                         {item.hotReason && (
                           <span className="chip text-amber-600 dark:text-amber-300">
@@ -855,7 +1272,7 @@ export function FeedArticlePage({ id }: { id: string }) {
           <a href={item.sourceUrl} target="_blank" rel="noreferrer" className="chip">打开来源</a>
           <span className="chip">{formatStatus(item.category)}</span>
           <ProvenanceBadge provenance={item.provenance} />
-          <span className="tl-time">{item.publicationTimeKnown === false ? "发布时间未知" : formatDate(item.publishedAt)}</span>
+          <span className="tl-time">{item.publicationTimeKnown === false ? "发布时间未知" : item.weather?.timeBasis === "received_at" ? `首次接收 ${formatDate(item.publishedAt)}` : formatDate(item.publishedAt)}</span>
         </div>
         {copy
           ? (

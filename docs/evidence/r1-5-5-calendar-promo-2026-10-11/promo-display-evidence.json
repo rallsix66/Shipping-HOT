@@ -1,0 +1,265 @@
+{
+  "kind": "R1.5-5 promo calendar isolated SQLite -> restart -> API -> /calendar",
+  "ranAt": "2026-10-11T03:55:13.242Z",
+  "gitHead": "fdfe238caa67e338fc96beb59955c707e60bd8fb",
+  "workspaceClean": true,
+  "runDir": "D:\\try one\\Shipping HOT\\.tmp\\r1-5-5-promo-2026-10-11T03-55-05-634Z",
+  "fixtureNotice": "The only confirmation uses fixture evidence https://shopee.vn/blog/fixture-r1-5-5-test-only; it is NOT a real official confirmation. No seller backend, no new source, no LLM, no upstream fetch.",
+  "verdict": "PASS",
+  "writes": {
+    "generate": [
+      {
+        "candidates": 488,
+        "created": 488,
+        "updated": 0,
+        "unchanged": 0,
+        "protected": 0,
+        "rejected": 0
+      },
+      {
+        "candidates": 488,
+        "created": 0,
+        "updated": 0,
+        "unchanged": 488,
+        "protected": 0,
+        "rejected": 0
+      }
+    ],
+    "negativeConfirm": {
+      "confirmedFlagOnly": {
+        "status": 422,
+        "statusText": "evidence_source_required"
+      },
+      "wrongCountry": {
+        "status": 422,
+        "statusText": "country_platform_mismatch"
+      },
+      "wrongPlatform": {
+        "status": 422,
+        "statusText": "country_platform_mismatch"
+      },
+      "noEvidenceRef": {
+        "status": 422,
+        "statusText": "evidence_ref_required"
+      },
+      "anchorPending": {
+        "status": 409,
+        "statusText": "window_pending_not_confirmable"
+      }
+    },
+    "fixtureConfirm": {
+      "status": 200,
+      "confirmationStatus": "confirmed",
+      "sourceId": "XX-E01"
+    }
+  },
+  "api": {
+    "status": 200,
+    "events": 490,
+    "confirmed": [
+      "promo:E-R01:2026:VN:shopee:m11"
+    ],
+    "byRule": {
+      "E-R01": 180,
+      "E-R02": 120,
+      "E-R03": 180,
+      "E-R04": 2,
+      "E-R05": 1,
+      "E-R06": 5
+    },
+    "pendingWindow": [
+      "promo:E-R06:2026:VN:unspecified:tet",
+      "promo:E-R04:2026:ID:unspecified:eid-anchor",
+      "promo:E-R04:2026:MY:unspecified:eid-anchor",
+      "promo:E-R06:2026:TH:unspecified:songkran",
+      "promo:E-R06:2026:ID:unspecified:christmas",
+      "promo:E-R06:2026:MY:unspecified:christmas",
+      "promo:E-R06:2026:PH:unspecified:christmas"
+    ],
+    "legacy": [
+      {
+        "id": "legacy-fixture-2",
+        "platform": "unspecified",
+        "confirmationStatus": "pending",
+        "dataIssue": "invalid_platform"
+      },
+      {
+        "id": "legacy-fixture-1",
+        "platform": "unspecified",
+        "confirmationStatus": "pending",
+        "dataIssue": "confirmed_without_evidence"
+      }
+    ],
+    "gaps": [
+      {
+        "ruleId": "E-R04",
+        "countryCode": "ID",
+        "reasonZh": "斋月起止不在现有可靠假日数据中；促销季窗口与适用平台待定"
+      },
+      {
+        "ruleId": "E-R04",
+        "countryCode": "MY",
+        "reasonZh": "斋月起止不在现有可靠假日数据中；促销季窗口与适用平台待定"
+      },
+      {
+        "ruleId": "E-R06",
+        "countryCode": "*",
+        "reasonZh": "目录中的“等”未列明具体节日，不推断其他节日；各节日促销窗口与平台待定"
+      }
+    ],
+    "before": {
+      "rows": 490,
+      "hashLength": 32020,
+      "hash": "3510811675",
+      "providerUsageRows": 0
+    },
+    "after": {
+      "rows": 490,
+      "hashLength": 32020,
+      "hash": "3510811675",
+      "providerUsageRows": 0
+    }
+  },
+  "browser": {
+    "status": "RAN",
+    "chrome": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    "url": "http://127.0.0.1:4495/calendar",
+    "screenshots": [
+      "calendar-2026-11-11.png",
+      "calendar-2026-12-12.png"
+    ],
+    "nov": {
+      "dayCount": "大促 15 项",
+      "cards": 15,
+      "confirmed": [
+        "VN · Shopee\n11.11 双数日大促\n\n日期 2026-11-04 – 2026-11-14\n\n已由 XX-E01 确认\n\n规则：E-R01 · 来源：信源目录 §9 E-R01\n\n生成依据：E-R01 每月 m.m（2026-11-11），活动窗口为当天前 7 天到后 3 天；适用三平台、五国（规则生成，未经官方确认）\n\n确认证据：XX-E01 · 2026-10-11 ↗"
+      ]
+    },
+    "feb": "电商大促（运营参考，非停工事实）· 1 项\nVN · 未指定\n越南春节促销（锚点：越南春节假日）\n\n节日锚点日期 2026-02-16 – 2026-02-20（促销窗口待定）\n\n节日锚点（促销窗口待定）\n\n规则：E-R06 · 来源：信源目录 §9 E-R06 + 年度参考日历\n\n生成依据：锚点 = 年度参考日历中的越南春节假日 2026-02-16–2026-02-20（official_summary_verified）；促销提前期与平台目录未列明，待定",
+    "may": "电商大促（运营参考，非停工事实）· 17 项\nID · Lazada\n5.5 双数日大促\n\n日期 2026-04-28 – 2026-05-08\n\n规则生成（待确认）\n\n规则：E-R01 · 来源：信源目录 §9 E-R01\n\n生成依据：E-R01 每月 m.m（2026-05-05），活动窗口为当天前 7 天到后 3 天；适用三平台、五国（规则生成，未经官方确认）\n\nID · Shopee\n5.5 双数日大促\n\n日期 2026-04-28 – 2026-05-08\n\n规则生成（待确认）\n\n规则：E-R01 · 来源：信源目录 §9 E-R01\n\n生成依据：E-R01 每月 m.m（2026-05-05），活动窗口为当天前 7 天到后 3 天；适用三平台、五国（规则生成，未经官方确认）\n\nID · TikTok Shop\n5.5 双数日大促\n\n日期 2026-04-28 – 2026-05-08\n\n规则生成（待确认）\n\n规则：E-R01 · 来源：信源目录 §9 E-R01\n\n生成依据：E-R01 每月 m.m（2026-05-05），活动窗口为当天前 7 天到后 3 天；适用三平台、五国（规则生成，未经官方确认）\n\nMY · Lazada\n5.5 双数日大促\n\n日期 2026-04-28 – 2026-05-08\n\n规则生成（待确认）\n\n规则：E-R01 · 来源：信源目录 §9 E-R01\n\n生成依据：E-R01 每月 m.m（2026-05-05），活动窗口为当天前 7 天到后 3 天；适用三平台、五国（规则生成，未经官方确认）\n\nMY · Shopee\n5.5 双数日大促\n\n日期 2026-04-28 – 2026-05-08\n\n规则生成（待确认）\n\n规则：E-R01 · 来源：信源目录 §9 E-R01\n\n生成依据：E-R01 每月 m.m（2026-05-05）",
+    "dec": "电商大促（运营参考，非停工事实）· 16 项\nID · Lazada\n12.12 双数日大促\n\n日期 2026-12-05 – 2026-12-15\n\n规则生成（待确认）\n\n规则：E-R01 · 来源：信源目录 §9 E-R01\n\n生成依据：E-R01 每月 m.m（2026-12-12），活动窗口为当天前 7 天到后 3 天；适用三平台、五国（规则生成，未经官方确认）\n\nID · Shopee\n12.12 双数日大促\n\n日期 2026-12-05 – 2026-12-15\n\n规则生成（待确认）\n\n规则：E-R01 · 来源：信源目录 §9 E-R01\n\n生成依据：E-R01 每月 m.m（2026-12-12），活动窗口为当天前 7 天到后 3 天；适用三平台、五国（规则生成，未经官方确认）\n\nID · TikTok Shop\n12.12 双数日大促\n\n日期 2026-12-05 – 2026-12-15\n\n规则生成（待确认）\n\n规则：E-R01 · 来源：信源目录 §9 E-R01\n\n生成依据：E-R01 每月 m.m（2026-12-12），活动窗口为当天前 7 天到后 3 天；适用三平台、五国（规则生成，未经官方确认）\n\nMY · Lazada\n12.12 双数日大促\n\n日期 2026-12-05 – 2026-12-15\n\n规则生成（待确认）\n\n规则：E-R01 · 来源：信源目录 §9 E-R01\n\n生成依据：E-R01 每月 m.m（2026-12-12），活动窗口为当天前 7 天到后 3 天；适用三平台、五国（规则生成，未经官方确认）\n\nMY · Shopee\n12.12 双数日大促\n\n日期 2026-12-05 – 2026-12-15\n\n规则生成（待确认）\n\n规则：E-R01 · 来源：信源目录 §9 E-R01\n\n生成依据：E-R01 每月 m.m（2026-12-12），活动窗口为当天前 7 天到后 3 天；适用三平台、五国（规则生成，未经官方确认）\n\nMY · TikTok Shop\n12.12 双数日大促\n\n日期 2026-12-05 – 2026-12-15\n\n规则生成（待确认）\n\n规则：E-R01 · 来源：信源目录 §9 E-R01\n\n生成依据：E-R01 每月 m.m（2026-12-12），活动窗口为当天前 7 天到后 3 天；适用三平台、五国（规则生成，未经官方确认）\n\nPH · Lazada\n12.12 双数日大促\n\n日期 2026-12-05 – 2026-12-15\n\n规则生成（待确认）\n\n规则：E-R01 · 来源：信源目录 §9 E-R01\n\n生成依据：E-R01 每月 m.m（2026-12-12），活动窗口为当天前 7 天到后 3 天；适用三平台、五国（规则生成，未经官方确认）\n\nPH · Shopee\n",
+    "gaps": "大促规则缺口（待定）：\nE-R04 ID：斋月起止不在现有可靠假日数据中；促销季窗口与适用平台待定\nE-R04 MY：斋月起止不在现有可靠假日数据中；促销季窗口与适用平台待定\nE-R06 *：目录中的“等”未列明具体节日，不推断其他节日；各节日促销窗口与平台待定"
+  },
+  "checks": [
+    {
+      "id": "server1_healthy",
+      "pass": true,
+      "detail": "http://127.0.0.1:4495"
+    },
+    {
+      "id": "fresh_db_empty_before_generate",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "id": "generate_foreign_origin_rejected",
+      "pass": true,
+      "detail": "403"
+    },
+    {
+      "id": "generate_invalid_year_rejected",
+      "pass": true,
+      "detail": "400"
+    },
+    {
+      "id": "generate_creates_then_idempotent",
+      "pass": true,
+      "detail": "[{\"candidates\":488,\"created\":488,\"updated\":0,\"unchanged\":0,\"protected\":0,\"rejected\":0},{\"candidates\":488,\"created\":0,\"updated\":0,\"unchanged\":488,\"protected\":0,\"rejected\":0}]"
+    },
+    {
+      "id": "confirm_negatives_rejected",
+      "pass": true,
+      "detail": "{\"confirmedFlagOnly\":{\"status\":422,\"statusText\":\"evidence_source_required\"},\"wrongCountry\":{\"status\":422,\"statusText\":\"country_platform_mismatch\"},\"wrongPlatform\":{\"status\":422,\"statusText\":\"country_platform_mismatch\"},\"noEvidenceRef\":{\"status\":422,\"statusText\":\"evidence_ref_required\"},\"anchorPendin"
+    },
+    {
+      "id": "confirm_with_fixture_evidence_ok",
+      "pass": true,
+      "detail": "{\"status\":200,\"confirmationStatus\":\"confirmed\",\"sourceId\":\"XX-E01\"}"
+    },
+    {
+      "id": "server2_healthy_after_restart",
+      "pass": true,
+      "detail": "http://127.0.0.1:4495"
+    },
+    {
+      "id": "api_persisted_after_restart",
+      "pass": true,
+      "detail": "490"
+    },
+    {
+      "id": "api_only_fixture_confirmed",
+      "pass": true,
+      "detail": "promo:E-R01:2026:VN:shopee:m11"
+    },
+    {
+      "id": "api_legacy_never_confirmed",
+      "pass": true,
+      "detail": "[{\"id\":\"legacy-fixture-2\",\"platform\":\"unspecified\",\"confirmationStatus\":\"pending\",\"dataIssue\":\"invalid_platform\"},{\"id\":\"legacy-fixture-1\",\"platform\":\"unspecified\",\"confirmationStatus\":\"pending\",\"dataIssue\":\"confirmed_without_evidence\"}]"
+    },
+    {
+      "id": "api_anchor_windows_pending",
+      "pass": true,
+      "detail": "7"
+    },
+    {
+      "id": "api_gaps_listed",
+      "pass": true,
+      "detail": "3"
+    },
+    {
+      "id": "get_checked_fingerprint_unchanged",
+      "pass": true,
+      "detail": "{\"rows\":490,\"hashLength\":32020,\"hash\":\"3510811675\",\"providerUsageRows\":0} / {\"rows\":490,\"hashLength\":32020,\"hash\":\"3510811675\",\"providerUsageRows\":0}"
+    },
+    {
+      "id": "browser_calendar_rendered",
+      "pass": true,
+      "detail": "/calendar"
+    },
+    {
+      "id": "browser_layer_off_by_default",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "id": "browser_1111_multi_country_platform",
+      "pass": true,
+      "detail": "15 cards; day chip 大促 15 项"
+    },
+    {
+      "id": "browser_1111_one_confirmed_with_evidence",
+      "pass": true,
+      "detail": "VN · Shopee\n11.11 双数日大促\n\n日期 2026-11-04 – 2026-11-14\n\n已由 XX-E01 确认\n\n规则：E-R01 · 来源：信源目录 §9 E-R01\n\n生成依据：E-R01 每月 m.m（2026-11-11），活动窗口为当天前 7 天到后 3 天；适用三平台、五国（规则生成，未经官方确认）\n\n确认证据：XX-E01 · 2026-10-11 ↗"
+    },
+    {
+      "id": "browser_1111_others_pending_with_basis",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_tet_anchor_pending_window",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_legacy_abnormal_not_confirmed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_harbolnas_catalog_pending",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "browser_gaps_shown_as_pending",
+      "pass": true,
+      "detail": "大促规则缺口（待定）：\nE-R04 ID：斋月起止不在现有可靠假日数据中；促销季窗口与适用平台待定\nE-R04 MY：斋月起止不在现有可靠假日数据中；促销季窗口与适用平台待定\nE-R06 *：目录中的“等”未列明具体节日，不推断其他节日；各节日促销窗口与平台待定"
+    },
+    {
+      "id": "browser_holiday_layer_unchanged",
+      "pass": true,
+      "detail": ""
+    }
+  ]
+}

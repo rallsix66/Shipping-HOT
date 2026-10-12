@@ -1,0 +1,110 @@
+{
+  "probe": "MY-W01 MetMalaysia limited integration real run (isolated)",
+  "gitHead": "eab30a761ddf25907ee884134eda3a5e79c048a1",
+  "workspaceClean": true,
+  "runDir": "D:\\try one\\Shipping HOT\\.tmp\\metmalaysia-live-eab30a7",
+  "ranAt": "2026-10-10T08:30:40.728Z",
+  "entry": "https://api.data.gov.my/weather/warning/",
+  "requests": 1,
+  "egress": [
+    {
+      "url": "https://api.data.gov.my/weather/warning/",
+      "redirect": "error",
+      "at": "2026-10-10T08:30:40.790Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://api.data.gov.my/weather/warning/",
+      "bytes": 7754
+    }
+  ],
+  "jobResult": {
+    "status": "success",
+    "recordsRead": 4,
+    "recordsWritten": 4
+  },
+  "classification": "received_official_warning_records_validity_pending",
+  "summaryZh": "收到 4 条官方预警记录，有效性待确认（时区未确认，未计算是否生效）",
+  "rowsReceived": 4,
+  "recordsStored": 4,
+  "recordsUnknownValidity": 4,
+  "recordsEventEligible": 0,
+  "recordsWithPort": 0,
+  "recordsCurrentFeed": 4,
+  "noAdvisoryRecords": 1,
+  "klang": {
+    "panelOfficialAlerts": 0,
+    "panelImpacts": 0,
+    "ruleHits": 0
+  },
+  "records": [
+    {
+      "id": "weather-alert:metmalaysia:1085cd3aec39f7e4",
+      "title": "No Advisory",
+      "raw": {
+        "issued": "2026-10-10T10:30:00",
+        "validFrom": null,
+        "validTo": null
+      },
+      "alertState": "unknown",
+      "validityStatus": "unknown",
+      "timezoneStatus": "unconfirmed",
+      "officialSeverity": "not_provided",
+      "receivedAt": "2026-10-10T08:30:40.728Z",
+      "fetchedAt": "2026-10-10T08:30:40.728Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:metmalaysia:c839053dda1e9e11",
+      "title": "Thunderstorms Warning",
+      "raw": {
+        "issued": "2026-10-10T15:50:00",
+        "validFrom": "2026-10-10T15:00:00",
+        "validTo": "2026-10-10T20:00:00"
+      },
+      "alertState": "unknown",
+      "validityStatus": "unknown",
+      "timezoneStatus": "unconfirmed",
+      "officialSeverity": "not_provided",
+      "receivedAt": "2026-10-10T08:30:40.728Z",
+      "fetchedAt": "2026-10-10T08:30:40.728Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:metmalaysia:468debfe0e6d17a5",
+      "title": "Strong Winds and Rough Seas Warning",
+      "raw": {
+        "issued": "2026-10-10T14:00:00",
+        "validFrom": "2026-10-10T13:00:00",
+        "validTo": "2026-10-10T18:00:00"
+      },
+      "alertState": "unknown",
+      "validityStatus": "unknown",
+      "timezoneStatus": "unconfirmed",
+      "officialSeverity": "not_provided",
+      "receivedAt": "2026-10-10T08:30:40.728Z",
+      "fetchedAt": "2026-10-10T08:30:40.728Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:metmalaysia:85e8ecb33970658b",
+      "title": "Strong Winds and Rough Seas Warning",
+      "raw": {
+        "issued": "2026-10-10T14:00:00",
+        "validFrom": "2026-10-08T00:00:00",
+        "validTo": "2026-10-10T23:59:00"
+      },
+      "alertState": "unknown",
+      "validityStatus": "unknown",
+      "timezoneStatus": "unconfirmed",
+      "officialSeverity": "not_provided",
+      "receivedAt": "2026-10-10T08:30:40.728Z",
+      "fetchedAt": "2026-10-10T08:30:40.728Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    }
+  ],
+  "scope": "real official API -> provider -> sync job -> isolated SQLite -> panel/impact SERVICE layer; HTTP API + browser are covered by r1-5-metmalaysia-display.mjs"
+}

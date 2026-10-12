@@ -1,0 +1,1 @@
+﻿VN-W01 real run: .tmp/nchmf-live-c064e5a on clean c064e5a, 2026-10-10 17:52:07 UTC+8, 13 requests (1 list + 12 articles), received 8 / candidates 12 / excluded 8 / failed 4 (PDF-only empty body) / truncated 0; display PASS 17/17. Eight-port weather live not rerun.

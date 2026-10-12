@@ -2,6 +2,8 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { annualCountries, annualCountryStatusLabels, annualEventScope, annualEvidenceLabel, annualMonthDays, annualSourceLabel, annualSourcePublishedLabel, annualTypes } from "@shared/annual-calendar"
 import type { AnnualCalendarResponse, AnnualCountry } from "@shared/annual-calendar"
+import { type PolicyListResponse, policyDisplayLabels } from "@shared/policy"
+import { type PromoCalendarResponse, promoDaysInRange, promoPlatforms, promoStatusLabel } from "@shared/promo-calendar"
 import { ShippingShell } from "./app"
 import { myFetch } from "~/utils"
 import "./annual-calendar.css"
@@ -15,6 +17,9 @@ export function AnnualCalendarPage() {
   const [selected, setSelected] = useState("")
   const [countries, setCountries] = useState<AnnualCountry[]>(countryCodes)
   const [showReferenceOnly, setShowReferenceOnly] = useState(false)
+  const [showPromos, setShowPromos] = useState(false)
+  const [showPolicies, setShowPolicies] = useState(false)
+  const [showCnPolicies, setShowCnPolicies] = useState(false)
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: ["annual-calendar-reference", year],
     queryFn: () => myFetch<AnnualCalendarResponse>(`/shipping/calendar/reference?year=${year}`),
@@ -22,6 +27,30 @@ export function AnnualCalendarPage() {
     refetchOnWindowFocus: false,
     retry: false,
   })
+  const promoQuery = useQuery({
+    queryKey: ["promo-calendar", year],
+    queryFn: () => myFetch<PromoCalendarResponse>(`/shipping/calendar/promotions?year=${year}`),
+    enabled: showPromos,
+    refetchOnWindowFocus: false,
+    retry: false,
+  })
+  const promoEvents = showPromos ? (promoQuery.data?.events ?? []).filter(p => countries.includes(p.countryCode as AnnualCountry)) : []
+  const promosByDay = new Map<string, typeof promoEvents>()
+  for (const promo of promoEvents) {
+    for (const day of promoDaysInRange(promo.startsAt, promo.endsAt)) promosByDay.set(day, [...(promosByDay.get(day) ?? []), promo])
+  }
+  const policyQuery = useQuery({
+    queryKey: ["calendar-policies", year],
+    queryFn: () => myFetch<PolicyListResponse>(`/shipping/policies?effectiveFrom=${year}-01-01&effectiveTo=${year}-12-31`),
+    enabled: showPolicies,
+    refetchOnWindowFocus: false,
+    retry: false,
+  })
+  const policyRecords = showPolicies ? (policyQuery.data?.records ?? []).filter(p => countries.includes(p.countryCode as AnnualCountry) || (showCnPolicies && p.countryCode === "CN")) : []
+  const policiesByDay = new Map<string, typeof policyRecords>()
+  for (const policy of policyRecords) {
+    if (policy.effectiveAt) policiesByDay.set(policy.effectiveAt, [...(policiesByDay.get(policy.effectiveAt) ?? []), policy])
+  }
   const selectedDate = selected.startsWith(`${year}-${String(month + 1).padStart(2, "0")}`)
     ? selected
     : `${year}-${String(month + 1).padStart(2, "0")}-01`
@@ -31,6 +60,8 @@ export function AnnualCalendarPage() {
   for (const event of events) eventsByDay.set(event.date, [...(eventsByDay.get(event.date) ?? []), event])
   const days = annualMonthDays(year, month)
   const details = eventsByDay.get(selectedDate) ?? []
+  const promoDetails = promosByDay.get(selectedDate) ?? []
+  const policyDetails = policiesByDay.get(selectedDate) ?? []
   const monthCount = events.filter(e => e.date.startsWith(`${year}-${String(month + 1).padStart(2, "0")}`)).length
   const unavailable = !isPending && !isError && data?.datasets.length === 0
   const availableYears = data?.availableYears ?? [2026, 2027]
@@ -74,6 +105,20 @@ export function AnnualCalendarPage() {
               <input type="checkbox" checked={showReferenceOnly} onChange={e => setShowReferenceOnly(e.target.checked)} />
               隐藏补班／特别工作日
             </label>
+            <label className="annual-option">
+              <input type="checkbox" data-testid="promo-layer-toggle" checked={showPromos} onChange={e => setShowPromos(e.target.checked)} />
+              显示电商大促图层（运营参考，非停工事实）
+            </label>
+            <label className="annual-option">
+              <input type="checkbox" data-testid="policy-layer-toggle" checked={showPolicies} onChange={e => setShowPolicies(e.target.checked)} />
+              显示政策生效日（参考，非停工事实）
+            </label>
+            {showPolicies && (
+              <label className="annual-option">
+                <input type="checkbox" data-testid="cn-policy-toggle" checked={showCnPolicies} onChange={e => setShowCnPolicies(e.target.checked)} />
+                含中国（CN）政策生效日（仅政策层；本日历无中国假日数据）
+              </label>
+            )}
             <div className="annual-filter-note">
               <strong>标记说明</strong>
               <p>
@@ -189,6 +234,12 @@ export function AnnualCalendarPage() {
                           <small>{annualEventScope(event)}</small>
                         </span>
                       ))}
+                      {showPromos && !day.outside && (promosByDay.get(day.date)?.length ?? 0) > 0 && (
+                        <span className="annual-promo-count" data-testid="promo-day-count">{`大促 ${promosByDay.get(day.date)!.length} 项`}</span>
+                      )}
+                      {showPolicies && !day.outside && (policiesByDay.get(day.date)?.length ?? 0) > 0 && (
+                        <span className="annual-promo-count" data-testid="policy-day-count">{`政策生效 ${policiesByDay.get(day.date)!.length} 项`}</span>
+                      )}
                       {rows.length > 3 && (
                         <span className="annual-more">
                           另有
@@ -260,6 +311,49 @@ export function AnnualCalendarPage() {
                         </article>
                       )
                     })}
+            {showPolicies && (
+              <div className="annual-promo-details" data-testid="policy-calendar-details">
+                <h3>{`政策生效日（参考，非停工事实）· ${policyDetails.length} 项`}</h3>
+                {policyQuery.isError && <p role="alert">政策资料读取失败。</p>}
+                {!policyQuery.isPending && !policyQuery.isError && policyDetails.length === 0 && <p>所选日期没有已录入的政策生效日（未录入不代表没有新规；中国政策需勾选「含中国」）。</p>}
+                {policyDetails.map(policy => (
+                  <article key={policy.id} data-testid="policy-calendar-item" data-status={policy.displayStatus}>
+                    <div className="annual-detail-label">{`${policy.countryCode}${policy.platform ? ` · ${policy.platform}` : ""}`}</div>
+                    <h3>{`${policy.isFixture ? "[示例 fixture，非真实公告] " : ""}${policy.title}`}</h3>
+                    <strong className="annual-evidence-pending">{`${policyDisplayLabels[policy.displayStatus]}${policy.autoActivated ? "（⚙ 到生效日自动）" : ""}`}</strong>
+                    <p>{`生效日 ${policy.effectiveAt} · v${policy.currentVersionNumber}`}</p>
+                    <a href="/policies">在政策库查看 →</a>
+                  </article>
+                ))}
+              </div>
+            )}
+            {showPromos && (
+              <div className="annual-promo-details" data-testid="promo-details">
+                <h3>{`电商大促（运营参考，非停工事实）· ${promoDetails.length} 项`}</h3>
+                {promoQuery.isError && <p role="alert">大促资料读取失败，不代表没有大促。</p>}
+                {promoQuery.isPending && <p>正在读取大促资料…</p>}
+                {!promoQuery.isPending && !promoQuery.isError && promoDetails.length === 0 && <p>所选日期没有已生成或录入的大促记录（未生成不代表没有大促）。</p>}
+                {promoDetails.map(promo => (
+                  <article key={promo.id} data-testid="promo-detail" data-status={promo.confirmationStatus}>
+                    <div className="annual-detail-label">
+                      <span className={`annual-dot annual-${promo.countryCode}`} />
+                      {`${promo.countryCode} · ${promoPlatforms[promo.platform]}`}
+                    </div>
+                    <h3>{promo.title}</h3>
+                    <p>{promo.windowStatus === "pending" ? `节日锚点日期 ${promo.startsAt} – ${promo.endsAt}（促销窗口待定）` : `日期 ${promo.startsAt} – ${promo.endsAt}`}</p>
+                    <strong className={promo.confirmationStatus === "confirmed" ? "annual-scope" : "annual-evidence-pending"} data-testid="promo-status">{promoStatusLabel(promo)}</strong>
+                    <p>{`规则：${promo.ruleId ?? "无（人工录入）"} · 来源：${promo.basisRef ?? "未提供"}`}</p>
+                    {promo.generationBasis && <p>{`生成依据：${promo.generationBasis}`}</p>}
+                    {promo.confirmation && (
+                      <a href={promo.confirmation.evidenceRef} target="_blank" rel="noreferrer">
+                        {`确认证据：${promo.confirmation.sourceId} · ${promo.confirmation.confirmedAt.slice(0, 10)} ↗`}
+                      </a>
+                    )}
+                    {promo.dataIssue && <p>{`数据异常：${promo.dataIssue}`}</p>}
+                  </article>
+                ))}
+              </div>
+            )}
           </aside>
         </div>
         <section className="annual-coverage" aria-label="资料范围与限制">
@@ -273,6 +367,14 @@ export function AnnualCalendarPage() {
               {dataset.warning}
             </p>
           ))}
+          {showPromos && (promoQuery.data?.gaps.length ?? 0) > 0 && (
+            <div data-testid="promo-gaps">
+              <strong>大促规则缺口（待定）：</strong>
+              <ul>
+                {promoQuery.data!.gaps.map(gap => <li key={`${gap.ruleId}-${gap.countryCode}`}>{`${gap.ruleId} ${gap.countryCode}：${gap.reasonZh}`}</li>)}
+              </ul>
+            </div>
+          )}
           <p>2026 年参考资料截至 2026-09-09 整理；未完成双人人工复核。未自动抓取或更新，后续官方更正需人工核对。具体作业安排请向当地代理确认。</p>
         </section>
       </div>

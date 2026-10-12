@@ -13,6 +13,12 @@ import { providerUsageRecordsMigration } from "#/database/migrations/011-provide
 import { translationRuntimeWorkStateMigration } from "#/database/migrations/012-translation-runtime-work-state"
 import { articleContentMigration } from "#/database/migrations/013-article-content"
 import { retireVesselVoyageMigration } from "#/database/migrations/014-retire-vessel-voyage"
+import { opsWeatherCalendarPolicyMigration } from "#/database/migrations/015-ops-weather-calendar-policy"
+import { promoCalendarMetadataMigration } from "#/database/migrations/016-promo-calendar-metadata"
+import { policyLifecycleMigration } from "#/database/migrations/017-policy-lifecycle"
+import { policyRelationsTimezoneMigration } from "#/database/migrations/018-policy-relations-timezone"
+import { policyRelationBackfillRepairMigration } from "#/database/migrations/019-policy-relation-backfill-repair"
+import { policyRelationMixedVersionRepairMigration } from "#/database/migrations/020-policy-relation-mixed-version-repair"
 
 export interface ShippingMigration {
   readonly version: number
@@ -38,6 +44,12 @@ export const shippingMigrations: readonly ShippingMigration[] = [
   translationRuntimeWorkStateMigration,
   articleContentMigration,
   retireVesselVoyageMigration,
+  opsWeatherCalendarPolicyMigration,
+  promoCalendarMetadataMigration,
+  policyLifecycleMigration,
+  policyRelationsTimezoneMigration,
+  policyRelationBackfillRepairMigration,
+  policyRelationMixedVersionRepairMigration,
 ]
 
 export const latestShippingSchemaVersion = shippingMigrations[shippingMigrations.length - 1].version

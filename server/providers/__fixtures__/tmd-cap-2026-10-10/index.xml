@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="https://www.tmd.go.th/rss/en/rss-style.xsl"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <atom:link rel="hub" href="//alert-hub.appspot.com" />
+    <atom:link rel="self" href="https://www.tmd.go.th/en/api/xml/CAP" type="application/rss+xml" />
+    <title>Latest alerts from Thai Meteorological Department (TMD)</title>
+    <link>https://www.tmd.go.th/en/api/xml/CAP</link>
+    <description>Latest alerts from Thai Meteorological Department (TMD)</description>
+    <language>en</language>
+    <copyright>public domain</copyright>
+    <pubDate>Sat, 10 Oct 2026 12:32:29 +0700</pubDate>
+    <lastBuildDate>Sat, 10 Oct 2026 12:32:29 +0700</lastBuildDate>
+    <docs>https://cyber.harvard.edu/rss/rss.html</docs>
+    <image>
+      <title>Latest alerts from Thai Meteorological Department (TMD)</title>
+      <url>https://www.tmd.go.th/CustomTheme3/logoes/logo_colorcmyk.png</url>
+      <link>https://www.tmd.go.th/en/api/xml/CAP</link>
+    </image>
+    <item>
+      <title>Heavy Rain</title>
+      <link>https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261010062912_2.xml</link>
+      <description>Another high-pressure system from China extends to upper Vietnam, expected to extend to the upper North and the upper Northeast by today (10 October 2026) while the easterly wind and the southeasterly wind bring the moisture from the South China Sea to the eastern part of the Northeast and the East. Meanwhile, the monsoon trough lies across the Gulf and the South. More rains and variable weather with thundershower, gust wind, hail and isolated heavy to very heavy rainfall including lightning strike are likely in the upper country while isolated heavy rains remains in the South. People should beware of severe conditions with heavy to very heavy rainfalls and accumulations that may cause flash flood and overflows, especially along the waterways near foothills and lowlands. The Andaman Sea and the Gulf, waves will be higher than 2 meters high in thundershower areas. All ships should keep off thundershowers.</description>
+      <author>info_service@tmd.mail.go.th (Thai Meteorological Department)</author>
+      <guid isPermaLink="false">TMD20261010062912_2-en</guid>
+      <pubDate>Fri, 09 Oct 2026 23:00:00 +0700</pubDate>
+    </item>
+    <item>
+      <title>Very Heavy Rain</title>
+      <link>https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261010061852_2.xml</link>
+      <description>Another high-pressure system from China extends to upper Vietnam, expected to extend to the upper North and the upper Northeast by today (10 October 2026) while the easterly wind and the southeasterly wind bring the moisture from the South China Sea to the eastern part of the Northeast and the East. Meanwhile, the monsoon trough lies across the Gulf and the South. More rains and variable weather with thundershower, gust wind, hail and isolated heavy to very heavy rainfall including lightning strike are likely in the upper country while isolated heavy rains remains in the South. People should beware of severe conditions with heavy to very heavy rainfalls and accumulations that may cause flash flood and overflows, especially along the waterways near foothills and lowlands. The Andaman Sea and the Gulf, waves will be higher than 2 meters high in thundershower areas. All ships should keep off thundershowers.</description>
+      <author>info_service@tmd.mail.go.th (Thai Meteorological Department)</author>
+      <guid isPermaLink="false">TMD20261010061852_2-en</guid>
+      <pubDate>Fri, 09 Oct 2026 23:00:00 +0700</pubDate>
+    </item>
+    <item>
+      <title>Heavy Rain</title>
+      <link>https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261009164949_2.xml</link>
+      <description>The high-pressure system covers the upper North and the upper Northeast while the easterly wind and the southeasterly wind bring the moisture from the South China Sea to the eastern part of the Northeast and the East. Meanwhile, the monsoon trough lies across the Gulf and the South. 
+
+Less rains is likely in the upper country while isolated heavy rains are forecast in the eastern part of the Northeast and the East the South while and isolated heavy rain are forecast in. 
+
+For the Andaman Sea and the Gulf, waves will be higher than 2 meters high in thundershower areas. 
+
+</description>
+      <author>info_service@tmd.mail.go.th (Thai Meteorological Department)</author>
+      <guid isPermaLink="false">TMD20261009164949_2-en</guid>
+      <pubDate>Fri, 09 Oct 2026 09:28:00 +0700</pubDate>
+    </item>
+    <item>
+      <title>Heavy Rain</title>
+      <link>https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261009050353_2.xml</link>
+      <description>The high-pressure system covers upper North and the upper Northeast while the southeasterly wind bring the moisture from the South China Sea to the eastern part of the Northeast and the East. Meanwhile, the monsoon trough lies across the Gulf and the South. 
+Isolated heavy rains are forecast in the South while less rains and isolated heavy rain are forecast in the eastern part of the Northeast and the East.
+For the Andaman Sea and the Gulf, waves will be higher than 2 meters high in thundershower areas. 
+</description>
+      <author>info_service@tmd.mail.go.th (Thai Meteorological Department)</author>
+      <guid isPermaLink="false">TMD20261009050353_2-en</guid>
+      <pubDate>Thu, 08 Oct 2026 21:58:00 +0700</pubDate>
+    </item>
+    <item>
+      <title>Heavy Rain</title>
+      <link>https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261008161413_2.xml</link>
+      <description>The high-pressure system covers upper Thailand while the monsoon trough lies across the Gulf and the South. Isolated heavy rains are forecast in the South while less rains and isolated thundershowers are forecast in the upper country especially in the western part of the North and the Central. 
+For the Andaman Sea and the Gulf, waves will be higher than 2 meters high in thundershower areas. 
+In addition, during 9-13 October 2026, the another high pressure system from China will extend to cover the Northeast and the South China Sea leading to the monsoon trough move down to lies across the East, the upper South. Meanwhile the moderate southwest monsoon prevailing over the Andaman Sea, Thailand and the Gulf. More rain with isolated heavy to very heavy rains are forecast in the East, the Central including Bangkok and vicinity and the South. During this period, people are advised to closely monitor weather forecasts and people in the affected areas should beware of heavy to very heavy rains and accumulated rains that may cause flash floods, overflows and landslides especially along the waterways near foothills and lowlands. 
+</description>
+      <author>info_service@tmd.mail.go.th (Thai Meteorological Department)</author>
+      <guid isPermaLink="false">TMD20261008161413_2-en</guid>
+      <pubDate>Thu, 08 Oct 2026 09:10:00 +0700</pubDate>
+    </item>
+    <item>
+      <title>Heavy Rain</title>
+      <link>https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261008054542_2.xml</link>
+      <description>The high-pressure system from China covers upper Thailand while the easterly wind prevails over the Gulf and the South. Isolated heavy rains are forecast in the South while less rains and isolated thundershowers are forecast in the upper country especially in the western part of the North and the Central and the East regions. People in the South beware of heavy rains and accumulations that may cause flash flood and overflows, especially along the waterways near foothills and lowlands. For the Andaman Sea and the Gulf, waves will be higher than 2 meters high in thundershower areas. All ships should keep off thundershowers. In addition, during 9-13 October 2026, the another high pressure system from China will extend to cover the Northeast and the South China Sea leading to the monsoon trough move down to lies across the East, the upper South. Meanwhile the moderate southwest monsoon prevailing over the Andaman Sea, Thailand and the Gulf. More rain with isolated heavy to very heavy rains are forecast in the East, the Central including Bangkok and vicinity and the South. During this period, 
+</description>
+      <author>info_service@tmd.mail.go.th (Thai Meteorological Department)</author>
+      <guid isPermaLink="false">TMD20261008054542_2-en</guid>
+      <pubDate>Wed, 07 Oct 2026 22:42:00 +0700</pubDate>
+    </item>
+    <item>
+      <title>Heavy Rain</title>
+      <link>https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261007164420_2.xml</link>
+      <description>The high-pressure system from China covers upper Thailand while the easterly wind prevails over the Gulf and the South. Isolated heavy rains are forecast in the South while less rains and isolated thundershowers are forecast in the upper country especially in the western part of the North and the Central and the East regions. 
+For the Andaman Sea and the Gulf, waves will be higher than 2 meters high in thundershower areas. 
+In addition, during 9-13 October 2026, the another high pressure system from China will extend to cover the Northeast and the South China Sea leading to the monsoon trough move down to lies across the East, the upper South. Meanwhile the moderate southwest monsoon prevailing over the Andaman Sea, Thailand and the Gulf. More rain with isolated heavy to very heavy rains are forecast in the East, the Central including Bangkok and vicinity and the South. 
+</description>
+      <author>info_service@tmd.mail.go.th (Thai Meteorological Department)</author>
+      <guid isPermaLink="false">TMD20261007164420_2-en</guid>
+      <pubDate>Wed, 07 Oct 2026 09:31:00 +0700</pubDate>
+    </item>
+  </channel>
+</rss>

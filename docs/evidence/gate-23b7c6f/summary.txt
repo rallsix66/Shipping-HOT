@@ -1,0 +1,11 @@
+﻿HEAD 23b7c6ff0247e4b9f2f83d721640aced522551db started 2026-10-10T15:43:33.3195100+08:00 node v24.15.0 pnpm 10.30.3 os Microsoft Windows NT 10.0.19045.0
+install exit=0
+build exit=0
+typecheck exit=0
+lint exit=0
+vitest exit=0
+smoke exit=0
+s7 exit=0
+audit exit=0
+status-after: []
+DONE

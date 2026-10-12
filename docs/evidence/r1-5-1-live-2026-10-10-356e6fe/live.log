@@ -1,0 +1,36 @@
+
+> shipping-hot@0.0.41 test:r1-5-1-live <repo>
+> node scripts/r1-5-1-live-acceptance.mjs
+
+Evidence: <repo>\.tmp\r1-5-1-live-2026-10-10T03-58-38-568Z\r1-5-1-evidence.json
+{
+  "total": 84,
+  "passed": 83,
+  "harnessFailed": [],
+  "prerequisiteMissing": [],
+  "businessBlocked": [
+    "coverage_port-ho-chi-minh"
+  ]
+}
+{
+  "seedToIsolatedDb": "VERIFIED",
+  "liveWeatherSyncToSqlite": "VERIFIED",
+  "restartPersistenceApiEightPorts": "VERIFIED",
+  "apiSqliteFieldConsistencyBeforeAfterRestart": "VERIFIED",
+  "browserPageMetadataAndCoverage": "VERIFIED",
+  "apiNotTruncated": "VERIFIED",
+  "jmaLiveArchive": "VERIFIED",
+  "fixtureTropicalBrowserS7": "VERIFIED",
+  "sevenDayCoveragePerPort": {
+    "port-shekou": "PASS",
+    "port-yantian": "PASS",
+    "port-nansha": "PASS",
+    "port-laem-chabang": "PASS",
+    "port-klang": "PASS",
+    "port-manila": "PASS",
+    "port-jakarta": "PASS",
+    "port-ho-chi-minh": "BLOCKED: marine_wave_or_swell_present"
+  }
+}
+R1.5-1 live acceptance: BLOCKED
+ ELIFECYCLE  Command failed with exit code 2.

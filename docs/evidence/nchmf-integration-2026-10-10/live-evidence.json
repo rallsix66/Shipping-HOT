@@ -1,0 +1,329 @@
+{
+  "probe": "VN-W01 NCHMF limited integration real run (isolated)",
+  "gitHead": "c064e5a649c007e8d50d156d086cdfcca4283f22",
+  "workspaceClean": true,
+  "runDir": "D:\\try one\\Shipping HOT\\.tmp\\nchmf-live-c064e5a",
+  "ranAt": "2026-10-10T09:52:07.741Z",
+  "entry": "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html",
+  "requests": 13,
+  "egress": [
+    {
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html",
+      "redirect": "error",
+      "at": "2026-10-10T09:52:07.791Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html",
+      "bytes": 259550
+    },
+    {
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-quet-sat-lo-dat-sut-lun-dat-do-mua-lu-hoac-dong-chay-tren-khu-vuc-cac-tinh-thanh-pho-tu-nghe-an-den-quang-ngai-post54549.html",
+      "redirect": "error",
+      "at": "2026-10-10T09:52:10.199Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-quet-sat-lo-dat-sut-lun-dat-do-mua-lu-hoac-dong-chay-tren-khu-vuc-cac-tinh-thanh-pho-tu-nghe-an-den-quang-ngai-post54549.html",
+      "bytes": 53013
+    },
+    {
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-du-bao-gio-manh-song-lon-va-mua-dong-tren-bien-post54353.html",
+      "redirect": "error",
+      "at": "2026-10-10T09:52:11.367Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-du-bao-gio-manh-song-lon-va-mua-dong-tren-bien-post54353.html",
+      "bytes": 52538
+    },
+    {
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-tren-song-dong-nai-post54547.html",
+      "redirect": "error",
+      "at": "2026-10-10T09:52:11.726Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-tren-song-dong-nai-post54547.html",
+      "bytes": 62283
+    },
+    {
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-tren-cac-song-tu-ha-tinh-den-thanh-pho-hue-post54546.html",
+      "redirect": "error",
+      "at": "2026-10-10T09:52:12.170Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-tren-cac-song-tu-ha-tinh-den-thanh-pho-hue-post54546.html",
+      "bytes": 62481
+    },
+    {
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-phuc-vu-quy-trinh-van-hanh-lien-ho-chua-song-huong-post54540.html",
+      "redirect": "error",
+      "at": "2026-10-10T09:52:12.468Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-phuc-vu-quy-trinh-van-hanh-lien-ho-chua-song-huong-post54540.html",
+      "bytes": 52263
+    },
+    {
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-du-bao-mua-lon-o-khu-vuc-tu-phia-nam-tinh-quang-tri-den-thanh-pho-da-nang-va-phia-dong-cac-tinh-tu-quang-ngai-den-gia-lai-post54290.html",
+      "redirect": "error",
+      "at": "2026-10-10T09:52:12.894Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-du-bao-mua-lon-o-khu-vuc-tu-phia-nam-tinh-quang-tri-den-thanh-pho-da-nang-va-phia-dong-cac-tinh-tu-quang-ngai-den-gia-lai-post54290.html",
+      "bytes": 53384
+    },
+    {
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/ban-tin-canh-bao-lu-phuc-vu-quy-trinh-lhc-song-dong-nai-post54545.html",
+      "redirect": "error",
+      "at": "2026-10-10T09:52:13.190Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/ban-tin-canh-bao-lu-phuc-vu-quy-trinh-lhc-song-dong-nai-post54545.html",
+      "bytes": 52205
+    },
+    {
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-quet-sat-lo-dat-sut-lun-dat-do-mua-lu-hoac-dong-chay-tren-khu-vuc-cac-tinh-thanh-pho-tu-nghe-an-den-quang-ngai-post54534.html",
+      "redirect": "error",
+      "at": "2026-10-10T09:52:13.515Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-quet-sat-lo-dat-sut-lun-dat-do-mua-lu-hoac-dong-chay-tren-khu-vuc-cac-tinh-thanh-pho-tu-nghe-an-den-quang-ngai-post54534.html",
+      "bytes": 53030
+    },
+    {
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/ban-tin-canh-bao-lu-phuc-vu-quy-trinh-lien-ho-chua-song-huong-trong-mua-lu-post54533.html",
+      "redirect": "error",
+      "at": "2026-10-10T09:52:13.928Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/ban-tin-canh-bao-lu-phuc-vu-quy-trinh-lien-ho-chua-song-huong-trong-mua-lu-post54533.html",
+      "bytes": 52340
+    },
+    {
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-tren-song-dong-nai-post54527.html",
+      "redirect": "error",
+      "at": "2026-10-10T09:52:14.256Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-tren-song-dong-nai-post54527.html",
+      "bytes": 62519
+    },
+    {
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-du-bao-trieu-cuong-vung-ven-bien-nam-bo-post54492.html",
+      "redirect": "error",
+      "at": "2026-10-10T09:52:14.885Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-du-bao-trieu-cuong-vung-ven-bien-nam-bo-post54492.html",
+      "bytes": 109358
+    },
+    {
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/ban-tin-canh-bao-lu-phuc-vu-quy-trinh-lhc-song-ca-post54544.html",
+      "redirect": "error",
+      "at": "2026-10-10T09:52:15.494Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/ban-tin-canh-bao-lu-phuc-vu-quy-trinh-lhc-song-ca-post54544.html",
+      "bytes": 52179
+    }
+  ],
+  "jobResult": {
+    "status": "success",
+    "recordsRead": 8,
+    "recordsWritten": 8
+  },
+  "classification": "received_with_partial_failures",
+  "report": {
+    "sourceId": "nchmf",
+    "listStatus": "ok",
+    "linksSeen": 20,
+    "linksRejected": 0,
+    "candidates": 12,
+    "excluded": 8,
+    "truncated": 0,
+    "requested": 12,
+    "received": 8,
+    "failed": [
+      {
+        "postId": "54540",
+        "reason": "nchmf_article_empty: body has no readable text"
+      },
+      {
+        "postId": "54545",
+        "reason": "nchmf_article_empty: body has no readable text"
+      },
+      {
+        "postId": "54533",
+        "reason": "nchmf_article_empty: body has no readable text"
+      },
+      {
+        "postId": "54544",
+        "reason": "nchmf_article_empty: body has no readable text"
+      }
+    ],
+    "created": 8,
+    "updated": 0,
+    "unchanged": 0
+  },
+  "summaryZh": "收到 8 条官方预警原文记录（候选 12，排除 8，失败 4，截断 0）；生命周期/有效期未知，未关联港口",
+  "recordsStored": 8,
+  "recordsWithOriginalLevel": 5,
+  "recordsLevelNotProvided": 3,
+  "recordsEventEligible": 0,
+  "recordsWithPort": 0,
+  "recordsCurrentFeed": 8,
+  "vnsgnRuleHits": 0,
+  "records": [
+    {
+      "id": "weather-alert:nchmf:54492",
+      "title": "TIN CẢNH BÁO, DỰ BÁO TRIỀU CƯỜNG VÙNG VEN BIỂN NAM BỘ",
+      "sourceUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-du-bao-trieu-cuong-vung-ven-bien-nam-bo-post54492.html",
+      "raw": {
+        "listTimeText": "10/10/2026",
+        "bodyPublishText": null,
+        "nextIssueText": "Bản tin tiếp theo được phát lúc: 15h30 ngày 11/10/2026",
+        "originalLevelText": null
+      },
+      "originalRiskLevel": null,
+      "officialSeverity": "not_provided",
+      "standardizedSeverity": "unmapped",
+      "alertState": "unknown",
+      "lifecycleStatus": "unknown",
+      "firstReceivedAt": "2026-10-10T09:52:07.741Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:nchmf:54527",
+      "title": "TIN CẢNH BÁO LŨ TRÊN SÔNG ĐỒNG NAI",
+      "sourceUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-tren-song-dong-nai-post54527.html",
+      "raw": {
+        "listTimeText": "10/10/2026 09:00:00",
+        "bodyPublishText": "Tin phát lúc 09h00' ngày 10/10/2026",
+        "nextIssueText": null,
+        "originalLevelText": "Cảnh báo cấp độ rủi ro thiên tai do lũ: Cấp 1"
+      },
+      "originalRiskLevel": "Cấp 1",
+      "officialSeverity": null,
+      "standardizedSeverity": "unmapped",
+      "alertState": "unknown",
+      "lifecycleStatus": "unknown",
+      "firstReceivedAt": "2026-10-10T09:52:07.741Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:nchmf:54534",
+      "title": "TIN CẢNH BÁO LŨ QUÉT SẠT LỞ ĐẤT, SỤT LÚN ĐẤT DO MƯA LŨ HOẶC DÒNG CHẢY TRÊN KHU VỰC CÁC TỈNH/THÀNH PHỐ TỪ NGHỆ AN ĐẾN QUẢNG NGÃI",
+      "sourceUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-quet-sat-lo-dat-sut-lun-dat-do-mua-lu-hoac-dong-chay-tren-khu-vuc-cac-tinh-thanh-pho-tu-nghe-an-den-quang-ngai-post54534.html",
+      "raw": {
+        "listTimeText": "10/10/2026 12:21:35",
+        "bodyPublishText": null,
+        "nextIssueText": null,
+        "originalLevelText": null
+      },
+      "originalRiskLevel": null,
+      "officialSeverity": "not_provided",
+      "standardizedSeverity": "unmapped",
+      "alertState": "unknown",
+      "lifecycleStatus": "unknown",
+      "firstReceivedAt": "2026-10-10T09:52:07.741Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:nchmf:54290",
+      "title": "TIN DỰ BÁO MƯA LỚN Ở KHU VỰC TỪ PHÍA NAM TỈNH QUẢNG TRỊ ĐẾN THÀNH PHỐ ĐÀ NẴNG VÀ PHÍA ĐÔNG CÁC TỈNH TỪ QUẢNG NGÃI ĐẾN GIA LAI",
+      "sourceUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-du-bao-mua-lon-o-khu-vuc-tu-phia-nam-tinh-quang-tri-den-thanh-pho-da-nang-va-phia-dong-cac-tinh-tu-quang-ngai-den-gia-lai-post54290.html",
+      "raw": {
+        "listTimeText": "10/10/2026 15:30:00",
+        "bodyPublishText": "Tin phát lúc: 15h30",
+        "nextIssueText": "Tin phát tiếp theo lúc: 21h00 ngày 10/10",
+        "originalLevelText": "4. Cảnh báo cấp độ rủi ro thiên tai do mưa lớn, lốc, sét, mưa đá: cấp 1."
+      },
+      "originalRiskLevel": "cấp 1",
+      "officialSeverity": null,
+      "standardizedSeverity": "unmapped",
+      "alertState": "unknown",
+      "lifecycleStatus": "unknown",
+      "firstReceivedAt": "2026-10-10T09:52:07.741Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:nchmf:54546",
+      "title": "TIN CẢNH BÁO LŨ TRÊN CÁC SÔNG TỪ HÀ TĨNH ĐẾN THÀNH PHỐ HUẾ",
+      "sourceUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-tren-cac-song-tu-ha-tinh-den-thanh-pho-hue-post54546.html",
+      "raw": {
+        "listTimeText": "10/10/2026 15:30:00",
+        "bodyPublishText": "Tin phát lúc 15h30' ngày 10/10/2026",
+        "nextIssueText": null,
+        "originalLevelText": "Cảnh báo cấp độ rủi ro thiên tai do lũ: Cấp 1"
+      },
+      "originalRiskLevel": "Cấp 1",
+      "officialSeverity": null,
+      "standardizedSeverity": "unmapped",
+      "alertState": "unknown",
+      "lifecycleStatus": "unknown",
+      "firstReceivedAt": "2026-10-10T09:52:07.741Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:nchmf:54547",
+      "title": "TIN CẢNH BÁO LŨ TRÊN SÔNG ĐỒNG NAI",
+      "sourceUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-tren-song-dong-nai-post54547.html",
+      "raw": {
+        "listTimeText": "10/10/2026 15:31:19",
+        "bodyPublishText": "Tin phát lúc 15h30' ngày 10/10/2026",
+        "nextIssueText": null,
+        "originalLevelText": "Cảnh báo cấp độ rủi ro thiên tai do lũ: Cấp 1"
+      },
+      "originalRiskLevel": "Cấp 1",
+      "officialSeverity": null,
+      "standardizedSeverity": "unmapped",
+      "alertState": "unknown",
+      "lifecycleStatus": "unknown",
+      "firstReceivedAt": "2026-10-10T09:52:07.741Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:nchmf:54353",
+      "title": "TIN DỰ BÁO GIÓ MẠNH, SÓNG LỚN VÀ MƯA DÔNG TRÊN BIỂN",
+      "sourceUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-du-bao-gio-manh-song-lon-va-mua-dong-tren-bien-post54353.html",
+      "raw": {
+        "listTimeText": "10/10/2026 16:00:00",
+        "bodyPublishText": "Tin phát lúc: 16h00",
+        "nextIssueText": "Tin phát tiếp theo lúc: 04h00 ngày 11/10",
+        "originalLevelText": "4. Cấp độ rủi ro thiên tai trên biển: cấp 2."
+      },
+      "originalRiskLevel": "cấp 2",
+      "officialSeverity": null,
+      "standardizedSeverity": "unmapped",
+      "alertState": "unknown",
+      "lifecycleStatus": "unknown",
+      "firstReceivedAt": "2026-10-10T09:52:07.741Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:nchmf:54549",
+      "title": "TIN CẢNH BÁO LŨ QUÉT SẠT LỞ ĐẤT, SỤT LÚN ĐẤT DO MƯA LŨ HOẶC DÒNG CHẢY TRÊN KHU VỰC CÁC TỈNH/THÀNH PHỐ TỪ NGHỆ AN ĐẾN QUẢNG NGÃI",
+      "sourceUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-quet-sat-lo-dat-sut-lun-dat-do-mua-lu-hoac-dong-chay-tren-khu-vuc-cac-tinh-thanh-pho-tu-nghe-an-den-quang-ngai-post54549.html",
+      "raw": {
+        "listTimeText": "10/10/2026 16:27:01",
+        "bodyPublishText": null,
+        "nextIssueText": null,
+        "originalLevelText": null
+      },
+      "originalRiskLevel": null,
+      "officialSeverity": "not_provided",
+      "standardizedSeverity": "unmapped",
+      "alertState": "unknown",
+      "lifecycleStatus": "unknown",
+      "firstReceivedAt": "2026-10-10T09:52:07.741Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    }
+  ],
+  "scope": "real official site -> provider -> sync job -> isolated SQLite -> impact rule SERVICE layer; HTTP API + browser are covered by r1-5-nchmf-display.mjs"
+}

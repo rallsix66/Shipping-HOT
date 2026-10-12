@@ -1,0 +1,2282 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="profile" href="http://gmpg.org/xfn/11">
+
+	<script data-cfasync="false" data-no-defer="1" data-no-minify="1" data-no-optimize="1">var ewww_webp_supported=!1;function check_webp_feature(A,e){var w;e=void 0!==e?e:function(){},ewww_webp_supported?e(ewww_webp_supported):((w=new Image).onload=function(){ewww_webp_supported=0<w.width&&0<w.height,e&&e(ewww_webp_supported)},w.onerror=function(){e&&e(!1)},w.src="data:image/webp;base64,"+{alpha:"UklGRkoAAABXRUJQVlA4WAoAAAAQAAAAAAAAAAAAQUxQSAwAAAARBxAR/Q9ERP8DAABWUDggGAAAABQBAJ0BKgEAAQAAAP4AAA3AAP7mtQAAAA=="}[A])}check_webp_feature("alpha");</script><script data-cfasync="false" data-no-defer="1" data-no-minify="1" data-no-optimize="1">var Arrive=function(c,w){"use strict";if(c.MutationObserver&&"undefined"!=typeof HTMLElement){var r,a=0,u=(r=HTMLElement.prototype.matches||HTMLElement.prototype.webkitMatchesSelector||HTMLElement.prototype.mozMatchesSelector||HTMLElement.prototype.msMatchesSelector,{matchesSelector:function(e,t){return e instanceof HTMLElement&&r.call(e,t)},addMethod:function(e,t,r){var a=e[t];e[t]=function(){return r.length==arguments.length?r.apply(this,arguments):"function"==typeof a?a.apply(this,arguments):void 0}},callCallbacks:function(e,t){t&&t.options.onceOnly&&1==t.firedElems.length&&(e=[e[0]]);for(var r,a=0;r=e[a];a++)r&&r.callback&&r.callback.call(r.elem,r.elem);t&&t.options.onceOnly&&1==t.firedElems.length&&t.me.unbindEventWithSelectorAndCallback.call(t.target,t.selector,t.callback)},checkChildNodesRecursively:function(e,t,r,a){for(var i,n=0;i=e[n];n++)r(i,t,a)&&a.push({callback:t.callback,elem:i}),0<i.childNodes.length&&u.checkChildNodesRecursively(i.childNodes,t,r,a)},mergeArrays:function(e,t){var r,a={};for(r in e)e.hasOwnProperty(r)&&(a[r]=e[r]);for(r in t)t.hasOwnProperty(r)&&(a[r]=t[r]);return a},toElementsArray:function(e){return e=void 0!==e&&("number"!=typeof e.length||e===c)?[e]:e}}),e=(l.prototype.addEvent=function(e,t,r,a){a={target:e,selector:t,options:r,callback:a,firedElems:[]};return this._beforeAdding&&this._beforeAdding(a),this._eventsBucket.push(a),a},l.prototype.removeEvent=function(e){for(var t,r=this._eventsBucket.length-1;t=this._eventsBucket[r];r--)e(t)&&(this._beforeRemoving&&this._beforeRemoving(t),(t=this._eventsBucket.splice(r,1))&&t.length&&(t[0].callback=null))},l.prototype.beforeAdding=function(e){this._beforeAdding=e},l.prototype.beforeRemoving=function(e){this._beforeRemoving=e},l),t=function(i,n){var o=new e,l=this,s={fireOnAttributesModification:!1};return o.beforeAdding(function(t){var e=t.target;e!==c.document&&e!==c||(e=document.getElementsByTagName("html")[0]);var r=new MutationObserver(function(e){n.call(this,e,t)}),a=i(t.options);r.observe(e,a),t.observer=r,t.me=l}),o.beforeRemoving(function(e){e.observer.disconnect()}),this.bindEvent=function(e,t,r){t=u.mergeArrays(s,t);for(var a=u.toElementsArray(this),i=0;i<a.length;i++)o.addEvent(a[i],e,t,r)},this.unbindEvent=function(){var r=u.toElementsArray(this);o.removeEvent(function(e){for(var t=0;t<r.length;t++)if(this===w||e.target===r[t])return!0;return!1})},this.unbindEventWithSelectorOrCallback=function(r){var a=u.toElementsArray(this),i=r,e="function"==typeof r?function(e){for(var t=0;t<a.length;t++)if((this===w||e.target===a[t])&&e.callback===i)return!0;return!1}:function(e){for(var t=0;t<a.length;t++)if((this===w||e.target===a[t])&&e.selector===r)return!0;return!1};o.removeEvent(e)},this.unbindEventWithSelectorAndCallback=function(r,a){var i=u.toElementsArray(this);o.removeEvent(function(e){for(var t=0;t<i.length;t++)if((this===w||e.target===i[t])&&e.selector===r&&e.callback===a)return!0;return!1})},this},i=new function(){var s={fireOnAttributesModification:!1,onceOnly:!1,existing:!1};function n(e,t,r){return!(!u.matchesSelector(e,t.selector)||(e._id===w&&(e._id=a++),-1!=t.firedElems.indexOf(e._id)))&&(t.firedElems.push(e._id),!0)}var c=(i=new t(function(e){var t={attributes:!1,childList:!0,subtree:!0};return e.fireOnAttributesModification&&(t.attributes=!0),t},function(e,i){e.forEach(function(e){var t=e.addedNodes,r=e.target,a=[];null!==t&&0<t.length?u.checkChildNodesRecursively(t,i,n,a):"attributes"===e.type&&n(r,i)&&a.push({callback:i.callback,elem:r}),u.callCallbacks(a,i)})})).bindEvent;return i.bindEvent=function(e,t,r){t=void 0===r?(r=t,s):u.mergeArrays(s,t);var a=u.toElementsArray(this);if(t.existing){for(var i=[],n=0;n<a.length;n++)for(var o=a[n].querySelectorAll(e),l=0;l<o.length;l++)i.push({callback:r,elem:o[l]});if(t.onceOnly&&i.length)return r.call(i[0].elem,i[0].elem);setTimeout(u.callCallbacks,1,i)}c.call(this,e,t,r)},i},o=new function(){var a={};function i(e,t){return u.matchesSelector(e,t.selector)}var n=(o=new t(function(){return{childList:!0,subtree:!0}},function(e,r){e.forEach(function(e){var t=e.removedNodes,e=[];null!==t&&0<t.length&&u.checkChildNodesRecursively(t,r,i,e),u.callCallbacks(e,r)})})).bindEvent;return o.bindEvent=function(e,t,r){t=void 0===r?(r=t,a):u.mergeArrays(a,t),n.call(this,e,t,r)},o};d(HTMLElement.prototype),d(NodeList.prototype),d(HTMLCollection.prototype),d(HTMLDocument.prototype),d(Window.prototype);var n={};return s(i,n,"unbindAllArrive"),s(o,n,"unbindAllLeave"),n}function l(){this._eventsBucket=[],this._beforeAdding=null,this._beforeRemoving=null}function s(e,t,r){u.addMethod(t,r,e.unbindEvent),u.addMethod(t,r,e.unbindEventWithSelectorOrCallback),u.addMethod(t,r,e.unbindEventWithSelectorAndCallback)}function d(e){e.arrive=i.bindEvent,s(i,e,"unbindArrive"),e.leave=o.bindEvent,s(o,e,"unbindLeave")}}(window,void 0),ewww_webp_supported=!1;function check_webp_feature(e,t){var r;ewww_webp_supported?t(ewww_webp_supported):((r=new Image).onload=function(){ewww_webp_supported=0<r.width&&0<r.height,t(ewww_webp_supported)},r.onerror=function(){t(!1)},r.src="data:image/webp;base64,"+{alpha:"UklGRkoAAABXRUJQVlA4WAoAAAAQAAAAAAAAAAAAQUxQSAwAAAARBxAR/Q9ERP8DAABWUDggGAAAABQBAJ0BKgEAAQAAAP4AAA3AAP7mtQAAAA==",animation:"UklGRlIAAABXRUJQVlA4WAoAAAASAAAAAAAAAAAAQU5JTQYAAAD/////AABBTk1GJgAAAAAAAAAAAAAAAAAAAGQAAABWUDhMDQAAAC8AAAAQBxAREYiI/gcA"}[e])}function ewwwLoadImages(e){if(e){for(var t=document.querySelectorAll(".batch-image img, .image-wrapper a, .ngg-pro-masonry-item a, .ngg-galleria-offscreen-seo-wrapper a"),r=0,a=t.length;r<a;r++)ewwwAttr(t[r],"data-src",t[r].getAttribute("data-webp")),ewwwAttr(t[r],"data-thumbnail",t[r].getAttribute("data-webp-thumbnail"));for(var i=document.querySelectorAll("div.woocommerce-product-gallery__image"),r=0,a=i.length;r<a;r++)ewwwAttr(i[r],"data-thumb",i[r].getAttribute("data-webp-thumb"))}for(var n=document.querySelectorAll("video"),r=0,a=n.length;r<a;r++)ewwwAttr(n[r],"poster",e?n[r].getAttribute("data-poster-webp"):n[r].getAttribute("data-poster-image"));for(var o,l=document.querySelectorAll("img.ewww_webp_lazy_load"),r=0,a=l.length;r<a;r++)e&&(ewwwAttr(l[r],"data-lazy-srcset",l[r].getAttribute("data-lazy-srcset-webp")),ewwwAttr(l[r],"data-srcset",l[r].getAttribute("data-srcset-webp")),ewwwAttr(l[r],"data-lazy-src",l[r].getAttribute("data-lazy-src-webp")),ewwwAttr(l[r],"data-src",l[r].getAttribute("data-src-webp")),ewwwAttr(l[r],"data-orig-file",l[r].getAttribute("data-webp-orig-file")),ewwwAttr(l[r],"data-medium-file",l[r].getAttribute("data-webp-medium-file")),ewwwAttr(l[r],"data-large-file",l[r].getAttribute("data-webp-large-file")),null!=(o=l[r].getAttribute("srcset"))&&!1!==o&&o.includes("R0lGOD")&&ewwwAttr(l[r],"src",l[r].getAttribute("data-lazy-src-webp"))),l[r].className=l[r].className.replace(/\bewww_webp_lazy_load\b/,"");for(var s=document.querySelectorAll(".ewww_webp"),r=0,a=s.length;r<a;r++)e?(ewwwAttr(s[r],"srcset",s[r].getAttribute("data-srcset-webp")),ewwwAttr(s[r],"src",s[r].getAttribute("data-src-webp")),ewwwAttr(s[r],"data-orig-file",s[r].getAttribute("data-webp-orig-file")),ewwwAttr(s[r],"data-medium-file",s[r].getAttribute("data-webp-medium-file")),ewwwAttr(s[r],"data-large-file",s[r].getAttribute("data-webp-large-file")),ewwwAttr(s[r],"data-large_image",s[r].getAttribute("data-webp-large_image")),ewwwAttr(s[r],"data-src",s[r].getAttribute("data-webp-src"))):(ewwwAttr(s[r],"srcset",s[r].getAttribute("data-srcset-img")),ewwwAttr(s[r],"src",s[r].getAttribute("data-src-img"))),s[r].className=s[r].className.replace(/\bewww_webp\b/,"ewww_webp_loaded");window.jQuery&&jQuery.fn.isotope&&jQuery.fn.imagesLoaded&&(jQuery(".fusion-posts-container-infinite").imagesLoaded(function(){jQuery(".fusion-posts-container-infinite").hasClass("isotope")&&jQuery(".fusion-posts-container-infinite").isotope()}),jQuery(".fusion-portfolio:not(.fusion-recent-works) .fusion-portfolio-wrapper").imagesLoaded(function(){jQuery(".fusion-portfolio:not(.fusion-recent-works) .fusion-portfolio-wrapper").isotope()}))}function ewwwWebPInit(e){ewwwLoadImages(e),ewwwNggLoadGalleries(e),document.arrive(".ewww_webp",function(){ewwwLoadImages(e)}),document.arrive(".ewww_webp_lazy_load",function(){ewwwLoadImages(e)}),document.arrive("videos",function(){ewwwLoadImages(e)}),"loading"==document.readyState?document.addEventListener("DOMContentLoaded",ewwwJSONParserInit):("undefined"!=typeof galleries&&ewwwNggParseGalleries(e),ewwwWooParseVariations(e))}function ewwwAttr(e,t,r){null!=r&&!1!==r&&e.setAttribute(t,r)}function ewwwJSONParserInit(){"undefined"!=typeof galleries&&check_webp_feature("alpha",ewwwNggParseGalleries),check_webp_feature("alpha",ewwwWooParseVariations)}function ewwwWooParseVariations(e){if(e)for(var t=document.querySelectorAll("form.variations_form"),r=0,a=t.length;r<a;r++){var i=t[r].getAttribute("data-product_variations"),n=!1;try{for(var o in i=JSON.parse(i))void 0!==i[o]&&void 0!==i[o].image&&(void 0!==i[o].image.src_webp&&(i[o].image.src=i[o].image.src_webp,n=!0),void 0!==i[o].image.srcset_webp&&(i[o].image.srcset=i[o].image.srcset_webp,n=!0),void 0!==i[o].image.full_src_webp&&(i[o].image.full_src=i[o].image.full_src_webp,n=!0),void 0!==i[o].image.gallery_thumbnail_src_webp&&(i[o].image.gallery_thumbnail_src=i[o].image.gallery_thumbnail_src_webp,n=!0),void 0!==i[o].image.thumb_src_webp&&(i[o].image.thumb_src=i[o].image.thumb_src_webp,n=!0));n&&ewwwAttr(t[r],"data-product_variations",JSON.stringify(i))}catch(e){}}}function ewwwNggParseGalleries(e){if(e)for(var t in galleries){var r=galleries[t];galleries[t].images_list=ewwwNggParseImageList(r.images_list)}}function ewwwNggLoadGalleries(e){e&&document.addEventListener("ngg.galleria.themeadded",function(e,t){window.ngg_galleria._create_backup=window.ngg_galleria.create,window.ngg_galleria.create=function(e,t){var r=$(e).data("id");return galleries["gallery_"+r].images_list=ewwwNggParseImageList(galleries["gallery_"+r].images_list),window.ngg_galleria._create_backup(e,t)}})}function ewwwNggParseImageList(e){for(var t in e){var r=e[t];if(void 0!==r["image-webp"]&&(e[t].image=r["image-webp"],delete e[t]["image-webp"]),void 0!==r["thumb-webp"]&&(e[t].thumb=r["thumb-webp"],delete e[t]["thumb-webp"]),void 0!==r.full_image_webp&&(e[t].full_image=r.full_image_webp,delete e[t].full_image_webp),void 0!==r.srcsets)for(var a in r.srcsets)nggSrcset=r.srcsets[a],void 0!==r.srcsets[a+"-webp"]&&(e[t].srcsets[a]=r.srcsets[a+"-webp"],delete e[t].srcsets[a+"-webp"]);if(void 0!==r.full_srcsets)for(var i in r.full_srcsets)nggFSrcset=r.full_srcsets[i],void 0!==r.full_srcsets[i+"-webp"]&&(e[t].full_srcsets[i]=r.full_srcsets[i+"-webp"],delete e[t].full_srcsets[i+"-webp"])}return e}check_webp_feature("alpha",ewwwWebPInit);</script><meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' />
+
+	<!-- This site is optimized with the Yoast SEO plugin v28.5 - https://yoast.com/product/yoast-seo-wordpress/ -->
+	<title>Super typhoon hobbles PH supply chain - PortCalls Asia</title>
+	<link rel="canonical" href="https://portcalls.com/super-typhoon-hobbles-ph-supply-chain/" />
+	<meta property="og:locale" content="en_US" />
+	<meta property="og:type" content="article" />
+	<meta property="og:title" content="Super typhoon hobbles PH supply chain - PortCalls Asia" />
+	<meta property="og:description" content="SUPER typhoon Yolanda (international name Haiyan) which ripped through central Philippines on&hellip;" />
+	<meta property="og:url" content="https://portcalls.com/super-typhoon-hobbles-ph-supply-chain/" />
+	<meta property="og:site_name" content="PortCalls Asia" />
+	<meta property="article:publisher" content="https://www.facebook.com/PortCalls.Asia" />
+	<meta property="article:published_time" content="2013-11-08T09:31:38+00:00" />
+	<meta property="article:modified_time" content="2013-11-09T07:27:44+00:00" />
+	<meta property="og:image" content="https://portcalls.com/wp-content/uploads/2013/11/MAP_PH.jpg" />
+	<meta property="og:image:width" content="386" />
+	<meta property="og:image:height" content="590" />
+	<meta property="og:image:type" content="image/jpeg" />
+	<meta name="author" content="Web Publisher" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:label1" content="Written by" />
+	<meta name="twitter:data1" content="Web Publisher" />
+	<meta name="twitter:label2" content="Est. reading time" />
+	<meta name="twitter:data2" content="4 minutes" />
+	<script type="application/ld+json" class="yoast-schema-graph">{"@context":"https:\/\/schema.org","@graph":[{"@type":"Article","@id":"https:\/\/portcalls.com\/super-typhoon-hobbles-ph-supply-chain\/#article","isPartOf":{"@id":"https:\/\/portcalls.com\/super-typhoon-hobbles-ph-supply-chain\/"},"author":{"name":"Web Publisher","@id":"https:\/\/portcalls.com\/#\/schema\/person\/7af63bc1b36636c350918422c483c1a1"},"headline":"Super typhoon hobbles PH supply chain","datePublished":"2013-11-08T09:31:38+00:00","dateModified":"2013-11-09T07:27:44+00:00","mainEntityOfPage":{"@id":"https:\/\/portcalls.com\/super-typhoon-hobbles-ph-supply-chain\/"},"wordCount":769,"publisher":{"@id":"https:\/\/portcalls.com\/#organization"},"image":{"@id":"https:\/\/portcalls.com\/super-typhoon-hobbles-ph-supply-chain\/#primaryimage"},"thumbnailUrl":"https:\/\/portcalls.com\/wp-content\/uploads\/2013\/11\/MAP_PH.jpg","keywords":["Asian Terminals Inc","Manila North Harbour Port Inc CEO Richard Barclay","MICT general manager Christian Gonzalez","Supply Chain Management Association of the Philippines (SCMAP) president Arnel Gamboa","Typhoon Yolanda","Typhoon Yolanda effect on sea and air ports"],"articleSection":["Aviation","Breaking News","Customs &amp; Trade","Maritime","Ports\/Terminals"],"inLanguage":"en-US"},{"@type":"WebPage","@id":"https:\/\/portcalls.com\/super-typhoon-hobbles-ph-supply-chain\/","url":"https:\/\/portcalls.com\/super-typhoon-hobbles-ph-supply-chain\/","name":"Super typhoon hobbles PH supply chain - PortCalls Asia","isPartOf":{"@id":"https:\/\/portcalls.com\/#website"},"primaryImageOfPage":{"@id":"https:\/\/portcalls.com\/super-typhoon-hobbles-ph-supply-chain\/#primaryimage"},"image":{"@id":"https:\/\/portcalls.com\/super-typhoon-hobbles-ph-supply-chain\/#primaryimage"},"thumbnailUrl":"https:\/\/portcalls.com\/wp-content\/uploads\/2013\/11\/MAP_PH.jpg","datePublished":"2013-11-08T09:31:38+00:00","dateModified":"2013-11-09T07:27:44+00:00","inLanguage":"en-US","potentialAction":[{"@type":"ReadAction","target":["https:\/\/portcalls.com\/super-typhoon-hobbles-ph-supply-chain\/"]}]},{"@type":"ImageObject","inLanguage":"en-US","@id":"https:\/\/portcalls.com\/super-typhoon-hobbles-ph-supply-chain\/#primaryimage","url":"https:\/\/portcalls.com\/wp-content\/uploads\/2013\/11\/MAP_PH.jpg","contentUrl":"https:\/\/portcalls.com\/wp-content\/uploads\/2013\/11\/MAP_PH.jpg","width":386,"height":590},{"@type":"WebSite","@id":"https:\/\/portcalls.com\/#website","url":"https:\/\/portcalls.com\/","name":"PortCalls Asia","description":"News provider for the cargo shipping and logistics industries","publisher":{"@id":"https:\/\/portcalls.com\/#organization"},"potentialAction":[{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https:\/\/portcalls.com\/?s={search_term_string}"},"query-input":{"@type":"PropertyValueSpecification","valueRequired":true,"valueName":"search_term_string"}}],"inLanguage":"en-US"},{"@type":"Organization","@id":"https:\/\/portcalls.com\/#organization","name":"PortCalls Asia","url":"https:\/\/portcalls.com\/","logo":{"@type":"ImageObject","inLanguage":"en-US","@id":"https:\/\/portcalls.com\/#\/schema\/logo\/image\/","url":"https:\/\/portcalls.com\/wp-content\/uploads\/2021\/01\/portcalls-asia-logo-footer.png","contentUrl":"https:\/\/portcalls.com\/wp-content\/uploads\/2021\/01\/portcalls-asia-logo-footer.png","width":600,"height":162,"caption":"PortCalls Asia"},"image":{"@id":"https:\/\/portcalls.com\/#\/schema\/logo\/image\/"},"sameAs":["https:\/\/www.facebook.com\/PortCalls.Asia"]},{"@type":"Person","@id":"https:\/\/portcalls.com\/#\/schema\/person\/7af63bc1b36636c350918422c483c1a1","name":"Web Publisher","image":{"@type":"ImageObject","inLanguage":"en-US","@id":"https:\/\/secure.gravatar.com\/avatar\/e4c113ae935f3edbd997e96e0d858defebbed3ab7d16ab864a84ed77caf71c9b?s=96&d=mm&r=g","url":"https:\/\/secure.gravatar.com\/avatar\/e4c113ae935f3edbd997e96e0d858defebbed3ab7d16ab864a84ed77caf71c9b?s=96&d=mm&r=g","contentUrl":"https:\/\/secure.gravatar.com\/avatar\/e4c113ae935f3edbd997e96e0d858defebbed3ab7d16ab864a84ed77caf71c9b?s=96&d=mm&r=g","caption":"Web Publisher"},"url":"https:\/\/portcalls.com\/author\/liza\/"}]}</script>
+	<!-- / Yoast SEO plugin. -->
+
+
+<link rel='dns-prefetch' href='//hcaptcha.com' />
+<link rel="alternate" type="application/rss+xml" title="PortCalls Asia &raquo; Feed" href="https://portcalls.com/feed/" />
+<style id="wp-img-auto-sizes-contain-inline-css">
+img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
+/*# sourceURL=wp-img-auto-sizes-contain-inline-css */
+</style>
+<link rel='alternate stylesheet' id='powerkit-icons-css' href='https://portcalls.com/wp-content/plugins/powerkit/assets/fonts/powerkit-icons.woff?ver=3.1.1' as='font' type='font/wof' crossorigin />
+<link rel='stylesheet' id='powerkit-css' href='https://portcalls.com/wp-content/plugins/powerkit/assets/css/powerkit.css?ver=3.1.1' media='all' />
+<style id="wp-block-library-inline-css">
+:root{--wp-block-synced-color:#7a00df;--wp-block-synced-color--rgb:122,0,223;--wp-bound-block-color:var(--wp-block-synced-color);--wp-editor-canvas-background:#ddd;--wp-admin-theme-color:#007cba;--wp-admin-theme-color--rgb:0,124,186;--wp-admin-theme-color-darker-10:#006ba1;--wp-admin-theme-color-darker-10--rgb:0,107,160.5;--wp-admin-theme-color-darker-20:#005a87;--wp-admin-theme-color-darker-20--rgb:0,90,135;--wp-admin-border-width-focus:2px}@media (min-resolution:192dpi){:root{--wp-admin-border-width-focus:1.5px}}.wp-element-button{cursor:pointer}:root .has-very-light-gray-background-color{background-color:#eee}:root .has-very-dark-gray-background-color{background-color:#313131}:root .has-very-light-gray-color{color:#eee}:root .has-very-dark-gray-color{color:#313131}:root .has-vivid-green-cyan-to-vivid-cyan-blue-gradient-background{background:linear-gradient(135deg,#00d084,#0693e3)}:root .has-purple-crush-gradient-background{background:linear-gradient(135deg,#34e2e4,#4721fb 50%,#ab1dfe)}:root .has-hazy-dawn-gradient-background{background:linear-gradient(135deg,#faaca8,#dad0ec)}:root .has-subdued-olive-gradient-background{background:linear-gradient(135deg,#fafae1,#67a671)}:root .has-atomic-cream-gradient-background{background:linear-gradient(135deg,#fdd79a,#004a59)}:root .has-nightshade-gradient-background{background:linear-gradient(135deg,#330968,#31cdcf)}:root .has-midnight-gradient-background{background:linear-gradient(135deg,#020381,#2874fc)}:root{--wp--preset--font-size--normal:16px;--wp--preset--font-size--huge:42px}.has-regular-font-size{font-size:1em}.has-larger-font-size{font-size:2.625em}.has-normal-font-size{font-size:var(--wp--preset--font-size--normal)}.has-huge-font-size{font-size:var(--wp--preset--font-size--huge)}:root .has-text-align-center{text-align:center}:root .has-text-align-left{text-align:left}:root .has-text-align-right{text-align:right}.has-fit-text{white-space:nowrap!important}#end-resizable-editor-section{display:none}.aligncenter{clear:both}.items-justified-left{justify-content:flex-start}.items-justified-center{justify-content:center}.items-justified-right{justify-content:flex-end}.items-justified-space-between{justify-content:space-between}.screen-reader-text{word-wrap:normal!important;border:0;clip-path:inset(50%);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px;word-break:normal!important}.screen-reader-text:focus{background-color:#ddd;clip-path:none;color:#444;display:block;font-size:1em;height:auto;left:5px;line-height:normal;padding:15px 23px 14px;text-decoration:none;top:5px;width:auto;z-index:100000}html :where(.has-border-color){border-style:solid}html :where([style^=border-color],[style*=";border-color"],[style*="; border-color"]){border-style:solid}html :where([style^=border-top-color],[style*=";border-top-color"],[style*="; border-top-color"]){border-top-style:solid}html :where([style^=border-right-color],[style*=";border-right-color"],[style*="; border-right-color"]){border-right-style:solid}html :where([style^=border-bottom-color],[style*=";border-bottom-color"],[style*="; border-bottom-color"]){border-bottom-style:solid}html :where([style^=border-left-color],[style*=";border-left-color"],[style*="; border-left-color"]){border-left-style:solid}html :where([style^=border-width],[style*=";border-width"],[style*="; border-width"]){border-style:solid}html :where([style^=border-top-width],[style*=";border-top-width"],[style*="; border-top-width"]){border-top-style:solid}html :where([style^=border-right-width],[style*=";border-right-width"],[style*="; border-right-width"]){border-right-style:solid}html :where([style^=border-bottom-width],[style*=";border-bottom-width"],[style*="; border-bottom-width"]){border-bottom-style:solid}html :where([style^=border-left-width],[style*=";border-left-width"],[style*="; border-left-width"]){border-left-style:solid}html :where(img[class*=wp-image-]){height:auto;max-width:100%}:where(figure){margin:0 0 1em}html :where(.is-position-sticky){--wp-admin--admin-bar--position-offset:var(--wp-admin--admin-bar--height,0px)}@media screen and (max-width:600px){html :where(.is-position-sticky){--wp-admin--admin-bar--position-offset:0px}}
+
+/*# sourceURL=/wp-includes/css/dist/block-library/common.min.css */
+</style>
+<style id="classic-theme-styles-inline-css">
+/*! This file is auto-generated */
+.wp-block-button__link{color:#fff;background-color:#32373c;border-radius:9999px;box-shadow:none;text-decoration:none;padding:calc(.667em + 2px) calc(1.333em + 2px);font-size:1.125em}.wp-block-file__button{background:#32373c;color:#fff;text-decoration:none}
+/*# sourceURL=/wp-includes/css/classic-themes.min.css */
+</style>
+
+<style id="global-styles-inline-css">
+:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgb(6,147,227) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgb(252,185,0) 0%,rgb(255,105,0) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgb(255,105,0) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgb(255, 255, 255), 6px 6px rgb(0, 0, 0);--wp--preset--shadow--crisp: 6px 6px 0px rgb(0, 0, 0);}.wp-block-button{--wp--preset--dimension--25: 25%;--wp--preset--dimension--50: 50%;--wp--preset--dimension--75: 75%;--wp--preset--dimension--100: 100%;}:where(body) { margin: 0; }:where(.is-layout-flex){gap: 0.5em;}:where(.is-layout-grid){gap: 0.5em;}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}body{padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;}:root :where(.wp-element-button, .wp-block-button__link){background-color: #32373c;border-width: 0;color: #fff;font-family: inherit;font-size: inherit;font-style: inherit;font-weight: inherit;letter-spacing: inherit;line-height: inherit;padding-top: calc(0.667em + 2px);padding-right: calc(1.333em + 2px);padding-bottom: calc(0.667em + 2px);padding-left: calc(1.333em + 2px);text-decoration: none;text-transform: inherit;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+/*# sourceURL=global-styles-inline-css */
+</style>
+
+<link rel='stylesheet' id='cookie-law-info-css' href='https://portcalls.com/wp-content/plugins/cookie-law-info/legacy/public/css/cookie-law-info-public.css?ver=3.5.6' media='all' />
+<link rel='stylesheet' id='cookie-law-info-gdpr-css' href='https://portcalls.com/wp-content/plugins/cookie-law-info/legacy/public/css/cookie-law-info-gdpr.css?ver=3.5.6' media='all' />
+<link rel='stylesheet' id='powerkit-author-box-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/author-box/public/css/public-powerkit-author-box.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-basic-elements-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/basic-elements/public/css/public-powerkit-basic-elements.css?ver=3.1.1' media='screen' />
+<link rel='stylesheet' id='powerkit-content-formatting-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/content-formatting/public/css/public-powerkit-content-formatting.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-сontributors-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/contributors/public/css/public-powerkit-contributors.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-facebook-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/facebook/public/css/public-powerkit-facebook.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-featured-categories-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/featured-categories/public/css/public-powerkit-featured-categories.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-inline-posts-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/inline-posts/public/css/public-powerkit-inline-posts.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-instagram-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/instagram/public/css/public-powerkit-instagram.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-justified-gallery-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/justified-gallery/public/css/public-powerkit-justified-gallery.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='glightbox-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/lightbox/public/css/glightbox.min.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-lightbox-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/lightbox/public/css/public-powerkit-lightbox.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-opt-in-forms-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/opt-in-forms/public/css/public-powerkit-opt-in-forms.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-pinterest-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/pinterest/public/css/public-powerkit-pinterest.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-scroll-to-top-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/scroll-to-top/public/css/public-powerkit-scroll-to-top.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-share-buttons-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/share-buttons/public/css/public-powerkit-share-buttons.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-slider-gallery-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/slider-gallery/public/css/public-powerkit-slider-gallery.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-social-links-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/social-links/public/css/public-powerkit-social-links.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-table-of-contents-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/table-of-contents/public/css/public-powerkit-table-of-contents.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-twitter-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/twitter/public/css/public-powerkit-twitter.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='powerkit-widget-about-css' href='https://portcalls.com/wp-content/plugins/powerkit/modules/widget-about/public/css/public-powerkit-widget-about.css?ver=3.1.1' media='all' />
+<link rel='stylesheet' id='csco-styles-css' href='https://portcalls.com/wp-content/themes/spotlight/style.css?ver=1.0.0' media='all' />
+<link rel='stylesheet' id='csco_child_css-css' href='https://portcalls.com/wp-content/themes/spotlight-child/style.css?ver=1.0.0' media='all' />
+<script id="jquery-core-js" src="https://portcalls.com/wp-includes/js/jquery/jquery.min.js?ver=3.7.1"></script>
+<script id="jquery-migrate-js" src="https://portcalls.com/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.4.1"></script>
+<script id="cookie-law-info-js-extra">
+var Cli_Data = {"nn_cookie_ids":[],"cookielist":[],"non_necessary_cookies":[],"ccpaEnabled":"","ccpaRegionBased":"","ccpaBarEnabled":"","strictlyEnabled":["necessary","obligatoire"],"ccpaType":"gdpr","js_blocking":"","custom_integration":"","triggerDomRefresh":"","secure_cookies":""};
+var cli_cookiebar_settings = {"animate_speed_hide":"500","animate_speed_show":"500","background":"#fff","border":"#444","border_on":"","button_1_button_colour":"#dd3333","button_1_button_hover":"#b12929","button_1_link_colour":"#fff","button_1_as_button":"1","button_1_new_win":"","button_2_button_colour":"#333","button_2_button_hover":"#292929","button_2_link_colour":"#444","button_2_as_button":"","button_2_hidebar":"1","button_3_button_colour":"#000","button_3_button_hover":"#000000","button_3_link_colour":"#fff","button_3_as_button":"1","button_3_new_win":"","button_4_button_colour":"#000","button_4_button_hover":"#000000","button_4_link_colour":"#fff","button_4_as_button":"1","button_7_button_colour":"#61a229","button_7_button_hover":"#4e8221","button_7_link_colour":"#fff","button_7_as_button":"1","button_7_new_win":"","font_family":"inherit","header_fix":"","notify_animate_hide":"1","notify_animate_show":"","notify_div_id":"#cookie-law-info-bar","notify_position_horizontal":"right","notify_position_vertical":"bottom","scroll_close":"","scroll_close_reload":"","accept_close_reload":"","reject_close_reload":"","showagain_tab":"1","showagain_background":"#fff","showagain_border":"#000","showagain_div_id":"#cookie-law-info-again","showagain_x_position":"100px","text":"#000","show_once_yn":"","show_once":"10000","logging_on":"","as_popup":"","popup_overlay":"1","bar_heading_text":"","cookie_bar_as":"banner","popup_showagain_position":"bottom-right","widget_position":"left"};
+var log_object = {"ajax_url":"https://portcalls.com/wp-admin/admin-ajax.php"};
+//# sourceURL=cookie-law-info-js-extra
+</script>
+<script id="cookie-law-info-js" src="https://portcalls.com/wp-content/plugins/cookie-law-info/legacy/public/js/cookie-law-info-public.js?ver=3.5.6"></script>
+<link rel="https://api.w.org/" href="https://portcalls.com/wp-json/" /><link rel="alternate" title="JSON" type="application/json" href="https://portcalls.com/wp-json/wp/v2/posts/20447" /><meta name="generator" content="WordPress 7.1.3" />
+<style>
+.h-captcha{position:relative;display:block;margin-bottom:2rem;padding:0;clear:both}.h-captcha[data-size="normal"]{width:302px;height:76px}.h-captcha[data-size="compact"]{width:158px;height:138px}.h-captcha[data-size="invisible"]{display:none}.h-captcha iframe{z-index:1}.h-captcha::before{content:"";display:block;position:absolute;top:0;left:0;background:url(https://portcalls.com/wp-content/plugins/hcaptcha-for-forms-and-more/assets/images/hcaptcha-div-logo.svg) no-repeat;border:1px solid #fff0;border-radius:4px;box-sizing:border-box}.h-captcha::after{content:"If you see this message, hCaptcha failed to load due to site errors.";font-family:-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,"Helvetica Neue",Arial,sans-serif;font-size:10px;font-weight:500;position:absolute;top:0;bottom:0;left:0;right:0;box-sizing:border-box;color:#bf1722;opacity:0}.h-captcha.hcaptcha-api-delayed::after{content:"The hCaptcha loading is delayed until user interaction with the form.";color:#555}.h-captcha:not(:has(iframe))::after{animation:hcap-msg-fade-in .3s ease forwards;animation-delay:2s}.h-captcha.hcaptcha-api-delayed:not(:has(iframe))::after{animation-delay:0s}.h-captcha:has(iframe)::after{animation:none;opacity:0}@keyframes hcap-msg-fade-in{to{opacity:1}}.h-captcha[data-size="normal"]::before{width:302px;height:76px;background-position:93.8% 28%}.h-captcha[data-size="normal"]::after{width:302px;height:76px;display:flex;flex-wrap:wrap;align-content:center;line-height:normal;padding:0 75px 0 10px}.h-captcha[data-size="compact"]::before{width:158px;height:138px;background-position:49.9% 78.8%}.h-captcha[data-size="compact"]::after{width:158px;height:138px;text-align:center;line-height:normal;padding:24px 10px 10px 10px}.h-captcha[data-theme="light"]::before,body.is-light-theme .h-captcha[data-theme="auto"]::before,.h-captcha[data-theme="auto"]::before{background-color:#fafafa;border:1px solid #e0e0e0}.h-captcha[data-theme="dark"]::before,body.is-dark-theme .h-captcha[data-theme="auto"]::before,html.wp-dark-mode-active .h-captcha[data-theme="auto"]::before,html.drdt-dark-mode .h-captcha[data-theme="auto"]::before{background-image:url(https://portcalls.com/wp-content/plugins/hcaptcha-for-forms-and-more/assets/images/hcaptcha-div-logo-white.svg);background-repeat:no-repeat;background-color:#333;border:1px solid #f5f5f5}@media (prefers-color-scheme:dark){.h-captcha[data-theme="auto"]::before{background-image:url(https://portcalls.com/wp-content/plugins/hcaptcha-for-forms-and-more/assets/images/hcaptcha-div-logo-white.svg);background-repeat:no-repeat;background-color:#333;border:1px solid #f5f5f5}}.h-captcha[data-theme="custom"]::before{background-color:initial}.h-captcha[data-size="invisible"]::before,.h-captcha[data-size="invisible"]::after{display:none}.h-captcha iframe{position:relative}div[style*="z-index: 2147483647"] div[style*="border-width: 11px"][style*="position: absolute"][style*="pointer-events: none"]{border-style:none}
+</style>
+<meta name="og:url" content="https://portcalls.com/super-typhoon-hobbles-ph-supply-chain/" /><noscript><style>.lazyload[data-src]{display:none !important;}</style></noscript><style>.lazyload{background-image:none !important;}.lazyload:before{background-image:none !important;}</style><style>.wp-block-gallery.is-cropped .blocks-gallery-item picture{height:100%;width:100%;}</style><style>
+span[data-name="hcap-cf7"] .h-captcha{margin-bottom:0}span[data-name="hcap-cf7"]~input[type="submit"],span[data-name="hcap-cf7"]~button[type="submit"]{margin-top:2rem}
+</style>
+<link rel="icon" href="https://portcalls.com/wp-content/uploads/2026/08/portcalls-logo-250-48x48.png" sizes="32x32" />
+<link rel="icon" href="https://portcalls.com/wp-content/uploads/2026/08/portcalls-logo-250.png" sizes="192x192" />
+<link rel="apple-touch-icon" href="https://portcalls.com/wp-content/uploads/2026/08/portcalls-logo-250.png" />
+<meta name="msapplication-TileImage" content="https://portcalls.com/wp-content/uploads/2026/08/portcalls-logo-250.png" />
+<style id="wp-custom-css">
+.cs-featured-posts article .post-wrap {border-bottom: 1px solid #878787;}
+
+	.featured-categories {
+    & .article-column {
+        article {
+            border-bottom: 1px solid #d3d3d3;
+			}
+    }
+}
+
+	.featured-categories {
+    & .article-column {
+        article.post:nth-of-type(3) {
+            border-bottom: none
+			}
+    }
+}
+
+
+.home .archive-main.col-2 > article {
+    padding-right: 8px;
+    border-top: 1px solid #878787;
+}
+
+@media (min-width: 1020px) {
+    .entry-single-header .entry-title {
+        font-size: 2.75rem;
+    }
+	.cs-featured-posts .post-meta {
+		margin-top: 0;
+	}
+	.cs-featured-posts article:last-child .post-wrap {
+	border-bottom: none;
+}
+}
+
+.entry-header .entry-inline-meta .post-categories a {
+		color: #000000 !important;
+    font-size: 1rem;
+		text-transform: uppercase;
+}
+
+.wp-caption .wp-caption-text {
+    margin: .25rem 0;
+}
+
+figcaption {
+    color: #000000 !important;
+}	
+
+.article-column {
+	padding-top: 40px !important;
+}
+
+section.featured-categories {
+	padding-top: 0 !important;
+}
+
+.post-meta {color:#6c757d}
+
+/*
+.pk-widget-posts .pk-post-number {
+	position: relative;
+	justify-content: left;
+	color: #dd3333;
+	font-size: 2rem;
+	font-weight: 700;
+	font-style: italic;
+	background: none !important;
+	margin-right: 1rem;
+}*/
+
+.pk-widget-posts .pk-post-number {
+    color: red;
+    font-weight: 700;
+    font-size: 1.7em;
+    font-style: italic;
+    background: #000000 !important;
+    padding-bottom: 1px;
+}
+
+.pk-widget-posts .pk-post-data .post-meta {
+    margin-top: 0.2rem;
+}
+
+@media (min-width: 600px) {
+    .featured-categories {
+        .article-column:nth-child(1),.article-column:nth-child(2), .article-column:nth-child(4), .article-column:nth-child(5), .article-column:nth-child(7), .article-column:nth-child(8) {
+            padding-right: 1rem;
+            border-right: 1px solid #d3d3d3;
+        }
+}
+</style>
+<style id="kirki-inline-styles">a:hover, .entry-content a, .must-log-in a, blockquote:before, .cs-bg-dark .footer-title, .cs-bg-dark .pk-social-links-scheme-bold:not(.pk-social-links-scheme-light-rounded) .pk-social-links-link .pk-social-links-icon{color:#dd3333;}.wp-block-button .wp-block-button__link:not(.has-background), button, .button, input[type="button"], input[type="reset"], input[type="submit"], .cs-bg-dark .pk-social-links-scheme-light-rounded .pk-social-links-link:hover .pk-social-links-icon, article .cs-overlay .post-categories a:hover, .post-format-icon > a:hover, .cs-list-articles > li > a:hover:before, .pk-bg-primary, .pk-button-primary, .pk-badge-primary, h2.pk-heading-numbered:before, .pk-post-item .pk-post-thumbnail a:hover .pk-post-number, .post-comments-show button{background-color:#dd3333;}.editor-styles-wrapper a{color:#dd3333;}.editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-button .wp-block-button__link:not(.has-background){background-color:#dd3333;}.pk-bg-overlay, .pk-zoom-icon-popup:after{background-color:rgba(10,10,10,0.56);}.navbar-primary, .header-default .offcanvas-header{background-color:#0a0a0a;}.navbar-nav .sub-menu, .navbar-nav .cs-mega-menu-has-categories .cs-mm-categories, .navbar-primary .navbar-dropdown-container{background-color:#1c1e21;}.navbar-nav > li.menu-item-has-children > .sub-menu:after, .navbar-primary .navbar-dropdown-container:after{border-bottom-color:#1c1e21;}.site-footer{background-color:#000000;}body{font-family:IBM Plex Sans;font-size:1rem;font-weight:400;letter-spacing:0px;}.editor-styles-wrapper.cs-editor-styles-wrapper{font-family:IBM Plex Sans;font-size:1rem;font-weight:400;letter-spacing:0px;}.cs-font-primary, button, .button, input[type="button"], input[type="reset"], input[type="submit"], .no-comments, .text-action, .cs-link-more, .share-total, .nav-links, .comment-reply-link, .post-tags a, .post-sidebar-tags a, .tagcloud a, .read-more, .navigation.pagination .nav-links > span, .navigation.pagination .nav-links > a, .pk-font-primary, .navbar-dropdown-btn-follow{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;font-size:0.75rem;font-weight:700;text-transform:uppercase;}label, .cs-font-secondary, .post-meta, .archive-count, .page-subtitle, .site-description, figcaption, .wp-block-image figcaption, .wp-block-audio figcaption, .wp-block-embed figcaption, .wp-block-pullquote cite, .wp-block-pullquote footer, .wp-block-pullquote .wp-block-pullquote__citation, .wp-block-quote cite, .post-format-icon, .comment-metadata, .says, .logged-in-as, .must-log-in, .wp-caption-text, .widget_rss ul li .rss-date, blockquote cite, div[class*="meta-"], span[class*="meta-"], small, .post-sidebar-shares .total-shares, .cs-breadcrumbs, .cs-homepage-category-count, .pk-font-secondary{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;font-size:0.875rem;font-weight:400;letter-spacing:0px;text-transform:none;}.editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-quote cite, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-quote__citation, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-image figcaption, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-audio figcaption, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-embed figcaption, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-pullquote cite, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-pullquote footer, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-pullquote .wp-block-pullquote__citation{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;font-size:0.875rem;font-weight:400;letter-spacing:0px;text-transform:none;}.entry-content{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;font-weight:400;}.editor-styles-wrapper .block-editor-block-list__layout, .editor-styles-wrapper .block-editor-block-list__layout p{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;font-weight:400;}h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .site-title, .comment-author .fn, blockquote, .wp-block-quote, .wp-block-cover .wp-block-cover-image-text, .wp-block-cover .wp-block-cover-text, .wp-block-cover h2, .wp-block-cover-image .wp-block-cover-image-text, .wp-block-cover-image .wp-block-cover-text, .wp-block-cover-image h2, .wp-block-pullquote p, p.has-drop-cap:not(:focus):first-letter, .pk-font-heading, .post-sidebar-date .reader-text{font-family:IBM Plex Sans;font-weight:700;letter-spacing:-0.025em;text-transform:none;}.editor-styles-wrapper.cs-editor-styles-wrapper h1, .editor-styles-wrapper.cs-editor-styles-wrapper h2, .editor-styles-wrapper.cs-editor-styles-wrapper h3, .editor-styles-wrapper.cs-editor-styles-wrapper h4, .editor-styles-wrapper.cs-editor-styles-wrapper h5, .editor-styles-wrapper.cs-editor-styles-wrapper h6, .editor-styles-wrapper.cs-editor-styles-wrapper .h1, .editor-styles-wrapper.cs-editor-styles-wrapper .h2, .editor-styles-wrapper.cs-editor-styles-wrapper .h3, .editor-styles-wrapper.cs-editor-styles-wrapper .h4, .editor-styles-wrapper.cs-editor-styles-wrapper .h5, .editor-styles-wrapper.cs-editor-styles-wrapper .h6, .editor-styles-wrapper.cs-editor-styles-wrapper .editor-post-title__input, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-quote, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-quote p, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-pullquote p, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-freeform blockquote p:first-child, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-cover .wp-block-cover-image-text, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-cover .wp-block-cover-text, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-cover-image .wp-block-cover-image-text, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-cover-image .wp-block-cover-text, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-cover-image h2, .editor-styles-wrapper.cs-editor-styles-wrapper .wp-block-cover h2, .editor-styles-wrapper.cs-editor-styles-wrapper p.has-drop-cap:not(:focus):first-letter{font-family:IBM Plex Sans;font-weight:700;letter-spacing:-0.025em;text-transform:none;}.title-block, .pk-font-block{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;font-size:1rem;font-weight:700;letter-spacing:0px;text-transform:uppercase;color:#dd3333;}.navbar-nav > li > a, .cs-mega-menu-child > a, .widget_archive li, .widget_categories li, .widget_meta li a, .widget_nav_menu .menu > li > a, .widget_pages .page_item a{font-family:IBM Plex Sans;font-size:1rem;font-weight:400;text-transform:none;}.navbar-nav .sub-menu > li > a, .widget_categories .children li a, .widget_nav_menu .sub-menu > li > a{font-family:IBM Plex Sans;font-size:0.875rem;font-weight:400;letter-spacing:0px;text-transform:none;}/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYnYALZg.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYDYALZg.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYfYALZg.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYvYALZg.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYrYALZg.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYTYAA.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYnYALZg.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYDYALZg.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYfYALZg.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYvYALZg.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYrYALZg.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYTYAA.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbABA.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbABA.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbABA.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbABA.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbABA.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYY.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbABA.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbABA.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbABA.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbABA.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbABA.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYY.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYnYALZg.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYDYALZg.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYfYALZg.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYvYALZg.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYrYALZg.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYTYAA.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYnYALZg.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYDYALZg.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYfYALZg.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYvYALZg.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYrYALZg.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYTYAA.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbABA.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbABA.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbABA.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbABA.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbABA.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYY.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbABA.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbABA.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbABA.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbABA.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbABA.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYY.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYnYALZg.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYDYALZg.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYfYALZg.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYvYALZg.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYrYALZg.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYTYAA.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYnYALZg.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYDYALZg.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYfYALZg.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYvYALZg.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYrYALZg.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXxKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbGYTYAA.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbABA.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbABA.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbABA.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbABA.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbABA.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYY.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbABA.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbABA.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbABA.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbABA.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbABA.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://portcalls.com/wp-content/fonts/ibm-plex-sans/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYY.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}</style></head>
+
+<body class="wp-singular post-template-default single single-post postid-20447 single-format-standard wp-embed-responsive wp-theme-spotlight wp-child-theme-spotlight-child cs-page-layout-right header-default navbar-sticky-enabled navbar-smart-enabled sticky-sidebar-enabled stick-to-bottom block-align-enabled">
+
+	<div class="site-overlay"></div>
+
+	<div class="offcanvas">
+
+		<div class="offcanvas-header cs-bg-navbar-dark">
+
+			
+			<nav class="navbar navbar-offcanvas">
+
+									<a class="navbar-brand" href="https://portcalls.com/" rel="home">
+						<picture><source srcset="https://portcalls.com/wp-content/uploads/2026/08/portcalls-logo-250.png.webp"  type="image/webp"><img src="https://portcalls.com/wp-content/uploads/2026/08/portcalls-logo-250.png"  alt="PortCalls Asia"  data-eio="p"></picture>					</a>
+					
+				<button type="button" class="toggle-offcanvas button-round">
+					<i class="cs-icon cs-icon-x"></i>
+				</button>
+
+			</nav>
+
+			
+		</div>
+
+		<aside class="offcanvas-sidebar">
+			<div class="offcanvas-inner">
+				<div class="widget widget_nav_menu cs-d-lg-none"><div class="menu-main-menu-container"><ul id="menu-main-menu" class="menu"><li id="menu-item-110406" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-110406"><a href="#">News</a>
+<ul class="sub-menu">
+	<li id="menu-item-34420" class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-34420"><a href="https://portcalls.com/category/breaking-news/">Breaking News</a></li>
+	<li id="menu-item-34411" class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-34411"><a href="https://portcalls.com/category/maritime/">Maritime</a></li>
+	<li id="menu-item-34415" class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-34415"><a href="https://portcalls.com/category/aviation/">Aviation</a></li>
+	<li id="menu-item-69454" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-69454"><a href="https://portcalls.com/category/land/">Land</a></li>
+	<li id="menu-item-34413" class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-34413"><a href="https://portcalls.com/category/customs-trade/">Customs &amp; Trade</a></li>
+	<li id="menu-item-34412" class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-34412"><a href="https://portcalls.com/category/ports-terminals/">Ports/Terminals</a></li>
+	<li id="menu-item-34414" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34414"><a href="https://portcalls.com/category/3pl-4pl/">3PL/4PL</a></li>
+	<li id="menu-item-69453" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-69453"><a href="https://portcalls.com/category/economy/">Economy</a></li>
+</ul>
+</li>
+<li id="menu-item-34421" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-34421"><a href="https://portcalls.com/category/opinion/">Opinion</a>
+<ul class="sub-menu">
+	<li id="menu-item-34430" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34430"><a href="https://portcalls.com/category/opinion/scmap-perspective/">SCMAP Perspective</a></li>
+	<li id="menu-item-68898" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-68898"><a href="https://portcalls.com/category/opinion/it-in-logistics/">IT in Logistics</a></li>
+	<li id="menu-item-120507" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-120507"><a href="https://portcalls.com/category/opinion/ask-the-customs-wiz/">Ask The Customs Wiz</a></li>
+	<li id="menu-item-123992" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123992"><a href="https://portcalls.com/category/opinion/beyond-logistics/">Beyond Logistics</a></li>
+	<li id="menu-item-120520" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-120520"><a href="https://portcalls.com/category/opinion/across-borders/">Across Borders</a></li>
+	<li id="menu-item-34427" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34427"><a href="https://portcalls.com/category/opinion/narrow-channel/">Narrow Channel</a></li>
+	<li id="menu-item-34426" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34426"><a href="https://portcalls.com/category/opinion/itinerary/">ITinerary</a></li>
+	<li id="menu-item-34423" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34423"><a href="https://portcalls.com/category/opinion/circle-of-safety/">Circle of Safety</a></li>
+	<li id="menu-item-34422" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34422"><a href="https://portcalls.com/category/opinion/across-borders/">Across Borders</a></li>
+	<li id="menu-item-34424" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34424"><a href="https://portcalls.com/category/opinion/did-you-know/">Did You Know?</a></li>
+	<li id="menu-item-34425" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34425"><a href="https://portcalls.com/category/opinion/in-their-view/">In Their View</a></li>
+	<li id="menu-item-34428" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34428"><a href="https://portcalls.com/category/opinion/next-wave/">Next Wave</a></li>
+	<li id="menu-item-34429" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34429"><a href="https://portcalls.com/category/opinion/pisfa/">PISFA at Work</a></li>
+	<li id="menu-item-34431" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34431"><a href="https://portcalls.com/category/opinion/export-advocate/">The Export Advocate</a></li>
+</ul>
+</li>
+<li id="menu-item-34417" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34417"><a href="https://portcalls.com/category/exclusives/">Exclusives</a></li>
+<li id="menu-item-34418" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34418"><a href="https://portcalls.com/category/features/">Features</a></li>
+<li id="menu-item-103437" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-103437"><a href="https://portcalls.com/category/sponsored-posts/">Sponsored Posts</a></li>
+<li id="menu-item-112217" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-112217"><a href="#">Publications</a>
+<ul class="sub-menu">
+	<li id="menu-item-112218" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-112218"><a href="https://portcalls.com/tag/print-edition">PortCalls Print Edition</a></li>
+	<li id="menu-item-115179" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-115179"><a href="https://portcalls.com/annual-cargo-transport-directory/">Annual Cargo Transport Directory</a></li>
+	<li id="menu-item-115183" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-115183"><a href="https://portcalls.com/books/">Books</a></li>
+</ul>
+</li>
+<li id="menu-item-68968" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-68968"><a href="https://portcalls.com/category/events/">Events</a>
+<ul class="sub-menu">
+	<li id="menu-item-115187" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-115187"><a href="https://portcalls.com/tag/seminars/">Seminars</a></li>
+	<li id="menu-item-113591" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-113591"><a href="https://portcalls.com/tag/central-luzon-transport-trade-conference/">Central Luzon Transport &#038; Trade Conference and Exhibit</a></li>
+	<li id="menu-item-115184" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-115184"><a href="https://portcalls.com/tag/visayas-shipping-conference/">Visayas Shipping Conference</a></li>
+	<li id="menu-item-115185" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-115185"><a href="https://portcalls.com/tag/mindanao-shipping-conference/">Mindanao Shipping Conference</a></li>
+	<li id="menu-item-115186" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-115186"><a href="https://portcalls.com/tag/philippines-air-cargo-day/">Philippines Air Cargo Day</a></li>
+	<li id="menu-item-113592" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-113592"><a href="https://portcalls.com/tag/portcalls-cargo-economics-conference/">PortCalls Cargo Economics Conference</a></li>
+</ul>
+</li>
+</ul></div></div>
+							</div>
+		</aside>
+	</div>
+
+<div id="page" class="site">
+
+	
+	<div class="site-inner">
+
+		
+		<header id="masthead" class="site-header">
+
+			
+			
+
+<nav class="navbar navbar-primary">
+
+	
+	<div class="navbar-wrap  cs-bg-navbar-dark">
+
+		<div class="navbar-container">
+
+			<div class="navbar-content">
+
+						<button type="button" aria-label="menu" class="navbar-toggle-offcanvas toggle-offcanvas  cs-d-lg-none">
+			<i class="cs-icon cs-icon-menu"></i>
+		</button>
+					<a class="navbar-brand" href="https://portcalls.com/" rel="home">
+				<picture><source srcset="https://portcalls.com/wp-content/uploads/2026/08/portcalls-logo-250.png.webp"  type="image/webp"><img src="https://portcalls.com/wp-content/uploads/2026/08/portcalls-logo-250.png"  alt="PortCalls Asia"  data-eio="p"></picture>			</a>
+			<ul id="menu-main-menu-1" class="navbar-nav  cs-navbar-nav-submenu-dark"><li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-110406"><a href="#">News</a>
+<ul class="sub-menu">
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-34420"><a href="https://portcalls.com/category/breaking-news/">Breaking News</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-34411"><a href="https://portcalls.com/category/maritime/">Maritime</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-34415"><a href="https://portcalls.com/category/aviation/">Aviation</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-69454"><a href="https://portcalls.com/category/land/">Land</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-34413"><a href="https://portcalls.com/category/customs-trade/">Customs &amp; Trade</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-34412"><a href="https://portcalls.com/category/ports-terminals/">Ports/Terminals</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34414"><a href="https://portcalls.com/category/3pl-4pl/">3PL/4PL</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-69453"><a href="https://portcalls.com/category/economy/">Economy</a></li>
+</ul>
+</li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-34421"><a href="https://portcalls.com/category/opinion/">Opinion</a>
+<ul class="sub-menu">
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34430"><a href="https://portcalls.com/category/opinion/scmap-perspective/">SCMAP Perspective</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-68898"><a href="https://portcalls.com/category/opinion/it-in-logistics/">IT in Logistics</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-120507"><a href="https://portcalls.com/category/opinion/ask-the-customs-wiz/">Ask The Customs Wiz</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123992"><a href="https://portcalls.com/category/opinion/beyond-logistics/">Beyond Logistics</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-120520"><a href="https://portcalls.com/category/opinion/across-borders/">Across Borders</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34427"><a href="https://portcalls.com/category/opinion/narrow-channel/">Narrow Channel</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34426"><a href="https://portcalls.com/category/opinion/itinerary/">ITinerary</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34423"><a href="https://portcalls.com/category/opinion/circle-of-safety/">Circle of Safety</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34422"><a href="https://portcalls.com/category/opinion/across-borders/">Across Borders</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34424"><a href="https://portcalls.com/category/opinion/did-you-know/">Did You Know?</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34425"><a href="https://portcalls.com/category/opinion/in-their-view/">In Their View</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34428"><a href="https://portcalls.com/category/opinion/next-wave/">Next Wave</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34429"><a href="https://portcalls.com/category/opinion/pisfa/">PISFA at Work</a></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34431"><a href="https://portcalls.com/category/opinion/export-advocate/">The Export Advocate</a></li>
+</ul>
+</li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34417"><a href="https://portcalls.com/category/exclusives/">Exclusives</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-34418"><a href="https://portcalls.com/category/features/">Features</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-103437"><a href="https://portcalls.com/category/sponsored-posts/">Sponsored Posts</a></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-112217"><a href="#">Publications</a>
+<ul class="sub-menu">
+	<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-112218"><a href="https://portcalls.com/tag/print-edition">PortCalls Print Edition</a></li>
+	<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-115179"><a href="https://portcalls.com/annual-cargo-transport-directory/">Annual Cargo Transport Directory</a></li>
+	<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-115183"><a href="https://portcalls.com/books/">Books</a></li>
+</ul>
+</li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-68968"><a href="https://portcalls.com/category/events/">Events</a>
+<ul class="sub-menu">
+	<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-115187"><a href="https://portcalls.com/tag/seminars/">Seminars</a></li>
+	<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-113591"><a href="https://portcalls.com/tag/central-luzon-transport-trade-conference/">Central Luzon Transport &#038; Trade Conference and Exhibit</a></li>
+	<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-115184"><a href="https://portcalls.com/tag/visayas-shipping-conference/">Visayas Shipping Conference</a></li>
+	<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-115185"><a href="https://portcalls.com/tag/mindanao-shipping-conference/">Mindanao Shipping Conference</a></li>
+	<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-115186"><a href="https://portcalls.com/tag/philippines-air-cargo-day/">Philippines Air Cargo Day</a></li>
+	<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-113592"><a href="https://portcalls.com/tag/portcalls-cargo-economics-conference/">PortCalls Cargo Economics Conference</a></li>
+</ul>
+</li>
+</ul>			<div class="navbar-dropdown-follow">
+				<span class="navbar-dropdown-btn-follow">Subscribe for free</span>
+
+				<div class="navbar-dropdown-container  cs-bg-dark">
+									<div class="navbar-subscribe">
+									<div class="pk-subscribe-form-wrap pk-subscribe-form-block" data-service="mailchimp">
+					
+					<div class="pk-subscribe-container ">
+						<div class="pk-subscribe-data">
+							<h3 class="pk-title">Sign up to our Newsletter</h3>
+															<p class="pk-subscribe-message ">Receive the latest updates about the cargo transportation industry.</p>
+							
+							<form method="post" class="subscription">
+								<input type="hidden" name="service" value="mailchimp">
+								<input type="hidden" name="list_id" value="fbb5efb263">
+
+								<div class="pk-input-group">
+									
+									<input type="text" name="EMAIL" class="email form-control" placeholder="Enter your email">
+
+									<button class="pk-subscribe-submit" type="submit">Subscribe</button>
+								</div>
+
+								<input type="hidden" name="_wp_http_referer" value="/super-typhoon-hobbles-ph-supply-chain/" />							</form>
+
+															<div class="pk-privacy pk-color-secondary">
+									<label><input name="pk-privacy" type="checkbox">By checking this box, you confirm that you have are agreeing to receive emails from PortCalls Asia.</label>
+								</div>
+													</div>
+					</div>
+				</div>
+								</div>
+							</div>
+			</div>
+					<button type="button" aria-label="search" class="navbar-toggle-search toggle-search">
+			<i class="cs-icon cs-icon-search"></i>
+		</button>
+		
+			</div><!-- .navbar-content -->
+
+		</div><!-- .navbar-container -->
+
+	</div><!-- .navbar-wrap -->
+
+	
+<div class="site-search" id="search">
+	<div class="cs-container">
+		<div class="search-form-wrap">
+			
+<form role="search" method="get" class="search-form" action="https://portcalls.com/">
+	<label class="sr-only">Search for:</label>
+	<div class="cs-input-group">
+		<input type="search" value="" name="s" class="search-field" placeholder="What are you looking for?" required>
+		<button type="submit" class="search-submit">Search</button>
+	</div>
+</form>
+			<span class="search-close"></span>
+		</div>
+	</div>
+</div>
+
+</nav><!-- .navbar -->
+
+			
+		</header><!-- #masthead -->
+
+		<section class="cs-custom-content cs-custom-content-header-after"><div id="custom_html-10" class="widget_text widget widget_custom_html after-header-widget"><div class="textwidget custom-html-widget"><span style="display: flex; gap: .5em; padding-top: 1em; padding-left: 1em; padding-right: 1em;">
+<a href="https://portcalls.com/pax-silica-and-the-luzon-economic-corridor-why-cargo-cant-move-until-the-rules-do/" target="_blank"><picture><source srcset="https://portcalls.com/wp-content/uploads/2026/09/part1.jpg.webp"  type="image/webp"><img src="https://portcalls.com/wp-content/uploads/2026/09/part1.jpg" alt="" width="100%" height="auto" class="aligncenter size-large wp-image-123139" data-eio="p" /></picture></a>
+
+<a href="https://portcalls.com/pax-silica-and-luzon-economic-corridor-what-customs-and-transport-rules-still-need-to-be-written/" target="_blank"><picture><source srcset="https://portcalls.com/wp-content/uploads/2026/09/part2.jpg.webp"  type="image/webp"><img src="https://portcalls.com/wp-content/uploads/2026/09/part2.jpg" alt="" width="100%" height="auto" class="aligncenter size-large wp-image-123140" data-eio="p" /></picture></a>
+
+<a href="https://portcalls.com/pax-silica-and-luzon-economic-corridor-operational-steps-pitfalls-logistics-gains/" target="_blank"><picture><source srcset="https://portcalls.com/wp-content/uploads/2026/09/part3.jpg.webp"  type="image/webp"><img src="https://portcalls.com/wp-content/uploads/2026/09/part3.jpg" alt="" width="100%" height="auto" class="aligncenter size-large wp-image-123141" data-eio="p" /></picture></a>
+</span></div></div></section>
+		<section class="cs-custom-content cs-custom-content-site_content-before"><div class="cs-container"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2029838559642482"
+     crossorigin="anonymous"></script>
+<!-- Horizontal - Responsive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-2029838559642482"
+     data-ad-slot="2226413717"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script></div></section>
+		<div class="site-content sidebar-enabled sidebar-right post-sidebar-enabled">
+
+			
+<section class="entry-header entry-single-header entry-header-standard entry-header-thumbnail">
+
+	
+	
+
+	<div class="cs-container">
+
+		
+		
+		<h1 class="entry-title">Super typhoon hobbles PH supply chain</h1>
+					<div class="entry-inline-meta">
+				<div class="meta-category"><ul class="post-categories">
+	<li><a href="https://portcalls.com/category/aviation/" rel="category tag">Aviation</a></li>
+	<li><a href="https://portcalls.com/category/breaking-news/" rel="category tag">Breaking News</a></li>
+	<li><a href="https://portcalls.com/category/customs-trade/" rel="category tag">Customs &amp; Trade</a></li>
+	<li><a href="https://portcalls.com/category/maritime/" rel="category tag">Maritime</a></li>
+	<li><a href="https://portcalls.com/category/ports-terminals/" rel="category tag">Ports/Terminals</a></li></ul></div>			</div>
+		
+						<div class="entry-meta-details">
+					<ul class="post-meta"><li class="meta-reading-time"><i class="cs-icon cs-icon-watch"></i>3 minute read</li></ul>		<div class="pk-share-buttons-wrap pk-share-buttons-layout-default pk-share-buttons-scheme-default pk-share-buttons-post_header pk-share-buttons-mode-php pk-share-buttons-mode-rest" data-post-id="20447" data-share-url="https://portcalls.com/super-typhoon-hobbles-ph-supply-chain/" >
+
+			
+			<div class="pk-share-buttons-items">
+
+										<div class="pk-share-buttons-item pk-share-buttons-facebook pk-share-buttons-no-count" data-id="facebook">
+
+							<a href="https://www.facebook.com/sharer.php?u=https://portcalls.com/super-typhoon-hobbles-ph-supply-chain/" class="pk-share-buttons-link" target="_blank">
+
+																	<i class="pk-share-buttons-icon pk-icon pk-icon-facebook"></i>
+								
+								
+																	<span class="pk-share-buttons-label pk-font-primary">Share</span>
+								
+															</a>
+
+							
+							
+													</div>
+											<div class="pk-share-buttons-item pk-share-buttons-mail pk-share-buttons-no-count" data-id="mail">
+
+							<a href="mailto:?subject=Super%20typhoon%20hobbles%20PH%20supply%20chain&body=Super%20typhoon%20hobbles%20PH%20supply%20chain%20https://portcalls.com/super-typhoon-hobbles-ph-supply-chain/" class="pk-share-buttons-link" target="_blank">
+
+																	<i class="pk-share-buttons-icon pk-icon pk-icon-mail"></i>
+								
+								
+																	<span class="pk-share-buttons-label pk-font-primary">Share</span>
+								
+															</a>
+
+							
+							
+													</div>
+											<div class="pk-share-buttons-item pk-share-buttons-twitter pk-share-buttons-no-count" data-id="twitter">
+
+							<a href="https://x.com/share?&text=Super%20typhoon%20hobbles%20PH%20supply%20chain&via=PortCalls&url=https://portcalls.com/super-typhoon-hobbles-ph-supply-chain/" class="pk-share-buttons-link" target="_blank">
+
+																	<i class="pk-share-buttons-icon pk-icon pk-icon-twitter"></i>
+								
+								
+																	<span class="pk-share-buttons-label pk-font-primary">Tweet</span>
+								
+															</a>
+
+							
+							
+													</div>
+											<div class="pk-share-buttons-item pk-share-buttons-linkedin pk-share-buttons-no-count" data-id="linkedin">
+
+							<a href="https://www.linkedin.com/shareArticle?mini=true&url=https://portcalls.com/super-typhoon-hobbles-ph-supply-chain/" class="pk-share-buttons-link" target="_blank">
+
+																	<i class="pk-share-buttons-icon pk-icon pk-icon-linkedin"></i>
+								
+								
+																	<span class="pk-share-buttons-label pk-font-primary">Share</span>
+								
+															</a>
+
+							
+							
+													</div>
+								</div>
+		</div>
+					</div>
+			
+		
+	</div>
+
+	
+</section>
+
+			<div class="cs-container">
+
+				
+				<div id="content" class="main-content">
+
+					
+	<div id="primary" class="content-area">
+
+		
+		<main id="main" class="site-main">
+
+			
+			
+				
+					
+<article id="post-20447" class="entry post-20447 post type-post status-publish format-standard has-post-thumbnail category-aviation category-breaking-news category-customs-trade category-maritime category-ports-terminals tag-asian-terminals-inc tag-manila-north-harbour-port-inc-ceo-richard-barclay tag-mict-general-manager-christian-gonzalez tag-supply-chain-management-association-of-the-philippines-scmap-president-arnel-gamboa tag-typhoon-yolanda tag-typhoon-yolanda-effect-on-sea-and-air-ports">
+
+	
+				<div class="post-media">
+				<figure >
+					<a href="https://portcalls.com/wp-content/uploads/2013/11/MAP_PH.jpg">
+						<img width="281" height="430" src="https://portcalls.com/wp-content/uploads/2013/11/MAP_PH.jpg" class="pk-lazyload-disabled wp-post-image" alt="" decoding="async" fetchpriority="high" srcset="https://portcalls.com/wp-content/uploads/2013/11/MAP_PH.jpg 386w, https://portcalls.com/wp-content/uploads/2013/11/MAP_PH-196x300.jpg 196w, https://portcalls.com/wp-content/uploads/2013/11/MAP_PH-275x420.jpg 275w, https://portcalls.com/wp-content/uploads/2013/11/MAP_PH-150x229.jpg 150w, https://portcalls.com/wp-content/uploads/2013/11/MAP_PH-300x459.jpg 300w" sizes="(max-width: 281px) 100vw, 281px" />					</a>
+									</figure>
+			</div>
+						<div class="entry-container">
+									<div class="entry-sidebar-wrap">
+								<div class="entry-post-next cs-d-none cs-d-lg-block">
+			<h5 class="title-block">
+				Up next			</h5>
+
+			<article>
+									<div class="entry-thumbnail">
+						<div class="cs-overlay cs-overlay-simple cs-overlay-ratio cs-ratio-landscape cs-bg-dark">
+							<div class="cs-overlay-background">
+								<picture><source srcset="https://portcalls.com/wp-content/uploads/2013/11/pisfa.jpg.webp"  type="image/webp"><img width="76" height="83" src="https://portcalls.com/wp-content/uploads/2013/11/pisfa.jpg" class="attachment-csco-intermediate size-csco-intermediate wp-post-image" alt="" decoding="async" data-eio="p" /></picture>							</div>
+							<div class="cs-overlay-content">
+															</div>
+							<a href="https://portcalls.com/new-officers-for-ph-freight-forwarders-association/" class="cs-overlay-link"></a>
+						</div>
+					</div>
+								<header class="entry-header">
+					<h6 class="entry-title"><a href="https://portcalls.com/new-officers-for-ph-freight-forwarders-association/">New officers for PH freight forwarders’ association</a></h6>
+									</header>
+				</div>
+		</section>
+							<div class="entry-sidebar">
+							
+<section class="post-section post-sidebar-date">
+	<time class="entry-date published" datetime="2013-11-08T09:31:38+08:00"><span class="reader-text published-text">Published on</span> November 8, 2013</time></section>
+
+
+<section class="post-section post-sidebar-author">
+
+	<h5 class="title-block">
+		Author	</h5>
+
+			<div class="author-wrap">
+			<div class="author">
+				<div class="author-description">
+					<h5 class="title-author">
+						<span class="fn">
+							<a href="https://portcalls.com/author/liza/" rel="author">
+								Web Publisher							</a>
+						</span>
+					</h5>
+									</div>
+			</div>
+		</div>
+		
+</section>
+
+<section class="post-section post-sidebar-tags"><h5 class="title-block title-tags">Tags</h5><ul><li><a href="https://portcalls.com/tag/asian-terminals-inc/" rel="tag">Asian Terminals Inc</a>,</li><li><a href="https://portcalls.com/tag/manila-north-harbour-port-inc-ceo-richard-barclay/" rel="tag">Manila North Harbour Port Inc CEO Richard Barclay</a>,</li><li><a href="https://portcalls.com/tag/mict-general-manager-christian-gonzalez/" rel="tag">MICT general manager Christian Gonzalez</a>,</li><li><a href="https://portcalls.com/tag/supply-chain-management-association-of-the-philippines-scmap-president-arnel-gamboa/" rel="tag">Supply Chain Management Association of the Philippines (SCMAP) president Arnel Gamboa</a>,</li><li><a href="https://portcalls.com/tag/typhoon-yolanda/" rel="tag">Typhoon Yolanda</a>,</li><li><a href="https://portcalls.com/tag/typhoon-yolanda-effect-on-sea-and-air-ports/" rel="tag">Typhoon Yolanda effect on sea and air ports</a></li></ul></section>						</div>
+					</div>
+							
+	<div class="entry-content-wrap">
+
+		
+		<div class="entry-content">
+
+			<p><a href="http://www.portcalls.com/wp-content/uploads/2013/11/MAP_PH.jpg"><img decoding="async" class="alignleft size-medium wp-image-20448" title="MAP_PH" src="http://www.portcalls.com/wp-content/uploads/2013/11/MAP_PH-196x300.jpg" alt="" width="196" height="300" srcset="https://portcalls.com/wp-content/uploads/2013/11/MAP_PH-196x300.jpg 196w, https://portcalls.com/wp-content/uploads/2013/11/MAP_PH-275x420.jpg 275w, https://portcalls.com/wp-content/uploads/2013/11/MAP_PH-150x229.jpg 150w, https://portcalls.com/wp-content/uploads/2013/11/MAP_PH-300x459.jpg 300w, https://portcalls.com/wp-content/uploads/2013/11/MAP_PH.jpg 386w" sizes="(max-width: 196px) 100vw, 196px" /></a></p>
+<p>SUPER typhoon Yolanda (international name Haiyan) which ripped through central Philippines on Friday heavily affected the supply chain, with many seaports and airports ordered closed on Friday and Saturday.</p>
+<p>The Civil Aviation Authority of the Philippines (CAAP) said 12 airports had suspended operations on Nov 8. But a day after, the airports of Legazpi, Surigao, Masbate and Iloilo resumed services, according to CAAP on its Twitter account.</p>
+<p>Closed until Nov 9 was Caticlan and until Nov 10, Tacloban, Roxas, and Kalibo.</p>
+<p>As of Saturday, the CAAP said it was still waiting feedback on airports in Romblon, Dumaguete, Busuanga, Bacolod, Caticlan and Puerto Princesa.</p>
+<p>In an advisory, low-cost carrier Cebu Pacific Air said approximately 132 roundtrip domestic flights and four roundtrip international flights from Nov 7 to 9 had been cancelled.</p>
+<p>Flag carrier Philippine Airlines and sister carrier PAL Express; Tigerair Philippines; AirAsia and AirAsia Zest cancelled flights on Nov 8.</p>
+<p>Ninoy Aquino International Airport reported that 445 local flights and eight international flights were cancelled as of 12:00 pm of Nov 8.</p>
+<p>&nbsp;</p>
+<p><strong>Seaport operations</strong></p>
+<p>The Philippine Ports Authority and the Cebu Port Authority (CPA) suspended port operations in various areas affected by the typhoon, considered one of the strongest ever recorded.</p>
+<p>PPA cancelled operations of 16 ports: Ormoc; Port of Baybay, Leyte; Palompon, Leyte; Port of Naval, Biliran; Port of Isabel, Leyte; Surigao and Port of Lipata, Surigao; Batangas, Poctoy, Lucena, Tabaco; Masbate; Albay, Legazpi, Tagbilaran, and Dumaguete.</p>
+<p>“No vessels at port, no cargo handling. Roro operations have been hold in abeyance starting today (Nov 8) until typhoon Yolanda leaves,” the PPA said in a statement. The typhoon exited the Philippine area of responsibility Saturday afternoon.</p>
+<p>CPA said trips of 24 passenger/cargo vessels were suspended on Nov 8, as well as 15 fastcraft, 16 general cargo, five container vessels and six tankers.</p>
+<p>In a phone conversation with PortCalls on Nov 7, CPA general manager Edmund Tan said shippers and shipping lines have been promptly alerted. He said vessels were no longer being allowed to berth and instead were advised to take shelter in secure areas or directed to seek anchorage in the Cebu channel.</p>
+<p>People’s Television on its Twitter account said 231 passengers and 184 cargo vessels were stranded in Batangas Port as of late afternoon of Nov 8.</p>
+<p>In a statement, the Philippine Coast Guard said 51 vessels were stranded in different ports in affected areas.</p>
+<p>Local reports as of Saturday morning point to at least 100 casualties, although the number is feared to be so much higher. Communication lines have been cut and many roads impassable, making casualty and damage assessment difficult to conduct.</p>
+<p>&nbsp;</p>
+<p><strong>Manila port operations</strong></p>
+<p>In a Nov 8 email to <em>PortCalls</em> Christian Gonzalez, general manager of the Philippines’ largest port Manila International Container Terminal, said, “We follow a very strict policy on storm safety. At this stage we are working as normal but in the event the storm comes within our threshold distance or takes a different track we will apply our SOP for shutting down and securing the port. We track storms on a 15-minute interval.”</p>
+<p>South Harbor operator Asian Terminals, Inc, for its part, said it “temporarily suspended yard and vessel operation at South Harbor as of 7:00 am November 8. This is part of ATI’s commitment to ensure safety at the terminal. Normal port operations will resume as soon as weather improves.”</p>
+<p>Gate and yard operations, however, resumed in South Harbor at 10pm on Nov 8 while vessel operations resumed midnight.</p>
+<p>In a phone conversation with <em>PortCalls </em>on Nov. 8, Richard Barclay, chief executive officer of the Manila North Harbour Port Inc. which operates the North Harbor, said vessel operations at the port were suspended.</p>
+<p>“Receiving outbound and delivering inbound cargoes is continuing,” Barclay said, adding that shipping lines have been alerted of the port’s status. Other operations are normal and port management is taking a wait-and-see stance, he said.</p>
+<p>Supply Chain Management Association of the Philippines (SCMAP) president Arnel Gamboa in a text message to <em>PortCalls </em>noted most Visayas and Mindanao warehouses operated by SCMAP members suspended operations starting Nov 8.</p>
+<p>“Cebu, Tacloban, Bacolod, Iloilo areas (have) closed operations today. Safety is (of) primary importance,” Gamboa said.</p>
+<p>Businesses in Central Visayas “will take a toll due to the back-to-back calamities.”</p>
+<p>Recently, Cebu, Bohol and some parts of Mindanao were hit by a 7.2 magnitude earthquake.</p>
+<p>“Nothing we can do for now but wait and pray,” Gamboa concluded.</p>
+<p>Customs operations were also limited due to the typhoon. Last Friday Customs Commissioner Rozzano Rufino Biazon in an advisory said BOC processed entries only up to 3:00 pm to give personnel time to prepare for the storm. The suspension, however, covered only those areas directly affected by the typhoon. &#8212;<strong> Roumina Pablo</strong></p>
+
+		</div>
+			</div>
+
+				</div>
+			
+</article>
+
+				
+	<section class="post-archive archive-related">
+
+		<div class="archive-wrap">
+
+			
+			<h5 class="title-block">
+				You May Also Like			</h5>
+
+			<div class="archive-main cs-featured-posts cs-featured-type-4 col-2">
+				
+<article class="layout-featured-grid post-126239 post type-post status-publish format-standard has-post-thumbnail category-maritime category-ports-terminals category-press-releases tag-adriatic-gate-container-terminal tag-hans-ole-madsen tag-ictsi tag-inigo-nunez-mendibe tag-international-container-terminal-services-inc">
+
+	<div class="post-outer">
+
+		<a class="post-link" href="https://portcalls.com/ictsis-adriatic-gate-terminal-hits-4m-teu-milestone-on-15th-year/"></a>
+
+		
+					<div class="post-inner entry-thumbnail">
+				<div class="cs-overlay cs-overlay-simple cs-overlay-ratio cs-ratio-landscape cs-bg-dark">
+					<div class="cs-overlay-background">
+						<picture><source srcset="https://portcalls.com/wp-content/uploads/2026/10/AGCT-reaches-4-million-TEUs-as-Rijeka-strengthens-regional-role-380x200.jpg.webp"  type="image/webp"><img width="380" height="200" src="https://portcalls.com/wp-content/uploads/2026/10/AGCT-reaches-4-million-TEUs-as-Rijeka-strengthens-regional-role-380x200.jpg" class="attachment-csco-thumbnail size-csco-thumbnail wp-post-image" alt="ICTSI’s Adriatic Gate Terminal hits 4M TEU milestone on 15th year" decoding="async" data-eio="p" /></picture>					</div>
+					<div class="cs-overlay-content">
+																	</div>
+				</div>
+			</div>
+		
+		<div class="post-inner entry-inner">
+
+			<div class="entry-data">
+
+				<header class="entry-header">
+					<h2 class="entry-title">ICTSI’s Adriatic Gate Terminal hits 4M TEU milestone on 15th year</h2>				</header>
+
+				<div class="entry-excerpt">
+					Adriatic Gate Container Terminal has handled four million twenty-foot equivalent units since&hellip;
+				</div>
+
+				<ul class="post-meta"><li class="meta-date">October 2, 2026</li><li class="meta-reading-time"><i class="cs-icon cs-icon-watch"></i>2 minute read</li></ul>
+			</div>
+
+		</div>
+
+	</div><!-- .post-outer -->
+
+</article><!-- #post-126239 -->
+
+<article class="layout-featured-grid post-126451 post type-post status-publish format-standard has-post-thumbnail category-3pl-4pl category-customs-trade category-economy category-editors-picks tag-dhl tag-dhl-express tag-ken-lee tag-msmes tag-nigel-lockett tag-sarah-meinert">
+
+	<div class="post-outer">
+
+		<a class="post-link" href="https://portcalls.com/dhl-ramps-up-gotrade-program-for-export-ready-philippine-smes/"></a>
+
+		
+					<div class="post-inner entry-thumbnail">
+				<div class="cs-overlay cs-overlay-simple cs-overlay-ratio cs-ratio-landscape cs-bg-dark">
+					<div class="cs-overlay-background">
+						<picture><source srcset="https://portcalls.com/wp-content/uploads/2026/10/DHL-GoTrade-in-Manila-380x200.jpg.webp"  type="image/webp"><img width="380" height="200" src="https://portcalls.com/wp-content/uploads/2026/10/DHL-GoTrade-in-Manila-380x200.jpg" class="attachment-csco-thumbnail size-csco-thumbnail wp-post-image" alt="AI boom keeps global trade strong, trounces tariffs &amp; geopolitics—DHL" decoding="async" data-eio="p" /></picture>					</div>
+					<div class="cs-overlay-content">
+																	</div>
+				</div>
+			</div>
+		
+		<div class="post-inner entry-inner">
+
+			<div class="entry-data">
+
+				<header class="entry-header">
+					<h2 class="entry-title">DHL ramps up GoTrade program for export-ready Philippine SMEs</h2>				</header>
+
+				<div class="entry-excerpt">
+					DHL is helping capacitate micro, small, and medium enterprises to grow and&hellip;
+				</div>
+
+				<ul class="post-meta"><li class="meta-date">October 8, 2026</li><li class="meta-reading-time"><i class="cs-icon cs-icon-watch"></i>3 minute read</li></ul>
+			</div>
+
+		</div>
+
+	</div><!-- .post-outer -->
+
+</article><!-- #post-126451 -->
+
+<article class="layout-featured-grid post-126163 post type-post status-publish format-standard has-post-thumbnail category-breaking-news category-customs-trade category-editors-picks category-press-releases tag-ariel-nepomuceno tag-bureau-of-customs tag-dakila-elteen-napao tag-goods-condemnation tag-import-commodity-clearance tag-vapes">
+
+	<div class="post-outer">
+
+		<a class="post-link" href="https://portcalls.com/boc-destroys-record-p1-4b-worth-of-smuggled-vapes/"></a>
+
+		
+					<div class="post-inner entry-thumbnail">
+				<div class="cs-overlay cs-overlay-simple cs-overlay-ratio cs-ratio-landscape cs-bg-dark">
+					<div class="cs-overlay-background">
+						<picture><source   type="image/webp" data-srcset="https://portcalls.com/wp-content/uploads/2026/10/Illegal-vape-destruction-380x200.jpeg.webp"><img width="380" height="200" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXwAAADIAQAAAADDsGewAAAAAnRSTlMAAHaTzTgAAAAfSURBVGje7cEBAQAAAIIg/69uSEABAAAAAAAAAADwbCZIAAGrk41gAAAAAElFTkSuQmCC" class="attachment-csco-thumbnail size-csco-thumbnail wp-post-image lazyload" alt="BOC crushes record P1.4B illicit vape haul" decoding="async" data-eio="p" data-src="https://portcalls.com/wp-content/uploads/2026/10/Illegal-vape-destruction-380x200.jpeg" data-eio-rwidth="380" data-eio-rheight="200" /></picture><noscript><img width="380" height="200" src="https://portcalls.com/wp-content/uploads/2026/10/Illegal-vape-destruction-380x200.jpeg" class="attachment-csco-thumbnail size-csco-thumbnail wp-post-image" alt="BOC crushes record P1.4B illicit vape haul" decoding="async" data-eio="l" /></noscript>					</div>
+					<div class="cs-overlay-content">
+																	</div>
+				</div>
+			</div>
+		
+		<div class="post-inner entry-inner">
+
+			<div class="entry-data">
+
+				<header class="entry-header">
+					<h2 class="entry-title">BOC destroys record P1.4B worth of smuggled vapes</h2>				</header>
+
+				<div class="entry-excerpt">
+					The Bureau of Customs destroyed P1.428 billion worth of illicit vape products,&hellip;
+				</div>
+
+				<ul class="post-meta"><li class="meta-date">October 1, 2026</li><li class="meta-reading-time"><i class="cs-icon cs-icon-watch"></i>2 minute read</li></ul>
+			</div>
+
+		</div>
+
+	</div><!-- .post-outer -->
+
+</article><!-- #post-126163 -->
+
+<article class="layout-featured-grid post-126320 post type-post status-publish format-standard has-post-thumbnail category-breaking-news category-economy category-press-releases tag-department-of-finance tag-frederick-go tag-koji-ikeya tag-toshiba-corporation">
+
+	<div class="post-outer">
+
+		<a class="post-link" href="https://portcalls.com/toshiba-to-invest-multi-billion-pesos-to-expand-philippine-operations/"></a>
+
+		
+					<div class="post-inner entry-thumbnail">
+				<div class="cs-overlay cs-overlay-simple cs-overlay-ratio cs-ratio-landscape cs-bg-dark">
+					<div class="cs-overlay-background">
+						<picture><source   type="image/webp" data-srcset="https://portcalls.com/wp-content/uploads/2026/10/DOF-Toshiba-380x200.jpg.webp"><img width="380" height="200" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXwAAADIAQAAAADDsGewAAAAAnRSTlMAAHaTzTgAAAAfSURBVGje7cEBAQAAAIIg/69uSEABAAAAAAAAAADwbCZIAAGrk41gAAAAAElFTkSuQmCC" class="attachment-csco-thumbnail size-csco-thumbnail wp-post-image lazyload" alt="Toshiba to invest multi-billion pesos to expand Philippine operations" decoding="async" data-eio="p" data-src="https://portcalls.com/wp-content/uploads/2026/10/DOF-Toshiba-380x200.jpg" data-eio-rwidth="380" data-eio-rheight="200" /></picture><noscript><img width="380" height="200" src="https://portcalls.com/wp-content/uploads/2026/10/DOF-Toshiba-380x200.jpg" class="attachment-csco-thumbnail size-csco-thumbnail wp-post-image" alt="Toshiba to invest multi-billion pesos to expand Philippine operations" decoding="async" data-eio="l" /></noscript>					</div>
+					<div class="cs-overlay-content">
+																	</div>
+				</div>
+			</div>
+		
+		<div class="post-inner entry-inner">
+
+			<div class="entry-data">
+
+				<header class="entry-header">
+					<h2 class="entry-title">Toshiba invests billions to grow Philippine hard drive output</h2>				</header>
+
+				<div class="entry-excerpt">
+					Toshiba Corporation is set to rollout a multi-billion-peso investment over the next&hellip;
+				</div>
+
+				<ul class="post-meta"><li class="meta-date">October 5, 2026</li><li class="meta-reading-time"><i class="cs-icon cs-icon-watch"></i>2 minute read</li></ul>
+			</div>
+
+		</div>
+
+	</div><!-- .post-outer -->
+
+</article><!-- #post-126320 -->
+			</div>
+
+		</div>
+
+	</section>
+
+	
+
+			
+			
+		</main>
+
+		
+	</div><!-- .content-area -->
+
+
+	<aside id="secondary" class="widget-area sidebar-area">
+		<div class="sidebar sidebar-1">
+						<div class="widget powerkit_social_links_widget-5 powerkit_social_links_widget">
+		<div class="widget-body">
+			<h5 class="title-block title-widget">Social Links</h5>	<div class="pk-social-links-wrap  pk-social-links-template-inline pk-social-links-align-default pk-social-links-scheme-light pk-social-links-titles-enabled pk-social-links-counts-enabled pk-social-links-labels-enabled pk-social-links-mode-php pk-social-links-mode-rest">
+		<div class="pk-social-links-items">
+								<div class="pk-social-links-item pk-social-links-facebook  pk-social-links-no-count" data-id="facebook">
+						<a href="https://facebook.com/PortCalls.Asia" class="pk-social-links-link" target="_blank" rel="nofollow noopener" aria-label="Facebook">
+							<i class="pk-social-links-icon pk-icon pk-icon-facebook"></i>
+															<span class="pk-social-links-title pk-font-heading">Facebook</span>
+							
+															<span class="pk-social-links-count pk-font-secondary">0</span>
+							
+							
+													</a>
+					</div>
+										<div class="pk-social-links-item pk-social-links-linkedin  pk-social-links-no-count" data-id="linkedin">
+						<a href="https://www.linkedin.com/company/portcalls" class="pk-social-links-link" target="_blank" rel="nofollow noopener" aria-label="LinkedIn">
+							<i class="pk-social-links-icon pk-icon pk-icon-linkedin"></i>
+															<span class="pk-social-links-title pk-font-heading">LinkedIn</span>
+							
+															<span class="pk-social-links-count pk-font-secondary">0</span>
+							
+							
+													</a>
+					</div>
+										<div class="pk-social-links-item pk-social-links-twitter  pk-social-links-no-count" data-id="twitter">
+						<a href="https://x.com/PortCalls" class="pk-social-links-link" target="_blank" rel="nofollow noopener" aria-label="Twitter">
+							<i class="pk-social-links-icon pk-icon pk-icon-twitter"></i>
+															<span class="pk-social-links-title pk-font-heading">Twitter</span>
+							
+															<span class="pk-social-links-count pk-font-secondary">0</span>
+							
+							
+													</a>
+					</div>
+										<div class="pk-social-links-item pk-social-links-youtube  pk-social-links-no-count" data-id="youtube">
+						<a href="https://www.youtube.com/channel/@PortCalls_Asia" class="pk-social-links-link" target="_blank" rel="nofollow noopener" aria-label="YouTube">
+							<i class="pk-social-links-icon pk-icon pk-icon-youtube"></i>
+															<span class="pk-social-links-title pk-font-heading">YouTube</span>
+							
+															<span class="pk-social-links-count pk-font-secondary">0</span>
+							
+							
+													</a>
+					</div>
+										<div class="pk-social-links-item pk-social-links-mail  pk-social-links-no-count" data-id="mail">
+						<a href="mailto:info@portcalls.com" class="pk-social-links-link" target="_blank" rel="nofollow noopener" aria-label="Email">
+							<i class="pk-social-links-icon pk-icon pk-icon-mail"></i>
+															<span class="pk-social-links-title pk-font-heading">Email</span>
+							
+															<span class="pk-social-links-count pk-font-secondary">0</span>
+							
+							
+													</a>
+					</div>
+							</div>
+	</div>
+			</div>
+
+		</div><div class="widget powerkit_widget_posts-3 powerkit_widget_posts"><h5 class="title-block title-widget">Most Read</h5>
+			<div class="widget-body pk-widget-posts pk-widget-posts-template-default pk-widget-posts-template-numbered posts-per-page-5">
+				<ul>
+											<li class="pk-post-item">
+								<article class="post-126624 post type-post status-publish format-standard has-post-thumbnail category-breaking-news category-editors-picks tag-portcalls-cover tag-portcalls-october-12-2026 tag-print-edition">
+		<div class="pk-post-outer">
+										<div class="pk-post-inner pk-post-thumbnail">
+					<a href="https://portcalls.com/portcalls-october-12-2026/" class="post-thumbnail">
+						<picture><source  sizes='(max-width: 80px) 100vw, 80px' type="image/webp" data-srcset="https://portcalls.com/wp-content/uploads/2026/10/PortCalls-October-12-2026-Monday-Issue-80x80.jpg.webp 80w, https://portcalls.com/wp-content/uploads/2026/10/PortCalls-October-12-2026-Monday-Issue-150x150.jpg.webp 150w"><img width="80" height="80" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQAQAAAACmas8AAAAAAnRSTlMAAHaTzTgAAAARSURBVCjPY2AYBaNgFNALAAADcAABkVpjHQAAAABJRU5ErkJggg==" class="attachment-pk-small size-pk-small wp-post-image lazyload" alt="" decoding="async"   data-eio="p" data-src="https://portcalls.com/wp-content/uploads/2026/10/PortCalls-October-12-2026-Monday-Issue-80x80.jpg" data-srcset="https://portcalls.com/wp-content/uploads/2026/10/PortCalls-October-12-2026-Monday-Issue-80x80.jpg 80w, https://portcalls.com/wp-content/uploads/2026/10/PortCalls-October-12-2026-Monday-Issue-150x150.jpg 150w" data-max-width="80" data-sizes="auto" data-eio-rwidth="80" data-eio-rheight="80" /></picture><noscript><img width="80" height="80" src="https://portcalls.com/wp-content/uploads/2026/10/PortCalls-October-12-2026-Monday-Issue-80x80.jpg" class="attachment-pk-small size-pk-small wp-post-image" alt="" decoding="async" srcset="https://portcalls.com/wp-content/uploads/2026/10/PortCalls-October-12-2026-Monday-Issue-80x80.jpg 80w, https://portcalls.com/wp-content/uploads/2026/10/PortCalls-October-12-2026-Monday-Issue-150x150.jpg 150w" sizes="(max-width: 80px) 100vw, 80px" data-eio="l" /></noscript>
+													<span class="pk-post-number pk-bg-primary">
+								1							</span>
+											</a>
+				</div>
+			
+			<div class="pk-post-inner pk-post-data">
+				
+				
+				<h6 class="entry-title">
+					<a href="https://portcalls.com/portcalls-october-12-2026/">PortCalls October 12, 2026</a>
+				</h6>
+
+				<ul class="pk-post-meta post-meta"><li class="pk-meta-date meta-date"><a href="https://portcalls.com/portcalls-october-12-2026/" rel="bookmark">October 12, 2026</a></li></ul>			</div>
+		</div>
+	</article>
+							</li>
+											<li class="pk-post-item">
+								<article class="post-126623 post type-post status-publish format-standard has-post-thumbnail category-3pl-4pl category-aviation category-economy category-land category-maritime tag-asian-development-bank tag-jose-ramon-albert tag-oil-crisis tag-philippine-institute-for-development-studies">
+		<div class="pk-post-outer">
+										<div class="pk-post-inner pk-post-thumbnail">
+					<a href="https://portcalls.com/aviation-freight-among-most-exposed-sectors-to-oil-shock-pids/" class="post-thumbnail">
+						<picture><source  sizes='(max-width: 80px) 100vw, 80px' type="image/webp" data-srcset="https://portcalls.com/wp-content/uploads/2026/10/Jose-Ramon-Albert-PIDS-80x80.jpg.webp 80w, https://portcalls.com/wp-content/uploads/2026/10/Jose-Ramon-Albert-PIDS-150x150.jpg.webp 150w"><img width="80" height="80" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQAQAAAACmas8AAAAAAnRSTlMAAHaTzTgAAAARSURBVCjPY2AYBaNgFNALAAADcAABkVpjHQAAAABJRU5ErkJggg==" class="attachment-pk-small size-pk-small wp-post-image lazyload" alt="Aviation, freight among most exposed sectors to oil shock—PIDS" decoding="async"   data-eio="p" data-src="https://portcalls.com/wp-content/uploads/2026/10/Jose-Ramon-Albert-PIDS-80x80.jpg" data-srcset="https://portcalls.com/wp-content/uploads/2026/10/Jose-Ramon-Albert-PIDS-80x80.jpg 80w, https://portcalls.com/wp-content/uploads/2026/10/Jose-Ramon-Albert-PIDS-150x150.jpg 150w" data-max-width="80" data-sizes="auto" data-eio-rwidth="80" data-eio-rheight="80" /></picture><noscript><img width="80" height="80" src="https://portcalls.com/wp-content/uploads/2026/10/Jose-Ramon-Albert-PIDS-80x80.jpg" class="attachment-pk-small size-pk-small wp-post-image" alt="Aviation, freight among most exposed sectors to oil shock—PIDS" decoding="async" srcset="https://portcalls.com/wp-content/uploads/2026/10/Jose-Ramon-Albert-PIDS-80x80.jpg 80w, https://portcalls.com/wp-content/uploads/2026/10/Jose-Ramon-Albert-PIDS-150x150.jpg 150w" sizes="(max-width: 80px) 100vw, 80px" data-eio="l" /></noscript>
+													<span class="pk-post-number pk-bg-primary">
+								2							</span>
+											</a>
+				</div>
+			
+			<div class="pk-post-inner pk-post-data">
+				
+				
+				<h6 class="entry-title">
+					<a href="https://portcalls.com/aviation-freight-among-most-exposed-sectors-to-oil-shock-pids/">Aviation, freight among most exposed sectors to oil shock—PIDS</a>
+				</h6>
+
+				<ul class="pk-post-meta post-meta"><li class="pk-meta-date meta-date"><a href="https://portcalls.com/aviation-freight-among-most-exposed-sectors-to-oil-shock-pids/" rel="bookmark">October 12, 2026</a></li></ul>			</div>
+		</div>
+	</article>
+							</li>
+											<li class="pk-post-item">
+								<article class="post-126598 post type-post status-publish format-standard has-post-thumbnail category-aviation category-editors-picks category-press-releases tag-airbus-a330neo tag-cebu-pacific tag-xander-lao">
+		<div class="pk-post-outer">
+										<div class="pk-post-inner pk-post-thumbnail">
+					<a href="https://portcalls.com/cebu-pacific-receives-15th-a330neo-fleet-now-78-neo/" class="post-thumbnail">
+						<picture><source  sizes='(max-width: 80px) 100vw, 80px' type="image/webp" data-srcset="https://portcalls.com/wp-content/uploads/2026/10/IMG_1942-80x80.jpeg.webp 80w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1942-150x150.jpeg.webp 150w"><img width="80" height="80" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQAQAAAACmas8AAAAAAnRSTlMAAHaTzTgAAAARSURBVCjPY2AYBaNgFNALAAADcAABkVpjHQAAAABJRU5ErkJggg==" class="attachment-pk-small size-pk-small wp-post-image lazyload" alt="" decoding="async"   data-eio="p" data-src="https://portcalls.com/wp-content/uploads/2026/10/IMG_1942-80x80.jpeg" data-srcset="https://portcalls.com/wp-content/uploads/2026/10/IMG_1942-80x80.jpeg 80w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1942-150x150.jpeg 150w" data-max-width="80" data-sizes="auto" data-eio-rwidth="80" data-eio-rheight="80" /></picture><noscript><img width="80" height="80" src="https://portcalls.com/wp-content/uploads/2026/10/IMG_1942-80x80.jpeg" class="attachment-pk-small size-pk-small wp-post-image" alt="" decoding="async" srcset="https://portcalls.com/wp-content/uploads/2026/10/IMG_1942-80x80.jpeg 80w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1942-150x150.jpeg 150w" sizes="(max-width: 80px) 100vw, 80px" data-eio="l" /></noscript>
+													<span class="pk-post-number pk-bg-primary">
+								3							</span>
+											</a>
+				</div>
+			
+			<div class="pk-post-inner pk-post-data">
+				
+				
+				<h6 class="entry-title">
+					<a href="https://portcalls.com/cebu-pacific-receives-15th-a330neo-fleet-now-78-neo/">Cebu Pacific receives 15th A330neo, fleet now 78% NEO</a>
+				</h6>
+
+				<ul class="pk-post-meta post-meta"><li class="pk-meta-date meta-date"><a href="https://portcalls.com/cebu-pacific-receives-15th-a330neo-fleet-now-78-neo/" rel="bookmark">October 11, 2026</a></li></ul>			</div>
+		</div>
+	</article>
+							</li>
+											<li class="pk-post-item">
+								<article class="post-126583 post type-post status-publish format-standard has-post-thumbnail category-3pl-4pl category-breaking-news category-economy category-editors-picks category-exclusives category-land category-latest-news category-maritime category-ports-terminals tag-container-yard tag-empty-container-depots tag-hataw tag-weslie-gatchalian">
+		<div class="pk-post-outer">
+										<div class="pk-post-inner pk-post-thumbnail">
+					<a href="https://portcalls.com/valenzuela-eyes-container-yard-ban-by-2027-truckers-ban-would-worsen-empty-container-crisis/" class="post-thumbnail">
+						<picture><source  sizes='(max-width: 80px) 100vw, 80px' type="image/webp" data-srcset="https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-80x80.jpeg.webp 80w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-300x300.jpeg.webp 300w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-1024x1024.jpeg.webp 1024w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-150x150.jpeg.webp 150w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-768x768.jpeg.webp 768w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-800x800.jpeg.webp 800w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-1160x1160.jpeg.webp 1160w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941.jpeg.webp 1200w"><img width="80" height="80" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQAQAAAACmas8AAAAAAnRSTlMAAHaTzTgAAAARSURBVCjPY2AYBaNgFNALAAADcAABkVpjHQAAAABJRU5ErkJggg==" class="attachment-pk-small size-pk-small wp-post-image lazyload" alt="" decoding="async"   data-eio="p" data-src="https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-80x80.jpeg" data-srcset="https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-80x80.jpeg 80w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-300x300.jpeg 300w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-1024x1024.jpeg 1024w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-150x150.jpeg 150w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-768x768.jpeg 768w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-800x800.jpeg 800w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-1160x1160.jpeg 1160w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941.jpeg 1200w" data-max-width="80" data-sizes="auto" data-eio-rwidth="80" data-eio-rheight="80" /></picture><noscript><img width="80" height="80" src="https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-80x80.jpeg" class="attachment-pk-small size-pk-small wp-post-image" alt="" decoding="async" srcset="https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-80x80.jpeg 80w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-300x300.jpeg 300w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-1024x1024.jpeg 1024w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-150x150.jpeg 150w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-768x768.jpeg 768w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-800x800.jpeg 800w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941-1160x1160.jpeg 1160w, https://portcalls.com/wp-content/uploads/2026/10/IMG_1941.jpeg 1200w" sizes="(max-width: 80px) 100vw, 80px" data-eio="l" /></noscript>
+													<span class="pk-post-number pk-bg-primary">
+								4							</span>
+											</a>
+				</div>
+			
+			<div class="pk-post-inner pk-post-data">
+				
+				
+				<h6 class="entry-title">
+					<a href="https://portcalls.com/valenzuela-eyes-container-yard-ban-by-2027-truckers-ban-would-worsen-empty-container-crisis/">Valenzuela eyes container yard ban by 2027; truckers: ban would worsen empty container crisis</a>
+				</h6>
+
+				<ul class="pk-post-meta post-meta"><li class="pk-meta-date meta-date"><a href="https://portcalls.com/valenzuela-eyes-container-yard-ban-by-2027-truckers-ban-would-worsen-empty-container-crisis/" rel="bookmark">October 10, 2026</a></li></ul>			</div>
+		</div>
+	</article>
+							</li>
+											<li class="pk-post-item">
+								<article class="post-126571 post type-post status-publish format-standard has-post-thumbnail category-3pl-4pl category-editors-picks category-latest-news tag-procurement-and-supply-institute-of-asia-pasia">
+		<div class="pk-post-outer">
+										<div class="pk-post-inner pk-post-thumbnail">
+					<a href="https://portcalls.com/pasia-launches-nationwide-supply-chain-integrity-program/" class="post-thumbnail">
+						<picture><source  sizes='(max-width: 80px) 100vw, 80px' type="image/webp" data-srcset="https://portcalls.com/wp-content/uploads/2026/10/Charlie-Villasenor-80x80.jpg.webp 80w, https://portcalls.com/wp-content/uploads/2026/10/Charlie-Villasenor-150x150.jpg.webp 150w"><img width="80" height="80" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQAQAAAACmas8AAAAAAnRSTlMAAHaTzTgAAAARSURBVCjPY2AYBaNgFNALAAADcAABkVpjHQAAAABJRU5ErkJggg==" class="attachment-pk-small size-pk-small wp-post-image lazyload" alt="PASIA launches nationwide supply chain ethics program" decoding="async"   data-eio="p" data-src="https://portcalls.com/wp-content/uploads/2026/10/Charlie-Villasenor-80x80.jpg" data-srcset="https://portcalls.com/wp-content/uploads/2026/10/Charlie-Villasenor-80x80.jpg 80w, https://portcalls.com/wp-content/uploads/2026/10/Charlie-Villasenor-150x150.jpg 150w" data-max-width="80" data-sizes="auto" data-eio-rwidth="80" data-eio-rheight="80" /></picture><noscript><img width="80" height="80" src="https://portcalls.com/wp-content/uploads/2026/10/Charlie-Villasenor-80x80.jpg" class="attachment-pk-small size-pk-small wp-post-image" alt="PASIA launches nationwide supply chain ethics program" decoding="async" srcset="https://portcalls.com/wp-content/uploads/2026/10/Charlie-Villasenor-80x80.jpg 80w, https://portcalls.com/wp-content/uploads/2026/10/Charlie-Villasenor-150x150.jpg 150w" sizes="(max-width: 80px) 100vw, 80px" data-eio="l" /></noscript>
+													<span class="pk-post-number pk-bg-primary">
+								5							</span>
+											</a>
+				</div>
+			
+			<div class="pk-post-inner pk-post-data">
+				
+				
+				<h6 class="entry-title">
+					<a href="https://portcalls.com/pasia-launches-nationwide-supply-chain-integrity-program/">PASIA launches nationwide supply chain integrity program</a>
+				</h6>
+
+				<ul class="pk-post-meta post-meta"><li class="pk-meta-date meta-date"><a href="https://portcalls.com/pasia-launches-nationwide-supply-chain-integrity-program/" rel="bookmark">October 9, 2026</a></li></ul>			</div>
+		</div>
+	</article>
+							</li>
+									</ul>
+			</div>
+
+			</div>					</div>
+		<div class="sidebar sidebar-2"></div>
+	</aside><!-- .widget-area -->
+
+
+					
+				</div><!-- .main-content -->
+
+				
+			</div><!-- .cs-container -->
+
+			
+		</div><!-- .site-content -->
+
+		
+		<section class="cs-custom-content cs-custom-content-footer-before"><div class="cs-container"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2029838559642482"
+     crossorigin="anonymous"></script>
+<!-- Horizontal - Responsive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-2029838559642482"
+     data-ad-slot="2226413717"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script></div></section>
+<div class="section-footer-posts">
+
+	
+		<div class="cs-container">
+
+			<div class="cs-footer-posts-wrap">
+
+				<div class="cs-footer-posts cs-featured-posts cs-featured-type-4">
+					
+<article class="layout-featured-grid post-123846 post type-post status-publish format-standard has-post-thumbnail category-3pl-4pl category-breaking-news category-customs-trade category-economy category-editors-picks category-events category-exclusives category-features category-maritime category-ports-terminals tag-bureau-of-customs-port-of-batangas tag-southern-luzon-logistics-conference tag-video">
+
+	<div class="post-wrap">
+
+		<div class="post-outer">
+
+			<a class="post-link" href="https://portcalls.com/portcalls-inaugural-southern-luzon-logistics-conference-charts-path-toward-world-class-regional-logistics-ecosystem/"></a>
+
+			
+							<div class="post-inner entry-thumbnail">
+					<div class="cs-overlay cs-overlay-simple cs-overlay-ratio cs-ratio-landscape cs-bg-dark">
+						<div class="cs-overlay-background">
+							<picture><source  sizes='(max-width: 260px) 100vw, 260px' type="image/webp" data-srcset="https://portcalls.com/wp-content/uploads/2026/08/SLLC-delegates-260x140.jpg.webp 260w, https://portcalls.com/wp-content/uploads/2026/08/SLLC-delegates-300x160.jpg.webp 300w, https://portcalls.com/wp-content/uploads/2026/08/SLLC-delegates-560x300.jpg.webp 560w"><img width="260" height="140" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQQAAACMAQAAAACy5+qmAAAAAnRSTlMAAHaTzTgAAAAbSURBVFjD7cExAQAAAMKg9U9tCy+gAAAAAOBvEpgAAa7krgAAAAAASUVORK5CYII=" class="attachment-csco-thumbnail-alternative size-csco-thumbnail-alternative wp-post-image lazyload" alt="PortCalls&#039; inaugural Southern Luzon Logistics Conference charts path toward world-class regional logistics ecosystem" decoding="async"   data-eio="p" data-src="https://portcalls.com/wp-content/uploads/2026/08/SLLC-delegates-260x140.jpg" data-srcset="https://portcalls.com/wp-content/uploads/2026/08/SLLC-delegates-260x140.jpg 260w, https://portcalls.com/wp-content/uploads/2026/08/SLLC-delegates-300x160.jpg 300w, https://portcalls.com/wp-content/uploads/2026/08/SLLC-delegates-560x300.jpg 560w" data-max-width="260" data-sizes="auto" data-eio-rwidth="260" data-eio-rheight="140" /></picture><noscript><img width="260" height="140" src="https://portcalls.com/wp-content/uploads/2026/08/SLLC-delegates-260x140.jpg" class="attachment-csco-thumbnail-alternative size-csco-thumbnail-alternative wp-post-image" alt="PortCalls&#039; inaugural Southern Luzon Logistics Conference charts path toward world-class regional logistics ecosystem" decoding="async" srcset="https://portcalls.com/wp-content/uploads/2026/08/SLLC-delegates-260x140.jpg 260w, https://portcalls.com/wp-content/uploads/2026/08/SLLC-delegates-300x160.jpg 300w, https://portcalls.com/wp-content/uploads/2026/08/SLLC-delegates-560x300.jpg 560w" sizes="(max-width: 260px) 100vw, 260px" data-eio="l" /></noscript>						</div>
+						<div class="cs-overlay-content">
+													</div>
+					</div>
+				</div>
+			
+			<div class="post-inner entry-inner entry-data">
+				<header class="entry-header">
+					<h2 class="entry-title">PortCalls&#8217; inaugural Southern Luzon Logistics Conference charts path toward world-class regional logistics ecosystem</h2>				</header>
+
+
+				<div class="entry-excerpt">
+					The recently concluded 1st Southern Luzon Logistics Conference &amp; Exhibit 2026,&hellip;				</div>
+
+				<ul class="post-meta"><li class="meta-date">July 29, 2026</li></ul>			</div>
+
+		</div><!-- .post-outer -->
+
+	</div>
+
+</article><!-- #post-123846 -->
+
+<article class="layout-featured-grid post-121414 post type-post status-publish format-standard has-post-thumbnail category-3pl-4pl category-aviation category-breaking-news category-economy category-editors-picks category-events category-exclusives category-features category-maritime category-ports-terminals tag-4th-central-luzon-transport-and-trade-conference-and-exhibit tag-bureau-of-customs-boc tag-clark-international-airport-crk tag-colliers tag-ictsi tag-subic-bay-international-terminal-corp-sbitc tag-subic-bay-metropolitan-authority tag-video">
+
+	<div class="post-wrap">
+
+		<div class="post-outer">
+
+			<a class="post-link" href="https://portcalls.com/4th-central-luzon-transport-trade-conference-highlights-regions-rise-as-premier-trade-corridor/"></a>
+
+			
+							<div class="post-inner entry-thumbnail">
+					<div class="cs-overlay cs-overlay-simple cs-overlay-ratio cs-ratio-landscape cs-bg-dark">
+						<div class="cs-overlay-background">
+							<picture><source  sizes='(max-width: 260px) 100vw, 260px' type="image/webp" data-srcset="https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-260x140.jpg.webp 260w, https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-300x160.jpg.webp 300w, https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-800x430.jpg.webp 800w, https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-560x300.jpg.webp 560w, https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-1160x620.jpg.webp 1160w"><img width="260" height="140" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQQAAACMAQAAAACy5+qmAAAAAnRSTlMAAHaTzTgAAAAbSURBVFjD7cExAQAAAMKg9U9tCy+gAAAAAOBvEpgAAa7krgAAAAAASUVORK5CYII=" class="attachment-csco-thumbnail-alternative size-csco-thumbnail-alternative wp-post-image lazyload" alt="4th Central Luzon Transport &amp; Trade Conference highlights region’s rise as premier trade corridor" decoding="async"   data-eio="p" data-src="https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-260x140.jpg" data-srcset="https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-260x140.jpg 260w, https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-300x160.jpg 300w, https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-800x430.jpg 800w, https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-560x300.jpg 560w, https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-1160x620.jpg 1160w" data-max-width="260" data-sizes="auto" data-eio-rwidth="260" data-eio-rheight="140" /></picture><noscript><img width="260" height="140" src="https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-260x140.jpg" class="attachment-csco-thumbnail-alternative size-csco-thumbnail-alternative wp-post-image" alt="4th Central Luzon Transport &amp; Trade Conference highlights region’s rise as premier trade corridor" decoding="async" srcset="https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-260x140.jpg 260w, https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-300x160.jpg 300w, https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-800x430.jpg 800w, https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-560x300.jpg 560w, https://portcalls.com/wp-content/uploads/2026/06/Crowd-shot_CLTT-2026-1160x620.jpg 1160w" sizes="(max-width: 260px) 100vw, 260px" data-eio="l" /></noscript>						</div>
+						<div class="cs-overlay-content">
+													</div>
+					</div>
+				</div>
+			
+			<div class="post-inner entry-inner entry-data">
+				<header class="entry-header">
+					<h2 class="entry-title">4th Central Luzon Transport &#038; Trade Conference highlights region’s rise as premier trade corridor</h2>				</header>
+
+
+				<div class="entry-excerpt">
+					The 4th Central Luzon Transport &amp; Trade Conference &amp; Exhibit underscored&hellip;				</div>
+
+				<ul class="post-meta"><li class="meta-date">June 7, 2026</li></ul>			</div>
+
+		</div><!-- .post-outer -->
+
+	</div>
+
+</article><!-- #post-121414 -->
+
+<article class="layout-featured-grid post-120302 post type-post status-publish format-standard has-post-thumbnail category-3pl-4pl category-aviation category-breaking-news category-customs-trade category-economy category-events category-exclusives category-features category-land category-maritime category-ports-terminals tag-department-of-trade-and-industry-supply-chain-and-logistics-group tag-digitalization tag-high-oil-prices tag-logistics-services-philippines-lsph tag-lsph-conference-and-exhibit tag-mary-jean-pacheco tag-rosemarie-edillon tag-video">
+
+	<div class="post-wrap">
+
+		<div class="post-outer">
+
+			<a class="post-link" href="https://portcalls.com/lsph-conference-strengthens-public-private-synergy-to-tackle-logistics-bottlenecks/"></a>
+
+			
+							<div class="post-inner entry-thumbnail">
+					<div class="cs-overlay cs-overlay-simple cs-overlay-ratio cs-ratio-landscape cs-bg-dark">
+						<div class="cs-overlay-background">
+							<picture><source  sizes='(max-width: 260px) 100vw, 260px' type="image/webp" data-srcset="https://portcalls.com/wp-content/uploads/2026/05/LSPH-Conference-Exhibit-2026-260x140.jpg.webp 260w, https://portcalls.com/wp-content/uploads/2026/05/LSPH-Conference-Exhibit-2026-300x160.jpg.webp 300w, https://portcalls.com/wp-content/uploads/2026/05/LSPH-Conference-Exhibit-2026-800x430.jpg.webp 800w, https://portcalls.com/wp-content/uploads/2026/05/LSPH-Conference-Exhibit-2026-560x300.jpg.webp 560w"><img width="260" height="140" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQQAAACMAQAAAACy5+qmAAAAAnRSTlMAAHaTzTgAAAAbSURBVFjD7cExAQAAAMKg9U9tCy+gAAAAAOBvEpgAAa7krgAAAAAASUVORK5CYII=" class="attachment-csco-thumbnail-alternative size-csco-thumbnail-alternative wp-post-image lazyload" alt="LSPH conference" decoding="async"   data-eio="p" data-src="https://portcalls.com/wp-content/uploads/2026/05/LSPH-Conference-Exhibit-2026-260x140.jpg" data-srcset="https://portcalls.com/wp-content/uploads/2026/05/LSPH-Conference-Exhibit-2026-260x140.jpg 260w, https://portcalls.com/wp-content/uploads/2026/05/LSPH-Conference-Exhibit-2026-300x160.jpg 300w, https://portcalls.com/wp-content/uploads/2026/05/LSPH-Conference-Exhibit-2026-800x430.jpg 800w, https://portcalls.com/wp-content/uploads/2026/05/LSPH-Conference-Exhibit-2026-560x300.jpg 560w" data-max-width="260" data-sizes="auto" data-eio-rwidth="260" data-eio-rheight="140" /></picture><noscript><img width="260" height="140" src="https://portcalls.com/wp-content/uploads/2026/05/LSPH-Conference-Exhibit-2026-260x140.jpg" class="attachment-csco-thumbnail-alternative size-csco-thumbnail-alternative wp-post-image" alt="LSPH conference" decoding="async" srcset="https://portcalls.com/wp-content/uploads/2026/05/LSPH-Conference-Exhibit-2026-260x140.jpg 260w, https://portcalls.com/wp-content/uploads/2026/05/LSPH-Conference-Exhibit-2026-300x160.jpg 300w, https://portcalls.com/wp-content/uploads/2026/05/LSPH-Conference-Exhibit-2026-800x430.jpg 800w, https://portcalls.com/wp-content/uploads/2026/05/LSPH-Conference-Exhibit-2026-560x300.jpg 560w" sizes="(max-width: 260px) 100vw, 260px" data-eio="l" /></noscript>						</div>
+						<div class="cs-overlay-content">
+													</div>
+					</div>
+				</div>
+			
+			<div class="post-inner entry-inner entry-data">
+				<header class="entry-header">
+					<h2 class="entry-title">LSPH Conference strengthens public-private synergy to tackle logistics bottlenecks</h2>				</header>
+
+
+				<div class="entry-excerpt">
+					Around 200 stakeholders and government representatives joined the Logistics Services&hellip;				</div>
+
+				<ul class="post-meta"><li class="meta-date">May 7, 2026</li></ul>			</div>
+
+		</div><!-- .post-outer -->
+
+	</div>
+
+</article><!-- #post-120302 -->
+
+<article class="layout-featured-grid post-114750 post type-post status-publish format-standard has-post-thumbnail category-3pl-4pl category-aviation category-breaking-news category-editors-picks category-events category-exclusives category-latest-news tag-agaton-teodoro-uvero tag-air-cargo-industry-digitalization tag-amy-le tag-andre-majeres tag-dangerous-goods-handling tag-david-wee tag-eira-mae-de-pablo tag-erich-lingad tag-gloria-mae-irabagon tag-international-air-transport-association-iata tag-jason-siy tag-philippine-multimodal-transport-and-logistics-association-inc tag-philippines-air-cargo-day tag-samuel-david tag-video">
+
+	<div class="post-wrap">
+
+		<div class="post-outer">
+
+			<a class="post-link" href="https://portcalls.com/philippine-air-cargo-sector-set-to-chart-a-smarter-safer-course/"></a>
+
+			
+							<div class="post-inner entry-thumbnail">
+					<div class="cs-overlay cs-overlay-simple cs-overlay-ratio cs-ratio-landscape cs-bg-dark">
+						<div class="cs-overlay-background">
+							<picture><source  sizes='(max-width: 260px) 100vw, 260px' type="image/webp" data-srcset="https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-260x140.jpg.webp 260w, https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-300x160.jpg.webp 300w, https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-800x430.jpg.webp 800w, https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-560x300.jpg.webp 560w, https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-1160x620.jpg.webp 1160w"><img width="260" height="140" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQQAAACMAQAAAACy5+qmAAAAAnRSTlMAAHaTzTgAAAAbSURBVFjD7cExAQAAAMKg9U9tCy+gAAAAAOBvEpgAAa7krgAAAAAASUVORK5CYII=" class="attachment-csco-thumbnail-alternative size-csco-thumbnail-alternative wp-post-image lazyload" alt="" decoding="async"   data-eio="p" data-src="https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-260x140.jpg" data-srcset="https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-260x140.jpg 260w, https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-300x160.jpg 300w, https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-800x430.jpg 800w, https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-560x300.jpg 560w, https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-1160x620.jpg 1160w" data-max-width="260" data-sizes="auto" data-eio-rwidth="260" data-eio-rheight="140" /></picture><noscript><img width="260" height="140" src="https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-260x140.jpg" class="attachment-csco-thumbnail-alternative size-csco-thumbnail-alternative wp-post-image" alt="" decoding="async" srcset="https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-260x140.jpg 260w, https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-300x160.jpg 300w, https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-800x430.jpg 800w, https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-560x300.jpg 560w, https://portcalls.com/wp-content/uploads/2025/11/PACD-2025-SDE-Thumbnail-1160x620.jpg 1160w" sizes="(max-width: 260px) 100vw, 260px" data-eio="l" /></noscript>						</div>
+						<div class="cs-overlay-content">
+													</div>
+					</div>
+				</div>
+			
+			<div class="post-inner entry-inner entry-data">
+				<header class="entry-header">
+					<h2 class="entry-title">Philippine air cargo sector set to chart a smarter, safer course</h2>				</header>
+
+
+				<div class="entry-excerpt">
+					Digital innovation and safety compliance took center stage at the second Philippines&hellip;				</div>
+
+				<ul class="post-meta"><li class="meta-date">November 17, 2025</li></ul>			</div>
+
+		</div><!-- .post-outer -->
+
+	</div>
+
+</article><!-- #post-114750 -->
+				</div>
+
+				
+			</div>
+
+		</div>
+
+	
+</div>
+
+
+		
+		<footer id="colophon" class="site-footer cs-bg-dark">
+
+			<div class="site-info">
+
+				
+				<div class="footer-content">
+											<h5 class="site-title footer-title">PortCalls Asia</h5>
+						
+					<nav class="navbar-footer"><ul id="menu-footer-menu" class="navbar-nav"><li id="menu-item-67246" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-67246"><a href="https://portcalls.com/about-us/">About Us</a></li>
+<li id="menu-item-67247" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-67247"><a href="https://portcalls.com/contact-us/">Contact Us</a></li>
+<li id="menu-item-113594" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-113594"><a href="#">Our Products</a></li>
+<li id="menu-item-110415" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-110415"><a href="https://portcalls.com/archives/">Archives</a></li>
+<li id="menu-item-67249" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-67249"><a href="https://portcalls.com/?page_id=19261">Sitemap</a></li>
+</ul></nav>
+											<div class="footer-copyright">
+							PortCalls Asia is a news and data provider for cargo transport and logistics professionals which began publication in 1996. It focuses on Asian news but also covers developments elsewhere.						</div>
+										</div>
+			</div><!-- .site-info -->
+
+		</footer>
+
+		
+	</div><!-- .site-inner -->
+
+	
+</div><!-- .site -->
+
+
+<script type="speculationrules">
+{"prefetch":[{"source":"document","where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/wp-*.php","/wp-admin/*","/wp-content/uploads/*","/wp-content/*","/wp-content/plugins/*","/wp-content/themes/spotlight-child/*","/wp-content/themes/spotlight/*","/*\\?(.+)"]}},{"not":{"selector_matches":"a[rel~=\"nofollow\"]"}},{"not":{"selector_matches":".no-prefetch, .no-prefetch a"}}]},"eagerness":"conservative"}]}
+</script>
+<!--googleoff: all--><div id="cookie-law-info-bar" data-nosnippet="true"><span>This website uses cookies to improve your experience. We'll assume you're ok with this, but you can opt-out if you wish. <a role="button" tabindex="0" class="medium cli-plugin-button cli-plugin-main-button cli_settings_button" style="margin:5px 20px 5px 20px">Settings</a><a role="button" tabindex="0" data-cli_action="accept" id="cookie_action_close_header" class="medium cli-plugin-button cli-plugin-main-button cookie_action_close_header cli_action_button wt-cli-accept-btn" style="display:inline-block;margin:5px">ACCEPT</a></span></div><div id="cookie-law-info-again" style="display:none" data-nosnippet="true"><span id="cookie_hdr_showagain">Privacy &amp; Cookies Policy</span></div><div class="cli-modal" data-nosnippet="true" id="cliSettingsPopup" tabindex="-1" role="dialog" aria-labelledby="cliSettingsPopup" aria-hidden="true">
+  <div class="cli-modal-dialog" role="document">
+	<div class="cli-modal-content cli-bar-popup">
+		  <button type="button" class="cli-modal-close" id="cliModalClose">
+			<svg class="" viewBox="0 0 24 24"><path d="M19 6.41l-1.41-1.41-5.59 5.59-5.59-5.59-1.41 1.41 5.59 5.59-5.59 5.59 1.41 1.41 5.59-5.59 5.59 5.59 1.41-1.41-5.59-5.59z"></path><path d="M0 0h24v24h-24z" fill="none"></path></svg>
+			<span class="wt-cli-sr-only">Close</span>
+		  </button>
+		  <div class="cli-modal-body">
+			<div class="cli-container-fluid cli-tab-container">
+	<div class="cli-row">
+		<div class="cli-col-12 cli-align-items-stretch cli-px-0">
+			<div class="cli-privacy-overview">
+				<h4>Privacy Overview</h4>				<div class="cli-privacy-content">
+					<div class="cli-privacy-content-text">This website uses cookies to improve your experience while you navigate through the website. Out of these cookies, the cookies that are categorized as necessary are stored on your browser as they are essential for the working of basic functionalities of the website. We also use third-party cookies that help us analyze and understand how you use this website. These cookies will be stored in your browser only with your consent. You also have the option to opt-out of these cookies. But opting out of some of these cookies may have an effect on your browsing experience.</div>
+				</div>
+				<a class="cli-privacy-readmore" aria-label="Show more" tabindex="0" role="button" data-readmore-text="Show more" data-readless-text="Show less"></a>			</div>
+		</div>
+		<div class="cli-col-12 cli-align-items-stretch cli-px-0 cli-tab-section-container">
+												<div class="cli-tab-section">
+						<div class="cli-tab-header">
+							<a role="button" tabindex="0" class="cli-nav-link cli-settings-mobile" data-target="necessary" data-toggle="cli-toggle-tab">
+								Necessary							</a>
+																						<div class="wt-cli-necessary-checkbox">
+									<input type="checkbox" class="cli-user-preference-checkbox" id="wt-cli-checkbox-necessary" data-id="checkbox-necessary" checked="checked" />
+									<label class="form-check-label" for="wt-cli-checkbox-necessary">Necessary</label>
+								</div>
+								<span class="cli-necessary-caption">Always Enabled</span>
+													</div>
+						<div class="cli-tab-content">
+							<div class="cli-tab-pane cli-fade" data-id="necessary">
+								<div class="wt-cli-cookie-description">
+									Necessary cookies are absolutely essential for the website to function properly. This category only includes cookies that ensures basic functionalities and security features of the website. These cookies do not store any personal information.								</div>
+							</div>
+						</div>
+					</div>
+																	<div class="cli-tab-section">
+						<div class="cli-tab-header">
+							<a role="button" tabindex="0" class="cli-nav-link cli-settings-mobile" data-target="non-necessary" data-toggle="cli-toggle-tab">
+								Non-necessary							</a>
+																						<div class="cli-switch">
+									<input type="checkbox" id="wt-cli-checkbox-non-necessary" class="cli-user-preference-checkbox" data-id="checkbox-non-necessary" checked='checked' />
+									<label for="wt-cli-checkbox-non-necessary" class="cli-slider" data-cli-enable="Enabled" data-cli-disable="Disabled"><span class="wt-cli-sr-only">Non-necessary</span></label>
+								</div>
+													</div>
+						<div class="cli-tab-content">
+							<div class="cli-tab-pane cli-fade" data-id="non-necessary">
+								<div class="wt-cli-cookie-description">
+									Any cookies that may not be particularly necessary for the website to function and is used specifically to collect user personal data via analytics, ads, other embedded contents are termed as non-necessary cookies. It is mandatory to procure user consent prior to running these cookies on your website.								</div>
+							</div>
+						</div>
+					</div>
+										</div>
+	</div>
+</div>
+		  </div>
+		  <div class="cli-modal-footer">
+			<div class="wt-cli-element cli-container-fluid cli-tab-container">
+				<div class="cli-row">
+					<div class="cli-col-12 cli-align-items-stretch cli-px-0">
+						<div class="cli-tab-footer wt-cli-privacy-overview-actions">
+						
+															<a id="wt-cli-privacy-save-btn" role="button" tabindex="0" data-cli-action="accept" class="wt-cli-privacy-btn cli_setting_save_button wt-cli-privacy-accept-btn cli-btn">SAVE &amp; ACCEPT</a>
+													</div>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+  </div>
+</div>
+<div class="cli-modal-backdrop cli-fade cli-settings-overlay"></div>
+<div class="cli-modal-backdrop cli-fade cli-popupbar-overlay"></div>
+<!--googleon: all-->			<a href="#top" class="pk-scroll-to-top">
+				<i class="pk-icon pk-icon-up"></i>
+			</a>
+					<div class="pk-mobile-share-overlay">
+							</div>
+			<script id='kirki-viewport-lists'>var kirkiViewports = {"md":{"value":1200,"scale":1,"minWidth":1200,"maxWidth":1200,"title":"Desktop","icon":"desktop","activeIcon":"desktop-hover","id":"md","type":"max"},"tablet":{"value":991,"scale":1,"minWidth":991,"maxWidth":991,"title":"Tablet","icon":"tablet-default","activeIcon":"tablet-hover","type":"max","id":"tablet"},"mobileLandscape":{"value":767,"scale":1,"minWidth":767,"maxWidth":767,"title":"Landscape","icon":"phone-hr-default","activeIcon":"phone-hr-hover","type":"max","id":"mobileLandscape"},"mobile":{"value":575,"scale":1,"minWidth":575,"maxWidth":575,"title":"Mobile","icon":"phone-vr-default","activeIcon":"phone-vr-hover","type":"max","id":"mobile"}};</script><script id='kirki-variable-lists'>var kirkiCSSVariable = {"data":[{"title":"Colors","key":"color","modes":[{"title":"Default","key":"default"}],"variables":[]},{"title":"Numbers","key":"size","modes":[{"title":"Default","key":"default"}],"variables":[]},{"title":"Text Styles","key":"text-style","modes":[{"title":"Default","key":"default"}],"variables":[]},{"title":"Font Family","key":"font-family","modes":[{"title":"Default","key":"default"}],"variables":[]}]};</script><script id="kirki-api-and-nonce">
+    window.wp_kirki = {
+        ajaxUrl: "https://portcalls.com/wp-admin/admin-ajax.php",
+        restUrl: "https://portcalls.com/wp-json/",
+        siteUrl: "https://portcalls.com",
+        apiVersion: "v1",
+        postId: "20447",
+        nonce: "[REDACTED]",
+        call_from: "",
+        templateId: "",
+        context: {"id":20447,"type":"post"}
+    };
+    </script><div id="fb-root"></div><script>
+var HCaptchaMainObject = {"params":"{\"sitekey\":\"779ab78e-d8f0-4d50-a91e-62ae7e367e9a\",\"theme\":\"light\",\"size\":\"normal\",\"hl\":\"en\"}"};
+</script>
+<script id="eio-lazy-load-js-before">
+var eio_lazy_vars = {"bg_min_dpr":1.1,"exactdn_domain":"","safe_domains":["portcalls.com","www.portcalls.com"],"skip_autoscale":0,"threshold":0,"use_dpr":1};
+//# sourceURL=eio-lazy-load-js-before
+</script>
+<script async data-wp-strategy="async" id="eio-lazy-load-js" src="https://portcalls.com/wp-content/plugins/ewww-image-optimizer/includes/lazysizes.min.js?ver=877"></script>
+<script id="powerkit-js" src="https://portcalls.com/wp-content/plugins/powerkit/assets/js/_scripts.js?ver=3.1.1"></script>
+<script id="wp-hooks-js" src="https://portcalls.com/wp-includes/js/dist/hooks.min.js?ver=f0f188028580e8dc1255"></script>
+<script id="wp-i18n-js" src="https://portcalls.com/wp-includes/js/dist/i18n.min.js?ver=1dfe7db3940c23ea9216"></script>
+<script id="wp-i18n-js-after">
+wp.i18n.setLocaleData( { 'text direction\u0004ltr': [ 'ltr' ] } );
+//# sourceURL=wp-i18n-js-after
+</script>
+<script id="swv-js" src="https://portcalls.com/wp-content/plugins/contact-form-7/includes/swv/js/index.js?ver=6.1.7"></script>
+<script id="contact-form-7-js-before">
+var wpcf7 = {
+    "api": {
+        "root": "https:\/\/portcalls.com\/wp-json\/",
+        "namespace": "contact-form-7\/v1"
+    },
+    "cached": 1
+};
+//# sourceURL=contact-form-7-js-before
+</script>
+<script id="contact-form-7-js" src="https://portcalls.com/wp-content/plugins/contact-form-7/includes/js/index.js?ver=6.1.7"></script>
+<script id="powerkit-basic-elements-js" src="https://portcalls.com/wp-content/plugins/powerkit/modules/basic-elements/public/js/public-powerkit-basic-elements.js?ver=4.0.0"></script>
+<script id="justifiedgallery-js" src="https://portcalls.com/wp-content/plugins/powerkit/modules/justified-gallery/public/js/jquery.justifiedGallery.min.js?ver=3.1.1"></script>
+<script id="powerkit-justified-gallery-js-extra">
+var powerkitJG = {"rtl":""};
+//# sourceURL=powerkit-justified-gallery-js-extra
+</script>
+<script id="powerkit-justified-gallery-js" src="https://portcalls.com/wp-content/plugins/powerkit/modules/justified-gallery/public/js/public-powerkit-justified-gallery.js?ver=3.1.1"></script>
+<script id="imagesloaded-js" src="https://portcalls.com/wp-includes/js/imagesloaded.min.js?ver=5.0.0"></script>
+<script id="glightbox-js" src="https://portcalls.com/wp-content/plugins/powerkit/modules/lightbox/public/js/glightbox.min.js?ver=3.1.1"></script>
+<script id="powerkit-lightbox-js-extra">
+var powerkit_lightbox_localize = {"text_previous":"Previous","text_next":"Next","text_close":"Close","text_loading":"Loading","text_counter":"of","single_image_selectors":".entry-content img,.single .post-media img","gallery_selectors":".wp-block-gallery,.gallery","exclude_selectors":"","zoom_icon":"1"};
+//# sourceURL=powerkit-lightbox-js-extra
+</script>
+<script id="powerkit-lightbox-js" src="https://portcalls.com/wp-content/plugins/powerkit/modules/lightbox/public/js/public-powerkit-lightbox.js?ver=3.1.1"></script>
+<script id="powerkit-opt-in-forms-js-extra">
+var opt_in = {"ajax_url":"https://portcalls.com/wp-admin/admin-ajax.php","warning_privacy":"Please confirm that you agree with our policies.","is_admin":"","server_error":"Server error occurred. Please try again later."};
+//# sourceURL=powerkit-opt-in-forms-js-extra
+</script>
+<script id="powerkit-opt-in-forms-js" src="https://portcalls.com/wp-content/plugins/powerkit/modules/opt-in-forms/public/js/public-powerkit-opt-in-forms.js?ver=3.1.1"></script>
+<script id="powerkit-pinterest-js" async="async" defer="defer" src="//assets.pinterest.com/js/pinit.js?ver=3.1.1"></script>
+<script id="powerkit-pin-it-js-extra">
+var powerkit_pinit_localize = {"image_selectors":".entry-content img","exclude_selectors":".pk-block-author,.pk-featured-categories img,.pk-inline-posts-container img,.pk-instagram-image,.pk-subscribe-image,.wp-block-cover,.pk-block-posts","only_hover":"1"};
+//# sourceURL=powerkit-pin-it-js-extra
+</script>
+<script id="powerkit-pin-it-js" src="https://portcalls.com/wp-content/plugins/powerkit/modules/pinterest/public/js/public-powerkit-pin-it.js?ver=3.1.1"></script>
+<script id="powerkit-scroll-to-top-js" src="https://portcalls.com/wp-content/plugins/powerkit/modules/scroll-to-top/public/js/public-powerkit-scroll-to-top.js?ver=3.1.1"></script>
+<script id="powerkit-share-buttons-js" src="https://portcalls.com/wp-content/plugins/powerkit/modules/share-buttons/public/js/public-powerkit-share-buttons.js?ver=3.1.1"></script>
+<script id="flickity-js" src="https://portcalls.com/wp-content/plugins/powerkit/modules/slider-gallery/public/js/flickity.pkgd.min.js?ver=3.1.1"></script>
+<script id="powerkit-slider-gallery-js-extra">
+var powerkit_sg_flickity = {"page_info_sep":" of "};
+//# sourceURL=powerkit-slider-gallery-js-extra
+</script>
+<script id="powerkit-slider-gallery-js" src="https://portcalls.com/wp-content/plugins/powerkit/modules/slider-gallery/public/js/public-powerkit-slider-gallery.js?ver=3.1.1"></script>
+<script id="powerkit-table-of-contents-js-extra">
+var powerkit_toc_config = {"label_show":"Show","label_hide":"Hide"};
+//# sourceURL=powerkit-table-of-contents-js-extra
+</script>
+<script id="powerkit-table-of-contents-js" src="https://portcalls.com/wp-content/plugins/powerkit/modules/table-of-contents/public/js/public-powerkit-table-of-contents.js?ver=3.1.1"></script>
+<script id="colcade-js" src="https://portcalls.com/wp-content/themes/spotlight/js/colcade.js?ver=0.2.0"></script>
+<script id="object-fit-images-js" src="https://portcalls.com/wp-content/themes/spotlight/js/ofi.min.js?ver=3.2.3"></script>
+<script id="csco-scripts-js-extra">
+var csco_mega_menu = {"rest_url":"https://portcalls.com/wp-json/csco/v1/menu-posts","current_lang":"","current_locale":"en_US"};
+//# sourceURL=csco-scripts-js-extra
+</script>
+<script id="csco-scripts-js" src="https://portcalls.com/wp-content/themes/spotlight/js/scripts.js?ver=1.0.0"></script>
+<script id="powerkit-facebook-sdk-js" src="https://connect.facebook.net/en_US/sdk.js?ver=3.1.1#xfbml=1&#038;version=v17.0&#038;appId=&#038;autoLogAppEvents=1"></script>
+	<script type="text/javascript">
+		"use strict";
+
+		(function($) {
+
+			$( window ).on( 'load', function() {
+
+				// Each All Share boxes.
+				$( '.pk-share-buttons-mode-rest' ).each( function() {
+
+					var powerkitButtonsIds = [],
+						powerkitButtonsBox = $( this );
+
+					// Check Counts.
+					if ( ! powerkitButtonsBox.hasClass( 'pk-share-buttons-has-counts' ) && ! powerkitButtonsBox.hasClass( 'pk-share-buttons-has-total-counts' ) ) {
+						return;
+					}
+
+					powerkitButtonsBox.find( '.pk-share-buttons-item' ).each( function() {
+						if ( $( this ).attr( 'data-id' ).length > 0 ) {
+							powerkitButtonsIds.push( $( this ).attr( 'data-id' ) );
+						}
+					});
+
+					// Generate accounts data.
+					var powerkitButtonsData = {};
+
+					if( powerkitButtonsIds.length > 0 ) {
+						powerkitButtonsData = {
+							'ids'     : powerkitButtonsIds.join(),
+							'post_id' : powerkitButtonsBox.attr( 'data-post-id' ),
+							'url'     : powerkitButtonsBox.attr( 'data-share-url' ),
+						};
+					}
+
+					// Get results by REST API.
+					$.ajax({
+						type: 'GET',
+						url: 'https://portcalls.com/wp-json/social-share/v1/get-shares',
+						data: powerkitButtonsData,
+						beforeSend: function(){
+
+							// Add Loading Class.
+							powerkitButtonsBox.addClass( 'pk-share-buttons-loading' );
+						},
+						success: function( response ) {
+
+							if ( ! $.isEmptyObject( response ) && ! response.hasOwnProperty( 'code' ) ) {
+
+								// Accounts loop.
+								$.each( response, function( index, data ) {
+
+									if ( index !== 'total_count' ) {
+
+										// Find Bsa Item.
+										var powerkitButtonsItem = powerkitButtonsBox.find( '.pk-share-buttons-item[data-id="' + index + '"]');
+
+										// Set Count.
+										if ( data.hasOwnProperty( 'count' ) && data.count  ) {
+
+											powerkitButtonsItem.removeClass( 'pk-share-buttons-no-count' ).addClass( 'pk-share-buttons-item-count' );
+											powerkitButtonsItem.find( '.pk-share-buttons-count' ).html( data.count );
+
+										} else {
+											powerkitButtonsItem.addClass( 'pk-share-buttons-no-count' );
+										}
+									}
+								});
+
+								if ( powerkitButtonsBox.hasClass( 'pk-share-buttons-has-total-counts' ) && response.hasOwnProperty( 'total_count' ) ) {
+									var powerkitButtonsTotalBox = powerkitButtonsBox.find( '.pk-share-buttons-total' );
+
+									if ( response.total_count ) {
+										powerkitButtonsTotalBox.find( '.pk-share-buttons-count' ).html( response.total_count );
+										powerkitButtonsTotalBox.show().removeClass( 'pk-share-buttons-total-no-count' );
+									}
+								}
+							}
+
+							// Remove Loading Class.
+							powerkitButtonsBox.removeClass( 'pk-share-buttons-loading' );
+						},
+						error: function() {
+
+							// Remove Loading Class.
+							powerkitButtonsBox.removeClass( 'pk-share-buttons-loading' );
+						}
+					});
+				});
+			});
+
+		})(jQuery);
+	</script>
+		<script type="text/javascript">
+		"use strict";
+
+		(function($) {
+
+			$( window ).on( 'load', function() {
+
+				// Get all links.
+				var powerkitSLinksIds = [];
+
+				var powerkitSLinksRestBox = $( '.pk-social-links-mode-rest' );
+
+				// Generate links Ids.
+				$( powerkitSLinksRestBox ).each( function( index, wrap ) {
+
+					if ( ! $( wrap ).hasClass( 'pk-social-links-counts-disabled' ) ) {
+
+						$( wrap ).find( '.pk-social-links-item' ).each( function() {
+							if ( $( this ).attr( 'data-id' ).length > 0 ) {
+								powerkitSLinksIds.push( $( this ).attr( 'data-id' ) );
+							}
+						});
+					}
+				});
+
+				// Generate links data.
+				var powerkitSLinksData = {};
+
+				if( powerkitSLinksIds.length > 0 ) {
+					powerkitSLinksData = { 'ids' : powerkitSLinksIds.join() };
+				}
+
+				// Check data.
+				if ( ! Object.entries( powerkitSLinksData ).length ) {
+					return;
+				}
+
+				// Get results by REST API.
+				$.ajax({
+					type: 'GET',
+					url: 'https://portcalls.com/wp-json/social-counts/v1/get-counts',
+					data: powerkitSLinksData,
+					beforeSend: function(){
+
+						// Add Loading Class.
+						powerkitSLinksRestBox.addClass( 'pk-social-links-loading' );
+					},
+					success: function( response ) {
+
+						if ( ! $.isEmptyObject( response ) && ! response.hasOwnProperty( 'code' ) ) {
+
+							// SLinks loop.
+							$.each( response, function( index, data ) {
+
+								// Find Bsa Item.
+								var powerkitSLinksItem = powerkitSLinksRestBox.find( '.pk-social-links-item[data-id="' + index + '"]');
+
+								// Set Class.
+								if ( data.hasOwnProperty( 'class' ) ) {
+									powerkitSLinksItem.addClass( data.class );
+								}
+
+								// Set Count.
+								if ( data.hasOwnProperty( 'result' ) && data.result !== null && data.result.hasOwnProperty( 'count' ) ) {
+
+									if ( data.result.count ) {
+										// Class Item.
+										powerkitSLinksItem.removeClass( 'pk-social-links-no-count' ).addClass( 'pk-social-links-item-count' );
+
+										// Count item.
+										powerkitSLinksItem.find( '.pk-social-links-count' ).not( '.pk-tippy' ).html( data.result.count );
+									}
+								} else {
+									powerkitSLinksItem.addClass( 'pk-social-links-no-count' );
+								}
+
+							});
+						}
+
+						// Remove Loading Class.
+						powerkitSLinksRestBox.removeClass( 'pk-social-links-loading' );
+					},
+					error: function() {
+
+						// Remove Loading Class.
+						powerkitSLinksRestBox.removeClass( 'pk-social-links-loading' );
+					}
+				});
+			});
+
+		})(jQuery);
+	</script>
+	</body>
+</html>
+
+<!-- Dynamic page generated in 0.957 seconds. -->
+<!-- Cached page generated by WP-Super-Cache on 2026-10-12 15:22:32 -->
+
+<!-- super cache -->

@@ -1,0 +1,3 @@
+fetched 2026-10-12T13:57:14+08:00 (UTC+8 box clock)
+HKO GET 200: weather.gov.hk/en/publica/tc/tc2022/six_hrly_data_nalgae.html, tc2023/six_hrly_data_saola.html, hko.gov.hk/en/publica/tc/tc2022/section3_6rpt.html
+Open-Meteo XX-A01 /v1/forecast start_date=2022-11-01 -> range error (openmeteo-range.txt)

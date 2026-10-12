@@ -5,3 +5,6 @@
 @media(max-width:1500px){.annual-layout{grid-template-columns:160px minmax(420px,1fr)}.annual-details{grid-column:2}.annual-details article{display:inline-block;width:100%;vertical-align:top}.annual-toolbar h2{font-size:22px}}
 @media(max-width:760px){.annual-layout{display:flex;flex-direction:column}.annual-panel{width:100%}.annual-heading{align-items:start;flex-direction:column}.annual-heading h1{font-size:24px}.annual-country{display:inline-flex;padding:8px;margin-right:8px}.annual-country small,.annual-filter-note{display:none}.annual-option{margin:8px}.annual-filters{padding:12px}.annual-day{min-height:115px}.annual-scroll{overflow-x:auto}.annual-grid,.annual-weekdays{min-width:510px}.annual-notice{font-size:13px}.annual-controls{flex-wrap:wrap}.annual-details{grid-column:auto}}
 .annual-status-list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:4px;font-size:12px;line-height:1.6;color:var(--annual-muted)}
+
+.annual-promo-count { display: block; font-size: 11px; padding: 1px 4px; border: 1px dashed currentColor; border-radius: 4px; opacity: 0.85; }
+.annual-promo-details { margin-top: 12px; border-top: 1px dashed currentColor; padding-top: 8px; }

@@ -1,0 +1,238 @@
+{
+  "probe": "CN-W01/CN-W02 NMC limited integration real run (isolated)",
+  "gitHead": "a6c00bc70de78a0e4d0a129947f69c8878445aa0",
+  "workspaceClean": true,
+  "runDir": "D:\\try one\\Shipping HOT\\.tmp\\nmc-live-a6c00bc",
+  "ranAt": "2026-10-11T01:38:50.372Z",
+  "entry": "https://www.nmc.cn/publish/country/warning/index.html",
+  "requests": 6,
+  "egress": [
+    {
+      "url": "https://www.nmc.cn/publish/typhoon/typhoon_new.html",
+      "redirect": "error",
+      "at": "2026-10-11T01:38:50.427Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nmc.cn/publish/typhoon/typhoon_new.html",
+      "bytes": 59861
+    },
+    {
+      "url": "https://www.nmc.cn/publish/typhoon/warning.html",
+      "redirect": "error",
+      "at": "2026-10-11T01:38:50.801Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nmc.cn/publish/typhoon/warning.html",
+      "bytes": 65627
+    },
+    {
+      "url": "https://www.nmc.cn/publish/country/warning/index.html",
+      "redirect": "error",
+      "at": "2026-10-11T01:38:51.146Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nmc.cn/publish/country/warning/index.html",
+      "bytes": 62233
+    },
+    {
+      "url": "https://www.nmc.cn/publish/country/warning/typhoon.html",
+      "redirect": "error",
+      "at": "2026-10-11T01:38:51.276Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nmc.cn/publish/country/warning/typhoon.html",
+      "bytes": 65334
+    },
+    {
+      "url": "https://www.nmc.cn/publish/country/warning/downpour.html",
+      "redirect": "error",
+      "at": "2026-10-11T01:38:51.410Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nmc.cn/publish/country/warning/downpour.html",
+      "bytes": 60672
+    },
+    {
+      "url": "https://www.nmc.cn/publish/country/warning/strong_convection.html",
+      "redirect": "error",
+      "at": "2026-10-11T01:38:51.501Z",
+      "status": 200,
+      "redirected": false,
+      "finalUrl": "https://www.nmc.cn/publish/country/warning/strong_convection.html",
+      "bytes": 62058
+    }
+  ],
+  "jobResult": {
+    "status": "success",
+    "recordsRead": 6,
+    "recordsWritten": 6
+  },
+  "classification": "received_all_six_pages",
+  "report": {
+    "sourceId": "nmc",
+    "requested": 6,
+    "received": 6,
+    "failed": [],
+    "created": 6,
+    "updated": 0,
+    "unchanged": 0,
+    "historical": 4
+  },
+  "summaryZh": "收到 6/6 页（新建 6，更新 0，未变 0，失败 0，历史产品提示 4）；生命周期/有效期未知，未关联港口",
+  "recordsStored": 6,
+  "recordsHistoricalNotice": 4,
+  "recordsLiftStatement": 4,
+  "recordsEventEligible": 0,
+  "recordsWithPort": 0,
+  "recordsCurrentFeed": 6,
+  "cnshaRuleHits": 0,
+  "records": [
+    {
+      "id": "weather-alert:nmc:warning_strong_convection:2026-09-29T18",
+      "title": "强对流天气预警（2026 年 09 月 29 日 18 时）",
+      "sourceUrl": "https://www.nmc.cn/publish/country/warning/strong_convection.html",
+      "raw": {
+        "publishTimeText": "2026 年 09 月 29 日 18 时",
+        "numberText": null,
+        "nextIssueText": null,
+        "historicalProductNotice": "此时段内暂无新产品更新，下列为过去时刻产品",
+        "liftStatement": {
+          "sentence": "中央气象台9月29日18时解除强对流天气蓝色预警",
+          "object": "强对流天气蓝色预警"
+        },
+        "rawColorLevel": "蓝色",
+        "typhoonIntensityText": null,
+        "centerPositionText": null,
+        "typhoonObjects": []
+      },
+      "standardizedSeverity": "unmapped",
+      "alertState": "unknown",
+      "lifecycleStatus": "unknown",
+      "firstReceivedAt": "2026-10-11T01:38:50.372Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:nmc:warning_downpour:2026-09-10T06",
+      "title": "暴雨预警（2026 年 09 月 10 日 06 时）",
+      "sourceUrl": "https://www.nmc.cn/publish/country/warning/downpour.html",
+      "raw": {
+        "publishTimeText": "2026 年 09 月 10 日 06 时",
+        "numberText": null,
+        "nextIssueText": null,
+        "historicalProductNotice": "此时段内暂无新产品更新，下列为过去时刻产品",
+        "liftStatement": {
+          "sentence": "中央气象台9月10日06时解除暴雨蓝色预警",
+          "object": "暴雨蓝色预警"
+        },
+        "rawColorLevel": "蓝色",
+        "typhoonIntensityText": null,
+        "centerPositionText": null,
+        "typhoonObjects": []
+      },
+      "standardizedSeverity": "unmapped",
+      "alertState": "unknown",
+      "lifecycleStatus": "unknown",
+      "firstReceivedAt": "2026-10-11T01:38:50.372Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:nmc:warning_typhoon:2026-09-06T10",
+      "title": "台风预警（2026 年 09 月 06 日 10 时）",
+      "sourceUrl": "https://www.nmc.cn/publish/country/warning/typhoon.html",
+      "raw": {
+        "publishTimeText": "2026 年 09 月 06 日 10 时",
+        "numberText": null,
+        "nextIssueText": null,
+        "historicalProductNotice": "此时段内暂无新产品更新，下列为过去时刻产品",
+        "liftStatement": {
+          "sentence": "中央气象台9月6日10时解除台风蓝色预警",
+          "object": "台风蓝色预警"
+        },
+        "rawColorLevel": "蓝色",
+        "typhoonIntensityText": null,
+        "centerPositionText": null,
+        "typhoonObjects": []
+      },
+      "standardizedSeverity": "unmapped",
+      "alertState": "unknown",
+      "lifecycleStatus": "unknown",
+      "firstReceivedAt": "2026-10-11T01:38:50.372Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:nmc:warning_index:2026-10-05T06",
+      "title": "大风预警（2026 年 10 月 05 日 06 时）",
+      "sourceUrl": "https://www.nmc.cn/publish/country/warning/index.html",
+      "raw": {
+        "publishTimeText": "2026 年 10 月 05 日 06 时",
+        "numberText": null,
+        "nextIssueText": null,
+        "historicalProductNotice": "此时段内暂无新产品更新，下列为过去时刻产品",
+        "liftStatement": {
+          "sentence": "中央气象台10月5日06时解除大风蓝色预警",
+          "object": "大风蓝色预警"
+        },
+        "rawColorLevel": "蓝色",
+        "typhoonIntensityText": null,
+        "centerPositionText": null,
+        "typhoonObjects": []
+      },
+      "standardizedSeverity": "unmapped",
+      "alertState": "unknown",
+      "lifecycleStatus": "unknown",
+      "firstReceivedAt": "2026-10-11T01:38:50.372Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:nmc:typhoon_bulletin:2026-10-11T10",
+      "title": "台风公报（2026 年 10 月 11 日 10 时）",
+      "sourceUrl": "https://www.nmc.cn/publish/typhoon/warning.html",
+      "raw": {
+        "publishTimeText": "2026 年 10 月 11 日 10 时",
+        "numberText": null,
+        "nextIssueText": null,
+        "historicalProductNotice": null,
+        "liftStatement": null,
+        "rawColorLevel": null,
+        "typhoonIntensityText": null,
+        "centerPositionText": null,
+        "typhoonObjects": []
+      },
+      "standardizedSeverity": "unmapped",
+      "alertState": "unknown",
+      "lifecycleStatus": "unknown",
+      "firstReceivedAt": "2026-10-11T01:38:50.372Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    },
+    {
+      "id": "weather-alert:nmc:typhoon_flash:2026-1873",
+      "title": "台风快讯（10月11日08时27分）",
+      "sourceUrl": "https://www.nmc.cn/publish/typhoon/typhoon_new.html",
+      "raw": {
+        "publishTimeText": "10月11日08时27分",
+        "numberText": "2026年总1873期",
+        "nextIssueText": "11日11时30分",
+        "historicalProductNotice": null,
+        "liftStatement": null,
+        "rawColorLevel": null,
+        "typhoonIntensityText": "超强台风级",
+        "centerPositionText": "北纬24.5度、东经148.2度",
+        "typhoonObjects": [
+          "“小熊”，KOGUMA"
+        ]
+      },
+      "standardizedSeverity": "unmapped",
+      "alertState": "unknown",
+      "lifecycleStatus": "unknown",
+      "firstReceivedAt": "2026-10-11T01:38:50.372Z",
+      "relatedPortIds": [],
+      "eventEligibility": false
+    }
+  ],
+  "scope": "real official site -> provider -> sync job -> isolated SQLite -> impact rule SERVICE layer; HTTP API + browser are covered by r1-5-nmc-display.mjs"
+}

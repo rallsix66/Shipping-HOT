@@ -1,0 +1,15 @@
+﻿ 鉁?server/services/tropical-cyclone-wr-s03.test.ts (3 tests) 3ms
+ 鉁?server/services/article-fetch-security.test.ts (10 tests) 12ms
+ 鉁?server/services/jma-target-tc-strict.test.ts (3 tests) 4ms
+ 鉁?server/services/weather-calibration-replay.test.ts (5 tests) 3ms
+ 鉁?server/providers/jtwc-typhoon-fixture.test.ts (1 test) 2ms
+ 鉁?test/common.test.ts (1 test) 1ms
+ 鉁?server/providers/shipping.test.ts (6 tests) 4ms
+ 鉁?server/shipping-store.test.ts (3 tests) 4ms
+ 鉁?server/providers/translation/fake-provider.test.ts (1 test) 2ms
+
+ Test Files  97 passed (97)
+      Tests  798 passed | 3 skipped (801)
+   Start at  11:50:24
+   Duration  7.23s (transform 12.81s, setup 0ms, import 41.65s, tests 26.91s, environment 27ms)
+

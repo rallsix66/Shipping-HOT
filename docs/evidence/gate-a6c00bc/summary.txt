@@ -1,0 +1,14 @@
+﻿HEAD a6c00bc70de78a0e4d0a129947f69c8878445aa0 started 2026-10-11T09:36:48.1550034+08:00 node v24.15.0 pnpm 10.30.3 os Microsoft Windows NT 10.0.19045.0
+status-before: []
+install exit=0
+build exit=0
+typecheck exit=0
+lint exit=0
+vitest exit=0
+smoke exit=0
+s7 exit=0
+selfscan keyLike=0 hex32Lines=14 hex32NotCmsIdOrIcon=14
+selfscan exit=1
+audit-inventory exit=0
+status-after: []
+DONE 2026-10-11T09:38:24.9008043+08:00

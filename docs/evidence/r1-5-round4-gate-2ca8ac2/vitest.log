@@ -1,0 +1,59 @@
+  jobId: [32m'feed-sync:healthy-source'[39m,
+  providerId: [32m'healthy-source'[39m
+}
+[info] runtime stopped
+ ✓ server/secrets/file-secret-store.test.ts (3 tests) 111ms
+ ✓ server/database/shipping-weather-batch.test.ts (1 test) 55ms
+ ✓ server/services/port-weather-panel.test.ts (2 tests) 97ms
+ ✓ server/runtime/feed-sync-job.test.ts (3 tests) 170ms
+ ✓ server/services/tropical-cyclone-panel.test.ts (1 test) 54ms
+ ✓ server/providers/jma-tropical-cyclone.test.ts (5 tests) 39ms
+ ✓ server/providers/weather-alerts.test.ts (16 tests) 54ms
+ ✓ server/services/weather-impact-interval.test.ts (3 tests) 49ms
+ ✓ server/services/tropical-cyclone-wr-s03-impact-chain.test.ts (1 test) 51ms
+ ✓ server/services/weather-impact-chain.test.ts (1 test) 48ms
+ ✓ server/runtime/port-sync-job.test.ts (3 tests) 78ms
+ ✓ server/providers/article-extractor.test.ts (7 tests) 31ms
+ ✓ server/providers/calendar.test.ts (28 tests) 25ms
+ ✓ server/services/article-translation-source.test.ts (10 tests) 23ms
+ ✓ server/services/port-weather-eight-port-audit.test.ts (1 test) 40ms
+ ✓ server/runtime/registry.test.ts (2 tests) 67ms
+ ✓ server/services/translation-protection.test.ts (10 tests) 20ms
+ ✓ scripts/lib/forecast-window-coverage.test.ts (11 tests) 12ms
+ ✓ server/database/migrations/012-translation-runtime-work-state.test.ts (2 tests) 14ms
+ ✓ server/runtime/bootstrap.test.ts (1 test) 36ms
+ ✓ server/services/precipitation-window.test.ts (4 tests) 6ms
+ ✓ shared/shipping-rules.test.ts (7 tests) 10ms
+ ✓ server/services/annual-calendar.test.ts (5 tests) 23ms
+ ✓ server/services/open-meteo-port-forecast.test.ts (4 tests) 11ms
+ ✓ server/env-loader.test.ts (3 tests) 11ms
+ ✓ shared/shipping-engine.test.ts (5 tests) 10ms
+ ✓ server/middleware/security.test.ts (15 tests) 13ms
+ ✓ server/middleware/retired-spa-routes.test.ts (5 tests) 7ms
+ ✓ server/services/weather-rule-coverage.test.ts (7 tests) 8ms
+ ✓ server/services/weather-rule-evaluation.test.ts (4 tests) 8ms
+ ✓ server/services/weather-impact-engine.test.ts (14 tests) 8ms
+ ✓ shared/shipping-feed.test.ts (2 tests) 7ms
+ ✓ server/services/article-fetch-security.test.ts (10 tests) 11ms
+ ✓ server/services/annual-calendar-diff.test.ts (4 tests) 7ms
+ ✓ server/services/official-alert-impact.test.ts (36 tests) 14ms
+ ✓ server/services/translation-failure-policy.test.ts (20 tests) 5ms
+ ✓ server/services/jma-typhoon-parse.test.ts (3 tests) 7ms
+ ✓ server/services/translation-secret.test.ts (3 tests) 5ms
+ ✓ server/services/jma-target-tc-strict.test.ts (3 tests) 5ms
+ ✓ server/providers/contracts.test.ts (8 tests) 5ms
+ ✓ test/ui-smoke.test.ts (12 tests) 19ms
+ ✓ server/services/weather-calibration-replay.test.ts (5 tests) 4ms
+ ✓ server/services/typhoon-position-validity.test.ts (3 tests) 3ms
+ ✓ server/providers/jtwc-typhoon-fixture.test.ts (1 test) 4ms
+ ✓ server/services/tropical-cyclone-wr-s03.test.ts (3 tests) 2ms
+ ✓ test/common.test.ts (1 test) 1ms
+ ✓ server/providers/shipping.test.ts (6 tests) 4ms
+ ✓ server/providers/translation/fake-provider.test.ts (1 test) 3ms
+ ✓ server/shipping-store.test.ts (3 tests) 4ms
+
+ Test Files  86 passed (86)
+      Tests  632 passed | 3 skipped (635)
+   Start at  12:39:10
+   Duration  5.71s (transform 11.93s, setup 0ms, import 35.26s, tests 15.29s, environment 13ms)
+

@@ -1,0 +1,621 @@
+{
+  "kind": "R1.5-6 four-page no-LLM integrated acceptance",
+  "ranAt": "2026-10-12T05:10:42.163Z",
+  "gitHead": "8a22019313ac6a59bbce4da589bb90b7732f4c56",
+  "workspaceClean": false,
+  "runDir": "D:\\try one\\Shipping HOT\\.tmp\\r1-5-6-integrated-2026-10-12T05-10-42-162Z",
+  "sources": {
+    "weather": {
+      "dir": ".tmp/r1-5-1-live-2026-10-10T06-42-03-941Z",
+      "sha": "50bad03",
+      "kind": "historical live sample (R1.5-1 accepted run, 2026-10-10 14:42 UTC+8)"
+    },
+    "nmc": {
+      "dir": ".tmp/nmc-live-a6c00bc",
+      "sha": "a6c00bc",
+      "kind": "historical live sample (CN-W01/02)"
+    },
+    "nchmf": {
+      "dir": ".tmp/nchmf-live-c064e5a",
+      "sha": "c064e5a",
+      "kind": "historical live sample (VN-W01)"
+    },
+    "metmalaysia": {
+      "dir": ".tmp/metmalaysia-live-eab30a7",
+      "sha": "eab30a7",
+      "kind": "historical live sample (MY-W01)"
+    }
+  },
+  "clock": "system clock (no TEST_NOW); policy fixtures use dates relative to 2026-10",
+  "notRun": [],
+  "seed": {
+    "copied": {
+      "nmc": 6,
+      "nchmf": 8,
+      "metmalaysia": 4
+    },
+    "counts": {
+      "feed": 19,
+      "forecast": 1746
+    }
+  },
+  "runtime": {
+    "envShipping": [
+      "SHIPPING_CALENDAR_PROVIDER",
+      "SHIPPING_DATA_MODE",
+      "SHIPPING_FEED_PROVIDER",
+      "SHIPPING_PORT_PROVIDER",
+      "SHIPPING_RUNTIME_ENABLED",
+      "SHIPPING_WEATHER_PROVIDER"
+    ],
+    "strippedEnvKeyNames": [
+      "BAOTA_MCP_TOKEN",
+      "STOCKPILOT_SECRET_KEY"
+    ],
+    "providerSecretsFilePresent": false
+  },
+  "translationStatus": {
+    "enabled": false,
+    "providerId": "deepseek",
+    "model": "deepseek-v4-flash",
+    "targetLanguage": "zh-CN",
+    "configured": false,
+    "secretSource": "missing",
+    "monthlyBudget": 0,
+    "estimatedMonthSpend": 0,
+    "currency": "USD",
+    "cache": {
+      "total": 0,
+      "succeeded": 0,
+      "pending": 0,
+      "failed": 0
+    },
+    "usage": {
+      "requestCount": 0,
+      "successCount": 0,
+      "failureCount": 0,
+      "cacheHitCount": 0,
+      "charactersIn": 0,
+      "charactersOut": 0,
+      "tokensIn": 0,
+      "tokensOut": 0,
+      "estimatedCost": 0,
+      "currency": "USD"
+    },
+    "state": "disabled",
+    "gateCode": "translation_disabled"
+  },
+  "api": {
+    "ports": {
+      "port-shekou": {
+        "state": "data_stale",
+        "forecastMeta": {
+          "actualCoverage": {
+            "firstInstant": "2026-10-12T05:00:00.000Z",
+            "lastInstant": "2026-10-17T06:00:00.000Z",
+            "totalReturned": 122,
+            "hourlyReturned": 122,
+            "currentReturned": 0
+          },
+          "lastSyncedAt": "2026-10-10T06:42:04.550Z"
+        },
+        "officialAlerts": 0,
+        "sources": {
+          "forecast": "unavailable（未写入持久化预报）",
+          "impacts": "system",
+          "alerts": "未启用或未命中官方预警"
+        },
+        "stale": true
+      },
+      "port-yantian": {
+        "state": "data_stale",
+        "forecastMeta": {
+          "actualCoverage": {
+            "firstInstant": "2026-10-12T05:00:00.000Z",
+            "lastInstant": "2026-10-17T06:00:00.000Z",
+            "totalReturned": 122,
+            "hourlyReturned": 122,
+            "currentReturned": 0
+          },
+          "lastSyncedAt": "2026-10-10T06:42:04.550Z"
+        },
+        "officialAlerts": 0,
+        "sources": {
+          "forecast": "unavailable（未写入持久化预报）",
+          "impacts": "system",
+          "alerts": "未启用或未命中官方预警"
+        },
+        "stale": true
+      },
+      "port-nansha": {
+        "state": "data_stale",
+        "forecastMeta": {
+          "actualCoverage": {
+            "firstInstant": "2026-10-12T05:00:00.000Z",
+            "lastInstant": "2026-10-17T06:00:00.000Z",
+            "totalReturned": 122,
+            "hourlyReturned": 122,
+            "currentReturned": 0
+          },
+          "lastSyncedAt": "2026-10-10T06:42:04.550Z"
+        },
+        "officialAlerts": 0,
+        "sources": {
+          "forecast": "unavailable（未写入持久化预报）",
+          "impacts": "system",
+          "alerts": "未启用或未命中官方预警"
+        },
+        "stale": true
+      },
+      "port-laem-chabang": {
+        "state": "data_stale",
+        "forecastMeta": {
+          "actualCoverage": {
+            "firstInstant": "2026-10-12T05:00:00.000Z",
+            "lastInstant": "2026-10-17T06:00:00.000Z",
+            "totalReturned": 122,
+            "hourlyReturned": 122,
+            "currentReturned": 0
+          },
+          "lastSyncedAt": "2026-10-10T06:42:04.550Z"
+        },
+        "officialAlerts": 0,
+        "sources": {
+          "forecast": "unavailable（未写入持久化预报）",
+          "impacts": "system",
+          "alerts": "未启用或未命中官方预警"
+        },
+        "stale": true
+      },
+      "port-klang": {
+        "state": "data_stale",
+        "forecastMeta": {
+          "actualCoverage": {
+            "firstInstant": "2026-10-12T05:00:00.000Z",
+            "lastInstant": "2026-10-17T06:00:00.000Z",
+            "totalReturned": 122,
+            "hourlyReturned": 122,
+            "currentReturned": 0
+          },
+          "lastSyncedAt": "2026-10-10T06:42:04.550Z"
+        },
+        "officialAlerts": 0,
+        "sources": {
+          "forecast": "unavailable（未写入持久化预报）",
+          "impacts": "system",
+          "alerts": "未启用或未命中官方预警"
+        },
+        "stale": true
+      },
+      "port-manila": {
+        "state": "data_stale",
+        "forecastMeta": {
+          "actualCoverage": {
+            "firstInstant": "2026-10-12T05:00:00.000Z",
+            "lastInstant": "2026-10-17T06:00:00.000Z",
+            "totalReturned": 122,
+            "hourlyReturned": 122,
+            "currentReturned": 0
+          },
+          "lastSyncedAt": "2026-10-10T06:42:04.550Z"
+        },
+        "officialAlerts": 0,
+        "sources": {
+          "forecast": "unavailable（未写入持久化预报）",
+          "impacts": "system",
+          "alerts": "未启用或未命中官方预警"
+        },
+        "stale": true
+      },
+      "port-jakarta": {
+        "state": "data_stale",
+        "forecastMeta": {
+          "actualCoverage": {
+            "firstInstant": "2026-10-12T05:00:00.000Z",
+            "lastInstant": "2026-10-17T06:00:00.000Z",
+            "totalReturned": 122,
+            "hourlyReturned": 122,
+            "currentReturned": 0
+          },
+          "lastSyncedAt": "2026-10-10T06:42:04.550Z"
+        },
+        "officialAlerts": 0,
+        "sources": {
+          "forecast": "unavailable（未写入持久化预报）",
+          "impacts": "system",
+          "alerts": "未启用或未命中官方预警"
+        },
+        "stale": true
+      },
+      "port-ho-chi-minh": {
+        "state": "data_stale",
+        "forecastMeta": {
+          "actualCoverage": {
+            "firstInstant": "2026-10-12T05:00:00.000Z",
+            "lastInstant": "2026-10-17T06:00:00.000Z",
+            "totalReturned": 122,
+            "hourlyReturned": 122,
+            "currentReturned": 0
+          },
+          "lastSyncedAt": "2026-10-10T06:42:04.550Z"
+        },
+        "officialAlerts": 0,
+        "sources": {
+          "forecast": "unavailable（未写入持久化预报）",
+          "impacts": "system",
+          "alerts": "未启用或未命中官方预警"
+        },
+        "stale": true
+      }
+    },
+    "feedOfficialNotices": 0,
+    "promo": {
+      "generateStatus": 200,
+      "events": 488,
+      "confirmed": 0
+    }
+  },
+  "ports": {
+    "port-shekou": {
+      "metaMatchesApi": true,
+      "officialSection": true,
+      "modelVsOfficial": true,
+      "apiState": "data_stale",
+      "apiStale": true,
+      "staleShown": true,
+      "noAlertsHonest": true,
+      "meta": "目标窗口 2026/10/12 12:10 → 2026/10/19 13:10 · 实际返回 122 条（hourly 122 / current 0） · 覆盖 2026/10/12 13:00 → 2026/10/17 14:00 · 更新 2026/10/10 14:42"
+    },
+    "port-yantian": {
+      "metaMatchesApi": true,
+      "officialSection": true,
+      "modelVsOfficial": true,
+      "apiState": "data_stale",
+      "apiStale": true,
+      "staleShown": true,
+      "noAlertsHonest": true,
+      "meta": "目标窗口 2026/10/12 12:10 → 2026/10/19 13:10 · 实际返回 122 条（hourly 122 / current 0） · 覆盖 2026/10/12 13:00 → 2026/10/17 14:00 · 更新 2026/10/10 14:42"
+    },
+    "port-nansha": {
+      "metaMatchesApi": true,
+      "officialSection": true,
+      "modelVsOfficial": true,
+      "apiState": "data_stale",
+      "apiStale": true,
+      "staleShown": true,
+      "noAlertsHonest": true,
+      "meta": "目标窗口 2026/10/12 12:10 → 2026/10/19 13:10 · 实际返回 122 条（hourly 122 / current 0） · 覆盖 2026/10/12 13:00 → 2026/10/17 14:00 · 更新 2026/10/10 14:42"
+    },
+    "port-laem-chabang": {
+      "metaMatchesApi": true,
+      "officialSection": true,
+      "modelVsOfficial": true,
+      "apiState": "data_stale",
+      "apiStale": true,
+      "staleShown": true,
+      "noAlertsHonest": true,
+      "meta": "目标窗口 2026/10/12 12:10 → 2026/10/19 13:10 · 实际返回 122 条（hourly 122 / current 0） · 覆盖 2026/10/12 13:00 → 2026/10/17 14:00 · 更新 2026/10/10 14:42"
+    },
+    "port-klang": {
+      "metaMatchesApi": true,
+      "officialSection": true,
+      "modelVsOfficial": true,
+      "apiState": "data_stale",
+      "apiStale": true,
+      "staleShown": true,
+      "noAlertsHonest": true,
+      "meta": "目标窗口 2026/10/12 12:10 → 2026/10/19 13:10 · 实际返回 122 条（hourly 122 / current 0） · 覆盖 2026/10/12 13:00 → 2026/10/17 14:00 · 更新 2026/10/10 14:42"
+    },
+    "port-manila": {
+      "metaMatchesApi": true,
+      "officialSection": true,
+      "modelVsOfficial": true,
+      "apiState": "data_stale",
+      "apiStale": true,
+      "staleShown": true,
+      "noAlertsHonest": true,
+      "meta": "目标窗口 2026/10/12 12:10 → 2026/10/19 13:10 · 实际返回 122 条（hourly 122 / current 0） · 覆盖 2026/10/12 13:00 → 2026/10/17 14:00 · 更新 2026/10/10 14:42"
+    },
+    "port-jakarta": {
+      "metaMatchesApi": true,
+      "officialSection": true,
+      "modelVsOfficial": true,
+      "apiState": "data_stale",
+      "apiStale": true,
+      "staleShown": true,
+      "noAlertsHonest": true,
+      "meta": "目标窗口 2026/10/12 12:10 → 2026/10/19 13:10 · 实际返回 122 条（hourly 122 / current 0） · 覆盖 2026/10/12 13:00 → 2026/10/17 14:00 · 更新 2026/10/10 14:42"
+    },
+    "port-ho-chi-minh": {
+      "metaMatchesApi": true,
+      "officialSection": true,
+      "modelVsOfficial": true,
+      "apiState": "data_stale",
+      "apiStale": true,
+      "staleShown": true,
+      "noAlertsHonest": true,
+      "meta": "目标窗口 2026/10/12 12:10 → 2026/10/19 13:10 · 实际返回 122 条（hourly 122 / current 0） · 覆盖 2026/10/12 13:00 → 2026/10/17 14:00 · 更新 2026/10/10 14:42 · 缺测 阵风0 浪122 降水0 能见度0\nOpen-Meteo marine（cell_selection=sea）在胡志明市坐标未返回浪高/涌浪；非填 0，WR-S02 等海况分支可能缺测。"
+    }
+  },
+  "feed": {
+    "countryRows": "发布国家 CN\n6 | 发布国家 MY\n4 | 发布国家 VN\n8",
+    "cnRaw": 6,
+    "officialRaw": 8
+  },
+  "calendar": {
+    "nov11": {
+      "promoChip": "大促 15 项",
+      "promoStatuses": [
+        "规则生成（待确认）",
+        "规则生成（待确认）",
+        "规则生成（待确认）",
+        "规则生成（待确认）",
+        "规则生成（待确认）",
+        "规则生成（待确认）"
+      ],
+      "apiPromoCount": 0
+    },
+    "nov1": {
+      "policyChip": "政策生效 1 项",
+      "policyItems": [
+        "MY\n[示例 fixture，非真实公告] [FIXTURE] 综合验收表单示例 D\n已发布待生效\n\n生效日 2026-11-01 · v1\n\n在政策库查看 →"
+      ],
+      "apiD": "published"
+    }
+  },
+  "screenshots": [
+    "port-ho-chi-minh.png",
+    "feed-official-notices.png",
+    "policies-detail.png",
+    "calendar-2026-11-11.png",
+    "calendar-2026-10-01.png"
+  ],
+  "outbound": {
+    "recorderReady": true,
+    "entries": []
+  },
+  "browserLog": {
+    "exceptions": [],
+    "consoleErrors": [
+      {
+        "page": "/policies",
+        "text": "network: Failed to load resource: the server responded with a status of 422 (entered_by_required)",
+        "url": "http://127.0.0.1:4499/api/shipping/policies/policy%3A9b7c3bda-ad8c-428f-b767-3e774035bf24/revise"
+      }
+    ],
+    "failedRequests": [],
+    "httpErrors": [
+      {
+        "page": "/policies",
+        "status": 422,
+        "url": "http://127.0.0.1:4499/api/shipping/policies/policy%3A9b7c3bda-ad8c-428f-b767-3e774035bf24/revise"
+      }
+    ],
+    "requests": 432
+  },
+  "checks": [
+    {
+      "id": "recorder_selftest_detects_outbound",
+      "pass": true,
+      "provenance": "recorder self-test",
+      "detail": "{\"at\":\"2026-10-12T05:10:42.315Z\",\"kind\":\"recorder_ready\",\"pid\":38656}\n{\"at\":\"2026-10-12T05:10:42.317Z\",\"kind\":\"tcp_connect\",\"host\":\"192.0.2.1\",\"port\":9}\n"
+    },
+    {
+      "id": "seed_from_retained_samples",
+      "pass": true,
+      "provenance": "historical live samples (copied)",
+      "detail": "{\"copied\":{\"nmc\":6,\"nchmf\":8,\"metmalaysia\":4},\"counts\":{\"feed\":19,\"forecast\":1746}}"
+    },
+    {
+      "id": "server_healthy",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": "http://127.0.0.1:4499"
+    },
+    {
+      "id": "llm_not_configured",
+      "pass": true,
+      "provenance": "config check",
+      "detail": "{\"configured\":false,\"providerSecretsFilePresent\":false}"
+    },
+    {
+      "id": "runtime_disabled_and_mock_providers",
+      "pass": true,
+      "provenance": "config check",
+      "detail": "SHIPPING_CALENDAR_PROVIDER,SHIPPING_DATA_MODE,SHIPPING_FEED_PROVIDER,SHIPPING_PORT_PROVIDER,SHIPPING_RUNTIME_ENABLED,SHIPPING_WEATHER_PROVIDER"
+    },
+    {
+      "id": "api_ports_all_respond",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": "{\"port-shekou\":\"data_stale\",\"port-yantian\":\"data_stale\",\"port-nansha\":\"data_stale\",\"port-laem-chabang\":\"data_stale\",\"port-klang\":\"data_stale\",\"port-manila\":\"data_stale\",\"port-jakarta\":\"data_stale\",\"port-ho-chi-minh\":\"data_stale\"}"
+    },
+    {
+      "id": "api_feed_official_notices",
+      "pass": false,
+      "provenance": "this-round browser/API",
+      "detail": "0"
+    },
+    {
+      "id": "api_feed_no_port_association_for_notices",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": ""
+    },
+    {
+      "id": "promo_rule_generated_all_pending",
+      "pass": true,
+      "provenance": "rule-generated (this run)",
+      "detail": "{\"generateStatus\":200,\"events\":488,\"confirmed\":0}"
+    },
+    {
+      "id": "policy_fixture_A_created",
+      "pass": true,
+      "provenance": "fixture",
+      "detail": "200 effective"
+    },
+    {
+      "id": "nav_links_present",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": "[\"/\",\"/\",\"/ports\",\"/events\",\"/feed\",\"/calendar\",\"/policies\",\"/settings\",\"/ports\",\"/ports/port-ho-chi-minh\",\"/ports/port-jakarta\",\"/ports/port-klang\",\"/ports/port-laem-chabang\",\"/ports/port-manila\",\"/ports/port-nansha\",\"/ports/port-shekou\",\"/ports/port-yantian\",\"/feed\",\"https://www.nmc.cn/publish/typ"
+    },
+    {
+      "id": "nav_click_through_all",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": "{\"/ports\":true,\"/feed\":true,\"/calendar\":true,\"/policies\":true}"
+    },
+    {
+      "id": "ports_page_rendered",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": ""
+    },
+    {
+      "id": "ports_forecast_meta_matches_api",
+      "pass": true,
+      "provenance": "historical live sample rendered this round",
+      "detail": "{\"port-shekou\":true,\"port-yantian\":true,\"port-nansha\":true,\"port-laem-chabang\":true,\"port-klang\":true,\"port-manila\":true,\"port-jakarta\":true,\"port-ho-chi-minh\":true}"
+    },
+    {
+      "id": "ports_official_vs_model_distinguished",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": ""
+    },
+    {
+      "id": "ports_stale_never_disguised",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": "{\"port-shekou\":\"data_stale/true\",\"port-yantian\":\"data_stale/true\",\"port-nansha\":\"data_stale/true\",\"port-laem-chabang\":\"data_stale/true\",\"port-klang\":\"data_stale/true\",\"port-manila\":\"data_stale/true\",\"port-jakarta\":\"data_stale/true\",\"port-ho-chi-minh\":\"data_stale/true\"}"
+    },
+    {
+      "id": "ports_missing_alerts_stated_honestly",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": ""
+    },
+    {
+      "id": "feed_grouped_by_issuing_country_cn_vn_my",
+      "pass": true,
+      "provenance": "historical live samples rendered this round",
+      "detail": "发布国家 CN\n6 | 发布国家 MY\n4 | 发布国家 VN\n8"
+    },
+    {
+      "id": "feed_lifecycle_unknown_and_timezone_unconfirmed",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": ""
+    },
+    {
+      "id": "feed_historical_product_notice_shown",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": ""
+    },
+    {
+      "id": "feed_publication_not_active_claim",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": ""
+    },
+    {
+      "id": "feed_raw_levels_unmapped_no_port",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": ""
+    },
+    {
+      "id": "feed_raw_blocks_rendered",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": "{\"countryRows\":\"发布国家 CN\\n6 | 发布国家 MY\\n4 | 发布国家 VN\\n8\",\"cnRaw\":6,\"officialRaw\":8}"
+    },
+    {
+      "id": "policy_form_create",
+      "pass": true,
+      "provenance": "fixture via real form",
+      "detail": ""
+    },
+    {
+      "id": "policy_form_revise_and_old_version_visible",
+      "pass": false,
+      "provenance": "fixture via real form",
+      "detail": "[FIXTURE] 综合验收表单示例 D\n\n示例（fixture）：仅用于验收，不是真实官方公告。\n\n马来西亚 · 无平台 · 海关与税收 · 文号 FIXTURE-R156-D · 发布方 示例机关（fixture）\n\n录入状态：已发布待生效 · 当前状态：已发布待生效 · 发布日 2026-10-05 · 生效日 2026-11-01（Asia/Kuala_Lumpur，当地判断日 2026-"
+    },
+    {
+      "id": "policy_status_page_equals_api",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": "[{\"id\":\"policy:f91dbc5d-30bc-4bd7-bcfe-cd2a2b6ad613\",\"status\":\"effective\"},{\"id\":\"policy:9b7c3bda-ad8c-428f-b767-3e774035bf24\",\"status\":\"published\"}]"
+    },
+    {
+      "id": "policy_filter_and_export_match",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": "http://127.0.0.1:4499/api/shipping/policies/export?country=VN"
+    },
+    {
+      "id": "calendar_promo_layer_pending_status",
+      "pass": true,
+      "provenance": "rule-generated (this run)",
+      "detail": "{\"promoChip\":\"大促 15 项\",\"promoStatuses\":[\"规则生成（待确认）\",\"规则生成（待确认）\",\"规则生成（待确认）\",\"规则生成（待确认）\",\"规则生成（待确认）\",\"规则生成（待确认）\"],\"apiPromoCount\":0}"
+    },
+    {
+      "id": "calendar_promo_not_shutdown",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": ""
+    },
+    {
+      "id": "calendar_policy_layer_consistent",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": "{\"policyChip\":\"政策生效 1 项\",\"policyItems\":[\"MY\\n[示例 fixture，非真实公告] [FIXTURE] 综合验收表单示例 D\\n已发布待生效\\n\\n生效日 2026-11-01 · v1\\n\\n在政策库查看 →\"],\"apiD\":\"published\"}"
+    },
+    {
+      "id": "calendar_policy_effective_consistent",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": "[\"VN\\n[示例 fixture，非真实公告] [FIXTURE] 综合验收示例越南海关公告 A\\n已生效\\n\\n生效日 2026-10-01 · v1\\n\\n在政策库查看 →\"]"
+    },
+    {
+      "id": "server_recorder_loaded",
+      "pass": true,
+      "provenance": "outbound observation",
+      "detail": ""
+    },
+    {
+      "id": "server_zero_outbound_calls",
+      "pass": true,
+      "provenance": "outbound observation",
+      "detail": "[]"
+    },
+    {
+      "id": "server_no_llm_host_contacted",
+      "pass": true,
+      "provenance": "outbound observation",
+      "detail": ""
+    },
+    {
+      "id": "browser_no_uncaught_exceptions",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": "[]"
+    },
+    {
+      "id": "browser_no_failed_or_external_requests",
+      "pass": true,
+      "provenance": "this-round browser/API",
+      "detail": "[]"
+    }
+  ],
+  "verdict": "FAIL",
+  "summary": {
+    "total": 36,
+    "passed": 34,
+    "consoleErrors": 1,
+    "httpErrors": 1
+  }
+}

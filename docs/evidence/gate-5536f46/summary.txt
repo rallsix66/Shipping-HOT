@@ -1,0 +1,14 @@
+HEAD 5536f4630d3c504fb5287723d970f497b39065c3 started 2026-10-10T13:37:17.8329886+08:00 node v24.15.0 pnpm 10.30.3 os Microsoft Windows NT 10.0.19045.0
+install exit=0
+build exit=0
+typecheck exit=0
+lint exit=0
+vitest exit=0
+smoke exit=0
+s7 exit=0
+live exit=1
+tmdlive exit=0
+audit exit=0
+status-after: []
+live-retry1 exit=2 (BLOCKED: coverage_port-ho-chi-minh only; same SHA, clean tree)
+note: first live run exit=1 = harness JMA transient (jma_job_success, jma_archived_live); treated as non-evidence, see r1-5-1-first-attempt-failed.json

@@ -1,0 +1,8 @@
+﻿ ✓ server/shipping-store.test.ts (3 tests) 5ms
+ ✓ server/providers/translation/fake-provider.test.ts (1 test) 3ms
+
+ Test Files  96 passed (96)
+      Tests  783 passed | 3 skipped (786)
+   Start at  13:41:37
+   Duration  7.60s (transform 13.92s, setup 0ms, import 44.63s, tests 26.32s, environment 15ms)
+

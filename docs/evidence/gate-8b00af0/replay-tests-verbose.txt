@@ -1,0 +1,43 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: real corpus > real corpus has only the Nalgae trial event and stays blocked (no PASS) 2ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: real corpus > candidates (incl. HKO/Nalgae) are not qualified 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: C1–C8 admission > rejects out-of-scope port, missing scope, non-https locator, missing quote, missing tz basis, invalid window 1ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: C1–C8 admission > rejects unapproved product, wrong unit, untimed/non-UTC point, and centre wind used as gust 1ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: C1–C8 admission > rejects duplicate event id and duplicate weather-system/port pair (no splitting one event) 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: C1–C8 admission > ambiguous time zone → pending manual review, not eligible 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: C1–C8 admission > window boundaries are inclusive; points outside are excluded, not counted 1ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > evaluates every valid point, counts the event once, reports first hit time and rule id 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > watch-only stays a miss; eligible misses remain in the denominator 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > wR-S03 may use cyclone distance from an approved derived-distance product 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > rejected events are listed separately and never enter the denominator 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > cross-port events of one typhoon are disclosed as a correlated group 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > decision: 9 eligible all hit → blocked (count) 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > decision: 10 eligible with 8 hits (80%) → ready (still not PASS) 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > decision: 10 eligible with 7 hits (70%) → blocked (rate) 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: event-level metric > decision: 9 eligible + 1 rejected does not reach 10 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: P2 value and time strictness > negative values and missing-value sentinels never become eligible hits 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: P2 value and time strictness > legitimate zeros are kept; optional fields may be absent 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: P2 value and time strictness > strict UTC parser rejects impossible dates and accepts a valid leap day 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: P2 value and time strictness > invalid closure window dates are rejected 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: P2 value and time strictness > invalid sample time (non-leap Feb 29) is excluded 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: P2 value and time strictness > valid leap-day window and sample are eligible and hit 0ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: real corpus Nalgae single-event post-hoc trial (fixed regression) > corpus holds only the Nalgae Shekou gate event with gate-only scope and operator HTTPS locators 1ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: real corpus Nalgae single-event post-hoc trial (fixed regression) > all nine in-window HKO fixes are entered; only typhoonDistanceKm is mapped; distances recompute by haversine R=6371 1ms
+ ✓ server/services/weather-calibration-replay.test.ts > r1.5-4 replay: real corpus Nalgae single-event post-hoc trial (fixed regression) > admission is eligible; all points evaluated; first hit 2022-11-02T00:00Z by WR-S03; status BLOCKED 1/10 1ms
+
+ Test Files  1 passed (1)
+      Tests  25 passed (25)
+   Start at  14:54:01
+   Duration  269ms (transform 84ms, setup 0ms, import 103ms, tests 11ms, environment 0ms)
+

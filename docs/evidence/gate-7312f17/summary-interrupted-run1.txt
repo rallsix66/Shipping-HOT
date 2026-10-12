@@ -1,0 +1,4 @@
+﻿sha 7312f17aa8b6d94dc57f437554954ba62a00f7f9 clean=[] start 2026-10-12T10:23:37.3143698+08:00
+pnpm install --frozen-lockfile => exit 0  2026-10-12T10:23:39.1963688+08:00
+pnpm build => exit 0  2026-10-12T10:23:56.0850079+08:00
+pnpm typecheck => exit 0  2026-10-12T10:23:58.9160988+08:00

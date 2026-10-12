@@ -8,6 +8,7 @@ import { createCalendarSyncJob } from "#/runtime/calendar-sync-job"
 import type { CalendarProvider } from "#/providers/calendar"
 import { createPortSyncJob } from "#/runtime/port-sync-job"
 import { createWeatherSyncJob } from "#/runtime/weather-sync-job"
+import { createTropicalCycloneSyncJob } from "#/runtime/tropical-cyclone-sync-job"
 import { createWeatherAlertSyncJob } from "#/runtime/weather-alert-sync-job"
 import { createOpenMeteoWeatherProvider, providerModes, providers } from "#/providers/shipping"
 import { activeOfficialWeatherAlertSourceIds, createOfficialWeatherAlertProvider, officialWeatherAlertSources } from "#/providers/weather-alerts"
@@ -115,6 +116,18 @@ function portJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
   })]
 }
 
+function tropicalCycloneJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
+  if (options.dataMode !== "real") return []
+  if (providerModes.weather !== "open-meteo") return []
+  return [createTropicalCycloneSyncJob({
+    database: options.database,
+    dataMode: options.dataMode,
+    intervalMs: weatherIntervalMs(),
+    enabled: true,
+    now: options.now,
+  })]
+}
+
 function weatherJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
   const weatherProvider = providerModes.weather === "open-meteo"
     ? createOpenMeteoWeatherProvider({ portDirectory: new PortDirectoryRepository(options.database, options.dataMode), now: options.now })
@@ -170,5 +183,5 @@ function translationJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
 }
 
 export function getDefaultRuntimeJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
-  return [...feedJobs(options), ...articleJobs(options), ...translationJobs(options), ...calendarJobs(options), ...portJobs(options), ...weatherJobs(options), ...weatherAlertJobs(options)]
+  return [...feedJobs(options), ...articleJobs(options), ...translationJobs(options), ...calendarJobs(options), ...portJobs(options), ...tropicalCycloneJobs(options), ...weatherJobs(options), ...weatherAlertJobs(options)]
 }

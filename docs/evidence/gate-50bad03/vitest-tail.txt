@@ -1,0 +1,7 @@
+ ✓ server/providers/translation/fake-provider.test.ts (1 test) 3ms
+
+ Test Files  91 passed (91)
+      Tests  704 passed | 3 skipped (707)
+   Start at  14:35:22
+   Duration  7.42s (transform 15.74s, setup 0ms, import 45.43s, tests 19.92s, environment 17ms)
+

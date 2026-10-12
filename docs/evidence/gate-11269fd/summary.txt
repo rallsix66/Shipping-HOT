@@ -1,0 +1,10 @@
+﻿sha 11269fd9e9877beffb2074e7a849547ff9e1307f clean=[] start 2026-10-11T13:40:53.2287397+08:00
+pnpm install --frozen-lockfile => exit 0  2026-10-11T13:40:55.4351910+08:00
+pnpm build => exit 0  2026-10-11T13:41:10.4485405+08:00
+pnpm typecheck => exit 0  2026-10-11T13:41:18.5930631+08:00
+pnpm lint => exit 0  2026-10-11T13:41:36.5662644+08:00
+pnpm exec vitest run => exit 0  2026-10-11T13:41:45.0985134+08:00
+pnpm smoke:p0-native => exit 0  2026-10-11T13:41:46.0264940+08:00
+node scripts/e2e-s7-integrated.mjs => exit 0  2026-10-11T13:42:24.9704653+08:00
+"C:\Program Files\Git\bin\bash.exe" scripts/audit-inventory.sh . => exit 0  2026-10-11T13:42:27.0327634+08:00
+self key-like scan rg (git diff b0fe880..11269fd9e9877beffb2074e7a849547ff9e1307f) => raw exit 1 (rg: 1 = no match, 0 = match, 2 = error)
