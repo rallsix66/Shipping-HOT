@@ -19,6 +19,8 @@ import { policyLifecycleMigration } from "#/database/migrations/017-policy-lifec
 import { policyRelationsTimezoneMigration } from "#/database/migrations/018-policy-relations-timezone"
 import { policyRelationBackfillRepairMigration } from "#/database/migrations/019-policy-relation-backfill-repair"
 import { policyRelationMixedVersionRepairMigration } from "#/database/migrations/020-policy-relation-mixed-version-repair"
+import { intelSourceRunsMigration } from "#/database/migrations/021-intel-source-runs"
+import { intelItemsMigration } from "#/database/migrations/022-intel-items"
 
 export interface ShippingMigration {
   readonly version: number
@@ -50,6 +52,8 @@ export const shippingMigrations: readonly ShippingMigration[] = [
   policyRelationsTimezoneMigration,
   policyRelationBackfillRepairMigration,
   policyRelationMixedVersionRepairMigration,
+  intelSourceRunsMigration,
+  intelItemsMigration,
 ]
 
 export const latestShippingSchemaVersion = shippingMigrations[shippingMigrations.length - 1].version

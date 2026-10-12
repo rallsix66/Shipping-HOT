@@ -217,6 +217,12 @@ function parsedDate(value: unknown): string | undefined {
 }
 
 function linkValue(value: unknown, base: string): string | undefined {
+  // Atom entries may carry several <link> elements; prefer rel="alternate" (or no rel), as AIHOT@44578fa rss.ts does.
+  if (Array.isArray(value)) {
+    const links = value as unknown[]
+    const alternate = links.find(link => typeof link === "object" && link !== null && (!(link as Record<string, unknown>)["@_rel"] || (link as Record<string, unknown>)["@_rel"] === "alternate"))
+    return linkValue(alternate ?? links[0], base)
+  }
   const candidate = typeof value === "object" && value !== null
     ? textValue((value as Record<string, unknown>)["@_href"] ?? (value as Record<string, unknown>)["#text"])
     : textValue(value)
@@ -248,22 +254,24 @@ export function classifyFeedItem(title: string, summary: string, source: Shippin
 }
 
 interface RawFeedItem {
-  title?: unknown
-  summary?: unknown
-  description?: unknown
-  content?: unknown
-  link?: unknown
-  guid?: unknown
-  id?: unknown
-  pubDate?: unknown
-  published?: unknown
-  updated?: unknown
-  created?: unknown
-  effective?: unknown
-  effectiveAt?: unknown
-  expires?: unknown
-  expiresAt?: unknown
-  expiration?: unknown
+  "title"?: unknown
+  "summary"?: unknown
+  "description"?: unknown
+  "content"?: unknown
+  "link"?: unknown
+  "guid"?: unknown
+  "id"?: unknown
+  "pubDate"?: unknown
+  "published"?: unknown
+  "updated"?: unknown
+  "created"?: unknown
+  "effective"?: unknown
+  "effectiveAt"?: unknown
+  "expires"?: unknown
+  "expiresAt"?: unknown
+  "expiration"?: unknown
+  "dc:date"?: unknown
+  "content:encoded"?: unknown
 }
 
 function rawFeedItem(raw: RawFeedItem, source: ShippingFeedSource, ports: Port[], fetchedAt: string, fallbackIndex: number): FeedItem | undefined {
@@ -272,8 +280,8 @@ function rawFeedItem(raw: RawFeedItem, source: ShippingFeedSource, ports: Port[]
   const summary = truncate(stripMarkup(textValue(raw.summary) ?? textValue(raw.description) ?? textValue(raw.content))) || title
   const articleUrl = linkValue(raw.link, source.url) ?? linkValue(raw.guid, source.url) ?? linkValue(raw.id, source.url)
   const canonicalUrl = articleUrl ?? `${source.url}#${digest(normalizeFeedTitle(title))}`
-  const publishedAt = parsedDate(raw.pubDate ?? raw.published ?? raw.created)
-  const sourceUpdatedAt = parsedDate(raw.updated ?? raw.pubDate ?? raw.published ?? raw.created)
+  const publishedAt = parsedDate(raw.pubDate ?? raw.published ?? raw["dc:date"] ?? raw.created)
+  const sourceUpdatedAt = parsedDate(raw.updated ?? raw.pubDate ?? raw.published ?? raw["dc:date"] ?? raw.created)
   const publicationTimeKnown = publishedAt !== undefined
   const classification = classifyFeedItem(title, summary, source, ports)
   const provenance: DataProvenance = {
@@ -313,13 +321,62 @@ function rawFeedItem(raw: RawFeedItem, source: ShippingFeedSource, ports: Port[]
   return applyFeedFreshnessPolicy(item, new Date(fetchedAt))
 }
 
-export function parseFeedRss(xml: string, source: ShippingFeedSource, ports: Port[] = [], fetchedAt = new Date().toISOString()): FeedItem[] {
+export type FeedDocumentFormat = "rss" | "atom" | "rdf"
+
+/**
+ * Single XML feed reader for RSS 2.0, Atom and RSS 1.0/RDF (R2 first slice: feed.ts is the only
+ * feed parser; intel collection calls this instead of carrying a second parser).
+ */
+function readFeedDocument(xml: string): { format: FeedDocumentFormat, items: RawFeedItem[] } {
   const parsed = parser.parse(xml) as Record<string, unknown>
   const rss = parsed.rss as Record<string, unknown> | undefined
   const feed = parsed.feed as Record<string, unknown> | undefined
-  const channel = (rss?.channel ?? feed) as Record<string, unknown> | undefined
-  if (!channel) throw new Error("RSS payload has no channel")
-  const rawItems = asArray<RawFeedItem>(channel.item as RawFeedItem | RawFeedItem[] | undefined ?? channel.entry as RawFeedItem | RawFeedItem[] | undefined)
+  const rdf = parsed["rdf:RDF"] as Record<string, unknown> | undefined
+  if (rss?.channel) {
+    const channel = rss.channel as Record<string, unknown>
+    return { format: "rss", items: asArray<RawFeedItem>(channel.item as RawFeedItem | RawFeedItem[] | undefined) }
+  }
+  if (feed) return { format: "atom", items: asArray<RawFeedItem>(feed.entry as RawFeedItem | RawFeedItem[] | undefined) }
+  // RSS 1.0 (RDF): <item> elements are siblings of <channel>, not children.
+  if (rdf) return { format: "rdf", items: asArray<RawFeedItem>(rdf.item as RawFeedItem | RawFeedItem[] | undefined) }
+  throw new Error("RSS payload has no channel")
+}
+
+export interface FeedEntry {
+  title: string
+  url?: string
+  canonicalUrl: string
+  publishedAt?: string
+  sourceUpdatedAt?: string
+  summary: string
+  /** Full entry text (content:encoded / Atom content / description) with markup stripped; not truncated. */
+  bodyText: string
+}
+
+/** Source-agnostic entries for the intel collector; shares every helper with parseFeedRss. */
+export function parseFeedEntries(xml: string, baseUrl: string, limit = 100): { format: FeedDocumentFormat, entries: FeedEntry[] } {
+  const document = readFeedDocument(xml)
+  const entries: FeedEntry[] = []
+  for (const raw of document.items.slice(0, limit)) {
+    const title = stripMarkup(textValue(raw.title))
+    if (!title) continue
+    const url = linkValue(raw.link, baseUrl) ?? linkValue(raw.guid, baseUrl) ?? linkValue(raw.id, baseUrl)
+    const bodyText = stripMarkup(textValue(raw["content:encoded"]) ?? textValue(raw.content) ?? textValue(raw.description) ?? textValue(raw.summary))
+    entries.push({
+      title,
+      url,
+      canonicalUrl: url ?? `${baseUrl}#${digest(normalizeFeedTitle(title))}`,
+      publishedAt: parsedDate(raw.pubDate ?? raw.published ?? raw["dc:date"] ?? raw.created),
+      sourceUpdatedAt: parsedDate(raw.updated ?? raw.pubDate ?? raw.published ?? raw["dc:date"] ?? raw.created),
+      summary: truncate(stripMarkup(textValue(raw.summary) ?? textValue(raw.description) ?? textValue(raw.content))) || title,
+      bodyText,
+    })
+  }
+  return { format: document.format, entries }
+}
+
+export function parseFeedRss(xml: string, source: ShippingFeedSource, ports: Port[] = [], fetchedAt = new Date().toISOString()): FeedItem[] {
+  const rawItems = readFeedDocument(xml).items
   return rawItems.slice(0, 30).map((item, index) => rawFeedItem(item, source, ports, fetchedAt, index)).filter((item): item is FeedItem => item !== undefined)
 }
 
