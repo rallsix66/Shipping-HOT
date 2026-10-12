@@ -1,0 +1,12 @@
+﻿HEAD 15e59da41f5723bef64bd70f57a56d84059c5380 clean=[] start 2026-10-12T12:25:49.3355945+08:00
+install exit=0
+build exit=0
+typecheck exit=0
+lint exit=0
+vitest exit=0
+smoke exit=0
+s7 exit=0
+audit-inventory.sh exit=0 (inventory only, not a security audit)
+self-scan rg exit=1 (1 = no match)
+browser exit=0
+end 2026-10-12T12:27:31.2399218+08:00 clean=[]
