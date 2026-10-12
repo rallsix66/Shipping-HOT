@@ -1,0 +1,16 @@
+﻿HEAD 286af7863c675dd739995f2714896f510ee4b4ae clean=[] start 2026-10-12T11:49:38.5304390+08:00
+install exit=0
+build exit=0
+typecheck exit=0
+lint exit=0
+vitest exit=0
+smoke exit=0
+s7 exit=0
+audit-inventory.sh exit=0 (inventory only, not a security audit)
+self-scan rg exit=1 (1 = no match)
+browser r1-5-7-policy-display exit=0
+end 2026-10-12T11:51:28.7621447+08:00 clean=[]
+note: an executor read of this file at 11:59 showed only the install line (read was stale); the original run had already completed at 11:51 (lines above). build/typecheck/lint were additionally re-run in foreground at 11:59; results below.
+build exit=0
+typecheck exit=0
+lint exit=0
