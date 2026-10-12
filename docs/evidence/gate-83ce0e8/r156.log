@@ -1,0 +1,19 @@
+[step] 2026-10-12T05:27:48.898Z /
+[step] 2026-10-12T05:27:49.754Z /
+[step] 2026-10-12T05:27:50.723Z /
+[step] 2026-10-12T05:27:51.929Z /
+[step] 2026-10-12T05:27:53.025Z /
+[step] 2026-10-12T05:27:53.770Z /ports
+[step] 2026-10-12T05:27:54.455Z /ports/port-shekou
+[step] 2026-10-12T05:27:55.322Z /ports/port-yantian
+[step] 2026-10-12T05:27:56.278Z /ports/port-nansha
+[step] 2026-10-12T05:27:57.228Z /ports/port-laem-chabang
+[step] 2026-10-12T05:27:58.177Z /ports/port-klang
+[step] 2026-10-12T05:27:59.132Z /ports/port-manila
+[step] 2026-10-12T05:28:00.109Z /ports/port-jakarta
+[step] 2026-10-12T05:28:01.044Z /ports/port-ho-chi-minh
+[step] 2026-10-12T05:28:04.541Z /feed
+[step] 2026-10-12T05:28:08.026Z /policies
+[step] 2026-10-12T05:28:13.301Z /calendar
+{"verdict":"PASS","summary":{"total":39,"passed":39,"consoleErrors":0,"httpErrors":0},"runDir":"D:\\try one\\Shipping HOT\\.tmp\\r1-5-6-integrated-2026-10-12T05-27-46-836Z","failed":[]}
+exit=0  
