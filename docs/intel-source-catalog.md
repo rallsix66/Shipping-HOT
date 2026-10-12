@@ -152,6 +152,7 @@
 | XX-W03 | A | 美军联合台风警报中心 JTWC | https://www.metoc.navy.mil/jtwc/rss/jtwc.rss | rss | OK | P2 | 美国政府数据，属公共领域 |
 | XX-W04 | A | 香港天文台 警告汇总 | https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=en | api | OK | P3 | 以香港为中心 |
 | XX-W05 | A | 中央气象台 台风（JSONP） | http://typhoon.nmc.cn/weatherservice/typhoon/jsons/list_default | json_list | OK | P3 | 只有 HTTP，没有公开文档，仅作备用 |
+| XX-W06 | A | 香港天文台 热带气旋六小时位置及强度（事后分析最佳路径） | https://www.hko.gov.hk/en/publica/tc/ （实际抓取 https://www.weather.gov.hk/en/publica/tc/tc2022/six_hrly_data_nalgae.html 等年度页） | manual | OK (2026-10-12) | — | **仅用于 R1.5-4 离线事后回放**：用户 2026-10-12 14:05 UTC+8 批准（「可以」）；不新增实时 provider、不扩港；只提供气旋中心位置（用于计算距离），中心最大风速不能当作港口阵风 |
 
 ### 7.2 船公司公告
 

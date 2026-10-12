@@ -10,13 +10,27 @@ import { evaluateWeatherImpactRules } from "#/services/weather-impact-engine"
 /** Eight-port scope (UN/LOCODE). Out-of-scope ports are never counted. */
 export const R1_5_4_EIGHT_PORTS: readonly string[] = ["CNSHK", "CNYTN", "CNNSA", "THLCH", "MYPKG", "PHMNL", "IDJKT", "VNSGN"]
 
-const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?Z$/
+const ISO_UTC = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?Z$/
 
-function parseUtc(value: string): number | undefined {
-  if (typeof value !== "string" || !ISO_UTC.test(value)) return undefined
-  const t = Date.parse(value)
-  return Number.isFinite(t) ? t : undefined
+/** Strict ISO-8601 UTC: every Y/M/D h:m:s component must be in range; no normalisation (e.g. Feb 30, Feb 29 in non-leap years). */
+export function parseStrictUtc(value: string): number | undefined {
+  if (typeof value !== "string") return undefined
+  const m = ISO_UTC.exec(value)
+  if (!m) return undefined
+  const [y, mo, d, h, mi] = [m[1], m[2], m[3], m[4], m[5]].map(Number)
+  const s = m[6] === undefined ? 0 : Number(m[6])
+  const ms = m[7] === undefined ? 0 : Number(m[7].padEnd(3, "0"))
+  if (mo < 1 || mo > 12 || d < 1 || h > 23 || mi > 59 || s > 59) return undefined
+  const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0
+  const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][mo - 1]
+  if (d > days) return undefined
+  const t = Date.UTC(y, mo - 1, d, h, mi, s, ms)
+  const back = new Date(t)
+  if (back.getUTCFullYear() !== y || back.getUTCMonth() !== mo - 1 || back.getUTCDate() !== d) return undefined
+  return t
 }
+
+const parseUtc = parseStrictUtc
 
 function isHttpsUrl(value: string): boolean {
   try {
@@ -59,7 +73,9 @@ function checkSample(sample: ReplayWeatherSample, startMs: number | undefined, e
   for (const key of Object.keys(REPLAY_INPUT_UNITS) as (keyof WeatherRuleInputs)[]) {
     const value = sample.inputs?.[key]
     if (value === undefined) continue
-    if (typeof value !== "number" || !Number.isFinite(value)) {
+    // Physical inputs (gust, wave, visibility, 24h rain, cyclone distance) are never negative; negatives are
+    // treated as missing-value sentinels (e.g. -1, -999) and rejected. Zero is a legitimate value.
+    if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
       reasons.push(`C6:invalid_value:${key}`)
       continue
     }

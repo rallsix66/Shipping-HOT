@@ -1,6 +1,6 @@
 import type { PortClosureReplayEvent, ReplayWeatherSample } from "@shared/weather-impact"
 import { describe, expect, it } from "vitest"
-import { admitReplayEvents, getR15_4CalibrationStatus, isR15_4ReplayRuleHit, runR15_4Replay } from "./weather-calibration-replay"
+import { admitReplayEvents, getR15_4CalibrationStatus, isR15_4ReplayRuleHit, parseStrictUtc, runR15_4Replay } from "./weather-calibration-replay"
 import { PLAN_WIND_GUST_MS } from "#/config/weather-impact-rules"
 import { portClosureReplayCandidates } from "#/data/weather-calibration/port-closure-replay-candidates"
 import { qualifiedPortClosureReplayEvents } from "#/data/weather-calibration/qualified-port-closure-replay"
@@ -190,5 +190,65 @@ describe("r1.5-4 replay: event-level metric", () => {
     const r = runR15_4Replay([...ids(9, "h").map(id => event(id)), event("x", { portUnlocode: "CNSHA" })])
     expect(r.eligibleCount).toBe(9)
     expect(r.status).toBe("blocked")
+  })
+})
+
+describe("r1.5-4 replay: P2 value and time strictness", () => {
+  it("negative values and missing-value sentinels never become eligible hits", () => {
+    const cases: ReplayWeatherSample["inputs"][] = [
+      { typhoonDistanceKm: -1 },
+      { visibilityM: -999 },
+      { windGustMs: -999 },
+      { waveHeightM: -1 },
+      { precipitationMm24h: -9999 },
+    ]
+    for (const inputs of cases) {
+      const s = sample("2030-01-01T06:00:00Z", inputs, { units: { typhoonDistanceKm: "km", visibilityM: "m", windGustMs: "m/s", waveHeightM: "m", precipitationMm24h: "mm" }, kind: "observation" })
+      const r = runR15_4Replay([event("neg", { samples: [s] })])
+      expect(r.eligibleCount).toBe(0)
+      expect(r.hits).toBe(0)
+      expect(r.rejected[0].reasons).toContain("C6:no_valid_samples_in_window")
+    }
+    const [mixed] = admitReplayEvents([event("mixed", { samples: [sample("2030-01-01T06:00:00Z", { windGustMs: 5, typhoonDistanceKm: -1 }, { units: { windGustMs: "m/s", typhoonDistanceKm: "km" } })] })])
+    expect(mixed.sampleChecks[0].reasons).toContain("C6:invalid_value:typhoonDistanceKm")
+    expect(mixed.status).toBe("rejected")
+  })
+
+  it("legitimate zeros are kept; optional fields may be absent", () => {
+    const r = runR15_4Replay([event("zero", { samples: [sample("2030-01-01T06:00:00Z", { precipitationMm24h: 0, waveHeightM: 0 }, { units: { precipitationMm24h: "mm", waveHeightM: "m" } })] })])
+    expect(r.eligibleCount).toBe(1)
+    expect(r.events[0].hit).toBe(false)
+    const v0 = runR15_4Replay([event("vis0", { samples: [sample("2030-01-01T06:00:00Z", { visibilityM: 0 }, { units: { visibilityM: "m" } })] })])
+    expect(v0.events[0].hitRuleIds).toEqual(["WR-S04"])
+  })
+
+  it("strict UTC parser rejects impossible dates and accepts a valid leap day", () => {
+    expect(parseStrictUtc("2023-02-30T00:00:00Z")).toBeUndefined()
+    expect(parseStrictUtc("2023-02-29T00:00:00Z")).toBeUndefined()
+    expect(parseStrictUtc("2100-02-29T00:00:00Z")).toBeUndefined()
+    expect(parseStrictUtc("2030-04-31T00:00:00Z")).toBeUndefined()
+    expect(parseStrictUtc("2030-01-01T24:00:00Z")).toBeUndefined()
+    expect(parseStrictUtc("2030-01-01T23:60:00Z")).toBeUndefined()
+    expect(parseStrictUtc("2030-13-01T00:00:00Z")).toBeUndefined()
+    expect(parseStrictUtc("2024-02-29T12:00:00Z")).toBe(Date.UTC(2024, 1, 29, 12))
+    expect(parseStrictUtc("2000-02-29T00:00:00.5Z")).toBe(Date.UTC(2000, 1, 29, 0, 0, 0, 500))
+  })
+
+  it("invalid closure window dates are rejected", () => {
+    const [a] = admitReplayEvents([event("win", { closureStartUtc: "2023-02-30T00:00:00Z", closureEndUtc: "2023-03-02T00:00:00Z" })])
+    expect(a.reasons).toContain("C5:invalid_utc_window")
+    expect(a.status).toBe("rejected")
+  })
+
+  it("invalid sample time (non-leap Feb 29) is excluded", () => {
+    const [a] = admitReplayEvents([event("st", { closureStartUtc: "2023-02-28T00:00:00Z", closureEndUtc: "2023-03-02T00:00:00Z", samples: [sample("2023-02-29T06:00:00Z", { windGustMs: 30 })] })])
+    expect(a.sampleChecks[0].reasons).toContain("C6:sample_time_not_utc_iso")
+    expect(a.status).toBe("rejected")
+  })
+
+  it("valid leap-day window and sample are eligible and hit", () => {
+    const r = runR15_4Replay([event("leap", { closureStartUtc: "2024-02-28T00:00:00Z", closureEndUtc: "2024-03-01T00:00:00Z", samples: [sample("2024-02-29T06:00:00Z", { windGustMs: 30 })] })])
+    expect(r.eligibleCount).toBe(1)
+    expect(r.events[0].hitAtUtc).toBe("2024-02-29T06:00:00Z")
   })
 })
