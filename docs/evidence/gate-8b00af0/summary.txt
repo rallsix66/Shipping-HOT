@@ -1,0 +1,14 @@
+﻿HEAD 8b00af03b64e9a7fe987722162692c5f8353a9ac clean=[] start 2026-10-12T14:52:25.2087092+08:00
+install exit=0
+build exit=0
+typecheck exit=0
+lint exit=0
+vitest exit=0
+smoke exit=0
+s7 exit=0
+audit-inventory.sh exit=0 (inventory only, not a security audit)
+self-scan rg exit=1 (1 = no match)
+nalgae-replay script exit=0
+evidence-scan rg (round docs/evidence + raw headers: session cookie/csrf values) exit=1 (1 = no match)
+evidence-scan rg (round docs/evidence: key/token values) exit=1 (1 = no match)
+end 2026-10-12T14:53:53.3403188+08:00 clean=[]
