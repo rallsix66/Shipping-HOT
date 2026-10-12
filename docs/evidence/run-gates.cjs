@@ -1,5 +1,5 @@
 // Evidence gate runner (R2). Runs each gate with spawnSync and writes UTF-8 logs that carry
-// the command, the full SHA, stdout/stderr and the raw exit code. Same logic as the copy that produced gate-a60a957.
+// the command, the full SHA, stdout/stderr and the raw exit code. Run from the repo root: node docs/evidence/run-gates.cjs
 const { execSync, spawnSync } = require("node:child_process")
 const fs = require("node:fs")
 const process = require("node:process")
@@ -9,13 +9,14 @@ const clean = execSync("git status --porcelain").toString().trim() === ""
 const dir = `docs/evidence/gate-${sha.slice(0, 7)}`
 fs.mkdirSync(dir, { recursive: true })
 const bash = "\"C:\\Program Files\\Git\\bin\\bash.exe\""
-const scope = "server/intel server/runtime/intel-collect-job.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts"
+const scope = "server/intel server/runtime/intel-collect-job.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts server/database/migrations/024-paid-receipt.ts server/services/paid-budget.ts"
 const commands = [
   ["install", "pnpm install --frozen-lockfile"],
   ["build", "pnpm build"],
   ["typecheck", "pnpm typecheck"],
   ["lint", "pnpm lint"],
   ["targeted-intel", "npx vitest run server/intel"],
+  ["targeted-paid-receipt", "npx vitest run server/intel/llm server/services/translation"],
   ["test", "pnpm test --run"],
   ["smoke-p0-native", "pnpm smoke:p0-native"],
   ["smoke-p2c-runtime", "pnpm smoke:p2c-runtime"],
