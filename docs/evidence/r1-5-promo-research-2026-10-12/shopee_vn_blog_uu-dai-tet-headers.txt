@@ -1,0 +1,16 @@
+HTTP/2 200 
+server: SGW
+date: Mon, 12 Oct 2026 07:34:14 GMT
+content-type: text/html; charset=UTF-8
+vary: Accept-Encoding
+x-powered-by: PHP/7.4.33
+x-pj-cache-status: miss
+x-shopee-wp-security: Active
+link: <https://shopee.vn/blog/wp-json/>; rel="https://api.w.org/"
+link: <https://shopee.vn/blog/wp-json/wp/v2/posts/109160>; rel="alternate"; title="JSON"; type="application/json"
+link: <https://shopee.vn/blog/?p=109160>; rel=shortlink
+vary: Accept-Encoding
+strict-transport-security: max-age=31536000; includeSubDomains
+content-security-policy-report-only: script-src 'self' 'unsafe-eval' deo.shopeemobile.com storage.googleapis.com www.google-analytics.com www.googletagmanager.com connect.facebook.net www.gstatic.com kit.fontawesome.com cdn.giaiphap.shopee.vn www.google.com cdnjs.cloudflare.com cdn.jsdelivr.net jnews.io; object-src 'none'; report-uri https://secreporter.susercontent.com/csp;
+alt-svc:  
+

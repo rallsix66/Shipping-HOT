@@ -1,0 +1,7 @@
+All fetched from the box with curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36", no -L, max-time 30. Times UTC+8.
+2026-10-12T15:33:4x https://shopee.co.id/m/big-ramadan-sale -> 200, 0 redirects, 158253 B. JS app shell: no <title>, no visible text, no campaign name/date in HTML. WebFetch: same JS shell only.
+2026-10-12T15:33:4x https://shopee.vn/m/tet-sieu-sale -> 200, 0 redirects, 162229 B. JS app shell, same as above. WebFetch: same JS shell only.
+2026-10-12T15:34:1x https://shopee.vn/blog/uu-dai-tet/ -> 200, 0 redirects, 274705 B. Static WordPress article (Shopee VN buyer blog, catalog XX-E01 host). published 2026-01-29T23:35:47+07:00, modified 2026-02-10T15:42:07+07:00.
+2026-10-12T15:34:1x https://money.kompas.com/read/2026/02/13/075900026/shopee-hadirkan-cerita-ramadan-masa-kini-lewat-big-ramadan-sale-2026 -> 200, 0 redirects, 469461 B. Media article (Kompas.com, 2026-02-13 07:59 WIB). Not an official Shopee page.
+No response Set-Cookie headers in any of the four (grep count 0). JS nonce / "...Secret" string values replaced with [REDACTED]; see hashes.txt.
+Search engines (2 WebSearch queries, 15:3x) used only as leads; snippets are not evidence.

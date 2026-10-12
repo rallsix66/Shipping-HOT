@@ -1,0 +1,16 @@
+HTTP/2 200 
+server: SGW
+date: Mon, 12 Oct 2026 07:33:42 GMT
+content-type: text/html; charset=utf-8
+content-length: 162229
+vary: Accept-Encoding
+alt-svc: h3=":443"; ma=2592000
+access-control-allow-origin: *
+content-security-policy: frame-ancestors 'self' *.wallet.airpay.vn *.shopee.kr *.airpay.vn *.shopeemobile.com *.shopee.vn *.shopee.cn *.shopee.io *.facebook.com *.dailyshopee.vn migoo.ai;
+x-permitted-cross-domain-policies: none
+strict-transport-security: max-age=31536000
+x-content-type-options: nosniff
+referrer-policy: strict-origin-when-cross-origin
+cache-control: no-cache
+expires: -1
+
