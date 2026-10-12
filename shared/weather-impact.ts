@@ -61,6 +61,20 @@ export interface ReplaySampleProvenance {
   longitude: number
   /** Unit for every provided input field; must equal REPLAY_INPUT_UNITS. */
   units: Partial<Record<keyof WeatherRuleInputs, string>>
+  /** For derived_distance: how the distance was computed from a position product (audit only; not interpreted by admission). */
+  derivation?: ReplayDistanceDerivation
+}
+
+export interface ReplayDistanceDerivation {
+  method: "haversine"
+  earthRadiusKm: number
+  /** Original fix coordinates from the source table (not interpolated). */
+  fixLatitude: number
+  fixLongitude: number
+  fixKind: ReplaySampleKind
+  fixSourceUrl: string
+  officialPageId?: string
+  interpolated: false
 }
 
 /** One time point of the weather series for an event (original source time, UTC). */
@@ -76,6 +90,8 @@ export interface ReplaySourceLocator {
   /** Verbatim sentence giving the stop or resume time. */
   quote: string
   archivedSha256?: string
+  /** All hash kinds kept separately (e.g. pre-redaction fetch bytes vs redacted archive blob); never mixed. */
+  hashes?: readonly { kind: string, sha256: string }[]
 }
 
 export interface ReplayTimeZoneBasis {

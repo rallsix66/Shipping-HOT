@@ -22,7 +22,7 @@
 ## 天气输入（HKO 最佳路径，事后分析）
 - **批准范围**：用户 2026-10-12 14:05 UTC+8 回复「可以」。只用于**离线事后回放**，不新增实时 provider，不扩港。目录已登记为 XX-W06。
 - 官方页面标识：香港天文台《2022年热带气旋》Nalgae（2222）六小时位置及强度数据，路径 `/en/publica/tc/tc2022/six_hrly_data_nalgae.html`（hko.gov.hk 与 weather.gov.hk 两个域名都提供这个路径）。**实际抓取地址**是 `https://www.weather.gov.hk/en/publica/tc/tc2022/six_hrly_data_nalgae.html`（HTTP 200）。报告页实际抓取的是 `https://www.hko.gov.hk/en/publica/tc/tc2022/section3_6rpt.html`。
-- 数据类型：`post_analysis`，经度纬度只取六小时整点定位，不插值；用这些定位计算与港口的距离（`derived_distance`，单位 km）。港口坐标用项目代表点，蛇口 22.48N 113.91E（`shared/shipping-fixtures.ts`），不是官方码头测点。计算公式：haversine，地球半径 R=6371 km。
+- 数据类型：`post_analysis`，经度纬度只取六小时整点定位，不插值；用这些定位计算与港口的距离（`derived_distance`，单位 km）。港口坐标用项目代表点，蛇口 22.48N 113.91E（`shared/shipping-fixtures.ts` 的 `portWeatherConfig["port-shekou"]`），不是官方码头测点。计算公式：haversine，地球半径 R=6371 km。
 - **窗口内全部定位点**（UTC，原文时间）：
 
 | 时间（UTC） | 纬度 | 经度 | 与蛇口距离 km |
@@ -37,7 +37,7 @@
 | 2022-11-02T18:00Z | 22.1 | 113.9 | 42.3 |
 | 2022-11-03T00:00Z | 22.2 | 113.3 | 70.0 |
 
-  2022-10-31T18:00Z（517.5 km）在窗口之外，不计入。2022-11-03T06:00Z 之后原文写的是 Dissipated（已消散），没有定位点。
+  2022-10-31T18:00Z（517.5 km）在窗口之外，不计入。最后定位为 2022-11-03 00Z，其后列为已消散（Dissipated），未提供更多定位或明确消散时刻。
 - **不使用**：最佳路径表中的「Estimated maximum surface winds」是气旋中心附近的最大风速，**不能当作港口阵风**；报告里的站点最大阵风（昂坪、横澜岛、长洲）没有发生时刻，站点也不在港区，同样不用。
 - 本轮**不跑**规则判断。
 
@@ -55,3 +55,7 @@
 ## 结构校验预检（下一轮试录前要做的）
 - C2 CNSHK 在八港内；C3 作业范围已写明；C4 两篇都是 https 链接、有原句、发布方是 operator；C5 时区是推定且附理由，UTC 窗口有效；C6 的 9 个定位点：产品已批准，类型为 derived_distance，单位 km，数值都非负；C7 窗口外的定位点（10-31 18Z）已剔除。
 - 这些只是**结构检查**，不能证明来源内容是真的。
+
+## 2026-10-12 补记
+- 已按本记录录入真实语料并做离线回放，见 `r1-5-4-nalgae-replay-trial-2026-10-12.md`。
+- recheck 头文件里的会话 cookie 值已脱敏（见回放文档的「证据卫生」）。

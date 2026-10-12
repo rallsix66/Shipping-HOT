@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { admitReplayEvents, getR15_4CalibrationStatus, isR15_4ReplayRuleHit, parseStrictUtc, runR15_4Replay } from "./weather-calibration-replay"
 import { PLAN_WIND_GUST_MS } from "#/config/weather-impact-rules"
 import { portClosureReplayCandidates } from "#/data/weather-calibration/port-closure-replay-candidates"
-import { qualifiedPortClosureReplayEvents } from "#/data/weather-calibration/qualified-port-closure-replay"
+import { NALGAE_HKO_FIXES_IN_WINDOW, NALGAE_SHEKOU_POINT, qualifiedPortClosureReplayEvents } from "#/data/weather-calibration/qualified-port-closure-replay"
 
 // All events below are SYNTHETIC test fixtures (example.org); they are never part of the real corpus.
 const START = "2030-01-01T00:00:00Z"
@@ -37,11 +37,11 @@ function event(id: string, over: Partial<PortClosureReplayEvent> = {}): PortClos
 }
 
 describe("r1.5-4 replay: real corpus", () => {
-  it("real qualified corpus stays empty and blocked (no synthetic events, no PASS)", () => {
-    expect(qualifiedPortClosureReplayEvents.length).toBe(0)
+  it("real corpus has only the Nalgae trial event and stays blocked (no PASS)", () => {
+    expect(qualifiedPortClosureReplayEvents.length).toBe(1)
     const status = getR15_4CalibrationStatus()
     expect(status.status).toBe("blocked")
-    expect(status.qualifiedCount).toBe(0)
+    expect(status.qualifiedCount).toBe(1)
   })
 
   it("candidates (incl. HKO/Nalgae) are not qualified", () => {
@@ -250,5 +250,64 @@ describe("r1.5-4 replay: P2 value and time strictness", () => {
     const r = runR15_4Replay([event("leap", { closureStartUtc: "2024-02-28T00:00:00Z", closureEndUtc: "2024-03-01T00:00:00Z", samples: [sample("2024-02-29T06:00:00Z", { windGustMs: 30 })] })])
     expect(r.eligibleCount).toBe(1)
     expect(r.events[0].hitAtUtc).toBe("2024-02-29T06:00:00Z")
+  })
+})
+
+describe("r1.5-4 replay: real corpus Nalgae single-event post-hoc trial (fixed regression)", () => {
+  const nalgae = qualifiedPortClosureReplayEvents.find(e => e.eventId === "2022-nalgae-shekou-gate")!
+
+  it("corpus holds only the Nalgae Shekou gate event with gate-only scope and operator HTTPS locators", () => {
+    expect(qualifiedPortClosureReplayEvents.map(e => e.eventId)).toEqual(["2022-nalgae-shekou-gate"])
+    expect(nalgae.portUnlocode).toBe("CNSHK")
+    expect(nalgae.operationScope).toMatch(/SCT\/CCT\/MCT.*gate/)
+    expect(nalgae.operationScope).not.toMatch(/port-wide|全港/)
+    expect(nalgae.stopSource.url).toBe("https://www.portshekou.com/ywgg/1200")
+    expect(nalgae.resumeSource.url).toBe("https://www.portshekou.com/ywgg/1199")
+    expect(nalgae.stopSource.hashes?.map(h => h.kind)).toEqual(["fetch_raw_pre_redaction", "archive_git_blob_redacted"])
+    expect(nalgae.resumeSource.hashes?.map(h => h.kind)).toEqual(["fetch_raw_pre_redaction", "archive_git_blob_redacted"])
+    expect(nalgae.timeZoneBasis).toMatchObject({ statedOffset: null, inferredOffset: "UTC+8", ambiguous: false })
+    expect(nalgae.closureStartUtc).toBe("2022-10-31T23:00:00Z")
+    expect(nalgae.closureEndUtc).toBe("2022-11-03T06:00:00Z")
+  })
+
+  it("all nine in-window HKO fixes are entered; only typhoonDistanceKm is mapped; distances recompute by haversine R=6371", () => {
+    expect(NALGAE_HKO_FIXES_IN_WINDOW).toHaveLength(9)
+    expect(nalgae.samples).toHaveLength(9)
+    const rad = (d: number) => d * Math.PI / 180
+    for (const [i, s] of nalgae.samples.entries()) {
+      const f = NALGAE_HKO_FIXES_IN_WINDOW[i]
+      expect(s.atUtc).toBe(f.atUtc)
+      expect(Object.keys(s.inputs)).toEqual(["typhoonDistanceKm"])
+      expect(s.provenance.kind).toBe("derived_distance")
+      expect(s.provenance.derivation).toMatchObject({ method: "haversine", earthRadiusKm: 6371, fixLatitude: f.latitude, fixLongitude: f.longitude, fixKind: "post_analysis", interpolated: false })
+      expect([s.provenance.latitude, s.provenance.longitude]).toEqual([NALGAE_SHEKOU_POINT.latitude, NALGAE_SHEKOU_POINT.longitude])
+      const dLat = rad(f.latitude - NALGAE_SHEKOU_POINT.latitude)
+      const dLon = rad(f.longitude - NALGAE_SHEKOU_POINT.longitude)
+      const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(f.latitude)) * Math.cos(rad(NALGAE_SHEKOU_POINT.latitude)) * Math.sin(dLon / 2) ** 2
+      const km = 2 * 6371 * Math.asin(Math.sqrt(h))
+      expect(Math.round(km * 10) / 10).toBe(s.inputs.typhoonDistanceKm)
+    }
+  })
+
+  it("admission is eligible; all points evaluated; first hit 2022-11-02T00:00Z by WR-S03; status BLOCKED 1/10", () => {
+    const [adm] = admitReplayEvents(qualifiedPortClosureReplayEvents)
+    expect(adm.status).toBe("eligible")
+    expect(adm.reasons).toEqual([])
+    expect(adm.sampleChecks.every(c => c.valid)).toBe(true)
+    const report = runR15_4Replay(qualifiedPortClosureReplayEvents)
+    expect(report.rejected).toEqual([])
+    expect(report.pendingReview).toEqual([])
+    const [ev] = report.events
+    expect(ev.validSampleCount).toBe(9)
+    expect(ev.points.map(p => p.counted)).toEqual([false, false, false, false, true, true, true, true, true])
+    expect(ev.hit).toBe(true)
+    expect(ev.hitAtUtc).toBe("2022-11-02T00:00:00Z")
+    expect(ev.hitRuleIds).toEqual(["WR-S03"])
+    expect(report.eligibleCount).toBe(1)
+    expect(report.hits).toBe(1)
+    expect(report.status).toBe("blocked")
+    expect(report.reason).toBe("Need 10 eligible events; have 1.")
+    const status = getR15_4CalibrationStatus()
+    expect(status).toMatchObject({ status: "blocked", qualifiedCount: 1, requiredCount: 10 })
   })
 })

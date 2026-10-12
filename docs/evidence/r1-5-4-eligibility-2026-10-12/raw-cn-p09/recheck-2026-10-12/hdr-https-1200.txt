@@ -11,7 +11,7 @@ Set-Cookie: think_lang=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0
 X-Frame-Options: SAMEORIGIN
 X-Frame-Options: SAMEORIGIN
 X-Via-JSL: 6e0ae86,-
-Set-Cookie: PHPSESSID=70a98db313c930e49240b8c75a345c26; path=/
-Set-Cookie: __jsluid_s=f4d698d77de0308b3cc71ee063f3e11f; max-age=31536000; path=/; HttpOnly; SameSite=None; secure
+Set-Cookie: PHPSESSID=[REDACTED]; path=/
+Set-Cookie: __jsluid_s=[REDACTED]; max-age=31536000; path=/; HttpOnly; SameSite=None; secure
 X-Cache: bypass
 
