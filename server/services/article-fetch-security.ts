@@ -180,9 +180,22 @@ export function validatedLookup(addresses: readonly ResolvedAddress[]) {
   }
 }
 
-function defaultTransport(url: URL, addresses: ResolvedAddress[], options: { timeoutMs: number, maxBytes: number, headers: Record<string, string>, signal?: AbortSignal }): Promise<ArticleHttpResponse> {
+/**
+ * Node request boundary. Exported only for the offline regression test, which
+ * mocks node:http/node:https; production callers go through secureFetchArticle.
+ * The GET request must be ended explicitly or it is never sent and only times out.
+ */
+export function defaultTransport(url: URL, addresses: ResolvedAddress[], options: { timeoutMs: number, maxBytes: number, headers: Record<string, string>, signal?: AbortSignal }): Promise<ArticleHttpResponse> {
   return new Promise((resolve, reject) => {
-    const request = (url.protocol === "https:" ? httpsRequest : httpRequest)(url, {
+    let settled = false
+    let request: ReturnType<typeof httpRequest> | undefined
+    const fail = (error: unknown) => {
+      if (settled) return
+      settled = true
+      request?.destroy()
+      reject(error instanceof Error ? error : new Error("fetch failed"))
+    }
+    request = (url.protocol === "https:" ? httpsRequest : httpRequest)(url, {
       method: "GET",
       headers: options.headers,
       timeout: options.timeoutMs,
@@ -194,16 +207,22 @@ function defaultTransport(url: URL, addresses: ResolvedAddress[], options: { tim
       response.on("data", (chunk: Buffer) => {
         total += chunk.length
         if (total > options.maxBytes) {
-          response.destroy(new Error("body_too_large"))
+          response.destroy()
+          fail(new Error("body_too_large"))
           return
         }
         chunks.push(chunk)
       })
-      response.on("end", () => resolve({ status: response.statusCode ?? 0, headers: response.headers, body: Buffer.concat(chunks).toString("utf8") }))
-      response.on("error", reject)
+      response.on("end", () => {
+        if (settled) return
+        settled = true
+        resolve({ status: response.statusCode ?? 0, headers: response.headers, body: Buffer.concat(chunks).toString("utf8") })
+      })
+      response.on("error", fail)
     })
-    request.on("timeout", () => request.destroy(new Error("fetch_timeout")))
-    request.on("error", reject)
+    request.on("timeout", () => fail(new Error("fetch_timeout")))
+    request.on("error", fail)
+    request.end()
   })
 }
 

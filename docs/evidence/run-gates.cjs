@@ -17,7 +17,7 @@ const commands = [
   ["lint", "pnpm lint"],
   ["targeted-intel", "npx vitest run server/intel"],
   ["targeted-paid-receipt", "npx vitest run server/intel/llm server/services/translation"],
-  ["targeted-feed-safe-fetch", "npx vitest run server/providers/feed.test.ts server/runtime/feed-sync-job.test.ts server/services/article server/runtime/article server/runtime/registry.test.ts"],
+  ["targeted-feed-safe-fetch", "npx vitest run server/providers/feed.test.ts server/runtime/feed-sync-job.test.ts server/services/article-fetch-security.test.ts server/services/article-fetch-transport.test.ts server/providers/article-extractor.test.ts server/services/article-service.test.ts server/runtime/registry.test.ts"],
   ["test", "pnpm test --run"],
   ["smoke-p0-native", "pnpm smoke:p0-native"],
   ["smoke-p2c-runtime", "pnpm smoke:p2c-runtime"],

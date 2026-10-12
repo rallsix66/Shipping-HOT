@@ -17,3 +17,7 @@
 - 默认开关和白名单没有改动：registry 的 Feed 启用条件不变，来源 enabled/status 不变；列表策略只允许列表 URL 自身的主机。
 - 没有页面或路由改动，所以没有浏览器或 S7 验收；没有运行上游实网抓取。
 - 仓库外的中转文件保留：之前列出的那些，加上 p27.js、p27t.js、p27u.js、p27v.js、dbg.js、dbg2.js、d27.js（都在 C:\Users\Administrator）。
+
+## 勘误（2026-10-12，dots 17:29 复审后补记）
+
+上面 targeted-feed-safe-fetch 一行写错了。按 targeted-feed-safe-fetch.log 实际是 8 个文件 / 75 项：feed.test 24、feed-sync-job 4（不是 5）、article-fetch-security 10、registry 2、article-service 8、article-translation-source 10、article-translation-display 7、article-translation-view 10。没有跑 article-fetch-job（没有对应单测文件）或 article-extractor（它的 7 项来自全量 test.log）。另外 85e3c0c 存在 P2：defaultTransport 没有调用 request.end()，已在后续提交修复。原日志未改动。

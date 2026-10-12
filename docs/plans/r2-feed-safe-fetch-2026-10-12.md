@@ -43,3 +43,10 @@
 - 不在本片：来源专属 CA、三种编码、web_list/json_list。
 - 天气预警等非 Feed 抓取器仍然各自实现，未统一。
 - 之前的缺口照旧：历史回放 1/10、PAGASA、促销缺口，以及 R2-3 的限制（遗留 unknown 的保守预留、实际费用对账和真实调用方仍未完成）。
+
+## dots 17:29 复审修复（P2）与勘误
+
+- **P2 修复**：`defaultTransport` 用 node:http/https.request 发 GET，但从未调用 `request.end()`，请求不会真正发出，只会等到超时。Feed 列表改走这里后，公开 Feed 在生产上会全部超时。现在注册好监听后调用 `request.end()`。同时补上清理：timeout/error/超限都只结算一次并 `request.destroy()`，超限还会销毁 response；迟到事件被忽略。地址固定（validatedLookup）和全部安全检查不变；`ArticleTransport` 注入口不变。
+- **回归测试** `server/services/article-fetch-transport.test.ts`（5 项）：在 Node request 边界 mock node:http/node:https，不替换 ArticleTransport，不开 socket。覆盖：end 被调用一次、响应分块读取、Feed 经 feed.ts 解析出条目、socket lookup 只返回已校验地址；超时 → fetch_timeout 并 destroy；请求错误 → fetch_failed、只 destroy 一次、迟到 timeout 被忽略；超限 → body_too_large 并销毁 response 和 request；私网地址根本不进入 Node request。去掉 `request.end()` 后本地复跑：5 项中 4 项失败（私网那项本来就不发请求），确认它能抓到这个缺陷。
+- **勘误（gate-85e3c0c 的 targeted 75）**：按日志实际是 8 个文件 / 75 项：feed.test 24、feed-sync-job **4**（原 3 项 + 本片新增 1 项；收尾记录误写为 5）、article-fetch-security 10、registry 2、article-service 8、article-translation-source 10、article-translation-display 7、article-translation-view 10。该命令**没有**跑 article-fetch-job（仓库里没有它的单测文件）或 article-extractor；article-extractor 的 7 项来自全量测试。上面“已覆盖”里 article-fetch-job 是按代码调用点核查得出，不是由 targeted 测试证明的。
+- 本轮 targeted 命令改为显式文件列表：feed.test、feed-sync-job.test、article-fetch-security.test、article-fetch-transport.test、article-extractor.test、article-service.test、registry.test。实际跑了哪些以日志为准。
