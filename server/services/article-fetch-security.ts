@@ -27,7 +27,7 @@ export type ArticleLookup = (hostname: string) => Promise<ResolvedAddress[]>
 export type ArticleTransport = (
   url: URL,
   addresses: ResolvedAddress[],
-  options: { timeoutMs: number, maxBytes: number, headers: Record<string, string> },
+  options: { timeoutMs: number, maxBytes: number, headers: Record<string, string>, signal?: AbortSignal },
 ) => Promise<ArticleHttpResponse>
 
 export interface SecureFetchOptions {
@@ -38,6 +38,8 @@ export interface SecureFetchOptions {
   timeoutMs?: number
   maxRedirects?: number
   signal?: AbortSignal
+  /** Accept header; defaults to the article (HTML) value. Feed list requests pass their XML/HTML types. */
+  accept?: string
 }
 
 export interface SecureFetchSuccess {
@@ -53,6 +55,8 @@ export interface SecureFetchFailure {
   ok: false
   code: string
   message: string
+  /** HTTP status for code 'http_error'. */
+  status?: number
 }
 
 function ipv4ToInt(address: string): number | null {
@@ -176,12 +180,13 @@ export function validatedLookup(addresses: readonly ResolvedAddress[]) {
   }
 }
 
-function defaultTransport(url: URL, addresses: ResolvedAddress[], options: { timeoutMs: number, maxBytes: number, headers: Record<string, string> }): Promise<ArticleHttpResponse> {
+function defaultTransport(url: URL, addresses: ResolvedAddress[], options: { timeoutMs: number, maxBytes: number, headers: Record<string, string>, signal?: AbortSignal }): Promise<ArticleHttpResponse> {
   return new Promise((resolve, reject) => {
     const request = (url.protocol === "https:" ? httpsRequest : httpRequest)(url, {
       method: "GET",
       headers: options.headers,
       timeout: options.timeoutMs,
+      signal: options.signal,
       lookup: validatedLookup(addresses) as never,
     }, (response) => {
       const chunks: Buffer[] = []
@@ -218,7 +223,7 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
   const maxRedirects = options.maxRedirects ?? ARTICLE_FETCH_DEFAULTS.maxRedirects
   const headers = {
     "user-agent": "shipping-hot-article/1.0",
-    "accept": "text/html,application/xhtml+xml",
+    "accept": options.accept ?? "text/html,application/xhtml+xml",
     "accept-encoding": "identity",
   }
 
@@ -230,6 +235,7 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
   }
 
   for (let hop = 0; hop <= maxRedirects; hop++) {
+    if (options.signal?.aborted) return failure("fetch_timeout", "Request aborted")
     if (current.username || current.password) return failure("credentials_not_allowed", "URL credentials are not allowed")
     const protocolError = validateProtocol(current, options.policy)
     if (protocolError) return protocolError
@@ -247,7 +253,7 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
     if (blocked) return failure("blocked_address", `Resolved address is not a public address: ${blocked.address}`)
     let response: ArticleHttpResponse
     try {
-      response = await transport(current, addresses, { timeoutMs, maxBytes, headers })
+      response = await transport(current, addresses, { timeoutMs, maxBytes, headers, signal: options.signal })
     } catch (error) {
       const message = error instanceof Error ? error.message : "fetch failed"
       return failure(message === "body_too_large" ? "body_too_large" : message === "fetch_timeout" ? "fetch_timeout" : "fetch_failed", message)
@@ -266,7 +272,7 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
       current = next
       continue
     }
-    if (response.status >= 400) return failure("http_error", `Article request failed with status ${response.status}`)
+    if (response.status >= 400) return { ...failure("http_error", `Article request failed with status ${response.status}`), status: response.status }
     const contentType = headerValue(response.headers, "content-type")
     const mime = contentType?.split(";")[0]?.trim().toLowerCase()
     const allowed = options.policy.allowedContentTypes.map(type => type.toLowerCase())

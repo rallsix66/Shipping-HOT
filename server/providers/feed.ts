@@ -2,23 +2,25 @@ import { createHash } from "node:crypto"
 import { XMLParser } from "fast-xml-parser"
 import { load } from "cheerio"
 import { type DataProvenance, type FeedCategory, type FeedFreshnessClass, type FeedItem, type Port, type SourceType, isMockProvenance } from "@shared/shipping"
-import type { ArticleSourcePolicyConfig } from "@shared/article"
+import type { ArticleSourcePolicy, ArticleSourcePolicyConfig } from "@shared/article"
 import { mockFeedItems } from "@shared/shipping-fixtures"
 import { applyFeedFreshnessPolicy } from "@shared/shipping-rules"
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
+import { type ArticleLookup, type ArticleTransport, type SecureFetchFailure, secureFetchArticle } from "#/services/article-fetch-security"
 
 export interface FeedProvider {
   readonly providerId: string
   getFeedItems: (lastKnown?: FeedItem[], ports?: Port[]) => Promise<FeedItem[]>
 }
 
-export interface FeedResponse {
-  ok: boolean
-  status: number
-  text: () => Promise<string>
+/**
+ * Injection seam for offline tests only. Production passes nothing: secureFetchArticle then uses real DNS and the
+ * pinned-address transport. There is no plain-fetch fallback.
+ */
+export interface FeedFetchDeps {
+  lookup?: ArticleLookup
+  transport?: ArticleTransport
 }
-
-export type FeedFetcher = (url: string, init?: { signal?: AbortSignal }) => Promise<FeedResponse>
 
 export interface ShippingFeedSource {
   id: string
@@ -447,7 +449,7 @@ function markSourceFailed(item: FeedItem, fetchedAt: string, failure: ProviderEr
 }
 
 export interface PublicFeedProviderOptions {
-  fetcher?: FeedFetcher
+  fetch?: FeedFetchDeps
   now?: () => Date
   sources?: ShippingFeedSource[]
   timeoutMs?: number
@@ -456,6 +458,32 @@ export interface PublicFeedProviderOptions {
 }
 
 export const PUBLIC_FEED_TIMEOUT_MS = 10_000
+/** Response size limit for one Feed list response (article pages use 512 KiB). */
+export const FEED_FETCH_MAX_BYTES = 2 * 1024 * 1024
+const FEED_XML_TYPES = ["application/rss+xml", "application/atom+xml", "application/rdf+xml", "application/xml", "text/xml"]
+
+/**
+ * Fetch policy for one Feed list URL: only the list URL's own host (no widening, redirects to any other host fail),
+ * HTTPS only, and the content types of the declared format. It is not an article policy.
+ */
+export function feedListFetchPolicy(source: ShippingFeedSource): ArticleSourcePolicy {
+  return {
+    sourceId: source.id,
+    status: "excerpt_only",
+    fetchAllowed: true,
+    persistence: "excerpt_only",
+    allowedHosts: [new URL(source.url).hostname],
+    allowedContentTypes: source.format === "rss" ? FEED_XML_TYPES : ["text/html"],
+    notes: "Feed list fetch policy derived from the source URL; not an article policy.",
+  }
+}
+
+function feedFetchError(source: ShippingFeedSource, failure: SecureFetchFailure, timeoutMs: number): ProviderError {
+  if (failure.code === "http_error" && failure.status) return providerHttpError(source.name, failure.status, `${source.name} request failed (${failure.status})`)
+  if (failure.code === "fetch_timeout") return new ProviderError("provider_timeout", `${source.name} request timed out after ${timeoutMs}ms`)
+  if (failure.code === "content_type_unsupported" || failure.code === "content_type_missing") return new ProviderError("provider_contract_changed", `${source.name}: ${failure.code}: ${failure.message}`)
+  return new ProviderError("provider_unavailable", `${source.name}: ${failure.code}: ${failure.message}`)
+}
 
 async function withFeedSourceTimeout<T>(operation: (signal: AbortSignal) => Promise<T>, timeoutMs: number, sourceName: string): Promise<T> {
   const controller = new AbortController()
@@ -482,14 +510,7 @@ async function withFeedSourceTimeout<T>(operation: (signal: AbortSignal) => Prom
   }
 }
 
-function publicFeedFetcher(): FeedFetcher {
-  const fetchImplementation = globalThis.fetch
-  if (!fetchImplementation) throw new Error("Fetch runtime is unavailable")
-  return (url, init) => fetchImplementation(url, init)
-}
-
 export function createPublicFeedProvider(options: PublicFeedProviderOptions = {}): FeedProvider {
-  const fetcher = options.fetcher ?? publicFeedFetcher()
   const now = options.now ?? (() => new Date())
   const sources = options.sources ?? shippingFeedSources
   const timeoutMs = Math.max(1, options.timeoutMs ?? PUBLIC_FEED_TIMEOUT_MS)
@@ -502,12 +523,20 @@ export function createPublicFeedProvider(options: PublicFeedProviderOptions = {}
         const previous = lastKnown.filter(item => item.sourceId === source.id)
         try {
           const parsed = await withFeedSourceTimeout(async (signal) => {
-            const response = await fetcher(source.url, { signal })
-            if (!response.ok) {
-              const body = await response.text().catch(() => "")
-              throw providerHttpError(source.name, response.status, `${source.name} request failed (${response.status})`, body)
-            }
-            const body = await response.text()
+            // The single safe entry (per-hop URL/host/DNS checks, address pinning, private-network and HTTPS-downgrade
+            // blocks, response size limit). Parsing stays in this file.
+            const policy = feedListFetchPolicy(source)
+            const response = await secureFetchArticle(source.url, {
+              policy,
+              lookup: options.fetch?.lookup,
+              transport: options.fetch?.transport,
+              timeoutMs,
+              maxBytes: FEED_FETCH_MAX_BYTES,
+              signal,
+              accept: policy.allowedContentTypes.join(", "),
+            })
+            if (!response.ok) throw feedFetchError(source, response, timeoutMs)
+            const body = response.body
             try {
               return source.format === "rss" ? parseFeedRss(body, source, ports, fetchedAt) : parseFeedHtml(body, source, ports, fetchedAt)
             } catch (error) {

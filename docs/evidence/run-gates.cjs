@@ -9,7 +9,7 @@ const clean = execSync("git status --porcelain").toString().trim() === ""
 const dir = `docs/evidence/gate-${sha.slice(0, 7)}`
 fs.mkdirSync(dir, { recursive: true })
 const bash = "\"C:\\Program Files\\Git\\bin\\bash.exe\""
-const scope = "server/intel server/runtime/intel-collect-job.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts server/database/migrations/024-paid-receipt.ts server/database/migrations/025-paid-receipt-usage-booking.ts server/services/paid-budget.ts"
+const scope = "server/intel server/runtime/intel-collect-job.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts server/database/migrations/024-paid-receipt.ts server/database/migrations/025-paid-receipt-usage-booking.ts server/services/paid-budget.ts server/providers/feed.ts server/services/article-fetch-security.ts"
 const commands = [
   ["install", "pnpm install --frozen-lockfile"],
   ["build", "pnpm build"],
@@ -17,6 +17,7 @@ const commands = [
   ["lint", "pnpm lint"],
   ["targeted-intel", "npx vitest run server/intel"],
   ["targeted-paid-receipt", "npx vitest run server/intel/llm server/services/translation"],
+  ["targeted-feed-safe-fetch", "npx vitest run server/providers/feed.test.ts server/runtime/feed-sync-job.test.ts server/services/article server/runtime/article server/runtime/registry.test.ts"],
   ["test", "pnpm test --run"],
   ["smoke-p0-native", "pnpm smoke:p0-native"],
   ["smoke-p2c-runtime", "pnpm smoke:p2c-runtime"],
