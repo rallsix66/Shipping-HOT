@@ -1,0 +1,5 @@
+# pattern: fetch\(|node:https?|node:dns|undici|globalThis\.fetch|\$fetch|openai|deepseek|apiKey|secret|credential
+# scope: server/intel, server/database/intel.ts, server/runtime/intel-collect-job.ts, migrations 021/022
+rg_exit=1 (1 = no match)
+# registry/api wiring: rg -n intel server/runtime/registry.ts server/api
+rg_exit=1 (1 = no match)

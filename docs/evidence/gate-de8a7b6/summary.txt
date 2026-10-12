@@ -1,0 +1,12 @@
+﻿sha=de8a7b6518ec59198fc5f16c6e1dcf39bf259c95
+clean_tree=True
+started=2026-10-12T16:14:16.8446440+08:00
+install exit=0
+build exit=0
+typecheck exit=0
+lint exit=0
+vitest exit=1
+smoke-p0-native exit=0
+smoke-p2c-runtime exit=0
+smoke-p3-feed-freshness exit=0
+finished=2026-10-12T16:15:02.5697288+08:00
