@@ -233,6 +233,22 @@ export class IntelRepository {
     `).run(input.consecutiveFailures, input.nextSyncAt, input.now, input.errorCode, input.now, sourceId)
   }
 
+  /** Success finish: run result and source state commit in one transaction, or neither does. */
+  async finishRunSuccess(runId: string, sourceId: string, run: Parameters<IntelRepository["completeRun"]>[1], source: Parameters<IntelRepository["recordSourceSuccess"]>[1]): Promise<void> {
+    await this.transaction(async () => {
+      await this.completeRun(runId, run)
+      await this.recordSourceSuccess(sourceId, source)
+    })
+  }
+
+  /** Failure finish: run result and source backoff commit in one transaction, or neither does. */
+  async finishRunFailure(runId: string, sourceId: string, run: Parameters<IntelRepository["completeRun"]>[1], source: Parameters<IntelRepository["recordSourceFailure"]>[1]): Promise<void> {
+    await this.transaction(async () => {
+      await this.completeRun(runId, run)
+      await this.recordSourceFailure(sourceId, source)
+    })
+  }
+
   private async recordCurrentChange(itemId: string, fromVersionId: string | null, toVersionId: string, reason: IntelCurrentChange["reason"], changedAt: string): Promise<void> {
     await this.db.prepare(`
       INSERT INTO intel_item_current_change (id, item_id, from_version_id, to_version_id, reason, changed_at) VALUES (?, ?, ?, ?, ?, ?)

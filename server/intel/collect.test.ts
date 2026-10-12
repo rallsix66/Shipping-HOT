@@ -225,6 +225,41 @@ describe("intel collect offline loop", () => {
     native.close()
   })
 
+  it("a one-time source-success write failure leaves DB, return value and backoff consistent and keeps committed entries", async () => {
+    const { native, repository } = await setup()
+    const net = offline({ [TMD.url]: () => xml(TMD_XML) })
+    let successWrites = 0
+    faults.when = (sql) => {
+      if (!sql.includes("consecutive_failures = 0")) return false
+      successWrites++
+      return successWrites === 1
+    }
+    const outcome = await collectIntelSource(repository, TMD, net.deps, T0)
+    expect(outcome).toMatchObject({ status: "failed", errorCode: "finalize_failed" })
+    const committed = (outcome as { itemsCommitted: number }).itemsCommitted
+    expect(committed).toBeGreaterThan(0)
+    expect((await repository.listRuns(TMD.id)).map(run => [run.status, run.errorCode])).toEqual([["failed", "finalize_failed"]])
+    const source = (await repository.getSource(TMD.id))!
+    expect(source).toMatchObject({ status: "failing", consecutiveFailures: 1, lastErrorCode: "finalize_failed", lastOkAt: null })
+    expect(minutes(T0, source.nextSyncAt)).toBe(15)
+    expect((await repository.listItems(TMD.id)).length).toBe(committed)
+    expect(native.prepare("SELECT COUNT(*) AS c FROM intel_fetch_run WHERE status IN ('ok_items','ok_empty')").get()).toEqual({ c: 0 })
+    native.close()
+  })
+
+  it("if the failure state cannot be saved either, success finish returns storage_unavailable and records no success", async () => {
+    const { native, repository } = await setup()
+    const net = offline({ [TMD.url]: () => xml(TMD_XML) })
+    faults.when = sql => sql.trim().startsWith("UPDATE intel_source")
+    const outcome = await collectIntelSource(repository, TMD, net.deps, T0)
+    expect(outcome).toMatchObject({ status: "storage_unavailable", errorCode: "finalize_failed" })
+    faults.when = undefined
+    expect((await repository.listRuns(TMD.id)).map(run => run.status)).toEqual(["running"])
+    expect(await repository.getSource(TMD.id)).toMatchObject({ consecutiveFailures: 0, lastOkAt: null })
+    expect((await repository.listItems(TMD.id)).length).toBeGreaterThan(0)
+    native.close()
+  })
+
   it("stores licensed full text, excerpt or metadata only according to source persistence", async () => {
     const metadataOnly: IntelSourceSeed = { ...TMD, id: "intel:test-metadata-only", persistence: "disallowed" }
     const { native, repository } = await setup([TMD, BMKG, metadataOnly])
@@ -404,6 +439,47 @@ describe("intel collect job on the single BackgroundRuntime", () => {
     const job = createIntelCollectJob({ db: database, enabled: true, fetch: net.deps, seeds: [TMD], now: () => T0 })
     expect((await job.run()).status).toBe("success")
     expect((await repository.listRuns(TMD.id)).map(run => [run.status, run.errorCode])).toEqual([["failed", "interrupted"], ["ok_items", null]])
+    native.close()
+  })
+
+  it("negative: end() is rejected while a fetch is paused, so a second instance cannot reclaim the working run", async () => {
+    const { database, native, repository } = await setup()
+    let release!: () => void
+    let entered!: () => void
+    const gate = new Promise<void>(resolve => (release = resolve))
+    const inTransport = new Promise<void>(resolve => (entered = resolve))
+    const netA = offline({ [TMD.url]: () => xml(TMD_XML) })
+    const paused: IntelFetchDeps = { lookup: netA.deps.lookup, transport: async (...args) => {
+      entered()
+      await gate
+      return netA.deps.transport(...args)
+    } }
+    const first = createIntelCollectJob({ db: database, enabled: true, fetch: paused, seeds: [TMD], now: () => T0 })
+    const firstRun = first.run()
+    await inTransport
+    await expect(first.end()).rejects.toThrow(/intel_executor_busy/)
+    expect(native.prepare("SELECT ended_at FROM intel_executor WHERE id = ?").get(first.executorId)).toEqual({ ended_at: null })
+    const netB = offline({ [TMD.url]: () => xml(TMD_XML) })
+    const second = createIntelCollectJob({ db: database, enabled: true, fetch: netB.deps, seeds: [TMD], now: () => new Date(T0.getTime() + 60_000) })
+    expect(await second.run()).toMatchObject({ status: "success", recordsRead: 0 })
+    expect(netB.calls).toEqual([])
+    expect((await repository.listRuns(TMD.id)).map(run => run.status)).toEqual(["running"])
+    release()
+    expect((await firstRun).status).toBe("success")
+    expect((await repository.listRuns(TMD.id)).map(run => [run.status, run.errorCode])).toEqual([["ok_items", null]])
+    await first.end()
+    native.close()
+  })
+
+  it("negative: an ended instance refuses to run again and opens no run", async () => {
+    const { database, native, repository } = await setup()
+    const net = offline({ [TMD.url]: () => xml(TMD_XML) })
+    const job = createIntelCollectJob({ db: database, enabled: true, fetch: net.deps, seeds: [TMD], now: () => T0 })
+    expect((await job.run()).status).toBe("success")
+    await job.end()
+    expect(await job.run()).toMatchObject({ status: "failed", errorCode: "intel_executor_ended" })
+    expect(net.calls.length).toBe(1)
+    expect((await repository.listRuns(TMD.id)).length).toBe(1)
     native.close()
   })
 

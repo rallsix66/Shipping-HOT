@@ -68,3 +68,10 @@ RSS/Atom/RDF 测试表（`server/providers/feed-formats.test.ts`）：
 3. **第二个 job 实例**：迁移 023 新增 `intel_executor` 与 `intel_fetch_run.executor_id`。每次运行仅回收**已确认结束**的 executor 的 running run（`recoverRunsOfEndedExecutors`）；崩溃遗留只能通过显式独占启动步骤 `recoverIntelRunsAtExclusiveStartup` 回收。绝不按时长判死；活跃实例的 run 由唯一 running 索引阻挡。
 4. 测试：`server/intel/collect.test.ts` 18 项（新增回滚、单条写失败+后续源继续+可重试、storage_unavailable、DB 级在途保护、双实例负向、重启遗留经独占启动回收、已结束 executor 回收）。schema 版本期望 22→23。
 5. 仍未完成：registry 接线、GET 端点；job 默认关闭、零网络、零 LLM；paid_receipt 切片未开始。
+
+## 9. 第二轮 P2 返修（dots 2026-10-12 16:44，ts 1791794650.429139）
+
+1. **成功收尾原子化**：新增 `finishRunSuccess` / `finishRunFailure`，run 结果与来源状态在同一 BEGIN IMMEDIATE 事务内提交。来源成功状态写入一次性失败时整体回滚，run 仍为 running，随后在同一事务内收尾为 failed（`finalize_failed`）+ 退避；已提交条目保留。若失败状态也无法保存，返回 `storage_unavailable`，数据库中不留下"成功"。
+2. **executor 生命周期护栏**：`end()` 在活动运行期间拒绝（`intel_executor_busy`），不写 ended_at；结束后 `run()` 返回 failed `intel_executor_ended`，不开 run。同一实例并发 run 返回 skipped `job_running`。显式独占启动恢复的调用前提保留，未引入通用进程锁框架。
+3. 测试：collect.test.ts 22 项（新增：一次性来源成功写失败一致性、失败状态也无法保存时 storage_unavailable、暂停 fetch→尝试 end→第二实例触发、end 后再 run）。
+4. 仍未完成：registry 接线、GET 端点；默认关闭、零网络、零 LLM；paid_receipt 暂缓。

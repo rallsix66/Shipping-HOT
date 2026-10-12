@@ -82,8 +82,7 @@ export async function collectIntelSource(repository: IntelRepository, seed: Inte
     try {
       const current = await repository.getSource(seed.id)
       const failures = (current?.consecutiveFailures ?? 0) + 1
-      await repository.completeRun(activeRunId, { status: "failed", finishedAt: nowIso, errorCode, errorMessage: errorMessage.slice(0, 300), itemsSeen: counts.seen, itemsNew: counts.created, itemsRevised: counts.revised })
-      await repository.recordSourceFailure(seed.id, {
+      await repository.finishRunFailure(activeRunId, seed.id, { status: "failed", finishedAt: nowIso, errorCode, errorMessage: errorMessage.slice(0, 300), itemsSeen: counts.seen, itemsNew: counts.created, itemsRevised: counts.revised }, {
         now: nowIso,
         consecutiveFailures: failures,
         errorCode,
@@ -142,8 +141,8 @@ export async function collectIntelSource(repository: IntelRepository, seed: Inte
   }
   const status = entries.length === 0 ? "ok_empty" : "ok_items"
   try {
-    await repository.completeRun(activeRunId, { status, finishedAt: nowIso, itemsSeen: entries.length, itemsNew, itemsRevised })
-    await repository.recordSourceSuccess(seed.id, {
+    // One transaction: if the source-state write fails, the run row stays 'running' and is then closed as failed with backoff.
+    await repository.finishRunSuccess(activeRunId, seed.id, { status, finishedAt: nowIso, itemsSeen: entries.length, itemsNew, itemsRevised }, {
       status: status === "ok_empty" ? "ok_empty" : "ok",
       now: nowIso,
       nextSyncAt: new Date(now.getTime() + seed.intervalMs).toISOString(),
