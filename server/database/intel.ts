@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto"
 import type { Database } from "db0"
+import type { WebDate } from "#/intel/sources/web-list"
 
 export type IntelPersistence = "full" | "excerpt_only" | "disallowed"
 export type IntelContentScope = "full_text" | "excerpt" | "metadata_only"
@@ -11,7 +12,7 @@ export interface IntelSourceRecord {
   id: string
   catalogId: string
   name: string
-  kind: "rss" | "atom" | "rdf"
+  kind: "rss" | "atom" | "rdf" | "web_list"
   url: string
   persistence: IntelPersistence
   enabled: boolean
@@ -36,6 +37,7 @@ export interface IntelRunRecord {
 }
 
 export interface IntelVersionRecord {
+  dateEvidence: WebDate | null
   id: string
   itemId: string
   contentHash: string
@@ -74,6 +76,7 @@ export interface IntelItemRecord {
 }
 
 export interface IntelEntryWrite {
+  dateEvidence?: WebDate
   sourceId: string
   canonicalUrl: string
   title: string
@@ -287,9 +290,9 @@ export class IntelRepository {
       }
       const versionId = randomUUID()
       await this.db.prepare(`
-        INSERT INTO intel_item_version (id, item_id, content_hash, fetched_at, extractor_version, content_scope, source_published_at, source_updated_at, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(versionId, itemId, entry.contentHash, entry.fetchedAt, entry.extractorVersion, entry.contentScope, entry.publishedAt ?? null, entry.sourceUpdatedAt ?? null, entry.fetchedAt)
+        INSERT INTO intel_item_version (id, item_id, content_hash, fetched_at, extractor_version, content_scope, source_published_at, source_updated_at, created_at, date_evidence)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(versionId, itemId, entry.contentHash, entry.fetchedAt, entry.extractorVersion, entry.contentScope, entry.publishedAt ?? null, entry.sourceUpdatedAt ?? null, entry.fetchedAt, entry.dateEvidence ? JSON.stringify(entry.dateEvidence) : null)
       for (const block of entry.blocks) {
         await this.db.prepare(`
           INSERT INTO intel_item_block (id, version_id, block_key, block_order, block_type, text) VALUES (?, ?, ?, ?, ?, ?)
@@ -333,6 +336,7 @@ export class IntelRepository {
       id: String(row.id),
       itemId: String(row.item_id),
       contentHash: String(row.content_hash),
+      dateEvidence: row.date_evidence == null ? null : JSON.parse(String(row.date_evidence)) as WebDate,
       contentScope: row.content_scope as IntelContentScope,
       extractorVersion: String(row.extractor_version),
       fetchedAt: String(row.fetched_at),

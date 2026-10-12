@@ -1,4 +1,5 @@
 import type { IntelPersistence } from "#/database/intel"
+import type { WebListConfig } from "#/intel/sources/config-keys"
 
 /**
  * R2 first-slice seeds. ADR-008: docs/intel-source-catalog.md is the only seed list; every entry here
@@ -9,7 +10,8 @@ export interface IntelSourceSeed {
   id: string
   catalogId: string
   name: string
-  kind: "rss" | "atom" | "rdf"
+  kind: "rss" | "atom" | "rdf" | "web_list"
+  webList?: WebListConfig
   url: string
   persistence: IntelPersistence
   enabled: boolean

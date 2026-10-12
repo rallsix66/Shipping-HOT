@@ -109,13 +109,14 @@
 - **Neat Freak（本批）：** Git Bash `scripts/audit-inventory.sh .` exit **0**。
 - 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 **结论：** **R1.5 = IN PROGRESS**；R1.5-1 **BLOCKED**（VNSGN 海况）、R1.5-4 **BLOCKED**；**非**阶段 PASS。
 
-### R2 web_list — 独立解析器已验证，持久化接线待确认（2026-10-12）
+### R2 web_list - approved 026 and collector/storage integration (2026-10-12)
 
-- **P2 URL 自身链接返修（2026-10-12）**：代码 `b8a91049f1106e999a64fde3e2ce6ac52f3891d6`。`listingItself` 改为复用 `canonicalizeFeedUrl` 比较完整 URL，保留同路径业务 query 身份，排除纯锚点/tracking-only 自身链接。web_list **35/35**，完整门禁均 exit 0、全量 **104 files / 937 passed / 3 skipped**，原始证据 `docs/evidence/gate-b8a9104/`；父会话复审 pending。未改 schema/collector/storage，下面整片 BLOCKED 状态不变。
-- 代码 `6c5e1515173f4d35a7c7d1b4f17176d4e813e725`：固定 AIHOT `44578fa` HTML 解析与配置白名单适配；严格日期规则，明确原文/精度/时区依据；复用 URL/安全策略。已有 NCHMF HTML 存档 + 合成日期 HTML 离线测试；无新生产来源、无业务实网请求。
-- 干净 SHA 门禁：install/build/typecheck/lint、三个 smoke 均 exit 0；web_list 定向 **34/34**；全量 **104 files / 936 passed / 3 skipped**。原始 UTF-8 日志、命令、SHA、raw exit 见 `docs/evidence/gate-6c5e151/`；真实 Neat Freak 收尾见该目录，inventory exit 0 不等于安全审计。
-- **整片 BLOCKED，非 PASS**：当前 `intel_source.kind` CHECK 不支持 web_list，版本表没有日期依据字段。按 AGENTS.md Confirm Before 已请求最小迁移 026 确认，尚未获得；因此未改 schema/种子，也未接 collector/storage。旧数据保留的 web_list 持久化闭环 **NOT_RUN**，不以纯解析测试替代。具体迁移范围和上游差异：`docs/plans/r2-web-list-2026-10-12.md`。
-- 浏览器/S7 **NOT_RUN**（无 UI/路由变更）；业务信源实网、付费、LLM **NOT_RUN**。CA、json_list、R3 不在本轮。父会话审查 pending，R2 整体未完成。
+- User approval at 12:11:25 UTC resolves the previous migration-confirmation blocker. This slice implements 026 and wiring only; no retained database migration or live source activation.
+- Source kind now permits web_list. Nullable per-version date_evidence preserves raw/date/timezone basis without modifying old versions. Existing source rows, IDs, health, foreign keys, indexes and triggers are preserved by the transaction-safe rebuild. RSS identity stays unchanged; only web_list version identity includes date evidence.
+- The collector reuses the secure byte-fetch/decoder path and existing writeEntry/finalization. Invalid configuration fails before fetching; empty lists require the parser's explicit empty marker. No production seed, registry/GET, CA, json_list, paid or R3 change.
+- Verification: targeted isolated tests underway; full code-SHA gate and Neat Freak evidence pending. Parent review pending; R2 overall remains incomplete. Browser/S7 NOT_RUN (no UI/routes); live/paid/LLM NOT_RUN.
+- Prior parser evidence: code 6c5e1515173f4d35a7c7d1b4f17176d4e813e725, gate-6c5e151 (34 parser, 936 full passed / 3 skipped). P2 query identity fix: b8a91049f1106e999a64fde3e2ce6ac52f3891d6, gate-b8a9104 (35 parser, 937 full passed / 3 skipped). Those earlier gates do not verify this new integration.
+- Current slice contract: docs/plans/r2-web-list-2026-10-12.md.
 
 ### R0 — 门禁 G 执行记录
 

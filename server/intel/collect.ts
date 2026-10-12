@@ -4,6 +4,8 @@ import type { IntelBlock, IntelContentScope, IntelPersistence, IntelRepository }
 import { parseFeedEntries } from "#/providers/feed"
 import { type ArticleLookup, type ArticleTransport, secureFetchArticle } from "#/services/article-fetch-security"
 import type { IntelSourceSeed } from "#/intel/sources"
+import { type WebListEntry, fromHtml } from "#/intel/sources/web-list"
+import { assertSupportedConfig } from "#/intel/sources/config-keys"
 
 export const INTEL_EXTRACTOR_VERSION = "intel-feed-v1"
 export const INTEL_BACKOFF_BASE_MS = 15 * 60 * 1000
@@ -96,6 +98,13 @@ export async function collectIntelSource(repository: IntelRepository, seed: Inte
 
   let body: string
   let finalUrl: string
+  if (seed.kind === "web_list") {
+    try {
+      assertSupportedConfig(seed.webList)
+    } catch (error) {
+      return await fail("config_invalid", message(error, "web_list config invalid"))
+    }
+  }
   try {
     const response = await secureFetchArticle(seed.url, { policy: sourcePolicy(seed), lookup: deps.lookup, transport: deps.transport })
     if (!response.ok) return await fail(response.code, response.message)
@@ -105,9 +114,9 @@ export async function collectIntelSource(repository: IntelRepository, seed: Inte
     return await fail("fetch_failed", message(error, "fetch failed"))
   }
 
-  let entries: ReturnType<typeof parseFeedEntries>["entries"]
+  let entries: (ReturnType<typeof parseFeedEntries>["entries"][number] | WebListEntry)[]
   try {
-    entries = parseFeedEntries(body, finalUrl).entries
+    entries = seed.kind === "web_list" ? fromHtml(body, finalUrl, seed.webList!, sourcePolicy(seed)) : parseFeedEntries(body, finalUrl).entries
   } catch (error) {
     return await fail("parse_failed", message(error, "parse failed"))
   }
@@ -117,7 +126,10 @@ export async function collectIntelSource(repository: IntelRepository, seed: Inte
   let itemsRevised = 0
   let committed = 0
   for (const entry of entries) {
-    const contentHash = createHash("sha256").update(`${entry.title}\n${entry.bodyText}`).digest("hex")
+    const dateEvidence = "dateEvidence" in entry ? entry.dateEvidence : undefined
+    // Preserve the RSS hash byte-for-byte. Only web_list versions include the date contract.
+    const identity = seed.kind === "web_list" ? JSON.stringify(["intel-web-list-v1", entry.title, entry.bodyText, dateEvidence]) : `${entry.title}\n${entry.bodyText}`
+    const contentHash = createHash("sha256").update(identity).digest("hex")
     try {
       const written = await repository.writeEntry({
         sourceId: seed.id,
@@ -125,9 +137,10 @@ export async function collectIntelSource(repository: IntelRepository, seed: Inte
         title: entry.title,
         publishedAt: entry.publishedAt,
         sourceUpdatedAt: entry.sourceUpdatedAt,
+        dateEvidence,
         contentHash,
         contentScope: scope,
-        extractorVersion: INTEL_EXTRACTOR_VERSION,
+        extractorVersion: seed.kind === "web_list" ? "intel-web-list-v1" : INTEL_EXTRACTOR_VERSION,
         blocks: licensedBlocks(scope, entry.title, entry.bodyText),
         fetchedAt: nowIso,
       })
