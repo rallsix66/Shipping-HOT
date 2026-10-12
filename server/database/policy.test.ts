@@ -79,7 +79,7 @@ async function setup() {
 }
 
 describe("r1.5-7 validation", () => {
-  const ok = (i: PolicyInput) => validatePolicyInput(i, "2026-10-12")
+  const ok = (i: PolicyInput) => validatePolicyInput(i, at("2026-10-12T02:00:00Z"))
   const err = (i: PolicyInput) => {
     const r = ok(i)
     return r.ok ? "ok" : r.error
@@ -108,28 +108,54 @@ describe("r1.5-7 validation", () => {
 })
 
 describe("r1.5-7 effective-date switching (injected clock)", () => {
-  it("switches at 00:00 UTC+8 of the effective date; expiry is inclusive of its date", () => {
+  it("switches at 00:00 local time of the applicable zone; expiry is inclusive of its date", () => {
     expect(policyToday(at("2026-10-31T15:59:59.999Z"))).toBe("2026-10-31")
     expect(policyToday(at("2026-10-31T16:00:00.000Z"))).toBe("2026-11-01")
-    const p = { status: "published" as const, effectiveAt: "2026-11-01", expiresAt: "2026-12-31" }
-    expect(policyDisplay(p, "2026-10-31")).toEqual({ displayStatus: "published", autoActivated: false, datePosition: "future" })
-    expect(policyDisplay(p, "2026-11-01")).toEqual({ displayStatus: "effective", autoActivated: true, datePosition: "in_effect" })
-    expect(policyDisplay(p, "2026-12-31").displayStatus).toBe("effective")
-    expect(policyDisplay(p, "2027-01-01")).toMatchObject({ displayStatus: "expired", datePosition: "past_expiry" })
+    const cn = { status: "published" as const, effectiveAt: "2026-11-01", expiresAt: "2026-12-31", applicableTimezone: "Asia/Shanghai" as const }
+    expect(policyDisplay(cn, at("2026-10-31T15:59:59Z"))).toMatchObject({ displayStatus: "published", autoActivated: false, datePosition: "future", localToday: "2026-10-31" })
+    expect(policyDisplay(cn, at("2026-10-31T16:00:00Z"))).toMatchObject({ displayStatus: "effective", autoActivated: true, datePosition: "in_effect", localToday: "2026-11-01" })
+    expect(policyDisplay(cn, at("2026-12-31T15:59:59Z")).displayStatus).toBe("effective")
+    expect(policyDisplay(cn, at("2026-12-31T16:00:00Z"))).toMatchObject({ displayStatus: "expired", datePosition: "past_expiry" })
+    for (const tz of ["Asia/Ho_Chi_Minh", "Asia/Bangkok", "Asia/Jakarta"] as const) {
+      const p = { ...cn, applicableTimezone: tz }
+      expect(policyDisplay(p, at("2026-10-31T16:59:59Z")).displayStatus).toBe("published") // local 23:59:59 Oct 31
+      expect(policyDisplay(p, at("2026-10-31T17:00:00Z")).displayStatus).toBe("effective") // local 00:00 Nov 1
+    }
+    for (const tz of ["Asia/Kuala_Lumpur", "Asia/Manila", "Asia/Makassar"] as const) {
+      expect(policyDisplay({ ...cn, applicableTimezone: tz }, at("2026-10-31T15:59:59Z")).displayStatus).toBe("published")
+      expect(policyDisplay({ ...cn, applicableTimezone: tz }, at("2026-10-31T16:00:00Z")).displayStatus).toBe("effective")
+    }
+    expect(policyDisplay({ ...cn, applicableTimezone: "Asia/Jayapura" }, at("2026-10-31T14:59:59Z")).displayStatus).toBe("published")
+    expect(policyDisplay({ ...cn, applicableTimezone: "Asia/Jayapura" }, at("2026-10-31T15:00:00Z")).displayStatus).toBe("effective")
+    expect(policyDisplay({ ...cn, applicableTimezone: null }, at("2027-01-01T00:00:00Z"))).toMatchObject({ displayStatus: "published", autoActivated: false, datePosition: "timezone_unconfirmed" })
   })
 
   it("rumor, draft, revised and repealed never auto-activate when the date arrives", () => {
     for (const status of ["rumor", "draft", "revised", "repealed"] as const) {
-      expect(policyDisplay({ status, effectiveAt: "2026-01-01", expiresAt: null }, "2026-10-12")).toEqual({ displayStatus: status, autoActivated: false, datePosition: "not_applicable" })
+      expect(policyDisplay({ status, effectiveAt: "2026-01-01", expiresAt: null, applicableTimezone: "Asia/Shanghai" }, T0)).toMatchObject({ displayStatus: status, autoActivated: false, datePosition: "not_applicable" })
     }
   })
 
-  it("repository views follow the injected clock, not the real one", async () => {
+  it("timezone input: single-zone default, ID must be explicit, zone must belong to the country", () => {
+    const v = (i: PolicyInput) => {
+      const r = validatePolicyInput(i, T0)
+      return r.ok ? r.fields.applicableTimezone : r.error
+    }
+    expect(v(official())).toBe("Asia/Ho_Chi_Minh")
+    expect(v(official({ countryCode: "TH" }))).toBe("Asia/Bangkok")
+    expect(v(official({ countryCode: "CN" }))).toBe("Asia/Shanghai")
+    expect(v(official({ countryCode: "ID" }))).toBe("timezone_required")
+    expect(v(official({ countryCode: "ID", applicableTimezone: "Asia/Makassar" }))).toBe("Asia/Makassar")
+    expect(v(official({ applicableTimezone: "Asia/Bangkok" }))).toBe("timezone_country_mismatch")
+    expect(v(official({ applicableTimezone: "toString" }))).toBe("invalid_timezone")
+  })
+
+  it("repository views follow the injected clock in the policy's own zone (VN switches at local midnight)", async () => {
     const { native, repo } = await setup()
     const created = await repo.create(official(), T0)
-    expect(created).toMatchObject({ displayStatus: "published", datePosition: "future" })
-    expect((await repo.list({}, at("2026-10-31T16:00:00.000Z")))[0]).toMatchObject({ displayStatus: "effective", autoActivated: true, status: "published" })
-    expect((await repo.list({}, at("2026-10-31T15:59:59.000Z")))[0]).toMatchObject({ displayStatus: "published" })
+    expect(created).toMatchObject({ displayStatus: "published", datePosition: "future", applicableTimezone: "Asia/Ho_Chi_Minh" })
+    expect((await repo.list({}, at("2026-10-31T16:30:00.000Z")))[0]).toMatchObject({ displayStatus: "published", localToday: "2026-10-31" })
+    expect((await repo.list({}, at("2026-10-31T17:00:00.000Z")))[0]).toMatchObject({ displayStatus: "effective", autoActivated: true, status: "published", localToday: "2026-11-01" })
     native.close()
   })
 
@@ -150,9 +176,9 @@ describe("r1.5-7 effective-date switching (injected clock)", () => {
 })
 
 describe("r1.5-7 versions, supersede and repeal", () => {
-  it("migration 017 reaches schema v17", async () => {
+  it("migrations reach schema v18", async () => {
     const { native, database } = await setup()
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(17)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(18)
     native.close()
   })
 
@@ -171,19 +197,69 @@ describe("r1.5-7 versions, supersede and repeal", () => {
     native.close()
   })
 
-  it("explicit supersede marks the old record revised/repealed with two-way links; terminal records are frozen", async () => {
+  it("supersession: rumor/draft cannot supersede; a future policy schedules the switch without terminating early", async () => {
     const { native, repo } = await setup()
-    const a = await repo.create(official(), T0)
-    await expect(repo.create({ ...official({ title: "[FIXTURE] B" }), supersedesPolicyId: a.id }, T0)).rejects.toMatchObject({ code: "relation_required" })
-    const b = await repo.create({ ...official({ title: "[FIXTURE] B", documentNumber: "FIXTURE-002" }), supersedesPolicyId: a.id, relation: "revised" }, T0)
-    expect(b.supersedesPolicyId).toBe(a.id)
-    const da = (await repo.detail(a.id, T0))!
-    expect(da.record).toMatchObject({ status: "revised", displayStatus: "revised", supersededByPolicyId: b.id, relationKind: "revised", basisText: "fixture 依据 v1" })
-    expect(da.versions.map(v => v.status)).toEqual(["published", "revised"])
-    expect(da.versions[0].snapshot?.basisText).toBe("fixture 依据 v1")
-    await expect(repo.revise(a.id, { ...official(), changeSummary: "x" }, T0)).rejects.toMatchObject({ code: "policy_terminal" })
-    await expect(repo.create({ ...official({ title: "[FIXTURE] C" }), supersedesPolicyId: a.id, relation: "repealed" }, T0)).rejects.toMatchObject({ code: "superseded_policy_already_terminal" })
-    await expect(repo.create({ ...official({ isFixture: false }), supersedesPolicyId: b.id, relation: "revised" }, T0)).rejects.toMatchObject({ code: "fixture_cannot_be_superseded_by_real" })
+    const a = await repo.create(official({ status: "effective", effectiveAt: "2026-10-01" }), T0)
+    const before = JSON.stringify(await repo.detail(a.id, T0))
+    await expect(repo.create({ ...official({ sourceType: "media", status: "rumor", fullText: "", title: "[FIXTURE] 传闻替代" }), supersedesPolicyId: a.id, relation: "revised" }, T0)).rejects.toMatchObject({ code: "supersession_requires_published_or_effective" })
+    await expect(repo.create({ ...official({ status: "draft", title: "[FIXTURE] 征求意见替代" }), supersedesPolicyId: a.id, relation: "repealed" }, T0)).rejects.toMatchObject({ code: "supersession_requires_published_or_effective" })
+    expect(JSON.stringify(await repo.detail(a.id, T0))).toBe(before)
+    const b = await repo.create({ ...official({ title: "[FIXTURE] 未来替代 B", documentNumber: "FIXTURE-B" }), supersedesPolicyId: a.id, relation: "revised" }, T0)
+    const pending = (await repo.detail(a.id, T0))!
+    expect(pending.record).toMatchObject({ status: "effective", displayStatus: "effective", supersededByPolicyId: b.id, supersededByRelationKind: "revised", supersedeSwitchAt: "2026-11-01", supersedeSwitched: false })
+    expect(pending.versions).toHaveLength(1)
+    expect((await repo.list({}, at("2026-10-31T16:59:59Z"))).find(r => r.id === a.id)?.displayStatus).toBe("effective")
+    const switched = (await repo.list({}, at("2026-10-31T17:00:00Z"))).find(r => r.id === a.id)!
+    expect(switched).toMatchObject({ displayStatus: "revised", supersedeSwitched: true, datePosition: "superseded", status: "effective" })
+    await expect(repo.revise(a.id, { ...official({ status: "effective", effectiveAt: "2026-10-01" }), changeSummary: "x" }, T0)).rejects.toMatchObject({ code: "policy_has_supersession" })
+    await expect(repo.create({ ...official({ title: "[FIXTURE] 第二个替代" }), supersedesPolicyId: a.id, relation: "revised" }, T0)).rejects.toMatchObject({ code: "superseded_policy_has_supersession" })
+    // Revising B's effective date moves the pending switch; repealing B before the switch cancels it.
+    await repo.revise(b.id, { ...official({ title: "[FIXTURE] 未来替代 B", documentNumber: "FIXTURE-B", effectiveAt: "2026-11-10" }), changeSummary: "延期" }, T0)
+    expect((await repo.detail(a.id, T0))!.record.supersedeSwitchAt).toBe("2026-11-10")
+    await expect(repo.revise(b.id, { ...official({ status: "draft" }), changeSummary: "改草案" }, T0)).rejects.toMatchObject({ code: "supersession_requires_published_or_effective" })
+    await repo.repeal(b.id, { actor: "tester", changeSummary: "撤回", sourceUrl: "https://example.org/fixture/withdraw" }, T0)
+    const cancelled = (await repo.detail(a.id, at("2026-12-01T00:00:00Z")))!
+    expect(cancelled.record).toMatchObject({ displayStatus: "effective", supersededByPolicyId: null })
+    expect(cancelled.changeLog.map(c => c.action)).toEqual(["create", "revise_scheduled", "supersession_rescheduled", "supersession_cancelled"])
+    // An already-effective replacement switches immediately.
+    const c = await repo.create(official({ status: "effective", effectiveAt: "2026-10-01", title: "[FIXTURE] C" }), T0)
+    await repo.create({ ...official({ status: "effective", effectiveAt: "2026-10-12", title: "[FIXTURE] D" }), supersedesPolicyId: c.id, relation: "repealed" }, T0)
+    expect((await repo.detail(c.id, T0))!.record).toMatchObject({ displayStatus: "repealed", supersedeSwitched: true })
+    native.close()
+  })
+
+  it("fixture isolation is bidirectional and leaves the original record untouched on failure", async () => {
+    const { native, repo } = await setup()
+    const real = await repo.create(official({ isFixture: false, title: "正式记录（测试库）" }), T0)
+    const fixture = await repo.create(official(), T0)
+    const snapshot = async () => JSON.stringify([await repo.detail(real.id, T0), await repo.detail(fixture.id, T0)])
+    const before = await snapshot()
+    await expect(repo.create({ ...official({ isFixture: true }), supersedesPolicyId: real.id, relation: "revised" }, T0)).rejects.toMatchObject({ code: "fixture_flag_mismatch" })
+    await expect(repo.create({ ...official({ isFixture: false }), supersedesPolicyId: fixture.id, relation: "revised" }, T0)).rejects.toMatchObject({ code: "fixture_flag_mismatch" })
+    expect(await snapshot()).toBe(before)
+    expect((await repo.list({}, T0)).length).toBe(2)
+    native.close()
+  })
+
+  it("mixed chain A -(revised by)-> B -(repealed by)-> C keeps both directions' relation kinds", async () => {
+    const { native, repo } = await setup()
+    const a = await repo.create(official({ status: "effective", effectiveAt: "2026-09-01", publishedAt: "2026-08-01", title: "[FIXTURE] A" }), T0)
+    const b = await repo.create({ ...official({ status: "effective", effectiveAt: "2026-10-01", title: "[FIXTURE] B" }), supersedesPolicyId: a.id, relation: "revised" }, T0)
+    const c = await repo.create({ ...official({ status: "effective", effectiveAt: "2026-10-10", title: "[FIXTURE] C" }), supersedesPolicyId: b.id, relation: "repealed" }, T0)
+    const view = async (id: string) => (await repo.detail(id, T0))!.record
+    expect(await view(a.id)).toMatchObject({ supersedesPolicyId: null, supersededByPolicyId: b.id, supersededByRelationKind: "revised", displayStatus: "revised" })
+    expect(await view(b.id)).toMatchObject({ supersedesPolicyId: a.id, supersedesRelationKind: "revised", supersededByPolicyId: c.id, supersededByRelationKind: "repealed", displayStatus: "repealed" })
+    expect(await view(c.id)).toMatchObject({ supersedesPolicyId: b.id, supersedesRelationKind: "repealed", supersededByPolicyId: null, displayStatus: "effective" })
+    const csv = policyCsv(await repo.list({}, T0))
+    const rowB = csv.split("\r\n").find(l => l.includes("[FIXTURE] B"))!
+    expect(rowB).toContain(`修订 ${a.id}`)
+    expect(rowB).toContain(`已被 ${c.id} 废止`)
+    expect(rowB).not.toContain(`废止 ${a.id}`)
+    native.close()
+  })
+
+  it("explicit repeal without replacement keeps the original source/excerpt in old versions", async () => {
+    const { native, repo } = await setup()
     const c = await repo.create(platformRule(), T0)
     await expect(repo.repeal(c.id, { actor: "tester", changeSummary: "停用" }, T0)).rejects.toMatchObject({ code: "source_url_required" })
     const repealed = await repo.repeal(c.id, { actor: "tester", changeSummary: "停用", sourceUrl: "https://example.org/fixture/repeal" }, at("2026-10-25T00:00:00Z"))
@@ -195,7 +271,6 @@ describe("r1.5-7 versions, supersede and repeal", () => {
     native.close()
   })
 })
-
 describe("r1.5-7 filtering and export", () => {
   it("filters by country/platform/category/status/effective range/text and exports exactly the filtered rows", async () => {
     const { native, repo } = await setup()

@@ -19,6 +19,7 @@ export function AnnualCalendarPage() {
   const [showReferenceOnly, setShowReferenceOnly] = useState(false)
   const [showPromos, setShowPromos] = useState(false)
   const [showPolicies, setShowPolicies] = useState(false)
+  const [showCnPolicies, setShowCnPolicies] = useState(false)
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: ["annual-calendar-reference", year],
     queryFn: () => myFetch<AnnualCalendarResponse>(`/shipping/calendar/reference?year=${year}`),
@@ -45,7 +46,7 @@ export function AnnualCalendarPage() {
     refetchOnWindowFocus: false,
     retry: false,
   })
-  const policyRecords = showPolicies ? (policyQuery.data?.records ?? []).filter(p => countries.includes(p.countryCode as AnnualCountry)) : []
+  const policyRecords = showPolicies ? (policyQuery.data?.records ?? []).filter(p => countries.includes(p.countryCode as AnnualCountry) || (showCnPolicies && p.countryCode === "CN")) : []
   const policiesByDay = new Map<string, typeof policyRecords>()
   for (const policy of policyRecords) {
     if (policy.effectiveAt) policiesByDay.set(policy.effectiveAt, [...(policiesByDay.get(policy.effectiveAt) ?? []), policy])
@@ -112,6 +113,12 @@ export function AnnualCalendarPage() {
               <input type="checkbox" data-testid="policy-layer-toggle" checked={showPolicies} onChange={e => setShowPolicies(e.target.checked)} />
               显示政策生效日（参考，非停工事实）
             </label>
+            {showPolicies && (
+              <label className="annual-option">
+                <input type="checkbox" data-testid="cn-policy-toggle" checked={showCnPolicies} onChange={e => setShowCnPolicies(e.target.checked)} />
+                含中国（CN）政策生效日（仅政策层；本日历无中国假日数据）
+              </label>
+            )}
             <div className="annual-filter-note">
               <strong>标记说明</strong>
               <p>
@@ -308,7 +315,7 @@ export function AnnualCalendarPage() {
               <div className="annual-promo-details" data-testid="policy-calendar-details">
                 <h3>{`政策生效日（参考，非停工事实）· ${policyDetails.length} 项`}</h3>
                 {policyQuery.isError && <p role="alert">政策资料读取失败。</p>}
-                {!policyQuery.isPending && !policyQuery.isError && policyDetails.length === 0 && <p>所选日期没有已录入的政策生效日（未录入不代表没有新规；中国政策不在本日历国家范围内）。</p>}
+                {!policyQuery.isPending && !policyQuery.isError && policyDetails.length === 0 && <p>所选日期没有已录入的政策生效日（未录入不代表没有新规；中国政策需勾选「含中国」）。</p>}
                 {policyDetails.map(policy => (
                   <article key={policy.id} data-testid="policy-calendar-item" data-status={policy.displayStatus}>
                     <div className="annual-detail-label">{`${policy.countryCode}${policy.platform ? ` · ${policy.platform}` : ""}`}</div>

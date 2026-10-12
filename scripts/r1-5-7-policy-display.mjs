@@ -20,7 +20,8 @@ const DEBUG_PORT = Number(process.env.E2E_POLICY_DEBUG_PORT ?? "9357")
 const SECRET_KEYS = ["GFW_API_TOKEN", "VESSELAPI_API_KEY", "AISSTREAM_API_KEY", "CALENDARIFIC_API_KEY", "DEEPSEEK_API_KEY", "SHIPPING_WEATHER_ALERT_PROVIDER"]
 const DB_PATH = join(RUN_DIR, ".data", "shipping-hot-v3.sqlite3")
 const NOW_1 = "2026-10-31T12:00:00+08:00"
-const NOW_2 = "2026-11-01T00:00:00+08:00"
+const NOW_2 = "2026-11-01T00:00:00+08:00" // CN midnight = VN/TH 2026-10-31 23:00
+const NOW_3 = "2026-11-01T00:00:00+07:00" // VN/TH midnight
 const checks = []
 const add = (id, pass, detail = "") => checks.push({ id, pass: Boolean(pass), detail: String(detail).slice(0, 300) })
 const sleep = ms => new Promise(r => setTimeout(r, ms))
@@ -64,7 +65,9 @@ const getJson = async path => (await fetch(`${BASE}${path}`)).json()
 
 const fixtureA = { category: "customs_tax", countryCode: "VN", title: "[FIXTURE] 示例越南海关公告 A", documentNumber: "FIXTURE-VN-A", publisher: "示例机关（fixture）", publishedAt: "2026-10-01", effectiveAt: "2026-11-01", status: "published", sourceType: "official", sourceUrl: "https://example.org/fixture/vn-a", fullText: "示例政府公告全文副本（fixture，非真实公告）。第一条……", basisText: "fixture 依据 v1：示例原文第 1 条", enteredBy: "acceptance-tester", isFixture: true }
 const fixtureB = { category: "ecommerce_platform", countryCode: "TH", platform: "shopee", title: "[FIXTURE] 示例 Shopee 泰国平台规则 B", effectiveAt: "2026-10-20", status: "published", sourceType: "platform", sourceUrl: "https://example.org/fixture/shopee-th-b", bodyExcerpt: "示例摘录（fixture）", basisText: "fixture 平台规则依据", enteredBy: "acceptance-tester", isFixture: true }
-const fixtureC = { category: "trade_export", countryCode: "ID", title: "[FIXTURE] 示例传闻 C", effectiveAt: "2026-10-15", status: "rumor", sourceType: "media", sourceUrl: "https://example.org/fixture/news-c", basisText: "fixture 媒体报道", enteredBy: "acceptance-tester", isFixture: true }
+const fx = (key, over) => ({ category: "customs_tax", countryCode: "VN", title: `[FIXTURE] 示例 ${key}`, documentNumber: `FIXTURE-${key}`, publisher: "示例机关（fixture）", publishedAt: "2026-09-01", status: "effective", sourceType: "official", sourceUrl: `https://example.org/fixture/${key.toLowerCase()}`, fullText: "示例全文（fixture，非真实公告）", basisText: `fixture 依据 ${key}`, enteredBy: "acceptance-tester", isFixture: true, ...over })
+const fixtureE = fx("中国海关公告 E", { countryCode: "CN", status: "published", effectiveAt: "2026-11-01" })
+const fixtureC = { category: "trade_export", countryCode: "ID", title: "[FIXTURE] 示例传闻 C", effectiveAt: "2026-10-15", status: "rumor", sourceType: "media", sourceUrl: "https://example.org/fixture/news-c", basisText: "fixture 媒体报道", applicableTimezone: "Asia/Jakarta", enteredBy: "acceptance-tester", isFixture: true }
 
 function dbFingerprint() {
   const db = new Database(DB_PATH, { readonly: true })
@@ -142,6 +145,28 @@ async function main() {
     }
     const rev = await post(`/api/shipping/policies/${encodeURIComponent(ids.A)}/revise`, { ...fixtureA, basisText: "fixture 依据 v2：示例原文第 1 条（更正）", enteredBy: "acceptance-tester-2", changeSummary: "依据更正（fixture）" })
     add("api_revise_A_v2", rev.status === 200 && rev.body.currentVersionNumber === 2, rev.status)
+    // Rework (dots 2026-10-12): supersession, fixture isolation, mixed chain, time zone, CN.
+    const mk = async (key, body) => {
+      const res = await post("/api/shipping/policies", body)
+      ids[key] = res.body.id
+      return res
+    }
+    await mk("E", fixtureE)
+    await mk("X", fx("链条 X", { effectiveAt: "2026-10-01" }))
+    await mk("Y", { ...fx("链条 Y", { effectiveAt: "2026-10-10" }), supersedesPolicyId: ids.X, relation: "revised" })
+    await mk("Z", { ...fx("链条 Z", { effectiveAt: "2026-10-20" }), supersedesPolicyId: ids.Y, relation: "repealed" })
+    await mk("P", fx("被未来替代 P", { effectiveAt: "2026-10-01" }))
+    const supNeg = {
+      rumor: (await post("/api/shipping/policies", { ...fx("传闻替代", { sourceType: "media", status: "rumor", effectiveAt: "2026-10-15", fullText: "" }), supersedesPolicyId: ids.P, relation: "revised" })).body.statusMessage,
+      draft: (await post("/api/shipping/policies", { ...fx("草案替代", { status: "draft", effectiveAt: "2026-10-15" }), supersedesPolicyId: ids.P, relation: "repealed" })).body.statusMessage,
+      fixtureToFormal: (await post("/api/shipping/policies", { ...fx("正式替代示例", { isFixture: false }), effectiveAt: "2026-10-15", supersedesPolicyId: ids.P, relation: "revised" })).body.statusMessage,
+      idWithoutTimezone: (await post("/api/shipping/policies", fx("印尼无时区", { countryCode: "ID", effectiveAt: "2026-10-15" }))).body.statusMessage,
+      vnWrongTimezone: (await post("/api/shipping/policies", fx("越南错时区", { applicableTimezone: "Asia/Bangkok", effectiveAt: "2026-10-15" }))).body.statusMessage,
+    }
+    writes.supersessionNegatives = supNeg
+    add("supersession_negatives_rejected", supNeg.rumor === "supersession_requires_published_or_effective" && supNeg.draft === "supersession_requires_published_or_effective" && supNeg.fixtureToFormal === "fixture_flag_mismatch" && supNeg.idWithoutTimezone === "timezone_required" && supNeg.vnWrongTimezone === "timezone_country_mismatch", JSON.stringify(supNeg))
+    const q = await mk("Q", { ...fx("未来替代 Q", { status: "published", effectiveAt: "2026-11-01" }), supersedesPolicyId: ids.P, relation: "revised" })
+    add("future_supersession_created", q.status === 200, String(q.status))
     writes.ids = ids
   } finally {
     await stopServer(server)
@@ -161,12 +186,22 @@ async function main() {
     const after = dbFingerprint()
     const byId = Object.fromEntries(list.records.map(r => [r.id, r]))
     api = { today: list.today, clock: list.clock, total: list.total, statuses: Object.fromEntries(Object.entries(ids).map(([k, id]) => [k, { status: byId[id]?.status, displayStatus: byId[id]?.displayStatus, autoActivated: byId[id]?.autoActivated, datePosition: byId[id]?.datePosition }])), detailAVersions: detailA.versions?.map(v => ({ n: v.versionNumber, basis: v.snapshot?.basisText, supersededBy: v.supersededByVersionId })), csvThLines: csvTh.trim().split(/\r?\n/).length, listThTotal: listTh.total, before, after }
-    add("api_persisted_after_restart", list.total === 3 && list.clock === "test" && list.today === "2026-10-31", JSON.stringify({ total: list.total, today: list.today }))
+    add("api_persisted_after_restart", list.total === 9 && list.clock === "test" && list.today === "2026-10-31", JSON.stringify({ total: list.total, today: list.today }))
     add("api_A_future_published", byId[ids.A]?.displayStatus === "published" && byId[ids.A]?.datePosition === "future", JSON.stringify(api.statuses.A))
     add("api_B_auto_effective", byId[ids.B]?.displayStatus === "effective" && byId[ids.B]?.autoActivated === true && byId[ids.B]?.status === "published", JSON.stringify(api.statuses.B))
     add("api_C_rumor_never_activates", byId[ids.C]?.displayStatus === "rumor" && byId[ids.C]?.autoActivated === false, JSON.stringify(api.statuses.C))
     add("api_A_versions_retained", detailA.versions?.length === 2 && detailA.versions[0].snapshot?.basisText?.includes("v1") && detailA.versions[0].supersededByVersionId === `${ids.A}:v2` && detailA.changeLog?.length === 2, JSON.stringify(api.detailAVersions))
     add("api_export_matches_filter", api.csvThLines === 1 + listTh.total && listTh.total === 1 && csvTh.includes("示例（fixture，非真实公告）"), `${api.csvThLines} lines vs ${listTh.total}`)
+    const det = async k => (await getJson(`/api/shipping/policies/${encodeURIComponent(ids[k])}`)).record
+    const [dx, dy, dz, dp] = [await det("X"), await det("Y"), await det("Z"), await det("P")]
+    api.chain = { X: [dx.supersededByRelationKind, dx.displayStatus], Y: [dy.supersedesRelationKind, dy.supersededByRelationKind, dy.displayStatus], Z: [dz.supersedesRelationKind, dz.displayStatus], P: [dp.displayStatus, dp.supersedeSwitchAt, dp.supersedeSwitched], E: byId[ids.E]?.displayStatus }
+    add("api_chain_both_directions", dx.supersededByPolicyId === ids.Y && dx.supersededByRelationKind === "revised" && dy.supersedesPolicyId === ids.X && dy.supersedesRelationKind === "revised" && dy.supersededByPolicyId === ids.Z && dy.supersededByRelationKind === "repealed" && dy.displayStatus === "repealed" && dz.supersedesRelationKind === "repealed", JSON.stringify(api.chain))
+    add("api_future_supersession_pending", dp.displayStatus === "effective" && dp.supersedeSwitched === false && dp.supersedeSwitchAt === "2026-11-01" && dp.supersededByPolicyId === ids.Q, JSON.stringify(api.chain.P))
+    const csvAll = await (await fetch(`${BASE}/api/shipping/policies/export`)).text()
+    const csvY = csvAll.split(/\r?\n/).find(l => l.includes("[FIXTURE] 示例 链条 Y")) ?? ""
+    add("api_export_chain_and_timezone", csvY.includes(`修订 ${ids.X}`) && csvY.includes(`已被 ${ids.Z} 废止`) && csvAll.includes("适用时区") && csvAll.includes("Asia/Ho_Chi_Minh"), csvY.slice(0, 300))
+    const listCn = await getJson("/api/shipping/policies?country=CN")
+    add("api_cn_filter", listCn.total === 1 && listCn.records[0].id === ids.E && listCn.records[0].applicableTimezone === "Asia/Shanghai", String(listCn.total))
     add("get_checked_fingerprint_unchanged", JSON.stringify(before) === JSON.stringify(after), `${JSON.stringify(before)} / ${JSON.stringify(after)}`)
 
     const chromePath = findChrome()
@@ -183,7 +218,7 @@ async function main() {
         await cdp.send("Page.enable")
         await cdp.send("Runtime.enable")
         await cdp.send("Page.navigate", { url: `${BASE}/policies` })
-        add("browser_policies_rendered", await waitFor(async () => Number(await cdp.evaluate("document.querySelectorAll('[data-testid=policy-row]').length")) === 3, 30000), "/policies 3 rows")
+        add("browser_policies_rendered", await waitFor(async () => Number(await cdp.evaluate("document.querySelectorAll('[data-testid=policy-row]').length")) === 9, 30000), "/policies 9 rows")
         await cdp.evaluate(SET_FIELD)
         const clockText = String(await cdp.evaluate("document.querySelector('[data-testid=policy-clock]')?.innerText ?? ''"))
         add("browser_test_clock_banner", clockText.includes("2026-10-31") && clockText.includes("测试时钟"), clockText.slice(0, 120))
@@ -194,7 +229,7 @@ async function main() {
         await sleep(200)
         await cdp.evaluate("document.querySelector('[data-testid=policy-submit]').click()")
         const savedD = await waitFor(async () => String(await cdp.evaluate("document.querySelector('[data-testid=policy-message]')?.innerText ?? ''")).includes("已保存"), 10000)
-        add("browser_form_create_D", savedD && await waitFor(async () => Number(await cdp.evaluate("document.querySelectorAll('[data-testid=policy-row]').length")) === 4, 10000), String(await cdp.evaluate("document.querySelector('[data-testid=policy-message]')?.innerText ?? ''")))
+        add("browser_form_create_D", savedD && await waitFor(async () => Number(await cdp.evaluate("document.querySelectorAll('[data-testid=policy-row]').length")) === 10, 10000), String(await cdp.evaluate("document.querySelector('[data-testid=policy-message]')?.innerText ?? ''")))
         // Form revise D (detail is auto-selected after save).
         await waitFor(async () => Boolean(await cdp.evaluate("!!document.querySelector('[data-testid=policy-start-revise]')")), 10000)
         await cdp.evaluate("document.querySelector('[data-testid=policy-start-revise]').click()")
@@ -224,7 +259,23 @@ async function main() {
         const exported = await cdp.evaluate(`fetch(${JSON.stringify(exportHref)}).then(r => r.text())`)
         const rowCount = Number(await cdp.evaluate("document.querySelectorAll('[data-testid=policy-row]').length"))
         add("browser_filter_and_export_match", rowCount === 1 && exportHref.includes("country=TH") && String(exported).trim().split(/\r?\n/).length === 1 + rowCount, `${rowCount} row, href ${exportHref}`)
+        await cdp.evaluate("window.__setField('filter-country', 'CN')")
+        const cnRows = await waitFor(async () => Number(await cdp.evaluate("document.querySelectorAll('[data-testid=policy-row]').length")) === 1, 10000)
+        add("browser_cn_country_filter", cnRows && String(await cdp.evaluate("document.querySelector('[data-testid=policy-row]').innerText")).includes("中国海关公告 E"), "")
         await cdp.evaluate("window.__setField('filter-country', '')")
+        await waitFor(async () => Number(await cdp.evaluate("document.querySelectorAll('[data-testid=policy-row]').length")) === 10, 10000)
+        const relText = async (k) => {
+          await cdp.evaluate(`document.querySelector('[data-testid=policy-row][data-id="${ids[k]}"]').click()`)
+          await waitFor(async () => String(await cdp.evaluate("document.querySelector('[data-testid=policy-detail]')?.innerText ?? ''")).includes(k === "Y" ? "链条 Y" : "被未来替代 P"), 8000)
+          await sleep(300)
+          return String(await cdp.evaluate("document.querySelector('[data-testid=policy-relation]')?.innerText ?? ''"))
+        }
+        const relY = await relText("Y")
+        add("browser_chain_relation_display", relY.includes(`本条修订：${ids.X}`) && relY.includes(`已被 ${ids.Z} 废止`) && !relY.includes(`废止：${ids.X}`), relY)
+        const relP = await relText("P")
+        add("browser_pending_supersession_display", relP.includes("将于 2026-11-01（Asia/Ho_Chi_Minh）起被") && relP.includes("尚未生效"), relP)
+        browser.relY = relY
+        browser.relP = relP
         // Calendar.
         await cdp.send("Page.navigate", { url: `${BASE}/calendar` })
         await waitFor(async () => String(await cdp.evaluate("document.body?.innerText ?? ''")).includes("东南亚假日台历"), 30000)
@@ -239,12 +290,18 @@ async function main() {
           return { text: String(await cdp.evaluate("document.querySelector('[data-testid=policy-calendar-details]')?.innerText ?? ''")), chip: String(await cdp.evaluate(`document.querySelector('button[aria-label^="${date}，"] [data-testid=policy-day-count]')?.innerText ?? ''`)), promoShown: Number(await cdp.evaluate("document.querySelectorAll('[data-testid=promo-details]').length")) }
         }
         const nov1 = await pick(10, "2026-11-01")
-        add("browser_calendar_policy_layer_separate", nov1.chip.includes("政策生效 1 项") && nov1.text.includes("[示例 fixture，非真实公告] [FIXTURE] 示例越南海关公告 A") && nov1.text.includes("已发布待生效") && nov1.text.includes("非停工事实") && nov1.promoShown === 0, JSON.stringify(nov1).slice(0, 300))
+        add("browser_calendar_policy_layer_separate", nov1.chip.includes("政策生效 2 项") && !nov1.text.includes("中国海关公告 E") && nov1.text.includes("[示例 fixture，非真实公告] [FIXTURE] 示例越南海关公告 A") && nov1.text.includes("已发布待生效") && nov1.text.includes("非停工事实") && nov1.promoShown === 0, JSON.stringify(nov1).slice(0, 300))
+        await cdp.evaluate("document.querySelector('[data-testid=cn-policy-toggle]').click()")
+        await sleep(300)
+        const nov1cn = await pick(10, "2026-11-01")
+        add("browser_calendar_cn_layer_positive", nov1cn.chip.includes("政策生效 3 项") && nov1cn.text.includes("中国海关公告 E") && nov1cn.text.includes("CN") && nov1cn.text.includes("已发布待生效"), JSON.stringify(nov1cn).slice(0, 400))
+        const shotCn = await cdp.send("Page.captureScreenshot", { format: "png", captureBeyondViewport: true })
+        writeFileSync(join(RUN_DIR, "calendar-cn-policy-2026-11-01.png"), Buffer.from(shotCn.data, "base64"))
         const oct20 = await pick(9, "2026-10-20")
         add("browser_calendar_auto_effective_consistent", oct20.text.includes("示例 Shopee 泰国平台规则 B") && oct20.text.includes("已生效（⚙ 到生效日自动）"), oct20.text.slice(0, 200))
         const shot2 = await cdp.send("Page.captureScreenshot", { format: "png", captureBeyondViewport: true })
         writeFileSync(join(RUN_DIR, "calendar-policy-2026-10-20.png"), Buffer.from(shot2.data, "base64"))
-        browser = { status: "RAN", chrome: chromePath, screenshots: ["policies-detail.png", "calendar-policy-2026-10-20.png"], rows: rows.map(r => ({ status: r.status, text: r.text.slice(0, 120) })), detailExcerpt: detailText.slice(0, 1500), nov1, oct20 }
+        browser = { ...browser, status: "RAN", chrome: chromePath, screenshots: ["policies-detail.png", "calendar-cn-policy-2026-11-01.png", "calendar-policy-2026-10-20.png"], nov1cn, rows: rows.map(r => ({ status: r.status, text: r.text.slice(0, 120) })), detailExcerpt: detailText.slice(0, 1500), nov1, oct20 }
         cdp.ws.close()
       } finally {
         chrome.kill("SIGKILL")
@@ -264,15 +321,32 @@ async function main() {
     const list = await getJson("/api/shipping/policies")
     const byId = Object.fromEntries(list.records.map(r => [r.id, r]))
     const d = list.records.find(r => r.title === "[FIXTURE] 表单录入示例 D")
-    api.phase3 = { today: list.today, A: byId[ids.A]?.displayStatus, C: byId[ids.C]?.displayStatus, D: d?.displayStatus, Deffective: d?.effectiveAt }
-    add("switch_A_effective_on_effective_date", list.today === "2026-11-01" && byId[ids.A]?.displayStatus === "effective" && byId[ids.A]?.autoActivated === true && byId[ids.A]?.status === "published", JSON.stringify(api.phase3))
+    api.phase3 = { today: list.today, A: byId[ids.A]?.displayStatus, AlocalToday: byId[ids.A]?.localToday, E: byId[ids.E]?.displayStatus, P: byId[ids.P]?.displayStatus, C: byId[ids.C]?.displayStatus, D: d?.displayStatus, Deffective: d?.effectiveAt }
+    add("cn_midnight_E_effective", byId[ids.E]?.displayStatus === "effective" && byId[ids.E]?.localToday === "2026-11-01", JSON.stringify(api.phase3))
+    add("vn_before_local_midnight_A_still_published", byId[ids.A]?.displayStatus === "published" && byId[ids.A]?.localToday === "2026-10-31" && byId[ids.P]?.displayStatus === "effective", JSON.stringify(api.phase3))
+    const effNow = await getJson("/api/shipping/policies?status=effective")
+    const csvEff = await (await fetch(`${BASE}/api/shipping/policies/export?status=effective`)).text()
+    add("filter_export_consistent_at_cn_midnight", effNow.records.some(r => r.id === ids.E) && !effNow.records.some(r => r.id === ids.A) && csvEff.trim().split(/\r?\n/).length === 1 + effNow.total, `${effNow.total}`)
     add("revised_D_still_future_at_11_01", d?.effectiveAt === "2026-11-05" && d?.displayStatus === "published", JSON.stringify(api.phase3))
     add("rumor_still_rumor", byId[ids.C]?.displayStatus === "rumor", JSON.stringify(api.phase3))
   } finally {
     await stopServer(server)
   }
+  // Phase 4: VN/TH local midnight -> A effective, P superseded (switch on Q's effective date).
+  server = startServer("phase4-vn-midnight", NOW_3)
+  try {
+    add("server4_healthy", await waitFor(async () => (await fetch(`${BASE}/api/shipping/health`)).status < 500), BASE)
+    const list = await getJson("/api/shipping/policies")
+    const byId = Object.fromEntries(list.records.map(r => [r.id, r]))
+    const dp = (await getJson(`/api/shipping/policies/${encodeURIComponent(ids.P)}`)).record
+    api.phase4 = { A: [byId[ids.A]?.displayStatus, byId[ids.A]?.localToday], P: [dp.displayStatus, dp.supersedeSwitched], Q: byId[ids.Q]?.displayStatus }
+    add("vn_local_midnight_A_effective", byId[ids.A]?.displayStatus === "effective" && byId[ids.A]?.autoActivated === true && byId[ids.A]?.localToday === "2026-11-01", JSON.stringify(api.phase4))
+    add("supersession_switches_on_effective_date", dp.displayStatus === "revised" && dp.supersedeSwitched === true && byId[ids.Q]?.displayStatus === "effective", JSON.stringify(api.phase4))
+  } finally {
+    await stopServer(server)
+  }
   const pass = checks.every(c => c.pass) && browser.status === "RAN"
-  const evidence = { kind: "R1.5-7 policy library isolated SQLite -> restart -> API -> form -> /policies -> /calendar -> restart(next TEST_NOW)", ranAt: new Date().toISOString(), gitHead: execSync("git rev-parse HEAD", { cwd: ROOT }).toString().trim(), workspaceClean: execSync("git status --porcelain", { cwd: ROOT }).toString().trim() === "", runDir: RUN_DIR, clock: { phase1and2: NOW_1, phase3: NOW_2, gate: "SHIPPING_TEST_CLOCK=1" }, fixtureNotice: "All policies are fixtures (isFixture=true, example.org links); none is a real official notice.", verdict: pass ? "PASS" : browser.status === "BLOCKED" ? "BLOCKED" : "FAIL", writes, api, browser, checks }
+  const evidence = { kind: "R1.5-7 policy library isolated SQLite -> restart -> API -> form -> /policies -> /calendar -> restart(next TEST_NOW)", ranAt: new Date().toISOString(), gitHead: execSync("git rev-parse HEAD", { cwd: ROOT }).toString().trim(), workspaceClean: execSync("git status --porcelain", { cwd: ROOT }).toString().trim() === "", runDir: RUN_DIR, clock: { phase1and2: NOW_1, phase3: NOW_2, phase4: NOW_3, gate: "SHIPPING_TEST_CLOCK=1" }, fixtureNotice: "All policies are fixtures (isFixture=true, example.org links); none is a real official notice.", verdict: pass ? "PASS" : browser.status === "BLOCKED" ? "BLOCKED" : "FAIL", writes, api, browser, checks }
   writeFileSync(join(RUN_DIR, "policy-display-evidence.json"), `${JSON.stringify(evidence, null, 2)}\n`)
   console.log(JSON.stringify({ verdict: evidence.verdict, runDir: RUN_DIR, failed: checks.filter(c => !c.pass) }))
   process.exitCode = pass ? 0 : 1

@@ -1,20 +1,20 @@
 import { useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { type PolicyDetail, type PolicyListResponse, type PolicyRecordView, policyCategories, policyCountries, policyDeclaredStatuses, policyDisplayLabels, policyPlatforms, policySourceTypes } from "@shared/policy"
+import { type PolicyDetail, type PolicyListResponse, type PolicyRecordView, policyCategories, policyCountries, policyDeclaredStatuses, policyDisplayLabels, policyPlatforms, policySourceTypes, policyTimezones } from "@shared/policy"
 import { ShippingShell } from "./app"
 import { myFetch } from "~/utils"
 import "./annual-calendar.css"
 
-const positionLabels: Record<PolicyRecordView["datePosition"], string> = { future: "未来生效", in_effect: "生效期内", past_expiry: "已过失效日", undated: "生效日未定", not_applicable: "不适用自动生效" }
+const positionLabels: Record<PolicyRecordView["datePosition"], string> = { future: "未来生效", in_effect: "生效期内", past_expiry: "已过失效日", undated: "生效日未定", not_applicable: "不适用自动生效", superseded: "已被替代", timezone_unconfirmed: "适用时区未确认（不自动生效）" }
 const entryStatuses = ["rumor", "draft", "published", "effective"] as const
 
 interface FormState {
   [key: string]: string | boolean
 }
-const emptyForm: FormState = { category: "customs_tax", countryCode: "VN", platform: "", title: "", documentNumber: "", publisher: "", publishedAt: "", effectiveAt: "", expiresAt: "", status: "published", scopeText: "", stage: "", sourceType: "official", sourceUrl: "", bodyExcerpt: "", fullText: "", basisText: "", enteredBy: "", isFixture: false, supersedesPolicyId: "", relation: "revised", changeSummary: "" }
+const emptyForm: FormState = { category: "customs_tax", countryCode: "VN", platform: "", title: "", documentNumber: "", publisher: "", publishedAt: "", effectiveAt: "", expiresAt: "", status: "published", applicableTimezone: "", scopeText: "", stage: "", sourceType: "official", sourceUrl: "", bodyExcerpt: "", fullText: "", basisText: "", enteredBy: "", isFixture: false, supersedesPolicyId: "", relation: "revised", changeSummary: "" }
 
 function formFrom(record: PolicyRecordView): FormState {
-  return { ...emptyForm, category: record.category, countryCode: record.countryCode, platform: record.platform ?? "", title: record.title, documentNumber: record.documentNumber ?? "", publisher: record.publisher ?? "", publishedAt: record.publishedAt ?? "", effectiveAt: record.effectiveAt ?? "", expiresAt: record.expiresAt ?? "", status: entryStatuses.includes(record.status as never) ? record.status : "published", scopeText: record.scopeText ?? "", stage: record.stage ?? "", sourceType: record.sourceType, sourceUrl: record.sourceUrl, bodyExcerpt: record.bodyExcerpt ?? "", fullText: record.fullText ?? "", basisText: record.basisText, enteredBy: "", isFixture: record.isFixture }
+  return { ...emptyForm, category: record.category, countryCode: record.countryCode, platform: record.platform ?? "", title: record.title, documentNumber: record.documentNumber ?? "", publisher: record.publisher ?? "", publishedAt: record.publishedAt ?? "", effectiveAt: record.effectiveAt ?? "", expiresAt: record.expiresAt ?? "", status: entryStatuses.includes(record.status as never) ? record.status : "published", applicableTimezone: record.applicableTimezone ?? "", scopeText: record.scopeText ?? "", stage: record.stage ?? "", sourceType: record.sourceType, sourceUrl: record.sourceUrl, bodyExcerpt: record.bodyExcerpt ?? "", fullText: record.fullText ?? "", basisText: record.basisText, enteredBy: "", isFixture: record.isFixture }
 }
 
 function errorCode(error: unknown): string {
@@ -106,7 +106,7 @@ export function PoliciesPage() {
           </div>
         </div>
         <div className="annual-notice" data-testid="policy-clock">
-          {list.data ? `判断日：${list.data.today}（UTC+8 日历日）${list.data.clock === "test" ? " · 测试时钟 TEST_NOW" : " · 系统时钟"}` : "读取中…"}
+          {list.data ? `当前时刻按各政策「适用时区」的当地日历日判断（UTC+8 参考日 ${list.data.today}）${list.data.clock === "test" ? " · 测试时钟 TEST_NOW" : " · 系统时钟"}` : "读取中…"}
           。只有「已发布待生效」会在生效日自动显示为已生效；传闻、征求意见、已修订、已废止不会自动生效。
         </div>
         <section className="annual-panel" aria-label="筛选">
@@ -150,7 +150,7 @@ export function PoliciesPage() {
                   <td>{r.platform ? policyPlatforms[r.platform] : "—"}</td>
                   <td>{policyCategories[r.category]}</td>
                   <td>{`${policyDisplayLabels[r.displayStatus]}${r.autoActivated ? "（⚙ 到生效日自动）" : ""}`}</td>
-                  <td>{`${r.effectiveAt ?? "未定"} · ${positionLabels[r.datePosition]}`}</td>
+                  <td>{`${r.effectiveAt ?? "未定"} · ${positionLabels[r.datePosition]} · ${r.applicableTimezone ?? "时区未确认"}`}</td>
                   <td>{policySourceTypes[r.sourceType] ?? r.sourceType}</td>
                   <td>{`v${r.currentVersionNumber}`}</td>
                 </tr>
@@ -163,7 +163,7 @@ export function PoliciesPage() {
             <h2>{d.record.title}</h2>
             {d.record.isFixture && <p className="annual-evidence-pending" data-testid="policy-fixture-label">示例（fixture）：仅用于验收，不是真实官方公告。</p>}
             <p>{`${policyCountries[d.record.countryCode]} · ${d.record.platform ? policyPlatforms[d.record.platform] : "无平台"} · ${policyCategories[d.record.category]} · 文号 ${d.record.documentNumber ?? "无"} · 发布方 ${d.record.publisher ?? "未填"}`}</p>
-            <p data-testid="policy-detail-status">{`录入状态：${policyDeclaredStatuses[d.record.status]} · 当前状态：${policyDisplayLabels[d.record.displayStatus]}${d.record.autoActivated ? "（⚙ 到生效日自动）" : ""} · 发布日 ${d.record.publishedAt ?? "未填"} · 生效日 ${d.record.effectiveAt ?? "未定"} · 失效日 ${d.record.expiresAt ?? "未填"}`}</p>
+            <p data-testid="policy-detail-status">{`录入状态：${policyDeclaredStatuses[d.record.status]} · 当前状态：${policyDisplayLabels[d.record.displayStatus]}${d.record.autoActivated ? "（⚙ 到生效日自动）" : ""} · 发布日 ${d.record.publishedAt ?? "未填"} · 生效日 ${d.record.effectiveAt ?? "未定"}（${d.record.applicableTimezone ?? "适用时区未确认"}，当地判断日 ${d.record.localToday ?? "无"}） · 失效日 ${d.record.expiresAt ?? "未填"}`}</p>
             <p>{`来源类型：${policySourceTypes[d.record.sourceType] ?? d.record.sourceType} · 录入方式：人工 · 录入人：${d.record.enteredBy}`}</p>
             <a href={d.record.sourceUrl} target="_blank" rel="noreferrer">{`来源链接 ↗ ${d.record.sourceUrl}`}</a>
             <p>{`依据：${d.record.basisText}`}</p>
@@ -177,8 +177,8 @@ export function PoliciesPage() {
             )}
             {(d.record.supersedesPolicyId || d.record.supersededByPolicyId) && (
               <p data-testid="policy-relation">
-                {d.record.supersedesPolicyId && `替代：${d.record.supersedesPolicyId}（${d.record.relationKind === "repealed" ? "废止" : "修订"}） `}
-                {d.record.supersededByPolicyId && `已被 ${d.record.supersededByPolicyId} ${d.record.relationKind === "repealed" ? "废止" : "修订"}`}
+                {d.record.supersedesPolicyId && `本条${d.record.supersedesRelationKind === "repealed" ? "废止" : "修订"}：${d.record.supersedesPolicyId}。 `}
+                {d.record.supersededByPolicyId && `${d.record.supersedeSwitched ? "已被" : `将于 ${d.record.supersedeSwitchAt}（${d.record.supersedeSwitchTimezone}）起被`} ${d.record.supersededByPolicyId} ${d.record.supersededByRelationKind === "repealed" ? "废止" : "修订"}${d.record.supersedeSwitched ? "" : "（尚未生效，当前状态不变）"}`}
               </p>
             )}
             <h3>{`版本（${d.versions.length}，旧版本永久保留）`}</h3>
@@ -224,6 +224,7 @@ export function PoliciesPage() {
             {text("publishedAt", "发布日", "date")}
             {text("effectiveAt", "生效日", "date")}
             {text("expiresAt", "失效日", "date")}
+            {select("applicableTimezone", "适用时区（印尼必须选择）", Object.fromEntries(Object.entries(policyTimezones).map(([k, v]) => [k, v.label])), true)}
             {select("status", "状态", Object.fromEntries(entryStatuses.map(s => [s, policyDeclaredStatuses[s]])))}
             {select("sourceType", "来源类型", policySourceTypes)}
             {text("sourceUrl", "来源链接（https）")}

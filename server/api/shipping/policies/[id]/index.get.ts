@@ -1,3 +1,4 @@
+import { policyToday } from "@shared/policy"
 import { policyClock } from "#/services/policy-clock"
 import { getPolicyRepository } from "#/shipping-store"
 
@@ -7,5 +8,5 @@ export default defineEventHandler(async (event) => {
   const { now, clock } = policyClock()
   const detail = await (await getPolicyRepository()).detail(decodeURIComponent(id), now)
   if (!detail) throw createError({ statusCode: 404, statusMessage: "policy_not_found" })
-  return { ...detail, clock }
+  return { ...detail, today: policyToday(now), clock }
 })
