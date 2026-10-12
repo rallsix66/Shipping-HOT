@@ -27,6 +27,15 @@ export class PaidGateError extends Error {
   }
 }
 
+/** The request estimate is not a finite, non-negative number: rejected before anything is claimed or sent. */
+export class PaidCostError extends Error {
+  readonly code = "paid_invalid_estimate"
+  constructor(message: string) {
+    super(message)
+    this.name = "PaidCostError"
+  }
+}
+
 export class ReceiptBusyError extends Error {
   readonly receiptId: string
   constructor(receiptId: string) {
@@ -152,7 +161,12 @@ async function immediate<T>(db: Database, work: () => Promise<T>): Promise<T> {
   })
 }
 
-/** Month spend = provider_usage estimated_cost + estimates reserved by attempts still pending. */
+/**
+ * Estimated budget gate (not a hard cap on actual charges).
+ * Month spend = provider_usage estimated_cost + reservations of attempts not yet booked into usage
+ * (pending, or unknown with usage_recorded = 0 for rows written before migration 025).
+ * Every attempt that may have been billed is booked into provider_usage exactly once (usage_recorded = 1).
+ */
 async function monthSpend(db: Database, req: ReceiptRequest, now: Date): Promise<number> {
   const window = paidBudgetWindow(now)
   const usage = await db.prepare(`
@@ -161,7 +175,7 @@ async function monthSpend(db: Database, req: ReceiptRequest, now: Date): Promise
   `).get(req.providerId, req.capability, window.from, window.to) as { spend: number }
   const pending = await db.prepare(`
     SELECT COALESCE(SUM(estimated_cost), 0) AS spend FROM paid_receipt_attempt
-    WHERE provider_id = ? AND capability = ? AND status = 'pending' AND started_at >= ? AND started_at < ?
+    WHERE provider_id = ? AND capability = ? AND usage_recorded = 0 AND status IN ('pending', 'unknown') AND started_at >= ? AND started_at < ?
   `).get(req.providerId, req.capability, window.from, window.to) as { spend: number }
   return Number(usage.spend) + Number(pending.spend)
 }
@@ -176,13 +190,43 @@ async function startAttempt(db: Database, receiptId: string, attempt: number, re
   await db.prepare(`
     INSERT INTO paid_receipt_attempt (id, receipt_id, attempt, provider_id, capability, model, status, estimated_cost, currency, started_at)
     VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, NULL, ?)
-  `).run(id, receiptId, attempt, req.providerId, req.capability, req.model ?? null, Math.max(0, req.estimatedCost), nowIso)
+  `).run(id, receiptId, attempt, req.providerId, req.capability, req.model ?? null, req.estimatedCost, nowIso)
   return id
 }
 
+interface AttemptRow {
+  id: string
+  provider_id: string
+  capability: string
+  estimated_cost: number
+  currency: string | null
+  usage_recorded: number
+}
+
+/**
+ * Closes one pending attempt as unknown or failed and books it into provider_usage in the same transaction.
+ * Idempotent per attempt: only a row still 'pending' changes, and usage is booked only while usage_recorded = 0.
+ * Unknown keeps its estimate (it may have been billed); a clear rejection is booked at 0.
+ */
+async function closeAttempt(db: Database, attemptId: string, status: "unknown" | "failed", reason: string, nowIso: string, latencyMs: number | null, currency: string): Promise<boolean> {
+  const attempt = await db.prepare("SELECT id, provider_id, capability, estimated_cost, currency, usage_recorded FROM paid_receipt_attempt WHERE id = ? AND status = 'pending'").get(attemptId) as AttemptRow | undefined
+  if (!attempt) return false
+  await db.prepare("UPDATE paid_receipt_attempt SET status = ?, error = ?, latency_ms = COALESCE(?, latency_ms), finished_at = ?, usage_recorded = 1 WHERE id = ? AND status = 'pending'").run(status, reason, latencyMs, nowIso, attemptId)
+  if (attempt.usage_recorded === 0) {
+    await recordProviderUsageInTransaction(db, { providerId: attempt.provider_id, capability: attempt.capability, failed: true, estimatedCost: status === "failed" ? 0 : Number(attempt.estimated_cost), currency, calledAt: nowIso, errorCode: status === "failed" ? "paid_provider_rejected" : "paid_result_unknown" })
+  }
+  return true
+}
+
 async function markUnknown(db: Database, receiptId: string, reason: string, nowIso: string): Promise<void> {
-  await db.prepare("UPDATE paid_receipt SET status = 'unknown', error = ?, updated_at = ? WHERE id = ?").run(reason, nowIso, receiptId)
-  await db.prepare("UPDATE paid_receipt_attempt SET status = 'unknown', error = ?, finished_at = ? WHERE receipt_id = ? AND status = 'pending'").run(reason, nowIso, receiptId)
+  const receipt = await db.prepare("SELECT currency FROM paid_receipt WHERE id = ?").get(receiptId) as { currency: string | null } | undefined
+  await db.prepare("UPDATE paid_receipt SET status = 'unknown', error = ?, updated_at = ? WHERE id = ? AND status = 'pending'").run(reason, nowIso, receiptId)
+  const pending = await db.prepare("SELECT id FROM paid_receipt_attempt WHERE receipt_id = ? AND status = 'pending'").all(receiptId) as Array<{ id: string }>
+  for (const row of pending) await closeAttempt(db, row.id, "unknown", reason, nowIso, null, receipt?.currency ?? "USD")
+}
+
+function validCost(amount: unknown): amount is number {
+  return typeof amount === "number" && Number.isFinite(amount) && amount >= 0
 }
 
 type Claim =
@@ -198,6 +242,7 @@ class Timeout extends Error {}
  * The caller parses the response and commits business results, then calls completeReceipt.
  */
 export async function paidRequest(ctx: PaidRequestContext, req: ReceiptRequest, call: (apiKey: string) => Promise<CallOutcome>): Promise<ReceiptResult> {
+  if (!validCost(req.estimatedCost)) throw new PaidCostError(`estimatedCost must be a finite, non-negative number (got ${String(req.estimatedCost)})`)
   const clock = ctx.now ?? (() => new Date())
   const logicalKey = logicalKeyFor(req)
   const apiKey = (await ctx.secretStore.get(req.providerId))?.trim()
@@ -227,7 +272,7 @@ export async function paidRequest(ctx: PaidRequestContext, req: ReceiptRequest, 
     await ctx.db.prepare(`
       INSERT INTO paid_receipt (id, logical_key, provider_id, capability, model, purpose, subject, status, request, estimated_cost, currency, attempts, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, 1, ?, ?)
-    `).run(id, logicalKey, req.providerId, req.capability, req.model ?? null, req.purpose, req.subject ?? null, JSON.stringify(req.requestSummary ?? {}), Math.max(0, req.estimatedCost), ctx.currency, nowIso, nowIso)
+    `).run(id, logicalKey, req.providerId, req.capability, req.model ?? null, req.purpose, req.subject ?? null, JSON.stringify(req.requestSummary ?? {}), req.estimatedCost, ctx.currency, nowIso, nowIso)
     return { kind: "call", id, attemptId: await startAttempt(ctx.db, id, 1, req, nowIso) }
   })
 
@@ -247,31 +292,44 @@ export async function paidRequest(ctx: PaidRequestContext, req: ReceiptRequest, 
     const message = (error instanceof Timeout ? "timeout after send" : error instanceof Error ? error.message : String(error)).slice(0, 2000)
     await immediate(ctx.db, async () => {
       const nowIso = clock().toISOString()
-      await ctx.db.prepare("UPDATE paid_receipt SET status = ?, error = ?, updated_at = ? WHERE id = ?").run(status, message, nowIso, receiptId)
-      await ctx.db.prepare("UPDATE paid_receipt_attempt SET status = ?, error = ?, latency_ms = ?, finished_at = ? WHERE id = ?").run(status, message, clock().getTime() - started, nowIso, attemptId)
-      // A rejected request is not billed; an unknown one is counted at its estimate (it may have been billed).
-      await recordProviderUsageInTransaction(ctx.db, { providerId: req.providerId, capability: req.capability, failed: true, estimatedCost: rejected ? 0 : Math.max(0, req.estimatedCost), currency: ctx.currency, calledAt: nowIso, errorCode: rejected ? "paid_provider_rejected" : "paid_result_unknown" })
+      if (await closeAttempt(ctx.db, attemptId, status, message, nowIso, clock().getTime() - started, ctx.currency)) {
+        await ctx.db.prepare("UPDATE paid_receipt SET status = ?, error = ?, updated_at = ? WHERE id = ? AND status = 'pending'").run(status, message, nowIso, receiptId)
+      }
     })
     if (error instanceof Timeout) throw new ReceiptUnknownError(receiptId, `Receipt ${receiptId} timed out after sending; outcome unknown`)
     throw error
   }
 
-  const actual = outcome.cost?.basis === "actual" && Number.isFinite(outcome.cost.amount) ? outcome.cost.amount : null
-  const estimated = outcome.cost?.basis === "estimated" && Number.isFinite(outcome.cost.amount) ? outcome.cost.amount : Math.max(0, req.estimatedCost)
+  // Returned costs are accepted only when finite, non-negative and in the budget currency; otherwise the
+  // valid request estimate is kept and no actual cost is recorded.
+  const returned = outcome.cost ?? null
+  const costProblem = !returned
+    ? null
+    : !validCost(returned.amount)
+        ? `returned cost rejected: ${String(returned.amount)}`
+        : returned.currency !== ctx.currency
+          ? `returned cost rejected: currency ${String(returned.currency)} != ${ctx.currency}`
+          : null
+  const accepted = returned && !costProblem ? returned : null
+  const actual = accepted?.basis === "actual" ? accepted.amount : null
+  const estimated = accepted?.basis === "estimated" ? accepted.amount : req.estimatedCost
   const basis = actual === null ? "estimated" : "actual"
-  const currency = outcome.cost?.currency ?? ctx.currency
+  const currency = ctx.currency
   await immediate(ctx.db, async () => {
     const nowIso = clock().toISOString()
     const usage = outcome.usage ? JSON.stringify(outcome.usage) : null
+    const attempt = await ctx.db.prepare("SELECT usage_recorded FROM paid_receipt_attempt WHERE id = ?").get(attemptId) as { usage_recorded: number } | undefined
+    // A late answer (attempt already recovered to unknown and booked at its estimate) is stored but not booked again.
+    const booked = attempt?.usage_recorded === 1
     await ctx.db.prepare(`
-      UPDATE paid_receipt SET status = 'received', response = ?, request_id = ?, usage = ?, estimated_cost = ?, actual_cost = ?, currency = ?, cost_basis = ?, received_at = ?, updated_at = ?
-      WHERE id = ?
-    `).run(JSON.stringify(outcome.response ?? null), outcome.requestId ?? null, usage, estimated, actual, currency, basis, nowIso, nowIso, receiptId)
+      UPDATE paid_receipt SET status = 'received', response = ?, request_id = ?, usage = ?, estimated_cost = ?, actual_cost = ?, currency = ?, cost_basis = ?, error = ?, received_at = ?, updated_at = ?
+      WHERE id = ? AND status IN ('pending', 'unknown')
+    `).run(JSON.stringify(outcome.response ?? null), outcome.requestId ?? null, usage, estimated, actual, currency, basis, costProblem, nowIso, nowIso, receiptId)
     await ctx.db.prepare(`
-      UPDATE paid_receipt_attempt SET status = 'received', request_id = ?, usage = ?, estimated_cost = ?, actual_cost = ?, currency = ?, cost_basis = ?, latency_ms = ?, finished_at = ?
+      UPDATE paid_receipt_attempt SET status = 'received', request_id = ?, usage = ?, estimated_cost = CASE WHEN usage_recorded = 1 THEN estimated_cost ELSE ? END, actual_cost = ?, currency = ?, cost_basis = ?, latency_ms = ?, finished_at = ?, error = ?, usage_recorded = 1
       WHERE id = ?
-    `).run(outcome.requestId ?? null, usage, estimated, actual, currency, basis, clock().getTime() - started, nowIso, attemptId)
-    await recordProviderUsageInTransaction(ctx.db, { providerId: req.providerId, capability: req.capability, succeeded: true, tokensIn: outcome.usage?.tokensIn, tokensOut: outcome.usage?.tokensOut, estimatedCost: estimated, currency, calledAt: nowIso })
+    `).run(outcome.requestId ?? null, usage, estimated, actual, currency, basis, clock().getTime() - started, nowIso, costProblem, attemptId)
+    if (!booked) await recordProviderUsageInTransaction(ctx.db, { providerId: req.providerId, capability: req.capability, succeeded: true, tokensIn: outcome.usage?.tokensIn, tokensOut: outcome.usage?.tokensOut, estimatedCost: estimated, currency, calledAt: nowIso })
   })
   return { receiptId, response: outcome.response ?? null, reused: false }
 }

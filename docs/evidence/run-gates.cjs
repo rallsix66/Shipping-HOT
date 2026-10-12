@@ -9,7 +9,7 @@ const clean = execSync("git status --porcelain").toString().trim() === ""
 const dir = `docs/evidence/gate-${sha.slice(0, 7)}`
 fs.mkdirSync(dir, { recursive: true })
 const bash = "\"C:\\Program Files\\Git\\bin\\bash.exe\""
-const scope = "server/intel server/runtime/intel-collect-job.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts server/database/migrations/024-paid-receipt.ts server/services/paid-budget.ts"
+const scope = "server/intel server/runtime/intel-collect-job.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts server/database/migrations/024-paid-receipt.ts server/database/migrations/025-paid-receipt-usage-booking.ts server/services/paid-budget.ts"
 const commands = [
   ["install", "pnpm install --frozen-lockfile"],
   ["build", "pnpm build"],

@@ -11,6 +11,7 @@ import { readDatabaseMetadata } from "#/database/runtime"
 import type { SecretStore } from "#/providers/contracts"
 import {
   type CallOutcome,
+  PaidCostError,
   PaidGateError,
   type PaidRequestContext,
   ProviderRejectedError,
@@ -108,12 +109,12 @@ const row = (native: Native, subject: string) => native.prepare("SELECT * FROM p
 const attempts = (native: Native, subject: string) => native.prepare("SELECT a.* FROM paid_receipt_attempt a JOIN paid_receipt r ON r.id = a.receipt_id WHERE r.subject = ? ORDER BY a.attempt").all(subject) as Array<Record<string, unknown>>
 const usage = (native: Native) => native.prepare("SELECT COALESCE(SUM(request_count),0) AS requests, COALESCE(SUM(success_count),0) AS ok, COALESCE(SUM(failure_count),0) AS failed, COALESCE(SUM(estimated_cost),0) AS cost FROM provider_usage WHERE provider_id = 'fake-llm'").get() as { requests: number, ok: number, failed: number, cost: number }
 
-describe("migration 024 (paid_receipt)", () => {
-  it("applies on a fresh isolated database to schema v24 and is idempotent", async () => {
+describe("migrations 024/025 (paid_receipt)", () => {
+  it("applies on a fresh isolated database to schema v25 and is idempotent", async () => {
     const { db, native } = await setup()
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(24)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(25)
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(24)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(25)
     const tables = native.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE 'paid_receipt%' ORDER BY name").all()
     expect(tables).toEqual([{ name: "paid_receipt" }, { name: "paid_receipt_attempt" }])
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name IN ('budgets', 'budget')").all()).toEqual([])
@@ -196,7 +197,7 @@ describe("paid receipts (fake caller, offline)", () => {
     expect(fake.state.hits).toBe(1)
   })
 
-  it("same-key claims through two connections on one database file send exactly one request", async () => {
+  it("same-process dual connections: same-key claims through two connections on one database file send exactly one request", async () => {
     const dir = mkdtempSync(join(tmpdir(), "paid-receipt-"))
     cleanups.push(() => rmSync(dir, { recursive: true, force: true }))
     const file = join(dir, "shipping.db")
@@ -326,6 +327,120 @@ describe("paid receipts (fake caller, offline)", () => {
     expect(second).toMatchObject({ receiptId: first.receiptId, reused: false, response: { ok: true } })
     expect(attempts(native, "unusable").map(a => a.status)).toEqual(["received", "received"])
     expect(usage(native)).toMatchObject({ requests: 2 })
+  })
+
+  describe("unknown recovery keeps the possibly-billed reservation (budget 1, sent 0.6)", () => {
+    const hang = () => new Promise<CallOutcome>(() => {})
+    const recoveries: Array<[string, (db: PaidRequestContext["db"]) => Promise<unknown>]> = [
+      ["expired claim on the same key", db => paidRequest(context(db, { monthlyBudget: 1, now: () => new Date(T0.getTime() + 11 * 60_000) }), request("held", { estimatedCost: 0.6 }), fakeCaller().call).catch(error => error)],
+      ["batch stale cleanup", db => markStalePendingReceipts(db, new Date(T0.getTime() + 11 * 60_000))],
+      ["exclusive startup recovery", db => markPendingReceiptsUnknownAtExclusiveStartup(db, new Date(T0.getTime() + 60_000))],
+    ]
+    for (const [name, recover] of recoveries) {
+      it(`${name}: unknown is booked once, another key's 0.6 stays blocked, repeated recovery adds nothing`, async () => {
+        const { db, native } = await setup()
+        const ctx = context(db, { monthlyBudget: 1 })
+        void paidRequest(ctx, request("held", { estimatedCost: 0.6 }), hang).catch(() => undefined)
+        await new Promise(resolve => setTimeout(resolve, 0))
+        const other = fakeCaller()
+        await expect(paidRequest(ctx, request("other", { estimatedCost: 0.6 }), other.call)).rejects.toMatchObject({ code: "paid_budget_exhausted" })
+        await recover(db)
+        expect(row(native, "held")).toMatchObject({ status: "unknown" })
+        expect(attempts(native, "held").map(a => [a.status, a.usage_recorded])).toEqual([["unknown", 1]])
+        expect(usage(native)).toMatchObject({ requests: 1, failed: 1 })
+        expect(usage(native).cost).toBeCloseTo(0.6)
+        await expect(paidRequest(ctx, request("other", { estimatedCost: 0.6 }), other.call)).rejects.toMatchObject({ code: "paid_budget_exhausted" })
+        for (const [, again] of recoveries) await again(db)
+        expect(usage(native)).toMatchObject({ requests: 1 })
+        expect(usage(native).cost).toBeCloseTo(0.6)
+        await expect(paidRequest(ctx, request("other", { estimatedCost: 0.6 }), other.call)).rejects.toMatchObject({ code: "paid_budget_exhausted" })
+        expect(other.state.hits).toBe(0)
+      })
+    }
+
+    it("a late result after recovery is stored and reusable but not booked twice; the budget stays held", async () => {
+      const { db, native } = await setup()
+      const ctx = context(db, { monthlyBudget: 1 })
+      let release!: () => void
+      const gate = new Promise<void>(resolve => (release = resolve))
+      const late = fakeCaller(async () => {
+        await gate
+        return { response: { late: true }, cost: { amount: 0.5, currency: "USD", basis: "actual" } }
+      })
+      const original = paidRequest(ctx, request("late", { estimatedCost: 0.6 }), late.call)
+      await new Promise(resolve => setTimeout(resolve, 0))
+      expect(await markPendingReceiptsUnknownAtExclusiveStartup(db, T0)).toBe(1)
+      release()
+      expect(await original).toMatchObject({ reused: false, response: { late: true } })
+      expect(row(native, "late")).toMatchObject({ status: "received", actual_cost: 0.5, cost_basis: "actual" })
+      expect(attempts(native, "late").map(a => [a.status, a.usage_recorded, a.estimated_cost])).toEqual([["received", 1, 0.6]])
+      expect(usage(native)).toMatchObject({ requests: 1 })
+      expect(usage(native).cost).toBeCloseTo(0.6)
+      expect((await paidRequest(ctx, request("late", { estimatedCost: 0.6 }), late.call)).reused).toBe(true)
+      await expect(paidRequest(ctx, request("other", { estimatedCost: 0.6 }), fakeCaller().call)).rejects.toMatchObject({ code: "paid_budget_exhausted" })
+      expect(late.state.hits).toBe(1)
+    })
+
+    it("a captured timeout followed by recovery books the attempt exactly once", async () => {
+      const { db, native } = await setup()
+      const ctx = context(db, { monthlyBudget: 1, timeoutMs: 10 })
+      await expect(paidRequest(ctx, request("t", { estimatedCost: 0.6 }), hang)).rejects.toBeInstanceOf(ReceiptUnknownError)
+      await markStalePendingReceipts(db, new Date(T0.getTime() + 11 * 60_000))
+      await markPendingReceiptsUnknownAtExclusiveStartup(db, T0)
+      expect(usage(native)).toMatchObject({ requests: 1 })
+      expect(usage(native).cost).toBeCloseTo(0.6)
+    })
+  })
+
+  describe("costs are finite, non-negative and in the budget currency", () => {
+    it("rejects an invalid request estimate before claiming or sending", async () => {
+      const { db, native } = await setup()
+      const fake = fakeCaller()
+      for (const bad of [-1, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, "0.1" as unknown as number]) {
+        await expect(paidRequest(context(db), request(`bad-${String(bad)}`, { estimatedCost: bad }), fake.call)).rejects.toBeInstanceOf(PaidCostError)
+      }
+      expect(fake.state.hits).toBe(0)
+      expect(native.prepare("SELECT COUNT(*) AS c FROM paid_receipt").get()).toEqual({ c: 0 })
+      expect(usage(native).requests).toBe(0)
+    })
+
+    it("invalid returned costs keep the valid estimate, store no negative or fake actual, and never lower the ledger or unlock the budget", async () => {
+      const { db, native } = await setup()
+      const ctx = context(db, { monthlyBudget: 0.05 })
+      const returned: Array<[string, CallOutcome["cost"]]> = [
+        ["neg-est", { amount: -1, currency: "USD", basis: "estimated" }],
+        ["neg-actual", { amount: -0.5, currency: "USD", basis: "actual" }],
+        ["nan", { amount: Number.NaN, currency: "USD", basis: "actual" }],
+        ["inf", { amount: Number.POSITIVE_INFINITY, currency: "USD", basis: "estimated" }],
+        ["eur", { amount: 0.001, currency: "EUR", basis: "actual" }],
+      ]
+      let ledger = 0
+      for (const [subject, cost] of returned.slice(0, 4)) {
+        await paidRequest(ctx, request(subject), async () => ({ response: subject, cost }))
+        expect(row(native, subject)).toMatchObject({ estimated_cost: 0.01, actual_cost: null, cost_basis: "estimated", currency: "USD" })
+        expect(String(row(native, subject)!.error)).toMatch(/returned cost rejected/)
+        expect(usage(native).cost).toBeGreaterThanOrEqual(ledger)
+        ledger = usage(native).cost
+      }
+      expect(ledger).toBeCloseTo(0.04)
+      await paidRequest(ctx, request("eur"), async () => ({ response: "eur", cost: returned[4]![1] }))
+      expect(row(native, "eur")).toMatchObject({ estimated_cost: 0.01, actual_cost: null, cost_basis: "estimated", currency: "USD" })
+      expect(String(row(native, "eur")!.error)).toMatch(/currency EUR != USD/)
+      expect(usage(native).cost).toBeCloseTo(0.05)
+      const blocked = fakeCaller()
+      await expect(paidRequest(ctx, request("after", { estimatedCost: 0.001 }), blocked.call)).rejects.toMatchObject({ code: "paid_budget_exhausted" })
+      expect(blocked.state.hits).toBe(0)
+      expect(native.prepare("SELECT COUNT(*) AS c FROM paid_receipt WHERE actual_cost < 0 OR estimated_cost < 0").get()).toEqual({ c: 0 })
+      expect(native.prepare("SELECT COUNT(*) AS c FROM paid_receipt_attempt WHERE actual_cost < 0 OR estimated_cost < 0").get()).toEqual({ c: 0 })
+    })
+
+    it("zero cost is valid: a zero estimate is accepted and a zero actual receipt is recorded as actual", async () => {
+      const { db, native } = await setup()
+      await paidRequest(context(db), request("zero-est", { estimatedCost: 0 }), async () => ({ response: 1 }))
+      expect(row(native, "zero-est")).toMatchObject({ estimated_cost: 0, actual_cost: null, cost_basis: "estimated" })
+      await paidRequest(context(db), request("zero-actual"), async () => ({ response: 2, cost: { amount: 0, currency: "USD", basis: "actual" } }))
+      expect(row(native, "zero-actual")).toMatchObject({ estimated_cost: 0.01, actual_cost: 0, cost_basis: "actual", error: null })
+    })
   })
 
   it("the logical key is stable for the same identity regardless of key order and differs by attempt tag", () => {
