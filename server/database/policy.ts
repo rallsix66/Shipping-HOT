@@ -59,6 +59,7 @@ export class PolicyError extends Error {
 
 const TERMINAL: PolicyDeclaredStatus[] = ["revised", "repealed"]
 const relationKind = (v: string | null): "revised" | "repealed" | null => v === "revised" || v === "repealed" ? v : null
+const relationKindOrUnknown = (v: string | null): "revised" | "repealed" | "unknown" | null => v === "unknown" ? "unknown" : relationKind(v)
 const tzOf = (v: string | null): PolicyTimezone | null => v && Object.prototype.hasOwnProperty.call(policyTimezones, v) ? v as PolicyTimezone : null
 
 function fieldsOf(row: RecordRow): PolicyFields {
@@ -131,9 +132,9 @@ export class PolicyRepository {
       currentVersionNumber: await this.versionNumber(row.current_version_id),
       ...policyDisplay(fields, now, supersession),
       supersedesPolicyId: row.supersedes_policy_id,
-      supersedesRelationKind: relationKind(row.supersedes_relation_kind),
+      supersedesRelationKind: relationKindOrUnknown(row.supersedes_relation_kind),
       supersededByPolicyId: row.superseded_by_policy_id,
-      supersededByRelationKind: byKind,
+      supersededByRelationKind: byKind ?? relationKindOrUnknown(row.superseded_by_relation_kind),
       supersedeSwitchAt: row.supersede_switch_at,
       supersedeSwitchTimezone: tzOf(row.supersede_switch_tz),
       createdAt: row.created_at,
@@ -191,6 +192,15 @@ export class PolicyRepository {
       const blocked = frozen(old)
       if (blocked) throw new PolicyError(blocked === "policy_terminal" ? "superseded_policy_already_terminal" : "superseded_policy_has_supersession", 409)
       if ((old.is_fixture === 1) !== f.isFixture) throw new PolicyError("fixture_flag_mismatch", 422)
+      // The target's own supersession of its predecessor must have switched first; otherwise the predecessor would
+      // still switch later to a successor that has since been replaced (dots 2026-10-12 P2).
+      if (old.supersedes_policy_id) {
+        const predecessor = await this.row(old.supersedes_policy_id)
+        if (predecessor && predecessor.superseded_by_policy_id === old.id && predecessor.supersede_switch_at) {
+          const switched = predecessor.supersede_switch_tz && policyLocalDate(now, predecessor.supersede_switch_tz as PolicyTimezone) >= predecessor.supersede_switch_at
+          if (!switched) throw new PolicyError("superseded_policy_supersession_pending", 409)
+        }
+      }
     }
     const id = `policy:${randomUUID()}`
     return await this.tx(async () => {

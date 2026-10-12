@@ -6,6 +6,7 @@ import { type PolicyInput, policyCsv, policyDisplay, policyToday, validatePolicy
 import { PolicyRepository } from "#/database/policy"
 import { initShippingTables } from "#/database/shipping"
 import { readDatabaseMetadata } from "#/database/runtime"
+import { shippingMigrations } from "#/database/migrations"
 import { policyClock } from "#/services/policy-clock"
 
 function memoryDb() {
@@ -178,7 +179,7 @@ describe("r1.5-7 effective-date switching (injected clock)", () => {
 describe("r1.5-7 versions, supersede and repeal", () => {
   it("migrations reach schema v18", async () => {
     const { native, database } = await setup()
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(18)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(19)
     native.close()
   })
 
@@ -294,6 +295,74 @@ describe("r1.5-7 filtering and export", () => {
     expect(lines).toHaveLength(1 + effective.length)
     expect(csv).toContain("\"'=HYPERLINK(\"\"x\"\")\"")
     expect(csv).toContain("示例（fixture，非真实公告）")
+    native.close()
+  })
+})
+
+describe("r1.5-7 P2 round 2 (dots 2026-10-12)", () => {
+  it("a successor relation cannot be created for a target whose own supersession has not switched (A -> pending B -> C)", async () => {
+    const { native, repo } = await setup()
+    const a = await repo.create(official({ status: "effective", effectiveAt: "2026-10-01", title: "[FIXTURE] A" }), T0)
+    const b = await repo.create({ ...official({ title: "[FIXTURE] B" }), supersedesPolicyId: a.id, relation: "revised" }, T0)
+    const dump = () => JSON.stringify(native.prepare("SELECT * FROM policy_record ORDER BY id").all()) + JSON.stringify(native.prepare("SELECT * FROM policy_version ORDER BY id").all()) + JSON.stringify(native.prepare("SELECT * FROM policy_change_log ORDER BY rowid").all())
+    const before = dump()
+    await expect(repo.create({ ...official({ status: "effective", effectiveAt: "2026-10-12", title: "[FIXTURE] C" }), supersedesPolicyId: b.id, relation: "repealed" }, T0)).rejects.toMatchObject({ code: "superseded_policy_supersession_pending", statusCode: 409 })
+    expect(dump()).toBe(before)
+    expect((native.prepare("SELECT COUNT(*) AS n FROM policy_record").get() as { n: number }).n).toBe(2)
+    // Once B's supersession of A has switched (VN 2026-11-01 00:00), C may supersede B.
+    const later = at("2026-10-31T17:00:00Z")
+    const c = await repo.create({ ...official({ status: "effective", effectiveAt: "2026-11-01", title: "[FIXTURE] C" }), supersedesPolicyId: b.id, relation: "repealed" }, later)
+    expect((await repo.detail(b.id, later))!.record).toMatchObject({ supersedesRelationKind: "revised", supersededByPolicyId: c.id, supersededByRelationKind: "repealed", displayStatus: "repealed" })
+    expect((await repo.detail(a.id, later))!.record).toMatchObject({ displayStatus: "revised", supersededByPolicyId: b.id })
+    native.close()
+  })
+
+  it("v17 -> latest upgrade with real legacy rows: 019 repairs the 018 backfill, unknown stays unknown, versions preserved", async () => {
+    const { native, database } = memoryDb()
+    native.exec("CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL)")
+    for (const m of shippingMigrations.filter(m => m.version <= 17)) {
+      await m.up(database)
+      native.prepare("INSERT INTO schema_migrations (version, name, applied_at) VALUES (?, ?, ?)").run(m.version, m.name, "2026-10-12T00:00:00Z")
+    }
+    // Rows exactly as 017 code left them: B's single relation_kind was overwritten to 'repealed' when C repealed it.
+    const rec = native.prepare(`INSERT INTO policy_record (id, category, country_code, title, status, source_url, entry_method, entered_by, current_version_id, created_at, updated_at, source_type, full_text, basis_text, is_fixture, effective_at, supersedes_policy_id, superseded_by_policy_id, relation_kind)
+      VALUES (?, 'customs_tax', 'VN', ?, ?, 'https://example.org/fixture/legacy', 'manual', 'legacy-tester', ?, '2026-10-01T00:00:00Z', '2026-10-02T00:00:00Z', 'official', 'legacy full text (fixture)', ?, 1, '2026-10-01', ?, ?, ?)`)
+    rec.run("policy:A", "[FIXTURE] legacy A", "revised", "policy:A:v2", "basis A v1", null, "policy:B", "revised")
+    rec.run("policy:B", "[FIXTURE] legacy B", "repealed", "policy:B:v2", "basis B", "policy:A", "policy:C", "repealed")
+    rec.run("policy:C", "[FIXTURE] legacy C", "effective", "policy:C:v1", "basis C", "policy:B", null, "repealed")
+    rec.run("policy:D", "[FIXTURE] legacy D (predecessor missing)", "effective", "policy:D:v1", "basis D", "policy:missing", null, "revised")
+    const ver = native.prepare(`INSERT INTO policy_version (id, policy_id, version_number, title, body_excerpt, effective_at, status, change_summary, source_url, created_at, superseded_by_version_id, snapshot_json, entered_by)
+      VALUES (?, ?, ?, ?, NULL, '2026-10-01', ?, ?, 'https://example.org/fixture/legacy', '2026-10-01T00:00:00Z', ?, ?, 'legacy-tester')`)
+    ver.run("policy:A:v1", "policy:A", 1, "[FIXTURE] legacy A", "effective", "create", "policy:A:v2", JSON.stringify({ basisText: "basis A v1" }))
+    ver.run("policy:A:v2", "policy:A", 2, "[FIXTURE] legacy A", "revised", "revised by B", null, JSON.stringify({ basisText: "basis A v1" }))
+    ver.run("policy:B:v1", "policy:B", 1, "[FIXTURE] legacy B", "effective", "create", "policy:B:v2", JSON.stringify({ basisText: "basis B" }))
+    ver.run("policy:B:v2", "policy:B", 2, "[FIXTURE] legacy B", "repealed", "repealed by C", null, JSON.stringify({ basisText: "basis B" }))
+    ver.run("policy:C:v1", "policy:C", 1, "[FIXTURE] legacy C", "effective", "create", null, null)
+    ver.run("policy:D:v1", "policy:D", 1, "[FIXTURE] legacy D", "effective", "create", null, null)
+    native.prepare("INSERT INTO policy_change_log (id, policy_id, version_id, action, actor, summary, created_at) VALUES ('log1', 'policy:A', 'policy:A:v2', 'superseded', 'legacy-tester', 'revised by B', '2026-10-02T00:00:00Z')").run()
+    const versionsBefore = JSON.stringify(native.prepare("SELECT * FROM policy_version ORDER BY id").all())
+    const logBefore = JSON.stringify(native.prepare("SELECT * FROM policy_change_log").all())
+
+    await initShippingTables(database, "real") // runs 018 then 019 on the legacy rows
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(19)
+    const raw = Object.fromEntries((native.prepare("SELECT id, supersedes_relation_kind AS s, superseded_by_relation_kind AS b, status, title, basis_text, applicable_timezone AS tz FROM policy_record").all() as { id: string }[]).map(r => [r.id, r]))
+    expect(raw["policy:A"]).toMatchObject({ s: null, b: "revised", status: "revised", basis_text: "basis A v1", tz: "Asia/Ho_Chi_Minh" })
+    expect(raw["policy:B"]).toMatchObject({ s: "revised", b: "repealed", status: "repealed", title: "[FIXTURE] legacy B" })
+    expect(raw["policy:C"]).toMatchObject({ s: "repealed", b: null })
+    expect(raw["policy:D"]).toMatchObject({ s: "unknown", b: null })
+    expect(JSON.stringify(native.prepare("SELECT * FROM policy_version ORDER BY id").all())).toBe(versionsBefore)
+    expect(JSON.stringify(native.prepare("SELECT * FROM policy_change_log").all())).toBe(logBefore)
+
+    const repo = new PolicyRepository(database)
+    const b = (await repo.detail("policy:B", T0))!
+    expect(b.record).toMatchObject({ supersedesRelationKind: "revised", supersededByRelationKind: "repealed", displayStatus: "repealed" })
+    expect(b.versions.map(v => v.versionNumber)).toEqual([1, 2])
+    expect((await repo.detail("policy:D", T0))!.record.supersedesRelationKind).toBe("unknown")
+    const csv = policyCsv(await repo.list({}, T0))
+    const rowB = csv.split("\r\n").find(l => l.includes("legacy B"))!
+    expect(rowB).toContain("修订 policy:A")
+    expect(rowB).not.toContain("废止 policy:A")
+    expect(csv.split("\r\n").find(l => l.includes("legacy D"))).toContain("关系类型未知")
     native.close()
   })
 })

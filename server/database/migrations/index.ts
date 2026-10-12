@@ -17,6 +17,7 @@ import { opsWeatherCalendarPolicyMigration } from "#/database/migrations/015-ops
 import { promoCalendarMetadataMigration } from "#/database/migrations/016-promo-calendar-metadata"
 import { policyLifecycleMigration } from "#/database/migrations/017-policy-lifecycle"
 import { policyRelationsTimezoneMigration } from "#/database/migrations/018-policy-relations-timezone"
+import { policyRelationBackfillRepairMigration } from "#/database/migrations/019-policy-relation-backfill-repair"
 
 export interface ShippingMigration {
   readonly version: number
@@ -46,6 +47,7 @@ export const shippingMigrations: readonly ShippingMigration[] = [
   promoCalendarMetadataMigration,
   policyLifecycleMigration,
   policyRelationsTimezoneMigration,
+  policyRelationBackfillRepairMigration,
 ]
 
 export const latestShippingSchemaVersion = shippingMigrations[shippingMigrations.length - 1].version

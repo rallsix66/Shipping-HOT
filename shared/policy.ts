@@ -33,6 +33,10 @@ export const policyTimezones = {
   "Asia/Jayapura": { label: "印尼东部 WIT UTC+9", offsetHours: 9, countries: ["ID"] },
 } as const
 export type PolicyTimezone = keyof typeof policyTimezones
+
+export function policyRelationVerb(kind: "revised" | "repealed" | "unknown" | null): string {
+  return kind === "repealed" ? "废止" : kind === "revised" ? "修订" : "替代（关系类型未知，旧数据无法确定）"
+}
 /** Single-zone countries get their zone by default; ID has no default (must be explicit). */
 export const policyDefaultTimezone: Record<PolicyCountry, PolicyTimezone | null> = { CN: "Asia/Shanghai", VN: "Asia/Ho_Chi_Minh", TH: "Asia/Bangkok", MY: "Asia/Kuala_Lumpur", PH: "Asia/Manila", ID: null }
 
@@ -125,10 +129,11 @@ export interface PolicyRecordView extends PolicyFields {
   localToday: string | null
   /** This record replaces supersedesPolicyId; how: supersedesRelationKind. */
   supersedesPolicyId: string | null
-  supersedesRelationKind: "revised" | "repealed" | null
+  /** "unknown" = legacy (v17) row whose type could not be recovered; never guessed. */
+  supersedesRelationKind: "revised" | "repealed" | "unknown" | null
   /** This record is (or will be) replaced by supersededByPolicyId; how: supersededByRelationKind. */
   supersededByPolicyId: string | null
-  supersededByRelationKind: "revised" | "repealed" | null
+  supersededByRelationKind: "revised" | "repealed" | "unknown" | null
   /** Civil date (in supersedeSwitchTimezone) on which the supersession takes effect; null = legacy, already switched. */
   supersedeSwitchAt: string | null
   supersedeSwitchTimezone: PolicyTimezone | null
@@ -309,6 +314,6 @@ function csvCell(value: unknown): string {
 }
 
 export function policyCsv(records: PolicyRecordView[]): string {
-  const rows = records.map(r => [r.id, r.isFixture ? "示例（fixture，非真实公告）" : "", r.countryCode, r.platform ? policyPlatforms[r.platform] : "", policyCategories[r.category], r.title, r.documentNumber, r.publisher, r.publishedAt, r.effectiveAt, r.expiresAt, r.applicableTimezone ?? "未确认", r.localToday ?? "", policyDeclaredStatuses[r.status], policyDisplayLabels[r.displayStatus], policySourceTypes[r.sourceType], r.sourceUrl, r.enteredBy, `v${r.currentVersionNumber}`, [r.supersedesPolicyId ? `${r.supersedesRelationKind === "repealed" ? "废止" : "修订"} ${r.supersedesPolicyId}` : "", r.supersededByPolicyId ? `${r.supersedeSwitched ? "已被" : `将于 ${r.supersedeSwitchAt ?? ""} 被`} ${r.supersededByPolicyId} ${r.supersededByRelationKind === "repealed" ? "废止" : "修订"}` : ""].filter(Boolean).join("；")])
+  const rows = records.map(r => [r.id, r.isFixture ? "示例（fixture，非真实公告）" : "", r.countryCode, r.platform ? policyPlatforms[r.platform] : "", policyCategories[r.category], r.title, r.documentNumber, r.publisher, r.publishedAt, r.effectiveAt, r.expiresAt, r.applicableTimezone ?? "未确认", r.localToday ?? "", policyDeclaredStatuses[r.status], policyDisplayLabels[r.displayStatus], policySourceTypes[r.sourceType], r.sourceUrl, r.enteredBy, `v${r.currentVersionNumber}`, [r.supersedesPolicyId ? `${policyRelationVerb(r.supersedesRelationKind)} ${r.supersedesPolicyId}` : "", r.supersededByPolicyId ? `${r.supersedeSwitched ? "已被" : `将于 ${r.supersedeSwitchAt ?? ""} 被`} ${r.supersededByPolicyId} ${policyRelationVerb(r.supersededByRelationKind)}` : ""].filter(Boolean).join("；")])
   return `\uFEFF${[policyCsvColumns.join(","), ...rows.map(row => row.map(csvCell).join(","))].join("\r\n")}\r\n`
 }

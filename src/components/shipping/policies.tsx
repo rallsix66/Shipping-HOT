@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { type PolicyDetail, type PolicyListResponse, type PolicyRecordView, policyCategories, policyCountries, policyDeclaredStatuses, policyDisplayLabels, policyPlatforms, policySourceTypes, policyTimezones } from "@shared/policy"
+import { type PolicyDetail, type PolicyListResponse, type PolicyRecordView, policyCategories, policyCountries, policyDeclaredStatuses, policyDisplayLabels, policyPlatforms, policyRelationVerb, policySourceTypes, policyTimezones } from "@shared/policy"
 import { ShippingShell } from "./app"
 import { myFetch } from "~/utils"
 import "./annual-calendar.css"
@@ -177,8 +177,8 @@ export function PoliciesPage() {
             )}
             {(d.record.supersedesPolicyId || d.record.supersededByPolicyId) && (
               <p data-testid="policy-relation">
-                {d.record.supersedesPolicyId && `本条${d.record.supersedesRelationKind === "repealed" ? "废止" : "修订"}：${d.record.supersedesPolicyId}。 `}
-                {d.record.supersededByPolicyId && `${d.record.supersedeSwitched ? "已被" : `将于 ${d.record.supersedeSwitchAt}（${d.record.supersedeSwitchTimezone}）起被`} ${d.record.supersededByPolicyId} ${d.record.supersededByRelationKind === "repealed" ? "废止" : "修订"}${d.record.supersedeSwitched ? "" : "（尚未生效，当前状态不变）"}`}
+                {d.record.supersedesPolicyId && `本条${policyRelationVerb(d.record.supersedesRelationKind)}：${d.record.supersedesPolicyId}。 `}
+                {d.record.supersededByPolicyId && `${d.record.supersedeSwitched ? "已被" : `将于 ${d.record.supersedeSwitchAt}（${d.record.supersedeSwitchTimezone}）起被`} ${d.record.supersededByPolicyId} ${policyRelationVerb(d.record.supersededByRelationKind)}${d.record.supersedeSwitched ? "" : "（尚未生效，当前状态不变）"}`}
               </p>
             )}
             <h3>{`版本（${d.versions.length}，旧版本永久保留）`}</h3>
