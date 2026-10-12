@@ -95,8 +95,9 @@ export function allowed(url: string, config: WebListConfig, policy: ArticleSourc
 }
 
 function listingItself(url: string, listing: string): boolean {
-  const bare = (x: URL) => `${x.host}${x.pathname.replace(/\/$/, "")}`
-  return bare(new URL(url)) === bare(new URL(listing))
+  // Business query parameters can identify a detail page on the same path.
+  // Shared canonicalization removes fragments/tracking and sorts query keys.
+  return canonicalizeFeedUrl(url) === canonicalizeFeedUrl(listing)
 }
 
 /** Pure HTML adapter. Fetch, decoding, retry, licensing and storage remain owned by existing services. */

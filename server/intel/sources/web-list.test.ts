@@ -65,6 +65,20 @@ describe("web_list HTML and config boundaries", () => {
     const markup = "<ul id=\"notices\"><li><a href=\"/list#paper\">Paper</a></li><li><a href=\"/notices/1?utm_source=x\">Notice one</a></li><li><a href=\"/notices/1#top\">Duplicate</a></li></ul>"
     expect(fromHtml(markup, base, config, policy).map(item => item.title)).toEqual(["Notice one"])
   })
+  it("keeps same-path business query identities while excluding anchors and tracking-only self links", () => {
+    const listing = "https://www.nchmf.gov.vn/notices?lang=en&utm_source=listing"
+    const markup = `<ul id="notices">
+      <li><a href="#paper">Pure anchor</a></li>
+      <li><a href="/notices?utm_campaign=x&lang=en#top">Tracking-only self</a></li>
+      <li><a href="/notices?id=123&lang=en">Notice 123</a></li>
+      <li><a href="/notices?lang=en&id=456">Notice 456</a></li>
+      <li><a href="/notices?utm_source=x&lang=en&id=123#top">Duplicate 123</a></li>
+    </ul>`
+    expect(fromHtml(markup, listing, config, policy).map(item => [item.title, item.canonicalUrl])).toEqual([
+      ["Notice 123", "https://www.nchmf.gov.vn/notices?id=123&lang=en"],
+      ["Notice 456", "https://www.nchmf.gov.vn/notices?id=456&lang=en"],
+    ])
+  })
   it("does not widen host/protocol/credential rules through prefix config", () => {
     for (const link of ["https://www.nchmf.gov.vn.evil.test/notices/1", "http://www.nchmf.gov.vn/notices/1", "https://user:pass@www.nchmf.gov.vn/notices/1", "https://www.nchmf.gov.vn:9443/notices/1"]) expect(allowed(link, config, policy)).toBe(false)
     expect(allowed("https://127.0.0.1/notices/1", config, { ...policy, allowedHosts: ["127.0.0.1"] })).toBe(false)
