@@ -16,6 +16,7 @@ const navLinks = [
   { to: "/events", label: "事件", icon: "i-ph-bell-ringing" },
   { to: "/feed", label: "资讯", icon: "i-ph-newspaper" },
   { to: "/calendar", label: "国家日历", icon: "i-ph-calendar-blank" },
+  { to: "/policies", label: "政策库", icon: "i-ph-scroll" },
   { to: "/settings", label: "设置", icon: "i-ph-gear" },
 ] as const
 

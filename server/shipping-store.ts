@@ -7,6 +7,7 @@ import { detectShippingEvents } from "@shared/shipping-engine"
 import { filterCalendarCoverageForSourceIds, filterCalendarEventsForSourceIds, mergeCalendarSources } from "#/providers/calendar"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { PromoCalendarRepository } from "#/database/promo-calendar"
+import { PolicyRepository } from "#/database/policy"
 import { defaultShippingSettings, healthyPersistenceStatus, persistenceUnavailableError } from "#/database/runtime"
 import { normalizeTranslationSettings } from "#/services/translation-settings"
 import { isWeatherFeedItem, operationalSourceContext, providerModes, providers } from "#/providers/shipping"
@@ -43,6 +44,13 @@ export async function getPromoCalendarRepository(): Promise<PromoCalendarReposit
   await initialize()
   requireRepository()
   return new PromoCalendarRepository(useDatabase())
+}
+
+/** R1.5-7 policy repository on the same initialized SQLite database. */
+export async function getPolicyRepository(): Promise<PolicyRepository> {
+  await initialize()
+  requireRepository()
+  return new PolicyRepository(useDatabase())
 }
 
 export function mergeWeatherFeedItems(existing: FeedItem[], weather: FeedItem[]): FeedItem[] {

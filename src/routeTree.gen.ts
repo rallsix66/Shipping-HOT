@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PortsRouteImport } from './routes/ports'
+import { Route as PoliciesRouteImport } from './routes/policies'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as CalendarRouteImport } from './routes/calendar'
@@ -26,6 +27,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const PortsRoute = PortsRouteImport.update({
   id: '/ports',
   path: '/ports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliciesRoute = PoliciesRouteImport.update({
+  id: '/policies',
+  path: '/policies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FeedRoute = FeedRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
   '/feed': typeof FeedRoute
+  '/policies': typeof PoliciesRoute
   '/ports': typeof PortsRoute
   '/settings': typeof SettingsRoute
   '/feed/$id': typeof FeedIdRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
   '/feed': typeof FeedRoute
+  '/policies': typeof PoliciesRoute
   '/ports': typeof PortsRoute
   '/settings': typeof SettingsRoute
   '/feed/$id': typeof FeedIdRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
   '/feed': typeof FeedRoute
+  '/policies': typeof PoliciesRoute
   '/ports': typeof PortsRoute
   '/settings': typeof SettingsRoute
   '/feed_/$id': typeof FeedIdRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/events'
     | '/feed'
+    | '/policies'
     | '/ports'
     | '/settings'
     | '/feed/$id'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/events'
     | '/feed'
+    | '/policies'
     | '/ports'
     | '/settings'
     | '/feed/$id'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/events'
     | '/feed'
+    | '/policies'
     | '/ports'
     | '/settings'
     | '/feed_/$id'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   EventsRoute: typeof EventsRoute
   FeedRoute: typeof FeedRoute
+  PoliciesRoute: typeof PoliciesRoute
   PortsRoute: typeof PortsRoute
   SettingsRoute: typeof SettingsRoute
   FeedIdRoute: typeof FeedIdRoute
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/ports'
       fullPath: '/ports'
       preLoaderRoute: typeof PortsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/policies': {
+      id: '/policies'
+      path: '/policies'
+      fullPath: '/policies'
+      preLoaderRoute: typeof PoliciesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feed': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   EventsRoute: EventsRoute,
   FeedRoute: FeedRoute,
+  PoliciesRoute: PoliciesRoute,
   PortsRoute: PortsRoute,
   SettingsRoute: SettingsRoute,
   FeedIdRoute: FeedIdRoute,
