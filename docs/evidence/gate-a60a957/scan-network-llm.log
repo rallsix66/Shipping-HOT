@@ -1,0 +1,14 @@
+# command: rg -n -i "fetch\(|https?://|openai|anthropic|llm" server/intel server/runtime/intel-collect-job.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts
+# full_sha: a60a957a2a281066bca61f565f12db99095965bd
+# started: 2026-10-12T08:53:55.778Z
+# ---- stdout ----
+server/intel\sources.ts:30:    url: "https://www.tmd.go.th/en/api/xml/CAP",
+server/intel\sources.ts:43:    url: "https://www.bmkg.go.id/alerts/nowcast/en/rss.xml",
+server/intel\collect.test.ts:104:    expect(items.every(item => item.title && item.canonicalUrl.startsWith("https://www.tmd.go.th/") && item.publishedAt)).toBe(true)
+server/intel\collect.test.ts:294:    const broken: IntelSourceSeed = { ...TMD, id: "intel:test-broken", url: "https://www.tmd.go.th/broken" }
+server/intel\collect.test.ts:352:    const offHost: IntelSourceSeed = { ...TMD, id: "intel:test-offhost", url: "https://evil.example/feed" }
+server/intel\collect.test.ts:358:    const downgrade = offline({ [TMD.url]: () => ({ status: 302, headers: { location: "http://www.tmd.go.th/en/api/xml/CAP" }, body: "" }) })
+
+# ---- stderr ----
+
+# raw_exit_code: 0
