@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.node.json",
+  "include": [
+    "../server",
+    "../*.config.*",
+    "../shared",
+    "../test",
+    "../scripts",
+    "../tools",
+    "../dist/.nitro/types",
+    "two-index-observe.test.ts"
+  ],
+  "exclude": [
+    "../test/ui-smoke.test.ts"
+  ]
+}
