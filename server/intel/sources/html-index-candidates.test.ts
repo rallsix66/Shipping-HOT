@@ -51,6 +51,15 @@ describe("disabled HTML index configurations and synthetic regressions", () => {
     expect(parseLooseDate("13 ตุลาคม 2569", { ...customs.webList!, calendar: "gregorian" }).localDate).toBeNull()
     expect(parseLooseDate("13 ตุลาคม 2026", { ...customs.webList!, calendar: "gregorian" }).localDate).toBe("2026-10-13")
   })
+  it("checks the saved real date/column facts without treating metadata as original HTML", () => {
+    const facts = JSON.parse(readFileSync("docs/evidence/r2-two-html-2026-10-13/TH-C01-relationships.json", "utf8"))
+    const row = facts.examples.find((entry: { titleColumnIndex?: number }) => entry.titleColumnIndex !== undefined)
+    expect(row.titleColumnIndex).toBe(3)
+    expect(row.dateColumnIndex).toBe(4)
+    expect(row.titleColumnText).toBe(row.title)
+    expect(customs.webList?.linkSelector).toBe(`td:nth-child(${row.titleColumnIndex}) a[href]`)
+    expect(parseLooseDate(row.sameItemDateText, customs.webList!)).toMatchObject({ raw: "3 ตุลาคม 2569", localDate: "2026-10-03", precision: "day", publishedAt: null })
+  })
   it("fails on absent/duplicate/redesigned lists and unconfirmed emptiness", () => {
     for (const markup of ["<html>Login</html>", "<div class=\"div-article-main2\"></div>", NORTHPORT_SYNTHETIC + NORTHPORT_SYNTHETIC]) expect(() => fromHtml(markup, northport.url, northport.webList!, sourcePolicy(northport))).toThrow(/web_list_/)
     expect(() => fromHtml(CUSTOMS_SYNTHETIC.replaceAll("table-hover", "new-list"), customs.url, customs.webList!, sourcePolicy(customs))).toThrow("web_list_structure_changed")

@@ -38,13 +38,13 @@ export const htmlIndexCandidates: readonly IntelSourceSeed[] = [
     webList: {
       listSelector: "table.table-hover",
       itemSelector: "tbody > tr",
-      linkSelector: "td:nth-child(2) a[href]",
-      titleSelector: "td:nth-child(2) a[href]",
+      linkSelector: "td:nth-child(3) a[href]",
+      titleSelector: "td:nth-child(3) a[href]",
       publishedAtSelector: "td:nth-child(4)",
       calendar: "buddhist",
       dateFormat: "thai_month_name",
       allowUrlPrefixes: ["https://www.customs.go.th/cont_strc_simple_with_date.php"],
-      dateRuleBasis: "TH-C01 index observed 2026-10-13: title/detail link in row column2 and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+      dateRuleBasis: "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
     },
   },
 ]

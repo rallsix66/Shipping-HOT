@@ -7,6 +7,6 @@ export const NORTHPORT_SYNTHETIC = `<nav><a href="/np/docs/Announcements/nav.pdf
 </div></section></div>`
 export const CUSTOMS_SYNTHETIC = `<nav><a href="/cont_strc_simple_with_date.php?current_id=nav">Navigation</a></nav>
 <table class="table table-hover"><thead><tr><th>Header</th></tr></thead><tbody>
-<tr><td>1</td><td><a href="/cont_strc_simple_with_date.php?current_id=first&lang=th">Synthetic Thai notice one</a></td><td>Icon</td><td>13 ตุลาคม 2569</td><td>87</td></tr>
-<tr><td>2</td><td><a href="/cont_strc_simple_with_date.php?current_id=second&lang=th">Synthetic Thai notice two</a></td><td>Icon</td><td>29 กุมภาพันธ์ 2567</td><td>65</td></tr>
+<tr><td>1</td><td>Icon</td><td><a href="/cont_strc_simple_with_date.php?current_id=first&lang=th">Synthetic Thai notice one</a></td><td>13 ตุลาคม 2569</td><td>87</td></tr>
+<tr><td>2</td><td>Icon</td><td><a href="/cont_strc_simple_with_date.php?current_id=second&lang=th">Synthetic Thai notice two</a></td><td>29 กุมภาพันธ์ 2567</td><td>65</td></tr>
 </tbody></table>`

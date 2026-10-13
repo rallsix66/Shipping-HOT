@@ -5,7 +5,7 @@
   "observationCoverage": {
     "retainedSameContainerAnchors": 54,
     "workingScanAnchorCap": 150,
-    "selectedExamples": 2
+    "selectedExamples": 3
   },
   "examples": [
     {
@@ -41,7 +41,7 @@
         }
       ],
       "sameItemDateText": "13 ตุลาคม 2569",
-      "dateMapping": "same tr fourth td, second td title/link"
+      "dateMapping": "same tr fourth td date, third td title/link"
     },
     {
       "title": "รองฯ ดิเรก พร้อมคณะ เข้าร่วมพิธีวางพวงมาลาถวายบังคมพระบรมราชานุสาวรีย์ พระบาทสมเด็จพระบรมชนกาธิเบศร มหาภูมิพลอดุลยเดชมหาราช บรมนาถบพิตร เนื่องในวันนวมินทรมหาราช พุทธศักราช ๒๕๖๙",
@@ -76,7 +76,45 @@
         }
       ],
       "sameItemDateText": "13 ตุลาคม 2569",
-      "dateMapping": "same tr fourth td, second td title/link"
+      "dateMapping": "same tr fourth td date, third td title/link"
+    },
+    {
+      "title": "รองฯ นิติ และคณะ เข้าร่วมงาน National Day of the Republic of Korea 2026",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?lang=th&top_menu=menu_homepage&ini_menu=menu_public_relations_160421_04&left_menu=&current_id=14232b324148505e4e464a4e464b49",
+      "anchor": {
+        "tag": "a",
+        "classes": []
+      },
+      "parentPath": [
+        {
+          "tag": "td",
+          "classes": [],
+          "anchorCount": 1
+        },
+        {
+          "tag": "tr",
+          "classes": [],
+          "anchorCount": 1
+        },
+        {
+          "tag": "tbody",
+          "classes": [],
+          "anchorCount": 100
+        },
+        {
+          "tag": "table",
+          "classes": [
+            "table",
+            "table-hover"
+          ],
+          "anchorCount": 100
+        }
+      ],
+      "sameItemDateText": "3 ตุลาคม 2569",
+      "titleColumnIndex": 3,
+      "dateColumnIndex": 4,
+      "titleColumnText": "รองฯ นิติ และคณะ เข้าร่วมงาน National Day of the Republic of Korea 2026",
+      "dateMapping": "same tr fourth td date, third td title/link"
     }
   ]
 }

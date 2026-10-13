@@ -10,7 +10,9 @@
     "id": "TH-C01",
     "rawResponseHashFile": "observation-results.json",
     "workingRelationshipMetadataSha256": "52f93b5dd2618f11676e88124ae5eff4d2af6acfd9a8b543953311380f130630",
-    "archivedRelationshipMetadataSha256": "fda0d327b50b922df2a8e9154e217c988b9beba7b054c980192abc375aa31473",
-    "transform": "Filter observed item-container anchors; retain only first2 examples plus Northport month-only example; remove navigation, repeated ancestors children/prose and other titles; keep factual tag/class path and paired title/link/date. Original HTML never saved."
+    "archivedRelationshipMetadataSha256": "839d29f238a7415c19abb5ee8152b590bbf85958347ea2ae4c4b39059c720175",
+    "transform": "Filter observed item-container anchors; retain only first2 examples plus Northport month-only example; remove navigation, repeated ancestors children/prose and other titles; keep factual tag/class path and paired title/link/date. Original HTML never saved.",
+    "initialArchivedRelationshipMetadataSha256": "fda0d327b50b922df2a8e9154e217c988b9beba7b054c980192abc375aa31473",
+    "correction": "Added one retained working-metadata short-title row proving title/link column3 and date column4; corrected former column2 annotation. No new HTTP or HTML reconstruction."
   }
 ]
