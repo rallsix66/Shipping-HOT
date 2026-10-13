@@ -1,0 +1,13 @@
+{
+  "baseline": "07946d249494fe5284f58dd6f07b4e873db3972c",
+  "oldCommittedSnapshot": "docs/evidence/r2-two-html-2026-10-13/two-index-observe.test.ts.txt",
+  "oldSnapshotSha256": "74d3a8f8f492e867bc50aa6469d78c634390755a1911d9839e5211e1d54f3eb6",
+  "localBeforeRepairSha256": "74d3a8f8f492e867bc50aa6469d78c634390755a1911d9839e5211e1d54f3eb6",
+  "repairedSnapshotSha256": "d3b01ecf0c6c8ca3a64ca6f5496561cf24d9aad129ec48ee95c2fce4ca0acf5f",
+  "repairedLiveProbeExecuted": false,
+  "httpRequestsThisRepairRound": 0,
+  "actualOldErrorCode": "UNKNOWN",
+  "actualNorthportQualification": "FAIL/incomplete",
+  "actualThaiQualification": "NOT_RUN",
+  "originalHtmlFixtures": 0
+}
