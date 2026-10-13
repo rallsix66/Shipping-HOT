@@ -65,6 +65,15 @@ export function assertSupportedConfig(input: unknown): asserts input is WebListC
       throw new UnsupportedConfig(`${key} invalid selector`)
     }
   }
+  assertDateAndUrlConfig(config)
+}
+
+/** Shared explicit date/URL contract; source adapters still validate their own key whitelist. */
+export function assertDateAndUrlConfig(config: Record<string, unknown>): void {
+  if (typeof config.dateRuleBasis !== "string" || !config.dateRuleBasis.trim()) throw new UnsupportedConfig("dateRuleBasis required")
+  for (const key of ["dateOrder", "calendar"]) {
+    if (config[key] !== undefined && (typeof config[key] !== "string" || !VALUES[key].includes(config[key] as string))) throw new UnsupportedConfig(`${key} invalid`)
+  }
   if (config.publishedAtUtcOffset !== undefined && (typeof config.publishedAtUtcOffset !== "string" || !/^[+-](?:0\d|1[0-3]):[0-5]\d$|^[+-]14:00$/.test(config.publishedAtUtcOffset))) throw new UnsupportedConfig("publishedAtUtcOffset invalid")
   if ((config.dateRuleBasis as string).length > 500) throw new UnsupportedConfig("dateRuleBasis too long")
   for (const key of ["allowUrlPrefixes", "denyUrlPrefixes"]) {

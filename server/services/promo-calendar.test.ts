@@ -97,7 +97,7 @@ describe("r1.5-5 persistence, regeneration and confirmation", () => {
 
   it("migration 016 adds platform/confirmation columns; legacy rows read as 未指定 and never confirmed without evidence", async () => {
     const { native, database, repo } = await setup()
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(26)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(27)
     native.prepare("INSERT INTO ops_calendar_event (id, country_code, title, starts_at, ends_at, category, basis_kind, basis_ref, confirmation_status, rule_id, notes, created_at, updated_at) VALUES ('legacy-1','VN','旧记录','2026-05-05',NULL,'promo','manual',NULL,'confirmed',NULL,NULL,?,?)").run(NOW, NOW)
     native.prepare("INSERT INTO ops_calendar_event (id, country_code, title, starts_at, ends_at, category, basis_kind, basis_ref, confirmation_status, rule_id, notes, created_at, updated_at, platform) VALUES ('bad-1','VN','坏日期','2026-02-30','2026-02-30','promo','manual',NULL,'confirmed',NULL,NULL,?,?,'amazon')").run(NOW, NOW)
     const legacy = await repo.get("legacy-1")

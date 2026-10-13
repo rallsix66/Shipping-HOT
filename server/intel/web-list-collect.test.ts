@@ -1,10 +1,8 @@
 import { createHash } from "node:crypto"
 import { mkdirSync, mkdtempSync, readFileSync } from "node:fs"
 import { resolve } from "node:path"
-import NativeDatabase from "better-sqlite3"
-import { createDatabase } from "db0"
 import { describe, expect, it, vi } from "vitest"
-import { IntelRepository } from "#/database/intel"
+import { open } from "./__fixtures__/isolated-db"
 import { shippingMigrations } from "#/database/migrations"
 import { initializeShippingDatabase } from "#/database/runtime"
 import { type IntelFetchDeps, collectIntelSource } from "#/intel/collect"
@@ -47,33 +45,6 @@ const SIMPLE: IntelSourceSeed = { ...WEB, webList: {
 } }
 const html = (date: string) => `<ul id="notices"><li><a href="/detail?id=1">Notice</a><time>${date}</time></li></ul>`
 
-function open(path = ":memory:", fault?: (sql: string) => void) {
-  const native = new NativeDatabase(path)
-  const database = createDatabase({
-    name: "sqlite",
-    dialect: "sqlite",
-    getInstance: () => native,
-    exec: (sql: string) => {
-      fault?.(sql)
-      return native.exec(sql)
-    },
-    prepare: (sql: string) => {
-      const statement = native.prepare(sql)
-      return {
-        all: async (...params: (string | number | boolean | null | undefined)[]) => statement.all(...params),
-        get: async (...params: (string | number | boolean | null | undefined)[]) => statement.get(...params),
-        run: async (...params: (string | number | boolean | null | undefined)[]) => {
-          fault?.(sql)
-          const result = statement.run(...params)
-          return { success: true, ...result }
-        },
-      }
-    },
-    dispose: () => native.close(),
-  } as never)
-  return { native, database, repository: new IntelRepository(database) }
-}
-
 function offline(body: Uint8Array | string, contentType = "text/html; charset=utf-8") {
   const transport = vi.fn(async () => ({ status: 200, headers: { "content-type": contentType }, body }))
   const lookup = vi.fn(async () => [{ address: "93.184.216.34", family: 4 as const }])
@@ -113,7 +84,7 @@ describe("026 isolated upgrade and web_list collection", () => {
       const run = native.prepare("SELECT * FROM intel_fetch_run").all()
       const objects = native.prepare("SELECT type,name,sql FROM sqlite_master WHERE type IN ('index','trigger') AND tbl_name='intel_source' ORDER BY name").all()
       const fk = native.prepare("PRAGMA foreign_key_list(source_child)").all()
-      expect((await initializeShippingDatabase(database, "mock")).schemaVersion).toBe(26)
+      expect((await initializeShippingDatabase(database, "mock")).schemaVersion).toBe(27)
       await initializeShippingDatabase(database, "mock")
       expect(native.prepare("SELECT * FROM intel_source").all()).toEqual(source)
       expect(native.prepare("SELECT * FROM intel_item").all()).toEqual(item)

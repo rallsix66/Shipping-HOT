@@ -5,6 +5,7 @@ Source: https://github.com/KKKKhazix/AIHOT at the pinned commit `44578fa` (2026-
 The name "AIHOT" and its logo are not licensed under MIT (upstream NOTICE).
 
 Adapted so far:
+- `packages/backend/src/sources/json-list.ts` -> `server/intel/sources/json-list.ts`: retained path/string/template/item mapping, restricted to pure JSON via the existing collector. Own-property bounded paths and encoded path/query templates replace raw interpolation; no embedded scripts, GitHub credentials, custom headers/POST, filters, recursive key discovery or pagination. Existing strict date evidence replaces upstream Date.parse/epoch/date-only-midnight conversion. JSON parser and integration tests are locally authored boundary regressions, not a claim that the whole upstream JSON test suite was ported. MIT attribution retained.
 - `packages/backend/src/providers/receipts.ts` → `server/intel/llm/receipts.ts` (R2-3, offline only)
 - `tests/receipts.test.ts` → behaviours re-expressed in `server/intel/llm/receipts.test.ts` with a fake caller
 - `packages/backend/src/sources/web-list.ts` → `server/intel/sources/web-list.ts`: HTML selector/seen/allowed flow retained; existing secure fetch, decoding and URL canonicalization reused. Jina/MiMo, Markdown/Docusaurus and detail-fetch branches are not enabled in this HTML-only slice. Unsupported config is rejected, not silently ignored.

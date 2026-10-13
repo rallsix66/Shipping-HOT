@@ -110,11 +110,11 @@ const attempts = (native: Native, subject: string) => native.prepare("SELECT a.*
 const usage = (native: Native) => native.prepare("SELECT COALESCE(SUM(request_count),0) AS requests, COALESCE(SUM(success_count),0) AS ok, COALESCE(SUM(failure_count),0) AS failed, COALESCE(SUM(estimated_cost),0) AS cost FROM provider_usage WHERE provider_id = 'fake-llm'").get() as { requests: number, ok: number, failed: number, cost: number }
 
 describe("migrations 024/025 (paid_receipt)", () => {
-  it("applies on a fresh isolated database to schema v26 and is idempotent", async () => {
+  it("applies on a fresh isolated database to schema v27 and is idempotent", async () => {
     const { db, native } = await setup()
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(26)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(27)
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(26)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(27)
     const tables = native.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE 'paid_receipt%' ORDER BY name").all()
     expect(tables).toEqual([{ name: "paid_receipt" }, { name: "paid_receipt_attempt" }])
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name IN ('budgets', 'budget')").all()).toEqual([])

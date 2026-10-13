@@ -12,7 +12,7 @@ export interface IntelSourceRecord {
   id: string
   catalogId: string
   name: string
-  kind: "rss" | "atom" | "rdf" | "web_list"
+  kind: "rss" | "atom" | "rdf" | "web_list" | "json_list"
   url: string
   persistence: IntelPersistence
   enabled: boolean

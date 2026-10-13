@@ -109,6 +109,14 @@
 - **Neat Freak（本批）：** Git Bash `scripts/audit-inventory.sh .` exit **0**。
 - 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 **结论：** **R1.5 = IN PROGRESS**；R1.5-1 **BLOCKED**（VNSGN 海况）、R1.5-4 **BLOCKED**；**非**阶段 PASS。
 
+### R2 json_list - approved 027 and offline integration (2026-10-13)
+
+- User approval at 00:57:52 UTC covers JSON integration and 027 on isolated databases only. 027 extends the source kind; existing version date_evidence is reused. Existing rows/IDs/health/FK/indexes/triggers are preserved, RSS/web-list identities unchanged.
+- Pinned AIHOT JSON mapping adapted to pure JSON, one GET, bounded own-property paths and encoded URL templates. Shared security/byte decoder/date rules/collector/repository remain authoritative. Unknown configuration, JSONP/scripts, custom request credentials/headers/POST, pagination and detail fetching are unsupported.
+- No production JSON seed or registry/GET activation. Synthetic UTF-8/GBK JSON fixtures do not claim live MY-W01 coverage. ID-W02 entitlement and HTTP/JSONP XX-W05 remain unsupported boundaries; no CA work.
+- Verification underway: targeted integration and parser tests; final clean-SHA local gate and actual Neat Freak closeout pending. Parent review NOT_RUN; R2 overall incomplete. Live/paid/LLM/browser/S7 NOT_RUN (no UI/routes).
+- Slice contract: `docs/plans/r2-json-list-2026-10-13.md`.
+
 ### R2 web_list - approved 026 and collector/storage integration (2026-10-12)
 
 - User approval at 12:11:25 UTC resolves the previous migration-confirmation blocker. This slice implements 026 and wiring only; no retained database migration or live source activation.
@@ -116,7 +124,7 @@
 - The collector reuses the secure byte-fetch/decoder path and existing writeEntry/finalization. Invalid configuration fails before fetching; empty lists require the parser's explicit empty marker. No production seed, registry/GET, CA, json_list, paid or R3 change.
 - Local gate PASS on clean code SHA `8cbf8343444b62c0bb06f59a249cefc74f404caf`: install/build/typecheck/lint, all targeted sets and three isolated smoke commands exit 0; web_list 42/42 (35 parser + 7 integration), intel 88/88, full suite 105 files / 944 passed / 3 skipped. Raw command/SHA/stdout/stderr/exit logs and actual Neat Freak closeout: `docs/evidence/gate-8cbf834/`.
 - First gate at `1f12ce1528c82aace4a2839bbda00a078c2b9c5e` failed only the stale translation test schema assertion (25 vs 26); its unmodified evidence remains in `docs/evidence/gate-1f12ce1/`. The assertion repair is in the final tested code SHA. Code/docs diff check passes excluding raw logs; raw build logs retain tool-emitted trailing spaces and therefore produce whitespace warnings.
-- Parent review NOT_RUN/pending; R2 overall remains incomplete. Browser/S7 NOT_RUN (no UI/routes); live/paid/LLM NOT_RUN. No retained database was opened for migration. Branch CI silence is not CI PASS.
+- Parent review PASS for code `8cbf834` / evidence `97fc682` (reported by parent before the JSON slice). The 42/944+3 results remain executor evidence, not an independent parent rerun; R2 overall remains incomplete. Browser/S7 NOT_RUN (no UI/routes); live/paid/LLM NOT_RUN. No retained database was opened for migration. Branch CI silence is not CI PASS.
 - Prior parser evidence: code 6c5e1515173f4d35a7c7d1b4f17176d4e813e725, gate-6c5e151 (34 parser, 936 full passed / 3 skipped). P2 query identity fix: b8a91049f1106e999a64fde3e2ce6ac52f3891d6, gate-b8a9104 (35 parser, 937 full passed / 3 skipped). Those earlier gates do not verify this new integration.
 - Current slice contract: docs/plans/r2-web-list-2026-10-12.md.
 

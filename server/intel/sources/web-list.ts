@@ -80,7 +80,7 @@ export function parseLooseDate(value: string | null | undefined, config: Pick<We
 }
 
 /** Prefix filters compare origin and path boundaries; they cannot widen the source policy. */
-export function allowed(url: string, config: WebListConfig, policy: ArticleSourcePolicy): boolean {
+export function allowed(url: string, config: Pick<WebListConfig, "allowUrlPrefixes" | "denyUrlPrefixes">, policy: ArticleSourcePolicy): boolean {
   const target = new URL(url)
   if (target.protocol !== "https:" || target.username || target.password || (target.port && target.port !== "443") || !articlePolicyHostResolves(policy, target.hostname)) return false
   const host = target.hostname.replace(/^\[|\]$/g, "")
