@@ -59,7 +59,7 @@ const rssSource = shippingFeedSources.find(source => source.id === "the-loadstar
 const PUBLIC = [{ address: "93.184.216.34", family: 4 as const }, { address: "2606:2800:220:1:248:1893:25c8:1946", family: 6 as const }]
 const lookup = vi.fn(async (_hostname: string) => PUBLIC)
 const RSS = "<rss><channel><item><title>Loadstar update</title><link>https://theloadstar.com/story/1</link><pubDate>Fri, 14 Aug 2026 00:00:00 GMT</pubDate></item></channel></rss>"
-const TEST_CA = readFileSync("server/services/__fixtures__/source-ca-test.pem", "utf8")
+const TEST_CA = readFileSync("test/__fixtures__/source-ca-test.pem", "utf8")
 
 beforeEach(() => {
   calls.length = 0
