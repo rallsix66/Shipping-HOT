@@ -1,0 +1,30 @@
+{
+  "kind": "Dedup diagnostic derived from retained relationship metadata of a previous byte-identical index response, not new HTTP or original HTML fixture",
+  "currentAndPriorRawResponseSha256": "880e1a180dc686d9d9d71578a753ee87af24042563a7c58f82c0885f8d3c5691",
+  "workingMetadataSha256": "4e06c1f33cbfc6b4c4d54214f4732212cafa1dc7f034e525546c88098c8b046f",
+  "nodes": 86,
+  "uniqueUrls": 84,
+  "duplicateGroups": [
+    {
+      "url": "https://www.northport.com.my/np/docs/Announcements/2024/Notice%20-%20Port%20Closure%20During%20Hari%20Raya%20Aidilfitri%202024.pdf",
+      "appearances": 2,
+      "distinctTitles": 2,
+      "listedDates": [
+        "9-6-2024",
+        "3-4-2024"
+      ]
+    },
+    {
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Company%20Statement%20-%20Contractors%20(Stakeholders)%2028-12-2020.pdf",
+      "appearances": 2,
+      "distinctTitles": 2,
+      "listedDates": [
+        "28-12-2020",
+        "10-12-2020"
+      ]
+    }
+  ],
+  "parserBehavior": "Existing first canonical URL occurrence retained; no product change",
+  "documentAssociation": "Not verified; duplicated URL with differing titles/dates is an upstream ambiguity, not proof of distinct events",
+  "oldProbeFailureCause": "Still UNKNOWN"
+}

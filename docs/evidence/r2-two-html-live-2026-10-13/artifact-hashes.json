@@ -1,0 +1,49 @@
+{
+  "kind": "Archived metadata hashes; original response hashes separately in fetch-results.json",
+  "artifacts": [
+    {
+      "file": "batch-summary.json",
+      "sha256": "710de5e6887aa093a43bc00d207d21337790a4321610d44bab9168ae8b4bf138"
+    },
+    {
+      "file": "fetch-results.json",
+      "sha256": "de7f6c9b471fe99c42815b8102224ac466a1c21c285aa7475ebb8f179b5a0ffa"
+    },
+    {
+      "file": "MY-P03-diagnostic.json",
+      "sha256": "e84933368ced0b05cb1802d94f767925b85cdd50bdf069c9c9ca3b5dabe183e9"
+    },
+    {
+      "file": "MY-P03-duplicate-link-observation.json",
+      "sha256": "b782fb5b1e83128033a37a3c7d5b738862f7d6e2d1cd6a6f4a2f65c75635cf06"
+    },
+    {
+      "file": "MY-P03-items-metadata.json",
+      "sha256": "1dea272d83221ec4403a4092b2398f1e0f9a930485b52a71cf26a02c4e0d3a18"
+    },
+    {
+      "file": "request-ledger.jsonl",
+      "sha256": "12bc1af8c598425dd093a33a6adb27648a5834679d8b8edef0d3a6d09ccb3a5e"
+    },
+    {
+      "file": "TH-C01-diagnostic.json",
+      "sha256": "85f94ed610e17d774d64aa4e84a5e7cc2c94921e19bd4088fd16c093b60d725b"
+    },
+    {
+      "file": "TH-C01-items-metadata.json",
+      "sha256": "f6e5565456219f8e9d6122337aa0e5457c77cbf33304eafb4fcbd10530d3962d"
+    },
+    {
+      "file": "integration/MY-P03-outcome.json",
+      "sha256": "ef4ffd6fe000b5565962d8125e906d4f53259d75f7c7e6a9672c3b3edd8932c9"
+    },
+    {
+      "file": "integration/summary.json",
+      "sha256": "f70a439814c1766c5383c1b08956efc55219bba7176b66d01604b7114f12263b"
+    },
+    {
+      "file": "integration/TH-C01-outcome.json",
+      "sha256": "03e445efa8cdf8d825b18ed35ea72eb293f44d2998bbbd72328b1738f40c46d9"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+# command: node .tmp/check-two-html-live.cjs
+# code baseline: 4a99126f0221ef0eb82eb4fdd777cb8b999f8a49
+# raw exit: 0
+PASS: two completed exact-source reservations,84+100 persisted items,83+100 day dates/1 unknown, no invented instants, second-run0 new/revised and one version each, metadata-only evidence
