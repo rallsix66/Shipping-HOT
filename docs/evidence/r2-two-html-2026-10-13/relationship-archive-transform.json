@@ -1,0 +1,16 @@
+[
+  {
+    "id": "MY-P03",
+    "rawResponseHashFile": "observation-results.json",
+    "workingRelationshipMetadataSha256": "4e06c1f33cbfc6b4c4d54214f4732212cafa1dc7f034e525546c88098c8b046f",
+    "archivedRelationshipMetadataSha256": "34b4e1f9146f84f3007d5e24dd3b0e0fed81cc560817c11e47cf4dec59337a27",
+    "transform": "Filter observed item-container anchors; retain only first2 examples plus Northport month-only example; remove navigation, repeated ancestors children/prose and other titles; keep factual tag/class path and paired title/link/date. Original HTML never saved."
+  },
+  {
+    "id": "TH-C01",
+    "rawResponseHashFile": "observation-results.json",
+    "workingRelationshipMetadataSha256": "52f93b5dd2618f11676e88124ae5eff4d2af6acfd9a8b543953311380f130630",
+    "archivedRelationshipMetadataSha256": "fda0d327b50b922df2a8e9154e217c988b9beba7b054c980192abc375aa31473",
+    "transform": "Filter observed item-container anchors; retain only first2 examples plus Northport month-only example; remove navigation, repeated ancestors children/prose and other titles; keep factual tag/class path and paired title/link/date. Original HTML never saved."
+  }
+]

@@ -1,0 +1,82 @@
+{
+  "id": "TH-C01",
+  "url": "https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th",
+  "kind": "Minimal factual relationship descriptors, not original HTML or reconstructed fixture",
+  "observationCoverage": {
+    "retainedSameContainerAnchors": 54,
+    "workingScanAnchorCap": 150,
+    "selectedExamples": 2
+  },
+  "examples": [
+    {
+      "title": "อธิบดีกรมศุลกากรพร้อมคณะ เข้าร่วมพิธีเปิดนิทรรศการเฉลิมพระเกียรติ “พระราชปณิธานอันทรงคุณค่า : เสริมพลังประชาชน สร้างความเข้มแข็ง เพื่อรับมือกับความเปลี่ยนแปลง”",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?lang=th&top_menu=menu_homepage&ini_menu=menu_public_relations_160421_04&left_menu=&current_id=14232b324148505e4f464b4c464b46",
+      "anchor": {
+        "tag": "a",
+        "classes": []
+      },
+      "parentPath": [
+        {
+          "tag": "td",
+          "classes": [],
+          "anchorCount": 1
+        },
+        {
+          "tag": "tr",
+          "classes": [],
+          "anchorCount": 1
+        },
+        {
+          "tag": "tbody",
+          "classes": [],
+          "anchorCount": 100
+        },
+        {
+          "tag": "table",
+          "classes": [
+            "table",
+            "table-hover"
+          ],
+          "anchorCount": 100
+        }
+      ],
+      "sameItemDateText": "13 ตุลาคม 2569",
+      "dateMapping": "same tr fourth td, second td title/link"
+    },
+    {
+      "title": "รองฯ ดิเรก พร้อมคณะ เข้าร่วมพิธีวางพวงมาลาถวายบังคมพระบรมราชานุสาวรีย์ พระบาทสมเด็จพระบรมชนกาธิเบศร มหาภูมิพลอดุลยเดชมหาราช บรมนาถบพิตร เนื่องในวันนวมินทรมหาราช พุทธศักราช ๒๕๖๙",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?lang=th&top_menu=menu_homepage&ini_menu=menu_public_relations_160421_04&left_menu=&current_id=14232b324148505e4f464b4c464b48",
+      "anchor": {
+        "tag": "a",
+        "classes": []
+      },
+      "parentPath": [
+        {
+          "tag": "td",
+          "classes": [],
+          "anchorCount": 1
+        },
+        {
+          "tag": "tr",
+          "classes": [],
+          "anchorCount": 1
+        },
+        {
+          "tag": "tbody",
+          "classes": [],
+          "anchorCount": 100
+        },
+        {
+          "tag": "table",
+          "classes": [
+            "table",
+            "table-hover"
+          ],
+          "anchorCount": 100
+        }
+      ],
+      "sameItemDateText": "13 ตุลาคม 2569",
+      "dateMapping": "same tr fourth td, second td title/link"
+    }
+  ]
+}

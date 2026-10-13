@@ -1,0 +1,50 @@
+import type { IntelSourceSeed } from "../sources"
+
+/** Disabled catalog candidates; never added to the active seed registry. */
+export const htmlIndexCandidates: readonly IntelSourceSeed[] = [
+  {
+    id: "intel:my-p03",
+    catalogId: "MY-P03",
+    name: "Northport announcements",
+    kind: "web_list",
+    url: "https://www.northport.com.my/np/page-announcements.html",
+    enabled: false,
+    persistence: "disallowed",
+    allowedHosts: ["www.northport.com.my"],
+    allowedContentTypes: ["text/html", "application/xhtml+xml"],
+    intervalMs: 3600000,
+    webList: {
+      listSelector: ".div-article-main2",
+      itemSelector: ".release-grid2 > article.card2",
+      linkSelector: "a[href]",
+      linkTextFormat: "dmy-date-title",
+      dateOrder: "dmy",
+      calendar: "gregorian",
+      allowUrlPrefixes: ["https://www.northport.com.my/np/docs/Announcements"],
+      dateRuleBasis: "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+    },
+  },
+  {
+    id: "intel:th-c01",
+    catalogId: "TH-C01",
+    name: "Thai Customs news",
+    kind: "web_list",
+    url: "https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th",
+    enabled: false,
+    persistence: "disallowed",
+    allowedHosts: ["www.customs.go.th"],
+    allowedContentTypes: ["text/html", "application/xhtml+xml"],
+    intervalMs: 3600000,
+    webList: {
+      listSelector: "table.table-hover",
+      itemSelector: "tbody > tr",
+      linkSelector: "td:nth-child(2) a[href]",
+      titleSelector: "td:nth-child(2) a[href]",
+      publishedAtSelector: "td:nth-child(4)",
+      calendar: "buddhist",
+      dateFormat: "thai_month_name",
+      allowUrlPrefixes: ["https://www.customs.go.th/cont_strc_simple_with_date.php"],
+      dateRuleBasis: "TH-C01 index observed 2026-10-13: title/detail link in row column2 and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+    },
+  },
+]

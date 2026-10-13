@@ -24,7 +24,7 @@ export interface WebListEntry extends FeedEntry {
 }
 
 /** Strict replacement for upstream's host-dependent Date.parse fallback and implicit +08:00. */
-export function parseLooseDate(value: string | null | undefined, config: Pick<WebListConfig, "publishedAtUtcOffset" | "dateOrder" | "calendar" | "dateRuleBasis">): WebDate {
+export function parseLooseDate(value: string | null | undefined, config: Pick<WebListConfig, "publishedAtUtcOffset" | "dateOrder" | "calendar" | "dateRuleBasis" | "dateFormat">): WebDate {
   const raw = value?.trim() || null
   const result: WebDate = { raw, rule: "missing", basis: config.dateRuleBasis, calendar: config.calendar ?? "gregorian", precision: "unknown", timezone: "missing", utcOffset: null, localDate: null, publishedAt: null }
   if (!raw) return result
@@ -36,9 +36,18 @@ export function parseLooseDate(value: string | null | undefined, config: Pick<We
   // Full-string patterns only: no date picked from nearby prose, no inferred D/M order.
   const m = /^(\d{4})([-/])(\d{1,2})\2(\d{1,2})(.*)$/.exec(v)
   const cn = /^(\d{4})年(\d{1,2})月(\d{1,2})日(.*)$/.exec(v)
-  const dm = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(.*)$/.exec(v)
+  const dm = /^(\d{1,2})([-/])(\d{1,2})\2(\d{4})(.*)$/.exec(v)
+  const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]
+  const thai = config.dateFormat === "thai_month_name" ? /^(\d{1,2})\s+(มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม)\s+(\d{4})$/.exec(v) : null
   let y: number, mo: number, d: number, tail: string
-  if (m) {
+  if (config.dateFormat === "thai_month_name") {
+    if (!thai || !thaiMonths.includes(thai[2])) return { ...result, rule: "unsupported_format" }
+    y = +thai[3]
+    mo = thaiMonths.indexOf(thai[2]) + 1
+    d = +thai[1]
+    tail = ""
+    result.rule = "configured_thai_month_name"
+  } else if (m) {
     y = +m[1]
     mo = +m[3]
     d = +m[4]
@@ -51,11 +60,11 @@ export function parseLooseDate(value: string | null | undefined, config: Pick<We
     tail = cn[4]
     result.rule = "chinese_ymd"
   } else if (dm && config.dateOrder === "dmy") {
-    y = +dm[3]
-    mo = +dm[2]
+    y = +dm[4]
+    mo = +dm[3]
     d = +dm[1]
-    tail = dm[4]
-    result.rule = "configured_dmy"
+    tail = dm[5]
+    result.rule = dm[2] === "-" ? "configured_dmy_dash" : "configured_dmy"
   } else {
     result.rule = dm ? "date_order_missing" : "unsupported_format"
     return result
@@ -123,10 +132,16 @@ export function fromHtml(html: string, base: string, config: WebListConfig, poli
     if (!url) throw new Error("web_list_invalid_link")
     if (seen.has(url) || !allowed(url, c, policy) || listingItself(url, base)) continue
     const titleEl = c.titleSelector ? (el.is(c.titleSelector) ? el : el.find(c.titleSelector).first()) : linkEl
-    const title = (c.titleAttribute ? titleEl.attr(c.titleAttribute) ?? "" : titleEl.text() || linkEl.attr("title") || "").replace(/\s+/g, " ").trim()
+    let title = (c.titleAttribute ? titleEl.attr(c.titleAttribute) ?? "" : titleEl.text() || linkEl.attr("title") || "").replace(/\s+/g, " ").trim()
     if (!title) throw new Error("web_list_missing_title")
     const dateEl = c.publishedAtSelector ? el.find(c.publishedAtSelector).first() : undefined
-    const dateEvidence = parseLooseDate(dateEl?.attr("datetime") ?? dateEl?.attr("title") ?? dateEl?.text(), c)
+    let rawDate = dateEl?.attr("datetime") ?? dateEl?.attr("title") ?? dateEl?.text()
+    if (c.linkTextFormat === "dmy-date-title") {
+      const pair = /^(\d{1,2}-\d{1,2}-\d{4}) (\S.*)$/.exec(title)
+      rawDate = pair?.[1]
+      if (pair) title = pair[2]
+    }
+    const dateEvidence = parseLooseDate(rawDate, c)
     seen.add(url)
     out.push({ url, canonicalUrl: url, title, summary: title, bodyText: "", publishedAt: dateEvidence.publishedAt ?? undefined, dateEvidence })
   }

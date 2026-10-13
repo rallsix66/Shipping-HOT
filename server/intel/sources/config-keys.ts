@@ -12,6 +12,9 @@ export interface WebListConfig {
   publishedAtUtcOffset?: string
   dateOrder?: "dmy"
   calendar?: "gregorian" | "buddhist"
+  dateFormat?: "thai_month_name"
+  /** Date and title share the observed anchor text; no prose/date searching. */
+  linkTextFormat?: "dmy-date-title"
   dateRuleBasis: string
   emptySelector?: string
   allowUrlPrefixes?: string[]
@@ -28,12 +31,14 @@ const KEYS = new Set([
   "publishedAtUtcOffset",
   "dateOrder",
   "calendar",
+  "dateFormat",
+  "linkTextFormat",
   "dateRuleBasis",
   "emptySelector",
   "allowUrlPrefixes",
   "denyUrlPrefixes",
 ])
-const VALUES: Record<string, string[]> = { titleAttribute: ["title", "alt"], dateOrder: ["dmy"], calendar: ["gregorian", "buddhist"] }
+const VALUES: Record<string, string[]> = { titleAttribute: ["title", "alt"], dateOrder: ["dmy"], calendar: ["gregorian", "buddhist"], dateFormat: ["thai_month_name"], linkTextFormat: ["dmy-date-title"] }
 const SELECTORS = ["listSelector", "itemSelector", "linkSelector", "titleSelector", "publishedAtSelector", "emptySelector"]
 
 export class UnsupportedConfig extends Error {}
@@ -66,6 +71,7 @@ export function assertSupportedConfig(input: unknown): asserts input is WebListC
     }
   }
   assertDateAndUrlConfig(config)
+  if (config.linkTextFormat && (config.dateOrder !== "dmy" || config.dateFormat || config.titleSelector || config.titleAttribute || config.publishedAtSelector)) throw new UnsupportedConfig("linkTextFormat requires dmy and exclusive link text mapping")
 }
 
 /** Shared explicit date/URL contract; source adapters still validate their own key whitelist. */

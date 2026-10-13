@@ -1,0 +1,18 @@
+[
+  {
+    "id": "MY-P03",
+    "url": "https://www.northport.com.my/np/page-announcements.html",
+    "reservedAt": "2026-10-13T08:38:12.976Z",
+    "state": "response_received",
+    "httpStatus": 200,
+    "finishedAt": "2026-10-13T08:38:14.076Z"
+  },
+  {
+    "id": "TH-C01",
+    "url": "https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th",
+    "reservedAt": "2026-10-13T08:38:14.077Z",
+    "state": "response_received",
+    "httpStatus": 200,
+    "finishedAt": "2026-10-13T08:38:15.312Z"
+  }
+]
