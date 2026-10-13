@@ -115,7 +115,7 @@ export async function collectIntelSource(repository: IntelRepository, seed: Inte
     }
   }
   try {
-    const response = await secureFetchArticle(seed.url, { policy: sourcePolicy(seed), lookup: deps.lookup, transport: deps.transport })
+    const response = await secureFetchArticle(seed.url, { policy: sourcePolicy(seed), sourceCa: seed.sourceCa, lookup: deps.lookup, transport: deps.transport })
     if (!response.ok) return await fail(response.code, response.message)
     body = response.body
     finalUrl = response.finalUrl

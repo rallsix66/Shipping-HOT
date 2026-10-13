@@ -1,4 +1,5 @@
 import { Buffer } from "node:buffer"
+import { X509Certificate } from "node:crypto"
 import { lookup as dnsLookup } from "node:dns/promises"
 import { request as httpRequest } from "node:http"
 import { request as httpsRequest } from "node:https"
@@ -27,14 +28,30 @@ export interface ArticleHttpResponse {
 }
 
 export type ArticleLookup = (hostname: string) => Promise<ResolvedAddress[]>
+/** Request-scoped public trust anchor, bound to one source and one exact host. No file/global trust mutation. */
+export interface SourceCaConfig {
+  sourceId: string
+  hostname: string
+  certificatePem: string
+}
+
+export interface ArticleTransportOptions {
+  timeoutMs: number
+  maxBytes: number
+  headers: Record<string, string>
+  signal?: AbortSignal
+  /** Validated by secureFetchArticle and selected independently for each HTTPS hop. */
+  caPem?: string
+}
 export type ArticleTransport = (
   url: URL,
   addresses: ResolvedAddress[],
-  options: { timeoutMs: number, maxBytes: number, headers: Record<string, string>, signal?: AbortSignal },
+  options: ArticleTransportOptions,
 ) => Promise<ArticleHttpResponse>
 
 export interface SecureFetchOptions {
   policy: ArticleSourcePolicy
+  sourceCa?: SourceCaConfig
   lookup?: ArticleLookup
   transport?: ArticleTransport
   maxBytes?: number
@@ -190,7 +207,7 @@ export function validatedLookup(addresses: readonly ResolvedAddress[]) {
  * mocks node:http/node:https; production callers go through secureFetchArticle.
  * The GET request must be ended explicitly or it is never sent and only times out.
  */
-export function defaultTransport(url: URL, addresses: ResolvedAddress[], options: { timeoutMs: number, maxBytes: number, headers: Record<string, string>, signal?: AbortSignal }): Promise<ArticleHttpResponse> {
+export function defaultTransport(url: URL, addresses: ResolvedAddress[], options: ArticleTransportOptions): Promise<ArticleHttpResponse> {
   return new Promise((resolve, reject) => {
     let settled = false
     let request: ReturnType<typeof httpRequest> | undefined
@@ -206,6 +223,7 @@ export function defaultTransport(url: URL, addresses: ResolvedAddress[], options
       timeout: options.timeoutMs,
       signal: options.signal,
       lookup: validatedLookup(addresses) as never,
+      ...(url.protocol === "https:" ? { rejectUnauthorized: true, ...(options.caPem ? { ca: options.caPem } : {}) } : {}),
     }, (response) => {
       const chunks: Buffer[] = []
       let total = 0
@@ -233,6 +251,20 @@ export function defaultTransport(url: URL, addresses: ResolvedAddress[], options
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308])
 
+function validateSourceCa(config: SourceCaConfig, policy: ArticleSourcePolicy): boolean {
+  try {
+    if (!config || typeof config !== "object" || Array.isArray(config) || Object.keys(config).some(key => !["sourceId", "hostname", "certificatePem"].includes(key))) return false
+    if (config.sourceId !== policy.sourceId || typeof config.hostname !== "string" || !config.hostname) return false
+    const host = config.hostname.toLowerCase()
+    // A URL/port/wildcard/path is not an exact hostname. Keep the policy's exact-host boundary.
+    if (!/^[a-z0-9.-]+$/.test(host) || new URL(`https://${host}`).hostname !== host || !articlePolicyHostResolves(policy, host)) return false
+    if (typeof config.certificatePem !== "string" || config.certificatePem.length > 64 * 1024 || !/^\s*-----BEGIN CERTIFICATE-----\r?\n[A-Za-z0-9+/=\r\n]+-----END CERTIFICATE-----\s*$/.test(config.certificatePem)) return false
+    return new X509Certificate(config.certificatePem).ca
+  } catch {
+    return false
+  }
+}
+
 /**
  * Connection-level SSRF-safe fetch. Every hop revalidates protocol, exact host,
  * DNS (all IPv4/IPv6 results) and binds the actual socket to the validated
@@ -258,6 +290,12 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
     return failure("invalid_url", "Article URL is not a valid absolute URL")
   }
 
+  // Snapshot scalar configuration before DNS/transport awaits; callers cannot retarget trust mid-flight.
+  const sourceCa = options.sourceCa === undefined ? undefined : { ...options.sourceCa }
+  if (sourceCa !== undefined && (!validateSourceCa(sourceCa, options.policy) || current.protocol !== "https:")) {
+    return failure("source_ca_invalid", "Source CA configuration is invalid or not bound to this HTTPS source")
+  }
+
   for (let hop = 0; hop <= maxRedirects; hop++) {
     if (options.signal?.aborted) return failure("fetch_timeout", "Request aborted")
     if (current.username || current.password) return failure("credentials_not_allowed", "URL credentials are not allowed")
@@ -277,7 +315,9 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
     if (blocked) return failure("blocked_address", `Resolved address is not a public address: ${blocked.address}`)
     let response: ArticleHttpResponse
     try {
-      response = await transport(current, addresses, { timeoutMs, maxBytes, headers, signal: options.signal })
+      // Never carry a previous hop's trust anchor to another host or another source.
+      const caPem = sourceCa && current.protocol === "https:" && current.hostname === sourceCa.hostname.toLowerCase() ? sourceCa.certificatePem : undefined
+      response = await transport(current, addresses, { timeoutMs, maxBytes, headers, signal: options.signal, ...(caPem ? { caPem } : {}) })
     } catch (error) {
       const message = error instanceof Error ? error.message : "fetch failed"
       return failure(message === "body_too_large" ? "body_too_large" : message === "fetch_timeout" ? "fetch_timeout" : "fetch_failed", message)

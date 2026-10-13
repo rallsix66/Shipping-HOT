@@ -6,7 +6,7 @@ import type { ArticleSourcePolicy, ArticleSourcePolicyConfig } from "@shared/art
 import { mockFeedItems } from "@shared/shipping-fixtures"
 import { applyFeedFreshnessPolicy } from "@shared/shipping-rules"
 import { ProviderError, providerErrorFromUnknown, providerHttpError } from "#/providers/contracts"
-import { type ArticleLookup, type ArticleTransport, type SecureFetchFailure, secureFetchArticle } from "#/services/article-fetch-security"
+import { type ArticleLookup, type ArticleTransport, type SecureFetchFailure, type SourceCaConfig, secureFetchArticle } from "#/services/article-fetch-security"
 
 export interface FeedProvider {
   readonly providerId: string
@@ -24,6 +24,7 @@ export interface FeedFetchDeps {
 
 export interface ShippingFeedSource {
   id: string
+  sourceCa?: SourceCaConfig
   name: string
   url: string
   sourceUrl: string
@@ -528,6 +529,7 @@ export function createPublicFeedProvider(options: PublicFeedProviderOptions = {}
             const policy = feedListFetchPolicy(source)
             const response = await secureFetchArticle(source.url, {
               policy,
+              sourceCa: source.sourceCa,
               lookup: options.fetch?.lookup,
               transport: options.fetch?.transport,
               timeoutMs,

@@ -1,6 +1,7 @@
 import type { IntelPersistence } from "#/database/intel"
 import type { WebListConfig } from "#/intel/sources/config-keys"
 import type { JsonListConfig } from "#/intel/sources/json-list"
+import type { SourceCaConfig } from "#/services/article-fetch-security"
 
 /**
  * R2 first-slice seeds. ADR-008: docs/intel-source-catalog.md is the only seed list; every entry here
@@ -14,6 +15,7 @@ export interface IntelSourceSeed {
   kind: "rss" | "atom" | "rdf" | "web_list" | "json_list"
   webList?: WebListConfig
   jsonList?: JsonListConfig
+  sourceCa?: SourceCaConfig
   url: string
   persistence: IntelPersistence
   enabled: boolean

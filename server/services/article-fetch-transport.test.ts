@@ -1,4 +1,6 @@
 import { Buffer } from "node:buffer"
+import { readFileSync } from "node:fs"
+import { X509Certificate } from "node:crypto"
 import { EventEmitter } from "node:events"
 import { PassThrough } from "node:stream"
 import NativeDatabase from "better-sqlite3"
@@ -55,8 +57,9 @@ const { createPublicFeedProvider, feedListFetchPolicy, shippingFeedSources } = a
 
 const rssSource = shippingFeedSources.find(source => source.id === "the-loadstar")!
 const PUBLIC = [{ address: "93.184.216.34", family: 4 as const }, { address: "2606:2800:220:1:248:1893:25c8:1946", family: 6 as const }]
-const lookup = vi.fn(async () => PUBLIC)
+const lookup = vi.fn(async (_hostname: string) => PUBLIC)
 const RSS = "<rss><channel><item><title>Loadstar update</title><link>https://theloadstar.com/story/1</link><pubDate>Fri, 14 Aug 2026 00:00:00 GMT</pubDate></item></channel></rss>"
+const TEST_CA = readFileSync("server/services/__fixtures__/source-ca-test.pem", "utf8")
 
 beforeEach(() => {
   calls.length = 0
@@ -230,5 +233,118 @@ describe("defaultTransport at the Node request boundary", () => {
     const result = await secureFetchArticle(rssSource.url, { policy: feedListFetchPolicy(rssSource), lookup: async () => [{ address: "10.0.0.5", family: 4 as const }] })
     expect(result).toMatchObject({ ok: false, code: "blocked_address" })
     expect(calls).toHaveLength(0)
+  })
+})
+
+describe("source-scoped CA at the offline Node boundary", () => {
+  const a = { sourceId: "ca-a", status: "allowed" as const, fetchAllowed: true, persistence: "full" as const, allowedHosts: ["a.example.com", "redirect.example.com"], allowedContentTypes: ["application/rss+xml"] }
+  const ca = { sourceId: "ca-a", hostname: "a.example.com", certificatePem: TEST_CA }
+
+  it("passes a valid test CA only on the bound source/host, keeping normal TLS and address pinning", async () => {
+    const certificate = new X509Certificate(TEST_CA)
+    expect(certificate.ca).toBe(true)
+    expect(certificate.verify(certificate.publicKey)).toBe(true)
+    onEnd = call => call.respond(200, { "content-type": "application/rss+xml" }, [RSS])
+    expect((await secureFetchArticle("https://a.example.com/list", { policy: a, sourceCa: ca, lookup })).ok).toBe(true)
+    expect((await secureFetchArticle("https://a.example.com/list", { policy: { ...a, sourceId: "ca-b" }, lookup })).ok).toBe(true)
+    expect(calls[0].options.ca).toBe(TEST_CA)
+    expect(calls[1].options).not.toHaveProperty("ca")
+    for (const call of calls) {
+      expect(call.options.rejectUnauthorized).toBe(true)
+      expect(call.options).not.toHaveProperty("checkServerIdentity")
+      expect(call.url.hostname).toBe("a.example.com")
+      const pinned = await new Promise(resolve => call.options.lookup("changed.invalid", { all: true }, (_error: unknown, list: unknown) => resolve(list)))
+      expect(pinned).toEqual(PUBLIC)
+    }
+  })
+
+  it("reselects trust on every redirect: same host retains CA, another allowed host uses system trust", async () => {
+    const mutableCa = { ...ca }
+    onEnd = (call) => {
+      if (call.url.pathname === "/start") {
+        mutableCa.hostname = "redirect.example.com"
+        mutableCa.certificatePem = "changed during request"
+        call.respond(302, { location: "/same" }, [])
+      } else if (call.url.pathname === "/same") {
+        call.respond(302, { location: "https://redirect.example.com/final" }, [])
+      } else {
+        call.respond(200, { "content-type": "application/rss+xml" }, [RSS])
+      }
+    }
+    expect(await secureFetchArticle("https://a.example.com/start", { policy: a, sourceCa: mutableCa, lookup })).toMatchObject({ ok: true, hops: 2 })
+    expect(calls.map(call => call.options.ca)).toEqual([TEST_CA, TEST_CA, undefined])
+    expect(calls.every(call => call.options.rejectUnauthorized === true)).toBe(true)
+    expect(lookup.mock.calls.map(call => call[0])).toEqual(["a.example.com", "a.example.com", "redirect.example.com"])
+  })
+
+  it("never sends CA to a host outside the policy, private redirect address or downgraded HTTPS target", async () => {
+    for (const [location, code] of [["https://outside.example.com/a", "host_not_allowed"], ["http://redirect.example.com/a", "https_downgrade"]]) {
+      calls.length = 0
+      onEnd = call => call.respond(302, { location }, [])
+      expect(await secureFetchArticle("https://a.example.com/start", { policy: a, sourceCa: ca, lookup })).toMatchObject({ ok: false, code })
+      expect(calls).toHaveLength(1)
+    }
+    calls.length = 0
+    onEnd = call => call.respond(302, { location: "https://redirect.example.com/a" }, [])
+    const dns = async (host: string) => host === "a.example.com" ? PUBLIC : [{ address: "10.0.0.1", family: 4 as const }]
+    expect(await secureFetchArticle("https://a.example.com/start", { policy: a, sourceCa: ca, lookup: dns })).toMatchObject({ ok: false, code: "blocked_address" })
+    expect(calls).toHaveLength(1)
+  })
+
+  it("fails invalid/missing/source-mismatched/host-mismatched CA before DNS and Node requests", async () => {
+    for (const sourceCa of [
+      { ...ca, certificatePem: "" },
+      { ...ca, certificatePem: "not a cert" },
+      { ...ca, certificatePem: undefined },
+      { ...ca, certificatePem: "-----BEGIN CERTIFICATE-----\nAAAA\n-----END CERTIFICATE-----" },
+      { ...ca, sourceId: "ca-b" },
+      { ...ca, hostname: "outside.example.com" },
+      { ...ca, hostname: "*.example.com" },
+      { ...ca, hostname: "a.example.com:443" },
+      { ...ca, rejectUnauthorized: false },
+    ]) {
+      expect(await secureFetchArticle("https://a.example.com/list", { policy: a, sourceCa: sourceCa as never, lookup })).toMatchObject({ ok: false, code: "source_ca_invalid" })
+    }
+    expect(calls).toHaveLength(0)
+    expect(lookup).not.toHaveBeenCalled()
+  })
+
+  it("preserves intel data and Feed last-known items on CA config/TLS failures, with no fallback", async () => {
+    const { native, repository } = await memoryIntel()
+    const seed = intelSourceSeeds[0]
+    const validCa = { sourceId: seed.id, hostname: new URL(seed.url).hostname, certificatePem: TEST_CA }
+    try {
+      await repository.upsertSource(seed, WHEN)
+      onEnd = call => call.respond(200, { "content-type": "application/rss+xml" }, [encodedRss("utf-8", "504f5254", new URL(seed.url).hostname)])
+      expect(await collectIntelSource(repository, { ...seed, sourceCa: validCa }, { lookup, transport: defaultTransport }, new Date(WHEN))).toMatchObject({ status: "ok_items" })
+      const items = await repository.listItems(seed.id)
+      const versions = await repository.listVersions(items[0].id)
+      const beforeCalls = calls.length
+      expect(await collectIntelSource(repository, { ...seed, sourceCa: { ...validCa, certificatePem: "" } }, { lookup, transport: defaultTransport }, new Date(WHEN))).toMatchObject({ status: "failed", errorCode: "source_ca_invalid" })
+      expect(calls).toHaveLength(beforeCalls)
+      onEnd = call => call.request.emit("error", new Error("UNABLE_TO_VERIFY_LEAF_SIGNATURE"))
+      expect(await collectIntelSource(repository, { ...seed, sourceCa: validCa }, { lookup, transport: defaultTransport }, new Date(WHEN))).toMatchObject({ status: "failed", errorCode: "fetch_failed" })
+      expect(calls).toHaveLength(beforeCalls + 1)
+      expect(calls.at(-1)!.options.rejectUnauthorized).toBe(true)
+      expect(await repository.listItems(seed.id)).toEqual(items)
+      expect(await repository.listVersions(items[0].id)).toEqual(versions)
+
+      onEnd = call => call.respond(200, { "content-type": "application/rss+xml" }, [RSS])
+      const provider = createPublicFeedProvider({ sources: [rssSource], fetch: { lookup }, now: () => new Date(WHEN) })
+      const known = await provider.getFeedItems([], [])
+      const broken = createPublicFeedProvider({ sources: [{ ...rssSource, sourceCa: { sourceId: rssSource.id, hostname: new URL(rssSource.url).hostname, certificatePem: "" } }], fetch: { lookup }, now: () => new Date(WHEN) })
+      const retained = await broken.getFeedItems(known, [])
+      expect(retained[0]).toMatchObject({ id: known[0].id, title: known[0].title, sourceStatus: "failed", stale: true })
+    } finally {
+      native.close()
+    }
+  })
+
+  it("retains response byte limits with a custom CA", async () => {
+    onEnd = call => call.respond(200, { "content-type": "application/rss+xml" }, ["x".repeat(20)])
+    expect(await secureFetchArticle("https://a.example.com/list", { policy: a, sourceCa: ca, lookup, maxBytes: 10 })).toMatchObject({ ok: false, code: "body_too_large" })
+    expect(calls[0].options.ca).toBe(TEST_CA)
+    expect(calls[0].options.rejectUnauthorized).toBe(true)
+    expect(calls[0].request.destroy).toHaveBeenCalled()
   })
 })

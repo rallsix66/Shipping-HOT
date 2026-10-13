@@ -109,9 +109,16 @@
 - **Neat Freak（本批）：** Git Bash `scripts/audit-inventory.sh .` exit **0**。
 - 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 **结论：** **R1.5 = IN PROGRESS**；R1.5-1 **BLOCKED**（VNSGN 海况）、R1.5-4 **BLOCKED**；**非**阶段 PASS。
 
+### R2-2 source-specific CA support (2026-10-13)
+
+- Application-only optional source/precise-host/public-PEM binding implemented in the existing secureFetchArticle chain and passed by intel/Feed list sources. No current real source has a CA configured; no schema or global/system trust change.
+- Config validates before DNS and is snapshotted before awaits. CA applies only to the matching HTTPS host; another allowed redirect host/default source uses system trust. rejectUnauthorized remains true, normal hostname verification and existing DNS/private-address/downgrade/limits stay active. Invalid/missing fields or TLS errors fail without weak-trust fallback and preserve existing data.
+- Offline Node-boundary test certificate/fixtures verify scope, redirect/mutation isolation, transport settings and retained intel/Feed data. No sockets or live TLS handshake. Full clean-SHA gate/actual Neat Freak closeout pending; parent review NOT_RUN, R2 overall incomplete.
+- Contract: `docs/plans/r2-source-ca-2026-10-13.md`.
+
 ### R2 json_list - approved 027 and offline integration (2026-10-13)
 
-- P2 unsafe numeric URL identity repair: code `8a1e7044e5baad45265cce31cc696d8a613ed13f` requires Number.isSafeInteger for numeric template parameters; larger IDs must be strings. Original wire JSON with 9007199254740992/9007199254740993 now fails collection before writes and preserves old data; string forms create two distinct URLs/records. Parent re-review pending; no additional migration/parser/CA work.
+- P2 unsafe numeric URL identity repair: code `8a1e7044e5baad45265cce31cc696d8a613ed13f` requires Number.isSafeInteger for numeric template parameters; larger IDs must be strings. Original wire JSON with 9007199254740992/9007199254740993 now fails collection before writes and preserves old data; string forms create two distinct URLs/records. Parent re-review PASS for code/evidence `8a1e704` / `a2b9ef2`, as reported before the CA slice; JSON/027 offline slice closed within that scope. Tests remain executor evidence, not live or CI acceptance.
 - Repair local gate PASS on that clean SHA: JSON 49/49, intel 137/137, full suite 107 files / 993 passed / 3 skipped; install/build/typecheck/lint, all targeted sets and three isolated smoke commands exit 0. UTF-8 raw logs and actual Neat Freak closeout: `docs/evidence/gate-8a1e704/`. The following 47/991 figures are pre-repair historical executor evidence, not the latest acceptance or an independent parent rerun.
 
 - User approval at 00:57:52 UTC covers JSON integration and 027 on isolated databases only. 027 extends the source kind; existing version date_evidence is reused. Existing rows/IDs/health/FK/indexes/triggers are preserved, RSS/web-list identities unchanged.
