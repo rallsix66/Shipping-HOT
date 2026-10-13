@@ -23,6 +23,8 @@ export interface WebListEntry extends FeedEntry {
   dateEvidence: WebDate
 }
 
+export const WEB_LIST_DUPLICATE_CONFLICT = "web_list_duplicate_conflict"
+
 /** Strict replacement for upstream's host-dependent Date.parse fallback and implicit +08:00. */
 export function parseLooseDate(value: string | null | undefined, config: Pick<WebListConfig, "publishedAtUtcOffset" | "dateOrder" | "calendar" | "dateRuleBasis" | "dateFormat">): WebDate {
   const raw = value?.trim() || null
@@ -115,7 +117,7 @@ export function fromHtml(html: string, base: string, config: WebListConfig, poli
   const c = config
   const $ = cheerio.load(html)
   const out: WebListEntry[] = []
-  const seen = new Set<string>()
+  const seen = new Map<string, string>()
   const list = $(c.listSelector)
   if (list.length !== 1) throw new Error("web_list_structure_changed")
   const nodes = list.find(c.itemSelector).toArray()
@@ -130,7 +132,7 @@ export function fromHtml(html: string, base: string, config: WebListConfig, poli
     const href = linkEl.attr("href")
     const url = href ? canonicalizeFeedUrl(href, base) : undefined
     if (!url) throw new Error("web_list_invalid_link")
-    if (seen.has(url) || !allowed(url, c, policy) || listingItself(url, base)) continue
+    if (!allowed(url, c, policy) || listingItself(url, base)) continue
     const titleEl = c.titleSelector ? (el.is(c.titleSelector) ? el : el.find(c.titleSelector).first()) : linkEl
     let title = (c.titleAttribute ? titleEl.attr(c.titleAttribute) ?? "" : titleEl.text() || linkEl.attr("title") || "").replace(/\s+/g, " ").trim()
     if (!title) throw new Error("web_list_missing_title")
@@ -142,7 +144,15 @@ export function fromHtml(html: string, base: string, config: WebListConfig, poli
       if (pair) title = pair[2]
     }
     const dateEvidence = parseLooseDate(rawDate, c)
-    seen.add(url)
+    // A URL identifies one item, but does not prove that conflicting title/date associations are duplicates.
+    // Keep the full normalized date evidence (including raw text/unknowns), without choosing an occurrence.
+    const association = JSON.stringify([title, dateEvidence])
+    const previous = seen.get(url)
+    if (previous !== undefined) {
+      if (previous !== association) throw new Error(WEB_LIST_DUPLICATE_CONFLICT)
+      continue
+    }
+    seen.set(url, association)
     out.push({ url, canonicalUrl: url, title, summary: title, bodyText: "", publishedAt: dateEvidence.publishedAt ?? undefined, dateEvidence })
   }
   if (!out.length) throw new Error("web_list_no_allowed_items")

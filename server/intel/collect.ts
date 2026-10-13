@@ -4,7 +4,7 @@ import type { IntelRepository } from "#/database/intel"
 import { parseFeedEntries } from "#/providers/feed"
 import { type ArticleLookup, type ArticleTransport, secureFetchArticle } from "#/services/article-fetch-security"
 import type { IntelSourceSeed } from "#/intel/sources"
-import { type WebListEntry, fromHtml } from "#/intel/sources/web-list"
+import { WEB_LIST_DUPLICATE_CONFLICT, type WebListEntry, fromHtml } from "#/intel/sources/web-list"
 import { assertSupportedConfig } from "#/intel/sources/config-keys"
 import { assertJsonListConfig, fromJson } from "#/intel/sources/json-list"
 
@@ -110,6 +110,7 @@ export async function collectIntelSource(repository: IntelRepository, seed: Inte
   try {
     entries = seed.kind === "json_list" ? fromJson(body, finalUrl, seed.jsonList!, sourcePolicy(seed)) : seed.kind === "web_list" ? fromHtml(body, finalUrl, seed.webList!, sourcePolicy(seed)) : parseFeedEntries(body, finalUrl).entries
   } catch (error) {
+    if (seed.kind === "web_list" && error instanceof Error && error.message === WEB_LIST_DUPLICATE_CONFLICT) return await fail(WEB_LIST_DUPLICATE_CONFLICT, WEB_LIST_DUPLICATE_CONFLICT)
     return await fail("parse_failed", message(error, "parse failed"))
   }
 

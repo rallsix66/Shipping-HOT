@@ -142,6 +142,15 @@ it("synthetic: explicit empty outcomes with a stored count of zero remain comple
   expect(report).toMatchObject({ ok: true, sources: [{ status: "PASS", count: 0 }] })
 })
 
+it("synthetic: keeps the dedicated duplicate-association failure code in saved outcomes", async () => {
+  const { sink, summaries } = memorySink()
+  const conflict: IntelCollectOutcome = { status: "failed", runId: failed.runId, errorCode: "web_list_duplicate_conflict", itemsCommitted: 0 }
+  const report = await recordTwoIndexProbe(tasks(conflict), sink, "synthetic_offline", clock)
+  expect(report.ok).toBe(false)
+  expect(summaries[0].sources[0].first?.errorCode).toBe("web_list_duplicate_conflict")
+  expect(summaries[0].sources[1].status).toBe("PASS")
+})
+
 it("synthetic: rejects duplicate/out-of-scope IDs before running or writing", async () => {
   const { sink, snapshots } = memorySink()
   const input = tasks(success)[0]

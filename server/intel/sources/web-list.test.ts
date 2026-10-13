@@ -62,7 +62,7 @@ describe("web_list HTML and config boundaries", () => {
     for (const broken of ["<html>Login</html>", "<ul id=\"notices\"></ul>", "<ul id=\"notices\"><li><a href=\"/notices/1\"></a></li></ul>"]) expect(() => fromHtml(broken, base, config, policy)).toThrow(/web_list_/)
   })
   it("retains upstream listing-anchor exclusion and deduplication with canonical URLs", () => {
-    const markup = "<ul id=\"notices\"><li><a href=\"/list#paper\">Paper</a></li><li><a href=\"/notices/1?utm_source=x\">Notice one</a></li><li><a href=\"/notices/1#top\">Duplicate</a></li></ul>"
+    const markup = "<ul id=\"notices\"><li><a href=\"/list#paper\">Paper</a></li><li><a href=\"/notices/1?utm_source=x\">Notice one</a></li><li><a href=\"/notices/1#top\">Notice one</a></li></ul>"
     expect(fromHtml(markup, base, config, policy).map(item => item.title)).toEqual(["Notice one"])
   })
   it("keeps same-path business query identities while excluding anchors and tracking-only self links", () => {
@@ -72,7 +72,7 @@ describe("web_list HTML and config boundaries", () => {
       <li><a href="/notices?utm_campaign=x&lang=en#top">Tracking-only self</a></li>
       <li><a href="/notices?id=123&lang=en">Notice 123</a></li>
       <li><a href="/notices?lang=en&id=456">Notice 456</a></li>
-      <li><a href="/notices?utm_source=x&lang=en&id=123#top">Duplicate 123</a></li>
+      <li><a href="/notices?utm_source=x&lang=en&id=123#top">Notice 123</a></li>
     </ul>`
     expect(fromHtml(markup, listing, config, policy).map(item => [item.title, item.canonicalUrl])).toEqual([
       ["Notice 123", "https://www.nchmf.gov.vn/notices?id=123&lang=en"],

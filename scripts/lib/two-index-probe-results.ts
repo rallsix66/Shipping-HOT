@@ -7,7 +7,7 @@ type SourceId = "MY-P03" | "TH-C01"
 type EvidenceKind = "synthetic_offline" | "held_live_response"
 const SOURCE_IDS = new Set(["MY-P03", "TH-C01"])
 const STATUSES = new Set(["ok_items", "ok_empty", "failed", "storage_unavailable", "skipped"])
-const ERROR_CODES = new Set(["config_invalid", "parse_failed", "store_failed", "fetch_failed", "run_start_failed", "finalize_failed", "source_run_in_flight", "blocked_address", "body_too_large", "content_type_missing", "content_type_unsupported", "credentials_not_allowed", "dns_empty", "dns_failed", "fetch_timeout", "host_not_allowed", "http_error", "http_not_allowed", "https_downgrade", "invalid_redirect", "invalid_url", "protocol_not_allowed", "redirect_limit", "redirect_without_location", "source_ca_invalid", "encoding_invalid", "encoding_unsupported"])
+const ERROR_CODES = new Set(["config_invalid", "parse_failed", "web_list_duplicate_conflict", "store_failed", "fetch_failed", "run_start_failed", "finalize_failed", "source_run_in_flight", "blocked_address", "body_too_large", "content_type_missing", "content_type_unsupported", "credentials_not_allowed", "dns_empty", "dns_failed", "fetch_timeout", "host_not_allowed", "http_error", "http_not_allowed", "https_downgrade", "invalid_redirect", "invalid_url", "protocol_not_allowed", "redirect_limit", "redirect_without_location", "source_ca_invalid", "encoding_invalid", "encoding_unsupported"])
 const IO_CODES = new Set(["EACCES", "EIO", "ENOSPC", "EPERM", "ENOENT", "EROFS", "EBUSY", "EEXIST", "ENOTDIR", "EISDIR", "ENOTEMPTY", "EINVAL", "EMFILE", "ENFILE"])
 
 export interface ProbeProgress {
