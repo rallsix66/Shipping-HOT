@@ -1,0 +1,4 @@
+# command: node .tmp/check-two-artifacts.cjs
+# full code SHA: 484db7b7a173f5c31312f3f7320807f4d521e5dd
+# raw exit: 0
+PASS: two exact one-shot responses/limits, working-to-archive hashes, no original HTML, failed/NOT_RUN real collector preserved

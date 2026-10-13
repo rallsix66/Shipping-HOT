@@ -1,0 +1,87 @@
+{
+  "sha": "b1ca0ee1fbfe509e2ef810f6d7fd01b6c19cb6c8",
+  "cleanAtStart": true,
+  "results": [
+    {
+      "name": "install",
+      "command": "pnpm install --frozen-lockfile",
+      "sha": "b1ca0ee1fbfe509e2ef810f6d7fd01b6c19cb6c8",
+      "started": "2026-10-13T08:53:54.735Z",
+      "finished": "2026-10-13T08:53:56.922Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "build",
+      "command": "pnpm build",
+      "sha": "b1ca0ee1fbfe509e2ef810f6d7fd01b6c19cb6c8",
+      "started": "2026-10-13T08:53:56.923Z",
+      "finished": "2026-10-13T08:54:14.548Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "typecheck",
+      "command": "pnpm typecheck",
+      "sha": "b1ca0ee1fbfe509e2ef810f6d7fd01b6c19cb6c8",
+      "started": "2026-10-13T08:54:14.548Z",
+      "finished": "2026-10-13T08:54:21.432Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "lint",
+      "command": "pnpm lint",
+      "sha": "b1ca0ee1fbfe509e2ef810f6d7fd01b6c19cb6c8",
+      "started": "2026-10-13T08:54:21.434Z",
+      "finished": "2026-10-13T08:54:44.464Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "targeted-html",
+      "command": "pnpm exec vitest run -c vitest.config.ts server/intel/sources/html-index-candidates.test.ts server/intel/html-index-candidates-collect.test.ts server/intel/sources/web-list.test.ts server/intel/web-list-collect.test.ts server/intel/sources/json-list.test.ts server/intel/json-list-collect.test.ts",
+      "sha": "b1ca0ee1fbfe509e2ef810f6d7fd01b6c19cb6c8",
+      "started": "2026-10-13T08:54:44.464Z",
+      "finished": "2026-10-13T08:54:47.133Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "test",
+      "command": "pnpm exec vitest run -c vitest.config.ts",
+      "sha": "b1ca0ee1fbfe509e2ef810f6d7fd01b6c19cb6c8",
+      "started": "2026-10-13T08:54:47.134Z",
+      "finished": "2026-10-13T08:54:58.871Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "smoke-p0-native",
+      "command": "pnpm smoke:p0-native",
+      "sha": "b1ca0ee1fbfe509e2ef810f6d7fd01b6c19cb6c8",
+      "started": "2026-10-13T08:54:58.871Z",
+      "finished": "2026-10-13T08:55:00.064Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "smoke-p2c-runtime",
+      "command": "pnpm smoke:p2c-runtime",
+      "sha": "b1ca0ee1fbfe509e2ef810f6d7fd01b6c19cb6c8",
+      "started": "2026-10-13T08:55:00.064Z",
+      "finished": "2026-10-13T08:55:01.379Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "smoke-p3-feed-freshness",
+      "command": "pnpm smoke:p3-feed-freshness",
+      "sha": "b1ca0ee1fbfe509e2ef810f6d7fd01b6c19cb6c8",
+      "started": "2026-10-13T08:55:01.379Z",
+      "finished": "2026-10-13T08:55:02.666Z",
+      "rawExit": 0,
+      "signal": null
+    }
+  ]
+}
