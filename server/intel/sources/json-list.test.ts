@@ -10,6 +10,11 @@ const record = { id: "one", title: "<b>Notice</b>", published: "2026-10-13", sum
 const parse = (data: unknown, c = config) => fromJson(JSON.stringify(data), base, c, policy)
 
 describe("json_list bounded pure adapter", () => {
+  it("allows safe integer template values only; large identities must be strings", () => {
+    for (const id of [Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER, 0, 42]) expect(renderTemplate("/notices/{id}", { id })).toBe(`/notices/${id}`)
+    for (const id of [9007199254740992, -9007199254740992, 1.5, Number.NaN, Number.POSITIVE_INFINITY]) expect(() => renderTemplate("/notices/{id}", { id })).toThrow("json_list_template_number_unsafe")
+    expect(renderTemplate("/notices/{id}", { id: "9007199254740993" })).toBe("/notices/9007199254740993")
+  })
   it("maps root/nested arrays, strips markup and preserves date-only precision", () => {
     expect(parse([record])[0]).toMatchObject({ title: "Notice", summary: "Summary text", bodyText: "Summary text", canonicalUrl: "https://api.data.gov.my/notices/one", publishedAt: undefined, dateEvidence: { raw: "2026-10-13", precision: "day", timezone: "missing", publishedAt: null } })
     expect(parse({ data: [{ items: [record] }] }, { ...config, itemsPath: "data.0.items" })).toEqual(parse([record]))

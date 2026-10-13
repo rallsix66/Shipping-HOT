@@ -228,4 +228,30 @@ describe("json_list 027 isolated persistence", () => {
       state.native.close()
     }
   })
+
+  it("rejects rounded numeric identities from raw JSON without losing old data, while string IDs remain distinct", async () => {
+    const state = open()
+    try {
+      await initializeShippingDatabase(state.database, "mock")
+      await state.repository.upsertSource(JSON_SOURCE, NOW.toISOString())
+      await collectIntelSource(state.repository, JSON_SOURCE, json([RECORD]), NOW)
+      const items = await state.repository.listItems(JSON_SOURCE.id)
+      const versions = await state.repository.listVersions(items[0].id)
+      // Raw wire text is essential: JS object literals/stringify would already round the second ID.
+      const numeric = "[{\"id\":9007199254740992,\"title\":\"A\"},{\"id\":9007199254740993,\"title\":\"B\"}]"
+      expect(await collectIntelSource(state.repository, JSON_SOURCE, offline(Buffer.from(numeric)), NOW)).toMatchObject({ status: "failed", errorCode: "parse_failed", itemsCommitted: 0 })
+      expect(await state.repository.listItems(JSON_SOURCE.id)).toEqual(items)
+      expect(await state.repository.listVersions(items[0].id)).toEqual(versions)
+      expect((await state.repository.getSource(JSON_SOURCE.id))?.status).toBe("failing")
+      const strings = "[{\"id\":\"9007199254740992\",\"title\":\"A\"},{\"id\":\"9007199254740993\",\"title\":\"B\"}]"
+      expect(await collectIntelSource(state.repository, JSON_SOURCE, offline(Buffer.from(strings)), NOW)).toMatchObject({ status: "ok_items", itemsSeen: 2, itemsNew: 2 })
+      const all = await state.repository.listItems(JSON_SOURCE.id)
+      expect(all).toHaveLength(3)
+      const added = all.filter(item => item.id !== items[0].id)
+      expect(added.map(item => item.canonicalUrl).sort()).toEqual(["https://api.data.gov.my/notices/9007199254740992", "https://api.data.gov.my/notices/9007199254740993"])
+      expect(new Set(added.map(item => item.id)).size).toBe(2)
+    } finally {
+      state.native.close()
+    }
+  })
 })

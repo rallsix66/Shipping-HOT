@@ -77,6 +77,8 @@ function firstString(item: unknown, paths: string[]): string | undefined {
 export function renderTemplate(template: string, item: unknown): string {
   return template.replace(/\{([^{}]+)\}/g, (_, path: string) => {
     const value = getPath(item, path)
+    // JSON.parse rounds large numeric IDs before mapping; require strings to preserve them.
+    if (typeof value === "number" && !Number.isSafeInteger(value)) throw new Error("json_list_template_number_unsafe")
     if ((typeof value !== "string" && typeof value !== "number") || (typeof value === "number" && !Number.isFinite(value)) || String(value).trim() === "") throw new Error("json_list_template_value_missing")
     return encodeURIComponent(String(value))
   })
