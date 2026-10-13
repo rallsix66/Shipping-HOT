@@ -1,0 +1,9 @@
+# command: node .tmp/check-bounded-results.cjs
+# baseline_sha: 9d7b39b68cc3e2bad9cd93e3ea7cc4829a046ed6
+# started: 2026-10-13T04:13:09.327Z
+# stdout
+PASS exact six planned IDs/URLs; zero actual transport calls/responses/parses/new fixtures; original source status unchanged; denominator null; batch elapsed<=120s; SHA/exit log; no raw/derivative response files
+
+# stderr
+
+# raw_exit_code: 0

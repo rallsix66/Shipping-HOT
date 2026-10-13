@@ -1,0 +1,11 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const dir='docs/evidence/r2-bounded-rss-2026-10-13';
+const r=JSON.parse(fs.readFileSync(dir+'/batch-results.json','utf8'));
+const planned=JSON.parse(fs.readFileSync('docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.json','utf8'));
+assert.deepEqual(r.results.map(x=>[x.id,x.url]),planned.batch.map(x=>[x.id,x.url]));
+assert.equal(r.actualHttpRequests,0);assert.equal(r.newParsedCandidates,0);assert.equal(r.originalStructureEvidence,0);assert.equal(r.finalR2Denominator,null);assert.equal(r.finalR2Coverage,null);
+for(const item of r.results){assert.equal(item.reason,'blocked_address');assert.equal(item.actualHttpRequests,0);assert.equal(item.httpStatus,null);assert.equal(item.bytes,null);assert.equal(item.rawResponseSha256,null);assert.equal(item.parse,'NOT_RUN');}
+assert.ok(Date.parse(r.finished)-Date.parse(r.started)<=120000);
+const log=fs.readFileSync(dir+'/batch.log','utf8');assert.ok(log.includes('# full_sha: '+r.baseline));assert.ok(log.includes('# raw_exit_code: 0'));
+assert.deepEqual(fs.readdirSync(dir).filter(x=>x.endsWith('-original.xml')||x.endsWith('-metadata.json')),[]);
+console.log('PASS exact six planned IDs/URLs; zero actual transport calls/responses/parses/new fixtures; original source status unchanged; denominator null; batch elapsed<=120s; SHA/exit log; no raw/derivative response files');
