@@ -48,6 +48,43 @@ afterEach(async () => {
 })
 
 describe("intel actual registry/bootstrap path (offline)", () => {
+  it.each(["end", "release"] as const)("keeps failed %s cleanup retryable and never returns a stopped runtime", async (failure) => {
+    const state = open()
+    const owner = ownership()
+    const registry = { intel: { enabled: true, fetch, seeds: [A] } }
+    const options = { database: state.database, registry, runtimeOptions, acquireIntelOwnership: owner.acquire }
+    const jobs = getDefaultRuntimeJobs({ ...registry, database: state.database, dataMode: "mock", now })
+    const intel = jobs.find(job => job.id === INTEL_COLLECT_JOB_ID) as ReturnType<typeof createIntelCollectJob>
+    const end = vi.spyOn(intel, "end")
+    if (failure === "end") end.mockRejectedValueOnce(new Error("first end failure"))
+    else owner.release.mockRejectedValueOnce(new Error("first release failure"))
+    try {
+      const old = await bootstrapBackgroundRuntime({ ...options, jobs })
+      await old.runNow(INTEL_COLLECT_JOB_ID)
+      await expect(shutdownBackgroundRuntime()).rejects.toThrow(`first ${failure} failure`)
+      expect(old.getStatus().running).toBe(false)
+      expect(owner.isHeld()).toBe(true)
+      expect(owner.release).toHaveBeenCalledTimes(failure === "end" ? 0 : 1)
+      await expect(bootstrapBackgroundRuntime(options)).rejects.toThrow("runtime_shutdown_incomplete")
+      expect(owner.acquire).toHaveBeenCalledTimes(1)
+      await shutdownBackgroundRuntime()
+      expect(owner.isHeld()).toBe(false)
+      expect(end).toHaveBeenCalledTimes(failure === "end" ? 2 : 1)
+      expect(owner.release).toHaveBeenCalledTimes(failure === "end" ? 1 : 2)
+      await shutdownBackgroundRuntime()
+      expect(end).toHaveBeenCalledTimes(failure === "end" ? 2 : 1)
+      expect(owner.release).toHaveBeenCalledTimes(failure === "end" ? 1 : 2)
+      const next = await bootstrapBackgroundRuntime(options)
+      expect(next).not.toBe(old)
+      expect(next.getStatus().running).toBe(true)
+      clock += 1000
+      expect(await next.runNow(INTEL_COLLECT_JOB_ID)).toMatchObject({ status: "success" })
+      expect(owner.acquire).toHaveBeenCalledTimes(2)
+    } finally {
+      await shutdownBackgroundRuntime()
+      state.native.close()
+    }
+  })
   it("releases acquired ownership after startup failure and permits a clean retry", async () => {
     const state = open()
     const owner = ownership()

@@ -14,6 +14,7 @@ interface RuntimeGlobalState {
   intelJobs?: IntelCollectJob[]
   intelOwnership?: { release: () => Promise<void> }
   shutdownPromise?: Promise<void>
+  shutdownIncomplete?: boolean
 }
 
 const globalKey = Symbol.for("shipping-hot.background-runtime")
@@ -67,6 +68,7 @@ function removeSignalHandlers() {
 export async function bootstrapBackgroundRuntime(options: BootstrapBackgroundRuntimeOptions = {}): Promise<BackgroundRuntime> {
   const state = globalState()
   if (state.shutdownPromise) await state.shutdownPromise
+  if (state.shutdownIncomplete) throw new Error("runtime_shutdown_incomplete")
   if (state.runtime) return state.runtime
   if (state.bootstrapPromise) return state.bootstrapPromise
   if (state.intelOwnership) throw new Error("intel_previous_ownership_not_released")
@@ -132,11 +134,16 @@ export function isBackgroundRuntimeEnabled(): boolean {
 export async function shutdownBackgroundRuntime(): Promise<void> {
   const state = globalState()
   if (state.shutdownPromise) return state.shutdownPromise
+  state.shutdownIncomplete = true
   state.shutdownPromise = (async () => {
     const runtime = state.runtime ?? await state.bootstrapPromise
     runtime?.stop()
     await runtime?.drain()
-    for (const job of state.intelJobs ?? []) await job.end()
+    // Remove only completed steps; a retry must not re-end successfully finalized executors.
+    while (state.intelJobs?.length) {
+      await state.intelJobs[0].end()
+      state.intelJobs.shift()
+    }
     await state.intelOwnership?.release()
     state.intelJobs = undefined
     state.intelOwnership = undefined
@@ -144,6 +151,7 @@ export async function shutdownBackgroundRuntime(): Promise<void> {
     state.bootstrapPromise = undefined
     state.bootstrapFailed = undefined
     removeSignalHandlers()
+    state.shutdownIncomplete = false
   })()
   try {
     await state.shutdownPromise

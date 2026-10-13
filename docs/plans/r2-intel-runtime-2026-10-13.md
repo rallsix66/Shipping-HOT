@@ -12,6 +12,8 @@ Authorized slice: connect collection/due/backoff to the existing BackgroundRunti
 
 ## Not connected
 
+Shutdown P2 repair: end/release failure retains shutdownIncomplete; bootstrap rejects with runtime_shutdown_incomplete instead of returning a stopped instance. Completed end steps are removed from the pending queue, and ownership is cleared only after successful release. Explicit shutdown retry resumes unfinished steps; successful steps are not repeated before a fresh startup.
+
 Real source seed selection/fetch, production exclusive-ownership provider, automatic crash recovery, GET/UI, registry enable settings, 304/ETag, P1 live fixtures, manual input, paid/LLM/R3 and 24h live acceptance. Production plugin uses only default-off registration. Do not enable a second TMD/BMKG weather collection chain under this registration change.
 
 ## Offline verification
