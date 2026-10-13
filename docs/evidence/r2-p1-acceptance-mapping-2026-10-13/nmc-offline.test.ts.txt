@@ -1,0 +1,53 @@
+import { readFileSync } from "node:fs"
+import { createHash } from "node:crypto"
+import { load } from "cheerio"
+import { describe, it, expect, vi } from "vitest"
+import { open } from "../server/intel/__fixtures__/isolated-db"
+import { initShippingTables } from "../server/database/shipping"
+import { collectIntelSource } from "../server/intel/collect"
+import { parseLooseDate } from "../server/intel/sources/web-list"
+import type { IntelSourceSeed } from "../server/intel/sources"
+
+const cases = [
+  { id: "CN-W01", url: "https://www.nmc.cn/publish/typhoon/typhoon_new.html", file: "typhoon_flash.html" },
+  { id: "CN-W02", url: "https://www.nmc.cn/publish/country/warning/index.html", file: "warning_index.html" },
+]
+describe("NMC existing product-page suitability for current intel list contract", () => {
+  it.each(cases)("$id has product metadata but no qualifying list detail link", async ({ id, url, file }) => {
+    const path = `server/providers/__fixtures__/nmc-2026-10-11/${file}`
+    const bytes = readFileSync(path)
+    const $ = load(bytes.toString("utf8"))
+    const root = $("#text")
+    expect(root).toHaveLength(1)
+    expect(root.find("div.title").text().trim()).not.toBe("")
+    expect(root.find("a[href]")).toHaveLength(0)
+    const basis = "Existing NMC archive suitability probe; offset is hypothetical explicit configuration, not a page claim"
+    const dateConfig = { dateRuleBasis: basis, publishedAtUtcOffset: "+08:00" }
+    const author = root.find("div.author").text().trim()
+    const parsedAuthor = parseLooseDate(author, dateConfig)
+    expect(parsedAuthor.publishedAt).toBeNull()
+    if (id === "CN-W01") {
+      expect(root.find("div.number").text().trim()).toBe("2026年总1873期")
+      expect(parsedAuthor.rule).toBe("missing")
+    } else {
+      expect(parsedAuthor.rule).toBe("unsupported_format")
+      expect(parseLooseDate("2026年10月05日06时", dateConfig)).toMatchObject({ rule: "invalid_time", publishedAt: null })
+    }
+    const state = open()
+    const forbiddenFetch = vi.fn(() => { throw new Error("No external network") })
+    vi.stubGlobal("fetch", forbiddenFetch)
+    let transports = 0
+    const seed: IntelSourceSeed = { id: `inventory:${id}`, catalogId: id, name: "Offline NMC suitability", kind: "web_list", url, enabled: false, persistence: "disallowed", allowedHosts: ["www.nmc.cn"], allowedContentTypes: ["text/html"], intervalMs: 3600000, webList: { listSelector: "body", itemSelector: "#text", linkSelector: "a[href]", titleSelector: "div.title", publishedAtSelector: "div.author", ...dateConfig } }
+    try {
+      await initShippingTables(state.database, "mock")
+      await state.repository.upsertSource(seed, "2026-10-13T04:00:00Z")
+      const result = await collectIntelSource(state.repository, seed, { lookup: async host => { expect(host).toBe("www.nmc.cn"); return [{ address: "93.184.216.34", family: 4 }] }, transport: async requested => { expect(requested.toString()).toBe(url); transports++; return { status: 200, headers: { "content-type": "text/html; charset=utf-8" }, body: bytes } } }, new Date("2026-10-13T04:00:00Z"))
+      expect(result).toMatchObject({ status: "failed", errorCode: "parse_failed", itemsCommitted: 0 })
+      expect(await state.repository.listItems(seed.id)).toEqual([])
+      expect(state.native.prepare("SELECT error_message FROM intel_fetch_run WHERE source_id=?").get(seed.id)).toEqual({ error_message: "web_list_invalid_link" })
+      expect(forbiddenFetch).not.toHaveBeenCalled()
+      expect(transports).toBe(1)
+      console.log(JSON.stringify({ id, url, archive: path, sha256: createHash("sha256").update(bytes).digest("hex"), bytes: bytes.length, productTitle: root.find("div.title").text().trim(), qualifyingAnchors: 0, authorDateRule: parsedAuthor.rule, publishedAt: null, timeSemantics: id === "CN-W01" ? "annual issue identity + day/hour observation, not an absolute publication timestamp" : "author preamble + Chinese hour format; configured offset cannot repair unsupported text/time grammar", hiddenGeneratedTime: "present but deliberately not used as publication", collector: result.status, errorCode: "web_list_invalid_link", items: 0, networkCalls: 0 }))
+    } finally { state.native.close(); vi.unstubAllGlobals() }
+  })
+})

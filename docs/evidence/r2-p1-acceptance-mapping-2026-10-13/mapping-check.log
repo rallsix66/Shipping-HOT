@@ -1,0 +1,9 @@
+# command: node .tmp/check-p1-mapping.cjs
+# baseline_sha: 0b532e1917ee5425194965b20e0fdf8c2a1f4805
+# started: 2026-10-13T04:00:13.071Z
+# stdout
+PASS unchanged catalog hash and41 ID/URL/format/state rows; proposed groups sum41; final denominator/coverage null; exact6 RSS batch URLs with 512KiB/10s/one request/no redirect/retry/paid; NMC archive hashes and negative suitability results
+
+# stderr
+
+# raw_exit_code: 0
