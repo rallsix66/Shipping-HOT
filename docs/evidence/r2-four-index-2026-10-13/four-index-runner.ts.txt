@@ -1,0 +1,93 @@
+import { load } from "cheerio"
+import { readFileSync, writeFileSync, existsSync } from "node:fs"
+import { createHash } from "node:crypto"
+import { open } from "../server/intel/__fixtures__/isolated-db"
+import { initShippingTables } from "../server/database/shipping"
+import { collectIntelSource, sourcePolicy } from "../server/intel/collect"
+import type { IntelSourceSeed } from "../server/intel/sources"
+import { type ArticleTransport, type ArticleHttpResponse, type SecureFetchFailure, defaultTransport, secureFetchArticle } from "../server/services/article-fetch-security"
+
+export const DIR = "docs/evidence/r2-four-index-2026-10-13"
+export function oneShotTransport(exactUrl: string, real: ArticleTransport, signal: AbortSignal, reserve: () => void, capture: (response: ArticleHttpResponse) => void): ArticleTransport {
+  let attempted = false
+  return async (url, addresses, options) => {
+    if (signal.aborted || attempted || url.toString() !== exactUrl) throw new Error("batch_request_forbidden")
+    if (options.maxBytes > 524288 || options.timeoutMs > 10000 || options.caPem) throw new Error("batch_limits_invalid")
+    attempted = true
+    reserve()
+    const response = await real(url, addresses, { ...options, signal })
+    capture(response)
+    return response
+  }
+}
+const hash = (bytes: Uint8Array | string) => createHash("sha256").update(bytes).digest("hex")
+const safeTitle = (title: string) => /\b(?:authorization|bearer|cookie|api[_-]?key|password|token|secret)\b/i.test(title) ? "[redacted]" : title.slice(0, 300)
+const safeUrl = (input: string) => { try { const u=new URL(input); return u.protocol==="https:" && !u.username && !u.password && ![...u.searchParams.keys()].some(k=>/key|token|secret|password|auth|credential|signature|cookie|csrf|utm_|gclid|fbclid/i.test(k)) ? u.href : null } catch { return null } }
+
+export async function runBoundedBatch() {
+  const manifest=JSON.parse(readFileSync("docs/evidence/r2-four-index-2026-10-13/manifest.json", "utf8"))
+  if (existsSync(DIR+'/request-ledger.json')) throw new Error('existing_ledger_never_restart')
+  const ledger: Record<string,unknown>[]=[]
+  const saveLedger=()=>writeFileSync(DIR+'/request-ledger.json',JSON.stringify(ledger,null,2)+'\n','utf8')
+  saveLedger()
+  const started=new Date().toISOString()
+  const controller=new AbortController()
+  const timer=setTimeout(()=>controller.abort(),120000)
+  let actualRequests=0
+  const results: Record<string, unknown>[]=[]
+  try {
+    for (const row of manifest.batch) {
+      const sourceStart=new Date().toISOString()
+      if (controller.signal.aborted) { results.push({ id: row.id, url: row.url, status: "NOT_RUN", reason: "batch_deadline" }); continue }
+      const local=new AbortController()
+      const abort=()=>local.abort()
+      controller.signal.addEventListener("abort",abort,{once:true})
+      const sourceTimer=setTimeout(abort,10000)
+      const before=actualRequests
+      let httpStatus: number | null=null
+      let bytes: number | null=null
+      let rawHash: string | null=null
+      let wireError: string | null=null
+      const seed: IntelSourceSeed={ id:`batch:${row.id}`,catalogId:row.id,name:row.id,kind:row.kind,url:row.url,enabled:false,persistence:"disallowed",allowedHosts:[row.host],allowedContentTypes:row.kind==="web_list"?["text/html","application/xhtml+xml"]:["application/rss+xml","application/atom+xml","application/rdf+xml","application/xml","text/xml"],intervalMs:3600000 }
+      try {
+        const transport=oneShotTransport(row.url, async (url,addresses,options)=> {
+          try { return await defaultTransport(url,addresses,options) } catch(error) { const code=(error as {code?:string}).code; wireError=typeof code==="string" && /^[A-Z0-9_]{1,80}$/.test(code)?code:null; throw error }
+        },local.signal,()=>{if(actualRequests>=4)throw new Error("batch_request_limit");ledger.push({id:row.id,url:row.url,state:'reserved_unknown',reservedAt:new Date().toISOString()});saveLedger();actualRequests++},response=>{httpStatus=response.status;const raw=typeof response.body==="string"?Buffer.from(response.body,"utf8"):response.body;bytes=raw.length;rawHash=hash(raw)})
+        const timeout=new Promise<SecureFetchFailure>(resolve=>{const fail=()=>resolve({ok:false,code:"fetch_timeout",message:"Source/batch deadline"});local.signal.addEventListener("abort",fail,{once:true});if(local.signal.aborted)fail()})
+        const fetched=await Promise.race([secureFetchArticle(row.url,{policy:sourcePolicy(seed),transport,signal:local.signal,maxBytes:524288,timeoutMs:10000,maxRedirects:0,accept:seed.allowedContentTypes.join(", ")}),timeout])
+        clearTimeout(sourceTimer)
+        if(!fetched.ok){results.push({id:row.id,url:row.url,started:sourceStart,finished:new Date().toISOString(),actualHttpRequests:actualRequests-before,httpStatus,bytes,rawResponseSha256:rawHash,status:"FAILED",reason:fetched.code,transportErrorCode:wireError,parse:"NOT_RUN",rawFixture:"not retained; failure or unverified permission"});continue}
+        if(row.kind==="web_list"){
+          const $=load(fetched.body);$('script,style,noscript').remove()
+          const text=$('body').text().replace(/\s+/g,' ').trim()
+          const numericDates=[...new Set(text.match(/\b(?:\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}[-/]\d{1,2}[-/]\d{4})\b/g)??[])].slice(0,12)
+          const observation={id:row.id,kind:'HTML structural observation, not item parser output',counts:{anchors:$('a[href]').length,tables:$('table').length,rows:$('tr').length,timeElements:$('time').length},numericDateTextCandidates:numericDates,candidateAssociation:'Not assigned to publication items; may be navigation or unrelated page dates',sourceConfig:'missing; no source selectors/date basis/calendar/offset approved',rawRetained:false}
+          const derivative=JSON.stringify(observation,null,2)+'\n';writeFileSync(DIR+'/'+row.id+'-structure-metadata.json',derivative,'utf8')
+          results.push({id:row.id,url:row.url,started:sourceStart,finished:new Date().toISOString(),actualHttpRequests:actualRequests-before,httpStatus,bytes,rawResponseSha256:hash(fetched.rawBody),status:'FETCHED_ADAPTER_NOT_CONFIGURED',parse:'NOT_RUN',decoding:{encoding:fetched.decoding.encoding,selectedBy:fetched.decoding.selectedBy,conflict:fetched.decoding.conflict},metadataSha256:hash(derivative),rawStructureFixtureRetained:false,rawFixtureReason:'Reuse permission not established; no original HTML retained',observation});continue
+        }
+        const state=open()
+        try {
+          await initShippingTables(state.database,"mock")
+          await state.repository.upsertSource(seed,sourceStart)
+          const outcome=await collectIntelSource(state.repository,seed,{lookup:async host=>{if(host!==row.host)throw new Error("offline_host_mismatch");return [{address:"93.184.216.34",family:4}]},transport:async requested=>{if(requested.href!==row.url)throw new Error("offline_url_mismatch");return {status:fetched.status,headers:{"content-type":fetched.contentType},body:fetched.rawBody}}},new Date(sourceStart))
+          const items=await state.repository.listItems(seed.id)
+          const metadata=items.map(item=>({title:safeTitle(item.title),url:safeUrl(item.canonicalUrl),publishedAt:item.publishedAt}))
+          const valid=metadata.filter(item=>item.title && item.title!=="[redacted]" && item.url && item.publishedAt && Number.isFinite(Date.parse(item.publishedAt))).length
+          const derivative=JSON.stringify({id:row.id,url:row.url,kind:"parsed metadata derivative only, not original RSS/encoding fixture",items:metadata},null,2)+"\n"
+          writeFileSync(`${DIR}/${row.id}-metadata.json`,derivative,"utf8")
+          // Only this approved public-domain source may retain raw XML, and only after explicit in-document license and sensitive-content checks.
+          const publicDomain=row.id==="TH-W01" && /<copyright\b[^>]*>\s*public domain\s*<\/copyright>/i.test(fetched.body)
+          const suspicious=/<script\b|tracking|analytics|\b(?:authorization|bearer|set-cookie|api[_-]?key|password|credential|token|secret)\s*[:=]|[?&][^=\s<>]*(?:key|token|sig|credential|cookie|auth|utm_|gclid|fbclid)[^=\s<>]*=/i.test(fetched.body)
+          const rawRetained=publicDomain && !suspicious
+          if(rawRetained)writeFileSync(`${DIR}/${row.id}-original.xml`,fetched.rawBody)
+          results.push({id:row.id,url:row.url,started:sourceStart,finished:new Date().toISOString(),actualHttpRequests:actualRequests-before,httpStatus,bytes,rawResponseSha256:hash(fetched.rawBody),status:outcome.status==="ok_items" && valid===items.length && items.length>0?"PARSED_TITLE_LINK_TIME":"PARTIAL_OR_PARSE_FAILED",collector:outcome,items:items.length,completeTitleLinkTime:valid,decoding:{encoding:fetched.decoding.encoding,selectedBy:fetched.decoding.selectedBy,conflict:fetched.decoding.conflict},metadataSha256:hash(derivative),rawStructureFixtureRetained:rawRetained,rawFixtureReason:rawRetained?"TH-W01 in-document public-domain license; exact original bytes, no transformation; sensitive-content scan clean":"permission not established; metadata derivative is not R2-5 proof",newCandidate:true})
+        } finally {state.native.close()}
+      } catch(error) {results.push({id:row.id,url:row.url,started:sourceStart,finished:new Date().toISOString(),actualHttpRequests:actualRequests-before,httpStatus,bytes,rawResponseSha256:rawHash,status:"FAILED",reason:"probe_exception",errorName:error instanceof Error?error.name:"unknown",transportErrorCode:wireError,parse:"NOT_RUN"})}
+      finally {clearTimeout(sourceTimer);controller.signal.removeEventListener("abort",abort);const entry=ledger.find(e=>e.id===row.id);if(entry){entry.state=httpStatus!==null?'response_received':'transport_finished_no_response';entry.httpStatus=httpStatus;entry.finishedAt=new Date().toISOString();saveLedger()}writeFileSync(DIR+'/partial-results.json',JSON.stringify(results,null,2)+'\n','utf8')}
+    }
+  } finally {clearTimeout(timer)}
+  const report={baseline:"01ea950ab023255fdb7e9efe1f2799d9320c260e",started,finished:new Date().toISOString(),approvedMaxHttpRequests:4,actualHttpRequests:actualRequests,maxBytes:524288,perSourceTimeoutMs:10000,totalDeadlineMs:120000,redirectsFollowed:0,retries:0,details:0,paidCalls:0,results,newParsedCandidates:results.filter(r=>r.newCandidate && r.status==="PARSED_TITLE_LINK_TIME").length,originalStructureEvidence:results.filter(r=>r.rawStructureFixtureRetained).length,finalR2Denominator:null,finalR2Coverage:null}
+  writeFileSync(`${DIR}/batch-results.json`,JSON.stringify(report,null,2)+"\n","utf8")
+  console.log(JSON.stringify(report))
+  return report
+}

@@ -1,0 +1,4 @@
+const fs=require('fs'),y=require('../node_modules/.pnpm/yaml@2.8.2/node_modules/yaml');
+const d='C:/Users/Administrator/AppData/Roaming/io.github.clash-verge-rev.clash-verge-rev/';
+const p=y.parse(fs.readFileSync(d+'profiles.yaml','utf8')),cur=p.items?.find(x=>x.uid===p.current),c=y.parse(fs.readFileSync(d+'clash-verge.yaml','utf8'));
+console.log(JSON.stringify({current:p.current,profileFile:cur?.file,script:cur?.option?.script,dnsMode:c.dns?.['enhanced-mode'],filterMode:c.dns?.['fake-ip-filter-mode']??'blacklist',tun:c.tun?.enable,knownFilter:(c.dns?.['fake-ip-filter']??[]).filter(x=>['www.westportsholdings.com','portcalls.com','www.customs.gov.my','www.mof.gov.my','www.tmd.go.th','www.bmkg.go.id','theloadstar.com','splash247.com','www.northport.com.my','www.customs.go.th'].includes(x))}));

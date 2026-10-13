@@ -1,0 +1,51 @@
+{
+  "origin": "Transcribed from actual tool stdout; one system lookup per host, current isBlockedAddress false for all. Not a second DNS run.",
+  "dns": [
+    {
+      "host": "theloadstar.com",
+      "started": "2026-10-13T08:23:32.511Z",
+      "finished": "2026-10-13T08:23:32.626Z",
+      "addresses": [
+        "172.67.68.194",
+        "104.26.2.171",
+        "104.26.3.171"
+      ]
+    },
+    {
+      "host": "splash247.com",
+      "started": "2026-10-13T08:23:32.626Z",
+      "finished": "2026-10-13T08:23:32.706Z",
+      "addresses": [
+        "104.26.6.32",
+        "172.67.73.185",
+        "104.26.7.32"
+      ]
+    },
+    {
+      "host": "www.northport.com.my",
+      "started": "2026-10-13T08:23:32.707Z",
+      "finished": "2026-10-13T08:23:33.443Z",
+      "addresses": [
+        "23.199.56.15",
+        "23.199.56.21"
+      ]
+    },
+    {
+      "host": "www.customs.go.th",
+      "started": "2026-10-13T08:23:33.443Z",
+      "finished": "2026-10-13T08:23:34.035Z",
+      "addresses": [
+        "209.15.100.77"
+      ]
+    }
+  ],
+  "generatedConfig": {
+    "profile": "R0coi38zEaOV",
+    "script": "shf0fNvLCn9b",
+    "mode": "fake-ip",
+    "filterMode": "blacklist",
+    "tenExpectedDomainsPresent": true,
+    "tun": true
+  },
+  "httpBeforeLaunch": 0
+}

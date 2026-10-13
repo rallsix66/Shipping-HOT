@@ -1,0 +1,10 @@
+import {lookup} from 'node:dns/promises'
+import {it} from 'vitest'
+import {isBlockedAddress} from '../server/services/article-fetch-security'
+it('queries each proposed host once via system DNS, without HTTP',async()=>{
+ for(const host of ['theloadstar.com','splash247.com','www.northport.com.my','www.customs.go.th']){
+  const started=new Date().toISOString()
+  try{const answers=await lookup(host,{all:true});console.log(JSON.stringify({host,started,finished:new Date().toISOString(),answers:answers.map(a=>({...a,blocked:isBlockedAddress(a as {address:string,family:4|6})})),secureFetchWouldReject:answers.some(a=>isBlockedAddress(a as {address:string,family:4|6}))}))}
+  catch(e){console.log(JSON.stringify({host,started,status:'DNS_FAILED',code:(e as {code?:string}).code??'unknown'}))}
+ }
+},45000)

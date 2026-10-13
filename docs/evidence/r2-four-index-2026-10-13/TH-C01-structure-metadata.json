@@ -1,0 +1,14 @@
+{
+  "id": "TH-C01",
+  "kind": "HTML structural observation, not item parser output",
+  "counts": {
+    "anchors": 230,
+    "tables": 1,
+    "rows": 101,
+    "timeElements": 0
+  },
+  "numericDateTextCandidates": [],
+  "candidateAssociation": "Not assigned to publication items; may be navigation or unrelated page dates",
+  "sourceConfig": "missing; no source selectors/date basis/calendar/offset approved",
+  "rawRetained": false
+}
