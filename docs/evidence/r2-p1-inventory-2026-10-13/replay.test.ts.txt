@@ -1,0 +1,39 @@
+import { readFileSync } from "node:fs"
+import { createHash } from "node:crypto"
+import { describe, it, expect, vi } from "vitest"
+import { open } from "../server/intel/__fixtures__/isolated-db"
+import { initShippingTables } from "../server/database/shipping"
+import { collectIntelSource } from "../server/intel/collect"
+import { intelSourceSeeds, type IntelSourceSeed } from "../server/intel/sources"
+
+const cases: { seed: IntelSourceSeed, file: string, type: string }[] = [
+  { seed: intelSourceSeeds[0], file: "server/providers/__fixtures__/tmd-cap-2026-10-10/index.xml", type: "application/xml" },
+  { seed: intelSourceSeeds[1], file: "server/providers/__fixtures__/bmkg-cap-2026-10-10/index.xml", type: "application/xml" },
+  { seed: { id: "inventory:vn-w01", catalogId: "VN-W01", name: "Offline NCHMF", kind: "web_list", url: "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html", enabled: false, persistence: "excerpt_only", allowedHosts: ["www.nchmf.gov.vn"], allowedContentTypes: ["text/html"], intervalMs: 3600000, webList: { listSelector: "#left-col > .ct-news-nb-block > ul.list-news", itemSelector: "li", linkSelector: "a", titleAttribute: "alt", publishedAtSelector: "label", dateOrder: "dmy", publishedAtUtcOffset: "+07:00", dateRuleBasis: "Offline archive inventory: existing configured DMY UTC+07 rule" } }, file: "docs/evidence/nchmf-integration-2026-10-10/raw/index.html", type: "text/html; charset=utf-8" },
+]
+describe("existing real archives through current intel collector only", () => {
+  it.each(cases)("$seed.catalogId exact catalog URL mapped to archived bytes", async ({ seed, file, type }) => {
+    const bytes = readFileSync(file)
+    const state = open()
+    let calls = 0
+    const noNetwork = vi.fn(() => { throw new Error("Network prohibited") })
+    vi.stubGlobal("fetch", noNetwork)
+    try {
+      await initShippingTables(state.database, "mock")
+      await state.repository.upsertSource(seed, "2026-10-13T04:00:00Z")
+      const outcome = await collectIntelSource(state.repository, seed, { lookup: async host => { expect(host).toBe(new URL(seed.url).hostname); return [{ address: "93.184.216.34", family: 4 }] }, transport: async url => { expect(url.toString()).toBe(seed.url); calls++; return { status: 200, headers: { "content-type": type }, body: bytes } } }, new Date("2026-10-13T04:00:00Z"))
+      expect(outcome.status).toBe("ok_items")
+      const items = await state.repository.listItems(seed.id)
+      expect(items.length).toBeGreaterThan(0)
+      expect(items.every(item => item.title.trim() && item.canonicalUrl.startsWith(`https://${new URL(seed.url).hostname}/`) && item.publishedAt && Number.isFinite(Date.parse(item.publishedAt)))).toBe(true)
+      if (seed.catalogId === "VN-W01") {
+        const item = items.find(item => item.canonicalUrl.endsWith("post54549.html"))!
+        expect(item.title).toContain("TIN CẢNH BÁO LŨ QUÉT")
+        expect(item.publishedAt).toBe("2026-10-10T09:27:01.000Z")
+      }
+      expect(calls).toBe(1)
+      expect(noNetwork).not.toHaveBeenCalled()
+      console.log(JSON.stringify({ catalogId: seed.catalogId, url: seed.url, archive: file, sha256: createHash("sha256").update(bytes).digest("hex"), bytes: bytes.length, outcome, items: items.length, titleLinkTimeAssertions: "all persisted items nonempty title, same-host HTTPS link, parseable publishedAt", networkCalls: 0, transport: "injected offline raw bytes; not a real socket", first: { title: items[0].title, link: items[0].canonicalUrl, publishedAt: items[0].publishedAt } }))
+    } finally { state.native.close(); vi.unstubAllGlobals() }
+  })
+})

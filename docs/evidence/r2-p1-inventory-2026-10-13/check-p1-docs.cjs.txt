@@ -1,0 +1,19 @@
+const fs = require('node:fs'), assert = require('node:assert/strict'), crypto = require('node:crypto');
+const dir='docs/evidence/r2-p1-inventory-2026-10-13';
+const inventory=JSON.parse(fs.readFileSync(`${dir}/source-inventory.json`,'utf8'));
+const catalog=fs.readFileSync('docs/intel-source-catalog.md','utf8');
+assert.equal(inventory.catalogSha256,crypto.createHash('sha256').update(catalog).digest('hex'));
+const rows=catalog.split('\n').filter(l=>/^\| [A-Z]{2}-[A-Z]\d\d \|/.test(l)).map(l=>l.split('|').slice(1,-1).map(s=>s.trim()));
+const p1=rows.filter(r=>r.includes('P1'));
+assert.equal(p1.length,58); assert.equal(inventory.entries.length,41); assert.equal(inventory.manualP1.length,17); assert.equal(inventory.p2.length,40);
+assert.equal(new Set([...inventory.entries,...inventory.manualP1].map(r=>r.id)).size,58);
+assert.deepEqual([...inventory.entries,...inventory.manualP1].map(r=>r.id).sort(),p1.map(r=>r[0]).sort());
+for(const r of [...inventory.entries,...inventory.manualP1]) { assert.ok(r.url); assert.ok(r.format); assert.ok(r.catalogState); }
+assert.equal(inventory.notPassed.length,38);
+const replay=fs.readFileSync(`${dir}/replay.log`,'utf8');
+assert.ok(replay.includes(`# full_sha: ${inventory.baseline}`)); assert.ok(replay.includes('# raw_exit_code: 0'));
+const result=replay.split('\n').filter(l=>l.startsWith('{"catalogId"')).map(l=>JSON.parse(l));
+assert.deepEqual(result.map(r=>r.catalogId).sort(),inventory.offlinePayloadPassed.slice().sort());
+for(const r of result) { assert.equal(r.sha256,crypto.createHash('sha256').update(fs.readFileSync(r.archive)).digest('hex')); assert.equal(r.networkCalls,0); assert.ok(r.items>0); }
+for(const file of ['docs/status.md','docs/architecture.md','docs/adr/ADR-007-intel-pipeline-llm-providers-and-paid-boundary.md','docs/adr/ADR-008-external-intel-and-weather-data-sources.md','docs/adr/ADR-009-vnsgn-area-reference-marine.md','docs/plans/shipping-hot-risk-intelligence-2026-09-29.md',`${dir}/qualification-matrix.md`,`${dir}/replay.test.ts.txt`,`${dir}/replay.config.ts.txt`]) assert.ok(fs.existsSync(file),file);
+console.log('PASS catalog immutable hash / 58 exact P1 IDs / 41 automatic + 17 manual / 40 P2 / 3 payload results + 38 missing / source hashes + zero-network results / authority and probe paths');

@@ -1,0 +1,2 @@
+import base from "../vitest.config"
+export default { ...base, test: { ...base.test, include: [".tmp/p1-replay.test.ts"] } }

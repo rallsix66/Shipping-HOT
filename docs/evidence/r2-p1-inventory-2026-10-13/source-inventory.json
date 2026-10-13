@@ -1,0 +1,949 @@
+{
+  "baseline": "a9e637fd52c69fbfde7fd226c660e58da0ea2ae8",
+  "catalogSha256": "7ec2dcea18db35ced16aac5a3ca4f758963e9232323cc986bd7f0ffe4c223a25",
+  "p1Total": 58,
+  "autoDenominator": 41,
+  "manualCount": 17,
+  "offlinePayloadPassed": [
+    "TH-W01",
+    "ID-W01",
+    "VN-W01"
+  ],
+  "notPassed": [
+    "CN-P01",
+    "CN-P02",
+    "CN-W01",
+    "CN-W02",
+    "CN-T01",
+    "CN-T02",
+    "VN-P01",
+    "VN-P03",
+    "VN-T01",
+    "VN-D01",
+    "TH-C01",
+    "TH-C02",
+    "MY-P02",
+    "MY-P03",
+    "MY-W01",
+    "MY-C01",
+    "MY-T01",
+    "MY-L01",
+    "ID-W02",
+    "ID-T01",
+    "ID-T02",
+    "PH-P01",
+    "PH-W01",
+    "PH-W02",
+    "PH-C01",
+    "PH-M01",
+    "XX-W01",
+    "XX-W02",
+    "XX-K01",
+    "XX-K02",
+    "XX-K03",
+    "XX-M01",
+    "XX-M03",
+    "XX-A01",
+    "XX-A02",
+    "XX-A03",
+    "XX-A04",
+    "XX-F01"
+  ],
+  "entries": [
+    {
+      "id": "CN-P01",
+      "url": "https://www.gd.msa.gov.cn/",
+      "format": "web_list",
+      "catalogState": "OK (2026-09-29)",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "CN-P02",
+      "url": "https://www.sz.msa.gov.cn/",
+      "format": "web_list",
+      "catalogState": "PARTIAL",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "CN-W01",
+      "url": "https://www.nmc.cn/publish/typhoon/typhoon_new.html",
+      "format": "web_list",
+      "catalogState": "OK",
+      "priority": "P1",
+      "adapter": "旧nmc-warning专用Feed链；无intel配置",
+      "archive": "docs/evidence/nmc-integration-2026-10-11/raw/typhoon_flash.html",
+      "capture": "目录原URL；nmc-live-evidence.json ranAt 2026-10-11T01:38:50.372Z（逐请求时间在egress）",
+      "assertion": "当前intel NOT_RUN；不能用旧专用链通过替代",
+      "gap": "缺intel selectors/日期配置/全链回放"
+    },
+    {
+      "id": "CN-W02",
+      "url": "https://www.nmc.cn/publish/country/warning/index.html",
+      "format": "web_list",
+      "catalogState": "OK",
+      "priority": "P1",
+      "adapter": "旧nmc-warning专用Feed链；无intel配置",
+      "archive": "docs/evidence/nmc-integration-2026-10-11/raw/warning_index.html",
+      "capture": "目录原URL；nmc-live-evidence.json ranAt 2026-10-11T01:38:50.372Z",
+      "assertion": "当前intel NOT_RUN",
+      "gap": "缺intel selectors/日期配置/全链回放"
+    },
+    {
+      "id": "CN-T01",
+      "url": "http://www.mofcom.gov.cn/zcfb/index.html",
+      "format": "web_list",
+      "catalogState": "OK (2026-09-30)",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "目录为HTTP；当前安全入口拒绝HTTP，需独立确认合规URL策略，不可放松安全或擅改URL"
+    },
+    {
+      "id": "CN-T02",
+      "url": "https://szs.mof.gov.cn/zhengcefabu/",
+      "format": "web_list",
+      "catalogState": "OK (2026-09-04)",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "VN-P01",
+      "url": "https://vimawa.gov.vn/vi/thong-bao-hang-hai",
+      "format": "web_list",
+      "catalogState": "PARTIAL",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "目录已标列表无日期；TBHH可去重但不能充当时间，当前标题/链接/时间资格NOT_RUN"
+    },
+    {
+      "id": "VN-P03",
+      "url": "https://saigonnewport.com.vn/tin-tuc",
+      "format": "web_list",
+      "catalogState": "OK (25/09/2026)",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "VN-W01",
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html",
+      "format": "web_list",
+      "catalogState": "OK (30/09/2026)",
+      "priority": "P1",
+      "adapter": "仅已有测试配置#left-col>.ct-news-nb-block>ul.list-news/li/a alt/label，DMY UTC+07；无正式intel seed",
+      "archive": "docs/evidence/nchmf-integration-2026-10-10/raw/index.html",
+      "capture": "目录原URL；live-evidence.json egress at 2026-10-10T09:52:07.791Z；存储衍生页面252878字节，日志原响应259550字节",
+      "assertion": "PASS 离线：5条；post54549标题片段+2026-10-10T09:27:01Z；replay.log",
+      "gap": "脱敏存储页不是原wire逐字节证据；日期时区为配置；未接正式seed或启用"
+    },
+    {
+      "id": "VN-T01",
+      "url": "https://idea.gov.vn/",
+      "format": "web_list",
+      "catalogState": "OK (30/09/2026)",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "VN-D01",
+      "url": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
+      "format": "web_list",
+      "catalogState": "OK (30/09/2026)",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "TH-W01",
+      "url": "https://www.tmd.go.th/en/api/xml/CAP",
+      "format": "rss",
+      "catalogState": "OK (30/09/2026)",
+      "priority": "P1",
+      "adapter": "正式 intel RSS 种子；feed.ts；CAP详情/官方影响仍为专用链",
+      "archive": "server/providers/__fixtures__/tmd-cap-2026-10-10/index.xml；同hash docs/evidence/th-w01-tmd-cap-2026-10-10/index.xml",
+      "capture": "目录原URL；旧记录2026-10-10约13:33 UTC+8（docs/evidence/th-w01-tmd-cap-2026-10-10.md）；不是07:02:58探测的同一响应",
+      "assertion": "PASS 离线：7条 title/同host HTTPS link/publishedAt；replay.log",
+      "gap": "完整精确抓取时间/原始wire字节未封口；不核CAP有效性；当前实网NOT_RUN"
+    },
+    {
+      "id": "TH-C01",
+      "url": "https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th",
+      "format": "web_list",
+      "catalogState": "OK (佛历 2569-09-29)",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "通用佛历日期能力存在，未配置本源/真实存档/时间断言"
+    },
+    {
+      "id": "TH-C02",
+      "url": "https://www.customs.go.th/list_strc_download_with_docno_date.php?ini_content=announce_160426_01&order_by=date&sort_type=0&lang=th",
+      "format": "web_list",
+      "catalogState": "PARTIAL",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "MY-P02",
+      "url": "https://www.westportsholdings.com/category/press-release/feed/",
+      "format": "rss",
+      "catalogState": "OK (28/09/2026)",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "MY-P03",
+      "url": "https://www.northport.com.my/np/page-announcements.html",
+      "format": "web_list",
+      "catalogState": "OK (15-09-2026)",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "MY-W01",
+      "url": "https://api.data.gov.my/weather/warning",
+      "format": "json_list",
+      "catalogState": "OK (30/09/2026)",
+      "priority": "P1",
+      "adapter": "旧metmalaysia-warning专用Feed链；通用json_list存在但无本源配置",
+      "archive": "docs/evidence/metmalaysia-integration-2026-10-10/raw/warning-2026-10-10T0830Z.json",
+      "capture": "2026-10-10T08:30:40.728Z；旧请求URL带尾/；目录无尾/在07:54:41Z返回301",
+      "assertion": "当前intel NOT_RUN；valid_from/to不能当publishedAt",
+      "gap": "warning_issue.issued时区、稳定URL/ID映射、非publication字段、完整回放待定"
+    },
+    {
+      "id": "MY-C01",
+      "url": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
+      "format": "rss",
+      "catalogState": "OK (28/09/2026)",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "MY-T01",
+      "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+      "format": "rss",
+      "catalogState": "OK (29/09/2026)",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "MY-L01",
+      "url": "https://www.pos.com.my/service-update",
+      "format": "web_list",
+      "catalogState": "OK (22/09/2026)",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "ID-W01",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/rss.xml",
+      "format": "rss",
+      "catalogState": "OK (WebFetch)",
+      "priority": "P1",
+      "adapter": "正式 intel RSS 种子；feed.ts；非CAP地区/有效性解析",
+      "archive": "server/providers/__fixtures__/bmkg-cap-2026-10-10/index.xml；同hash docs/evidence/bmkg-cap-2026-10-10/raw/index.xml",
+      "capture": "旧fetch-log：2026-10-10T06:48:32Z GET /alerts/nowcast/en；RSS self-link为目录/en/rss.xml",
+      "assertion": "PASS 离线：12条 title/同host HTTPS link/publishedAt；replay.log",
+      "gap": "原请求URL与目录URL不同，不能称目录URL实网通过；24h及有效性NOT_RUN"
+    },
+    {
+      "id": "ID-W02",
+      "url": "https://maritim.bmkg.go.id/marine2026-data/ （文档 `/apidoc`；`/pelabuhan/{KODE}.json`）",
+      "format": "json_list",
+      "catalogState": "PARTIAL",
+      "priority": "P1",
+      "adapter": "无BMKG港口海况intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "目录是根路径+参数化文档，缺批准具体港口URL及映射；不是文章feed"
+    },
+    {
+      "id": "ID-T01",
+      "url": "https://jdih.kemendag.go.id/",
+      "format": "web_list",
+      "catalogState": "OK",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "ID-T02",
+      "url": "https://jdih.kemenkeu.go.id/",
+      "format": "web_list",
+      "catalogState": "PARTIAL",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "PH-P01",
+      "url": "https://www.ppa.com.ph/content/ppa-helpdesk-advisory ，https://www.ppa.com.ph/ppa-port-news",
+      "format": "web_list",
+      "catalogState": "PARTIAL",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "目录一行两URL，仍只算1个ID；仅离线sourceCa机制，未配置真实CA/selector/存档"
+    },
+    {
+      "id": "PH-W01",
+      "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+      "format": "web_list",
+      "catalogState": "OK",
+      "priority": "P1",
+      "adapter": "旧PAGASA探测；无intel配置",
+      "archive": "docs/evidence/pagasa-warning-2026-10-10/raw/www.pagasa.dost.gov.ph_tropical_cyclone_severe_weather_bulletin.html",
+      "capture": "目录原URL；fetch-log 2026-10-10T11:03:48Z",
+      "assertion": "当前intel NOT_RUN；无活动正样本",
+      "gap": "空壳/iframe与正样本缺口；不称标题时间通过"
+    },
+    {
+      "id": "PH-W02",
+      "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+      "format": "web_list",
+      "catalogState": "OK",
+      "priority": "P1",
+      "adapter": "旧PAGASA探测；无intel配置",
+      "archive": "docs/evidence/pagasa-warning-2026-10-10/raw/www.pagasa.dost.gov.ph_weather_weather_advisory.html",
+      "capture": "目录原URL；fetch-log 2026-10-10T11:03:49.920Z",
+      "assertion": "当前intel NOT_RUN；无活动正样本",
+      "gap": "正样本/selector/时间规则缺失"
+    },
+    {
+      "id": "PH-C01",
+      "url": "https://customs.gov.ph/category/media-releases/",
+      "format": "web_list",
+      "catalogState": "OK (WebFetch)",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "PH-M01",
+      "url": "https://portcalls.com/feed/",
+      "format": "rss",
+      "catalogState": "OK (30/09/2026)",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "XX-W01",
+      "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+      "format": "json_list",
+      "catalogState": "OK",
+      "priority": "P1",
+      "adapter": "既有jma-tropical-cyclone专用Runtime，非intel种子",
+      "archive": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json（旧操作诊断，非本源文章夹具）",
+      "capture": "旧2026-10-10运行；本轮未回放其载荷",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "TC列表非文章标题/链接/时间契约；现有证据不计本轮intel通过"
+    },
+    {
+      "id": "XX-W02",
+      "url": "`https://www.jma.go.jp/bosai/typhoon/data/TC{id}/forecast.json` 、`/specifications.json`",
+      "format": "api",
+      "catalogState": "OK",
+      "priority": "P1",
+      "adapter": "既有jma-tropical-cyclone详情适配器，非intel",
+      "archive": "同XX-W01旧操作诊断；未确认本轮独立原始响应夹具",
+      "capture": "旧2026-10-10运行；本轮NOT_RUN",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "参数化TC路径/forecast/specifications，非文章列表；不得编造事件标题日期"
+    },
+    {
+      "id": "XX-K01",
+      "url": "https://www.maersk.com/news",
+      "format": "web_list",
+      "catalogState": "OK",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "XX-K02",
+      "url": "https://www.one-line.com/en/news",
+      "format": "web_list",
+      "catalogState": "OK",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "XX-K03",
+      "url": "https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/",
+      "format": "web_list",
+      "catalogState": "OK",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "XX-M01",
+      "url": "https://theloadstar.com/feed/",
+      "format": "rss（表头RSS）",
+      "catalogState": "OK",
+      "priority": "P1",
+      "adapter": "旧ShippingFeedSources RSS同URL；无intel种子",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "未找到合格真实Feed存档/标题链接时间证据；现有Feed注册不等于intel验证"
+    },
+    {
+      "id": "XX-M03",
+      "url": "https://splash247.com/feed/",
+      "format": "rss（表头RSS）",
+      "catalogState": "OK",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "缺来源专属配置、存档谱系与回放"
+    },
+    {
+      "id": "XX-A01",
+      "url": "https://api.open-meteo.com/v1/forecast",
+      "format": "api (非资讯接口)",
+      "catalogState": "OK",
+      "priority": "P1",
+      "adapter": "既有Open-Meteo陆地天气适配器，非intel",
+      "archive": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/（旧七天验收）",
+      "capture": "旧2026-10-10；本轮NOT_RUN",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "天气时序不是资讯；旧验收不计intel/R2-5；免费演示/上线许可限制保留"
+    },
+    {
+      "id": "XX-A02",
+      "url": "https://marine-api.open-meteo.com/v1/marine",
+      "format": "api (非资讯接口)",
+      "catalogState": "OK",
+      "priority": "P1",
+      "adapter": "既有Open-Meteo海况适配器，非intel",
+      "archive": "同XX-A01旧七天验收",
+      "capture": "旧2026-10-10；本轮NOT_RUN",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "非文章契约；VNSGN原点缺测/独立参考点限制不变"
+    },
+    {
+      "id": "XX-A03",
+      "url": "https://customer-api.open-meteo.com",
+      "format": "api (非资讯接口)",
+      "catalogState": "OK（未带 key 时返回 401）",
+      "priority": "P1",
+      "adapter": "未配置付费版；非intel",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "仅目录401历史备注，无真实授权数据；付费/凭据需另行批准，NOT_RUN"
+    },
+    {
+      "id": "XX-A04",
+      "url": "https://help.aliyun.com/zh/model-studio/embedding",
+      "format": "api (非资讯接口)",
+      "catalogState": "OK（文档）",
+      "priority": "P1",
+      "adapter": "已选定Bailian但未接真实embedding调用；非intel抓取源",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "目录为文档链接不是可抓资讯；真实付费/预算/凭据均未授权，NOT_RUN"
+    },
+    {
+      "id": "XX-F01",
+      "url": "https://seller-my.tiktok.com/university/essay?knowledge_id=4293090978809617",
+      "format": "web_list（整页对比）",
+      "catalogState": "OK（更新于 17/09/2026）",
+      "priority": "P1",
+      "adapter": "通用解析器能力存在；无本源正式intel配置",
+      "archive": "未找到可资格化真实存档（本次已盘点范围）",
+      "capture": "缺失",
+      "assertion": "NOT_RUN 标题/链接/时间",
+      "gap": "整页带日期段落对比不是已配置list；无合规存档及可复现intel断言"
+    }
+  ],
+  "manualP1": [
+    {
+      "id": "CN-P05",
+      "url": "https://www.msa.gov.cn/",
+      "format": "manual",
+      "catalogState": "BLOCKED (403)",
+      "priority": "P1"
+    },
+    {
+      "id": "CN-C01",
+      "url": "http://www.customs.gov.cn/customs/302249/302266/302267/index.html",
+      "format": "manual",
+      "catalogState": "BLOCKED (412 JS 验证)",
+      "priority": "P1"
+    },
+    {
+      "id": "CN-H01",
+      "url": "gov.cn 原文（403）；2026 年通知的新华网转载：https://www.news.cn/politics/20251104/88bcffd88ae249e58c699b8772548e3d/c.html",
+      "format": "manual",
+      "catalogState": "PARTIAL",
+      "priority": "P1"
+    },
+    {
+      "id": "VN-C01",
+      "url": "https://customs.gov.vn/index.jsp?cid=31&pageId=6",
+      "format": "manual",
+      "catalogState": "BLOCKED (超时)",
+      "priority": "P1"
+    },
+    {
+      "id": "VN-T02",
+      "url": "https://mof.gov.vn/",
+      "format": "manual",
+      "catalogState": "BLOCKED (JS)",
+      "priority": "P1"
+    },
+    {
+      "id": "VN-H01",
+      "url": "https://chinhphu.vn/",
+      "format": "manual",
+      "catalogState": "OK",
+      "priority": "P1"
+    },
+    {
+      "id": "TH-P01",
+      "url": "https://www.port.co.th/",
+      "format": "manual",
+      "catalogState": "BLOCKED (连接被断开)",
+      "priority": "P1"
+    },
+    {
+      "id": "TH-H01",
+      "url": "https://www.bot.or.th/en/financial-institutions-holiday.html",
+      "format": "manual",
+      "catalogState": "PARTIAL (JS)",
+      "priority": "P1"
+    },
+    {
+      "id": "MY-P01",
+      "url": "https://www.pka.gov.my/index.php/en/",
+      "format": "manual",
+      "catalogState": "BLOCKED (403)",
+      "priority": "P1"
+    },
+    {
+      "id": "MY-H01",
+      "url": "https://www.kabinet.gov.my/hari-kelepasan-am/",
+      "format": "manual",
+      "catalogState": "BLOCKED (本次连接被断开)",
+      "priority": "P1"
+    },
+    {
+      "id": "ID-P01",
+      "url": "https://maritimhub.kemenhub.go.id/",
+      "format": "manual",
+      "catalogState": "BLOCKED (JS)",
+      "priority": "P1"
+    },
+    {
+      "id": "ID-C01",
+      "url": "https://www.beacukai.go.id/",
+      "format": "manual",
+      "catalogState": "BLOCKED",
+      "priority": "P1"
+    },
+    {
+      "id": "ID-H01",
+      "url": "https://www.kemenkopmk.go.id/",
+      "format": "manual",
+      "catalogState": "PARTIAL",
+      "priority": "P1"
+    },
+    {
+      "id": "PH-H01",
+      "url": "https://www.officialgazette.gov.ph/section/laws/executive-issuances/proclamations/",
+      "format": "manual",
+      "catalogState": "BLOCKED (403)",
+      "priority": "P1"
+    },
+    {
+      "id": "XX-F05",
+      "url": "https://seller.tiktokglobalshop.com/university/home",
+      "format": "manual",
+      "catalogState": "BLOCKED（JS）",
+      "priority": "P1"
+    },
+    {
+      "id": "XX-F06",
+      "url": "https://shopee.cn/edu/",
+      "format": "manual",
+      "catalogState": "BLOCKED（JS，公告需要登录）",
+      "priority": "P1"
+    },
+    {
+      "id": "XX-F08",
+      "url": "https://university.lazada.com/",
+      "format": "manual",
+      "catalogState": "BLOCKED（JS，部分内容需要登录）",
+      "priority": "P1"
+    }
+  ],
+  "p2": [
+    {
+      "id": "CN-P03",
+      "url": "https://www.sh.msa.gov.cn/",
+      "format": "web_list",
+      "catalogState": "OK (2026-09-20)",
+      "priority": "P2"
+    },
+    {
+      "id": "CN-P04",
+      "url": "https://www.fj.msa.gov.cn/",
+      "format": "web_list",
+      "catalogState": "OK (2026-09-24)",
+      "priority": "P2"
+    },
+    {
+      "id": "CN-P06",
+      "url": "https://www.zj.msa.gov.cn/",
+      "format": "manual",
+      "catalogState": "BLOCKED (JS)",
+      "priority": "P2"
+    },
+    {
+      "id": "CN-W03",
+      "url": "http://gd.cma.gov.cn/",
+      "format": "web_list",
+      "catalogState": "OK (2026-09-29)",
+      "priority": "P2"
+    },
+    {
+      "id": "CN-W04",
+      "url": "https://weather.sz.gov.cn/",
+      "format": "web_list",
+      "catalogState": "OK",
+      "priority": "P2"
+    },
+    {
+      "id": "CN-T03",
+      "url": "https://www.mof.gov.cn/zhengwuxinxi/zhengcefabu/",
+      "format": "web_list",
+      "catalogState": "OK (2026-09-29)",
+      "priority": "P2"
+    },
+    {
+      "id": "CN-T04",
+      "url": "https://fgk.chinatax.gov.cn/",
+      "format": "web_list",
+      "catalogState": "OK (2026-09-08)",
+      "priority": "P2"
+    },
+    {
+      "id": "CN-M01",
+      "url": "https://www.xindemarinenews.com/",
+      "format": "web_list",
+      "catalogState": "OK (2026-09-30)",
+      "priority": "P2"
+    },
+    {
+      "id": "VN-P02",
+      "url": "https://haiphongport.com.vn/vi/tin-tuc",
+      "format": "web_list",
+      "catalogState": "OK (22/09/2026)",
+      "priority": "P2"
+    },
+    {
+      "id": "VN-W02",
+      "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/thoi-tiet-bien-24h-s12h3-15.html",
+      "format": "web_list",
+      "catalogState": "OK",
+      "priority": "P2"
+    },
+    {
+      "id": "VN-L01",
+      "url": "https://ghn.vn/blogs/tin-tuc-ghn",
+      "format": "web_list",
+      "catalogState": "OK (2026-08-17)",
+      "priority": "P2"
+    },
+    {
+      "id": "VN-L03",
+      "url": "https://jtexpress.vn/vi/news",
+      "format": "web_list",
+      "catalogState": "OK (23/09/2026)",
+      "priority": "P2"
+    },
+    {
+      "id": "VN-M01",
+      "url": "https://vnexpress.net/rss/kinh-doanh.rss",
+      "format": "rss",
+      "catalogState": "OK",
+      "priority": "P2"
+    },
+    {
+      "id": "TH-P02",
+      "url": "https://md.go.th/feed/",
+      "format": "rss",
+      "catalogState": "OK (29/09/2026)",
+      "priority": "P2"
+    },
+    {
+      "id": "TH-P03",
+      "url": "https://www.navigationsupport.com/noticestomariners2026",
+      "format": "web_list",
+      "catalogState": "PARTIAL",
+      "priority": "P2"
+    },
+    {
+      "id": "TH-T01",
+      "url": "https://www.rd.go.th/ ，https://www.moc.go.th/ ，https://www.dft.go.th/",
+      "format": "manual",
+      "catalogState": "PARTIAL",
+      "priority": "P2"
+    },
+    {
+      "id": "TH-L01",
+      "url": "https://www.flashexpress.co.th/news",
+      "format": "web_list",
+      "catalogState": "OK (2026-08-14)",
+      "priority": "P2"
+    },
+    {
+      "id": "TH-L02",
+      "url": "https://th.kex-express.com/th/news",
+      "format": "web_list",
+      "catalogState": "OK (2026-09-02)",
+      "priority": "P2"
+    },
+    {
+      "id": "TH-D01",
+      "url": "https://www.disaster.go.th/",
+      "format": "manual",
+      "catalogState": "BLOCKED (403)",
+      "priority": "P2"
+    },
+    {
+      "id": "TH-M01",
+      "url": "https://www.bangkokpost.com/rss/data/business.xml",
+      "format": "rss",
+      "catalogState": "OK",
+      "priority": "P2"
+    },
+    {
+      "id": "MY-P06",
+      "url": "https://www.marine.gov.my/feed/ ；航运通告页 https://www.marine.gov.my/b-notis-perkapalan-malaysia/",
+      "format": "rss + web_list",
+      "catalogState": "OK / PARTIAL",
+      "priority": "P2"
+    },
+    {
+      "id": "MY-W02",
+      "url": "https://publicinfobanjir.water.gov.my/",
+      "format": "manual",
+      "catalogState": "PARTIAL (JS)",
+      "priority": "P2"
+    },
+    {
+      "id": "MY-D01",
+      "url": "https://www.nadma.gov.my/bm/media-2/berita?format=feed&type=rss",
+      "format": "rss",
+      "catalogState": "OK (28/09/2026)",
+      "priority": "P2"
+    },
+    {
+      "id": "MY-M01",
+      "url": "https://www.bernama.com/en/rssfeed.php",
+      "format": "rss",
+      "catalogState": "OK",
+      "priority": "P2"
+    },
+    {
+      "id": "ID-P02",
+      "url": "https://www.pelindo.co.id/media/berita",
+      "format": "manual",
+      "catalogState": "BLOCKED (403)",
+      "priority": "P2"
+    },
+    {
+      "id": "ID-L01",
+      "url": "https://www.jne.co.id/berita",
+      "format": "web_list",
+      "catalogState": "OK (2026-09-10)",
+      "priority": "P2"
+    },
+    {
+      "id": "ID-D01",
+      "url": "https://bnpb.go.id/berita",
+      "format": "manual",
+      "catalogState": "BLOCKED (403)",
+      "priority": "P2"
+    },
+    {
+      "id": "PH-P02",
+      "url": "https://marina.gov.ph/feed/",
+      "format": "rss",
+      "catalogState": "OK (29/09/2026)",
+      "priority": "P2"
+    },
+    {
+      "id": "PH-P03",
+      "url": "https://coastguard.gov.ph/",
+      "format": "manual",
+      "catalogState": "BLOCKED (403)",
+      "priority": "P2"
+    },
+    {
+      "id": "PH-T01",
+      "url": "https://www.dti.gov.ph/category/dti-advisories/feed/",
+      "format": "rss",
+      "catalogState": "PARTIAL",
+      "priority": "P2"
+    },
+    {
+      "id": "PH-T02",
+      "url": "https://www.bir.gov.ph/",
+      "format": "manual",
+      "catalogState": "BLOCKED (JS)",
+      "priority": "P2"
+    },
+    {
+      "id": "PH-D01",
+      "url": "https://ndrrmc.gov.ph/",
+      "format": "manual",
+      "catalogState": "BLOCKED (403)",
+      "priority": "P2"
+    },
+    {
+      "id": "XX-W03",
+      "url": "https://www.metoc.navy.mil/jtwc/rss/jtwc.rss",
+      "format": "rss",
+      "catalogState": "OK",
+      "priority": "P2"
+    },
+    {
+      "id": "XX-K05",
+      "url": "—",
+      "format": "manual",
+      "catalogState": "BLOCKED",
+      "priority": "P2"
+    },
+    {
+      "id": "XX-M02",
+      "url": "https://maritime-executive.com/articles.rss",
+      "format": "rss（表头RSS）",
+      "catalogState": "OK",
+      "priority": "P2"
+    },
+    {
+      "id": "XX-M04",
+      "url": "https://gcaptain.com/feed/",
+      "format": "rss（表头RSS）",
+      "catalogState": "OK",
+      "priority": "P2"
+    },
+    {
+      "id": "XX-M05",
+      "url": "https://container-news.com/feed/",
+      "format": "rss（表头RSS）",
+      "catalogState": "OK",
+      "priority": "P2"
+    },
+    {
+      "id": "XX-A05",
+      "url": "https://open.bigmodel.cn/api/paas/v4/embeddings",
+      "format": "api (非资讯接口)",
+      "catalogState": "OK（文档）",
+      "priority": "P2"
+    },
+    {
+      "id": "XX-F03",
+      "url": "https://seller-ph.tiktok.com/university/essay?knowledge_id=1348211165366017&lang=en",
+      "format": "manual",
+      "catalogState": "STALE（页面标注已废弃，最后更新 25 Jun 2026）",
+      "priority": "P2"
+    },
+    {
+      "id": "XX-F04",
+      "url": "https://seller-id.tokopedia.com/university/essay?knowledge_id=4293090979071761",
+      "format": "web_list（整页对比）",
+      "catalogState": "BLOCKED（本次返回 504）",
+      "priority": "P2"
+    }
+  ]
+}
