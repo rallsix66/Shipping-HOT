@@ -60,6 +60,10 @@ describe("json_list bounded pure adapter", () => {
     expect(() => parse(Array.from({ length: 501 }, () => record))).toThrow("item_limit")
   })
 
+  it("does not expose malformed response fragments in run error messages", () => {
+    expect(() => fromJson("private-response-marker is not JSON", base, config, policy)).toThrow(/^json_list_invalid_json$/)
+  })
+
   it("canonicalizes business query identity and rejects disallowed links even among valid items", () => {
     const c: JsonListConfig = { ...config, urlTemplate: undefined, urlPath: "url" }
     const records = ["/detail?id=1&utm_source=test#top", "/detail?id=1", "/detail?id=2"].map(url => ({ ...record, url }))

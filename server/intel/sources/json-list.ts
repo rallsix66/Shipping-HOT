@@ -91,7 +91,13 @@ function text(value: string): string {
 /** Array-at-root or explicit path only; [] is legal, missing/wrong-shaped arrays fail closed. */
 export function fromJson(body: string, base: string, config: JsonListConfig, policy: ArticleSourcePolicy): WebListEntry[] {
   assertJsonListConfig(config)
-  const data: unknown = JSON.parse(body)
+  let data: unknown
+  try {
+    data = JSON.parse(body)
+  } catch {
+    // Native SyntaxError may contain response fragments; run records must not retain them.
+    throw new Error("json_list_invalid_json")
+  }
   const items = config.itemsPath ? getPath(data, config.itemsPath) : data
   if (!Array.isArray(items)) throw new Error("json_list_items_not_array")
   if (items.length > 500) throw new Error("json_list_item_limit")
