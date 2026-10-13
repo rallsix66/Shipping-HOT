@@ -1,0 +1,12 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const dir='docs/evidence/r2-dns-diagnostic-2026-10-13';
+const d=JSON.parse(fs.readFileSync(dir+'/dns-results.json','utf8'));
+const b=JSON.parse(fs.readFileSync('docs/evidence/r2-bounded-rss-2026-10-13/batch-results.json','utf8'));
+assert.equal(d.dnsApiCalls,6);assert.equal(d.httpCalls,0);assert.equal(d.resolverOverride,false);
+assert.deepEqual(d.results.map(r=>[r.id,r.hostname]),b.results.map(r=>[r.id,new URL(r.url).hostname]));
+for(const r of d.results){assert.equal(r.apiCalls,1);assert.ok(Date.parse(r.started)>Date.parse(b.finished));assert.equal(r.addresses.length,1);assert.equal(r.addresses[0].blockedByCurrentCode,true);assert.match(r.addresses[0].address,/^198\.18\./);assert.match(r.addresses[0].rule,/198\.19\.255\.255/);}
+assert.ok(fs.readFileSync(dir+'/dns-only.log','utf8').includes('# raw_exit_code: 0'));
+const config=JSON.parse(fs.readFileSync(dir+'/network-config-categories.json','utf8'));
+assert.equal(config.rawValuesWithheld,true);assert.ok(config.adapters.some(x=>x.status==='Up'&&x.descriptionCategory==='tunnel-or-vpn-marker'));assert.ok(config.configuredDnsServers.some(x=>x.serverAddressClasses.includes('special-198.18/15')));assert.ok(config.proxyEnvironment.every(x=>!x.present));assert.ok(config.approvedHostsFileOverrides.every(x=>!x.hostsOverridePresent));
+const code=fs.readFileSync('.tmp/dns-diagnostic.test.ts','utf8');assert.ok(!/secureFetchArticle\(|defaultTransport\(|https?\.request\(/.test(code));
+console.log('PASS same six approved hostnames / one later system lookup each / zero HTTP / no override / returned deny-range matches / sanitized configuration categories / no earlier-log backfill / no fetch or transport call in DNS probe');

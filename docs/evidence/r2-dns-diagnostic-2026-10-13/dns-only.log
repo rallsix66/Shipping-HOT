@@ -1,0 +1,30 @@
+# command: pnpm exec vitest run -c .tmp/dns-diagnostic.config.ts
+# baseline_sha: 7905d5dbb7b377767913a17d9e49762ea507e037
+# started: 2026-10-13T04:18:11.009Z
+# stdout
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+stdout | .tmp/dns-diagnostic.test.ts > DNS-only and current IP classifier diagnostics > queries each of six approved hosts exactly once using system getaddrinfo; no HTTP
+{"baseline":"7905d5dbb7b377767913a17d9e49762ea507e037","dnsApiCalls":6,"httpCalls":0,"resolverOverride":false,"results":[{"id":"MY-P02","hostname":"www.westportsholdings.com","started":"2026-10-13T04:18:13.153Z","finished":"2026-10-13T04:18:13.161Z","method":"node:dns/promises.lookup(all:true), OS getaddrinfo/default resolver, no resolver override","apiCalls":1,"addresses":[{"address":"198.18.1.44","family":4,"category":"special range (code's denylist; not RFC1918)","rule":"BLOCKED_V4_RANGES: 198.18.0.0..198.19.255.255","blockedByCurrentCode":true}]},{"id":"PH-M01","hostname":"portcalls.com","started":"2026-10-13T04:18:13.161Z","finished":"2026-10-13T04:18:13.163Z","method":"node:dns/promises.lookup(all:true), OS getaddrinfo/default resolver, no resolver override","apiCalls":1,"addresses":[{"address":"198.18.1.45","family":4,"category":"special range (code's denylist; not RFC1918)","rule":"BLOCKED_V4_RANGES: 198.18.0.0..198.19.255.255","blockedByCurrentCode":true}]},{"id":"MY-C01","hostname":"www.customs.gov.my","started":"2026-10-13T04:18:13.163Z","finished":"2026-10-13T04:18:13.164Z","method":"node:dns/promises.lookup(all:true), OS getaddrinfo/default resolver, no resolver override","apiCalls":1,"addresses":[{"address":"198.18.1.46","family":4,"category":"special range (code's denylist; not RFC1918)","rule":"BLOCKED_V4_RANGES: 198.18.0.0..198.19.255.255","blockedByCurrentCode":true}]},{"id":"MY-T01","hostname":"www.mof.gov.my","started":"2026-10-13T04:18:13.164Z","finished":"2026-10-13T04:18:13.165Z","method":"node:dns/promises.lookup(all:true), OS getaddrinfo/default resolver, no resolver override","apiCalls":1,"addresses":[{"address":"198.18.1.47","family":4,"category":"special range (code's denylist; not RFC1918)","rule":"BLOCKED_V4_RANGES: 198.18.0.0..198.19.255.255","blockedByCurrentCode":true}]},{"id":"TH-W01","hostname":"www.tmd.go.th","started":"2026-10-13T04:18:13.165Z","finished":"2026-10-13T04:18:13.166Z","method":"node:dns/promises.lookup(all:true), OS getaddrinfo/default resolver, no resolver override","apiCalls":1,"addresses":[{"address":"198.18.1.48","family":4,"category":"special range (code's denylist; not RFC1918)","rule":"BLOCKED_V4_RANGES: 198.18.0.0..198.19.255.255","blockedByCurrentCode":true}]},{"id":"ID-W01","hostname":"www.bmkg.go.id","started":"2026-10-13T04:18:13.166Z","finished":"2026-10-13T04:18:13.166Z","method":"node:dns/promises.lookup(all:true), OS getaddrinfo/default resolver, no resolver override","apiCalls":1,"addresses":[{"address":"198.18.1.49","family":4,"category":"special range (code's denylist; not RFC1918)","rule":"BLOCKED_V4_RANGES: 198.18.0.0..198.19.255.255","blockedByCurrentCode":true}]}]}
+
+ ✓ .tmp/dns-diagnostic.test.ts (2 tests) 20ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  12:18:12
+   Duration  870ms (transform 254ms, setup 0ms, import 585ms, tests 20ms, environment 0ms)
+
+
+# stderr
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+
+# raw_exit_code: 0

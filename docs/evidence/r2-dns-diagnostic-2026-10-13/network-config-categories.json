@@ -1,0 +1,134 @@
+{
+  "observedAt": "2026-10-13T04:19:07.9378536Z",
+  "method": "read-only sanitized OS settings; no DNS/HTTP calls",
+  "internetSettings": {
+    "ProxyEnable": false,
+    "ProxyServerCategory": "contains-loopback-endpoint",
+    "AutoConfigUrlPresent": false
+  },
+  "adapters": [
+    {
+      "status": "Disconnected",
+      "hardwareInterface": false,
+      "descriptionCategory": "tunnel-or-vpn-marker"
+    },
+    {
+      "status": "Up",
+      "hardwareInterface": true,
+      "descriptionCategory": "physical-network"
+    },
+    {
+      "status": "Disconnected",
+      "hardwareInterface": true,
+      "descriptionCategory": "physical-network"
+    },
+    {
+      "status": "Up",
+      "hardwareInterface": false,
+      "descriptionCategory": "tunnel-or-vpn-marker"
+    }
+  ],
+  "configuredDnsServers": [
+    {
+      "family": "2",
+      "serverAddressClasses": [
+        "special-198.18/15"
+      ]
+    },
+    {
+      "family": "23",
+      "serverAddressClasses": [
+        "other-address-or-hostname",
+        "other-address-or-hostname",
+        "other-address-or-hostname"
+      ]
+    },
+    {
+      "family": "2",
+      "serverAddressClasses": [
+        "other-address-or-hostname",
+        "other-address-or-hostname"
+      ]
+    },
+    {
+      "family": "2",
+      "serverAddressClasses": [
+        "other-address-or-hostname",
+        "other-address-or-hostname"
+      ]
+    },
+    {
+      "family": "23",
+      "serverAddressClasses": [
+        "other-address-or-hostname",
+        "other-address-or-hostname",
+        "other-address-or-hostname"
+      ]
+    },
+    {
+      "family": "23",
+      "serverAddressClasses": [
+        "other-address-or-hostname",
+        "other-address-or-hostname",
+        "other-address-or-hostname"
+      ]
+    },
+    {
+      "family": "23",
+      "serverAddressClasses": [
+        "other-address-or-hostname",
+        "other-address-or-hostname",
+        "other-address-or-hostname"
+      ]
+    }
+  ],
+  "proxyEnvironment": [
+    {
+      "setting": "HTTP_PROXY",
+      "present": false,
+      "valueCategory": "unset"
+    },
+    {
+      "setting": "HTTPS_PROXY",
+      "present": false,
+      "valueCategory": "unset"
+    },
+    {
+      "setting": "ALL_PROXY",
+      "present": false,
+      "valueCategory": "unset"
+    },
+    {
+      "setting": "NO_PROXY",
+      "present": false,
+      "valueCategory": "unset"
+    }
+  ],
+  "approvedHostsFileOverrides": [
+    {
+      "hostname": "www.westportsholdings.com",
+      "hostsOverridePresent": false
+    },
+    {
+      "hostname": "portcalls.com",
+      "hostsOverridePresent": false
+    },
+    {
+      "hostname": "www.customs.gov.my",
+      "hostsOverridePresent": false
+    },
+    {
+      "hostname": "www.mof.gov.my",
+      "hostsOverridePresent": false
+    },
+    {
+      "hostname": "www.tmd.go.th",
+      "hostsOverridePresent": false
+    },
+    {
+      "hostname": "www.bmkg.go.id",
+      "hostsOverridePresent": false
+    }
+  ],
+  "rawValuesWithheld": true
+}
