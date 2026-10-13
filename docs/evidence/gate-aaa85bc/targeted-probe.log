@@ -1,0 +1,23 @@
+{"name":"targeted-probe","command":"pnpm exec vitest run -c vitest.config.ts scripts/lib/two-index-probe-results.test.ts","sha":"aaa85bcc212ff285ab581086e0ff0a890dff6b43","started":"2026-10-13T10:35:45.074Z","finished":"2026-10-13T10:35:46.145Z","rawExit":0,"signal":null}
+STDOUT
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ scripts/lib/two-index-probe-results.test.ts (14 tests) 31ms
+
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+   Start at  18:35:45
+   Duration  240ms (transform 42ms, setup 0ms, import 56ms, tests 31ms, environment 0ms)
+
+
+STDERR
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
