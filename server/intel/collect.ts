@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto"
 import type { ArticleSourcePolicy } from "@shared/article"
-import type { IntelBlock, IntelContentScope, IntelPersistence, IntelRepository } from "#/database/intel"
+import type { IntelRepository } from "#/database/intel"
 import { parseFeedEntries } from "#/providers/feed"
 import { type ArticleLookup, type ArticleTransport, secureFetchArticle } from "#/services/article-fetch-security"
 import type { IntelSourceSeed } from "#/intel/sources"
@@ -8,11 +8,13 @@ import { type WebListEntry, fromHtml } from "#/intel/sources/web-list"
 import { assertSupportedConfig } from "#/intel/sources/config-keys"
 import { assertJsonListConfig, fromJson } from "#/intel/sources/json-list"
 
+import { contentScopeFor, licensedBlocks } from "#/intel/content-license"
+
+export { contentScopeFor, licensedBlocks } from "#/intel/content-license"
+
 export const INTEL_EXTRACTOR_VERSION = "intel-feed-v1"
 export const INTEL_BACKOFF_BASE_MS = 15 * 60 * 1000
 export const INTEL_BACKOFF_MAX_MS = 24 * 60 * 60 * 1000
-const BLOCK_CHARS = 2000
-const EXCERPT_CHARS = 280
 
 /** Offline-capable fetch dependencies. Both are required: there is no implicit network default. */
 export interface IntelFetchDeps {
@@ -34,25 +36,6 @@ const message = (error: unknown, fallback: string) => (error instanceof Error ? 
 export function computeBackoffMs(consecutiveFailures: number, baseMs = INTEL_BACKOFF_BASE_MS, maxMs = INTEL_BACKOFF_MAX_MS): number {
   if (consecutiveFailures <= 0) return 0
   return Math.min(maxMs, baseMs * 2 ** Math.min(consecutiveFailures - 1, 30))
-}
-
-export function contentScopeFor(persistence: IntelPersistence): IntelContentScope {
-  return persistence === "full" ? "full_text" : persistence === "excerpt_only" ? "excerpt" : "metadata_only"
-}
-
-/** Blocks kept for one version, limited to what the source license allows. */
-export function licensedBlocks(scope: IntelContentScope, title: string, bodyText: string): IntelBlock[] {
-  const blocks: IntelBlock[] = [{ blockKey: "title", order: 0, type: "title", text: title }]
-  if (scope === "metadata_only" || !bodyText) return blocks
-  if (scope === "excerpt") {
-    const excerpt = bodyText.length <= EXCERPT_CHARS ? bodyText : `${bodyText.slice(0, EXCERPT_CHARS - 1).trimEnd()}…`
-    blocks.push({ blockKey: "excerpt", order: 1, type: "excerpt", text: excerpt })
-    return blocks
-  }
-  for (let offset = 0, index = 0; offset < bodyText.length; offset += BLOCK_CHARS, index++) {
-    blocks.push({ blockKey: `p${index}`, order: index + 1, type: "paragraph", text: bodyText.slice(offset, offset + BLOCK_CHARS) })
-  }
-  return blocks
 }
 
 export function sourcePolicy(seed: IntelSourceSeed): ArticleSourcePolicy {

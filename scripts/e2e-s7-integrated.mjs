@@ -40,7 +40,7 @@ const SEED_ENTRY = join(ROOT, "scripts", "s7-local-seed.ts")
 const PORT = Number(process.env.E2E_S7_PORT ?? "4477")
 const BASE = (process.env.E2E_BASE_URL ?? `http://127.0.0.1:${PORT}`).replace(/\/$/, "")
 const DEBUG_PORT = Number(process.env.E2E_DEBUG_PORT ?? "9345")
-const EXPECTED_SCHEMA_VERSION = 20
+const EXPECTED_SCHEMA_VERSION = 27
 
 const REQUIRED_TABLES = [
   "app_metadata",
@@ -451,6 +451,23 @@ async function main() {
     check(vesselSearchStatus === 404, `retired vessel search endpoint returns 404 (got ${vesselSearchStatus})`)
 
     const countersStart = snapshotCounters(db)
+
+    // New intel GETs use only Repository SELECTs; verify the production route mapping and a full DB snapshot.
+    const intelDbSnapshot = () => JSON.stringify(db.prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").all().map(({ name }) => [name, db.prepare(`SELECT * FROM "${name.replaceAll("\"", "\"\"")}"`).all()]))
+    const intelBefore = intelDbSnapshot()
+    for (let repeat = 0; repeat < 2; repeat++) {
+      for (const path of ["sources", "items"]) {
+        const response = await fetch(`${BASE}/api/shipping/intel/${path}?limit=1`)
+        const payload = await response.json()
+        check(response.status === 200 && Array.isArray(payload.items) && payload.items.length === 0, `intel ${path} route reads empty persisted table (repeat ${repeat})`)
+        check(response.headers.get("cache-control") === "no-store", `intel ${path} read is not cached (repeat ${repeat})`)
+      }
+    }
+    const missingIntel = await fetch(`${BASE}/api/shipping/intel/items/unknown-s7-item`)
+    const missingIntelBody = await missingIntel.json()
+    check(missingIntel.status === 404 && JSON.stringify(missingIntelBody).includes("Unknown intel item"), "registered intel detail route returns coded unknown-item 404")
+    check((await fetch(`${BASE}/api/shipping/intel/items?limit=51`)).status === 400, "intel production route rejects out-of-range paging")
+    check(intelDbSnapshot() === intelBefore, "repeated production intel GETs leave all database tables unchanged")
 
     /* ------------------------------------------- phase 4: browser flows */
 

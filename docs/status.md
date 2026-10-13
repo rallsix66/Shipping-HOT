@@ -109,9 +109,15 @@
 - **Neat Freak（本批）：** Git Bash `scripts/audit-inventory.sh .` exit **0**。
 - 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 **结论：** **R1.5 = IN PROGRESS**；R1.5-1 **BLOCKED**（VNSGN 海况）、R1.5-4 **BLOCKED**；**非**阶段 PASS。
 
+### R2 intel persisted read-only GET (2026-10-13)
+
+- Three routes: sources health/recent runs, item paging, item/current-or-historical-version detail with date evidence. Read closure only queries existing Repository tables; no initialization/runtime/provider/fetch/recovery/translation dependency. Explicit safe DTOs, no raw config/CA/errors/credentials; no-store and stricter current/stored license scope enforced.
+- Actual loopback HTTP + isolated SQLite query_only/snapshot + external-fetch interception/read-dependency assertions verify normal/failed/unknown/empty/invalid/uninitialized reads, privacy and full->excerpt->metadata restrictions. No schema, write/enable/API registration change or existing page edits; Runtime remains disabled.
+- Full clean-SHA gate, existing S7 regression and actual Neat Freak closeout pending. S7 now expects existing schema27 and covers new production route mapping and unchanged DB. Parent review NOT_RUN; R2 overall incomplete. Contract: `docs/plans/r2-intel-read-2026-10-13.md`.
+
 ### R2 intel Runtime default-off registration (2026-10-13)
 
-- Shutdown P2 repair: code `cb86aabaf715f82eed6d53aa5e481404b37635e3` retains incomplete cleanup and rejects bootstrap before returning a stopped runtime. Successful end steps are removed from the pending queue; release is retried only while ownership remains. End-first-failure and release-first-failure regressions verify held ownership, explicit bootstrap rejection, safe cleanup retry, no repeated successful steps and normal fresh startup.
+- Shutdown P2 repair: code `cb86aabaf715f82eed6d53aa5e481404b37635e3` retains incomplete cleanup and rejects bootstrap before returning a stopped runtime. Successful end steps are removed from the pending queue; release is retried only while ownership remains. End-first-failure and release-first-failure regressions verify held ownership, explicit bootstrap rejection, safe cleanup retry, no repeated successful steps and normal fresh startup. Parent re-review PASS for code/evidence `cb86aab` / `1cd3657`, reported before the GET slice; default-off registry/bootstrap offline slice closed, not production readiness.
 - Repair clean-SHA local gate PASS: registry/bootstrap/Runtime 24/24, full suite 108 files / 1008 passed / 3 skipped; install/build/typecheck/lint, all other targeted suites and three isolated smoke commands exit 0. Original UTF-8 SHA/command/stdout/stderr/raw exit and actual Neat Freak closeout: `docs/evidence/gate-cb86aab/`. Parent re-review pending; the following 22/1006 results are pre-repair executor evidence.
 
 - Actual plugin/bootstrap/registry path now registers one disabled intel-collect job with no implicit sources/fetch. Existing Feed/weather registration is preserved; TMD/BMKG are not silently enabled in a second pipeline. No new scheduler/schema/GET/UI or enable environment switch.

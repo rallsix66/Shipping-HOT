@@ -124,9 +124,65 @@ function mapRun(row: Row): IntelRunRecord {
   }
 }
 
+function mapItem(row: Row): IntelItemRecord {
+  return {
+    id: String(row.id),
+    sourceId: String(row.source_id),
+    canonicalUrl: String(row.canonical_url),
+    title: String(row.title),
+    publishedAt: str(row.published_at),
+    firstSeenAt: String(row.first_seen_at),
+    lastSeenAt: String(row.last_seen_at),
+    currentVersionId: str(row.current_version_id),
+  }
+}
+
+function mapVersion(row: Row): IntelVersionRecord {
+  return {
+    id: String(row.id),
+    itemId: String(row.item_id),
+    contentHash: String(row.content_hash),
+    dateEvidence: row.date_evidence == null ? null : JSON.parse(String(row.date_evidence)) as WebDate,
+    contentScope: row.content_scope as IntelContentScope,
+    extractorVersion: String(row.extractor_version),
+    fetchedAt: String(row.fetched_at),
+    createdAt: String(row.created_at),
+  }
+}
+
 /** Repository for the R2 intel tables (021/022). Reads never trigger fetching. */
 export class IntelRepository {
   constructor(private readonly db: Database) {}
+
+  async listSourcesPage(limit: number, offset: number, id?: string): Promise<IntelSourceRecord[]> {
+    const rows = await this.db.prepare(`SELECT * FROM intel_source ${id ? "WHERE id = ?" : ""} ORDER BY id LIMIT ? OFFSET ?`).all(...(id ? [id, limit, offset] : [limit, offset])) as Row[]
+    return rows.map(mapSource)
+  }
+
+  async listItemsPage(limit: number, offset: number, sourceId?: string): Promise<IntelItemRecord[]> {
+    const rows = await this.db.prepare(`SELECT * FROM intel_item ${sourceId ? "WHERE source_id = ?" : ""} ORDER BY first_seen_at DESC, id LIMIT ? OFFSET ?`).all(...(sourceId ? [sourceId, limit, offset] : [limit, offset])) as Row[]
+    return rows.map(mapItem)
+  }
+
+  async getItem(id: string): Promise<IntelItemRecord | undefined> {
+    const row = await this.db.prepare("SELECT * FROM intel_item WHERE id = ?").get(id) as Row | undefined
+    return row ? mapItem(row) : undefined
+  }
+
+  async listVersionsPage(itemId: string, limit: number, offset: number): Promise<IntelVersionRecord[]> {
+    const rows = await this.db.prepare("SELECT * FROM intel_item_version WHERE item_id = ? ORDER BY created_at DESC, id LIMIT ? OFFSET ?").all(itemId, limit, offset) as Row[]
+    return rows.map(mapVersion)
+  }
+
+  async getVersion(itemId: string, versionId: string): Promise<IntelVersionRecord | undefined> {
+    const row = await this.db.prepare("SELECT * FROM intel_item_version WHERE item_id = ? AND id = ?").get(itemId, versionId) as Row | undefined
+    return row ? mapVersion(row) : undefined
+  }
+
+  async listRecentRuns(sourceId: string): Promise<IntelRunRecord[]> {
+    const rows = await this.db.prepare("SELECT * FROM intel_fetch_run WHERE source_id = ? ORDER BY started_at DESC, id LIMIT 5").all(sourceId) as Row[]
+    return rows.map(mapRun)
+  }
 
   private async transaction<T>(work: () => Promise<T>): Promise<T> {
     await this.db.prepare("BEGIN IMMEDIATE").run()
@@ -318,30 +374,12 @@ export class IntelRepository {
 
   async listItems(sourceId: string): Promise<IntelItemRecord[]> {
     const rows = await this.db.prepare("SELECT * FROM intel_item WHERE source_id = ? ORDER BY canonical_url").all(sourceId) as Row[]
-    return rows.map(row => ({
-      id: String(row.id),
-      sourceId: String(row.source_id),
-      canonicalUrl: String(row.canonical_url),
-      title: String(row.title),
-      publishedAt: str(row.published_at),
-      firstSeenAt: String(row.first_seen_at),
-      lastSeenAt: String(row.last_seen_at),
-      currentVersionId: str(row.current_version_id),
-    }))
+    return rows.map(mapItem)
   }
 
   async listVersions(itemId: string): Promise<IntelVersionRecord[]> {
     const rows = await this.db.prepare("SELECT * FROM intel_item_version WHERE item_id = ? ORDER BY created_at DESC, rowid DESC").all(itemId) as Row[]
-    return rows.map(row => ({
-      id: String(row.id),
-      itemId: String(row.item_id),
-      contentHash: String(row.content_hash),
-      dateEvidence: row.date_evidence == null ? null : JSON.parse(String(row.date_evidence)) as WebDate,
-      contentScope: row.content_scope as IntelContentScope,
-      extractorVersion: String(row.extractor_version),
-      fetchedAt: String(row.fetched_at),
-      createdAt: String(row.created_at),
-    }))
+    return rows.map(mapVersion)
   }
 
   async readVersionBlocks(versionId: string): Promise<IntelBlock[]> {
