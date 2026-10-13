@@ -113,7 +113,9 @@
 
 - Application-only optional source/precise-host/public-PEM binding implemented in the existing secureFetchArticle chain and passed by intel/Feed list sources. No current real source has a CA configured; no schema or global/system trust change.
 - Config validates before DNS and is snapshotted before awaits. CA applies only to the matching HTTPS host; another allowed redirect host/default source uses system trust. rejectUnauthorized remains true, normal hostname verification and existing DNS/private-address/downgrade/limits stay active. Invalid/missing fields or TLS errors fail without weak-trust fallback and preserve existing data.
-- Offline Node-boundary test certificate/fixtures verify scope, redirect/mutation isolation, transport settings and retained intel/Feed data. No sockets or live TLS handshake. Full clean-SHA gate/actual Neat Freak closeout pending; parent review NOT_RUN, R2 overall incomplete.
+- Local gate PASS on clean code SHA `7d98bdb99caf9fdaf15c833ef91f457bee05a2cd`: Feed/security/etc 77/77, Node transport boundary 16/16 including six CA cases, full suite 107 files / 999 passed / 3 skipped; install/build/typecheck/lint, other targeted sets and three isolated smoke commands exit 0. Raw UTF-8 command/SHA/stdout/stderr/exit evidence and actual Neat Freak closeout: `docs/evidence/gate-7d98bdb/`.
+- Initial gate `3038651aa92b70f4d8045559501418e5e686c685` failed only because test-certificate Base64 accidentally matched the R1 business-code retirement scan. Moved the public fixture from server/services to test/__fixtures__ without changing any scan rule, then fully reran. Original failure logs remain in `docs/evidence/gate-3038651/`.
+- Offline Node-boundary certificate/fixtures verify scope, redirect/mutation isolation, transport settings and retained intel/Feed data. No sockets or live TLS handshake. Parent review NOT_RUN, R2 overall incomplete; production trust configuration/system root installation/live/paid/browser/S7 NOT_RUN. CI silence is not CI PASS; existing warnings/skips and raw build-log trailing spaces retained.
 - Contract: `docs/plans/r2-source-ca-2026-10-13.md`.
 
 ### R2 json_list - approved 027 and offline integration (2026-10-13)
@@ -126,7 +128,7 @@
 - No production JSON seed or registry/GET activation. Synthetic UTF-8/GBK JSON fixtures do not claim live MY-W01 coverage. ID-W02 entitlement and HTTP/JSONP XX-W05 remain unsupported boundaries; no CA work.
 - Local gate PASS on clean code SHA `8081997c1ff60786826d579f7f5d461b1a011a3d`: JSON 47/47 (41 parser + 6 integration), web-list 42/42, intel 135/135, full suite 107 files / 991 passed / 3 skipped. Install/build/typecheck/lint, all targeted sets and three isolated smoke commands exit 0. Raw UTF-8 command/SHA/stdout/stderr/exit logs and actual Neat Freak closeout: `docs/evidence/gate-8081997/`.
 - Initial code `aac1560cf0699f16a3c53bb3ebb707f0707cb366` also passed its gate (990/3); closeout review then replaced native JSON parse errors with a constant code to prevent response snippets entering run errors. Added a regression and repeated the full gate on the final SHA; both evidence directories remain. No retained database migration, new dependency, production seed or live source request.
-- Parent review NOT_RUN; R2 overall incomplete. Live/paid/LLM/browser/S7 NOT_RUN (no UI/routes). Code/docs whitespace check passes excluding raw build logs, whose tool-emitted trailing spaces remain intact. CI silence is not CI PASS.
+- JSON/027 parent review PASS after the P2 repair (see repair record above); R2 overall incomplete. Live/paid/LLM/browser/S7 NOT_RUN (no UI/routes). Code/docs whitespace check passes excluding raw build logs, whose tool-emitted trailing spaces remain intact. CI silence is not CI PASS.
 - Slice contract: `docs/plans/r2-json-list-2026-10-13.md`.
 
 ### R2 web_list - approved 026 and collector/storage integration (2026-10-12)
