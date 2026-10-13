@@ -1,0 +1,33 @@
+# command: npx vitest run server/intel
+# full_sha: cb86aabaf715f82eed6d53aa5e481404b37635e3
+# started: 2026-10-13T02:18:43.927Z
+# ---- stdout ----
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ server/intel/sources/json-list.test.ts (42 tests) 37ms
+ ✓ server/intel/sources/web-list.test.ts (35 tests) 73ms
+ ✓ server/intel/json-list-collect.test.ts (7 tests) 381ms
+ ✓ server/intel/web-list-collect.test.ts (7 tests) 424ms
+ ✓ server/intel/llm/receipts.test.ts (24 tests) 906ms
+ ✓ server/intel/collect.test.ts (22 tests) 797ms
+
+ Test Files  6 passed (6)
+      Tests  137 passed (137)
+   Start at  10:18:44
+   Duration  1.63s (transform 1.33s, setup 0ms, import 2.89s, tests 2.62s, environment 1ms)
+
+
+# ---- stderr ----
+npm warn Unknown env config "store-dir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+
+# raw_exit_code: 0

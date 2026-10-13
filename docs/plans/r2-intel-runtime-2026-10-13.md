@@ -10,9 +10,9 @@ Authorized slice: connect collection/due/backoff to the existing BackgroundRunti
 - recoverInterruptedIntel is absent/false by default. Only a bootstrap that acquired that ownership may call recoverIntelRunsAtExclusiveStartup, before runtime starts. Repeated/concurrent bootstrap returns the existing runtime/promise and never repeats recovery. There is no age/heartbeat inference or automatic stale-lock cleanup. Safe recovery of already-ended executors stays in the job.
 - Runtime shutdown stops scheduling, drains tracked execution promises, calls the intel job end method, then releases ownership. A new bootstrap waits for shutdown. Busy/manual executors still refuse end; failed end/release does not silently surrender ownership. Startup failure cleans up its jobs/lease; retained unreleased ownership blocks replacement startup.
 
-## Not connected
-
 Shutdown P2 repair: end/release failure retains shutdownIncomplete; bootstrap rejects with runtime_shutdown_incomplete instead of returning a stopped instance. Completed end steps are removed from the pending queue, and ownership is cleared only after successful release. Explicit shutdown retry resumes unfinished steps; successful steps are not repeated before a fresh startup.
+
+## Not connected
 
 Real source seed selection/fetch, production exclusive-ownership provider, automatic crash recovery, GET/UI, registry enable settings, 304/ETag, P1 live fixtures, manual input, paid/LLM/R3 and 24h live acceptance. Production plugin uses only default-off registration. Do not enable a second TMD/BMKG weather collection chain under this registration change.
 
