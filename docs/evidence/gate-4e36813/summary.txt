@@ -1,0 +1,25 @@
+s7_run_dir=D:\try one\Shipping HOT\.tmp\s7-intel-4e36813-1791861850640
+full_sha=4e36813eb8859f4fb4d658f8cacdedde5b6275ad
+worktree_clean_before_gates=true
+node=v24.15.0
+runner=docs/evidence/run-gates.cjs (spawnSync, UTF-8 capture)
+install raw_exit_code=0  cmd: pnpm install --frozen-lockfile
+build raw_exit_code=0  cmd: pnpm build
+typecheck raw_exit_code=0  cmd: pnpm typecheck
+lint raw_exit_code=0  cmd: pnpm lint
+targeted-intel raw_exit_code=0  cmd: npx vitest run server/intel
+targeted-web-list raw_exit_code=0  cmd: npx vitest run server/intel/sources/web-list.test.ts server/intel/web-list-collect.test.ts
+targeted-json-list raw_exit_code=0  cmd: npx vitest run server/intel/sources/json-list.test.ts server/intel/json-list-collect.test.ts
+targeted-runtime-registry raw_exit_code=0  cmd: npx vitest run server/runtime/intel-bootstrap.test.ts server/runtime/registry.test.ts server/runtime/bootstrap.test.ts server/runtime/background-runtime.test.ts
+targeted-intel-http raw_exit_code=0  cmd: npx vitest run server/api/shipping/intel/read-http.test.ts
+targeted-paid-receipt raw_exit_code=0  cmd: npx vitest run server/intel/llm server/services/translation
+targeted-feed-safe-fetch raw_exit_code=0  cmd: npx vitest run server/providers/feed.test.ts server/runtime/feed-sync-job.test.ts server/services/article-fetch-security.test.ts server/services/article-fetch-transport.test.ts server/services/response-decoding.test.ts server/providers/article-extractor.test.ts server/services/article-service.test.ts server/runtime/registry.test.ts
+test raw_exit_code=0  cmd: pnpm test --run
+smoke-p0-native raw_exit_code=0  cmd: pnpm smoke:p0-native
+smoke-p2c-runtime raw_exit_code=0  cmd: pnpm smoke:p2c-runtime
+smoke-p3-feed-freshness raw_exit_code=0  cmd: pnpm smoke:p3-feed-freshness
+scan-network-llm raw_exit_code=0  cmd: rg -n -i "fetch\(|https?://|openai|anthropic|llm" server/intel server/runtime/intel-collect-job.ts server/runtime/registry.ts server/runtime/bootstrap.ts server/runtime/background-runtime.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts server/database/migrations/024-paid-receipt.ts server/database/migrations/025-paid-receipt-usage-booking.ts server/database/migrations/026-intel-web-list.ts server/database/migrations/027-intel-json-list.ts server/database/runtime.ts server/services/paid-budget.ts server/providers/feed.ts server/services/article-fetch-security.ts server/utils/intel-read.ts server/api/shipping/intel
+scan-secrets raw_exit_code=0  cmd: rg -n -i "(api[_-]?key|secret|token|password)\s*[:=]\s*.[A-Za-z0-9_-]{12,}" server/intel server/runtime/intel-collect-job.ts server/runtime/registry.ts server/runtime/bootstrap.ts server/runtime/background-runtime.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts server/database/migrations/024-paid-receipt.ts server/database/migrations/025-paid-receipt-usage-booking.ts server/database/migrations/026-intel-web-list.ts server/database/migrations/027-intel-json-list.ts server/database/runtime.ts server/services/paid-budget.ts server/providers/feed.ts server/services/article-fetch-security.ts server/utils/intel-read.ts server/api/shipping/intel
+s7 raw_exit_code=0  cmd: pnpm test:e2e:s7
+neat-freak-inventory raw_exit_code=0  cmd: "C:\Program Files\Git\bin\bash.exe" scripts/audit-inventory.sh .
+note: rg exit 1 = no match; audit-inventory.sh is an inventory only, not a security audit.
