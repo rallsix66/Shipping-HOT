@@ -111,6 +111,9 @@
 
 ### R2 json_list - approved 027 and offline integration (2026-10-13)
 
+- P2 unsafe numeric URL identity repair: code `8a1e7044e5baad45265cce31cc696d8a613ed13f` requires Number.isSafeInteger for numeric template parameters; larger IDs must be strings. Original wire JSON with 9007199254740992/9007199254740993 now fails collection before writes and preserves old data; string forms create two distinct URLs/records. Parent re-review pending; no additional migration/parser/CA work.
+- Repair local gate PASS on that clean SHA: JSON 49/49, intel 137/137, full suite 107 files / 993 passed / 3 skipped; install/build/typecheck/lint, all targeted sets and three isolated smoke commands exit 0. UTF-8 raw logs and actual Neat Freak closeout: `docs/evidence/gate-8a1e704/`. The following 47/991 figures are pre-repair historical executor evidence, not the latest acceptance or an independent parent rerun.
+
 - User approval at 00:57:52 UTC covers JSON integration and 027 on isolated databases only. 027 extends the source kind; existing version date_evidence is reused. Existing rows/IDs/health/FK/indexes/triggers are preserved, RSS/web-list identities unchanged.
 - Pinned AIHOT JSON mapping adapted to pure JSON, one GET, bounded own-property paths and encoded URL templates. Shared security/byte decoder/date rules/collector/repository remain authoritative. Unknown configuration, JSONP/scripts, custom request credentials/headers/POST, pagination and detail fetching are unsupported.
 - No production JSON seed or registry/GET activation. Synthetic UTF-8/GBK JSON fixtures do not claim live MY-W01 coverage. ID-W02 entitlement and HTTP/JSONP XX-W05 remain unsupported boundaries; no CA work.
