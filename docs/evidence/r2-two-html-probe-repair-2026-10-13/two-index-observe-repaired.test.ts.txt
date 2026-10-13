@@ -1,5 +1,5 @@
 import { createProbeFileSink, recordTwoIndexProbe, type ProbeTask } from "../scripts/lib/two-index-probe-results"
-import {readFileSync,writeFileSync,existsSync,mkdirSync} from 'node:fs'
+import {writeFileSync,existsSync,mkdirSync} from 'node:fs'
 import {createHash} from 'node:crypto'
 import {load} from 'cheerio'
 import {it,expect} from 'vitest'

@@ -4,10 +4,10 @@ import { expect, it, vi } from "vitest"
 import type { IntelCollectOutcome } from "../../server/intel/collect"
 import { type ProbeRecord, type ProbeReport, type ProbeSink, type ProbeTask, createProbeFileSink, recordTwoIndexProbe } from "./two-index-probe-results"
 
-const success: IntelCollectOutcome = { status: "ok_items", runId: "11111111-1111-1111-1111-111111111111", itemsSeen: 2, itemsNew: 2, itemsRevised: 0 }
+const success: Extract<IntelCollectOutcome, { status: "ok_items" | "ok_empty" }> = { status: "ok_items", runId: "11111111-1111-1111-1111-111111111111", itemsSeen: 2, itemsNew: 2, itemsRevised: 0 }
 const failed: IntelCollectOutcome = { status: "failed", runId: "22222222-2222-2222-2222-222222222222", errorCode: "parse_failed", itemsCommitted: 0 }
 const clock = () => new Date("2026-10-13T09:00:00Z")
-function tasks(firstOutcome = failed): ProbeTask[] {
+function tasks(firstOutcome: IntelCollectOutcome = failed): ProbeTask[] {
   return ["MY-P03", "TH-C01"].map((id, index) => ({
     id: id as ProbeTask["id"],
     run: async (progress, checkpoint) => {
@@ -146,7 +146,7 @@ it("synthetic: rejects duplicate/out-of-scope IDs before running or writing", as
   const { sink, snapshots } = memorySink()
   const input = tasks(success)[0]
   await expect(recordTwoIndexProbe([input, input], sink, "synthetic_offline", clock)).rejects.toThrow("invalid_probe_sources")
-  await expect(recordTwoIndexProbe([{ ...input, id: "../invalid" } as ProbeTask], sink, "synthetic_offline", clock)).rejects.toThrow("invalid_probe_sources")
+  await expect(recordTwoIndexProbe([{ ...input, id: "../invalid" } as unknown as ProbeTask], sink, "synthetic_offline", clock)).rejects.toThrow("invalid_probe_sources")
   expect(snapshots).toHaveLength(0)
   await expect(recordTwoIndexProbe([], sink, "synthetic_offline", clock)).rejects.toThrow("invalid_probe_sources")
 })
