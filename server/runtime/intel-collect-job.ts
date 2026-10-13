@@ -29,7 +29,7 @@ export interface IntelCollectJob extends RuntimeJob {
 }
 
 /**
- * Registers on the single BackgroundRuntime as an ordinary RuntimeJob; no second scheduler. Not added to registry.ts in this slice.
+ * Registers on the single BackgroundRuntime through registry.ts; default disabled and no implicit registry sources/fetcher.
  * Each instance is one executor. It only recovers runs of executors confirmed ended; it never infers that a run is dead from
  * its age. Crash leftovers are handled by the explicit `recoverIntelRunsAtExclusiveStartup` step.
  */

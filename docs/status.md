@@ -109,13 +109,20 @@
 - **Neat Freak（本批）：** Git Bash `scripts/audit-inventory.sh .` exit **0**。
 - 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 **结论：** **R1.5 = IN PROGRESS**；R1.5-1 **BLOCKED**（VNSGN 海况）、R1.5-4 **BLOCKED**；**非**阶段 PASS。
 
+### R2 intel Runtime default-off registration (2026-10-13)
+
+- Actual plugin/bootstrap/registry path now registers one disabled intel-collect job with no implicit sources/fetch. Existing Feed/weather registration is preserved; TMD/BMKG are not silently enabled in a second pipeline. No new scheduler/schema/GET/UI or enable environment switch.
+- Explicit offline injection can enable the job only with seeds/fetch and acquired DB-exclusive lifetime ownership. Optional interrupted-run recovery is gated by that acquisition before startup, never by record age or a repeated bootstrap. Shutdown stops/drains, ends executor, then releases ownership; replacement startup waits. Ownership contract is an injection seam, not a production cross-process lock implementation.
+- Isolated actual-factory/bootstrap tests cover default-off/no duplicates, due/backoff/health, reentry, concurrent bootstrap, drain/restart, denied/missing lease, startup cleanup and file-backed reopen/recovery. Targeted tests pass; clean-SHA full gate/actual Neat Freak closeout pending. Parent review NOT_RUN; R2 overall incomplete.
+- Not connected: production ownership provider/live seed/fetch, real activation, GET/UI, 304/ETag, P1 real fixtures/manual input/24h live. Contract: `docs/plans/r2-intel-runtime-2026-10-13.md`.
+
 ### R2-2 source-specific CA support (2026-10-13)
 
 - Application-only optional source/precise-host/public-PEM binding implemented in the existing secureFetchArticle chain and passed by intel/Feed list sources. No current real source has a CA configured; no schema or global/system trust change.
 - Config validates before DNS and is snapshotted before awaits. CA applies only to the matching HTTPS host; another allowed redirect host/default source uses system trust. rejectUnauthorized remains true, normal hostname verification and existing DNS/private-address/downgrade/limits stay active. Invalid/missing fields or TLS errors fail without weak-trust fallback and preserve existing data.
 - Local gate PASS on clean code SHA `7d98bdb99caf9fdaf15c833ef91f457bee05a2cd`: Feed/security/etc 77/77, Node transport boundary 16/16 including six CA cases, full suite 107 files / 999 passed / 3 skipped; install/build/typecheck/lint, other targeted sets and three isolated smoke commands exit 0. Raw UTF-8 command/SHA/stdout/stderr/exit evidence and actual Neat Freak closeout: `docs/evidence/gate-7d98bdb/`.
 - Initial gate `3038651aa92b70f4d8045559501418e5e686c685` failed only because test-certificate Base64 accidentally matched the R1 business-code retirement scan. Moved the public fixture from server/services to test/__fixtures__ without changing any scan rule, then fully reran. Original failure logs remain in `docs/evidence/gate-3038651/`.
-- Offline Node-boundary certificate/fixtures verify scope, redirect/mutation isolation, transport settings and retained intel/Feed data. No sockets or live TLS handshake. Parent review NOT_RUN, R2 overall incomplete; production trust configuration/system root installation/live/paid/browser/S7 NOT_RUN. CI silence is not CI PASS; existing warnings/skips and raw build-log trailing spaces retained.
+- Offline Node-boundary certificate/fixtures verify scope, redirect/mutation isolation, transport settings and retained intel/Feed data. Parent review PASS for code `7d98bdb` / evidence `020f649`, reported before the Runtime slice; CA application offline scope closed. No sockets or live TLS handshake. R2 overall incomplete; production trust configuration/system root installation/live/paid/browser/S7 NOT_RUN. CI silence is not CI PASS; existing warnings/skips and raw build-log trailing spaces retained.
 - Contract: `docs/plans/r2-source-ca-2026-10-13.md`.
 
 ### R2 json_list - approved 027 and offline integration (2026-10-13)
