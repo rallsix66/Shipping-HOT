@@ -1,0 +1,72 @@
+{
+  "id": "ID-W01",
+  "url": "https://www.bmkg.go.id/alerts/nowcast/en/rss.xml",
+  "kind": "parsed metadata derivative only, not original RSS/encoding fixture",
+  "items": [
+    {
+      "title": "Thunderstorm This Afternoon in Kep. Riau",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CKR20261013002_alert.xml",
+      "publishedAt": "2026-10-13T04:39:00.000Z"
+    },
+    {
+      "title": "Thunderstorm This Afternoon in Kep. Riau",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CKR20261013003_alert.xml",
+      "publishedAt": "2026-10-13T06:14:00.000Z"
+    },
+    {
+      "title": "Thunderstorm This Afternoon in Kalimantan Timur",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CKT20261013003_alert.xml",
+      "publishedAt": "2026-10-13T05:55:00.000Z"
+    },
+    {
+      "title": "Thunderstorm This Evening in Maluku Utara",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CMU20261013002_alert.xml",
+      "publishedAt": "2026-10-13T05:47:00.000Z"
+    },
+    {
+      "title": "Thunderstorm This Evening in Maluku Utara",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CMU20261013003_alert.xml",
+      "publishedAt": "2026-10-13T05:47:00.000Z"
+    },
+    {
+      "title": "Thunderstorm This Afternoon in Papua Barat",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CPB20261013001_alert.xml",
+      "publishedAt": "2026-10-13T05:06:00.000Z"
+    },
+    {
+      "title": "Thunderstorm This Evening in Papua Barat Daya",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CPD20261013001_alert.xml",
+      "publishedAt": "2026-10-13T06:10:00.000Z"
+    },
+    {
+      "title": "Thunderstorm This Evening in Papua Barat Daya",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CPD20261013002_alert.xml",
+      "publishedAt": "2026-10-13T06:30:00.000Z"
+    },
+    {
+      "title": "Thunderstorm This Afternoon in Papua",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CPU20261013001_alert.xml",
+      "publishedAt": "2026-10-13T04:19:00.000Z"
+    },
+    {
+      "title": "Thunderstorm This Afternoon in Riau",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CRU20261013002_alert.xml",
+      "publishedAt": "2026-10-13T04:30:00.000Z"
+    },
+    {
+      "title": "Thunderstorm This Afternoon in Riau",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CRU20261013003_alert.xml",
+      "publishedAt": "2026-10-13T06:00:00.000Z"
+    },
+    {
+      "title": "Thunderstorm This Afternoon in Sulawesi Tengah",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CSG20261013001_alert.xml",
+      "publishedAt": "2026-10-13T05:33:00.000Z"
+    },
+    {
+      "title": "Thunderstorm This Afternoon in Sumatera Utara",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/CSU20261013001_alert.xml",
+      "publishedAt": "2026-10-13T04:50:00.000Z"
+    }
+  ]
+}
