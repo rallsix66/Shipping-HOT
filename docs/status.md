@@ -1,6 +1,16 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
-## R2 原验收收敛 — 2026-10-14（本轮仅文档/只读）
+## R2 default-off production wiring / upstream adaptation — 2026-10-14
+
+- Code `e5d2f0bb0aa4651984d69d280db0c2485d9467a2` (initial70a0b80 plus integer-bound validation). Actual AIHOT commit44578fa11da55f2e863900752653e0c221f6cf70 recovered read-only from retained local Git packs: real path `packages/backend/src/sources/collect.ts`, adaptIntervals. Existing cache worktrees/HEAD were incomplete, not treated as valid source; no upstream download. Blob SHA256/raw source proof and MIT licence retained. Upstream rule:7-day non-backfill daily count/7,<=0.15 uses max, otherwise round(clamp1440/(perDay*3)); free editorial15..60min. No user-designed multiplier.
+- New pure adaptation runs inside the same collection job. Minimal SQLite differences: UTC daily-window boundary rather than a second daily scheduler; initial successful import excluded using first ok_items/ok_empty fetch-run time because no backfill column; only original auto extractor lineage contributes, manual-origin and current-day discoveries excluded. Target15..60minutes for the two existing free RSS info products; failure15min exponential/24hcap still wins while failing, success resets and uses target. This is faithful formula/bounds with explicit timing/backfill adaptation, not a byte-for-byte upstream transplant. Real job tick may round due dispatch; target interval is not an exact wall-clock SLA.
+- Nitro plugin now supplies productionIntelOptions to existing bootstrap/registry/Runtime. Default SHIPPING_INTEL_ENABLED absent/false = disabled/empty sources/no intel dependencies executed. Enabled requires explicit SHIPPING_INTEL_SOURCE_IDS catalog IDs limited to TH-W01/ID-W01; invalid/manual/unadapted selection or missing dependencies fails closed. Real DNS promises.lookup + existing defaultTransport retain pinned-address/security/byte/CA path. No source URL/permission or user persistent env/config changed. Existing source seeds reused;39unadapted source decision/41mapping pending and not activated or countedPASS.
+- Concrete database-scoped ownership is an adjacent `.intel-owner.lock` held through Runtime drain/executor end; exclusive wx acquisition, realpath canonical DB identity, token-checked release. Concurrent same-file process cannot acquire; stale/PID-age lock is never auto-deleted. Default DB is exact Nitro cwd/.data/shipping-hot-v3.sqlite3, not SHIPPING_DATABASE_PATH override. Hard-crash lock can deliberately block restart until authorized operator recovery; no age-based bypass. Only current owner removes its own lock as lifecycle release, not workspace cleanup.
+- New6offline cases: verified formula/source bounds (incl fractional reject), initial/manual/today exclusion and success/failure coordination, default/incomplete/unsupported startup, actual other-process lease competition and stale preservation, pause/drain/release/manual source-row invariance, actual Nitro default-off + query_only HTTP GET with0intel runs/executors. Tests enable only injected fake transport in isolated DB; default real dependency is constructed but never invoked. Existing9bootstrap/22collector and read security suites retained.
+- Exact final new clone `.tmp/intel-production-final2-build`: frozen install/build/typecheck/lint,17files167targeted,124files1156pass/3existing Windows skips,3isolated smokes allrawexit0. Initial70a0b80 also passed; final boundary tightening reran gate. Retained DB/secret-file hashes unchanged. Raw/source proof and actual Neat Freak: `docs/evidence/gate-e5d2f0b-frontend/closeout.md`.
+- **Implementation locally verified, parent wiring review pending.** Actual production enabled calls0, public6batch0, paid/LLM0,24h0. No .env/production config/schema/threshold/denominator/source permission change. GUI/S7NOT_RUN; old previews untouched and no new live server launched.41classification/39public denominator still require user confirmation, NorthportFAIL/originalmaterial gaps remain. No merge/deploy/forcepush or blanket R2PASS.
+
+## Historical R2 原验收收敛 — 2026-10-14（接线/自适应代码事实由上方新实现替代）
 
 - 原9.29条款不扩写：R2-1是指定格式/日期/编码等单元覆盖；真实来源配置归4/5。R2-2是SSRF与分源CA隔离测试，不另加全站实网TLS硬门槛。R2-3是发送后超时/重启不重复付费与零/未配预算零调用，不把实际对账、分钟限流、unknown UI或真实实付加入通关标准。
 - 仅读代码确认：成功nextSync固定seed.intervalMs，独立成功态自适应没有实现；失败15min指数退避/24h封顶及failing/成功重置已有。生产Nitro bootstrap未提供intel seeds/fetch/acquireIntelOwnership，默认disabled/empty；测试注入不是完整生产接线。生产接线是明确未完成项；原“自适应”的算法/验收含义尚须按参考实现或用户确认，不能擅把“成功态变化算法”定义为新硬门槛。本轮未实施。
@@ -30,7 +40,7 @@
 | R2-5 | 真实页夹具100%标题/链接/时间；已有存档/8707019链 | 真实原结构/许可/绑定缺口，NorthportFAIL/原DOM0。不能自行豁免天气/付费/向量 |
 | R2-6 | 审查确认无第二调度/预算表/RSS解析器；现有单一Runtime/parser/budget及链 | 逐项整阶段审查；不为验收创建第二机制或重复同等链 |
 | R2-7 | R3前原文允许纯手动；入库/官方人工标签/清单频率与上次检查时间 | 已有native/HTTP/SSR；真实表单操作未验，保留GUI/S7限制，不另加本轮AI/实付 |
-| R2-8 | 经用户授权真实P1连续24h，失败退避/failing并记live-verification | 生产依赖接线未齐备，原自适应语义先按参考实现/用户澄清；具体代码缺口再离线补，24h随后明确授权，假钟不替代 |
+| R2-8 | 经用户授权真实P1连续24h，失败退避/failing并记live-verification | 接线和经核实上游自适应适配已实现，实际启用/全P1配置及24h仍待授权与验证，假钟不替代 |
 
 额外对账/频率上限/unknown管理/实付/多进程压力是已知限制或后续范围，不擅升为R2-1/2/3新标准。原实施要求的“自适应抓取频率、现有Runtime定时、付费回执/统一预算”仍保留，不能因删除额外门槛而漏掉真实实施缺口。原R2-3切片registry/GET未做项已被后续实现取代。历史1/10用户延后，不重找。
 

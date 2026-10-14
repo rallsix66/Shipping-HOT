@@ -1,5 +1,7 @@
 # R2 原验收收敛与来源映射建议 — 2026-10-14
 
+> Historical read-only findings below were accurate at8707019. Wiring/adaptive gaps are now addressed by `e5d2f0bb0aa4651984d69d280db0c2485d9467a2`; upstream actual44578fa found in local packs, formula/bounds adapted, default remains off. This does not approve pending classification/denominator/network/24h proposals; use docs/status.md for current implementation.
+
 状态：**PROPOSAL / NOT_RUN（公开核查与24h未执行）**。本轮仅只读代码与校正文档；不得把此文当作联网、生产启用、付费、迁移或分母变更授权。权威标准仍是9.29原计划，≥80%/100%不改。代码检查基线 `8707019a74ac81a698d303d852a40b3c13bed489`，既有门禁证据 `docs/evidence/gate-8707019-frontend/`；本轮未重跑功能全量。
 
 ## 1. 原条款 → 证据 → 真缺口

@@ -8,6 +8,8 @@
 
 ## Current Round — Shipping Risk Intelligence (R0–R5 + Demo + Launch)
 
+- **R2 intel entry (2026-10-14):** code supports explicit SHIPPING_INTEL_ENABLED / SHIPPING_INTEL_SOURCE_IDS but default is off; do not enable, write persistent config or run24h without separate authorization. Only currentTMD/BMKG configs selectable. DB-adjacent ownership lock is released only after drain; do not delete stale locks by age/PID or treat them as cleanup residue. Upstream adaptive formula is pinned; source/denominator decisions remain pending. Current evidence in docs/status.md.
+
 - **R2-7 manual slice (2026-10-14):** schema028 and explicit local/same-origin manual submit/check were separately approved by the user. Reuse intel versions/licensed blocks; manual actor/time is separate audit, not authenticated identity or publication time. Manual sources remain disabled; body allowance requires an exact verified Feed-product URL and cannot exceed its existing permission (same-host pages stay metadata-only); no URL fetch/LLM/automatic risk confirmation. Approved temporary R2 stack on `codex/shipping-hot-r2` / draft PR8 over unmerged R1.5 is retained. GUI/S7 and parent acceptance remain pending; read `docs/status.md` for exact evidence.
 
 - **Status (2026-10-09): R1 merged + CI green on `main@b928174`** (PR #5 + PR #6 ripgrep fix). **R1.5 in progress** on `codex/shipping-hot-r1-5` — see `docs/status.md` for acceptance matrix (foundation landed; UI/Runtime/providers pending). R0 `PASS` on `main`. Authoritative plan: `docs/plans/shipping-hot-risk-intelligence-2026-09-29.md` (`APPROVED` 2026-09-30 with `docs/intel-source-catalog.md`). When R0 is `PASS`, this plan supersedes S0–S8 as the active execution plan in docs pointers; S0–S8 remains historical record only.

@@ -1,0 +1,9 @@
+{
+  "name": "smoke-p2c",
+  "command": "pnpm smoke:p2c-runtime",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-production-final2-build",
+  "sha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2",
+  "startedAt": "2026-10-14T06:43:24.682Z",
+  "endedAt": "2026-10-14T06:43:25.993Z",
+  "rawExit": 0
+}

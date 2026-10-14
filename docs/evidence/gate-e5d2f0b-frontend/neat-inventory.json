@@ -1,0 +1,5 @@
+{
+  "command": "bash audit-inventory.sh .",
+  "rawExit": 0,
+  "codeSha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2"
+}
