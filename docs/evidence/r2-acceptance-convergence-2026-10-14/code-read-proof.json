@@ -1,0 +1,20 @@
+{
+  "sha": "8707019a74ac81a698d303d852a40b3c13bed489",
+  "scope": "read-only source inspection; no functional tests rerun",
+  "files": {
+    "server/intel/collect.ts": "7cd2f9657239af5378d16bf84551e338bfc874a5bf591403ef14ba4bbfab7667",
+    "server/runtime/intel-collect-job.ts": "a757467581091a77a0e23d6486cf3b7427322fe431e48ed18aa588eb0d9eb0f4",
+    "server/runtime/registry.ts": "09b43a58711389817e5a90fbd25d6ec7e71d294067231818531ab4870acdb40e",
+    "server/runtime/bootstrap.ts": "bf60fe5e79ca4df548bc812425b24dabc74d55ef8d617a34471ee89508117e93",
+    "server/plugins/background-runtime.ts": "330b91e31d335af8315423ab8a351672002b7feda6ebc37c42b66c0f256a9c1d",
+    "server/intel/llm/receipts.test.ts": "e932c38d09676c4658ee55300182e397713558d369d2cea9812035f42fdb8f5c",
+    "server/services/article-fetch-transport.test.ts": "c87394f66209757ebc5624bfea0fb0ef7c05f246bb6f8322a85a6be34388c4fd"
+  },
+  "findings": {
+    "successFrequency": "fixed seed.intervalMs, no independent success-adaptive branch",
+    "failureBackoff": "15min*2^(n-1),24h cap, source failing, reset on success",
+    "production": "plugin passes no intel injection; registry defaults disabled/empty seeds; no real lookup/transport or concrete lease wiring supplied",
+    "receiptRestartTest": "new fake caller/context on same memory DB; not actual OS restart. File dual-connection test is separate; do not present test title as process evidence",
+    "adaptiveInterpretation": "Original algorithm/bounds unspecified; success-adaptive rule is not automatically a new hard requirement, clarify reference/user meaning before implementation"
+  }
+}

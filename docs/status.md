@@ -1,5 +1,13 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
+## R2 原验收收敛 — 2026-10-14（本轮仅文档/只读）
+
+- 原9.29条款不扩写：R2-1是指定格式/日期/编码等单元覆盖；真实来源配置归4/5。R2-2是SSRF与分源CA隔离测试，不另加全站实网TLS硬门槛。R2-3是发送后超时/重启不重复付费与零/未配预算零调用，不把实际对账、分钟限流、unknown UI或真实实付加入通关标准。
+- 仅读代码确认：成功nextSync固定seed.intervalMs，独立成功态自适应没有实现；失败15min指数退避/24h封顶及failing/成功重置已有。生产Nitro bootstrap未提供intel seeds/fetch/acquireIntelOwnership，默认disabled/empty；测试注入不是完整生产接线。生产接线是明确未完成项；原“自适应”的算法/验收含义尚须按参考实现或用户确认，不能擅把“成功态变化算法”定义为新硬门槛。本轮未实施。
+- 回执“new process”测试实际同内存DB/new fake caller/context，不称真实OS重启；已有重启语义断言和双文件连接竞争证据分开。若需补持久重开证据，可离线补原重启行为，不要求真实付费或额外进程压力门槛。
+- 41项P1自动库存逐项保留，建议分为普通资讯25/天气双重8/政策整页1/运营5/付费天气1/向量1；任何类型/分母解释须用户同意后再用于覆盖率，≥80%/100%原值不改。N/A建议不是PASS，也不自动把41变34或25。Northport关联FAIL与原DOM0保留。
+- 完整原条款→8707019具体代码/既有日志→缺口/决策、逐源fixture许可/脱敏、下一批精确6URL×1GET/512KiB/10s/总120s及24h准备：`docs/plans/r2-acceptance-convergence-2026-10-14.md`。提案NOT_RUN，本轮请求0、实网0、收费0、功能测试重跑0，无新实现/迁移/源启用/权限变更。现有完整链不重复。
+
 ## R2 archived Runtime → GET → page SSR chain — 2026-10-14
 
 - Code `8707019a74ac81a698d303d852a40b3c13bed489`; only `server/intel/chain.test.ts` is new relative to the accepted79fc6c8 production tree. No business/UI/migration/provider/config/permission changes. Existing separate tests already covered real TMD collection/dedupe, Runtime scheduling/lifecycle, read-only HTTP and synthetic SSR; this test joins their interfaces in one execution rather than replacing them.
@@ -7,24 +15,24 @@
 - After Runtime shutdown/ownership release, native SQLite closes/reopens without initialization/recovery. Actual H3 GET list/current/historical/checklist runs under PRAGMA query_only, before/after all-table snapshots equal. Real React Query caches are populated from actual HTTP JSON and the actual ManualIntelPage is SSR-rendered. Shell and unused legacy page only are stubbed; read query function is a throwing tripwire and is not called. HTTP data/state/query hooks are not fabricated. Stored revised title/source link/original published time appear in saved partial SSR. No actual DOM events/styles/pixels/browser acceptance.
 - External TCP connects and non-loopback fetch are blocked by process-local test guards; fetch transport is bytes only and DNS is injected. No external attempts observed, no LLM/paid usage; local intel_collect capability accounting exists and is not misreported as zero Provider invocation.7source rows are archived replay, not live notifications or confirmed port impacts. Revision/503/empty/check operator are synthetic and identified as such.
 - Fresh exact code clone `.tmp/intel-chain-final2-build`: install/build/typecheck/lint,13files130targeted,122files1150pass/3existing Windows skips,3isolated smokes all rawexit0. Targeted and full runs each generated chain proof. Initialde793ce gate typecheck FAIL (test imported server aliases from frontend project), later phases NOT_RUN; test moved to the server project, HTTP result types added, view loaded at runtime while production view remains app-typechecked. Failed evidence retained. Final raw logs, chain metadata and partial HTML: `docs/evidence/gate-8707019-frontend/`.
-- **Offline chain PASS only; overallR2 NOT_RUN/incomplete; parent chain review pending.** Visual/keyboard/live events/widths/S7 NOT_RUN. Existing4488/feed preview still serves79fc6c8 unchanged production code; no new production build/preview switch was needed. SSR artifact is not an interactive preview. Old previews, raw/evidence logs, clones and isolated DBs retained; no network source fetch, live/paid run, merge/deploy/force-push.
+- **Offline chain parent limited review accepted; overallR2 incomplete.** Visual/keyboard/live events/widths/S7 NOT_RUN. Existing4488/feed preview still serves79fc6c8 unchanged production code; no new production build/preview switch was needed. SSR artifact is not an interactive preview. Old previews, raw/evidence logs, clones and isolated DBs retained; no network source fetch, live/paid run, merge/deploy/force-push.
 
-### R2 remaining acceptance — active2026-09-29 plan, as of2026-10-14
+### R2 remaining acceptance — corrected to original9/29 clauses2026-10-14
 
-No new offline loop is prescribed by this list. Limited acceptance is not an overall stage PASS.
+以下替代上一轮把风险限制混入硬门槛的列表。详情与逐条原文见 `docs/plans/r2-acceptance-convergence-2026-10-14.md`；原≥80%/100%不变。
 
-| Plan item | Already implemented/verified within scope | Remaining category and concrete requirement |
+| 项目 | 原标准/已有码证据 | 真正剩余与边界 |
 | --- | --- | --- |
-| R2-1 formats/encoding/date/URL/license | Existing RSS/Atom/RDF/web_list/json_list/charset/date/security unit suites; this TH-W01 end-to-end archived flow | **Data/config gap:** per-source real product compatibility, P1 article scope/denominator and suitable original/date fixtures still incomplete; generic/synthetic tests do not certify every source |
-| R2-2 SSRF/source-specific CA | Existing private/redirect/DNS-fixed/CA isolation offline tests; this exact secure-byte path | **Live evidence:** source TLS/CA and reachability only within previously approved snapshots; no blanket whole-project fetch unification or live entitlement claim |
-| R2-3 paid receipts/budget | Idempotent claims/unknown no-resend/late accounting/zero-budget and absent-key offline gates | **Implementation/validation boundaries:** actual-fee reconciliation/hard ceiling, minute/hour/day request caps, unknown manual resolution UI and independent-process SQLITE_BUSY retry evidence are not completed; real model/caller wiring belongs later authorizedR3, not this zero-LLM chain. Real paid acceptance requires explicit budget/key/call authorization |
-| R2-4 environment/catalog qualification | Prior separately approved six-RSS after-DNS batch and four-index snapshots recorded; DNS correction was actually observed, oldHTTP0 blockage is historical | **Decision + authorized live verification:** final article/operational denominator unresolved; allP1>=80% current qualification/coverage not established. Need agreed mapping and separately authorized bounded environment checks; snapshots do not establish continuous reliability |
-| R2-5 real-page replay/title/link/time | Existing historical archive subchecks and approved snapshots; this uses the same TH-W01 archive and adds no source count | **Data/license gap:** original XML/DOM/encoding/date material still missing for many candidates; metadata derivatives are not originals. Northport association qualityFAIL and originalHTML0 remain, despite offline fail-closed defense. Retained automatic inventory41 is not an approved final article denominator |
-| R2-6 no duplicate mechanisms | Existing one Runtime/registry/parser/budget boundary; source inventory review; this uses one registry-created job and existingGET/page | **Whole-stage closeout/review:** final integrated audit after scope/data gaps resolved. Do not build another scheduler/parser/budget or repeat this same successful offline chain without a new failure |
-| R2-7 manual entry/checklist |79fc6c8 twoP2 parent review closed, limited accepted; product license/identity/native write/read/SSR cases and checklist distinctions verified | **Implemented but GUI unverified:** actual click/edit/retry/version UX, keyboard/widths/S7 remainNOT_RUN. AI autofill deliberately waits forR3; operator is self-entered, licenses are not broadened |
-| R2-8 controlled real24h/backoff | Runtime/due/backoff/empty/failure/lease and restart simulated offline, including this5-run flow | **Explicit live authorization:** actualP1 source configuration/permission, exclusive owner and >=24h controlled run/logs; must not infer from fake clocks, archives or short snapshots |
+| R2-1 | 指定RSS/Atom/RDF/web_list/json_list/日期/GBK/TIS-620/windows-1258/URL/修订/白名单单元；8707019既有全量日志 | 单元证据逐项复审；真实来源配置不是本条新增条件，归4/5 |
+| R2-2 | 私网/跳转私网阻断及分源CA隔离；security/transport单测在8707019 | 不加实网TLS全站握手通关要求；实际证书有效性只是后续实网边界 |
+| R2-3 | 发送后超时/重启不重复付费；零/未配预算零调用；receipts单测/单预算 | 重启用例语义模拟不冒充真实进程。可离线补文件库重开证明；对账/分钟限流/unknown UI/真实实付不是新增门槛 |
+| R2-4 | 实际环境逐源写回目录，P1自动≥80% OK；已有六RSS/four-index快照 | 分类/分母未批准；更广复核需有界公开授权。HTTP200不是OK |
+| R2-5 | 真实页夹具100%标题/链接/时间；已有存档/8707019链 | 真实原结构/许可/绑定缺口，NorthportFAIL/原DOM0。不能自行豁免天气/付费/向量 |
+| R2-6 | 审查确认无第二调度/预算表/RSS解析器；现有单一Runtime/parser/budget及链 | 逐项整阶段审查；不为验收创建第二机制或重复同等链 |
+| R2-7 | R3前原文允许纯手动；入库/官方人工标签/清单频率与上次检查时间 | 已有native/HTTP/SSR；真实表单操作未验，保留GUI/S7限制，不另加本轮AI/实付 |
+| R2-8 | 经用户授权真实P1连续24h，失败退避/failing并记live-verification | 生产依赖接线未齐备，原自适应语义先按参考实现/用户澄清；具体代码缺口再离线补，24h随后明确授权，假钟不替代 |
 
-R2-3 first-slice plan's old registry/GET-not-done bullet is historical: later registry/GET slices already landed. R1.5 historical1/10 remains user-deferred and is not recollected or used to block R2. Next meaningful work is scope/denominator/data/live authorization or specific remaining implementation, not another equivalent offline replay. This list does not authorize any live/config/paid action.
+额外对账/频率上限/unknown管理/实付/多进程压力是已知限制或后续范围，不擅升为R2-1/2/3新标准。原实施要求的“自适应抓取频率、现有Runtime定时、付费回执/统一预算”仍保留，不能因删除额外门槛而漏掉真实实施缺口。原R2-3切片registry/GET未做项已被后续实现取代。历史1/10用户延后，不重找。
 
 ## R2-7 P2 license / attribution repair — 2026-10-14
 

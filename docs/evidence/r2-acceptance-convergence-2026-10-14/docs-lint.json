@@ -1,0 +1,7 @@
+{
+  "command": "pnpm exec eslint docs/status.md docs/plans/r2-acceptance-convergence-2026-10-14.md --fix",
+  "scope": "docs-only",
+  "startedAt": "2026-10-14T06:01:31.864Z",
+  "endedAt": "2026-10-14T06:01:34.692Z",
+  "rawExit": 0
+}
