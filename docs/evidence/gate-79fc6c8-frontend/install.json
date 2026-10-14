@@ -1,0 +1,9 @@
+{
+  "name": "install",
+  "command": "pnpm install --frozen-lockfile",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\manual-p2-final-build",
+  "sha": "79fc6c84b29497c869e029d27130ac02c8c04251",
+  "startedAt": "2026-10-14T04:56:49.709Z",
+  "endedAt": "2026-10-14T04:57:00.015Z",
+  "rawExit": 0
+}
