@@ -1,0 +1,9 @@
+{
+  "name": "smoke-feed",
+  "command": "pnpm smoke:p3-feed-freshness",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\manual-intel-final2-build",
+  "sha": "a974de75fc8db1e5bf2ef1122b4953a65602cc2e",
+  "startedAt": "2026-10-14T04:38:57.722Z",
+  "endedAt": "2026-10-14T04:38:58.808Z",
+  "rawExit": 0
+}

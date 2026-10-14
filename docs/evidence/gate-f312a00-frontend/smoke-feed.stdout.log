@@ -1,0 +1,5 @@
+
+> shipping-hot@0.0.41 smoke:p3-feed-freshness D:\try one\Shipping HOT\.tmp\manual-intel-final3-build
+> node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p3-feed-freshness-sqlite-smoke.ts
+
+{"process":"B","persisted":true,"current":1,"history":3,"visibility":"current"}
