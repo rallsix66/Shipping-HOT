@@ -1,0 +1,6 @@
+{
+  "scope": "new JSON metadata only; not private raw or historical whole repository",
+  "positiveControlDetected": true,
+  "filesChecked": 7,
+  "valueHits": 0
+}

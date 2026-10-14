@@ -1,3 +1,7 @@
+## R2 下一四源核查及 TH-C02 文件日期适配（2026-10-14）
+
+代码2acfda4c8ddab3f8064d199bb3cfcf26873ff288：VN-P03/VN-T01/ID-T01均安全DNS blocked_address、HTTP0，未取得原页，不判来源本身不合格；TH-C02原目录GET1、200、115531bytes。本批HTTP1，无retry/redirect/detail/网络配置改动。TH-C02默认关闭、仅metadata，不加入active registry；复用第3列标题/link、第4列Thai佛历“文件日期”规则，不把编号/计数当日期，不声明发布时间/时区。完整原字节现collector隔离SQLite100items/100versions、重复new0/revised0、只读重开全部字段0差异；仅该原页文件日期metadata回放有限通过。原页许可未知仍只本地。155定向、1182全量/3既有跳过、install/build/typecheck/lint/3smoke全退出0，根保留DB/secret-file哈希不变。39≥32/整体R2未通过，生产/24h/付费未启用、GUI/S7未运行。[四源事实和边界](evidence/r2-next-four-2026-10-14/report.md)，[精确SHA门禁](evidence/gate-2acfda4-thai-document/summary.json)。
+
 ## R2 三源默认关闭适配与完整原字节回放（2026-10-14）
 
 代码ca654122bcad240f090d0e675071a5e208237e8e：CN-T02政策10条、PH-C01真实标题card11条、CN-P01真正“通知公告”tab8条加入现有HTML候选配置，全部enabled=false/persistence=disallowed，不加入active registry，production仍仅原TMD/BMKG允许。PH只取h3标题link，Read more排除；新增显式Gregorian完整英文月份day规则，无宽松Date.parse/时间推断，重复URL冲突仍fail-closed。三份完整本地原字节→现collector/隔离SQLite→重复0新0修订→只读重开全部title/URL/dateEvidence核对0差异，day precision、未知时区/publishedAtnull。VN-P01全表10行日期缺失，unknown/缺字段、不详情。本轮sourceHTTP0/DNS0，未知原页许可仍只本地，不把骨架称raw。

@@ -1,0 +1,163 @@
+{
+  "id": "TH-C02",
+  "url": "https://www.customs.go.th/list_strc_download_with_docno_date.php?ini_content=announce_160426_01&order_by=date&sort_type=0&lang=th",
+  "enabled": false,
+  "persistence": "disallowed",
+  "config": {
+    "listSelector": "table.table-hover",
+    "itemSelector": "tbody > tr",
+    "linkSelector": "td:nth-child(3) a[href]",
+    "titleSelector": "td:nth-child(3) a[href]",
+    "publishedAtSelector": "td:nth-child(4)",
+    "calendar": "buddhist",
+    "dateFormat": "thai_month_name",
+    "allowUrlPrefixes": [
+      "https://www.customs.go.th/cont_strc_download_with_docno_date.php"
+    ],
+    "dateRuleBasis": "TH-C02 complete raw observed 2026-10-14: column3 title/detail link, column4 header วันที่เอกสาร (document date), full Thai month names/Buddhist year2569. Column2 is document number, column5 download count. Local document day only, not publication timestamp; no time or timezone."
+  },
+  "startedAt": "2026-10-14T08:40:52.514Z",
+  "httpRequests": 0,
+  "material": "complete private real response bytes, not synthetic or sanitized skeleton",
+  "rawHtmlCommitted": false,
+  "fetchedRawSha256": "d3569050a2f6be3f01a0a8cd9e62fd6c5c632520bc91956efefa679364f85ec7",
+  "rawBytes": 115531,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 115531
+  },
+  "adapterCount": 100,
+  "dateRules": [
+    "configured_thai_month_name_buddhist_minus_543"
+  ],
+  "samples": [
+    {
+      "titleExcerpt": "ยกเลิกใบเสร็จรับเงิน",
+      "canonicalUrl": "https://www.customs.go.th/cont_strc_download_with_docno_date.php?current_id=14232b324148505e4f464b47464b4a&lang=th&top_menu=menu_homepage",
+      "dateEvidence": {
+        "raw": "9 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C02 complete raw observed 2026-10-14: column3 title/detail link, column4 header วันที่เอกสาร (document date), full Thai month names/Buddhist year2569. Column2 is document number, column5 download count. Local document day only, not publication timestamp; no time or timezone.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-09",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "อนุมัติต่ออายุการเป็นผู้ประกอบการของเร่งด่วน",
+      "canonicalUrl": "https://www.customs.go.th/cont_strc_download_with_docno_date.php?current_id=14232b324148505e4f464b47464b4b&lang=th&top_menu=menu_homepage",
+      "dateEvidence": {
+        "raw": "9 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C02 complete raw observed 2026-10-14: column3 title/detail link, column4 header วันที่เอกสาร (document date), full Thai month names/Buddhist year2569. Column2 is document number, column5 download count. Local document day only, not publication timestamp; no time or timezone.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-09",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "ยกเลิกใบเสร็จรับเงิน",
+      "canonicalUrl": "https://www.customs.go.th/cont_strc_download_with_docno_date.php?current_id=14232b324148505e4f464a4f464b49&lang=th&top_menu=menu_homepage",
+      "dateEvidence": {
+        "raw": "8 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C02 complete raw observed 2026-10-14: column3 title/detail link, column4 header วันที่เอกสาร (document date), full Thai month names/Buddhist year2569. Column2 is document number, column5 download count. Local document day only, not publication timestamp; no time or timezone.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-08",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "การเปิดดำเนินการเขตปลอดอากร JHT FREE ZONE ของบริษัท จิ่วเหอไทย จำกัด",
+      "canonicalUrl": "https://www.customs.go.th/cont_strc_download_with_docno_date.php?current_id=14232b324148505e4e464b48464b4a&lang=th&top_menu=menu_homepage",
+      "dateEvidence": {
+        "raw": "6 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C02 complete raw observed 2026-10-14: column3 title/detail link, column4 header วันที่เอกสาร (document date), full Thai month names/Buddhist year2569. Column2 is document number, column5 download count. Local document day only, not publication timestamp; no time or timezone.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-06",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "แก้ไขเพิ่มเติมรหัสสถิติสินค้า (ฉบับที่ 12)",
+      "canonicalUrl": "https://www.customs.go.th/cont_strc_download_with_docno_date.php?current_id=14232b324147505f4d464b48464b48&lang=th&top_menu=menu_homepage",
+      "dateEvidence": {
+        "raw": "30 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C02 complete raw observed 2026-10-14: column3 title/detail link, column4 header วันที่เอกสาร (document date), full Thai month names/Buddhist year2569. Column2 is document number, column5 download count. Local document day only, not publication timestamp; no time or timezone.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-30",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "การระงับสิทธิการเป็นผู้นำของเข้า ผู้ส่งของออกระดับมาตรฐานเออีโอเป็นการชั่วคราว",
+      "canonicalUrl": "https://www.customs.go.th/cont_strc_download_with_docno_date.php?current_id=14232b324147505f4d464b48464b4c&lang=th&top_menu=menu_homepage",
+      "dateEvidence": {
+        "raw": "30 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C02 complete raw observed 2026-10-14: column3 title/detail link, column4 header วันที่เอกสาร (document date), full Thai month names/Buddhist year2569. Column2 is document number, column5 download count. Local document day only, not publication timestamp; no time or timezone.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-30",
+        "publishedAt": null
+      }
+    }
+  ],
+  "first": {
+    "status": "ok_items",
+    "runId": "d8ecee6a-7261-48d6-ad95-938854e88971",
+    "itemsSeen": 100,
+    "itemsNew": 100,
+    "itemsRevised": 0
+  },
+  "firstCounts": {
+    "items": 100,
+    "versions": 100
+  },
+  "repeat": {
+    "status": "ok_items",
+    "runId": "9d80729a-e811-432a-89d5-f1323759c837",
+    "itemsSeen": 100,
+    "itemsNew": 0,
+    "itemsRevised": 0
+  },
+  "repeatCounts": {
+    "items": 100,
+    "versions": 100
+  },
+  "injectedTransports": 2,
+  "status": "OFFLINE_REPLAY_PENDING_REOPEN"
+}
