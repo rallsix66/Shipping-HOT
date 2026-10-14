@@ -1,0 +1,15 @@
+{
+  "source": "TH-C01",
+  "url": "https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th",
+  "kind": "sanitized DOM structural metadata derivative; not original HTML or configured parser output",
+  "counts": {
+    "anchors": 0,
+    "tables": 0,
+    "rows": 0,
+    "times": 0
+  },
+  "candidates": [],
+  "itemParser": "NOT_RUN: no source adapter configured in this observation",
+  "noCandidateMeaning": "No numeric/English date association observed by bounded heuristic; not proof of no items",
+  "completeFieldsPass": false
+}
