@@ -1,3 +1,7 @@
+## R2 两源原字节回放及明确 DNS 事实（2026-10-14）
+
+产品/候选配置未改。Northport与10/13同hash原页经现有适配器首次/重复均duplicate_conflict、写入0，仍FAIL；Thai完整原字节现配置解析100条、隔离SQLite100版本、重复无新版本；只读重开对全部100条完整dateEvidence/身份检查0差异，day precision/localDate，publishedAt仍null。该原页离线回放有限通过，不计全P1可用性PASS。四域各一次系统DNS分别返回198.18.2.24–27，现有SSRF均blocked_address；符合fake-IP形态但不单凭结果归因代理配置，交父处理，无HTTP或网络设置更改。[结果、许可边界和已实现规则纠正](evidence/r2-two-raw-dns-2026-10-14/report.md)。原页仍仅本地；39≥32未达标，24h/生产/付费未启用。
+
 ## R2 六源有界公开观察（2026-10-14；非生产启用）
 
 本轮目录内六源各评估一次：CN-P01/CN-T02/VN-P01/PH-C01 在 DNS 安全检查 blocked_address，HTTP0；MY-P03/TH-C01 各 GET1、200，合计HTTP2，保存响应前置哈希和脱敏标签树/同行字段关系。两源均 PARTIAL，产品适配器 NOT_RUN、原页再分发许可未知，完整原字节仅本地忽略目录；没有新增 PASS。首次 Thai form 子树误删观察已离线纠正，不据初始0计数认定无条目。Northport 旧关联 FAIL 保留，已有原结构观察不等于产品通过。无重试/重定向/详情/换路/网络设置/LLM/付费/生产开关/24h；39公开源≥32通过仍未达标。[本批证据和下一最小适配需求](evidence/r2-six-public-2026-10-14/report.md)。

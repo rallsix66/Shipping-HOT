@@ -1,0 +1,16 @@
+{
+  "hostname": "www.gd.msa.gov.cn",
+  "startedAt": "2026-10-14T07:30:18.927Z",
+  "resolver": "node:dns/promises.lookup hostname {all:true}; existing system resolver only",
+  "httpRequests": 0,
+  "addresses": [
+    {
+      "address": "198.18.2.24",
+      "family": 4,
+      "blockedByExistingSafety": true,
+      "benchmark19818Range": true
+    }
+  ],
+  "safetyResult": "blocked_address",
+  "finishedAt": "2026-10-14T07:30:18.935Z"
+}

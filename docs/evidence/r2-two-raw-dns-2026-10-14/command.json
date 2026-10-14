@@ -1,0 +1,1 @@
+{"started":"2026-10-14T07:30:16.659Z","finishedAt":"2026-10-14T07:30:18.984Z","command":"pnpm exec vitest run -c .tmp/two-raw-dns-20261014.config.ts","rawExit":0,"signal":null}

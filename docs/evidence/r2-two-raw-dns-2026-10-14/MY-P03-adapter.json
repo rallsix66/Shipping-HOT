@@ -1,0 +1,34 @@
+{
+  "id": "MY-P03",
+  "startedAt": "2026-10-14T07:30:18.265Z",
+  "status": "NOT_RUN",
+  "config": {
+    "listSelector": ".div-article-main2",
+    "itemSelector": ".release-grid2 > article.card2",
+    "linkSelector": "a[href]",
+    "linkTextFormat": "dmy-date-title",
+    "dateOrder": "dmy",
+    "calendar": "gregorian",
+    "allowUrlPrefixes": [
+      "https://www.northport.com.my/np/docs/Announcements"
+    ],
+    "dateRuleBasis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied."
+  },
+  "sourceEnabled": false,
+  "permission": "private complete raw replay only; sanitized bounded metadata committed, not raw HTML",
+  "actualHttpRequests": 0,
+  "rawBytes": 73037,
+  "rawSha256": "880e1a180dc686d9d9d71578a753ee87af24042563a7c58f82c0885f8d3c5691",
+  "expectedRawSha256": "880e1a180dc686d9d9d71578a753ee87af24042563a7c58f82c0885f8d3c5691",
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "default",
+    "declarations": [],
+    "conflict": false,
+    "byteLength": 73037
+  },
+  "adapter": {
+    "status": "failed",
+    "errorCode": "web_list_duplicate_conflict"
+  }
+}
