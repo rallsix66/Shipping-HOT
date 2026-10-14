@@ -12,7 +12,7 @@ export interface WebListConfig {
   publishedAtUtcOffset?: string
   dateOrder?: "dmy"
   calendar?: "gregorian" | "buddhist"
-  dateFormat?: "thai_month_name" | "english_month_name"
+  dateFormat?: "thai_month_name" | "english_month_name" | "indonesian_enactment_date"
   /** Date and title share the observed anchor text; no prose/date searching. */
   linkTextFormat?: "dmy-date-title"
   dateRuleBasis: string
@@ -38,7 +38,7 @@ const KEYS = new Set([
   "allowUrlPrefixes",
   "denyUrlPrefixes",
 ])
-const VALUES: Record<string, string[]> = { titleAttribute: ["title", "alt"], dateOrder: ["dmy"], calendar: ["gregorian", "buddhist"], dateFormat: ["thai_month_name", "english_month_name"], linkTextFormat: ["dmy-date-title"] }
+const VALUES: Record<string, string[]> = { titleAttribute: ["title", "alt"], dateOrder: ["dmy"], calendar: ["gregorian", "buddhist"], dateFormat: ["thai_month_name", "english_month_name", "indonesian_enactment_date"], linkTextFormat: ["dmy-date-title"] }
 const SELECTORS = ["listSelector", "itemSelector", "linkSelector", "titleSelector", "publishedAtSelector", "emptySelector"]
 
 export class UnsupportedConfig extends Error {}
@@ -72,6 +72,7 @@ export function assertSupportedConfig(input: unknown): asserts input is WebListC
   }
   assertDateAndUrlConfig(config)
   if (config.dateFormat === "english_month_name" && config.calendar === "buddhist") throw new UnsupportedConfig("english_month_name requires Gregorian calendar")
+  if (config.dateFormat === "indonesian_enactment_date" && config.calendar === "buddhist") throw new UnsupportedConfig("indonesian_enactment_date requires Gregorian calendar")
   if (config.linkTextFormat && (config.dateOrder !== "dmy" || config.dateFormat || config.titleSelector || config.titleAttribute || config.publishedAtSelector)) throw new UnsupportedConfig("linkTextFormat requires dmy and exclusive link text mapping")
 }
 
