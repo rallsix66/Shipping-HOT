@@ -6,7 +6,7 @@ import { CUSTOMS_SYNTHETIC, NORTHPORT_SYNTHETIC } from "./sources/__fixtures__/h
 import { initShippingTables } from "#/database/shipping"
 
 const NOW = new Date("2026-10-13T08:00:00Z")
-const cases = htmlIndexCandidates.map((seed, index) => ({ seed, html: [NORTHPORT_SYNTHETIC, CUSTOMS_SYNTHETIC][index], count: [3, 2][index] }))
+const cases = htmlIndexCandidates.filter(seed => ["MY-P03", "TH-C01"].includes(seed.catalogId)).map((seed, index) => ({ seed, html: [NORTHPORT_SYNTHETIC, CUSTOMS_SYNTHETIC][index], count: [3, 2][index] }))
 const offline = (html: string): IntelFetchDeps => ({ lookup: async () => [{ address: "93.184.216.34", family: 4 }], transport: async () => ({ status: 200, headers: { "content-type": "text/html; charset=utf-8" }, body: new TextEncoder().encode(html) }) })
 
 describe("disabled HTML candidates: synthetic collector to SQLite only", () => {

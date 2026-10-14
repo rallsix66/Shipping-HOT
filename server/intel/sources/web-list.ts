@@ -42,7 +42,16 @@ export function parseLooseDate(value: string | null | undefined, config: Pick<We
   const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]
   const thai = config.dateFormat === "thai_month_name" ? /^(\d{1,2})\s+(มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม)\s+(\d{4})$/.exec(v) : null
   let y: number, mo: number, d: number, tail: string
-  if (config.dateFormat === "thai_month_name") {
+  if (config.dateFormat === "english_month_name") {
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    const english = /^(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2}),\s+(\d{4})$/.exec(v)
+    if (!english || result.calendar !== "gregorian") return { ...result, rule: "unsupported_format" }
+    y = +english[3]
+    mo = months.indexOf(english[1]) + 1
+    d = +english[2]
+    tail = ""
+    result.rule = "configured_english_month_name"
+  } else if (config.dateFormat === "thai_month_name") {
     if (!thai || !thaiMonths.includes(thai[2])) return { ...result, rule: "unsupported_format" }
     y = +thai[3]
     mo = thaiMonths.indexOf(thai[2]) + 1
