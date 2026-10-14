@@ -34,6 +34,12 @@ afterEach(() => {
 })
 
 describe("r2-7 manual entry offline SQLite", () => {
+  it("reuses Feed URL canonicalization for tracking parameters, fragments and trailing slash", async () => {
+    const a = await manualSubmit(state.repository, input({ url: "https://www.tmd.go.th/story/?utm_source=offline#part" }), NOW)
+    const b = await manualSubmit(state.repository, input({ requestId: "request-0002" }), NOW)
+    expect(b).toMatchObject({ itemId: a.itemId, outcome: "unchanged" })
+    expect(await state.repository.listItems(source.id)).toHaveLength(1)
+  })
   it("rolls back a failed schema28 rebuild, restores FK enforcement and safely retries", async () => {
     let fault = false
     const old = open(":memory:", (sql) => {

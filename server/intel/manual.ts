@@ -2,7 +2,8 @@ import { createHash } from "node:crypto"
 import type { IntelRepository } from "#/database/intel"
 import { contentScopeFor, licensedBlocks } from "#/intel/content-license"
 import { manualCatalog } from "#/intel/manual-catalog"
-import { intelSourceSeeds } from "#/intel/sources"
+import { intelSourceSeeds } from "#/intel/sources.ts"
+import { canonicalizeFeedUrl } from "#/providers/feed"
 
 export class ManualInputError extends Error {}
 function invalid(): never {
@@ -44,8 +45,8 @@ export async function manualSubmit(repo: IntelRepository, input: unknown, now: s
   }
   const hosts = manual ? manual.urls.map(value => new URL(value).hostname) : seed!.allowedHosts
   if (url.protocol !== "https:" || url.username || url.password || (url.port && url.port !== "443") || !hosts.includes(url.hostname) || [...url.searchParams.keys()].some(key => /key|token|secret|password|auth|credential|signature|cookie|csrf|sig/i.test(key))) return invalid()
-  url.hash = ""
-  url.searchParams.sort()
+  const canonicalUrl = canonicalizeFeedUrl(url.toString())
+  if (!canonicalUrl) return invalid()
   const title = text(data.title, 500)
   const body = text(data.body ?? "", 100000, false)
   // Refuse prohibited text instead of silently storing a hash of restricted full text.
@@ -61,5 +62,5 @@ export async function manualSubmit(repo: IntelRepository, input: unknown, now: s
   const contentScope = contentScopeFor(source.persistence)
   const blocks = licensedBlocks(contentScope, title, body)
   const contentHash = hash({ title, publishedAt: publishedAt ?? null, contentScope, blocks })
-  return repo.writeEntry({ sourceId, canonicalUrl: url.toString(), title, publishedAt, contentHash, contentScope, blocks, fetchedAt: now, extractorVersion: "manual-plain-v1" }, { requestId, sourceId, operator, enteredAt: now, action: "submit", payloadHash: hash({ sourceId, operator, url: url.toString(), contentHash }) })
+  return repo.writeEntry({ sourceId, canonicalUrl, title, publishedAt, contentHash, contentScope, blocks, fetchedAt: now, extractorVersion: "manual-plain-v1" }, { requestId, sourceId, operator, enteredAt: now, action: "submit", payloadHash: hash({ sourceId, operator, canonicalUrl, contentHash }) })
 }

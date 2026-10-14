@@ -1,6 +1,6 @@
 import type { Database } from "db0"
 import { manualCatalog } from "#/intel/manual-catalog"
-import { intelSourceSeeds } from "#/intel/sources"
+import { intelSourceSeeds } from "#/intel/sources.ts"
 
 /** Approved R2-7 addition. Old rows and their provenance remain untouched. */
 export const intelManualMigration = {
