@@ -10,5 +10,5 @@
     }
   },
   "include": ["server", "*.config.*", "shared", "test", "scripts", "tools", "dist/.nitro/types"],
-  "exclude": ["test/ui-smoke.test.ts", "test/policy-console.test.ts", "test/reduce-motion.test.ts", "test/ports-demo.test.ts", "test/calendar-demo.test.ts", "test/manual-intel.test.ts"]
+  "exclude": ["test/ui-smoke.test.ts", "test/policy-console.test.ts", "test/reduce-motion.test.ts", "test/ports-demo.test.ts", "test/calendar-demo.test.ts", "test/manual-intel.test.ts", "test/intel-chain.test.ts"]
 }
