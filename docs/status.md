@@ -1,5 +1,13 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
+## Demo-source frontend / manual policy slice — 2026-10-14
+
+- User requested frontend/backend parallel progress: frontend adapts the selected demo source; backend remains on the2026-09-29 plan, modules open according to actual capabilities. Code `3fb3ad3dd0d6435c7d36376c579de238b6ecfa3c` (initial7666890 plus cached-read-error repair), draftPR8 stacked on R1.5.
+- Reused demo palette/sidebar/mobile nav/filter tabs/policy list/detail CSS and structure; reference SHA256 `23d6efbb343182eba93caa74a4b1ca1657bab25f414fb873d9c448efe98b51b7` unchanged. Seven existing pages remain reachable. Country overview, independent weather and merged risk-event modules unopened; manual policies use existing APIs/validation/timezones/fixture and version semantics. No hardcoded demo counts/AI output, new backend/schema/dependency/source activation or paid work.
+- Final isolated fresh-install gate: install/build/typecheck/lint,28 targeted tests, full115files/1090pass/3existing Windows skips and3isolated smokes raw exit0. Initial7666890 missing`.tmp` failure remains archived; environment corrected, no product/test relaxation. Evidence/actual Neat Freak: `docs/evidence/gate-3fb3ad3-frontend/closeout.md` and adjacent raw logs.
+- Built-server HTTP32pass on `http://127.0.0.1:4482/policies`; synthetic S7/policy fixtures only, fixed test clock explicitly disclosed, no credentials/project env, Runtime/translation/providers disabled, independent cwd/build. Existing4477 was not replaced/rebuilt/restarted.
+- **Browser/pixel/mobile/keyboard/S7 NOT_RUN; full UI acceptance pending.** Custom CDP action was rejected by automatic approval; official browser unavailable, no bypass. Source adaptation/non-browser continuation explicitly approved. Implementation is available for parent/user review, not a full frontend-stage PASS. R1.5 and R2 remaining gaps unchanged; R3–R5 targets not promoted. No merge/deploy/force-push.
+
 ## Shipping Risk Intelligence — R0 Baseline, Decisions & Authorization — 2026-10-09
 
 - **阶段 / 验收 ID：** R0 / R0-1–R0-3（`docs/plans/shipping-hot-risk-intelligence-2026-09-29.md` §6）。

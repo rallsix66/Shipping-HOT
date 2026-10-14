@@ -1,0 +1,11 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/frontend-policy-build-7666890
+
+ ✓ test/policy-console.test.ts (9 tests) 11ms
+ ✓ server/database/policy.test.ts (19 tests) 574ms
+
+ Test Files  2 passed (2)
+      Tests  28 passed (28)
+   Start at  09:30:36
+   Duration  1.11s (transform 323ms, setup 0ms, import 452ms, tests 586ms, environment 0ms)
+

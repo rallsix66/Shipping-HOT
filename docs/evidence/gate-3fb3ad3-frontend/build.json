@@ -1,0 +1,9 @@
+{
+  "name": "build",
+  "command": "pnpm build",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\frontend-policy-final-build",
+  "sha": "3fb3ad3dd0d6435c7d36376c579de238b6ecfa3c",
+  "startedAt": "2026-10-14T01:36:06.005Z",
+  "endedAt": "2026-10-14T01:36:26.422Z",
+  "rawExit": 0
+}
