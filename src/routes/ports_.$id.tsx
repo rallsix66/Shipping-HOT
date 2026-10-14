@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { PortDetailPage } from "~/components/shipping/pages"
+import { DemoPortsPage } from "~/components/shipping/ports-demo"
 
 export const Route = createFileRoute("/ports_/$id")({ component: PortDetailRoute })
 
 function PortDetailRoute() {
-  return <PortDetailPage id={Route.useParams().id} />
+  return <DemoPortsPage id={Route.useParams().id} />
 }

@@ -1,4 +1,5 @@
 import process from "node:process"
+import { portDirectoryBaseline } from "@shared/port-directory"
 import { getShippingSnapshot } from "#/shipping-store"
 import { getPortWeatherPanel } from "#/services/port-weather-panel"
 import { providerModes } from "#/providers/shipping"
@@ -9,7 +10,9 @@ export default defineEventHandler(async (event) => {
   if (!portId) throw createError({ statusCode: 400, statusMessage: "port id required" })
   const snapshot = await getShippingSnapshot()
   const port = snapshot.ports.find(item => item.id === portId)
-  if (!port) throw createError({ statusCode: 404, statusMessage: "port not found" })
+  // Approved focus IDs can have weather/reference cache even without an operational port snapshot.
+  // This only permits a repository read; it does not create a port or trigger synchronization.
+  if (!port && !portDirectoryBaseline.some(item => item.shippingPortId === portId)) throw createError({ statusCode: 404, statusMessage: "port not found" })
   const db = useDatabase()
   const dataMode = process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock"
   const repository = new ShippingRepository(db, dataMode)
