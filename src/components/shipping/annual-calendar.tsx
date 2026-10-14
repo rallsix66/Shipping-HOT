@@ -7,6 +7,7 @@ import { type PromoCalendarResponse, promoDaysInRange, promoPlatforms, promoStat
 import { ShippingShell } from "./app"
 import { myFetch } from "~/utils"
 import "./annual-calendar.css"
+import "./calendar-demo.css"
 
 const countryCodes = Object.keys(annualCountries) as AnnualCountry[]
 const weekdays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
@@ -34,7 +35,7 @@ export function AnnualCalendarPage() {
     refetchOnWindowFocus: false,
     retry: false,
   })
-  const promoEvents = showPromos ? (promoQuery.data?.events ?? []).filter(p => countries.includes(p.countryCode as AnnualCountry)) : []
+  const promoEvents = showPromos && !promoQuery.isError ? (promoQuery.data?.events ?? []).filter(p => countries.includes(p.countryCode as AnnualCountry)) : []
   const promosByDay = new Map<string, typeof promoEvents>()
   for (const promo of promoEvents) {
     for (const day of promoDaysInRange(promo.startsAt, promo.endsAt)) promosByDay.set(day, [...(promosByDay.get(day) ?? []), promo])
@@ -46,7 +47,7 @@ export function AnnualCalendarPage() {
     refetchOnWindowFocus: false,
     retry: false,
   })
-  const policyRecords = showPolicies ? (policyQuery.data?.records ?? []).filter(p => countries.includes(p.countryCode as AnnualCountry) || (showCnPolicies && p.countryCode === "CN")) : []
+  const policyRecords = showPolicies && !policyQuery.isError ? (policyQuery.data?.records ?? []).filter(p => countries.includes(p.countryCode as AnnualCountry) || (showCnPolicies && p.countryCode === "CN")) : []
   const policiesByDay = new Map<string, typeof policyRecords>()
   for (const policy of policyRecords) {
     if (policy.effectiveAt) policiesByDay.set(policy.effectiveAt, [...(policiesByDay.get(policy.effectiveAt) ?? []), policy])
@@ -54,7 +55,7 @@ export function AnnualCalendarPage() {
   const selectedDate = selected.startsWith(`${year}-${String(month + 1).padStart(2, "0")}`)
     ? selected
     : `${year}-${String(month + 1).padStart(2, "0")}-01`
-  const datasets = (data?.datasets ?? []).filter(d => countries.includes(d.countryCode))
+  const datasets = (isError ? [] : data?.datasets ?? []).filter(d => countries.includes(d.countryCode))
   const events = datasets.flatMap(d => d.events).filter(e => !showReferenceOnly || !annualTypes[e.type]?.work)
   const eventsByDay = new Map<string, typeof events>()
   for (const event of events) eventsByDay.set(event.date, [...(eventsByDay.get(event.date) ?? []), event])
@@ -77,18 +78,18 @@ export function AnnualCalendarPage() {
   }
 
   return (
-    <ShippingShell title="年度参考日历">
-      <div className="annual-calendar">
+    <ShippingShell title="日历">
+      <div className="annual-calendar calendar-demo" data-testid="calendar-demo">
         <div className="annual-heading">
           <div>
-            <p className="eyebrow-sh">SOUTHEAST ASIA / ANNUAL CALENDAR</p>
-            <h1>东南亚假日台历</h1>
-            <p>固定年度资料 · 假日、补休与工作日调整 · 不代表港口停运</p>
+
+            <h1>日历</h1>
+            <p>左侧国家与图层 · 中间月历（周一开始）· 右侧当天安排。假日与政策日期不代表停工。</p>
           </div>
         </div>
         <div className="annual-notice">年度参考资料，非实时运营状态。泰国资料不完整；地区、公职和企业适用条件请留意每条标记。未录入不代表没有假日。</div>
         <div className="annual-layout">
-          <aside className="annual-panel annual-filters">
+          <aside className="annual-panel annual-filters" aria-label="国家与图层筛选">
             <div className="annual-filter-title">
               <strong>关注国家</strong>
               <button type="button" onClick={() => setCountries(countryCodes)}>全选</button>
@@ -119,8 +120,13 @@ export function AnnualCalendarPage() {
                 含中国（CN）政策生效日（仅政策层；本日历无中国假日数据）
               </label>
             )}
+            <label className="annual-option">
+              <input type="checkbox" disabled />
+              风险事件 / 备货窗口重叠（未开放）
+            </label>
             <div className="annual-filter-note">
               <strong>标记说明</strong>
+              <p>格内最多显示三条假日，其他图层显示数量；完整记录在右侧展开。确认为原记录状态，本页不重新验证外部证据。</p>
               <p>
                 “班”与“工作”不是休假。
                 <br />
@@ -183,6 +189,19 @@ export function AnnualCalendarPage() {
                   ))}
                 </select>
                 <button type="button" aria-label="下个月" disabled={year === 2027 && month === 11} onClick={() => moveMonth(1)}>›</button>
+                <button
+                  type="button"
+                  aria-label="跳转到今天"
+                  disabled={new Date().getFullYear() < 2026 || new Date().getFullYear() > 2027}
+                  onClick={() => {
+                    const now = new Date()
+                    setYear(now.getFullYear())
+                    setMonth(now.getMonth())
+                    setSelected(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`)
+                  }}
+                >
+                  今天
+                </button>
               </div>
             </div>
             <div className="annual-month-meta">
@@ -190,7 +209,7 @@ export function AnnualCalendarPage() {
               {" "}
               个国家已选 ·
               {" "}
-              {isPending ? "读取年度资料…" : `${monthCount} 项本月参考安排`}
+              {isPending ? "读取年度资料…" : isError ? "年度资料读取失败，数量未知" : `${monthCount} 项本月参考安排`}
               {" "}
               · 周一开始
             </div>
@@ -259,9 +278,7 @@ export function AnnualCalendarPage() {
               <small>当天安排</small>
               <h2>{selectedDate.slice(5).replace("-", " / ")}</h2>
               <span>
-                {details.length}
-                {" "}
-                项所选国家记录
+                {isPending ? "正在读取参考记录…" : isError ? "参考记录数量未知" : `${details.length} 项参考假日记录；其他图层见下方`}
               </span>
             </div>
             {isPending
@@ -321,7 +338,7 @@ export function AnnualCalendarPage() {
                     <div className="annual-detail-label">{`${policy.countryCode}${policy.platform ? ` · ${policy.platform}` : ""}`}</div>
                     <h3>{`${policy.isFixture ? "[示例 fixture，非真实公告] " : ""}${policy.title}`}</h3>
                     <strong className="annual-evidence-pending">{`${policyDisplayLabels[policy.displayStatus]}${policy.autoActivated ? "（⚙ 到生效日自动）" : ""}`}</strong>
-                    <p>{`生效日 ${policy.effectiveAt} · v${policy.currentVersionNumber}`}</p>
+                    <p>{`生效日 ${policy.effectiveAt} · ${policy.applicableTimezone ?? "适用时区未确认（不自动生效）"} · 当地判断日 ${policy.localToday ?? "未知"} · v${policy.currentVersionNumber}`}</p>
                     <a href="/policies">在政策库查看 →</a>
                   </article>
                 ))}
@@ -349,6 +366,7 @@ export function AnnualCalendarPage() {
                         {`确认证据：${promo.confirmation.sourceId} · ${promo.confirmation.confirmedAt.slice(0, 10)} ↗`}
                       </a>
                     )}
+                    {promo.confirmation?.note && <p>{`确认证据备注（原记录）：${promo.confirmation.note}`}</p>}
                     {promo.dataIssue && <p>{`数据异常：${promo.dataIssue}`}</p>}
                   </article>
                 ))}
