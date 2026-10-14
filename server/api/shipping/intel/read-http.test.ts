@@ -6,6 +6,7 @@ import sourcesHandler from "./sources.get"
 import itemsHandler from "./items.get"
 import itemHandler from "./items/[id].get"
 import manualHandler from "./manual.get"
+import { manualSubmit } from "#/intel/manual"
 import { open } from "#/intel/__fixtures__/isolated-db"
 import { initShippingTables } from "#/database/shipping"
 import { intelSourceSeeds } from "#/intel/sources"
@@ -70,6 +71,39 @@ async function get(path: string) {
 }
 
 describe("intel actual HTTP read routes", () => {
+  it("keeps early manual-version identity after 22 newer actions, distinct from automatic versions", async () => {
+    state.native.exec("PRAGMA query_only=OFF")
+    let earliest = ""
+    let targetItem = ""
+    for (let index = 0; index < 23; index++) {
+      const result = await manualSubmit(state.repository, { requestId: `history-request-${index}`, sourceId: intelSourceSeeds[0].id, operator: `Reviewer ${index}`, action: "submit", url: intelSourceSeeds[0].url, title: "Synthetic CAP", body: `Synthetic version ${index}` }, NOW)
+      targetItem = result.itemId!
+      if (index === 0) earliest = result.versionId!
+    }
+    const auto = await state.repository.writeEntry({ sourceId: intelSourceSeeds[0].id, canonicalUrl: intelSourceSeeds[0].url, title: "Synthetic automatic", contentHash: "auto-new", contentScope: "full_text", extractorVersion: "intel-feed-v1", blocks: [], fetchedAt: NOW })
+    before = snapshot()
+    state.native.exec("PRAGMA query_only=ON")
+    const early = await get(`items/${targetItem}?versionId=${earliest}`)
+    expect(early.body.manualActions).toHaveLength(20)
+    expect(early.body.manualLabel).toBe("官方通知（人工录入）")
+    expect(early.body.manualEntry).toMatchObject({ operator: "Reviewer 0" })
+    const current = await get(`items/${targetItem}?versionId=${auto.versionId}`)
+    expect(current.body.manualLabel).toBeNull()
+    expect(current.body.manualEntry).toBeNull()
+    const items = await get(`items?sourceId=${intelSourceSeeds[0].id}`)
+    expect(items.body.items[0].manualEntry).toBeNull()
+  })
+  it("clips legacy out-of-product manual body at read time without changing stored versions", async () => {
+    state.native.exec("PRAGMA query_only=OFF")
+    const saved = await state.repository.writeEntry({ sourceId: intelSourceSeeds[0].id, canonicalUrl: "https://www.tmd.go.th/story", title: "Synthetic legacy", contentHash: "legacy", contentScope: "full_text", extractorVersion: "manual-plain-v1", blocks: [{ blockKey: "title", type: "title", order: 0, text: "Synthetic legacy" }, { blockKey: "p0", type: "paragraph", order: 1, text: "Legacy out-of-product body" }], fetchedAt: NOW }, { requestId: "legacy-manual-action", sourceId: intelSourceSeeds[0].id, operator: "Legacy reviewer", action: "submit", enteredAt: NOW, payloadHash: "legacy" })
+    before = snapshot()
+    state.native.exec("PRAGMA query_only=ON")
+    const response = await get(`items/${saved.itemId}`)
+    expect(response.body.selectedVersion.contentScope).toBe("metadata_only")
+    expect(response.body.selectedVersion.blocks).toHaveLength(1)
+    expect(JSON.stringify(response.body)).not.toContain("Legacy out-of-product body")
+    expect((await state.repository.getVersion(saved.itemId, saved.versionId))?.contentScope).toBe("full_text")
+  })
   it("reads manual checklist with query_only and no external requests", async () => {
     const response = await get("manual")
     expect(response.status).toBe(200)
@@ -140,12 +174,12 @@ describe("intel actual HTTP read routes", () => {
       const code = readFileSync(path, "utf8")
       expect(code).not.toMatch(/(?:bootstrap|initShipping|recoverIntel|secureFetch|collectIntel|providers\/|runtime\/|paid|translation|fetch\()/)
       const imports = [...code.matchAll(/from\s+["']([^"']+)["']/g)].map(match => match[1])
-      expect(imports.every(module => ["h3", "#/database/intel", "#/intel/content-license", "#/intel/manual-catalog", "#/utils/intel-read"].includes(module))).toBe(true)
+      expect(imports.every(module => ["h3", "#/database/intel", "#/intel/content-license", "#/intel/manual-catalog", "#/intel/manual-license", "#/utils/intel-read"].includes(module))).toBe(true)
       expect(code).not.toMatch(/\b(?:eval|require|import)\s*\(/)
     }
     // Repository has write APIs, but these named methods' bodies contain only bound SELECT statements.
     const repo = readFileSync("server/database/intel.ts", "utf8")
-    for (const method of ["listSourcesPage", "listItemsPage", "getItem", "listVersionsPage", "getVersion", "listRecentRuns", "getSource", "readVersionBlocks"]) {
+    for (const method of ["listSourcesPage", "listItemsPage", "getItem", "listVersionsPage", "getVersion", "listRecentRuns", "getSource", "readVersionBlocks", "getManualVersionAction"]) {
       const start = repo.indexOf(`async ${method}(`)
       const end = repo.indexOf("\n  }", start)
       const code = repo.slice(start, end)

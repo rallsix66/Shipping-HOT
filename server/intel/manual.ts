@@ -4,6 +4,7 @@ import { contentScopeFor, licensedBlocks } from "#/intel/content-license"
 import { manualCatalog } from "#/intel/manual-catalog"
 import { intelSourceSeeds } from "#/intel/sources.ts"
 import { canonicalizeFeedUrl } from "#/providers/feed"
+import { manualPersistenceFor } from "#/intel/manual-license"
 
 export class ManualInputError extends Error {}
 function invalid(): never {
@@ -50,7 +51,8 @@ export async function manualSubmit(repo: IntelRepository, input: unknown, now: s
   const title = text(data.title, 500)
   const body = text(data.body ?? "", 100000, false)
   // Refuse prohibited text instead of silently storing a hash of restricted full text.
-  if (source.persistence === "disallowed" && body) return invalid()
+  const persistence = manualPersistenceFor(source, canonicalUrl)
+  if (persistence === "disallowed" && body) return invalid()
   let publishedAt: string | undefined
   if (data.publishedAt !== undefined && data.publishedAt !== "") {
     const value = text(data.publishedAt, 40)
@@ -59,7 +61,7 @@ export async function manualSubmit(repo: IntelRepository, input: unknown, now: s
     const date = value.slice(0, 10)
     if (new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) !== date) return invalid()
   }
-  const contentScope = contentScopeFor(source.persistence)
+  const contentScope = contentScopeFor(persistence)
   const blocks = licensedBlocks(contentScope, title, body)
   const contentHash = hash({ title, publishedAt: publishedAt ?? null, contentScope, blocks })
   return repo.writeEntry({ sourceId, canonicalUrl, title, publishedAt, contentHash, contentScope, blocks, fetchedAt: now, extractorVersion: "manual-plain-v1" }, { requestId, sourceId, operator, enteredAt: now, action: "submit", payloadHash: hash({ sourceId, operator, canonicalUrl, contentHash }) })

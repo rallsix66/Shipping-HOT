@@ -400,6 +400,11 @@ export class IntelRepository {
     return this.db.prepare(`SELECT request_id, action, operator, entered_at, item_id, version_id, outcome FROM intel_manual_action WHERE source_id = ? ${itemId ? "AND item_id = ?" : ""} ORDER BY entered_at DESC, rowid DESC LIMIT 20`).all(...(itemId ? [sourceId, itemId] : [sourceId])) as Promise<Row[]>
   }
 
+  /** Identity lookup is independent of the bounded audit display. */
+  async getManualVersionAction(sourceId: string, itemId: string, versionId: string): Promise<Row | undefined> {
+    return this.db.prepare("SELECT operator, entered_at FROM intel_manual_action WHERE source_id = ? AND item_id = ? AND version_id = ? AND action = 'submit' ORDER BY entered_at DESC, rowid DESC LIMIT 1").get(sourceId, itemId, versionId) as Promise<Row | undefined>
+  }
+
   async listCurrentChanges(itemId: string): Promise<IntelCurrentChange[]> {
     const rows = await this.db.prepare("SELECT * FROM intel_item_current_change WHERE item_id = ? ORDER BY changed_at, rowid").all(itemId) as Row[]
     return rows.map(row => ({

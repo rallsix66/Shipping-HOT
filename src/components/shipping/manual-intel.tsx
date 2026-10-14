@@ -34,6 +34,7 @@ interface Item {
 }
 interface Detail {
   manualLabel: string | null
+  manualEntry?: { operator: string, enteredAt: string } | null
   item: Item
   source: { name: string, persistence: string }
   manualActions: Action[]
@@ -102,7 +103,7 @@ export function ManualIntelPage({ onLegacy }: { onLegacy: () => void }) {
           <h2 className="console-title">资讯录入与记录</h2>
           <button type="button" className="chip" onClick={onLegacy}>已有 Feed 与天气预警</button>
         </div>
-        <p>纯手动表单：粘贴 URL 不联网，不自动识别字段、不调用模型。未知发布时间留空；录入人是本地操作者自填，未经账户认证。风险分析尚未开放。</p>
+        <p>正文许可仅适用于已核实的精确 Feed 产品 URL；同域其他页面仅保存元数据。纯手动表单：粘贴 URL 不联网，不自动识别字段、不调用模型。未知发布时间留空；录入人是本地操作者自填，未经账户认证。风险分析尚未开放。</p>
         <div className="manual-grid">
           <aside className="filter-panel">
             <h3>人工信源检查清单</h3>
@@ -208,6 +209,7 @@ export function ManualIntelPage({ onLegacy }: { onLegacy: () => void }) {
                 {!detail.isError && detail.data && (
                   <>
                     <p>{`所选版本原文发布时间：${detail.data.selectedVersion?.publishedAt ?? "未知"}（不以录入时间代替）`}</p>
+                    {detail.data.manualEntry && <p>{`所选版本录入人：${detail.data.manualEntry.operator} · 录入时间：${detail.data.manualEntry.enteredAt}`}</p>}
                     <p>{detail.data.manualLabel ? `${detail.data.manualLabel} · 真实性未独立核验` : "未记录人工提交，保留原有来源"}</p>
                     {detail.data.manualActions.map((action, index) => (
                       <p key={index}>

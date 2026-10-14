@@ -43,7 +43,7 @@ afterEach(async () => {
   state.native.close()
   vi.unstubAllGlobals()
 })
-const data = { requestId: "http-request-1", sourceId: "intel:th-w01", operator: "Synthetic operator", action: "submit", title: "Synthetic HTTP notice", url: "https://www.tmd.go.th/offline", body: "Synthetic licensed text" }
+const data = { requestId: "http-request-1", sourceId: "intel:th-w01", operator: "Synthetic operator", action: "submit", title: "Synthetic HTTP notice", url: "https://www.tmd.go.th/en/api/xml/CAP", body: "Synthetic licensed text" }
 async function post(body = data, origin = base) {
   return fetch(`${base}/api/shipping/intel/manual`, { method: "POST", headers: { "Content-Type": "application/json", "Origin": origin }, body: JSON.stringify(body) })
 }

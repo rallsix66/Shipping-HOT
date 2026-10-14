@@ -16,7 +16,7 @@ const NOW = "2026-10-14T05:00:00.000Z"
 let state: ReturnType<typeof open>
 let fail = false
 const source = intelSourceSeeds[0]
-const input = (extra = {}) => ({ requestId: "request-0001", sourceId: source.id, operator: "Local reviewer", action: "submit", url: "https://www.tmd.go.th/story", title: "Offline synthetic notice", body: "Synthetic content only", ...extra })
+const input = (extra = {}) => ({ requestId: "request-0001", sourceId: source.id, operator: "Local reviewer", action: "submit", url: source.url, title: "Offline synthetic notice", body: "Synthetic content only", ...extra })
 beforeEach(async () => {
   state = open(":memory:", (sql) => {
     if (fail && sql.startsWith("INSERT INTO intel_manual_action")) throw new Error("injected audit fault")
@@ -34,8 +34,20 @@ afterEach(() => {
 })
 
 describe("r2-7 manual entry offline SQLite", () => {
+  it("binds body license to exact CAP/BMKG feed products, never the whole domain", async () => {
+    for (const [sourceId, url] of [[source.id, "https://www.tmd.go.th/story"], [intelSourceSeeds[1].id, "https://www.bmkg.go.id/story"], [source.id, `${source.url}?other=product`]]) {
+      await expect(manualSubmit(state.repository, input({ sourceId, url }), NOW)).rejects.toThrow("invalid")
+    }
+    const cap = await manualSubmit(state.repository, input(), NOW)
+    expect((await state.repository.listVersions(cap.itemId!))[0].contentScope).toBe("full_text")
+    const metadata = await manualSubmit(state.repository, input({ requestId: "metadata-outside", url: "https://www.tmd.go.th/story", body: "" }), NOW)
+    expect((await state.repository.listVersions(metadata.itemId!))[0].contentScope).toBe("metadata_only")
+    state.native.prepare("UPDATE intel_source SET persistence='full' WHERE id=?").run(intelSourceSeeds[1].id)
+    const excerpt = await manualSubmit(state.repository, input({ requestId: "bmkg-product-01", sourceId: intelSourceSeeds[1].id, url: intelSourceSeeds[1].url, body: "X".repeat(1000) }), NOW)
+    expect((await state.repository.listVersions(excerpt.itemId!))[0].contentScope).toBe("excerpt")
+  })
   it("reuses Feed URL canonicalization for tracking parameters, fragments and trailing slash", async () => {
-    const a = await manualSubmit(state.repository, input({ url: "https://www.tmd.go.th/story/?utm_source=offline#part" }), NOW)
+    const a = await manualSubmit(state.repository, input({ url: "https://www.tmd.go.th/en/api/xml/CAP/?utm_source=offline#part" }), NOW)
     const b = await manualSubmit(state.repository, input({ requestId: "request-0002" }), NOW)
     expect(b).toMatchObject({ itemId: a.itemId, outcome: "unchanged" })
     expect(await state.repository.listItems(source.id)).toHaveLength(1)
@@ -128,7 +140,7 @@ describe("r2-7 manual entry offline SQLite", () => {
     await expect(manualSubmit(state.repository, { ...metadata, body: "Restricted full text" }, NOW)).rejects.toThrow("invalid")
     const saved = await manualSubmit(state.repository, metadata, NOW)
     expect(await state.repository.readVersionBlocks(saved.versionId!)).toHaveLength(1)
-    const excerpt = await manualSubmit(state.repository, input({ requestId: "excerpt-0001", sourceId: intelSourceSeeds[1].id, url: "https://www.bmkg.go.id/story", body: "X".repeat(1000) }), NOW)
+    const excerpt = await manualSubmit(state.repository, input({ requestId: "excerpt-0001", sourceId: intelSourceSeeds[1].id, url: intelSourceSeeds[1].url, body: "X".repeat(1000) }), NOW)
     expect((await state.repository.readVersionBlocks(excerpt.versionId!))[1].text).toHaveLength(280)
   })
   it.each([

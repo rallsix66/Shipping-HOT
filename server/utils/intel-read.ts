@@ -2,6 +2,7 @@ import { type H3Event, defineEventHandler, getQuery, getRouterParam, setResponse
 import { type IntelContentScope, type IntelItemRecord, IntelRepository, type IntelSourceRecord, type IntelVersionRecord } from "#/database/intel"
 import { licensedBlocks } from "#/intel/content-license"
 import { manualCatalog } from "#/intel/manual-catalog"
+import { manualPersistenceFor } from "#/intel/manual-license"
 
 class IntelReadError extends Error {
   constructor(readonly statusCode: number, message: string) {
@@ -52,12 +53,13 @@ function sourceDto(source: IntelSourceRecord) {
 function itemDto(item: IntelItemRecord) {
   return { id: item.id, sourceId: item.sourceId, title: item.title, publishedAt: item.publishedAt, firstSeenAt: item.firstSeenAt, lastSeenAt: item.lastSeenAt, currentVersionId: item.currentVersionId, canonicalUrl: publicUrl(item.canonicalUrl) }
 }
-function scope(source: IntelSourceRecord, version: IntelVersionRecord): IntelContentScope {
-  const a = source.persistence === "full" ? 2 : source.persistence === "excerpt_only" ? 1 : 0
+function scope(source: IntelSourceRecord, version: IntelVersionRecord, manualUrl?: string): IntelContentScope {
+  const persistence = manualUrl === undefined ? source.persistence : manualPersistenceFor(source, manualUrl)
+  const a = persistence === "full" ? 2 : persistence === "excerpt_only" ? 1 : 0
   const b = version.contentScope === "full_text" ? 2 : version.contentScope === "excerpt" ? 1 : 0
   return (["metadata_only", "excerpt", "full_text"] as const)[Math.min(a, b)]
 }
-function versionDto(version: IntelVersionRecord, source: IntelSourceRecord) {
+function versionDto(version: IntelVersionRecord, source: IntelSourceRecord, manualUrl?: string) {
   const e = version.dateEvidence
   const dateEvidence = e
     ? {
@@ -72,7 +74,7 @@ function versionDto(version: IntelVersionRecord, source: IntelSourceRecord) {
         publishedAt: typeof e.publishedAt === "string" && /^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(e.publishedAt) ? e.publishedAt : null,
       }
     : null
-  return { id: version.id, itemId: version.itemId, publishedAt: version.sourcePublishedAt, fetchedAt: version.fetchedAt, createdAt: version.createdAt, contentScope: scope(source, version), dateEvidence }
+  return { id: version.id, itemId: version.itemId, publishedAt: version.sourcePublishedAt, fetchedAt: version.fetchedAt, createdAt: version.createdAt, contentScope: scope(source, version, manualUrl), dateEvidence }
 }
 
 /** Read-only adapter: no initialization, runtime, provider or recovery dependency. */
@@ -104,7 +106,7 @@ export async function readIntelItems(event: H3Event, repo: IntelRepository) {
   if (sourceId && !await repo.getSource(sourceId)) missing("source")
   const rows = await repo.listItemsPage(limit + 1, offset, sourceId)
   const items = await Promise.all(rows.map(async (item) => {
-    const latest = (await repo.listManualActions(item.sourceId, item.id)).find(action => action.version_id === item.currentVersionId)
+    const latest = item.currentVersionId ? await repo.getManualVersionAction(item.sourceId, item.id, item.currentVersionId) : undefined
     return { ...itemDto(item), manualEntry: latest ? { operator: latest.operator, enteredAt: latest.entered_at } : null }
   }))
   return page(items, limit, offset)
@@ -120,11 +122,14 @@ export async function readIntelItem(event: H3Event, repo: IntelRepository) {
   if (versionId && !selected) return missing("version")
   const versions = await repo.listVersionsPage(item.id, limit + 1, offset)
   const blocks = selected ? await repo.readVersionBlocks(selected.id) : []
-  const permitted = selected ? scope(source, selected) : "metadata_only"
+  const selectedManual = selected ? await repo.getManualVersionAction(source.id, item.id, selected.id) : undefined
+  const manualUrl = selectedManual ? item.canonicalUrl : undefined
+  const permitted = selected ? scope(source, selected, manualUrl) : "metadata_only"
   const title = blocks.find(block => block.type === "title")?.text ?? item.title
   const safeBlocks = permitted === "full_text" ? blocks : licensedBlocks(permitted, title, blocks.filter(block => block.type !== "title").map(block => block.text).join(""))
   const manualActions = await repo.listManualActions(source.id, item.id)
   const grade = manualCatalog.find(row => row.catalogId === source.catalogId)?.grade ?? (["TH-W01", "ID-W01"].includes(source.catalogId) ? "A" : "unknown")
-  const manualLabel = manualActions.some(action => action.version_id === selected?.id) ? grade === "A" ? "官方通知（人工录入）" : grade === "unknown" ? "资讯（人工录入，类型未核验）" : "报道（人工录入）" : null
-  return { item: itemDto(item), source: sourceDto(source), manualActions, manualLabel, versions: page(versions.map(version => versionDto(version, source)), limit, offset), selectedVersion: selected ? { ...versionDto(selected, source), blocks: safeBlocks } : null }
+  const manualLabel = selectedManual ? grade === "A" ? "官方通知（人工录入）" : grade === "unknown" ? "资讯（人工录入，类型未核验）" : "报道（人工录入）" : null
+  const versionRows = await Promise.all(versions.map(async version => versionDto(version, source, await repo.getManualVersionAction(source.id, item.id, version.id) ? item.canonicalUrl : undefined)))
+  return { item: itemDto(item), source: sourceDto(source), manualActions, manualLabel, manualEntry: selectedManual ? { operator: selectedManual.operator, enteredAt: selectedManual.entered_at } : null, versions: page(versionRows, limit, offset), selectedVersion: selected ? { ...versionDto(selected, source, manualUrl), blocks: safeBlocks } : null }
 }
