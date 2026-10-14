@@ -1,3 +1,7 @@
+## R2 DNS 修复后四源独立只读核查（2026-10-14）
+
+已批准四域Clash精确例外经用户重新应用，生成filter14项（原10+新4）；只读系统DNS均公网。随后目录原URL四源各GET1，07:56本批HTTP4，均200且原字节即时本地留证，既有安全DNS/TLS/SSRF未弱化，无重试/redirect/detail。CN-P01需区分要闻样本与通告栏目；CN-T02已有同li标题/link/日期观察；VN-P01真实table标题/link存在但日期样本缺口保留；PH-C01本地容器英文日期/标题/同目标双链接已留证。四源均PARTIAL、新增PASS0、完整adapter/SQLite回放未跑；39≥32未达标。上一HTTP0/DNS198.18批为历史，不称当前阻塞。[独立四源证据与最小下一步](evidence/r2-four-after-clash-2026-10-14/report.md)。产品/目录/阈值/网络设置本批未改；Northport/Thai不重抓，生产/24h/付费未启用。
+
 ## R2 两源原字节回放及明确 DNS 事实（2026-10-14）
 
 产品/候选配置未改。Northport与10/13同hash原页经现有适配器首次/重复均duplicate_conflict、写入0，仍FAIL；Thai完整原字节现配置解析100条、隔离SQLite100版本、重复无新版本；只读重开对全部100条完整dateEvidence/身份检查0差异，day precision/localDate，publishedAt仍null。该原页离线回放有限通过，不计全P1可用性PASS。四域各一次系统DNS分别返回198.18.2.24–27，现有SSRF均blocked_address；符合fake-IP形态但不单凭结果归因代理配置，交父处理，无HTTP或网络设置更改。[结果、许可边界和已实现规则纠正](evidence/r2-two-raw-dns-2026-10-14/report.md)。原页仍仅本地；39≥32未达标，24h/生产/付费未启用。

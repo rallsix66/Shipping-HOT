@@ -1,0 +1,34 @@
+{
+  "source": "VN-P01",
+  "url": "https://vimawa.gov.vn/vi/thong-bao-hang-hai",
+  "kind": "sanitized DOM structural metadata derivative; not original HTML or configured parser output",
+  "counts": {
+    "anchors": 84,
+    "tables": 2,
+    "rows": 15,
+    "times": 0
+  },
+  "candidates": [
+    {
+      "anchorDocumentIndex": 0,
+      "titleExcerpt": "Skip to main content",
+      "href": "https://vimawa.gov.vn/vi/thong-bao-hang-hai#main-content",
+      "ancestorTags": [
+        "a",
+        "div",
+        "body"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "14/10/2026",
+        "29/12/2003"
+      ],
+      "anchorCountInAncestor": 84,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": []
+    }
+  ],
+  "itemParser": "NOT_RUN: no source adapter configured in this observation",
+  "noCandidateMeaning": "No numeric/English date association observed by bounded heuristic; not proof of no items",
+  "completeFieldsPass": false
+}

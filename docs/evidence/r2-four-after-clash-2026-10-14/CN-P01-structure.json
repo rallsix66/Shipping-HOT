@@ -1,0 +1,168 @@
+{
+  "source": "CN-P01",
+  "url": "https://www.gd.msa.gov.cn/",
+  "kind": "sanitized DOM structural metadata derivative; not original HTML or configured parser output",
+  "counts": {
+    "anchors": 192,
+    "tables": 0,
+    "rows": 0,
+    "times": 0
+  },
+  "candidates": [
+    {
+      "anchorDocumentIndex": 36,
+      "titleExcerpt": "",
+      "href": "https://www.gd.msa.gov.cn/",
+      "ancestorTags": [
+        "a",
+        "header",
+        "body"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "2026-10-10",
+        "2026-10-09",
+        "2026-10-08",
+        "2026-06-17",
+        "2026-06-16",
+        "2026-09-18",
+        "2026-08-26",
+        "2026-08-14"
+      ],
+      "anchorCountInAncestor": 192,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "div",
+        "div",
+        "div",
+        "img",
+        "form",
+        "div",
+        "ul"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 69,
+      "titleExcerpt": "大国重器扬帆出海，“铁建起重5000”轮开启首次“跨国之旅”",
+      "href": "https://www.gd.msa.gov.cn/html/gdmsa/hsyw/article/2026/f4b5e958427444be80e731a412d76f8e.html",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 3,
+      "dateTextCandidates": [
+        "2026-10-10",
+        "2026-10-09",
+        "2026-10-08"
+      ],
+      "anchorCountInAncestor": 14,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "a",
+        "a",
+        "a",
+        "a"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 70,
+      "titleExcerpt": "东莞海事多举措保障水上交通安全",
+      "href": "https://www.gd.msa.gov.cn/html/gdmsa/hsyw/article/2026/83f24266a68348d7a9435ee733d41b33.html",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 3,
+      "dateTextCandidates": [
+        "2026-10-10",
+        "2026-10-09",
+        "2026-10-08"
+      ],
+      "anchorCountInAncestor": 14,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "a",
+        "a",
+        "a",
+        "a"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 71,
+      "titleExcerpt": "实战砺兵！深汕海巡执法大队联合多部门开展船舶碰撞险情“双盲”应急演练",
+      "href": "https://www.gd.msa.gov.cn/html/gdmsa/hsyw/article/2026/1c571a5da88e4fffb0ce3809f51ae57e.html",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 3,
+      "dateTextCandidates": [
+        "2026-10-10",
+        "2026-10-09",
+        "2026-10-08"
+      ],
+      "anchorCountInAncestor": 14,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "a",
+        "a",
+        "a",
+        "a"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 72,
+      "titleExcerpt": "千帆竞争“鲜” 汕尾海事全力护航开渔“第一网”",
+      "href": "https://www.gd.msa.gov.cn/html/gdmsa/hsyw/article/2026/b8ebfa6c877044c0ba67876b20e94985.html",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 3,
+      "dateTextCandidates": [
+        "2026-10-10",
+        "2026-10-09",
+        "2026-10-08"
+      ],
+      "anchorCountInAncestor": 14,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "a",
+        "a",
+        "a",
+        "a"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 73,
+      "titleExcerpt": "茂名海事局全面开展开渔前巡航保障工作",
+      "href": "https://www.gd.msa.gov.cn/html/gdmsa/hsyw/article/2026/22e69255130d4d159ebd5d5977ca92a7.html",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 3,
+      "dateTextCandidates": [
+        "2026-10-10",
+        "2026-10-09",
+        "2026-10-08"
+      ],
+      "anchorCountInAncestor": 14,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "a",
+        "a",
+        "a",
+        "a"
+      ]
+    }
+  ],
+  "itemParser": "NOT_RUN: no source adapter configured in this observation",
+  "noCandidateMeaning": "No numeric/English date association observed by bounded heuristic; not proof of no items",
+  "completeFieldsPass": false
+}

@@ -1,0 +1,14 @@
+{
+  "id": "PH-C01",
+  "url": "https://customs.gov.ph/category/media-releases/",
+  "startedAt": "2026-10-14T07:56:33.170Z",
+  "status": "NOT_RUN",
+  "httpRequests": 1,
+  "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+  "receivedAt": "2026-10-14T07:56:34.958Z",
+  "httpStatus": 200,
+  "contentType": "text/html; charset=UTF-8",
+  "rawByteLength": 166897,
+  "fetchedBytesSha256": "9d56a123e75dd0d3fa7523da3d410125a5c71f23e42dbacd012c50d31627a6c6",
+  "rawLocalOnly": true
+}

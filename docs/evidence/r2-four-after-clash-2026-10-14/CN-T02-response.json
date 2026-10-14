@@ -1,0 +1,14 @@
+{
+  "id": "CN-T02",
+  "url": "https://szs.mof.gov.cn/zhengcefabu/",
+  "startedAt": "2026-10-14T07:56:30.392Z",
+  "status": "NOT_RUN",
+  "httpRequests": 1,
+  "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+  "receivedAt": "2026-10-14T07:56:30.683Z",
+  "httpStatus": 200,
+  "contentType": "text/html",
+  "rawByteLength": 12222,
+  "fetchedBytesSha256": "934dfb210e414105867c99db2907ebcf98c175b643a3bc74157f2d9c1679df04",
+  "rawLocalOnly": true
+}

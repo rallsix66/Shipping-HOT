@@ -1,0 +1,28 @@
+{
+  "dnsSelectedFields": {
+    "enable": "true",
+    "enhanced-mode": "fake-ip",
+    "fake-ip-range": "198.18.0.1/16"
+  },
+  "effectiveFilter": [
+    "www.westportsholdings.com",
+    "portcalls.com",
+    "www.customs.gov.my",
+    "www.mof.gov.my",
+    "www.tmd.go.th",
+    "www.bmkg.go.id",
+    "theloadstar.com",
+    "splash247.com",
+    "www.northport.com.my",
+    "www.customs.go.th",
+    "www.gd.msa.gov.cn",
+    "szs.mof.gov.cn",
+    "vimawa.gov.vn",
+    "customs.gov.ph"
+  ],
+  "exactOldTenPlusNewFour": true,
+  "activeExtensionHashMatchesAuthorizedEdit": true,
+  "keyDnsFieldsMatchPreEditRead": true,
+  "otherSettings": "no pre-edit full generated baseline was captured; cannot independently prove every runtime setting unchanged",
+  "httpRequests": 0
+}

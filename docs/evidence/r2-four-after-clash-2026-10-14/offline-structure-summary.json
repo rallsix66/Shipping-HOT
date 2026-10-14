@@ -1,0 +1,77 @@
+{
+  "httpRequests": 0,
+  "results": [
+    {
+      "id": "CN-P01",
+      "localRawHashVerified": true,
+      "domShapeSha256": "5a69c9b2f85b26be12ecc91406a4cc8e91ddbf70987dc8c11c9601043d08ec69",
+      "diagnostics": {
+        "htmlTitleExcerpt": "中华人民共和国广东海事局",
+        "scriptElements": 17,
+        "formElements": 1,
+        "bodyCharacters": 31664,
+        "totalElements": 682,
+        "scriptContentExcluded": true,
+        "sanitizedAnchors": 192,
+        "sanitizedRows": 0
+      },
+      "localDateGroupCount": 60,
+      "positiveControlDetected": true,
+      "committedSensitiveHits": 0
+    },
+    {
+      "id": "CN-T02",
+      "localRawHashVerified": true,
+      "domShapeSha256": "b5a177330268854f2a85fe5afa43838eba9b9baec53ec4d7a9b5a0e980ef75b1",
+      "diagnostics": {
+        "htmlTitleExcerpt": "政策发布",
+        "scriptElements": 7,
+        "formElements": 1,
+        "bodyCharacters": 5253,
+        "totalElements": 149,
+        "scriptContentExcluded": true,
+        "sanitizedAnchors": 26,
+        "sanitizedRows": 0
+      },
+      "localDateGroupCount": 10,
+      "positiveControlDetected": true,
+      "committedSensitiveHits": 0
+    },
+    {
+      "id": "VN-P01",
+      "localRawHashVerified": true,
+      "domShapeSha256": "1bbce3ec873814e4c662d562b1dc541596cffd775c3ffc34fc96a2def63fe28a",
+      "diagnostics": {
+        "htmlTitleExcerpt": "Thông báo hàng hải | CỤC HÀNG HẢI VÀ ĐƯỜNG THUỶ VIỆT NAM",
+        "scriptElements": 37,
+        "formElements": 2,
+        "bodyCharacters": 10544,
+        "totalElements": 597,
+        "scriptContentExcluded": true,
+        "sanitizedAnchors": 84,
+        "sanitizedRows": 15
+      },
+      "localDateGroupCount": 0,
+      "positiveControlDetected": true,
+      "committedSensitiveHits": 0
+    },
+    {
+      "id": "PH-C01",
+      "localRawHashVerified": true,
+      "domShapeSha256": "85fd98b931ca59761ebbd7b3e079282355436caae9853f84ca5dd52e1e97de5d",
+      "diagnostics": {
+        "htmlTitleExcerpt": "Media Releases – Bureau of CustomsAccessibility ToolsIncrease TextDecrease TextGrayscaleHigh ContrastNegative ContrastLi",
+        "scriptElements": 40,
+        "formElements": 2,
+        "bodyCharacters": 35399,
+        "totalElements": 1620,
+        "scriptContentExcluded": true,
+        "sanitizedAnchors": 392,
+        "sanitizedRows": 0
+      },
+      "localDateGroupCount": 11,
+      "positiveControlDetected": true,
+      "committedSensitiveHits": 0
+    }
+  ]
+}
