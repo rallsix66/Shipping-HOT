@@ -1,0 +1,150 @@
+{
+  "type": "docs_only_evidence_validation",
+  "at": "2026-10-14T10:42:56.283437+00:00",
+  "codeSha": "355bc861d4020ba22ddd00401de709d7cee497e3",
+  "evidenceBaseline": "679400c1970cf270eabe85ec866a52b0bef820b6",
+  "command": "python .tmp/validate-current-r2-matrix.py",
+  "newSourceRequests": 0,
+  "newSourceDns": 0,
+  "functionalTests": "NOT_RUN_by_docs_only_instruction",
+  "originalFieldReplay": "NOT_RUN_this_round; stored original evidence inspected",
+  "checks": [
+    {
+      "check": "41 unique entries match current catalogue automatic P1 rows",
+      "pass": true,
+      "detail": {
+        "catalogCount": 41
+      }
+    },
+    {
+      "check": "All literal product URL text retained from catalogue",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Approved 34 information / 5 numeric / 2 deferred partition",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Current catalogue LF text digest",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "All evidence paths exist",
+      "pass": true,
+      "detail": {
+        "referenceOccurrences": 110,
+        "uniquePaths": 28,
+        "missing": []
+      }
+    },
+    {
+      "check": "All evidence LF text hashes match",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "check": "All evidence source selectors resolve",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "check": "R2-4 independently recomputed verdicts and flags",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "R2-5 independently recomputed verdicts and flags",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Numeric 3/5 separate and absent from article numerator",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "r2_4 status totals recomputed",
+      "pass": true,
+      "detail": {
+        "OK": 20,
+        "NOT_RUN": 11,
+        "PARTIAL": 8
+      }
+    },
+    {
+      "check": "r2_5 status totals recomputed",
+      "pass": true,
+      "detail": {
+        "PASS": 11,
+        "NOT_RUN": 19,
+        "FAIL": 3,
+        "PARTIAL": 1
+      }
+    },
+    {
+      "check": "Eight original HTML field passes refer to actual successful collection/repeat/reopen",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "check": "Three older original field replays have stored source results and raw exit0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "NMC failed source results preserved with actual time and successful assertion harness",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Document/enactment days not relabelled publication instants",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "At most four exact untested catalogue URLs proposed",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Tracked changes confined to approved docs and rule correction",
+      "pass": true,
+      "detail": [
+        "AGENTS.md",
+        "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
+        "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.json",
+        "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.md",
+        "docs/evidence/r2-p1-inventory-2026-10-13/qualification-matrix.md",
+        "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "docs/intel-source-catalog.md",
+        "docs/plans/r2-acceptance-convergence-2026-10-14.md",
+        "docs/status.md"
+      ]
+    },
+    {
+      "check": "Production Intel job and HTML candidates remain unchanged",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Nine disabled candidates / two enabled seed declarations distinguished",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Changed Markdown local links exist",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "check": "Readable report retains one row for every ID",
+      "pass": true,
+      "detail": null
+    }
+  ],
+  "errors": [],
+  "rawExit": 0
+}

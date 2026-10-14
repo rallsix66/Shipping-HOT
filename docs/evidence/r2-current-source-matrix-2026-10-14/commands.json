@@ -1,0 +1,147 @@
+{
+  "type": "docs_only_commands",
+  "evidenceBaseline": "679400c1970cf270eabe85ec866a52b0bef820b6",
+  "commands": [
+    {
+      "label": "docs_lint_no_fix",
+      "command": [
+        "C:\\Program Files\\nodejs\\pnpm.cmd",
+        "exec",
+        "eslint",
+        "AGENTS.md",
+        "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
+        "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.json",
+        "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.md",
+        "docs/evidence/r2-p1-inventory-2026-10-13/qualification-matrix.md",
+        "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "docs/intel-source-catalog.md",
+        "docs/plans/r2-acceptance-convergence-2026-10-14.md",
+        "docs/status.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json"
+      ],
+      "startedAt": "2026-10-14T10:38:51.229875+00:00",
+      "finishedAt": "2026-10-14T10:38:51.534714+00:00",
+      "stdout": "",
+      "stderr": "'eslint' �����ڲ����ⲿ���Ҳ���ǿ����еĳ���\n���������ļ���\n",
+      "rawExit": 1
+    },
+    {
+      "label": "tracked_diff_whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "startedAt": "2026-10-14T10:38:51.534761+00:00",
+      "finishedAt": "2026-10-14T10:38:51.583510+00:00",
+      "stdout": "",
+      "stderr": "warning: in the working copy of 'AGENTS.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-p1-inventory-2026-10-13/qualification-matrix.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/intel-source-catalog.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/plans/r2-acceptance-convergence-2026-10-14.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it\n",
+      "rawExit": 0
+    },
+    {
+      "label": "docs_lint_direct_installed_node_no_fix",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "node_modules/eslint/bin/eslint.js",
+        "AGENTS.md",
+        "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
+        "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.json",
+        "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.md",
+        "docs/evidence/r2-p1-inventory-2026-10-13/qualification-matrix.md",
+        "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "docs/intel-source-catalog.md",
+        "docs/plans/r2-acceptance-convergence-2026-10-14.md",
+        "docs/status.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json"
+      ],
+      "startedAt": "2026-10-14T10:40:05.570032+00:00",
+      "finishedAt": "2026-10-14T10:40:09.810322+00:00",
+      "stdout": "\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-acceptance-convergence-2026-10-14\\mapping.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\commands.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\mapping.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\metadata-scan.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\validation.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-p1-acceptance-mapping-2026-10-13\\acceptance-mapping.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-p1-inventory-2026-10-13\\source-inventory.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\n✖ 7 problems (0 errors, 7 warnings)\n\n",
+      "stderr": "",
+      "rawExit": 0
+    },
+    {
+      "label": "tracked_diff_whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "startedAt": "2026-10-14T10:40:09.810376+00:00",
+      "finishedAt": "2026-10-14T10:40:09.861468+00:00",
+      "stdout": "",
+      "stderr": "warning: in the working copy of 'AGENTS.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-p1-inventory-2026-10-13/qualification-matrix.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/intel-source-catalog.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/plans/r2-acceptance-convergence-2026-10-14.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it\n",
+      "rawExit": 0
+    },
+    {
+      "label": "docs_lint_direct_installed_node_no_fix",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "node_modules/eslint/bin/eslint.js",
+        "AGENTS.md",
+        "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
+        "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.json",
+        "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.md",
+        "docs/evidence/r2-p1-inventory-2026-10-13/qualification-matrix.md",
+        "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "docs/intel-source-catalog.md",
+        "docs/plans/r2-acceptance-convergence-2026-10-14.md",
+        "docs/status.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json"
+      ],
+      "startedAt": "2026-10-14T10:42:54.111649+00:00",
+      "finishedAt": "2026-10-14T10:42:56.090812+00:00",
+      "stdout": "\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-acceptance-convergence-2026-10-14\\mapping.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\commands.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\mapping.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\metadata-scan.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\validation.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-p1-acceptance-mapping-2026-10-13\\acceptance-mapping.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-p1-inventory-2026-10-13\\source-inventory.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\n✖ 7 problems (0 errors, 7 warnings)\n\n",
+      "stderr": "",
+      "rawExit": 0
+    },
+    {
+      "label": "tracked_diff_whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "startedAt": "2026-10-14T10:42:56.090867+00:00",
+      "finishedAt": "2026-10-14T10:42:56.141090+00:00",
+      "stdout": "",
+      "stderr": "warning: in the working copy of 'AGENTS.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-p1-inventory-2026-10-13/qualification-matrix.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/intel-source-catalog.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/plans/r2-acceptance-convergence-2026-10-14.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it\n",
+      "rawExit": 0
+    },
+    {
+      "label": "matrix_structural_evidence_validation",
+      "command": [
+        "C:\\Program Files\\Python313\\python.EXE",
+        ".tmp/validate-current-r2-matrix.py"
+      ],
+      "startedAt": "2026-10-14T10:42:56.154077+00:00",
+      "finishedAt": "2026-10-14T10:42:56.289153+00:00",
+      "stdout": "{\"checks\": 22, \"errors\": [], \"referenceOccurrences\": 110, \"uniquePaths\": 28, \"rawExit\": 0}\r\n",
+      "stderr": "",
+      "rawExit": 0
+    }
+  ],
+  "metadataScan": {
+    "scope": "New matrix/report/builder/closeout only; no historic-third-party/full-project safety claim",
+    "syntheticPositiveControlDetected": true,
+    "valueHits": [],
+    "rawExit": 0
+  },
+  "initialInventoryRawExit": 127,
+  "finalInventoryRawExit": 0,
+  "functionalGates": "NOT_RUN_this_docs_round",
+  "initialDocValidationFailures": "SyntaxError in new validator, then table-header variants/missing not-yet-generated closeout/command references; corrected before final validation. Local intermediate logs retained."
+}

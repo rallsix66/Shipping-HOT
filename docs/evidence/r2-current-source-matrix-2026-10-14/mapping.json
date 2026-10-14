@@ -1,0 +1,3765 @@
+{
+  "type": "current_authoritative_evidence_matrix",
+  "generatedAt": "2026-10-14T10:34:35.845238+00:00",
+  "reviewedCodeSha": "355bc861d4020ba22ddd00401de709d7cee497e3",
+  "evidenceHead": "679400c1970cf270eabe85ec866a52b0bef820b6",
+  "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
+  "catalogSha256": "f4d37cbbecde67494cdc7ba8acd1a6fff063678aff1903eae8c18727a4c9ba4d",
+  "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
+  "approval": {
+    "messageId": "Sentinel_81b542f9f60c8191a2b32b4cc8018c61",
+    "at": "2026-10-14T06:31:44Z",
+    "all41Retained": true,
+    "informationNotice": 34,
+    "numericWeather": 5,
+    "laterStage": 2
+  },
+  "approvedDenominator": {
+    "r2_4PublicAutomatic": 39,
+    "r2_5InformationFieldReplay": 34,
+    "numericFieldValidationSeparate": 5,
+    "retainedInventory": 41
+  },
+  "thresholds": {
+    "r2_4MinimumOK": 32,
+    "r2_4MinimumRatio": 0.8,
+    "r2_5RequiredFieldReplay": 34,
+    "r2_5MinimumRatio": 1.0
+  },
+  "countingRules": {
+    "r2_4": "Genuine expected product response and usable real parsing/normalization/field verification; mere200 shells, unresolved conflicts, unverified URL/products are partial. Count latest stored measured availability, not current uptime. Default-off is independent.",
+    "r2_5": "Complete stored real-page title/link/actual source-time fields replay; day precision and honest document/enactment role remain explicit, never relabelled publication. Live parse without retained full real replay is not pass. Numeric products excluded.",
+    "freshness": "Dates are per-capture proof. No new liveness/current continuous run claimed; catalogue labels alone do not prove availability.",
+    "utc": "Unknown zones/instants stay unknown/null. Older NCHMF configured+07 is not source declaration/independent UTC certification."
+  },
+  "measuredCoverage": {
+    "r2_4": {
+      "numerator": 20,
+      "denominator": 39,
+      "ratio": 0.5128205128205128,
+      "minimumOK": 32,
+      "shortfall": 12,
+      "ids": [
+        "CN-P01",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-P02",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "PH-M01",
+        "XX-W01",
+        "XX-M01",
+        "XX-M03",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "statusCounts": {
+        "OK": 20,
+        "NOT_RUN": 11,
+        "PARTIAL": 8
+      },
+      "pass": false
+    },
+    "r2_5": {
+      "numerator": 11,
+      "denominator": 34,
+      "ratio": 0.3235294117647059,
+      "remaining": 23,
+      "ids": [
+        "CN-P01",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01"
+      ],
+      "statusCounts": {
+        "PASS": 11,
+        "NOT_RUN": 19,
+        "FAIL": 3,
+        "PARTIAL": 1
+      },
+      "pass": false
+    },
+    "numericFieldsSeparate": {
+      "numerator": 3,
+      "denominator": 5,
+      "ids": [
+        "XX-W01",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness"
+    },
+    "r2Continuous24h": {
+      "numerator": 0,
+      "denominator": 39,
+      "status": "NOT_RUN"
+    },
+    "overallR2Pass": false
+  },
+  "clarifications": [
+    "XX-W02 catalogue lists forecast plus specifications; current code/evidence only forecast. Keep row PARTIAL pending product contract clarification, not silently exclude or full-pass.",
+    "R2-5 field pass is actual source-time field with honest role/precision, not certification of news publication instant, warning validity or untruncated legal text. If a stricter publication-only contract is desired it is a separately stated change; no such new hard gate introduced.",
+    "NCHMF older real sanitized DOM field replay retains configured+07 warning; no new UTC provenance claim. BMKG older raw URL alias and latest13-item exact request are separate proofs."
+  ],
+  "entries": [
+    {
+      "id": "CN-P01",
+      "priority": "P1",
+      "catalogUrlText": "https://www.gd.msa.gov.cn/",
+      "catalogUrls": [
+        "https://www.gd.msa.gov.cn/"
+      ],
+      "exactProductUrl": "https://www.gd.msa.gov.cn/",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "CN-P01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-four-after-clash-2026-10-14/summary.json",
+          "selector": {
+            "id": "CN-P01"
+          },
+          "sha256": "6257a6b9cafef66b5de783d11594b31cb9601d8723e7ffc185bfc6d6794101ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.gd.msa.gov.cn/",
+        "startedAt": "2026-10-14T07:56:30.108Z",
+        "receivedAt": "2026-10-14T07:56:30.357Z",
+        "finishedAt": "2026-10-14T07:56:30.391Z",
+        "httpStatus": 200,
+        "wireSha256": "6dc9a6c69a50a0643510cc2fc0125f8bb686a150ff42f3abc1d5a88e25593a2a",
+        "bytes": 80546,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-public-index-replay-2026-10-14/summary.json",
+          "selector": {
+            "id": "CN-P01"
+          },
+          "sha256": "7ec812e5e76152ab4e9de93b57f2417f12caf43b252a701608480d7b985c8881",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 8,
+        "first": {
+          "status": "ok_items",
+          "runId": "1968d96a-e0e1-43a7-9202-476afaad5f99",
+          "itemsSeen": 8,
+          "itemsNew": 8,
+          "itemsRevised": 0
+        },
+        "repeat": {
+          "status": "ok_items",
+          "runId": "d4b86bcf-d8ec-4bfd-8c56-f4856aff2f5a",
+          "itemsSeen": 8,
+          "itemsNew": 0,
+          "itemsRevised": 0
+        },
+        "readOnlyReopen": {
+          "readOnly": true,
+          "rows": 8,
+          "versions": 8,
+          "fullTitleUrlDateEvidenceCompared": true,
+          "mismatches": 0,
+          "dayPrecision": 8,
+          "missingTimezone": 8,
+          "nullPublicationInstants": 8
+        },
+        "independentStorageAudit": null
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "source_displayed_list_day",
+        "precision": "day",
+        "sourceDeclaredTimezone": "missing",
+        "publicationInstant": null,
+        "notClaimedAsPublicationTimestamp": true,
+        "basis": "Preserved actual source field role; full dateEvidence stored/replayed, no UTC/clock inference."
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "disabled_HTML_candidate",
+        "declaredSeedEnabled": false,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Complete real page title/link/source-time fields replayed with their actual role and day precision, with repeat/reopen comparison. Does not certify publication instant, article body or impacts."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Private original raw only; remote derivative cannot reconstruct the full page.",
+        "No continuous production or enablement."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "CN-P02",
+      "priority": "P1",
+      "catalogUrlText": "https://www.sz.msa.gov.cn/",
+      "catalogUrls": [
+        "https://www.sz.msa.gov.cn/"
+      ],
+      "exactProductUrl": "https://www.sz.msa.gov.cn/",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "CN-P02"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": null,
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "NOT_RUN",
+        "countedOK": false,
+        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "缺来源专属配置、存档谱系与回放"
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "CN-W01",
+      "priority": "P1",
+      "catalogUrlText": "https://www.nmc.cn/publish/typhoon/typhoon_new.html",
+      "catalogUrls": [
+        "https://www.nmc.cn/publish/typhoon/typhoon_new.html"
+      ],
+      "exactProductUrl": "https://www.nmc.cn/publish/typhoon/typhoon_new.html",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "DUAL",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "CN-W01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json",
+          "selector": {
+            "egress.url": "https://www.nmc.cn/publish/typhoon/typhoon_new.html"
+          },
+          "sha256": "d46d7e5c532d01ab36eef087d6b58afd60363b7bc1c234c44480bbeb484986ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.nmc.cn/publish/typhoon/typhoon_new.html",
+        "at": "2026-10-11T01:38:50.427Z",
+        "httpStatus": 200,
+        "bytes": 59861,
+        "wireSha256": null,
+        "scope": "legacy_limited_original_information_Feed_live_run"
+      },
+      "fieldReplayEvidence": {
+        "status": "FAIL_REAL_LIST_SUITABILITY",
+        "relatedLegacyEvidence": {
+          "path": "docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json",
+          "selector": null,
+          "sha256": "d46d7e5c532d01ab36eef087d6b58afd60363b7bc1c234c44480bbeb484986ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "evidence": {
+          "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log",
+          "selector": null,
+          "sha256": "2a94fee2233c0542022d3dc749375351bfd1c88ff2d894cdc1ffde39cd0e5d52",
+          "hashBasis": "committed_text_LF"
+        },
+        "harness": {
+          "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt",
+          "selector": null,
+          "sha256": "9669884842686eab547d03cfc59c6a8af86dba03fe60be8db9e288363ba3b15f",
+          "hashBasis": "committed_text_LF"
+        },
+        "qualifyingAnchors": 0,
+        "itemsCommitted": 0,
+        "collectorError": "web_list_invalid_link",
+        "chronology": {
+          "originalCaptureAt": "2026-10-11T01:38:50.427Z",
+          "suitabilityReplayStartedAt": "2026-10-13T03:55:13.246Z",
+          "suitabilityReplayCodeSha": "0b532e1917ee5425194965b20e0fdf8c2a1f4805",
+          "harnessExit": 0,
+          "harnessAssertedCollectionFailure": true,
+          "laterQualifyingReplayFound": false,
+          "reviewScope": "Stored R2 evidence and current disabled HTML candidates through evidence head679400c; no new fetch or replay."
+        }
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unresolved_source_heading_or_report_time",
+        "precision": "unverified",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": null
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "PARTIAL",
+        "countedOK": false,
+        "reason": "Exact original product is readable in legacy limited Feed, but stored real-page suitability replay failed the current automatic list contract: no qualifying detail link/time mapping. Accessible is not a qualified automatic source."
+      },
+      "r2_5": {
+        "verdict": "FAIL",
+        "countedPass": false,
+        "reason": "Stored real product-page suitability probe: zero qualifying anchors and missing/unsupported author date; harness passed by asserting source collection failure, not by parsing qualified items."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Limited legacy Feed remains readable, but actual Intel-list suitability failed; do not call it untested or field PASS.",
+        "Source has self-contained product pages, not a qualifying detail-link list; author time/hidden generated time not publication proof.",
+        "Warning validity and port effects unverified."
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "CN-W02",
+      "priority": "P1",
+      "catalogUrlText": "https://www.nmc.cn/publish/country/warning/index.html",
+      "catalogUrls": [
+        "https://www.nmc.cn/publish/country/warning/index.html"
+      ],
+      "exactProductUrl": "https://www.nmc.cn/publish/country/warning/index.html",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "DUAL",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "CN-W02"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json",
+          "selector": {
+            "egress.url": "https://www.nmc.cn/publish/country/warning/index.html"
+          },
+          "sha256": "d46d7e5c532d01ab36eef087d6b58afd60363b7bc1c234c44480bbeb484986ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.nmc.cn/publish/country/warning/index.html",
+        "at": "2026-10-11T01:38:51.146Z",
+        "httpStatus": 200,
+        "bytes": 62233,
+        "wireSha256": null,
+        "scope": "legacy_limited_original_information_Feed_live_run"
+      },
+      "fieldReplayEvidence": {
+        "status": "FAIL_REAL_LIST_SUITABILITY",
+        "relatedLegacyEvidence": {
+          "path": "docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json",
+          "selector": null,
+          "sha256": "d46d7e5c532d01ab36eef087d6b58afd60363b7bc1c234c44480bbeb484986ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "evidence": {
+          "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log",
+          "selector": null,
+          "sha256": "2a94fee2233c0542022d3dc749375351bfd1c88ff2d894cdc1ffde39cd0e5d52",
+          "hashBasis": "committed_text_LF"
+        },
+        "harness": {
+          "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt",
+          "selector": null,
+          "sha256": "9669884842686eab547d03cfc59c6a8af86dba03fe60be8db9e288363ba3b15f",
+          "hashBasis": "committed_text_LF"
+        },
+        "qualifyingAnchors": 0,
+        "itemsCommitted": 0,
+        "collectorError": "web_list_invalid_link",
+        "chronology": {
+          "originalCaptureAt": "2026-10-11T01:38:51.146Z",
+          "suitabilityReplayStartedAt": "2026-10-13T03:55:13.246Z",
+          "suitabilityReplayCodeSha": "0b532e1917ee5425194965b20e0fdf8c2a1f4805",
+          "harnessExit": 0,
+          "harnessAssertedCollectionFailure": true,
+          "laterQualifyingReplayFound": false,
+          "reviewScope": "Stored R2 evidence and current disabled HTML candidates through evidence head679400c; no new fetch or replay."
+        }
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unresolved_source_heading_or_report_time",
+        "precision": "unverified",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": null
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "PARTIAL",
+        "countedOK": false,
+        "reason": "Exact original product is readable in legacy limited Feed, but stored real-page suitability replay failed the current automatic list contract: no qualifying detail link/time mapping. Accessible is not a qualified automatic source."
+      },
+      "r2_5": {
+        "verdict": "FAIL",
+        "countedPass": false,
+        "reason": "Stored real product-page suitability probe: zero qualifying anchors and missing/unsupported author date; harness passed by asserting source collection failure, not by parsing qualified items."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Limited legacy Feed remains readable, but actual Intel-list suitability failed; do not call it untested or field PASS.",
+        "Source has self-contained product pages, not a qualifying detail-link list; author time/hidden generated time not publication proof.",
+        "Warning validity and port effects unverified."
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "CN-T01",
+      "priority": "P1",
+      "catalogUrlText": "http://www.mofcom.gov.cn/zcfb/index.html",
+      "catalogUrls": [
+        "http://www.mofcom.gov.cn/zcfb/index.html"
+      ],
+      "exactProductUrl": "http://www.mofcom.gov.cn/zcfb/index.html",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "CN-T01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": null,
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "NOT_RUN",
+        "countedOK": false,
+        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "目录为HTTP；当前安全入口拒绝HTTP，需独立确认合规URL策略，不可放松安全或擅改URL",
+        "Exact catalogue product is HTTP; current secure fetch entry requires HTTPS. No request was made here and no alternate HTTPS URL is assumed."
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "CN-T02",
+      "priority": "P1",
+      "catalogUrlText": "https://szs.mof.gov.cn/zhengcefabu/",
+      "catalogUrls": [
+        "https://szs.mof.gov.cn/zhengcefabu/"
+      ],
+      "exactProductUrl": "https://szs.mof.gov.cn/zhengcefabu/",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "CN-T02"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-four-after-clash-2026-10-14/summary.json",
+          "selector": {
+            "id": "CN-T02"
+          },
+          "sha256": "6257a6b9cafef66b5de783d11594b31cb9601d8723e7ffc185bfc6d6794101ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://szs.mof.gov.cn/zhengcefabu/",
+        "startedAt": "2026-10-14T07:56:30.392Z",
+        "receivedAt": "2026-10-14T07:56:30.683Z",
+        "finishedAt": "2026-10-14T07:56:30.690Z",
+        "httpStatus": 200,
+        "wireSha256": "934dfb210e414105867c99db2907ebcf98c175b643a3bc74157f2d9c1679df04",
+        "bytes": 12222,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-public-index-replay-2026-10-14/summary.json",
+          "selector": {
+            "id": "CN-T02"
+          },
+          "sha256": "7ec812e5e76152ab4e9de93b57f2417f12caf43b252a701608480d7b985c8881",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 10,
+        "first": {
+          "status": "ok_items",
+          "runId": "f945561e-828a-4161-ae1f-2159e2c0b163",
+          "itemsSeen": 10,
+          "itemsNew": 10,
+          "itemsRevised": 0
+        },
+        "repeat": {
+          "status": "ok_items",
+          "runId": "c4c45927-38b5-43c8-baf2-155d1959efb9",
+          "itemsSeen": 10,
+          "itemsNew": 0,
+          "itemsRevised": 0
+        },
+        "readOnlyReopen": {
+          "readOnly": true,
+          "rows": 10,
+          "versions": 10,
+          "fullTitleUrlDateEvidenceCompared": true,
+          "mismatches": 0,
+          "dayPrecision": 10,
+          "missingTimezone": 10,
+          "nullPublicationInstants": 10
+        },
+        "independentStorageAudit": null
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "source_displayed_list_day",
+        "precision": "day",
+        "sourceDeclaredTimezone": "missing",
+        "publicationInstant": null,
+        "notClaimedAsPublicationTimestamp": true,
+        "basis": "Preserved actual source field role; full dateEvidence stored/replayed, no UTC/clock inference."
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "disabled_HTML_candidate",
+        "declaredSeedEnabled": false,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Complete real page title/link/source-time fields replayed with their actual role and day precision, with repeat/reopen comparison. Does not certify publication instant, article body or impacts."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Private original raw only; remote derivative cannot reconstruct the full page.",
+        "No continuous production or enablement."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "VN-P01",
+      "priority": "P1",
+      "catalogUrlText": "https://vimawa.gov.vn/vi/thong-bao-hang-hai",
+      "catalogUrls": [
+        "https://vimawa.gov.vn/vi/thong-bao-hang-hai"
+      ],
+      "exactProductUrl": "https://vimawa.gov.vn/vi/thong-bao-hang-hai",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "VN-P01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-four-after-clash-2026-10-14/summary.json",
+          "selector": {
+            "id": "VN-P01"
+          },
+          "sha256": "6257a6b9cafef66b5de783d11594b31cb9601d8723e7ffc185bfc6d6794101ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://vimawa.gov.vn/vi/thong-bao-hang-hai",
+        "startedAt": "2026-10-14T07:56:30.690Z",
+        "receivedAt": "2026-10-14T07:56:33.148Z",
+        "finishedAt": "2026-10-14T07:56:33.169Z",
+        "httpStatus": 200,
+        "wireSha256": "da133741708879c9fd4544a0137dd8050a92c1dab662ac843bc9892d412bd4ef",
+        "bytes": 63083,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "PARTIAL_REAL_TABLE_TITLE_LINK_NO_DATE",
+        "evidence": {
+          "path": "docs/evidence/r2-four-after-clash-2026-10-14/VN-P01-table-metadata.json",
+          "selector": null,
+          "sha256": "745acf673f366c6c3829b1a5f068f44438e1a624f5a4c654acfc0b5b574bc34c",
+          "hashBasis": "committed_text_LF"
+        },
+        "fullFieldInspection": {
+          "path": "docs/evidence/r2-public-index-replay-2026-10-14/cn-vn-full-raw-field-inspection.json",
+          "selector": {
+            "id": "VN-P01"
+          },
+          "sha256": "8200ba80223b1b56bc63b031ff214cb6590b4f5622cf1861f35717f6a771c4eb",
+          "hashBasis": "committed_text_LF"
+        }
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "PARTIAL",
+        "countedOK": false,
+        "reason": "Genuine title/link table, but no date field and no completed configured collector replay."
+      },
+      "r2_5": {
+        "verdict": "PARTIAL",
+        "countedPass": false,
+        "reason": "Complete saved table inspection found title/link but no visible date/date attribute; TBHH identifier and header cannot substitute for date."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Date unknown across 10 rows/20 cells. No detail fetch or guessed date. No source config/full collector replay."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "VN-P03",
+      "priority": "P1",
+      "catalogUrlText": "https://saigonnewport.com.vn/tin-tuc",
+      "catalogUrls": [
+        "https://saigonnewport.com.vn/tin-tuc"
+      ],
+      "exactProductUrl": "https://saigonnewport.com.vn/tin-tuc",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "VN-P03"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-three-after-clash-2026-10-14/summary.json",
+          "selector": {
+            "id": "VN-P03"
+          },
+          "sha256": "686fbee3d317f58025c5ea3c88e55adfb5fca849b8df7706c87bf48d829538cf",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://saigonnewport.com.vn/tin-tuc",
+        "startedAt": "2026-10-14T09:08:39.423Z",
+        "receivedAt": "2026-10-14T09:08:42.844Z",
+        "finishedAt": "2026-10-14T09:08:42.878Z",
+        "httpStatus": 200,
+        "wireSha256": "e730d4af7dacc5b95995139b6407f91a2adb2d4be7f1e2bbec7dbadc738b51c8",
+        "bytes": 143215,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-post-clash-index-replay-final-2026-10-14/summary.json",
+          "selector": {
+            "id": "VN-P03"
+          },
+          "sha256": "d5c6e3e4880bdd1a1eb31e344e6a02a2b53ebc78d8e4c08bfa0e977d392c68fa",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 14,
+        "first": {
+          "status": "ok_items",
+          "runId": "766cb1c9-37d7-4d93-9f35-8f1fc6fb9398",
+          "itemsSeen": 14,
+          "itemsNew": 14,
+          "itemsRevised": 0
+        },
+        "repeat": {
+          "status": "ok_items",
+          "runId": "2edfa225-f4fc-493a-b052-1fbfca728f5c",
+          "itemsSeen": 14,
+          "itemsNew": 0,
+          "itemsRevised": 0
+        },
+        "readOnlyReopen": {
+          "readOnly": true,
+          "rows": 14,
+          "versions": 14,
+          "fullTitleUrlDateEvidenceCompared": true,
+          "mismatches": 0,
+          "dayPrecision": 14,
+          "missingTimezone": 14,
+          "nullPublicationInstants": 14
+        },
+        "independentStorageAudit": null
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "source_displayed_list_day",
+        "precision": "day",
+        "sourceDeclaredTimezone": "missing",
+        "publicationInstant": null,
+        "notClaimedAsPublicationTimestamp": true,
+        "basis": "Preserved actual source field role; full dateEvidence stored/replayed, no UTC/clock inference."
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "disabled_HTML_candidate",
+        "declaredSeedEnabled": false,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Complete real page title/link/source-time fields replayed with their actual role and day precision, with repeat/reopen comparison. Does not certify publication instant, article body or impacts."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Private original raw only; remote derivative cannot reconstruct the full page.",
+        "No continuous production or enablement."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "VN-W01",
+      "priority": "P1",
+      "catalogUrlText": "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html",
+      "catalogUrls": [
+        "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html"
+      ],
+      "exactProductUrl": "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "DUAL",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "VN-W01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/nchmf-integration-2026-10-10/live-evidence.json",
+          "selector": null,
+          "sha256": "3cad6ad0f757ebf946ba205c8ba17c447d9600869de140992e9a659c5da28b4f",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html",
+        "at": "2026-10-10T09:52:07.791Z",
+        "httpStatus": 200,
+        "wireSha256": null,
+        "storedArchiveSha256": "e710f9f75c2036e0e796e3ce7fd78137de5784121ee7bd60894395d33f714b90",
+        "scope": "historical_live_capture_then_sanitized_full_DOM_archive",
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "PASS_STORED_REAL_ARCHIVE_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/replay.log",
+          "selector": null,
+          "sha256": "eb3d2dbeff7567eca8b14873d3eb9fdbdabe9eb1ac443cbc1d75b2a615618905",
+          "hashBasis": "committed_text_LF"
+        },
+        "harness": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/replay.test.ts.txt",
+          "selector": null,
+          "sha256": "376a9309c3b4e9dda2e73b8a7851e58e075382dc2c68791765046f2566d424ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 5,
+        "artifact": "docs/evidence/nchmf-integration-2026-10-10/raw/index.html",
+        "captureProvenance": "目录原URL；live-evidence.json egress at 2026-10-10T09:52:07.791Z；存储衍生页面252878字节，日志原响应259550字节",
+        "repeatReadOnlyReopen": "not_asserted_by_this_older_replay"
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "source_list_local_datetime",
+        "precision": "datetime",
+        "sourceDeclaredTimezone": "unknown; older replay config +07, not source declaration",
+        "publicationInstant": "older normalized output; source-local fields passed, absolute UTC not independently certified"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "older_replay_fixture_config_only_no_active_seed",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-index capture and 5-item full DOM/collector field replay; UTC+07 is older test configuration, not source-declared evidence."
+      },
+      "r2_5": {
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Saved real source archive (not synthetic) was replayed through collector with every title/link/time assertion; limited historical field scope and alias/redaction/zone notes retained."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "脱敏存储页不是原wire逐字节证据；日期时区为配置；未接正式seed或启用",
+        "Current continuous production and official alert validity/port effect are not proved by fields."
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "VN-T01",
+      "priority": "P1",
+      "catalogUrlText": "https://idea.gov.vn/",
+      "catalogUrls": [
+        "https://idea.gov.vn/"
+      ],
+      "exactProductUrl": "https://idea.gov.vn/",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "VN-T01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-three-after-clash-2026-10-14/summary.json",
+          "selector": {
+            "id": "VN-T01"
+          },
+          "sha256": "686fbee3d317f58025c5ea3c88e55adfb5fca849b8df7706c87bf48d829538cf",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://idea.gov.vn/",
+        "startedAt": "2026-10-14T09:08:42.879Z",
+        "receivedAt": "2026-10-14T09:08:45.043Z",
+        "finishedAt": "2026-10-14T09:08:45.055Z",
+        "httpStatus": 200,
+        "wireSha256": "972674566750a436a01f84020a512400391dd47427a79464ed735f146f8c16ca",
+        "bytes": 22451,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-post-clash-index-replay-final-2026-10-14/summary.json",
+          "selector": {
+            "id": "VN-T01"
+          },
+          "sha256": "d5c6e3e4880bdd1a1eb31e344e6a02a2b53ebc78d8e4c08bfa0e977d392c68fa",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 3,
+        "first": {
+          "status": "ok_items",
+          "runId": "41140b5a-0c66-45b8-ac6a-8206b2a6cd2f",
+          "itemsSeen": 3,
+          "itemsNew": 3,
+          "itemsRevised": 0
+        },
+        "repeat": {
+          "status": "ok_items",
+          "runId": "7abb1582-ea8e-473c-b07d-0af644efec43",
+          "itemsSeen": 3,
+          "itemsNew": 0,
+          "itemsRevised": 0
+        },
+        "readOnlyReopen": {
+          "readOnly": true,
+          "rows": 3,
+          "versions": 3,
+          "fullTitleUrlDateEvidenceCompared": true,
+          "mismatches": 0,
+          "dayPrecision": 3,
+          "missingTimezone": 3,
+          "nullPublicationInstants": 3
+        },
+        "independentStorageAudit": null
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "source_displayed_list_day",
+        "precision": "day",
+        "sourceDeclaredTimezone": "missing",
+        "publicationInstant": null,
+        "notClaimedAsPublicationTimestamp": true,
+        "basis": "Preserved actual source field role; full dateEvidence stored/replayed, no UTC/clock inference."
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "disabled_HTML_candidate",
+        "declaredSeedEnabled": false,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Complete real page title/link/source-time fields replayed with their actual role and day precision, with repeat/reopen comparison. Does not certify publication instant, article body or impacts."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Private original raw only; remote derivative cannot reconstruct the full page.",
+        "No continuous production or enablement."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "VN-D01",
+      "priority": "P1",
+      "catalogUrlText": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
+      "catalogUrls": [
+        "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx"
+      ],
+      "exactProductUrl": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "VN-D01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": null,
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "NOT_RUN",
+        "countedOK": false,
+        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "缺来源专属配置、存档谱系与回放"
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "TH-W01",
+      "priority": "P1",
+      "catalogUrlText": "https://www.tmd.go.th/en/api/xml/CAP",
+      "catalogUrls": [
+        "https://www.tmd.go.th/en/api/xml/CAP"
+      ],
+      "exactProductUrl": "https://www.tmd.go.th/en/api/xml/CAP",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "DUAL",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "TH-W01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "TH-W01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.tmd.go.th/en/api/xml/CAP",
+        "startedAt": "2026-10-13T07:00:38.389Z",
+        "receivedAt": null,
+        "finishedAt": "2026-10-13T07:00:40.268Z",
+        "httpStatus": 200,
+        "wireSha256": "d88a2f41868ab82631714e427a39998cc17ece4079a40d5d34fe95a576b8b325",
+        "bytes": 11234,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "PASS_STORED_REAL_ARCHIVE_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/replay.log",
+          "selector": null,
+          "sha256": "eb3d2dbeff7567eca8b14873d3eb9fdbdabe9eb1ac443cbc1d75b2a615618905",
+          "hashBasis": "committed_text_LF"
+        },
+        "harness": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/replay.test.ts.txt",
+          "selector": null,
+          "sha256": "376a9309c3b4e9dda2e73b8a7851e58e075382dc2c68791765046f2566d424ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 7,
+        "artifact": "server/providers/__fixtures__/tmd-cap-2026-10-10/index.xml；同hash docs/evidence/th-w01-tmd-cap-2026-10-10/index.xml",
+        "captureProvenance": "目录原URL；旧记录2026-10-10约13:33 UTC+8（docs/evidence/th-w01-tmd-cap-2026-10-10.md）；不是07:02:58探测的同一响应",
+        "repeatReadOnlyReopen": "not_asserted_by_this_older_replay",
+        "latestExactPayloadReplay": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/offline-check.log",
+          "selector": null,
+          "sha256": "c77ba4dc62af75643cb789c7f0689f77a562c706f88b28164c7dae478f02ecec",
+          "hashBasis": "committed_text_LF"
+        },
+        "latestExactPayloadReplayProcedure": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/after-dns-replay.test.ts.txt",
+          "selector": null,
+          "sha256": "8d9c9284810aeb1be3b10407ef3fd69eb9ddb5a185a76053b273a65bdc96172f",
+          "hashBasis": "committed_text_LF"
+        },
+        "latestExactPayloadItems": 10
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "feed_declared_date_time",
+        "precision": "datetime",
+        "sourceDeclaredTimezone": "feed_date_normalization_provenance",
+        "publicationInstant": "present in saved parser output"
+      },
+      "licensePolicy": {
+        "storedBody": "full_under_public_domain_feed_declaration",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "built_in_seed",
+        "declaredSeedEnabled": true,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Saved real source archive (not synthetic) was replayed through collector with every title/link/time assertion; limited historical field scope and alias/redaction/zone notes retained."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "CAP validity and port impact outside this Feed field pass; no 24h/enablement claim."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "TH-C01",
+      "priority": "P1",
+      "catalogUrlText": "https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th",
+      "catalogUrls": [
+        "https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th"
+      ],
+      "exactProductUrl": "https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "TH-C01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-six-public-2026-10-14/summary.json",
+          "selector": {
+            "id": "TH-C01"
+          },
+          "sha256": "eae6ddcbdaf257b5b88fe6e8ddb222434f28e83351bb16c4d644b66aa704fad2",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th",
+        "startedAt": "2026-10-14T07:16:50.062Z",
+        "receivedAt": "2026-10-14T07:16:51.316Z",
+        "finishedAt": "2026-10-14T07:16:51.334Z",
+        "httpStatus": 200,
+        "wireSha256": "96349dcd1383c8ed1e33b9ad7905f5355f4a6ff9c5528e065e13a09aae30398c",
+        "bytes": 123781,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-two-raw-dns-2026-10-14/replay-summary.json",
+          "selector": {
+            "id": "TH-C01"
+          },
+          "sha256": "6b0f0630fb8757d1e2f95c6905a7cdcd5b28922bc8427451682521afdd857ba3",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 100,
+        "first": {
+          "status": "ok_items",
+          "runId": "5b7b015c-907d-414d-ad70-0e77c3225584",
+          "itemsSeen": 100,
+          "itemsNew": 100,
+          "itemsRevised": 0
+        },
+        "repeat": {
+          "status": "ok_items",
+          "runId": "a1ebd663-ad13-427c-8ce5-ac0227cd06c8",
+          "itemsSeen": 100,
+          "itemsNew": 0,
+          "itemsRevised": 0
+        },
+        "readOnlyReopen": null,
+        "independentStorageAudit": {
+          "path": "docs/evidence/r2-two-raw-dns-2026-10-14/storage-and-conflicts-audit.json",
+          "selector": {
+            "id": "TH-C01"
+          },
+          "sha256": "4d8d88eda51326e7e3a0dca922406b7f19ace29f411ce4d42d7da7dd7c73b0d6",
+          "hashBasis": "committed_text_LF"
+        }
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "source_displayed_list_day",
+        "precision": "day",
+        "sourceDeclaredTimezone": "missing",
+        "publicationInstant": null,
+        "notClaimedAsPublicationTimestamp": true,
+        "basis": "Preserved actual source field role; full dateEvidence stored/replayed, no UTC/clock inference."
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "disabled_HTML_candidate",
+        "declaredSeedEnabled": false,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Complete real page title/link/source-time fields replayed with their actual role and day precision, with repeat/reopen comparison. Does not certify publication instant, article body or impacts."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Private original raw only; remote derivative cannot reconstruct the full page.",
+        "No continuous production or enablement."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "TH-C02",
+      "priority": "P1",
+      "catalogUrlText": "https://www.customs.go.th/list_strc_download_with_docno_date.php?ini_content=announce_160426_01&order_by=date&sort_type=0&lang=th",
+      "catalogUrls": [
+        "https://www.customs.go.th/list_strc_download_with_docno_date.php?ini_content=announce_160426_01&order_by=date&sort_type=0&lang=th"
+      ],
+      "exactProductUrl": "https://www.customs.go.th/list_strc_download_with_docno_date.php?ini_content=announce_160426_01&order_by=date&sort_type=0&lang=th",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "TH-C02"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-next-four-2026-10-14/summary.json",
+          "selector": {
+            "id": "TH-C02"
+          },
+          "sha256": "66e025198c452759e00c271eff947101a01d5a8f10205072230226b9fe80bf3d",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.customs.go.th/list_strc_download_with_docno_date.php?ini_content=announce_160426_01&order_by=date&sort_type=0&lang=th",
+        "startedAt": "2026-10-14T08:33:16.386Z",
+        "receivedAt": "2026-10-14T08:33:17.641Z",
+        "finishedAt": "2026-10-14T08:33:17.699Z",
+        "httpStatus": 200,
+        "wireSha256": "d3569050a2f6be3f01a0a8cd9e62fd6c5c632520bc91956efefa679364f85ec7",
+        "bytes": 115531,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-thai-document-replay-2026-10-14/summary.json",
+          "selector": {
+            "id": "TH-C02"
+          },
+          "sha256": "c30a4a9f45fe4adc75193034fd2f7f294a167e961188bedce5e8ed247c63fc50",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 100,
+        "first": {
+          "status": "ok_items",
+          "runId": "d8ecee6a-7261-48d6-ad95-938854e88971",
+          "itemsSeen": 100,
+          "itemsNew": 100,
+          "itemsRevised": 0
+        },
+        "repeat": {
+          "status": "ok_items",
+          "runId": "9d80729a-e811-432a-89d5-f1323759c837",
+          "itemsSeen": 100,
+          "itemsNew": 0,
+          "itemsRevised": 0
+        },
+        "readOnlyReopen": {
+          "readOnly": true,
+          "rows": 100,
+          "versions": 100,
+          "fullTitleUrlDateEvidenceCompared": true,
+          "mismatches": 0,
+          "dayPrecision": 100,
+          "missingTimezone": 100,
+          "nullPublicationInstants": 100
+        },
+        "independentStorageAudit": null
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "document_day",
+        "precision": "day",
+        "sourceDeclaredTimezone": "missing",
+        "publicationInstant": null,
+        "notClaimedAsPublicationTimestamp": true,
+        "basis": "Preserved actual source field role; full dateEvidence stored/replayed, no UTC/clock inference."
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "disabled_HTML_candidate",
+        "declaredSeedEnabled": false,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Complete real page title/link/source-time fields replayed with their actual role and day precision, with repeat/reopen comparison. Does not certify publication instant, article body or impacts."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Private original raw only; remote derivative cannot reconstruct the full page.",
+        "No continuous production or enablement.",
+        "Document/enactment day is not publication date or instant; field-role PASS only."
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "MY-P02",
+      "priority": "P1",
+      "catalogUrlText": "https://www.westportsholdings.com/category/press-release/feed/",
+      "catalogUrls": [
+        "https://www.westportsholdings.com/category/press-release/feed/"
+      ],
+      "exactProductUrl": "https://www.westportsholdings.com/category/press-release/feed/",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "MY-P02"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "MY-P02"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.westportsholdings.com/category/press-release/feed/",
+        "startedAt": "2026-10-13T07:00:27.722Z",
+        "receivedAt": null,
+        "finishedAt": "2026-10-13T07:00:29.489Z",
+        "httpStatus": 200,
+        "wireSha256": "db9676f1167a48d5c36ad76364e6215221173eefb6874d16a77204a160befc8b",
+        "bytes": 36266,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": false,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY",
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "MY-P02"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "liveParsedItems": 3,
+        "liveTitleLinkTimeComplete": 3,
+        "storedDerivativeOnly": true,
+        "repeatAndReadOnlyReopen": "NOT_RUN"
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "feed_declared_date_time_normalized",
+        "precision": "instant_in_saved_metadata",
+        "sourceDeclaredTimezone": "not_reaudited_here",
+        "publicationInstant": "available_in_saved_live_metadata"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "MY-P03",
+      "priority": "P1",
+      "catalogUrlText": "https://www.northport.com.my/np/page-announcements.html",
+      "catalogUrls": [
+        "https://www.northport.com.my/np/page-announcements.html"
+      ],
+      "exactProductUrl": "https://www.northport.com.my/np/page-announcements.html",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "MY-P03"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-six-public-2026-10-14/summary.json",
+          "selector": {
+            "id": "MY-P03"
+          },
+          "sha256": "eae6ddcbdaf257b5b88fe6e8ddb222434f28e83351bb16c4d644b66aa704fad2",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.northport.com.my/np/page-announcements.html",
+        "startedAt": "2026-10-14T07:16:47.635Z",
+        "receivedAt": "2026-10-14T07:16:50.033Z",
+        "finishedAt": "2026-10-14T07:16:50.062Z",
+        "httpStatus": 200,
+        "wireSha256": "880e1a180dc686d9d9d71578a753ee87af24042563a7c58f82c0885f8d3c5691",
+        "bytes": 73037,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "FAIL_REAL_DUPLICATE_ASSOCIATIONS",
+        "evidence": {
+          "path": "docs/evidence/r2-two-raw-dns-2026-10-14/replay-summary.json",
+          "selector": {
+            "id": "MY-P03"
+          },
+          "sha256": "6b0f0630fb8757d1e2f95c6905a7cdcd5b28922bc8427451682521afdd857ba3",
+          "hashBasis": "committed_text_LF"
+        },
+        "conflictAudit": {
+          "path": "docs/evidence/r2-two-raw-dns-2026-10-14/storage-and-conflicts-audit.json",
+          "selector": {
+            "id": "MY-P03"
+          },
+          "sha256": "4d8d88eda51326e7e3a0dca922406b7f19ace29f411ce4d42d7da7dd7c73b0d6",
+          "hashBasis": "committed_text_LF"
+        },
+        "itemsCommitted": 0,
+        "sameRawAsOct13": true
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "source_displayed_notice_day",
+        "precision": "day_if_unambiguous",
+        "sourceDeclaredTimezone": "missing",
+        "publicationInstant": null
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "disabled_HTML_candidate",
+        "declaredSeedEnabled": false,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "PARTIAL",
+        "countedOK": false,
+        "reason": "Genuine response exists but current collection qualification is incomplete: duplicate association conflict"
+      },
+      "r2_5": {
+        "verdict": "FAIL",
+        "countedPass": false,
+        "reason": "Full actual raw repeated URL with conflicting title/date; collector fails closed. No selection/merging to manufacture a pass."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Real duplicate URL title/date conflicts persist, 0 items committed.",
+        "No licensed full raw redistribution."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "MY-W01",
+      "priority": "P1",
+      "catalogUrlText": "https://api.data.gov.my/weather/warning",
+      "catalogUrls": [
+        "https://api.data.gov.my/weather/warning"
+      ],
+      "exactProductUrl": "https://api.data.gov.my/weather/warning",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "DUAL",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "MY-W01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/metmalaysia-integration-2026-10-10/live-evidence.json",
+          "selector": null,
+          "sha256": "b6ea58cb4851c4c46fd6cc5354b4017133b5a8e362cc8879d4ac4ccbc79f9686",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://api.data.gov.my/weather/warning/",
+        "at": "2026-10-10T08:30:40.728Z",
+        "httpStatus": 200,
+        "scope": "related_product_trailing_slash_JSON; exact_no_slash_catalogue_request_301_in_old_probe",
+        "catalogueExact301Evidence": {
+          "path": "docs/evidence/metmalaysia-warning-2026-10-10/raw/fetch-log.txt",
+          "selector": null,
+          "sha256": "fcea5d40cbc05bee217ec34a39a65d9244510e1aaef5f77d05def121cb5869fc",
+          "hashBasis": "committed_text_LF"
+        }
+      },
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "issue_or_validity_fields_unresolved",
+        "precision": "unverified",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "PARTIAL",
+        "countedOK": false,
+        "reason": "Related slash endpoint JSON available, but exact catalogue URL gave301; stable product URL/collection mapping not qualified here."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "warning_issue.issued时区、稳定URL/ID映射、非publication字段、完整回放待定"
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "MY-C01",
+      "priority": "P1",
+      "catalogUrlText": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
+      "catalogUrls": [
+        "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss"
+      ],
+      "exactProductUrl": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "MY-C01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "MY-C01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
+        "startedAt": "2026-10-13T07:00:30.791Z",
+        "receivedAt": null,
+        "finishedAt": "2026-10-13T07:00:35.339Z",
+        "httpStatus": 200,
+        "wireSha256": "b7f4e2c40f5d27df510d7eb00fb1ae1526b48269f39609a61279b20093b0de60",
+        "bytes": 7619,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": false,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY",
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "MY-C01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "liveParsedItems": 10,
+        "liveTitleLinkTimeComplete": 10,
+        "storedDerivativeOnly": true,
+        "repeatAndReadOnlyReopen": "NOT_RUN"
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "feed_declared_date_time_normalized",
+        "precision": "instant_in_saved_metadata",
+        "sourceDeclaredTimezone": "not_reaudited_here",
+        "publicationInstant": "available_in_saved_live_metadata"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "MY-T01",
+      "priority": "P1",
+      "catalogUrlText": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+      "catalogUrls": [
+        "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss"
+      ],
+      "exactProductUrl": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "MY-T01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "MY-T01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+        "startedAt": "2026-10-13T07:00:35.340Z",
+        "receivedAt": null,
+        "finishedAt": "2026-10-13T07:00:38.388Z",
+        "httpStatus": 200,
+        "wireSha256": "6136eaa0b359ed2a1c9d76bf00814a787706540e0eb0f02bd64d5b737e092439",
+        "bytes": 6086,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": false,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY",
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "MY-T01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "liveParsedItems": 6,
+        "liveTitleLinkTimeComplete": 6,
+        "storedDerivativeOnly": true,
+        "repeatAndReadOnlyReopen": "NOT_RUN"
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "feed_declared_date_time_normalized",
+        "precision": "instant_in_saved_metadata",
+        "sourceDeclaredTimezone": "not_reaudited_here",
+        "publicationInstant": "available_in_saved_live_metadata"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "MY-L01",
+      "priority": "P1",
+      "catalogUrlText": "https://www.pos.com.my/service-update",
+      "catalogUrls": [
+        "https://www.pos.com.my/service-update"
+      ],
+      "exactProductUrl": "https://www.pos.com.my/service-update",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "MY-L01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": null,
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "NOT_RUN",
+        "countedOK": false,
+        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "缺来源专属配置、存档谱系与回放"
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "ID-W01",
+      "priority": "P1",
+      "catalogUrlText": "https://www.bmkg.go.id/alerts/nowcast/en/rss.xml",
+      "catalogUrls": [
+        "https://www.bmkg.go.id/alerts/nowcast/en/rss.xml"
+      ],
+      "exactProductUrl": "https://www.bmkg.go.id/alerts/nowcast/en/rss.xml",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "DUAL",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "ID-W01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "ID-W01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.bmkg.go.id/alerts/nowcast/en/rss.xml",
+        "startedAt": "2026-10-13T07:00:40.269Z",
+        "receivedAt": null,
+        "finishedAt": "2026-10-13T07:00:40.906Z",
+        "httpStatus": 200,
+        "wireSha256": "65c0116af021c4fc99efec11d1abb1b8a534e9748fa18289ab21f2ee0d5213c5",
+        "bytes": 14805,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": false,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "PASS_STORED_REAL_ARCHIVE_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/replay.log",
+          "selector": null,
+          "sha256": "eb3d2dbeff7567eca8b14873d3eb9fdbdabe9eb1ac443cbc1d75b2a615618905",
+          "hashBasis": "committed_text_LF"
+        },
+        "harness": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/replay.test.ts.txt",
+          "selector": null,
+          "sha256": "376a9309c3b4e9dda2e73b8a7851e58e075382dc2c68791765046f2566d424ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 12,
+        "artifact": "server/providers/__fixtures__/bmkg-cap-2026-10-10/index.xml；同hash docs/evidence/bmkg-cap-2026-10-10/raw/index.xml",
+        "captureProvenance": "旧fetch-log：2026-10-10T06:48:32Z GET /alerts/nowcast/en；RSS self-link为目录/en/rss.xml",
+        "repeatReadOnlyReopen": "not_asserted_by_this_older_replay"
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "feed_declared_date_time",
+        "precision": "datetime",
+        "sourceDeclaredTimezone": "feed_date_normalization_provenance",
+        "publicationInstant": "present in saved parser output"
+      },
+      "licensePolicy": {
+        "storedBody": "excerpt_only_pending_license_review",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "built_in_seed",
+        "declaredSeedEnabled": true,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Saved real source archive (not synthetic) was replayed through collector with every title/link/time assertion; limited historical field scope and alias/redaction/zone notes retained."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Latest 13-item exact catalogue RSS fetch solved earlier request URL access gap.",
+        "12-item older full RSS archive originated from /alerts/nowcast/en with self-link identifying /en/rss.xml; keep alias provenance, do not say it was that exact earlier GET.",
+        "Latest exact 13-item raw was not retained; old 12-item payload field replay is distinct.",
+        "Validity, licensed full body and 24h unverified."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "ID-W02",
+      "priority": "P1",
+      "catalogUrlText": "https://maritim.bmkg.go.id/marine2026-data/ （文档 `/apidoc`；`/pelabuhan/{KODE}.json`）",
+      "catalogUrls": [
+        "https://maritim.bmkg.go.id/marine2026-data/"
+      ],
+      "exactProductUrl": null,
+      "catalogUnresolvedFragments": [
+        "/apidoc",
+        "/pelabuhan/{KODE}.json"
+      ],
+      "classification": "numeric_weather",
+      "legacyGroup": "OP",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "ID-W02"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": null,
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": {
+        "status": "NOT_RUN",
+        "reason": "Catalogue root/doc/template only; concrete approved KODE product URL and real numerical fields unknown."
+      },
+      "dateEvidence": {
+        "role": "forecast_valid_time_or_cyclone_reference_time",
+        "precision": "source_numerical_contract",
+        "sourceDeclaredTimezone": "existing_operational_contract; not article timestamp",
+        "publicationInstant": "not_applicable"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "not_applicable_existing_operational_layer",
+        "sourceConfig": "not_configured",
+        "codeDefaultJobEnabled": null,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "NOT_RUN",
+        "countedOK": false,
+        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+      },
+      "r2_5": {
+        "verdict": "NOT_APPLICABLE_NUMERIC",
+        "countedPass": false,
+        "reason": "Approved numerical field validation is separate; not in 34 article title/link/time denominator."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "目录是根路径+参数化文档，缺批准具体港口URL及映射；不是文章feed"
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "ID-T01",
+      "priority": "P1",
+      "catalogUrlText": "https://jdih.kemendag.go.id/",
+      "catalogUrls": [
+        "https://jdih.kemendag.go.id/"
+      ],
+      "exactProductUrl": "https://jdih.kemendag.go.id/",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "ID-T01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-three-after-clash-2026-10-14/summary.json",
+          "selector": {
+            "id": "ID-T01"
+          },
+          "sha256": "686fbee3d317f58025c5ea3c88e55adfb5fca849b8df7706c87bf48d829538cf",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://jdih.kemendag.go.id/",
+        "startedAt": "2026-10-14T09:08:45.056Z",
+        "receivedAt": "2026-10-14T09:08:52.943Z",
+        "finishedAt": "2026-10-14T09:08:53.001Z",
+        "httpStatus": 200,
+        "wireSha256": "7bda040e2c0db0ba557bc91837f1c05bc8a30e34d18e6a5568c9a37426b74032",
+        "bytes": 390183,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-post-clash-index-replay-final-2026-10-14/summary.json",
+          "selector": {
+            "id": "ID-T01"
+          },
+          "sha256": "d5c6e3e4880bdd1a1eb31e344e6a02a2b53ebc78d8e4c08bfa0e977d392c68fa",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 8,
+        "first": {
+          "status": "ok_items",
+          "runId": "ecf8d082-baf6-4bfc-a9cf-5eb9f25fb5ba",
+          "itemsSeen": 8,
+          "itemsNew": 8,
+          "itemsRevised": 0
+        },
+        "repeat": {
+          "status": "ok_items",
+          "runId": "8d78d470-dba8-4ae3-ad12-cec8c44ec2e1",
+          "itemsSeen": 8,
+          "itemsNew": 0,
+          "itemsRevised": 0
+        },
+        "readOnlyReopen": {
+          "readOnly": true,
+          "rows": 8,
+          "versions": 8,
+          "fullTitleUrlDateEvidenceCompared": true,
+          "mismatches": 0,
+          "dayPrecision": 8,
+          "missingTimezone": 8,
+          "nullPublicationInstants": 8
+        },
+        "independentStorageAudit": null
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "enactment_day",
+        "precision": "day",
+        "sourceDeclaredTimezone": "missing",
+        "publicationInstant": null,
+        "notClaimedAsPublicationTimestamp": true,
+        "basis": "Preserved actual source field role; full dateEvidence stored/replayed, no UTC/clock inference."
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "disabled_HTML_candidate",
+        "declaredSeedEnabled": false,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Complete real page title/link/source-time fields replayed with their actual role and day precision, with repeat/reopen comparison. Does not certify publication instant, article body or impacts."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Private original raw only; remote derivative cannot reconstruct the full page.",
+        "No continuous production or enablement.",
+        "Visible regulation title contains original ellipsis; no complete legal title/text claim. Initial 7/8 date failure retained, fixed explicit observed October token only.",
+        "Document/enactment day is not publication date or instant; field-role PASS only."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "ID-T02",
+      "priority": "P1",
+      "catalogUrlText": "https://jdih.kemenkeu.go.id/",
+      "catalogUrls": [
+        "https://jdih.kemenkeu.go.id/"
+      ],
+      "exactProductUrl": "https://jdih.kemenkeu.go.id/",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "ID-T02"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": null,
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "NOT_RUN",
+        "countedOK": false,
+        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "缺来源专属配置、存档谱系与回放"
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "PH-P01",
+      "priority": "P1",
+      "catalogUrlText": "https://www.ppa.com.ph/content/ppa-helpdesk-advisory ，https://www.ppa.com.ph/ppa-port-news",
+      "catalogUrls": [
+        "https://www.ppa.com.ph/content/ppa-helpdesk-advisory",
+        "https://www.ppa.com.ph/ppa-port-news"
+      ],
+      "exactProductUrl": null,
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "PH-P01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": null,
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "NOT_RUN",
+        "countedOK": false,
+        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "目录一行两URL，仍只算1个ID；仅离线sourceCa机制，未配置真实CA/selector/存档"
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "PH-W01",
+      "priority": "P1",
+      "catalogUrlText": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+      "catalogUrls": [
+        "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin"
+      ],
+      "exactProductUrl": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "DUAL",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "PH-W01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/pagasa-warning-2026-10-10/raw/fetch-log.txt",
+          "selector": null,
+          "sha256": "011c6a9b2185fbc4aa8368b44bab651e103d0f72c23c14f329721350c86254b9",
+          "hashBasis": "committed_text_LF"
+        },
+        "captureInventory": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+          "selector": {
+            "id": "PH-W01"
+          },
+          "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+        "at": "2026-10-10T11:03:48Z",
+        "httpStatus": 200,
+        "scope": "page_shell/iframe; no qualified active positive warning item"
+      },
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "PARTIAL",
+        "countedOK": false,
+        "reason": "Page response alone is not usable verified warning payload; no positive item/explicit parsed-empty contract proved."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "空壳/iframe与正样本缺口；不称标题时间通过"
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "PH-W02",
+      "priority": "P1",
+      "catalogUrlText": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+      "catalogUrls": [
+        "https://www.pagasa.dost.gov.ph/weather/weather-advisory"
+      ],
+      "exactProductUrl": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "DUAL",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "PH-W02"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/pagasa-warning-2026-10-10/raw/fetch-log.txt",
+          "selector": null,
+          "sha256": "011c6a9b2185fbc4aa8368b44bab651e103d0f72c23c14f329721350c86254b9",
+          "hashBasis": "committed_text_LF"
+        },
+        "captureInventory": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+          "selector": {
+            "id": "PH-W02"
+          },
+          "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+        "at": "2026-10-10T11:03:49.920Z",
+        "httpStatus": 200,
+        "scope": "page_shell/iframe; no qualified active positive warning item"
+      },
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "PARTIAL",
+        "countedOK": false,
+        "reason": "Page response alone is not usable verified warning payload; no positive item/explicit parsed-empty contract proved."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "正样本/selector/时间规则缺失"
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "PH-C01",
+      "priority": "P1",
+      "catalogUrlText": "https://customs.gov.ph/category/media-releases/",
+      "catalogUrls": [
+        "https://customs.gov.ph/category/media-releases/"
+      ],
+      "exactProductUrl": "https://customs.gov.ph/category/media-releases/",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "PH-C01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-four-after-clash-2026-10-14/summary.json",
+          "selector": {
+            "id": "PH-C01"
+          },
+          "sha256": "6257a6b9cafef66b5de783d11594b31cb9601d8723e7ffc185bfc6d6794101ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://customs.gov.ph/category/media-releases/",
+        "startedAt": "2026-10-14T07:56:33.170Z",
+        "receivedAt": "2026-10-14T07:56:34.958Z",
+        "finishedAt": "2026-10-14T07:56:34.989Z",
+        "httpStatus": 200,
+        "wireSha256": "9d56a123e75dd0d3fa7523da3d410125a5c71f23e42dbacd012c50d31627a6c6",
+        "bytes": 166897,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-public-index-replay-2026-10-14/summary.json",
+          "selector": {
+            "id": "PH-C01"
+          },
+          "sha256": "7ec812e5e76152ab4e9de93b57f2417f12caf43b252a701608480d7b985c8881",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 11,
+        "first": {
+          "status": "ok_items",
+          "runId": "a9e28198-8fb9-4bc5-af09-b8329e763166",
+          "itemsSeen": 11,
+          "itemsNew": 11,
+          "itemsRevised": 0
+        },
+        "repeat": {
+          "status": "ok_items",
+          "runId": "1c4e71e1-4d49-487b-aaa4-77301f4f2077",
+          "itemsSeen": 11,
+          "itemsNew": 0,
+          "itemsRevised": 0
+        },
+        "readOnlyReopen": {
+          "readOnly": true,
+          "rows": 11,
+          "versions": 11,
+          "fullTitleUrlDateEvidenceCompared": true,
+          "mismatches": 0,
+          "dayPrecision": 11,
+          "missingTimezone": 11,
+          "nullPublicationInstants": 11
+        },
+        "independentStorageAudit": null
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "source_displayed_list_day",
+        "precision": "day",
+        "sourceDeclaredTimezone": "missing",
+        "publicationInstant": null,
+        "notClaimedAsPublicationTimestamp": true,
+        "basis": "Preserved actual source field role; full dateEvidence stored/replayed, no UTC/clock inference."
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "disabled_HTML_candidate",
+        "declaredSeedEnabled": false,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Complete real page title/link/source-time fields replayed with their actual role and day precision, with repeat/reopen comparison. Does not certify publication instant, article body or impacts."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Private original raw only; remote derivative cannot reconstruct the full page.",
+        "No continuous production or enablement."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "PH-M01",
+      "priority": "P1",
+      "catalogUrlText": "https://portcalls.com/feed/",
+      "catalogUrls": [
+        "https://portcalls.com/feed/"
+      ],
+      "exactProductUrl": "https://portcalls.com/feed/",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "PH-M01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "PH-M01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://portcalls.com/feed/",
+        "startedAt": "2026-10-13T07:00:29.490Z",
+        "receivedAt": null,
+        "finishedAt": "2026-10-13T07:00:30.790Z",
+        "httpStatus": 200,
+        "wireSha256": "e245e5a3a1be9cc4cdc6c6204f159eee93674b380679eec8fe0dc99411c27b71",
+        "bytes": 10112,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": false,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY",
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "PH-M01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "liveParsedItems": 10,
+        "liveTitleLinkTimeComplete": 10,
+        "storedDerivativeOnly": true,
+        "repeatAndReadOnlyReopen": "NOT_RUN"
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "feed_declared_date_time_normalized",
+        "precision": "instant_in_saved_metadata",
+        "sourceDeclaredTimezone": "not_reaudited_here",
+        "publicationInstant": "available_in_saved_live_metadata"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "XX-W01",
+      "priority": "P1",
+      "catalogUrlText": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+      "catalogUrls": [
+        "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json"
+      ],
+      "exactProductUrl": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+      "catalogUnresolvedFragments": [],
+      "classification": "numeric_weather",
+      "legacyGroup": "OP",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "XX-W01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
+          "selector": null,
+          "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+          "hashBasis": "committed_text_LF"
+        },
+        "atWindow": [
+          "2026-10-10T03:58:39.141Z",
+          "2026-10-10T03:58:44.112Z"
+        ],
+        "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+        "httpStatus": 200,
+        "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
+        "wireSha256": null
+      },
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": {
+        "status": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+          "selector": null,
+          "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+          "hashBasis": "committed_text_LF"
+        },
+        "rawNumericalPayloadReplay": "NOT_RUN; do not confuse normalized diagnostics with retained raw replay",
+        "qualification": "target TC list/IDs and persisted cyclones"
+      },
+      "dateEvidence": {
+        "role": "forecast_valid_time_or_cyclone_reference_time",
+        "precision": "source_numerical_contract",
+        "sourceDeclaredTimezone": "existing_operational_contract; not article timestamp",
+        "publicationInstant": "not_applicable"
+      },
+      "licensePolicy": {
+        "storedBody": "official_numeric_data_attribution; no full article contract",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "not_applicable_existing_operational_layer",
+        "sourceConfig": "existing_runtime_config_dependent",
+        "codeDefaultJobEnabled": "conditional_real_mode_and_open_meteo_for_jma; existing_weather_job_enabled_for_selected_provider",
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored real selected-product operational responses and normalized field checks; snapshot-time only, not an article or new ongoing run."
+      },
+      "r2_5": {
+        "verdict": "NOT_APPLICABLE_NUMERIC",
+        "countedPass": false,
+        "reason": "Approved numerical field validation is separate; not in 34 article title/link/time denominator."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Historical snapshot10/10; current uptime/live refresh unknown. No original numerical wire replay retained in these diagnostics."
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "XX-W02",
+      "priority": "P1",
+      "catalogUrlText": "`https://www.jma.go.jp/bosai/typhoon/data/TC{id}/forecast.json` 、`/specifications.json`",
+      "catalogUrls": [
+        "https://www.jma.go.jp/bosai/typhoon/data/TC{id}/forecast.json"
+      ],
+      "exactProductUrl": null,
+      "catalogUnresolvedFragments": [
+        "/specifications.json"
+      ],
+      "classification": "numeric_weather",
+      "legacyGroup": "OP",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "XX-W02"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
+          "selector": null,
+          "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+          "hashBasis": "committed_text_LF"
+        },
+        "atWindow": [
+          "2026-10-10T03:58:39.141Z",
+          "2026-10-10T03:58:44.112Z"
+        ],
+        "url": null,
+        "httpStatus": 200,
+        "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
+        "wireSha256": null,
+        "expectedForecastProductsInferredFromStoredIds": [
+          "https://www.jma.go.jp/bosai/typhoon/data/TC2635/forecast.json",
+          "https://www.jma.go.jp/bosai/typhoon/data/TC2634/forecast.json"
+        ]
+      },
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": {
+        "status": "PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED",
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+          "selector": null,
+          "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+          "hashBasis": "committed_text_LF"
+        },
+        "rawNumericalPayloadReplay": "NOT_RUN; do not confuse normalized diagnostics with retained raw replay",
+        "qualification": "Existing adapter fetches forecast.json, not specifications.json; exact per-request/raw product evidence incomplete."
+      },
+      "dateEvidence": {
+        "role": "forecast_valid_time_or_cyclone_reference_time",
+        "precision": "source_numerical_contract",
+        "sourceDeclaredTimezone": "existing_operational_contract; not article timestamp",
+        "publicationInstant": "not_applicable"
+      },
+      "licensePolicy": {
+        "storedBody": "official_numeric_data_attribution; no full article contract",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "not_applicable_existing_operational_layer",
+        "sourceConfig": "existing_runtime_config_dependent",
+        "codeDefaultJobEnabled": "conditional_real_mode_and_open_meteo_for_jma; existing_weather_job_enabled_for_selected_provider",
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "PARTIAL",
+        "countedOK": false,
+        "reason": "Forecast branch has real persisted diagnostics, but catalogue also names specifications.json; that product not verified, no full-row OK."
+      },
+      "r2_5": {
+        "verdict": "NOT_APPLICABLE_NUMERIC",
+        "countedPass": false,
+        "reason": "Approved numerical field validation is separate; not in 34 article title/link/time denominator."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Resolve catalogue forecast/specifications product scope and retain field evidence; do not manufacture concrete unobserved URL or count forecast-only as full row."
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "XX-K01",
+      "priority": "P1",
+      "catalogUrlText": "https://www.maersk.com/news",
+      "catalogUrls": [
+        "https://www.maersk.com/news"
+      ],
+      "exactProductUrl": "https://www.maersk.com/news",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "XX-K01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": null,
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "NOT_RUN",
+        "countedOK": false,
+        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "缺来源专属配置、存档谱系与回放"
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "XX-K02",
+      "priority": "P1",
+      "catalogUrlText": "https://www.one-line.com/en/news",
+      "catalogUrls": [
+        "https://www.one-line.com/en/news"
+      ],
+      "exactProductUrl": "https://www.one-line.com/en/news",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "XX-K02"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": null,
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "NOT_RUN",
+        "countedOK": false,
+        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "缺来源专属配置、存档谱系与回放"
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "XX-K03",
+      "priority": "P1",
+      "catalogUrlText": "https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/",
+      "catalogUrls": [
+        "https://www.sitc.com/en/list.asp?classid=44",
+        "https://sitcline.vn/"
+      ],
+      "exactProductUrl": null,
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "XX-K03"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": null,
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "NOT_RUN",
+        "countedOK": false,
+        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "缺来源专属配置、存档谱系与回放"
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "XX-M01",
+      "priority": "P1",
+      "catalogUrlText": "https://theloadstar.com/feed/",
+      "catalogUrls": [
+        "https://theloadstar.com/feed/"
+      ],
+      "exactProductUrl": "https://theloadstar.com/feed/",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "XX-M01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-four-index-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "XX-M01"
+          },
+          "sha256": "b80c69f6ba391dc900b5289ecb587729133806ff78ace526b7457a0e12e18092",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://theloadstar.com/feed/",
+        "startedAt": "2026-10-13T08:25:10.410Z",
+        "receivedAt": null,
+        "finishedAt": "2026-10-13T08:25:11.081Z",
+        "httpStatus": 200,
+        "wireSha256": "48d0e7d2b8a37ba89ceb91a4b74361b782b7109d5ac854320ad3bedb2f9c64b9",
+        "bytes": 20055,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": false,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY",
+        "evidence": {
+          "path": "docs/evidence/r2-four-index-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "XX-M01"
+          },
+          "sha256": "b80c69f6ba391dc900b5289ecb587729133806ff78ace526b7457a0e12e18092",
+          "hashBasis": "committed_text_LF"
+        },
+        "liveParsedItems": 10,
+        "liveTitleLinkTimeComplete": 10,
+        "storedDerivativeOnly": true,
+        "repeatAndReadOnlyReopen": "NOT_RUN"
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "feed_declared_date_time_normalized",
+        "precision": "instant_in_saved_metadata",
+        "sourceDeclaredTimezone": "not_reaudited_here",
+        "publicationInstant": "available_in_saved_live_metadata"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "XX-M03",
+      "priority": "P1",
+      "catalogUrlText": "https://splash247.com/feed/",
+      "catalogUrls": [
+        "https://splash247.com/feed/"
+      ],
+      "exactProductUrl": "https://splash247.com/feed/",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "NEWS",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "XX-M03"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-four-index-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "XX-M03"
+          },
+          "sha256": "b80c69f6ba391dc900b5289ecb587729133806ff78ace526b7457a0e12e18092",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://splash247.com/feed/",
+        "startedAt": "2026-10-13T08:25:11.082Z",
+        "receivedAt": null,
+        "finishedAt": "2026-10-13T08:25:12.342Z",
+        "httpStatus": 200,
+        "wireSha256": "728d1f80635db0dde301c0bbd918d7d761d4c851738d041c03a1d9ca464e4ad2",
+        "bytes": 19299,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": false,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY",
+        "evidence": {
+          "path": "docs/evidence/r2-four-index-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "XX-M03"
+          },
+          "sha256": "b80c69f6ba391dc900b5289ecb587729133806ff78ace526b7457a0e12e18092",
+          "hashBasis": "committed_text_LF"
+        },
+        "liveParsedItems": 10,
+        "liveTitleLinkTimeComplete": 10,
+        "storedDerivativeOnly": true,
+        "repeatAndReadOnlyReopen": "NOT_RUN"
+      },
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "feed_declared_date_time_normalized",
+        "precision": "instant_in_saved_metadata",
+        "sourceDeclaredTimezone": "not_reaudited_here",
+        "publicationInstant": "available_in_saved_live_metadata"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay."
+      ],
+      "historicalSuperseded": [
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+      ]
+    },
+    {
+      "id": "XX-A01",
+      "priority": "P1",
+      "catalogUrlText": "https://api.open-meteo.com/v1/forecast",
+      "catalogUrls": [
+        "https://api.open-meteo.com/v1/forecast"
+      ],
+      "exactProductUrl": "https://api.open-meteo.com/v1/forecast",
+      "catalogUnresolvedFragments": [],
+      "classification": "numeric_weather",
+      "legacyGroup": "OP",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "XX-A01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
+          "selector": null,
+          "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+          "hashBasis": "committed_text_LF"
+        },
+        "atWindow": [
+          "2026-10-10T03:58:39.141Z",
+          "2026-10-10T03:58:44.112Z"
+        ],
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "httpStatus": 200,
+        "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
+        "wireSha256": null
+      },
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": {
+        "status": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+          "selector": null,
+          "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+          "hashBasis": "committed_text_LF"
+        },
+        "rawNumericalPayloadReplay": "NOT_RUN; do not confuse normalized diagnostics with retained raw replay",
+        "qualification": "windGust/precipitation/visibility timestamps at eight land points"
+      },
+      "dateEvidence": {
+        "role": "forecast_valid_time_or_cyclone_reference_time",
+        "precision": "source_numerical_contract",
+        "sourceDeclaredTimezone": "existing_operational_contract; not article timestamp",
+        "publicationInstant": "not_applicable"
+      },
+      "licensePolicy": {
+        "storedBody": "numerical_data_usage_terms; Open-Meteo attribution/noncommercial local scope, commercial/paid authorization separate",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "not_applicable_existing_operational_layer",
+        "sourceConfig": "existing_runtime_config_dependent",
+        "codeDefaultJobEnabled": "conditional_real_mode_and_open_meteo_for_jma; existing_weather_job_enabled_for_selected_provider",
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored real selected-product operational responses and normalized field checks; snapshot-time only, not an article or new ongoing run."
+      },
+      "r2_5": {
+        "verdict": "NOT_APPLICABLE_NUMERIC",
+        "countedPass": false,
+        "reason": "Approved numerical field validation is separate; not in 34 article title/link/time denominator."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Historical snapshot10/10; current uptime/live refresh unknown. No original numerical wire replay retained in these diagnostics."
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "XX-A02",
+      "priority": "P1",
+      "catalogUrlText": "https://marine-api.open-meteo.com/v1/marine",
+      "catalogUrls": [
+        "https://marine-api.open-meteo.com/v1/marine"
+      ],
+      "exactProductUrl": "https://marine-api.open-meteo.com/v1/marine",
+      "catalogUnresolvedFragments": [],
+      "classification": "numeric_weather",
+      "legacyGroup": "OP",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "XX-A02"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
+          "selector": null,
+          "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+          "hashBasis": "committed_text_LF"
+        },
+        "atWindow": [
+          "2026-10-10T03:58:39.141Z",
+          "2026-10-10T03:58:44.112Z"
+        ],
+        "url": "https://marine-api.open-meteo.com/v1/marine",
+        "httpStatus": 200,
+        "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
+        "wireSha256": null,
+        "latestReferencePointProbe": {
+          "path": "docs/evidence/vnsgn-point-check-2026-10-10/vnsgn-point-check.json",
+          "selector": null,
+          "sha256": "5a4f550716b05cadef45b64997a3592516110f82a86d3ac929f8f2feb4d82bac",
+          "hashBasis": "committed_text_LF"
+        },
+        "referenceProbeAt": "2026-10-10T05:31:34+00:00"
+      },
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": {
+        "status": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+          "selector": null,
+          "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+          "hashBasis": "committed_text_LF"
+        },
+        "rawNumericalPayloadReplay": "NOT_RUN; do not confuse normalized diagnostics with retained raw replay",
+        "qualification": "wave/swell forecast fields at7port origins and separate ADR009 engineering reference; original VNSGN remains missing"
+      },
+      "dateEvidence": {
+        "role": "forecast_valid_time_or_cyclone_reference_time",
+        "precision": "source_numerical_contract",
+        "sourceDeclaredTimezone": "existing_operational_contract; not article timestamp",
+        "publicationInstant": "not_applicable"
+      },
+      "licensePolicy": {
+        "storedBody": "numerical_data_usage_terms; Open-Meteo attribution/noncommercial local scope, commercial/paid authorization separate",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "not_applicable_existing_operational_layer",
+        "sourceConfig": "existing_runtime_config_dependent",
+        "codeDefaultJobEnabled": "conditional_real_mode_and_open_meteo_for_jma; existing_weather_job_enabled_for_selected_provider",
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored real selected-product operational responses and normalized field checks; snapshot-time only, not an article or new ongoing run."
+      },
+      "r2_5": {
+        "verdict": "NOT_APPLICABLE_NUMERIC",
+        "countedPass": false,
+        "reason": "Approved numerical field validation is separate; not in 34 article title/link/time denominator."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Historical snapshot10/10; current uptime/live refresh unknown. No original numerical wire replay retained in these diagnostics.",
+        "Original VNSGN marine missing; reference about61.8km away cannot be berth/original-port observations.",
+        "10/10 seven-day historical window, not proof of a fresh seven-day window today."
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "XX-A03",
+      "priority": "P1",
+      "catalogUrlText": "https://customer-api.open-meteo.com",
+      "catalogUrls": [
+        "https://customer-api.open-meteo.com"
+      ],
+      "exactProductUrl": "https://customer-api.open-meteo.com",
+      "catalogUnresolvedFragments": [],
+      "classification": "later_stage",
+      "legacyGroup": "PAID",
+      "inPublicDenominator": false,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "XX-A03"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": null,
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_not_configured_for_this_stage",
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "DEFERRED_POST_STAGE",
+        "countedOK": false,
+        "reason": "User-approved later paid/vector stage; retained in41, excluded only from public39, not counted PASS."
+      },
+      "r2_5": {
+        "verdict": "DEFERRED_POST_STAGE",
+        "countedPass": false,
+        "reason": "Not in approved34 information field-replay denominator."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Entitlement/product endpoint/budget/credentials/real call not approved or verified by this summary."
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "XX-A04",
+      "priority": "P1",
+      "catalogUrlText": "https://help.aliyun.com/zh/model-studio/embedding",
+      "catalogUrls": [
+        "https://help.aliyun.com/zh/model-studio/embedding"
+      ],
+      "exactProductUrl": null,
+      "catalogUnresolvedFragments": [],
+      "classification": "later_stage",
+      "legacyGroup": "VECTOR",
+      "inPublicDenominator": false,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "XX-A04"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": null,
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_not_configured_for_this_stage",
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "DEFERRED_POST_STAGE",
+        "countedOK": false,
+        "reason": "User-approved later paid/vector stage; retained in41, excluded only from public39, not counted PASS."
+      },
+      "r2_5": {
+        "verdict": "DEFERRED_POST_STAGE",
+        "countedPass": false,
+        "reason": "Not in approved34 information field-replay denominator."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "Entitlement/product endpoint/budget/credentials/real call not approved or verified by this summary.",
+        "Catalogue URL is documentation, actual embedding API endpoint remains unknown here."
+      ],
+      "historicalSuperseded": []
+    },
+    {
+      "id": "XX-F01",
+      "priority": "P1",
+      "catalogUrlText": "https://seller-my.tiktok.com/university/essay?knowledge_id=4293090978809617",
+      "catalogUrls": [
+        "https://seller-my.tiktok.com/university/essay?knowledge_id=4293090978809617"
+      ],
+      "exactProductUrl": "https://seller-my.tiktok.com/university/essay?knowledge_id=4293090978809617",
+      "catalogUnresolvedFragments": [],
+      "classification": "information_notice",
+      "legacyGroup": "POLICY",
+      "inPublicDenominator": true,
+      "legacyInventoryEvidence": {
+        "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+        "selector": {
+          "id": "XX-F01"
+        },
+        "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+        "hashBasis": "committed_text_LF"
+      },
+      "latestActualFetch": null,
+      "fieldReplayEvidence": null,
+      "numericFieldValidation": null,
+      "dateEvidence": {
+        "role": "unknown",
+        "precision": "unknown",
+        "sourceDeclaredTimezone": "unknown",
+        "publicationInstant": "unknown"
+      },
+      "licensePolicy": {
+        "storedBody": "metadata_only_until_source_permission_verified",
+        "rawRedistribution": "not_assumed",
+        "historicalArtifactsNotReaudited": true
+      },
+      "defaultState": {
+        "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+        "sourceConfig": "not_configured",
+        "declaredSeedEnabled": null,
+        "effectiveDefaultIntelJobEnabled": false,
+        "currentUserPersistedSettings": "not_inspected"
+      },
+      "r2_4": {
+        "verdict": "NOT_RUN",
+        "countedOK": false,
+        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+      },
+      "r2_5": {
+        "verdict": "NOT_RUN",
+        "countedPass": false,
+        "reason": "No stored real-page full title/link/source-time replay."
+      },
+      "continuousProduction": {
+        "status": "NOT_RUN",
+        "scope": "No approved R2-8 24h run for this source"
+      },
+      "gaps": [
+        "整页带日期段落对比不是已配置list；无合规存档及可复现intel断言"
+      ],
+      "historicalSuperseded": []
+    }
+  ],
+  "nextBatchProposal": [
+    {
+      "id": "CN-P02",
+      "url": "https://www.sz.msa.gov.cn/",
+      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; source selectors/date evidence must first be observed, no current implementation or request claim"
+    },
+    {
+      "id": "VN-D01",
+      "url": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
+      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; source selectors/date evidence must first be observed, no current implementation or request claim"
+    },
+    {
+      "id": "MY-L01",
+      "url": "https://www.pos.com.my/service-update",
+      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; source selectors/date evidence must first be observed, no current implementation or request claim"
+    },
+    {
+      "id": "ID-T02",
+      "url": "https://jdih.kemenkeu.go.id/",
+      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; source selectors/date evidence must first be observed, no current implementation or request claim"
+    }
+  ]
+}

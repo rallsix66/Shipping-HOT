@@ -784,5 +784,8 @@
     }
   ],
   "maxTotalHttpRequests": 6,
-  "batchStatus": "NOT_RUN"
+  "batchStatus": "NOT_RUN",
+  "historicalSnapshot": true,
+  "supersededBy": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+  "historicalScope": "Original code SHA, catalogue labels, proposed/null denominators and per-source findings retained as history. Current approved denominators and cumulative existing-evidence decisions are in supersededBy; no historic record is rerun or relabelled."
 }

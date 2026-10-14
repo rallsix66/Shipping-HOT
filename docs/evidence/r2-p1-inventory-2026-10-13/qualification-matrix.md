@@ -1,3 +1,5 @@
+> 历史快照：以下只代表原记录的 SHA 与采集时点；其中目录标签、待定分母和当时缺口不代表当前状态。当前累计结论见[41项矩阵](../r2-current-source-matrix-2026-10-14/report.md)及[逐源机器记录](../r2-current-source-matrix-2026-10-14/mapping.json)。
+
 # R2 P1 目录与已有证据资格盘点 — 2026-10-13
 
 依据现行9/29方案R2-4/5、信源目录与ADR007/008/009；目录字节SHA256见source-inventory.json。基线 a9e637fd52c69fbfde7fd226c660e58da0ea2ae8。仅盘点及已有合规存档离线回放，没有新上游访问或历史封港事件收集。
