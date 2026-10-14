@@ -330,7 +330,8 @@ export function AnnualCalendarPage() {
                     })}
             {showPolicies && (
               <div className="annual-promo-details" data-testid="policy-calendar-details">
-                <h3>{`政策生效日（参考，非停工事实）· ${policyDetails.length} 项`}</h3>
+                <h3>{`政策生效日（参考，非停工事实）· ${policyQuery.isPending ? "读取中…" : policyQuery.isError ? "数量未知" : `${policyDetails.length} 项`}`}</h3>
+                {policyQuery.isPending && <p>正在读取政策资料…</p>}
                 {policyQuery.isError && <p role="alert">政策资料读取失败。</p>}
                 {!policyQuery.isPending && !policyQuery.isError && policyDetails.length === 0 && <p>所选日期没有已录入的政策生效日（未录入不代表没有新规；中国政策需勾选「含中国」）。</p>}
                 {policyDetails.map(policy => (
@@ -346,7 +347,7 @@ export function AnnualCalendarPage() {
             )}
             {showPromos && (
               <div className="annual-promo-details" data-testid="promo-details">
-                <h3>{`电商大促（运营参考，非停工事实）· ${promoDetails.length} 项`}</h3>
+                <h3>{`电商大促（运营参考，非停工事实）· ${promoQuery.isPending ? "读取中…" : promoQuery.isError ? "数量未知" : `${promoDetails.length} 项`}`}</h3>
                 {promoQuery.isError && <p role="alert">大促资料读取失败，不代表没有大促。</p>}
                 {promoQuery.isPending && <p>正在读取大促资料…</p>}
                 {!promoQuery.isPending && !promoQuery.isError && promoDetails.length === 0 && <p>所选日期没有已生成或录入的大促记录（未生成不代表没有大促）。</p>}

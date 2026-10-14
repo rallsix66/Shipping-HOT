@@ -83,6 +83,7 @@ describe("demo calendar existing-layer rendering", () => {
     state.promos.isError = true
     expect(draw()).not.toContain("合成节日锚点")
     expect(draw()).toContain("大促资料读取失败")
+    expect(draw()).toContain("数量未知")
   })
   it("keeps CN independent, fixture identity and policy local timezone visible", () => {
     state.values[6] = true
@@ -97,5 +98,6 @@ describe("demo calendar existing-layer rendering", () => {
     state.policies.isError = true
     expect(draw()).not.toContain("合成中国政策")
     expect(draw()).toContain("政策资料读取失败")
+    expect(draw()).toContain("数量未知")
   })
 })
