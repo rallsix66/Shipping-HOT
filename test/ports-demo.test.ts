@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs"
 import { renderToString } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 import type { PortWeatherPanelResponse } from "@shared/shipping"
+import { createMockSnapshot } from "@shared/shipping-fixtures"
+import { FeedNoticeMetadata } from "../src/components/shipping/feed-notice-metadata"
 import { demoFocusPorts } from "../src/components/shipping/port-focus"
 import { ForecastTable, PortWeatherPanelView } from "../src/components/shipping/port-weather"
 
@@ -23,6 +25,33 @@ function panel(state: PortWeatherPanelResponse["state"]): PortWeatherPanelRespon
 }
 
 describe("demo ports scope and weather trust", () => {
+  it("discloses stale historical publication without deriving expiry from the date", () => {
+    const item = { ...createMockSnapshot().feedItems[0], publishedAt: "2020-01-01T00:00:00Z", publicationTimeKnown: true, stale: true }
+    const html = renderToString(FeedNoticeMetadata({ item }))
+    expect(html).toContain("发布时间")
+    expect(html).toContain("2020")
+    expect(html).toContain("缓存已过期")
+    expect(html).not.toContain("预警状态：已过期")
+  })
+  it("keeps source failure and persisted expired/unknown lifecycle states visible", () => {
+    const item = { ...createMockSnapshot().feedItems[0], sourceStatus: "failed" as const, weather: { riskSource: "official" as const, alertState: "expired" as const, validityStatus: "unknown" as const, lifecycleStatus: "unknown" as const } }
+    const html = renderToString(FeedNoticeMetadata({ item }))
+    for (const label of ["数据源失败", "预警状态：已过期", "有效性待确认", "生命周期未知"]) expect(html).toContain(label)
+  })
+  it("does not display a placeholder timestamp as a known publication", () => {
+    const item = { ...createMockSnapshot().feedItems[0], publishedAt: "2001-01-01T00:00:00Z", publicationTimeKnown: false }
+    const html = renderToString(FeedNoticeMetadata({ item }))
+    expect(html).toContain("发布时间未知")
+    expect(html).not.toContain("2001")
+  })
+  it("labels received_at as first receipt even if publicationTimeKnown is false", () => {
+    const item = { ...createMockSnapshot().feedItems[0], publicationTimeKnown: false, publishedAt: "2026-10-14T00:00:00Z", weather: { riskSource: "official" as const, timeBasis: "received_at" as const } }
+    const html = renderToString(FeedNoticeMetadata({ item }))
+    expect(html).toContain("发布时间未知")
+    expect(html).toContain("首次接收")
+    expect(html).toContain("非发布时间")
+    expect(html).not.toMatch(/发布时间 2026/)
+  })
   it("uses exactly the approved eight ports in demo order, with stable existing IDs", () => {
     expect(demoFocusPorts.map(p => p.unlocode)).toEqual(["CNYTN", "CNSHK", "CNNSA", "VNSGN", "THLCH", "MYPKG", "IDJKT", "PHMNL"])
     expect(new Set(demoFocusPorts.map(p => p.shippingPortId)).size).toBe(8)

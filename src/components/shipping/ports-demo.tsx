@@ -6,6 +6,7 @@ import { PortWeatherPanelSection } from "./port-weather"
 import { ProvenanceBadge } from "./ui"
 import { TropicalCyclonePanelSection, WatchChip } from "./pages"
 import { formatStatus } from "./format"
+import { FeedNoticeMetadata } from "./feed-notice-metadata"
 
 export function DemoPortsPage({ id = "port-yantian" }: { id?: string }) {
   const { data, isLoading, isError, refetch } = useShipping()
@@ -81,6 +82,7 @@ export function DemoPortsPage({ id = "port-yantian" }: { id?: string }) {
                               <article className="ev" key={item.id}>
                                 <h3>{item.title}</h3>
                                 <ProvenanceBadge provenance={item.provenance} />
+                                <FeedNoticeMetadata item={item} />
                                 <p>{item.summary}</p>
                                 <Link to="/feed/$id" params={{ id: item.id }}>查看资料与原文依据</Link>
                               </article>
