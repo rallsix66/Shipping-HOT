@@ -226,6 +226,17 @@ export class IntelRepository {
     return row ? mapSource(row) : undefined
   }
 
+  /** Auto discoveries after the initial successful import; manual versions do not drive polling. */
+  async countAdaptiveDiscoveries(sourceId: string, from: string, until: string): Promise<number> {
+    const row = await this.db.prepare(`SELECT COUNT(*) AS n FROM intel_item i
+      WHERE i.source_id = ? AND i.first_seen_at >= ? AND i.first_seen_at < ?
+      AND i.first_seen_at > (SELECT MIN(finished_at) FROM intel_fetch_run WHERE source_id = i.source_id AND status IN ('ok_items','ok_empty'))
+      AND EXISTS (SELECT 1 FROM intel_item_current_change c JOIN intel_item_version v ON v.id = c.to_version_id
+        WHERE c.item_id = i.id AND c.from_version_id IS NULL AND v.extractor_version IN ('intel-feed-v1','intel-web-list-v1','intel-json-list-v1'))
+    `).get(sourceId, from, until) as { n: number }
+    return Number(row.n)
+  }
+
   async listDueSources(now: string): Promise<IntelSourceRecord[]> {
     const rows = await this.db.prepare("SELECT * FROM intel_source WHERE enabled = 1 AND kind != 'manual' AND (next_sync_at IS NULL OR next_sync_at <= ?) ORDER BY id").all(now) as Row[]
     return rows.map(mapSource)

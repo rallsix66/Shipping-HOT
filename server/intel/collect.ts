@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto"
 import type { ArticleSourcePolicy } from "@shared/article"
+import { adaptiveIntervalMs, adaptiveWindow } from "#/intel/adaptive"
 import type { IntelRepository } from "#/database/intel"
 import { parseFeedEntries } from "#/providers/feed"
 import { type ArticleLookup, type ArticleTransport, secureFetchArticle } from "#/services/article-fetch-security"
@@ -148,11 +149,13 @@ export async function collectIntelSource(repository: IntelRepository, seed: Inte
   }
   const status = entries.length === 0 ? "ok_empty" : "ok_items"
   try {
+    const window = adaptiveWindow(now)
+    const intervalMs = seed.adaptive ? adaptiveIntervalMs(await repository.countAdaptiveDiscoveries(seed.id, window.from, window.until), seed.adaptive) : seed.intervalMs
     // One transaction: if the source-state write fails, the run row stays 'running' and is then closed as failed with backoff.
     await repository.finishRunSuccess(activeRunId, seed.id, { status, finishedAt: nowIso, itemsSeen: entries.length, itemsNew, itemsRevised }, {
       status: status === "ok_empty" ? "ok_empty" : "ok",
       now: nowIso,
-      nextSyncAt: new Date(now.getTime() + seed.intervalMs).toISOString(),
+      nextSyncAt: new Date(now.getTime() + intervalMs).toISOString(),
     })
   } catch (error) {
     return await fail("finalize_failed", message(error, "finalize failed"), committed, { seen: entries.length, created: itemsNew, revised: itemsRevised })

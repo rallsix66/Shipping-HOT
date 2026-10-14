@@ -2,6 +2,7 @@ import type { IntelPersistence } from "#/database/intel"
 import type { WebListConfig } from "#/intel/sources/config-keys"
 import type { JsonListConfig } from "#/intel/sources/json-list"
 import type { SourceCaConfig } from "#/services/article-fetch-security"
+import type { IntelAdaptiveBounds } from "#/intel/adaptive"
 
 /**
  * R2 first-slice seeds. ADR-008: docs/intel-source-catalog.md is the only seed list; every entry here
@@ -22,6 +23,7 @@ export interface IntelSourceSeed {
   allowedHosts: string[]
   allowedContentTypes: string[]
   intervalMs: number
+  adaptive?: IntelAdaptiveBounds
 }
 
 const FEED_CONTENT_TYPES = ["application/rss+xml", "application/atom+xml", "application/rdf+xml", "application/xml", "text/xml"]
