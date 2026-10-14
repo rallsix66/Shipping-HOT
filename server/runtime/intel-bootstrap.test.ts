@@ -117,7 +117,7 @@ describe("intel actual registry/bootstrap path (offline)", () => {
       state.native.close()
     }
   })
-  it("registers exactly one disabled intel task without sources, egress or duplicate Feed/weather tasks", async () => {
+  it("registers exactly one disabled intel task with only disabled catalog seeds, no egress or duplicate Feed/weather tasks", async () => {
     const state = open()
     try {
       const runtime = await bootstrapBackgroundRuntime({ database: state.database, enabled: true, runtimeOptions })
@@ -127,7 +127,8 @@ describe("intel actual registry/bootstrap path (offline)", () => {
       expect(jobs.filter(job => job.id === "weather-sync")).toHaveLength(1)
       expect(jobs.filter(job => job.id === "feed-sync:mock-port-notice")).toHaveLength(1)
       expect(await runtime.runNow(INTEL_COLLECT_JOB_ID)).toMatchObject({ status: "skipped", errorCode: "job_disabled" })
-      expect(state.native.prepare("SELECT COUNT(*) AS n FROM intel_source").get()).toEqual({ n: 0 })
+      expect(state.native.prepare("SELECT COUNT(*) AS n FROM intel_source WHERE enabled = 1").get()).toEqual({ n: 0 })
+      expect(state.native.prepare("SELECT COUNT(*) AS n FROM intel_source WHERE kind='manual'").get()).toEqual({ n: 39 })
       expect(state.native.prepare("SELECT COUNT(*) AS n FROM intel_executor").get()).toEqual({ n: 0 })
       expect(transport).not.toHaveBeenCalled()
       expect(getDefaultRuntimeJobs({ database: state.database, dataMode: "mock" }).find(job => job.id === INTEL_COLLECT_JOB_ID)?.enabled).toBe(false)

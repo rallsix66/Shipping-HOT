@@ -80,11 +80,11 @@ const xml = (body: string): ArticleHttpResponse => ({ status: 200, headers: { "c
 const minutes = (from: Date, iso: string | null) => (Date.parse(iso!) - from.getTime()) / 60_000
 
 describe("migrations 021/022/023 (intel)", () => {
-  it("apply on a fresh isolated database to schema v27 and are idempotent", async () => {
+  it("apply on a fresh isolated database to current schema v28 and are idempotent", async () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
     await initShippingTables(database, "mock")
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(27)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(28)
     const tables = new Set((native.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>).map(row => row.name))
     for (const table of ["intel_source", "intel_fetch_run", "intel_item", "intel_item_version", "intel_item_block"]) expect(tables.has(table)).toBe(true)
     const applied = native.prepare("SELECT version, COUNT(*) AS c FROM schema_migrations WHERE version IN (21, 22, 23) GROUP BY version").all() as Array<{ c: number }>

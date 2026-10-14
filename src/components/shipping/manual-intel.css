@@ -1,0 +1,10 @@
+.manual-grid { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 20px; }
+.manual-intel .filter-panel { max-height: 75vh; overflow: auto; }
+.manual-source { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.manual-intel form { display: grid; gap: 12px; }
+.manual-intel label { display: grid; gap: 6px; }
+.manual-intel input, .manual-intel textarea, .manual-intel select { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 10px; width: 100%; }
+.manual-intel textarea { min-height: 140px; }
+.manual-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.manual-intel a { display: block; color: var(--accent); }
+@media (max-width: 900px) { .manual-grid { grid-template-columns: 1fr; } }

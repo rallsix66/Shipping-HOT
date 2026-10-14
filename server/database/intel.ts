@@ -12,7 +12,7 @@ export interface IntelSourceRecord {
   id: string
   catalogId: string
   name: string
-  kind: "rss" | "atom" | "rdf" | "web_list" | "json_list"
+  kind: "rss" | "atom" | "rdf" | "web_list" | "json_list" | "manual"
   url: string
   persistence: IntelPersistence
   enabled: boolean
@@ -37,6 +37,7 @@ export interface IntelRunRecord {
 }
 
 export interface IntelVersionRecord {
+  sourcePublishedAt: string | null
   dateEvidence: WebDate | null
   id: string
   itemId: string
@@ -63,6 +64,15 @@ export interface IntelCurrentChange {
 }
 
 export type IntelWriteOutcome = "created" | "unchanged" | "revised" | "restored"
+
+export interface IntelManualAction {
+  requestId: string
+  payloadHash: string
+  sourceId: string
+  action: "submit" | "checked_empty"
+  operator: string
+  enteredAt: string
+}
 
 export interface IntelItemRecord {
   id: string
@@ -139,6 +149,7 @@ function mapItem(row: Row): IntelItemRecord {
 
 function mapVersion(row: Row): IntelVersionRecord {
   return {
+    sourcePublishedAt: str(row.source_published_at),
     id: String(row.id),
     itemId: String(row.item_id),
     contentHash: String(row.content_hash),
@@ -216,7 +227,7 @@ export class IntelRepository {
   }
 
   async listDueSources(now: string): Promise<IntelSourceRecord[]> {
-    const rows = await this.db.prepare("SELECT * FROM intel_source WHERE enabled = 1 AND (next_sync_at IS NULL OR next_sync_at <= ?) ORDER BY id").all(now) as Row[]
+    const rows = await this.db.prepare("SELECT * FROM intel_source WHERE enabled = 1 AND kind != 'manual' AND (next_sync_at IS NULL OR next_sync_at <= ?) ORDER BY id").all(now) as Row[]
     return rows.map(mapSource)
   }
 
@@ -321,8 +332,16 @@ export class IntelRepository {
    *   change recorded; no duplicate version or blocks
    * - new hash → new version, change recorded; old versions untouched
    */
-  async writeEntry(entry: IntelEntryWrite): Promise<{ outcome: IntelWriteOutcome, created: boolean, revised: boolean, itemId: string, versionId: string }> {
+  async writeEntry(entry: IntelEntryWrite, manual?: IntelManualAction): Promise<{ outcome: IntelWriteOutcome, created: boolean, revised: boolean, itemId: string, versionId: string }> {
     return this.transaction(async () => {
+      if (manual) {
+        const old = await this.manualReplay(manual)
+        if (old) return { outcome: old.outcome as IntelWriteOutcome, created: old.outcome === "created", revised: ["revised", "restored"].includes(String(old.outcome)), itemId: String(old.item_id), versionId: String(old.version_id) }
+      }
+      const finish = async (result: { outcome: IntelWriteOutcome, created: boolean, revised: boolean, itemId: string, versionId: string }) => {
+        if (manual) await this.saveManualAction(manual, result.outcome, result.itemId, result.versionId)
+        return result
+      }
       const existing = await this.db.prepare("SELECT * FROM intel_item WHERE source_id = ? AND canonical_url = ?").get(entry.sourceId, entry.canonicalUrl) as Row | undefined
       const itemId = existing ? String(existing.id) : randomUUID()
       const currentVersionId = existing ? str(existing.current_version_id) : null
@@ -337,12 +356,12 @@ export class IntelRepository {
         const versionId = String(matched.id)
         if (versionId === currentVersionId) {
           await this.db.prepare("UPDATE intel_item SET last_seen_at = ? WHERE id = ?").run(entry.fetchedAt, itemId)
-          return { outcome: "unchanged", created: false, revised: false, itemId, versionId }
+          return finish({ outcome: "unchanged", created: false, revised: false, itemId, versionId })
         }
         await this.db.prepare("UPDATE intel_item SET title = ?, published_at = ?, last_seen_at = ?, current_version_id = ? WHERE id = ?")
           .run(entry.title, entry.publishedAt ?? null, entry.fetchedAt, versionId, itemId)
         await this.recordCurrentChange(itemId, currentVersionId, versionId, "restored_version", entry.fetchedAt)
-        return { outcome: "restored", created: false, revised: true, itemId, versionId }
+        return finish({ outcome: "restored", created: false, revised: true, itemId, versionId })
       }
       const versionId = randomUUID()
       await this.db.prepare(`
@@ -357,8 +376,28 @@ export class IntelRepository {
       await this.db.prepare("UPDATE intel_item SET title = ?, published_at = ?, last_seen_at = ?, current_version_id = ? WHERE id = ?")
         .run(entry.title, entry.publishedAt ?? null, entry.fetchedAt, versionId, itemId)
       await this.recordCurrentChange(itemId, currentVersionId, versionId, "new_version", entry.fetchedAt)
-      return { outcome: existing ? "revised" : "created", created: !existing, revised: Boolean(existing), itemId, versionId }
+      return finish({ outcome: existing ? "revised" : "created", created: !existing, revised: Boolean(existing), itemId, versionId })
     })
+  }
+
+  private async manualReplay(action: IntelManualAction): Promise<Row | undefined> {
+    const old = await this.db.prepare("SELECT * FROM intel_manual_action WHERE request_id = ?").get(action.requestId) as Row | undefined
+    if (old && old.payload_hash !== action.payloadHash) throw new Error("manual_request_conflict")
+    return old
+  }
+
+  private async saveManualAction(action: IntelManualAction, outcome: string, itemId: string | null, versionId: string | null) {
+    await this.db.prepare("INSERT INTO intel_manual_action (request_id, payload_hash, source_id, action, operator, entered_at, item_id, version_id, outcome) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").run(action.requestId, action.payloadHash, action.sourceId, action.action, action.operator, action.enteredAt, itemId, versionId, outcome)
+  }
+
+  async recordManualCheck(action: IntelManualAction): Promise<void> {
+    await this.transaction(async () => {
+      if (!await this.manualReplay(action)) await this.saveManualAction(action, "checked_empty", null, null)
+    })
+  }
+
+  async listManualActions(sourceId: string, itemId?: string): Promise<Row[]> {
+    return this.db.prepare(`SELECT request_id, action, operator, entered_at, item_id, version_id, outcome FROM intel_manual_action WHERE source_id = ? ${itemId ? "AND item_id = ?" : ""} ORDER BY entered_at DESC, rowid DESC LIMIT 20`).all(...(itemId ? [sourceId, itemId] : [sourceId])) as Promise<Row[]>
   }
 
   async listCurrentChanges(itemId: string): Promise<IntelCurrentChange[]> {

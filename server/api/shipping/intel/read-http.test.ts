@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import sourcesHandler from "./sources.get"
 import itemsHandler from "./items.get"
 import itemHandler from "./items/[id].get"
+import manualHandler from "./manual.get"
 import { open } from "#/intel/__fixtures__/isolated-db"
 import { initShippingTables } from "#/database/shipping"
 import { intelSourceSeeds } from "#/intel/sources"
@@ -39,7 +40,7 @@ beforeEach(async () => {
   await state.repository.recordSourceFailure(source.id, { now: NOW, consecutiveFailures: 1, errorCode: "private-marker", nextSyncAt: NOW })
   vi.stubGlobal("useDatabase", () => state.database)
   const app = createApp({ debug: false })
-  const router = createRouter().get("/api/shipping/intel/sources", sourcesHandler).get("/api/shipping/intel/items", itemsHandler).get("/api/shipping/intel/items/:id", itemHandler)
+  const router = createRouter().get("/api/shipping/intel/manual", manualHandler).get("/api/shipping/intel/sources", sourcesHandler).get("/api/shipping/intel/items", itemsHandler).get("/api/shipping/intel/items/:id", itemHandler)
   app.use(router)
   server = createServer(toNodeListener(app))
   await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve))
@@ -69,8 +70,15 @@ async function get(path: string) {
 }
 
 describe("intel actual HTTP read routes", () => {
+  it("reads manual checklist with query_only and no external requests", async () => {
+    const response = await get("manual")
+    expect(response.status).toBe(200)
+    expect(response.body.items).toHaveLength(41)
+    expect(response.body.items.find((row: { catalogId: string }) => row.catalogId === "CN-P05")).toMatchObject({ persistence: "disallowed", recentActions: [] })
+  })
+
   it("reads failed source health/recent runs and pages stored items without leaking config or error details", async () => {
-    const sources = await get("sources")
+    const sources = await get("sources?sourceId=test:read")
     expect(sources.status).toBe(200)
     expect(sources.cache).toBe("no-store")
     expect(sources.body.items[0]).toMatchObject({ status: "failing", consecutiveFailures: 1, recentRuns: [{ status: "failed" }] })
@@ -132,7 +140,7 @@ describe("intel actual HTTP read routes", () => {
       const code = readFileSync(path, "utf8")
       expect(code).not.toMatch(/(?:bootstrap|initShipping|recoverIntel|secureFetch|collectIntel|providers\/|runtime\/|paid|translation|fetch\()/)
       const imports = [...code.matchAll(/from\s+["']([^"']+)["']/g)].map(match => match[1])
-      expect(imports.every(module => ["h3", "#/database/intel", "#/intel/content-license", "#/utils/intel-read"].includes(module))).toBe(true)
+      expect(imports.every(module => ["h3", "#/database/intel", "#/intel/content-license", "#/intel/manual-catalog", "#/utils/intel-read"].includes(module))).toBe(true)
       expect(code).not.toMatch(/\b(?:eval|require|import)\s*\(/)
     }
     // Repository has write APIs, but these named methods' bodies contain only bound SELECT statements.

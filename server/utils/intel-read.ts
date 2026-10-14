@@ -1,6 +1,7 @@
 import { type H3Event, defineEventHandler, getQuery, getRouterParam, setResponseHeader, setResponseStatus } from "h3"
 import { type IntelContentScope, type IntelItemRecord, IntelRepository, type IntelSourceRecord, type IntelVersionRecord } from "#/database/intel"
 import { licensedBlocks } from "#/intel/content-license"
+import { manualCatalog } from "#/intel/manual-catalog"
 
 class IntelReadError extends Error {
   constructor(readonly statusCode: number, message: string) {
@@ -71,7 +72,7 @@ function versionDto(version: IntelVersionRecord, source: IntelSourceRecord) {
         publishedAt: typeof e.publishedAt === "string" && /^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(e.publishedAt) ? e.publishedAt : null,
       }
     : null
-  return { id: version.id, itemId: version.itemId, fetchedAt: version.fetchedAt, createdAt: version.createdAt, contentScope: scope(source, version), dateEvidence }
+  return { id: version.id, itemId: version.itemId, publishedAt: version.sourcePublishedAt, fetchedAt: version.fetchedAt, createdAt: version.createdAt, contentScope: scope(source, version), dateEvidence }
 }
 
 /** Read-only adapter: no initialization, runtime, provider or recovery dependency. */
@@ -101,7 +102,12 @@ export async function readIntelItems(event: H3Event, repo: IntelRepository) {
   const { q, limit, offset } = query(event, ["sourceId"])
   const sourceId = q.sourceId === undefined ? undefined : id(q.sourceId)
   if (sourceId && !await repo.getSource(sourceId)) missing("source")
-  return page((await repo.listItemsPage(limit + 1, offset, sourceId)).map(itemDto), limit, offset)
+  const rows = await repo.listItemsPage(limit + 1, offset, sourceId)
+  const items = await Promise.all(rows.map(async (item) => {
+    const latest = (await repo.listManualActions(item.sourceId, item.id)).find(action => action.version_id === item.currentVersionId)
+    return { ...itemDto(item), manualEntry: latest ? { operator: latest.operator, enteredAt: latest.entered_at } : null }
+  }))
+  return page(items, limit, offset)
 }
 export async function readIntelItem(event: H3Event, repo: IntelRepository) {
   const { q, limit, offset } = query(event, ["versionId"])
@@ -117,5 +123,8 @@ export async function readIntelItem(event: H3Event, repo: IntelRepository) {
   const permitted = selected ? scope(source, selected) : "metadata_only"
   const title = blocks.find(block => block.type === "title")?.text ?? item.title
   const safeBlocks = permitted === "full_text" ? blocks : licensedBlocks(permitted, title, blocks.filter(block => block.type !== "title").map(block => block.text).join(""))
-  return { item: itemDto(item), source: sourceDto(source), versions: page(versions.map(version => versionDto(version, source)), limit, offset), selectedVersion: selected ? { ...versionDto(selected, source), blocks: safeBlocks } : null }
+  const manualActions = await repo.listManualActions(source.id, item.id)
+  const grade = manualCatalog.find(row => row.catalogId === source.catalogId)?.grade ?? (["TH-W01", "ID-W01"].includes(source.catalogId) ? "A" : "unknown")
+  const manualLabel = manualActions.some(action => action.version_id === selected?.id) ? grade === "A" ? "官方通知（人工录入）" : grade === "unknown" ? "资讯（人工录入，类型未核验）" : "报道（人工录入）" : null
+  return { item: itemDto(item), source: sourceDto(source), manualActions, manualLabel, versions: page(versions.map(version => versionDto(version, source)), limit, offset), selectedVersion: selected ? { ...versionDto(selected, source), blocks: safeBlocks } : null }
 }
