@@ -1,9 +1,9 @@
 {
-  "kind": "sanitized archive hashes separate from private fetched raw hash",
+  "kind": "sanitized committed archive bytes (Git line-ending normalization); separate from private fetched raw hash",
   "sha256": {
     "command.json": "f88ace8203e482d0a72617d59bb5da416e83f7060272d15b51a9b822b9a44f14",
     "partial-results.json": "9306561e51173202081349429c3fa4c4712adfd1ba12845e9bbdebcc8a14d506",
-    "sensitive-scan.json": "8ab5b4a0b6fdc72ddacf03a482ab832bafdeb2a285207076140c0a23db0c56ff",
+    "sensitive-scan.json": "bf28154545d5153cb837b3fef9a3111a457667df949275c3a3185ec7308f5049",
     "summary.json": "c30a4a9f45fe4adc75193034fd2f7f294a167e961188bedce5e8ed247c63fc50",
     "TH-C02-adapter.json": "ebcaf39b7c8f8ce8578803dc06ca4db1277d1fdaab2a9d20da290ad555a57f62",
     "TH-C02-first.json": "efa391b131f955e25690e4bce92b8fc45e2415c5611d91232009a2080d0f2d2c",
