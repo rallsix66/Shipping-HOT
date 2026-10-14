@@ -1,0 +1,14 @@
+{
+  "id": "ID-T01",
+  "url": "https://jdih.kemendag.go.id/",
+  "startedAt": "2026-10-14T09:08:45.056Z",
+  "status": "NOT_RUN",
+  "httpRequests": 1,
+  "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+  "receivedAt": "2026-10-14T09:08:52.943Z",
+  "httpStatus": 200,
+  "contentType": "text/html; charset=UTF-8",
+  "rawByteLength": 390183,
+  "fetchedBytesSha256": "7bda040e2c0db0ba557bc91837f1c05bc8a30e34d18e6a5568c9a37426b74032",
+  "rawLocalOnly": true
+}

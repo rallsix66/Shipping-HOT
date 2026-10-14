@@ -1,3 +1,7 @@
+## R2 三域例外已应用、三索引真实原页适配（2026-10-14）
+
+当前订阅扩展/生成配置17精确例外（旧14保留），三个系统DNS均公网；09:08本轮目录索引各GET1共HTTP3，TLS/SSRF/地址固定未弱化，无retry/redirect/detail，TH-C02不重抓。最终代码355bc861d4020ba22ddd00401de709d7cee497e3：VN-P03资讯14条、VN-T01新闻3条、ID-T01最新法规可见标题/制定日8条，默认关闭metadata候选、不加入active registry/生产允许列表。原卡片标题省略号保留、不猜完整法规标题或运营影响；显式Gregorian制定日规则，不猜timezone/发布时间。初始af38350原页回放ID7/8日期、October unknown造成harness FAIL保留；只补实页literal October别名，最终同raw14/3/8入库/版本、重复new0/revised0、只读重开全部字段/日期0差异。只有当前原页metadata有限回放通过。173定向、1200全量/3跳过、install/build/typecheck/lint/3smoke全退出0，根DB/secret-file哈希不变。39≥32/整体R2仍未通过，Northport/VN-P01缺口保留，生产/24h/付费/GUI/S7未运行。[抓取、失败、更正与范围](evidence/r2-three-after-clash-2026-10-14/report.md)，[最终门禁](evidence/gate-355bc86-post-clash/summary.json)。
+
 ## R2 下一四源核查及 TH-C02 文件日期适配（2026-10-14）
 
 代码2acfda4c8ddab3f8064d199bb3cfcf26873ff288：VN-P03/VN-T01/ID-T01均安全DNS blocked_address、HTTP0，未取得原页，不判来源本身不合格；TH-C02原目录GET1、200、115531bytes。本批HTTP1，无retry/redirect/detail/网络配置改动。TH-C02默认关闭、仅metadata，不加入active registry；复用第3列标题/link、第4列Thai佛历“文件日期”规则，不把编号/计数当日期，不声明发布时间/时区。完整原字节现collector隔离SQLite100items/100versions、重复new0/revised0、只读重开全部字段0差异；仅该原页文件日期metadata回放有限通过。原页许可未知仍只本地。155定向、1182全量/3既有跳过、install/build/typecheck/lint/3smoke全退出0，根保留DB/secret-file哈希不变。39≥32/整体R2未通过，生产/24h/付费未启用、GUI/S7未运行。[四源事实和边界](evidence/r2-next-four-2026-10-14/report.md)，[精确SHA门禁](evidence/gate-2acfda4-thai-document/summary.json)。

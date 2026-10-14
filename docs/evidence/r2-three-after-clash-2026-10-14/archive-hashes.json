@@ -1,0 +1,24 @@
+{
+  "kind": "sanitized committed archive bytes with Git EOL normalization, separate from fetched raw hashes",
+  "sha256": {
+    "applied-filter-verification.json": "c4e5ad1be67eef3787c3fcec8196179cde160eb789f54542f39cd077e9b78559",
+    "command.json": "96461b8bfea57ea8389d05392ad06247c5ad01ebfd0d5c0d93eea6e9572fac51",
+    "ID-T01-response.json": "de9e9b15e3087271082ac8c95c66c3040a94cbd990de38ff89bf6a9cb514c997",
+    "ID-T01-result.json": "4ee1460120aec9b512d81bc7af5a08410db2c79f029abe8450275e80667b5009",
+    "ID-T01-structure.json": "fb2c97c3e1bb941880f65bdc5221ba762a794283877fe32ca8ae4f34f26f02ef",
+    "launch.json": "f3d58d3526d62b5d27999f1ca9e8e8fdfb489aad0070c5a781e579e615ad9869",
+    "manifest.json": "83284e1e24ba39b3c8253bb5422fbebce71859c870b05b8d98f2f59fba05647d",
+    "neat-inventory.json": "613758238cc131b058c4bd39ce888c1b5994ab779d99aaf2c18186b6271a4ae0",
+    "partial-results.json": "95c2db19ea2585ce97bfdc114032a19dd616eb8fe7fecce67f9177fdbecbf5b9",
+    "request-ledger.json": "c6e03780e7f20f9847538cf1b10f83940cdd8c20dc1fda063fb803edd05ff74c",
+    "sensitive-scan.json": "74ca1223a4dcac74711d1e45e7d15a374fdb2509016e6a8f804987229b0d997b",
+    "summary.json": "686fbee3d317f58025c5ea3c88e55adfb5fca849b8df7706c87bf48d829538cf",
+    "verified-system-dns.json": "630604039c822bd4c777b38bca998cf44cb6099ba41859b74ba49c022993507f",
+    "VN-P03-response.json": "aa3ff7aacd7b630a4f8226e154784ed0ae38aa97274ac726d1d6f9e7be62d5c9",
+    "VN-P03-result.json": "bfb7966147af803d81b8d045a89651629b4ddec695d1cb6401faaaf9ee71e460",
+    "VN-P03-structure.json": "d7589460d1f52a1f15bed0cfd0acc079f81f989e700764c7e432048518f6b95d",
+    "VN-T01-response.json": "72dd64192c58f148bb6379403ad50fc92ecb57d6d252c1c5525031a0bba5e61c",
+    "VN-T01-result.json": "d65cdc87a30be41e84f59933410da83686ed9ece2a7264dabaffad7b3de2ec9d",
+    "VN-T01-structure.json": "cba0318951b5e7f6c857016dbac87163969230405dcf82ff11eea6e0e35dcc26"
+  }
+}

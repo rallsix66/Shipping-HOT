@@ -1,0 +1,39 @@
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/post-clash-final-build/shared/promo-calendar.ts" is used
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  .tmp/post-clash-raw-replay.test.ts > full real archived bytes through disabled configs, repeat collection and read-only SQLite reopen
+AssertionError: expected { readOnly: true, rows: 8, …(6) } to match object { rows: 8, versions: 8, …(4) }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+@@ -1,7 +1,7 @@
+  {
+-   "dayPrecision": 8,
++   "dayPrecision": 7,
+    "mismatches": 0,
+    "missingTimezone": 8,
+    "nullPublicationInstants": 8,
+    "rows": 8,
+    "versions": 8,
+
+ ❯ .tmp/post-clash-raw-replay.test.ts:76:7
+     74|       expect(result.repeat).toMatchObject({ status: "ok_items", itemsN…
+     75|       expect(result.firstCounts).toEqual(result.repeatCounts)
+     76|       expect(result.reopen).toMatchObject({ rows: count, versions: cou…
+       |       ^
+     77|     }
+     78|     expect(noFetch).not.toHaveBeenCalled()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

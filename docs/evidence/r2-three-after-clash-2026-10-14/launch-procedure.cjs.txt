@@ -1,0 +1,8 @@
+const fs=require('node:fs'),cp=require('node:child_process');
+const dir='docs/evidence/r2-three-after-clash-2026-10-14';fs.mkdirSync(dir,{recursive:true});
+if(fs.existsSync(dir+'/request-ledger.json')||fs.existsSync(dir+'/launch.json'))throw Error('existing_launch_never_repeat');
+const started=new Date().toISOString();const command='pnpm exec vitest run -c .tmp/three-after-clash-20261014.config.ts';
+fs.writeFileSync(dir+'/launch.json',JSON.stringify({started,command,head:'30beae80b68406c230e10c4c21ff13c0d7a028ff',authorization:'parent delegated three exact catalog after approved exception and system DNS check next catalog coverage; no network settings changed public URLs; no retry/redirect/detail/production activation',permission:'unknown reuse; private ignored response bytes for inspection only, sanitized structural metadata committed'}));
+const r=cp.spawnSync(command,{shell:true,encoding:'utf8',maxBuffer:1<<24,env:{...process.env,SHIPPING_APPROVED_POSTCLASH_THREE:'1'}});
+fs.writeFileSync(dir+'/command.json',JSON.stringify({started,endedAt:new Date().toISOString(),command,rawExit:r.status,signal:r.signal}));
+fs.writeFileSync(dir+'/stdout.log',r.stdout||'');fs.writeFileSync(dir+'/stderr.log',r.stderr||'');console.log(JSON.stringify({rawExit:r.status,evidence:dir}));process.exitCode=r.status??1;

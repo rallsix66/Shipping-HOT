@@ -1,0 +1,150 @@
+{
+  "id": "ID-T01",
+  "url": "https://jdih.kemendag.go.id/",
+  "enabled": false,
+  "persistence": "disallowed",
+  "config": {
+    "listSelector": "#terkini .slider-terkini > .swiper-wrapper",
+    "itemSelector": ".swiper-slide",
+    "linkSelector": "a.d-inline-block[href]",
+    "titleSelector": "p.mt-2.mb-0",
+    "publishedAtSelector": "span.badge.bg-primary",
+    "calendar": "gregorian",
+    "dateFormat": "indonesian_enactment_date",
+    "allowUrlPrefixes": [
+      "https://jdih.kemendag.go.id/peraturan"
+    ],
+    "dateRuleBasis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded."
+  },
+  "startedAt": "2026-10-14T09:28:05.645Z",
+  "httpRequests": 0,
+  "material": "complete private real response bytes, not synthetic or sanitized skeleton",
+  "rawHtmlCommitted": false,
+  "fetchedRawSha256": "7bda040e2c0db0ba557bc91837f1c05bc8a30e34d18e6a5568c9a37426b74032",
+  "rawBytes": 390183,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 390183
+  },
+  "adapterCount": 8,
+  "dateRules": [
+    "configured_indonesian_enactment_date"
+  ],
+  "samples": [
+    {
+      "titleExcerpt": "Keputusan Menteri Perdagangan Republik Indonesia Nomor 2008 Tahun 2026 tentang Harga Patokan Ekspor dan Harga…",
+      "canonicalUrl": "https://jdih.kemendag.go.id/peraturan/keputusan-menteri-perdagangan-republik-indonesia-nomor-2008-tahun-2026-tentang-harga-patokan-ekspor-dan-harga-referensi-atas-produk-pertambangan-yang-dikenakan-bea-keluar",
+      "dateEvidence": {
+        "raw": "Ditetapkan\n                                                                14 October 2026",
+        "rule": "configured_indonesian_enactment_date",
+        "basis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-14",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "Keputusan Menteri Perdagangan Republik Indonesia Nomor 1925 Tahun 2026 tentang Harga Patokan Ekspor dan Harga…",
+      "canonicalUrl": "https://jdih.kemendag.go.id/peraturan/keputusan-menteri-perdagangan-republik-indonesia-nomor-1925-tahun-2026-tentang-harga-patokan-ekspor-dan-harga-referensi-atas-produk-pertambangan-yang-dikenakan-bea-keluar",
+      "dateEvidence": {
+        "raw": "Ditetapkan\n                                                                30 September 2026",
+        "rule": "configured_indonesian_enactment_date",
+        "basis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-30",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "Peraturan Menteri Perdagangan Republik Indonesia Nomor 25 Tahun 2026 Tentang Petunjuk Teknis Pengelolaan Konflik Kepenti",
+      "canonicalUrl": "https://jdih.kemendag.go.id/peraturan/peraturan-menteri-perdagangan-republik-indonesia-nomor-25-tahun-2026-tentang-petunjuk-teknis-pengelolaan-konflik-kepentingan-di-lingkungan-kementerian-perdagangan",
+      "dateEvidence": {
+        "raw": "Ditetapkan\n                                                                29 September 2026",
+        "rule": "configured_indonesian_enactment_date",
+        "basis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-29",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "Keputusan Menteri Perdagangan Republik Indonesia Nomor 1922 Tahun 2026 tentang Daftar Merek Refined, Bleached, and…",
+      "canonicalUrl": "https://jdih.kemendag.go.id/peraturan/keputusan-menteri-perdagangan-republik-indonesia-nomor-1922-tahun-2026-tentang-daftar-merek-refined-bleached-and-deodorized-palm-olein-dalam-kemasan-bermerek-dan-dikemas-dengan-berat-netto-25-kg",
+      "dateEvidence": {
+        "raw": "Ditetapkan\n                                                                29 September 2026",
+        "rule": "configured_indonesian_enactment_date",
+        "basis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-29",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "Keputusan Menteri Perdagangan Republik Indonesia Nomor 1921 Tahun 2026 tentang Harga Patokan Ekspor dan Harga…",
+      "canonicalUrl": "https://jdih.kemendag.go.id/peraturan/keputusan-menteri-perdagangan-republik-indonesia-nomor-1921-tahun-2026-tentang-harga-patokan-ekspor-dan-harga-referensi-atas-produk-pertanian-dan-kehutanan-yang-dikenakan-bea-keluar-dan-tarif-layanan-badan-layanan-umum",
+      "dateEvidence": {
+        "raw": "Ditetapkan\n                                                                29 September 2026",
+        "rule": "configured_indonesian_enactment_date",
+        "basis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-29",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "Keputusan Menteri Perdagangan Republik Indonesia Nomor 1907 Tahun 2026 tentang Pembentukan Tim Penyelenggara Perdagangan",
+      "canonicalUrl": "https://jdih.kemendag.go.id/peraturan/keputusan-menteri-perdagangan-republik-indonesia-nomor-1907-tahun-2026-tentang-pembentukan-tim-penyelenggara-perdagangan-melalui-sistem-elektronik-luar-negeri",
+      "dateEvidence": {
+        "raw": "Ditetapkan\n                                                                22 September 2026",
+        "rule": "configured_indonesian_enactment_date",
+        "basis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-22",
+        "publishedAt": null
+      }
+    }
+  ],
+  "first": {
+    "status": "ok_items",
+    "runId": "ecf8d082-baf6-4bfc-a9cf-5eb9f25fb5ba",
+    "itemsSeen": 8,
+    "itemsNew": 8,
+    "itemsRevised": 0
+  },
+  "firstCounts": {
+    "items": 8,
+    "versions": 8
+  }
+}

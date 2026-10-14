@@ -1,0 +1,130 @@
+{
+  "source": "ID-T01",
+  "url": "https://jdih.kemendag.go.id/",
+  "kind": "sanitized DOM structural metadata derivative; not original HTML or configured parser output",
+  "counts": {
+    "anchors": 213,
+    "tables": 0,
+    "rows": 0,
+    "times": 0
+  },
+  "candidates": [
+    {
+      "anchorDocumentIndex": 36,
+      "titleExcerpt": "2008 TAHUN 2026",
+      "href": "https://jdih.kemendag.go.id/peraturan/keputusan-menteri-perdagangan-republik-indonesia-nomor-2008-tahun-2026-tentang-harga-patokan-ekspor-dan-harga-referensi-atas-produk-pertambangan-yang-dikenakan-bea-keluar",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "14 October 2026"
+      ],
+      "anchorCountInAncestor": 1,
+      "association": "same-local-container-observation-only",
+      "siblingTags": [
+        "br",
+        "span",
+        "p"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 37,
+      "titleExcerpt": "Lihat Regulasi",
+      "href": "https://jdih.kemendag.go.id/peraturan/keputusan-menteri-perdagangan-republik-indonesia-nomor-2008-tahun-2026-tentang-harga-patokan-ekspor-dan-harga-referensi-atas-produk-pertambangan-yang-dikenakan-bea-keluar",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "14 October 2026"
+      ],
+      "anchorCountInAncestor": 2,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": []
+    },
+    {
+      "anchorDocumentIndex": 38,
+      "titleExcerpt": "1925 TAHUN 2026",
+      "href": "https://jdih.kemendag.go.id/peraturan/keputusan-menteri-perdagangan-republik-indonesia-nomor-1925-tahun-2026-tentang-harga-patokan-ekspor-dan-harga-referensi-atas-produk-pertambangan-yang-dikenakan-bea-keluar",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "30 September 2026"
+      ],
+      "anchorCountInAncestor": 1,
+      "association": "same-local-container-observation-only",
+      "siblingTags": [
+        "br",
+        "span",
+        "p"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 39,
+      "titleExcerpt": "Lihat Regulasi",
+      "href": "https://jdih.kemendag.go.id/peraturan/keputusan-menteri-perdagangan-republik-indonesia-nomor-1925-tahun-2026-tentang-harga-patokan-ekspor-dan-harga-referensi-atas-produk-pertambangan-yang-dikenakan-bea-keluar",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "30 September 2026"
+      ],
+      "anchorCountInAncestor": 2,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": []
+    },
+    {
+      "anchorDocumentIndex": 40,
+      "titleExcerpt": "25 TAHUN 2026",
+      "href": "https://jdih.kemendag.go.id/peraturan/peraturan-menteri-perdagangan-republik-indonesia-nomor-25-tahun-2026-tentang-petunjuk-teknis-pengelolaan-konflik-kepentingan-di-lingkungan-kementerian-perdagangan",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "29 September 2026"
+      ],
+      "anchorCountInAncestor": 1,
+      "association": "same-local-container-observation-only",
+      "siblingTags": [
+        "br",
+        "span",
+        "p"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 41,
+      "titleExcerpt": "Lihat Regulasi",
+      "href": "https://jdih.kemendag.go.id/peraturan/peraturan-menteri-perdagangan-republik-indonesia-nomor-25-tahun-2026-tentang-petunjuk-teknis-pengelolaan-konflik-kepentingan-di-lingkungan-kementerian-perdagangan",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "29 September 2026"
+      ],
+      "anchorCountInAncestor": 2,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": []
+    }
+  ],
+  "itemParser": "NOT_RUN: no source adapter configured in this observation",
+  "noCandidateMeaning": "No numeric/English date association observed by bounded heuristic; not proof of no items",
+  "completeFieldsPass": false
+}

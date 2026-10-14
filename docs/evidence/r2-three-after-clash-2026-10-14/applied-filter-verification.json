@@ -1,0 +1,14 @@
+{
+  "extensionHashMatchesAuthorizedEdit": true,
+  "extensionHasAll17ExactHosts": true,
+  "generatedExactlyOld14PlusNew3": true,
+  "generatedFilterCount": 17,
+  "old14Preserved": true,
+  "keyDnsFields": {
+    "enable": "true",
+    "enhanced-mode": "fake-ip",
+    "fake-ip-range": "198.18.0.1/16"
+  },
+  "settingsChanged": false,
+  "activeSelectedProfileUsesVerifiedExtension": true
+}

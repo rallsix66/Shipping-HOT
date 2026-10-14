@@ -1,3 +1,5 @@
+> R2 VN/ID候选增量（2026-10-14）：三个默认关闭metadata HTML候选，沿用现有安全fetch/fromHtml/SQLite。VN显式D/M/Y日；ID Ditetapkan制定日严格Gregorian grammar仅Indonesian月份及实页October别名，保留可见标题省略号，不猜timezone/instant/全文/影响。Active registry/production允许边界不变，未知许可完整原页只本地。
+
 > R2 TH-C02增量（2026-10-14）：一个默认关闭、仅metadata的HTML候选，复用现有第3/4列和Thai佛历日期规则。第4列语义明确为文件日期，不能当发布时间；仅local day、未知时区/instantnull。活动registry/生产允许范围不变，完整未知许可原页只本地取证，详见status。
 
 > R2 HTML候选配置增量（2026-10-14）：MOF税政、PH海关标题card、广东真正通告tab默认关闭且仅metadata，不加入active registry；沿用fromHtml/安全fetch/原SQLite。PH显式english_month_name全串Gregorian day规则，时区未知、不构造instant、不宽松Date.parse；Read more不作为标题项，同URL冲突规则不放宽。生产启用边界未扩大，未知原页完整HTML仍仅本地取证。状态与限度见docs/status.md。

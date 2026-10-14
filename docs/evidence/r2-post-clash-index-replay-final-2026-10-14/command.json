@@ -1,0 +1,9 @@
+{
+  "sha": "355bc861d4020ba22ddd00401de709d7cee497e3",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\post-clash-final2-build",
+  "command": "pnpm exec vitest run -c .tmp/post-clash-raw-replay-final.config.ts",
+  "startedAt": "2026-10-14T09:28:03.498Z",
+  "finishedAt": "2026-10-14T09:28:05.904Z",
+  "rawExit": 0,
+  "sourceHttpRequests": 0
+}
