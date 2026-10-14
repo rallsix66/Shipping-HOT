@@ -100,7 +100,7 @@ export function PoliciesPage() {
     }
   }
 
-  const d = !list.isError && activeId ? detail.data : undefined
+  const d = !list.isError && !detail.isError && activeId ? detail.data : undefined
   const text = (key: string, label: string, type = "text") => (
     <label className="annual-option" key={key}>
       {label}
@@ -154,7 +154,7 @@ export function PoliciesPage() {
           </div>
         </section>
         <div className="annual-notice" data-testid="policy-clock">
-          {list.data ? `当前时刻按各政策「适用时区」的当地日历日判断（UTC+8 参考日 ${list.data.today}）${list.data.clock === "test" ? " · 测试时钟 TEST_NOW" : " · 系统时钟"}` : list.isError ? "时钟信息读取失败" : "读取中…"}
+          {!list.isError && list.data ? `当前时刻按各政策「适用时区」的当地日历日判断（UTC+8 参考日 ${list.data.today}）${list.data.clock === "test" ? " · 测试时钟 TEST_NOW" : " · 系统时钟"}` : list.isError ? "时钟信息读取失败" : "读取中…"}
           。只有「已发布待生效」会在生效日自动显示为已生效；传闻、征求意见、已修订、已废止不会自动生效。
         </div>
         <section className="annual-panel pol-filters" aria-label="筛选">

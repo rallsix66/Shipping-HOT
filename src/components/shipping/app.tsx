@@ -21,7 +21,7 @@ export function ShippingShell({ children, title }: { children: ReactNode, title?
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark)
   }, [isDark])
-  const summary = data ? providerSummary(data.provider).label : isError ? "读取失败" : "读取中…"
+  const summary = isError ? "读取失败" : data ? providerSummary(data.provider).label : "读取中…"
   return (
     <div className="shipping-shell risk-console">
       <a className="rc-skip" href="#shipping-content">跳到页面内容</a>
