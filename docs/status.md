@@ -1,5 +1,12 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
+## Port notice metadata P2 repair — 2026-10-14
+
+- Code `180f919ebdcbf350a23a75d28bd2efbcf5765f67`: existing publication/unknown-time/first-receipt semantics and stale/sourceStatus/persisted lifecycle labels restored on demo port notice cards. received_at never becomes publication; no date-derived expiry/state, backend/DTO/schema/source/weather/reference/rule changes. Four synthetic SSR regression cases; no calendar or new slice.
+- Exact clean-SHA fresh-install gate: install/build/typecheck/lint,59targeted,full117files/1107pass/3existing Windows skips,3isolated smokes all exit0. Actual Neat Freak and raw logs: `docs/evidence/gate-180f919-frontend/closeout.md`.
+- New independent preview `http://127.0.0.1:4485/ports` PID11600, old previews and original isolated policy samples retained; no credentials/project env and Runtime/providers/translation off.54HTTP/API/assets checks pass, but all eight approved-port forecasts are empty: read/empty-state proof only, not actual weather coverage or browser switching.
+- **Visual/keyboard/widths/S7 NOT_RUN; parent review pending.** No bypass of browser rejection, real source/paid/LLM calls, merge/deploy/force-push; no stage-wide PASS.
+
 ## Demo ports / existing weather slice — 2026-10-14
 
 - Code `11aa1162a286d96bdc7a44a2f61a95d3d2a886e8`: `/ports` and `/ports/:id` adapt actual demo eight-port selection/header/announcement-weather columns/table CSS. Existing cache APIs, port watch and tropical-cyclone display reused. Forecasts remain hourly/current with API units and missing values; no daily aggregation, fake shutdown/risks/delay or frontend threshold recomputation.

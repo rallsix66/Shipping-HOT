@@ -1,0 +1,9 @@
+{
+  "name": "lint",
+  "command": "pnpm lint",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\port-notice-fix-build",
+  "sha": "180f919ebdcbf350a23a75d28bd2efbcf5765f67",
+  "startedAt": "2026-10-14T03:23:18.609Z",
+  "endedAt": "2026-10-14T03:23:58.929Z",
+  "rawExit": 0
+}
