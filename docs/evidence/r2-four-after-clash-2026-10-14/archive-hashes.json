@@ -1,7 +1,7 @@
 {
-  "kind": "sanitized archive bytes distinct from fetched page bytes",
+  "kind": "sanitized committed archive bytes distinct from fetched page bytes; CRLF normalization accounted for",
   "sha256": {
-    "clash-filter-verification.json": "31ec3d7cedac99b9056db42063a63acb4470b7c9ab7c64121a8e895924a7089e",
+    "clash-filter-verification.json": "535338eb3a67e892b27db234b45887a7a0af193f3c775f78bb8c2e543ec1b9ee",
     "CN-P01-dom-shape.json": "5a69c9b2f85b26be12ecc91406a4cc8e91ddbf70987dc8c11c9601043d08ec69",
     "CN-P01-response.json": "1bce91a92637589faf781b2f37b9d34dd37225de6b74056214513cf541f5a29e",
     "CN-P01-result.json": "0ae2f4b1225bba0c6a0fad39f57c37926ca6708c21ea13b233d9e676a870487e",
