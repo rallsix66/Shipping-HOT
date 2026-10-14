@@ -14,7 +14,11 @@ import { useMedia } from "react-use"
  *
  * `getOnInit` 让首帧就按已保存的选择执行，否则首屏仍会创建 WebGL 上下文并画几帧。
  */
-const reduceMotionAtom = atomWithStorage<boolean | null>("sh-reduce-motion", null, undefined, { getOnInit: true })
+export function createReduceMotionAtom() {
+  return atomWithStorage<boolean | null>("sh-reduce-motion", null, undefined, { getOnInit: true })
+}
+
+const reduceMotionAtom = createReduceMotionAtom()
 
 export function useReduceMotion() {
   const [override, setOverride] = useAtom(reduceMotionAtom)

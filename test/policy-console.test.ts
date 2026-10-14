@@ -1,9 +1,12 @@
 import { readFileSync } from "node:fs"
 import { renderToString } from "react-dom/server"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import type { PolicyRecordView, PolicyVersionView } from "@shared/policy"
 import { PolicyFacts, PolicyHistory, PolicyRows } from "../src/components/shipping/policy-view"
-import { consoleNavigation, existingNavigation } from "../src/components/shipping/console-navigation"
+import { consoleNavigation } from "../src/components/shipping/console-navigation"
+import { CountryOverviewContent } from "../src/components/shipping/country-overview"
+
+vi.mock("../src/components/shipping/app", () => ({ ShippingShell: () => null }))
 
 const record: PolicyRecordView = {
   id: "fixture-policy",
@@ -61,6 +64,13 @@ function version(number: number): PolicyVersionView {
 }
 
 describe("policy console honest rendering", () => {
+  it.each(["published", "effective"] as const)("renders the actual %s status with a corresponding style", (status) => {
+    const html = renderToString(PolicyRows({ records: [{ ...record, displayStatus: status, status }], selectedId: "", state: "ready", onSelect: () => {} }))
+    expect(html).toContain(`class="ps ${status}"`)
+    const css = readFileSync("src/components/shipping/risk-console.css", "utf8")
+    expect(css).toMatch(new RegExp(`\\.ps\\.${status}\\s*\\{[^}]*background:`))
+    expect(html).toContain(status === "published" ? "已发布待生效" : "已生效")
+  })
   it.each(["loading", "error", "ready"] as const)("keeps %s distinguishable from a successful empty list", (state) => {
     const html = renderToString(PolicyRows({ records: [], selectedId: "", state, onSelect: () => {} }))
     expect(html).toContain(state === "loading" ? "正在读取" : state === "error" ? "无法确认记录数量" : "无记录不代表没有政策变化")
@@ -104,11 +114,25 @@ describe("policy console honest rendering", () => {
 
 describe("gradual module opening", () => {
   it("opens only existing routes while retaining all currently usable routes", () => {
-    const opened = [...consoleNavigation.filter(i => i.available).map(i => i.to), ...existingNavigation.map(i => i.to)]
+    const opened = consoleNavigation.filter(i => i.available).map(i => i.to)
     expect(new Set(opened)).toEqual(new Set(["/", "/ports", "/events", "/feed", "/calendar", "/policies", "/settings"]))
     for (const route of opened) expect(readFileSync(`src/routes/${route === "/" ? "index" : route.slice(1)}.tsx`, "utf8")).toContain("createFileRoute")
     const unopened = consoleNavigation.filter(i => !i.available)
-    expect(unopened.map(i => i.label)).toEqual(["国家总览", "天气", "风险事件"])
+    expect(new Set(opened).size).toBe(opened.length)
+    expect(unopened.map(i => i.label)).toEqual(["天气"])
     for (const item of unopened) expect(item).not.toHaveProperty("to")
+  })
+  it("mounts the demo overview framework without old HOT statistics or invented risk values", () => {
+    const html = renderToString(CountryOverviewContent())
+    expect(html.match(/data-testid="country-card"/g)).toHaveLength(6)
+    for (const country of ["中国（起运）", "马来西亚", "菲律宾", "越南", "泰国", "印尼"]) expect(html).toContain(country)
+    expect(html).toContain("判断来源")
+    expect(html).toContain("确认状态")
+    expect(html).toContain("未评估")
+    expect(html).toContain("不提供延误天数")
+    expect(html).not.toMatch(/活跃 HOT|港口概览|资讯快讯|需要关注事项|\+1|[1-5]\/5/)
+    const route = readFileSync("src/routes/index.tsx", "utf8")
+    expect(route).toContain("<CountryOverviewPage />")
+    expect(route).not.toContain("HotPage")
   })
 })

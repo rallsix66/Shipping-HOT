@@ -144,8 +144,8 @@ color:var(--ink);}
 .policy-console .ps { font-size: 12px; padding: 1px 8px; border-radius: 4px; white-space: nowrap; }
 .policy-console .ps.rumor { color: var(--sev-3); border: 1px dashed currentColor; }
 .policy-console .ps.draft { color: var(--p-system); border: 1px solid currentColor; }
-.policy-console .ps.pending { color: var(--panel); background: var(--sev-4); }
-.policy-console .ps.active { color: var(--panel); background: var(--sev-2); }
+.policy-console .ps.published { color: var(--panel); background: var(--sev-4); }
+.policy-console .ps.effective { color: var(--panel); background: var(--sev-2); }
 .policy-console .ps.revised, .policy-console .ps.repealed { color: var(--ink-3); border: 1px solid currentColor; }
 .policy-console .timeline { display: flex; flex-direction: column; gap: 0; border-left: 2px solid var(--line); margin-left: 6px; }
 .policy-console .timeline div { position: relative; padding: 0 0 12px 16px; font-size: 13px; }
@@ -153,3 +153,64 @@ color:var(--ink);}
 .policy-console .timeline .mono { font-size: 12px; color: var(--ink-3); display: block; }
 
 @media(max-width:640px){.policy-console .pol-row{grid-template-columns:80px minmax(0,1fr)}.policy-console .pol-row .who{grid-column:2}.policy-console .pol-row .ttl{grid-column:1/-1}.policy-console .pol-row .ps{grid-column:1/-1;justify-self:start}}
+
+/* Avoid squeezing a four-column row inside the sidebar + two-panel layout. */
+@media(max-width:1280px){.pol-cols{grid-template-columns:minmax(0,1fr)}}
+.policy-console .pol-row>*{min-width:0;overflow-wrap:anywhere}
+.policy-console .pol-row .ps{white-space:normal}
+
+/* Actual overview rules copied from the selected demo, scoped to the page. */
+.country-overview .view-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 10px 20px; }
+.country-overview h1 { font-size: 22px; margin: 0; font-weight: 700; text-wrap: balance; }
+.country-overview h2 { font-size: 16px; margin: 0; font-weight: 700; text-wrap: balance; }
+.country-overview h3 { font-size: 14px; margin: 0; font-weight: 700; }
+.country-overview .sub { color: var(--ink-3); font-size: 13px; margin: 2px 0 0; }
+.country-overview .label { font-size: 11.5px; letter-spacing: 0.06em; color: var(--ink-3); text-transform: uppercase; }
+
+.country-overview .legend { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 12.5px; color: var(--ink-2); background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 14px; }
+.country-overview .legend .note { color: var(--ink-3); flex-basis: 100%; }
+
+/* status chip */
+.country-overview .st { font-size: 12px; padding: 1px 8px; border-radius: 4px; border: 1px solid currentColor; white-space: nowrap; }
+.country-overview .st.confirmed { color: var(--sev-2); }
+.country-overview .st.multi { color: var(--accent); }
+.country-overview .st.pending { color: var(--sev-3); }
+.country-overview .st.conflict { color: var(--sev-5); border-style: dashed; }
+.country-overview .st.potential { color: var(--p-system); border-style: dashed; }
+.country-overview .st.done { color: var(--ink-3); }
+
+.country-overview .sev { display: inline-flex; gap: 2px; align-items: center; }
+.country-overview .sev i { width: 6px; height: 12px; border-radius: 1px; background: var(--line); display: block; }
+
+/* country grid */
+.country-overview .countries { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+.country-overview .ccard { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px 14px 20px; position: relative; display: flex; flex-direction: column; gap: 10px; cursor: pointer; text-align: left; }
+.country-overview .ccard:hover { border-color: var(--accent); }
+.country-overview .ccard::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 5px; border-radius: 0 3px 3px 0; background: var(--stripe, var(--sev-1)); }
+.country-overview .ccard .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.country-overview .ccard .name { font-size: 17px; font-weight: 700; }
+.country-overview .ccard .port { font-family: var(--f-data); font-size: 12px; color: var(--ink-3); }
+.country-overview .kv { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 4px 10px; font-size: 13px; align-items: baseline; }
+.country-overview .kv dt { color: var(--ink-3); }
+.country-overview .kv dd { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: baseline; }
+.country-overview .big { font-family: var(--f-data); font-size: 18px; font-weight: 500; }
+.country-overview .muted { color: var(--ink-3); }
+
+.country-overview .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.country-overview .delay { background: var(--panel-2); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.country-overview .delay ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.country-overview .delay li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; }
+.country-overview .delay .in { color: var(--sev-2); font-weight: 500; }
+.country-overview .delay .out { color: var(--ink-3); }
+
+
+.rc-banner{grid-column:1/-1;background:var(--sev-bg-3);color:var(--ink);border-bottom:1px solid var(--line);padding:8px 16px;font-size:13px;text-align:center}
+.rc-banner b{color:var(--sev-4)}
+.country-overview{display:flex;flex-direction:column;gap:20px}
+.country-overview .ccard{cursor:default;--stripe:var(--sev-1)}
+.country-overview .ccard a{color:var(--accent);text-decoration:underline}
+.country-overview .ccard .port{overflow-wrap:anywhere}
+.country-overview .note{margin:0}
+.country-overview .overview-row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center}
+.country-overview .overview-btn{border:1px solid var(--line);border-radius:6px;padding:6px 10px;background:var(--panel);color:var(--ink-2);text-decoration:none;font-size:13px}
+.country-overview .ccard .top{flex-wrap:wrap}
