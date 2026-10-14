@@ -3,7 +3,12 @@
 .manual-source { padding: 12px 0; border-bottom: 1px solid var(--line); }
 .manual-intel form { display: grid; gap: 12px; }
 .manual-intel label { display: grid; gap: 6px; }
-.manual-intel input, .manual-intel textarea, .manual-intel select { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 10px; width: 100%; }
+.manual-intel input, .manual-intel textarea, .manual-intel select { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 10px; width: 100%; }
+.manual-intel .glass-panel, .manual-intel .filter-panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); box-shadow: none; padding: 18px; }
+.manual-intel .chip { border: 1px solid var(--line); background: var(--panel); border-radius: 7px; padding: 5px 12px; cursor: pointer; font-size: 13px; }
+.manual-intel .chip:hover { border-color: var(--accent); color: var(--accent); }
+.manual-intel .fbtn { width: 100%; text-align: left; background: none; border: 0; padding: 8px; border-radius: 7px; }
+.manual-intel .fbtn.active { background: var(--accent-soft); color: var(--accent); }
 .manual-intel textarea { min-height: 140px; }
 .manual-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 .manual-intel a { display: block; color: var(--accent); }
