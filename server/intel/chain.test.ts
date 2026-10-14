@@ -9,8 +9,6 @@ import { renderToString } from "react-dom/server"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { createApp, createRouter, toNodeListener } from "h3"
 import { expect, it, vi } from "vitest"
-import { ManualIntelPage } from "../src/components/shipping/manual-intel"
-import { myFetch } from "~/utils"
 import { open } from "#/intel/__fixtures__/isolated-db"
 import { intelSourceSeeds } from "#/intel/sources"
 import { manualSubmit } from "#/intel/manual"
@@ -21,9 +19,18 @@ import itemsHandler from "#/api/shipping/intel/items.get"
 import detailHandler from "#/api/shipping/intel/items/[id].get"
 import checklistHandler from "#/api/shipping/intel/manual.get"
 
+interface ChainDetail {
+  item: { title: string }
+  manualLabel: string | null
+  selectedVersion: { contentScope: string, blocks: { text: string }[] }
+}
+interface ChainChecklist {
+  items: { id: string, recentActions: { action: string }[] }[]
+}
+
 // Only shell/unused legacy page are stubbed. Real query hooks render real HTTP data.
-vi.mock("../src/components/shipping/app", () => ({ ShippingShell: ({ children }: { children: unknown }) => children }))
-vi.mock("../src/components/shipping/pages", () => ({ FeedPage: () => null }))
+vi.mock("../../src/components/shipping/app", () => ({ ShippingShell: ({ children }: { children: unknown }) => children }))
+vi.mock("../../src/components/shipping/pages", () => ({ FeedPage: () => null }))
 vi.mock("~/utils", () => ({ myFetch: vi.fn(() => {
   throw new Error("Unexpected SSR fetching")
 }) }))
@@ -126,20 +133,25 @@ it("joins existing Runtime, archived safe-byte fetch, SQLite, restart, HTTP and 
     await new Promise<void>(done => server!.listen(0, "127.0.0.1", done))
     port = (server.address() as { port: number }).port
     base = `http://127.0.0.1:${port}`
-    const get = async (suffix: string) => {
+    const get = async <T = unknown>(suffix: string): Promise<T> => {
       const response = await fetch(`${base}/api/shipping/intel/${suffix}`)
       expect(response.status).toBe(200)
-      return response.json()
+      return await response.json() as T
     }
     const list = await get("items")
-    const checklist = await get("manual")
-    const current = await get(`items/${item.id}`)
-    const historical = await get(`items/${item.id}?versionId=${firstVersion}`)
+    const checklist = await get<ChainChecklist>("manual")
+    const current = await get<ChainDetail>(`items/${item.id}`)
+    const historical = await get<ChainDetail>(`items/${item.id}?versionId=${firstVersion}`)
     expect(current.item.title).toBe("Heavy Rain — SYNTHETIC REVISION")
     expect(current.manualLabel).toBeNull()
     expect(current.selectedVersion.contentScope).toBe("full_text")
     expect(historical.selectedVersion.blocks[0].text).toBe("Heavy Rain")
-    expect(checklist.items.find((row: { id: string }) => row.id === seed.id).recentActions[0].action).toBe("checked_empty")
+    expect(checklist.items.find(row => row.id === seed.id)!.recentActions[0].action).toBe("checked_empty")
+    // Load the already app-typechecked view at runtime; this test is typechecked in the server project.
+    const viewPath = "../../src/components/shipping/manual-intel"
+    const utilsPath = "../../src/utils/index"
+    const { ManualIntelPage } = await import(viewPath)
+    const { myFetch } = await import(utilsPath)
     const query = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } })
     query.setQueryData(["intel-items", ""], list)
     query.setQueryData(["intel-manual"], checklist)
