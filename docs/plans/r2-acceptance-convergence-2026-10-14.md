@@ -1,3 +1,5 @@
+> 验收分类已批准（2026-10-14 06:31:44 UTC，用户消息 Sentinel_81b542f9f60c8191a2b32b4cc8018c61）：41 项信源全部保留；34 项资讯／公告检查真实页面解析，5 项数值天气检查数据字段；付费天气、向量接口保留在原定后续阶段。R2 的 39 项公开自动源要求至少 80% 可用，即至少 32 项通过；各项缺口照实保留。真实页面／字段验收要求仍保留，分类本身不是 PASS。本批准不授权六次实网、24h 启用、付费或网络设置；下方“分类／分母未批准”均为批准前历史记录。
+
 # R2 原验收收敛与来源映射建议 — 2026-10-14
 
 > Historical read-only findings below were accurate at8707019. Wiring/adaptive gaps are now addressed by `e5d2f0bb0aa4651984d69d280db0c2485d9467a2`; upstream actual44578fa found in local packs, formula/bounds adapted, default remains off. This does not approve pending classification/denominator/network/24h proposals; use docs/status.md for current implementation.
