@@ -1,10 +1,10 @@
 # R2 41项来源累计证据 — 2026-10-14
 
-本报告汇总已保存证据，供父会话独立审查。代码基准 `355bc861d4020ba22ddd00401de709d7cee497e3`，起始证据 HEAD `679400c1970cf270eabe85ec866a52b0bef820b6`。本轮仅更新文档：没有新源请求、DNS、字段回放或功能门禁；此前执行者的测试记录仍是此前记录。[机器矩阵](mapping.json)保留全部41项的精确目录产品、采集时点、原证据路径/LF文本哈希、字段回放、时间角色、许可、默认状态及两项独立判定。
+本报告汇总已保存证据，供父会话独立审查。代码基准 `355bc861d4020ba22ddd00401de709d7cee497e3`，本批采集HEAD `e4d56116cda05fe4a8dbe151040c26874b6807c1`。本轮先单独提交Westports文档修正，再按授权执行四次系统DNS；全部安全阻断，HTTP0，没有字段回放或产品门禁；此前执行者的测试记录仍是此前记录。[机器矩阵](mapping.json)保留全部41项的精确目录产品、采集时点、原证据路径/LF文本哈希、字段回放、时间角色、许可、默认状态及两项独立判定。
 
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
-| R2-4公开自动来源 | **19/39（48.72%）** | 最少32项，尚差13；19 OK、8 PARTIAL、1 STALE、11 NOT_RUN，未通过 |
+| R2-4公开自动来源 | **19/39（48.72%）** | 最少32项，尚差13；19 OK、8 PARTIAL、1 STALE、4 BLOCKED、7 NOT_RUN，未通过 |
 | R2-5资讯/公告原页字段回放 | **11/34（32.35%）** | 尚差23；11 PASS、3 FAIL、1 PARTIAL、19 NOT_RUN，未通过 |
 | 数值字段独立检查 | **3/5** | 仅历史归一化诊断；不加到34项原页回放分子 |
 | R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
@@ -20,7 +20,7 @@ NMC两项曾将暂计22/39修正到20/39；本次Westports日期复审再修正�
 | ID | 精确目录URL / 原文本 | 最新已有采集UTC / HTTP | R2-4 | R2-5 | 判定理由 / 保留缺口 |
 | --- | --- | --- | --- | --- | --- |
 | CN-P01 | https://www.gd.msa.gov.cn/ | 2026-10-14T07:56:30.108Z / 200 [取证](../r2-four-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-public-index-replay-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
-| CN-P02 | https://www.sz.msa.gov.cn/ | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
+| CN-P02 | https://www.sz.msa.gov.cn/ | 2026-10-14T10:55:51.552Z DNS / HTTP0 [地址留证](../r2-new-four-bounded-2026-10-14/dns-ledger.json) | BLOCKED | NOT_RUN | 系统DNS 198.18.0.166 被现安全入口blocked_address；没有HTTP响应，不判源内容失败，也不猜配置。 |
 | CN-W01 | https://www.nmc.cn/publish/typhoon/typhoon_new.html | 2026-10-11T01:38:50.427Z / 200 [取证](../nmc-integration-2026-10-11/nmc-live-evidence.json) | PARTIAL | FAIL [字段](../r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log) | 原产品页可读；10/13实页列表回放零合格链接，缺发布日，收藏失败，未有后续合格证据。 |
 | CN-W02 | https://www.nmc.cn/publish/country/warning/index.html | 2026-10-11T01:38:51.146Z / 200 [取证](../nmc-integration-2026-10-11/nmc-live-evidence.json) | PARTIAL | FAIL [字段](../r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log) | 原产品页可读；10/13实页列表回放零合格链接，作者日期语法不支持，未有后续合格证据。 |
 | CN-T01 | http://www.mofcom.gov.cn/zcfb/index.html | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 目录URL为HTTP；现安全入口只接受HTTPS，未假设替代URL，也没有当次请求。 |
@@ -29,7 +29,7 @@ NMC两项曾将暂计22/39修正到20/39；本次Westports日期复审再修正�
 | VN-P03 | https://saigonnewport.com.vn/tin-tuc | 2026-10-14T09:08:39.423Z / 200 [取证](../r2-three-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-post-clash-index-replay-final-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
 | VN-W01 | https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html | 2026-10-10T09:52:07.791Z / 200 [取证](../nchmf-integration-2026-10-10/live-evidence.json) | OK | PASS [字段](../r2-p1-inventory-2026-10-13/replay.log) | 旧真实脱敏DOM5条字段回放；+07是测试配置，不能说源声明时区或独立UTC验证。 |
 | VN-T01 | https://idea.gov.vn/ | 2026-10-14T09:08:42.879Z / 200 [取证](../r2-three-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-post-clash-index-replay-final-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
-| VN-D01 | https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
+| VN-D01 | https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx | 2026-10-14T10:55:51.558Z DNS / HTTP0 [地址留证](../r2-new-four-bounded-2026-10-14/dns-ledger.json) | BLOCKED | NOT_RUN | 系统DNS 198.18.0.167 被现安全入口blocked_address；没有HTTP响应，不判源内容失败，也不猜配置。 |
 | TH-W01 | https://www.tmd.go.th/en/api/xml/CAP | 2026-10-13T07:00:38.389Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | PASS [字段](../r2-p1-inventory-2026-10-13/replay.log) | 最新精确CAP实网10条，原XML另有回放；预警有效性/港口影响不在本字段通过范围。 |
 | TH-C01 | https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th | 2026-10-14T07:16:50.062Z / 200 [取证](../r2-six-public-2026-10-14/summary.json) | OK | PASS [字段](../r2-two-raw-dns-2026-10-14/replay-summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
 | TH-C02 | https://www.customs.go.th/list_strc_download_with_docno_date.php?ini_content=announce_160426_01&order_by=date&sort_type=0&lang=th | 2026-10-14T08:33:16.386Z / 200 [取证](../r2-next-four-2026-10-14/summary.json) | OK | PASS [字段](../r2-thai-document-replay-2026-10-14/summary.json) | 100条完整原页回放通过；日期是文件日，不是发布日期，时区/发布瞬间未知。 |
@@ -38,10 +38,10 @@ NMC两项曾将暂计22/39修正到20/39；本次Westports日期复审再修正�
 | MY-W01 | https://api.data.gov.my/weather/warning | 2026-10-10T08:30:40.728Z / 200 [取证](../metmalaysia-integration-2026-10-10/live-evidence.json) | PARTIAL | NOT_RUN | 目录无尾斜杠URL曾301；相关尾斜杠JSON可读，精确产品映射及完整字段回放未合格。 |
 | MY-C01 | https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss | 2026-10-13T07:00:30.791Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
 | MY-T01 | https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss | 2026-10-13T07:00:35.340Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
-| MY-L01 | https://www.pos.com.my/service-update | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
+| MY-L01 | https://www.pos.com.my/service-update | 2026-10-14T10:55:51.561Z DNS / HTTP0 [地址留证](../r2-new-four-bounded-2026-10-14/dns-ledger.json) | BLOCKED | NOT_RUN | 系统DNS 198.18.0.168 被现安全入口blocked_address；没有HTTP响应，不判源内容失败，也不猜配置。 |
 | ID-W01 | https://www.bmkg.go.id/alerts/nowcast/en/rss.xml | 2026-10-13T07:00:40.269Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | PASS [字段](../r2-p1-inventory-2026-10-13/replay.log) | 最新精确RSS13条可读；回放是旧12条、原GET为/en别名，不把两份payload混为一份。 |
 | ID-T01 | https://jdih.kemendag.go.id/ | 2026-10-14T09:08:45.056Z / 200 [取证](../r2-three-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-post-clash-index-replay-final-2026-10-14/summary.json) | 8条完整原页回放通过；制定日不是发布日期，标题原有省略号保留，初始失败另存。 |
-| ID-T02 | https://jdih.kemenkeu.go.id/ | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
+| ID-T02 | https://jdih.kemenkeu.go.id/ | 2026-10-14T10:55:51.562Z DNS / HTTP0 [地址留证](../r2-new-four-bounded-2026-10-14/dns-ledger.json) | BLOCKED | NOT_RUN | 系统DNS 198.18.0.169 被现安全入口blocked_address；没有HTTP响应，不判源内容失败，也不猜配置。 |
 | PH-P01 | https://www.ppa.com.ph/content/ppa-helpdesk-advisory ，https://www.ppa.com.ph/ppa-port-news | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
 | PH-W01 | https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin | 2026-10-10T11:03:48Z / 200 [取证](../pagasa-warning-2026-10-10/raw/fetch-log.txt) | PARTIAL | NOT_RUN | 200页面外壳/iframe，无合格活动正样本；页面可读不代替预警数据。 |
 | PH-W02 | https://www.pagasa.dost.gov.ph/weather/weather-advisory | 2026-10-10T11:03:49.920Z / 200 [取证](../pagasa-warning-2026-10-10/raw/fetch-log.txt) | PARTIAL | NOT_RUN | 200页面外壳/iframe，无合格活动正样本；页面可读不代替预警数据。 |
@@ -81,13 +81,13 @@ TMD/BMKG内置seed的声明是 `enabled=true`，而默认生产Intel job仍关�
 
 已被后续真实响应/回放取代的DNS阻断、旧selector缺口保留为历史，不继续当当前失败。Northport真实冲突与VN-P01无日期不因DNS修好消失。R1.5历史1/10仍为用户延后、未完成验证，不重新找事件，也不阻塞R2。
 
-## 下一批建议（未执行，至多4项）
+## 四源授权批次（DNS完成，HTTP0）
 
 | ID | 精确目录URL | 可复用入口 / 尚需先观察 |
 | --- | --- | --- |
-| CN-P02 | https://www.sz.msa.gov.cn/ | 现secureFetchArticle → fromHtml/config keys/严格日期 → collectIntelSource/隔离SQLite；先观察真实容器与源时间角色，本轮未请求或新增配置 |
-| VN-D01 | https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx | 现secureFetchArticle → fromHtml/config keys/严格日期 → collectIntelSource/隔离SQLite；先观察真实容器与源时间角色，本轮未请求或新增配置 |
-| MY-L01 | https://www.pos.com.my/service-update | 现secureFetchArticle → fromHtml/config keys/严格日期 → collectIntelSource/隔离SQLite；先观察真实容器与源时间角色，本轮未请求或新增配置 |
-| ID-T02 | https://jdih.kemenkeu.go.id/ | 现secureFetchArticle → fromHtml/config keys/严格日期 → collectIntelSource/隔离SQLite；先观察真实容器与源时间角色，本轮未请求或新增配置 |
+| CN-P02 | https://www.sz.msa.gov.cn/ | 现secureFetchArticle → fromHtml/config keys/严格日期 → collectIntelSource/隔离SQLite；待取得真实容器与源时间角色；本轮仅DNS且安全阻断，没有HTTP或新增配置 |
+| VN-D01 | https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx | 现secureFetchArticle → fromHtml/config keys/严格日期 → collectIntelSource/隔离SQLite；待取得真实容器与源时间角色；本轮仅DNS且安全阻断，没有HTTP或新增配置 |
+| MY-L01 | https://www.pos.com.my/service-update | 现secureFetchArticle → fromHtml/config keys/严格日期 → collectIntelSource/隔离SQLite；待取得真实容器与源时间角色；本轮仅DNS且安全阻断，没有HTTP或新增配置 |
+| ID-T02 | https://jdih.kemenkeu.go.id/ | 现secureFetchArticle → fromHtml/config keys/严格日期 → collectIntelSource/隔离SQLite；待取得真实容器与源时间角色；本轮仅DNS且安全阻断，没有HTTP或新增配置 |
 
-下一批仅为待发完整指令建议，不构成实网、CA、详情页、生产开关或付费调用授权。父会话保留发令权。文档验证与真实Neat Freak收尾见[closeout.md](closeout.md)及[validation.json](validation.json)。
+四源各一次DNS结果见[批次报告](../r2-new-four-bounded-2026-10-14/report.md)。本批无原页字节，字段回放NOT_RUN；不改网络、重试、自动迁域或增加合成替代，父会话保留后续完整发令权。文档验证与真实Neat Freak收尾见[closeout.md](closeout.md)及[validation.json](validation.json)。

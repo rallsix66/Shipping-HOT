@@ -1,6 +1,6 @@
 {
   "type": "docs_only_commands",
-  "evidenceBaseline": "679400c1970cf270eabe85ec866a52b0bef820b6",
+  "evidenceBaseline": "e4d56116cda05fe4a8dbe151040c26874b6807c1",
   "commands": [
     {
       "label": "docs_lint_no_fix",
@@ -179,16 +179,196 @@
       "stdout": "{\"checks\": 22, \"errors\": [], \"referenceOccurrences\": 111, \"uniquePaths\": 29, \"rawExit\": 0}\r\n",
       "stderr": "",
       "rawExit": 0
+    },
+    {
+      "label": "docs_lint_direct_installed_node_no_fix",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "node_modules/eslint/bin/eslint.js",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/status.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/CN-P02-result.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/command.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/ID-T02-result.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/launch.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/manifest.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/MY-L01-result.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/partial-results.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/report.md",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/request-ledger.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/VN-D01-result.json"
+      ],
+      "startedAt": "2026-10-14T10:59:56.893384+00:00",
+      "finishedAt": "2026-10-14T10:59:58.903092+00:00",
+      "stdout": "\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\commands.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\mapping.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\metadata-scan.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\validation.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\CN-P02-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\ID-T02-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\MY-L01-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\VN-D01-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\command.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\dns-ledger.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\launch.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\manifest.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\partial-results.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\request-ledger.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\summary.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\n✖ 15 problems (0 errors, 15 warnings)\n\n",
+      "stderr": "",
+      "rawExit": 0
+    },
+    {
+      "label": "tracked_diff_whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "startedAt": "2026-10-14T10:59:58.903145+00:00",
+      "finishedAt": "2026-10-14T10:59:58.948775+00:00",
+      "stdout": "",
+      "stderr": "warning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/report.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it\n",
+      "rawExit": 0
+    },
+    {
+      "label": "matrix_structural_evidence_validation",
+      "command": [
+        "C:\\Program Files\\Python313\\python.EXE",
+        ".tmp/validate-current-r2-matrix.py"
+      ],
+      "startedAt": "2026-10-14T10:59:58.964721+00:00",
+      "finishedAt": "2026-10-14T10:59:59.106981+00:00",
+      "stdout": "{\"checks\": 25, \"errors\": [], \"referenceOccurrences\": 119, \"uniquePaths\": 31, \"rawExit\": 0}\r\n",
+      "stderr": "",
+      "rawExit": 0
+    },
+    {
+      "label": "docs_lint_direct_installed_node_no_fix",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "node_modules/eslint/bin/eslint.js",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/status.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/archive-hashes.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/CN-P02-result.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/command.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/ID-T02-result.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/launch.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/manifest.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/MY-L01-result.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/partial-results.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/report.md",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/request-ledger.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/VN-D01-result.json"
+      ],
+      "startedAt": "2026-10-14T11:01:07.909804+00:00",
+      "finishedAt": "2026-10-14T11:01:09.896157+00:00",
+      "stdout": "\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\commands.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\mapping.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\metadata-scan.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\validation.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\CN-P02-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\ID-T02-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\MY-L01-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\VN-D01-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\archive-hashes.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\command.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\dns-ledger.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\launch.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\manifest.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\partial-results.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\request-ledger.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\summary.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\n✖ 16 problems (0 errors, 16 warnings)\n\n",
+      "stderr": "",
+      "rawExit": 0
+    },
+    {
+      "label": "tracked_diff_whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "startedAt": "2026-10-14T11:01:09.896216+00:00",
+      "finishedAt": "2026-10-14T11:01:09.947684+00:00",
+      "stdout": "",
+      "stderr": "warning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/commands.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/report.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/validate-matrix.py.txt', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/validation.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it\n",
+      "rawExit": 0
+    },
+    {
+      "label": "matrix_structural_evidence_validation",
+      "command": [
+        "C:\\Program Files\\Python313\\python.EXE",
+        ".tmp/validate-current-r2-matrix.py"
+      ],
+      "startedAt": "2026-10-14T11:01:09.965583+00:00",
+      "finishedAt": "2026-10-14T11:01:10.107708+00:00",
+      "stdout": "{\"checks\": 25, \"errors\": [], \"referenceOccurrences\": 119, \"uniquePaths\": 31, \"rawExit\": 0}\r\n",
+      "stderr": "",
+      "rawExit": 0
+    },
+    {
+      "label": "docs_lint_direct_installed_node_no_fix",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "node_modules/eslint/bin/eslint.js",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/archive-hashes.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/command.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/archive-hashes.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/CN-P02-result.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/command.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/ID-T02-result.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/launch.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/manifest.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/MY-L01-result.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/partial-results.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/report.md",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/request-ledger.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+        "docs/evidence/r2-new-four-bounded-2026-10-14/VN-D01-result.json"
+      ],
+      "startedAt": "2026-10-14T11:04:10.315834+00:00",
+      "finishedAt": "2026-10-14T11:04:12.207270+00:00",
+      "stdout": "\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\commands.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\mapping.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\metadata-scan.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\validation.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\CN-P02-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\ID-T02-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\MY-L01-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\VN-D01-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\archive-hashes.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\command.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\dns-ledger.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\launch.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\manifest.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\partial-results.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\request-ledger.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-new-four-bounded-2026-10-14\\summary.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\n✖ 16 problems (0 errors, 16 warnings)\n\n",
+      "stderr": "",
+      "rawExit": 0
+    },
+    {
+      "label": "tracked_diff_whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "startedAt": "2026-10-14T11:04:12.207323+00:00",
+      "finishedAt": "2026-10-14T11:04:12.243812+00:00",
+      "stdout": "",
+      "stderr": "warning: in the working copy of 'docs/evidence/r2-new-four-bounded-2026-10-14/archive-hashes.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-new-four-bounded-2026-10-14/command.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-new-four-bounded-2026-10-14/report.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-new-four-bounded-2026-10-14/stdout.log', LF will be replaced by CRLF the next time Git touches it\n",
+      "rawExit": 0
+    },
+    {
+      "label": "matrix_structural_evidence_validation",
+      "command": [
+        "C:\\Program Files\\Python313\\python.EXE",
+        ".tmp/validate-current-r2-matrix.py"
+      ],
+      "startedAt": "2026-10-14T11:04:12.259582+00:00",
+      "finishedAt": "2026-10-14T11:04:12.398593+00:00",
+      "stdout": "{\"checks\": 25, \"errors\": [], \"referenceOccurrences\": 119, \"uniquePaths\": 31, \"rawExit\": 0}\r\n",
+      "stderr": "",
+      "rawExit": 0
     }
   ],
   "metadataScan": {
-    "scope": "New matrix/report/builder/closeout only; no historic-third-party/full-project safety claim",
+    "scope": "New/updated matrix/report/builder/closeout and this four-source capture archive only; no historic-third-party/full-project safety claim",
     "syntheticPositiveControlDetected": true,
     "valueHits": [],
     "rawExit": 0
   },
   "initialInventoryRawExit": 127,
   "finalInventoryRawExit": 0,
-  "functionalGates": "NOT_RUN_this_docs_round",
+  "functionalGates": "NOT_RUN_no_product_source_changes",
   "initialDocValidationFailures": "SyntaxError in new validator, then table-header variants/missing not-yet-generated closeout/command references; corrected before final validation. Local intermediate logs retained."
 }

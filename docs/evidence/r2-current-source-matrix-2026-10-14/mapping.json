@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-14T10:52:01.028448+00:00",
+  "generatedAt": "2026-10-14T10:57:22.667526+00:00",
   "reviewedCodeSha": "355bc861d4020ba22ddd00401de709d7cee497e3",
-  "evidenceHead": "679400c1970cf270eabe85ec866a52b0bef820b6",
+  "evidenceHead": "e4d56116cda05fe4a8dbe151040c26874b6807c1",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "f4d37cbbecde67494cdc7ba8acd1a6fff063678aff1903eae8c18727a4c9ba4d",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -62,8 +62,9 @@
       ],
       "statusCounts": {
         "OK": 19,
-        "NOT_RUN": 11,
+        "BLOCKED": 4,
         "PARTIAL": 8,
+        "NOT_RUN": 7,
         "STALE": 1
       },
       "pass": false
@@ -279,23 +280,54 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "NOT_RUN",
+        "verdict": "BLOCKED",
         "countedOK": false,
-        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+        "reason": "Latest authorized exact-URL check resolved a198.18 special-range address; unchanged secure fetch blocked before transport. Current environment blocked, not proof source content is unusable."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "No stored real-page full title/link/source-time replay."
+        "reason": "DNS blocked before HTTP, no original response bytes obtained; no guessing selectors/dates or synthetic replacement replay."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "缺来源专属配置、存档谱系与回放"
+        "System DNS198.18 special address blocked before HTTP; no retry or network-setting change.",
+        "Actual page, source field roles/selector and license remain unverified; no new source configuration."
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "latestAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+          "selector": {
+            "id": "CN-P02"
+          },
+          "sha256": "210c2b85d3fdfa7a7b51134f8edd513e5166a967b05606bbb6fc5aaa23b2189f",
+          "hashBasis": "committed_text_LF"
+        },
+        "dnsEvidence": {
+          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+          "selector": {
+            "id": "CN-P02"
+          },
+          "sha256": "7e14c25243ced26a2b98fbda3c37cc076a973fefa00a757713e3f131e4809d58",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-14T10:55:51.552Z",
+        "url": "https://www.sz.msa.gov.cn/",
+        "addresses": [
+          {
+            "address": "198.18.0.166",
+            "family": 4
+          }
+        ],
+        "systemDnsCalls": 1,
+        "httpRequests": 0,
+        "reason": "blocked_address",
+        "scope": "current_environment_dns_only_no_response_no_parse"
+      }
     },
     {
       "id": "CN-W01",
@@ -1168,23 +1200,54 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "NOT_RUN",
+        "verdict": "BLOCKED",
         "countedOK": false,
-        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+        "reason": "Latest authorized exact-URL check resolved a198.18 special-range address; unchanged secure fetch blocked before transport. Current environment blocked, not proof source content is unusable."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "No stored real-page full title/link/source-time replay."
+        "reason": "DNS blocked before HTTP, no original response bytes obtained; no guessing selectors/dates or synthetic replacement replay."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "缺来源专属配置、存档谱系与回放"
+        "System DNS198.18 special address blocked before HTTP; no retry or network-setting change.",
+        "Actual page, source field roles/selector and license remain unverified; no new source configuration."
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "latestAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+          "selector": {
+            "id": "VN-D01"
+          },
+          "sha256": "210c2b85d3fdfa7a7b51134f8edd513e5166a967b05606bbb6fc5aaa23b2189f",
+          "hashBasis": "committed_text_LF"
+        },
+        "dnsEvidence": {
+          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+          "selector": {
+            "id": "VN-D01"
+          },
+          "sha256": "7e14c25243ced26a2b98fbda3c37cc076a973fefa00a757713e3f131e4809d58",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-14T10:55:51.558Z",
+        "url": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
+        "addresses": [
+          {
+            "address": "198.18.0.167",
+            "family": 4
+          }
+        ],
+        "systemDnsCalls": 1,
+        "httpRequests": 0,
+        "reason": "blocked_address",
+        "scope": "current_environment_dns_only_no_response_no_parse"
+      }
     },
     {
       "id": "TH-W01",
@@ -2059,23 +2122,54 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "NOT_RUN",
+        "verdict": "BLOCKED",
         "countedOK": false,
-        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+        "reason": "Latest authorized exact-URL check resolved a198.18 special-range address; unchanged secure fetch blocked before transport. Current environment blocked, not proof source content is unusable."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "No stored real-page full title/link/source-time replay."
+        "reason": "DNS blocked before HTTP, no original response bytes obtained; no guessing selectors/dates or synthetic replacement replay."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "缺来源专属配置、存档谱系与回放"
+        "System DNS198.18 special address blocked before HTTP; no retry or network-setting change.",
+        "Actual page, source field roles/selector and license remain unverified; no new source configuration."
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "latestAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+          "selector": {
+            "id": "MY-L01"
+          },
+          "sha256": "210c2b85d3fdfa7a7b51134f8edd513e5166a967b05606bbb6fc5aaa23b2189f",
+          "hashBasis": "committed_text_LF"
+        },
+        "dnsEvidence": {
+          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+          "selector": {
+            "id": "MY-L01"
+          },
+          "sha256": "7e14c25243ced26a2b98fbda3c37cc076a973fefa00a757713e3f131e4809d58",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-14T10:55:51.561Z",
+        "url": "https://www.pos.com.my/service-update",
+        "addresses": [
+          {
+            "address": "198.18.0.168",
+            "family": 4
+          }
+        ],
+        "systemDnsCalls": 1,
+        "httpRequests": 0,
+        "reason": "blocked_address",
+        "scope": "current_environment_dns_only_no_response_no_parse"
+      }
     },
     {
       "id": "ID-W01",
@@ -2408,23 +2502,54 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "NOT_RUN",
+        "verdict": "BLOCKED",
         "countedOK": false,
-        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+        "reason": "Latest authorized exact-URL check resolved a198.18 special-range address; unchanged secure fetch blocked before transport. Current environment blocked, not proof source content is unusable."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "No stored real-page full title/link/source-time replay."
+        "reason": "DNS blocked before HTTP, no original response bytes obtained; no guessing selectors/dates or synthetic replacement replay."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "缺来源专属配置、存档谱系与回放"
+        "System DNS198.18 special address blocked before HTTP; no retry or network-setting change.",
+        "Actual page, source field roles/selector and license remain unverified; no new source configuration."
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "latestAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+          "selector": {
+            "id": "ID-T02"
+          },
+          "sha256": "210c2b85d3fdfa7a7b51134f8edd513e5166a967b05606bbb6fc5aaa23b2189f",
+          "hashBasis": "committed_text_LF"
+        },
+        "dnsEvidence": {
+          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+          "selector": {
+            "id": "ID-T02"
+          },
+          "sha256": "7e14c25243ced26a2b98fbda3c37cc076a973fefa00a757713e3f131e4809d58",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-14T10:55:51.562Z",
+        "url": "https://jdih.kemenkeu.go.id/",
+        "addresses": [
+          {
+            "address": "198.18.0.169",
+            "family": 4
+          }
+        ],
+        "systemDnsCalls": 1,
+        "httpRequests": 0,
+        "reason": "blocked_address",
+        "scope": "current_environment_dns_only_no_response_no_parse"
+      }
     },
     {
       "id": "PH-P01",
@@ -3762,22 +3887,26 @@
     {
       "id": "CN-P02",
       "url": "https://www.sz.msa.gov.cn/",
-      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; source selectors/date evidence must first be observed, no current implementation or request claim"
+      "status": "HISTORICAL_PROPOSAL_NOW_ATTEMPTED_DNS_BLOCKED_HTTP0",
+      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; no payload obtained, no configuration added, no automatic retry/network change authorized"
     },
     {
       "id": "VN-D01",
       "url": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
-      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; source selectors/date evidence must first be observed, no current implementation or request claim"
+      "status": "HISTORICAL_PROPOSAL_NOW_ATTEMPTED_DNS_BLOCKED_HTTP0",
+      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; no payload obtained, no configuration added, no automatic retry/network change authorized"
     },
     {
       "id": "MY-L01",
       "url": "https://www.pos.com.my/service-update",
-      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; source selectors/date evidence must first be observed, no current implementation or request claim"
+      "status": "HISTORICAL_PROPOSAL_NOW_ATTEMPTED_DNS_BLOCKED_HTTP0",
+      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; no payload obtained, no configuration added, no automatic retry/network change authorized"
     },
     {
       "id": "ID-T02",
       "url": "https://jdih.kemenkeu.go.id/",
-      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; source selectors/date evidence must first be observed, no current implementation or request claim"
+      "status": "HISTORICAL_PROPOSAL_NOW_ATTEMPTED_DNS_BLOCKED_HTTP0",
+      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; no payload obtained, no configuration added, no automatic retry/network change authorized"
     }
   ]
 }

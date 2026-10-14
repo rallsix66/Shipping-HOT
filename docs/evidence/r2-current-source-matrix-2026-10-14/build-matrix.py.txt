@@ -11,7 +11,7 @@ old = json.loads(OLD.read_text(encoding='utf-8'))
 inventory_path = ROOT / 'r2-p1-inventory-2026-10-13/source-inventory.json'
 inventory = json.loads(inventory_path.read_text(encoding='utf-8'))
 legacy = {r['id']: r for r in inventory['entries']}
-HEAD = '679400c1970cf270eabe85ec866a52b0bef820b6'
+HEAD = 'e4d56116cda05fe4a8dbe151040c26874b6807c1'
 CODE = '355bc861d4020ba22ddd00401de709d7cee497e3'
 
 def read(path): return json.loads(Path(path).read_text(encoding='utf-8'))
@@ -86,6 +86,12 @@ for source in old['entries']:
        'r2_5':{'verdict':'NOT_RUN','countedPass':False,'reason':'No stored real-page full title/link/source-time replay.'},
        'continuousProduction':{'status':'NOT_RUN','scope':'No approved R2-8 24h run for this source'},
        'gaps':[legacy[sid]['gap']], 'historicalSuperseded':[]}
+    if sid in ['CN-P02','VN-D01','MY-L01','ID-T02']:
+        batch='docs/evidence/r2-new-four-bounded-2026-10-14/summary.json';attempt=outcome(batch,sid)
+        e['latestAttempt']={'evidence':ref(batch,{'id':sid}),'dnsEvidence':ref('docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json',{'id':sid}),'at':attempt['startedAt'],'url':attempt['url'],'addresses':attempt['addresses'],'systemDnsCalls':1,'httpRequests':0,'reason':'blocked_address','scope':'current_environment_dns_only_no_response_no_parse'}
+        e['r2_4']={'verdict':'BLOCKED','countedOK':False,'reason':'Latest authorized exact-URL check resolved a198.18 special-range address; unchanged secure fetch blocked before transport. Current environment blocked, not proof source content is unusable.'}
+        e['r2_5']={'verdict':'NOT_RUN','countedPass':False,'reason':'DNS blocked before HTTP, no original response bytes obtained; no guessing selectors/dates or synthetic replacement replay.'}
+        e['gaps']=['System DNS198.18 special address blocked before HTTP; no retry or network-setting change.','Actual page, source field roles/selector and license remain unverified; no new source configuration.']
     if sid in paths:
         e['latestActualFetch']=fetch(paths[sid],sid)
         e['r2_4']={'verdict':'OK','countedOK':True,'reason':'Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h.'}
@@ -257,7 +263,7 @@ result={'type':'current_authoritative_evidence_matrix','generatedAt':datetime.no
  ],'entries':entries}
 (OUT/'mapping.json').write_bytes((json.dumps(result,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
 next_ids=['CN-P02','VN-D01','MY-L01','ID-T02']
-result['nextBatchProposal']=[{'id':sid,'url':next(r['exactProductUrl'] for r in entries if r['id']==sid),'existingReusableImplementation':'secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; source selectors/date evidence must first be observed, no current implementation or request claim'} for sid in next_ids]
+result['nextBatchProposal']=[{'id':sid,'url':next(r['exactProductUrl'] for r in entries if r['id']==sid),'status':'HISTORICAL_PROPOSAL_NOW_ATTEMPTED_DNS_BLOCKED_HTTP0','existingReusableImplementation':'secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; no payload obtained, no configuration added, no automatic retry/network change authorized'} for sid in next_ids]
 assert all(next(r for r in entries if r['id']==sid)['latestActualFetch'] is None for sid in next_ids)
 (OUT/'mapping.json').write_bytes((json.dumps(result,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
 print(json.dumps({'r2_4':result['measuredCoverage']['r2_4'],'r2_5':result['measuredCoverage']['r2_5'],'numeric':result['measuredCoverage']['numericFieldsSeparate']},ensure_ascii=True))

@@ -1,0 +1,21 @@
+{
+  "id": "CN-P02",
+  "url": "https://www.sz.msa.gov.cn/",
+  "host": "www.sz.msa.gov.cn",
+  "catalogLineSha256": "fb8626584a4638504f67317547732ce3b2d3b288cc96bbde8d25b99c6c0bed19",
+  "startedAt": "2026-10-14T10:55:51.552Z",
+  "systemDnsCalls": 1,
+  "httpRequests": 0,
+  "status": "BLOCKED",
+  "rawHtmlCommitted": false,
+  "addresses": [
+    {
+      "address": "198.18.0.166",
+      "family": 4
+    }
+  ],
+  "addressClassification": "blocked_address",
+  "reason": "blocked_address",
+  "parser": "NOT_RUN",
+  "finishedAt": "2026-10-14T10:55:51.558Z"
+}

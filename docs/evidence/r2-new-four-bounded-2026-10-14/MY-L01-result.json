@@ -1,0 +1,21 @@
+{
+  "id": "MY-L01",
+  "url": "https://www.pos.com.my/service-update",
+  "host": "www.pos.com.my",
+  "catalogLineSha256": "4dcce7c27f05b11245fe478de0872b4aee55dc338ef0ea00e878cf5526bc7078",
+  "startedAt": "2026-10-14T10:55:51.561Z",
+  "systemDnsCalls": 1,
+  "httpRequests": 0,
+  "status": "BLOCKED",
+  "rawHtmlCommitted": false,
+  "addresses": [
+    {
+      "address": "198.18.0.168",
+      "family": 4
+    }
+  ],
+  "addressClassification": "blocked_address",
+  "reason": "blocked_address",
+  "parser": "NOT_RUN",
+  "finishedAt": "2026-10-14T10:55:51.561Z"
+}

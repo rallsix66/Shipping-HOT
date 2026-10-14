@@ -1,5 +1,5 @@
 {
-  "scope": "New matrix/report/builder/closeout only; no historic-third-party/full-project safety claim",
+  "scope": "New/updated matrix/report/builder/closeout and this four-source capture archive only; no historic-third-party/full-project safety claim",
   "syntheticPositiveControlDetected": true,
   "valueHits": [],
   "rawExit": 0

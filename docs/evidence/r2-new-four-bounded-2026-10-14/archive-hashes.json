@@ -1,0 +1,23 @@
+{
+  "basis": "Git UTF8 text LF; original captured stdout kept verbatim inside command.json; no raw response exists",
+  "files": {
+    "capture-config.ts.txt": "52ab527e964da32b46d5e21894b4ff84396631f08be7031a931d82fa6a83a91b",
+    "capture-procedure.ts.txt": "0ec0d6981c6313ff3cda8313693168e9bc73a3ae5a271f85a4f7d374ae8d4485",
+    "CN-P02-result.json": "38c0265be70f905a824c80d4ab271101afb040647bfbac5058b6823b9128cc04",
+    "command.json": "db6f3e8a5ee6b486e31d11a24b5058bd47bfc4a48ce49bb8cb3eec9bfb1b37ed",
+    "dns-ledger.json": "7e14c25243ced26a2b98fbda3c37cc076a973fefa00a757713e3f131e4809d58",
+    "ID-T02-result.json": "e6ad8ca21f8290ce6fd4fe5833965836544cc818b83af8d8b2e4870dbf5ce513",
+    "inventory.txt": "c28e1b534d7a16afc36f55a529bd83fbb37be91ce93515169e1cf63dc3e78c0b",
+    "launch-procedure.cjs.txt": "6277256ba8632bf1722c09fc96625d7bb1e3d5cfa7313d4aba115ab9e93ed235",
+    "launch.json": "cc98b8d4177830c681fb0a682da0d37f73eb75d78f9229bafa3b8bf416cb16f9",
+    "manifest.json": "7d307acfdc64d977c6c8e97c61831d65211d8b962a5f6792881565b7ed81d804",
+    "MY-L01-result.json": "3414c4e30da3f608ffeb868a24a476df2935c2d0ae4be9cf0420ad669a4b9ef4",
+    "partial-results.json": "782e9b73112bc77d5d1a10c1214744a4c85ab695980f7f8ccd88bc6a5b4f3c0c",
+    "report.md": "9c1dacaadde412816ed716ee663b1d74263c8bdc8f4e75ff15ba5248d7b2d688",
+    "request-ledger.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "stderr.log": "2b2089ef48a0decf6778aa45b416b29808b7d9476761ca686b28c9a254486d42",
+    "stdout.log": "1535444d829963de501ca9ec8ab34e7528e2788a6065e9e61eec7d903527907e",
+    "summary.json": "210c2b85d3fdfa7a7b51134f8edd513e5166a967b05606bbb6fc5aaa23b2189f",
+    "VN-D01-result.json": "c05f93c47307753e4d638ac1de8c2bf87f42d957fe805f4df945b920ce45fb42"
+  }
+}
