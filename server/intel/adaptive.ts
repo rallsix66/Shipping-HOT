@@ -13,7 +13,7 @@ export function adaptiveWindow(now: Date) {
 }
 
 export function adaptiveIntervalMs(recentCount: number, bounds: IntelAdaptiveBounds): number {
-  if (!Number.isSafeInteger(recentCount) || recentCount < 0 || !Number.isFinite(bounds.minMinutes) || !Number.isFinite(bounds.maxMinutes) || bounds.minMinutes < 15 || bounds.maxMinutes < bounds.minMinutes || bounds.maxMinutes > 180) throw new Error("intel_adaptive_bounds_invalid")
+  if (!Number.isSafeInteger(recentCount) || recentCount < 0 || !Number.isSafeInteger(bounds.minMinutes) || !Number.isSafeInteger(bounds.maxMinutes) || bounds.minMinutes < 15 || bounds.maxMinutes < bounds.minMinutes || bounds.maxMinutes > 180) throw new Error("intel_adaptive_bounds_invalid")
   const perDay = recentCount / 7
   const minutes = perDay <= 0.15 ? bounds.maxMinutes : Math.round(Math.min(bounds.maxMinutes, Math.max(bounds.minMinutes, 1440 / (perDay * 3))))
   return minutes * 60000

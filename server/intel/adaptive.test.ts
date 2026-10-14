@@ -12,6 +12,7 @@ it("uses the verified upstream 7-day/3 formula and source-specific min/max", () 
   expect(adaptiveIntervalMs(700, { minMinutes: 60, maxMinutes: 180 })).toBe(60 * 60000)
   expect(() => adaptiveIntervalMs(-1, bounds)).toThrow("bounds_invalid")
   expect(() => adaptiveIntervalMs(1, { minMinutes: 1, maxMinutes: 60 })).toThrow("bounds_invalid")
+  expect(() => adaptiveIntervalMs(700, { minMinutes: 15.2, maxMinutes: 60 })).toThrow("bounds_invalid")
   expect(adaptiveWindow(new Date("2026-10-20T12:00:00Z"))).toEqual({ from: "2026-10-13T00:00:00.000Z", until: "2026-10-20T00:00:00.000Z" })
 })
 
