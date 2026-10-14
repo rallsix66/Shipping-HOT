@@ -1,5 +1,14 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
+## Demo ports / existing weather slice — 2026-10-14
+
+- Code `11aa1162a286d96bdc7a44a2f61a95d3d2a886e8`: `/ports` and `/ports/:id` adapt actual demo eight-port selection/header/announcement-weather columns/table CSS. Existing cache APIs, port watch and tropical-cyclone display reused. Forecasts remain hourly/current with API units and missing values; no daily aggregation, fake shutdown/risks/delay or frontend threshold recomputation.
+- Weather presentation extracted without dropping source/window/precipitation/rule/stale/failure disclosures. VNSGN original point and ADR-009 independent engineering reference remain separate, with reference distance/grid/attempt/success/history/coverage; reference marine values never fill original-point rows. Focus directory is scope, not evidence of current data. Regional weather and R5 country/event/calendar summaries remain unopened.
+- Minimal read compatibility: approved focus IDs can read existing weather/reference cache even when absent from operational snapshot; no port insertion or synchronization. Missing unapproved IDs still404. Schema,provider,threshold,sampling,source/budget/production configuration unchanged.
+- Exact clean-SHA fresh-install gate: install/build/typecheck/lint,55targeted,full117files/1103pass/3existing Windows skips,3isolated smokes all exit0. Original gate completed during a temporary transport disconnect; recovered metadata inspected, no duplicate gate. Actual Neat Freak/raw evidence: `docs/evidence/gate-11aa116-frontend/closeout.md`.
+- New isolated preview `http://127.0.0.1:4484/ports` PID52080; original4482fixture DB copied, policy samples retained, credentials/project env absent and Runtime/providers/translation off.54loopback HTTP/API/assets checks passed including eight reads, unknown404, three existing snapshot DTOs/statuses unchanged and read-count preservation. Old4477/4482/4483 previews untouched.
+- **Browser/visual/keyboard/mobile/S7 NOT_RUN; parent review pending.** No workaround of rejected CDP path, no source or paid/LLM requests, no new real-data evidence, no R1.5/R2/R5 overall PASS. No merge/deploy/force-push.
+
 ## Demo overview correction / same-round review repairs — 2026-10-14
 
 - User screenshot comparison showed the previous default homepage was still legacy HOT, and navigation had duplicate home/event entries. Earlier shell/policy adaptation did not meet the requested overall demo structure. Code `c3e08408623c69a3a071d761ed0300659644bd68` now mounts the actual demo country-overview framework at `/`: six ordered country cards, judgement/status legend, banner and attention panel. Single navigation preserves seven routes. Risk fields explicitly unevaluated/unopened; no fake severity/count/delay/AI output. Original reference hash unchanged; legacy HotPage unmounted.
