@@ -99,6 +99,12 @@ for source in old['entries']:
                 'storedDerivativeOnly':True,'repeatAndReadOnlyReopen':'NOT_RUN'}
             e['dateEvidence']={'role':'feed_declared_date_time_normalized','precision':'instant_in_saved_metadata','sourceDeclaredTimezone':'not_reaudited_here','publicationInstant':'available_in_saved_live_metadata'}
             e['gaps']=['Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay.']
+        if sid=='MY-P02':
+            meta='docs/evidence/r2-bounded-rss-after-dns-2026-10-13/MY-P02-metadata.json'
+            days=sorted(item['publishedAt'][:10] for item in read(meta)['items'])
+            e['contentFreshness']={'evidence':ref(meta),'itemDays':days,'latestItemDay':days[-1],'requiredCatalogYear':2026,'status':'STALE','noNewFetch':True}
+            e['r2_4']={'verdict':'STALE','countedOK':False,'reason':'Saved exact RSS has only 2024-11-08, 2025-02-01 and 2025-08-01 dated items; latest predates catalogue 2026 content criterion. HTTP200 and complete fields do not establish current content. No later stored update found.'}
+            e['gaps'].append('Latest saved source item is 2025-08-01; retain STALE rather than count a reachable old feed as OK.')
     if sid in raw_replays:
         x=outcome(raw_replays[sid],sid)
         e['fieldReplayEvidence']={'status':'PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS',
@@ -238,7 +244,7 @@ result={'type':'current_authoritative_evidence_matrix','generatedAt':datetime.no
  'thresholds':{'r2_4MinimumOK':32,'r2_4MinimumRatio':0.8,'r2_5RequiredFieldReplay':34,'r2_5MinimumRatio':1.0},
  'countingRules':{'r2_4':'Genuine expected product response and usable real parsing/normalization/field verification; mere200 shells, unresolved conflicts, unverified URL/products are partial. Count latest stored measured availability, not current uptime. Default-off is independent.',
  'r2_5':'Complete stored real-page title/link/actual source-time fields replay; day precision and honest document/enactment role remain explicit, never relabelled publication. Live parse without retained full real replay is not pass. Numeric products excluded.',
- 'freshness':'Dates are per-capture proof. No new liveness/current continuous run claimed; catalogue labels alone do not prove availability.',
+ 'freshness':'Dates are per-capture proof. An accessible feed whose latest saved item predates the catalogue 2026 content criterion remains STALE, not OK. No new liveness/current continuous run claimed; catalogue labels alone do not prove availability.',
  'utc':'Unknown zones/instants stay unknown/null. Older NCHMF configured+07 is not source declaration/independent UTC certification.'},
  'measuredCoverage':{'r2_4':{'numerator':len(ok),'denominator':39,'ratio':len(ok)/39,'minimumOK':32,'shortfall':max(0,32-len(ok)),'ids':ok,'statusCounts':dict(Counter(r['r2_4']['verdict'] for r in pub)),'pass':len(ok)>=32},
  'r2_5':{'numerator':len(fields),'denominator':34,'ratio':len(fields)/34,'remaining':34-len(fields),'ids':fields,'statusCounts':dict(Counter(r['r2_5']['verdict'] for r in info)),'pass':len(fields)==34},

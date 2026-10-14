@@ -47,7 +47,7 @@ check('All evidence LF text hashes match',not hash_errors,hash_errors)
 check('All evidence source selectors resolve',not selector_errors,selector_errors)
 pub=[e for e in entries if e['inPublicDenominator']];info=[e for e in entries if e['classification']=='information_notice'];numeric=[e for e in entries if e['classification']=='numeric_weather']
 ok=[e['id'] for e in pub if e['r2_4']['verdict']=='OK'];passed=[e['id'] for e in info if e['r2_5']['verdict']=='PASS'];numok=[e['id'] for e in numeric if (e['numericFieldValidation'] or {}).get('status')=='PASS_LIMITED_STORED_REAL_DIAGNOSTIC']
-check('R2-4 independently recomputed verdicts and flags',len(pub)==39 and ok==m['measuredCoverage']['r2_4']['ids'] and len(ok)==20 and all(e['r2_4']['countedOK']==(e['r2_4']['verdict']=='OK') for e in pub))
+check('R2-4 independently recomputed verdicts and flags',len(pub)==39 and ok==m['measuredCoverage']['r2_4']['ids'] and len(ok)==19 and all(e['r2_4']['countedOK']==(e['r2_4']['verdict']=='OK') for e in pub))
 check('R2-5 independently recomputed verdicts and flags',len(info)==34 and passed==m['measuredCoverage']['r2_5']['ids'] and len(passed)==11 and all(e['r2_5']['countedPass']==(e['r2_5']['verdict']=='PASS') for e in info))
 check('Numeric 3/5 separate and absent from article numerator',len(numeric)==5 and len(numok)==3 and set(numok).isdisjoint(passed) and all(e['r2_5']['verdict']=='NOT_APPLICABLE_NUMERIC' for e in numeric))
 for which,subset in [('r2_4',pub),('r2_5',info)]:

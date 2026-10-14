@@ -1,6 +1,6 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-14T10:34:35.845238+00:00",
+  "generatedAt": "2026-10-14T10:52:01.028448+00:00",
   "reviewedCodeSha": "355bc861d4020ba22ddd00401de709d7cee497e3",
   "evidenceHead": "679400c1970cf270eabe85ec866a52b0bef820b6",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
@@ -29,16 +29,16 @@
   "countingRules": {
     "r2_4": "Genuine expected product response and usable real parsing/normalization/field verification; mere200 shells, unresolved conflicts, unverified URL/products are partial. Count latest stored measured availability, not current uptime. Default-off is independent.",
     "r2_5": "Complete stored real-page title/link/actual source-time fields replay; day precision and honest document/enactment role remain explicit, never relabelled publication. Live parse without retained full real replay is not pass. Numeric products excluded.",
-    "freshness": "Dates are per-capture proof. No new liveness/current continuous run claimed; catalogue labels alone do not prove availability.",
+    "freshness": "Dates are per-capture proof. An accessible feed whose latest saved item predates the catalogue 2026 content criterion remains STALE, not OK. No new liveness/current continuous run claimed; catalogue labels alone do not prove availability.",
     "utc": "Unknown zones/instants stay unknown/null. Older NCHMF configured+07 is not source declaration/independent UTC certification."
   },
   "measuredCoverage": {
     "r2_4": {
-      "numerator": 20,
+      "numerator": 19,
       "denominator": 39,
-      "ratio": 0.5128205128205128,
+      "ratio": 0.48717948717948717,
       "minimumOK": 32,
-      "shortfall": 12,
+      "shortfall": 13,
       "ids": [
         "CN-P01",
         "CN-T02",
@@ -48,7 +48,6 @@
         "TH-W01",
         "TH-C01",
         "TH-C02",
-        "MY-P02",
         "MY-C01",
         "MY-T01",
         "ID-W01",
@@ -62,9 +61,10 @@
         "XX-A02"
       ],
       "statusCounts": {
-        "OK": 20,
+        "OK": 19,
         "NOT_RUN": 11,
-        "PARTIAL": 8
+        "PARTIAL": 8,
+        "STALE": 1
       },
       "pass": false
     },
@@ -1610,9 +1610,9 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "OK",
-        "countedOK": true,
-        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
+        "verdict": "STALE",
+        "countedOK": false,
+        "reason": "Saved exact RSS has only 2024-11-08, 2025-02-01 and 2025-08-01 dated items; latest predates catalogue 2026 content criterion. HTTP200 and complete fields do not establish current content. No later stored update found."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
@@ -1624,11 +1624,29 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay."
+        "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay.",
+        "Latest saved source item is 2025-08-01; retain STALE rather than count a reachable old feed as OK."
       ],
       "historicalSuperseded": [
         "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
-      ]
+      ],
+      "contentFreshness": {
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/MY-P02-metadata.json",
+          "selector": null,
+          "sha256": "d0acbdfad4bc7772a6e5728af9832b4f0170e72e88ac111f4f59fda5be252c64",
+          "hashBasis": "committed_text_LF"
+        },
+        "itemDays": [
+          "2024-11-08",
+          "2025-02-01",
+          "2025-08-01"
+        ],
+        "latestItemDay": "2025-08-01",
+        "requiredCatalogYear": 2026,
+        "status": "STALE",
+        "noNewFetch": true
+      }
     },
     {
       "id": "MY-P03",

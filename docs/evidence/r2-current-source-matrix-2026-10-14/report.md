@@ -4,14 +4,14 @@
 
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
-| R2-4公开自动来源 | **20/39（51.28%）** | 最少32项，尚差12；20 OK、8 PARTIAL、11 NOT_RUN，未通过 |
+| R2-4公开自动来源 | **19/39（48.72%）** | 最少32项，尚差13；19 OK、8 PARTIAL、1 STALE、11 NOT_RUN，未通过 |
 | R2-5资讯/公告原页字段回放 | **11/34（32.35%）** | 尚差23；11 PASS、3 FAIL、1 PARTIAL、19 NOT_RUN，未通过 |
 | 数值字段独立检查 | **3/5** | 仅历史归一化诊断；不加到34项原页回放分子 |
 | R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
 
 34资讯/公告、5数值天气、2后续阶段的分类于06:31:44 UTC已批准，41项全部保留。后续付费天气与向量只从公开39项分母排除，没有标PASS。这里的OK只描述留证时的实产品可用和数据/解析检查，不描述今天实时可用、生产默认启用或24小时表现。默认关闭独立于来源资格，不记作失败。
 
-NMC两项是本次从暂计22/39修正到20/39的原因：10/11原URL旧Feed读取早于10/13 03:55:13.246 UTC真实页面适用性回放。后者在 `0b532e1917ee5425194965b20e0fdf8c2a1f4805` 断言零合格链接、`web_list_invalid_link`、写入0；harness退出0证明预期失败得到验证，不代表源解析成功。[原始日志](../r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log)、[过程](../r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt)。已核对当前9个关闭HTML候选与后续R2记录，没有取代这两项失败的合格回放；它们保留为R2-4 PARTIAL / R2-5 FAIL，不称未测试。
+NMC两项曾将暂计22/39修正到20/39；本次Westports日期复审再修正为19/39。NMC的既有证据顺序为：10/11原URL旧Feed读取早于10/13 03:55:13.246 UTC真实页面适用性回放。后者在 `0b532e1917ee5425194965b20e0fdf8c2a1f4805` 断言零合格链接、`web_list_invalid_link`、写入0；harness退出0证明预期失败得到验证，不代表源解析成功。[原始日志](../r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log)、[过程](../r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt)。已核对当前9个关闭HTML候选与后续R2记录，没有取代这两项失败的合格回放；它们保留为R2-4 PARTIAL / R2-5 FAIL，不称未测试。
 
 字段PASS忠实保留源实际时间角色。TH-C02是文件日，ID-T01是制定日；其余六个新增HTML原页是源显示的列表日，全部day精度、时区缺失、发布瞬间null。BMKG旧12条/en别名原文与最新13条精确/rss.xml响应分开；NCHMF旧脱敏DOM保留+07来自测试配置的限制。字段通过不证明发布瞬间、预警有效性、港口影响、法规全文或政策人工审核。
 
@@ -33,7 +33,7 @@ NMC两项是本次从暂计22/39修正到20/39的原因：10/11原URL旧Feed读�
 | TH-W01 | https://www.tmd.go.th/en/api/xml/CAP | 2026-10-13T07:00:38.389Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | PASS [字段](../r2-p1-inventory-2026-10-13/replay.log) | 最新精确CAP实网10条，原XML另有回放；预警有效性/港口影响不在本字段通过范围。 |
 | TH-C01 | https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th | 2026-10-14T07:16:50.062Z / 200 [取证](../r2-six-public-2026-10-14/summary.json) | OK | PASS [字段](../r2-two-raw-dns-2026-10-14/replay-summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
 | TH-C02 | https://www.customs.go.th/list_strc_download_with_docno_date.php?ini_content=announce_160426_01&order_by=date&sort_type=0&lang=th | 2026-10-14T08:33:16.386Z / 200 [取证](../r2-next-four-2026-10-14/summary.json) | OK | PASS [字段](../r2-thai-document-replay-2026-10-14/summary.json) | 100条完整原页回放通过；日期是文件日，不是发布日期，时区/发布瞬间未知。 |
-| MY-P02 | https://www.westportsholdings.com/category/press-release/feed/ | 2026-10-13T07:00:27.722Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
+| MY-P02 | https://www.westportsholdings.com/category/press-release/feed/ | 2026-10-13T07:00:27.722Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | STALE | NOT_RUN [字段](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | 三条保存日期为2024-11-08、2025-02-01、2025-08-01，最新仅2025-08-01；200和完整字段不能满足目录2026内容口径。[日期证据](../r2-bounded-rss-after-dns-2026-10-13/MY-P02-metadata.json)，未有更新留证，不重抓。完整原页回放仍NOT_RUN。 |
 | MY-P03 | https://www.northport.com.my/np/page-announcements.html | 2026-10-14T07:16:47.635Z / 200 [取证](../r2-six-public-2026-10-14/summary.json) | PARTIAL | FAIL [字段](../r2-two-raw-dns-2026-10-14/replay-summary.json) | 原页同URL对应冲突标题/日期；首次与重复均失败，写入0，不择优消除冲突。 |
 | MY-W01 | https://api.data.gov.my/weather/warning | 2026-10-10T08:30:40.728Z / 200 [取证](../metmalaysia-integration-2026-10-10/live-evidence.json) | PARTIAL | NOT_RUN | 目录无尾斜杠URL曾301；相关尾斜杠JSON可读，精确产品映射及完整字段回放未合格。 |
 | MY-C01 | https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss | 2026-10-13T07:00:30.791Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |

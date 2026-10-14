@@ -13,8 +13,10 @@
 
 目录盘点使用skill自带 `audit-inventory.sh`。初次Git Bash PATH缺少Unix工具、退出127，原日志保留在 `.tmp/r2-current-matrix-inventory.txt`；修正子进程PATH后同一只读脚本退出0，见[盘点摘要](inventory.txt)。完整2586行枚举留在本地 `.tmp/r2-current-matrix-inventory-final.txt`，摘要记录原日志hash；不把旧克隆路径清单全部复制进新文档。盘点是目录枚举，不是安全审计。Git全局ignore读取权限warning保留，不影响此范围文件diff/显式add；不宣称全项目或历史第三方档案已安全审计。
 
-文档结构验证独立从当前目录表头抽取P1自动行，核对41个ID/原URL、批准分类、110处引用、28个不同证据路径/LF文本hash、逐源selector、原回放结果、分子、默认状态及Markdown本地链接，22项通过。结果见[validation.json](validation.json)。原始网络字节hash不做EOL归一化；这里只给仓库文本引用使用LF摘要，便于Git blob独立核对。
+文档结构验证独立从当前目录表头抽取P1自动行，核对41个ID/原URL、批准分类、111处引用、29个不同证据路径/LF文本hash、逐源selector、原回放结果、分子、默认状态及Markdown本地链接，22项通过。结果见[validation.json](validation.json)。原始网络字节hash不做EOL归一化；这里只给仓库文本引用使用LF摘要，便于Git blob独立核对。
 
 语法和表头抽取的初次文档验证问题已修正，原本地日志/中间记录保留；不是产品或来源新回放失败。首次pnpm包装调用找不到eslint，退出1；直接调用现有安装的Node/eslint后退出0，没有安装依赖。7个JSON按既有lint规则忽略的warning保留，JSON结构/证据由上述独立验证覆盖。git diff --check退出0，Git LF/CRLF提示保留。只运行无自动修改的文档lint和结构/证据验证，不运行install/build/typecheck/full test、源回放、smoke或浏览器。命令、stdout/stderr及实际退出码见[commands.json](commands.json)。未知许可第三方完整HTML未新增到Git，新增元数据敏感值扫描仅覆盖本轮文件，并有合成阳性对照，实际值命中0；不扩称全面安全审计。
 
 未新增架构、Provider、日期规则、迁移、权限或预算，ADR-007/008/009仍适用；不需新ADR。R2总体未通过，XX-W02产品范围、Northport冲突、VN-P01日期、其余未实测/未留原页及连续运行均保留。不合并、部署或清场。PR8仍是临时stack的草稿，分支CI静默不是CI PASS，最终提交/远端核对结果由交审报告提供。
+
+Westports单独文档复审：原保存三条日期最新2025-08-01，不满足目录2026内容口径，R2-4改STALE、累计19/39，距32差13；R2-5 11/34、数值有限诊断3/5不变。未重抓Westports或跑产品门禁，引用日期metadata并更新文档检查预期。

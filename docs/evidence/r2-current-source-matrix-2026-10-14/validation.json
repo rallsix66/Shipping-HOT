@@ -1,6 +1,6 @@
 {
   "type": "docs_only_evidence_validation",
-  "at": "2026-10-14T10:42:56.283437+00:00",
+  "at": "2026-10-14T10:52:03.345773+00:00",
   "codeSha": "355bc861d4020ba22ddd00401de709d7cee497e3",
   "evidenceBaseline": "679400c1970cf270eabe85ec866a52b0bef820b6",
   "command": "python .tmp/validate-current-r2-matrix.py",
@@ -35,8 +35,8 @@
       "check": "All evidence paths exist",
       "pass": true,
       "detail": {
-        "referenceOccurrences": 110,
-        "uniquePaths": 28,
+        "referenceOccurrences": 111,
+        "uniquePaths": 29,
         "missing": []
       }
     },
@@ -69,9 +69,10 @@
       "check": "r2_4 status totals recomputed",
       "pass": true,
       "detail": {
-        "OK": 20,
+        "OK": 19,
         "NOT_RUN": 11,
-        "PARTIAL": 8
+        "PARTIAL": 8,
+        "STALE": 1
       }
     },
     {
@@ -115,6 +116,15 @@
       "detail": [
         "AGENTS.md",
         "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/inventory.txt",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validate-matrix.py.txt",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
         "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.json",
         "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.md",
         "docs/evidence/r2-p1-inventory-2026-10-13/qualification-matrix.md",

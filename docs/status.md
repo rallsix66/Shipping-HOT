@@ -1,6 +1,6 @@
 ## R2 41项来源当前累计证据（2026-10-14，文档汇总待独立审查）
 
-全部41项保留：34资讯/公告、5数值天气、2原定后续阶段。按已批准分类及现有逐源证据，R2-4 **20/39**（最少32，差12；20 OK / 8 PARTIAL / 11 NOT_RUN）；R2-5 **11/34**（11 PASS / 3 FAIL / 1 PARTIAL / 19 NOT_RUN），数值字段另列 **3/5**。不是整体R2 PASS或24小时运行证明。当前唯一累计入口为[逐源报告](evidence/r2-current-source-matrix-2026-10-14/report.md)及[机器矩阵](evidence/r2-current-source-matrix-2026-10-14/mapping.json)；下面各批记录按其发生时点保留为历史，不再单独充当当前总计。
+全部41项保留：34资讯/公告、5数值天气、2原定后续阶段。按已批准分类及现有逐源证据，R2-4 **19/39**（最少32，差13；19 OK / 8 PARTIAL / 1 STALE / 11 NOT_RUN）；R2-5 **11/34**（11 PASS / 3 FAIL / 1 PARTIAL / 19 NOT_RUN），数值字段另列 **3/5**。不是整体R2 PASS或24小时运行证明。Westports MY-P02三条旧日期最新仅2025-08-01，改为STALE且不计OK；未重抓。当前唯一累计入口为[逐源报告](evidence/r2-current-source-matrix-2026-10-14/report.md)及[机器矩阵](evidence/r2-current-source-matrix-2026-10-14/mapping.json)；下面各批记录按其发生时点保留为历史，不再单独充当当前总计。
 
 代码仍355bc861d4020ba22ddd00401de709d7cee497e3，起始证据HEAD679400c1970cf270eabe85ec866a52b0bef820b6。本次没有新抓取、DNS、字段回放或功能门禁。NMC两原页10/11旧Feed可读，10/13实页列表适用性回放零链接/parse_failed，后续没有合格替代证据，故继续PARTIAL/FAIL（暂计22已撤回）；Northport冲突FAIL、VN-P01缺日期PARTIAL保留。字段PASS忠实保留文件日/制定日/day精度，不能说发布瞬间、时区、有效性或港口影响已通过。XX-W02仅forecast有历史诊断，specifications未验证，整行PARTIAL。VNSGN原点缺测和约61.8公里独立参考边界保留。
 
