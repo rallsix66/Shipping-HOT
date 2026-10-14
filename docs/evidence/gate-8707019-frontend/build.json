@@ -1,0 +1,9 @@
+{
+  "name": "build",
+  "command": "pnpm build",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-chain-final2-build",
+  "sha": "8707019a74ac81a698d303d852a40b3c13bed489",
+  "startedAt": "2026-10-14T05:22:02.284Z",
+  "endedAt": "2026-10-14T05:22:27.459Z",
+  "rawExit": 0
+}

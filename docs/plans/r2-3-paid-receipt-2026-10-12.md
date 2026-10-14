@@ -28,6 +28,8 @@
 `paid_receipt`（logical_key UNIQUE）和 `paid_receipt_attempt`（UNIQUE(receipt_id, attempt)），只追加，schema 版本 24。
 
 ## 5. 未覆盖项
+
+> Historical slice-local list. Later Runtime registration and provider-free intel GET are implemented; see current docs/status.md. Other receipt/model/actual-cost boundaries below remain as recorded.
 - 真实 provider 接入：没有实现 llm.ts / chatJson，也没有接入任何调用方；R3 自动抽取未接入。
 - 生产绑定和开关没有变化；registry 接线和 GET 端点仍未完成。
 - 没有 unknown 回执的人工释放接口或 UI（上游的 admin 自动释放也没有移植）。
