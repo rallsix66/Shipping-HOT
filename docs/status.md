@@ -1,5 +1,13 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
+## Existing calendar demo-source adaptation — 2026-10-14
+
+- Code `2b988bca8574247c277b1ed7aabc14525d973515` (initialc6604cc plus unknown layer-count fix). Existing left-country/month/day component and GET reference/promotion/policy services reused; direct scoped demo annual-ref CSS copied. Heading/Today/unopened risk layer adapted; existing multi-country, workday filter, CN-only policy flag and2026–2027 date boundaries retained. No demo dates/risks/preparation windows, new backend/generator/DTO/schema/provider/date/source/paid/production switch.
+- Existing pending/anchor/window status and E-R04/E-R06 gaps retained. Policy fixture/local-zone/localToday and stored confirmation notes disclosed; no re-verification or client date-derived activation. Error responses no longer show cached records/zero counts as success. Loaded empty, loading, missing year, no-country and error remain distinct.
+- Exact clean-SHA fresh-install gate: install/build/typecheck/lint,79targeted,full118files/1115pass/3existing Windows skips,3isolated smokes all exit0. Initialc6604cc gate retained separately. Eight actual-page synthetic SSR cases cover filters/layers/boundaries/empty/error/CN/fixture/timezone but not live event interaction. Actual Neat Freak and raw logs: `docs/evidence/gate-2b988bc-frontend/closeout.md`.
+- New isolated preview `http://127.0.0.1:4486/calendar` PID64764;28loopback HTTP/API/assets checks pass, reference/promotion/policy responses identical to old4485, original3fixture policies retained and read counts unchanged. Bundled reference dates are separate from synthetic cache/policy samples; no new real-date validation or generation. Old previews4477/4482/4483/4484/4485 untouched; credentials/project env absent and Runtime/providers/translation off.
+- **Visual/keyboard/widths/S7 NOT_RUN; parent review pending.** No workaround of browser restriction, no true full calendar/country/R1.5/R2/R5 PASS, no merge/deploy/force-push.
+
 ## Port notice metadata P2 repair — 2026-10-14
 
 - Code `180f919ebdcbf350a23a75d28bd2efbcf5765f67`: existing publication/unknown-time/first-receipt semantics and stale/sourceStatus/persisted lifecycle labels restored on demo port notice cards. received_at never becomes publication; no date-derived expiry/state, backend/DTO/schema/source/weather/reference/rule changes. Four synthetic SSR regression cases; no calendar or new slice.

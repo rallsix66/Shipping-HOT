@@ -1,0 +1,172 @@
+{
+  "sha": "2b988bca8574247c277b1ed7aabc14525d973515",
+  "url": "http://127.0.0.1:4486/calendar",
+  "checks": [
+    {
+      "name": "same GET status /api/shipping/calendar/reference?year=2026",
+      "status": "PASS"
+    },
+    {
+      "name": "existing response unchanged /api/shipping/calendar/reference?year=2026",
+      "status": "PASS"
+    },
+    {
+      "name": "same GET status /api/shipping/calendar/reference?year=2027",
+      "status": "PASS"
+    },
+    {
+      "name": "existing response unchanged /api/shipping/calendar/reference?year=2027",
+      "status": "PASS"
+    },
+    {
+      "name": "same GET status /api/shipping/calendar/promotions?year=2026",
+      "status": "PASS"
+    },
+    {
+      "name": "existing response unchanged /api/shipping/calendar/promotions?year=2026",
+      "status": "PASS"
+    },
+    {
+      "name": "same GET status /api/shipping/calendar/promotions?year=2027",
+      "status": "PASS"
+    },
+    {
+      "name": "existing response unchanged /api/shipping/calendar/promotions?year=2027",
+      "status": "PASS"
+    },
+    {
+      "name": "same GET status /api/shipping/policies?effectiveFrom=2026-01-01&effectiveTo=2026-12-31",
+      "status": "PASS"
+    },
+    {
+      "name": "existing response unchanged /api/shipping/policies?effectiveFrom=2026-01-01&effectiveTo=2026-12-31",
+      "status": "PASS"
+    },
+    {
+      "name": "original3fixture policies retained",
+      "status": "PASS"
+    },
+    {
+      "name": "policy applicable zones retained",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /calendar",
+      "status": "PASS"
+    },
+    {
+      "name": "asset /assets/index-ETBbUe5W.js",
+      "status": "PASS"
+    },
+    {
+      "name": "asset /assets/index-BnKYeCpx.css",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /ports",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /policies",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /feed",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /events",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /settings",
+      "status": "PASS"
+    },
+    {
+      "name": "Runtime off",
+      "status": "PASS"
+    },
+    {
+      "name": "calendar/promo/policy/usage/receipt/run reads do not write",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4477",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4482",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4483",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4484",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4485",
+      "status": "PASS"
+    }
+  ],
+  "observations": [
+    {
+      "path": "/api/shipping/calendar/reference?year=2026",
+      "datasets": 5,
+      "availableYears": [
+        2026,
+        2027
+      ]
+    },
+    {
+      "path": "/api/shipping/calendar/reference?year=2027",
+      "datasets": 0,
+      "availableYears": [
+        2026,
+        2027
+      ]
+    },
+    {
+      "path": "/api/shipping/calendar/promotions?year=2026",
+      "events": 0
+    },
+    {
+      "path": "/api/shipping/calendar/promotions?year=2027",
+      "events": 0
+    },
+    {
+      "path": "/api/shipping/policies?effectiveFrom=2026-01-01&effectiveTo=2026-12-31",
+      "records": 3
+    }
+  ],
+  "summary": {
+    "passed": 28,
+    "failed": 0
+  },
+  "countsBefore": {
+    "calendar_events": 0,
+    "ops_calendar_event": 0,
+    "policy_record": 3,
+    "policy_version": 4,
+    "provider_usage": 0,
+    "paid_receipt": 0,
+    "sync_runs": 0
+  },
+  "countsAfter": {
+    "calendar_events": 0,
+    "ops_calendar_event": 0,
+    "policy_record": 3,
+    "policy_version": 4,
+    "provider_usage": 0,
+    "paid_receipt": 0,
+    "sync_runs": 0
+  },
+  "browser": "NOT_RUN",
+  "scope": "loopback API/static resources and unchanged stored/annual reference responses only; not DOM toggling or real source/date validation"
+}
