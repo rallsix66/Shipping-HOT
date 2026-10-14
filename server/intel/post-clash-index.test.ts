@@ -19,6 +19,7 @@ const offline = (body: string) => ({ lookup: async () => [{ address: "93.184.216
 it("explicit Indonesian enacted-date grammar is Gregorian day evidence, not a publication instant", () => {
   expect(parseLooseDate("Ditetapkan 30 September 2026", id.webList!)).toMatchObject({ raw: "Ditetapkan 30 September 2026", localDate: "2026-09-30", rule: "configured_indonesian_enactment_date", calendar: "gregorian", precision: "day", timezone: "missing", utcOffset: null, publishedAt: null })
   expect(parseLooseDate("Ditetapkan 29 Februari 2000", id.webList!).localDate).toBe("2000-02-29")
+  expect(parseLooseDate("Ditetapkan 14 October 2026", id.webList!)).toMatchObject({ localDate: "2026-10-14", precision: "day", timezone: "missing", publishedAt: null })
   expect(parseLooseDate("Ditetapkan 30 September 2026", { ...id.webList!, dateFormat: undefined }).localDate).toBeNull()
   expect(() => assertSupportedConfig({ ...id.webList!, calendar: "buddhist" })).toThrow("Gregorian")
 })

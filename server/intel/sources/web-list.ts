@@ -44,10 +44,11 @@ export function parseLooseDate(value: string | null | undefined, config: Pick<We
   let y: number, mo: number, d: number, tail: string
   if (config.dateFormat === "indonesian_enactment_date") {
     const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
-    const enacted = /^Ditetapkan\s+(\d{1,2})\s+(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember)\s+(\d{4})$/.exec(v)
+    // This index also renders the explicit English "October" token; no locale fallback.
+    const enacted = /^Ditetapkan\s+(\d{1,2})\s+(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|October|November|Desember)\s+(\d{4})$/.exec(v)
     if (!enacted || result.calendar !== "gregorian") return { ...result, rule: "unsupported_format" }
     y = +enacted[3]
-    mo = months.indexOf(enacted[2]) + 1
+    mo = months.indexOf(enacted[2] === "October" ? "Oktober" : enacted[2]) + 1
     d = +enacted[1]
     tail = ""
     result.rule = "configured_indonesian_enactment_date"

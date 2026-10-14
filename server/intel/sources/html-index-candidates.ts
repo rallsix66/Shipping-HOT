@@ -202,7 +202,7 @@ export const htmlIndexCandidates: readonly IntelSourceSeed[] = [
       calendar: "gregorian",
       dateFormat: "indonesian_enactment_date",
       allowUrlPrefixes: ["https://jdih.kemendag.go.id/peraturan"],
-      dateRuleBasis: "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY. Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded.",
+      dateRuleBasis: "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded.",
     },
   },
 ]
