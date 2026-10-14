@@ -1,0 +1,23 @@
+{
+  "kind": "sanitized evidence archive bytes separate from private fetched page hashes",
+  "sha256": {
+    "CN-P01-adapter.json": "3de0c702ec52f8ef2ee0adaadf54b1cc1afe56291a1d52aaf0c562342f8b63eb",
+    "CN-P01-first.json": "6ab1cc06fbc37d7ff00918f810e7d1d909638f7865906a726f8734bc07fac8f6",
+    "CN-P01-repeat.json": "d19f49a662e969657597ee1a6870746dd845f120596bf2e814b96af99fe4a74c",
+    "CN-P01-result.json": "fb92569bc3a6194ffff8760b17e081358a96711aaacd8e6e6e669555e4e63fa7",
+    "CN-T02-adapter.json": "8aa8b380bde94759ef17cf0fa0a8f24088dc29bf22b312f612b709805cfe94eb",
+    "CN-T02-first.json": "920b9b9589764495f95ab3e40ee7ff8cb145d8ed8b5c37e58c04d323f8db8aab",
+    "CN-T02-repeat.json": "ce61b212d971717123fca83702a2da1b91c3abfb6bc8a5074eb7b613b6878d83",
+    "CN-T02-result.json": "a4dfa29451dc96a4d41635b4903321e741d9910d0f0fdc8ea903bf693e162627",
+    "cn-vn-full-raw-field-inspection.json": "8200ba80223b1b56bc63b031ff214cb6590b4f5622cf1861f35717f6a771c4eb",
+    "command.json": "85c08f184feebe39f57ae3f86210038c1c6846123c7f05af361d78c22d17db0a",
+    "neat-inventory.json": "613758238cc131b058c4bd39ce888c1b5994ab779d99aaf2c18186b6271a4ae0",
+    "partial-results.json": "5e6bdfa79b0892ba85f9e43358b70a95428fe146427da6a35c896497b33a29c8",
+    "PH-C01-adapter.json": "5436a2928983491b47c12bc31bf57b69fb57214da03420bb8e2bb236b30b4847",
+    "PH-C01-first.json": "8208b379825bee0779ab9f646dee3ee21cdc19e8abb574937cf0e92ebf53b09d",
+    "PH-C01-repeat.json": "b5975665d2325d07b983899e21c42db91a5b7d10fd5967df6a73d2b33e75cb84",
+    "PH-C01-result.json": "314b2806b5eab6a664d26d41f1a599a27623f1b17a2b0d412c58319da5f98d9d",
+    "sensitive-scan.json": "e4c16b731a7216bceff5b6f02bacde7822218a21627834ad9120f47f29ac3236",
+    "summary.json": "7ec812e5e76152ab4e9de93b57f2417f12caf43b252a701608480d7b985c8881"
+  }
+}

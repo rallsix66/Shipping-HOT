@@ -1,0 +1,9 @@
+{
+  "name": "install",
+  "command": "pnpm install --frozen-lockfile",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\public-index-final-build",
+  "sha": "ca654122bcad240f090d0e675071a5e208237e8e",
+  "startedAt": "2026-10-14T08:17:17.418Z",
+  "endedAt": "2026-10-14T08:17:26.643Z",
+  "rawExit": 0
+}

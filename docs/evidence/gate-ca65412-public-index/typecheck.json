@@ -1,0 +1,9 @@
+{
+  "name": "typecheck",
+  "command": "pnpm typecheck",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\public-index-final-build",
+  "sha": "ca654122bcad240f090d0e675071a5e208237e8e",
+  "startedAt": "2026-10-14T08:17:45.171Z",
+  "endedAt": "2026-10-14T08:17:53.680Z",
+  "rawExit": 0
+}

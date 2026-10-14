@@ -1,3 +1,9 @@
+## R2 三源默认关闭适配与完整原字节回放（2026-10-14）
+
+代码ca654122bcad240f090d0e675071a5e208237e8e：CN-T02政策10条、PH-C01真实标题card11条、CN-P01真正“通知公告”tab8条加入现有HTML候选配置，全部enabled=false/persistence=disallowed，不加入active registry，production仍仅原TMD/BMKG允许。PH只取h3标题link，Read more排除；新增显式Gregorian完整英文月份day规则，无宽松Date.parse/时间推断，重复URL冲突仍fail-closed。三份完整本地原字节→现collector/隔离SQLite→重复0新0修订→只读重开全部title/URL/dateEvidence核对0差异，day precision、未知时区/publishedAtnull。VN-P01全表10行日期缺失，unknown/缺字段、不详情。本轮sourceHTTP0/DNS0，未知原页许可仍只本地，不把骨架称raw。
+
+精确代码SHA新克隆install/build/typecheck/lint、151定向、1178全量/3既有跳过、3smoke全rawexit0，保留DB/secret-file哈希不变。限三原页离线回放通过，整体R2/39≥32与全源100%仍未通过，Northport真实冲突FAIL保留；生产/24h/付费/GUI/S7未运行。[真实回放与合成边界](evidence/r2-public-index-replay-2026-10-14/report.md)，[门禁原始日志](evidence/gate-ca65412-public-index/summary.json)。
+
 ## R2 DNS 修复后四源独立只读核查（2026-10-14）
 
 已批准四域Clash精确例外经用户重新应用，生成filter14项（原10+新4）；只读系统DNS均公网。随后目录原URL四源各GET1，07:56本批HTTP4，均200且原字节即时本地留证，既有安全DNS/TLS/SSRF未弱化，无重试/redirect/detail。CN-P01需区分要闻样本与通告栏目；CN-T02已有同li标题/link/日期观察；VN-P01真实table标题/link存在但日期样本缺口保留；PH-C01本地容器英文日期/标题/同目标双链接已留证。四源均PARTIAL、新增PASS0、完整adapter/SQLite回放未跑；39≥32未达标。上一HTTP0/DNS198.18批为历史，不称当前阻塞。[独立四源证据与最小下一步](evidence/r2-four-after-clash-2026-10-14/report.md)。产品/目录/阈值/网络设置本批未改；Northport/Thai不重抓，生产/24h/付费未启用。

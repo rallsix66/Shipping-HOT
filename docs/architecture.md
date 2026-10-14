@@ -1,3 +1,5 @@
+> R2 HTML候选配置增量（2026-10-14）：MOF税政、PH海关标题card、广东真正通告tab默认关闭且仅metadata，不加入active registry；沿用fromHtml/安全fetch/原SQLite。PH显式english_month_name全串Gregorian day规则，时区未知、不构造instant、不宽松Date.parse；Read more不作为标题项，同URL冲突规则不放宽。生产启用边界未扩大，未知原页完整HTML仍仅本地取证。状态与限度见docs/status.md。
+
 # Architecture — Shipping HOT
 
 - **R2 default-off intel production entry (2026-10-14):** Nitro plugin -> productionIntelOptions -> existing bootstrap/registry/BackgroundRuntime. Explicit switch/source selection restricted to existingTH-W01/ID-W01, real secure transport/DNS and DB-file ownership dependencies, no another scheduler. Daily upstream output-based polling formula runs inside existing collector with initial-import/manual exclusion; next_sync_at carries the target, no migration. File lease held until drain/end, no stale auto-unlink; default-off entry never starts intel collection. Source mapping/batch/24h activation remain separately unapproved. Details and precise adaptation in docs/status.md.
