@@ -1,0 +1,85 @@
+{
+  "sha": "c3e08408623c69a3a071d761ed0300659644bd68",
+  "checks": [
+    {
+      "name": "original isolated policy samples retained",
+      "status": "PASS"
+    },
+    {
+      "name": "all3 original policy fixtures retained",
+      "status": "PASS"
+    },
+    {
+      "name": "detail policy:86705caf-3a1d-455e-9c22-aafba4504230",
+      "status": "PASS"
+    },
+    {
+      "name": "detail policy:2d5b0ff6-9ceb-448b-9ad4-8ca12f8b089c",
+      "status": "PASS"
+    },
+    {
+      "name": "old and current versions retained",
+      "status": "PASS"
+    },
+    {
+      "name": "detail policy:0e6cd27b-0de1-4116-980b-fc4525ce7470",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /",
+      "status": "PASS"
+    },
+    {
+      "name": "asset /assets/index-CwobZYbH.js",
+      "status": "PASS"
+    },
+    {
+      "name": "asset /assets/index-BUEP8Dny.css",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /policies",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /ports",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /feed",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /events",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /calendar",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /settings",
+      "status": "PASS"
+    },
+    {
+      "name": "Runtime remains off",
+      "status": "PASS"
+    },
+    {
+      "name": "original preview 4477 retained",
+      "status": "PASS"
+    },
+    {
+      "name": "original preview 4482 retained",
+      "status": "PASS"
+    }
+  ],
+  "summary": {
+    "passed": 18,
+    "failed": 0
+  },
+  "url": "http://127.0.0.1:4483/",
+  "scope": "HTTP and unchanged synthetic policy sample checks only; not DOM or visual acceptance",
+  "browser": "NOT_RUN",
+  "data": "copied original4482 isolated fixture DB, no upstream or new sample acquisition"
+}

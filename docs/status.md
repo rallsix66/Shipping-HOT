@@ -1,6 +1,14 @@
 # Project Status — Shipping HOT / NewsNow Foundation
 
-## Demo-source frontend / manual policy slice — 2026-10-14
+## Demo overview correction / same-round review repairs — 2026-10-14
+
+- User screenshot comparison showed the previous default homepage was still legacy HOT, and navigation had duplicate home/event entries. Earlier shell/policy adaptation did not meet the requested overall demo structure. Code `c3e08408623c69a3a071d761ed0300659644bd68` now mounts the actual demo country-overview framework at `/`: six ordered country cards, judgement/status legend, banner and attention panel. Single navigation preserves seven routes. Risk fields explicitly unevaluated/unopened; no fake severity/count/delay/AI output. Original reference hash unchanged; legacy HotPage unmounted.
+- Parent review repairs: original motion preference hook/storage/html class and MotionConfig/native switch restored; real policy published/effective CSS mappings fixed;<=1280px policy panels stack and row/status content wraps. Mid-width overflow was a static risk, not reproduced visual evidence. Policy APIs/schema/timezones/fixtures/business rules and backend stage gates unchanged.
+- Fresh exact-SHA frozen-install gate: install/build/typecheck/lint,46 targeted, full116files/1096pass/3existing Windows skips and3isolated smokes all exit0. Actual Neat Freak and raw evidence: `docs/evidence/gate-c3e0840-frontend/closeout.md`.
+- New preview `http://127.0.0.1:4483/` (PID15768),18loopback HTTP/API/resource checks pass. Copied4482 isolated DB preserving original3policy fixtures and versions; disclosed fixed test clock, no credentials/project env, Runtime/providers/translation off.4477 and4482 unchanged.
+- **Browser/pixel/real keyboard/mobile/S7 NOT_RUN; full UI acceptance pending.** Executor did not independently view the two user attachments; used parent's reported screenshot observations and original HTML. No workaround of rejected browser path. Country framework open does not imply R4/R5 risk aggregation or R2/source qualification PASS. DraftPR8 review pending; no merge/deploy/force-push.
+
+## Historical first demo-source frontend / manual policy slice — 2026-10-14 (superseded homepage/navigation)
 
 - User requested frontend/backend parallel progress: frontend adapts the selected demo source; backend remains on the2026-09-29 plan, modules open according to actual capabilities. Code `3fb3ad3dd0d6435c7d36376c579de238b6ecfa3c` (initial7666890 plus cached-read-error repair), draftPR8 stacked on R1.5.
 - Reused demo palette/sidebar/mobile nav/filter tabs/policy list/detail CSS and structure; reference SHA256 `23d6efbb343182eba93caa74a4b1ca1657bab25f414fb873d9c448efe98b51b7` unchanged. Seven existing pages remain reachable. Country overview, independent weather and merged risk-event modules unopened; manual policies use existing APIs/validation/timezones/fixture and version semantics. No hardcoded demo counts/AI output, new backend/schema/dependency/source activation or paid work.
