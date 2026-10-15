@@ -1,0 +1,117 @@
+{
+  "baselineHead": "16ae7b7c1f2e149caeceea0c727d7dba788d272c",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "files": [
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+      "committedTextLfSha256": "e2de5c67bd9ea6fe87887ad8d5604617a5a8adc1967ba350b380c2e9697f20ca"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+      "committedTextLfSha256": "7497e673764a78abc8c673080319a67e3ed4a41dd3defeabc92a56ee50870e3b"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+      "committedTextLfSha256": "38005f0292995315753c5435588797f924702ea36cc7ae50c254fc84ea8a2fdc"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+      "committedTextLfSha256": "79e65acc3dd75bb24737c270acea07a3e4003ef1ebcd2fc774671470a7b21bf3"
+    },
+    {
+      "path": "docs/evidence/r2-two-media-2026-10-15/availability-frontier.md",
+      "committedTextLfSha256": "9eb0ddccb66b9b515a3621ce57d517ded9dca993883fcb11f6149c6175a644bd"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/bmkg-cap.test.ts-egress.json",
+      "committedTextLfSha256": "2969e3fb4359b55244b70e5dbdea39e788f1375b1a6d14d88d8df694c9d851c4"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/catalogue-change.json",
+      "committedTextLfSha256": "48f572bf8f8df19af6f37da21c8c424bf40b9d747846c3e6998cfe7f1fc9051f"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/closeout.md",
+      "committedTextLfSha256": "19a4185b357a1d6d276ff68c3cc08a6231be050e8fb8db5d09b527a4763d5357"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/doc-lint-runner.cjs.txt",
+      "committedTextLfSha256": "b6b96531ef96b1cdc2ab1b5cd42df4bce6f6e023626db51cde417cad5f764ace"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/doc-lint.json",
+      "committedTextLfSha256": "0397eeb2ae2671e6ef3bb2ee2652a5c30be10e85c8fdc02cb4b70645ed123a0b"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/matrix-delta.json",
+      "committedTextLfSha256": "3032e62d60fe979bcb314a8c5bf0232473c43b5850e8c86bcb2159d68b516f94"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/nchmf-warning.test.ts-egress.json",
+      "committedTextLfSha256": "2969e3fb4359b55244b70e5dbdea39e788f1375b1a6d14d88d8df694c9d851c4"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/nmc-warning.test.ts-egress.json",
+      "committedTextLfSha256": "2969e3fb4359b55244b70e5dbdea39e788f1375b1a6d14d88d8df694c9d851c4"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/offline-command.json",
+      "committedTextLfSha256": "3ffcada622db81b0235e8219ade81e532aed2be06d16dfe746a0f29bc96a5472"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/offline-config.ts.txt",
+      "committedTextLfSha256": "a62262de1b588e1cc17ce7e0cd16a8a7dd6cf992d0ff472b2b8d4597032479ed"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/offline-guard.ts.txt",
+      "committedTextLfSha256": "d101da3d318d0deaffff335b3c9205c9ad8dab01e23ce97c7ebf292b8bf96ee5"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/offline-runner.cjs.txt",
+      "committedTextLfSha256": "e90cce6917a24e0450e2c7c514db29fcc4f98f4a32354eb79b3bbde8f60d45cf"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/report.md",
+      "committedTextLfSha256": "ca5508906125e3745ba5b567d86d7548804fae6b1675d753bbef6ce5d8a8d61d"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/source-proof.json",
+      "committedTextLfSha256": "bfca44069d7a42bc0b8d3107575a1e106a09ec843c31d48aa76a528c2f93fcb7"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/tmd-cap.test.ts-egress.json",
+      "committedTextLfSha256": "2969e3fb4359b55244b70e5dbdea39e788f1375b1a6d14d88d8df694c9d851c4"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/validation-procedure.cjs.txt",
+      "committedTextLfSha256": "be90b6bc045d9be9833846d49e6514446235a6368f5f7328b0a30484f72b2dc4"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/validation.first.json",
+      "committedTextLfSha256": "4db0c90ebd94baa71ce23665d240b572baf3f25861403ccae3f5df248bf32df0"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/validation.json",
+      "committedTextLfSha256": "79e65acc3dd75bb24737c270acea07a3e4003ef1ebcd2fc774671470a7b21bf3"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/weather-review.json",
+      "committedTextLfSha256": "d608b64119b1b0cb6dcc14c769aa6ec0aeba3548afbd705b3d432f5aa9d2c99c"
+    },
+    {
+      "path": "docs/handoffs/r2-next-execution-2026-10-15.md",
+      "committedTextLfSha256": "32f6a3edff6d5f4f75862bb2223ac7525257778e173304fb005f723259048445"
+    },
+    {
+      "path": "docs/intel-source-catalog.md",
+      "committedTextLfSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593"
+    },
+    {
+      "path": "docs/status.md",
+      "committedTextLfSha256": "199f23f502135643558abec454c47aded627053fe16d453da98faed62bd24069"
+    }
+  ],
+  "sourceRequests": 0,
+  "systemDns": 0,
+  "productGate": "NOT_RUN_no_product_change"
+}

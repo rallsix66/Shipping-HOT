@@ -1,10 +1,10 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T04:43:34.036Z",
+  "generatedAt": "2026-10-15T04:52:59.415Z",
   "reviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "evidenceHead": "f5ffcda5629343456bd74ee0264c6e7c02dc448a",
+  "evidenceHead": "16ae7b7c1f2e149caeceea0c727d7dba788d272c",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
-  "catalogSha256": "40979ae016c197075b1950b68f88c78d48b976820deaaadaace1ddd35c6abf3d",
+  "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
   "approval": {
     "messageId": "Sentinel_81b542f9f60c8191a2b32b4cc8018c61",
@@ -30,15 +30,16 @@
     "r2_4": "Genuine expected product response and usable real parsing/normalization/field verification; mere200 shells, unresolved conflicts, unverified URL/products are partial. Count latest stored measured availability, not current uptime. Default-off is independent.",
     "r2_5": "Complete stored real-page title/link/actual source-time fields replay; day precision and honest document/enactment role remain explicit, never relabelled publication. Live parse without retained full real replay is not pass. Numeric products excluded.",
     "freshness": "Dates are per-capture proof. An accessible feed whose latest saved item predates the catalogue 2026 content criterion remains STALE, not OK. No new liveness/current continuous run claimed; catalogue labels alone do not prove availability.",
-    "utc": "Unknown zones/instants stay unknown/null. Older NCHMF configured+07 is not source declaration/independent UTC certification."
+    "utc": "Unknown zones/instants stay unknown/null. Older NCHMF configured+07 is not source declaration/independent UTC certification.",
+    "weatherReuse": "Approved existing weather provider/storage chain is reusable under original R2-4/5. Complete recorded response text is valid recorded material; individual article URLs, known UTC, intel-table materialization or wire-byte hash are not additional hard gates. Preserve lifecycle/partial-failure/positive-sample limits and separately approved numeric partition."
   },
   "measuredCoverage": {
     "r2_4": {
-      "numerator": 21,
+      "numerator": 22,
       "denominator": 39,
-      "ratio": 0.5384615384615384,
+      "ratio": 0.5641025641025641,
       "minimumOK": 32,
-      "shortfall": 11,
+      "shortfall": 10,
       "ids": [
         "CN-P01",
         "CN-T02",
@@ -49,6 +50,7 @@
         "TH-W01",
         "TH-C01",
         "TH-C02",
+        "MY-W01",
         "MY-C01",
         "MY-T01",
         "ID-W01",
@@ -63,8 +65,8 @@
         "XX-A02"
       ],
       "statusCounts": {
-        "OK": 21,
-        "PARTIAL": 11,
+        "OK": 22,
+        "PARTIAL": 10,
         "NOT_RUN": 5,
         "STALE": 1,
         "BLOCKED": 1
@@ -72,10 +74,10 @@
       "pass": false
     },
     "r2_5": {
-      "numerator": 18,
+      "numerator": 19,
       "denominator": 34,
-      "ratio": 0.5294117647058824,
-      "remaining": 16,
+      "ratio": 0.5588235294117647,
+      "remaining": 15,
       "ids": [
         "CN-P01",
         "CN-T02",
@@ -86,6 +88,7 @@
         "TH-W01",
         "TH-C01",
         "TH-C02",
+        "MY-W01",
         "MY-C01",
         "MY-T01",
         "ID-W01",
@@ -97,8 +100,8 @@
         "XX-M03"
       ],
       "statusCounts": {
-        "PASS": 18,
-        "NOT_RUN": 11,
+        "PASS": 19,
+        "NOT_RUN": 10,
         "FAIL": 4,
         "PARTIAL": 1
       },
@@ -1997,11 +2000,11 @@
     {
       "id": "MY-W01",
       "priority": "P1",
-      "catalogUrlText": "https://api.data.gov.my/weather/warning",
+      "catalogUrlText": "https://api.data.gov.my/weather/warning/",
       "catalogUrls": [
-        "https://api.data.gov.my/weather/warning"
+        "https://api.data.gov.my/weather/warning/"
       ],
-      "exactProductUrl": "https://api.data.gov.my/weather/warning",
+      "exactProductUrl": "https://api.data.gov.my/weather/warning/",
       "catalogUnresolvedFragments": [],
       "classification": "information_notice",
       "legacyGroup": "DUAL",
@@ -2039,7 +2042,7 @@
         "capturedAtHead": "eab30a761ddf25907ee884134eda3a5e79c048a1"
       },
       "fieldReplayEvidence": {
-        "status": "PASS_EXISTING_FEED_CHAIN_NOT_R2_INTEL_QUALIFIED",
+        "status": "PASS_EXISTING_APPROVED_WEATHER_FEED_CHAIN",
         "evidence": {
           "path": "docs/evidence/r2-my-w01-contract-2026-10-15/feed-replay.json",
           "selector": null,
@@ -2067,7 +2070,10 @@
         "realRows": 4,
         "sourceContractReused": true,
         "originalWireByteHashVerified": false,
-        "coverageUnchanged": true
+        "coverageUnchanged": false,
+        "qualificationBasis": "Complete recorded0830 response text -> existing weather provider/Feed4rows -> restart/repeat/query_only field replay; approved reuse of R1.5 weather tables",
+        "wireHashNotAnAcceptancePrerequisite": true,
+        "intelMaterializationNotRequired": true
       },
       "numericFieldValidation": null,
       "dateEvidence": {
@@ -2088,27 +2094,31 @@
         "sourceConfig": "not_configured",
         "declaredSeedEnabled": null,
         "effectiveDefaultIntelJobEnabled": false,
-        "currentUserPersistedSettings": "not_inspected"
+        "currentUserPersistedSettings": "not_inspected",
+        "qualificationUsesExistingWeatherProvider": true,
+        "weatherProviderEnabled": false,
+        "weatherProviderLiveStatus": "experimental",
+        "genericIntelSeedConfigured": false
       },
       "r2_4": {
-        "verdict": "PARTIAL",
-        "countedOK": false,
-        "reason": "Existing approved related Feed product/parser/storage and response-text replay verified; exact catalogue/ R2 intel bridge and acceptance mapping remain unresolved. Not a claim of missing parser/identity."
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "User-reviewed historical actual0830/200 response and existing approved weather provider/Feed storage chain; sample2026-10-10, not current liveness/24h."
       },
       "r2_5": {
-        "verdict": "NOT_RUN",
-        "countedPass": false,
-        "reason": "Existing Feed chain passes under approved source semantics; R2 intel qualification/mapping not changed this evidence-only round."
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "User-reviewed4real recorded-response-text fields through existing weather provider/Feed storage and readonly replay; no separate article URL, known UTC, intel table or wire-hash gate in R2-5."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Existing approved Feed parser/identity/storage chain is implemented and replayed, not absent or awaiting a new source identity contract.",
-        "R2 collector/immutable version storage and production source selection not wired; current generic JSON URL mapping and source+canonical_url uniqueness cannot directly preserve four approved shared-URL identities.",
-        "Catalogue no-slash versus approved Feed pinned-slash URL retained unchanged; acceptance/bridge differences listed for review, no automatic R2-4 or R2-5 upgrade.",
-        "Complete0830 response text and origin recorded; original wire-byte hash not certified; do not confuse separate0754/0830 runs or presuppose refetch."
+        "Sampling remains2026-10-10T08:30:40.728Z; no new upstream call, present-day liveness or24h verification.",
+        "Source timezone/validity remain unknown; publishedAt is first received with received_at, never source UTC instant; zero ports or inferred impacts.",
+        "Optional future intel materialization is an implementation choice, not a R2-4/5 hard requirement; production flags/seeds unchanged.",
+        "Historical harness stored complete response.text(); original wire bytes/hash not certified and not an extra R2-4/5 gate."
       ],
       "historicalSuperseded": [],
       "historicalMyW01AssessmentBeforeContractReuse": {
@@ -2154,6 +2164,75 @@
           "sha256": "8f8758762c2a338525bf4a3474a7753f1d6128e862278d136e3f4f5518520389",
           "hashBasis": "committed_text_LF"
         }
+      },
+      "historicalBeforeApprovedWeatherReuse": {
+        "catalogUrlText": "https://api.data.gov.my/weather/warning",
+        "catalogUrls": [
+          "https://api.data.gov.my/weather/warning"
+        ],
+        "exactProductUrl": "https://api.data.gov.my/weather/warning",
+        "r2_4": {
+          "verdict": "PARTIAL",
+          "countedOK": false,
+          "reason": "Existing approved related Feed product/parser/storage and response-text replay verified; exact catalogue/ R2 intel bridge and acceptance mapping remain unresolved. Not a claim of missing parser/identity."
+        },
+        "r2_5": {
+          "verdict": "NOT_RUN",
+          "countedPass": false,
+          "reason": "Existing Feed chain passes under approved source semantics; R2 intel qualification/mapping not changed this evidence-only round."
+        },
+        "fieldReplayEvidence": {
+          "status": "PASS_EXISTING_FEED_CHAIN_NOT_R2_INTEL_QUALIFIED",
+          "evidence": {
+            "path": "docs/evidence/r2-my-w01-contract-2026-10-15/feed-replay.json",
+            "selector": null,
+            "sha256": "8f8758762c2a338525bf4a3474a7753f1d6128e862278d136e3f4f5518520389",
+            "hashBasis": "committed_text_LF"
+          },
+          "provenanceCorrection": {
+            "path": "docs/evidence/r2-my-w01-contract-2026-10-15/provenance-correction.json",
+            "selector": null,
+            "sha256": "c82cd87a6c274d7abe8d5123fe083c4d472879344b631dea92c88a9a9653b508",
+            "hashBasis": "committed_text_LF"
+          },
+          "intelCompatibility": {
+            "path": "docs/evidence/r2-my-w01-contract-2026-10-15/intel-compatibility.json",
+            "selector": null,
+            "sha256": "45664f44e46b241a11518a00ba85ed49272475de383ab8a807a0598f9448adce",
+            "hashBasis": "committed_text_LF"
+          },
+          "procedure": {
+            "path": "docs/evidence/r2-my-w01-contract-2026-10-15/procedure.test.ts.txt",
+            "selector": null,
+            "sha256": "1e3f908bda8b8e557b95397784b50c1ac4c5f8aadbb422a369fc896985ed24a0",
+            "hashBasis": "committed_text_LF"
+          },
+          "realRows": 4,
+          "sourceContractReused": true,
+          "originalWireByteHashVerified": false,
+          "coverageUnchanged": true
+        },
+        "gaps": [
+          "Existing approved Feed parser/identity/storage chain is implemented and replayed, not absent or awaiting a new source identity contract.",
+          "R2 collector/immutable version storage and production source selection not wired; current generic JSON URL mapping and source+canonical_url uniqueness cannot directly preserve four approved shared-URL identities.",
+          "Catalogue no-slash versus approved Feed pinned-slash URL retained unchanged; acceptance/bridge differences listed for review, no automatic R2-4 or R2-5 upgrade.",
+          "Complete0830 response text and origin recorded; original wire-byte hash not certified; do not confuse separate0754/0830 runs or presuppose refetch."
+        ],
+        "defaultState": {
+          "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+          "sourceConfig": "not_configured",
+          "declaredSeedEnabled": null,
+          "effectiveDefaultIntelJobEnabled": false,
+          "currentUserPersistedSettings": "not_inspected"
+        }
+      },
+      "approvedAcceptanceMapping": {
+        "approvedAt": "2026-10-15",
+        "basis": "9.29 plan R2-4/5 plus R1.5 weather-table reuse; explicit user delegation",
+        "historicalSample": "2026-10-10T08:30:40.728Z",
+        "realRows": 4,
+        "noNewNetwork": true,
+        "noKnownUtcOrIndividualArticleUrlOrIntelTableRequired": true
       }
     },
     {
@@ -5360,5 +5439,28 @@
     "systemDns": 0,
     "productCodeChanged": false,
     "acceptanceOrCatalogueChanged": false
+  },
+  "lastWeatherReuseReview": {
+    "evidence": {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/report.md",
+      "selector": null,
+      "sha256": "ca5508906125e3745ba5b567d86d7548804fae6b1675d753bbef6ce5d8a8d61d",
+      "hashBasis": "committed_text_LF"
+    },
+    "sourceReview": {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/weather-review.json",
+      "selector": null,
+      "sha256": "d608b64119b1b0cb6dcc14c769aa6ec0aeba3548afbd705b3d432f5aa9d2c99c",
+      "hashBasis": "committed_text_LF"
+    },
+    "approvedCatalogue": {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/catalogue-change.json",
+      "selector": null,
+      "sha256": "48f572bf8f8df19af6f37da21c8c424bf40b9d747846c3e6998cfe7f1fc9051f",
+      "hashBasis": "committed_text_LF"
+    },
+    "qualificationAppliedOnlyTo": "MY-W01",
+    "sourceRequests": 0,
+    "systemDns": 0
   }
 }

@@ -102,7 +102,7 @@
 | MY-P04 | B | 丹戎帕拉帕斯港 PTP | https://www.ptp.com.my/announcements | web_list | en | PARTIAL | P3 | |
 | MY-P05 | B | 槟城港 | https://www.penangport.com.my/Media-Center/Announcements | web_list | en | OK | P3 | |
 | MY-P06 | A | 海事局 JLM | https://www.marine.gov.my/feed/ ；航运通告页 https://www.marine.gov.my/b-notis-perkapalan-malaysia/ | rss + web_list | ms | OK / PARTIAL | P2 | |
-| MY-W01 | A | 马来西亚气象局（经 data.gov.my） | https://api.data.gov.my/weather/warning | json_list | en/ms | OK (30/09/2026) | P1 | 开放 API，带 valid_from 和 valid_to 字段 |
+| MY-W01 | A | 马来西亚气象局（经 data.gov.my） | https://api.data.gov.my/weather/warning/ | json_list | en/ms | OK (30/09/2026) | P1 | 开放 API，带 valid_from 和 valid_to 字段 |
 | MY-W02 | A | 洪水信息门户 | https://publicinfobanjir.water.gov.my/ | manual | ms/en | PARTIAL (JS) | P2 | |
 | MY-C01 | A | 皇家关税局 JKDM 公告 | https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss | rss | ms | OK (28/09/2026) | P1 | 媒体报道 feed：`/ms/arkib/liputan-media?format=feed&type=rss` |
 | MY-T01 | A | 财政部 新闻稿 | https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss | rss | ms | OK (29/09/2026) | P1 | 低价值商品税为 10%（≤ RM500）。2027 年预算案将于 2026 年 10 月公布 |
