@@ -1,0 +1,8 @@
+const fs=require('node:fs'), cp=require('node:child_process');
+const dir='docs/evidence/r2-two-media-2026-10-15';fs.mkdirSync(dir,{recursive:true});
+const startedAt=new Date().toISOString();
+const args=['exec','vitest','run','-c','.tmp/r2-two-media-capture-20261015.config.ts'];
+const out=cp.spawnSync('pnpm.cmd',args,{shell:true,env:{...process.env,SHIPPING_APPROVED_TWO_MEDIA:'1'},encoding:'utf8',timeout:90000});
+fs.writeFileSync(dir+'/capture.stdout.log',out.stdout??'');fs.writeFileSync(dir+'/capture.stderr.log',out.stderr??'');
+fs.writeFileSync(dir+'/capture-command.json',JSON.stringify({command:'pnpm '+args.join(' '),startedAt,finishedAt:new Date().toISOString(),rawExit:out.status,signal:out.signal,error:out.error?{code:out.error.code,message:out.error.message}:null},null,2)+'\n');
+console.log(JSON.stringify({rawExit:out.status,summary:fs.existsSync(dir+'/capture-summary.json')?JSON.parse(fs.readFileSync(dir+'/capture-summary.json','utf8')):null},null,2));process.exitCode=out.status??1;

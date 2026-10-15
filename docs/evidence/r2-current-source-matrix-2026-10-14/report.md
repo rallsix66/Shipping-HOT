@@ -1,6 +1,8 @@
 # R2 41项来源累计证据 — 2026-10-15
 
-最新三源RSS原XML资格已补齐：MY-C01/MY-T01/PH-M01各一次DNS/GET、均200，实际10/6/10条；完整原字节只私有ignored，复用RSS/collector隔离SQLite，源日期/明确offset逐字段、重复和query-only重开全部通过。仅R2-5由13/34到16/34；R2-4保持21/39，其他38项逐源未改。代码bebe144未改，本轮产品门禁NOT_RUN；整体R2、24h、GUI/S7未通过。[完整报告](../r2-three-rss-2026-10-15/report.md)。
+最新两媒体RSS原XML验收：XX-M01/XX-M03各DNS1/GET1，实际各10条，共20条完整私有字节→既有collector→隔离SQLite→重复→readonly/query_only字段通过。R2-5现18/34，R2-4仍21/39；其他39源不变。[本批报告](../r2-two-media-2026-10-15/report.md) / [可用性缺口下一步](../r2-two-media-2026-10-15/availability-frontier.md)。产品未改，门禁NOT_RUN。
+
+前轮三源RSS原XML资格已补齐：MY-C01/MY-T01/PH-M01各一次DNS/GET、均200，实际10/6/10条；完整原字节只私有ignored，复用RSS/collector隔离SQLite，源日期/明确offset逐字段、重复和query-only重开全部通过。仅R2-5由13/34到16/34；R2-4保持21/39，其他38项逐源未改。代码bebe144未改，本轮产品门禁NOT_RUN；整体R2、24h、GUI/S7未通过。[完整报告](../r2-three-rss-2026-10-15/report.md)。
 
 前轮ONE同源目录URL更新已获批准并应用：XX-K02现为 https://www.one-line.com/en/newsroom，旧/en/news及原308链保留；目录web_list为HTML页面形态，现有默认关闭候选用json_list惰性HTML内嵌JSON模式。源码 `bebe1441465adfcabb9daf93cb2a8656ec1fc796` 干净门禁245定向、1230全量/3跳过及3smoke通过。已有635664原HTML经正式关闭候选回归10条字段、重复0新0修订、只读重开0差异，与前轮10条原字段完全相同；本轮来源DNS/HTTP0，不刷新02:56实网时间，不推导持续可用。覆盖仍21/39、13/34，数值3/5独立。[本轮目录/配置依据与至多三项建议](../r2-one-catalog-candidate-2026-10-15/report.md)。
 
@@ -9,7 +11,7 @@
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
 | R2-4公开自动来源 | **21/39（53.85%）** | 最少32项，尚差11；21 OK、11 PARTIAL、1 STALE、1 BLOCKED、5 NOT_RUN，未通过 |
-| R2-5资讯/公告原页字段回放 | **16/34（47.06%）** | 尚差18；16 PASS、4 FAIL、1 PARTIAL、13 NOT_RUN，未通过 |
+| R2-5资讯/公告原页字段回放 | **18/34（52.94%）** | 尚差16；18 PASS、4 FAIL、1 PARTIAL、11 NOT_RUN，未通过 |
 | 数值字段独立检查 | **3/5** | 仅历史归一化诊断；不加到34项原页回放分子 |
 | R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
 
@@ -54,8 +56,8 @@ NMC两项与Westports日期复审曾将旧暂计逐步修正为19/39；历史VN-
 | XX-K01 | https://www.maersk.com/news | 2026-10-15T02:38:28.356Z / 尝试1、未捕获响应 [当前证据](../r2-carrier-reapplied-2026-10-15/summary.json) | BLOCKED | NOT_RUN | 公网23.53.3.137、23.53.3.144；fetch_failed无底层错误记录，不判断CA/TLS/反爬；不重试。 |
 | XX-K02 | https://www.one-line.com/en/newsroom（旧/en/news与308另存） | 2026-10-15T02:56:22.136Z / 200（前轮实测；本轮HTTP0）[沿革](../r2-one-catalog-candidate-2026-10-15/catalogue-change-applied.json) | OK | PASS [正式关闭候选原页回归](../r2-one-catalog-candidate-replay-2026-10-15/summary.json) | 目录web_list页面由json_list惰性数据模式读取；1置顶+9列表，日期秒精度无时区/瞬间null，默认关闭metadata-only且不进入活动源。 |
 | XX-K03 | https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/ | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
-| XX-M01 | https://theloadstar.com/feed/ | 2026-10-13T08:25:10.410Z / 200 [取证](../r2-four-index-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-four-index-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
-| XX-M03 | https://splash247.com/feed/ | 2026-10-13T08:25:11.082Z / 200 [取证](../r2-four-index-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-four-index-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
+| XX-M01 | https://theloadstar.com/feed/ | 2026-10-15T04:25:58.202Z / 200 [取证](../r2-two-media-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-two-media-2026-10-15/XX-M01-replay.json) | 完整私有RSS10条，pubDate秒精度+0000；隔离collector/重复零新增修订/query_only重开零差异；metadata-only，生产未配置。 |
+| XX-M03 | https://splash247.com/feed/ | 2026-10-15T04:25:58.867Z / 200 [取证](../r2-two-media-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-two-media-2026-10-15/XX-M03-replay.json) | 完整私有RSS10条，pubDate秒精度+0000；隔离collector/重复零新增修订/query_only重开零差异；metadata-only，生产未配置。 |
 | XX-F01 | https://seller-my.tiktok.com/university/essay?knowledge_id=4293090978809617 | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
 
 ## 5项数值天气（不混入R2-5）

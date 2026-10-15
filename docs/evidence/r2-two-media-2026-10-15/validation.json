@@ -1,0 +1,305 @@
+{
+  "type": "bounded_evidence_and_current_matrix_validation",
+  "at": "2026-10-15T04:30:40.088Z",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "executedAtHead": "183385403520d6bf52b028909e0d42ae6b0a59a0",
+  "sourceRequestsInValidator": 0,
+  "sourceDnsInValidator": 0,
+  "productGate": "NOT_RUN_no_product_change",
+  "checks": [
+    {
+      "name": "Exact approved branch, code and executed evidence HEAD",
+      "pass": true
+    },
+    {
+      "name": "All tracked modifications since tested code are documentation only",
+      "pass": true,
+      "detail": [
+        "docs/architecture.md",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/archive-hashes.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/build.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/build.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/build.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/gate-driver.cjs.txt",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/install.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/install.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/install.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/launch.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/lint.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/lint.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/lint.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/report.md",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-feed.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-feed.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-feed.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-p0.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-p0.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-p0.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-p2c.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-p2c.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-p2c.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/source-proof.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/summary.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/targeted.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/targeted.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/targeted.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/typecheck.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/typecheck.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/typecheck.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/vitest.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/vitest.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/vitest.stdout.log",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/archive-hashes.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validate-matrix.py.txt",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/archive-hashes.json",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/catalogue-change-applied.diff.txt",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/catalogue-change-applied.json",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/closeout.md",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/documentation-validation-driver.py.txt",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/inventory-metadata.json",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/inventory.txt",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/matrix-delta.json",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/metadata-update-driver.py.txt",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/next-batch-recommendations.json",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/report.md",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/archive-hashes.json",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/candidate-config.json",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/command.json",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/launch.json",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/raw-field-metadata.json",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/replay-config.ts.txt",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/replay-launcher.cjs.txt",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/replay-procedure.test.ts.txt",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/report.md",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/stderr.log",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/stdout.log",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/summary.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-C01-capture.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-C01-field-audit.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-C01-isolated-config.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-C01-replay.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-T01-capture.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-T01-field-audit.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-T01-isolated-config.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-T01-replay.json",
+        "docs/evidence/r2-three-rss-2026-10-15/PH-M01-capture.json",
+        "docs/evidence/r2-three-rss-2026-10-15/PH-M01-field-audit.json",
+        "docs/evidence/r2-three-rss-2026-10-15/PH-M01-isolated-config.json",
+        "docs/evidence/r2-three-rss-2026-10-15/PH-M01-replay.json",
+        "docs/evidence/r2-three-rss-2026-10-15/archive-manifest.json",
+        "docs/evidence/r2-three-rss-2026-10-15/capture-command.json",
+        "docs/evidence/r2-three-rss-2026-10-15/capture-config.ts.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/capture-procedure.test.ts.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/capture-runner.cjs.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/capture-summary.json",
+        "docs/evidence/r2-three-rss-2026-10-15/capture.stderr.log",
+        "docs/evidence/r2-three-rss-2026-10-15/capture.stdout.log",
+        "docs/evidence/r2-three-rss-2026-10-15/closeout.md",
+        "docs/evidence/r2-three-rss-2026-10-15/dns-ledger.json",
+        "docs/evidence/r2-three-rss-2026-10-15/doc-lint-runner.cjs.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/doc-lint.json",
+        "docs/evidence/r2-three-rss-2026-10-15/inventory-procedure.cjs.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/local-raw-inventory.json",
+        "docs/evidence/r2-three-rss-2026-10-15/manifest.json",
+        "docs/evidence/r2-three-rss-2026-10-15/matrix-delta.json",
+        "docs/evidence/r2-three-rss-2026-10-15/original-command-outputs.json",
+        "docs/evidence/r2-three-rss-2026-10-15/preparation-errors.json",
+        "docs/evidence/r2-three-rss-2026-10-15/replay-command.json",
+        "docs/evidence/r2-three-rss-2026-10-15/replay-config.ts.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/replay-procedure.test.ts.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/replay-runner.cjs.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/replay-summary.json",
+        "docs/evidence/r2-three-rss-2026-10-15/replay.stderr.log",
+        "docs/evidence/r2-three-rss-2026-10-15/replay.stdout.log",
+        "docs/evidence/r2-three-rss-2026-10-15/report.md",
+        "docs/evidence/r2-three-rss-2026-10-15/request-ledger.json",
+        "docs/evidence/r2-three-rss-2026-10-15/validation-procedure.cjs.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/validation.first.json",
+        "docs/evidence/r2-three-rss-2026-10-15/validation.json",
+        "docs/handoffs/r2-next-execution-2026-10-15.md",
+        "docs/status.md"
+      ]
+    },
+    {
+      "name": "Zero product/schema/config/dependency/workflow diff from accepted code",
+      "pass": true
+    },
+    {
+      "name": "41 unique approved catalogue automatic P1 rows retained",
+      "pass": true
+    },
+    {
+      "name": "Current catalogue unchanged and LF digest matches",
+      "pass": true
+    },
+    {
+      "name": "Only two named entries changed; other39 identical",
+      "pass": true,
+      "detail": [
+        "XX-M01",
+        "XX-M03"
+      ]
+    },
+    {
+      "name": "Approved denominator partition unchanged",
+      "pass": true
+    },
+    {
+      "name": "R2-4 21/39 and numeric3/5 unchanged",
+      "pass": true
+    },
+    {
+      "name": "R2-5 independently recomputed18/34 with16remaining",
+      "pass": true
+    },
+    {
+      "name": "r2_4 all status counts independently recomputed",
+      "pass": true,
+      "detail": {
+        "OK": 21,
+        "PARTIAL": 11,
+        "NOT_RUN": 5,
+        "STALE": 1,
+        "BLOCKED": 1
+      }
+    },
+    {
+      "name": "r2_5 all status counts independently recomputed",
+      "pass": true,
+      "detail": {
+        "PASS": 18,
+        "NOT_RUN": 11,
+        "FAIL": 4,
+        "PARTIAL": 1
+      }
+    },
+    {
+      "name": "Every current/historical evidence reference exists with matching LF hash and ID selector",
+      "pass": true,
+      "detail": {
+        "occurrences": 204,
+        "uniquePaths": 71,
+        "errors": []
+      }
+    },
+    {
+      "name": "Exactly2 DNS and2 complete once-only safe responses",
+      "pass": true
+    },
+    {
+      "name": "No redirects/retries/details/paid/LLM/settings changes",
+      "pass": true
+    },
+    {
+      "name": "Original XML inventory missing before authorized acquisition",
+      "pass": true
+    },
+    {
+      "name": "Original capture and replay raw exit codes0",
+      "pass": true
+    },
+    {
+      "name": "Original executed replay code archived exactly",
+      "pass": true
+    },
+    {
+      "name": "XX-M01 source exact catalogue URL, wire size/hash and private raw",
+      "pass": true
+    },
+    {
+      "name": "XX-M01 actual records, zero-new zero-revised repeat, unchanged versions",
+      "pass": true
+    },
+    {
+      "name": "XX-M01 readonly query_only all-field reopen without byte delta",
+      "pass": true
+    },
+    {
+      "name": "XX-M01 full literals/times audited without inventing zone",
+      "pass": true
+    },
+    {
+      "name": "XX-M01 no actual offline egress and metadata-only config",
+      "pass": true
+    },
+    {
+      "name": "XX-M01 source config remains unconfigured production off",
+      "pass": true
+    },
+    {
+      "name": "XX-M03 source exact catalogue URL, wire size/hash and private raw",
+      "pass": true
+    },
+    {
+      "name": "XX-M03 actual records, zero-new zero-revised repeat, unchanged versions",
+      "pass": true
+    },
+    {
+      "name": "XX-M03 readonly query_only all-field reopen without byte delta",
+      "pass": true
+    },
+    {
+      "name": "XX-M03 full literals/times audited without inventing zone",
+      "pass": true
+    },
+    {
+      "name": "XX-M03 no actual offline egress and metadata-only config",
+      "pass": true
+    },
+    {
+      "name": "XX-M03 source config remains unconfigured production off",
+      "pass": true
+    },
+    {
+      "name": "20 total real records, no overall R2/24h PASS",
+      "pass": true
+    },
+    {
+      "name": "Completed recommendation removed from future authorization queue",
+      "pass": true
+    },
+    {
+      "name": "All affected Markdown local links resolve",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Readable current report contains exactly41 source rows",
+      "pass": true
+    },
+    {
+      "name": "Status and handoff share current coverage and pending limits",
+      "pass": true
+    },
+    {
+      "name": "Evidence contains no full rawXML/DB/secret payloads",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Private raw and isolated DB paths ignored",
+      "pass": true
+    },
+    {
+      "name": "All18 nonOK rows classified once without retesting",
+      "pass": true
+    },
+    {
+      "name": "MYW01 artifact wire provenance and missing ID/zone not overstated",
+      "pass": true
+    },
+    {
+      "name": "Exact original log hashes preserved through Git text conversion",
+      "pass": true
+    }
+  ],
+  "errors": [],
+  "rawExit": 0
+}

@@ -1,0 +1,75 @@
+{
+  "type": "read_only_existing_saved_material_inventory_no_retest",
+  "sourceHttpRequests": 0,
+  "systemDnsCalls": 0,
+  "failedProbeReruns": 0,
+  "savedResponseChecks": [
+    {
+      "id": "CN-P02",
+      "path": ".tmp/r2-four-reapplied-2026-10-15-private/CN-P02.response.bin",
+      "exists": true,
+      "wireHashMatches": true,
+      "sha256": "0636ef4de5a01c1744ea9e76e6dbb29b0668d130d6b7f349d1b2268ea73dd29e"
+    },
+    {
+      "id": "ID-T02",
+      "path": ".tmp/r2-four-reapplied-2026-10-15-private/ID-T02.response.bin",
+      "exists": true,
+      "wireHashMatches": true,
+      "sha256": "2cc974af6afc822c42a4e914df05c697348b80420941f6b27561b2bf688587b7"
+    },
+    {
+      "id": "VN-P01",
+      "path": ".tmp/r2-four-after-clash-2026-10-14-private/VN-P01.response.bin",
+      "exists": true,
+      "wireHashMatches": true,
+      "sha256": "da133741708879c9fd4544a0137dd8050a92c1dab662ac843bc9892d412bd4ef"
+    },
+    {
+      "id": "MY-P03",
+      "path": ".tmp/r2-six-public-2026-10-14-private/MY-P03.response.bin",
+      "exists": true,
+      "wireHashMatches": true,
+      "sha256": "880e1a180dc686d9d9d71578a753ee87af24042563a7c58f82c0885f8d3c5691"
+    },
+    {
+      "id": "MY-L01",
+      "path": ".tmp/r2-four-reapplied-2026-10-15-private/MY-L01.response.bin",
+      "exists": true,
+      "wireHashMatches": true,
+      "sha256": "9e9787d4cf60f454824a0529787b1d345a2814ac45f91a957ff1d8b57c1cb310"
+    }
+  ],
+  "myW01": {
+    "path": "docs/evidence/metmalaysia-integration-2026-10-10/raw/warning-2026-10-10T0830Z.json",
+    "artifactBytes": 7754,
+    "artifactSha256": "24d20e53b4ca59547c83ecfccea542ab11e0da094e863da3a2de40adb4124ebf",
+    "wireSha256": null,
+    "wireHashNotManufactured": true,
+    "rows": 4,
+    "fieldKeys": [
+      "warning_issue",
+      "valid_from",
+      "valid_to",
+      "heading_en",
+      "text_en",
+      "instruction_en",
+      "heading_bm",
+      "text_bm",
+      "instruction_bm"
+    ],
+    "issueFields": [
+      "issued",
+      "title_bm",
+      "title_en"
+    ],
+    "issuedLiterals": [
+      "2026-10-10T14:00:00",
+      "2026-10-10T15:50:00",
+      "2026-10-10T10:30:00"
+    ],
+    "issuedHaveTimezone": false,
+    "rowsWithIndependentIdOrUrl": 0,
+    "scope": "Existing related trailing-slash product; no new mapping, request, collection or production change."
+  }
+}

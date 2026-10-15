@@ -1,8 +1,8 @@
 {
   "type": "bounded_evidence_and_current_matrix_validation",
-  "at": "2026-10-15T04:20:03.679Z",
+  "at": "2026-10-15T04:30:40.088Z",
   "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "executedAtHead": "8027aeeda436faff8eb6ac3c0f0f0dd8d763f9be",
+  "executedAtHead": "183385403520d6bf52b028909e0d42ae6b0a59a0",
   "sourceRequestsInValidator": 0,
   "sourceDnsInValidator": 0,
   "productGate": "NOT_RUN_no_product_change",
@@ -140,12 +140,11 @@
       "pass": true
     },
     {
-      "name": "Only three named entries changed; other38 identical",
+      "name": "Only two named entries changed; other39 identical",
       "pass": true,
       "detail": [
-        "MY-C01",
-        "MY-T01",
-        "PH-M01"
+        "XX-M01",
+        "XX-M03"
       ]
     },
     {
@@ -157,7 +156,7 @@
       "pass": true
     },
     {
-      "name": "R2-5 independently recomputed16/34 with18remaining",
+      "name": "R2-5 independently recomputed18/34 with16remaining",
       "pass": true
     },
     {
@@ -175,8 +174,8 @@
       "name": "r2_5 all status counts independently recomputed",
       "pass": true,
       "detail": {
-        "PASS": 16,
-        "NOT_RUN": 13,
+        "PASS": 18,
+        "NOT_RUN": 11,
         "FAIL": 4,
         "PARTIAL": 1
       }
@@ -185,13 +184,13 @@
       "name": "Every current/historical evidence reference exists with matching LF hash and ID selector",
       "pass": true,
       "detail": {
-        "occurrences": 192,
-        "uniquePaths": 66,
+        "occurrences": 204,
+        "uniquePaths": 71,
         "errors": []
       }
     },
     {
-      "name": "Exactly3 DNS and3 complete once-only safe responses",
+      "name": "Exactly2 DNS and2 complete once-only safe responses",
       "pass": true
     },
     {
@@ -211,79 +210,55 @@
       "pass": true
     },
     {
-      "name": "MY-C01 source exact catalogue URL, wire size/hash and private raw",
+      "name": "XX-M01 source exact catalogue URL, wire size/hash and private raw",
       "pass": true
     },
     {
-      "name": "MY-C01 actual records, zero-new zero-revised repeat, unchanged versions",
+      "name": "XX-M01 actual records, zero-new zero-revised repeat, unchanged versions",
       "pass": true
     },
     {
-      "name": "MY-C01 readonly query_only all-field reopen without byte delta",
+      "name": "XX-M01 readonly query_only all-field reopen without byte delta",
       "pass": true
     },
     {
-      "name": "MY-C01 full literals/times audited without inventing zone",
+      "name": "XX-M01 full literals/times audited without inventing zone",
       "pass": true
     },
     {
-      "name": "MY-C01 no actual offline egress and metadata-only config",
+      "name": "XX-M01 no actual offline egress and metadata-only config",
       "pass": true
     },
     {
-      "name": "MY-C01 source config remains unconfigured production off",
+      "name": "XX-M01 source config remains unconfigured production off",
       "pass": true
     },
     {
-      "name": "MY-T01 source exact catalogue URL, wire size/hash and private raw",
+      "name": "XX-M03 source exact catalogue URL, wire size/hash and private raw",
       "pass": true
     },
     {
-      "name": "MY-T01 actual records, zero-new zero-revised repeat, unchanged versions",
+      "name": "XX-M03 actual records, zero-new zero-revised repeat, unchanged versions",
       "pass": true
     },
     {
-      "name": "MY-T01 readonly query_only all-field reopen without byte delta",
+      "name": "XX-M03 readonly query_only all-field reopen without byte delta",
       "pass": true
     },
     {
-      "name": "MY-T01 full literals/times audited without inventing zone",
+      "name": "XX-M03 full literals/times audited without inventing zone",
       "pass": true
     },
     {
-      "name": "MY-T01 no actual offline egress and metadata-only config",
+      "name": "XX-M03 no actual offline egress and metadata-only config",
       "pass": true
     },
     {
-      "name": "MY-T01 source config remains unconfigured production off",
+      "name": "XX-M03 source config remains unconfigured production off",
       "pass": true
     },
     {
-      "name": "PH-M01 source exact catalogue URL, wire size/hash and private raw",
-      "pass": true
-    },
-    {
-      "name": "PH-M01 actual records, zero-new zero-revised repeat, unchanged versions",
-      "pass": true
-    },
-    {
-      "name": "PH-M01 readonly query_only all-field reopen without byte delta",
-      "pass": true
-    },
-    {
-      "name": "PH-M01 full literals/times audited without inventing zone",
-      "pass": true
-    },
-    {
-      "name": "PH-M01 no actual offline egress and metadata-only config",
-      "pass": true
-    },
-    {
-      "name": "PH-M01 source config remains unconfigured production off",
-      "pass": true
-    },
-    {
-      "name": "26 total real records, no overall R2/24h PASS",
+      "name": "20 total real records, no overall R2/24h PASS",
       "pass": true
     },
     {
@@ -310,6 +285,14 @@
     },
     {
       "name": "Private raw and isolated DB paths ignored",
+      "pass": true
+    },
+    {
+      "name": "All18 nonOK rows classified once without retesting",
+      "pass": true
+    },
+    {
+      "name": "MYW01 artifact wire provenance and missing ID/zone not overstated",
       "pass": true
     },
     {

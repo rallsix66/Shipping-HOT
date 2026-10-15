@@ -1,0 +1,54 @@
+{
+  "id": "XX-M03",
+  "status": "PASS",
+  "url": "https://splash247.com/feed/",
+  "rawBytes": 18929,
+  "wireSha256": "969e258cf2ab584fcf8e616c5afe27126dd95d2506206e7f83c67ffdbd1e1bab",
+  "actualSystemDnsCalls": 0,
+  "actualSourceHttpRequests": 0,
+  "first": {
+    "status": "ok_items",
+    "runId": "904f2294-f539-4ad8-8bad-fc93e6d4ec97",
+    "itemsSeen": 10,
+    "itemsNew": 10,
+    "itemsRevised": 0
+  },
+  "repeat": {
+    "status": "ok_items",
+    "runId": "105edf25-c3fd-4bcd-86a3-00f30f06dac8",
+    "itemsSeen": 10,
+    "itemsNew": 0,
+    "itemsRevised": 0
+  },
+  "reopen": {
+    "queryOnly": true,
+    "readonlyConnection": true,
+    "rows": 10,
+    "versions": 10,
+    "mismatches": 0,
+    "fullTitleUrlDateEvidenceCompared": true,
+    "allItemVersionBlockFieldsEqualAfterReopen": true,
+    "metadataOnlyTitleBlocks": 10,
+    "dateEvidenceColumn": "null_existing_RSS_contract; exact literal/timezone preserved in private XML and bounded evidence, not a new migration",
+    "databaseBytesUnchanged": true
+  },
+  "realRecords": 10,
+  "rawDateRole": "RSS item pubDate",
+  "precision": "second",
+  "sourceTimezoneLiterals": [
+    "+0000"
+  ],
+  "utcOffsets": [
+    "+00:00"
+  ],
+  "unknownTimezoneRecords": 0,
+  "sourceUpdatedField": "absent; existing sourceUpdatedAt falls back to pubDate",
+  "injectedLookupCalls": 2,
+  "injectedTransportCalls": 2,
+  "tcpConnectionAttempts": 0,
+  "globalFetchCalls": 0,
+  "providerUsageRowsUnchanged": true,
+  "rawRedistributed": false,
+  "productionConfigChanged": false,
+  "repeatLastSeenAdvancedOnly": true
+}

@@ -1,0 +1,4 @@
+const fs=require('node:fs'),cp=require('node:child_process');const dir='docs/evidence/r2-two-media-2026-10-15';
+const startedAt=new Date().toISOString();const command='pnpm exec vitest run -c .tmp/r2-two-media-replay-20261015.config.ts';
+const out=cp.spawnSync(command,{shell:true,encoding:'utf8',timeout:90000});
+fs.writeFileSync(dir+'/replay.stdout.log',out.stdout??'');fs.writeFileSync(dir+'/replay.stderr.log',out.stderr??'');fs.writeFileSync(dir+'/replay-command.json',JSON.stringify({command,startedAt,finishedAt:new Date().toISOString(),executedAtHead:cp.execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),productCodeSha:'bebe1441465adfcabb9daf93cb2a8656ec1fc796',rawExit:out.status,signal:out.signal},null,2)+'\n');console.log(out.stdout);console.error(out.stderr);process.exitCode=out.status??1;
