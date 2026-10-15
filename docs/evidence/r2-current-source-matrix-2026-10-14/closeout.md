@@ -1,1 +1,1 @@
-当前真实Neat Freak见[26项应用后官方补证](../r2-official-gaps-applied-2026-10-15/closeout.md)。过滤列表精确26/原23/新3；生成整体额外字节差异未归因。四DNS公网/四GET：两403、目录200、列表404；条件追加0，业务/入库0，全部资格/24/39、21/34、3/5保持待审。旧440affa阻断原件和历史源响应不改，产品/目录/生产/迁移/阈值/24h不改；产品门禁/GUI/S7本批NOT_RUN，定向验证/归档单列，现场保留。
+当前真实Neat Freak见[JMA归属修正与BMKG doc](../r2-bmkg-doc-jma-attribution-2026-10-15/closeout.md)。已有同URL404归XX-W01/02，同一请求不重复计数；XX-W01当前OK→BLOCKED，23/39、21/34、历史数值3/5。新BMKG DNS1/GET1目录200，无apidoc/KODE/数值样本；未下载/遍历，JMA/PAGASA0。其他38条原样，原件/历史/26项与生成额外字节unknown限制保留，不再盘点旧全文。产品门禁/GUI/S7/24h本批NOT_RUN，定向验证/归档单列，整体未通过待父审。

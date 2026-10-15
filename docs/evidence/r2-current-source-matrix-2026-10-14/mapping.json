@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T05:57:37.873Z",
+  "generatedAt": "2026-10-15T06:08:59.600Z",
   "reviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "evidenceHead": "440affa012e06b80c38d97f08b04e395b8506d0f",
+  "evidenceHead": "32c8974c6c5f50ad8630b6eb771f0a6af3bd9b44",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -35,11 +35,11 @@
   },
   "measuredCoverage": {
     "r2_4": {
-      "numerator": 24,
+      "numerator": 23,
       "denominator": 39,
-      "ratio": 0.6153846153846154,
+      "ratio": 0.5897435897435898,
       "minimumOK": 32,
-      "shortfall": 8,
+      "shortfall": 9,
       "ids": [
         "CN-P01",
         "CN-W01",
@@ -59,7 +59,6 @@
         "ID-T01",
         "PH-C01",
         "PH-M01",
-        "XX-W01",
         "XX-K02",
         "XX-M01",
         "XX-M03",
@@ -67,11 +66,11 @@
         "XX-A02"
       ],
       "statusCounts": {
-        "OK": 24,
+        "OK": 23,
         "PARTIAL": 8,
         "NOT_RUN": 5,
         "STALE": 1,
-        "BLOCKED": 1
+        "BLOCKED": 2
       },
       "pass": false
     },
@@ -3118,16 +3117,16 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/ID-W02-root-capture.json",
-          "sha256": "a8cf4da28b74da69cc178ea054d82002ee5ef4f147d24e0e361da5774e537a42",
+          "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/ID-W02-doc-capture.json",
+          "sha256": "fa234af961225bd74139a694c438ded035daa080c7cec72dcfeddc6c44dff548",
           "hashBasis": "committed_text_LF"
         },
-        "url": "https://maritim.bmkg.go.id/marine2026-data/",
-        "at": "2026-10-15T05:53:37.472Z",
+        "url": "https://maritim.bmkg.go.id/marine2026-data/doc/",
+        "at": "2026-10-15T06:05:16.816Z",
         "httpStatus": 200,
-        "bytes": 577,
-        "wireSha256": "6d66fa455f6bc943ff0d6dd33de2c4928126ac72217a38d555bf9e784995ad76",
-        "scope": "actual_root_directory_response_only_not_port_numeric_product",
+        "bytes": 1137,
+        "wireSha256": "1ac1835765cc2354cfed278a191bd229f9f23df452eb7b69de1d3398b46b9aaf",
+        "scope": "observed_doc_directory_only_not_verified_api_documentation_or_port_numeric_product",
         "productQualificationChanged": false
       },
       "fieldReplayEvidence": null,
@@ -3167,7 +3166,8 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "目录是根路径+参数化文档，缺批准具体港口URL及映射；不是文章feed"
+        "目录是根路径+参数化文档，缺批准具体港口URL及映射；不是文章feed",
+        "Latest observed doc/200 is16 file/directory links, not identified as API documentation; no Jakarta/TanjungPriok officialKODE mapping seen, linked PDFs/PNGs/subdirs not fetched."
       ],
       "historicalSuperseded": [
         {
@@ -3195,32 +3195,74 @@
             "code": "blocked_address",
             "doesNotReplaceHistoricalCaptureOrQualification": true
           }
+        },
+        {
+          "reason": "New separately approved observed doc directory GET; root directory response and older DNS block retained",
+          "previousLatestActualFetch": {
+            "evidence": {
+              "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/ID-W02-root-capture.json",
+              "sha256": "a8cf4da28b74da69cc178ea054d82002ee5ef4f147d24e0e361da5774e537a42",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://maritim.bmkg.go.id/marine2026-data/",
+            "at": "2026-10-15T05:53:37.472Z",
+            "httpStatus": 200,
+            "bytes": 577,
+            "wireSha256": "6d66fa455f6bc943ff0d6dd33de2c4928126ac72217a38d555bf9e784995ad76",
+            "scope": "actual_root_directory_response_only_not_port_numeric_product",
+            "productQualificationChanged": false
+          },
+          "previousSafeFetchAttempt": {
+            "evidence": {
+              "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/ID-W02-root-capture.json",
+              "sha256": "a8cf4da28b74da69cc178ea054d82002ee5ef4f147d24e0e361da5774e537a42",
+              "hashBasis": "committed_text_LF"
+            },
+            "dnsEvidence": {
+              "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/dns-ledger.json",
+              "sha256": "22d9f6ad64b9dceb5f0b87b00abe037bec631e4feb0b6e5a34174e9c46aee2b2",
+              "hashBasis": "committed_text_LF"
+            },
+            "structure": {
+              "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/structure-observation.json",
+              "sha256": "c15adc9c04aeba84e4320b54b0e6945ed5be0d73528baa1da8267ba2e9ecf42f",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://maritim.bmkg.go.id/marine2026-data/",
+            "startedAt": "2026-10-15T05:53:36.849Z",
+            "finishedAt": "2026-10-15T05:53:37.473Z",
+            "systemDnsCalls": 1,
+            "sourceGetAttempts": 1,
+            "httpStatus": 200,
+            "result": "CAPTURED_ROOT_DIRECTORY_ONLY",
+            "code": null,
+            "qualificationUnchanged": true
+          }
         }
       ],
       "lastSafeFetchAttempt": {
         "evidence": {
-          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/ID-W02-root-capture.json",
-          "sha256": "a8cf4da28b74da69cc178ea054d82002ee5ef4f147d24e0e361da5774e537a42",
+          "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/ID-W02-doc-capture.json",
+          "sha256": "fa234af961225bd74139a694c438ded035daa080c7cec72dcfeddc6c44dff548",
           "hashBasis": "committed_text_LF"
         },
         "dnsEvidence": {
-          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/dns-ledger.json",
-          "sha256": "22d9f6ad64b9dceb5f0b87b00abe037bec631e4feb0b6e5a34174e9c46aee2b2",
+          "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/dns-ledger.json",
+          "sha256": "257d762242955e0d9ef8b0ff63867da29ec34a724eba0bae91d64084dc993593",
           "hashBasis": "committed_text_LF"
         },
         "structure": {
-          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/structure-observation.json",
-          "sha256": "c15adc9c04aeba84e4320b54b0e6945ed5be0d73528baa1da8267ba2e9ecf42f",
+          "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/document-observation.json",
+          "sha256": "00e937d0d036ce11e7eb9336e9bcf6a01a6c83211963e6a3d283d846271f13a7",
           "hashBasis": "committed_text_LF"
         },
-        "url": "https://maritim.bmkg.go.id/marine2026-data/",
-        "startedAt": "2026-10-15T05:53:36.849Z",
-        "finishedAt": "2026-10-15T05:53:37.473Z",
+        "url": "https://maritim.bmkg.go.id/marine2026-data/doc/",
+        "startedAt": "2026-10-15T06:05:16.385Z",
+        "finishedAt": "2026-10-15T06:05:16.817Z",
         "systemDnsCalls": 1,
         "sourceGetAttempts": 1,
         "httpStatus": 200,
-        "result": "CAPTURED_ROOT_DIRECTORY_ONLY",
-        "code": null,
+        "result": "CAPTURED_FILE_DIRECTORY_ONLY",
         "qualificationUnchanged": true
       }
     },
@@ -4190,19 +4232,17 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
-          "selector": null,
-          "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/XX-W02-targetTc-capture.json",
+          "sha256": "8e791a21bead8c6f565faf4847351e6333934677e88e518d0eb5d8da4bc36100",
           "hashBasis": "committed_text_LF"
         },
-        "atWindow": [
-          "2026-10-10T03:58:39.141Z",
-          "2026-10-10T03:58:44.112Z"
-        ],
         "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
-        "httpStatus": 200,
-        "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
-        "wireSha256": null
+        "at": "2026-10-15T05:53:37.778Z",
+        "httpStatus": 404,
+        "bytes": 2203,
+        "wireSha256": "959efccbba82d9eca9d398d32811d456f51929aff12dfba2ccaf60a0b1b35b58",
+        "scope": "exact_XX-W01_catalogue_targetTc_URL_HTTP404; same original captured request also prerequisite for_XX-W02",
+        "productQualificationChanged": true
       },
       "fieldReplayEvidence": null,
       "numericFieldValidation": {
@@ -4234,9 +4274,9 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "OK",
-        "countedOK": true,
-        "reason": "Stored real selected-product operational responses and normalized field checks; snapshot-time only, not an article or new ongoing run."
+        "verdict": "BLOCKED",
+        "countedOK": false,
+        "reason": "Latest actual exact catalogue/provider-constant targetTc URL returnedHTTP404 at2026-10-15T05:53:37.778Z; same saved request previously only associated withXX-W02. Current availability is notOK; historical3/5 normalized diagnostics retained separately."
       },
       "r2_5": {
         "verdict": "NOT_APPLICABLE_NUMERIC",
@@ -4248,9 +4288,106 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Historical snapshot10/10; current uptime/live refresh unknown. No original numerical wire replay retained in these diagnostics."
+        "Latest exact targetTc URL HTTP404; not an empty cyclone list. No alternative URL or new request guessed.",
+        "Historical10/10 numeric diagnostics retained, but do not prove current availability or raw numerical wire replay."
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [
+        {
+          "reason": "Correct omitted shared exact URL404 attribution; prior historical200 and OK retained as prior state",
+          "previousLatestActualFetch": {
+            "evidence": {
+              "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
+              "selector": null,
+              "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+              "hashBasis": "committed_text_LF"
+            },
+            "atWindow": [
+              "2026-10-10T03:58:39.141Z",
+              "2026-10-10T03:58:44.112Z"
+            ],
+            "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+            "httpStatus": 200,
+            "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
+            "wireSha256": null
+          },
+          "previousR24": {
+            "verdict": "OK",
+            "countedOK": true,
+            "reason": "Stored real selected-product operational responses and normalized field checks; snapshot-time only, not an article or new ongoing run."
+          }
+        }
+      ],
+      "lastSafeFetchAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/XX-W02-targetTc-capture.json",
+          "sha256": "8e791a21bead8c6f565faf4847351e6333934677e88e518d0eb5d8da4bc36100",
+          "hashBasis": "committed_text_LF"
+        },
+        "dnsEvidence": {
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/dns-ledger.json",
+          "sha256": "22d9f6ad64b9dceb5f0b87b00abe037bec631e4feb0b6e5a34174e9c46aee2b2",
+          "hashBasis": "committed_text_LF"
+        },
+        "structure": {
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/structure-observation.json",
+          "sha256": "c15adc9c04aeba84e4320b54b0e6945ed5be0d73528baa1da8267ba2e9ecf42f",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+        "startedAt": "2026-10-15T05:53:37.474Z",
+        "finishedAt": "2026-10-15T05:53:37.778Z",
+        "systemDnsCalls": 1,
+        "sourceGetAttempts": 1,
+        "httpStatus": 404,
+        "result": "HTTP_ERROR",
+        "code": "http_error",
+        "qualificationUnchanged": true,
+        "sourceGetAttemptsThisRound": 0,
+        "systemDnsCallsThisRound": 0,
+        "attribution": {
+          "evidence": {
+            "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/jma-cross-product-attribution.json",
+            "sha256": "f86d97245ec20acbd9613bf604278b5ededdda66c330e0c6079c9a30e2d62f42",
+            "hashBasis": "committed_text_LF"
+          },
+          "recordedRequestId": "XX-W02-targetTc",
+          "recordedRequestUrl": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+          "recordedAt": "2026-10-15T05:53:37.778Z",
+          "wireSha256": "959efccbba82d9eca9d398d32811d456f51929aff12dfba2ccaf60a0b1b35b58",
+          "httpStatus": 404,
+          "requestLedger": {
+            "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/request-ledger.json",
+            "sha256": "2fdacbb87f06311b0c5920cb2625999b73a2def5b0a3ca3b5708eeedd9909d1c",
+            "hashBasis": "committed_text_LF"
+          },
+          "originalRecordedRequestCount": 1,
+          "sourceGetAttemptsThisRound": 0,
+          "systemDnsCallsThisRound": 0,
+          "doNotSumProductAssociationsAsRequests": true
+        }
+      },
+      "sharedRequestAttribution": {
+        "evidence": {
+          "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/jma-cross-product-attribution.json",
+          "sha256": "f86d97245ec20acbd9613bf604278b5ededdda66c330e0c6079c9a30e2d62f42",
+          "hashBasis": "committed_text_LF"
+        },
+        "recordedRequestId": "XX-W02-targetTc",
+        "recordedRequestUrl": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+        "recordedAt": "2026-10-15T05:53:37.778Z",
+        "wireSha256": "959efccbba82d9eca9d398d32811d456f51929aff12dfba2ccaf60a0b1b35b58",
+        "httpStatus": 404,
+        "requestLedger": {
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/request-ledger.json",
+          "sha256": "2fdacbb87f06311b0c5920cb2625999b73a2def5b0a3ca3b5708eeedd9909d1c",
+          "hashBasis": "committed_text_LF"
+        },
+        "originalRecordedRequestCount": 1,
+        "sourceGetAttemptsThisRound": 0,
+        "systemDnsCallsThisRound": 0,
+        "doNotSumProductAssociationsAsRequests": true,
+        "role": "exact_catalogue_product"
+      }
     },
     {
       "id": "XX-W02",
@@ -4332,7 +4469,8 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Resolve catalogue forecast/specifications product scope and retain field evidence; do not manufacture concrete unobserved URL or count forecast-only as full row."
+        "Resolve catalogue forecast/specifications product scope and retain field evidence; do not manufacture concrete unobserved URL or count forecast-only as full row.",
+        "Existing05:53:37.778Z targetTc404 is the same request cross-attributed to exactXX-W01; no object selection or two product requests."
       ],
       "historicalSuperseded": [
         {
@@ -4406,6 +4544,28 @@
         "result": "HTTP_ERROR",
         "code": "http_error",
         "qualificationUnchanged": true
+      },
+      "sharedRequestAttribution": {
+        "evidence": {
+          "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/jma-cross-product-attribution.json",
+          "sha256": "f86d97245ec20acbd9613bf604278b5ededdda66c330e0c6079c9a30e2d62f42",
+          "hashBasis": "committed_text_LF"
+        },
+        "recordedRequestId": "XX-W02-targetTc",
+        "recordedRequestUrl": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+        "recordedAt": "2026-10-15T05:53:37.778Z",
+        "wireSha256": "959efccbba82d9eca9d398d32811d456f51929aff12dfba2ccaf60a0b1b35b58",
+        "httpStatus": 404,
+        "requestLedger": {
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/request-ledger.json",
+          "sha256": "2fdacbb87f06311b0c5920cb2625999b73a2def5b0a3ca3b5708eeedd9909d1c",
+          "hashBasis": "committed_text_LF"
+        },
+        "originalRecordedRequestCount": 1,
+        "sourceGetAttemptsThisRound": 0,
+        "systemDnsCallsThisRound": 0,
+        "doNotSumProductAssociationsAsRequests": true,
+        "role": "prerequisite_list_for_two_existing_catalogue_products"
       }
     },
     {
@@ -6034,5 +6194,49 @@
       "sha256": "71243f4a918cc487b41a329597462c85f73ec998591e72ec5d1e152997614362",
       "hashBasis": "committed_text_LF"
     }
+  },
+  "lastJmaExactUrlAttributionCorrection": {
+    "evidence": {
+      "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/jma-cross-product-attribution.json",
+      "sha256": "f86d97245ec20acbd9613bf604278b5ededdda66c330e0c6079c9a30e2d62f42",
+      "hashBasis": "committed_text_LF"
+    },
+    "report": {
+      "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/report.md",
+      "sha256": "1cfd383b5d54f9828d46f2067a8975765ad0d8a736896b597f3cb54d4e928370",
+      "hashBasis": "committed_text_LF"
+    },
+    "r24": [
+      24,
+      23
+    ],
+    "r25Unchanged": 21,
+    "numericHistoricalUnchanged": [
+      3,
+      5
+    ],
+    "originalRequestCount": 1,
+    "newJmaRequests": 0
+  },
+  "lastBmkgDocumentProbe": {
+    "report": {
+      "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/report.md",
+      "sha256": "1cfd383b5d54f9828d46f2067a8975765ad0d8a736896b597f3cb54d4e928370",
+      "hashBasis": "committed_text_LF"
+    },
+    "capture": {
+      "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/ID-W02-doc-capture.json",
+      "sha256": "fa234af961225bd74139a694c438ded035daa080c7cec72dcfeddc6c44dff548",
+      "hashBasis": "committed_text_LF"
+    },
+    "structure": {
+      "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/document-observation.json",
+      "sha256": "00e937d0d036ce11e7eb9336e9bcf6a01a6c83211963e6a3d283d846271f13a7",
+      "hashBasis": "committed_text_LF"
+    },
+    "sourceGetAttempts": 1,
+    "systemDnsCalls": 1,
+    "otherSourceRequests": 0,
+    "qualificationChanged": false
   }
 }

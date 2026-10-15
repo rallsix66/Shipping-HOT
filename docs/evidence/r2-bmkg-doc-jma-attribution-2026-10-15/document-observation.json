@@ -1,0 +1,128 @@
+{
+  "httpStatus": 200,
+  "url": "https://maritim.bmkg.go.id/marine2026-data/doc/",
+  "at": "2026-10-15T06:05:16.816Z",
+  "bytes": 1137,
+  "wireSha256": "1ac1835765cc2354cfed278a191bd229f9f23df452eb7b69de1d3398b46b9aaf",
+  "title": "",
+  "headings": [],
+  "classification": "file_directory_index_not_identified_as_api_documentation",
+  "linkCount": 16,
+  "pdfLinks": 7,
+  "pngLinks": 7,
+  "subdirectories": 2,
+  "links": [
+    {
+      "label": "PRAKIRAAN_POTENSI_CURAH_HUJAN_3_HARI_KEDEPAN.pdf",
+      "hrefLiteral": "PRAKIRAAN_POTENSI_CURAH_HUJAN_3_HARI_KEDEPAN.pdf",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/PRAKIRAAN_POTENSI_CURAH_HUJAN_3_HARI_KEDEPAN.pdf",
+      "followed": false
+    },
+    {
+      "label": "Prakicumar_Wisata_Bahari_Gili_Lawalaut.png",
+      "hrefLiteral": "Prakicumar_Wisata_Bahari_Gili_Lawalaut.png",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/Prakicumar_Wisata_Bahari_Gili_Lawalaut.png",
+      "followed": false
+    },
+    {
+      "label": "Prakicumar_Wisata_Bahari_Kanawa.png",
+      "hrefLiteral": "Prakicumar_Wisata_Bahari_Kanawa.png",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/Prakicumar_Wisata_Bahari_Kanawa.png",
+      "followed": false
+    },
+    {
+      "label": "Prakicumar_Wisata_Bahari_Manta_Point.png",
+      "hrefLiteral": "Prakicumar_Wisata_Bahari_Manta_Point.png",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/Prakicumar_Wisata_Bahari_Manta_Point.png",
+      "followed": false
+    },
+    {
+      "label": "Prakicumar_Wisata_Bahari_Padar.png",
+      "hrefLiteral": "Prakicumar_Wisata_Bahari_Padar.png",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/Prakicumar_Wisata_Bahari_Padar.png",
+      "followed": false
+    },
+    {
+      "label": "Prakicumar_Wisata_Bahari_Papagarang.png",
+      "hrefLiteral": "Prakicumar_Wisata_Bahari_Papagarang.png",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/Prakicumar_Wisata_Bahari_Papagarang.png",
+      "followed": false
+    },
+    {
+      "label": "Prakicumar_Wisata_Bahari_Rinca.png",
+      "hrefLiteral": "Prakicumar_Wisata_Bahari_Rinca.png",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/Prakicumar_Wisata_Bahari_Rinca.png",
+      "followed": false
+    },
+    {
+      "label": "Prakicumar_Wisata_Bahari_Sabolo.png",
+      "hrefLiteral": "Prakicumar_Wisata_Bahari_Sabolo.png",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/Prakicumar_Wisata_Bahari_Sabolo.png",
+      "followed": false
+    },
+    {
+      "label": "banjir_rob.pdf",
+      "hrefLiteral": "banjir_rob.pdf",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/banjir_rob.pdf",
+      "followed": false
+    },
+    {
+      "label": "bmoi.pdf",
+      "hrefLiteral": "bmoi.pdf",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/bmoi.pdf",
+      "followed": false
+    },
+    {
+      "label": "buletin/",
+      "hrefLiteral": "buletin/",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/buletin/",
+      "followed": false
+    },
+    {
+      "label": "bulletin.pdf",
+      "hrefLiteral": "bulletin.pdf",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/bulletin.pdf",
+      "followed": false
+    },
+    {
+      "label": "cuaca/",
+      "hrefLiteral": "cuaca/",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/cuaca/",
+      "followed": false
+    },
+    {
+      "label": "gelombang_7hari_kedepan.pdf",
+      "hrefLiteral": "gelombang_7hari_kedepan.pdf",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/gelombang_7hari_kedepan.pdf",
+      "followed": false
+    },
+    {
+      "label": "gelombang_mingguan.pdf",
+      "hrefLiteral": "gelombang_mingguan.pdf",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/gelombang_mingguan.pdf",
+      "followed": false
+    },
+    {
+      "label": "peringatan-dini-banjir-rob.pdf",
+      "hrefLiteral": "peringatan-dini-banjir-rob.pdf",
+      "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/peringatan-dini-banjir-rob.pdf",
+      "followed": false
+    }
+  ],
+  "identityTermCounts": {
+    "Tanjung": 0,
+    "Priok": 0,
+    "Jakarta": 0,
+    "KODE": 0,
+    "apidoc": 0
+  },
+  "officialJakartaOrTanjungPriokKode": null,
+  "portMappingObserved": false,
+  "apiDocumentationIdentityConfirmed": false,
+  "numericFieldSample": false,
+  "businessRecordsPersisted": 0,
+  "otherRequests": 0,
+  "pdfDownloads": 0,
+  "portJsonRequests": 0,
+  "scope": "Only this exact response; linked documents and subdirectories not fetched. Filename metadata is not document-content evidence."
+}

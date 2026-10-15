@@ -1,8 +1,10 @@
 ## R2 41项来源当前累计证据（2026-10-15，待独立审查）
 
-全部41项保留：34资讯/公告、5数值天气、2原定后续阶段。当前R2-4 **24/39**（至少32，差8；24 OK / 8 PARTIAL / 1 STALE / 1 BLOCKED / 5 NOT_RUN）；R2-5 **21/34**（21 PASS / 2 FAIL / 1 PARTIAL / 10 NOT_RUN），数值有限历史诊断另列 **3/5**。不是整体R2 PASS或24小时证明。[唯一当前逐源矩阵](evidence/r2-current-source-matrix-2026-10-14/mapping.json) / [41项报告](evidence/r2-current-source-matrix-2026-10-14/report.md)。以下旧批次按发生时点保留，不单独充当当前累计。
+全部41项保留：34资讯/公告、5数值天气、2原定后续阶段。当前R2-4 **23/39**（至少32，差9；23 OK / 8 PARTIAL / 1 STALE / 2 BLOCKED / 5 NOT_RUN）；R2-5 **21/34**（21 PASS / 2 FAIL / 1 PARTIAL / 10 NOT_RUN），数值有限历史诊断另列 **3/5**。不是整体R2 PASS或24小时证明。[唯一当前逐源矩阵](evidence/r2-current-source-matrix-2026-10-14/mapping.json) / [41项报告](evidence/r2-current-source-matrix-2026-10-14/report.md)。以下旧批次按发生时点保留，不单独充当当前累计。
 
-本轮26项过滤列表核验后官方补证（起点440affa）：用户确认应用后，只读核实扩展/生成均26、原23顺序保留、新3各一次；生成文件整体额外字节差异无法归因，未宣称其他设置完全相同。05:53:36–37Z四目标DNS4均公网/GET4：PAGASA两页403各118字节，BMKG根200/577字节目录18链接、无明确apidoc/KODE，JMA targetTc404/2203字节非JSON/空列表。条件追加0、PDF/港口JSON0、业务/入库0，不重试/跳转/改设置。原件只本地ignored，旧440affa阻断保留；真实响应与历史成功分开，资格待父审、不改24/39、21/34、数值3/5。无产品/目录/生产/迁移/阈值改变，产品门禁/GUI/S7/24h本批NOT_RUN。[本轮材料与精确下一步](evidence/r2-official-gaps-applied-2026-10-15/report.md)。
+本轮JMA归属修正+BMKG doc单请求（起点32c8974）：已有05:53:37.778Z targetTc404与XX-W01目录/既有provider常量完全同URL，上轮只归XX-W02遗漏已修，交叉关联同一请求不重复计数。XX-W01当前OK→BLOCKED，R2-4=23/39、差9；R2-5=21/34与历史数值3/5不变。JMA/PAGASA新请求0。BMKG精确doc/于06:05:16.816Z安全DNS1/GET1=200/1137字节，只是7PDF+7PNG+2子目录索引，未见apidoc/目标港口/KODE映射；无下载/遍历/港口JSON，业务入库0，ID-W02不升格。旧200/404/32c8974误归属版本和原件保留，无系统写入；26项与额外生成字节unknown限制沿用，不再盘点旧全文。产品/目录/生产/迁移/阈值不改，产品门禁/GUI/S7/24h本批NOT_RUN。[修正依据、单请求与下一步](evidence/r2-bmkg-doc-jma-attribution-2026-10-15/report.md)，待父审。
+
+前轮26项过滤列表核验后官方补证（32c8974旧遗漏由上段修正，起点440affa）：用户确认应用后，只读核实扩展/生成均26、原23顺序保留、新3各一次；生成文件整体额外字节差异无法归因，未宣称其他设置完全相同。05:53:36–37Z四目标DNS4均公网/GET4：PAGASA两页403各118字节，BMKG根200/577字节目录18链接、无明确apidoc/KODE，JMA targetTc404/2203字节非JSON/空列表。条件追加0、PDF/港口JSON0、业务/入库0，不重试/跳转/改设置。原件只本地ignored，旧440affa阻断保留；真实响应与历史成功分开，资格待父审、不改24/39、21/34、数值3/5。无产品/目录/生产/迁移/阈值改变，产品门禁/GUI/S7/24h本批NOT_RUN。[本轮材料与精确下一步](evidence/r2-official-gaps-applied-2026-10-15/report.md)。
 
 前轮官方缺口有界取证（440affa原件保留，执行起点cfce1b3，NMC前批已获限定认可）：2026-10-15 05:21:25Z对PAGASA两既定入口、BMKG海事根、JMA targetTc逐目标DNS共4次，分别198.18.0.85（两次）/198.18.0.86/198.18.2.99，均被既有安全入口blocked_address，GET0、响应0。无当前页面/空状态/结构，BMKG apidoc和JMA forecast/specifications条件未满足，追加0；无PDF/港口JSON/重试/跳转/网络设置改动。只追加尝试记录，24/39、21/34、数值3/5与所有原资格/历史证据保持；不直接升格，不把安全阻断认定来源失败。产品不改、完整门禁/GUI/S7/24h本批NOT_RUN。[精确目标、台账及下一步](evidence/r2-official-gaps-2026-10-15/report.md)，待父审查。
 

@@ -1,6 +1,8 @@
 # R2 41项来源累计证据 — 2026-10-15
 
-最新用户应用后补证：扩展/生成26/原23/新3核验通过（生成整体额外字节差异unknown），DNS4公网/GET4：PAGASA403两次、BMKG根目录200、JMA列表404；没有活动/数值正样本，条件追加0，资格计数不变。[本批事实与限制](../r2-official-gaps-applied-2026-10-15/report.md)。
+最新JMA归属修正：同一次targetTc404也是XX-W01精确目录产品，现OK→BLOCKED，23/39、21/34、历史数值3/5；BMKG doc新DNS1/GET1=200文件目录，无apidoc/KODE。其他38项条目不改、无新JMA/PAGASA请求。[本批依据](../r2-bmkg-doc-jma-attribution-2026-10-15/report.md)。
+
+前轮用户应用后补证（32c8974遗漏由上段修正）：扩展/生成26/原23/新3核验通过（生成整体额外字节差异unknown），DNS4公网/GET4：PAGASA403两次、BMKG根目录200、JMA列表404；没有活动/数值正样本，条件追加0，资格计数不变。[本批事实与限制](../r2-official-gaps-applied-2026-10-15/report.md)。
 
 前轮官方缺口探测（440affa保留）：四固定入口DNS4/GET0，全部198.18保留地址安全阻断，没有当前页面或JSON响应；条件追加请求未启动。资格/计数24/39、21/34、数值3/5保持，历史成功/官方空状态不覆盖。[本批台账与精确下一步](../r2-official-gaps-2026-10-15/report.md)。
 
@@ -20,7 +22,7 @@
 
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
-| R2-4公开自动来源 | **24/39（61.54%）** | 最少32项，尚差8；24 OK、8 PARTIAL、1 STALE、1 BLOCKED、5 NOT_RUN，未通过 |
+| R2-4公开自动来源 | **23/39（58.97%）** | 最少32项，尚差9；23 OK、8 PARTIAL、1 STALE、2 BLOCKED、5 NOT_RUN，未通过 |
 | R2-5资讯/公告原页字段回放 | **21/34（61.76%）** | 尚差13；21 PASS、2 FAIL、1 PARTIAL、10 NOT_RUN，未通过 |
 | 数值字段独立检查 | **3/5** | 仅历史归一化诊断；不加到34项原页回放分子 |
 | R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
@@ -74,9 +76,9 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 
 | ID | 精确目录URL / 原文本 | 最新已有采集UTC / HTTP | R2-4 | 独立数值字段 | 判定理由 / 保留缺口 |
 | --- | --- | --- | --- | --- | --- |
-| ID-W02 | https://maritim.bmkg.go.id/marine2026-data/ （原目录文档/港口KODE模板） | 2026-10-15T05:53:37.472Z / 200 [根响应](../r2-official-gaps-applied-2026-10-15/ID-W02-root-capture.json) | NOT_RUN | NOT_RUN | 只取得18链接目录索引，无明确apidoc/官方KODE/数值产品；根可达不直接改资格，doc/未跟进。 |
-| XX-W01 | https://www.jma.go.jp/bosai/typhoon/data/targetTc.json | 2026-10-10T03:58:39.141Z / 200 [取证](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json) | OK | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 历史实网targetTc/持久化气旋ID诊断；无逐请求原JSON台账，不当文章回放。 |
-| XX-W02 | `https://www.jma.go.jp/bosai/typhoon/data/TC{id}/forecast.json` 、`/specifications.json` | 2026-10-15T05:53:37.778Z / targetTc404 [本次](../r2-official-gaps-applied-2026-10-15/XX-W02-targetTc-capture.json) | PARTIAL | PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED [旧字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 本次无有效列表，未请求两产品；旧forecast诊断保留，specifications仍缺，不降/升原资格。 |
+| ID-W02 | https://maritim.bmkg.go.id/marine2026-data/ （原目录文档/港口KODE模板） | 2026-10-15T06:05:16.816Z / doc200 [本次](../r2-bmkg-doc-jma-attribution-2026-10-15/ID-W02-doc-capture.json) | NOT_RUN | NOT_RUN | doc是16文件/子目录索引，非已确认apidoc，无目标港口/KODE映射或数值样本，所有链接未跟进，资格不升。 |
+| XX-W01 | https://www.jma.go.jp/bosai/typhoon/data/targetTc.json | 2026-10-15T05:53:37.778Z / 404 [同次归属](../r2-bmkg-doc-jma-attribution-2026-10-15/jma-cross-product-attribution.json) | BLOCKED | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [历史字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 最新精确URL404移出当前OK；历史数值诊断保留，404非无气旋，同一请求不重复计数。 |
+| XX-W02 | `https://www.jma.go.jp/bosai/typhoon/data/TC{id}/forecast.json` 、`/specifications.json` | 2026-10-15T05:53:37.778Z / 同次targetTc404 [归属](../r2-bmkg-doc-jma-attribution-2026-10-15/jma-cross-product-attribution.json) | PARTIAL | PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED [旧字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 前置列表与XX-W01是同一请求，没有两产品新请求；历史forecast保留，spec仍缺。 |
 | XX-A01 | https://api.open-meteo.com/v1/forecast | 2026-10-10T03:58:39.141Z / 200 [取证](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json) | OK | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 10/10陆地8港风/降水/能见度与时间字段诊断；不是保留原JSON回放或今天刷新。 |
 | XX-A02 | https://marine-api.open-meteo.com/v1/marine | 2026-10-10T03:58:39.141Z / 200 [取证](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json) | OK | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 10/10原点海况7港；VNSGN仍缺，约61.8公里独立参考点不能冒充泊位/原点。 |
 

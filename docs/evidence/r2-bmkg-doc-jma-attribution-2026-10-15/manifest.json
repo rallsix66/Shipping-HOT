@@ -1,0 +1,23 @@
+{
+  "executionHead": "32c8974c6c5f50ad8630b6eb771f0a6af3bd9b44",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "id": "ID-W02-doc",
+  "url": "https://maritim.bmkg.go.id/marine2026-data/doc/",
+  "observedIn": "docs/evidence/r2-official-gaps-applied-2026-10-15/structure-observation.json",
+  "explicitNewDocGetAuthorization": true,
+  "maxDnsCalls": 1,
+  "maxGetAttempts": 1,
+  "maxBytes": 1048576,
+  "timeoutMs": 10000,
+  "retries": 0,
+  "redirects": 0,
+  "pdf": 0,
+  "portJson": 0,
+  "sourcePolicy": {
+    "fetchAllowed": true,
+    "persistence": "disallowed",
+    "rawLocalOnly": true,
+    "remote": "minimal redacted metadata and hashes"
+  },
+  "systemSettingsWritten": false
+}
