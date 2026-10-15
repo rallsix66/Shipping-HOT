@@ -1,21 +1,21 @@
 {
   "type": "docs_and_saved_evidence_validation",
-  "at": "2026-10-15T03:21:18.506815+00:00",
-  "codeSha": "01934a5746c10d4165f4c4ffc5ce145d6de33d16",
-  "evidenceBaseline": "01934a5746c10d4165f4c4ffc5ce145d6de33d16",
+  "at": "2026-10-15T03:53:08.913555+00:00",
+  "codeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "evidenceBaseline": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
   "command": "python .tmp/validate-current-r2-matrix.py",
   "validatorSourceRequests": 0,
   "validatorSourceDns": 0,
   "lastQualificationBatchSystemDns": 4,
   "lastQualificationBatchHttpRequests": 4,
-  "thisTargetBatchTransportAttempts": 1,
-  "thisTargetBatchSystemDns": 1,
-  "thisTargetBatchCompletedResponses": 1,
+  "thisAdoptionRoundTransportAttempts": 0,
+  "thisAdoptionRoundSystemDns": 0,
+  "latestRealTargetCaptureRetainedFromPriorRound": true,
   "thisRoundMaerskRequests": 0,
   "thisCloseoutSourceRequests": 0,
   "thisCloseoutSystemDns": 0,
-  "functionalTests": "PASS_exact_clean_code_gate01934a5; separate from docs validation command",
-  "originalFieldReplay": "PASS_full_original_ONE_HTML10_metadata_fields_repeat_readonly_reopen; all40other_entries_unchanged",
+  "functionalTests": "PASS_exact_clean_code_gate_bebe144; separate from docs validation command",
+  "originalFieldReplay": "PASS_declared_disabled_ONE_config_existing_full_HTML10_metadata_fields; all40other_entries_and_all_coverage_unchanged",
   "checks": [
     {
       "check": "41 unique entries match current catalogue automatic P1 rows",
@@ -43,8 +43,8 @@
       "check": "All evidence paths exist",
       "pass": true,
       "detail": {
-        "referenceOccurrences": 167,
-        "uniquePaths": 55,
+        "referenceOccurrences": 175,
+        "uniquePaths": 60,
         "missing": []
       }
     },
@@ -124,6 +124,7 @@
       "pass": true,
       "detail": [
         "docs/architecture.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/archive-hashes.json",
         "docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt",
         "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
         "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
@@ -142,7 +143,7 @@
       "detail": null
     },
     {
-      "check": "Ten disabled candidates / two enabled seed declarations distinguished",
+      "check": "Eleven disabled page candidates / two enabled active-seed declarations distinguished",
       "pass": true,
       "detail": null
     },
@@ -252,7 +253,7 @@
       "detail": null
     },
     {
-      "check": "ONE target resolves only the actually saved308 relative Location without catalog replacement",
+      "check": "Historical ONE target resolves actual saved308 and current approved catalog names that same target",
       "pass": true,
       "detail": null
     },
@@ -282,7 +283,7 @@
       "detail": null
     },
     {
-      "check": "ONE candidate remains offline disabled metadata only and catalogue proposal unapplied",
+      "check": "Historical ONE offline mapping and then-unapplied proposal retained; current declaration remains disabled metadata-only",
       "pass": true,
       "detail": null
     },
@@ -313,6 +314,46 @@
     },
     {
       "check": "Only ONE source qualification changes to21/39 and13/34 with other40 untouched",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Approved one-row same-product catalog URL applied with original308 preserved",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Catalog web_list page shape explicitly maps to inert-HTML json_list without active-source expansion",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Declared ONE config preserves all previously verified mapping except display name",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Declared candidate replays all10 previous original metadata without new network",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Exact adopted candidate code gate and local replay share clean approved SHA",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Adoption original gate log hashes and245/1230+3 reported counts match",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "check": "ONE adoption changes only its config/catalog state, leaves all coverage and40others unchanged",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Next recommendations are at most3 already-measured RSS gaps, no probes or repeated failed search",
       "pass": true,
       "detail": null
     },

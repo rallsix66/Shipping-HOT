@@ -1,0 +1,60 @@
+{
+  "type": "committed_text_archive_hashes",
+  "at": "2026-10-15T03:53:08.993343+00:00",
+  "hashBasis": "Git LF text only; original wire/log byte digests remain exact and are never normalized",
+  "excluded": [
+    "archive-hashes.json"
+  ],
+  "files": [
+    {
+      "file": "catalogue-change-applied.diff.txt",
+      "sha256": "54a77e8d34983d76ba36f781da786ac829f25d2cf4ac22d52edbc79b5bd2cd0a",
+      "bytesLF": 291
+    },
+    {
+      "file": "catalogue-change-applied.json",
+      "sha256": "ae131ff792de08307b3538236d2454f54a334d14531276bec471522434df40b7",
+      "bytesLF": 2751
+    },
+    {
+      "file": "closeout.md",
+      "sha256": "e3afc21d4e86487bed1ccdc41141cb66f4623f0c221e058e16d262c0e0299606",
+      "bytesLF": 2641
+    },
+    {
+      "file": "documentation-validation-driver.py.txt",
+      "sha256": "ab6dddca55825f5586038620198e466a5ac00e67ababd6fb583cd9027b6abda0",
+      "bytesLF": 3586
+    },
+    {
+      "file": "inventory-metadata.json",
+      "sha256": "edbd6afa4be117356c29b2420f313adec41b9528117685498739e42029a0f421",
+      "bytesLF": 265
+    },
+    {
+      "file": "inventory.txt",
+      "sha256": "cd936a5cd5200ae7ef4cc488fe736ffa3491089dedbfb74639a5a9bb98202426",
+      "bytesLF": 2597
+    },
+    {
+      "file": "matrix-delta.json",
+      "sha256": "7f556203abda7c5c8f24c8e1e3d61fd23657a71b45d439688bbf54f7316e05dc",
+      "bytesLF": 3639
+    },
+    {
+      "file": "metadata-update-driver.py.txt",
+      "sha256": "1ac742e670e099aab786e966a6a6c172caf10f103a0ab4a892bc85df6bb1ea77",
+      "bytesLF": 13111
+    },
+    {
+      "file": "next-batch-recommendations.json",
+      "sha256": "c4660c8d085a6389684b873b35423d79c7ca5f3ad827b3590e6592aa049e7c5d",
+      "bytesLF": 5366
+    },
+    {
+      "file": "report.md",
+      "sha256": "54c0639b31883168b6719853934c5eeb49d6695d881e48b2a24467811584e316",
+      "bytesLF": 6117
+    }
+  ]
+}

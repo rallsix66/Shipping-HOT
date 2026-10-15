@@ -1,10 +1,10 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T03:14:35.075315+00:00",
-  "reviewedCodeSha": "01934a5746c10d4165f4c4ffc5ce145d6de33d16",
-  "evidenceHead": "01934a5746c10d4165f4c4ffc5ce145d6de33d16",
+  "generatedAt": "2026-10-15T03:44:21.669322+00:00",
+  "reviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "evidenceHead": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
-  "catalogSha256": "91328b2e4754dfe51ab1c94508df3c47675ede66df1e852d1b69b187418dd0b3",
+  "catalogSha256": "40979ae016c197075b1950b68f88c78d48b976820deaaadaace1ddd35c6abf3d",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
   "approval": {
     "messageId": "Sentinel_81b542f9f60c8191a2b32b4cc8018c61",
@@ -3644,11 +3644,11 @@
     {
       "id": "XX-K02",
       "priority": "P1",
-      "catalogUrlText": "https://www.one-line.com/en/news",
+      "catalogUrlText": "https://www.one-line.com/en/newsroom",
       "catalogUrls": [
-        "https://www.one-line.com/en/news"
+        "https://www.one-line.com/en/newsroom"
       ],
-      "exactProductUrl": "https://www.one-line.com/en/news",
+      "exactProductUrl": "https://www.one-line.com/en/newsroom",
       "catalogUnresolvedFragments": [],
       "classification": "information_notice",
       "legacyGroup": "NEWS",
@@ -3685,36 +3685,36 @@
       "fieldReplayEvidence": {
         "status": "PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS",
         "evidence": {
-          "path": "docs/evidence/r2-one-newsroom-replay-final-2026-10-15/summary.json",
+          "path": "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/summary.json",
           "selector": {
             "id": "XX-K02"
           },
-          "sha256": "94ccab2aaf783b73790cf5dd7e7acc753cb98b58ccf039a9df8a4413402d481b",
+          "sha256": "a7e71fdc70961bc73f223d6657e9bc903d4caf68b38ff589bf54ae5035cfd628",
           "hashBasis": "committed_text_LF"
         },
         "independentRawFields": {
-          "path": "docs/evidence/r2-one-newsroom-replay-final-2026-10-15/raw-field-metadata.json",
+          "path": "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/raw-field-metadata.json",
           "selector": {
             "id": "XX-K02"
           },
           "sha256": "87add267d9f024bc6294d614487b13bb653146c52de3118a89e98ead10a47380",
           "hashBasis": "committed_text_LF"
         },
-        "offlineCandidateConfig": {
-          "path": "docs/evidence/r2-one-newsroom-replay-final-2026-10-15/candidate-config.json",
+        "declaredCandidateConfig": {
+          "path": "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/candidate-config.json",
           "selector": null,
-          "sha256": "23f896f4484f2a8be0bd672570d6be82316e0beb8cbdc853e3eaf421e0d3dda9",
+          "sha256": "d5655397c98833c5c00b92e812e2db23c393fea5203a3357469ae8f92d786849",
           "hashBasis": "committed_text_LF"
         },
         "codeGate": {
-          "path": "docs/evidence/gate-01934a5-one-newsroom-json/source-proof.json",
+          "path": "docs/evidence/gate-bebe144-one-catalog-candidate/source-proof.json",
           "selector": null,
-          "sha256": "ec2dee72ba01d7ca853cd0cb19f708b3a2533d1583f705a00b1eab8839372980",
+          "sha256": "eb948fd4f68a02e7bae6959296ba4cae449e2236f6b2bb67dba446188967743b",
           "hashBasis": "committed_text_LF"
         },
         "records": 10,
-        "role": "one pinned plus nine listed records from original HTML inert application/json, not rebuilt JSON transport",
-        "sourceDateRole": "source-labelled releaseDate local datetime; no timezone/publication instant certification"
+        "role": "Declared default-off candidate replay of existing complete private HTML; no new source request",
+        "sourceDateRole": "Source-labelled releaseDate local second precision, no timezone/publication instant certification"
       },
       "numericFieldValidation": null,
       "dateEvidence": {
@@ -3730,34 +3730,33 @@
       },
       "defaultState": {
         "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
-        "sourceConfig": "offline_candidate_only_not_registered",
-        "declaredSeedEnabled": null,
+        "sourceConfig": "configured_disabled_candidate",
+        "declaredSeedEnabled": false,
         "effectiveDefaultIntelJobEnabled": false,
-        "currentUserPersistedSettings": "not_inspected",
-        "offlineCandidateEnabled": false
+        "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
         "verdict": "OK",
         "countedOK": true,
-        "reason": "Saved original308 resolves to explicitly approved same-host HTTPS target; canonical/h1/embedded page verify ONE Newsroom,200 complete original bytes and10 real metadata collector/repeat/read-only-reopen fields pass. Counts resolved source product qualification; original catalogue URL not claimed200 and permanent catalogue/registration remain unchanged."
+        "reason": "Previously verified exact target200 and10 full original metadata replay retained; approved same-product catalogue URL now matches declared disabled candidate. Original URL308 remains historical. No new live or continuous-availability qualification this round."
       },
       "r2_5": {
         "verdict": "PASS",
         "countedPass": true,
-        "reason": "All10 pinned/list records compared to original JSON title/aliasUrl/releaseDate and complete stored date evidence after read-only reopen; zero repeat versions. Second precision, missing timezone and null UTC/publication instant retained."
+        "reason": "Declared disabled configuration exactly reuses verified inert-HTML JSON mapping; all10 existing raw title/alias/releaseDate fields match prior proof, repeat0new/revised and read-only reopen0mismatch. No new upstream request."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Formal one-row catalogue URL proposal remains unapplied; original catalogue endpoint still308.",
-        "Typed metadata-only candidate exists only in offline evidence, not active seeds/allowlist/production.",
-        "releaseDate has no timezone; no UTC publication or operational port-impact inference."
+        "Candidate remains disabled and absent from active seeds/production source selection; no24h or continuous availability evidence.",
+        "releaseDate still lacks timezone; no UTC publication or operational impact inference."
       ],
       "historicalSuperseded": [
         "Earlier198.18 DNS block superseded by one public system DNS result; this round current outcome is transport failure or actual308, not DNS blockage.",
-        "ONE target now verified with200 and original embedded10-field replay; prior original308 and DNS history retained rather than overwritten. Maersk unchanged this round."
+        "ONE target now verified with200 and original embedded10-field replay; prior original308 and DNS history retained rather than overwritten. Maersk unchanged this round.",
+        "One-row catalogue URL proposal approved/applied; old proposal and original308 retained as history, not current pending work."
       ],
       "latestAttempt": {
         "evidence": {
@@ -3940,12 +3939,63 @@
         }
       },
       "resolvedProductUrl": "https://www.one-line.com/en/newsroom",
-      "catalogChangeProposal": {
+      "previousCatalogProductUrl": "https://www.one-line.com/en/news",
+      "catalogUrlChangeApplied": {
+        "path": "docs/evidence/r2-one-catalog-candidate-2026-10-15/catalogue-change-applied.json",
+        "selector": {
+          "id": "XX-K02"
+        },
+        "sha256": "ae131ff792de08307b3538236d2454f54a334d14531276bec471522434df40b7",
+        "hashBasis": "committed_text_LF"
+      },
+      "historicalCatalogChangeProposal": {
         "path": "docs/evidence/r2-one-newsroom-target-2026-10-15/catalogue-url-proposal.json",
         "selector": null,
         "sha256": "83a650e59ebd7e052d7b9125f190db93af9de35f02f4ee8819f34c25d516b5cc",
         "hashBasis": "committed_text_LF"
-      }
+      },
+      "catalogProductMapping": {
+        "directoryFormat": "web_list",
+        "parserKind": "json_list",
+        "parserInputMode": "HTML inline inert application/json",
+        "sameSourceAndProduct": true
+      },
+      "historicalFieldReplays": [
+        {
+          "status": "PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS",
+          "evidence": {
+            "path": "docs/evidence/r2-one-newsroom-replay-final-2026-10-15/summary.json",
+            "selector": {
+              "id": "XX-K02"
+            },
+            "sha256": "94ccab2aaf783b73790cf5dd7e7acc753cb98b58ccf039a9df8a4413402d481b",
+            "hashBasis": "committed_text_LF"
+          },
+          "independentRawFields": {
+            "path": "docs/evidence/r2-one-newsroom-replay-final-2026-10-15/raw-field-metadata.json",
+            "selector": {
+              "id": "XX-K02"
+            },
+            "sha256": "87add267d9f024bc6294d614487b13bb653146c52de3118a89e98ead10a47380",
+            "hashBasis": "committed_text_LF"
+          },
+          "offlineCandidateConfig": {
+            "path": "docs/evidence/r2-one-newsroom-replay-final-2026-10-15/candidate-config.json",
+            "selector": null,
+            "sha256": "23f896f4484f2a8be0bd672570d6be82316e0beb8cbdc853e3eaf421e0d3dda9",
+            "hashBasis": "committed_text_LF"
+          },
+          "codeGate": {
+            "path": "docs/evidence/gate-01934a5-one-newsroom-json/source-proof.json",
+            "selector": null,
+            "sha256": "ec2dee72ba01d7ca853cd0cb19f708b3a2533d1583f705a00b1eab8839372980",
+            "hashBasis": "committed_text_LF"
+          },
+          "records": 10,
+          "role": "one pinned plus nine listed records from original HTML inert application/json, not rebuilt JSON transport",
+          "sourceDateRole": "source-labelled releaseDate local datetime; no timezone/publication instant certification"
+        }
+      ]
     },
     {
       "id": "XX-K03",
@@ -4551,7 +4601,7 @@
       "historicalSuperseded": []
     }
   ],
-  "nextBatchProposal": [
+  "historicalCompletedBatchProposal": [
     {
       "id": "CN-P02",
       "url": "https://www.sz.msa.gov.cn/",
@@ -4579,6 +4629,86 @@
       "status": "HISTORICAL_PROPOSAL_NOW_EXACT_URL_CAPTURED_ONCE",
       "latestR2_4": "PARTIAL",
       "existingReusableImplementation": "Current bounded batch complete: VN-D01 disabled candidate/raw replay; other gaps retained. No automatic redirect/retry/new interface authorized."
+    }
+  ],
+  "nextBatchProposal": [
+    {
+      "id": "MY-C01",
+      "url": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
+      "status": "PROPOSED_ONLY_NOT_EXECUTED",
+      "currentR2_4": "OK",
+      "currentR2_5": "NOT_RUN",
+      "storedActualHttpStatus": 200,
+      "storedActualAt": "2026-10-13T07:00:30.791Z",
+      "storedParsedItems": 10,
+      "storedCompleteTitleLinkTime": 10,
+      "reusableEvidence": {
+        "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+        "selector": {
+          "id": "MY-C01"
+        },
+        "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+        "hashBasis": "committed_text_LF"
+      },
+      "reusableImplementation": "Existing RSS Feed parser, secure byte transport/decoder, collector, metadata-only SQLite versions and read-only reopen harness",
+      "gap": "Full original XML was not retained; stored metadata/hash is not a real raw replay. Need original XML -> collector -> idempotency -> read-only field comparison with explicit source-date semantics.",
+      "license": "Unknown full-body reuse; metadata_only, raw XML private ignored only if separately authorized; never reconstruct raw XML from metadata.",
+      "expectedBenefit": "At most one additional R2-5 pass if qualified; already R2-4 OK so no new availability numerator",
+      "futurePrerequisite": "Separate bounded next round; read-only config/safety DNS check then at most one exact GET each if approved. No probe or source configuration change in this recommendation.",
+      "thisRoundDnsCalls": 0,
+      "thisRoundHttpRequests": 0
+    },
+    {
+      "id": "MY-T01",
+      "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+      "status": "PROPOSED_ONLY_NOT_EXECUTED",
+      "currentR2_4": "OK",
+      "currentR2_5": "NOT_RUN",
+      "storedActualHttpStatus": 200,
+      "storedActualAt": "2026-10-13T07:00:35.340Z",
+      "storedParsedItems": 6,
+      "storedCompleteTitleLinkTime": 6,
+      "reusableEvidence": {
+        "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+        "selector": {
+          "id": "MY-T01"
+        },
+        "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+        "hashBasis": "committed_text_LF"
+      },
+      "reusableImplementation": "Existing RSS Feed parser, secure byte transport/decoder, collector, metadata-only SQLite versions and read-only reopen harness",
+      "gap": "Full original XML was not retained; stored metadata/hash is not a real raw replay. Need original XML -> collector -> idempotency -> read-only field comparison with explicit source-date semantics.",
+      "license": "Unknown full-body reuse; metadata_only, raw XML private ignored only if separately authorized; never reconstruct raw XML from metadata.",
+      "expectedBenefit": "At most one additional R2-5 pass if qualified; already R2-4 OK so no new availability numerator",
+      "futurePrerequisite": "Separate bounded next round; read-only config/safety DNS check then at most one exact GET each if approved. No probe or source configuration change in this recommendation.",
+      "thisRoundDnsCalls": 0,
+      "thisRoundHttpRequests": 0
+    },
+    {
+      "id": "PH-M01",
+      "url": "https://portcalls.com/feed/",
+      "status": "PROPOSED_ONLY_NOT_EXECUTED",
+      "currentR2_4": "OK",
+      "currentR2_5": "NOT_RUN",
+      "storedActualHttpStatus": 200,
+      "storedActualAt": "2026-10-13T07:00:29.490Z",
+      "storedParsedItems": 10,
+      "storedCompleteTitleLinkTime": 10,
+      "reusableEvidence": {
+        "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+        "selector": {
+          "id": "PH-M01"
+        },
+        "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+        "hashBasis": "committed_text_LF"
+      },
+      "reusableImplementation": "Existing RSS Feed parser, secure byte transport/decoder, collector, metadata-only SQLite versions and read-only reopen harness",
+      "gap": "Full original XML was not retained; stored metadata/hash is not a real raw replay. Need original XML -> collector -> idempotency -> read-only field comparison with explicit source-date semantics.",
+      "license": "Unknown full-body reuse; metadata_only, raw XML private ignored only if separately authorized; never reconstruct raw XML from metadata.",
+      "expectedBenefit": "At most one additional R2-5 pass if qualified; already R2-4 OK so no new availability numerator",
+      "futurePrerequisite": "Separate bounded next round; read-only config/safety DNS check then at most one exact GET each if approved. No probe or source configuration change in this recommendation.",
+      "thisRoundDnsCalls": 0,
+      "thisRoundHttpRequests": 0
     }
   ]
 }

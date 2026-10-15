@@ -1,0 +1,121 @@
+from pathlib import Path
+from datetime import datetime,timezone
+import json,hashlib,subprocess,shutil,re
+
+code='bebe1441465adfcabb9daf93cb2a8656ec1fc796'
+previous='b213739722e5ec5bb66d287d70b0e1e0d7ff7068'
+batch=Path('docs/evidence/r2-one-catalog-candidate-2026-10-15');batch.mkdir(exist_ok=True)
+replay=Path('docs/evidence/r2-one-catalog-candidate-replay-2026-10-15')
+gate=Path('docs/evidence/gate-bebe144-one-catalog-candidate')
+matrix=Path('docs/evidence/r2-current-source-matrix-2026-10-14')
+def read(p):return json.loads(Path(p).read_text(encoding='utf-8-sig'))
+def write(p,x):Path(p).write_bytes((json.dumps(x,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
+def text(p,s):Path(p).write_bytes(('\n'.join(l.rstrip() for l in s.splitlines()).rstrip()+'\n').encode('utf-8'))
+def sha(b):return hashlib.sha256(b).hexdigest()
+def blob(rev,p):return subprocess.check_output(['git','show',rev+':'+p])
+assert subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()==code
+g=read(gate/'summary.json');r=read(replay/'summary.json')['results'][0]
+assert g['sha']==code and len(g['commands'])==9 and all(c['rawExit']==0 for c in g['commands']) and g['retainedUnchanged'] and not g['testedSourceDiff']
+assert read(replay/'command.json')['sha']==code and read(replay/'command.json')['rawExit']==0
+assert r['configMatchesPreviouslyVerifiedMapping'] and r['all10RawMetadataFieldsMatchPreviousProof'] and r['reopen']['mismatches']==0
+assert not (gate/'source-proof.json').exists(), 'one-time evidence processing already completed'
+local=Path('.tmp/one-catalog-candidate-original-gate-logs');local.mkdir(exist_ok=False)
+for command in g['commands']:
+    name=command['name'];phase=read(gate/(name+'.json'))
+    for stream in ['stdout','stderr']:
+        p=gate/(name+'.'+stream+'.log');raw=p.read_bytes();shutil.copyfile(p,local/p.name)
+        phase[stream+'ExactUtf8']=raw.decode('utf-8');phase[stream+'OriginalByteSha256']=sha(raw);text(p,raw.decode('utf-8'))
+    write(gate/(name+'.json'),phase)
+write(gate/'source-proof.json',{'sha':code,'cleanClone':True,'node':'v24.15.0','abi':'137','existingNodeModulesBeforeInstall':False,
+    'installScriptsNotSkipped':True,'commandsAllRawExitZero':True,'targeted':{'files':17,'passed':245},'full':{'files':129,'passed':1230,'skipped':3},
+    'retainedUnchanged':g['retainedUnchanged'],'testedSourceDiff':g['testedSourceDiff'],'upstreamSourceRequestsThisRound':0,
+    'networkScope':'Dependency installation separate from source requests; no ONE/Maersk live work in this round',
+    'exactOriginalLogs':'Per-command JSON carries exact UTF8 stdout/stderr and byte hashes; display logs whitespace-normalized only',
+    's7':'NOT_RUN_no_route_or_UI_change; prior_GUI_pending'})
+for folder,pairs in [(replay,[('.tmp/one-catalog-candidate-replay-20261015.test.ts','replay-procedure.test.ts.txt'),('.tmp/one-catalog-candidate-replay-20261015.config.ts','replay-config.ts.txt'),('.tmp/execute-one-catalog-candidate-replay-20261015.cjs','replay-launcher.cjs.txt')]),(gate,[('.tmp/one-catalog-candidate-clean-gate-20261015.cjs','gate-driver.cjs.txt')])]:
+    for source,name in pairs:text(folder/name,Path(source).read_text(encoding='utf-8'))
+for stream in ['stdout.log','stderr.log']:text(replay/stream,(replay/stream).read_text(encoding='utf-8'))
+before=blob(previous,'docs/intel-source-catalog.md');after=blob(code,'docs/intel-source-catalog.md')
+assert Path('docs/intel-source-catalog.md').read_bytes().replace(b'\r\n',b'\n')==after
+old_row=next(l for l in before.decode('utf-8').splitlines() if l.startswith('| XX-K02 |'))
+new_row=next(l for l in after.decode('utf-8').splitlines() if l.startswith('| XX-K02 |'))
+assert new_row==old_row.replace('https://www.one-line.com/en/news |','https://www.one-line.com/en/newsroom |',1)
+old_rows={l.split('|')[1].strip():l for l in before.decode('utf-8').splitlines() if re.match(r'^\| [A-Z]{2}-[A-Z]\d{2} \|',l)}
+new_rows={l.split('|')[1].strip():l for l in after.decode('utf-8').splitlines() if re.match(r'^\| [A-Z]{2}-[A-Z]\d{2} \|',l)}
+assert set(old_rows)==set(new_rows) and [sid for sid in old_rows if old_rows[sid]!=new_rows[sid]]==['XX-K02']
+cfg=read(replay/'candidate-config.json')
+write(batch/'catalogue-change-applied.json',{'status':'APPLIED_APPROVED','appliedCodeSha':code,'previousEvidenceHead':previous,
+    'authorization':'Current parent delegation explicitly approves this one same-source/same-product URL update and disabled candidate; no invented message ID',
+    'id':'XX-K02','oldUrl':'https://www.one-line.com/en/news','newUrl':'https://www.one-line.com/en/newsroom',
+    'oldRow':old_row,'newRow':new_row,'oldCatalogLfSha256':sha(before),'newCatalogLfSha256':sha(after),
+    'tableRowsChangedOnly':['XX-K02'],'noteAdded':'Old URL/actual308/verified target provenance and page-shape versus parser-mode mapping',
+    'directoryFormat':'web_list','parserKind':'json_list','parserInputMode':'HTML inline inert application/json',
+    'original308Evidence':'docs/evidence/r2-carrier-reapplied-2026-10-15/XX-K02-response.json',
+    'targetEvidence':'docs/evidence/r2-one-newsroom-target-2026-10-15/summary.json',
+    'candidateConfig':cfg['seed'],'candidateMappingMatchesPriorProof':True,
+    'defaultEnabled':False,'persistence':'disallowed','contentScope':'metadata_only',
+    'activeSeedsOrProductionAllowlistChanged':False,'sourceDnsCallsThisRound':0,'sourceHttpRequestsThisRound':0,'MaerskRequests':0,
+    'continuousAvailability':'NOT_RUN_no_new_live_or24h_claim'})
+text(batch/'catalogue-change-applied.diff.txt','--- docs/intel-source-catalog.md (prior)\n+++ docs/intel-source-catalog.md (approved current)\n-'+old_row+'\n+'+new_row)
+inv=Path('.tmp/one-catalog-candidate-inventory-20261015.txt').read_bytes();kept=[];skip=False
+for line in inv.decode('utf-8').splitlines():
+    if line.startswith('## '):skip=line=='## project-markdown'
+    if not skip:kept.append(line)
+text(batch/'inventory.txt','\n'.join(kept));write(batch/'inventory-metadata.json',{'rawExit':0,'fullInventoryByteSha256':sha(inv),'localOriginal':'.tmp/one-catalog-candidate-inventory-20261015.txt','scope':'Inventory only, not safety audit; full local listing preserved'})
+shutil.copyfile(matrix/'mapping.json','.tmp/one-catalog-candidate-matrix-before.json')
+old_matrix=read(matrix/'mapping.json')
+recommendations=[]
+for sid in ['MY-C01','MY-T01','PH-M01']:
+    e=next(e for e in old_matrix['entries'] if e['id']==sid)
+    recommendations.append({'id':sid,'url':e['exactProductUrl'],'status':'PROPOSED_ONLY_NOT_EXECUTED','currentR2_4':e['r2_4']['verdict'],'currentR2_5':e['r2_5']['verdict'],
+        'storedActualHttpStatus':e['latestActualFetch']['httpStatus'],'storedActualAt':e['latestActualFetch']['startedAt'],
+        'storedParsedItems':e['fieldReplayEvidence']['liveParsedItems'],'storedCompleteTitleLinkTime':e['fieldReplayEvidence']['liveTitleLinkTimeComplete'],
+        'reusableEvidence':e['latestActualFetch']['evidence'],'reusableImplementation':'Existing RSS Feed parser, secure byte transport/decoder, collector, metadata-only SQLite versions and read-only reopen harness',
+        'gap':'Full original XML was not retained; stored metadata/hash is not a real raw replay. Need original XML -> collector -> idempotency -> read-only field comparison with explicit source-date semantics.',
+        'license':'Unknown full-body reuse; metadata_only, raw XML private ignored only if separately authorized; never reconstruct raw XML from metadata.',
+        'expectedBenefit':'At most one additional R2-5 pass if qualified; already R2-4 OK so no new availability numerator',
+        'futurePrerequisite':'Separate bounded next round; read-only config/safety DNS check then at most one exact GET each if approved. No probe or source configuration change in this recommendation.',
+        'thisRoundDnsCalls':0,'thisRoundHttpRequests':0})
+write(batch/'next-batch-recommendations.json',{'type':'at_most_three_evidence_based_recommendations','basis':'Current accepted matrix plus stored genuine RSS metadata; no new probe, no repeat of concluded failed investigations','entries':recommendations,
+    'maximumPotentialR2_5':'13/34 ->16/34 only if all3 full original XML replays qualify','r2_4Remains':'21/39; these three already OK, public shortfall11 not reduced',
+    'notAuthorizedByThisFile':'No live DNS/HTTP/activation; exact execution and source scope must be coordinated by parent','sourceDnsCalls':0,'sourceHttpRequests':0})
+p=Path('.tmp/build-current-r2-matrix.py');builder=p.read_text(encoding='utf-8')
+builder=builder.replace("HEAD = '01934a5746c10d4165f4c4ffc5ce145d6de33d16'",f"HEAD = '{code}'").replace("CODE = '01934a5746c10d4165f4c4ffc5ce145d6de33d16'",f"CODE = '{code}'")
+needle="    url_text=source['originalCatalogUrlText']"
+assert needle in builder
+builder=builder.replace(needle,needle+"\n    if sid=='XX-K02':url_text=next(l for l in Path('docs/intel-source-catalog.md').read_text(encoding='utf-8').splitlines() if l.startswith('| XX-K02 |')).split('|')[4].strip()",1)
+block="""    if sid=='XX-K02':
+        applied_batch='docs/evidence/r2-one-catalog-candidate-2026-10-15'
+        e['previousCatalogProductUrl']='https://www.one-line.com/en/news'
+        e['catalogUrlChangeApplied']=ref(applied_batch+'/catalogue-change-applied.json',{'id':sid})
+        e['historicalCatalogChangeProposal']=e.pop('catalogChangeProposal')
+        e['catalogProductMapping']={'directoryFormat':'web_list','parserKind':'json_list','parserInputMode':'HTML inline inert application/json','sameSourceAndProduct':True}
+        e['defaultState']['sourceConfig']='configured_disabled_candidate'
+        e['defaultState']['declaredSeedEnabled']=False
+        e['defaultState'].pop('offlineCandidateEnabled',None)
+        e['historicalFieldReplays']=[e['fieldReplayEvidence']]
+        e['fieldReplayEvidence']={'status':'PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS','evidence':ref('docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/summary.json',{'id':sid}),
+            'independentRawFields':ref('docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/raw-field-metadata.json',{'id':sid}),
+            'declaredCandidateConfig':ref('docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/candidate-config.json'),
+            'codeGate':ref('docs/evidence/gate-bebe144-one-catalog-candidate/source-proof.json'),
+            'records':10,'role':'Declared default-off candidate replay of existing complete private HTML; no new source request',
+            'sourceDateRole':'Source-labelled releaseDate local second precision, no timezone/publication instant certification'}
+        e['r2_4']={'verdict':'OK','countedOK':True,'reason':'Previously verified exact target200 and10 full original metadata replay retained; approved same-product catalogue URL now matches declared disabled candidate. Original URL308 remains historical. No new live or continuous-availability qualification this round.'}
+        e['r2_5']={'verdict':'PASS','countedPass':True,'reason':'Declared disabled configuration exactly reuses verified inert-HTML JSON mapping; all10 existing raw title/alias/releaseDate fields match prior proof, repeat0new/revised and read-only reopen0mismatch. No new upstream request.'}
+        e['gaps']=['Candidate remains disabled and absent from active seeds/production source selection; no24h or continuous availability evidence.', 'releaseDate still lacks timezone; no UTC publication or operational impact inference.']
+        e['historicalSuperseded'].append('One-row catalogue URL proposal approved/applied; old proposal and original308 retained as history, not current pending work.')
+"""
+assert builder.count('    entries.append(e)')==1
+builder=builder.replace('    entries.append(e)',block+'    entries.append(e)')
+builder=builder.replace("result['nextBatchProposal']=[", "result['historicalCompletedBatchProposal']=[")
+needle="for sid in next_ids]\n(OUT/'mapping.json')"
+assert needle in builder
+builder=builder.replace(needle,"for sid in next_ids]\nresult['nextBatchProposal']=read('docs/evidence/r2-one-catalog-candidate-2026-10-15/next-batch-recommendations.json')['entries']\n(OUT/'mapping.json')",1)
+text(p,builder);subprocess.run(['python',str(p)],check=True);shutil.copyfile(p,matrix/'build-matrix.py.txt')
+current=read(matrix/'mapping.json');prior={e['id']:e for e in old_matrix['entries']}
+other=[e['id'] for e in current['entries'] if e['id']!='XX-K02' and e!=prior[e['id']]]
+assert other==[] and current['measuredCoverage']==old_matrix['measuredCoverage']
+write(batch/'matrix-delta.json',{'changedSourceIdsOnly':['XX-K02'],'other40SourceEntryDifferences':other,'allCoverageCountsAndStatusesUnchanged':True,
+    'beforeCoverage':old_matrix['measuredCoverage'],'afterCoverage':current['measuredCoverage'],'latestActualFetchUnchanged':next(e for e in current['entries'] if e['id']=='XX-K02')['latestActualFetch']==prior['XX-K02']['latestActualFetch'],
+    'thisRoundSourceDnsCalls':0,'thisRoundSourceHttpRequests':0,'newLiveQualification':False})
+print(json.dumps({'code':code,'other40SourceChanges':other,'coverageUnchanged':True,'nextBatchIds':[r['id'] for r in recommendations]},ensure_ascii=True))

@@ -1,8 +1,8 @@
 # R2 41项来源累计证据 — 2026-10-15
 
-当前ONE单独核准的已保存308目标 /en/newsroom 实测200、635664字节，完整原HTML内嵌JSON的1置顶+9列表元数据经现有collector/SQLite、幂等及只读重开全字段0差异；秒精度releaseDate无时区，UTC/publication instant均null。源码 `01934a5746c10d4165f4c4ffc5ce145d6de33d16` 干净门禁244定向、1229全量/3跳过与3smoke通过。原目录 /en/news 仍保留，先前308链未覆盖，只提交一行目录URL提案；离线typed候选默认关闭、未注册。ONE计对应已验证目标的来源/字段资格，不宣称原URL直接200或生产启用。Maersk本轮0请求、旧通用失败原因仍未知。[本轮证据与目录提案](../r2-one-newsroom-target-2026-10-15/report.md)。
+当前ONE同源目录URL更新已获批准并应用：XX-K02现为 https://www.one-line.com/en/newsroom，旧/en/news及原308链保留；目录web_list为HTML页面形态，现有默认关闭候选用json_list惰性HTML内嵌JSON模式。源码 `bebe1441465adfcabb9daf93cb2a8656ec1fc796` 干净门禁245定向、1230全量/3跳过及3smoke通过。已有635664原HTML经正式关闭候选回归10条字段、重复0新0修订、只读重开0差异，与前轮10条原字段完全相同；本轮来源DNS/HTTP0，不刷新02:56实网时间，不推导持续可用。覆盖仍21/39、13/34，数值3/5独立。[本轮目录/配置依据与至多三项建议](../r2-one-catalog-candidate-2026-10-15/report.md)。
 
-本报告汇总已保存证据，供父会话独立审查。源码基准 `01934a5746c10d4165f4c4ffc5ce145d6de33d16`；前一四源采集HEAD为 `50da3805ee14e72222a4e26f4230073cf1842bc7`。该历史批次四次系统DNS均公网、精确索引HTTP4；VN-D01原页有限通过、MY-L01真实探针失败，两源跳转未跟随；干净源码门禁已另存。[机器矩阵](mapping.json)保留全部41项的精确目录产品、采集时点、原证据路径/LF文本哈希、字段回放、时间角色、许可、默认状态及两项独立判定。
+本报告汇总已保存证据，供父会话独立审查。源码基准 `bebe1441465adfcabb9daf93cb2a8656ec1fc796`；前一四源采集HEAD为 `50da3805ee14e72222a4e26f4230073cf1842bc7`。该历史批次四次系统DNS均公网、精确索引HTTP4；VN-D01原页有限通过、MY-L01真实探针失败，两源跳转未跟随；干净源码门禁已另存。[机器矩阵](mapping.json)保留全部41项的精确目录产品、采集时点、原证据路径/LF文本哈希、字段回放、时间角色、许可、默认状态及两项独立判定。
 
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
@@ -50,7 +50,7 @@ NMC两项与Westports日期复审曾将旧暂计逐步修正为19/39；本批VN-
 | PH-C01 | https://customs.gov.ph/category/media-releases/ | 2026-10-14T07:56:33.170Z / 200 [取证](../r2-four-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-public-index-replay-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
 | PH-M01 | https://portcalls.com/feed/ | 2026-10-13T07:00:29.490Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
 | XX-K01 | https://www.maersk.com/news | 2026-10-15T02:38:28.356Z / 尝试1、未捕获响应 [当前证据](../r2-carrier-reapplied-2026-10-15/summary.json) | BLOCKED | NOT_RUN | 公网23.53.3.137、23.53.3.144；fetch_failed无底层错误记录，不判断CA/TLS/反爬；不重试。 |
-| XX-K02 | 原目录 https://www.one-line.com/en/news → 已核准目标 https://www.one-line.com/en/newsroom | 2026-10-15T02:56:22.136Z / 200 [目标与原308链](../r2-one-newsroom-target-2026-10-15/report.md) | OK | PASS [10条原页字段](../r2-one-newsroom-replay-final-2026-10-15/summary.json) | 原HTML内嵌JSON的置顶1+列表9；重复0修订、只读重开0差异；releaseDate秒精度/无时区/瞬间null，目录URL提案尚未应用、未注册。 |
+| XX-K02 | https://www.one-line.com/en/newsroom（旧/en/news与308另存） | 2026-10-15T02:56:22.136Z / 200（前轮实测；本轮HTTP0）[沿革](../r2-one-catalog-candidate-2026-10-15/catalogue-change-applied.json) | OK | PASS [正式关闭候选原页回归](../r2-one-catalog-candidate-replay-2026-10-15/summary.json) | 目录web_list页面由json_list惰性数据模式读取；1置顶+9列表，日期秒精度无时区/瞬间null，默认关闭metadata-only且不进入活动源。 |
 | XX-K03 | https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/ | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
 | XX-M01 | https://theloadstar.com/feed/ | 2026-10-13T08:25:10.410Z / 200 [取证](../r2-four-index-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-four-index-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
 | XX-M03 | https://splash247.com/feed/ | 2026-10-13T08:25:11.082Z / 200 [取证](../r2-four-index-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-four-index-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
@@ -79,7 +79,7 @@ NMC两项与Westports日期复审曾将旧暂计逐步修正为19/39；本批VN-
 
 逐项完整状态在mapping.json。未知HTML许可仅允许metadata，完整私有字节不发布；远端导出字段/hash不能重建完整原页。TMD精确CAP按已有public-domain声明，BMKG RSS仅excerpt范围，未知同主机页面不继承许可。旧第三方档案本轮未做全面脱敏审计或清理。
 
-TMD/BMKG内置seed的声明是 `enabled=true`，而默认生产Intel job仍关闭，未显式启用时启动选中源为空；这两个事实分开。10个HTML候选均 `enabled=false`。其他资讯源未配置；数值天气属于现有运行设置所控制的运营层，本轮不读取用户持久化设置，不写成已开或已关。
+TMD/BMKG内置seed的声明是 `enabled=true`，而默认生产Intel job仍关闭，未显式启用时启动选中源为空；这两个事实分开。11个页面候选均 `enabled=false`（10个web_list mapper、ONE为json_list的HTML模式）。其他资讯源未配置；数值天气属于现有运行设置所控制的运营层，本轮不读取用户持久化设置，不写成已开或已关。
 
 已被后续真实响应/回放取代的DNS阻断、旧selector缺口保留为历史，不继续当当前失败。Northport真实冲突与VN-P01无日期不因DNS修好消失。R1.5历史1/10仍为用户延后、未完成验证，不重新找事件，也不阻塞R2。
 
@@ -90,3 +90,7 @@ TMD/BMKG内置seed的声明是 `enabled=true`，而默认生产Intel job仍关�
 文档验证与收尾见[closeout.md](closeout.md)及[validation.json](validation.json)。
 
 P2复审修复：尾部模式不匹配不再交通用日期解析，原四条保存原页全字段与修前一致，覆盖不变，P2修复轮新增来源HTTP/DNS0。两个重定向只保存正文相对路径，未保存Location，不确认同域或绝对目标；MY静态卡片只缺详情href。[修复报告](../r2-anchor-date-review-repair-2026-10-15/report.md)。
+
+## 下一批仅建议，尚未执行
+
+建议MY-C01、MY-T01、PH-M01三项既有RSS元数据补完整原XML回放/幂等/只读重开；已有10/6/10条完整标题链接时间派生，R2-5仍NOT_RUN。均已R2-4 OK，不重复增加可用性分子；没有新探测或重复失败检索。详见[三项证据与缺口](../r2-one-catalog-candidate-2026-10-15/next-batch-recommendations.json)。

@@ -11,8 +11,8 @@ old = json.loads(OLD.read_text(encoding='utf-8'))
 inventory_path = ROOT / 'r2-p1-inventory-2026-10-13/source-inventory.json'
 inventory = json.loads(inventory_path.read_text(encoding='utf-8'))
 legacy = {r['id']: r for r in inventory['entries']}
-HEAD = '01934a5746c10d4165f4c4ffc5ce145d6de33d16'
-CODE = '01934a5746c10d4165f4c4ffc5ce145d6de33d16'
+HEAD = 'bebe1441465adfcabb9daf93cb2a8656ec1fc796'
+CODE = 'bebe1441465adfcabb9daf93cb2a8656ec1fc796'
 
 def read(path): return json.loads(Path(path).read_text(encoding='utf-8'))
 def ref(path, selector=None):
@@ -72,6 +72,7 @@ for source in old['entries']:
     category='numeric_weather' if group=='OP' else 'later_stage' if group in ['PAID','VECTOR'] else 'information_notice'
     # Keep multi-product catalogue rows and templates literal, never manufacture a resolved URL.
     url_text=source['originalCatalogUrlText']
+    if sid=='XX-K02':url_text=next(l for l in Path('docs/intel-source-catalog.md').read_text(encoding='utf-8').splitlines() if l.startswith('| XX-K02 |')).split('|')[4].strip()
     urls=re.findall(r'https?://[^\s`，；、（）]+',url_text)
     concrete=[u for u in urls if '{' not in u and '}' not in u]
     e={'id':sid,'priority':'P1','catalogUrlText':url_text,'catalogUrls':urls,
@@ -326,6 +327,26 @@ for source in old['entries']:
         e['catalogChangeProposal']=ref(target_batch+'/catalogue-url-proposal.json')
         e['gaps']=['Formal one-row catalogue URL proposal remains unapplied; original catalogue endpoint still308.', 'Typed metadata-only candidate exists only in offline evidence, not active seeds/allowlist/production.', 'releaseDate has no timezone; no UTC publication or operational port-impact inference.']
         e['historicalSuperseded'].append('ONE target now verified with200 and original embedded10-field replay; prior original308 and DNS history retained rather than overwritten. Maersk unchanged this round.')
+    if sid=='XX-K02':
+        applied_batch='docs/evidence/r2-one-catalog-candidate-2026-10-15'
+        e['previousCatalogProductUrl']='https://www.one-line.com/en/news'
+        e['catalogUrlChangeApplied']=ref(applied_batch+'/catalogue-change-applied.json',{'id':sid})
+        e['historicalCatalogChangeProposal']=e.pop('catalogChangeProposal')
+        e['catalogProductMapping']={'directoryFormat':'web_list','parserKind':'json_list','parserInputMode':'HTML inline inert application/json','sameSourceAndProduct':True}
+        e['defaultState']['sourceConfig']='configured_disabled_candidate'
+        e['defaultState']['declaredSeedEnabled']=False
+        e['defaultState'].pop('offlineCandidateEnabled',None)
+        e['historicalFieldReplays']=[e['fieldReplayEvidence']]
+        e['fieldReplayEvidence']={'status':'PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS','evidence':ref('docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/summary.json',{'id':sid}),
+            'independentRawFields':ref('docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/raw-field-metadata.json',{'id':sid}),
+            'declaredCandidateConfig':ref('docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/candidate-config.json'),
+            'codeGate':ref('docs/evidence/gate-bebe144-one-catalog-candidate/source-proof.json'),
+            'records':10,'role':'Declared default-off candidate replay of existing complete private HTML; no new source request',
+            'sourceDateRole':'Source-labelled releaseDate local second precision, no timezone/publication instant certification'}
+        e['r2_4']={'verdict':'OK','countedOK':True,'reason':'Previously verified exact target200 and10 full original metadata replay retained; approved same-product catalogue URL now matches declared disabled candidate. Original URL308 remains historical. No new live or continuous-availability qualification this round.'}
+        e['r2_5']={'verdict':'PASS','countedPass':True,'reason':'Declared disabled configuration exactly reuses verified inert-HTML JSON mapping; all10 existing raw title/alias/releaseDate fields match prior proof, repeat0new/revised and read-only reopen0mismatch. No new upstream request.'}
+        e['gaps']=['Candidate remains disabled and absent from active seeds/production source selection; no24h or continuous availability evidence.', 'releaseDate still lacks timezone; no UTC publication or operational impact inference.']
+        e['historicalSuperseded'].append('One-row catalogue URL proposal approved/applied; old proposal and original308 retained as history, not current pending work.')
     entries.append(e)
 
 assert len(entries)==41 and len({r['id'] for r in entries})==41
@@ -359,6 +380,7 @@ result={'type':'current_authoritative_evidence_matrix','generatedAt':datetime.no
  ],'entries':entries}
 (OUT/'mapping.json').write_bytes((json.dumps(result,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
 next_ids=['CN-P02','VN-D01','MY-L01','ID-T02']
-result['nextBatchProposal']=[{'id':sid,'url':next(r['exactProductUrl'] for r in entries if r['id']==sid),'status':'HISTORICAL_PROPOSAL_NOW_EXACT_URL_CAPTURED_ONCE','latestR2_4':next(r['r2_4']['verdict'] for r in entries if r['id']==sid),'existingReusableImplementation':'Current bounded batch complete: VN-D01 disabled candidate/raw replay; other gaps retained. No automatic redirect/retry/new interface authorized.'} for sid in next_ids]
+result['historicalCompletedBatchProposal']=[{'id':sid,'url':next(r['exactProductUrl'] for r in entries if r['id']==sid),'status':'HISTORICAL_PROPOSAL_NOW_EXACT_URL_CAPTURED_ONCE','latestR2_4':next(r['r2_4']['verdict'] for r in entries if r['id']==sid),'existingReusableImplementation':'Current bounded batch complete: VN-D01 disabled candidate/raw replay; other gaps retained. No automatic redirect/retry/new interface authorized.'} for sid in next_ids]
+result['nextBatchProposal']=read('docs/evidence/r2-one-catalog-candidate-2026-10-15/next-batch-recommendations.json')['entries']
 (OUT/'mapping.json').write_bytes((json.dumps(result,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
 print(json.dumps({'r2_4':result['measuredCoverage']['r2_4'],'r2_5':result['measuredCoverage']['r2_5'],'numeric':result['measuredCoverage']['numericFieldsSeparate']},ensure_ascii=True))

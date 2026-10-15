@@ -1,1 +1,1 @@
-当前真实收尾见[ONE目标/受限JSON适配Neat Freak](../r2-one-newsroom-target-2026-10-15/closeout.md)。代码01934a5746c10d4165f4c4ffc5ce145d6de33d16干净门禁通过，完整原HTML10字段回放通过；一次ONE真实DNS/GET，Maersk0。覆盖21/39、13/34、有限数值3/5，目录URL只提案、active注册未变，整体R2/24h未通过。[当前报告](report.md)。
+当前真实收尾见[ONE目录/关闭候选Neat Freak](../r2-one-catalog-candidate-2026-10-15/closeout.md)。源码bebe1441465adfcabb9daf93cb2a8656ec1fc796干净门禁、正式关闭候选既有原页10字段回归均通过；本轮来源DNS/HTTP0。21/39、13/34、有限数值3/5与全部状态分布不变，不新增连续可用性证明。目录更新已应用，三项RSS只建议未执行。[当前报告](report.md)。
