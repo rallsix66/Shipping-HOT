@@ -1,6 +1,8 @@
 # R2 后续执行交接 — 2026-10-15
 
-材料读取离线切片：当前测试代码`954c831f27eff4fd4382a0ea68be3894de053759`，独立审查pending。先核对固定materials.ts，复用已有版本/去重/A→B→A/审计，仅补显式item+version的内部许可材料读接口，五SELECT、无Feed正文隐式桥接/抓取/写入/R3模型。24新用例，正常新clone离线frozen install含scripts及九命令全0，134定向/1338全量通过/3跳过；源网络/新增真实记录/LLM/付费0，25/39、24/34、历史3/5不变。Readability c7ba3c6已获限定认可。[职责核对/结果](../evidence/r2-material-read-2026-10-15/report.md) / [门禁](../evidence/gate-954c831-material-read/summary.json)。
+R2-6最终文档复用审计：52行§5.3来源/代码/测试映射已完成，本地无第二Runtime/预算表/通用RSS解析器，建议PASS待主审；未概称整份上游已移植。collector完整cursor/RSS validator等差异待裁定。R2整体仍BLOCKED，25/39、24/34、历史3/5不变，GUI/S7/真实24h未验。材料读取954c831已获限定认可：仅已存intel精确版本内部合同，无业务消费者、Feed桥接或R3输入，source是当前配置而非完整历史快照。本轮产品门禁NOT_RUN，仅文档核验，业务请求/新真实记录/LLM/付费0。24h两源仅提案未启动。**推送后停止新实现和信源请求，等待主审与用户下一阶段决定。** [最终审计](../evidence/r2-final-reuse-audit-2026-10-15/report.md) / [原验收与动作](../evidence/r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md)。
+
+材料读取离线切片：已认可代码`954c831f27eff4fd4382a0ea68be3894de053759`，主会话限定审查通过、无新增P2；无业务消费者，source为当前配置。先核对固定materials.ts，复用已有版本/去重/A→B→A/审计，仅补显式item+version的内部许可材料读接口，五SELECT、无Feed正文隐式桥接/抓取/写入/R3模型。24新用例，正常新clone离线frozen install含scripts及九命令全0，134定向/1338全量通过/3跳过；源网络/新增真实记录/LLM/付费0，25/39、24/34、历史3/5不变。Readability c7ba3c6已获限定认可。[职责核对/结果](../evidence/r2-material-read-2026-10-15/report.md) / [门禁](../evidence/gate-954c831-material-read/summary.json)。
 
 前轮Readability离线切片：已认可代码`c7ba3c62786a7554aeaf92ce9e4d9809fd137754`（主会话限定审查通过、未发现新增P2；不证明实时/24h或整体R2），唯一article-extractor合入固定AIHOT Readability，显式container优先且缺失失败，原安全fetch/许可/版本合同不变。正常第二份新clone九命令全0，124定向/1314全量通过/3跳过；首份0a511c0类型门禁FAIL及原件保留。业务信源/LLM/付费0，无UI/route/GUI/S7/生产/24h。本轮不改25/39、24/34、历史3/5。[实现与限制](../evidence/r2-readability-offline-2026-10-15/report.md) / [门禁](../evidence/gate-c7ba3c6-readability/summary.json)。
 
@@ -9,7 +11,7 @@ Westports 已获限定认可：R2-4仍 STALE、25/39；R2-5按既有 parser 的3
 接手先读取 [AGENTS.md](../../AGENTS.md)、[status](../status.md)、[现役计划](../plans/shipping-hot-risk-intelligence-2026-09-29.md)、[信源目录](../intel-source-catalog.md) 与 ADR-007/008/009。本文是短索引；逐源事实只以[当前41项矩阵](../evidence/r2-current-source-matrix-2026-10-14/mapping.json)及其[报告](../evidence/r2-current-source-matrix-2026-10-14/report.md)为准。
 
 - 仓库 `D:\try one\Shipping HOT`，远端 `rallsix66/Shipping-HOT`。分支 `codex/shipping-hot-r2`，草稿 [PR8](https://github.com/rallsix66/Shipping-HOT/pull/8)，base `codex/shipping-hot-r1-5`；PR7未合并。这是已批准的临时堆叠，不切回main、不重建实现。
-- 当前本地实现/门禁代码：`954c831f27eff4fd4382a0ea68be3894de053759`，材料读取本地门禁通过、待独立审查；先前Readability代码c7ba3c6已获主会话限定认可。本文所在独立证据提交才是PR8最新head，接手核对远端。来源/GUI/S7/生产/24h状态见上文。
+- 当前产品代码：`954c831f27eff4fd4382a0ea68be3894de053759`，材料读取已限定认可；本次仅R2-6文档审计，产品门禁NOT_RUN。本文所在docs提交才是PR8最新head，接手核对远端。当前停止新实现/来源请求，先等主会话审计与用户阶段决定，不按旧批次“下一项”自动推进。
 - 批准方案沿用 Vite/React/Nitro/db0/SQLite 单体、单 Runtime/parser/预算体系；优先未来自动采集。41项保留，公开39、资讯34、数值5，阈值至少32公开OK与34字段回放，不能删分母或自改标准。
 - 当前覆盖25/39、24/34，数值有限历史诊断3/5单列；整体R2/24h未通过。13个页面候选默认关闭（12web_list mapper+ONE json_list HTML模式）；TMD/BMKG内置seed enabled=true与Intel生产job默认off分开，未授权开启、写持久化配置或运行24h。
 - 前轮[ONE目录/候选落地](../evidence/r2-one-catalog-candidate-2026-10-15/report.md)：已批准目录URL现为https://www.one-line.com/en/newsroom，原/en/news的308及Location/前后目录hash保留。目录web_list指HTML页面；候选kind=json_list仅从惰性application/json读取置顶1+列表9，映射/日期basis与已验配置相同。候选已进入现有数组但enabled=false/persistence=disallowed，不是活动seed/生产允许项。正式候选用同一635664原字节→collector/SQLite→重复0新0修订→只读重开10字段0差异，源releaseDate秒精度/无时区/UTC null不变。该ONE配置轮DNS/HTTP0，ONE最新实际目标200仍02:56 UTC，不宣称连续可用。

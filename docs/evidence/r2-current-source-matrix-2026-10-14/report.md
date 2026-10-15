@@ -1,6 +1,8 @@
 # R2 41项来源累计证据 — 2026-10-15
 
-材料读取离线切片：当前测试代码`954c831f27eff4fd4382a0ea68be3894de053759`，独立审查pending。先核对固定materials.ts，复用已有版本/去重/A→B→A/审计，仅补显式item+version的内部许可材料读接口，五SELECT、无Feed正文隐式桥接/抓取/写入/R3模型。24新用例，正常新clone离线frozen install含scripts及九命令全0，134定向/1338全量通过/3跳过；源网络/新增真实记录/LLM/付费0，25/39、24/34、历史3/5不变。Readability c7ba3c6已获限定认可。[职责核对/结果](../r2-material-read-2026-10-15/report.md) / [门禁](../gate-954c831-material-read/summary.json)。
+R2-6最终文档复用审计：52行§5.3来源/代码/测试映射已完成，本地无第二Runtime/预算表/通用RSS解析器，建议PASS待主审；未概称整份上游已移植。collector完整cursor/RSS validator等差异待裁定。R2整体仍BLOCKED，25/39、24/34、历史3/5不变，GUI/S7/真实24h未验。材料读取954c831已获限定认可：仅已存intel精确版本内部合同，无业务消费者、Feed桥接或R3输入，source是当前配置而非完整历史快照。本轮产品门禁NOT_RUN，仅文档核验，业务请求/新真实记录/LLM/付费0。24h两源仅提案未启动。**推送后停止新实现和信源请求，等待主审与用户下一阶段决定。** [最终审计](../r2-final-reuse-audit-2026-10-15/report.md) / [原验收与动作](../r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md)。
+
+材料读取离线切片：已认可代码`954c831f27eff4fd4382a0ea68be3894de053759`，主会话限定审查通过、无新增P2；无业务消费者，source为当前配置。先核对固定materials.ts，复用已有版本/去重/A→B→A/审计，仅补显式item+version的内部许可材料读接口，五SELECT、无Feed正文隐式桥接/抓取/写入/R3模型。24新用例，正常新clone离线frozen install含scripts及九命令全0，134定向/1338全量通过/3跳过；源网络/新增真实记录/LLM/付费0，25/39、24/34、历史3/5不变。Readability c7ba3c6已获限定认可。[职责核对/结果](../r2-material-read-2026-10-15/report.md) / [门禁](../gate-954c831-material-read/summary.json)。
 
 前轮Readability离线切片：已认可代码`c7ba3c62786a7554aeaf92ce9e4d9809fd137754`（主会话限定审查通过、未发现新增P2；不证明实时/24h或整体R2），唯一article-extractor合入固定AIHOT Readability，显式container优先且缺失失败，原安全fetch/许可/版本合同不变。正常第二份新clone九命令全0，124定向/1314全量通过/3跳过；首份0a511c0类型门禁FAIL及原件保留。业务信源/LLM/付费0，无UI/route/GUI/S7/生产/24h。本轮不改25/39、24/34、历史3/5。[实现与限制](../r2-readability-offline-2026-10-15/report.md) / [门禁](../gate-c7ba3c6-readability/summary.json)。
 

@@ -1,0 +1,110 @@
+{
+  "executionHead": "0321584ffbbb2f99c1f8ecd64c680b78d0affcc6",
+  "productCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
+  "productGateThisRound": "NOT_RUN_docs_only",
+  "localReuseAudit": "PASS",
+  "formalR26IndependentAcceptance": "PENDING_PARENT",
+  "overallR2": "BLOCKED",
+  "sourceQualificationUnchanged": [
+    "25/39",
+    "24/34"
+  ],
+  "numericHistorical": "3/5",
+  "items": [
+    {
+      "id": "R2-1",
+      "originalPlanLine": 498,
+      "originalClause": "- R2-1 单元测试覆盖：RSS、Atom、RDF；`web_list`（包括“年月日”写法、佛历、`dd/mm/yyyy`、不带时区的日期）；`json_list`；GBK、TIS-620、windows-1258 编码；URL 规范化；内容修订；配置白名单。",
+      "localVerdict": "PASS",
+      "basis": "原指定单元合同已有覆盖；RSS/Atom/RDF、HTML/JSON、显式日期/unknown、编码、URL、修订、白名单。引用954c831既有全量日志，本轮未跑测试。",
+      "remaining": "不把真实源100%配置/回放追加为本条条件；原实际来源缺口归4/5。"
+    },
+    {
+      "id": "R2-2",
+      "originalPlanLine": 499,
+      "originalClause": "- R2-2 SSRF 防护：访问私网地址被拒绝，经跳转到达私网地址也被拒绝；按信源配置的 CA 只对该信源生效（测试）。",
+      "localVerdict": "PASS",
+      "basis": "私网/跳转私网阻断与分源CA单元已有；保护沿既有secure fetch。",
+      "remaining": "scope仅该安全链/单测；实际源CA与真实TLS握手未验证，不新增全站握手门槛。"
+    },
+    {
+      "id": "R2-3",
+      "originalPlanLine": 500,
+      "originalClause": "- R2-3 回执幂等：请求已发出后超时，重启后**不会重复付费**；预算设为 0 或没有配置时，一次都不调用（测试）。",
+      "localVerdict": "PASS",
+      "basis": "既有fake-caller测试：零/未配预算零调用、发送后超时unknown不重发、复用已收响应、启动恢复/过期模拟。",
+      "remaining": "“restart”用例是在同一测试DB重建caller/context，不冒充真实OS重启/实付验证；双连接测试也是同进程。通用业务caller未接；不新增实付/分钟限流/unknown UI门槛。"
+    },
+    {
+      "id": "R2-4",
+      "originalPlanLine": 502,
+      "originalClause": "- R2-4 **在实际运行环境中重新核查信源目录**：逐条记录 `OK / PARTIAL / BLOCKED / STALE` 并写回目录。P1 中的自动信源有 ≥ 80% 为 `OK`。",
+      "localVerdict": "FAIL",
+      "basis": "批准口径41保留，公开自动39；25 OK /7 PARTIAL /1 STALE /2 BLOCKED /4 NOT_RUN，即25/39，至少32，差7。",
+      "remaining": "14非OK逐源条件保留，必须获新的有界任务后才能复核；不靠HTTP200或本次文档审计提高分子。"
+    },
+    {
+      "id": "R2-5",
+      "originalPlanLine": 503,
+      "originalClause": "- R2-5 离线夹具回放：用录制下来的真实页面测试，P1 自动信源 100% 能解析出标题、链接和时间。",
+      "localVerdict": "FAIL",
+      "basis": "资讯/公告24/34，24 PASS /2 FAIL /1 PARTIAL /7 NOT_RUN；历史数值3/5独立，不冒充资讯字段全覆盖。",
+      "remaining": "还差10源真实结构字段链。unknown日期不补造，缺href/同URL冲突不绕过；完整原件只在许可范围保存。"
+    },
+    {
+      "id": "R2-6",
+      "originalPlanLine": 501,
+      "originalClause": "- R2-6 没有重复的机制：代码里没有第二套任务调度、预算表或 RSS 解析器（在审查中逐项确认）。",
+      "localVerdict": "PASS",
+      "basis": "本次静态审计建议PASS：52行§5.3映射、唯一通用RSS/Runtime/月度预算决策且无第二预算/任务队列表。",
+      "remaining": "仅本地审计结果/建议，主会话正式独立认可pending；不等于整份上游或整个R2已完成，collector cursor对应关系仍需裁定。"
+    },
+    {
+      "id": "R2-7",
+      "originalPlanLine": 504,
+      "originalClause": "- R2-7 人工录入：粘贴链接和正文后，AI 能自动填好字段（R3 接入模型之前，先用纯手动表单验收）；保存后能正常入库，并标为“官方通知（人工录入）”；检查清单能显示每个信源的建议查看频率和上次查看时间。",
+      "localVerdict": "BLOCKED",
+      "basis": "R3前允许纯手动；manualSubmit/检查清单/旧版本/精确产品许可及native/HTTP/SSR已实现、已有测试。",
+      "remaining": "真实表单/键盘/宽度/浏览器交互及当前R2 GUI/S7未验。不得用SSR或旧S0–S8冻结S7代替；不新增本轮AI识别/真实付费条件。"
+    },
+    {
+      "id": "R2-8",
+      "originalPlanLine": 505,
+      "originalClause": "- R2-8 受控的真实运行（需要用户授权）：P1 信源连续跑 24 小时，失败的信源能自动退避并标记为 `failing`。结果记录到 `docs/live-verification.md`。",
+      "localVerdict": "NOT_RUN",
+      "basis": "实际连续24h未启动，当前生产选择只允许TMD/BMKG且默认off。",
+      "remaining": "需要用户独立明确授权；2源观察只能覆盖2/39，不替代原P1全体要求。完整配置/选择范围扩展须另批，见只读提案。"
+    }
+  ],
+  "remainingAvailabilityIds": [
+    "CN-P02",
+    "CN-T01",
+    "VN-P01",
+    "MY-P02",
+    "MY-P03",
+    "MY-L01",
+    "ID-W02",
+    "PH-P01",
+    "PH-W01",
+    "PH-W02",
+    "XX-W01",
+    "XX-W02",
+    "XX-K01",
+    "XX-F01"
+  ],
+  "remainingInformationFieldIds": [
+    "CN-P02",
+    "CN-T01",
+    "VN-P01",
+    "MY-P03",
+    "MY-L01",
+    "PH-P01",
+    "PH-W01",
+    "PH-W02",
+    "XX-K01",
+    "XX-F01"
+  ],
+  "confirmedCurrentBlockedJsIds": [],
+  "blockedJsBasis": "current BLOCKED sources are XX-W01 exact404 and XX-K01 unknown transport, neither confirmed JS; zero confirmed does not prove zero JS problems",
+  "stopAfterPush": true
+}

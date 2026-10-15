@@ -1,7 +1,7 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-15T08:59:58.093Z",
-  "reviewedCodeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
+  "reviewedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
   "evidenceHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
@@ -7023,15 +7023,21 @@
   "codeVerification": {
     "testedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
     "priorParentAcceptedCodeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
-    "state": "LOCAL_GATE_PASSED_PENDING_PARENT_REVIEW",
+    "state": "ACCEPTED_LIMITED_PARENT_INTERNAL_STORED_VERSION_READ",
     "gate": {
       "path": "docs/evidence/gate-954c831-material-read/summary.json",
       "sha256": "ac14624a122e8466ddbb3b1a56bf7bf97be01c3f27276b987ded7d18b94f8726",
       "hashBasis": "committed_text_LF"
     },
-    "independentReview": "PENDING_PARENT",
+    "independentReview": "accepted_no_new_P2",
     "ciPassedClaimed": false,
-    "continuous24hVerified": false
+    "continuous24hVerified": false,
+    "reviewDate": "2026-10-15",
+    "acceptance": {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/material-read-acceptance.json",
+      "sha256": "92a25a15392fb0cc829625de55171ac8ef5fa21d6d9104c56b62f79193c05540",
+      "hashBasis": "committed_text_LF"
+    }
   },
   "previousSITCAppliedCompatibility": {
     "report": {
@@ -7287,6 +7293,45 @@
     },
     "sourceRequests": 0,
     "qualificationUnchanged": true,
-    "productionEnabled": false
+    "productionEnabled": false,
+    "independentReview": "ACCEPTED_LIMITED_no_new_P2",
+    "acceptance": {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/material-read-acceptance.json",
+      "sha256": "92a25a15392fb0cc829625de55171ac8ef5fa21d6d9104c56b62f79193c05540",
+      "hashBasis": "committed_text_LF"
+    },
+    "hasBusinessConsumer": false,
+    "sourceConfiguration": "CURRENT_SOURCE_NOT_COMPLETE_HISTORICAL_CONFIGURATION_SNAPSHOT"
+  },
+  "lastFinalReuseAudit": {
+    "executionHead": "0321584ffbbb2f99c1f8ecd64c680b78d0affcc6",
+    "productCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
+    "report": {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/report.md",
+      "sha256": "e55069044c4b3dd612b0ea5d720062c252ad869cad59275c0ca9ef9f0ccc7aaa",
+      "hashBasis": "committed_text_LF"
+    },
+    "matrix": {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/reuse-matrix.json",
+      "sha256": "a26d5b80b3fc7240f0edb58987075e3aa8e43bf5501a0da60f5927bb1e482266",
+      "hashBasis": "committed_text_LF"
+    },
+    "acceptance": {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/acceptance.json",
+      "sha256": "8a15ffc39b5e8dd2a8092daebaba7465bf6de260aa7255428d8238ab060ee223",
+      "hashBasis": "committed_text_LF"
+    },
+    "pilotProposal": {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/pilot-24h-proposal.md",
+      "sha256": "355430e57a2519057057f9f03079008131c46da3f803ec1211bd2fd96aef3cc4",
+      "hashBasis": "committed_text_LF"
+    },
+    "localR26Recommendation": "PASS",
+    "independentReview": "PENDING_PARENT",
+    "overallR2": "BLOCKED",
+    "productGate": "NOT_RUN_docs_only",
+    "sourceRequests": 0,
+    "stopNewImplementationAndSourceRequests": true,
+    "pilotStarted": false
   }
 }

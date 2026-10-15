@@ -1,52 +1,60 @@
 {
   "rawExit": 0,
-  "at": "2026-10-15T10:07:01.082Z",
-  "testedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
+  "at": "2026-10-15T10:34:37.661Z",
+  "executionHead": "0321584ffbbb2f99c1f8ecd64c680b78d0affcc6",
+  "productCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
   "checks": [
     {
-      "name": "bounded five-file code scope, no new storage/schema/dependency/HTTP endpoint",
+      "name": "exact execution baseline and docs-only scope; product gates intentionally NOT_RUN",
       "pass": true
     },
     {
-      "name": "exact-SHA normal fresh clone/offline install scripts and nine successful gates",
+      "name": "all52 plan5.3 mappings include actual origin/classification/limits/tests; no fake future implementation",
       "pass": true
     },
     {
-      "name": "fixed local upstream responsibility audit, no duplicate writer or new body bridge",
+      "name": "unique mechanisms with explicit scope; internal material and receipt have no business consumer",
       "pass": true
     },
     {
-      "name": "license/read boundary evidence and prior Readability review recorded without source inflation",
+      "name": "original8 criteria retained; overall blocked, source thresholds/GUI/24h gaps not hidden",
       "pass": true
     },
     {
-      "name": "all recursive current matrix file hashes resolve",
+      "name": "all41 source entries and denominators unchanged; material scope acceptance exact",
       "pass": true
     },
     {
-      "name": "affected links/data hygiene and exact original/LF log hashes",
+      "name": "recursive current-matrix hashes and retained roots resolve unchanged",
       "pass": true
     },
     {
-      "name": "retained root files unchanged since previous delivery, artifacts kept ignored, runtime unactivated",
+      "name": "proposal not executed; source/frequency/isolated DB/zero-paid constraints and local docs links explicit",
       "pass": true
     }
   ],
-  "recursiveMatrixHashReferences": 364,
-  "affectedLocalMarkdownLinks": 166,
+  "planReuseRows": 52,
+  "reviewedCodeFileHashes": 35,
+  "recursiveMatrixHashReferences": 370,
+  "affectedLocalMarkdownLinks": 177,
+  "productChecks": {
+    "install": "NOT_RUN",
+    "build": "NOT_RUN",
+    "typecheck": "NOT_RUN",
+    "lint": "NOT_RUN",
+    "test": "NOT_RUN"
+  },
+  "documentationOnly": true,
+  "localR26Recommendation": "PASS",
+  "independentReview": "PENDING_PARENT",
+  "overallR2": "BLOCKED",
   "sourceRequests": 0,
   "newRealRecords": 0,
-  "fullGateCommands": 9,
-  "targetedTests": 134,
-  "fullTestsPassed": 1338,
-  "fullTestsSkipped": 3,
-  "approvedCoverage": [
+  "coverageUnchanged": [
     "25/39",
     "24/34"
   ],
   "numericHistorical": "3/5",
-  "independentReview": "PENDING_PARENT",
-  "neatFreak": "six_fact_surfaces_performed_no_cleanup",
-  "guiS7": "NOT_RUN_prior_pending",
-  "production24h": "NOT_RUN"
+  "pilotStarted": false,
+  "stopAfterPush": true
 }

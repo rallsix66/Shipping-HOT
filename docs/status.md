@@ -1,6 +1,8 @@
 ## R2 41项来源当前累计证据（2026-10-15，待独立审查）
 
-材料读取离线切片：当前测试代码`954c831f27eff4fd4382a0ea68be3894de053759`，独立审查pending。先核对固定materials.ts，复用已有版本/去重/A→B→A/审计，仅补显式item+version的内部许可材料读接口，五SELECT、无Feed正文隐式桥接/抓取/写入/R3模型。24新用例，正常新clone离线frozen install含scripts及九命令全0，134定向/1338全量通过/3跳过；源网络/新增真实记录/LLM/付费0，25/39、24/34、历史3/5不变。Readability c7ba3c6已获限定认可。[职责核对/结果](evidence/r2-material-read-2026-10-15/report.md) / [门禁](evidence/gate-954c831-material-read/summary.json)。
+R2-6最终文档复用审计：52行§5.3来源/代码/测试映射已完成，本地无第二Runtime/预算表/通用RSS解析器，建议PASS待主审；未概称整份上游已移植。collector完整cursor/RSS validator等差异待裁定。R2整体仍BLOCKED，25/39、24/34、历史3/5不变，GUI/S7/真实24h未验。材料读取954c831已获限定认可：仅已存intel精确版本内部合同，无业务消费者、Feed桥接或R3输入，source是当前配置而非完整历史快照。本轮产品门禁NOT_RUN，仅文档核验，业务请求/新真实记录/LLM/付费0。24h两源仅提案未启动。**推送后停止新实现和信源请求，等待主审与用户下一阶段决定。** [最终审计](evidence/r2-final-reuse-audit-2026-10-15/report.md) / [原验收与动作](evidence/r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md)。
+
+材料读取离线切片：已认可代码`954c831f27eff4fd4382a0ea68be3894de053759`，主会话限定审查通过、无新增P2；无业务消费者，source为当前配置。先核对固定materials.ts，复用已有版本/去重/A→B→A/审计，仅补显式item+version的内部许可材料读接口，五SELECT、无Feed正文隐式桥接/抓取/写入/R3模型。24新用例，正常新clone离线frozen install含scripts及九命令全0，134定向/1338全量通过/3跳过；源网络/新增真实记录/LLM/付费0，25/39、24/34、历史3/5不变。Readability c7ba3c6已获限定认可。[职责核对/结果](evidence/r2-material-read-2026-10-15/report.md) / [门禁](evidence/gate-954c831-material-read/summary.json)。
 
 前轮Readability离线切片：已认可代码`c7ba3c62786a7554aeaf92ce9e4d9809fd137754`（主会话限定审查通过、未发现新增P2；不证明实时/24h或整体R2），唯一article-extractor合入固定AIHOT Readability，显式container优先且缺失失败，原安全fetch/许可/版本合同不变。正常第二份新clone九命令全0，124定向/1314全量通过/3跳过；首份0a511c0类型门禁FAIL及原件保留。业务信源/LLM/付费0，无UI/route/GUI/S7/生产/24h。本轮不改25/39、24/34、历史3/5。[实现与限制](evidence/r2-readability-offline-2026-10-15/report.md) / [门禁](evidence/gate-c7ba3c6-readability/summary.json)。
 
@@ -109,20 +111,20 @@ Westports独立修正e4d56116cda05fe4a8dbe151040c26874b6807c1保留，RSS最新�
 - Fresh exact code clone `.tmp/intel-chain-final2-build`: install/build/typecheck/lint,13files130targeted,122files1150pass/3existing Windows skips,3isolated smokes all rawexit0. Targeted and full runs each generated chain proof. Initialde793ce gate typecheck FAIL (test imported server aliases from frontend project), later phases NOT_RUN; test moved to the server project, HTTP result types added, view loaded at runtime while production view remains app-typechecked. Failed evidence retained. Final raw logs, chain metadata and partial HTML: `docs/evidence/gate-8707019-frontend/`.
 - **Offline chain parent limited review accepted; overallR2 incomplete.** Visual/keyboard/live events/widths/S7 NOT_RUN. Existing4488/feed preview still serves79fc6c8 unchanged production code; no new production build/preview switch was needed. SSR artifact is not an interactive preview. Old previews, raw/evidence logs, clones and isolated DBs retained; no network source fetch, live/paid run, merge/deploy/force-push.
 
-### R2 remaining acceptance — corrected to original9/29 clauses2026-10-14
+### R2 remaining acceptance — final reuse audit 2026-10-15（原9/29标准不变）
 
-以下替代上一轮把风险限制混入硬门槛的列表。详情与逐条原文见 `docs/plans/r2-acceptance-convergence-2026-10-14.md`；原≥80%/100%不变。
+当前逐条原文、范围判定和权限动作以[最终验收审计](evidence/r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md)为准；`docs/plans/r2-acceptance-convergence-2026-10-14.md`保留作历史对照。原≥80%/100%和已批准39/34/5口径不变，本地审计建议不替代主会话正式验收。
 
 | 项目 | 原标准/已有码证据 | 真正剩余与边界 |
 | --- | --- | --- |
-| R2-1 | 指定RSS/Atom/RDF/web_list/json_list/日期/GBK/TIS-620/windows-1258/URL/修订/白名单单元；8707019既有全量日志 | 单元证据逐项复审；真实来源配置不是本条新增条件，归4/5 |
-| R2-2 | 私网/跳转私网阻断及分源CA隔离；security/transport单测在8707019 | 不加实网TLS全站握手通关要求；实际证书有效性只是后续实网边界 |
-| R2-3 | 发送后超时/重启不重复付费；零/未配预算零调用；receipts单测/单预算 | 重启用例语义模拟不冒充真实进程。可离线补文件库重开证明；对账/分钟限流/unknown UI/真实实付不是新增门槛 |
-| R2-4 | 实际环境逐源写回目录，P1自动≥80% OK；已有六RSS/four-index快照 | 分类/分母未批准；更广复核需有界公开授权。HTTP200不是OK |
-| R2-5 | 真实页夹具100%标题/链接/时间；已有存档/8707019链 | 真实原结构/许可/绑定缺口，NorthportFAIL/原DOM0。不能自行豁免天气/付费/向量 |
-| R2-6 | 审查确认无第二调度/预算表/RSS解析器；现有单一Runtime/parser/budget及链 | 逐项整阶段审查；不为验收创建第二机制或重复同等链 |
-| R2-7 | R3前原文允许纯手动；入库/官方人工标签/清单频率与上次检查时间 | 已有native/HTTP/SSR；真实表单操作未验，保留GUI/S7限制，不另加本轮AI/实付 |
-| R2-8 | 经用户授权真实P1连续24h，失败退避/failing并记live-verification | 接线和经核实上游自适应适配已实现，实际启用/全P1配置及24h仍待授权与验证，假钟不替代 |
+| R2-1 | PASS：原指定单元合同已有覆盖；RSS/Atom/RDF、HTML/JSON、显式日期/unknown、编码、URL、修订、白名单。引用954c831既有全量日志，本轮未跑测试。 | 不把真实源100%配置/回放追加为本条条件；原实际来源缺口归4/5。 |
+| R2-2 | PASS：私网/跳转私网阻断与分源CA单元已有；保护沿既有secure fetch。 | scope仅该安全链/单测；实际源CA与真实TLS握手未验证，不新增全站握手门槛。 |
+| R2-3 | PASS：既有fake-caller测试：零/未配预算零调用、发送后超时unknown不重发、复用已收响应、启动恢复/过期模拟。 | “restart”用例是在同一测试DB重建caller/context，不冒充真实OS重启/实付验证；双连接测试也是同进程。通用业务caller未接；不新增实付/分钟限流/unknown UI门槛。 |
+| R2-4 | FAIL：批准口径41保留，公开自动39；25 OK /7 PARTIAL /1 STALE /2 BLOCKED /4 NOT_RUN，即25/39，至少32，差7。 | 14非OK逐源条件保留，必须获新的有界任务后才能复核；不靠HTTP200或本次文档审计提高分子。 |
+| R2-5 | FAIL：资讯/公告24/34，24 PASS /2 FAIL /1 PARTIAL /7 NOT_RUN；历史数值3/5独立，不冒充资讯字段全覆盖。 | 还差10源真实结构字段链。unknown日期不补造，缺href/同URL冲突不绕过；完整原件只在许可范围保存。 |
+| R2-6 | PASS：本次静态审计建议PASS：52行§5.3映射、唯一通用RSS/Runtime/月度预算决策且无第二预算/任务队列表。 | 仅本地审计结果/建议，主会话正式独立认可pending；不等于整份上游或整个R2已完成，collector cursor对应关系仍需裁定。 |
+| R2-7 | BLOCKED：R3前允许纯手动；manualSubmit/检查清单/旧版本/精确产品许可及native/HTTP/SSR已实现、已有测试。 | 真实表单/键盘/宽度/浏览器交互及当前R2 GUI/S7未验。不得用SSR或旧S0–S8冻结S7代替；不新增本轮AI识别/真实付费条件。 |
+| R2-8 | NOT_RUN：实际连续24h未启动，当前生产选择只允许TMD/BMKG且默认off。 | 需要用户独立明确授权；2源观察只能覆盖2/39，不替代原P1全体要求。完整配置/选择范围扩展须另批，见只读提案。 |
 
 额外对账/频率上限/unknown管理/实付/多进程压力是已知限制或后续范围，不擅升为R2-1/2/3新标准。原实施要求的“自适应抓取频率、现有Runtime定时、付费回执/统一预算”仍保留，不能因删除额外门槛而漏掉真实实施缺口。原R2-3切片registry/GET未做项已被后续实现取代。历史1/10用户延后，不重找。
 
