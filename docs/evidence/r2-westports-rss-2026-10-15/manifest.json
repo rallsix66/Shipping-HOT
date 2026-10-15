@@ -1,0 +1,26 @@
+{
+  "executedAtHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",
+  "productCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "rows": [
+    {
+      "id": "MY-P02",
+      "url": "https://www.westportsholdings.com/category/press-release/feed/",
+      "host": "www.westportsholdings.com",
+      "catalogLineLfSha256": "cbbbfdeaa784005cd81d85da3aa30583a3b8d295c3e5cab5bb8b6434d6f3e5bf",
+      "oldWireSha256": "db9676f1167a48d5c36ad76364e6215221173eefb6874d16a77204a160befc8b"
+    }
+  ],
+  "authorized": "Delegated user instruction 2026-10-15: one named exact Westports RSS product; private complete bytes; no settings changes",
+  "maxSystemDns": 1,
+  "maxTransportInvocations": 1,
+  "maxBytes": 524288,
+  "perRequestMs": 10000,
+  "batchMs": 25000,
+  "retries": 0,
+  "redirectsFollowed": 0,
+  "details": 0,
+  "pagination": 0,
+  "persistence": "disallowed",
+  "productionEnabled": false,
+  "rawRedistributed": false
+}

@@ -1,0 +1,9 @@
+{
+  "id": "MY-P02",
+  "status": "FAIL",
+  "url": "https://www.westportsholdings.com/category/press-release/feed/",
+  "rawBytes": 36266,
+  "wireSha256": "db9676f1167a48d5c36ad76364e6215221173eefb6874d16a77204a160befc8b",
+  "actualSystemDnsCalls": 0,
+  "actualSourceHttpRequests": 0
+}

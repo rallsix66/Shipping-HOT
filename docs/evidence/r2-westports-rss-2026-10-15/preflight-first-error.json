@@ -1,0 +1,13 @@
+{
+  "phase": "Offline XML preflight before collector replay",
+  "rawExit": 1,
+  "cause": "The preflight wrapper mistakenly expected3 items based on the old metadata derivative, while complete XML contains10. XML validation had passed before the cardinality assertion.",
+  "expectedByMistakenWrapper": 3,
+  "actualCompleteXmlItems": 10,
+  "collectorReplayStarted": false,
+  "subsequentLauncher": "Stopped before Vitest because xml-preflight.json had not been written",
+  "resolution": "Validate the complete original item count dynamically and compare all original items with the existing parser/collector; never reconstruct the feed from3 derived records.",
+  "productCodeChanged": false,
+  "newSourceRequests": 0,
+  "rawXmlPreserved": true
+}

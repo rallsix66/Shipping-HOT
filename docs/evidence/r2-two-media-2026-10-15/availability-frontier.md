@@ -13,7 +13,7 @@ ID-T02已按主会话限定代码/过程认可OK/PASS并移出本表，当前25/
 | MY-L01 | PARTIAL | 完整10张卡片原字节hash匹配；详情锚点无href已FAIL | 新明确产品/链接证据或另批R2-X策略评估；不猜路由/隐藏接口或重复缺href探针 |
 | PH-W01 | PARTIAL | 最新精确入口403，历史10/10官方局部无活动状态另存 | 活动正样本或新有界诊断仍待批准；不重试，不把403或旧空状态当今天无风险 |
 | PH-W02 | PARTIAL | 最新精确入口403，历史Weather Advisory官方空状态另存 | 活动身份/时间/区域正样本仍缺，不重试或猜PDF/替代入口 |
-| MY-P02 | STALE | 旧派生3条、最新2025-08-01；无完整旧RSS资格 | 只有新授权取证才能判断是否更新；或保留STALE。不得降低2026内容口径 |
+| MY-P02 | STALE | 新完整XML10项，7源title空排除，3有效最新2025-08-01；3/3/3回放/重复0/query_only0差异，源DNS1/GET1 | 需源近期项标题/身份完整，不将raw2026日期当有效更新；限定字段PASS待审，见[精简阻塞](../r2-westports-rss-2026-10-15/remaining-blockers.md)，本批后不再请求 |
 | CN-T01 | NOT_RUN | 没有合格响应；目录为HTTP | 确认可用的官方HTTPS精确产品URL后再授权取证；不放松现有HTTPS安全入口 |
 | ID-W02 | NOT_RUN | 根200与新doc200都是目录索引，doc含7PDF/7PNG/2子目录 | 未见apidoc身份或Jakarta/TanjungPriok官方KODE，需可靠官方API/港口元数据出处；不下载遍历或猜KODE/URL |
 | PH-P01 | NOT_RUN | 目录一行两URL，无合格原始列表存档 | 明确一次有界核验的产品范围及来源绑定公共CA证据；不关闭证书验证、不全局改信任 |

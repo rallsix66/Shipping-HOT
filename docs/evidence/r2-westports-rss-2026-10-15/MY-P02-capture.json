@@ -1,0 +1,55 @@
+{
+  "id": "MY-P02",
+  "url": "https://www.westportsholdings.com/category/press-release/feed/",
+  "host": "www.westportsholdings.com",
+  "catalogLineLfSha256": "cbbbfdeaa784005cd81d85da3aa30583a3b8d295c3e5cab5bb8b6434d6f3e5bf",
+  "oldWireSha256": "db9676f1167a48d5c36ad76364e6215221173eefb6874d16a77204a160befc8b",
+  "startedAt": "2026-10-15T08:46:45.729Z",
+  "systemDnsCalls": 1,
+  "transportInvocations": 1,
+  "status": "CAPTURED_SAFE_XML",
+  "parser": "NOT_RUN",
+  "rawLocalOnly": true,
+  "addresses": [
+    {
+      "address": "104.26.3.69",
+      "family": 4
+    },
+    {
+      "address": "104.26.2.69",
+      "family": 4
+    },
+    {
+      "address": "172.67.71.25",
+      "family": 4
+    }
+  ],
+  "addressClassification": "public_address",
+  "receivedAt": "2026-10-15T08:46:47.628Z",
+  "httpStatus": 200,
+  "contentType": "application/rss+xml; charset=UTF-8",
+  "bytes": 36266,
+  "wireSha256": "db9676f1167a48d5c36ad76364e6215221173eefb6874d16a77204a160befc8b",
+  "completeResponseCaptured": true,
+  "locationPresent": false,
+  "locationFollowed": false,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "xml",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 36266
+  },
+  "finishedAt": "2026-10-15T08:46:47.628Z"
+}

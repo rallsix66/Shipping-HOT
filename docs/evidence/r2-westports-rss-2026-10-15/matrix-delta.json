@@ -1,0 +1,20 @@
+{
+  "baselineHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",
+  "changedSourceIdsOnly": [
+    "MY-P02"
+  ],
+  "other40EntriesUnchanged": true,
+  "approvedCoverageUnchanged": true,
+  "approvedCoverage": [
+    "25/39",
+    "23/34"
+  ],
+  "numericHistorical": "3/5",
+  "r24": "STALE_unchanged",
+  "r25": "NOT_RUN_approved_local_limitedPASS_pending_parent",
+  "sourceDnsCalls": 1,
+  "sourceGetAttempts": 1,
+  "rawSourceItems": 10,
+  "normalizedRecords": 3,
+  "emptySourceTitles": 7
+}

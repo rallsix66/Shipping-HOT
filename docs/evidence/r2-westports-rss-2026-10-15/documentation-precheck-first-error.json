@@ -1,0 +1,9 @@
+{
+  "phase": "Documentation consistency check after source-field verification",
+  "rawExit": 1,
+  "cause": "A documentation assertion incorrectly presumed the7 blank-title source links were date-directory paths; the saved structural flag was false and caught this unsupported claim.",
+  "resolution": "Remove the unsupported link-shape/identity-gap claim. Preserve original links as source data and keep the proven empty-title field gap only.",
+  "productCodeChanged": false,
+  "sourceRequests": 0,
+  "existingFieldReplayResultChanged": false
+}

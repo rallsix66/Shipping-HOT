@@ -1,56 +1,66 @@
 {
   "rawExit": 0,
-  "startedAt": "2026-10-15T08:35:50.980Z",
-  "finishedAt": "2026-10-15T08:35:51.330Z",
-  "executionHead": "45d2296301bb85aa18a6e4a5e6509bfa854319b0",
+  "startedAt": "2026-10-15T09:07:12.244Z",
+  "finishedAt": "2026-10-15T09:07:12.561Z",
+  "executionHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",
   "productCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
   "checks": [
     {
-      "name": "branch/base, product/catalogue and previous evidence unchanged; full gate not run",
+      "name": "branch/base and no product/catalogue/previous evidence change, no new full gate",
       "pass": true
     },
     {
-      "name": "exact catalogue and real Location self-URL; no body-derived target or repeated request",
+      "name": "one exact safe RSS request, complete new bytes and no fabricated old XML",
       "pass": true
     },
     {
-      "name": "one public DNS and one GET, full207 bytes and original command streams",
+      "name": "valid full XML10, source7 genuinely blank titles, original dates not normalized freshness",
       "pass": true
     },
     {
-      "name": "ID-T02 limited process acceptance keeps date unknowns/correction; CN-P02 and39 others unchanged qualifications",
+      "name": "existing official parser/collector3 rows, repeat0/query-only exact and zero actual replay network",
       "pass": true
     },
     {
-      "name": "only approved ID-T02 adds25/39 and23/34; fixed thresholds/numeric3/5/24h remain",
+      "name": "only MY-P02 entry changed, approved STALE/NOT_RUN and all coverage unchanged",
       "pass": true
     },
     {
-      "name": "all recursive matrix evidence file hashes resolve with committed LF basis",
+      "name": "compact blocker list exactly covers14 public nonOK, no scope expansion",
       "pass": true
     },
     {
-      "name": "current docs/frontier/rules, minimum disclosure and retained root hashes",
+      "name": "recursive matrix file/hash references all resolve with committed LF basis",
+      "pass": true
+    },
+    {
+      "name": "affected local links, retained root hashes, ignored raw/DB and minimal remote evidence",
+      "pass": true
+    },
+    {
+      "name": "capture/failure/final replay streams remain exact and distinct",
       "pass": true
     }
   ],
-  "recursiveMatrixFileHashes": 339,
-  "localMarkdownLinks": 153,
+  "recursiveMatrixFileHashes": 354,
+  "localMarkdownLinks": 165,
   "sourceDnsCalls": 1,
   "sourceGetAttempts": 1,
-  "targetGetAttempts": 0,
-  "singleSelfRedirectObserved": true,
-  "multiHopCycleTested": false,
-  "normalizedRecords": 0,
-  "recordsPersisted": 0,
-  "idT02Qualification": "OK/PASS_limited_parent_process_evidence",
-  "parentIndependentPrivateRawReplay": false,
-  "cnP02Qualification": "PARTIAL/NOT_RUN_unchanged",
-  "coverage": {
-    "r24": "25/39",
-    "r25": "23/34",
-    "numericHistorical": "3/5"
-  },
+  "rawSourceItems": 10,
+  "emptySourceTitles": 7,
+  "normalizedRecords": 3,
+  "repeatedNew": 0,
+  "repeatedRevised": 0,
+  "readonlyFieldMismatches": 0,
+  "currentAvailability": "STALE",
+  "localFieldEvidence": "PASS_for_normalized3_all10_source_items_accounted_pending_parent",
+  "approvedCoverage": [
+    "25/39",
+    "23/34"
+  ],
+  "numericHistorical": "3/5",
+  "blockerSources": 14,
+  "noFurtherSourceRequests": true,
   "fullProductGate": "NOT_RUN_no_product_change",
   "guiS7": "NOT_RUN",
   "production24h": "NOT_RUN"

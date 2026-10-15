@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T08:32:20.346Z",
+  "generatedAt": "2026-10-15T08:59:58.093Z",
   "reviewedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
-  "evidenceHead": "45d2296301bb85aa18a6e4a5e6509bfa854319b0",
+  "evidenceHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -2098,45 +2098,81 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
-          "selector": {
-            "id": "MY-P02"
-          },
-          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-capture.json",
+          "sha256": "3fd7267538b80dd3bb5d9f10fed6b45d667faf473f33f612d241bffe243379d3",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://www.westportsholdings.com/category/press-release/feed/",
-        "startedAt": "2026-10-13T07:00:27.722Z",
-        "receivedAt": null,
-        "finishedAt": "2026-10-13T07:00:29.489Z",
+        "startedAt": "2026-10-15T08:46:45.729Z",
+        "receivedAt": "2026-10-15T08:46:47.628Z",
+        "finishedAt": "2026-10-15T08:46:47.628Z",
         "httpStatus": 200,
-        "wireSha256": "db9676f1167a48d5c36ad76364e6215221173eefb6874d16a77204a160befc8b",
         "bytes": 36266,
-        "scope": "one_actual_index_response",
-        "verbatimLatestRawRetained": false,
+        "wireSha256": "db9676f1167a48d5c36ad76364e6215221173eefb6874d16a77204a160befc8b",
+        "scope": "one_actual_exact_RSS_complete10_source_items_7_empty_title_3_normalizable",
+        "verbatimLatestRawRetained": true,
+        "rawLocalOnly": true,
         "notContinuousProduction": true
       },
       "fieldReplayEvidence": {
-        "status": "LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY",
+        "status": "PASS_LOCAL_3_NORMALIZED_RECORDS_ALL10_SOURCE_ITEMS_ACCOUNTED_7_EMPTY_TITLE_FILTERED_PENDING_PARENT_REVIEW",
         "evidence": {
-          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
-          "selector": {
-            "id": "MY-P02"
-          },
-          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-replay.json",
+          "sha256": "acbe258a9eef99ebc4564f6d017d1f817cead35ba9e15881527cd15ed612d8f1",
           "hashBasis": "committed_text_LF"
         },
-        "liveParsedItems": 3,
-        "liveTitleLinkTimeComplete": 3,
-        "storedDerivativeOnly": true,
-        "repeatAndReadOnlyReopen": "NOT_RUN"
+        "fieldAudit": {
+          "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-field-audit.json",
+          "sha256": "5208b6fd1945f8495487d2f88fa0bd73f53821fdb2b3d10d4957cab179332ddd",
+          "hashBasis": "committed_text_LF"
+        },
+        "allSourceItemAccounting": {
+          "path": "docs/evidence/r2-westports-rss-2026-10-15/source-item-accounting.json",
+          "sha256": "785ec553e3118f67979f2fb994bd18332d62ef903e0a71af3f3b7059224f220c",
+          "hashBasis": "committed_text_LF"
+        },
+        "sourceFieldVerification": {
+          "path": "docs/evidence/r2-westports-rss-2026-10-15/source-field-verification.json",
+          "sha256": "f1adffec4e1a018bbdb58a5f1e5cd6a30b99c321709558c6d1d8dce7907514f4",
+          "hashBasis": "committed_text_LF"
+        },
+        "command": {
+          "path": "docs/evidence/r2-westports-rss-2026-10-15/replay-final-command.json",
+          "sha256": "8a9defa7cb6ede8b5d7411e81aed21afdd7ccb84b89ccffcebe39f5218ff7cb9",
+          "hashBasis": "committed_text_LF"
+        },
+        "productCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+        "rawSourceItems": 10,
+        "sourceEmptyTitleItems": 7,
+        "normalizedItems": 3,
+        "itemsPersisted": 3,
+        "versions": 3,
+        "metadataOnlyBlocks": 3,
+        "repeatNew": 0,
+        "repeatRevised": 0,
+        "readonlyFieldMismatches": 0,
+        "sourceRequestsDuringReplay": 0,
+        "productionEnabled": false
       },
       "numericFieldValidation": null,
       "dateEvidence": {
-        "role": "feed_declared_date_time_normalized",
-        "precision": "instant_in_saved_metadata",
-        "sourceDeclaredTimezone": "not_reaudited_here",
-        "publicationInstant": "available_in_saved_live_metadata"
+        "role": "RSS item pubDate on original10 and normalized3;channel lastBuildDate distinct",
+        "rawEvidence": {
+          "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-field-audit.json",
+          "sha256": "5208b6fd1945f8495487d2f88fa0bd73f53821fdb2b3d10d4957cab179332ddd",
+          "hashBasis": "committed_text_LF"
+        },
+        "allOriginalEvidence": {
+          "path": "docs/evidence/r2-westports-rss-2026-10-15/source-item-accounting.json",
+          "sha256": "785ec553e3118f67979f2fb994bd18332d62ef903e0a71af3f3b7059224f220c",
+          "hashBasis": "committed_text_LF"
+        },
+        "precision": "second",
+        "sourceDeclaredTimezone": "+0000",
+        "utcOffset": "+00:00",
+        "publicationInstant": "derived_only_from_explicit_source_offset",
+        "sourceUpdatedField": "absent; existing sourceUpdatedAt fallback to pubDate",
+        "dateEvidenceSqlColumn": "null_existing_RSS_contract_no_migration"
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -2153,40 +2189,162 @@
       "r2_4": {
         "verdict": "STALE",
         "countedOK": false,
-        "reason": "Saved exact RSS has only 2024-11-08, 2025-02-01 and 2025-08-01 dated items; latest predates catalogue 2026 content criterion. HTTP200 and complete fields do not establish current content. No later stored update found."
+        "reason": "STALE retained after complete original10 accounting:7 newer items have genuinely empty source titles (5 in2026), existing parser deliberately excludes them;3 valid titled entries latest2025-08-01. Raw date/channel2026 orHTTP200/field replay success is not usable current content."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "No stored real-page full title/link/source-time replay."
+        "reason": "Local complete XML->existing parser/collector normalized3->repeat0/query-only3 exactPASS, with all10 raw items accounted and7 empty-title exclusions explicit. Approved qualification remainsNOT_RUN pending parent review ofthis limited field scope;23/34 not auto increased."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay.",
-        "Latest saved source item is 2025-08-01; retain STALE rather than count a reachable old feed as OK."
+        "Complete original XML gap now closed locally; old3 metadata are only the valid-title subset, not full10 raw feed.",
+        "7 newer source items have genuinely empty source titles; original links are retained; no invented title/identity or detail fetch. Latest valid normalized item remains2025-08-01, retainSTALE.",
+        "Normalized3 field chain locallyPASS, all10 source items accounted; qualification scope pending parent review, not all10 complete records.",
+        "No permanent source config/activation/24h; default off andmetadata-only permission unchanged."
       ],
       "historicalSuperseded": [
-        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current.",
+        {
+          "reason": "New independently captured complete XML allows all10 source item accounting: old3 metadata are valid-title subset, not complete feed count; latest eligible remains2025-08-01,7 newer empty-source-title items retained in evidence",
+          "previousActualFetch": {
+            "evidence": {
+              "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+              "selector": {
+                "id": "MY-P02"
+              },
+              "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://www.westportsholdings.com/category/press-release/feed/",
+            "startedAt": "2026-10-13T07:00:27.722Z",
+            "receivedAt": null,
+            "finishedAt": "2026-10-13T07:00:29.489Z",
+            "httpStatus": 200,
+            "wireSha256": "db9676f1167a48d5c36ad76364e6215221173eefb6874d16a77204a160befc8b",
+            "bytes": 36266,
+            "scope": "one_actual_index_response",
+            "verbatimLatestRawRetained": false,
+            "notContinuousProduction": true
+          },
+          "previousFieldReplayEvidence": {
+            "status": "LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY",
+            "evidence": {
+              "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+              "selector": {
+                "id": "MY-P02"
+              },
+              "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+              "hashBasis": "committed_text_LF"
+            },
+            "liveParsedItems": 3,
+            "liveTitleLinkTimeComplete": 3,
+            "storedDerivativeOnly": true,
+            "repeatAndReadOnlyReopen": "NOT_RUN"
+          },
+          "previousDateEvidence": {
+            "role": "feed_declared_date_time_normalized",
+            "precision": "instant_in_saved_metadata",
+            "sourceDeclaredTimezone": "not_reaudited_here",
+            "publicationInstant": "available_in_saved_live_metadata"
+          },
+          "previousContentFreshness": {
+            "evidence": {
+              "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/MY-P02-metadata.json",
+              "selector": null,
+              "sha256": "d0acbdfad4bc7772a6e5728af9832b4f0170e72e88ac111f4f59fda5be252c64",
+              "hashBasis": "committed_text_LF"
+            },
+            "itemDays": [
+              "2024-11-08",
+              "2025-02-01",
+              "2025-08-01"
+            ],
+            "latestItemDay": "2025-08-01",
+            "requiredCatalogYear": 2026,
+            "status": "STALE",
+            "noNewFetch": true
+          },
+          "previousR24": {
+            "verdict": "STALE",
+            "countedOK": false,
+            "reason": "STALE retained after complete original10 accounting:7 newer items have genuinely empty source titles (5 in2026), existing parser deliberately excludes them;3 valid titled entries latest2025-08-01. Raw date/channel2026 orHTTP200/field replay success is not usable current content."
+          },
+          "previousR25": {
+            "verdict": "NOT_RUN",
+            "countedPass": false,
+            "reason": "Local complete XML->existing parser/collector normalized3->repeat0/query-only3 exactPASS, with all10 raw items accounted and7 empty-title exclusions explicit. Approved qualification remainsNOT_RUN pending parent review ofthis limited field scope;23/34 not auto increased."
+          },
+          "previousGaps": [
+            "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay.",
+            "Latest saved source item is 2025-08-01; retain STALE rather than count a reachable old feed as OK."
+          ]
+        }
       ],
       "contentFreshness": {
         "evidence": {
-          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/MY-P02-metadata.json",
-          "selector": null,
-          "sha256": "d0acbdfad4bc7772a6e5728af9832b4f0170e72e88ac111f4f59fda5be252c64",
+          "path": "docs/evidence/r2-westports-rss-2026-10-15/source-item-accounting.json",
+          "sha256": "785ec553e3118f67979f2fb994bd18332d62ef903e0a71af3f3b7059224f220c",
           "hashBasis": "committed_text_LF"
         },
-        "itemDays": [
-          "2024-11-08",
-          "2025-02-01",
-          "2025-08-01"
-        ],
+        "rawSourceItems": 10,
+        "normalizedEligibleItems": 3,
+        "excludedEmptyTitleItems": 7,
+        "latestRawItemDay": "2026-09-28",
+        "latestEligibleItemDay": "2025-08-01",
         "latestItemDay": "2025-08-01",
+        "latestItemDayRole": "latest usable normalized entry with source title/link/pubDate, not latest raw item date",
         "requiredCatalogYear": 2026,
         "status": "STALE",
-        "noNewFetch": true
+        "newActualFetch": true,
+        "sourceBodyHashMatchesOldCapture": true,
+        "notClaimedNewPublicationToday": true
+      },
+      "latestAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-capture.json",
+          "sha256": "3fd7267538b80dd3bb5d9f10fed6b45d667faf473f33f612d241bffe243379d3",
+          "hashBasis": "committed_text_LF"
+        },
+        "dnsEvidence": {
+          "path": "docs/evidence/r2-westports-rss-2026-10-15/dns-ledger.json",
+          "sha256": "532b33362bbce1370d8e7bde6fb4c0464a1096eeaf8e4c40b407e425c6e3a339",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-15T08:46:45.729Z",
+        "url": "https://www.westportsholdings.com/category/press-release/feed/",
+        "addresses": [
+          {
+            "address": "104.26.3.69",
+            "family": 4
+          },
+          {
+            "address": "104.26.2.69",
+            "family": 4
+          },
+          {
+            "address": "172.67.71.25",
+            "family": 4
+          }
+        ],
+        "systemDnsCalls": 1,
+        "httpRequests": 1,
+        "httpStatus": 200,
+        "scope": "one exact RSS GET only, no retry/redirect/detail/network_settings_write"
+      },
+      "qualificationProposal": {
+        "status": "PENDING_PARENT_REVIEW",
+        "availability": "STALE_remains",
+        "fieldAcceptance": "PASS_for_existing_normalized3_contract_proposed_only",
+        "countedOK": false,
+        "countedPass": false,
+        "localFieldEvidencePassed": true,
+        "rawSourceCompleteness": "7_of10_source_titles_empty",
+        "currentApprovedAvailability": "STALE",
+        "currentApprovedField": "NOT_RUN"
       }
     },
     {
@@ -7026,6 +7184,40 @@
     "recordsPersisted": 0,
     "productChanged": false,
     "fullProductGate": "NOT_RUN_no_product_change",
-    "qualificationChanged": false
+    "qualificationChanged": false,
+    "documentationReview": "accepted_limited_parent_review_no_retry_self_redirect"
+  },
+  "lastWestportsRSSAudit": {
+    "report": {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/report.md",
+      "sha256": "b3044307d8af455c1c7f9c2e8d94424b6b0a4cdca21efda2f287cdcc7cb0745f",
+      "hashBasis": "committed_text_LF"
+    },
+    "capture": {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-capture.json",
+      "sha256": "3fd7267538b80dd3bb5d9f10fed6b45d667faf473f33f612d241bffe243379d3",
+      "hashBasis": "committed_text_LF"
+    },
+    "result": {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-replay.json",
+      "sha256": "acbe258a9eef99ebc4564f6d017d1f817cead35ba9e15881527cd15ed612d8f1",
+      "hashBasis": "committed_text_LF"
+    },
+    "blockers": {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/remaining-blockers.md",
+      "sha256": "0545847a98abea24aa2366968190022c2dfe71a4382a58d05c0159f1af90aeea",
+      "hashBasis": "committed_text_LF"
+    },
+    "executionHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",
+    "productCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+    "sourceDnsCalls": 1,
+    "sourceGetAttempts": 1,
+    "rawItems": 10,
+    "normalizedRecords": 3,
+    "emptySourceTitles": 7,
+    "availability": "STALE",
+    "fieldQualification": "pending_parent",
+    "fullProductGate": "NOT_RUN_no_product_change",
+    "noFurtherSourceRequests": true
   }
 }
