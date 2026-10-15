@@ -1,6 +1,8 @@
 # R2 41项来源累计证据 — 2026-10-15
 
-最新Westports MY-P02：单次DNS1/GET1原XML200/36266字节，10原项中7title源空、3有效，raw最高2026-09-28但有效最新2025-08-01，STALE维持；正式collector3/3/3、重复0/query_only字段0差异，限定字段PASS待父审，25/39、23/34、历史3/5不增，无产品改动/新全门禁。旧3是有效子集、不代表全XML；失败/原件留存，本批不继续来源请求。[本轮报告](../r2-westports-rss-2026-10-15/report.md) / [14项精简阻塞](../r2-westports-rss-2026-10-15/remaining-blockers.md)。
+Westports 已获限定认可：R2-4仍 STALE、25/39；R2-5按既有 parser 的3条有效记录回放 PASS，累计24/34。原XML10项、7空标题排除；原XML最高日期2026-09-28，有效最新2025-08-01，两个日期不可混同。此前待审记录保留为历史，后续停止新信源请求。[认可范围](../r2-westports-acceptance-2026-10-15/report.md)。
+
+前轮Westports MY-P02（当时待审，现已限定认可）：单次DNS1/GET1原XML200/36266字节，10原项中7title源空、3有效，raw最高2026-09-28但有效最新2025-08-01，STALE维持；正式collector3/3/3、重复0/query_only字段0差异，限定字段PASS待父审，25/39、23/34、历史3/5不增，无产品改动/新全门禁。旧3是有效子集、不代表全XML；失败/原件留存，本批不继续来源请求。[本轮报告](../r2-westports-rss-2026-10-15/report.md) / [14项精简阻塞](../r2-westports-rss-2026-10-15/remaining-blockers.md)。
 
 前轮SITC应用后真页（8be5bdd负例保留）：DNS1/GET1=200/38839字节，20卡片原HTTP链接与点分发布日期不符合当前generic合同；隔离collector明确拒绝、业务0，空表重开不作正向PASS。PARTIAL建议待审，原资格/23/39、21/34、历史3/5不改。[本轮材料](../r2-sitc-applied-2026-10-15/report.md)。
 
@@ -29,13 +31,13 @@
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
 | R2-4公开自动来源 | **25/39（64.10%）** | 最少32项，尚差7；25 OK、7 PARTIAL、1 STALE、2 BLOCKED、4 NOT_RUN，未通过 |
-| R2-5资讯/公告原页字段回放 | **23/34（67.65%）** | 尚差11；23 PASS、2 FAIL、1 PARTIAL、8 NOT_RUN，未通过 |
+| R2-5资讯/公告原页字段回放 | **24/34（70.59%）** | 尚差10；24 PASS、2 FAIL、1 PARTIAL、7 NOT_RUN，未通过 |
 | 数值字段独立检查 | **3/5** | 仅历史归一化诊断；不加到34项原页回放分子 |
 | R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
 
 34资讯/公告、5数值天气、2后续阶段的分类于06:31:44 UTC已批准，41项全部保留。后续付费天气与向量只从公开39项分母排除，没有标PASS。这里的OK只描述留证时的实产品可用和数据/解析检查，不描述今天实时可用、生产默认启用或24小时表现。默认关闭独立于来源资格，不记作失败。
 
-NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强制generic web_list配置的零网络适配负例；原日志/脚本保留，但不是后续实网不可达或专用provider失败。现按用户审定复用既有专用链计OK/PASS，[合并收口](../r2-nmc-close-2026-10-15/report.md)。Westports最新2025-08-01仍STALE，其他缺口不变。
+NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强制generic web_list配置的零网络适配负例；原日志/脚本保留，但不是后续实网不可达或专用provider失败。现按用户审定复用既有专用链计OK/PASS，[合并收口](../r2-nmc-close-2026-10-15/report.md)。Westports有效记录最新2025-08-01（原XML最高2026-09-28，10原项中7空标题排除）仍STALE，其他缺口不变。
 
 字段PASS忠实保留源实际时间角色。TH-C02是文件日，ID-T01是制定日；包括VN-D01的其余七个新增HTML原页是源显示的列表日，全部day精度、时区缺失、发布瞬间null。BMKG旧12条/en别名原文与最新13条精确/rss.xml响应分开；NCHMF旧脱敏DOM保留+07来自测试配置的限制。字段通过不证明发布瞬间、预警有效性、港口影响、法规全文或政策人工审核。
 
@@ -57,7 +59,7 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 | TH-W01 | https://www.tmd.go.th/en/api/xml/CAP | 2026-10-13T07:00:38.389Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | PASS [字段](../r2-p1-inventory-2026-10-13/replay.log) | 最新精确CAP实网10条，原XML另有回放；预警有效性/港口影响不在本字段通过范围。 |
 | TH-C01 | https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th | 2026-10-14T07:16:50.062Z / 200 [取证](../r2-six-public-2026-10-14/summary.json) | OK | PASS [字段](../r2-two-raw-dns-2026-10-14/replay-summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
 | TH-C02 | https://www.customs.go.th/list_strc_download_with_docno_date.php?ini_content=announce_160426_01&order_by=date&sort_type=0&lang=th | 2026-10-14T08:33:16.386Z / 200 [取证](../r2-next-four-2026-10-14/summary.json) | OK | PASS [字段](../r2-thai-document-replay-2026-10-14/summary.json) | 100条完整原页回放通过；日期是文件日，不是发布日期，时区/发布瞬间未知。 |
-| MY-P02 | https://www.westportsholdings.com/category/press-release/feed/ | 2026-10-15T08:46:47.628Z /200，DNS1/GET1 | STALE | NOT_RUN（限定3条本地PASS待审） | 完整10项中7源title空，raw最新2026但3有效最新2025-08-01；3/3/3、重复0/query_only0差异，不能把回放或2026空标题项当当前可用。 |
+| MY-P02 | https://www.westportsholdings.com/category/press-release/feed/ | 2026-10-15T08:46:47.628Z /200，DNS1/GET1 | STALE | PASS（已认可既有parser的3条有效记录；10原项/7空标题排除，原XML最高2026-09-28） | 完整10项中7源title空，raw最新2026但3有效最新2025-08-01；3/3/3、重复0/query_only0差异，不能把回放或2026空标题项当当前可用。 |
 | MY-P03 | https://www.northport.com.my/np/page-announcements.html | 2026-10-14T07:16:47.635Z / 200 [取证](../r2-six-public-2026-10-14/summary.json) | PARTIAL | FAIL [字段](../r2-two-raw-dns-2026-10-14/replay-summary.json) | 原页同URL对应冲突标题/日期；首次与重复均失败，写入0，不择优消除冲突。 |
 | MY-W01 | https://api.data.gov.my/weather/warning/ | 2026-10-10T08:30:40.728Z / 200（历史实测，非本日） | OK | PASS（已审定天气Feed复用） | [4条完整响应文本回放](../r2-my-w01-contract-2026-10-15/feed-replay.json)：unknown时区/有效性、received_at、0港口影响不变；目录同产品补尾斜杠，旧301保留。未运行24h。 |
 | MY-C01 | https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss | 2026-10-15T04:10:40.625Z / 200 [本轮取证](../r2-three-rss-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-three-rss-2026-10-15/MY-C01-replay.json) | 完整私有XML→既有collector→隔离SQLite 10条；重复0新0修订，readonly/query_only重开0差异；pubDate秒精度、原offset +0800，无独立updated。仅metadata，未生产启用。 |

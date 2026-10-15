@@ -77,10 +77,10 @@
       "pass": false
     },
     "r2_5": {
-      "numerator": 23,
+      "numerator": 24,
       "denominator": 34,
-      "ratio": 0.6764705882352942,
-      "remaining": 11,
+      "ratio": 0.7058823529411765,
+      "remaining": 10,
       "ids": [
         "CN-P01",
         "CN-W01",
@@ -93,6 +93,7 @@
         "TH-W01",
         "TH-C01",
         "TH-C02",
+        "MY-P02",
         "MY-W01",
         "MY-C01",
         "MY-T01",
@@ -107,8 +108,8 @@
         "XX-M03"
       ],
       "statusCounts": {
-        "PASS": 23,
-        "NOT_RUN": 8,
+        "PASS": 24,
+        "NOT_RUN": 7,
         "PARTIAL": 1,
         "FAIL": 2
       },
@@ -2115,7 +2116,7 @@
         "notContinuousProduction": true
       },
       "fieldReplayEvidence": {
-        "status": "PASS_LOCAL_3_NORMALIZED_RECORDS_ALL10_SOURCE_ITEMS_ACCOUNTED_7_EMPTY_TITLE_FILTERED_PENDING_PARENT_REVIEW",
+        "status": "PASS_LIMITED_PARENT_ACCEPTED_3_VALID_RECORDS_10_RAW_ITEMS_7_EMPTY_SOURCE_TITLE_EXCLUDED",
         "evidence": {
           "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-replay.json",
           "sha256": "acbe258a9eef99ebc4564f6d017d1f817cead35ba9e15881527cd15ed612d8f1",
@@ -2192,9 +2193,9 @@
         "reason": "STALE retained after complete original10 accounting:7 newer items have genuinely empty source titles (5 in2026), existing parser deliberately excludes them;3 valid titled entries latest2025-08-01. Raw date/channel2026 orHTTP200/field replay success is not usable current content."
       },
       "r2_5": {
-        "verdict": "NOT_RUN",
-        "countedPass": false,
-        "reason": "Local complete XML->existing parser/collector normalized3->repeat0/query-only3 exactPASS, with all10 raw items accounted and7 empty-title exclusions explicit. Approved qualification remainsNOT_RUN pending parent review ofthis limited field scope;23/34 not auto increased."
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Parent explicitly accepted limited existing RSS parser contract: complete raw XML10 accounted,7 genuinely empty source titles excluded,3 valid records replayed exactly through collector/SQLite/repeat0/query-only. Raw latest2026-09-28; eligible latest2025-08-01. Availability remainsSTALE."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
@@ -2203,7 +2204,7 @@
       "gaps": [
         "Complete original XML gap now closed locally; old3 metadata are only the valid-title subset, not full10 raw feed.",
         "7 newer source items have genuinely empty source titles; original links are retained; no invented title/identity or detail fetch. Latest valid normalized item remains2025-08-01, retainSTALE.",
-        "Normalized3 field chain locallyPASS, all10 source items accounted; qualification scope pending parent review, not all10 complete records.",
+        "Normalized3 field chain acceptedPASS within existing parser contract;10 raw=7 excluded empty-title+3 valid. Raw latest2026-09-28, eligible latest2025-08-01; no all10 complete-record claim.",
         "No permanent source config/activation/24h; default off andmetadata-only permission unchanged."
       ],
       "historicalSuperseded": [
@@ -2336,15 +2337,15 @@
         "scope": "one exact RSS GET only, no retry/redirect/detail/network_settings_write"
       },
       "qualificationProposal": {
-        "status": "PENDING_PARENT_REVIEW",
+        "status": "ACCEPTED_LIMITED_PARENT",
         "availability": "STALE_remains",
-        "fieldAcceptance": "PASS_for_existing_normalized3_contract_proposed_only",
+        "fieldAcceptance": "PASS_for_existing_normalized3_contract_only",
         "countedOK": false,
-        "countedPass": false,
+        "countedPass": true,
         "localFieldEvidencePassed": true,
         "rawSourceCompleteness": "7_of10_source_titles_empty",
         "currentApprovedAvailability": "STALE",
-        "currentApprovedField": "NOT_RUN"
+        "currentApprovedField": "PASS"
       }
     },
     {
@@ -7216,8 +7217,25 @@
     "normalizedRecords": 3,
     "emptySourceTitles": 7,
     "availability": "STALE",
-    "fieldQualification": "pending_parent",
+    "fieldQualification": "accepted_limited_parent_existing_parser3",
     "fullProductGate": "NOT_RUN_no_product_change",
+    "noFurtherSourceRequests": true,
+    "qualificationAcceptance": {
+      "path": "docs/evidence/r2-westports-acceptance-2026-10-15/report.md",
+      "sha256": "e286651edd32ce497c07d6e6d186fbbe0664967ac5e8a936bb0d2c6f588e9aca",
+      "hashBasis": "committed_text_LF"
+    }
+  },
+  "lastWestportsQualificationAcceptance": {
+    "evidence": {
+      "path": "docs/evidence/r2-westports-acceptance-2026-10-15/report.md",
+      "sha256": "e286651edd32ce497c07d6e6d186fbbe0664967ac5e8a936bb0d2c6f588e9aca",
+      "hashBasis": "committed_text_LF"
+    },
+    "previousEvidenceHead": "aa2e9e1ba1e6095cdd504f2a54bc9b60eb008388",
+    "sourceRequests": 0,
+    "r2_4": "STALE",
+    "r2_5": "PASS_limited3",
     "noFurtherSourceRequests": true
   }
 }
