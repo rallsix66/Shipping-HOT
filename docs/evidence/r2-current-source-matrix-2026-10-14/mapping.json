@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T04:28:06.488Z",
+  "generatedAt": "2026-10-15T04:43:34.036Z",
   "reviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "evidenceHead": "183385403520d6bf52b028909e0d42ae6b0a59a0",
+  "evidenceHead": "f5ffcda5629343456bd74ee0264c6e7c02dc448a",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "40979ae016c197075b1950b68f88c78d48b976820deaaadaace1ddd35c6abf3d",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -2024,21 +2024,59 @@
         "url": "https://api.data.gov.my/weather/warning/",
         "at": "2026-10-10T08:30:40.728Z",
         "httpStatus": 200,
-        "scope": "related_product_trailing_slash_JSON; exact_no_slash_catalogue_request_301_in_old_probe",
+        "scope": "existing_0830_Feed_integration_complete_response_text_real_origin_recorded",
         "catalogueExact301Evidence": {
           "path": "docs/evidence/metmalaysia-warning-2026-10-10/raw/fetch-log.txt",
           "selector": null,
           "sha256": "fcea5d40cbc05bee217ec34a39a65d9244510e1aaef5f77d05def121cb5869fc",
           "hashBasis": "committed_text_LF"
-        }
+        },
+        "bytes": 7754,
+        "byteRepresentation": "UTF8 length of historical response.text(); not original wire-byte certification",
+        "verbatimLatestRawRetained": false,
+        "fullResponseTextRetained": true,
+        "wireSha256": null,
+        "capturedAtHead": "eab30a761ddf25907ee884134eda3a5e79c048a1"
       },
-      "fieldReplayEvidence": null,
+      "fieldReplayEvidence": {
+        "status": "PASS_EXISTING_FEED_CHAIN_NOT_R2_INTEL_QUALIFIED",
+        "evidence": {
+          "path": "docs/evidence/r2-my-w01-contract-2026-10-15/feed-replay.json",
+          "selector": null,
+          "sha256": "8f8758762c2a338525bf4a3474a7753f1d6128e862278d136e3f4f5518520389",
+          "hashBasis": "committed_text_LF"
+        },
+        "provenanceCorrection": {
+          "path": "docs/evidence/r2-my-w01-contract-2026-10-15/provenance-correction.json",
+          "selector": null,
+          "sha256": "c82cd87a6c274d7abe8d5123fe083c4d472879344b631dea92c88a9a9653b508",
+          "hashBasis": "committed_text_LF"
+        },
+        "intelCompatibility": {
+          "path": "docs/evidence/r2-my-w01-contract-2026-10-15/intel-compatibility.json",
+          "selector": null,
+          "sha256": "45664f44e46b241a11518a00ba85ed49272475de383ab8a807a0598f9448adce",
+          "hashBasis": "committed_text_LF"
+        },
+        "procedure": {
+          "path": "docs/evidence/r2-my-w01-contract-2026-10-15/procedure.test.ts.txt",
+          "selector": null,
+          "sha256": "1e3f908bda8b8e557b95397784b50c1ac4c5f8aadbb422a369fc896985ed24a0",
+          "hashBasis": "committed_text_LF"
+        },
+        "realRows": 4,
+        "sourceContractReused": true,
+        "originalWireByteHashVerified": false,
+        "coverageUnchanged": true
+      },
       "numericFieldValidation": null,
       "dateEvidence": {
-        "role": "issue_or_validity_fields_unresolved",
-        "precision": "unverified",
-        "sourceDeclaredTimezone": "unknown",
-        "publicationInstant": "unknown"
+        "role": "raw issued/validFrom/validTo preserved; Feed publishedAt=first_received with received_at basis",
+        "precision": "raw_source_strings",
+        "sourceDeclaredTimezone": "unknown_by_approved_contract",
+        "publicationInstant": null,
+        "validity": "unknown",
+        "firstReceivedAt": "2026-10-10T08:30:40.728Z"
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -2055,21 +2093,68 @@
       "r2_4": {
         "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "Related slash endpoint JSON available, but exact catalogue URL gave301; stable product URL/collection mapping not qualified here."
+        "reason": "Existing approved related Feed product/parser/storage and response-text replay verified; exact catalogue/ R2 intel bridge and acceptance mapping remain unresolved. Not a claim of missing parser/identity."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "No stored real-page full title/link/source-time replay."
+        "reason": "Existing Feed chain passes under approved source semantics; R2 intel qualification/mapping not changed this evidence-only round."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "warning_issue.issued时区、稳定URL/ID映射、非publication字段、完整回放待定"
+        "Existing approved Feed parser/identity/storage chain is implemented and replayed, not absent or awaiting a new source identity contract.",
+        "R2 collector/immutable version storage and production source selection not wired; current generic JSON URL mapping and source+canonical_url uniqueness cannot directly preserve four approved shared-URL identities.",
+        "Catalogue no-slash versus approved Feed pinned-slash URL retained unchanged; acceptance/bridge differences listed for review, no automatic R2-4 or R2-5 upgrade.",
+        "Complete0830 response text and origin recorded; original wire-byte hash not certified; do not confuse separate0754/0830 runs or presuppose refetch."
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "historicalMyW01AssessmentBeforeContractReuse": {
+        "latestActualFetch": {
+          "evidence": {
+            "path": "docs/evidence/metmalaysia-integration-2026-10-10/live-evidence.json",
+            "selector": null,
+            "sha256": "b6ea58cb4851c4c46fd6cc5354b4017133b5a8e362cc8879d4ac4ccbc79f9686",
+            "hashBasis": "committed_text_LF"
+          },
+          "url": "https://api.data.gov.my/weather/warning/",
+          "at": "2026-10-10T08:30:40.728Z",
+          "httpStatus": 200,
+          "scope": "related_product_trailing_slash_JSON; exact_no_slash_catalogue_request_301_in_old_probe",
+          "catalogueExact301Evidence": {
+            "path": "docs/evidence/metmalaysia-warning-2026-10-10/raw/fetch-log.txt",
+            "selector": null,
+            "sha256": "fcea5d40cbc05bee217ec34a39a65d9244510e1aaef5f77d05def121cb5869fc",
+            "hashBasis": "committed_text_LF"
+          }
+        },
+        "fieldReplayEvidence": null,
+        "dateEvidence": {
+          "role": "issue_or_validity_fields_unresolved",
+          "precision": "unverified",
+          "sourceDeclaredTimezone": "unknown",
+          "publicationInstant": "unknown"
+        },
+        "gaps": [
+          "warning_issue.issued时区、稳定URL/ID映射、非publication字段、完整回放待定"
+        ]
+      },
+      "existingFeedContract": {
+        "parser": "server/providers/metmalaysia-warning.ts:parseMetMalaysiaRows",
+        "identity": "issued + title_en + validFrom + validTo",
+        "canonicalSourceUrl": "https://api.data.gov.my/weather/warning/",
+        "publicationDisplayTime": "first_received; timeBasis=received_at; not source publication instant",
+        "unknownTimezoneAndValidity": true,
+        "noPortOrImpactInference": true,
+        "evidence": {
+          "path": "docs/evidence/r2-my-w01-contract-2026-10-15/feed-replay.json",
+          "selector": null,
+          "sha256": "8f8758762c2a338525bf4a3474a7753f1d6128e862278d136e3f4f5518520389",
+          "hashBasis": "committed_text_LF"
+        }
+      }
     },
     {
       "id": "MY-C01",
@@ -5257,5 +5342,23 @@
     "httpRequests": 2,
     "realRecords": 20,
     "noProductCodeChanged": true
+  },
+  "lastMyW01ContractReuse": {
+    "evidence": {
+      "path": "docs/evidence/r2-my-w01-contract-2026-10-15/report.md",
+      "selector": null,
+      "sha256": "8f4c461379cf338217a2c38099594868da20eccd4be3a5582e325a71185073de",
+      "hashBasis": "committed_text_LF"
+    },
+    "feed": {
+      "path": "docs/evidence/r2-my-w01-contract-2026-10-15/feed-replay.json",
+      "selector": null,
+      "sha256": "8f8758762c2a338525bf4a3474a7753f1d6128e862278d136e3f4f5518520389",
+      "hashBasis": "committed_text_LF"
+    },
+    "sourceRequests": 0,
+    "systemDns": 0,
+    "productCodeChanged": false,
+    "acceptanceOrCatalogueChanged": false
   }
 }

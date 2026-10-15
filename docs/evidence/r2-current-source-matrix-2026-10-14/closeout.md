@@ -1,1 +1,1 @@
-当前真实Neat Freak收尾见[两媒体RSS](../r2-two-media-2026-10-15/closeout.md)。产品bebe144未变，执行起点1833854；两源各DNS1/GET1、各10条原字节字段链通过，R2-5现18/34、21/39与数值3/5不变，其他39源不变。本批仅证据测试1+2、文档验证与lint；产品门禁NOT_RUN。前轮三源1833854已获限定认可，整体R2/24h、旧GUI/S7仍pending。[下一步缺口边界](../r2-two-media-2026-10-15/availability-frontier.md)。全部现场保留，不清场。
+当前真实Neat Freak收尾见[MY-W01既有合同复用](../r2-my-w01-contract-2026-10-15/closeout.md)。零上游/DNS，已有Feed4条重启/重复/query-only链通过；不冒充R2 intel。更正不同实跑谱系与漏读parser判断，产品/目录/验收口径不改；21/39、18/34、数值3/5全不变，其他40来源不变。父会话审查pending，全部现场保留。

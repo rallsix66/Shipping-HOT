@@ -70,6 +70,24 @@
     ],
     "issuedHaveTimezone": false,
     "rowsWithIndependentIdOrUrl": 0,
-    "scope": "Existing related trailing-slash product; no new mapping, request, collection or production change."
+    "scope": "Existing related trailing-slash product; no new mapping, request, collection or production change.",
+    "provenanceCorrection": {
+      "separateRealRuns": true,
+      "earlyProbeAt": "2026-10-10T07:54:44Z",
+      "earlyProbeBytes": 7688,
+      "integrationAt": "2026-10-10T08:30:40.728Z",
+      "integrationResponseTextBytes": 7754,
+      "fullResponseTextAndOriginRecorded": true,
+      "wireBytesVerified": false,
+      "notSameResponseSizeMismatch": true,
+      "existingApprovedParser": "server/providers/metmalaysia-warning.ts:parseMetMalaysiaRows",
+      "existingIdentity": "issued + title_en + validFrom + validTo",
+      "source": {
+        "path": "docs/evidence/r2-my-w01-contract-2026-10-15/provenance-correction.json",
+        "selector": null,
+        "sha256": "c82cd87a6c274d7abe8d5123fe083c4d472879344b631dea92c88a9a9653b508",
+        "hashBasis": "committed_text_LF"
+      }
+    }
   }
 }

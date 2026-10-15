@@ -1,0 +1,50 @@
+{
+  "executionHead": "f5ffcda5629343456bd74ee0264c6e7c02dc448a",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "productDiff": "",
+  "catalogueUnchanged": true,
+  "files": [
+    {
+      "path": "server/providers/metmalaysia-warning.ts",
+      "textLfSha256": "01cff8d576e855ac3441838a6ec68ad416858b0a29cebea368744efe6350a489"
+    },
+    {
+      "path": "server/providers/metmalaysia-warning.test.ts",
+      "textLfSha256": "e78fdc33738dbe67cf83160d2c6ec8c24c8a0a615b72092656f72efcb56aa651"
+    },
+    {
+      "path": "server/providers/weather-alerts.ts",
+      "textLfSha256": "c6b349228eae11c5a458ed5d9598dc08945bbeaa2e33963ba9c7e54b98aca6b6"
+    },
+    {
+      "path": "server/runtime/weather-alert-sync-job.ts",
+      "textLfSha256": "bf818bcf37ded0ceca2bac698db904576799adad6e1ca53d06b2e488f4803df1"
+    },
+    {
+      "path": "server/database/shipping.ts",
+      "textLfSha256": "8ca53bdfa4617379bce0f4681b61d682a63dd244d69df55fcf720e6258f8034a"
+    },
+    {
+      "path": "scripts/r1-5-metmalaysia-live.ts",
+      "textLfSha256": "93862fdc24b6536015ff0bc368d2b618870a7ae8300770b7943e94361cbe4a4f"
+    },
+    {
+      "path": "server/intel/collect.ts",
+      "textLfSha256": "70e21f54009af8a9b90168c0e1d6362b8d701a4a3c62ba35154c5688c1807c30"
+    },
+    {
+      "path": "server/intel/sources/json-list.ts",
+      "textLfSha256": "7a2202bdce1f8ab128af5adc44492e979dffa9ac862e1ac04bc3c45c635cf5af"
+    },
+    {
+      "path": "server/database/intel.ts",
+      "textLfSha256": "f1508621e80252fb57db4520c2f96ba4a15fcac3168f9b056e07de6f99074f35"
+    },
+    {
+      "path": "server/database/migrations/022-intel-items.ts",
+      "textLfSha256": "6161b4ee14a1b6b5262fdc44c9f34f63705999616509caf0bd70d202bbc360f8"
+    }
+  ],
+  "sourceRequests": 0,
+  "systemDns": 0
+}

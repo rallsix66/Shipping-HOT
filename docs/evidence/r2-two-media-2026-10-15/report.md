@@ -24,4 +24,4 @@
 
 仅两个来源条目改变，其他39项逐项相同：[delta](matrix-delta.json)。R2-5 **16/34→18/34**（18PASS/4FAIL/1PARTIAL/11NOT_RUN，差16），R2-4仍 **21/39**（需至少32，差11）；数值有限历史诊断3/5单列。来源资格不等于生产开启或持续可用。整体R2、24h、旧GUI/S7未通过；无迁移、生产、真实LLM/付费、merge/deploy/force-push。
 
-同时完成[18项非OK来源的只读下一步边界](availability-frontier.md)：已有完整失败材料保留、不重跑结论；可优先离线推进MY-W01字段/身份提案，但其当前artifact未证明等同wire原字节，且精确产品URL/无id链接/未知时区仍需合同审查。没有仅凭已有材料可直接升OK的候选。[材料审计](saved-gap-material-audit.json)没有来源请求或失败探针重跑。
+同时完成[18项非OK来源的下一步边界](availability-frontier.md)。其中MY-W01前轮判断已更正：[0754/0830分别实跑、已有批准parser/Feed合同与R2差距](../r2-my-w01-contract-2026-10-15/report.md)。7754字节是0830另一实跑，不能与0754的7688字节当同一响应比较；完整文本/来源已记录，wire hash未验证，不预设重抓。其他来源的专用实现与失败证据分别保留，未重跑失败探针。

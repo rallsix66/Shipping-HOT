@@ -13,6 +13,6 @@
 
 无产品变更，因此不新跑install/typecheck/产品lint/full test/build；本批证据测试1+2、Markdown lint及文档/矩阵/归档校验单列。没有根目录dev/start、保留库初始化或凭据读取/写入；实际写库路径仅ignored私有db子目录。没有全程保留DB前后字节快照，不能冒称该证明；产品文件零diff及脚本作用域可查。
 
-来源许可没有扩张，远端不保存新的原XML/正文，完整字节与完整title/URL字段审计只在ignored。当前source/date/timezone/identity合同如实复用，RSS date_evidence保持null。MY-W01旧artifact7754字节与当时报告7688wire bytes不同，未记录独立wire hash，只能先推进离线合同提案，不能冒充完整原字节证明；此发现不改其现有PARTIAL，也不重跑任何失败材料。
+来源许可没有扩张，远端无新原XML/正文。RSS合同不变。MY-W01的旧大小/身份判断已由[零网络复用收尾](../r2-my-w01-contract-2026-10-15/closeout.md)更正：0754 probe与0830 integration不同，后者完整7754字节response.text()及4条入库有来源，wire hash未验证。已有批准parser/身份/Feed链应复用；不预设重抓，不改PARTIAL。原错误文本在f5ffcda及更正前快照保留。
 
 未消除warning：既有unimport重复符号、固定字面量capture shell args的DEP0190、沙箱全局git ignore读取及LF/CRLF提示。精确原日志另存，展示日志尾部规范化；无安全检查绕过。整体R2/24h、旧GUI/S7和父会话本批独立审查pending；merge/deploy/生产/付费out-of-scope，分支无CI不能写CI PASS。全部复核现场保留，不删除候选；将来清场需用户看完报告后另行确认。
