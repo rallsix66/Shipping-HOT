@@ -1,5 +1,7 @@
 # R2 41项来源累计证据 — 2026-10-15
 
+Readability离线切片：当前测试代码`c7ba3c62786a7554aeaf92ce9e4d9809fd137754`（独立审查pending；先前认可代码仍8d0993e），唯一article-extractor合入固定AIHOT Readability，显式container优先且缺失失败，原安全fetch/许可/版本合同不变。正常第二份新clone九命令全0，124定向/1314全量通过/3跳过；首份0a511c0类型门禁FAIL及原件保留。业务信源/LLM/付费0，无UI/route/GUI/S7/生产/24h。本轮不改25/39、24/34、历史3/5。[实现与限制](../r2-readability-offline-2026-10-15/report.md) / [门禁](../gate-c7ba3c6-readability/summary.json)。
+
 Westports 已获限定认可：R2-4仍 STALE、25/39；R2-5按既有 parser 的3条有效记录回放 PASS，累计24/34。原XML10项、7空标题排除；原XML最高日期2026-09-28，有效最新2025-08-01，两个日期不可混同。此前待审记录保留为历史，后续停止新信源请求。[认可范围](../r2-westports-acceptance-2026-10-15/report.md)。
 
 前轮Westports MY-P02（当时待审，现已限定认可）：单次DNS1/GET1原XML200/36266字节，10原项中7title源空、3有效，raw最高2026-09-28但有效最新2025-08-01，STALE维持；正式collector3/3/3、重复0/query_only字段0差异，限定字段PASS待父审，25/39、23/34、历史3/5不增，无产品改动/新全门禁。旧3是有效子集、不代表全XML；失败/原件留存，本批不继续来源请求。[本轮报告](../r2-westports-rss-2026-10-15/report.md) / [14项精简阻塞](../r2-westports-rss-2026-10-15/remaining-blockers.md)。

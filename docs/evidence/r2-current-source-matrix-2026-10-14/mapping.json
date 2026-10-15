@@ -7021,17 +7021,20 @@
   },
   "previousReviewedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
   "codeVerification": {
-    "testedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
-    "priorParentAcceptedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
-    "state": "ACCEPTED_LIMITED_PARENT_CODE_AND_PROCESS_REVIEW",
+    "testedCodeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
+    "priorParentAcceptedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+    "state": "LOCAL_GATE_PASSED_PENDING_PARENT_REVIEW",
     "gate": {
-      "path": "docs/evidence/gate-8d0993e-id-mof-card/summary.json",
-      "sha256": "ddd1eb55f8c25639ebad57e2d92437bbb38d0171d58135f596e342c5dba5d902",
+      "path": "docs/evidence/gate-c7ba3c6-readability/summary.json",
+      "sha256": "e9346a7d7fa8b66996e74d0c780b5d3a98f480aba215824aaea8964e7dc823e2",
       "hashBasis": "committed_text_LF"
     },
-    "independentReview": "accepted_no_new_P2",
-    "parentIndependentlyReplayedPrivateOriginal": false,
-    "reviewDate": "2026-10-15",
+    "priorFailedGate": {
+      "path": "docs/evidence/gate-0a511c0-readability/summary.json",
+      "sha256": "a864cf15c72d9c5d7d14d1af8a62776247befedaa331ac34a460a46e6c8f93c6",
+      "hashBasis": "committed_text_LF"
+    },
+    "independentReview": "PENDING_PARENT",
     "ciPassedClaimed": false,
     "continuous24hVerified": false
   },
@@ -7073,7 +7076,7 @@
     "sourceGetAttemptsThisRound": 0,
     "productionEnabled": false
   },
-  "testedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "testedCodeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
   "lastSITCQualificationAcceptance": {
     "evidence": {
       "path": "docs/evidence/r2-id-t02-location-2026-10-15/report.md",
@@ -7111,12 +7114,12 @@
     "qualificationChanged": false
   },
   "previousCodeVerification": {
-    "testedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
-    "priorParentAcceptedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+    "testedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+    "priorParentAcceptedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
     "state": "ACCEPTED_LIMITED_PARENT_CODE_AND_PROCESS_REVIEW",
     "gate": {
-      "path": "docs/evidence/gate-0a483dd-sitc-metadata/summary.json",
-      "sha256": "50c4c510c25d94ea5b8af2fb847ae254c6535c2f51f5b480a09e16d79bb388dd",
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/summary.json",
+      "sha256": "ddd1eb55f8c25639ebad57e2d92437bbb38d0171d58135f596e342c5dba5d902",
       "hashBasis": "committed_text_LF"
     },
     "independentReview": "accepted_no_new_P2",
@@ -7237,5 +7240,22 @@
     "r2_4": "STALE",
     "r2_5": "PASS_limited3",
     "noFurtherSourceRequests": true
+  },
+  "lastReadabilityOfflineSlice": {
+    "codeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
+    "report": {
+      "path": "docs/evidence/r2-readability-offline-2026-10-15/report.md",
+      "sha256": "4dcddd752776f68feafc364bacbea2fa4ce80ce19a2c924087423e3a68bf48c2",
+      "hashBasis": "committed_text_LF"
+    },
+    "result": {
+      "path": "docs/evidence/r2-readability-offline-2026-10-15/result.json",
+      "sha256": "1778b7a4e95fcfaec64eac44c3cd0e70103230b8f0bfb93645dc892e581136ce",
+      "hashBasis": "committed_text_LF"
+    },
+    "businessSourceRequests": 0,
+    "llmCalls": 0,
+    "qualificationUnchanged": true,
+    "productionEnabled": false
   }
 }

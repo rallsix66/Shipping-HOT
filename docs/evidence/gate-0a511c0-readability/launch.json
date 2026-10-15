@@ -1,0 +1,11 @@
+{
+  "sha": "0a511c09114674d31f3c6334ab1a3834ba8f2c0a",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\readability-build-20261015",
+  "startedAt": "2026-10-15T09:30:21.421Z",
+  "cleanClone": true,
+  "existingNodeModules": false,
+  "installScriptsNotSkipped": true,
+  "providerCredentialEnvironmentScrubbed": true,
+  "node": "v24.15.0",
+  "abi": "137"
+}

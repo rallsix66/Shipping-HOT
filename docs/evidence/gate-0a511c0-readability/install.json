@@ -1,0 +1,9 @@
+{
+  "name": "install",
+  "command": "pnpm install --frozen-lockfile",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\readability-build-20261015",
+  "sha": "0a511c09114674d31f3c6334ab1a3834ba8f2c0a",
+  "startedAt": "2026-10-15T09:30:21.422Z",
+  "finishedAt": "2026-10-15T09:30:29.762Z",
+  "rawExit": 0
+}

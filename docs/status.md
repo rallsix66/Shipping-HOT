@@ -1,5 +1,7 @@
 ## R2 41项来源当前累计证据（2026-10-15，待独立审查）
 
+Readability离线切片：当前测试代码`c7ba3c62786a7554aeaf92ce9e4d9809fd137754`（独立审查pending；先前认可代码仍8d0993e），唯一article-extractor合入固定AIHOT Readability，显式container优先且缺失失败，原安全fetch/许可/版本合同不变。正常第二份新clone九命令全0，124定向/1314全量通过/3跳过；首份0a511c0类型门禁FAIL及原件保留。业务信源/LLM/付费0，无UI/route/GUI/S7/生产/24h。本轮不改25/39、24/34、历史3/5。[实现与限制](evidence/r2-readability-offline-2026-10-15/report.md) / [门禁](evidence/gate-c7ba3c6-readability/summary.json)。
+
 Westports 已获限定认可：R2-4仍 STALE、25/39；R2-5按既有 parser 的3条有效记录回放 PASS，累计24/34。原XML10项、7空标题排除；原XML最高日期2026-09-28，有效最新2025-08-01，两个日期不可混同。此前待审记录保留为历史，后续停止新信源请求。[认可范围](evidence/r2-westports-acceptance-2026-10-15/report.md)。
 
 全部41项保留：34资讯/公告、5数值天气、2原定后续阶段。当前R2-4 **25/39**（至少32，差7；25 OK / 7 PARTIAL / 1 STALE / 2 BLOCKED / 4 NOT_RUN）；R2-5 **24/34**（24 PASS / 2 FAIL / 1 PARTIAL / 7 NOT_RUN），数值有限历史诊断另列 **3/5**。不是整体R2 PASS或24小时证明。[唯一当前逐源矩阵](evidence/r2-current-source-matrix-2026-10-14/mapping.json) / [41项报告](evidence/r2-current-source-matrix-2026-10-14/report.md)。以下旧批次按发生时点保留，不单独充当当前累计。
