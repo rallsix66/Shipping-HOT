@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T06:18:42.822Z",
+  "generatedAt": "2026-10-15T06:41:28.168Z",
   "reviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "evidenceHead": "14b6548bcab3ef9df5a24f718dcbf9556cc0ffa5",
+  "evidenceHead": "e37c5e49c0c90d69663af3c5f45f347bfc8326f4",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -5106,14 +5106,65 @@
         "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
         "hashBasis": "committed_text_LF"
       },
-      "latestActualFetch": null,
-      "fieldReplayEvidence": null,
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-sitc-applied-2026-10-15/XX-K03-capture.json",
+          "sha256": "c25ba11d20812cf7adf7e104ceb8cd7813cf4a96a78739fb4f32d5a24f8687ff",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.sitc.com/en/list.asp?classid=44",
+        "at": "2026-10-15T06:32:48.737Z",
+        "httpStatus": 200,
+        "bytes": 38839,
+        "wireSha256": "2f590a0f00dbe6f6cacc98102775942c42d288995c69206c0d33b46b99afe7c4",
+        "scope": "exact_main_index_actual20_news_cards_originalHTTP_details_and_dotted_date_text; metadata_only_observation_no_details",
+        "productQualificationChanged": false
+      },
+      "fieldReplayEvidence": {
+        "status": "BLOCKED_EXISTING_WEB_LIST_COMPATIBILITY_NOT_POSITIVE_FIELD_PASS",
+        "observation": {
+          "path": "docs/evidence/r2-sitc-applied-2026-10-15/field-observation.json",
+          "sha256": "0f0de6046c5fdf216ba293e1298ffcc6328615e6ee4846f871430c858550ec44",
+          "hashBasis": "committed_text_LF"
+        },
+        "evidence": {
+          "path": "docs/evidence/r2-sitc-applied-2026-10-15/compatibility-result.json",
+          "sha256": "cbe4b6b1033a19e4ff24d2dd57c7c0e16ec599e1b39681de4f16a774d41924b8",
+          "hashBasis": "committed_text_LF"
+        },
+        "finalCommand": {
+          "path": "docs/evidence/r2-sitc-applied-2026-10-15/replay-command.final.json",
+          "sha256": "206778b79d85a1eb282477b60e18d1ef2f00b1b78f4294b06a9a1e6c34eaab10",
+          "hashBasis": "committed_text_LF"
+        },
+        "initialScriptFailure": {
+          "path": "docs/evidence/r2-sitc-applied-2026-10-15/replay-command.json",
+          "sha256": "fb62319f5d0d7ff77792d6262f23b940e4c161a52aa9012c02bf4f58a2314928",
+          "hashBasis": "committed_text_LF"
+        },
+        "actualCards": 20,
+        "normalizedItems": 0,
+        "itemsPersisted": 0,
+        "versions": 0,
+        "originalLinkProtocol": "http:",
+        "originalDateFormat": "发布日期: YYYY.MM.DD",
+        "urlOrDateRewritten": false,
+        "unknownTimezonePreserved": true,
+        "readonlyEmptyTablesNotClaimedAsPositiveFieldAcceptance": true
+      },
       "numericFieldValidation": null,
       "dateEvidence": {
-        "role": "unknown",
-        "precision": "unknown",
+        "role": "Source-labelled发布日期 text on each own news card; existing grammar returns unsupported",
+        "rawEvidence": {
+          "path": "docs/evidence/r2-sitc-applied-2026-10-15/field-observation.json",
+          "sha256": "0f0de6046c5fdf216ba293e1298ffcc6328615e6ee4846f871430c858550ec44",
+          "hashBasis": "committed_text_LF"
+        },
+        "precision": "unknown_under_current_parser",
         "sourceDeclaredTimezone": "unknown",
-        "publicationInstant": "unknown"
+        "publicationInstant": null,
+        "utcOffset": null,
+        "localDate": null
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -5130,42 +5181,98 @@
       "r2_4": {
         "verdict": "NOT_RUN",
         "countedOK": false,
-        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+        "reason": "PriorNOT_RUN qualification retained pending parent review: actual200 exact main news index20cards is now stored; originalHTTP detail identities conflict with existingHTTPS-only web-list adapter. PARTIAL proposal is unapproved, not a countedOK."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "No stored real-page full title/link/source-time replay."
+        "reason": "PriorNOT_RUN qualification retained pending parent review. Existing raw HTML/parser/collector compatibility probe rejects allHTTP links and stores0; dotted source-date grammar unsupported. This is not positive field PASS or proof source invalidity."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "缺来源专属配置、存档谱系与回放"
+        "ExistingHTTPS-only metadata-link rule rejects20 originalHTTP source identities; no HTTPS identity proven or rewritten.",
+        "Source发布日期:YYYY.MM.DD is preserved but currentdate grammar unsupported; no clock/timezone/UTC inferred.",
+        "20 real cards are observational metadata; collector0items/versions means no positive field/SQLite acceptance.",
+        "ProposalPARTIAL and any source-rule change await parent review; no Vietnam/detail/pagination request or production candidate."
       ],
-      "historicalSuperseded": [],
+      "historicalSuperseded": [
+        {
+          "reason": "New explicitly authorized after-user-apply exact index200 replaces earlier DNS-only block as latest attempt; no source qualification approval inferred",
+          "previousLatestActualFetch": null,
+          "previousSafeFetchAttempt": {
+            "evidence": {
+              "path": "docs/evidence/r2-sitc-index-2026-10-15/XX-K03-capture.json",
+              "sha256": "3c4a6c992600ef074a3d3107855de50b1a720167dc4ad439d0c7caf1df3aaaca",
+              "hashBasis": "committed_text_LF"
+            },
+            "dnsEvidence": {
+              "path": "docs/evidence/r2-sitc-index-2026-10-15/dns-ledger.json",
+              "sha256": "d3ba8c4848284b440463054c60bfab17a9e9d3ff2ae6e9b8fd72824dfc94988c",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://www.sitc.com/en/list.asp?classid=44",
+            "startedAt": "2026-10-15T06:16:38.795Z",
+            "finishedAt": "2026-10-15T06:16:38.802Z",
+            "systemDnsCalls": 1,
+            "sourceGetAttempts": 0,
+            "httpStatus": null,
+            "result": "BLOCKED_BEFORE_HTTP",
+            "code": "blocked_address",
+            "qualificationUnchanged": true,
+            "parserAndSqliteReplay": "NOT_RUN_no_response"
+          },
+          "previousR24": {
+            "verdict": "NOT_RUN",
+            "countedOK": false,
+            "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+          },
+          "previousR25": {
+            "verdict": "NOT_RUN",
+            "countedPass": false,
+            "reason": "No stored real-page full title/link/source-time replay."
+          },
+          "previousDateEvidence": {
+            "role": "unknown",
+            "precision": "unknown",
+            "sourceDeclaredTimezone": "unknown",
+            "publicationInstant": "unknown"
+          }
+        }
+      ],
       "lastSafeFetchAttempt": {
         "evidence": {
-          "path": "docs/evidence/r2-sitc-index-2026-10-15/XX-K03-capture.json",
-          "sha256": "3c4a6c992600ef074a3d3107855de50b1a720167dc4ad439d0c7caf1df3aaaca",
+          "path": "docs/evidence/r2-sitc-applied-2026-10-15/XX-K03-capture.json",
+          "sha256": "c25ba11d20812cf7adf7e104ceb8cd7813cf4a96a78739fb4f32d5a24f8687ff",
           "hashBasis": "committed_text_LF"
         },
         "dnsEvidence": {
-          "path": "docs/evidence/r2-sitc-index-2026-10-15/dns-ledger.json",
-          "sha256": "d3ba8c4848284b440463054c60bfab17a9e9d3ff2ae6e9b8fd72824dfc94988c",
+          "path": "docs/evidence/r2-sitc-applied-2026-10-15/dns-ledger.json",
+          "sha256": "7cff205f40524664fd79ee96e9f262855461e54a7494804cd9aa0f0937a1297a",
+          "hashBasis": "committed_text_LF"
+        },
+        "configuration": {
+          "path": "docs/evidence/r2-sitc-applied-2026-10-15/clash-applied-verification.json",
+          "sha256": "49003b7dc16d69fbea8b46c6ab632248cf932d0a367fcd4e3f59df9d78b4c5e1",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://www.sitc.com/en/list.asp?classid=44",
-        "startedAt": "2026-10-15T06:16:38.795Z",
-        "finishedAt": "2026-10-15T06:16:38.802Z",
+        "startedAt": "2026-10-15T06:32:47.777Z",
+        "finishedAt": "2026-10-15T06:32:48.740Z",
         "systemDnsCalls": 1,
-        "sourceGetAttempts": 0,
-        "httpStatus": null,
-        "result": "BLOCKED_BEFORE_HTTP",
-        "code": "blocked_address",
-        "qualificationUnchanged": true,
-        "parserAndSqliteReplay": "NOT_RUN_no_response"
+        "sourceGetAttempts": 1,
+        "httpStatus": 200,
+        "result": "CAPTURED_REAL_LIST_EXISTING_ADAPTER_INCOMPATIBLE",
+        "qualificationUnchanged": true
+      },
+      "qualificationProposal": {
+        "status": "PENDING_PARENT_REVIEW",
+        "availability": "PARTIAL_readable_actual20_card_list_with_adapter_contract_gap",
+        "countedOK": false,
+        "fieldAcceptance": "BLOCKED_pending_HTTP_metadata_identity_and_explicit_source_date_rule_decision",
+        "notAnIntrinsicSourceFailure": true
       }
     },
     {
@@ -6263,6 +6370,24 @@
   },
   "lastSITCIndexProbe": {
     "report": {
+      "path": "docs/evidence/r2-sitc-applied-2026-10-15/report.md",
+      "sha256": "cc061a08b52b155b657ef41f104cb56cb6eaf9166b957bb22cd9db65bfe3a78c",
+      "hashBasis": "committed_text_LF"
+    },
+    "capture": {
+      "path": "docs/evidence/r2-sitc-applied-2026-10-15/XX-K03-capture.json",
+      "sha256": "c25ba11d20812cf7adf7e104ceb8cd7813cf4a96a78739fb4f32d5a24f8687ff",
+      "hashBasis": "committed_text_LF"
+    },
+    "sourceGetAttempts": 1,
+    "systemDnsCalls": 1,
+    "completeResponses": 1,
+    "actualCards": 20,
+    "businessRecordsPersisted": 0,
+    "qualificationChanged": false
+  },
+  "previousSITCIndexProbe": {
+    "report": {
       "path": "docs/evidence/r2-sitc-index-2026-10-15/report.md",
       "sha256": "2b2d48ac1ab165f3cc06d4d4dfa9d6b6a7e98e21f712a29e000b61591eb7c3a5",
       "hashBasis": "committed_text_LF"
@@ -6277,5 +6402,23 @@
     "completeResponses": 0,
     "businessRecords": 0,
     "qualificationChanged": false
+  },
+  "lastSITCAppliedCompatibility": {
+    "report": {
+      "path": "docs/evidence/r2-sitc-applied-2026-10-15/report.md",
+      "sha256": "cc061a08b52b155b657ef41f104cb56cb6eaf9166b957bb22cd9db65bfe3a78c",
+      "hashBasis": "committed_text_LF"
+    },
+    "result": {
+      "path": "docs/evidence/r2-sitc-applied-2026-10-15/compatibility-result.json",
+      "sha256": "cbe4b6b1033a19e4ff24d2dd57c7c0e16ec599e1b39681de4f16a774d41924b8",
+      "hashBasis": "committed_text_LF"
+    },
+    "fieldObservation": {
+      "path": "docs/evidence/r2-sitc-applied-2026-10-15/field-observation.json",
+      "sha256": "0f0de6046c5fdf216ba293e1298ffcc6328615e6ee4846f871430c858550ec44",
+      "hashBasis": "committed_text_LF"
+    },
+    "productChanges": false
   }
 }

@@ -1,1 +1,1 @@
-当前真实Neat Freak见[SITC主站安全阻断](../r2-sitc-index-2026-10-15/closeout.md)。XX-K03精确索引DNS1=198.18.0.64、transport前阻断，GET0/响应0，未改网络/CA，不试越南站或其他来源；配置/解析/SQLite回放NOT_RUN。仅追加尝试，原资格/23/39、21/34、历史3/5保持，其他40条原样；26项与额外生成字节unknown限制沿用，不盘点旧全文。产品门禁/GUI/S7/24h本批NOT_RUN，定向验证/归档单列，整体未通过待父审，现场保留。
+当前真实Neat Freak见[SITC真实列表及适配负例](../r2-sitc-applied-2026-10-15/closeout.md)。27项只读确认，DNS1/GET1=200，20卡片全HTTP标题链接/点分日期与既有合同不兼容；隔离collector两失败/业务0，空表query-only不当正向字段PASS。首次脚本表名错误和原DNS阻断保留，无重抓。仅XX-K03元数据更新、PARTIAL建议待审，原资格/23/39、21/34、历史3/5与其他40条不改；无产品/规则/目录/生产/迁移变化，产品门禁/GUI/S7/24h本批NOT_RUN，现场保留。
