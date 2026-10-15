@@ -23,6 +23,11 @@ it.each(["Synthetic news (29/2/2025)", "Synthetic news (31/4/2026)", "Synthetic 
   expect(entry.dateEvidence.localDate).toBeNull()
   expect(entry.publishedAt).toBeUndefined()
 })
+it.each(["14/10/2026", "2026-10-14", "(14/10/2026)", "   (14/10/2026)", "\u200B (14/10/2026)"])("rejects suffix mapping without a nonempty visible title and preserves raw unknown: %s", (text) => {
+  const [entry] = fromHtml(page(card("/Pages/one.aspx", "Synthetic full title", text)), seed.url, seed.webList!, policy)
+  expect(entry.dateEvidence).toMatchObject({ raw: text.trim(), rule: "title_dmy_date_mismatch", precision: "unknown", localDate: null, publishedAt: null, timezone: "missing", utcOffset: null })
+  expect(entry.publishedAt).toBeUndefined()
+})
 it("does not take a neighboring synthetic date or substitute truncated text for a missing full title", () => {
   const neighboring = page(`${card("/Pages/one.aspx", "Synthetic title", "Synthetic text")}<span>14/10/2026</span>`)
   expect(fromHtml(neighboring, seed.url, seed.webList!, policy)[0].dateEvidence.localDate).toBeNull()

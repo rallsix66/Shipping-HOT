@@ -25,10 +25,14 @@ export interface WebListEntry extends FeedEntry {
 
 export const WEB_LIST_DUPLICATE_CONFLICT = "web_list_duplicate_conflict"
 
+function unknownDateEvidence(value: string | null | undefined, config: Pick<WebListConfig, "calendar" | "dateRuleBasis">): WebDate {
+  return { raw: value?.trim() || null, rule: "missing", basis: config.dateRuleBasis, calendar: config.calendar ?? "gregorian", precision: "unknown", timezone: "missing", utcOffset: null, localDate: null, publishedAt: null }
+}
+
 /** Strict replacement for upstream's host-dependent Date.parse fallback and implicit +08:00. */
 export function parseLooseDate(value: string | null | undefined, config: Pick<WebListConfig, "publishedAtUtcOffset" | "dateOrder" | "calendar" | "dateRuleBasis" | "dateFormat">): WebDate {
-  const raw = value?.trim() || null
-  const result: WebDate = { raw, rule: "missing", basis: config.dateRuleBasis, calendar: config.calendar ?? "gregorian", precision: "unknown", timezone: "missing", utcOffset: null, localDate: null, publishedAt: null }
+  const result = unknownDateEvidence(value, config)
+  const raw = result.raw
   if (!raw) return result
   let v = raw.replace(/^\((.*)\)$/, "$1").trim()
   if (/^(?:พ\.ศ\.|B\.E\.)\s*/i.test(v)) {
@@ -157,6 +161,7 @@ export function fromHtml(html: string, base: string, config: WebListConfig, poli
     if (!title) throw new Error("web_list_missing_title")
     const dateEl = c.publishedAtSelector ? el.find(c.publishedAtSelector).first() : undefined
     let rawDate = dateEl?.attr("datetime") ?? dateEl?.attr("title") ?? dateEl?.text()
+    let unmatchedDate: WebDate | undefined
     if (c.linkTextFormat === "dmy-date-title") {
       const pair = /^(\d{1,2}-\d{1,2}-\d{4}) (\S.*)$/.exec(title)
       rawDate = pair?.[1]
@@ -165,11 +170,14 @@ export function fromHtml(html: string, base: string, config: WebListConfig, poli
     if (c.linkTextFormat === "title-dmy-date") {
       // One observed anchor: its full title attribute and trailing parenthesized D/M/Y.
       // Preserve unsupported text as unknown evidence; never search neighboring prose.
-      const visible = linkEl.text().replace(/\s+/g, " ").trim()
+      const originalText = linkEl.text()
+      const visible = originalText.replace(/\s+/g, " ").trim()
       const pair = /\((\d{1,2}\/\d{1,2}\/\d{4})\)$/.exec(visible)
-      rawDate = pair && pair.index > 1 && visible[pair.index - 1] === " " ? pair[1] : visible
+      const visibleTitle = pair ? visible.slice(0, pair.index).replace(/[\p{Cf}\p{Cc}\s]/gu, "") : ""
+      if (pair && visibleTitle && visible[pair.index - 1] === " ") rawDate = pair[1]
+      else unmatchedDate = { ...unknownDateEvidence(originalText, c), rule: "title_dmy_date_mismatch" }
     }
-    const dateEvidence = parseLooseDate(rawDate, c)
+    const dateEvidence = unmatchedDate ?? parseLooseDate(rawDate, c)
     // A URL identifies one item, but does not prove that conflicting title/date associations are duplicates.
     // Keep the full normalized date evidence (including raw text/unknowns), without choosing an occurrence.
     const association = JSON.stringify([title, dateEvidence])
