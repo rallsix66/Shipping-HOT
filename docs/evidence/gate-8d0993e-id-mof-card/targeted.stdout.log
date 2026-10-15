@@ -1,0 +1,29 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/id-mof-card-build-20261015
+
+ ✓ server/intel/sources/json-list-html.test.ts (5 tests) 66ms
+ ✓ server/intel/sources/html-index-candidates.test.ts (25 tests) 58ms
+ ✓ server/intel/sources/json-list.test.ts (42 tests) 72ms
+ ✓ server/intel/sources/web-list.test.ts (35 tests) 117ms
+ ✓ server/intel/post-clash-index.test.ts (18 tests) 345ms
+ ✓ server/intel/id-mof-index.test.ts (31 tests) 197ms
+ ✓ server/intel/sitc-index.test.ts (39 tests) 243ms
+ ✓ server/intel/vn-disaster-index.test.ts (22 tests) 163ms
+ ✓ server/intel/public-index-candidates-collect.test.ts (22 tests) 548ms
+ ✓ server/intel/html-index-candidates-collect.test.ts (4 tests) 385ms
+ ✓ server/intel/thai-document-index.test.ts (4 tests) 113ms
+ ✓ server/intel/adaptive.test.ts (2 tests) 98ms
+ ✓ server/intel/web-list-collect.test.ts (7 tests) 780ms
+ ✓ server/intel/sources/web-list-conflicts.test.ts (12 tests) 44ms
+ ✓ server/intel/web-list-conflicts-collect.test.ts (3 tests) 198ms
+ ✓ server/intel/json-list-collect.test.ts (9 tests) 872ms
+ ✓ server/runtime/intel-production.test.ts (4 tests) 549ms
+   ✓ holds a database-scoped lease across processes, refuses competitors and never deletes a stale lease  329ms
+ ✓ server/runtime/intel-bootstrap.test.ts (9 tests) 588ms
+ ✓ server/intel/collect.test.ts (22 tests) 1240ms
+
+ Test Files  19 passed (19)
+      Tests  315 passed (315)
+   Start at  16:07:32
+   Duration  3.00s (transform 6.30s, setup 0ms, import 17.55s, tests 6.68s, environment 3ms)
+

@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T07:43:04.327Z",
+  "generatedAt": "2026-10-15T08:12:50.004Z",
   "reviewedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
-  "evidenceHead": "4ca3a77cd8cdb1be3c793052b7edff628cec0529",
+  "evidenceHead": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -3441,13 +3441,53 @@
         },
         "notContinuousProduction": true
       },
-      "fieldReplayEvidence": null,
+      "fieldReplayEvidence": {
+        "status": "PASS_LOCAL_SAVED_ORIGINAL_CHAIN7_PENDING_PARENT_CODE_AND_QUALIFICATION_REVIEW",
+        "evidence": {
+          "path": "docs/evidence/r2-id-t02-finite-cn-p02-2026-10-15/replay-result.json",
+          "sha256": "0a32f1a5e511e1ebf56dcb047feb42d38b6a4bb1783d6c1fe168e107f11f5497",
+          "hashBasis": "committed_text_LF"
+        },
+        "fieldAudit": {
+          "path": "docs/evidence/r2-id-t02-finite-cn-p02-2026-10-15/field-audit.json",
+          "sha256": "feefcde2f955b4d2d0d96b7d320974660599490b122bae4bc6e87affa513d84b",
+          "hashBasis": "committed_text_LF"
+        },
+        "command": {
+          "path": "docs/evidence/r2-id-t02-finite-cn-p02-2026-10-15/replay-command.json",
+          "sha256": "509fd8be9b409baadce4e5a159eead39a9ba0cbc56d2cf645fd4d57990d2eade",
+          "hashBasis": "committed_text_LF"
+        },
+        "testedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+        "sourceCaptureHead": "4ca3a77cd8cdb1be3c793052b7edff628cec0529",
+        "sourceCapturedAt": "2026-10-15T07:37:48.920Z",
+        "sourceGetAttemptsThisRound": 0,
+        "observedNodes": 16,
+        "normalizedItems": 7,
+        "itemsPersisted": 7,
+        "versions": 7,
+        "blocks": 7,
+        "repeatNew": 0,
+        "repeatRevised": 0,
+        "readonlyFieldMismatches": 0,
+        "sourceTimezoneUnknown": true,
+        "publicationInstant": null,
+        "productionEnabled": false
+      },
       "numericFieldValidation": null,
       "dateEvidence": {
-        "role": "unknown",
-        "precision": "unknown",
-        "sourceDeclaredTimezone": "unknown",
-        "publicationInstant": "unknown"
+        "role": "Unlabelled original source card day, not certified publication/enactment/effectiveness",
+        "rawEvidence": {
+          "path": "docs/evidence/r2-id-t02-finite-cn-p02-2026-10-15/field-audit.json",
+          "sha256": "feefcde2f955b4d2d0d96b7d320974660599490b122bae4bc6e87affa513d84b",
+          "hashBasis": "committed_text_LF"
+        },
+        "precision": "day",
+        "sourceDeclaredTimezone": "missing",
+        "publicationInstant": null,
+        "utcOffset": null,
+        "calendar": "gregorian",
+        "localDateBasis": "Exact own-card span.card-tag DD Indonesian-month-abbreviation YYYY; preserve raw, no implicit instant or date role"
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -3456,30 +3496,32 @@
       },
       "defaultState": {
         "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
-        "sourceConfig": "not_configured",
+        "sourceConfig": "declared_disabled_html_index_candidate",
         "declaredSeedEnabled": null,
         "effectiveDefaultIntelJobEnabled": false,
-        "currentUserPersistedSettings": "not_inspected"
+        "currentUserPersistedSettings": "not_inspected",
+        "declaredCandidateEnabled": false,
+        "productionRegistryJoined": false
       },
       "r2_4": {
         "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "PARTIAL retained: exact root307 now has real Location, approved same-host HTTPS/home target returned200;16 hidden streamed DOM card nodes/7 identities observed only. Formal list/date/adapter contract is unverified; no automatic qualification upgrade."
+        "reason": "ApprovedPARTIAL remains pending parent review ofnew8d0993e minimal disabled candidate and7-record saved-original replay. Original root307/real target200 unchanged; no new source availability or24h proof."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "NOT_RUN retained: structural observation only; no source publication-date contract, parser/config extension or collector/SQLite field replay.16 DOM nodes/7 identities are not normalized records."
+        "reason": "Local original-chain7-item parser/collector/repeat/query-only field replayPASS oncleanSHA8d0993e; qualification remainsNOT_RUN pending parent review, so22/34 is unchanged."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Actual307 Location and same-host target200 now verified; old header-missing response remains historical, catalogue root URL unchanged.",
-        "Target/home has16 hidden DOM card fragments in4 repeated groups and7 identity URLs; review exact list scope/identifier/descriptive-title contract before any adapter.",
-        "No explicit publication field in observed cards; legal identifier year is not a date. Other script data/date semantics not evaluated; unknown date/timezone stays unknown.",
-        "No ID-T02 formal candidate, product extension, parser/collector/SQLite replay or further requests authorized by this structural-only round."
+        "Previous no-card-date statement corrected by own span.card-tag andsafe JSON identity/date association; old evidence retained.",
+        "Minimal default-off metadata candidate and7-record replay pass locally; code/qualification independent review pending.",
+        "Card day role/timezone/instant unverified;2007/2025 popular historical records remain historical, no inferred freshness/publication/port impact.",
+        "Actual capture still2026-10-15T07:37:48.920Z; this round sourceGET/DNS0, CN-P02 conditional branch not opened; production/24h not run."
       ],
       "historicalSuperseded": [
         "Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block.",
@@ -3520,6 +3562,53 @@
             "countedPass": false,
             "reason": "NOT_RUN retained: structural observation only; no source publication-date contract, parser/config extension or collector/SQLite field replay.16 DOM nodes/7 identities are not normalized records."
           }
+        },
+        {
+          "reason": "Finite own-card/SVG direct-text inspection corrects previous false absence-of-date finding; minimal disabled candidate and7-record original-chain replay now locally pass, qualification pending parent",
+          "previousStructureObservation": {
+            "evidence": {
+              "path": "docs/evidence/r2-id-t02-location-2026-10-15/structure-observation.json",
+              "sha256": "c61fe27597d874ecb14397ad0daa18be70322afbe4a79690d11052e13e9d0d60",
+              "hashBasis": "committed_text_LF"
+            },
+            "observedHiddenCardNodes": 16,
+            "distinctObservedDocumentIdentities": 7,
+            "normalizedRecords": 0,
+            "recordsPersisted": 0,
+            "publicationDateInObservedCards": "not_explicit",
+            "scope": "offline_DOM_structure_only_not_parser_or_repository_acceptance",
+            "adapterImplemented": false
+          },
+          "previousFieldReplayEvidence": null,
+          "previousDateEvidence": {
+            "role": "unknown",
+            "precision": "unknown",
+            "sourceDeclaredTimezone": "unknown",
+            "publicationInstant": "unknown"
+          },
+          "previousDefaultState": {
+            "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+            "sourceConfig": "not_configured",
+            "declaredSeedEnabled": null,
+            "effectiveDefaultIntelJobEnabled": false,
+            "currentUserPersistedSettings": "not_inspected"
+          },
+          "previousR24": {
+            "verdict": "PARTIAL",
+            "countedOK": false,
+            "reason": "ApprovedPARTIAL remains pending parent review ofnew8d0993e minimal disabled candidate and7-record saved-original replay. Original root307/real target200 unchanged; no new source availability or24h proof."
+          },
+          "previousR25": {
+            "verdict": "NOT_RUN",
+            "countedPass": false,
+            "reason": "Local original-chain7-item parser/collector/repeat/query-only field replayPASS oncleanSHA8d0993e; qualification remainsNOT_RUN pending parent review, so22/34 is unchanged."
+          },
+          "previousGaps": [
+            "Actual307 Location and same-host target200 now verified; old header-missing response remains historical, catalogue root URL unchanged.",
+            "Target/home has16 hidden DOM card fragments in4 repeated groups and7 identity URLs; review exact list scope/identifier/descriptive-title contract before any adapter.",
+            "No explicit publication field in observed cards; legal identifier year is not a date. Other script data/date semantics not evaluated; unknown date/timezone stays unknown.",
+            "No ID-T02 formal candidate, product extension, parser/collector/SQLite replay or further requests authorized by this structural-only round."
+          ]
         }
       ],
       "latestAttempt": {
@@ -3648,17 +3737,33 @@
       },
       "structureObservation": {
         "evidence": {
-          "path": "docs/evidence/r2-id-t02-location-2026-10-15/structure-observation.json",
-          "sha256": "c61fe27597d874ecb14397ad0daa18be70322afbe4a79690d11052e13e9d0d60",
+          "path": "docs/evidence/r2-id-t02-finite-cn-p02-2026-10-15/id-t02-finite-result.json",
+          "sha256": "39721188ce038fb8c336be5beb5e6fc7ef75f16a9b65d1c1dacbd499546d62c0",
           "hashBasis": "committed_text_LF"
         },
         "observedHiddenCardNodes": 16,
         "distinctObservedDocumentIdentities": 7,
-        "normalizedRecords": 0,
-        "recordsPersisted": 0,
-        "publicationDateInObservedCards": "not_explicit",
-        "scope": "offline_DOM_structure_only_not_parser_or_repository_acceptance",
-        "adapterImplemented": false
+        "groups": [
+          "S:1=Terkini_main",
+          "S:2=Populer_main",
+          "S:4=Terkini_d-md-none",
+          "S:5=Populer_d-md-none"
+        ],
+        "ownCardDateSelector": "span.card-tag",
+        "oldCardDateAbsenceClaimCorrected": true,
+        "wholePageNoDatesClaimed": false,
+        "scope": "Finite offline original DOM and safely decoded JSON-only data; no script execution",
+        "adapterImplemented": true
+      },
+      "qualificationProposal": {
+        "status": "PENDING_PARENT_CODE_AND_QUALIFICATION_REVIEW",
+        "availability": "OK_proposed_only",
+        "fieldAcceptance": "PASS_proposed_only",
+        "countedOK": false,
+        "countedPass": false,
+        "localEvidencePassed": true,
+        "currentApprovedAvailability": "PARTIAL",
+        "currentApprovedField": "NOT_RUN"
       }
     },
     {
@@ -6643,19 +6748,15 @@
   },
   "previousReviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
   "codeVerification": {
-    "testedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
-    "priorParentAcceptedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-    "state": "ACCEPTED_LIMITED_PARENT_CODE_AND_PROCESS_REVIEW",
+    "testedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+    "priorParentAcceptedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+    "state": "LOCALLY_VERIFIED_PENDING_PARENT_REVIEW",
     "gate": {
-      "path": "docs/evidence/gate-0a483dd-sitc-metadata/summary.json",
-      "sha256": "50c4c510c25d94ea5b8af2fb847ae254c6535c2f51f5b480a09e16d79bb388dd",
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/summary.json",
+      "sha256": "ddd1eb55f8c25639ebad57e2d92437bbb38d0171d58135f596e342c5dba5d902",
       "hashBasis": "committed_text_LF"
     },
-    "independentReview": "accepted_no_new_P2",
-    "parentIndependentlyReplayedPrivateOriginal": false,
-    "reviewDate": "2026-10-15",
-    "ciPassedClaimed": false,
-    "continuous24hVerified": false
+    "independentReview": "pending_parent"
   },
   "previousSITCAppliedCompatibility": {
     "report": {
@@ -6695,7 +6796,7 @@
     "sourceGetAttemptsThisRound": 0,
     "productionEnabled": false
   },
-  "testedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "testedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
   "lastSITCQualificationAcceptance": {
     "evidence": {
       "path": "docs/evidence/r2-id-t02-location-2026-10-15/report.md",
@@ -6731,5 +6832,43 @@
     "productChanged": false,
     "fullProductGate": "NOT_RUN_no_product_change",
     "qualificationChanged": false
+  },
+  "previousCodeVerification": {
+    "testedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+    "priorParentAcceptedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+    "state": "ACCEPTED_LIMITED_PARENT_CODE_AND_PROCESS_REVIEW",
+    "gate": {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/summary.json",
+      "sha256": "50c4c510c25d94ea5b8af2fb847ae254c6535c2f51f5b480a09e16d79bb388dd",
+      "hashBasis": "committed_text_LF"
+    },
+    "independentReview": "accepted_no_new_P2",
+    "parentIndependentlyReplayedPrivateOriginal": false,
+    "reviewDate": "2026-10-15",
+    "ciPassedClaimed": false,
+    "continuous24hVerified": false
+  },
+  "lastIDT02CardRepair": {
+    "report": {
+      "path": "docs/evidence/r2-id-t02-finite-cn-p02-2026-10-15/report.md",
+      "sha256": "b8e12a9043555e25c7cd0299e41912fa0051149103bc56f489b72a501f3f2caf",
+      "hashBasis": "committed_text_LF"
+    },
+    "result": {
+      "path": "docs/evidence/r2-id-t02-finite-cn-p02-2026-10-15/replay-result.json",
+      "sha256": "0a32f1a5e511e1ebf56dcb047feb42d38b6a4bb1783d6c1fe168e107f11f5497",
+      "hashBasis": "committed_text_LF"
+    },
+    "finite": {
+      "path": "docs/evidence/r2-id-t02-finite-cn-p02-2026-10-15/id-t02-finite-result.json",
+      "sha256": "39721188ce038fb8c336be5beb5e6fc7ef75f16a9b65d1c1dacbd499546d62c0",
+      "hashBasis": "committed_text_LF"
+    },
+    "testedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+    "sourceDnsCalls": 0,
+    "sourceGetAttempts": 0,
+    "cnP02Requests": 0,
+    "qualificationUpgrade": "pending_parent",
+    "productionEnabled": false
   }
 }

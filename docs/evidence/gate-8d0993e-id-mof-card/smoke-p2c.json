@@ -1,0 +1,9 @@
+{
+  "name": "smoke-p2c",
+  "command": "pnpm smoke:p2c-runtime",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\id-mof-card-build-20261015",
+  "sha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "startedAt": "2026-10-15T08:07:50.214Z",
+  "finishedAt": "2026-10-15T08:07:51.317Z",
+  "rawExit": 0
+}

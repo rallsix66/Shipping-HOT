@@ -1,0 +1,10 @@
+{
+  "command": "node .tmp/finalize-id-t02-finite-20261015.cjs",
+  "rawExit": 1,
+  "stdoutExactUtf8": "",
+  "stderrExactUtf8": "node:internal/assert/utils:77\r\n    throw err;\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\r\n\r\n  assert(paragraphTexts(prop.exactSubtree).includes(first.descriptiveTitle))\r\n\r\n    at D:\\try one\\Shipping HOT\\.tmp\\finalize-id-t02-finite-20261015.cjs:9:631\r\n    at Array.map (<anonymous>)\r\n    at Object.<anonymous> (D:\\try one\\Shipping HOT\\.tmp\\finalize-id-t02-finite-20261015.cjs:9:83)\r\n    at Module._compile (node:internal/modules/cjs/loader:1830:14)\r\n    at Object..js (node:internal/modules/cjs/loader:1961:10)\r\n    at Module.load (node:internal/modules/cjs/loader:1553:32)\r\n    at Module._load (node:internal/modules/cjs/loader:1355:12)\r\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\r\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\r\n    at node:internal/main/run_main_module:33:47 {\r\n  generatedMessage: true,\r\n  code: 'ERR_ASSERTION',\r\n  actual: false,\r\n  expected: true,\r\n  operator: '==',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.15.0\r\n",
+  "stdoutOriginalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrOriginalByteSha256": "a392f4d53006da16b7889108c33bf0c76bbc2f2480941bf8fd34cac6eaea5006",
+  "networkCalls": 0,
+  "scriptExecution": false
+}

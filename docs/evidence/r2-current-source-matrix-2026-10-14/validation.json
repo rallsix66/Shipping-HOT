@@ -1,58 +1,61 @@
 {
   "rawExit": 0,
-  "startedAt": "2026-10-15T07:45:55.244Z",
-  "finishedAt": "2026-10-15T07:45:55.556Z",
-  "executionHead": "4ca3a77cd8cdb1be3c793052b7edff628cec0529",
-  "productCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "startedAt": "2026-10-15T08:16:55.145Z",
+  "finishedAt": "2026-10-15T08:16:55.618Z",
+  "baselineEvidenceHead": "0274014037fbf68d7821309d2fd4090eaa036396",
+  "testedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "priorParentAcceptedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "independentReview": "pending_parent",
   "checks": [
     {
-      "name": "exact branch/base and zero product/catalogue/prior-evidence diff",
+      "name": "clean code SHA five-file scope and fixed safety/collector/Runtime/schema/catalogue boundaries",
       "pass": true
     },
     {
-      "name": "exact catalogue row and safely captured real Location, not old body inference",
+      "name": "finite own-card correction, exact group binding and preserved failure records",
       "pass": true
     },
     {
-      "name": "bounded two public DNS/two GET and exact original bytes/command streams",
+      "name": "original complete bytes and all positional range hashes",
       "pass": true
     },
     {
-      "name": "offline DOM16 hidden nodes/7 identities only, no date or business-record invention",
+      "name": "fresh normal install and full nine-command code gate",
       "pass": true
     },
     {
-      "name": "SITC limited parent process acceptance only, ID-T02 qualifications unchanged, other39 exact",
+      "name": "complete saved307-to200 chain,7 real rows/repeat0/query-only7 and no external calls",
       "pass": true
     },
     {
-      "name": "24/39 and22/34 only plusSITC, fixed thresholds/numeric3/5/24h not run",
+      "name": "only ID-T02 entry changed, entire approved coverage and40 other entries unchanged",
       "pass": true
     },
     {
-      "name": "recursive current matrix file hashes all resolve in committed LF basis",
+      "name": "all current matrix evidence references resolve on committed LF basis",
       "pass": true
     },
     {
-      "name": "affected links/rules/frontier and minimal remote evidence, retained hashes unchanged",
+      "name": "affected links/default-off count, minimum disclosure, ignored originals and evidence-only diff",
+      "pass": true
+    },
+    {
+      "name": "exact command streams and original/LF gate log hashes retained",
       "pass": true
     }
   ],
-  "recursiveMatrixFileHashes": 323,
-  "localMarkdownLinks": 153,
-  "sourceDnsCalls": 2,
-  "sourceGetAttempts": 2,
-  "normalizedRecords": 0,
-  "recordsPersisted": 0,
-  "sitcQualification": "OK/PASS_limited_parent_process_evidence",
-  "parentIndependentPrivateRawReplay": false,
-  "idT02Qualification": "PARTIAL/NOT_RUN_unchanged",
-  "coverage": {
-    "r24": "24/39",
-    "r25": "22/34",
-    "numericHistorical": "3/5"
-  },
-  "fullProductGate": "NOT_RUN_no_product_change",
+  "originalByteRangeHashes": 35,
+  "recursiveMatrixFileHashes": 332,
+  "localMarkdownLinks": 156,
+  "sourceDnsCalls": 0,
+  "sourceGetAttempts": 0,
+  "cnP02Requests": 0,
+  "realItems": 7,
+  "approvedCoverage": [
+    "24/39",
+    "22/34"
+  ],
+  "numericHistorical": "3/5",
   "guiS7": "NOT_RUN",
   "production24h": "NOT_RUN"
 }
