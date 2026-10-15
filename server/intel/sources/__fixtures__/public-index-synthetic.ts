@@ -19,3 +19,16 @@ export const GD_SYNTHETIC = `<div class="index-tab-box"><ul class="index-tabs">
 <li><a href="/html/gdmsa/xxgk/article/2026/one.html">Synthetic official notice</a><span class="index-tab-date">2026-06-17</span></li>
 <li><a href="/html/gdmsa/xxgk/article/2024/two.html">Synthetic leap notice</a><span class="index-tab-date">2024-02-29</span></li>
 </ul><ul class="index-tab-item"><li><a href="/html/gdmsa/hsyw/article/2026/news.html">Synthetic unrelated news</a><span class="index-tab-date">2026-10-14</span></li></ul></div></div>`
+
+export const SITC_SYNTHETIC = `<nav><a href="http://www.sitc.com/en/show.asp?id=999">Synthetic navigation</a></nav>
+<div id="content">
+<div class="media row-fluid"><div class="span11"><div class="media-body">
+<h4 class="title media-heading"><a href="http://www.sitc.com/en/show.asp?id=0001">Synthetic SITC notice one</a></h4>
+<ul class="inline meta muted visible-phone"><li><i></i> <span>发布日期:</span> 2026.09.20</li></ul>
+<a class="media-object" href="http://www.sitc.com/en/show.asp?id=0001"><img src="/synthetic.png"></a>
+<p>Synthetic summary must not be persisted</p><a href="http://www.sitc.com/en/show.asp?id=0001">Details</a>
+</div></div></div>
+<div class="media row-fluid"><div class="span11"><div class="media-body">
+<h4 class="title media-heading"><a href="http://www.sitc.com/en/show.asp?id=0002">Synthetic SITC leap notice</a></h4>
+<ul class="meta"><li><span>发布日期:</span> 2000.02.29</li></ul>
+</div></div></div></div>`

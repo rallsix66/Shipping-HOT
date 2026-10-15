@@ -46,7 +46,15 @@ export function parseLooseDate(value: string | null | undefined, config: Pick<We
   const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]
   const thai = config.dateFormat === "thai_month_name" ? /^(\d{1,2})\s+(มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม)\s+(\d{4})$/.exec(v) : null
   let y: number, mo: number, d: number, tail: string
-  if (config.dateFormat === "indonesian_enactment_date") {
+  if (config.dateFormat === "sitc_publication_day") {
+    const published = /^发布日期: (\d{4})\.(\d{2})\.(\d{2})$/.exec(raw)
+    if (!published || result.calendar !== "gregorian") return { ...result, rule: "unsupported_format" }
+    y = +published[1]
+    mo = +published[2]
+    d = +published[3]
+    tail = ""
+    result.rule = "configured_sitc_publication_day"
+  } else if (config.dateFormat === "indonesian_enactment_date") {
     const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
     // This index also renders the explicit English "October" token; no locale fallback.
     const enacted = /^Ditetapkan\s+(\d{1,2})\s+(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|October|November|Desember)\s+(\d{4})$/.exec(v)
@@ -101,6 +109,7 @@ export function parseLooseDate(value: string | null | undefined, config: Pick<We
   const check = new Date(Date.UTC(y, mo - 1, d))
   if (y < 1900 || y > 2399 || check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d) return { ...result, rule: "invalid_calendar_date" }
   const date = `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`
+  if (config.dateFormat === "sitc_publication_day") return { ...result, precision: "day", localDate: date, timezone: "missing", utcOffset: null, publishedAt: null }
   if (!tail.trim()) return { ...result, precision: "day", localDate: date, utcOffset: config.publishedAtUtcOffset ?? null, timezone: config.publishedAtUtcOffset ? "configured" : "missing" }
   const t = /^(?:T|\s+)(\d{1,2}):(\d{2})(?::(\d{2})(\.\d{1,3})?)?\s*(Z|UTC|GMT|[+-]\d{2}:?\d{2})?$/.exec(tail)
   if (!t || +t[1] > 23 || +t[2] > 59 || +(t[3] ?? 0) > 59) return { ...result, rule: "invalid_time" }
@@ -114,8 +123,18 @@ export function parseLooseDate(value: string | null | undefined, config: Pick<We
 }
 
 /** Prefix filters compare origin and path boundaries; they cannot widen the source policy. */
-export function allowed(url: string, config: Pick<WebListConfig, "allowUrlPrefixes" | "denyUrlPrefixes">, policy: ArticleSourcePolicy): boolean {
+export function allowed(url: string, config: Pick<WebListConfig, "allowUrlPrefixes" | "denyUrlPrefixes" | "metadataLinkRule">, policy: ArticleSourcePolicy): boolean {
   const target = new URL(url)
+  if (config.metadataLinkRule === "sitc_show") {
+    // Only a stored identity. secureFetchArticle and its independent HTTP/redirect policy are unchanged.
+    return policy.sourceId === "intel:xx-k03" && policy.persistence === "disallowed"
+      && articlePolicyHostResolves(policy, target.hostname)
+      && (target.protocol === "http:" || target.protocol === "https:")
+      && !target.username && !target.password && !target.port
+      && target.hostname === "www.sitc.com" && target.pathname === "/en/show.asp"
+      && [...target.searchParams.keys()].length === 1 && /^\d+$/.test(target.searchParams.get("id") ?? "")
+      && config.allowUrlPrefixes === undefined && config.denyUrlPrefixes === undefined
+  }
   if (target.protocol !== "https:" || target.username || target.password || (target.port && target.port !== "443") || !articlePolicyHostResolves(policy, target.hostname)) return false
   const host = target.hostname.replace(/^\[|\]$/g, "")
   const family = isIP(host)
@@ -155,6 +174,7 @@ export function fromHtml(html: string, base: string, config: WebListConfig, poli
     const href = linkEl.attr("href")
     const url = href ? canonicalizeFeedUrl(href, base) : undefined
     if (!url) throw new Error("web_list_invalid_link")
+    if (c.metadataLinkRule && !allowed(new URL(href!, base).href, c, policy)) continue
     if (!allowed(url, c, policy) || listingItself(url, base)) continue
     const titleEl = c.titleSelector ? (el.is(c.titleSelector) ? el : el.find(c.titleSelector).first()) : linkEl
     let title = (c.titleAttribute ? titleEl.attr(c.titleAttribute) ?? "" : titleEl.text() || linkEl.attr("title") || "").replace(/\s+/g, " ").trim()
