@@ -1,5 +1,5 @@
 {
-  "scope": "New/updated matrix/report/builder/closeout and this batch capture/replay/gate archive only; no historic-third-party/full-project safety claim",
+  "scope": "Current matrix/report/builder/closeout, this carrier batch evidence and requested handoff only; no historic-third-party/full-project safety claim",
   "syntheticPositiveControlDetected": true,
   "valueHits": [],
   "rawExit": 0

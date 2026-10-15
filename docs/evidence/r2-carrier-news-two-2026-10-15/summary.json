@@ -1,0 +1,57 @@
+{
+  "results": [
+    {
+      "id": "XX-K01",
+      "url": "https://www.maersk.com/news",
+      "host": "www.maersk.com",
+      "catalogLineSha256": "76ee5690128ed1208d5c3738898effd40531eac09705c4fbf902bb9335590051",
+      "startedAt": "2026-10-15T02:03:12.613Z",
+      "systemDnsCalls": 1,
+      "httpRequests": 0,
+      "status": "BLOCKED",
+      "rawHtmlCommitted": false,
+      "addresses": [
+        {
+          "address": "198.18.0.217",
+          "family": 4
+        }
+      ],
+      "addressClassification": "blocked_address",
+      "reason": "blocked_address",
+      "parser": "NOT_RUN",
+      "finishedAt": "2026-10-15T02:03:12.621Z"
+    },
+    {
+      "id": "XX-K02",
+      "url": "https://www.one-line.com/en/news",
+      "host": "www.one-line.com",
+      "catalogLineSha256": "661332dd77a5036797e5870d0ac3cf63a643c551eb7faaa3a91763c0735011b0",
+      "startedAt": "2026-10-15T02:03:12.621Z",
+      "systemDnsCalls": 1,
+      "httpRequests": 0,
+      "status": "BLOCKED",
+      "rawHtmlCommitted": false,
+      "addresses": [
+        {
+          "address": "198.18.0.218",
+          "family": 4
+        }
+      ],
+      "addressClassification": "blocked_address",
+      "reason": "blocked_address",
+      "parser": "NOT_RUN",
+      "finishedAt": "2026-10-15T02:03:12.624Z"
+    }
+  ],
+  "systemDnsCalls": 2,
+  "reservedTransportCalls": 0,
+  "retries": 0,
+  "redirects": 0,
+  "details": 0,
+  "productionEnabled": false,
+  "live24h": "NOT_RUN",
+  "paidCalls": 0,
+  "llmCalls": 0,
+  "fullRawRedistributed": false,
+  "overallR2Pass": false
+}

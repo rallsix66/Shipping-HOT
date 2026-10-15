@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T01:48:35.689029+00:00",
+  "generatedAt": "2026-10-15T02:13:24.880151+00:00",
   "reviewedCodeSha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
-  "evidenceHead": "d22019c3e432fc84ad51e1132aedd14708a82b4e",
+  "evidenceHead": "a5da09871d1a017ae947a0f3f56980461807bfaf",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "91328b2e4754dfe51ab1c94508df3c47675ede66df1e852d1b69b187418dd0b3",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -64,8 +64,9 @@
       "statusCounts": {
         "OK": 20,
         "PARTIAL": 11,
-        "NOT_RUN": 7,
-        "STALE": 1
+        "NOT_RUN": 5,
+        "STALE": 1,
+        "BLOCKED": 2
       },
       "pass": false
     },
@@ -3519,23 +3520,68 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "NOT_RUN",
+        "verdict": "BLOCKED",
         "countedOK": false,
-        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+        "reason": "One actual system DNS resolved 198.18 special-range address; existing secure-fetch safety check stopped before transport. Environment blockage is not a page/content qualification failure."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "No stored real-page full title/link/source-time replay."
+        "reason": "HTTP0; no response bytes, title/link/date parsing or original-page replay. No invented selectors or source-time semantics."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "缺来源专属配置、存档谱系与回放"
+        "Target exact host absent from selected extension literals and generated DNS filter at read-only check; no settings modified.",
+        "Public DNS/actual exact index response and source field/license qualification remain pending; no retry authorized by this closeout."
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "latestAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-carrier-news-two-2026-10-15/summary.json",
+          "selector": {
+            "id": "XX-K01"
+          },
+          "sha256": "cb5f74745b29c6dc08283b5d9758aace29583cd2ca3cbcabb86190a69d2b3127",
+          "hashBasis": "committed_text_LF"
+        },
+        "dnsEvidence": {
+          "path": "docs/evidence/r2-carrier-news-two-2026-10-15/dns-ledger.json",
+          "selector": {
+            "id": "XX-K01"
+          },
+          "sha256": "850e49f78e870804c9d2dff33b33276a7c9cbf240b0bfb63d12627df0bcc5ae6",
+          "hashBasis": "committed_text_LF"
+        },
+        "configPresenceEvidence": {
+          "path": "docs/evidence/r2-carrier-news-two-2026-10-15/clash-host-presence.json",
+          "selector": null,
+          "sha256": "42c4431be44c7988321d02c0dcac5145f1e91f1365f662ab0a5b34f229160478",
+          "hashBasis": "committed_text_LF"
+        },
+        "executionBinding": {
+          "path": "docs/evidence/r2-carrier-news-two-2026-10-15/execution-binding.json",
+          "selector": null,
+          "sha256": "c0712f41ea32a4dea38422d282b0490df7951a4daa02d4e0431fd61efce975f0",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-15T02:03:12.613Z",
+        "url": "https://www.maersk.com/news",
+        "host": "www.maersk.com",
+        "addresses": [
+          {
+            "address": "198.18.0.217",
+            "family": 4
+          }
+        ],
+        "systemDnsCalls": 1,
+        "httpRequests": 0,
+        "reason": "blocked_address",
+        "parser": "NOT_RUN",
+        "scope": "one system DNS only; special-range address blocked before HTTP; no retry or settings change"
+      }
     },
     {
       "id": "XX-K02",
@@ -3579,23 +3625,68 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "NOT_RUN",
+        "verdict": "BLOCKED",
         "countedOK": false,
-        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+        "reason": "One actual system DNS resolved 198.18 special-range address; existing secure-fetch safety check stopped before transport. Environment blockage is not a page/content qualification failure."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "No stored real-page full title/link/source-time replay."
+        "reason": "HTTP0; no response bytes, title/link/date parsing or original-page replay. No invented selectors or source-time semantics."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "缺来源专属配置、存档谱系与回放"
+        "Target exact host absent from selected extension literals and generated DNS filter at read-only check; no settings modified.",
+        "Public DNS/actual exact index response and source field/license qualification remain pending; no retry authorized by this closeout."
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "latestAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-carrier-news-two-2026-10-15/summary.json",
+          "selector": {
+            "id": "XX-K02"
+          },
+          "sha256": "cb5f74745b29c6dc08283b5d9758aace29583cd2ca3cbcabb86190a69d2b3127",
+          "hashBasis": "committed_text_LF"
+        },
+        "dnsEvidence": {
+          "path": "docs/evidence/r2-carrier-news-two-2026-10-15/dns-ledger.json",
+          "selector": {
+            "id": "XX-K02"
+          },
+          "sha256": "850e49f78e870804c9d2dff33b33276a7c9cbf240b0bfb63d12627df0bcc5ae6",
+          "hashBasis": "committed_text_LF"
+        },
+        "configPresenceEvidence": {
+          "path": "docs/evidence/r2-carrier-news-two-2026-10-15/clash-host-presence.json",
+          "selector": null,
+          "sha256": "42c4431be44c7988321d02c0dcac5145f1e91f1365f662ab0a5b34f229160478",
+          "hashBasis": "committed_text_LF"
+        },
+        "executionBinding": {
+          "path": "docs/evidence/r2-carrier-news-two-2026-10-15/execution-binding.json",
+          "selector": null,
+          "sha256": "c0712f41ea32a4dea38422d282b0490df7951a4daa02d4e0431fd61efce975f0",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-15T02:03:12.621Z",
+        "url": "https://www.one-line.com/en/news",
+        "host": "www.one-line.com",
+        "addresses": [
+          {
+            "address": "198.18.0.218",
+            "family": 4
+          }
+        ],
+        "systemDnsCalls": 1,
+        "httpRequests": 0,
+        "reason": "blocked_address",
+        "parser": "NOT_RUN",
+        "scope": "one system DNS only; special-range address blocked before HTTP; no retry or settings change"
+      }
     },
     {
       "id": "XX-K03",

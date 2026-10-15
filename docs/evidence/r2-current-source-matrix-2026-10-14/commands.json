@@ -1,6 +1,6 @@
 {
   "type": "docs_only_commands",
-  "evidenceBaseline": "d22019c3e432fc84ad51e1132aedd14708a82b4e",
+  "evidenceBaseline": "a5da09871d1a017ae947a0f3f56980461807bfaf",
   "commands": [
     {
       "label": "docs_lint_no_fix",
@@ -692,16 +692,223 @@
       "stdout": "{\"checks\": 27, \"errors\": [], \"referenceOccurrences\": 140, \"uniquePaths\": 38, \"rawExit\": 0}\r\n",
       "stderr": "",
       "rawExit": 0
+    },
+    {
+      "label": "docs_lint_direct_installed_node_no_fix",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "node_modules/eslint/bin/eslint.js",
+        "docs/handoffs/r2-next-execution-2026-10-15.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/status.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/capture-output-original.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/clash-host-presence.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/closeout.md",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/command.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/dns-ledger.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/execution-binding.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/inventory-metadata.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/launch.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/manifest.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/manifest.original.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/matrix-delta.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/partial-results.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/report.md",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/request-ledger.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/summary.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/XX-K01-result.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/XX-K02-result.json"
+      ],
+      "startedAt": "2026-10-15T02:15:59.603358+00:00",
+      "finishedAt": "2026-10-15T02:16:02.228436+00:00",
+      "stdout": "\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\XX-K01-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\XX-K02-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\capture-output-original.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\clash-host-presence.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\command.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\dns-ledger.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\execution-binding.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\inventory-metadata.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\launch.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\manifest.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\manifest.original.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\matrix-delta.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\partial-results.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\request-ledger.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\summary.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\commands.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\mapping.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\metadata-scan.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\validation.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\n✖ 19 problems (0 errors, 19 warnings)\n\n",
+      "stderr": "",
+      "rawExit": 0
+    },
+    {
+      "label": "tracked_diff_whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "startedAt": "2026-10-15T02:16:02.228498+00:00",
+      "finishedAt": "2026-10-15T02:16:02.285485+00:00",
+      "stdout": "",
+      "stderr": "warning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/report.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it\n",
+      "rawExit": 0
+    },
+    {
+      "label": "matrix_structural_evidence_validation",
+      "command": [
+        "C:\\Program Files\\Python313\\python.EXE",
+        ".tmp/validate-current-r2-matrix.py"
+      ],
+      "startedAt": "2026-10-15T02:16:02.308878+00:00",
+      "finishedAt": "2026-10-15T02:16:02.486345+00:00",
+      "stdout": "{\"checks\": 34, \"errors\": [\"Changed Markdown local links exist\"], \"referenceOccurrences\": 148, \"uniquePaths\": 42, \"rawExit\": 1}\r\n",
+      "stderr": "",
+      "rawExit": 1
+    },
+    {
+      "label": "docs_lint_direct_installed_node_no_fix",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "node_modules/eslint/bin/eslint.js",
+        "docs/handoffs/r2-next-execution-2026-10-15.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/status.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/archive-hashes.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/archive-hashes.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/capture-output-original.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/clash-host-presence.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/closeout.md",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/command.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/dns-ledger.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/execution-binding.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/initial-doc-validation.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/inventory-metadata.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/launch.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/manifest.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/manifest.original.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/matrix-delta.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/partial-results.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/report.md",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/request-ledger.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/summary.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/XX-K01-result.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/XX-K02-result.json"
+      ],
+      "startedAt": "2026-10-15T02:17:03.004607+00:00",
+      "finishedAt": "2026-10-15T02:17:05.623798+00:00",
+      "stdout": "\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\XX-K01-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\XX-K02-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\archive-hashes.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\capture-output-original.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\clash-host-presence.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\command.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\dns-ledger.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\execution-binding.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\initial-doc-validation.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\inventory-metadata.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\launch.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\manifest.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\manifest.original.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\matrix-delta.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\partial-results.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\request-ledger.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\summary.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\archive-hashes.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\commands.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\mapping.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\metadata-scan.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\validation.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\n✖ 22 problems (0 errors, 22 warnings)\n\n",
+      "stderr": "",
+      "rawExit": 0
+    },
+    {
+      "label": "tracked_diff_whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "startedAt": "2026-10-15T02:17:05.623859+00:00",
+      "finishedAt": "2026-10-15T02:17:05.685980+00:00",
+      "stdout": "",
+      "stderr": "warning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/commands.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/report.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/validate-matrix.py.txt', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/validation.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it\n",
+      "rawExit": 0
+    },
+    {
+      "label": "matrix_structural_evidence_validation",
+      "command": [
+        "C:\\Program Files\\Python313\\python.EXE",
+        ".tmp/validate-current-r2-matrix.py"
+      ],
+      "startedAt": "2026-10-15T02:17:05.708380+00:00",
+      "finishedAt": "2026-10-15T02:17:05.901356+00:00",
+      "stdout": "{\"checks\": 34, \"errors\": [], \"referenceOccurrences\": 148, \"uniquePaths\": 42, \"rawExit\": 0}\r\n",
+      "stderr": "",
+      "rawExit": 0
+    },
+    {
+      "label": "docs_lint_direct_installed_node_no_fix",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "node_modules/eslint/bin/eslint.js",
+        "docs/handoffs/r2-next-execution-2026-10-15.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/status.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/archive-hashes.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/archive-hashes.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/capture-output-original.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/clash-host-presence.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/closeout.md",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/command.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/dns-ledger.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/execution-binding.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/initial-doc-validation.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/inventory-metadata.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/launch.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/manifest.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/manifest.original.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/matrix-delta.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/partial-results.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/report.md",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/request-ledger.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/summary.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/XX-K01-result.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/XX-K02-result.json"
+      ],
+      "startedAt": "2026-10-15T02:17:54.960334+00:00",
+      "finishedAt": "2026-10-15T02:17:57.592139+00:00",
+      "stdout": "\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\XX-K01-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\XX-K02-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\archive-hashes.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\capture-output-original.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\clash-host-presence.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\command.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\dns-ledger.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\execution-binding.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\initial-doc-validation.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\inventory-metadata.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\launch.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\manifest.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\manifest.original.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\matrix-delta.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\partial-results.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\request-ledger.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-carrier-news-two-2026-10-15\\summary.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\archive-hashes.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\commands.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\mapping.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\metadata-scan.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\validation.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\n✖ 22 problems (0 errors, 22 warnings)\n\n",
+      "stderr": "",
+      "rawExit": 0
+    },
+    {
+      "label": "tracked_diff_whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "startedAt": "2026-10-15T02:17:57.592195+00:00",
+      "finishedAt": "2026-10-15T02:17:57.659878+00:00",
+      "stdout": "",
+      "stderr": "warning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/commands.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/report.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/validate-matrix.py.txt', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/validation.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it\n",
+      "rawExit": 0
+    },
+    {
+      "label": "matrix_structural_evidence_validation",
+      "command": [
+        "C:\\Program Files\\Python313\\python.EXE",
+        ".tmp/validate-current-r2-matrix.py"
+      ],
+      "startedAt": "2026-10-15T02:17:57.683233+00:00",
+      "finishedAt": "2026-10-15T02:17:57.887461+00:00",
+      "stdout": "{\"checks\": 34, \"errors\": [], \"referenceOccurrences\": 148, \"uniquePaths\": 42, \"rawExit\": 0}\r\n",
+      "stderr": "",
+      "rawExit": 0
     }
   ],
   "metadataScan": {
-    "scope": "New/updated matrix/report/builder/closeout and this batch capture/replay/gate archive only; no historic-third-party/full-project safety claim",
+    "scope": "Current matrix/report/builder/closeout, this carrier batch evidence and requested handoff only; no historic-third-party/full-project safety claim",
     "syntheticPositiveControlDetected": true,
     "valueHits": [],
     "rawExit": 0
   },
   "initialInventoryRawExit": 127,
   "finalInventoryRawExit": 0,
-  "functionalGates": "PASS_in_separate_gate_355952c_anchor_date_repair_not_this_docs_command",
+  "functionalGates": "NOT_RUN_this_docs_only_round; accepted gate355952c preserved separately",
   "initialDocValidationFailures": "Historical initial validator syntax/header issues were corrected; local intermediate logs retained."
 }

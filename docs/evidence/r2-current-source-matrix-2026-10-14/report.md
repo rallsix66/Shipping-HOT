@@ -1,10 +1,12 @@
 # R2 41项来源累计证据 — 2026-10-15
 
-本报告汇总已保存证据，供父会话独立审查。源码基准 `355952c0e8c01266adbe692dfcfd3bca9b3c17b2`，采集HEAD `50da3805ee14e72222a4e26f4230073cf1842bc7`。历史资格核验批次四次系统DNS均公网、精确索引HTTP4；VN-D01原页有限通过、MY-L01真实探针失败，两源跳转未跟随；干净源码门禁已另存。[机器矩阵](mapping.json)保留全部41项的精确目录产品、采集时点、原证据路径/LF文本哈希、字段回放、时间角色、许可、默认状态及两项独立判定。
+本轮最新两源只做系统DNS各1次：Maersk `www.maersk.com`→`198.18.0.217`，ONE `www.one-line.com`→`198.18.0.218`；现有安全检查均BLOCKED、HTTP0、解析NOT_RUN。两精确主机不在当前选中扩展字面量/生成DNS过滤表中；仅只读核对，未改设置、未重试。执行HEAD `a5da09871d1a017ae947a0f3f56980461807bfaf`，产品源码仍为 `355952c0e8c01266adbe692dfcfd3bca9b3c17b2`；旧manifest标签已带原件更正，未重跑采集。[两源事实、SHA绑定和最小下一步](../r2-carrier-news-two-2026-10-15/report.md)。
+
+本报告汇总已保存证据，供父会话独立审查。源码基准 `355952c0e8c01266adbe692dfcfd3bca9b3c17b2`；前一四源采集HEAD为 `50da3805ee14e72222a4e26f4230073cf1842bc7`。该历史批次四次系统DNS均公网、精确索引HTTP4；VN-D01原页有限通过、MY-L01真实探针失败，两源跳转未跟随；干净源码门禁已另存。[机器矩阵](mapping.json)保留全部41项的精确目录产品、采集时点、原证据路径/LF文本哈希、字段回放、时间角色、许可、默认状态及两项独立判定。
 
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
-| R2-4公开自动来源 | **20/39（51.28%）** | 最少32项，尚差12；20 OK、11 PARTIAL、1 STALE、7 NOT_RUN，未通过 |
+| R2-4公开自动来源 | **20/39（51.28%）** | 最少32项，尚差12；20 OK、11 PARTIAL、1 STALE、2 BLOCKED、5 NOT_RUN，未通过 |
 | R2-5资讯/公告原页字段回放 | **12/34（35.29%）** | 尚差22；12 PASS、4 FAIL、1 PARTIAL、17 NOT_RUN，未通过 |
 | 数值字段独立检查 | **3/5** | 仅历史归一化诊断；不加到34项原页回放分子 |
 | R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
@@ -47,8 +49,8 @@ NMC两项与Westports日期复审曾将旧暂计逐步修正为19/39；本批VN-
 | PH-W02 | https://www.pagasa.dost.gov.ph/weather/weather-advisory | 2026-10-10T11:03:49.920Z / 200 [取证](../pagasa-warning-2026-10-10/raw/fetch-log.txt) | PARTIAL | NOT_RUN | 200页面外壳/iframe，无合格活动正样本；页面可读不代替预警数据。 |
 | PH-C01 | https://customs.gov.ph/category/media-releases/ | 2026-10-14T07:56:33.170Z / 200 [取证](../r2-four-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-public-index-replay-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
 | PH-M01 | https://portcalls.com/feed/ | 2026-10-13T07:00:29.490Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
-| XX-K01 | https://www.maersk.com/news | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
-| XX-K02 | https://www.one-line.com/en/news | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
+| XX-K01 | https://www.maersk.com/news | 2026-10-15T02:03:12Z / HTTP0 [DNS](../r2-carrier-news-two-2026-10-15/dns-ledger.json) | BLOCKED | NOT_RUN | `www.maersk.com`系统DNS一次返回`198.18.0.217`，安全检查阻断；无响应/解析，不判页面不合格，未改设置。 |
+| XX-K02 | https://www.one-line.com/en/news | 2026-10-15T02:03:12Z / HTTP0 [DNS](../r2-carrier-news-two-2026-10-15/dns-ledger.json) | BLOCKED | NOT_RUN | `www.one-line.com`系统DNS一次返回`198.18.0.218`，安全检查阻断；无响应/解析，不判页面不合格，未改设置。 |
 | XX-K03 | https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/ | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
 | XX-M01 | https://theloadstar.com/feed/ | 2026-10-13T08:25:10.410Z / 200 [取证](../r2-four-index-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-four-index-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
 | XX-M03 | https://splash247.com/feed/ | 2026-10-13T08:25:11.082Z / 200 [取证](../r2-four-index-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-four-index-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
@@ -81,10 +83,10 @@ TMD/BMKG内置seed的声明是 `enabled=true`，而默认生产Intel job仍关�
 
 已被后续真实响应/回放取代的DNS阻断、旧selector缺口保留为历史，不继续当当前失败。Northport真实冲突与VN-P01无日期不因DNS修好消失。R1.5历史1/10仍为用户延后、未完成验证，不重新找事件，也不阻塞R2。
 
-## 四源最新批次（精确索引已各GET一次）
+## 前一四源批次（精确索引已各GET一次）
 
-原提议四源现均已核验，旧DNS阻断是历史。VN-D01关闭配置/4条原页字段有限通过；MY-L01缺详情链接失败；CN-P02/ID-T02跳转未跟随。实际地址、HTTP、原字节摘要和逐项理由见[最新报告](../r2-four-reapplied-2026-10-15/report.md)。本批没有自动后续请求授权。
+原提议四源现均已核验，旧DNS阻断是历史。VN-D01关闭配置/4条原页字段有限通过；MY-L01缺详情链接失败；CN-P02/ID-T02跳转未跟随。实际地址、HTTP、原字节摘要和逐项理由见[该历史批次报告](../r2-four-reapplied-2026-10-15/report.md)。本批没有自动后续请求授权。
 
 文档验证与收尾见[closeout.md](closeout.md)及[validation.json](validation.json)。
 
-P2复审修复：尾部模式不匹配不再交通用日期解析，原四条保存原页全字段与修前一致，覆盖不变，本轮新增来源HTTP/DNS0。两个重定向只保存正文相对路径，未保存Location，不确认同域或绝对目标；MY静态卡片只缺详情href。[修复报告](../r2-anchor-date-review-repair-2026-10-15/report.md)。
+P2复审修复：尾部模式不匹配不再交通用日期解析，原四条保存原页全字段与修前一致，覆盖不变，P2修复轮新增来源HTTP/DNS0。两个重定向只保存正文相对路径，未保存Location，不确认同域或绝对目标；MY静态卡片只缺详情href。[修复报告](../r2-anchor-date-review-repair-2026-10-15/report.md)。

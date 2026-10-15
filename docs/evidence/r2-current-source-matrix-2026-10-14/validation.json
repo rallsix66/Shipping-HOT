@@ -1,17 +1,19 @@
 {
   "type": "docs_and_saved_evidence_validation",
-  "at": "2026-10-15T01:53:27.618762+00:00",
+  "at": "2026-10-15T02:17:57.880339+00:00",
   "codeSha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
-  "evidenceBaseline": "d22019c3e432fc84ad51e1132aedd14708a82b4e",
+  "evidenceBaseline": "a5da09871d1a017ae947a0f3f56980461807bfaf",
   "command": "python .tmp/validate-current-r2-matrix.py",
   "validatorSourceRequests": 0,
   "validatorSourceDns": 0,
   "lastQualificationBatchSystemDns": 4,
   "lastQualificationBatchHttpRequests": 4,
-  "thisRepairRoundSourceRequests": 0,
-  "thisRepairRoundSystemDns": 0,
-  "functionalTests": "PASS_clean_code_gate_355952c; separate from this metadata validation",
-  "originalFieldReplay": "saved_VN-D01_four_records_compare_unchanged_PASS; old_MY-L01_suitability_FAIL_not_reclassified; redirects_not_followed",
+  "thisCarrierBatchSourceRequests": 0,
+  "thisCarrierBatchSystemDns": 2,
+  "thisCloseoutSourceRequests": 0,
+  "thisCloseoutSystemDns": 0,
+  "functionalTests": "NOT_RUN_this_docs_only_round; accepted clean code gate355952c retained separately",
+  "originalFieldReplay": "NOT_RUN_this_docs_round; saved VN-D01 PASS / MY-L01 FAIL / redirects unchanged",
   "checks": [
     {
       "check": "41 unique entries match current catalogue automatic P1 rows",
@@ -39,8 +41,8 @@
       "check": "All evidence paths exist",
       "pass": true,
       "detail": {
-        "referenceOccurrences": 140,
-        "uniquePaths": 38,
+        "referenceOccurrences": 148,
+        "uniquePaths": 42,
         "missing": []
       }
     },
@@ -75,8 +77,9 @@
       "detail": {
         "OK": 20,
         "PARTIAL": 11,
-        "NOT_RUN": 7,
-        "STALE": 1
+        "NOT_RUN": 5,
+        "STALE": 1,
+        "BLOCKED": 2
       }
     },
     {
@@ -119,10 +122,65 @@
       "pass": true,
       "detail": [
         "docs/architecture.md",
+        "docs/evidence/gate-355952c-anchor-date-repair/archive-hashes.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/build.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/build.stderr.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/build.stdout.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/gate-driver.cjs.txt",
+        "docs/evidence/gate-355952c-anchor-date-repair/install.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/install.stderr.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/install.stdout.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/launch.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/lint.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/lint.stderr.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/lint.stdout.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-feed.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-feed.stderr.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-feed.stdout.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p0.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p0.stderr.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p0.stdout.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p2c.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p2c.stderr.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p2c.stdout.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/source-proof.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/summary.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/targeted.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/targeted.stderr.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/targeted.stdout.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/typecheck.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/typecheck.stderr.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/typecheck.stdout.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/vitest.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/vitest.stderr.log",
+        "docs/evidence/gate-355952c-anchor-date-repair/vitest.stdout.log",
+        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/archive-hashes.json",
+        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/before-fix-regression.json",
+        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/closeout.md",
+        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/inventory.txt",
+        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/redirect-material-inspection.json",
+        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/report.md",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-adapter.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-first.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-repeat.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-result.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/archive-hashes.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/baseline-comparison.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/command.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/launch.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/partial-results.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/raw-replay-config.ts.txt",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/raw-replay-launch.cjs.txt",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/raw-replay-procedure.ts.txt",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/report.md",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/stderr.log",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/stdout.log",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/summary.json",
         "docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt",
         "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
         "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
         "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
         "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
         "docs/evidence/r2-current-source-matrix-2026-10-14/validate-matrix.py.txt",
         "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
@@ -161,6 +219,41 @@
     },
     {
       "check": "Redirect relative body literals are not promoted to saved Location or absolute host",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Carrier batch exactly two once-only system DNS and no HTTP",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Carrier exact catalogue URLs hosts actual addresses preserved",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Carrier DNS block never promotes response or field evidence",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Carrier actual launch and code binding corrected without hiding original label",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Read-only Clash exact host absence and21 generated entries",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Carrier two entries only and coverage unchanged",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Original capture stdout stderr byte hashes retained",
       "pass": true,
       "detail": null
     },

@@ -1,0 +1,55 @@
+{
+  "type": "committed_text_archive_hashes",
+  "generatedAt": "2026-10-15T02:17:57.955477+00:00",
+  "hashBasis": "committed text LF normalization only; nested original/wire byte hashes remain exact and unchanged",
+  "excluded": [
+    "archive-hashes.json"
+  ],
+  "files": [
+    {
+      "file": "build-matrix.py.txt",
+      "sha256": "a67af3111aa34827b52d0a333f5faf9fd58646d1dc21ce511b3247968a0cf1f9",
+      "bytesLF": 35190
+    },
+    {
+      "file": "closeout.md",
+      "sha256": "9b9492de33870f4215e3b3de6e9580d96721cc8807e4b99c031ab5990bc84f4d",
+      "bytesLF": 372
+    },
+    {
+      "file": "commands.json",
+      "sha256": "e0a1fc3d62bd9622bdfa5d154b8e26cb81c2d680ac85e9112db87570d58aea1e",
+      "bytesLF": 133251
+    },
+    {
+      "file": "inventory.txt",
+      "sha256": "827432f362ad8cd1e8680016dabe1831344ec8db66429f5f42d52bacbfbdbc4a",
+      "bytesLF": 2900
+    },
+    {
+      "file": "mapping.json",
+      "sha256": "a69ddd97d251a53e475f9e2f70c4329690d01f248f08ea42d1f6e3a2399be81a",
+      "bytesLF": 175366
+    },
+    {
+      "file": "metadata-scan.json",
+      "sha256": "e589ea1e30c342c530fc425546f6d43de42c9f0a6c3c800776dd314aab08a438",
+      "bytesLF": 242
+    },
+    {
+      "file": "report.md",
+      "sha256": "09a1a09b28be32a6a8512e820d1fc09c56d0af03fb0ed770fdfac7a703eb73a5",
+      "bytesLF": 18943
+    },
+    {
+      "file": "validate-matrix.py.txt",
+      "sha256": "351e6fbebad0da282df4ceda9966333c0ea7a7e949a0fbbb2a9c44498dca260f",
+      "bytesLF": 15583
+    },
+    {
+      "file": "validation.json",
+      "sha256": "145c24af1b77034ab8ff0571fba25fb3a0e6751453b81fdf07a62adaad014b4b",
+      "bytesLF": 10402
+    }
+  ]
+}

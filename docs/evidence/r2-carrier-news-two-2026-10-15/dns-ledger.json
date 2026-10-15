@@ -1,0 +1,30 @@
+[
+  {
+    "id": "XX-K01",
+    "host": "www.maersk.com",
+    "reservedAt": "2026-10-15T02:03:12.613Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "198.18.0.217",
+        "family": 4
+      }
+    ],
+    "classification": "blocked_address",
+    "finishedAt": "2026-10-15T02:03:12.620Z"
+  },
+  {
+    "id": "XX-K02",
+    "host": "www.one-line.com",
+    "reservedAt": "2026-10-15T02:03:12.621Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "198.18.0.218",
+        "family": 4
+      }
+    ],
+    "classification": "blocked_address",
+    "finishedAt": "2026-10-15T02:03:12.623Z"
+  }
+]
