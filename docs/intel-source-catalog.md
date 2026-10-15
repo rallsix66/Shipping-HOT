@@ -1,5 +1,7 @@
 > R2当前复核（2026-10-15）：[41项累计证据与缺口](evidence/r2-current-source-matrix-2026-10-14/report.md) / [逐源矩阵](evidence/r2-current-source-matrix-2026-10-14/mapping.json)。下表核查标签保留为编制时历史；当前R2-4/5结论以逐源矩阵为准。所有ID、URL、格式和优先级保持原样；默认启用状态与采集资格分开记录。
 
+> XX-K02 同源同产品 URL 更新（2026-10-15，已批准）：原 `https://www.one-line.com/en/news` 的实际308 Location为 `/en/newsroom`，现目录改为已核实的 `https://www.one-line.com/en/newsroom`。[原308记录](evidence/r2-carrier-reapplied-2026-10-15/XX-K02-response.json)与[目标实网/原页回放依据](evidence/r2-one-newsroom-target-2026-10-15/report.md)保留。目录 `web_list` 描述HTML新闻页面形态；实现用现有 `json_list` 的HTML惰性JSON模式读取其内嵌数据，不是新增JSON接口。候选默认关闭、仅metadata，不加入生产允许列表或改变许可。
+
 # Shipping HOT 信源目录（草案）
 
 > 状态：`DRAFT`。首次核查日期 2026-09-30，核查方式为 curl 与 WebFetch，核查网络为编制者本机（中国大陆，Windows）。
@@ -161,7 +163,7 @@
 | ID | 等级 | 船公司 | URL | 方式 | 核查 | 优先级 | 备注 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | XX-K01 | B | Maersk | https://www.maersk.com/news | web_list | OK | P1 | 文章路径里带日期，有台风季更新。没有 RSS |
-| XX-K02 | B | ONE | https://www.one-line.com/en/news | web_list | OK | P1 | 页面约 635 KB |
+| XX-K02 | B | ONE | https://www.one-line.com/en/newsroom | web_list | OK | P1 | 页面约 635 KB |
 | XX-K03 | B | SITC | https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/ | web_list | OK | P1 | 近洋航线主力船公司 |
 | XX-K04 | B | Hapag-Lloyd / Yang Ming | https://www.hapag-lloyd.com/en/services-information/news.html ，https://www.yangming.com/en/esolution/news | manual | PARTIAL (JS) | P3 | |
 | XX-K05 | B | COSCO / Evergreen / Wan Hai / MSC / CMA CGM | — | manual | BLOCKED | P2 | 反爬或需要 JS 渲染 |

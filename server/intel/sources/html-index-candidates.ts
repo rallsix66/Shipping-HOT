@@ -1,6 +1,6 @@
 import type { IntelSourceSeed } from "../sources"
 
-/** Disabled catalog candidates; never added to the active seed registry. */
+/** Disabled catalog HTML pages, mapped by web_list or inert-HTML json_list; never active seeds. */
 export const htmlIndexCandidates: readonly IntelSourceSeed[] = [
   {
     id: "intel:my-p03",
@@ -226,6 +226,29 @@ export const htmlIndexCandidates: readonly IntelSourceSeed[] = [
       calendar: "gregorian",
       allowUrlPrefixes: ["https://phongchongthientai.mard.gov.vn/Pages"],
       dateRuleBasis: "VN-D01 complete raw observed 2026-10-15: unique news-headlines list, four own-anchor full title attributes and visible trailing (D/M/YYYY) dates. Preserve the full title rather than truncated visible text. Gregorian source-displayed list day only; no publication clock/timezone or disaster/port impact inference.",
+    },
+  },
+  {
+    id: "intel:xx-k02",
+    catalogId: "XX-K02",
+    name: "ONE Newsroom",
+    // Catalog web_list describes the HTML page; JSON mapping reads its inert data script.
+    kind: "json_list",
+    url: "https://www.one-line.com/en/newsroom",
+    enabled: false,
+    persistence: "disallowed",
+    allowedHosts: ["www.one-line.com"],
+    allowedContentTypes: ["text/html", "application/xhtml+xml"],
+    intervalMs: 3600000,
+    jsonList: {
+      htmlScriptSelector: "script#__NEXT_DATA__",
+      itemsPaths: ["props.pageProps.pinArticle", "props.pageProps.articles"],
+      titlePaths: ["title"],
+      urlPath: "aliasUrl",
+      publishedAtPath: "releaseDate",
+      calendar: "gregorian",
+      allowUrlPrefixes: ["https://www.one-line.com/newsroom"],
+      dateRuleBasis: "XX-K02 saved ONE Newsroom HTML 2026-10-15: inert application/json __NEXT_DATA__ pinArticle plus nine articles; releaseDate is source-labelled local second precision without timezone. Preserve raw field, not a certified publication instant or port-impact time.",
     },
   },
 ]

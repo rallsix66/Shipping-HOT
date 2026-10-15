@@ -5,6 +5,7 @@ import { sourcePolicy } from "../collect"
 import { htmlIndexCandidates } from "./html-index-candidates"
 import { assertSupportedConfig } from "./config-keys"
 import { fromHtml, parseLooseDate } from "./web-list"
+import { assertJsonListConfig } from "./json-list"
 
 import { CUSTOMS_SYNTHETIC, NORTHPORT_SYNTHETIC } from "./__fixtures__/html-index-synthetic"
 
@@ -15,13 +16,33 @@ describe("disabled HTML index configurations and synthetic regressions", () => {
   it("uses exact catalog URLs without joining active seeds or granting body persistence", () => {
     const catalog = readFileSync("docs/intel-source-catalog.md", "utf8")
     for (const seed of htmlIndexCandidates) {
-      expect(catalog).toContain(seed.url)
-      expect(seed).toMatchObject({ enabled: false, persistence: "disallowed", kind: "web_list" })
+      const rows = catalog.split(/\r?\n/).filter(line => line.startsWith(`| ${seed.catalogId} |`))
+      expect(rows).toHaveLength(1)
+      const cells = rows[0].split("|").map(cell => cell.trim())
+      expect(cells[4]).toBe(seed.url)
+      expect(cells[5]).toBe("web_list")
+      expect(seed).toMatchObject({ enabled: false, persistence: "disallowed" })
       expect(intelSourceSeeds.some(active => active.catalogId === seed.catalogId)).toBe(false)
       expect(seed.allowedHosts).toEqual([new URL(seed.url).hostname])
-      assertSupportedConfig(seed.webList)
-      expect(seed.webList?.publishedAtUtcOffset).toBeUndefined()
+      if (seed.catalogId === "XX-K02") {
+        expect(seed.kind).toBe("json_list")
+        assertJsonListConfig(seed.jsonList)
+        expect(seed.jsonList?.htmlScriptSelector).toBe("script#__NEXT_DATA__")
+        expect(seed.jsonList?.publishedAtUtcOffset).toBeUndefined()
+      } else {
+        expect(seed.kind).toBe("web_list")
+        assertSupportedConfig(seed.webList)
+        expect(seed.webList?.publishedAtUtcOffset).toBeUndefined()
+      }
     }
+  })
+  it("keeps ONE's verified inert-HTML mapping unchanged while adopting its approved catalog URL", () => {
+    const saved = JSON.parse(readFileSync("docs/evidence/r2-one-newsroom-replay-final-2026-10-15/candidate-config.json", "utf8")).seed
+    const one = htmlIndexCandidates.find(seed => seed.catalogId === "XX-K02")!
+    expect({ ...one, name: saved.name }).toEqual(saved)
+    expect(one.webList).toBeUndefined()
+    expect(one.allowedContentTypes).toEqual(["text/html", "application/xhtml+xml"])
+    expect(one.url).toBe("https://www.one-line.com/en/newsroom")
   })
   it("maps each synthetic Northport link's own leading date and title, excluding navigation", () => {
     const entries = fromHtml(NORTHPORT_SYNTHETIC, northport.url, northport.webList!, sourcePolicy(northport))
