@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T03:44:21.669322+00:00",
+  "generatedAt": "2026-10-15T04:13:54.541Z",
   "reviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "evidenceHead": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "evidenceHead": "8027aeeda436faff8eb6ac3c0f0f0dd8d763f9be",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "40979ae016c197075b1950b68f88c78d48b976820deaaadaace1ddd35c6abf3d",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -24,7 +24,7 @@
     "r2_4MinimumOK": 32,
     "r2_4MinimumRatio": 0.8,
     "r2_5RequiredFieldReplay": 34,
-    "r2_5MinimumRatio": 1.0
+    "r2_5MinimumRatio": 1
   },
   "countingRules": {
     "r2_4": "Genuine expected product response and usable real parsing/normalization/field verification; mere200 shells, unresolved conflicts, unverified URL/products are partial. Count latest stored measured availability, not current uptime. Default-off is independent.",
@@ -72,10 +72,10 @@
       "pass": false
     },
     "r2_5": {
-      "numerator": 13,
+      "numerator": 16,
       "denominator": 34,
-      "ratio": 0.38235294117647056,
-      "remaining": 21,
+      "ratio": 0.47058823529411764,
+      "remaining": 18,
       "ids": [
         "CN-P01",
         "CN-T02",
@@ -86,14 +86,17 @@
         "TH-W01",
         "TH-C01",
         "TH-C02",
+        "MY-C01",
+        "MY-T01",
         "ID-W01",
         "ID-T01",
         "PH-C01",
+        "PH-M01",
         "XX-K02"
       ],
       "statusCounts": {
-        "PASS": 13,
-        "NOT_RUN": 16,
+        "PASS": 16,
+        "NOT_RUN": 13,
         "FAIL": 4,
         "PARTIAL": 1
       },
@@ -2088,45 +2091,66 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "path": "docs/evidence/r2-three-rss-2026-10-15/capture-summary.json",
           "selector": {
             "id": "MY-C01"
           },
-          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "sha256": "973b0d292ebf1372be34949cdf2181f1a7fdb08061dffce18cfdcbb500a164be",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
-        "startedAt": "2026-10-13T07:00:30.791Z",
-        "receivedAt": null,
-        "finishedAt": "2026-10-13T07:00:35.339Z",
+        "startedAt": "2026-10-15T04:10:40.625Z",
+        "receivedAt": "2026-10-15T04:10:41.341Z",
+        "finishedAt": "2026-10-15T04:10:41.341Z",
         "httpStatus": 200,
-        "wireSha256": "b7f4e2c40f5d27df510d7eb00fb1ae1526b48269f39609a61279b20093b0de60",
+        "wireSha256": "a53ae6ded69ef3a0a64bd64c8824d69392592e00a6f87a97425ea82636c4858f",
         "bytes": 7619,
-        "scope": "one_actual_index_response",
-        "verbatimLatestRawRetained": false,
+        "scope": "one_actual_exact_RSS_response_private_complete_bytes",
+        "verbatimLatestRawRetained": true,
+        "rawLocation": "private_ignored_only",
+        "capturedAtHead": "8027aeeda436faff8eb6ac3c0f0f0dd8d763f9be",
         "notContinuousProduction": true
       },
       "fieldReplayEvidence": {
-        "status": "LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY",
+        "status": "PASS_REAL_COMPLETE_PRIVATE_RSS_FIELDS",
         "evidence": {
-          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "path": "docs/evidence/r2-three-rss-2026-10-15/replay-summary.json",
           "selector": {
             "id": "MY-C01"
           },
-          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "sha256": "b3a90e558e41d9c417796af6a1e008bcbce8b7ef197c15d7a1b07df583f06f11",
           "hashBasis": "committed_text_LF"
         },
-        "liveParsedItems": 10,
-        "liveTitleLinkTimeComplete": 10,
-        "storedDerivativeOnly": true,
-        "repeatAndReadOnlyReopen": "NOT_RUN"
+        "rawFieldAudit": {
+          "path": "docs/evidence/r2-three-rss-2026-10-15/MY-C01-field-audit.json",
+          "selector": {
+            "id": "MY-C01"
+          },
+          "sha256": "e212671254a7588b1f7b55f815571fb219a9408002034a075c6313cc8b064e67",
+          "hashBasis": "committed_text_LF"
+        },
+        "procedure": {
+          "path": "docs/evidence/r2-three-rss-2026-10-15/replay-procedure.test.ts.txt",
+          "selector": null,
+          "sha256": "fc081075bdab07d5a774df63629ff54558157de360356604efad67c6b1ab3b13",
+          "hashBasis": "committed_text_LF"
+        },
+        "wireSha256": "a53ae6ded69ef3a0a64bd64c8824d69392592e00a6f87a97425ea82636c4858f",
+        "realRecords": 10,
+        "repeatAndReadOnlyReopen": "PASS",
+        "rawSourceDateAndTimezoneCompared": true,
+        "sourceUpdatedAt": "pubDate fallback; no independent updated literal in source",
+        "rssDateEvidenceColumn": "null_existing_contract; raw/timezone audit retained outside business DB",
+        "rawRedistributed": false
       },
       "numericFieldValidation": null,
       "dateEvidence": {
-        "role": "feed_declared_date_time_normalized",
-        "precision": "instant_in_saved_metadata",
-        "sourceDeclaredTimezone": "not_reaudited_here",
-        "publicationInstant": "available_in_saved_live_metadata"
+        "role": "RSS item pubDate as declared by source; no independent editorial verification",
+        "precision": "second",
+        "sourceDeclaredTimezone": "+0800",
+        "utcOffset": "+08:00",
+        "publicationInstant": "normalized from explicit source offset, each field independently compared",
+        "unknownTimezoneRecords": 0
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -2146,20 +2170,96 @@
         "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
       },
       "r2_5": {
-        "verdict": "NOT_RUN",
-        "countedPass": false,
-        "reason": "No stored real-page full title/link/source-time replay."
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Complete private source XML hash verified -> existing RSS Feed parser/collector -> isolated metadata-only SQLite -> repeat zero new/revised -> readonly+query_only full field reopen, zero mismatches."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay."
+        "No production source configuration or continuous 24h run; evidence-only disabled seed.",
+        "Body reuse permission unresolved; full XML private ignored only; persisted blocks metadata-only.",
+        "RSS immutable version date_evidence remains null by existing contract; exact original pubDate/offset audited in bounded evidence."
       ],
       "historicalSuperseded": [
-        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
-      ]
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current.",
+        "2026-10-13 derived 10/6/10 records were not complete XML. Replaced only for this source by separately authorized 2026-10-15 exact safe GET and full private XML replay; old evidence retained."
+      ],
+      "historicalEvidenceBeforeThreeRss": {
+        "latestActualFetch": {
+          "evidence": {
+            "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+            "selector": {
+              "id": "MY-C01"
+            },
+            "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+            "hashBasis": "committed_text_LF"
+          },
+          "url": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
+          "startedAt": "2026-10-13T07:00:30.791Z",
+          "receivedAt": null,
+          "finishedAt": "2026-10-13T07:00:35.339Z",
+          "httpStatus": 200,
+          "wireSha256": "b7f4e2c40f5d27df510d7eb00fb1ae1526b48269f39609a61279b20093b0de60",
+          "bytes": 7619,
+          "scope": "one_actual_index_response",
+          "verbatimLatestRawRetained": false,
+          "notContinuousProduction": true
+        },
+        "fieldReplayEvidence": {
+          "status": "LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY",
+          "evidence": {
+            "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+            "selector": {
+              "id": "MY-C01"
+            },
+            "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+            "hashBasis": "committed_text_LF"
+          },
+          "liveParsedItems": 10,
+          "liveTitleLinkTimeComplete": 10,
+          "storedDerivativeOnly": true,
+          "repeatAndReadOnlyReopen": "NOT_RUN"
+        },
+        "dateEvidence": {
+          "role": "feed_declared_date_time_normalized",
+          "precision": "instant_in_saved_metadata",
+          "sourceDeclaredTimezone": "not_reaudited_here",
+          "publicationInstant": "available_in_saved_live_metadata"
+        },
+        "gaps": [
+          "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay."
+        ],
+        "r2_5": {
+          "verdict": "NOT_RUN",
+          "countedPass": false,
+          "reason": "No stored real-page full title/link/source-time replay."
+        }
+      },
+      "latestAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-three-rss-2026-10-15/capture-summary.json",
+          "selector": {
+            "id": "MY-C01"
+          },
+          "sha256": "973b0d292ebf1372be34949cdf2181f1a7fdb08061dffce18cfdcbb500a164be",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-15T04:10:40.625Z",
+        "addresses": [
+          {
+            "address": "103.245.91.224",
+            "family": 4
+          }
+        ],
+        "systemDnsCalls": 1,
+        "httpRequests": 1,
+        "parser": "existing_Feed_RSS_then_existing_collector_offline",
+        "redirectsFollowed": 0,
+        "retries": 0
+      }
     },
     {
       "id": "MY-T01",
@@ -2183,45 +2283,66 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "path": "docs/evidence/r2-three-rss-2026-10-15/capture-summary.json",
           "selector": {
             "id": "MY-T01"
           },
-          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "sha256": "973b0d292ebf1372be34949cdf2181f1a7fdb08061dffce18cfdcbb500a164be",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
-        "startedAt": "2026-10-13T07:00:35.340Z",
-        "receivedAt": null,
-        "finishedAt": "2026-10-13T07:00:38.388Z",
+        "startedAt": "2026-10-15T04:10:41.342Z",
+        "receivedAt": "2026-10-15T04:10:42.205Z",
+        "finishedAt": "2026-10-15T04:10:42.205Z",
         "httpStatus": 200,
-        "wireSha256": "6136eaa0b359ed2a1c9d76bf00814a787706540e0eb0f02bd64d5b737e092439",
-        "bytes": 6086,
-        "scope": "one_actual_index_response",
-        "verbatimLatestRawRetained": false,
+        "wireSha256": "576ea0c1878c50591cd326fe07d27aafe9c6ba7f402df0ae1adc3b42a448a0c0",
+        "bytes": 6185,
+        "scope": "one_actual_exact_RSS_response_private_complete_bytes",
+        "verbatimLatestRawRetained": true,
+        "rawLocation": "private_ignored_only",
+        "capturedAtHead": "8027aeeda436faff8eb6ac3c0f0f0dd8d763f9be",
         "notContinuousProduction": true
       },
       "fieldReplayEvidence": {
-        "status": "LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY",
+        "status": "PASS_REAL_COMPLETE_PRIVATE_RSS_FIELDS",
         "evidence": {
-          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "path": "docs/evidence/r2-three-rss-2026-10-15/replay-summary.json",
           "selector": {
             "id": "MY-T01"
           },
-          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "sha256": "b3a90e558e41d9c417796af6a1e008bcbce8b7ef197c15d7a1b07df583f06f11",
           "hashBasis": "committed_text_LF"
         },
-        "liveParsedItems": 6,
-        "liveTitleLinkTimeComplete": 6,
-        "storedDerivativeOnly": true,
-        "repeatAndReadOnlyReopen": "NOT_RUN"
+        "rawFieldAudit": {
+          "path": "docs/evidence/r2-three-rss-2026-10-15/MY-T01-field-audit.json",
+          "selector": {
+            "id": "MY-T01"
+          },
+          "sha256": "0a24c6e905720c6c6cf90cb10140849451df390f675056bc5cde3255f98ad57d",
+          "hashBasis": "committed_text_LF"
+        },
+        "procedure": {
+          "path": "docs/evidence/r2-three-rss-2026-10-15/replay-procedure.test.ts.txt",
+          "selector": null,
+          "sha256": "fc081075bdab07d5a774df63629ff54558157de360356604efad67c6b1ab3b13",
+          "hashBasis": "committed_text_LF"
+        },
+        "wireSha256": "576ea0c1878c50591cd326fe07d27aafe9c6ba7f402df0ae1adc3b42a448a0c0",
+        "realRecords": 6,
+        "repeatAndReadOnlyReopen": "PASS",
+        "rawSourceDateAndTimezoneCompared": true,
+        "sourceUpdatedAt": "pubDate fallback; no independent updated literal in source",
+        "rssDateEvidenceColumn": "null_existing_contract; raw/timezone audit retained outside business DB",
+        "rawRedistributed": false
       },
       "numericFieldValidation": null,
       "dateEvidence": {
-        "role": "feed_declared_date_time_normalized",
-        "precision": "instant_in_saved_metadata",
-        "sourceDeclaredTimezone": "not_reaudited_here",
-        "publicationInstant": "available_in_saved_live_metadata"
+        "role": "RSS item pubDate as declared by source; no independent editorial verification",
+        "precision": "second",
+        "sourceDeclaredTimezone": "+0800",
+        "utcOffset": "+08:00",
+        "publicationInstant": "normalized from explicit source offset, each field independently compared",
+        "unknownTimezoneRecords": 0
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -2241,20 +2362,96 @@
         "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
       },
       "r2_5": {
-        "verdict": "NOT_RUN",
-        "countedPass": false,
-        "reason": "No stored real-page full title/link/source-time replay."
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Complete private source XML hash verified -> existing RSS Feed parser/collector -> isolated metadata-only SQLite -> repeat zero new/revised -> readonly+query_only full field reopen, zero mismatches."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay."
+        "No production source configuration or continuous 24h run; evidence-only disabled seed.",
+        "Body reuse permission unresolved; full XML private ignored only; persisted blocks metadata-only.",
+        "RSS immutable version date_evidence remains null by existing contract; exact original pubDate/offset audited in bounded evidence."
       ],
       "historicalSuperseded": [
-        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
-      ]
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current.",
+        "2026-10-13 derived 10/6/10 records were not complete XML. Replaced only for this source by separately authorized 2026-10-15 exact safe GET and full private XML replay; old evidence retained."
+      ],
+      "historicalEvidenceBeforeThreeRss": {
+        "latestActualFetch": {
+          "evidence": {
+            "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+            "selector": {
+              "id": "MY-T01"
+            },
+            "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+            "hashBasis": "committed_text_LF"
+          },
+          "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+          "startedAt": "2026-10-13T07:00:35.340Z",
+          "receivedAt": null,
+          "finishedAt": "2026-10-13T07:00:38.388Z",
+          "httpStatus": 200,
+          "wireSha256": "6136eaa0b359ed2a1c9d76bf00814a787706540e0eb0f02bd64d5b737e092439",
+          "bytes": 6086,
+          "scope": "one_actual_index_response",
+          "verbatimLatestRawRetained": false,
+          "notContinuousProduction": true
+        },
+        "fieldReplayEvidence": {
+          "status": "LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY",
+          "evidence": {
+            "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+            "selector": {
+              "id": "MY-T01"
+            },
+            "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+            "hashBasis": "committed_text_LF"
+          },
+          "liveParsedItems": 6,
+          "liveTitleLinkTimeComplete": 6,
+          "storedDerivativeOnly": true,
+          "repeatAndReadOnlyReopen": "NOT_RUN"
+        },
+        "dateEvidence": {
+          "role": "feed_declared_date_time_normalized",
+          "precision": "instant_in_saved_metadata",
+          "sourceDeclaredTimezone": "not_reaudited_here",
+          "publicationInstant": "available_in_saved_live_metadata"
+        },
+        "gaps": [
+          "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay."
+        ],
+        "r2_5": {
+          "verdict": "NOT_RUN",
+          "countedPass": false,
+          "reason": "No stored real-page full title/link/source-time replay."
+        }
+      },
+      "latestAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-three-rss-2026-10-15/capture-summary.json",
+          "selector": {
+            "id": "MY-T01"
+          },
+          "sha256": "973b0d292ebf1372be34949cdf2181f1a7fdb08061dffce18cfdcbb500a164be",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-15T04:10:41.342Z",
+        "addresses": [
+          {
+            "address": "163.53.154.2",
+            "family": 4
+          }
+        ],
+        "systemDnsCalls": 1,
+        "httpRequests": 1,
+        "parser": "existing_Feed_RSS_then_existing_collector_offline",
+        "redirectsFollowed": 0,
+        "retries": 0
+      }
     },
     {
       "id": "MY-L01",
@@ -3233,45 +3430,66 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "path": "docs/evidence/r2-three-rss-2026-10-15/capture-summary.json",
           "selector": {
             "id": "PH-M01"
           },
-          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "sha256": "973b0d292ebf1372be34949cdf2181f1a7fdb08061dffce18cfdcbb500a164be",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://portcalls.com/feed/",
-        "startedAt": "2026-10-13T07:00:29.490Z",
-        "receivedAt": null,
-        "finishedAt": "2026-10-13T07:00:30.790Z",
+        "startedAt": "2026-10-15T04:10:42.206Z",
+        "receivedAt": "2026-10-15T04:10:43.168Z",
+        "finishedAt": "2026-10-15T04:10:43.168Z",
         "httpStatus": 200,
-        "wireSha256": "e245e5a3a1be9cc4cdc6c6204f159eee93674b380679eec8fe0dc99411c27b71",
-        "bytes": 10112,
-        "scope": "one_actual_index_response",
-        "verbatimLatestRawRetained": false,
+        "wireSha256": "d8a6a4d1c9f9247404777d9ba0434ab611cc5fd5a3e4872ed1c4e32714d33a9a",
+        "bytes": 10179,
+        "scope": "one_actual_exact_RSS_response_private_complete_bytes",
+        "verbatimLatestRawRetained": true,
+        "rawLocation": "private_ignored_only",
+        "capturedAtHead": "8027aeeda436faff8eb6ac3c0f0f0dd8d763f9be",
         "notContinuousProduction": true
       },
       "fieldReplayEvidence": {
-        "status": "LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY",
+        "status": "PASS_REAL_COMPLETE_PRIVATE_RSS_FIELDS",
         "evidence": {
-          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "path": "docs/evidence/r2-three-rss-2026-10-15/replay-summary.json",
           "selector": {
             "id": "PH-M01"
           },
-          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "sha256": "b3a90e558e41d9c417796af6a1e008bcbce8b7ef197c15d7a1b07df583f06f11",
           "hashBasis": "committed_text_LF"
         },
-        "liveParsedItems": 10,
-        "liveTitleLinkTimeComplete": 10,
-        "storedDerivativeOnly": true,
-        "repeatAndReadOnlyReopen": "NOT_RUN"
+        "rawFieldAudit": {
+          "path": "docs/evidence/r2-three-rss-2026-10-15/PH-M01-field-audit.json",
+          "selector": {
+            "id": "PH-M01"
+          },
+          "sha256": "4ee4c651ff01c952db236fdb246e570fecbbb41d95194285263f4b84f9fc3270",
+          "hashBasis": "committed_text_LF"
+        },
+        "procedure": {
+          "path": "docs/evidence/r2-three-rss-2026-10-15/replay-procedure.test.ts.txt",
+          "selector": null,
+          "sha256": "fc081075bdab07d5a774df63629ff54558157de360356604efad67c6b1ab3b13",
+          "hashBasis": "committed_text_LF"
+        },
+        "wireSha256": "d8a6a4d1c9f9247404777d9ba0434ab611cc5fd5a3e4872ed1c4e32714d33a9a",
+        "realRecords": 10,
+        "repeatAndReadOnlyReopen": "PASS",
+        "rawSourceDateAndTimezoneCompared": true,
+        "sourceUpdatedAt": "pubDate fallback; no independent updated literal in source",
+        "rssDateEvidenceColumn": "null_existing_contract; raw/timezone audit retained outside business DB",
+        "rawRedistributed": false
       },
       "numericFieldValidation": null,
       "dateEvidence": {
-        "role": "feed_declared_date_time_normalized",
-        "precision": "instant_in_saved_metadata",
-        "sourceDeclaredTimezone": "not_reaudited_here",
-        "publicationInstant": "available_in_saved_live_metadata"
+        "role": "RSS item pubDate as declared by source; no independent editorial verification",
+        "precision": "second",
+        "sourceDeclaredTimezone": "+0000",
+        "utcOffset": "+00:00",
+        "publicationInstant": "normalized from explicit source offset, each field independently compared",
+        "unknownTimezoneRecords": 0
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -3291,20 +3509,96 @@
         "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
       },
       "r2_5": {
-        "verdict": "NOT_RUN",
-        "countedPass": false,
-        "reason": "No stored real-page full title/link/source-time replay."
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Complete private source XML hash verified -> existing RSS Feed parser/collector -> isolated metadata-only SQLite -> repeat zero new/revised -> readonly+query_only full field reopen, zero mismatches."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay."
+        "No production source configuration or continuous 24h run; evidence-only disabled seed.",
+        "Body reuse permission unresolved; full XML private ignored only; persisted blocks metadata-only.",
+        "RSS immutable version date_evidence remains null by existing contract; exact original pubDate/offset audited in bounded evidence."
       ],
       "historicalSuperseded": [
-        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
-      ]
+        "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current.",
+        "2026-10-13 derived 10/6/10 records were not complete XML. Replaced only for this source by separately authorized 2026-10-15 exact safe GET and full private XML replay; old evidence retained."
+      ],
+      "historicalEvidenceBeforeThreeRss": {
+        "latestActualFetch": {
+          "evidence": {
+            "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+            "selector": {
+              "id": "PH-M01"
+            },
+            "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+            "hashBasis": "committed_text_LF"
+          },
+          "url": "https://portcalls.com/feed/",
+          "startedAt": "2026-10-13T07:00:29.490Z",
+          "receivedAt": null,
+          "finishedAt": "2026-10-13T07:00:30.790Z",
+          "httpStatus": 200,
+          "wireSha256": "e245e5a3a1be9cc4cdc6c6204f159eee93674b380679eec8fe0dc99411c27b71",
+          "bytes": 10112,
+          "scope": "one_actual_index_response",
+          "verbatimLatestRawRetained": false,
+          "notContinuousProduction": true
+        },
+        "fieldReplayEvidence": {
+          "status": "LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY",
+          "evidence": {
+            "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+            "selector": {
+              "id": "PH-M01"
+            },
+            "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+            "hashBasis": "committed_text_LF"
+          },
+          "liveParsedItems": 10,
+          "liveTitleLinkTimeComplete": 10,
+          "storedDerivativeOnly": true,
+          "repeatAndReadOnlyReopen": "NOT_RUN"
+        },
+        "dateEvidence": {
+          "role": "feed_declared_date_time_normalized",
+          "precision": "instant_in_saved_metadata",
+          "sourceDeclaredTimezone": "not_reaudited_here",
+          "publicationInstant": "available_in_saved_live_metadata"
+        },
+        "gaps": [
+          "Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay."
+        ],
+        "r2_5": {
+          "verdict": "NOT_RUN",
+          "countedPass": false,
+          "reason": "No stored real-page full title/link/source-time replay."
+        }
+      },
+      "latestAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-three-rss-2026-10-15/capture-summary.json",
+          "selector": {
+            "id": "PH-M01"
+          },
+          "sha256": "973b0d292ebf1372be34949cdf2181f1a7fdb08061dffce18cfdcbb500a164be",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-15T04:10:42.206Z",
+        "addresses": [
+          {
+            "address": "173.231.251.20",
+            "family": 4
+          }
+        ],
+        "systemDnsCalls": 1,
+        "httpRequests": 1,
+        "parser": "existing_Feed_RSS_then_existing_collector_offline",
+        "redirectsFollowed": 0,
+        "retries": 0
+      }
     },
     {
       "id": "XX-W01",
@@ -4631,84 +4925,105 @@
       "existingReusableImplementation": "Current bounded batch complete: VN-D01 disabled candidate/raw replay; other gaps retained. No automatic redirect/retry/new interface authorized."
     }
   ],
-  "nextBatchProposal": [
-    {
-      "id": "MY-C01",
-      "url": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
-      "status": "PROPOSED_ONLY_NOT_EXECUTED",
-      "currentR2_4": "OK",
-      "currentR2_5": "NOT_RUN",
-      "storedActualHttpStatus": 200,
-      "storedActualAt": "2026-10-13T07:00:30.791Z",
-      "storedParsedItems": 10,
-      "storedCompleteTitleLinkTime": 10,
-      "reusableEvidence": {
-        "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
-        "selector": {
-          "id": "MY-C01"
-        },
-        "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
-        "hashBasis": "committed_text_LF"
-      },
-      "reusableImplementation": "Existing RSS Feed parser, secure byte transport/decoder, collector, metadata-only SQLite versions and read-only reopen harness",
-      "gap": "Full original XML was not retained; stored metadata/hash is not a real raw replay. Need original XML -> collector -> idempotency -> read-only field comparison with explicit source-date semantics.",
-      "license": "Unknown full-body reuse; metadata_only, raw XML private ignored only if separately authorized; never reconstruct raw XML from metadata.",
-      "expectedBenefit": "At most one additional R2-5 pass if qualified; already R2-4 OK so no new availability numerator",
-      "futurePrerequisite": "Separate bounded next round; read-only config/safety DNS check then at most one exact GET each if approved. No probe or source configuration change in this recommendation.",
-      "thisRoundDnsCalls": 0,
-      "thisRoundHttpRequests": 0
+  "nextBatchProposal": [],
+  "lastCompletedThreeRssBatch": {
+    "evidence": {
+      "path": "docs/evidence/r2-three-rss-2026-10-15/capture-summary.json",
+      "selector": null,
+      "sha256": "973b0d292ebf1372be34949cdf2181f1a7fdb08061dffce18cfdcbb500a164be",
+      "hashBasis": "committed_text_LF"
     },
-    {
-      "id": "MY-T01",
-      "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
-      "status": "PROPOSED_ONLY_NOT_EXECUTED",
-      "currentR2_4": "OK",
-      "currentR2_5": "NOT_RUN",
-      "storedActualHttpStatus": 200,
-      "storedActualAt": "2026-10-13T07:00:35.340Z",
-      "storedParsedItems": 6,
-      "storedCompleteTitleLinkTime": 6,
-      "reusableEvidence": {
-        "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
-        "selector": {
-          "id": "MY-T01"
-        },
-        "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
-        "hashBasis": "committed_text_LF"
-      },
-      "reusableImplementation": "Existing RSS Feed parser, secure byte transport/decoder, collector, metadata-only SQLite versions and read-only reopen harness",
-      "gap": "Full original XML was not retained; stored metadata/hash is not a real raw replay. Need original XML -> collector -> idempotency -> read-only field comparison with explicit source-date semantics.",
-      "license": "Unknown full-body reuse; metadata_only, raw XML private ignored only if separately authorized; never reconstruct raw XML from metadata.",
-      "expectedBenefit": "At most one additional R2-5 pass if qualified; already R2-4 OK so no new availability numerator",
-      "futurePrerequisite": "Separate bounded next round; read-only config/safety DNS check then at most one exact GET each if approved. No probe or source configuration change in this recommendation.",
-      "thisRoundDnsCalls": 0,
-      "thisRoundHttpRequests": 0
+    "replay": {
+      "path": "docs/evidence/r2-three-rss-2026-10-15/replay-summary.json",
+      "selector": null,
+      "sha256": "b3a90e558e41d9c417796af6a1e008bcbce8b7ef197c15d7a1b07df583f06f11",
+      "hashBasis": "committed_text_LF"
     },
-    {
-      "id": "PH-M01",
-      "url": "https://portcalls.com/feed/",
-      "status": "PROPOSED_ONLY_NOT_EXECUTED",
-      "currentR2_4": "OK",
-      "currentR2_5": "NOT_RUN",
-      "storedActualHttpStatus": 200,
-      "storedActualAt": "2026-10-13T07:00:29.490Z",
-      "storedParsedItems": 10,
-      "storedCompleteTitleLinkTime": 10,
-      "reusableEvidence": {
-        "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
-        "selector": {
-          "id": "PH-M01"
+    "executedAtHead": "8027aeeda436faff8eb6ac3c0f0f0dd8d763f9be",
+    "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+    "systemDnsCalls": 3,
+    "httpRequests": 3,
+    "realRecords": 26,
+    "noProductCodeChanged": true,
+    "previousRecommendation": [
+      {
+        "id": "MY-C01",
+        "url": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
+        "status": "PROPOSED_ONLY_NOT_EXECUTED",
+        "currentR2_4": "OK",
+        "currentR2_5": "NOT_RUN",
+        "storedActualHttpStatus": 200,
+        "storedActualAt": "2026-10-13T07:00:30.791Z",
+        "storedParsedItems": 10,
+        "storedCompleteTitleLinkTime": 10,
+        "reusableEvidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "MY-C01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
         },
-        "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
-        "hashBasis": "committed_text_LF"
+        "reusableImplementation": "Existing RSS Feed parser, secure byte transport/decoder, collector, metadata-only SQLite versions and read-only reopen harness",
+        "gap": "Full original XML was not retained; stored metadata/hash is not a real raw replay. Need original XML -> collector -> idempotency -> read-only field comparison with explicit source-date semantics.",
+        "license": "Unknown full-body reuse; metadata_only, raw XML private ignored only if separately authorized; never reconstruct raw XML from metadata.",
+        "expectedBenefit": "At most one additional R2-5 pass if qualified; already R2-4 OK so no new availability numerator",
+        "futurePrerequisite": "Separate bounded next round; read-only config/safety DNS check then at most one exact GET each if approved. No probe or source configuration change in this recommendation.",
+        "thisRoundDnsCalls": 0,
+        "thisRoundHttpRequests": 0
       },
-      "reusableImplementation": "Existing RSS Feed parser, secure byte transport/decoder, collector, metadata-only SQLite versions and read-only reopen harness",
-      "gap": "Full original XML was not retained; stored metadata/hash is not a real raw replay. Need original XML -> collector -> idempotency -> read-only field comparison with explicit source-date semantics.",
-      "license": "Unknown full-body reuse; metadata_only, raw XML private ignored only if separately authorized; never reconstruct raw XML from metadata.",
-      "expectedBenefit": "At most one additional R2-5 pass if qualified; already R2-4 OK so no new availability numerator",
-      "futurePrerequisite": "Separate bounded next round; read-only config/safety DNS check then at most one exact GET each if approved. No probe or source configuration change in this recommendation.",
-      "thisRoundDnsCalls": 0,
-      "thisRoundHttpRequests": 0
-    }
-  ]
+      {
+        "id": "MY-T01",
+        "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+        "status": "PROPOSED_ONLY_NOT_EXECUTED",
+        "currentR2_4": "OK",
+        "currentR2_5": "NOT_RUN",
+        "storedActualHttpStatus": 200,
+        "storedActualAt": "2026-10-13T07:00:35.340Z",
+        "storedParsedItems": 6,
+        "storedCompleteTitleLinkTime": 6,
+        "reusableEvidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "MY-T01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "reusableImplementation": "Existing RSS Feed parser, secure byte transport/decoder, collector, metadata-only SQLite versions and read-only reopen harness",
+        "gap": "Full original XML was not retained; stored metadata/hash is not a real raw replay. Need original XML -> collector -> idempotency -> read-only field comparison with explicit source-date semantics.",
+        "license": "Unknown full-body reuse; metadata_only, raw XML private ignored only if separately authorized; never reconstruct raw XML from metadata.",
+        "expectedBenefit": "At most one additional R2-5 pass if qualified; already R2-4 OK so no new availability numerator",
+        "futurePrerequisite": "Separate bounded next round; read-only config/safety DNS check then at most one exact GET each if approved. No probe or source configuration change in this recommendation.",
+        "thisRoundDnsCalls": 0,
+        "thisRoundHttpRequests": 0
+      },
+      {
+        "id": "PH-M01",
+        "url": "https://portcalls.com/feed/",
+        "status": "PROPOSED_ONLY_NOT_EXECUTED",
+        "currentR2_4": "OK",
+        "currentR2_5": "NOT_RUN",
+        "storedActualHttpStatus": 200,
+        "storedActualAt": "2026-10-13T07:00:29.490Z",
+        "storedParsedItems": 10,
+        "storedCompleteTitleLinkTime": 10,
+        "reusableEvidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "PH-M01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "reusableImplementation": "Existing RSS Feed parser, secure byte transport/decoder, collector, metadata-only SQLite versions and read-only reopen harness",
+        "gap": "Full original XML was not retained; stored metadata/hash is not a real raw replay. Need original XML -> collector -> idempotency -> read-only field comparison with explicit source-date semantics.",
+        "license": "Unknown full-body reuse; metadata_only, raw XML private ignored only if separately authorized; never reconstruct raw XML from metadata.",
+        "expectedBenefit": "At most one additional R2-5 pass if qualified; already R2-4 OK so no new availability numerator",
+        "futurePrerequisite": "Separate bounded next round; read-only config/safety DNS check then at most one exact GET each if approved. No probe or source configuration change in this recommendation.",
+        "thisRoundDnsCalls": 0,
+        "thisRoundHttpRequests": 0
+      }
+    ]
+  }
 }

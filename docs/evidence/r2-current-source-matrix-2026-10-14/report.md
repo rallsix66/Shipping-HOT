@@ -1,19 +1,21 @@
 # R2 41项来源累计证据 — 2026-10-15
 
-当前ONE同源目录URL更新已获批准并应用：XX-K02现为 https://www.one-line.com/en/newsroom，旧/en/news及原308链保留；目录web_list为HTML页面形态，现有默认关闭候选用json_list惰性HTML内嵌JSON模式。源码 `bebe1441465adfcabb9daf93cb2a8656ec1fc796` 干净门禁245定向、1230全量/3跳过及3smoke通过。已有635664原HTML经正式关闭候选回归10条字段、重复0新0修订、只读重开0差异，与前轮10条原字段完全相同；本轮来源DNS/HTTP0，不刷新02:56实网时间，不推导持续可用。覆盖仍21/39、13/34，数值3/5独立。[本轮目录/配置依据与至多三项建议](../r2-one-catalog-candidate-2026-10-15/report.md)。
+最新三源RSS原XML资格已补齐：MY-C01/MY-T01/PH-M01各一次DNS/GET、均200，实际10/6/10条；完整原字节只私有ignored，复用RSS/collector隔离SQLite，源日期/明确offset逐字段、重复和query-only重开全部通过。仅R2-5由13/34到16/34；R2-4保持21/39，其他38项逐源未改。代码bebe144未改，本轮产品门禁NOT_RUN；整体R2、24h、GUI/S7未通过。[完整报告](../r2-three-rss-2026-10-15/report.md)。
+
+前轮ONE同源目录URL更新已获批准并应用：XX-K02现为 https://www.one-line.com/en/newsroom，旧/en/news及原308链保留；目录web_list为HTML页面形态，现有默认关闭候选用json_list惰性HTML内嵌JSON模式。源码 `bebe1441465adfcabb9daf93cb2a8656ec1fc796` 干净门禁245定向、1230全量/3跳过及3smoke通过。已有635664原HTML经正式关闭候选回归10条字段、重复0新0修订、只读重开0差异，与前轮10条原字段完全相同；本轮来源DNS/HTTP0，不刷新02:56实网时间，不推导持续可用。覆盖仍21/39、13/34，数值3/5独立。[本轮目录/配置依据与至多三项建议](../r2-one-catalog-candidate-2026-10-15/report.md)。
 
 本报告汇总已保存证据，供父会话独立审查。源码基准 `bebe1441465adfcabb9daf93cb2a8656ec1fc796`；前一四源采集HEAD为 `50da3805ee14e72222a4e26f4230073cf1842bc7`。该历史批次四次系统DNS均公网、精确索引HTTP4；VN-D01原页有限通过、MY-L01真实探针失败，两源跳转未跟随；干净源码门禁已另存。[机器矩阵](mapping.json)保留全部41项的精确目录产品、采集时点、原证据路径/LF文本哈希、字段回放、时间角色、许可、默认状态及两项独立判定。
 
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
 | R2-4公开自动来源 | **21/39（53.85%）** | 最少32项，尚差11；21 OK、11 PARTIAL、1 STALE、1 BLOCKED、5 NOT_RUN，未通过 |
-| R2-5资讯/公告原页字段回放 | **13/34（38.24%）** | 尚差21；13 PASS、4 FAIL、1 PARTIAL、16 NOT_RUN，未通过 |
+| R2-5资讯/公告原页字段回放 | **16/34（47.06%）** | 尚差18；16 PASS、4 FAIL、1 PARTIAL、13 NOT_RUN，未通过 |
 | 数值字段独立检查 | **3/5** | 仅历史归一化诊断；不加到34项原页回放分子 |
 | R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
 
 34资讯/公告、5数值天气、2后续阶段的分类于06:31:44 UTC已批准，41项全部保留。后续付费天气与向量只从公开39项分母排除，没有标PASS。这里的OK只描述留证时的实产品可用和数据/解析检查，不描述今天实时可用、生产默认启用或24小时表现。默认关闭独立于来源资格，不记作失败。
 
-NMC两项与Westports日期复审曾将旧暂计逐步修正为19/39；本批VN-D01原页有限通过后当前为20/39。NMC的既有证据顺序为：10/11原URL旧Feed读取早于10/13 03:55:13.246 UTC真实页面适用性回放。后者在 `0b532e1917ee5425194965b20e0fdf8c2a1f4805` 断言零合格链接、`web_list_invalid_link`、写入0；harness退出0证明预期失败得到验证，不代表源解析成功。[原始日志](../r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log)、[过程](../r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt)。已核对当前9个关闭HTML候选与后续R2记录，没有取代这两项失败的合格回放；它们保留为R2-4 PARTIAL / R2-5 FAIL，不称未测试。
+NMC两项与Westports日期复审曾将旧暂计逐步修正为19/39；历史VN-D01批原页有限通过后当时为20/39（现已因后续ONE证据为21/39）。NMC的既有证据顺序为：10/11原URL旧Feed读取早于10/13 03:55:13.246 UTC真实页面适用性回放。后者在 `0b532e1917ee5425194965b20e0fdf8c2a1f4805` 断言零合格链接、`web_list_invalid_link`、写入0；harness退出0证明预期失败得到验证，不代表源解析成功。[原始日志](../r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log)、[过程](../r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt)。已核对当前9个关闭HTML候选与后续R2记录，没有取代这两项失败的合格回放；它们保留为R2-4 PARTIAL / R2-5 FAIL，不称未测试。
 
 字段PASS忠实保留源实际时间角色。TH-C02是文件日，ID-T01是制定日；包括VN-D01的其余七个新增HTML原页是源显示的列表日，全部day精度、时区缺失、发布瞬间null。BMKG旧12条/en别名原文与最新13条精确/rss.xml响应分开；NCHMF旧脱敏DOM保留+07来自测试配置的限制。字段通过不证明发布瞬间、预警有效性、港口影响、法规全文或政策人工审核。
 
@@ -38,8 +40,8 @@ NMC两项与Westports日期复审曾将旧暂计逐步修正为19/39；本批VN-
 | MY-P02 | https://www.westportsholdings.com/category/press-release/feed/ | 2026-10-13T07:00:27.722Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | STALE | NOT_RUN [字段](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | 三条保存日期为2024-11-08、2025-02-01、2025-08-01，最新仅2025-08-01；200和完整字段不能满足目录2026内容口径。[日期证据](../r2-bounded-rss-after-dns-2026-10-13/MY-P02-metadata.json)，未有更新留证，不重抓。完整原页回放仍NOT_RUN。 |
 | MY-P03 | https://www.northport.com.my/np/page-announcements.html | 2026-10-14T07:16:47.635Z / 200 [取证](../r2-six-public-2026-10-14/summary.json) | PARTIAL | FAIL [字段](../r2-two-raw-dns-2026-10-14/replay-summary.json) | 原页同URL对应冲突标题/日期；首次与重复均失败，写入0，不择优消除冲突。 |
 | MY-W01 | https://api.data.gov.my/weather/warning | 2026-10-10T08:30:40.728Z / 200 [取证](../metmalaysia-integration-2026-10-10/live-evidence.json) | PARTIAL | NOT_RUN | 目录无尾斜杠URL曾301；相关尾斜杠JSON可读，精确产品映射及完整字段回放未合格。 |
-| MY-C01 | https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss | 2026-10-13T07:00:30.791Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
-| MY-T01 | https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss | 2026-10-13T07:00:35.340Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
+| MY-C01 | https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss | 2026-10-15T04:10:40.625Z / 200 [本轮取证](../r2-three-rss-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-three-rss-2026-10-15/MY-C01-replay.json) | 完整私有XML→既有collector→隔离SQLite 10条；重复0新0修订，readonly/query_only重开0差异；pubDate秒精度、原offset +0800，无独立updated。仅metadata，未生产启用。 |
+| MY-T01 | https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss | 2026-10-15T04:10:41.342Z / 200 [本轮取证](../r2-three-rss-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-three-rss-2026-10-15/MY-T01-replay.json) | 完整私有XML→既有collector→隔离SQLite 6条；重复0新0修订，readonly/query_only重开0差异；pubDate秒精度、原offset +0800，无独立updated。仅metadata，未生产启用。 |
 | MY-L01 | https://www.pos.com.my/service-update | 2026-10-15T01:16:13.254Z / 200 [本批](../r2-four-reapplied-2026-10-15/report.md) | PARTIAL | FAIL | 原页10张卡片标题锚点均无href；类别链接是列表自身。真实适用性探针失败/写入0，不猜路由或时区。 |
 | ID-W01 | https://www.bmkg.go.id/alerts/nowcast/en/rss.xml | 2026-10-13T07:00:40.269Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | PASS [字段](../r2-p1-inventory-2026-10-13/replay.log) | 最新精确RSS13条可读；回放是旧12条、原GET为/en别名，不把两份payload混为一份。 |
 | ID-T01 | https://jdih.kemendag.go.id/ | 2026-10-14T09:08:45.056Z / 200 [取证](../r2-three-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-post-clash-index-replay-final-2026-10-14/summary.json) | 8条完整原页回放通过；制定日不是发布日期，标题原有省略号保留，初始失败另存。 |
@@ -48,7 +50,7 @@ NMC两项与Westports日期复审曾将旧暂计逐步修正为19/39；本批VN-
 | PH-W01 | https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin | 2026-10-10T11:03:48Z / 200 [取证](../pagasa-warning-2026-10-10/raw/fetch-log.txt) | PARTIAL | NOT_RUN | 200页面外壳/iframe，无合格活动正样本；页面可读不代替预警数据。 |
 | PH-W02 | https://www.pagasa.dost.gov.ph/weather/weather-advisory | 2026-10-10T11:03:49.920Z / 200 [取证](../pagasa-warning-2026-10-10/raw/fetch-log.txt) | PARTIAL | NOT_RUN | 200页面外壳/iframe，无合格活动正样本；页面可读不代替预警数据。 |
 | PH-C01 | https://customs.gov.ph/category/media-releases/ | 2026-10-14T07:56:33.170Z / 200 [取证](../r2-four-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-public-index-replay-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
-| PH-M01 | https://portcalls.com/feed/ | 2026-10-13T07:00:29.490Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
+| PH-M01 | https://portcalls.com/feed/ | 2026-10-15T04:10:42.206Z / 200 [本轮取证](../r2-three-rss-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-three-rss-2026-10-15/PH-M01-replay.json) | 完整私有XML→既有collector→隔离SQLite 10条；重复0新0修订，readonly/query_only重开0差异；pubDate秒精度、原offset +0000，无独立updated。仅metadata，未生产启用。 |
 | XX-K01 | https://www.maersk.com/news | 2026-10-15T02:38:28.356Z / 尝试1、未捕获响应 [当前证据](../r2-carrier-reapplied-2026-10-15/summary.json) | BLOCKED | NOT_RUN | 公网23.53.3.137、23.53.3.144；fetch_failed无底层错误记录，不判断CA/TLS/反爬；不重试。 |
 | XX-K02 | https://www.one-line.com/en/newsroom（旧/en/news与308另存） | 2026-10-15T02:56:22.136Z / 200（前轮实测；本轮HTTP0）[沿革](../r2-one-catalog-candidate-2026-10-15/catalogue-change-applied.json) | OK | PASS [正式关闭候选原页回归](../r2-one-catalog-candidate-replay-2026-10-15/summary.json) | 目录web_list页面由json_list惰性数据模式读取；1置顶+9列表，日期秒精度无时区/瞬间null，默认关闭metadata-only且不进入活动源。 |
 | XX-K03 | https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/ | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |

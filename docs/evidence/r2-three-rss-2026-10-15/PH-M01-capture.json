@@ -1,0 +1,47 @@
+{
+  "id": "PH-M01",
+  "url": "https://portcalls.com/feed/",
+  "host": "portcalls.com",
+  "catalogLineLfSha256": "fb28f8edfdafe94bb6030f7d32c1b21d545af1aaf1c1779ecf292b94fb869f92",
+  "oldWireSha256": "e245e5a3a1be9cc4cdc6c6204f159eee93674b380679eec8fe0dc99411c27b71",
+  "startedAt": "2026-10-15T04:10:42.206Z",
+  "systemDnsCalls": 1,
+  "transportInvocations": 1,
+  "status": "CAPTURED_SAFE_XML",
+  "parser": "NOT_RUN",
+  "rawLocalOnly": true,
+  "addresses": [
+    {
+      "address": "173.231.251.20",
+      "family": 4
+    }
+  ],
+  "addressClassification": "public_address",
+  "receivedAt": "2026-10-15T04:10:43.168Z",
+  "httpStatus": 200,
+  "contentType": "application/rss+xml; charset=UTF-8",
+  "bytes": 10179,
+  "wireSha256": "d8a6a4d1c9f9247404777d9ba0434ab611cc5fd5a3e4872ed1c4e32714d33a9a",
+  "completeResponseCaptured": true,
+  "locationPresent": false,
+  "locationFollowed": false,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "xml",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 10179
+  },
+  "finishedAt": "2026-10-15T04:10:43.168Z"
+}

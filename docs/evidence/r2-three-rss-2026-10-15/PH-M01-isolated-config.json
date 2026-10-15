@@ -1,0 +1,23 @@
+{
+  "seed": {
+    "id": "bounded:PH-M01",
+    "catalogId": "PH-M01",
+    "name": "PH-M01",
+    "kind": "rss",
+    "url": "https://portcalls.com/feed/",
+    "enabled": false,
+    "persistence": "disallowed",
+    "allowedHosts": [
+      "portcalls.com"
+    ],
+    "allowedContentTypes": [
+      "application/rss+xml",
+      "application/atom+xml",
+      "application/rdf+xml",
+      "application/xml",
+      "text/xml"
+    ],
+    "intervalMs": 3600000
+  },
+  "role": "Isolated evidence-only configuration, not production registry/candidate or active seed"
+}

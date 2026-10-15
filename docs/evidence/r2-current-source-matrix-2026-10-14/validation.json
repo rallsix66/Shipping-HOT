@@ -1,80 +1,167 @@
 {
-  "type": "docs_and_saved_evidence_validation",
-  "at": "2026-10-15T03:53:08.913555+00:00",
-  "codeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "evidenceBaseline": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "command": "python .tmp/validate-current-r2-matrix.py",
-  "validatorSourceRequests": 0,
-  "validatorSourceDns": 0,
-  "lastQualificationBatchSystemDns": 4,
-  "lastQualificationBatchHttpRequests": 4,
-  "thisAdoptionRoundTransportAttempts": 0,
-  "thisAdoptionRoundSystemDns": 0,
-  "latestRealTargetCaptureRetainedFromPriorRound": true,
-  "thisRoundMaerskRequests": 0,
-  "thisCloseoutSourceRequests": 0,
-  "thisCloseoutSystemDns": 0,
-  "functionalTests": "PASS_exact_clean_code_gate_bebe144; separate from docs validation command",
-  "originalFieldReplay": "PASS_declared_disabled_ONE_config_existing_full_HTML10_metadata_fields; all40other_entries_and_all_coverage_unchanged",
+  "type": "bounded_evidence_and_current_matrix_validation",
+  "at": "2026-10-15T04:20:03.679Z",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "executedAtHead": "8027aeeda436faff8eb6ac3c0f0f0dd8d763f9be",
+  "sourceRequestsInValidator": 0,
+  "sourceDnsInValidator": 0,
+  "productGate": "NOT_RUN_no_product_change",
   "checks": [
     {
-      "check": "41 unique entries match current catalogue automatic P1 rows",
-      "pass": true,
-      "detail": {
-        "catalogCount": 41
-      }
+      "name": "Exact approved branch, code and executed evidence HEAD",
+      "pass": true
     },
     {
-      "check": "All literal product URL text retained from catalogue",
+      "name": "All tracked modifications since tested code are documentation only",
       "pass": true,
-      "detail": null
+      "detail": [
+        "docs/architecture.md",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/archive-hashes.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/build.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/build.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/build.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/gate-driver.cjs.txt",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/install.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/install.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/install.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/launch.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/lint.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/lint.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/lint.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/report.md",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-feed.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-feed.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-feed.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-p0.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-p0.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-p0.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-p2c.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-p2c.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/smoke-p2c.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/source-proof.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/summary.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/targeted.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/targeted.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/targeted.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/typecheck.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/typecheck.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/typecheck.stdout.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/vitest.json",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/vitest.stderr.log",
+        "docs/evidence/gate-bebe144-one-catalog-candidate/vitest.stdout.log",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/archive-hashes.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validate-matrix.py.txt",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/archive-hashes.json",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/catalogue-change-applied.diff.txt",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/catalogue-change-applied.json",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/closeout.md",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/documentation-validation-driver.py.txt",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/inventory-metadata.json",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/inventory.txt",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/matrix-delta.json",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/metadata-update-driver.py.txt",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/next-batch-recommendations.json",
+        "docs/evidence/r2-one-catalog-candidate-2026-10-15/report.md",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/archive-hashes.json",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/candidate-config.json",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/command.json",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/launch.json",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/raw-field-metadata.json",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/replay-config.ts.txt",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/replay-launcher.cjs.txt",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/replay-procedure.test.ts.txt",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/report.md",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/stderr.log",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/stdout.log",
+        "docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/summary.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-C01-capture.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-C01-field-audit.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-C01-isolated-config.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-C01-replay.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-T01-capture.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-T01-field-audit.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-T01-isolated-config.json",
+        "docs/evidence/r2-three-rss-2026-10-15/MY-T01-replay.json",
+        "docs/evidence/r2-three-rss-2026-10-15/PH-M01-capture.json",
+        "docs/evidence/r2-three-rss-2026-10-15/PH-M01-field-audit.json",
+        "docs/evidence/r2-three-rss-2026-10-15/PH-M01-isolated-config.json",
+        "docs/evidence/r2-three-rss-2026-10-15/PH-M01-replay.json",
+        "docs/evidence/r2-three-rss-2026-10-15/archive-manifest.json",
+        "docs/evidence/r2-three-rss-2026-10-15/capture-command.json",
+        "docs/evidence/r2-three-rss-2026-10-15/capture-config.ts.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/capture-procedure.test.ts.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/capture-runner.cjs.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/capture-summary.json",
+        "docs/evidence/r2-three-rss-2026-10-15/capture.stderr.log",
+        "docs/evidence/r2-three-rss-2026-10-15/capture.stdout.log",
+        "docs/evidence/r2-three-rss-2026-10-15/closeout.md",
+        "docs/evidence/r2-three-rss-2026-10-15/dns-ledger.json",
+        "docs/evidence/r2-three-rss-2026-10-15/doc-lint-runner.cjs.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/doc-lint.json",
+        "docs/evidence/r2-three-rss-2026-10-15/inventory-procedure.cjs.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/local-raw-inventory.json",
+        "docs/evidence/r2-three-rss-2026-10-15/manifest.json",
+        "docs/evidence/r2-three-rss-2026-10-15/matrix-delta.json",
+        "docs/evidence/r2-three-rss-2026-10-15/original-command-outputs.json",
+        "docs/evidence/r2-three-rss-2026-10-15/preparation-errors.json",
+        "docs/evidence/r2-three-rss-2026-10-15/replay-command.json",
+        "docs/evidence/r2-three-rss-2026-10-15/replay-config.ts.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/replay-procedure.test.ts.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/replay-runner.cjs.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/replay-summary.json",
+        "docs/evidence/r2-three-rss-2026-10-15/replay.stderr.log",
+        "docs/evidence/r2-three-rss-2026-10-15/replay.stdout.log",
+        "docs/evidence/r2-three-rss-2026-10-15/report.md",
+        "docs/evidence/r2-three-rss-2026-10-15/request-ledger.json",
+        "docs/evidence/r2-three-rss-2026-10-15/validation-procedure.cjs.txt",
+        "docs/evidence/r2-three-rss-2026-10-15/validation.first.json",
+        "docs/evidence/r2-three-rss-2026-10-15/validation.json",
+        "docs/handoffs/r2-next-execution-2026-10-15.md",
+        "docs/status.md"
+      ]
     },
     {
-      "check": "Approved 34 information / 5 numeric / 2 deferred partition",
-      "pass": true,
-      "detail": null
+      "name": "Zero product/schema/config/dependency/workflow diff from accepted code",
+      "pass": true
     },
     {
-      "check": "Current catalogue LF text digest",
-      "pass": true,
-      "detail": null
+      "name": "41 unique approved catalogue automatic P1 rows retained",
+      "pass": true
     },
     {
-      "check": "All evidence paths exist",
-      "pass": true,
-      "detail": {
-        "referenceOccurrences": 175,
-        "uniquePaths": 60,
-        "missing": []
-      }
+      "name": "Current catalogue unchanged and LF digest matches",
+      "pass": true
     },
     {
-      "check": "All evidence LF text hashes match",
+      "name": "Only three named entries changed; other38 identical",
       "pass": true,
-      "detail": []
+      "detail": [
+        "MY-C01",
+        "MY-T01",
+        "PH-M01"
+      ]
     },
     {
-      "check": "All evidence source selectors resolve",
-      "pass": true,
-      "detail": []
+      "name": "Approved denominator partition unchanged",
+      "pass": true
     },
     {
-      "check": "R2-4 independently recomputed verdicts and flags",
-      "pass": true,
-      "detail": null
+      "name": "R2-4 21/39 and numeric3/5 unchanged",
+      "pass": true
     },
     {
-      "check": "R2-5 independently recomputed verdicts and flags",
-      "pass": true,
-      "detail": null
+      "name": "R2-5 independently recomputed16/34 with18remaining",
+      "pass": true
     },
     {
-      "check": "Numeric 3/5 separate and absent from article numerator",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "r2_4 status totals recomputed",
+      "name": "r2_4 all status counts independently recomputed",
       "pass": true,
       "detail": {
         "OK": 21,
@@ -85,287 +172,149 @@
       }
     },
     {
-      "check": "r2_5 status totals recomputed",
+      "name": "r2_5 all status counts independently recomputed",
       "pass": true,
       "detail": {
-        "PASS": 13,
-        "NOT_RUN": 16,
+        "PASS": 16,
+        "NOT_RUN": 13,
         "FAIL": 4,
         "PARTIAL": 1
       }
     },
     {
-      "check": "Ten complete original HTML field passes refer to actual successful collection/repeat/reopen",
+      "name": "Every current/historical evidence reference exists with matching LF hash and ID selector",
+      "pass": true,
+      "detail": {
+        "occurrences": 192,
+        "uniquePaths": 66,
+        "errors": []
+      }
+    },
+    {
+      "name": "Exactly3 DNS and3 complete once-only safe responses",
+      "pass": true
+    },
+    {
+      "name": "No redirects/retries/details/paid/LLM/settings changes",
+      "pass": true
+    },
+    {
+      "name": "Original XML inventory missing before authorized acquisition",
+      "pass": true
+    },
+    {
+      "name": "Original capture and replay raw exit codes0",
+      "pass": true
+    },
+    {
+      "name": "Original executed replay code archived exactly",
+      "pass": true
+    },
+    {
+      "name": "MY-C01 source exact catalogue URL, wire size/hash and private raw",
+      "pass": true
+    },
+    {
+      "name": "MY-C01 actual records, zero-new zero-revised repeat, unchanged versions",
+      "pass": true
+    },
+    {
+      "name": "MY-C01 readonly query_only all-field reopen without byte delta",
+      "pass": true
+    },
+    {
+      "name": "MY-C01 full literals/times audited without inventing zone",
+      "pass": true
+    },
+    {
+      "name": "MY-C01 no actual offline egress and metadata-only config",
+      "pass": true
+    },
+    {
+      "name": "MY-C01 source config remains unconfigured production off",
+      "pass": true
+    },
+    {
+      "name": "MY-T01 source exact catalogue URL, wire size/hash and private raw",
+      "pass": true
+    },
+    {
+      "name": "MY-T01 actual records, zero-new zero-revised repeat, unchanged versions",
+      "pass": true
+    },
+    {
+      "name": "MY-T01 readonly query_only all-field reopen without byte delta",
+      "pass": true
+    },
+    {
+      "name": "MY-T01 full literals/times audited without inventing zone",
+      "pass": true
+    },
+    {
+      "name": "MY-T01 no actual offline egress and metadata-only config",
+      "pass": true
+    },
+    {
+      "name": "MY-T01 source config remains unconfigured production off",
+      "pass": true
+    },
+    {
+      "name": "PH-M01 source exact catalogue URL, wire size/hash and private raw",
+      "pass": true
+    },
+    {
+      "name": "PH-M01 actual records, zero-new zero-revised repeat, unchanged versions",
+      "pass": true
+    },
+    {
+      "name": "PH-M01 readonly query_only all-field reopen without byte delta",
+      "pass": true
+    },
+    {
+      "name": "PH-M01 full literals/times audited without inventing zone",
+      "pass": true
+    },
+    {
+      "name": "PH-M01 no actual offline egress and metadata-only config",
+      "pass": true
+    },
+    {
+      "name": "PH-M01 source config remains unconfigured production off",
+      "pass": true
+    },
+    {
+      "name": "26 total real records, no overall R2/24h PASS",
+      "pass": true
+    },
+    {
+      "name": "Completed recommendation removed from future authorization queue",
+      "pass": true
+    },
+    {
+      "name": "All affected Markdown local links resolve",
       "pass": true,
       "detail": []
     },
     {
-      "check": "Three older original field replays have stored source results and raw exit0",
-      "pass": true,
-      "detail": null
+      "name": "Readable current report contains exactly41 source rows",
+      "pass": true
     },
     {
-      "check": "NMC failed source results preserved with actual time and successful assertion harness",
-      "pass": true,
-      "detail": null
+      "name": "Status and handoff share current coverage and pending limits",
+      "pass": true
     },
     {
-      "check": "Document/enactment days not relabelled publication instants",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Four exact catalogue URLs captured once after fresh public DNS",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Tracked changes confined to approved docs and rule correction",
-      "pass": true,
-      "detail": [
-        "docs/architecture.md",
-        "docs/evidence/r2-current-source-matrix-2026-10-14/archive-hashes.json",
-        "docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt",
-        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
-        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
-        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
-        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
-        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
-        "docs/evidence/r2-current-source-matrix-2026-10-14/validate-matrix.py.txt",
-        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
-        "docs/handoffs/r2-next-execution-2026-10-15.md",
-        "docs/status.md"
-      ]
-    },
-    {
-      "check": "Production Intel job and HTML candidates remain unchanged",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Eleven disabled page candidates / two enabled active-seed declarations distinguished",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Four latest system DNS records and exactly one index request per source",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Fresh public addresses match current matrix attempts",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Westports latest saved date enforces STALE without changing field denominator",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "P2 repair leaves all four accepted real title URL date records unchanged",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Redirect relative body literals are not promoted to saved Location or absolute host",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Carrier batch exactly two once-only system DNS and no HTTP",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Carrier exact catalogue URLs hosts actual addresses preserved",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Historical carrier DNS-only records remain no-response no-parser",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Carrier actual launch and code binding corrected without hiding original label",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Read-only Clash exact host absence and21 generated entries",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Carrier two entries only and coverage unchanged",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Original capture stdout stderr byte hashes retained",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "User-applied23 exact entries preserve old21 with no agent config writes",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Reapplied batch two actual once-only DNS and exact transport attempts",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "No redirect retry details production paid or LLM in current batch",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Reapplied manifest launch command bind exact existing code and head",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Maersk generic failure no invented response or underlying diagnosis",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "ONE actual308 relative header12bytes retained without follow or field promotion",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Historical public attempts preserve actual source results without claiming original list parse",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Only two source entries changed in reapplied round, numerators preserved",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Reapplied original stdout stderr byte digests retained",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Historical ONE target resolves actual saved308 and current approved catalog names that same target",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "ONE target exactly one new public DNS and one pinned transport, Maersk zero",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "ONE target200 byte encoding content type and absence of further Location recorded",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Capture and replay bind distinct accurate execution code states",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Full original HTML10 records collector repeat and read-only reopen passed",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "ONE identity and independent complete raw source fields do not invent aliases or timezone",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Historical ONE offline mapping and then-unapplied proposal retained; current declaration remains disabled metadata-only",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Initial lastSeenAt-only harness failure preserved separately from passing final proof",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Synthetic error cause recording and redaction proof makes no Maersk diagnosis or requests",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Exact clean code gate frozen real install and all nine commands raw exit0",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Gate reported test counts match actual original stdout summaries",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Clean gate exact original UTF8 stdout stderr hashes retained",
+      "name": "Evidence contains no full rawXML/DB/secret payloads",
       "pass": true,
       "detail": []
     },
     {
-      "check": "Only ONE source qualification changes to21/39 and13/34 with other40 untouched",
-      "pass": true,
-      "detail": null
+      "name": "Private raw and isolated DB paths ignored",
+      "pass": true
     },
     {
-      "check": "Approved one-row same-product catalog URL applied with original308 preserved",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Catalog web_list page shape explicitly maps to inert-HTML json_list without active-source expansion",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Declared ONE config preserves all previously verified mapping except display name",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Declared candidate replays all10 previous original metadata without new network",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Exact adopted candidate code gate and local replay share clean approved SHA",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Adoption original gate log hashes and245/1230+3 reported counts match",
-      "pass": true,
-      "detail": []
-    },
-    {
-      "check": "ONE adoption changes only its config/catalog state, leaves all coverage and40others unchanged",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Next recommendations are at most3 already-measured RSS gaps, no probes or repeated failed search",
-      "pass": true,
-      "detail": null
-    },
-    {
-      "check": "Changed Markdown local links exist",
-      "pass": true,
-      "detail": []
-    },
-    {
-      "check": "Readable report retains one row for every ID",
-      "pass": true,
-      "detail": null
+      "name": "Exact original log hashes preserved through Git text conversion",
+      "pass": true
     }
   ],
   "errors": [],

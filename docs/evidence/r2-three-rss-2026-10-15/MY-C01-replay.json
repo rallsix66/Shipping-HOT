@@ -1,0 +1,54 @@
+{
+  "id": "MY-C01",
+  "status": "PASS",
+  "url": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
+  "rawBytes": 7619,
+  "wireSha256": "a53ae6ded69ef3a0a64bd64c8824d69392592e00a6f87a97425ea82636c4858f",
+  "actualSystemDnsCalls": 0,
+  "actualSourceHttpRequests": 0,
+  "first": {
+    "status": "ok_items",
+    "runId": "1d463156-e28a-4056-b991-4337ffe31b7b",
+    "itemsSeen": 10,
+    "itemsNew": 10,
+    "itemsRevised": 0
+  },
+  "repeat": {
+    "status": "ok_items",
+    "runId": "0fcb5a93-d284-4bce-9500-5890a4de40e3",
+    "itemsSeen": 10,
+    "itemsNew": 0,
+    "itemsRevised": 0
+  },
+  "reopen": {
+    "queryOnly": true,
+    "readonlyConnection": true,
+    "rows": 10,
+    "versions": 10,
+    "mismatches": 0,
+    "fullTitleUrlDateEvidenceCompared": true,
+    "allItemVersionBlockFieldsEqualAfterReopen": true,
+    "metadataOnlyTitleBlocks": 10,
+    "dateEvidenceColumn": "null_existing_RSS_contract; exact literal/timezone preserved in private XML and bounded evidence, not a new migration",
+    "databaseBytesUnchanged": true
+  },
+  "realRecords": 10,
+  "rawDateRole": "RSS item pubDate",
+  "precision": "second",
+  "sourceTimezoneLiterals": [
+    "+0800"
+  ],
+  "utcOffsets": [
+    "+08:00"
+  ],
+  "unknownTimezoneRecords": 0,
+  "sourceUpdatedField": "absent; existing sourceUpdatedAt falls back to pubDate",
+  "injectedLookupCalls": 2,
+  "injectedTransportCalls": 2,
+  "tcpConnectionAttempts": 0,
+  "globalFetchCalls": 0,
+  "providerUsageRowsUnchanged": true,
+  "rawRedistributed": false,
+  "productionConfigChanged": false,
+  "repeatLastSeenAdvancedOnly": true
+}
