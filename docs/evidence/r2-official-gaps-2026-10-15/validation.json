@@ -1,0 +1,92 @@
+{
+  "type": "bounded_official_gap_dns_block_evidence_validation",
+  "at": "2026-10-15T05:25:29.366Z",
+  "executionHead": "cfce1b3f0a1cccf8cc61527f5aebea879a8a1aec",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "sourceGetAttempts": 0,
+  "systemDnsCalls": 4,
+  "productGate": "NOT_RUN_no_product_change",
+  "checks": [
+    {
+      "name": "Exact branch/execution/product binding",
+      "pass": true
+    },
+    {
+      "name": "No product/schema/dependency/production/workflow change",
+      "pass": true
+    },
+    {
+      "name": "Catalogue unchanged",
+      "pass": true
+    },
+    {
+      "name": "Only four authorized fixed targets, each exact URL and one DNS call",
+      "pass": true
+    },
+    {
+      "name": "All results blocked before HTTP, no response/status/body hash invented",
+      "pass": true
+    },
+    {
+      "name": "DNS4 GET0 and seven-request cap; empty request ledger",
+      "pass": true
+    },
+    {
+      "name": "Conditional dependencies not observed, no URLs guessed or old TC selected",
+      "pass": true
+    },
+    {
+      "name": "No retry/redirect/PDF/port JSON/credentials/network/production change",
+      "pass": true
+    },
+    {
+      "name": "Existing secure fetch boundary, pinned DNS and normal TLS transport reused",
+      "pass": true
+    },
+    {
+      "name": "Private raw destination ignored and empty; no new DB",
+      "pass": true
+    },
+    {
+      "name": "All 41 original source entries unchanged except four appended diagnostic fields",
+      "pass": true
+    },
+    {
+      "name": "Historical captures and qualification values unchanged for all sources",
+      "pass": true
+    },
+    {
+      "name": "Coverage, denominators, thresholds and default rules unchanged",
+      "pass": true
+    },
+    {
+      "name": "Capture harness raw exit0 only; exact output byte hashes preserved",
+      "pass": true
+    },
+    {
+      "name": "All current matrix evidence references and LF hashes resolve",
+      "pass": true,
+      "detail": {
+        "occurrences": 242,
+        "uniquePaths": 89,
+        "badRefs": []
+      }
+    },
+    {
+      "name": "Affected local Markdown links resolve",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Current status/handoff correctly report attempts without upgrading counts",
+      "pass": true
+    },
+    {
+      "name": "Bounded new evidence secret-pattern scan has no credential values",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "errors": [],
+  "rawExit": 0
+}

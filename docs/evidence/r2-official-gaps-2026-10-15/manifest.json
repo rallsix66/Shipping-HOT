@@ -1,0 +1,40 @@
+{
+  "executionHead": "cfce1b3f0a1cccf8cc61527f5aebea879a8a1aec",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "authorizedAt": "2026-10-15 delegated instruction after accepted NMC closeout",
+  "fixed": [
+    {
+      "id": "PH-W01",
+      "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin"
+    },
+    {
+      "id": "PH-W02",
+      "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory"
+    },
+    {
+      "id": "ID-W02-root",
+      "url": "https://maritim.bmkg.go.id/marine2026-data/"
+    },
+    {
+      "id": "XX-W02-targetTc",
+      "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json"
+    }
+  ],
+  "maximumGetAttempts": 7,
+  "conditional": "one same-host apidoc explicitly linked by BMKG root; one actual targetTc object forecast+specifications pair; no guessed IDs/URLs",
+  "sourceRequestsOnly": true,
+  "sourcePolicy": {
+    "fetchAllowed": true,
+    "persistence": "disallowed",
+    "rawLocalOnly": true,
+    "remote": "minimal derived metadata and hashes",
+    "cookiesOrKeysRecorded": false
+  },
+  "maxBytes": 1048576,
+  "perTargetTimeoutMs": 10000,
+  "retries": 0,
+  "redirectsFollowed": 0,
+  "pdfDownloads": 0,
+  "portJsonRequests": 0,
+  "providerOrProductionChanged": false
+}

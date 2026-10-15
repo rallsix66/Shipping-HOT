@@ -1,124 +1,75 @@
 {
-  "type": "nmc_two_catalogue_historical_acceptance_and_reference_closeout_validation",
-  "at": "2026-10-15T05:15:14.080Z",
-  "executionHead": "f58e01e7360f17ab55706e36ce09851e265ddedb",
+  "type": "bounded_official_gap_dns_block_evidence_validation",
+  "at": "2026-10-15T05:25:29.366Z",
+  "executionHead": "cfce1b3f0a1cccf8cc61527f5aebea879a8a1aec",
   "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "sourceRequests": 0,
-  "systemDns": 0,
+  "sourceGetAttempts": 0,
+  "systemDnsCalls": 4,
   "productGate": "NOT_RUN_no_product_change",
   "checks": [
     {
-      "name": "Exact branch and execution/product binding",
+      "name": "Exact branch/execution/product binding",
       "pass": true
     },
     {
-      "name": "No product, schema, dependency, production or workflow changes",
+      "name": "No product/schema/dependency/production/workflow change",
       "pass": true
     },
     {
-      "name": "Catalogue unchanged and current hash correct",
+      "name": "Catalogue unchanged",
       "pass": true
     },
     {
-      "name": "Only two NMC entries changed; other 39 identical",
-      "pass": true,
-      "detail": [
-        "CN-W01",
-        "CN-W02"
-      ]
-    },
-    {
-      "name": "41 retained, approved denominators and thresholds unchanged",
+      "name": "Only four authorized fixed targets, each exact URL and one DNS call",
       "pass": true
     },
     {
-      "name": "r2_4 independently recomputed counts, ids, ratio and statuses",
-      "pass": true,
-      "detail": {
-        "OK": 24,
-        "PARTIAL": 8,
-        "NOT_RUN": 5,
-        "STALE": 1,
-        "BLOCKED": 1
-      }
-    },
-    {
-      "name": "r2_5 independently recomputed counts, ids, ratio and statuses",
-      "pass": true,
-      "detail": {
-        "PASS": 21,
-        "NOT_RUN": 10,
-        "PARTIAL": 1,
-        "FAIL": 2
-      }
-    },
-    {
-      "name": "Numeric 3/5 and 24h unchanged; whole R2 remains incomplete",
+      "name": "All results blocked before HTTP, no response/status/body hash invented",
       "pass": true
     },
     {
-      "name": "Two historical qualifications only; prior negative state preserved",
+      "name": "DNS4 GET0 and seven-request cap; empty request ledger",
       "pass": true
     },
     {
-      "name": "Six existing products map to two exact catalogue products and four companions",
+      "name": "Conditional dependencies not observed, no URLs guessed or old TC selected",
       "pass": true
     },
     {
-      "name": "Original sample six 200/six persisted; timestamp and raw archive hashes resolve",
+      "name": "No retry/redirect/PDF/port JSON/credentials/network/production change",
       "pass": true
     },
     {
-      "name": "No upstream/DNS/TCP/fetch in necessary mapping, no tests rerun",
+      "name": "Existing secure fetch boundary, pinned DNS and normal TLS transport reused",
       "pass": true
     },
     {
-      "name": "Mapping exact original stdout hash",
+      "name": "Private raw destination ignored and empty; no new DB",
       "pass": true
     },
     {
-      "name": "Mapping exact original stderr hash",
+      "name": "All 41 original source entries unchanged except four appended diagnostic fields",
       "pass": true
     },
     {
-      "name": "Existing 16 dedicated NMC tests reused from prior 101 run, raw result unchanged",
+      "name": "Historical captures and qualification values unchanged for all sources",
       "pass": true
     },
     {
-      "name": "Original offline generic negative untouched, injected 200 and forced selectors explicit",
+      "name": "Coverage, denominators, thresholds and default rules unchanged",
       "pass": true
     },
     {
-      "name": "Six accepted references only, no rerun or new source qualification",
+      "name": "Capture harness raw exit0 only; exact output byte hashes preserved",
       "pass": true
     },
     {
-      "name": "NCHMF partial failure and VNSGN origin missingness retained",
-      "pass": true
-    },
-    {
-      "name": "PAGASA official scoped empty vs active gap; ID-W02 no auth/KODE unknown; JMA specifications already in scope",
-      "pass": true
-    },
-    {
-      "name": "All current evidence references and LF hashes resolve",
+      "name": "All current matrix evidence references and LF hashes resolve",
       "pass": true,
       "detail": {
-        "occurrences": 287,
-        "uniquePaths": 93,
+        "occurrences": 242,
+        "uniquePaths": 89,
         "badRefs": []
-      }
-    },
-    {
-      "name": "Superseded interpretation texts preserved against exact prior SHA",
-      "pass": true
-    },
-    {
-      "name": "Prior historical archive still verifies at pinned SHA, rather than claiming current hashes",
-      "pass": true,
-      "detail": {
-        "historicalFiles": 27,
-        "badHistorical": []
       }
     },
     {
@@ -127,12 +78,13 @@
       "detail": []
     },
     {
-      "name": "Frontier exactly represents 15 non-OK sources; NMC/MY removed",
+      "name": "Current status/handoff correctly report attempts without upgrading counts",
       "pass": true
     },
     {
-      "name": "Current status and handoff counts 24/39 and 21/34",
-      "pass": true
+      "name": "Bounded new evidence secret-pattern scan has no credential values",
+      "pass": true,
+      "detail": []
     }
   ],
   "errors": [],

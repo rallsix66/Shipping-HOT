@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T05:10:42.464Z",
+  "generatedAt": "2026-10-15T05:23:22.215Z",
   "reviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "evidenceHead": "f58e01e7360f17ab55706e36ce09851e265ddedb",
+  "evidenceHead": "cfce1b3f0a1cccf8cc61527f5aebea879a8a1aec",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -3156,7 +3156,28 @@
       "gaps": [
         "目录是根路径+参数化文档，缺批准具体港口URL及映射；不是文章feed"
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "lastSafeFetchAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-official-gaps-2026-10-15/ID-W02-root-capture.json",
+          "sha256": "10d49a6a1fbdd7bf69e6e3fb5ff1b60dc27ed126c72c101c780510eb791627c0",
+          "hashBasis": "committed_text_LF"
+        },
+        "dnsEvidence": {
+          "path": "docs/evidence/r2-official-gaps-2026-10-15/dns-ledger.json",
+          "sha256": "f2c7ff89e921d8e67b5a2cb5bdeb63cddab340f6c5b2cc41c2d5c42595b37d6c",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://maritim.bmkg.go.id/marine2026-data/",
+        "startedAt": "2026-10-15T05:21:25.073Z",
+        "finishedAt": "2026-10-15T05:21:25.074Z",
+        "systemDnsCalls": 1,
+        "sourceGetAttempts": 0,
+        "httpStatus": null,
+        "result": "BLOCKED_BEFORE_HTTP",
+        "code": "blocked_address",
+        "doesNotReplaceHistoricalCaptureOrQualification": true
+      }
     },
     {
       "id": "ID-T01",
@@ -3577,7 +3598,28 @@
       "gaps": [
         "空壳/iframe与正样本缺口；不称标题时间通过"
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "lastSafeFetchAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-official-gaps-2026-10-15/PH-W01-capture.json",
+          "sha256": "751942793b372807478195102bd49eeb4a03a8057d45b3679b75c176fbe499fb",
+          "hashBasis": "committed_text_LF"
+        },
+        "dnsEvidence": {
+          "path": "docs/evidence/r2-official-gaps-2026-10-15/dns-ledger.json",
+          "sha256": "f2c7ff89e921d8e67b5a2cb5bdeb63cddab340f6c5b2cc41c2d5c42595b37d6c",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+        "startedAt": "2026-10-15T05:21:25.064Z",
+        "finishedAt": "2026-10-15T05:21:25.070Z",
+        "systemDnsCalls": 1,
+        "sourceGetAttempts": 0,
+        "httpStatus": null,
+        "result": "BLOCKED_BEFORE_HTTP",
+        "code": "blocked_address",
+        "doesNotReplaceHistoricalCaptureOrQualification": true
+      }
     },
     {
       "id": "PH-W02",
@@ -3656,7 +3698,28 @@
       "gaps": [
         "正样本/selector/时间规则缺失"
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "lastSafeFetchAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-official-gaps-2026-10-15/PH-W02-capture.json",
+          "sha256": "8155b2e824e2f1b08f1c9b649a82ff74d1dc8c75f2cca67cfc74b3a99846adbe",
+          "hashBasis": "committed_text_LF"
+        },
+        "dnsEvidence": {
+          "path": "docs/evidence/r2-official-gaps-2026-10-15/dns-ledger.json",
+          "sha256": "f2c7ff89e921d8e67b5a2cb5bdeb63cddab340f6c5b2cc41c2d5c42595b37d6c",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+        "startedAt": "2026-10-15T05:21:25.071Z",
+        "finishedAt": "2026-10-15T05:21:25.072Z",
+        "systemDnsCalls": 1,
+        "sourceGetAttempts": 0,
+        "httpStatus": null,
+        "result": "BLOCKED_BEFORE_HTTP",
+        "code": "blocked_address",
+        "doesNotReplaceHistoricalCaptureOrQualification": true
+      }
     },
     {
       "id": "PH-C01",
@@ -4142,7 +4205,28 @@
       "gaps": [
         "Resolve catalogue forecast/specifications product scope and retain field evidence; do not manufacture concrete unobserved URL or count forecast-only as full row."
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "lastSafeFetchAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-official-gaps-2026-10-15/XX-W02-targetTc-capture.json",
+          "sha256": "d54343bcda531e910dcb4860c70fbd5642c6ea6e39c870d174dc1fb77f48bcc8",
+          "hashBasis": "committed_text_LF"
+        },
+        "dnsEvidence": {
+          "path": "docs/evidence/r2-official-gaps-2026-10-15/dns-ledger.json",
+          "sha256": "f2c7ff89e921d8e67b5a2cb5bdeb63cddab340f6c5b2cc41c2d5c42595b37d6c",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+        "startedAt": "2026-10-15T05:21:25.074Z",
+        "finishedAt": "2026-10-15T05:21:25.075Z",
+        "systemDnsCalls": 1,
+        "sourceGetAttempts": 0,
+        "httpStatus": null,
+        "result": "BLOCKED_BEFORE_HTTP",
+        "code": "blocked_address",
+        "doesNotReplaceHistoricalCaptureOrQualification": true
+      }
     },
     {
       "id": "XX-K01",
@@ -5691,5 +5775,26 @@
       "CN-W02"
     ],
     "existingTestsReusedWithoutRerun": true
+  },
+  "lastOfficialGapProbe": {
+    "report": {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/report.md",
+      "sha256": "eb5fa0808b7e4215400331ae518353409db0d58e38fa5df80974eab9398e7763",
+      "hashBasis": "committed_text_LF"
+    },
+    "summary": {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/capture-summary.json",
+      "sha256": "9564299b7b0c48431c004dfef951e0a319afce5e3f723d19d0610375ee4cf90d",
+      "hashBasis": "committed_text_LF"
+    },
+    "sourceGetAttempts": 0,
+    "systemDnsCalls": 4,
+    "completeResponses": 0,
+    "qualificationsChanged": false,
+    "conditionalRequestsNotRun": [
+      "ID-W02 apidoc: no observed root link",
+      "XX-W02 forecast/specifications: targetTc unavailable, no object selected"
+    ],
+    "reviewedNmcEvidenceHead": "cfce1b3f0a1cccf8cc61527f5aebea879a8a1aec"
   }
 }

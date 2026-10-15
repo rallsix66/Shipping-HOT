@@ -1,0 +1,14 @@
+{
+  "command": "pnpm exec vitest run -c .tmp/r2-official-gaps-capture-20261015.config.ts",
+  "phase": "initial",
+  "startedAt": "2026-10-15T05:21:23.731Z",
+  "finishedAt": "2026-10-15T05:21:25.114Z",
+  "executionHead": "cfce1b3f0a1cccf8cc61527f5aebea879a8a1aec",
+  "rawExit": 0,
+  "signal": null,
+  "error": null,
+  "stdoutExactUtf8": "\n RUN  v4.0.18 D:/try one/Shipping HOT\n\n ✓ .tmp/r2-official-gaps-capture-20261015.test.ts (1 test) 50ms\n\n Test Files  1 passed (1)\n      Tests  1 passed (1)\n   Start at  13:21:24\n   Duration  578ms (transform 174ms, setup 0ms, import 371ms, tests 50ms, environment 0ms)\n\n",
+  "stderrExactUtf8": "Duplicated imports \"string\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/calendar.ts\" is used\nDuplicated imports \"VN\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"TH\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"MY\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"PH\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"string\", the one from \"D:/try one/Shipping HOT/shared/calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"lazada\", the one from \"D:/try one/Shipping HOT/shared/policy.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/promo-calendar.ts\" is used\nDuplicated imports \"tiktok_shop\", the one from \"D:/try one/Shipping HOT/shared/policy.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/promo-calendar.ts\" is used\nDuplicated imports \"string\", the one from \"D:/try one/Shipping HOT/shared/policy.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/promo-calendar.ts\" is used\n",
+  "stdoutOriginalByteSha256": "b0644d186e51bab0134c06588b1bc3ed0ff1c5e947dd5882118603196094abfb",
+  "stderrOriginalByteSha256": "2b2089ef48a0decf6778aa45b416b29808b7d9476761ca686b28c9a254486d42"
+}
