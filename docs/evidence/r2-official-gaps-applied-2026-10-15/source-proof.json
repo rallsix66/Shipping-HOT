@@ -1,0 +1,10 @@
+{
+  "executionHead": "440affa012e06b80c38d97f08b04e395b8506d0f",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "productDiff": "",
+  "catalogueDiff": "",
+  "sourceGetAttempts": 4,
+  "systemDnsCalls": 4,
+  "scope": "After-apply exact target HTTP/structure evidence and documentation only; all source qualifications unchanged",
+  "productGate": "NOT_RUN_no_product_change"
+}

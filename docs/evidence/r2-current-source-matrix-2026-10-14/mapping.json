@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T05:23:22.215Z",
+  "generatedAt": "2026-10-15T05:57:37.873Z",
   "reviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "evidenceHead": "cfce1b3f0a1cccf8cc61527f5aebea879a8a1aec",
+  "evidenceHead": "440affa012e06b80c38d97f08b04e395b8506d0f",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -3116,7 +3116,20 @@
         "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
         "hashBasis": "committed_text_LF"
       },
-      "latestActualFetch": null,
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/ID-W02-root-capture.json",
+          "sha256": "a8cf4da28b74da69cc178ea054d82002ee5ef4f147d24e0e361da5774e537a42",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://maritim.bmkg.go.id/marine2026-data/",
+        "at": "2026-10-15T05:53:37.472Z",
+        "httpStatus": 200,
+        "bytes": 577,
+        "wireSha256": "6d66fa455f6bc943ff0d6dd33de2c4928126ac72217a38d555bf9e784995ad76",
+        "scope": "actual_root_directory_response_only_not_port_numeric_product",
+        "productQualificationChanged": false
+      },
       "fieldReplayEvidence": null,
       "numericFieldValidation": {
         "status": "NOT_RUN",
@@ -3156,27 +3169,59 @@
       "gaps": [
         "目录是根路径+参数化文档，缺批准具体港口URL及映射；不是文章feed"
       ],
-      "historicalSuperseded": [],
+      "historicalSuperseded": [
+        {
+          "supersededAt": "2026-10-15T05:57:37.873Z",
+          "reason": "New separately authorized after-apply real response; prior DNS-only block and historical source capture preserved, no qualification change",
+          "previousLatestActualFetch": null,
+          "previousSafeFetchAttempt": {
+            "evidence": {
+              "path": "docs/evidence/r2-official-gaps-2026-10-15/ID-W02-root-capture.json",
+              "sha256": "10d49a6a1fbdd7bf69e6e3fb5ff1b60dc27ed126c72c101c780510eb791627c0",
+              "hashBasis": "committed_text_LF"
+            },
+            "dnsEvidence": {
+              "path": "docs/evidence/r2-official-gaps-2026-10-15/dns-ledger.json",
+              "sha256": "f2c7ff89e921d8e67b5a2cb5bdeb63cddab340f6c5b2cc41c2d5c42595b37d6c",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://maritim.bmkg.go.id/marine2026-data/",
+            "startedAt": "2026-10-15T05:21:25.073Z",
+            "finishedAt": "2026-10-15T05:21:25.074Z",
+            "systemDnsCalls": 1,
+            "sourceGetAttempts": 0,
+            "httpStatus": null,
+            "result": "BLOCKED_BEFORE_HTTP",
+            "code": "blocked_address",
+            "doesNotReplaceHistoricalCaptureOrQualification": true
+          }
+        }
+      ],
       "lastSafeFetchAttempt": {
         "evidence": {
-          "path": "docs/evidence/r2-official-gaps-2026-10-15/ID-W02-root-capture.json",
-          "sha256": "10d49a6a1fbdd7bf69e6e3fb5ff1b60dc27ed126c72c101c780510eb791627c0",
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/ID-W02-root-capture.json",
+          "sha256": "a8cf4da28b74da69cc178ea054d82002ee5ef4f147d24e0e361da5774e537a42",
           "hashBasis": "committed_text_LF"
         },
         "dnsEvidence": {
-          "path": "docs/evidence/r2-official-gaps-2026-10-15/dns-ledger.json",
-          "sha256": "f2c7ff89e921d8e67b5a2cb5bdeb63cddab340f6c5b2cc41c2d5c42595b37d6c",
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/dns-ledger.json",
+          "sha256": "22d9f6ad64b9dceb5f0b87b00abe037bec631e4feb0b6e5a34174e9c46aee2b2",
+          "hashBasis": "committed_text_LF"
+        },
+        "structure": {
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/structure-observation.json",
+          "sha256": "c15adc9c04aeba84e4320b54b0e6945ed5be0d73528baa1da8267ba2e9ecf42f",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://maritim.bmkg.go.id/marine2026-data/",
-        "startedAt": "2026-10-15T05:21:25.073Z",
-        "finishedAt": "2026-10-15T05:21:25.074Z",
+        "startedAt": "2026-10-15T05:53:36.849Z",
+        "finishedAt": "2026-10-15T05:53:37.473Z",
         "systemDnsCalls": 1,
-        "sourceGetAttempts": 0,
-        "httpStatus": null,
-        "result": "BLOCKED_BEFORE_HTTP",
-        "code": "blocked_address",
-        "doesNotReplaceHistoricalCaptureOrQualification": true
+        "sourceGetAttempts": 1,
+        "httpStatus": 200,
+        "result": "CAPTURED_ROOT_DIRECTORY_ONLY",
+        "code": null,
+        "qualificationUnchanged": true
       }
     },
     {
@@ -3543,23 +3588,17 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/pagasa-warning-2026-10-10/raw/fetch-log.txt",
-          "selector": null,
-          "sha256": "011c6a9b2185fbc4aa8368b44bab651e103d0f72c23c14f329721350c86254b9",
-          "hashBasis": "committed_text_LF"
-        },
-        "captureInventory": {
-          "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
-          "selector": {
-            "id": "PH-W01"
-          },
-          "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/PH-W01-capture.json",
+          "sha256": "29c0d4947fdbeca0869f107af98203702b43e4918b42a3ed626e98cbf0010480",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
-        "at": "2026-10-10T11:03:48Z",
-        "httpStatus": 200,
-        "scope": "page_shell/iframe; no qualified active positive warning item"
+        "at": "2026-10-15T05:53:36.714Z",
+        "httpStatus": 403,
+        "bytes": 118,
+        "wireSha256": "58bf2215b395dcac74c009aa98701854e43cbe54a1cd3a95fee6a647ca9910d4",
+        "scope": "exact_catalogue_entry_HTTP403_not_weather_empty_or_active_positive",
+        "productQualificationChanged": false
       },
       "fieldReplayEvidence": null,
       "numericFieldValidation": null,
@@ -3598,27 +3637,78 @@
       "gaps": [
         "空壳/iframe与正样本缺口；不称标题时间通过"
       ],
-      "historicalSuperseded": [],
+      "historicalSuperseded": [
+        {
+          "supersededAt": "2026-10-15T05:57:37.872Z",
+          "reason": "New separately authorized after-apply real response; prior DNS-only block and historical source capture preserved, no qualification change",
+          "previousLatestActualFetch": {
+            "evidence": {
+              "path": "docs/evidence/pagasa-warning-2026-10-10/raw/fetch-log.txt",
+              "selector": null,
+              "sha256": "011c6a9b2185fbc4aa8368b44bab651e103d0f72c23c14f329721350c86254b9",
+              "hashBasis": "committed_text_LF"
+            },
+            "captureInventory": {
+              "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+              "selector": {
+                "id": "PH-W01"
+              },
+              "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+            "at": "2026-10-10T11:03:48Z",
+            "httpStatus": 200,
+            "scope": "page_shell/iframe; no qualified active positive warning item"
+          },
+          "previousSafeFetchAttempt": {
+            "evidence": {
+              "path": "docs/evidence/r2-official-gaps-2026-10-15/PH-W01-capture.json",
+              "sha256": "751942793b372807478195102bd49eeb4a03a8057d45b3679b75c176fbe499fb",
+              "hashBasis": "committed_text_LF"
+            },
+            "dnsEvidence": {
+              "path": "docs/evidence/r2-official-gaps-2026-10-15/dns-ledger.json",
+              "sha256": "f2c7ff89e921d8e67b5a2cb5bdeb63cddab340f6c5b2cc41c2d5c42595b37d6c",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+            "startedAt": "2026-10-15T05:21:25.064Z",
+            "finishedAt": "2026-10-15T05:21:25.070Z",
+            "systemDnsCalls": 1,
+            "sourceGetAttempts": 0,
+            "httpStatus": null,
+            "result": "BLOCKED_BEFORE_HTTP",
+            "code": "blocked_address",
+            "doesNotReplaceHistoricalCaptureOrQualification": true
+          }
+        }
+      ],
       "lastSafeFetchAttempt": {
         "evidence": {
-          "path": "docs/evidence/r2-official-gaps-2026-10-15/PH-W01-capture.json",
-          "sha256": "751942793b372807478195102bd49eeb4a03a8057d45b3679b75c176fbe499fb",
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/PH-W01-capture.json",
+          "sha256": "29c0d4947fdbeca0869f107af98203702b43e4918b42a3ed626e98cbf0010480",
           "hashBasis": "committed_text_LF"
         },
         "dnsEvidence": {
-          "path": "docs/evidence/r2-official-gaps-2026-10-15/dns-ledger.json",
-          "sha256": "f2c7ff89e921d8e67b5a2cb5bdeb63cddab340f6c5b2cc41c2d5c42595b37d6c",
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/dns-ledger.json",
+          "sha256": "22d9f6ad64b9dceb5f0b87b00abe037bec631e4feb0b6e5a34174e9c46aee2b2",
+          "hashBasis": "committed_text_LF"
+        },
+        "structure": {
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/structure-observation.json",
+          "sha256": "c15adc9c04aeba84e4320b54b0e6945ed5be0d73528baa1da8267ba2e9ecf42f",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
-        "startedAt": "2026-10-15T05:21:25.064Z",
-        "finishedAt": "2026-10-15T05:21:25.070Z",
+        "startedAt": "2026-10-15T05:53:36.025Z",
+        "finishedAt": "2026-10-15T05:53:36.714Z",
         "systemDnsCalls": 1,
-        "sourceGetAttempts": 0,
-        "httpStatus": null,
-        "result": "BLOCKED_BEFORE_HTTP",
-        "code": "blocked_address",
-        "doesNotReplaceHistoricalCaptureOrQualification": true
+        "sourceGetAttempts": 1,
+        "httpStatus": 403,
+        "result": "HTTP_ERROR",
+        "code": "http_error",
+        "qualificationUnchanged": true
       }
     },
     {
@@ -3643,23 +3733,17 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/pagasa-warning-2026-10-10/raw/fetch-log.txt",
-          "selector": null,
-          "sha256": "011c6a9b2185fbc4aa8368b44bab651e103d0f72c23c14f329721350c86254b9",
-          "hashBasis": "committed_text_LF"
-        },
-        "captureInventory": {
-          "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
-          "selector": {
-            "id": "PH-W02"
-          },
-          "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/PH-W02-capture.json",
+          "sha256": "0cfd7c2d6e3010ddcf4eb25b1f7b800f189e7ea555e645e8cfe1500599cacfc6",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
-        "at": "2026-10-10T11:03:49.920Z",
-        "httpStatus": 200,
-        "scope": "page_shell/iframe; no qualified active positive warning item"
+        "at": "2026-10-15T05:53:36.848Z",
+        "httpStatus": 403,
+        "bytes": 118,
+        "wireSha256": "58bf2215b395dcac74c009aa98701854e43cbe54a1cd3a95fee6a647ca9910d4",
+        "scope": "exact_catalogue_entry_HTTP403_not_weather_empty_or_active_positive",
+        "productQualificationChanged": false
       },
       "fieldReplayEvidence": null,
       "numericFieldValidation": null,
@@ -3698,27 +3782,78 @@
       "gaps": [
         "正样本/selector/时间规则缺失"
       ],
-      "historicalSuperseded": [],
+      "historicalSuperseded": [
+        {
+          "supersededAt": "2026-10-15T05:57:37.873Z",
+          "reason": "New separately authorized after-apply real response; prior DNS-only block and historical source capture preserved, no qualification change",
+          "previousLatestActualFetch": {
+            "evidence": {
+              "path": "docs/evidence/pagasa-warning-2026-10-10/raw/fetch-log.txt",
+              "selector": null,
+              "sha256": "011c6a9b2185fbc4aa8368b44bab651e103d0f72c23c14f329721350c86254b9",
+              "hashBasis": "committed_text_LF"
+            },
+            "captureInventory": {
+              "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+              "selector": {
+                "id": "PH-W02"
+              },
+              "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+            "at": "2026-10-10T11:03:49.920Z",
+            "httpStatus": 200,
+            "scope": "page_shell/iframe; no qualified active positive warning item"
+          },
+          "previousSafeFetchAttempt": {
+            "evidence": {
+              "path": "docs/evidence/r2-official-gaps-2026-10-15/PH-W02-capture.json",
+              "sha256": "8155b2e824e2f1b08f1c9b649a82ff74d1dc8c75f2cca67cfc74b3a99846adbe",
+              "hashBasis": "committed_text_LF"
+            },
+            "dnsEvidence": {
+              "path": "docs/evidence/r2-official-gaps-2026-10-15/dns-ledger.json",
+              "sha256": "f2c7ff89e921d8e67b5a2cb5bdeb63cddab340f6c5b2cc41c2d5c42595b37d6c",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+            "startedAt": "2026-10-15T05:21:25.071Z",
+            "finishedAt": "2026-10-15T05:21:25.072Z",
+            "systemDnsCalls": 1,
+            "sourceGetAttempts": 0,
+            "httpStatus": null,
+            "result": "BLOCKED_BEFORE_HTTP",
+            "code": "blocked_address",
+            "doesNotReplaceHistoricalCaptureOrQualification": true
+          }
+        }
+      ],
       "lastSafeFetchAttempt": {
         "evidence": {
-          "path": "docs/evidence/r2-official-gaps-2026-10-15/PH-W02-capture.json",
-          "sha256": "8155b2e824e2f1b08f1c9b649a82ff74d1dc8c75f2cca67cfc74b3a99846adbe",
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/PH-W02-capture.json",
+          "sha256": "0cfd7c2d6e3010ddcf4eb25b1f7b800f189e7ea555e645e8cfe1500599cacfc6",
           "hashBasis": "committed_text_LF"
         },
         "dnsEvidence": {
-          "path": "docs/evidence/r2-official-gaps-2026-10-15/dns-ledger.json",
-          "sha256": "f2c7ff89e921d8e67b5a2cb5bdeb63cddab340f6c5b2cc41c2d5c42595b37d6c",
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/dns-ledger.json",
+          "sha256": "22d9f6ad64b9dceb5f0b87b00abe037bec631e4feb0b6e5a34174e9c46aee2b2",
+          "hashBasis": "committed_text_LF"
+        },
+        "structure": {
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/structure-observation.json",
+          "sha256": "c15adc9c04aeba84e4320b54b0e6945ed5be0d73528baa1da8267ba2e9ecf42f",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
-        "startedAt": "2026-10-15T05:21:25.071Z",
-        "finishedAt": "2026-10-15T05:21:25.072Z",
+        "startedAt": "2026-10-15T05:53:36.715Z",
+        "finishedAt": "2026-10-15T05:53:36.848Z",
         "systemDnsCalls": 1,
-        "sourceGetAttempts": 0,
-        "httpStatus": null,
-        "result": "BLOCKED_BEFORE_HTTP",
-        "code": "blocked_address",
-        "doesNotReplaceHistoricalCaptureOrQualification": true
+        "sourceGetAttempts": 1,
+        "httpStatus": 403,
+        "result": "HTTP_ERROR",
+        "code": "http_error",
+        "qualificationUnchanged": true
       }
     },
     {
@@ -4141,23 +4276,17 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
-          "selector": null,
-          "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/XX-W02-targetTc-capture.json",
+          "sha256": "8e791a21bead8c6f565faf4847351e6333934677e88e518d0eb5d8da4bc36100",
           "hashBasis": "committed_text_LF"
         },
-        "atWindow": [
-          "2026-10-10T03:58:39.141Z",
-          "2026-10-10T03:58:44.112Z"
-        ],
-        "url": null,
-        "httpStatus": 200,
-        "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
-        "wireSha256": null,
-        "expectedForecastProductsInferredFromStoredIds": [
-          "https://www.jma.go.jp/bosai/typhoon/data/TC2635/forecast.json",
-          "https://www.jma.go.jp/bosai/typhoon/data/TC2634/forecast.json"
-        ]
+        "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+        "at": "2026-10-15T05:53:37.778Z",
+        "httpStatus": 404,
+        "bytes": 2203,
+        "wireSha256": "959efccbba82d9eca9d398d32811d456f51929aff12dfba2ccaf60a0b1b35b58",
+        "scope": "auxiliary_targetTc_list_HTTP404_not_forecast_or_specifications",
+        "productQualificationChanged": false
       },
       "fieldReplayEvidence": null,
       "numericFieldValidation": {
@@ -4205,27 +4334,78 @@
       "gaps": [
         "Resolve catalogue forecast/specifications product scope and retain field evidence; do not manufacture concrete unobserved URL or count forecast-only as full row."
       ],
-      "historicalSuperseded": [],
+      "historicalSuperseded": [
+        {
+          "supersededAt": "2026-10-15T05:57:37.873Z",
+          "reason": "New separately authorized after-apply real response; prior DNS-only block and historical source capture preserved, no qualification change",
+          "previousLatestActualFetch": {
+            "evidence": {
+              "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
+              "selector": null,
+              "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+              "hashBasis": "committed_text_LF"
+            },
+            "atWindow": [
+              "2026-10-10T03:58:39.141Z",
+              "2026-10-10T03:58:44.112Z"
+            ],
+            "url": null,
+            "httpStatus": 200,
+            "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
+            "wireSha256": null,
+            "expectedForecastProductsInferredFromStoredIds": [
+              "https://www.jma.go.jp/bosai/typhoon/data/TC2635/forecast.json",
+              "https://www.jma.go.jp/bosai/typhoon/data/TC2634/forecast.json"
+            ]
+          },
+          "previousSafeFetchAttempt": {
+            "evidence": {
+              "path": "docs/evidence/r2-official-gaps-2026-10-15/XX-W02-targetTc-capture.json",
+              "sha256": "d54343bcda531e910dcb4860c70fbd5642c6ea6e39c870d174dc1fb77f48bcc8",
+              "hashBasis": "committed_text_LF"
+            },
+            "dnsEvidence": {
+              "path": "docs/evidence/r2-official-gaps-2026-10-15/dns-ledger.json",
+              "sha256": "f2c7ff89e921d8e67b5a2cb5bdeb63cddab340f6c5b2cc41c2d5c42595b37d6c",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+            "startedAt": "2026-10-15T05:21:25.074Z",
+            "finishedAt": "2026-10-15T05:21:25.075Z",
+            "systemDnsCalls": 1,
+            "sourceGetAttempts": 0,
+            "httpStatus": null,
+            "result": "BLOCKED_BEFORE_HTTP",
+            "code": "blocked_address",
+            "doesNotReplaceHistoricalCaptureOrQualification": true
+          }
+        }
+      ],
       "lastSafeFetchAttempt": {
         "evidence": {
-          "path": "docs/evidence/r2-official-gaps-2026-10-15/XX-W02-targetTc-capture.json",
-          "sha256": "d54343bcda531e910dcb4860c70fbd5642c6ea6e39c870d174dc1fb77f48bcc8",
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/XX-W02-targetTc-capture.json",
+          "sha256": "8e791a21bead8c6f565faf4847351e6333934677e88e518d0eb5d8da4bc36100",
           "hashBasis": "committed_text_LF"
         },
         "dnsEvidence": {
-          "path": "docs/evidence/r2-official-gaps-2026-10-15/dns-ledger.json",
-          "sha256": "f2c7ff89e921d8e67b5a2cb5bdeb63cddab340f6c5b2cc41c2d5c42595b37d6c",
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/dns-ledger.json",
+          "sha256": "22d9f6ad64b9dceb5f0b87b00abe037bec631e4feb0b6e5a34174e9c46aee2b2",
+          "hashBasis": "committed_text_LF"
+        },
+        "structure": {
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/structure-observation.json",
+          "sha256": "c15adc9c04aeba84e4320b54b0e6945ed5be0d73528baa1da8267ba2e9ecf42f",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
-        "startedAt": "2026-10-15T05:21:25.074Z",
-        "finishedAt": "2026-10-15T05:21:25.075Z",
+        "startedAt": "2026-10-15T05:53:37.474Z",
+        "finishedAt": "2026-10-15T05:53:37.778Z",
         "systemDnsCalls": 1,
-        "sourceGetAttempts": 0,
-        "httpStatus": null,
-        "result": "BLOCKED_BEFORE_HTTP",
-        "code": "blocked_address",
-        "doesNotReplaceHistoricalCaptureOrQualification": true
+        "sourceGetAttempts": 1,
+        "httpStatus": 404,
+        "result": "HTTP_ERROR",
+        "code": "http_error",
+        "qualificationUnchanged": true
       }
     },
     {
@@ -5778,6 +5958,35 @@
   },
   "lastOfficialGapProbe": {
     "report": {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/report.md",
+      "sha256": "7d20cc7df1350f728c6b8fadf1a93302d37e1fee01831614dc1fdbf990b913dc",
+      "hashBasis": "committed_text_LF"
+    },
+    "summary": {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/capture-summary.json",
+      "sha256": "7e20f70a91a51c96741ba14ca4cb0f0304478381100e2bcbb7ef6f866e8d7fd9",
+      "hashBasis": "committed_text_LF"
+    },
+    "configuration": {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/clash-applied-verification.json",
+      "sha256": "71524cf19de32e7fcf4c2838e35350904bcdf4a34b873844d64c19b39bad099d",
+      "hashBasis": "committed_text_LF"
+    },
+    "sourceGetAttempts": 4,
+    "systemDnsCalls": 4,
+    "completeResponses": 4,
+    "successRootOnly": 1,
+    "httpErrors": 3,
+    "businessRecords": 0,
+    "qualificationsChanged": false,
+    "conditionalRequestsNotRun": {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/conditional-decisions.json",
+      "sha256": "71243f4a918cc487b41a329597462c85f73ec998591e72ec5d1e152997614362",
+      "hashBasis": "committed_text_LF"
+    }
+  },
+  "previousOfficialGapProbe": {
+    "report": {
       "path": "docs/evidence/r2-official-gaps-2026-10-15/report.md",
       "sha256": "eb5fa0808b7e4215400331ae518353409db0d58e38fa5df80974eab9398e7763",
       "hashBasis": "committed_text_LF"
@@ -5796,5 +6005,34 @@
       "XX-W02 forecast/specifications: targetTc unavailable, no object selected"
     ],
     "reviewedNmcEvidenceHead": "cfce1b3f0a1cccf8cc61527f5aebea879a8a1aec"
+  },
+  "lastCompletedOfficialAfterApplyProbe": {
+    "report": {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/report.md",
+      "sha256": "7d20cc7df1350f728c6b8fadf1a93302d37e1fee01831614dc1fdbf990b913dc",
+      "hashBasis": "committed_text_LF"
+    },
+    "summary": {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/capture-summary.json",
+      "sha256": "7e20f70a91a51c96741ba14ca4cb0f0304478381100e2bcbb7ef6f866e8d7fd9",
+      "hashBasis": "committed_text_LF"
+    },
+    "configuration": {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/clash-applied-verification.json",
+      "sha256": "71524cf19de32e7fcf4c2838e35350904bcdf4a34b873844d64c19b39bad099d",
+      "hashBasis": "committed_text_LF"
+    },
+    "sourceGetAttempts": 4,
+    "systemDnsCalls": 4,
+    "completeResponses": 4,
+    "successRootOnly": 1,
+    "httpErrors": 3,
+    "businessRecords": 0,
+    "qualificationsChanged": false,
+    "conditionalRequestsNotRun": {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/conditional-decisions.json",
+      "sha256": "71243f4a918cc487b41a329597462c85f73ec998591e72ec5d1e152997614362",
+      "hashBasis": "committed_text_LF"
+    }
   }
 }

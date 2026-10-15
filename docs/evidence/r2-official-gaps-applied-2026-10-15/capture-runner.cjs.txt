@@ -1,0 +1,7 @@
+const fs = require('node:fs'), cp = require('node:child_process'), crypto = require('node:crypto');
+const d = 'docs/evidence/r2-official-gaps-applied-2026-10-15', phase = process.argv[2] || 'initial'; fs.mkdirSync(d, { recursive: true });
+if (fs.existsSync(d + '/capture-command-' + phase + '.json')) throw Error('phase_command_exists_never_repeat');
+const args = ['exec', 'vitest', 'run', '-c', '.tmp/r2-official-gaps-applied-capture-20261015.config.ts'], startedAt = new Date().toISOString();
+const o = cp.spawnSync('pnpm.cmd', args, { shell: true, env: { ...process.env, SHIPPING_APPROVED_OFFICIAL_GAPS: '1', SHIPPING_OFFICIAL_PHASE: phase }, encoding: 'utf8', timeout: 70000 }), sha = s => crypto.createHash('sha256').update(Buffer.from(s || '')).digest('hex');
+fs.writeFileSync(d + '/capture-command-' + phase + '.json', JSON.stringify({ command: 'pnpm ' + args.join(' '), phase, startedAt, finishedAt: new Date().toISOString(), executionHead: '440affa012e06b80c38d97f08b04e395b8506d0f', rawExit: o.status, signal: o.signal, error: o.error ? { code: o.error.code, message: o.error.message } : null, stdoutExactUtf8: o.stdout, stderrExactUtf8: o.stderr, stdoutOriginalByteSha256: sha(o.stdout), stderrOriginalByteSha256: sha(o.stderr) }, null, 2) + '\n');
+console.log(JSON.stringify({ rawExit: o.status, summary: fs.existsSync(d + '/capture-summary.json') ? JSON.parse(fs.readFileSync(d + '/capture-summary.json', 'utf8')) : null }, null, 2)); process.exitCode = o.status ?? 1;

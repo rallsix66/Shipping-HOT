@@ -1,6 +1,8 @@
 # R2 41项来源累计证据 — 2026-10-15
 
-最新官方缺口探测：四固定入口DNS4/GET0，全部198.18保留地址安全阻断，没有当前页面或JSON响应；条件追加请求未启动。资格/计数24/39、21/34、数值3/5保持，历史成功/官方空状态不覆盖。[本批台账与精确下一步](../r2-official-gaps-2026-10-15/report.md)。
+最新用户应用后补证：扩展/生成26/原23/新3核验通过（生成整体额外字节差异unknown），DNS4公网/GET4：PAGASA403两次、BMKG根目录200、JMA列表404；没有活动/数值正样本，条件追加0，资格计数不变。[本批事实与限制](../r2-official-gaps-applied-2026-10-15/report.md)。
+
+前轮官方缺口探测（440affa保留）：四固定入口DNS4/GET0，全部198.18保留地址安全阻断，没有当前页面或JSON响应；条件追加请求未启动。资格/计数24/39、21/34、数值3/5保持，历史成功/官方空状态不覆盖。[本批台账与精确下一步](../r2-official-gaps-2026-10-15/report.md)。
 
 前轮NMC审定（cfce1b3已获限定认可）：CN-W01/CN-W02专用链历史实测OK/字段PASS，现24/39、21/34、数值3/5；10/13generic负例性质已更正，原件保留。其他39项不改、无新请求/重跑测试。[本轮报告](../r2-nmc-close-2026-10-15/report.md)。
 
@@ -57,8 +59,8 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 | ID-T01 | https://jdih.kemendag.go.id/ | 2026-10-14T09:08:45.056Z / 200 [取证](../r2-three-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-post-clash-index-replay-final-2026-10-14/summary.json) | 8条完整原页回放通过；制定日不是发布日期，标题原有省略号保留，初始失败另存。 |
 | ID-T02 | https://jdih.kemenkeu.go.id/ | 2026-10-15T01:16:15.021Z / 307 [本批](../r2-four-reapplied-2026-10-15/report.md) | PARTIAL | NOT_RUN | 精确URL307，原5字节已保存，未跟随跳转；没有列表字段回放。 |
 | PH-P01 | https://www.ppa.com.ph/content/ppa-helpdesk-advisory ，https://www.ppa.com.ph/ppa-port-news | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
-| PH-W01 | https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin | 2026-10-10T11:03:48Z / 200 [取证](../pagasa-warning-2026-10-10/raw/fetch-log.txt) | PARTIAL | NOT_RUN | 200页面外壳/iframe，无合格活动正样本；页面可读不代替预警数据。 |
-| PH-W02 | https://www.pagasa.dost.gov.ph/weather/weather-advisory | 2026-10-10T11:03:49.920Z / 200 [取证](../pagasa-warning-2026-10-10/raw/fetch-log.txt) | PARTIAL | NOT_RUN | 200页面外壳/iframe，无合格活动正样本；页面可读不代替预警数据。 |
+| PH-W01 | https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin | 2026-10-15T05:53:36.714Z / 403 [本次](../r2-official-gaps-applied-2026-10-15/PH-W01-capture.json) | PARTIAL | NOT_RUN | 本次错误页非天气空状态，无活动正样本；10/10官方局部无活动状态另作历史，不称今天无风险。 |
+| PH-W02 | https://www.pagasa.dost.gov.ph/weather/weather-advisory | 2026-10-15T05:53:36.848Z / 403 [本次](../r2-official-gaps-applied-2026-10-15/PH-W02-capture.json) | PARTIAL | NOT_RUN | 本次错误页非天气空状态，无活动正样本；10/10官方局部无活动状态另作历史，不称今天无风险。 |
 | PH-C01 | https://customs.gov.ph/category/media-releases/ | 2026-10-14T07:56:33.170Z / 200 [取证](../r2-four-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-public-index-replay-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
 | PH-M01 | https://portcalls.com/feed/ | 2026-10-15T04:10:42.206Z / 200 [本轮取证](../r2-three-rss-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-three-rss-2026-10-15/PH-M01-replay.json) | 完整私有XML→既有collector→隔离SQLite 10条；重复0新0修订，readonly/query_only重开0差异；pubDate秒精度、原offset +0000，无独立updated。仅metadata，未生产启用。 |
 | XX-K01 | https://www.maersk.com/news | 2026-10-15T02:38:28.356Z / 尝试1、未捕获响应 [当前证据](../r2-carrier-reapplied-2026-10-15/summary.json) | BLOCKED | NOT_RUN | 公网23.53.3.137、23.53.3.144；fetch_failed无底层错误记录，不判断CA/TLS/反爬；不重试。 |
@@ -72,9 +74,9 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 
 | ID | 精确目录URL / 原文本 | 最新已有采集UTC / HTTP | R2-4 | 独立数值字段 | 判定理由 / 保留缺口 |
 | --- | --- | --- | --- | --- | --- |
-| ID-W02 | https://maritim.bmkg.go.id/marine2026-data/ （文档 `/apidoc`；`/pelabuhan/{KODE}.json`） | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 目录是根/文档/港口KODE模板；具体获批产品URL和实测数值字段未知。 |
+| ID-W02 | https://maritim.bmkg.go.id/marine2026-data/ （原目录文档/港口KODE模板） | 2026-10-15T05:53:37.472Z / 200 [根响应](../r2-official-gaps-applied-2026-10-15/ID-W02-root-capture.json) | NOT_RUN | NOT_RUN | 只取得18链接目录索引，无明确apidoc/官方KODE/数值产品；根可达不直接改资格，doc/未跟进。 |
 | XX-W01 | https://www.jma.go.jp/bosai/typhoon/data/targetTc.json | 2026-10-10T03:58:39.141Z / 200 [取证](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json) | OK | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 历史实网targetTc/持久化气旋ID诊断；无逐请求原JSON台账，不当文章回放。 |
-| XX-W02 | `https://www.jma.go.jp/bosai/typhoon/data/TC{id}/forecast.json` 、`/specifications.json` | 2026-10-10T03:58:39.141Z / 200 [取证](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json) | PARTIAL | PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED [字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 旧实网仅forecast分支；目录还列specifications，后者未验证，整行保留PARTIAL。 |
+| XX-W02 | `https://www.jma.go.jp/bosai/typhoon/data/TC{id}/forecast.json` 、`/specifications.json` | 2026-10-15T05:53:37.778Z / targetTc404 [本次](../r2-official-gaps-applied-2026-10-15/XX-W02-targetTc-capture.json) | PARTIAL | PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED [旧字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 本次无有效列表，未请求两产品；旧forecast诊断保留，specifications仍缺，不降/升原资格。 |
 | XX-A01 | https://api.open-meteo.com/v1/forecast | 2026-10-10T03:58:39.141Z / 200 [取证](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json) | OK | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 10/10陆地8港风/降水/能见度与时间字段诊断；不是保留原JSON回放或今天刷新。 |
 | XX-A02 | https://marine-api.open-meteo.com/v1/marine | 2026-10-10T03:58:39.141Z / 200 [取证](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json) | OK | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 10/10原点海况7港；VNSGN仍缺，约61.8公里独立参考点不能冒充泊位/原点。 |
 
