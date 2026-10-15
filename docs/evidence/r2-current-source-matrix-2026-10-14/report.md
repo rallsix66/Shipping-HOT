@@ -1,6 +1,6 @@
 # R2 41项来源累计证据 — 2026-10-15
 
-最新SITC固定metadata修正：代码0a483dd/干净门禁通过，同一原页20条SQLite/重复/query_only字段通过，源请求0；抓取安全入口未改。已批准PARTIAL，OK/PASS建议待复审，23/39、21/34、历史3/5不加。[本轮实现/验收](../r2-sitc-metadata-2026-10-15/report.md)。
+最新审定：SITC代码/过程证据独立审查限定通过，未发现新增P2，明确认可OK/PASS，累计24/39、22/34、历史3/5不变；不是主会话独立重放私有原页、CI或24h通过。本轮ID-T02真实307 Location→同主机目标200，DNS2/GET2，仅16隐藏DOM节点/7身份结构观察、规范化/入库0，仍PARTIAL/NOT_RUN，无产品改动。[本轮报告与结构差异](../r2-id-t02-location-2026-10-15/report.md)。
 
 前轮SITC应用后真页（8be5bdd负例保留）：DNS1/GET1=200/38839字节，20卡片原HTTP链接与点分发布日期不符合当前generic合同；隔离collector明确拒绝、业务0，空表重开不作正向PASS。PARTIAL建议待审，原资格/23/39、21/34、历史3/5不改。[本轮材料](../r2-sitc-applied-2026-10-15/report.md)。
 
@@ -24,12 +24,12 @@
 
 前轮ONE同源目录URL更新已获批准并应用：XX-K02现为 https://www.one-line.com/en/newsroom，旧/en/news及原308链保留；目录web_list为HTML页面形态，现有默认关闭候选用json_list惰性HTML内嵌JSON模式。源码 `bebe1441465adfcabb9daf93cb2a8656ec1fc796` 干净门禁245定向、1230全量/3跳过及3smoke通过。已有635664原HTML经正式关闭候选回归10条字段、重复0新0修订、只读重开0差异，与前轮10条原字段完全相同；本轮来源DNS/HTTP0，不刷新02:56实网时间，不推导持续可用。覆盖仍21/39、13/34，数值3/5独立。[本轮目录/配置依据与至多三项建议](../r2-one-catalog-candidate-2026-10-15/report.md)。
 
-本报告汇总已保存证据，供父会话独立审查。当前本地代码基准 `0a483dd18a2027c73bf950cc0b948c013e29cf09`（父审pending）；前一四源采集HEAD为 `50da3805ee14e72222a4e26f4230073cf1842bc7`。该历史批次四次系统DNS均公网、精确索引HTTP4；VN-D01原页有限通过、MY-L01真实探针失败，两源跳转未跟随；干净源码门禁已另存。[机器矩阵](mapping.json)保留全部41项的精确目录产品、采集时点、原证据路径/LF文本哈希、字段回放、时间角色、许可、默认状态及两项独立判定。
+本报告汇总已保存证据，供父会话独立审查。当前本地代码基准 `0a483dd18a2027c73bf950cc0b948c013e29cf09`（主会话限定代码/过程认可；无独立私有原页重放）；前一四源采集HEAD为 `50da3805ee14e72222a4e26f4230073cf1842bc7`。该历史批次四次系统DNS均公网、精确索引HTTP4；VN-D01原页有限通过、MY-L01真实探针失败，两源跳转未跟随；干净源码门禁已另存。[机器矩阵](mapping.json)保留全部41项的精确目录产品、采集时点、原证据路径/LF文本哈希、字段回放、时间角色、许可、默认状态及两项独立判定。
 
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
-| R2-4公开自动来源 | **23/39（58.97%）** | 最少32项，尚差9；23 OK、9 PARTIAL、1 STALE、2 BLOCKED、4 NOT_RUN，未通过 |
-| R2-5资讯/公告原页字段回放 | **21/34（61.76%）** | 尚差13；21 PASS、2 FAIL、1 PARTIAL、10 NOT_RUN，未通过 |
+| R2-4公开自动来源 | **24/39（61.54%）** | 最少32项，尚差8；24 OK、8 PARTIAL、1 STALE、2 BLOCKED、4 NOT_RUN，未通过 |
+| R2-5资讯/公告原页字段回放 | **22/34（64.71%）** | 尚差12；22 PASS、2 FAIL、1 PARTIAL、9 NOT_RUN，未通过 |
 | 数值字段独立检查 | **3/5** | 仅历史归一化诊断；不加到34项原页回放分子 |
 | R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
 
@@ -65,7 +65,7 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 | MY-L01 | https://www.pos.com.my/service-update | 2026-10-15T01:16:13.254Z / 200 [本批](../r2-four-reapplied-2026-10-15/report.md) | PARTIAL | FAIL | 原页10张卡片标题锚点均无href；类别链接是列表自身。真实适用性探针失败/写入0，不猜路由或时区。 |
 | ID-W01 | https://www.bmkg.go.id/alerts/nowcast/en/rss.xml | 2026-10-13T07:00:40.269Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | PASS [字段](../r2-p1-inventory-2026-10-13/replay.log) | 最新精确RSS13条可读；回放是旧12条、原GET为/en别名，不把两份payload混为一份。 |
 | ID-T01 | https://jdih.kemendag.go.id/ | 2026-10-14T09:08:45.056Z / 200 [取证](../r2-three-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-post-clash-index-replay-final-2026-10-14/summary.json) | 8条完整原页回放通过；制定日不是发布日期，标题原有省略号保留，初始失败另存。 |
-| ID-T02 | https://jdih.kemenkeu.go.id/ | 2026-10-15T01:16:15.021Z / 307 [本批](../r2-four-reapplied-2026-10-15/report.md) | PARTIAL | NOT_RUN | 精确URL307，原5字节已保存，未跟随跳转；没有列表字段回放。 |
+| ID-T02 | https://jdih.kemenkeu.go.id/ | 原目录07:37:48.414Z /307真实Location；目标/home07:37:48.920Z /200 | PARTIAL | NOT_RUN | 同主机HTTPS目标212037字节，16隐藏DOM节点/7身份、卡片日期unknown；仅结构，规范化/入库0，无产品适配。 |
 | PH-P01 | https://www.ppa.com.ph/content/ppa-helpdesk-advisory ，https://www.ppa.com.ph/ppa-port-news | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
 | PH-W01 | https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin | 2026-10-15T05:53:36.714Z / 403 [本次](../r2-official-gaps-applied-2026-10-15/PH-W01-capture.json) | PARTIAL | NOT_RUN | 本次错误页非天气空状态，无活动正样本；10/10官方局部无活动状态另作历史，不称今天无风险。 |
 | PH-W02 | https://www.pagasa.dost.gov.ph/weather/weather-advisory | 2026-10-15T05:53:36.848Z / 403 [本次](../r2-official-gaps-applied-2026-10-15/PH-W02-capture.json) | PARTIAL | NOT_RUN | 本次错误页非天气空状态，无活动正样本；10/10官方局部无活动状态另作历史，不称今天无风险。 |
@@ -73,7 +73,7 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 | PH-M01 | https://portcalls.com/feed/ | 2026-10-15T04:10:42.206Z / 200 [本轮取证](../r2-three-rss-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-three-rss-2026-10-15/PH-M01-replay.json) | 完整私有XML→既有collector→隔离SQLite 10条；重复0新0修订，readonly/query_only重开0差异；pubDate秒精度、原offset +0000，无独立updated。仅metadata，未生产启用。 |
 | XX-K01 | https://www.maersk.com/news | 2026-10-15T02:38:28.356Z / 尝试1、未捕获响应 [当前证据](../r2-carrier-reapplied-2026-10-15/summary.json) | BLOCKED | NOT_RUN | 公网23.53.3.137、23.53.3.144；fetch_failed无底层错误记录，不判断CA/TLS/反爬；不重试。 |
 | XX-K02 | https://www.one-line.com/en/newsroom（旧/en/news与308另存） | 2026-10-15T02:56:22.136Z / 200（前轮实测；本轮HTTP0）[沿革](../r2-one-catalog-candidate-2026-10-15/catalogue-change-applied.json) | OK | PASS [正式关闭候选原页回归](../r2-one-catalog-candidate-replay-2026-10-15/summary.json) | 目录web_list页面由json_list惰性数据模式读取；1置顶+9列表，日期秒精度无时区/瞬间null，默认关闭metadata-only且不进入活动源。 |
-| XX-K03 | https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/ | 原2026-10-15T06:32:48.737Z / 200 [原采集](../r2-sitc-applied-2026-10-15/XX-K03-capture.json)，本轮无请求 | PARTIAL（已认可） | NOT_RUN（本地20条PASS待资格复审） | 固定metadata HTTP身份/整串源日期已在0a483dd实现，20items/versions/titleblocks、重复0/query_only字段0差异；OK/PASS仅建议，生产未开。 |
+| XX-K03 | https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/ | 原06:32:48.737Z /200，当前无新请求 | OK | PASS | 主会话限定代码/过程认可执行线程20条原页验收；未独立重放私有原页，不称CI/24h通过。 |
 | XX-M01 | https://theloadstar.com/feed/ | 2026-10-15T04:25:58.202Z / 200 [取证](../r2-two-media-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-two-media-2026-10-15/XX-M01-replay.json) | 完整私有RSS10条，pubDate秒精度+0000；隔离collector/重复零新增修订/query_only重开零差异；metadata-only，生产未配置。 |
 | XX-M03 | https://splash247.com/feed/ | 2026-10-15T04:25:58.867Z / 200 [取证](../r2-two-media-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-two-media-2026-10-15/XX-M03-replay.json) | 完整私有RSS10条，pubDate秒精度+0000；隔离collector/重复零新增修订/query_only重开零差异；metadata-only，生产未配置。 |
 | XX-F01 | https://seller-my.tiktok.com/university/essay?knowledge_id=4293090978809617 | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |

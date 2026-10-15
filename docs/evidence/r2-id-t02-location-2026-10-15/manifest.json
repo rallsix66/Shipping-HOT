@@ -1,0 +1,19 @@
+{
+  "executionHead": "4ca3a77cd8cdb1be3c793052b7edff628cec0529",
+  "productCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "id": "ID-T02",
+  "exactCatalogueUrl": "https://jdih.kemenkeu.go.id/",
+  "catalogueRowLfSha256": "badbcb5421386368eaa2d608b1cfe39bcc9ecbb6868b09e16812792b916d539b",
+  "allowedHost": "jdih.kemenkeu.go.id",
+  "maximumSystemDnsCalls": 2,
+  "maximumGetAttempts": 2,
+  "additionalGetCondition": "Actual Location only; same approved exact host/HTTPS/no credentials/no abnormal port, then existing safety boundary; never a second redirect",
+  "retries": 0,
+  "automaticRedirects": 0,
+  "details": 0,
+  "pagination": 0,
+  "rawLocalOnly": true,
+  "persistence": "disallowed",
+  "systemSettingsWritten": false,
+  "productChanged": false
+}

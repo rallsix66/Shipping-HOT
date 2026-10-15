@@ -1,0 +1,44 @@
+{
+  "role": "catalogue",
+  "endpoint": {
+    "protocol": "https:",
+    "hostname": "jdih.kemenkeu.go.id",
+    "port": null,
+    "pathname": "/",
+    "queryPresent": false,
+    "querySha256": null,
+    "credentialsPresent": false,
+    "fragmentPresent": false
+  },
+  "startedAt": "2026-10-15T07:37:46.846Z",
+  "systemDnsCalls": 1,
+  "getAttempts": 1,
+  "status": "BLOCKED",
+  "addressClassification": "public_address",
+  "receivedAt": "2026-10-15T07:37:48.414Z",
+  "httpStatus": 307,
+  "contentType": null,
+  "bytes": 5,
+  "wireSha256": "2cc974af6afc822c42a4e914df05c697348b80420941f6b27561b2bf688587b7",
+  "completeResponseCaptured": true,
+  "location": {
+    "rawHeaderSha256": "2cc974af6afc822c42a4e914df05c697348b80420941f6b27561b2bf688587b7",
+    "rawValueLength": 5,
+    "resolved": {
+      "protocol": "https:",
+      "hostname": "jdih.kemenkeu.go.id",
+      "port": null,
+      "pathname": "/home",
+      "queryPresent": false,
+      "querySha256": null,
+      "credentialsPresent": false,
+      "fragmentPresent": false
+    },
+    "followedAutomatically": false
+  },
+  "secureEntryError": {
+    "code": "redirect_limit",
+    "message": "Too many redirects"
+  },
+  "finishedAt": "2026-10-15T07:37:48.415Z"
+}

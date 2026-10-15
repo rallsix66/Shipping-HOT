@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T07:18:13.142Z",
-  "reviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "evidenceHead": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "generatedAt": "2026-10-15T07:43:04.327Z",
+  "reviewedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "evidenceHead": "4ca3a77cd8cdb1be3c793052b7edff628cec0529",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -35,11 +35,11 @@
   },
   "measuredCoverage": {
     "r2_4": {
-      "numerator": 23,
+      "numerator": 24,
       "denominator": 39,
-      "ratio": 0.5897435897435898,
+      "ratio": 0.6153846153846154,
       "minimumOK": 32,
-      "shortfall": 9,
+      "shortfall": 8,
       "ids": [
         "CN-P01",
         "CN-W01",
@@ -60,14 +60,15 @@
         "PH-C01",
         "PH-M01",
         "XX-K02",
+        "XX-K03",
         "XX-M01",
         "XX-M03",
         "XX-A01",
         "XX-A02"
       ],
       "statusCounts": {
-        "OK": 23,
-        "PARTIAL": 9,
+        "OK": 24,
+        "PARTIAL": 8,
         "NOT_RUN": 4,
         "STALE": 1,
         "BLOCKED": 2
@@ -75,10 +76,10 @@
       "pass": false
     },
     "r2_5": {
-      "numerator": 21,
+      "numerator": 22,
       "denominator": 34,
-      "ratio": 0.6176470588235294,
-      "remaining": 13,
+      "ratio": 0.6470588235294118,
+      "remaining": 12,
       "ids": [
         "CN-P01",
         "CN-W01",
@@ -99,12 +100,13 @@
         "PH-C01",
         "PH-M01",
         "XX-K02",
+        "XX-K03",
         "XX-M01",
         "XX-M03"
       ],
       "statusCounts": {
-        "PASS": 21,
-        "NOT_RUN": 10,
+        "PASS": 22,
+        "NOT_RUN": 9,
         "PARTIAL": 1,
         "FAIL": 2
       },
@@ -3410,22 +3412,33 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
-          "selector": {
-            "id": "ID-T02"
-          },
-          "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
+          "path": "docs/evidence/r2-id-t02-location-2026-10-15/catalogue-capture.json",
+          "sha256": "179562edd9f6b663679f42595d6687ff8947256c6b78070c6a7a97037bf30b7f",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://jdih.kemenkeu.go.id/",
-        "startedAt": "2026-10-15T01:16:15.021Z",
-        "receivedAt": "2026-10-15T01:16:18.420Z",
-        "finishedAt": "2026-10-15T01:16:18.420Z",
+        "startedAt": "2026-10-15T07:37:46.846Z",
+        "receivedAt": "2026-10-15T07:37:48.414Z",
+        "finishedAt": "2026-10-15T07:37:48.415Z",
         "httpStatus": 307,
-        "wireSha256": "2cc974af6afc822c42a4e914df05c697348b80420941f6b27561b2bf688587b7",
         "bytes": 5,
-        "scope": "one_actual_index_response",
-        "verbatimLatestRawRetained": true,
+        "wireSha256": "2cc974af6afc822c42a4e914df05c697348b80420941f6b27561b2bf688587b7",
+        "scope": "one_actual_exact_catalogue_root307_with_actual_Location_header",
+        "location": {
+          "rawHeaderSha256": "2cc974af6afc822c42a4e914df05c697348b80420941f6b27561b2bf688587b7",
+          "rawValueLength": 5,
+          "resolved": {
+            "protocol": "https:",
+            "hostname": "jdih.kemenkeu.go.id",
+            "port": null,
+            "pathname": "/home",
+            "queryPresent": false,
+            "querySha256": null,
+            "credentialsPresent": false,
+            "fragmentPresent": false
+          },
+          "followedAutomatically": false
+        },
         "notContinuousProduction": true
       },
       "fieldReplayEvidence": null,
@@ -3451,49 +3464,76 @@
       "r2_4": {
         "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "Exact catalogue URL returned HTTP307; redirects were not followed. Response retained but actual list product unknown; no automatic alternate host/path."
+        "reason": "PARTIAL retained: exact root307 now has real Location, approved same-host HTTPS/home target returned200;16 hidden streamed DOM card nodes/7 identities observed only. Formal list/date/adapter contract is unverified; no automatic qualification upgrade."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "Only exact index redirect response obtained, no original list payload for field replay."
+        "reason": "NOT_RUN retained: structural observation only; no source publication-date contract, parser/config extension or collector/SQLite field replay.16 DOM nodes/7 identities are not normalized records."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Redirect not followed; destination/list fields and new product URL remain unverified.",
-        "No source config, no guessed alternate URL, no further request.",
-        "Saved material has no Location header; body only gives a relative path literal, no verified absolute destination or same-origin conclusion."
+        "Actual307 Location and same-host target200 now verified; old header-missing response remains historical, catalogue root URL unchanged.",
+        "Target/home has16 hidden DOM card fragments in4 repeated groups and7 identity URLs; review exact list scope/identifier/descriptive-title contract before any adapter.",
+        "No explicit publication field in observed cards; legal identifier year is not a date. Other script data/date semantics not evaluated; unknown date/timezone stays unknown.",
+        "No ID-T02 formal candidate, product extension, parser/collector/SQLite replay or further requests authorized by this structural-only round."
       ],
       "historicalSuperseded": [
-        "Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block."
+        "Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block.",
+        {
+          "reason": "New explicitly authorized root307 with actual Location and one validated same-host target200; previous Location-missing evidence retained",
+          "previousActualFetch": {
+            "evidence": {
+              "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
+              "selector": {
+                "id": "ID-T02"
+              },
+              "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://jdih.kemenkeu.go.id/",
+            "startedAt": "2026-10-15T01:16:15.021Z",
+            "receivedAt": "2026-10-15T01:16:18.420Z",
+            "finishedAt": "2026-10-15T01:16:18.420Z",
+            "httpStatus": 307,
+            "wireSha256": "2cc974af6afc822c42a4e914df05c697348b80420941f6b27561b2bf688587b7",
+            "bytes": 5,
+            "scope": "one_actual_index_response",
+            "verbatimLatestRawRetained": true,
+            "notContinuousProduction": true
+          },
+          "previousGaps": [
+            "Redirect not followed; destination/list fields and new product URL remain unverified.",
+            "No source config, no guessed alternate URL, no further request.",
+            "Saved material has no Location header; body only gives a relative path literal, no verified absolute destination or same-origin conclusion."
+          ],
+          "previousR24": {
+            "verdict": "PARTIAL",
+            "countedOK": false,
+            "reason": "PARTIAL retained: exact root307 now has real Location, approved same-host HTTPS/home target returned200;16 hidden streamed DOM card nodes/7 identities observed only. Formal list/date/adapter contract is unverified; no automatic qualification upgrade."
+          },
+          "previousR25": {
+            "verdict": "NOT_RUN",
+            "countedPass": false,
+            "reason": "NOT_RUN retained: structural observation only; no source publication-date contract, parser/config extension or collector/SQLite field replay.16 DOM nodes/7 identities are not normalized records."
+          }
+        }
       ],
       "latestAttempt": {
         "evidence": {
-          "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
-          "selector": {
-            "id": "ID-T02"
-          },
-          "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
+          "path": "docs/evidence/r2-id-t02-location-2026-10-15/catalogue-capture.json",
+          "sha256": "179562edd9f6b663679f42595d6687ff8947256c6b78070c6a7a97037bf30b7f",
           "hashBasis": "committed_text_LF"
         },
         "dnsEvidence": {
-          "path": "docs/evidence/r2-four-reapplied-2026-10-15/dns-ledger.json",
-          "selector": {
-            "id": "ID-T02"
-          },
-          "sha256": "f326c38e383606a895d9fcf6377ac6c62685b1d34bc6a0a44351d2a359404f5c",
+          "path": "docs/evidence/r2-id-t02-location-2026-10-15/dns-ledger.json",
+          "sha256": "dbcb47ff32a66d3be94b7cffb20c1777c7f6ca89f2124bf7e1b5ce0c7be6c4f9",
           "hashBasis": "committed_text_LF"
         },
-        "appliedConfigEvidence": {
-          "path": "docs/evidence/r2-four-reapplied-2026-10-15/applied-config-check.json",
-          "selector": null,
-          "sha256": "1523c3665d2251b4ba5f1d4bd0b910d77eec12002cf220577317da481c37f1ce",
-          "hashBasis": "committed_text_LF"
-        },
-        "at": "2026-10-15T01:16:15.021Z",
+        "at": "2026-10-15T07:37:46.846Z",
         "url": "https://jdih.kemenkeu.go.id/",
         "addresses": [
           {
@@ -3504,7 +3544,7 @@
         "systemDnsCalls": 1,
         "httpRequests": 1,
         "httpStatus": 307,
-        "scope": "one exact catalogue GET after verified21 exceptions and public OS DNS; no redirect/retry/detail"
+        "scope": "one_exact_root_GET_no_automatic_redirect; actualLocation_audited_before_separate_target_request"
       },
       "historicalAttempts": [
         {
@@ -3536,6 +3576,42 @@
           "httpRequests": 0,
           "reason": "blocked_address",
           "scope": "current_environment_dns_only_no_response_no_parse"
+        },
+        {
+          "evidence": {
+            "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
+            "selector": {
+              "id": "ID-T02"
+            },
+            "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
+            "hashBasis": "committed_text_LF"
+          },
+          "dnsEvidence": {
+            "path": "docs/evidence/r2-four-reapplied-2026-10-15/dns-ledger.json",
+            "selector": {
+              "id": "ID-T02"
+            },
+            "sha256": "f326c38e383606a895d9fcf6377ac6c62685b1d34bc6a0a44351d2a359404f5c",
+            "hashBasis": "committed_text_LF"
+          },
+          "appliedConfigEvidence": {
+            "path": "docs/evidence/r2-four-reapplied-2026-10-15/applied-config-check.json",
+            "selector": null,
+            "sha256": "1523c3665d2251b4ba5f1d4bd0b910d77eec12002cf220577317da481c37f1ce",
+            "hashBasis": "committed_text_LF"
+          },
+          "at": "2026-10-15T01:16:15.021Z",
+          "url": "https://jdih.kemenkeu.go.id/",
+          "addresses": [
+            {
+              "address": "103.196.166.252",
+              "family": 4
+            }
+          ],
+          "systemDnsCalls": 1,
+          "httpRequests": 1,
+          "httpStatus": 307,
+          "scope": "one exact catalogue GET after verified21 exceptions and public OS DNS; no redirect/retry/detail"
         }
       ],
       "redirectInspection": {
@@ -3545,6 +3621,44 @@
         },
         "sha256": "923e62e0701337eb62fb286ca2c26c68659ded2dbd13100ddbfb7390e23e04cd",
         "hashBasis": "committed_text_LF"
+      },
+      "verifiedRedirectTarget": {
+        "evidence": {
+          "path": "docs/evidence/r2-id-t02-location-2026-10-15/location-target-capture.json",
+          "sha256": "d43eaa5e2b4c0797bf986f33e53f5e1c0fe5bc9cf2607116096463b6505b3ca7",
+          "hashBasis": "committed_text_LF"
+        },
+        "locationDecision": {
+          "path": "docs/evidence/r2-id-t02-location-2026-10-15/location-decision.json",
+          "sha256": "39d6b4ba3ece95a816c5959d4b96ec50edbc3ab48b17f47f376fbf73ff5574f8",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://jdih.kemenkeu.go.id/home",
+        "startedAt": "2026-10-15T07:37:48.417Z",
+        "receivedAt": "2026-10-15T07:37:48.920Z",
+        "httpStatus": 200,
+        "bytes": 212037,
+        "wireSha256": "be6dd13c7c42b55e6c5526fd88dd00c2c8fcc4f7a1526929c713725776bd8d2b",
+        "systemDnsCalls": 1,
+        "getAttempts": 1,
+        "scope": "one_actual_real_Location_target_GET_same_approved_host_https_no_credentials_or_abnormal_port",
+        "automaticRedirects": 0,
+        "nextRedirectFollowed": false,
+        "catalogueUrlChanged": false
+      },
+      "structureObservation": {
+        "evidence": {
+          "path": "docs/evidence/r2-id-t02-location-2026-10-15/structure-observation.json",
+          "sha256": "c61fe27597d874ecb14397ad0daa18be70322afbe4a79690d11052e13e9d0d60",
+          "hashBasis": "committed_text_LF"
+        },
+        "observedHiddenCardNodes": 16,
+        "distinctObservedDocumentIdentities": 7,
+        "normalizedRecords": 0,
+        "recordsPersisted": 0,
+        "publicationDateInObservedCards": "not_explicit",
+        "scope": "offline_DOM_structure_only_not_parser_or_repository_acceptance",
+        "adapterImplemented": false
       }
     },
     {
@@ -5121,7 +5235,7 @@
         "productQualificationChanged": false
       },
       "fieldReplayEvidence": {
-        "status": "PASS_LOCAL_SAVED_ORIGINAL20_DISABLED_CANDIDATE_REPLAY_PENDING_QUALIFICATION_REVIEW",
+        "status": "ACCEPTED_LIMITED_PROCESS_EVIDENCE_EXECUTOR_LOCAL_SAVED_ORIGINAL20_REPLAY",
         "evidence": {
           "path": "docs/evidence/r2-sitc-metadata-2026-10-15/replay-result.json",
           "sha256": "49dcf15cbdcfe05a3c8b4cb4b99aa74368d96147d98993316e07e2b318903455",
@@ -5183,24 +5297,24 @@
         "productionRegistryJoined": false
       },
       "r2_4": {
-        "verdict": "PARTIAL",
-        "countedOK": false,
-        "reason": "User explicitly acceptedPARTIAL before this repair. Saved real20-card replay now passes locally under narrow approvedmetadata rules; any upgrade toOK awaits parent review, no new source request or24h proof."
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Explicit parent acceptance on2026-10-15: exact real index200 with20 cards plus scoped metadata identity/date implementation and executor local saved-original20 replay. Limited process evidence review; no independent parent raw-page replay, continuous availability or24h claim."
       },
       "r2_5": {
-        "verdict": "NOT_RUN",
-        "countedPass": false,
-        "reason": "Local20-item parser/collector/repeat/query-only field replay nowPASS oncleanSHA0a483dd; approved qualification remainsNOT_RUN pending parent review, so21/34 is not increased automatically."
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Explicit parent process-evidence acceptance of executor original20 field replay,20 items/versions/titleblocks, repeat0 new/0 revised and query-only20/0 mismatches oncode0a483dd. No parent independent private-original replay or new runtime/CI/24h verification."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Local original20-field replay passed; sourceOK/fieldPASS qualification upgrade awaits parent review.",
-        "MetadataHTTP exception is fixed toSITC sourceID/disallowed/www.sitc.com/en/show.asp/numericid; does not grant bodyHTTP or downgrade/detail fetch.",
-        "Day andraw fields retained; no clock/timezone/offset/publication instant inferred.",
-        "Source capture remains2026-10-15T06:32:48.737Z; current/live/24h/production not newly verified."
+        "Qualification accepted through limited parent code/process evidence review; executor saved-original20 replay is not an independent parent replay of private bytes.",
+        "Metadata-only/default-off boundary retained; actual HTTP body fetch and HTTPS downgrade remain forbidden.",
+        "Source original dates remain day precision with missing timezone, null instant/offset.",
+        "Latest real capture remains2026-10-15T06:32:48.737Z; no new live/production/24h verification."
       ],
       "historicalSuperseded": [
         {
@@ -5316,6 +5430,29 @@
             "countedPass": false,
             "reason": "PriorNOT_RUN qualification retained pending parent review. Existing raw HTML/parser/collector compatibility probe rejects allHTTP links and stores0; dotted source-date grammar unsupported. This is not positive field PASS or proof source invalidity."
           }
+        },
+        {
+          "reason": "Parent independently reviewed the bounded SITC code/evidence and explicitly accepted qualification; review is process evidence, not an independent replay of private original bytes",
+          "previousR24": {
+            "verdict": "PARTIAL",
+            "countedOK": false,
+            "reason": "User explicitly acceptedPARTIAL before this repair. Saved real20-card replay now passes locally under narrow approvedmetadata rules; any upgrade toOK awaits parent review, no new source request or24h proof."
+          },
+          "previousR25": {
+            "verdict": "NOT_RUN",
+            "countedPass": false,
+            "reason": "Local20-item parser/collector/repeat/query-only field replay nowPASS oncleanSHA0a483dd; approved qualification remainsNOT_RUN pending parent review, so21/34 is not increased automatically."
+          },
+          "previousQualificationProposal": {
+            "status": "PENDING_PARENT_REVIEW",
+            "availability": "OK_proposed_only",
+            "fieldAcceptance": "PASS_proposed_only",
+            "countedOK": false,
+            "countedPass": false,
+            "localEvidencePassed": true,
+            "currentApprovedAvailability": "PARTIAL",
+            "currentApprovedField": "NOT_RUN"
+          }
         }
       ],
       "lastSafeFetchAttempt": {
@@ -5344,14 +5481,16 @@
         "qualificationUnchanged": true
       },
       "qualificationProposal": {
-        "status": "PENDING_PARENT_REVIEW",
-        "availability": "OK_proposed_only",
-        "fieldAcceptance": "PASS_proposed_only",
-        "countedOK": false,
-        "countedPass": false,
-        "localEvidencePassed": true,
-        "currentApprovedAvailability": "PARTIAL",
-        "currentApprovedField": "NOT_RUN"
+        "status": "ACCEPTED_LIMITED_PARENT_PROCESS_REVIEW",
+        "availability": "OK",
+        "fieldAcceptance": "PASS",
+        "countedOK": true,
+        "countedPass": true,
+        "reviewDate": "2026-10-15",
+        "method": "independent_code_and_process_evidence_review_no_new_P2",
+        "parentIndependentlyReplayedPrivateOriginal": false,
+        "continuous24hVerified": false,
+        "ciPassedClaimed": false
       }
     },
     {
@@ -6506,13 +6645,17 @@
   "codeVerification": {
     "testedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
     "priorParentAcceptedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-    "state": "LOCALLY_VERIFIED_PENDING_PARENT_REVIEW",
+    "state": "ACCEPTED_LIMITED_PARENT_CODE_AND_PROCESS_REVIEW",
     "gate": {
       "path": "docs/evidence/gate-0a483dd-sitc-metadata/summary.json",
       "sha256": "50c4c510c25d94ea5b8af2fb847ae254c6535c2f51f5b480a09e16d79bb388dd",
       "hashBasis": "committed_text_LF"
     },
-    "independentReview": "pending_parent"
+    "independentReview": "accepted_no_new_P2",
+    "parentIndependentlyReplayedPrivateOriginal": false,
+    "reviewDate": "2026-10-15",
+    "ciPassedClaimed": false,
+    "continuous24hVerified": false
   },
   "previousSITCAppliedCompatibility": {
     "report": {
@@ -6552,5 +6695,41 @@
     "sourceGetAttemptsThisRound": 0,
     "productionEnabled": false
   },
-  "testedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09"
+  "testedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "lastSITCQualificationAcceptance": {
+    "evidence": {
+      "path": "docs/evidence/r2-id-t02-location-2026-10-15/report.md",
+      "sha256": "42281f48d25c69957427ad7f06b7969beb1dbff26ebc41cd0f9349d2a173a18c",
+      "hashBasis": "committed_text_LF"
+    },
+    "codeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+    "reviewDate": "2026-10-15",
+    "method": "parent_limited_independent_code_and_process_evidence_review_no_new_P2",
+    "parentIndependentlyReplayedPrivateOriginal": false,
+    "approvedR24": "OK",
+    "approvedR25": "PASS",
+    "ciPassedClaimed": false,
+    "continuous24hVerified": false
+  },
+  "lastIDT02LocationAudit": {
+    "report": {
+      "path": "docs/evidence/r2-id-t02-location-2026-10-15/report.md",
+      "sha256": "42281f48d25c69957427ad7f06b7969beb1dbff26ebc41cd0f9349d2a173a18c",
+      "hashBasis": "committed_text_LF"
+    },
+    "summary": {
+      "path": "docs/evidence/r2-id-t02-location-2026-10-15/capture-summary.json",
+      "sha256": "2fe0960488ea46d0d8909e16e314b294c44380d0693ea9a0e0d2552517c8beec",
+      "hashBasis": "committed_text_LF"
+    },
+    "executionHead": "4ca3a77cd8cdb1be3c793052b7edff628cec0529",
+    "productCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+    "sourceDnsCalls": 2,
+    "getAttempts": 2,
+    "actualLocationTargetOnly": true,
+    "recordsPersisted": 0,
+    "productChanged": false,
+    "fullProductGate": "NOT_RUN_no_product_change",
+    "qualificationChanged": false
+  }
 }

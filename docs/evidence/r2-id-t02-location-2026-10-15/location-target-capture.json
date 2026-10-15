@@ -1,0 +1,44 @@
+{
+  "role": "location-target",
+  "endpoint": {
+    "protocol": "https:",
+    "hostname": "jdih.kemenkeu.go.id",
+    "port": null,
+    "pathname": "/home",
+    "queryPresent": false,
+    "querySha256": null,
+    "credentialsPresent": false,
+    "fragmentPresent": false
+  },
+  "startedAt": "2026-10-15T07:37:48.417Z",
+  "systemDnsCalls": 1,
+  "getAttempts": 1,
+  "status": "CAPTURED_SAFE_HTML",
+  "addressClassification": "public_address",
+  "receivedAt": "2026-10-15T07:37:48.920Z",
+  "httpStatus": 200,
+  "contentType": "text/html; charset=utf-8",
+  "bytes": 212037,
+  "wireSha256": "be6dd13c7c42b55e6c5526fd88dd00c2c8fcc4f7a1526929c713725776bd8d2b",
+  "completeResponseCaptured": true,
+  "location": null,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 212037
+  },
+  "finishedAt": "2026-10-15T07:37:48.921Z"
+}
