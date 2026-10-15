@@ -176,7 +176,7 @@ export function extractArticle(html: string, sourceUrl: string, policy: ArticleS
   }
   const containerSelector = policy.selectors?.container
   let content = $
-  let root = $("body")
+  let root: ReturnType<typeof $> = $("body")
   let readableTitle: string | undefined
   if (containerSelector) {
     try {
@@ -189,15 +189,15 @@ export function extractArticle(html: string, sourceUrl: string, policy: ArticleS
     if (!root.length) return { blocks: [], status: "source_unavailable" }
   } else {
     try {
-      // Adapt the upstream inert parseHTML -> base -> Readability flow. No
+      // Adapt the upstream inert parseHTML/base -> Readability flow. No
       // scripts/resources are executed or loaded; fetching remains exclusively
       // in the existing secure transport. Ignore any page-supplied base URL.
       $("base").remove()
-      const { document } = parseHTML($.html())
-      const base = document.createElement("base")
-      base.setAttribute("href", sourceUrl)
-      document.head.appendChild(base)
-      const article = new Readability(document as unknown as ConstructorParameters<typeof Readability>[0], {
+      $("head").append($("<base>").attr("href", sourceUrl))
+      // linkedom declares a browser Window; this server's Node tsconfig has no
+      // browser globals. Narrow only the document passed to Readability.
+      const { document } = parseHTML($.html()) as unknown as { document: ConstructorParameters<typeof Readability>[0] }
+      const article = new Readability(document, {
         charThreshold: MIN_READABLE_CHARACTERS,
         keepClasses: false,
       }).parse()
