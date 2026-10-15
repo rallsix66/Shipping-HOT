@@ -1,0 +1,16 @@
+{
+  "id": "XX-K03",
+  "url": "https://www.sitc.com/en/list.asp?classid=44",
+  "startedAt": "2026-10-15T06:16:38.795Z",
+  "systemDnsCalls": 1,
+  "getAttempts": 0,
+  "status": "BLOCKED",
+  "rawLocalOnly": true,
+  "addressClassification": "blocked_address",
+  "secureEntryError": {
+    "code": "blocked_address",
+    "message": "Resolved address is not a public address: 198.18.0.64"
+  },
+  "httpStatus": null,
+  "finishedAt": "2026-10-15T06:16:38.802Z"
+}

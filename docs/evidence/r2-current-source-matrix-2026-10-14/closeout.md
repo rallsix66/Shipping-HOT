@@ -1,1 +1,1 @@
-当前真实Neat Freak见[JMA归属修正与BMKG doc](../r2-bmkg-doc-jma-attribution-2026-10-15/closeout.md)。已有同URL404归XX-W01/02，同一请求不重复计数；XX-W01当前OK→BLOCKED，23/39、21/34、历史数值3/5。新BMKG DNS1/GET1目录200，无apidoc/KODE/数值样本；未下载/遍历，JMA/PAGASA0。其他38条原样，原件/历史/26项与生成额外字节unknown限制保留，不再盘点旧全文。产品门禁/GUI/S7/24h本批NOT_RUN，定向验证/归档单列，整体未通过待父审。
+当前真实Neat Freak见[SITC主站安全阻断](../r2-sitc-index-2026-10-15/closeout.md)。XX-K03精确索引DNS1=198.18.0.64、transport前阻断，GET0/响应0，未改网络/CA，不试越南站或其他来源；配置/解析/SQLite回放NOT_RUN。仅追加尝试，原资格/23/39、21/34、历史3/5保持，其他40条原样；26项与额外生成字节unknown限制沿用，不盘点旧全文。产品门禁/GUI/S7/24h本批NOT_RUN，定向验证/归档单列，整体未通过待父审，现场保留。

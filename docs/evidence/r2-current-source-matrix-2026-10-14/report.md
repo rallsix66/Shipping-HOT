@@ -1,6 +1,8 @@
 # R2 41项来源累计证据 — 2026-10-15
 
-最新JMA归属修正：同一次targetTc404也是XX-W01精确目录产品，现OK→BLOCKED，23/39、21/34、历史数值3/5；BMKG doc新DNS1/GET1=200文件目录，无apidoc/KODE。其他38项条目不改、无新JMA/PAGASA请求。[本批依据](../r2-bmkg-doc-jma-attribution-2026-10-15/report.md)。
+最新SITC主站精确索引：DNS1=198.18.0.64安全阻断，GET0/响应0，无原页/配置/SQLite回放；仅XX-K03追加尝试，原资格与23/39、21/34、历史3/5不变。[本轮阻塞](../r2-sitc-index-2026-10-15/report.md)。
+
+前轮JMA归属修正（14b6548限定认可）：同一次targetTc404也是XX-W01精确目录产品，现OK→BLOCKED，23/39、21/34、历史数值3/5；BMKG doc新DNS1/GET1=200文件目录，无apidoc/KODE。其他38项条目不改、无新JMA/PAGASA请求。[本批依据](../r2-bmkg-doc-jma-attribution-2026-10-15/report.md)。
 
 前轮用户应用后补证（32c8974遗漏由上段修正）：扩展/生成26/原23/新3核验通过（生成整体额外字节差异unknown），DNS4公网/GET4：PAGASA403两次、BMKG根目录200、JMA列表404；没有活动/数值正样本，条件追加0，资格计数不变。[本批事实与限制](../r2-official-gaps-applied-2026-10-15/report.md)。
 
@@ -67,7 +69,7 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 | PH-M01 | https://portcalls.com/feed/ | 2026-10-15T04:10:42.206Z / 200 [本轮取证](../r2-three-rss-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-three-rss-2026-10-15/PH-M01-replay.json) | 完整私有XML→既有collector→隔离SQLite 10条；重复0新0修订，readonly/query_only重开0差异；pubDate秒精度、原offset +0000，无独立updated。仅metadata，未生产启用。 |
 | XX-K01 | https://www.maersk.com/news | 2026-10-15T02:38:28.356Z / 尝试1、未捕获响应 [当前证据](../r2-carrier-reapplied-2026-10-15/summary.json) | BLOCKED | NOT_RUN | 公网23.53.3.137、23.53.3.144；fetch_failed无底层错误记录，不判断CA/TLS/反爬；不重试。 |
 | XX-K02 | https://www.one-line.com/en/newsroom（旧/en/news与308另存） | 2026-10-15T02:56:22.136Z / 200（前轮实测；本轮HTTP0）[沿革](../r2-one-catalog-candidate-2026-10-15/catalogue-change-applied.json) | OK | PASS [正式关闭候选原页回归](../r2-one-catalog-candidate-replay-2026-10-15/summary.json) | 目录web_list页面由json_list惰性数据模式读取；1置顶+9列表，日期秒精度无时区/瞬间null，默认关闭metadata-only且不进入活动源。 |
-| XX-K03 | https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/ | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
+| XX-K03 | https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/ | 2026-10-15T06:16:38.795Z / DNS blocked_address / HTTP0 [本次](../r2-sitc-index-2026-10-15/XX-K03-capture.json) | NOT_RUN | NOT_RUN | 本批只主站DNS1=198.18.0.64，安全入口在transport前停止；无页面/配置/回放，原资格暂不改，越南站未请求。 |
 | XX-M01 | https://theloadstar.com/feed/ | 2026-10-15T04:25:58.202Z / 200 [取证](../r2-two-media-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-two-media-2026-10-15/XX-M01-replay.json) | 完整私有RSS10条，pubDate秒精度+0000；隔离collector/重复零新增修订/query_only重开零差异；metadata-only，生产未配置。 |
 | XX-M03 | https://splash247.com/feed/ | 2026-10-15T04:25:58.867Z / 200 [取证](../r2-two-media-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-two-media-2026-10-15/XX-M03-replay.json) | 完整私有RSS10条，pubDate秒精度+0000；隔离collector/重复零新增修订/query_only重开零差异；metadata-only，生产未配置。 |
 | XX-F01 | https://seller-my.tiktok.com/university/essay?knowledge_id=4293090978809617 | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |

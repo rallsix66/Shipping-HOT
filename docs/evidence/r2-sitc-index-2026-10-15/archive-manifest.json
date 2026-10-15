@@ -1,0 +1,117 @@
+{
+  "baselineHead": "14b6548bcab3ef9df5a24f718dcbf9556cc0ffa5",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "files": [
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+      "committedTextLfSha256": "ee1aedc0241b49db587486be45239fc749f1e4c3be638385f3dfdd3ab02f9000"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+      "committedTextLfSha256": "49b014f961a1aeb86d6a5012002ce82c85653486ce8e299b582c65b92c4c691f"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+      "committedTextLfSha256": "d3f0efd350de7cb5b20588b5d7ed1c397522546fcfd1d10b1ff6afd1f0162b3c"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+      "committedTextLfSha256": "2f02860dde57a1e80bd4aac61476d612e2c2bd4ea76925612c28600f73b4b284"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/XX-K03-capture.json",
+      "committedTextLfSha256": "3c4a6c992600ef074a3d3107855de50b1a720167dc4ad439d0c7caf1df3aaaca"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/archive-procedure.cjs.txt",
+      "committedTextLfSha256": "7cbd8406e5423bdf8d615759094dc02503016884efbb123319b5f12d134c93f6"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/archive-verification-procedure.cjs.txt",
+      "committedTextLfSha256": "260f77357cf3f3790e759bbe099b6ff8ba5848265ce919f796f4e66d3c5cbb3f"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/capture-command.json",
+      "committedTextLfSha256": "bbb3d2aadf3bd63eb404d11c321e75d27948b393d14d4d16eb0cf911fbbae0c4"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/capture-config.ts.txt",
+      "committedTextLfSha256": "fe1c1d72323ac1179e75b04934935d1f90ee1fe2a9f0b9b80e2fc8f3ef07b017"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/capture-procedure.test.ts.txt",
+      "committedTextLfSha256": "471030e72f3a38a690f6dd8b75f94889f74c343683b2e9fff55eb72826d3c2e0"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/capture-runner.cjs.txt",
+      "committedTextLfSha256": "98435754aae18fa59db5c5691eeb5d0e2ef8bbe8ff60f5977fbc8f040232f3e3"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/capture-summary.json",
+      "committedTextLfSha256": "8189ec2dfb7ee7ad256291be978ce2a38e44aa44e62ba46c2674bfbba679e834"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/closeout.md",
+      "committedTextLfSha256": "dd22dfe92d27d8d775ee27b3eb7c5e6aaafbdb8cf41a8da3973e6b26c01b7b97"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/dns-ledger.json",
+      "committedTextLfSha256": "d3ba8c4848284b440463054c60bfab17a9e9d3ff2ae6e9b8fd72824dfc94988c"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/doc-lint-procedure.cjs.txt",
+      "committedTextLfSha256": "bbfcf2ea41f5a10c3fffbfb5dbcd6d6bee7f2a6c7fb1c65f61983225b4f6a12b"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/doc-lint.json",
+      "committedTextLfSha256": "0c30924c79b31594e6baf55d155046ed3b316441b324fbd9e61222d3f9a51278"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/manifest.json",
+      "committedTextLfSha256": "1ff8b1ea31f8e1cf14eb3cfa4aad6f61d38a9686d71e298ca28abc8d02aaeaf2"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/matrix-delta.json",
+      "committedTextLfSha256": "208af0a6f1d5e0a2a36f927a31914a2b4502028b39a9882fc7b3f88af8f83c73"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/replay-decision.json",
+      "committedTextLfSha256": "7131bdcecba1fca7f13176afde6de18e44057ac13e5e381b3b3604eaf1f07131"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/report.md",
+      "committedTextLfSha256": "2b2d48ac1ab165f3cc06d4d4dfa9d6b6a7e98e21f712a29e000b61591eb7c3a5"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/request-ledger.json",
+      "committedTextLfSha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/source-proof.json",
+      "committedTextLfSha256": "b210ef686e3ca672d6637118ac248d239c38c93f755ba0db605692fe54576731"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/validation-procedure.cjs.txt",
+      "committedTextLfSha256": "d345e46fb6b8f21a00859a196882aeddbd5bdac7cd82327fa2bc241d8d56f59a"
+    },
+    {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/validation.json",
+      "committedTextLfSha256": "2f02860dde57a1e80bd4aac61476d612e2c2bd4ea76925612c28600f73b4b284"
+    },
+    {
+      "path": "docs/evidence/r2-two-media-2026-10-15/availability-frontier.md",
+      "committedTextLfSha256": "39ed57abf4ae4cca0ddc85cc7142c71b60fb4c8cde0d122252cd4128c0da6558"
+    },
+    {
+      "path": "docs/handoffs/r2-next-execution-2026-10-15.md",
+      "committedTextLfSha256": "e9ae157eeb5d2188bf8a21a1b839879571628b586b6faca17958bbc9379cde7e"
+    },
+    {
+      "path": "docs/status.md",
+      "committedTextLfSha256": "21434d8e065738f3a99da0ab3fe83dd8ceda1ed0683c35b195cc590d721ea1e6"
+    }
+  ],
+  "sourceGetAttempts": 0,
+  "systemDnsCalls": 1,
+  "productGate": "NOT_RUN_no_product_change"
+}

@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T06:08:59.600Z",
+  "generatedAt": "2026-10-15T06:18:42.822Z",
   "reviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "evidenceHead": "32c8974c6c5f50ad8630b6eb771f0a6af3bd9b44",
+  "evidenceHead": "14b6548bcab3ef9df5a24f718dcbf9556cc0ffa5",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -5144,7 +5144,29 @@
       "gaps": [
         "缺来源专属配置、存档谱系与回放"
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "lastSafeFetchAttempt": {
+        "evidence": {
+          "path": "docs/evidence/r2-sitc-index-2026-10-15/XX-K03-capture.json",
+          "sha256": "3c4a6c992600ef074a3d3107855de50b1a720167dc4ad439d0c7caf1df3aaaca",
+          "hashBasis": "committed_text_LF"
+        },
+        "dnsEvidence": {
+          "path": "docs/evidence/r2-sitc-index-2026-10-15/dns-ledger.json",
+          "sha256": "d3ba8c4848284b440463054c60bfab17a9e9d3ff2ae6e9b8fd72824dfc94988c",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.sitc.com/en/list.asp?classid=44",
+        "startedAt": "2026-10-15T06:16:38.795Z",
+        "finishedAt": "2026-10-15T06:16:38.802Z",
+        "systemDnsCalls": 1,
+        "sourceGetAttempts": 0,
+        "httpStatus": null,
+        "result": "BLOCKED_BEFORE_HTTP",
+        "code": "blocked_address",
+        "qualificationUnchanged": true,
+        "parserAndSqliteReplay": "NOT_RUN_no_response"
+      }
     },
     {
       "id": "XX-M01",
@@ -6237,6 +6259,23 @@
     "sourceGetAttempts": 1,
     "systemDnsCalls": 1,
     "otherSourceRequests": 0,
+    "qualificationChanged": false
+  },
+  "lastSITCIndexProbe": {
+    "report": {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/report.md",
+      "sha256": "2b2d48ac1ab165f3cc06d4d4dfa9d6b6a7e98e21f712a29e000b61591eb7c3a5",
+      "hashBasis": "committed_text_LF"
+    },
+    "capture": {
+      "path": "docs/evidence/r2-sitc-index-2026-10-15/XX-K03-capture.json",
+      "sha256": "3c4a6c992600ef074a3d3107855de50b1a720167dc4ad439d0c7caf1df3aaaca",
+      "hashBasis": "committed_text_LF"
+    },
+    "sourceGetAttempts": 0,
+    "systemDnsCalls": 1,
+    "completeResponses": 0,
+    "businessRecords": 0,
     "qualificationChanged": false
   }
 }
