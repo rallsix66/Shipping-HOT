@@ -1,0 +1,154 @@
+{
+  "results": [
+    {
+      "id": "VN-D01",
+      "url": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
+      "enabled": false,
+      "persistence": "disallowed",
+      "config": {
+        "listSelector": ".boxtopnews ul.news-headlines",
+        "itemSelector": "li > .item .col-md-10.title_item",
+        "linkSelector": "p > a[href]",
+        "titleAttribute": "title",
+        "linkTextFormat": "title-dmy-date",
+        "dateOrder": "dmy",
+        "calendar": "gregorian",
+        "allowUrlPrefixes": [
+          "https://phongchongthientai.mard.gov.vn/Pages"
+        ],
+        "dateRuleBasis": "VN-D01 complete raw observed 2026-10-15: unique news-headlines list, four own-anchor full title attributes and visible trailing (D/M/YYYY) dates. Preserve the full title rather than truncated visible text. Gregorian source-displayed list day only; no publication clock/timezone or disaster/port impact inference."
+      },
+      "startedAt": "2026-10-15T01:46:52.084Z",
+      "httpRequests": 0,
+      "material": "complete private real response bytes, not synthetic or sanitized skeleton",
+      "rawHtmlCommitted": false,
+      "fetchedRawSha256": "6267157d5c21c4a4c3885a6d29aec73bd9f354d085dc239c5ea70709eb7c2861",
+      "rawBytes": 183913,
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "http",
+        "declarations": [
+          {
+            "source": "http",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          },
+          {
+            "source": "meta",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          }
+        ],
+        "conflict": false,
+        "byteLength": 183913
+      },
+      "adapterCount": 4,
+      "dateRules": [
+        "configured_dmy"
+      ],
+      "samples": [
+        {
+          "titleExcerpt": "Đà Nẵng khẩn trương bảo vệ người dân vùng sạt lở ven sông Vu Gia",
+          "canonicalUrl": "https://phongchongthientai.mard.gov.vn/Pages/da-nang-khan-truong-bao-ve-nguoi-dan-vung-sat-lo-ven-song-vu-gia.aspx",
+          "dateEvidence": {
+            "raw": "14/10/2026",
+            "rule": "configured_dmy",
+            "basis": "VN-D01 complete raw observed 2026-10-15: unique news-headlines list, four own-anchor full title attributes and visible trailing (D/M/YYYY) dates. Preserve the full title rather than truncated visible text. Gregorian source-displayed list day only; no publication clock/timezone or disaster/port impact inference.",
+            "calendar": "gregorian",
+            "precision": "day",
+            "timezone": "missing",
+            "utcOffset": null,
+            "localDate": "2026-10-14",
+            "publishedAt": null
+          }
+        },
+        {
+          "titleExcerpt": "Cà Mau chủ động bảo vệ người dân trước thiên tai",
+          "canonicalUrl": "https://phongchongthientai.mard.gov.vn/Pages/ca-mau-chu-dong-bao-ve-nguoi-dan-truoc-thien-tai.aspx",
+          "dateEvidence": {
+            "raw": "14/10/2026",
+            "rule": "configured_dmy",
+            "basis": "VN-D01 complete raw observed 2026-10-15: unique news-headlines list, four own-anchor full title attributes and visible trailing (D/M/YYYY) dates. Preserve the full title rather than truncated visible text. Gregorian source-displayed list day only; no publication clock/timezone or disaster/port impact inference.",
+            "calendar": "gregorian",
+            "precision": "day",
+            "timezone": "missing",
+            "utcOffset": null,
+            "localDate": "2026-10-14",
+            "publishedAt": null
+          }
+        },
+        {
+          "titleExcerpt": "Nâng cao khả năng chống chịu thiên tai, bắt đầu từ chính ngôi nhà của bạn.",
+          "canonicalUrl": "https://phongchongthientai.mard.gov.vn/Pages/nang-cao-kha-nang-chong-chiu-thien-tai-bat-dau-tu-chinh-ngoi-nha-cua-ban.aspx",
+          "dateEvidence": {
+            "raw": "13/10/2026",
+            "rule": "configured_dmy",
+            "basis": "VN-D01 complete raw observed 2026-10-15: unique news-headlines list, four own-anchor full title attributes and visible trailing (D/M/YYYY) dates. Preserve the full title rather than truncated visible text. Gregorian source-displayed list day only; no publication clock/timezone or disaster/port impact inference.",
+            "calendar": "gregorian",
+            "precision": "day",
+            "timezone": "missing",
+            "utcOffset": null,
+            "localDate": "2026-10-13",
+            "publishedAt": null
+          }
+        },
+        {
+          "titleExcerpt": "Hà Nội tăng cường năng lực phòng, chống thiên tai tại cơ sở",
+          "canonicalUrl": "https://phongchongthientai.mard.gov.vn/Pages/ha-noi-tang-cuong-nang-luc-phong-chong-thien-tai-tai-co-so.aspx",
+          "dateEvidence": {
+            "raw": "13/10/2026",
+            "rule": "configured_dmy",
+            "basis": "VN-D01 complete raw observed 2026-10-15: unique news-headlines list, four own-anchor full title attributes and visible trailing (D/M/YYYY) dates. Preserve the full title rather than truncated visible text. Gregorian source-displayed list day only; no publication clock/timezone or disaster/port impact inference.",
+            "calendar": "gregorian",
+            "precision": "day",
+            "timezone": "missing",
+            "utcOffset": null,
+            "localDate": "2026-10-13",
+            "publishedAt": null
+          }
+        }
+      ],
+      "first": {
+        "status": "ok_items",
+        "runId": "5dd31a17-3e4b-4e78-96c8-a04117511892",
+        "itemsSeen": 4,
+        "itemsNew": 4,
+        "itemsRevised": 0
+      },
+      "firstCounts": {
+        "items": 4,
+        "versions": 4
+      },
+      "repeat": {
+        "status": "ok_items",
+        "runId": "44b1204d-e96b-457f-899e-fd03d5f23e9d",
+        "itemsSeen": 4,
+        "itemsNew": 0,
+        "itemsRevised": 0
+      },
+      "repeatCounts": {
+        "items": 4,
+        "versions": 4
+      },
+      "injectedTransports": 2,
+      "status": "OFFLINE_REPLAY_ONLY_PASS",
+      "reopen": {
+        "readOnly": true,
+        "rows": 4,
+        "versions": 4,
+        "fullTitleUrlDateEvidenceCompared": true,
+        "mismatches": 0,
+        "dayPrecision": 4,
+        "missingTimezone": 4,
+        "nullPublicationInstants": 4
+      },
+      "finishedAt": "2026-10-15T01:46:52.287Z"
+    }
+  ],
+  "actualSourceHttpRequests": 0,
+  "synthetic": false,
+  "originalRawRedistributed": false,
+  "overallR2Pass": false,
+  "publicSourceAvailabilityPasses": 0,
+  "note": "per-response archive offline replay only; no production activation or 24h"
+}

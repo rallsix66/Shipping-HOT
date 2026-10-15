@@ -1,0 +1,42 @@
+{
+  "checkedAt": "2026-10-15T01:45:12.107967+00:00",
+  "readOnly": true,
+  "checkedLocalFiles": [
+    "docs/evidence/r2-four-reapplied-2026-10-15/CN-P02-response.json",
+    "docs/evidence/r2-four-reapplied-2026-10-15/CN-P02-result.json",
+    "docs/evidence/r2-four-reapplied-2026-10-15/ID-T02-response.json",
+    "docs/evidence/r2-four-reapplied-2026-10-15/ID-T02-result.json",
+    ".tmp/r2-four-reapplied-2026-10-15-private/CN-P02.response.bin",
+    ".tmp/r2-four-reapplied-2026-10-15-private/ID-T02.response.bin"
+  ],
+  "locationKeysFound": [],
+  "results": [
+    {
+      "id": "CN-P02",
+      "httpStatus": 302,
+      "rawBytes": 207,
+      "rawSha256": "0636ef4de5a01c1744ea9e76e6dbb29b0668d130d6b7f349d1b2268ea73dd29e",
+      "locationHeaderSaved": false,
+      "explicitBodyTargetLiteral": "/btatw23_atbp/bt",
+      "bodyEvidenceKind": "relative anchor href in302 response body",
+      "absoluteDestination": null,
+      "sameHostNotEstablished": true,
+      "followed": false,
+      "newRequests": 0
+    },
+    {
+      "id": "ID-T02",
+      "httpStatus": 307,
+      "rawBytes": 5,
+      "rawSha256": "2cc974af6afc822c42a4e914df05c697348b80420941f6b27561b2bf688587b7",
+      "locationHeaderSaved": false,
+      "explicitBodyTargetLiteral": "/home",
+      "bodyEvidenceKind": "entire307 response body is this relative path",
+      "absoluteDestination": null,
+      "sameHostNotEstablished": true,
+      "followed": false,
+      "newRequests": 0
+    }
+  ],
+  "limits": "Relative body literals are recorded without resolving host or asserting Location. No header can be reconstructed and no new request authorized."
+}

@@ -1,0 +1,9 @@
+const fs=require('node:fs'),cp=require('node:child_process')
+const dir='docs/evidence/r2-anchor-date-review-replay-2026-10-15';fs.mkdirSync(dir,{recursive:true})
+if(fs.existsSync(dir+'/launch.json'))throw Error('raw_replay_launch_exists')
+const sha=cp.execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),args=['node_modules/vitest/vitest.mjs','run','-c','.tmp/anchor-date-review-replay-20261015.config.ts'],startedAt=new Date().toISOString()
+fs.writeFileSync(dir+'/launch.json',JSON.stringify({sha,startedAt,command:[process.execPath,...args],actualSourceHttpRequests:0,material:'full original private response bytes, not synthetic or sanitized reconstruction'},null,2)+'\n')
+const r=cp.spawnSync(process.execPath,args,{windowsHide:true,encoding:'utf8',maxBuffer:1<<24})
+fs.writeFileSync(dir+'/command.json',JSON.stringify({sha,startedAt,finishedAt:new Date().toISOString(),command:[process.execPath,...args],rawExit:r.status,stdoutCapturedUtf8:r.stdout||'',stderrCapturedUtf8:r.stderr||''},null,2)+'\n')
+fs.writeFileSync(dir+'/stdout.log',(r.stdout||'').trimEnd()+'\n');fs.writeFileSync(dir+'/stderr.log',(r.stderr||'').trimEnd()+(r.stderr?'\n':''))
+console.log(JSON.stringify({rawExit:r.status,sha,evidence:dir}));process.exitCode=r.status??1

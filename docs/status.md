@@ -2,11 +2,13 @@
 
 全部41项保留：34资讯/公告、5数值天气、2原定后续阶段。当前R2-4 **20/39**（至少32，差12；20 OK / 11 PARTIAL / 1 STALE / 7 NOT_RUN）；R2-5 **12/34**（12 PASS / 4 FAIL / 1 PARTIAL / 17 NOT_RUN），数值有限历史诊断另列 **3/5**。不是整体R2 PASS或24小时证明。[唯一当前逐源矩阵](evidence/r2-current-source-matrix-2026-10-14/mapping.json) / [41项报告](evidence/r2-current-source-matrix-2026-10-14/report.md)。以下旧批次按发生时点保留，不单独充当当前累计。
 
-用户重新应用后只读核实生成21项、原17保留，四次系统DNS均公网、各精确GET一次。CN-P02=302和ID-T02=307未跟随；VN-D01=200原183913字节4条新闻，完整title属性和同锚点末尾DMY日期；MY-L01=200原124208字节，10张标题卡片无href，真实collector探针失败/写入0。源码9ec4a2dd4e6a76657ec3ed2a6dabb15187b4d5a8仅新增关闭VN候选与严格title-dmy-date映射，无迁移/Provider/框架或active生产范围变化。原页→隔离SQLite4 items/versions，重复0新0修订，只读重开全字段0差异，源列表日/day、missing timezone/瞬间null，不猜发布日期或港口影响。[本批结果与边界](evidence/r2-four-reapplied-2026-10-15/report.md)。
+用户重新应用后只读核实生成21项、原17保留，四次系统DNS均公网、各精确GET一次。CN-P02=302和ID-T02=307未跟随；VN-D01=200原183913字节4条新闻，完整title属性和同锚点末尾DMY日期；MY-L01=200原124208字节，10张标题卡片无href，真实collector探针失败/写入0。当前源码355952c0e8c01266adbe692dfcfd3bca9b3c17b2继承关闭VN候选；本轮仅修复title-dmy-date语法不匹配时的通用回退，无迁移/Provider/框架或active生产范围变化。原页→隔离SQLite4 items/versions，重复0新0修订，只读重开全字段0差异，源列表日/day、missing timezone/瞬间null，不猜发布日期或港口影响。[本批结果与边界](evidence/r2-four-reapplied-2026-10-15/report.md)。
 
-该源码全新隔离克隆frozen install正常scripts、build/typecheck/lint、190定向、1217全量通过/3既有跳过、3smoke全退出0，测试源码diff0、根保留DB/secret-file摘要不变；[精确SHA原始门禁](evidence/gate-9ec4a2d-reapplied-four/summary.json)。原字节私有ignored，远端只有必要派生metadata/过程/hash。TMD/BMKG seed enabled=true与生产job默认off区分，10个HTML候选enabled=false；本轮未修改网络设置/系统配置，不启生产、24h、付费或LLM，GUI/S7 NOT_RUN且原GUI仍pending。临时stack PR8/base codex/shipping-hot-r1-5保持。
+该源码全新隔离克隆frozen install正常scripts、build/typecheck/lint、195定向、1222全量通过/3既有跳过、3smoke全退出0，测试源码diff0、根保留DB/secret-file摘要不变；[精确SHA原始门禁](evidence/gate-355952c-anchor-date-repair/summary.json)。原字节私有ignored，远端只有必要派生metadata/过程/hash。TMD/BMKG seed enabled=true与生产job默认off区分，10个HTML候选enabled=false；本轮未修改网络设置/系统配置，不启生产、24h、付费或LLM，GUI/S7 NOT_RUN且原GUI仍pending。临时stack PR8/base codex/shipping-hot-r1-5保持。
 
 Westports独立修正e4d56116cda05fe4a8dbe151040c26874b6807c1保留，RSS最新保存日2025-08-01仍STALE；Northport冲突、VN-P01无日期、NMC适用性FAIL、XX-W02仅forecast/specifications未验证、VNSGN原点缺测/约61.8km独立参考边界不变。旧四源198.18 DNS阻断已由本批公网实响取代，不能当当前阻断。R1.5历史1/10用户延后、不重找；不合并部署。
+
+本轮P2修复严格阻止title-dmy-date不匹配后回退通用日期解析，原文留存unknown；裸DMY、ISO、单独括号日期与空白/零宽标题均有负例。仅保存原页重放，四条与修前完整字段一致，覆盖不变。CN-P02正文仅相对`/btatw23_atbp/bt`、ID-T02仅`/home`，Location未保存，不确认绝对目标/同域且未重新请求。MY-L01有十张静态卡片，详情href缺失，不判断隐藏接口。[修复与边界](evidence/r2-anchor-date-review-repair-2026-10-15/report.md)。
 
 ## R2 三域例外已应用、三索引真实原页适配（2026-10-14）
 

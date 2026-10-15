@@ -1,0 +1,14 @@
+{
+  "name": "lint",
+  "command": "pnpm lint",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\anchor-date-repair-build-20261015",
+  "sha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
+  "startedAt": "2026-10-15T01:47:54.009Z",
+  "finishedAt": "2026-10-15T01:48:20.456Z",
+  "rawExit": 0,
+  "stderrCapturedUtf8": "",
+  "stderrCapturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "displayLogTrailingWhitespaceTrimmed": true,
+  "stdoutCapturedUtf8": "\n> shipping-hot@0.0.41 lint D:\\try one\\Shipping HOT\\.tmp\\anchor-date-repair-build-20261015\n> eslint\n\n",
+  "stdoutCapturedSha256": "c160bb8ce2c988abfee2b46c7bdfa71a5bd60b749ffa98fabb31c63e118649c5"
+}

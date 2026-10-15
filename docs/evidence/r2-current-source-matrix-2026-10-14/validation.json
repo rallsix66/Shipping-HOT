@@ -1,15 +1,17 @@
 {
-  "type": "docs_and_capture_evidence_validation",
-  "at": "2026-10-15T01:33:34.450303+00:00",
-  "codeSha": "9ec4a2dd4e6a76657ec3ed2a6dabb15187b4d5a8",
-  "evidenceBaseline": "50da3805ee14e72222a4e26f4230073cf1842bc7",
+  "type": "docs_and_saved_evidence_validation",
+  "at": "2026-10-15T01:53:27.618762+00:00",
+  "codeSha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
+  "evidenceBaseline": "d22019c3e432fc84ad51e1132aedd14708a82b4e",
   "command": "python .tmp/validate-current-r2-matrix.py",
   "validatorSourceRequests": 0,
   "validatorSourceDns": 0,
-  "currentBatchSystemDns": 4,
-  "currentBatchHttpRequests": 4,
-  "functionalTests": "PASS_clean_code_gate_9ec4a2d; documented separately from this metadata validation",
-  "originalFieldReplay": "VN-D01_complete_private_raw_PASS; MY-L01_actual_list_suitability_FAIL; redirects_not_followed",
+  "lastQualificationBatchSystemDns": 4,
+  "lastQualificationBatchHttpRequests": 4,
+  "thisRepairRoundSourceRequests": 0,
+  "thisRepairRoundSystemDns": 0,
+  "functionalTests": "PASS_clean_code_gate_355952c; separate from this metadata validation",
+  "originalFieldReplay": "saved_VN-D01_four_records_compare_unchanged_PASS; old_MY-L01_suitability_FAIL_not_reclassified; redirects_not_followed",
   "checks": [
     {
       "check": "41 unique entries match current catalogue automatic P1 rows",
@@ -37,8 +39,8 @@
       "check": "All evidence paths exist",
       "pass": true,
       "detail": {
-        "referenceOccurrences": 137,
-        "uniquePaths": 36,
+        "referenceOccurrences": 140,
+        "uniquePaths": 38,
         "missing": []
       }
     },
@@ -121,11 +123,9 @@
         "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
         "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
         "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
-        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
         "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
         "docs/evidence/r2-current-source-matrix-2026-10-14/validate-matrix.py.txt",
         "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
-        "docs/intel-source-catalog.md",
         "docs/status.md"
       ]
     },
@@ -151,6 +151,16 @@
     },
     {
       "check": "Westports latest saved date enforces STALE without changing field denominator",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "P2 repair leaves all four accepted real title URL date records unchanged",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Redirect relative body literals are not promoted to saved Location or absolute host",
       "pass": true,
       "detail": null
     },

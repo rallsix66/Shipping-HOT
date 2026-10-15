@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T01:30:19.749850+00:00",
-  "reviewedCodeSha": "9ec4a2dd4e6a76657ec3ed2a6dabb15187b4d5a8",
-  "evidenceHead": "50da3805ee14e72222a4e26f4230073cf1842bc7",
+  "generatedAt": "2026-10-15T01:48:35.689029+00:00",
+  "reviewedCodeSha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
+  "evidenceHead": "d22019c3e432fc84ad51e1132aedd14708a82b4e",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "91328b2e4754dfe51ab1c94508df3c47675ede66df1e852d1b69b187418dd0b3",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -315,7 +315,8 @@
       },
       "gaps": [
         "Redirect not followed; destination/list fields and new product URL remain unverified.",
-        "No source config, no guessed alternate URL, no further request."
+        "No source config, no guessed alternate URL, no further request.",
+        "Saved material has no Location header; body only gives a relative path literal, no verified absolute destination or same-origin conclusion."
       ],
       "historicalSuperseded": [
         "Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block."
@@ -387,7 +388,15 @@
           "reason": "blocked_address",
           "scope": "current_environment_dns_only_no_response_no_parse"
         }
-      ]
+      ],
+      "redirectInspection": {
+        "path": "docs/evidence/r2-anchor-date-review-repair-2026-10-15/redirect-material-inspection.json",
+        "selector": {
+          "id": "CN-P02"
+        },
+        "sha256": "923e62e0701337eb62fb286ca2c26c68659ded2dbd13100ddbfb7390e23e04cd",
+        "hashBasis": "committed_text_LF"
+      }
     },
     {
       "id": "CN-W01",
@@ -1261,24 +1270,24 @@
       "fieldReplayEvidence": {
         "status": "PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS",
         "evidence": {
-          "path": "docs/evidence/r2-reapplied-raw-replay-2026-10-15/summary.json",
+          "path": "docs/evidence/r2-anchor-date-review-replay-2026-10-15/summary.json",
           "selector": {
             "id": "VN-D01"
           },
-          "sha256": "10430d43b76b7416086a3bca07798e55350bc720c098ea574897a0de72d86499",
+          "sha256": "f8c2b4debe5ed2d7ed8777212717ca0f2b7a5eca92c1df55b3f3f4f307892a1b",
           "hashBasis": "committed_text_LF"
         },
         "items": 4,
         "first": {
           "status": "ok_items",
-          "runId": "31c61cbf-0d43-4f38-aceb-a144e4b919d1",
+          "runId": "5dd31a17-3e4b-4e78-96c8-a04117511892",
           "itemsSeen": 4,
           "itemsNew": 4,
           "itemsRevised": 0
         },
         "repeat": {
           "status": "ok_items",
-          "runId": "884ed1fa-8161-408d-9047-ada16adbf4ec",
+          "runId": "44b1204d-e96b-457f-899e-fd03d5f23e9d",
           "itemsSeen": 4,
           "itemsNew": 0,
           "itemsRevised": 0
@@ -1293,7 +1302,13 @@
           "missingTimezone": 4,
           "nullPublicationInstants": 4
         },
-        "independentStorageAudit": null
+        "independentStorageAudit": null,
+        "reviewRepairProof": {
+          "path": "docs/evidence/r2-anchor-date-review-replay-2026-10-15/baseline-comparison.json",
+          "selector": null,
+          "sha256": "5067e111fdb81d606857986958498a48a9e5abb56ad6cba7fc4a5e558afc222d",
+          "hashBasis": "committed_text_LF"
+        }
       },
       "numericFieldValidation": null,
       "dateEvidence": {
@@ -1332,7 +1347,8 @@
       },
       "gaps": [
         "Private original raw only; remote derivative cannot reconstruct the full page.",
-        "No continuous production or enablement."
+        "No continuous production or enablement.",
+        "P2 repair rejects mismatched title/date grammar without generic-date fallback; all four saved real records compare unchanged, no new upstream request."
       ],
       "historicalSuperseded": [
         "Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block."
@@ -2326,7 +2342,8 @@
       "gaps": [
         "Ten title anchors lack href; category URL cannot identify articles.",
         "Abbreviated English month/12h clock not supported by current strict grammar; no date/zone guess.",
-        "No permanent source config or hidden-interface/detail request."
+        "No permanent source config or hidden-interface/detail request.",
+        "Static response contains ten title/time cards; rendering method or hidden API is not established by this missing-href result."
       ],
       "historicalSuperseded": [
         "Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block."
@@ -2769,7 +2786,8 @@
       },
       "gaps": [
         "Redirect not followed; destination/list fields and new product URL remain unverified.",
-        "No source config, no guessed alternate URL, no further request."
+        "No source config, no guessed alternate URL, no further request.",
+        "Saved material has no Location header; body only gives a relative path literal, no verified absolute destination or same-origin conclusion."
       ],
       "historicalSuperseded": [
         "Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block."
@@ -2841,7 +2859,15 @@
           "reason": "blocked_address",
           "scope": "current_environment_dns_only_no_response_no_parse"
         }
-      ]
+      ],
+      "redirectInspection": {
+        "path": "docs/evidence/r2-anchor-date-review-repair-2026-10-15/redirect-material-inspection.json",
+        "selector": {
+          "id": "ID-T02"
+        },
+        "sha256": "923e62e0701337eb62fb286ca2c26c68659ded2dbd13100ddbfb7390e23e04cd",
+        "hashBasis": "committed_text_LF"
+      }
     },
     {
       "id": "PH-P01",

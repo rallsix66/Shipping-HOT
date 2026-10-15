@@ -1,1 +1,1 @@
-当前收尾见[2026-10-15真实Neat Freak记录](../r2-four-reapplied-2026-10-15/closeout.md)。旧50da380的DNS-only结论为历史，本批已公网解析/各精确GET一次；当前20/39、12/34，数值有限诊断3/5。[逐源报告](report.md)。
+当前收尾见[P2限域修复真实Neat Freak](../r2-anchor-date-review-repair-2026-10-15/closeout.md)。源码355952c0e8c01266adbe692dfcfd3bca9b3c17b2；原四条保存记录不变，覆盖20/39、12/34、有限数值3/5，新增来源HTTP/DNS0。[当前逐源报告](report.md)。

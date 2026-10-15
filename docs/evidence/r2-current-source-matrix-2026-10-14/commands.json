@@ -1,6 +1,6 @@
 {
   "type": "docs_only_commands",
-  "evidenceBaseline": "50da3805ee14e72222a4e26f4230073cf1842bc7",
+  "evidenceBaseline": "d22019c3e432fc84ad51e1132aedd14708a82b4e",
   "commands": [
     {
       "label": "docs_lint_no_fix",
@@ -543,6 +543,155 @@
       "stdout": "{\"checks\": 25, \"errors\": [], \"referenceOccurrences\": 137, \"uniquePaths\": 36, \"rawExit\": 0}\r\n",
       "stderr": "",
       "rawExit": 0
+    },
+    {
+      "label": "docs_lint_direct_installed_node_no_fix",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "node_modules/eslint/bin/eslint.js",
+        "docs/architecture.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/status.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/before-fix-regression.json",
+        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/closeout.md",
+        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/redirect-material-inspection.json",
+        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/report.md",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/baseline-comparison.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/command.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/launch.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/partial-results.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/report.md",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/summary.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-adapter.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-first.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-repeat.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-result.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/build.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/install.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/launch.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/lint.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-feed.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p0.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p2c.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/summary.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/targeted.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/typecheck.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/vitest.json"
+      ],
+      "startedAt": "2026-10-15T01:51:53.455359+00:00",
+      "finishedAt": "2026-10-15T01:51:56.328598+00:00",
+      "stdout": "\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\build.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\install.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\launch.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\lint.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\smoke-feed.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\smoke-p0.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\smoke-p2c.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\summary.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\targeted.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\typecheck.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\vitest.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-repair-2026-10-15\\before-fix-regression.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-repair-2026-10-15\\redirect-material-inspection.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\VN-D01-adapter.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\VN-D01-first.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\VN-D01-repeat.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\VN-D01-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\baseline-comparison.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\command.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\launch.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\partial-results.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\summary.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\commands.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\mapping.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\metadata-scan.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\validation.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\n✖ 26 problems (0 errors, 26 warnings)\n\n",
+      "stderr": "",
+      "rawExit": 0
+    },
+    {
+      "label": "tracked_diff_whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "startedAt": "2026-10-15T01:51:56.328654+00:00",
+      "finishedAt": "2026-10-15T01:51:56.388995+00:00",
+      "stdout": "",
+      "stderr": "warning: in the working copy of 'docs/architecture.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/report.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/validate-matrix.py.txt', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it\n",
+      "rawExit": 0
+    },
+    {
+      "label": "matrix_structural_evidence_validation",
+      "command": [
+        "C:\\Program Files\\Python313\\python.EXE",
+        ".tmp/validate-current-r2-matrix.py"
+      ],
+      "startedAt": "2026-10-15T01:51:56.421515+00:00",
+      "finishedAt": "2026-10-15T01:51:56.612624+00:00",
+      "stdout": "{\"checks\": 27, \"errors\": [], \"referenceOccurrences\": 140, \"uniquePaths\": 38, \"rawExit\": 0}\r\n",
+      "stderr": "",
+      "rawExit": 0
+    },
+    {
+      "label": "docs_lint_direct_installed_node_no_fix",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.EXE",
+        "node_modules/eslint/bin/eslint.js",
+        "docs/architecture.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/status.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/before-fix-regression.json",
+        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/closeout.md",
+        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/redirect-material-inspection.json",
+        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/report.md",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/baseline-comparison.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/command.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/launch.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/partial-results.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/report.md",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/summary.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-adapter.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-first.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-repeat.json",
+        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-result.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/build.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/install.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/launch.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/lint.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-feed.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p0.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p2c.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/source-proof.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/summary.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/targeted.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/typecheck.json",
+        "docs/evidence/gate-355952c-anchor-date-repair/vitest.json"
+      ],
+      "startedAt": "2026-10-15T01:53:24.412571+00:00",
+      "finishedAt": "2026-10-15T01:53:27.324381+00:00",
+      "stdout": "\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\build.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\install.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\launch.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\lint.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\smoke-feed.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\smoke-p0.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\smoke-p2c.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\source-proof.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\summary.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\targeted.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\typecheck.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\gate-355952c-anchor-date-repair\\vitest.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-repair-2026-10-15\\before-fix-regression.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-repair-2026-10-15\\redirect-material-inspection.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\VN-D01-adapter.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\VN-D01-first.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\VN-D01-repeat.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\VN-D01-result.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\baseline-comparison.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\command.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\launch.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\partial-results.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-anchor-date-review-replay-2026-10-15\\summary.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\commands.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\mapping.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\metadata-scan.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\nD:\\try one\\Shipping HOT\\docs\\evidence\\r2-current-source-matrix-2026-10-14\\validation.json\n  0:0  warning  File ignored because of a matching ignore pattern. Use \"--no-ignore\" to disable file ignore settings or use \"--no-warn-ignored\" to suppress this warning\n\n✖ 27 problems (0 errors, 27 warnings)\n\n",
+      "stderr": "",
+      "rawExit": 0
+    },
+    {
+      "label": "tracked_diff_whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "startedAt": "2026-10-15T01:53:27.324442+00:00",
+      "finishedAt": "2026-10-15T01:53:27.391605+00:00",
+      "stdout": "",
+      "stderr": "warning: in the working copy of 'docs/architecture.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/commands.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/report.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/validate-matrix.py.txt', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/validation.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it\n",
+      "rawExit": 0
+    },
+    {
+      "label": "matrix_structural_evidence_validation",
+      "command": [
+        "C:\\Program Files\\Python313\\python.EXE",
+        ".tmp/validate-current-r2-matrix.py"
+      ],
+      "startedAt": "2026-10-15T01:53:27.423703+00:00",
+      "finishedAt": "2026-10-15T01:53:27.625348+00:00",
+      "stdout": "{\"checks\": 27, \"errors\": [], \"referenceOccurrences\": 140, \"uniquePaths\": 38, \"rawExit\": 0}\r\n",
+      "stderr": "",
+      "rawExit": 0
     }
   ],
   "metadataScan": {
@@ -553,6 +702,6 @@
   },
   "initialInventoryRawExit": 127,
   "finalInventoryRawExit": 0,
-  "functionalGates": "PASS_in_separate_gate_9ec4a2d_reapplied_four_not_this_docs_command",
+  "functionalGates": "PASS_in_separate_gate_355952c_anchor_date_repair_not_this_docs_command",
   "initialDocValidationFailures": "Historical initial validator syntax/header issues were corrected; local intermediate logs retained."
 }
