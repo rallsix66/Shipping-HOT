@@ -1,0 +1,57 @@
+{
+  "rawExit": 0,
+  "startedAt": "2026-10-15T08:35:50.980Z",
+  "finishedAt": "2026-10-15T08:35:51.330Z",
+  "executionHead": "45d2296301bb85aa18a6e4a5e6509bfa854319b0",
+  "productCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "checks": [
+    {
+      "name": "branch/base, product/catalogue and previous evidence unchanged; full gate not run",
+      "pass": true
+    },
+    {
+      "name": "exact catalogue and real Location self-URL; no body-derived target or repeated request",
+      "pass": true
+    },
+    {
+      "name": "one public DNS and one GET, full207 bytes and original command streams",
+      "pass": true
+    },
+    {
+      "name": "ID-T02 limited process acceptance keeps date unknowns/correction; CN-P02 and39 others unchanged qualifications",
+      "pass": true
+    },
+    {
+      "name": "only approved ID-T02 adds25/39 and23/34; fixed thresholds/numeric3/5/24h remain",
+      "pass": true
+    },
+    {
+      "name": "all recursive matrix evidence file hashes resolve with committed LF basis",
+      "pass": true
+    },
+    {
+      "name": "current docs/frontier/rules, minimum disclosure and retained root hashes",
+      "pass": true
+    }
+  ],
+  "recursiveMatrixFileHashes": 339,
+  "localMarkdownLinks": 153,
+  "sourceDnsCalls": 1,
+  "sourceGetAttempts": 1,
+  "targetGetAttempts": 0,
+  "singleSelfRedirectObserved": true,
+  "multiHopCycleTested": false,
+  "normalizedRecords": 0,
+  "recordsPersisted": 0,
+  "idT02Qualification": "OK/PASS_limited_parent_process_evidence",
+  "parentIndependentPrivateRawReplay": false,
+  "cnP02Qualification": "PARTIAL/NOT_RUN_unchanged",
+  "coverage": {
+    "r24": "25/39",
+    "r25": "23/34",
+    "numericHistorical": "3/5"
+  },
+  "fullProductGate": "NOT_RUN_no_product_change",
+  "guiS7": "NOT_RUN",
+  "production24h": "NOT_RUN"
+}

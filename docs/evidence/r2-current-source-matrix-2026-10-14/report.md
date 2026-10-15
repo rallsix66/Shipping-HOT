@@ -1,6 +1,6 @@
 # R2 41项来源累计证据 — 2026-10-15
 
-最新ID-T02有限检查更正：span.card-tag原日期与身份/标识/描述标题可靠绑定，前轮漏检保留更正；8d0993e最小关闭候选与9项cleanSHA门禁/315定向/1300全量+3跳过/3smoke通过，同一完整307→200链7条落库/重复0/query_only字段0差异，源请求0，CN-P02未开启。代码/资格建议待父审，批准24/39、22/34、历史3/5不加。[本轮报告](../r2-id-t02-finite-cn-p02-2026-10-15/report.md)。
+最新审定：ID-T02代码/过程证据限定通过、无新增P2，认可OK/PASS，累计25/39、23/34、历史3/5；不称独立私有原页重放/CI/24h通过。本轮CN-P02 DNS1/GET1，真实302 Location指回原URL，按零重试止步、目标0，无列表/字段/入库/产品扩展，资格不变。[本轮报告](../r2-cn-p02-location-2026-10-15/report.md)。
 
 前轮SITC应用后真页（8be5bdd负例保留）：DNS1/GET1=200/38839字节，20卡片原HTTP链接与点分发布日期不符合当前generic合同；隔离collector明确拒绝、业务0，空表重开不作正向PASS。PARTIAL建议待审，原资格/23/39、21/34、历史3/5不改。[本轮材料](../r2-sitc-applied-2026-10-15/report.md)。
 
@@ -24,12 +24,12 @@
 
 前轮ONE同源目录URL更新已获批准并应用：XX-K02现为 https://www.one-line.com/en/newsroom，旧/en/news及原308链保留；目录web_list为HTML页面形态，现有默认关闭候选用json_list惰性HTML内嵌JSON模式。源码 `bebe1441465adfcabb9daf93cb2a8656ec1fc796` 干净门禁245定向、1230全量/3跳过及3smoke通过。已有635664原HTML经正式关闭候选回归10条字段、重复0新0修订、只读重开0差异，与前轮10条原字段完全相同；本轮来源DNS/HTTP0，不刷新02:56实网时间，不推导持续可用。覆盖仍21/39、13/34，数值3/5独立。[本轮目录/配置依据与至多三项建议](../r2-one-catalog-candidate-2026-10-15/report.md)。
 
-本报告汇总已保存证据，供父会话独立审查。当前本地代码基准 `8d0993e4164dae0b7a7f96dc531b9aac92be54b1`（ID-T02本地门禁通过、父审pending；父认可代码仍0a483dd）；前一四源采集HEAD为 `50da3805ee14e72222a4e26f4230073cf1842bc7`。该历史批次四次系统DNS均公网、精确索引HTTP4；VN-D01原页有限通过、MY-L01真实探针失败，两源跳转未跟随；干净源码门禁已另存。[机器矩阵](mapping.json)保留全部41项的精确目录产品、采集时点、原证据路径/LF文本哈希、字段回放、时间角色、许可、默认状态及两项独立判定。
+本报告汇总已保存证据，供父会话独立审查。当前本地代码基准 `8d0993e4164dae0b7a7f96dc531b9aac92be54b1`（主会话限定代码/过程认可，无独立私有原页重放）；前一四源采集HEAD为 `50da3805ee14e72222a4e26f4230073cf1842bc7`。该历史批次四次系统DNS均公网、精确索引HTTP4；VN-D01原页有限通过、MY-L01真实探针失败，两源跳转未跟随；干净源码门禁已另存。[机器矩阵](mapping.json)保留全部41项的精确目录产品、采集时点、原证据路径/LF文本哈希、字段回放、时间角色、许可、默认状态及两项独立判定。
 
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
-| R2-4公开自动来源 | **24/39（61.54%）** | 最少32项，尚差8；24 OK、8 PARTIAL、1 STALE、2 BLOCKED、4 NOT_RUN，未通过 |
-| R2-5资讯/公告原页字段回放 | **22/34（64.71%）** | 尚差12；22 PASS、2 FAIL、1 PARTIAL、9 NOT_RUN，未通过 |
+| R2-4公开自动来源 | **25/39（64.10%）** | 最少32项，尚差7；25 OK、7 PARTIAL、1 STALE、2 BLOCKED、4 NOT_RUN，未通过 |
+| R2-5资讯/公告原页字段回放 | **23/34（67.65%）** | 尚差11；23 PASS、2 FAIL、1 PARTIAL、8 NOT_RUN，未通过 |
 | 数值字段独立检查 | **3/5** | 仅历史归一化诊断；不加到34项原页回放分子 |
 | R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
 
@@ -44,7 +44,7 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 | ID | 精确目录URL / 原文本 | 最新已有采集UTC / HTTP | R2-4 | R2-5 | 判定理由 / 保留缺口 |
 | --- | --- | --- | --- | --- | --- |
 | CN-P01 | https://www.gd.msa.gov.cn/ | 2026-10-14T07:56:30.108Z / 200 [取证](../r2-four-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-public-index-replay-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
-| CN-P02 | https://www.sz.msa.gov.cn/ | 2026-10-15T01:16:09.530Z / 302 [本批](../r2-four-reapplied-2026-10-15/report.md) | PARTIAL | NOT_RUN | 精确URL302，原207字节已保存，未跟随跳转；没有列表字段回放。 |
+| CN-P02 | https://www.sz.msa.gov.cn/ | 2026-10-15T08:27:32.616Z /302真实自指Location，DNS1/GET1 | PARTIAL | NOT_RUN | Location等于原URL，零重试停止、目标0，无实际列表/结构/回放；旧正文相对路径不当跳转目标。 |
 | CN-W01 | https://www.nmc.cn/publish/typhoon/typhoon_new.html | 2026-10-11历史200 [实跑](../nmc-integration-2026-10-11/nmc-live-evidence.json) | OK | PASS [专用映射](../r2-nmc-close-2026-10-15/product-mapping.json) | 固定产品URL/标题/原时间或年度期号，unknown TZ/生命周期、历史/解除提示、0港口影响；10/13为零网络generic适配负例，不是源实网失败。 |
 | CN-W02 | https://www.nmc.cn/publish/country/warning/index.html | 2026-10-11历史200 [实跑](../nmc-integration-2026-10-11/nmc-live-evidence.json) | OK | PASS [专用映射](../r2-nmc-close-2026-10-15/product-mapping.json) | 固定产品URL/标题/原时间或年度期号，unknown TZ/生命周期、历史/解除提示、0港口影响；10/13为零网络generic适配负例，不是源实网失败。 |
 | CN-T01 | http://www.mofcom.gov.cn/zcfb/index.html | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 目录URL为HTTP；现安全入口只接受HTTPS，未假设替代URL，也没有当次请求。 |
@@ -65,7 +65,7 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 | MY-L01 | https://www.pos.com.my/service-update | 2026-10-15T01:16:13.254Z / 200 [本批](../r2-four-reapplied-2026-10-15/report.md) | PARTIAL | FAIL | 原页10张卡片标题锚点均无href；类别链接是列表自身。真实适用性探针失败/写入0，不猜路由或时区。 |
 | ID-W01 | https://www.bmkg.go.id/alerts/nowcast/en/rss.xml | 2026-10-13T07:00:40.269Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | PASS [字段](../r2-p1-inventory-2026-10-13/replay.log) | 最新精确RSS13条可读；回放是旧12条、原GET为/en别名，不把两份payload混为一份。 |
 | ID-T01 | https://jdih.kemendag.go.id/ | 2026-10-14T09:08:45.056Z / 200 [取证](../r2-three-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-post-clash-index-replay-final-2026-10-14/summary.json) | 8条完整原页回放通过；制定日不是发布日期，标题原有省略号保留，初始失败另存。 |
-| ID-T02 | https://jdih.kemenkeu.go.id/ | 原07:37:48.414Z root307→真实Location/home07:37:48.920Z 200，当前无新请求 | PARTIAL | NOT_RUN（本地7条PASS待审） | span.card-tag原日期更正、13th关闭候选8d0993e；7items/versions/titleblocks、重复0、query_only0差异，未认证日期角色/TZ/UTC或生产。 |
+| ID-T02 | https://jdih.kemenkeu.go.id/ | 原07:37:48.414Z root307→真实Location/home07:37:48.920Z 200，当前无新请求 | OK | PASS | 主会话限定代码/过程认可7条原件验收，日期角色/TZ未知、publishedAt null及漏检更正保留，不称独立私有原页重放/CI/24h通过。 |
 | PH-P01 | https://www.ppa.com.ph/content/ppa-helpdesk-advisory ，https://www.ppa.com.ph/ppa-port-news | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
 | PH-W01 | https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin | 2026-10-15T05:53:36.714Z / 403 [本次](../r2-official-gaps-applied-2026-10-15/PH-W01-capture.json) | PARTIAL | NOT_RUN | 本次错误页非天气空状态，无活动正样本；10/10官方局部无活动状态另作历史，不称今天无风险。 |
 | PH-W02 | https://www.pagasa.dost.gov.ph/weather/weather-advisory | 2026-10-15T05:53:36.848Z / 403 [本次](../r2-official-gaps-applied-2026-10-15/PH-W02-capture.json) | PARTIAL | NOT_RUN | 本次错误页非天气空状态，无活动正样本；10/10官方局部无活动状态另作历史，不称今天无风险。 |

@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T08:12:50.004Z",
-  "reviewedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
-  "evidenceHead": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "generatedAt": "2026-10-15T08:32:20.346Z",
+  "reviewedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "evidenceHead": "45d2296301bb85aa18a6e4a5e6509bfa854319b0",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -35,11 +35,11 @@
   },
   "measuredCoverage": {
     "r2_4": {
-      "numerator": 24,
+      "numerator": 25,
       "denominator": 39,
-      "ratio": 0.6153846153846154,
+      "ratio": 0.6410256410256411,
       "minimumOK": 32,
-      "shortfall": 8,
+      "shortfall": 7,
       "ids": [
         "CN-P01",
         "CN-W01",
@@ -57,6 +57,7 @@
         "MY-T01",
         "ID-W01",
         "ID-T01",
+        "ID-T02",
         "PH-C01",
         "PH-M01",
         "XX-K02",
@@ -67,8 +68,8 @@
         "XX-A02"
       ],
       "statusCounts": {
-        "OK": 24,
-        "PARTIAL": 8,
+        "OK": 25,
+        "PARTIAL": 7,
         "NOT_RUN": 4,
         "STALE": 1,
         "BLOCKED": 2
@@ -76,10 +77,10 @@
       "pass": false
     },
     "r2_5": {
-      "numerator": 22,
+      "numerator": 23,
       "denominator": 34,
-      "ratio": 0.6470588235294118,
-      "remaining": 12,
+      "ratio": 0.6764705882352942,
+      "remaining": 11,
       "ids": [
         "CN-P01",
         "CN-W01",
@@ -97,6 +98,7 @@
         "MY-T01",
         "ID-W01",
         "ID-T01",
+        "ID-T02",
         "PH-C01",
         "PH-M01",
         "XX-K02",
@@ -105,8 +107,8 @@
         "XX-M03"
       ],
       "statusCounts": {
-        "PASS": 22,
-        "NOT_RUN": 9,
+        "PASS": 23,
+        "NOT_RUN": 8,
         "PARTIAL": 1,
         "FAIL": 2
       },
@@ -277,22 +279,33 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
-          "selector": {
-            "id": "CN-P02"
-          },
-          "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
+          "path": "docs/evidence/r2-cn-p02-location-2026-10-15/catalogue-capture.json",
+          "sha256": "a63ae85aecaa9c5958cec63fdd0d5b1800a714655782ecb23876d3cc5413266e",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://www.sz.msa.gov.cn/",
-        "startedAt": "2026-10-15T01:16:09.530Z",
-        "receivedAt": "2026-10-15T01:16:09.783Z",
-        "finishedAt": "2026-10-15T01:16:09.783Z",
+        "startedAt": "2026-10-15T08:27:32.368Z",
+        "receivedAt": "2026-10-15T08:27:32.616Z",
+        "finishedAt": "2026-10-15T08:27:32.616Z",
         "httpStatus": 302,
-        "wireSha256": "0636ef4de5a01c1744ea9e76e6dbb29b0668d130d6b7f349d1b2268ea73dd29e",
         "bytes": 207,
-        "scope": "one_actual_index_response",
-        "verbatimLatestRawRetained": true,
+        "wireSha256": "0636ef4de5a01c1744ea9e76e6dbb29b0668d130d6b7f349d1b2268ea73dd29e",
+        "location": {
+          "rawHeaderSha256": "0830d1a040223df9f6c8d4a2b448a6254fe5d2e9890aedacd62ac19307ad6966",
+          "rawValueLength": 26,
+          "resolved": {
+            "protocol": "https:",
+            "hostname": "www.sz.msa.gov.cn",
+            "port": null,
+            "pathname": "/",
+            "queryPresent": false,
+            "querySha256": null,
+            "credentialsPresent": false,
+            "fragmentPresent": false
+          },
+          "followedAutomatically": false
+        },
+        "scope": "one_actual_exact_catalogue_root302_with_real_Location_equal_to_requested_URL",
         "notContinuousProduction": true
       },
       "fieldReplayEvidence": null,
@@ -318,49 +331,75 @@
       "r2_4": {
         "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "Exact catalogue URL returned HTTP302; redirects were not followed. Response retained but actual list product unknown; no automatic alternate host/path."
+        "reason": "PARTIAL retained: exact root302 nowhas real Location pointing to the same requested HTTPS root. Zero-retry boundary stops before duplicateGET; actual list product not obtained, no root-cause or multihop-loop claim."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "Only exact index redirect response obtained, no original list payload for field replay."
+        "reason": "NOT_RUN retained: no list or distinct target payload; only one root302/header capture, no title/identity/date adapter or field replay."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Redirect not followed; destination/list fields and new product URL remain unverified.",
-        "No source config, no guessed alternate URL, no further request.",
-        "Saved material has no Location header; body only gives a relative path literal, no verified absolute destination or same-origin conclusion."
+        "RealLocation now observed and resolves to exact original root URL; old body relative/btatw23_atbp/bt is not used as target.",
+        "No repeated originalGET, distinct target or actual list; structure/field replay not run and no product extension.",
+        "Source remainsPARTIAL/NOT_RUN; any future exact official product basis or bounded scope requires parent decision, no guessed paths/network changes/retries."
       ],
       "historicalSuperseded": [
-        "Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block."
+        "Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block.",
+        {
+          "reason": "New one-shot exact root302 captures actual self-Location; old Location-missing response and body path retained",
+          "previousActualFetch": {
+            "evidence": {
+              "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
+              "selector": {
+                "id": "CN-P02"
+              },
+              "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://www.sz.msa.gov.cn/",
+            "startedAt": "2026-10-15T01:16:09.530Z",
+            "receivedAt": "2026-10-15T01:16:09.783Z",
+            "finishedAt": "2026-10-15T01:16:09.783Z",
+            "httpStatus": 302,
+            "wireSha256": "0636ef4de5a01c1744ea9e76e6dbb29b0668d130d6b7f349d1b2268ea73dd29e",
+            "bytes": 207,
+            "scope": "one_actual_index_response",
+            "verbatimLatestRawRetained": true,
+            "notContinuousProduction": true
+          },
+          "previousGaps": [
+            "Redirect not followed; destination/list fields and new product URL remain unverified.",
+            "No source config, no guessed alternate URL, no further request.",
+            "Saved material has no Location header; body only gives a relative path literal, no verified absolute destination or same-origin conclusion."
+          ],
+          "previousR24": {
+            "verdict": "PARTIAL",
+            "countedOK": false,
+            "reason": "PARTIAL retained: exact root302 nowhas real Location pointing to the same requested HTTPS root. Zero-retry boundary stops before duplicateGET; actual list product not obtained, no root-cause or multihop-loop claim."
+          },
+          "previousR25": {
+            "verdict": "NOT_RUN",
+            "countedPass": false,
+            "reason": "NOT_RUN retained: no list or distinct target payload; only one root302/header capture, no title/identity/date adapter or field replay."
+          }
+        }
       ],
       "latestAttempt": {
         "evidence": {
-          "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
-          "selector": {
-            "id": "CN-P02"
-          },
-          "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
+          "path": "docs/evidence/r2-cn-p02-location-2026-10-15/catalogue-capture.json",
+          "sha256": "a63ae85aecaa9c5958cec63fdd0d5b1800a714655782ecb23876d3cc5413266e",
           "hashBasis": "committed_text_LF"
         },
         "dnsEvidence": {
-          "path": "docs/evidence/r2-four-reapplied-2026-10-15/dns-ledger.json",
-          "selector": {
-            "id": "CN-P02"
-          },
-          "sha256": "f326c38e383606a895d9fcf6377ac6c62685b1d34bc6a0a44351d2a359404f5c",
+          "path": "docs/evidence/r2-cn-p02-location-2026-10-15/dns-ledger.json",
+          "sha256": "c19e58fcddf932b98a1d66050805025e3556f5d5b52b98d8b2caac57b7aa29e4",
           "hashBasis": "committed_text_LF"
         },
-        "appliedConfigEvidence": {
-          "path": "docs/evidence/r2-four-reapplied-2026-10-15/applied-config-check.json",
-          "selector": null,
-          "sha256": "1523c3665d2251b4ba5f1d4bd0b910d77eec12002cf220577317da481c37f1ce",
-          "hashBasis": "committed_text_LF"
-        },
-        "at": "2026-10-15T01:16:09.530Z",
+        "at": "2026-10-15T08:27:32.368Z",
         "url": "https://www.sz.msa.gov.cn/",
         "addresses": [
           {
@@ -371,7 +410,7 @@
         "systemDnsCalls": 1,
         "httpRequests": 1,
         "httpStatus": 302,
-        "scope": "one exact catalogue GET after verified21 exceptions and public OS DNS; no redirect/retry/detail"
+        "scope": "one_exact_root_GET; actualLocation_self_URL_stop_no_retry_or_extra_target_DNS_GET"
       },
       "historicalAttempts": [
         {
@@ -403,6 +442,42 @@
           "httpRequests": 0,
           "reason": "blocked_address",
           "scope": "current_environment_dns_only_no_response_no_parse"
+        },
+        {
+          "evidence": {
+            "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
+            "selector": {
+              "id": "CN-P02"
+            },
+            "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
+            "hashBasis": "committed_text_LF"
+          },
+          "dnsEvidence": {
+            "path": "docs/evidence/r2-four-reapplied-2026-10-15/dns-ledger.json",
+            "selector": {
+              "id": "CN-P02"
+            },
+            "sha256": "f326c38e383606a895d9fcf6377ac6c62685b1d34bc6a0a44351d2a359404f5c",
+            "hashBasis": "committed_text_LF"
+          },
+          "appliedConfigEvidence": {
+            "path": "docs/evidence/r2-four-reapplied-2026-10-15/applied-config-check.json",
+            "selector": null,
+            "sha256": "1523c3665d2251b4ba5f1d4bd0b910d77eec12002cf220577317da481c37f1ce",
+            "hashBasis": "committed_text_LF"
+          },
+          "at": "2026-10-15T01:16:09.530Z",
+          "url": "https://www.sz.msa.gov.cn/",
+          "addresses": [
+            {
+              "address": "125.124.253.156",
+              "family": 4
+            }
+          ],
+          "systemDnsCalls": 1,
+          "httpRequests": 1,
+          "httpStatus": 302,
+          "scope": "one exact catalogue GET after verified21 exceptions and public OS DNS; no redirect/retry/detail"
         }
       ],
       "redirectInspection": {
@@ -412,6 +487,20 @@
         },
         "sha256": "923e62e0701337eb62fb286ca2c26c68659ded2dbd13100ddbfb7390e23e04cd",
         "hashBasis": "committed_text_LF"
+      },
+      "observedRedirectDecision": {
+        "evidence": {
+          "path": "docs/evidence/r2-cn-p02-location-2026-10-15/location-decision.json",
+          "sha256": "42aa699b0b887e629784cf74ab068defb469209eb081922ab3e5d5af1cb689e8",
+          "hashBasis": "committed_text_LF"
+        },
+        "status": "OBSERVED_SINGLE_SELF_REDIRECT_STOPPED_NO_RETRY",
+        "sameHostHttpsNoCredentialsOrAbnormalPort": true,
+        "sameAsOriginalUrl": true,
+        "targetSystemDnsCalls": 0,
+        "targetGetAttempts": 0,
+        "multiHopCycleTested": false,
+        "bodyPathNotUsedAsLocation": true
       }
     },
     {
@@ -3442,7 +3531,7 @@
         "notContinuousProduction": true
       },
       "fieldReplayEvidence": {
-        "status": "PASS_LOCAL_SAVED_ORIGINAL_CHAIN7_PENDING_PARENT_CODE_AND_QUALIFICATION_REVIEW",
+        "status": "ACCEPTED_LIMITED_PARENT_PROCESS_EVIDENCE_EXECUTOR_LOCAL7_RECORD_REPLAY",
         "evidence": {
           "path": "docs/evidence/r2-id-t02-finite-cn-p02-2026-10-15/replay-result.json",
           "sha256": "0a32f1a5e511e1ebf56dcb047feb42d38b6a4bb1783d6c1fe168e107f11f5497",
@@ -3504,24 +3593,24 @@
         "productionRegistryJoined": false
       },
       "r2_4": {
-        "verdict": "PARTIAL",
-        "countedOK": false,
-        "reason": "ApprovedPARTIAL remains pending parent review ofnew8d0993e minimal disabled candidate and7-record saved-original replay. Original root307/real target200 unchanged; no new source availability or24h proof."
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Explicit parent limited review acceptance on2026-10-15 ofreal root307/actualLocation200 and8d0993e disabled metadata candidate/local7-record replay. Not continuous production or24h evidence."
       },
       "r2_5": {
-        "verdict": "NOT_RUN",
-        "countedPass": false,
-        "reason": "Local original-chain7-item parser/collector/repeat/query-only field replayPASS oncleanSHA8d0993e; qualification remainsNOT_RUN pending parent review, so22/34 is unchanged."
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Explicit parent limited code/process evidence acceptance:16 own-card associations/7 identities, original card day/title/identity, SQLite7/7/7, repeat0/query-only7 exact. Date role andtimezone unknown, publishedAt null preserved; no independent parent private-page replay."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Previous no-card-date statement corrected by own span.card-tag andsafe JSON identity/date association; old evidence retained.",
-        "Minimal default-off metadata candidate and7-record replay pass locally; code/qualification independent review pending.",
-        "Card day role/timezone/instant unverified;2007/2025 popular historical records remain historical, no inferred freshness/publication/port impact.",
-        "Actual capture still2026-10-15T07:37:48.920Z; this round sourceGET/DNS0, CN-P02 conditional branch not opened; production/24h not run."
+        "Qualification accepted through limited parent code/process evidence review; executor private-page replay is not independent parent replay.",
+        "Unlabelled card day/date-role andtimezone remain unknown, publishedAt/offset null; original missing-date observation remains corrected with old evidence retained.",
+        "Disabled metadata-only candidate remains outside active/production selection; no24h or new live source proof.",
+        "Actual target capture remains2026-10-15T07:37:48.920Z; no newID-T02 source request."
       ],
       "historicalSuperseded": [
         "Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block.",
@@ -3609,6 +3698,29 @@
             "No explicit publication field in observed cards; legal identifier year is not a date. Other script data/date semantics not evaluated; unknown date/timezone stays unknown.",
             "No ID-T02 formal candidate, product extension, parser/collector/SQLite replay or further requests authorized by this structural-only round."
           ]
+        },
+        {
+          "reason": "2026-10-15 explicit parent limited code/process evidence acceptance, no newP2; not independent private-original replay",
+          "previousR24": {
+            "verdict": "PARTIAL",
+            "countedOK": false,
+            "reason": "ApprovedPARTIAL remains pending parent review ofnew8d0993e minimal disabled candidate and7-record saved-original replay. Original root307/real target200 unchanged; no new source availability or24h proof."
+          },
+          "previousR25": {
+            "verdict": "NOT_RUN",
+            "countedPass": false,
+            "reason": "Local original-chain7-item parser/collector/repeat/query-only field replayPASS oncleanSHA8d0993e; qualification remainsNOT_RUN pending parent review, so22/34 is unchanged."
+          },
+          "previousQualificationProposal": {
+            "status": "PENDING_PARENT_CODE_AND_QUALIFICATION_REVIEW",
+            "availability": "OK_proposed_only",
+            "fieldAcceptance": "PASS_proposed_only",
+            "countedOK": false,
+            "countedPass": false,
+            "localEvidencePassed": true,
+            "currentApprovedAvailability": "PARTIAL",
+            "currentApprovedField": "NOT_RUN"
+          }
         }
       ],
       "latestAttempt": {
@@ -3756,14 +3868,16 @@
         "adapterImplemented": true
       },
       "qualificationProposal": {
-        "status": "PENDING_PARENT_CODE_AND_QUALIFICATION_REVIEW",
-        "availability": "OK_proposed_only",
-        "fieldAcceptance": "PASS_proposed_only",
-        "countedOK": false,
-        "countedPass": false,
-        "localEvidencePassed": true,
-        "currentApprovedAvailability": "PARTIAL",
-        "currentApprovedField": "NOT_RUN"
+        "status": "ACCEPTED_LIMITED_PARENT_CODE_AND_PROCESS_REVIEW",
+        "availability": "OK",
+        "fieldAcceptance": "PASS",
+        "countedOK": true,
+        "countedPass": true,
+        "reviewDate": "2026-10-15",
+        "method": "independent_code_and_process_evidence_review_no_new_P2",
+        "parentIndependentlyReplayedPrivateOriginal": false,
+        "ciPassedClaimed": false,
+        "continuous24hVerified": false
       }
     },
     {
@@ -6746,17 +6860,21 @@
     "sourceGetAttemptsThisRound": 0,
     "productionEnabled": false
   },
-  "previousReviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "previousReviewedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
   "codeVerification": {
     "testedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
     "priorParentAcceptedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
-    "state": "LOCALLY_VERIFIED_PENDING_PARENT_REVIEW",
+    "state": "ACCEPTED_LIMITED_PARENT_CODE_AND_PROCESS_REVIEW",
     "gate": {
       "path": "docs/evidence/gate-8d0993e-id-mof-card/summary.json",
       "sha256": "ddd1eb55f8c25639ebad57e2d92437bbb38d0171d58135f596e342c5dba5d902",
       "hashBasis": "committed_text_LF"
     },
-    "independentReview": "pending_parent"
+    "independentReview": "accepted_no_new_P2",
+    "parentIndependentlyReplayedPrivateOriginal": false,
+    "reviewDate": "2026-10-15",
+    "ciPassedClaimed": false,
+    "continuous24hVerified": false
   },
   "previousSITCAppliedCompatibility": {
     "report": {
@@ -6868,7 +6986,46 @@
     "sourceDnsCalls": 0,
     "sourceGetAttempts": 0,
     "cnP02Requests": 0,
-    "qualificationUpgrade": "pending_parent",
-    "productionEnabled": false
+    "qualificationUpgrade": "accepted_limited_parent_process_evidence",
+    "productionEnabled": false,
+    "parentIndependentlyReplayedPrivateOriginal": false
+  },
+  "lastIDT02QualificationAcceptance": {
+    "evidence": {
+      "path": "docs/evidence/r2-cn-p02-location-2026-10-15/report.md",
+      "sha256": "5614e39aa9eed6df90c6817285d30ead0bfe4c43cfaaf2e9821f87519f4c8ec9",
+      "hashBasis": "committed_text_LF"
+    },
+    "codeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+    "reviewDate": "2026-10-15",
+    "method": "parent_limited_code_and_process_evidence_review_no_new_P2",
+    "approvedR24": "OK",
+    "approvedR25": "PASS",
+    "parentIndependentlyReplayedPrivateOriginal": false,
+    "ciPassedClaimed": false,
+    "continuous24hVerified": false
+  },
+  "lastCNP02LocationAudit": {
+    "report": {
+      "path": "docs/evidence/r2-cn-p02-location-2026-10-15/report.md",
+      "sha256": "5614e39aa9eed6df90c6817285d30ead0bfe4c43cfaaf2e9821f87519f4c8ec9",
+      "hashBasis": "committed_text_LF"
+    },
+    "summary": {
+      "path": "docs/evidence/r2-cn-p02-location-2026-10-15/capture-summary.json",
+      "sha256": "68710c67086dfe2213b6cd9b96a8a43db30462edf53dfce2931829c7e7f0ccdc",
+      "hashBasis": "committed_text_LF"
+    },
+    "executionHead": "45d2296301bb85aa18a6e4a5e6509bfa854319b0",
+    "productCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+    "sourceDnsCalls": 1,
+    "getAttempts": 1,
+    "targetGetAttempts": 0,
+    "observedSelfRedirect": true,
+    "multiHopCycleTested": false,
+    "recordsPersisted": 0,
+    "productChanged": false,
+    "fullProductGate": "NOT_RUN_no_product_change",
+    "qualificationChanged": false
   }
 }
