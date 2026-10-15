@@ -17,9 +17,9 @@
       "currentNumeric": null,
       "reuse": "Existing nmc-warning six-page provider/storage/API/display chain; captured6/6 on2026-10-11T01:38Z",
       "lifecycle": "Historical products/local report time unconverted; no port/event inference",
-      "laterFailure": "2026-10-13T03:55:13.246Z real generic-list failure web_list_invalid_link,0items; remainsFAIL",
+      "laterFailure": "CORRECTED:10/13 zero-network old-fixture generic web_list adapter negative; not later source or dedicated-provider failure",
       "extraIntelGateRisk": true,
-      "decision": "Review both chains and fields; no automatic upgrade",
+      "decision": "Dedicated chain approved OK/PASS in subsequent NMC closeout; original negative retained",
       "docs": [
         "docs/evidence/nmc-integration-2026-10-11.md",
         "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log"
@@ -60,7 +60,9 @@
       },
       "production24h": "NOT_RUN",
       "newSourceRequests": 0,
-      "newQualificationApplied": false
+      "newQualificationApplied": false,
+      "originalNegativeEvidencePreserved": true,
+      "subsequentApproval": "docs/evidence/r2-nmc-close-2026-10-15/report.md"
     },
     {
       "id": "CN-W02",
@@ -70,9 +72,9 @@
       "currentNumeric": null,
       "reuse": "Same existing NMC dedicated chain; original national warning product page retained",
       "lifecycle": "Original warning/lift wording and unknown validity preserved; no port/event inference",
-      "laterFailure": "2026-10-13T03:55:13.246Z unsupported author-date/zero link real generic-list failure,0items; remainsFAIL",
+      "laterFailure": "CORRECTED:10/13 zero-network old-fixture generic web_list adapter negative; not later source or dedicated-provider failure",
       "extraIntelGateRisk": true,
-      "decision": "Needs individual review without erasing later failure",
+      "decision": "Dedicated chain approved OK/PASS in subsequent NMC closeout; original negative retained",
       "docs": [
         "docs/evidence/nmc-integration-2026-10-11.md",
         "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log"
@@ -113,7 +115,9 @@
       },
       "production24h": "NOT_RUN",
       "newSourceRequests": 0,
-      "newQualificationApplied": false
+      "newQualificationApplied": false,
+      "originalNegativeEvidencePreserved": true,
+      "subsequentApproval": "docs/evidence/r2-nmc-close-2026-10-15/report.md"
     },
     {
       "id": "VN-W01",

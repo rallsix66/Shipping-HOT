@@ -1,0 +1,41 @@
+import assert from "node:assert/strict"
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs"
+import { createHash } from "node:crypto"
+import net from "node:net"
+import dns from "node:dns/promises"
+const d="docs/evidence/r2-nmc-close-2026-10-15";mkdirSync(d,{recursive:true})
+let tcp=0,dnsCalls=0,fetchCalls=0
+const oldConnect=net.Socket.prototype.connect,oldLookup=dns.lookup,oldFetch=globalThis.fetch
+net.Socket.prototype.connect=function(){tcp++;throw Error("offline_tcp_forbidden")} as any
+dns.lookup=async()=>{dnsCalls++;throw Error("offline_dns_forbidden")}
+globalThis.fetch=async()=>{fetchCalls++;throw Error("offline_fetch_forbidden")}
+const hash=(s:string|Uint8Array)=>createHash("sha256").update(s).digest("hex")
+try{
+ const {NMC_PAGES,parseNmcPage,buildNmcFeedItem}=await import("../server/providers/nmc-warning.ts")
+ const live=JSON.parse(readFileSync("docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json","utf8"))
+ assert.equal(live.requests,6);assert.equal(live.recordsStored,6);assert.equal(live.report.failed.length,0)
+ const catalog=readFileSync("docs/intel-source-catalog.md","utf8"),rows=[]
+ for(const page of NMC_PAGES){
+   const id=page.column.startsWith("typhoon_")?"CN-W01":"CN-W02"
+   const row=catalog.split(/\r?\n/).find(l=>l.startsWith(`| ${id} |`))!
+   const catalogUrl=row.split("|")[4].trim()
+   const p=`docs/evidence/nmc-integration-2026-10-11/raw/${page.column}.html`,raw=readFileSync(p),parsed=parseNmcPage(raw.toString("utf8"),page)
+   const {item}=buildNmcFeedItem(page,parsed,{id:"nmc",provenance:{sourceType:"official",dataNature:"reported",sourceId:"nmc",verified:true}},live.ranAt)
+   const captured=live.records.find((r:any)=>r.sourceUrl===page.url),request=live.egress.find((r:any)=>r.url===page.url)
+   assert(captured);assert(request);assert.equal(request.status,200);assert.equal(request.redirected,false)
+   assert.equal(item.id,captured.id);assert.equal(item.title,captured.title);assert.equal(item.sourceUrl,captured.sourceUrl);assert.equal(item.canonicalUrl,page.url)
+   for(const key of ["publishTimeText","numberText","nextIssueText","historicalProductNotice","rawColorLevel"] as const)assert.deepEqual(parsed[key],captured.raw[key])
+   assert.deepEqual(parsed.liftStatement,captured.raw.liftStatement)
+   assert(parsed.publishTimeText);assert(parsed.identityKey)
+   assert.equal(item.weather?.lifecycleStatus,"unknown");assert.equal(item.weather?.timezoneStatus,"unconfirmed");assert.equal(item.weather?.validityStatus,"unknown")
+   assert.equal(item.weather?.timeBasis,"received_at");assert.equal(item.publishedAt,live.ranAt);assert.deepEqual(item.relatedPortIds,[]);assert.equal(item.eventEligibility,false)
+   const exact=page.url===catalogUrl
+   rows.push({catalogId:id,role:exact?"exact_catalogue_product":"existing_approved_companion_product",product:page.productName,column:page.column,pageTitle:parsed.pageTitle,feedTitle:item.title,productUrl:page.url,catalogueUrl:catalogUrl,sourceRequestAt:request.at,sourceHttpStatus:200,sourceArtifact:p,sourceArtifactSha256:hash(raw),originalWireHashCertified:false,feedId:item.id,identityBasis:page.identity,identityKey:parsed.identityKey,rawPublishTime:parsed.publishTimeText,rawAnnualIssue:parsed.numberText,nextIssueText:parsed.nextIssueText,historicalProductNotice:parsed.historicalProductNotice,liftStatement:parsed.liftStatement,lifecycle:"unknown",timezone:"unconfirmed",firstReceivedAt:item.publishedAt,timeBasis:"received_at",ports:0,eventEligible:false,exactStoredRecordFieldsMatch:true})
+ }
+ assert.equal(rows.filter(r=>r.role==="exact_catalogue_product").length,2);assert.equal(rows.filter(r=>r.historicalProductNotice).length,4);assert.equal(rows.filter(r=>r.liftStatement).length,4)
+ const negative=readFileSync("docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt","utf8")
+ assert(negative.includes('readFileSync(path)'));assert(negative.includes('linkSelector: "a[href]"'));assert(negative.includes('publishedAtSelector: "div.author"'));assert(negative.includes('status: 200'));assert(negative.includes('networkCalls: 0'))
+ assert.equal(tcp+dnsCalls+fetchCalls,0)
+ writeFileSync(`${d}/product-mapping.json`,JSON.stringify({status:"PASS",sourceSampleAt:live.ranAt,sourceSampleCodeSha:live.gitHead,originalRealRequests:6,originalReal200:6,originalStoredRecords:6,sourceRequestsThisRound:0,systemDnsThisRound:0,tcpConnectionAttempts:tcp,globalFetchCalls:fetchCalls,existingDedicated16TestsReusedFrom:"docs/evidence/r2-weather-reuse-2026-10-15/offline-command.json",dedicatedTestsRerun:false,genericNegativeProbe:{at:"2026-10-13T03:55:13.246Z",realNetworkCalls:0,input:"Saved2026-10-11 fixtures",injectedHttpStatus:200,forcedMapping:'web_list #text / a[href] / div.author',result:"web_list_invalid_link",meaning:"Generic adapter unsuitable; not later live/source/dedicated-provider failure",originalLogPreserved:true},rows},null,2)+"\n")
+ console.log(JSON.stringify({status:"PASS",catalogueIds:2,products:6,historicalNotices:4,liftStatements:4,sourceRequests:0,systemDns:0}))
+}finally{net.Socket.prototype.connect=oldConnect;dns.lookup=oldLookup;globalThis.fetch=oldFetch}

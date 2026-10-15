@@ -1,0 +1,269 @@
+{
+  "scope": "Existing accepted references only; no new tests, requests, qualification or inference",
+  "sourceRequests": 0,
+  "systemDns": 0,
+  "testsRerun": false,
+  "entries": [
+    {
+      "id": "VN-W01",
+      "r24": "OK",
+      "r25": "PASS",
+      "numeric": null,
+      "sample": {
+        "evidence": {
+          "path": "docs/evidence/nchmf-integration-2026-10-10/live-evidence.json",
+          "selector": null,
+          "sha256": "3cad6ad0f757ebf946ba205c8ba17c447d9600869de140992e9a659c5da28b4f",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html",
+        "at": "2026-10-10T09:52:07.791Z",
+        "httpStatus": 200,
+        "wireSha256": null,
+        "storedArchiveSha256": "e710f9f75c2036e0e796e3ce7fd78137de5784121ee7bd60894395d33f714b90",
+        "scope": "historical_live_capture_then_sanitized_full_DOM_archive",
+        "notContinuousProduction": true
+      },
+      "field": {
+        "status": "PASS_STORED_REAL_ARCHIVE_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/replay.log",
+          "selector": null,
+          "sha256": "eb3d2dbeff7567eca8b14873d3eb9fdbdabe9eb1ac443cbc1d75b2a615618905",
+          "hashBasis": "committed_text_LF"
+        },
+        "harness": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/replay.test.ts.txt",
+          "selector": null,
+          "sha256": "376a9309c3b4e9dda2e73b8a7851e58e075382dc2c68791765046f2566d424ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 5,
+        "artifact": "docs/evidence/nchmf-integration-2026-10-10/raw/index.html",
+        "captureProvenance": "目录原URL；live-evidence.json egress at 2026-10-10T09:52:07.791Z；存储衍生页面252878字节，日志原响应259550字节",
+        "repeatReadOnlyReopen": "not_asserted_by_this_older_replay"
+      },
+      "numericEvidence": null,
+      "limits": "8success4failed old live; historical job success bug fixedbe78026; limited field PASS is not whole-batch success"
+    },
+    {
+      "id": "TH-W01",
+      "r24": "OK",
+      "r25": "PASS",
+      "numeric": null,
+      "sample": {
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "TH-W01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.tmd.go.th/en/api/xml/CAP",
+        "startedAt": "2026-10-13T07:00:38.389Z",
+        "receivedAt": null,
+        "finishedAt": "2026-10-13T07:00:40.268Z",
+        "httpStatus": 200,
+        "wireSha256": "d88a2f41868ab82631714e427a39998cc17ece4079a40d5d34fe95a576b8b325",
+        "bytes": 11234,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "field": {
+        "status": "PASS_STORED_REAL_ARCHIVE_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/replay.log",
+          "selector": null,
+          "sha256": "eb3d2dbeff7567eca8b14873d3eb9fdbdabe9eb1ac443cbc1d75b2a615618905",
+          "hashBasis": "committed_text_LF"
+        },
+        "harness": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/replay.test.ts.txt",
+          "selector": null,
+          "sha256": "376a9309c3b4e9dda2e73b8a7851e58e075382dc2c68791765046f2566d424ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 7,
+        "artifact": "server/providers/__fixtures__/tmd-cap-2026-10-10/index.xml；同hash docs/evidence/th-w01-tmd-cap-2026-10-10/index.xml",
+        "captureProvenance": "目录原URL；旧记录2026-10-10约13:33 UTC+8（docs/evidence/th-w01-tmd-cap-2026-10-10.md）；不是07:02:58探测的同一响应",
+        "repeatReadOnlyReopen": "not_asserted_by_this_older_replay",
+        "latestExactPayloadReplay": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/offline-check.log",
+          "selector": null,
+          "sha256": "c77ba4dc62af75643cb789c7f0689f77a562c706f88b28164c7dae478f02ecec",
+          "hashBasis": "committed_text_LF"
+        },
+        "latestExactPayloadReplayProcedure": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/after-dns-replay.test.ts.txt",
+          "selector": null,
+          "sha256": "8d9c9284810aeb1be3b10407ef3fd69eb9ddb5a185a76053b273a65bdc96172f",
+          "hashBasis": "committed_text_LF"
+        },
+        "latestExactPayloadItems": 10
+      },
+      "numericEvidence": null,
+      "limits": "Old7CAP->4persisted versus later10RSS separate; current activity not inferred"
+    },
+    {
+      "id": "ID-W01",
+      "r24": "OK",
+      "r25": "PASS",
+      "numeric": null,
+      "sample": {
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "ID-W01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.bmkg.go.id/alerts/nowcast/en/rss.xml",
+        "startedAt": "2026-10-13T07:00:40.269Z",
+        "receivedAt": null,
+        "finishedAt": "2026-10-13T07:00:40.906Z",
+        "httpStatus": 200,
+        "wireSha256": "65c0116af021c4fc99efec11d1abb1b8a534e9748fa18289ab21f2ee0d5213c5",
+        "bytes": 14805,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": false,
+        "notContinuousProduction": true
+      },
+      "field": {
+        "status": "PASS_STORED_REAL_ARCHIVE_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/replay.log",
+          "selector": null,
+          "sha256": "eb3d2dbeff7567eca8b14873d3eb9fdbdabe9eb1ac443cbc1d75b2a615618905",
+          "hashBasis": "committed_text_LF"
+        },
+        "harness": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/replay.test.ts.txt",
+          "selector": null,
+          "sha256": "376a9309c3b4e9dda2e73b8a7851e58e075382dc2c68791765046f2566d424ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 12,
+        "artifact": "server/providers/__fixtures__/bmkg-cap-2026-10-10/index.xml；同hash docs/evidence/bmkg-cap-2026-10-10/raw/index.xml",
+        "captureProvenance": "旧fetch-log：2026-10-10T06:48:32Z GET /alerts/nowcast/en；RSS self-link为目录/en/rss.xml",
+        "repeatReadOnlyReopen": "not_asserted_by_this_older_replay"
+      },
+      "numericEvidence": null,
+      "limits": "Old12RSS/en,9CAP live and later13/rss.xml distinct samples; Jakarta not covered at sample"
+    },
+    {
+      "id": "XX-W01",
+      "r24": "OK",
+      "r25": "NOT_APPLICABLE_NUMERIC",
+      "numeric": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+      "sample": {
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
+          "selector": null,
+          "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+          "hashBasis": "committed_text_LF"
+        },
+        "atWindow": [
+          "2026-10-10T03:58:39.141Z",
+          "2026-10-10T03:58:44.112Z"
+        ],
+        "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+        "httpStatus": 200,
+        "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
+        "wireSha256": null
+      },
+      "field": null,
+      "numericEvidence": {
+        "status": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+          "selector": null,
+          "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+          "hashBasis": "committed_text_LF"
+        },
+        "rawNumericalPayloadReplay": "NOT_RUN; do not confuse normalized diagnostics with retained raw replay",
+        "qualification": "target TC list/IDs and persisted cyclones"
+      },
+      "limits": "Historical limited numeric diagnostics; not current liveness/24h"
+    },
+    {
+      "id": "XX-A01",
+      "r24": "OK",
+      "r25": "NOT_APPLICABLE_NUMERIC",
+      "numeric": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+      "sample": {
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
+          "selector": null,
+          "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+          "hashBasis": "committed_text_LF"
+        },
+        "atWindow": [
+          "2026-10-10T03:58:39.141Z",
+          "2026-10-10T03:58:44.112Z"
+        ],
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "httpStatus": 200,
+        "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
+        "wireSha256": null
+      },
+      "field": null,
+      "numericEvidence": {
+        "status": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+          "selector": null,
+          "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+          "hashBasis": "committed_text_LF"
+        },
+        "rawNumericalPayloadReplay": "NOT_RUN; do not confuse normalized diagnostics with retained raw replay",
+        "qualification": "windGust/precipitation/visibility timestamps at eight land points"
+      },
+      "limits": "Historical limited numeric diagnostics; not current liveness/24h"
+    },
+    {
+      "id": "XX-A02",
+      "r24": "OK",
+      "r25": "NOT_APPLICABLE_NUMERIC",
+      "numeric": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+      "sample": {
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
+          "selector": null,
+          "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+          "hashBasis": "committed_text_LF"
+        },
+        "atWindow": [
+          "2026-10-10T03:58:39.141Z",
+          "2026-10-10T03:58:44.112Z"
+        ],
+        "url": "https://marine-api.open-meteo.com/v1/marine",
+        "httpStatus": 200,
+        "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
+        "wireSha256": null,
+        "latestReferencePointProbe": {
+          "path": "docs/evidence/vnsgn-point-check-2026-10-10/vnsgn-point-check.json",
+          "selector": null,
+          "sha256": "5a4f550716b05cadef45b64997a3592516110f82a86d3ac929f8f2feb4d82bac",
+          "hashBasis": "committed_text_LF"
+        },
+        "referenceProbeAt": "2026-10-10T05:31:34+00:00"
+      },
+      "field": null,
+      "numericEvidence": {
+        "status": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+          "selector": null,
+          "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+          "hashBasis": "committed_text_LF"
+        },
+        "rawNumericalPayloadReplay": "NOT_RUN; do not confuse normalized diagnostics with retained raw replay",
+        "qualification": "wave/swell forecast fields at7port origins and separate ADR009 engineering reference; original VNSGN remains missing"
+      },
+      "limits": "VNSGN origin missing; separateADR009 engineering reference not berth/origin"
+    }
+  ]
+}

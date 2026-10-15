@@ -1,115 +1,137 @@
 {
-  "type": "approved_my_weather_reuse_and_bounded_weather_review_validation",
-  "at": "2026-10-15T04:58:57.433Z",
-  "executionHead": "16ae7b7c1f2e149caeceea0c727d7dba788d272c",
+  "type": "nmc_two_catalogue_historical_acceptance_and_reference_closeout_validation",
+  "at": "2026-10-15T05:15:14.080Z",
+  "executionHead": "f58e01e7360f17ab55706e36ce09851e265ddedb",
   "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
   "sourceRequests": 0,
   "systemDns": 0,
   "productGate": "NOT_RUN_no_product_change",
   "checks": [
     {
-      "name": "Exact branch, execution head and product code",
+      "name": "Exact branch and execution/product binding",
       "pass": true
     },
     {
-      "name": "Zero product/schema/dependency/production/workflow diff",
+      "name": "No product, schema, dependency, production or workflow changes",
       "pass": true
     },
     {
-      "name": "Catalogue exact single slash change and current digest",
+      "name": "Catalogue unchanged and current hash correct",
       "pass": true
     },
     {
-      "name": "OnlyMY changed, other40 byte-equivalent JSON entries",
+      "name": "Only two NMC entries changed; other 39 identical",
       "pass": true,
       "detail": [
-        "MY-W01"
+        "CN-W01",
+        "CN-W02"
       ]
     },
     {
-      "name": "41 inventory and denominator/threshold unchanged",
+      "name": "41 retained, approved denominators and thresholds unchanged",
       "pass": true
     },
     {
-      "name": "r2_4 independently recomputed approved numerator and statuses",
-      "pass": true
-    },
-    {
-      "name": "r2_5 independently recomputed approved numerator and statuses",
-      "pass": true
-    },
-    {
-      "name": "OnlyMY verdict upgrade; numeric3/5,24h and overall limits unchanged",
-      "pass": true
-    },
-    {
-      "name": "MY preserves historic sample and unknown/received_at contract",
-      "pass": true
-    },
-    {
-      "name": "Original R2 boundaries restored, no new mandatory articleURL/UTC/intel/wire gates",
-      "pass": true
-    },
-    {
-      "name": "13 unique bounded weather rows, onlyMY new qualification",
-      "pass": true
-    },
-    {
-      "name": "All recorded implementation and review evidence paths exist",
-      "pass": true
-    },
-    {
-      "name": "NMC old6/6 and later realFAIL both preserved, no upgrade",
-      "pass": true
-    },
-    {
-      "name": "NCHMF8success4fail not misread as full success",
-      "pass": true
-    },
-    {
-      "name": "PAGASA remains limited official empty states, no active coverage upgrade",
-      "pass": true
-    },
-    {
-      "name": "Forecast/specifications and VNSGN missingness unchanged",
-      "pass": true
-    },
-    {
-      "name": "Existing4file101 tests rawexit0 and source0, not live run",
-      "pass": true
-    },
-    {
-      "name": "Exact originalstdout byte hash",
-      "pass": true
-    },
-    {
-      "name": "Exact originalstderr byte hash",
-      "pass": true
-    },
-    {
-      "name": "Four guard reports have0 TCP/DNS/globalfetch attempts",
-      "pass": true
-    },
-    {
-      "name": "Current matrix and13row review references/hash resolve",
+      "name": "r2_4 independently recomputed counts, ids, ratio and statuses",
       "pass": true,
       "detail": {
-        "occurrences": 257,
-        "uniquePaths": 90,
-        "errors": []
+        "OK": 24,
+        "PARTIAL": 8,
+        "NOT_RUN": 5,
+        "STALE": 1,
+        "BLOCKED": 1
       }
     },
     {
-      "name": "Affected Markdown links resolve",
+      "name": "r2_5 independently recomputed counts, ids, ratio and statuses",
+      "pass": true,
+      "detail": {
+        "PASS": 21,
+        "NOT_RUN": 10,
+        "PARTIAL": 1,
+        "FAIL": 2
+      }
+    },
+    {
+      "name": "Numeric 3/5 and 24h unchanged; whole R2 remains incomplete",
+      "pass": true
+    },
+    {
+      "name": "Two historical qualifications only; prior negative state preserved",
+      "pass": true
+    },
+    {
+      "name": "Six existing products map to two exact catalogue products and four companions",
+      "pass": true
+    },
+    {
+      "name": "Original sample six 200/six persisted; timestamp and raw archive hashes resolve",
+      "pass": true
+    },
+    {
+      "name": "No upstream/DNS/TCP/fetch in necessary mapping, no tests rerun",
+      "pass": true
+    },
+    {
+      "name": "Mapping exact original stdout hash",
+      "pass": true
+    },
+    {
+      "name": "Mapping exact original stderr hash",
+      "pass": true
+    },
+    {
+      "name": "Existing 16 dedicated NMC tests reused from prior 101 run, raw result unchanged",
+      "pass": true
+    },
+    {
+      "name": "Original offline generic negative untouched, injected 200 and forced selectors explicit",
+      "pass": true
+    },
+    {
+      "name": "Six accepted references only, no rerun or new source qualification",
+      "pass": true
+    },
+    {
+      "name": "NCHMF partial failure and VNSGN origin missingness retained",
+      "pass": true
+    },
+    {
+      "name": "PAGASA official scoped empty vs active gap; ID-W02 no auth/KODE unknown; JMA specifications already in scope",
+      "pass": true
+    },
+    {
+      "name": "All current evidence references and LF hashes resolve",
+      "pass": true,
+      "detail": {
+        "occurrences": 287,
+        "uniquePaths": 93,
+        "badRefs": []
+      }
+    },
+    {
+      "name": "Superseded interpretation texts preserved against exact prior SHA",
+      "pass": true
+    },
+    {
+      "name": "Prior historical archive still verifies at pinned SHA, rather than claiming current hashes",
+      "pass": true,
+      "detail": {
+        "historicalFiles": 27,
+        "badHistorical": []
+      }
+    },
+    {
+      "name": "Affected local Markdown links resolve",
       "pass": true,
       "detail": []
     },
     {
-      "name": "Frontier now17 nonOK rows, MY moved out",
+      "name": "Frontier exactly represents 15 non-OK sources; NMC/MY removed",
       "pass": true
     },
     {
-      "name": "Status and handoff display22/39,19/34",
+      "name": "Current status and handoff counts 24/39 and 21/34",
       "pass": true
     }
   ],

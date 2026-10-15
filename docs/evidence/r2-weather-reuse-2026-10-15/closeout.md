@@ -5,7 +5,7 @@
 | 事实面 | 状态 | 结论 |
 | --- | --- | --- |
 | 代码 | verified-current | 产品仍bebe144，无server/src/shared/scripts/依赖/schema/开关改动；仅目录MY同产品尾斜杠一字符修正已获明确批准。 |
-| 运行态 | verified-current（历史样本/离线限定） | MY10/10 08:30实测与4条回放认可；本轮101既有测试通过、四文件守卫0；不是今天实网/24h。NMC后失败、PAGASA无活动正样本、NCHMF8/4部分失败保留。 |
+| 运行态 | verified-current（历史样本/离线限定） | MY10/10 08:30实测与4条回放认可；本轮101既有测试通过、四文件守卫0；不是今天实网/24h。NMC零网络适配负例（后已审定专用链资格，不是实网失败）、PAGASA无活动正样本、NCHMF8/4部分失败保留。 |
 | 文档 | changed-and-verified | 唯一矩阵/status/交接现22/39、19/34、3/5；只有MY条目变化，其余40条不改。13项天气复核单列候选，不先计新资格。去掉额外文章URL/UTC/intel表/wire-hash硬门槛，原阈值不变。 |
 | 规则/架构 | verified-current | 9.29原R2-4/5及R1.5天气表复用、ADR008沿用；非新架构或新身份合同。AGENTS未扩张。 |
 | 记忆 | generated-read-only | 当前用户审定优先；无生成记忆写入。 |

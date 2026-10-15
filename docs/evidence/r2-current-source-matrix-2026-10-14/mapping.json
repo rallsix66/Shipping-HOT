@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T04:52:59.415Z",
+  "generatedAt": "2026-10-15T05:10:42.464Z",
   "reviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "evidenceHead": "16ae7b7c1f2e149caeceea0c727d7dba788d272c",
+  "evidenceHead": "f58e01e7360f17ab55706e36ce09851e265ddedb",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -35,13 +35,15 @@
   },
   "measuredCoverage": {
     "r2_4": {
-      "numerator": 22,
+      "numerator": 24,
       "denominator": 39,
-      "ratio": 0.5641025641025641,
+      "ratio": 0.6153846153846154,
       "minimumOK": 32,
-      "shortfall": 10,
+      "shortfall": 8,
       "ids": [
         "CN-P01",
+        "CN-W01",
+        "CN-W02",
         "CN-T02",
         "VN-P03",
         "VN-W01",
@@ -65,8 +67,8 @@
         "XX-A02"
       ],
       "statusCounts": {
-        "OK": 22,
-        "PARTIAL": 10,
+        "OK": 24,
+        "PARTIAL": 8,
         "NOT_RUN": 5,
         "STALE": 1,
         "BLOCKED": 1
@@ -74,12 +76,14 @@
       "pass": false
     },
     "r2_5": {
-      "numerator": 19,
+      "numerator": 21,
       "denominator": 34,
-      "ratio": 0.5588235294117647,
-      "remaining": 15,
+      "ratio": 0.6176470588235294,
+      "remaining": 13,
       "ids": [
         "CN-P01",
+        "CN-W01",
+        "CN-W02",
         "CN-T02",
         "VN-P03",
         "VN-W01",
@@ -100,10 +104,10 @@
         "XX-M03"
       ],
       "statusCounts": {
-        "PASS": 19,
+        "PASS": 21,
         "NOT_RUN": 10,
-        "FAIL": 4,
-        "PARTIAL": 1
+        "PARTIAL": 1,
+        "FAIL": 2
       },
       "pass": false
     },
@@ -446,44 +450,55 @@
         "scope": "legacy_limited_original_information_Feed_live_run"
       },
       "fieldReplayEvidence": {
-        "status": "FAIL_REAL_LIST_SUITABILITY",
-        "relatedLegacyEvidence": {
-          "path": "docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json",
+        "status": "PASS_EXISTING_APPROVED_NMC_WEATHER_CHAIN",
+        "evidence": {
+          "path": "docs/evidence/r2-nmc-close-2026-10-15/product-mapping.json",
           "selector": null,
+          "sha256": "d1ca354aca16775094bd2b18cc4afedde73b4119118dd7c262a3220f0b68de63",
+          "hashBasis": "committed_text_LF"
+        },
+        "realSourceCapture": {
+          "path": "docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json",
+          "selector": {
+            "egress.url": "https://www.nmc.cn/publish/typhoon/typhoon_new.html"
+          },
           "sha256": "d46d7e5c532d01ab36eef087d6b58afd60363b7bc1c234c44480bbeb484986ba",
           "hashBasis": "committed_text_LF"
         },
-        "evidence": {
-          "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log",
+        "existingDedicatedTests": {
+          "path": "docs/evidence/r2-weather-reuse-2026-10-15/offline-command.json",
           "selector": null,
-          "sha256": "2a94fee2233c0542022d3dc749375351bfd1c88ff2d894cdc1ffde39cd0e5d52",
+          "sha256": "3ffcada622db81b0235e8219ade81e532aed2be06d16dfe746a0f29bc96a5472",
           "hashBasis": "committed_text_LF"
         },
-        "harness": {
-          "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt",
-          "selector": null,
-          "sha256": "9669884842686eab547d03cfc59c6a8af86dba03fe60be8db9e288363ba3b15f",
-          "hashBasis": "committed_text_LF"
-        },
-        "qualifyingAnchors": 0,
-        "itemsCommitted": 0,
-        "collectorError": "web_list_invalid_link",
-        "chronology": {
-          "originalCaptureAt": "2026-10-11T01:38:50.427Z",
-          "suitabilityReplayStartedAt": "2026-10-13T03:55:13.246Z",
-          "suitabilityReplayCodeSha": "0b532e1917ee5425194965b20e0fdf8c2a1f4805",
-          "harnessExit": 0,
-          "harnessAssertedCollectionFailure": true,
-          "laterQualifyingReplayFound": false,
-          "reviewScope": "Stored R2 evidence and current disabled HTML candidates through evidence head679400c; no new fetch or replay."
-        }
+        "exactCatalogueProducts": 1,
+        "existingApprovedCompanionProducts": 1,
+        "products": [
+          {
+            "column": "typhoon_flash",
+            "url": "https://www.nmc.cn/publish/typhoon/typhoon_new.html",
+            "rawTime": "10月11日08时27分",
+            "annualIssue": "2026年总1873期"
+          },
+          {
+            "column": "typhoon_bulletin",
+            "url": "https://www.nmc.cn/publish/typhoon/warning.html",
+            "rawTime": "2026 年 10 月 11 日 10 时",
+            "annualIssue": null
+          }
+        ],
+        "newSourceRequests": 0,
+        "newTestsRerun": false,
+        "unknownTimezoneAccepted": true
       },
       "numericFieldValidation": null,
       "dateEvidence": {
-        "role": "unresolved_source_heading_or_report_time",
-        "precision": "unverified",
+        "role": "Original product publish time or annual issue; Feed publishedAt=first received received_at",
         "sourceDeclaredTimezone": "unknown",
-        "publicationInstant": null
+        "publicationInstant": null,
+        "firstReceivedAt": "2026-10-11T01:38:50.372Z",
+        "rawExactCatalogueTime": "10月11日08时27分",
+        "rawAnnualIssue": "2026年总1873期"
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -495,28 +510,111 @@
         "sourceConfig": "not_configured",
         "declaredSeedEnabled": null,
         "effectiveDefaultIntelJobEnabled": false,
-        "currentUserPersistedSettings": "not_inspected"
+        "currentUserPersistedSettings": "not_inspected",
+        "qualificationUsesExistingNmcWeatherProvider": true,
+        "productionStateChanged": false
       },
       "r2_4": {
-        "verdict": "PARTIAL",
-        "countedOK": false,
-        "reason": "Exact original product is readable in legacy limited Feed, but stored real-page suitability replay failed the current automatic list contract: no qualifying detail link/time mapping. Accessible is not a qualified automatic source."
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Explicit user-reviewed historical10/11 exact product HTTP200 and existing dedicated NMC weather/Feed chain.10/13 generic adapter negative was offline, not a later live/provider failure."
       },
       "r2_5": {
-        "verdict": "FAIL",
-        "countedPass": false,
-        "reason": "Stored real product-page suitability probe: zero qualifying anchors and missing/unsupported author date; harness passed by asserting source collection failure, not by parsing qualified items."
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "User-approved fixed product URL/title/original time or annual issue fields replay via existing NMC parser; release/historical notice valid, unknown TZ/lifecycle preserved, no activity/intel-table hard gate."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Limited legacy Feed remains readable, but actual Intel-list suitability failed; do not call it untested or field PASS.",
-        "Source has self-contained product pages, not a qualifying detail-link list; author time/hidden generated time not publication proof.",
-        "Warning validity and port effects unverified."
+        "Historical10/11 sample only; no present-day liveness or24h proof.",
+        "Unknown lifecycle/validity/timezone, original unnormalized level and zero port/event impact remain approved limits.",
+        "Only existing six national products; no provincial coverage or automatic revocation inference.",
+        "10/13 unsupported generic-list mapping retained as offline negative diagnostic, not source failure."
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "historicalBeforeNmcAcceptance": {
+        "r2_4": {
+          "verdict": "PARTIAL",
+          "countedOK": false,
+          "reason": "Exact original product is readable in legacy limited Feed, but stored real-page suitability replay failed the current automatic list contract: no qualifying detail link/time mapping. Accessible is not a qualified automatic source."
+        },
+        "r2_5": {
+          "verdict": "FAIL",
+          "countedPass": false,
+          "reason": "Stored real product-page suitability probe: zero qualifying anchors and missing/unsupported author date; harness passed by asserting source collection failure, not by parsing qualified items."
+        },
+        "fieldReplayEvidence": {
+          "status": "FAIL_REAL_LIST_SUITABILITY",
+          "relatedLegacyEvidence": {
+            "path": "docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json",
+            "selector": null,
+            "sha256": "d46d7e5c532d01ab36eef087d6b58afd60363b7bc1c234c44480bbeb484986ba",
+            "hashBasis": "committed_text_LF"
+          },
+          "evidence": {
+            "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log",
+            "selector": null,
+            "sha256": "2a94fee2233c0542022d3dc749375351bfd1c88ff2d894cdc1ffde39cd0e5d52",
+            "hashBasis": "committed_text_LF"
+          },
+          "harness": {
+            "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt",
+            "selector": null,
+            "sha256": "9669884842686eab547d03cfc59c6a8af86dba03fe60be8db9e288363ba3b15f",
+            "hashBasis": "committed_text_LF"
+          },
+          "qualifyingAnchors": 0,
+          "itemsCommitted": 0,
+          "collectorError": "web_list_invalid_link",
+          "chronology": {
+            "originalCaptureAt": "2026-10-11T01:38:50.427Z",
+            "suitabilityReplayStartedAt": "2026-10-13T03:55:13.246Z",
+            "suitabilityReplayCodeSha": "0b532e1917ee5425194965b20e0fdf8c2a1f4805",
+            "harnessExit": 0,
+            "harnessAssertedCollectionFailure": true,
+            "laterQualifyingReplayFound": false,
+            "reviewScope": "Stored R2 evidence and current disabled HTML candidates through evidence head679400c; no new fetch or replay."
+          }
+        },
+        "dateEvidence": {
+          "role": "unresolved_source_heading_or_report_time",
+          "precision": "unverified",
+          "sourceDeclaredTimezone": "unknown",
+          "publicationInstant": null
+        },
+        "gaps": [
+          "Limited legacy Feed remains readable, but actual Intel-list suitability failed; do not call it untested or field PASS.",
+          "Source has self-contained product pages, not a qualifying detail-link list; author time/hidden generated time not publication proof.",
+          "Warning validity and port effects unverified."
+        ]
+      },
+      "genericAdapterNegativeEvidence": {
+        "evidence": {
+          "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log",
+          "selector": null,
+          "sha256": "2a94fee2233c0542022d3dc749375351bfd1c88ff2d894cdc1ffde39cd0e5d52",
+          "hashBasis": "committed_text_LF"
+        },
+        "procedure": {
+          "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt",
+          "selector": null,
+          "sha256": "9669884842686eab547d03cfc59c6a8af86dba03fe60be8db9e288363ba3b15f",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-13T03:55:13.246Z",
+        "input": "2026-10-11 saved fixture",
+        "http200": "injected offline transport",
+        "sourceRequests": 0,
+        "systemDns": 0,
+        "outerCollectorError": "parse_failed",
+        "storedMessage": "web_list_invalid_link",
+        "classification": "adapter_suitability_negative_not_live_or_dedicated_provider_failure",
+        "originalUnchanged": true,
+        "doesNotBlockApprovedDedicatedProviderQualification": true
+      }
     },
     {
       "id": "CN-W02",
@@ -555,44 +653,67 @@
         "scope": "legacy_limited_original_information_Feed_live_run"
       },
       "fieldReplayEvidence": {
-        "status": "FAIL_REAL_LIST_SUITABILITY",
-        "relatedLegacyEvidence": {
-          "path": "docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json",
+        "status": "PASS_EXISTING_APPROVED_NMC_WEATHER_CHAIN",
+        "evidence": {
+          "path": "docs/evidence/r2-nmc-close-2026-10-15/product-mapping.json",
           "selector": null,
+          "sha256": "d1ca354aca16775094bd2b18cc4afedde73b4119118dd7c262a3220f0b68de63",
+          "hashBasis": "committed_text_LF"
+        },
+        "realSourceCapture": {
+          "path": "docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json",
+          "selector": {
+            "egress.url": "https://www.nmc.cn/publish/country/warning/index.html"
+          },
           "sha256": "d46d7e5c532d01ab36eef087d6b58afd60363b7bc1c234c44480bbeb484986ba",
           "hashBasis": "committed_text_LF"
         },
-        "evidence": {
-          "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log",
+        "existingDedicatedTests": {
+          "path": "docs/evidence/r2-weather-reuse-2026-10-15/offline-command.json",
           "selector": null,
-          "sha256": "2a94fee2233c0542022d3dc749375351bfd1c88ff2d894cdc1ffde39cd0e5d52",
+          "sha256": "3ffcada622db81b0235e8219ade81e532aed2be06d16dfe746a0f29bc96a5472",
           "hashBasis": "committed_text_LF"
         },
-        "harness": {
-          "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt",
-          "selector": null,
-          "sha256": "9669884842686eab547d03cfc59c6a8af86dba03fe60be8db9e288363ba3b15f",
-          "hashBasis": "committed_text_LF"
-        },
-        "qualifyingAnchors": 0,
-        "itemsCommitted": 0,
-        "collectorError": "web_list_invalid_link",
-        "chronology": {
-          "originalCaptureAt": "2026-10-11T01:38:51.146Z",
-          "suitabilityReplayStartedAt": "2026-10-13T03:55:13.246Z",
-          "suitabilityReplayCodeSha": "0b532e1917ee5425194965b20e0fdf8c2a1f4805",
-          "harnessExit": 0,
-          "harnessAssertedCollectionFailure": true,
-          "laterQualifyingReplayFound": false,
-          "reviewScope": "Stored R2 evidence and current disabled HTML candidates through evidence head679400c; no new fetch or replay."
-        }
+        "exactCatalogueProducts": 1,
+        "existingApprovedCompanionProducts": 3,
+        "products": [
+          {
+            "column": "warning_index",
+            "url": "https://www.nmc.cn/publish/country/warning/index.html",
+            "rawTime": "2026 年 10 月 05 日 06 时",
+            "annualIssue": null
+          },
+          {
+            "column": "warning_typhoon",
+            "url": "https://www.nmc.cn/publish/country/warning/typhoon.html",
+            "rawTime": "2026 年 09 月 06 日 10 时",
+            "annualIssue": null
+          },
+          {
+            "column": "warning_downpour",
+            "url": "https://www.nmc.cn/publish/country/warning/downpour.html",
+            "rawTime": "2026 年 09 月 10 日 06 时",
+            "annualIssue": null
+          },
+          {
+            "column": "warning_strong_convection",
+            "url": "https://www.nmc.cn/publish/country/warning/strong_convection.html",
+            "rawTime": "2026 年 09 月 29 日 18 时",
+            "annualIssue": null
+          }
+        ],
+        "newSourceRequests": 0,
+        "newTestsRerun": false,
+        "unknownTimezoneAccepted": true
       },
       "numericFieldValidation": null,
       "dateEvidence": {
-        "role": "unresolved_source_heading_or_report_time",
-        "precision": "unverified",
+        "role": "Original product publish time or annual issue; Feed publishedAt=first received received_at",
         "sourceDeclaredTimezone": "unknown",
-        "publicationInstant": null
+        "publicationInstant": null,
+        "firstReceivedAt": "2026-10-11T01:38:50.372Z",
+        "rawExactCatalogueTime": "2026 年 10 月 05 日 06 时",
+        "rawAnnualIssue": null
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -604,28 +725,111 @@
         "sourceConfig": "not_configured",
         "declaredSeedEnabled": null,
         "effectiveDefaultIntelJobEnabled": false,
-        "currentUserPersistedSettings": "not_inspected"
+        "currentUserPersistedSettings": "not_inspected",
+        "qualificationUsesExistingNmcWeatherProvider": true,
+        "productionStateChanged": false
       },
       "r2_4": {
-        "verdict": "PARTIAL",
-        "countedOK": false,
-        "reason": "Exact original product is readable in legacy limited Feed, but stored real-page suitability replay failed the current automatic list contract: no qualifying detail link/time mapping. Accessible is not a qualified automatic source."
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Explicit user-reviewed historical10/11 exact product HTTP200 and existing dedicated NMC weather/Feed chain.10/13 generic adapter negative was offline, not a later live/provider failure."
       },
       "r2_5": {
-        "verdict": "FAIL",
-        "countedPass": false,
-        "reason": "Stored real product-page suitability probe: zero qualifying anchors and missing/unsupported author date; harness passed by asserting source collection failure, not by parsing qualified items."
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "User-approved fixed product URL/title/original time or annual issue fields replay via existing NMC parser; release/historical notice valid, unknown TZ/lifecycle preserved, no activity/intel-table hard gate."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Limited legacy Feed remains readable, but actual Intel-list suitability failed; do not call it untested or field PASS.",
-        "Source has self-contained product pages, not a qualifying detail-link list; author time/hidden generated time not publication proof.",
-        "Warning validity and port effects unverified."
+        "Historical10/11 sample only; no present-day liveness or24h proof.",
+        "Unknown lifecycle/validity/timezone, original unnormalized level and zero port/event impact remain approved limits.",
+        "Only existing six national products; no provincial coverage or automatic revocation inference.",
+        "10/13 unsupported generic-list mapping retained as offline negative diagnostic, not source failure."
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "historicalBeforeNmcAcceptance": {
+        "r2_4": {
+          "verdict": "PARTIAL",
+          "countedOK": false,
+          "reason": "Exact original product is readable in legacy limited Feed, but stored real-page suitability replay failed the current automatic list contract: no qualifying detail link/time mapping. Accessible is not a qualified automatic source."
+        },
+        "r2_5": {
+          "verdict": "FAIL",
+          "countedPass": false,
+          "reason": "Stored real product-page suitability probe: zero qualifying anchors and missing/unsupported author date; harness passed by asserting source collection failure, not by parsing qualified items."
+        },
+        "fieldReplayEvidence": {
+          "status": "FAIL_REAL_LIST_SUITABILITY",
+          "relatedLegacyEvidence": {
+            "path": "docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json",
+            "selector": null,
+            "sha256": "d46d7e5c532d01ab36eef087d6b58afd60363b7bc1c234c44480bbeb484986ba",
+            "hashBasis": "committed_text_LF"
+          },
+          "evidence": {
+            "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log",
+            "selector": null,
+            "sha256": "2a94fee2233c0542022d3dc749375351bfd1c88ff2d894cdc1ffde39cd0e5d52",
+            "hashBasis": "committed_text_LF"
+          },
+          "harness": {
+            "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt",
+            "selector": null,
+            "sha256": "9669884842686eab547d03cfc59c6a8af86dba03fe60be8db9e288363ba3b15f",
+            "hashBasis": "committed_text_LF"
+          },
+          "qualifyingAnchors": 0,
+          "itemsCommitted": 0,
+          "collectorError": "web_list_invalid_link",
+          "chronology": {
+            "originalCaptureAt": "2026-10-11T01:38:51.146Z",
+            "suitabilityReplayStartedAt": "2026-10-13T03:55:13.246Z",
+            "suitabilityReplayCodeSha": "0b532e1917ee5425194965b20e0fdf8c2a1f4805",
+            "harnessExit": 0,
+            "harnessAssertedCollectionFailure": true,
+            "laterQualifyingReplayFound": false,
+            "reviewScope": "Stored R2 evidence and current disabled HTML candidates through evidence head679400c; no new fetch or replay."
+          }
+        },
+        "dateEvidence": {
+          "role": "unresolved_source_heading_or_report_time",
+          "precision": "unverified",
+          "sourceDeclaredTimezone": "unknown",
+          "publicationInstant": null
+        },
+        "gaps": [
+          "Limited legacy Feed remains readable, but actual Intel-list suitability failed; do not call it untested or field PASS.",
+          "Source has self-contained product pages, not a qualifying detail-link list; author time/hidden generated time not publication proof.",
+          "Warning validity and port effects unverified."
+        ]
+      },
+      "genericAdapterNegativeEvidence": {
+        "evidence": {
+          "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log",
+          "selector": null,
+          "sha256": "2a94fee2233c0542022d3dc749375351bfd1c88ff2d894cdc1ffde39cd0e5d52",
+          "hashBasis": "committed_text_LF"
+        },
+        "procedure": {
+          "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt",
+          "selector": null,
+          "sha256": "9669884842686eab547d03cfc59c6a8af86dba03fe60be8db9e288363ba3b15f",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-13T03:55:13.246Z",
+        "input": "2026-10-11 saved fixture",
+        "http200": "injected offline transport",
+        "sourceRequests": 0,
+        "systemDns": 0,
+        "outerCollectorError": "parse_failed",
+        "storedMessage": "web_list_invalid_link",
+        "classification": "adapter_suitability_negative_not_live_or_dedicated_provider_failure",
+        "originalUnchanged": true,
+        "doesNotBlockApprovedDedicatedProviderQualification": true
+      }
     },
     {
       "id": "CN-T01",
@@ -5444,13 +5648,13 @@
     "evidence": {
       "path": "docs/evidence/r2-weather-reuse-2026-10-15/report.md",
       "selector": null,
-      "sha256": "ca5508906125e3745ba5b567d86d7548804fae6b1675d753bbef6ce5d8a8d61d",
+      "sha256": "09b4236ab18dfeb63d4bada56d63054062b52e85492d061a3e180e367263d643",
       "hashBasis": "committed_text_LF"
     },
     "sourceReview": {
       "path": "docs/evidence/r2-weather-reuse-2026-10-15/weather-review.json",
       "selector": null,
-      "sha256": "d608b64119b1b0cb6dcc14c769aa6ec0aeba3548afbd705b3d432f5aa9d2c99c",
+      "sha256": "49dd068e6b0ef775435accac6af80ebe581276d7fe979875b343dec0be26942b",
       "hashBasis": "committed_text_LF"
     },
     "approvedCatalogue": {
@@ -5462,5 +5666,30 @@
     "qualificationAppliedOnlyTo": "MY-W01",
     "sourceRequests": 0,
     "systemDns": 0
+  },
+  "lastNmcCloseout": {
+    "report": {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/report.md",
+      "selector": null,
+      "sha256": "745db812c18fe267521be111d97aa9e994eb85a6fd989d08af1cb256d39ad222",
+      "hashBasis": "committed_text_LF"
+    },
+    "mapping": {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/product-mapping.json",
+      "selector": null,
+      "sha256": "d1ca354aca16775094bd2b18cc4afedde73b4119118dd7c262a3220f0b68de63",
+      "hashBasis": "committed_text_LF"
+    },
+    "approvedCounts": [
+      24,
+      21
+    ],
+    "sourceRequests": 0,
+    "systemDns": 0,
+    "onlyNewQualifications": [
+      "CN-W01",
+      "CN-W02"
+    ],
+    "existingTestsReusedWithoutRerun": true
   }
 }

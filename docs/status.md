@@ -1,8 +1,10 @@
 ## R2 41项来源当前累计证据（2026-10-15，待独立审查）
 
-全部41项保留：34资讯/公告、5数值天气、2原定后续阶段。当前R2-4 **22/39**（至少32，差10；22 OK / 10 PARTIAL / 1 STALE / 1 BLOCKED / 5 NOT_RUN）；R2-5 **19/34**（19 PASS / 4 FAIL / 1 PARTIAL / 10 NOT_RUN），数值有限历史诊断另列 **3/5**。不是整体R2 PASS或24小时证明。[唯一当前逐源矩阵](evidence/r2-current-source-matrix-2026-10-14/mapping.json) / [41项报告](evidence/r2-current-source-matrix-2026-10-14/report.md)。以下旧批次按发生时点保留，不单独充当当前累计。
+全部41项保留：34资讯/公告、5数值天气、2原定后续阶段。当前R2-4 **24/39**（至少32，差8；24 OK / 8 PARTIAL / 1 STALE / 1 BLOCKED / 5 NOT_RUN）；R2-5 **21/34**（21 PASS / 2 FAIL / 1 PARTIAL / 10 NOT_RUN），数值有限历史诊断另列 **3/5**。不是整体R2 PASS或24小时证明。[唯一当前逐源矩阵](evidence/r2-current-source-matrix-2026-10-14/mapping.json) / [41项报告](evidence/r2-current-source-matrix-2026-10-14/report.md)。以下旧批次按发生时点保留，不单独充当当前累计。
 
-本轮MY-W01审定收尾：依据9.29原R2-4/5与已有天气表复用，MY按10/10 08:30历史200/7754完整响应文本、4条既有Feed回放认可OK/PASS；不是今天实网。目录仅将同产品URL补尾斜杠，旧301证据保留，主机/许可/生产配置不扩。unknown时区/有效性、received_at、零港口影响保持；不增加独立文章URL/已知UTC/intel表/wire hash门槛，当前22/39、19/34、数值3/5，只有MY计数增加。另有界复核13天气来源：NMC专用6/6旧证据与10/13generic失败并列，未覆盖后失败；NCHMF8成功4失败不作全成功，已修失败传播；PAGASA只有明确官方无活动状态，无活动正样本不升格。101现有provider/存储链离线测试全通过、TCP/DNS/fetch0，其他40来源原判定不改，逐项待父审。无产品源码/迁移/阈值/生产/24h/付费，产品全门禁/GUI/S7本轮NOT_RUN。[本轮报告及逐项复用边界](evidence/r2-weather-reuse-2026-10-15/report.md)。
+本轮NMC两目录合并收口：CN-W01/CN-W02依9.29原标准复用10/11六页实网200/六条入库及已有16专用测试，审定历史OK/字段PASS，当前24/39、21/34、数值3/5。10/13失败已核实是读旧存档、注入200、强制通用web_list a[href]/div.author的零网络适配负例，原件保留，不是后来源不可达或专用provider失效。必要最小六产品映射对照标题/固定URL/原时间期号/Feed身份一致，4历史提示/4解除通知可作为真实字段，保持unknown生命周期/TZ、无港口影响，不称今天实网或24h。其他39来源不改；VN/TH/ID及三数值仅整理已有引用，不重复测试；NCHMF部分失败、VNSGN原点缺测保留。PAGASA活动正样本、ID-W02官方KODE数值、XX-W02specifications的精确下一步有现存来源，不猜URL/不请求。[收口及下一步](evidence/r2-nmc-close-2026-10-15/report.md)。无产品/迁移/生产/付费，完整门禁/GUI/S7/24h本轮NOT_RUN，待父审查。
+
+前轮MY-W01审定收尾：依据9.29原R2-4/5与已有天气表复用，MY按10/10 08:30历史200/7754完整响应文本、4条既有Feed回放认可OK/PASS；不是今天实网。目录仅将同产品URL补尾斜杠，旧301证据保留，主机/许可/生产配置不扩。unknown时区/有效性、received_at、零港口影响保持；不增加独立文章URL/已知UTC/intel表/wire hash门槛，当前22/39、19/34、数值3/5，只有MY计数增加。另有界复核13天气来源：NMC专用6/6旧证据与10/13零网络generic适配负例保留，后已更正其非实网失败性质；NCHMF8成功4失败不作全成功，已修失败传播；PAGASA只有明确官方无活动状态，无活动正样本不升格。101现有provider/存储链离线测试全通过、TCP/DNS/fetch0，其他40来源原判定不改，逐项待父审。无产品源码/迁移/阈值/生产/24h/付费，产品全门禁/GUI/S7本轮NOT_RUN。[本轮报告及逐项复用边界](evidence/r2-weather-reuse-2026-10-15/report.md)。
 
 前轮MY-W01零网络复用核验：0754Z的7688字节probe与0830Z的7754字节integration是两次实跑，旧frontier混淆已更正；0830完整response.text()与来源/4条入库有证，wire字节/hash未认证，不预设重抓。复用既有parseMetMalaysiaRows/provider/WeatherAlertSyncJob/ShippingRepository，4个批准身份、共享来源URL、首次接收received_at、原日期未知时区/有效性、No Advisory独立性及零港口影响均保留；重启/重复/query_only重开0差异。现有14+本轮3测试17通过（初次负例期望层级失败已保留修正），TCP/DNS/fetch0。R2 generic JSON与source+URL唯一键不能纯配置保留4个既有身份，接线/验收差异只列审；intel items/versions/runs0，产品/目录/身份合同未改，21/39、18/34、数值3/5不变。MY优先不代表其他来源没有既有实现。[复用报告与最小建议](evidence/r2-my-w01-contract-2026-10-15/report.md)。产品全门禁/GUI/S7/24h本轮NOT_RUN，待父审查。
 
@@ -16,7 +18,7 @@
 
 该源码全新隔离克隆frozen install正常scripts、build/typecheck/lint、195定向、1222全量通过/3既有跳过、3smoke全退出0，测试源码diff0、根保留DB/secret-file摘要不变；[精确SHA原始门禁](evidence/gate-355952c-anchor-date-repair/summary.json)。原字节私有ignored，远端只有必要派生metadata/过程/hash。TMD/BMKG seed enabled=true与生产job默认off区分，10个HTML候选enabled=false；本轮未修改网络设置/系统配置，不启生产、24h、付费或LLM，GUI/S7 NOT_RUN且原GUI仍pending。临时stack PR8/base codex/shipping-hot-r1-5保持。
 
-Westports独立修正e4d56116cda05fe4a8dbe151040c26874b6807c1保留，RSS最新保存日2025-08-01仍STALE；Northport冲突、VN-P01无日期、NMC适用性FAIL、XX-W02仅forecast/specifications未验证、VNSGN原点缺测/约61.8km独立参考边界不变。旧四源198.18 DNS阻断已由本批公网实响取代，不能当当前阻断。R1.5历史1/10用户延后、不重找；不合并部署。
+Westports独立修正e4d56116cda05fe4a8dbe151040c26874b6807c1保留，RSS最新保存日2025-08-01仍STALE；Northport冲突、VN-P01无日期、NMC旧generic适配FAIL（离线负例，后已审定专用链OK/PASS）、XX-W02仅forecast/specifications未验证、VNSGN原点缺测/约61.8km独立参考边界不变。旧四源198.18 DNS阻断已由本批公网实响取代，不能当当前阻断。R1.5历史1/10用户延后、不重找；不合并部署。
 
 本轮P2修复严格阻止title-dmy-date不匹配后回退通用日期解析，原文留存unknown；裸DMY、ISO、单独括号日期与空白/零宽标题均有负例。仅保存原页重放，四条与修前完整字段一致，覆盖不变。CN-P02正文仅相对`/btatw23_atbp/bt`、ID-T02仅`/home`，Location未保存，不确认绝对目标/同域且未重新请求。MY-L01有十张静态卡片，详情href缺失，不判断隐藏接口。[修复与边界](evidence/r2-anchor-date-review-repair-2026-10-15/report.md)。
 

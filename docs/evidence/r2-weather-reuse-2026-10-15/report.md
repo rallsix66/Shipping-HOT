@@ -8,13 +8,13 @@ MY-W01现为 **历史实测OK / 4条真实存档回放PASS**，累计 **22/39（
 
 ## 13项天气来源：复用与真实边界
 
-以下是复核材料和候选，**除MY外不改变既有判定**。保存文本/专用provider/天气表可以复用，generic intel适配并非新增资格硬门槛；也不能用这一原则覆盖后来的实际失败、空样本或产品未覆盖。[逐项机器记录与引用](weather-review.json)。
+以下是复核材料和候选，**除MY外不改变既有判定**。保存文本/专用provider/天气表可以复用，generic intel适配并非新增资格硬门槛；也不能用这一原则覆盖真实的上游失败、空样本或产品未覆盖；NMC10/13案例已确认是零网络generic适配负例而非此类实网失败。[逐项机器记录与引用](weather-review.json)。
 
 | ID | 可复用的实测/实现链 | 失败、生命周期与真实缺口；本轮处理 |
 | --- | --- | --- |
 | MY-W01 | 10/10 08:30Z，200/7754响应文本4条；已有parser/provider→sync job→Feed SQLite，前轮重启/重复/query_only复读 | 用户已审定OK/PASS；unknown时区/有效性、received_at、0港口影响保持；不要求intel物化，不新抓 |
-| CN-W01 | 10/11 01:38Z NMC专用provider六固定产品页6/6→SQLite/API/Feed展示；有原页/专用parser/测试可复用 | 10/13 03:55Z该目录页generic列表真实FAIL、0条/web_list_invalid_link必须保留。两链并列，不用旧6/6抹掉后失败。时区/有效性未知、历史产品/解除语句不充活动预警；维持PARTIAL/FAIL，逐项交审 |
-| CN-W02 | 同上；对应全国预警目录产品页有专用原时文保留链 | 同样保留10/13失败与缺/不支持日期事实；不得借“天气复用”擅自升格，维持PARTIAL/FAIL |
+| CN-W01 | 10/11专用六页实网200/六条入库链可复用 | 10/13读旧存档、注入200并用a[href]/div.author的通用web_list配置失败，是适配负例而非后续实网/专用失败；[现已审定OK/PASS](../r2-nmc-close-2026-10-15/report.md)，unknown/历史提示/零影响保持 |
+| CN-W02 | 对应固定全国预警产品与原时文已有专用链 | 同一零网络generic适配负例原件保留，不继续阻挡专用链资格；本轮已审定OK/PASS，解除通知有字段，不要求活动预警 |
 | VN-W01 | 10/10 09:52Z，列表+12文章；专用NCHMF postId身份、原时间/级别、Feed SQLite/API展示；另有R2旧5条列表DOM字段回放 | 实跑8成功/4 PDF-only空正文失败，历史job误写success，be78026已修失败传播。本轮22测试验证partial/all-failed确为failed；既有OK/PASS仅原受限字段范围，不能说13请求全链成功/全国覆盖。unknown生命周期/0港口影响、配置+07非源声明保留 |
 | TH-W01 | TMD 10/10索引7+CAP正文7，Update后存4（当时2active/2expired）；专用CAP/provider→SQLite/panel，后续10/13 RSS10条是另批 | Actual/Update/Cancel、sent时钟门槛/expires/geocode与失败保留链可复用；当时TH-20未覆盖=0影响，不是今天无风险；不可把RSS字段10条说成当前10条active。已有OK/PASS保持 |
 | ID-W01 | BMKG旧/en索引12+CAP原件；10/10 07:02Z另次live9条active；10/13精确/rss.xml13条；专用CAP/provider/SQLite/panel可复用 | 三个样本不拼为同份。polygon才关联，Jakarta当时未覆盖=0影响；消失/过期/失败/缺expires区分保持。已有OK/PASS保持，不以最新13条替代旧12条回放或9条生命周期实跑 |
@@ -26,7 +26,7 @@ MY-W01现为 **历史实测OK / 4条真实存档回放PASS**，累计 **22/39（
 | XX-A01 | 10/10 03:58Z Open-Meteo八港陆地点风/雨/能见度与时间，SQLite→重启API→浏览器对照 | 已有有限数值诊断保持；当时169小时窗口不代表今天fresh或当前7天，无需落intel表。生产商业许可仍后续范围 |
 | XX-A02 | 同批7港原点海况+后续ADR-009独立参考点链；波浪/涌浪与时间、天气表可复用 | 早期356e6fe整体BLOCKED因VNSGN原点缺测；后续ADR-009映射通过是独立参考约61.8km，绝不覆盖原点缺测/冒充泊位。有限3/5保持，不说8原点齐全或今天窗口已验 |
 
-NMC证据层级需要下一轮逐项审查：旧专用链确实存在；后来的generic列表失败也确实存在。两者是否满足R2原条款应按具体字段与产品语义审，不额外要求新parser/文章URL，也不直接用本轮夹具通过覆盖后失败。PAGASA需活动正样本才能讨论活动公报字段覆盖；本轮未抓且不猜地址。NCHMF部分失败的旧job success只作为历史缺陷原件保留，不作为成功证据。
+NMC审查现已完成：[两目录ID合并收口](../r2-nmc-close-2026-10-15/report.md)。10/13是零网络generic适配负例，不是后续实网不可达/专用失败；原件不改，资格按既有专用链审定。PAGASA正样本缺口与NCHMF部分失败仍保留。
 
 ## 本轮离线验证和范围
 

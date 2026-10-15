@@ -1,6 +1,8 @@
 # R2 41项来源累计证据 — 2026-10-15
 
-最新审定：MY-W01按9.29原条款复用既有天气provider/Feed与4条存档，OK/PASS，当前22/39、19/34、数值3/5。目录仅补同产品尾斜杠，10/10 08:30样本不是今天实网。13天气复核与101既有离线测试不改变其他来源资格。[本轮收尾/边界](../r2-weather-reuse-2026-10-15/report.md)。
+最新NMC审定：CN-W01/CN-W02专用链历史实测OK/字段PASS，现24/39、21/34、数值3/5；10/13generic负例性质已更正，原件保留。其他39项不改、无新请求/重跑测试。[本轮报告](../r2-nmc-close-2026-10-15/report.md)。
+
+前轮审定：MY-W01按9.29原条款复用既有天气provider/Feed与4条存档，OK/PASS，当前22/39、19/34、数值3/5。目录仅补同产品尾斜杠，10/10 08:30样本不是今天实网。13天气复核与101既有离线测试不改变其他来源资格。[本轮收尾/边界](../r2-weather-reuse-2026-10-15/report.md)。
 
 前轮MY-W01零网络合同复用：更正0754/0830不同实跑，完整0830响应文本及4条Feed链复读通过，wire字节未认证。已批准身份/时间/未知影响语义复用，R2桥接只列差异不实施；全部计数不变。[本轮报告](../r2-my-w01-contract-2026-10-15/report.md)。
 
@@ -14,14 +16,14 @@
 
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
-| R2-4公开自动来源 | **22/39（56.41%）** | 最少32项，尚差10；22 OK、10 PARTIAL、1 STALE、1 BLOCKED、5 NOT_RUN，未通过 |
-| R2-5资讯/公告原页字段回放 | **19/34（55.88%）** | 尚差15；19 PASS、4 FAIL、1 PARTIAL、10 NOT_RUN，未通过 |
+| R2-4公开自动来源 | **24/39（61.54%）** | 最少32项，尚差8；24 OK、8 PARTIAL、1 STALE、1 BLOCKED、5 NOT_RUN，未通过 |
+| R2-5资讯/公告原页字段回放 | **21/34（61.76%）** | 尚差13；21 PASS、2 FAIL、1 PARTIAL、10 NOT_RUN，未通过 |
 | 数值字段独立检查 | **3/5** | 仅历史归一化诊断；不加到34项原页回放分子 |
 | R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
 
 34资讯/公告、5数值天气、2后续阶段的分类于06:31:44 UTC已批准，41项全部保留。后续付费天气与向量只从公开39项分母排除，没有标PASS。这里的OK只描述留证时的实产品可用和数据/解析检查，不描述今天实时可用、生产默认启用或24小时表现。默认关闭独立于来源资格，不记作失败。
 
-NMC两项与Westports日期复审曾将旧暂计逐步修正为19/39；历史VN-D01批原页有限通过后当时为20/39（现已因后续ONE证据为21/39）。NMC的既有证据顺序为：10/11原URL旧Feed读取早于10/13 03:55:13.246 UTC真实页面适用性回放。后者在 `0b532e1917ee5425194965b20e0fdf8c2a1f4805` 断言零合格链接、`web_list_invalid_link`、写入0；harness退出0证明预期失败得到验证，不代表源解析成功。[原始日志](../r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log)、[过程](../r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt)。已核对当前9个关闭HTML候选与后续R2记录，没有取代这两项失败的合格回放；它们保留为R2-4 PARTIAL / R2-5 FAIL，不称未测试。
+NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强制generic web_list配置的零网络适配负例；原日志/脚本保留，但不是后续实网不可达或专用provider失败。现按用户审定复用既有专用链计OK/PASS，[合并收口](../r2-nmc-close-2026-10-15/report.md)。Westports最新2025-08-01仍STALE，其他缺口不变。
 
 字段PASS忠实保留源实际时间角色。TH-C02是文件日，ID-T01是制定日；包括VN-D01的其余七个新增HTML原页是源显示的列表日，全部day精度、时区缺失、发布瞬间null。BMKG旧12条/en别名原文与最新13条精确/rss.xml响应分开；NCHMF旧脱敏DOM保留+07来自测试配置的限制。字段通过不证明发布瞬间、预警有效性、港口影响、法规全文或政策人工审核。
 
@@ -31,8 +33,8 @@ NMC两项与Westports日期复审曾将旧暂计逐步修正为19/39；历史VN-
 | --- | --- | --- | --- | --- | --- |
 | CN-P01 | https://www.gd.msa.gov.cn/ | 2026-10-14T07:56:30.108Z / 200 [取证](../r2-four-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-public-index-replay-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
 | CN-P02 | https://www.sz.msa.gov.cn/ | 2026-10-15T01:16:09.530Z / 302 [本批](../r2-four-reapplied-2026-10-15/report.md) | PARTIAL | NOT_RUN | 精确URL302，原207字节已保存，未跟随跳转；没有列表字段回放。 |
-| CN-W01 | https://www.nmc.cn/publish/typhoon/typhoon_new.html | 2026-10-11T01:38:50.427Z / 200 [取证](../nmc-integration-2026-10-11/nmc-live-evidence.json) | PARTIAL | FAIL [字段](../r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log) | 原产品页可读；10/13实页列表回放零合格链接，缺发布日，收藏失败，未有后续合格证据。 |
-| CN-W02 | https://www.nmc.cn/publish/country/warning/index.html | 2026-10-11T01:38:51.146Z / 200 [取证](../nmc-integration-2026-10-11/nmc-live-evidence.json) | PARTIAL | FAIL [字段](../r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log) | 原产品页可读；10/13实页列表回放零合格链接，作者日期语法不支持，未有后续合格证据。 |
+| CN-W01 | https://www.nmc.cn/publish/typhoon/typhoon_new.html | 2026-10-11历史200 [实跑](../nmc-integration-2026-10-11/nmc-live-evidence.json) | OK | PASS [专用映射](../r2-nmc-close-2026-10-15/product-mapping.json) | 固定产品URL/标题/原时间或年度期号，unknown TZ/生命周期、历史/解除提示、0港口影响；10/13为零网络generic适配负例，不是源实网失败。 |
+| CN-W02 | https://www.nmc.cn/publish/country/warning/index.html | 2026-10-11历史200 [实跑](../nmc-integration-2026-10-11/nmc-live-evidence.json) | OK | PASS [专用映射](../r2-nmc-close-2026-10-15/product-mapping.json) | 固定产品URL/标题/原时间或年度期号，unknown TZ/生命周期、历史/解除提示、0港口影响；10/13为零网络generic适配负例，不是源实网失败。 |
 | CN-T01 | http://www.mofcom.gov.cn/zcfb/index.html | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 目录URL为HTTP；现安全入口只接受HTTPS，未假设替代URL，也没有当次请求。 |
 | CN-T02 | https://szs.mof.gov.cn/zhengcefabu/ | 2026-10-14T07:56:30.392Z / 200 [取证](../r2-four-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-public-index-replay-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
 | VN-P01 | https://vimawa.gov.vn/vi/thong-bao-hang-hai | 2026-10-14T07:56:30.690Z / 200 [取证](../r2-four-after-clash-2026-10-14/summary.json) | PARTIAL | PARTIAL [字段](../r2-four-after-clash-2026-10-14/VN-P01-table-metadata.json) | 实表10行有标题/链接，无可见日期或日期属性；TBHH编号、表头不当日期。 |
