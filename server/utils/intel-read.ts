@@ -1,6 +1,6 @@
 import { type H3Event, defineEventHandler, getQuery, getRouterParam, setResponseHeader, setResponseStatus } from "h3"
 import { type IntelContentScope, type IntelItemRecord, IntelRepository, type IntelSourceRecord, type IntelVersionRecord } from "#/database/intel"
-import { licensedBlocks } from "#/intel/content-license"
+import { licensedBlocks, permittedContentScope } from "#/intel/content-license"
 import { manualCatalog } from "#/intel/manual-catalog"
 import { manualPersistenceFor } from "#/intel/manual-license"
 
@@ -55,9 +55,7 @@ function itemDto(item: IntelItemRecord) {
 }
 function scope(source: IntelSourceRecord, version: IntelVersionRecord, manualUrl?: string): IntelContentScope {
   const persistence = manualUrl === undefined ? source.persistence : manualPersistenceFor(source, manualUrl)
-  const a = persistence === "full" ? 2 : persistence === "excerpt_only" ? 1 : 0
-  const b = version.contentScope === "full_text" ? 2 : version.contentScope === "excerpt" ? 1 : 0
-  return (["metadata_only", "excerpt", "full_text"] as const)[Math.min(a, b)]
+  return permittedContentScope(persistence, version.contentScope)
 }
 function versionDto(version: IntelVersionRecord, source: IntelSourceRecord, manualUrl?: string) {
   const e = version.dateEvidence

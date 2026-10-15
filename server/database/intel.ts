@@ -38,6 +38,7 @@ export interface IntelRunRecord {
 
 export interface IntelVersionRecord {
   sourcePublishedAt: string | null
+  sourceUpdatedAt: string | null
   dateEvidence: WebDate | null
   id: string
   itemId: string
@@ -150,6 +151,7 @@ function mapItem(row: Row): IntelItemRecord {
 function mapVersion(row: Row): IntelVersionRecord {
   return {
     sourcePublishedAt: str(row.source_published_at),
+    sourceUpdatedAt: str(row.source_updated_at),
     id: String(row.id),
     itemId: String(row.item_id),
     contentHash: String(row.content_hash),

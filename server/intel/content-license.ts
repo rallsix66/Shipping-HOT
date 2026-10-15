@@ -7,6 +7,13 @@ export function contentScopeFor(persistence: IntelPersistence): IntelContentScop
   return persistence === "full" ? "full_text" : persistence === "excerpt_only" ? "excerpt" : "metadata_only"
 }
 
+/** A read may narrow stored rights to the current policy, never widen them. */
+export function permittedContentScope(persistence: IntelPersistence, stored: IntelContentScope): IntelContentScope {
+  const current = persistence === "full" ? 2 : persistence === "excerpt_only" ? 1 : 0
+  const original = stored === "full_text" ? 2 : stored === "excerpt" ? 1 : 0
+  return (["metadata_only", "excerpt", "full_text"] as const)[Math.min(current, original)]
+}
+
 /** Blocks kept for one version, limited to what the source license allows. */
 export function licensedBlocks(scope: IntelContentScope, title: string, bodyText: string): IntelBlock[] {
   const blocks: IntelBlock[] = [{ blockKey: "title", order: 0, type: "title", text: title }]
