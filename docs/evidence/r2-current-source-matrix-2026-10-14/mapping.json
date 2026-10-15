@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T06:41:28.168Z",
+  "generatedAt": "2026-10-15T07:18:13.142Z",
   "reviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
-  "evidenceHead": "e37c5e49c0c90d69663af3c5f45f347bfc8326f4",
+  "evidenceHead": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -67,8 +67,8 @@
       ],
       "statusCounts": {
         "OK": 23,
-        "PARTIAL": 8,
-        "NOT_RUN": 5,
+        "PARTIAL": 9,
+        "NOT_RUN": 4,
         "STALE": 1,
         "BLOCKED": 2
       },
@@ -5121,50 +5121,52 @@
         "productQualificationChanged": false
       },
       "fieldReplayEvidence": {
-        "status": "BLOCKED_EXISTING_WEB_LIST_COMPATIBILITY_NOT_POSITIVE_FIELD_PASS",
-        "observation": {
-          "path": "docs/evidence/r2-sitc-applied-2026-10-15/field-observation.json",
-          "sha256": "0f0de6046c5fdf216ba293e1298ffcc6328615e6ee4846f871430c858550ec44",
-          "hashBasis": "committed_text_LF"
-        },
+        "status": "PASS_LOCAL_SAVED_ORIGINAL20_DISABLED_CANDIDATE_REPLAY_PENDING_QUALIFICATION_REVIEW",
         "evidence": {
-          "path": "docs/evidence/r2-sitc-applied-2026-10-15/compatibility-result.json",
-          "sha256": "cbe4b6b1033a19e4ff24d2dd57c7c0e16ec599e1b39681de4f16a774d41924b8",
+          "path": "docs/evidence/r2-sitc-metadata-2026-10-15/replay-result.json",
+          "sha256": "49dcf15cbdcfe05a3c8b4cb4b99aa74368d96147d98993316e07e2b318903455",
           "hashBasis": "committed_text_LF"
         },
-        "finalCommand": {
-          "path": "docs/evidence/r2-sitc-applied-2026-10-15/replay-command.final.json",
-          "sha256": "206778b79d85a1eb282477b60e18d1ef2f00b1b78f4294b06a9a1e6c34eaab10",
+        "fieldAudit": {
+          "path": "docs/evidence/r2-sitc-metadata-2026-10-15/field-audit.json",
+          "sha256": "0666f63f5c52d8ca45bec0a2d8d9a8c28625cdc5e5455edd88494881ed2cc382",
           "hashBasis": "committed_text_LF"
         },
-        "initialScriptFailure": {
-          "path": "docs/evidence/r2-sitc-applied-2026-10-15/replay-command.json",
-          "sha256": "fb62319f5d0d7ff77792d6262f23b940e4c161a52aa9012c02bf4f58a2314928",
+        "command": {
+          "path": "docs/evidence/r2-sitc-metadata-2026-10-15/replay-command.json",
+          "sha256": "716d560cea34df0534409eeb6f10a328115759a5f5f858ba0b60ce036b69ecd6",
           "hashBasis": "committed_text_LF"
         },
+        "testedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+        "sourceCapturedAt": "2026-10-15T06:32:48.737Z",
+        "sourceCaptureHead": "e37c5e49c0c90d69663af3c5f45f347bfc8326f4",
+        "sourceGetAttemptsThisRound": 0,
         "actualCards": 20,
-        "normalizedItems": 0,
-        "itemsPersisted": 0,
-        "versions": 0,
-        "originalLinkProtocol": "http:",
-        "originalDateFormat": "发布日期: YYYY.MM.DD",
-        "urlOrDateRewritten": false,
-        "unknownTimezonePreserved": true,
-        "readonlyEmptyTablesNotClaimedAsPositiveFieldAcceptance": true
+        "normalizedItems": 20,
+        "itemsPersisted": 20,
+        "versions": 20,
+        "blocks": 20,
+        "repeatNew": 0,
+        "repeatRevised": 0,
+        "readonlyFieldMismatches": 0,
+        "originalHttpProtocolAndBusinessIdsPreserved": true,
+        "sourceTimezoneUnknown": true,
+        "publicationInstant": null,
+        "productionEnabled": false
       },
       "numericFieldValidation": null,
       "dateEvidence": {
-        "role": "Source-labelled发布日期 text on each own news card; existing grammar returns unsupported",
+        "role": "Source-labelled whole发布日期: YYYY.MM.DD, explicit strictGregorian day grammar",
         "rawEvidence": {
-          "path": "docs/evidence/r2-sitc-applied-2026-10-15/field-observation.json",
-          "sha256": "0f0de6046c5fdf216ba293e1298ffcc6328615e6ee4846f871430c858550ec44",
+          "path": "docs/evidence/r2-sitc-metadata-2026-10-15/field-audit.json",
+          "sha256": "0666f63f5c52d8ca45bec0a2d8d9a8c28625cdc5e5455edd88494881ed2cc382",
           "hashBasis": "committed_text_LF"
         },
-        "precision": "unknown_under_current_parser",
-        "sourceDeclaredTimezone": "unknown",
+        "precision": "day",
+        "sourceDeclaredTimezone": "missing",
         "publicationInstant": null,
         "utcOffset": null,
-        "localDate": null
+        "localDateBasis": "source_raw_calendar_day_no_timezone_or_instant_inference"
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -5173,30 +5175,32 @@
       },
       "defaultState": {
         "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
-        "sourceConfig": "not_configured",
+        "sourceConfig": "declared_disabled_html_index_candidate",
         "declaredSeedEnabled": null,
         "effectiveDefaultIntelJobEnabled": false,
-        "currentUserPersistedSettings": "not_inspected"
+        "currentUserPersistedSettings": "not_inspected",
+        "declaredCandidateEnabled": false,
+        "productionRegistryJoined": false
       },
       "r2_4": {
-        "verdict": "NOT_RUN",
+        "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "PriorNOT_RUN qualification retained pending parent review: actual200 exact main news index20cards is now stored; originalHTTP detail identities conflict with existingHTTPS-only web-list adapter. PARTIAL proposal is unapproved, not a countedOK."
+        "reason": "User explicitly acceptedPARTIAL before this repair. Saved real20-card replay now passes locally under narrow approvedmetadata rules; any upgrade toOK awaits parent review, no new source request or24h proof."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "PriorNOT_RUN qualification retained pending parent review. Existing raw HTML/parser/collector compatibility probe rejects allHTTP links and stores0; dotted source-date grammar unsupported. This is not positive field PASS or proof source invalidity."
+        "reason": "Local20-item parser/collector/repeat/query-only field replay nowPASS oncleanSHA0a483dd; approved qualification remainsNOT_RUN pending parent review, so21/34 is not increased automatically."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "ExistingHTTPS-only metadata-link rule rejects20 originalHTTP source identities; no HTTPS identity proven or rewritten.",
-        "Source发布日期:YYYY.MM.DD is preserved but currentdate grammar unsupported; no clock/timezone/UTC inferred.",
-        "20 real cards are observational metadata; collector0items/versions means no positive field/SQLite acceptance.",
-        "ProposalPARTIAL and any source-rule change await parent review; no Vietnam/detail/pagination request or production candidate."
+        "Local original20-field replay passed; sourceOK/fieldPASS qualification upgrade awaits parent review.",
+        "MetadataHTTP exception is fixed toSITC sourceID/disallowed/www.sitc.com/en/show.asp/numericid; does not grant bodyHTTP or downgrade/detail fetch.",
+        "Day andraw fields retained; no clock/timezone/offset/publication instant inferred.",
+        "Source capture remains2026-10-15T06:32:48.737Z; current/live/24h/production not newly verified."
       ],
       "historicalSuperseded": [
         {
@@ -5240,6 +5244,78 @@
             "sourceDeclaredTimezone": "unknown",
             "publicationInstant": "unknown"
           }
+        },
+        {
+          "reason": "User-approved fixed metadata HTTP identity/source-day rule implemented and cleanSHA verified; initial generic incompatibility and failed probe retained",
+          "previousFieldReplayEvidence": {
+            "status": "BLOCKED_EXISTING_WEB_LIST_COMPATIBILITY_NOT_POSITIVE_FIELD_PASS",
+            "observation": {
+              "path": "docs/evidence/r2-sitc-applied-2026-10-15/field-observation.json",
+              "sha256": "0f0de6046c5fdf216ba293e1298ffcc6328615e6ee4846f871430c858550ec44",
+              "hashBasis": "committed_text_LF"
+            },
+            "evidence": {
+              "path": "docs/evidence/r2-sitc-applied-2026-10-15/compatibility-result.json",
+              "sha256": "cbe4b6b1033a19e4ff24d2dd57c7c0e16ec599e1b39681de4f16a774d41924b8",
+              "hashBasis": "committed_text_LF"
+            },
+            "finalCommand": {
+              "path": "docs/evidence/r2-sitc-applied-2026-10-15/replay-command.final.json",
+              "sha256": "206778b79d85a1eb282477b60e18d1ef2f00b1b78f4294b06a9a1e6c34eaab10",
+              "hashBasis": "committed_text_LF"
+            },
+            "initialScriptFailure": {
+              "path": "docs/evidence/r2-sitc-applied-2026-10-15/replay-command.json",
+              "sha256": "fb62319f5d0d7ff77792d6262f23b940e4c161a52aa9012c02bf4f58a2314928",
+              "hashBasis": "committed_text_LF"
+            },
+            "actualCards": 20,
+            "normalizedItems": 0,
+            "itemsPersisted": 0,
+            "versions": 0,
+            "originalLinkProtocol": "http:",
+            "originalDateFormat": "发布日期: YYYY.MM.DD",
+            "urlOrDateRewritten": false,
+            "unknownTimezonePreserved": true,
+            "readonlyEmptyTablesNotClaimedAsPositiveFieldAcceptance": true
+          },
+          "previousDateEvidence": {
+            "role": "Source-labelled发布日期 text on each own news card; existing grammar returns unsupported",
+            "rawEvidence": {
+              "path": "docs/evidence/r2-sitc-applied-2026-10-15/field-observation.json",
+              "sha256": "0f0de6046c5fdf216ba293e1298ffcc6328615e6ee4846f871430c858550ec44",
+              "hashBasis": "committed_text_LF"
+            },
+            "precision": "unknown_under_current_parser",
+            "sourceDeclaredTimezone": "unknown",
+            "publicationInstant": null,
+            "utcOffset": null,
+            "localDate": null
+          },
+          "previousDefaultState": {
+            "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
+            "sourceConfig": "not_configured",
+            "declaredSeedEnabled": null,
+            "effectiveDefaultIntelJobEnabled": false,
+            "currentUserPersistedSettings": "not_inspected"
+          },
+          "previousQualificationProposal": {
+            "status": "PENDING_PARENT_REVIEW",
+            "availability": "PARTIAL_readable_actual20_card_list_with_adapter_contract_gap",
+            "countedOK": false,
+            "fieldAcceptance": "BLOCKED_pending_HTTP_metadata_identity_and_explicit_source_date_rule_decision",
+            "notAnIntrinsicSourceFailure": true
+          },
+          "previousR24": {
+            "verdict": "NOT_RUN",
+            "countedOK": false,
+            "reason": "PriorNOT_RUN qualification retained pending parent review: actual200 exact main news index20cards is now stored; originalHTTP detail identities conflict with existingHTTPS-only web-list adapter. PARTIAL proposal is unapproved, not a countedOK."
+          },
+          "previousR25": {
+            "verdict": "NOT_RUN",
+            "countedPass": false,
+            "reason": "PriorNOT_RUN qualification retained pending parent review. Existing raw HTML/parser/collector compatibility probe rejects allHTTP links and stores0; dotted source-date grammar unsupported. This is not positive field PASS or proof source invalidity."
+          }
         }
       ],
       "lastSafeFetchAttempt": {
@@ -5269,10 +5345,13 @@
       },
       "qualificationProposal": {
         "status": "PENDING_PARENT_REVIEW",
-        "availability": "PARTIAL_readable_actual20_card_list_with_adapter_contract_gap",
+        "availability": "OK_proposed_only",
+        "fieldAcceptance": "PASS_proposed_only",
         "countedOK": false,
-        "fieldAcceptance": "BLOCKED_pending_HTTP_metadata_identity_and_explicit_source_date_rule_decision",
-        "notAnIntrinsicSourceFailure": true
+        "countedPass": false,
+        "localEvidencePassed": true,
+        "currentApprovedAvailability": "PARTIAL",
+        "currentApprovedField": "NOT_RUN"
       }
     },
     {
@@ -6405,6 +6484,38 @@
   },
   "lastSITCAppliedCompatibility": {
     "report": {
+      "path": "docs/evidence/r2-sitc-metadata-2026-10-15/report.md",
+      "sha256": "53758d5d13fc7be826a1cc1b05f5b4700573a0173f3847e8896e4364e343654a",
+      "hashBasis": "committed_text_LF"
+    },
+    "result": {
+      "path": "docs/evidence/r2-sitc-metadata-2026-10-15/replay-result.json",
+      "sha256": "49dcf15cbdcfe05a3c8b4cb4b99aa74368d96147d98993316e07e2b318903455",
+      "hashBasis": "committed_text_LF"
+    },
+    "fieldObservation": {
+      "path": "docs/evidence/r2-sitc-metadata-2026-10-15/field-audit.json",
+      "sha256": "0666f63f5c52d8ca45bec0a2d8d9a8c28625cdc5e5455edd88494881ed2cc382",
+      "hashBasis": "committed_text_LF"
+    },
+    "testedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+    "sourceGetAttemptsThisRound": 0,
+    "productionEnabled": false
+  },
+  "previousReviewedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "codeVerification": {
+    "testedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+    "priorParentAcceptedCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+    "state": "LOCALLY_VERIFIED_PENDING_PARENT_REVIEW",
+    "gate": {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/summary.json",
+      "sha256": "50c4c510c25d94ea5b8af2fb847ae254c6535c2f51f5b480a09e16d79bb388dd",
+      "hashBasis": "committed_text_LF"
+    },
+    "independentReview": "pending_parent"
+  },
+  "previousSITCAppliedCompatibility": {
+    "report": {
       "path": "docs/evidence/r2-sitc-applied-2026-10-15/report.md",
       "sha256": "cc061a08b52b155b657ef41f104cb56cb6eaf9166b957bb22cd9db65bfe3a78c",
       "hashBasis": "committed_text_LF"
@@ -6420,5 +6531,26 @@
       "hashBasis": "committed_text_LF"
     },
     "productChanges": false
-  }
+  },
+  "lastSITCMetadataRepair": {
+    "report": {
+      "path": "docs/evidence/r2-sitc-metadata-2026-10-15/report.md",
+      "sha256": "53758d5d13fc7be826a1cc1b05f5b4700573a0173f3847e8896e4364e343654a",
+      "hashBasis": "committed_text_LF"
+    },
+    "result": {
+      "path": "docs/evidence/r2-sitc-metadata-2026-10-15/replay-result.json",
+      "sha256": "49dcf15cbdcfe05a3c8b4cb4b99aa74368d96147d98993316e07e2b318903455",
+      "hashBasis": "committed_text_LF"
+    },
+    "fieldObservation": {
+      "path": "docs/evidence/r2-sitc-metadata-2026-10-15/field-audit.json",
+      "sha256": "0666f63f5c52d8ca45bec0a2d8d9a8c28625cdc5e5455edd88494881ed2cc382",
+      "hashBasis": "committed_text_LF"
+    },
+    "testedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+    "sourceGetAttemptsThisRound": 0,
+    "productionEnabled": false
+  },
+  "testedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09"
 }

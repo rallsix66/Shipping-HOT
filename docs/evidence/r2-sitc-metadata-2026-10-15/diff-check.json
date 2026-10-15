@@ -1,0 +1,33 @@
+{
+  "rawLogInclusive": {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "0a483dd18a2027c73bf950cc0b948c013e29cf09"
+    ],
+    "rawExit": 2,
+    "stdoutExactUtf8": "docs/evidence/gate-0a483dd-sitc-metadata/build.stdout.log:24: trailing whitespace.\n+o Building Server...                                                          \ndocs/evidence/gate-0a483dd-sitc-metadata/build.stdout.log:74: trailing whitespace.\n+√ The server has been successfully built.                                     \ndocs/evidence/gate-0a483dd-sitc-metadata/lint.stdout.log:4: new blank line at EOF.\ndocs/evidence/gate-0a483dd-sitc-metadata/targeted.stdout.log:27: new blank line at EOF.\ndocs/evidence/gate-0a483dd-sitc-metadata/typecheck.stdout.log:4: new blank line at EOF.\ndocs/evidence/gate-0a483dd-sitc-metadata/vitest.stdout.log:518: new blank line at EOF.\n",
+    "stderrExactUtf8": "warning: unable to access 'C:\\Users\\Administrator/.config/git/ignore': Permission denied\nwarning: in the working copy of 'docs/evidence/r2-sitc-metadata-2026-10-15/closeout.md', LF will be replaced by CRLF the next time Git touches it\n",
+    "stdoutOriginalByteSha256": "10a310a919f683d4224c6ca9ed57d12bd98fce9500199c2e3e4d43cf40be48af",
+    "stderrOriginalByteSha256": "8fe2024650ab0cee2213abe76b711411b0e6958f37181c9e8abeae29d35220ca"
+  },
+  "nonLogChanges": {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+      "--",
+      ".",
+      ":(exclude)docs/evidence/gate-0a483dd-sitc-metadata/*.log"
+    ],
+    "rawExit": 0,
+    "stdoutExactUtf8": "",
+    "stderrExactUtf8": "warning: unable to access 'C:\\Users\\Administrator/.config/git/ignore': Permission denied\nwarning: in the working copy of 'docs/evidence/r2-sitc-metadata-2026-10-15/closeout.md', LF will be replaced by CRLF the next time Git touches it\n",
+    "stdoutOriginalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrOriginalByteSha256": "8fe2024650ab0cee2213abe76b711411b0e6958f37181c9e8abeae29d35220ca"
+  },
+  "decision": "Preserve original command stdout exactly, including CLI trailing spaces/blank lines; all non-log changes pass whitespace check",
+  "productGateImpact": "none"
+}

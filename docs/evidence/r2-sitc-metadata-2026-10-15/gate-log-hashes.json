@@ -1,0 +1,119 @@
+{
+  "codeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "gateDirectory": "docs/evidence/gate-0a483dd-sitc-metadata",
+  "logs": [
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/build.stderr.log",
+      "originalByteSha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658",
+      "committedTextLfSha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658",
+      "originalBytes": 524
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/build.stdout.log",
+      "originalByteSha256": "bd46679153fde5ac1d44a093ef995297529a1cf149c356f5d9076404856e2fef",
+      "committedTextLfSha256": "bd46679153fde5ac1d44a093ef995297529a1cf149c356f5d9076404856e2fef",
+      "originalBytes": 5437
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/install.stderr.log",
+      "originalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedTextLfSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "originalBytes": 0
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/install.stdout.log",
+      "originalByteSha256": "171bd6a1f0508132025103d7b75f1a86c03a98eaf085b7fc4c4e6b236e13ad17",
+      "committedTextLfSha256": "171bd6a1f0508132025103d7b75f1a86c03a98eaf085b7fc4c4e6b236e13ad17",
+      "originalBytes": 1936
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/lint.stderr.log",
+      "originalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedTextLfSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "originalBytes": 0
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/lint.stdout.log",
+      "originalByteSha256": "f07082a703973e436764798cdee7d9a317c681de04c54dbc3ee564541dcf2954",
+      "committedTextLfSha256": "f07082a703973e436764798cdee7d9a317c681de04c54dbc3ee564541dcf2954",
+      "originalBytes": 96
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/smoke-feed.stderr.log",
+      "originalByteSha256": "f8e373173939ea0f71683688de7c1542f9b986a942846e63cc9a1fc1e81612ab",
+      "committedTextLfSha256": "f8e373173939ea0f71683688de7c1542f9b986a942846e63cc9a1fc1e81612ab",
+      "originalBytes": 365
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/smoke-feed.stdout.log",
+      "originalByteSha256": "c99a7b5cc51b9028292822c67f513646d7f404a1e37ba6d1d9de6a911edb77e7",
+      "committedTextLfSha256": "c99a7b5cc51b9028292822c67f513646d7f404a1e37ba6d1d9de6a911edb77e7",
+      "originalBytes": 307
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/smoke-p0.stderr.log",
+      "originalByteSha256": "122cf701e6e372586624921bff4378d3d8a04df36c52d9fb6f67550d82dc2340",
+      "committedTextLfSha256": "122cf701e6e372586624921bff4378d3d8a04df36c52d9fb6f67550d82dc2340",
+      "originalBytes": 1247
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/smoke-p0.stdout.log",
+      "originalByteSha256": "c1029ba94cb8d33e9998e16486697148182c3eea599dd2403cb0edb73edcf9f0",
+      "committedTextLfSha256": "c1029ba94cb8d33e9998e16486697148182c3eea599dd2403cb0edb73edcf9f0",
+      "originalBytes": 368
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/smoke-p2c.stderr.log",
+      "originalByteSha256": "684e0a0a28e9bd14fd172130071e1ee68ad454566f0bc48b2499af87f4d77c86",
+      "committedTextLfSha256": "684e0a0a28e9bd14fd172130071e1ee68ad454566f0bc48b2499af87f4d77c86",
+      "originalBytes": 365
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/smoke-p2c.stdout.log",
+      "originalByteSha256": "ddf8fc18c5a8a46328cbc9fd6c73e819449b990ba2455e60f721644e398a6fc1",
+      "committedTextLfSha256": "ddf8fc18c5a8a46328cbc9fd6c73e819449b990ba2455e60f721644e398a6fc1",
+      "originalBytes": 323
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/targeted.stderr.log",
+      "originalByteSha256": "b13a91e4606f1528fca4701738cac98a0301afb613736d6751369f3c0977c779",
+      "committedTextLfSha256": "b13a91e4606f1528fca4701738cac98a0301afb613736d6751369f3c0977c779",
+      "originalBytes": 2087
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/targeted.stdout.log",
+      "originalByteSha256": "88ba81862027cb6b8cbd7f6ab7bd45c8fbae0c38ef6f4c9f975be63453ea31bf",
+      "committedTextLfSha256": "88ba81862027cb6b8cbd7f6ab7bd45c8fbae0c38ef6f4c9f975be63453ea31bf",
+      "originalBytes": 1369
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/typecheck.stderr.log",
+      "originalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedTextLfSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "originalBytes": 0
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/typecheck.stdout.log",
+      "originalByteSha256": "01e0bf3f251e088ed650e13f94ef8ce7de522d398c91d55782c7ea1e343d7ee4",
+      "committedTextLfSha256": "01e0bf3f251e088ed650e13f94ef8ce7de522d398c91d55782c7ea1e343d7ee4",
+      "originalBytes": 166
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/vitest.stderr.log",
+      "originalByteSha256": "b585226d0334690f2d3e607e198d9360c21941c9a4ad4165c3940d4be11afc61",
+      "committedTextLfSha256": "b585226d0334690f2d3e607e198d9360c21941c9a4ad4165c3940d4be11afc61",
+      "originalBytes": 5339
+    },
+    {
+      "path": "docs/evidence/gate-0a483dd-sitc-metadata/vitest.stdout.log",
+      "originalByteSha256": "f22eab5b38aa376cc8773104be8b937c371f5bc3bbc4826f9d30be648e2f511e",
+      "committedTextLfSha256": "f22eab5b38aa376cc8773104be8b937c371f5bc3bbc4826f9d30be648e2f511e",
+      "originalBytes": 18725
+    }
+  ],
+  "precheckMaterialsRetainedIgnored": [
+    ".tmp/sitc-metadata-targeted-before-commit.log",
+    ".tmp/sitc-metadata-targeted-direct-before-commit.log",
+    ".tmp/sitc-metadata-typecheck-before-commit.log"
+  ]
+}
