@@ -1,19 +1,20 @@
 {
   "type": "docs_and_saved_evidence_validation",
-  "at": "2026-10-15T02:17:57.880339+00:00",
+  "at": "2026-10-15T02:47:20.597841+00:00",
   "codeSha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
-  "evidenceBaseline": "a5da09871d1a017ae947a0f3f56980461807bfaf",
+  "evidenceBaseline": "0ad53dd63632f097e719197345a1000b0e0c1d29",
   "command": "python .tmp/validate-current-r2-matrix.py",
   "validatorSourceRequests": 0,
   "validatorSourceDns": 0,
   "lastQualificationBatchSystemDns": 4,
   "lastQualificationBatchHttpRequests": 4,
-  "thisCarrierBatchSourceRequests": 0,
+  "thisCarrierBatchTransportAttempts": 2,
   "thisCarrierBatchSystemDns": 2,
+  "thisCarrierBatchCompletedResponses": 1,
   "thisCloseoutSourceRequests": 0,
   "thisCloseoutSystemDns": 0,
   "functionalTests": "NOT_RUN_this_docs_only_round; accepted clean code gate355952c retained separately",
-  "originalFieldReplay": "NOT_RUN_this_docs_round; saved VN-D01 PASS / MY-L01 FAIL / redirects unchanged",
+  "originalFieldReplay": "NOT_RUN_current_carrier_list_payloads_missing; saved older accepted fields unchanged",
   "checks": [
     {
       "check": "41 unique entries match current catalogue automatic P1 rows",
@@ -41,8 +42,8 @@
       "check": "All evidence paths exist",
       "pass": true,
       "detail": {
-        "referenceOccurrences": 148,
-        "uniquePaths": 42,
+        "referenceOccurrences": 157,
+        "uniquePaths": 46,
         "missing": []
       }
     },
@@ -76,10 +77,10 @@
       "pass": true,
       "detail": {
         "OK": 20,
-        "PARTIAL": 11,
+        "PARTIAL": 12,
         "NOT_RUN": 5,
         "STALE": 1,
-        "BLOCKED": 2
+        "BLOCKED": 1
       }
     },
     {
@@ -176,6 +177,62 @@
         "docs/evidence/r2-anchor-date-review-replay-2026-10-15/stderr.log",
         "docs/evidence/r2-anchor-date-review-replay-2026-10-15/stdout.log",
         "docs/evidence/r2-anchor-date-review-replay-2026-10-15/summary.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/XX-K01-result.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/XX-K02-result.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/archive-hashes.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/capture-config.ts.txt",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/capture-launcher.cjs.txt",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/capture-output-original.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/capture-procedure.test.ts.txt",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/clash-host-presence.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/clash-readonly-procedure.py.txt",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/closeout.md",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/command.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/dns-ledger.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/documentation-validation-driver.py.txt",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/execution-binding.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/initial-doc-validation.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/inventory-metadata.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/inventory.txt",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/launch.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/manifest.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/manifest.original.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/matrix-delta.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/metadata-correction-driver.py.txt",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/partial-results.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/report.md",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/request-ledger.json",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/stderr.log",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/stdout.log",
+        "docs/evidence/r2-carrier-news-two-2026-10-15/summary.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/XX-K01-result.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/XX-K02-response.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/XX-K02-result.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/applied-config-check.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/applied-config-readonly.py.txt",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/archive-hashes.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/capture-config.ts.txt",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/capture-integrity.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/capture-launcher.cjs.txt",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/capture-output-original.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/capture-procedure.test.ts.txt",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/closeout.md",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/command.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/dns-ledger.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/documentation-validation-driver.py.txt",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/inventory-metadata.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/inventory.txt",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/launch.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/manifest.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/matrix-delta.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/metadata-update-driver.py.txt",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/partial-results.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/report.md",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/request-ledger.json",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/stderr.log",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/stdout.log",
+        "docs/evidence/r2-carrier-reapplied-2026-10-15/summary.json",
+        "docs/evidence/r2-current-source-matrix-2026-10-14/archive-hashes.json",
         "docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt",
         "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
         "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
@@ -184,6 +241,7 @@
         "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
         "docs/evidence/r2-current-source-matrix-2026-10-14/validate-matrix.py.txt",
         "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+        "docs/handoffs/r2-next-execution-2026-10-15.md",
         "docs/status.md"
       ]
     },
@@ -254,6 +312,51 @@
     },
     {
       "check": "Original capture stdout stderr byte hashes retained",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "User-applied23 exact entries preserve old21 with no agent config writes",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Reapplied batch two actual once-only DNS and exact transport attempts",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "No redirect retry details production paid or LLM in current batch",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Reapplied manifest launch command bind exact existing code and head",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Maersk generic failure no invented response or underlying diagnosis",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "ONE actual308 relative header12bytes retained without follow or field promotion",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Both latest attempts replace DNS blockage without parsing or source configuration",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Only two source entries changed in reapplied round, numerators preserved",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Reapplied original stdout stderr byte digests retained",
       "pass": true,
       "detail": null
     },

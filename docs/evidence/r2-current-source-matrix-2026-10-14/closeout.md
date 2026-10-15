@@ -1,1 +1,1 @@
-当前收尾见[两源DNS证据与真实Neat Freak](../r2-carrier-news-two-2026-10-15/closeout.md)。本批系统DNS2、HTTP0，收尾阶段新增DNS/HTTP0；产品源码仍为355952c0e8c01266adbe692dfcfd3bca9b3c17b2，功能门禁本轮NOT_RUN。覆盖20/39、12/34、有限数值3/5不变；两源从未运行改为环境DNS BLOCKED。[当前逐源报告](report.md)。
+当前收尾见[用户应用后两源限界核验真实Neat Freak](../r2-carrier-reapplied-2026-10-15/closeout.md)。本批系统DNS2、精确目录transport尝试2；Maersk未捕获响应，ONE308未跟随。源码仍355952c0e8c01266adbe692dfcfd3bca9b3c17b2，功能门禁NOT_RUN。覆盖20/39、12/34、有限数值3/5不变。[当前逐源报告](report.md)。

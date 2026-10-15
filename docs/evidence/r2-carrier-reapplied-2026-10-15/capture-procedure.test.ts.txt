@@ -1,0 +1,113 @@
+import { it, expect } from "vitest"
+import { lookup } from "node:dns/promises"
+import { createHash } from "node:crypto"
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs"
+import { load } from "cheerio"
+import { secureFetchArticle, defaultTransport, isBlockedAddress } from "../server/services/article-fetch-security"
+
+const dir = "docs/evidence/r2-carrier-reapplied-2026-10-15"
+const local = ".tmp/r2-carrier-reapplied-2026-10-15-private"
+const targets = [
+  ["XX-K01", "https://www.maersk.com/news"],
+  ["XX-K02", "https://www.one-line.com/en/news"],
+]
+const hash = (v: string | Uint8Array) => createHash("sha256").update(v).digest("hex")
+const save = (name: string, x: unknown) => writeFileSync(`${dir}/${name}.json`, JSON.stringify(x, null, 2) + "\n", "utf8")
+const sensitive = /authorization|bearer|cookie|api[_-]?key|password|credential|token|secret|csrf/i
+function sanitizeLocation(value: string | string[] | undefined) {
+  if (value === undefined) return { present: false }
+  if (Array.isArray(value) || value.length > 4096 || /[\r\n]/.test(value)) return { present: true, sanitized: null, redacted: true, reason: "invalid_or_oversized" }
+  try {
+    const literal = value.trim(), u = new URL(literal, "https://synthetic-location-base.invalid/")
+    if (!["http:", "https:"].includes(u.protocol)) return { present: true, sanitized: null, redacted: true, reason: "non_http" }
+    const relative = !/^[A-Za-z][A-Za-z0-9+.-]*:/.test(literal)
+    let pathname = relative && !literal.startsWith("/") ? literal.split(/[?#]/, 1)[0] : u.pathname
+    const pathRedacted = pathname.split("/").some(p => p.length >= 32 || sensitive.test(p))
+    pathname = pathname.split("/").map(p => p.length >= 32 || sensitive.test(p) ? "[path-redacted]" : p).join("/")
+    const sanitized = relative ? literal.startsWith("//") ? `//${u.host}${pathname}` : pathname : `${u.origin}${pathname}`
+    return { present: true, sanitized, relative, credentialsRemoved: Boolean(u.username || u.password), queryRemoved: Boolean(u.search), fragmentRemoved: Boolean(u.hash), pathRedacted, followed: false }
+  } catch { return { present: true, sanitized: null, redacted: true, reason: "invalid_location" } }
+}
+function safeUrl(s: string, base: string) {
+  try { const u = new URL(s, base); return ["http:", "https:"].includes(u.protocol) && !u.username && !u.password && ![...u.searchParams.keys()].some(k => sensitive.test(k) || /signature|^sig$|utm_|gclid|fbclid/i.test(k)) ? u.href : null }
+  catch { return null }
+}
+function observe(body: string, url: string) {
+  const $ = load(body); $("script,style,noscript,iframe,input,meta,link").remove()
+  const candidates: unknown[] = []
+  const date = /\b\d{1,4}[/-]\d{1,2}[/-]\d{1,4}\b|\d{4}年\d{1,2}月\d{1,2}日/g
+  $("a[href]").each((index, el) => {
+    if (candidates.length >= 8) return
+    const a = $(el), href = safeUrl(a.attr("href") ?? "", url), text = a.text().replace(/\s+/g, " ").trim()
+    if (!href || !text || sensitive.test(text)) return
+    let container = a.parent(), dates: string[] = [], depth = 0
+    while (depth++ < 3) { dates = [...new Set(container.text().match(date) ?? [])]; if (dates.length) break; container = container.parent() }
+    if (!dates.length) return
+    candidates.push({ index, titleExcerpt: text.slice(0, 100), href, dateCandidates: dates.slice(0, 5), ancestorDepth: depth, localAnchorCount: container.find("a[href]").length, association: "observation_only_not_assigned" })
+  })
+  return { kind: "sanitized bounded structural metadata, not raw HTML or configured fields", counts: { anchors: $("a[href]").length, tables: $("table").length, times: $("time").length }, candidates, parser: "NOT_RUN", fullFieldsPass: false }
+}
+it("two approved exact carrier-news catalogue targets: one OS DNS and at most one pinned index request each", async () => {
+  expect(process.env.SHIPPING_APPROVED_CARRIER_REAPPLIED).toBe("1")
+  expect(sanitizeLocation("https://synthetic:placeholder@example.test/news?token=synthetic#fragment")?.sanitized).toBe("https://example.test/news")
+  mkdirSync(dir, { recursive: true }); mkdirSync(local, { recursive: true })
+  if (existsSync(`${dir}/request-ledger.json`) || existsSync(`${dir}/dns-ledger.json`)) throw new Error("ledger_exists_never_repeat")
+  const applied = JSON.parse(readFileSync(`${dir}/applied-config-check.json`, "utf8"))
+  expect(applied.selectedExtensionExactlyOriginal21Plus2 && applied.generatedExactlyOriginal21Plus2 && applied.agentSystemWriteExecuted === false).toBe(true)
+  const catalog = readFileSync("docs/intel-source-catalog.md", "utf8")
+  const rows = targets.map(([id, expected]) => {
+    const line = catalog.split(/\r?\n/).find(l => l.startsWith(`| ${id} |`))!
+    const url = line.split("|")[4].trim(); if (url !== expected) throw new Error("catalog_exact_url_mismatch")
+    const u = new URL(url); if (u.protocol !== "https:") throw new Error("catalog_https_required")
+    return { id, url, host: u.hostname, catalogLineSha256: hash(line) }
+  })
+  save("manifest", { rows, productCodeSha: "355952c0e8c01266adbe692dfcfd3bca9b3c17b2", maxSystemDns: 2, maxHttpRequests: 2, maxBytes: 1048576, perRequestMs: 10000, batchMs: 60000, retries: 0, redirects: 0, pagination: 0, details: 0, networkSettingsChanged: false, fullRawPermission: "unknown; ignored private response bytes only, no redistribution" })
+  const dns: any[] = [], requests: any[] = [], results: any[] = []
+  save("dns-ledger", dns); save("request-ledger", requests)
+  const batch = new AbortController(), timer = setTimeout(() => batch.abort(), 60000)
+  try {
+    for (const row of rows) {
+      const result: any = { ...row, startedAt: new Date().toISOString(), systemDnsCalls: 0, httpRequests: 0, status: "NOT_RUN", rawHtmlCommitted: false }
+      try {
+        if (batch.signal.aborted) throw new Error("batch_deadline")
+        result.systemDnsCalls = 1
+        const record: any = { id: row.id, host: row.host, reservedAt: new Date().toISOString(), state: "reserved_unknown" }; dns.push(record); save("dns-ledger", dns)
+        let dnsTimer: ReturnType<typeof setTimeout> | undefined
+        let addresses: Awaited<ReturnType<typeof lookup>>[]
+        try {
+          addresses = await Promise.race([lookup(row.host, { all: true, verbatim: true }), new Promise<never>((_, reject) => { dnsTimer = setTimeout(() => reject(new Error("system_dns_timeout")), 10000) })]) as any
+          record.addresses = addresses; record.classification = !addresses.length ? "dns_empty" : addresses.some(isBlockedAddress as any) ? "blocked_address" : "public_address"
+          record.state = "finished"; record.finishedAt = new Date().toISOString(); save("dns-ledger", dns)
+        } catch (error) {
+          record.state = "failed"; record.finishedAt = new Date().toISOString(); record.errorCode = (error as any)?.code ?? "system_dns_timeout_or_failure"; save("dns-ledger", dns); throw error
+        } finally { if (dnsTimer) clearTimeout(dnsTimer) }
+        result.addresses = addresses; result.addressClassification = record.classification
+        const fetched = await secureFetchArticle(row.url, {
+          policy: { sourceId: row.id, status: "allowed", fetchAllowed: true, persistence: "disallowed", allowedHosts: [row.host], allowedContentTypes: ["text/html", "application/xhtml+xml"] },
+          maxBytes: 1048576, timeoutMs: 10000, maxRedirects: 0, signal: batch.signal,
+          lookup: async host => { if (host !== row.host) throw new Error("pinned_host_mismatch"); return addresses as any },
+          transport: async (url, ips, options) => {
+            if (result.httpRequests || requests.length >= 2 || url.href !== row.url || options.caPem) throw new Error("one_shot_boundary")
+            result.httpRequests = 1; requests.push({ id: row.id, url: row.url, addresses: ips, reservedAt: new Date().toISOString(), state: "reserved_unknown" }); save("request-ledger", requests)
+            const response = await defaultTransport(url, ips, options)
+            const raw = typeof response.body === "string" ? Buffer.from(response.body) : response.body
+            writeFileSync(`${local}/${row.id}.response.bin`, raw)
+            Object.assign(result, { receivedAt: new Date().toISOString(), httpStatus: response.status, contentType: response.headers["content-type"], bytes: raw.length, wireSha256: hash(raw), rawLocalOnly: true, location: sanitizeLocation(response.headers["location"]) })
+            save(`${row.id}-response`, result)
+            return response
+          },
+        })
+        if (!fetched.ok) { result.status = "BLOCKED"; result.reason = fetched.code; result.httpStatus ??= fetched.status; result.parser = "NOT_RUN" }
+        else { const metadata = observe(fetched.body, row.url); save(`${row.id}-structure`, metadata); result.status = "PARTIAL"; result.decoding = fetched.decoding; result.parser = "STRUCTURE_ONLY" }
+      } catch (error) {
+        result.status = "BLOCKED"; const code = (error as any)?.code; result.reason = typeof code === "string" && /^[A-Z_0-9]+$/.test(code) ? code : error instanceof Error && error.message === "system_dns_timeout" ? "system_dns_timeout" : "capture_exception"
+      } finally {
+        result.finishedAt = new Date().toISOString(); save(`${row.id}-result`, result); results.push(result); save("partial-results", results)
+        const req = requests.find(r => r.id === row.id); if (req) { req.state = result.receivedAt ? "response_captured" : "finished_without_response"; req.finishedAt = result.finishedAt; save("request-ledger", requests) }
+      }
+    }
+  } finally { clearTimeout(timer) }
+  save("summary", { results, systemDnsCalls: dns.length, reservedTransportCalls: requests.length, retries: 0, redirects: 0, details: 0, productionEnabled: false, live24h: "NOT_RUN", paidCalls: 0, llmCalls: 0, fullRawRedistributed: false, overallR2Pass: false })
+  expect(results).toHaveLength(2); expect(dns).toHaveLength(2); expect(requests.length).toBeLessThanOrEqual(2)
+  for (const r of results) { expect(r.systemDnsCalls).toBe(1); expect(r.httpRequests).toBeLessThanOrEqual(1) }
+}, 65000)

@@ -11,7 +11,7 @@ old = json.loads(OLD.read_text(encoding='utf-8'))
 inventory_path = ROOT / 'r2-p1-inventory-2026-10-13/source-inventory.json'
 inventory = json.loads(inventory_path.read_text(encoding='utf-8'))
 legacy = {r['id']: r for r in inventory['entries']}
-HEAD = 'a5da09871d1a017ae947a0f3f56980461807bfaf'
+HEAD = '0ad53dd63632f097e719197345a1000b0e0c1d29'
 CODE = '355952c0e8c01266adbe692dfcfd3bca9b3c17b2'
 
 def read(path): return json.loads(Path(path).read_text(encoding='utf-8'))
@@ -269,6 +269,31 @@ for source in old['entries']:
         e['r2_4']={'verdict':'BLOCKED','countedOK':False,'reason':'One actual system DNS resolved 198.18 special-range address; existing secure-fetch safety check stopped before transport. Environment blockage is not a page/content qualification failure.'}
         e['r2_5']={'verdict':'NOT_RUN','countedPass':False,'reason':'HTTP0; no response bytes, title/link/date parsing or original-page replay. No invented selectors or source-time semantics.'}
         e['gaps']=['Target exact host absent from selected extension literals and generated DNS filter at read-only check; no settings modified.', 'Public DNS/actual exact index response and source field/license qualification remain pending; no retry authorized by this closeout.']
+    if sid in ['XX-K01','XX-K02']:
+        new_batch='docs/evidence/r2-carrier-reapplied-2026-10-15'
+        attempt=outcome(new_batch+'/summary.json',sid)
+        e['historicalAttempts']=[e['latestAttempt']]
+        e['latestAttempt']={'evidence':ref(new_batch+'/summary.json',{'id':sid}),
+            'dnsEvidence':ref(new_batch+'/dns-ledger.json',{'id':sid}),
+            'appliedConfigEvidence':ref(new_batch+'/applied-config-check.json'),
+            'captureIntegrity':ref(new_batch+'/capture-integrity.json'),
+            'at':attempt['startedAt'],'url':attempt['url'],'host':attempt['host'],
+            'addresses':attempt['addresses'],'addressClassification':'public_address',
+            'systemDnsCalls':1,'httpRequests':1,'requestCountMeaning':'one reserved transport invocation; not proof that complete HTTP response or on-wire send succeeded',
+            'responseCaptured':bool(attempt.get('receivedAt')),'httpStatus':attempt.get('httpStatus'),
+            'reason':attempt['reason'],'parser':'NOT_RUN',
+            'scope':'exact catalogue index attempt once after user-applied23 exceptions; no follow retry detail or agent network config write'}
+        e['r2_5']={'verdict':'NOT_RUN','countedPass':False,'reason':'No original news-list payload obtained, no title/link/time parsing or collector/SQLite replay.'}
+        e['historicalSuperseded'].append('Earlier198.18 DNS block superseded by one public system DNS result; this round current outcome is transport failure or actual308, not DNS blockage.')
+        if sid=='XX-K01':
+            e['latestActualFetch']=None
+            e['r2_4']={'verdict':'BLOCKED','countedOK':False,'reason':'Public system DNS and one exact transport attempt, generic secure entry fetch_failed; no completed response captured. Underlying error not recorded; no TLS/CA/anti-bot diagnosis.'}
+            e['gaps']=['No captured response/status/content type/raw bytes/Location; no qualifying news fields.', 'Any later diagnostic needs explicit bounded task and sanitized underlying error capture; no automatic retry or network settings change.']
+        else:
+            e['latestActualFetch']=fetch(new_batch+'/summary.json',sid)
+            e['latestActualFetch']['location']=attempt['location']
+            e['r2_4']={'verdict':'PARTIAL','countedOK':False,'reason':'Exact catalogue index returned308 with saved relative Location /en/newsroom and12 original bytes; no redirect followed, target list product and fields unverified.'}
+            e['gaps']=['Actual Location /en/newsroom is a relative response header, not a confirmed news-list product.', 'Current catalogue remains /en/news; any product URL change/future request must be explicitly coordinated, no silent substitution or follow.']
     entries.append(e)
 
 assert len(entries)==41 and len({r['id'] for r in entries})==41
