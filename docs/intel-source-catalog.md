@@ -1,4 +1,4 @@
-> R2当前复核（2026-10-14）：[41项累计证据与缺口](evidence/r2-current-source-matrix-2026-10-14/report.md) / [逐源矩阵](evidence/r2-current-source-matrix-2026-10-14/mapping.json)。下表核查标签保留为编制时历史；当前R2-4/5结论以逐源矩阵为准。所有ID、URL、格式和优先级保持原样；默认启用状态与采集资格分开记录。
+> R2当前复核（2026-10-15）：[41项累计证据与缺口](evidence/r2-current-source-matrix-2026-10-14/report.md) / [逐源矩阵](evidence/r2-current-source-matrix-2026-10-14/mapping.json)。下表核查标签保留为编制时历史；当前R2-4/5结论以逐源矩阵为准。所有ID、URL、格式和优先级保持原样；默认启用状态与采集资格分开记录。
 
 # Shipping HOT 信源目录（草案）
 

@@ -1,10 +1,10 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-14T10:57:22.667526+00:00",
-  "reviewedCodeSha": "355bc861d4020ba22ddd00401de709d7cee497e3",
-  "evidenceHead": "e4d56116cda05fe4a8dbe151040c26874b6807c1",
+  "generatedAt": "2026-10-15T01:30:19.749850+00:00",
+  "reviewedCodeSha": "9ec4a2dd4e6a76657ec3ed2a6dabb15187b4d5a8",
+  "evidenceHead": "50da3805ee14e72222a4e26f4230073cf1842bc7",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
-  "catalogSha256": "f4d37cbbecde67494cdc7ba8acd1a6fff063678aff1903eae8c18727a4c9ba4d",
+  "catalogSha256": "91328b2e4754dfe51ab1c94508df3c47675ede66df1e852d1b69b187418dd0b3",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
   "approval": {
     "messageId": "Sentinel_81b542f9f60c8191a2b32b4cc8018c61",
@@ -34,17 +34,18 @@
   },
   "measuredCoverage": {
     "r2_4": {
-      "numerator": 19,
+      "numerator": 20,
       "denominator": 39,
-      "ratio": 0.48717948717948717,
+      "ratio": 0.5128205128205128,
       "minimumOK": 32,
-      "shortfall": 13,
+      "shortfall": 12,
       "ids": [
         "CN-P01",
         "CN-T02",
         "VN-P03",
         "VN-W01",
         "VN-T01",
+        "VN-D01",
         "TH-W01",
         "TH-C01",
         "TH-C02",
@@ -61,25 +62,25 @@
         "XX-A02"
       ],
       "statusCounts": {
-        "OK": 19,
-        "BLOCKED": 4,
-        "PARTIAL": 8,
+        "OK": 20,
+        "PARTIAL": 11,
         "NOT_RUN": 7,
         "STALE": 1
       },
       "pass": false
     },
     "r2_5": {
-      "numerator": 11,
+      "numerator": 12,
       "denominator": 34,
-      "ratio": 0.3235294117647059,
-      "remaining": 23,
+      "ratio": 0.35294117647058826,
+      "remaining": 22,
       "ids": [
         "CN-P01",
         "CN-T02",
         "VN-P03",
         "VN-W01",
         "VN-T01",
+        "VN-D01",
         "TH-W01",
         "TH-C01",
         "TH-C02",
@@ -88,9 +89,9 @@
         "PH-C01"
       ],
       "statusCounts": {
-        "PASS": 11,
-        "NOT_RUN": 19,
-        "FAIL": 3,
+        "PASS": 12,
+        "NOT_RUN": 17,
+        "FAIL": 4,
         "PARTIAL": 1
       },
       "pass": false
@@ -258,7 +259,26 @@
         "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
         "hashBasis": "committed_text_LF"
       },
-      "latestActualFetch": null,
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
+          "selector": {
+            "id": "CN-P02"
+          },
+          "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.sz.msa.gov.cn/",
+        "startedAt": "2026-10-15T01:16:09.530Z",
+        "receivedAt": "2026-10-15T01:16:09.783Z",
+        "finishedAt": "2026-10-15T01:16:09.783Z",
+        "httpStatus": 302,
+        "wireSha256": "0636ef4de5a01c1744ea9e76e6dbb29b0668d130d6b7f349d1b2268ea73dd29e",
+        "bytes": 207,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
       "fieldReplayEvidence": null,
       "numericFieldValidation": null,
       "dateEvidence": {
@@ -280,54 +300,94 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "BLOCKED",
+        "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "Latest authorized exact-URL check resolved a198.18 special-range address; unchanged secure fetch blocked before transport. Current environment blocked, not proof source content is unusable."
+        "reason": "Exact catalogue URL returned HTTP302; redirects were not followed. Response retained but actual list product unknown; no automatic alternate host/path."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "DNS blocked before HTTP, no original response bytes obtained; no guessing selectors/dates or synthetic replacement replay."
+        "reason": "Only exact index redirect response obtained, no original list payload for field replay."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "System DNS198.18 special address blocked before HTTP; no retry or network-setting change.",
-        "Actual page, source field roles/selector and license remain unverified; no new source configuration."
+        "Redirect not followed; destination/list fields and new product URL remain unverified.",
+        "No source config, no guessed alternate URL, no further request."
       ],
-      "historicalSuperseded": [],
+      "historicalSuperseded": [
+        "Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block."
+      ],
       "latestAttempt": {
         "evidence": {
-          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
           "selector": {
             "id": "CN-P02"
           },
-          "sha256": "210c2b85d3fdfa7a7b51134f8edd513e5166a967b05606bbb6fc5aaa23b2189f",
+          "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
           "hashBasis": "committed_text_LF"
         },
         "dnsEvidence": {
-          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/dns-ledger.json",
           "selector": {
             "id": "CN-P02"
           },
-          "sha256": "7e14c25243ced26a2b98fbda3c37cc076a973fefa00a757713e3f131e4809d58",
+          "sha256": "f326c38e383606a895d9fcf6377ac6c62685b1d34bc6a0a44351d2a359404f5c",
           "hashBasis": "committed_text_LF"
         },
-        "at": "2026-10-14T10:55:51.552Z",
+        "appliedConfigEvidence": {
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/applied-config-check.json",
+          "selector": null,
+          "sha256": "1523c3665d2251b4ba5f1d4bd0b910d77eec12002cf220577317da481c37f1ce",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-15T01:16:09.530Z",
         "url": "https://www.sz.msa.gov.cn/",
         "addresses": [
           {
-            "address": "198.18.0.166",
+            "address": "125.124.253.156",
             "family": 4
           }
         ],
         "systemDnsCalls": 1,
-        "httpRequests": 0,
-        "reason": "blocked_address",
-        "scope": "current_environment_dns_only_no_response_no_parse"
-      }
+        "httpRequests": 1,
+        "httpStatus": 302,
+        "scope": "one exact catalogue GET after verified21 exceptions and public OS DNS; no redirect/retry/detail"
+      },
+      "historicalAttempts": [
+        {
+          "evidence": {
+            "path": "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+            "selector": {
+              "id": "CN-P02"
+            },
+            "sha256": "210c2b85d3fdfa7a7b51134f8edd513e5166a967b05606bbb6fc5aaa23b2189f",
+            "hashBasis": "committed_text_LF"
+          },
+          "dnsEvidence": {
+            "path": "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+            "selector": {
+              "id": "CN-P02"
+            },
+            "sha256": "7e14c25243ced26a2b98fbda3c37cc076a973fefa00a757713e3f131e4809d58",
+            "hashBasis": "committed_text_LF"
+          },
+          "at": "2026-10-14T10:55:51.552Z",
+          "url": "https://www.sz.msa.gov.cn/",
+          "addresses": [
+            {
+              "address": "198.18.0.166",
+              "family": 4
+            }
+          ],
+          "systemDnsCalls": 1,
+          "httpRequests": 0,
+          "reason": "blocked_address",
+          "scope": "current_environment_dns_only_no_response_no_parse"
+        }
+      ]
     },
     {
       "id": "CN-W01",
@@ -1178,14 +1238,71 @@
         "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
         "hashBasis": "committed_text_LF"
       },
-      "latestActualFetch": null,
-      "fieldReplayEvidence": null,
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
+          "selector": {
+            "id": "VN-D01"
+          },
+          "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
+        "startedAt": "2026-10-15T01:16:09.783Z",
+        "receivedAt": "2026-10-15T01:16:13.206Z",
+        "finishedAt": "2026-10-15T01:16:13.253Z",
+        "httpStatus": 200,
+        "wireSha256": "6267157d5c21c4a4c3885a6d29aec73bd9f354d085dc239c5ea70709eb7c2861",
+        "bytes": 183913,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS",
+        "evidence": {
+          "path": "docs/evidence/r2-reapplied-raw-replay-2026-10-15/summary.json",
+          "selector": {
+            "id": "VN-D01"
+          },
+          "sha256": "10430d43b76b7416086a3bca07798e55350bc720c098ea574897a0de72d86499",
+          "hashBasis": "committed_text_LF"
+        },
+        "items": 4,
+        "first": {
+          "status": "ok_items",
+          "runId": "31c61cbf-0d43-4f38-aceb-a144e4b919d1",
+          "itemsSeen": 4,
+          "itemsNew": 4,
+          "itemsRevised": 0
+        },
+        "repeat": {
+          "status": "ok_items",
+          "runId": "884ed1fa-8161-408d-9047-ada16adbf4ec",
+          "itemsSeen": 4,
+          "itemsNew": 0,
+          "itemsRevised": 0
+        },
+        "readOnlyReopen": {
+          "readOnly": true,
+          "rows": 4,
+          "versions": 4,
+          "fullTitleUrlDateEvidenceCompared": true,
+          "mismatches": 0,
+          "dayPrecision": 4,
+          "missingTimezone": 4,
+          "nullPublicationInstants": 4
+        },
+        "independentStorageAudit": null
+      },
       "numericFieldValidation": null,
       "dateEvidence": {
-        "role": "unknown",
-        "precision": "unknown",
-        "sourceDeclaredTimezone": "unknown",
-        "publicationInstant": "unknown"
+        "role": "source_displayed_list_day",
+        "precision": "day",
+        "sourceDeclaredTimezone": "missing",
+        "publicationInstant": null,
+        "notClaimedAsPublicationTimestamp": true,
+        "basis": "Preserved actual source field role; full dateEvidence stored/replayed, no UTC/clock inference."
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -1194,60 +1311,100 @@
       },
       "defaultState": {
         "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
-        "sourceConfig": "not_configured",
-        "declaredSeedEnabled": null,
+        "sourceConfig": "disabled_HTML_candidate",
+        "declaredSeedEnabled": false,
         "effectiveDefaultIntelJobEnabled": false,
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "BLOCKED",
-        "countedOK": false,
-        "reason": "Latest authorized exact-URL check resolved a198.18 special-range address; unchanged secure fetch blocked before transport. Current environment blocked, not proof source content is unusable."
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h."
       },
       "r2_5": {
-        "verdict": "NOT_RUN",
-        "countedPass": false,
-        "reason": "DNS blocked before HTTP, no original response bytes obtained; no guessing selectors/dates or synthetic replacement replay."
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Complete real page title/link/source-time fields replayed with their actual role and day precision, with repeat/reopen comparison. Does not certify publication instant, article body or impacts."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "System DNS198.18 special address blocked before HTTP; no retry or network-setting change.",
-        "Actual page, source field roles/selector and license remain unverified; no new source configuration."
+        "Private original raw only; remote derivative cannot reconstruct the full page.",
+        "No continuous production or enablement."
       ],
-      "historicalSuperseded": [],
+      "historicalSuperseded": [
+        "Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block."
+      ],
       "latestAttempt": {
         "evidence": {
-          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
           "selector": {
             "id": "VN-D01"
           },
-          "sha256": "210c2b85d3fdfa7a7b51134f8edd513e5166a967b05606bbb6fc5aaa23b2189f",
+          "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
           "hashBasis": "committed_text_LF"
         },
         "dnsEvidence": {
-          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/dns-ledger.json",
           "selector": {
             "id": "VN-D01"
           },
-          "sha256": "7e14c25243ced26a2b98fbda3c37cc076a973fefa00a757713e3f131e4809d58",
+          "sha256": "f326c38e383606a895d9fcf6377ac6c62685b1d34bc6a0a44351d2a359404f5c",
           "hashBasis": "committed_text_LF"
         },
-        "at": "2026-10-14T10:55:51.558Z",
+        "appliedConfigEvidence": {
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/applied-config-check.json",
+          "selector": null,
+          "sha256": "1523c3665d2251b4ba5f1d4bd0b910d77eec12002cf220577317da481c37f1ce",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-15T01:16:09.783Z",
         "url": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
         "addresses": [
           {
-            "address": "198.18.0.167",
+            "address": "103.9.86.254",
             "family": 4
           }
         ],
         "systemDnsCalls": 1,
-        "httpRequests": 0,
-        "reason": "blocked_address",
-        "scope": "current_environment_dns_only_no_response_no_parse"
-      }
+        "httpRequests": 1,
+        "httpStatus": 200,
+        "scope": "one exact catalogue GET after verified21 exceptions and public OS DNS; no redirect/retry/detail"
+      },
+      "historicalAttempts": [
+        {
+          "evidence": {
+            "path": "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+            "selector": {
+              "id": "VN-D01"
+            },
+            "sha256": "210c2b85d3fdfa7a7b51134f8edd513e5166a967b05606bbb6fc5aaa23b2189f",
+            "hashBasis": "committed_text_LF"
+          },
+          "dnsEvidence": {
+            "path": "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+            "selector": {
+              "id": "VN-D01"
+            },
+            "sha256": "7e14c25243ced26a2b98fbda3c37cc076a973fefa00a757713e3f131e4809d58",
+            "hashBasis": "committed_text_LF"
+          },
+          "at": "2026-10-14T10:55:51.558Z",
+          "url": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
+          "addresses": [
+            {
+              "address": "198.18.0.167",
+              "family": 4
+            }
+          ],
+          "systemDnsCalls": 1,
+          "httpRequests": 0,
+          "reason": "blocked_address",
+          "scope": "current_environment_dns_only_no_response_no_parse"
+        }
+      ]
     },
     {
       "id": "TH-W01",
@@ -2100,14 +2257,45 @@
         "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
         "hashBasis": "committed_text_LF"
       },
-      "latestActualFetch": null,
-      "fieldReplayEvidence": null,
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
+          "selector": {
+            "id": "MY-L01"
+          },
+          "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.pos.com.my/service-update",
+        "startedAt": "2026-10-15T01:16:13.254Z",
+        "receivedAt": "2026-10-15T01:16:15.006Z",
+        "finishedAt": "2026-10-15T01:16:15.021Z",
+        "httpStatus": 200,
+        "wireSha256": "9e9787d4cf60f454824a0529787b1d345a2814ac45f91a957ff1d8b57c1cb310",
+        "bytes": 124208,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "fieldReplayEvidence": {
+        "status": "FAIL_REAL_LIST_MISSING_DETAIL_LINK",
+        "evidence": {
+          "path": "docs/evidence/r2-reapplied-raw-replay-2026-10-15/MY-L01-suitability.json",
+          "selector": null,
+          "sha256": "e36a850f9df530dbefb8d51fb8fcc6b95edebff6509f938a1c9a25ab2c84cd5b",
+          "hashBasis": "committed_text_LF"
+        },
+        "itemsCommitted": 0,
+        "collectorError": "web_list_invalid_link",
+        "sourceConfigAdded": false
+      },
       "numericFieldValidation": null,
       "dateEvidence": {
-        "role": "unknown",
-        "precision": "unknown",
-        "sourceDeclaredTimezone": "unknown",
-        "publicationInstant": "unknown"
+        "role": "source_displayed_card_local_datetime",
+        "precision": "unverified_by_existing_grammar",
+        "sourceDeclaredTimezone": "missing",
+        "publicationInstant": null,
+        "rawExample": "07 Oct 2026 06:30 pm"
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -2122,54 +2310,99 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "BLOCKED",
+        "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "Latest authorized exact-URL check resolved a198.18 special-range address; unchanged secure fetch blocked before transport. Current environment blocked, not proof source content is unusable."
+        "reason": "Real200 has ten current title/time cards but no title-anchor href. Category links point to listing itself; actual original page fails list identity contract."
       },
       "r2_5": {
-        "verdict": "NOT_RUN",
+        "verdict": "FAIL",
         "countedPass": false,
-        "reason": "DNS blocked before HTTP, no original response bytes obtained; no guessing selectors/dates or synthetic replacement replay."
+        "reason": "Full private original page suitability probe fails closed on missing detail link, committed0; no hidden interface or inferred slug used."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "System DNS198.18 special address blocked before HTTP; no retry or network-setting change.",
-        "Actual page, source field roles/selector and license remain unverified; no new source configuration."
+        "Ten title anchors lack href; category URL cannot identify articles.",
+        "Abbreviated English month/12h clock not supported by current strict grammar; no date/zone guess.",
+        "No permanent source config or hidden-interface/detail request."
       ],
-      "historicalSuperseded": [],
+      "historicalSuperseded": [
+        "Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block."
+      ],
       "latestAttempt": {
         "evidence": {
-          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
           "selector": {
             "id": "MY-L01"
           },
-          "sha256": "210c2b85d3fdfa7a7b51134f8edd513e5166a967b05606bbb6fc5aaa23b2189f",
+          "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
           "hashBasis": "committed_text_LF"
         },
         "dnsEvidence": {
-          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/dns-ledger.json",
           "selector": {
             "id": "MY-L01"
           },
-          "sha256": "7e14c25243ced26a2b98fbda3c37cc076a973fefa00a757713e3f131e4809d58",
+          "sha256": "f326c38e383606a895d9fcf6377ac6c62685b1d34bc6a0a44351d2a359404f5c",
           "hashBasis": "committed_text_LF"
         },
-        "at": "2026-10-14T10:55:51.561Z",
+        "appliedConfigEvidence": {
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/applied-config-check.json",
+          "selector": null,
+          "sha256": "1523c3665d2251b4ba5f1d4bd0b910d77eec12002cf220577317da481c37f1ce",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-15T01:16:13.254Z",
         "url": "https://www.pos.com.my/service-update",
         "addresses": [
           {
-            "address": "198.18.0.168",
+            "address": "23.56.0.78",
+            "family": 4
+          },
+          {
+            "address": "23.56.0.83",
             "family": 4
           }
         ],
         "systemDnsCalls": 1,
-        "httpRequests": 0,
-        "reason": "blocked_address",
-        "scope": "current_environment_dns_only_no_response_no_parse"
-      }
+        "httpRequests": 1,
+        "httpStatus": 200,
+        "scope": "one exact catalogue GET after verified21 exceptions and public OS DNS; no redirect/retry/detail"
+      },
+      "historicalAttempts": [
+        {
+          "evidence": {
+            "path": "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+            "selector": {
+              "id": "MY-L01"
+            },
+            "sha256": "210c2b85d3fdfa7a7b51134f8edd513e5166a967b05606bbb6fc5aaa23b2189f",
+            "hashBasis": "committed_text_LF"
+          },
+          "dnsEvidence": {
+            "path": "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+            "selector": {
+              "id": "MY-L01"
+            },
+            "sha256": "7e14c25243ced26a2b98fbda3c37cc076a973fefa00a757713e3f131e4809d58",
+            "hashBasis": "committed_text_LF"
+          },
+          "at": "2026-10-14T10:55:51.561Z",
+          "url": "https://www.pos.com.my/service-update",
+          "addresses": [
+            {
+              "address": "198.18.0.168",
+              "family": 4
+            }
+          ],
+          "systemDnsCalls": 1,
+          "httpRequests": 0,
+          "reason": "blocked_address",
+          "scope": "current_environment_dns_only_no_response_no_parse"
+        }
+      ]
     },
     {
       "id": "ID-W01",
@@ -2480,7 +2713,26 @@
         "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
         "hashBasis": "committed_text_LF"
       },
-      "latestActualFetch": null,
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
+          "selector": {
+            "id": "ID-T02"
+          },
+          "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://jdih.kemenkeu.go.id/",
+        "startedAt": "2026-10-15T01:16:15.021Z",
+        "receivedAt": "2026-10-15T01:16:18.420Z",
+        "finishedAt": "2026-10-15T01:16:18.420Z",
+        "httpStatus": 307,
+        "wireSha256": "2cc974af6afc822c42a4e914df05c697348b80420941f6b27561b2bf688587b7",
+        "bytes": 5,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
       "fieldReplayEvidence": null,
       "numericFieldValidation": null,
       "dateEvidence": {
@@ -2502,54 +2754,94 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "BLOCKED",
+        "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "Latest authorized exact-URL check resolved a198.18 special-range address; unchanged secure fetch blocked before transport. Current environment blocked, not proof source content is unusable."
+        "reason": "Exact catalogue URL returned HTTP307; redirects were not followed. Response retained but actual list product unknown; no automatic alternate host/path."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
         "countedPass": false,
-        "reason": "DNS blocked before HTTP, no original response bytes obtained; no guessing selectors/dates or synthetic replacement replay."
+        "reason": "Only exact index redirect response obtained, no original list payload for field replay."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "System DNS198.18 special address blocked before HTTP; no retry or network-setting change.",
-        "Actual page, source field roles/selector and license remain unverified; no new source configuration."
+        "Redirect not followed; destination/list fields and new product URL remain unverified.",
+        "No source config, no guessed alternate URL, no further request."
       ],
-      "historicalSuperseded": [],
+      "historicalSuperseded": [
+        "Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block."
+      ],
       "latestAttempt": {
         "evidence": {
-          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
           "selector": {
             "id": "ID-T02"
           },
-          "sha256": "210c2b85d3fdfa7a7b51134f8edd513e5166a967b05606bbb6fc5aaa23b2189f",
+          "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
           "hashBasis": "committed_text_LF"
         },
         "dnsEvidence": {
-          "path": "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/dns-ledger.json",
           "selector": {
             "id": "ID-T02"
           },
-          "sha256": "7e14c25243ced26a2b98fbda3c37cc076a973fefa00a757713e3f131e4809d58",
+          "sha256": "f326c38e383606a895d9fcf6377ac6c62685b1d34bc6a0a44351d2a359404f5c",
           "hashBasis": "committed_text_LF"
         },
-        "at": "2026-10-14T10:55:51.562Z",
+        "appliedConfigEvidence": {
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/applied-config-check.json",
+          "selector": null,
+          "sha256": "1523c3665d2251b4ba5f1d4bd0b910d77eec12002cf220577317da481c37f1ce",
+          "hashBasis": "committed_text_LF"
+        },
+        "at": "2026-10-15T01:16:15.021Z",
         "url": "https://jdih.kemenkeu.go.id/",
         "addresses": [
           {
-            "address": "198.18.0.169",
+            "address": "103.196.166.252",
             "family": 4
           }
         ],
         "systemDnsCalls": 1,
-        "httpRequests": 0,
-        "reason": "blocked_address",
-        "scope": "current_environment_dns_only_no_response_no_parse"
-      }
+        "httpRequests": 1,
+        "httpStatus": 307,
+        "scope": "one exact catalogue GET after verified21 exceptions and public OS DNS; no redirect/retry/detail"
+      },
+      "historicalAttempts": [
+        {
+          "evidence": {
+            "path": "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
+            "selector": {
+              "id": "ID-T02"
+            },
+            "sha256": "210c2b85d3fdfa7a7b51134f8edd513e5166a967b05606bbb6fc5aaa23b2189f",
+            "hashBasis": "committed_text_LF"
+          },
+          "dnsEvidence": {
+            "path": "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
+            "selector": {
+              "id": "ID-T02"
+            },
+            "sha256": "7e14c25243ced26a2b98fbda3c37cc076a973fefa00a757713e3f131e4809d58",
+            "hashBasis": "committed_text_LF"
+          },
+          "at": "2026-10-14T10:55:51.562Z",
+          "url": "https://jdih.kemenkeu.go.id/",
+          "addresses": [
+            {
+              "address": "198.18.0.169",
+              "family": 4
+            }
+          ],
+          "systemDnsCalls": 1,
+          "httpRequests": 0,
+          "reason": "blocked_address",
+          "scope": "current_environment_dns_only_no_response_no_parse"
+        }
+      ]
     },
     {
       "id": "PH-P01",
@@ -3887,26 +4179,30 @@
     {
       "id": "CN-P02",
       "url": "https://www.sz.msa.gov.cn/",
-      "status": "HISTORICAL_PROPOSAL_NOW_ATTEMPTED_DNS_BLOCKED_HTTP0",
-      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; no payload obtained, no configuration added, no automatic retry/network change authorized"
+      "status": "HISTORICAL_PROPOSAL_NOW_EXACT_URL_CAPTURED_ONCE",
+      "latestR2_4": "PARTIAL",
+      "existingReusableImplementation": "Current bounded batch complete: VN-D01 disabled candidate/raw replay; other gaps retained. No automatic redirect/retry/new interface authorized."
     },
     {
       "id": "VN-D01",
       "url": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
-      "status": "HISTORICAL_PROPOSAL_NOW_ATTEMPTED_DNS_BLOCKED_HTTP0",
-      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; no payload obtained, no configuration added, no automatic retry/network change authorized"
+      "status": "HISTORICAL_PROPOSAL_NOW_EXACT_URL_CAPTURED_ONCE",
+      "latestR2_4": "OK",
+      "existingReusableImplementation": "Current bounded batch complete: VN-D01 disabled candidate/raw replay; other gaps retained. No automatic redirect/retry/new interface authorized."
     },
     {
       "id": "MY-L01",
       "url": "https://www.pos.com.my/service-update",
-      "status": "HISTORICAL_PROPOSAL_NOW_ATTEMPTED_DNS_BLOCKED_HTTP0",
-      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; no payload obtained, no configuration added, no automatic retry/network change authorized"
+      "status": "HISTORICAL_PROPOSAL_NOW_EXACT_URL_CAPTURED_ONCE",
+      "latestR2_4": "PARTIAL",
+      "existingReusableImplementation": "Current bounded batch complete: VN-D01 disabled candidate/raw replay; other gaps retained. No automatic redirect/retry/new interface authorized."
     },
     {
       "id": "ID-T02",
       "url": "https://jdih.kemenkeu.go.id/",
-      "status": "HISTORICAL_PROPOSAL_NOW_ATTEMPTED_DNS_BLOCKED_HTTP0",
-      "existingReusableImplementation": "secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; no payload obtained, no configuration added, no automatic retry/network change authorized"
+      "status": "HISTORICAL_PROPOSAL_NOW_EXACT_URL_CAPTURED_ONCE",
+      "latestR2_4": "PARTIAL",
+      "existingReusableImplementation": "Current bounded batch complete: VN-D01 disabled candidate/raw replay; other gaps retained. No automatic redirect/retry/new interface authorized."
     }
   ]
 }

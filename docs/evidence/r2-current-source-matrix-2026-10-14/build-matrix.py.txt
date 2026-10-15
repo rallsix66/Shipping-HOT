@@ -11,8 +11,8 @@ old = json.loads(OLD.read_text(encoding='utf-8'))
 inventory_path = ROOT / 'r2-p1-inventory-2026-10-13/source-inventory.json'
 inventory = json.loads(inventory_path.read_text(encoding='utf-8'))
 legacy = {r['id']: r for r in inventory['entries']}
-HEAD = 'e4d56116cda05fe4a8dbe151040c26874b6807c1'
-CODE = '355bc861d4020ba22ddd00401de709d7cee497e3'
+HEAD = '50da3805ee14e72222a4e26f4230073cf1842bc7'
+CODE = '9ec4a2dd4e6a76657ec3ed2a6dabb15187b4d5a8'
 
 def read(path): return json.loads(Path(path).read_text(encoding='utf-8'))
 def ref(path, selector=None):
@@ -27,7 +27,7 @@ def fetch(path, sid):
     return {'evidence':ref(path, {'id':sid}), 'url':x['url'],
         'startedAt':x.get('startedAt',x.get('started')), 'receivedAt':x.get('receivedAt'),
         'finishedAt':x.get('finishedAt',x.get('finished')), 'httpStatus':x.get('httpStatus'),
-        'wireSha256':x.get('fetchedBytesSha256',x.get('rawResponseSha256')),
+        'wireSha256':x.get('fetchedBytesSha256',x.get('rawResponseSha256',x.get('wireSha256'))),
         'bytes':x.get('rawByteLength',x.get('bytes')), 'scope':'one_actual_index_response',
         'verbatimLatestRawRetained':x.get('rawLocalOnly',x.get('rawStructureFixtureRetained',False)),
         'notContinuousProduction':True}
@@ -48,6 +48,8 @@ for sid in ['MY-P02','PH-M01','MY-C01','MY-T01','TH-W01','ID-W01']:
     paths[sid] = 'docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json'
 for sid in ['XX-M01','XX-M03']:
     paths[sid] = 'docs/evidence/r2-four-index-2026-10-13/batch-results.json'
+for sid in ['CN-P02','VN-D01','MY-L01','ID-T02']:
+    paths[sid] = 'docs/evidence/r2-four-reapplied-2026-10-15/summary.json'
 
 raw_replays = {
  'CN-P01':'docs/evidence/r2-public-index-replay-2026-10-14/summary.json',
@@ -58,6 +60,7 @@ raw_replays = {
  'VN-P03':'docs/evidence/r2-post-clash-index-replay-final-2026-10-14/summary.json',
  'VN-T01':'docs/evidence/r2-post-clash-index-replay-final-2026-10-14/summary.json',
  'ID-T01':'docs/evidence/r2-post-clash-index-replay-final-2026-10-14/summary.json',
+ 'VN-D01':'docs/evidence/r2-reapplied-raw-replay-2026-10-15/summary.json',
 }
 numeric_sync='docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json'
 numeric_accept='docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json'
@@ -228,6 +231,22 @@ for source in old['entries']:
         if sid=='XX-A04':e['gaps'].append('Catalogue URL is documentation, actual embedding API endpoint remains unknown here.')
     if sid=='CN-T01':
         e['gaps'].append('Exact catalogue product is HTTP; current secure fetch entry requires HTTPS. No request was made here and no alternate HTTPS URL is assumed.')
+    if sid in ['CN-P02','VN-D01','MY-L01','ID-T02']:
+        previous=e['latestAttempt'];attempt=outcome(paths[sid],sid)
+        e['historicalAttempts']=[previous]
+        e['latestAttempt']={'evidence':ref(paths[sid],{'id':sid}),'dnsEvidence':ref('docs/evidence/r2-four-reapplied-2026-10-15/dns-ledger.json',{'id':sid}),'appliedConfigEvidence':ref('docs/evidence/r2-four-reapplied-2026-10-15/applied-config-check.json'),'at':attempt['startedAt'],'url':attempt['url'],'addresses':attempt['addresses'],'systemDnsCalls':1,'httpRequests':1,'httpStatus':attempt['httpStatus'],'scope':'one exact catalogue GET after verified21 exceptions and public OS DNS; no redirect/retry/detail'}
+        e['historicalSuperseded'].append('Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block.')
+        if sid in ['CN-P02','ID-T02']:
+            e['r2_4']={'verdict':'PARTIAL','countedOK':False,'reason':f"Exact catalogue URL returned HTTP{attempt['httpStatus']}; redirects were not followed. Response retained but actual list product unknown; no automatic alternate host/path."}
+            e['r2_5']={'verdict':'NOT_RUN','countedPass':False,'reason':'Only exact index redirect response obtained, no original list payload for field replay.'}
+            e['gaps']=['Redirect not followed; destination/list fields and new product URL remain unverified.','No source config, no guessed alternate URL, no further request.']
+        if sid=='MY-L01':
+            probe='docs/evidence/r2-reapplied-raw-replay-2026-10-15/MY-L01-suitability.json'
+            e['r2_4']={'verdict':'PARTIAL','countedOK':False,'reason':'Real200 has ten current title/time cards but no title-anchor href. Category links point to listing itself; actual original page fails list identity contract.'}
+            e['fieldReplayEvidence']={'status':'FAIL_REAL_LIST_MISSING_DETAIL_LINK','evidence':ref(probe),'itemsCommitted':0,'collectorError':'web_list_invalid_link','sourceConfigAdded':False}
+            e['r2_5']={'verdict':'FAIL','countedPass':False,'reason':'Full private original page suitability probe fails closed on missing detail link, committed0; no hidden interface or inferred slug used.'}
+            e['dateEvidence']={'role':'source_displayed_card_local_datetime','precision':'unverified_by_existing_grammar','sourceDeclaredTimezone':'missing','publicationInstant':None,'rawExample':'07 Oct 2026 06:30 pm'}
+            e['gaps']=['Ten title anchors lack href; category URL cannot identify articles.','Abbreviated English month/12h clock not supported by current strict grammar; no date/zone guess.','No permanent source config or hidden-interface/detail request.']
     if sid in ['CN-P01','CN-T02','PH-C01','TH-C01','VN-P01','MY-P03','VN-P03','VN-T01','ID-T01','TH-W01','ID-W01','MY-P02','MY-C01','MY-T01','PH-M01','XX-M01','XX-M03']:
         e['historicalSuperseded'].append('Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current.')
     entries.append(e)
@@ -263,7 +282,6 @@ result={'type':'current_authoritative_evidence_matrix','generatedAt':datetime.no
  ],'entries':entries}
 (OUT/'mapping.json').write_bytes((json.dumps(result,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
 next_ids=['CN-P02','VN-D01','MY-L01','ID-T02']
-result['nextBatchProposal']=[{'id':sid,'url':next(r['exactProductUrl'] for r in entries if r['id']==sid),'status':'HISTORICAL_PROPOSAL_NOW_ATTEMPTED_DNS_BLOCKED_HTTP0','existingReusableImplementation':'secureFetchArticle + fromHtml/config-keys/strict existing date formats + collectIntelSource/isolated SQLite; no payload obtained, no configuration added, no automatic retry/network change authorized'} for sid in next_ids]
-assert all(next(r for r in entries if r['id']==sid)['latestActualFetch'] is None for sid in next_ids)
+result['nextBatchProposal']=[{'id':sid,'url':next(r['exactProductUrl'] for r in entries if r['id']==sid),'status':'HISTORICAL_PROPOSAL_NOW_EXACT_URL_CAPTURED_ONCE','latestR2_4':next(r['r2_4']['verdict'] for r in entries if r['id']==sid),'existingReusableImplementation':'Current bounded batch complete: VN-D01 disabled candidate/raw replay; other gaps retained. No automatic redirect/retry/new interface authorized.'} for sid in next_ids]
 (OUT/'mapping.json').write_bytes((json.dumps(result,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
 print(json.dumps({'r2_4':result['measuredCoverage']['r2_4'],'r2_5':result['measuredCoverage']['r2_5'],'numeric':result['measuredCoverage']['numericFieldsSeparate']},ensure_ascii=True))

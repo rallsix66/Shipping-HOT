@@ -1,0 +1,14 @@
+{
+  "name": "lint",
+  "command": "pnpm lint",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\reapplied-four-build-20261015",
+  "sha": "9ec4a2dd4e6a76657ec3ed2a6dabb15187b4d5a8",
+  "startedAt": "2026-10-15T01:25:24.221Z",
+  "finishedAt": "2026-10-15T01:25:51.912Z",
+  "rawExit": 0,
+  "stderrCapturedUtf8": "",
+  "stderrCapturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "displayLogTrailingBlankLinesTrimmed": true,
+  "stdoutCapturedUtf8": "\n> shipping-hot@0.0.41 lint D:\\try one\\Shipping HOT\\.tmp\\reapplied-four-build-20261015\n> eslint\n\n",
+  "stdoutCapturedSha256": "f5f4eab87bffa152b32ac70354aab7cb3c605cb6a18fbd9dc125652ced3ce1b4"
+}

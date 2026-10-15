@@ -1,0 +1,160 @@
+{
+  "results": [
+    {
+      "id": "CN-P02",
+      "url": "https://www.sz.msa.gov.cn/",
+      "host": "www.sz.msa.gov.cn",
+      "catalogLineSha256": "fb8626584a4638504f67317547732ce3b2d3b288cc96bbde8d25b99c6c0bed19",
+      "startedAt": "2026-10-15T01:16:09.530Z",
+      "systemDnsCalls": 1,
+      "httpRequests": 1,
+      "status": "BLOCKED",
+      "rawHtmlCommitted": false,
+      "addresses": [
+        {
+          "address": "125.124.253.156",
+          "family": 4
+        }
+      ],
+      "addressClassification": "public_address",
+      "receivedAt": "2026-10-15T01:16:09.783Z",
+      "httpStatus": 302,
+      "contentType": "text/html",
+      "bytes": 207,
+      "wireSha256": "0636ef4de5a01c1744ea9e76e6dbb29b0668d130d6b7f349d1b2268ea73dd29e",
+      "rawLocalOnly": true,
+      "reason": "redirect_limit",
+      "parser": "NOT_RUN",
+      "finishedAt": "2026-10-15T01:16:09.783Z"
+    },
+    {
+      "id": "VN-D01",
+      "url": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
+      "host": "phongchongthientai.mard.gov.vn",
+      "catalogLineSha256": "d788316a9a0286c442c1309fc448266e4d8ec2d1e74846949c30ef2bd8e19e0e",
+      "startedAt": "2026-10-15T01:16:09.783Z",
+      "systemDnsCalls": 1,
+      "httpRequests": 1,
+      "status": "PARTIAL",
+      "rawHtmlCommitted": false,
+      "addresses": [
+        {
+          "address": "103.9.86.254",
+          "family": 4
+        }
+      ],
+      "addressClassification": "public_address",
+      "receivedAt": "2026-10-15T01:16:13.206Z",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 183913,
+      "wireSha256": "6267157d5c21c4a4c3885a6d29aec73bd9f354d085dc239c5ea70709eb7c2861",
+      "rawLocalOnly": true,
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "http",
+        "declarations": [
+          {
+            "source": "http",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          },
+          {
+            "source": "meta",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          }
+        ],
+        "conflict": false,
+        "byteLength": 183913
+      },
+      "parser": "STRUCTURE_ONLY",
+      "finishedAt": "2026-10-15T01:16:13.253Z"
+    },
+    {
+      "id": "MY-L01",
+      "url": "https://www.pos.com.my/service-update",
+      "host": "www.pos.com.my",
+      "catalogLineSha256": "4dcce7c27f05b11245fe478de0872b4aee55dc338ef0ea00e878cf5526bc7078",
+      "startedAt": "2026-10-15T01:16:13.254Z",
+      "systemDnsCalls": 1,
+      "httpRequests": 1,
+      "status": "PARTIAL",
+      "rawHtmlCommitted": false,
+      "addresses": [
+        {
+          "address": "23.56.0.78",
+          "family": 4
+        },
+        {
+          "address": "23.56.0.83",
+          "family": 4
+        }
+      ],
+      "addressClassification": "public_address",
+      "receivedAt": "2026-10-15T01:16:15.006Z",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 124208,
+      "wireSha256": "9e9787d4cf60f454824a0529787b1d345a2814ac45f91a957ff1d8b57c1cb310",
+      "rawLocalOnly": true,
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "http",
+        "declarations": [
+          {
+            "source": "http",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          },
+          {
+            "source": "meta",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          }
+        ],
+        "conflict": false,
+        "byteLength": 124208
+      },
+      "parser": "STRUCTURE_ONLY",
+      "finishedAt": "2026-10-15T01:16:15.021Z"
+    },
+    {
+      "id": "ID-T02",
+      "url": "https://jdih.kemenkeu.go.id/",
+      "host": "jdih.kemenkeu.go.id",
+      "catalogLineSha256": "badbcb5421386368eaa2d608b1cfe39bcc9ecbb6868b09e16812792b916d539b",
+      "startedAt": "2026-10-15T01:16:15.021Z",
+      "systemDnsCalls": 1,
+      "httpRequests": 1,
+      "status": "BLOCKED",
+      "rawHtmlCommitted": false,
+      "addresses": [
+        {
+          "address": "103.196.166.252",
+          "family": 4
+        }
+      ],
+      "addressClassification": "public_address",
+      "receivedAt": "2026-10-15T01:16:18.420Z",
+      "httpStatus": 307,
+      "bytes": 5,
+      "wireSha256": "2cc974af6afc822c42a4e914df05c697348b80420941f6b27561b2bf688587b7",
+      "rawLocalOnly": true,
+      "reason": "redirect_limit",
+      "parser": "NOT_RUN",
+      "finishedAt": "2026-10-15T01:16:18.420Z"
+    }
+  ],
+  "systemDnsCalls": 4,
+  "reservedTransportCalls": 4,
+  "retries": 0,
+  "redirects": 0,
+  "details": 0,
+  "productionEnabled": false,
+  "live24h": "NOT_RUN",
+  "paidCalls": 0,
+  "llmCalls": 0,
+  "fullRawRedistributed": false,
+  "overallR2Pass": false
+}

@@ -47,8 +47,8 @@ check('All evidence LF text hashes match',not hash_errors,hash_errors)
 check('All evidence source selectors resolve',not selector_errors,selector_errors)
 pub=[e for e in entries if e['inPublicDenominator']];info=[e for e in entries if e['classification']=='information_notice'];numeric=[e for e in entries if e['classification']=='numeric_weather']
 ok=[e['id'] for e in pub if e['r2_4']['verdict']=='OK'];passed=[e['id'] for e in info if e['r2_5']['verdict']=='PASS'];numok=[e['id'] for e in numeric if (e['numericFieldValidation'] or {}).get('status')=='PASS_LIMITED_STORED_REAL_DIAGNOSTIC']
-check('R2-4 independently recomputed verdicts and flags',len(pub)==39 and ok==m['measuredCoverage']['r2_4']['ids'] and len(ok)==19 and all(e['r2_4']['countedOK']==(e['r2_4']['verdict']=='OK') for e in pub))
-check('R2-5 independently recomputed verdicts and flags',len(info)==34 and passed==m['measuredCoverage']['r2_5']['ids'] and len(passed)==11 and all(e['r2_5']['countedPass']==(e['r2_5']['verdict']=='PASS') for e in info))
+check('R2-4 independently recomputed verdicts and flags',len(pub)==39 and ok==m['measuredCoverage']['r2_4']['ids'] and len(ok)==20 and all(e['r2_4']['countedOK']==(e['r2_4']['verdict']=='OK') for e in pub))
+check('R2-5 independently recomputed verdicts and flags',len(info)==34 and passed==m['measuredCoverage']['r2_5']['ids'] and len(passed)==12 and all(e['r2_5']['countedPass']==(e['r2_5']['verdict']=='PASS') for e in info))
 check('Numeric 3/5 separate and absent from article numerator',len(numeric)==5 and len(numok)==3 and set(numok).isdisjoint(passed) and all(e['r2_5']['verdict']=='NOT_APPLICABLE_NUMERIC' for e in numeric))
 for which,subset in [('r2_4',pub),('r2_5',info)]:
     actual=dict(Counter(e[which]['verdict'] for e in subset));check(which+' status totals recomputed',actual==m['measuredCoverage'][which]['statusCounts'],actual)
@@ -62,27 +62,27 @@ for e in info:
         if e['id']=='TH-C01':
             audit=json.loads((root/f['independentStorageAudit']['path']).read_text(encoding='utf-8'));reopen=next(r for r in audit['reports'] if r['id']==e['id'])
         if not reopen or reopen.get('mismatches')!=0 or not (reopen.get('fullTitleUrlDateEvidenceCompared') or reopen.get('fullDateEvidenceCompared')):replay_errors.append(e['id'])
-check('Eight original HTML field passes refer to actual successful collection/repeat/reopen',not replay_errors,replay_errors)
+check('Nine original HTML field passes refer to actual successful collection/repeat/reopen',not replay_errors,replay_errors)
 oldlog=(root/'docs/evidence/r2-p1-inventory-2026-10-13/replay.log').read_text(encoding='utf-8')
 procedure=(root/'docs/evidence/r2-p1-inventory-2026-10-13/replay.test.ts.txt').read_text(encoding='utf-8')
 check('Three older original field replays have stored source results and raw exit0',all(s in oldlog for s in ['TH-W01','ID-W01','VN-W01']) and ('raw_exit_code: 0' in oldlog or 'raw_exit: 0' in oldlog) and 'expect' in procedure)
 nmc=(root/'docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log').read_text(encoding='utf-8')
 check('NMC failed source results preserved with actual time and successful assertion harness',all(s in nmc for s in ['2026-10-13T03:55:13.246Z','CN-W01','CN-W02','web_list_invalid_link','"items":0','raw_exit_code: 0']) and all(next(e for e in entries if e['id']==s)['r2_5']['verdict']=='FAIL' for s in ['CN-W01','CN-W02']))
 check('Document/enactment days not relabelled publication instants',all(next(e for e in entries if e['id']==s)['dateEvidence']['publicationInstant'] is None for s in ['TH-C02','ID-T01']))
-proposal=m['nextBatchProposal'];check('Four exact URLs attempted DNS-only with no payload',len(proposal)==4 and all(p['url']==catalog[p['id']] and next(e for e in entries if e['id']==p['id'])['latestActualFetch'] is None and next(e for e in entries if e['id']==p['id'])['latestAttempt']['httpRequests']==0 for p in proposal))
-git=subprocess.run(['git','diff','--name-only','679400c1970cf270eabe85ec866a52b0bef820b6'],capture_output=True,text=True)
+proposal=m['nextBatchProposal'];check('Four exact catalogue URLs captured once after fresh public DNS',len(proposal)==4 and all(p['url']==catalog[p['id']] and next(e for e in entries if e['id']==p['id'])['latestActualFetch'] is not None and next(e for e in entries if e['id']==p['id'])['latestAttempt']['httpRequests']==1 for p in proposal))
+git=subprocess.run(['git','diff','--name-only',m['reviewedCodeSha']],capture_output=True,text=True)
 changes=git.stdout.splitlines();check('Tracked changes confined to approved docs and rule correction',git.returncode==0 and all(p.startswith('docs/') or p=='AGENTS.md' for p in changes),changes)
 check('Production Intel job and HTML candidates remain unchanged',not any(p.startswith(('server/','src/','scripts/','package','pnpm','nitro','.github/')) for p in changes))
 candidate_code=(root/'server/intel/sources/html-index-candidates.ts').read_text(encoding='utf-8')
 seed_code=(root/'server/intel/sources.ts').read_text(encoding='utf-8')
 candidate_ids=re.findall(r'catalogId:\s*"([A-Z]{2}-[A-Z]\d{2})"',candidate_code)
-check('Nine disabled candidates / two enabled seed declarations distinguished',len(candidate_ids)==9 and candidate_code.count('enabled: false')==9 and seed_code.count('enabled: true')==2 and all(next(e for e in entries if e['id']==s)['defaultState']['declaredSeedEnabled'] is False for s in candidate_ids) and all(next(e for e in entries if e['id']==s)['defaultState']['declaredSeedEnabled'] is True for s in ['TH-W01','ID-W01']))
-batch=root/'docs/evidence/r2-new-four-bounded-2026-10-14'
+check('Ten disabled candidates / two enabled seed declarations distinguished',len(candidate_ids)==10 and candidate_code.count('enabled: false')==10 and seed_code.count('enabled: true')==2 and all(next(e for e in entries if e['id']==s)['defaultState']['declaredSeedEnabled'] is False for s in candidate_ids) and all(next(e for e in entries if e['id']==s)['defaultState']['declaredSeedEnabled'] is True for s in ['TH-W01','ID-W01']))
+batch=root/'docs/evidence/r2-four-reapplied-2026-10-15'
 dns=json.loads((batch/'dns-ledger.json').read_text(encoding='utf-8'))
 requests=json.loads((batch/'request-ledger.json').read_text(encoding='utf-8'))
 captures=json.loads((batch/'summary.json').read_text(encoding='utf-8'))
-check('Four latest batch system DNS records with no HTTP reservations',len(dns)==4 and not requests and captures['systemDnsCalls']==4 and captures['reservedTransportCalls']==0 and all(r['systemDnsCalls']==1 and r['httpRequests']==0 and r['reason']=='blocked_address' and r['status']=='BLOCKED' for r in captures['results']))
-check('DNS blocked addresses and current matrix decisions match',all(next(e for e in entries if e['id']==r['id'])['latestAttempt']['addresses']==r['addresses'] and next(e for e in entries if e['id']==r['id'])['r2_4']['verdict']=='BLOCKED' for r in captures['results']))
+check('Four latest system DNS records and exactly one index request per source',len(dns)==4 and len(requests)==4 and captures['systemDnsCalls']==4 and captures['reservedTransportCalls']==4 and all(r['systemDnsCalls']==1 and r['httpRequests']==1 and r['addressClassification']=='public_address' for r in captures['results']))
+check('Fresh public addresses match current matrix attempts',all(next(e for e in entries if e['id']==r['id'])['latestAttempt']['addresses']==r['addresses'] for r in captures['results']))
 westports=next(e for e in entries if e['id']=='MY-P02')
 check('Westports latest saved date enforces STALE without changing field denominator',westports['contentFreshness']['latestItemDay']=='2025-08-01' and westports['r2_4']['verdict']=='STALE' and not westports['r2_4']['countedOK'] and westports['r2_5']['verdict']=='NOT_RUN')
 markdown=[root/p for p in changes if p.endswith('.md')]+[out/'report.md',out/'closeout.md',batch/'report.md']
@@ -94,8 +94,8 @@ for p in markdown:
         if not t or re.match(r'^[a-z]+:',t):continue
         if not (p.parent/t).exists():link_errors.append({'file':p.relative_to(root).as_posix(),'target':t})
 check('Changed Markdown local links exist',not link_errors,link_errors)
-report=(out/'report.md').read_text(encoding='utf-8');check('Readable report retains one row for every ID',all(len(re.findall(r'^\| '+re.escape(s)+r' \|',report,re.M))==1+(s in [p['id'] for p in proposal]) for s in ids))
-value={'type':'docs_and_capture_evidence_validation','at':datetime.now(timezone.utc).isoformat(),'codeSha':m['reviewedCodeSha'],'evidenceBaseline':m['evidenceHead'],'command':'python .tmp/validate-current-r2-matrix.py','validatorSourceRequests':0,'validatorSourceDns':0,'currentBatchSystemDns':4,'currentBatchHttpRequests':0,'functionalTests':'NOT_RUN_no_product_source_changes','originalFieldReplay':'NOT_RUN_this_round; no response in DNS-blocked batch; stored older original evidence inspected','checks':checks,'errors':errors,'rawExit':1 if errors else 0}
+report=(out/'report.md').read_text(encoding='utf-8');check('Readable report retains one row for every ID',all(len(re.findall(r'^\| '+re.escape(s)+r' \|',report,re.M))==1 for s in ids))
+value={'type':'docs_and_capture_evidence_validation','at':datetime.now(timezone.utc).isoformat(),'codeSha':m['reviewedCodeSha'],'evidenceBaseline':m['evidenceHead'],'command':'python .tmp/validate-current-r2-matrix.py','validatorSourceRequests':0,'validatorSourceDns':0,'currentBatchSystemDns':4,'currentBatchHttpRequests':4,'functionalTests':'PASS_clean_code_gate_9ec4a2d; documented separately from this metadata validation','originalFieldReplay':'VN-D01_complete_private_raw_PASS; MY-L01_actual_list_suitability_FAIL; redirects_not_followed','checks':checks,'errors':errors,'rawExit':1 if errors else 0}
 (out/'validation.json').write_bytes((json.dumps(value,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
 print(json.dumps({'checks':len(checks),'errors':errors,'referenceOccurrences':len(refs),'uniquePaths':len({r['path'] for r in refs}),'rawExit':value['rawExit']},ensure_ascii=True))
 raise SystemExit(value['rawExit'])

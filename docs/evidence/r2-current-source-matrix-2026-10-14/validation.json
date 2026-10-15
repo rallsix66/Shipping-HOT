@@ -1,15 +1,15 @@
 {
   "type": "docs_and_capture_evidence_validation",
-  "at": "2026-10-14T11:04:12.392803+00:00",
-  "codeSha": "355bc861d4020ba22ddd00401de709d7cee497e3",
-  "evidenceBaseline": "e4d56116cda05fe4a8dbe151040c26874b6807c1",
+  "at": "2026-10-15T01:33:34.450303+00:00",
+  "codeSha": "9ec4a2dd4e6a76657ec3ed2a6dabb15187b4d5a8",
+  "evidenceBaseline": "50da3805ee14e72222a4e26f4230073cf1842bc7",
   "command": "python .tmp/validate-current-r2-matrix.py",
   "validatorSourceRequests": 0,
   "validatorSourceDns": 0,
   "currentBatchSystemDns": 4,
-  "currentBatchHttpRequests": 0,
-  "functionalTests": "NOT_RUN_no_product_source_changes",
-  "originalFieldReplay": "NOT_RUN_this_round; no response in DNS-blocked batch; stored older original evidence inspected",
+  "currentBatchHttpRequests": 4,
+  "functionalTests": "PASS_clean_code_gate_9ec4a2d; documented separately from this metadata validation",
+  "originalFieldReplay": "VN-D01_complete_private_raw_PASS; MY-L01_actual_list_suitability_FAIL; redirects_not_followed",
   "checks": [
     {
       "check": "41 unique entries match current catalogue automatic P1 rows",
@@ -37,8 +37,8 @@
       "check": "All evidence paths exist",
       "pass": true,
       "detail": {
-        "referenceOccurrences": 119,
-        "uniquePaths": 31,
+        "referenceOccurrences": 137,
+        "uniquePaths": 36,
         "missing": []
       }
     },
@@ -71,9 +71,8 @@
       "check": "r2_4 status totals recomputed",
       "pass": true,
       "detail": {
-        "OK": 19,
-        "BLOCKED": 4,
-        "PARTIAL": 8,
+        "OK": 20,
+        "PARTIAL": 11,
         "NOT_RUN": 7,
         "STALE": 1
       }
@@ -82,14 +81,14 @@
       "check": "r2_5 status totals recomputed",
       "pass": true,
       "detail": {
-        "PASS": 11,
-        "NOT_RUN": 19,
-        "FAIL": 3,
+        "PASS": 12,
+        "NOT_RUN": 17,
+        "FAIL": 4,
         "PARTIAL": 1
       }
     },
     {
-      "check": "Eight original HTML field passes refer to actual successful collection/repeat/reopen",
+      "check": "Nine original HTML field passes refer to actual successful collection/repeat/reopen",
       "pass": true,
       "detail": []
     },
@@ -109,7 +108,7 @@
       "detail": null
     },
     {
-      "check": "Four exact URLs attempted DNS-only with no payload",
+      "check": "Four exact catalogue URLs captured once after fresh public DNS",
       "pass": true,
       "detail": null
     },
@@ -117,42 +116,16 @@
       "check": "Tracked changes confined to approved docs and rule correction",
       "pass": true,
       "detail": [
-        "AGENTS.md",
-        "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
+        "docs/architecture.md",
         "docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt",
         "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
         "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
-        "docs/evidence/r2-current-source-matrix-2026-10-14/inventory.txt",
         "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
         "docs/evidence/r2-current-source-matrix-2026-10-14/metadata-scan.json",
         "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
         "docs/evidence/r2-current-source-matrix-2026-10-14/validate-matrix.py.txt",
         "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/CN-P02-result.json",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/ID-T02-result.json",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/MY-L01-result.json",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/VN-D01-result.json",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/archive-hashes.json",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/capture-config.ts.txt",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/capture-procedure.ts.txt",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/command.json",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/inventory.txt",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/launch-procedure.cjs.txt",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/launch.json",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/manifest.json",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/partial-results.json",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/report.md",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/request-ledger.json",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/stderr.log",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/stdout.log",
-        "docs/evidence/r2-new-four-bounded-2026-10-14/summary.json",
-        "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.json",
-        "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.md",
-        "docs/evidence/r2-p1-inventory-2026-10-13/qualification-matrix.md",
-        "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
         "docs/intel-source-catalog.md",
-        "docs/plans/r2-acceptance-convergence-2026-10-14.md",
         "docs/status.md"
       ]
     },
@@ -162,17 +135,17 @@
       "detail": null
     },
     {
-      "check": "Nine disabled candidates / two enabled seed declarations distinguished",
+      "check": "Ten disabled candidates / two enabled seed declarations distinguished",
       "pass": true,
       "detail": null
     },
     {
-      "check": "Four latest batch system DNS records with no HTTP reservations",
+      "check": "Four latest system DNS records and exactly one index request per source",
       "pass": true,
       "detail": null
     },
     {
-      "check": "DNS blocked addresses and current matrix decisions match",
+      "check": "Fresh public addresses match current matrix attempts",
       "pass": true,
       "detail": null
     },

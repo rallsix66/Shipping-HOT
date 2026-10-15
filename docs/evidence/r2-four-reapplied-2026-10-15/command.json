@@ -1,0 +1,19 @@
+{
+  "startedAt": "2026-10-15T01:16:07.779Z",
+  "finishedAt": "2026-10-15T01:16:18.448Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "-c",
+    ".tmp/four-reapplied-20261015.config.ts"
+  ],
+  "head": "50da3805ee14e72222a4e26f4230073cf1842bc7",
+  "rawExit": 0,
+  "signal": null,
+  "stderrCapturedUtf8": "Duplicated imports \"string\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/calendar.ts\" is used\nDuplicated imports \"VN\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"TH\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"MY\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"PH\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"string\", the one from \"D:/try one/Shipping HOT/shared/calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"lazada\", the one from \"D:/try one/Shipping HOT/shared/policy.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/promo-calendar.ts\" is used\nDuplicated imports \"tiktok_shop\", the one from \"D:/try one/Shipping HOT/shared/policy.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/promo-calendar.ts\" is used\nDuplicated imports \"string\", the one from \"D:/try one/Shipping HOT/shared/policy.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/promo-calendar.ts\" is used\n",
+  "stderrCapturedSha256": "2b2089ef48a0decf6778aa45b416b29808b7d9476761ca686b28c9a254486d42",
+  "displayLogTrailingBlankLinesTrimmed": true,
+  "stdoutCapturedUtf8": "\n RUN  v4.0.18 D:/try one/Shipping HOT\n\n ✓ .tmp/four-reapplied-20261015.test.ts (1 test) 8896ms\n   ✓ four approved exact catalogue targets: one OS DNS and at most one pinned index request each  8895ms\n\n Test Files  1 passed (1)\n      Tests  1 passed (1)\n   Start at  09:16:08\n   Duration  9.83s (transform 235ms, setup 0ms, import 725ms, tests 8.90s, environment 0ms)\n\n",
+  "stdoutCapturedSha256": "c45afa47b3322f8d35f50fee927662eef95c3ca69893e2c74ff064cc4f086d72"
+}
