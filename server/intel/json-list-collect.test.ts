@@ -11,6 +11,7 @@ import { type IntelSourceSeed, intelSourceSeeds } from "#/intel/sources"
 import { fromHtml } from "#/intel/sources/web-list"
 import { sourcePolicy } from "#/intel/collect"
 import { parseFeedEntries } from "#/providers/feed"
+import { JSON_LIST_HTML_MAX_BYTES } from "#/intel/sources/json-list"
 
 const NOW = new Date("2026-10-13T01:00:00Z")
 const JSON_SOURCE: IntelSourceSeed = {
@@ -63,6 +64,60 @@ async function v26(state: ReturnType<typeof open>) {
 }
 
 describe("json_list 027 isolated persistence", () => {
+  it("collects a bounded inert data script from full HTML bytes without changing legacy limits", async () => {
+    const state = open()
+    try {
+      await initializeShippingDatabase(state.database, "mock")
+      const source: IntelSourceSeed = { ...JSON_SOURCE, persistence: "disallowed", allowedContentTypes: ["text/html"], jsonList: { ...JSON_SOURCE.jsonList!, htmlScriptSelector: "#payload", itemsPaths: ["page.pin", "page.items"] } }
+      await state.repository.upsertSource(source, NOW.toISOString())
+      const pinned = { ...RECORD, id: "pinned", published: "2026-10-13T09:00:00" }
+      const html = `<html>${" ".repeat(600 * 1024)}<script id="payload" type="application/json">${JSON.stringify({ page: { pin: pinned, items: [RECORD] } })}</script></html>`
+      const fixture = offline(Buffer.from(html), "text/html; charset=utf-8")
+      const deps: IntelFetchDeps = { ...fixture, transport: async (_url, _ips, options) => {
+        expect(options.maxBytes).toBe(JSON_LIST_HTML_MAX_BYTES)
+        return fixture.transport()
+      } }
+      expect(await collectIntelSource(state.repository, source, deps, NOW)).toMatchObject({ status: "ok_items", itemsSeen: 2, itemsNew: 2 })
+      expect(await collectIntelSource(state.repository, source, deps, NOW)).toMatchObject({ itemsNew: 0, itemsRevised: 0 })
+      const items = await state.repository.listItems(source.id)
+      const versions = await Promise.all(items.map(item => state.repository.listVersions(item.id)))
+      for (const item of items) expect(await state.repository.readVersionBlocks(item.currentVersionId!)).toEqual([{ blockKey: "title", order: 0, type: "title", text: RECORD.title }])
+      expect(items.find(item => item.canonicalUrl.endsWith("/pinned"))?.publishedAt).toBeNull()
+      for (const body of ["<html></html>", html.replace("application/json", "text/javascript"), html + " ".repeat(JSON_LIST_HTML_MAX_BYTES)]) {
+        expect((await collectIntelSource(state.repository, source, offline(Buffer.from(body), "text/html"), NOW)).status).toBe("failed")
+        expect(await state.repository.listItems(source.id)).toEqual(items)
+        expect(await Promise.all(items.map(item => state.repository.listVersions(item.id)))).toEqual(versions)
+      }
+      expect(await collectIntelSource(state.repository, JSON_SOURCE, json([{ ...RECORD, summary: "x".repeat(600 * 1024) }]), NOW)).toMatchObject({ status: "failed", errorCode: "body_too_large" })
+      expect(await state.repository.listItems(source.id)).toEqual(items)
+    } finally {
+      state.native.close()
+    }
+  })
+
+  it("rejects data-script content-type/config mismatches before DNS and keeps private addresses blocked", async () => {
+    const state = open()
+    try {
+      await initializeShippingDatabase(state.database, "mock")
+      await state.repository.upsertSource(JSON_SOURCE, NOW.toISOString())
+      for (const source of [
+        { ...JSON_SOURCE, allowedContentTypes: ["text/html"] },
+        { ...JSON_SOURCE, jsonList: { ...JSON_SOURCE.jsonList!, htmlScriptSelector: "#payload" } },
+      ]) {
+        const deps = json([])
+        expect(await collectIntelSource(state.repository, source, deps, NOW)).toMatchObject({ errorCode: "config_invalid" })
+        expect(deps.lookup).not.toHaveBeenCalled()
+        expect(deps.transport).not.toHaveBeenCalled()
+      }
+      const source = { ...JSON_SOURCE, allowedContentTypes: ["text/html"], jsonList: { ...JSON_SOURCE.jsonList!, htmlScriptSelector: "#payload" } }
+      const deps = offline("<script id=\"payload\" type=\"application/json\">[]</script>", "text/html")
+      expect(await collectIntelSource(state.repository, source, { ...deps, lookup: async () => [{ address: "127.0.0.1", family: 4 }] }, NOW)).toMatchObject({ status: "failed", errorCode: "blocked_address" })
+      expect(deps.transport).not.toHaveBeenCalled()
+    } finally {
+      state.native.close()
+    }
+  })
+
   it("upgrades populated v26 twice without changing old rows, identities, FK children, indexes or triggers", async () => {
     const state = open()
     try {

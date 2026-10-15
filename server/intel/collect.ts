@@ -7,7 +7,7 @@ import { type ArticleLookup, type ArticleTransport, secureFetchArticle } from "#
 import type { IntelSourceSeed } from "#/intel/sources"
 import { WEB_LIST_DUPLICATE_CONFLICT, type WebListEntry, fromHtml } from "#/intel/sources/web-list"
 import { assertSupportedConfig } from "#/intel/sources/config-keys"
-import { assertJsonListConfig, fromJson } from "#/intel/sources/json-list"
+import { JSON_LIST_HTML_MAX_BYTES, assertJsonListConfig, fromJson } from "#/intel/sources/json-list"
 
 import { contentScopeFor, licensedBlocks } from "#/intel/content-license"
 
@@ -93,13 +93,14 @@ export async function collectIntelSource(repository: IntelRepository, seed: Inte
   if (seed.kind === "json_list") {
     try {
       assertJsonListConfig(seed.jsonList)
-      if (!seed.allowedContentTypes.length || seed.allowedContentTypes.some(type => !/^application\/(?:json|[\w.-]+\+json)$/i.test(type))) throw new Error("json_list requires JSON content types")
+      const pattern = seed.jsonList.htmlScriptSelector ? /^(?:text\/html|application\/xhtml\+xml)$/i : /^application\/(?:json|[\w.-]+\+json)$/i
+      if (!seed.allowedContentTypes.length || seed.allowedContentTypes.some(type => !pattern.test(type))) throw new Error("json_list content types do not match configured input")
     } catch (error) {
       return await fail("config_invalid", message(error, "json_list config invalid"))
     }
   }
   try {
-    const response = await secureFetchArticle(seed.url, { policy: sourcePolicy(seed), sourceCa: seed.sourceCa, lookup: deps.lookup, transport: deps.transport })
+    const response = await secureFetchArticle(seed.url, { policy: sourcePolicy(seed), sourceCa: seed.sourceCa, lookup: deps.lookup, transport: deps.transport, ...(seed.kind === "json_list" && seed.jsonList?.htmlScriptSelector ? { maxBytes: JSON_LIST_HTML_MAX_BYTES } : {}) })
     if (!response.ok) return await fail(response.code, response.message)
     body = response.body
     finalUrl = response.finalUrl

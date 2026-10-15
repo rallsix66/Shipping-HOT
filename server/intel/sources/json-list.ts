@@ -1,5 +1,7 @@
 // Adapted from AIHOT@44578fa packages/backend/src/sources/json-list.ts (MIT).
-// Pure JSON mapping only; fetch/decoding/storage stay in the existing collector.
+// Pure JSON mapping, including one explicitly selected inert HTML data script.
+// Fetch/decoding/storage stay in the existing collector; scripts are never executed.
+import { Buffer } from "node:buffer"
 import { load } from "cheerio"
 import type { ArticleSourcePolicy } from "@shared/article"
 import { UnsupportedConfig, type WebListConfig, assertDateAndUrlConfig } from "./config-keys"
@@ -8,6 +10,10 @@ import { canonicalizeFeedUrl } from "#/providers/feed"
 
 export interface JsonListConfig extends Pick<WebListConfig, "dateRuleBasis" | "dateOrder" | "calendar" | "publishedAtUtcOffset" | "allowUrlPrefixes" | "denyUrlPrefixes"> {
   itemsPath?: string
+  /** Explicit bounded groups; each must resolve to an array or one record. */
+  itemsPaths?: string[]
+  /** Exactly one inline script[type=application/json], never a window variable or external script. */
+  htmlScriptSelector?: string
   titlePaths: string[]
   summaryPaths?: string[]
   urlPath?: string
@@ -15,7 +21,8 @@ export interface JsonListConfig extends Pick<WebListConfig, "dateRuleBasis" | "d
   publishedAtPath?: string
 }
 
-const KEYS = new Set(["itemsPath", "titlePaths", "summaryPaths", "urlPath", "urlTemplate", "publishedAtPath", "dateRuleBasis", "dateOrder", "calendar", "publishedAtUtcOffset", "allowUrlPrefixes", "denyUrlPrefixes"])
+export const JSON_LIST_HTML_MAX_BYTES = 1024 * 1024
+const KEYS = new Set(["itemsPath", "itemsPaths", "htmlScriptSelector", "titlePaths", "summaryPaths", "urlPath", "urlTemplate", "publishedAtPath", "dateRuleBasis", "dateOrder", "calendar", "publishedAtUtcOffset", "allowUrlPrefixes", "denyUrlPrefixes"])
 const FORBIDDEN_SEGMENTS = new Set(["__proto__", "prototype", "constructor"])
 
 function assertPath(path: unknown): asserts path is string {
@@ -31,6 +38,19 @@ export function assertJsonListConfig(input: unknown): asserts input is JsonListC
     if (!KEYS.has(key)) throw new UnsupportedConfig(`Unsupported json_list config: ${key}`)
   }
   assertDateAndUrlConfig(c)
+  if (c.itemsPaths !== undefined) {
+    if (c.itemsPath !== undefined || !Array.isArray(c.itemsPaths) || !c.itemsPaths.length || c.itemsPaths.length > 4) throw new UnsupportedConfig("itemsPaths invalid or ambiguous")
+    for (const path of c.itemsPaths) assertPath(path)
+    if (new Set(c.itemsPaths).size !== c.itemsPaths.length) throw new UnsupportedConfig("itemsPaths duplicate path")
+  }
+  if (c.htmlScriptSelector !== undefined) {
+    if (typeof c.htmlScriptSelector !== "string" || !c.htmlScriptSelector.trim() || c.htmlScriptSelector.length > 256) throw new UnsupportedConfig("htmlScriptSelector invalid")
+    try {
+      load("<html></html>")(c.htmlScriptSelector)
+    } catch {
+      throw new UnsupportedConfig("htmlScriptSelector invalid")
+    }
+  }
   for (const key of ["itemsPath", "urlPath", "publishedAtPath"]) {
     if (c[key] !== undefined) assertPath(c[key])
   }
@@ -90,21 +110,40 @@ function text(value: string): string {
   return $.root().text().replace(/\s+/g, " ").trim()
 }
 
-/** Array-at-root or explicit path only; [] is legal, missing/wrong-shaped arrays fail closed. */
+/** Explicit paths only; optional HTML mode selects inert JSON, never discovers/fetches another URL. */
 export function fromJson(body: string, base: string, config: JsonListConfig, policy: ArticleSourcePolicy): WebListEntry[] {
   assertJsonListConfig(config)
+  let json = body
+  if (config.htmlScriptSelector) {
+    if (Buffer.byteLength(body, "utf8") > JSON_LIST_HTML_MAX_BYTES) throw new Error("json_list_html_body_limit")
+    const $ = load(body)
+    const script = $(config.htmlScriptSelector)
+    if (script.length !== 1 || !script.is("script") || script.attr("type")?.trim().toLowerCase() !== "application/json" || script.attr("src") !== undefined) throw new Error("json_list_html_script_shape")
+    json = script.text()
+  }
   let data: unknown
   try {
-    data = JSON.parse(body)
+    data = JSON.parse(json)
   } catch {
     // Native SyntaxError may contain response fragments; run records must not retain them.
     throw new Error("json_list_invalid_json")
   }
-  const items = config.itemsPath ? getPath(data, config.itemsPath) : data
+  let items: unknown = config.itemsPath ? getPath(data, config.itemsPath) : data
+  if (config.itemsPaths) {
+    const combined: unknown[] = []
+    for (const path of config.itemsPaths) {
+      const group = getPath(data, path)
+      if (!group || typeof group !== "object") throw new Error("json_list_group_shape_changed")
+      const records = Array.isArray(group) ? group : [group]
+      if (combined.length + records.length > 500) throw new Error("json_list_item_limit")
+      combined.push(...records)
+    }
+    items = combined
+  }
   if (!Array.isArray(items)) throw new Error("json_list_items_not_array")
   if (items.length > 500) throw new Error("json_list_item_limit")
   const entries: WebListEntry[] = []
-  const seen = new Set<string>()
+  const seen = new Map<string, WebListEntry>()
   for (const item of items) {
     if (!item || typeof item !== "object" || Array.isArray(item)) throw new Error("json_list_item_shape_changed")
     const title = text(firstString(item, config.titlePaths) ?? "")
@@ -116,9 +155,14 @@ export function fromJson(body: string, base: string, config: JsonListConfig, pol
     if (rawDate != null && typeof rawDate !== "string" && typeof rawDate !== "number") throw new Error("json_list_date_type_changed")
     const dateEvidence = parseLooseDate(rawDate == null ? undefined : String(rawDate), config)
     const summary = text(firstString(item, config.summaryPaths ?? []) ?? "")
-    if (seen.has(url)) continue
-    seen.add(url)
-    entries.push({ url, canonicalUrl: url, title, summary, bodyText: summary, publishedAt: dateEvidence.publishedAt ?? undefined, dateEvidence })
+    const entry = { url, canonicalUrl: url, title, summary, bodyText: summary, publishedAt: dateEvidence.publishedAt ?? undefined, dateEvidence }
+    const previous = seen.get(url)
+    if (previous) {
+      if (config.itemsPaths && JSON.stringify([previous.title, previous.bodyText, previous.dateEvidence]) !== JSON.stringify([entry.title, entry.bodyText, entry.dateEvidence])) throw new Error("json_list_duplicate_conflict")
+      continue
+    }
+    seen.set(url, entry)
+    entries.push(entry)
   }
   return entries
 }
