@@ -14,7 +14,7 @@ export interface WebListConfig {
   calendar?: "gregorian" | "buddhist"
   dateFormat?: "thai_month_name" | "english_month_name" | "indonesian_enactment_date"
   /** Date and title share the observed anchor text; no prose/date searching. */
-  linkTextFormat?: "dmy-date-title"
+  linkTextFormat?: "dmy-date-title" | "title-dmy-date"
   dateRuleBasis: string
   emptySelector?: string
   allowUrlPrefixes?: string[]
@@ -38,7 +38,7 @@ const KEYS = new Set([
   "allowUrlPrefixes",
   "denyUrlPrefixes",
 ])
-const VALUES: Record<string, string[]> = { titleAttribute: ["title", "alt"], dateOrder: ["dmy"], calendar: ["gregorian", "buddhist"], dateFormat: ["thai_month_name", "english_month_name", "indonesian_enactment_date"], linkTextFormat: ["dmy-date-title"] }
+const VALUES: Record<string, string[]> = { titleAttribute: ["title", "alt"], dateOrder: ["dmy"], calendar: ["gregorian", "buddhist"], dateFormat: ["thai_month_name", "english_month_name", "indonesian_enactment_date"], linkTextFormat: ["dmy-date-title", "title-dmy-date"] }
 const SELECTORS = ["listSelector", "itemSelector", "linkSelector", "titleSelector", "publishedAtSelector", "emptySelector"]
 
 export class UnsupportedConfig extends Error {}
@@ -73,7 +73,9 @@ export function assertSupportedConfig(input: unknown): asserts input is WebListC
   assertDateAndUrlConfig(config)
   if (config.dateFormat === "english_month_name" && config.calendar === "buddhist") throw new UnsupportedConfig("english_month_name requires Gregorian calendar")
   if (config.dateFormat === "indonesian_enactment_date" && config.calendar === "buddhist") throw new UnsupportedConfig("indonesian_enactment_date requires Gregorian calendar")
-  if (config.linkTextFormat && (config.dateOrder !== "dmy" || config.dateFormat || config.titleSelector || config.titleAttribute || config.publishedAtSelector)) throw new UnsupportedConfig("linkTextFormat requires dmy and exclusive link text mapping")
+  if (config.linkTextFormat && (config.dateOrder !== "dmy" || config.dateFormat || config.titleSelector || config.publishedAtSelector)) throw new UnsupportedConfig("linkTextFormat requires dmy and exclusive link text mapping")
+  if (config.linkTextFormat === "dmy-date-title" && config.titleAttribute) throw new UnsupportedConfig("dmy-date-title cannot use a separate title attribute")
+  if (config.linkTextFormat === "title-dmy-date" && config.titleAttribute !== "title") throw new UnsupportedConfig("title-dmy-date requires the same anchor's full title attribute")
 }
 
 /** Shared explicit date/URL contract; source adapters still validate their own key whitelist. */

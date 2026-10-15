@@ -162,6 +162,13 @@ export function fromHtml(html: string, base: string, config: WebListConfig, poli
       rawDate = pair?.[1]
       if (pair) title = pair[2]
     }
+    if (c.linkTextFormat === "title-dmy-date") {
+      // One observed anchor: its full title attribute and trailing parenthesized D/M/Y.
+      // Preserve unsupported text as unknown evidence; never search neighboring prose.
+      const visible = linkEl.text().replace(/\s+/g, " ").trim()
+      const pair = /\((\d{1,2}\/\d{1,2}\/\d{4})\)$/.exec(visible)
+      rawDate = pair && pair.index > 1 && visible[pair.index - 1] === " " ? pair[1] : visible
+    }
     const dateEvidence = parseLooseDate(rawDate, c)
     // A URL identifies one item, but does not prove that conflicting title/date associations are duplicates.
     // Keep the full normalized date evidence (including raw text/unknowns), without choosing an occurrence.
