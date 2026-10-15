@@ -1,1 +1,1 @@
-当前收尾见[用户应用后两源限界核验真实Neat Freak](../r2-carrier-reapplied-2026-10-15/closeout.md)。本批系统DNS2、精确目录transport尝试2；Maersk未捕获响应，ONE308未跟随。源码仍355952c0e8c01266adbe692dfcfd3bca9b3c17b2，功能门禁NOT_RUN。覆盖20/39、12/34、有限数值3/5不变。[当前逐源报告](report.md)。
+当前真实收尾见[ONE目标/受限JSON适配Neat Freak](../r2-one-newsroom-target-2026-10-15/closeout.md)。代码01934a5746c10d4165f4c4ffc5ce145d6de33d16干净门禁通过，完整原HTML10字段回放通过；一次ONE真实DNS/GET，Maersk0。覆盖21/39、13/34、有限数值3/5，目录URL只提案、active注册未变，整体R2/24h未通过。[当前报告](report.md)。

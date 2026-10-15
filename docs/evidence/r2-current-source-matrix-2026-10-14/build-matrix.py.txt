@@ -11,8 +11,8 @@ old = json.loads(OLD.read_text(encoding='utf-8'))
 inventory_path = ROOT / 'r2-p1-inventory-2026-10-13/source-inventory.json'
 inventory = json.loads(inventory_path.read_text(encoding='utf-8'))
 legacy = {r['id']: r for r in inventory['entries']}
-HEAD = '0ad53dd63632f097e719197345a1000b0e0c1d29'
-CODE = '355952c0e8c01266adbe692dfcfd3bca9b3c17b2'
+HEAD = '01934a5746c10d4165f4c4ffc5ce145d6de33d16'
+CODE = '01934a5746c10d4165f4c4ffc5ce145d6de33d16'
 
 def read(path): return json.loads(Path(path).read_text(encoding='utf-8'))
 def ref(path, selector=None):
@@ -294,6 +294,38 @@ for source in old['entries']:
             e['latestActualFetch']['location']=attempt['location']
             e['r2_4']={'verdict':'PARTIAL','countedOK':False,'reason':'Exact catalogue index returned308 with saved relative Location /en/newsroom and12 original bytes; no redirect followed, target list product and fields unverified.'}
             e['gaps']=['Actual Location /en/newsroom is a relative response header, not a confirmed news-list product.', 'Current catalogue remains /en/news; any product URL change/future request must be explicitly coordinated, no silent substitution or follow.']
+    if sid=='XX-K02':
+        target_batch='docs/evidence/r2-one-newsroom-target-2026-10-15'
+        actual=outcome(target_batch+'/summary.json',sid)
+        e['historicalAttempts'].append(e['latestAttempt'])
+        e['originalCatalogLastResponse']=e['latestActualFetch']
+        e['resolvedProductUrl']=actual['url']
+        e['latestActualFetch']=fetch(target_batch+'/summary.json',sid)
+        e['latestActualFetch']['scope']='separately approved target from saved308; original catalogue URL remains308'
+        e['latestActualFetch']['capturedAtHead']='03d1515d33dd1c5d96137c43e0aafb596b334be3'
+        e['latestAttempt']={'evidence':ref(target_batch+'/summary.json',{'id':sid}),
+            'dnsEvidence':ref(target_batch+'/dns-ledger.json',{'id':sid}),
+            'captureIntegrity':ref(target_batch+'/capture-integrity.json'),
+            'originalRedirectEvidence':ref('docs/evidence/r2-carrier-reapplied-2026-10-15/XX-K02-response.json',{'id':sid}),
+            'at':actual['startedAt'],'url':actual['url'],'originalCatalogUrl':actual['catalogUrl'],
+            'host':actual['host'],'addresses':actual['addresses'],'systemDnsCalls':1,'httpRequests':1,
+            'responseCaptured':True,'httpStatus':200,'parser':'STRUCTURE_ONLY at capture; separate full inert-JSON raw replay passed',
+            'scope':'same-ID separately approved saved308 target, not automatic follow or permanent catalogue substitution'}
+        e['fieldReplayEvidence']={'status':'PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS',
+            'evidence':ref('docs/evidence/r2-one-newsroom-replay-final-2026-10-15/summary.json',{'id':sid}),
+            'independentRawFields':ref('docs/evidence/r2-one-newsroom-replay-final-2026-10-15/raw-field-metadata.json',{'id':sid}),
+            'offlineCandidateConfig':ref('docs/evidence/r2-one-newsroom-replay-final-2026-10-15/candidate-config.json'),
+            'codeGate':ref('docs/evidence/gate-01934a5-one-newsroom-json/source-proof.json'),
+            'records':10,'role':'one pinned plus nine listed records from original HTML inert application/json, not rebuilt JSON transport',
+            'sourceDateRole':'source-labelled releaseDate local datetime; no timezone/publication instant certification'}
+        e['dateEvidence']={'role':'source_label_releaseDate_local_datetime','precision':'second','sourceDeclaredTimezone':'missing','publicationInstant':None}
+        e['defaultState']['sourceConfig']='offline_candidate_only_not_registered'
+        e['defaultState']['offlineCandidateEnabled']=False
+        e['r2_4']={'verdict':'OK','countedOK':True,'reason':'Saved original308 resolves to explicitly approved same-host HTTPS target; canonical/h1/embedded page verify ONE Newsroom,200 complete original bytes and10 real metadata collector/repeat/read-only-reopen fields pass. Counts resolved source product qualification; original catalogue URL not claimed200 and permanent catalogue/registration remain unchanged.'}
+        e['r2_5']={'verdict':'PASS','countedPass':True,'reason':'All10 pinned/list records compared to original JSON title/aliasUrl/releaseDate and complete stored date evidence after read-only reopen; zero repeat versions. Second precision, missing timezone and null UTC/publication instant retained.'}
+        e['catalogChangeProposal']=ref(target_batch+'/catalogue-url-proposal.json')
+        e['gaps']=['Formal one-row catalogue URL proposal remains unapplied; original catalogue endpoint still308.', 'Typed metadata-only candidate exists only in offline evidence, not active seeds/allowlist/production.', 'releaseDate has no timezone; no UTC publication or operational port-impact inference.']
+        e['historicalSuperseded'].append('ONE target now verified with200 and original embedded10-field replay; prior original308 and DNS history retained rather than overwritten. Maersk unchanged this round.')
     entries.append(e)
 
 assert len(entries)==41 and len({r['id'] for r in entries})==41

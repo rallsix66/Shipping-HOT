@@ -1,0 +1,25 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/one-newsroom-json-build-20261015
+
+ ✓ server/intel/sources/json-list.test.ts (42 tests) 56ms
+ ✓ server/intel/sources/json-list-html.test.ts (5 tests) 61ms
+ ✓ server/intel/sources/web-list.test.ts (35 tests) 108ms
+ ✓ server/intel/sources/html-index-candidates.test.ts (24 tests) 58ms
+ ✓ server/intel/thai-document-index.test.ts (4 tests) 189ms
+ ✓ server/intel/adaptive.test.ts (2 tests) 134ms
+ ✓ server/intel/post-clash-index.test.ts (18 tests) 360ms
+ ✓ server/intel/vn-disaster-index.test.ts (22 tests) 140ms
+ ✓ server/intel/html-index-candidates-collect.test.ts (4 tests) 432ms
+ ✓ server/intel/public-index-candidates-collect.test.ts (22 tests) 495ms
+ ✓ server/intel/sources/web-list-conflicts.test.ts (12 tests) 37ms
+ ✓ server/intel/web-list-conflicts-collect.test.ts (3 tests) 199ms
+ ✓ server/intel/web-list-collect.test.ts (7 tests) 667ms
+ ✓ server/intel/json-list-collect.test.ts (9 tests) 776ms
+ ✓ server/runtime/intel-production.test.ts (4 tests) 524ms
+ ✓ server/runtime/intel-bootstrap.test.ts (9 tests) 610ms
+ ✓ server/intel/collect.test.ts (22 tests) 1157ms
+
+ Test Files  17 passed (17)
+      Tests  244 passed (244)
+   Start at  11:07:56
+   Duration  3.10s (transform 6.91s, setup 0ms, import 17.74s, tests 6.00s, environment 3ms)

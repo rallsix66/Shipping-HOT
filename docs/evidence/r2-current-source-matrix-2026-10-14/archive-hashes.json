@@ -1,25 +1,25 @@
 {
   "type": "committed_text_archive_hashes",
-  "generatedAt": "2026-10-15T02:47:20.671503+00:00",
-  "hashBasis": "committed text LF normalization only; nested original/wire byte hashes remain exact and unchanged",
+  "at": "2026-10-15T03:22:57.740756+00:00",
+  "hashBasis": "Git LF text only; original wire/log byte digests remain exact and are never normalized",
   "excluded": [
     "archive-hashes.json"
   ],
   "files": [
     {
       "file": "build-matrix.py.txt",
-      "sha256": "a33abc6d440a29459db883951b8f6dc962f763b337b8d8dc0f7e0682e85416f2",
-      "bytesLF": 37937
+      "sha256": "098e525dac42770c6652af7f99d5ccacc7fa1e961973e486dc48bb33d014d844",
+      "bytesLF": 41792
     },
     {
       "file": "closeout.md",
-      "sha256": "88bca63a8dab83a1c624f43ac1a795e21d9adbce39a15699c75403f2e4563c56",
-      "bytesLF": 364
+      "sha256": "150285c46979e4adf282bf1b54fab87831f3143f769068b9c7c9772ca6525bdb",
+      "bytesLF": 385
     },
     {
       "file": "commands.json",
-      "sha256": "8949f5a89385460505a4ceabaf70d5f86a93a3f96c25ac4147ac42747908b1b7",
-      "bytesLF": 164530
+      "sha256": "4a8e9f8f39f80af5db646f3ba5be54030ced4f1c7c7ee154627b57fd65decb27",
+      "bytesLF": 202376
     },
     {
       "file": "inventory.txt",
@@ -28,28 +28,28 @@
     },
     {
       "file": "mapping.json",
-      "sha256": "2ed04f1be75397fe0502b965f3f68433537efe12c5e0c31948aa17303a360971",
-      "bytesLF": 181014
+      "sha256": "2b17729130e10af5a11accd0175b8d650e5ee12894b56d8b9fcfac46f26db36c",
+      "bytesLF": 186687
     },
     {
       "file": "metadata-scan.json",
-      "sha256": "e589ea1e30c342c530fc425546f6d43de42c9f0a6c3c800776dd314aab08a438",
-      "bytesLF": 242
+      "sha256": "899ea132d01d6879ed004afe3fecb7055e4116d4083fcded78e1ff25254f9e2e",
+      "bytesLF": 272
     },
     {
       "file": "report.md",
-      "sha256": "8b0435c1ff2b5641066b3b6479135afb1d6cac2860ae020138ad91b3a0555282",
-      "bytesLF": 19002
+      "sha256": "e7aa2985a42c667e31b97c66f390f8ca21950e773b8f520760ecb31bb4c5d679",
+      "bytesLF": 19293
     },
     {
       "file": "validate-matrix.py.txt",
-      "sha256": "14a3f92a13bce4547a03b427d494eeb77b12b338a07b1e7e046ebf914d755979",
-      "bytesLF": 20694
+      "sha256": "29cdd7698439dbc316bb4b6789cc99f47094071b2f6ac95ce31248f342e2868d",
+      "bytesLF": 29656
     },
     {
       "file": "validation.json",
-      "sha256": "84f5feb4e86d56bd855e4ac9c0aaede66f8c132ac40f98e6b4d26bdb34c1d072",
-      "bytesLF": 16101
+      "sha256": "6756c61193e966cee22a2789cdcc7fd02714e481b08288de4262026d1bf9e316",
+      "bytesLF": 9593
     }
   ]
 }

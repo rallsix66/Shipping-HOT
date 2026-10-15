@@ -1,13 +1,13 @@
 # R2 41项来源累计证据 — 2026-10-15
 
-当前两源已由用户亲自应用例外，选中扩展/生成filter均23项，原21项逐项保留。2026-10-15 02:38 UTC每域系统DNS一次均为公网，各精确目录索引transport尝试一次：Maersk通用fetch_failed、未捕获完整响应；ONE308，实际相对Location `/en/newsroom`，12字节原响应仅本地，未跟随。两源无列表原页，解析/collector回放NOT_RUN。执行HEAD `0ad53dd63632f097e719197345a1000b0e0c1d29`、产品代码 `355952c0e8c01266adbe692dfcfd3bca9b3c17b2`；本轮不改产品、不跑功能门禁。[当前两源报告](../r2-carrier-reapplied-2026-10-15/report.md)。
+当前ONE单独核准的已保存308目标 /en/newsroom 实测200、635664字节，完整原HTML内嵌JSON的1置顶+9列表元数据经现有collector/SQLite、幂等及只读重开全字段0差异；秒精度releaseDate无时区，UTC/publication instant均null。源码 `01934a5746c10d4165f4c4ffc5ce145d6de33d16` 干净门禁244定向、1229全量/3跳过与3smoke通过。原目录 /en/news 仍保留，先前308链未覆盖，只提交一行目录URL提案；离线typed候选默认关闭、未注册。ONE计对应已验证目标的来源/字段资格，不宣称原URL直接200或生产启用。Maersk本轮0请求、旧通用失败原因仍未知。[本轮证据与目录提案](../r2-one-newsroom-target-2026-10-15/report.md)。
 
-本报告汇总已保存证据，供父会话独立审查。源码基准 `355952c0e8c01266adbe692dfcfd3bca9b3c17b2`；前一四源采集HEAD为 `50da3805ee14e72222a4e26f4230073cf1842bc7`。该历史批次四次系统DNS均公网、精确索引HTTP4；VN-D01原页有限通过、MY-L01真实探针失败，两源跳转未跟随；干净源码门禁已另存。[机器矩阵](mapping.json)保留全部41项的精确目录产品、采集时点、原证据路径/LF文本哈希、字段回放、时间角色、许可、默认状态及两项独立判定。
+本报告汇总已保存证据，供父会话独立审查。源码基准 `01934a5746c10d4165f4c4ffc5ce145d6de33d16`；前一四源采集HEAD为 `50da3805ee14e72222a4e26f4230073cf1842bc7`。该历史批次四次系统DNS均公网、精确索引HTTP4；VN-D01原页有限通过、MY-L01真实探针失败，两源跳转未跟随；干净源码门禁已另存。[机器矩阵](mapping.json)保留全部41项的精确目录产品、采集时点、原证据路径/LF文本哈希、字段回放、时间角色、许可、默认状态及两项独立判定。
 
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
-| R2-4公开自动来源 | **20/39（51.28%）** | 最少32项，尚差12；20 OK、12 PARTIAL、1 STALE、1 BLOCKED、5 NOT_RUN，未通过 |
-| R2-5资讯/公告原页字段回放 | **12/34（35.29%）** | 尚差22；12 PASS、4 FAIL、1 PARTIAL、17 NOT_RUN，未通过 |
+| R2-4公开自动来源 | **21/39（53.85%）** | 最少32项，尚差11；21 OK、11 PARTIAL、1 STALE、1 BLOCKED、5 NOT_RUN，未通过 |
+| R2-5资讯/公告原页字段回放 | **13/34（38.24%）** | 尚差21；13 PASS、4 FAIL、1 PARTIAL、16 NOT_RUN，未通过 |
 | 数值字段独立检查 | **3/5** | 仅历史归一化诊断；不加到34项原页回放分子 |
 | R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
 
@@ -50,7 +50,7 @@ NMC两项与Westports日期复审曾将旧暂计逐步修正为19/39；本批VN-
 | PH-C01 | https://customs.gov.ph/category/media-releases/ | 2026-10-14T07:56:33.170Z / 200 [取证](../r2-four-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-public-index-replay-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
 | PH-M01 | https://portcalls.com/feed/ | 2026-10-13T07:00:29.490Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
 | XX-K01 | https://www.maersk.com/news | 2026-10-15T02:38:28.356Z / 尝试1、未捕获响应 [当前证据](../r2-carrier-reapplied-2026-10-15/summary.json) | BLOCKED | NOT_RUN | 公网23.53.3.137、23.53.3.144；fetch_failed无底层错误记录，不判断CA/TLS/反爬；不重试。 |
-| XX-K02 | https://www.one-line.com/en/news | 2026-10-15T02:38:29.155Z / 308 [当前证据](../r2-carrier-reapplied-2026-10-15/summary.json) | PARTIAL | NOT_RUN | 公网104.19.145.47、104.19.144.47；12字节，相对Location /en/newsroom已脱敏保存，未跟随，无列表字段。 |
+| XX-K02 | 原目录 https://www.one-line.com/en/news → 已核准目标 https://www.one-line.com/en/newsroom | 2026-10-15T02:56:22.136Z / 200 [目标与原308链](../r2-one-newsroom-target-2026-10-15/report.md) | OK | PASS [10条原页字段](../r2-one-newsroom-replay-final-2026-10-15/summary.json) | 原HTML内嵌JSON的置顶1+列表9；重复0修订、只读重开0差异；releaseDate秒精度/无时区/瞬间null，目录URL提案尚未应用、未注册。 |
 | XX-K03 | https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/ | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
 | XX-M01 | https://theloadstar.com/feed/ | 2026-10-13T08:25:10.410Z / 200 [取证](../r2-four-index-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-four-index-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |
 | XX-M03 | https://splash247.com/feed/ | 2026-10-13T08:25:11.082Z / 200 [取证](../r2-four-index-2026-10-13/batch-results.json) | OK | NOT_RUN [字段](../r2-four-index-2026-10-13/batch-results.json) | 实网RSS解析字段完整，累计可用；只保存导出元数据/hash，未保留完整原文供完整回放。 |

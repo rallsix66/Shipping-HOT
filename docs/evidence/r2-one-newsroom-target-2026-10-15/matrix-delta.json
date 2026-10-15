@@ -1,0 +1,138 @@
+{
+  "changedSourceIdsOnly": [
+    "XX-K02"
+  ],
+  "other40SourceEntryDifferences": [],
+  "r2_4Before": {
+    "numerator": 20,
+    "denominator": 39,
+    "ratio": 0.5128205128205128,
+    "minimumOK": 32,
+    "shortfall": 12,
+    "ids": [
+      "CN-P01",
+      "CN-T02",
+      "VN-P03",
+      "VN-W01",
+      "VN-T01",
+      "VN-D01",
+      "TH-W01",
+      "TH-C01",
+      "TH-C02",
+      "MY-C01",
+      "MY-T01",
+      "ID-W01",
+      "ID-T01",
+      "PH-C01",
+      "PH-M01",
+      "XX-W01",
+      "XX-M01",
+      "XX-M03",
+      "XX-A01",
+      "XX-A02"
+    ],
+    "statusCounts": {
+      "OK": 20,
+      "PARTIAL": 12,
+      "NOT_RUN": 5,
+      "STALE": 1,
+      "BLOCKED": 1
+    },
+    "pass": false
+  },
+  "r2_4After": {
+    "numerator": 21,
+    "denominator": 39,
+    "ratio": 0.5384615384615384,
+    "minimumOK": 32,
+    "shortfall": 11,
+    "ids": [
+      "CN-P01",
+      "CN-T02",
+      "VN-P03",
+      "VN-W01",
+      "VN-T01",
+      "VN-D01",
+      "TH-W01",
+      "TH-C01",
+      "TH-C02",
+      "MY-C01",
+      "MY-T01",
+      "ID-W01",
+      "ID-T01",
+      "PH-C01",
+      "PH-M01",
+      "XX-W01",
+      "XX-K02",
+      "XX-M01",
+      "XX-M03",
+      "XX-A01",
+      "XX-A02"
+    ],
+    "statusCounts": {
+      "OK": 21,
+      "PARTIAL": 11,
+      "NOT_RUN": 5,
+      "STALE": 1,
+      "BLOCKED": 1
+    },
+    "pass": false
+  },
+  "r2_5Before": {
+    "numerator": 12,
+    "denominator": 34,
+    "ratio": 0.35294117647058826,
+    "remaining": 22,
+    "ids": [
+      "CN-P01",
+      "CN-T02",
+      "VN-P03",
+      "VN-W01",
+      "VN-T01",
+      "VN-D01",
+      "TH-W01",
+      "TH-C01",
+      "TH-C02",
+      "ID-W01",
+      "ID-T01",
+      "PH-C01"
+    ],
+    "statusCounts": {
+      "PASS": 12,
+      "NOT_RUN": 17,
+      "FAIL": 4,
+      "PARTIAL": 1
+    },
+    "pass": false
+  },
+  "r2_5After": {
+    "numerator": 13,
+    "denominator": 34,
+    "ratio": 0.38235294117647056,
+    "remaining": 21,
+    "ids": [
+      "CN-P01",
+      "CN-T02",
+      "VN-P03",
+      "VN-W01",
+      "VN-T01",
+      "VN-D01",
+      "TH-W01",
+      "TH-C01",
+      "TH-C02",
+      "ID-W01",
+      "ID-T01",
+      "PH-C01",
+      "XX-K02"
+    ],
+    "statusCounts": {
+      "PASS": 13,
+      "NOT_RUN": 16,
+      "FAIL": 4,
+      "PARTIAL": 1
+    },
+    "pass": false
+  },
+  "numericUnchanged": true,
+  "countBasis": "Verified separately approved saved redirect target, not direct originalURL200 or source default activation"
+}

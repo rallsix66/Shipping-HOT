@@ -1,0 +1,13 @@
+{
+  "name": "lint",
+  "command": "pnpm lint",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\one-newsroom-json-build-20261015",
+  "sha": "01934a5746c10d4165f4c4ffc5ce145d6de33d16",
+  "startedAt": "2026-10-15T03:06:59.996Z",
+  "finishedAt": "2026-10-15T03:07:55.465Z",
+  "rawExit": 0,
+  "stdoutExactUtf8": "\n> shipping-hot@0.0.41 lint D:\\try one\\Shipping HOT\\.tmp\\one-newsroom-json-build-20261015\n> eslint\n\n",
+  "stdoutOriginalByteSha256": "7356e842b36fe445b73a7888349125d3a407991e9d038af5bb6fc284541b1efe",
+  "stderrExactUtf8": "",
+  "stderrOriginalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

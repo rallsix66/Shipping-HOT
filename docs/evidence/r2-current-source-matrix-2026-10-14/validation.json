@@ -1,20 +1,21 @@
 {
   "type": "docs_and_saved_evidence_validation",
-  "at": "2026-10-15T02:47:20.597841+00:00",
-  "codeSha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
-  "evidenceBaseline": "0ad53dd63632f097e719197345a1000b0e0c1d29",
+  "at": "2026-10-15T03:21:18.506815+00:00",
+  "codeSha": "01934a5746c10d4165f4c4ffc5ce145d6de33d16",
+  "evidenceBaseline": "01934a5746c10d4165f4c4ffc5ce145d6de33d16",
   "command": "python .tmp/validate-current-r2-matrix.py",
   "validatorSourceRequests": 0,
   "validatorSourceDns": 0,
   "lastQualificationBatchSystemDns": 4,
   "lastQualificationBatchHttpRequests": 4,
-  "thisCarrierBatchTransportAttempts": 2,
-  "thisCarrierBatchSystemDns": 2,
-  "thisCarrierBatchCompletedResponses": 1,
+  "thisTargetBatchTransportAttempts": 1,
+  "thisTargetBatchSystemDns": 1,
+  "thisTargetBatchCompletedResponses": 1,
+  "thisRoundMaerskRequests": 0,
   "thisCloseoutSourceRequests": 0,
   "thisCloseoutSystemDns": 0,
-  "functionalTests": "NOT_RUN_this_docs_only_round; accepted clean code gate355952c retained separately",
-  "originalFieldReplay": "NOT_RUN_current_carrier_list_payloads_missing; saved older accepted fields unchanged",
+  "functionalTests": "PASS_exact_clean_code_gate01934a5; separate from docs validation command",
+  "originalFieldReplay": "PASS_full_original_ONE_HTML10_metadata_fields_repeat_readonly_reopen; all40other_entries_unchanged",
   "checks": [
     {
       "check": "41 unique entries match current catalogue automatic P1 rows",
@@ -42,8 +43,8 @@
       "check": "All evidence paths exist",
       "pass": true,
       "detail": {
-        "referenceOccurrences": 157,
-        "uniquePaths": 46,
+        "referenceOccurrences": 167,
+        "uniquePaths": 55,
         "missing": []
       }
     },
@@ -76,8 +77,8 @@
       "check": "r2_4 status totals recomputed",
       "pass": true,
       "detail": {
-        "OK": 20,
-        "PARTIAL": 12,
+        "OK": 21,
+        "PARTIAL": 11,
         "NOT_RUN": 5,
         "STALE": 1,
         "BLOCKED": 1
@@ -87,14 +88,14 @@
       "check": "r2_5 status totals recomputed",
       "pass": true,
       "detail": {
-        "PASS": 12,
-        "NOT_RUN": 17,
+        "PASS": 13,
+        "NOT_RUN": 16,
         "FAIL": 4,
         "PARTIAL": 1
       }
     },
     {
-      "check": "Nine original HTML field passes refer to actual successful collection/repeat/reopen",
+      "check": "Ten complete original HTML field passes refer to actual successful collection/repeat/reopen",
       "pass": true,
       "detail": []
     },
@@ -123,116 +124,6 @@
       "pass": true,
       "detail": [
         "docs/architecture.md",
-        "docs/evidence/gate-355952c-anchor-date-repair/archive-hashes.json",
-        "docs/evidence/gate-355952c-anchor-date-repair/build.json",
-        "docs/evidence/gate-355952c-anchor-date-repair/build.stderr.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/build.stdout.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/gate-driver.cjs.txt",
-        "docs/evidence/gate-355952c-anchor-date-repair/install.json",
-        "docs/evidence/gate-355952c-anchor-date-repair/install.stderr.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/install.stdout.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/launch.json",
-        "docs/evidence/gate-355952c-anchor-date-repair/lint.json",
-        "docs/evidence/gate-355952c-anchor-date-repair/lint.stderr.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/lint.stdout.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/smoke-feed.json",
-        "docs/evidence/gate-355952c-anchor-date-repair/smoke-feed.stderr.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/smoke-feed.stdout.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p0.json",
-        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p0.stderr.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p0.stdout.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p2c.json",
-        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p2c.stderr.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/smoke-p2c.stdout.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/source-proof.json",
-        "docs/evidence/gate-355952c-anchor-date-repair/summary.json",
-        "docs/evidence/gate-355952c-anchor-date-repair/targeted.json",
-        "docs/evidence/gate-355952c-anchor-date-repair/targeted.stderr.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/targeted.stdout.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/typecheck.json",
-        "docs/evidence/gate-355952c-anchor-date-repair/typecheck.stderr.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/typecheck.stdout.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/vitest.json",
-        "docs/evidence/gate-355952c-anchor-date-repair/vitest.stderr.log",
-        "docs/evidence/gate-355952c-anchor-date-repair/vitest.stdout.log",
-        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/archive-hashes.json",
-        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/before-fix-regression.json",
-        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/closeout.md",
-        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/inventory.txt",
-        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/redirect-material-inspection.json",
-        "docs/evidence/r2-anchor-date-review-repair-2026-10-15/report.md",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-adapter.json",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-first.json",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-repeat.json",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/VN-D01-result.json",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/archive-hashes.json",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/baseline-comparison.json",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/command.json",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/launch.json",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/partial-results.json",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/raw-replay-config.ts.txt",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/raw-replay-launch.cjs.txt",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/raw-replay-procedure.ts.txt",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/report.md",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/stderr.log",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/stdout.log",
-        "docs/evidence/r2-anchor-date-review-replay-2026-10-15/summary.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/XX-K01-result.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/XX-K02-result.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/archive-hashes.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/capture-config.ts.txt",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/capture-launcher.cjs.txt",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/capture-output-original.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/capture-procedure.test.ts.txt",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/clash-host-presence.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/clash-readonly-procedure.py.txt",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/closeout.md",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/command.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/dns-ledger.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/documentation-validation-driver.py.txt",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/execution-binding.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/initial-doc-validation.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/inventory-metadata.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/inventory.txt",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/launch.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/manifest.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/manifest.original.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/matrix-delta.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/metadata-correction-driver.py.txt",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/partial-results.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/report.md",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/request-ledger.json",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/stderr.log",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/stdout.log",
-        "docs/evidence/r2-carrier-news-two-2026-10-15/summary.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/XX-K01-result.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/XX-K02-response.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/XX-K02-result.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/applied-config-check.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/applied-config-readonly.py.txt",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/archive-hashes.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/capture-config.ts.txt",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/capture-integrity.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/capture-launcher.cjs.txt",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/capture-output-original.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/capture-procedure.test.ts.txt",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/closeout.md",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/command.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/dns-ledger.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/documentation-validation-driver.py.txt",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/inventory-metadata.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/inventory.txt",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/launch.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/manifest.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/matrix-delta.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/metadata-update-driver.py.txt",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/partial-results.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/report.md",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/request-ledger.json",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/stderr.log",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/stdout.log",
-        "docs/evidence/r2-carrier-reapplied-2026-10-15/summary.json",
-        "docs/evidence/r2-current-source-matrix-2026-10-14/archive-hashes.json",
         "docs/evidence/r2-current-source-matrix-2026-10-14/build-matrix.py.txt",
         "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
         "docs/evidence/r2-current-source-matrix-2026-10-14/commands.json",
@@ -291,7 +182,7 @@
       "detail": null
     },
     {
-      "check": "Carrier DNS block never promotes response or field evidence",
+      "check": "Historical carrier DNS-only records remain no-response no-parser",
       "pass": true,
       "detail": null
     },
@@ -346,7 +237,7 @@
       "detail": null
     },
     {
-      "check": "Both latest attempts replace DNS blockage without parsing or source configuration",
+      "check": "Historical public attempts preserve actual source results without claiming original list parse",
       "pass": true,
       "detail": null
     },
@@ -357,6 +248,71 @@
     },
     {
       "check": "Reapplied original stdout stderr byte digests retained",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "ONE target resolves only the actually saved308 relative Location without catalog replacement",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "ONE target exactly one new public DNS and one pinned transport, Maersk zero",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "ONE target200 byte encoding content type and absence of further Location recorded",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Capture and replay bind distinct accurate execution code states",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Full original HTML10 records collector repeat and read-only reopen passed",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "ONE identity and independent complete raw source fields do not invent aliases or timezone",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "ONE candidate remains offline disabled metadata only and catalogue proposal unapplied",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Initial lastSeenAt-only harness failure preserved separately from passing final proof",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Synthetic error cause recording and redaction proof makes no Maersk diagnosis or requests",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Exact clean code gate frozen real install and all nine commands raw exit0",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Gate reported test counts match actual original stdout summaries",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "check": "Clean gate exact original UTF8 stdout stderr hashes retained",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "check": "Only ONE source qualification changes to21/39 and13/34 with other40 untouched",
       "pass": true,
       "detail": null
     },

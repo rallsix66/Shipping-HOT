@@ -1,0 +1,23 @@
+{
+  "source": "synthetic_only_not_Maersk",
+  "injectedLookup": true,
+  "fakeTransportCalls": 1,
+  "sourceDnsCalls": 0,
+  "realTransportCalls": 0,
+  "MaerskRequests": 0,
+  "secureEntryError": {
+    "code": "fetch_failed",
+    "message": "synthetic connection reset; token=[redacted] https://synthetic.example.test/news Cookie=[redacted]",
+    "redacted": true,
+    "truncated": false
+  },
+  "transportError": {
+    "code": "ECONNRESET",
+    "message": "synthetic connection reset; token=[redacted] https://synthetic.example.test/news Cookie=[redacted]",
+    "redacted": true,
+    "truncated": false,
+    "stackSaved": false
+  },
+  "redactionAssertions": "PASS",
+  "role": "Offline error recording proof, not diagnosis of any real provider"
+}
