@@ -1,4 +1,7 @@
+// Adapted from AIHOT@44578fa packages/backend/src/content/extract.ts (MIT)
+import { Readability } from "@mozilla/readability"
 import { load } from "cheerio"
+import { parseHTML } from "linkedom"
 import {
   type ArticleBlock,
   type ArticleBlockType,
@@ -9,7 +12,9 @@ import {
   normalizeArticleBlockText,
 } from "@shared/article"
 
-export const ARTICLE_EXTRACTOR_VERSION = "article-extractor-v1"
+export const ARTICLE_EXTRACTOR_VERSION = "article-extractor-v2-readability"
+
+const MIN_READABLE_CHARACTERS = 200
 
 export interface ExtractedArticle {
   blocks: ArticleBlock[]
@@ -160,6 +165,7 @@ function completenessOf(blocks: readonly ArticleBlock[], policy: ArticleSourcePo
  */
 export function extractArticle(html: string, sourceUrl: string, policy: ArticleSourcePolicy): ExtractedArticle {
   const $ = load(html)
+  const htmlLang = $("html").attr("lang")?.trim()
   for (const selector of NON_CONTENT_SELECTORS) $(selector).remove()
   for (const selector of policy.selectors?.remove ?? []) {
     try {
@@ -169,27 +175,47 @@ export function extractArticle(html: string, sourceUrl: string, policy: ArticleS
     }
   }
   const containerSelector = policy.selectors?.container
-  const context: WalkContext = { blocks: [], order: 0, sourceUrl, $ }
-  let root = containerSelector ? $(containerSelector).first() : $("article").first()
-  if (containerSelector && !root.length) {
-    // A configured container that no longer matches is a structure failure; do
-    // not fall back to the whole page and never mark it complete.
+  let content = $
+  let root = $("body")
+  let readableTitle: string | undefined
+  if (containerSelector) {
+    try {
+      root = $(containerSelector).first()
+    } catch {
+      return { blocks: [], status: "source_unavailable" }
+    }
+    // Explicit source structure remains authoritative: no Readability/body
+    // fallback when it changes or disappears.
+    if (!root.length) return { blocks: [], status: "source_unavailable" }
+  } else {
+    try {
+      // Adapt the upstream inert parseHTML -> base -> Readability flow. No
+      // scripts/resources are executed or loaded; fetching remains exclusively
+      // in the existing secure transport. Ignore any page-supplied base URL.
+      $("base").remove()
+      const { document } = parseHTML($.html())
+      const base = document.createElement("base")
+      base.setAttribute("href", sourceUrl)
+      document.head.appendChild(base)
+      const article = new Readability(document as unknown as ConstructorParameters<typeof Readability>[0], {
+        charThreshold: MIN_READABLE_CHARACTERS,
+        keepClasses: false,
+      }).parse()
+      if (!article?.content) return { blocks: [], status: "source_unavailable" }
+      content = load(article.content)
+      root = content("body")
+      readableTitle = article.title || undefined
+    } catch {
+      return { blocks: [], status: "source_unavailable" }
+    }
+  }
+  const context: WalkContext = { blocks: [], order: 0, sourceUrl, $: content }
+  walk(context, root.get(0))
+  if (context.blocks.length === 0 || (!containerSelector && context.blocks.reduce((sum, block) => sum + block.text.length, 0) < MIN_READABLE_CHARACTERS)) {
     return { blocks: [], status: "source_unavailable" }
   }
-  if (!containerSelector) {
-    if (!root.length) root = $("main").first()
-    if (!root.length) root = $("body")
-  }
-  walk(context, root.get(0))
-  if (containerSelector) {
-    if (context.blocks.length === 0) return { blocks: [], status: "source_unavailable" }
-  } else if (context.blocks.length === 0) {
-    context.order = 0
-    walk(context, $("body").get(0))
-  }
   const titleSelector = policy.selectors?.title
-  const titleText = titleSelector ? $(titleSelector).first().text() : root.find("h1").first().text() || $("title").text()
+  const titleText = titleSelector ? $(titleSelector).first().text() : readableTitle || root.find("h1").first().text() || $("title").text()
   const title = titleText ? normalizeArticleBlockText(titleText) : undefined
-  const htmlLang = $("html").attr("lang")?.trim()
   return { blocks: context.blocks, status: completenessOf(context.blocks, policy), title, language: htmlLang || undefined }
 }
