@@ -1,0 +1,32 @@
+{
+  "codeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
+  "executionBase": "0780da4e7d36bdffbf0114e7079d0511679fb69f",
+  "priorAcceptedCodeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
+  "gate": {
+    "path": "docs/evidence/gate-954c831-material-read/summary.json",
+    "sha256": "ac14624a122e8466ddbb3b1a56bf7bf97be01c3f27276b987ded7d18b94f8726",
+    "hashBasis": "committed_text_LF"
+  },
+  "targetedFiles": 11,
+  "targetedTests": 134,
+  "fullTestsPassed": 1338,
+  "fullTestsSkipped": 3,
+  "newOfflineTests": 24,
+  "sourceDnsCalls": 0,
+  "sourceGetRequests": 0,
+  "newRealRecords": 0,
+  "llmCalls": 0,
+  "paidCalls": 0,
+  "newDependencies": 0,
+  "offlineFrozenInstallWithScripts": true,
+  "migrationsChanged": false,
+  "sourceQualificationUnchanged": [
+    "25/39",
+    "24/34"
+  ],
+  "numericHistorical": "3/5",
+  "retainedHashesUnchanged": true,
+  "independentReview": "PENDING_PARENT",
+  "guiS7": "NOT_RUN_no_UI_or_route_behavior_change; prior pending preserved",
+  "production24h": "NOT_RUN"
+}

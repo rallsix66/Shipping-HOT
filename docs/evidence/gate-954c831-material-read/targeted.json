@@ -1,0 +1,9 @@
+{
+  "name": "targeted",
+  "command": "pnpm exec vitest run -c vitest.config.ts server/intel/material-read.test.ts server/api/shipping/intel/read-http.test.ts server/api/shipping/intel/manual-http.test.ts server/intel/manual.test.ts server/intel/collect.test.ts server/intel/chain.test.ts server/services/article-service.test.ts server/database/article.test.ts server/runtime/intel-production.test.ts server/intel/web-list-collect.test.ts server/intel/json-list-collect.test.ts",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\material-read-build-20261015",
+  "sha": "954c831f27eff4fd4382a0ea68be3894de053759",
+  "startedAt": "2026-10-15T10:01:09.952Z",
+  "finishedAt": "2026-10-15T10:01:13.882Z",
+  "rawExit": 0
+}

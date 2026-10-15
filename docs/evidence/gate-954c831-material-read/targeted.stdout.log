@@ -1,0 +1,21 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/material-read-build-20261015
+
+ ✓ server/database/article.test.ts (8 tests) 497ms
+ ✓ server/api/shipping/intel/manual-http.test.ts (3 tests) 278ms
+ ✓ server/intel/web-list-collect.test.ts (7 tests) 627ms
+ ✓ server/intel/json-list-collect.test.ts (9 tests) 767ms
+ ✓ server/api/shipping/intel/read-http.test.ts (19 tests) 1142ms
+ ✓ server/runtime/intel-production.test.ts (4 tests) 547ms
+ ✓ server/intel/chain.test.ts (1 test) 576ms
+   ✓ joins existing Runtime, archived safe-byte fetch, SQLite, restart, HTTP and real page SSR offline  575ms
+ ✓ server/intel/collect.test.ts (22 tests) 1105ms
+ ✓ server/intel/material-read.test.ts (24 tests) 1141ms
+ ✓ server/intel/manual.test.ts (26 tests) 1273ms
+ ✓ server/services/article-service.test.ts (11 tests) 1544ms
+
+ Test Files  11 passed (11)
+      Tests  134 passed (134)
+   Start at  18:01:10
+   Duration  3.06s (transform 4.29s, setup 0ms, import 10.48s, tests 9.50s, environment 1ms)
+

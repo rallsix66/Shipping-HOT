@@ -1,0 +1,52 @@
+{
+  "rawExit": 0,
+  "at": "2026-10-15T10:07:01.082Z",
+  "testedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
+  "checks": [
+    {
+      "name": "bounded five-file code scope, no new storage/schema/dependency/HTTP endpoint",
+      "pass": true
+    },
+    {
+      "name": "exact-SHA normal fresh clone/offline install scripts and nine successful gates",
+      "pass": true
+    },
+    {
+      "name": "fixed local upstream responsibility audit, no duplicate writer or new body bridge",
+      "pass": true
+    },
+    {
+      "name": "license/read boundary evidence and prior Readability review recorded without source inflation",
+      "pass": true
+    },
+    {
+      "name": "all recursive current matrix file hashes resolve",
+      "pass": true
+    },
+    {
+      "name": "affected links/data hygiene and exact original/LF log hashes",
+      "pass": true
+    },
+    {
+      "name": "retained root files unchanged since previous delivery, artifacts kept ignored, runtime unactivated",
+      "pass": true
+    }
+  ],
+  "recursiveMatrixHashReferences": 364,
+  "affectedLocalMarkdownLinks": 166,
+  "sourceRequests": 0,
+  "newRealRecords": 0,
+  "fullGateCommands": 9,
+  "targetedTests": 134,
+  "fullTestsPassed": 1338,
+  "fullTestsSkipped": 3,
+  "approvedCoverage": [
+    "25/39",
+    "24/34"
+  ],
+  "numericHistorical": "3/5",
+  "independentReview": "PENDING_PARENT",
+  "neatFreak": "six_fact_surfaces_performed_no_cleanup",
+  "guiS7": "NOT_RUN_prior_pending",
+  "production24h": "NOT_RUN"
+}

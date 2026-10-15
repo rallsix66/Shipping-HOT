@@ -1,7 +1,7 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-15T08:59:58.093Z",
-  "reviewedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "reviewedCodeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
   "evidenceHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
@@ -7021,17 +7021,12 @@
   },
   "previousReviewedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
   "codeVerification": {
-    "testedCodeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
-    "priorParentAcceptedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+    "testedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
+    "priorParentAcceptedCodeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
     "state": "LOCAL_GATE_PASSED_PENDING_PARENT_REVIEW",
     "gate": {
-      "path": "docs/evidence/gate-c7ba3c6-readability/summary.json",
-      "sha256": "e9346a7d7fa8b66996e74d0c780b5d3a98f480aba215824aaea8964e7dc823e2",
-      "hashBasis": "committed_text_LF"
-    },
-    "priorFailedGate": {
-      "path": "docs/evidence/gate-0a511c0-readability/summary.json",
-      "sha256": "a864cf15c72d9c5d7d14d1af8a62776247befedaa331ac34a460a46e6c8f93c6",
+      "path": "docs/evidence/gate-954c831-material-read/summary.json",
+      "sha256": "ac14624a122e8466ddbb3b1a56bf7bf97be01c3f27276b987ded7d18b94f8726",
       "hashBasis": "committed_text_LF"
     },
     "independentReview": "PENDING_PARENT",
@@ -7076,7 +7071,7 @@
     "sourceGetAttemptsThisRound": 0,
     "productionEnabled": false
   },
-  "testedCodeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
+  "testedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
   "lastSITCQualificationAcceptance": {
     "evidence": {
       "path": "docs/evidence/r2-id-t02-location-2026-10-15/report.md",
@@ -7114,19 +7109,28 @@
     "qualificationChanged": false
   },
   "previousCodeVerification": {
-    "testedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
-    "priorParentAcceptedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+    "testedCodeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
+    "priorParentAcceptedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
     "state": "ACCEPTED_LIMITED_PARENT_CODE_AND_PROCESS_REVIEW",
     "gate": {
-      "path": "docs/evidence/gate-8d0993e-id-mof-card/summary.json",
-      "sha256": "ddd1eb55f8c25639ebad57e2d92437bbb38d0171d58135f596e342c5dba5d902",
+      "path": "docs/evidence/gate-c7ba3c6-readability/summary.json",
+      "sha256": "e9346a7d7fa8b66996e74d0c780b5d3a98f480aba215824aaea8964e7dc823e2",
+      "hashBasis": "committed_text_LF"
+    },
+    "priorFailedGate": {
+      "path": "docs/evidence/gate-0a511c0-readability/summary.json",
+      "sha256": "a864cf15c72d9c5d7d14d1af8a62776247befedaa331ac34a460a46e6c8f93c6",
       "hashBasis": "committed_text_LF"
     },
     "independentReview": "accepted_no_new_P2",
-    "parentIndependentlyReplayedPrivateOriginal": false,
-    "reviewDate": "2026-10-15",
     "ciPassedClaimed": false,
-    "continuous24hVerified": false
+    "continuous24hVerified": false,
+    "reviewDate": "2026-10-15",
+    "acceptance": {
+      "path": "docs/evidence/r2-material-read-2026-10-15/readability-acceptance.json",
+      "sha256": "968170185da0559b2ef22bef8b4a758dcd59936f08419d8c868fec9cb52822cc",
+      "hashBasis": "committed_text_LF"
+    }
   },
   "lastIDT02CardRepair": {
     "report": {
@@ -7255,6 +7259,33 @@
     },
     "businessSourceRequests": 0,
     "llmCalls": 0,
+    "qualificationUnchanged": true,
+    "productionEnabled": false,
+    "independentReview": "ACCEPTED_LIMITED_no_new_P2",
+    "acceptance": {
+      "path": "docs/evidence/r2-material-read-2026-10-15/readability-acceptance.json",
+      "sha256": "968170185da0559b2ef22bef8b4a758dcd59936f08419d8c868fec9cb52822cc",
+      "hashBasis": "committed_text_LF"
+    }
+  },
+  "lastMaterialReadOfflineSlice": {
+    "codeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
+    "audit": {
+      "path": "docs/evidence/r2-material-read-2026-10-15/audit.md",
+      "sha256": "9675943db8041c371227824cb97a82533a0cb60a16eaf21d95569fc8ec53e0fc",
+      "hashBasis": "committed_text_LF"
+    },
+    "report": {
+      "path": "docs/evidence/r2-material-read-2026-10-15/report.md",
+      "sha256": "8c6ef80b84865801ddfcd1565c349fa28aa829b67d3b41dc633471d9bdb5c148",
+      "hashBasis": "committed_text_LF"
+    },
+    "result": {
+      "path": "docs/evidence/r2-material-read-2026-10-15/result.json",
+      "sha256": "c1be19c2bdcb01747e33d5dbafad9108361c3e09f533e0bba8c006cace9fe637",
+      "hashBasis": "committed_text_LF"
+    },
+    "sourceRequests": 0,
     "qualificationUnchanged": true,
     "productionEnabled": false
   }

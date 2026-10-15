@@ -1,54 +1,52 @@
 {
   "rawExit": 0,
-  "at": "2026-10-15T09:40:27.522Z",
-  "testedCodeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
+  "at": "2026-10-15T10:07:01.082Z",
+  "testedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
   "checks": [
     {
-      "name": "exact code and approved five-file implementation scope; evidence changes isolated",
+      "name": "bounded five-file code scope, no new storage/schema/dependency/HTTP endpoint",
       "pass": true
     },
     {
-      "name": "only approved exact direct dependencies, registry and MIT reuse provenance",
+      "name": "exact-SHA normal fresh clone/offline install scripts and nine successful gates",
       "pass": true
     },
     {
-      "name": "new clone full nine-command gate exact SHA and preserved first failure",
+      "name": "fixed local upstream responsibility audit, no duplicate writer or new body bridge",
       "pass": true
     },
     {
-      "name": "gate log bytes and committed LF representations both auditable",
+      "name": "license/read boundary evidence and prior Readability review recorded without source inflation",
       "pass": true
     },
     {
-      "name": "source qualification unchanged from explicit Westports approval; all41 entries retained",
+      "name": "all recursive current matrix file hashes resolve",
       "pass": true
     },
     {
-      "name": "recursive current matrix evidence hashes resolve",
+      "name": "affected links/data hygiene and exact original/LF log hashes",
       "pass": true
     },
     {
-      "name": "all affected local Markdown links exist, no secrets/raw source/SQLite shipped",
-      "pass": true
-    },
-    {
-      "name": "retained hashes same as accepted earlier baseline; ignored evidence and no enabled production",
+      "name": "retained root files unchanged since previous delivery, artifacts kept ignored, runtime unactivated",
       "pass": true
     }
   ],
-  "recursiveMatrixHashReferences": 359,
-  "affectedLocalMarkdownLinks": 156,
+  "recursiveMatrixHashReferences": 364,
+  "affectedLocalMarkdownLinks": 166,
   "sourceRequests": 0,
+  "newRealRecords": 0,
   "fullGateCommands": 9,
-  "targetedTests": 124,
-  "fullTestsPassed": 1314,
+  "targetedTests": 134,
+  "fullTestsPassed": 1338,
   "fullTestsSkipped": 3,
   "approvedCoverage": [
     "25/39",
     "24/34"
   ],
+  "numericHistorical": "3/5",
   "independentReview": "PENDING_PARENT",
-  "neatFreak": "performed_six_fact_surfaces; no_cleanup",
+  "neatFreak": "six_fact_surfaces_performed_no_cleanup",
   "guiS7": "NOT_RUN_prior_pending",
   "production24h": "NOT_RUN"
 }
