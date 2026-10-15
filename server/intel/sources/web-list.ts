@@ -54,6 +54,15 @@ export function parseLooseDate(value: string | null | undefined, config: Pick<We
     d = +published[3]
     tail = ""
     result.rule = "configured_sitc_publication_day"
+  } else if (config.dateFormat === "indonesian_month_abbr") {
+    const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
+    const cardDay = /^(\d{2}) (Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des) (\d{4})$/.exec(raw)
+    if (!cardDay || result.calendar !== "gregorian") return { ...result, rule: "unsupported_format" }
+    y = +cardDay[3]
+    mo = months.indexOf(cardDay[2]) + 1
+    d = +cardDay[1]
+    tail = ""
+    result.rule = "configured_indonesian_month_abbr"
   } else if (config.dateFormat === "indonesian_enactment_date") {
     const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
     // This index also renders the explicit English "October" token; no locale fallback.
@@ -109,7 +118,7 @@ export function parseLooseDate(value: string | null | undefined, config: Pick<We
   const check = new Date(Date.UTC(y, mo - 1, d))
   if (y < 1900 || y > 2399 || check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d) return { ...result, rule: "invalid_calendar_date" }
   const date = `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`
-  if (config.dateFormat === "sitc_publication_day") return { ...result, precision: "day", localDate: date, timezone: "missing", utcOffset: null, publishedAt: null }
+  if (config.dateFormat === "sitc_publication_day" || config.dateFormat === "indonesian_month_abbr") return { ...result, precision: "day", localDate: date, timezone: "missing", utcOffset: null, publishedAt: null }
   if (!tail.trim()) return { ...result, precision: "day", localDate: date, utcOffset: config.publishedAtUtcOffset ?? null, timezone: config.publishedAtUtcOffset ? "configured" : "missing" }
   const t = /^(?:T|\s+)(\d{1,2}):(\d{2})(?::(\d{2})(\.\d{1,3})?)?\s*(Z|UTC|GMT|[+-]\d{2}:?\d{2})?$/.exec(tail)
   if (!t || +t[1] > 23 || +t[2] > 59 || +(t[3] ?? 0) > 59) return { ...result, rule: "invalid_time" }

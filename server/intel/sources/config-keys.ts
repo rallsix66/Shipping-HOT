@@ -12,7 +12,7 @@ export interface WebListConfig {
   publishedAtUtcOffset?: string
   dateOrder?: "dmy"
   calendar?: "gregorian" | "buddhist"
-  dateFormat?: "thai_month_name" | "english_month_name" | "indonesian_enactment_date" | "sitc_publication_day"
+  dateFormat?: "thai_month_name" | "english_month_name" | "indonesian_enactment_date" | "indonesian_month_abbr" | "sitc_publication_day"
   /** Fixed SITC metadata identity exception; never grants permission to fetch HTTP bodies. */
   metadataLinkRule?: "sitc_show"
   /** Date and title share the observed anchor text; no prose/date searching. */
@@ -41,7 +41,7 @@ const KEYS = new Set([
   "allowUrlPrefixes",
   "denyUrlPrefixes",
 ])
-const VALUES: Record<string, string[]> = { titleAttribute: ["title", "alt"], dateOrder: ["dmy"], calendar: ["gregorian", "buddhist"], dateFormat: ["thai_month_name", "english_month_name", "indonesian_enactment_date", "sitc_publication_day"], metadataLinkRule: ["sitc_show"], linkTextFormat: ["dmy-date-title", "title-dmy-date"] }
+const VALUES: Record<string, string[]> = { titleAttribute: ["title", "alt"], dateOrder: ["dmy"], calendar: ["gregorian", "buddhist"], dateFormat: ["thai_month_name", "english_month_name", "indonesian_enactment_date", "indonesian_month_abbr", "sitc_publication_day"], metadataLinkRule: ["sitc_show"], linkTextFormat: ["dmy-date-title", "title-dmy-date"] }
 const SELECTORS = ["listSelector", "itemSelector", "linkSelector", "titleSelector", "publishedAtSelector", "emptySelector"]
 
 export class UnsupportedConfig extends Error {}
@@ -77,6 +77,7 @@ export function assertSupportedConfig(input: unknown): asserts input is WebListC
   if (config.dateFormat === "english_month_name" && config.calendar === "buddhist") throw new UnsupportedConfig("english_month_name requires Gregorian calendar")
   if (config.dateFormat === "indonesian_enactment_date" && config.calendar === "buddhist") throw new UnsupportedConfig("indonesian_enactment_date requires Gregorian calendar")
   if (config.dateFormat === "sitc_publication_day" && (config.calendar === "buddhist" || config.publishedAtUtcOffset !== undefined)) throw new UnsupportedConfig("sitc_publication_day requires Gregorian day without offset")
+  if (config.dateFormat === "indonesian_month_abbr" && (config.calendar === "buddhist" || config.publishedAtUtcOffset !== undefined)) throw new UnsupportedConfig("indonesian_month_abbr requires Gregorian day without offset")
   if (config.metadataLinkRule === "sitc_show" && (config.allowUrlPrefixes !== undefined || config.denyUrlPrefixes !== undefined)) throw new UnsupportedConfig("sitc_show uses its fixed metadata host/path rule, not prefix overrides")
   if (config.linkTextFormat && (config.dateOrder !== "dmy" || config.dateFormat || config.titleSelector || config.publishedAtSelector)) throw new UnsupportedConfig("linkTextFormat requires dmy and exclusive link text mapping")
   if (config.linkTextFormat === "dmy-date-title" && config.titleAttribute) throw new UnsupportedConfig("dmy-date-title cannot use a separate title attribute")

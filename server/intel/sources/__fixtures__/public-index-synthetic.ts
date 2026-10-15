@@ -32,3 +32,11 @@ export const SITC_SYNTHETIC = `<nav><a href="http://www.sitc.com/en/show.asp?id=
 <h4 class="title media-heading"><a href="http://www.sitc.com/en/show.asp?id=0002">Synthetic SITC leap notice</a></h4>
 <ul class="meta"><li><span>发布日期:</span> 2000.02.29</li></ul>
 </div></div></div></div>`
+
+const jdihCard = (id: string, title: string, date: string) => `<a class="w-100" href="/dok/${id}"><div class="jdih-recent recent-doc-2"><div><span class="title">Synthetic identifier ${id}</span><span class="card-tag"><svg><path></path></svg>${date}</span></div><p>${title}</p></div></a>`
+const jdihLatest = jdihCard("synthetic-one", "Synthetic complete regulation one", "08 Okt 2026") + jdihCard("synthetic-two", "Synthetic complete leap regulation", "29 Feb 2000")
+const jdihPopular = jdihCard("synthetic-two", "Synthetic complete leap regulation", "29 Feb 2000") + jdihCard("synthetic-old", "Synthetic historical regulation", "20 Mei 2025")
+export const JDIH_MOF_SYNTHETIC = `<nav><a href="/search">Navigation</a><a href="/rss.xml">Unrequested feed</a></nav>
+<div hidden id="S:1">${jdihLatest}</div><div hidden id="S:2">${jdihPopular}</div>
+<div hidden id="S:4">${jdihLatest}</div><div hidden id="S:5">${jdihPopular}</div>
+<script>throw new Error("Synthetic script must never execute")</script>`
