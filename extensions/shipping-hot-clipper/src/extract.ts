@@ -38,7 +38,22 @@ export function plainSelection(html: string): string {
   const template = document.createElement("template")
   template.innerHTML = html
   template.content.querySelectorAll("script,style,form,input,textarea,iframe,object,svg").forEach(n => n.remove())
-  return Array.from(template.content.childNodes).map(node => node.textContent ?? "").join("").trim()
+  const blocks = new Set("P DIV MAIN ARTICLE SECTION H1 H2 H3 H4 H5 H6 BLOCKQUOTE PRE CAPTION UL OL TABLE".split(" "))
+  function read(node: Node): string {
+    if (node.nodeType === 3) return (node.textContent ?? "").replace(/[ \t\r\n\f]+/g, " ")
+    if (node.nodeType !== 1 && node.nodeType !== 11) return ""
+    const tag = node.nodeType === 1 ? (node as Element).tagName.toUpperCase() : ""
+    if (tag === "BR") return "\n"
+    if (tag === "TR") {
+      const cells = Array.from((node as Element).children).filter(cell => ["TD", "TH"].includes(cell.tagName.toUpperCase()))
+      return `${cells.map(cell => Array.from(cell.childNodes).map(read).join("").trim()).join("\t")}\n`
+    }
+    const text = Array.from(node.childNodes).map(read).join("")
+    if (tag === "LI") return `${text.trim()}\n`
+    return blocks.has(tag) ? `\n\n${text}\n\n` : text
+  }
+  const text = read(template.content).replace(/ *\n */g, "\n").replace(/\n{3,}/g, "\n\n").replace(/^[ \n]+|[ \n]+$/g, "")
+  return text.trim() ? text : ""
 }
 export function extractDocument(doc: Document, mode: ClipMode, selection: string, now: string): ClipDraft {
   const actualUrl = clipActualUrl(doc.URL)

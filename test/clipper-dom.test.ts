@@ -1,9 +1,10 @@
 import { readFileSync } from "node:fs"
 import { parseHTML } from "linkedom"
 import { afterEach, beforeEach, expect, it, vi } from "vitest"
-import { extractDocument, inertSnapshot } from "../extensions/shipping-hot-clipper/src/extract"
+import { extractDocument, inertSnapshot, plainSelection } from "../extensions/shipping-hot-clipper/src/extract"
 import { serializeChildren } from "../extensions/shipping-hot-clipper/src/dom-utils"
 import { selectedHTML } from "../extensions/shipping-hot-clipper/src/selection"
+import { clipSavePayload } from "../shared/clipper-bridge"
 
 let page: ReturnType<typeof parseHTML>
 let attempts = 0
@@ -63,4 +64,36 @@ it("never permits async parsing, interpreter or remote-resource helpers in adapt
   const source = readFileSync("extensions/shipping-hot-clipper/src/clip-utils.ts", "utf8")
   expect(source).toContain("useAsync: false")
   expect(source).not.toMatch(/\.parseAsync\(|defuddle\/full|defuddle\/node/)
+})
+
+const boundaryCases = [
+  { name: "paragraphs", html: "<p>关闭10:00</p><p>恢复18:00</p>", expected: "关闭10:00\n\n恢复18:00" },
+  { name: "line breaks", html: "<p>关闭10:00<br>恢复18:00<br><br>次日复核</p>", expected: "关闭10:00\n恢复18:00\n\n次日复核" },
+  { name: "list items", html: "<ul><li>关闭10:00</li><li>恢复18:00</li></ul>", expected: "关闭10:00\n恢复18:00" },
+  { name: "table cells and rows", html: "<table><tbody><tr><th>作业</th><th>时间</th></tr><tr><td>关闭</td><td>10:00</td></tr><tr><td>恢复</td><td>18:00</td></tr></tbody></table>", expected: "作业\t时间\n关闭\t10:00\n恢复\t18:00" },
+]
+it.each(boundaryCases)("preserves exact $name separators and strips dangerous nodes", ({ html, expected }) => {
+  expect(plainSelection(`${html}<script>unsafe script</script><style>unsafe style</style><iframe src=\"https://example.org/unsafe\">unsafe frame</iframe><form>private field</form>`)).toBe(expected)
+})
+it.each(boundaryCases.flatMap(fixture => (["selection", "article"] as const).map(mode => ({ ...fixture, mode }))))("preserves $name from $mode preview through save payload to stored material", async ({ mode, html, expected, name }) => {
+  // Runtime-load real server modules without mixing their Node-only TS project
+  // into this browser-DOM test's TypeScript project. Production types stay checked.
+  const { open } = await vi.importActual<{ open: (path: string) => { database: unknown, repository: unknown, native: { close: () => void } } }>("#/intel/__fixtures__/isolated-db")
+  const { initShippingTables } = await vi.importActual<{ initShippingTables: (db: unknown, mode: string) => Promise<void> }>("#/database/shipping")
+  const { manualSubmit } = await vi.importActual<{ manualSubmit: (repo: unknown, input: unknown, now: string) => Promise<{ itemId: string, versionId: string }> }>("#/intel/manual")
+  const { readIntelMaterial } = await vi.importActual<{ readIntelMaterial: (repo: unknown, item: string, version: string) => Promise<{ ok: boolean, material?: { bodyText: string | null } }> }>("#/intel/material-read")
+  const db = open(":memory:")
+  try {
+    await initShippingTables(db.database, "real")
+    page.document.body.innerHTML = `<main><article>${html}</article></main>`
+    const preview = extractDocument(page.document, mode, html, "2026-10-16T02:00:00.000Z")
+    expect(preview.body).toBe(expected)
+    const payload = clipSavePayload({ draft: preview, rights: { basis: "own_work", scope: "full_text", evidence: "Synthetic boundary acceptance fixture", applicableUrl: preview.actualUrl }, operator: "Synthetic author", requestId: `boundary-${mode}-${name.replace(/ /g, "-")}` })
+    expect(payload.clip.body).toBe(expected)
+    const saved = await manualSubmit(db.repository, payload, "2026-10-16T02:01:00.000Z")
+    const read = await readIntelMaterial(db.repository, saved.itemId!, saved.versionId!)
+    expect(read.ok && read.material?.bodyText).toBe(expected)
+  } finally {
+    db.native.close()
+  }
 })
