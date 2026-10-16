@@ -1,4 +1,4 @@
-import { CLIP_PROTOCOL, MANUAL_CLIP_SOURCE_ID, clipText, exactKeys, parseClipDraft, parseClipRights } from "./manual-clip"
+import { CLIP_PROTOCOL, MANUAL_CLIP_SOURCE_ID, clipOperator, clipText, exactKeys, parseClipDraft, parseClipRights } from "./manual-clip"
 import type { ClipDraft, ClipRights } from "./manual-clip"
 
 export const CLIP_ORIGIN = "http://127.0.0.1:5173"
@@ -7,7 +7,7 @@ export const CLIP_TTL_MS = 120000
 export interface ClipTransfer {
   draft: ClipDraft
   rights: ClipRights
-  operator: string
+  operator?: string
   requestId: string
 }
 export interface ClipSender {
@@ -40,7 +40,7 @@ export function parseClipTransfer(input: unknown): ClipTransfer {
   if ((rights.scope === "metadata_only" && draft.body) || (rights.scope === "excerpt" && draft.body.length > 280)) throw new Error("clip_body_exceeds_rights")
   const requestId = clipText(row.requestId, 80)
   if (!/^[\w-]{8,80}$/.test(requestId)) throw new Error("invalid_clip_input")
-  return { draft, rights, operator: clipText(row.operator, 80), requestId }
+  return { draft, rights, operator: clipOperator(row.operator), requestId }
 }
 export function clipSavePayload(transfer: ClipTransfer) {
   const row = parseClipTransfer(transfer)

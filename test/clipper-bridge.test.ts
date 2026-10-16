@@ -1,7 +1,7 @@
 import { beforeEach, expect, it } from "vitest"
 import { CLIP_EXTENSION_ID, CLIP_ORIGIN, CLIP_TTL_MS, ClipBroker, clipSavePayload } from "../shared/clipper-bridge"
 import type { ClipSender, ClipSession, ClipTransfer } from "../shared/clipper-bridge"
-import { CLIP_PROTOCOL, MANUAL_CLIP_SOURCE_ID } from "../shared/manual-clip"
+import { CLIP_PROTOCOL, CLIP_UNIDENTIFIED_OPERATOR, MANUAL_CLIP_SOURCE_ID } from "../shared/manual-clip"
 import { receiveClip } from "../src/utils/clip-import"
 
 const nonce = "a".repeat(64)
@@ -21,6 +21,12 @@ beforeEach(() => {
   } }, () => clock)
 })
 const msg = (type = "claim") => ({ protocol: CLIP_PROTOCOL, nonce, type })
+it.each([undefined, "", " \t\n"])("normalizes an omitted/blank clipping operator without requiring a name: %j", async (operator) => {
+  row!.transfer.operator = operator
+  const response = await receiveClip(nonce, { sendMessage: async (_id, value) => broker.claim(value, sender) })
+  expect(response.operator).toBe(CLIP_UNIDENTIFIED_OPERATOR)
+  expect(clipSavePayload(response)).toMatchObject({ operator: CLIP_UNIDENTIFIED_OPERATOR, requestId: transfer.requestId })
+})
 it("pulls into application preview without saving, then constructs only the manual source payload", async () => {
   const response = await receiveClip(nonce, { sendMessage: async (id, value) => {
     expect(id).toBe(CLIP_EXTENSION_ID)

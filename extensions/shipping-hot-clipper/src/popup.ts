@@ -44,11 +44,11 @@ document.getElementById("send")!.addEventListener("click", () => {
   if (!draft || busy) return
   busy = true
   void (async () => {
-    const transfer = parseClipTransfer({ draft: { ...draft, title: field("title").value, body: field("body").value, date: { ...draft!.date, raw: field("date").value, role: field("role").value as DateRole } }, rights: { basis: field("basis").value, scope: field("scope").value, evidence: field("evidence").value, applicableUrl: draft!.actualUrl }, operator: field("operator").value, requestId: crypto.randomUUID() })
+    const transfer = parseClipTransfer({ draft: { ...draft, title: field("title").value, body: field("body").value, date: { ...draft!.date, raw: field("date").value, role: field("role").value as DateRole } }, rights: { basis: field("basis").value, scope: field("scope").value, evidence: field("evidence").value, applicableUrl: draft!.actualUrl }, requestId: crypto.randomUUID() })
     const result = await chrome.runtime.sendMessage(transfer) as { ok?: boolean }
     if (!result?.ok) throw new Error("发送未确认")
     message("已送入系统预览；请在系统中核对并点击保存。草稿两分钟过期，仅可领取一次。")
-  })().catch(() => message("不能发送：请填写录入人；正文需明确权利依据与范围，摘录最多280字符。未知权利请明确移除正文。也请检查系统入口和扩展ID。")).finally(() => {
+  })().catch(() => message("不能发送：正文需明确权利依据与范围，摘录最多280字符。未知权利请明确移除正文。也请检查系统入口和扩展ID。")).finally(() => {
     busy = false
   })
 })

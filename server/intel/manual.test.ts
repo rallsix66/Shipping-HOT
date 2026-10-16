@@ -154,6 +154,7 @@ describe("r2-7 manual entry offline SQLite", () => {
     { title: "<img src=x onerror=alert(1)>" },
     { body: "<script>alert(1)</script>" },
     { operator: "" },
+    { operator: undefined },
     { publishedAt: "2026-02-30T00:00:00Z" },
     { publishedAt: "2026-10-14" },
     { body: "x".repeat(100001) },

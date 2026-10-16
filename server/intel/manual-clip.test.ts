@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync } from "node:fs"
 import { join } from "node:path"
 import { afterEach, beforeEach, expect, it, vi } from "vitest"
 import { createApp, createRouter, toNodeListener } from "h3"
-import { CLIP_PROTOCOL, MANUAL_CLIP_SOURCE_ID } from "@shared/manual-clip"
+import { CLIP_PROTOCOL, CLIP_UNIDENTIFIED_OPERATOR, MANUAL_CLIP_SOURCE_ID } from "@shared/manual-clip"
 import { open } from "#/intel/__fixtures__/isolated-db"
 import { initShippingTables } from "#/database/shipping"
 import { manualSubmit } from "#/intel/manual"
@@ -30,6 +30,46 @@ beforeEach(async () => {
 afterEach(() => {
   state.native.close()
   vi.unstubAllGlobals()
+})
+it.each([undefined, "", " \t\n"])("saves without a supplied clipping operator and records unverified server-time audit: %j", async (operator) => {
+  const data = { ...input(), operator }
+  const saved = await manualSubmit(state.repository, data, now)
+  const action = await state.repository.getManualVersionAction(MANUAL_CLIP_SOURCE_ID, saved.itemId!, saved.versionId!)
+  expect(action).toMatchObject({ operator: CLIP_UNIDENTIFIED_OPERATOR, entered_at: now })
+  expect(JSON.parse(String(action?.metadata_json))).toMatchObject({ declaredBy: CLIP_UNIDENTIFIED_OPERATOR, declaredAt: now, verification: "user_declaration_unverified", actualUrl: url })
+  expect(await manualSubmit(state.repository, data, now)).toMatchObject(saved)
+  const read = await readIntelMaterial(state.repository, saved.itemId!, saved.versionId!)
+  expect(read.ok && read.material.bodyText).toBe(draft.body)
+})
+it("keeps old supplied names and licensed historical versions after a name-free revision", async () => {
+  const old = await manualSubmit(state.repository, input(), now)
+  const before = await state.repository.getManualVersionAction(MANUAL_CLIP_SOURCE_ID, old.itemId!, old.versionId!)
+  const next = input()
+  const { operator: _operator, ...withoutName } = next
+  withoutName.requestId = "clip-no-name-0002"
+  withoutName.clip.body = "Synthetic name-free revision"
+  const revised = await manualSubmit(state.repository, withoutName, now)
+  expect(revised).toMatchObject({ outcome: "revised", itemId: old.itemId })
+  expect(await state.repository.getManualVersionAction(MANUAL_CLIP_SOURCE_ID, old.itemId!, old.versionId!)).toEqual(before)
+  expect(before?.operator).toBe("Synthetic owner")
+  const oldRead = await readIntelMaterial(state.repository, old.itemId!, old.versionId!)
+  expect(oldRead.ok && oldRead.material.bodyText).toBe(draft.body)
+})
+it.each([null, 123, {}, "<script>x</script>", "x".repeat(81)])("still rejects malformed supplied legacy operator: %j", async (operator) => {
+  await expect(manualSubmit(state.repository, { ...input(), operator }, now)).rejects.toThrow()
+  expect(await state.repository.listItems(MANUAL_CLIP_SOURCE_ID)).toHaveLength(0)
+})
+it("does not relax rights, source, URL or schema checks when the operator is omitted", async () => {
+  const { operator: _operator, ...data } = input()
+  for (const bad of [
+    { ...data, rights: { ...data.rights, basis: "unknown" } },
+    { ...data, rights: { ...data.rights, evidence: "" } },
+    { ...data, rights: { ...data.rights, applicableUrl: "https://example.org/other" } },
+    { ...data, sourceId: "intel:th-w01" },
+    { ...data, clip: { ...data.clip, actualUrl: "http://127.0.0.1/private" } },
+    { ...data, authenticated: true },
+  ]) await expect(manualSubmit(state.repository, bad, now)).rejects.toThrow()
+  expect(await state.repository.listItems(MANUAL_CLIP_SOURCE_ID)).toHaveLength(0)
 })
 it("stores authored text, original URL, canonical identity, raw unknown date and unverified audit in the existing versions", async () => {
   const saved = await manualSubmit(state.repository, input(), now)
@@ -188,12 +228,14 @@ it("runs bridge-shaped payload through same-origin HTTP and reads stored text wi
   try {
     expect((await request("/api/shipping/intel/manual", input(), "https://evil.example")).status).toBe(403)
     expect(await state.repository.listItems(MANUAL_CLIP_SOURCE_ID)).toHaveLength(0)
-    const saved = await request("/api/shipping/intel/manual", input())
+    const { operator: _operator, ...withoutName } = input()
+    const saved = await request("/api/shipping/intel/manual", withoutName)
     expect(saved.status).toBe(200)
     state.native.exec("PRAGMA query_only=ON")
     const read = await request(`/api/shipping/intel/items/${saved.data.itemId}`)
     expect(read.data.manualLabel).toContain("不是官方预警")
     expect(read.data.clip.actualUrl).toBe(url)
+    expect(read.data.manualEntry).toMatchObject({ operator: CLIP_UNIDENTIFIED_OPERATOR })
     expect(read.data.selectedVersion.blocks[1].text).toBe(draft.body)
   } finally {
     server.closeAllConnections()

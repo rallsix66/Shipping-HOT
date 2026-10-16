@@ -31,7 +31,7 @@ export function ClipImporter({ onSaved }: { onSaved: (id: string) => void }) {
       setDraft(null)
       onSaved(result.itemId)
     } catch {
-      setStatus("保存未确认。草稿保留，重试沿用原提交编号；检查录入人、正文范围和权利依据。")
+      setStatus("保存未确认。草稿保留，重试沿用原提交编号；检查正文范围和权利依据。")
     } finally {
       setBusy(false)
     }
@@ -55,10 +55,7 @@ export function ClipImporter({ onSaved }: { onSaved: (id: string) => void }) {
             许可范围纯文本
             <textarea maxLength={100000} value={draft.draft.body} onChange={event => setDraft({ ...draft, draft: { ...draft.draft, body: event.target.value } })} />
           </label>
-          <label>
-            录入人
-            <input maxLength={80} value={draft.operator} onChange={event => setDraft({ ...draft, operator: event.target.value })} />
-          </label>
+          <p>无需填写姓名；保存时间与未识别人工操作审计由系统记录，不代表已认证身份。</p>
           <p className="manual-text">{`原时间：${draft.draft.date.raw || "未知"}；角色：${draft.draft.date.role}；浏览器提取时间：${draft.draft.capturedAt}（不是发布时间）`}</p>
           <p className="manual-text">{`用户声明：${draft.rights.basis}；范围：${draft.rights.scope}；依据：${draft.rights.evidence || "无"}。未经独立核验。`}</p>
           <button className="chip" disabled={busy} type="submit">{busy ? "保存中" : "保存人工剪藏资料"}</button>

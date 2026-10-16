@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto"
-import { MANUAL_CLIP_SOURCE_ID, clipText, exactKeys, parseClipDraft, parseClipRights } from "@shared/manual-clip"
+import { MANUAL_CLIP_SOURCE_ID, clipOperator, clipText, exactKeys, parseClipDraft, parseClipRights } from "@shared/manual-clip"
 import type { ClipAudit, ClipDateInput } from "@shared/manual-clip"
 import type { IntelRepository } from "#/database/intel"
 import type { WebDate } from "#/intel/sources/web-list"
@@ -26,7 +26,7 @@ export async function manualClipSubmit(repo: IntelRepository, data: Record<strin
   try {
     exactKeys(data, ["requestId", "sourceId", "operator", "action", "clip", "rights"])
     const requestId = clipText(data.requestId, 80)
-    const operator = clipText(data.operator, 80)
+    const operator = clipOperator(data.operator)
     if (!/^[\w-]{8,80}$/.test(requestId) || data.sourceId !== MANUAL_CLIP_SOURCE_ID || data.action !== "submit") throw new Error("invalid_clip_input")
     const draft = parseClipDraft(data.clip)
     const rights = parseClipRights(data.rights, draft.actualUrl)

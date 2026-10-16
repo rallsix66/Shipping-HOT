@@ -4,6 +4,12 @@ import { Buffer } from "node:buffer"
 import { expect, it } from "vitest"
 import { CLIP_EXTENSION_ID, CLIP_ORIGIN } from "../shared/clipper-bridge"
 
+it("has no operator input while keeping explicit rights controls", () => {
+  const popup = readFileSync("extensions/shipping-hot-clipper/popup.html", "utf8")
+  expect(popup).not.toMatch(/<input[^>]*id="operator"/)
+  for (const id of ["basis", "scope", "evidence"]) expect(popup).toContain(`id="${id}"`)
+})
+
 it("pins a public-only stable extension ID and the narrow local message surface", () => {
   const manifest = JSON.parse(readFileSync("extensions/shipping-hot-clipper/manifest.json", "utf8"))
   const publicDer = Buffer.from(manifest.key, "base64")

@@ -1,7 +1,7 @@
 import type { ReactElement } from "react"
 import { beforeEach, expect, it, vi } from "vitest"
 import { ClipImporter } from "../src/components/shipping/clip-import"
-import { CLIP_PROTOCOL, MANUAL_CLIP_SOURCE_ID } from "../shared/manual-clip"
+import { CLIP_PROTOCOL, CLIP_UNIDENTIFIED_OPERATOR, MANUAL_CLIP_SOURCE_ID } from "../shared/manual-clip"
 
 const state = vi.hoisted(() => ({ values: [] as unknown[], index: 0, ref: { current: null as unknown }, fetch: vi.fn() }))
 vi.mock("react", async original => ({ ...await original<typeof import("react")>(), useEffect: vi.fn(), useRef: () => state.ref, useState: (initial: unknown) => {
@@ -34,6 +34,16 @@ it("preview does not call save; only form submission constructs the manual clip 
   form.props.onSubmit({ preventDefault: vi.fn() })
   await vi.waitFor(() => expect(state.fetch).toHaveBeenCalledOnce())
   expect(state.fetch.mock.calls[0][1]).toMatchObject({ method: "POST", body: { sourceId: MANUAL_CLIP_SOURCE_ID, action: "submit" } })
+})
+it.each([undefined, ""])("saves a name-free preview with automatic unidentified audit: %j", async (operator) => {
+  ;(state.values[0] as { operator?: string }).operator = operator
+  const tree = draw()
+  expect(JSON.stringify(tree)).not.toContain("Synthetic owner")
+  expect(JSON.stringify(tree)).not.toContain("\"maxLength\":80")
+  state.fetch.mockResolvedValue({ outcome: "created", itemId: "synthetic-item" })
+  find(tree, "form")!.props.onSubmit({ preventDefault: vi.fn() })
+  await vi.waitFor(() => expect(state.fetch).toHaveBeenCalledOnce())
+  expect(state.fetch.mock.calls[0][1].body.operator).toBe(CLIP_UNIDENTIFIED_OPERATOR)
 })
 it("retries an uncertain identical save with the same ID; edited material receives a new ID", async () => {
   state.fetch.mockRejectedValue(new Error("uncertain synthetic response"))

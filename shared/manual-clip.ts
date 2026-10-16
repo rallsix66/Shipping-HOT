@@ -3,6 +3,7 @@ import { isSyntheticClipUrl } from "./clip-build"
 export const MANUAL_CLIP_SOURCE_ID = "intel:manual:clip"
 export const CLIP_PROTOCOL = "shipping-hot-clip-v1"
 export const CLIP_MAX_BYTES = 512 * 1024
+export const CLIP_UNIDENTIFIED_OPERATOR = "未识别人工操作（未经身份认证）"
 export type ClipScope = "metadata_only" | "excerpt" | "full_text"
 export type ClipMode = "metadata" | "selection" | "article"
 export type DateRole = "unknown" | "publication" | "effective" | "updated"
@@ -36,6 +37,12 @@ export interface ClipAudit extends ClipDraft {
 export function clipText(value: unknown, max: number, required = true): string {
   if (typeof value !== "string" || value.length > max || [...value].some(char => char.charCodeAt(0) < 32 && !"\t\n\r".includes(char)) || /<\/?[a-z!]|&#?\w+;/i.test(value) || (required && !value.trim())) throw new Error("invalid_clip_input")
   return value
+}
+/** Legacy supplied names remain unverified; new clipping never requires a name. */
+export function clipOperator(value: unknown): string {
+  if (value === undefined) return CLIP_UNIDENTIFIED_OPERATOR
+  const operator = clipText(value, 80, false)
+  return operator.trim() ? operator : CLIP_UNIDENTIFIED_OPERATOR
 }
 export function exactKeys(value: unknown, keys: string[]): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).some(key => !keys.includes(key))) throw new Error("invalid_clip_input")
