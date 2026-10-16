@@ -1,0 +1,9 @@
+{
+  "name": "vitest",
+  "command": "pnpm exec vitest run -c vitest.config.ts --reporter=dot",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-final-f95f73b",
+  "sha": "f95f73b4f6b3e6c150fc442f1b10f5fb308e6b71",
+  "startedAt": "2026-10-16T03:29:06.552Z",
+  "endedAt": "2026-10-16T03:29:21.172Z",
+  "rawExit": 0
+}
