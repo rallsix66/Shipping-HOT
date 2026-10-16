@@ -1,0 +1,9 @@
+{
+  "name": "lint",
+  "command": "pnpm lint",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-private-abb1b99",
+  "sha": "abb1b992a7de030025b16ad06ded63211e99ff1b",
+  "startedAt": "2026-10-16T08:04:18.461Z",
+  "endedAt": "2026-10-16T08:04:45.921Z",
+  "rawExit": 0
+}

@@ -1,0 +1,10 @@
+# Prepared only. Execute after parent review; never operate Chrome here.
+$clipReceiver=Get-CimInstance Win32_Process -Filter 'ProcessId=10880'
+$clipSource=Get-CimInstance Win32_Process -Filter 'ProcessId=40064'
+if (-not $clipReceiver -or $clipReceiver.ParentProcessId -ne 40064 -or $clipReceiver.CommandLine -notlike '*\.tmp\clipper-manual-bdc7b59\app-test\server\index.mjs*') { throw 'receiver changed; inspect before stopping' }
+if (-not $clipSource -or $clipSource.CommandLine -notlike '*clip-no-operator-serve.cjs*') { throw 'source changed; inspect before stopping' }
+Stop-Process -Id 10880 -ErrorAction Stop
+for ($clipProbe=0; $clipProbe -lt 20; $clipProbe++) { if (-not (Get-Process -Id 40064 -ErrorAction SilentlyContinue)) { break }; Start-Sleep -Milliseconds 100 }
+if (Get-Process -Id 40064 -ErrorAction SilentlyContinue) { throw 'old source still running; do not bypass' }
+if (netstat -ano | Select-String '127.0.0.1:5173\s.*LISTENING|127.0.0.1:5174\s.*LISTENING') { throw 'ports occupied; do not stop other processes' }
+node .tmp/clip-private-serve.cjs

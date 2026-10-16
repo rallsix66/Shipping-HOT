@@ -1,4 +1,16 @@
-## 当前：剪藏免填录入人（2026-10-16，离线PASS，父审/新包GUI待验）
+## 当前：普通私人剪藏（2026-10-16，离线PASS，父审后双端更新）
+
+用户15:46UTC+8决定取消权利/保存范围/依据及时间角色表单（Sentinel_e20d7de212748191815c0f692ae9efd9）。产品SHA **`abb1b992a7de030025b16ad06ded63211e99ff1b`**：普通剪藏为提取→预览→明确保存，页面时间自动/未知；确认正文按原100000字符/体积/纯文本限制存入原版本。独立服务端审计为manual_user_capture/private_material/rights unknown及自动保存时间，不伪造本人原创或授权。
+
+本地人工详情按精确来源和私人审计读回正文；通用许可材料读取仍metadata_only/bodyText=null。legacy声明、旧版本和其他表单/自动来源策略保持原合同；新私人与legacy hash区分usage，防止相同正文覆盖旧声明版本。没有schema/依赖/认证/网络权限/Host/Origin/CORS/SSRF或合成URL隔离变更。[用户新决定与实现](evidence/gate-abb1b99-clip-private/report.md) / ADR-010。
+
+精确SHA新检出`.tmp/clipper-private-abb1b99`正常frozen install含scripts、普通与合成build/typecheck/lint、**200定向/1464全量通过+3既有Windows跳过、3smoke全部raw0**；同检出的编译后普通服务在独立库/5273通过22项HTTP：无声明正文POST200/超过280字精确读回、未知日期、旧版本兼容、拒绝请求零增量和usage/runtime/cache/fetch/executor0；自己的进程树已结束。不是GUI证据。[门禁](evidence/gate-abb1b99-clip-private/summary.json) / [编译HTTP](evidence/gate-abb1b99-clip-private/compiled-http-result.json) / [真实Neat Freak](evidence/gate-abb1b99-clip-private/closeout.md)。
+
+新包`.tmp/clipper-manual-abb1b99/extension-test`和ZIP仅staged，6087/bdc7旧包8文件及ZIP hash未变。[包/hash](evidence/gate-abb1b99-clip-private/staged-package.json)。**先父审，再更新接收服务，最后用户加载扩展；当前5173仍是bdc7b59，不能只换扩展用旧后端测试。** 原PID10880/40064和同一个6087 run数据库仍保留，UUID`f79f2bd2-050f-42b0-831e-6e787eb1344f`、schema29/real；07:59UTC材料/版本/动作及usage等0、GET200。原库未清空/搬动，四个保留DB/Secret hash不变。[现场](evidence/gate-abb1b99-clip-private/current-user-scene.json) / [待审切换与用户步骤](evidence/gate-abb1b99-clip-private/handoff.md)。
+
+新包真实GUI/nonce/保存重开NOT_RUN，父审pending；普通HTTPS浏览器、完整GUI/S7、24h未验。R2仍BLOCKED：25/39、24/34、历史3/5。无生产启用/付费/模型/合并/部署/强推/删除。下方是此前时点历史，不覆盖本条新产品决定。
+
+## 历史：bdc7b59免填录入人（后来普通流程进一步简化，见上）
 
 用户15:14UTC+8明确要求去掉姓名输入（Sentinel_386b8dfb40ac8191b002c84c69d904d5）。产品SHA **`bdc7b59d88d440966d8c6aff7fc68229c136dbb1`**：扩展与系统接收预览均无录入人输入/必填；剪藏专用桥接/后端把缺省或空白姓名记为`未识别人工操作（未经身份认证）`，自动保留保存时间/来源/操作审计。合法旧姓名与旧版本仍可读；畸形旧字段仍拒绝。其他人工/政策表单原要求不变，许可/URL/正文/同源/幂等/版本校验未放松，无schema/认证/权限变更。
 

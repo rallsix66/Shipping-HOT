@@ -1,0 +1,42 @@
+[
+  {
+    "path": "assets/popup-aVjAIvTt.css",
+    "bytes": 465,
+    "sha256": "8a2411b56c91c16e429d97f0d5fe6de4556b718846ca7997d098bb3885dd68db"
+  },
+  {
+    "path": "assets/popup-DHU7aOx9.js",
+    "bytes": 6280,
+    "sha256": "058f037b30b5b2c1953d2c196afa69906c5c40a487206178efb881e1910c8e56"
+  },
+  {
+    "path": "content.js",
+    "bytes": 326604,
+    "sha256": "da6c9e3fe6b979a56f034cc50ca3d33f98a481693fad7318a05ed002393e3ae2"
+  },
+  {
+    "path": "licenses/defuddle-MIT.txt",
+    "bytes": 1076,
+    "sha256": "c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092"
+  },
+  {
+    "path": "licenses/obsidian-clipper-MIT.txt",
+    "bytes": 1088,
+    "sha256": "3ca04f8f046005103b08302723521f546605a34a269d5a867a82d200dfd9c0d7"
+  },
+  {
+    "path": "manifest.json",
+    "bytes": 1011,
+    "sha256": "8d2cc507bd632cbe95a740aee6a2f7801e3c07c079a787aa77b34dcbddae67e8"
+  },
+  {
+    "path": "popup.html",
+    "bytes": 1015,
+    "sha256": "2d2bf242cf996d12ab286226bc55cf5c6668c3dc1d2d80054b06d80f4bad86b9"
+  },
+  {
+    "path": "worker.js",
+    "bytes": 5639,
+    "sha256": "cd60d4fd354e043235a57ca67d808b6e008bac9369fab6ce436d5d7ac3291638"
+  }
+]
