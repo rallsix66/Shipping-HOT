@@ -1,0 +1,47 @@
+// Read-only inspection of the approved synthetic manual-save database and GET projection.
+const fs = require('node:fs');
+const path = require('node:path');
+const http = require('node:http');
+const Native = require('better-sqlite3');
+const run = path.join(__dirname, 'run');
+const expectedSource = 'http://127.0.0.1:5174/synthetic-article.html';
+function get(urlPath) {
+  return new Promise((resolve, reject) => {
+    const req = http.get({ hostname: '127.0.0.1', port: 5173, path: urlPath }, res => {
+      let body = '';
+      res.setEncoding('utf8');
+      res.on('data', text => { body += text; if (body.length > 1000000) req.destroy(Error('response_too_large')); });
+      res.on('end', () => { if (res.statusCode !== 200) reject(Error(`read_http_${res.statusCode}`)); else { try { resolve(JSON.parse(body)); } catch (error) { reject(error); } } });
+    });
+    req.setTimeout(3000, () => req.destroy(Error('receiver_timeout')));
+    req.on('error', reject);
+  });
+}
+(async () => {
+  const marker = JSON.parse(fs.readFileSync(path.join(run, 'clip-synthetic-run.json'), 'utf8'));
+  const build = JSON.parse(fs.readFileSync(path.join(__dirname, 'build.json'), 'utf8'));
+  if (marker.sourceUrl !== expectedSource || marker.sha !== build.sha || build.synthetic !== true) throw Error('unexpected_run_marker');
+  const db = new Native(path.join(run, '.data/shipping-hot-v3.sqlite3'), { readonly: true, fileMustExist: true });
+  let snapshot;
+  try {
+    const metadata = db.prepare('SELECT schema_version,data_mode,database_id FROM app_metadata').get();
+    if (metadata.schema_version !== 29 || metadata.data_mode !== 'real' || metadata.database_id !== marker.databaseId) throw Error('unexpected_database');
+    const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(r => r.name);
+    snapshot = { metadata, counts: Object.fromEntries(tables.filter(t => /^(?:intel_|provider_usage$|provider_runtime$|translation_cache$)/.test(t)).map(t => [t, db.prepare(`SELECT count(*) AS n FROM "${t}"`).get().n])) };
+  } finally { db.close(); }
+  const list = await get('/api/shipping/intel/items?sourceId=intel%3Amanual%3Aclip&limit=50');
+  if (list.hasMore) throw Error('manual_list_exceeds_fixture_scope');
+  const details = [];
+  for (const item of list.items) {
+    if (item.sourceId !== 'intel:manual:clip' || item.canonicalUrl !== expectedSource) throw Error('unexpected_source_do_not_expand_review');
+    const detail = await get(`/api/shipping/intel/items/${encodeURIComponent(item.id)}`);
+    if (detail.item.sourceId !== 'intel:manual:clip' || detail.clip?.actualUrl !== expectedSource) throw Error('unexpected_detail_source');
+    const versions = [];
+    for (const version of detail.versions.items) versions.push(await get(`/api/shipping/intel/items/${encodeURIComponent(item.id)}?versionId=${encodeURIComponent(version.id)}`));
+    details.push({ current: detail, versions });
+  }
+  const result = { readAt: new Date().toISOString(), readOnly: true, sha: build.sha, databasePath: path.join(run, '.data/shipping-hot-v3.sqlite3'), expectedSource, snapshot, list, details };
+  const output = path.join(__dirname, `manual-readback-${Date.now()}.json`);
+  fs.writeFileSync(output, JSON.stringify(result, null, 2));
+  console.log(JSON.stringify({ output, ...result }, null, 2));
+})().catch(error => { console.error(error.message); process.exitCode = 1; });

@@ -1,0 +1,373 @@
+{
+  "metadata": {
+    "outcome": "created",
+    "created": true,
+    "revised": false,
+    "itemId": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+    "versionId": "225dee0f-9ae5-4286-adea-2e628ac58887"
+  },
+  "full": {
+    "outcome": "revised",
+    "created": false,
+    "revised": true,
+    "itemId": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+    "versionId": "422ce0ce-b05a-4fd9-9651-2764b934c6b8"
+  },
+  "detail": {
+    "item": {
+      "id": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+      "sourceId": "intel:manual:clip",
+      "title": "Synthetic exact source",
+      "publishedAt": null,
+      "firstSeenAt": "2026-10-16T06:44:45.491Z",
+      "lastSeenAt": "2026-10-16T06:44:45.495Z",
+      "currentVersionId": "422ce0ce-b05a-4fd9-9651-2764b934c6b8",
+      "canonicalUrl": "http://127.0.0.1:5174/synthetic-article.html"
+    },
+    "source": {
+      "id": "intel:manual:clip",
+      "catalogId": "MANUAL-CLIP",
+      "name": "人工剪藏资料（未经独立核验）",
+      "kind": "manual",
+      "persistence": "disallowed",
+      "status": "never_run",
+      "consecutiveFailures": 0,
+      "nextSyncAt": null,
+      "lastRunAt": null,
+      "lastOkAt": null
+    },
+    "manualActions": [
+      {
+        "request_id": "synthetic-http-40",
+        "action": "submit",
+        "operator": "Synthetic test author",
+        "entered_at": "2026-10-16T06:44:45.495Z",
+        "item_id": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+        "version_id": "422ce0ce-b05a-4fd9-9651-2764b934c6b8",
+        "outcome": "revised"
+      },
+      {
+        "request_id": "synthetic-http-39",
+        "action": "submit",
+        "operator": "Synthetic test author",
+        "entered_at": "2026-10-16T06:44:45.491Z",
+        "item_id": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+        "version_id": "225dee0f-9ae5-4286-adea-2e628ac58887",
+        "outcome": "created"
+      }
+    ],
+    "manualLabel": "人工剪藏资料（未经独立核验，不是官方预警）",
+    "clip": {
+      "protocol": "shipping-hot-clip-v1",
+      "actualUrl": "http://127.0.0.1:5174/synthetic-article.html",
+      "title": "Synthetic exact source",
+      "body": "",
+      "mode": "selection",
+      "date": {
+        "raw": "2026-10-16 10:00 timezone unknown",
+        "field": "synthetic",
+        "role": "unknown"
+      },
+      "capturedAt": "2026-10-16T06:20:00.000Z",
+      "extractorVersion": "synthetic-programmatic-v1",
+      "rights": {
+        "basis": "own_work",
+        "scope": "full_text",
+        "evidence": "Only authored synthetic fixture",
+        "applicableUrl": "http://127.0.0.1:5174/synthetic-article.html"
+      },
+      "declaredBy": "Synthetic test author",
+      "declaredAt": "2026-10-16T06:44:45.495Z",
+      "verification": "user_declaration_unverified"
+    },
+    "manualEntry": {
+      "operator": "Synthetic test author",
+      "enteredAt": "2026-10-16T06:44:45.495Z"
+    },
+    "versions": {
+      "items": [
+        {
+          "id": "422ce0ce-b05a-4fd9-9651-2764b934c6b8",
+          "itemId": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+          "publishedAt": null,
+          "fetchedAt": "2026-10-16T06:44:45.495Z",
+          "createdAt": "2026-10-16T06:44:45.495Z",
+          "contentScope": "full_text",
+          "dateEvidence": {
+            "raw": "2026-10-16 10:00 timezone unknown",
+            "rule": "manual_raw",
+            "basis": "User supplied; unverified; field=synthetic",
+            "calendar": null,
+            "role": "unknown",
+            "precision": "unknown",
+            "timezone": "missing",
+            "utcOffset": null,
+            "localDate": null,
+            "publishedAt": null
+          }
+        },
+        {
+          "id": "225dee0f-9ae5-4286-adea-2e628ac58887",
+          "itemId": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+          "publishedAt": null,
+          "fetchedAt": "2026-10-16T06:44:45.491Z",
+          "createdAt": "2026-10-16T06:44:45.491Z",
+          "contentScope": "metadata_only",
+          "dateEvidence": {
+            "raw": "2026-10-16 10:00 timezone unknown",
+            "rule": "manual_raw",
+            "basis": "User supplied; unverified; field=synthetic",
+            "calendar": null,
+            "role": "unknown",
+            "precision": "unknown",
+            "timezone": "missing",
+            "utcOffset": null,
+            "localDate": null,
+            "publishedAt": null
+          }
+        }
+      ],
+      "limit": 20,
+      "offset": 0,
+      "hasMore": false
+    },
+    "selectedVersion": {
+      "id": "422ce0ce-b05a-4fd9-9651-2764b934c6b8",
+      "itemId": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+      "publishedAt": null,
+      "fetchedAt": "2026-10-16T06:44:45.495Z",
+      "createdAt": "2026-10-16T06:44:45.495Z",
+      "contentScope": "full_text",
+      "dateEvidence": {
+        "raw": "2026-10-16 10:00 timezone unknown",
+        "rule": "manual_raw",
+        "basis": "User supplied; unverified; field=synthetic",
+        "calendar": null,
+        "role": "unknown",
+        "precision": "unknown",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": null,
+        "publishedAt": null
+      },
+      "blocks": [
+        {
+          "blockKey": "title",
+          "order": 0,
+          "type": "title",
+          "text": "Synthetic exact source"
+        },
+        {
+          "blockKey": "p0",
+          "order": 1,
+          "type": "paragraph",
+          "text": "港口A  10:00\n\n\n港口B\t18:00"
+        }
+      ]
+    }
+  },
+  "old": {
+    "item": {
+      "id": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+      "sourceId": "intel:manual:clip",
+      "title": "Synthetic exact source",
+      "publishedAt": null,
+      "firstSeenAt": "2026-10-16T06:44:45.491Z",
+      "lastSeenAt": "2026-10-16T06:44:45.507Z",
+      "currentVersionId": "4d275dcb-c4a9-414c-9ea7-0b5f466b59e7",
+      "canonicalUrl": "http://127.0.0.1:5174/synthetic-article.html"
+    },
+    "source": {
+      "id": "intel:manual:clip",
+      "catalogId": "MANUAL-CLIP",
+      "name": "人工剪藏资料（未经独立核验）",
+      "kind": "manual",
+      "persistence": "disallowed",
+      "status": "never_run",
+      "consecutiveFailures": 0,
+      "nextSyncAt": null,
+      "lastRunAt": null,
+      "lastOkAt": null
+    },
+    "manualActions": [
+      {
+        "request_id": "synthetic-http-42",
+        "action": "submit",
+        "operator": "Synthetic test author",
+        "entered_at": "2026-10-16T06:44:45.507Z",
+        "item_id": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+        "version_id": "4d275dcb-c4a9-414c-9ea7-0b5f466b59e7",
+        "outcome": "revised"
+      },
+      {
+        "request_id": "synthetic-http-41",
+        "action": "submit",
+        "operator": "Synthetic test author",
+        "entered_at": "2026-10-16T06:44:45.505Z",
+        "item_id": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+        "version_id": "422ce0ce-b05a-4fd9-9651-2764b934c6b8",
+        "outcome": "unchanged"
+      },
+      {
+        "request_id": "synthetic-http-40",
+        "action": "submit",
+        "operator": "Synthetic test author",
+        "entered_at": "2026-10-16T06:44:45.495Z",
+        "item_id": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+        "version_id": "422ce0ce-b05a-4fd9-9651-2764b934c6b8",
+        "outcome": "revised"
+      },
+      {
+        "request_id": "synthetic-http-39",
+        "action": "submit",
+        "operator": "Synthetic test author",
+        "entered_at": "2026-10-16T06:44:45.491Z",
+        "item_id": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+        "version_id": "225dee0f-9ae5-4286-adea-2e628ac58887",
+        "outcome": "created"
+      }
+    ],
+    "manualLabel": "人工剪藏资料（未经独立核验，不是官方预警）",
+    "clip": {
+      "protocol": "shipping-hot-clip-v1",
+      "actualUrl": "http://127.0.0.1:5174/synthetic-article.html",
+      "title": "Synthetic exact source",
+      "body": "",
+      "mode": "selection",
+      "date": {
+        "raw": "2026-10-16 10:00 timezone unknown",
+        "field": "synthetic",
+        "role": "unknown"
+      },
+      "capturedAt": "2026-10-16T06:20:00.000Z",
+      "extractorVersion": "synthetic-programmatic-v1",
+      "rights": {
+        "basis": "own_work",
+        "scope": "full_text",
+        "evidence": "Only authored synthetic fixture",
+        "applicableUrl": "http://127.0.0.1:5174/synthetic-article.html"
+      },
+      "declaredBy": "Synthetic test author",
+      "declaredAt": "2026-10-16T06:44:45.505Z",
+      "verification": "user_declaration_unverified"
+    },
+    "manualEntry": {
+      "operator": "Synthetic test author",
+      "enteredAt": "2026-10-16T06:44:45.505Z"
+    },
+    "versions": {
+      "items": [
+        {
+          "id": "4d275dcb-c4a9-414c-9ea7-0b5f466b59e7",
+          "itemId": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+          "publishedAt": null,
+          "fetchedAt": "2026-10-16T06:44:45.507Z",
+          "createdAt": "2026-10-16T06:44:45.507Z",
+          "contentScope": "full_text",
+          "dateEvidence": {
+            "raw": "2026-10-16 10:00 timezone unknown",
+            "rule": "manual_raw",
+            "basis": "User supplied; unverified; field=synthetic",
+            "calendar": null,
+            "role": "unknown",
+            "precision": "unknown",
+            "timezone": "missing",
+            "utcOffset": null,
+            "localDate": null,
+            "publishedAt": null
+          }
+        },
+        {
+          "id": "422ce0ce-b05a-4fd9-9651-2764b934c6b8",
+          "itemId": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+          "publishedAt": null,
+          "fetchedAt": "2026-10-16T06:44:45.495Z",
+          "createdAt": "2026-10-16T06:44:45.495Z",
+          "contentScope": "full_text",
+          "dateEvidence": {
+            "raw": "2026-10-16 10:00 timezone unknown",
+            "rule": "manual_raw",
+            "basis": "User supplied; unverified; field=synthetic",
+            "calendar": null,
+            "role": "unknown",
+            "precision": "unknown",
+            "timezone": "missing",
+            "utcOffset": null,
+            "localDate": null,
+            "publishedAt": null
+          }
+        },
+        {
+          "id": "225dee0f-9ae5-4286-adea-2e628ac58887",
+          "itemId": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+          "publishedAt": null,
+          "fetchedAt": "2026-10-16T06:44:45.491Z",
+          "createdAt": "2026-10-16T06:44:45.491Z",
+          "contentScope": "metadata_only",
+          "dateEvidence": {
+            "raw": "2026-10-16 10:00 timezone unknown",
+            "rule": "manual_raw",
+            "basis": "User supplied; unverified; field=synthetic",
+            "calendar": null,
+            "role": "unknown",
+            "precision": "unknown",
+            "timezone": "missing",
+            "utcOffset": null,
+            "localDate": null,
+            "publishedAt": null
+          }
+        }
+      ],
+      "limit": 20,
+      "offset": 0,
+      "hasMore": false
+    },
+    "selectedVersion": {
+      "id": "422ce0ce-b05a-4fd9-9651-2764b934c6b8",
+      "itemId": "2f72e678-f85b-4265-ad42-9ace65f6dd7c",
+      "publishedAt": null,
+      "fetchedAt": "2026-10-16T06:44:45.495Z",
+      "createdAt": "2026-10-16T06:44:45.495Z",
+      "contentScope": "full_text",
+      "dateEvidence": {
+        "raw": "2026-10-16 10:00 timezone unknown",
+        "rule": "manual_raw",
+        "basis": "User supplied; unverified; field=synthetic",
+        "calendar": null,
+        "role": "unknown",
+        "precision": "unknown",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": null,
+        "publishedAt": null
+      },
+      "blocks": [
+        {
+          "blockKey": "title",
+          "order": 0,
+          "type": "title",
+          "text": "Synthetic exact source"
+        },
+        {
+          "blockKey": "p0",
+          "order": 1,
+          "type": "paragraph",
+          "text": "港口A  10:00\n\n\n港口B\t18:00"
+        }
+      ]
+    }
+  },
+  "after": {
+    "translation_cache": 0,
+    "provider_usage": 0,
+    "provider_runtime": 0,
+    "intel_fetch_run": 0,
+    "intel_item": 1,
+    "intel_item_version": 3,
+    "intel_item_block": 5,
+    "intel_executor": 0,
+    "intel_item_current_change": 3,
+    "intel_source": 42,
+    "intel_manual_action": 4
+  }
+}

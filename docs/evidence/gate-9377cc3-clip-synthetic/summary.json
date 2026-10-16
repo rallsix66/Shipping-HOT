@@ -1,0 +1,108 @@
+{
+  "sha": "9377cc352b3b99269dd07cd7458278437e6954cd",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-9377cc3",
+  "results": [
+    {
+      "name": "clone",
+      "command": [
+        "git",
+        "-c",
+        "core.excludesFile=",
+        "clone",
+        "--no-hardlinks",
+        "--branch",
+        "codex/shipping-hot-r2",
+        ".",
+        "D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-9377cc3"
+      ],
+      "cwd": "D:\\try one\\Shipping HOT",
+      "sha": "9377cc352b3b99269dd07cd7458278437e6954cd",
+      "startedAt": "2026-10-16T06:34:20.311Z",
+      "endedAt": "2026-10-16T06:34:21.391Z",
+      "rawExit": 0
+    },
+    {
+      "name": "install",
+      "command": "pnpm install --frozen-lockfile --registry=https://registry.npmjs.org",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-9377cc3",
+      "sha": "9377cc352b3b99269dd07cd7458278437e6954cd",
+      "startedAt": "2026-10-16T06:34:21.431Z",
+      "endedAt": "2026-10-16T06:34:30.479Z",
+      "rawExit": 0
+    },
+    {
+      "name": "build",
+      "command": "pnpm build",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-9377cc3",
+      "sha": "9377cc352b3b99269dd07cd7458278437e6954cd",
+      "startedAt": "2026-10-16T06:34:30.480Z",
+      "endedAt": "2026-10-16T06:34:53.343Z",
+      "rawExit": 0
+    },
+    {
+      "name": "typecheck",
+      "command": "pnpm typecheck",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-9377cc3",
+      "sha": "9377cc352b3b99269dd07cd7458278437e6954cd",
+      "startedAt": "2026-10-16T06:34:53.344Z",
+      "endedAt": "2026-10-16T06:35:02.296Z",
+      "rawExit": 0
+    },
+    {
+      "name": "lint",
+      "command": "pnpm lint",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-9377cc3",
+      "sha": "9377cc352b3b99269dd07cd7458278437e6954cd",
+      "startedAt": "2026-10-16T06:35:02.297Z",
+      "endedAt": "2026-10-16T06:35:27.335Z",
+      "rawExit": 0
+    },
+    {
+      "name": "clipper-build",
+      "command": "pnpm build:clipper",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-9377cc3",
+      "sha": "9377cc352b3b99269dd07cd7458278437e6954cd",
+      "startedAt": "2026-10-16T06:35:27.336Z",
+      "endedAt": "2026-10-16T06:35:28.676Z",
+      "rawExit": 0
+    },
+    {
+      "name": "synthetic-build",
+      "command": "pnpm build:clip-synthetic",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-9377cc3",
+      "sha": "9377cc352b3b99269dd07cd7458278437e6954cd",
+      "startedAt": "2026-10-16T06:35:28.677Z",
+      "endedAt": "2026-10-16T06:35:48.347Z",
+      "rawExit": 0
+    },
+    {
+      "name": "targeted",
+      "command": "pnpm exec vitest run -c vitest.config.ts server/intel/manual-clip.test.ts server/intel/manual.test.ts server/intel/material-read.test.ts server/api/shipping/intel/manual-http.test.ts server/api/shipping/intel/read-http.test.ts test/manual-intel.test.ts test/clipper-bridge.test.ts test/clipper-dom.test.ts test/clipper-package.test.ts test/clip-import.test.ts server/runtime/clip-synthetic-guard.test.ts --reporter=dot",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-9377cc3",
+      "sha": "9377cc352b3b99269dd07cd7458278437e6954cd",
+      "startedAt": "2026-10-16T06:35:48.347Z",
+      "endedAt": "2026-10-16T06:35:51.679Z",
+      "rawExit": 1
+    }
+  ],
+  "error": "targeted failed",
+  "retainedBefore": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedAfter": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedUnchanged": true,
+  "environment": "OS-only child environment; no project env/credentials copied; process-local PATH adds installed bins and existing bundled rg",
+  "browser": "NOT_RUN: installation, permissions and real-page reads not authorized; no CDP workaround",
+  "s7": "NOT_RUN: browser acceptance outside this authorized offline slice",
+  "businessSourceFetchCommandsIssued": 0,
+  "paidCallCommandsIssued": 0,
+  "networkEvidence": "Scoped synthetic tests reject fetch and HTTP acceptance is local. Action counts are not packet capture. Official registry install is separate."
+}

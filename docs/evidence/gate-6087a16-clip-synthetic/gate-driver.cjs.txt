@@ -1,0 +1,56 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const cp = require('node:child_process');
+const crypto = require('node:crypto');
+const root = process.cwd();
+const sha = cp.execFileSync('git', ['rev-parse','HEAD'], {encoding:'utf8'}).trim();
+const cwd = path.join(root,'.tmp','clipper-synthetic-final-'+sha.slice(0,7));
+const evidence = path.join(root,'docs','evidence','gate-'+sha.slice(0,7)+'-clip-synthetic');
+fs.mkdirSync(evidence,{recursive:true});
+const baseline = ['.data/shipping-hot-v3.sqlite3','.data/shipping-hot-v3-browser.sqlite3','.data/p7-final-seal-20260904.sqlite3','.data/provider-secrets.json'];
+function hashes() { return Object.fromEntries(baseline.map(p => [p,fs.existsSync(path.join(root,p))?crypto.createHash('sha256').update(fs.readFileSync(path.join(root,p))).digest('hex'):'absent'])); }
+const retainedBefore = hashes();
+const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => /^(?:systemroot|windir|temp|tmp|userprofile|appdata|localappdata|comspec|programfiles(?:\(x86\))?|programdata|pathext|number_of_processors|processor_architecture|processor_identifier|os|path)$/i.test(k)));
+for (const key of Object.keys(env)) if (key.toLowerCase()==='path') delete env[key];
+const rgDir = 'C:\\Users\\Administrator\\AppData\\Roaming\\npm\\node_modules\\@openai\\codex\\node_modules\\@openai\\codex-win32-x64\\vendor\\x86_64-pc-windows-msvc\\codex-path';
+env.Path = path.join(cwd,'node_modules','.bin')+';'+rgDir+';'+(process.env.PATH||process.env.Path);
+env.CI='true';
+const commands = [
+ ['install','pnpm install --frozen-lockfile --registry=https://registry.npmjs.org'],
+ ['build','pnpm build'], ['typecheck','pnpm typecheck'], ['lint','pnpm lint'],
+ ['clipper-build','pnpm build:clipper'], ['synthetic-build','pnpm build:clip-synthetic'],
+ ['targeted','pnpm exec vitest run -c vitest.config.ts server/intel/manual-clip.test.ts server/intel/manual.test.ts server/intel/material-read.test.ts server/api/shipping/intel/manual-http.test.ts server/api/shipping/intel/read-http.test.ts test/manual-intel.test.ts test/clipper-bridge.test.ts test/clipper-dom.test.ts test/clipper-package.test.ts test/clip-import.test.ts server/runtime/clip-synthetic-guard.test.ts --reporter=dot'],
+ ['vitest','pnpm exec vitest run -c vitest.config.ts --reporter=dot'],
+ ['smoke-p0','pnpm smoke:p0-native'], ['smoke-p2c','pnpm smoke:p2c-runtime'], ['smoke-feed','pnpm smoke:p3-feed-freshness'], ['synthetic-http','node .tmp/clip-synthetic-accept.cjs']
+];
+const results=[];
+function write(name,value){fs.writeFileSync(path.join(evidence,name),JSON.stringify(value,null,2));}
+async function run(name,command,workdir){
+ const out=fs.openSync(path.join(evidence,name+'.stdout.log'),'w');
+ const err=fs.openSync(path.join(evidence,name+'.stderr.log'),'w');
+ const startedAt=new Date().toISOString();
+ console.log('START '+name);
+ const child=Array.isArray(command)?cp.spawn(command[0],command.slice(1),{cwd:workdir,env,windowsHide:true,stdio:['ignore',out,err]}):cp.spawn(process.env.ComSpec||'cmd.exe',['/d','/s','/c',command],{cwd:workdir,env,windowsHide:true,stdio:['ignore',out,err]});
+ const rawExit=await new Promise((resolve,reject)=>{child.once('error',reject);child.once('exit',resolve)});
+ fs.closeSync(out);fs.closeSync(err);
+ const result={name,command,cwd:workdir,sha,startedAt,endedAt:new Date().toISOString(),rawExit};
+ results.push(result);write(name+'.json',result);console.log('END '+name+' exit='+rawExit);
+ if(rawExit!==0)throw new Error(name+' failed');
+}
+(async()=>{
+ let error;
+ try {
+  if(fs.existsSync(cwd))throw new Error('Refuse to reuse a checkout');
+  await run('clone',['git','-c','core.excludesFile=','clone','--no-hardlinks','--branch','codex/shipping-hot-r2','.',cwd],root);
+  fs.mkdirSync(path.join(cwd,'.tmp'),{recursive:true}); fs.copyFileSync(path.join(root,'.tmp','clip-synthetic-accept.cjs'),path.join(cwd,'.tmp','clip-synthetic-accept.cjs'));
+  const actualSha=cp.execFileSync('git',['rev-parse','HEAD'],{cwd,encoding:'utf8'}).trim();
+  if(actualSha!==sha)throw new Error('SHA drift');
+  for(const [name,command]of commands)await run(name,command,cwd);
+  const files=[];
+  function walk(p){for(const entry of fs.readdirSync(p,{withFileTypes:true})){const full=path.join(p,entry.name);if(entry.isDirectory())walk(full);else files.push({path:path.relative(path.join(cwd,'.tmp','clipper-package'),full).replaceAll('\\','/'),bytes:fs.statSync(full).size,sha256:crypto.createHash('sha256').update(fs.readFileSync(full)).digest('hex')});}}
+  walk(path.join(cwd,'.tmp','clipper-package'));write('package-files.json',files);
+ } catch(e){error=e.message;console.error(error);process.exitCode=1;}
+ const retainedAfter=hashes();
+ write('summary.json',{sha,cwd,results,error,retainedBefore,retainedAfter,retainedUnchanged:JSON.stringify(retainedBefore)===JSON.stringify(retainedAfter),environment:'OS-only child environment; no project env/credentials copied; process-local PATH adds installed bins and existing bundled rg',browser:'NOT_RUN: installation, permissions and real-page reads not authorized; no CDP workaround',s7:'NOT_RUN: browser acceptance outside this authorized offline slice',businessSourceFetchCommandsIssued:0,paidCallCommandsIssued:0,networkEvidence:"Scoped synthetic tests reject fetch and HTTP acceptance is local. Action counts are not packet capture. Official registry install is separate."});
+ if(JSON.stringify(retainedBefore)!==JSON.stringify(retainedAfter))process.exitCode=1;
+})();

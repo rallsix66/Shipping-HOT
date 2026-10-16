@@ -1,0 +1,34 @@
+{
+  "readAt": "2026-10-16T06:50:59.598Z",
+  "readOnly": true,
+  "sha": "6087a169cb2e591e3acb10d23ccc641d8212f5c0",
+  "databasePath": "D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-6087a16\\run\\.data\\shipping-hot-v3.sqlite3",
+  "expectedSource": "http://127.0.0.1:5174/synthetic-article.html",
+  "snapshot": {
+    "metadata": {
+      "schema_version": 29,
+      "data_mode": "real",
+      "database_id": "f79f2bd2-050f-42b0-831e-6e787eb1344f"
+    },
+    "counts": {
+      "translation_cache": 0,
+      "provider_usage": 0,
+      "provider_runtime": 0,
+      "intel_fetch_run": 0,
+      "intel_item": 0,
+      "intel_item_version": 0,
+      "intel_item_block": 0,
+      "intel_executor": 0,
+      "intel_item_current_change": 0,
+      "intel_source": 42,
+      "intel_manual_action": 0
+    }
+  },
+  "list": {
+    "items": [],
+    "limit": 50,
+    "offset": 0,
+    "hasMore": false
+  },
+  "details": []
+}

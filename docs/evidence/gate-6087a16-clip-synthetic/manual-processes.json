@@ -1,0 +1,12 @@
+[
+  {
+    "ProcessId": 25368,
+    "ParentProcessId": 65052,
+    "CommandLine": "node  --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs tools/clip-synthetic/serve.ts \".tmp/clipper-manual-6087a16\""
+  },
+  {
+    "ProcessId": 58772,
+    "ParentProcessId": 25368,
+    "CommandLine": "\"C:\\Program Files\\nodejs\\node.exe\" \"D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-6087a16\\app-test\\server\\index.mjs\""
+  }
+]
