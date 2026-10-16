@@ -24,6 +24,8 @@
 
 ## 数据、包及待复审
 
-原用户隔离库路径/UUID/内容未改，07:59UTC仍0材料/版本/操作及usage等；原服务仍运行bdc7b59，PID10880/40064、127.0.0.1:5173/5174均200。[当前现场](current-user-scene.json)。四个保留DB/Secret hash不变。6087与bdc旧包8文件及ZIP完整保留。新包`.tmp/clipper-manual-abb1b99/extension-test`和ZIP仅staged；[包/hash](staged-package.json)。
+主会话对abb1b99限定复审通过，无代码阻塞。已修正本报告和handoff残留的短SHA，并按已审脚本核实后只结束原本轮自有进程，切换原隔离接收服务。实际代码SHA为`abb1b992a7de030025b16ad06ded63211e99ff1b`，receiver33992/source40400，仅127.0.0.1:5173/5174，GET均200，实际HTML/JS及合成文章逐字节匹配构建。[切换核验](switch-verification.json) / [进程](switch-current-processes.json)。
 
-**按本轮要求先交父审，再更新接收服务和用户扩展。新e627尚未切换当前5173，也未让用户加载；不得只更新扩展就用旧后端测试。** 已准备复用原DB文件的受限更新脚本，未执行；[交接步骤](handoff.md)。新包真实GUI/nonce/保存重开NOT_RUN，父审pending；普通HTTPS浏览器、完整GUI/S7、24h未验。R2仍BLOCKED：25/39、24/34、历史3/5。无合并/部署/强推/付费/模型调用/清场。
+同一个原DB文件和UUID`f79f2bd2-050f-42b0-831e-6e787eb1344f`继续使用，schema29/real；08:16UTC切换前后材料/版本/动作/usage/runtime/cache/fetch/executor均0、来源42，没有清空、迁移或丢记录。先做一致backup，未改原隔离标记；[保全](switch-database-preservation.json)。四个保留DB/Secret hash不变，旧包8文件和ZIP保留。新包准确目录`.tmp/clipper-manual-abb1b99/extension-test`，可交用户手动加载。[包/hash](staged-package.json) / [最短步骤](handoff.md)。
+
+没有操作用户Chrome，新包实际GUI/nonce/保存重开仍NOT_RUN；普通HTTPS浏览器、完整GUI/S7、24h未验。R2仍BLOCKED：25/39、24/34、历史3/5。无合并/部署/强推/付费/模型调用/清场。PR正文发布仍被拒，未重试，不影响本次获批测试服务切换。

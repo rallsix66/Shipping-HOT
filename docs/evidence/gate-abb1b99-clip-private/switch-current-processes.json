@@ -1,0 +1,12 @@
+[
+  {
+    "ProcessId": 40400,
+    "ParentProcessId": 35264,
+    "CommandLine": "\"C:\\Program Files\\nodejs\\node.exe\" .tmp/clip-private-serve.cjs"
+  },
+  {
+    "ProcessId": 33992,
+    "ParentProcessId": 40400,
+    "CommandLine": "\"C:\\Program Files\\nodejs\\node.exe\" \"D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-abb1b99\\app-test\\server\\index.mjs\""
+  }
+]

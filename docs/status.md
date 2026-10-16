@@ -1,4 +1,4 @@
-## 当前：普通私人剪藏（2026-10-16，离线PASS，父审后双端更新）
+## 当前：普通私人剪藏（2026-10-16，限定复审通过，测试服务已切换，GUI待验）
 
 用户15:46UTC+8决定取消权利/保存范围/依据及时间角色表单（Sentinel_e20d7de212748191815c0f692ae9efd9）。产品SHA **`abb1b992a7de030025b16ad06ded63211e99ff1b`**：普通剪藏为提取→预览→明确保存，页面时间自动/未知；确认正文按原100000字符/体积/纯文本限制存入原版本。独立服务端审计为manual_user_capture/private_material/rights unknown及自动保存时间，不伪造本人原创或授权。
 
@@ -6,9 +6,9 @@
 
 精确SHA新检出`.tmp/clipper-private-abb1b99`正常frozen install含scripts、普通与合成build/typecheck/lint、**200定向/1464全量通过+3既有Windows跳过、3smoke全部raw0**；同检出的编译后普通服务在独立库/5273通过22项HTTP：无声明正文POST200/超过280字精确读回、未知日期、旧版本兼容、拒绝请求零增量和usage/runtime/cache/fetch/executor0；自己的进程树已结束。不是GUI证据。[门禁](evidence/gate-abb1b99-clip-private/summary.json) / [编译HTTP](evidence/gate-abb1b99-clip-private/compiled-http-result.json) / [真实Neat Freak](evidence/gate-abb1b99-clip-private/closeout.md)。
 
-新包`.tmp/clipper-manual-abb1b99/extension-test`和ZIP仅staged，6087/bdc7旧包8文件及ZIP hash未变。[包/hash](evidence/gate-abb1b99-clip-private/staged-package.json)。**先父审，再更新接收服务，最后用户加载扩展；当前5173仍是bdc7b59，不能只换扩展用旧后端测试。** 原PID10880/40064和同一个6087 run数据库仍保留，UUID`f79f2bd2-050f-42b0-831e-6e787eb1344f`、schema29/real；07:59UTC材料/版本/动作及usage等0、GET200。原库未清空/搬动，四个保留DB/Secret hash不变。[现场](evidence/gate-abb1b99-clip-private/current-user-scene.json) / [待审切换与用户步骤](evidence/gate-abb1b99-clip-private/handoff.md)。
+主会话限定复审已通过，无代码阻塞。已按审查脚本切换本轮自有测试服务到abb1b99，实际HTML/JS及合成文章匹配构建；receiver33992/source40400只监听127.0.0.1:5173/5174，GET200。继续使用原6087 run的同一个DB文件、UUID`f79f2bd2-050f-42b0-831e-6e787eb1344f`和schema29/real；08:16UTC前后材料/版本/动作/usage等0、来源42，先留一致backup，原库未清空/搬动，四个保留DB/Secret hash未变。新准确目录`.tmp/clipper-manual-abb1b99/extension-test`可交用户手动加载，旧包/ZIP保留。[切换核验](evidence/gate-abb1b99-clip-private/switch-verification.json) / [保全](evidence/gate-abb1b99-clip-private/switch-database-preservation.json) / [用户最短步骤](evidence/gate-abb1b99-clip-private/handoff.md)。PR正文发布仍被拒，未重试。
 
-新包真实GUI/nonce/保存重开NOT_RUN，父审pending；普通HTTPS浏览器、完整GUI/S7、24h未验。R2仍BLOCKED：25/39、24/34、历史3/5。无生产启用/付费/模型/合并/部署/强推/删除。下方是此前时点历史，不覆盖本条新产品决定。
+新包真实GUI/nonce/保存重开NOT_RUN，限定复审已通过；普通HTTPS浏览器、完整GUI/S7、24h未验。R2仍BLOCKED：25/39、24/34、历史3/5。无生产启用/付费/模型/合并/部署/强推/删除。下方是此前时点历史，不覆盖本条新产品决定。
 
 ## 历史：bdc7b59免填录入人（后来普通流程进一步简化，见上）
 

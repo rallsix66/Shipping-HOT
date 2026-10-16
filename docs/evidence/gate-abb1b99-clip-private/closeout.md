@@ -13,6 +13,8 @@
 
 相关18文件无TODO/FIXME。两处TSX按已读取的React Best Practices技能完成简要检查：未增hooks/外呼/危险HTML、使用判别联合展示legacy与private审计，保留显式提交/busy/原请求号重试。未加框架或CSS体系，不借机重构其他表单。
 
-Proposal/实现/已验边界已拆清：新私人body可本地详情读，通用许可材料reader仍metadata-only；无伪造授权/官方身份/自动模型资格。普通编译HTTP已有真实POST200读回，新合成服务及GUI实际切换尚未运行；不把旧108HTTP证据写成重跑。旧文档和门禁作为历史保留，当前权威入口status置顶。
+Proposal/实现/已验边界已拆清：新私人body可本地详情读，通用许可材料reader仍metadata-only；无伪造授权/官方身份/自动模型资格。普通编译HTTP已有真实POST200读回；获批新合成测试服务已切换并核验，GUI仍未运行；不把旧108HTTP证据写成重跑。旧文档和门禁作为历史保留，当前权威入口status置顶。
 
-未完成：父审及随后接收服务/用户扩展更新；新GUI/nonce/保存重开、普通HTTPS浏览器、完整GUI/S7、24hNOT_RUN。R2仍BLOCKED（25/39、24/34、历史3/5）。既有构建warning及3项Windows跳过保留。清场仅预览：旧/新包、ZIP、原DB/备份、干净检出、API诊断及日志全部保留，未删除。原服务继续供当前测试，未被当残留结束。
+未完成：用户手动加载新扩展及后续交互验收；新GUI/nonce/保存重开、普通HTTPS浏览器、完整GUI/S7、24hNOT_RUN。R2仍BLOCKED（25/39、24/34、历史3/5）。既有构建warning及3项Windows跳过保留。清场仅预览：旧/新包、ZIP、原DB/备份、干净检出、API诊断及日志全部保留，未删除。原服务继续供当前测试，未被当残留结束。
+
+本次收尾补记：handoff第2/4步和report末段残留e627短SHA已纠正为abb1b99；08:16UTC获批测试切换核验已同步status/report/handoff/package元数据。无产品代码变化，不重跑已封存完整门禁；以构建内容hash、实际进程、端口和前后DB快照验证本次运行态操作。原始stdout EOF空行告警保留，源码/文档whitespace检查通过。PR正文仍未发布且不重试。

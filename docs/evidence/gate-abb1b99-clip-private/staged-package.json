@@ -128,12 +128,13 @@
     "bytes": 105743,
     "sha256": "8213a1de90549fa85bb95108bb17137841d48cf85d75beb322c87ed1176eef85"
   },
-  "deployedToCurrentReceiver": false,
-  "currentReceiverCodeSha": "bdc7b59d88d440966d8c6aff7fc68229c136dbb1",
-  "userLoad": "Pending parent review and coordinated receiver update",
+  "deployedToCurrentReceiver": true,
+  "currentReceiverCodeSha": "abb1b992a7de030025b16ad06ded63211e99ff1b",
+  "userLoad": "Limited parent review passed; receiver updated, ready for user manual loading; GUI NOT_RUN",
   "zip": {
     "path": "D:\\try one\\Shipping HOT\\.tmp\\Shipping-HOT-Clipper-Synthetic-abb1b99.zip",
     "bytes": 105743,
     "sha256": "ff35fbc33aa98f0446ddb34c46ee5068b484ecfc9f843a7e009b06f351268487"
-  }
+  },
+  "switchedAt": "2026-10-16T08:16:42.729Z"
 }
