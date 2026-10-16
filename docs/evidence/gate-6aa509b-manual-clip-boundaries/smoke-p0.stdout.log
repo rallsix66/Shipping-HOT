@@ -1,0 +1,5 @@
+
+> shipping-hot@0.0.41 smoke:p0-native D:\try one\Shipping HOT\.tmp\clipper-final-6aa509b
+> node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p0-native-sqlite-smoke.ts
+
+{"process":"B","node":"v24.15.0","abi":"137","bootstrapCompletedAt":"2026-10-16T03:21:14.259Z","watchedPort":"p0-smoke-port-shekou","portDirectory":"ready"}
