@@ -1,5 +1,6 @@
 import { type H3Event, defineEventHandler, getQuery, getRouterParam, setResponseHeader, setResponseStatus } from "h3"
 import { MANUAL_CLIP_SOURCE_ID } from "@shared/manual-clip"
+import { isSyntheticClipUrl } from "@shared/clip-build"
 import { type IntelContentScope, type IntelItemRecord, IntelRepository, type IntelSourceRecord, type IntelVersionRecord } from "#/database/intel"
 import { licensedBlocks, permittedContentScope } from "#/intel/content-license"
 import { manualCatalog } from "#/intel/manual-catalog"
@@ -39,7 +40,8 @@ function publicText(value: unknown): string | null {
   if (/-----BEGIN [A-Z ]+-----|\b(?:authorization|bearer|cookie|set-cookie|api[_-]?key|password|token|credential|signature|secret)\b/i.test(value)) return "[redacted]"
   return value.slice(0, 500)
 }
-function publicUrl(value: string): string | null {
+function publicUrl(value: string, sourceId: string): string | null {
+  if (sourceId === MANUAL_CLIP_SOURCE_ID && isSyntheticClipUrl(value)) return value
   try {
     const url = new URL(value)
     if (url.protocol !== "https:" || url.username || url.password || [...url.searchParams.keys()].some(key => /key|token|secret|password|auth|credential|signature|cookie|csrf|(?:^|[_-])sig(?:$|[_-])/i.test(key))) return null
@@ -52,7 +54,7 @@ function sourceDto(source: IntelSourceRecord) {
   return { id: source.id, catalogId: source.catalogId, name: publicText(source.name), kind: source.kind, persistence: source.persistence, status: source.status, consecutiveFailures: source.consecutiveFailures, nextSyncAt: source.nextSyncAt, lastRunAt: source.lastRunAt, lastOkAt: source.lastOkAt }
 }
 function itemDto(item: IntelItemRecord) {
-  return { id: item.id, sourceId: item.sourceId, title: item.title, publishedAt: item.publishedAt, firstSeenAt: item.firstSeenAt, lastSeenAt: item.lastSeenAt, currentVersionId: item.currentVersionId, canonicalUrl: publicUrl(item.canonicalUrl) }
+  return { id: item.id, sourceId: item.sourceId, title: item.title, publishedAt: item.publishedAt, firstSeenAt: item.firstSeenAt, lastSeenAt: item.lastSeenAt, currentVersionId: item.currentVersionId, canonicalUrl: publicUrl(item.canonicalUrl, item.sourceId) }
 }
 function scope(source: IntelSourceRecord, version: IntelVersionRecord, manualUrl?: string, action?: Record<string, unknown>): IntelContentScope {
   const persistence = manualUrl === undefined ? source.persistence : manualPersistenceFor(source, manualUrl, action)

@@ -45,6 +45,6 @@ const pwaOption: Partial<VitePWAOptions> = {
   },
 }
 
-export default function pwa() {
-  return VitePWA(pwaOption)
+export default function pwa(synthetic = false) {
+  return VitePWA({ ...pwaOption, disable: synthetic })
 }

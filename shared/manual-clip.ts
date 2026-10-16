@@ -1,3 +1,5 @@
+import { isSyntheticClipUrl } from "./clip-build"
+
 export const MANUAL_CLIP_SOURCE_ID = "intel:manual:clip"
 export const CLIP_PROTOCOL = "shipping-hot-clip-v1"
 export const CLIP_MAX_BYTES = 512 * 1024
@@ -41,6 +43,7 @@ export function exactKeys(value: unknown, keys: string[]): Record<string, unknow
 }
 export function clipActualUrl(value: unknown): string {
   const raw = clipText(value, 2048)
+  if (isSyntheticClipUrl(raw)) return raw
   let url: URL
   try {
     url = new URL(raw)

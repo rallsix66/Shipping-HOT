@@ -90,7 +90,7 @@ it("requires explicit rights and exact applicable URL, never silently drops body
   excerpt.clip.body = "X".repeat(280)
   expect(await manualSubmit(state.repository, excerpt, now)).toMatchObject({ outcome: "revised" })
 })
-it.each(["https://user:pass@example.org/a", "https://example.org/a?access_token=secret", "https://example.org/a#access_token=secret", "http://example.org/a", "https://localhost/a", "https://127.0.0.1/a"]) ("rejects sensitive/unsupported URL without fetching: %s", async (actualUrl) => {
+it.each(["https://user:pass@example.org/a", "https://example.org/a?access_token=secret", "https://example.org/a#access_token=secret", "http://example.org/a", "https://localhost/a", "https://127.0.0.1/a", "http://127.0.0.1:5174/synthetic-article.html", "http://localhost:5174/synthetic-article.html", "http://127.1:5174/synthetic-article.html", "http://127.0.0.1:5174/synthetic-article.html?x=1", "http://127.0.0.1:5174/synthetic-article.html#x"]) ("rejects sensitive/unsupported URL without fetching: %s", async (actualUrl) => {
   const data = input()
   data.clip.actualUrl = actualUrl
   data.rights.applicableUrl = actualUrl
