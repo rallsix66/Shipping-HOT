@@ -38,25 +38,62 @@ export function plainSelection(html: string): string {
   const template = document.createElement("template")
   template.innerHTML = html
   template.content.querySelectorAll("script,style,form,input,textarea,iframe,object,svg").forEach(n => n.remove())
-  const blocks = new Set("P DIV MAIN ARTICLE SECTION H1 H2 H3 H4 H5 H6 BLOCKQUOTE PRE CAPTION UL OL TABLE".split(" "))
-  function read(node: Node): string {
-    if (node.nodeType === 3) return (node.textContent ?? "").replace(/[ \t\r\n\f]+/g, " ")
+  const blocks = new Set("P DIV MAIN ARTICLE SECTION H1 H2 H3 H4 H5 H6 BLOCKQUOTE CAPTION UL OL TABLE".split(" "))
+  type TextPart = string | { pre: string }
+  // Keep PRE text separate so neither structural trimming nor final normal-flow
+  // whitespace normalization can change its spaces, tabs or line breaks.
+  function trim(parts: TextPart[]): TextPart[] {
+    const result = [...parts]
+    while (typeof result[0] === "string") {
+      result[0] = (result[0] as string).trimStart()
+      if (result[0]) break
+      result.shift()
+    }
+    while (typeof result[result.length - 1] === "string") {
+      const last = result.length - 1
+      result[last] = (result[last] as string).trimEnd()
+      if (result[last]) break
+      result.pop()
+    }
+    return result
+  }
+  function readPre(node: Node): string {
+    if (node.nodeType === 3) return node.textContent ?? ""
     if (node.nodeType !== 1 && node.nodeType !== 11) return ""
+    if (node.nodeType === 1 && (node as Element).tagName.toUpperCase() === "BR") return "\n"
+    return Array.from(node.childNodes).map(readPre).join("")
+  }
+  function read(node: Node): TextPart[] {
+    if (node.nodeType === 3) return [(node.textContent ?? "").replace(/[ \t\r\n\f]+/g, " ")]
+    if (node.nodeType !== 1 && node.nodeType !== 11) return []
     const tag = node.nodeType === 1 ? (node as Element).tagName.toUpperCase() : ""
-    if (tag === "BR") return "\n"
+    if (tag === "PRE") return ["\n\n", { pre: readPre(node) }, "\n\n"]
+    if (tag === "BR") return ["\n"]
     if (tag === "TR") {
       const cells = Array.from((node as Element).children).filter(cell => ["TD", "TH"].includes(cell.tagName.toUpperCase()))
-      return `${cells.map(cell => Array.from(cell.childNodes).map(read).join("").trim()).join("\t")}\n`
+      return [...cells.flatMap((cell, index) => [...(index ? ["\t"] : []), ...trim(Array.from(cell.childNodes).flatMap(read))]), "\n"]
     }
-    const text = Array.from(node.childNodes).map(read).join("")
+    const text = Array.from(node.childNodes).flatMap(read)
     if (["TD", "TH"].includes(tag)) {
       const next = (node as Element).nextElementSibling?.tagName.toUpperCase()
-      return text.trim() + (next && ["TD", "TH"].includes(next) ? "\t" : "")
+      return [...trim(text), ...(next && ["TD", "TH"].includes(next) ? ["\t"] : [])]
     }
-    if (tag === "LI") return `${text.trim()}\n`
-    return blocks.has(tag) ? `\n\n${text}\n\n` : text
+    if (tag === "LI") return [...trim(text), "\n"]
+    return blocks.has(tag) ? ["\n\n", ...text, "\n\n"] : text
   }
-  const text = read(template.content).replace(/ *\n */g, "\n").replace(/\n{3,}/g, "\n\n").replace(/^[ \n]+|[ \n]+$/g, "")
+  const parts: TextPart[] = []
+  for (const part of read(template.content)) {
+    const last = parts.length - 1
+    if (typeof part === "string" && typeof parts[last] === "string") parts[last] += part
+    else parts.push(part)
+  }
+  const text = parts.map((part, index) => {
+    if (typeof part !== "string") return part.pre
+    let normal = part.replace(/ *\n */g, "\n").replace(/\n{3,}/g, "\n\n")
+    if (index === 0) normal = normal.replace(/^[ \n]+/g, "")
+    if (index === parts.length - 1) normal = normal.replace(/[ \n]+$/g, "")
+    return normal
+  }).join("")
   return text.trim() ? text : ""
 }
 export function extractDocument(doc: Document, mode: ClipMode, selection: string, now: string): ClipDraft {

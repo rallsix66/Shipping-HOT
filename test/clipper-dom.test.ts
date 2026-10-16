@@ -73,11 +73,19 @@ const boundaryCases = [
   { name: "table cells and rows", html: "<table><tbody><tr><th>作业</th><th>时间</th></tr><tr><td>关闭</td><td>10:00</td></tr><tr><td>恢复</td><td>18:00</td></tr></tbody></table>", expected: "作业\t时间\n关闭\t10:00\n恢复\t18:00" },
   { name: "selected cell fragment", html: "<td>关闭10:00</td><td>恢复18:00</td>", expected: "关闭10:00\t恢复18:00", selectionOnly: true },
   { name: "selected row fragments", html: "<tr><td>关闭</td><td>10:00</td></tr><tr><td>恢复</td><td>18:00</td></tr>", expected: "关闭\t10:00\n恢复\t18:00", selectionOnly: true },
+  { name: "PRE double spaces and lines", html: "<pre>港口A  10:00\n港口B  18:00</pre>", expected: "港口A  10:00\n港口B  18:00" },
+  // Defuddle's existing code-block transform expands tabs and trims/dedents
+  // before plainSelection. Pin that article output separately; do not change
+  // the upstream parser or mistake it for raw-selection whitespace fidelity.
+  { name: "PRE tabs", html: "<pre>港口A\t10:00\n港口B\t\t18:00</pre>", expected: "港口A\t10:00\n港口B\t\t18:00", articleExpected: "港口A    10:00\n港口B        18:00" },
+  { name: "PRE edge spaces and blank lines", html: "<pre>  港口A  10:00 \n\n\n\t港口B  18:00  \n </pre>", expected: "  港口A  10:00 \n\n\n\t港口B  18:00  \n ", articleExpected: "港口A  10:00 \n\n  港口B  18:00" },
+  { name: "PRE inline elements", html: "<pre>  <strong>港口A</strong>  <code>10:00\t开港</code>\n\n\n<span>港口B</span>\t 18:00  <script>unsafe script</script><iframe src=\"https://example.org/unsafe\">unsafe frame</iframe></pre>", expected: "  港口A  10:00\t开港\n\n\n港口B\t 18:00  ", articleExpected: "港口A  10:00    开港\n\n港口B     18:00" },
+  { name: "PRE surrounded by normal blocks", html: "<p> 前文 </p><pre>  港口A  10:00 \n\n\n港口B\t18:00  </pre><p> 后文<br>复核 </p>", expected: "前文\n\n  港口A  10:00 \n\n\n港口B\t18:00  \n\n后文\n复核", articleExpected: "前文\n\n港口A  10:00 \n\n港口B    18:00\n\n后文\n复核" },
 ]
 it.each(boundaryCases)("preserves exact $name separators and strips dangerous nodes", ({ html, expected }) => {
   expect(plainSelection(`${html}<script>unsafe script</script><style>unsafe style</style><iframe src=\"https://example.org/unsafe\">unsafe frame</iframe><form>private field</form>`)).toBe(expected)
 })
-it.each(boundaryCases.flatMap(fixture => (fixture.selectionOnly ? ["selection"] as const : ["selection", "article"] as const).map(mode => ({ ...fixture, mode }))))("preserves $name from $mode preview through save payload to stored material", async ({ mode, html, expected, name }) => {
+it.each(boundaryCases.flatMap(fixture => (fixture.selectionOnly ? ["selection"] as const : ["selection", "article"] as const).map(mode => ({ ...fixture, mode, expected: mode === "article" ? fixture.articleExpected ?? fixture.expected : fixture.expected }))))("preserves $name from $mode preview through save payload to stored material", async ({ mode, html, expected, name }) => {
   // Runtime-load real server modules without mixing their Node-only TS project
   // into this browser-DOM test's TypeScript project. Production types stay checked.
   const { open } = await vi.importActual<{ open: (path: string) => { database: unknown, repository: unknown, native: { close: () => void } } }>("#/intel/__fixtures__/isolated-db")
