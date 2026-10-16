@@ -12,7 +12,7 @@
 
 新检出`.tmp/clipper-synthetic-final-6087a16`，Node24.15.0/ABI137/pnpm10.30.3；正常frozen install含scripts，未复用node_modules、ignore-scripts或手拷原生模块。普通build/typecheck/lint、普通扩展、合成app/扩展build均raw0；11文件173定向、138文件1437全量通过+3既有Windows跳过，三个隔离smoke均raw0。[原始门禁](summary.json)及逐命令日志保留。
 
-同SHA/检出的HTTP步骤重试raw0，**108检查**见[结果](http-result.json)和[收据](synthetic-http-retry.json)：普通实际content.js VM与普通编译后HTTP拒绝本地精确URL及18变体，19URL拒绝前后DB增量0；有效HTTPS元数据仍可保存，避免全拒绝假阳性。合成content.js和HTTP仅接受精确URL、拒绝18变体。无标记cwd在建库前失败，原权限/key/receiver/CSP相同、标记存在。
+同SHA/检出的HTTP步骤重试raw0，**108检查**见[结果](http-result.json)和[收据](synthetic-http-retry.json)：普通实际content.js VM与普通编译后HTTP拒绝本地精确URL及18变体，19URL拒绝前后DB增量0；正式 content.js 仍接受 HTTPS 元数据，避免全拒绝假阳性。合成content.js和HTTP仅接受精确URL、拒绝18变体。无标记cwd在建库前失败，原权限/key/receiver/CSP相同、标记存在。
 
 隔离API测试显式保存元数据、本人原创全文及修订；既有GET核实真实本地URL、未知时间、正文空格/tab/连续换行、旧全文和元数据版本、重放/不变不增版/修订增版。[读回](http-saved-readback.json)。Provider usage/runtime/translation cache/intel fetch/executor增量0。该测试库有1材料3版本，**不用于用户交接**。没有实际Chrome操作，不能替代nonce交付/GUI。
 
