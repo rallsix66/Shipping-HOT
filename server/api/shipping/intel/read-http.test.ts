@@ -107,7 +107,7 @@ describe("intel actual HTTP read routes", () => {
   it("reads manual checklist with query_only and no external requests", async () => {
     const response = await get("manual")
     expect(response.status).toBe(200)
-    expect(response.body.items).toHaveLength(41)
+    expect(response.body.items).toHaveLength(42)
     expect(response.body.items.find((row: { catalogId: string }) => row.catalogId === "CN-P05")).toMatchObject({ persistence: "disallowed", recentActions: [] })
   })
 
@@ -174,7 +174,7 @@ describe("intel actual HTTP read routes", () => {
       const code = readFileSync(path, "utf8")
       expect(code).not.toMatch(/(?:bootstrap|initShipping|recoverIntel|secureFetch|collectIntel|providers\/|runtime\/|paid|translation|fetch\()/)
       const imports = [...code.matchAll(/from\s+["']([^"']+)["']/g)].map(match => match[1])
-      expect(imports.every(module => ["h3", "#/database/intel", "#/intel/content-license", "#/intel/manual-catalog", "#/intel/manual-license", "#/utils/intel-read"].includes(module))).toBe(true)
+      expect(imports.every(module => ["h3", "@shared/manual-clip", "#/database/intel", "#/intel/content-license", "#/intel/manual-catalog", "#/intel/manual-license", "#/utils/intel-read"].includes(module))).toBe(true)
       expect(code).not.toMatch(/\b(?:eval|require|import)\s*\(/)
     }
     // Repository has write APIs, but these named methods' bodies contain only bound SELECT statements.

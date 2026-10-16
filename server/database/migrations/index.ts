@@ -27,6 +27,7 @@ import { paidReceiptUsageBookingMigration } from "#/database/migrations/025-paid
 import { intelWebListMigration } from "#/database/migrations/026-intel-web-list"
 import { intelJsonListMigration } from "#/database/migrations/027-intel-json-list"
 import { intelManualMigration } from "#/database/migrations/028-intel-manual"
+import { manualClipMigration } from "#/database/migrations/029-manual-clip"
 
 export interface ShippingMigration {
   readonly version: number
@@ -67,6 +68,7 @@ export const shippingMigrations: readonly ShippingMigration[] = [
   intelWebListMigration,
   intelJsonListMigration,
   intelManualMigration,
+  manualClipMigration,
 ]
 
 export const latestShippingSchemaVersion = shippingMigrations[shippingMigrations.length - 1].version

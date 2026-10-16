@@ -129,7 +129,7 @@ describe("json_list 027 isolated persistence", () => {
       const objects = state.native.prepare("SELECT type,name,sql FROM sqlite_master WHERE tbl_name='intel_source' AND type IN ('index','trigger') ORDER BY name").all()
       const columns = state.native.prepare("PRAGMA table_info(intel_item_version)").all()
       const fk = state.native.prepare("PRAGMA foreign_key_list(json_child)").all()
-      expect((await initializeShippingDatabase(state.database, "mock")).schemaVersion).toBe(28)
+      expect((await initializeShippingDatabase(state.database, "mock")).schemaVersion).toBe(29)
       await initializeShippingDatabase(state.database, "mock")
       expect(tables.map(table => state.native.prepare(`SELECT * FROM ${table}${table === "intel_source" ? " WHERE id IN ('intel:th-w01', 'test:web')" : ""}`).all())).toEqual(snapshots)
       expect(state.native.prepare("SELECT type,name,sql FROM sqlite_master WHERE tbl_name='intel_source' AND type IN ('index','trigger') ORDER BY name").all()).toEqual(objects)

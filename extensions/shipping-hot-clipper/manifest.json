@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Shipping HOT 人工剪藏",
+  "version": "0.1.0",
+  "minimum_chrome_version": "106",
+  "description": "预览当前页或选区，送入本机 Shipping HOT 后由用户显式保存。",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7CQ81TlmSquo1qo1ckPucPkSU2i1H/cjCmpPCByT5zohNJf+c0GYYXMZyF0tpyAycjwyOj7NFVxHneLixESZmqoKtnHfd1OCSGmH5pG8wrDjczFkS0j9puhAVv6+HwgDtPYCtFZ6Ypv514JXCegrVM9Lavmi8d91duDrvMp69ozxKww6FM3pa4iAC3hERZ0+Jx1xv5xpHFJv6ivl5mVyTR8paQHrT73bV5Dr8u2iX09Q8F3upCGNZgnl4+kcD+1939iuY7n6HyvvLqbAbJSgn80STDEmYhqinImKHzdwklB3twzpEFS99RtLLdKk/4FkyEhM4VlPMrObnDF2RLnLJwIDAQAB",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "action": { "default_popup": "popup.html" },
+  "background": { "service_worker": "worker.js" },
+  "externally_connectable": { "ids": [], "matches": ["http://127.0.0.1:5173/feed"] },
+  "content_security_policy": { "extension_pages": "script-src 'self'; object-src 'none'; connect-src 'none'; img-src 'none'" }
+}

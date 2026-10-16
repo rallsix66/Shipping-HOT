@@ -84,7 +84,7 @@ describe("026 isolated upgrade and web_list collection", () => {
       const run = native.prepare("SELECT * FROM intel_fetch_run").all()
       const objects = native.prepare("SELECT type,name,sql FROM sqlite_master WHERE type IN ('index','trigger') AND tbl_name='intel_source' ORDER BY name").all()
       const fk = native.prepare("PRAGMA foreign_key_list(source_child)").all()
-      expect((await initializeShippingDatabase(database, "mock")).schemaVersion).toBe(28)
+      expect((await initializeShippingDatabase(database, "mock")).schemaVersion).toBe(29)
       await initializeShippingDatabase(database, "mock")
       expect(native.prepare("SELECT * FROM intel_source WHERE id='intel:th-w01'").all()).toEqual(source)
       expect(native.prepare("SELECT * FROM intel_item").all()).toEqual(item)

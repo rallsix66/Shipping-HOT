@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto"
 import type { Database } from "db0"
+import type { ClipAudit } from "@shared/manual-clip"
 import type { WebDate } from "#/intel/sources/web-list"
 
 export type IntelPersistence = "full" | "excerpt_only" | "disallowed"
@@ -67,6 +68,7 @@ export interface IntelCurrentChange {
 export type IntelWriteOutcome = "created" | "unchanged" | "revised" | "restored"
 
 export interface IntelManualAction {
+  metadata?: ClipAudit
   requestId: string
   payloadHash: string
   sourceId: string
@@ -400,7 +402,7 @@ export class IntelRepository {
   }
 
   private async saveManualAction(action: IntelManualAction, outcome: string, itemId: string | null, versionId: string | null) {
-    await this.db.prepare("INSERT INTO intel_manual_action (request_id, payload_hash, source_id, action, operator, entered_at, item_id, version_id, outcome) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").run(action.requestId, action.payloadHash, action.sourceId, action.action, action.operator, action.enteredAt, itemId, versionId, outcome)
+    await this.db.prepare("INSERT INTO intel_manual_action (request_id, payload_hash, source_id, action, operator, entered_at, item_id, version_id, outcome, metadata_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").run(action.requestId, action.payloadHash, action.sourceId, action.action, action.operator, action.enteredAt, itemId, versionId, outcome, action.metadata ? JSON.stringify(action.metadata) : null)
   }
 
   async recordManualCheck(action: IntelManualAction): Promise<void> {
@@ -410,12 +412,12 @@ export class IntelRepository {
   }
 
   async listManualActions(sourceId: string, itemId?: string): Promise<Row[]> {
-    return this.db.prepare(`SELECT request_id, action, operator, entered_at, item_id, version_id, outcome FROM intel_manual_action WHERE source_id = ? ${itemId ? "AND item_id = ?" : ""} ORDER BY entered_at DESC, rowid DESC LIMIT 20`).all(...(itemId ? [sourceId, itemId] : [sourceId])) as Promise<Row[]>
+    return this.db.prepare(`SELECT request_id, action, operator, entered_at, item_id, version_id, outcome, metadata_json FROM intel_manual_action WHERE source_id = ? ${itemId ? "AND item_id = ?" : ""} ORDER BY entered_at DESC, rowid DESC LIMIT 20`).all(...(itemId ? [sourceId, itemId] : [sourceId])) as Promise<Row[]>
   }
 
   /** Identity lookup is independent of the bounded audit display. */
   async getManualVersionAction(sourceId: string, itemId: string, versionId: string): Promise<Row | undefined> {
-    return this.db.prepare("SELECT operator, entered_at FROM intel_manual_action WHERE source_id = ? AND item_id = ? AND version_id = ? AND action = 'submit' ORDER BY entered_at DESC, rowid DESC LIMIT 1").get(sourceId, itemId, versionId) as Promise<Row | undefined>
+    return this.db.prepare("SELECT operator, entered_at, metadata_json FROM intel_manual_action WHERE source_id = ? AND item_id = ? AND version_id = ? AND action = 'submit' ORDER BY entered_at DESC, rowid DESC LIMIT 1").get(sourceId, itemId, versionId) as Promise<Row | undefined>
   }
 
   async listCurrentChanges(itemId: string): Promise<IntelCurrentChange[]> {

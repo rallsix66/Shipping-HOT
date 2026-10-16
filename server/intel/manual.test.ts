@@ -10,6 +10,7 @@ import { intelExecutorCurrentMigration } from "#/database/migrations/023-intel-e
 import { intelWebListMigration } from "#/database/migrations/026-intel-web-list"
 import { intelJsonListMigration } from "#/database/migrations/027-intel-json-list"
 import { intelManualMigration } from "#/database/migrations/028-intel-manual"
+import { manualClipMigration } from "#/database/migrations/029-manual-clip"
 import { shippingMigrations } from "#/database/migrations"
 
 const NOW = "2026-10-14T05:00:00.000Z"
@@ -76,7 +77,7 @@ describe("r2-7 manual entry offline SQLite", () => {
       fault = false
       await initShippingTables(old.database, "real")
       await initShippingTables(old.database, "real")
-      expect(old.native.prepare("SELECT COUNT(*) AS n FROM intel_source WHERE kind='manual' AND enabled=0").get()).toEqual({ n: 39 })
+      expect(old.native.prepare("SELECT COUNT(*) AS n FROM intel_source WHERE kind='manual' AND enabled=0").get()).toEqual({ n: 40 })
       expect(old.native.prepare("PRAGMA foreign_key_check").all()).toEqual([])
     } finally {
       old.native.close()
@@ -90,6 +91,7 @@ describe("r2-7 manual entry offline SQLite", () => {
       const saved = await old.repository.writeEntry({ sourceId: source.id, canonicalUrl: "https://www.tmd.go.th/old", title: "Old", contentHash: "old", contentScope: "metadata_only", extractorVersion: "original", blocks: [], fetchedAt: NOW })
       const before = old.native.prepare("SELECT * FROM intel_item").all()
       await intelManualMigration.up(old.database)
+      await manualClipMigration.up(old.database)
       expect(old.native.prepare("SELECT * FROM intel_item").all()).toEqual(before)
       expect(await old.repository.listManualActions(source.id, saved.itemId)).toEqual([])
       expect((await old.repository.getSource("intel:manual:cn-p05"))?.kind).toBe("manual")

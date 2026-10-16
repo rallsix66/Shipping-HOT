@@ -12,7 +12,8 @@ export interface WebDate {
   raw: string | null
   rule: string
   basis: string
-  calendar: "gregorian" | "buddhist"
+  calendar: "gregorian" | "buddhist" | "unknown"
+  role?: "unknown" | "publication" | "effective" | "updated"
   precision: "unknown" | "day" | "minute" | "second" | "millisecond"
   timezone: "missing" | "explicit" | "configured"
   utcOffset: string | null

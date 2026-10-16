@@ -1,0 +1,12 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>Shipping HOT 剪藏</title></head><body>
+<h1>Shipping HOT 人工剪藏</h1><p>本地预览；不是官方核验或自动采集证据。关闭弹窗会丢失未发送预览。</p>
+<label>提取范围<select id="mode"><option value="article">当前文章</option><option value="selection">选中文字</option><option value="metadata">仅标题链接</option></select></label><button id="extract" type="button">重新提取</button>
+<label>实际页面地址<input id="url" readonly></label><label>标题<input id="title" maxlength="500"></label><label>正文或摘录<textarea id="body" maxlength="100000"></textarea></label>
+<label>原时间文本<input id="date" maxlength="400"></label><label>时间角色<select id="role"><option value="unknown">未知</option><option value="publication">原文发布时间</option><option value="effective">生效时间</option><option value="updated">更新时间</option></select></label>
+<label>录入人（自行填写，未经身份认证）<input id="operator" maxlength="80"></label>
+<label>权利依据<select id="basis"><option value="unknown">未知／未声明</option><option value="own_work">本人原创</option><option value="permission">已获许可</option></select></label>
+<label>保存范围<select id="scope"><option value="metadata_only">仅元数据</option><option value="excerpt">摘录（最多280字符）</option><option value="full_text">全文</option></select></label>
+<label>依据说明（授权方、范围或原创说明）<textarea id="evidence" maxlength="1000"></textarea></label>
+<p>这是用户声明，未经独立核验；不授予自动抓取、转发或模型使用权限。未知权利只允许元数据。</p>
+<button id="metadata" type="button">明确移除正文，仅带标题链接</button><button id="send" type="button">送到 Shipping HOT 预览</button><p id="status" role="status"></p>
+<script type="module" src="/src/popup.ts"></script></body></html>

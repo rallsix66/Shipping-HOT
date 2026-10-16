@@ -1,6 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
+import type { ClipAudit } from "@shared/manual-clip"
+import { MANUAL_CLIP_SOURCE_ID } from "@shared/manual-clip"
 import { ShippingShell } from "./app"
+import { ClipImporter } from "./clip-import"
 import { FeedPage } from "./pages"
 import { myFetch } from "~/utils"
 import "./manual-intel.css"
@@ -33,6 +36,7 @@ interface Item {
   firstSeenAt: string
 }
 interface Detail {
+  clip?: ClipAudit | null
   manualLabel: string | null
   manualEntry?: { operator: string, enteredAt: string } | null
   item: Item
@@ -104,6 +108,14 @@ export function ManualIntelPage({ onLegacy }: { onLegacy: () => void }) {
           <button type="button" className="chip" onClick={onLegacy}>已有 Feed 与天气预警</button>
         </div>
         <p>正文许可仅适用于已核实的精确 Feed 产品 URL；同域其他页面仅保存元数据。纯手动表单：粘贴 URL 不联网，不自动识别字段、不调用模型。未知发布时间留空；录入人是本地操作者自填，未经账户认证。风险分析尚未开放。</p>
+        <ClipImporter onSaved={(id) => {
+          setSelected(id)
+          setVersion("")
+          void client.invalidateQueries({ queryKey: ["intel-items"] })
+          void client.invalidateQueries({ queryKey: ["intel-item"] })
+          void client.invalidateQueries({ queryKey: ["intel-manual"] })
+        }}
+        />
         <div className="manual-grid">
           <aside className="filter-panel">
             <h3>人工信源检查清单</h3>
@@ -168,8 +180,9 @@ export function ManualIntelPage({ onLegacy }: { onLegacy: () => void }) {
                 许可范围纯文本（不接受 HTML）
                 <textarea disabled={!source || source.persistence === "disallowed"} maxLength={100000} value={body} onChange={event => setBody(event.target.value)} />
               </label>
-              <button className="chip" disabled={busy || !source || source.historicalOnly} type="submit">{busy ? "保存中" : "保存人工条目"}</button>
-              <button className="chip" disabled={busy || !source || source.historicalOnly || !operator.trim()} type="button" onClick={() => void save("checked_empty")}>已查看，无新内容</button>
+              {sourceId === MANUAL_CLIP_SOURCE_ID && <p>人工剪藏资料请使用上方插件导入；此处原目录表单不授予剪藏正文许可。</p>}
+              <button className="chip" disabled={busy || !source || source.historicalOnly || sourceId === MANUAL_CLIP_SOURCE_ID} type="submit">{busy ? "保存中" : "保存人工条目"}</button>
+              <button className="chip" disabled={busy || !source || source.historicalOnly || !operator.trim() || sourceId === MANUAL_CLIP_SOURCE_ID} type="button" onClick={() => void save("checked_empty")}>已查看，无新内容</button>
             </form>
             <p role="status">{message}</p>
             <h3>持久化资讯（最多 50 条）</h3>
@@ -211,6 +224,14 @@ export function ManualIntelPage({ onLegacy }: { onLegacy: () => void }) {
                     <p>{`所选版本原文发布时间：${detail.data.selectedVersion?.publishedAt ?? "未知"}（不以录入时间代替）`}</p>
                     {detail.data.manualEntry && <p>{`所选版本录入人：${detail.data.manualEntry.operator} · 录入时间：${detail.data.manualEntry.enteredAt}`}</p>}
                     <p>{detail.data.manualLabel ? `${detail.data.manualLabel} · 真实性未独立核验` : "未记录人工提交，保留原有来源"}</p>
+                    {detail.data.clip && (
+                      <div className="manual-text">
+                        <p>{`实际来源地址：${detail.data.clip.actualUrl}`}</p>
+                        <p>{`剪藏方式：${detail.data.clip.mode}；浏览器提取时间：${detail.data.clip.capturedAt}（不是发布时间）`}</p>
+                        <p>{`原时间证据：${detail.data.clip.date.raw || "未知"}；字段：${detail.data.clip.date.field || "未知"}；角色：${detail.data.clip.date.role}`}</p>
+                        <p>{`权利依据：${detail.data.clip.rights.basis}；范围：${detail.data.clip.rights.scope}；说明：${detail.data.clip.rights.evidence || "无"}；声明人：${detail.data.clip.declaredBy}；声明时间：${detail.data.clip.declaredAt}。用户声明未经独立核验，不授予自动采集、转发或模型使用权限。`}</p>
+                      </div>
+                    )}
                     {detail.data.manualActions.map((action, index) => (
                       <p key={index}>
                         录入人：

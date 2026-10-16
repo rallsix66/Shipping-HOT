@@ -1,12 +1,15 @@
 import { createHash } from "node:crypto"
+import { MANUAL_CLIP_SOURCE_ID } from "@shared/manual-clip"
 import type { IntelRepository } from "#/database/intel"
 import { contentScopeFor, licensedBlocks } from "#/intel/content-license"
 import { manualCatalog } from "#/intel/manual-catalog"
 import { intelSourceSeeds } from "#/intel/sources.ts"
 import { canonicalizeFeedUrl } from "#/providers/feed"
 import { manualPersistenceFor } from "#/intel/manual-license"
+import { manualClipSubmit } from "#/intel/manual-clip"
+import { ManualInputError } from "#/intel/manual-input"
 
-export class ManualInputError extends Error {}
+export { ManualInputError } from "#/intel/manual-input"
 function invalid(): never {
   throw new ManualInputError("invalid_manual_input")
 }
@@ -22,6 +25,7 @@ const hash = (value: unknown) => createHash("sha256").update(JSON.stringify(valu
 export async function manualSubmit(repo: IntelRepository, input: unknown, now: string): Promise<{ outcome: string, itemId?: string, versionId?: string }> {
   if (!input || typeof input !== "object" || Array.isArray(input)) return invalid()
   const data = input as Record<string, unknown>
+  if (data.sourceId === MANUAL_CLIP_SOURCE_ID) return manualClipSubmit(repo, data, now)
   if (Object.keys(data).some(key => !["requestId", "sourceId", "operator", "action", "url", "title", "body", "publishedAt"].includes(key))) return invalid()
   const requestId = text(data.requestId, 80)
   if (!/^[\w-]{8,80}$/.test(requestId)) return invalid()

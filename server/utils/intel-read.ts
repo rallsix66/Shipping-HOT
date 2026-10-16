@@ -1,8 +1,9 @@
 import { type H3Event, defineEventHandler, getQuery, getRouterParam, setResponseHeader, setResponseStatus } from "h3"
+import { MANUAL_CLIP_SOURCE_ID } from "@shared/manual-clip"
 import { type IntelContentScope, type IntelItemRecord, IntelRepository, type IntelSourceRecord, type IntelVersionRecord } from "#/database/intel"
 import { licensedBlocks, permittedContentScope } from "#/intel/content-license"
 import { manualCatalog } from "#/intel/manual-catalog"
-import { manualPersistenceFor } from "#/intel/manual-license"
+import { manualPersistenceFor, readClipAudit } from "#/intel/manual-license"
 
 class IntelReadError extends Error {
   constructor(readonly statusCode: number, message: string) {
@@ -53,11 +54,11 @@ function sourceDto(source: IntelSourceRecord) {
 function itemDto(item: IntelItemRecord) {
   return { id: item.id, sourceId: item.sourceId, title: item.title, publishedAt: item.publishedAt, firstSeenAt: item.firstSeenAt, lastSeenAt: item.lastSeenAt, currentVersionId: item.currentVersionId, canonicalUrl: publicUrl(item.canonicalUrl) }
 }
-function scope(source: IntelSourceRecord, version: IntelVersionRecord, manualUrl?: string): IntelContentScope {
-  const persistence = manualUrl === undefined ? source.persistence : manualPersistenceFor(source, manualUrl)
+function scope(source: IntelSourceRecord, version: IntelVersionRecord, manualUrl?: string, action?: Record<string, unknown>): IntelContentScope {
+  const persistence = manualUrl === undefined ? source.persistence : manualPersistenceFor(source, manualUrl, action)
   return permittedContentScope(persistence, version.contentScope)
 }
-function versionDto(version: IntelVersionRecord, source: IntelSourceRecord, manualUrl?: string) {
+function versionDto(version: IntelVersionRecord, source: IntelSourceRecord, manualUrl?: string, action?: Record<string, unknown>) {
   const e = version.dateEvidence
   const dateEvidence = e
     ? {
@@ -65,6 +66,7 @@ function versionDto(version: IntelVersionRecord, source: IntelSourceRecord, manu
         rule: publicText(e.rule),
         basis: publicText(e.basis),
         calendar: ["gregorian", "buddhist"].includes(e.calendar) ? e.calendar : null,
+        role: ["unknown", "publication", "effective", "updated"].includes(e.role ?? "") ? e.role : "unknown",
         precision: ["unknown", "day", "minute", "second", "millisecond"].includes(e.precision) ? e.precision : "unknown",
         timezone: ["missing", "explicit", "configured"].includes(e.timezone) ? e.timezone : "missing",
         utcOffset: typeof e.utcOffset === "string" && /^[+-](?:0\d|1[0-3]):[0-5]\d$|^[+-]14:00$/.test(e.utcOffset) ? e.utcOffset : null,
@@ -72,7 +74,7 @@ function versionDto(version: IntelVersionRecord, source: IntelSourceRecord, manu
         publishedAt: typeof e.publishedAt === "string" && /^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(e.publishedAt) ? e.publishedAt : null,
       }
     : null
-  return { id: version.id, itemId: version.itemId, publishedAt: version.sourcePublishedAt, fetchedAt: version.fetchedAt, createdAt: version.createdAt, contentScope: scope(source, version, manualUrl), dateEvidence }
+  return { id: version.id, itemId: version.itemId, publishedAt: version.sourcePublishedAt, fetchedAt: version.fetchedAt, createdAt: version.createdAt, contentScope: scope(source, version, manualUrl, action), dateEvidence }
 }
 
 /** Read-only adapter: no initialization, runtime, provider or recovery dependency. */
@@ -122,12 +124,15 @@ export async function readIntelItem(event: H3Event, repo: IntelRepository) {
   const blocks = selected ? await repo.readVersionBlocks(selected.id) : []
   const selectedManual = selected ? await repo.getManualVersionAction(source.id, item.id, selected.id) : undefined
   const manualUrl = selectedManual ? item.canonicalUrl : undefined
-  const permitted = selected ? scope(source, selected, manualUrl) : "metadata_only"
+  const permitted = selected ? scope(source, selected, manualUrl, selectedManual) : "metadata_only"
   const title = blocks.find(block => block.type === "title")?.text ?? item.title
   const safeBlocks = permitted === "full_text" ? blocks : licensedBlocks(permitted, title, blocks.filter(block => block.type !== "title").map(block => block.text).join(""))
   const manualActions = await repo.listManualActions(source.id, item.id)
   const grade = manualCatalog.find(row => row.catalogId === source.catalogId)?.grade ?? (["TH-W01", "ID-W01"].includes(source.catalogId) ? "A" : "unknown")
-  const manualLabel = selectedManual ? grade === "A" ? "官方通知（人工录入）" : grade === "unknown" ? "资讯（人工录入，类型未核验）" : "报道（人工录入）" : null
-  const versionRows = await Promise.all(versions.map(async version => versionDto(version, source, await repo.getManualVersionAction(source.id, item.id, version.id) ? item.canonicalUrl : undefined)))
-  return { item: itemDto(item), source: sourceDto(source), manualActions, manualLabel, manualEntry: selectedManual ? { operator: selectedManual.operator, enteredAt: selectedManual.entered_at } : null, versions: page(versionRows, limit, offset), selectedVersion: selected ? { ...versionDto(selected, source, manualUrl), blocks: safeBlocks } : null }
+  const manualLabel = source.id === MANUAL_CLIP_SOURCE_ID ? "人工剪藏资料（未经独立核验，不是官方预警）" : selectedManual ? grade === "A" ? "官方通知（人工录入）" : grade === "unknown" ? "资讯（人工录入，类型未核验）" : "报道（人工录入）" : null
+  const versionRows = await Promise.all(versions.map(async (version) => {
+    const action = await repo.getManualVersionAction(source.id, item.id, version.id)
+    return versionDto(version, source, action ? item.canonicalUrl : undefined, action)
+  }))
+  return { item: itemDto(item), source: sourceDto(source), manualActions: manualActions.map(({ metadata_json: _metadata, ...action }) => action), manualLabel, clip: readClipAudit(selectedManual), manualEntry: selectedManual ? { operator: selectedManual.operator, enteredAt: selectedManual.entered_at } : null, versions: page(versionRows, limit, offset), selectedVersion: selected ? { ...versionDto(selected, source, manualUrl, selectedManual), blocks: safeBlocks } : null }
 }

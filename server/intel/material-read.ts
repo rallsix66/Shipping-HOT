@@ -42,7 +42,7 @@ export async function readIntelMaterial(repo: MaterialRepository, itemId: string
     const title = blocks.find(block => block.type === "title")?.text
     if (title === undefined) return { ok: false, code: "version_content_unavailable" }
     const manual = await repo.getManualVersionAction(source.id, item.id, version.id)
-    const persistence = manual ? manualPersistenceFor(source, item.canonicalUrl) : source.persistence
+    const persistence = manual ? manualPersistenceFor(source, item.canonicalUrl, manual) : source.persistence
     const { contentScope: storedContentScope, ...identity } = version
     const contentScope = permittedContentScope(persistence, storedContentScope)
     const safeBlocks = contentScope === "full_text"

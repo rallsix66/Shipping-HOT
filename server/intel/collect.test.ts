@@ -84,7 +84,7 @@ describe("migrations 021/022/023 (intel)", () => {
     const { database, native } = createNativeDatabase()
     await initShippingTables(database, "mock")
     await initShippingTables(database, "mock")
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(28)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(29)
     const tables = new Set((native.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>).map(row => row.name))
     for (const table of ["intel_source", "intel_fetch_run", "intel_item", "intel_item_version", "intel_item_block"]) expect(tables.has(table)).toBe(true)
     const applied = native.prepare("SELECT version, COUNT(*) AS c FROM schema_migrations WHERE version IN (21, 22, 23) GROUP BY version").all() as Array<{ c: number }>
