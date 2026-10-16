@@ -1,0 +1,36 @@
+{
+  "sha": "f95f73b4f6b3e6c150fc442f1b10f5fb308e6b71",
+  "method": "actual baseline plainSelection, type annotations transpiled away; synthetic inert DOM in isolated VM, not a browser run",
+  "cases": [
+    {
+      "name": "double spaces and lines",
+      "expected": "港口A  10:00\n港口B  18:00",
+      "baselineActual": "港口A 10:00 港口B 18:00",
+      "baselineFails": true
+    },
+    {
+      "name": "tabs",
+      "expected": "港口A\t10:00\n港口B\t\t18:00",
+      "baselineActual": "港口A 10:00 港口B 18:00",
+      "baselineFails": true
+    },
+    {
+      "name": "edge spaces and blank lines",
+      "expected": "  港口A  10:00 \n\n\n\t港口B  18:00  \n ",
+      "baselineActual": "港口A 10:00 港口B 18:00",
+      "baselineFails": true
+    },
+    {
+      "name": "inline elements",
+      "expected": "  港口A  10:00\t开港\n\n\n港口B\t 18:00  ",
+      "baselineActual": "港口A 10:00 开港 港口B 18:00",
+      "baselineFails": true
+    },
+    {
+      "name": "surrounded by normal blocks",
+      "expected": "前文\n\n  港口A  10:00 \n\n\n港口B\t18:00  \n\n后文\n复核",
+      "baselineActual": "前文\n\n港口A 10:00 港口B 18:00\n\n后文\n复核",
+      "baselineFails": true
+    }
+  ]
+}
