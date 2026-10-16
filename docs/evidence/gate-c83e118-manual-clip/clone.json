@@ -1,0 +1,19 @@
+{
+  "name": "clone",
+  "command": [
+    "git",
+    "-c",
+    "core.excludesFile=",
+    "clone",
+    "--no-hardlinks",
+    "--branch",
+    "codex/shipping-hot-r2",
+    ".",
+    "D:\\try one\\Shipping HOT\\.tmp\\clipper-final-c83e118"
+  ],
+  "cwd": "D:\\try one\\Shipping HOT",
+  "sha": "c83e118da17c4ebe04d42b748000d502694d3888",
+  "startedAt": "2026-10-16T02:58:06.308Z",
+  "endedAt": "2026-10-16T02:58:07.410Z",
+  "rawExit": 0
+}

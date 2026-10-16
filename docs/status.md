@@ -1,6 +1,10 @@
-## 本地人工剪藏第一切片（2026-10-16，实施/离线验收中，待主审）
+## 本地人工剪藏第一切片（2026-10-16，离线限定验收通过，待主审/浏览器）
 
-用户于2026-10-16 10:18 UTC+8确认“能写进系统里面就行了”（Sentinel_22d4c3856c0881918829ea55d72e760b），随后主会话批准本地代码/合成夹具/隔离库实现。此新授权取代下方上一轮审计的停工文字，仅限ADR-010；不是对任意网页的版权授权。当前新增人工剪藏资料通道、schema029原审计元数据、插件预览/短期草稿桥接与系统内显式保存/查看。未安装扩展、未授予浏览器权限、未读取真实页面，未启动应用/24h或改变生产开关。门禁与精确代码SHA待本轮独立检出完成后记录，当前不宣称整体PASS。
+用户于2026-10-16 10:18 UTC+8确认“能写进系统里面就行了”（Sentinel_22d4c3856c0881918829ea55d72e760b），随后主会话批准本地代码/合成夹具/隔离库实现。此新授权取代下方上一轮审计的停工文字，仅限ADR-010；不是对任意网页的版权授权。代码`c83e118da17c4ebe04d42b748000d502694d3888`新增disabled人工剪藏资料来源、schema029原审计元数据、插件预览/短期草稿桥接与系统内显式保存/查看。权利未知只允许元数据，正文须明确的用户声明、依据、范围及适用URL；声明未经独立核验，不授予自动来源权限/官方预警身份/模型权利。实际URL、原日期、提取/录入时间分开保存，原Intel版本/幂等/审计复用，后端Readability/全局防护不变。
+
+精确SHA在本机新检出`.tmp/clipper-final-c83e118`正常frozen install含scripts、build/typecheck/lint、扩展build、10文件128定向、137文件1392全量通过/3既有Windows跳过、3隔离smoke全部rawexit0；54新用例含nonce/发送身份/导航/重放、显式保存、许可、时间、旧版本、native重启及schema29回滚重试。四个保留DB/Secret文件前后hash不变。固定Web Clipper MIT提交`6d56d618b00bd970aa738d6a7a61edee27783e81`的实际代码复用清单、Defuddle0.19.2 DOM-only边界、生成包hash和真实Neat Freak均见[报告](evidence/gate-c83e118-manual-clip/report.md)、[门禁](evidence/gate-c83e118-manual-clip/summary.json)、[收尾](evidence/gate-c83e118-manual-clip/closeout.md)。无真实信源请求命令/新真实记录/LLM/付费；测试拒绝fetch和本机合成HTTP，不冒称整机逐包零外呼。首次driver clone引用错误未创建检出，原件保留，修复结构化参数后上述门禁通过。
+
+扩展仅已打包、未安装/授予权限/读取真实页面；实际Chrome Manifest加载、sender字段、消息交付、视觉/键盘/宽度/当前GUI与S7仍`NOT_RUN`，主会话独立审查pending。接收地址严格`http://127.0.0.1:5173/feed`、公开ID`jihkanbaffodclncabodmbahbbgkjoad`，这是构建配置，不代表服务已启动。包位于`.tmp/clipper-final-c83e118/.tmp/clipper-package`，zip`.tmp/Shipping-HOT-Clipper-c83e118.zip`。未启动应用/24h、改生产开关、合并/部署/强推；原R2整体BLOCKED和25/39、24/34、历史3/5不变。临时现场未清理。
 
 ## R2 41项来源当前累计证据（2026-10-15，待独立审查）
 

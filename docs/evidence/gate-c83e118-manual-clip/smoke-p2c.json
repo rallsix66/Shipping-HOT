@@ -1,0 +1,9 @@
+{
+  "name": "smoke-p2c",
+  "command": "pnpm smoke:p2c-runtime",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-final-c83e118",
+  "sha": "c83e118da17c4ebe04d42b748000d502694d3888",
+  "startedAt": "2026-10-16T03:00:14.181Z",
+  "endedAt": "2026-10-16T03:00:15.266Z",
+  "rawExit": 0
+}
