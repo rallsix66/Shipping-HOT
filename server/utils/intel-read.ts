@@ -4,7 +4,7 @@ import { isSyntheticClipUrl } from "@shared/clip-build"
 import { type IntelContentScope, type IntelItemRecord, IntelRepository, type IntelSourceRecord, type IntelVersionRecord } from "#/database/intel"
 import { licensedBlocks, permittedContentScope } from "#/intel/content-license"
 import { manualCatalog } from "#/intel/manual-catalog"
-import { manualPersistenceFor, readClipAudit } from "#/intel/manual-license"
+import { manualPersistenceFor, privateClipScopeFor, readClipAudit } from "#/intel/manual-license"
 
 class IntelReadError extends Error {
   constructor(readonly statusCode: number, message: string) {
@@ -57,6 +57,10 @@ function itemDto(item: IntelItemRecord) {
   return { id: item.id, sourceId: item.sourceId, title: item.title, publishedAt: item.publishedAt, firstSeenAt: item.firstSeenAt, lastSeenAt: item.lastSeenAt, currentVersionId: item.currentVersionId, canonicalUrl: publicUrl(item.canonicalUrl, item.sourceId) }
 }
 function scope(source: IntelSourceRecord, version: IntelVersionRecord, manualUrl?: string, action?: Record<string, unknown>): IntelContentScope {
+  if (manualUrl !== undefined) {
+    const privateScope = privateClipScopeFor(source, manualUrl, version.contentScope, action)
+    if (privateScope !== null) return privateScope
+  }
   const persistence = manualUrl === undefined ? source.persistence : manualPersistenceFor(source, manualUrl, action)
   return permittedContentScope(persistence, version.contentScope)
 }

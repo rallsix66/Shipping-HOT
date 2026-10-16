@@ -9,6 +9,7 @@ import { open } from "#/intel/__fixtures__/isolated-db"
 import { initShippingTables } from "#/database/shipping"
 import { manualSubmit } from "#/intel/manual"
 import { manualClipDate } from "#/intel/manual-clip"
+import { manualPersistenceFor, privateClipScopeFor, readClipAudit } from "#/intel/manual-license"
 import { readIntelMaterial } from "#/intel/material-read"
 import manualPost from "#/api/shipping/intel/manual.post"
 import itemGet from "#/api/shipping/intel/items/[id].get"
@@ -30,6 +31,57 @@ beforeEach(async () => {
 afterEach(() => {
   state.native.close()
   vi.unstubAllGlobals()
+})
+it("stores private confirmed text without a declaration, and keeps generic licensed reads metadata-only", async () => {
+  const { operator: _operator, rights: _rights, ...data } = input()
+  data.clip.body = "Private synthetic text  \t\n\n".repeat(40)
+  const saved = await manualSubmit(state.repository, data, now)
+  const source = (await state.repository.getSource(MANUAL_CLIP_SOURCE_ID))!
+  const item = (await state.repository.getItem(saved.itemId!))!
+  const action = await state.repository.getManualVersionAction(MANUAL_CLIP_SOURCE_ID, saved.itemId!, saved.versionId!)
+  const audit = readClipAudit(action)
+  expect(audit).toMatchObject({ capture: "manual_user_capture", usage: "private_material", rightsStatus: "unknown", recordedBy: CLIP_UNIDENTIFIED_OPERATOR, recordedAt: now, verification: "manual_capture_unverified" })
+  expect(audit).not.toHaveProperty("rights")
+  expect(manualPersistenceFor(source, item.canonicalUrl, action)).toBe("disallowed")
+  expect(privateClipScopeFor(source, item.canonicalUrl, "full_text", action)).toBe("full_text")
+  expect(privateClipScopeFor({ ...source, kind: "rss" }, item.canonicalUrl, "full_text", action)).toBeNull()
+  expect(privateClipScopeFor(source, "https://example.org/other", "full_text", action)).toBeNull()
+  expect((await state.repository.readVersionBlocks(saved.versionId!)).filter(b => b.type !== "title").map(b => b.text).join("")).toBe(data.clip.body)
+  expect(await manualSubmit(state.repository, data, now)).toMatchObject(saved)
+  const generic = await readIntelMaterial(state.repository, saved.itemId!, saved.versionId!)
+  expect(generic.ok && generic.material).toMatchObject({ contentScope: "metadata_only", bodyText: null })
+  expect(source).toMatchObject({ enabled: false, persistence: "disallowed", status: "never_run" })
+})
+it("preserves legacy permission/version history when a private capture has identical text", async () => {
+  const legacy = await manualSubmit(state.repository, input(), now)
+  const oldAudit = await state.repository.getManualVersionAction(MANUAL_CLIP_SOURCE_ID, legacy.itemId!, legacy.versionId!)
+  const { rights: _rights, ...data } = input()
+  data.requestId = "private-same-text-1"
+  const next = await manualSubmit(state.repository, data, now)
+  expect(next).toMatchObject({ outcome: "revised", itemId: legacy.itemId })
+  expect(next.versionId).not.toBe(legacy.versionId)
+  expect(await state.repository.getManualVersionAction(MANUAL_CLIP_SOURCE_ID, legacy.itemId!, legacy.versionId!)).toEqual(oldAudit)
+  const old = await readIntelMaterial(state.repository, legacy.itemId!, legacy.versionId!)
+  expect(old.ok && old.material.bodyText).toBe(draft.body)
+  expect(await manualSubmit(state.repository, { ...data, requestId: "private-same-text-2" }, now)).toMatchObject({ outcome: "unchanged", versionId: next.versionId })
+})
+it("defaults missing optional date fields to unknown without granting caller-derived facts", async () => {
+  const { rights: _rights, ...data } = input()
+  const { date: _date, ...withoutDate } = data.clip
+  const saved = await manualSubmit(state.repository, { ...data, clip: withoutDate }, now)
+  const version = await state.repository.getVersion(saved.itemId!, saved.versionId!)
+  expect(version?.dateEvidence).toMatchObject({ role: "unknown", timezone: "missing", publishedAt: null, raw: null })
+})
+it.each(["x".repeat(100001), "<script>unsafe</script>"])("keeps private body size/plain-text restrictions", async (body) => {
+  const { rights: _rights, ...data } = input()
+  await expect(manualSubmit(state.repository, { ...data, clip: { ...data.clip, body } }, now)).rejects.toThrow()
+  expect(await state.repository.listItems(MANUAL_CLIP_SOURCE_ID)).toHaveLength(0)
+})
+it("does not accept private capture markers or no-declaration body for an automatic source", async () => {
+  const { rights: _rights, ...data } = input()
+  await expect(manualSubmit(state.repository, { ...data, sourceId: "intel:th-w01" }, now)).rejects.toThrow()
+  await expect(manualSubmit(state.repository, { ...data, authorized: true }, now)).rejects.toThrow()
+  expect(await state.repository.listItems(MANUAL_CLIP_SOURCE_ID)).toHaveLength(0)
 })
 it.each([undefined, "", " \t\n"])("saves without a supplied clipping operator and records unverified server-time audit: %j", async (operator) => {
   const data = { ...input(), operator }
@@ -109,7 +161,7 @@ it("does not create revisions for capture/parser version alone, but date evidenc
   b.clip.date.raw = "2026-10-17"
   expect(await manualSubmit(state.repository, b, now)).toMatchObject({ outcome: "revised" })
 })
-it("requires explicit rights and exact applicable URL, never silently drops body", async () => {
+it("validates compatible legacy declarations and exact applicable URL without silently dropping body", async () => {
   const data = input()
   data.rights.basis = "unknown"
   await expect(manualSubmit(state.repository, data, now)).rejects.toThrow()
@@ -206,7 +258,7 @@ it.each([
 ])("preserves raw date and derives only supported semantics: %s", (raw, role, precision, timezone, publishedAt) => {
   expect(manualClipDate({ raw: String(raw), field: "synthetic", role: role as "publication" })).toMatchObject({ raw, role, precision, timezone, publishedAt })
 })
-it("runs bridge-shaped payload through same-origin HTTP and reads stored text without write/egress", async () => {
+it.each(["legacy", "private"])("runs %s bridge-shaped payload through same-origin HTTP and reads stored text without write/egress", async (mode) => {
   vi.stubGlobal("useDatabase", () => state.database)
   const server = createServer(toNodeListener(createApp().use(security).use(createRouter().post("/api/shipping/intel/manual", manualPost).get("/api/shipping/intel/items/:id", itemGet))))
   await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve))
@@ -226,17 +278,25 @@ it("runs bridge-shaped payload through same-origin HTTP and reads stored text wi
     })
   }
   try {
-    expect((await request("/api/shipping/intel/manual", input(), "https://evil.example")).status).toBe(403)
-    expect(await state.repository.listItems(MANUAL_CLIP_SOURCE_ID)).toHaveLength(0)
     const { operator: _operator, ...withoutName } = input()
-    const saved = await request("/api/shipping/intel/manual", withoutName)
+    const { rights: _rights, ...privateInput } = withoutName
+    if (mode === "private") privateInput.clip.body = "Private confirmed body  \t\n\n".repeat(40)
+    expect((await request("/api/shipping/intel/manual", mode === "private" ? privateInput : withoutName, "https://evil.example")).status).toBe(403)
+    expect(await state.repository.listItems(MANUAL_CLIP_SOURCE_ID)).toHaveLength(0)
+    const saved = await request("/api/shipping/intel/manual", mode === "private" ? privateInput : withoutName)
     expect(saved.status).toBe(200)
     state.native.exec("PRAGMA query_only=ON")
     const read = await request(`/api/shipping/intel/items/${saved.data.itemId}`)
     expect(read.data.manualLabel).toContain("不是官方预警")
     expect(read.data.clip.actualUrl).toBe(url)
     expect(read.data.manualEntry).toMatchObject({ operator: CLIP_UNIDENTIFIED_OPERATOR })
-    expect(read.data.selectedVersion.blocks[1].text).toBe(draft.body)
+    expect(read.data.selectedVersion.blocks.filter((b: { type: string }) => b.type !== "title").map((b: { text: string }) => b.text).join("")).toBe(mode === "private" ? privateInput.clip.body : draft.body)
+    if (mode === "private") {
+      expect(read.data.clip).toMatchObject({ usage: "private_material", rightsStatus: "unknown" })
+      expect(read.data.clip).not.toHaveProperty("rights")
+      const generic = await readIntelMaterial(state.repository, saved.data.itemId, saved.data.versionId)
+      expect(generic.ok && generic.material.bodyText).toBeNull()
+    }
   } finally {
     server.closeAllConnections()
     await new Promise<void>(resolve => server.close(() => resolve()))

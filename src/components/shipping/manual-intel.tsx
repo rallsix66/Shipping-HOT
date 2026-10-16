@@ -229,7 +229,9 @@ export function ManualIntelPage({ onLegacy }: { onLegacy: () => void }) {
                         <p>{`实际来源地址：${detail.data.clip.actualUrl}`}</p>
                         <p>{`剪藏方式：${detail.data.clip.mode}；浏览器提取时间：${detail.data.clip.capturedAt}（不是发布时间）`}</p>
                         <p>{`原时间证据：${detail.data.clip.date.raw || "未知"}；字段：${detail.data.clip.date.field || "未知"}；角色：${detail.data.clip.date.role}`}</p>
-                        <p>{`权利依据：${detail.data.clip.rights.basis}；范围：${detail.data.clip.rights.scope}；说明：${detail.data.clip.rights.evidence || "无"}；声明人：${detail.data.clip.declaredBy}；声明时间：${detail.data.clip.declaredAt}。用户声明未经独立核验，不授予自动采集、转发或模型使用权限。`}</p>
+                        {detail.data.clip.verification === "manual_capture_unverified"
+                          ? <p>人工私人资料；权利状态未知，未经独立核验。不授予自动采集、公开发布或模型训练许可。</p>
+                          : <p>{`权利依据：${detail.data.clip.rights.basis}；范围：${detail.data.clip.rights.scope}；说明：${detail.data.clip.rights.evidence || "无"}；声明人：${detail.data.clip.declaredBy}；声明时间：${detail.data.clip.declaredAt}。用户声明未经独立核验，不授予自动采集、转发或模型使用权限。`}</p>}
                       </div>
                     )}
                     {detail.data.manualActions.map((action, index) => (

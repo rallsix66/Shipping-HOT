@@ -4,10 +4,11 @@ import { Buffer } from "node:buffer"
 import { expect, it } from "vitest"
 import { CLIP_EXTENSION_ID, CLIP_ORIGIN } from "../shared/clipper-bridge"
 
-it("has no operator input while keeping explicit rights controls", () => {
+it("keeps the clipping preview free of identity, rights and time-role forms", () => {
   const popup = readFileSync("extensions/shipping-hot-clipper/popup.html", "utf8")
   expect(popup).not.toMatch(/<input[^>]*id="operator"/)
-  for (const id of ["basis", "scope", "evidence"]) expect(popup).toContain(`id="${id}"`)
+  for (const id of ["basis", "scope", "evidence", "role"]) expect(popup).not.toContain(`id="${id}"`)
+  expect(popup).not.toMatch(/<(input|select)[^>]*id="date"/)
 })
 
 it("pins a public-only stable extension ID and the narrow local message surface", () => {

@@ -28,12 +28,21 @@ export interface ClipRights {
   evidence: string
   applicableUrl: string
 }
-export interface ClipAudit extends ClipDraft {
+export interface LegacyClipAudit extends ClipDraft {
   rights: ClipRights
   declaredBy: string
   declaredAt: string
   verification: "user_declaration_unverified"
 }
+export interface PrivateClipAudit extends ClipDraft {
+  capture: "manual_user_capture"
+  usage: "private_material"
+  rightsStatus: "unknown"
+  recordedBy: string
+  recordedAt: string
+  verification: "manual_capture_unverified"
+}
+export type ClipAudit = LegacyClipAudit | PrivateClipAudit
 export function clipText(value: unknown, max: number, required = true): string {
   if (typeof value !== "string" || value.length > max || [...value].some(char => char.charCodeAt(0) < 32 && !"\t\n\r".includes(char)) || /<\/?[a-z!]|&#?\w+;/i.test(value) || (required && !value.trim())) throw new Error("invalid_clip_input")
   return value
@@ -68,9 +77,10 @@ export function clipActualUrl(value: unknown): string {
 }
 export function parseClipDraft(value: unknown): ClipDraft {
   const row = exactKeys(value, ["protocol", "actualUrl", "title", "body", "mode", "date", "capturedAt", "extractorVersion"])
-  const date = exactKeys(row.date, ["raw", "field", "role"])
-  if (row.protocol !== CLIP_PROTOCOL || !["metadata", "selection", "article"].includes(String(row.mode)) || !["unknown", "publication", "effective", "updated"].includes(String(date.role))) throw new Error("invalid_clip_input")
-  const draft: ClipDraft = { protocol: CLIP_PROTOCOL, actualUrl: clipActualUrl(row.actualUrl), title: clipText(row.title, 500), body: clipText(row.body, 100000, false), mode: row.mode as ClipMode, date: { raw: clipText(date.raw, 400, false), field: clipText(date.field, 80, false), role: date.role as DateRole }, capturedAt: clipText(row.capturedAt, 40), extractorVersion: clipText(row.extractorVersion, 80) }
+  const date = exactKeys(row.date === undefined ? {} : row.date, ["raw", "field", "role"])
+  const role = date.role === undefined ? "unknown" : date.role
+  if (row.protocol !== CLIP_PROTOCOL || !["metadata", "selection", "article"].includes(String(row.mode)) || !["unknown", "publication", "effective", "updated"].includes(String(role))) throw new Error("invalid_clip_input")
+  const draft: ClipDraft = { protocol: CLIP_PROTOCOL, actualUrl: clipActualUrl(row.actualUrl), title: clipText(row.title, 500), body: clipText(row.body, 100000, false), mode: row.mode as ClipMode, date: { raw: clipText(date.raw === undefined ? "" : date.raw, 400, false), field: clipText(date.field === undefined ? "" : date.field, 80, false), role: role as DateRole }, capturedAt: clipText(row.capturedAt, 40), extractorVersion: clipText(row.extractorVersion, 80) }
   if (!/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(draft.capturedAt) || !Number.isFinite(Date.parse(draft.capturedAt)) || (draft.mode === "metadata" && draft.body) || new TextEncoder().encode(JSON.stringify(draft)).length > CLIP_MAX_BYTES) throw new Error("invalid_clip_input")
   return draft
 }

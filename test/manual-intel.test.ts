@@ -40,3 +40,13 @@ it("separates read error/loading/empty and hides cached records on errors", () =
   state.sources = { isPending: true }
   expect(draw()).toContain("读取中")
 })
+
+it("renders private-capture details separately from compatible legacy declarations", () => {
+  const data = state.detail.data as Record<string, unknown>
+  data.clip = { actualUrl: "https://example.org/private", mode: "selection", capturedAt: "2026-10-16T02:00:00Z", date: { raw: "", field: "", role: "unknown" }, verification: "manual_capture_unverified" }
+  expect(draw()).toContain("人工私人资料；权利状态未知")
+  expect(draw()).not.toContain("声明人：")
+  data.clip = { ...(data.clip as object), verification: "user_declaration_unverified", rights: { basis: "permission", scope: "excerpt", evidence: "Legacy proof" }, declaredBy: "Old supplied name", declaredAt: "2026-10-16T02:00:00Z" }
+  expect(draw()).toContain("Old supplied name")
+  expect(draw()).toContain("Legacy proof")
+})

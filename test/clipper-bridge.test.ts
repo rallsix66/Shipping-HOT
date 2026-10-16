@@ -21,6 +21,15 @@ beforeEach(() => {
   } }, () => clock)
 })
 const msg = (type = "claim") => ({ protocol: CLIP_PROTOCOL, nonce, type })
+it("delivers confirmed private body with no rights form or forged grant", async () => {
+  delete row!.transfer.rights
+  row!.transfer.draft.mode = "selection"
+  row!.transfer.draft.body = "Synthetic private text ".repeat(40)
+  const response = await receiveClip(nonce, { sendMessage: async (_id, value) => broker.claim(value, sender) })
+  const payload = clipSavePayload(response)
+  expect(payload.clip.body.length).toBeGreaterThan(280)
+  expect(payload).not.toHaveProperty("rights")
+})
 it.each([undefined, "", " \t\n"])("normalizes an omitted/blank clipping operator without requiring a name: %j", async (operator) => {
   row!.transfer.operator = operator
   const response = await receiveClip(nonce, { sendMessage: async (_id, value) => broker.claim(value, sender) })

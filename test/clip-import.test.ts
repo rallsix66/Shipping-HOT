@@ -45,6 +45,17 @@ it.each([undefined, ""])("saves a name-free preview with automatic unidentified 
   await vi.waitFor(() => expect(state.fetch).toHaveBeenCalledOnce())
   expect(state.fetch.mock.calls[0][1].body.operator).toBe(CLIP_UNIDENTIFIED_OPERATOR)
 })
+it("submits the confirmed body as private material without fabricating a rights declaration", async () => {
+  delete (state.values[0] as { rights?: unknown }).rights
+  const tree = draw()
+  expect(JSON.stringify(tree)).not.toContain("用户声明")
+  state.fetch.mockResolvedValue({ outcome: "created", itemId: "private-item" })
+  expect(state.fetch).not.toHaveBeenCalled()
+  find(tree, "form")!.props.onSubmit({ preventDefault: vi.fn() })
+  await vi.waitFor(() => expect(state.fetch).toHaveBeenCalledOnce())
+  expect(state.fetch.mock.calls[0][1].body.clip.body).toBe("Synthetic owned text")
+  expect(state.fetch.mock.calls[0][1].body).not.toHaveProperty("rights")
+})
 it("retries an uncertain identical save with the same ID; edited material receives a new ID", async () => {
   state.fetch.mockRejectedValue(new Error("uncertain synthetic response"))
   find(draw(), "form")!.props.onSubmit({ preventDefault: vi.fn() })
@@ -60,7 +71,7 @@ it("retries an uncertain identical save with the same ID; edited material receiv
   await vi.waitFor(() => expect(state.fetch).toHaveBeenCalledTimes(3))
   expect(state.fetch.mock.calls[2][1].body.requestId).not.toBe(firstId)
 })
-it("never sends body when rights are unknown even if a draft is forged in memory", async () => {
+it("still rejects a malformed legacy declaration instead of treating it as private capture", async () => {
   ;(state.values[0] as { rights: { basis: string } }).rights.basis = "unknown"
   find(draw(), "form")!.props.onSubmit({ preventDefault: vi.fn() })
   await vi.waitFor(() => expect(state.values[2]).toBe(false))

@@ -29,18 +29,21 @@ export async function manualClipSubmit(repo: IntelRepository, data: Record<strin
     const operator = clipOperator(data.operator)
     if (!/^[\w-]{8,80}$/.test(requestId) || data.sourceId !== MANUAL_CLIP_SOURCE_ID || data.action !== "submit") throw new Error("invalid_clip_input")
     const draft = parseClipDraft(data.clip)
-    const rights = parseClipRights(data.rights, draft.actualUrl)
-    if ((rights.scope === "metadata_only" && draft.body) || (rights.scope === "excerpt" && draft.body.length > 280)) throw new Error("clip_body_exceeds_rights")
+    const rights = data.rights === undefined ? undefined : parseClipRights(data.rights, draft.actualUrl)
+    if (rights && ((rights.scope === "metadata_only" && draft.body) || (rights.scope === "excerpt" && draft.body.length > 280))) throw new Error("clip_body_exceeds_rights")
     const source = await repo.getSource(MANUAL_CLIP_SOURCE_ID)
     if (!source || source.kind !== "manual" || source.catalogId !== "MANUAL-CLIP" || source.enabled) throw new Error("invalid_clip_source")
     const canonicalUrl = canonicalizeFeedUrl(draft.actualUrl)!
     const dateEvidence = manualClipDate(draft.date)
-    const blocks = licensedBlocks(rights.scope, draft.title, draft.body)
-    const metadata: ClipAudit = { ...draft, body: "", rights, declaredBy: operator, declaredAt: now, verification: "user_declaration_unverified" }
+    const contentScope = rights?.scope ?? (draft.body ? "full_text" : "metadata_only")
+    const blocks = licensedBlocks(contentScope, draft.title, draft.body)
+    const metadata: ClipAudit = rights
+      ? { ...draft, body: "", rights, declaredBy: operator, declaredAt: now, verification: "user_declaration_unverified" }
+      : { ...draft, body: "", capture: "manual_user_capture", usage: "private_material", rightsStatus: "unknown", recordedBy: operator, recordedAt: now, verification: "manual_capture_unverified" }
     const hash = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex")
     // Capture/software version is audit; only semantic date/content changes version.
-    const contentHash = hash({ title: draft.title, dateEvidence, contentScope: rights.scope, blocks })
-    return await repo.writeEntry({ sourceId: MANUAL_CLIP_SOURCE_ID, canonicalUrl, title: draft.title, publishedAt: dateEvidence.publishedAt ?? undefined, dateEvidence, contentHash, contentScope: rights.scope, blocks, fetchedAt: now, extractorVersion: "manual-clip-v1" }, { requestId, sourceId: MANUAL_CLIP_SOURCE_ID, operator, enteredAt: now, action: "submit", payloadHash: hash({ operator, metadata: { ...metadata, declaredAt: undefined }, contentHash }), metadata })
+    const contentHash = hash({ title: draft.title, dateEvidence, contentScope, blocks, ...(!rights ? { usage: "private_material" } : {}) })
+    return await repo.writeEntry({ sourceId: MANUAL_CLIP_SOURCE_ID, canonicalUrl, title: draft.title, publishedAt: dateEvidence.publishedAt ?? undefined, dateEvidence, contentHash, contentScope, blocks, fetchedAt: now, extractorVersion: "manual-clip-v1" }, { requestId, sourceId: MANUAL_CLIP_SOURCE_ID, operator, enteredAt: now, action: "submit", payloadHash: hash({ operator, metadata: { ...metadata, declaredAt: undefined, recordedAt: undefined }, contentHash }), metadata })
   } catch (error) {
     if (error instanceof Error && error.message === "manual_request_conflict") throw error
     if (error instanceof Error && /^(?:invalid_|sensitive_|clip_)/.test(error.message)) throw new ManualInputError(error.message)

@@ -1,5 +1,5 @@
 import { CLIP_EXTENSION_ID, CLIP_ORIGIN, parseClipTransfer } from "../../../shared/clipper-bridge"
-import type { ClipDraft, ClipMode, DateRole } from "../../../shared/manual-clip"
+import type { ClipDraft, ClipMode } from "../../../shared/manual-clip"
 import { chromeAPI as chrome } from "./chrome"
 import { extractPageContent } from "./content-extractor"
 import "./popup.css"
@@ -21,7 +21,7 @@ async function extract() {
     field("url").value = draft.actualUrl
     field("title").value = draft.title
     field("body").value = draft.body
-    field("date").value = draft.date.raw
+    document.getElementById("date")!.textContent = `页面时间：${draft.date.raw || "未知"}`
     message(`仅本地预览，尚未发送或保存。接收入口：${CLIP_ORIGIN}/feed`)
   } catch (error) {
     draft = undefined
@@ -33,22 +33,15 @@ async function extract() {
 document.getElementById("extract")!.addEventListener("click", () => {
   void extract()
 })
-document.getElementById("metadata")!.addEventListener("click", () => {
-  if (!draft) return
-  draft = { ...draft, mode: "metadata", body: "" }
-  field("body").value = ""
-  field("scope").value = "metadata_only"
-  message("已按你的选择移除本次草稿正文；仅带标题、链接和时间证据。")
-})
 document.getElementById("send")!.addEventListener("click", () => {
   if (!draft || busy) return
   busy = true
   void (async () => {
-    const transfer = parseClipTransfer({ draft: { ...draft, title: field("title").value, body: field("body").value, date: { ...draft!.date, raw: field("date").value, role: field("role").value as DateRole } }, rights: { basis: field("basis").value, scope: field("scope").value, evidence: field("evidence").value, applicableUrl: draft!.actualUrl }, requestId: crypto.randomUUID() })
+    const transfer = parseClipTransfer({ draft: { ...draft, title: field("title").value, body: field("body").value }, requestId: crypto.randomUUID() })
     const result = await chrome.runtime.sendMessage(transfer) as { ok?: boolean }
     if (!result?.ok) throw new Error("发送未确认")
     message("已送入系统预览；请在系统中核对并点击保存。草稿两分钟过期，仅可领取一次。")
-  })().catch(() => message("不能发送：正文需明确权利依据与范围，摘录最多280字符。未知权利请明确移除正文。也请检查系统入口和扩展ID。")).finally(() => {
+  })().catch(() => message("发送未确认，请重新提取并检查系统入口是否已打开；正文最多100000字符。")).finally(() => {
     busy = false
   })
 })

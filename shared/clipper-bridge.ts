@@ -6,7 +6,7 @@ export const CLIP_EXTENSION_ID = "jihkanbaffodclncabodmbahbbgkjoad"
 export const CLIP_TTL_MS = 120000
 export interface ClipTransfer {
   draft: ClipDraft
-  rights: ClipRights
+  rights?: ClipRights
   operator?: string
   requestId: string
 }
@@ -36,15 +36,15 @@ export interface ClipSessionStore {
 export function parseClipTransfer(input: unknown): ClipTransfer {
   const row = exactKeys(input, ["draft", "rights", "operator", "requestId"])
   const draft = parseClipDraft(row.draft)
-  const rights = parseClipRights(row.rights, draft.actualUrl)
-  if ((rights.scope === "metadata_only" && draft.body) || (rights.scope === "excerpt" && draft.body.length > 280)) throw new Error("clip_body_exceeds_rights")
+  const rights = row.rights === undefined ? undefined : parseClipRights(row.rights, draft.actualUrl)
+  if (rights && ((rights.scope === "metadata_only" && draft.body) || (rights.scope === "excerpt" && draft.body.length > 280))) throw new Error("clip_body_exceeds_rights")
   const requestId = clipText(row.requestId, 80)
   if (!/^[\w-]{8,80}$/.test(requestId)) throw new Error("invalid_clip_input")
-  return { draft, rights, operator: clipOperator(row.operator), requestId }
+  return { draft, ...(rights ? { rights } : {}), operator: clipOperator(row.operator), requestId }
 }
 export function clipSavePayload(transfer: ClipTransfer) {
   const row = parseClipTransfer(transfer)
-  return { requestId: row.requestId, sourceId: MANUAL_CLIP_SOURCE_ID, operator: row.operator, action: "submit", clip: row.draft, rights: row.rights }
+  return { requestId: row.requestId, sourceId: MANUAL_CLIP_SOURCE_ID, operator: row.operator, action: "submit", clip: row.draft, ...(row.rights ? { rights: row.rights } : {}) }
 }
 export function validClipSender(sender: ClipSender, row: ClipSession): boolean {
   try {
