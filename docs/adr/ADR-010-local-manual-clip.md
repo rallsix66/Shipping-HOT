@@ -1,6 +1,6 @@
 # ADR-010 — Local manual clipping through a one-use browser draft
 
-- Status: approved implementation scope, 2026-10-16; browser installation/permissions and live acceptance remain unapproved / NOT_RUN.
+- Status: approved implementation scope, 2026-10-16; actual browser acceptance remains NOT_RUN; approved user-manual synthetic scope and name-free correction are recorded below.
 - Authority: user confirmation “能写进系统里面就行了”, 2026-10-16 10:18 UTC+8, Sentinel_22d4c3856c0881918829ea55d72e760b, followed by the parent-approved local implementation contract. This is product authorization, not a copyright grant for arbitrary pages.
 
 Keep Nitro/SQLite, IntelRepository, immutable versions, canonical dedupe, request replay and manual audit. Add one disabled manual source `intel:manual:clip` / `MANUAL-CLIP`, outside the automatic-source denominator. It is unverified user material, never an official alert, provider qualification or automatic risk confirmation. No new material library, collector, scheduler, model or network fetch.

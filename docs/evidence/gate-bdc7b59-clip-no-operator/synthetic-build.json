@@ -1,0 +1,9 @@
+{
+  "name": "synthetic-build",
+  "command": "pnpm build:clip-synthetic",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-no-operator-bdc7b59",
+  "sha": "bdc7b59d88d440966d8c6aff7fc68229c136dbb1",
+  "startedAt": "2026-10-16T07:21:19.470Z",
+  "endedAt": "2026-10-16T07:21:57.472Z",
+  "rawExit": 0
+}

@@ -1,0 +1,88 @@
+{
+  "at": "2026-10-16T07:19:39.261Z",
+  "head": "bdc7b59d88d440966d8c6aff7fc68229c136dbb1",
+  "oldArtifact": ".tmp/clipper-manual-6087a16",
+  "oldZip": {
+    "path": ".tmp/Shipping-HOT-Clipper-Synthetic-6087a16.zip",
+    "sha256": "6cf98f33451b8c0d82f20a62855df809378f7502f801d8bc046d8520def2e86b"
+  },
+  "oldExtension": [
+    {
+      "file": "assets\\popup-aVjAIvTt.css",
+      "sha256": "8a2411b56c91c16e429d97f0d5fe6de4556b718846ca7997d098bb3885dd68db"
+    },
+    {
+      "file": "assets\\popup-mkRLBbSk.js",
+      "sha256": "62036fe96039d551a457c90cb76c0dfb27f64d3ca68780586ff978406082f424"
+    },
+    {
+      "file": "content.js",
+      "sha256": "c24781c496cbfc9e7084c3fdca84f5dc99c101172b87d920eb773dc823ac0e2b"
+    },
+    {
+      "file": "licenses\\defuddle-MIT.txt",
+      "sha256": "c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092"
+    },
+    {
+      "file": "licenses\\obsidian-clipper-MIT.txt",
+      "sha256": "3ca04f8f046005103b08302723521f546605a34a269d5a867a82d200dfd9c0d7"
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "a7890899d2fa62e4b7e32321119a8450d7fbef1d77c3c11f4ea80a71ce75532c"
+    },
+    {
+      "file": "popup.html",
+      "sha256": "123ca49edb1914f49efbe6d9bd0a5f364dac118c582c43ebc1d9693d480209cc"
+    },
+    {
+      "file": "worker.js",
+      "sha256": "4061a47fc7ead3e8127b05b7a81142afc5781bfef8c976ec5eadaee853528379"
+    }
+  ],
+  "oldRun": {
+    "sha": "6087a169cb2e591e3acb10d23ccc641d8212f5c0",
+    "receiverPid": 58772,
+    "sourcePid": 25368,
+    "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-6087a16\\run",
+    "receiver": "http://127.0.0.1:5173/feed",
+    "source": "http://127.0.0.1:5174/synthetic-article.html",
+    "synthetic": true,
+    "browserOperated": false
+  },
+  "snapshot": {
+    "readAt": "2026-10-16T07:15:09.661Z",
+    "readOnly": true,
+    "sha": "6087a169cb2e591e3acb10d23ccc641d8212f5c0",
+    "databasePath": "D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-6087a16\\run\\.data\\shipping-hot-v3.sqlite3",
+    "expectedSource": "http://127.0.0.1:5174/synthetic-article.html",
+    "snapshot": {
+      "metadata": {
+        "schema_version": 29,
+        "data_mode": "real",
+        "database_id": "f79f2bd2-050f-42b0-831e-6e787eb1344f"
+      },
+      "counts": {
+        "translation_cache": 0,
+        "provider_usage": 0,
+        "provider_runtime": 0,
+        "intel_fetch_run": 0,
+        "intel_item": 0,
+        "intel_item_version": 0,
+        "intel_item_block": 0,
+        "intel_executor": 0,
+        "intel_item_current_change": 0,
+        "intel_source": 42,
+        "intel_manual_action": 0
+      }
+    },
+    "list": {
+      "items": [],
+      "limit": 50,
+      "offset": 0,
+      "hasMore": false
+    },
+    "details": []
+  },
+  "policy": "Old artifact/ZIP/database retained untouched; no deletion. Re-read database immediately before switching."
+}

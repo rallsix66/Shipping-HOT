@@ -1,4 +1,14 @@
-## 当前：精确来源合成剪藏测试包（2026-10-16，离线PASS，父审/用户手动Chrome待验）
+## 当前：剪藏免填录入人（2026-10-16，离线PASS，父审/新包GUI待验）
+
+用户15:14UTC+8明确要求去掉姓名输入（Sentinel_386b8dfb40ac8191b002c84c69d904d5）。产品SHA **`bdc7b59d88d440966d8c6aff7fc68229c136dbb1`**：扩展与系统接收预览均无录入人输入/必填；剪藏专用桥接/后端把缺省或空白姓名记为`未识别人工操作（未经身份认证）`，自动保留保存时间/来源/操作审计。合法旧姓名与旧版本仍可读；畸形旧字段仍拒绝。其他人工/政策表单原要求不变，许可/URL/正文/同源/幂等/版本校验未放松，无schema/认证/权限变更。
+
+精确SHA新检出`.tmp/clipper-no-operator-bdc7b59`正常frozen install含scripts、普通与合成build、typecheck、lint、**190定向/1454全量通过+3既有Windows跳过、3隔离smoke**全部raw0。新增17回归覆盖无姓名保存/重放/旧版本与许可拒绝，含真实H3 POST→SQLite→GET；本轮未把6087的108HTTP检查冒称重新执行。[报告](evidence/gate-bdc7b59-clip-no-operator/report.md) / [原门禁](evidence/gate-bdc7b59-clip-no-operator/summary.json) / [真实Neat Freak](evidence/gate-bdc7b59-clip-no-operator/closeout.md)。
+
+新扩展目录`.tmp/clipper-manual-bdc7b59/extension-test`、ZIP`.tmp/Shipping-HOT-Clipper-Synthetic-bdc7b59.zip`；旧6087包8文件/ZIP hash未变。[包/hash](evidence/gate-bdc7b59-clip-no-operator/synthetic-package.json)。继续使用原`.tmp/clipper-manual-6087a16/run/.data/shipping-hot-v3.sqlite3`，UUID`f79f2bd2-050f-42b0-831e-6e787eb1344f`、schema29/real，未搬库/清空；另留一致backup。07:24UTC材料/版本/动作/usage等仍0，仅来源42；receiver10880/source40064仅loopback5173/5174，GET200且HTML/JS匹配新构建。运行证据明确区分实际代码bdc7与原隔离目录6087标记，不伪改旧标记。[保全](evidence/gate-bdc7b59-clip-no-operator/preserved-database.json) / [只读结果](evidence/gate-bdc7b59-clip-no-operator/after-update-readonly.json) / [健康](evidence/gate-bdc7b59-clip-no-operator/manual-service-health.json)。四个保留DB/Secret hash不变。
+
+父审后用户需自行加载新目录、刷新接收页并重新提取草稿；旧目录只点重新加载不会升级。[最短步骤](evidence/gate-bdc7b59-clip-no-operator/handoff.md)。未操作浏览器，本SHA真实GUI/nonce/保存重开仍NOT_RUN；普通HTTPS/完整GUI/S7/24h未验。R2仍BLOCKED：25/39、24/34、历史3/5；无生产启用/付费/模型/合并/部署/强推/清场。
+
+## 历史：6087a16精确来源合成包（限定父审通过，后续免姓名修正见上）
 
 用户14:12UTC+8批准唯一额外来源`http://127.0.0.1:5174/synthetic-article.html`（Sentinel_93f0d70a11e88191be1cf2aac55064f7）。当前产品SHA **`6087a169cb2e591e3acb10d23ccc641d8212f5c0`**（实现9377cc3，随后补全只读依赖闭包审计）。仅显式编译的独立扩展/前端/后端支持该原始整串URL，均有“合成测试版”标记；普通包不能通过环境变量、请求头或Settings开启例外。复用原人工来源、schema29、Intel版本/去重/审计及许可，不改全局Host/Origin/CORS/SSRF、Readability、公开ID、三项权限或桥接。合同见ADR-010。
 

@@ -2,7 +2,7 @@
 
 当前批准的独立合成包及手动交接见[测试构建说明](../../tools/clip-synthetic/README.md)和[当前状态](../../docs/status.md)。仅显式测试包额外接受唯一原创本地URL，普通包继续遵守下方HTTPS限制。用户自行加载/点击/保存，实际Chrome验收尚未通过。
 
-当前是未安装的可审查扩展包。没有授予浏览器权限，没有访问真实网页；实际Chrome加载/点击/键盘/宽度和GUI/S7均为NOT_RUN。不要将离线测试当作浏览器已验收。完整合同见[ADR-010](../../docs/adr/ADR-010-local-manual-clip.md)，当前证据见[状态](../../docs/status.md)。
+这是可审查的本地扩展包；用户手动加载测试不等于完整验收。当前新SHA的实际Chrome交互与GUI/S7以状态文档证据为准，不将离线通过写成GUI已通过。完整合同见[ADR-010](../../docs/adr/ADR-010-local-manual-clip.md)，当前证据见[状态](../../docs/status.md)。
 
 本地构建：`pnpm build:clipper`，输出 `<repo>/.tmp/clipper-package`。固定公开扩展ID `jihkanbaffodclncabodmbahbbgkjoad`；接收地址严格为 `http://127.0.0.1:5173/feed`。这不会启动或配置该服务。入口不匹配时拒绝；不要通过修改全局CORS/Origin、扫描端口或删除Origin来接通。需要其他端口时先审查并同步修改共享常量和Manifest、重新构建/验收。
 
