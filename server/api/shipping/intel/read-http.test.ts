@@ -170,13 +170,17 @@ describe("intel actual HTTP read routes", () => {
       expect((await get("items")).status).toBe(200)
       expect((await get(`items/${itemId}`)).status).toBe(200)
     }
-    for (const path of ["server/utils/intel-read.ts", "server/intel/content-license.ts", "server/api/shipping/intel/sources.get.ts", "server/api/shipping/intel/items.get.ts", "server/api/shipping/intel/items/[id].get.ts"]) {
+    for (const path of ["server/utils/intel-read.ts", "shared/clip-build.ts", "server/intel/content-license.ts", "server/api/shipping/intel/sources.get.ts", "server/api/shipping/intel/items.get.ts", "server/api/shipping/intel/items/[id].get.ts"]) {
       const code = readFileSync(path, "utf8")
       expect(code).not.toMatch(/(?:bootstrap|initShipping|recoverIntel|secureFetch|collectIntel|providers\/|runtime\/|paid|translation|fetch\()/)
       const imports = [...code.matchAll(/from\s+["']([^"']+)["']/g)].map(match => match[1])
-      expect(imports.every(module => ["h3", "@shared/manual-clip", "#/database/intel", "#/intel/content-license", "#/intel/manual-catalog", "#/intel/manual-license", "#/utils/intel-read"].includes(module))).toBe(true)
+      expect(imports.every(module => ["h3", "@shared/manual-clip", "@shared/clip-build", "#/database/intel", "#/intel/content-license", "#/intel/manual-catalog", "#/intel/manual-license", "#/utils/intel-read"].includes(module))).toBe(true)
       expect(code).not.toMatch(/\b(?:eval|require|import)\s*\(/)
     }
+    // The new leaf is only a compile-time capability; it has no imports or
+    // runtime environment/global/network lookup hidden behind that allowance.
+    const policy = readFileSync("shared/clip-build.ts", "utf8").replace(/\/\/[^\n]*/g, "")
+    expect(policy).not.toMatch(/\b(?:process|globalThis|fetch|XMLHttpRequest|require|import)\b/)
     // Repository has write APIs, but these named methods' bodies contain only bound SELECT statements.
     const repo = readFileSync("server/database/intel.ts", "utf8")
     for (const method of ["listSourcesPage", "listItemsPage", "getItem", "listVersionsPage", "getVersion", "listRecentRuns", "getSource", "readVersionBlocks", "getManualVersionAction"]) {
