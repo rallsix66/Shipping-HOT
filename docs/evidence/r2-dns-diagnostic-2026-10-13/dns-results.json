@@ -1,0 +1,110 @@
+{
+  "baseline": "7905d5dbb7b377767913a17d9e49762ea507e037",
+  "dnsApiCalls": 6,
+  "httpCalls": 0,
+  "resolverOverride": false,
+  "results": [
+    {
+      "id": "MY-P02",
+      "hostname": "www.westportsholdings.com",
+      "started": "2026-10-13T04:18:13.153Z",
+      "finished": "2026-10-13T04:18:13.161Z",
+      "method": "node:dns/promises.lookup(all:true), OS getaddrinfo/default resolver, no resolver override",
+      "apiCalls": 1,
+      "addresses": [
+        {
+          "address": "198.18.1.44",
+          "family": 4,
+          "category": "special range (code's denylist; not RFC1918)",
+          "rule": "BLOCKED_V4_RANGES: 198.18.0.0..198.19.255.255",
+          "blockedByCurrentCode": true
+        }
+      ]
+    },
+    {
+      "id": "PH-M01",
+      "hostname": "portcalls.com",
+      "started": "2026-10-13T04:18:13.161Z",
+      "finished": "2026-10-13T04:18:13.163Z",
+      "method": "node:dns/promises.lookup(all:true), OS getaddrinfo/default resolver, no resolver override",
+      "apiCalls": 1,
+      "addresses": [
+        {
+          "address": "198.18.1.45",
+          "family": 4,
+          "category": "special range (code's denylist; not RFC1918)",
+          "rule": "BLOCKED_V4_RANGES: 198.18.0.0..198.19.255.255",
+          "blockedByCurrentCode": true
+        }
+      ]
+    },
+    {
+      "id": "MY-C01",
+      "hostname": "www.customs.gov.my",
+      "started": "2026-10-13T04:18:13.163Z",
+      "finished": "2026-10-13T04:18:13.164Z",
+      "method": "node:dns/promises.lookup(all:true), OS getaddrinfo/default resolver, no resolver override",
+      "apiCalls": 1,
+      "addresses": [
+        {
+          "address": "198.18.1.46",
+          "family": 4,
+          "category": "special range (code's denylist; not RFC1918)",
+          "rule": "BLOCKED_V4_RANGES: 198.18.0.0..198.19.255.255",
+          "blockedByCurrentCode": true
+        }
+      ]
+    },
+    {
+      "id": "MY-T01",
+      "hostname": "www.mof.gov.my",
+      "started": "2026-10-13T04:18:13.164Z",
+      "finished": "2026-10-13T04:18:13.165Z",
+      "method": "node:dns/promises.lookup(all:true), OS getaddrinfo/default resolver, no resolver override",
+      "apiCalls": 1,
+      "addresses": [
+        {
+          "address": "198.18.1.47",
+          "family": 4,
+          "category": "special range (code's denylist; not RFC1918)",
+          "rule": "BLOCKED_V4_RANGES: 198.18.0.0..198.19.255.255",
+          "blockedByCurrentCode": true
+        }
+      ]
+    },
+    {
+      "id": "TH-W01",
+      "hostname": "www.tmd.go.th",
+      "started": "2026-10-13T04:18:13.165Z",
+      "finished": "2026-10-13T04:18:13.166Z",
+      "method": "node:dns/promises.lookup(all:true), OS getaddrinfo/default resolver, no resolver override",
+      "apiCalls": 1,
+      "addresses": [
+        {
+          "address": "198.18.1.48",
+          "family": 4,
+          "category": "special range (code's denylist; not RFC1918)",
+          "rule": "BLOCKED_V4_RANGES: 198.18.0.0..198.19.255.255",
+          "blockedByCurrentCode": true
+        }
+      ]
+    },
+    {
+      "id": "ID-W01",
+      "hostname": "www.bmkg.go.id",
+      "started": "2026-10-13T04:18:13.166Z",
+      "finished": "2026-10-13T04:18:13.166Z",
+      "method": "node:dns/promises.lookup(all:true), OS getaddrinfo/default resolver, no resolver override",
+      "apiCalls": 1,
+      "addresses": [
+        {
+          "address": "198.18.1.49",
+          "family": 4,
+          "category": "special range (code's denylist; not RFC1918)",
+          "rule": "BLOCKED_V4_RANGES: 198.18.0.0..198.19.255.255",
+          "blockedByCurrentCode": true
+        }
+      ]
+    }
+  ]
+}

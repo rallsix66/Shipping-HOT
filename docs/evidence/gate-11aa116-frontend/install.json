@@ -1,0 +1,9 @@
+{
+  "name": "install",
+  "command": "pnpm install --frozen-lockfile",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\ports-demo-review-build",
+  "sha": "11aa1162a286d96bdc7a44a2f61a95d3d2a886e8",
+  "startedAt": "2026-10-14T02:58:47.401Z",
+  "endedAt": "2026-10-14T02:58:56.161Z",
+  "rawExit": 0
+}

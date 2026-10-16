@@ -1,0 +1,14 @@
+{
+  "id": "CN-P01",
+  "url": "https://www.gd.msa.gov.cn/",
+  "startedAt": "2026-10-14T07:56:30.108Z",
+  "status": "NOT_RUN",
+  "httpRequests": 1,
+  "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+  "receivedAt": "2026-10-14T07:56:30.357Z",
+  "httpStatus": 200,
+  "contentType": "text/html; charset=utf-8",
+  "rawByteLength": 80546,
+  "fetchedBytesSha256": "6dc9a6c69a50a0643510cc2fc0125f8bb686a150ff42f3abc1d5a88e25593a2a",
+  "rawLocalOnly": true
+}

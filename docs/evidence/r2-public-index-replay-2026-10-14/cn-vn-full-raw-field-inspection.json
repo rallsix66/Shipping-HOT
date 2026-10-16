@@ -1,0 +1,42 @@
+{
+  "httpRequests": 0,
+  "dnsRequests": 0,
+  "rawCommitted": false,
+  "reports": [
+    {
+      "id": "CN-P01",
+      "rawSha256": "6dc9a6c69a50a0643510cc2fc0125f8bb686a150ff42f3abc1d5a88e25593a2a",
+      "selector": ".index-tab-box:has(.index-tabs > li:first-child > a[href='/html/gdmsa/xxgk/gkml/tzgg/index.html']) .index-tab-con > ul.index-tab-item:first-child",
+      "listMatches": 1,
+      "noticeHeader": "通知公告",
+      "noticeHeaderHref": "/html/gdmsa/xxgk/gkml/tzgg/index.html",
+      "sameItemRows": 8,
+      "noticeTitleLinks": 8,
+      "dateNodes": 8,
+      "allItemLinksOnNoticePath": true,
+      "hsywNewsUsed": false,
+      "configAdded": true
+    },
+    {
+      "id": "VN-P01",
+      "rawSha256": "da133741708879c9fd4544a0137dd8050a92c1dab662ac843bc9892d412bd4ef",
+      "tableHeaders": [
+        "Số/ Thời gian ban hành",
+        "Thông báo hàng hải"
+      ],
+      "allDataRows": 10,
+      "allDataCells": 20,
+      "rowsWithVisibleFullDate": 0,
+      "datetimeAttributes": 0,
+      "dateAttributeMatches": 0,
+      "identifierSamples": [
+        "200/TBHH-CHHĐTVN",
+        "144/TBHH-CHHĐTVN",
+        "185/TBHH-CHHĐTVN"
+      ],
+      "publicationDate": "unknown; no inference from table header or TBHH identifier",
+      "configAdded": false,
+      "detailsFetched": 0
+    }
+  ]
+}

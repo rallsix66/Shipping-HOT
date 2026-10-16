@@ -1,0 +1,10 @@
+{
+  "executionHead": "e37c5e49c0c90d69663af3c5f45f347bfc8326f4",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "productDiff": "",
+  "catalogueDiff": "",
+  "sourceGetAttempts": 1,
+  "systemDnsCalls": 1,
+  "scope": "SITC exact main index200 and existingHTTPS/date compatibility negative; no product/catalogue or qualification changes",
+  "productGate": "NOT_RUN_no_product_change"
+}

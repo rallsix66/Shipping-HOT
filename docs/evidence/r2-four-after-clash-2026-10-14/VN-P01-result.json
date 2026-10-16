@@ -1,0 +1,42 @@
+{
+  "id": "VN-P01",
+  "url": "https://vimawa.gov.vn/vi/thong-bao-hang-hai",
+  "startedAt": "2026-10-14T07:56:30.690Z",
+  "status": "PARTIAL",
+  "httpRequests": 1,
+  "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+  "receivedAt": "2026-10-14T07:56:33.148Z",
+  "httpStatus": 200,
+  "contentType": "text/html; charset=utf-8",
+  "rawByteLength": 63083,
+  "fetchedBytesSha256": "da133741708879c9fd4544a0137dd8050a92c1dab662ac843bc9892d412bd4ef",
+  "rawLocalOnly": true,
+  "parse": "DOM_OBSERVATION_ONLY",
+  "parserError": null,
+  "observedCandidateCount": 1,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 63083
+  },
+  "archivedMetadataSha256": "249ecba32f815f03e80cfd409213b21d10e25e51f16b8c146b6e14cce5ef6a39",
+  "originalHtmlCommitted": false,
+  "sensitiveScan": {
+    "positiveControlDetected": true,
+    "committedMaterialHits": 0
+  },
+  "finishedAt": "2026-10-14T07:56:33.169Z"
+}

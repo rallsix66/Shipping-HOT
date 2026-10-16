@@ -1,0 +1,25 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/reapplied-four-build-20261015
+
+ ✓ server/intel/sources/web-list.test.ts (35 tests) 126ms
+ ✓ server/intel/sources/web-list-conflicts.test.ts (12 tests) 69ms
+ ✓ server/intel/sources/html-index-candidates.test.ts (24 tests) 76ms
+ ✓ server/intel/thai-document-index.test.ts (4 tests) 157ms
+ ✓ server/intel/post-clash-index.test.ts (18 tests) 333ms
+ ✓ server/intel/web-list-conflicts-collect.test.ts (3 tests) 337ms
+ ✓ server/intel/adaptive.test.ts (2 tests) 253ms
+ ✓ server/intel/html-index-candidates-collect.test.ts (4 tests) 604ms
+ ✓ server/intel/vn-disaster-index.test.ts (17 tests) 290ms
+ ✓ server/intel/public-index-candidates-collect.test.ts (22 tests) 757ms
+ ✓ server/intel/json-list-collect.test.ts (7 tests) 1096ms
+     ✓ decodes actual UTF-8 bytes to SQLite, deduplicates and reads date evidence after restart  337ms
+ ✓ server/intel/web-list-collect.test.ts (7 tests) 1170ms
+     ✓ passes archived HTML bytes through secure transport, decoding, parser and SQLite, then reads evidence after restart  453ms
+ ✓ server/intel/collect.test.ts (22 tests) 1598ms
+ ✓ server/runtime/intel-production.test.ts (4 tests) 483ms
+ ✓ server/runtime/intel-bootstrap.test.ts (9 tests) 537ms
+
+ Test Files  15 passed (15)
+      Tests  190 passed (190)
+   Start at  09:25:52
+   Duration  3.70s (transform 8.97s, setup 0ms, import 18.90s, tests 7.89s, environment 2ms)

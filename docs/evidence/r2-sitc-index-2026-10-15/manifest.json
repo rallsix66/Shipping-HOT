@@ -1,0 +1,25 @@
+{
+  "executionHead": "14b6548bcab3ef9df5a24f718dcbf9556cc0ffa5",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "id": "XX-K03",
+  "url": "https://www.sitc.com/en/list.asp?classid=44",
+  "host": "www.sitc.com",
+  "catalogueRowLfSha256": "9942adb927f4be73c4f62288f2b7791fea74c87601fefafa54088c281a8d0e44",
+  "scope": "One exact SITC main-site index; Vietnam site and all other source requests excluded",
+  "maximumSystemDnsCalls": 1,
+  "maximumGetAttempts": 1,
+  "maxBytes": 1048576,
+  "timeoutMs": 10000,
+  "retries": 0,
+  "redirects": 0,
+  "details": 0,
+  "pagination": 0,
+  "sourcePolicy": {
+    "fetchAllowed": true,
+    "persistence": "disallowed",
+    "rawLocalOnly": true,
+    "remote": "minimal redacted metadata and hashes",
+    "businessContentScopeCeiling": "metadata_only"
+  },
+  "systemSettingsWritten": false
+}

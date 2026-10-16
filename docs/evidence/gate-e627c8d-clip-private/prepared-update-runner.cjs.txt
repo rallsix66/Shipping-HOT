@@ -1,0 +1,39 @@
+// One-round local service update. Reuses the original DB file/cwd; no browser control.
+const fs=require('node:fs'),p=require('node:path'),http=require('node:http'),cp=require('node:child_process'),Native=require('better-sqlite3');
+const root=fs.realpathSync(process.cwd());
+const sha='e627c8d2b7937cfa4df6c63f93ad349835b730d8';
+const artifact=p.join(root,'.tmp','clipper-manual-'+sha.slice(0,7));
+const run=p.join(root,'.tmp/clipper-manual-6087a16/run');
+const dbPath=p.join(run,'.data/shipping-hot-v3.sqlite3');
+const sourceUrl='http://127.0.0.1:5174/synthetic-article.html';
+const marker=JSON.parse(fs.readFileSync(p.join(run,'clip-synthetic-run.json'),'utf8'));
+const build=JSON.parse(fs.readFileSync(p.join(artifact,'build.json'),'utf8'));
+if(build.sha!==sha||!build.synthetic||build.sourceUrl!==sourceUrl||marker.sha!=='6087a169cb2e591e3acb10d23ccc641d8212f5c0'||marker.repositoryRoot!==root||marker.sourceUrl!==sourceUrl||fs.realpathSync(run)!==run||fs.lstatSync(dbPath).nlink!==1||fs.lstatSync(dbPath).isSymbolicLink()||fs.existsSync(p.join(run,'.data/provider-secrets.json')))throw Error('unexpected_preserved_run');
+const db=new Native(dbPath,{readonly:true,fileMustExist:true});
+const metadata=db.prepare('SELECT schema_version,data_mode,database_id FROM app_metadata').get();
+if(metadata.schema_version!==29||metadata.data_mode!=='real'||metadata.database_id!==marker.databaseId)throw Error('database_identity_changed');
+const counts=Object.fromEntries(db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(r=>r.name).filter(t=>/^(?:intel_|provider_usage$|provider_runtime$|translation_cache$)/.test(t)).map(t=>[t,db.prepare(`SELECT count(*) AS n FROM "${t}"`).get().n]));
+const backup=p.join(artifact,'original-database-before-update.sqlite3');
+if(fs.existsSync(backup))throw Error('backup_already_exists_do_not_overwrite');
+(async()=>{
+  await db.backup(backup);db.close();
+  fs.writeFileSync(p.join(artifact,'preserved-database.json'),JSON.stringify({at:new Date().toISOString(),actualCodeSha:sha,isolationSha:marker.sha,run,dbPath,metadata,counts,backup,originalMarkerUnchanged:true},null,2));
+  const fixture=fs.readFileSync(p.join(artifact,'synthetic-article.html'));
+  const source=http.createServer((req,res)=>{
+    if(req.headers.host!=='127.0.0.1:5174'||req.url!=='/synthetic-article.html'){res.writeHead(404);res.end();return;}
+    if(!['GET','HEAD'].includes(req.method||'')){res.writeHead(405);res.end();return;}
+    res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Length':fixture.length,'X-Content-Type-Options':'nosniff'});res.end(req.method==='HEAD'?undefined:fixture);
+  });
+  await new Promise((ok,fail)=>{source.once('error',fail);source.listen(5174,'127.0.0.1',ok);});
+  const env=Object.fromEntries(Object.entries(process.env).filter(([k])=>/^(?:systemroot|windir|temp|tmp|userprofile|appdata|localappdata|comspec|programfiles(?:\(x86\))?|programdata|pathext|number_of_processors|processor_architecture|processor_identifier|os|path)$/i.test(k)));
+  Object.assign(env,{HOST:'127.0.0.1',NITRO_HOST:'127.0.0.1',PORT:'5173',NITRO_PORT:'5173',SHIPPING_DATA_MODE:'real',SHIPPING_RUNTIME_ENABLED:'false',SHIPPING_INTEL_ENABLED:'false',NODE_ENV:'production'});
+  const entry=p.join(artifact,'app-test/server/index.mjs');
+  const child=cp.spawn(process.execPath,[entry],{cwd:run,env,windowsHide:true,stdio:['ignore',fs.openSync(p.join(artifact,'server.stdout.log'),'a'),fs.openSync(p.join(artifact,'server.stderr.log'),'a')]});
+  child.once('error',()=>source.close());child.once('exit',()=>source.close());
+  const service={sha,actualCodeSha:sha,isolationSha:marker.sha,receiverPid:child.pid,sourcePid:process.pid,cwd:run,databasePath:dbPath,databaseId:marker.databaseId,entrypoint:entry,receiver:'http://127.0.0.1:5173/feed',source:sourceUrl,synthetic:true,browserOperated:false};
+  fs.writeFileSync(p.join(artifact,'service.json'),JSON.stringify(service,null,2));
+  fs.copyFileSync(p.join(run,'service.json'),p.join(artifact,'old-service.json'));
+  fs.writeFileSync(p.join(run,'service.json'),JSON.stringify(service,null,2));
+  function stop(){child.kill();source.close();}process.once('SIGINT',stop);process.once('SIGTERM',stop);
+  console.log(JSON.stringify(service));
+})().catch(e=>{try{db.close();}catch{}console.error(e);process.exitCode=1;});

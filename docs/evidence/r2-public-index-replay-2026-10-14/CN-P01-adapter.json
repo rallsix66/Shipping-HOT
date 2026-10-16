@@ -1,0 +1,138 @@
+{
+  "id": "CN-P01",
+  "url": "https://www.gd.msa.gov.cn/",
+  "enabled": false,
+  "persistence": "disallowed",
+  "config": {
+    "listSelector": ".index-tab-box:has(.index-tabs > li:first-child > a[href='/html/gdmsa/xxgk/gkml/tzgg/index.html']) .index-tab-con > ul.index-tab-item:first-child",
+    "itemSelector": "li",
+    "linkSelector": "a[href]",
+    "titleSelector": "a[href]",
+    "publishedAtSelector": "span.index-tab-date",
+    "calendar": "gregorian",
+    "allowUrlPrefixes": [
+      "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article"
+    ],
+    "dateRuleBasis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only."
+  },
+  "startedAt": "2026-10-14T08:19:35.407Z",
+  "httpRequests": 0,
+  "material": "complete private real response bytes, not synthetic or sanitized skeleton",
+  "rawHtmlCommitted": false,
+  "fetchedRawSha256": "6dc9a6c69a50a0643510cc2fc0125f8bb686a150ff42f3abc1d5a88e25593a2a",
+  "rawBytes": 80546,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 80546
+  },
+  "adapterCount": 8,
+  "dateRules": [
+    "ymd"
+  ],
+  "samples": [
+    {
+      "titleExcerpt": "广东海事局 广东省人力资源和社会保障厅 广州海事法院 中国海员工会广东省委员会 关于联合发布《广东省船员权益保障中心 服务指南（1.0版）》的通告",
+      "canonicalUrl": "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article/2026/5439613d219d442990fa9476af68b338.html",
+      "dateEvidence": {
+        "raw": "2026-06-17",
+        "rule": "ymd",
+        "basis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-06-17",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "广东海事局 广东省交通运输厅关于联合发布《广东省船员驿站“一站一册”（1.0版）》的通告",
+      "canonicalUrl": "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article/2026/404d8be53e524d028c5ab4ba6cb5edcc.html",
+      "dateEvidence": {
+        "raw": "2026-06-16",
+        "rule": "ymd",
+        "basis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-06-16",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "广东海事局关于辖区船舶污染清除单位应急清污能力监督检查情况的公告 （2026年10月）",
+      "canonicalUrl": "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article/2026/9f6ba044ad294732b0bc700d19f05d8b.html",
+      "dateEvidence": {
+        "raw": "2026-10-10",
+        "rule": "ymd",
+        "basis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-10",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "中华人民共和国清远海事局 清远市工业和信息化局 清远市应急管理局 广东省北江航道事务中心关于划定清远市船舶修造企业作业水域的通知",
+      "canonicalUrl": "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article/2026/790d1d2c9d15469b9807da53593e082d.html",
+      "dateEvidence": {
+        "raw": "2026-10-10",
+        "rule": "ymd",
+        "basis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-10",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "中华人民共和国广东海事局“海巡09”船信息化运维服务采购项目成交公告",
+      "canonicalUrl": "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article/2026/47c15c528ebb4983bc0eba7783cc3751.html",
+      "dateEvidence": {
+        "raw": "2026-09-18",
+        "rule": "ymd",
+        "basis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-18",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "广东海事局关于公布2026年度第一次船载危险货物申报人员和集装箱装箱现场检查人员从业资格考核合格人员名单的通知",
+      "canonicalUrl": "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article/2026/d45b6c06178142bd9c95d89b1ce44679.html",
+      "dateEvidence": {
+        "raw": "2026-08-26",
+        "rule": "ymd",
+        "basis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-26",
+        "publishedAt": null
+      }
+    }
+  ]
+}

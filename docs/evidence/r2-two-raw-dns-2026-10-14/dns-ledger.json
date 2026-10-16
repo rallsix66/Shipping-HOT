@@ -1,0 +1,22 @@
+[
+  {
+    "hostname": "www.gd.msa.gov.cn",
+    "reservedAt": "2026-10-14T07:30:18.927Z",
+    "state": "finished"
+  },
+  {
+    "hostname": "szs.mof.gov.cn",
+    "reservedAt": "2026-10-14T07:30:18.936Z",
+    "state": "finished"
+  },
+  {
+    "hostname": "vimawa.gov.vn",
+    "reservedAt": "2026-10-14T07:30:18.938Z",
+    "state": "finished"
+  },
+  {
+    "hostname": "customs.gov.ph",
+    "reservedAt": "2026-10-14T07:30:18.939Z",
+    "state": "finished"
+  }
+]

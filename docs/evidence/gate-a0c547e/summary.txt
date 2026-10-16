@@ -1,0 +1,11 @@
+﻿sha=a0c547e8ca163efada470024b7fa69e1a868b474
+status_clean=True
+install exit=0
+build exit=0
+typecheck exit=0
+lint exit=0
+test exit=0
+smoke-p0-native exit=0
+smoke-p2c-runtime exit=0
+smoke-p3-feed-freshness exit=0
+rg network/llm scan exit=0 (1=no match)

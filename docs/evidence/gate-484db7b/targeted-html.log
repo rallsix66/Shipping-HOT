@@ -1,0 +1,28 @@
+{"name":"targeted-html","command":"pnpm exec vitest run -c vitest.config.ts server/intel/sources/html-index-candidates.test.ts server/intel/html-index-candidates-collect.test.ts server/intel/sources/web-list.test.ts server/intel/web-list-collect.test.ts server/intel/sources/json-list.test.ts server/intel/json-list-collect.test.ts","sha":"484db7b7a173f5c31312f3f7320807f4d521e5dd","started":"2026-10-13T09:01:01.211Z","finished":"2026-10-13T09:01:03.343Z","rawExit":0,"signal":null}
+STDOUT
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ server/intel/sources/json-list.test.ts (42 tests) 34ms
+ ✓ server/intel/sources/html-index-candidates.test.ts (24 tests) 38ms
+ ✓ server/intel/sources/web-list.test.ts (35 tests) 73ms
+ ✓ server/intel/html-index-candidates-collect.test.ts (4 tests) 187ms
+ ✓ server/intel/json-list-collect.test.ts (7 tests) 392ms
+ ✓ server/intel/web-list-collect.test.ts (7 tests) 424ms
+
+ Test Files  6 passed (6)
+      Tests  119 passed (119)
+   Start at  17:01:02
+   Duration  1.25s (transform 1.22s, setup 0ms, import 3.06s, tests 1.15s, environment 1ms)
+
+
+STDERR
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used

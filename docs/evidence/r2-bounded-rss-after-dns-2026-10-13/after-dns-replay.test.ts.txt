@@ -1,0 +1,26 @@
+import {readFileSync} from 'node:fs'
+import {createHash} from 'node:crypto'
+import {expect,it} from 'vitest'
+import {open} from '../server/intel/__fixtures__/isolated-db'
+import {initShippingTables} from '../server/database/shipping'
+import {collectIntelSource} from '../server/intel/collect'
+import type {IntelSourceSeed} from '../server/intel/sources'
+it('replays retained TMD original bytes offline and verifies evidence hashes',async()=>{
+ const dir='docs/evidence/r2-bounded-rss-after-dns-2026-10-13'
+ const r=JSON.parse(readFileSync(dir+'/batch-results.json','utf8'))
+ const ledger=JSON.parse(readFileSync(dir+'/request-ledger.json','utf8'))
+ expect(ledger).toHaveLength(6);expect(new Set(ledger.map((x:any)=>x.id)).size).toBe(6)
+ expect(ledger.every((x:any)=>x.state==='response_received')).toBe(true)
+ const sha=(b:Uint8Array)=>createHash('sha256').update(b).digest('hex')
+ for(const row of r.results)expect(sha(readFileSync(dir+'/'+row.id+'-metadata.json'))).toBe(row.metadataSha256)
+ const row=r.results.find((x:any)=>x.id==='TH-W01'),raw=readFileSync(dir+'/TH-W01-original.xml')
+ expect(sha(raw)).toBe(row.rawResponseSha256)
+ const seed:IntelSourceSeed={id:'replay:TH-W01',catalogId:'TH-W01',name:'TMD',kind:'rss',url:row.url,enabled:false,persistence:'disallowed',allowedHosts:['www.tmd.go.th'],allowedContentTypes:['application/xml','text/xml'],intervalMs:3600000}
+ const state=open();let calls=0
+ try{await initShippingTables(state.database,'mock');await state.repository.upsertSource(seed,r.started)
+ const out=await collectIntelSource(state.repository,seed,{lookup:async()=>[{address:'93.184.216.34',family:4}],transport:async()=>{calls++;return{status:200,headers:{'content-type':'application/xml'},body:raw}}},new Date(row.started))
+ const items=await state.repository.listItems(seed.id)
+ expect(out.status).toBe('ok_items');expect(calls).toBe(1);expect(items).toHaveLength(10)
+ expect(items.every(x=>x.title&&x.canonicalUrl&&x.publishedAt&&Number.isFinite(Date.parse(x.publishedAt)))).toBe(true)
+ }finally{state.native.close()}
+})

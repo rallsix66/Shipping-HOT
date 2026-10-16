@@ -1,0 +1,63 @@
+import { createProbeFileSink, recordTwoIndexProbe, type ProbeTask } from "../scripts/lib/two-index-probe-results"
+import {writeFileSync,existsSync,mkdirSync} from 'node:fs'
+import {createHash} from 'node:crypto'
+import {load} from 'cheerio'
+import {it,expect} from 'vitest'
+import {defaultTransport,secureFetchArticle} from '../server/services/article-fetch-security'
+import type {ArticleTransport,ArticleHttpResponse} from '../server/services/article-fetch-security'
+function oneShotTransport(exact:string,real:ArticleTransport,signal:AbortSignal,reserve:()=>void,capture:(r:ArticleHttpResponse)=>void):ArticleTransport{let sent=false;return async(url,addresses,options)=>{if(sent||signal.aborted||url.href!==exact||options.maxBytes>524288||options.timeoutMs>10000||options.caPem)throw Error('request_forbidden');sent=true;reserve();const response=await real(url,addresses,{...options,signal});capture(response);return response}}
+const dir='docs/evidence/r2-two-html-2026-10-13'
+const rows=[{id:'MY-P03',host:'www.northport.com.my',url:'https://www.northport.com.my/np/page-announcements.html'},{id:'TH-C01',host:'www.customs.go.th',url:'https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th'}]
+const sha=(v:Uint8Array|string)=>createHash('sha256').update(v).digest('hex')
+const safeText=(v:string)=>/authorization|bearer|cookie|api[_-]?key|password|token|secret/i.test(v)?'[redacted]':v.replace(/\s+/g,' ').trim().slice(0,300)
+it('fetches each exact index once, observes facts, retains bodies in RAM for same-response integration',async()=>{
+ if(existsSync(dir+'/request-ledger.json'))throw Error('existing_ledger_no_restart')
+ mkdirSync(dir,{recursive:true});const ledger:any[]=[],results:any[]=[],held:any[]=[]
+ const save=()=>writeFileSync(dir+'/request-ledger.json',JSON.stringify(ledger,null,2)+'\n')
+ save();const deadline=new AbortController(),timer=setTimeout(()=>deadline.abort(),120000)
+ for(const row of rows){const c=new AbortController(),abort=()=>c.abort();deadline.signal.addEventListener('abort',abort,{once:true});const st=setTimeout(abort,10000);let status:number|null=null
+ try{
+ const transport=oneShotTransport(row.url,defaultTransport,c.signal,()=>{if(deadline.signal.aborted||ledger.length>=2)throw Error('limits');ledger.push({id:row.id,url:row.url,reservedAt:new Date().toISOString(),state:'unknown_reserved'});save()},res=>{status=res.status})
+ const fetched=await secureFetchArticle(row.url,{policy:{sourceId:row.id,status:'allowed',fetchAllowed:true,persistence:'disallowed',allowedHosts:[row.host],allowedContentTypes:['text/html','application/xhtml+xml']},transport,signal:c.signal,maxBytes:524288,timeoutMs:10000,maxRedirects:0})
+ if(!fetched.ok){results.push({id:row.id,status:'FETCH_FAILED',code:fetched.code,httpStatus:status});continue}
+ const $=load(fetched.body);$('script,style,noscript').remove()
+ const node=(n:any)=>{const e=$(n);return{tag:n.tagName,id:/^[\w-]{1,80}$/.test(e.attr('id')??'')?e.attr('id'):undefined,classes:(e.attr('class')??'').split(/\s+/).filter(x=>/^[\w-]{1,60}$/.test(x)).slice(0,8)}}
+ const anchors:any[]=[]
+ for(const a of $('a[href]').toArray()){
+ let u:URL;try{u=new URL($(a).attr('href')!,row.url)}catch{continue}
+ if(u.protocol!=='https:'||u.hostname!==row.host||u.username||u.password||[...u.searchParams.keys()].some(x=>/token|key|cookie|auth|secret|sig/i.test(x)))continue
+ const title=safeText($(a).text()||$(a).attr('title')||'');if(title.length<6||title==='[redacted]')continue
+ const ancestry:any[]=[];let n:any=a.parent
+ for(let depth=0;n&&depth<4;depth++,n=n.parent){const e=$(n),text=e.text().replace(/\s+/g,' ').trim();const dates=[...new Set(text.match(/\b(?:\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}[-/]\d{1,2}[-/]\d{4})\b|\d{1,2}\s+[ก-๙.]+\s+\d{2,4}/g)??[])].slice(0,8);ancestry.push({...node(n),anchorCount:e.find('a[href]').length,dates,children:e.children().toArray().slice(0,8).map(ch=>({...node(ch),text:/\d/.test($(ch).text())&&$(ch).text().trim().length<90?safeText($(ch).text()):undefined}))})}
+ anchors.push({anchor:node(a),title,url:u.href,ancestry});if(anchors.length>=150)break
+ }
+ const observation={id:row.id,url:row.url,kind:'factual DOM relationship metadata, not retained original HTML or reconstructed fixture',anchors}
+ const text=JSON.stringify(observation,null,2)+'\n';writeFileSync(dir+'/'+row.id+'-relationships.json',text)
+ results.push({id:row.id,httpStatus:fetched.status,bytes:fetched.rawBody.length,rawResponseSha256:sha(fetched.rawBody),relationshipMetadataSha256:sha(text),decoding:fetched.decoding,originalFixture:false,status:'FETCHED_HELD_IN_RAM'})
+ held.push({row,fetched})
+ }finally{clearTimeout(st);deadline.signal.removeEventListener('abort',abort);const entry=ledger.find(x=>x.id===row.id);if(entry){entry.state=status===null?'completed_no_response':'response_received';entry.httpStatus=status;entry.finishedAt=new Date().toISOString();save()}writeFileSync(dir+'/observation-results.json',JSON.stringify(results,null,2)+'\n')}
+ }
+ clearTimeout(timer);console.log('NETWORK COMPLETE; bodies held in RAM, awaiting .tmp/two-index-parse-ready')
+ const until=Date.now()+900000;while(!existsSync('.tmp/two-index-parse-ready')&&Date.now()<until)await new Promise(r=>setTimeout(r,500))
+ if(!existsSync('.tmp/two-index-parse-ready')){writeFileSync(dir+'/integration-results.json',JSON.stringify({status:'NOT_RUN',reason:'RAM retention deadline; no re-fetch permitted'}));return}
+ const {htmlIndexCandidates}=await import('../server/intel/sources/html-index-candidates')
+ const {collectIntelSource}=await import('../server/intel/collect')
+ const {open}=await import('../server/intel/__fixtures__/isolated-db')
+ const {initShippingTables}=await import('../server/database/shipping')
+ const tasks: ProbeTask[]=held.map(({row,fetched})=>{
+  let state: ReturnType<typeof open> | undefined
+  return {id:row.id,run:async(progress,checkpoint)=>{
+   const seed=htmlIndexCandidates.find(x=>x.catalogId===row.id)
+   if(!seed)throw new Error('probe_config_missing')
+   state=open();const now=new Date();await initShippingTables(state.database,'mock');await state.repository.upsertSource(seed,now.toISOString())
+   const deps={lookup:async()=>[{address:'93.184.216.34',family:4 as const}],transport:async()=>({status:200,headers:{'content-type':'text/html; charset=utf-8'},body:fetched.rawBody})}
+   progress.first=await collectIntelSource(state.repository,seed,deps,now);await checkpoint()
+   progress.second=await collectIntelSource(state.repository,seed,deps,new Date(now.getTime()+1000));await checkpoint()
+   progress.count=(await state.repository.listItems(seed.id)).length;await checkpoint()
+  },dispose:()=>{state?.native.close()}}
+ })
+ const report=await recordTwoIndexProbe(tasks,createProbeFileSink(dir+'/repaired-integration'),'held_live_response')
+ console.log(JSON.stringify(report))
+ // Aggregate assertion is reached only after every source and summary persistence have been attempted.
+ expect(report.ok).toBe(true)
+},1000000)

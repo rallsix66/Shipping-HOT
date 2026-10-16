@@ -1,0 +1,9 @@
+{
+  "name": "lint",
+  "command": "pnpm lint",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\public-index-final-build",
+  "sha": "ca654122bcad240f090d0e675071a5e208237e8e",
+  "startedAt": "2026-10-14T08:17:53.680Z",
+  "endedAt": "2026-10-14T08:18:19.024Z",
+  "rawExit": 0
+}

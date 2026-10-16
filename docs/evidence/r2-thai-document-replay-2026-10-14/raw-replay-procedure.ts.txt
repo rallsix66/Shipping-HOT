@@ -1,0 +1,80 @@
+import { it, expect, vi } from "vitest"
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import { createHash } from "node:crypto"
+import { resolve } from "node:path"
+import NativeDatabase from "better-sqlite3"
+import { open } from "../server/intel/__fixtures__/isolated-db"
+import { initShippingTables } from "../server/database/shipping"
+import { collectIntelSource, sourcePolicy } from "../server/intel/collect"
+import { htmlIndexCandidates } from "../server/intel/sources/html-index-candidates"
+import { fromHtml } from "../server/intel/sources/web-list"
+import { decodeResponse } from "../server/services/response-decoding"
+
+const dir = "docs/evidence/r2-thai-document-replay-2026-10-14"
+const privateDir = ".tmp/r2-next-four-2026-10-14-private"
+const hash = (v: Uint8Array | string) => createHash("sha256").update(v).digest("hex")
+const save = (name: string, value: unknown) => writeFileSync(`${dir}/${name}.json`, JSON.stringify(value, null, 2) + "\n")
+const secrets = /(?:authorization|bearer|cookie|api[_-]?key|password|credential|token|secret|csrf)/i
+const safeTitle = (s: string) => secrets.test(s) ? "[redacted]" : s.slice(0, 120)
+function safeUrl(s: string) { const u = new URL(s); return !u.username && !u.password && ![...u.searchParams.keys()].some(k => secrets.test(k) || /signature|^sig$|utm_|gclid|fbclid/i.test(k)) ? u.href : "[redacted]" }
+it("full real archived bytes through disabled configs, repeat collection and read-only SQLite reopen", async () => {
+  mkdirSync(dir, { recursive: true }); mkdirSync(".tmp/thai-document-raw-db", { recursive: true })
+  if (existsSync(`${dir}/summary.json`)) throw new Error("replay_already_recorded")
+  const results: any[] = []
+  const noFetch = vi.fn(() => { throw new Error("source_network_forbidden") }); vi.stubGlobal("fetch", noFetch)
+  try {
+    for (const seed of htmlIndexCandidates.filter(s => ["TH-C02"].includes(s.catalogId))) {
+      const result: any = { id: seed.catalogId, url: seed.url, enabled: seed.enabled, persistence: seed.persistence, config: seed.webList, startedAt: new Date().toISOString(), httpRequests: 0, material: "complete private real response bytes, not synthetic or sanitized skeleton", rawHtmlCommitted: false }
+      const databasePath = resolve(`.tmp/thai-document-raw-db/${seed.catalogId}-${Date.now()}.sqlite3`)
+      const state = open(databasePath)
+      let parsed: ReturnType<typeof fromHtml> = []
+      try {
+        const raw = readFileSync(`${privateDir}/${seed.catalogId}.response.bin`)
+        const response = JSON.parse(readFileSync(`docs/evidence/r2-next-four-2026-10-14/${seed.catalogId}-result.json`, "utf8"))
+        result.fetchedRawSha256 = hash(raw); result.rawBytes = raw.length
+        if (result.fetchedRawSha256 !== response.fetchedBytesSha256) throw new Error("raw_hash_mismatch")
+        const decoded = decodeResponse(raw, response.contentType)
+        result.decoding = decoded.decoding
+        parsed = fromHtml(decoded.body, seed.url, seed.webList!, sourcePolicy(seed))
+        result.adapterCount = parsed.length; result.dateRules = [...new Set(parsed.map(e => e.dateEvidence.rule))]
+        result.samples = parsed.slice(0, 6).map(e => ({ titleExcerpt: safeTitle(e.title), canonicalUrl: safeUrl(e.canonicalUrl), dateEvidence: e.dateEvidence }))
+        save(`${seed.catalogId}-adapter`, result)
+        await initShippingTables(state.database, "mock")
+        const now = new Date("2026-10-14T08:00:00Z")
+        await state.repository.upsertSource(seed, now.toISOString())
+        let transports = 0
+        const deps = { lookup: async (host: string) => { if (host !== new URL(seed.url).hostname) throw new Error("offline_host_mismatch"); return [{ address: "93.184.216.34", family: 4 as const }] }, transport: async (url: URL) => { if (url.href !== seed.url) throw new Error("offline_url_mismatch"); transports++; return { status: response.httpStatus, headers: { "content-type": response.contentType }, body: raw } } }
+        result.first = await collectIntelSource(state.repository, seed, deps, now)
+        result.firstCounts = { items: (state.native.prepare("SELECT COUNT(*) AS n FROM intel_item WHERE source_id=?").get(seed.id) as any).n, versions: (state.native.prepare("SELECT COUNT(*) AS n FROM intel_item_version").get() as any).n }
+        save(`${seed.catalogId}-first`, result)
+        result.repeat = await collectIntelSource(state.repository, seed, deps, new Date(now.getTime() + 1000))
+        result.repeatCounts = { items: (state.native.prepare("SELECT COUNT(*) AS n FROM intel_item WHERE source_id=?").get(seed.id) as any).n, versions: (state.native.prepare("SELECT COUNT(*) AS n FROM intel_item_version").get() as any).n }
+        result.injectedTransports = transports; result.status = result.first.status === "ok_items" ? "OFFLINE_REPLAY_PENDING_REOPEN" : "FAIL"
+        save(`${seed.catalogId}-repeat`, result)
+      } catch (error) { result.status = "FAIL"; result.errorCode = error instanceof Error ? error.message : "unknown" }
+      finally { state.native.close() }
+      try {
+        const db = new NativeDatabase(databasePath, { readonly: true })
+        try {
+          const rows = db.prepare("SELECT i.canonical_url,i.title,i.published_at,v.date_evidence,v.content_scope FROM intel_item i JOIN intel_item_version v ON v.id=i.current_version_id WHERE i.source_id=?").all(seed.id) as any[]
+          const mismatches = rows.filter(row => { const e = parsed.find(entry => entry.canonicalUrl === row.canonical_url); return !e || e.title !== row.title || JSON.stringify(JSON.parse(row.date_evidence)) !== JSON.stringify(e.dateEvidence) || row.published_at !== (e.publishedAt ?? null) || row.content_scope !== "metadata_only" })
+          const versionCount = (db.prepare("SELECT COUNT(*) AS n FROM intel_item_version").get() as any).n
+          result.reopen = { readOnly: true, rows: rows.length, versions: versionCount, fullTitleUrlDateEvidenceCompared: true, mismatches: mismatches.length, dayPrecision: parsed.filter(e => e.dateEvidence.precision === "day").length, missingTimezone: parsed.filter(e => e.dateEvidence.timezone === "missing").length, nullPublicationInstants: rows.filter(r => r.published_at === null).length }
+          if (result.status !== "FAIL" && rows.length === parsed.length && rows.length > 0 && !mismatches.length) result.status = "OFFLINE_REPLAY_ONLY_PASS"
+        } finally { db.close() }
+      } catch (error) { result.status = "FAIL"; result.reopenError = error instanceof Error ? error.message : "unknown" }
+      result.finishedAt = new Date().toISOString(); save(`${seed.catalogId}-result`, result); results.push(result); save("partial-results", results)
+    }
+    save("summary", { results, actualSourceHttpRequests: 0, synthetic: false, originalRawRedistributed: false, overallR2Pass: false, publicSourceAvailabilityPasses: 0, note: "per-response archive offline replay only; no production activation or 24h" })
+    expect(results).toHaveLength(1)
+    for (const result of results) {
+      const count = ({ "TH-C02": 100 } as any)[result.id]
+      expect(result.status).toBe("OFFLINE_REPLAY_ONLY_PASS")
+      expect(result.first).toMatchObject({ status: "ok_items", itemsSeen: count, itemsNew: count })
+      expect(result.repeat).toMatchObject({ status: "ok_items", itemsNew: 0, itemsRevised: 0 })
+      expect(result.firstCounts).toEqual(result.repeatCounts)
+      expect(result.reopen).toMatchObject({ rows: count, versions: count, mismatches: 0, dayPrecision: count, missingTimezone: count, nullPublicationInstants: count })
+    }
+    expect(noFetch).not.toHaveBeenCalled()
+  } finally { vi.unstubAllGlobals() }
+}, 30000)

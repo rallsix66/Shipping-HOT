@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-16T07:23:50.454Z",
+  "actualCodeSha": "bdc7b59d88d440966d8c6aff7fc68229c136dbb1",
+  "isolationSha": "6087a169cb2e591e3acb10d23ccc641d8212f5c0",
+  "run": "D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-6087a16\\run",
+  "dbPath": "D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-6087a16\\run\\.data\\shipping-hot-v3.sqlite3",
+  "metadata": {
+    "schema_version": 29,
+    "data_mode": "real",
+    "database_id": "f79f2bd2-050f-42b0-831e-6e787eb1344f"
+  },
+  "counts": {
+    "translation_cache": 0,
+    "provider_usage": 0,
+    "provider_runtime": 0,
+    "intel_fetch_run": 0,
+    "intel_item": 0,
+    "intel_item_version": 0,
+    "intel_item_block": 0,
+    "intel_executor": 0,
+    "intel_item_current_change": 0,
+    "intel_source": 42,
+    "intel_manual_action": 0
+  },
+  "backup": "D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-bdc7b59\\original-database-before-update.sqlite3",
+  "originalMarkerUnchanged": true
+}

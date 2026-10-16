@@ -1,0 +1,25 @@
+{
+  "id": "PH-W02",
+  "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+  "phase": "initial",
+  "host": "www.pagasa.dost.gov.ph",
+  "startedAt": "2026-10-15T05:53:36.715Z",
+  "systemDnsCalls": 1,
+  "getAttempts": 1,
+  "status": "BLOCKED",
+  "rawLocalOnly": true,
+  "qualificationChanged": false,
+  "addressClassification": "public_address",
+  "receivedAt": "2026-10-15T05:53:36.848Z",
+  "httpStatus": 403,
+  "contentType": "text/html",
+  "bytes": 118,
+  "wireSha256": "58bf2215b395dcac74c009aa98701854e43cbe54a1cd3a95fee6a647ca9910d4",
+  "completeResponseCaptured": true,
+  "location": null,
+  "secureEntryError": {
+    "code": "http_error",
+    "message": "Article request failed with status 403"
+  },
+  "finishedAt": "2026-10-15T05:53:36.848Z"
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "url": "https://www.sitc.com/en/list.asp?classid=44",
+    "host": "www.sitc.com",
+    "reservedAt": "2026-10-15T06:32:47.777Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "223.255.133.6",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T06:32:47.912Z"
+  }
+]

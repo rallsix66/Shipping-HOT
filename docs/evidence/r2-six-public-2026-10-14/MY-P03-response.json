@@ -1,0 +1,14 @@
+{
+  "id": "MY-P03",
+  "url": "https://www.northport.com.my/np/page-announcements.html",
+  "startedAt": "2026-10-14T07:16:47.635Z",
+  "status": "NOT_RUN",
+  "httpRequests": 1,
+  "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+  "receivedAt": "2026-10-14T07:16:50.033Z",
+  "httpStatus": 200,
+  "contentType": "text/html",
+  "rawByteLength": 73037,
+  "fetchedBytesSha256": "880e1a180dc686d9d9d71578a753ee87af24042563a7c58f82c0885f8d3c5691",
+  "rawLocalOnly": true
+}

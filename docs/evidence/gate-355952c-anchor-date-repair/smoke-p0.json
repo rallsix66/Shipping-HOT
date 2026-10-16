@@ -1,0 +1,14 @@
+{
+  "name": "smoke-p0",
+  "command": "pnpm smoke:p0-native",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\anchor-date-repair-build-20261015",
+  "sha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
+  "startedAt": "2026-10-15T01:48:37.721Z",
+  "finishedAt": "2026-10-15T01:48:38.893Z",
+  "rawExit": 0,
+  "stderrCapturedUtf8": "(node:40348) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/tsx-alias-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:20944) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"file%3A///D%3A/try%2520one/Shipping%2520HOT/.tmp/anchor-date-repair-build-20261015/scripts/tsx-alias-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:61268) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"file%3A///D%3A/try%2520one/Shipping%2520HOT/.tmp/anchor-date-repair-build-20261015/scripts/tsx-alias-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+  "stderrCapturedSha256": "10454f827829169f3ac957ffb0e24fde45447ef87e180a52aecf3e7e8414e68b",
+  "displayLogTrailingWhitespaceTrimmed": true,
+  "stdoutCapturedUtf8": "\n> shipping-hot@0.0.41 smoke:p0-native D:\\try one\\Shipping HOT\\.tmp\\anchor-date-repair-build-20261015\n> node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p0-native-sqlite-smoke.ts\n\n{\"process\":\"B\",\"node\":\"v24.15.0\",\"abi\":\"137\",\"bootstrapCompletedAt\":\"2026-10-15T01:48:38.618Z\",\"watchedPort\":\"p0-smoke-port-shekou\",\"portDirectory\":\"ready\"}\n",
+  "stdoutCapturedSha256": "85d7be6da5fc0e0000e187e50215e8b0e859aa5c44f0a8e9eafdbaa6b2c85ea3"
+}

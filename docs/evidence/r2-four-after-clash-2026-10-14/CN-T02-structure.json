@@ -1,0 +1,154 @@
+{
+  "source": "CN-T02",
+  "url": "https://szs.mof.gov.cn/zhengcefabu/",
+  "kind": "sanitized DOM structural metadata derivative; not original HTML or configured parser output",
+  "counts": {
+    "anchors": 26,
+    "tables": 0,
+    "rows": 0,
+    "times": 0
+  },
+  "candidates": [
+    {
+      "anchorDocumentIndex": 0,
+      "titleExcerpt": "",
+      "href": "http://www.mof.gov.cn/",
+      "ancestorTags": [
+        "a",
+        "h2",
+        "div"
+      ],
+      "ancestorDepth": 3,
+      "dateTextCandidates": [
+        "2026-10-12",
+        "2026-09-04",
+        "2026-09-01",
+        "2026-08-28",
+        "2026-08-14",
+        "2026-07-28",
+        "2026-07-24",
+        "2026-07-17"
+      ],
+      "anchorCountInAncestor": 26,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": []
+    },
+    {
+      "anchorDocumentIndex": 2,
+      "titleExcerpt": "返回主站",
+      "href": "http://www.mof.gov.cn/",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 3,
+      "dateTextCandidates": [
+        "2026-10-12",
+        "2026-09-04",
+        "2026-09-01",
+        "2026-08-28",
+        "2026-08-14",
+        "2026-07-28",
+        "2026-07-24",
+        "2026-07-17"
+      ],
+      "anchorCountInAncestor": 26,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": []
+    },
+    {
+      "anchorDocumentIndex": 8,
+      "titleExcerpt": "首页",
+      "href": "https://szs.mof.gov.cn/",
+      "ancestorTags": [
+        "a",
+        "p",
+        "div"
+      ],
+      "ancestorDepth": 3,
+      "dateTextCandidates": [
+        "2026-10-12",
+        "2026-09-04",
+        "2026-09-01",
+        "2026-08-28",
+        "2026-08-14",
+        "2026-07-28",
+        "2026-07-24",
+        "2026-07-17"
+      ],
+      "anchorCountInAncestor": 12,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "a"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 9,
+      "titleExcerpt": "政策发布",
+      "href": "https://szs.mof.gov.cn/zhengcefabu/",
+      "ancestorTags": [
+        "a",
+        "p",
+        "div"
+      ],
+      "ancestorDepth": 3,
+      "dateTextCandidates": [
+        "2026-10-12",
+        "2026-09-04",
+        "2026-09-01",
+        "2026-08-28",
+        "2026-08-14",
+        "2026-07-28",
+        "2026-07-24",
+        "2026-07-17"
+      ],
+      "anchorCountInAncestor": 12,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "a"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 10,
+      "titleExcerpt": "关于调整部分产品出口退税政策的公告",
+      "href": "https://szs.mof.gov.cn/zhengcefabu/202610/t20261012_4002592.htm",
+      "ancestorTags": [
+        "a",
+        "li",
+        "ul"
+      ],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "2026-10-12"
+      ],
+      "anchorCountInAncestor": 1,
+      "association": "same-local-container-observation-only",
+      "siblingTags": [
+        "span"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 11,
+      "titleExcerpt": "关于发布《境内单位代扣代缴自然人增值税管理办法》的公告",
+      "href": "https://szs.mof.gov.cn/zhengcefabu/202609/t20260904_3996707.htm",
+      "ancestorTags": [
+        "a",
+        "li",
+        "ul"
+      ],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "2026-09-04"
+      ],
+      "anchorCountInAncestor": 1,
+      "association": "same-local-container-observation-only",
+      "siblingTags": [
+        "span"
+      ]
+    }
+  ],
+  "itemParser": "NOT_RUN: no source adapter configured in this observation",
+  "noCandidateMeaning": "No numeric/English date association observed by bounded heuristic; not proof of no items",
+  "completeFieldsPass": false
+}

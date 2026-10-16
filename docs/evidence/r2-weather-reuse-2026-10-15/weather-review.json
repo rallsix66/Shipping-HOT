@@ -1,0 +1,686 @@
+{
+  "scope": "Bounded13public matrix weather rows only; existing recorded evidence and dedicated providers, no refetch or new parser",
+  "originalPlanRequiresWeatherIntelTable": false,
+  "originalPlanRequiresKnownUTC": false,
+  "originalPlanRequiresSeparateArticleURL": false,
+  "originalPlanRequiresWireHash": false,
+  "sourceRequests": 0,
+  "systemDns": 0,
+  "onlyNewQualification": "MY-W01 explicit user approval",
+  "other12QualificationChanges": false,
+  "entries": [
+    {
+      "id": "CN-W01",
+      "classification": "information_notice",
+      "currentR24": "PARTIAL",
+      "currentR25": "FAIL",
+      "currentNumeric": null,
+      "reuse": "Existing nmc-warning six-page provider/storage/API/display chain; captured6/6 on2026-10-11T01:38Z",
+      "lifecycle": "Historical products/local report time unconverted; no port/event inference",
+      "laterFailure": "CORRECTED:10/13 zero-network old-fixture generic web_list adapter negative; not later source or dedicated-provider failure",
+      "extraIntelGateRisk": true,
+      "decision": "Dedicated chain approved OK/PASS in subsequent NMC closeout; original negative retained",
+      "docs": [
+        "docs/evidence/nmc-integration-2026-10-11.md",
+        "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log"
+      ],
+      "impl": [
+        "server/providers/nmc-warning.ts",
+        "server/providers/nmc-warning.test.ts"
+      ],
+      "evidenceRefs": [
+        {
+          "path": "docs/evidence/nmc-integration-2026-10-11.md",
+          "selector": null,
+          "sha256": "894c0a017d0fa29ec6d28e5773803db6c0a8d476cf6a8dd26598fbb404d910ac",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log",
+          "selector": null,
+          "sha256": "2a94fee2233c0542022d3dc749375351bfd1c88ff2d894cdc1ffde39cd0e5d52",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "latestStoredSample": {
+        "evidence": {
+          "path": "docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json",
+          "selector": {
+            "egress.url": "https://www.nmc.cn/publish/typhoon/typhoon_new.html"
+          },
+          "sha256": "d46d7e5c532d01ab36eef087d6b58afd60363b7bc1c234c44480bbeb484986ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.nmc.cn/publish/typhoon/typhoon_new.html",
+        "at": "2026-10-11T01:38:50.427Z",
+        "httpStatus": 200,
+        "bytes": 59861,
+        "wireSha256": null,
+        "scope": "legacy_limited_original_information_Feed_live_run"
+      },
+      "production24h": "NOT_RUN",
+      "newSourceRequests": 0,
+      "newQualificationApplied": false,
+      "originalNegativeEvidencePreserved": true,
+      "subsequentApproval": "docs/evidence/r2-nmc-close-2026-10-15/report.md"
+    },
+    {
+      "id": "CN-W02",
+      "classification": "information_notice",
+      "currentR24": "PARTIAL",
+      "currentR25": "FAIL",
+      "currentNumeric": null,
+      "reuse": "Same existing NMC dedicated chain; original national warning product page retained",
+      "lifecycle": "Original warning/lift wording and unknown validity preserved; no port/event inference",
+      "laterFailure": "CORRECTED:10/13 zero-network old-fixture generic web_list adapter negative; not later source or dedicated-provider failure",
+      "extraIntelGateRisk": true,
+      "decision": "Dedicated chain approved OK/PASS in subsequent NMC closeout; original negative retained",
+      "docs": [
+        "docs/evidence/nmc-integration-2026-10-11.md",
+        "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log"
+      ],
+      "impl": [
+        "server/providers/nmc-warning.ts",
+        "server/providers/nmc-warning.test.ts"
+      ],
+      "evidenceRefs": [
+        {
+          "path": "docs/evidence/nmc-integration-2026-10-11.md",
+          "selector": null,
+          "sha256": "894c0a017d0fa29ec6d28e5773803db6c0a8d476cf6a8dd26598fbb404d910ac",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log",
+          "selector": null,
+          "sha256": "2a94fee2233c0542022d3dc749375351bfd1c88ff2d894cdc1ffde39cd0e5d52",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "latestStoredSample": {
+        "evidence": {
+          "path": "docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json",
+          "selector": {
+            "egress.url": "https://www.nmc.cn/publish/country/warning/index.html"
+          },
+          "sha256": "d46d7e5c532d01ab36eef087d6b58afd60363b7bc1c234c44480bbeb484986ba",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.nmc.cn/publish/country/warning/index.html",
+        "at": "2026-10-11T01:38:51.146Z",
+        "httpStatus": 200,
+        "bytes": 62233,
+        "wireSha256": null,
+        "scope": "legacy_limited_original_information_Feed_live_run"
+      },
+      "production24h": "NOT_RUN",
+      "newSourceRequests": 0,
+      "newQualificationApplied": false,
+      "originalNegativeEvidencePreserved": true,
+      "subsequentApproval": "docs/evidence/r2-nmc-close-2026-10-15/report.md"
+    },
+    {
+      "id": "VN-W01",
+      "classification": "information_notice",
+      "currentR24": "OK",
+      "currentR25": "PASS",
+      "currentNumeric": null,
+      "reuse": "NCHMF parser/postId/provider/Feed chain; 2026-10-10T09:52Z list+12articles,8success4failed; separate old5list-DOM fields replay",
+      "lifecycle": "Unknown validity/timezone; original risk level unnormalized; no port impacts; next issue is not expiry",
+      "laterFailure": "Historical jobResult success was a bug; classification/report says partial. be78026 lastRunIssue repair returns failed for partial/allfailed; old raw not rewritten",
+      "extraIntelGateRisk": false,
+      "decision": "Existing limited OK/PASS unchanged, not full-batch operational success",
+      "docs": [
+        "docs/evidence/nchmf-integration-2026-10-10.md",
+        "docs/evidence/gate-be78026/p2-fixture-tests.txt"
+      ],
+      "impl": [
+        "server/providers/nchmf-warning.ts",
+        "server/providers/nchmf-warning.test.ts",
+        "server/runtime/weather-alert-sync-job.ts"
+      ],
+      "evidenceRefs": [
+        {
+          "path": "docs/evidence/nchmf-integration-2026-10-10.md",
+          "selector": null,
+          "sha256": "00fc06a8fc52439199927df49779680fac211a7adb87ac2b037e62da0d31e0e1",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/gate-be78026/p2-fixture-tests.txt",
+          "selector": null,
+          "sha256": "2816c4f36553f751450abedbe7a89b4d4044eda77d01ef1fec98217504f482d5",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "latestStoredSample": {
+        "evidence": {
+          "path": "docs/evidence/nchmf-integration-2026-10-10/live-evidence.json",
+          "selector": null,
+          "sha256": "3cad6ad0f757ebf946ba205c8ba17c447d9600869de140992e9a659c5da28b4f",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html",
+        "at": "2026-10-10T09:52:07.791Z",
+        "httpStatus": 200,
+        "wireSha256": null,
+        "storedArchiveSha256": "e710f9f75c2036e0e796e3ce7fd78137de5784121ee7bd60894395d33f714b90",
+        "scope": "historical_live_capture_then_sanitized_full_DOM_archive",
+        "notContinuousProduction": true
+      },
+      "production24h": "NOT_RUN",
+      "newSourceRequests": 0,
+      "newQualificationApplied": false
+    },
+    {
+      "id": "TH-W01",
+      "classification": "information_notice",
+      "currentR24": "OK",
+      "currentR25": "PASS",
+      "currentNumeric": null,
+      "reuse": "TMD existing CAP/provider/SQLite/panel;10/10 index7->4afterUpdate,2active2expired;10/13 RSS10 is separate",
+      "lifecycle": "Actual/Update/Cancel/sent/expires/geocode, missing/failure retained separately; TH20 not covered at sample",
+      "laterFailure": "First-failure/retained-failure are fixture cases, no claim real source failure occurred",
+      "extraIntelGateRisk": false,
+      "decision": "Already OK/PASS; historical field/lifecycle bounds retained",
+      "docs": [
+        "docs/evidence/th-w01-tmd-cap-2026-10-10.md",
+        "docs/evidence/gate-3e25a45/tmd-cap-live-evidence.json"
+      ],
+      "impl": [
+        "server/providers/cap-alerts.ts",
+        "server/providers/tmd-cap.test.ts"
+      ],
+      "evidenceRefs": [
+        {
+          "path": "docs/evidence/th-w01-tmd-cap-2026-10-10.md",
+          "selector": null,
+          "sha256": "d5f3f348a15a865fffaa8de595c12652e3d2d6589e033fec3e9fb62420981d26",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/gate-3e25a45/tmd-cap-live-evidence.json",
+          "selector": null,
+          "sha256": "40bfac2e06df9afbfc2e26b759214e7af37b74b63321cc9037f84984b500385d",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "latestStoredSample": {
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "TH-W01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.tmd.go.th/en/api/xml/CAP",
+        "startedAt": "2026-10-13T07:00:38.389Z",
+        "receivedAt": null,
+        "finishedAt": "2026-10-13T07:00:40.268Z",
+        "httpStatus": 200,
+        "wireSha256": "d88a2f41868ab82631714e427a39998cc17ece4079a40d5d34fe95a576b8b325",
+        "bytes": 11234,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
+      },
+      "production24h": "NOT_RUN",
+      "newSourceRequests": 0,
+      "newQualificationApplied": false
+    },
+    {
+      "id": "MY-W01",
+      "classification": "information_notice",
+      "currentR24": "OK",
+      "currentR25": "PASS",
+      "currentNumeric": null,
+      "reuse": "User-approved10/10 08:30 complete response.text4rows, existing provider/Feed chain and prior17test replay",
+      "lifecycle": "Unknown timezone/validity, received_at first time,0ports/impacts; NoAdvisory scoped only",
+      "laterFailure": "No new failure or network;0754probe7688 and0830integration7754 are distinct real runs",
+      "extraIntelGateRisk": true,
+      "decision": "Explicit user approval applied OK/PASS; same-product trailing slash catalogue only",
+      "docs": [
+        "docs/evidence/metmalaysia-integration-2026-10-10/live-evidence.json",
+        "docs/evidence/r2-my-w01-contract-2026-10-15/feed-replay.json"
+      ],
+      "impl": [
+        "server/providers/metmalaysia-warning.ts",
+        "server/providers/metmalaysia-warning.test.ts"
+      ],
+      "evidenceRefs": [
+        {
+          "path": "docs/evidence/metmalaysia-integration-2026-10-10/live-evidence.json",
+          "selector": null,
+          "sha256": "b6ea58cb4851c4c46fd6cc5354b4017133b5a8e362cc8879d4ac4ccbc79f9686",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/r2-my-w01-contract-2026-10-15/feed-replay.json",
+          "selector": null,
+          "sha256": "8f8758762c2a338525bf4a3474a7753f1d6128e862278d136e3f4f5518520389",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "latestStoredSample": {
+        "evidence": {
+          "path": "docs/evidence/metmalaysia-integration-2026-10-10/live-evidence.json",
+          "selector": null,
+          "sha256": "b6ea58cb4851c4c46fd6cc5354b4017133b5a8e362cc8879d4ac4ccbc79f9686",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://api.data.gov.my/weather/warning/",
+        "at": "2026-10-10T08:30:40.728Z",
+        "httpStatus": 200,
+        "scope": "existing_0830_Feed_integration_complete_response_text_real_origin_recorded",
+        "catalogueExact301Evidence": {
+          "path": "docs/evidence/metmalaysia-warning-2026-10-10/raw/fetch-log.txt",
+          "selector": null,
+          "sha256": "fcea5d40cbc05bee217ec34a39a65d9244510e1aaef5f77d05def121cb5869fc",
+          "hashBasis": "committed_text_LF"
+        },
+        "bytes": 7754,
+        "byteRepresentation": "UTF8 length of historical response.text(); not original wire-byte certification",
+        "verbatimLatestRawRetained": false,
+        "fullResponseTextRetained": true,
+        "wireSha256": null,
+        "capturedAtHead": "eab30a761ddf25907ee884134eda3a5e79c048a1"
+      },
+      "production24h": "NOT_RUN",
+      "newSourceRequests": 0,
+      "newQualificationApplied": true
+    },
+    {
+      "id": "ID-W01",
+      "classification": "information_notice",
+      "currentR24": "OK",
+      "currentR25": "PASS",
+      "currentNumeric": null,
+      "reuse": "BMKG CAP provider/SQLite/panel; old/en12RSS,10/10 07:02Z9active,10/13exact/rss.xml13 distinct snapshots",
+      "lifecycle": "Actual/expiry/missing/UpdateCancel retained; polygon only port association; Jakarta not covered at sample",
+      "laterFailure": "First/following failure behavior covered by fixtures, not invented live failure",
+      "extraIntelGateRisk": false,
+      "decision": "Already OK/PASS; alias and payload differences retained",
+      "docs": [
+        "docs/evidence/bmkg-cap-2026-10-10.md",
+        "docs/evidence/gate-b41db75/bmkg-cap-live-evidence.json"
+      ],
+      "impl": [
+        "server/providers/cap-alerts.ts",
+        "server/providers/bmkg-cap.test.ts"
+      ],
+      "evidenceRefs": [
+        {
+          "path": "docs/evidence/bmkg-cap-2026-10-10.md",
+          "selector": null,
+          "sha256": "e7a8a2db78b46bb9de88af135e74292d694eaf049de9e31b79bbfddea972dff5",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/gate-b41db75/bmkg-cap-live-evidence.json",
+          "selector": null,
+          "sha256": "449c65ce4a547c6ce1755ff6114eb964e6ce895513fb01412dd75b353c5b1221",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "latestStoredSample": {
+        "evidence": {
+          "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+          "selector": {
+            "id": "ID-W01"
+          },
+          "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.bmkg.go.id/alerts/nowcast/en/rss.xml",
+        "startedAt": "2026-10-13T07:00:40.269Z",
+        "receivedAt": null,
+        "finishedAt": "2026-10-13T07:00:40.906Z",
+        "httpStatus": 200,
+        "wireSha256": "65c0116af021c4fc99efec11d1abb1b8a534e9748fa18289ab21f2ee0d5213c5",
+        "bytes": 14805,
+        "scope": "one_actual_index_response",
+        "verbatimLatestRawRetained": false,
+        "notContinuousProduction": true
+      },
+      "production24h": "NOT_RUN",
+      "newSourceRequests": 0,
+      "newQualificationApplied": false
+    },
+    {
+      "id": "ID-W02",
+      "classification": "numeric_weather",
+      "currentR24": "NOT_RUN",
+      "currentR25": "NOT_APPLICABLE_NUMERIC",
+      "currentNumeric": "NOT_RUN",
+      "reuse": "Catalogue root/documentation/KODE template only; no concrete numeric data capture confirmed",
+      "lifecycle": "Unknown concrete product and sample; no invented dates/identity",
+      "laterFailure": null,
+      "extraIntelGateRisk": false,
+      "decision": "Genuine product/data gap, remains NOT_RUN",
+      "docs": [
+        "docs/intel-source-catalog.md"
+      ],
+      "impl": [],
+      "evidenceRefs": [
+        {
+          "path": "docs/intel-source-catalog.md",
+          "selector": null,
+          "sha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "latestStoredSample": null,
+      "production24h": "NOT_RUN",
+      "newSourceRequests": 0,
+      "newQualificationApplied": false
+    },
+    {
+      "id": "PH-W01",
+      "classification": "information_notice",
+      "currentR24": "PARTIAL",
+      "currentR25": "NOT_RUN",
+      "currentNumeric": null,
+      "reuse": "10/10 11:03Z HTML200 with explicit no-active-TC-within-PAR text, saved page and proposal",
+      "lifecycle": "No active bulletin identity/time/validity/PDF/updatecancel positive sample; scoped empty not nationwide no-risk",
+      "laterFailure": "No observed fetch failure; missing positive sample is not active coverage",
+      "extraIntelGateRisk": false,
+      "decision": "Keep PARTIAL/NOT_RUN pending individual positive-sample review",
+      "docs": [
+        "docs/evidence/pagasa-warning-2026-10-10.md",
+        "docs/evidence/pagasa-warning-2026-10-10-integration-proposal.md"
+      ],
+      "impl": [],
+      "evidenceRefs": [
+        {
+          "path": "docs/evidence/pagasa-warning-2026-10-10.md",
+          "selector": null,
+          "sha256": "4f60d8429dfa98c6538a32e5b00ed3d2838e7bbf271e820a002d187a2f7c3b60",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/pagasa-warning-2026-10-10-integration-proposal.md",
+          "selector": null,
+          "sha256": "af505f5381f8a3deebaf37e2b946b56bde89bc55ed741252823f4f045cceb37c",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "latestStoredSample": {
+        "evidence": {
+          "path": "docs/evidence/pagasa-warning-2026-10-10/raw/fetch-log.txt",
+          "selector": null,
+          "sha256": "011c6a9b2185fbc4aa8368b44bab651e103d0f72c23c14f329721350c86254b9",
+          "hashBasis": "committed_text_LF"
+        },
+        "captureInventory": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+          "selector": {
+            "id": "PH-W01"
+          },
+          "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+        "at": "2026-10-10T11:03:48Z",
+        "httpStatus": 200,
+        "scope": "page_shell/iframe; no qualified active positive warning item"
+      },
+      "production24h": "NOT_RUN",
+      "newSourceRequests": 0,
+      "newQualificationApplied": false,
+      "activePositiveSampleRecords": 0,
+      "officialScopedEmptyStateRecorded": true,
+      "activeWarningCoverageProved": false
+    },
+    {
+      "id": "PH-W02",
+      "classification": "information_notice",
+      "currentR24": "PARTIAL",
+      "currentR25": "NOT_RUN",
+      "currentNumeric": null,
+      "reuse": "10/10 11:03Z HTML200 with no-Weather-Advisory-issued text, saved page and proposal",
+      "lifecycle": "Unknown positive publication/expiry/region/severity/withdrawal contract; empty state is scoped",
+      "laterFailure": "Do not relabel official empty text as transport failure or activity",
+      "extraIntelGateRisk": false,
+      "decision": "Keep PARTIAL/NOT_RUN",
+      "docs": [
+        "docs/evidence/pagasa-warning-2026-10-10.md"
+      ],
+      "impl": [],
+      "evidenceRefs": [
+        {
+          "path": "docs/evidence/pagasa-warning-2026-10-10.md",
+          "selector": null,
+          "sha256": "4f60d8429dfa98c6538a32e5b00ed3d2838e7bbf271e820a002d187a2f7c3b60",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "latestStoredSample": {
+        "evidence": {
+          "path": "docs/evidence/pagasa-warning-2026-10-10/raw/fetch-log.txt",
+          "selector": null,
+          "sha256": "011c6a9b2185fbc4aa8368b44bab651e103d0f72c23c14f329721350c86254b9",
+          "hashBasis": "committed_text_LF"
+        },
+        "captureInventory": {
+          "path": "docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json",
+          "selector": {
+            "id": "PH-W02"
+          },
+          "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
+          "hashBasis": "committed_text_LF"
+        },
+        "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+        "at": "2026-10-10T11:03:49.920Z",
+        "httpStatus": 200,
+        "scope": "page_shell/iframe; no qualified active positive warning item"
+      },
+      "production24h": "NOT_RUN",
+      "newSourceRequests": 0,
+      "newQualificationApplied": false,
+      "activePositiveSampleRecords": 0,
+      "officialScopedEmptyStateRecorded": true,
+      "activeWarningCoverageProved": false
+    },
+    {
+      "id": "XX-W01",
+      "classification": "numeric_weather",
+      "currentR24": "OK",
+      "currentR25": "NOT_APPLICABLE_NUMERIC",
+      "currentNumeric": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+      "reuse": "JMA targetTc historic10/10 03:58Z normalized IDs/cyclones/operational storage and restart/API/browser diagnostics",
+      "lifecycle": "Historical active/archive focus filtering, not today active cyclone/24h",
+      "laterFailure": "Original combined356e6fe gateBLOCKED by VNSGN, not a clean all-port pass",
+      "extraIntelGateRisk": false,
+      "decision": "Keep existing limited numeric diagnostic; no new qualification",
+      "docs": [
+        "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json"
+      ],
+      "impl": [
+        "server/providers/jma-tropical-cyclone.ts"
+      ],
+      "evidenceRefs": [
+        {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+          "selector": null,
+          "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "latestStoredSample": {
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
+          "selector": null,
+          "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+          "hashBasis": "committed_text_LF"
+        },
+        "atWindow": [
+          "2026-10-10T03:58:39.141Z",
+          "2026-10-10T03:58:44.112Z"
+        ],
+        "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+        "httpStatus": 200,
+        "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
+        "wireSha256": null
+      },
+      "production24h": "NOT_RUN",
+      "newSourceRequests": 0,
+      "newQualificationApplied": false
+    },
+    {
+      "id": "XX-W02",
+      "classification": "numeric_weather",
+      "currentR24": "PARTIAL",
+      "currentR25": "NOT_APPLICABLE_NUMERIC",
+      "currentNumeric": "PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED",
+      "reuse": "Same JMA provider/forecast branch and persisted fields",
+      "lifecycle": "Forecast vs specifications products separate; inferredTC URLs not actual ledger",
+      "laterFailure": "specifications not verified; partial forecast cannot count whole product row",
+      "extraIntelGateRisk": false,
+      "decision": "Keep PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED",
+      "docs": [
+        "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json"
+      ],
+      "impl": [
+        "server/providers/jma-tropical-cyclone.ts"
+      ],
+      "evidenceRefs": [
+        {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+          "selector": null,
+          "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "latestStoredSample": {
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
+          "selector": null,
+          "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+          "hashBasis": "committed_text_LF"
+        },
+        "atWindow": [
+          "2026-10-10T03:58:39.141Z",
+          "2026-10-10T03:58:44.112Z"
+        ],
+        "url": null,
+        "httpStatus": 200,
+        "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
+        "wireSha256": null,
+        "expectedForecastProductsInferredFromStoredIds": [
+          "https://www.jma.go.jp/bosai/typhoon/data/TC2635/forecast.json",
+          "https://www.jma.go.jp/bosai/typhoon/data/TC2634/forecast.json"
+        ]
+      },
+      "production24h": "NOT_RUN",
+      "newSourceRequests": 0,
+      "newQualificationApplied": false
+    },
+    {
+      "id": "XX-A01",
+      "classification": "numeric_weather",
+      "currentR24": "OK",
+      "currentR25": "NOT_APPLICABLE_NUMERIC",
+      "currentNumeric": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+      "reuse": "10/10 03:58Z eight land points numeric fields/time ->SQLite/restart/API/browser",
+      "lifecycle": "169hour historic window, not current fresh/next7days; commercial licensing future",
+      "laterFailure": "Do not turn older temporary upstream failures or combined VNSGN block into source-wide full pass",
+      "extraIntelGateRisk": false,
+      "decision": "Keep existing3/5 limited numeric partition",
+      "docs": [
+        "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json"
+      ],
+      "impl": [
+        "server/providers/shipping.ts",
+        "server/providers/weather.test.ts"
+      ],
+      "evidenceRefs": [
+        {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+          "selector": null,
+          "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "latestStoredSample": {
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
+          "selector": null,
+          "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+          "hashBasis": "committed_text_LF"
+        },
+        "atWindow": [
+          "2026-10-10T03:58:39.141Z",
+          "2026-10-10T03:58:44.112Z"
+        ],
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "httpStatus": 200,
+        "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
+        "wireSha256": null
+      },
+      "production24h": "NOT_RUN",
+      "newSourceRequests": 0,
+      "newQualificationApplied": false
+    },
+    {
+      "id": "XX-A02",
+      "classification": "numeric_weather",
+      "currentR24": "OK",
+      "currentR25": "NOT_APPLICABLE_NUMERIC",
+      "currentNumeric": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+      "reuse": "Historic7origin marine points; later ADR009 isolated engineering reference chain",
+      "lifecycle": "VNSGN origin missing remains;61.8km reference not berth/origin; historic not current",
+      "laterFailure": "356e6fe original gateBLOCKED preserved; later ADR009 mapped pass has separate conditions",
+      "extraIntelGateRisk": false,
+      "decision": "Keep existing limited numeric diagnostic and original missingness",
+      "docs": [
+        "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+        "docs/adr/ADR-009-vnsgn-area-reference-marine.md"
+      ],
+      "impl": [
+        "server/providers/shipping.ts",
+        "server/providers/weather.test.ts"
+      ],
+      "evidenceRefs": [
+        {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+          "selector": null,
+          "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/adr/ADR-009-vnsgn-area-reference-marine.md",
+          "selector": null,
+          "sha256": "e22f259d72ef11fe05ab8438b15fc6b13e37e51b988a0b40d0a00ae2877d4ee2",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "latestStoredSample": {
+        "evidence": {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json",
+          "selector": null,
+          "sha256": "17b315bf9a15ca072c4584f422c57ad5bf772f458f4c178f3ba2fc4af03de327",
+          "hashBasis": "committed_text_LF"
+        },
+        "atWindow": [
+          "2026-10-10T03:58:39.141Z",
+          "2026-10-10T03:58:44.112Z"
+        ],
+        "url": "https://marine-api.open-meteo.com/v1/marine",
+        "httpStatus": 200,
+        "scope": "historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash",
+        "wireSha256": null,
+        "latestReferencePointProbe": {
+          "path": "docs/evidence/vnsgn-point-check-2026-10-10/vnsgn-point-check.json",
+          "selector": null,
+          "sha256": "5a4f550716b05cadef45b64997a3592516110f82a86d3ac929f8f2feb4d82bac",
+          "hashBasis": "committed_text_LF"
+        },
+        "referenceProbeAt": "2026-10-10T05:31:34+00:00"
+      },
+      "production24h": "NOT_RUN",
+      "newSourceRequests": 0,
+      "newQualificationApplied": false
+    }
+  ]
+}

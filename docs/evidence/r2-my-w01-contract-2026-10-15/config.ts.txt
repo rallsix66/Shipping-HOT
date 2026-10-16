@@ -1,0 +1,2 @@
+import base from "../vitest.config"
+export default { ...base, test: { ...base.test, include: [".tmp/my-w01-contract-20261015.test.ts", "server/providers/metmalaysia-warning.test.ts"], setupFiles:[".tmp/my-w01-contract-20261015.guard.ts"], fileParallelism:false } }

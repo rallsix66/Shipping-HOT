@@ -1,0 +1,8 @@
+{"name":"lint","command":"pnpm lint","sha":"484db7b7a173f5c31312f3f7320807f4d521e5dd","started":"2026-10-13T09:00:36.134Z","finished":"2026-10-13T09:01:01.210Z","rawExit":0,"signal":null}
+STDOUT
+
+> shipping-hot@0.0.41 lint D:\try one\Shipping HOT
+> eslint
+
+
+STDERR

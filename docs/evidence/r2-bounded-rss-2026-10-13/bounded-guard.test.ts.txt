@@ -1,0 +1,7 @@
+import { expect, it, vi } from "vitest"
+import { oneShotTransport } from "./bounded-batch-runner"
+const url=new URL("https://public.example/index.xml")
+const addresses=[{address:"93.184.216.34",family:4 as const}]
+const options={timeoutMs:10000,maxBytes:524288,headers:{accept:"text/xml"}}
+it("one shot cannot send another request or a different URL",async()=>{const real=vi.fn(async()=>({status:302,headers:{location:"/other"},body:""}));const reserve=vi.fn();const t=oneShotTransport(url.href,real,new AbortController().signal,reserve,()=>{});await t(url,addresses,options);await expect(t(url,addresses,options)).rejects.toThrow("batch_request_forbidden");await expect(t(new URL("https://public.example/other"),addresses,options)).rejects.toThrow("batch_request_forbidden");expect(real).toHaveBeenCalledTimes(1);expect(reserve).toHaveBeenCalledTimes(1)})
+it("aborted or enlarged/CA configuration never reaches real transport",async()=>{const real=vi.fn();const c=new AbortController();c.abort();await expect(oneShotTransport(url.href,real,c.signal,()=>{},()=>{})(url,addresses,options)).rejects.toThrow("batch_request_forbidden");for(const patch of [{maxBytes:524289},{timeoutMs:10001},{caPem:"not-authorized"}])await expect(oneShotTransport(url.href,real,new AbortController().signal,()=>{},()=>{})(url,addresses,{...options,...patch})).rejects.toThrow("batch_limits_invalid");expect(real).not.toHaveBeenCalled()})

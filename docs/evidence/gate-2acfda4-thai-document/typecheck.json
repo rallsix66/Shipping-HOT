@@ -1,0 +1,9 @@
+{
+  "name": "typecheck",
+  "command": "pnpm typecheck",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\thai-document-final-build",
+  "sha": "2acfda4c8ddab3f8064d199bb3cfcf26873ff288",
+  "startedAt": "2026-10-14T08:38:33.086Z",
+  "endedAt": "2026-10-14T08:38:41.275Z",
+  "rawExit": 0
+}

@@ -1,0 +1,9 @@
+# command: node .tmp/check-p1-docs.cjs
+# baseline_sha: a9e637fd52c69fbfde7fd226c660e58da0ea2ae8
+# started: 2026-10-13T03:44:06.993Z
+# stdout
+PASS catalog immutable hash / 58 exact P1 IDs / 41 automatic + 17 manual / 40 P2 / 3 payload results + 38 missing / source hashes + zero-network results / authority and probe paths
+
+# stderr
+
+# raw_exit_code: 0

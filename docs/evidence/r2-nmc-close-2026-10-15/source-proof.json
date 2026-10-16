@@ -1,0 +1,10 @@
+{
+  "executionHead": "f58e01e7360f17ab55706e36ce09851e265ddedb",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "productDiff": "",
+  "catalogueDiff": "",
+  "sourceRequests": 0,
+  "systemDns": 0,
+  "scope": "Only approved NMC historical evidence mapping/qualification and bounded current-document corrections; no product/schema/production change",
+  "productGate": "NOT_RUN_no_product_change"
+}

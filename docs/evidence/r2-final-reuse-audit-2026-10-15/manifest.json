@@ -1,0 +1,85 @@
+{
+  "executionHead": "0321584ffbbb2f99c1f8ecd64c680b78d0affcc6",
+  "productCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
+  "productGate": "NOT_RUN_docs_only",
+  "hashBasis": "committed UTF8 LF",
+  "files": [
+    {
+      "path": "docs/architecture.md",
+      "sha256": "4e64be609704e73f860ab295c2cfc3a8af0fc48bfef619f80b6004c1dd32c331"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+      "sha256": "8fe1f4f5fce458cdb2489777d2d7611bd261b08346f7d47c5cf4960b5681f70e"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+      "sha256": "d7b70b273454925249610db514b21064551b130c6a5061398f9b457419d584eb"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+      "sha256": "98fdeb8d3409ab43d9fd81a9b7295427ecf52faddc14c7a7cc66787f77c20f48"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+      "sha256": "a82bb715a754bc54f97aabaf608d973c240d6d0e4c23e5ebbacc8a6ab3b76850"
+    },
+    {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md",
+      "sha256": "2f1a60a246bf41de6eb69a3a0048e437da0925963ad3a1ad65af71961298444f"
+    },
+    {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/acceptance.json",
+      "sha256": "8a15ffc39b5e8dd2a8092daebaba7465bf6de260aa7255428d8238ab060ee223"
+    },
+    {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/closeout.md",
+      "sha256": "d7662b9079c3c7d9ef9200d2bf2568e69302b986336c42207a10f9f1fc4ff037"
+    },
+    {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/doc-lint.json",
+      "sha256": "bdc526f3461d135afdc067afa0501e2790f053d39a93e3b4b5afd6e3185d8c66"
+    },
+    {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/document-validation-initial-error.json",
+      "sha256": "76ff9c3aaa90a4f4db4bc27b7788070689a0599f3a1534f1ad8f06ff25bfb166"
+    },
+    {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/material-read-acceptance.json",
+      "sha256": "92a25a15392fb0cc829625de55171ac8ef5fa21d6d9104c56b62f79193c05540"
+    },
+    {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/mechanical-audit.json",
+      "sha256": "54e3e4488b93fd6695b1ad06edcf5b1264a3bbf6c06e8ce8859af479b03fb631"
+    },
+    {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/pilot-24h-proposal.md",
+      "sha256": "355430e57a2519057057f9f03079008131c46da3f803ec1211bd2fd96aef3cc4"
+    },
+    {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/report.md",
+      "sha256": "e55069044c4b3dd612b0ea5d720062c252ad869cad59275c0ca9ef9f0ccc7aaa"
+    },
+    {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/reuse-matrix.json",
+      "sha256": "a26d5b80b3fc7240f0edb58987075e3aa8e43bf5501a0da60f5927bb1e482266"
+    },
+    {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/source-proof.json",
+      "sha256": "e31ea5fed3bd4e3fbcebb361768f24d71d8e2e83d9cf2b129a6c76a0d540e066"
+    },
+    {
+      "path": "docs/evidence/r2-final-reuse-audit-2026-10-15/validation.json",
+      "sha256": "a82bb715a754bc54f97aabaf608d973c240d6d0e4c23e5ebbacc8a6ab3b76850"
+    },
+    {
+      "path": "docs/handoffs/r2-next-execution-2026-10-15.md",
+      "sha256": "806af106f1cb4ec96a28e07f863548c02b52c1076b22bd6930e667675ca3a2d5"
+    },
+    {
+      "path": "docs/status.md",
+      "sha256": "07e5319b756bfd0931342d9056cb8ec69673530f9c5c09095bc9bf4c966ace2f"
+    }
+  ],
+  "manifestSelfHashIntentionallyExcluded": true
+}

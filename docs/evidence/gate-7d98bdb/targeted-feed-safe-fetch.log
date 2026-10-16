@@ -1,0 +1,58 @@
+# command: npx vitest run server/providers/feed.test.ts server/runtime/feed-sync-job.test.ts server/services/article-fetch-security.test.ts server/services/article-fetch-transport.test.ts server/services/response-decoding.test.ts server/providers/article-extractor.test.ts server/services/article-service.test.ts server/runtime/registry.test.ts
+# full_sha: 7d98bdb99caf9fdaf15c833ef91f457bee05a2cd
+# started: 2026-10-13T01:39:27.745Z
+# ---- stdout ----
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ server/services/response-decoding.test.ts (6 tests) 6ms
+ ✓ server/providers/article-extractor.test.ts (7 tests) 36ms
+ ✓ server/services/article-fetch-security.test.ts (10 tests) 11ms
+ ✓ server/providers/feed.test.ts (24 tests) 98ms
+[info] runtime started {
+  jobs: [33m2[39m
+}
+[info] job started {
+  jobId: [32m'feed-sync:failed-source'[39m,
+  providerId: [32m'failed-source'[39m,
+  capability: [32m'feed_sync'[39m
+}
+[info] job started {
+  jobId: [32m'feed-sync:healthy-source'[39m,
+  providerId: [32m'healthy-source'[39m,
+  capability: [32m'feed_sync'[39m
+}
+[info] job success {
+  jobId: [32m'feed-sync:healthy-source'[39m,
+  providerId: [32m'healthy-source'[39m
+}
+[info] runtime stopped
+ ✓ server/services/article-fetch-transport.test.ts (16 tests) 197ms
+ ✓ server/runtime/feed-sync-job.test.ts (4 tests) 155ms
+ ✓ server/runtime/registry.test.ts (2 tests) 75ms
+ ✓ server/services/article-service.test.ts (8 tests) 934ms
+
+ Test Files  8 passed (8)
+      Tests  77 passed (77)
+   Start at  09:39:28
+   Duration  1.91s (transform 2.38s, setup 0ms, import 4.72s, tests 1.51s, environment 1ms)
+
+
+# ---- stderr ----
+npm warn Unknown env config "store-dir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+[error] job failed {
+  jobId: [32m'feed-sync:failed-source'[39m,
+  providerId: [32m'failed-source'[39m,
+  errorCode: [32m'job_failed'[39m
+}
+
+# raw_exit_code: 0

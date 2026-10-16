@@ -1,0 +1,24 @@
+{
+  "sha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "cleanClone": true,
+  "node": "v24.15.0",
+  "abi": "137",
+  "existingNodeModulesBeforeInstall": false,
+  "installScriptsNotSkipped": true,
+  "commandsAllRawExitZero": true,
+  "targeted": {
+    "files": 17,
+    "passed": 245
+  },
+  "full": {
+    "files": 129,
+    "passed": 1230,
+    "skipped": 3
+  },
+  "retainedUnchanged": true,
+  "testedSourceDiff": "",
+  "upstreamSourceRequestsThisRound": 0,
+  "networkScope": "Dependency installation separate from source requests; no ONE/Maersk live work in this round",
+  "exactOriginalLogs": "Per-command JSON carries exact UTF8 stdout/stderr and byte hashes; display logs whitespace-normalized only",
+  "s7": "NOT_RUN_no_route_or_UI_change; prior_GUI_pending"
+}

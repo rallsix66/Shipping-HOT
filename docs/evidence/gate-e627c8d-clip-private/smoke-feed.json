@@ -1,0 +1,9 @@
+{
+  "name": "smoke-feed",
+  "command": "pnpm smoke:p3-feed-freshness",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-private-e627c8d",
+  "sha": "e627c8d2b7937cfa4df6c63f93ad349835b730d8",
+  "startedAt": "2026-10-16T07:57:04.232Z",
+  "endedAt": "2026-10-16T07:57:05.349Z",
+  "rawExit": 0
+}

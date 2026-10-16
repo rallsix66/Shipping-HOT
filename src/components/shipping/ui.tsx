@@ -50,6 +50,10 @@ export function ProviderChip({ label, value, tone }: { label: string, value: str
   )
 }
 
+export function MotionToggle({ reduced, onToggle }: { reduced: boolean, onToggle: () => void }) {
+  return <button type="button" aria-label="关闭动效" aria-pressed={reduced} onClick={onToggle}>{reduced ? "动效已关闭" : "关闭动效"}</button>
+}
+
 export function ProvenanceBadge({ provenance }: { provenance?: DataProvenance }) {
   const isMock = provenance?.sourceType === "mock"
   return (

@@ -1,0 +1,2 @@
+import base from "../vitest.config"
+export default { ...base, test: { ...base.test, include: [".tmp/carrier-news-two-20261015.test.ts"] } }

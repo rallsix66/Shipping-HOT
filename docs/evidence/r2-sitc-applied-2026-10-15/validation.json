@@ -1,0 +1,108 @@
+{
+  "type": "sitc_actual_page_existing_contract_negative_validation",
+  "at": "2026-10-15T06:43:20.702Z",
+  "executionHead": "e37c5e49c0c90d69663af3c5f45f347bfc8326f4",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "sourceGetAttempts": 1,
+  "systemDnsCalls": 1,
+  "productGate": "NOT_RUN_no_product_change",
+  "checks": [
+    {
+      "name": "Exact branch, execution and product code binding",
+      "pass": true
+    },
+    {
+      "name": "No product/schema/dependency/production/workflow/catalogue diff",
+      "pass": true
+    },
+    {
+      "name": "Required27/old26/SITC once confirmation precedes capture, read-only and no full-config claim",
+      "pass": true
+    },
+    {
+      "name": "Only exact authorized index, safeDNS1/GET1/public200 complete response",
+      "pass": true
+    },
+    {
+      "name": "Complete private original size/hash retained and ignored",
+      "pass": true
+    },
+    {
+      "name": "No retry/redirect/Vietnam/detail/pagination/other-source/settings or credentials",
+      "pass": true
+    },
+    {
+      "name": "20 genuine unique sourceHTTP title identities, no rewrite, exact private/public field hashes",
+      "pass": true
+    },
+    {
+      "name": "Source raw dates retained as unsupported/unknown without guessedUTC or calendar conversion",
+      "pass": true
+    },
+    {
+      "name": "Isolated evidence config disabled/disallowed, not production candidate",
+      "pass": true
+    },
+    {
+      "name": "Existing parser/collector rejectsHTTP identity and records two failed runs, not successful empty",
+      "pass": true
+    },
+    {
+      "name": "Zeroitems/versions/blocks, provider usage unchanged and query-only proof explicitly empty",
+      "pass": true
+    },
+    {
+      "name": "Offline replay realTCP/DNS/globalfetch0; two injected reproductions only",
+      "pass": true
+    },
+    {
+      "name": "Initial harness SQL name failure and exact first procedure preserved; final fix changes table name only",
+      "pass": true
+    },
+    {
+      "name": "Raw capture/final negative exit0 and all three exact original stdout/stderr hashes",
+      "pass": true
+    },
+    {
+      "name": "OnlyXX-K03 entry updated, other40 identical",
+      "pass": true
+    },
+    {
+      "name": "All41 qualification verdicts/counts/permissions/defaults and numeric diagnostics unchanged",
+      "pass": true
+    },
+    {
+      "name": "New200 latest capture, oldDNS block retained and proposal explicitly pending",
+      "pass": true
+    },
+    {
+      "name": "23/39,21/34,historical3/5, thresholds and24h unchanged",
+      "pass": true
+    },
+    {
+      "name": "Old e37DNS-block evidence directory untouched",
+      "pass": true
+    },
+    {
+      "name": "Current matrix references and LF hashes resolve",
+      "pass": true,
+      "detail": {
+        "occurrences": 303,
+        "uniquePaths": 116,
+        "bad": []
+      }
+    },
+    {
+      "name": "Affected local Markdown links resolve",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "New public evidence contains no rawHTML/DB or credential-value pattern",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "errors": [],
+  "rawExit": 0
+}

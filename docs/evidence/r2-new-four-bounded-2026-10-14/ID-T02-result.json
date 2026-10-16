@@ -1,0 +1,21 @@
+{
+  "id": "ID-T02",
+  "url": "https://jdih.kemenkeu.go.id/",
+  "host": "jdih.kemenkeu.go.id",
+  "catalogLineSha256": "badbcb5421386368eaa2d608b1cfe39bcc9ecbb6868b09e16812792b916d539b",
+  "startedAt": "2026-10-14T10:55:51.562Z",
+  "systemDnsCalls": 1,
+  "httpRequests": 0,
+  "status": "BLOCKED",
+  "rawHtmlCommitted": false,
+  "addresses": [
+    {
+      "address": "198.18.0.169",
+      "family": 4
+    }
+  ],
+  "addressClassification": "blocked_address",
+  "reason": "blocked_address",
+  "parser": "NOT_RUN",
+  "finishedAt": "2026-10-14T10:55:51.563Z"
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "MY-P02",
+    "host": "www.westportsholdings.com",
+    "reservedAt": "2026-10-15T08:46:45.729Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "104.26.3.69",
+        "family": 4
+      },
+      {
+        "address": "104.26.2.69",
+        "family": 4
+      },
+      {
+        "address": "172.67.71.25",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T08:46:45.995Z"
+  }
+]

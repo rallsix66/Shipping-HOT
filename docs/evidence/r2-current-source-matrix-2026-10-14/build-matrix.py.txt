@@ -1,0 +1,386 @@
+from pathlib import Path
+from datetime import datetime, timezone
+from collections import Counter
+import json, hashlib, re
+
+ROOT = Path('docs/evidence')
+OUT = ROOT / 'r2-current-source-matrix-2026-10-14'
+OUT.mkdir(exist_ok=True)
+OLD = ROOT / 'r2-acceptance-convergence-2026-10-14/mapping.json'
+old = json.loads(OLD.read_text(encoding='utf-8'))
+inventory_path = ROOT / 'r2-p1-inventory-2026-10-13/source-inventory.json'
+inventory = json.loads(inventory_path.read_text(encoding='utf-8'))
+legacy = {r['id']: r for r in inventory['entries']}
+HEAD = 'bebe1441465adfcabb9daf93cb2a8656ec1fc796'
+CODE = 'bebe1441465adfcabb9daf93cb2a8656ec1fc796'
+
+def read(path): return json.loads(Path(path).read_text(encoding='utf-8'))
+def ref(path, selector=None):
+    p = Path(path)
+    assert p.is_file(), str(p)
+    return {'path':p.as_posix(), 'selector':selector, 'sha256':hashlib.sha256(p.read_bytes().replace(b'\r\n', b'\n')).hexdigest(), 'hashBasis':'committed_text_LF'}
+def outcome(path, sid):
+    x = read(path)
+    return next(r for r in x['results'] if r['id'] == sid)
+def fetch(path, sid):
+    x = outcome(path, sid)
+    return {'evidence':ref(path, {'id':sid}), 'url':x['url'],
+        'startedAt':x.get('startedAt',x.get('started')), 'receivedAt':x.get('receivedAt'),
+        'finishedAt':x.get('finishedAt',x.get('finished')), 'httpStatus':x.get('httpStatus'),
+        'wireSha256':x.get('fetchedBytesSha256',x.get('rawResponseSha256',x.get('wireSha256'))),
+        'bytes':x.get('rawByteLength',x.get('bytes')), 'scope':'one_actual_index_response',
+        'verbatimLatestRawRetained':x.get('rawLocalOnly',x.get('rawStructureFixtureRetained',False)),
+        'notContinuousProduction':True}
+
+paths = {
+ 'CN-P01':'docs/evidence/r2-four-after-clash-2026-10-14/summary.json',
+ 'CN-T02':'docs/evidence/r2-four-after-clash-2026-10-14/summary.json',
+ 'VN-P01':'docs/evidence/r2-four-after-clash-2026-10-14/summary.json',
+ 'PH-C01':'docs/evidence/r2-four-after-clash-2026-10-14/summary.json',
+ 'MY-P03':'docs/evidence/r2-six-public-2026-10-14/summary.json',
+ 'TH-C01':'docs/evidence/r2-six-public-2026-10-14/summary.json',
+ 'TH-C02':'docs/evidence/r2-next-four-2026-10-14/summary.json',
+ 'VN-P03':'docs/evidence/r2-three-after-clash-2026-10-14/summary.json',
+ 'VN-T01':'docs/evidence/r2-three-after-clash-2026-10-14/summary.json',
+ 'ID-T01':'docs/evidence/r2-three-after-clash-2026-10-14/summary.json',
+}
+for sid in ['MY-P02','PH-M01','MY-C01','MY-T01','TH-W01','ID-W01']:
+    paths[sid] = 'docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json'
+for sid in ['XX-M01','XX-M03']:
+    paths[sid] = 'docs/evidence/r2-four-index-2026-10-13/batch-results.json'
+for sid in ['CN-P02','VN-D01','MY-L01','ID-T02']:
+    paths[sid] = 'docs/evidence/r2-four-reapplied-2026-10-15/summary.json'
+
+raw_replays = {
+ 'CN-P01':'docs/evidence/r2-public-index-replay-2026-10-14/summary.json',
+ 'CN-T02':'docs/evidence/r2-public-index-replay-2026-10-14/summary.json',
+ 'PH-C01':'docs/evidence/r2-public-index-replay-2026-10-14/summary.json',
+ 'TH-C01':'docs/evidence/r2-two-raw-dns-2026-10-14/replay-summary.json',
+ 'TH-C02':'docs/evidence/r2-thai-document-replay-2026-10-14/summary.json',
+ 'VN-P03':'docs/evidence/r2-post-clash-index-replay-final-2026-10-14/summary.json',
+ 'VN-T01':'docs/evidence/r2-post-clash-index-replay-final-2026-10-14/summary.json',
+ 'ID-T01':'docs/evidence/r2-post-clash-index-replay-final-2026-10-14/summary.json',
+ 'VN-D01':'docs/evidence/r2-anchor-date-review-replay-2026-10-15/summary.json',
+}
+numeric_sync='docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json'
+numeric_accept='docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json'
+point='docs/evidence/vnsgn-point-check-2026-10-10/vnsgn-point-check.json'
+
+entries=[]
+for source in old['entries']:
+    sid=source['id']; group=source['proposedType']
+    category='numeric_weather' if group=='OP' else 'later_stage' if group in ['PAID','VECTOR'] else 'information_notice'
+    # Keep multi-product catalogue rows and templates literal, never manufacture a resolved URL.
+    url_text=source['originalCatalogUrlText']
+    if sid=='XX-K02':url_text=next(l for l in Path('docs/intel-source-catalog.md').read_text(encoding='utf-8').splitlines() if l.startswith('| XX-K02 |')).split('|')[4].strip()
+    urls=re.findall(r'https?://[^\s`，；、（）]+',url_text)
+    concrete=[u for u in urls if '{' not in u and '}' not in u]
+    e={'id':sid,'priority':'P1','catalogUrlText':url_text,'catalogUrls':urls,
+       'exactProductUrl':concrete[0] if len(concrete)==1 and len(urls)==1 and sid not in ['ID-W02','XX-A04'] else None,
+       'catalogUnresolvedFragments':(['/apidoc','/pelabuhan/{KODE}.json'] if sid=='ID-W02' else ['/specifications.json'] if sid=='XX-W02' else []),
+       'classification':category,'legacyGroup':group,'inPublicDenominator':category!='later_stage',
+       'legacyInventoryEvidence':ref(inventory_path,{'id':sid}),
+       'latestActualFetch':None,'fieldReplayEvidence':None,'numericFieldValidation':None,
+       'dateEvidence':{'role':'unknown','precision':'unknown','sourceDeclaredTimezone':'unknown','publicationInstant':'unknown'},
+       'licensePolicy':{'storedBody':'metadata_only_until_source_permission_verified','rawRedistribution':'not_assumed','historicalArtifactsNotReaudited':True},
+       'defaultState':{'r2AutomaticEntry':'off_without_explicit_enable_and_selected_ids',
+          'sourceConfig':'not_configured','declaredSeedEnabled':None,'effectiveDefaultIntelJobEnabled':False,
+          'currentUserPersistedSettings':'not_inspected'},
+       'r2_4':{'verdict':'NOT_RUN','countedOK':False,'reason':'No qualifying stored actual product request/data verification; catalogue notes alone are not evidence.'},
+       'r2_5':{'verdict':'NOT_RUN','countedPass':False,'reason':'No stored real-page full title/link/source-time replay.'},
+       'continuousProduction':{'status':'NOT_RUN','scope':'No approved R2-8 24h run for this source'},
+       'gaps':[legacy[sid]['gap']], 'historicalSuperseded':[]}
+    if sid in ['CN-P02','VN-D01','MY-L01','ID-T02']:
+        batch='docs/evidence/r2-new-four-bounded-2026-10-14/summary.json';attempt=outcome(batch,sid)
+        e['latestAttempt']={'evidence':ref(batch,{'id':sid}),'dnsEvidence':ref('docs/evidence/r2-new-four-bounded-2026-10-14/dns-ledger.json',{'id':sid}),'at':attempt['startedAt'],'url':attempt['url'],'addresses':attempt['addresses'],'systemDnsCalls':1,'httpRequests':0,'reason':'blocked_address','scope':'current_environment_dns_only_no_response_no_parse'}
+        e['r2_4']={'verdict':'BLOCKED','countedOK':False,'reason':'Latest authorized exact-URL check resolved a198.18 special-range address; unchanged secure fetch blocked before transport. Current environment blocked, not proof source content is unusable.'}
+        e['r2_5']={'verdict':'NOT_RUN','countedPass':False,'reason':'DNS blocked before HTTP, no original response bytes obtained; no guessing selectors/dates or synthetic replacement replay.'}
+        e['gaps']=['System DNS198.18 special address blocked before HTTP; no retry or network-setting change.','Actual page, source field roles/selector and license remain unverified; no new source configuration.']
+    if sid in paths:
+        e['latestActualFetch']=fetch(paths[sid],sid)
+        e['r2_4']={'verdict':'OK','countedOK':True,'reason':'Stored genuine exact-catalogue product response plus real data parsing/collector or completed real raw replay; measured at capture time, not current uptime/24h.'}
+        e['gaps']=[]
+        if sid in ['MY-P03','VN-P01']:
+            e['r2_4']={'verdict':'PARTIAL','countedOK':False,'reason':'Genuine response exists but current collection qualification is incomplete: duplicate association conflict' if sid=='MY-P03' else 'Genuine title/link table, but no date field and no completed configured collector replay.'}
+        if sid in ['MY-P02','MY-C01','MY-T01','PH-M01','XX-M01','XX-M03']:
+            x=outcome(paths[sid],sid)
+            e['fieldReplayEvidence']={'status':'LIVE_PARSE_ONLY_NO_RETAINED_COMPLETE_RAW_REPLAY',
+                'evidence':ref(paths[sid],{'id':sid}),'liveParsedItems':x['items'],'liveTitleLinkTimeComplete':x['completeTitleLinkTime'],
+                'storedDerivativeOnly':True,'repeatAndReadOnlyReopen':'NOT_RUN'}
+            e['dateEvidence']={'role':'feed_declared_date_time_normalized','precision':'instant_in_saved_metadata','sourceDeclaredTimezone':'not_reaudited_here','publicationInstant':'available_in_saved_live_metadata'}
+            e['gaps']=['Full original RSS not retained under unverified reuse permission; live parse/metadata/hash is not a later full-page replay.']
+        if sid=='MY-P02':
+            meta='docs/evidence/r2-bounded-rss-after-dns-2026-10-13/MY-P02-metadata.json'
+            days=sorted(item['publishedAt'][:10] for item in read(meta)['items'])
+            e['contentFreshness']={'evidence':ref(meta),'itemDays':days,'latestItemDay':days[-1],'requiredCatalogYear':2026,'status':'STALE','noNewFetch':True}
+            e['r2_4']={'verdict':'STALE','countedOK':False,'reason':'Saved exact RSS has only 2024-11-08, 2025-02-01 and 2025-08-01 dated items; latest predates catalogue 2026 content criterion. HTTP200 and complete fields do not establish current content. No later stored update found.'}
+            e['gaps'].append('Latest saved source item is 2025-08-01; retain STALE rather than count a reachable old feed as OK.')
+    if sid in raw_replays:
+        x=outcome(raw_replays[sid],sid)
+        e['fieldReplayEvidence']={'status':'PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS',
+            'evidence':ref(raw_replays[sid],{'id':sid}),
+            'items':x.get('adapterCount',x.get('adapter',{}).get('count')),
+            'first':x['first'],'repeat':x['repeat'],'readOnlyReopen':x.get('reopen'),
+            'independentStorageAudit':ref('docs/evidence/r2-two-raw-dns-2026-10-14/storage-and-conflicts-audit.json',{'id':sid}) if sid=='TH-C01' else None}
+        role='document_day' if sid=='TH-C02' else 'enactment_day' if sid=='ID-T01' else 'source_displayed_list_day'
+        e['dateEvidence']={'role':role,'precision':'day','sourceDeclaredTimezone':'missing','publicationInstant':None,
+            'notClaimedAsPublicationTimestamp':True,'basis':'Preserved actual source field role; full dateEvidence stored/replayed, no UTC/clock inference.'}
+        e['r2_5']={'verdict':'PASS','countedPass':True,'reason':'Complete real page title/link/source-time fields replayed with their actual role and day precision, with repeat/reopen comparison. Does not certify publication instant, article body or impacts.'}
+        e['defaultState']['sourceConfig']='disabled_HTML_candidate';e['defaultState']['declaredSeedEnabled']=False
+        e['gaps']=['Private original raw only; remote derivative cannot reconstruct the full page.','No continuous production or enablement.']
+        if sid=='ID-T01':e['gaps'].append('Visible regulation title contains original ellipsis; no complete legal title/text claim. Initial 7/8 date failure retained, fixed explicit observed October token only.')
+        if sid in ['TH-C02','ID-T01']:e['gaps'].append('Document/enactment day is not publication date or instant; field-role PASS only.')
+    if sid in ['TH-W01','ID-W01','VN-W01']:
+        e['fieldReplayEvidence']={'status':'PASS_STORED_REAL_ARCHIVE_FIELDS',
+            'evidence':ref('docs/evidence/r2-p1-inventory-2026-10-13/replay.log'),
+            'harness':ref('docs/evidence/r2-p1-inventory-2026-10-13/replay.test.ts.txt'),
+            'items':{'TH-W01':7,'ID-W01':12,'VN-W01':5}[sid],
+            'artifact':legacy[sid]['archive'],'captureProvenance':legacy[sid]['capture'],
+            'repeatReadOnlyReopen':'not_asserted_by_this_older_replay'}
+        e['r2_5']={'verdict':'PASS','countedPass':True,'reason':'Saved real source archive (not synthetic) was replayed through collector with every title/link/time assertion; limited historical field scope and alias/redaction/zone notes retained.'}
+        e['dateEvidence']={'role':'source_list_local_datetime' if sid=='VN-W01' else 'feed_declared_date_time',
+            'precision':'datetime','sourceDeclaredTimezone':'unknown; older replay config +07, not source declaration' if sid=='VN-W01' else 'feed_date_normalization_provenance',
+            'publicationInstant':'older normalized output; source-local fields passed, absolute UTC not independently certified' if sid=='VN-W01' else 'present in saved parser output'}
+        e['gaps']=[legacy[sid]['gap'],'Current continuous production and official alert validity/port effect are not proved by fields.']
+        if sid in ['TH-W01','ID-W01']:
+            e['defaultState']['sourceConfig']='built_in_seed';e['defaultState']['declaredSeedEnabled']=True
+            e['licensePolicy']['storedBody']='full_under_public_domain_feed_declaration' if sid=='TH-W01' else 'excerpt_only_pending_license_review'
+            e['gaps'].append('Seed enabled=true is distinct from default-off production Intel job; startup selects no seeds without explicit enable.')
+        else:
+            e['defaultState']['sourceConfig']='older_replay_fixture_config_only_no_active_seed'
+            e['latestActualFetch']={'evidence':ref('docs/evidence/nchmf-integration-2026-10-10/live-evidence.json'),
+                'url':source['originalCatalogUrlText'],'at':'2026-10-10T09:52:07.791Z','httpStatus':200,
+                'wireSha256':None,'storedArchiveSha256':hashlib.sha256(Path('docs/evidence/nchmf-integration-2026-10-10/raw/index.html').read_bytes()).hexdigest(),
+                'scope':'historical_live_capture_then_sanitized_full_DOM_archive','notContinuousProduction':True}
+            e['r2_4']={'verdict':'OK','countedOK':True,'reason':'Stored genuine exact-index capture and 5-item full DOM/collector field replay; UTC+07 is older test configuration, not source-declared evidence.'}
+        if sid=='TH-W01':
+            e['fieldReplayEvidence']['latestExactPayloadReplay']=ref('docs/evidence/r2-bounded-rss-after-dns-2026-10-13/offline-check.log')
+            e['fieldReplayEvidence']['latestExactPayloadReplayProcedure']=ref('docs/evidence/r2-bounded-rss-after-dns-2026-10-13/after-dns-replay.test.ts.txt')
+            e['fieldReplayEvidence']['latestExactPayloadItems']=10
+            e['gaps']=['CAP validity and port impact outside this Feed field pass; no 24h/enablement claim.']
+        if sid=='ID-W01':e['gaps']=['Latest 13-item exact catalogue RSS fetch solved earlier request URL access gap.','12-item older full RSS archive originated from /alerts/nowcast/en with self-link identifying /en/rss.xml; keep alias provenance, do not say it was that exact earlier GET.','Latest exact 13-item raw was not retained; old 12-item payload field replay is distinct.','Validity, licensed full body and 24h unverified.']
+    if sid=='MY-P03':
+        e['fieldReplayEvidence']={'status':'FAIL_REAL_DUPLICATE_ASSOCIATIONS',
+            'evidence':ref('docs/evidence/r2-two-raw-dns-2026-10-14/replay-summary.json',{'id':sid}),
+            'conflictAudit':ref('docs/evidence/r2-two-raw-dns-2026-10-14/storage-and-conflicts-audit.json',{'id':sid}),
+            'itemsCommitted':0,'sameRawAsOct13':True}
+        e['r2_5']={'verdict':'FAIL','countedPass':False,'reason':'Full actual raw repeated URL with conflicting title/date; collector fails closed. No selection/merging to manufacture a pass.'}
+        e['dateEvidence']={'role':'source_displayed_notice_day','precision':'day_if_unambiguous','sourceDeclaredTimezone':'missing','publicationInstant':None}
+        e['defaultState']['sourceConfig']='disabled_HTML_candidate';e['defaultState']['declaredSeedEnabled']=False
+        e['gaps']=['Real duplicate URL title/date conflicts persist, 0 items committed.','No licensed full raw redistribution.']
+    if sid=='VN-P01':
+        e['fieldReplayEvidence']={'status':'PARTIAL_REAL_TABLE_TITLE_LINK_NO_DATE',
+            'evidence':ref('docs/evidence/r2-four-after-clash-2026-10-14/VN-P01-table-metadata.json'),
+            'fullFieldInspection':ref('docs/evidence/r2-public-index-replay-2026-10-14/cn-vn-full-raw-field-inspection.json',{'id':sid})}
+        e['r2_5']={'verdict':'PARTIAL','countedPass':False,'reason':'Complete saved table inspection found title/link but no visible date/date attribute; TBHH identifier and header cannot substitute for date.'}
+        e['gaps']=['Date unknown across 10 rows/20 cells. No detail fetch or guessed date. No source config/full collector replay.']
+    if sid in ['CN-W01','CN-W02']:
+        path='docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json';x=read(path);hit=next(t for t in x['egress'] if t['url']==source['originalCatalogUrlText'])
+        e['latestActualFetch']={'evidence':ref(path,{'egress.url':hit['url']}),'url':hit['url'],'at':hit['at'],'httpStatus':hit['status'],'bytes':hit['bytes'],'wireSha256':None,'scope':'legacy_limited_original_information_Feed_live_run'}
+        e['r2_4']={'verdict':'PARTIAL','countedOK':False,'reason':'Exact original product is readable in legacy limited Feed, but stored real-page suitability replay failed the current automatic list contract: no qualifying detail link/time mapping. Accessible is not a qualified automatic source.'}
+        e['fieldReplayEvidence']={'status':'FAIL_REAL_LIST_SUITABILITY','relatedLegacyEvidence':ref(path),
+            'evidence':ref('docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log'),
+            'harness':ref('docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.test.ts.txt'),
+            'qualifyingAnchors':0,'itemsCommitted':0,'collectorError':'web_list_invalid_link'}
+        e['fieldReplayEvidence']['chronology']={'originalCaptureAt':hit['at'],'suitabilityReplayStartedAt':'2026-10-13T03:55:13.246Z','suitabilityReplayCodeSha':'0b532e1917ee5425194965b20e0fdf8c2a1f4805','harnessExit':0,'harnessAssertedCollectionFailure':True,'laterQualifyingReplayFound':False,'reviewScope':'Stored R2 evidence and current disabled HTML candidates through evidence head679400c; no new fetch or replay.'}
+        e['r2_5']={'verdict':'FAIL','countedPass':False,'reason':'Stored real product-page suitability probe: zero qualifying anchors and missing/unsupported author date; harness passed by asserting source collection failure, not by parsing qualified items.'}
+        e['dateEvidence']={'role':'unresolved_source_heading_or_report_time','precision':'unverified','sourceDeclaredTimezone':'unknown','publicationInstant':None}
+        e['gaps']=['Limited legacy Feed remains readable, but actual Intel-list suitability failed; do not call it untested or field PASS.','Source has self-contained product pages, not a qualifying detail-link list; author time/hidden generated time not publication proof.','Warning validity and port effects unverified.']
+    if sid=='MY-W01':
+        e['latestActualFetch']={'evidence':ref('docs/evidence/metmalaysia-integration-2026-10-10/live-evidence.json'),
+          'url':'https://api.data.gov.my/weather/warning/','at':'2026-10-10T08:30:40.728Z','httpStatus':200,
+          'scope':'related_product_trailing_slash_JSON; exact_no_slash_catalogue_request_301_in_old_probe','catalogueExact301Evidence':ref('docs/evidence/metmalaysia-warning-2026-10-10/raw/fetch-log.txt')}
+        e['r2_4']={'verdict':'PARTIAL','countedOK':False,'reason':'Related slash endpoint JSON available, but exact catalogue URL gave301; stable product URL/collection mapping not qualified here.'}
+        e['dateEvidence']={'role':'issue_or_validity_fields_unresolved','precision':'unverified','sourceDeclaredTimezone':'unknown','publicationInstant':'unknown'}
+    if sid in ['PH-W01','PH-W02']:
+        e['latestActualFetch']={'evidence':ref('docs/evidence/pagasa-warning-2026-10-10/raw/fetch-log.txt'),'captureInventory':ref(inventory_path,{'id':sid}),
+            'url':source['originalCatalogUrlText'],'at':'2026-10-10T11:03:48Z' if sid=='PH-W01' else '2026-10-10T11:03:49.920Z','httpStatus':200,'scope':'page_shell/iframe; no qualified active positive warning item'}
+        e['r2_4']={'verdict':'PARTIAL','countedOK':False,'reason':'Page response alone is not usable verified warning payload; no positive item/explicit parsed-empty contract proved.'}
+    if category=='numeric_weather':
+        e['r2_5']={'verdict':'NOT_APPLICABLE_NUMERIC','countedPass':False,'reason':'Approved numerical field validation is separate; not in 34 article title/link/time denominator.'}
+        e['defaultState']={'r2AutomaticEntry':'not_applicable_existing_operational_layer','sourceConfig':'existing_runtime_config_dependent' if sid!='ID-W02' else 'not_configured',
+             'codeDefaultJobEnabled':'conditional_real_mode_and_open_meteo_for_jma; existing_weather_job_enabled_for_selected_provider' if sid!='ID-W02' else None,'currentUserPersistedSettings':'not_inspected'}
+        e['dateEvidence']={'role':'forecast_valid_time_or_cyclone_reference_time','precision':'source_numerical_contract','sourceDeclaredTimezone':'existing_operational_contract; not article timestamp','publicationInstant':'not_applicable'}
+        if sid in ['XX-A01','XX-A02','XX-W01','XX-W02']:
+            e['latestActualFetch']={'evidence':ref(numeric_sync),'atWindow':['2026-10-10T03:58:39.141Z','2026-10-10T03:58:44.112Z'],
+                'url':source['originalCatalogUrlText'] if sid in ['XX-A01','XX-A02','XX-W01'] else None,
+                'httpStatus':200,'scope':'historical_real_operational_sync; URL bound to adapter and host/status totals, no per-request ledger/wire hash',
+                'wireSha256':None}
+            e['numericFieldValidation']={'status':'PASS_LIMITED_STORED_REAL_DIAGNOSTIC','evidence':ref(numeric_accept),
+                'rawNumericalPayloadReplay':'NOT_RUN; do not confuse normalized diagnostics with retained raw replay',
+                'qualification':'target TC list/IDs and persisted cyclones' if sid=='XX-W01' else 'windGust/precipitation/visibility timestamps at eight land points' if sid=='XX-A01' else 'wave/swell forecast fields at7port origins and separate ADR009 engineering reference; original VNSGN remains missing'}
+            e['r2_4']={'verdict':'OK','countedOK':True,'reason':'Stored real selected-product operational responses and normalized field checks; snapshot-time only, not an article or new ongoing run.'}
+            e['gaps']=['Historical snapshot10/10; current uptime/live refresh unknown. No original numerical wire replay retained in these diagnostics.']
+            e['licensePolicy']['storedBody']='numerical_data_usage_terms; Open-Meteo attribution/noncommercial local scope, commercial/paid authorization separate' if sid.startswith('XX-A') else 'official_numeric_data_attribution; no full article contract'
+        if sid=='XX-A02':
+            e['latestActualFetch']['latestReferencePointProbe']=ref(point)
+            e['latestActualFetch']['referenceProbeAt']='2026-10-10T05:31:34+00:00'
+            e['gaps']+=['Original VNSGN marine missing; reference about61.8km away cannot be berth/original-port observations.','10/10 seven-day historical window, not proof of a fresh seven-day window today.']
+        if sid=='XX-W02':
+            e['exactProductUrl']=None
+            e['latestActualFetch']['expectedForecastProductsInferredFromStoredIds']=['https://www.jma.go.jp/bosai/typhoon/data/TC2635/forecast.json','https://www.jma.go.jp/bosai/typhoon/data/TC2634/forecast.json']
+            e['numericFieldValidation']['status']='PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED'
+            e['numericFieldValidation']['qualification']='Existing adapter fetches forecast.json, not specifications.json; exact per-request/raw product evidence incomplete.'
+            e['r2_4']={'verdict':'PARTIAL','countedOK':False,'reason':'Forecast branch has real persisted diagnostics, but catalogue also names specifications.json; that product not verified, no full-row OK.'}
+            e['gaps']=['Resolve catalogue forecast/specifications product scope and retain field evidence; do not manufacture concrete unobserved URL or count forecast-only as full row.']
+        if sid=='ID-W02':e['numericFieldValidation']={'status':'NOT_RUN','reason':'Catalogue root/doc/template only; concrete approved KODE product URL and real numerical fields unknown.'}
+    if category=='later_stage':
+        e['r2_4']={'verdict':'DEFERRED_POST_STAGE','countedOK':False,'reason':'User-approved later paid/vector stage; retained in41, excluded only from public39, not counted PASS.'}
+        e['r2_5']={'verdict':'DEFERRED_POST_STAGE','countedPass':False,'reason':'Not in approved34 information field-replay denominator.'}
+        e['defaultState']={'r2AutomaticEntry':'off_not_configured_for_this_stage','currentUserPersistedSettings':'not_inspected'}
+        e['gaps']=['Entitlement/product endpoint/budget/credentials/real call not approved or verified by this summary.']
+        if sid=='XX-A04':e['gaps'].append('Catalogue URL is documentation, actual embedding API endpoint remains unknown here.')
+    if sid=='CN-T01':
+        e['gaps'].append('Exact catalogue product is HTTP; current secure fetch entry requires HTTPS. No request was made here and no alternate HTTPS URL is assumed.')
+    if sid in ['CN-P02','VN-D01','MY-L01','ID-T02']:
+        previous=e['latestAttempt'];attempt=outcome(paths[sid],sid)
+        e['historicalAttempts']=[previous]
+        e['latestAttempt']={'evidence':ref(paths[sid],{'id':sid}),'dnsEvidence':ref('docs/evidence/r2-four-reapplied-2026-10-15/dns-ledger.json',{'id':sid}),'appliedConfigEvidence':ref('docs/evidence/r2-four-reapplied-2026-10-15/applied-config-check.json'),'at':attempt['startedAt'],'url':attempt['url'],'addresses':attempt['addresses'],'systemDnsCalls':1,'httpRequests':1,'httpStatus':attempt['httpStatus'],'scope':'one exact catalogue GET after verified21 exceptions and public OS DNS; no redirect/retry/detail'}
+        e['historicalSuperseded'].append('Prior198.18 DNS block superseded by current public system DNS and one exact response; not a current block.')
+        if sid in ['CN-P02','ID-T02']:
+            e['r2_4']={'verdict':'PARTIAL','countedOK':False,'reason':f"Exact catalogue URL returned HTTP{attempt['httpStatus']}; redirects were not followed. Response retained but actual list product unknown; no automatic alternate host/path."}
+            e['r2_5']={'verdict':'NOT_RUN','countedPass':False,'reason':'Only exact index redirect response obtained, no original list payload for field replay.'}
+            e['gaps']=['Redirect not followed; destination/list fields and new product URL remain unverified.','No source config, no guessed alternate URL, no further request.']
+            e['redirectInspection']=ref('docs/evidence/r2-anchor-date-review-repair-2026-10-15/redirect-material-inspection.json',{'id':sid})
+            e['gaps'].append('Saved material has no Location header; body only gives a relative path literal, no verified absolute destination or same-origin conclusion.')
+        if sid=='MY-L01':
+            probe='docs/evidence/r2-reapplied-raw-replay-2026-10-15/MY-L01-suitability.json'
+            e['r2_4']={'verdict':'PARTIAL','countedOK':False,'reason':'Real200 has ten current title/time cards but no title-anchor href. Category links point to listing itself; actual original page fails list identity contract.'}
+            e['fieldReplayEvidence']={'status':'FAIL_REAL_LIST_MISSING_DETAIL_LINK','evidence':ref(probe),'itemsCommitted':0,'collectorError':'web_list_invalid_link','sourceConfigAdded':False}
+            e['r2_5']={'verdict':'FAIL','countedPass':False,'reason':'Full private original page suitability probe fails closed on missing detail link, committed0; no hidden interface or inferred slug used.'}
+            e['dateEvidence']={'role':'source_displayed_card_local_datetime','precision':'unverified_by_existing_grammar','sourceDeclaredTimezone':'missing','publicationInstant':None,'rawExample':'07 Oct 2026 06:30 pm'}
+            e['gaps']=['Ten title anchors lack href; category URL cannot identify articles.','Abbreviated English month/12h clock not supported by current strict grammar; no date/zone guess.','No permanent source config or hidden-interface/detail request.']
+            e['gaps'].append('Static response contains ten title/time cards; rendering method or hidden API is not established by this missing-href result.')
+        if sid=='VN-D01':
+            e['fieldReplayEvidence']['reviewRepairProof']=ref('docs/evidence/r2-anchor-date-review-replay-2026-10-15/baseline-comparison.json')
+            e['gaps'].append('P2 repair rejects mismatched title/date grammar without generic-date fallback; all four saved real records compare unchanged, no new upstream request.')
+    if sid in ['CN-P01','CN-T02','PH-C01','TH-C01','VN-P01','MY-P03','VN-P03','VN-T01','ID-T01','TH-W01','ID-W01','MY-P02','MY-C01','MY-T01','PH-M01','XX-M01','XX-M03']:
+        e['historicalSuperseded'].append('Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current.')
+    if sid in ['XX-K01','XX-K02']:
+        current_batch='docs/evidence/r2-carrier-news-two-2026-10-15'
+        attempt=outcome(current_batch+'/summary.json',sid)
+        e['latestAttempt']={'evidence':ref(current_batch+'/summary.json',{'id':sid}),
+            'dnsEvidence':ref(current_batch+'/dns-ledger.json',{'id':sid}),
+            'configPresenceEvidence':ref(current_batch+'/clash-host-presence.json'),
+            'executionBinding':ref(current_batch+'/execution-binding.json'),
+            'at':attempt['startedAt'],'url':attempt['url'],'host':attempt['host'],
+            'addresses':attempt['addresses'],'systemDnsCalls':1,'httpRequests':0,
+            'reason':'blocked_address','parser':'NOT_RUN',
+            'scope':'one system DNS only; special-range address blocked before HTTP; no retry or settings change'}
+        e['r2_4']={'verdict':'BLOCKED','countedOK':False,'reason':'One actual system DNS resolved 198.18 special-range address; existing secure-fetch safety check stopped before transport. Environment blockage is not a page/content qualification failure.'}
+        e['r2_5']={'verdict':'NOT_RUN','countedPass':False,'reason':'HTTP0; no response bytes, title/link/date parsing or original-page replay. No invented selectors or source-time semantics.'}
+        e['gaps']=['Target exact host absent from selected extension literals and generated DNS filter at read-only check; no settings modified.', 'Public DNS/actual exact index response and source field/license qualification remain pending; no retry authorized by this closeout.']
+    if sid in ['XX-K01','XX-K02']:
+        new_batch='docs/evidence/r2-carrier-reapplied-2026-10-15'
+        attempt=outcome(new_batch+'/summary.json',sid)
+        e['historicalAttempts']=[e['latestAttempt']]
+        e['latestAttempt']={'evidence':ref(new_batch+'/summary.json',{'id':sid}),
+            'dnsEvidence':ref(new_batch+'/dns-ledger.json',{'id':sid}),
+            'appliedConfigEvidence':ref(new_batch+'/applied-config-check.json'),
+            'captureIntegrity':ref(new_batch+'/capture-integrity.json'),
+            'at':attempt['startedAt'],'url':attempt['url'],'host':attempt['host'],
+            'addresses':attempt['addresses'],'addressClassification':'public_address',
+            'systemDnsCalls':1,'httpRequests':1,'requestCountMeaning':'one reserved transport invocation; not proof that complete HTTP response or on-wire send succeeded',
+            'responseCaptured':bool(attempt.get('receivedAt')),'httpStatus':attempt.get('httpStatus'),
+            'reason':attempt['reason'],'parser':'NOT_RUN',
+            'scope':'exact catalogue index attempt once after user-applied23 exceptions; no follow retry detail or agent network config write'}
+        e['r2_5']={'verdict':'NOT_RUN','countedPass':False,'reason':'No original news-list payload obtained, no title/link/time parsing or collector/SQLite replay.'}
+        e['historicalSuperseded'].append('Earlier198.18 DNS block superseded by one public system DNS result; this round current outcome is transport failure or actual308, not DNS blockage.')
+        if sid=='XX-K01':
+            e['latestActualFetch']=None
+            e['r2_4']={'verdict':'BLOCKED','countedOK':False,'reason':'Public system DNS and one exact transport attempt, generic secure entry fetch_failed; no completed response captured. Underlying error not recorded; no TLS/CA/anti-bot diagnosis.'}
+            e['gaps']=['No captured response/status/content type/raw bytes/Location; no qualifying news fields.', 'Any later diagnostic needs explicit bounded task and sanitized underlying error capture; no automatic retry or network settings change.']
+        else:
+            e['latestActualFetch']=fetch(new_batch+'/summary.json',sid)
+            e['latestActualFetch']['location']=attempt['location']
+            e['r2_4']={'verdict':'PARTIAL','countedOK':False,'reason':'Exact catalogue index returned308 with saved relative Location /en/newsroom and12 original bytes; no redirect followed, target list product and fields unverified.'}
+            e['gaps']=['Actual Location /en/newsroom is a relative response header, not a confirmed news-list product.', 'Current catalogue remains /en/news; any product URL change/future request must be explicitly coordinated, no silent substitution or follow.']
+    if sid=='XX-K02':
+        target_batch='docs/evidence/r2-one-newsroom-target-2026-10-15'
+        actual=outcome(target_batch+'/summary.json',sid)
+        e['historicalAttempts'].append(e['latestAttempt'])
+        e['originalCatalogLastResponse']=e['latestActualFetch']
+        e['resolvedProductUrl']=actual['url']
+        e['latestActualFetch']=fetch(target_batch+'/summary.json',sid)
+        e['latestActualFetch']['scope']='separately approved target from saved308; original catalogue URL remains308'
+        e['latestActualFetch']['capturedAtHead']='03d1515d33dd1c5d96137c43e0aafb596b334be3'
+        e['latestAttempt']={'evidence':ref(target_batch+'/summary.json',{'id':sid}),
+            'dnsEvidence':ref(target_batch+'/dns-ledger.json',{'id':sid}),
+            'captureIntegrity':ref(target_batch+'/capture-integrity.json'),
+            'originalRedirectEvidence':ref('docs/evidence/r2-carrier-reapplied-2026-10-15/XX-K02-response.json',{'id':sid}),
+            'at':actual['startedAt'],'url':actual['url'],'originalCatalogUrl':actual['catalogUrl'],
+            'host':actual['host'],'addresses':actual['addresses'],'systemDnsCalls':1,'httpRequests':1,
+            'responseCaptured':True,'httpStatus':200,'parser':'STRUCTURE_ONLY at capture; separate full inert-JSON raw replay passed',
+            'scope':'same-ID separately approved saved308 target, not automatic follow or permanent catalogue substitution'}
+        e['fieldReplayEvidence']={'status':'PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS',
+            'evidence':ref('docs/evidence/r2-one-newsroom-replay-final-2026-10-15/summary.json',{'id':sid}),
+            'independentRawFields':ref('docs/evidence/r2-one-newsroom-replay-final-2026-10-15/raw-field-metadata.json',{'id':sid}),
+            'offlineCandidateConfig':ref('docs/evidence/r2-one-newsroom-replay-final-2026-10-15/candidate-config.json'),
+            'codeGate':ref('docs/evidence/gate-01934a5-one-newsroom-json/source-proof.json'),
+            'records':10,'role':'one pinned plus nine listed records from original HTML inert application/json, not rebuilt JSON transport',
+            'sourceDateRole':'source-labelled releaseDate local datetime; no timezone/publication instant certification'}
+        e['dateEvidence']={'role':'source_label_releaseDate_local_datetime','precision':'second','sourceDeclaredTimezone':'missing','publicationInstant':None}
+        e['defaultState']['sourceConfig']='offline_candidate_only_not_registered'
+        e['defaultState']['offlineCandidateEnabled']=False
+        e['r2_4']={'verdict':'OK','countedOK':True,'reason':'Saved original308 resolves to explicitly approved same-host HTTPS target; canonical/h1/embedded page verify ONE Newsroom,200 complete original bytes and10 real metadata collector/repeat/read-only-reopen fields pass. Counts resolved source product qualification; original catalogue URL not claimed200 and permanent catalogue/registration remain unchanged.'}
+        e['r2_5']={'verdict':'PASS','countedPass':True,'reason':'All10 pinned/list records compared to original JSON title/aliasUrl/releaseDate and complete stored date evidence after read-only reopen; zero repeat versions. Second precision, missing timezone and null UTC/publication instant retained.'}
+        e['catalogChangeProposal']=ref(target_batch+'/catalogue-url-proposal.json')
+        e['gaps']=['Formal one-row catalogue URL proposal remains unapplied; original catalogue endpoint still308.', 'Typed metadata-only candidate exists only in offline evidence, not active seeds/allowlist/production.', 'releaseDate has no timezone; no UTC publication or operational port-impact inference.']
+        e['historicalSuperseded'].append('ONE target now verified with200 and original embedded10-field replay; prior original308 and DNS history retained rather than overwritten. Maersk unchanged this round.')
+    if sid=='XX-K02':
+        applied_batch='docs/evidence/r2-one-catalog-candidate-2026-10-15'
+        e['previousCatalogProductUrl']='https://www.one-line.com/en/news'
+        e['catalogUrlChangeApplied']=ref(applied_batch+'/catalogue-change-applied.json',{'id':sid})
+        e['historicalCatalogChangeProposal']=e.pop('catalogChangeProposal')
+        e['catalogProductMapping']={'directoryFormat':'web_list','parserKind':'json_list','parserInputMode':'HTML inline inert application/json','sameSourceAndProduct':True}
+        e['defaultState']['sourceConfig']='configured_disabled_candidate'
+        e['defaultState']['declaredSeedEnabled']=False
+        e['defaultState'].pop('offlineCandidateEnabled',None)
+        e['historicalFieldReplays']=[e['fieldReplayEvidence']]
+        e['fieldReplayEvidence']={'status':'PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS','evidence':ref('docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/summary.json',{'id':sid}),
+            'independentRawFields':ref('docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/raw-field-metadata.json',{'id':sid}),
+            'declaredCandidateConfig':ref('docs/evidence/r2-one-catalog-candidate-replay-2026-10-15/candidate-config.json'),
+            'codeGate':ref('docs/evidence/gate-bebe144-one-catalog-candidate/source-proof.json'),
+            'records':10,'role':'Declared default-off candidate replay of existing complete private HTML; no new source request',
+            'sourceDateRole':'Source-labelled releaseDate local second precision, no timezone/publication instant certification'}
+        e['r2_4']={'verdict':'OK','countedOK':True,'reason':'Previously verified exact target200 and10 full original metadata replay retained; approved same-product catalogue URL now matches declared disabled candidate. Original URL308 remains historical. No new live or continuous-availability qualification this round.'}
+        e['r2_5']={'verdict':'PASS','countedPass':True,'reason':'Declared disabled configuration exactly reuses verified inert-HTML JSON mapping; all10 existing raw title/alias/releaseDate fields match prior proof, repeat0new/revised and read-only reopen0mismatch. No new upstream request.'}
+        e['gaps']=['Candidate remains disabled and absent from active seeds/production source selection; no24h or continuous availability evidence.', 'releaseDate still lacks timezone; no UTC publication or operational impact inference.']
+        e['historicalSuperseded'].append('One-row catalogue URL proposal approved/applied; old proposal and original308 retained as history, not current pending work.')
+    entries.append(e)
+
+assert len(entries)==41 and len({r['id'] for r in entries})==41
+cats=Counter(r['classification'] for r in entries)
+assert cats=={'information_notice':34,'numeric_weather':5,'later_stage':2}
+pub=[r for r in entries if r['inPublicDenominator']]
+info=[r for r in entries if r['classification']=='information_notice']
+num=[r for r in entries if r['classification']=='numeric_weather']
+ok=[r['id'] for r in pub if r['r2_4']['countedOK']]
+fields=[r['id'] for r in info if r['r2_5']['countedPass']]
+numeric_ok=[r['id'] for r in num if (r['numericFieldValidation'] or {}).get('status')=='PASS_LIMITED_STORED_REAL_DIAGNOSTIC']
+result={'type':'current_authoritative_evidence_matrix','generatedAt':datetime.now(timezone.utc).isoformat(),
+ 'reviewedCodeSha':CODE,'evidenceHead':HEAD,'historicalMapping':OLD.as_posix(),
+ 'catalogSha256':hashlib.sha256(Path('docs/intel-source-catalog.md').read_bytes().replace(b'\r\n', b'\n')).hexdigest(),
+ 'referenceHashBasis':'committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized',
+ 'approval':{'messageId':'Sentinel_81b542f9f60c8191a2b32b4cc8018c61','at':'2026-10-14T06:31:44Z','all41Retained':True,'informationNotice':34,'numericWeather':5,'laterStage':2},
+ 'approvedDenominator':{'r2_4PublicAutomatic':39,'r2_5InformationFieldReplay':34,'numericFieldValidationSeparate':5,'retainedInventory':41},
+ 'thresholds':{'r2_4MinimumOK':32,'r2_4MinimumRatio':0.8,'r2_5RequiredFieldReplay':34,'r2_5MinimumRatio':1.0},
+ 'countingRules':{'r2_4':'Genuine expected product response and usable real parsing/normalization/field verification; mere200 shells, unresolved conflicts, unverified URL/products are partial. Count latest stored measured availability, not current uptime. Default-off is independent.',
+ 'r2_5':'Complete stored real-page title/link/actual source-time fields replay; day precision and honest document/enactment role remain explicit, never relabelled publication. Live parse without retained full real replay is not pass. Numeric products excluded.',
+ 'freshness':'Dates are per-capture proof. An accessible feed whose latest saved item predates the catalogue 2026 content criterion remains STALE, not OK. No new liveness/current continuous run claimed; catalogue labels alone do not prove availability.',
+ 'utc':'Unknown zones/instants stay unknown/null. Older NCHMF configured+07 is not source declaration/independent UTC certification.'},
+ 'measuredCoverage':{'r2_4':{'numerator':len(ok),'denominator':39,'ratio':len(ok)/39,'minimumOK':32,'shortfall':max(0,32-len(ok)),'ids':ok,'statusCounts':dict(Counter(r['r2_4']['verdict'] for r in pub)),'pass':len(ok)>=32},
+ 'r2_5':{'numerator':len(fields),'denominator':34,'ratio':len(fields)/34,'remaining':34-len(fields),'ids':fields,'statusCounts':dict(Counter(r['r2_5']['verdict'] for r in info)),'pass':len(fields)==34},
+ 'numericFieldsSeparate':{'numerator':len(numeric_ok),'denominator':5,'ids':numeric_ok,'scope':'limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness'},
+ 'r2Continuous24h':{'numerator':0,'denominator':39,'status':'NOT_RUN'},'overallR2Pass':False},
+ 'clarifications':[
+ 'XX-W02 catalogue lists forecast plus specifications; current code/evidence only forecast. Keep row PARTIAL pending product contract clarification, not silently exclude or full-pass.',
+ 'R2-5 field pass is actual source-time field with honest role/precision, not certification of news publication instant, warning validity or untruncated legal text. If a stricter publication-only contract is desired it is a separately stated change; no such new hard gate introduced.',
+ 'NCHMF older real sanitized DOM field replay retains configured+07 warning; no new UTC provenance claim. BMKG older raw URL alias and latest13-item exact request are separate proofs.'
+ ],'entries':entries}
+(OUT/'mapping.json').write_bytes((json.dumps(result,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
+next_ids=['CN-P02','VN-D01','MY-L01','ID-T02']
+result['historicalCompletedBatchProposal']=[{'id':sid,'url':next(r['exactProductUrl'] for r in entries if r['id']==sid),'status':'HISTORICAL_PROPOSAL_NOW_EXACT_URL_CAPTURED_ONCE','latestR2_4':next(r['r2_4']['verdict'] for r in entries if r['id']==sid),'existingReusableImplementation':'Current bounded batch complete: VN-D01 disabled candidate/raw replay; other gaps retained. No automatic redirect/retry/new interface authorized.'} for sid in next_ids]
+result['nextBatchProposal']=read('docs/evidence/r2-one-catalog-candidate-2026-10-15/next-batch-recommendations.json')['entries']
+(OUT/'mapping.json').write_bytes((json.dumps(result,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
+print(json.dumps({'r2_4':result['measuredCoverage']['r2_4'],'r2_5':result['measuredCoverage']['r2_5'],'numeric':result['measuredCoverage']['numericFieldsSeparate']},ensure_ascii=True))

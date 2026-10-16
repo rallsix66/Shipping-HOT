@@ -1,0 +1,60 @@
+/* Directly adapted from selected demo annual-ref rules (lines241–287), scoped to existing calendar. */
+.calendar-demo .annual-notice { background: var(--sev-bg-3); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 14px; }
+.calendar-demo .annual-layout { display: grid; grid-template-columns: 175px minmax(420px, 1fr) 255px; gap: 14px; align-items: start; }
+.calendar-demo .annual-panel { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow: hidden; }
+.calendar-demo .annual-filters { padding: 16px 12px; display: flex; flex-direction: column; gap: 6px; }
+.calendar-demo .annual-filters strong { font-size: 13px; margin-bottom: 4px; }
+.calendar-demo .annual-filters button { text-align: left; border: 1px solid var(--line); background: var(--panel); border-radius: 7px; padding: 7px 10px; cursor: pointer; font-size: 13px; }
+.calendar-demo .annual-filters button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+.calendar-demo .annual-filter-note { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-3); line-height: 1.7; }
+.calendar-demo .annual-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding: 16px 16px 10px; }
+.calendar-demo .annual-toolbar h2 { font-size: 22px; margin: 0; font-weight: 700; }
+.calendar-demo .annual-controls { display: flex; gap: 5px; align-items: center; }
+.calendar-demo .annual-controls button { min-width: 34px; padding: 5px 10px; }
+.calendar-demo .annual-controls select { border: 1px solid var(--line); border-radius: 7px; background: var(--panel); padding: 6px 10px; font: inherit; font-size: 13px; cursor: pointer; min-height: 34px; }
+.calendar-demo .annual-controls select[aria-label="年份"] { min-width: 7.2em; }
+.calendar-demo .annual-controls select[aria-label="月份"] { min-width: 5.2em; }
+.calendar-demo .annual-month-meta { font-size: 12px; color: var(--ink-3); padding: 0 16px 12px; }
+.calendar-demo .annual-scroll { overflow-x: auto; }
+.calendar-demo .annual-weekdays, .calendar-demo .annual-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); min-width: 560px; }
+.calendar-demo .annual-weekdays { border-block: 1px solid var(--line); text-align: center; color: var(--ink-3); font-size: 12px; padding: 8px 0; }
+.calendar-demo .annual-day { display: flex; flex-direction: column; gap: 4px; text-align: left; padding: 8px 4px; min-height: 128px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); min-width: 0; cursor: pointer; background: transparent; font: inherit; color: inherit; }
+.calendar-demo .annual-day:nth-child(7n) { border-right: 0; }
+.calendar-demo .annual-day.outside { background: var(--panel-2); cursor: default; opacity: 0.45; }
+.calendar-demo .annual-day.prep { background: var(--promo-bg); }
+.calendar-demo .annual-day.selected { box-shadow: inset 0 0 0 2px var(--accent); background: var(--accent-soft); }
+.calendar-demo .annual-day.today .annual-day-number { background: var(--accent); color: var(--panel); border-radius: 999px; padding: 0 7px; }
+.calendar-demo .annual-day-number { font-size: 16px; font-weight: 600; padding: 0 5px 2px; width: fit-content; font-family: var(--f-data); }
+.calendar-demo .annual-day.weekend .annual-day-number { color: #b26770; }
+.calendar-demo .annual-event { display: flex; flex-direction: column; border-left: 2px solid var(--cc-line, var(--accent)); border-radius: 3px; background: var(--cc-bg, var(--panel-2)); color: var(--cc-ink, var(--ink-2)); padding: 4px; font-size: 10px; line-height: 1.45; overflow-wrap: anywhere; }
+.calendar-demo .annual-event strong { font-weight: 650; font-size: 11.5px; color: var(--ink); }
+.calendar-demo .annual-more { color: var(--ink-3); font-size: 11px; padding: 0 4px; }
+.calendar-demo .annual-CN { --cc-line: #0b6f94; --cc-bg: #dcecf3; --cc-ink: #0b6f94; }
+.calendar-demo .annual-VN { --cc-line: #176e55; --cc-bg: #e3f6ed; --cc-ink: #176e55; }
+.calendar-demo .annual-TH { --cc-line: #7044a0; --cc-bg: #f2eafa; --cc-ink: #7044a0; }
+.calendar-demo .annual-MY { --cc-line: #146b88; --cc-bg: #e5f5fa; --cc-ink: #146b88; }
+.calendar-demo .annual-ID { --cc-line: #a8500e; --cc-bg: #fff0dd; --cc-ink: #a8500e; }
+.calendar-demo .annual-PH { --cc-line: #365bb1; --cc-bg: #ebefff; --cc-ink: #365bb1; }
+.calendar-demo .annual-ALL { --cc-line: #b0457a; --cc-bg: #f7e1ec; --cc-ink: #b0457a; }
+.calendar-demo .annual-detail-heading { background: var(--accent-soft); padding: 18px 16px; border-bottom: 1px solid var(--line); }
+.calendar-demo .annual-detail-heading small, .calendar-demo .annual-detail-heading span { font-size: 12px; color: var(--ink-3); display: block; }
+.calendar-demo .annual-detail-heading h2 { font-size: 32px; margin: 4px 0; font-family: var(--f-data); font-weight: 600; }
+.calendar-demo .annual-details { font-size: 13px; }
+.calendar-demo .annual-details > p { padding: 16px; color: var(--ink-3); margin: 0; line-height: 1.7; }
+.calendar-demo .annual-details article { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.calendar-demo .annual-details article:last-child { border-bottom: 0; }
+.calendar-demo .annual-details h3 { font-size: 15px; margin: 6px 0 8px; font-weight: 700; }
+.calendar-demo .annual-details .annual-detail-label { font-size: 12px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 6px; }
+.calendar-demo .annual-details p { margin: 0 0 8px; color: var(--ink-2); line-height: 1.65; font-size: 13px; }
+
+.calendar-demo{--annual-border:var(--line);--annual-surface:var(--panel);--annual-ink:var(--ink);--annual-muted:var(--ink-3)}
+.dark .calendar-demo{--annual-border:var(--line);--annual-surface:var(--panel);--annual-ink:var(--ink);--annual-muted:var(--ink-3)}
+.calendar-demo .annual-heading h1{font-size:22px;margin:0;font-weight:700}
+.calendar-demo .annual-heading p{font-size:13px;color:var(--ink-3)}
+.calendar-demo .annual-country{border:1px solid var(--line);border-radius:7px;padding:7px 10px;margin:0;cursor:pointer;background:var(--panel);font-size:13px}
+.calendar-demo .annual-country:has(input:checked){background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.calendar-demo .annual-event{border-left-color:var(--cc-line);background:var(--cc-bg);color:var(--cc-ink)}
+.calendar-demo .annual-option{flex-wrap:wrap;line-height:1.6;margin:6px 0}
+.calendar-demo .annual-filter-note{display:block}
+.calendar-demo .annual-controls{flex-wrap:wrap}
+@media(max-width:1500px){.calendar-demo .annual-layout{grid-template-columns:minmax(0,1fr)}.calendar-demo .annual-details{grid-column:auto}.calendar-demo .annual-filters{flex-direction:row;flex-wrap:wrap}.calendar-demo .annual-filter-note{flex-basis:100%}}

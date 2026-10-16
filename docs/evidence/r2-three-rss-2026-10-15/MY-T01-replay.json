@@ -1,0 +1,54 @@
+{
+  "id": "MY-T01",
+  "status": "PASS",
+  "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+  "rawBytes": 6185,
+  "wireSha256": "576ea0c1878c50591cd326fe07d27aafe9c6ba7f402df0ae1adc3b42a448a0c0",
+  "actualSystemDnsCalls": 0,
+  "actualSourceHttpRequests": 0,
+  "first": {
+    "status": "ok_items",
+    "runId": "c7636c2a-dc7f-4f5b-8d22-b5e5b6a6bca3",
+    "itemsSeen": 6,
+    "itemsNew": 6,
+    "itemsRevised": 0
+  },
+  "repeat": {
+    "status": "ok_items",
+    "runId": "62a96af4-a05a-41d7-86f9-ae9b67881161",
+    "itemsSeen": 6,
+    "itemsNew": 0,
+    "itemsRevised": 0
+  },
+  "reopen": {
+    "queryOnly": true,
+    "readonlyConnection": true,
+    "rows": 6,
+    "versions": 6,
+    "mismatches": 0,
+    "fullTitleUrlDateEvidenceCompared": true,
+    "allItemVersionBlockFieldsEqualAfterReopen": true,
+    "metadataOnlyTitleBlocks": 6,
+    "dateEvidenceColumn": "null_existing_RSS_contract; exact literal/timezone preserved in private XML and bounded evidence, not a new migration",
+    "databaseBytesUnchanged": true
+  },
+  "realRecords": 6,
+  "rawDateRole": "RSS item pubDate",
+  "precision": "second",
+  "sourceTimezoneLiterals": [
+    "+0800"
+  ],
+  "utcOffsets": [
+    "+08:00"
+  ],
+  "unknownTimezoneRecords": 0,
+  "sourceUpdatedField": "absent; existing sourceUpdatedAt falls back to pubDate",
+  "injectedLookupCalls": 2,
+  "injectedTransportCalls": 2,
+  "tcpConnectionAttempts": 0,
+  "globalFetchCalls": 0,
+  "providerUsageRowsUnchanged": true,
+  "rawRedistributed": false,
+  "productionConfigChanged": false,
+  "repeatLastSeenAdvancedOnly": true
+}

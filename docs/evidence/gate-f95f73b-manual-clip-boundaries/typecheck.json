@@ -1,0 +1,9 @@
+{
+  "name": "typecheck",
+  "command": "pnpm typecheck",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-final-f95f73b",
+  "sha": "f95f73b4f6b3e6c150fc442f1b10f5fb308e6b71",
+  "startedAt": "2026-10-16T03:28:12.043Z",
+  "endedAt": "2026-10-16T03:28:20.559Z",
+  "rawExit": 0
+}

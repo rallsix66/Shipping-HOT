@@ -1,0 +1,1806 @@
+{
+  "kind": "normalized metadata derivative, not original DOM fixture",
+  "id": "TH-C01",
+  "items": [
+    {
+      "id": "0969d828-32bf-407b-9018-3ef7e7d6416d",
+      "title": "วารสาร Asia/Pacific Customs News ฉบับที่ 78",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b48464b48&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "27 สิงหาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-27",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "28c9d374-4a1f-41e7-9de6-50087d8ec86d",
+      "title": "รษก. ทปษ. ยุทธนาฯ และคณะ เข้าร่วมประชุมหารือระหว่างกระทรวงการคลังกับสภาธุรกิจสหรัฐอเมริกา-อาเซียน (US-ASEAN Business Council : USABC)",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b48464b4d&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "27 สิงหาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-27",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "4529bcfe-ffaa-401f-8d57-ef5269c6026a",
+      "title": "รษก.ทปษ. ยุทธนา และคณะ เข้าร่วมประชุมกับคณะอนุกรรมาธิการพิจารณาศึกษาทบทวนระเบียบมาตรฐานอุตสาหกรรมปัจจุบันฯ",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b49464a4f&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "27 สิงหาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-27",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "4ccbe99b-8236-4856-8c56-19baedb7ce14",
+      "title": "ทปษ.กิจจาลักษณ์เข้าร่วมการประชุมหารือเกี่ยวกับ FTA Utilization and Customs Administration ร่วมกับคณะผู้แทน JETRO",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b49464b48&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "27 สิงหาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-27",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "9184860e-ae53-4945-907b-19fa1f6bbd8b",
+      "title": "สำนักงานพิทักษ์เขตแดนออสเตรเลีย (Australian Border Force:ABF) ได้ออกประกาศศุลกากรออสเตรเลีย ที่ 2026/29 >> เรื่อง การปรับปรุงกฎระเบียบว่าด้วยการควบคุมถุงนิโคติน (Nicotine Poucher)",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b49464b4d&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "28 สิงหาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-28",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "46d752f9-fde3-47e8-b416-bf53ca3d97b5",
+      "title": "การรับ Form AJ Japan แบบไฟล์ PDF จากประเทศญี่ปุ่น ภายใต้ความตกลง AJCEP",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b4a464b4a&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "28 สิงหาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-28",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "523accb9-db8b-4dff-bc2a-e019c93f5c54",
+      "title": "ทปษ. นันท์ฐิตาฯ และคณะ เข้าร่วมหารือแลกเปลี่ยนเกี่ยวกับสถานการณ์ ทิศทาง และนโยบายเศรษฐกิจของประเทศไทย",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b4b464b46&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "28 สิงหาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-28",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "1d30d30e-420d-4757-8a39-e17b300144a8",
+      "title": "อธิบดีกรมศุลกากร ให้การต้อนรับคณะเจ้าหน้าที่สถาบันพัฒนาข้าราชการฝ่ายตุลาการศาลยุติธรรม ซึ่งเป็นผู้ที่เข้าอบรมในหลักสูตร “ประกาศนียบัตรกฎหมายภาษีอากรขั้นต้นสำหรับผู้พิพากษา”",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b4b464b48&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "28 สิงหาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-28",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "6e41fc63-965b-46c7-a0b5-ae95d15e1dd3",
+      "title": "รองฯ นิติ เข้าร่วมการเจรจาร่าง Annex: Country-Specific Commitments และร่าง Annex - Duty Evasion Cooperation ภายใต้ความตกลงว่าด้วยการค้าต่างตอบแทนระหว่างสหรัฐอเมริกาและไทย",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b4b464b4a&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "29 สิงหาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-29",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "bf7a4e46-6134-4534-a313-2f7e6b00d69f",
+      "title": "รษก.ทปษ. ยุทธนาฯ ร่วมให้การต้อนรับและบรรยายสรุปข้อมูลเกี่ยวกับการดำเนินงานของด่านศุลกากรปาดังเบซาร์ และความคืบหน้าการเปิดจุดผ่านแดนถาวรปาดังเบซาร์แห่งที่ ๒ ให้กับนายสีหศักดิ์ พวงเกตุแก้ว รองนายกรัฐมนตรีและรัฐมนตรีว่าการกระทรวงการต่างประเทศ",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b4b464b4c&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "31 สิงหาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-31",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "0473c58b-e9ed-4535-a975-51e56cec02e2",
+      "title": "อธิบดีฯ ให้การต้อนรับ H.E. Mr. Pablo Kang, Australian Ambassador to Thailand เอกอัครราชทูตออสเตรเลียประจำประเทศไทย",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b4c464b46&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "31 สิงหาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-31",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "39cd3949-4731-4cf5-bd21-47e2bcea278a",
+      "title": "อธิบดีฯ และทปษ. กิจจาลักษณ์เข้าร่วมการประชุมหารือระหว่างกรมควบคุมมลพิษ กรมศุลกากร และกรมโรงงานอุตสาหกรรม ในการพิจารณาแนวทางการพิจารณาระดับสิ่งปะปนและลักษณะของเศษโลหะจากต่างประเทศ",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b4d464a4f&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "1 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-01",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "1e00b6df-5f82-4acf-9b82-6f7a6b3e8213",
+      "title": "กระทรวงวัฒนธรรม ประชาสัมพันธ์ >> งานมหกรรมวัฒนธรรมแห่งชาติ วิถีถิ่น วิถีไทย ประจำปีงบประมาณ พ.ศ. 2569 สี สรรค์ ไทย : COLORS OF THAI THAI",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4a464a4e464b4b&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "2 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-02",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "7a29fe57-2efb-4fa2-8b94-7456d04c3f19",
+      "title": "รองฯ นิติเข้าร่วมการเจรจาประเด็นคงค้างของร่าง Annex - Duty Evasion Cooperation ภายใต้ความตกลงว่าด้วยการค้าต่างตอบแทนระหว่างสหรัฐอเมริกาและไทย",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4a464a4f464b47&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "2 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-02",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "2e75cf97-ab3a-4909-b32f-a2092b24730a",
+      "title": "รองฯ ดิเรก เป็นประธานการประชุมหารือแนวทางปฏิบัติรองรับประกาศกระทรวงกลาโหมฯ และคำสั่งกระทรวงกลาโหมฯ ตามพระราชกำหนดควบคุมสินค้าตามชายแดน พ.ศ. ๒๕๒๔ ร่วมกับและสมาคมผู้นำเข้าและส่งออกระดับมาตรฐานเออีโอ",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4a464a4f464b4a&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "2 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-02",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "f03609ca-326a-42e7-a970-ffe49c406edb",
+      "title": "รองฯ สุนทรียา พร้อมคณะ ร่วมแสดงความยินดี ในโอกาสวันคล้ายวันสถาปนากรมสรรพากร ครบรอบปีที่ ๑๑๑",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4a464a4f464b4c&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "2 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-02",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "b7589fdf-56d9-4dab-9410-ea417ee64b87",
+      "title": "อธิบดีกรมศุลกากร ให้การต้อนรับ ผู้แทนจากบริษัท NMB-Minebea Thai Ltd. เนื่องในโอกาสเข้าเยี่ยมคารวะ",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4a464b46464a4e&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "2 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-02",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "2867ba35-2cb7-44a2-afe8-1ef9f76b20e7",
+      "title": "รษก.ทปษ. ยุทธนา เป็นประธานในการประชุมหารือแนวทางการดำเนินการ และเตรียมความพร้อมสำหรับงานแสดงสินค้าอัญมณีและเครื่องประดับ ครั้งที่ ๗๔",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4a464b46464b46&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "2 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-02",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "592f6464-7f98-4a1c-a827-4a98e58a27a7",
+      "title": "มติคณะรัฐมนตรีเกี่ยวกับการแก้ไขปัญหาการบิดเบือนข้อมูลข่าวสารและการเผยแพร่ข่าวหรือข้อมูลปลอม (Fake News)",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4a464b48464b4a&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "3 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-03",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "4b3ce9e8-0b54-4e90-be33-100c787a7400",
+      "title": "สำนักงานคณะกรรมการคุ้มครองผู้บริโภค ประชาสัมพันธ์ ข่าว สคบ. ด้านการคุ้มครองผู้บริโภค จำนวน 6 เรื่อง",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4a464b48464b4b&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "3 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-03",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "fac698e7-4ebb-4cdf-8e23-89ed1018c9b7",
+      "title": "อธิบดีฯ เข้าร่วมงาน The Bangkok Business Summit 2026 Reinvent Thailand, Resilient ASEAN",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4a464b49464b47&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "3 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-03",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "d1d53b7e-35a3-4901-b645-52ef62b9ff19",
+      "title": "รองฯ ดิเรก ตรวจราชการ ณ สำนักงานศุลกากรตรวจสินค้าลาดกระบัง",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4a464b4d464b4b&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "4 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-04",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "5d8c79d3-2f98-4816-8835-748c439b67ae",
+      "title": "รองฯ สุนทรียา เข้าร่วมการประชุมเตรียมความพร้อมในการเปิดให้บริการเที่ยวบินระหว่างประเทศ (International Airport) และงานมหกรรมพืชสวนโลก จ.อุดรธานี",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4b464a4e464b4a&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "4 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-04",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "fada09e3-cd99-458c-93a3-4573a83a975e",
+      "title": "อธิบดีฯ เข้าร่วมพิธีมอบใบประกาศเกียรติคุณผู้เกษียณอายุราชการ กระทรวงการคลัง ประจำปีงบประมาณ พ.ศ. ๒๕๖๙",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4b464a4f464b4d&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "4 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-04",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "f9526cff-54cd-4f29-9758-90bd41abe93b",
+      "title": "อธิบดีกรมศุลกากร พร้อมคณะ เข้าร่วมกิจกรรมแข่งขันฟุตบอลกระชับมิตร ไทย-อังกฤษ",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4b464b46464b4b&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "6 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-06",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "a0c7ab77-1a21-4f3f-9ce9-f4cb4429be01",
+      "title": "กรมควบคุมมลพิษ >> ประชาสัมพันธ์ สถานการ์ณมลพิษของประเทศไทย ปี 2569 ในรูปแบบ E-book",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4b464b47464a4f&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "7 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-07",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "7e739140-256e-468b-aa54-5bbe6016a780",
+      "title": "อธิบดีกรมศุลกากรและรองเลขาธิการคณะกรรมการป้องกันและปราบปรามยาเสพติด เป็นประธานพิธีทำลายของกลางประเภทสารเคมีผลิตสารตั้งต้นยาเสพติด และสารเคมีอันตรายที่ตกเป็นของแผ่นดิน",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4b464b48464b47&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "7 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-07",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "038bf28e-3b72-4947-85be-1230cbb3915f",
+      "title": "กองพิกัดอัตราศุลกากร ได้ออกประกาศกรมศุลกากร ที่ 110/2569 เรื่อง หลักเกณฑ์และพิธีการการยกเว้นอากรและลดอัตราอากรศุลกากร สําหรับเขตการค้าเสรีอาเซียน-ญี่ปุ่น (ฉบับที่ 3) ลงวันที่ 7 กันยายน 2569",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4b464b48464b49&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "8 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-08",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "b6266794-0be6-4aa2-ac44-c1f6a6f7dae6",
+      "title": "Press release ฉ.55/2569 กรมศุลกากร บุกทลายโกดังบางพลี ยึดของเล่น-สกุชชี่ ละเมิดเครื่องหมายการค้าและไร้ มอก. กว่า 3 หมื่นชิ้น มูลค่ารวมกว่า 5 ล้านบาท",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4b464b49464a4e&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "8 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-08",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "c8dbc172-8169-4156-b114-b6c40dff5a46",
+      "title": "รองฯ ดิเรก เป็นประธานการประชุมเพื่อเตรียมความพร้อมสำหรับการประชุมหารือการดำเนินการขับเคลื่อนโครงการสร้างความโปร่งใสในการปฏิบัติราชการฯ",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4b464b49464b4b&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "9 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-09",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "2bc0ca08-e6ba-43c6-b22b-04454416d43c",
+      "title": "กรมศุลกากร เข้ารับมอบรางวัลเลิศรัฐ ประจำปี ๒๕๖๙",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4b464b4b464b4c&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "10 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-10",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "5eebd25d-6c5b-4a65-9c19-8b3ae3baa759",
+      "title": "ทปษ. นันท์ฐิตาฯ ร่วมหารือในประเด็นด้านความร่วมมือในการแลกเปลี่ยนข้อมูลเพื่อป้องกันและปราบปรามการกระทำผิดทางศุลกากร และการยกระดับประสิทธิภาพในการตรวจสอบผู้โดยสารฯ",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4b464b4c464b49&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "11 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-11",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "1efd5054-5406-401d-8a25-30ad6b9e47e6",
+      "title": "ทปษ. นันท์ฐิตาฯ และคณะ ร่วมหารือในประเด็นด้านความร่วมมือระหว่าง ท่าอากาศยานสุวรรณภูมิ กรมศุลกากร และท่าอากาศยานปารีส ชาร์ล เดอ โกล กรมศุลกากรและภาษีทางอ้อมฝรั่งเศส (Direction générale des douanes et droits indirects)",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4b464b4c464b4a&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "11 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-11",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "a272f86e-aa5c-4eaf-a0af-70868820371a",
+      "title": "รษก.ทปษ. ยุทธนาฯ เข้าร่วมการประชุมคณะกรรมการพัฒนาบุคลากรของกระทรวงการคลัง (คพค.) ครั้งที่ 4/2569",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4b464b4d464b4b&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "11 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-11",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "d35101b8-63b6-41f7-bd36-d33c3516831a",
+      "title": "ทปษ.นันท์ฐิตา พร้อมคณะเข้าเยี่ยมคารวะ และหารือข้อในประเด็นด้านการส่งเสริมความร่วมมือระหว่างหน่วยงาน ณ กรมศุลกากรและภาษีทางอ้อมฝรั่งเศส กรุงปารีส สาธารณรัฐฝรั่งเศส",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4b464b4d464b4d&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "12 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-12",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "ef309b38-5a7d-4602-b9f3-8740d2ee79a8",
+      "title": "ทปษ.นันท์ฐิตา พร้อมคณะ ร่วมหารือในประเด็นด้านการส่งเสริมความร่วมมือระหว่างหน่วยงานในทุกมิติ ทั้งด้านการแลกเปลี่ยนข้อมูลข่าวสารทางศุลกากร ณ กรมศุลกากรและภาษีทางอ้อมฝรั่งเศส",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464a4e464a4f&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "12 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-12",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "22564dd6-4a32-42e5-994c-ace9c832ec73",
+      "title": "รองฯ สุนทรียา พร้อมคณะ เข้าร่วมการประชุมเชิงปฏิบัติการ Seaport Cargo Examination and Interdiction Workshop ณ เมืองชาร์ลสตัน ประเทศสหรัฐอเมริกา",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464a4e464b47&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "12 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-12",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "ea3a276c-6a01-4e1c-84c9-e277dbb8a73f",
+      "title": "“รมว.สุชาติ” ผนึกกำลัง ศุลกากร–DSI–คพ.– กรมโรงงานฯ ลุยตรวจขยะอิเล็กทรอนิกส์แหลมฉบัง ศุลกากรเผยผลงานด้านสิ่งแวดล้อมจับกุมกว่า ๒๓๔ ล้านบาท",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464a4f464a4e&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "14 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-14",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "4de4b101-ceae-4cec-afae-b447ba0fb6fb",
+      "title": "รองฯ สุนทรียา เข้าร่วมพิธีเปิดงาน Gastech Exhibition & Conference 2026 (Gastch 2026)",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464a4f464b46&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "14 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-14",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "e73570e5-f862-49c2-a7c7-c875477681ca",
+      "title": "อธิบดีฯ ให้สัมภาษณ์ผ่านรายการ ThanTalk Interview ในประเด็นเกี่ยวกับแนวทางการใช้ชีวิตอย่างสมดุล",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464a4f464b48&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "15 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-15",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "c9ae425d-0992-468e-a679-0a617cc24afc",
+      "title": "ประกาศมูลนิธิสถาบันวิจัยนโยบายเศรษฐกิจการคลัง เรื่อง การรับสมัครบุคคลเพื่อรับการคัดเลือกเข้าดำรงตำแหน่งผู้อำนวยการสถาบันวิจัยนโยบายเศรษฐกิจการคลังปี 2569",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464a4f464b49&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "15 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-15",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "fbb50019-51ed-4d38-ba32-908bcf593188",
+      "title": "ประชาสัมพันธ์การร่วมแสดงความคิดเห็นต่อหลักการของร่างพระราชกฤษฎีกาว่าด้วยหลักเกณฑ์และวิธีการบริหารจัดการบ้านเมืองที่ดี พ.ศ. .....",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464a4f464b4d&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "15 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-15",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "365a8679-98a6-4874-997e-dbe3d508773e",
+      "title": "Press release ฉ.56/2569 “รมว.สุชาติ” ผนึกกำลัง ศุลกากร–DSI–คพ.– กรมโรงงานฯ ลุยตรวจขยะอิเล็กทรอนิกส์แหลมฉบัง ศุลกากรเผยผลงานด้านสิ่งแวดล้อมจับกุมกว่า 234 ล้านบาท",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464b46464b46&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "15 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-15",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "64fe44ef-eb71-482d-8d06-7605d64d37f0",
+      "title": "อธิบดีฯ และคณะ เข้าร่วมการประชุมหารือผู้แทนจากสถานเอกอัครราชทูตนิวซีแลนด์ประจำประเทศไทย",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464b47464a4f&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "16 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-16",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "e5ca4840-373f-40f7-828c-0c0caae84156",
+      "title": "ทปษ. กิจจาลักษณ์ ให้การต้อนรับเจ้าหน้าที่ระดับสูงด้านทรัพย์สินทางปัญญาของบริษัท หลุยส์ วิตตอง มาลเลอติเย (Louis Vuitton Malletier) และ ผู้แทนจากบริษัท สัตยะพล แอนด์ พาร์ทเนอร์ส จำกัด ที่ปรึกษาด้านกฎหมาย",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464b48464b4a&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "17 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-17",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "a18f9682-d2b0-4611-ae60-cf951ac0558c",
+      "title": "อธิบดีฯ และคณะผู้บริหารฯ เข้าร่วมพิธีบำเพ็ญกุศลสตมวาร (๑๐๐ วัน) เพื่ออุทิศถวายเป็นพระกุศลแด่ สมเด็จพระเจ้าลูกเธอ เจ้าฟ้าพัชรกิติยาภาฯ",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464b49464b47&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "18 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-18",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "2072cc4b-4eab-40cf-ab12-0518dabe2773",
+      "title": "รษก.ทปษ. ยุทธนาฯ เข้าร่วมการประชุมคณะกรรมการควบคุมสินค้าที่เกี่ยวข้องกับการแพร่ขยายอาวุธที่มีอานุภาพทำลายล้างสูง ครั้งที่ ๒/๒๕๖๙",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464b49464b4a&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "18 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-18",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "7aa164a9-a5c3-4cfb-b3a9-5cc4e6b5df97",
+      "title": "อธิบดีกรมศุลกากรให้การต้อนรับเลขาธิการสำนักงานคณะกรรมการพัฒนาระบบราชการ เพื่อร่วมประชุมหารือแนวทางการดำเนินการขับเคลื่อนโครงการสร้างความโปร่งใสในการปฏิบัติราชการ (๑ กรม ๑ โปร่งใสไร้เทา)",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464b4a464a4f&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "21 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-21",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "32771be1-1dae-4a69-abb2-ca1247d1f2c5",
+      "title": "อธิบดีฯ ร่วมประชุมหารือและติดตามผลการเชื่อมโยงข้อมูลสินค้าพาณิชย์อิเล็กทรอนิกส์ (e-Commerce)",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464b4a464b4a&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "22 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-22",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "ea906018-5ebf-4ae5-a05f-1950cb1c8eb0",
+      "title": "'รายงานการศึกษานโยบายศุลกากรในต่างประเทศ เรื่อง “การปรับใช้เทคโนโลยีปัญญาประดิษฐ์ (Artificial Intelligence: AI) และการเรียนรู้ของเครื่อง (Machine Learning: ML) ในงานศุลกากร” โดยสำนักงานที่ปรึกษาการศุลกากร ณ กรุงบรัสเซลส์ '",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464b4b464a4f&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "23 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-23",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "54aaef3d-6573-4ad2-ae29-7f82368a43b7",
+      "title": "ทปษ. กิจจาลักษณ์ฯ เป็นประธานการประชุมสำนักงานศุลกากรภาคที่ ๑ สัญจร พร้อมรับฟังบรรยายสรุปผลการดำเนินงานฯ",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464b4b464b46&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "23 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-23",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "f2865fc5-ac21-46b4-95e3-ca9eed8e0425",
+      "title": "อธิบดีฯ เข้าร่วมการประชุมหารือกับประธานผู้ตรวจการแผ่นดิน เพื่อหารือแนวทางการจัดทำข้อเสนอแนะเพื่อเสนอต่อคณะรัฐมนตรี ในการแก้ไขปัญหาการนำเข้าขยะอิเล็กทรอนิกส์ฯ",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464b4b464b4a&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "23 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-23",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "84f0562f-2983-4823-857a-e638dcfb2112",
+      "title": "ทปษ. กิจจาลักษณ์ฯ เข้าร่วมการสัมมนาแลกเปลี่ยนความคิดเห็นการดำเนินการป้องกันและปราบปรามการทุจริต",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464b4b464b4b&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "23 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-23",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "d4657d82-d841-482f-97db-998fc677db25",
+      "title": "รองฯ สุนทรียา เข้าร่วมการประชุมเตรียมความพร้อมสำหรับการประชุมคณะกรรมการระดับชาติเพื่อเตรียมการจัดการประชุมประจำปีสภาผู้ว่าการธนาคารโลกและกองทุนการเงินระหว่างประเทศ ปี ๒๕๖๙",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464b4c464b4b&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "23 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-23",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "ab37b129-7f9f-4f68-8d5d-3c3110937c41",
+      "title": "อธิบดีกรมศุลกากรแถลงข่าวเกี่ยวกับการดำเนินงานของกรมศุลกากรในรอบ ๑ ปี ภายใต้แนวคิด “NEXT DRIVE CUSTOMS”",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464b4c464b4d&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "23 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-23",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "072b572b-3216-4528-80a3-f1e94c6e7d1f",
+      "title": "จดหมายข่าวศุลกากร (CPMU news) ของสำนักงานที่ปรึกษาการศุลกากร ณ กรุงบรัสเซลส์ ฉบับเดือนกันยายน 2569 เรื่อง การป้องกันและปราบปรามการลักลอบขนส่งขยะอิเล็กทรอนิกส์ (e-waste)",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4c464b4d464a4e&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "24 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-24",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "32bc94d6-9dfe-478c-84e5-eb88b8514aac",
+      "title": "กรมศุลกากรร่วมพระพิธีธรรมสวดพระอภิธรรมพระศพสมเด็จพระเจ้าลูกเธอ เจ้าฟ้าพัชรกิติยาภา นเรนทิราเทพยวดี กรมหลวงราชสาริณีสิริพัชร มหาวัชรราชธิดา",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4d464a4e464b46&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "24 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-24",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "e16143be-0cbe-42bb-804c-f5b6e8466d46",
+      "title": "อธิบดีกรมศุลกากร เป็นประธานในพิธีมอบโล่ที่ระลึกผู้เกษียณอายุราชการ ประจำปีงบประมาณ พ.ศ. ๒๕๖๙",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4d464a4e464b48&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "25 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-25",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "1f602140-03a1-4d8d-b49d-975800e025e4",
+      "title": "รษก.ทปษ.ยุทธนา รับใบประกาศนียบัตรกิจกรรม Prime Minister Awards: Thailand Cybersecurity Excellence Awards ประจำปี 2026",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4d464a4e464b4a&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "25 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-25",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "7e5ecca0-7d9a-47af-8a30-8f8355fe252e",
+      "title": "รองฯ สุนทรียาเข้าร่วมหารือเพื่อเตรียมการจัดงานเลี้ยงรับรองอาหารค่ำแก่สภาผู้ว่าการธนาคารโลกและกองทุนการเงินระหว่างประเทศ และกลุ่มธนาคารโลก",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4d464a4f464a4e&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "26 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-26",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "4c8ffb82-691a-453a-a507-1211c9f4d5af",
+      "title": "Press release ฉ.57/2569 ‘กรมศุลกากร’ แถลงผลงานจัดเก็บ กวาดรายได้ทะลุ 6 แสนล้านบาท ชู NEXT DRIVE CUSTOMS สู่ความสำเร็จอีกระดับ พร้อมขับเคลื่อนเศรษฐกิจไทยสู่อนาคตอย่างยั่งยืน",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4d464a4f464a4f&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "26 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-26",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "2aafd210-2a94-451d-91b7-25f9e11eb0a1",
+      "title": "Press release ฉ.58/2569 กรมศุลกากร ตรวจยึด “ขยะแผ่นวงจรอิเล็กทรอนิกส์ปะปนกับเศษและของที่ใช้ไม่ได้” น้ำหนักของกลางกว่า 48 ตัน ลักลอบเคลื่อนย้ายข้ามแดน",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4d464b47464b48&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "29 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-29",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "87d2dc59-7ae3-4063-ad3c-df44d4709b7e",
+      "title": "ประกาศกรมศุลกากร ที่ 118/2569 เรื่อง แก้ไขเพิ่มเติมรหัสสถิติสินค้า (ฉบับที่ 12)",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4d464b47464b49&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "29 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-29",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "0060789b-0e83-4119-a4e9-e7fa095f424f",
+      "title": "อธิบดีกรมศุลกากรร่วมหารือ กับ ดร. พจน์ อร่ามวัฒนานนท์ ประธานสภาหอการค้าไทย และคณะผู้บริหาร the SF&KEX trade and logistics ในประเด็นเกี่ยวกับการปฏิบัติพิธีการศุลกากรเพื่อนำเข้า-ส่งออกสินค้า",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4d464b48464b47&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "29 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-29",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "e6a20ff8-1fe3-49fe-90d2-f73ae4df4a9c",
+      "title": "อธิบดีฯ เข้าร่วมการประชุมแนวทางการดำเนินโครงการสนับสนุนการติดตั้งระบบผลิตไฟฟ้าพลังงานแสงอาทิตย์บนหลังคา (Solar Rooftop) สำหรับภาคครัวเรือน",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4d464b49464b46&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "30 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-30",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "4d58f9a3-ea4a-4b58-974d-2910b3602ffb",
+      "title": "อธิบดีฯ และคณะ เข้าร่วมรับฟังการเสวนาหัวข้อ “ประเทศไทยในโลกที่ไม่เหมือนเดิม : เปลี่ยนอย่างไรให้ไปต่อ” ในงาน “เปลี่ยนไทยให้ไปไปไกลกว่าเดิม Thailand Next Agenda”",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4d464b49464b4a&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "30 กันยายน 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-30",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "57d09e5b-40b3-4aea-a0b5-4cf5ce52ce2b",
+      "title": "รองฯ นิติ และคณะ เข้าร่วมงาน Day of German Unity 2026",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4d464b4a464b49&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "1 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-01",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "c2783d9b-ba4f-4f68-be54-5aee6c40a1bb",
+      "title": "อธิบดีฯ เข้าร่วมงาน Dinner Talk หัวข้อ “Zero Corruption : From Policy to Action”",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4d464b4c464a4f&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "2 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-02",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "c07f0242-6ec8-44a5-9ba4-2647037c3042",
+      "title": "อธิบดีฯ และคณะ ให้การต้อนรับ Ms. Carine Willems ผู้ช่วยทูตฝ่ายศุลกากรราชอาณาจักรเบลเยียม ประจำประเทศอินโดนีเซีย สิงคโปร์ มาเลเซีย ไทย และเวียดนามฯ",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4d464b4c464b4d&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "2 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-02",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "e63133aa-0a99-48ea-8f68-ec25baa5a62e",
+      "title": "ทปษ. นันท์ฐิตาฯ เป็นประธานเปิดการอบรมปฐมนิเทศและซักซ้อมความเข้าใจแก่เจ้าหน้าที่ผู้ประสานงานในการรับรองผู้เข้าร่วมการประชุมประจำปีสภาผู้ว่าการธนาคารโลกและกองทุนการเงินระหว่างประเทศ ปี ๒๕๖๙",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f4d464b4d464b49&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "2 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-02",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "ca415641-9c74-4024-9b6f-5604b35229bc",
+      "title": "รองฯ สุนทรียา เข้าร่วมประชุมสรุปภาพรวมการเตรียมการจัดงานเลี้ยงรับรองอาหารค่ำ สำหรับรัฐมนตรีว่าการกระทรวงการคลังและผู้ว่าการธนาคารกลางของประเทศสมาชิก",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4e464a4e464b47&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "3 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-03",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "3193078f-01fa-447f-9a43-4ad6b30c7cb2",
+      "title": "รองฯ นิติ และคณะ เข้าร่วมงาน National Day of the Republic of Korea 2026",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4e464a4e464b49&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "3 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-03",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "10125b3d-8593-4c90-ad9e-bf1e1a9a8b7b",
+      "title": "สำนักงานนโยบายและยุทธศาสตร์การค้า (สนค.) ได้ดำเนินโครงการศึกษาการยกระดับรายได้เกษตรกรผู้ปลูกข้าว สู่สินค้าเกษตรมูลค่าสูง ปีงบประมาณ 2569",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4e464b46464b48&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "5 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-05",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "c4f98084-bb61-472a-8c10-a846af2b1fda",
+      "title": "กรมศุลกากรร่วมให้การต้อนรับ คณะผู้แทนจากองค์การความร่วมมือระหว่างญี่ปุ่น(Japan International Cooperation Activity : JICA) และประชาคมแอฟริกาตะวันออก (East African Community : EAC) เนื่องในโอกาสเข้าเยี่ยมคารวะ และประชุมหารือร่วมกัน",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4e464b47464b4d&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "5 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-05",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "56e418aa-63e3-4168-b21b-a99dc6cab8fa",
+      "title": "รองฯ สุนทรียา เข้าร่วมประชุมคณะกรรมการระดับชาติเพื่อเตรียมการจัดการประชุมประจำปีสภาผู้ว่าการธนาคารโลกและกองทุนการเงินระหว่างประเทศ ครั้งที่ ๓/๒๕๖๙",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4e464b48464a4e&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "5 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-05",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "a1293e22-4b37-470a-95bd-04b5d6bea268",
+      "title": "ทปษ. กิจจาลักษณ์ฯ เข้าร่วมการประชุมเพื่อพิจารณาจัดทำรายละเอียดแผนแม่บท ระบบการป้องกันและปราบปรามอาชญากรรมทางเทคโนโลยี",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4e464b49464a4e&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "6 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-06",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "c429d704-c21a-4308-af07-1fea78d0a9ce",
+      "title": "อธิบดีกรมศุลกากร เข้าร่วมประชุมหารือเพื่อเตรียมการจัดงานเลี้ยงรับรองอาหารค่ำแก่สภาผู้ว่าการธนาคารโลกและกองทุนการเงินระหว่างประเทศ และกลุ่มธนาคารโลก",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4e464b4b464b49&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "6 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-06",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "d9277d55-40c2-4365-b3ea-d2542b0b763a",
+      "title": "รองฯ นิติ เป็นประธานการประชุมคณะกรรมการศุลกากรร่วมไทย - มาเลเซีย เพื่อพื้นที่พัฒนาร่วม ครั้งที่ ๓๐",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4e464b4c464b4a&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "7 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-07",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "419e7451-240b-4a2f-896a-90bf9810ab0a",
+      "title": "อธิบดีฯ เป็นประธานการแถลงข่าวผลงานด้านการป้องกันและปราบปราม ในรอบ ๑ ปี (๑ ตุลาคม ๒๕๖๘ – ๓๐ กันยายน ๒๕๖๙)",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4e464b4d464b48&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "7 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-07",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "b310d622-238e-458a-bbec-349b6eeff22f",
+      "title": "รองฯ ดิเรก พร้อมด้วยผู้แทนหน่วยงานผู้รับผิดชอบตัวชี้วัด เข้าร่วมประชุมคณะกรรมการกำกับการประเมินผลการปฏิบัติราชการของส่วนราชการในสังกัดกระทรวงการคลัง ครั้งที่ ๒/๒๕๖๙",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4e464b4d464b49&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "7 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-07",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "72f31eca-9992-4bca-b24b-5994f108c909",
+      "title": "สำนักงานศาลปกครองจัดทำสื่อประชาสัมพันธ์ของสำนักงานศาลปกครอง และเผยแพร่ผ่านช่องทางต่าง ๆ รวมถึงศูนย์การเรียนรู้ศาลปกครองออนไลน์ (ALL Cloue)",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4e464b4d464b4d&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "7 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-07",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "d15c925c-baab-4082-809a-009a85048ccd",
+      "title": "ศูนย์อำนวยการรักษาผลประโยชน์ของชาติ >> ประชาสัมพันธ์สรุปผลการปฎิบัติงานของศูนย์อำนวยการรักษาผลประโยชน์ของชาติทางทะเลประจำเดือน กันยายน 2569",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464a4e464b46&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "7 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-07",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "61137948-431c-441a-9ef6-cc3dc0b250c8",
+      "title": "อธิบดีกรมศุลกากร รับมอบเครื่องตรวจสอบสัมภาระและพัสดุด้วยรังสีเอ็กซ์ (Dual View System)",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464a4e464b4c&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "7 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-07",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "e52caa4e-1285-4652-bb8d-6940d086dfa3",
+      "title": "รองฯ นิติ ได้ลงนามรับรองการเพิ่มรายการของในบัญชีของที่ได้รับความเห็นชอบทางศุลกากรสำหรับใช้ในพื้นที่พัฒนาร่วมฯ",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464a4f464b4b&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "8 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-08",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "4d712128-6c55-4bd8-b5f3-4d99b7a74dea",
+      "title": "อธิบดีฯ ให้การต้อนรับ ดร. เอก์ เหลืองสะอาด นายกสมาคมผู้สื่อข่าวต้านคอร์รัปชัน (ประเทศไทย) ในโอกาสมอบหนังสือเชิญอธิบดีฯ เข้ารับรางวัล “ANTI-CORRUPTION AWARDS 2026” ส่งเสริมธรรมาภิบาล ประจำปี ๒๕๖๙",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464a4f464b4d&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "8 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-08",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "28cc783c-95f6-4b15-bcd0-21092154d44d",
+      "title": "อธิบดีฯ และ ทปษ. กิจจาลักษณ์ฯ เข้าร่วมการประชุมคณะทำงานกำหนดหลักเกณฑ์การพิจารณาระดับสิ่งปะปน และลักษณะของเศษโลหะที่จะนำเข้ามาในราชอาณาจักร ครั้งที่ ๑/๒๕๖๙",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b46464b46&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "8 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-08",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "15fa843e-79dc-408c-8f95-d89ba53ee40f",
+      "title": "อธิบดีกรมศุลกากรเข้าร่วมการประชุมเตรียมการจัดงานเลี้ยงรับรองอาหารค่ำแก่สภาผู้ว่าการธนาคารโลกและกองทุนการเงินระหว่างประเทศ และกลุ่มธนาคารโลก",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b46464b4c&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "8 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-08",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "df6d3101-ac09-494b-8732-7891a0459771",
+      "title": "Press release ฉ.1/2570 ศุลกากรเผยผลงานป้องกันและปราบปราม ปิดปีงบประมาณ 2569 จับกุมสินค้าผิดกฎหมายตลอดทั้งปี รวมมูลค่าทะลุ4,830 ล้านบาท",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b47464b46&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "9 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-09",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "7c1d3b44-0234-42ac-8783-8c0670713e97",
+      "title": "สำนักงานคณะกรรมการคุ้มครองผู้บริโภค ประชาสัมพันธ์ ข่าว สคบ. ด้านการคุ้มครองผู้บริโภค",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b47464b47&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "9 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-09",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "8a0c5aec-98b1-4365-8cf0-252927c7d448",
+      "title": "ประชาสัมพันธ์ >> โครงการรับชำระค่าภาษีอากรเพิ่มด้วยวิธีสมัครใจ",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b47464b49&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "9 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-09",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "753c012d-dbbd-4c1b-95e0-71031149029a",
+      "title": "ทปษ. นันท์ฐิตาฯ เข้าร่วมการประชุมคณะอนุกรรมการนำเข้า-ส่งออก และการค้าชายแดนผ่านแดนสายงานอาเซียนและโลจิสติกส์ ครั้งที่ ๒/๒๕๖๙",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b48464a4e&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "9 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-09",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "fe997eb3-62f9-4079-a356-6d1917612669",
+      "title": "รองฯ นิติ เป็นประธานการประชุมคณะทำงานบริหารจัดการและพัฒนาระบบเชื่อมโยงข้อมูลการนำเข้า ส่งออก และโลจิสติกส์ ครั้งที่ ๓/๒๕๖๙",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b48464b48&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "9 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-09",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "2af8063a-de3b-4d43-8b57-6afc91e4ef8a",
+      "title": "รองฯ นิติ และคณะ เข้าร่วมการประชุมหารือกับ กรมการขนส่งทางบก เรื่อง แนวทางการบูรณาการความร่วมมือในการกำกับดูแลรถขนส่งต่างประเทศ ที่เข้ามาทำการขนส่งในประเทศไทย",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b48464b4d&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "9 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-09",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "e843587c-3aeb-402c-a3df-8f6b038406aa",
+      "title": "ทปษ.นันท์ฐิตา ร่วมให้การต้อนรับ Ms. Kristalina Georgieva, Managing Director International Monetary Fund",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b49464a4f&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "10 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-10",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "d2a9d7ff-57c2-4e5e-8079-238e188a03e2",
+      "title": "อธิบดีกรมศุลกากร ร่วมให้การต้อนรับ Mr. Carlos Carvallo Spalding AM Chair, Paraguay จาก Doha",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b49464b47&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "10 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-10",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "6c0f3a4a-ee2a-4252-be9a-f326f1bb1f3e",
+      "title": "ดร.เอกนิติ นิติทัณฑ์ประภาศ รองนายกรัฐมนตรีและรัฐมนตรีว่าการกระทรวงการคลัง พร้อมคณะ ตรวจเยี่ยมความพร้อมการต้อนรับผู้แทน ที่เข้าร่วมการประชุมประจำปีสภาผู้ว่าการกองทุนการเงินระหว่างประเทศและกลุ่มธนาคารโลก ประจำปี ๒๕๖๙ (IMF-World Bank Group Annual Meetings 2026)",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b49464b49&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "10 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-10",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "74d24018-66cf-4a80-b1e8-aed942febad2",
+      "title": "Press release ฉ.2/2570 “สุวรรณภูมิพร้อม” ต้อนรับผู้เข้าร่วม Annual Meetings 2026 จากทั่วโลก",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b4b464b46&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "12 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-12",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "91e11099-74b1-4b2e-abab-9fc60d7d2c30",
+      "title": "Press release ฉ.3/2570ศุลกากรขานรับนโยบายรัฐ ลุยปราบสินค้าลักลอบ ยึดของกลางโกดังใหญ่ระนอง 3.5 หมื่นชิ้น ทะลุ 7 ล้าน!",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b4b464b47&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "12 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-12",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "cb4591bd-5865-4209-9174-f228c81102e3",
+      "title": "อธิบดีกรมศุลกากรพร้อมคณะ เข้าร่วมพิธีเปิดนิทรรศการเฉลิมพระเกียรติ “พระราชปณิธานอันทรงคุณค่า : เสริมพลังประชาชน สร้างความเข้มแข็ง เพื่อรับมือกับความเปลี่ยนแปลง”",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b4c464b46&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "13 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-13",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "28cb2358-5e96-40c5-a39d-6d0bd7be2693",
+      "title": "รองฯ ดิเรก พร้อมคณะ เข้าร่วมพิธีวางพวงมาลาถวายบังคมพระบรมราชานุสาวรีย์ พระบาทสมเด็จพระบรมชนกาธิเบศร มหาภูมิพลอดุลยเดชมหาราช บรมนาถบพิตร เนื่องในวันนวมินทรมหาราช พุทธศักราช ๒๕๖๙",
+      "url": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324148505e4f464b4c464b48&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "13 ตุลาคม 2569",
+        "rule": "configured_thai_month_name_buddhist_minus_543",
+        "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+        "calendar": "buddhist",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-13",
+        "publishedAt": null
+      },
+      "versions": 1
+    }
+  ]
+}

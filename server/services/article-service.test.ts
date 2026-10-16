@@ -9,6 +9,7 @@ import type { FeedItem } from "@shared/shipping"
 import { ArticleService } from "./article-service"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { createArticleFetchJob } from "#/runtime/article-fetch-job"
+import { ARTICLE_EXTRACTOR_VERSION } from "#/providers/article-extractor"
 
 function feedItem(id: string, sourceId: string, sourceUrl: string, canonicalUrl = sourceUrl): FeedItem {
   const now = "2026-09-12T00:00:00.000Z"
@@ -121,6 +122,79 @@ describe("articleService orchestration", () => {
     const result = await service.process("feed:the-loadstar:1")
     expect(result).toMatchObject({ status: "policy_disallowed", fetched: false })
     expect(calls).toBe(0)
+  })
+
+  it("persists generic Readability blocks idempotently and keeps older versions readable without fetching", async () => {
+    const prose = "Operational cargo handling guidance for terminal operators, berth planning and safe port arrival. ".repeat(8)
+    let body = `<html lang="vi"><head><title>Port guidance</title></head><body><div><h2>Port guidance</h2><p>${prose}</p><p>${prose}</p></div></body></html>`
+    let calls = 0
+    const service = new ArticleService({
+      database,
+      dataMode: "mock",
+      resolvePolicy: () => ({ ...fullPolicy, selectors: undefined }),
+      fetchOptions: {
+        lookup: async () => [{ address: "93.184.216.34", family: 4 }],
+        transport: async () => {
+          calls++
+          return { status: 200, headers: { "content-type": "text/html" }, body }
+        },
+      },
+    })
+    const id = "feed:shekou-official:1"
+    expect(await service.process(id)).toMatchObject({ status: "complete", created: true })
+    const original = await service.getDetail(id)
+    expect(original?.currentVersion).toMatchObject({ extractorVersion: ARTICLE_EXTRACTOR_VERSION, language: "vi" })
+    expect(await service.process(id)).toMatchObject({ created: false })
+    body = body.replace("Operational cargo", "Revised operational cargo")
+    expect(await service.process(id)).toMatchObject({ created: true })
+    const readsBefore = calls
+    const previous = await service.getDetail(id, original?.currentVersion?.id)
+    expect(previous?.blocks).toEqual(original?.blocks)
+    expect(previous?.versions).toHaveLength(2)
+    expect(calls).toBe(readsBefore)
+    body = "<html><body><nav>Empty article</nav></body></html>"
+    expect(await service.process(id)).toMatchObject({ status: "source_unavailable" })
+    expect((await service.getDetail(id))?.versions).toHaveLength(2)
+  })
+
+  it("does not revise unchanged explicit-container content from the v1 extractor", async () => {
+    const service = new ArticleService({
+      database,
+      dataMode: "mock",
+      resolvePolicy: () => fullPolicy,
+      fetchOptions: {
+        lookup: async () => [{ address: "93.184.216.34", family: 4 }],
+        transport: async () => ({ status: 200, headers: { "content-type": "text/html" }, body: articleHtml }),
+      },
+    })
+    const id = "feed:shekou-official:1"
+    await service.process(id)
+    native.prepare("UPDATE article_versions SET extractor_version = ?").run("article-extractor-v1")
+    const legacy = await service.getDetail(id)
+    expect(await service.process(id)).toMatchObject({ created: false })
+    const after = await service.getDetail(id)
+    expect(after?.versions).toHaveLength(1)
+    expect(after?.currentVersion?.extractorVersion).toBe("article-extractor-v1")
+    expect(after?.currentVersion?.contentHash).toBe(legacy?.currentVersion?.contentHash)
+    expect(after?.blocks).toEqual(legacy?.blocks)
+  })
+
+  it("applies excerpt-only licensing after generic extraction without persisting the full body", async () => {
+    const prose = "Terminal operating arrangements and safe arrival guidance. ".repeat(20)
+    const service = new ArticleService({
+      database,
+      dataMode: "mock",
+      resolvePolicy: () => ({ ...fullPolicy, status: "excerpt_only", persistence: "excerpt_only", selectors: undefined }),
+      fetchOptions: {
+        lookup: async () => [{ address: "93.184.216.34", family: 4 }],
+        transport: async () => ({ status: 200, headers: { "content-type": "text/html" }, body: `<html><body><main><p>${prose}</p><p>${prose}</p></main></body></html>` }),
+      },
+    })
+    expect(await service.process("feed:shekou-official:1")).toMatchObject({ status: "summary_only" })
+    const rows = native.prepare("SELECT text FROM article_blocks").all() as Array<{ text: string }>
+    expect(rows).toHaveLength(1)
+    expect(rows[0].text.length).toBeLessThanOrEqual(280)
+    expect(rows[0].text).not.toContain(prose)
   })
 
   it("skips disallowed sources and processes allowed ones in the bounded runtime job", async () => {

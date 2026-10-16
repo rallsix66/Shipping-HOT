@@ -1,0 +1,14 @@
+{
+  "startedAt": "2026-10-15T02:38:26.924Z",
+  "finishedAt": "2026-10-15T02:38:29.185Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "-c",
+    ".tmp/carrier-reapplied-20261015.config.ts"
+  ],
+  "head": "0ad53dd63632f097e719197345a1000b0e0c1d29",
+  "rawExit": 0,
+  "signal": null
+}

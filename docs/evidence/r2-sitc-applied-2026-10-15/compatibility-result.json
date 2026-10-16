@@ -1,0 +1,54 @@
+{
+  "status": "EXPECTED_EXISTING_CONTRACT_REJECTION",
+  "positiveAcceptance": "NOT_PASSED",
+  "actualObservedCards": 20,
+  "parserError": "web_list_no_allowed_items",
+  "first": {
+    "status": "failed",
+    "runId": "7629802e-c83b-432f-b406-4f579eaa38ec",
+    "errorCode": "parse_failed",
+    "itemsCommitted": 0
+  },
+  "repeat": {
+    "status": "failed",
+    "runId": "d1568df8-9ce2-44e0-861e-2e58d219a0dc",
+    "errorCode": "parse_failed",
+    "itemsCommitted": 0
+  },
+  "runs": [
+    {
+      "status": "failed",
+      "error_code": "parse_failed",
+      "error_message": "web_list_no_allowed_items",
+      "items_new": 0,
+      "items_revised": 0
+    },
+    {
+      "status": "failed",
+      "error_code": "parse_failed",
+      "error_message": "web_list_no_allowed_items",
+      "items_new": 0,
+      "items_revised": 0
+    }
+  ],
+  "items": 0,
+  "versions": 0,
+  "blocks": 0,
+  "providerUsageUnchanged": true,
+  "readonlyReopen": {
+    "readonly": true,
+    "queryOnly": 1,
+    "emptyBusinessTablesUnchanged": true,
+    "dbBytesUnchanged": true,
+    "fieldAcceptanceNotClaimedBecauseZeroBusinessRows": true
+  },
+  "dbBeforeSha256": "273a713122fa5fb9cc502a41b89a9fe5a898a653a9442b2c76d6448153a6906b",
+  "dbAfterSha256": "273a713122fa5fb9cc502a41b89a9fe5a898a653a9442b2c76d6448153a6906b",
+  "actualSourceRequests": 0,
+  "actualSystemDns": 0,
+  "tcpConnectionAttempts": 0,
+  "globalFetchCalls": 0,
+  "injectedLookupCalls": 2,
+  "injectedTransportCalls": 2,
+  "productChanges": false
+}

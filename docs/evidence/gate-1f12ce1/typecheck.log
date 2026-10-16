@@ -1,0 +1,12 @@
+# command: pnpm typecheck
+# full_sha: 1f12ce1528c82aace4a2839bbda00a078c2b9c5e
+# started: 2026-10-12T12:22:52.104Z
+# ---- stdout ----
+
+> shipping-hot@0.0.41 typecheck D:\try one\Shipping HOT
+> tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.app.json
+
+
+# ---- stderr ----
+
+# raw_exit_code: 0

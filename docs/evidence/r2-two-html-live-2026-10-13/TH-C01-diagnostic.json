@@ -1,0 +1,12 @@
+{
+  "id": "TH-C01",
+  "kind": "same-response in-memory structural counts and parser diagnostic; not original HTML",
+  "listSelector": "table.table-hover",
+  "listMatches": 1,
+  "itemMatches": 100,
+  "parserErrorCode": null,
+  "parsedCount": 100,
+  "dateOnly": 100,
+  "unknownDate": 0,
+  "publishedInstants": 0
+}

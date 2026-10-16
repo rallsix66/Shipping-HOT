@@ -1,4 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { FeedPage } from "~/components/shipping/pages"
+import { FeedRoutePage } from "~/components/shipping/manual-intel"
 
-export const Route = createFileRoute("/feed")({ component: FeedPage })
+export const Route = createFileRoute("/feed")({ component: FeedRoutePage })

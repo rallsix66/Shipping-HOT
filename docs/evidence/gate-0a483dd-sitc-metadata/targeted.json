@@ -1,0 +1,9 @@
+{
+  "name": "targeted",
+  "command": "pnpm exec vitest run -c vitest.config.ts server/intel/sitc-index.test.ts server/intel/sources/json-list-html.test.ts server/intel/sources/json-list.test.ts server/intel/vn-disaster-index.test.ts server/intel/post-clash-index.test.ts server/intel/thai-document-index.test.ts server/intel/public-index-candidates-collect.test.ts server/intel/html-index-candidates-collect.test.ts server/intel/sources/html-index-candidates.test.ts server/intel/sources/web-list.test.ts server/intel/sources/web-list-conflicts.test.ts server/intel/web-list-conflicts-collect.test.ts server/intel/json-list-collect.test.ts server/intel/web-list-collect.test.ts server/intel/adaptive.test.ts server/runtime/intel-production.test.ts server/runtime/intel-bootstrap.test.ts server/intel/collect.test.ts",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\sitc-metadata-build-20261015",
+  "sha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "startedAt": "2026-10-15T07:05:32.277Z",
+  "finishedAt": "2026-10-15T07:05:36.355Z",
+  "rawExit": 0
+}

@@ -1,0 +1,1 @@
+{"started":"2026-10-14T09:08:37.983Z","endedAt":"2026-10-14T09:08:53.046Z","command":"pnpm exec vitest run -c .tmp/three-after-clash-20261014.config.ts","rawExit":0,"signal":null}

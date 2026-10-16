@@ -1,0 +1,26 @@
+{
+  "correctedAt": "2026-10-15T02:13:24.733564+00:00",
+  "executionHead": "a5da09871d1a017ae947a0f3f56980461807bfaf",
+  "productCodeSha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
+  "launchAndCommandHeadAgree": true,
+  "launcherProductCodeShaAgrees": true,
+  "codeToExecutionHeadNonDocumentationDiff": [],
+  "catalogRowChecks": [
+    {
+      "id": "XX-K01",
+      "matches": true
+    },
+    {
+      "id": "XX-K02",
+      "matches": true
+    }
+  ],
+  "originalIncorrectManifestProductCodeSha": "355bc861d4020ba22ddd00401de709d7cee497e3",
+  "originalManifestPreserved": "manifest.original.json",
+  "originalManifestByteSha256": "b98fe7b28931d75db3c09cfe2b3ca57e61d6260f9dfc2473ec37620e2e37c068",
+  "reason": "Copied diagnostic test hardcoded an older code label; launch.json and command.json bind the actual clean execution HEAD. Product tree matches the accepted 355952c code. Only metadata corrected; no capture rerun.",
+  "executedProcedureRetainsOriginalStaleLabel": true,
+  "additionalDnsCalls": 0,
+  "additionalHttpRequests": 0,
+  "functionalGateThisRound": "NOT_RUN_docs_only; accepted clean code gate remains separate at gate-355952c-anchor-date-repair"
+}

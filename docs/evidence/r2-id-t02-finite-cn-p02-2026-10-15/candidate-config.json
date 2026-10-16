@@ -1,0 +1,33 @@
+{
+  "seed": {
+    "id": "intel:id-t02",
+    "catalogId": "ID-T02",
+    "name": "Indonesia MOF JDIH homepage law cards",
+    "kind": "web_list",
+    "url": "https://jdih.kemenkeu.go.id/",
+    "enabled": false,
+    "persistence": "disallowed",
+    "allowedHosts": [
+      "jdih.kemenkeu.go.id"
+    ],
+    "allowedContentTypes": [
+      "text/html",
+      "application/xhtml+xml"
+    ],
+    "intervalMs": 3600000,
+    "webList": {
+      "listSelector": "body",
+      "itemSelector": "a[href]:has(> .jdih-recent.recent-doc-2)",
+      "linkSelector": "a[href]",
+      "titleSelector": ".jdih-recent p",
+      "publishedAtSelector": "span.card-tag",
+      "calendar": "gregorian",
+      "dateFormat": "indonesian_month_abbr",
+      "allowUrlPrefixes": [
+        "https://jdih.kemenkeu.go.id/dok"
+      ],
+      "dateRuleBasis": "ID-T02 saved root307 and real same-host /home200 2026-10-15: Terkini/Populer desktop/mobile cards bind own /dok/ identity, descriptive p title and span.card-tag DD Indonesian-month-abbreviation YYYY. Identical repeated title/date associations dedupe; identifier span.title is separately audited. Unlabelled source card day only, not certified publication/enactment/effectiveness; no clock/timezone/UTC. No script execution or detail fetch."
+    }
+  },
+  "role": "Declared disabled root candidate replaying saved root307 and actualLocation/home200; not active registry or production"
+}

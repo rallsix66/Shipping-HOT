@@ -5,7 +5,7 @@ import { createMockSnapshot } from "@shared/shipping-fixtures"
 import type { FeedItem } from "@shared/shipping"
 import { createFeedSyncJob } from "./feed-sync-job"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
-import type { FeedProvider } from "#/providers/feed"
+import { type FeedProvider, createPublicFeedProvider, shippingFeedSources } from "#/providers/feed"
 import { BackgroundRuntime } from "#/runtime/background-runtime"
 import { RuntimeRepository } from "#/database/runtime-jobs"
 
@@ -141,5 +141,42 @@ describe("feed sync job", () => {
     await expect(job.run()).resolves.toMatchObject({ status: "failed", recordsRead: 1 })
     expect(provider.getFeedItems).toHaveBeenCalledWith([expect.objectContaining({ id: historical.id })], expect.any(Array))
     native.close()
+  })
+
+  it("a blocked or failed safe fetch does not clear existing Feed items for that source", async () => {
+    const { database, native } = createNativeDatabase()
+    await initShippingTables(database, "mock")
+    const repository = new ShippingRepository(database, "mock")
+    const snapshot = createMockSnapshot()
+    await repository.seed(snapshot.ports, [], snapshot.events, snapshot.settings)
+    // Fresh item (6h old at the run): visibility changes here could only come from the fetch failure, not from the freshness policy.
+    await repository.upsertFeedItem(item({ id: "feed-runtime-kept", title: "Kept runtime update", sourceUrl: "https://theloadstar.com/runtime-kept", fetchedAt: "2026-08-14T00:00:00.000Z" }))
+    const loadstar = shippingFeedSources.find(source => source.id === "the-loadstar")!
+    const hops: string[] = []
+    for (const [label, lookup] of [
+      ["private address", async () => [{ address: "10.0.0.8", family: 4 as const }]],
+      ["dns failure", async () => {
+        throw new Error("ENOTFOUND")
+      }],
+    ] as const) {
+      const job = createFeedSyncJob({
+        database,
+        dataMode: "mock",
+        provider: createPublicFeedProvider({ sources: [loadstar], throwOnSourceFailureWithoutLastKnown: true, now: () => new Date("2026-08-14T06:00:00.000Z"), fetch: { lookup, transport: async (url) => {
+          hops.push(url.toString())
+          throw new Error("must not be called")
+        } } }),
+        source: loadstar,
+        intervalMs: 60_000,
+        now: () => new Date("2026-08-14T06:00:00.000Z"),
+      })
+      const result = await job.run()
+      expect(result, label).toMatchObject({ status: "failed", errorCode: "provider_unavailable" })
+      const kept = (await repository.listFeedItems({ now: new Date("2026-08-14T06:00:00.000Z"), view: "all" })).filter(feed => feed.sourceId === "the-loadstar")
+      expect(kept.map(feed => feed.id), label).toEqual(["feed-runtime-kept"])
+      expect(kept[0], label).toMatchObject({ stale: true, sourceStatus: "failed" })
+      expect(native.prepare("SELECT visibility FROM feed_items WHERE id = 'feed-runtime-kept'").get(), label).toEqual({ visibility: "current" })
+    }
+    expect(hops).toEqual([])
   })
 })

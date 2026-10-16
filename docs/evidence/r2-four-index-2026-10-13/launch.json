@@ -1,0 +1,1 @@
+{"started":"2026-10-13T08:25:08.904Z","command":"pnpm exec vitest run -c .tmp/four-index.config.ts","environment":"SHIPPING_APPROVED_SIX=1","sha":"01ea950ab023255fdb7e9efe1f2799d9320c260e"}

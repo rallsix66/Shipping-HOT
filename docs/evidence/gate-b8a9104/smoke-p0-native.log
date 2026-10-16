@@ -1,0 +1,22 @@
+# command: pnpm smoke:p0-native
+# full_sha: b8a91049f1106e999a64fde3e2ce6ac52f3891d6
+# started: 2026-10-12T10:29:56.665Z
+# ---- stdout ----
+
+> shipping-hot@0.0.41 smoke:p0-native D:\try one\Shipping HOT
+> node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p0-native-sqlite-smoke.ts
+
+{"process":"B","node":"v24.15.0","abi":"137","bootstrapCompletedAt":"2026-10-12T10:29:57.366Z","watchedPort":"p0-smoke-port-shekou","portDirectory":"ready"}
+
+# ---- stderr ----
+(node:62956) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./scripts/tsx-alias-loader.mjs", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:33956) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("file%3A///D%3A/try%2520one/Shipping%2520HOT/scripts/tsx-alias-loader.mjs", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:66380) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("file%3A///D%3A/try%2520one/Shipping%2520HOT/scripts/tsx-alias-loader.mjs", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+# raw_exit_code: 0

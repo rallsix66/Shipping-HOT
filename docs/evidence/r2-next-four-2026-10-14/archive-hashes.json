@@ -1,0 +1,19 @@
+{
+  "kind": "sanitized committed archive bytes (Git line-ending normalization); separate from private fetched raw hash",
+  "sha256": {
+    "command.json": "8716ada25810da3c4688b11bc8e5b812956b884fad0c4dab19090051b3d6406a",
+    "ID-T01-result.json": "5d4aa3e6f8e1f69c8a19b6e73ce5b613ec55dd40195f4bd8935bcb7e16a88182",
+    "launch.json": "a630dbd2f7b2fc78da8919d265fa315951658edc0c76ea94acdc536123caae98",
+    "manifest.json": "5e971e23c41992a1dd209c4bf12e02827de5437a8e2189da2bf451c10eefa703",
+    "neat-inventory.json": "613758238cc131b058c4bd39ce888c1b5994ab779d99aaf2c18186b6271a4ae0",
+    "partial-results.json": "96f4cb6dd6da2db87bb43e66f2f8e8fa43df29b5c0f6ef8f5d2df8d08587827f",
+    "request-ledger.json": "f4a67de917ad47d75db9375fb2f5c372b6d84537b29d0a796b96f506d7cce54f",
+    "sensitive-scan.json": "e3cf5cf9d748a02caeb85ed1e19f33ca8876eb20dcbee2549d060b838517f5e7",
+    "summary.json": "66e025198c452759e00c271eff947101a01d5a8f10205072230226b9fe80bf3d",
+    "TH-C02-response.json": "6d44aa5816718e2e463373e131fbbbbd6651c20b725898b6f755fd03677d66d2",
+    "TH-C02-result.json": "ab46c5a7ab297e07f240a97d990e225dd73ff521c23a3f9bc137e6c1d01af1a3",
+    "TH-C02-structure.json": "79920cc05dfeecdee3b9e20b1d5da8ef888dde2412d0891f218415ad1ba92b81",
+    "VN-P03-result.json": "d684714f3cdeb70966a565d9c036d3b497f3e0f8ce4ab409c8e7c0882467ec07",
+    "VN-T01-result.json": "5eb364a2f193c95db5c07d527b8fd708b4696b7821ba9c5755140b6c2cfdbb21"
+  }
+}

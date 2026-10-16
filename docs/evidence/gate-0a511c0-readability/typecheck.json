@@ -1,0 +1,9 @@
+{
+  "name": "typecheck",
+  "command": "pnpm typecheck",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\readability-build-20261015",
+  "sha": "0a511c09114674d31f3c6334ab1a3834ba8f2c0a",
+  "startedAt": "2026-10-15T09:31:15.018Z",
+  "finishedAt": "2026-10-15T09:31:20.283Z",
+  "rawExit": 2
+}

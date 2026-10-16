@@ -1,0 +1,21 @@
+{
+  "kind": "sanitized committed archive bytes with Git EOL normalization, separate from fetched raw hashes",
+  "sha256": {
+    "command.json": "77f2c8cec4048faa7a99cb4e5164af262c29880cb6065ed6062a5ce35099e2b7",
+    "ID-T01-adapter.json": "751ce86a18ef9f622427eee307a590413a66b448587f33bf8c6601b5d374884b",
+    "ID-T01-first.json": "c27a80167ad368626ebcc18bb3ad452f251c1c171d859d4ea0dc73a607281a3e",
+    "ID-T01-repeat.json": "6af2aa52f7858515678af11c17700fdf393e461385df32c650e2f322ac9153eb",
+    "ID-T01-result.json": "a984db7d261d113d69e6e0176e65e585ef7cd3fab2f5d6da371c962f3221fe2a",
+    "partial-results.json": "b6578057beb104d1f1589a013a337239f9fd014d3a827c210f121abd2cf8d128",
+    "sensitive-scan.json": "ad2181405901fa5b721542b3c0cd3c32f4835e101d542478f4a1301c115f6f95",
+    "summary.json": "16ff8464c2a12bab986df7e8ef810623cd2988de749c1f9aefe9aeac03098cac",
+    "VN-P03-adapter.json": "89a906251811c0e4d593f0dae67b6ae60d233f10a0aef39e705fda0fe71547a3",
+    "VN-P03-first.json": "d86835944e72ee048de4232d63ecb6f5c190610c99a93452d8cd714108be2db8",
+    "VN-P03-repeat.json": "08f7d257d583acdf1cb3f1323ae448891dc7bc25a62c1ebde39a138dfaf10ff5",
+    "VN-P03-result.json": "d8cdffa581f565dfdb32e8dce4e0ad01b398830b19cfead3655e46dcca256624",
+    "VN-T01-adapter.json": "07aa9054158cd6ca881c5899b6ae7fdaeb49affbb24436a840919b365351d778",
+    "VN-T01-first.json": "e3c7ab121937edd447018e8c74cedf64886ec173fda2c7c03c8be677b9b53065",
+    "VN-T01-repeat.json": "144d23782f5cd87f9c2b2b5cba1f8e11de41f87388446062fe94c5fe5324758d",
+    "VN-T01-result.json": "bf1bdca285fdb464b914f313df52a8b0985681c30ea8a2d15c6fb11f97f352d0"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "policy-targeted",
+  "command": "pnpm exec vitest run -c vitest.config.ts test/policy-console.test.ts test/reduce-motion.test.ts test/ui-smoke.test.ts server/database/policy.test.ts test/ports-demo.test.ts server/services/port-weather-panel.test.ts test/calendar-demo.test.ts server/services/promo-calendar.test.ts server/intel/manual.test.ts server/api/shipping/intel/manual-http.test.ts server/api/shipping/intel/read-http.test.ts test/manual-intel.test.ts server/intel/chain.test.ts server/intel/adaptive.test.ts server/runtime/intel-production.test.ts server/runtime/intel-bootstrap.test.ts server/intel/collect.test.ts",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-production-final2-build",
+  "sha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2",
+  "startedAt": "2026-10-14T06:43:03.094Z",
+  "endedAt": "2026-10-14T06:43:07.765Z",
+  "rawExit": 0
+}

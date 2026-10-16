@@ -1,0 +1,10 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ .tmp/one-newsroom-raw-replay-final-20261015.test.ts (1 test) 341ms
+   ✓ complete ONE HTML bytes through existing collector, exact raw fields, repeat and read-only reopen  340ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  11:08:54
+   Duration  1.39s (transform 461ms, setup 0ms, import 839ms, tests 341ms, environment 0ms)

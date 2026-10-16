@@ -1,0 +1,65 @@
+{
+  "type": "committed_text_archive_hashes",
+  "at": "2026-10-15T03:53:08.994577+00:00",
+  "hashBasis": "Git LF text only; original wire/log byte digests remain exact and are never normalized",
+  "excluded": [
+    "archive-hashes.json"
+  ],
+  "files": [
+    {
+      "file": "candidate-config.json",
+      "sha256": "d5655397c98833c5c00b92e812e2db23c393fea5203a3357469ae8f92d786849",
+      "bytesLF": 1545
+    },
+    {
+      "file": "command.json",
+      "sha256": "20c407fa2d32e0298131d4bfacea4fb1069a1c466aba4ba889dd65e4fca08c07",
+      "bytesLF": 2336
+    },
+    {
+      "file": "launch.json",
+      "sha256": "1212eb67fe43d359c1584dcf5fa30ae59bdd916003b850311a70a84128e7ba4d",
+      "bytesLF": 418
+    },
+    {
+      "file": "raw-field-metadata.json",
+      "sha256": "87add267d9f024bc6294d614487b13bb653146c52de3118a89e98ead10a47380",
+      "bytesLF": 4293
+    },
+    {
+      "file": "replay-config.ts.txt",
+      "sha256": "4e1835f28c3d70a33806a4294191dea7889faa734ecf25eb9967b633f6163a2d",
+      "bytesLF": 152
+    },
+    {
+      "file": "replay-launcher.cjs.txt",
+      "sha256": "9a3a898131c62ecf61e9f2e1bdfe28b3c5071965ae3634fbf0b0c5f84f730022",
+      "bytesLF": 1390
+    },
+    {
+      "file": "replay-procedure.test.ts.txt",
+      "sha256": "504e35ea0f1cbd2b8e4b6a8b5b84629d6a759c551a478fb29ae3f8f0d50ea974",
+      "bytesLF": 9755
+    },
+    {
+      "file": "report.md",
+      "sha256": "7c63c23243123a7be233251c827f019c9f4c5f7dc25f4a4d75bff993eabe452d",
+      "bytesLF": 985
+    },
+    {
+      "file": "stderr.log",
+      "sha256": "2b2089ef48a0decf6778aa45b416b29808b7d9476761ca686b28c9a254486d42",
+      "bytesLF": 1475
+    },
+    {
+      "file": "stdout.log",
+      "sha256": "57672384a252f3e57dc22e604b9e03e65fd4bb118d24264fbf84dc5f5facddf9",
+      "bytesLF": 390
+    },
+    {
+      "file": "summary.json",
+      "sha256": "a7e71fdc70961bc73f223d6657e9bc903d4caf68b38ff589bf54ae5035cfd628",
+      "bytesLF": 1893
+    }
+  ]
+}

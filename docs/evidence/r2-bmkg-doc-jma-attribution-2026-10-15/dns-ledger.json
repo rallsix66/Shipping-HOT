@@ -1,0 +1,20 @@
+[
+  {
+    "url": "https://maritim.bmkg.go.id/marine2026-data/doc/",
+    "host": "maritim.bmkg.go.id",
+    "reservedAt": "2026-10-15T06:05:16.385Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "104.20.20.136",
+        "family": 4
+      },
+      {
+        "address": "172.66.159.70",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T06:05:16.490Z"
+  }
+]

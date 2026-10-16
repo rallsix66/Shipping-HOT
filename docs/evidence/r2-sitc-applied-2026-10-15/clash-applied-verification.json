@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-15T06:32:01.292546+00:00",
+  "readOnly": true,
+  "userAppliedAt": "2026-10-15T06:30:48Z",
+  "extensionHostCount": 27,
+  "generatedFilterCount": 27,
+  "checks": {
+    "selectedExtensionExpectedBytes": true,
+    "extension27ExactExpectedOrder": true,
+    "generated27ExactExpectedOrder": true,
+    "original26Preserved": true,
+    "sitcExactlyOnceInBoth": true,
+    "fakeIpBlacklistMode": true
+  },
+  "original26OrderedSha256": "548cbae3de70843d8f4547526a38a29bdafecc0734b65bb7f67c6bb009842ee0",
+  "extensionAfterSha256": "3e22727b5b239afb5f0ff6578c3923069a00da2ba9d96383d803bbb93cf1dbe1",
+  "generatedFilterOrderedSha256": "2702b764f109b2984a83865e0f70fa71bd482b9ea0fdbd98dcb8494a9d7c9ff7",
+  "noFullConfigurationEqualityClaim": true,
+  "previousWholeGeneratedByteDifference": "UNRESOLVED_prior_full_image_missing_not_reinvestigated",
+  "systemSettingsWritten": false,
+  "credentialValuesExported": false,
+  "sourceDnsCalls": 0,
+  "upstreamGet": 0,
+  "runningCoreApiInspected": false,
+  "status": "VERIFIED_EXACT_FILTER27"
+}

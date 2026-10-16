@@ -1,0 +1,20 @@
+const fs = require('node:fs');
+const cp = require('node:child_process');
+const vm = require('node:vm');
+const {parseHTML} = require('linkedom');
+const sha = '258bfb8eb20ca5b7a37700f703c95b8ed7992997';
+const source = cp.execFileSync('git',['show',sha+':extensions/shipping-hot-clipper/src/extract.ts'],{encoding:'utf8'});
+const method = source.slice(source.indexOf('export function plainSelection'), source.indexOf('export function extractDocument')).replace('export function plainSelection(html: string): string','function plainSelection(html)');
+const {document} = parseHTML('<html><head></head><body></body></html>');
+const convert = vm.runInNewContext(method+'\nplainSelection',{document});
+const cases = [
+ ['paragraphs','<p>关闭10:00</p><p>恢复18:00</p>','关闭10:00\n\n恢复18:00'],
+ ['br','<p>关闭10:00<br>恢复18:00<br><br>次日复核</p>','关闭10:00\n恢复18:00\n\n次日复核'],
+ ['list','<ul><li>关闭10:00</li><li>恢复18:00</li></ul>','关闭10:00\n恢复18:00'],
+ ['table','<table><tbody><tr><th>作业</th><th>时间</th></tr><tr><td>关闭</td><td>10:00</td></tr><tr><td>恢复</td><td>18:00</td></tr></tbody></table>','作业\t时间\n关闭\t10:00\n恢复\t18:00'],
+ ['selected cells','<td>关闭10:00</td><td>恢复18:00</td>','关闭10:00\t恢复18:00'],
+ ['selected rows','<tr><td>关闭</td><td>10:00</td></tr><tr><td>恢复</td><td>18:00</td></tr>','关闭\t10:00\n恢复\t18:00']
+].map(([name,html,expected]) => ({name,expected,baselineActual:convert(html),baselineFails:convert(html)!==expected}));
+fs.writeFileSync('.tmp/clip-boundary-negative.json',JSON.stringify({sha,method:'actual baseline plainSelection isolated in VM with synthetic inert DOM; not a browser run',cases},null,2));
+if(!cases.every(x=>x.baselineFails))process.exitCode=1;
+console.log(JSON.stringify({baselineCases:cases.length,baselineFailures:cases.filter(x=>x.baselineFails).length}));

@@ -1,0 +1,12 @@
+{
+  "command": "pnpm exec vitest run -c .tmp/r2-sitc-capture-20261015.config.ts",
+  "startedAt": "2026-10-15T06:16:37.327Z",
+  "finishedAt": "2026-10-15T06:16:38.843Z",
+  "executionHead": "14b6548bcab3ef9df5a24f718dcbf9556cc0ffa5",
+  "rawExit": 0,
+  "signal": null,
+  "stdoutExactUtf8": "\n RUN  v4.0.18 D:/try one/Shipping HOT\n\n ✓ .tmp/r2-sitc-capture-20261015.test.ts (1 test) 49ms\n\n Test Files  1 passed (1)\n      Tests  1 passed (1)\n   Start at  14:16:38\n   Duration  625ms (transform 194ms, setup 0ms, import 410ms, tests 49ms, environment 0ms)\n\n",
+  "stderrExactUtf8": "Duplicated imports \"string\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/calendar.ts\" is used\nDuplicated imports \"VN\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"TH\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"MY\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"PH\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"string\", the one from \"D:/try one/Shipping HOT/shared/calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"lazada\", the one from \"D:/try one/Shipping HOT/shared/policy.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/promo-calendar.ts\" is used\nDuplicated imports \"tiktok_shop\", the one from \"D:/try one/Shipping HOT/shared/policy.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/promo-calendar.ts\" is used\nDuplicated imports \"string\", the one from \"D:/try one/Shipping HOT/shared/policy.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/promo-calendar.ts\" is used\n",
+  "stdoutOriginalByteSha256": "81816fba1fb6463e05b11e4691b015ff5765fff4e7d87c85f72c7e642bc38fba",
+  "stderrOriginalByteSha256": "2b2089ef48a0decf6778aa45b416b29808b7d9476761ca686b28c9a254486d42"
+}

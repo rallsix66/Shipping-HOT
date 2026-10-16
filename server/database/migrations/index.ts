@@ -19,10 +19,20 @@ import { policyLifecycleMigration } from "#/database/migrations/017-policy-lifec
 import { policyRelationsTimezoneMigration } from "#/database/migrations/018-policy-relations-timezone"
 import { policyRelationBackfillRepairMigration } from "#/database/migrations/019-policy-relation-backfill-repair"
 import { policyRelationMixedVersionRepairMigration } from "#/database/migrations/020-policy-relation-mixed-version-repair"
+import { intelSourceRunsMigration } from "#/database/migrations/021-intel-source-runs"
+import { intelItemsMigration } from "#/database/migrations/022-intel-items"
+import { intelExecutorCurrentMigration } from "#/database/migrations/023-intel-executor-current"
+import { paidReceiptMigration } from "#/database/migrations/024-paid-receipt"
+import { paidReceiptUsageBookingMigration } from "#/database/migrations/025-paid-receipt-usage-booking"
+import { intelWebListMigration } from "#/database/migrations/026-intel-web-list"
+import { intelJsonListMigration } from "#/database/migrations/027-intel-json-list"
+import { intelManualMigration } from "#/database/migrations/028-intel-manual"
+import { manualClipMigration } from "#/database/migrations/029-manual-clip"
 
 export interface ShippingMigration {
   readonly version: number
   readonly name: string
+  readonly rebuildWithForeignKeysDisabled?: boolean
   up: (db: Database) => Promise<void>
 }
 
@@ -50,6 +60,15 @@ export const shippingMigrations: readonly ShippingMigration[] = [
   policyRelationsTimezoneMigration,
   policyRelationBackfillRepairMigration,
   policyRelationMixedVersionRepairMigration,
+  intelSourceRunsMigration,
+  intelItemsMigration,
+  intelExecutorCurrentMigration,
+  paidReceiptMigration,
+  paidReceiptUsageBookingMigration,
+  intelWebListMigration,
+  intelJsonListMigration,
+  intelManualMigration,
+  manualClipMigration,
 ]
 
 export const latestShippingSchemaVersion = shippingMigrations[shippingMigrations.length - 1].version

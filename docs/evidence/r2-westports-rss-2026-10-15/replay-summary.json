@@ -1,0 +1,75 @@
+{
+  "results": [
+    {
+      "id": "MY-P02",
+      "status": "PASS",
+      "url": "https://www.westportsholdings.com/category/press-release/feed/",
+      "rawBytes": 36266,
+      "wireSha256": "db9676f1167a48d5c36ad76364e6215221173eefb6874d16a77204a160befc8b",
+      "actualSystemDnsCalls": 0,
+      "actualSourceHttpRequests": 0,
+      "first": {
+        "status": "ok_items",
+        "runId": "27e0dbb1-2830-43e7-b0e6-8839416d116a",
+        "itemsSeen": 3,
+        "itemsNew": 3,
+        "itemsRevised": 0
+      },
+      "repeat": {
+        "status": "ok_items",
+        "runId": "ba0e9b20-eed4-4882-9224-2a5dd2d09781",
+        "itemsSeen": 3,
+        "itemsNew": 0,
+        "itemsRevised": 0
+      },
+      "reopen": {
+        "queryOnly": true,
+        "readonlyConnection": true,
+        "rows": 3,
+        "versions": 3,
+        "mismatches": 0,
+        "fullTitleUrlDateEvidenceCompared": true,
+        "allItemVersionBlockFieldsEqualAfterReopen": true,
+        "metadataOnlyTitleBlocks": 3,
+        "dateEvidenceColumn": "null_existing_RSS_contract; exact literal/timezone preserved in private XML and bounded evidence, not a new migration",
+        "dbBeforeSha256": "4286b1b9d5f33f871674b5d0b3ca875c9889d383b9b01d2d757fc57dafda3698",
+        "dbAfterSha256": "4286b1b9d5f33f871674b5d0b3ca875c9889d383b9b01d2d757fc57dafda3698",
+        "databaseBytesUnchanged": true
+      },
+      "realRecords": 3,
+      "rawSourceItems": 10,
+      "excludedEmptySourceTitles": 7,
+      "allOriginalItemsAccounted": true,
+      "latestRawItemDay": "2026-09-28",
+      "latestEligibleItemDay": "2025-08-01",
+      "currentAvailability": "STALE",
+      "rawDateRole": "RSS item pubDate",
+      "precision": "second",
+      "sourceTimezoneLiterals": [
+        "+0000"
+      ],
+      "utcOffsets": [
+        "+00:00"
+      ],
+      "unknownTimezoneRecords": 0,
+      "sourceUpdatedField": "absent; existing sourceUpdatedAt falls back to pubDate",
+      "injectedLookupCalls": 2,
+      "injectedTransportCalls": 2,
+      "tcpConnectionAttempts": 0,
+      "globalFetchCalls": 0,
+      "providerUsageRowsUnchanged": true,
+      "rawRedistributed": false,
+      "productionConfigChanged": false,
+      "repeatLastSeenAdvancedOnly": true
+    }
+  ],
+  "status": "PASS",
+  "evidenceOnly": true,
+  "actualSystemDnsCalls": 0,
+  "actualSourceHttpRequests": 0,
+  "productionEnabled": false,
+  "live24h": "NOT_RUN",
+  "paidCalls": 0,
+  "llmCalls": 0,
+  "productGate": "NOT_RUN_no_product_code_changed"
+}

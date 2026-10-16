@@ -1,0 +1,55 @@
+import { it, expect, vi } from "vitest"
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs"
+import { resolve } from "node:path"
+import { createHash } from "node:crypto"
+import net from "node:net"
+import dns from "node:dns/promises"
+import NativeDatabase from "better-sqlite3"
+import { load } from "cheerio"
+import { open } from "../server/intel/__fixtures__/isolated-db"
+import { initShippingTables } from "../server/database/shipping"
+import { collectIntelSource, sourcePolicy } from "../server/intel/collect"
+import type { IntelSourceSeed } from "../server/intel/sources"
+import { fromHtml, parseLooseDate, allowed } from "../server/intel/sources/web-list"
+import { decodeResponse } from "../server/services/response-decoding"
+
+const d="docs/evidence/r2-sitc-applied-2026-10-15",local=".tmp/r2-sitc-applied-20261015-private",hash=(v:string|Uint8Array)=>createHash("sha256").update(v).digest("hex"),save=(n:string,v:unknown)=>writeFileSync(`${d}/${n}.json`,JSON.stringify(v,null,2)+"\n")
+const snapshot=(db:NativeDatabase.Database)=>Object.fromEntries(["intel_item","intel_item_version","intel_item_block"].map(t=>[t,db.prepare(`SELECT * FROM ${t} ORDER BY id`).all()]))
+it("saved actualSITC20-card HTML: existing HTTPS/date contract compatibility negative, no network or positive acceptance",async()=>{
+ const capture=JSON.parse(readFileSync(`${d}/XX-K03-capture.json`,"utf8"));expect(capture.status).toBe("CAPTURED_SAFE_HTML")
+ const raw=readFileSync(`${local}/XX-K03.response.bin`);expect(raw.length).toBe(capture.bytes);expect(hash(raw)).toBe(capture.wireSha256)
+ const decoded=decodeResponse(raw,capture.contentType),$=load(decoded.body);expect(decoded.decoding.conflict).toBe(false);expect($("#content")).toHaveLength(1)
+ const seed:IntelSourceSeed={id:"bounded:XX-K03",catalogId:"XX-K03",name:"SITC exact main-site isolated compatibility probe",kind:"web_list",url:capture.url,enabled:false,persistence:"disallowed",allowedHosts:["www.sitc.com"],allowedContentTypes:["text/html","application/xhtml+xml"],intervalMs:3600000,webList:{listSelector:"#content",itemSelector:".media.row-fluid",linkSelector:"h4.title.media-heading > a[href]",titleSelector:"h4.title.media-heading > a[href]",publishedAtSelector:"ul.meta > li",calendar:"gregorian",dateRuleBasis:"SITC actual20 cards2026-10-15: h4 title anchors carry originalHTTP show.asp?id links; ul.meta li has source label发布日期 and dotted Y.M.D day. Existing rules do not accept those links/grammar; preserve raw metadata and unknown timezone, no rewriting."}}
+ const fields=$("#content .media.row-fluid").toArray().map((el,index)=>{
+  const row=$(el),a=row.find("h4.title.media-heading > a[href]");expect(a).toHaveLength(1)
+  const title=a.text().replace(/\s+/g," ").trim(),href=a.attr("href")!,dateNode=row.find("ul.meta > li");expect(dateNode).toHaveLength(1)
+  const rawDate=dateNode.text().replace(/\s+/g," ").trim(),literal=/^发布日期:\s*(\d{4}[.]\d{2}[.]\d{2})$/.exec(rawDate)?.[1]
+  expect(title.length).toBeGreaterThan(0);expect(new URL(href).protocol).toBe("http:");expect(new URL(href).hostname).toBe("www.sitc.com");expect(literal).toBeDefined()
+  expect(allowed(href,seed.webList!,sourcePolicy(seed))).toBe(false)
+  const parsedDate=parseLooseDate(rawDate,seed.webList!),literalDate=parseLooseDate(literal,seed.webList!);expect(parsedDate).toMatchObject({raw:rawDate,rule:"unsupported_format",precision:"unknown",timezone:"missing",localDate:null,publishedAt:null});expect(literalDate.rule).toBe("unsupported_format")
+  return {index,title,rawHref:href,rawDate,numericDateLiteral:literal,sourceLabel:"发布日期:",titleAttributePresent:!!a.attr("title"),linkProtocol:"http:",existingHttpsPolicyAllows:false,parsedDate,literalDate}
+ });
+ expect(fields).toHaveLength(20);expect(new Set(fields.map(f=>f.rawHref)).size).toBe(20)
+ writeFileSync(`${local}/XX-K03-exact-field-audit.json`,JSON.stringify(fields,null,2)+"\n")
+ save("field-observation",{scope:"20 actual cards from private complete original HTML; remote title/link hashes only, no body/summary. This is observation and compatibility failure, not qualified parser output.",rawResponseSha256:capture.wireSha256,actualCards:20,uniqueOriginalHttpLinks:20,existingHttpsPolicyRejected:20,unknownSourceTimezone:20,sourceDateGrammarUnsupported:20,linksOrDatesRewritten:false,fields:fields.map(({title,rawHref,...rest})=>({...rest,titleSha256:hash(title),originalHrefSha256:hash(rawHref)}))})
+ save("isolated-config",{seed,role:"Isolated negative evidence configuration only, not production candidate/registry and not a proposed HTTPS-upgraded identity"})
+ expect(()=>fromHtml(decoded.body,capture.url,seed.webList!,sourcePolicy(seed))).toThrow("web_list_no_allowed_items")
+ mkdirSync(`${local}/db`,{recursive:true});const dbPath=resolve(`${local}/db/sitc-negative-${Date.now()}.sqlite3`)
+ let tcp=0,systemDns=0,globalFetch=0,injectedLookup=0,injectedTransport=0
+ const tcpGuard=vi.spyOn(net.Socket.prototype,"connect").mockImplementation(()=>{tcp++;throw Error("offline_tcp_forbidden")}),dnsGuard=vi.spyOn(dns,"lookup").mockImplementation(async()=>{systemDns++;throw Error("offline_dns_forbidden")})
+ vi.stubGlobal("fetch",()=>{globalFetch++;throw Error("offline_fetch_forbidden")})
+ const state=open(dbPath);let closed=false
+ try{
+  const now=new Date(capture.receivedAt);await initShippingTables(state.database,"mock");await state.repository.upsertSource(seed,now.toISOString());const usageBefore=state.native.prepare("SELECT * FROM provider_usage ORDER BY rowid").all()
+  const deps={lookup:async(host:string)=>{expect(host).toBe("www.sitc.com");injectedLookup++;return [{address:"93.184.216.34",family:4 as const}]},transport:async(url:URL)=>{expect(url.href).toBe(capture.url);injectedTransport++;return {status:200,headers:{"content-type":capture.contentType},body:raw}}}
+  const first=await collectIntelSource(state.repository,seed,deps,now),repeat=await collectIntelSource(state.repository,seed,deps,new Date(now.getTime()+1000))
+  for(const result of [first,repeat])expect(result).toMatchObject({status:"failed",errorCode:"parse_failed",itemsCommitted:0})
+  const runs=state.native.prepare("SELECT status,error_code,error_message,items_new,items_revised FROM intel_fetch_run ORDER BY started_at").all() as any[]
+  expect(runs).toHaveLength(2);for(const r of runs){expect(r.status).toBe("failed");expect(r.error_message).toBe("web_list_no_allowed_items");expect(r.items_new??0).toBe(0);expect(r.items_revised??0).toBe(0)}
+  expect(snapshot(state.native)).toEqual({intel_item:[],intel_item_version:[],intel_item_block:[]});expect(state.native.prepare("SELECT * FROM provider_usage ORDER BY rowid").all()).toEqual(usageBefore)
+  const before=snapshot(state.native);state.native.close();closed=true;const dbBefore=hash(readFileSync(dbPath)),reopened=new NativeDatabase(dbPath,{readonly:true,fileMustExist:true});let queryOnly
+  try{reopened.pragma("query_only = ON");queryOnly=reopened.pragma("query_only",{simple:true});expect(queryOnly).toBe(1);expect(snapshot(reopened)).toEqual(before)}finally{reopened.close()}
+  const dbAfter=hash(readFileSync(dbPath));expect(dbAfter).toBe(dbBefore);expect(tcp+systemDns+globalFetch).toBe(0);expect(injectedLookup).toBe(2);expect(injectedTransport).toBe(2)
+  save("compatibility-result",{status:"EXPECTED_EXISTING_CONTRACT_REJECTION",positiveAcceptance:"NOT_PASSED",actualObservedCards:20,parserError:"web_list_no_allowed_items",first,repeat,runs,items:0,versions:0,blocks:0,providerUsageUnchanged:true,readonlyReopen:{readonly:true,queryOnly,emptyBusinessTablesUnchanged:true,dbBytesUnchanged:true,fieldAcceptanceNotClaimedBecauseZeroBusinessRows:true},dbBeforeSha256:dbBefore,dbAfterSha256:dbAfter,actualSourceRequests:0,actualSystemDns:systemDns,tcpConnectionAttempts:tcp,globalFetchCalls:globalFetch,injectedLookupCalls:injectedLookup,injectedTransportCalls:injectedTransport,productChanges:false})
+ }finally{if(!closed)state.native.close();tcpGuard.mockRestore();dnsGuard.mockRestore();vi.unstubAllGlobals()}
+},30000)

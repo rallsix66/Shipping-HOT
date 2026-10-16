@@ -1,0 +1,9 @@
+{
+  "name": "typecheck",
+  "command": "pnpm typecheck",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\manual-p2-final-build",
+  "sha": "79fc6c84b29497c869e029d27130ac02c8c04251",
+  "startedAt": "2026-10-14T04:57:25.645Z",
+  "endedAt": "2026-10-14T04:57:33.227Z",
+  "rawExit": 0
+}

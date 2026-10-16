@@ -1,0 +1,12 @@
+{
+  "phase": "conditional",
+  "status": "NOT_RUN",
+  "targets": [],
+  "reason": "All prerequisite exact roots were blocked before HTTP. No BMKG root link or valid JMA targetTc object was observed.",
+  "bmkgApidoc": { "getAttempts": 0, "systemDnsCalls": 0, "officialLinkObserved": false, "guessedUrl": false },
+  "jmaForecastAndSpecifications": { "getAttempts": 0, "systemDnsCalls": 0, "actualTropicalCycloneSelected": null, "oldIdsReused": false },
+  "pdfDownloads": 0,
+  "portJsonRequests": 0,
+  "unspentMaximumGetAllowance": 7,
+  "automaticRetryAuthorized": false
+}

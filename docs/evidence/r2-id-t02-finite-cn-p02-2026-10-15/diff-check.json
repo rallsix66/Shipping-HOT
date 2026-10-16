@@ -1,0 +1,33 @@
+{
+  "rawLogInclusive": {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "8d0993e4164dae0b7a7f96dc531b9aac92be54b1"
+    ],
+    "rawExit": 2,
+    "stdoutExactUtf8": "docs/evidence/gate-8d0993e-id-mof-card/build.stdout.log:24: trailing whitespace.\n+o Building Server...                                                          \ndocs/evidence/gate-8d0993e-id-mof-card/build.stdout.log:74: trailing whitespace.\n+√ The server has been successfully built.                                     \ndocs/evidence/gate-8d0993e-id-mof-card/lint.stdout.log:4: new blank line at EOF.\ndocs/evidence/gate-8d0993e-id-mof-card/targeted.stdout.log:29: new blank line at EOF.\ndocs/evidence/gate-8d0993e-id-mof-card/typecheck.stdout.log:4: new blank line at EOF.\ndocs/evidence/gate-8d0993e-id-mof-card/vitest.stdout.log:509: new blank line at EOF.\n",
+    "stderrExactUtf8": "warning: unable to access 'C:\\Users\\Administrator/.config/git/ignore': Permission denied\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/report.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/validation.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-two-media-2026-10-15/availability-frontier.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/handoffs/r2-next-execution-2026-10-15.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it\n",
+    "stdoutOriginalByteSha256": "77c02745a6e987c50ac12d313126e60d83953ec75174b104dc696e27563b25ad",
+    "stderrOriginalByteSha256": "45d6f1c19df75a7848c560ab7855ea00ca9d44f44af5987ca09e3734e5fff901"
+  },
+  "nonLogChanges": {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+      "--",
+      ".",
+      ":(exclude)docs/evidence/gate-8d0993e-id-mof-card/*.log"
+    ],
+    "rawExit": 0,
+    "stdoutExactUtf8": "",
+    "stderrExactUtf8": "warning: unable to access 'C:\\Users\\Administrator/.config/git/ignore': Permission denied\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/report.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-current-source-matrix-2026-10-14/validation.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/evidence/r2-two-media-2026-10-15/availability-frontier.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/handoffs/r2-next-execution-2026-10-15.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it\n",
+    "stdoutOriginalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrOriginalByteSha256": "45d6f1c19df75a7848c560ab7855ea00ca9d44f44af5987ca09e3734e5fff901"
+  },
+  "decision": "Preserve original command stdout exactly, including CLI trailing spaces/blank lines; all non-log changes pass whitespace check",
+  "productGateImpact": "none"
+}

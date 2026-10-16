@@ -1,0 +1,149 @@
+{
+  "hashBasis": "original log bytes and committed UTF8 text LF both declared",
+  "files": [
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/build.stderr.log",
+      "originalBytes": 524,
+      "originalByteSha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658",
+      "committedTextLfSha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/build.stdout.log",
+      "originalBytes": 5450,
+      "originalByteSha256": "df5abdf435c59cf6913e9a8c701222112cdcbbe097f761108ef3cb3dbff9f0d4",
+      "committedTextLfSha256": "df5abdf435c59cf6913e9a8c701222112cdcbbe097f761108ef3cb3dbff9f0d4"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/install.stderr.log",
+      "originalBytes": 0,
+      "originalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedTextLfSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/install.stdout.log",
+      "originalBytes": 1989,
+      "originalByteSha256": "32d5101e91a08c64e9c3ad54f17bd412e9b841895d82c294bd1ca4d6f8ff2c95",
+      "committedTextLfSha256": "32d5101e91a08c64e9c3ad54f17bd412e9b841895d82c294bd1ca4d6f8ff2c95"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/lint.stderr.log",
+      "originalBytes": 0,
+      "originalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedTextLfSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/lint.stdout.log",
+      "originalBytes": 100,
+      "originalByteSha256": "b2baec33cdb9573dcd4d3c5208f18cf08f1d46852f082f77795d568fda009db3",
+      "committedTextLfSha256": "b2baec33cdb9573dcd4d3c5208f18cf08f1d46852f082f77795d568fda009db3"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/smoke-feed.stderr.log",
+      "originalBytes": 365,
+      "originalByteSha256": "77fc7966dd5bddf0deac85dbcdd19ae0b7d5d75776faced81126e3d632f64ea3",
+      "committedTextLfSha256": "77fc7966dd5bddf0deac85dbcdd19ae0b7d5d75776faced81126e3d632f64ea3"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/smoke-feed.stdout.log",
+      "originalBytes": 311,
+      "originalByteSha256": "30343eef31ce2753b4b931cb5258fb9bf1c2aa74f3b16088553be21bea8b467d",
+      "committedTextLfSha256": "30343eef31ce2753b4b931cb5258fb9bf1c2aa74f3b16088553be21bea8b467d"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/smoke-p0.stderr.log",
+      "originalBytes": 1255,
+      "originalByteSha256": "5742e356b624d1e14a21cd57496e7509035a236743eda488ca46667e948e4ba0",
+      "committedTextLfSha256": "5742e356b624d1e14a21cd57496e7509035a236743eda488ca46667e948e4ba0"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/smoke-p0.stdout.log",
+      "originalBytes": 372,
+      "originalByteSha256": "fc78eab2f6af1fe50d56d0e7bed6485d2bd87890f9915b1622e225380758380e",
+      "committedTextLfSha256": "fc78eab2f6af1fe50d56d0e7bed6485d2bd87890f9915b1622e225380758380e"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/smoke-p2c.stderr.log",
+      "originalBytes": 365,
+      "originalByteSha256": "dec0ba776456b7c306e47b916de0a799a76dffbb6fcee0936d8989a4b469cf23",
+      "committedTextLfSha256": "dec0ba776456b7c306e47b916de0a799a76dffbb6fcee0936d8989a4b469cf23"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/smoke-p2c.stdout.log",
+      "originalBytes": 327,
+      "originalByteSha256": "96924552baa69f8ef631f445254cfd74803c1dad205fdcebcd60598cfac69aa9",
+      "committedTextLfSha256": "96924552baa69f8ef631f445254cfd74803c1dad205fdcebcd60598cfac69aa9"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/targeted.stderr.log",
+      "originalBytes": 2159,
+      "originalByteSha256": "986cdd2c20e64cc6cbd5df6b2e578972c3f4ba1d91f9de27b0f356dbdc10341b",
+      "committedTextLfSha256": "986cdd2c20e64cc6cbd5df6b2e578972c3f4ba1d91f9de27b0f356dbdc10341b"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/targeted.stdout.log",
+      "originalBytes": 972,
+      "originalByteSha256": "6fdddc5b2e9fae49689ae8e29eae5da4bfc8ae9b8e67ef58a6afd47768031fe6",
+      "committedTextLfSha256": "6fdddc5b2e9fae49689ae8e29eae5da4bfc8ae9b8e67ef58a6afd47768031fe6"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/typecheck.stderr.log",
+      "originalBytes": 0,
+      "originalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedTextLfSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/typecheck.stdout.log",
+      "originalBytes": 170,
+      "originalByteSha256": "69e045d044cf10a9c54ae3ecc4354b1653bdea007c2ad26058aa3e865a27adb6",
+      "committedTextLfSha256": "69e045d044cf10a9c54ae3ecc4354b1653bdea007c2ad26058aa3e865a27adb6"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/vitest.stderr.log",
+      "originalBytes": 5435,
+      "originalByteSha256": "82a6df7fd47a80cb9ff47912d692a940c9e3a08c3725412df72de4cffb1fc0e0",
+      "committedTextLfSha256": "82a6df7fd47a80cb9ff47912d692a940c9e3a08c3725412df72de4cffb1fc0e0"
+    },
+    {
+      "path": "docs/evidence/gate-c7ba3c6-readability/vitest.stdout.log",
+      "originalBytes": 17878,
+      "originalByteSha256": "5e4c1fc0af3f48ccbd799ab12df0534d8a16673393a5ac8f6d6636807be9f6f8",
+      "committedTextLfSha256": "5e4c1fc0af3f48ccbd799ab12df0534d8a16673393a5ac8f6d6636807be9f6f8"
+    },
+    {
+      "path": "docs/evidence/gate-0a511c0-readability/build.stderr.log",
+      "originalBytes": 524,
+      "originalByteSha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658",
+      "committedTextLfSha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658"
+    },
+    {
+      "path": "docs/evidence/gate-0a511c0-readability/build.stdout.log",
+      "originalBytes": 5444,
+      "originalByteSha256": "c09b794f6c399878778e9446494ba097cbe0f9c1a30187db6c4350731a27b3e3",
+      "committedTextLfSha256": "c09b794f6c399878778e9446494ba097cbe0f9c1a30187db6c4350731a27b3e3"
+    },
+    {
+      "path": "docs/evidence/gate-0a511c0-readability/install.stderr.log",
+      "originalBytes": 0,
+      "originalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedTextLfSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/gate-0a511c0-readability/install.stdout.log",
+      "originalBytes": 1921,
+      "originalByteSha256": "185a7eba568f204630a8ef09fddc08802b93a490c2dade38124ae8f8e1178c0b",
+      "committedTextLfSha256": "185a7eba568f204630a8ef09fddc08802b93a490c2dade38124ae8f8e1178c0b"
+    },
+    {
+      "path": "docs/evidence/gate-0a511c0-readability/typecheck.stderr.log",
+      "originalBytes": 0,
+      "originalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedTextLfSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/gate-0a511c0-readability/typecheck.stdout.log",
+      "originalBytes": 648,
+      "originalByteSha256": "33e07faeda1bba800aeb7ffd4bfd2b44e2f2b85861ae99059b2e7dfc760f22d2",
+      "committedTextLfSha256": "6bfe0a6b5e9da3a07b76cfd27457aa66ee3e1c33cbbad6c371ae198f4756e7a4"
+    }
+  ]
+}

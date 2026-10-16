@@ -1,0 +1,21 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/manual-intel-final3-build
+
+ ✓ test/reduce-motion.test.ts (2 tests) 89ms
+ ✓ test/policy-console.test.ts (12 tests) 17ms
+ ✓ test/manual-intel.test.ts (2 tests) 13ms
+ ✓ test/calendar-demo.test.ts (8 tests) 122ms
+ ✓ test/ui-smoke.test.ts (13 tests) 14ms
+ ✓ test/ports-demo.test.ts (11 tests) 28ms
+ ✓ server/services/port-weather-panel.test.ts (2 tests) 98ms
+ ✓ server/api/shipping/intel/manual-http.test.ts (3 tests) 187ms
+ ✓ server/services/promo-calendar.test.ts (12 tests) 573ms
+ ✓ server/database/policy.test.ts (19 tests) 686ms
+ ✓ server/api/shipping/intel/read-http.test.ts (17 tests) 728ms
+ ✓ server/intel/manual.test.ts (25 tests) 943ms
+
+ Test Files  12 passed (12)
+      Tests  126 passed (126)
+   Start at  12:40:46
+   Duration  2.46s (transform 5.03s, setup 0ms, import 8.78s, tests 3.50s, environment 2ms)
+

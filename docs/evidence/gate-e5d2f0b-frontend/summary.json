@@ -1,0 +1,102 @@
+{
+  "sha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-production-final2-build",
+  "commands": [
+    {
+      "name": "install",
+      "command": "pnpm install --frozen-lockfile",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-production-final2-build",
+      "sha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2",
+      "startedAt": "2026-10-14T06:41:59.475Z",
+      "endedAt": "2026-10-14T06:42:08.960Z",
+      "rawExit": 0
+    },
+    {
+      "name": "build",
+      "command": "pnpm build",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-production-final2-build",
+      "sha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2",
+      "startedAt": "2026-10-14T06:42:08.960Z",
+      "endedAt": "2026-10-14T06:42:27.202Z",
+      "rawExit": 0
+    },
+    {
+      "name": "typecheck",
+      "command": "pnpm typecheck",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-production-final2-build",
+      "sha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2",
+      "startedAt": "2026-10-14T06:42:27.203Z",
+      "endedAt": "2026-10-14T06:42:35.685Z",
+      "rawExit": 0
+    },
+    {
+      "name": "lint",
+      "command": "pnpm lint",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-production-final2-build",
+      "sha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2",
+      "startedAt": "2026-10-14T06:42:35.686Z",
+      "endedAt": "2026-10-14T06:43:03.093Z",
+      "rawExit": 0
+    },
+    {
+      "name": "policy-targeted",
+      "command": "pnpm exec vitest run -c vitest.config.ts test/policy-console.test.ts test/reduce-motion.test.ts test/ui-smoke.test.ts server/database/policy.test.ts test/ports-demo.test.ts server/services/port-weather-panel.test.ts test/calendar-demo.test.ts server/services/promo-calendar.test.ts server/intel/manual.test.ts server/api/shipping/intel/manual-http.test.ts server/api/shipping/intel/read-http.test.ts test/manual-intel.test.ts server/intel/chain.test.ts server/intel/adaptive.test.ts server/runtime/intel-production.test.ts server/runtime/intel-bootstrap.test.ts server/intel/collect.test.ts",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-production-final2-build",
+      "sha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2",
+      "startedAt": "2026-10-14T06:43:03.094Z",
+      "endedAt": "2026-10-14T06:43:07.765Z",
+      "rawExit": 0
+    },
+    {
+      "name": "vitest",
+      "command": "pnpm exec vitest run -c vitest.config.ts",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-production-final2-build",
+      "sha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2",
+      "startedAt": "2026-10-14T06:43:07.765Z",
+      "endedAt": "2026-10-14T06:43:23.367Z",
+      "rawExit": 0
+    },
+    {
+      "name": "smoke-p0",
+      "command": "pnpm smoke:p0-native",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-production-final2-build",
+      "sha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2",
+      "startedAt": "2026-10-14T06:43:23.367Z",
+      "endedAt": "2026-10-14T06:43:24.682Z",
+      "rawExit": 0
+    },
+    {
+      "name": "smoke-p2c",
+      "command": "pnpm smoke:p2c-runtime",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-production-final2-build",
+      "sha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2",
+      "startedAt": "2026-10-14T06:43:24.682Z",
+      "endedAt": "2026-10-14T06:43:25.993Z",
+      "rawExit": 0
+    },
+    {
+      "name": "smoke-feed",
+      "command": "pnpm smoke:p3-feed-freshness",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-production-final2-build",
+      "sha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2",
+      "startedAt": "2026-10-14T06:43:25.994Z",
+      "endedAt": "2026-10-14T06:43:27.252Z",
+      "rawExit": 0
+    }
+  ],
+  "retainedBefore": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedAfter": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedUnchanged": true,
+  "browser": "NOT_RUN: official browser unavailable, custom CDP action rejected",
+  "s7": "NOT_RUN: browser control blocked; shell change still needs integration acceptance"
+}

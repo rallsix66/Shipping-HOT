@@ -1,0 +1,9 @@
+{
+  "name": "smoke-p0",
+  "command": "pnpm smoke:p0-native",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\ports-demo-review-build",
+  "sha": "11aa1162a286d96bdc7a44a2f61a95d3d2a886e8",
+  "startedAt": "2026-10-14T03:00:34.017Z",
+  "endedAt": "2026-10-14T03:00:35.150Z",
+  "rawExit": 0
+}

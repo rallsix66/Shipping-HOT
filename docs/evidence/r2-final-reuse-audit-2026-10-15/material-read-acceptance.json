@@ -1,0 +1,17 @@
+{
+  "reviewedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
+  "evidenceHead": "0321584ffbbb2f99c1f8ecd64c680b78d0affcc6",
+  "parentReview": "ACCEPTED_LIMITED_no_new_P2",
+  "scope": "internal licensed material read of exact stored intel item/version only",
+  "hasBusinessConsumer": false,
+  "feedBodyBridgeImplemented": false,
+  "r3InputImplemented": false,
+  "sourceConfiguration": "CURRENT_SOURCE_NOT_COMPLETE_HISTORICAL_CONFIGURATION_SNAPSHOT",
+  "coverageUnchanged": [
+    "25/39",
+    "24/34"
+  ],
+  "numericHistorical": "3/5",
+  "doesNotProve": "live/24h/overallR2",
+  "reviewDate": "2026-10-15"
+}

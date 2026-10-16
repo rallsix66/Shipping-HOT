@@ -1,0 +1,479 @@
+[
+  {
+    "id": "VN-P03",
+    "url": "https://saigonnewport.com.vn/tin-tuc",
+    "enabled": false,
+    "persistence": "disallowed",
+    "config": {
+      "listSelector": ".page-container > .news",
+      "itemSelector": ".news-card",
+      "linkSelector": "h3.title > a[href]",
+      "titleSelector": "h3.title > a[href]",
+      "publishedAtSelector": "p.news-label.date",
+      "dateOrder": "dmy",
+      "calendar": "gregorian",
+      "allowUrlPrefixes": [
+        "https://saigonnewport.com.vn/tin-tuc"
+      ],
+      "dateRuleBasis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact."
+    },
+    "startedAt": "2026-10-14T09:28:05.277Z",
+    "httpRequests": 0,
+    "material": "complete private real response bytes, not synthetic or sanitized skeleton",
+    "rawHtmlCommitted": false,
+    "fetchedRawSha256": "e730d4af7dacc5b95995139b6407f91a2adb2d4be7f1e2bbec7dbadc738b51c8",
+    "rawBytes": 143215,
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "http",
+      "declarations": [
+        {
+          "source": "http",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        },
+        {
+          "source": "meta",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        }
+      ],
+      "conflict": false,
+      "byteLength": 143215
+    },
+    "adapterCount": 14,
+    "dateRules": [
+      "configured_dmy"
+    ],
+    "samples": [
+      {
+        "titleExcerpt": "Thiếu tướng Ngô Minh Thuấn: Truyền cảm hứng đổi mới, khơi dậy khát vọng cống hiến",
+        "canonicalUrl": "https://saigonnewport.com.vn/tin-tuc/trach-nhiem-xa-hoi/thieu-tuong-ngo-minh-thuan-truyen-cam-hung-doi-moi-khoi-day-khat-vong-cong-hien.html",
+        "dateEvidence": {
+          "raw": "12/10/2026",
+          "rule": "configured_dmy",
+          "basis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-12",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "Tổng công ty Tân Cảng Sài Gòn vinh danh 18 doanh nhân tiêu biểu",
+        "canonicalUrl": "https://saigonnewport.com.vn/tin-tuc/trach-nhiem-xa-hoi/tong-cong-ty-tan-cang-sai-gon-vinh-danh-18-doanh-nhan-tieu-bieu.html",
+        "dateEvidence": {
+          "raw": "10/10/2026",
+          "rule": "configured_dmy",
+          "basis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-10",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "TÂN CẢNG SÀI GÒN ĐƯỢC VINH DANH TOP 10 THƯƠNG HIỆU DOANH NGHIỆP DẪN ĐẦU KHU VỰC KINH TẾ NHÀ NƯỚC",
+        "canonicalUrl": "https://saigonnewport.com.vn/tin-tuc/trach-nhiem-xa-hoi/tan-cang-sai-gon-duoc-vinh-danh-top-10-thuong-hieu-doanh-nghiep-dan-dau-khu-vuc-kinh-te-nha-nuoc.html",
+        "dateEvidence": {
+          "raw": "05/10/2026",
+          "rule": "configured_dmy",
+          "basis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-05",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "Binh đoàn 20: Khai mạc Hội thao thể dục thể thao lần thứ I - năm 2026",
+        "canonicalUrl": "https://saigonnewport.com.vn/tin-tuc/trach-nhiem-xa-hoi/binh-doan-20-khai-mac-hoi-thao-the-duc-the-thao-lan-thu-i-nam-2026.html",
+        "dateEvidence": {
+          "raw": "02/10/2026",
+          "rule": "configured_dmy",
+          "basis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-02",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "ICD Tân Cảng - Sóng Thần và ICD Tân Cảng - Long Bình: Đồng hành hợp tác, kiến tạo năng lực vận hành kho toàn diện",
+        "canonicalUrl": "https://saigonnewport.com.vn/tin-tuc/hoat-dong-kinh-doanh/icd-tan-cang-song-than-va-icd-tan-cang-long-binh-dong-hanh-hop-tac-kien-tao-nang-luc-van-hanh-kho-toan-dien.html",
+        "dateEvidence": {
+          "raw": "18/09/2026",
+          "rule": "configured_dmy",
+          "basis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-09-18",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "Tân Cảng Sài Gòn đẩy mạnh kết nối logistics Việt Nam - Campuchia",
+        "canonicalUrl": "https://saigonnewport.com.vn/tin-tuc/hoat-dong-kinh-doanh/tan-cang-sai-gon-day-manh-ket-noi-logistics-viet-nam-campuchia.html",
+        "dateEvidence": {
+          "raw": "14/10/2026",
+          "rule": "configured_dmy",
+          "basis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-14",
+          "publishedAt": null
+        }
+      }
+    ],
+    "first": {
+      "status": "ok_items",
+      "runId": "766cb1c9-37d7-4d93-9f35-8f1fc6fb9398",
+      "itemsSeen": 14,
+      "itemsNew": 14,
+      "itemsRevised": 0
+    },
+    "firstCounts": {
+      "items": 14,
+      "versions": 14
+    },
+    "repeat": {
+      "status": "ok_items",
+      "runId": "2edfa225-f4fc-493a-b052-1fbfca728f5c",
+      "itemsSeen": 14,
+      "itemsNew": 0,
+      "itemsRevised": 0
+    },
+    "repeatCounts": {
+      "items": 14,
+      "versions": 14
+    },
+    "injectedTransports": 2,
+    "status": "OFFLINE_REPLAY_ONLY_PASS",
+    "reopen": {
+      "readOnly": true,
+      "rows": 14,
+      "versions": 14,
+      "fullTitleUrlDateEvidenceCompared": true,
+      "mismatches": 0,
+      "dayPrecision": 14,
+      "missingTimezone": 14,
+      "nullPublicationInstants": 14
+    },
+    "finishedAt": "2026-10-14T09:28:05.509Z"
+  },
+  {
+    "id": "VN-T01",
+    "url": "https://idea.gov.vn/",
+    "enabled": false,
+    "persistence": "disallowed",
+    "config": {
+      "listSelector": "#newSlider",
+      "itemSelector": "li",
+      "linkSelector": "a.news012ndLink[href]",
+      "titleSelector": ".news012ndLinkTit",
+      "publishedAtSelector": ".news012ndLinkTime",
+      "dateOrder": "dmy",
+      "calendar": "gregorian",
+      "allowUrlPrefixes": [
+        "https://idea.gov.vn/default.aspx"
+      ],
+      "dateRuleBasis": "VN-T01 complete raw observed 2026-10-14: unique newSlider has three news012ndLink items, title isolated in news012ndLinkTit and local D/M/Y day in news012ndLinkTime. Exact default.aspx business query identities retained; no time or timezone."
+    },
+    "startedAt": "2026-10-14T09:28:05.509Z",
+    "httpRequests": 0,
+    "material": "complete private real response bytes, not synthetic or sanitized skeleton",
+    "rawHtmlCommitted": false,
+    "fetchedRawSha256": "972674566750a436a01f84020a512400391dd47427a79464ed735f146f8c16ca",
+    "rawBytes": 22451,
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "http",
+      "declarations": [
+        {
+          "source": "http",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        },
+        {
+          "source": "meta",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        }
+      ],
+      "conflict": false,
+      "byteLength": 22451
+    },
+    "adapterCount": 3,
+    "dateRules": [
+      "configured_dmy"
+    ],
+    "samples": [
+      {
+        "titleExcerpt": "Hải Phòng thúc đẩy kết nối qua thương mại điện tử",
+        "canonicalUrl": "https://idea.gov.vn/default.aspx?do=detail&id=a7f3cc49-326f-4da5-aedb-2a12cbd4b43c&page=news",
+        "dateEvidence": {
+          "raw": "02/10/2026",
+          "rule": "configured_dmy",
+          "basis": "VN-T01 complete raw observed 2026-10-14: unique newSlider has three news012ndLink items, title isolated in news012ndLinkTit and local D/M/Y day in news012ndLinkTime. Exact default.aspx business query identities retained; no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-02",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "Cục Thương mại điện tử đồng hành cùng Hải Phòng nâng cao hiệu lực quản lý và phát triển thị trường thương mại điện tử",
+        "canonicalUrl": "https://idea.gov.vn/default.aspx?do=detail&id=d9379a52-1b51-4dcb-b0f3-5675939eb95b&page=news",
+        "dateEvidence": {
+          "raw": "01/10/2026",
+          "rule": "configured_dmy",
+          "basis": "VN-T01 complete raw observed 2026-10-14: unique newSlider has three news012ndLink items, title isolated in news012ndLinkTit and local D/M/Y day in news012ndLinkTime. Exact default.aspx business query identities retained; no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-01",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "Hải Phòng tổ chức Hội chợ Thương mại điện tử năm 2026",
+        "canonicalUrl": "https://idea.gov.vn/default.aspx?do=detail&id=1a1ddc3f-3eeb-406a-bfc5-5d8095241b9d&page=news",
+        "dateEvidence": {
+          "raw": "01/10/2026",
+          "rule": "configured_dmy",
+          "basis": "VN-T01 complete raw observed 2026-10-14: unique newSlider has three news012ndLink items, title isolated in news012ndLinkTit and local D/M/Y day in news012ndLinkTime. Exact default.aspx business query identities retained; no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-01",
+          "publishedAt": null
+        }
+      }
+    ],
+    "first": {
+      "status": "ok_items",
+      "runId": "41140b5a-0c66-45b8-ac6a-8206b2a6cd2f",
+      "itemsSeen": 3,
+      "itemsNew": 3,
+      "itemsRevised": 0
+    },
+    "firstCounts": {
+      "items": 3,
+      "versions": 3
+    },
+    "repeat": {
+      "status": "ok_items",
+      "runId": "7abb1582-ea8e-473c-b07d-0af644efec43",
+      "itemsSeen": 3,
+      "itemsNew": 0,
+      "itemsRevised": 0
+    },
+    "repeatCounts": {
+      "items": 3,
+      "versions": 3
+    },
+    "injectedTransports": 2,
+    "status": "OFFLINE_REPLAY_ONLY_PASS",
+    "reopen": {
+      "readOnly": true,
+      "rows": 3,
+      "versions": 3,
+      "fullTitleUrlDateEvidenceCompared": true,
+      "mismatches": 0,
+      "dayPrecision": 3,
+      "missingTimezone": 3,
+      "nullPublicationInstants": 3
+    },
+    "finishedAt": "2026-10-14T09:28:05.644Z"
+  },
+  {
+    "id": "ID-T01",
+    "url": "https://jdih.kemendag.go.id/",
+    "enabled": false,
+    "persistence": "disallowed",
+    "config": {
+      "listSelector": "#terkini .slider-terkini > .swiper-wrapper",
+      "itemSelector": ".swiper-slide",
+      "linkSelector": "a.d-inline-block[href]",
+      "titleSelector": "p.mt-2.mb-0",
+      "publishedAtSelector": "span.badge.bg-primary",
+      "calendar": "gregorian",
+      "dateFormat": "indonesian_enactment_date",
+      "allowUrlPrefixes": [
+        "https://jdih.kemendag.go.id/peraturan"
+      ],
+      "dateRuleBasis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded."
+    },
+    "startedAt": "2026-10-14T09:28:05.645Z",
+    "httpRequests": 0,
+    "material": "complete private real response bytes, not synthetic or sanitized skeleton",
+    "rawHtmlCommitted": false,
+    "fetchedRawSha256": "7bda040e2c0db0ba557bc91837f1c05bc8a30e34d18e6a5568c9a37426b74032",
+    "rawBytes": 390183,
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "http",
+      "declarations": [
+        {
+          "source": "http",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        },
+        {
+          "source": "meta",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        }
+      ],
+      "conflict": false,
+      "byteLength": 390183
+    },
+    "adapterCount": 8,
+    "dateRules": [
+      "configured_indonesian_enactment_date"
+    ],
+    "samples": [
+      {
+        "titleExcerpt": "Keputusan Menteri Perdagangan Republik Indonesia Nomor 2008 Tahun 2026 tentang Harga Patokan Ekspor dan Harga…",
+        "canonicalUrl": "https://jdih.kemendag.go.id/peraturan/keputusan-menteri-perdagangan-republik-indonesia-nomor-2008-tahun-2026-tentang-harga-patokan-ekspor-dan-harga-referensi-atas-produk-pertambangan-yang-dikenakan-bea-keluar",
+        "dateEvidence": {
+          "raw": "Ditetapkan\n                                                                14 October 2026",
+          "rule": "configured_indonesian_enactment_date",
+          "basis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-14",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "Keputusan Menteri Perdagangan Republik Indonesia Nomor 1925 Tahun 2026 tentang Harga Patokan Ekspor dan Harga…",
+        "canonicalUrl": "https://jdih.kemendag.go.id/peraturan/keputusan-menteri-perdagangan-republik-indonesia-nomor-1925-tahun-2026-tentang-harga-patokan-ekspor-dan-harga-referensi-atas-produk-pertambangan-yang-dikenakan-bea-keluar",
+        "dateEvidence": {
+          "raw": "Ditetapkan\n                                                                30 September 2026",
+          "rule": "configured_indonesian_enactment_date",
+          "basis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-09-30",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "Peraturan Menteri Perdagangan Republik Indonesia Nomor 25 Tahun 2026 Tentang Petunjuk Teknis Pengelolaan Konflik Kepenti",
+        "canonicalUrl": "https://jdih.kemendag.go.id/peraturan/peraturan-menteri-perdagangan-republik-indonesia-nomor-25-tahun-2026-tentang-petunjuk-teknis-pengelolaan-konflik-kepentingan-di-lingkungan-kementerian-perdagangan",
+        "dateEvidence": {
+          "raw": "Ditetapkan\n                                                                29 September 2026",
+          "rule": "configured_indonesian_enactment_date",
+          "basis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-09-29",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "Keputusan Menteri Perdagangan Republik Indonesia Nomor 1922 Tahun 2026 tentang Daftar Merek Refined, Bleached, and…",
+        "canonicalUrl": "https://jdih.kemendag.go.id/peraturan/keputusan-menteri-perdagangan-republik-indonesia-nomor-1922-tahun-2026-tentang-daftar-merek-refined-bleached-and-deodorized-palm-olein-dalam-kemasan-bermerek-dan-dikemas-dengan-berat-netto-25-kg",
+        "dateEvidence": {
+          "raw": "Ditetapkan\n                                                                29 September 2026",
+          "rule": "configured_indonesian_enactment_date",
+          "basis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-09-29",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "Keputusan Menteri Perdagangan Republik Indonesia Nomor 1921 Tahun 2026 tentang Harga Patokan Ekspor dan Harga…",
+        "canonicalUrl": "https://jdih.kemendag.go.id/peraturan/keputusan-menteri-perdagangan-republik-indonesia-nomor-1921-tahun-2026-tentang-harga-patokan-ekspor-dan-harga-referensi-atas-produk-pertanian-dan-kehutanan-yang-dikenakan-bea-keluar-dan-tarif-layanan-badan-layanan-umum",
+        "dateEvidence": {
+          "raw": "Ditetapkan\n                                                                29 September 2026",
+          "rule": "configured_indonesian_enactment_date",
+          "basis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-09-29",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "Keputusan Menteri Perdagangan Republik Indonesia Nomor 1907 Tahun 2026 tentang Pembentukan Tim Penyelenggara Perdagangan",
+        "canonicalUrl": "https://jdih.kemendag.go.id/peraturan/keputusan-menteri-perdagangan-republik-indonesia-nomor-1907-tahun-2026-tentang-pembentukan-tim-penyelenggara-perdagangan-melalui-sistem-elektronik-luar-negeri",
+        "dateEvidence": {
+          "raw": "Ditetapkan\n                                                                22 September 2026",
+          "rule": "configured_indonesian_enactment_date",
+          "basis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-09-22",
+          "publishedAt": null
+        }
+      }
+    ],
+    "first": {
+      "status": "ok_items",
+      "runId": "ecf8d082-baf6-4bfc-a9cf-5eb9f25fb5ba",
+      "itemsSeen": 8,
+      "itemsNew": 8,
+      "itemsRevised": 0
+    },
+    "firstCounts": {
+      "items": 8,
+      "versions": 8
+    },
+    "repeat": {
+      "status": "ok_items",
+      "runId": "8d78d470-dba8-4ae3-ad12-cec8c44ec2e1",
+      "itemsSeen": 8,
+      "itemsNew": 0,
+      "itemsRevised": 0
+    },
+    "repeatCounts": {
+      "items": 8,
+      "versions": 8
+    },
+    "injectedTransports": 2,
+    "status": "OFFLINE_REPLAY_ONLY_PASS",
+    "reopen": {
+      "readOnly": true,
+      "rows": 8,
+      "versions": 8,
+      "fullTitleUrlDateEvidenceCompared": true,
+      "mismatches": 0,
+      "dayPrecision": 8,
+      "missingTimezone": 8,
+      "nullPublicationInstants": 8
+    },
+    "finishedAt": "2026-10-14T09:28:05.846Z"
+  }
+]

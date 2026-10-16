@@ -1,0 +1,9 @@
+{
+  "name": "lint",
+  "command": "pnpm lint",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\readability-final-build-20261015",
+  "sha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
+  "startedAt": "2026-10-15T09:35:47.133Z",
+  "finishedAt": "2026-10-15T09:36:29.014Z",
+  "rawExit": 0
+}

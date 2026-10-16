@@ -14,6 +14,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      "~": join(projectDir, "src"),
       "@shared": join(projectDir, "shared"),
       "#": join(projectDir, "server"),
     },

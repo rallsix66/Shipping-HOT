@@ -1,0 +1,13 @@
+{
+  "status": "PROPOSED_NOT_APPLIED",
+  "id": "XX-K02",
+  "originalRow": "| XX-K02 | B | ONE | https://www.one-line.com/en/news | web_list | OK | P1 | 页面约 635 KB |",
+  "proposedRow": "| XX-K02 | B | ONE | https://www.one-line.com/en/newsroom | web_list | OK | P1 | 页面约 635 KB |",
+  "onlyProposedFieldChange": "URL; identity, format, priority and historical label left unchanged",
+  "reason": "Original exact URL observed308 with relative Location /en/newsroom; separately approved same-host HTTPS target returned200, canonical/h1/Next page verify corresponding Newsroom and complete10 metadata fields replay successfully.",
+  "catalogFileLfSha256": "91328b2e4754dfe51ab1c94508df3c47675ede66df1e852d1b69b187418dd0b3",
+  "catalogStillUnchanged": true,
+  "runtimeRegistration": "NOT_CHANGED",
+  "license": "metadata_only",
+  "approvalAndApplication": "parent/user review required within existing catalog authority; no new real request authorized by this proposal"
+}

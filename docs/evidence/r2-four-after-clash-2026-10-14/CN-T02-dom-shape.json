@@ -1,0 +1,1483 @@
+{
+  "source": "CN-T02",
+  "url": "https://szs.mof.gov.cn/zhengcefabu/",
+  "fetchedBytesSha256": "934dfb210e414105867c99db2907ebcf98c175b643a3bc74157f2d9c1679df04",
+  "kind": "tag hierarchy and bounded local metadata observations; full HTML not redistributed",
+  "diagnostics": {
+    "htmlTitleExcerpt": "政策发布",
+    "scriptElements": 7,
+    "formElements": 1,
+    "bodyCharacters": 5253,
+    "totalElements": 149,
+    "scriptContentExcluded": true,
+    "sanitizedAnchors": 26,
+    "sanitizedRows": 0
+  },
+  "skeleton": [
+    {
+      "index": 0,
+      "parent": null,
+      "tag": "html",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 1,
+      "parent": 0,
+      "tag": "head",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 2,
+      "parent": 1,
+      "tag": "meta",
+      "attributeNames": [
+        "http-equiv",
+        "content"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 3,
+      "parent": 1,
+      "tag": "meta",
+      "attributeNames": [
+        "http-equiv",
+        "content"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 4,
+      "parent": 1,
+      "tag": "meta",
+      "attributeNames": [
+        "name",
+        "content"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 5,
+      "parent": 1,
+      "tag": "meta",
+      "attributeNames": [
+        "name",
+        "content"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 6,
+      "parent": 1,
+      "tag": "meta",
+      "attributeNames": [
+        "name",
+        "content"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 7,
+      "parent": 1,
+      "tag": "meta",
+      "attributeNames": [
+        "name",
+        "content"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 8,
+      "parent": 1,
+      "tag": "meta",
+      "attributeNames": [
+        "name",
+        "content"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 9,
+      "parent": 1,
+      "tag": "meta",
+      "attributeNames": [
+        "name",
+        "content"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 10,
+      "parent": 1,
+      "tag": "meta",
+      "attributeNames": [
+        "name",
+        "content"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 11,
+      "parent": 1,
+      "tag": "meta",
+      "attributeNames": [
+        "name",
+        "content"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 12,
+      "parent": 1,
+      "tag": "title",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 13,
+      "parent": 1,
+      "tag": "link",
+      "attributeNames": [
+        "href",
+        "rel",
+        "type"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 14,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 15,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 16,
+      "parent": 1,
+      "tag": "link",
+      "attributeNames": [
+        "href",
+        "rel",
+        "type"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 17,
+      "parent": 0,
+      "tag": "body",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 18,
+      "parent": 17,
+      "tag": "script",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 19,
+      "parent": 17,
+      "tag": "style",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 20,
+      "parent": 17,
+      "tag": "style",
+      "attributeNames": [
+        "media"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 21,
+      "parent": 17,
+      "tag": "style",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 22,
+      "parent": 17,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "popfr"
+      ]
+    },
+    {
+      "index": 23,
+      "parent": 22,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 24,
+      "parent": 23,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 25,
+      "parent": 24,
+      "tag": "img",
+      "attributeNames": [
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 26,
+      "parent": 24,
+      "tag": "h3",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 27,
+      "parent": 23,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 28,
+      "parent": 27,
+      "tag": "img",
+      "attributeNames": [
+        "style",
+        "src",
+        "alt"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 29,
+      "parent": 27,
+      "tag": "h3",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 30,
+      "parent": 23,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 31,
+      "parent": 30,
+      "tag": "img",
+      "attributeNames": [
+        "style",
+        "src",
+        "alt"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 32,
+      "parent": 30,
+      "tag": "h3",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 33,
+      "parent": 32,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 34,
+      "parent": 23,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 35,
+      "parent": 34,
+      "tag": "img",
+      "attributeNames": [
+        "style",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 36,
+      "parent": 34,
+      "tag": "h3",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 37,
+      "parent": 34,
+      "tag": "span",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 38,
+      "parent": 23,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 39,
+      "parent": 38,
+      "tag": "img",
+      "attributeNames": [
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 40,
+      "parent": 38,
+      "tag": "h3",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 41,
+      "parent": 38,
+      "tag": "span",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 42,
+      "parent": 17,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "logodiv"
+      ]
+    },
+    {
+      "index": 43,
+      "parent": 42,
+      "tag": "h2",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 44,
+      "parent": 43,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 45,
+      "parent": 44,
+      "tag": "img",
+      "attributeNames": [
+        "src",
+        "alt"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 46,
+      "parent": 42,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "zzName"
+      ]
+    },
+    {
+      "index": 47,
+      "parent": 17,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "nav"
+      ]
+    },
+    {
+      "index": 48,
+      "parent": 47,
+      "tag": "p",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 49,
+      "parent": 48,
+      "tag": "span",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 50,
+      "parent": 47,
+      "tag": "script",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 51,
+      "parent": 47,
+      "tag": "form",
+      "attributeNames": [
+        "action",
+        "method",
+        "name",
+        "target",
+        "id",
+        "accept-charset",
+        "onsubmit"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 52,
+      "parent": 51,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "zz_serach"
+      ]
+    },
+    {
+      "index": 53,
+      "parent": 52,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "searchinput"
+      ]
+    },
+    {
+      "index": 54,
+      "parent": 53,
+      "tag": "input",
+      "attributeNames": [
+        "type",
+        "id",
+        "name",
+        "value",
+        "onfocus",
+        "onblur"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 55,
+      "parent": 53,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 56,
+      "parent": 55,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 57,
+      "parent": 56,
+      "tag": "p",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 58,
+      "parent": 56,
+      "tag": "ol",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 59,
+      "parent": 58,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 60,
+      "parent": 56,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "clear"
+      ]
+    },
+    {
+      "index": 61,
+      "parent": 53,
+      "tag": "script",
+      "attributeNames": [
+        "type"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 62,
+      "parent": 52,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "buttoninput"
+      ]
+    },
+    {
+      "index": 63,
+      "parent": 62,
+      "tag": "span",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 64,
+      "parent": 63,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "onclick"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 65,
+      "parent": 47,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "returnmain"
+      ]
+    },
+    {
+      "index": 66,
+      "parent": 65,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 67,
+      "parent": 17,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "mainboxerji"
+      ]
+    },
+    {
+      "index": 68,
+      "parent": 67,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "zzleft"
+      ]
+    },
+    {
+      "index": 69,
+      "parent": 68,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 70,
+      "parent": 69,
+      "tag": "li",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 71,
+      "parent": 70,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 72,
+      "parent": 69,
+      "tag": "li",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 73,
+      "parent": 72,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 74,
+      "parent": 69,
+      "tag": "li",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 75,
+      "parent": 74,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 76,
+      "parent": 69,
+      "tag": "li",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 77,
+      "parent": 76,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 78,
+      "parent": 69,
+      "tag": "li",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 79,
+      "parent": 78,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 80,
+      "parent": 69,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "clear"
+      ]
+    },
+    {
+      "index": 81,
+      "parent": 68,
+      "tag": "script",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 82,
+      "parent": 67,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "zzright"
+      ]
+    },
+    {
+      "index": 83,
+      "parent": 82,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "dqwzright"
+      ]
+    },
+    {
+      "index": 84,
+      "parent": 83,
+      "tag": "p",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 85,
+      "parent": 84,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target",
+        "title",
+        "class"
+      ],
+      "structuralClasses": [
+        "CurrChnlCls"
+      ]
+    },
+    {
+      "index": 86,
+      "parent": 84,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target",
+        "title",
+        "class"
+      ],
+      "structuralClasses": [
+        "CurrChnlCls"
+      ]
+    },
+    {
+      "index": 87,
+      "parent": 82,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "listBox"
+      ]
+    },
+    {
+      "index": 88,
+      "parent": 87,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "titlebox"
+      ]
+    },
+    {
+      "index": 89,
+      "parent": 88,
+      "tag": "h3",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 90,
+      "parent": 87,
+      "tag": "ul",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "liBox"
+      ]
+    },
+    {
+      "index": 91,
+      "parent": 90,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 92,
+      "parent": 91,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 93,
+      "parent": 91,
+      "tag": "span",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 94,
+      "parent": 90,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 95,
+      "parent": 94,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 96,
+      "parent": 94,
+      "tag": "span",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 97,
+      "parent": 90,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 98,
+      "parent": 97,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 99,
+      "parent": 97,
+      "tag": "span",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 100,
+      "parent": 90,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 101,
+      "parent": 100,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 102,
+      "parent": 100,
+      "tag": "span",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 103,
+      "parent": 90,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 104,
+      "parent": 103,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 105,
+      "parent": 103,
+      "tag": "span",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 106,
+      "parent": 90,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 107,
+      "parent": 106,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 108,
+      "parent": 106,
+      "tag": "span",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 109,
+      "parent": 90,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 110,
+      "parent": 109,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 111,
+      "parent": 109,
+      "tag": "span",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 112,
+      "parent": 90,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 113,
+      "parent": 112,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 114,
+      "parent": 112,
+      "tag": "span",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 115,
+      "parent": 90,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 116,
+      "parent": 115,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 117,
+      "parent": 115,
+      "tag": "span",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 118,
+      "parent": 90,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 119,
+      "parent": 118,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 120,
+      "parent": 118,
+      "tag": "span",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 121,
+      "parent": 90,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "clear"
+      ]
+    },
+    {
+      "index": 122,
+      "parent": 87,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "clear"
+      ]
+    },
+    {
+      "index": 123,
+      "parent": 87,
+      "tag": "p",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "pagerji"
+      ]
+    },
+    {
+      "index": 124,
+      "parent": 123,
+      "tag": "script",
+      "attributeNames": [
+        "language"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 125,
+      "parent": 67,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "clear"
+      ]
+    },
+    {
+      "index": 126,
+      "parent": 17,
+      "tag": "style",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 127,
+      "parent": 17,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 128,
+      "parent": 127,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "footercon"
+      ]
+    },
+    {
+      "index": 129,
+      "parent": 128,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "footerconfl"
+      ]
+    },
+    {
+      "index": 130,
+      "parent": 129,
+      "tag": "a",
+      "attributeNames": [
+        "class",
+        "href",
+        "target"
+      ],
+      "structuralClasses": [
+        "findMistake"
+      ]
+    },
+    {
+      "index": 131,
+      "parent": 130,
+      "tag": "img",
+      "attributeNames": [
+        "style",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 132,
+      "parent": 129,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 133,
+      "parent": 132,
+      "tag": "img",
+      "attributeNames": [
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 134,
+      "parent": 128,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "footerconfr"
+      ]
+    },
+    {
+      "index": 135,
+      "parent": 134,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 136,
+      "parent": 135,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 137,
+      "parent": 136,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 138,
+      "parent": 135,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 139,
+      "parent": 138,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 140,
+      "parent": 135,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "clear"
+      ]
+    },
+    {
+      "index": 141,
+      "parent": 134,
+      "tag": "p",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 142,
+      "parent": 141,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 143,
+      "parent": 141,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target",
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 144,
+      "parent": 141,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "target",
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 145,
+      "parent": 144,
+      "tag": "img",
+      "attributeNames": [
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 146,
+      "parent": 141,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 147,
+      "parent": 141,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 148,
+      "parent": 128,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "clear"
+      ]
+    }
+  ],
+  "skeletonTruncated": false,
+  "timeElements": [],
+  "localDateGroupCount": 10,
+  "localDateGroups": [
+    {
+      "dateElementIndex": 71,
+      "dateElementTag": "span",
+      "ancestorTag": "li",
+      "structuralClasses": [],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "2026-10-12"
+      ],
+      "anchors": [
+        {
+          "tag": "a",
+          "titleExcerpt": "关于调整部分产品出口退税政策的公告",
+          "href": "https://szs.mof.gov.cn/zhengcefabu/202610/t20261012_4002592.htm"
+        }
+      ],
+      "association": "original local container observed, not publication-time interpretation or parser PASS"
+    },
+    {
+      "dateElementIndex": 74,
+      "dateElementTag": "span",
+      "ancestorTag": "li",
+      "structuralClasses": [],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "2026-09-04"
+      ],
+      "anchors": [
+        {
+          "tag": "a",
+          "titleExcerpt": "关于发布《境内单位代扣代缴自然人增值税管理办法》的公告",
+          "href": "https://szs.mof.gov.cn/zhengcefabu/202609/t20260904_3996707.htm"
+        }
+      ],
+      "association": "original local container observed, not publication-time interpretation or parser PASS"
+    },
+    {
+      "dateElementIndex": 77,
+      "dateElementTag": "span",
+      "ancestorTag": "li",
+      "structuralClasses": [],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "2026-09-01"
+      ],
+      "anchors": [
+        {
+          "tag": "a",
+          "titleExcerpt": "关于外籍个人股息红利个人所得税政策有关事项的公告",
+          "href": "https://szs.mof.gov.cn/zhengcefabu/202609/t20260901_3996442.htm"
+        }
+      ],
+      "association": "original local container observed, not publication-time interpretation or parser PASS"
+    },
+    {
+      "dateElementIndex": 80,
+      "dateElementTag": "span",
+      "ancestorTag": "li",
+      "structuralClasses": [],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "2026-08-28"
+      ],
+      "anchors": [
+        {
+          "tag": "a",
+          "titleExcerpt": "关于明确非应税交易等增值税有关事项的公告",
+          "href": "https://szs.mof.gov.cn/zhengcefabu/202608/t20260828_3996295.htm"
+        }
+      ],
+      "association": "original local container observed, not publication-time interpretation or parser PASS"
+    },
+    {
+      "dateElementIndex": 83,
+      "dateElementTag": "span",
+      "ancestorTag": "li",
+      "structuralClasses": [],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "2026-08-28"
+      ],
+      "anchors": [
+        {
+          "tag": "a",
+          "titleExcerpt": "关于规范转让上市公司限售股个人所得税政策的公告",
+          "href": "https://szs.mof.gov.cn/zhengcefabu/202608/t20260828_3996290.htm"
+        }
+      ],
+      "association": "original local container observed, not publication-time interpretation or parser PASS"
+    },
+    {
+      "dateElementIndex": 86,
+      "dateElementTag": "span",
+      "ancestorTag": "li",
+      "structuralClasses": [],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "2026-08-14"
+      ],
+      "anchors": [
+        {
+          "tag": "a",
+          "titleExcerpt": "关于集成电路企业、工业母机企业非货币性资产交换企业所得税政策的公告",
+          "href": "https://szs.mof.gov.cn/zhengcefabu/202608/t20260814_3995441.htm"
+        }
+      ],
+      "association": "original local container observed, not publication-time interpretation or parser PASS"
+    }
+  ],
+  "selection": "first six local date containers in original document order; no sorting/merging/conflict resolution",
+  "originalHtmlCommitted": false,
+  "permission": "unknown full-page reuse; text excerpts bounded to six groups, no scripts/keys/cookies/attribute values",
+  "parserStatus": "NOT_RUN",
+  "completeFieldsPass": false
+}

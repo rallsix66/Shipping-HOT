@@ -1,0 +1,29 @@
+{
+  "seed": {
+    "id": "bounded:XX-K03",
+    "catalogId": "XX-K03",
+    "name": "SITC exact main-site isolated compatibility probe",
+    "kind": "web_list",
+    "url": "https://www.sitc.com/en/list.asp?classid=44",
+    "enabled": false,
+    "persistence": "disallowed",
+    "allowedHosts": [
+      "www.sitc.com"
+    ],
+    "allowedContentTypes": [
+      "text/html",
+      "application/xhtml+xml"
+    ],
+    "intervalMs": 3600000,
+    "webList": {
+      "listSelector": "#content",
+      "itemSelector": ".media.row-fluid",
+      "linkSelector": "h4.title.media-heading > a[href]",
+      "titleSelector": "h4.title.media-heading > a[href]",
+      "publishedAtSelector": "ul.meta > li",
+      "calendar": "gregorian",
+      "dateRuleBasis": "SITC actual20 cards2026-10-15: h4 title anchors carry originalHTTP show.asp?id links; ul.meta li has source label发布日期 and dotted Y.M.D day. Existing rules do not accept those links/grammar; preserve raw metadata and unknown timezone, no rewriting."
+    }
+  },
+  "role": "Isolated negative evidence configuration only, not production candidate/registry and not a proposed HTTPS-upgraded identity"
+}

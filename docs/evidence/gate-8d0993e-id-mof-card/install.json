@@ -1,0 +1,9 @@
+{
+  "name": "install",
+  "command": "pnpm install --frozen-lockfile",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\id-mof-card-build-20261015",
+  "sha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "startedAt": "2026-10-15T08:06:04.758Z",
+  "finishedAt": "2026-10-15T08:06:13.237Z",
+  "rawExit": 0
+}

@@ -1,0 +1,51 @@
+{
+  "id": "MY-P02",
+  "scope": "Full title/link and original source time independently compared locally; remote titles/URLs are hashes only, no summaries/body",
+  "fields": [
+    {
+      "index": 7,
+      "rawPubDate": "Fri, 01 Aug 2025 04:35:40 +0000",
+      "rawUpdated": null,
+      "sourceTimezoneLiteral": "+0000",
+      "utcOffset": "+00:00",
+      "publishedAt": "2025-08-01T04:35:40.000Z",
+      "updatedAt": "2025-08-01T04:35:40.000Z",
+      "titleSha256": "5ff7aafb5275321fd662e3e361b027cadf5e20b5ab314729a4743d503579d579",
+      "canonicalUrlSha256": "0627bbadb641198f48a34d3ccfc250f72478fa54fe88eae9888a3af454e3b0f1",
+      "rawLinkSha256": "d2686b13cdbcbb4f2bee8e76a377fa33b37e2303b8d240944092ecce74290b51",
+      "exactTitleMatch": true,
+      "exactCanonicalLinkMatch": true,
+      "exactSourceDateMatch": true
+    },
+    {
+      "index": 8,
+      "rawPubDate": "Sat, 01 Feb 2025 01:24:34 +0000",
+      "rawUpdated": null,
+      "sourceTimezoneLiteral": "+0000",
+      "utcOffset": "+00:00",
+      "publishedAt": "2025-02-01T01:24:34.000Z",
+      "updatedAt": "2025-02-01T01:24:34.000Z",
+      "titleSha256": "e14bc88343bf9012ffb70cf8e02096d14027b31fae2fe7259fe26a44009b0c91",
+      "canonicalUrlSha256": "2062b5118ed1607fdddee777efdc43c52a2419be0e9fe08ab4f322ac6513e86b",
+      "rawLinkSha256": "8cbf0f37554d14f2bd43391185d7b8bcb8a0ece340785616da9b374a63c9176a",
+      "exactTitleMatch": true,
+      "exactCanonicalLinkMatch": true,
+      "exactSourceDateMatch": true
+    },
+    {
+      "index": 9,
+      "rawPubDate": "Fri, 08 Nov 2024 04:43:31 +0000",
+      "rawUpdated": null,
+      "sourceTimezoneLiteral": "+0000",
+      "utcOffset": "+00:00",
+      "publishedAt": "2024-11-08T04:43:31.000Z",
+      "updatedAt": "2024-11-08T04:43:31.000Z",
+      "titleSha256": "f94d66642beb4aae342aed645b5a1d9fe1bb67506a3eeab4538a3d956ffb6cca",
+      "canonicalUrlSha256": "59af736debc096d3c2c68895ecfb9004dc1c5e4d88790681e66644f5765ca5fd",
+      "rawLinkSha256": "0fbc1dc64a274f5276a32589a5a371b6be5a08e164711df790a99641ce9a85f2",
+      "exactTitleMatch": true,
+      "exactCanonicalLinkMatch": true,
+      "exactSourceDateMatch": true
+    }
+  ]
+}

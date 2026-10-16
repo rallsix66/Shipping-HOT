@@ -1,0 +1,142 @@
+{
+  "id": "MY-P03",
+  "url": "https://www.northport.com.my/np/page-announcements.html",
+  "kind": "Minimal factual relationship descriptors, not original HTML or reconstructed fixture",
+  "observationCoverage": {
+    "retainedSameContainerAnchors": 86,
+    "workingScanAnchorCap": 150,
+    "selectedExamples": 3
+  },
+  "examples": [
+    {
+      "title": "6-10-2026 NOTICE OF NORTHPORT'S NEW CONTAINER TERMINAL OPERATING SYSTEM (NAVIS N4) GO-LIVE",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2026/Notice%20of%20Northport's%20New%20Container%20Terminal%20Operating%20System%20N4%20Go%20Live%20-%20Both.pdf",
+      "anchor": {
+        "tag": "a",
+        "classes": []
+      },
+      "parentPath": [
+        {
+          "tag": "article",
+          "classes": [
+            "card2"
+          ],
+          "anchorCount": 1
+        },
+        {
+          "tag": "div",
+          "classes": [
+            "release-grid2"
+          ],
+          "anchorCount": 86
+        },
+        {
+          "tag": "section",
+          "id": "year-2025",
+          "classes": [
+            "year",
+            "active"
+          ],
+          "anchorCount": 86
+        },
+        {
+          "tag": "div",
+          "classes": [
+            "div-article-main2"
+          ],
+          "anchorCount": 86
+        }
+      ],
+      "sameItemDateText": [
+        "6-10-2026"
+      ],
+      "dateMapping": "leading complete D-M-YYYY in same link, otherwise unknown"
+    },
+    {
+      "title": "15-09-2026 STAMP DUTY CIRCULAR TO VENDORS/SUPPLIERS",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2026/Stamp%20Duty%20Circular%20to%20Vendors%20Suppliers.pdf",
+      "anchor": {
+        "tag": "a",
+        "classes": []
+      },
+      "parentPath": [
+        {
+          "tag": "article",
+          "classes": [
+            "card2"
+          ],
+          "anchorCount": 1
+        },
+        {
+          "tag": "div",
+          "classes": [
+            "release-grid2"
+          ],
+          "anchorCount": 86
+        },
+        {
+          "tag": "section",
+          "id": "year-2025",
+          "classes": [
+            "year",
+            "active"
+          ],
+          "anchorCount": 86
+        },
+        {
+          "tag": "div",
+          "classes": [
+            "div-article-main2"
+          ],
+          "anchorCount": 86
+        }
+      ],
+      "sameItemDateText": [
+        "15-09-2026"
+      ],
+      "dateMapping": "leading complete D-M-YYYY in same link, otherwise unknown"
+    },
+    {
+      "title": "10-2024 ANNOUNCEMENT - NORTHPORT ACCESS CONTROL SYSTEM V1",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2024/Announcement%20-%20Northport%20Access%20Control%20System%20v1.pdf",
+      "anchor": {
+        "tag": "a",
+        "classes": []
+      },
+      "parentPath": [
+        {
+          "tag": "article",
+          "classes": [
+            "card2"
+          ],
+          "anchorCount": 1
+        },
+        {
+          "tag": "div",
+          "classes": [
+            "release-grid2"
+          ],
+          "anchorCount": 86
+        },
+        {
+          "tag": "section",
+          "id": "year-2025",
+          "classes": [
+            "year",
+            "active"
+          ],
+          "anchorCount": 86
+        },
+        {
+          "tag": "div",
+          "classes": [
+            "div-article-main2"
+          ],
+          "anchorCount": 86
+        }
+      ],
+      "sameItemDateText": [],
+      "dateMapping": "leading complete D-M-YYYY in same link, otherwise unknown"
+    }
+  ]
+}

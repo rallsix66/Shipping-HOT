@@ -1,0 +1,66 @@
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +1315
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 1315, reused 1313, downloaded 0, added 77
+Progress: resolved 1315, reused 1313, downloaded 0, added 307
+Progress: resolved 1315, reused 1313, downloaded 0, added 578
+Progress: resolved 1315, reused 1313, downloaded 0, added 1072
+Progress: resolved 1315, reused 1313, downloaded 0, added 1315, done
+
+dependencies:
++ @formkit/auto-animate 0.9.0
++ @tanstack/react-router 1.163.2
++ @unocss/reset 66.6.2
++ better-sqlite3 12.6.2
++ cheerio 1.2.0
++ clsx 2.1.1
++ consola 3.4.2
++ dayjs 1.11.13
++ db0 0.3.4
++ fast-xml-parser 5.4.1
++ framer-motion 12.34.3
++ h3 1.15.3
++ jotai 2.18.0
++ ofetch 1.5.1
++ react 19.1.0
++ react-dom 19.1.0
++ react-use 17.6.0
+
+devDependencies:
++ @eslint-react/eslint-plugin 2.13.0
++ @iconify-json/ph 1.2.2
++ @ourongxing/eslint-config 3.2.3-beta.6
++ @tanstack/react-query 5.90.21
++ @tanstack/router-plugin 1.163.2
++ @types/react 19.2.14
++ @types/react-dom 19.2.3
++ @unocss/rule-utils 66.6.2
++ @vitejs/plugin-react-swc 4.2.3
++ cross-env 10.1.0
++ dotenv 17.3.1
++ eslint 9.39.3
++ eslint-plugin-react-hooks 5.2.0
++ eslint-plugin-react-refresh 0.4.26
++ lint-staged 16.2.7
++ rollup 4.59.0
++ simple-git-hooks 2.13.1
++ tsx 4.21.0
++ typescript 5.9.3
++ typescript-eslint 8.56.1
++ unimport 6.0.0
++ unocss 66.6.2
++ vite 7.3.1
++ vite-plugin-pwa 1.2.0
++ vite-plugin-with-nitro 0.0.3
++ vitest 4.0.18
++ workbox-build 7.4.0
++ workbox-window 7.4.0
+
+
+> shipping-hot@0.0.41 prepare D:\try one\Shipping HOT\.tmp\frontend-overview-review-build
+> simple-git-hooks
+
+[INFO] Successfully set the pre-commit with command: npx lint-staged
+[INFO] Successfully set all git hooks
+Done in 7.1s using pnpm v10.30.3

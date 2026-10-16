@@ -1,0 +1,118 @@
+{
+  "type": "approved_my_weather_reuse_and_bounded_weather_review_validation",
+  "at": "2026-10-15T04:58:57.433Z",
+  "executionHead": "16ae7b7c1f2e149caeceea0c727d7dba788d272c",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "sourceRequests": 0,
+  "systemDns": 0,
+  "productGate": "NOT_RUN_no_product_change",
+  "checks": [
+    {
+      "name": "Exact branch, execution head and product code",
+      "pass": true
+    },
+    {
+      "name": "Zero product/schema/dependency/production/workflow diff",
+      "pass": true
+    },
+    {
+      "name": "Catalogue exact single slash change and current digest",
+      "pass": true
+    },
+    {
+      "name": "OnlyMY changed, other40 byte-equivalent JSON entries",
+      "pass": true,
+      "detail": [
+        "MY-W01"
+      ]
+    },
+    {
+      "name": "41 inventory and denominator/threshold unchanged",
+      "pass": true
+    },
+    {
+      "name": "r2_4 independently recomputed approved numerator and statuses",
+      "pass": true
+    },
+    {
+      "name": "r2_5 independently recomputed approved numerator and statuses",
+      "pass": true
+    },
+    {
+      "name": "OnlyMY verdict upgrade; numeric3/5,24h and overall limits unchanged",
+      "pass": true
+    },
+    {
+      "name": "MY preserves historic sample and unknown/received_at contract",
+      "pass": true
+    },
+    {
+      "name": "Original R2 boundaries restored, no new mandatory articleURL/UTC/intel/wire gates",
+      "pass": true
+    },
+    {
+      "name": "13 unique bounded weather rows, onlyMY new qualification",
+      "pass": true
+    },
+    {
+      "name": "All recorded implementation and review evidence paths exist",
+      "pass": true
+    },
+    {
+      "name": "NMC old6/6 and later realFAIL both preserved, no upgrade",
+      "pass": true
+    },
+    {
+      "name": "NCHMF8success4fail not misread as full success",
+      "pass": true
+    },
+    {
+      "name": "PAGASA remains limited official empty states, no active coverage upgrade",
+      "pass": true
+    },
+    {
+      "name": "Forecast/specifications and VNSGN missingness unchanged",
+      "pass": true
+    },
+    {
+      "name": "Existing4file101 tests rawexit0 and source0, not live run",
+      "pass": true
+    },
+    {
+      "name": "Exact originalstdout byte hash",
+      "pass": true
+    },
+    {
+      "name": "Exact originalstderr byte hash",
+      "pass": true
+    },
+    {
+      "name": "Four guard reports have0 TCP/DNS/globalfetch attempts",
+      "pass": true
+    },
+    {
+      "name": "Current matrix and13row review references/hash resolve",
+      "pass": true,
+      "detail": {
+        "occurrences": 257,
+        "uniquePaths": 90,
+        "errors": []
+      }
+    },
+    {
+      "name": "Affected Markdown links resolve",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Frontier now17 nonOK rows, MY moved out",
+      "pass": true
+    },
+    {
+      "name": "Status and handoff display22/39,19/34",
+      "pass": true
+    }
+  ],
+  "errors": [],
+  "rawExit": 0
+}

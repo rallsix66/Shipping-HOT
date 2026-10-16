@@ -1,0 +1,10 @@
+# command: git diff --check -- docs/status.md docs/plans/r2-intel-read-2026-10-13.md
+# baseline_sha: a9e637fd52c69fbfde7fd226c660e58da0ea2ae8
+# started: 2026-10-13T03:44:07.109Z
+# stdout
+
+# stderr
+warning: in the working copy of 'docs/plans/r2-intel-read-2026-10-13.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it
+
+# raw_exit_code: 0

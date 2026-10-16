@@ -1,0 +1,46 @@
+[
+  {
+    "id": "XX-M01",
+    "host": "theloadstar.com",
+    "reservedAt": "2026-10-15T04:25:58.203Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "104.26.3.171",
+        "family": 4
+      },
+      {
+        "address": "104.26.2.171",
+        "family": 4
+      },
+      {
+        "address": "172.67.68.194",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T04:25:58.294Z"
+  },
+  {
+    "id": "XX-M03",
+    "host": "splash247.com",
+    "reservedAt": "2026-10-15T04:25:58.867Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "172.67.73.185",
+        "family": 4
+      },
+      {
+        "address": "104.26.7.32",
+        "family": 4
+      },
+      {
+        "address": "104.26.6.32",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T04:25:58.954Z"
+  }
+]

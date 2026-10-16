@@ -1,3 +1,7 @@
+> R2当前复核（2026-10-15）：[41项累计证据与缺口](evidence/r2-current-source-matrix-2026-10-14/report.md) / [逐源矩阵](evidence/r2-current-source-matrix-2026-10-14/mapping.json)。下表核查标签保留为编制时历史；当前R2-4/5结论以逐源矩阵为准。所有ID、URL、格式和优先级保持原样；默认启用状态与采集资格分开记录。
+
+> XX-K02 同源同产品 URL 更新（2026-10-15，已批准）：原 `https://www.one-line.com/en/news` 的实际308 Location为 `/en/newsroom`，现目录改为已核实的 `https://www.one-line.com/en/newsroom`。[原308记录](evidence/r2-carrier-reapplied-2026-10-15/XX-K02-response.json)与[目标实网/原页回放依据](evidence/r2-one-newsroom-target-2026-10-15/report.md)保留。目录 `web_list` 描述HTML新闻页面形态；实现用现有 `json_list` 的HTML惰性JSON模式读取其内嵌数据，不是新增JSON接口。候选默认关闭、仅metadata，不加入生产允许列表或改变许可。
+
 # Shipping HOT 信源目录（草案）
 
 > 状态：`DRAFT`。首次核查日期 2026-09-30，核查方式为 curl 与 WebFetch，核查网络为编制者本机（中国大陆，Windows）。
@@ -98,7 +102,7 @@
 | MY-P04 | B | 丹戎帕拉帕斯港 PTP | https://www.ptp.com.my/announcements | web_list | en | PARTIAL | P3 | |
 | MY-P05 | B | 槟城港 | https://www.penangport.com.my/Media-Center/Announcements | web_list | en | OK | P3 | |
 | MY-P06 | A | 海事局 JLM | https://www.marine.gov.my/feed/ ；航运通告页 https://www.marine.gov.my/b-notis-perkapalan-malaysia/ | rss + web_list | ms | OK / PARTIAL | P2 | |
-| MY-W01 | A | 马来西亚气象局（经 data.gov.my） | https://api.data.gov.my/weather/warning | json_list | en/ms | OK (30/09/2026) | P1 | 开放 API，带 valid_from 和 valid_to 字段 |
+| MY-W01 | A | 马来西亚气象局（经 data.gov.my） | https://api.data.gov.my/weather/warning/ | json_list | en/ms | OK (30/09/2026) | P1 | 开放 API，带 valid_from 和 valid_to 字段 |
 | MY-W02 | A | 洪水信息门户 | https://publicinfobanjir.water.gov.my/ | manual | ms/en | PARTIAL (JS) | P2 | |
 | MY-C01 | A | 皇家关税局 JKDM 公告 | https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss | rss | ms | OK (28/09/2026) | P1 | 媒体报道 feed：`/ms/arkib/liputan-media?format=feed&type=rss` |
 | MY-T01 | A | 财政部 新闻稿 | https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss | rss | ms | OK (29/09/2026) | P1 | 低价值商品税为 10%（≤ RM500）。2027 年预算案将于 2026 年 10 月公布 |
@@ -159,7 +163,7 @@
 | ID | 等级 | 船公司 | URL | 方式 | 核查 | 优先级 | 备注 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | XX-K01 | B | Maersk | https://www.maersk.com/news | web_list | OK | P1 | 文章路径里带日期，有台风季更新。没有 RSS |
-| XX-K02 | B | ONE | https://www.one-line.com/en/news | web_list | OK | P1 | 页面约 635 KB |
+| XX-K02 | B | ONE | https://www.one-line.com/en/newsroom | web_list | OK | P1 | 页面约 635 KB |
 | XX-K03 | B | SITC | https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/ | web_list | OK | P1 | 近洋航线主力船公司 |
 | XX-K04 | B | Hapag-Lloyd / Yang Ming | https://www.hapag-lloyd.com/en/services-information/news.html ，https://www.yangming.com/en/esolution/news | manual | PARTIAL (JS) | P3 | |
 | XX-K05 | B | COSCO / Evergreen / Wan Hai / MSC / CMA CGM | — | manual | BLOCKED | P2 | 反爬或需要 JS 渲染 |

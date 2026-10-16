@@ -1,0 +1,10 @@
+{
+  "basis": "Git UTF8 text LF; original wire/captured stdout strings not normalized",
+  "files": {
+    "before-fix-regression.json": "2103314b699d67e9d5468b91789b3fb2311ed0f6a756c671a84c7905e89f3ecb",
+    "closeout.md": "e2239e67876b7abc6df5ceb893b84ee82c42ee2149f5ffc6f734aa82f31f9504",
+    "inventory.txt": "3c98b67ec60aaddbb5f5846c1d5917184b1cd503c9e6ed0f0783f9337be4dd74",
+    "redirect-material-inspection.json": "923e62e0701337eb62fb286ca2c26c68659ded2dbd13100ddbfb7390e23e04cd",
+    "report.md": "94a9e1544b7f0b1fe2a585a5112793247732c9ff7fae0e44809f94d21efc9ac9"
+  }
+}

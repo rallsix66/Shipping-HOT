@@ -1,0 +1,9 @@
+{
+  "name": "smoke-feed",
+  "command": "pnpm smoke:p3-feed-freshness",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\thai-document-final-build",
+  "sha": "2acfda4c8ddab3f8064d199bb3cfcf26873ff288",
+  "startedAt": "2026-10-14T08:39:26.875Z",
+  "endedAt": "2026-10-14T08:39:28.025Z",
+  "rawExit": 0
+}

@@ -1,0 +1,14 @@
+{
+  "name": "install",
+  "command": "pnpm install --frozen-lockfile",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\anchor-date-repair-build-20261015",
+  "sha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
+  "startedAt": "2026-10-15T01:47:19.452Z",
+  "finishedAt": "2026-10-15T01:47:27.949Z",
+  "rawExit": 0,
+  "stderrCapturedUtf8": "",
+  "stderrCapturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "displayLogTrailingWhitespaceTrimmed": true,
+  "stdoutCapturedUtf8": "Lockfile is up to date, resolution step is skipped\nProgress: resolved 1, reused 0, downloaded 0, added 0\nPackages: +1315\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\nProgress: resolved 1315, reused 1313, downloaded 0, added 64\nProgress: resolved 1315, reused 1313, downloaded 0, added 214\nProgress: resolved 1315, reused 1313, downloaded 0, added 466\nProgress: resolved 1315, reused 1313, downloaded 0, added 717\nProgress: resolved 1315, reused 1313, downloaded 0, added 1190\nProgress: resolved 1315, reused 1313, downloaded 0, added 1315, done\n\ndependencies:\n+ @formkit/auto-animate 0.9.0\n+ @tanstack/react-router 1.163.2\n+ @unocss/reset 66.6.2\n+ better-sqlite3 12.6.2\n+ cheerio 1.2.0\n+ clsx 2.1.1\n+ consola 3.4.2\n+ dayjs 1.11.13\n+ db0 0.3.4\n+ fast-xml-parser 5.4.1\n+ framer-motion 12.34.3\n+ h3 1.15.3\n+ jotai 2.18.0\n+ ofetch 1.5.1\n+ react 19.1.0\n+ react-dom 19.1.0\n+ react-use 17.6.0\n\ndevDependencies:\n+ @eslint-react/eslint-plugin 2.13.0\n+ @iconify-json/ph 1.2.2\n+ @ourongxing/eslint-config 3.2.3-beta.6\n+ @tanstack/react-query 5.90.21\n+ @tanstack/router-plugin 1.163.2\n+ @types/react 19.2.14\n+ @types/react-dom 19.2.3\n+ @unocss/rule-utils 66.6.2\n+ @vitejs/plugin-react-swc 4.2.3\n+ cross-env 10.1.0\n+ dotenv 17.3.1\n+ eslint 9.39.3\n+ eslint-plugin-react-hooks 5.2.0\n+ eslint-plugin-react-refresh 0.4.26\n+ lint-staged 16.2.7\n+ rollup 4.59.0\n+ simple-git-hooks 2.13.1\n+ tsx 4.21.0\n+ typescript 5.9.3\n+ typescript-eslint 8.56.1\n+ unimport 6.0.0\n+ unocss 66.6.2\n+ vite 7.3.1\n+ vite-plugin-pwa 1.2.0\n+ vite-plugin-with-nitro 0.0.3\n+ vitest 4.0.18\n+ workbox-build 7.4.0\n+ workbox-window 7.4.0\n\n\n> shipping-hot@0.0.41 prepare D:\\try one\\Shipping HOT\\.tmp\\anchor-date-repair-build-20261015\n> simple-git-hooks\n\n[INFO] Successfully set the pre-commit with command: npx lint-staged\n[INFO] Successfully set all git hooks\nDone in 8.3s using pnpm v10.30.3\n",
+  "stdoutCapturedSha256": "ad855a4080e9c2a4154706c690523632cb9047632146b6dbbae12c26c8ee1307"
+}

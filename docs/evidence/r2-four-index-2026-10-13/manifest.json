@@ -1,0 +1,30 @@
+{
+  "baseline": "01ea950ab023255fdb7e9efe1f2799d9320c260e",
+  "approvedAt": "2026-10-13T08:03:50Z",
+  "batch": [
+    {
+      "id": "XX-M01",
+      "host": "theloadstar.com",
+      "url": "https://theloadstar.com/feed/",
+      "kind": "rss"
+    },
+    {
+      "id": "XX-M03",
+      "host": "splash247.com",
+      "url": "https://splash247.com/feed/",
+      "kind": "rss"
+    },
+    {
+      "id": "MY-P03",
+      "host": "www.northport.com.my",
+      "url": "https://www.northport.com.my/np/page-announcements.html",
+      "kind": "web_list"
+    },
+    {
+      "id": "TH-C01",
+      "host": "www.customs.go.th",
+      "url": "https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th",
+      "kind": "web_list"
+    }
+  ]
+}

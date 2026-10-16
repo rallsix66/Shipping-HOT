@@ -1,0 +1,10 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ .tmp/r2-two-media-capture-20261015.test.ts (1 test) 1980ms
+   ✓ authorized two exact media RSS products once each, with pinned safe DNS and no retry/redirect  1979ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  12:25:57
+   Duration  2.69s (transform 241ms, setup 0ms, import 532ms, tests 1.98s, environment 1ms)

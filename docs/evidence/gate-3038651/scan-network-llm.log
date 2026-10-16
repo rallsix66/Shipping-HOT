@@ -1,0 +1,59 @@
+# command: rg -n -i "fetch\(|https?://|openai|anthropic|llm" server/intel server/runtime/intel-collect-job.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts server/database/migrations/024-paid-receipt.ts server/database/migrations/025-paid-receipt-usage-booking.ts server/database/migrations/026-intel-web-list.ts server/database/migrations/027-intel-json-list.ts server/database/runtime.ts server/services/paid-budget.ts server/providers/feed.ts server/services/article-fetch-security.ts
+# full_sha: 3038651aa92b70f4d8045559501418e5e686c685
+# started: 2026-10-13T01:36:08.575Z
+# ---- stdout ----
+server/services/article-fetch-security.ts:260:    if (!/^[a-z0-9.-]+$/.test(host) || new URL(`https://${host}`).hostname !== host || !articlePolicyHostResolves(policy, host)) return false
+server/providers/feed.ts:46:    url: "https://theloadstar.com/feed/",
+server/providers/feed.ts:47:    sourceUrl: "https://theloadstar.com/",
+server/providers/feed.ts:66:    url: "https://maritime-executive.com/rss",
+server/providers/feed.ts:67:    sourceUrl: "https://maritime-executive.com/",
+server/providers/feed.ts:79:    url: "https://www.portshekou.com/ywgg/",
+server/providers/feed.ts:80:    sourceUrl: "https://www.portshekou.com/ywgg/",
+server/providers/feed.ts:104:    url: "https://www.port.co.th/",
+server/providers/feed.ts:105:    sourceUrl: "https://www.port.co.th/",
+server/providers/feed.ts:118:    url: "https://www.pka.gov.my/index.php/en/",
+server/providers/feed.ts:119:    sourceUrl: "https://www.pka.gov.my/index.php/en/",
+server/providers/feed.ts:132:    url: "https://www.yantian.gov.cn/",
+server/providers/feed.ts:133:    sourceUrl: "https://www.yantian.gov.cn/",
+server/providers/feed.ts:146:    url: "https://www.gzns.gov.cn/",
+server/providers/feed.ts:147:    sourceUrl: "https://www.gzns.gov.cn/",
+server/providers/feed.ts:166:  mock: { sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice", sourceUrl: "https://example.com/mock/feed", verified: false },
+server/intel\web-list-collect.test.ts:21:  url: "https://www.nchmf.gov.vn/list",
+server/intel\sources.ts:36:    url: "https://www.tmd.go.th/en/api/xml/CAP",
+server/intel\sources.ts:49:    url: "https://www.bmkg.go.id/alerts/nowcast/en/rss.xml",
+server/intel\sources\web-list.test.ts:11:const base = "https://www.nchmf.gov.vn/list"
+server/intel\sources\web-list.test.ts:48:    expect(entries[0].canonicalUrl).toBe("https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-quet-sat-lo-dat-sut-lun-dat-do-mua-lu-hoac-dong-chay-tren-khu-vuc-cac-tinh-thanh-pho-tu-nghe-an-den-quang-ngai-post54549.html")
+server/intel\sources\web-list.test.ts:54:    expect(items[0]).toMatchObject({ title: "港口通知：年月日日期", canonicalUrl: "https://www.nchmf.gov.vn/notices/cn", publishedAt: "2026-10-12T02:30:00.000Z", dateEvidence: { rule: "chinese_ymd", timezone: "configured", basis: config.dateRuleBasis } })
+server/intel\sources\web-list.test.ts:69:    const listing = "https://www.nchmf.gov.vn/notices?lang=en&utm_source=listing"
+server/intel\sources\web-list.test.ts:78:      ["Notice 123", "https://www.nchmf.gov.vn/notices?id=123&lang=en"],
+server/intel\sources\web-list.test.ts:79:      ["Notice 456", "https://www.nchmf.gov.vn/notices?id=456&lang=en"],
+server/intel\sources\web-list.test.ts:83:    for (const link of ["https://www.nchmf.gov.vn.evil.test/notices/1", "http://www.nchmf.gov.vn/notices/1", "https://user:pass@www.nchmf.gov.vn/notices/1", "https://www.nchmf.gov.vn:9443/notices/1"]) expect(allowed(link, config, policy)).toBe(false)
+server/intel\sources\web-list.test.ts:84:    expect(allowed("https://127.0.0.1/notices/1", config, { ...policy, allowedHosts: ["127.0.0.1"] })).toBe(false)
+server/intel\sources\web-list.test.ts:85:    const filtered = { ...config, allowUrlPrefixes: ["https://www.nchmf.gov.vn/notices"], denyUrlPrefixes: ["https://www.nchmf.gov.vn/notices/private"] }
+server/intel\sources\web-list.test.ts:86:    expect(allowed("https://www.nchmf.gov.vn/notices/private/1", filtered, policy)).toBe(false)
+server/intel\sources\web-list.test.ts:87:    expect(allowed("https://www.nchmf.gov.vn/noticesevil/1", filtered, policy)).toBe(false)
+server/intel\sources\web-list.test.ts:88:    expect(allowed("https://www.nchmf.gov.vn/notices/public/1", filtered, policy)).toBe(true)
+server/intel\sources\json-list.ts:51:    const probe = new URL(c.urlTemplate.replace(/\{[^{}]+\}/g, "x"), "https://template.invalid/")
+server/intel\sources\json-list.test.ts:6:const base = "https://api.data.gov.my/weather/warning"
+server/intel\sources\json-list.test.ts:19:    expect(parse([record])[0]).toMatchObject({ title: "Notice", summary: "Summary text", bodyText: "Summary text", canonicalUrl: "https://api.data.gov.my/notices/one", publishedAt: undefined, dateEvidence: { raw: "2026-10-13", precision: "day", timezone: "missing", publishedAt: null } })
+server/intel\sources\json-list.test.ts:54:  it.each(["https://{host}/x", "//{host}/x", " //{host}/x", "\\\\{host}/x", "http://example.com/{id}", "https://u:p@example.com/{id}", "/x/{raw:id}", "/x/{id", "/x/static"])("rejects unsafe/malformed template %s", (urlTemplate) => {
+server/intel\sources\json-list.test.ts:75:    expect(parse(records, c).map(e => e.canonicalUrl)).toEqual(["https://api.data.gov.my/detail?id=1", "https://api.data.gov.my/detail?id=2"])
+server/intel\sources\json-list.test.ts:76:    for (const url of ["http://api.data.gov.my/detail", "https://evil.invalid/detail", "https://127.0.0.1/detail", "https://u:p@api.data.gov.my/detail", "https://api.data.gov.my:444/detail", base, "javascript:alert(1)"]) expect(() => parse([records[0], { ...record, url }], c)).toThrow("invalid_link")
+server/intel\sources\json-list.test.ts:77:    expect(() => parse([record], { ...config, denyUrlPrefixes: ["https://api.data.gov.my/notices"] })).toThrow()
+server/intel\llm\receipts.test.ts:27:} from "#/intel/llm/receipts"
+server/intel\llm\receipts.test.ts:68:function secrets(values: Record<string, string> = { "fake-llm": "test-placeholder" }): SecretStore {
+server/intel\llm\receipts.test.ts:92:    providerId: "fake-llm",
+server/intel\llm\receipts.test.ts:110:const usage = (native: Native) => native.prepare("SELECT COALESCE(SUM(request_count),0) AS requests, COALESCE(SUM(success_count),0) AS ok, COALESCE(SUM(failure_count),0) AS failed, COALESCE(SUM(estimated_cost),0) AS cost FROM provider_usage WHERE provider_id = 'fake-llm'").get() as { requests: number, ok: number, failed: number, cost: number }
+server/intel\llm\receipts.test.ts:127:      VALUES (?, ?, 'fake-llm', 'x', 'p', 'received', ?, ?, 't', 't')`).run(`id-${basis}-${actual}`, `k-${basis}-${actual}`, actual, basis)
+server/intel\json-list-collect.test.ts:21:  url: "https://api.data.gov.my/weather/warning",
+server/intel\json-list-collect.test.ts:147:      expect(item).toMatchObject({ title: RECORD.title, canonicalUrl: "https://api.data.gov.my/notices/one", publishedAt: "2026-10-13T01:00:00.000Z" })
+server/intel\json-list-collect.test.ts:188:        [{ ...JSON_SOURCE, jsonList: { ...JSON_SOURCE.jsonList!, urlTemplate: "https://evil.invalid/{id}" } }, json([RECORD])],
+server/intel\json-list-collect.test.ts:251:      expect(added.map(item => item.canonicalUrl).sort()).toEqual(["https://api.data.gov.my/notices/9007199254740992", "https://api.data.gov.my/notices/9007199254740993"])
+server/intel\collect.test.ts:104:    expect(items.every(item => item.title && item.canonicalUrl.startsWith("https://www.tmd.go.th/") && item.publishedAt)).toBe(true)
+server/intel\collect.test.ts:294:    const broken: IntelSourceSeed = { ...TMD, id: "intel:test-broken", url: "https://www.tmd.go.th/broken" }
+server/intel\collect.test.ts:352:    const offHost: IntelSourceSeed = { ...TMD, id: "intel:test-offhost", url: "https://evil.example/feed" }
+server/intel\collect.test.ts:358:    const downgrade = offline({ [TMD.url]: () => ({ status: 302, headers: { location: "http://www.tmd.go.th/en/api/xml/CAP" }, body: "" }) })
+
+# ---- stderr ----
+
+# raw_exit_code: 0

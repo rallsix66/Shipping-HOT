@@ -1,0 +1,36 @@
+[
+  {
+    "id": "XX-K01",
+    "url": "https://www.maersk.com/news",
+    "addresses": [
+      {
+        "address": "23.53.3.137",
+        "family": 4
+      },
+      {
+        "address": "23.53.3.144",
+        "family": 4
+      }
+    ],
+    "reservedAt": "2026-10-15T02:38:28.438Z",
+    "state": "finished_without_response",
+    "finishedAt": "2026-10-15T02:38:28.806Z"
+  },
+  {
+    "id": "XX-K02",
+    "url": "https://www.one-line.com/en/news",
+    "addresses": [
+      {
+        "address": "104.19.145.47",
+        "family": 4
+      },
+      {
+        "address": "104.19.144.47",
+        "family": 4
+      }
+    ],
+    "reservedAt": "2026-10-15T02:38:28.879Z",
+    "state": "response_captured",
+    "finishedAt": "2026-10-15T02:38:29.156Z"
+  }
+]

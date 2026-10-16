@@ -1,0 +1,25 @@
+from pathlib import Path
+from datetime import datetime,timezone
+import ast,hashlib,json,re
+root=Path('C:/Users/Administrator/AppData/Roaming/io.github.clash-verge-rev.clash-verge-rev')
+repo=Path('D:/try one/Shipping HOT')
+d=repo/'docs/evidence/r2-official-gaps-applied-2026-10-15';d.mkdir(exist_ok=True)
+pointer=json.loads((repo/'.tmp/clash-three-weather-hosts-20261015-prepared.json').read_text(encoding='utf-8'))
+backup=Path(pointer['backup']);manifest=json.loads((backup/'manifest.json').read_text(encoding='utf-8'))
+tree=ast.parse((repo/'.tmp/prepare-clash-three-weather-hosts-20261015.py').read_text(encoding='utf-8'))
+for node in tree.body:
+    if isinstance(node,ast.FunctionDef) and node.name in ['selected_extension','generated_dns']:
+        exec(compile(ast.Module(body=[node],type_ignores=[]),'<read-only-reader>','exec'))
+sha=lambda b:hashlib.sha256(b).hexdigest()
+target=selected_extension();actual=target.read_bytes();hosts=re.findall(r'^\s+"([^"\r\n]+)",\s*$',actual.decode('utf-8-sig'),re.M)
+generated=generated_dns();generated_bytes=(root/'clash-verge.yaml').read_bytes();stripped=generated_bytes;removed={}
+for h in manifest['addedOnly']:
+    stripped,n=re.subn(rb'(?m)^[ \t]*-[ \t]*["\x27]?'+re.escape(h.encode('ascii'))+rb'["\x27]?[ \t]*\r?\n',b'',stripped);removed[h]=n
+original_hash=manifest['watchedBeforeSha256'][str(root/'clash-verge.yaml')]
+expected=manifest['originalHosts']+manifest['addedOnly']
+checks={'selectedExtensionExpectedBytes':sha(actual)==manifest['proposedSha256'],'extension26ExactExpectedOrder':hosts==expected and len(hosts)==26,'generated26ExactExpectedOrder':generated['filter']==expected and len(generated['filter'])==26,'original23Preserved':generated['filter'][:23]==manifest['originalHosts'],'threeExactNewHostsOnce':all(generated['filter'].count(h)==1 and removed[h]==1 for h in manifest['addedOnly']),'generatedOnlyThreeLiteralFilterLinesChanged':sha(stripped)==original_hash,'fakeIpBlacklistMode':generated['modes'].get('enhanced-mode')=='fake-ip' and generated['modes'].get('fake-ip-filter-mode','blacklist')=='blacklist'}
+accepted=all(value for key,value in checks.items() if key!='generatedOnlyThreeLiteralFilterLinesChanged')
+result={'checkedAt':datetime.now(timezone.utc).isoformat(),'readOnly':True,'userAppliedAt':'2026-10-15T05:50:59Z','extensionHostCount':len(hosts),'generatedFilterCount':len(generated['filter']),'addedOnly':manifest['addedOnly'],'checks':checks,'acceptanceBasis':'User requested exact extension/generated26, original23 retained, exact3 hosts; all those checks pass. Whole generated-file byte identity is a separate unresolved diagnostic, not proof of ineffective filter.','generatedBeforeSha256':original_hash,'generatedAfterSha256':sha(generated_bytes),'generatedAfterRemovingThreeLinesSha256':sha(stripped),'extensionAfterSha256':sha(actual),'original23':manifest['originalHosts'],'sourceDnsCalls':0,'upstreamGet':0,'systemSettingsWritten':False,'credentialValuesExported':False,'runningCoreApiInspected':False,'otherGeneratedByteChanges':'UNRESOLVED_no_full_before_image_no_cause_inferred','status':'VERIFIED_EXACT_FILTER26_OTHER_BYTES_UNRESOLVED' if accepted else 'BLOCKED_REQUIRED_FILTER_DIFFERENCE'}
+(d/'clash-applied-verification.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+print(json.dumps(result,ensure_ascii=True))
+raise SystemExit(0 if accepted else 1)

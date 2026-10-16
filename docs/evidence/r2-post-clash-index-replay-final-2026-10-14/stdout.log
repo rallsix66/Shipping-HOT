@@ -1,0 +1,11 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/post-clash-final2-build
+
+ ✓ .tmp/post-clash-raw-replay-final.test.ts (1 test) 575ms
+   ✓ full real archived bytes through disabled configs, repeat collection and read-only SQLite reopen  575ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  17:28:04
+   Duration  1.48s (transform 420ms, setup 0ms, import 733ms, tests 575ms, environment 0ms)
+

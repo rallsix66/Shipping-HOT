@@ -1,0 +1,28 @@
+# command: npx vitest run server/api/shipping/intel/read-http.test.ts
+# full_sha: 4e36813eb8859f4fb4d658f8cacdedde5b6275ad
+# started: 2026-10-13T03:26:14.655Z
+# ---- stdout ----
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ server/api/shipping/intel/read-http.test.ts (16 tests) 1258ms
+
+ Test Files  1 passed (1)
+      Tests  16 passed (16)
+   Start at  11:26:16
+   Duration  2.62s (transform 593ms, setup 0ms, import 1.09s, tests 1.26s, environment 0ms)
+
+
+# ---- stderr ----
+npm warn Unknown env config "store-dir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+
+# raw_exit_code: 0

@@ -1,0 +1,7 @@
+{
+  "sha": "f312a002445f788ed3322dd20273fa0dfd3b01cd",
+  "command": "git diff --exit-code --ignore-space-at-eol",
+  "rawExit": 0,
+  "stdout": "",
+  "stderr": "warning: in the working copy of 'src/routeTree.gen.ts', LF will be replaced by CRLF the next time Git touches it\n"
+}

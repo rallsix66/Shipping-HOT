@@ -1,0 +1,1419 @@
+{
+  "plan": "docs/plans/shipping-hot-risk-intelligence-2026-09-29.md §5.3 A–E",
+  "upstream": "44578fa11da55f2e863900752653e0c221f6cf70",
+  "executionHead": "0321584ffbbb2f99c1f8ecd64c680b78d0affcc6",
+  "productCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
+  "classificationDefinitions": {
+    "直接适配": "有明确上游文件/改编头，且只声明实际子集",
+    "参考": "参考上游行为/局部公式，非整份文件直接移植",
+    "原工程等价": "优先现有工程中已需要的职责；不等于上游全部feature逐函数同构",
+    "阶段未实施": "未实施；E组为计划明确排除，其余按后续阶段保留"
+  },
+  "rows": [
+    {
+      "id": "A-01",
+      "section": "A",
+      "upstream": "BE/lib/url.ts",
+      "classification": "原工程等价",
+      "targets": [
+        "server/providers/feed.ts",
+        "server/services/source-policy.ts"
+      ],
+      "tests": [
+        "server/providers/feed-formats.test.ts",
+        "server/intel/sources/web-list.test.ts"
+      ],
+      "scope": "复用canonicalizeFeedUrl/域名许可与原实体身份；未整体复制上游URL工具，不引入跨源全局identity。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/lib/url.ts",
+          "kind": "file",
+          "blobOid": "4a986d7713af9f5d04b1a3fd3e4ce1285cb90b3a",
+          "sha256": "97d7faaffa2ffd4a858d63c9112fb8fed3160a449ee128562b1d2f26e17dfe4e",
+          "bytes": 10553
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/providers/feed.ts",
+          "sha256": "d99b0ec8fceb3df842d4b81914133451648f56a5285b73c0bd5bad20af8e7d67",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/services/source-policy.ts",
+          "sha256": "22cb1b1d5161fbec12b6bb8493f3c2558be503a5591c9a9ded28c281f1a06085",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "A-02",
+      "section": "A",
+      "upstream": "BE/lib/text.ts",
+      "classification": "原工程等价",
+      "targets": [
+        "server/providers/feed.ts",
+        "shared/article.ts"
+      ],
+      "tests": [
+        "server/providers/feed-formats.test.ts",
+        "server/providers/article-extractor.test.ts"
+      ],
+      "scope": "既有stripMarkup/归一化/截断及block文本合同，非上游所有文本工具逐函数等价。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/lib/text.ts",
+          "kind": "file",
+          "blobOid": "9ee29be154e911aacc4ef579f1299143679484cf",
+          "sha256": "e012a381f747ca210c438fd2141d3ea8e5c6f06724827caab0b6eba875a85ef0",
+          "bytes": 1781
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/providers/feed.ts",
+          "sha256": "d99b0ec8fceb3df842d4b81914133451648f56a5285b73c0bd5bad20af8e7d67",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "shared/article.ts",
+          "sha256": "2f0937c64df88ffdcaccc67b395b1b43c8a5281baefe5de812e80beb914b36cc",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "A-03",
+      "section": "A",
+      "upstream": "BE/lib/ids.ts",
+      "classification": "原工程等价",
+      "targets": [
+        "server/database/intel.ts",
+        "server/services/article-content-hash.ts",
+        "server/intel/llm/receipts.ts"
+      ],
+      "tests": [
+        "server/intel/collect.test.ts",
+        "server/database/article.test.ts",
+        "server/intel/llm/receipts.test.ts"
+      ],
+      "scope": "node:crypto UUID/hash和实体独立hash；receipts stableJson注明上游来源。没有复制整份ids库或改旧identity。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/lib/ids.ts",
+          "kind": "file",
+          "blobOid": "9598788fc71f3cda40c28181e99cd8ae1b3254b0",
+          "sha256": "e14fbf18a75cf5744761722d65f0b50a13e14cc6d17c693404c618b77be5d779",
+          "bytes": 1090
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/database/intel.ts",
+          "sha256": "525f85886caf1f261c2599a81c3827ba914bd781095bddd44c7ec2e146aec9f2",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/services/article-content-hash.ts",
+          "sha256": "49b823fd30025f4df6873a041e92ff4cb5a9c7cd21f82002f7e00fa4ae49201e",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/intel/llm/receipts.ts",
+          "sha256": "e6fb3f25e70917e601677c72b883b8b58e3856ccecf1c56c494d58a89ea4f4a4",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "A-04",
+      "section": "A",
+      "upstream": "BE/lib/http-fetch.ts",
+      "classification": "原工程等价",
+      "targets": [
+        "server/services/article-fetch-security.ts",
+        "server/services/response-decoding.ts"
+      ],
+      "tests": [
+        "server/services/article-fetch-security.test.ts",
+        "server/services/article-fetch-transport.test.ts"
+      ],
+      "scope": "既有Node http/https安全传输、固定DNS地址、重定向/大小/超时/分源CA；不是字面guardedFetch或全项目所有Provider只用此函数的宣称。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/lib/http-fetch.ts",
+          "kind": "file",
+          "blobOid": "58a9ed8e8ea066b7c96f3959f174e54915724669",
+          "sha256": "1266fcffff058294ea51aef497cf80f85d7b2bf06cca95d1b92eb4f903140219",
+          "bytes": 5766
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/services/article-fetch-security.ts",
+          "sha256": "967b106148c5d2dfcd6388b4602a4b9055d3732a9fa4a49d32c69aabb310d2a4",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/services/response-decoding.ts",
+          "sha256": "b34ced2d8c19833358fec8ead1e86d343adf0402e4516dca2657ff1c86308557",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "A-05",
+      "section": "A",
+      "upstream": "BE/content/sanitize.ts",
+      "classification": "原工程等价",
+      "targets": [
+        "server/providers/article-extractor.ts",
+        "server/intel/content-license.ts",
+        "src/components/shipping/pages.tsx"
+      ],
+      "tests": [
+        "server/providers/article-extractor.test.ts",
+        "server/services/article-service.test.ts"
+      ],
+      "scope": "当前持久化/显示结构化纯文本blocks，沿用移除非正文和安全链接；未复制上游白名单HTML/图片签名/Markdown导出合同，不称完整sanitize.ts已移植。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/content/sanitize.ts",
+          "kind": "file",
+          "blobOid": "83a03b76435d15bcf25a1b47e5e2ed9a16c87a3f",
+          "sha256": "23deabdb8cc4ce50658cf1161ff7fd9a6f3be364d16b0662c5da57427148965e",
+          "bytes": 8504
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/providers/article-extractor.ts",
+          "sha256": "70f9d50bed708a8e6cc5e98b4267308337eed7c74b1b8f799707523483be3f33",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/intel/content-license.ts",
+          "sha256": "0724f6ff17957dad5362990c4d579f7cb7c36af40ec6f57518545a8341d6cefa",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "src/components/shipping/pages.tsx",
+          "sha256": "15e4eba6b5f6ceb7c32fa8cac5ef6ffca652c58cd5ebdcb2eec30489da4b76e2",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "A-06",
+      "section": "A",
+      "upstream": "BE/sources/types.ts",
+      "classification": "原工程等价",
+      "targets": [
+        "server/intel/sources.ts",
+        "server/database/intel.ts"
+      ],
+      "tests": [
+        "server/intel/collect.test.ts"
+      ],
+      "scope": "现有IntelSourceSeed/Record/Entry类型边界；没有第二套Vendor Domain类型。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/sources/types.ts",
+          "kind": "file",
+          "blobOid": "1b2e396366251472aa1029cf58ee30d72900e05a",
+          "sha256": "0d1aed284681aafd5466a05de52d69cb28797abdbd28f9ef16fe0e0fafcb9237",
+          "bytes": 932
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/intel/sources.ts",
+          "sha256": "10d92a7c07a11bfb589c3fc52882fd84f4b1513607fcf721a3628232d828caa5",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/database/intel.ts",
+          "sha256": "525f85886caf1f261c2599a81c3827ba914bd781095bddd44c7ec2e146aec9f2",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "A-07",
+      "section": "A",
+      "upstream": "BE/sources/config-keys.ts",
+      "classification": "直接适配",
+      "targets": [
+        "server/intel/sources/config-keys.ts"
+      ],
+      "tests": [
+        "server/intel/sources/web-list.test.ts",
+        "server/intel/sources/json-list.test.ts"
+      ],
+      "scope": "MIT改编头；只实现获批HTML/JSON配置子集，未知/未支持键拒绝，删X/MP/Jina等。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/sources/config-keys.ts",
+          "kind": "file",
+          "blobOid": "7840992f095a2fe025d2ed34437cd058ab964028",
+          "sha256": "dcf89b3511dedb0f455b8992c022cc98355bd0eb13cd4a44b6bccec816fe149d",
+          "bytes": 3393
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/intel/sources/config-keys.ts",
+          "sha256": "cc4fd3656e7aed9c562fad87e72f5ab93d72a5cf0cb003f1e0b1ec83ef85b86e",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "A-08",
+      "section": "A",
+      "upstream": "BE/sources/rss.ts",
+      "classification": "原工程等价",
+      "targets": [
+        "server/providers/feed.ts",
+        "server/intel/collect.ts"
+      ],
+      "tests": [
+        "server/providers/feed-formats.test.ts",
+        "server/providers/feed.test.ts",
+        "server/intel/collect.test.ts"
+      ],
+      "scope": "唯一通用RSS/Atom/RDF parseFeedEntries；collector复用，未创建intel/sources/rss.ts。上游RSS条件请求验证器未移植，见差异。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/sources/rss.ts",
+          "kind": "file",
+          "blobOid": "1a465b0b697978e78437af0e9516b1830f8e0911",
+          "sha256": "895f9ce693a34ca3133d27d41759081b804f21828424a35eaca1793027446700",
+          "bytes": 8707
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/providers/feed.ts",
+          "sha256": "d99b0ec8fceb3df842d4b81914133451648f56a5285b73c0bd5bad20af8e7d67",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/intel/collect.ts",
+          "sha256": "70e21f54009af8a9b90168c0e1d6362b8d701a4a3c62ba35154c5688c1807c30",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "A-09",
+      "section": "A",
+      "upstream": "BE/sources/web-list.ts",
+      "classification": "直接适配",
+      "targets": [
+        "server/intel/sources/web-list.ts"
+      ],
+      "tests": [
+        "server/intel/sources/web-list.test.ts",
+        "server/intel/web-list-collect.test.ts",
+        "server/intel/web-list-conflicts-collect.test.ts"
+      ],
+      "scope": "MIT改编fromHtml selector/seen/allowed流；日期显式/unknown，限制500节点，冲突fail-closed；无Jina/MiMo/Markdown/分页/详情。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/sources/web-list.ts",
+          "kind": "file",
+          "blobOid": "330633dce29a176919ced44c421e98c31dfd96d2",
+          "sha256": "9ab658f813d9592075a08f11bd6f7096970c6cef56ec5ad205c733b3d7667e7a",
+          "bytes": 19323
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/intel/sources/web-list.ts",
+          "sha256": "ca7668d876dc290b5f1bea193ce46498f71b4eb00f14c591554bb5a40edc014a",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "A-10",
+      "section": "A",
+      "upstream": "BE/sources/json-list.ts",
+      "classification": "直接适配",
+      "targets": [
+        "server/intel/sources/json-list.ts"
+      ],
+      "tests": [
+        "server/intel/sources/json-list.test.ts",
+        "server/intel/sources/json-list-html.test.ts",
+        "server/intel/json-list-collect.test.ts"
+      ],
+      "scope": "MIT改编路径/模板/条目映射；显式惰性application/json，不执行脚本；至多4组/500记录；无凭据/隐含API/分页。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/sources/json-list.ts",
+          "kind": "file",
+          "blobOid": "f9869b7a3a1190d2da21f194ab98c6a9e24d14bb",
+          "sha256": "6d4394653e7fc1567630562f6429f39fc22a343f027adb10bbddb190a6c56326",
+          "bytes": 8059
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/intel/sources/json-list.ts",
+          "sha256": "7a2202bdce1f8ab128af5adc44492e979dffa9ac862e1ac04bc3c45c635cf5af",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "A-11",
+      "section": "A",
+      "upstream": "BE/providers/llm.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "通用chatJson、服务商/步骤绑定业务消费者未实施；既有DeepSeek翻译Provider不冒充R3通用模型层。",
+      "stage": "R3",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/providers/llm.ts",
+          "kind": "file",
+          "blobOid": "748569c8eae0b504a86ddd6b4b63d4315034e643",
+          "sha256": "d89f20e0a4185d1a5286455693e492d974cadabfc475963cc56cb6d9ffa96d49",
+          "bytes": 10388
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "A-12",
+      "section": "A",
+      "upstream": "BE/providers/receipts.ts",
+      "classification": "直接适配",
+      "targets": [
+        "server/intel/llm/receipts.ts",
+        "server/services/paid-budget.ts"
+      ],
+      "tests": [
+        "server/intel/llm/receipts.test.ts"
+      ],
+      "scope": "MIT原结构适配SQLite BEGIN IMMEDIATE、SecretStore和provider_usage；unknown不自动重发，actual/estimate分开；当前只有离线测试调用。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/providers/receipts.ts",
+          "kind": "file",
+          "blobOid": "64048742788f105f65ae6ffe5b64f63c08054558",
+          "sha256": "c0be41d6b65ed44d84a8a7a8bf9ea4bf764023f72e72e85f5d99a9989de28cca",
+          "bytes": 10532
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/intel/llm/receipts.ts",
+          "sha256": "e6fb3f25e70917e601677c72b883b8b58e3856ccecf1c56c494d58a89ea4f4a4",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/services/paid-budget.ts",
+          "sha256": "0775f79fae8c96b1f11822e998ff01b64390a402210e336cebe323137d06afb9",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "A-13",
+      "section": "A",
+      "upstream": "BE/providers/embeddings.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "百炼向量/向量持久与模型绑定未实施；未用占位函数冒充。",
+      "stage": "R3/R4",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/providers/embeddings.ts",
+          "kind": "file",
+          "blobOid": "f2387704c91ab62c45f292d7eda885290986fd6f",
+          "sha256": "973d75b278b8251edcfaf3576af916e7adb66eac57990c5b2b0736cd22075bf4",
+          "bytes": 6507
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "A-14",
+      "section": "A",
+      "upstream": "BE/editorial/prompts.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "提示词加载和版本hash未实施。",
+      "stage": "R3",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/editorial/prompts.ts",
+          "kind": "file",
+          "blobOid": "6b98f282c44d691f2089a5ebebbb655e981472b0",
+          "sha256": "dde539a023f475b29175a2d0f34162cae7859afcc5622c89476f0aed342e36c0",
+          "bytes": 2463
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "A-15",
+      "section": "A",
+      "upstream": "BE/events/merge.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "风险情报事件合并helper未实施；旧Event列表不等于R4合并。",
+      "stage": "R4",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/events/merge.ts",
+          "kind": "file",
+          "blobOid": "27c38b4aae7728fd1e72847ff5ab6ed5b954b12e",
+          "sha256": "6cc7f71c0f8c4f96cd718dad9d7cd4b9f5054aec844a4748775d09bde4ceb6c8",
+          "bytes": 2782
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "A-16",
+      "section": "A",
+      "upstream": "BE/events/relate.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "情报关联判断未实施。",
+      "stage": "R4",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/events/relate.ts",
+          "kind": "file",
+          "blobOid": "b88662f33b6a125080ad38d53066176d0a1fe331",
+          "sha256": "20947ca5f05b483c154b337ecfe35b5d2f3b73179d49b0627ae8ed55196c5e9e",
+          "bytes": 8302
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "B-01",
+      "section": "B",
+      "upstream": "BE/content/materials.ts",
+      "classification": "原工程等价",
+      "targets": [
+        "server/database/intel.ts",
+        "server/database/article.ts",
+        "server/intel/manual.ts",
+        "server/intel/material-read.ts"
+      ],
+      "tests": [
+        "server/intel/collect.test.ts",
+        "server/intel/manual.test.ts",
+        "server/intel/material-read.test.ts",
+        "server/database/article.test.ts"
+      ],
+      "scope": "既有身份/不可变版本/去重/A→B→A/审计优先；补内部精确版本只读接口已获限定认可。无业务消费者；Feed桥接/R3输入未实现；source是当前配置而非完整历史配置快照。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/content/materials.ts",
+          "kind": "file",
+          "blobOid": "b22b96b2766faad7150273b520a8ca4653daa990",
+          "sha256": "84c029ce0c995060c18ce7f7a1b52ea1eb7f0201d602775c2039a393331c72ec",
+          "bytes": 11503
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/database/intel.ts",
+          "sha256": "525f85886caf1f261c2599a81c3827ba914bd781095bddd44c7ec2e146aec9f2",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/database/article.ts",
+          "sha256": "2b1d0dd376b0d1f5b84489a6c74800d96126013220b9908341e75b36257f3682",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/intel/manual.ts",
+          "sha256": "d06a984f6b7b5ccb37993174f989bb2725b31c7b47bf9ba982fe60d4227094e2",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/intel/material-read.ts",
+          "sha256": "68c5ed2903e510ef44c555eb4effad3a96eb7dcd309399baff17488a1c615db3",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "B-02",
+      "section": "B",
+      "upstream": "BE/content/extract.ts",
+      "classification": "直接适配",
+      "targets": [
+        "server/providers/article-extractor.ts"
+      ],
+      "tests": [
+        "server/providers/article-extractor.test.ts",
+        "server/services/article-service.test.ts"
+      ],
+      "scope": "MIT Readability流程并入唯一extractor；显式容器优先，缺失失败；保留blocks/许可/版本，200字符通用确认；不含Jina/X/第二抓取器。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/content/extract.ts",
+          "kind": "file",
+          "blobOid": "22d6af1003a8d69ffad374de12e380cebe35ac17",
+          "sha256": "adbe031d1b8f52f1d309bf7ec2c1c8c1f92b8ca0d55b9c3583bf3ee5a57d9cd4",
+          "bytes": 8426
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/providers/article-extractor.ts",
+          "sha256": "70f9d50bed708a8e6cc5e98b4267308337eed7c74b1b8f799707523483be3f33",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "B-03",
+      "section": "B",
+      "upstream": "BE/sources/collect.ts",
+      "classification": "参考",
+      "targets": [
+        "server/intel/collect.ts",
+        "server/intel/adaptive.ts",
+        "server/runtime/intel-collect-job.ts"
+      ],
+      "tests": [
+        "server/intel/collect.test.ts",
+        "server/intel/adaptive.test.ts",
+        "server/runtime/intel-bootstrap.test.ts"
+      ],
+      "scope": "collector沿现有Repository/安全fetch组织；adaptIntervals公式局部直接改编有MIT头。过滤/上限/去重/水位/退避与7天自适应已有；上游完整cursor/RSS validator、noise/backfill配置未全移植，不能概称整份collect已复制。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/sources/collect.ts",
+          "kind": "file",
+          "blobOid": "f534562b93677614c1fb5966e0b5ff6fda643fee",
+          "sha256": "f718c943e5ad2b12a0e4ac5b9d563135043dd23dc61eea6f3fb8efcee788995c",
+          "bytes": 21072
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/intel/collect.ts",
+          "sha256": "70e21f54009af8a9b90168c0e1d6362b8d701a4a3c62ba35154c5688c1807c30",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/intel/adaptive.ts",
+          "sha256": "300fb49041c445b31c6f440f8eb00d5d1156001d0de08da6be3dfbcd2d7922eb",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/runtime/intel-collect-job.ts",
+          "sha256": "a757467581091a77a0e23d6486cf3b7427322fe431e48ed18aa588eb0d9eb0f4",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "B-04",
+      "section": "B",
+      "upstream": "BE/editorial/models.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "llm_step_binding业务读取未实施。",
+      "stage": "R3",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/editorial/models.ts",
+          "kind": "file",
+          "blobOid": "495ebff3af57abbafcd737ef30d2f4fc9d4fb718",
+          "sha256": "87e3b2fca576cd2201c568ed906ad6fd8bef5a67fcb8a2b24436498d9634eed1",
+          "bytes": 4393
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "B-05",
+      "section": "B",
+      "upstream": "BE/editorial/analyze.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "pipeline/预筛/抽取/严重度消费者未实施；材料读接口未接分析。",
+      "stage": "R3",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/editorial/analyze.ts",
+          "kind": "file",
+          "blobOid": "6ad735911e444e9064be46268d1749fd572d6182",
+          "sha256": "8a190d94a19e9ffa5aa976c1c0b3c55c11039a683ac2dc8dc9defe2d33eeacc9",
+          "bytes": 23235
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "B-06",
+      "section": "B",
+      "upstream": "BE/events/group.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "精确键召回/向量/批量判断/second opinion/人工优先分组未实施。",
+      "stage": "R4",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/events/group.ts",
+          "kind": "file",
+          "blobOid": "64d81a53cf8be6baa721166798731aefc4b5dbf9",
+          "sha256": "e2992d7445ffec5ff8f291d98b5f9d2ae153bd245cf1c77d1f24fb0f977a379b",
+          "bytes": 46094
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "B-07",
+      "section": "B",
+      "upstream": "BE/events/digest.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "情报事件防抖重算/影响卡片未实施。",
+      "stage": "R4",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/events/digest.ts",
+          "kind": "file",
+          "blobOid": "41d5c90f00998b9c8ed578820d2c605799964cad",
+          "sha256": "bde101e25bce1acc1d8641125be121d2830410f831f1e64a1feb53d058e34f53",
+          "bytes": 5790
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "B-08",
+      "section": "B",
+      "upstream": "BE/reports/compose.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "国家日报/持续事件编排未实施；demo国家卡片不作替代。",
+      "stage": "R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/reports/compose.ts",
+          "kind": "file",
+          "blobOid": "609b3b9b14cff7edc7399131a58cda2f47839a33",
+          "sha256": "0a73d33b1d1808c1c13371d6c064c58f162d983f487e2b819eca0192405976f2",
+          "bytes": 15515
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "B-09",
+      "section": "B",
+      "upstream": "scripts/eval-selection.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "未建立intel-eval/标注评测消费者；不为文件名建空脚本。",
+      "stage": "R3",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "scripts/eval-selection.ts",
+          "kind": "file",
+          "blobOid": "d6b886c1458c429563d59c334828f2d9f5f041c4",
+          "sha256": "a40060bf198befb6ccf93f92b6d3f7110d41b689c955562e4766bf4a1abe1491",
+          "bytes": 8876
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-01",
+      "section": "C",
+      "upstream": "IND/prompts/safety.md",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "计划直接复用的通用提示词，当前风险intel提示词层未实施。",
+      "stage": "R3–R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/prompts/safety.md",
+          "kind": "file",
+          "blobOid": "ad08766153ed60790257dce5b8af6d24e038f788",
+          "sha256": "3963b20e601f9bdde876ea9a9f2e68b58d6e618e59109791773ff6e1d4e7badd",
+          "bytes": 234
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-02",
+      "section": "C",
+      "upstream": "IND/prompts/rules-anti-hallucination.md",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "计划直接复用的通用提示词，当前风险intel提示词层未实施。",
+      "stage": "R3–R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/prompts/rules-anti-hallucination.md",
+          "kind": "file",
+          "blobOid": "b56a5fc897078c4b20a6f49a6a12061e659ecf74",
+          "sha256": "37026fd742a233cb932166e173c19588fdbba086709d3ef4a8fd532f2be1cccf",
+          "bytes": 1176
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-03",
+      "section": "C",
+      "upstream": "IND/prompts/rules-self-contained-title.md",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "计划直接复用的通用提示词，当前风险intel提示词层未实施。",
+      "stage": "R3–R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/prompts/rules-self-contained-title.md",
+          "kind": "file",
+          "blobOid": "7706a682eb5e4b7af2b95f3a700d6b364216cc2b",
+          "sha256": "4f1652d77ef64ee6756b6872a4b4405fcb46edc8356c4de3cb577e21208f4f6b",
+          "bytes": 1814
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-04",
+      "section": "C",
+      "upstream": "IND/prompts/rules-answer-first-summary.md",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "计划直接复用的通用提示词，当前风险intel提示词层未实施。",
+      "stage": "R3–R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/prompts/rules-answer-first-summary.md",
+          "kind": "file",
+          "blobOid": "a2d7c3246a5989ec2507b31b05190a3ac434e9e4",
+          "sha256": "b8a517e60351e5adc453159e9d4e49a08d765c657a9b726044f04601d7f5a923",
+          "bytes": 1131
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-05",
+      "section": "C",
+      "upstream": "IND/prompts/group-method.md",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "计划保留骨架替换航运例子；当前未实施。",
+      "stage": "R4/R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/prompts/group-method.md",
+          "kind": "file",
+          "blobOid": "7ba0113517808bb130101b3729d4db0cf64274f1",
+          "sha256": "8c51856fbfa4b66f6f26ef36bc38fbb857090d7d7d42528233dc05b0284c0e05",
+          "bytes": 311
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-06",
+      "section": "C",
+      "upstream": "IND/prompts/group-batch.md",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "计划保留骨架替换航运例子；当前未实施。",
+      "stage": "R4/R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/prompts/group-batch.md",
+          "kind": "file",
+          "blobOid": "9fdc768856784ae7291f9f38ea3b4c65d8f1e7d4",
+          "sha256": "13a5e1fc191523888bab1eed0296d06677ca27c6a7e213b87e20875e44b0a8bc",
+          "bytes": 604
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-07",
+      "section": "C",
+      "upstream": "IND/prompts/group-pair.md",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "计划保留骨架替换航运例子；当前未实施。",
+      "stage": "R4/R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/prompts/group-pair.md",
+          "kind": "file",
+          "blobOid": "02cdd9397c696ddd0b00a4802cf3c479cd936f4f",
+          "sha256": "ef967620b842cb4ee9aaeb4716445dabade536ff7ec42bb0eb61e536f1ea77b3",
+          "bytes": 777
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-08",
+      "section": "C",
+      "upstream": "IND/prompts/group-definitions.md",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "计划保留骨架替换航运例子；当前未实施。",
+      "stage": "R4/R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/prompts/group-definitions.md",
+          "kind": "file",
+          "blobOid": "e35a0be6d9dfe2604fbff8167e53404389f438e5",
+          "sha256": "b7e5aae668e8773178fea8fd96a9c0701200ed1b706f14c1aa4bd04bc7f74c48",
+          "bytes": 1821
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-09",
+      "section": "C",
+      "upstream": "IND/prompts/story-digest.md",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "计划保留骨架替换航运例子；当前未实施。",
+      "stage": "R4/R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/prompts/story-digest.md",
+          "kind": "file",
+          "blobOid": "bd63afc84a49ce624296c75f4798ccaa469ebdcc",
+          "sha256": "db6c73aab6f7bdd7fe796b1b832a01fb8a19cf8c8ea76f80ed20a57352eabdc6",
+          "bytes": 697
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-10",
+      "section": "C",
+      "upstream": "IND/prompts/report-daily-lead.md",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "计划保留骨架替换航运例子；当前未实施。",
+      "stage": "R4/R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/prompts/report-daily-lead.md",
+          "kind": "file",
+          "blobOid": "5433bc60817dcaa149719ce34552c64ff87e32d5",
+          "sha256": "77f6576c77a19dbd25d24e1fd9b614b0acc3f3d3c23b51d1d3339854e5b10fed",
+          "bytes": 462
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-11",
+      "section": "C",
+      "upstream": "IND/prompts/prefilter.md",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "计划按§4.1/4.2适配，当前未实施。",
+      "stage": "R3",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/prompts/prefilter.md",
+          "kind": "file",
+          "blobOid": "4fbd092cad1f69e009a9fac3681d6fc355ba1ee4",
+          "sha256": "bc27aaf562982f23e1b6fd93a45506073ea10f1552b68e3ea85a1697277ccce0",
+          "bytes": 1601
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-12",
+      "section": "C",
+      "upstream": "IND/prompts/selection-score.md",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "计划按§4.1/4.2适配，当前未实施。",
+      "stage": "R3",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/prompts/selection-score.md",
+          "kind": "file",
+          "blobOid": "2f80469d40abc1d17685e809739f8ad324ccb9c7",
+          "sha256": "11700da358cfa0a07b73deaf872ac7fcf43cf665e47e8a6b40e594fa82447ace",
+          "bytes": 9705
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-13",
+      "section": "C",
+      "upstream": "IND/prompts/structure.md",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "计划按§4.1/4.2适配，当前未实施。",
+      "stage": "R3",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/prompts/structure.md",
+          "kind": "file",
+          "blobOid": "bd07ecf5ec346df48e229593c155d77626cf52d4",
+          "sha256": "8040e4b8f8649fcb96225eca9d5f4c09d600358df66ba531c1cabb8c1bfdeaff",
+          "bytes": 1136
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-14",
+      "section": "C",
+      "upstream": "IND/prompts/rules-domain.md",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "行业配置/规则/金标格式未作为R3数据与消费者实施。",
+      "stage": "R3–R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/prompts/rules-domain.md",
+          "kind": "file",
+          "blobOid": "bba754893537e1d41f8a42398934c9affef9f34e",
+          "sha256": "d2ae6066259bac3144eb2bea32f0239e15dd23f7e19d1acf281727853277a864",
+          "bytes": 3930
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-15",
+      "section": "C",
+      "upstream": "IND/taxonomy.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "行业配置/规则/金标格式未作为R3数据与消费者实施。",
+      "stage": "R3–R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/taxonomy.ts",
+          "kind": "file",
+          "blobOid": "49062c6fe8715014df31b2eacbf498dd4b88c43f",
+          "sha256": "b452537054e6ab7877781b80bc15d38b7a7a809cead4bdcc9d149cec7a20ae18",
+          "bytes": 10941
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-16",
+      "section": "C",
+      "upstream": "IND/selection.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "行业配置/规则/金标格式未作为R3数据与消费者实施。",
+      "stage": "R3–R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/selection.ts",
+          "kind": "file",
+          "blobOid": "6c0a63384181bd11d9e29d15dd70f110dbd0b477",
+          "sha256": "770195fcae042d4d64d765e9f3921055a85779509bd31dceb66ab853428fcc9b",
+          "bytes": 1220
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-17",
+      "section": "C",
+      "upstream": "IND/site.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "行业配置/规则/金标格式未作为R3数据与消费者实施。",
+      "stage": "R3–R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/site.ts",
+          "kind": "file",
+          "blobOid": "9002c66061becdec6889516b3641d284ee12d159",
+          "sha256": "fc6f010c374e627cab82472d37385f1eea3571d7faf6ec4358dc6a67aac9196b",
+          "bytes": 4456
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "C-18",
+      "section": "C",
+      "upstream": "IND/gold.example.jsonl",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "行业配置/规则/金标格式未作为R3数据与消费者实施。",
+      "stage": "R3–R5",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "industry/gold.example.jsonl",
+          "kind": "file",
+          "blobOid": "0380ba0b108dd33d5999a34da2c6a98a096dbaa4",
+          "sha256": "173d4e87d50c12b1edcfda984d6358b1e8140c659941bc6c60920ae91feb07fb",
+          "bytes": 1180
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "D-01",
+      "section": "D",
+      "upstream": "BE/jobs/* + apps/worker/src/schedules.ts",
+      "classification": "原工程等价",
+      "targets": [
+        "server/runtime/background-runtime.ts",
+        "server/runtime/bootstrap.ts",
+        "server/runtime/registry.ts",
+        "server/runtime/intel-ownership.ts"
+      ],
+      "tests": [
+        "server/runtime/background-runtime.test.ts",
+        "server/runtime/intel-bootstrap.test.ts",
+        "server/runtime/intel-production.test.ts"
+      ],
+      "scope": "已有单Runtime，job/executor/DB唯一运行和文件lease；错过周期/退避等复用当前Runtime，不引入pg-boss/第二task表。R4合并串行任务尚未实施。",
+      "stage": "R2",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/jobs/*",
+          "kind": "directory_or_pattern",
+          "members": 6,
+          "notCopied": true
+        },
+        {
+          "path": "apps/worker/src/schedules.ts",
+          "kind": "file",
+          "blobOid": "abbfac241fb5a0c2c384cd5552f47831e3a7be09",
+          "sha256": "6ec8bac408d53bff853fee00b95da9c925e065e02af1f4be22621b94cf2211b4",
+          "bytes": 6869
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/runtime/background-runtime.ts",
+          "sha256": "48056c2585cc1cf0b5cb11c3a7166deca851ddee06051ed45bfcbefec5de75d1",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/runtime/bootstrap.ts",
+          "sha256": "c80dff14da3e869d216536882bf5dbf6949daa6bfb60103c542d0a2a780df973",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/runtime/registry.ts",
+          "sha256": "ef80bf2316c29ec8f4b28d84c7b532421c764b479ba6d4ec3a66798b4e6556de",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/runtime/intel-ownership.ts",
+          "sha256": "c2b8339cf4ee974f02752b57deab04d90744f5bbe7a68e9ff3860c72228622f3",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "D-02",
+      "section": "D",
+      "upstream": "BE/admin/sources.ts + apps/web",
+      "classification": "阶段未实施",
+      "targets": [
+        "server/intel/manual-checklist.ts",
+        "server/utils/intel-read.ts"
+      ],
+      "tests": [
+        "server/api/shipping/intel/read-http.test.ts",
+        "server/api/shipping/intel/manual-http.test.ts"
+      ],
+      "scope": "仅已有只读/手工子集；试抓预览、乐观锁、完整配置管理未移植，未来需单独范围，不称整个上游后台已替换。",
+      "stage": "后续信源管理",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/admin/sources.ts",
+          "kind": "file",
+          "blobOid": "9249dc63dd3d39ebe71cd473dd1001c6851d4f82",
+          "sha256": "09bb743e175b52cd7bcfc5701544b9a78e6e0dd4b8e33041a1d91ecc2f28b459",
+          "bytes": 11226
+        },
+        {
+          "path": "apps/web",
+          "kind": "directory_or_pattern",
+          "members": 125,
+          "notCopied": true
+        }
+      ],
+      "codeEvidence": [
+        {
+          "path": "server/intel/manual-checklist.ts",
+          "sha256": "716f030396b93c54e1d24a4f99231dbb12ea103077bf9360f70bf1e5b5b88e23",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "server/utils/intel-read.ts",
+          "sha256": "314071973298297580562114636f03a5f83fb904304a3f4a99ab2b6e5f806c2f",
+          "hashBasis": "committed_text_LF"
+        }
+      ]
+    },
+    {
+      "id": "D-03",
+      "section": "D",
+      "upstream": "BE/events/hot.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "计划只参考独立来源去重概念；风险聚合/排序未实施，旧HOT和demo不充当R4。",
+      "stage": "R4",
+      "excluded": false,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/events/hot.ts",
+          "kind": "file",
+          "blobOid": "cf3f8c98a3b9374a77a2d09c7dd885a0c440da00",
+          "sha256": "7336dd6378faebeaa03e30742351ab9cb0b8942ff9d402b9b4747aaf708fc645",
+          "bytes": 12726
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "E-01",
+      "section": "E",
+      "upstream": "BE/sources/x.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "原计划明确不复用，不是待补的R2任务；不使用AIHOT名称/logo。",
+      "stage": "明确排除",
+      "excluded": true,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/sources/x.ts",
+          "kind": "file",
+          "blobOid": "51b2f14fc880216ef68118c7989e6aa8dbc07514",
+          "sha256": "2ee111e93de4eaf57193298c4b1cf3db15d92cb3ddf6c5dd8d53be7d6991bbf2",
+          "bytes": 10908
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "E-02",
+      "section": "E",
+      "upstream": "BE/sources/mp.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "原计划明确不复用，不是待补的R2任务；不使用AIHOT名称/logo。",
+      "stage": "明确排除",
+      "excluded": true,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/sources/mp.ts",
+          "kind": "file",
+          "blobOid": "ce7d7a519eea4dc0424d6155beb6101ef217f79b",
+          "sha256": "f08cd4348b35019d4264c6e7bbad988c48b758b7076e561af8f195dde4fd8c7d",
+          "bytes": 8172
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "E-03",
+      "section": "E",
+      "upstream": "BE/providers/jina.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "原计划明确不复用，不是待补的R2任务；不使用AIHOT名称/logo。",
+      "stage": "明确排除",
+      "excluded": true,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/providers/jina.ts",
+          "kind": "file",
+          "blobOid": "913d2a2dbaf31c6aba0d2dc3005fa8b0fff21623",
+          "sha256": "f0119f13dc35e2a91bfb22a285eaa74252c4fffe39f435976b12a18cec8527ed",
+          "bytes": 3680
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "E-04",
+      "section": "E",
+      "upstream": "BE/providers/socialdata.ts",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "原计划明确不复用，不是待补的R2任务；不使用AIHOT名称/logo。",
+      "stage": "明确排除",
+      "excluded": true,
+      "upstreamEvidence": [
+        {
+          "path": "packages/backend/src/providers/socialdata.ts",
+          "kind": "file",
+          "blobOid": "edd889317144b16191650dcf12b70e08856a9d16",
+          "sha256": "fb5b527b2d6e7c205b33b0175c033faabc99855a5d19082525890c50b557299b",
+          "bytes": 8100
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "E-05",
+      "section": "E",
+      "upstream": "apps/web",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "原计划明确不复用，不是待补的R2任务；不使用AIHOT名称/logo。",
+      "stage": "明确排除",
+      "excluded": true,
+      "upstreamEvidence": [
+        {
+          "path": "apps/web",
+          "kind": "directory_or_pattern",
+          "members": 125,
+          "notCopied": true
+        }
+      ],
+      "codeEvidence": []
+    },
+    {
+      "id": "E-06",
+      "section": "E",
+      "upstream": "AI行业模型排行/Codex监控专用模块",
+      "classification": "阶段未实施",
+      "targets": [],
+      "tests": [],
+      "scope": "原计划明确不复用，不是待补的R2任务；不使用AIHOT名称/logo。",
+      "stage": "明确排除",
+      "excluded": true,
+      "upstreamEvidence": [
+        {
+          "path": "AI行业模型排行/Codex监控专用模块",
+          "kind": "not_a_resolved_fixed_file",
+          "members": 0,
+          "notCopied": true
+        }
+      ],
+      "codeEvidence": []
+    }
+  ],
+  "historicalTestEvidence": {
+    "path": "docs/evidence/gate-954c831-material-read/summary.json",
+    "sha256": "ac14624a122e8466ddbb3b1a56bf7bf97be01c3f27276b987ded7d18b94f8726",
+    "hashBasis": "committed_text_LF"
+  },
+  "productGateThisRound": "NOT_RUN_docs_only",
+  "independentAuditAcceptance": "PENDING_PARENT"
+}

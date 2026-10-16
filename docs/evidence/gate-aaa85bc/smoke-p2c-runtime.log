@@ -1,0 +1,12 @@
+{"name":"smoke-p2c-runtime","command":"pnpm smoke:p2c-runtime","sha":"aaa85bcc212ff285ab581086e0ff0a890dff6b43","started":"2026-10-13T10:36:00.235Z","finished":"2026-10-13T10:36:01.205Z","rawExit":0,"signal":null}
+STDOUT
+
+> shipping-hot@0.0.41 smoke:p2c-runtime D:\try one\Shipping HOT
+> node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p2c-runtime-sqlite-smoke.ts
+
+{"process":"B","persisted":true,"status":"healthy","lastSuccessAt":"2026-08-24T00:00:01.000Z","syncRuns":1}
+
+STDERR
+(node:45068) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./scripts/tsx-alias-loader.mjs", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)

@@ -1,0 +1,41 @@
+{
+  "correction": "Previous32c8974 attached this existing response only to XX-W02 and omitted the identical XX-W01 catalogue product URL. This receipt fixes attribution and current availability without a new JMA request.",
+  "originalCapture": {
+    "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/XX-W02-targetTc-capture.json",
+    "sha256": "8e791a21bead8c6f565faf4847351e6333934677e88e518d0eb5d8da4bc36100",
+    "hashBasis": "committed_text_LF"
+  },
+  "originalRequestLedger": {
+    "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/request-ledger.json",
+    "sha256": "2fdacbb87f06311b0c5920cb2625999b73a2def5b0a3ca3b5708eeedd9909d1c",
+    "hashBasis": "committed_text_LF"
+  },
+  "recordedRequestId": "XX-W02-targetTc",
+  "recordedUrl": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+  "recordedAt": "2026-10-15T05:53:37.778Z",
+  "recordedHttpStatus": 404,
+  "recordedWireSha256": "959efccbba82d9eca9d398d32811d456f51929aff12dfba2ccaf60a0b1b35b58",
+  "originalRecordedGetCount": 1,
+  "sourceGetAttemptsThisRound": 0,
+  "systemDnsCallsThisRound": 0,
+  "exactCatalogueRowLfSha256": "d49156c4c4b90d9645ba34b34f63412e81c63867196ca39142b06835d1a9d5f1",
+  "providerConstantLineLfSha256": "fb35efb04995ea662cd4966670abafcc6877263048a8400d5ae6b2e88cce3641",
+  "products": [
+    {
+      "id": "XX-W01",
+      "role": "exact_catalogue_current_TC_list_and_existing_provider_constant",
+      "currentR24": "BLOCKED",
+      "countedOK": false
+    },
+    {
+      "id": "XX-W02",
+      "role": "prerequisite_list_for_forecast_and_specifications",
+      "currentR24": "PARTIAL",
+      "countedOK": false
+    }
+  ],
+  "current404IsNotEmptyList": true,
+  "noAlternativeUrlGuessed": true,
+  "historicalNumericDiagnostic": "Retain3/5 as limited historical diagnostics; not current availability or wire replay",
+  "requestCountNotDoubled": true
+}

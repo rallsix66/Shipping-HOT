@@ -1,0 +1,18 @@
+
+> shipping-hot@0.0.41 typecheck D:\try one\Shipping HOT\.tmp\intel-chain-final-build
+> tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.app.json
+
+test/intel-chain.test.ts(14,22): error TS2307: Cannot find module '#/intel/__fixtures__/isolated-db' or its corresponding type declarations.
+test/intel-chain.test.ts(15,34): error TS2307: Cannot find module '#/intel/sources' or its corresponding type declarations.
+test/intel-chain.test.ts(16,30): error TS2307: Cannot find module '#/intel/manual' or its corresponding type declarations.
+test/intel-chain.test.ts(17,39): error TS2307: Cannot find module '#/runtime/registry' or its corresponding type declarations.
+test/intel-chain.test.ts(18,71): error TS2307: Cannot find module '#/runtime/bootstrap' or its corresponding type declarations.
+test/intel-chain.test.ts(19,38): error TS2307: Cannot find module '#/runtime/intel-collect-job' or its corresponding type declarations.
+test/intel-chain.test.ts(20,26): error TS2307: Cannot find module '#/api/shipping/intel/items.get' or its corresponding type declarations.
+test/intel-chain.test.ts(21,27): error TS2307: Cannot find module '#/api/shipping/intel/items/[id].get' or its corresponding type declarations.
+test/intel-chain.test.ts(22,30): error TS2307: Cannot find module '#/api/shipping/intel/manual.get' or its corresponding type declarations.
+test/intel-chain.test.ts(37,38): error TS7006: Parameter 'row' implicitly has an 'any' type.
+test/intel-chain.test.ts(77,226): error TS7006: Parameter 'job' implicitly has an 'any' type.
+test/intel-chain.test.ts(87,30): error TS7006: Parameter 'row' implicitly has an 'any' type.
+test/intel-chain.test.ts(113,59): error TS7006: Parameter 'row' implicitly has an 'any' type.
+ ELIFECYCLE  Command failed with exit code 2.

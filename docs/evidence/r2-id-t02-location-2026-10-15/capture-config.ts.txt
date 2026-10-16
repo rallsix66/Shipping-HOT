@@ -1,0 +1,2 @@
+import base from "../vitest.config"
+export default { ...base, test: { ...base.test, include: [".tmp/r2-id-t02-location-20261015.test.ts"] } }

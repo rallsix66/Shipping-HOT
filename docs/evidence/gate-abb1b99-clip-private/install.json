@@ -1,0 +1,9 @@
+{
+  "name": "install",
+  "command": "pnpm install --frozen-lockfile --registry=https://registry.npmjs.org",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-private-abb1b99",
+  "sha": "abb1b992a7de030025b16ad06ded63211e99ff1b",
+  "startedAt": "2026-10-16T08:03:36.472Z",
+  "endedAt": "2026-10-16T08:03:46.121Z",
+  "rawExit": 0
+}

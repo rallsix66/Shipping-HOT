@@ -1,0 +1,10 @@
+{
+  "command": "node node_modules/eslint/bin/eslint.js docs/architecture.md docs/status.md docs/handoffs/r2-next-execution-2026-10-15.md docs/evidence/r2-current-source-matrix-2026-10-14/report.md docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md third_party/aihot/README.md docs/evidence/r2-readability-offline-2026-10-15/report.md docs/evidence/r2-readability-offline-2026-10-15/closeout.md",
+  "startedAt": "2026-10-15T09:39:20.354Z",
+  "finishedAt": "2026-10-15T09:39:23.040Z",
+  "rawExit": 0,
+  "stdoutExactUtf8": "",
+  "stderrExactUtf8": "",
+  "stdoutOriginalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrOriginalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

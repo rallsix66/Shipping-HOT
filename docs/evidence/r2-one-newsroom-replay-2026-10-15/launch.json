@@ -1,0 +1,13 @@
+{
+  "sha": "01934a5746c10d4165f4c4ffc5ce145d6de33d16",
+  "startedAt": "2026-10-15T03:08:01.949Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "-c",
+    ".tmp/one-newsroom-raw-replay-20261015.config.ts"
+  ],
+  "actualSourceHttpRequests": 0,
+  "material": "Complete original ONE635664byte HTML through collector, not reconstructed JSON response"
+}

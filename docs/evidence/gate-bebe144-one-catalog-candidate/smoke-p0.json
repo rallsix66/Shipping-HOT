@@ -1,0 +1,13 @@
+{
+  "name": "smoke-p0",
+  "command": "pnpm smoke:p0-native",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\one-catalog-candidate-build-20261015",
+  "sha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "startedAt": "2026-10-15T03:41:41.399Z",
+  "finishedAt": "2026-10-15T03:41:42.638Z",
+  "rawExit": 0,
+  "stdoutExactUtf8": "\n> shipping-hot@0.0.41 smoke:p0-native D:\\try one\\Shipping HOT\\.tmp\\one-catalog-candidate-build-20261015\n> node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p0-native-sqlite-smoke.ts\n\n{\"process\":\"B\",\"node\":\"v24.15.0\",\"abi\":\"137\",\"bootstrapCompletedAt\":\"2026-10-15T03:41:42.363Z\",\"watchedPort\":\"p0-smoke-port-shekou\",\"portDirectory\":\"ready\"}\n",
+  "stdoutOriginalByteSha256": "f0fb5261d7f27fce61911ab781364c896347b912c120245ddc67c036b6957453",
+  "stderrExactUtf8": "(node:12580) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/tsx-alias-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:41560) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"file%3A///D%3A/try%2520one/Shipping%2520HOT/.tmp/one-catalog-candidate-build-20261015/scripts/tsx-alias-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:22556) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"file%3A///D%3A/try%2520one/Shipping%2520HOT/.tmp/one-catalog-candidate-build-20261015/scripts/tsx-alias-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+  "stderrOriginalByteSha256": "e8eed9385979eae28f843be514c4eee0bfaeed9bd634fbe036015945946d8da0"
+}

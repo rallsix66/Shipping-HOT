@@ -1,0 +1,105 @@
+{
+  "id": "VN-T01",
+  "url": "https://idea.gov.vn/",
+  "enabled": false,
+  "persistence": "disallowed",
+  "config": {
+    "listSelector": "#newSlider",
+    "itemSelector": "li",
+    "linkSelector": "a.news012ndLink[href]",
+    "titleSelector": ".news012ndLinkTit",
+    "publishedAtSelector": ".news012ndLinkTime",
+    "dateOrder": "dmy",
+    "calendar": "gregorian",
+    "allowUrlPrefixes": [
+      "https://idea.gov.vn/default.aspx"
+    ],
+    "dateRuleBasis": "VN-T01 complete raw observed 2026-10-14: unique newSlider has three news012ndLink items, title isolated in news012ndLinkTit and local D/M/Y day in news012ndLinkTime. Exact default.aspx business query identities retained; no time or timezone."
+  },
+  "startedAt": "2026-10-14T09:28:05.509Z",
+  "httpRequests": 0,
+  "material": "complete private real response bytes, not synthetic or sanitized skeleton",
+  "rawHtmlCommitted": false,
+  "fetchedRawSha256": "972674566750a436a01f84020a512400391dd47427a79464ed735f146f8c16ca",
+  "rawBytes": 22451,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 22451
+  },
+  "adapterCount": 3,
+  "dateRules": [
+    "configured_dmy"
+  ],
+  "samples": [
+    {
+      "titleExcerpt": "Hải Phòng thúc đẩy kết nối qua thương mại điện tử",
+      "canonicalUrl": "https://idea.gov.vn/default.aspx?do=detail&id=a7f3cc49-326f-4da5-aedb-2a12cbd4b43c&page=news",
+      "dateEvidence": {
+        "raw": "02/10/2026",
+        "rule": "configured_dmy",
+        "basis": "VN-T01 complete raw observed 2026-10-14: unique newSlider has three news012ndLink items, title isolated in news012ndLinkTit and local D/M/Y day in news012ndLinkTime. Exact default.aspx business query identities retained; no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-02",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "Cục Thương mại điện tử đồng hành cùng Hải Phòng nâng cao hiệu lực quản lý và phát triển thị trường thương mại điện tử",
+      "canonicalUrl": "https://idea.gov.vn/default.aspx?do=detail&id=d9379a52-1b51-4dcb-b0f3-5675939eb95b&page=news",
+      "dateEvidence": {
+        "raw": "01/10/2026",
+        "rule": "configured_dmy",
+        "basis": "VN-T01 complete raw observed 2026-10-14: unique newSlider has three news012ndLink items, title isolated in news012ndLinkTit and local D/M/Y day in news012ndLinkTime. Exact default.aspx business query identities retained; no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-01",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "Hải Phòng tổ chức Hội chợ Thương mại điện tử năm 2026",
+      "canonicalUrl": "https://idea.gov.vn/default.aspx?do=detail&id=1a1ddc3f-3eeb-406a-bfc5-5d8095241b9d&page=news",
+      "dateEvidence": {
+        "raw": "01/10/2026",
+        "rule": "configured_dmy",
+        "basis": "VN-T01 complete raw observed 2026-10-14: unique newSlider has three news012ndLink items, title isolated in news012ndLinkTit and local D/M/Y day in news012ndLinkTime. Exact default.aspx business query identities retained; no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-01",
+        "publishedAt": null
+      }
+    }
+  ],
+  "first": {
+    "status": "ok_items",
+    "runId": "41140b5a-0c66-45b8-ac6a-8206b2a6cd2f",
+    "itemsSeen": 3,
+    "itemsNew": 3,
+    "itemsRevised": 0
+  },
+  "firstCounts": {
+    "items": 3,
+    "versions": 3
+  }
+}

@@ -1,0 +1,45 @@
+[
+  {
+    "id": "MY-P03",
+    "httpStatus": 200,
+    "bytes": 73037,
+    "rawResponseSha256": "880e1a180dc686d9d9d71578a753ee87af24042563a7c58f82c0885f8d3c5691",
+    "relationshipMetadataSha256": "4e06c1f33cbfc6b4c4d54214f4732212cafa1dc7f034e525546c88098c8b046f",
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "default",
+      "declarations": [],
+      "conflict": false,
+      "byteLength": 73037
+    },
+    "originalFixture": false,
+    "status": "FETCHED_HELD_IN_RAM"
+  },
+  {
+    "id": "TH-C01",
+    "httpStatus": 200,
+    "bytes": 123625,
+    "rawResponseSha256": "230d31ff01edebeb123312a7b987e96827dea0921de90265abb883ea67c3322d",
+    "relationshipMetadataSha256": "52f93b5dd2618f11676e88124ae5eff4d2af6acfd9a8b543953311380f130630",
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "http",
+      "declarations": [
+        {
+          "source": "http",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        },
+        {
+          "source": "meta",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        }
+      ],
+      "conflict": false,
+      "byteLength": 123625
+    },
+    "originalFixture": false,
+    "status": "FETCHED_HELD_IN_RAM"
+  }
+]

@@ -1,0 +1,28 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/intel-production-final2-build
+
+ ✓ test/policy-console.test.ts (12 tests) 16ms
+ ✓ test/calendar-demo.test.ts (8 tests) 170ms
+ ✓ test/manual-intel.test.ts (2 tests) 16ms
+ ✓ test/ui-smoke.test.ts (13 tests) 20ms
+ ✓ test/reduce-motion.test.ts (2 tests) 38ms
+ ✓ test/ports-demo.test.ts (11 tests) 41ms
+ ✓ server/services/port-weather-panel.test.ts (2 tests) 160ms
+ ✓ server/api/shipping/intel/manual-http.test.ts (3 tests) 313ms
+ ✓ server/intel/adaptive.test.ts (2 tests) 109ms
+ ✓ server/services/promo-calendar.test.ts (12 tests) 902ms
+ ✓ server/database/policy.test.ts (19 tests) 1058ms
+ ✓ server/intel/chain.test.ts (1 test) 488ms
+   ✓ joins existing Runtime, archived safe-byte fetch, SQLite, restart, HTTP and real page SSR offline  487ms
+ ✓ server/runtime/intel-production.test.ts (4 tests) 660ms
+   ✓ holds a database-scoped lease across processes, refuses competitors and never deletes a stale lease  376ms
+ ✓ server/runtime/intel-bootstrap.test.ts (9 tests) 696ms
+ ✓ server/api/shipping/intel/read-http.test.ts (19 tests) 1301ms
+ ✓ server/intel/collect.test.ts (22 tests) 1163ms
+ ✓ server/intel/manual.test.ts (26 tests) 1345ms
+
+ Test Files  17 passed (17)
+      Tests  167 passed (167)
+   Start at  14:43:04
+   Duration  3.59s (transform 10.39s, setup 0ms, import 20.33s, tests 8.50s, environment 3ms)
+

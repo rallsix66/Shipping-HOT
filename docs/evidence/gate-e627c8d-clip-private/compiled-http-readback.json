@@ -1,0 +1,326 @@
+{
+  "legacy": {
+    "outcome": "created",
+    "created": true,
+    "revised": false,
+    "itemId": "75a95a63-9573-4006-a376-ab864bc6aa62",
+    "versionId": "92516ffb-e658-4f13-a66c-ff2394fb0a21"
+  },
+  "saved": {
+    "outcome": "revised",
+    "created": false,
+    "revised": true,
+    "itemId": "75a95a63-9573-4006-a376-ab864bc6aa62",
+    "versionId": "dae9dbeb-e822-4c67-a2c8-450430e64f21"
+  },
+  "detail": {
+    "item": {
+      "id": "75a95a63-9573-4006-a376-ab864bc6aa62",
+      "sourceId": "intel:manual:clip",
+      "title": "Private capture fixture",
+      "publishedAt": null,
+      "firstSeenAt": "2026-10-16T07:57:35.493Z",
+      "lastSeenAt": "2026-10-16T07:57:35.497Z",
+      "currentVersionId": "dae9dbeb-e822-4c67-a2c8-450430e64f21",
+      "canonicalUrl": "https://example.org/private-fixture"
+    },
+    "source": {
+      "id": "intel:manual:clip",
+      "catalogId": "MANUAL-CLIP",
+      "name": "人工剪藏资料（未经独立核验）",
+      "kind": "manual",
+      "persistence": "disallowed",
+      "status": "never_run",
+      "consecutiveFailures": 0,
+      "nextSyncAt": null,
+      "lastRunAt": null,
+      "lastOkAt": null
+    },
+    "manualActions": [
+      {
+        "request_id": "private-http-request-001",
+        "action": "submit",
+        "operator": "未识别人工操作（未经身份认证）",
+        "entered_at": "2026-10-16T07:57:35.497Z",
+        "item_id": "75a95a63-9573-4006-a376-ab864bc6aa62",
+        "version_id": "dae9dbeb-e822-4c67-a2c8-450430e64f21",
+        "outcome": "revised"
+      },
+      {
+        "request_id": "private-http-legacy-001",
+        "action": "submit",
+        "operator": "未识别人工操作（未经身份认证）",
+        "entered_at": "2026-10-16T07:57:35.493Z",
+        "item_id": "75a95a63-9573-4006-a376-ab864bc6aa62",
+        "version_id": "92516ffb-e658-4f13-a66c-ff2394fb0a21",
+        "outcome": "created"
+      }
+    ],
+    "manualLabel": "人工剪藏资料（未经独立核验，不是官方预警）",
+    "clip": {
+      "protocol": "shipping-hot-clip-v1",
+      "actualUrl": "https://example.org/private-fixture",
+      "title": "Private capture fixture",
+      "body": "",
+      "mode": "selection",
+      "date": {
+        "raw": "",
+        "field": "",
+        "role": "unknown"
+      },
+      "capturedAt": "2026-10-16T07:45:00.000Z",
+      "extractorVersion": "synthetic-private-v1",
+      "capture": "manual_user_capture",
+      "usage": "private_material",
+      "rightsStatus": "unknown",
+      "recordedBy": "未识别人工操作（未经身份认证）",
+      "recordedAt": "2026-10-16T07:57:35.497Z",
+      "verification": "manual_capture_unverified"
+    },
+    "manualEntry": {
+      "operator": "未识别人工操作（未经身份认证）",
+      "enteredAt": "2026-10-16T07:57:35.497Z"
+    },
+    "versions": {
+      "items": [
+        {
+          "id": "dae9dbeb-e822-4c67-a2c8-450430e64f21",
+          "itemId": "75a95a63-9573-4006-a376-ab864bc6aa62",
+          "publishedAt": null,
+          "fetchedAt": "2026-10-16T07:57:35.497Z",
+          "createdAt": "2026-10-16T07:57:35.497Z",
+          "contentScope": "full_text",
+          "dateEvidence": {
+            "raw": null,
+            "rule": "manual_raw",
+            "basis": "User supplied; unverified; field=unknown",
+            "calendar": null,
+            "role": "unknown",
+            "precision": "unknown",
+            "timezone": "missing",
+            "utcOffset": null,
+            "localDate": null,
+            "publishedAt": null
+          }
+        },
+        {
+          "id": "92516ffb-e658-4f13-a66c-ff2394fb0a21",
+          "itemId": "75a95a63-9573-4006-a376-ab864bc6aa62",
+          "publishedAt": null,
+          "fetchedAt": "2026-10-16T07:57:35.493Z",
+          "createdAt": "2026-10-16T07:57:35.493Z",
+          "contentScope": "metadata_only",
+          "dateEvidence": {
+            "raw": null,
+            "rule": "manual_raw",
+            "basis": "User supplied; unverified; field=unknown",
+            "calendar": null,
+            "role": "unknown",
+            "precision": "unknown",
+            "timezone": "missing",
+            "utcOffset": null,
+            "localDate": null,
+            "publishedAt": null
+          }
+        }
+      ],
+      "limit": 20,
+      "offset": 0,
+      "hasMore": false
+    },
+    "selectedVersion": {
+      "id": "dae9dbeb-e822-4c67-a2c8-450430e64f21",
+      "itemId": "75a95a63-9573-4006-a376-ab864bc6aa62",
+      "publishedAt": null,
+      "fetchedAt": "2026-10-16T07:57:35.497Z",
+      "createdAt": "2026-10-16T07:57:35.497Z",
+      "contentScope": "full_text",
+      "dateEvidence": {
+        "raw": null,
+        "rule": "manual_raw",
+        "basis": "User supplied; unverified; field=unknown",
+        "calendar": null,
+        "role": "unknown",
+        "precision": "unknown",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": null,
+        "publishedAt": null
+      },
+      "blocks": [
+        {
+          "blockKey": "title",
+          "order": 0,
+          "type": "title",
+          "text": "Private capture fixture"
+        },
+        {
+          "blockKey": "p0",
+          "order": 1,
+          "type": "paragraph",
+          "text": "Authored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\nAuthored private fixture  \t\n\n"
+        }
+      ]
+    }
+  },
+  "historical": {
+    "item": {
+      "id": "75a95a63-9573-4006-a376-ab864bc6aa62",
+      "sourceId": "intel:manual:clip",
+      "title": "Private capture fixture",
+      "publishedAt": null,
+      "firstSeenAt": "2026-10-16T07:57:35.493Z",
+      "lastSeenAt": "2026-10-16T07:57:35.497Z",
+      "currentVersionId": "dae9dbeb-e822-4c67-a2c8-450430e64f21",
+      "canonicalUrl": "https://example.org/private-fixture"
+    },
+    "source": {
+      "id": "intel:manual:clip",
+      "catalogId": "MANUAL-CLIP",
+      "name": "人工剪藏资料（未经独立核验）",
+      "kind": "manual",
+      "persistence": "disallowed",
+      "status": "never_run",
+      "consecutiveFailures": 0,
+      "nextSyncAt": null,
+      "lastRunAt": null,
+      "lastOkAt": null
+    },
+    "manualActions": [
+      {
+        "request_id": "private-http-request-001",
+        "action": "submit",
+        "operator": "未识别人工操作（未经身份认证）",
+        "entered_at": "2026-10-16T07:57:35.497Z",
+        "item_id": "75a95a63-9573-4006-a376-ab864bc6aa62",
+        "version_id": "dae9dbeb-e822-4c67-a2c8-450430e64f21",
+        "outcome": "revised"
+      },
+      {
+        "request_id": "private-http-legacy-001",
+        "action": "submit",
+        "operator": "未识别人工操作（未经身份认证）",
+        "entered_at": "2026-10-16T07:57:35.493Z",
+        "item_id": "75a95a63-9573-4006-a376-ab864bc6aa62",
+        "version_id": "92516ffb-e658-4f13-a66c-ff2394fb0a21",
+        "outcome": "created"
+      }
+    ],
+    "manualLabel": "人工剪藏资料（未经独立核验，不是官方预警）",
+    "clip": {
+      "protocol": "shipping-hot-clip-v1",
+      "actualUrl": "https://example.org/private-fixture",
+      "title": "Private capture fixture",
+      "body": "",
+      "mode": "metadata",
+      "date": {
+        "raw": "",
+        "field": "",
+        "role": "unknown"
+      },
+      "capturedAt": "2026-10-16T07:45:00.000Z",
+      "extractorVersion": "synthetic-private-v1",
+      "rights": {
+        "basis": "unknown",
+        "scope": "metadata_only",
+        "evidence": "",
+        "applicableUrl": "https://example.org/private-fixture"
+      },
+      "declaredBy": "未识别人工操作（未经身份认证）",
+      "declaredAt": "2026-10-16T07:57:35.493Z",
+      "verification": "user_declaration_unverified"
+    },
+    "manualEntry": {
+      "operator": "未识别人工操作（未经身份认证）",
+      "enteredAt": "2026-10-16T07:57:35.493Z"
+    },
+    "versions": {
+      "items": [
+        {
+          "id": "dae9dbeb-e822-4c67-a2c8-450430e64f21",
+          "itemId": "75a95a63-9573-4006-a376-ab864bc6aa62",
+          "publishedAt": null,
+          "fetchedAt": "2026-10-16T07:57:35.497Z",
+          "createdAt": "2026-10-16T07:57:35.497Z",
+          "contentScope": "full_text",
+          "dateEvidence": {
+            "raw": null,
+            "rule": "manual_raw",
+            "basis": "User supplied; unverified; field=unknown",
+            "calendar": null,
+            "role": "unknown",
+            "precision": "unknown",
+            "timezone": "missing",
+            "utcOffset": null,
+            "localDate": null,
+            "publishedAt": null
+          }
+        },
+        {
+          "id": "92516ffb-e658-4f13-a66c-ff2394fb0a21",
+          "itemId": "75a95a63-9573-4006-a376-ab864bc6aa62",
+          "publishedAt": null,
+          "fetchedAt": "2026-10-16T07:57:35.493Z",
+          "createdAt": "2026-10-16T07:57:35.493Z",
+          "contentScope": "metadata_only",
+          "dateEvidence": {
+            "raw": null,
+            "rule": "manual_raw",
+            "basis": "User supplied; unverified; field=unknown",
+            "calendar": null,
+            "role": "unknown",
+            "precision": "unknown",
+            "timezone": "missing",
+            "utcOffset": null,
+            "localDate": null,
+            "publishedAt": null
+          }
+        }
+      ],
+      "limit": 20,
+      "offset": 0,
+      "hasMore": false
+    },
+    "selectedVersion": {
+      "id": "92516ffb-e658-4f13-a66c-ff2394fb0a21",
+      "itemId": "75a95a63-9573-4006-a376-ab864bc6aa62",
+      "publishedAt": null,
+      "fetchedAt": "2026-10-16T07:57:35.493Z",
+      "createdAt": "2026-10-16T07:57:35.493Z",
+      "contentScope": "metadata_only",
+      "dateEvidence": {
+        "raw": null,
+        "rule": "manual_raw",
+        "basis": "User supplied; unverified; field=unknown",
+        "calendar": null,
+        "role": "unknown",
+        "precision": "unknown",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": null,
+        "publishedAt": null
+      },
+      "blocks": [
+        {
+          "blockKey": "title",
+          "order": 0,
+          "type": "title",
+          "text": "Private capture fixture"
+        }
+      ]
+    }
+  },
+  "after": {
+    "translation_cache": 0,
+    "provider_usage": 0,
+    "provider_runtime": 0,
+    "intel_fetch_run": 0,
+    "intel_item": 1,
+    "intel_item_version": 2,
+    "intel_item_block": 3,
+    "intel_executor": 0,
+    "intel_item_current_change": 2,
+    "intel_source": 42,
+    "intel_manual_action": 3
+  }
+}

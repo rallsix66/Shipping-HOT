@@ -1,0 +1,49 @@
+{
+  "sha": "0a511c09114674d31f3c6334ab1a3834ba8f2c0a",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\readability-build-20261015",
+  "commands": [
+    {
+      "name": "install",
+      "command": "pnpm install --frozen-lockfile",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\readability-build-20261015",
+      "sha": "0a511c09114674d31f3c6334ab1a3834ba8f2c0a",
+      "startedAt": "2026-10-15T09:30:21.422Z",
+      "finishedAt": "2026-10-15T09:30:29.762Z",
+      "rawExit": 0
+    },
+    {
+      "name": "build",
+      "command": "pnpm build",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\readability-build-20261015",
+      "sha": "0a511c09114674d31f3c6334ab1a3834ba8f2c0a",
+      "startedAt": "2026-10-15T09:30:29.762Z",
+      "finishedAt": "2026-10-15T09:31:15.017Z",
+      "rawExit": 0
+    },
+    {
+      "name": "typecheck",
+      "command": "pnpm typecheck",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\readability-build-20261015",
+      "sha": "0a511c09114674d31f3c6334ab1a3834ba8f2c0a",
+      "startedAt": "2026-10-15T09:31:15.018Z",
+      "finishedAt": "2026-10-15T09:31:20.283Z",
+      "rawExit": 2
+    }
+  ],
+  "retainedBefore": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedAfter": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedUnchanged": true,
+  "testedSourceDiff": "",
+  "browser": "NOT_RUN",
+  "s7": "NOT_RUN_no_UI_or_route_change; prior_GUI_acceptance_pending"
+}

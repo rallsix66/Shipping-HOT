@@ -1,0 +1,57 @@
+{
+  "id": "TH-W01",
+  "url": "https://www.tmd.go.th/en/api/xml/CAP",
+  "kind": "parsed metadata derivative only, not original RSS/encoding fixture",
+  "items": [
+    {
+      "title": "Very Heavy Rain",
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261010165731_2.xml",
+      "publishedAt": "2026-10-10T02:42:00.000Z"
+    },
+    {
+      "title": "Heavy Rain",
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261010165957_2.xml",
+      "publishedAt": "2026-10-10T02:59:00.000Z"
+    },
+    {
+      "title": "Heavy Rain",
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261010171757_2.xml",
+      "publishedAt": "2026-10-10T03:10:00.000Z"
+    },
+    {
+      "title": "Very Heavy Rain",
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261011062839_2.xml",
+      "publishedAt": "2026-10-10T15:55:00.000Z"
+    },
+    {
+      "title": "Heavy Rain",
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261011062847_2.xml",
+      "publishedAt": "2026-10-10T15:40:00.000Z"
+    },
+    {
+      "title": "Heavy Rain",
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261011163925_2.xml",
+      "publishedAt": "2026-10-11T02:30:00.000Z"
+    },
+    {
+      "title": "Very Heavy Rain",
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261011164117_2.xml",
+      "publishedAt": "2026-10-11T02:39:00.000Z"
+    },
+    {
+      "title": "Heavy Rain",
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261012054148_2.xml",
+      "publishedAt": "2026-10-11T15:37:00.000Z"
+    },
+    {
+      "title": "Heavy Rain",
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261012165615_2.xml",
+      "publishedAt": "2026-10-12T02:50:00.000Z"
+    },
+    {
+      "title": "Heavy Rain",
+      "url": "https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261013062059_2.xml",
+      "publishedAt": "2026-10-12T16:13:00.000Z"
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "changedSourceIdsOnly": [
+    "XX-K01",
+    "XX-K02"
+  ],
+  "other39SourceEntryDifferences": [],
+  "r2_4Before": {
+    "numerator": 20,
+    "denominator": 39,
+    "ratio": 0.5128205128205128,
+    "minimumOK": 32,
+    "shortfall": 12,
+    "ids": [
+      "CN-P01",
+      "CN-T02",
+      "VN-P03",
+      "VN-W01",
+      "VN-T01",
+      "VN-D01",
+      "TH-W01",
+      "TH-C01",
+      "TH-C02",
+      "MY-C01",
+      "MY-T01",
+      "ID-W01",
+      "ID-T01",
+      "PH-C01",
+      "PH-M01",
+      "XX-W01",
+      "XX-M01",
+      "XX-M03",
+      "XX-A01",
+      "XX-A02"
+    ],
+    "statusCounts": {
+      "OK": 20,
+      "PARTIAL": 11,
+      "NOT_RUN": 5,
+      "STALE": 1,
+      "BLOCKED": 2
+    },
+    "pass": false
+  },
+  "r2_4After": {
+    "numerator": 20,
+    "denominator": 39,
+    "ratio": 0.5128205128205128,
+    "minimumOK": 32,
+    "shortfall": 12,
+    "ids": [
+      "CN-P01",
+      "CN-T02",
+      "VN-P03",
+      "VN-W01",
+      "VN-T01",
+      "VN-D01",
+      "TH-W01",
+      "TH-C01",
+      "TH-C02",
+      "MY-C01",
+      "MY-T01",
+      "ID-W01",
+      "ID-T01",
+      "PH-C01",
+      "PH-M01",
+      "XX-W01",
+      "XX-M01",
+      "XX-M03",
+      "XX-A01",
+      "XX-A02"
+    ],
+    "statusCounts": {
+      "OK": 20,
+      "PARTIAL": 12,
+      "NOT_RUN": 5,
+      "STALE": 1,
+      "BLOCKED": 1
+    },
+    "pass": false
+  },
+  "r2_5Unchanged": true,
+  "numericUnchanged": true
+}

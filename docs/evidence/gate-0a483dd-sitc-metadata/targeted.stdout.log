@@ -1,0 +1,27 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/sitc-metadata-build-20261015
+
+ ✓ server/intel/sources/json-list-html.test.ts (5 tests) 74ms
+ ✓ server/intel/sources/json-list.test.ts (42 tests) 71ms
+ ✓ server/intel/sources/html-index-candidates.test.ts (25 tests) 62ms
+ ✓ server/intel/sources/web-list.test.ts (35 tests) 128ms
+ ✓ server/intel/thai-document-index.test.ts (4 tests) 181ms
+ ✓ server/intel/sitc-index.test.ts (39 tests) 262ms
+ ✓ server/intel/vn-disaster-index.test.ts (22 tests) 160ms
+ ✓ server/intel/post-clash-index.test.ts (18 tests) 382ms
+ ✓ server/intel/html-index-candidates-collect.test.ts (4 tests) 464ms
+ ✓ server/intel/public-index-candidates-collect.test.ts (22 tests) 514ms
+ ✓ server/intel/sources/web-list-conflicts.test.ts (12 tests) 35ms
+ ✓ server/intel/adaptive.test.ts (2 tests) 83ms
+ ✓ server/intel/web-list-collect.test.ts (7 tests) 736ms
+ ✓ server/intel/web-list-conflicts-collect.test.ts (3 tests) 175ms
+ ✓ server/intel/json-list-collect.test.ts (9 tests) 813ms
+ ✓ server/runtime/intel-production.test.ts (4 tests) 528ms
+ ✓ server/runtime/intel-bootstrap.test.ts (9 tests) 573ms
+ ✓ server/intel/collect.test.ts (22 tests) 1124ms
+
+ Test Files  18 passed (18)
+      Tests  284 passed (284)
+   Start at  15:05:33
+   Duration  3.14s (transform 7.19s, setup 0ms, import 19.55s, tests 6.36s, environment 3ms)
+

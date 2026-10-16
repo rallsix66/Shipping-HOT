@@ -1,0 +1,23 @@
+{
+  "seed": {
+    "id": "bounded:XX-M01",
+    "catalogId": "XX-M01",
+    "name": "XX-M01",
+    "kind": "rss",
+    "url": "https://theloadstar.com/feed/",
+    "enabled": false,
+    "persistence": "disallowed",
+    "allowedHosts": [
+      "theloadstar.com"
+    ],
+    "allowedContentTypes": [
+      "application/rss+xml",
+      "application/atom+xml",
+      "application/rdf+xml",
+      "application/xml",
+      "text/xml"
+    ],
+    "intervalMs": 3600000
+  },
+  "role": "Isolated evidence-only configuration, not production registry/candidate or active seed"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "build",
+  "command": "pnpm build",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\frontend-overview-review-build",
+  "sha": "c3e08408623c69a3a071d761ed0300659644bd68",
+  "startedAt": "2026-10-14T01:57:10.336Z",
+  "endedAt": "2026-10-14T01:57:28.143Z",
+  "rawExit": 0
+}

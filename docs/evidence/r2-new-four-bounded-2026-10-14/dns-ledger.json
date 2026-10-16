@@ -1,0 +1,58 @@
+[
+  {
+    "id": "CN-P02",
+    "host": "www.sz.msa.gov.cn",
+    "reservedAt": "2026-10-14T10:55:51.552Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "198.18.0.166",
+        "family": 4
+      }
+    ],
+    "classification": "blocked_address",
+    "finishedAt": "2026-10-14T10:55:51.557Z"
+  },
+  {
+    "id": "VN-D01",
+    "host": "phongchongthientai.mard.gov.vn",
+    "reservedAt": "2026-10-14T10:55:51.558Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "198.18.0.167",
+        "family": 4
+      }
+    ],
+    "classification": "blocked_address",
+    "finishedAt": "2026-10-14T10:55:51.560Z"
+  },
+  {
+    "id": "MY-L01",
+    "host": "www.pos.com.my",
+    "reservedAt": "2026-10-14T10:55:51.561Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "198.18.0.168",
+        "family": 4
+      }
+    ],
+    "classification": "blocked_address",
+    "finishedAt": "2026-10-14T10:55:51.561Z"
+  },
+  {
+    "id": "ID-T02",
+    "host": "jdih.kemenkeu.go.id",
+    "reservedAt": "2026-10-14T10:55:51.562Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "198.18.0.169",
+        "family": 4
+      }
+    ],
+    "classification": "blocked_address",
+    "finishedAt": "2026-10-14T10:55:51.563Z"
+  }
+]

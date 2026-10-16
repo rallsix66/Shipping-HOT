@@ -1,0 +1,7 @@
+{
+  "command": "node scripts/evidence-secret-scan.mjs docs/evidence/gate-7666890-frontend docs/evidence/gate-7666890-frontend-resume docs/evidence/gate-3fb3ad3-frontend",
+  "codeSha": "3fb3ad3dd0d6435c7d36376c579de238b6ecfa3c",
+  "rawExit": 0,
+  "stdout": "total_hits=0 mode=scan",
+  "scope": "new evidence only; pattern scan is not a full security audit"
+}

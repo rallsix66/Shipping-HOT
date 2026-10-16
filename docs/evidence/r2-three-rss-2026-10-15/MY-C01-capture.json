@@ -1,0 +1,47 @@
+{
+  "id": "MY-C01",
+  "url": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
+  "host": "www.customs.gov.my",
+  "catalogLineLfSha256": "3809a3418cb408dd2abf92867d52cb2f79b12bd1d2ccb81b477eee161fd2b71f",
+  "oldWireSha256": "b7f4e2c40f5d27df510d7eb00fb1ae1526b48269f39609a61279b20093b0de60",
+  "startedAt": "2026-10-15T04:10:40.625Z",
+  "systemDnsCalls": 1,
+  "transportInvocations": 1,
+  "status": "CAPTURED_SAFE_XML",
+  "parser": "NOT_RUN",
+  "rawLocalOnly": true,
+  "addresses": [
+    {
+      "address": "103.245.91.224",
+      "family": 4
+    }
+  ],
+  "addressClassification": "public_address",
+  "receivedAt": "2026-10-15T04:10:41.341Z",
+  "httpStatus": 200,
+  "contentType": "application/rss+xml; charset=utf-8",
+  "bytes": 7619,
+  "wireSha256": "a53ae6ded69ef3a0a64bd64c8824d69392592e00a6f87a97425ea82636c4858f",
+  "completeResponseCaptured": true,
+  "locationPresent": false,
+  "locationFollowed": false,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "xml",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 7619
+  },
+  "finishedAt": "2026-10-15T04:10:41.341Z"
+}

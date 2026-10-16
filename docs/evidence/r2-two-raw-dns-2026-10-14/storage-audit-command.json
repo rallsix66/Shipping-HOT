@@ -1,0 +1,1 @@
+{"command":"pnpm exec vitest run -c .tmp/two-raw-storage-audit-20261014.config.ts","started":"2026-10-14T07:32:09.695Z","endedAt":"2026-10-14T07:32:11.254Z","rawExit":0,"scope":"read-only reopened isolated SQLite/full date evidence audit; HTTP0/DNS0"}

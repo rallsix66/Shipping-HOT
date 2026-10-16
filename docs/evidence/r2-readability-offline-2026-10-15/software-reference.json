@@ -1,0 +1,29 @@
+{
+  "upstreamRepository": "https://github.com/KKKKhazix/AIHOT",
+  "commit": "44578fa11da55f2e863900752653e0c221f6cf70",
+  "file": "packages/backend/src/content/extract.ts",
+  "fileBlobOid": "22d6af1003a8d69ffad374de12e380cebe35ac17",
+  "fileBytes": 8426,
+  "fileSha256": "adbe031d1b8f52f1d309bf7ec2c1c8c1f92b8ca0d55b9c3583bf3ee5a57d9cd4",
+  "licensePath": "third_party/aihot/LICENSE",
+  "licenseLfSha256": "b7f53d07ea4ae2eef26a4f8b28cb7d4df95586e2aa713df408f1ffde9f5a0fea",
+  "scope": "Adapt readable(): inert parseHTML -> trusted source base -> Readability charThreshold200/keepClassesfalse -> existing ArticleBlock converter; preserve source container priority; no Jina/X/second fetcher/PG/material storage copied",
+  "upstreamDedicatedExtractTests": [],
+  "dependencies": {
+    "@mozilla/readability": {
+      "version": "0.6.0",
+      "registry": "https://registry.npmjs.org",
+      "approvedBy": "ADR-007/008 + plan5.4 user2026-09-30"
+    },
+    "linkedom": {
+      "version": "0.18.13",
+      "registry": "https://registry.npmjs.org",
+      "approvedBy": "ADR-007/008 + plan5.4 user2026-09-30"
+    }
+  },
+  "businessUpstreamDnsCalls": 0,
+  "businessUpstreamGetRequests": 0,
+  "llmCalls": 0,
+  "paidCalls": 0,
+  "softwareReferenceAndRegistryReadsExcludedFromBusinessCounts": true
+}

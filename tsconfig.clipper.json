@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": { "lib": ["ES2020", "DOM", "DOM.Iterable"], "rootDir": "." },
+  "include": ["extensions/shipping-hot-clipper/src", "shared/manual-clip.ts", "shared/clipper-bridge.ts", "shared/clip-build.ts"]
+}

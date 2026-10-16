@@ -1,0 +1,222 @@
+{
+  "baselineHead": "45d2296301bb85aa18a6e4a5e6509bfa854319b0",
+  "changedSourceIds": [
+    "CN-P02",
+    "ID-T02"
+  ],
+  "other39EntriesUnchanged": true,
+  "idT02ApprovedUpgrade": {
+    "r24": [
+      "PARTIAL",
+      "OK"
+    ],
+    "r25": [
+      "NOT_RUN",
+      "PASS"
+    ],
+    "reviewBasis": "limited_parent_code_and_process_evidence_no_independent_private_raw_replay"
+  },
+  "cnP02QualificationUnchanged": {
+    "r24": "PARTIAL",
+    "r25": "NOT_RUN"
+  },
+  "beforeCoverage": {
+    "r2_4": {
+      "numerator": 24,
+      "denominator": 39,
+      "ratio": 0.6153846153846154,
+      "minimumOK": 32,
+      "shortfall": 8,
+      "ids": [
+        "CN-P01",
+        "CN-W01",
+        "CN-W02",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-W01",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "PH-M01",
+        "XX-K02",
+        "XX-K03",
+        "XX-M01",
+        "XX-M03",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "statusCounts": {
+        "OK": 24,
+        "PARTIAL": 8,
+        "NOT_RUN": 4,
+        "STALE": 1,
+        "BLOCKED": 2
+      },
+      "pass": false
+    },
+    "r2_5": {
+      "numerator": 22,
+      "denominator": 34,
+      "ratio": 0.6470588235294118,
+      "remaining": 12,
+      "ids": [
+        "CN-P01",
+        "CN-W01",
+        "CN-W02",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-W01",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "PH-M01",
+        "XX-K02",
+        "XX-K03",
+        "XX-M01",
+        "XX-M03"
+      ],
+      "statusCounts": {
+        "PASS": 22,
+        "NOT_RUN": 9,
+        "PARTIAL": 1,
+        "FAIL": 2
+      },
+      "pass": false
+    },
+    "numericFieldsSeparate": {
+      "numerator": 3,
+      "denominator": 5,
+      "ids": [
+        "XX-W01",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness"
+    },
+    "r2Continuous24h": {
+      "numerator": 0,
+      "denominator": 39,
+      "status": "NOT_RUN"
+    },
+    "overallR2Pass": false
+  },
+  "afterCoverage": {
+    "r2_4": {
+      "numerator": 25,
+      "denominator": 39,
+      "ratio": 0.6410256410256411,
+      "minimumOK": 32,
+      "shortfall": 7,
+      "ids": [
+        "CN-P01",
+        "CN-W01",
+        "CN-W02",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-W01",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "ID-T02",
+        "PH-C01",
+        "PH-M01",
+        "XX-K02",
+        "XX-K03",
+        "XX-M01",
+        "XX-M03",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "statusCounts": {
+        "OK": 25,
+        "PARTIAL": 7,
+        "NOT_RUN": 4,
+        "STALE": 1,
+        "BLOCKED": 2
+      },
+      "pass": false
+    },
+    "r2_5": {
+      "numerator": 23,
+      "denominator": 34,
+      "ratio": 0.6764705882352942,
+      "remaining": 11,
+      "ids": [
+        "CN-P01",
+        "CN-W01",
+        "CN-W02",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-W01",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "ID-T02",
+        "PH-C01",
+        "PH-M01",
+        "XX-K02",
+        "XX-K03",
+        "XX-M01",
+        "XX-M03"
+      ],
+      "statusCounts": {
+        "PASS": 23,
+        "NOT_RUN": 8,
+        "PARTIAL": 1,
+        "FAIL": 2
+      },
+      "pass": false
+    },
+    "numericFieldsSeparate": {
+      "numerator": 3,
+      "denominator": 5,
+      "ids": [
+        "XX-W01",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness"
+    },
+    "r2Continuous24h": {
+      "numerator": 0,
+      "denominator": 39,
+      "status": "NOT_RUN"
+    },
+    "overallR2Pass": false
+  },
+  "sourceDnsCalls": 1,
+  "sourceGetAttempts": 1,
+  "targetGetAttempts": 0,
+  "normalizedRecords": 0,
+  "recordsPersisted": 0
+}

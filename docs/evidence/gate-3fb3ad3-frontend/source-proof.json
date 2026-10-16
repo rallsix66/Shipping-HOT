@@ -1,0 +1,7 @@
+{
+  "sha": "3fb3ad3dd0d6435c7d36376c579de238b6ecfa3c",
+  "normalizedTrackedDiffRawExit": 0,
+  "stdout": "",
+  "stderr": "warning: in the working copy of 'src/routeTree.gen.ts', LF will be replaced by CRLF the next time Git touches it\n",
+  "note": "Build may report routeTree.gen.ts LF/CRLF status; normalized git diff is empty. Source checkout is the exact code commit; docs/evidence are added afterwards."
+}

@@ -1,0 +1,15 @@
+{
+  "approval": "User delegated instruction2026-10-15: same-product trailing slash and existing weather chain acceptance explicitly approved",
+  "beforeUrl": "https://api.data.gov.my/weather/warning",
+  "afterUrl": "https://api.data.gov.my/weather/warning/",
+  "beforeLine": "| MY-W01 | A | 马来西亚气象局（经 data.gov.my） | https://api.data.gov.my/weather/warning | json_list | en/ms | OK (30/09/2026) | P1 | 开放 API，带 valid_from 和 valid_to 字段 |",
+  "afterLine": "| MY-W01 | A | 马来西亚气象局（经 data.gov.my） | https://api.data.gov.my/weather/warning/ | json_list | en/ms | OK (30/09/2026) | P1 | 开放 API，带 valid_from 和 valid_to 字段 |",
+  "beforeLfSha256": "40979ae016c197075b1950b68f88c78d48b976820deaaadaace1ddd35c6abf3d",
+  "afterLfSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
+  "exactOnlyChangeIsTrailingSlash": true,
+  "existingProviderUrlUnchanged": true,
+  "sourceHostOrPermissionExpanded": false,
+  "newRequests": 0,
+  "redirectProvenance": "docs/evidence/metmalaysia-warning-2026-10-10/raw/fetch-log.txt",
+  "sampleAt": "2026-10-10T08:30:40.728Z"
+}

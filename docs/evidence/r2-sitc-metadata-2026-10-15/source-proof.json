@@ -1,0 +1,46 @@
+{
+  "baselineEvidenceHead": "8be5bdda81ed5f88d43aec5f36d8d970cf479dbe",
+  "testedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "productDiffAtCurrentWorktree": "",
+  "secureFetchDiffFromPriorAcceptedCode": "",
+  "codeFiles": [
+    "server/intel/sitc-index.test.ts",
+    "server/intel/sources/__fixtures__/public-index-synthetic.ts",
+    "server/intel/sources/config-keys.ts",
+    "server/intel/sources/html-index-candidates.test.ts",
+    "server/intel/sources/html-index-candidates.ts",
+    "server/intel/sources/web-list.ts"
+  ],
+  "candidate": {
+    "id": "intel:xx-k03",
+    "catalogId": "XX-K03",
+    "name": "SITC main-site news metadata",
+    "kind": "web_list",
+    "url": "https://www.sitc.com/en/list.asp?classid=44",
+    "enabled": false,
+    "persistence": "disallowed",
+    "allowedHosts": [
+      "www.sitc.com"
+    ],
+    "allowedContentTypes": [
+      "text/html",
+      "application/xhtml+xml"
+    ],
+    "intervalMs": 3600000,
+    "webList": {
+      "listSelector": "#content",
+      "itemSelector": ".media.row-fluid",
+      "linkSelector": "h4.title.media-heading > a[href]",
+      "titleSelector": "h4.title.media-heading > a[href]",
+      "publishedAtSelector": "ul.meta > li",
+      "calendar": "gregorian",
+      "dateFormat": "sitc_publication_day",
+      "metadataLinkRule": "sitc_show",
+      "dateRuleBasis": "XX-K03 saved complete index2026-10-15: each news card pairs its own h4 title/original HTTP show.asp?id identity with whole source-labelled 发布日期: YYYY.MM.DD. Explicit Gregorian day only; no timezone, clock or publication instant. Metadata identity is not HTTP body-fetch permission."
+    }
+  },
+  "sourceRequestsThisRound": 0,
+  "sourceDnsThisRound": 0,
+  "prodEnabled": false,
+  "qualificationReview": "pending"
+}

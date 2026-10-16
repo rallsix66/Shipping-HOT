@@ -1,0 +1,126 @@
+{
+  "source": "VN-P03",
+  "url": "https://saigonnewport.com.vn/tin-tuc",
+  "kind": "sanitized DOM structural metadata derivative; not original HTML or configured parser output",
+  "counts": {
+    "anchors": 126,
+    "tables": 0,
+    "rows": 0,
+    "times": 0
+  },
+  "candidates": [
+    {
+      "anchorDocumentIndex": 63,
+      "titleExcerpt": "",
+      "href": "https://saigonnewport.com.vn/tin-tuc/trach-nhiem-xa-hoi/thieu-tuong-ngo-minh-thuan-truyen-cam-hung-doi-moi-khoi-day-khat-vong-cong-hien.html",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "12/10/2026"
+      ],
+      "anchorCountInAncestor": 3,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": []
+    },
+    {
+      "anchorDocumentIndex": 64,
+      "titleExcerpt": "Thiếu tướng Ngô Minh Thuấn: Truyền cảm hứng đổi mới, khơi dậy khát vọng cống hiến",
+      "href": "https://saigonnewport.com.vn/tin-tuc/trach-nhiem-xa-hoi/thieu-tuong-ngo-minh-thuan-truyen-cam-hung-doi-moi-khoi-day-khat-vong-cong-hien.html",
+      "ancestorTags": [
+        "a",
+        "h3",
+        "div"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "12/10/2026"
+      ],
+      "anchorCountInAncestor": 2,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": []
+    },
+    {
+      "anchorDocumentIndex": 65,
+      "titleExcerpt": "Xem chi tiết",
+      "href": "https://saigonnewport.com.vn/tin-tuc/trach-nhiem-xa-hoi/thieu-tuong-ngo-minh-thuan-truyen-cam-hung-doi-moi-khoi-day-khat-vong-cong-hien.html",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "12/10/2026"
+      ],
+      "anchorCountInAncestor": 2,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "p",
+        "h3",
+        "p"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 66,
+      "titleExcerpt": "",
+      "href": "https://saigonnewport.com.vn/tin-tuc/trach-nhiem-xa-hoi/tong-cong-ty-tan-cang-sai-gon-vinh-danh-18-doanh-nhan-tieu-bieu.html",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "10/10/2026"
+      ],
+      "anchorCountInAncestor": 3,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": []
+    },
+    {
+      "anchorDocumentIndex": 67,
+      "titleExcerpt": "Tổng công ty Tân Cảng Sài Gòn vinh danh 18 doanh nhân tiêu biểu",
+      "href": "https://saigonnewport.com.vn/tin-tuc/trach-nhiem-xa-hoi/tong-cong-ty-tan-cang-sai-gon-vinh-danh-18-doanh-nhan-tieu-bieu.html",
+      "ancestorTags": [
+        "a",
+        "h3",
+        "div"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "10/10/2026"
+      ],
+      "anchorCountInAncestor": 2,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": []
+    },
+    {
+      "anchorDocumentIndex": 68,
+      "titleExcerpt": "Xem chi tiết",
+      "href": "https://saigonnewport.com.vn/tin-tuc/trach-nhiem-xa-hoi/tong-cong-ty-tan-cang-sai-gon-vinh-danh-18-doanh-nhan-tieu-bieu.html",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "10/10/2026"
+      ],
+      "anchorCountInAncestor": 2,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "p",
+        "h3",
+        "p"
+      ]
+    }
+  ],
+  "itemParser": "NOT_RUN: no source adapter configured in this observation",
+  "noCandidateMeaning": "No numeric/English date association observed by bounded heuristic; not proof of no items",
+  "completeFieldsPass": false
+}

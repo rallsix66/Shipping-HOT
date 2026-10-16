@@ -1,0 +1,183 @@
+{
+  "baselineHead": "8027aeeda436faff8eb6ac3c0f0f0dd8d763f9be",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "changedSourceIdsOnly": [
+    "MY-C01",
+    "MY-T01",
+    "PH-M01"
+  ],
+  "other38SourceEntryDifferences": [],
+  "beforeCoverage": {
+    "r2_4": {
+      "numerator": 21,
+      "denominator": 39,
+      "ratio": 0.5384615384615384,
+      "minimumOK": 32,
+      "shortfall": 11,
+      "ids": [
+        "CN-P01",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "PH-M01",
+        "XX-W01",
+        "XX-K02",
+        "XX-M01",
+        "XX-M03",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "statusCounts": {
+        "OK": 21,
+        "PARTIAL": 11,
+        "NOT_RUN": 5,
+        "STALE": 1,
+        "BLOCKED": 1
+      },
+      "pass": false
+    },
+    "r2_5": {
+      "numerator": 13,
+      "denominator": 34,
+      "ratio": 0.38235294117647056,
+      "remaining": 21,
+      "ids": [
+        "CN-P01",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "XX-K02"
+      ],
+      "statusCounts": {
+        "PASS": 13,
+        "NOT_RUN": 16,
+        "FAIL": 4,
+        "PARTIAL": 1
+      },
+      "pass": false
+    },
+    "numericFieldsSeparate": {
+      "numerator": 3,
+      "denominator": 5,
+      "ids": [
+        "XX-W01",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness"
+    },
+    "r2Continuous24h": {
+      "numerator": 0,
+      "denominator": 39,
+      "status": "NOT_RUN"
+    },
+    "overallR2Pass": false
+  },
+  "afterCoverage": {
+    "r2_4": {
+      "numerator": 21,
+      "denominator": 39,
+      "ratio": 0.5384615384615384,
+      "minimumOK": 32,
+      "shortfall": 11,
+      "ids": [
+        "CN-P01",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "PH-M01",
+        "XX-W01",
+        "XX-K02",
+        "XX-M01",
+        "XX-M03",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "statusCounts": {
+        "OK": 21,
+        "PARTIAL": 11,
+        "NOT_RUN": 5,
+        "STALE": 1,
+        "BLOCKED": 1
+      },
+      "pass": false
+    },
+    "r2_5": {
+      "numerator": 16,
+      "denominator": 34,
+      "ratio": 0.47058823529411764,
+      "remaining": 18,
+      "ids": [
+        "CN-P01",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "PH-M01",
+        "XX-K02"
+      ],
+      "statusCounts": {
+        "PASS": 16,
+        "NOT_RUN": 13,
+        "FAIL": 4,
+        "PARTIAL": 1
+      },
+      "pass": false
+    },
+    "numericFieldsSeparate": {
+      "numerator": 3,
+      "denominator": 5,
+      "ids": [
+        "XX-W01",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness"
+    },
+    "r2Continuous24h": {
+      "numerator": 0,
+      "denominator": 39,
+      "status": "NOT_RUN"
+    },
+    "overallR2Pass": false
+  },
+  "availabilityNumeratorUnchanged": true,
+  "numericUnchanged": true
+}

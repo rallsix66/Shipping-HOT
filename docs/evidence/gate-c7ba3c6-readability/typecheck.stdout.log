@@ -1,0 +1,4 @@
+
+> shipping-hot@0.0.41 typecheck D:\try one\Shipping HOT\.tmp\readability-final-build-20261015
+> tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.app.json
+

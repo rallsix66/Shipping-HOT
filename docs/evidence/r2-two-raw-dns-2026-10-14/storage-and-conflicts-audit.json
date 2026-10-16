@@ -1,0 +1,98 @@
+{
+  "httpRequests": 0,
+  "dnsLookups": 0,
+  "codeChanged": false,
+  "reports": [
+    {
+      "id": "MY-P03",
+      "readOnlyReopen": true,
+      "itemRows": 0,
+      "conflictGroupCount": 2,
+      "conflictGroups": [
+        {
+          "url": "https://www.northport.com.my/np/docs/Announcements/2024/Notice%20-%20Port%20Closure%20During%20Hari%20Raya%20Aidilfitri%202024.pdf",
+          "occurrences": [
+            {
+              "titleExcerpt": "KENYATAAN SYARIKAT NO. 1 - PENCEMARAN AIR SG. PULOH",
+              "dateEvidence": {
+                "raw": "9-6-2024",
+                "rule": "configured_dmy_dash",
+                "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+                "calendar": "gregorian",
+                "precision": "day",
+                "timezone": "missing",
+                "utcOffset": null,
+                "localDate": "2024-06-09",
+                "publishedAt": null
+              }
+            },
+            {
+              "titleExcerpt": "NOTICE - PORT CLOSURE DURING HARI RAYA AIDILFITRI 2024",
+              "dateEvidence": {
+                "raw": "3-4-2024",
+                "rule": "configured_dmy_dash",
+                "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+                "calendar": "gregorian",
+                "precision": "day",
+                "timezone": "missing",
+                "utcOffset": null,
+                "localDate": "2024-04-03",
+                "publishedAt": null
+              }
+            }
+          ]
+        },
+        {
+          "url": "https://www.northport.com.my/np/docs/Announcements/2020/Company%20Statement%20-%20Contractors%20(Stakeholders)%2028-12-2020.pdf",
+          "occurrences": [
+            {
+              "titleExcerpt": "REPORTED COVID-19 POSITIVE CASES INVOLVING EMPLOYEES OF TWO (2) CONTRACTOR COMPANIES IN NORTHPORT (MALAYSIA) BHD",
+              "dateEvidence": {
+                "raw": "28-12-2020",
+                "rule": "configured_dmy_dash",
+                "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+                "calendar": "gregorian",
+                "precision": "day",
+                "timezone": "missing",
+                "utcOffset": null,
+                "localDate": "2020-12-28",
+                "publishedAt": null
+              }
+            },
+            {
+              "titleExcerpt": "OFFICIAL STATEMENT REGARDING COVID-19 CASE IN NORTHPORT (MALAYSIA) BHD",
+              "dateEvidence": {
+                "raw": "10-12-2020",
+                "rule": "configured_dmy_dash",
+                "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+                "calendar": "gregorian",
+                "precision": "day",
+                "timezone": "missing",
+                "utcOffset": null,
+                "localDate": "2020-12-10",
+                "publishedAt": null
+              }
+            }
+          ]
+        }
+      ],
+      "status": "FAIL_REAL_DUPLICATE_ASSOCIATIONS",
+      "selection": "all configured nodes observed; first six conflict groups recorded in document order; no conflict resolution"
+    },
+    {
+      "id": "TH-C01",
+      "readOnlyReopen": true,
+      "parsedCount": 100,
+      "storedCount": 100,
+      "fullDateEvidenceCompared": true,
+      "mismatches": 0,
+      "dayPrecision": 100,
+      "nullInstants": 100,
+      "localDateRange": [
+        "2026-08-27",
+        "2026-10-13"
+      ],
+      "status": "OFFLINE_STORED_ASSOCIATIONS_MATCH"
+    }
+  ]
+}

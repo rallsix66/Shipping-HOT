@@ -1,0 +1,10 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ .tmp/one-catalog-candidate-replay-20261015.test.ts (1 test) 553ms
+   ✓ complete ONE HTML bytes through existing collector, exact raw fields, repeat and read-only reopen  551ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  11:40:12
+   Duration  1.99s (transform 640ms, setup 0ms, import 1.11s, tests 553ms, environment 0ms)

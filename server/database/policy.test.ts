@@ -179,7 +179,7 @@ describe("r1.5-7 effective-date switching (injected clock)", () => {
 describe("r1.5-7 versions, supersede and repeal", () => {
   it("migrations reach schema v18", async () => {
     const { native, database } = await setup()
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(20)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(29)
     native.close()
   })
 
@@ -344,7 +344,7 @@ describe("r1.5-7 P2 round 2 (dots 2026-10-12)", () => {
     const logBefore = JSON.stringify(native.prepare("SELECT * FROM policy_change_log").all())
 
     await initShippingTables(database, "real") // runs 018 then 019 on the legacy rows
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(20)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(29)
     const raw = Object.fromEntries((native.prepare("SELECT id, supersedes_relation_kind AS s, superseded_by_relation_kind AS b, status, title, basis_text, applicable_timezone AS tz FROM policy_record").all() as { id: string, s: string | null, b: string | null, sw: string | null }[]).map(r => [r.id, r]))
     expect(raw["policy:A"]).toMatchObject({ s: null, b: "revised", status: "revised", basis_text: "basis A v1", tz: "Asia/Ho_Chi_Minh" })
     expect(raw["policy:B"]).toMatchObject({ s: "revised", b: "repealed", status: "repealed", title: "[FIXTURE] legacy B" })
@@ -408,7 +408,7 @@ describe("r1.5-7 mixed-version upgrade matrix (dots 2026-10-12 12:24)", () => {
     const { native, database, repo } = await legacyDb(17)
     const before = dump(native)
     await initShippingTables(database, "real")
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(20)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(29)
     const k = kinds(native)
     expect(k["policy:A"]).toMatchObject({ s: null, b: "revised", sw: null })
     expect(k["policy:B"]).toMatchObject({ s: "revised", b: "repealed", sw: null })
@@ -457,7 +457,7 @@ describe("r1.5-7 mixed-version upgrade matrix (dots 2026-10-12 12:24)", () => {
     native.prepare("DELETE FROM policy_change_log WHERE policy_id = 'policy:D' AND action = 'repeal_scheduled'").run()
     const before = dump(native)
     await initShippingTables(database, "real") // runs only 020
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(20)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(29)
     const k = kinds(native)
     expect(k["policy:Q"]).toMatchObject({ b: "repealed", sw: "2026-10-10", s: "revised" }) // from successor link
     expect(k["policy:C"]).toMatchObject({ b: "repealed", sw: "2026-10-10" }) // from change log

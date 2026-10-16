@@ -1,0 +1,42 @@
+{
+  "id": "VN-T01",
+  "url": "https://idea.gov.vn/",
+  "startedAt": "2026-10-14T09:08:42.879Z",
+  "status": "PARTIAL",
+  "httpRequests": 1,
+  "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+  "receivedAt": "2026-10-14T09:08:45.043Z",
+  "httpStatus": 200,
+  "contentType": "text/html; charset=utf-8",
+  "rawByteLength": 22451,
+  "fetchedBytesSha256": "972674566750a436a01f84020a512400391dd47427a79464ed735f146f8c16ca",
+  "rawLocalOnly": true,
+  "parse": "DOM_OBSERVATION_ONLY",
+  "parserError": null,
+  "observedCandidateCount": 6,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 22451
+  },
+  "archivedMetadataSha256": "cba0318951b5e7f6c857016dbac87163969230405dcf82ff11eea6e0e35dcc26",
+  "originalHtmlCommitted": false,
+  "sensitiveScan": {
+    "positiveControlDetected": true,
+    "committedMaterialHits": 0
+  },
+  "finishedAt": "2026-10-14T09:08:45.055Z"
+}

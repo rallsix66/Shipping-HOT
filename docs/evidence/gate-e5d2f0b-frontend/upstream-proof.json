@@ -1,0 +1,7 @@
+{
+  "commit": "44578fa11da55f2e863900752653e0c221f6cf70",
+  "path": "packages/backend/src/sources/collect.ts",
+  "sha256": "f718c943e5ad2b12a0e4ac5b9d563135043dd23dc61eea6f3fb8efcee788995c",
+  "method": "read-only git alternate object packs; no download",
+  "algorithm": "7-day non-backfill count/7; threshold0.15; round(clamp(1440/(perDay*3),min,max)); free editorial15..60 minutes; daily"
+}

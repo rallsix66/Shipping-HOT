@@ -1,0 +1,9 @@
+{
+  "name": "targeted",
+  "command": "pnpm exec vitest run -c vitest.config.ts server/providers/article-extractor.test.ts server/services/article-service.test.ts server/services/article-fetch-security.test.ts server/services/article-fetch-transport.test.ts server/database/article.test.ts server/services/article-translation-display.test.ts server/services/article-translation-source.test.ts server/services/article-translation-view.test.ts server/runtime/translation-sync-article-job.test.ts server/intel/collect.test.ts server/runtime/intel-production.test.ts",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\readability-final-build-20261015",
+  "sha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
+  "startedAt": "2026-10-15T09:36:29.014Z",
+  "finishedAt": "2026-10-15T09:36:32.783Z",
+  "rawExit": 0
+}

@@ -1,0 +1,160 @@
+{
+  "id": "PH-C01",
+  "url": "https://customs.gov.ph/category/media-releases/",
+  "enabled": false,
+  "persistence": "disallowed",
+  "config": {
+    "listSelector": ".uk-child-width-1-1.uk-grid-match",
+    "itemSelector": ".el-item.uk-card",
+    "linkSelector": "h3.el-title > a[href]",
+    "titleSelector": "h3.el-title > a[href]",
+    "publishedAtSelector": ".el-meta",
+    "calendar": "gregorian",
+    "dateFormat": "english_month_name",
+    "dateRuleBasis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone."
+  },
+  "startedAt": "2026-10-14T08:19:35.199Z",
+  "httpRequests": 0,
+  "material": "complete private real response bytes, not synthetic or sanitized skeleton",
+  "rawHtmlCommitted": false,
+  "fetchedRawSha256": "9d56a123e75dd0d3fa7523da3d410125a5c71f23e42dbacd012c50d31627a6c6",
+  "rawBytes": 166897,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 166897
+  },
+  "adapterCount": 11,
+  "dateRules": [
+    "configured_english_month_name"
+  ],
+  "samples": [
+    {
+      "titleExcerpt": "BOC, Pinasalamatan ang PH Navy sa Mahigit ₱4-Bilyong Nasamsam na Kontrabando sa Mindanao",
+      "canonicalUrl": "https://customs.gov.ph/boc-pinasalamatan-ang-ph-navy-sa-mahigit-%e2%82%b14-bilyong-nasamsam-na-kontrabando-sa-mindanao",
+      "dateEvidence": {
+        "raw": "October 14, 2026",
+        "rule": "configured_english_month_name",
+        "basis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-14",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "Nepomuceno: “The BOC is your Partner in Growth”",
+      "canonicalUrl": "https://customs.gov.ph/nepomuceno-the-boc-is-your-partner-in-growth",
+      "dateEvidence": {
+        "raw": "October 14, 2026",
+        "rule": "configured_english_month_name",
+        "basis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-14",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "BOC, DA, at Navy, Kinilala ni Sen. Kiko Dahil sa Matagumpay na Paghuli ng ₱700M na Bigas!",
+      "canonicalUrl": "https://customs.gov.ph/boc-da-at-navy-kinilala-ni-sen-kiko-dahil-sa-matagumpay-na-paghuli-ng-%e2%82%b1700m-na-bigas",
+      "dateEvidence": {
+        "raw": "October 13, 2026",
+        "rule": "configured_english_month_name",
+        "basis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-13",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "₱43.7-M Droga, Nasabat ng BOC-NAIA sa 8 Abandonadong Parcel!",
+      "canonicalUrl": "https://customs.gov.ph/%e2%82%b143-7-m-droga-nasabat-ng-boc-naia-sa-8-abandonadong-parcel",
+      "dateEvidence": {
+        "raw": "October 12, 2026",
+        "rule": "configured_english_month_name",
+        "basis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-12",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "BOC, Iba’t Ibang Ahensya Nagkaisa para Sugpuin ang Smuggling",
+      "canonicalUrl": "https://customs.gov.ph/boc-ibat-ibang-ahensya-nagkaisa-para-sugpuin-ang-smuggling",
+      "dateEvidence": {
+        "raw": "October 10, 2026",
+        "rule": "configured_english_month_name",
+        "basis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-10",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "₱29.17-M Halaga Ng Sigarilyo, Bistado Sa Shipment Na Dineklarang Scrap Metal",
+      "canonicalUrl": "https://customs.gov.ph/%e2%82%b129-17-m-halaga-ng-sigarilyo-bistado-sa-shipment-na-dineklarang-scrap-metal",
+      "dateEvidence": {
+        "raw": "October 9, 2026",
+        "rule": "configured_english_month_name",
+        "basis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-09",
+        "publishedAt": null
+      }
+    }
+  ],
+  "first": {
+    "status": "ok_items",
+    "runId": "a9e28198-8fb9-4bc5-af09-b8329e763166",
+    "itemsSeen": 11,
+    "itemsNew": 11,
+    "itemsRevised": 0
+  },
+  "firstCounts": {
+    "items": 11,
+    "versions": 11
+  },
+  "repeat": {
+    "status": "ok_items",
+    "runId": "1c4e71e1-4d49-487b-aaa4-77301f4f2077",
+    "itemsSeen": 11,
+    "itemsNew": 0,
+    "itemsRevised": 0
+  },
+  "repeatCounts": {
+    "items": 11,
+    "versions": 11
+  },
+  "injectedTransports": 2,
+  "status": "OFFLINE_REPLAY_PENDING_REOPEN"
+}

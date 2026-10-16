@@ -1,0 +1,14 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--cached",
+    "--check"
+  ],
+  "head": "0ad53dd63632f097e719197345a1000b0e0c1d29",
+  "at": "2026-10-15T02:47:17.839832+00:00",
+  "stdout": "docs/evidence/r2-carrier-reapplied-2026-10-15/applied-config-readonly.py.txt:95: trailing whitespace.\n+assert result['selectedExtensionExactlyOriginal21Plus2'] and result['generatedExactly23TargetsPresent'] and result['original21Preserved'] and result['generatedExactlyOriginal21Plus2'], 'Applied configuration mismatch; do not start DNS/HTTP' \n",
+  "stderr": "warning: unable to access 'C:\\Users\\Administrator/.config/git/ignore': Permission denied\n",
+  "rawExit": 2,
+  "scope": "Initial staged-only documentation whitespace check; no source request or product gate."
+}

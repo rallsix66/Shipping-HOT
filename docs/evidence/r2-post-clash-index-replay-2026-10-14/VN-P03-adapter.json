@@ -1,0 +1,139 @@
+{
+  "id": "VN-P03",
+  "url": "https://saigonnewport.com.vn/tin-tuc",
+  "enabled": false,
+  "persistence": "disallowed",
+  "config": {
+    "listSelector": ".page-container > .news",
+    "itemSelector": ".news-card",
+    "linkSelector": "h3.title > a[href]",
+    "titleSelector": "h3.title > a[href]",
+    "publishedAtSelector": "p.news-label.date",
+    "dateOrder": "dmy",
+    "calendar": "gregorian",
+    "allowUrlPrefixes": [
+      "https://saigonnewport.com.vn/tin-tuc"
+    ],
+    "dateRuleBasis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact."
+  },
+  "startedAt": "2026-10-14T09:21:13.291Z",
+  "httpRequests": 0,
+  "material": "complete private real response bytes, not synthetic or sanitized skeleton",
+  "rawHtmlCommitted": false,
+  "fetchedRawSha256": "e730d4af7dacc5b95995139b6407f91a2adb2d4be7f1e2bbec7dbadc738b51c8",
+  "rawBytes": 143215,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 143215
+  },
+  "adapterCount": 14,
+  "dateRules": [
+    "configured_dmy"
+  ],
+  "samples": [
+    {
+      "titleExcerpt": "Thiếu tướng Ngô Minh Thuấn: Truyền cảm hứng đổi mới, khơi dậy khát vọng cống hiến",
+      "canonicalUrl": "https://saigonnewport.com.vn/tin-tuc/trach-nhiem-xa-hoi/thieu-tuong-ngo-minh-thuan-truyen-cam-hung-doi-moi-khoi-day-khat-vong-cong-hien.html",
+      "dateEvidence": {
+        "raw": "12/10/2026",
+        "rule": "configured_dmy",
+        "basis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-12",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "Tổng công ty Tân Cảng Sài Gòn vinh danh 18 doanh nhân tiêu biểu",
+      "canonicalUrl": "https://saigonnewport.com.vn/tin-tuc/trach-nhiem-xa-hoi/tong-cong-ty-tan-cang-sai-gon-vinh-danh-18-doanh-nhan-tieu-bieu.html",
+      "dateEvidence": {
+        "raw": "10/10/2026",
+        "rule": "configured_dmy",
+        "basis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-10",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "TÂN CẢNG SÀI GÒN ĐƯỢC VINH DANH TOP 10 THƯƠNG HIỆU DOANH NGHIỆP DẪN ĐẦU KHU VỰC KINH TẾ NHÀ NƯỚC",
+      "canonicalUrl": "https://saigonnewport.com.vn/tin-tuc/trach-nhiem-xa-hoi/tan-cang-sai-gon-duoc-vinh-danh-top-10-thuong-hieu-doanh-nghiep-dan-dau-khu-vuc-kinh-te-nha-nuoc.html",
+      "dateEvidence": {
+        "raw": "05/10/2026",
+        "rule": "configured_dmy",
+        "basis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-05",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "Binh đoàn 20: Khai mạc Hội thao thể dục thể thao lần thứ I - năm 2026",
+      "canonicalUrl": "https://saigonnewport.com.vn/tin-tuc/trach-nhiem-xa-hoi/binh-doan-20-khai-mac-hoi-thao-the-duc-the-thao-lan-thu-i-nam-2026.html",
+      "dateEvidence": {
+        "raw": "02/10/2026",
+        "rule": "configured_dmy",
+        "basis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-02",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "ICD Tân Cảng - Sóng Thần và ICD Tân Cảng - Long Bình: Đồng hành hợp tác, kiến tạo năng lực vận hành kho toàn diện",
+      "canonicalUrl": "https://saigonnewport.com.vn/tin-tuc/hoat-dong-kinh-doanh/icd-tan-cang-song-than-va-icd-tan-cang-long-binh-dong-hanh-hop-tac-kien-tao-nang-luc-van-hanh-kho-toan-dien.html",
+      "dateEvidence": {
+        "raw": "18/09/2026",
+        "rule": "configured_dmy",
+        "basis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-18",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "Tân Cảng Sài Gòn đẩy mạnh kết nối logistics Việt Nam - Campuchia",
+      "canonicalUrl": "https://saigonnewport.com.vn/tin-tuc/hoat-dong-kinh-doanh/tan-cang-sai-gon-day-manh-ket-noi-logistics-viet-nam-campuchia.html",
+      "dateEvidence": {
+        "raw": "14/10/2026",
+        "rule": "configured_dmy",
+        "basis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-14",
+        "publishedAt": null
+      }
+    }
+  ]
+}

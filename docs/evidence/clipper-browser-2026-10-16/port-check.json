@@ -1,0 +1,6 @@
+{
+  "command": "netstat -ano -p tcp (filtered specified test ports only)",
+  "exit": 0,
+  "matches": [],
+  "initialGetNetTcpConnection": "access denied; read-only fallback used"
+}

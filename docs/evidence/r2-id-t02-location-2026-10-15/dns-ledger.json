@@ -1,0 +1,30 @@
+[
+  {
+    "role": "catalogue",
+    "hostname": "jdih.kemenkeu.go.id",
+    "reservedAt": "2026-10-15T07:37:46.846Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "103.196.166.252",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T07:37:47.996Z"
+  },
+  {
+    "role": "location-target",
+    "hostname": "jdih.kemenkeu.go.id",
+    "reservedAt": "2026-10-15T07:37:48.417Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "103.196.166.252",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T07:37:48.418Z"
+  }
+]

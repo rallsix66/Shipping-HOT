@@ -1,0 +1,86 @@
+# Actual Neat Freak inventory excerpt
+raw_exit=0
+full_local=.tmp/reapplied-neat-inventory-20261015.txt
+full_raw_sha256=f8e83851f66bd1be5c325e11205c6ba9bff921d884d46770f2c9955624450d95
+
+# neat-freak inventory v2
+project_root=/d/try one/Shipping HOT
+generated_at=2026-10-15T01:27:29Z
+
+## platform-directories
+/c/Users/Administrator/.claude
+/c/Users/Administrator/.codex
+/c/Users/Administrator/.cursor
+/c/Users/Administrator/.gemini
+/c/Users/Administrator/.trae
+/c/Users/Administrator/.codebuddy
+
+## other-agent-rule-artifacts
+
+## git
+git_root=D:/try one/Shipping HOT
+branch=codex/shipping-hot-r2
+head=9ec4a2dd4e6a76657ec3ed2a6dabb15187b4d5a8
+warning: unable to access 'C:\Users\Administrator/.config/git/ignore': Permission denied
+warning: unable to access 'C:\Users\Administrator/.config/git/ignore': Permission denied
+status_entries=4
+worktrees=1
+
+## rule-chain-candidates
+/d/try one/Shipping HOT/AGENTS.md	lines=109	bytes=26534
+/c/Users/Administrator/.codex/AGENTS.md	lines=0	bytes=0
+
+## project-markdown
+[Full enumeration preserved locally, omitted here.]
+## project-markdown-count
+2648
+
+## root-entries
+/d/try one/Shipping HOT/.cursorindexingignore
+/d/try one/Shipping HOT/.data
+/d/try one/Shipping HOT/.dockerignore
+/d/try one/Shipping HOT/.env.local
+/d/try one/Shipping HOT/.git
+/d/try one/Shipping HOT/.github
+/d/try one/Shipping HOT/.gitignore
+/d/try one/Shipping HOT/.nvmrc
+/d/try one/Shipping HOT/.pnpm-store
+/d/try one/Shipping HOT/.tanstack
+/d/try one/Shipping HOT/.tmp
+/d/try one/Shipping HOT/.vscode
+/d/try one/Shipping HOT/AGENTS.md
+/d/try one/Shipping HOT/Dockerfile
+/d/try one/Shipping HOT/LICENSE
+/d/try one/Shipping HOT/README.md
+/d/try one/Shipping HOT/dist
+/d/try one/Shipping HOT/docker-compose.local.yml
+/d/try one/Shipping HOT/docker-compose.yml
+/d/try one/Shipping HOT/docs
+/d/try one/Shipping HOT/eslint.config.mjs
+/d/try one/Shipping HOT/example.env.server
+/d/try one/Shipping HOT/imports.app.d.ts
+/d/try one/Shipping HOT/index.html
+/d/try one/Shipping HOT/nitro.config.ts
+/d/try one/Shipping HOT/node_modules
+/d/try one/Shipping HOT/package.json
+/d/try one/Shipping HOT/patches
+/d/try one/Shipping HOT/pnpm-lock.yaml
+/d/try one/Shipping HOT/prototypes
+/d/try one/Shipping HOT/public
+/d/try one/Shipping HOT/pwa.config.ts
+/d/try one/Shipping HOT/screenshots
+/d/try one/Shipping HOT/scripts
+/d/try one/Shipping HOT/server
+/d/try one/Shipping HOT/shared
+/d/try one/Shipping HOT/src
+/d/try one/Shipping HOT/test
+/d/try one/Shipping HOT/third_party
+/d/try one/Shipping HOT/tsconfig.app.json
+/d/try one/Shipping HOT/tsconfig.app.tsbuildinfo
+/d/try one/Shipping HOT/tsconfig.base.json
+/d/try one/Shipping HOT/tsconfig.json
+/d/try one/Shipping HOT/tsconfig.node.json
+/d/try one/Shipping HOT/tsconfig.node.tsbuildinfo
+/d/try one/Shipping HOT/uno.config.ts
+/d/try one/Shipping HOT/vite.config.ts
+/d/try one/Shipping HOT/vitest.config.ts

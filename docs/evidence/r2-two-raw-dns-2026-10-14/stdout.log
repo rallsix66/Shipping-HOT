@@ -1,0 +1,11 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ .tmp/two-raw-dns-20261014.test.ts (2 tests) 678ms
+   ✓ replays both exact raw captures through existing adapters and isolated SQLite before assertions  663ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  15:30:17
+   Duration  1.48s (transform 390ms, setup 0ms, import 651ms, tests 678ms, environment 0ms)
+

@@ -1,0 +1,40 @@
+{
+  "executedAtHead": "8027aeeda436faff8eb6ac3c0f0f0dd8d763f9be",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "rows": [
+    {
+      "id": "MY-C01",
+      "url": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
+      "host": "www.customs.gov.my",
+      "catalogLineLfSha256": "3809a3418cb408dd2abf92867d52cb2f79b12bd1d2ccb81b477eee161fd2b71f",
+      "oldWireSha256": "b7f4e2c40f5d27df510d7eb00fb1ae1526b48269f39609a61279b20093b0de60"
+    },
+    {
+      "id": "MY-T01",
+      "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+      "host": "www.mof.gov.my",
+      "catalogLineLfSha256": "00c52ccf8e53b5460b7836bb94eec3d2607d35c4a3f0c2518a1cbb575997d548",
+      "oldWireSha256": "6136eaa0b359ed2a1c9d76bf00814a787706540e0eb0f02bd64d5b737e092439"
+    },
+    {
+      "id": "PH-M01",
+      "url": "https://portcalls.com/feed/",
+      "host": "portcalls.com",
+      "catalogLineLfSha256": "fb28f8edfdafe94bb6030f7d32c1b21d545af1aaf1c1779ecf292b94fb869f92",
+      "oldWireSha256": "e245e5a3a1be9cc4cdc6c6204f159eee93674b380679eec8fe0dc99411c27b71"
+    }
+  ],
+  "authorized": "Delegated user instruction 2026-10-15: three named exact RSS products; private complete bytes; no settings changes",
+  "maxSystemDns": 3,
+  "maxTransportInvocations": 3,
+  "maxBytes": 524288,
+  "perRequestMs": 10000,
+  "batchMs": 60000,
+  "retries": 0,
+  "redirectsFollowed": 0,
+  "details": 0,
+  "pagination": 0,
+  "persistence": "disallowed",
+  "productionEnabled": false,
+  "rawRedistributed": false
+}

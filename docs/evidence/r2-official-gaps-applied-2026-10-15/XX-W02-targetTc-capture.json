@@ -1,0 +1,25 @@
+{
+  "id": "XX-W02-targetTc",
+  "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+  "phase": "initial",
+  "host": "www.jma.go.jp",
+  "startedAt": "2026-10-15T05:53:37.474Z",
+  "systemDnsCalls": 1,
+  "getAttempts": 1,
+  "status": "BLOCKED",
+  "rawLocalOnly": true,
+  "qualificationChanged": false,
+  "addressClassification": "public_address",
+  "receivedAt": "2026-10-15T05:53:37.778Z",
+  "httpStatus": 404,
+  "contentType": "text/html",
+  "bytes": 2203,
+  "wireSha256": "959efccbba82d9eca9d398d32811d456f51929aff12dfba2ccaf60a0b1b35b58",
+  "completeResponseCaptured": true,
+  "location": null,
+  "secureEntryError": {
+    "code": "http_error",
+    "message": "Article request failed with status 404"
+  },
+  "finishedAt": "2026-10-15T05:53:37.778Z"
+}

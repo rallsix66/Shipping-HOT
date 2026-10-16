@@ -1,0 +1,118 @@
+{
+  "executionHead": "440affa012e06b80c38d97f08b04e395b8506d0f",
+  "method": "Offline minimal DOM inspection with already installed cheerio; no new product parser/provider or requests",
+  "sourceGetAttemptsThisScript": 0,
+  "systemDnsCallsThisScript": 0,
+  "originalResponses": 4,
+  "rows": [
+    {
+      "id": "PH-W01",
+      "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+      "at": "2026-10-15T05:53:36.714Z",
+      "status": 403,
+      "wireSha256": "58bf2215b395dcac74c009aa98701854e43cbe54a1cd3a95fee6a647ca9910d4",
+      "bytes": 118,
+      "title": "403 Forbidden",
+      "headings": [
+        "403 Forbidden"
+      ],
+      "observedPdfLinks": [],
+      "businessRecordsObserved": 0,
+      "businessRecordsPersisted": 0,
+      "classification": "http403_not_official_empty_weather_state",
+      "activeIdentity": null,
+      "sourcePublicationTime": null,
+      "sourceRegion": null
+    },
+    {
+      "id": "PH-W02",
+      "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+      "at": "2026-10-15T05:53:36.848Z",
+      "status": 403,
+      "wireSha256": "58bf2215b395dcac74c009aa98701854e43cbe54a1cd3a95fee6a647ca9910d4",
+      "bytes": 118,
+      "title": "403 Forbidden",
+      "headings": [
+        "403 Forbidden"
+      ],
+      "observedPdfLinks": [],
+      "businessRecordsObserved": 0,
+      "businessRecordsPersisted": 0,
+      "classification": "http403_not_official_empty_weather_state",
+      "activeIdentity": null,
+      "sourcePublicationTime": null,
+      "sourceRegion": null
+    },
+    {
+      "id": "ID-W02-root",
+      "url": "https://maritim.bmkg.go.id/marine2026-data/",
+      "at": "2026-10-15T05:53:37.472Z",
+      "status": 200,
+      "wireSha256": "6d66fa455f6bc943ff0d6dd33de2c4928126ac72217a38d555bf9e784995ad76",
+      "bytes": 577,
+      "title": "",
+      "headings": [],
+      "observedPdfLinks": [],
+      "businessRecordsObserved": 0,
+      "businessRecordsPersisted": 0,
+      "classification": "directory_index_only_not_numeric_product",
+      "anchorCount": 18,
+      "explicitApiDocLinkCount": 0,
+      "relevantObservedLinks": [
+        {
+          "label": "doc/",
+          "hrefLiteral": "doc/",
+          "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/doc/",
+          "followed": false,
+          "officialApiDocConfirmed": false
+        },
+        {
+          "label": "help/",
+          "hrefLiteral": "help/",
+          "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/help/",
+          "followed": false,
+          "officialApiDocConfirmed": false
+        },
+        {
+          "label": "pelabuhan/",
+          "hrefLiteral": "pelabuhan/",
+          "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/pelabuhan/",
+          "followed": false,
+          "officialApiDocConfirmed": false
+        },
+        {
+          "label": "pelabuhan_slug/",
+          "hrefLiteral": "pelabuhan_slug/",
+          "absoluteObservedUrl": "https://maritim.bmkg.go.id/marine2026-data/pelabuhan_slug/",
+          "followed": false,
+          "officialApiDocConfirmed": false
+        }
+      ],
+      "officialJakartaKode": null,
+      "numericFieldSample": false
+    },
+    {
+      "id": "XX-W02-targetTc",
+      "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+      "at": "2026-10-15T05:53:37.778Z",
+      "status": 404,
+      "wireSha256": "959efccbba82d9eca9d398d32811d456f51929aff12dfba2ccaf60a0b1b35b58",
+      "bytes": 2203,
+      "title": "404｜気象庁",
+      "headings": [
+        "気象庁",
+        "404 Not Found",
+        "指定されたページは存在しません"
+      ],
+      "observedPdfLinks": [],
+      "businessRecordsObserved": 0,
+      "businessRecordsPersisted": 0,
+      "classification": "http404_not_json_or_empty_list",
+      "activeIdentity": null,
+      "sourcePublicationTime": null,
+      "sourceRegion": null
+    }
+  ],
+  "qualificationChanges": 0,
+  "parserStorageReplay": "NOT_RUN_no_qualified_positive_or_numeric_response"
+}
