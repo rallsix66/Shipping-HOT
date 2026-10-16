@@ -1,0 +1,17 @@
+[
+  {
+    "path": ".tmp/clipper-browser-20261016/synthetic-article.html",
+    "bytes": 2604,
+    "sha256": "5df06e249d230385a5420600e391406ff4eb22b807b095db7a9e970316add205"
+  },
+  {
+    "path": ".tmp/clipper-browser-20261016/prepare.ts",
+    "bytes": 1674,
+    "sha256": "8864d91c4898835d73c6ea33ad358556fe47ef437a26da9d41f9dbec7fe94c38"
+  },
+  {
+    "path": ".tmp/clipper-browser-20261016/prepare.cjs",
+    "bytes": 2102,
+    "sha256": "7887f8ad58e123e34718091bed25d97e61e48fe285b1c6982cf6981c3d01855e"
+  }
+]

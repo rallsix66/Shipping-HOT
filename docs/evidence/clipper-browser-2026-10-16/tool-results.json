@@ -1,0 +1,20 @@
+{
+  "browserCreate": {
+    "tool": "mcp__cua_repl.js",
+    "code": "var clipTestTab = await cua.createBrowserTab(\"chrome\", \"about:blank\", { sessionName: \"🧪 Clipper测试\" });",
+    "result": "Browser is not available: chrome",
+    "tabCreated": false,
+    "outcome": "not_executed"
+  },
+  "browserInventory": {
+    "tool": "mcp__cua_repl.js",
+    "code": "await cua.listBrowsers();",
+    "result": []
+  },
+  "nativeComputerApis": "disabled in active tool declaration",
+  "nodeRepl": "not exposed in active tool list",
+  "extensionLoaded": false,
+  "permissionGranted": false,
+  "customCdpAttempted": false,
+  "screenshots": []
+}
