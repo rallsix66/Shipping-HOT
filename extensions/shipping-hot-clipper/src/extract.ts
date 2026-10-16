@@ -49,6 +49,10 @@ export function plainSelection(html: string): string {
       return `${cells.map(cell => Array.from(cell.childNodes).map(read).join("").trim()).join("\t")}\n`
     }
     const text = Array.from(node.childNodes).map(read).join("")
+    if (["TD", "TH"].includes(tag)) {
+      const next = (node as Element).nextElementSibling?.tagName.toUpperCase()
+      return text.trim() + (next && ["TD", "TH"].includes(next) ? "\t" : "")
+    }
     if (tag === "LI") return `${text.trim()}\n`
     return blocks.has(tag) ? `\n\n${text}\n\n` : text
   }

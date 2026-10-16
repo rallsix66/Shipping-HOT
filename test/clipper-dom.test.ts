@@ -71,11 +71,13 @@ const boundaryCases = [
   { name: "line breaks", html: "<p>关闭10:00<br>恢复18:00<br><br>次日复核</p>", expected: "关闭10:00\n恢复18:00\n\n次日复核" },
   { name: "list items", html: "<ul><li>关闭10:00</li><li>恢复18:00</li></ul>", expected: "关闭10:00\n恢复18:00" },
   { name: "table cells and rows", html: "<table><tbody><tr><th>作业</th><th>时间</th></tr><tr><td>关闭</td><td>10:00</td></tr><tr><td>恢复</td><td>18:00</td></tr></tbody></table>", expected: "作业\t时间\n关闭\t10:00\n恢复\t18:00" },
+  { name: "selected cell fragment", html: "<td>关闭10:00</td><td>恢复18:00</td>", expected: "关闭10:00\t恢复18:00", selectionOnly: true },
+  { name: "selected row fragments", html: "<tr><td>关闭</td><td>10:00</td></tr><tr><td>恢复</td><td>18:00</td></tr>", expected: "关闭\t10:00\n恢复\t18:00", selectionOnly: true },
 ]
 it.each(boundaryCases)("preserves exact $name separators and strips dangerous nodes", ({ html, expected }) => {
   expect(plainSelection(`${html}<script>unsafe script</script><style>unsafe style</style><iframe src=\"https://example.org/unsafe\">unsafe frame</iframe><form>private field</form>`)).toBe(expected)
 })
-it.each(boundaryCases.flatMap(fixture => (["selection", "article"] as const).map(mode => ({ ...fixture, mode }))))("preserves $name from $mode preview through save payload to stored material", async ({ mode, html, expected, name }) => {
+it.each(boundaryCases.flatMap(fixture => (fixture.selectionOnly ? ["selection"] as const : ["selection", "article"] as const).map(mode => ({ ...fixture, mode }))))("preserves $name from $mode preview through save payload to stored material", async ({ mode, html, expected, name }) => {
   // Runtime-load real server modules without mixing their Node-only TS project
   // into this browser-DOM test's TypeScript project. Production types stay checked.
   const { open } = await vi.importActual<{ open: (path: string) => { database: unknown, repository: unknown, native: { close: () => void } } }>("#/intel/__fixtures__/isolated-db")
