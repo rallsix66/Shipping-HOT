@@ -12,4 +12,6 @@
 
 源代码实际复用、MIT及品牌边界见[来源清单](../../third_party/obsidian-clipper/README.md)。Defuddle0.19.2只运行惰性DOM提取；PRE选区保留原空白，article模式仍经过Defuddle既有代码块整理。无自动全站采集或读时模型调用。
 
+文章提取候选修复（`defuddle-0.19.2-dom-v2`）在复制惰性DOM前排除明确标为`complementary`、`navigation`、`contentinfo`的块，以及HTML `hidden`或内联`display:none`的块。`aria-hidden`只描述无障碍树，visibility可被子元素覆盖，两者均不再作为整棵剪枝依据；不引入computedStyle或完整CSS算法。不会按“订阅”“购买”等正文词语截断，不新增站点文案/class/id黑名单，不修改选区模式或原网页。Defuddle既有class/id启发式和PRE整理保持原样；仅靠无结构标记的文本不能可靠识别推广尾段。候选包离线验证不代表真实新闻页已修复，实际部署/用户包状态仍见status。
+
 新包/实际服务/手动验收状态以[status](../../docs/status.md)为准。包构建及离线测试不代表真实Chrome/nonce/GUI/S7通过；本轮待父审后才让用户更新包。旧包、数据库和全部现场保留。

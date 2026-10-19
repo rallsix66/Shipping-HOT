@@ -48,6 +48,73 @@ it("uses Defuddle synchronously on a resource-free snapshot, leaving the live do
   expect(draft.body).not.toContain("must not run")
   expect(page.document.documentElement.outerHTML).toBe(before)
 })
+
+// Original fixtures, not a reconstruction of any publisher's page. The saved
+// real-world text does not tell us which DOM containers that publisher used.
+const nonArticleRegions = [
+  { name: "subscription sidebar", attrs: "role=\"complementary\"", text: "原创测试：订阅入口及会员权益推广。" },
+  { name: "recommended-story navigation", attrs: "role=\"navigation\"", text: "原创测试：另一则推荐消息，点击前往阅读。" },
+  { name: "purchase footer", attrs: "role=\"contentinfo\"", text: "原创测试：文章购买服务入口。" },
+  { name: "case-insensitive sidebar", attrs: "role=\" COMPLEMENTARY \"", text: "原创测试：大小写不同的侧栏入口。" },
+  { name: "hidden widget", attrs: "hidden", text: "原创测试：隐藏的推荐入口。" },
+  { name: "display-none widget", attrs: "style=\"display: none !important\"", text: "原创测试：不显示的订阅入口。" },
+]
+it.each(nonArticleRegions)("excludes the structurally marked $name before Defuddle can retry", ({ attrs, text }) => {
+  page.document.body.innerHTML = `<article><p>原创正文说明订阅行业和购买行为的研究结果，保留完整句子。</p><div ${attrs}><p>${text}</p></div><p>原创正文的最后一段，仍应保留。</p></article>`
+  const before = page.document.documentElement.outerHTML
+  const snapshot = inertSnapshot(page.document)
+  expect(snapshot.body.textContent).not.toContain(text)
+  expect(snapshot.body.textContent).toContain("原创正文说明订阅行业和购买行为的研究结果，保留完整句子。")
+  const draft = extractDocument(page.document, "article", "", "2026-10-19T04:00:00.000Z")
+  expect(draft.body).not.toContain(text)
+  expect(draft.body).toContain("原创正文的最后一段，仍应保留。")
+  expect(draft.extractorVersion).toBe("defuddle-0.19.2-dom-v2")
+  expect(page.document.documentElement.outerHTML).toBe(before)
+})
+const visibleArticleRegions = [
+  { name: "aria-hidden visual prose", html: "<div aria-hidden=\"true\"><p>原创视觉正文：订阅服务的购买条件。</p></div>", expected: "原创视觉正文：订阅服务的购买条件。" },
+  { name: "visibility-hidden parent with visible child", html: "<div style=\"visibility: hidden\"><p style=\"visibility: visible\">原创可见子段：购买与订阅研究。</p></div>", expected: "原创可见子段：购买与订阅研究。" },
+  { name: "visibility-collapse parent with visible child", html: "<div style=\"visibility: collapse\"><p style=\"visibility: visible\">原创可见子段：折叠容器中的正文。</p></div>", expected: "原创可见子段：折叠容器中的正文。" },
+]
+it.each(visibleArticleRegions)("retains visually meaningful $name through snapshot and article extraction", ({ html, expected }) => {
+  page.document.body.innerHTML = `<article>${html}</article>`
+  const before = page.document.documentElement.outerHTML
+  expect(inertSnapshot(page.document).body.textContent).toBe(expected)
+  expect(extractDocument(page.document, "article", "", "2026-10-19T04:00:00.000Z").body).toBe(expected)
+  expect(page.document.documentElement.outerHTML).toBe(before)
+})
+it("preserves subscription and purchase prose, quotes, and an unmarked trailing paragraph", () => {
+  page.document.body.innerHTML = `<article role="article"><p>研究人员讨论订阅定价和购买行为，正文中这些词语不能成为截断依据。</p><blockquote><p>受访者说：订阅费用影响购买决定。</p></blockquote><section role="region" class="research-data"><p>另一段关于购买文章和订阅制度的原创分析。</p></section><p>请订阅并购买文章。这段没有非正文结构信号，不能猜测删除。</p><p>后续正文仍然完整。</p></article>`
+  const snapshot = inertSnapshot(page.document)
+  expect(snapshot.body.textContent).toContain("另一段关于购买文章和订阅制度的原创分析。")
+  expect(snapshot.body.textContent).toContain("请订阅并购买文章。这段没有非正文结构信号，不能猜测删除。")
+  const draft = extractDocument(page.document, "article", "", "2026-10-19T04:00:00.000Z")
+  expect(draft.body).toContain("研究人员讨论订阅定价和购买行为，正文中这些词语不能成为截断依据。")
+  expect(draft.body).toContain("受访者说：订阅费用影响购买决定。")
+  expect(draft.body).toContain("另一段关于购买文章和订阅制度的原创分析。")
+  expect(draft.body).toContain("请订阅并购买文章。这段没有非正文结构信号，不能猜测删除。")
+  expect(draft.body).toContain("后续正文仍然完整。")
+})
+it("does not assume every generic region or dialog is a non-article widget", () => {
+  page.document.body.innerHTML = "<div role=\"dialog\"><article role=\"article\"><div role=\"region\"><p>原创阅读窗口内的文章内容。</p></div></article></div>"
+  expect(inertSnapshot(page.document).body.textContent).toBe("原创阅读窗口内的文章内容。")
+})
+it("does not let a short-article fallback restore a long excluded widget", () => {
+  const widget = "Original synthetic membership widget content that must stay outside the captured article. ".repeat(40)
+  page.document.body.innerHTML = `<article><p>一段简短原创正文。</p><div role="complementary"><p>${widget}</p></div><div hidden><p>${widget}</p></div></article>`
+  expect(extractDocument(page.document, "article", "", "2026-10-19T04:00:00.000Z").body).toBe("一段简短原创正文。")
+})
+it("fails visibly rather than returning widgets when no article text remains", () => {
+  page.document.body.innerHTML = "<article><div role=\"complementary\"><p>原创测试会员入口。</p></div><div hidden><p>原创测试隐藏材料。</p></div></article>"
+  expect(() => extractDocument(page.document, "article", "", "2026-10-19T04:00:00.000Z")).toThrow("clip_empty_use_metadata")
+  expect(extractDocument(page.document, "metadata", "", "2026-10-19T04:00:00.000Z").body).toBe("")
+})
+it("leaves explicitly selected landmark text under the user's selection control", () => {
+  const html = "<div role=\"complementary\"><p>用户明确选择的订阅分析。</p><p>用户明确选择的购买说明。</p></div>"
+  const draft = extractDocument(page.document, "selection", html, "2026-10-19T04:00:00.000Z")
+  expect(draft.body).toBe("用户明确选择的订阅分析。\n\n用户明确选择的购买说明。")
+  expect(draft.extractorVersion).toBe("defuddle-0.19.2-dom-v1")
+})
 it("reuses selected range cloning and serialization while returning plain text", () => {
   const fragment = page.document.createDocumentFragment()
   const span = page.document.createElement("span")
@@ -67,6 +134,7 @@ it("never permits async parsing, interpreter or remote-resource helpers in adapt
 })
 
 const boundaryCases = [
+  { name: "widgets with formatted prose", html: "<p>正文讨论订阅和购买行为。</p><blockquote><p>引用：购买并不代表订阅。</p></blockquote><ul><li>订阅10:00</li><li>购买18:00</li></ul><table><tr><td>订阅</td><td>10:00</td></tr><tr><td>购买</td><td>18:00</td></tr></table><pre>订阅  10:00\n购买  18:00</pre><div role=\"complementary\"><p>原创测试推广入口</p></div><div role=\"navigation\"><p>原创测试推荐导航</p></div><div role=\"contentinfo\"><p>原创测试购买控件</p></div><p>尾段正文。</p>", expected: "正文讨论订阅和购买行为。\n\n引用：购买并不代表订阅。\n\n订阅10:00\n购买18:00\n\n订阅\t10:00\n购买\t18:00\n\n订阅  10:00\n购买  18:00\n\n原创测试推广入口\n\n原创测试推荐导航\n\n原创测试购买控件\n\n尾段正文。", articleExpected: "正文讨论订阅和购买行为。\n\n引用：购买并不代表订阅。\n\n订阅10:00\n购买18:00\n\n订阅\t10:00\n购买\t18:00\n\n订阅  10:00\n购买  18:00\n\n尾段正文。" },
   { name: "paragraphs", html: "<p>关闭10:00</p><p>恢复18:00</p>", expected: "关闭10:00\n\n恢复18:00" },
   { name: "line breaks", html: "<p>关闭10:00<br>恢复18:00<br><br>次日复核</p>", expected: "关闭10:00\n恢复18:00\n\n次日复核" },
   { name: "list items", html: "<ul><li>关闭10:00</li><li>恢复18:00</li></ul>", expected: "关闭10:00\n恢复18:00" },

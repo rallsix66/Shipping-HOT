@@ -3,6 +3,20 @@ import type { ClipDraft, ClipMode } from "../../../shared/manual-clip"
 import { parseForClip } from "./clip-utils"
 
 const allowed = new Set("DIV MAIN ARTICLE SECTION P SPAN H1 H2 H3 H4 H5 H6 UL OL LI TABLE THEAD TBODY TR TH TD CAPTION BLOCKQUOTE BR TIME B STRONG I EM A PRE CODE".split(" "))
+const nonArticleRoles = new Set(["complementary", "navigation", "contentinfo"])
+function isNonArticleRegion(element: Element): boolean {
+  // The snapshot intentionally does not copy role, hidden or style attributes.
+  // Decide from the original element before those signals disappear. Pruning
+  // here also prevents Defuddle's short-article retries from restoring widgets
+  // or explicitly hidden content. Never infer a boundary from article words.
+  const role = element.getAttribute("role")?.trim().toLowerCase().split(/\s+/)[0]
+  if (role && nonArticleRoles.has(role)) return true
+  if (element.hasAttribute("hidden")) return true
+  // aria-hidden controls accessibility, while children can override visibility.
+  // Neither attribute alone establishes a whole-subtree visual boundary.
+  const style = (element as HTMLElement).style
+  return /^none(?:\s*!important)?$/i.test(style.getPropertyValue("display").trim())
+}
 /** Copy structural/text nodes only, never resource attributes, forms or active DOM. */
 export function inertSnapshot(source: Document): Document {
   const target = source.implementation.createHTMLDocument(source.title)
@@ -19,7 +33,7 @@ export function inertSnapshot(source: Document): Document {
     }
     if (node.nodeType !== 1) return
     const element = node as Element
-    if (!allowed.has(element.tagName.toUpperCase())) return
+    if (!allowed.has(element.tagName.toUpperCase()) || isNonArticleRegion(element)) return
     const child = target.createElement(element.tagName)
     for (const attr of ["class", "id", "datetime", "lang"]) {
       const value = element.getAttribute(attr)
@@ -111,5 +125,5 @@ export function extractDocument(doc: Document, mode: ClipMode, selection: string
   }
   if (mode !== "metadata" && !body) throw new Error("clip_empty_use_metadata")
   if (doc.URL !== actualUrl) throw new Error("clip_navigation_changed")
-  return parseClipDraft({ protocol: CLIP_PROTOCOL, actualUrl, title, body, mode, date, capturedAt: now, extractorVersion: "defuddle-0.19.2-dom-v1" })
+  return parseClipDraft({ protocol: CLIP_PROTOCOL, actualUrl, title, body, mode, date, capturedAt: now, extractorVersion: mode === "article" ? "defuddle-0.19.2-dom-v2" : "defuddle-0.19.2-dom-v1" })
 }

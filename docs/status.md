@@ -1,4 +1,16 @@
-## 当前：普通私人剪藏（2026-10-16，限定复审通过，测试服务已切换，GUI待验）
+## 当前：剪藏提取结构候选（2026-10-19，两项P2限定复审通过，仅本地提交交接，未切换）
+
+用户已在普通abb1b99包手动保存一条HTTPS新闻，本地只读确认1材料/1版本/1审计，详情API与SQLite正文一致、private_material/unknown，但正文尾部含非正文杂项；存储一致不证明原网页完整。原始页面DOM未取得，未自动抓取或浏览器控制，旧记录/版本不改写。
+
+本轮沿用`codex/shipping-hot-r2`，提交前门禁基线为`3506e61e47d6764189c27aaaf1b69e251c150305`加受控源码快照：article快照在丢弃属性前排除明确非正文ARIA地标、HTML hidden和内联display:none，审计标签dom-v2；主审两项P2已移除aria-hidden及visibility整棵剪枝，三个视觉正文反例从删空改为精确保留，不实现computedStyle/CSS算法；没有文案/域名/class/id黑名单，选区及Defuddle/后端Readability保持原样。缺原DOM使实际新闻尾部修复仍NOT_RUN；上游既有class/id误删风险未改。[修复范围与限制](evidence/clipper-structure-2026-10-19/report.md)。
+
+独立全新检出正常frozen install含scripts、普通app/扩展build、typecheck、lint、**217相关/1481全量通过+3既有Windows跳过、3条SQLite smoke和42项正式bundle合成DOM断言**通过。此前候选的初次安装EACCES及错误测试环境导致的首轮7失败原始日志保留；本次P2门禁全部raw0，不改产品Runtime。真实Neat Freak已执行；[结果](evidence/clipper-structure-2026-10-19/summary.json) / [收尾](evidence/clipper-structure-2026-10-19/closeout.md)。
+
+新P2普通包仅在`.tmp/clipper-tail-p2-20261019/.tmp/clipper-package`，上轮候选包8文件也保留未变。本轮未启停或替换5173服务/用户包；原abb1b99普通HTML仍GET200，旧包/两测试库/保留库/Secret共14文件hash不变，正式记录正文hash和版本不变，usage/runtime/cache/fetch/executor仍0。未推送、PR更新、合并、部署、生产启用或付费/模型调用。
+
+两项P2限定复审通过，用户后续明确允许仅本地提交；精确提交SHA/动作结果以本地git记录和本机交接凭证为准。上述完整门禁绑定提交前基线加受控源码快照，不是干净提交SHA验证；源码内容指纹见summary。缓存ignore改动留在工作区，不纳入本轮提交。真实页面重测、完整GUI/S7、24h未验，R2仍BLOCKED：25/39、24/34、历史3/5。下方为此前时点历史，不覆盖本条现状。
+
+## 历史：普通私人剪藏（2026-10-16，限定复审通过，测试服务已切换，GUI待验）
 
 用户15:46UTC+8决定取消权利/保存范围/依据及时间角色表单（Sentinel_e20d7de212748191815c0f692ae9efd9）。产品SHA **`abb1b992a7de030025b16ad06ded63211e99ff1b`**：普通剪藏为提取→预览→明确保存，页面时间自动/未知；确认正文按原100000字符/体积/纯文本限制存入原版本。独立服务端审计为manual_user_capture/private_material/rights unknown及自动保存时间，不伪造本人原创或授权。
 

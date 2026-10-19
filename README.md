@@ -11,7 +11,7 @@
 - 港口目录和公共来源覆盖有限；商业船期已延后，不属于当前方案范围。
 - `/calendar` 当前展示五国 2026 年固定参考数据，存在地区与主依据缺口；2027 年尚未导入。
 - 资讯标题/摘要翻译与版本化文章逐段翻译已有实现；全文真实长文章验收仍受样本和预算授权限制，不能视为已通过。R3 的风险预筛、抽取和自动政策匹配尚未开放。
-- 本地人工剪藏首片提供插件预览、一次性草稿导入和系统内显式保存；资料标为未经独立核验，正文需要用户声明权利依据与范围。当前扩展尚未安装，实际浏览器/GUI/S7未验，构建及边界见[剪藏说明](extensions/shipping-hot-clipper/README.md)。
+- 本地人工剪藏提供提取、预览、一次性草稿导入和系统内显式保存；普通私人资料不需姓名或权利表单，保存为权利未知、未经独立核验的材料。已有一条用户手动HTTPS新闻的本地保存/读回证据；提取质量候选修复与完整GUI/S7验收仍须区分，当前状态见[status](docs/status.md)，使用与边界见[剪藏说明](extensions/shipping-hot-clipper/README.md)。
 
 ## 本地运行
 
@@ -61,7 +61,7 @@ E2E_BASE_URL=http://127.0.0.1:4444 pnpm test:e2e
 
 ## 本轮状态
 
-交付范围为 **Windows 本地完善与验收**；服务器部署/实机发布为后续待授权范围（本轮不连接服务器、不部署、不切换服务）。S1 已完成产品独立化与旧资讯业务退役：移除 NewsNow 资讯源、旧资讯路由、OAuth/用户同步与旧缓存模块，改为仅保留 Shipping HOT 的 `shipping/**` 路由、SQLite 底座和共享工具；包名、PWA/页面元数据与图标改用 Shipping HOT 身份；旧 Cloudflare/Vercel/Bun 部署入口退出。`newsnow_data` 物理卷、留存的旧 `user` 表数据和 MIT 许可未被删除。旧资讯业务与内容完善（真实数据、日历、全文翻译、商业船期）仍按计划在 S2–S6 推进。详见 [独立化与内容完善工作单](docs/plans/shipping-hot-standalone-content-2026-09-10.md)。
+交付范围为 **Windows 本地完善与验收**；服务器部署/实机发布为后续待授权范围。当前执行[风险情报方案 R0–R5](docs/plans/shipping-hot-risk-intelligence-2026-09-29.md)，阶段与验收以[docs/status.md](docs/status.md)为准；R2整体仍未通过，不能把限定人工剪藏验证当作整体通过。此前[独立化与内容完善 S0–S8](docs/plans/shipping-hot-standalone-content-2026-09-10.md)已合并关闭，仅保留为历史记录。
 
 ## 许可证
 
