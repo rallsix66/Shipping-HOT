@@ -110,6 +110,36 @@ export function plainSelection(html: string): string {
   }).join("")
   return text.trim() ? text : ""
 }
+/** Discuz thread detail only: the first page orders the main post before replies. */
+function forumMainSelector(source: Document, snapshot: Document): string | undefined {
+  if (!source.body.matches("#nv_forum.pg_viewthread")) return
+  const url = new URL(source.URL)
+  const prettyPage = /\/thread-\d+-(\d+)-\d+\.html$/.exec(url.pathname)
+  const allowedQueryKeys = prettyPage ? ["page"] : ["mod", "tid", "page"]
+  const defaultView = Array.from(url.searchParams.keys()).every(key => allowedQueryKeys.includes(key) && url.searchParams.getAll(key).length === 1)
+  const queryPages = url.searchParams.getAll("page")
+  const firstPage = (queryPages.length === 0 || (queryPages.length === 1 && queryPages[0] === "1"))
+    && (prettyPage
+      ? prettyPage[1] === "1"
+      : /\/forum\.php$/.test(url.pathname)
+        && url.searchParams.getAll("mod").length === 1 && url.searchParams.get("mod") === "viewthread"
+        && url.searchParams.getAll("tid").length === 1 && /^\d+$/.test(url.searchParams.get("tid") ?? ""))
+  const lists = source.querySelectorAll("#postlist")
+  const first = lists[0] && Array.from(lists[0].children).find(node => node.tagName === "DIV" && /^post_\d+$/.test(node.id))
+  const postId = first?.id.slice("post_".length)
+  const selector = postId ? `#postmessage_${postId}` : undefined
+  const bodies = selector ? source.querySelectorAll(selector) : undefined
+  const body = bodies?.[0]
+  const table = body?.closest("table.plhin")
+  if (!defaultView || !firstPage || lists.length !== 1 || source.querySelectorAll("h1.ts").length !== 1
+    || !first || bodies?.length !== 1 || !body?.matches("td.t_f") || !first.contains(body)
+    || table?.id !== `pid${postId}` || !first.contains(table)
+    || !selector || snapshot.querySelectorAll(selector).length !== 1) {
+    // Do not let an absent/hidden main post fall through to a visible reply.
+    throw new Error("无法确认论坛主帖，请选择正文后重试。")
+  }
+  return selector
+}
 export function extractDocument(doc: Document, mode: ClipMode, selection: string, now: string): ClipDraft {
   const actualUrl = clipActualUrl(doc.URL)
   const raw = doc.querySelector("meta[property=\"article:published_time\"]")
@@ -119,11 +149,12 @@ export function extractDocument(doc: Document, mode: ClipMode, selection: string
   let body = ""
   if (mode === "selection") body = plainSelection(selection)
   if (mode === "article") {
-    const parsed = parseForClip(inertSnapshot(doc))
+    const snapshot = inertSnapshot(doc)
+    const parsed = parseForClip(snapshot, forumMainSelector(doc, snapshot))
     title = parsed.title || title
     body = plainSelection(parsed.content)
   }
   if (mode !== "metadata" && !body) throw new Error("clip_empty_use_metadata")
   if (doc.URL !== actualUrl) throw new Error("clip_navigation_changed")
-  return parseClipDraft({ protocol: CLIP_PROTOCOL, actualUrl, title, body, mode, date, capturedAt: now, extractorVersion: mode === "article" ? "defuddle-0.19.2-dom-v2" : "defuddle-0.19.2-dom-v1" })
+  return parseClipDraft({ protocol: CLIP_PROTOCOL, actualUrl, title, body, mode, date, capturedAt: now, extractorVersion: mode === "article" ? "defuddle-0.19.2-dom-v4" : "defuddle-0.19.2-dom-v1" })
 }

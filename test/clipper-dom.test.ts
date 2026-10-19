@@ -68,7 +68,7 @@ it.each(nonArticleRegions)("excludes the structurally marked $name before Defudd
   const draft = extractDocument(page.document, "article", "", "2026-10-19T04:00:00.000Z")
   expect(draft.body).not.toContain(text)
   expect(draft.body).toContain("原创正文的最后一段，仍应保留。")
-  expect(draft.extractorVersion).toBe("defuddle-0.19.2-dom-v2")
+  expect(draft.extractorVersion).toBe("defuddle-0.19.2-dom-v4")
   expect(page.document.documentElement.outerHTML).toBe(before)
 })
 const visibleArticleRegions = [

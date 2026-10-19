@@ -2,8 +2,8 @@
 // Removed Obsidian reader DOM recovery; core synchronous parser only.
 import Defuddle from "defuddle"
 
-export function parseForClip(doc: Document) {
+export function parseForClip(doc: Document, contentSelector?: string) {
   return new Defuddle(doc, { url: "https://clipper.invalid/", useAsync: false, removeImages: true, includeReplies: false, fetch: async () => {
     throw new Error("clip_network_disabled")
-  } }).parse()
+  }, contentSelector }).parse()
 }

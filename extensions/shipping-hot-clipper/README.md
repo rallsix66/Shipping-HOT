@@ -12,6 +12,10 @@
 
 源代码实际复用、MIT及品牌边界见[来源清单](../../third_party/obsidian-clipper/README.md)。Defuddle0.19.2只运行惰性DOM提取；PRE选区保留原空白，article模式仍经过Defuddle既有代码块整理。无自动全站采集或读时模型调用。
 
-文章提取候选修复（`defuddle-0.19.2-dom-v2`）在复制惰性DOM前排除明确标为`complementary`、`navigation`、`contentinfo`的块，以及HTML `hidden`或内联`display:none`的块。`aria-hidden`只描述无障碍树，visibility可被子元素覆盖，两者均不再作为整棵剪枝依据；不引入computedStyle或完整CSS算法。不会按“订阅”“购买”等正文词语截断，不新增站点文案/class/id黑名单，不修改选区模式或原网页。Defuddle既有class/id启发式和PRE整理保持原样；仅靠无结构标记的文本不能可靠识别推广尾段。候选包离线验证不代表真实新闻页已修复，实际部署/用户包状态仍见status。
+文章提取候选修复（`defuddle-0.19.2-dom-v4`）保留原`dom-v2`的安全边界：复制惰性DOM前排除明确标为`complementary`、`navigation`、`contentinfo`的块，以及HTML `hidden`或内联`display:none`的块。`aria-hidden`只描述无障碍树，visibility可被子元素覆盖，两者均不作为整棵剪枝依据；不引入computedStyle或完整CSS算法。不会按“订阅”“购买”等正文词语截断，不新增站点文案黑名单，不修改选区模式或原网页。
+
+论坛例外仅识别Discuz主题详情结构`body#nv_forum.pg_viewthread`，要求唯一`#postlist`、主题标题、第一页地址（`thread-<数字>-1-<数字>.html`或`forum.php?mod=viewthread&tid=<数字>`，page缺省或唯一为1），及首帖`post_<数字>` / `table#pid<同一数字>.plhin` / `td#postmessage_<同一数字>.t_f`的对应关系。只把已通过安全快照的首帖正文交给Defuddle的`contentSelector`，继续执行原噪声清理与PRE整理，不把整个帖子列表或后续回复纳入正文。非第一页、结构不明确或首帖被安全边界排除时，提示“无法确认论坛主帖，请选择正文后重试”，不回退到回复。无域名、文章ID或标题特判；其他模板不承诺完整提取，正文内部残留控件仍需预览核对。独立候选包和本地保存页回放不代表已安装或真实Chrome/GUI通过，实际用户包状态仍见status。
+
+`dom-v4`收紧父审发现的排序/筛选P2：pretty地址只允许`page`，`forum.php`只允许`mod/tid/page`；URLSearchParams解码后按精确小写键白名单判断，每个键只准一次。任何额外键（包括`ordertype=0`、`pid/viewpid/stand/from`及未知或大小写变体）均提示选区，不解析论坛排序；编码后的重复键同样拒绝。允许的模式不证明服务器隐藏排序状态，只支持已验证的默认未筛选第一页。既有敏感URL规则完全保留：`authorid`因匹配`auth`仍在所有模式下返回`sensitive_clip_url`；其他通过全局URL检查的排序/筛选URL仍可使用选区/元数据。
 
 新包/实际服务/手动验收状态以[status](../../docs/status.md)为准。包构建及离线测试不代表真实Chrome/nonce/GUI/S7通过；本轮待父审后才让用户更新包。旧包、数据库和全部现场保留。

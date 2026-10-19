@@ -1711,3 +1711,23 @@ The final seal keeps Voyage focus-port coverage, Calendar completeness, JMA/geog
   - **PR #1**：`state = MERGED`、`mergedAt = 2026-09-15T02:57:44Z`、`mergedBy = rallsix66`、`mergeCommit = 96886948a906bda0b273c8da458a185a41887ad6`、base 仍为 `6f0a22cb`（**无 base drift**）、head = `d4e679e`。final CI run `34923163109` **两个 job 全绿**（`checks` 02:57:48→02:58:56；`e2e-windows` 02:58:58→03:01:03，含 “S7 isolated acceptance” 与证据上传 success）→ `merged = PASS` / `final CI = PASS`，此前“`e2e-windows` 合并前无法预演”的限制就此解除。
   - **PR #2（本次性能修复）**：按用户指示从 `main`（`9688694`）拉出 `codex/shipping-hot-render-performance`，把本次三个提交 cherry-pick 过去（新分支树与已全面验证的 `9980cf9` 树 `git diff` 为空，故门禁与 S7 结论直接沿用）；分支 push 与 PR 创建实测新增 CI run = **0**。**已按用户明确授权合并**：`state = MERGED`、`mergedAt = 2026-09-15T05:46:24Z`、`mergedBy = rallsix66`、`mergeCommit = efe170f135bdf2cebab01d5d00f718df2c4956dc`（merge commit，符合约定）、base 仍为 `9688694`（无 drift）、head = `50a43bd`。其 final CI run `34934104496`（`main` @ `efe170f`，`push` 触发）**两个 job 全绿**：`checks`（05:46:28→05:47:34，install / build / typecheck / lint / tests / whitespace 全部 success）与 `e2e-windows`（05:47:38→05:49:52，“Build production server”、“S7 isolated acceptance (production build + system Chrome)”、“Upload S7 isolated acceptance evidence” 全部 success）。
   - **结论**：**`main` 现已包含本次渲染性能修复**（`merged = PASS` + `final CI = PASS` ×2）。`deployed` / `live verified` 仍为 `NOT_RUN`（未授权、未执行），Docker 仍为 `UNVERIFIED / FUTURE`；不得写“全部完成”。
+
+## 论坛主帖提取修复候选（2026-10-19，待父审/未安装）
+
+在HEAD`777007073f184d025147eb19f8ece86858e68362`之上完成未提交最小修复：`defuddle-0.19.2-dom-v3`只在明确第一页Discuz详情结构与首帖身份配对成立时，把安全快照中的首帖正文交给Defuddle contentSelector；不含域名/文章ID/标题特判，不关闭全局噪声清理，不混入回复。非第一页/歧义/主帖被原安全边界排除时提示选区。旧hidden/role/display、无资源快照、PRE/表格、选区/元数据版本及后端/许可边界保持不变。
+
+原创夹具先红后绿，23论坛用例；隔离全新frozen install/scripts、build/typecheck/lint/正式插件构建、240相关/1504全量通过（3既有Windows跳过）、3原生smoke均exit0。现有rg仅追加到检查子进程Path，未改系统设置。用户桌面93508字节原HTML只读离线回放：五段340字在snapshot/Defuddle/纯文本逐字、顺序、次数均完整；独立正式bundle同结果。最终391字仍有35非空白字符的附件提示/关闭控件（含分隔多43字符），不宣称纯净全文/全部论坛覆盖。
+
+正式候选目录`.tmp/clipper-forum-v3-20261019/snapshot/.tmp/clipper-package`；content.js SHA256 `ad174d9fd407b46b64d0a618ba12abaaba361da6384c89b8da1b613e64bfc7e6`。原用户包8文件、桌面原件、.gitignore不变；status此前内容完整保留。未提交/推送/更新PR/安装/切换5173/操作旧DB/调用付费/启动24h。父审、真实Chrome/GUI/S7仍pending/NOT_RUN；R2整体BLOCKED与来源计数保持不变。[报告](evidence/clipper-forum-2026-10-19/report.md) / [证据](evidence/clipper-forum-2026-10-19/summary.json) / [真实Neat Freak](evidence/clipper-forum-2026-10-19/closeout.md)。
+
+## 论坛主帖父审P2修复候选（2026-10-19，dom-v4待复核/未安装）
+
+dom-v3被父审发现排序/筛选query可将前置回复误当主帖。本次未提交最小修复仅支持默认未筛选第一页：pretty URL只准page，forum.php只准mod/tid/page，解码后精确小写键且每键一次；其他键、重复、大小写变体及ordertype=0等均提示选区，不解释排序。全局敏感URL规则未改，authorid匹配auth故各模式仍拒绝；其他合规过滤URL可用selection/metadata。审计版本`defuddle-0.19.2-dom-v4`。
+
+3反例先红；81论坛（本轮新增58）、298相关、1562全量通过（3既有Windows跳过）、fresh frozen install/scripts、build/typecheck/lint/正式构建/3smoke均exit0。独立正常包64项检查通过；原93508字节HTML五段340字仍在snapshot/Defuddle/plain逐字、顺序和各一次完整，最终391字/35非空白附件提示残留不变。新content.js SHA256 `12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630`；独立目录`.tmp/clipper-forum-v4-p2-20261019/snapshot/.tmp/clipper-package`。
+
+旧用户包8文件、dom-v3候选、原HTML、.gitignore和status已有字节保留；无提交/推送/安装/服务或旧DB操作/付费/网络设置变更。父审复核、真实Chrome/GUI/S7仍pending/NOT_RUN，R2整体BLOCKED和计数不变。[P2报告](evidence/clipper-forum-p2-2026-10-19/report.md) / [证据](evidence/clipper-forum-p2-2026-10-19/summary.json) / [真实Neat Freak增量](evidence/clipper-forum-p2-2026-10-19/closeout.md)。
+
+## dom-v4父审与本地交付授权（2026-10-19）
+
+父会话已关闭排序/筛选P2并给予离线限定通过；用户于2026-10-19 15:44 UTC+8明确批准本地提交并更新现用插件。已审dom-v4代码、测试与正式包摘要核对一致；交付执行仅允许content.js变更（预期SHA256 12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630），备份后更新，不代替用户重新加载Chrome。现有298相关/1562全量与其他门禁为提交前受控快照证据，未宣称提交后重跑；父审不等于真实Chrome/GUI/S7或R2整体通过。实际提交、钩子、备份及更新结果记录在本机`.tmp/clipper-delivery-dom-v4-20261019/`交付收据；服务保持原版本，仅只读健康检查，禁止推送/PR更新/合并/部署。

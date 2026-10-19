@@ -1,0 +1,785 @@
+{
+  "at": "2026-10-19T07:41:34.614Z",
+  "head": "777007073f184d025147eb19f8ece86858e68362",
+  "cwd": "D:\\try one\\Shipping HOT",
+  "branch": "codex/shipping-hot-r2",
+  "extractorVersion": "defuddle-0.19.2-dom-v4",
+  "parentP2": "locally repaired; parent re-review pending",
+  "uncommittedCandidate": true,
+  "sourceFiles": [
+    {
+      "path": "extensions/shipping-hot-clipper/src/extract.ts",
+      "sha256": "8beacc987bff704d058c11ebc7c67e0035b84e6247079e8c7d67193b10ad3ab2"
+    },
+    {
+      "path": "extensions/shipping-hot-clipper/src/clip-utils.ts",
+      "sha256": "d5f3389fd7614a8c498a2fff3929190f4394e63b9f14ab187370138e694b2085"
+    },
+    {
+      "path": "test/clipper-dom.test.ts",
+      "sha256": "cb0c71f316214bee05baa72c7b71a7625a01ffde23ef57c156df7436eed8702c"
+    },
+    {
+      "path": "test/clipper-forum.test.ts",
+      "sha256": "6a57abe4a8b33de56a3ad6c06b70c5102e807711f11d38a2e12d3961f1cf482f"
+    },
+    {
+      "path": "tsconfig.node.json",
+      "sha256": "c074fca66be697a18cce157ff7f7ad9e4fba0e1b871a7f8e464ff12c3508b2b2"
+    },
+    {
+      "path": "extensions/shipping-hot-clipper/README.md",
+      "sha256": "ef05022f97db2a05a790c2eb226506ac1130db1a6aa825307f3d531c63f1fd8c"
+    },
+    {
+      "path": "docs/architecture.md",
+      "sha256": "ac57bd37d01c087424afbd8caba4eef7138326b416b8216fe5efcb038bcf2b47"
+    }
+  ],
+  "codePatchSha256": "6ad23b458a5dfa50481fde9aacddb4f96792cf0bda9834861037691c63786e75",
+  "productionPatchSha256": "f8ced47c1264506500346bd0cae8eb87eb6271138feefd559d6ba47a3eb442f8",
+  "p2DeltaPatchSha256": "f16c80e4a844d70b5fcfde47175367ed91fc70bf8f9c23d0b2136610f718ddb3",
+  "queryPolicy": {
+    "pretty": [
+      "page"
+    ],
+    "query": [
+      "mod",
+      "tid",
+      "page"
+    ],
+    "decodedCanonicalLowercaseKeys": true,
+    "duplicates": "reject",
+    "allOtherKeys": "reject without interpretation",
+    "authorid": "existing global sensitive_clip_url rejection for every mode; not weakened"
+  },
+  "research": {
+    "source": "https://raw.githubusercontent.com/Discuz-X/DiscuzX/master/source/module/forum/forum_viewthread.php",
+    "scope": "Historical Discuz 3.1 source (2013), not a claim about the target server version",
+    "observed": "ordertype/authorid/viewpid/stand/from affect the view in this source; pid and all other additional names are conservatively rejected without a version-specific parser",
+    "currentUpstreamLookup": "Current official GitHub/Gitee source was unavailable via browser; historical source and local counterexamples suffice for the closed allowlist",
+    "copiedUpstreamCode": false
+  },
+  "verification": {
+    "freshInstall": {
+      "rawExit": 0,
+      "command": "pnpm install --frozen-lockfile",
+      "scriptsEnabled": true,
+      "oldNodeModulesCopied": false
+    },
+    "results": [
+      {
+        "name": "build",
+        "command": "pnpm build",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:37:04.204Z",
+        "endedAt": "2026-10-19T07:37:26.360Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\build.log"
+      },
+      {
+        "name": "typecheck",
+        "command": "pnpm typecheck",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:37:26.361Z",
+        "endedAt": "2026-10-19T07:37:34.743Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\typecheck.log"
+      },
+      {
+        "name": "lint",
+        "command": "pnpm lint",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:37:34.743Z",
+        "endedAt": "2026-10-19T07:38:06.178Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\lint.log"
+      },
+      {
+        "name": "clipper-build",
+        "command": "pnpm build:clipper",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:38:06.179Z",
+        "endedAt": "2026-10-19T07:38:07.530Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\clipper-build.log"
+      },
+      {
+        "name": "targeted",
+        "command": "pnpm exec vitest run -c vitest.config.ts server/intel/manual-clip.test.ts server/intel/manual.test.ts server/intel/material-read.test.ts server/api/shipping/intel/manual-http.test.ts server/api/shipping/intel/read-http.test.ts test/manual-intel.test.ts test/clipper-bridge.test.ts test/clipper-dom.test.ts test/clipper-forum.test.ts test/clipper-package.test.ts test/clip-import.test.ts server/runtime/clip-synthetic-guard.test.ts --reporter=dot",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:38:07.531Z",
+        "endedAt": "2026-10-19T07:38:11.668Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\targeted.log"
+      },
+      {
+        "name": "vitest",
+        "command": "pnpm exec vitest run -c vitest.config.ts --reporter=dot",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:38:11.669Z",
+        "endedAt": "2026-10-19T07:38:27.586Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\vitest.log"
+      },
+      {
+        "name": "smoke-p0",
+        "command": "pnpm smoke:p0-native",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:38:27.587Z",
+        "endedAt": "2026-10-19T07:38:28.751Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\smoke-p0.log"
+      },
+      {
+        "name": "smoke-p2c",
+        "command": "pnpm smoke:p2c-runtime",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:38:28.751Z",
+        "endedAt": "2026-10-19T07:38:29.813Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\smoke-p2c.log"
+      },
+      {
+        "name": "smoke-feed",
+        "command": "pnpm smoke:p3-feed-freshness",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:38:29.814Z",
+        "endedAt": "2026-10-19T07:38:30.875Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\smoke-feed.log"
+      }
+    ],
+    "related": {
+      "files": 12,
+      "passed": 298
+    },
+    "full": {
+      "files": 139,
+      "passed": 1562,
+      "skipped": 3,
+      "failed": 0
+    },
+    "forum": 81,
+    "p2Added": 58,
+    "originalRedCases": 3,
+    "smokes": 3,
+    "cleanCommitShaGate": "NOT_RUN; uncommitted source overlay"
+  },
+  "actualReplay": {
+    "at": "2026-10-19T07:38:37.867Z",
+    "file": {
+      "path": "C:\\Users\\Administrator\\Desktop\\下周或有超级台风.html",
+      "bytes": 93508,
+      "sha256": "1d02a77ff25a0a247f26ce43abe53b9748cef09d7e92eb404329884e491aeaf3",
+      "sourceTitleVerified": true,
+      "sourceAddressVerified": true,
+      "unchanged": true
+    },
+    "method": "Full local user-saved HTML; current source and separate formal browser bundle in offline linkedom/Node VM",
+    "extractorVersion": "defuddle-0.19.2-dom-v4",
+    "stages": {
+      "source": {
+        "exactParagraphs": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "retainedChars": 340,
+        "positions": [
+          79,
+          149,
+          329,
+          399,
+          461
+        ],
+        "inOriginalOrder": true,
+        "occurrences": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "totalChars": 506,
+        "sha256": "395a8aace9605a809ae02b6b546b9d50783eb62d9938af16755c75db7bc7ac75"
+      },
+      "snapshot": {
+        "exactParagraphs": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "retainedChars": 340,
+        "positions": [
+          79,
+          149,
+          257,
+          327,
+          389
+        ],
+        "inOriginalOrder": true,
+        "occurrences": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "totalChars": 434,
+        "sha256": "bbb593a5c74ec97bccd01703bf1791b8ad8d97b5c991448673fa5d8b836385ee"
+      },
+      "defuddle": {
+        "contentSelector": "#postmessage_14378788",
+        "removePartialSelectors": "default true",
+        "wordCount": 343,
+        "text": {
+          "exactParagraphs": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "retainedChars": 340,
+          "positions": [
+            47,
+            118,
+            225,
+            296,
+            359
+          ],
+          "inOriginalOrder": true,
+          "occurrences": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "totalChars": 405,
+          "sha256": "4d58b6144685068d631cdfe8197e23725b17c30b1158740af23aa0aeec7e664b"
+        }
+      },
+      "plain": {
+        "exactParagraphs": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "retainedChars": 340,
+        "positions": [
+          43,
+          113,
+          217,
+          287,
+          349
+        ],
+        "inOriginalOrder": true,
+        "occurrences": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "totalChars": 391,
+        "sha256": "1c3fa4c042521c4daa213e457ba1afa7efb30ef02c5b22fd36fedc9b1c07d0db"
+      },
+      "sourceDomUnchanged": true
+    },
+    "actualScope": {
+      "totalBodyChars": 391,
+      "equalsExactlyFiveParagraphs": false,
+      "expectedFiveParagraphsWithSeparatorsChars": 348,
+      "extraCharsIncludingSeparators": 43,
+      "residualNonWhitespaceChars": 35,
+      "residualBlocks": [
+        {
+          "chars": 11,
+          "sha256": "7cb02c0857b34868c90dbe09288ec58668f6d65501e4831fca40aa3ec190d7ac",
+          "classification": "attachment-permission hint/control"
+        },
+        {
+          "chars": 26,
+          "sha256": "3362eb9a22661c74b4034902617fc9ef4fd64a63fc8be8e33eaf57796d936ae5",
+          "classification": "attachment-permission hint/control"
+        },
+        {
+          "chars": 1,
+          "sha256": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+          "classification": "attachment-permission hint/control"
+        }
+      ],
+      "residualBlockCount": 3
+    },
+    "bundle": {
+      "path": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\snapshot\\.tmp\\clipper-package\\content.js",
+      "sha256": "12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630",
+      "matchesCurrentSourceOutput": true,
+      "sourceDomUnchanged": true,
+      "authoredRegressionCases": [
+        {
+          "name": "single main post",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "long replies excluded",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "later page rejected",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "excluded main never falls to reply",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "index-like detail rejected",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "recommendation list not promoted",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "normal bundle rejects synthetic HTTP exception",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "normal bundle rejects public HTTP",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "normal bundle rejects credential identity",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "normal bundle rejects sensitive query field",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / ordertype=1 / pretty / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / ordertype=1 / pretty / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / ordertype=1 / pretty / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / pid=202 / pretty / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / pid=202 / pretty / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / pid=202 / pretty / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / viewpid=202 / pretty / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / viewpid=202 / pretty / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / viewpid=202 / pretty / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / OrderType=1 / pretty / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / OrderType=1 / pretty / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / OrderType=1 / pretty / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / %6frdertype=1 / pretty / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / %6frdertype=1 / pretty / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / %6frdertype=1 / pretty / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / page=1 / pretty / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / page=1 / pretty / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / page=1 / pretty / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / Page=1 / pretty / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / Page=1 / pretty / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / Page=1 / pretty / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / unknown_view=1 / pretty / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / unknown_view=1 / pretty / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / unknown_view=1 / pretty / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / ordertype=1 / query / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / ordertype=1 / query / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / ordertype=1 / query / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / pid=202 / query / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / pid=202 / query / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / pid=202 / query / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / viewpid=202 / query / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / viewpid=202 / query / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / viewpid=202 / query / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / OrderType=1 / query / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / OrderType=1 / query / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / OrderType=1 / query / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / %6frdertype=1 / query / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / %6frdertype=1 / query / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / %6frdertype=1 / query / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / page=1 / query / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / page=1 / query / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / page=1 / query / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / Page=1 / query / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / Page=1 / query / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / Page=1 / query / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / unknown_view=1 / query / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / unknown_view=1 / query / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 valid reversed identities / unknown_view=1 / query / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 existing sensitive URL rule / authorid=202 / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 existing sensitive URL rule / authorid=202 / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 existing sensitive URL rule / authorid=202 / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 existing sensitive URL rule / AUTHORID=202 / article",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 existing sensitive URL rule / AUTHORID=202 / selection",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "P2 existing sensitive URL rule / AUTHORID=202 / metadata",
+          "passed": true,
+          "sourceDomUnchanged": true
+        }
+      ]
+    },
+    "retainedUserBundle": {
+      "path": "D:\\try one\\Shipping HOT\\.tmp\\clipper-private-abb1b99\\.tmp\\clipper-package\\content.js",
+      "sha256": "0628839376a48ce100d233b87909f868b0e703858df9ee3a59463aa72d5d0325",
+      "unchanged": true
+    },
+    "networkAttempts": 0,
+    "operations": {
+      "databaseOpened": false,
+      "pageScriptsExecuted": false,
+      "externalResourcesLoaded": false,
+      "rawArticleOrHtmlWritten": false,
+      "installed": false,
+      "serviceChanged": false,
+      "gitCommitOrPush": false
+    },
+    "limits": [
+      "Offline saved-page replay does not attest capture-time live DOM or Chrome-loaded build",
+      "GUI/S7/installation remain NOT_RUN"
+    ]
+  },
+  "package": {
+    "directory": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v4-p2-20261019\\snapshot\\.tmp\\clipper-package",
+    "installed": false,
+    "synthetic": false,
+    "files": [
+      {
+        "path": "assets/popup-aVjAIvTt.css",
+        "sha256": "8a2411b56c91c16e429d97f0d5fe6de4556b718846ca7997d098bb3885dd68db",
+        "bytes": 465
+      },
+      {
+        "path": "assets/popup-DHU7aOx9.js",
+        "sha256": "058f037b30b5b2c1953d2c196afa69906c5c40a487206178efb881e1910c8e56",
+        "bytes": 6280
+      },
+      {
+        "path": "content.js",
+        "sha256": "12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630",
+        "bytes": 328094
+      },
+      {
+        "path": "licenses/defuddle-MIT.txt",
+        "sha256": "c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092",
+        "bytes": 1076
+      },
+      {
+        "path": "licenses/obsidian-clipper-MIT.txt",
+        "sha256": "3ca04f8f046005103b08302723521f546605a34a269d5a867a82d200dfd9c0d7",
+        "bytes": 1088
+      },
+      {
+        "path": "manifest.json",
+        "sha256": "8d2cc507bd632cbe95a740aee6a2f7801e3c07c079a787aa77b34dcbddae67e8",
+        "bytes": 1011
+      },
+      {
+        "path": "popup.html",
+        "sha256": "2d2bf242cf996d12ab286226bc55cf5c6668c3dc1d2d80054b06d80f4bad86b9",
+        "bytes": 1015
+      },
+      {
+        "path": "worker.js",
+        "sha256": "cd60d4fd354e043235a57ca67d808b6e008bac9369fab6ce436d5d7ac3291638",
+        "bytes": 5639
+      }
+    ],
+    "contentSha256": "12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630",
+    "treeSha256": "10918cddd49adc99d5f50478bb25fe6812bb3177d731ee83dd787c98f8236770",
+    "zip": {
+      "path": "D:\\try one\\Shipping HOT\\.tmp\\Shipping-HOT-Clipper-forum-dom-v4-p2-20261019.zip",
+      "bytes": 106109,
+      "sha256": "a5ed051e4eec1ac7637d105c9fc67886c617b2684979434a7f23a9a59e931915"
+    }
+  },
+  "preservation": {
+    "installed8FilesUnchanged": true,
+    "previousDomV3CandidateUnchanged": true,
+    "originalHtmlUnchanged": true,
+    "gitignoreUnchanged": true,
+    "statusOriginalPrefixPreserved": true,
+    "oldDatabaseOpened": false,
+    "serviceChanged": false,
+    "statusBeforeSha256": "e931c787dde5883e251083f702c5f20cc1ef4347e152005fd31e39fc891d2a15",
+    "statusAddedBytes": 1551
+  },
+  "closeout": {
+    "skill": "C:/Users/Administrator/.codex/skills/neat-freak/SKILL.md",
+    "state": "performed; source/runtime/docs/rules/workspace reconciled, memory read-only, parent re-review pending",
+    "parentReview": "pending",
+    "memory": "out-of-scope / generated-read-only",
+    "cleanup": "none; all artifacts retained",
+    "inventory": {
+      "files": 3667,
+      "markdown": 235,
+      "rules": [
+        "AGENTS.md"
+      ]
+    }
+  },
+  "operations": {
+    "commit": false,
+    "push": false,
+    "PRChange": false,
+    "install": false,
+    "serviceSwitch": false,
+    "providerOrPaidCall": false,
+    "migration": false,
+    "networkSettingsChange": false,
+    "rawHtmlOrBodyInGit": false
+  },
+  "limits": {
+    "GUI_S7": "NOT_RUN",
+    "R2": "BLOCKED unchanged",
+    "hiddenServerOrdering": "not attested",
+    "residualNonWhitespaceChars": 35
+  },
+  "finalAudit": {
+    "at": "2026-10-19T07:41:34.859Z",
+    "sourceMatchesGate": true,
+    "originalParagraphLeakCount": 0,
+    "localLinks": 8,
+    "diffCheck": 0,
+    "gitStatus": " M .gitignore\n M docs/architecture.md\n M docs/status.md\n M extensions/shipping-hot-clipper/README.md\n M extensions/shipping-hot-clipper/src/clip-utils.ts\n M extensions/shipping-hot-clipper/src/extract.ts\n M test/clipper-dom.test.ts\n M tsconfig.node.json\n?? docs/evidence/clipper-forum-2026-10-19/\n?? docs/evidence/clipper-forum-p2-2026-10-19/\n?? test/clipper-forum.test.ts\n",
+    "allOriginalStatusBytesPreserved": true,
+    "deleted": []
+  }
+}
