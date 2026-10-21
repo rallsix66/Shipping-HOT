@@ -1,3 +1,5 @@
+> 现役更新：2026-10-20父会话独立代码与补证审查通过，精确应用XX-K01有限OK/PASS、CN-T01有限OK/PARTIAL，累计28/39（至少32，差4）、资讯25/34（余9）。单次历史响应＋完整原件离线回放，CN7/8、role键缺省非publication，day无时区/instant；不是持续或生产声明。[认可与限界](../r2-maersk-mofcom-qualification-2026-10-20/acceptance.json) / [当前剩余R2](../r2-maersk-mofcom-qualification-2026-10-20/remaining-r2.md)。其他39条来源保持；下方旧流程、旧总数与旧“下一批”建议按原时点保留，最新动作以当前剩余R2为准。
+
 # R2 41项来源累计证据 — 2026-10-15
 
 R2-6最终文档复用审计：52行§5.3来源/代码/测试映射已完成，本地无第二Runtime/预算表/通用RSS解析器，建议PASS待主审；未概称整份上游已移植。collector完整cursor/RSS validator等差异待裁定。R2整体仍BLOCKED，25/39、24/34、历史3/5不变，GUI/S7/真实24h未验。材料读取954c831已获限定认可：仅已存intel精确版本内部合同，无业务消费者、Feed桥接或R3输入，source是当前配置而非完整历史快照。本轮产品门禁NOT_RUN，仅文档核验，业务请求/新真实记录/LLM/付费0。24h两源仅提案未启动。**推送后停止新实现和信源请求，等待主审与用户下一阶段决定。** [最终审计](../r2-final-reuse-audit-2026-10-15/report.md) / [原验收与动作](../r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md)。
@@ -36,9 +38,9 @@ Westports 已获限定认可：R2-4仍 STALE、25/39；R2-5按既有 parser 的3
 
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
-| R2-4公开自动来源 | **25/39（64.10%）** | 最少32项，尚差7；25 OK、7 PARTIAL、1 STALE、2 BLOCKED、4 NOT_RUN，未通过 |
-| R2-5资讯/公告原页字段回放 | **24/34（70.59%）** | 尚差10；24 PASS、2 FAIL、1 PARTIAL、7 NOT_RUN，未通过 |
-| 数值字段独立检查 | **3/5** | 仅历史归一化诊断；不加到34项原页回放分子 |
+| R2-4公开自动来源 | **28/39（71.79%）** | 最少32项，尚差4；28 OK、7 PARTIAL、1 STALE、1 BLOCKED、2 NOT_RUN，未通过 |
+| R2-5资讯/公告原页字段回放 | **25/34（73.53%）** | 尚差9；25 PASS、2 FAIL、2 PARTIAL、5 NOT_RUN，未通过 |
+| 数值字段独立检查 | **历史3项有限诊断＋新增1项完整原件离线解析** | 分母5，类型分列；不称4/5生产接入，不加到34项原页回放分子 |
 | R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
 
 34资讯/公告、5数值天气、2后续阶段的分类于06:31:44 UTC已批准，41项全部保留。后续付费天气与向量只从公开39项分母排除，没有标PASS。这里的OK只描述留证时的实产品可用和数据/解析检查，不描述今天实时可用、生产默认启用或24小时表现。默认关闭独立于来源资格，不记作失败。
@@ -55,7 +57,7 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 | CN-P02 | https://www.sz.msa.gov.cn/ | 2026-10-15T08:27:32.616Z /302真实自指Location，DNS1/GET1 | PARTIAL | NOT_RUN | Location等于原URL，零重试停止、目标0，无实际列表/结构/回放；旧正文相对路径不当跳转目标。 |
 | CN-W01 | https://www.nmc.cn/publish/typhoon/typhoon_new.html | 2026-10-11历史200 [实跑](../nmc-integration-2026-10-11/nmc-live-evidence.json) | OK | PASS [专用映射](../r2-nmc-close-2026-10-15/product-mapping.json) | 固定产品URL/标题/原时间或年度期号，unknown TZ/生命周期、历史/解除提示、0港口影响；10/13为零网络generic适配负例，不是源实网失败。 |
 | CN-W02 | https://www.nmc.cn/publish/country/warning/index.html | 2026-10-11历史200 [实跑](../nmc-integration-2026-10-11/nmc-live-evidence.json) | OK | PASS [专用映射](../r2-nmc-close-2026-10-15/product-mapping.json) | 固定产品URL/标题/原时间或年度期号，unknown TZ/生命周期、历史/解除提示、0港口影响；10/13为零网络generic适配负例，不是源实网失败。 |
-| CN-T01 | http://www.mofcom.gov.cn/zcfb/index.html | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 目录URL为HTTP；现安全入口只接受HTTPS，未假设替代URL，也没有当次请求。 |
+| CN-T01 | 原http://www.mofcom.gov.cn/zcfb/index.html；同host/path已验HTTPS | 2026-10-20T07:51:35.830Z /200，20318B [单次历史访问](../r2-three-url-after-save-2026-10-20/request-ledger.json) | OK（限定） | PARTIAL [完整原件回放](../r2-maersk-mofcom-offline-2026-10-20/replay-CN-T01.json) | 父独立代码/补证审查认可：8原项/7 HTTPS身份入库，HTTP一项不改写；重复0新0修订/关闭重开一致，role键缺省非publication、day无timezone/instant，metadata-only，生产/24h未验。 |
 | CN-T02 | https://szs.mof.gov.cn/zhengcefabu/ | 2026-10-14T07:56:30.392Z / 200 [取证](../r2-four-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-public-index-replay-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
 | VN-P01 | https://vimawa.gov.vn/vi/thong-bao-hang-hai | 2026-10-14T07:56:30.690Z / 200 [取证](../r2-four-after-clash-2026-10-14/summary.json) | PARTIAL | PARTIAL [字段](../r2-four-after-clash-2026-10-14/VN-P01-table-metadata.json) | 实表10行有标题/链接，无可见日期或日期属性；TBHH编号、表头不当日期。 |
 | VN-P03 | https://saigonnewport.com.vn/tin-tuc | 2026-10-14T09:08:39.423Z / 200 [取证](../r2-three-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-post-clash-index-replay-final-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
@@ -79,7 +81,7 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 | PH-W02 | https://www.pagasa.dost.gov.ph/weather/weather-advisory | 2026-10-15T05:53:36.848Z / 403 [本次](../r2-official-gaps-applied-2026-10-15/PH-W02-capture.json) | PARTIAL | NOT_RUN | 本次错误页非天气空状态，无活动正样本；10/10官方局部无活动状态另作历史，不称今天无风险。 |
 | PH-C01 | https://customs.gov.ph/category/media-releases/ | 2026-10-14T07:56:33.170Z / 200 [取证](../r2-four-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-public-index-replay-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
 | PH-M01 | https://portcalls.com/feed/ | 2026-10-15T04:10:42.206Z / 200 [本轮取证](../r2-three-rss-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-three-rss-2026-10-15/PH-M01-replay.json) | 完整私有XML→既有collector→隔离SQLite 10条；重复0新0修订，readonly/query_only重开0差异；pubDate秒精度、原offset +0000，无独立updated。仅metadata，未生产启用。 |
-| XX-K01 | https://www.maersk.com/news | 2026-10-15T02:38:28.356Z / 尝试1、未捕获响应 [当前证据](../r2-carrier-reapplied-2026-10-15/summary.json) | BLOCKED | NOT_RUN | 公网23.53.3.137、23.53.3.144；fetch_failed无底层错误记录，不判断CA/TLS/反爬；不重试。 |
+| XX-K01 | https://www.maersk.com/news | 2026-10-20T07:28:29.935Z /200，46251B [单次历史访问](../r2-maersk-32k-live-2026-10-20/request-ledger.json) | OK（限定） | PASS（限定） [完整原件回放](../r2-maersk-mofcom-offline-2026-10-20/replay-XX-K01.json) | 父独立代码/补证审查认可18/18；固定exact source/URL32768 opt-in，原件逐项0差异/重复0新0修订/关闭重开一致；unknown role、day无timezone/instant、metadata-only且默认关闭，非持续或生产可用。 |
 | XX-K02 | https://www.one-line.com/en/newsroom（旧/en/news与308另存） | 2026-10-15T02:56:22.136Z / 200（前轮实测；本轮HTTP0）[沿革](../r2-one-catalog-candidate-2026-10-15/catalogue-change-applied.json) | OK | PASS [正式关闭候选原页回归](../r2-one-catalog-candidate-replay-2026-10-15/summary.json) | 目录web_list页面由json_list惰性数据模式读取；1置顶+9列表，日期秒精度无时区/瞬间null，默认关闭metadata-only且不进入活动源。 |
 | XX-K03 | https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/ | 原06:32:48.737Z /200，当前无新请求 | OK | PASS | 主会话限定代码/过程认可执行线程20条原页验收；未独立重放私有原页，不称CI/24h通过。 |
 | XX-M01 | https://theloadstar.com/feed/ | 2026-10-15T04:25:58.202Z / 200 [取证](../r2-two-media-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-two-media-2026-10-15/XX-M01-replay.json) | 完整私有RSS10条，pubDate秒精度+0000；隔离collector/重复零新增修订/query_only重开零差异；metadata-only，生产未配置。 |
@@ -90,7 +92,7 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 
 | ID | 精确目录URL / 原文本 | 最新已有采集UTC / HTTP | R2-4 | 独立数值字段 | 判定理由 / 保留缺口 |
 | --- | --- | --- | --- | --- | --- |
-| ID-W02 | https://maritim.bmkg.go.id/marine2026-data/ （原目录文档/港口KODE模板） | 2026-10-15T06:05:16.816Z / doc200 [本次](../r2-bmkg-doc-jma-attribution-2026-10-15/ID-W02-doc-capture.json) | NOT_RUN | NOT_RUN | doc是16文件/子目录索引，非已确认apidoc，无目标港口/KODE映射或数值样本，所有链接未跟进，资格不升。 |
+| ID-W02 | https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json | 2026-10-20T03:33:54.513Z / 200，11259字节 | OK（限定） | NOT_APPLICABLE_NUMERIC | 完整41点原件纯parser回放、归一化/字段验证已认可；父独立静态审查，门禁与回放为执行者证据。生产/24h未验证。 |
 | XX-W01 | https://www.jma.go.jp/bosai/typhoon/data/targetTc.json | 2026-10-15T05:53:37.778Z / 404 [同次归属](../r2-bmkg-doc-jma-attribution-2026-10-15/jma-cross-product-attribution.json) | BLOCKED | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [历史字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 最新精确URL404移出当前OK；历史数值诊断保留，404非无气旋，同一请求不重复计数。 |
 | XX-W02 | `https://www.jma.go.jp/bosai/typhoon/data/TC{id}/forecast.json` 、`/specifications.json` | 2026-10-15T05:53:37.778Z / 同次targetTc404 [归属](../r2-bmkg-doc-jma-attribution-2026-10-15/jma-cross-product-attribution.json) | PARTIAL | PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED [旧字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 前置列表与XX-W01是同一请求，没有两产品新请求；历史forecast保留，spec仍缺。 |
 | XX-A01 | https://api.open-meteo.com/v1/forecast | 2026-10-10T03:58:39.141Z / 200 [取证](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json) | OK | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 10/10陆地8港风/降水/能见度与时间字段诊断；不是保留原JSON回放或今天刷新。 |

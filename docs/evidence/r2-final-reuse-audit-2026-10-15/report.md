@@ -1,5 +1,9 @@
 # R2-6 最终复用审计 — 2026-10-15
 
+> 交付更新（2026-10-21）：已普通推送到 `codex/shipping-hot-r2`。Maersk/商务部/日期切片 `3f8971e3`，门禁 `1b68adcd`。观察工具 + BMKG(ID-W02) 切片 `c9af8c55`，门禁 `5e665216`，包含 LOGONSERVER 仅 win32 隔离前认可。worker 启动竞态 `160c67a9`，门禁 `00e97518`。以上均经 dots 限定复审通过。下文“未提交/uncommitted/待父审”是当时的口径。正预算实网观察、24h、R3 仍未运行、未授权；S7、R2 均未通过。
+
+> 2026-10-19 parent-review clarification: R2-6 received limited PASS at `aea56e72ec11fa76986deccc5c3a9797584ab157` for reuse/dedupe architecture (product `954c831f27eff4fd4382a0ea68be3894de053759`). This is not full implementation of every row in the 52-row map and not overall R2 PASS. Older "pending" review/cursor language below describes the historical cutoff and is superseded; a cursor/validator decision is not a new R2-6 gate. The launcher and Windows environment repair have since received limited offline parent acceptance (uncommitted). Current work is the [2026-10-20 offline R2 closeout](../r2-closeout-offline-2026-10-20/report.md); live collection and R2-8 remain NOT_RUN.
+
 执行起点`0321584ffbbb2f99c1f8ecd64c680b78d0affcc6`，唯一当前产品代码`954c831f27eff4fd4382a0ea68be3894de053759`。**本轮仅文档静态审计，产品门禁NOT_RUN，既有1338/3与九命令门禁仅引用历史证据，没有重跑。** 材料读取已获主会话限定审查通过、无新增P2：[认可范围](material-read-acceptance.json)。它只读已存intel精确版本，当前无业务消费者；Feed正文桥接/R3输入未实施；source为当前来源配置，不是完整历史配置快照。至此不为未来R3继续加接口。
 
 ## 统一结论

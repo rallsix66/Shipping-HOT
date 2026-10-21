@@ -1,10 +1,10 @@
 {
   "type": "current_authoritative_evidence_matrix",
-  "generatedAt": "2026-10-15T08:59:58.093Z",
+  "generatedAt": "2026-10-20T04:06:11.578Z",
   "reviewedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
   "evidenceHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
-  "catalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
+  "catalogSha256": "1b98532577a3de49b394dc0746e3a556717c94a0058bb35c14dacb453d0bc90f",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
   "approval": {
     "messageId": "Sentinel_81b542f9f60c8191a2b32b4cc8018c61",
@@ -35,15 +35,16 @@
   },
   "measuredCoverage": {
     "r2_4": {
-      "numerator": 25,
+      "numerator": 28,
       "denominator": 39,
-      "ratio": 0.6410256410256411,
+      "ratio": 0.717948717948718,
       "minimumOK": 32,
-      "shortfall": 7,
+      "shortfall": 4,
       "ids": [
         "CN-P01",
         "CN-W01",
         "CN-W02",
+        "CN-T01",
         "CN-T02",
         "VN-P03",
         "VN-W01",
@@ -56,10 +57,12 @@
         "MY-C01",
         "MY-T01",
         "ID-W01",
+        "ID-W02",
         "ID-T01",
         "ID-T02",
         "PH-C01",
         "PH-M01",
+        "XX-K01",
         "XX-K02",
         "XX-K03",
         "XX-M01",
@@ -68,19 +71,19 @@
         "XX-A02"
       ],
       "statusCounts": {
-        "OK": 25,
+        "OK": 28,
         "PARTIAL": 7,
-        "NOT_RUN": 4,
         "STALE": 1,
-        "BLOCKED": 2
+        "NOT_RUN": 2,
+        "BLOCKED": 1
       },
       "pass": false
     },
     "r2_5": {
-      "numerator": 24,
+      "numerator": 25,
       "denominator": 34,
-      "ratio": 0.7058823529411765,
-      "remaining": 10,
+      "ratio": 0.7352941176470589,
+      "remaining": 9,
       "ids": [
         "CN-P01",
         "CN-W01",
@@ -102,15 +105,16 @@
         "ID-T02",
         "PH-C01",
         "PH-M01",
+        "XX-K01",
         "XX-K02",
         "XX-K03",
         "XX-M01",
         "XX-M03"
       ],
       "statusCounts": {
-        "PASS": 24,
-        "NOT_RUN": 7,
-        "PARTIAL": 1,
+        "PASS": 25,
+        "NOT_RUN": 5,
+        "PARTIAL": 2,
         "FAIL": 2
       },
       "pass": false
@@ -123,7 +127,20 @@
         "XX-A01",
         "XX-A02"
       ],
-      "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness"
+      "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness",
+      "additionalCompleteOriginalOfflineReplay": {
+        "count": 1,
+        "ids": [
+          "ID-W02"
+        ],
+        "type": "complete_original_offline_parse",
+        "acceptance": {
+          "path": "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/qualification-acceptance.json",
+          "sha256": "37eede08e0b0e8222400da4671d65e405cfc71364ffa7e4062a211018852ad2a",
+          "hashBasis": "local_file_bytes"
+        },
+        "productionIntegrationRate": "NOT_CLAIMED"
+      }
     },
     "r2Continuous24h": {
       "numerator": 0,
@@ -942,14 +959,74 @@
         "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
         "hashBasis": "committed_text_LF"
       },
-      "latestActualFetch": null,
-      "fieldReplayEvidence": null,
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-three-url-after-save-2026-10-20/request-ledger.json",
+          "selector": {
+            "key": "mofcom"
+          },
+          "sha256": "f0cac47440cbda71314163b1c231feb4e03410023107eaa63b5a34d427536632",
+          "hashBasis": "local_file_bytes"
+        },
+        "url": "https://www.mofcom.gov.cn/zcfb/index.html",
+        "startedAt": "2026-10-20T07:51:35.830Z",
+        "receivedAt": "2026-10-20T07:51:35.913Z",
+        "finishedAt": "2026-10-20T07:51:35.945Z",
+        "httpStatus": 200,
+        "bytes": 20318,
+        "wireSha256": "ab5e3780d9988fe7032458a05ad00adf4f6e66bb891aaaed385f8e2f515d340f",
+        "scope": "one historical complete initial HTML response; no current uptime/continuous claim",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true,
+        "originalCatalogURL": "http://www.mofcom.gov.cn/zcfb/index.html",
+        "sameHostPathHTTPSApproved": true,
+        "noDetailProtocolRewrite": true
+      },
+      "fieldReplayEvidence": {
+        "status": "PARTIAL_PARENT_ACCEPTED_7_OF_8_ORIGINAL_ITEMS_ONE_HTTP_IDENTITY_EXCLUDED",
+        "evidence": {
+          "path": "docs/evidence/r2-maersk-mofcom-offline-2026-10-20/replay-CN-T01.json",
+          "sha256": "4332ca2142b1d24997b92637c5287a6dfec14095dc7418ddbb9e8a6599d407ef",
+          "hashBasis": "local_file_bytes"
+        },
+        "independentFieldAudit": {
+          "path": "docs/evidence/r2-maersk-mofcom-offline-2026-10-20/independent-fields.json",
+          "sha256": "d81668bd502ebd1f7c991df55eeb8f00855a9f6fb5871e9f555f268f33060a7c",
+          "hashBasis": "local_file_bytes"
+        },
+        "originalItems": 8,
+        "acceptedItems": 7,
+        "independentNodeDifferences": 0,
+        "itemsPersisted": 7,
+        "versions": 7,
+        "metadataOnlyBlocks": 7,
+        "repeatNew": 0,
+        "repeatRevised": 0,
+        "closedAndReopened": true,
+        "allRowsReadBack": true,
+        "sourceRequestsDuringReplay": 0,
+        "productionEnabled": false,
+        "acceptance": {
+          "path": "docs/evidence/r2-maersk-mofcom-qualification-2026-10-20/acceptance.json",
+          "sha256": "149c4e0e3eb5a6d7bb920cd296eaad4b8309b027488701b7f2265868c1938343",
+          "hashBasis": "local_file_bytes"
+        }
+      },
       "numericFieldValidation": null,
       "dateEvidence": {
         "role": "unknown",
-        "precision": "unknown",
+        "storedRole": "optional role key omitted; not publication",
+        "precision": "day",
         "sourceDeclaredTimezone": "unknown",
-        "publicationInstant": "unknown"
+        "utcOffset": null,
+        "publicationInstant": null,
+        "rawDateRetained": true,
+        "localDateRetained": true,
+        "range": {
+          "earliest": "2026-10-09",
+          "latest": "2026-10-19"
+        },
+        "notUTCFreshnessCertification": true
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -958,30 +1035,40 @@
       },
       "defaultState": {
         "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
-        "sourceConfig": "not_configured",
-        "declaredSeedEnabled": null,
+        "sourceConfig": "configured_disabled_metadata_candidate",
+        "declaredSeedEnabled": false,
         "effectiveDefaultIntelJobEnabled": false,
-        "currentUserPersistedSettings": "not_inspected"
+        "currentUserPersistedSettings": "not_inspected",
+        "productionSelectable": false
       },
       "r2_4": {
-        "verdict": "NOT_RUN",
-        "countedOK": false,
-        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Parent accepted limited same-host/path HTTPS policy-list historical200 and complete8-row original accounting with7 eligible identities verified through collector/SQLite; original HTTP catalog identity retained; no continuous or production claim."
       },
       "r2_5": {
-        "verdict": "NOT_RUN",
+        "verdict": "PARTIAL",
         "countedPass": false,
-        "reason": "No stored real-page full title/link/source-time replay."
+        "reason": "Parent accepted7/8 eligible original title/link/day identities through collector/SQLite/repeat/reopen. One original HTTP policy identity excluded without rewrite or exception, so no8/8 PASS. Stored optional role key omitted, not publication; timezone missing and instant null."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "目录为HTTP；当前安全入口拒绝HTTP，需独立确认合规URL策略，不可放松安全或擅改URL",
-        "Exact catalogue product is HTTP; current secure fetch entry requires HTTPS. No request was made here and no alternate HTTPS URL is assumed."
+        "One original HTTP policy identity and its HTTP interpretation remain excluded; no proved detail-URL HTTPS equivalence and no protocol rewrite or exception.",
+        "Eight original visible rows accounted, only seven eligible identities stored; R2-5 remainsPARTIAL.",
+        "Stored dateEvidence role key omitted, not publication; displayed day without timezone/instant.",
+        "Same-host/path HTTPS evidence does not grant HTTP body fetch, detail fetch, full-text rights, current uptime or production/24h acceptance."
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [
+        "Earlier catalog-HTTP-only/no-response state superseded by approved same-product HTTPS historical200 and7/8 offline collector replay; original HTTP catalog text remains."
+      ],
+      "qualificationAcceptance": {
+        "path": "docs/evidence/r2-maersk-mofcom-qualification-2026-10-20/acceptance.json",
+        "sha256": "149c4e0e3eb5a6d7bb920cd296eaad4b8309b027488701b7f2265868c1938343",
+        "hashBasis": "local_file_bytes"
+      }
     },
     {
       "id": "CN-T02",
@@ -3345,15 +3432,12 @@
     {
       "id": "ID-W02",
       "priority": "P1",
-      "catalogUrlText": "https://maritim.bmkg.go.id/marine2026-data/ （文档 `/apidoc`；`/pelabuhan/{KODE}.json`）",
+      "catalogUrlText": "https://maritim.bmkg.go.id/marine2026-data/ （文档 `/apidoc`；已证 `/pelabuhan/XJ001.json`）",
       "catalogUrls": [
         "https://maritim.bmkg.go.id/marine2026-data/"
       ],
-      "exactProductUrl": null,
-      "catalogUnresolvedFragments": [
-        "/apidoc",
-        "/pelabuhan/{KODE}.json"
-      ],
+      "exactProductUrl": "https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json",
+      "catalogUnresolvedFragments": [],
       "classification": "numeric_weather",
       "legacyGroup": "OP",
       "inPublicDenominator": true,
@@ -3367,28 +3451,63 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/ID-W02-doc-capture.json",
-          "sha256": "fa234af961225bd74139a694c438ded035daa080c7cec72dcfeddc6c44dff548",
-          "hashBasis": "committed_text_LF"
+          "path": "docs/evidence/r2-id-w02-xj001-2026-10-20/summary.json",
+          "sha256": "b13666702f6b54ae08fbec92cb6ffb0637fe36de7f77cce496c888414ab66641",
+          "hashBasis": "local_file_bytes"
         },
-        "url": "https://maritim.bmkg.go.id/marine2026-data/doc/",
-        "at": "2026-10-15T06:05:16.816Z",
+        "url": "https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json",
+        "startedAt": "2026-10-20T03:33:54.513Z",
+        "receivedAt": "2026-10-20T03:33:55.108Z",
+        "finishedAt": "2026-10-20T03:33:55.114Z",
         "httpStatus": 200,
-        "bytes": 1137,
-        "wireSha256": "1ac1835765cc2354cfed278a191bd229f9f23df452eb7b69de1d3398b46b9aaf",
-        "scope": "observed_doc_directory_only_not_verified_api_documentation_or_port_numeric_product",
-        "productQualificationChanged": false
+        "bytes": 11259,
+        "wireSha256": "3af2b483aeb5623312ae86fbef5d63ca31ec6653e10b2ac24bfaa6213da98ba1",
+        "scope": "one_recorded_XJ001_numeric_product",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true
       },
       "fieldReplayEvidence": null,
       "numericFieldValidation": {
-        "status": "NOT_RUN",
-        "reason": "Catalogue root/doc/template only; concrete approved KODE product URL and real numerical fields unknown."
+        "status": "COMPLETE_ORIGINAL_OFFLINE_PARSE_LIMITED_ACCEPTED",
+        "evidence": {
+          "path": "docs/evidence/r2-id-w02-offline-parser-2026-10-20/raw-replay.json",
+          "sha256": "5160f85925d06ba20301bf8357d59b362d087acad7f0edc3048ab775612d806b",
+          "hashBasis": "local_file_bytes"
+        },
+        "points": 41,
+        "groups": [
+          {
+            "key": "forecast_day1",
+            "cadenceMinutes": 60,
+            "count": 24
+          },
+          {
+            "key": "forecast_day2-4",
+            "cadenceMinutes": 180,
+            "count": 17
+          }
+        ],
+        "numericFields": 328,
+        "textFields": 164,
+        "projections": 164,
+        "timeMatches": 41,
+        "mismatches": 0,
+        "scope": "complete original through pure parser; no DB/Provider activation/current uptime claim",
+        "acceptance": {
+          "path": "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/qualification-acceptance.json",
+          "sha256": "37eede08e0b0e8222400da4671d65e405cfc71364ffa7e4062a211018852ad2a",
+          "hashBasis": "local_file_bytes"
+        }
       },
       "dateEvidence": {
-        "role": "forecast_valid_time_or_cyclone_reference_time",
-        "precision": "source_numerical_contract",
-        "sourceDeclaredTimezone": "existing_operational_contract; not article timestamp",
-        "publicationInstant": "not_applicable"
+        "role": "source_issued_and_forecast_valid_time",
+        "precision": "minute",
+        "sourceDeclaredTimezone": "UTC explicitly in source values and official documentation",
+        "issuedRaw": "2026-10-19 12:00 UTC",
+        "validFromRaw": "2026-10-20 00:00 UTC",
+        "validToRaw": "2026-10-23 00:00 UTC",
+        "publicationInstant": "not_applicable_forecast_not_article",
+        "freshnessVerdict": "not_inferred_from_fetchedAt"
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -3402,9 +3521,15 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "NOT_RUN",
-        "countedOK": false,
-        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+        "verdict": "OK",
+        "countedOK": true,
+        "qualification": "limited_recorded_product_and_complete_original_offline_parse",
+        "reason": "Genuine expected XJ001 product and usable real parsing/normalization/field verification independently statically reviewed; no new DB or Provider-registration gate. No current/production/24h claim.",
+        "acceptance": {
+          "path": "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/qualification-acceptance.json",
+          "sha256": "37eede08e0b0e8222400da4671d65e405cfc71364ffa7e4062a211018852ad2a",
+          "hashBasis": "local_file_bytes"
+        }
       },
       "r2_5": {
         "verdict": "NOT_APPLICABLE_NUMERIC",
@@ -3416,8 +3541,8 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "目录是根路径+参数化文档，缺批准具体港口URL及映射；不是文章feed",
-        "Latest observed doc/200 is16 file/directory links, not identified as API documentation; no Jakarta/TanjungPriok officialKODE mapping seen, linked PDFs/PNGs/subdirs not fetched."
+        "Production integration/activation and continuous availability remain unverified; not added as R2-4 qualification gates.",
+        "72h mixed 60/180-minute single-port product; no seven-day hourly, precipitation/swell/current-observation or nationwide coverage claim."
       ],
       "historicalSuperseded": [
         {
@@ -3488,32 +3613,78 @@
             "code": null,
             "qualificationUnchanged": true
           }
+        },
+        {
+          "reason": "2026-10-20 parent-approved genuine XJ001 response and complete original pure-parser replay supersede old directory-only gap; original evidence unchanged",
+          "previousExactProductUrl": null,
+          "previousLatestActualFetch": {
+            "evidence": {
+              "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/ID-W02-doc-capture.json",
+              "sha256": "fa234af961225bd74139a694c438ded035daa080c7cec72dcfeddc6c44dff548",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://maritim.bmkg.go.id/marine2026-data/doc/",
+            "at": "2026-10-15T06:05:16.816Z",
+            "httpStatus": 200,
+            "bytes": 1137,
+            "wireSha256": "1ac1835765cc2354cfed278a191bd229f9f23df452eb7b69de1d3398b46b9aaf",
+            "scope": "observed_doc_directory_only_not_verified_api_documentation_or_port_numeric_product",
+            "productQualificationChanged": false
+          },
+          "previousLastSafeFetchAttempt": {
+            "evidence": {
+              "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/ID-W02-doc-capture.json",
+              "sha256": "fa234af961225bd74139a694c438ded035daa080c7cec72dcfeddc6c44dff548",
+              "hashBasis": "committed_text_LF"
+            },
+            "dnsEvidence": {
+              "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/dns-ledger.json",
+              "sha256": "257d762242955e0d9ef8b0ff63867da29ec34a724eba0bae91d64084dc993593",
+              "hashBasis": "committed_text_LF"
+            },
+            "structure": {
+              "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/document-observation.json",
+              "sha256": "00e937d0d036ce11e7eb9336e9bcf6a01a6c83211963e6a3d283d846271f13a7",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://maritim.bmkg.go.id/marine2026-data/doc/",
+            "startedAt": "2026-10-15T06:05:16.385Z",
+            "finishedAt": "2026-10-15T06:05:16.817Z",
+            "systemDnsCalls": 1,
+            "sourceGetAttempts": 1,
+            "httpStatus": 200,
+            "result": "CAPTURED_FILE_DIRECTORY_ONLY",
+            "qualificationUnchanged": true
+          },
+          "previousNumericFieldValidation": {
+            "status": "NOT_RUN",
+            "reason": "Catalogue root/doc/template only; concrete approved KODE product URL and real numerical fields unknown."
+          },
+          "previousGaps": [
+            "目录是根路径+参数化文档，缺批准具体港口URL及映射；不是文章feed",
+            "Latest observed doc/200 is16 file/directory links, not identified as API documentation; no Jakarta/TanjungPriok officialKODE mapping seen, linked PDFs/PNGs/subdirs not fetched."
+          ]
         }
       ],
       "lastSafeFetchAttempt": {
         "evidence": {
-          "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/ID-W02-doc-capture.json",
-          "sha256": "fa234af961225bd74139a694c438ded035daa080c7cec72dcfeddc6c44dff548",
-          "hashBasis": "committed_text_LF"
+          "path": "docs/evidence/r2-id-w02-xj001-2026-10-20/summary.json",
+          "sha256": "b13666702f6b54ae08fbec92cb6ffb0637fe36de7f77cce496c888414ab66641",
+          "hashBasis": "local_file_bytes"
         },
-        "dnsEvidence": {
-          "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/dns-ledger.json",
-          "sha256": "257d762242955e0d9ef8b0ff63867da29ec34a724eba0bae91d64084dc993593",
-          "hashBasis": "committed_text_LF"
-        },
-        "structure": {
-          "path": "docs/evidence/r2-bmkg-doc-jma-attribution-2026-10-15/document-observation.json",
-          "sha256": "00e937d0d036ce11e7eb9336e9bcf6a01a6c83211963e6a3d283d846271f13a7",
-          "hashBasis": "committed_text_LF"
-        },
-        "url": "https://maritim.bmkg.go.id/marine2026-data/doc/",
-        "startedAt": "2026-10-15T06:05:16.385Z",
-        "finishedAt": "2026-10-15T06:05:16.817Z",
+        "url": "https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json",
+        "startedAt": "2026-10-20T03:33:54.513Z",
+        "finishedAt": "2026-10-20T03:33:55.114Z",
         "systemDnsCalls": 1,
         "sourceGetAttempts": 1,
         "httpStatus": 200,
-        "result": "CAPTURED_FILE_DIRECTORY_ONLY",
-        "qualificationUnchanged": true
+        "result": "CAPTURED_EXACT_XJ001_PRODUCT",
+        "scope": "prior authorized capture; no new request during qualification update"
+      },
+      "productMappingEvidence": {
+        "path": "docs/evidence/r2-id-w02-doc-map-2026-10-20/mapping-evidence.json",
+        "sha256": "670588ead19c854a23d7ea965b329e6d2e9df0d178711d52b178a35b07c8eeeb",
+        "hashBasis": "local_file_bytes"
       }
     },
     {
@@ -5080,14 +5251,74 @@
         "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
         "hashBasis": "committed_text_LF"
       },
-      "latestActualFetch": null,
-      "fieldReplayEvidence": null,
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-maersk-32k-live-2026-10-20/request-ledger.json",
+          "sha256": "42118580cd6d00f30a7d619d0b805e6019d7ebd5896412ad9cb4a2a80c1dfc3b",
+          "hashBasis": "local_file_bytes"
+        },
+        "url": "https://www.maersk.com/news",
+        "startedAt": "2026-10-20T07:28:29.935Z",
+        "receivedAt": "2026-10-20T07:28:30.700Z",
+        "finishedAt": "2026-10-20T07:28:30.739Z",
+        "httpStatus": 200,
+        "bytes": 46251,
+        "wireSha256": "9e7271c8d37da91032150dfff719de6fb7fd8d30426cfad50ae123e10fd72673",
+        "scope": "one historical complete initial HTML response; no current uptime/continuous claim",
+        "verbatimLatestRawRetained": true,
+        "notContinuousProduction": true,
+        "fixedHeaderOptIn": {
+          "sourceId": "intel:xx-k01",
+          "url": "https://www.maersk.com/news",
+          "maxHeaderSize": 32768,
+          "actualWireHeaderBytes": null
+        }
+      },
+      "fieldReplayEvidence": {
+        "status": "PASS_LIMITED_PARENT_ACCEPTED_18_ORIGINAL_ITEMS",
+        "evidence": {
+          "path": "docs/evidence/r2-maersk-mofcom-offline-2026-10-20/replay-XX-K01.json",
+          "sha256": "bcf07d5f9bb2bc370a17a20e8a76f165f8f5345ecc9a7a254efe84b6eb6beab7",
+          "hashBasis": "local_file_bytes"
+        },
+        "independentFieldAudit": {
+          "path": "docs/evidence/r2-maersk-mofcom-offline-2026-10-20/independent-fields.json",
+          "sha256": "d81668bd502ebd1f7c991df55eeb8f00855a9f6fb5871e9f555f268f33060a7c",
+          "hashBasis": "local_file_bytes"
+        },
+        "originalItems": 18,
+        "acceptedItems": 18,
+        "independentNodeDifferences": 0,
+        "itemsPersisted": 18,
+        "versions": 18,
+        "metadataOnlyBlocks": 18,
+        "repeatNew": 0,
+        "repeatRevised": 0,
+        "closedAndReopened": true,
+        "allRowsReadBack": true,
+        "sourceRequestsDuringReplay": 0,
+        "productionEnabled": false,
+        "acceptance": {
+          "path": "docs/evidence/r2-maersk-mofcom-qualification-2026-10-20/acceptance.json",
+          "sha256": "149c4e0e3eb5a6d7bb920cd296eaad4b8309b027488701b7f2265868c1938343",
+          "hashBasis": "local_file_bytes"
+        }
+      },
       "numericFieldValidation": null,
       "dateEvidence": {
         "role": "unknown",
-        "precision": "unknown",
+        "storedRole": "unknown",
+        "precision": "day",
         "sourceDeclaredTimezone": "unknown",
-        "publicationInstant": "unknown"
+        "utcOffset": null,
+        "publicationInstant": null,
+        "rawDateRetained": true,
+        "localDateRetained": true,
+        "range": {
+          "earliest": "2026-09-28",
+          "latest": "2026-10-20"
+        },
+        "notUTCFreshnessCertification": true
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -5096,31 +5327,34 @@
       },
       "defaultState": {
         "r2AutomaticEntry": "off_without_explicit_enable_and_selected_ids",
-        "sourceConfig": "not_configured",
-        "declaredSeedEnabled": null,
+        "sourceConfig": "configured_disabled_metadata_candidate",
+        "declaredSeedEnabled": false,
         "effectiveDefaultIntelJobEnabled": false,
-        "currentUserPersistedSettings": "not_inspected"
+        "currentUserPersistedSettings": "not_inspected",
+        "productionSelectable": false
       },
       "r2_4": {
-        "verdict": "BLOCKED",
-        "countedOK": false,
-        "reason": "Public system DNS and one exact transport attempt, generic secure entry fetch_failed; no completed response captured. Underlying error not recorded; no TLS/CA/anti-bot diagnosis."
+        "verdict": "OK",
+        "countedOK": true,
+        "reason": "Parent accepted limited exact Maersk historical200 with fixed32KiB opt-in and complete18-item original parsing/collector/SQLite verification; no continuous or production claim."
       },
       "r2_5": {
-        "verdict": "NOT_RUN",
-        "countedPass": false,
-        "reason": "No original news-list payload obtained, no title/link/time parsing or collector/SQLite replay."
+        "verdict": "PASS",
+        "countedPass": true,
+        "reason": "Parent accepted complete18 original title/link/raw Gregorian displayed-day comparisons, isolated collector/metadata-only versions, zero-new/zero-revised repeat and closed/reopened readback. Role unknown, timezone missing and instant null remain explicit."
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "No captured response/status/content type/raw bytes/Location; no qualifying news fields.",
-        "Any later diagnostic needs explicit bounded task and sanitized underlying error capture; no automatic retry or network settings change."
+        "Single historical response and18 initial HTML items only; no archive/pagination/current uptime/continuous production or24h verification.",
+        "Displayed day has unknown publication role/timezone/instant; no URL/footer/fetchedAt-derived timestamp.",
+        "Candidate remains disabled/disallowed and outside production source selection."
       ],
       "historicalSuperseded": [
-        "Earlier198.18 DNS block superseded by one public system DNS result; this round current outcome is transport failure or actual308, not DNS blockage."
+        "Earlier198.18 DNS block superseded by one public system DNS result; this round current outcome is transport failure or actual308, not DNS blockage.",
+        "Earlier missing response/header-overflow/unsupported date evidence is historical; now limited accepted single32KiB response and complete18-item offline replay."
       ],
       "latestAttempt": {
         "evidence": {
@@ -5219,7 +5453,12 @@
           "parser": "NOT_RUN",
           "scope": "one system DNS only; special-range address blocked before HTTP; no retry or settings change"
         }
-      ]
+      ],
+      "qualificationAcceptance": {
+        "path": "docs/evidence/r2-maersk-mofcom-qualification-2026-10-20/acceptance.json",
+        "sha256": "149c4e0e3eb5a6d7bb920cd296eaad4b8309b027488701b7f2265868c1938343",
+        "hashBasis": "local_file_bytes"
+      }
     },
     {
       "id": "XX-K02",
@@ -7333,5 +7572,22 @@
     "sourceRequests": 0,
     "stopNewImplementationAndSourceRequests": true,
     "pilotStarted": false
+  },
+  "lastIDW02QualificationAcceptance": {
+    "sourceThreadId": "01a156ee-5b41-73b8-9694-0368aaf900f2",
+    "type": "independent_static_source_review",
+    "result": "no_P2_blocker_limited_acceptance",
+    "didRerunExecutorTests": false,
+    "evidence": {
+      "path": "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/qualification-acceptance.json",
+      "sha256": "37eede08e0b0e8222400da4671d65e405cfc71364ffa7e4062a211018852ad2a",
+      "hashBasis": "local_file_bytes"
+    },
+    "currentPublic": "26/39",
+    "information": "24/34",
+    "numericEvidence": "historical3 limited diagnostics + new1 complete original offline parse; no4/5 production integration",
+    "previousCatalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
+    "catalogHashBasis": "current local catalog text normalized to LF",
+    "currentCatalogSha256": "6c2d06eeac91ed2e9429983ed127736606fbf4d7e78d7816a76bd4d08a69eede"
   }
 }

@@ -1,5 +1,9 @@
 # R2-8 最小24h观察提案（未授权、未启动）
 
+> 交付更新（2026-10-21）：已普通推送到 `codex/shipping-hot-r2`。Maersk/商务部/日期切片 `3f8971e3`，门禁 `1b68adcd`。观察工具 + BMKG(ID-W02) 切片 `c9af8c55`，门禁 `5e665216`，包含 LOGONSERVER 仅 win32 隔离前认可。worker 启动竞态 `160c67a9`，门禁 `00e97518`。以上均经 dots 限定复审通过。下文“未提交/uncommitted/待父审”是当时的口径。正预算实网观察、24h、R3 仍未运行、未授权；S7、R2 均未通过。
+
+> 2026-10-20 update: the launcher/request cap and Windows environment repair have received limited offline parent acceptance, still uncommitted. The earlier unimplemented wording below is historical. See [offline implementation](../r2-observation-launcher-offline-2026-10-19/report.md), [environment repair](../r2-observation-env-repair-2026-10-19/report.md) and [current R2 closeout](../r2-closeout-offline-2026-10-20/report.md). No positive-budget source call or 24h run has started; this proposal still needs separate authorization.
+
 这只是用户决定前的文档方案。没有创建runner/运行目录、写配置、启用Runtime或访问来源。**两源成功也只是2/39的观察，不能替代原R2-8全P1连续24h要求或改变25/39、24/34。** 当前生产允许选择仅以下既有产品：
 
 | catalog/internal ID | 精确现有URL | 已有持久许可 |

@@ -1,4 +1,14 @@
+> 当前交付口径（2026-10-21）：以 [mapping.json](../evidence/r2-current-source-matrix-2026-10-14/mapping.json) measuredCoverage 为准。R2-4 来源 28/39（至少 32，差 4），R2-5 资讯 25/34（余 9），均未通过。数值分列：历史 3 项有限诊断，另加 ID-W02 一项完整原件离线解析，不称 4/5 生产接入。新增的 CN-T01、ID-W02、XX-K01 支撑链都已随库：[Maersk/商务部认可](../evidence/r2-maersk-mofcom-qualification-2026-10-20/acceptance.json)、[ID-W02 认可与剩余矩阵](../evidence/r2-id-w02-qualification-vnp01-2026-10-20/remaining-matrix.md)。下方 26/39、25/39、24/34 等是当时的数字，按原时点保留。S7、R2 均未通过。
+
+> 交付更新（2026-10-21）：已普通推送到 `codex/shipping-hot-r2`。Maersk/商务部/日期切片 `3f8971e3`，门禁 `1b68adcd`。观察工具 + BMKG(ID-W02) 切片 `c9af8c55`，门禁 `5e665216`，包含 LOGONSERVER 仅 win32 隔离前认可。worker 启动竞态 `160c67a9`，门禁 `00e97518`。以上均经 dots 限定复审通过。下文“未提交/uncommitted/待父审”是当时的口径。正预算实网观察、24h、R3 仍未运行、未授权；S7、R2 均未通过。
+
+> 当前资格（2026-10-20）：ID-W02限定OK已获父独立静态审查认可并落地，累计26/39（至少32，差6）；资讯24/34不变。数值分列历史3项有限诊断＋新增1项完整原件离线解析，不称4/5生产接入。执行者30定向/1688通过＋3跳过/41点零差异未由父重跑；现役[剩余矩阵](../evidence/r2-id-w02-qualification-vnp01-2026-10-20/remaining-matrix.md)。以下旧时点记录保留。
+
+> 当前交接（2026-10-20）：观察启动器/Windows环境修复已获父会话离线限定认可，dom-v4用户实测具体论坛问题已解决；R2-6继承限定PASS。当前待审的是[剩余矩阵与MY-L01离线时间修复](../evidence/r2-closeout-offline-2026-10-20/report.md)，来源25/39、字段24/34、历史数字3/5不变；真实24h、R3及现用服务切换仍未授权。以下旧执行阶段措辞按原时点保留。
+
 # R2 后续执行交接 — 2026-10-15
+
+> 2026-10-19 parent-review clarification: R2-6 received limited PASS at `aea56e72ec11fa76986deccc5c3a9797584ab157` for reuse/dedupe architecture (product `954c831f27eff4fd4382a0ea68be3894de053759`). This is not full implementation of every row in the 52-row map and not overall R2 PASS. Older "pending" review/cursor language below describes the historical cutoff and is superseded; a cursor/validator decision is not a new R2-6 gate. Current authorized work is offline-only observation-launcher/request-budget implementation. Live collection and R2-8 remain NOT_RUN.
 
 R2-6最终文档复用审计：52行§5.3来源/代码/测试映射已完成，本地无第二Runtime/预算表/通用RSS解析器，建议PASS待主审；未概称整份上游已移植。collector完整cursor/RSS validator等差异待裁定。R2整体仍BLOCKED，25/39、24/34、历史3/5不变，GUI/S7/真实24h未验。材料读取954c831已获限定认可：仅已存intel精确版本内部合同，无业务消费者、Feed桥接或R3输入，source是当前配置而非完整历史快照。本轮产品门禁NOT_RUN，仅文档核验，业务请求/新真实记录/LLM/付费0。24h两源仅提案未启动。**推送后停止新实现和信源请求，等待主审与用户下一阶段决定。** [最终审计](../evidence/r2-final-reuse-audit-2026-10-15/report.md) / [原验收与动作](../evidence/r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md)。
 

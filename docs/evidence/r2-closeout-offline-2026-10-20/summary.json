@@ -1,0 +1,615 @@
+{
+  "at": "2026-10-20T02:33:18.374Z",
+  "cwd": "D:\\try one\\Shipping HOT",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "branch": "codex/shipping-hot-r2",
+  "scope": "offline_R2_remaining_matrix_and_explicit_MY_L01_date_grammar",
+  "parentReview": "PENDING_FOR_THIS_SLICE",
+  "inheritedObservationLauncherAndWindowsRepair": "OFFLINE_LIMITED_ACCEPTANCE_PER_PARENT_HANDOFF_UNCOMMITTED",
+  "r2_6": "LIMITED_PASS_INHERITED_aea56e72",
+  "qualification": {
+    "publicOK": "25/39",
+    "minimum": 32,
+    "remainingNonOK": 14,
+    "information": "24/34",
+    "remainingInformation": 10,
+    "historicalNumeric": "3/5",
+    "matrixBytesUnchanged": true
+  },
+  "archiveBefore": {
+    "path": ".tmp/r2-closeout-20261020/archive-before.json",
+    "sha256": "6b4827850969735805f97da976b00e3eeb9ce85981b5b95fbf79087674804217",
+    "negativeControl": "10_unsupported_dates_original_code",
+    "rawExit": "UNCAPTURED_FOR_INITIAL_MISCONFIGURED_BROAD_RUN"
+  },
+  "archiveAfter": {
+    "path": ".tmp/r2-closeout-20261020/archive-after.json",
+    "sha256": "b0c679cdf68ee37431c7de7ad7c87bbc217c459f6ec5699c0ca715f5b8d54a13",
+    "rawExit": 0,
+    "dates": 10,
+    "timezone": "missing",
+    "publicationInstants": 0,
+    "items": 0,
+    "versions": 0,
+    "injectedArchiveTransport": 1,
+    "actualDNS": 0,
+    "actualHTTP": 0,
+    "readOnlyReopen": true
+  },
+  "commands": [
+    {
+      "name": "install",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\r2-closeout-clean-20261020",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Program Files\\nodejs\\node_modules\\corepack\\dist\\pnpm.js",
+        "install",
+        "--frozen-lockfile",
+        "--offline"
+      ],
+      "startedAt": "2026-10-20T02:26:44.886Z",
+      "finishedAt": "2026-10-20T02:26:56.419Z",
+      "rawExit": 0,
+      "signal": null,
+      "stdout": {
+        "path": ".tmp/r2-closeout-20261020/install.stdout.log",
+        "sha256": "50ab7597abb80e7d68d0f8a38b608ad7f546c9372a80d16e2e369551df448ec2"
+      },
+      "stderr": {
+        "path": ".tmp/r2-closeout-20261020/install.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "build",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\r2-closeout-clean-20261020",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Program Files\\nodejs\\node_modules\\corepack\\dist\\pnpm.js",
+        "build"
+      ],
+      "startedAt": "2026-10-20T02:28:02.790Z",
+      "finishedAt": "2026-10-20T02:28:41.697Z",
+      "rawExit": 0,
+      "signal": null,
+      "stdout": {
+        "path": ".tmp/r2-closeout-20261020/build.stdout.log",
+        "sha256": "251db6e3d3a8c82f54630b3e90605f2ef67f0945c87555a1ed083729eae8c0e7"
+      },
+      "stderr": {
+        "path": ".tmp/r2-closeout-20261020/build.stderr.log",
+        "sha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658"
+      }
+    },
+    {
+      "name": "typecheck",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\r2-closeout-clean-20261020",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Program Files\\nodejs\\node_modules\\corepack\\dist\\pnpm.js",
+        "typecheck"
+      ],
+      "startedAt": "2026-10-20T02:30:46.708Z",
+      "finishedAt": "2026-10-20T02:30:50.233Z",
+      "rawExit": 0,
+      "signal": null,
+      "stdout": {
+        "path": ".tmp/r2-closeout-20261020/typecheck.stdout.log",
+        "sha256": "ad8201d532e5862e14380a60aadffe05ac88e5d1922db87af9ba6ea1d4b7333d"
+      },
+      "stderr": {
+        "path": ".tmp/r2-closeout-20261020/typecheck.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "lint",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\r2-closeout-clean-20261020",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Program Files\\nodejs\\node_modules\\corepack\\dist\\pnpm.js",
+        "lint"
+      ],
+      "startedAt": "2026-10-20T02:30:50.234Z",
+      "finishedAt": "2026-10-20T02:31:34.108Z",
+      "rawExit": 0,
+      "signal": null,
+      "stdout": {
+        "path": ".tmp/r2-closeout-20261020/lint.stdout.log",
+        "sha256": "3c636dd961d0cd23285898cc3367f22cc1474cd2e06ff93b487bfc6b8a14b419"
+      },
+      "stderr": {
+        "path": ".tmp/r2-closeout-20261020/lint.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "targeted",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\r2-closeout-clean-20261020",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Program Files\\nodejs\\node_modules\\corepack\\dist\\pnpm.js",
+        "exec",
+        "vitest",
+        "run",
+        "-c",
+        "vitest.config.ts",
+        "server/intel/sources/web-list-english-12h.test.ts",
+        "server/intel/sources/web-list.test.ts",
+        "server/intel/sources/web-list-conflicts.test.ts",
+        "server/intel/sources/web-list-english-month.test.ts"
+      ],
+      "startedAt": "2026-10-20T02:31:34.108Z",
+      "finishedAt": "2026-10-20T02:31:35.763Z",
+      "rawExit": 0,
+      "signal": null,
+      "stdout": {
+        "path": ".tmp/r2-closeout-20261020/targeted.stdout.log",
+        "sha256": "642b3194207b2b843ff65901c1788f287b52b3e9808fce316c27352f6fa69660"
+      },
+      "stderr": {
+        "path": ".tmp/r2-closeout-20261020/targeted.stderr.log",
+        "sha256": "8597cc6356100566cf6b27541e3a75f09c05e7f9138f4551a4e5b11fdb36750f"
+      }
+    },
+    {
+      "name": "vitest",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\r2-closeout-clean-20261020",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Program Files\\nodejs\\node_modules\\corepack\\dist\\pnpm.js",
+        "exec",
+        "vitest",
+        "run",
+        "-c",
+        "vitest.config.ts"
+      ],
+      "startedAt": "2026-10-20T02:31:35.763Z",
+      "finishedAt": "2026-10-20T02:31:52.639Z",
+      "rawExit": 0,
+      "signal": null,
+      "stdout": {
+        "path": ".tmp/r2-closeout-20261020/vitest.stdout.log",
+        "sha256": "a61110f71279aa6bbac0943fd31c32ee5fa51b61ceb7e2f0059160dee27d2a77"
+      },
+      "stderr": {
+        "path": ".tmp/r2-closeout-20261020/vitest.stderr.log",
+        "sha256": "92496e62958367a47d85400063a08cb95d9becec027dc6bb5c7db0c8e06985d1"
+      }
+    }
+  ],
+  "tests": {
+    "targeted": {
+      "files": "3 passed (3)",
+      "tests": "76 passed (76)"
+    },
+    "full": {
+      "files": "143 passed (143)",
+      "tests": "1658 passed | 3 skipped (1661)"
+    }
+  },
+  "gateManifest": {
+    "candidate": "D:\\try one\\Shipping HOT\\.tmp\\r2-closeout-clean-20261020",
+    "base": "40629587e22d8932df105962ec214530e4054414",
+    "overlay": [
+      {
+        "path": "package.json",
+        "sha256": "32716b71ba5f3d807d141fb41373eacbedebc99fac727514dd59abb56e295196"
+      },
+      {
+        "path": "scripts/tsx-alias-loader.mjs",
+        "sha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d"
+      },
+      {
+        "path": "server/runtime/intel-collect-job.ts",
+        "sha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2"
+      },
+      {
+        "path": "scripts/r2-intel-observe-environment.ts",
+        "sha256": "1100f875229b901f5a8b5fc32108afc593f4671f880461009d4e880142aa1d23"
+      },
+      {
+        "path": "scripts/r2-intel-observe-options.ts",
+        "sha256": "09b5e5f5b68879bf835d73b7b5b4b9c0064a09ca17049d0f3300c8900c53f5e8"
+      },
+      {
+        "path": "scripts/r2-intel-observe-worker.ts",
+        "sha256": "47dbb370b05c717feed2928a0afaf4236eb8fec7186bc5ae514b7ac4da4870f7"
+      },
+      {
+        "path": "scripts/r2-intel-observe.test.ts",
+        "sha256": "3e442d363e6a3b766199f102c6c47a18584a2b847f95497763086c5507a97066"
+      },
+      {
+        "path": "scripts/r2-intel-observe.ts",
+        "sha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224"
+      },
+      {
+        "path": "server/runtime/intel-observation-network.test.ts",
+        "sha256": "361168e5fb7339bde62a69f85d75400218e290967a88ae03f30b875ff3739e75"
+      },
+      {
+        "path": "server/runtime/intel-observation-network.ts",
+        "sha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006"
+      },
+      {
+        "path": "server/runtime/intel-observation.test.ts",
+        "sha256": "24212377dbefe7fbc6dbdf4286e19df6e5356d3bea4913123d835c353f002774"
+      },
+      {
+        "path": "server/runtime/intel-observation.ts",
+        "sha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019"
+      },
+      {
+        "path": "server/intel/sources/web-list.ts",
+        "sha256": "86f893311fb3c3d8c65256d1e6709acd547658b8cd3e71499900229ec26f75b5"
+      },
+      {
+        "path": "server/intel/sources/config-keys.ts",
+        "sha256": "2efbb61e1ab1e19bb349853a65a7b79bd080ab073420c28a645e56f95a8be620"
+      },
+      {
+        "path": "server/intel/sources/web-list-english-12h.test.ts",
+        "sha256": "c37a3b958a769a415b0775ce997198e1a42819c6652724e3f623306d02eff5b9"
+      }
+    ]
+  },
+  "overlay": [
+    {
+      "path": "package.json",
+      "sha256": "32716b71ba5f3d807d141fb41373eacbedebc99fac727514dd59abb56e295196",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "scripts/tsx-alias-loader.mjs",
+      "sha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/runtime/intel-collect-job.ts",
+      "sha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-environment.ts",
+      "sha256": "1100f875229b901f5a8b5fc32108afc593f4671f880461009d4e880142aa1d23",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-options.ts",
+      "sha256": "09b5e5f5b68879bf835d73b7b5b4b9c0064a09ca17049d0f3300c8900c53f5e8",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-worker.ts",
+      "sha256": "47dbb370b05c717feed2928a0afaf4236eb8fec7186bc5ae514b7ac4da4870f7",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.test.ts",
+      "sha256": "3e442d363e6a3b766199f102c6c47a18584a2b847f95497763086c5507a97066",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.ts",
+      "sha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.test.ts",
+      "sha256": "361168e5fb7339bde62a69f85d75400218e290967a88ae03f30b875ff3739e75",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.ts",
+      "sha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/runtime/intel-observation.test.ts",
+      "sha256": "24212377dbefe7fbc6dbdf4286e19df6e5356d3bea4913123d835c353f002774",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/runtime/intel-observation.ts",
+      "sha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/intel/sources/web-list.ts",
+      "sha256": "86f893311fb3c3d8c65256d1e6709acd547658b8cd3e71499900229ec26f75b5",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/intel/sources/config-keys.ts",
+      "sha256": "2efbb61e1ab1e19bb349853a65a7b79bd080ab073420c28a645e56f95a8be620",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/intel/sources/web-list-english-12h.test.ts",
+      "sha256": "c37a3b958a769a415b0775ce997198e1a42819c6652724e3f623306d02eff5b9",
+      "rootMatches": true,
+      "candidateMatches": true
+    }
+  ],
+  "protectedFiles": [
+    {
+      "path": ".data/calendarific-double-year-verification-20260908-b.sqlite3",
+      "bytes": 991232,
+      "sha256": "4029ff8075eb78dfa1a806d5d24f443514a12f8d9d15d38d92aef06a7e9a7c3d",
+      "afterSha256": "4029ff8075eb78dfa1a806d5d24f443514a12f8d9d15d38d92aef06a7e9a7c3d",
+      "unchanged": true
+    },
+    {
+      "path": ".data/calendarific-double-year-verification-20260908.sqlite3",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unchanged": true
+    },
+    {
+      "path": ".data/p7-final-seal-20260904.sqlite3",
+      "bytes": 978944,
+      "sha256": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+      "afterSha256": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+      "unchanged": true
+    },
+    {
+      "path": ".data/provider-secrets.json",
+      "bytes": 56,
+      "sha256": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1",
+      "afterSha256": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1",
+      "unchanged": true
+    },
+    {
+      "path": ".data/shipping-hot-v3-browser.sqlite3",
+      "bytes": 1572864,
+      "sha256": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+      "afterSha256": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+      "unchanged": true
+    },
+    {
+      "path": ".data/shipping-hot-v3.sqlite3",
+      "bytes": 8425472,
+      "sha256": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+      "afterSha256": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-https-abb1b99-20261019/run/.data/shipping-hot-v3.sqlite3",
+      "bytes": 667648,
+      "sha256": "023ef5c603ac2ff8282149ad0cd281911d96dbbffbe7ead0cd64dafeb370a025",
+      "afterSha256": "023ef5c603ac2ff8282149ad0cd281911d96dbbffbe7ead0cd64dafeb370a025",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-manual-6087a16/run/.data/shipping-hot-v3.sqlite3",
+      "bytes": 667648,
+      "sha256": "c4292b3c18076d38838b1533d51b1f99c03b59b8d42a1de3818338eec4eb5d91",
+      "afterSha256": "c4292b3c18076d38838b1533d51b1f99c03b59b8d42a1de3818338eec4eb5d91",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/dist/output/server/index.mjs",
+      "bytes": 1919,
+      "sha256": "c55b32d9d6a69e31ec6e939f9791be3f2c62704c9704c6466e21af98e3d7c763",
+      "afterSha256": "c55b32d9d6a69e31ec6e939f9791be3f2c62704c9704c6466e21af98e3d7c763",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/r2-four-reapplied-2026-10-15-private/MY-L01.response.bin",
+      "bytes": 124208,
+      "sha256": "9e9787d4cf60f454824a0529787b1d345a2814ac45f91a957ff1d8b57c1cb310",
+      "afterSha256": "9e9787d4cf60f454824a0529787b1d345a2814ac45f91a957ff1d8b57c1cb310",
+      "unchanged": true
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+      "bytes": 318540,
+      "sha256": "d7b70b273454925249610db514b21064551b130c6a5061398f9b457419d584eb",
+      "afterSha256": "d7b70b273454925249610db514b21064551b130c6a5061398f9b457419d584eb",
+      "unchanged": true
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 164,
+      "sha256": "5cb2122a9e9c62ceee2253251feeeb39bdae11fc8a0796dc33e8dfbfd875d67e",
+      "afterSha256": "5cb2122a9e9c62ceee2253251feeeb39bdae11fc8a0796dc33e8dfbfd875d67e",
+      "unchanged": true
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 458937,
+      "sha256": "68638a3267a597e7d4e16d336f5f56c8fca2ff657700b97605c0d2847dfb324c",
+      "afterSha256": "68638a3267a597e7d4e16d336f5f56c8fca2ff657700b97605c0d2847dfb324c",
+      "unchanged": true
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 28170,
+      "sha256": "0729f86b64546824c66b248bb6679d120b0e18245fabffb3eb61c9f657c623d7",
+      "afterSha256": "0729f86b64546824c66b248bb6679d120b0e18245fabffb3eb61c9f657c623d7",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/content.js",
+      "bytes": 328094,
+      "sha256": "12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630",
+      "afterSha256": "12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/manifest.json",
+      "bytes": 1011,
+      "sha256": "8d2cc507bd632cbe95a740aee6a2f7801e3c07c079a787aa77b34dcbddae67e8",
+      "afterSha256": "8d2cc507bd632cbe95a740aee6a2f7801e3c07c079a787aa77b34dcbddae67e8",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/popup.html",
+      "bytes": 1015,
+      "sha256": "2d2bf242cf996d12ab286226bc55cf5c6668c3dc1d2d80054b06d80f4bad86b9",
+      "afterSha256": "2d2bf242cf996d12ab286226bc55cf5c6668c3dc1d2d80054b06d80f4bad86b9",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/worker.js",
+      "bytes": 5639,
+      "sha256": "cd60d4fd354e043235a57ca67d808b6e008bac9369fab6ce436d5d7ac3291638",
+      "afterSha256": "cd60d4fd354e043235a57ca67d808b6e008bac9369fab6ce436d5d7ac3291638",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-aVjAIvTt.css",
+      "bytes": 465,
+      "sha256": "8a2411b56c91c16e429d97f0d5fe6de4556b718846ca7997d098bb3885dd68db",
+      "afterSha256": "8a2411b56c91c16e429d97f0d5fe6de4556b718846ca7997d098bb3885dd68db",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-DHU7aOx9.js",
+      "bytes": 6280,
+      "sha256": "058f037b30b5b2c1953d2c196afa69906c5c40a487206178efb881e1910c8e56",
+      "afterSha256": "058f037b30b5b2c1953d2c196afa69906c5c40a487206178efb881e1910c8e56",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/defuddle-MIT.txt",
+      "bytes": 1076,
+      "sha256": "c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092",
+      "afterSha256": "c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/obsidian-clipper-MIT.txt",
+      "bytes": 1088,
+      "sha256": "3ca04f8f046005103b08302723521f546605a34a269d5a867a82d200dfd9c0d7",
+      "afterSha256": "3ca04f8f046005103b08302723521f546605a34a269d5a867a82d200dfd9c0d7",
+      "unchanged": true
+    }
+  ],
+  "unchangedAcceptedSourceFiles": [
+    {
+      "path": "package.json",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/tsx-alias-loader.mjs",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-collect-job.ts",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-environment.ts",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-options.ts",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-worker.ts",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.test.ts",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.ts",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.test.ts",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.ts",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation.test.ts",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation.ts",
+      "unchanged": true
+    }
+  ],
+  "failedAttempts": [
+    {
+      "path": ".tmp/r2-closeout-20261020/archive-before.log",
+      "reason": "Initial temporary Vitest merge concatenated base includes and ran the full root suite: 3 failures (two rg missing PATH plus a 5s pre-existing CLI timeout). Original-code negative control wrote its artifact; not a successful full gate. Config now replaces includes."
+    },
+    {
+      "path": ".tmp/r2-closeout-20261020/build-initial.json",
+      "rawExit": 3221225477,
+      "reason": "Windows native crash after client output; root cause unverified. Same isolated candidate passed subsequent normal build."
+    },
+    {
+      "path": ".tmp/r2-closeout-20261020/lint-initial.json",
+      "rawExit": 1,
+      "reason": "7 formatting findings in new test file; fixed by existing ESLint, final lint raw0."
+    },
+    {
+      "reason": "Initial gate driver used a nonexistent pnpm JS entry; failed before installation. Corrected to existing Corepack pnpm entry with COREPACK_ENABLE_NETWORK=0."
+    }
+  ],
+  "notRun": [
+    "new_upstream_DNS_or_HTTP",
+    "24h_or_positive_budget_observation",
+    "R3_or_models_or_paid",
+    "browser_control_or_new_GUI_S7",
+    "service_or_extension_changes",
+    "schema_or_sources_or_network_changes",
+    "commit_push_PR_merge_deploy"
+  ],
+  "cleanup": "NONE; all pre-existing and new diagnostic artifacts retained",
+  "finalAudit": {
+    "path": ".tmp/r2-closeout-20261020/final-audit.json",
+    "sha256": "3d6d163fae69be89091c777716de7979ba7e07d4e738abefa20d691446f4b729",
+    "ownChangedFiles": [
+      "docs/architecture.md",
+      "docs/evidence/r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md",
+      "docs/evidence/r2-final-reuse-audit-2026-10-15/pilot-24h-proposal.md",
+      "docs/evidence/r2-final-reuse-audit-2026-10-15/report.md",
+      "docs/handoffs/r2-next-execution-2026-10-15.md",
+      "docs/status.md",
+      "server/intel/sources/web-list.ts",
+      "server/intel/sources/config-keys.ts",
+      "server/intel/sources/web-list-english-12h.test.ts",
+      "docs/evidence/r2-closeout-offline-2026-10-20/closeout.md",
+      "docs/evidence/r2-closeout-offline-2026-10-20/interaction-acceptance.md",
+      "docs/evidence/r2-closeout-offline-2026-10-20/my-l01-date-replay.json",
+      "docs/evidence/r2-closeout-offline-2026-10-20/remaining-matrix.json",
+      "docs/evidence/r2-closeout-offline-2026-10-20/remaining-matrix.md",
+      "docs/evidence/r2-closeout-offline-2026-10-20/report.md",
+      "docs/evidence/r2-closeout-offline-2026-10-20/summary.json"
+    ],
+    "acceptedSourceFilesUnchanged": true,
+    "protectedUnchanged": true,
+    "invalidLinks": 0,
+    "possibleSecretHits": 0,
+    "docsLintRawExit": 0,
+    "inventoryRawExit": 0,
+    "markdownInventoryCount": 7521,
+    "servicePID": 33364,
+    "stagedFiles": []
+  }
+}
