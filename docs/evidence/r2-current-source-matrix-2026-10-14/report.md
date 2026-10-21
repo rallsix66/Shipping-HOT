@@ -92,7 +92,7 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 
 | ID | 精确目录URL / 原文本 | 最新已有采集UTC / HTTP | R2-4 | 独立数值字段 | 判定理由 / 保留缺口 |
 | --- | --- | --- | --- | --- | --- |
-| ID-W02 | https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json | 2026-10-20T03:33:54.513Z / 200，11259字节 | OK（限定） | NOT_APPLICABLE_NUMERIC | 完整41点原件纯parser回放、归一化/字段验证已认可；父独立静态审查，门禁与回放为执行者证据。生产/24h未验证。 |
+| ID-W02 | https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json | 2026-10-20T03:33:54.513Z / 200，11259字节 | OK（限定） | 完整原件离线解析（限定） | 独立数值字段一列只表示XJ001完整原件离线解析；不适用于资讯R2-5（不计入34项分子/分母），也不增加生产数值覆盖计数。完整41点原件纯parser回放、归一化/字段验证已认可；父独立静态审查，门禁与回放为执行者证据。生产/24h未验证。 |
 | XX-W01 | https://www.jma.go.jp/bosai/typhoon/data/targetTc.json | 2026-10-15T05:53:37.778Z / 404 [同次归属](../r2-bmkg-doc-jma-attribution-2026-10-15/jma-cross-product-attribution.json) | BLOCKED | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [历史字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 最新精确URL404移出当前OK；历史数值诊断保留，404非无气旋，同一请求不重复计数。 |
 | XX-W02 | `https://www.jma.go.jp/bosai/typhoon/data/TC{id}/forecast.json` 、`/specifications.json` | 2026-10-15T05:53:37.778Z / 同次targetTc404 [归属](../r2-bmkg-doc-jma-attribution-2026-10-15/jma-cross-product-attribution.json) | PARTIAL | PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED [旧字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 前置列表与XX-W01是同一请求，没有两产品新请求；历史forecast保留，spec仍缺。 |
 | XX-A01 | https://api.open-meteo.com/v1/forecast | 2026-10-10T03:58:39.141Z / 200 [取证](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json) | OK | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 10/10陆地8港风/降水/能见度与时间字段诊断；不是保留原JSON回放或今天刷新。 |

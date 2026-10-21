@@ -1,6 +1,8 @@
 # R2离线收口第一切片（2026-10-20）
 
 > 历史本地证据说明（2026-10-21 补注）：本目录是 2026-10-20 的离线收口快照，正文保持原样。其中 25/39、24/34 是当时的数字，现行口径以 [mapping.json](../r2-current-source-matrix-2026-10-14/mapping.json) 的 28/39、25/34 为准，均未通过。MY-L01 日期格式代码已随 `3f8971e3` 推送；观察启动器与环境修复已随 `c9af8c55`、`160c67a9` 推送。文中 `.tmp/…`、私有原存档、隔离 DB、clone 与原始 stdout/stderr 路径都是历史本地证据，不随库交付，也没有补造。原文中的本机用户目录已替换为 `<USERPROFILE>`。
+>
+> 哈希说明：由于加了这段补注并做了脱敏，本目录当前的 report.md、closeout.md、interaction-acceptance.md、remaining-matrix.md 不再匹配 [summary.json](summary.json) 里记录的原始哈希。summary 里的旧哈希只对应 2026-10-20 当时的快照；原 summary 保留，不重写。
 
 本轮停止在主审点：本地修复与验证完成，待父会话审查，未提交/推送/更新PR。执行目录`D:\try one\Shipping HOT`，分支`codex/shipping-hot-r2`，HEAD仍`40629587e22d8932df105962ec214530e4054414`。既有草稿PR8/未合并R1.5叠层保持原样；本轮不作远端查询或写入。原dirty `.gitignore`、观察启动器及Windows环境修复、用户服务/数据库/插件均保留。
 

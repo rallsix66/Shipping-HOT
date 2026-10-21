@@ -1,6 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-20T04:06:11.578Z",
+  "lastUpdatedAt": "2026-10-21T04:44:03.104Z",
+  "lastUpdateNote": "generatedAt is the historical build time; entries CN-T01/ID-W02/XX-K01, measuredCoverage and catalogSha256 were last updated in commit 8531a7b (2026-10-21) and this field was added afterwards; no source requests.",
   "reviewedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
   "evidenceHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
