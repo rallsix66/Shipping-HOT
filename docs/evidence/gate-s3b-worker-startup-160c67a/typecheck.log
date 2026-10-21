@@ -1,0 +1,13 @@
+command: pnpm typecheck
+full_sha: 160c67a91698a44803df19e9585ac99c8827c8bb
+started: 2026-10-21T04:14:54.052Z
+finished: 2026-10-21T04:14:57.461Z
+raw_exit_code: 0
+--- stdout ---
+
+> shipping-hot@0.0.41 typecheck D:\wt-s3
+> tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.clipper.json
+
+
+--- stderr ---
+
