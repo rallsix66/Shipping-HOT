@@ -1,3 +1,16 @@
+## 2026-10-21 切片3补修：观察 worker 启动时序竞态（离线）
+
+- 按 dots 1792555459.663299 与更正 1792555472.118219：`scripts/r2-intel-observe-worker.ts` 在首次异步业务导入前同步安装并锁存 stop/disconnect/SIGINT/SIGTERM。逻辑在新文件 `scripts/r2-intel-observe-worker-startup.ts`，代码身份已列入该文件。
+- 有 IPC 通道时，立即检查 `process.connected`；导入屏障释放后再检查一次。已中止的信号贯穿到 `startIntelObservation`，沿用其既有的 operator_stop 收尾：只读重开、释放所有权、写 result.json。
+- 测试 `scripts/r2-intel-observe-worker-startup.test.ts` 确定性、离线：
+  - 主要回归：导入屏障期间父进程断连。
+  - 屏障期间 connected=false 但没有事件。
+  - 启动时已断连。
+  - 早期 stop（屏障前/屏障中，仅作兼容性测试）。
+  - 正常启动与运行期 stop/断连不回退。
+- 以上中止场景都没有 DNS/HTTP、没有 source_run，锁已释放。
+- DNS 无法取消导致 drain 等待仍按历史限制口径；不删锁，不强杀。未运行实网，R2 总体仍未通过。
+
 ## 2026-10-21 切片3：观察工具 + BMKG(ID-W02) 候选（离线）
 
 - 按 dots 裁定（1792554503.258689）最小修复：win32 `windowsInjected` 加小写 `logonserver`。保证表述为“隔离后业务阶段不可见”（Node v24.15.0 / libuv 1.51.0），不是“从未收到”。
