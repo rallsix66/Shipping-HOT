@@ -1,0 +1,13 @@
+command: pnpm lint
+full_sha: 312ee273a25f03292d28e70fbb1241244cc20d3b
+started: 2026-10-21T03:31:24.616Z
+finished: 2026-10-21T03:31:54.938Z
+raw_exit_code: 0
+--- stdout ---
+
+> shipping-hot@0.0.41 lint D:\wt-s2
+> eslint
+
+
+--- stderr ---
+

@@ -1,0 +1,11 @@
+full_sha=312ee273a25f03292d28e70fbb1241244cc20d3b
+worktree_clean_before_gates=true
+node=v24.15.0
+cwd=D:\wt-s2
+install raw_exit_code=0  cmd: pnpm install --frozen-lockfile
+build raw_exit_code=0  cmd: pnpm build
+typecheck raw_exit_code=0  cmd: pnpm typecheck
+lint raw_exit_code=0  cmd: pnpm lint
+targeted raw_exit_code=0  cmd: npx vitest run test/manual-intel.test.ts scripts/s7-local-seed.test.ts server/intel/manual
+test raw_exit_code=0  cmd: pnpm test --run
+post_gate_worktree_changes="M src/routeTree.gen.ts\n?? docs/evidence/gate-s2-manual-clip-312ee27/"
