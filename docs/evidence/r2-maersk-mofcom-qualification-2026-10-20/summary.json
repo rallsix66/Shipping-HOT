@@ -1,0 +1,229 @@
+{
+  "at": "2026-10-20T08:29:05.066Z",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "branch": "codex/shipping-hot-r2",
+  "scope": "approved qualification two entries and corresponding aggregate/status only; remaining R2 read-only inventory",
+  "acceptance": {
+    "path": "docs/evidence/r2-maersk-mofcom-qualification-2026-10-20/acceptance.json",
+    "sha256": "149c4e0e3eb5a6d7bb920cd296eaad4b8309b027488701b7f2265868c1938343",
+    "hashBasis": "local_file_bytes"
+  },
+  "counts": {
+    "r2_4": {
+      "numerator": 28,
+      "denominator": 39,
+      "ratio": 0.717948717948718,
+      "minimumOK": 32,
+      "shortfall": 4,
+      "ids": [
+        "CN-P01",
+        "CN-W01",
+        "CN-W02",
+        "CN-T01",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-W01",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-W02",
+        "ID-T01",
+        "ID-T02",
+        "PH-C01",
+        "PH-M01",
+        "XX-K01",
+        "XX-K02",
+        "XX-K03",
+        "XX-M01",
+        "XX-M03",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "statusCounts": {
+        "OK": 28,
+        "PARTIAL": 7,
+        "STALE": 1,
+        "NOT_RUN": 2,
+        "BLOCKED": 1
+      },
+      "pass": false
+    },
+    "r2_5": {
+      "numerator": 25,
+      "denominator": 34,
+      "ratio": 0.7352941176470589,
+      "remaining": 9,
+      "ids": [
+        "CN-P01",
+        "CN-W01",
+        "CN-W02",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-P02",
+        "MY-W01",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "ID-T02",
+        "PH-C01",
+        "PH-M01",
+        "XX-K01",
+        "XX-K02",
+        "XX-K03",
+        "XX-M01",
+        "XX-M03"
+      ],
+      "statusCounts": {
+        "PASS": 25,
+        "NOT_RUN": 5,
+        "PARTIAL": 2,
+        "FAIL": 2
+      },
+      "pass": false
+    }
+  },
+  "preserved": {
+    "otherEntriesByteIdentical": 39,
+    "countingRulesByteIdentical": true,
+    "otherTopLevelValuesUnchanged": true,
+    "numericEvidenceUnchanged": true,
+    "continuous24hUnchanged": true,
+    "overallR2Pass": false
+  },
+  "sourceRequests": 0,
+  "newTestRuns": 0,
+  "finalAudit": {
+    "at": "2026-10-20T08:33:42.008Z",
+    "status": "approved mapping applied and docs-only closeout complete",
+    "skill": "e0/neat-freak",
+    "matrix": {
+      "sha256": "01482036fb0b3505a267e247acac39a8a038754fdd346455ca7e403fc1610b4a",
+      "updatedEntries": [
+        "XX-K01",
+        "CN-T01"
+      ],
+      "otherEntriesByteIdentical": 39,
+      "countingRulesByteIdentical": true,
+      "otherTopLevelValuesUnchanged": true,
+      "onlyOtherValueChange": "measuredCoverage r2_4/r2_5",
+      "numericEvidenceUnchanged": true,
+      "continuous24hUnchanged": true,
+      "r2_4": "28/39",
+      "minimumOK": 32,
+      "shortfall": 4,
+      "r2_5": "25/34",
+      "remainingPublic": [
+        "CN-P02",
+        "VN-P01",
+        "MY-P02",
+        "MY-P03",
+        "MY-L01",
+        "PH-P01",
+        "PH-W01",
+        "PH-W02",
+        "XX-W01",
+        "XX-W02",
+        "XX-F01"
+      ],
+      "remainingInformation": [
+        "CN-P02",
+        "CN-T01",
+        "VN-P01",
+        "MY-P03",
+        "MY-L01",
+        "PH-P01",
+        "PH-W01",
+        "PH-W02",
+        "XX-F01"
+      ],
+      "overallR2Pass": false
+    },
+    "preservation": {
+      "protectedFilesUnchanged": 51,
+      "sourceOverlayFilesUnchanged": 26,
+      "otherSourceReportRowsUnchanged": 39,
+      "statusOldBytesPreserved": true,
+      "headUnchanged": true,
+      "branchUnchanged": true,
+      "stagedEmpty": true,
+      "gitStatusEntries": 53,
+      "gitStatusLog": ".tmp/maersk-mofcom-qualification-20261020/git-status-final.log"
+    },
+    "verification": {
+      "productGates": "NOT_RUN for docs-only change; existing executor evidence1777 passed+3 skips unchanged; parent independently reviewed code and evidence without rerunning",
+      "docLintRawExit": 0,
+      "diffCheckRawExit": 0,
+      "links": {
+        "checked": 254,
+        "broken": []
+      },
+      "inventory": {
+        "rawExit": 0,
+        "log": ".tmp/maersk-mofcom-qualification-20261020/neat-inventory.log",
+        "sha256": "d5bd3a98bba04d3f8a94c19fca4a0345e16f99c37f31c1a5fe74de10335c58e7",
+        "markdownEntries": 8521
+      }
+    },
+    "documents": [
+      {
+        "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "sha256": "01482036fb0b3505a267e247acac39a8a038754fdd346455ca7e403fc1610b4a"
+      },
+      {
+        "path": "docs/status.md",
+        "sha256": "29f725d99325c81e8b66ddc0be62272450e69aaa9522b1a764fecb8510b2c43b"
+      },
+      {
+        "path": "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "sha256": "61d0733ec4c0e3c0e1c2085626507b4a6d150cf96a1a9fe48f99b9f23c178dc3"
+      },
+      {
+        "path": "docs/evidence/r2-maersk-mofcom-qualification-2026-10-20/remaining-r2.md",
+        "sha256": "3a683d3eebaab25e9dda9c243f44e0c794d63f7e562403984b6513d5be4cce78"
+      },
+      {
+        "path": "docs/evidence/r2-maersk-mofcom-qualification-2026-10-20/closeout.md",
+        "sha256": "0b6773d526118f4f6a97156bc30a9aac2dcb295e78e2a3b65b3e6416a5e6e25d"
+      },
+      {
+        "path": "docs/evidence/r2-maersk-mofcom-qualification-2026-10-20/acceptance.json",
+        "sha256": "149c4e0e3eb5a6d7bb920cd296eaad4b8309b027488701b7f2265868c1938343"
+      }
+    ],
+    "rules": {
+      "AGENTSUnchanged": true,
+      "bytes": 28170,
+      "budget32KiBFraction": 0.85968017578125
+    },
+    "memory": "generated-read-only; no write",
+    "sourceRequests": 0,
+    "newTestRuns": 0,
+    "serviceChanges": 0,
+    "productionActivation": false,
+    "trial24h": false,
+    "commit": false,
+    "push": false,
+    "deploy": false,
+    "cleanup": "none; all prior evidence, private complete samples, SQLite, snapshots and logs retained",
+    "pending": [
+      "parent chooses next minimal slice",
+      "R2-7 actual GUI evidence; prior self-built CDP denial not retried",
+      "11 availability gaps and9 information gaps require actual source facts; no repeat-history promotion",
+      "R2-8 NOT_RUN and R3 paused"
+    ],
+    "scopeNote": "Only the two matrix entries, r2_4/r2_5 aggregates, corresponding report rows/count lines/current note and status prefix changed; architecture/catalog/other historical docs untouched per explicit scope"
+  }
+}

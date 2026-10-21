@@ -1,0 +1,223 @@
+{
+  "catalogId": "CN-T01",
+  "input": {
+    "path": ".tmp/cn-t01-https-20261020/response-after-save-20261020.bin",
+    "bytes": 20318,
+    "sha256": "ab5e3780d9988fe7032458a05ad00adf4f6e66bb891aaaed385f8e2f515d340f"
+  },
+  "productParser": "fromHtml",
+  "collector": "createIntelCollectJob -> collectIntelSource -> secureFetchArticle with fixed offline lookup/transport -> IntelRepository",
+  "independentExpected": 7,
+  "parsed": 7,
+  "independentNodeDifferences": 0,
+  "first": {
+    "status": "success",
+    "recordsRead": 7,
+    "recordsWritten": 7
+  },
+  "second": {
+    "status": "success",
+    "recordsRead": 7,
+    "recordsWritten": 0
+  },
+  "versionCount": 7,
+  "blockCount": 7,
+  "duplicateItems": 0,
+  "revisionsOnRepeat": 0,
+  "closedAndReopened": true,
+  "allRowsReadBack": true,
+  "SQLitePath": ".tmp\\two-source-offline-20261020\\native-KJx7LB\\replay.sqlite3",
+  "productionDBAccess": false,
+  "sourceDefaultEnabled": false,
+  "testOnlyIsolatedSeedEnabled": true,
+  "transportCalls": [
+    {
+      "url": "https://www.mofcom.gov.cn/zcfb/index.html",
+      "timeoutMs": 10000,
+      "maxBytes": 524288
+    },
+    {
+      "url": "https://www.mofcom.gov.cn/zcfb/index.html",
+      "timeoutMs": 10000,
+      "maxBytes": 524288
+    }
+  ],
+  "syntheticDNS": [
+    "www.mofcom.gov.cn",
+    "www.mofcom.gov.cn"
+  ],
+  "systemDNSCalls": 0,
+  "actualHTTPRequests": 0,
+  "otherSites": 0,
+  "providerUsageRows": 0,
+  "rows": [
+    {
+      "url": "https://www.mofcom.gov.cn/zcfb/zc/art/2026/art_1628d886f39840489513af242f93517b.html",
+      "title": "商务部 海关总署公告2026年第50号 公布对盾构机等物项实施出口管制的决定",
+      "versionId": "ea00b9b0-1369-4636-95c6-d4931982c81b",
+      "contentHash": "b867833936d34d71ff4545ff9fb41a1d44c68d03955324bfe85550a024a17565",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "2026-10-19",
+        "rule": "ymd",
+        "basis": "CN-T01 complete 20318-byte same-product HTTPS HTML saved 2026-10-20: Latest policy ul.policy-list has eight own title/link/span YYYY-MM-DD rows. Seven relative HTTPS identities retained; one original HTTP policy and its interpretation link excluded by existing policy. Displayed day only, publication role/clock/timezone unknown; no protocol rewrite or detail fetch.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-19",
+        "publishedAt": null
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.mofcom.gov.cn/zcfb/zc/art/2026/art_202618c40d1943e9abfed97cef83e671.html",
+      "title": "商务部等9部门关于加快推进科技兴商的意见",
+      "versionId": "82be7eec-6cde-4b44-a184-196dcf2a750b",
+      "contentHash": "a2c5ed5e02bcca8ab66a1db93f7db48888a2338f6eaf4d5243dfb94fa72cd4b5",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "2026-10-19",
+        "rule": "ymd",
+        "basis": "CN-T01 complete 20318-byte same-product HTTPS HTML saved 2026-10-20: Latest policy ul.policy-list has eight own title/link/span YYYY-MM-DD rows. Seven relative HTTPS identities retained; one original HTTP policy and its interpretation link excluded by existing policy. Displayed day only, publication role/clock/timezone unknown; no protocol rewrite or detail fetch.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-19",
+        "publishedAt": null
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.mofcom.gov.cn/zcfb/zc/art/2026/art_531d1a665fab4dafb810927f37788e24.html",
+      "title": "商务部 海关总署公告2026年第52号 公布进一步优化两用物项出口管制质疑和鉴别工作有关事项",
+      "versionId": "4753820f-31b6-4328-aec4-c50a888ca720",
+      "contentHash": "e6ed8ceecf7d3ae1b38a8ae76113b308008ac018e08c3b091b9c8a2440050274",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "2026-10-19",
+        "rule": "ymd",
+        "basis": "CN-T01 complete 20318-byte same-product HTTPS HTML saved 2026-10-20: Latest policy ul.policy-list has eight own title/link/span YYYY-MM-DD rows. Seven relative HTTPS identities retained; one original HTTP policy and its interpretation link excluded by existing policy. Displayed day only, publication role/clock/timezone unknown; no protocol rewrite or detail fetch.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-19",
+        "publishedAt": null
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.mofcom.gov.cn/zcfb/zc/art/2026/art_a16bf7fda92441fcb3626866b86a19f4.html",
+      "title": "公布2027年化肥进口关税配额总量、分配原则及相关程序",
+      "versionId": "02f1d366-77a6-4809-aca7-46a7551e02ce",
+      "contentHash": "801cbe31a254de985caefd94e238c747454bd45f7d126b352a6c5ced0bfd9388",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "2026-10-14",
+        "rule": "ymd",
+        "basis": "CN-T01 complete 20318-byte same-product HTTPS HTML saved 2026-10-20: Latest policy ul.policy-list has eight own title/link/span YYYY-MM-DD rows. Seven relative HTTPS identities retained; one original HTTP policy and its interpretation link excluded by existing policy. Displayed day only, publication role/clock/timezone unknown; no protocol rewrite or detail fetch.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-14",
+        "publishedAt": null
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.mofcom.gov.cn/zcfb/zc/art/2026/art_b2fa4e60bcd24bdf8c658e476b808785.html",
+      "title": "商务部 海关总署 中央军委装备发展部公告2026年第49号 公布优化调整无人机相关物项出口管制措施的决定",
+      "versionId": "84919207-39f5-445c-91de-13ddc4f7752d",
+      "contentHash": "23e6fba0e8e7cbd199f592cc4b693b06b9791c02a221a4c41a411b58e8cf45e9",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "2026-10-19",
+        "rule": "ymd",
+        "basis": "CN-T01 complete 20318-byte same-product HTTPS HTML saved 2026-10-20: Latest policy ul.policy-list has eight own title/link/span YYYY-MM-DD rows. Seven relative HTTPS identities retained; one original HTTP policy and its interpretation link excluded by existing policy. Displayed day only, publication role/clock/timezone unknown; no protocol rewrite or detail fetch.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-19",
+        "publishedAt": null
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.mofcom.gov.cn/zcfb/zc/art/2026/art_f4ab31f0b7e94c159b357e39f5a12fc9.html",
+      "title": "商务部 海关总署公告2026年第51号 公布优化调整挖泥船相关物项出口管制措施的决定",
+      "versionId": "01ec2d55-3ae9-42ed-b849-46e7d7b308ba",
+      "contentHash": "5f2b870d8a590df2d25dd8dc6d8de74db48178ca3a7fead1ef722ef3285788f0",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "2026-10-19",
+        "rule": "ymd",
+        "basis": "CN-T01 complete 20318-byte same-product HTTPS HTML saved 2026-10-20: Latest policy ul.policy-list has eight own title/link/span YYYY-MM-DD rows. Seven relative HTTPS identities retained; one original HTTP policy and its interpretation link excluded by existing policy. Displayed day only, publication role/clock/timezone unknown; no protocol rewrite or detail fetch.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-19",
+        "publishedAt": null
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.mofcom.gov.cn/zcfb/zc/art/2026/art_fd6a83b3c0fe416fb810384ae79ba473.html",
+      "title": "商务部公告2026年第46号 2027年食糖、羊毛、毛条进口关税配额实施细则",
+      "versionId": "45c7dbfa-5f8b-4027-a7a0-e0aa541ddb47",
+      "contentHash": "538634073c527cfcc6677ab0d69e3a235cfd64b9b4029a73b1e50c2059c6eaec",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "2026-10-09",
+        "rule": "ymd",
+        "basis": "CN-T01 complete 20318-byte same-product HTTPS HTML saved 2026-10-20: Latest policy ul.policy-list has eight own title/link/span YYYY-MM-DD rows. Seven relative HTTPS identities retained; one original HTTP policy and its interpretation link excluded by existing policy. Displayed day only, publication role/clock/timezone unknown; no protocol rewrite or detail fetch.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-09",
+        "publishedAt": null
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    }
+  ]
+}

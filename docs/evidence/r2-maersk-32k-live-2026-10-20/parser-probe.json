@@ -1,0 +1,143 @@
+{
+  "existingGenericParser": "fromHtml",
+  "input": "complete stored46251-byte HTML",
+  "entries": 18,
+  "uniqueURLs": 18,
+  "titleLinkRawDatePresent": 18,
+  "dateRules": {
+    "unsupported_format": 18
+  },
+  "sourceTimezone": "missing",
+  "publishedAt": null,
+  "sourceNetworkCalls": 0,
+  "DBWrites": 0,
+  "qualificationChanged": false,
+  "rows": [
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/20/maersk-lt-first-planned-drydocking-india-kattupalli",
+      "title": "Maersk partners with L&T for its first planned drydocking in India",
+      "rawDate": "20 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/19/adidas-sporting-event-logistics",
+      "title": "How adidas scaled sporting event logistics with Maersk Ground Freight",
+      "rawDate": "19 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/19/maersk-completes-worlds-largest-ethanol-bunkering-singapore",
+      "title": "Maersk completes the world’s largest ethanol bunkering in Singapore",
+      "rawDate": "19 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/14/latin-america-market-update-october",
+      "title": "Maersk Latin America Market Update – October, 2026",
+      "rawDate": "14 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/13/india-middle-east-and-africa-market-update-october",
+      "title": "IMEA Maersk Market Update – October 2026",
+      "rawDate": "13 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/08/pharma-asia-international-conference",
+      "title": "Discover supply chain innovation at Pharma Asia International Conference 2026",
+      "rawDate": "8 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/08/maersk-supply-chain-leaders-forum-strengthening-supply-chains-through-ai",
+      "title": "Maersk Supply Chain Leaders Forum 2026: strengthening supply chains through AI",
+      "rawDate": "8 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/07/europe-market-update-october",
+      "title": "Maersk Europe Market Update October 2026",
+      "rawDate": "7 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/07/north-america-market-update-october",
+      "title": "Maersk North America Market Update — October 2026",
+      "rawDate": "7 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/07/maersk-asia-pacific-market-update-october",
+      "title": "Maersk Asia Pacific Market Update – October 2026",
+      "rawDate": "7 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/09/30/rail-forward-india",
+      "title": "RAIL FORWARD: Delivering India's manufacturing growth through rail logistics",
+      "rawDate": "30 Sep 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/09/28/maersk-completes-first-us-ethanol-bunkering-of-a-deep-sea-container-vessel",
+      "title": "Maersk completes first U.S. ethanol bunkering of a deep-sea container vessel",
+      "rawDate": "28 Sep 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/19/western-mediterranean-west-africa-network-enhancements",
+      "title": "Enhanced connectivity between the Western Mediterranean and West Africa",
+      "rawDate": "19 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/19/gemini-network-service-enhancements-ae18",
+      "title": "Further enhancements to the Gemini network Gemini Service",
+      "rawDate": "19 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/19/network-update-me2-ae12-jeddah-colombo",
+      "title": "Network update: ME2 and AE12",
+      "rawDate": "19 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/19/transport-document-amendment-fee-export-europe-world",
+      "title": "Customer Advisory - European and Mediterranean countries - Transport Document Amendment Fee Export (AME) Revised Egypt rates and Algeria implementation.",
+      "rawDate": "19 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/19/booking-vehicles-for-container-transport",
+      "title": "Booking Vehicles for Container Transport",
+      "rawDate": "19 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/16/us-canada-emergency-intermodal-fuel-surcharge-november",
+      "title": "U.S. & Canada Emergency Intermodal Fuel Surcharge Inland Rail Ramps and Container Yards",
+      "rawDate": "16 Oct 2026",
+      "dateRule": "unsupported_format",
+      "publishedAt": null
+    }
+  ]
+}

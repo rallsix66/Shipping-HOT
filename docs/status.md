@@ -1,3 +1,14 @@
+## 当前：Maersk/商务部及日期切片已单独提交（2026-10-21）
+
+本次提交只含 Maersk（XX-K01）/商务部（CN-T01）及日期这一切片，从原工作区按文件原样复制到隔离 worktree，基于 `40629587e22d8932df105962ec214530e4054414` 生成：
+- 代码：`article-fetch-security.ts` 新增显式 `SourceHeaderLimitConfig`，只允许 intel:xx-k01 ＋ 精确 `https://www.maersk.com/news` ＋ 32768 字节；collector 和 seed 类型透传；web_list 新增 `english_month_abbr_day`（Maersk 卡片显示日，role unknown、时区 missing）和 `english_month_abbr_12h`（MY-L01 卡片本地时间，无 offset）；`html-index-candidates.ts` 新增 XX-K01、CN-T01 两个默认关闭（enabled=false、persistence=disallowed）的 metadata 候选。
+- 测试：maersk-mofcom、web-list-english-12h、article-fetch-header-limit，以及 article-fetch-transport、html-index-candidates 的增量。
+- 证据：三 URL 诊断、Maersk header-limit／32KiB 单次 GET、三 URL 保存后验证、CN-T01 HTTPS／应用核对、MOFCOM host 追加、Maersk/MOFCOM 离线适配和限定资格这些目录。只含摘要、字段审计、hash 和 diff，没有原始响应全文、临时数据库或凭据。
+
+资格口径（限定）：XX-K01 OK/PASS（限定），CN-T01 OK/PARTIAL（限定）。累计 28/39（至少 32，差 4）、资讯 25/34 是*本地已审结果*。逐源矩阵 `mapping.json`、累计报告和目录说明的对应修改与 ID-W02（BMKG 实现仍留本地）及其他切片混在一起，本次没有提交，仍保留在原工作区。部分随附证据（如 qualification/remaining-r2.md、cn-t01-https/summary.json）引用了尚未入库的本地证据目录，这些链接目前只在本机有效。
+
+不在本切片：观察工具与 BMKG（`observation_child_environment_invalid` 测试失败未查清）、人工录入/剪藏、MY-L01 回放证据（r2-closeout-offline，与人工交互验收混在同一目录）。来源均默认关闭；没有实网请求或生产启用。R2 整体未通过。
+
 ## 当前：剪藏提取结构候选（2026-10-19，两项P2限定复审通过，仅本地提交交接，未切换）
 
 用户已在普通abb1b99包手动保存一条HTTPS新闻，本地只读确认1材料/1版本/1审计，详情API与SQLite正文一致、private_material/unknown，但正文尾部含非正文杂项；存储一致不证明原网页完整。原始页面DOM未取得，未自动抓取或浏览器控制，旧记录/版本不改写。

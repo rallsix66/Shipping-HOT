@@ -74,6 +74,29 @@ export function parseLooseDate(value: string | null | undefined, config: Pick<We
     d = +enacted[1]
     tail = ""
     result.rule = "configured_indonesian_enactment_date"
+  } else if (config.dateFormat === "english_month_abbr_day") {
+    // Observed Maersk card day only; no publication role, clock or timezone is declared.
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    const day = /^(\d{1,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4})$/.exec(raw)
+    result.role = "unknown"
+    if (!day || result.calendar !== "gregorian" || config.publishedAtUtcOffset !== undefined) return { ...result, rule: "unsupported_format" }
+    y = +day[3]
+    mo = months.indexOf(day[2]) + 1
+    d = +day[1]
+    tail = ""
+    result.rule = "configured_english_month_abbr_day"
+  } else if (config.dateFormat === "english_month_abbr_12h") {
+    // Observed MY-L01 card grammar only; the source does not declare a timezone or time role.
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    const local = /^(\d{2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) (\d{2}):(\d{2}) (am|pm)$/.exec(raw)
+    if (!local || result.calendar !== "gregorian" || config.publishedAtUtcOffset !== undefined) return { ...result, rule: "unsupported_format" }
+    y = +local[3]
+    mo = months.indexOf(local[2]) + 1
+    d = +local[1]
+    if (+local[4] < 1 || +local[4] > 12 || +local[5] > 59) return { ...result, rule: "invalid_time" }
+    const hour = (+local[4] % 12) + (local[6] === "pm" ? 12 : 0)
+    tail = ` ${hour}:${local[5]}`
+    result.rule = "configured_english_month_abbr_12h"
   } else if (config.dateFormat === "english_month_name") {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
     const english = /^(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2}),\s+(\d{4})$/.exec(v)
@@ -119,7 +142,7 @@ export function parseLooseDate(value: string | null | undefined, config: Pick<We
   const check = new Date(Date.UTC(y, mo - 1, d))
   if (y < 1900 || y > 2399 || check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d) return { ...result, rule: "invalid_calendar_date" }
   const date = `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`
-  if (config.dateFormat === "sitc_publication_day" || config.dateFormat === "indonesian_month_abbr") return { ...result, precision: "day", localDate: date, timezone: "missing", utcOffset: null, publishedAt: null }
+  if (config.dateFormat === "sitc_publication_day" || config.dateFormat === "indonesian_month_abbr" || config.dateFormat === "english_month_abbr_day") return { ...result, precision: "day", localDate: date, timezone: "missing", utcOffset: null, publishedAt: null }
   if (!tail.trim()) return { ...result, precision: "day", localDate: date, utcOffset: config.publishedAtUtcOffset ?? null, timezone: config.publishedAtUtcOffset ? "configured" : "missing" }
   const t = /^(?:T|\s+)(\d{1,2}):(\d{2})(?::(\d{2})(\.\d{1,3})?)?\s*(Z|UTC|GMT|[+-]\d{2}:?\d{2})?$/.exec(tail)
   if (!t || +t[1] > 23 || +t[2] > 59 || +(t[3] ?? 0) > 59) return { ...result, rule: "invalid_time" }

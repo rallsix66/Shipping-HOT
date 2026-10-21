@@ -1,0 +1,46 @@
+{
+  "type": "PARENT_ACCEPTED_LIMITED_SOURCE_QUALIFICATION",
+  "acceptedAt": "2026-10-20T08:29:05.066Z",
+  "parentThreadId": "01a156ee-5b41-73b8-9694-0368aaf900f2",
+  "authorization": "Independent seven-file code review and detailed evidence review passed; explicitly apply proposed mapping: XX-K01 limited OK/PASS; CN-T01 limited OK/PARTIAL. No other entries or countingRules changes.",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "branch": "codex/shipping-hot-r2",
+  "codeState": "reviewed uncommitted working-source hashes; no new commit",
+  "reviewedProduct": {
+    "path": "docs/evidence/r2-maersk-mofcom-offline-2026-10-20/product-files.json",
+    "sha256": "3e1b6addfada336f1c24ed798762290eb1a6dfee37ce1c686079cfe63b54c19f",
+    "hashBasis": "local_file_bytes"
+  },
+  "reviewedProposal": {
+    "path": "docs/evidence/r2-maersk-mofcom-offline-2026-10-20/proposed-mapping.json",
+    "sha256": "4d7a3971302f2a9292c49a03eb86fb89192b44dcabdf732baf3a0dd642dafa43",
+    "hashBasis": "local_file_bytes"
+  },
+  "reviewScope": "Parent independently read all three actual code segments and detailed stored evidence; local test/replay execution is executor evidence, not parent-rerun evidence.",
+  "results": [
+    {
+      "id": "XX-K01",
+      "r2_4": "OK",
+      "r2_5": "PASS",
+      "scope": "single historical exact32KiB response plus complete18-item original offline replay; metadata-only; day/unknown role, no timezone/instant; no continuous/production claim"
+    },
+    {
+      "id": "CN-T01",
+      "r2_4": "OK",
+      "r2_5": "PARTIAL",
+      "scope": "single historical same-host/path HTTPS200 plus complete8-row original accounting;7 eligible identities stored/repeated/reopened,1 HTTP identity excluded; role key omitted, not publication; no timezone/instant"
+    }
+  ],
+  "expectedTotals": {
+    "r2_4": "28/39",
+    "minimumOK": 32,
+    "shortfall": 4,
+    "r2_5": "25/34",
+    "informationRemaining": 9
+  },
+  "otherEntriesUnchanged": 39,
+  "countingRulesUnchanged": true,
+  "productionActivation": false,
+  "sourceRequests": 0,
+  "newTestRuns": 0
+}

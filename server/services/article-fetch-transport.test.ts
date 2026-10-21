@@ -67,6 +67,22 @@ beforeEach(() => {
   onEnd = () => {}
 })
 
+it("keeps strict TLS, pinned lookup and cancellation when the exact Maersk header budget is selected", async () => {
+  const url = "https://www.maersk.com/news"
+  const signal = new AbortController().signal
+  onEnd = call => call.respond(200, { "content-type": "text/html" }, ["synthetic"])
+  expect(await secureFetchArticle(url, { policy: { sourceId: "intel:xx-k01", status: "allowed", fetchAllowed: true, persistence: "disallowed", allowedHosts: ["www.maersk.com"], allowedContentTypes: ["text/html"] }, sourceHeaderLimit: { sourceId: "intel:xx-k01", url, maxHeaderSize: 32768 }, lookup, signal, maxRedirects: 0 })).toMatchObject({ ok: true })
+  expect(calls[0].options).toMatchObject({ method: "GET", rejectUnauthorized: true, timeout: 10000, maxHeaderSize: 32768, signal })
+  expect(calls[0].options.ca).toBeUndefined()
+  expect(calls[0].options.insecureHTTPParser).toBeUndefined()
+  let pinned: unknown
+  calls[0].options.lookup("www.maersk.com", { all: true }, (_error: unknown, values: unknown) => {
+    pinned = values
+  })
+  expect(pinned).toEqual(PUBLIC)
+  expect(calls[0].request.end).toHaveBeenCalledTimes(1)
+})
+
 // Synthetic, independently specified legacy bytes (not UTF-8 strings with a legacy header).
 // windows-1258 represents the hook-above as a combining character: no normalization is imposed.
 const ENCODED = [

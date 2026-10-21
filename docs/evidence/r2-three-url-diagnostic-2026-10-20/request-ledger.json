@@ -1,0 +1,95 @@
+{
+  "at": "2026-10-20T04:21:33.688Z",
+  "limits": {
+    "totalPhysicalGET": 3,
+    "perURL": 1,
+    "timeoutMs": 10000,
+    "maxBytes": 524288,
+    "retries": 0,
+    "redirectFollows": 0
+  },
+  "totals": {
+    "URLsInScope": 3,
+    "URLsWithSystemDNS": 2,
+    "systemDNSCalls": 2,
+    "physicalGETReservations": 1,
+    "transportInvocations": 1,
+    "capturedHTTPResponses": 0,
+    "successfulHTML": 0,
+    "skippedURLs": 1,
+    "retries": 0,
+    "followedRedirects": 0,
+    "details": 0,
+    "images": 0,
+    "pagination": 0,
+    "login": 0,
+    "sourceCAChanges": 0,
+    "certificateValidationDisabled": 0,
+    "networkChanges": 0,
+    "DBWrites": 0,
+    "paidCalls": 0
+  },
+  "targets": [
+    {
+      "sourceId": "XX-K01",
+      "key": "maersk",
+      "target": "https://www.maersk.com/news",
+      "startedAt": "2026-10-20T04:18:45.500Z",
+      "finishedAt": "2026-10-20T04:18:46.098Z",
+      "DNS": 1,
+      "physicalGETReservations": 1,
+      "transportInvocations": 1,
+      "rawExit": 2,
+      "result": {
+        "ok": false,
+        "code": "fetch_failed",
+        "message": "Parse Error: Header overflow"
+      },
+      "phase": "http_response_header_parser",
+      "error": {
+        "code": "HPE_HEADER_OVERFLOW",
+        "message": "Parse Error: Header overflow",
+        "phase": "transport_before_http_response",
+        "certificateErrorType": null
+      },
+      "HTTPStatus": null,
+      "HTMLRetained": false
+    },
+    {
+      "sourceId": "PH-P01",
+      "key": "ppa-helpdesk",
+      "target": "https://www.ppa.com.ph/content/ppa-helpdesk-advisory",
+      "startedAt": "2026-10-20T04:19:32.542Z",
+      "finishedAt": "2026-10-20T04:19:32.549Z",
+      "DNS": 1,
+      "physicalGETReservations": 0,
+      "transportInvocations": 0,
+      "rawExit": 2,
+      "result": {
+        "ok": false,
+        "code": "blocked_address",
+        "message": "Resolved address is not a public address: 198.18.0.79"
+      },
+      "phase": "address_validation",
+      "error": null,
+      "HTTPStatus": null,
+      "HTMLRetained": false
+    },
+    {
+      "sourceId": "PH-P01",
+      "key": "ppa-news",
+      "target": "https://www.ppa.com.ph/ppa-port-news",
+      "startedAt": null,
+      "finishedAt": null,
+      "DNS": 0,
+      "physicalGETReservations": 0,
+      "transportInvocations": 0,
+      "rawExit": null,
+      "result": "NOT_REQUESTED_SHARED_HOST_SAFETY_REFUSAL",
+      "phase": "not_requested_after_common_host_safety_refusal",
+      "error": null,
+      "HTTPStatus": null,
+      "HTMLRetained": false
+    }
+  ]
+}

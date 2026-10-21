@@ -100,7 +100,7 @@ export async function collectIntelSource(repository: IntelRepository, seed: Inte
     }
   }
   try {
-    const response = await secureFetchArticle(seed.url, { policy: sourcePolicy(seed), sourceCa: seed.sourceCa, lookup: deps.lookup, transport: deps.transport, ...(seed.kind === "json_list" && seed.jsonList?.htmlScriptSelector ? { maxBytes: JSON_LIST_HTML_MAX_BYTES } : {}) })
+    const response = await secureFetchArticle(seed.url, { policy: sourcePolicy(seed), sourceCa: seed.sourceCa, sourceHeaderLimit: seed.sourceHeaderLimit, lookup: deps.lookup, transport: deps.transport, ...(seed.kind === "json_list" && seed.jsonList?.htmlScriptSelector ? { maxBytes: JSON_LIST_HTML_MAX_BYTES } : {}) })
     if (!response.ok) return await fail(response.code, response.message)
     body = response.body
     finalUrl = response.finalUrl

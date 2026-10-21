@@ -1,0 +1,41 @@
+{
+  "at": "2026-10-20T03:11:02.610Z",
+  "target": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\profiles\\shf0fNvLCn9b.js",
+  "backup": "D:\\try one\\Shipping HOT\\.tmp\\clash-mofcom-singlehost-20261020\\selected-extension-before.js",
+  "beforeSha256": "3e22727b5b239afb5f0ff6578c3923069a00da2ba9d96383d803bbb93cf1dbe1",
+  "afterSha256": "8fbcc45aaf8e10a26c228e9fb1e5bf6e477b8624c373cd67c5ab9c05c81907a1",
+  "insertedHost": "www.mofcom.gov.cn",
+  "oldLiteralCount": 27,
+  "newLiteralCount": 28,
+  "original27OrderPreserved": true,
+  "inheritedSpreadPreserved": true,
+  "BMKGOccurrences": 1,
+  "syntaxCompiledNotExecuted": true,
+  "oneInsertionOnly": true,
+  "configApplied": false,
+  "DNS": 0,
+  "HTTP": 0,
+  "finishedAt": "2026-10-20T03:11:02.613Z",
+  "writeConfirmed": true,
+  "generatedFilterCount": 27,
+  "generatedMofcomOccurrences": 0,
+  "generatedBMKGOccurrences": 1,
+  "generatedConfigUnchanged": true,
+  "otherInspectedConfigsUnchanged": true,
+  "reload": false,
+  "cacheClear": false,
+  "subscriptionOrSecretsExported": false,
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "projectSourceUnchanged": true,
+  "protectedFilesUnchanged": true,
+  "BMKGThisRound": {
+    "DNS": 0,
+    "HTTP": 0,
+    "status": "paused_before_requests"
+  },
+  "knowledgeCloseout": {
+    "docsLintRawExit": 0,
+    "inventoryRawExit": 0,
+    "deletedFiles": 0
+  }
+}

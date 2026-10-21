@@ -1,0 +1,145 @@
+{
+  "at": "2026-10-20T07:55:14.470Z",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "branch": "codex/shipping-hot-r2",
+  "cwd": "D:\\try one\\Shipping HOT",
+  "status": "bounded_access_verification_complete; source qualification unchanged",
+  "accounting": {
+    "DNS": 3,
+    "transportInvocations": 3,
+    "GETBudgetReservations": 3,
+    "completeHTTPResponses": 1,
+    "TLSFailuresBeforeHTTPResponse": 2,
+    "retries": 0,
+    "redirectsFollowed": 0,
+    "detailOrAttachmentRequests": 0,
+    "MaerskRequests": 0,
+    "DBWrites": 0
+  },
+  "results": [
+    {
+      "sourceId": "intel:cn-t01",
+      "url": "https://www.mofcom.gov.cn/zcfb/index.html",
+      "status": 200,
+      "bytes": 20318,
+      "sha256": "ab5e3780d9988fe7032458a05ad00adf4f6e66bb891aaaed385f8e2f515d340f",
+      "error": null,
+      "phase": "http_response_captured"
+    },
+    {
+      "sourceId": "intel:ph-p01",
+      "url": "https://www.ppa.com.ph/content/ppa-helpdesk-advisory",
+      "status": null,
+      "bytes": null,
+      "sha256": null,
+      "error": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+      "phase": "tls_certificate_verification"
+    },
+    {
+      "sourceId": "intel:ph-p01",
+      "url": "https://www.ppa.com.ph/ppa-port-news",
+      "status": null,
+      "bytes": null,
+      "sha256": null,
+      "error": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+      "phase": "tls_certificate_verification"
+    }
+  ],
+  "gates": {
+    "productSourceChanged": false,
+    "previousProductGate": "92 targeted;1727 passed+3 pre-existing Windows skips; not rerun for this evidence-only task",
+    "fieldAcceptance": "NOT_RUN",
+    "GUI_S7": "pending",
+    "observation24h": "NOT_RUN",
+    "R3": "paused"
+  },
+  "preservation": {
+    "filesUnchanged": 47,
+    "headUnchanged": true,
+    "branchUnchanged": true,
+    "stagedEmpty": true,
+    "matrixAndCatalogUnchanged": true,
+    "statusOriginalBytesPreserved": true,
+    "rawIgnored": true
+  },
+  "deniedAction": {
+    "action": "prior Get-CimInstance Win32_Process read of filtered Clash/Mihomo executable and -f/-d config paths",
+    "target": "local process metadata",
+    "reason": "OS access denied",
+    "outcome": "DENIED; active runtime config path pending",
+    "completed": "installed version and scoped disk config snapshot obtained previously; this round three URL verification completed",
+    "retried": false,
+    "newGate": false
+  },
+  "cleanup": "none; all evidence, private response and logs retained",
+  "finalAudit": {
+    "status": "complete; content/qualification and future implementation remain pending",
+    "at": "2026-10-20T07:56:02.170Z",
+    "skill": "e0/neat-freak",
+    "inventory": {
+      "log": ".tmp/three-url-after-save-20261020/neat-inventory.log",
+      "rawExit": 0,
+      "sha256": "db40013d8ad2f1abc84d1e685e87a29672a5ee58a77d0161237b794cea11b5d7",
+      "markdownEntries": 8277
+    },
+    "docLint": {
+      "rawExit": 0,
+      "log": ".tmp/three-url-after-save-20261020/docs-lint.log"
+    },
+    "links": {
+      "checked": 156,
+      "broken": []
+    },
+    "diffCheck": {
+      "rawExit": 0,
+      "log": ".tmp/three-url-after-save-20261020/diff-check.log"
+    },
+    "preservation": {
+      "baselineFiles": 47,
+      "changed": [],
+      "headUnchanged": true,
+      "stagedEmpty": true,
+      "statusOriginalBytesPreserved": true,
+      "rawShaVerified": [
+        {
+          "path": ".tmp/cn-t01-https-20261020/response-after-save-20261020.bin",
+          "sha256": "ab5e3780d9988fe7032458a05ad00adf4f6e66bb891aaaed385f8e2f515d340f",
+          "bytes": 20318
+        }
+      ],
+      "gitStatusEntries": 46,
+      "gitStatusLog": ".tmp/three-url-after-save-20261020/final-git-status.log"
+    },
+    "docs": [
+      {
+        "path": "docs/status.md",
+        "sha256": "df325a795e79607769cea0fbc0fb0dc1977e4a3e06f823efd2f362b1fb249320"
+      },
+      {
+        "path": "docs/architecture.md",
+        "sha256": "c78c5a22a0a9c76f204362951a0c5e96a67e953347b42bbb224f14720ca2a177"
+      },
+      {
+        "path": "docs/evidence/r2-three-url-after-save-2026-10-20/report.md",
+        "sha256": "aa78b83436e3c627954fb56c6b0a2e3827e270c1380851900114e8e073fda825"
+      },
+      {
+        "path": "docs/evidence/r2-three-url-after-save-2026-10-20/closeout.md",
+        "sha256": "5e9ff2d95d4899cdee72cd2c108187175ed0a71e74efe987f4d67e350239a351"
+      }
+    ],
+    "rules": {
+      "AGENTSUnchanged": true,
+      "bytes": 28170,
+      "budget32KiBFraction": 0.85968017578125
+    },
+    "pending": [
+      "CN-T01 field/date acceptance not run",
+      "PPA strict TLS certificate chain verification failure",
+      "Maersk date and collector adaptation next round",
+      "GUI/S7 and24h unaccepted; R3 paused",
+      "previous denied process read remains denied without retry; not a gate"
+    ],
+    "cleanup": "none; review evidence and raw samples retained"
+  }
+}

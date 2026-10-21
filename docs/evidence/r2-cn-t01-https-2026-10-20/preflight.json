@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-20T02:51:00.792Z",
+  "exactTarget": "https://www.mofcom.gov.cn/zcfb/index.html",
+  "searchRawExit": 1,
+  "existingCompletedExactHTTPSRecords": [],
+  "excluded": "dependencies/builds/git/preimage_snapshots/current_task_records",
+  "processCheck": {
+    "method": "read-only Get-CimInstance Win32_Process",
+    "onlyExistingProjectNode": {
+      "pid": 33364,
+      "entry": ".tmp/clipper-private-abb1b99/dist/output/server/index.mjs"
+    },
+    "sameTargetRequestProcessObserved": false
+  },
+  "historicalHTTP": "CN-T01 had no physical HTTP dispatch per parent and stored qualification matrix",
+  "parentOfficialWebResearch": "same HTTPS host/path publicly readable; not local execution evidence"
+}

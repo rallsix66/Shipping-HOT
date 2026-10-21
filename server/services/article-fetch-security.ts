@@ -35,6 +35,15 @@ export interface SourceCaConfig {
   certificatePem: string
 }
 
+/** Explicit, request-scoped opt-in; only the approved Maersk URL may use 32 KiB. */
+export interface SourceHeaderLimitConfig {
+  sourceId: string
+  url: string
+  maxHeaderSize: number
+}
+
+const MAERSK_HEADER_LIMIT = { sourceId: "intel:xx-k01", url: "https://www.maersk.com/news", maxHeaderSize: 32768 } as const
+
 export interface ArticleTransportOptions {
   timeoutMs: number
   maxBytes: number
@@ -42,6 +51,8 @@ export interface ArticleTransportOptions {
   signal?: AbortSignal
   /** Validated by secureFetchArticle and selected independently for each HTTPS hop. */
   caPem?: string
+  /** Resolved by secureFetchArticle. Undefined preserves Node's default. */
+  maxHeaderSize?: 32768
 }
 export type ArticleTransport = (
   url: URL,
@@ -52,6 +63,7 @@ export type ArticleTransport = (
 export interface SecureFetchOptions {
   policy: ArticleSourcePolicy
   sourceCa?: SourceCaConfig
+  sourceHeaderLimit?: SourceHeaderLimitConfig
   lookup?: ArticleLookup
   transport?: ArticleTransport
   maxBytes?: number
@@ -208,6 +220,7 @@ export function validatedLookup(addresses: readonly ResolvedAddress[]) {
  * The GET request must be ended explicitly or it is never sent and only times out.
  */
 export function defaultTransport(url: URL, addresses: ResolvedAddress[], options: ArticleTransportOptions): Promise<ArticleHttpResponse> {
+  if (options.maxHeaderSize !== undefined && options.maxHeaderSize !== MAERSK_HEADER_LIMIT.maxHeaderSize) return Promise.reject(new Error("source_header_limit_invalid"))
   return new Promise((resolve, reject) => {
     let settled = false
     let request: ReturnType<typeof httpRequest> | undefined
@@ -223,6 +236,7 @@ export function defaultTransport(url: URL, addresses: ResolvedAddress[], options
       timeout: options.timeoutMs,
       signal: options.signal,
       lookup: validatedLookup(addresses) as never,
+      ...(options.maxHeaderSize === undefined ? {} : { maxHeaderSize: options.maxHeaderSize }),
       ...(url.protocol === "https:" ? { rejectUnauthorized: true, ...(options.caPem ? { ca: options.caPem } : {}) } : {}),
     }, (response) => {
       const chunks: Buffer[] = []
@@ -265,6 +279,12 @@ function validateSourceCa(config: SourceCaConfig, policy: ArticleSourcePolicy): 
   }
 }
 
+function validateSourceHeaderLimit(config: SourceHeaderLimitConfig, policy: ArticleSourcePolicy): boolean {
+  if (!config || typeof config !== "object" || Array.isArray(config) || Object.keys(config).some(key => !["sourceId", "url", "maxHeaderSize"].includes(key))) return false
+  return config.sourceId === MAERSK_HEADER_LIMIT.sourceId && policy.sourceId === config.sourceId
+    && config.url === MAERSK_HEADER_LIMIT.url && config.maxHeaderSize === MAERSK_HEADER_LIMIT.maxHeaderSize
+}
+
 /**
  * Connection-level SSRF-safe fetch. Every hop revalidates protocol, exact host,
  * DNS (all IPv4/IPv6 results) and binds the actual socket to the validated
@@ -295,9 +315,17 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
   if (sourceCa !== undefined && (!validateSourceCa(sourceCa, options.policy) || current.protocol !== "https:")) {
     return failure("source_ca_invalid", "Source CA configuration is invalid or not bound to this HTTPS source")
   }
+  const sourceHeaderLimit = options.sourceHeaderLimit === undefined ? undefined : { ...options.sourceHeaderLimit }
+  if (sourceHeaderLimit !== undefined && (!validateSourceHeaderLimit(sourceHeaderLimit, options.policy) || target !== sourceHeaderLimit.url)) {
+    return failure("source_header_limit_invalid", "Response-header limit is invalid or not bound to this source and exact URL")
+  }
 
   for (let hop = 0; hop <= maxRedirects; hop++) {
     if (options.signal?.aborted) return failure("fetch_timeout", "Request aborted")
+    // Opt-in is exact-URL-only: a different redirect target is refused before its DNS lookup.
+    if (sourceHeaderLimit !== undefined && (!validateSourceHeaderLimit(sourceHeaderLimit, options.policy) || current.href !== sourceHeaderLimit.url)) {
+      return failure("source_header_limit_invalid", "Response-header limit does not apply to this redirect target")
+    }
     if (current.username || current.password) return failure("credentials_not_allowed", "URL credentials are not allowed")
     const protocolError = validateProtocol(current, options.policy)
     if (protocolError) return protocolError
@@ -313,11 +341,12 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
     if (addresses.length === 0) return failure("dns_empty", `No addresses resolved for ${current.hostname}`)
     const blocked = addresses.find(isBlockedAddress)
     if (blocked) return failure("blocked_address", `Resolved address is not a public address: ${blocked.address}`)
+    if (sourceHeaderLimit !== undefined && !validateSourceHeaderLimit(sourceHeaderLimit, options.policy)) return failure("source_header_limit_invalid", "Response-header source binding changed")
     let response: ArticleHttpResponse
     try {
       // Never carry a previous hop's trust anchor to another host or another source.
       const caPem = sourceCa && current.protocol === "https:" && current.hostname === sourceCa.hostname.toLowerCase() ? sourceCa.certificatePem : undefined
-      response = await transport(current, addresses, { timeoutMs, maxBytes, headers, signal: options.signal, ...(caPem ? { caPem } : {}) })
+      response = await transport(current, addresses, { timeoutMs, maxBytes, headers, signal: options.signal, ...(caPem ? { caPem } : {}), ...(sourceHeaderLimit ? { maxHeaderSize: MAERSK_HEADER_LIMIT.maxHeaderSize } : {}) })
     } catch (error) {
       const message = error instanceof Error ? error.message : "fetch failed"
       return failure(message === "body_too_large" ? "body_too_large" : message === "fetch_timeout" ? "fetch_timeout" : "fetch_failed", message)

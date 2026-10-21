@@ -19,8 +19,15 @@ describe("disabled HTML index configurations and synthetic regressions", () => {
       const rows = catalog.split(/\r?\n/).filter(line => line.startsWith(`| ${seed.catalogId} |`))
       expect(rows).toHaveLength(1)
       const cells = rows[0].split("|").map(cell => cell.trim())
-      if (seed.catalogId === "XX-K03") expect(cells[4]).toBe(`${seed.url} ；越南站 https://sitcline.vn/`)
-      else expect(cells[4]).toBe(seed.url)
+      if (seed.catalogId === "XX-K03") {
+        expect(cells[4]).toBe(`${seed.url} ；越南站 https://sitcline.vn/`)
+      } else if (seed.catalogId === "CN-T01") {
+        expect(cells[4]).toBe("http://www.mofcom.gov.cn/zcfb/index.html")
+        expect(seed.url).toBe("https://www.mofcom.gov.cn/zcfb/index.html")
+        expect(new URL(seed.url).host + new URL(seed.url).pathname).toBe(new URL(cells[4]).host + new URL(cells[4]).pathname)
+      } else {
+        expect(cells[4]).toBe(seed.url)
+      }
       expect(cells[5]).toBe("web_list")
       expect(seed).toMatchObject({ enabled: false, persistence: "disallowed" })
       expect(intelSourceSeeds.some(active => active.catalogId === seed.catalogId)).toBe(false)

@@ -1,7 +1,7 @@
 import type { IntelPersistence } from "#/database/intel"
 import type { WebListConfig } from "#/intel/sources/config-keys"
 import type { JsonListConfig } from "#/intel/sources/json-list"
-import type { SourceCaConfig } from "#/services/article-fetch-security"
+import type { SourceCaConfig, SourceHeaderLimitConfig } from "#/services/article-fetch-security"
 import type { IntelAdaptiveBounds } from "#/intel/adaptive"
 
 /**
@@ -17,6 +17,8 @@ export interface IntelSourceSeed {
   webList?: WebListConfig
   jsonList?: JsonListConfig
   sourceCa?: SourceCaConfig
+  /** Existing secureFetch validator accepts only the fixed Maersk source/URL/32KiB opt-in. */
+  sourceHeaderLimit?: SourceHeaderLimitConfig
   url: string
   persistence: IntelPersistence
   enabled: boolean
