@@ -1,0 +1,21 @@
+{
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "branch": "codex/shipping-hot-r2",
+  "relativeTo": "saved dirty working state at this slice start",
+  "files": [
+    {
+      "path": "src/components/shipping/manual-intel.tsx",
+      "sha256": "55bfc2e882f5c3d21773337e0e6d7c68eed398afba4b898d1f0df5701fbc6de2",
+      "bytes": 14442
+    },
+    {
+      "path": "test/manual-intel.test.ts",
+      "sha256": "758c08d293607c93d20a3ba233820b86313183e1790debe1f09dbce4c8bc3cda",
+      "bytes": 21838
+    }
+  ],
+  "diff": {
+    "path": "product.diff",
+    "sha256": "b7caeee7edbf895dc291fa8df9d14fd404a014e029478765f30f262b9199d081"
+  }
+}

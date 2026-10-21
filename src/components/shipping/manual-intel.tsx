@@ -85,15 +85,20 @@ export function ManualIntelPage({ onLegacy }: { onLegacy: () => void }) {
     setMessage("")
     try {
       const result = await myFetch<{ outcome: string, itemId?: string }>("/shipping/intel/manual", { method: "POST", body: { ...data, requestId } })
-      setMessage(result.outcome === "checked_empty" ? "已记录：查看后无新内容。不是抓取成功或来源已验证。" : `已保存：${result.outcome}。人工录入不代表已核实港口影响。`)
+      const savedMessage = result.outcome === "checked_empty" ? "已记录：查看后无新内容。不是抓取成功或来源已验证。" : `已保存：${result.outcome}。人工录入不代表已核实港口影响。`
+      setMessage(savedMessage)
       setPending(null)
       if (result.itemId) {
         setSelected(result.itemId)
         setVersion("")
       }
-      await client.invalidateQueries({ queryKey: ["intel-manual"] })
-      await client.invalidateQueries({ queryKey: ["intel-items"] })
-      await client.invalidateQueries({ queryKey: ["intel-item"] })
+      try {
+        await client.invalidateQueries({ queryKey: ["intel-manual"] }, { throwOnError: true })
+        await client.invalidateQueries({ queryKey: ["intel-items"] }, { throwOnError: true })
+        await client.invalidateQueries({ queryKey: ["intel-item"] }, { throwOnError: true })
+      } catch {
+        setMessage(`${savedMessage} 读取刷新失败，请刷新页面查看已存记录。`)
+      }
     } catch {
       setMessage("保存未确认，请检查字段或重试；输入保留，重试沿用同一提交编号。")
     } finally {

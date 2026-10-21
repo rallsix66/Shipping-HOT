@@ -1,3 +1,14 @@
+## 当前：人工录入/剪藏切片已单独提交（2026-10-21）
+
+本次提交只含人工录入/剪藏这一切片，从原工作区按文件原样复制到隔离 worktree，基于切片 1 的 `1b68adcd5ebe33bc4ed655c894f8830fec7f3138` 生成：
+- 代码：`src/components/shipping/manual-intel.tsx`（三处 invalidateQueries 显式 throwOnError，单独提示读取刷新失败）；`server/intel/manual-checklist.ts`（MANUAL-CLIP 说明改为保留原始出处、本地私人资料，无需填写权利声明，不代表官方确认）；`scripts/s7-local-seed.ts` 的 `--manual-only` 及其 CLI 测试；`scripts/e2e-s7-integrated.mjs` 的增量；`scripts/tsx-alias-loader.mjs` 只在候选路径是文件时才解析（s7-local-seed 的 CLI 测试必需，否则 `#/intel/sources` 会被当成目录解析失败；观察工具也用到这个修复）。
+- 测试：`test/manual-intel.test.ts`、`scripts/s7-local-seed.test.ts`。
+- 证据：s7-manual-preparation、manual-query-refresh-p2、manual-gui-launch、manual-gui-limited、manual-read-recovery、manual-desktop-resume、clip-copy-clash 这些目录。只含摘要、读回计数、hash 和 diff，没有原始响应全文、临时数据库或凭据；隔离数据库只在 ignored `.tmp`。
+
+验收口径不变：人工核心流程（错误日期拒收、创建、去重、A→B 修订、旧 A 保留、刷新保留、CN-P05 仅查看记录）已验证，*不等于整个 S7 PASS*。电脑端 1280 宽布局和键盘操作未验证；手机端为用户暂缓，不算通过。R2-7 GUI/S7 仍未通过，R2 整体未通过。
+
+不在本切片：观察工具与 BMKG（`observation_child_environment_invalid` 测试失败未查清）、r2-closeout-offline（MY-L01 回放与人工交互验收混在同一目录）、逐源矩阵和目录说明的修改。clip-copy-clash/summary.json 引用了尚未入库的本地证据目录，这些链接目前只在本机有效。
+
 ## 当前：Maersk/商务部及日期切片已单独提交（2026-10-21）
 
 本次提交只含 Maersk（XX-K01）/商务部（CN-T01）及日期这一切片，从原工作区按文件原样复制到隔离 worktree，基于 `40629587e22d8932df105962ec214530e4054414` 生成：

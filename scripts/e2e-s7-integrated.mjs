@@ -40,7 +40,7 @@ const SEED_ENTRY = join(ROOT, "scripts", "s7-local-seed.ts")
 const PORT = Number(process.env.E2E_S7_PORT ?? "4477")
 const BASE = (process.env.E2E_BASE_URL ?? `http://127.0.0.1:${PORT}`).replace(/\/$/, "")
 const DEBUG_PORT = Number(process.env.E2E_DEBUG_PORT ?? "9345")
-const EXPECTED_SCHEMA_VERSION = 27
+const EXPECTED_SCHEMA_VERSION = 29
 
 const REQUIRED_TABLES = [
   "app_metadata",
@@ -62,6 +62,11 @@ const REQUIRED_TABLES = [
   "ops_calendar_event",
   "policy_record",
   "policy_version",
+  "intel_source",
+  "intel_item",
+  "intel_item_version",
+  "intel_item_block",
+  "intel_manual_action",
 ]
 
 /** Retained (never-seeded, never-written) databases this run must not touch. */
@@ -79,8 +84,8 @@ const RETAINED_DATABASES = [
  * retained production database before the retained-file check could only report it.
  */
 const ISOLATED_ROOT = resolve(join(ROOT, ".tmp"))
-if (!RUN_DIR.startsWith(ISOLATED_ROOT + sep) && process.env.E2E_S7_ALLOW_OUTSIDE_TMP !== "1") {
-  throw new Error(`refusing to run: E2E_S7_DIR must stay inside ${ISOLATED_ROOT} (got ${RUN_DIR}); set E2E_S7_ALLOW_OUTSIDE_TMP=1 only for a throwaway directory`)
+if (!RUN_DIR.startsWith(ISOLATED_ROOT + sep)) {
+  throw new Error(`refusing to run: E2E_S7_DIR must stay inside ${ISOLATED_ROOT} (got ${RUN_DIR})`)
 }
 if (RETAINED_DATABASES.includes(DB_PATH)) {
   throw new Error(`refusing to run: ${DB_PATH} is a retained database and must never be deleted or written`)

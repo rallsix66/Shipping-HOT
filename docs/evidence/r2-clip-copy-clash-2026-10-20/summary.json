@@ -1,0 +1,714 @@
+{
+  "at": "2026-10-20T03:05:40.324Z",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "branch": "codex/shipping-hot-r2",
+  "root": "D:\\try one\\Shipping HOT",
+  "productFiles": [
+    "server/intel/manual-checklist.ts"
+  ],
+  "productChange": "focus_string_only_no_test_changes",
+  "tests": {
+    "targeted": {
+      "files": "5 passed (5)",
+      "tests": "84 passed (84)"
+    },
+    "full": {
+      "files": "143 passed (143)",
+      "tests": "1658 passed | 3 skipped (1661)"
+    }
+  },
+  "commands": [
+    {
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\r2-clip-copy-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "install",
+        "--frozen-lockfile",
+        "--offline"
+      ],
+      "startedAt": "2026-10-20T03:01:14.434Z",
+      "finishedAt": "2026-10-20T03:01:26.007Z",
+      "rawExit": 0,
+      "name": "install",
+      "stdout": {
+        "path": ".tmp/r2-clip-copy-clash-20261020/install.stdout.log",
+        "sha256": "00811c18b84ed24f9f207edb207ebb774d3cf82e034c27f66f04a8a205c143b1"
+      },
+      "stderr": {
+        "path": ".tmp/r2-clip-copy-clash-20261020/install.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\r2-clip-copy-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "build"
+      ],
+      "startedAt": "2026-10-20T03:01:26.008Z",
+      "finishedAt": "2026-10-20T03:01:50.685Z",
+      "rawExit": 0,
+      "name": "build",
+      "stdout": {
+        "path": ".tmp/r2-clip-copy-clash-20261020/build.stdout.log",
+        "sha256": "f5105c761831e90fe2b7e313d42f7549b4091985667cae31fa0257bd2ace7565"
+      },
+      "stderr": {
+        "path": ".tmp/r2-clip-copy-clash-20261020/build.stderr.log",
+        "sha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658"
+      }
+    },
+    {
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\r2-clip-copy-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "typecheck"
+      ],
+      "startedAt": "2026-10-20T03:01:50.685Z",
+      "finishedAt": "2026-10-20T03:01:59.523Z",
+      "rawExit": 0,
+      "name": "typecheck",
+      "stdout": {
+        "path": ".tmp/r2-clip-copy-clash-20261020/typecheck.stdout.log",
+        "sha256": "8941b28040b0f9b53f13c979e7f5a7c20804710e757e29ee5c78138e32428675"
+      },
+      "stderr": {
+        "path": ".tmp/r2-clip-copy-clash-20261020/typecheck.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\r2-clip-copy-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "lint"
+      ],
+      "startedAt": "2026-10-20T03:01:59.523Z",
+      "finishedAt": "2026-10-20T03:02:44.334Z",
+      "rawExit": 0,
+      "name": "lint",
+      "stdout": {
+        "path": ".tmp/r2-clip-copy-clash-20261020/lint.stdout.log",
+        "sha256": "b43ca83facf0d8667b6f1119afff820d9a152c424b0729d945e457af6f407fc3"
+      },
+      "stderr": {
+        "path": ".tmp/r2-clip-copy-clash-20261020/lint.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\r2-clip-copy-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "exec",
+        "vitest",
+        "run",
+        "-c",
+        "vitest.config.ts",
+        "server/intel/manual.test.ts",
+        "server/intel/manual-clip.test.ts",
+        "server/api/shipping/intel/manual-http.test.ts",
+        "test/manual-intel.test.ts",
+        "test/clip-import.test.ts"
+      ],
+      "startedAt": "2026-10-20T03:02:44.336Z",
+      "finishedAt": "2026-10-20T03:02:48.281Z",
+      "rawExit": 0,
+      "name": "targeted",
+      "stdout": {
+        "path": ".tmp/r2-clip-copy-clash-20261020/targeted.stdout.log",
+        "sha256": "1444b58338fad170bb93efea12f44536774f21aa71cf061786b3692f38882acf"
+      },
+      "stderr": {
+        "path": ".tmp/r2-clip-copy-clash-20261020/targeted.stderr.log",
+        "sha256": "daa38c45f9bf25372a42a91de14cd5093f09dd63d800eb00b919138cc70b07c5"
+      }
+    },
+    {
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\r2-clip-copy-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "exec",
+        "vitest",
+        "run",
+        "-c",
+        "vitest.config.ts"
+      ],
+      "startedAt": "2026-10-20T03:02:48.282Z",
+      "finishedAt": "2026-10-20T03:03:08.273Z",
+      "rawExit": 0,
+      "name": "vitest",
+      "stdout": {
+        "path": ".tmp/r2-clip-copy-clash-20261020/vitest.stdout.log",
+        "sha256": "30eb7381d2c1393679165f6b06fbf18fb301495f4253f8f422e52a965a2e1efd"
+      },
+      "stderr": {
+        "path": ".tmp/r2-clip-copy-clash-20261020/vitest.stderr.log",
+        "sha256": "401a0a47bd3cd3f2315d24a8f9c0d91b3cc014a63d6eb674ddc0fafef867a2f0"
+      }
+    }
+  ],
+  "manifest": {
+    "base": "40629587e22d8932df105962ec214530e4054414",
+    "candidate": "D:\\try one\\Shipping HOT\\.tmp\\r2-clip-copy-clean-20261020",
+    "overlay": [
+      {
+        "path": "package.json",
+        "sha256": "32716b71ba5f3d807d141fb41373eacbedebc99fac727514dd59abb56e295196"
+      },
+      {
+        "path": "scripts/tsx-alias-loader.mjs",
+        "sha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d"
+      },
+      {
+        "path": "server/runtime/intel-collect-job.ts",
+        "sha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2"
+      },
+      {
+        "path": "scripts/r2-intel-observe-environment.ts",
+        "sha256": "1100f875229b901f5a8b5fc32108afc593f4671f880461009d4e880142aa1d23"
+      },
+      {
+        "path": "scripts/r2-intel-observe-options.ts",
+        "sha256": "09b5e5f5b68879bf835d73b7b5b4b9c0064a09ca17049d0f3300c8900c53f5e8"
+      },
+      {
+        "path": "scripts/r2-intel-observe-worker.ts",
+        "sha256": "47dbb370b05c717feed2928a0afaf4236eb8fec7186bc5ae514b7ac4da4870f7"
+      },
+      {
+        "path": "scripts/r2-intel-observe.test.ts",
+        "sha256": "3e442d363e6a3b766199f102c6c47a18584a2b847f95497763086c5507a97066"
+      },
+      {
+        "path": "scripts/r2-intel-observe.ts",
+        "sha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224"
+      },
+      {
+        "path": "server/runtime/intel-observation-network.test.ts",
+        "sha256": "361168e5fb7339bde62a69f85d75400218e290967a88ae03f30b875ff3739e75"
+      },
+      {
+        "path": "server/runtime/intel-observation-network.ts",
+        "sha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006"
+      },
+      {
+        "path": "server/runtime/intel-observation.test.ts",
+        "sha256": "24212377dbefe7fbc6dbdf4286e19df6e5356d3bea4913123d835c353f002774"
+      },
+      {
+        "path": "server/runtime/intel-observation.ts",
+        "sha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019"
+      },
+      {
+        "path": "server/intel/sources/web-list.ts",
+        "sha256": "86f893311fb3c3d8c65256d1e6709acd547658b8cd3e71499900229ec26f75b5"
+      },
+      {
+        "path": "server/intel/sources/config-keys.ts",
+        "sha256": "2efbb61e1ab1e19bb349853a65a7b79bd080ab073420c28a645e56f95a8be620"
+      },
+      {
+        "path": "server/intel/sources/web-list-english-12h.test.ts",
+        "sha256": "c37a3b958a769a415b0775ce997198e1a42819c6652724e3f623306d02eff5b9"
+      },
+      {
+        "path": "server/intel/sources/html-index-candidates.ts",
+        "sha256": "64e674df2a6acd2f0cb6b3a51387a099c1052413de0ad984f481236533de2b3c"
+      },
+      {
+        "path": "server/services/article-fetch-security.ts",
+        "sha256": "967b106148c5d2dfcd6388b4602a4b9055d3732a9fa4a49d32c69aabb310d2a4"
+      },
+      {
+        "path": "server/intel/manual-checklist.ts",
+        "sha256": "b1802fe28a487ef9edecc95a976cee706f7903f4d24eeb43cf037d133a589329"
+      }
+    ]
+  },
+  "verifiedInputs": [
+    {
+      "path": "package.json",
+      "sha256": "32716b71ba5f3d807d141fb41373eacbedebc99fac727514dd59abb56e295196",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "scripts/tsx-alias-loader.mjs",
+      "sha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/runtime/intel-collect-job.ts",
+      "sha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-environment.ts",
+      "sha256": "1100f875229b901f5a8b5fc32108afc593f4671f880461009d4e880142aa1d23",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-options.ts",
+      "sha256": "09b5e5f5b68879bf835d73b7b5b4b9c0064a09ca17049d0f3300c8900c53f5e8",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-worker.ts",
+      "sha256": "47dbb370b05c717feed2928a0afaf4236eb8fec7186bc5ae514b7ac4da4870f7",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.test.ts",
+      "sha256": "3e442d363e6a3b766199f102c6c47a18584a2b847f95497763086c5507a97066",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.ts",
+      "sha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.test.ts",
+      "sha256": "361168e5fb7339bde62a69f85d75400218e290967a88ae03f30b875ff3739e75",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.ts",
+      "sha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/runtime/intel-observation.test.ts",
+      "sha256": "24212377dbefe7fbc6dbdf4286e19df6e5356d3bea4913123d835c353f002774",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/runtime/intel-observation.ts",
+      "sha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/intel/sources/web-list.ts",
+      "sha256": "86f893311fb3c3d8c65256d1e6709acd547658b8cd3e71499900229ec26f75b5",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/intel/sources/config-keys.ts",
+      "sha256": "2efbb61e1ab1e19bb349853a65a7b79bd080ab073420c28a645e56f95a8be620",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/intel/sources/web-list-english-12h.test.ts",
+      "sha256": "c37a3b958a769a415b0775ce997198e1a42819c6652724e3f623306d02eff5b9",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/intel/sources/html-index-candidates.ts",
+      "sha256": "64e674df2a6acd2f0cb6b3a51387a099c1052413de0ad984f481236533de2b3c",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/services/article-fetch-security.ts",
+      "sha256": "967b106148c5d2dfcd6388b4602a4b9055d3732a9fa4a49d32c69aabb310d2a4",
+      "rootMatches": true,
+      "candidateMatches": true
+    },
+    {
+      "path": "server/intel/manual-checklist.ts",
+      "sha256": "b1802fe28a487ef9edecc95a976cee706f7903f4d24eeb43cf037d133a589329",
+      "rootMatches": true,
+      "candidateMatches": true
+    }
+  ],
+  "protectedFiles": [
+    {
+      "path": ".data/calendarific-double-year-verification-20260908-b.sqlite3",
+      "sha256": "4029ff8075eb78dfa1a806d5d24f443514a12f8d9d15d38d92aef06a7e9a7c3d",
+      "unchanged": true
+    },
+    {
+      "path": ".data/calendarific-double-year-verification-20260908.sqlite3",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unchanged": true
+    },
+    {
+      "path": ".data/p7-final-seal-20260904.sqlite3",
+      "sha256": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+      "unchanged": true
+    },
+    {
+      "path": ".data/provider-secrets.json",
+      "sha256": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1",
+      "unchanged": true
+    },
+    {
+      "path": ".data/shipping-hot-v3-browser.sqlite3",
+      "sha256": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+      "unchanged": true
+    },
+    {
+      "path": ".data/shipping-hot-v3.sqlite3",
+      "sha256": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-https-abb1b99-20261019/run/.data/shipping-hot-v3.sqlite3",
+      "sha256": "023ef5c603ac2ff8282149ad0cd281911d96dbbffbe7ead0cd64dafeb370a025",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-manual-6087a16/run/.data/shipping-hot-v3.sqlite3",
+      "sha256": "c4292b3c18076d38838b1533d51b1f99c03b59b8d42a1de3818338eec4eb5d91",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/dist/output/server/index.mjs",
+      "sha256": "c55b32d9d6a69e31ec6e939f9791be3f2c62704c9704c6466e21af98e3d7c763",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/r2-four-reapplied-2026-10-15-private/MY-L01.response.bin",
+      "sha256": "9e9787d4cf60f454824a0529787b1d345a2814ac45f91a957ff1d8b57c1cb310",
+      "unchanged": true
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+      "sha256": "d7b70b273454925249610db514b21064551b130c6a5061398f9b457419d584eb",
+      "unchanged": true
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "5cb2122a9e9c62ceee2253251feeeb39bdae11fc8a0796dc33e8dfbfd875d67e",
+      "unchanged": true
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "68638a3267a597e7d4e16d336f5f56c8fca2ff657700b97605c0d2847dfb324c",
+      "unchanged": true
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "0729f86b64546824c66b248bb6679d120b0e18245fabffb3eb61c9f657c623d7",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/content.js",
+      "sha256": "12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/manifest.json",
+      "sha256": "8d2cc507bd632cbe95a740aee6a2f7801e3c07c079a787aa77b34dcbddae67e8",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/popup.html",
+      "sha256": "2d2bf242cf996d12ab286226bc55cf5c6668c3dc1d2d80054b06d80f4bad86b9",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/worker.js",
+      "sha256": "cd60d4fd354e043235a57ca67d808b6e008bac9369fab6ce436d5d7ac3291638",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-aVjAIvTt.css",
+      "sha256": "8a2411b56c91c16e429d97f0d5fe6de4556b718846ca7997d098bb3885dd68db",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-DHU7aOx9.js",
+      "sha256": "058f037b30b5b2c1953d2c196afa69906c5c40a487206178efb881e1910c8e56",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/defuddle-MIT.txt",
+      "sha256": "c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/obsidian-clipper-MIT.txt",
+      "sha256": "3ca04f8f046005103b08302723521f546605a34a269d5a867a82d200dfd9c0d7",
+      "unchanged": true
+    }
+  ],
+  "priorCode": [
+    {
+      "path": "package.json",
+      "sha256": "32716b71ba5f3d807d141fb41373eacbedebc99fac727514dd59abb56e295196",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/tsx-alias-loader.mjs",
+      "sha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-collect-job.ts",
+      "sha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-environment.ts",
+      "sha256": "1100f875229b901f5a8b5fc32108afc593f4671f880461009d4e880142aa1d23",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-options.ts",
+      "sha256": "09b5e5f5b68879bf835d73b7b5b4b9c0064a09ca17049d0f3300c8900c53f5e8",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-worker.ts",
+      "sha256": "47dbb370b05c717feed2928a0afaf4236eb8fec7186bc5ae514b7ac4da4870f7",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.test.ts",
+      "sha256": "3e442d363e6a3b766199f102c6c47a18584a2b847f95497763086c5507a97066",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.ts",
+      "sha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.test.ts",
+      "sha256": "361168e5fb7339bde62a69f85d75400218e290967a88ae03f30b875ff3739e75",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.ts",
+      "sha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation.test.ts",
+      "sha256": "24212377dbefe7fbc6dbdf4286e19df6e5356d3bea4913123d835c353f002774",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation.ts",
+      "sha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/web-list.ts",
+      "sha256": "86f893311fb3c3d8c65256d1e6709acd547658b8cd3e71499900229ec26f75b5",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/config-keys.ts",
+      "sha256": "2efbb61e1ab1e19bb349853a65a7b79bd080ab073420c28a645e56f95a8be620",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/web-list-english-12h.test.ts",
+      "sha256": "c37a3b958a769a415b0775ce997198e1a42819c6652724e3f623306d02eff5b9",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/html-index-candidates.ts",
+      "sha256": "64e674df2a6acd2f0cb6b3a51387a099c1052413de0ad984f481236533de2b3c",
+      "unchanged": true
+    },
+    {
+      "path": "server/services/article-fetch-security.ts",
+      "sha256": "967b106148c5d2dfcd6388b4602a4b9055d3732a9fa4a49d32c69aabb310d2a4",
+      "unchanged": true
+    }
+  ],
+  "clash": {
+    "at": "2026-10-20T03:02:07.284Z",
+    "readOnly": true,
+    "selectedProfileAndScriptResolved": true,
+    "selectedExtension": {
+      "role": "selected_subscription_extension",
+      "staticOnly": true,
+      "executed": false,
+      "modes": {},
+      "fakeIPFilterWriteFound": true,
+      "literalArrays": [
+        {
+          "literalCount": 27,
+          "otherElements": 1,
+          "exactHostOccurrences": {
+            "www.mofcom.gov.cn": 0,
+            "maritim.bmkg.go.id": 1
+          },
+          "orderedLiteralSha256": "2702b764f109b2984a83865e0f70fa71bd482b9ea0fdbd98dcb8494a9d7c9ff7"
+        }
+      ],
+      "referencedLiteralArrays": [],
+      "exactQuotedHostLiterals": {
+        "www.mofcom.gov.cn": false,
+        "maritim.bmkg.go.id": true
+      }
+    },
+    "globalExtension": {
+      "role": "global_extension",
+      "staticOnly": true,
+      "executed": false,
+      "modes": {},
+      "fakeIPFilterWriteFound": false,
+      "literalArrays": [],
+      "referencedLiteralArrays": [],
+      "exactQuotedHostLiterals": {
+        "www.mofcom.gov.cn": false,
+        "maritim.bmkg.go.id": false
+      }
+    },
+    "generated": {
+      "role": "clash-verge.yaml",
+      "dnsBlockFound": true,
+      "modes": {
+        "enhanced-mode": "fake-ip"
+      },
+      "filterModeExplicit": null,
+      "filterCount": 27,
+      "exactHostOccurrences": {
+        "www.mofcom.gov.cn": 0,
+        "maritim.bmkg.go.id": 1
+      },
+      "matchingLiteralPatternsCount": {
+        "www.mofcom.gov.cn": 0,
+        "maritim.bmkg.go.id": 1
+      },
+      "nonLiteralDomainRulesCount": 0,
+      "orderedSha256": "2702b764f109b2984a83865e0f70fa71bd482b9ea0fdbd98dcb8494a9d7c9ff7",
+      "historical27OrderedFingerprintMatches": true
+    },
+    "applicationBase": {
+      "role": "config.yaml",
+      "dnsBlockFound": false,
+      "modes": {},
+      "filterModeExplicit": null,
+      "filterCount": 0,
+      "exactHostOccurrences": {
+        "www.mofcom.gov.cn": 0,
+        "maritim.bmkg.go.id": 0
+      },
+      "matchingLiteralPatternsCount": {
+        "www.mofcom.gov.cn": 0,
+        "maritim.bmkg.go.id": 0
+      },
+      "nonLiteralDomainRulesCount": 0,
+      "orderedSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "historical27OrderedFingerprintMatches": false
+    },
+    "sourceDNS": 0,
+    "HTTP": 0,
+    "controllerRead": false,
+    "configurationWrites": 0,
+    "reloadOrCacheClear": false,
+    "runningCoreLoadedConfiguration": "NOT_VERIFIED_NO_CONTROLLER_REQUEST",
+    "files": [
+      {
+        "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\profiles.yaml",
+        "bytes": 2448,
+        "mtimeMs": 1792464226518.3877,
+        "sha256": "8d97e6b76e5deb60362d08ea689208efbab9415dadd05759105f6855f51e0252",
+        "unchangedBytesAndMtime": true
+      },
+      {
+        "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\profiles\\shf0fNvLCn9b.js",
+        "bytes": 1244,
+        "mtimeMs": 1792045673022.6233,
+        "sha256": "3e22727b5b239afb5f0ff6578c3923069a00da2ba9d96383d803bbb93cf1dbe1",
+        "unchangedBytesAndMtime": true
+      },
+      {
+        "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\profiles\\Script.js",
+        "bytes": 218,
+        "mtimeMs": 1788944349120.5496,
+        "sha256": "0f7be089d03ca3532b717b4634d3b464e3e2df93efc203e832c6c1d6deaeb3ea",
+        "unchangedBytesAndMtime": true
+      },
+      {
+        "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\clash-verge.yaml",
+        "bytes": 58374,
+        "mtimeMs": 1792464226745.701,
+        "sha256": "8c8a12cc069354a25c5f9641f02727ec97d0540705eff7514efc9b56f4aca9f3",
+        "unchangedBytesAndMtime": true
+      },
+      {
+        "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\config.yaml",
+        "bytes": 645,
+        "mtimeMs": 1789872310679.704,
+        "sha256": "e100c4561564cb769de90960d6b91e242da1502a62190b0e1f0f40b32d2d057e",
+        "unchangedBytesAndMtime": true
+      }
+    ]
+  },
+  "networkOperations": {
+    "sourceDNS": 0,
+    "sourceHTTP": 0,
+    "controllerHTTP": 0,
+    "configWrite": 0,
+    "reload": 0,
+    "cacheClear": 0
+  },
+  "qualification": {
+    "public": "25/39",
+    "information": "24/34",
+    "historicalNumeric": "3/5",
+    "r2": "BLOCKED"
+  },
+  "notRun": [
+    "real_browser_or_forum_retest",
+    "GUI_S7",
+    "extension_install_or_update",
+    "service_DB_plugin_change",
+    "24h_R3_paid",
+    "commit_push_PR_merge_deploy"
+  ],
+  "review": "PENDING_THIS_SLICE",
+  "cleanup": "none",
+  "finalAudit": {
+    "at": "2026-10-20T03:06:21.215Z",
+    "head": "40629587e22d8932df105962ec214530e4054414",
+    "productFiles": [
+      "server/intel/manual-checklist.ts"
+    ],
+    "onlyFocusStringChanged": true,
+    "selectedScriptInheritedSpreadVerified": true,
+    "priorSourceUnchanged": 17,
+    "protectedUnchanged": 22,
+    "clashFilesUnchanged": 5,
+    "docsLintRawExit": 0,
+    "inventoryRawExit": 0,
+    "markdownCount": 7771,
+    "invalidLinks": [],
+    "stagedFiles": [],
+    "workflowFiles": [
+      "shipping-hot-checks.yml"
+    ],
+    "status": "M .gitignore\n M docs/architecture.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/pilot-24h-proposal.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/report.md\n M docs/handoffs/r2-next-execution-2026-10-15.md\n M docs/intel-source-catalog.md\n M docs/status.md\n M package.json\n M scripts/tsx-alias-loader.mjs\n M server/intel/manual-checklist.ts\n M server/intel/sources/config-keys.ts\n M server/intel/sources/web-list.ts\n M server/runtime/intel-collect-job.ts\n?? docs/evidence/r2-clip-copy-clash-2026-10-20/\n?? docs/evidence/r2-closeout-offline-2026-10-20/\n?? docs/evidence/r2-cn-t01-https-2026-10-20/\n?? docs/evidence/r2-observation-env-repair-2026-10-19/\n?? docs/evidence/r2-observation-launcher-offline-2026-10-19/\n?? scripts/r2-intel-observe-environment.ts\n?? scripts/r2-intel-observe-options.ts\n?? scripts/r2-intel-observe-worker.ts\n?? scripts/r2-intel-observe.test.ts\n?? scripts/r2-intel-observe.ts\n?? server/intel/sources/web-list-english-12h.test.ts\n?? server/runtime/intel-observation-network.test.ts\n?? server/runtime/intel-observation-network.ts\n?? server/runtime/intel-observation.test.ts\n?? server/runtime/intel-observation.ts",
+    "cleanup": "none",
+    "path": ".tmp/r2-clip-copy-clash-20261020/final-audit.json",
+    "sha256": "ab021149369e3733c742adbfc8cfe7839df6b4af676a780f93ab163fc524e842"
+  }
+}

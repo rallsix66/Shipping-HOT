@@ -1,0 +1,90 @@
+{
+  "at": "2026-10-21T01:32:03.212Z",
+  "reason": "previous known PID62716 absent (ESRCH), exec session88802 unavailable, all local routes ECONNREFUSED; precise termination cause unrecorded",
+  "restored": true,
+  "url": "http://127.0.0.1:4489/feed",
+  "pid": 73356,
+  "execSessionId": 92781,
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020\\.tmp\\s7-r2-manual-ready-20261020",
+  "databasePath": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020\\.tmp\\s7-r2-manual-ready-20261020\\.data\\shipping-hot-v3.sqlite3",
+  "API": [
+    {
+      "route": "/feed",
+      "status": 200
+    },
+    {
+      "route": "/api/shipping",
+      "status": 200
+    },
+    {
+      "route": "/api/shipping/runtime",
+      "status": 200
+    },
+    {
+      "route": "/api/shipping/intel/manual",
+      "status": 200
+    },
+    {
+      "route": "/api/shipping/intel/items?limit=50&sourceId=intel%3Ath-w01",
+      "status": 200
+    },
+    {
+      "route": "/api/shipping/intel/items/da2263db-c12f-4aad-8f4a-d8d305d3a678",
+      "status": 200
+    }
+  ],
+  "runtimeRunning": false,
+  "beforeCounts": {
+    "ports": 0,
+    "feed_items": 0,
+    "intel_item": 1,
+    "intel_item_version": 1,
+    "intel_manual_action": 2,
+    "provider_usage": 0,
+    "provider_runtime": 0,
+    "sync_runs": 0,
+    "translation_cache": 0
+  },
+  "afterCounts": {
+    "ports": 0,
+    "feed_items": 0,
+    "intel_item": 1,
+    "intel_item_version": 1,
+    "intel_manual_action": 2,
+    "provider_usage": 0,
+    "provider_runtime": 0,
+    "sync_runs": 0,
+    "translation_cache": 0
+  },
+  "sourceEnabled": 0,
+  "totalSources": 42,
+  "translation": {
+    "enabled": false,
+    "monthlyBudget": 0
+  },
+  "record": {
+    "id": "da2263db-c12f-4aad-8f4a-d8d305d3a678",
+    "title": "【S7合成】人工交互材料，非官方内容",
+    "currentVersion": "49d91769-06c1-4512-9d4a-7bac6801dedb",
+    "versionCount": 1,
+    "publishedAt": null,
+    "containsSyntheticA": true,
+    "containsSyntheticB": false,
+    "auditOutcomes": [
+      "created",
+      "unchanged"
+    ]
+  },
+  "schemaVersion": 29,
+  "databaseIdentityUnchanged": true,
+  "normalStartupMetadata": "last_migration_at updated; no business row or audit change",
+  "manifestUnchanged": true,
+  "databaseSHA": "09ad00a4e3a8304f8146416fea1fd819f10977a5705b5a745059b1a641c531d6",
+  "outboundAttempts": 0,
+  "POSTs": 0,
+  "browserActions": 0,
+  "productionOr5173Operations": 0,
+  "reseed": false,
+  "stop": "write_stdin session_id92781 with literal stop followed by newline",
+  "GUIAcceptance": "pending user; no A-to-B acceptance inferred"
+}

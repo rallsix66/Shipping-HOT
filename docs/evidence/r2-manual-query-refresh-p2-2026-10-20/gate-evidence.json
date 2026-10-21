@@ -1,0 +1,170 @@
+{
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "branch": "codex/shipping-hot-r2",
+  "node": "24.15.0",
+  "ABI": 137,
+  "pnpm": "10.30.3",
+  "candidate": "D:\\try one\\Shipping HOT\\.tmp\\manual-query-p2-clean-20261020",
+  "versions": {
+    "reactQuery": "5.90.21",
+    "queryCore": "5.90.20"
+  },
+  "normalFrozenOfflineInstall": true,
+  "installScriptsEnabled": true,
+  "copiedNodeModules": false,
+  "copiedNativeModules": false,
+  "gates": [
+    {
+      "name": "install",
+      "artifact": "install",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\manual-query-p2-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "install",
+        "--frozen-lockfile",
+        "--offline"
+      ],
+      "startedAt": "2026-10-20T09:19:46.103Z",
+      "finishedAt": "2026-10-20T09:19:55.721Z",
+      "rawExit": 0,
+      "stdoutSHA": "182f62c7b71f7faa4e74c76e399ebcdba8419c083255540982665606f4130bcc",
+      "stderrSHA": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "targeted",
+      "artifact": "targeted-attempt2",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\manual-query-p2-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "exec",
+        "vitest",
+        "run",
+        "-c",
+        "vitest.config.ts",
+        "test/manual-intel.test.ts",
+        "server/intel/manual.test.ts",
+        "server/api/shipping/intel/manual-http.test.ts",
+        "test/clip-import.test.ts"
+      ],
+      "startedAt": "2026-10-20T09:20:35.538Z",
+      "finishedAt": "2026-10-20T09:20:39.761Z",
+      "rawExit": 0,
+      "stdoutSHA": "0a1a8a08118db6b021ec434ab9b61db4c85b726e10c2202eeb201c35f0db0dd2",
+      "stderrSHA": "447a17ca29e7e2b43454376c35e758d76d39ca8a2147484c35778fd1b797fa1b"
+    },
+    {
+      "name": "build",
+      "artifact": "build",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\manual-query-p2-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "build"
+      ],
+      "startedAt": "2026-10-20T09:20:39.763Z",
+      "finishedAt": "2026-10-20T09:21:23.524Z",
+      "rawExit": 0,
+      "stdoutSHA": "9d2c8096ef935eb85bcdb3eec005a3009ea9eb4045de7e0641943b83e3ba7051",
+      "stderrSHA": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658"
+    },
+    {
+      "name": "typecheck",
+      "artifact": "typecheck",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\manual-query-p2-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "typecheck"
+      ],
+      "startedAt": "2026-10-20T09:21:23.524Z",
+      "finishedAt": "2026-10-20T09:21:32.932Z",
+      "rawExit": 0,
+      "stdoutSHA": "6dbe47af6b9ed1351bd656d55389a1e7248a5ce61227c246f2777ba6c70aa141",
+      "stderrSHA": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "lint",
+      "artifact": "lint",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\manual-query-p2-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "lint"
+      ],
+      "startedAt": "2026-10-20T09:21:32.932Z",
+      "finishedAt": "2026-10-20T09:22:24.392Z",
+      "rawExit": 0,
+      "stdoutSHA": "c8dfc3abfe502f700c1230b5458cb8ffd14186c90f06f2a07c559a7f78851e13",
+      "stderrSHA": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "vitest",
+      "artifact": "vitest",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\manual-query-p2-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "exec",
+        "vitest",
+        "run",
+        "-c",
+        "vitest.config.ts"
+      ],
+      "startedAt": "2026-10-20T09:22:24.393Z",
+      "finishedAt": "2026-10-20T09:22:42.594Z",
+      "rawExit": 0,
+      "stdoutSHA": "6e8d46d2e087c25d7802c323d6cce15712a189b95a4363f27c496b1ef7378df9",
+      "stderrSHA": "100b27c7312512c5f68f4b53f17bacbb5b9a787579242467feb5f009c7f74b67"
+    }
+  ],
+  "red": {
+    "name": "targeted",
+    "artifact": "targeted",
+    "cwd": "D:\\try one\\Shipping HOT\\.tmp\\manual-query-p2-clean-20261020",
+    "args": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+      "exec",
+      "vitest",
+      "run",
+      "-c",
+      "vitest.config.ts",
+      "test/manual-intel.test.ts",
+      "server/intel/manual.test.ts",
+      "server/api/shipping/intel/manual-http.test.ts",
+      "test/clip-import.test.ts"
+    ],
+    "startedAt": "2026-10-20T09:19:55.723Z",
+    "finishedAt": "2026-10-20T09:20:00.035Z",
+    "rawExit": 1,
+    "tests": {
+      "passed": 48,
+      "failed": 3
+    },
+    "failureKeys": [
+      "intel-manual",
+      "intel-items",
+      "intel-item"
+    ],
+    "passedContractAndPostRetryTests": true,
+    "stdoutSHA": "6504eb7cf7460dbe938db271f2b5f7646b0f3e156f9824d42cfa74243195848a",
+    "stderrSHA": "2a1a16b06121d5f4841312c67768e172b01825b5137d1686a45eae1d76d1414d"
+  },
+  "green": {
+    "targeted": 51,
+    "files": 4,
+    "full": 1794,
+    "skipped": 3,
+    "fullFiles": 147
+  },
+  "sourceNetworkRequests": 0,
+  "applicationServerStarted": false,
+  "browserStarted": false,
+  "GUI": "NOT_RUN",
+  "S7Acceptance": "pending parent review; not accepted by this P2 task",
+  "newDependencies": false,
+  "newSchema": false,
+  "newAPI": false
+}
