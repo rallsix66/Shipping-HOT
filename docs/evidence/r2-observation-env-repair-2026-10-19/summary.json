@@ -1,0 +1,457 @@
+{
+  "generatedAt": "2026-10-19T10:11:43.750Z",
+  "workspace": "D:\\try one\\Shipping HOT",
+  "branch": "codex/shipping-hot-r2",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "uncommittedCandidate": true,
+  "incrementalProductionFiles": [
+    "scripts/r2-intel-observe-environment.ts",
+    "scripts/r2-intel-observe-options.ts",
+    "scripts/r2-intel-observe-worker.ts"
+  ],
+  "incrementalTestFiles": [
+    "scripts/r2-intel-observe.test.ts"
+  ],
+  "sourceProof": [
+    {
+      "file": "package.json",
+      "sha256": "32716b71ba5f3d807d141fb41373eacbedebc99fac727514dd59abb56e295196",
+      "gateSha256": "32716b71ba5f3d807d141fb41373eacbedebc99fac727514dd59abb56e295196"
+    },
+    {
+      "file": "scripts/tsx-alias-loader.mjs",
+      "sha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+      "gateSha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d"
+    },
+    {
+      "file": "server/runtime/intel-collect-job.ts",
+      "sha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2",
+      "gateSha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2"
+    },
+    {
+      "file": "server/runtime/intel-observation.ts",
+      "sha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019",
+      "gateSha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019"
+    },
+    {
+      "file": "server/runtime/intel-observation-network.ts",
+      "sha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006",
+      "gateSha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006"
+    },
+    {
+      "file": "server/runtime/intel-observation.test.ts",
+      "sha256": "24212377dbefe7fbc6dbdf4286e19df6e5356d3bea4913123d835c353f002774",
+      "gateSha256": "24212377dbefe7fbc6dbdf4286e19df6e5356d3bea4913123d835c353f002774"
+    },
+    {
+      "file": "server/runtime/intel-observation-network.test.ts",
+      "sha256": "361168e5fb7339bde62a69f85d75400218e290967a88ae03f30b875ff3739e75",
+      "gateSha256": "361168e5fb7339bde62a69f85d75400218e290967a88ae03f30b875ff3739e75"
+    },
+    {
+      "file": "scripts/r2-intel-observe.ts",
+      "sha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224",
+      "gateSha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224"
+    },
+    {
+      "file": "scripts/r2-intel-observe-options.ts",
+      "sha256": "09b5e5f5b68879bf835d73b7b5b4b9c0064a09ca17049d0f3300c8900c53f5e8",
+      "gateSha256": "09b5e5f5b68879bf835d73b7b5b4b9c0064a09ca17049d0f3300c8900c53f5e8"
+    },
+    {
+      "file": "scripts/r2-intel-observe-worker.ts",
+      "sha256": "47dbb370b05c717feed2928a0afaf4236eb8fec7186bc5ae514b7ac4da4870f7",
+      "gateSha256": "47dbb370b05c717feed2928a0afaf4236eb8fec7186bc5ae514b7ac4da4870f7"
+    },
+    {
+      "file": "scripts/r2-intel-observe.test.ts",
+      "sha256": "3e442d363e6a3b766199f102c6c47a18584a2b847f95497763086c5507a97066",
+      "gateSha256": "3e442d363e6a3b766199f102c6c47a18584a2b847f95497763086c5507a97066"
+    },
+    {
+      "file": "scripts/r2-intel-observe-environment.ts",
+      "sha256": "1100f875229b901f5a8b5fc32108afc593f4671f880461009d4e880142aa1d23",
+      "gateSha256": "1100f875229b901f5a8b5fc32108afc593f4671f880461009d4e880142aa1d23"
+    }
+  ],
+  "coreProof": [
+    {
+      "file": "server/runtime/intel-observation-network.ts",
+      "sha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006",
+      "unchangedFromInitialCandidate": true
+    },
+    {
+      "file": "server/runtime/intel-observation.ts",
+      "sha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019",
+      "unchangedFromInitialCandidate": true
+    },
+    {
+      "file": "server/runtime/intel-collect-job.ts",
+      "sha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2",
+      "unchangedFromInitialCandidate": true
+    },
+    {
+      "file": "scripts/tsx-alias-loader.mjs",
+      "sha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+      "unchangedFromInitialCandidate": true
+    }
+  ],
+  "configurationLookupProof": [
+    {
+      "file": "tsconfig.json",
+      "role": "pinned runtime loader config; same as former default",
+      "gateSha256": "79ee11611bace48df98fde1947a7a9858f4bf503ad8e94270aaccc27a29fbeeb",
+      "rootSha256": "79ee11611bace48df98fde1947a7a9858f4bf503ad8e94270aaccc27a29fbeeb",
+      "contentMatchesHead": true
+    },
+    {
+      "file": "tsconfig.node.json",
+      "role": "unchanged typecheck/project support config",
+      "gateSha256": "c074fca66be697a18cce157ff7f7ad9e4fba0e1b871a7f8e464ff12c3508b2b2",
+      "rootSha256": "c074fca66be697a18cce157ff7f7ad9e4fba0e1b871a7f8e464ff12c3508b2b2",
+      "contentMatchesHead": true
+    },
+    {
+      "file": "tsconfig.base.json",
+      "role": "unchanged typecheck/project support config",
+      "gateSha256": "dd96ebba055796c065666eee254a2a782c06150c7ce58fc12fa5b295b6e8fddf",
+      "rootSha256": "dd96ebba055796c065666eee254a2a782c06150c7ce58fc12fa5b295b6e8fddf",
+      "contentMatchesHead": true
+    }
+  ],
+  "gate": {
+    "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+    "install": "reused previously clean normal install; offline frozen revalidation with normal prepare scripts",
+    "node": "v24.15.0",
+    "abi": "137",
+    "pnpm": "10.30.3",
+    "checks": [
+      {
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+        "command": "pnpm install --frozen-lockfile --offline",
+        "rawExit": 0,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-env-repair-20261019\\install-offline-approved.log",
+        "sha256": "3b3da505d1f8c7c294191458d3fa5f7cf3d3a59cd8780c1795c50277a458185c"
+      },
+      {
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+        "command": "pnpm build",
+        "rawExit": 0,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-env-repair-20261019\\build-final-config.log",
+        "sha256": "2a70556415137125337921a40140ea2e70614598cd38e1793a0cd99e71eb1bc0"
+      },
+      {
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+        "command": "pnpm typecheck",
+        "rawExit": 0,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-env-repair-20261019\\typecheck-final-config.log",
+        "sha256": "67de922ab555b19c33b17ea59976a41ab661b503bd90bb8d0c9d051d0dc0d3fd"
+      },
+      {
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+        "command": "pnpm lint",
+        "rawExit": 0,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-env-repair-20261019\\lint-final-config.log",
+        "sha256": "0b8f46fe08d362a4474626a501bbb837e60b5f8107d80b3a9c59982d69aa3e68"
+      },
+      {
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+        "command": "pnpm exec vitest run -c vitest.config.ts",
+        "rawExit": 0,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-env-repair-20261019\\vitest-final-config.log",
+        "sha256": "b5587e26983d63b1ef79e8ab8ccd0ac416dced62c2413ddf94f203529357978c"
+      },
+      {
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+        "command": "pnpm exec vitest run -c vitest.config.ts scripts/r2-intel-observe.test.ts server/runtime/intel-observation-network.test.ts server/runtime/intel-observation.test.ts",
+        "rawExit": 0,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-env-repair-20261019\\related-final-config.log",
+        "sha256": "05a2531290f19779bb5ba288277f63a2374798b1270d0bfc2ed24de957983e0b"
+      }
+    ],
+    "related": {
+      "files": 3,
+      "passed": 67,
+      "newCases": 28,
+      "sensitiveNegatives": 25
+    },
+    "full": {
+      "files": 142,
+      "passed": 1629,
+      "skipped": 3,
+      "skips": "pre-existing scripts/r1-migration-copy-guard.test.ts Windows skips"
+    }
+  },
+  "actualCli": {
+    "state": "PASS",
+    "command": "pnpm observe:intel --execute --run-id env-fixed-config-c1094551-9538-4d7e-b5ab-25e6f131aa00 --sources 'TH-W01,ID-W01' --duration-ms 10000 --max-http-requests 0",
+    "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+    "rawExit": 2,
+    "runId": "env-fixed-config-c1094551-9538-4d7e-b5ab-25e6f131aa00",
+    "runDir": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019\\.tmp\\r2-intel-observe-env-fixed-config-c1094551-9538-4d7e-b5ab-25e6f131aa00",
+    "resultPath": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019\\.tmp\\r2-intel-observe-env-fixed-config-c1094551-9538-4d7e-b5ab-25e6f131aa00\\result.json",
+    "resultSha256": "59f4af54d2954745aef665a481a2c2c7c7ff12ef23dba9a18f80fe620becf7d1",
+    "manifestPath": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019\\.tmp\\r2-intel-observe-env-fixed-config-c1094551-9538-4d7e-b5ab-25e6f131aa00\\manifest.json",
+    "manifestSha256": "2ff3c981b2c3e67a06cfe10b4ed83b07964eb4a8c9ffffe3ef7e7f28a13069de",
+    "conditions": {
+      "expectedExit": true,
+      "reason": true,
+      "zeroHttp": true,
+      "zeroDns": true,
+      "zeroReservations": true,
+      "workerCwd": true,
+      "onlyJob": true,
+      "home": true,
+      "modulePaths": true,
+      "homedir": true,
+      "tsxConfig": true,
+      "emptyHome": true,
+      "ownershipReleased": true,
+      "reopen": true,
+      "zeroBusiness": true,
+      "zeroPaid": true,
+      "noSecretFile": true,
+      "protectedFiles": true
+    },
+    "environmentIsolation": {
+      "home": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019\\.tmp\\r2-intel-observe-env-fixed-config-c1094551-9538-4d7e-b5ab-25e6f131aa00\\.home",
+      "discardedWindowsKeys": [
+        "HOMEDRIVE",
+        "HOMEPATH",
+        "SYSTEMDRIVE",
+        "USERDOMAIN",
+        "USERNAME",
+        "USERPROFILE"
+      ],
+      "tsconfigPath": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019\\tsconfig.json",
+      "userConfigCopied": false,
+      "moduleGlobalPaths": [],
+      "homedirMatches": true,
+      "gitConfig": "repository-only; system/global config disabled"
+    },
+    "runtimeSourceProof": [
+      {
+        "file": "scripts/r2-intel-observe.ts",
+        "sha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224",
+        "gateCurrentSha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224",
+        "matches": true
+      },
+      {
+        "file": "scripts/r2-intel-observe-options.ts",
+        "sha256": "09b5e5f5b68879bf835d73b7b5b4b9c0064a09ca17049d0f3300c8900c53f5e8",
+        "gateCurrentSha256": "09b5e5f5b68879bf835d73b7b5b4b9c0064a09ca17049d0f3300c8900c53f5e8",
+        "matches": true
+      },
+      {
+        "file": "scripts/r2-intel-observe-environment.ts",
+        "sha256": "1100f875229b901f5a8b5fc32108afc593f4671f880461009d4e880142aa1d23",
+        "gateCurrentSha256": "1100f875229b901f5a8b5fc32108afc593f4671f880461009d4e880142aa1d23",
+        "matches": true
+      },
+      {
+        "file": "scripts/r2-intel-observe-worker.ts",
+        "sha256": "47dbb370b05c717feed2928a0afaf4236eb8fec7186bc5ae514b7ac4da4870f7",
+        "gateCurrentSha256": "47dbb370b05c717feed2928a0afaf4236eb8fec7186bc5ae514b7ac4da4870f7",
+        "matches": true
+      },
+      {
+        "file": "scripts/tsx-alias-loader.mjs",
+        "sha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+        "gateCurrentSha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+        "matches": true
+      },
+      {
+        "file": "server/runtime/intel-observation.ts",
+        "sha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019",
+        "gateCurrentSha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019",
+        "matches": true
+      },
+      {
+        "file": "server/runtime/intel-observation-network.ts",
+        "sha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006",
+        "gateCurrentSha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006",
+        "matches": true
+      },
+      {
+        "file": "server/runtime/intel-collect-job.ts",
+        "sha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2",
+        "gateCurrentSha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2",
+        "matches": true
+      },
+      {
+        "file": "server/runtime/intel-production.ts",
+        "sha256": "2f47ed77e332964539da1d16c377dfdff940dc4b3e552557e9bee1249cf9e9e9",
+        "gateCurrentSha256": "2f47ed77e332964539da1d16c377dfdff940dc4b3e552557e9bee1249cf9e9e9",
+        "matches": true
+      },
+      {
+        "file": "server/runtime/bootstrap.ts",
+        "sha256": "bf60fe5e79ca4df548bc812425b24dabc74d55ef8d617a34471ee89508117e93",
+        "gateCurrentSha256": "bf60fe5e79ca4df548bc812425b24dabc74d55ef8d617a34471ee89508117e93",
+        "matches": true
+      },
+      {
+        "file": "server/runtime/background-runtime.ts",
+        "sha256": "a85169f572066d64f9cc5688d51a5c294a27a23cb1fe5f6faa6bede326464f39",
+        "gateCurrentSha256": "a85169f572066d64f9cc5688d51a5c294a27a23cb1fe5f6faa6bede326464f39",
+        "matches": true
+      },
+      {
+        "file": "server/services/article-fetch-security.ts",
+        "sha256": "f388e83391526a05b01d1e40f1070b8285f3f895608403b212a8c34171741fa2",
+        "gateCurrentSha256": "f388e83391526a05b01d1e40f1070b8285f3f895608403b212a8c34171741fa2",
+        "matches": true
+      },
+      {
+        "file": "server/intel/collect.ts",
+        "sha256": "9cfd9c44e9e9b70b48c2a1271380e5bd30028766c568f8d8f257a52a5df6e8c2",
+        "gateCurrentSha256": "9cfd9c44e9e9b70b48c2a1271380e5bd30028766c568f8d8f257a52a5df6e8c2",
+        "matches": true
+      },
+      {
+        "file": "server/intel/sources.ts",
+        "sha256": "5873295dfe5557664babcadf0826032439a8cac0a7ef4953df02d31c1c3e148b",
+        "gateCurrentSha256": "5873295dfe5557664babcadf0826032439a8cac0a7ef4953df02d31c1c3e148b",
+        "matches": true
+      }
+    ],
+    "result": {
+      "reason": "http_budget",
+      "elapsedMs": 128,
+      "reservations": 0,
+      "httpRequests": 0,
+      "dnsRequests": 0,
+      "readOnlyReopen": true,
+      "ownershipReleased": true
+    },
+    "copyResultSha256": "59f4af54d2954745aef665a481a2c2c7c7ff12ef23dba9a18f80fe620becf7d1"
+  },
+  "protectedProof": [
+    {
+      "path": "D:\\try one\\Shipping HOT\\.data\\calendarific-double-year-verification-20260908-b.sqlite3",
+      "sha256Before": "4029ff8075eb78dfa1a806d5d24f443514a12f8d9d15d38d92aef06a7e9a7c3d",
+      "sha256After": "4029ff8075eb78dfa1a806d5d24f443514a12f8d9d15d38d92aef06a7e9a7c3d",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\try one\\Shipping HOT\\.data\\calendarific-double-year-verification-20260908.sqlite3",
+      "sha256Before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256After": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\try one\\Shipping HOT\\.data\\p7-final-seal-20260904.sqlite3",
+      "sha256Before": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+      "sha256After": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\try one\\Shipping HOT\\.data\\provider-secrets.json",
+      "sha256Before": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1",
+      "sha256After": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\try one\\Shipping HOT\\.data\\shipping-hot-v3-browser.sqlite3",
+      "sha256Before": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+      "sha256After": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\try one\\Shipping HOT\\.data\\shipping-hot-v3.sqlite3",
+      "sha256Before": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+      "sha256After": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\try one\\Shipping HOT\\.tmp\\clipper-https-abb1b99-20261019\\run\\.data\\shipping-hot-v3.sqlite3",
+      "sha256Before": "023ef5c603ac2ff8282149ad0cd281911d96dbbffbe7ead0cd64dafeb370a025",
+      "sha256After": "023ef5c603ac2ff8282149ad0cd281911d96dbbffbe7ead0cd64dafeb370a025",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-6087a16\\run\\.data\\shipping-hot-v3.sqlite3",
+      "sha256Before": "c4292b3c18076d38838b1533d51b1f99c03b59b8d42a1de3818338eec4eb5d91",
+      "sha256After": "c4292b3c18076d38838b1533d51b1f99c03b59b8d42a1de3818338eec4eb5d91",
+      "unchanged": true
+    }
+  ],
+  "pluginProof": [
+    {
+      "name": "content.js",
+      "unchanged": true
+    },
+    {
+      "name": "manifest.json",
+      "unchanged": true
+    },
+    {
+      "name": "popup.html",
+      "unchanged": true
+    },
+    {
+      "name": "worker.js",
+      "unchanged": true
+    }
+  ],
+  "retainedFailures": [
+    "original real execute child_environment_invalid (old raw directory retained)",
+    "PowerShell comma argument quoting rejection",
+    "targeted-1.log: user-global Git ownership dependency plus typecheck-1.log typing errors",
+    "install-offline.log: sandbox pnpm store/no-TTY abort; offline same installer identity succeeded separately",
+    "vitest-clean.log:1628 passed/1 default5s subprocess-test timeout/3 existing skips; only new case timeout raised to20s with15s process bound unchanged"
+  ],
+  "neatFreak": {
+    "skill": "<USERPROFILE>/.codex/skills/neat-freak/SKILL.md",
+    "inventoryExit": 0,
+    "enumeratedMarkdown": 7276,
+    "cleanup": "retained, none deleted",
+    "linksChecked": 8,
+    "brokenLinks": 0,
+    "sourceTodos": 0,
+    "statusOriginalPreserved": true,
+    "gitignorePreserved": true,
+    "trackedSensitive": [
+      "test/__fixtures__/source-ca-test.pem"
+    ]
+  },
+  "parentAcceptance": "pending",
+  "scope": {
+    "businessDns": 0,
+    "businessHttp": 0,
+    "positiveBudgetObservation": "NOT_RUN",
+    "realCaptures": 0,
+    "paidCalls": 0,
+    "gui": "NOT_RUN",
+    "continuous24h": "NOT_RUN",
+    "commit": false,
+    "push": false,
+    "deploy": false
+  },
+  "r2": {
+    "state": "BLOCKED",
+    "public": "25/39",
+    "fields": "24/34",
+    "historicalNumeric": "3/5",
+    "r2_6": "inherited limited PASS at aea56e72"
+  },
+  "finalizedAt": "2026-10-19T10:17:50.948Z",
+  "interimZeroCliPreserved": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-env-repair-20261019\\actual-cli-acceptance.json",
+  "configurationInspection": {
+    "formerDefaultConfigPath": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019\\tsconfig.json",
+    "compilerOptions": {},
+    "pinnedSameProjectEntry": true
+  },
+  "incrementalDiff": {
+    "production": {
+      "path": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-env-repair-20261019\\production-incremental.diff",
+      "sha256": "06fd708a651058eff7a2ad2d0d131e5e4976c14db6aa21cd38d96a904b0e8758",
+      "bytes": 11761
+    },
+    "tests": {
+      "path": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-env-repair-20261019\\tests-incremental.diff",
+      "sha256": "e8c3df04a2a3b790d6817d1ad5be10560fb5f555f61169948642b25bb29806f5"
+    }
+  },
+  "finalGitStatus": " M .gitignore\n M docs/architecture.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/pilot-24h-proposal.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/report.md\n M docs/handoffs/r2-next-execution-2026-10-15.md\n M docs/status.md\n M package.json\n M scripts/tsx-alias-loader.mjs\n M server/runtime/intel-collect-job.ts\n?? docs/evidence/r2-observation-env-repair-2026-10-19/\n?? docs/evidence/r2-observation-launcher-offline-2026-10-19/\n?? scripts/r2-intel-observe-environment.ts\n?? scripts/r2-intel-observe-options.ts\n?? scripts/r2-intel-observe-worker.ts\n?? scripts/r2-intel-observe.test.ts\n?? scripts/r2-intel-observe.ts\n?? server/runtime/intel-observation-network.test.ts\n?? server/runtime/intel-observation-network.ts\n?? server/runtime/intel-observation.test.ts\n?? server/runtime/intel-observation.ts\n"
+}

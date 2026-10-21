@@ -1,0 +1,579 @@
+{
+  "at": "2026-10-20T03:39:53.792Z",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "root": "D:\\try one\\Shipping HOT",
+  "scope": "one_XJ001_sample_contract_and_design_only",
+  "capture": {
+    "target": "https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json",
+    "startedAt": "2026-10-20T03:33:54.513Z",
+    "DNS": 1,
+    "HTTPReservations": 1,
+    "transportInvocations": 1,
+    "addresses": [
+      {
+        "address": "104.20.20.136",
+        "family": 4,
+        "blocked": false
+      },
+      {
+        "address": "172.66.159.70",
+        "family": 4,
+        "blocked": false
+      }
+    ],
+    "response": {
+      "status": 200,
+      "contentType": "application/json",
+      "location": null,
+      "bytes": 11259,
+      "sha256": "3af2b483aeb5623312ae86fbef5d63ca31ec6653e10b2ac24bfaa6213da98ba1",
+      "receivedAt": "2026-10-20T03:33:55.108Z"
+    },
+    "underlyingError": null,
+    "finishedAt": "2026-10-20T03:33:55.114Z",
+    "result": {
+      "ok": true,
+      "status": 200,
+      "finalUrl": "https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json",
+      "contentType": "application/json",
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "default",
+        "declarations": [],
+        "conflict": false,
+        "byteLength": 11259
+      },
+      "hops": 0
+    },
+    "retries": 0,
+    "otherProductRequests": 0,
+    "paidCalls": 0,
+    "rawRedistributed": false
+  },
+  "rawExit": 0,
+  "captureLog": {
+    "path": ".tmp/id-w02-xj001-20261020/capture.log",
+    "sha256": "082621d88362255811a8daaccbb061303a15c08a6db2c4fd62e4ac13b17479f1"
+  },
+  "rawPrivateOnly": ".tmp/id-w02-xj001-20261020/response.bin",
+  "contractAudit": {
+    "at": "2026-10-20T03:35:39.628Z",
+    "sourceURL": "https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json",
+    "sourceSha256": "3af2b483aeb5623312ae86fbef5d63ca31ec6653e10b2ac24bfaa6213da98ba1",
+    "sourceBytes": 11259,
+    "topLevelKeys": [
+      "code",
+      "name",
+      "issued",
+      "valid_from",
+      "valid_to",
+      "forecast_day1",
+      "forecast_day2-4"
+    ],
+    "identity": {
+      "code": "XJ001",
+      "name": "Pelabuhan Tanjung Priok",
+      "exactIndexMatch": true,
+      "indexProvince": "DK Jakarta",
+      "indexCoordinates": {
+        "lat": -6.103879776,
+        "lon": 106.882294878
+      },
+      "payloadCoordinatesPresent": false,
+      "coordinateVerdict": "NOT_COMPARABLE_PRODUCT_OMITS_COORDINATES; index location retained separately; project coordinates unchanged"
+    },
+    "time": {
+      "issuedRaw": "2026-10-19 12:00 UTC",
+      "issuedISO": "2026-10-19T12:00:00.000Z",
+      "updatedFieldPresent": false,
+      "validFromRaw": "2026-10-20 00:00 UTC",
+      "validToRaw": "2026-10-23 00:00 UTC",
+      "validFromISO": "2026-10-20T00:00:00.000Z",
+      "validToISO": "2026-10-23T00:00:00.000Z",
+      "declaredSpanHours": 72,
+      "issuedAgeHoursAtFetch": 15.565307777777777,
+      "fetchWithinDeclaredValidity": true,
+      "remainingValidityHoursAtFetch": 68.43469222222222,
+      "firstToLastHours": 72,
+      "futurePoints": 37,
+      "pastPoints": 4,
+      "groupStats": [
+        {
+          "key": "forecast_day1",
+          "count": 24,
+          "firstRaw": "2026-10-20 00:00 UTC",
+          "lastRaw": "2026-10-20 23:00 UTC",
+          "firstISO": "2026-10-20T00:00:00.000Z",
+          "lastISO": "2026-10-20T23:00:00.000Z",
+          "intervalMinutes": [
+            60
+          ],
+          "strictlyAscending": true
+        },
+        {
+          "key": "forecast_day2-4",
+          "count": 17,
+          "firstRaw": "2026-10-21 00:00 UTC",
+          "lastRaw": "2026-10-23 00:00 UTC",
+          "firstISO": "2026-10-21T00:00:00.000Z",
+          "lastISO": "2026-10-23T00:00:00.000Z",
+          "intervalMinutes": [
+            180
+          ],
+          "strictlyAscending": true
+        }
+      ],
+      "allTimesExplicitUTC": true,
+      "issuedIsNotFetchedAtOrValidTime": true,
+      "noNewFreshnessSLA": true
+    },
+    "rowCount": 41,
+    "rowKeys": [
+      "time",
+      "weather",
+      "visibility",
+      "temp_avg",
+      "rh_avg",
+      "wind_from",
+      "wind_speed",
+      "wind_gust",
+      "wave_cat",
+      "wave_height",
+      "current_to",
+      "current_speed",
+      "tides"
+    ],
+    "numericStats": {
+      "visibility": {
+        "observedTypes": [
+          "number"
+        ],
+        "missing": 0,
+        "nulls": 0,
+        "finite": 41,
+        "min": 7,
+        "max": 10
+      },
+      "temp_avg": {
+        "observedTypes": [
+          "number"
+        ],
+        "missing": 0,
+        "nulls": 0,
+        "finite": 41,
+        "min": 27,
+        "max": 30
+      },
+      "rh_avg": {
+        "observedTypes": [
+          "number"
+        ],
+        "missing": 0,
+        "nulls": 0,
+        "finite": 41,
+        "min": 66,
+        "max": 83
+      },
+      "wind_speed": {
+        "observedTypes": [
+          "number"
+        ],
+        "missing": 0,
+        "nulls": 0,
+        "finite": 41,
+        "min": 1,
+        "max": 9
+      },
+      "wind_gust": {
+        "observedTypes": [
+          "number"
+        ],
+        "missing": 0,
+        "nulls": 0,
+        "finite": 41,
+        "min": 4,
+        "max": 18
+      },
+      "wave_height": {
+        "observedTypes": [
+          "number"
+        ],
+        "missing": 0,
+        "nulls": 0,
+        "finite": 41,
+        "min": 0.1,
+        "max": 0.3
+      },
+      "current_speed": {
+        "observedTypes": [
+          "number"
+        ],
+        "missing": 0,
+        "nulls": 0,
+        "finite": 41,
+        "min": 0.59,
+        "max": 0.8
+      },
+      "tides": {
+        "observedTypes": [
+          "number"
+        ],
+        "missing": 0,
+        "nulls": 0,
+        "finite": 41,
+        "min": -0.52,
+        "max": 0.22
+      }
+    },
+    "stringCategories": {
+      "weather": [
+        "Berawan Tebal",
+        "Cerah Berawan",
+        "Cerah",
+        "Berawan"
+      ],
+      "wind_from": [
+        "Tenggara",
+        "Utara",
+        "Timur Laut",
+        "Selatan",
+        "Timur",
+        "Barat Daya"
+      ],
+      "wave_cat": [
+        "Tenang"
+      ],
+      "current_to": [
+        "Barat",
+        "Selatan",
+        "Tenggara",
+        "Timur",
+        "Timur Laut",
+        "Utara",
+        "Barat Laut",
+        "Barat Daya"
+      ]
+    },
+    "qualityCodeFieldSeen": false,
+    "nullCount": 0,
+    "anomalies": {
+      "duplicateTimes": 0,
+      "nonascending": 0,
+      "outsideDeclaredBounds": 0,
+      "negativeNonnegativeFields": [],
+      "humidityOutside0To100": 0,
+      "gustBelowWind": 0
+    },
+    "unitBasis": "previous local official apidoc UTC/unit evidence; actual payload has no unit metadata",
+    "payloadUnitFieldsPresent": false,
+    "coverage": {
+      "onePortOnly": true,
+      "points": 41,
+      "day1Hourly": true,
+      "day2To4ThreeHourly": true,
+      "sevenDayHourly": false,
+      "precipitationMmPresent": false,
+      "swellSeparatePresent": false,
+      "officialWarningOrOperationalImpact": false
+    },
+    "classification": "numeric_weather_not_information_feed",
+    "qualificationChanged": false
+  },
+  "codeNameVerifiedForThisResponse": true,
+  "integrationVerified": false,
+  "protectedFiles": [
+    {
+      "path": ".data/calendarific-double-year-verification-20260908-b.sqlite3",
+      "sha256": "4029ff8075eb78dfa1a806d5d24f443514a12f8d9d15d38d92aef06a7e9a7c3d",
+      "unchanged": true
+    },
+    {
+      "path": ".data/calendarific-double-year-verification-20260908.sqlite3",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unchanged": true
+    },
+    {
+      "path": ".data/p7-final-seal-20260904.sqlite3",
+      "sha256": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+      "unchanged": true
+    },
+    {
+      "path": ".data/provider-secrets.json",
+      "sha256": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1",
+      "unchanged": true
+    },
+    {
+      "path": ".data/shipping-hot-v3-browser.sqlite3",
+      "sha256": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+      "unchanged": true
+    },
+    {
+      "path": ".data/shipping-hot-v3.sqlite3",
+      "sha256": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-https-abb1b99-20261019/run/.data/shipping-hot-v3.sqlite3",
+      "sha256": "023ef5c603ac2ff8282149ad0cd281911d96dbbffbe7ead0cd64dafeb370a025",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-manual-6087a16/run/.data/shipping-hot-v3.sqlite3",
+      "sha256": "c4292b3c18076d38838b1533d51b1f99c03b59b8d42a1de3818338eec4eb5d91",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/dist/output/server/index.mjs",
+      "sha256": "c55b32d9d6a69e31ec6e939f9791be3f2c62704c9704c6466e21af98e3d7c763",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/r2-four-reapplied-2026-10-15-private/MY-L01.response.bin",
+      "sha256": "9e9787d4cf60f454824a0529787b1d345a2814ac45f91a957ff1d8b57c1cb310",
+      "unchanged": true
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+      "sha256": "d7b70b273454925249610db514b21064551b130c6a5061398f9b457419d584eb",
+      "unchanged": true
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "5cb2122a9e9c62ceee2253251feeeb39bdae11fc8a0796dc33e8dfbfd875d67e",
+      "unchanged": true
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "68638a3267a597e7d4e16d336f5f56c8fca2ff657700b97605c0d2847dfb324c",
+      "unchanged": true
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "0729f86b64546824c66b248bb6679d120b0e18245fabffb3eb61c9f657c623d7",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/content.js",
+      "sha256": "12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/manifest.json",
+      "sha256": "8d2cc507bd632cbe95a740aee6a2f7801e3c07c079a787aa77b34dcbddae67e8",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/popup.html",
+      "sha256": "2d2bf242cf996d12ab286226bc55cf5c6668c3dc1d2d80054b06d80f4bad86b9",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/worker.js",
+      "sha256": "cd60d4fd354e043235a57ca67d808b6e008bac9369fab6ce436d5d7ac3291638",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-aVjAIvTt.css",
+      "sha256": "8a2411b56c91c16e429d97f0d5fe6de4556b718846ca7997d098bb3885dd68db",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-DHU7aOx9.js",
+      "sha256": "058f037b30b5b2c1953d2c196afa69906c5c40a487206178efb881e1910c8e56",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/defuddle-MIT.txt",
+      "sha256": "c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/obsidian-clipper-MIT.txt",
+      "sha256": "3ca04f8f046005103b08302723521f546605a34a269d5a867a82d200dfd9c0d7",
+      "unchanged": true
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "package.json",
+      "sha256": "32716b71ba5f3d807d141fb41373eacbedebc99fac727514dd59abb56e295196",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/tsx-alias-loader.mjs",
+      "sha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-collect-job.ts",
+      "sha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-environment.ts",
+      "sha256": "1100f875229b901f5a8b5fc32108afc593f4671f880461009d4e880142aa1d23",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-options.ts",
+      "sha256": "09b5e5f5b68879bf835d73b7b5b4b9c0064a09ca17049d0f3300c8900c53f5e8",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-worker.ts",
+      "sha256": "47dbb370b05c717feed2928a0afaf4236eb8fec7186bc5ae514b7ac4da4870f7",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.test.ts",
+      "sha256": "3e442d363e6a3b766199f102c6c47a18584a2b847f95497763086c5507a97066",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.ts",
+      "sha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.test.ts",
+      "sha256": "361168e5fb7339bde62a69f85d75400218e290967a88ae03f30b875ff3739e75",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.ts",
+      "sha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation.test.ts",
+      "sha256": "24212377dbefe7fbc6dbdf4286e19df6e5356d3bea4913123d835c353f002774",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation.ts",
+      "sha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/web-list.ts",
+      "sha256": "86f893311fb3c3d8c65256d1e6709acd547658b8cd3e71499900229ec26f75b5",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/config-keys.ts",
+      "sha256": "2efbb61e1ab1e19bb349853a65a7b79bd080ab073420c28a645e56f95a8be620",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/web-list-english-12h.test.ts",
+      "sha256": "c37a3b958a769a415b0775ce997198e1a42819c6652724e3f623306d02eff5b9",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/html-index-candidates.ts",
+      "sha256": "64e674df2a6acd2f0cb6b3a51387a099c1052413de0ad984f481236533de2b3c",
+      "unchanged": true
+    },
+    {
+      "path": "server/services/article-fetch-security.ts",
+      "sha256": "967b106148c5d2dfcd6388b4602a4b9055d3732a9fa4a49d32c69aabb310d2a4",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/manual-checklist.ts",
+      "sha256": "b1802fe28a487ef9edecc95a976cee706f7903f4d24eeb43cf037d133a589329",
+      "unchanged": true
+    }
+  ],
+  "productDiff": "EMPTY",
+  "productGate": "NOT_RUN_NO_PRODUCT_CODE_OR_TEST_CHANGE",
+  "numericAcceptance": "ONE_SAMPLE_FACTS_ONLY_NOT_AUTOMATIC_PASS",
+  "coverage": {
+    "public": "25/39",
+    "information": "24/34",
+    "historicalNumeric": "3/5"
+  },
+  "notRun": [
+    "other_port_index_or_source_request",
+    "CN_T01_poll_or_DNS_HTTP",
+    "network_CA_security_change",
+    "schema_coordinates_source_switch_contract_change",
+    "formal_adapter_SQLite_or_Runtime_integration",
+    "service_DB_plugin_change",
+    "24h_R3_paid",
+    "commit_push_PR_merge_deploy"
+  ],
+  "review": "PENDING_PARENT",
+  "cleanup": "none",
+  "finalAudit": {
+    "at": "2026-10-20T03:41:01.402Z",
+    "head": "40629587e22d8932df105962ec214530e4054414",
+    "productDiff": "EMPTY_THIS_ROUND",
+    "protectedUnchanged": 22,
+    "sourceUnchanged": 18,
+    "reviewedExistingCode": [
+      {
+        "path": "shared/shipping.ts",
+        "sha256": "e7fe7f6faf69259ad7861b9c5d8f4fc241372cd1c69c92a52f8d3cb455e3d247",
+        "unchangedAgainstHEAD": true
+      },
+      {
+        "path": "shared/port-directory.ts",
+        "sha256": "a2ab2dd73d1c149f6ca97bf52916a0a727f62b2837a3d31ea4c1d4cb8db7508f",
+        "unchangedAgainstHEAD": true
+      },
+      {
+        "path": "server/providers/shipping.ts",
+        "sha256": "55b59cc1f750874dbf49ea602d2b6c2200724dee78438674218f1a568ccea398",
+        "unchangedAgainstHEAD": true
+      },
+      {
+        "path": "server/database/shipping.ts",
+        "sha256": "1c9aa8d5750e61acef8ea3e1d62734757f652a03de59f8096e66d156937d8304",
+        "unchangedAgainstHEAD": true
+      },
+      {
+        "path": "server/database/migrations/015-ops-weather-calendar-policy.ts",
+        "sha256": "d792eae6c63ce9b87b363c48c96046416299fa2fa763d8410fce8e5dfc767038",
+        "unchangedAgainstHEAD": true
+      },
+      {
+        "path": "server/runtime/weather-sync-job.ts",
+        "sha256": "3d617b615d4c8dfc94259be5755d9a1de824ff4ed6c2ce851e24d0f07380fbfe",
+        "unchangedAgainstHEAD": true
+      },
+      {
+        "path": "server/services/open-meteo-port-forecast.ts",
+        "sha256": "dbabe562817f896a4e01a694df2a4f85ab795cfbda3d5c1b2c9f44e887e23533",
+        "unchangedAgainstHEAD": true
+      },
+      {
+        "path": "server/services/weather-panel-policy.ts",
+        "sha256": "ec2e23fd8cba354f1004c51babfde98af8f1ff4f1e2a99876e7fb491cf0f9f30",
+        "unchangedAgainstHEAD": true
+      },
+      {
+        "path": "server/services/weather-impact-interval.ts",
+        "sha256": "6bec2abc1020964f0ac80b48bac8edce6544436f04a9d7fe9cb0d4d4c891be4c",
+        "unchangedAgainstHEAD": true
+      },
+      {
+        "path": "shared/weather-units.ts",
+        "sha256": "79945ee69706be16754ba3da1fa0ae6cef3c2b1fa00873460aae64a529562014",
+        "unchangedAgainstHEAD": true
+      }
+    ],
+    "sourceDNS": 1,
+    "physicalHTTP": 1,
+    "rawSourceIgnored": true,
+    "invalidLinks": [],
+    "docsLintRawExit": 0,
+    "inventoryRawExit": 0,
+    "markdownCount": 7781,
+    "stagedFiles": [],
+    "status": "M .gitignore\n M docs/architecture.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/pilot-24h-proposal.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/report.md\n M docs/handoffs/r2-next-execution-2026-10-15.md\n M docs/intel-source-catalog.md\n M docs/status.md\n M package.json\n M scripts/tsx-alias-loader.mjs\n M server/intel/manual-checklist.ts\n M server/intel/sources/config-keys.ts\n M server/intel/sources/web-list.ts\n M server/runtime/intel-collect-job.ts\n?? docs/evidence/r2-clip-copy-clash-2026-10-20/\n?? docs/evidence/r2-closeout-offline-2026-10-20/\n?? docs/evidence/r2-cn-t01-after-apply-2026-10-20/\n?? docs/evidence/r2-cn-t01-https-2026-10-20/\n?? docs/evidence/r2-id-w02-doc-map-2026-10-20/\n?? docs/evidence/r2-id-w02-xj001-2026-10-20/\n?? docs/evidence/r2-mofcom-host-append-2026-10-20/\n?? docs/evidence/r2-observation-env-repair-2026-10-19/\n?? docs/evidence/r2-observation-launcher-offline-2026-10-19/\n?? scripts/r2-intel-observe-environment.ts\n?? scripts/r2-intel-observe-options.ts\n?? scripts/r2-intel-observe-worker.ts\n?? scripts/r2-intel-observe.test.ts\n?? scripts/r2-intel-observe.ts\n?? server/intel/sources/web-list-english-12h.test.ts\n?? server/runtime/intel-observation-network.test.ts\n?? server/runtime/intel-observation-network.ts\n?? server/runtime/intel-observation.test.ts\n?? server/runtime/intel-observation.ts",
+    "cleanup": "none",
+    "path": ".tmp/id-w02-xj001-20261020/final-audit.json",
+    "sha256": "f963f4d5cd1848c99a5b6ae7262ac94e81ae6a984559ab62d8d296e6eb1fb592"
+  }
+}

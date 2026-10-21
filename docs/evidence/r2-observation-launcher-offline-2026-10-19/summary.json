@@ -1,0 +1,314 @@
+{
+  "generatedAt": "2026-10-19T09:28:55.931Z",
+  "workspace": "D:\\try one\\Shipping HOT",
+  "branch": "codex/shipping-hot-r2",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "uncommittedCandidate": true,
+  "noCommitPush": true,
+  "node": "v24.15.0",
+  "abi": "137",
+  "pnpm": "10.30.3",
+  "cleanClone": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+  "normalInstallLifecycle": true,
+  "gateSourceProof": [
+    {
+      "file": "package.json",
+      "sha256": "32716b71ba5f3d807d141fb41373eacbedebc99fac727514dd59abb56e295196",
+      "gateSha256": "32716b71ba5f3d807d141fb41373eacbedebc99fac727514dd59abb56e295196",
+      "bytes": 5991
+    },
+    {
+      "file": "scripts/tsx-alias-loader.mjs",
+      "sha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+      "gateSha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+      "bytes": 952
+    },
+    {
+      "file": "server/runtime/intel-collect-job.ts",
+      "sha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2",
+      "gateSha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2",
+      "bytes": 5625
+    },
+    {
+      "file": "server/runtime/intel-observation.ts",
+      "sha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019",
+      "gateSha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019",
+      "bytes": 9656
+    },
+    {
+      "file": "server/runtime/intel-observation-network.ts",
+      "sha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006",
+      "gateSha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006",
+      "bytes": 8112
+    },
+    {
+      "file": "server/runtime/intel-observation.test.ts",
+      "sha256": "24212377dbefe7fbc6dbdf4286e19df6e5356d3bea4913123d835c353f002774",
+      "gateSha256": "24212377dbefe7fbc6dbdf4286e19df6e5356d3bea4913123d835c353f002774",
+      "bytes": 11772
+    },
+    {
+      "file": "server/runtime/intel-observation-network.test.ts",
+      "sha256": "361168e5fb7339bde62a69f85d75400218e290967a88ae03f30b875ff3739e75",
+      "gateSha256": "361168e5fb7339bde62a69f85d75400218e290967a88ae03f30b875ff3739e75",
+      "bytes": 8877
+    },
+    {
+      "file": "scripts/r2-intel-observe.ts",
+      "sha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224",
+      "gateSha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224",
+      "bytes": 1724
+    },
+    {
+      "file": "scripts/r2-intel-observe-options.ts",
+      "sha256": "9c832b94ee1c729b2e7126d01258dcf07effc257c16c8819263f11561e7d9504",
+      "gateSha256": "9c832b94ee1c729b2e7126d01258dcf07effc257c16c8819263f11561e7d9504",
+      "bytes": 4070
+    },
+    {
+      "file": "scripts/r2-intel-observe-worker.ts",
+      "sha256": "13b2f8e44af6d06b4661bea3f38aed1fa900910eaa09a87da63c8aac6988f7ac",
+      "gateSha256": "13b2f8e44af6d06b4661bea3f38aed1fa900910eaa09a87da63c8aac6988f7ac",
+      "bytes": 3883
+    },
+    {
+      "file": "scripts/r2-intel-observe.test.ts",
+      "sha256": "b5f9c196d5fd99943ddbd0eea292ba2a3fab676e16995118210874f3cb913b06",
+      "gateSha256": "b5f9c196d5fd99943ddbd0eea292ba2a3fab676e16995118210874f3cb913b06",
+      "bytes": 5495
+    }
+  ],
+  "unchangedReferenceProof": [
+    {
+      "file": "pnpm-lock.yaml",
+      "sha256": "68638a3267a597e7d4e16d336f5f56c8fca2ff657700b97605c0d2847dfb324c",
+      "headSha256": "68638a3267a597e7d4e16d336f5f56c8fca2ff657700b97605c0d2847dfb324c",
+      "normalizedContentUnchanged": true,
+      "lineEndingNote": "same bytes"
+    },
+    {
+      "file": "server/services/article-fetch-security.ts",
+      "sha256": "967b106148c5d2dfcd6388b4602a4b9055d3732a9fa4a49d32c69aabb310d2a4",
+      "headSha256": "967b106148c5d2dfcd6388b4602a4b9055d3732a9fa4a49d32c69aabb310d2a4",
+      "normalizedContentUnchanged": true,
+      "lineEndingNote": "same bytes"
+    },
+    {
+      "file": "server/runtime/intel-production.ts",
+      "sha256": "2f47ed77e332964539da1d16c377dfdff940dc4b3e552557e9bee1249cf9e9e9",
+      "headSha256": "9ffb606e48b2307bb4d43fb3efd3375108de2412190a3439642fe05d02ed318a",
+      "normalizedContentUnchanged": true,
+      "lineEndingNote": "checkout CRLF vs Git LF; no content diff"
+    },
+    {
+      "file": "server/runtime/bootstrap.ts",
+      "sha256": "bf60fe5e79ca4df548bc812425b24dabc74d55ef8d617a34471ee89508117e93",
+      "headSha256": "c80dff14da3e869d216536882bf5dbf6949daa6bfb60103c542d0a2a780df973",
+      "normalizedContentUnchanged": true,
+      "lineEndingNote": "checkout CRLF vs Git LF; no content diff"
+    },
+    {
+      "file": "server/runtime/background-runtime.ts",
+      "sha256": "50d49347965c9042c4f89bbd122eb84d252bac4b0ae2f32fb3ae2eb48c5819cc",
+      "headSha256": "48056c2585cc1cf0b5cb11c3a7166deca851ddee06051ed45bfcbefec5de75d1",
+      "normalizedContentUnchanged": true,
+      "lineEndingNote": "checkout CRLF vs Git LF; no content diff"
+    },
+    {
+      "file": "server/intel/collect.ts",
+      "sha256": "70e21f54009af8a9b90168c0e1d6362b8d701a4a3c62ba35154c5688c1807c30",
+      "headSha256": "70e21f54009af8a9b90168c0e1d6362b8d701a4a3c62ba35154c5688c1807c30",
+      "normalizedContentUnchanged": true,
+      "lineEndingNote": "same bytes"
+    },
+    {
+      "file": "server/intel/sources.ts",
+      "sha256": "10d92a7c07a11bfb589c3fc52882fd84f4b1513607fcf721a3628232d828caa5",
+      "headSha256": "10d92a7c07a11bfb589c3fc52882fd84f4b1513607fcf721a3628232d828caa5",
+      "normalizedContentUnchanged": true,
+      "lineEndingNote": "same bytes"
+    },
+    {
+      "file": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+      "sha256": "d7b70b273454925249610db514b21064551b130c6a5061398f9b457419d584eb",
+      "headSha256": "d7b70b273454925249610db514b21064551b130c6a5061398f9b457419d584eb",
+      "normalizedContentUnchanged": true,
+      "lineEndingNote": "same bytes"
+    },
+    {
+      "file": ".github/workflows/shipping-hot-checks.yml",
+      "sha256": "1cc261dbc0e32c16e4c1ad39006a0eb2aa111bcdcd48717e8453061349a74017",
+      "headSha256": "c2535a4d51af6075ced8aef4e3cb7267d903e66365930fa6769a3d8c106121a5",
+      "normalizedContentUnchanged": true,
+      "lineEndingNote": "checkout CRLF vs Git LF; no content diff"
+    }
+  ],
+  "steps": [
+    {
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+      "command": "pnpm install --frozen-lockfile",
+      "rawExit": 0,
+      "log": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-20261019\\install-approved.log",
+      "logSha256": "993b9669b9861855e0c3ddf320351d1dd28fe228f3c79efe1f60886bca371b58"
+    },
+    {
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+      "command": "pnpm build",
+      "rawExit": 0,
+      "log": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-20261019\\build-final.log",
+      "logSha256": "1de7e68121fe5baf9dfcbc8fd275492256361d1aacfb1ddd9e4d4e1c8ec29102"
+    },
+    {
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+      "command": "pnpm typecheck",
+      "rawExit": 0,
+      "log": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-20261019\\typecheck-final.log",
+      "logSha256": "67de922ab555b19c33b17ea59976a41ab661b503bd90bb8d0c9d051d0dc0d3fd"
+    },
+    {
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+      "command": "pnpm lint",
+      "rawExit": 0,
+      "log": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-20261019\\lint-final-clean.log",
+      "logSha256": "0b8f46fe08d362a4474626a501bbb837e60b5f8107d80b3a9c59982d69aa3e68"
+    },
+    {
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+      "command": "pnpm exec vitest run -c vitest.config.ts",
+      "rawExit": 0,
+      "log": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-20261019\\vitest-final.log",
+      "logSha256": "442cd499fcb9423ada1cc0fee7838b58a59786df80912448230a0b5f39376062"
+    },
+    {
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+      "command": "pnpm smoke:p0-native",
+      "rawExit": 0,
+      "log": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-20261019\\smoke-p0.log",
+      "logSha256": "c2e13d404cb41a7b51b77adc8744013d4c118d1e2dbc4778a197d595d3bd59e6"
+    },
+    {
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+      "command": "pnpm smoke:p2c-runtime",
+      "rawExit": 0,
+      "log": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-20261019\\smoke-p2c.log",
+      "logSha256": "8c57c459145f03f19fe2fc4c893db9f2381530ddaebf7453e9629091f9197a79"
+    },
+    {
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-clean-20261019",
+      "command": "pnpm smoke:p3-feed-freshness",
+      "rawExit": 0,
+      "log": "D:\\try one\\Shipping HOT\\.tmp\\intel-observation-20261019\\smoke-feed.log",
+      "logSha256": "7ba14e1ffef4934bbde0e65a3335d2dc3280c697acd856344eda4db8e2db79aa"
+    }
+  ],
+  "newTests": {
+    "passed": 39,
+    "files": 3
+  },
+  "fullTests": {
+    "passed": 1601,
+    "skipped": 3,
+    "files": 142
+  },
+  "skips": "3 pre-existing Windows skips in scripts/r1-migration-copy-guard.test.ts",
+  "s7": "NOT_RUN; no UI/route/shell change or browser control in this scope",
+  "businessNetworkCalls": 0,
+  "liveObservation": "NOT_RUN",
+  "continuous24h": "NOT_RUN",
+  "parentAcceptance": "pending",
+  "r2_6": "parent limited PASS at aea56e72; reuse/dedupe architecture only",
+  "r2": "BLOCKED",
+  "qualification": {
+    "public": "25/39",
+    "informationFields": "24/34",
+    "historicalNumeric": "3/5"
+  },
+  "protectedFiles": [
+    {
+      "path": ".data\\calendarific-double-year-verification-20260908-b.sqlite3",
+      "unchanged": true
+    },
+    {
+      "path": ".data\\calendarific-double-year-verification-20260908.sqlite3",
+      "unchanged": true
+    },
+    {
+      "path": ".data\\p7-final-seal-20260904.sqlite3",
+      "unchanged": true
+    },
+    {
+      "path": ".data\\provider-secrets.json",
+      "unchanged": true
+    },
+    {
+      "path": ".data\\shipping-hot-v3-browser.sqlite3",
+      "unchanged": true
+    },
+    {
+      "path": ".data\\shipping-hot-v3.sqlite3",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp\\clipper-https-abb1b99-20261019\\run\\.data\\shipping-hot-v3.sqlite3",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp\\clipper-manual-6087a16\\run\\.data\\shipping-hot-v3.sqlite3",
+      "unchanged": true
+    }
+  ],
+  "activePluginFiles": [
+    {
+      "name": "content.js",
+      "unchanged": true
+    },
+    {
+      "name": "manifest.json",
+      "unchanged": true
+    },
+    {
+      "name": "popup.html",
+      "unchanged": true
+    },
+    {
+      "name": "worker.js",
+      "unchanged": true
+    }
+  ],
+  "gitignorePreserved": true,
+  "finalizedAt": "2026-10-19T09:32:25.380Z",
+  "productionDiff": {
+    "path": ".tmp/intel-observation-20261019/production.diff",
+    "sha256": "68e7d56996ca51118247905d2302686903a5ff82de71de75719beb6b1e23ad9e",
+    "bytes": 59879
+  },
+  "rawAttemptsRetained": [
+    {
+      "log": "install.log",
+      "rawExit": 1,
+      "reason": "sandbox registry EACCES; approved normal installation succeeded separately"
+    },
+    {
+      "log": "vitest-clean.log",
+      "rawExit": 1,
+      "reason": "1599 passed /1 Windows absolute loader failure /3 existing skips; corrected with file URL and rerun"
+    },
+    {
+      "log": "targeted-final-3.log",
+      "rawExit": 0,
+      "passed": 39
+    }
+  ],
+  "neatFreak": {
+    "skill": "<USERPROFILE>/.codex/skills/neat-freak/SKILL.md",
+    "actualInventoryScriptExit": 0,
+    "enumeratedMarkdown": 7270,
+    "trackedMarkdown": 235,
+    "relativeLinksChecked": 45,
+    "brokenLinks": 0,
+    "changedSourceTodos": 0,
+    "statusOriginalContentPreserved": true,
+    "cleanup": "retained; nothing deleted"
+  },
+  "finalGitStatus": " M .gitignore\n M docs/architecture.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/pilot-24h-proposal.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/report.md\n M docs/handoffs/r2-next-execution-2026-10-15.md\n M docs/status.md\n M package.json\n M scripts/tsx-alias-loader.mjs\n M server/runtime/intel-collect-job.ts\n?? docs/evidence/r2-observation-launcher-offline-2026-10-19/\n?? scripts/r2-intel-observe-options.ts\n?? scripts/r2-intel-observe-worker.ts\n?? scripts/r2-intel-observe.test.ts\n?? scripts/r2-intel-observe.ts\n?? server/runtime/intel-observation-network.test.ts\n?? server/runtime/intel-observation-network.ts\n?? server/runtime/intel-observation.test.ts\n?? server/runtime/intel-observation.ts\n"
+}

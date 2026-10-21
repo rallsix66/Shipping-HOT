@@ -12,11 +12,13 @@ export interface IntelCollectJobOptions {
   db: Database
   /** Default false: the job is off unless explicitly enabled. */
   enabled?: boolean
-  /** Required to do any work. R2 first slice only wires offline fetchers (fixtures); there is no network default. */
+  /** Required to do any work; this job has no network default. Callers supply the reviewed dependencies. */
   fetch?: IntelFetchDeps
   seeds?: readonly IntelSourceSeed[]
   intervalMs?: number
   now?: () => Date
+  /** Optional outer observation stop: finish the current source, never start another one. */
+  signal?: AbortSignal
 }
 
 export interface IntelCollectJob extends RuntimeJob {
@@ -56,6 +58,7 @@ export function createIntelCollectJob(options: IntelCollectJobOptions): IntelCol
     },
     async run(): Promise<SyncResult> {
       if (ended) return { status: "failed", errorCode: "intel_executor_ended", errorMessage: "this executor has ended; create a new job instance" }
+      if (options.signal?.aborted) return { status: "skipped", errorCode: "intel_collection_stopped", preserveRuntimeEvidence: true }
       if (active) return { status: "skipped", errorCode: "job_running" }
       if (!options.fetch) return { status: "skipped", errorCode: "offline_fetcher_not_configured", preserveRuntimeEvidence: true }
       active = true
@@ -87,6 +90,7 @@ export function createIntelCollectJob(options: IntelCollectJobOptions): IntelCol
     let attempted = 0
     let storageUnavailable = 0
     for (const seed of seeds.filter(item => due.has(item.id))) {
+      if (options.signal?.aborted) break
       let outcome: IntelCollectOutcome
       try {
         outcome = await collectIntelSource(repository, seed, fetchDeps, now(), executorId)

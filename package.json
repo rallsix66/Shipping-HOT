@@ -25,6 +25,7 @@
     "seed:s5-browser": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/s5-article-browser-seed.ts",
     "seed:s7-local": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/s7-local-seed.ts",
     "calendar:diff": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/annual-calendar-diff.ts",
+    "observe:intel": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/r2-intel-observe.ts",
     "smoke:p0-native": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p0-native-sqlite-smoke.ts",
     "test:r1-5-1-live": "node scripts/r1-5-1-live-acceptance.mjs",
     "test:bmkg-cap-live": "cross-env NODE_USE_SYSTEM_CA=1 node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/r1-5-bmkg-cap-live.ts",

@@ -1,0 +1,426 @@
+{
+  "generatedAt": "2026-10-20T04:06:11.581Z",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "qualificationMatrix": {
+    "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+    "sha256": "886dac164d6a1bad8c3aa5536faacc43bec94b6fe3aa41a1d3888ec4678579c0",
+    "generatedAt": "2026-10-20T04:06:11.578Z"
+  },
+  "totals": {
+    "retained": 41,
+    "public": 39,
+    "information": 34,
+    "publicOK": 26,
+    "minimumOK": 32,
+    "additionalOKNeeded": 6,
+    "informationPass": 24,
+    "informationRemaining": 10,
+    "historicalNumericDiagnosticPass": 3,
+    "historicalNumericDenominator": 5,
+    "additionalCompleteOriginalOfflineNumericSources": 1
+  },
+  "r2_6": "LIMITED_PASS_INHERITED_aea56e72",
+  "continuous24h": "NOT_RUN_NOT_AUTHORIZED",
+  "classificationChanged": false,
+  "rows": [
+    {
+      "id": "CN-P02",
+      "catalogUrls": [
+        "https://www.sz.msa.gov.cn/"
+      ],
+      "exactProductUrl": "https://www.sz.msa.gov.cn/",
+      "availability": "PARTIAL",
+      "informationFields": "NOT_RUN",
+      "qualificationReason": "PARTIAL retained: exact root302 nowhas real Location pointing to the same requested HTTPS root. Zero-retry boundary stops before duplicateGET; actual list product not obtained, no root-cause or multihop-loop claim.",
+      "fieldReason": "NOT_RUN retained: no list or distinct target payload; only one root302/header capture, no title/identity/date adapter or field replay.",
+      "cause": "真实Location指回原HTTPS根；没有不同目标/栏目正文。",
+      "reuse": "已有302头/hash可复用，不能由body猜路径。",
+      "minimumAction": "先取得可证的不同官方目标；再单次受控请求/标题链接日期回放。",
+      "networkOrUserPrerequisite": "需要官方目标证据及另批请求；不重试原自指URL。",
+      "evidence": [
+        {
+          "path": "docs/evidence/r2-cn-p02-location-2026-10-15/catalogue-capture.json",
+          "sha256": "a63ae85aecaa9c5958cec63fdd0d5b1800a714655782ecb23876d3cc5413266e",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "currentGaps": [
+        "RealLocation now observed and resolves to exact original root URL; old body relative/btatw23_atbp/bt is not used as target.",
+        "No repeated originalGET, distinct target or actual list; structure/field replay not run and no product extension.",
+        "Source remainsPARTIAL/NOT_RUN; any future exact official product basis or bounded scope requires parent decision, no guessed paths/network changes/retries."
+      ]
+    },
+    {
+      "id": "CN-T01",
+      "catalogUrls": [
+        "http://www.mofcom.gov.cn/zcfb/index.html"
+      ],
+      "exactProductUrl": "http://www.mofcom.gov.cn/zcfb/index.html",
+      "availability": "NOT_RUN",
+      "informationFields": "NOT_RUN",
+      "qualificationReason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence.",
+      "fieldReason": "No stored real-page full title/link/source-time replay.",
+      "cause": "目录产品是HTTP，安全入口只准HTTPS，未请求。",
+      "reuse": "无合规原页；目录说明不是字段证据。",
+      "minimumAction": "确认正式HTTPS产品依据；若只能HTTP，先作单独协议决策。",
+      "networkOrUserPrerequisite": "需要用户/官方URL证据及另批请求；不能自动改协议。",
+      "evidence": [],
+      "currentGaps": [
+        "目录为HTTP；当前安全入口拒绝HTTP，需独立确认合规URL策略，不可放松安全或擅改URL",
+        "Exact catalogue product is HTTP; current secure fetch entry requires HTTPS. No request was made here and no alternate HTTPS URL is assumed."
+      ]
+    },
+    {
+      "id": "VN-P01",
+      "catalogUrls": [
+        "https://vimawa.gov.vn/vi/thong-bao-hang-hai"
+      ],
+      "exactProductUrl": "https://vimawa.gov.vn/vi/thong-bao-hang-hai",
+      "availability": "PARTIAL",
+      "informationFields": "PARTIAL",
+      "qualificationReason": "Genuine title/link table, but no date field and no completed configured collector replay.",
+      "fieldReason": "Complete saved table inspection found title/link but no visible date/date attribute; TBHH identifier and header cannot substitute for date.",
+      "cause": "10行标题/链接存在，原页无日期或日期属性。",
+      "reuse": "完整字段检查/表格元数据可复用；文号/抓取时间不能充当发布日期。",
+      "minimumAction": "取得与同一材料身份绑定的原日期证据后再配置、完整回放。",
+      "networkOrUserPrerequisite": "需新的合法原日期样本；详情请求必须单独限定，现不请求。",
+      "evidence": [
+        {
+          "path": "docs/evidence/r2-four-after-clash-2026-10-14/summary.json",
+          "selector": {
+            "id": "VN-P01"
+          },
+          "sha256": "6257a6b9cafef66b5de783d11594b31cb9601d8723e7ffc185bfc6d6794101ba",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/r2-four-after-clash-2026-10-14/VN-P01-table-metadata.json",
+          "selector": null,
+          "sha256": "745acf673f366c6c3829b1a5f068f44438e1a624f5a4c654acfc0b5b574bc34c",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/r2-public-index-replay-2026-10-14/cn-vn-full-raw-field-inspection.json",
+          "selector": {
+            "id": "VN-P01"
+          },
+          "sha256": "8200ba80223b1b56bc63b031ff214cb6590b4f5622cf1861f35717f6a771c4eb",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "currentGaps": [
+        "Date unknown across 10 rows/20 cells. No detail fetch or guessed date. No source config/full collector replay."
+      ],
+      "latestSample": {
+        "evidence": "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/vn-p01-date-audit.json",
+        "scope": "one exact original HTML detail",
+        "identity": "title/canonical match",
+        "ownDate": "unknown; empty submitted and only footer licence date",
+        "qualificationChanged": false,
+        "otherDetailsOrAttachments": 0
+      }
+    },
+    {
+      "id": "MY-P02",
+      "catalogUrls": [
+        "https://www.westportsholdings.com/category/press-release/feed/"
+      ],
+      "exactProductUrl": "https://www.westportsholdings.com/category/press-release/feed/",
+      "availability": "STALE",
+      "informationFields": "PASS",
+      "qualificationReason": "STALE retained after complete original10 accounting:7 newer items have genuinely empty source titles (5 in2026), existing parser deliberately excludes them;3 valid titled entries latest2025-08-01. Raw date/channel2026 orHTTP200/field replay success is not usable current content.",
+      "fieldReason": "Parent explicitly accepted limited existing RSS parser contract: complete raw XML10 accounted,7 genuinely empty source titles excluded,3 valid records replayed exactly through collector/SQLite/repeat0/query-only. Raw latest2026-09-28; eligible latest2025-08-01. Availability remainsSTALE.",
+      "cause": "10原项中7项源title真空；3有效项最新2025-08-01，仍STALE。",
+      "reuse": "完整XML逐项核算及3条collector/SQLite/repeat/reopen已通过，不重开字段门禁。",
+      "minimumAction": "未来在同一精确Feed取得近期有效标题项，沿原解析器复核。",
+      "networkOrUserPrerequisite": "需要另批一次新Feed响应；不能由raw最高日期改判。",
+      "evidence": [
+        {
+          "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-capture.json",
+          "sha256": "3fd7267538b80dd3bb5d9f10fed6b45d667faf473f33f612d241bffe243379d3",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-replay.json",
+          "sha256": "acbe258a9eef99ebc4564f6d017d1f817cead35ba9e15881527cd15ed612d8f1",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "currentGaps": [
+        "Complete original XML gap now closed locally; old3 metadata are only the valid-title subset, not full10 raw feed.",
+        "7 newer source items have genuinely empty source titles; original links are retained; no invented title/identity or detail fetch. Latest valid normalized item remains2025-08-01, retainSTALE.",
+        "Normalized3 field chain acceptedPASS within existing parser contract;10 raw=7 excluded empty-title+3 valid. Raw latest2026-09-28, eligible latest2025-08-01; no all10 complete-record claim.",
+        "No permanent source config/activation/24h; default off andmetadata-only permission unchanged."
+      ]
+    },
+    {
+      "id": "MY-P03",
+      "catalogUrls": [
+        "https://www.northport.com.my/np/page-announcements.html"
+      ],
+      "exactProductUrl": "https://www.northport.com.my/np/page-announcements.html",
+      "availability": "PARTIAL",
+      "informationFields": "FAIL",
+      "qualificationReason": "Genuine response exists but current collection qualification is incomplete: duplicate association conflict",
+      "fieldReason": "Full actual raw repeated URL with conflicting title/date; collector fails closed. No selection/merging to manufacture a pass.",
+      "cause": "同一真实URL关联冲突标题/日期；collector失败且0入库。",
+      "reuse": "完整私有原页与冲突审计可复用，不能任选首项/删冲突。",
+      "minimumAction": "需要原文明确且不同的稳定身份/关联证据，再作源专用适配。",
+      "networkOrUserPrerequisite": "现有归档不支持合法消冲突；需来源证据，网络访问另批。",
+      "evidence": [
+        {
+          "path": "docs/evidence/r2-six-public-2026-10-14/summary.json",
+          "selector": {
+            "id": "MY-P03"
+          },
+          "sha256": "eae6ddcbdaf257b5b88fe6e8ddb222434f28e83351bb16c4d644b66aa704fad2",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/r2-two-raw-dns-2026-10-14/replay-summary.json",
+          "selector": {
+            "id": "MY-P03"
+          },
+          "sha256": "6b0f0630fb8757d1e2f95c6905a7cdcd5b28922bc8427451682521afdd857ba3",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/r2-two-raw-dns-2026-10-14/storage-and-conflicts-audit.json",
+          "selector": {
+            "id": "MY-P03"
+          },
+          "sha256": "4d8d88eda51326e7e3a0dca922406b7f19ace29f411ce4d42d7da7dd7c73b0d6",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "currentGaps": [
+        "Real duplicate URL title/date conflicts persist, 0 items committed.",
+        "No licensed full raw redistribution."
+      ]
+    },
+    {
+      "id": "MY-L01",
+      "catalogUrls": [
+        "https://www.pos.com.my/service-update"
+      ],
+      "exactProductUrl": "https://www.pos.com.my/service-update",
+      "availability": "PARTIAL",
+      "informationFields": "FAIL",
+      "qualificationReason": "Real200 has ten current title/time cards but no title-anchor href. Category links point to listing itself; actual original page fails list identity contract.",
+      "fieldReason": "Full private original page suitability probe fails closed on missing detail link, committed0; no hidden interface or inferred slug used.",
+      "cause": "十张卡片缺文章href；此前英文缩写月/12小时制时间不支持。",
+      "reuse": "原124208字节私有存档及十条事实时间可复用；本轮只修时间格式，保留无href失败。",
+      "minimumAction": "已补显式格式；后续还需真实文章链接证据，不能用目录自链接/标题造slug。",
+      "networkOrUserPrerequisite": "本轮修复无需网络；解除字段/可用性失败仍需身份依据，访问另批。",
+      "evidence": [
+        {
+          "path": "docs/evidence/r2-four-reapplied-2026-10-15/summary.json",
+          "selector": {
+            "id": "MY-L01"
+          },
+          "sha256": "870a5cd2b61d9faa2edac01b843847f6667b1b557be044b1f68b5c28e65f967f",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/r2-reapplied-raw-replay-2026-10-15/MY-L01-suitability.json",
+          "selector": null,
+          "sha256": "e36a850f9df530dbefb8d51fb8fcc6b95edebff6509f938a1c9a25ab2c84cd5b",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "currentGaps": [
+        "Ten title anchors lack href; category URL cannot identify articles.",
+        "Abbreviated English month/12h clock not supported by current strict grammar; no date/zone guess.",
+        "No permanent source config or hidden-interface/detail request.",
+        "Static response contains ten title/time cards; rendering method or hidden API is not established by this missing-href result."
+      ]
+    },
+    {
+      "id": "PH-P01",
+      "catalogUrls": [
+        "https://www.ppa.com.ph/content/ppa-helpdesk-advisory",
+        "https://www.ppa.com.ph/ppa-port-news"
+      ],
+      "exactProductUrl": null,
+      "availability": "NOT_RUN",
+      "informationFields": "NOT_RUN",
+      "qualificationReason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence.",
+      "fieldReason": "No stored real-page full title/link/source-time replay.",
+      "cause": "一条目录含两URL，均无合规完整产品/真实字段存档。",
+      "reuse": "只有源级CA单元机制；不证明真实证书或握手已解决。",
+      "minimumAction": "分别确认两产品范围、TLS实况及必要的源级CA，再归档回放。",
+      "networkOrUserPrerequisite": "需要有界诊断/官方CA依据及另批请求；不改系统信任。",
+      "evidence": [],
+      "currentGaps": [
+        "目录一行两URL，仍只算1个ID；仅离线sourceCa机制，未配置真实CA/selector/存档"
+      ]
+    },
+    {
+      "id": "PH-W01",
+      "catalogUrls": [
+        "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin"
+      ],
+      "exactProductUrl": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+      "availability": "PARTIAL",
+      "informationFields": "NOT_RUN",
+      "qualificationReason": "Page response alone is not usable verified warning payload; no positive item/explicit parsed-empty contract proved.",
+      "fieldReason": "No stored real-page full title/link/source-time replay.",
+      "cause": "最新精确目录403；此前空壳/iframe不证明活动预警或明确空列表。",
+      "reuse": "403原始响应摘要/旧结构观察可复用，不能当无天气事件。",
+      "minimumAction": "先取得合法官方正样本、实际材料身份和原时间字段，再定适配。",
+      "networkOrUserPrerequisite": "需官方样本或另批单次请求；不绕403、不猜iframe产品。",
+      "evidence": [
+        {
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/PH-W01-capture.json",
+          "sha256": "29c0d4947fdbeca0869f107af98203702b43e4918b42a3ed626e98cbf0010480",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "currentGaps": [
+        "空壳/iframe与正样本缺口；不称标题时间通过"
+      ]
+    },
+    {
+      "id": "PH-W02",
+      "catalogUrls": [
+        "https://www.pagasa.dost.gov.ph/weather/weather-advisory"
+      ],
+      "exactProductUrl": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+      "availability": "PARTIAL",
+      "informationFields": "NOT_RUN",
+      "qualificationReason": "Page response alone is not usable verified warning payload; no positive item/explicit parsed-empty contract proved.",
+      "fieldReason": "No stored real-page full title/link/source-time replay.",
+      "cause": "最新精确目录403；无官方正样本、selector/原时间合同。",
+      "reuse": "403摘要可复用，不能与PH-W01混为两个成功产品。",
+      "minimumAction": "取得weather-advisory正样本和明确时间/身份规则再回放。",
+      "networkOrUserPrerequisite": "需官方样本或另批请求；不重复403凑证据。",
+      "evidence": [
+        {
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/PH-W02-capture.json",
+          "sha256": "0cfd7c2d6e3010ddcf4eb25b1f7b800f189e7ea555e645e8cfe1500599cacfc6",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "currentGaps": [
+        "正样本/selector/时间规则缺失"
+      ]
+    },
+    {
+      "id": "XX-W01",
+      "catalogUrls": [
+        "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json"
+      ],
+      "exactProductUrl": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+      "availability": "BLOCKED",
+      "informationFields": "NOT_APPLICABLE_NUMERIC",
+      "qualificationReason": "Latest actual exact catalogue/provider-constant targetTc URL returnedHTTP404 at2026-10-15T05:53:37.778Z; same saved request previously only associated withXX-W02. Current availability is notOK; historical3/5 normalized diagnostics retained separately.",
+      "fieldReason": "Approved numerical field validation is separate; not in 34 article title/link/time denominator.",
+      "cause": "精确targetTc返回404；不是空台风列表。",
+      "reuse": "与XX-W02共用同一次404；历史数值诊断有限通过独立保留。",
+      "minimumAction": "先取得官方当前精确产品依据；再做有界获取/数值验证。",
+      "networkOrUserPrerequisite": "需官方资料和另批请求；不猜替代URL或重放旧3/5当当前成功。",
+      "evidence": [
+        {
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/XX-W02-targetTc-capture.json",
+          "sha256": "8e791a21bead8c6f565faf4847351e6333934677e88e518d0eb5d8da4bc36100",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+          "selector": null,
+          "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "currentGaps": [
+        "Latest exact targetTc URL HTTP404; not an empty cyclone list. No alternative URL or new request guessed.",
+        "Historical10/10 numeric diagnostics retained, but do not prove current availability or raw numerical wire replay."
+      ]
+    },
+    {
+      "id": "XX-W02",
+      "catalogUrls": [
+        "https://www.jma.go.jp/bosai/typhoon/data/TC{id}/forecast.json"
+      ],
+      "exactProductUrl": null,
+      "availability": "PARTIAL",
+      "informationFields": "NOT_APPLICABLE_NUMERIC",
+      "qualificationReason": "Forecast branch has real persisted diagnostics, but catalogue also names specifications.json; that product not verified, no full-row OK.",
+      "fieldReason": "Approved numerical field validation is separate; not in 34 article title/link/time denominator.",
+      "cause": "forecast有历史诊断，specifications产品未完整验证；前提targetTc同一次404。",
+      "reuse": "历史forecast诊断及同一404可复用；无完整数值wire回放。",
+      "minimumAction": "先澄清forecast/specifications整行范围及官方具体产品，再逐字段验证。",
+      "networkOrUserPrerequisite": "需官方范围/身份资料和另批请求；不把forecast分支代表整行。",
+      "evidence": [
+        {
+          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/XX-W02-targetTc-capture.json",
+          "sha256": "8e791a21bead8c6f565faf4847351e6333934677e88e518d0eb5d8da4bc36100",
+          "hashBasis": "committed_text_LF"
+        },
+        {
+          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+          "selector": null,
+          "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+          "hashBasis": "committed_text_LF"
+        }
+      ],
+      "currentGaps": [
+        "Resolve catalogue forecast/specifications product scope and retain field evidence; do not manufacture concrete unobserved URL or count forecast-only as full row.",
+        "Existing05:53:37.778Z targetTc404 is the same request cross-attributed to exactXX-W01; no object selection or two product requests."
+      ]
+    },
+    {
+      "id": "XX-K01",
+      "catalogUrls": [
+        "https://www.maersk.com/news"
+      ],
+      "exactProductUrl": "https://www.maersk.com/news",
+      "availability": "BLOCKED",
+      "informationFields": "NOT_RUN",
+      "qualificationReason": "Public system DNS and one exact transport attempt, generic secure entry fetch_failed; no completed response captured. Underlying error not recorded; no TLS/CA/anti-bot diagnosis.",
+      "fieldReason": "No original news-list payload obtained, no title/link/time parsing or collector/SQLite replay.",
+      "cause": "一次安全链transport尝试仅fetch_failed；无底层错误/HTTP响应。",
+      "reuse": "已有系统DNS及安全失败诊断可复用，不能归因JS/CA/反爬。",
+      "minimumAction": "单独批准一次有界底层错误诊断，先保留安全拒绝与精确URL范围。",
+      "networkOrUserPrerequisite": "需要另批诊断；不切工具/改网络/盲目重试。",
+      "evidence": [],
+      "currentGaps": [
+        "No captured response/status/content type/raw bytes/Location; no qualifying news fields.",
+        "Any later diagnostic needs explicit bounded task and sanitized underlying error capture; no automatic retry or network settings change."
+      ]
+    },
+    {
+      "id": "XX-F01",
+      "catalogUrls": [
+        "https://seller-my.tiktok.com/university/essay?knowledge_id=4293090978809617"
+      ],
+      "exactProductUrl": "https://seller-my.tiktok.com/university/essay?knowledge_id=4293090978809617",
+      "availability": "NOT_RUN",
+      "informationFields": "NOT_RUN",
+      "qualificationReason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence.",
+      "fieldReason": "No stored real-page full title/link/source-time replay.",
+      "cause": "整页日期段落版本对比合同未落地；无合法存档/可复现字段回放。",
+      "reuse": "仅目录产品身份；不是已配置的list。",
+      "minimumAction": "先确认整页版本、时间角色和许可，取得合法样本后决定最小适配。",
+      "networkOrUserPrerequisite": "需要许可/样本/合同，网络另批；不自行抓全文。",
+      "evidence": [],
+      "currentGaps": [
+        "整页带日期段落对比不是已配置list；无合规存档及可复现intel断言"
+      ]
+    }
+  ],
+  "remainingInformationIds": [
+    "CN-P02",
+    "CN-T01",
+    "VN-P01",
+    "MY-P03",
+    "MY-L01",
+    "PH-P01",
+    "PH-W01",
+    "PH-W02",
+    "XX-K01",
+    "XX-F01"
+  ],
+  "numericEvidence": "historical3 limited diagnostics + new1 ID-W02 complete original offline parse; no production integration rate",
+  "predecessor": "docs/evidence/r2-closeout-offline-2026-10-20/remaining-matrix.json"
+}

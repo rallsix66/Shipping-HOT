@@ -1,0 +1,82 @@
+{
+  "type": "limited_qualification_acceptance",
+  "recordedAt": "2026-10-20T04:06:11.570Z",
+  "sourceId": "ID-W02",
+  "applied": true,
+  "parentReview": {
+    "sourceThreadId": "01a156ee-5b41-73b8-9694-0368aaf900f2",
+    "type": "independent_static_source_review",
+    "result": "no_P2_blocker_limited_acceptance",
+    "didRerunExecutorTests": false
+  },
+  "executorEvidence": {
+    "targetedPassed": 30,
+    "fullPassed": 1688,
+    "fullSkipped": 3,
+    "completeOriginalPoints": 41,
+    "mismatches": 0,
+    "summary": {
+      "path": "docs/evidence/r2-id-w02-offline-parser-2026-10-20/summary.json",
+      "sha256": "6f4dff459c8f6ae4a9bd2daf6a99eda894ce07b48608dbc606d08b80d8e0df6f",
+      "hashBasis": "local_file_bytes"
+    },
+    "replay": {
+      "path": "docs/evidence/r2-id-w02-offline-parser-2026-10-20/raw-replay.json",
+      "sha256": "5160f85925d06ba20301bf8357d59b362d087acad7f0edc3048ab775612d806b",
+      "hashBasis": "local_file_bytes"
+    },
+    "files": [
+      {
+        "path": "server/services/bmkg-port-forecast.ts",
+        "sha256": "e179c8987787ceca2d2525a1ebbfc3586f3732838612d63fb4e1255eadb37083",
+        "hashBasis": "local_file_bytes"
+      },
+      {
+        "path": "server/services/bmkg-port-forecast.test.ts",
+        "sha256": "03dfba1cd9e3aad37c6067fdbbb55b9f31859bc9e0a3ed7cfd1c2436637a0d1c",
+        "hashBasis": "local_file_bytes"
+      }
+    ]
+  },
+  "acceptedScope": "Recorded genuine XJ001 product plus complete original offline parsing/normalization/field verification under unchanged R2-4 countingRules",
+  "excluded": [
+    "production integration",
+    "default enablement",
+    "database writes",
+    "current uptime",
+    "continuous24h",
+    "seven-day hourly weather coverage",
+    "R3"
+  ],
+  "change": {
+    "r2_4": {
+      "from": "NOT_RUN",
+      "to": "OK",
+      "qualification": "limited"
+    },
+    "public": {
+      "from": 25,
+      "to": 26,
+      "denominator": 39,
+      "minimumOK": 32,
+      "shortfall": 6
+    },
+    "information": {
+      "numerator": 24,
+      "denominator": 34,
+      "unchanged": true
+    },
+    "numeric": {
+      "historicalLimitedDiagnostics": 3,
+      "additionalCompleteOriginalOfflineParse": 1,
+      "denominator": 5,
+      "productionIntegrationRate": "NOT_CLAIMED"
+    }
+  },
+  "sourceCallsThisRound": {
+    "DNS": 0,
+    "HTTP": 0
+  },
+  "newProductGateRuns": 0,
+  "originalEvidenceRewritten": false
+}

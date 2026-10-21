@@ -1,3 +1,10 @@
+## 2026-10-21 切片3：观察工具 + BMKG(ID-W02) 候选（离线）
+
+- 按 dots 裁定（1792554503.258689）最小修复：win32 `windowsInjected` 加小写 `logonserver`。保证表述为“隔离后业务阶段不可见”（Node v24.15.0 / libuv 1.51.0），不是“从未收到”。
+- 未扩大其它白名单，也未放宽拒绝条件。修复前失败与修复后通过的记录见 `docs/evidence/r2-observation-logonserver-2026-10-21/`。
+- 本切片未对 live 网络运行观察工具，未启动 24h/R3，也未调用模型或付费服务。R2 总体仍未通过。
+- mapping.json、source-matrix、intel-source-catalog、handoff、final-reuse-audit 以及 r2-closeout-offline（与 MY-L01/manual 混合）仍留在原工作区，未纳入本切片。
+
 ## 当前：人工录入/剪藏切片已单独提交（2026-10-21）
 
 本次提交只含人工录入/剪藏这一切片，从原工作区按文件原样复制到隔离 worktree，基于切片 1 的 `1b68adcd5ebe33bc4ed655c894f8830fec7f3138` 生成：

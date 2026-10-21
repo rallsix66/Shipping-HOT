@@ -1,0 +1,24 @@
+
+ RUN  v4.0.18 D:/wt-s3
+
+Duplicated imports "string", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/wt-s3/shared/calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/wt-s3/shared/policy.ts" has been ignored and "D:/wt-s3/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/wt-s3/shared/policy.ts" has been ignored and "D:/wt-s3/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/wt-s3/shared/policy.ts" has been ignored and "D:/wt-s3/shared/promo-calendar.ts" is used
+ ✓ scripts/r2-intel-observe.test.ts (34 tests) 2965ms
+   ✓ actual Node CLI resolves file/directory aliases and exits without starting on help or missing execute  1119ms
+   ✓ actual execute CLI reaches bootstrap, zero-budget stop, read-only reopen and released ownership with an isolated home  1587ms
+ ✓ scripts/r2-intel-observe-logonserver.test.ts (11 tests) 3468ms
+   ✓ actual two-level CLI reaches exit 2 with parent LOGONSERVER synthetic marker, not visible to the business phase  1824ms
+   ✓ actual two-level CLI reaches exit 2 with parent LOGONSERVER absent, not visible to the business phase  1610ms
+
+ Test Files  2 passed (2)
+      Tests  45 passed (45)
+   Start at  11:56:18
+   Duration  4.13s (transform 391ms, setup 0ms, import 899ms, tests 6.43s, environment 0ms)
+
