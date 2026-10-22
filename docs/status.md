@@ -1,3 +1,11 @@
+## 2026-10-22 R2-7 电脑端两项补验（限定通过，dots 1792640825.474229）
+
+- 在隔离 v2 现场按已审恢复脚本（5c484e1d…）执行一次：before、READY、startup、gui-after 全部通过；所列业务/schema/指针/计数/设置不变，只有 last_migration_at 随启动和页面 GET 前移。
+- 用户做了 1280×900 截图（主审在用户会话查看，未随库）和键盘版本切换（用户自报，无录像）。
+- 停止：进程已退出、4489 已释放；`shutdown-v2.json` 缺失，记为关闭事件取证不完整。
+- 服务器防护未记录拦截事件；浏览器无网络记录，不声称零外联/零 POST。
+- 只是 R2-7 两项电脑端的限定通过：S7、R2 整体未通过，手机端仍暂缓。证据：[docs/evidence/r2-7-desktop-closeout-2026-10-22/README.md](evidence/r2-7-desktop-closeout-2026-10-22/README.md)。
+
 ## 2026-10-22 XX-F01 第二、三次单次取样（均未取得样本）
 
 - 第二次（10-21 17:29 UTC+8，脚本 b6249464…9c14，正文上限 512 KiB）：用户先在界面内为该主机加了精确 fake-IP 例外。DNS 1 次（5 个公网 IPv4）/ GET 1 次，`body_too_large`，没有完整响应。证据：[docs/evidence/xx-f01-oneshot-r2-2026-10-21/README.md](evidence/xx-f01-oneshot-r2-2026-10-21/README.md)。
