@@ -2,7 +2,7 @@ import { type IntelSourceSeed, intelSourceSeeds } from "../sources"
 import { htmlIndexCandidates } from "./html-index-candidates"
 
 /** Qualified candidates registered by default but kept closed: enabled=false and persistence=disallowed (metadata only). */
-export const REGISTERED_CLOSED_CANDIDATE_IDS = ["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "XX-K03", "ID-T02", "VN-D01", "XX-K02"] as const
+export const REGISTERED_CLOSED_CANDIDATE_IDS = ["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "XX-K03", "ID-T02", "VN-D01", "XX-K02", "XX-K01"] as const
 
 function closedCandidate(catalogId: string): IntelSourceSeed {
   const seed = htmlIndexCandidates.find(row => row.catalogId === catalogId)

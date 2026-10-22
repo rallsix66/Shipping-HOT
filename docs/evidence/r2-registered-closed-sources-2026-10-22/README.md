@@ -1,4 +1,4 @@
-# R2：已合格 HTML 候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02 / VN-D01 / XX-K02）与 collect-job 默认接线（2026-10-22）
+# R2：已合格 HTML 候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02 / VN-D01 / XX-K02 / XX-K01）与 collect-job 默认接线（2026-10-22）
 
 dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基线 `a26defa`。
 
@@ -62,3 +62,10 @@ dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基�
 - 无专用样本，新建 `server/intel/sources/__fixtures__/one-newsroom-synthetic.ts`：明确标记为按现有配置形状编写的合成 fixture，不是保存的 ONE 原页，也不是通用 `#payload`/`page.pin` 样本；内含一个不应执行的脚本。
 - registry.test d：副本经 Runtime→隔离 SQLite 只请求 `https://www.one-line.com/en/newsroom`，写入 3 条 metadata_only；`releaseDate` 保留秒精度原串（`2026-10-05T11:31:17` 等），precision=second、timezone=missing、publishedAt=null。脚本不执行、冲突与越界链接拒绝沿用 `json-list-html.test.ts` / `json-list-collect.test.ts` 已有断言。生产选择拒绝 XX-K02。
 - 仍区分配置注册/运行接线与迁移预置 42 行目录行；R2-4 28/39、R2-5 25/34 不变，未接通 live。
+
+## 第七切片：XX-K01（dots 1792663523.596789）
+
+- `REGISTERED_CLOSED_CANDIDATE_IDS` 扩为十三个，新增 XX-K01（web_list，复用候选对象，enabled:false、persistence:disallowed）；解析器、安全合同、`MAERSK_HEADER_LIMIT` 未改，不新增或传播例外。
+- `maersk-mofcom.test.ts` 的 `maerskHtml` 原样移到 `server/intel/sources/__fixtures__/maersk-news-synthetic.ts`（SHA-256 `e88fd89abeeb6438e1719237d6569d902daeba88e80e0b48709dd18178920f6a` 与 12369ac 原串一致），原测试输入与断言不变。
+- registry.test d：副本经 Runtime→隔离 SQLite 只请求 `https://www.maersk.com/news`，写入 2 条 metadata_only；transport 选项精确为 maxHeaderSize 32768、maxBytes 524288、timeoutMs 10000、无 caPem；其他来源 transport 不带 maxHeaderSize。生产选择拒绝 XX-K01。
+- 保留回归：错误 sourceId/URL/预算 DNS 前拒绝、重定向不继承例外（`maersk-mofcom.test.ts`）；默认 16 KiB、20 KiB 仅精确 opt-in 通过、40 KiB 拒绝（`article-fetch-header-limit.test.ts`）。CN-T01 未混入，MY-P03 不注册；R2-4 28/39、R2-5 25/34 不变，未接通 live。

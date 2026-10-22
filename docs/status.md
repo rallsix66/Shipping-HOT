@@ -1,3 +1,8 @@
+## 2026-10-22 R2 XX-K01 加入默认关闭注册（dots 1792663523.596789）
+
+- `registeredIntelSources` 新增 XX-K01（web_list，enabled:false、persistence:disallowed），默认关闭候选共十三个；`maerskHtml` 原样移到共享 fixture。仅 intel:xx-k01 + https://www.maersk.com/news 精确 opt-in 32768 响应头（正文 524288、10000ms、无 caPem），例外未扩大。
+- CN-T01 未注册（R2-5 PARTIAL）；R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
 ## 2026-10-22 R2 XX-K02 加入默认关闭注册（dots 1792662529.753349 / 1792662635.586629）
 
 - `registeredIntelSources` 新增 XX-K02（json_list，enabled:false、persistence:disallowed），默认关闭候选共十二个；新增明确标记的合成 `__NEXT_DATA__` fixture，releaseDate 保留秒精度原串、publishedAt=null；解析器、安全合同未改。

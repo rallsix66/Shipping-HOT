@@ -10,6 +10,7 @@ import { type IntelSourceSeed, intelSourceSeeds } from "#/intel/sources"
 import { htmlIndexCandidates } from "#/intel/sources/html-index-candidates"
 import { assertSupportedConfig } from "#/intel/sources/config-keys"
 import { fromHtml, parseLooseDate } from "#/intel/sources/web-list"
+import { maerskHtml } from "#/intel/sources/__fixtures__/maersk-news-synthetic"
 import { createIntelCollectJob } from "#/runtime/intel-collect-job"
 import { productionIntelOptions } from "#/runtime/intel-production"
 
@@ -19,7 +20,6 @@ const now = new Date("2026-10-20T08:00:00.000Z")
 const publicAddresses = [{ address: "93.184.216.34", family: 4 as const }]
 
 // Original synthetic markup. Complete recorded site HTML is private and replayed separately.
-const maerskHtml = `<html><body><article class="p-section__news__teaser"><a class="p-section__news__teaser__image" href="/news/articles/synthetic/one"></a><a class="p-section__news__teaser__title" href="/news/articles/synthetic/one">Synthetic latest news</a><span class="p-section__news__teaser__timestamp">7 Oct 2026</span></article><a class="news-hub__panel__item" href="/news/articles/synthetic/two"><span class="news-hub__panel__item__title">Synthetic advisory</span><time class="news-hub__panel__item__timestamp">20 Oct 2026</time></a><footer>2026-10-21</footer></body></html>`
 const mofcomHtml = `<section class="channel-con"><h2>Latest policy</h2><ul class="policy-list"><li><em>Category</em><a href="/zcfb/zc/art/synthetic/one.html" title="Synthetic policy one">Synthetic policy one</a><span>2026-10-19</span></li><li><a href="/zcfb/zc/art/synthetic/two.html" title="Synthetic policy two">Synthetic policy two</a><a href="http://www.mofcom.gov.cn/zcjd/synthetic.html">Interpretation</a><span>2026-10-14</span></li><li><a href="http://www.mofcom.gov.cn/zcfb/dwmygl/art/synthetic/three.html" title="Synthetic HTTP policy">Synthetic HTTP policy</a><span>2026-10-16</span></li></ul></section>`
 
 function openNative(file = ":memory:") {

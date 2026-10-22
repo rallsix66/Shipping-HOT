@@ -4,6 +4,7 @@ import { open } from "../__fixtures__/isolated-db"
 import type { IntelFetchDeps } from "../collect"
 import { intelSourceSeeds } from "../sources"
 import { CUSTOMS_SYNTHETIC } from "./__fixtures__/html-index-synthetic"
+import { maerskHtml as MAERSK_SYNTHETIC } from "./__fixtures__/maersk-news-synthetic"
 import { ONE_NEWSROOM_SYNTHETIC } from "./__fixtures__/one-newsroom-synthetic"
 import { fixtures as POST_CLASH } from "./__fixtures__/post-clash-synthetic"
 import { GD_SYNTHETIC, JDIH_MOF_SYNTHETIC, MOF_SYNTHETIC, PH_SYNTHETIC, SITC_SYNTHETIC } from "./__fixtures__/public-index-synthetic"
@@ -31,28 +32,33 @@ const SK = htmlIndexCandidates.find(seed => seed.catalogId === "XX-K03")!
 const JD = htmlIndexCandidates.find(seed => seed.catalogId === "ID-T02")!
 const VD = htmlIndexCandidates.find(seed => seed.catalogId === "VN-D01")!
 const XK = htmlIndexCandidates.find(seed => seed.catalogId === "XX-K02")!
-const NEW = [CN, TH, PH, GD, TD, VP, VT, IT, SK, JD, VD, XK]
-const SYNTHETIC = [{ seed: CN, html: MOF_SYNTHETIC }, { seed: TH, html: CUSTOMS_SYNTHETIC }, { seed: PH, html: PH_SYNTHETIC }, { seed: GD, html: GD_SYNTHETIC }, { seed: TD, html: thaiDocumentMarkup() }, { seed: VP, html: POST_CLASH["VN-P03"] }, { seed: VT, html: POST_CLASH["VN-T01"] }, { seed: IT, html: POST_CLASH["ID-T01"] }, { seed: SK, html: SITC_SYNTHETIC }, { seed: JD, html: JDIH_MOF_SYNTHETIC, count: 3 }, { seed: VD, html: VN_DISASTER_SYNTHETIC }, { seed: XK, html: ONE_NEWSROOM_SYNTHETIC, count: 3 }]
+const MK = htmlIndexCandidates.find(seed => seed.catalogId === "XX-K01")!
+const NEW = [CN, TH, PH, GD, TD, VP, VT, IT, SK, JD, VD, XK, MK]
+const SYNTHETIC = [{ seed: CN, html: MOF_SYNTHETIC }, { seed: TH, html: CUSTOMS_SYNTHETIC }, { seed: PH, html: PH_SYNTHETIC }, { seed: GD, html: GD_SYNTHETIC }, { seed: TD, html: thaiDocumentMarkup() }, { seed: VP, html: POST_CLASH["VN-P03"] }, { seed: VT, html: POST_CLASH["VN-T01"] }, { seed: IT, html: POST_CLASH["ID-T01"] }, { seed: SK, html: SITC_SYNTHETIC }, { seed: JD, html: JDIH_MOF_SYNTHETIC, count: 3 }, { seed: VD, html: VN_DISASTER_SYNTHETIC }, { seed: XK, html: ONE_NEWSROOM_SYNTHETIC, count: 3 }, { seed: MK, html: MAERSK_SYNTHETIC }]
 const SNAPSHOT = JSON.stringify(htmlIndexCandidates)
 const ORIGINAL_SNAPSHOT = JSON.stringify(intelSourceSeeds)
+
+type TransportOptions = Parameters<NonNullable<IntelFetchDeps["transport"]>>[2]
 
 /** Fake lookup/transport: records every call, serves synthetic HTML by URL, 503 otherwise; never opens a socket. */
 function fake(routes: Record<string, string> = {}) {
   const lookups: string[] = []
   const calls: string[] = []
+  const options: TransportOptions[] = []
   const deps: IntelFetchDeps = {
     lookup: async (host: string) => {
       lookups.push(host)
       return [{ address: "93.184.216.34", family: 4 }]
     },
-    transport: async (url: URL) => {
+    transport: async (url: URL, _addresses: unknown, opts: TransportOptions) => {
       calls.push(url.toString())
+      options.push(opts)
       const html = routes[url.toString()]
       if (html === undefined) return { status: 503, headers: {}, body: new Uint8Array() }
       return { status: 200, headers: { "content-type": "text/html; charset=utf-8" }, body: new TextEncoder().encode(html) }
     },
   }
-  return { deps, calls, lookups }
+  return { deps, calls, lookups, options }
 }
 
 async function isolated() {
@@ -88,7 +94,7 @@ afterEach(() => {
 })
 
 describe("registeredIntelSources", () => {
-  it("keeps the original two seeds unchanged and reuses all twelve closed candidate objects (CN-T02/TH-C01/PH-C01/CN-P01/TH-C02/VN-P03/VN-T01/ID-T01/XX-K03/ID-T02/VN-D01/XX-K02)", () => {
+  it("keeps the original two seeds unchanged and reuses all thirteen closed candidate objects (CN-T02/TH-C01/PH-C01/CN-P01/TH-C02/VN-P03/VN-T01/ID-T01/XX-K03/ID-T02/VN-D01/XX-K02/XX-K01)", () => {
     expect(registeredIntelSources.map(seed => seed.catalogId)).toEqual(["TH-W01", "ID-W01", ...REGISTERED_CLOSED_CANDIDATE_IDS])
     expect(registeredIntelSources.slice(0, 2)).toEqual(intelSourceSeeds)
     expect(registeredIntelSources[0]).toBe(intelSourceSeeds[0])
@@ -97,14 +103,14 @@ describe("registeredIntelSources", () => {
     expect(registeredIntelSources.slice(2)).toEqual(NEW)
     NEW.forEach((seed, index) => expect(registeredIntelSources[index + 2]).toBe(seed))
     for (const seed of NEW) expect(seed).toMatchObject({ enabled: false, persistence: "disallowed" })
-    expect(new Set(registeredIntelSources.map(seed => seed.id)).size).toBe(14)
-    expect(new Set(registeredIntelSources.map(seed => seed.catalogId)).size).toBe(14)
+    expect(new Set(registeredIntelSources.map(seed => seed.id)).size).toBe(15)
+    expect(new Set(registeredIntelSources.map(seed => seed.catalogId)).size).toBe(15)
     expect(Object.isFrozen(registeredIntelSources)).toBe(true)
   })
 })
 
 describe("default collect job (no seeds) on the BackgroundRuntime with isolated SQLite", () => {
-  it("a) registers all twelve closed candidates as enabled=0 but never makes them due or requests them", async () => {
+  it("a) registers all thirteen closed candidates as enabled=0 but never makes them due or requests them", async () => {
     const state = await isolated()
     const net = fake()
     const runtime = runtimeFor(state)
@@ -180,7 +186,7 @@ describe("b) production selection is unchanged", () => {
     const options = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "TH-W01,ID-W01" }, dependencies })
     expect(options.registry?.intel?.seeds?.map(seed => seed.catalogId)).toEqual(["TH-W01", "ID-W01"])
   })
-  it.each(["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-W01,CN-T02", "ID-W01,TH-C01", "TH-W01,PH-C01", "ID-W01,CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "TH-W01,TH-C02", "ID-W01,ID-T01", "XX-K03", "ID-T02", "TH-W01,XX-K03", "ID-W01,ID-T02", "VN-D01", "TH-W01,VN-D01", "XX-K02", "ID-W01,XX-K02"])("rejects %s with intel_source_selection_invalid", (ids) => {
+  it.each(["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-W01,CN-T02", "ID-W01,TH-C01", "TH-W01,PH-C01", "ID-W01,CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "TH-W01,TH-C02", "ID-W01,ID-T01", "XX-K03", "ID-T02", "TH-W01,XX-K03", "ID-W01,ID-T02", "VN-D01", "TH-W01,VN-D01", "XX-K02", "ID-W01,XX-K02", "XX-K01", "TH-W01,XX-K01"])("rejects %s with intel_source_selection_invalid", (ids) => {
     expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: ids }, dependencies })).toThrow("intel_source_selection_invalid")
   })
   it("disabled production passes explicit empty seeds", () => {
@@ -221,6 +227,16 @@ describe("d) test-only enabled copies run Runtime -> isolated SQLite with fake l
         const evidence = await Promise.all(items.map(async item => (await state.repository.listVersions(item.id))[0].dateEvidence))
         expect(evidence.map(row => row?.raw).sort()).toEqual(["2024-02-29T09:00:00", "2026-09-30T15:06:44", "2026-10-05T11:31:17"])
         for (const row of evidence) expect(row).toMatchObject({ precision: "second", timezone: "missing", utcOffset: null, publishedAt: null })
+      }
+      // XX-K01: only the exact intel:xx-k01 + https://www.maersk.com/news opt-in reaches transport (32768 header, 524288 body, 10000ms, no caPem).
+      if (seed === MK) {
+        expect(copy.sourceHeaderLimit).toEqual({ sourceId: "intel:xx-k01", url: "https://www.maersk.com/news", maxHeaderSize: 32768 })
+        expect(copy.sourceHeaderLimit).not.toBe(seed.sourceHeaderLimit)
+        expect(net.options).toHaveLength(1)
+        expect(net.options[0]).toMatchObject({ maxHeaderSize: 32768, maxBytes: 524288, timeoutMs: 10000 })
+        expect(net.options[0].caPem).toBeUndefined()
+      } else {
+        for (const opts of net.options) expect(opts.maxHeaderSize).toBeUndefined()
       }
       if (seed === SK) expect(items.map(item => item.canonicalUrl).sort()).toEqual(["http://www.sitc.com/en/show.asp?id=0001", "http://www.sitc.com/en/show.asp?id=0002"])
       for (const item of items) {
