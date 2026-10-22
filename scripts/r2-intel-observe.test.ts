@@ -4,6 +4,7 @@ import { basename, resolve } from "node:path"
 import { randomUUID } from "node:crypto"
 import { spawnSync } from "node:child_process"
 import { pathToFileURL } from "node:url"
+import { homedir, userInfo } from "node:os"
 import { expect, it } from "vitest"
 import { observationEnvironment, parseObservationArguments, prepareObservationLaunch, validateObservationChildEnvironment } from "./r2-intel-observe-options"
 import { isolateObservationChildEnvironment } from "./r2-intel-observe-environment"
@@ -46,14 +47,22 @@ it("the child independently rejects inherited extra settings or mismatched enabl
   expect(() => validateObservationChildEnvironment({ ...env, SHIPPING_RUNTIME_ENABLED: "false" }, ["TH-W01"])).toThrow("child_environment_invalid")
 })
 
-it("actual Node CLI resolves file/directory aliases and exits without starting on help or missing execute", () => {
-  const entry = ["--import", "tsx/esm", "--experimental-loader", pathToFileURL(resolve("scripts/tsx-alias-loader.mjs")).href, resolve("scripts/r2-intel-observe.ts")]
-  const options = { cwd: resolve("."), env: observationEnvironment(process.env, []), encoding: "utf8" as const, windowsHide: true }
-  const help = spawnSync(process.execPath, [...entry, "--help"], options)
-  expect(help.status, help.stderr).toBe(0)
+const cliEntry = () => ["--import", "tsx/esm", "--experimental-loader", pathToFileURL(resolve("scripts/tsx-alias-loader.mjs")).href, resolve("scripts/r2-intel-observe.ts")]
+const cliOptions = () => ({ cwd: resolve("."), env: observationEnvironment(process.env, []), encoding: "utf8" as const, windowsHide: true, timeout: 5000 })
+const redact = (text: unknown) => String(text ?? "").split(resolve(".")).join("<repo>").split(homedir()).join("<home>").replace(/[a-z]:[\\/][^\s"']*/gi, "<path>").replace(/(token|secret|key|password)=\S+/gi, "$1=<redacted>").split(userInfo().username).join("<user>").slice(-2000)
+const cliFailure = (child: ReturnType<typeof spawnSync>) => `error=${redact(child.error?.message)} signal=${child.signal} stderr=${redact(child.stderr)}`
+
+it("actual Node CLI resolves file/directory aliases and exits without starting on help", () => {
+  const help = spawnSync(process.execPath, [...cliEntry(), "--help"], cliOptions())
+  expect(help.error, cliFailure(help)).toBeUndefined()
+  expect(help.status, cliFailure(help)).toBe(0)
   expect(help.stdout).toContain("Explicit observation only")
-  const absent = spawnSync(process.execPath, entry, options)
-  expect(absent.status, absent.stderr).toBe(1)
+})
+
+it("actual Node CLI resolves file/directory aliases and exits without starting on missing execute", () => {
+  const absent = spawnSync(process.execPath, cliEntry(), cliOptions())
+  expect(absent.error, cliFailure(absent)).toBeUndefined()
+  expect(absent.status, cliFailure(absent)).toBe(1)
   expect(absent.stderr).toContain("observation_explicit_execute_required")
 })
 
