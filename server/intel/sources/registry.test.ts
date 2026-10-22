@@ -5,7 +5,7 @@ import type { IntelFetchDeps } from "../collect"
 import { intelSourceSeeds } from "../sources"
 import { CUSTOMS_SYNTHETIC } from "./__fixtures__/html-index-synthetic"
 import { fixtures as POST_CLASH } from "./__fixtures__/post-clash-synthetic"
-import { GD_SYNTHETIC, MOF_SYNTHETIC, PH_SYNTHETIC } from "./__fixtures__/public-index-synthetic"
+import { GD_SYNTHETIC, JDIH_MOF_SYNTHETIC, MOF_SYNTHETIC, PH_SYNTHETIC, SITC_SYNTHETIC } from "./__fixtures__/public-index-synthetic"
 import { markup as thaiDocumentMarkup } from "./__fixtures__/thai-document-synthetic"
 import { htmlIndexCandidates } from "./html-index-candidates"
 import { REGISTERED_CLOSED_CANDIDATE_IDS, registeredIntelSources } from "./registry"
@@ -25,8 +25,10 @@ const TD = htmlIndexCandidates.find(seed => seed.catalogId === "TH-C02")!
 const VP = htmlIndexCandidates.find(seed => seed.catalogId === "VN-P03")!
 const VT = htmlIndexCandidates.find(seed => seed.catalogId === "VN-T01")!
 const IT = htmlIndexCandidates.find(seed => seed.catalogId === "ID-T01")!
-const NEW = [CN, TH, PH, GD, TD, VP, VT, IT]
-const SYNTHETIC = [{ seed: CN, html: MOF_SYNTHETIC }, { seed: TH, html: CUSTOMS_SYNTHETIC }, { seed: PH, html: PH_SYNTHETIC }, { seed: GD, html: GD_SYNTHETIC }, { seed: TD, html: thaiDocumentMarkup() }, { seed: VP, html: POST_CLASH["VN-P03"] }, { seed: VT, html: POST_CLASH["VN-T01"] }, { seed: IT, html: POST_CLASH["ID-T01"] }]
+const SK = htmlIndexCandidates.find(seed => seed.catalogId === "XX-K03")!
+const JD = htmlIndexCandidates.find(seed => seed.catalogId === "ID-T02")!
+const NEW = [CN, TH, PH, GD, TD, VP, VT, IT, SK, JD]
+const SYNTHETIC = [{ seed: CN, html: MOF_SYNTHETIC }, { seed: TH, html: CUSTOMS_SYNTHETIC }, { seed: PH, html: PH_SYNTHETIC }, { seed: GD, html: GD_SYNTHETIC }, { seed: TD, html: thaiDocumentMarkup() }, { seed: VP, html: POST_CLASH["VN-P03"] }, { seed: VT, html: POST_CLASH["VN-T01"] }, { seed: IT, html: POST_CLASH["ID-T01"] }, { seed: SK, html: SITC_SYNTHETIC }, { seed: JD, html: JDIH_MOF_SYNTHETIC, count: 3 }]
 const SNAPSHOT = JSON.stringify(htmlIndexCandidates)
 const ORIGINAL_SNAPSHOT = JSON.stringify(intelSourceSeeds)
 
@@ -82,7 +84,7 @@ afterEach(() => {
 })
 
 describe("registeredIntelSources", () => {
-  it("keeps the original two seeds unchanged and reuses all eight closed candidate objects (CN-T02/TH-C01/PH-C01/CN-P01/TH-C02/VN-P03/VN-T01/ID-T01)", () => {
+  it("keeps the original two seeds unchanged and reuses all ten closed candidate objects (CN-T02/TH-C01/PH-C01/CN-P01/TH-C02/VN-P03/VN-T01/ID-T01/XX-K03/ID-T02)", () => {
     expect(registeredIntelSources.map(seed => seed.catalogId)).toEqual(["TH-W01", "ID-W01", ...REGISTERED_CLOSED_CANDIDATE_IDS])
     expect(registeredIntelSources.slice(0, 2)).toEqual(intelSourceSeeds)
     expect(registeredIntelSources[0]).toBe(intelSourceSeeds[0])
@@ -91,14 +93,14 @@ describe("registeredIntelSources", () => {
     expect(registeredIntelSources.slice(2)).toEqual(NEW)
     NEW.forEach((seed, index) => expect(registeredIntelSources[index + 2]).toBe(seed))
     for (const seed of NEW) expect(seed).toMatchObject({ enabled: false, persistence: "disallowed" })
-    expect(new Set(registeredIntelSources.map(seed => seed.id)).size).toBe(10)
-    expect(new Set(registeredIntelSources.map(seed => seed.catalogId)).size).toBe(10)
+    expect(new Set(registeredIntelSources.map(seed => seed.id)).size).toBe(12)
+    expect(new Set(registeredIntelSources.map(seed => seed.catalogId)).size).toBe(12)
     expect(Object.isFrozen(registeredIntelSources)).toBe(true)
   })
 })
 
 describe("default collect job (no seeds) on the BackgroundRuntime with isolated SQLite", () => {
-  it("a) registers all eight closed candidates as enabled=0 but never makes them due or requests them", async () => {
+  it("a) registers all ten closed candidates as enabled=0 but never makes them due or requests them", async () => {
     const state = await isolated()
     const net = fake()
     const runtime = runtimeFor(state)
@@ -174,7 +176,7 @@ describe("b) production selection is unchanged", () => {
     const options = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "TH-W01,ID-W01" }, dependencies })
     expect(options.registry?.intel?.seeds?.map(seed => seed.catalogId)).toEqual(["TH-W01", "ID-W01"])
   })
-  it.each(["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-W01,CN-T02", "ID-W01,TH-C01", "TH-W01,PH-C01", "ID-W01,CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "TH-W01,TH-C02", "ID-W01,ID-T01"])("rejects %s with intel_source_selection_invalid", (ids) => {
+  it.each(["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-W01,CN-T02", "ID-W01,TH-C01", "TH-W01,PH-C01", "ID-W01,CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "TH-W01,TH-C02", "ID-W01,ID-T01", "XX-K03", "ID-T02", "TH-W01,XX-K03", "ID-W01,ID-T02"])("rejects %s with intel_source_selection_invalid", (ids) => {
     expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: ids }, dependencies })).toThrow("intel_source_selection_invalid")
   })
   it("disabled production passes explicit empty seeds", () => {
@@ -183,7 +185,7 @@ describe("b) production selection is unchanged", () => {
 })
 
 describe("d) test-only enabled copies run Runtime -> isolated SQLite with fake lookup/transport", () => {
-  it.each(SYNTHETIC)("$seed.catalogId copy collects synthetic HTML as metadata-only under disallowed persistence", async ({ seed, html }) => {
+  it.each(SYNTHETIC)("$seed.catalogId copy collects synthetic HTML as metadata-only under disallowed persistence", async ({ seed, html, count = 2 }) => {
     const copy = { ...structuredClone(seed), enabled: true }
     expect(copy).not.toBe(seed)
     expect(copy.webList).not.toBe(seed.webList)
@@ -199,11 +201,14 @@ describe("d) test-only enabled copies run Runtime -> isolated SQLite with fake l
       expect(jobs).toHaveLength(1)
       runtime.register(jobs[0])
       await runtime.start()
-      expect(await runtime.runNow(INTEL_COLLECT_JOB_ID)).toMatchObject({ status: "success", recordsRead: 2, recordsWritten: 2 })
+      expect(await runtime.runNow(INTEL_COLLECT_JOB_ID)).toMatchObject({ status: "success", recordsRead: count, recordsWritten: count })
+      // Only the exact configured HTTPS entry literal is requested: no HTTP body fetch, redirect or detail request.
       expect(net.calls).toEqual([seed.url])
+      expect(net.calls.every(url => new URL(url).protocol === "https:")).toBe(true)
       expect(sourceRow(state, seed.id)).toEqual({ enabled: 1, persistence: "disallowed" })
       const items = await state.repository.listItems(seed.id)
-      expect(items).toHaveLength(2)
+      expect(items).toHaveLength(count)
+      if (seed === SK) expect(items.map(item => item.canonicalUrl).sort()).toEqual(["http://www.sitc.com/en/show.asp?id=0001", "http://www.sitc.com/en/show.asp?id=0002"])
       for (const item of items) {
         const versions = await state.repository.listVersions(item.id)
         expect(versions).toHaveLength(1)

@@ -1,4 +1,4 @@
-# R2：已合格 HTML 候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01）与 collect-job 默认接线（2026-10-22）
+# R2：已合格 HTML 候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02）与 collect-job 默认接线（2026-10-22）
 
 dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基线 `a26defa`。
 
@@ -40,3 +40,10 @@ dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基�
 - 测试复用整理：`thai-document-index.test.ts` 的 `markup()`（三个参数及默认值不变）逐字移到 `server/intel/sources/__fixtures__/thai-document-synthetic.ts`；`post-clash-index.test.ts` 的 `fixtures`（键顺序 VN-P03、VN-T01、ID-T01 不变，原测试 `cases[2]` 仍是 ID-T01）逐字移到 `post-clash-synthetic.ts`。原测试改为 import，输入与断言不变。逐字比对（去掉新增 `export ` 后的块文本 SHA-256）：markup `d7b3b6cd…7d8a`（641 B）、fixtures `6df6b1a9…ae92`（1681 B），前后一致，记录于 `D:\diag-logs\slice3-fixture-verbatim-2026-10-22.json`（本机日志，未入库）。
 - registry.test 的注册表、a、b、c、d、e 与共享对象未修改断言覆盖八个新增源；d 另断言条目与版本日期证据的 publishedAt 均为 null：TH-C02 文档日期、ID-T01 制定日期保持原角色，不升级为发布时间。
 - 仍区分“配置注册/运行接线”与迁移预置的 42 行目录行；upsert 只在 job 实际执行且有 fetch 时发生；普通应用启动不自动注册。R2-4 28/39、R2-5 25/34 不变，未接通 live。
+
+## 第四切片：XX-K03 / ID-T02（dots 1792660394.720859、1792660460.596279）
+
+- `REGISTERED_CLOSED_CANDIDATE_IDS` 扩为十个，新增 XX-K03、ID-T02，仍复用候选对象，enabled:false、persistence:disallowed。未新设 HTTP、重定向或许可例外；解析器、安全规则、样本、生产白名单、资格计数未改。
+- 只读边界核对（以代码字面值为准）：XX-K03 入口 `https://www.sitc.com/en/list.asp?classid=44`；`metadataLinkRule: "sitc_show"` 只在 `web-list.ts` 的条目链接 `allowed()` 中生效，仅允许该来源、metadata-only 下精确 `www.sitc.com/en/show.asp?id=<digits>` 形状作为元数据身份，不进入抓取策略（`sourcePolicy` 无 allowHttp）。ID-T02 入口 `https://jdih.kemenkeu.go.id/`（HTTPS 根路径）；原有 root 307→/home 的保存形状测试仍在 `id-mof-index.test.ts`，本切片不改入口、不新增跳转许可。Runtime 路径与直接调用同为 `collectIntelSource`→既有安全抓取检查。
+- registry.test 覆盖：注册表、a、b、c、e 与共享对象未修改扩至十源；d 副本经 Runtime→隔离 SQLite，fake transport 只收到配置字面值 HTTPS 入口（根路径直接 200，无跳转），XX-K03 2 条、ID-T02 3 条均 metadata_only、publishedAt=null，XX-K03 条目身份为原 HTTP show.asp 链接但没有任何 HTTP 请求。复用 `SITC_SYNTHETIC`、`JDIH_MOF_SYNTHETIC`。
+- 仍区分配置注册/运行接线与迁移预置 42 行目录行；普通应用启动不自动注册。R2-4 28/39、R2-5 25/34 不变，未接通 live。MY-P03 不注册；XX-K01/CN-T01 未纳入。

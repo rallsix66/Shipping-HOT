@@ -1,3 +1,8 @@
+## 2026-10-22 R2 XX-K03 / ID-T02 加入默认关闭注册（dots 1792660394.720859 / 1792660460.596279）
+
+- `registeredIntelSources` 新增 XX-K03、ID-T02（enabled:false、persistence:disallowed），默认关闭候选共十个；未新设 HTTP/重定向/许可例外。sitc_show 只是元数据身份规则，不是 HTTP 正文抓取许可；ID-T02 入口仍为 HTTPS 根路径。
+- 隔离测试：副本经 Runtime→SQLite 只请求配置字面值 HTTPS 入口，metadata_only、publishedAt=null；生产拒绝、`[]` 零新增注册行、enabled=1 行回到 0 均覆盖。配置注册/运行接线与迁移预置 42 行目录行分开；R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
 ## 2026-10-22 R2 TH-C02 / VN-P03 / VN-T01 / ID-T01 加入默认关闭注册（dots 1792659856.878179 / 1792659922.734899）
 
 - `registeredIntelSources` 新增四源（enabled:false、persistence:disallowed，复用候选对象），默认关闭注册候选共八个。TH-C02 `markup()` 与 VN/ID `fixtures` 逐字移到 `server/intel/sources/__fixtures__/` 共享，原测试输入与断言不变（块文本 SHA-256 前后一致）。
