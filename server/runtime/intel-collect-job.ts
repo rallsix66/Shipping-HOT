@@ -2,7 +2,8 @@ import { randomUUID } from "node:crypto"
 import type { Database } from "db0"
 import { IntelRepository } from "#/database/intel"
 import { type IntelCollectOutcome, type IntelFetchDeps, collectIntelSource } from "#/intel/collect"
-import { type IntelSourceSeed, intelSourceSeeds } from "#/intel/sources"
+import type { IntelSourceSeed } from "#/intel/sources"
+import { registeredIntelSources } from "#/intel/sources/registry"
 import type { RuntimeJob, SyncResult } from "#/runtime/background-runtime"
 
 export const INTEL_COLLECT_JOB_ID = "intel-collect"
@@ -31,14 +32,16 @@ export interface IntelCollectJob extends RuntimeJob {
 }
 
 /**
- * Registers on the single BackgroundRuntime through registry.ts; default disabled and no implicit registry sources/fetcher.
+ * Registers on the single BackgroundRuntime through registry.ts (which always passes explicit seeds); default disabled and no fetcher.
+ * Without seeds the factory registers `registeredIntelSources` (closed candidates are upserted enabled=0 and never due).
  * Each instance is one executor. It only recovers runs of executors confirmed ended; it never infers that a run is dead from
  * its age. Crash leftovers are handled by the explicit `recoverIntelRunsAtExclusiveStartup` step.
  */
 export function createIntelCollectJob(options: IntelCollectJobOptions): IntelCollectJob {
   const repository = new IntelRepository(options.db)
   const now = options.now ?? (() => new Date())
-  const seeds = options.seeds ?? intelSourceSeeds
+  // `??` on purpose: an explicit [] means zero sources and never falls back to the registry.
+  const seeds = options.seeds ?? registeredIntelSources
   const executorId = randomUUID()
   let registered = false
   let active = false

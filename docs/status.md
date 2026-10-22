@@ -1,3 +1,8 @@
+## 2026-10-22 R2 CN-T02 / TH-C01 默认关闭注册（collect-job 默认接线，dots 1792657970.271849 / 1792658044.563019）
+
+- 新增 `registeredIntelSources`（原两源不变 + CN-T02/TH-C01 enabled:false、persistence:disallowed），`createIntelCollectJob` 未传 seeds 时默认用它；显式 seeds（含 `[]`）原样优先。
+- 只是 collect-job factory 的默认注册接入；普通应用启动不自动注册四源（runtime registry 仍显式 `seeds ?? []`），生产白名单、migration/manual/observation 不变。
+- 隔离测试覆盖默认注册不请求、生产选择不变、`[]` 零源、测试副本 Runtime→SQLite（metadata-only）、同 ID enabled=1 行回到 0。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
 ## 2026-10-22 R2-7 电脑端两项补验（限定通过，dots 1792640825.474229）
 
 - 在隔离 v2 现场按已审恢复脚本（5c484e1d…）执行一次：before、READY、startup、gui-after 全部通过；所列业务/schema/指针/计数/设置不变，只有 last_migration_at 随启动和页面 GET 前移。
