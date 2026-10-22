@@ -1,4 +1,4 @@
-# R2：HTML 候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02 / VN-D01 / XX-K02 / XX-K01 / CN-T01 / MY-C01）与 collect-job 默认接线（2026-10-22）
+# R2：来源候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02 / VN-D01 / XX-K02 / XX-K01 / CN-T01 / MY-C01 / MY-T01 / PH-M01）与 collect-job 默认接线（2026-10-22）
 
 dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基线 `a26defa`。
 
@@ -86,3 +86,10 @@ dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基�
 - 新增 `server/intel/sources/rss-candidates.ts`：正式 ID `intel:my-c01`（与 `intel:<catalog>` 命名一致且唯一，不复用 `bounded:` 取证 ID），`https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss`、host `www.customs.gov.my`、既有 Feed content-types（`sources.ts` 仅把 `FEED_CONTENT_TYPES` 改为 export，值不变），enabled:false、persistence:disallowed；沿用既有 Feed parser，无 header/CA/HTTP 例外，解析器/许可/网络安全未改。registry 按 catalogId 复用该对象，默认关闭注册共十五个。
 - 新编 synthetic RSS `server/intel/sources/__fixtures__/my-customs-rss-synthetic.ts`（明确标注，非私有原 XML、非派生记录）。registry.test d：Runtime→隔离 SQLite 只请求配置 URL，2 条 metadata_only（description 不入库），既有 Feed 语义下显式 +0800 pubDate 换算 publishedAt；正式 ID 入库、无 `bounded:` 行；生产选择拒绝 `MY-C01`、`TH-W01,MY-C01`、`intel:my-c01`、`bounded:MY-C01`。
 - 本次仅补默认关闭接线，不新增资格分子、不宣称 live；生产白名单仍仅 TH-W01/ID-W01、应用启动仍显式空 seeds，生产自动抓取未启用。R2-4 28/39、R2-5 25/34 不变。MY-T01/PH-M01 留后续。
+
+## 第十切片：MY-T01 / PH-M01 RSS 默认关闭接线（dots 1792665219.519459）
+
+- 开工核对 `docs/evidence/r2-three-rss-2026-10-15/MY-T01-isolated-config.json`、`PH-M01-isolated-config.json` 与目录：URL、host、kind=rss、五项内容类型、3600000、disallowed 一致，无冲突。
+- `rss-candidates.ts` 新增 `intel:my-t01`（`https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss`，host `www.mof.gov.my`）与 `intel:ph-m01`（`https://portcalls.com/feed/`，保留尾斜杠，host `portcalls.com`，不加 www）；enabled:false、persistence:disallowed，无 CA/header/HTTP 例外，沿用既有 Feed parser。默认关闭注册共十七个。
+- 新 fixture `my-mof-rss-synthetic.ts`（+0800）、`portcalls-rss-synthetic.ts`（+0000）明示 synthetic，带 description。registry.test 的“非 MY-C01 即 publishedAt=null”改为明确 RSS 分支：三源逐条核对 UTC publishedAt；RSS 保持 dateEvidence=null（区别于 HTML/JSON 日期证据）；fixture 无 `<updated>`，sourceUpdatedAt 为 parser 回退到 pubDate 的值，不是独立更新时间；title-only，description 不入库。
+- 生产单独及混合选择（含 `intel:`、`bounded:` 形式）均拒绝；生产白名单、应用显式空 seeds 未改，生产自动抓取未启用。不新增资格分子，R2-4 28/39、R2-5 25/34 不变，未接通 live。

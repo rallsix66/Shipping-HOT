@@ -1,3 +1,8 @@
+## 2026-10-22 R2 MY-T01 / PH-M01 RSS 默认关闭接线（dots 1792665219.519459）
+
+- 新增 `intel:my-t01`、`intel:ph-m01`（既有 Feed parser，enabled:false、persistence:disallowed，与 10/15 隔离配置一致），默认关闭注册共十七个；新编 synthetic RSS 做 Runtime→隔离 SQLite 测试，RSS 分支逐条核对 UTC，dateEvidence=null，sourceUpdatedAt 为回退 pubDate 值。
+- 默认关闭注册 ≠ 生产启用：白名单仍仅 TH-W01/ID-W01。不新增资格分子，R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
 ## 2026-10-22 R2 MY-C01 RSS 默认关闭接线（dots 1792664710.276179）
 
 - 新增 RSS 关闭候选 `intel:my-c01`（既有 Feed parser，enabled:false、persistence:disallowed），接入 registry；不复用取证 ID `bounded:MY-C01`。新编 synthetic RSS 做 Runtime→隔离 SQLite 测试。三源“补原 XML 回放”建议已过时（10/15 证据已完成 26 条回放、OK/PASS）。

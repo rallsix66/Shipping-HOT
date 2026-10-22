@@ -6,6 +6,8 @@ import { intelSourceSeeds } from "../sources"
 import { CUSTOMS_SYNTHETIC } from "./__fixtures__/html-index-synthetic"
 import { maerskHtml as MAERSK_SYNTHETIC } from "./__fixtures__/maersk-news-synthetic"
 import { mofcomHtml as MOFCOM_SYNTHETIC } from "./__fixtures__/mofcom-policy-synthetic"
+import { MY_MOF_RSS_SYNTHETIC } from "./__fixtures__/my-mof-rss-synthetic"
+import { PORTCALLS_RSS_SYNTHETIC } from "./__fixtures__/portcalls-rss-synthetic"
 import { MY_CUSTOMS_RSS_SYNTHETIC } from "./__fixtures__/my-customs-rss-synthetic"
 import { ONE_NEWSROOM_SYNTHETIC } from "./__fixtures__/one-newsroom-synthetic"
 import { fixtures as POST_CLASH } from "./__fixtures__/post-clash-synthetic"
@@ -38,8 +40,25 @@ const XK = htmlIndexCandidates.find(seed => seed.catalogId === "XX-K02")!
 const MK = htmlIndexCandidates.find(seed => seed.catalogId === "XX-K01")!
 const MC = htmlIndexCandidates.find(seed => seed.catalogId === "CN-T01")!
 const MY = rssCandidates.find(seed => seed.catalogId === "MY-C01")!
-const NEW = [CN, TH, PH, GD, TD, VP, VT, IT, SK, JD, VD, XK, MK, MC, MY]
-const SYNTHETIC = [{ seed: CN, html: MOF_SYNTHETIC }, { seed: TH, html: CUSTOMS_SYNTHETIC }, { seed: PH, html: PH_SYNTHETIC }, { seed: GD, html: GD_SYNTHETIC }, { seed: TD, html: thaiDocumentMarkup() }, { seed: VP, html: POST_CLASH["VN-P03"] }, { seed: VT, html: POST_CLASH["VN-T01"] }, { seed: IT, html: POST_CLASH["ID-T01"] }, { seed: SK, html: SITC_SYNTHETIC }, { seed: JD, html: JDIH_MOF_SYNTHETIC, count: 3 }, { seed: VD, html: VN_DISASTER_SYNTHETIC }, { seed: XK, html: ONE_NEWSROOM_SYNTHETIC, count: 3 }, { seed: MK, html: MAERSK_SYNTHETIC }, { seed: MC, html: MOFCOM_SYNTHETIC }, { seed: MY, html: MY_CUSTOMS_RSS_SYNTHETIC }]
+const MT = rssCandidates.find(seed => seed.catalogId === "MY-T01")!
+const PM = rssCandidates.find(seed => seed.catalogId === "PH-M01")!
+const RSS = [MY, MT, PM]
+const NEW = [CN, TH, PH, GD, TD, VP, VT, IT, SK, JD, VD, XK, MK, MC, MY, MT, PM]
+const SYNTHETIC = [{ seed: CN, html: MOF_SYNTHETIC }, { seed: TH, html: CUSTOMS_SYNTHETIC }, { seed: PH, html: PH_SYNTHETIC }, { seed: GD, html: GD_SYNTHETIC }, { seed: TD, html: thaiDocumentMarkup() }, { seed: VP, html: POST_CLASH["VN-P03"] }, { seed: VT, html: POST_CLASH["VN-T01"] }, { seed: IT, html: POST_CLASH["ID-T01"] }, { seed: SK, html: SITC_SYNTHETIC }, { seed: JD, html: JDIH_MOF_SYNTHETIC, count: 3 }, { seed: VD, html: VN_DISASTER_SYNTHETIC }, { seed: XK, html: ONE_NEWSROOM_SYNTHETIC, count: 3 }, { seed: MK, html: MAERSK_SYNTHETIC }, { seed: MC, html: MOFCOM_SYNTHETIC }, { seed: MY, html: MY_CUSTOMS_RSS_SYNTHETIC }, { seed: MT, html: MY_MOF_RSS_SYNTHETIC }, { seed: PM, html: PORTCALLS_RSS_SYNTHETIC }]
+const RSS_EXPECTED: Record<string, { id: string, url: string, host: string, items: [string, string, string][] }> = {
+  "MY-C01": { id: "intel:my-c01", url: "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss", host: "www.customs.gov.my", items: [
+    ["https://www.customs.gov.my/ms/arkib/pengumuman/synthetic-dua", "Synthetic pengumuman dua", "2026-09-28T12:32:19.000Z"],
+    ["https://www.customs.gov.my/ms/arkib/pengumuman/synthetic-satu", "Synthetic pengumuman satu", "2026-10-08T01:16:03.000Z"],
+  ] },
+  "MY-T01": { id: "intel:my-t01", url: "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss", host: "www.mof.gov.my", items: [
+    ["https://www.mof.gov.my/portal/ms/berita/siaran-media/synthetic-dua", "Synthetic siaran media dua", "2026-10-02T00:30:00.000Z"],
+    ["https://www.mof.gov.my/portal/ms/berita/siaran-media/synthetic-satu", "Synthetic siaran media satu", "2026-10-14T08:05:00.000Z"],
+  ] },
+  "PH-M01": { id: "intel:ph-m01", url: "https://portcalls.com/feed/", host: "portcalls.com", items: [
+    ["https://portcalls.com/synthetic-port-call-one", "Synthetic port call one", "2026-10-15T04:00:43.000Z"],
+    ["https://portcalls.com/synthetic-port-call-two", "Synthetic port call two", "2026-10-14T12:38:17.000Z"],
+  ] },
+}
 const SNAPSHOT = JSON.stringify(htmlIndexCandidates)
 const RSS_SNAPSHOT = JSON.stringify(rssCandidates)
 const ORIGINAL_SNAPSHOT = JSON.stringify(intelSourceSeeds)
@@ -102,7 +121,7 @@ afterEach(() => {
 })
 
 describe("registeredIntelSources", () => {
-  it("keeps the original two seeds unchanged and reuses all fifteen closed candidate objects (CN-T02/TH-C01/PH-C01/CN-P01/TH-C02/VN-P03/VN-T01/ID-T01/XX-K03/ID-T02/VN-D01/XX-K02/XX-K01/CN-T01/MY-C01)", () => {
+  it("keeps the original two seeds unchanged and reuses all seventeen closed candidate objects (CN-T02/TH-C01/PH-C01/CN-P01/TH-C02/VN-P03/VN-T01/ID-T01/XX-K03/ID-T02/VN-D01/XX-K02/XX-K01/CN-T01/MY-C01/MY-T01/PH-M01)", () => {
     expect(registeredIntelSources.map(seed => seed.catalogId)).toEqual(["TH-W01", "ID-W01", ...REGISTERED_CLOSED_CANDIDATE_IDS])
     expect(registeredIntelSources.slice(0, 2)).toEqual(intelSourceSeeds)
     expect(registeredIntelSources[0]).toBe(intelSourceSeeds[0])
@@ -111,14 +130,14 @@ describe("registeredIntelSources", () => {
     expect(registeredIntelSources.slice(2)).toEqual(NEW)
     NEW.forEach((seed, index) => expect(registeredIntelSources[index + 2]).toBe(seed))
     for (const seed of NEW) expect(seed).toMatchObject({ enabled: false, persistence: "disallowed" })
-    expect(new Set(registeredIntelSources.map(seed => seed.id)).size).toBe(17)
-    expect(new Set(registeredIntelSources.map(seed => seed.catalogId)).size).toBe(17)
+    expect(new Set(registeredIntelSources.map(seed => seed.id)).size).toBe(19)
+    expect(new Set(registeredIntelSources.map(seed => seed.catalogId)).size).toBe(19)
     expect(Object.isFrozen(registeredIntelSources)).toBe(true)
   })
 })
 
 describe("default collect job (no seeds) on the BackgroundRuntime with isolated SQLite", () => {
-  it("a) registers all fifteen closed candidates as enabled=0 but never makes them due or requests them", async () => {
+  it("a) registers all seventeen closed candidates as enabled=0 but never makes them due or requests them", async () => {
     const state = await isolated()
     const net = fake()
     const runtime = runtimeFor(state)
@@ -194,7 +213,7 @@ describe("b) production selection is unchanged", () => {
     const options = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "TH-W01,ID-W01" }, dependencies })
     expect(options.registry?.intel?.seeds?.map(seed => seed.catalogId)).toEqual(["TH-W01", "ID-W01"])
   })
-  it.each(["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-W01,CN-T02", "ID-W01,TH-C01", "TH-W01,PH-C01", "ID-W01,CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "TH-W01,TH-C02", "ID-W01,ID-T01", "XX-K03", "ID-T02", "TH-W01,XX-K03", "ID-W01,ID-T02", "VN-D01", "TH-W01,VN-D01", "XX-K02", "ID-W01,XX-K02", "XX-K01", "TH-W01,XX-K01", "CN-T01", "ID-W01,CN-T01", "MY-C01", "TH-W01,MY-C01", "intel:my-c01", "bounded:MY-C01"])("rejects %s with intel_source_selection_invalid", (ids) => {
+  it.each(["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-W01,CN-T02", "ID-W01,TH-C01", "TH-W01,PH-C01", "ID-W01,CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "TH-W01,TH-C02", "ID-W01,ID-T01", "XX-K03", "ID-T02", "TH-W01,XX-K03", "ID-W01,ID-T02", "VN-D01", "TH-W01,VN-D01", "XX-K02", "ID-W01,XX-K02", "XX-K01", "TH-W01,XX-K01", "CN-T01", "ID-W01,CN-T01", "MY-C01", "TH-W01,MY-C01", "intel:my-c01", "bounded:MY-C01", "MY-T01", "PH-M01", "ID-W01,MY-T01", "TH-W01,PH-M01", "MY-T01,PH-M01", "intel:my-t01", "intel:ph-m01", "bounded:MY-T01", "bounded:PH-M01"])("rejects %s with intel_source_selection_invalid", (ids) => {
     expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: ids }, dependencies })).toThrow("intel_source_selection_invalid")
   })
   it("disabled production passes explicit empty seeds", () => {
@@ -258,18 +277,24 @@ describe("d) test-only enabled copies run Runtime -> isolated SQLite with fake l
         expect(evidence.map(row => row?.raw).sort()).toEqual(["2026-10-14", "2026-10-19"])
         for (const row of evidence) expect(row).toMatchObject({ precision: "day", timezone: "missing", utcOffset: null, publishedAt: null })
       }
-      // MY-C01: existing Feed parser semantics (explicit +0800 pubDate -> instant), metadata only, product id only (never the bounded: evidence id).
-      if (seed === MY) {
-        expect(copy.id).toBe("intel:my-c01")
-        expect(copy.url).toBe("https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss")
-        expect(copy.allowedHosts).toEqual(["www.customs.gov.my"])
+      // RSS branch (MY-C01 +0800, MY-T01 +0800, PH-M01 +0000): existing Feed parser semantics. Explicit-offset pubDate becomes the
+      // publishedAt instant (checked per item in UTC); RSS keeps dateEvidence=null, unlike HTML/JSON day/second date evidence.
+      // No <updated> in the fixtures, so sourceUpdatedAt is the parser's fallback to pubDate, not an independent update time.
+      // Formal intel:<catalog> ids only; the bounded:<catalog> evidence ids never appear.
+      if (RSS.includes(seed)) {
+        const expected = RSS_EXPECTED[seed.catalogId]
+        expect(copy).toMatchObject({ id: expected.id, kind: "rss", url: expected.url, allowedHosts: [expected.host], intervalMs: 3600000 })
+        expect(copy.allowedContentTypes).toEqual(["application/rss+xml", "application/atom+xml", "application/rdf+xml", "application/xml", "text/xml"])
         expect(copy.sourceHeaderLimit).toBeUndefined()
         expect(copy.sourceCa).toBeUndefined()
         expect(sourceIds(state).some(id => id.startsWith("bounded:"))).toBe(false)
-        expect(items.map(item => [item.canonicalUrl, item.title, item.publishedAt]).sort()).toEqual([
-          ["https://www.customs.gov.my/ms/arkib/pengumuman/synthetic-dua", "Synthetic pengumuman dua", "2026-09-28T12:32:19.000Z"],
-          ["https://www.customs.gov.my/ms/arkib/pengumuman/synthetic-satu", "Synthetic pengumuman satu", "2026-10-08T01:16:03.000Z"],
-        ])
+        expect(items.map(item => [item.canonicalUrl, item.title, item.publishedAt]).sort()).toEqual(expected.items)
+        for (const item of items) {
+          const [version] = await state.repository.listVersions(item.id)
+          expect(version.dateEvidence).toBeNull()
+          expect(version.sourcePublishedAt).toBe(item.publishedAt)
+          expect(version.sourceUpdatedAt).toBe(item.publishedAt)
+        }
         for (const opts of net.options) expect(opts.caPem).toBeUndefined()
       }
       if (seed === SK) expect(items.map(item => item.canonicalUrl).sort()).toEqual(["http://www.sitc.com/en/show.asp?id=0001", "http://www.sitc.com/en/show.asp?id=0002"])
@@ -278,7 +303,7 @@ describe("d) test-only enabled copies run Runtime -> isolated SQLite with fake l
         expect(versions).toHaveLength(1)
         expect(versions[0].contentScope).toBe("metadata_only")
         // Day/document/enactment date evidence keeps its role; never promoted to a publication instant.
-        if (seed !== MY) {
+        if (!RSS.includes(seed)) {
           expect(item.publishedAt).toBeNull()
           expect(versions[0].dateEvidence?.publishedAt).toBeNull()
         }
