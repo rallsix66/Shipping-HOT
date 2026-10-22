@@ -1,8 +1,13 @@
+## 2026-10-22 R2 PH-C01 / CN-P01 加入默认关闭注册（dots 1792659213.305219）
+
+- `registeredIntelSources` 新增 PH-C01、CN-P01（enabled:false、persistence:disallowed，复用候选对象）；隔离测试复用 PH_SYNTHETIC/GD_SYNTHETIC 覆盖默认不请求/不进 due、生产拒绝、测试副本 Runtime→SQLite、enabled=1 行回到 0。
+- 配置注册/运行接线与迁移预置的 42 行目录行分开写：后者是数据库已有目录行，本切片不改变。upsert 只在 job 实际执行且有 fetch 时发生，构造时不写库。普通应用启动仍不自动注册（runtime registry 显式 `seeds ?? []`）。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
 ## 2026-10-22 R2 CN-T02 / TH-C01 默认关闭注册（collect-job 默认接线，dots 1792657970.271849 / 1792658044.563019）
 
 - 新增 `registeredIntelSources`（原两源不变 + CN-T02/TH-C01 enabled:false、persistence:disallowed），`createIntelCollectJob` 未传 seeds 时默认用它；显式 seeds（含 `[]`）原样优先。
 - 只是 collect-job factory 的默认注册接入；普通应用启动不自动注册四源（runtime registry 仍显式 `seeds ?? []`），生产白名单、migration/manual/observation 不变。
-- 隔离测试覆盖默认注册不请求、生产选择不变、`[]` 零源、测试副本 Runtime→SQLite（metadata-only）、同 ID enabled=1 行回到 0。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+- 隔离测试覆盖默认注册不请求、生产选择不变、`[]` 零新增注册行且迁移预置行不变、测试副本 Runtime→SQLite（metadata-only）、同 ID enabled=1 行回到 0。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
 ## 2026-10-22 R2-7 电脑端两项补验（限定通过，dots 1792640825.474229）
 
 - 在隔离 v2 现场按已审恢复脚本（5c484e1d…）执行一次：before、READY、startup、gui-after 全部通过；所列业务/schema/指针/计数/设置不变，只有 last_migration_at 随启动和页面 GET 前移。

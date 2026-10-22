@@ -4,7 +4,7 @@ import { open } from "../__fixtures__/isolated-db"
 import type { IntelFetchDeps } from "../collect"
 import { intelSourceSeeds } from "../sources"
 import { CUSTOMS_SYNTHETIC } from "./__fixtures__/html-index-synthetic"
-import { MOF_SYNTHETIC } from "./__fixtures__/public-index-synthetic"
+import { GD_SYNTHETIC, MOF_SYNTHETIC, PH_SYNTHETIC } from "./__fixtures__/public-index-synthetic"
 import { htmlIndexCandidates } from "./html-index-candidates"
 import { REGISTERED_CLOSED_CANDIDATE_IDS, registeredIntelSources } from "./registry"
 import { initShippingTables } from "#/database/shipping"
@@ -17,7 +17,10 @@ import { getDefaultRuntimeJobs } from "#/runtime/registry"
 const NOW = new Date("2026-10-22T08:00:00Z")
 const CN = htmlIndexCandidates.find(seed => seed.catalogId === "CN-T02")!
 const TH = htmlIndexCandidates.find(seed => seed.catalogId === "TH-C01")!
-const NEW = [CN, TH]
+const PH = htmlIndexCandidates.find(seed => seed.catalogId === "PH-C01")!
+const GD = htmlIndexCandidates.find(seed => seed.catalogId === "CN-P01")!
+const NEW = [CN, TH, PH, GD]
+const SYNTHETIC = [{ seed: CN, html: MOF_SYNTHETIC }, { seed: TH, html: CUSTOMS_SYNTHETIC }, { seed: PH, html: PH_SYNTHETIC }, { seed: GD, html: GD_SYNTHETIC }]
 const SNAPSHOT = JSON.stringify(htmlIndexCandidates)
 const ORIGINAL_SNAPSHOT = JSON.stringify(intelSourceSeeds)
 
@@ -69,28 +72,27 @@ afterEach(() => {
   expect(blocked).toEqual([])
   expect(JSON.stringify(htmlIndexCandidates)).toBe(SNAPSHOT)
   expect(JSON.stringify(intelSourceSeeds)).toBe(ORIGINAL_SNAPSHOT)
-  expect(CN.enabled).toBe(false)
-  expect(TH.enabled).toBe(false)
+  for (const seed of NEW) expect(seed).toMatchObject({ enabled: false, persistence: "disallowed" })
 })
 
 describe("registeredIntelSources", () => {
-  it("keeps the original two seeds unchanged and reuses CN-T02/TH-C01 candidate objects closed", () => {
+  it("keeps the original two seeds unchanged and reuses CN-T02/TH-C01/PH-C01/CN-P01 candidate objects closed", () => {
     expect(registeredIntelSources.map(seed => seed.catalogId)).toEqual(["TH-W01", "ID-W01", ...REGISTERED_CLOSED_CANDIDATE_IDS])
     expect(registeredIntelSources.slice(0, 2)).toEqual(intelSourceSeeds)
     expect(registeredIntelSources[0]).toBe(intelSourceSeeds[0])
     expect(registeredIntelSources[1]).toBe(intelSourceSeeds[1])
     expect(registeredIntelSources.slice(0, 2).every(seed => seed.enabled)).toBe(true)
-    expect(registeredIntelSources[2]).toBe(CN)
-    expect(registeredIntelSources[3]).toBe(TH)
+    expect(registeredIntelSources.slice(2)).toEqual(NEW)
+    NEW.forEach((seed, index) => expect(registeredIntelSources[index + 2]).toBe(seed))
     for (const seed of NEW) expect(seed).toMatchObject({ enabled: false, persistence: "disallowed" })
-    expect(new Set(registeredIntelSources.map(seed => seed.id)).size).toBe(4)
-    expect(new Set(registeredIntelSources.map(seed => seed.catalogId)).size).toBe(4)
+    expect(new Set(registeredIntelSources.map(seed => seed.id)).size).toBe(6)
+    expect(new Set(registeredIntelSources.map(seed => seed.catalogId)).size).toBe(6)
     expect(Object.isFrozen(registeredIntelSources)).toBe(true)
   })
 })
 
 describe("default collect job (no seeds) on the BackgroundRuntime with isolated SQLite", () => {
-  it("a) registers CN-T02/TH-C01 as enabled=0 but never makes them due or requests them", async () => {
+  it("a) registers CN-T02/TH-C01/PH-C01/CN-P01 as enabled=0 but never makes them due or requests them", async () => {
     const state = await isolated()
     const net = fake()
     const runtime = runtimeFor(state)
@@ -116,7 +118,7 @@ describe("default collect job (no seeds) on the BackgroundRuntime with isolated 
 
   it("e) a same-ID row previously enabled=1 returns to enabled=0 after the default upsert and is not requested", async () => {
     const state = await isolated()
-    const net = fake({ [CN.url]: MOF_SYNTHETIC, [TH.url]: CUSTOMS_SYNTHETIC })
+    const net = fake(Object.fromEntries(SYNTHETIC.map(({ seed, html }) => [seed.url, html])))
     const runtime = runtimeFor(state)
     try {
       for (const seed of NEW) await state.repository.upsertSource({ ...seed, enabled: true }, new Date(NOW.getTime() - 1000).toISOString())
@@ -129,8 +131,8 @@ describe("default collect job (no seeds) on the BackgroundRuntime with isolated 
         expect(runCount(state, seed.id)).toBe(0)
         expect(await state.repository.listItems(seed.id)).toEqual([])
       }
-      expect((await state.repository.listDueSources(NOW.toISOString())).map(row => row.id)).not.toEqual(expect.arrayContaining([CN.id]))
-      expect((await state.repository.listDueSources(NOW.toISOString())).map(row => row.id)).not.toEqual(expect.arrayContaining([TH.id]))
+      const due = (await state.repository.listDueSources(NOW.toISOString())).map(row => row.id)
+      for (const seed of NEW) expect(due).not.toContain(seed.id)
       expect(net.calls.filter(isNewUrl)).toEqual([])
     } finally {
       runtime.stop()
@@ -138,7 +140,7 @@ describe("default collect job (no seeds) on the BackgroundRuntime with isolated 
     }
   })
 
-  it("c) explicit seeds: [] is zero sources (no registry fallback), zero rows and zero requests", async () => {
+  it("c) explicit seeds: [] adds zero registered rows (migration-preseeded catalog rows unchanged), no registry fallback, zero requests", async () => {
     const state = await isolated()
     const net = fake()
     const runtime = runtimeFor(state)
@@ -166,7 +168,7 @@ describe("b) production selection is unchanged", () => {
     const options = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "TH-W01,ID-W01" }, dependencies })
     expect(options.registry?.intel?.seeds?.map(seed => seed.catalogId)).toEqual(["TH-W01", "ID-W01"])
   })
-  it.each(["CN-T02", "TH-C01", "TH-W01,CN-T02", "ID-W01,TH-C01"])("rejects %s with intel_source_selection_invalid", (ids) => {
+  it.each(["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-W01,CN-T02", "ID-W01,TH-C01", "TH-W01,PH-C01", "ID-W01,CN-P01"])("rejects %s with intel_source_selection_invalid", (ids) => {
     expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: ids }, dependencies })).toThrow("intel_source_selection_invalid")
   })
   it("disabled production passes explicit empty seeds", () => {
@@ -175,7 +177,7 @@ describe("b) production selection is unchanged", () => {
 })
 
 describe("d) test-only enabled copies run Runtime -> isolated SQLite with fake lookup/transport", () => {
-  it.each([{ seed: CN, html: MOF_SYNTHETIC }, { seed: TH, html: CUSTOMS_SYNTHETIC }])("$seed.catalogId copy collects synthetic HTML as metadata-only under disallowed persistence", async ({ seed, html }) => {
+  it.each(SYNTHETIC)("$seed.catalogId copy collects synthetic HTML as metadata-only under disallowed persistence", async ({ seed, html }) => {
     const copy = { ...structuredClone(seed), enabled: true }
     expect(copy).not.toBe(seed)
     expect(copy.webList).not.toBe(seed.webList)
