@@ -255,3 +255,9 @@ color:var(--ink);}
 .ports-demo .cols{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
 .ports-demo .tablewrap{max-height:384px;overflow:auto}
 @media(max-width:1280px){.ports-demo .cols{grid-template-columns:minmax(0,1fr)}}
+
+/* Timeline long-string overflow (/events, /feed): wrap only, never truncate risk facts. */
+.risk-console .tl-body .tl-title-row {min-width:0;}
+.risk-console .tl-body .tl-title-row h4,
+.risk-console .tl-body .tl-sum {min-width:0;overflow-wrap:anywhere;word-break:break-word;}
+.risk-console .tl-body .tl-chips > .chip {max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;word-break:break-word;}
