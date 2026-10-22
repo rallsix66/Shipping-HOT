@@ -1,22 +1,22 @@
 ## 2026-10-22 R2 XX-M01 / XX-M03 RSS 默认关闭接线（dots 1792665925.725299）
 
-- 新增 `intel:xx-m01`、`intel:xx-m03`（既有 Feed parser，enabled:false、persistence:disallowed，与 10/15 隔离配置一致），默认关闭注册共十九个；既有 shipping feed 源 `the-loadstar` 未改、与 intel ID 分离。synthetic RSS（+0000）逐条核对 UTC，dateEvidence=null，sourceUpdatedAt 为 pubDate 回退值。
-- 默认关闭注册 ≠ 生产启用：intel 生产白名单仍仅 TH-W01/ID-W01。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+- 新增 `intel:xx-m01`、`intel:xx-m03`（既有 Feed parser，enabled:false、persistence:disallowed，与 10/15 隔离配置一致），默认关闭注册共十九个；既有 shipping feed 源 `the-loadstar` 未改、与 intel ID 分离（其 enabled=true 只说明配置存在，不证明当前实例在运行）；未来启用 `intel:xx-m01` 前须确定单一抓取责任，禁止两条链路独立抓取同一 URL。synthetic RSS（+0000）逐条核对 UTC，dateEvidence=null，sourceUpdatedAt 为 pubDate 回退值。
+- 默认关闭注册 ≠ 生产启用：本轮新增 intel 来源均未启用（不泛指已有 shipping feed 或天气链路），intel 生产白名单仍仅 TH-W01/ID-W01。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
 
 ## 2026-10-22 R2 MY-T01 / PH-M01 RSS 默认关闭接线（dots 1792665219.519459）
 
 - 新增 `intel:my-t01`、`intel:ph-m01`（既有 Feed parser，enabled:false、persistence:disallowed，与 10/15 隔离配置一致），默认关闭注册共十七个；新编 synthetic RSS 做 Runtime→隔离 SQLite 测试，RSS 分支逐条核对 UTC，dateEvidence=null，sourceUpdatedAt 为回退 pubDate 值。
-- 默认关闭注册 ≠ 生产启用：白名单仍仅 TH-W01/ID-W01。不新增资格分子，R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+- 默认关闭注册 ≠ 生产启用：本轮新增 intel 来源均未启用，intel 生产白名单仍仅 TH-W01/ID-W01。不新增资格分子，R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
 
 ## 2026-10-22 R2 MY-C01 RSS 默认关闭接线（dots 1792664710.276179）
 
 - 新增 RSS 关闭候选 `intel:my-c01`（既有 Feed parser，enabled:false、persistence:disallowed），接入 registry；不复用取证 ID `bounded:MY-C01`。新编 synthetic RSS 做 Runtime→隔离 SQLite 测试。三源“补原 XML 回放”建议已过时（10/15 证据已完成 26 条回放、OK/PASS）。
-- 默认关闭注册共十五个（含 MY-C01）≠ 生产启用：生产白名单仍仅 TH-W01/ID-W01，应用启动仍显式空 seeds。本次不新增资格分子，R2-4 28/39、R2-5 25/34 不变，未接通 live。MY-T01/PH-M01 留后续。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+- 默认关闭注册共十五个（含 MY-C01）≠ 生产启用：本轮新增 intel 来源均未启用，intel 生产白名单仍仅 TH-W01/ID-W01，应用启动仍显式空 seeds。本次不新增资格分子，R2-4 28/39、R2-5 25/34 不变，未接通 live。MY-T01/PH-M01 留后续。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
 
 ## 2026-10-22 R2 CN-T01 加入默认关闭注册，不升级资格（dots 1792664101.141579 / 1792664168.380759）
 
 - `registeredIntelSources` 新增 CN-T01（web_list，enabled:false、persistence:disallowed），默认关闭注册共十四个；`mofcomHtml` 原样移到共享 fixture。只入库两条合成 HTTPS 政策，原始 HTTP 身份与解读链接仍排除；无 header 例外；日期 day、无时区、publishedAt=null。
-- CN-T01 为 R2-4 OK / R2-5 PARTIAL（7/8），注册不补足缺失身份；“默认关闭注册”不是资格声明，生产自动抓取未启用。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+- CN-T01 为 R2-4 OK / R2-5 PARTIAL（7/8），注册不补足缺失身份；“默认关闭注册”不是资格声明，本轮新增 intel 来源均未启用。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
 
 ## 2026-10-22 R2 XX-K01 加入默认关闭注册（dots 1792663523.596789）
 
