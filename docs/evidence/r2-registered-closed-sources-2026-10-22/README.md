@@ -1,4 +1,4 @@
-# R2：来源候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02 / VN-D01 / XX-K02 / XX-K01 / CN-T01 / MY-C01 / MY-T01 / PH-M01）与 collect-job 默认接线（2026-10-22）
+# R2：来源候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02 / VN-D01 / XX-K02 / XX-K01 / CN-T01 / MY-C01 / MY-T01 / PH-M01 / XX-M01 / XX-M03）与 collect-job 默认接线（2026-10-22）
 
 dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基线 `a26defa`。
 
@@ -93,3 +93,9 @@ dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基�
 - `rss-candidates.ts` 新增 `intel:my-t01`（`https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss`，host `www.mof.gov.my`）与 `intel:ph-m01`（`https://portcalls.com/feed/`，保留尾斜杠，host `portcalls.com`，不加 www）；enabled:false、persistence:disallowed，无 CA/header/HTTP 例外，沿用既有 Feed parser。默认关闭注册共十七个。
 - 新 fixture `my-mof-rss-synthetic.ts`（+0800）、`portcalls-rss-synthetic.ts`（+0000）明示 synthetic，带 description。registry.test 的“非 MY-C01 即 publishedAt=null”改为明确 RSS 分支：三源逐条核对 UTC publishedAt；RSS 保持 dateEvidence=null（区别于 HTML/JSON 日期证据）；fixture 无 `<updated>`，sourceUpdatedAt 为 parser 回退到 pubDate 的值，不是独立更新时间；title-only，description 不入库。
 - 生产单独及混合选择（含 `intel:`、`bounded:` 形式）均拒绝；生产白名单、应用显式空 seeds 未改，生产自动抓取未启用。不新增资格分子，R2-4 28/39、R2-5 25/34 不变，未接通 live。
+
+## 第十一切片：XX-M01 / XX-M03 RSS 默认关闭接线（dots 1792665925.725299）
+
+- 开工核对 `docs/evidence/r2-two-media-2026-10-15/XX-M01-isolated-config.json`、`XX-M03-isolated-config.json`：URL、host、rss、五项内容类型、3600000、disallowed 一致，无冲突。另注：既有 Feed provider `server/providers/feed.ts` 的 `the-loadstar`（同 URL，enabled，shipping feed 链路）是另一条已上线产品链路，本切片未改；`intel:xx-m01` 为 intel 链路的独立关闭候选，不复用、不替代该 feed 源 ID。
+- `rss-candidates.ts` 新增 `intel:xx-m01`（`https://theloadstar.com/feed/`，host `theloadstar.com`）、`intel:xx-m03`（`https://splash247.com/feed/`，host `splash247.com`），不加 www、保留尾斜杠；enabled:false、persistence:disallowed，无 CA/header/HTTP 例外；parser/security/生产允许集合未改。默认关闭注册共十九个。
+- 新 fixture `loadstar-rss-synthetic.ts`、`splash247-rss-synthetic.ts` 明示 synthetic，带 description，pubDate 显式 +0000，无独立 updated。RSS 分支扩为五源：逐条 UTC、dateEvidence=null、sourceUpdatedAt=pubDate 回退值、title-only。生产拒绝含 `the-loadstar`、`intel:`、`bounded:` 形式。原 XML 回放已于 10/15 完成，未重做。R2-4 28/39、R2-5 25/34 不变，未接通 live。

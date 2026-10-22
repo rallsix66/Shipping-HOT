@@ -2,8 +2,8 @@ import { FEED_CONTENT_TYPES, type IntelSourceSeed } from "../sources"
 
 /**
  * Default-closed RSS candidates read by the existing Feed parser (parseFeedEntries); no new parser, license, header, CA or HTTP exception.
- * MY-C01 / MY-T01 / PH-M01: exact catalog URL/host from docs/intel-source-catalog.md; product ids "intel:<catalog>" are distinct from the 2026-10-15
- * evidence-only ids "bounded:<catalog>" (docs/evidence/r2-three-rss-2026-10-15/*-isolated-config.json), which are not production identities.
+ * MY-C01 / MY-T01 / PH-M01 / XX-M01 / XX-M03: exact catalog URL/host from docs/intel-source-catalog.md; product ids "intel:<catalog>" are distinct from the 2026-10-15
+ * evidence-only ids "bounded:<catalog>" (docs/evidence/r2-three-rss-2026-10-15/ and r2-two-media-2026-10-15/ *-isolated-config.json), which are not production identities.
  * Registering adds no qualification numerator and does not enable production collection.
  */
 export const rssCandidates: readonly IntelSourceSeed[] = [
@@ -40,6 +40,30 @@ export const rssCandidates: readonly IntelSourceSeed[] = [
     enabled: false,
     persistence: "disallowed",
     allowedHosts: ["portcalls.com"],
+    allowedContentTypes: [...FEED_CONTENT_TYPES],
+    intervalMs: 3600000,
+  },
+  {
+    id: "intel:xx-m01",
+    catalogId: "XX-M01",
+    name: "The Loadstar",
+    kind: "rss",
+    url: "https://theloadstar.com/feed/",
+    enabled: false,
+    persistence: "disallowed",
+    allowedHosts: ["theloadstar.com"],
+    allowedContentTypes: [...FEED_CONTENT_TYPES],
+    intervalMs: 3600000,
+  },
+  {
+    id: "intel:xx-m03",
+    catalogId: "XX-M03",
+    name: "Splash247",
+    kind: "rss",
+    url: "https://splash247.com/feed/",
+    enabled: false,
+    persistence: "disallowed",
+    allowedHosts: ["splash247.com"],
     allowedContentTypes: [...FEED_CONTENT_TYPES],
     intervalMs: 3600000,
   },

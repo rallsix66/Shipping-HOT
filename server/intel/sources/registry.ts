@@ -4,11 +4,11 @@ import { rssCandidates } from "./rss-candidates"
 
 /**
  * Default-closed registration (not a qualification claim): enabled=false and persistence=disallowed (metadata only).
- * Covers HTML/JSON index candidates and RSS candidates (MY-C01/MY-T01/PH-M01 via the existing Feed parser).
+ * Covers HTML/JSON index candidates and RSS candidates (MY-C01/MY-T01/PH-M01/XX-M01/XX-M03 via the existing Feed parser).
  * Each entry keeps its own matrix status; e.g. CN-T01 is R2-4 OK / R2-5 PARTIAL (7/8). Registering does not fill missing identities
  * or change the 28/39 and 25/34 counts.
  */
-export const REGISTERED_CLOSED_CANDIDATE_IDS = ["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "XX-K03", "ID-T02", "VN-D01", "XX-K02", "XX-K01", "CN-T01", "MY-C01", "MY-T01", "PH-M01"] as const
+export const REGISTERED_CLOSED_CANDIDATE_IDS = ["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "XX-K03", "ID-T02", "VN-D01", "XX-K02", "XX-K01", "CN-T01", "MY-C01", "MY-T01", "PH-M01", "XX-M01", "XX-M03"] as const
 
 function closedCandidate(catalogId: string): IntelSourceSeed {
   const seed = [...htmlIndexCandidates, ...rssCandidates].find(row => row.catalogId === catalogId)

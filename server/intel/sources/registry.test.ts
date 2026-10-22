@@ -6,6 +6,8 @@ import { intelSourceSeeds } from "../sources"
 import { CUSTOMS_SYNTHETIC } from "./__fixtures__/html-index-synthetic"
 import { maerskHtml as MAERSK_SYNTHETIC } from "./__fixtures__/maersk-news-synthetic"
 import { mofcomHtml as MOFCOM_SYNTHETIC } from "./__fixtures__/mofcom-policy-synthetic"
+import { LOADSTAR_RSS_SYNTHETIC } from "./__fixtures__/loadstar-rss-synthetic"
+import { SPLASH247_RSS_SYNTHETIC } from "./__fixtures__/splash247-rss-synthetic"
 import { MY_MOF_RSS_SYNTHETIC } from "./__fixtures__/my-mof-rss-synthetic"
 import { PORTCALLS_RSS_SYNTHETIC } from "./__fixtures__/portcalls-rss-synthetic"
 import { MY_CUSTOMS_RSS_SYNTHETIC } from "./__fixtures__/my-customs-rss-synthetic"
@@ -42,9 +44,11 @@ const MC = htmlIndexCandidates.find(seed => seed.catalogId === "CN-T01")!
 const MY = rssCandidates.find(seed => seed.catalogId === "MY-C01")!
 const MT = rssCandidates.find(seed => seed.catalogId === "MY-T01")!
 const PM = rssCandidates.find(seed => seed.catalogId === "PH-M01")!
-const RSS = [MY, MT, PM]
-const NEW = [CN, TH, PH, GD, TD, VP, VT, IT, SK, JD, VD, XK, MK, MC, MY, MT, PM]
-const SYNTHETIC = [{ seed: CN, html: MOF_SYNTHETIC }, { seed: TH, html: CUSTOMS_SYNTHETIC }, { seed: PH, html: PH_SYNTHETIC }, { seed: GD, html: GD_SYNTHETIC }, { seed: TD, html: thaiDocumentMarkup() }, { seed: VP, html: POST_CLASH["VN-P03"] }, { seed: VT, html: POST_CLASH["VN-T01"] }, { seed: IT, html: POST_CLASH["ID-T01"] }, { seed: SK, html: SITC_SYNTHETIC }, { seed: JD, html: JDIH_MOF_SYNTHETIC, count: 3 }, { seed: VD, html: VN_DISASTER_SYNTHETIC }, { seed: XK, html: ONE_NEWSROOM_SYNTHETIC, count: 3 }, { seed: MK, html: MAERSK_SYNTHETIC }, { seed: MC, html: MOFCOM_SYNTHETIC }, { seed: MY, html: MY_CUSTOMS_RSS_SYNTHETIC }, { seed: MT, html: MY_MOF_RSS_SYNTHETIC }, { seed: PM, html: PORTCALLS_RSS_SYNTHETIC }]
+const LS = rssCandidates.find(seed => seed.catalogId === "XX-M01")!
+const SP = rssCandidates.find(seed => seed.catalogId === "XX-M03")!
+const RSS = [MY, MT, PM, LS, SP]
+const NEW = [CN, TH, PH, GD, TD, VP, VT, IT, SK, JD, VD, XK, MK, MC, MY, MT, PM, LS, SP]
+const SYNTHETIC = [{ seed: CN, html: MOF_SYNTHETIC }, { seed: TH, html: CUSTOMS_SYNTHETIC }, { seed: PH, html: PH_SYNTHETIC }, { seed: GD, html: GD_SYNTHETIC }, { seed: TD, html: thaiDocumentMarkup() }, { seed: VP, html: POST_CLASH["VN-P03"] }, { seed: VT, html: POST_CLASH["VN-T01"] }, { seed: IT, html: POST_CLASH["ID-T01"] }, { seed: SK, html: SITC_SYNTHETIC }, { seed: JD, html: JDIH_MOF_SYNTHETIC, count: 3 }, { seed: VD, html: VN_DISASTER_SYNTHETIC }, { seed: XK, html: ONE_NEWSROOM_SYNTHETIC, count: 3 }, { seed: MK, html: MAERSK_SYNTHETIC }, { seed: MC, html: MOFCOM_SYNTHETIC }, { seed: MY, html: MY_CUSTOMS_RSS_SYNTHETIC }, { seed: MT, html: MY_MOF_RSS_SYNTHETIC }, { seed: PM, html: PORTCALLS_RSS_SYNTHETIC }, { seed: LS, html: LOADSTAR_RSS_SYNTHETIC }, { seed: SP, html: SPLASH247_RSS_SYNTHETIC }]
 const RSS_EXPECTED: Record<string, { id: string, url: string, host: string, items: [string, string, string][] }> = {
   "MY-C01": { id: "intel:my-c01", url: "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss", host: "www.customs.gov.my", items: [
     ["https://www.customs.gov.my/ms/arkib/pengumuman/synthetic-dua", "Synthetic pengumuman dua", "2026-09-28T12:32:19.000Z"],
@@ -57,6 +61,14 @@ const RSS_EXPECTED: Record<string, { id: string, url: string, host: string, item
   "PH-M01": { id: "intel:ph-m01", url: "https://portcalls.com/feed/", host: "portcalls.com", items: [
     ["https://portcalls.com/synthetic-port-call-one", "Synthetic port call one", "2026-10-15T04:00:43.000Z"],
     ["https://portcalls.com/synthetic-port-call-two", "Synthetic port call two", "2026-10-14T12:38:17.000Z"],
+  ] },
+  "XX-M01": { id: "intel:xx-m01", url: "https://theloadstar.com/feed/", host: "theloadstar.com", items: [
+    ["https://theloadstar.com/synthetic-story-one", "Synthetic Loadstar story one", "2026-10-15T03:10:00.000Z"],
+    ["https://theloadstar.com/synthetic-story-two", "Synthetic Loadstar story two", "2026-10-13T17:45:30.000Z"],
+  ] },
+  "XX-M03": { id: "intel:xx-m03", url: "https://splash247.com/feed/", host: "splash247.com", items: [
+    ["https://splash247.com/synthetic-splash-one", "Synthetic Splash story one", "2026-10-14T22:05:11.000Z"],
+    ["https://splash247.com/synthetic-splash-two", "Synthetic Splash story two", "2026-10-12T06:00:00.000Z"],
   ] },
 }
 const SNAPSHOT = JSON.stringify(htmlIndexCandidates)
@@ -121,7 +133,7 @@ afterEach(() => {
 })
 
 describe("registeredIntelSources", () => {
-  it("keeps the original two seeds unchanged and reuses all seventeen closed candidate objects (CN-T02/TH-C01/PH-C01/CN-P01/TH-C02/VN-P03/VN-T01/ID-T01/XX-K03/ID-T02/VN-D01/XX-K02/XX-K01/CN-T01/MY-C01/MY-T01/PH-M01)", () => {
+  it("keeps the original two seeds unchanged and reuses all nineteen closed candidate objects (CN-T02/TH-C01/PH-C01/CN-P01/TH-C02/VN-P03/VN-T01/ID-T01/XX-K03/ID-T02/VN-D01/XX-K02/XX-K01/CN-T01/MY-C01/MY-T01/PH-M01/XX-M01/XX-M03)", () => {
     expect(registeredIntelSources.map(seed => seed.catalogId)).toEqual(["TH-W01", "ID-W01", ...REGISTERED_CLOSED_CANDIDATE_IDS])
     expect(registeredIntelSources.slice(0, 2)).toEqual(intelSourceSeeds)
     expect(registeredIntelSources[0]).toBe(intelSourceSeeds[0])
@@ -130,14 +142,14 @@ describe("registeredIntelSources", () => {
     expect(registeredIntelSources.slice(2)).toEqual(NEW)
     NEW.forEach((seed, index) => expect(registeredIntelSources[index + 2]).toBe(seed))
     for (const seed of NEW) expect(seed).toMatchObject({ enabled: false, persistence: "disallowed" })
-    expect(new Set(registeredIntelSources.map(seed => seed.id)).size).toBe(19)
-    expect(new Set(registeredIntelSources.map(seed => seed.catalogId)).size).toBe(19)
+    expect(new Set(registeredIntelSources.map(seed => seed.id)).size).toBe(21)
+    expect(new Set(registeredIntelSources.map(seed => seed.catalogId)).size).toBe(21)
     expect(Object.isFrozen(registeredIntelSources)).toBe(true)
   })
 })
 
 describe("default collect job (no seeds) on the BackgroundRuntime with isolated SQLite", () => {
-  it("a) registers all seventeen closed candidates as enabled=0 but never makes them due or requests them", async () => {
+  it("a) registers all nineteen closed candidates as enabled=0 but never makes them due or requests them", async () => {
     const state = await isolated()
     const net = fake()
     const runtime = runtimeFor(state)
@@ -213,7 +225,7 @@ describe("b) production selection is unchanged", () => {
     const options = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "TH-W01,ID-W01" }, dependencies })
     expect(options.registry?.intel?.seeds?.map(seed => seed.catalogId)).toEqual(["TH-W01", "ID-W01"])
   })
-  it.each(["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-W01,CN-T02", "ID-W01,TH-C01", "TH-W01,PH-C01", "ID-W01,CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "TH-W01,TH-C02", "ID-W01,ID-T01", "XX-K03", "ID-T02", "TH-W01,XX-K03", "ID-W01,ID-T02", "VN-D01", "TH-W01,VN-D01", "XX-K02", "ID-W01,XX-K02", "XX-K01", "TH-W01,XX-K01", "CN-T01", "ID-W01,CN-T01", "MY-C01", "TH-W01,MY-C01", "intel:my-c01", "bounded:MY-C01", "MY-T01", "PH-M01", "ID-W01,MY-T01", "TH-W01,PH-M01", "MY-T01,PH-M01", "intel:my-t01", "intel:ph-m01", "bounded:MY-T01", "bounded:PH-M01"])("rejects %s with intel_source_selection_invalid", (ids) => {
+  it.each(["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-W01,CN-T02", "ID-W01,TH-C01", "TH-W01,PH-C01", "ID-W01,CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "TH-W01,TH-C02", "ID-W01,ID-T01", "XX-K03", "ID-T02", "TH-W01,XX-K03", "ID-W01,ID-T02", "VN-D01", "TH-W01,VN-D01", "XX-K02", "ID-W01,XX-K02", "XX-K01", "TH-W01,XX-K01", "CN-T01", "ID-W01,CN-T01", "MY-C01", "TH-W01,MY-C01", "intel:my-c01", "bounded:MY-C01", "MY-T01", "PH-M01", "ID-W01,MY-T01", "TH-W01,PH-M01", "MY-T01,PH-M01", "intel:my-t01", "intel:ph-m01", "bounded:MY-T01", "bounded:PH-M01", "XX-M01", "XX-M03", "TH-W01,XX-M01", "ID-W01,XX-M03", "XX-M01,XX-M03", "intel:xx-m01", "intel:xx-m03", "bounded:XX-M01", "bounded:XX-M03", "the-loadstar"])("rejects %s with intel_source_selection_invalid", (ids) => {
     expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: ids }, dependencies })).toThrow("intel_source_selection_invalid")
   })
   it("disabled production passes explicit empty seeds", () => {
@@ -277,7 +289,7 @@ describe("d) test-only enabled copies run Runtime -> isolated SQLite with fake l
         expect(evidence.map(row => row?.raw).sort()).toEqual(["2026-10-14", "2026-10-19"])
         for (const row of evidence) expect(row).toMatchObject({ precision: "day", timezone: "missing", utcOffset: null, publishedAt: null })
       }
-      // RSS branch (MY-C01 +0800, MY-T01 +0800, PH-M01 +0000): existing Feed parser semantics. Explicit-offset pubDate becomes the
+      // RSS branch (MY-C01 +0800, MY-T01 +0800, PH-M01/XX-M01/XX-M03 +0000): existing Feed parser semantics. Explicit-offset pubDate becomes the
       // publishedAt instant (checked per item in UTC); RSS keeps dateEvidence=null, unlike HTML/JSON day/second date evidence.
       // No <updated> in the fixtures, so sourceUpdatedAt is the parser's fallback to pubDate, not an independent update time.
       // Formal intel:<catalog> ids only; the bounded:<catalog> evidence ids never appear.

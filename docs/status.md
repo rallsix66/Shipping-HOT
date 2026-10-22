@@ -1,3 +1,8 @@
+## 2026-10-22 R2 XX-M01 / XX-M03 RSS 默认关闭接线（dots 1792665925.725299）
+
+- 新增 `intel:xx-m01`、`intel:xx-m03`（既有 Feed parser，enabled:false、persistence:disallowed，与 10/15 隔离配置一致），默认关闭注册共十九个；既有 shipping feed 源 `the-loadstar` 未改、与 intel ID 分离。synthetic RSS（+0000）逐条核对 UTC，dateEvidence=null，sourceUpdatedAt 为 pubDate 回退值。
+- 默认关闭注册 ≠ 生产启用：intel 生产白名单仍仅 TH-W01/ID-W01。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
 ## 2026-10-22 R2 MY-T01 / PH-M01 RSS 默认关闭接线（dots 1792665219.519459）
 
 - 新增 `intel:my-t01`、`intel:ph-m01`（既有 Feed parser，enabled:false、persistence:disallowed，与 10/15 隔离配置一致），默认关闭注册共十七个；新编 synthetic RSS 做 Runtime→隔离 SQLite 测试，RSS 分支逐条核对 UTC，dateEvidence=null，sourceUpdatedAt 为回退 pubDate 值。
