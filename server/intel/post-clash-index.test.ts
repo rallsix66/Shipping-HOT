@@ -4,14 +4,9 @@ import { collectIntelSource, sourcePolicy } from "./collect"
 import { htmlIndexCandidates } from "./sources/html-index-candidates"
 import { WEB_LIST_DUPLICATE_CONFLICT, fromHtml, parseLooseDate } from "./sources/web-list"
 import { assertSupportedConfig } from "./sources/config-keys"
+import { fixtures } from "./sources/__fixtures__/post-clash-synthetic"
 import { initShippingTables } from "#/database/shipping"
 
-// Authored synthetic structure/identity boundaries, not copied upstream pages.
-const fixtures = {
-  "VN-P03": `<div class="page-container"><div class="news"><div class="news-card"><a href="/tin-tuc/one.html">Image label</a><div class="info"><p class="news-label date">18/09/2026</p><h3 class="title"><a href="/tin-tuc/one.html">Synthetic terminal news</a></h3></div></div><div class="news-card"><div class="info"><p class="news-label date">29/02/2024</p><h3 class="title"><a href="/tin-tuc/two.html">Synthetic second news</a></h3></div></div></div></div>`,
-  "VN-T01": `<ul id="newSlider"><li><a class="news012ndLink" href="./default.aspx?page=news&do=detail&id=one"><div><span class="news012ndLinkTime">02/10/2026</span><span class="news012ndLinkTit">Synthetic IDEA news</span></div></a></li><li><a class="news012ndLink" href="./default.aspx?do=detail&id=two&page=news"><span class="news012ndLinkTime">01/10/2026</span><span class="news012ndLinkTit">Synthetic second IDEA news</span></a></li></ul>`,
-  "ID-T01": `<div id="terkini"><div class="slider-terkini"><div class="swiper-wrapper"><div class="swiper-slide"><a class="d-inline-block" href="/peraturan/one">100 TAHUN 2026</a><p class="mt-2 mb-0">Synthetic regulation title…</p><span class="badge bg-primary">Ditetapkan 30 September 2026</span><a href="/peraturan/one">Lihat Regulasi</a></div><div class="swiper-slide"><a class="d-inline-block" href="/peraturan/two">101 TAHUN 2026</a><p class="mt-2 mb-0">Synthetic second regulation</p><span class="badge bg-primary">Ditetapkan 29 Februari 2024</span></div></div></div></div><div id="populer"><a href="/peraturan/unrelated">Synthetic popular tab not selected</a></div>`,
-}
 const cases = Object.entries(fixtures).map(([id, html]) => ({ seed: htmlIndexCandidates.find(s => s.catalogId === id)!, html }))
 const id = cases[2].seed
 const now = new Date("2026-10-14T09:15:00Z")

@@ -1,4 +1,4 @@
-# R2：CN-T02 / TH-C01 / PH-C01 / CN-P01 默认关闭注册与 collect-job 默认接线（2026-10-22）
+# R2：已合格 HTML 候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01）与 collect-job 默认接线（2026-10-22）
 
 dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基线 `a26defa`。
 
@@ -33,3 +33,10 @@ dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基�
 - registry.test 的注册表、a、b、d、e 及共享对象未修改断言覆盖四个新增源；d 复用 `PH_SYNTHETIC`、`GD_SYNTHETIC`（各 2 条 metadata_only）。
 - 区分两件事：上面是“配置注册/运行接线”；`initShippingTables` 迁移本身预置的 42 行目录行（含 TH-W01/ID-W01，不含这四个新增源）是数据库已有目录行，与本注册集是不同概念，不代表此前完全无注册，也不由本切片改变。
 - R2-4 28/39、R2-5 25/34 不变；未接通 live。
+
+## 第三切片：TH-C02 / VN-P03 / VN-T01 / ID-T01（dots 1792659856.878179、1792659922.734899）
+
+- `REGISTERED_CLOSED_CANDIDATE_IDS` 扩为八个，新四源同样复用候选对象，enabled:false、persistence:disallowed；解析器、许可、生产白名单、资格计数未改，未重新请求原页。
+- 测试复用整理：`thai-document-index.test.ts` 的 `markup()`（三个参数及默认值不变）逐字移到 `server/intel/sources/__fixtures__/thai-document-synthetic.ts`；`post-clash-index.test.ts` 的 `fixtures`（键顺序 VN-P03、VN-T01、ID-T01 不变，原测试 `cases[2]` 仍是 ID-T01）逐字移到 `post-clash-synthetic.ts`。原测试改为 import，输入与断言不变。逐字比对（去掉新增 `export ` 后的块文本 SHA-256）：markup `d7b3b6cd…7d8a`（641 B）、fixtures `6df6b1a9…ae92`（1681 B），前后一致，记录于 `D:\diag-logs\slice3-fixture-verbatim-2026-10-22.json`（本机日志，未入库）。
+- registry.test 的注册表、a、b、c、d、e 与共享对象未修改断言覆盖八个新增源；d 另断言条目与版本日期证据的 publishedAt 均为 null：TH-C02 文档日期、ID-T01 制定日期保持原角色，不升级为发布时间。
+- 仍区分“配置注册/运行接线”与迁移预置的 42 行目录行；upsert 只在 job 实际执行且有 fetch 时发生；普通应用启动不自动注册。R2-4 28/39、R2-5 25/34 不变，未接通 live。

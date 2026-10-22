@@ -3,16 +3,10 @@ import { open } from "./__fixtures__/isolated-db"
 import { collectIntelSource, sourcePolicy } from "./collect"
 import { htmlIndexCandidates } from "./sources/html-index-candidates"
 import { WEB_LIST_DUPLICATE_CONFLICT, fromHtml } from "./sources/web-list"
+import { markup } from "./sources/__fixtures__/thai-document-synthetic"
 import { initShippingTables } from "#/database/shipping"
 
 const seed = htmlIndexCandidates.find(s => s.catalogId === "TH-C02")!
-// Authored synthetic rows; not copied from the unknown-permission raw page.
-function markup(secondId = "second", date = "8 ตุลาคม 2569", secondTitle = "Synthetic same document title") {
-  return `<table class="table table-hover"><tbody>
-<tr><td>1</td><td>120/2569</td><td><a href="cont_strc_download_with_docno_date.php?lang=th&current_id=first">Synthetic same document title</a></td><td>9 ตุลาคม 2569</td><td>120</td></tr>
-<tr><td>2</td><td>124/2569</td><td><a href="cont_strc_download_with_docno_date.php?lang=th&current_id=${secondId}">${secondTitle}</a></td><td>${date}</td><td>137</td></tr>
-</tbody></table>`
-}
 const now = new Date("2026-10-14T08:40:00Z")
 const offline = (body: string) => ({ lookup: async () => [{ address: "93.184.216.34", family: 4 as const }], transport: async () => ({ status: 200, headers: { "content-type": "text/html; charset=utf-8" }, body: new TextEncoder().encode(body) }) })
 it("synthetic Thai document rows keep document numbers/counters apart from actual local document dates", () => {

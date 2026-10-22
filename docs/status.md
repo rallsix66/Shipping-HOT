@@ -1,3 +1,8 @@
+## 2026-10-22 R2 TH-C02 / VN-P03 / VN-T01 / ID-T01 加入默认关闭注册（dots 1792659856.878179 / 1792659922.734899）
+
+- `registeredIntelSources` 新增四源（enabled:false、persistence:disallowed，复用候选对象），默认关闭注册候选共八个。TH-C02 `markup()` 与 VN/ID `fixtures` 逐字移到 `server/intel/sources/__fixtures__/` 共享，原测试输入与断言不变（块文本 SHA-256 前后一致）。
+- 隔离测试覆盖默认不请求/不进 due、生产拒绝、`[]` 零新增注册行且迁移预置行不变、测试副本 Runtime→SQLite（metadata-only，日期证据不升级为发布时间）、enabled=1 行回到 0。配置注册/运行接线与迁移预置 42 行目录行分开；普通应用启动不自动注册。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
 ## 2026-10-22 R2 PH-C01 / CN-P01 加入默认关闭注册（dots 1792659213.305219）
 
 - `registeredIntelSources` 新增 PH-C01、CN-P01（enabled:false、persistence:disallowed，复用候选对象）；隔离测试复用 PH_SYNTHETIC/GD_SYNTHETIC 覆盖默认不请求/不进 due、生产拒绝、测试副本 Runtime→SQLite、enabled=1 行回到 0。
