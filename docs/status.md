@@ -1,3 +1,8 @@
+## 2026-10-22 R2 VN-D01 加入默认关闭注册（dots 1792661910.864189）
+
+- `registeredIntelSources` 新增 VN-D01（enabled:false、persistence:disallowed），默认关闭候选共十一个；VN-D01 合成样本逐字移到共享 fixture，原测试与负例不变。新 worktree 位于主项目 `.tmp/worktrees/r2-compat`，日志在其 `.tmp/logs/`。
+- 配置注册/运行接线与迁移预置 42 行目录行分开；R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
 ## 2026-10-22 R2 XX-K03 / ID-T02 加入默认关闭注册（dots 1792660394.720859 / 1792660460.596279）
 
 - `registeredIntelSources` 新增 XX-K03、ID-T02（enabled:false、persistence:disallowed），默认关闭候选共十个；未新设 HTTP/重定向/许可例外。sitc_show 只是元数据身份规则，不是 HTTP 正文抓取许可；ID-T02 入口仍为 HTTPS 根路径。

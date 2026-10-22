@@ -5,13 +5,10 @@ import { collectIntelSource, sourcePolicy } from "./collect"
 import { htmlIndexCandidates } from "./sources/html-index-candidates"
 import { assertSupportedConfig } from "./sources/config-keys"
 import { fromHtml } from "./sources/web-list"
+import { card, page, synthetic } from "./sources/__fixtures__/vn-disaster-synthetic"
 
 const seed = htmlIndexCandidates.find(s => s.catalogId === "VN-D01")!
 const policy = sourcePolicy(seed)
-const card = (href: string, title: string, visible: string) => `<li><div class="item"><div class="row"><div class="col-md-10 title_item"><p><a href="${href}" title="${title}">${visible}</a></p></div></div></div></li>`
-const page = (content: string) => `<div class="boxtopnews"><ul class="news-headlines">${content}</ul></div>`
-const synthetic = page(card("/Pages/one.aspx", "Synthetic full news title with its actual punctuation.", "Synthetic shortened... (14/10/2026)") + card("/Pages/two.aspx", "Synthetic second news", "Synthetic second news (29/2/2024)"))
-
 it("maps only each synthetic anchor's full title attribute and terminal DMY day", () => {
   const result = fromHtml(synthetic, seed.url, seed.webList!, policy)
   expect(result).toHaveLength(2)

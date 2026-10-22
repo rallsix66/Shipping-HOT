@@ -1,4 +1,4 @@
-# R2：已合格 HTML 候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02）与 collect-job 默认接线（2026-10-22）
+# R2：已合格 HTML 候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02 / VN-D01）与 collect-job 默认接线（2026-10-22）
 
 dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基线 `a26defa`。
 
@@ -47,3 +47,11 @@ dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基�
 - 只读边界核对（以代码字面值为准）：XX-K03 入口 `https://www.sitc.com/en/list.asp?classid=44`；`metadataLinkRule: "sitc_show"` 只在 `web-list.ts` 的条目链接 `allowed()` 中生效，仅允许该来源、metadata-only 下精确 `www.sitc.com/en/show.asp?id=<digits>` 形状作为元数据身份，不进入抓取策略（`sourcePolicy` 无 allowHttp）。ID-T02 入口 `https://jdih.kemenkeu.go.id/`（HTTPS 根路径）；原有 root 307→/home 的保存形状测试仍在 `id-mof-index.test.ts`，本切片不改入口、不新增跳转许可。Runtime 路径与直接调用同为 `collectIntelSource`→既有安全抓取检查。
 - registry.test 覆盖：注册表、a、b、c、e 与共享对象未修改扩至十源；d 副本经 Runtime→隔离 SQLite，fake transport 只收到配置字面值 HTTPS 入口（根路径直接 200，无跳转），XX-K03 2 条、ID-T02 3 条均 metadata_only、publishedAt=null，XX-K03 条目身份为原 HTTP show.asp 链接但没有任何 HTTP 请求。复用 `SITC_SYNTHETIC`、`JDIH_MOF_SYNTHETIC`。
 - 仍区分配置注册/运行接线与迁移预置 42 行目录行；普通应用启动不自动注册。R2-4 28/39、R2-5 25/34 不变，未接通 live。MY-P03 不注册；XX-K01/CN-T01 未纳入。
+
+## 第五切片：VN-D01（dots 1792661910.864189）
+
+- 在新 worktree `D:\try one\Shipping HOT\.tmp\worktrees\r2-compat`（detached，起点 51e5968）完成；依赖按锁文件离线安装，门禁前核实解析到该 worktree 自己的 node_modules。
+- `REGISTERED_CLOSED_CANDIDATE_IDS` 扩为十一个，新增 VN-D01（复用候选对象，enabled:false、persistence:disallowed）；解析器、安全规则、生产白名单、资格计数未改，未重新请求原页。
+- `vn-disaster-index.test.ts` 的 `card`/`page`/`synthetic` 三行逐字移到 `server/intel/sources/__fixtures__/vn-disaster-synthetic.ts`（去掉新增 `export ` 后块文本 SHA-256 一致：`7f2b13e8…7bfb`，eslint 后去尾空白复核 `5af5a3c9…29dd1`）；原测试改为 import，title 属性、同锚点尾部日期、未知时区/null 发布时间断言与全部负例不变。
+- registry.test 覆盖扩至十一源；d 副本经 Runtime→隔离 SQLite 只请求配置 HTTPS 入口，2 条 metadata_only，标题取完整 title 属性，publishedAt=null。
+- 仍区分配置注册/运行接线与迁移预置 42 行目录行；普通应用启动不自动注册。R2-4 28/39、R2-5 25/34 不变，未接通 live。
