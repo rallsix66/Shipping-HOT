@@ -1,4 +1,4 @@
-# R2：已合格 HTML 候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02 / VN-D01 / XX-K02 / XX-K01）与 collect-job 默认接线（2026-10-22）
+# R2：HTML 候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02 / VN-D01 / XX-K02 / XX-K01 / CN-T01）与 collect-job 默认接线（2026-10-22）
 
 dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基线 `a26defa`。
 
@@ -69,3 +69,12 @@ dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基�
 - `maersk-mofcom.test.ts` 的 `maerskHtml` 原样移到 `server/intel/sources/__fixtures__/maersk-news-synthetic.ts`（SHA-256 `e88fd89abeeb6438e1719237d6569d902daeba88e80e0b48709dd18178920f6a` 与 12369ac 原串一致），原测试输入与断言不变。
 - registry.test d：副本经 Runtime→隔离 SQLite 只请求 `https://www.maersk.com/news`，写入 2 条 metadata_only；transport 选项精确为 maxHeaderSize 32768、maxBytes 524288、timeoutMs 10000、无 caPem；其他来源 transport 不带 maxHeaderSize。生产选择拒绝 XX-K01。
 - 保留回归：错误 sourceId/URL/预算 DNS 前拒绝、重定向不继承例外（`maersk-mofcom.test.ts`）；默认 16 KiB、20 KiB 仅精确 opt-in 通过、40 KiB 拒绝（`article-fetch-header-limit.test.ts`）。CN-T01 未混入，MY-P03 不注册；R2-4 28/39、R2-5 25/34 不变，未接通 live。
+
+> 措辞说明：本文件所列均为“默认关闭注册”（enabled=false、persistence=disallowed、仅 metadata），不是资格声明；各源资格以矩阵为准，CN-T01 为 R2-4 OK / R2-5 PARTIAL（7/8）。注册不补足缺失身份，不改变 28/39、25/34；生产自动抓取未启用。
+
+## 第八切片：CN-T01（dots 1792664101.141579、1792664168.380759）
+
+- `REGISTERED_CLOSED_CANDIDATE_IDS` 扩为十四个，新增 CN-T01（web_list，复用候选对象，enabled:false、persistence:disallowed）；registry 注释由 “Qualified candidates” 改为默认关闭注册、非资格声明。解析器、安全合同、HTTP 策略未改；不加 sourceHeaderLimit/maxHeaderSize，不共享 Maersk 例外。
+- `mofcomHtml` 原样移到 `server/intel/sources/__fixtures__/mofcom-policy-synthetic.ts`（SHA-256 `1b141f217fda8cb31c08272a883143ab47a0c3ae1f06db2a61a6bd43b1528100` 与 198e688 原串一致），原测试输入与断言不变。
+- registry.test d：副本经 Runtime→隔离 SQLite 只请求 `https://www.mofcom.gov.cn/zcfb/index.html`，只入库两条合成 HTTPS 政策；原始 HTTP policy 身份与 HTTP 解读链接继续排除，不改写协议、不请求详情；日期 precision=day、timezone=missing、publishedAt=null；transport 不带 maxHeaderSize。生产单独/混合选择（`CN-T01`、`ID-W01,CN-T01`）均拒绝。
+- CN-T01 仍为 R2-4 OK / R2-5 PARTIAL（7/8），不升级资格；R2-4 28/39、R2-5 25/34 不变，未接通 live。MY-P03 不注册。

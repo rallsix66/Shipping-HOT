@@ -1,3 +1,8 @@
+## 2026-10-22 R2 CN-T01 加入默认关闭注册，不升级资格（dots 1792664101.141579 / 1792664168.380759）
+
+- `registeredIntelSources` 新增 CN-T01（web_list，enabled:false、persistence:disallowed），默认关闭注册共十四个；`mofcomHtml` 原样移到共享 fixture。只入库两条合成 HTTPS 政策，原始 HTTP 身份与解读链接仍排除；无 header 例外；日期 day、无时区、publishedAt=null。
+- CN-T01 为 R2-4 OK / R2-5 PARTIAL（7/8），注册不补足缺失身份；“默认关闭注册”不是资格声明，生产自动抓取未启用。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
 ## 2026-10-22 R2 XX-K01 加入默认关闭注册（dots 1792663523.596789）
 
 - `registeredIntelSources` 新增 XX-K01（web_list，enabled:false、persistence:disallowed），默认关闭候选共十三个；`maerskHtml` 原样移到共享 fixture。仅 intel:xx-k01 + https://www.maersk.com/news 精确 opt-in 32768 响应头（正文 524288、10000ms、无 caPem），例外未扩大。

@@ -11,6 +11,7 @@ import { htmlIndexCandidates } from "#/intel/sources/html-index-candidates"
 import { assertSupportedConfig } from "#/intel/sources/config-keys"
 import { fromHtml, parseLooseDate } from "#/intel/sources/web-list"
 import { maerskHtml } from "#/intel/sources/__fixtures__/maersk-news-synthetic"
+import { mofcomHtml } from "#/intel/sources/__fixtures__/mofcom-policy-synthetic"
 import { createIntelCollectJob } from "#/runtime/intel-collect-job"
 import { productionIntelOptions } from "#/runtime/intel-production"
 
@@ -19,8 +20,7 @@ const mofcom = htmlIndexCandidates.find(seed => seed.catalogId === "CN-T01")!
 const now = new Date("2026-10-20T08:00:00.000Z")
 const publicAddresses = [{ address: "93.184.216.34", family: 4 as const }]
 
-// Original synthetic markup. Complete recorded site HTML is private and replayed separately.
-const mofcomHtml = `<section class="channel-con"><h2>Latest policy</h2><ul class="policy-list"><li><em>Category</em><a href="/zcfb/zc/art/synthetic/one.html" title="Synthetic policy one">Synthetic policy one</a><span>2026-10-19</span></li><li><a href="/zcfb/zc/art/synthetic/two.html" title="Synthetic policy two">Synthetic policy two</a><a href="http://www.mofcom.gov.cn/zcjd/synthetic.html">Interpretation</a><span>2026-10-14</span></li><li><a href="http://www.mofcom.gov.cn/zcfb/dwmygl/art/synthetic/three.html" title="Synthetic HTTP policy">Synthetic HTTP policy</a><span>2026-10-16</span></li></ul></section>`
+// Original synthetic markup lives in __fixtures__ (moved verbatim). Complete recorded site HTML is private and replayed separately.
 
 function openNative(file = ":memory:") {
   const native = new NativeDatabase(file)
