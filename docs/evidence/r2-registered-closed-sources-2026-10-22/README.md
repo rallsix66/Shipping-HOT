@@ -1,4 +1,4 @@
-# R2：已合格 HTML 候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02 / VN-D01）与 collect-job 默认接线（2026-10-22）
+# R2：已合格 HTML 候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02 / VN-D01 / XX-K02）与 collect-job 默认接线（2026-10-22）
 
 dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基线 `a26defa`。
 
@@ -50,8 +50,15 @@ dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基�
 
 ## 第五切片：VN-D01（dots 1792661910.864189）
 
-- 在新 worktree `D:\try one\Shipping HOT\.tmp\worktrees\r2-compat`（detached，起点 51e5968）完成；依赖按锁文件离线安装，门禁前核实解析到该 worktree 自己的 node_modules。
+- 在新 worktree `D:\try one\Shipping HOT\.tmp\worktrees\r2-compat`（detached，起点 51e5968）完成；依赖按锁文件离线安装（`pnpm install --frozen-lockfile --offline` exit 0，但 prepare 阶段 simple-git-hooks 的 hook setup 报错：worktree 内 `.git` 是文件，无法创建 `.git\hooks`；共享 hooks 未改），门禁前核实解析到该 worktree 自己的 node_modules。
 - `REGISTERED_CLOSED_CANDIDATE_IDS` 扩为十一个，新增 VN-D01（复用候选对象，enabled:false、persistence:disallowed）；解析器、安全规则、生产白名单、资格计数未改，未重新请求原页。
 - `vn-disaster-index.test.ts` 的 `card`/`page`/`synthetic` 三行逐字移到 `server/intel/sources/__fixtures__/vn-disaster-synthetic.ts`（去掉新增 `export ` 后块文本 SHA-256 一致：`7f2b13e8…7bfb`，eslint 后去尾空白复核 `5af5a3c9…29dd1`）；原测试改为 import，title 属性、同锚点尾部日期、未知时区/null 发布时间断言与全部负例不变。
 - registry.test 覆盖扩至十一源；d 副本经 Runtime→隔离 SQLite 只请求配置 HTTPS 入口，2 条 metadata_only，标题取完整 title 属性，publishedAt=null。
 - 仍区分配置注册/运行接线与迁移预置 42 行目录行；普通应用启动不自动注册。R2-4 28/39、R2-5 25/34 不变，未接通 live。
+
+## 第六切片：XX-K02（dots 1792662529.753349、1792662635.586629）
+
+- `REGISTERED_CLOSED_CANDIDATE_IDS` 扩为十二个，新增 XX-K02（`kind: json_list`，复用候选对象，enabled:false、persistence:disallowed）；沿用已有 json_list adapter 与 `script#__NEXT_DATA__`、`props.pageProps.pinArticle` + `props.pageProps.articles` 配置，解析器与安全合同未改。
+- 无专用样本，新建 `server/intel/sources/__fixtures__/one-newsroom-synthetic.ts`：明确标记为按现有配置形状编写的合成 fixture，不是保存的 ONE 原页，也不是通用 `#payload`/`page.pin` 样本；内含一个不应执行的脚本。
+- registry.test d：副本经 Runtime→隔离 SQLite 只请求 `https://www.one-line.com/en/newsroom`，写入 3 条 metadata_only；`releaseDate` 保留秒精度原串（`2026-10-05T11:31:17` 等），precision=second、timezone=missing、publishedAt=null。脚本不执行、冲突与越界链接拒绝沿用 `json-list-html.test.ts` / `json-list-collect.test.ts` 已有断言。生产选择拒绝 XX-K02。
+- 仍区分配置注册/运行接线与迁移预置 42 行目录行；R2-4 28/39、R2-5 25/34 不变，未接通 live。
