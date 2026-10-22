@@ -261,3 +261,4 @@ color:var(--ink);}
 .risk-console .tl-body .tl-title-row h4,
 .risk-console .tl-body .tl-sum {min-width:0;overflow-wrap:anywhere;word-break:break-word;}
 .risk-console .tl-body .tl-chips > .chip {max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;word-break:break-word;}
+.risk-console .tl-body .tl-title-row > .chip { flex-shrink:0; white-space:nowrap; }
