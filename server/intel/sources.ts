@@ -28,7 +28,7 @@ export interface IntelSourceSeed {
   adaptive?: IntelAdaptiveBounds
 }
 
-const FEED_CONTENT_TYPES = ["application/rss+xml", "application/atom+xml", "application/rdf+xml", "application/xml", "text/xml"]
+export const FEED_CONTENT_TYPES = ["application/rss+xml", "application/atom+xml", "application/rdf+xml", "application/xml", "text/xml"]
 const HOUR = 60 * 60 * 1000
 
 export const intelSourceSeeds: readonly IntelSourceSeed[] = [

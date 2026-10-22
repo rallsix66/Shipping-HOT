@@ -1,4 +1,4 @@
-# R2：HTML 候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02 / VN-D01 / XX-K02 / XX-K01 / CN-T01）与 collect-job 默认接线（2026-10-22）
+# R2：HTML 候选默认关闭注册（CN-T02 / TH-C01 / PH-C01 / CN-P01 / TH-C02 / VN-P03 / VN-T01 / ID-T01 / XX-K03 / ID-T02 / VN-D01 / XX-K02 / XX-K01 / CN-T01 / MY-C01）与 collect-job 默认接线（2026-10-22）
 
 dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基线 `a26defa`。
 
@@ -78,3 +78,11 @@ dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基�
 - `mofcomHtml` 原样移到 `server/intel/sources/__fixtures__/mofcom-policy-synthetic.ts`（SHA-256 `1b141f217fda8cb31c08272a883143ab47a0c3ae1f06db2a61a6bd43b1528100` 与 198e688 原串一致），原测试输入与断言不变。
 - registry.test d：副本经 Runtime→隔离 SQLite 只请求 `https://www.mofcom.gov.cn/zcfb/index.html`，只入库两条合成 HTTPS 政策；原始 HTTP policy 身份与 HTTP 解读链接继续排除，不改写协议、不请求详情；日期 precision=day、timezone=missing、publishedAt=null；transport 不带 maxHeaderSize。生产单独/混合选择（`CN-T01`、`ID-W01,CN-T01`）均拒绝。
 - CN-T01 仍为 R2-4 OK / R2-5 PARTIAL（7/8），不升级资格；R2-4 28/39、R2-5 25/34 不变，未接通 live。MY-P03 不注册。
+
+## 第九切片：MY-C01 RSS 默认关闭接线（dots 1792664710.276179）
+
+- 纠正：MY-C01/MY-T01/PH-M01 “补原 XML 回放”为过时待办，已由 `docs/evidence/r2-three-rss-2026-10-15/report.md` 完成 26 条回放、矩阵 OK/PASS；本切片未重找原件、未重跑历史回放、未由派生记录补造 XML。
+- 只读核对：此前仅有 evidence-only 配置 `bounded:MY-C01`（`MY-C01-isolated-config.json`，标明非生产/非候选），无其他产品配置；URL、host、kind=rss、persistence=disallowed 与目录 `docs/intel-source-catalog.md` 一致，无合同冲突。
+- 新增 `server/intel/sources/rss-candidates.ts`：正式 ID `intel:my-c01`（与 `intel:<catalog>` 命名一致且唯一，不复用 `bounded:` 取证 ID），`https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss`、host `www.customs.gov.my`、既有 Feed content-types（`sources.ts` 仅把 `FEED_CONTENT_TYPES` 改为 export，值不变），enabled:false、persistence:disallowed；沿用既有 Feed parser，无 header/CA/HTTP 例外，解析器/许可/网络安全未改。registry 按 catalogId 复用该对象，默认关闭注册共十五个。
+- 新编 synthetic RSS `server/intel/sources/__fixtures__/my-customs-rss-synthetic.ts`（明确标注，非私有原 XML、非派生记录）。registry.test d：Runtime→隔离 SQLite 只请求配置 URL，2 条 metadata_only（description 不入库），既有 Feed 语义下显式 +0800 pubDate 换算 publishedAt；正式 ID 入库、无 `bounded:` 行；生产选择拒绝 `MY-C01`、`TH-W01,MY-C01`、`intel:my-c01`、`bounded:MY-C01`。
+- 本次仅补默认关闭接线，不新增资格分子、不宣称 live；生产白名单仍仅 TH-W01/ID-W01、应用启动仍显式空 seeds，生产自动抓取未启用。R2-4 28/39、R2-5 25/34 不变。MY-T01/PH-M01 留后续。

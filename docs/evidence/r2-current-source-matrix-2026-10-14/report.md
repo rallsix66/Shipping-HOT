@@ -125,4 +125,4 @@ P2复审修复：尾部模式不匹配不再交通用日期解析，原四条保
 
 ## 下一批仅建议，尚未执行
 
-建议MY-C01、MY-T01、PH-M01三项既有RSS元数据补完整原XML回放/幂等/只读重开；已有10/6/10条完整标题链接时间派生，R2-5仍NOT_RUN。均已R2-4 OK，不重复增加可用性分子；没有新探测或重复失败检索。详见[三项证据与缺口](../r2-one-catalog-candidate-2026-10-15/next-batch-recommendations.json)。
+建议MY-C01、MY-T01、PH-M01三项既有RSS元数据补完整原XML回放/幂等/只读重开；已有10/6/10条完整标题链接时间派生，R2-5仍NOT_RUN。均已R2-4 OK，不重复增加可用性分子；没有新探测或重复失败检索。详见[三项证据与缺口](../r2-one-catalog-candidate-2026-10-15/next-batch-recommendations.json)。（2026-10-22 标注：此建议已过时，已由 [r2-three-rss-2026-10-15](../r2-three-rss-2026-10-15/report.md) 完成 26 条原 XML 回放、矩阵 OK/PASS；不再重找原件或重跑）

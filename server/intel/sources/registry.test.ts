@@ -6,6 +6,7 @@ import { intelSourceSeeds } from "../sources"
 import { CUSTOMS_SYNTHETIC } from "./__fixtures__/html-index-synthetic"
 import { maerskHtml as MAERSK_SYNTHETIC } from "./__fixtures__/maersk-news-synthetic"
 import { mofcomHtml as MOFCOM_SYNTHETIC } from "./__fixtures__/mofcom-policy-synthetic"
+import { MY_CUSTOMS_RSS_SYNTHETIC } from "./__fixtures__/my-customs-rss-synthetic"
 import { ONE_NEWSROOM_SYNTHETIC } from "./__fixtures__/one-newsroom-synthetic"
 import { fixtures as POST_CLASH } from "./__fixtures__/post-clash-synthetic"
 import { GD_SYNTHETIC, JDIH_MOF_SYNTHETIC, MOF_SYNTHETIC, PH_SYNTHETIC, SITC_SYNTHETIC } from "./__fixtures__/public-index-synthetic"
@@ -13,6 +14,7 @@ import { markup as thaiDocumentMarkup } from "./__fixtures__/thai-document-synth
 import { synthetic as VN_DISASTER_SYNTHETIC } from "./__fixtures__/vn-disaster-synthetic"
 import { htmlIndexCandidates } from "./html-index-candidates"
 import { REGISTERED_CLOSED_CANDIDATE_IDS, registeredIntelSources } from "./registry"
+import { rssCandidates } from "./rss-candidates"
 import { initShippingTables } from "#/database/shipping"
 import { RuntimeRepository } from "#/database/runtime-jobs"
 import { BackgroundRuntime } from "#/runtime/background-runtime"
@@ -35,9 +37,11 @@ const VD = htmlIndexCandidates.find(seed => seed.catalogId === "VN-D01")!
 const XK = htmlIndexCandidates.find(seed => seed.catalogId === "XX-K02")!
 const MK = htmlIndexCandidates.find(seed => seed.catalogId === "XX-K01")!
 const MC = htmlIndexCandidates.find(seed => seed.catalogId === "CN-T01")!
-const NEW = [CN, TH, PH, GD, TD, VP, VT, IT, SK, JD, VD, XK, MK, MC]
-const SYNTHETIC = [{ seed: CN, html: MOF_SYNTHETIC }, { seed: TH, html: CUSTOMS_SYNTHETIC }, { seed: PH, html: PH_SYNTHETIC }, { seed: GD, html: GD_SYNTHETIC }, { seed: TD, html: thaiDocumentMarkup() }, { seed: VP, html: POST_CLASH["VN-P03"] }, { seed: VT, html: POST_CLASH["VN-T01"] }, { seed: IT, html: POST_CLASH["ID-T01"] }, { seed: SK, html: SITC_SYNTHETIC }, { seed: JD, html: JDIH_MOF_SYNTHETIC, count: 3 }, { seed: VD, html: VN_DISASTER_SYNTHETIC }, { seed: XK, html: ONE_NEWSROOM_SYNTHETIC, count: 3 }, { seed: MK, html: MAERSK_SYNTHETIC }, { seed: MC, html: MOFCOM_SYNTHETIC }]
+const MY = rssCandidates.find(seed => seed.catalogId === "MY-C01")!
+const NEW = [CN, TH, PH, GD, TD, VP, VT, IT, SK, JD, VD, XK, MK, MC, MY]
+const SYNTHETIC = [{ seed: CN, html: MOF_SYNTHETIC }, { seed: TH, html: CUSTOMS_SYNTHETIC }, { seed: PH, html: PH_SYNTHETIC }, { seed: GD, html: GD_SYNTHETIC }, { seed: TD, html: thaiDocumentMarkup() }, { seed: VP, html: POST_CLASH["VN-P03"] }, { seed: VT, html: POST_CLASH["VN-T01"] }, { seed: IT, html: POST_CLASH["ID-T01"] }, { seed: SK, html: SITC_SYNTHETIC }, { seed: JD, html: JDIH_MOF_SYNTHETIC, count: 3 }, { seed: VD, html: VN_DISASTER_SYNTHETIC }, { seed: XK, html: ONE_NEWSROOM_SYNTHETIC, count: 3 }, { seed: MK, html: MAERSK_SYNTHETIC }, { seed: MC, html: MOFCOM_SYNTHETIC }, { seed: MY, html: MY_CUSTOMS_RSS_SYNTHETIC }]
 const SNAPSHOT = JSON.stringify(htmlIndexCandidates)
+const RSS_SNAPSHOT = JSON.stringify(rssCandidates)
 const ORIGINAL_SNAPSHOT = JSON.stringify(intelSourceSeeds)
 
 type TransportOptions = Parameters<NonNullable<IntelFetchDeps["transport"]>>[2]
@@ -57,7 +61,8 @@ function fake(routes: Record<string, string> = {}) {
       options.push(opts)
       const html = routes[url.toString()]
       if (html === undefined) return { status: 503, headers: {}, body: new Uint8Array() }
-      return { status: 200, headers: { "content-type": "text/html; charset=utf-8" }, body: new TextEncoder().encode(html) }
+      const contentType = html.startsWith("<?xml") ? "application/rss+xml; charset=utf-8" : "text/html; charset=utf-8"
+      return { status: 200, headers: { "content-type": contentType }, body: new TextEncoder().encode(html) }
     },
   }
   return { deps, calls, lookups, options }
@@ -91,12 +96,13 @@ afterEach(() => {
   guard?.mockRestore()
   expect(blocked).toEqual([])
   expect(JSON.stringify(htmlIndexCandidates)).toBe(SNAPSHOT)
+  expect(JSON.stringify(rssCandidates)).toBe(RSS_SNAPSHOT)
   expect(JSON.stringify(intelSourceSeeds)).toBe(ORIGINAL_SNAPSHOT)
   for (const seed of NEW) expect(seed).toMatchObject({ enabled: false, persistence: "disallowed" })
 })
 
 describe("registeredIntelSources", () => {
-  it("keeps the original two seeds unchanged and reuses all fourteen closed candidate objects (CN-T02/TH-C01/PH-C01/CN-P01/TH-C02/VN-P03/VN-T01/ID-T01/XX-K03/ID-T02/VN-D01/XX-K02/XX-K01/CN-T01)", () => {
+  it("keeps the original two seeds unchanged and reuses all fifteen closed candidate objects (CN-T02/TH-C01/PH-C01/CN-P01/TH-C02/VN-P03/VN-T01/ID-T01/XX-K03/ID-T02/VN-D01/XX-K02/XX-K01/CN-T01/MY-C01)", () => {
     expect(registeredIntelSources.map(seed => seed.catalogId)).toEqual(["TH-W01", "ID-W01", ...REGISTERED_CLOSED_CANDIDATE_IDS])
     expect(registeredIntelSources.slice(0, 2)).toEqual(intelSourceSeeds)
     expect(registeredIntelSources[0]).toBe(intelSourceSeeds[0])
@@ -105,14 +111,14 @@ describe("registeredIntelSources", () => {
     expect(registeredIntelSources.slice(2)).toEqual(NEW)
     NEW.forEach((seed, index) => expect(registeredIntelSources[index + 2]).toBe(seed))
     for (const seed of NEW) expect(seed).toMatchObject({ enabled: false, persistence: "disallowed" })
-    expect(new Set(registeredIntelSources.map(seed => seed.id)).size).toBe(16)
-    expect(new Set(registeredIntelSources.map(seed => seed.catalogId)).size).toBe(16)
+    expect(new Set(registeredIntelSources.map(seed => seed.id)).size).toBe(17)
+    expect(new Set(registeredIntelSources.map(seed => seed.catalogId)).size).toBe(17)
     expect(Object.isFrozen(registeredIntelSources)).toBe(true)
   })
 })
 
 describe("default collect job (no seeds) on the BackgroundRuntime with isolated SQLite", () => {
-  it("a) registers all fourteen closed candidates as enabled=0 but never makes them due or requests them", async () => {
+  it("a) registers all fifteen closed candidates as enabled=0 but never makes them due or requests them", async () => {
     const state = await isolated()
     const net = fake()
     const runtime = runtimeFor(state)
@@ -188,7 +194,7 @@ describe("b) production selection is unchanged", () => {
     const options = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "TH-W01,ID-W01" }, dependencies })
     expect(options.registry?.intel?.seeds?.map(seed => seed.catalogId)).toEqual(["TH-W01", "ID-W01"])
   })
-  it.each(["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-W01,CN-T02", "ID-W01,TH-C01", "TH-W01,PH-C01", "ID-W01,CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "TH-W01,TH-C02", "ID-W01,ID-T01", "XX-K03", "ID-T02", "TH-W01,XX-K03", "ID-W01,ID-T02", "VN-D01", "TH-W01,VN-D01", "XX-K02", "ID-W01,XX-K02", "XX-K01", "TH-W01,XX-K01", "CN-T01", "ID-W01,CN-T01"])("rejects %s with intel_source_selection_invalid", (ids) => {
+  it.each(["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-W01,CN-T02", "ID-W01,TH-C01", "TH-W01,PH-C01", "ID-W01,CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "TH-W01,TH-C02", "ID-W01,ID-T01", "XX-K03", "ID-T02", "TH-W01,XX-K03", "ID-W01,ID-T02", "VN-D01", "TH-W01,VN-D01", "XX-K02", "ID-W01,XX-K02", "XX-K01", "TH-W01,XX-K01", "CN-T01", "ID-W01,CN-T01", "MY-C01", "TH-W01,MY-C01", "intel:my-c01", "bounded:MY-C01"])("rejects %s with intel_source_selection_invalid", (ids) => {
     expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: ids }, dependencies })).toThrow("intel_source_selection_invalid")
   })
   it("disabled production passes explicit empty seeds", () => {
@@ -252,14 +258,30 @@ describe("d) test-only enabled copies run Runtime -> isolated SQLite with fake l
         expect(evidence.map(row => row?.raw).sort()).toEqual(["2026-10-14", "2026-10-19"])
         for (const row of evidence) expect(row).toMatchObject({ precision: "day", timezone: "missing", utcOffset: null, publishedAt: null })
       }
+      // MY-C01: existing Feed parser semantics (explicit +0800 pubDate -> instant), metadata only, product id only (never the bounded: evidence id).
+      if (seed === MY) {
+        expect(copy.id).toBe("intel:my-c01")
+        expect(copy.url).toBe("https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss")
+        expect(copy.allowedHosts).toEqual(["www.customs.gov.my"])
+        expect(copy.sourceHeaderLimit).toBeUndefined()
+        expect(copy.sourceCa).toBeUndefined()
+        expect(sourceIds(state).some(id => id.startsWith("bounded:"))).toBe(false)
+        expect(items.map(item => [item.canonicalUrl, item.title, item.publishedAt]).sort()).toEqual([
+          ["https://www.customs.gov.my/ms/arkib/pengumuman/synthetic-dua", "Synthetic pengumuman dua", "2026-09-28T12:32:19.000Z"],
+          ["https://www.customs.gov.my/ms/arkib/pengumuman/synthetic-satu", "Synthetic pengumuman satu", "2026-10-08T01:16:03.000Z"],
+        ])
+        for (const opts of net.options) expect(opts.caPem).toBeUndefined()
+      }
       if (seed === SK) expect(items.map(item => item.canonicalUrl).sort()).toEqual(["http://www.sitc.com/en/show.asp?id=0001", "http://www.sitc.com/en/show.asp?id=0002"])
       for (const item of items) {
         const versions = await state.repository.listVersions(item.id)
         expect(versions).toHaveLength(1)
         expect(versions[0].contentScope).toBe("metadata_only")
         // Day/document/enactment date evidence keeps its role; never promoted to a publication instant.
-        expect(item.publishedAt).toBeNull()
-        expect(versions[0].dateEvidence?.publishedAt).toBeNull()
+        if (seed !== MY) {
+          expect(item.publishedAt).toBeNull()
+          expect(versions[0].dateEvidence?.publishedAt).toBeNull()
+        }
         expect(await state.repository.readVersionBlocks(versions[0].id)).toEqual([expect.objectContaining({ type: "title", text: item.title })])
       }
       expect(sourceIds(state).filter(id => !baseline.includes(id))).toEqual([seed.id])
