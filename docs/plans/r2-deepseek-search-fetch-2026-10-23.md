@@ -67,7 +67,7 @@
 
 ## 3. 合同三点修正（相对 a9ae16d 方案，强制）
 
-### 3.1 硬预算 = 发送前原子预留（不能只靠 `decidePaidBudget`）
+### 3.1 硬预算 = `paidRequest` 内原子预留（不能只靠 `decidePaidBudget`）
 
 - **必须**复用 `server/intel/llm/receipts.ts` 已有骨架：`BEGIN IMMEDIATE` 占位、`pending` / `unknown`、`usage_recorded` 幂等、`monthSpend = usage + 未入账 pending/unknown`。
 - `decidePaidBudget` **单独不足以**控制并发；并发争用最后一个额度时，只有拿到 IMMEDIATE 预留的一方可外呼。
@@ -90,7 +90,7 @@
 - 目标审核与 persistence **分离**：`reviewFetchTarget` / `FetchTargetReview` 为句法闸（复用 `isBlockedAddress`，规范化括号与尾点）；**不**宣称能验证第三方实际 DNS/IP/跳转。persistence 许可不能代替目标安全审核；调用方已 `locally_rejected` 时即使 persistence=full 亦拒绝。
 - **计费**：按上游有效非空结果次数结算（Search 以 `results.length` 为准），不以裁剪后 `candidates.length`；HTTP200 无效 JSON / 错误 schema → `unknown` 保留额度；仅明确有效空结果释放。query/count 等入参校验在 `paidRequest` 之前。
 - **错误**：回执/日志只存固定错误码（如 `deepseek_tools_http_401`），禁止附响应正文或凭据。
-- **时限**：本服务有限默认总期限 + 调用方取消信号传到 HTTP；响应体流式字节上限；发送后超时/取消/超限且无法确认计费 → `unknown`。
+- **时限**：默认 AbortSignal（约 25s）**主要约束 outbound HTTP** + 调用方取消下传；响应体流式字节上限；发送后超时/取消/超限且无法确认计费 → `unknown`。Secret/DB claim 仍按既有 `paidRequest`（先读密钥再原子预留），**不宣称**端到端总期限。未发送取消 → 固定非计费。
 - **预算**：`deepseek_search` 与 `deepseek_fetch` **各自**月预算，不是共享总池。
 
 - Search **请求缓存键** = 规范化 query ＋ 有效参数 ＋ 策略版本；**不能**用请求前还没有的结果 `dedupeKey`。候选 URL 去重是**另一层**（结果侧）。
@@ -100,7 +100,7 @@
 
 | 既有 | 复用方式 |
 | --- | --- |
-| `paidRequest` / `paid_receipt` | 发送前原子预留；logical_key = identity 哈希兼请求缓存 |
+| `paidRequest` / `paid_receipt` | 先读 Secret 再原子预留（既有语义）；logical_key = identity 哈希兼请求缓存 |
 | `provider_usage` | capability 分列；CNY；空结果 0 成本 |
 | `decidePaidBudget` | 仅闸门辅助；并发以 IMMEDIATE 为准 |
 | `FileSecretStore` / `deepseek` | **默认关闭或预算≤0 时连 SecretStore 都不读** |
@@ -188,3 +188,11 @@
 ## 10. 明确不在此次授权内
 
 启源、真实密钥写入、付费外呼、合并/部署/force、R3、24h、联系 Guyang、抬 R2 计数、改 CN-T01/XX-M01 门槛、主工作区 64 条修改、wt-s*/wt-diag/Junction、新依赖、启服务、碰现用 DB。
+
+## 合同缺口修补 v1.2（2026-10-23）
+
+1. Client transport 异常不透传：统一 `request_failed` / `response_read_failed` 等固定码，保持 unknown。
+2. Fetch `targetReview.canonicalUrl` 必须与 `input.url` 规范化结果一致；不一致或伪造 approved 私网 → 零密钥/零回执/零 HTTP。
+3. 预先取消：入口拒绝已取消；dispatch 前再检；未发送非计费，已发送才 unknown。
+4. 合成 `Response`/`ReadableStream` 覆盖默认适配器流式字节上限（不只 `staticReadText`）。
+5. 措辞：25s controller 主要约束 HTTP；不宣称端到端总期限或「先预留再读密钥」。

@@ -1,3 +1,11 @@
+## 2026-10-23 — DeepSeek Search/Fetch 三缺口合并修补 v1.2（默认关闭）
+
+- 基线 efd1e005 → 本修补 tip；policyVersion `ds-sf-v1.2-2026-10-23`。
+- 三缺口：① transport/readText 未知异常统一固定码（`request_failed`/`response_read_failed` 等），receipt+attempt 不落敏感文本；② `targetReview` 必须绑定实际 `input.url`，不以其 canonical 替换请求目标；伪造/错配审核零密钥、零回执、零 HTTP；③ 入口与 dispatch 前拒绝已取消；未发送取消固定非计费，已 dispatch 才 unknown。另补默认 HTTP 适配器 ReadableStream 字节上限测试。
+- 措辞：25s controller 主要约束 outbound HTTP；`secretStore.get`/DB claim 不受完整总期限约束；既有 `paidRequest` 仍是先读密钥再原子预留——不宣称端到端总期限或「先预留再读密钥」。
+- 仍默认关闭；未启源、未真实 API/密钥、未合并部署；不联系 Guyang。R2 计数与 CN-T01/XX-M01 不变。
+- 门禁含**全量** `pnpm lint`（非仅改动文件 eslint）。日志：`.tmp/logs/deepseek-search-fetch-gapfix2-2026-10-23/`。
+
 ## 2026-10-23 — DeepSeek Search/Fetch 合同缺口修补（默认关闭）
 
 - 基线 e11ec92 → 本修补 tip（待提交）；policyVersion ds-sf-v1.1-2026-10-23。
@@ -9,7 +17,7 @@
 ## 2026-10-23 DeepSeek Search/Fetch 合同修正 + 默认关闭第一片（dots `1792725183.066059`）
 
 - 方向认可基线 `a9ae16d`；同一授权内先修正方案三点，再落地默认关闭、离线可测最小接入；不另等用户批准；不联系 Guyang。
-- 合同三点：①硬预算发送前原子预留（复用 `receipts` BEGIN IMMEDIATE / pending / unknown；`decidePaidBudget`  alone 不足）；②`third_party_markdown` 为 provenance 非 contentScope，删除 disallowed Markdown 存证例外，回执/缓存/日志无正文；③删除安全拒绝后预览绕行；Search 缓存键=规范化 query+参数+策略版本。
+- 合同三点：①硬预算在 `paidRequest` 内原子预留（复用 BEGIN IMMEDIATE / pending / unknown；既有顺序先读 Secret 再预留；`decidePaidBudget` alone 不足）；②`third_party_markdown` 为 provenance 非 contentScope，删除 disallowed Markdown 存证例外，回执/缓存/日志无正文；③删除安全拒绝后预览绕行；Search 缓存键=规范化 query+参数+策略版本。
 - 方案：[`docs/plans/r2-deepseek-search-fetch-2026-10-23.md`](plans/r2-deepseek-search-fetch-2026-10-23.md)；ADR：[`docs/adr/ADR-011-deepseek-search-fetch-intel-assist.md`](adr/ADR-011-deepseek-search-fetch-intel-assist.md)。
 - 实现：`server/providers/deepseek/search-fetch-client.ts`、`server/intel/discovery/{deepseek-search-fetch-policy,candidate-trim,search-fetch-service}.ts` + 离线测试。零 schema 迁移。真实付费/启源/R3/24h/合并部署仍未授权。R2 28/39、25/34 与允许选择 19≠启用、CN-T01/XX-M01 不变。
 

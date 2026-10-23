@@ -4,8 +4,13 @@
  * Reuses paid_receipt BEGIN IMMEDIATE reserve; response DTOs never carry bodies.
  *
  * Target URL review is syntactic only (assertPublicHttpUrl / isBlockedAddress).
- * Persistence license never substitutes for that review. This service does not
+ * Persistence license never substitutes for that review. Supplied reviews must
+ * bind to input.url and never retarget the request. This service does not
  * verify third-party DNS, resolved IPs, or redirects.
+ *
+ * timeoutMs / AbortSignal bound the outbound HTTP call only; secretStore.get and
+ * DB claim follow existing paidRequest order (key then reserve), not an
+ * end-to-end wall clock.
  */
 import { Buffer } from "node:buffer"
 import type { Database } from "db0"
@@ -26,6 +31,7 @@ import type { SecretStore } from "#/providers/contracts"
 import {
   PaidGateError,
   type PaidRequestContext,
+  ProviderRejectedError,
   type ReceiptResult,
   paidRequest,
 } from "#/intel/llm/receipts"
@@ -66,6 +72,15 @@ export class SearchFetchPolicyError extends Error {
   }
 }
 
+/** Fixed non-billing cancel before HTTP dispatch (no unknown reservation). */
+export class SearchFetchCancelledError extends Error {
+  readonly code = "request_cancelled" as const
+  constructor(message = "request cancelled before send") {
+    super(message)
+    this.name = "SearchFetchCancelledError"
+  }
+}
+
 export interface SearchFetchServiceConfig {
   db: Database
   secretStore: SecretStore
@@ -77,9 +92,14 @@ export interface SearchFetchServiceConfig {
   monthlyBudgetFetch?: number | null
   fetcher?: InjectedFetcher
   now?: () => Date
-  /** Total deadline for one paid call; default DEEPSEEK_SEARCH_FETCH_DEFAULT_TIMEOUT_MS. */
+  /**
+   * Abort deadline applied to the outbound HTTP call (AbortSignal), default
+   * DEEPSEEK_SEARCH_FETCH_DEFAULT_TIMEOUT_MS. Does NOT bound secretStore.get or
+   * the DB claim inside paidRequest — those run before HTTP under existing
+   * receipt semantics (key read then atomic reserve).
+   */
   timeoutMs?: number
-  /** Optional outer cancel; combined with the service timeout. */
+  /** Optional outer cancel; combined with the HTTP timeout signal. */
   signal?: AbortSignal
 }
 
@@ -157,7 +177,7 @@ export function reviewFetchTarget(url: string): FetchTargetReview {
   }
 }
 
-async function readResponseBodyLimited(
+export async function readResponseBodyLimited(
   response: Response,
   maxBytes: number,
   signal?: AbortSignal,
@@ -214,7 +234,7 @@ function toInjectedFetcher(fetcher: InjectedFetcher | undefined): InjectedFetche
   }
 }
 
-function searchIdentity(input: SearchInput, query: string, count: number, need_content: boolean) {
+function searchIdentity(_input: SearchInput, query: string, count: number, need_content: boolean) {
   return {
     policyVersion: DEEPSEEK_SEARCH_FETCH_POLICY_VERSION,
     capability: DEEPSEEK_SEARCH_CAPABILITY,
@@ -291,8 +311,84 @@ function createCallSignal(
   }
 }
 
+function assertNotCancelled(...signals: Array<AbortSignal | undefined>): void {
+  for (const signal of signals) {
+    if (signal?.aborted) throw new SearchFetchCancelledError()
+  }
+}
+
+/** paidRequest reads the key before claiming; race get against cancel so pre-claim abort stays non-billing. */
+function abortAwareSecretStore(store: SecretStore, signal: AbortSignal): SecretStore {
+  return {
+    get: async (id) => {
+      if (signal.aborted) throw new SearchFetchCancelledError()
+      return await new Promise<string | undefined>((resolve, reject) => {
+        let cleaned = false
+        const onAbort = () => {
+          if (cleaned) return
+          cleaned = true
+          signal.removeEventListener("abort", onAbort)
+          reject(new SearchFetchCancelledError())
+        }
+        const cleanup = () => {
+          if (cleaned) return
+          cleaned = true
+          signal.removeEventListener("abort", onAbort)
+        }
+        signal.addEventListener("abort", onAbort, { once: true })
+        Promise.resolve(store.get(id)).then(
+          (value) => {
+            cleanup()
+            if (signal.aborted) reject(new SearchFetchCancelledError())
+            else resolve(value)
+          },
+          (error) => {
+            cleanup()
+            reject(error)
+          },
+        )
+      })
+    },
+    set: (id, value) => store.set(id, value),
+    delete: id => store.delete(id),
+    has: id => store.has(id),
+    source: id => store.source(id),
+  }
+}
+
+/** Pre-HTTP cancel inside paidRequest callback → failed/0 cost (not unknown). */
+function rejectIfCancelledBeforeSend(signal: AbortSignal): void {
+  if (signal.aborted) {
+    throw new ProviderRejectedError("deepseek_tools_cancelled_before_send", 499, false)
+  }
+}
+
+function resolveFetchCanonical(input: FetchInput): string {
+  // Always review the actual request URL. Supplied review never replaces the target.
+  if (input.targetReview?.status === "locally_rejected") {
+    throw new SearchFetchPolicyError(
+      input.targetReview.code || "url_blocked",
+      "Fetch refused: target already locally rejected (persistence cannot bypass)",
+    )
+  }
+  const actual = reviewFetchTarget(input.url)
+  if (actual.status === "locally_rejected") {
+    throw new SearchFetchPolicyError(actual.code, actual.message)
+  }
+  if (input.targetReview?.status === "syntactically_allowed") {
+    if (input.targetReview.canonicalUrl !== actual.canonicalUrl) {
+      throw new SearchFetchPolicyError(
+        "target_review_mismatch",
+        "supplied target review does not bind to input.url",
+      )
+    }
+  }
+  return actual.canonicalUrl
+}
+
 export async function runDeepSeekSearch(config: SearchFetchServiceConfig, input: SearchInput): Promise<SearchOutcome> {
   assertEnabled(config)
+  assertNotCancelled(config.signal, input.signal)
   // Full input validation BEFORE paidRequest — bad params must not create unknown receipts.
   let query: string
   let count: number
@@ -308,10 +404,11 @@ export async function runDeepSeekSearch(config: SearchFetchServiceConfig, input:
   const timeoutMs = resolveTimeoutMs(config)
   const fetcher = toInjectedFetcher(config.fetcher)
   const { signal, dispose } = createCallSignal(timeoutMs, config.signal, input.signal)
+  assertNotCancelled(signal)
 
   try {
     const result: ReceiptResult = await paidRequest(
-      paidCtx(config, budget, timeoutMs),
+      paidCtx({ ...config, secretStore: abortAwareSecretStore(config.secretStore, signal) }, budget, timeoutMs),
       {
         providerId: DEEPSEEK_SEARCH_FETCH_PROVIDER_ID,
         capability: DEEPSEEK_SEARCH_CAPABILITY,
@@ -328,6 +425,7 @@ export async function runDeepSeekSearch(config: SearchFetchServiceConfig, input:
         estimatedCost: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
       },
       async (apiKey) => {
+        rejectIfCancelledBeforeSend(signal)
         let response
         try {
           response = await deepSeekSearch({
@@ -380,34 +478,26 @@ export async function runDeepSeekSearch(config: SearchFetchServiceConfig, input:
 
 export async function runDeepSeekFetch(config: SearchFetchServiceConfig, input: FetchInput): Promise<FetchOutcome> {
   assertEnabled(config)
+  assertNotCancelled(config.signal, input.signal)
   // Persistence license is not a security approval and never bypasses target review.
   if (input.persistence === "disallowed") {
     throw new SearchFetchPolicyError("persistence_disallowed", "Fetch refused: persistence disallowed (no preview bypass)")
   }
-  if (input.targetReview?.status === "locally_rejected") {
-    throw new SearchFetchPolicyError(
-      input.targetReview.code || "url_blocked",
-      "Fetch refused: target already locally rejected (persistence cannot bypass)",
-    )
-  }
 
-  const reviewed = input.targetReview?.status === "syntactically_allowed"
-    ? input.targetReview
-    : reviewFetchTarget(input.url)
-  if (reviewed.status === "locally_rejected") {
-    throw new SearchFetchPolicyError(reviewed.code, reviewed.message)
-  }
+  // Always bind security review to input.url; supplied review cannot retarget the request.
+  const canonicalUrl = resolveFetchCanonical(input)
 
   const budget = assertBudget(config.monthlyBudgetFetch, DEEPSEEK_FETCH_CAPABILITY)
-  const identity = fetchIdentity(input, reviewed.canonicalUrl)
+  const identity = fetchIdentity(input, canonicalUrl)
   const timeoutMs = resolveTimeoutMs(config)
   const fetcher = toInjectedFetcher(config.fetcher)
   const { signal, dispose } = createCallSignal(timeoutMs, config.signal, input.signal)
+  assertNotCancelled(signal)
 
   let freshBody: DeepSeekFetchResponse | undefined
   try {
     const result: ReceiptResult = await paidRequest(
-      paidCtx(config, budget, timeoutMs),
+      paidCtx({ ...config, secretStore: abortAwareSecretStore(config.secretStore, signal) }, budget, timeoutMs),
       {
         providerId: DEEPSEEK_SEARCH_FETCH_PROVIDER_ID,
         capability: DEEPSEEK_FETCH_CAPABILITY,
@@ -425,9 +515,10 @@ export async function runDeepSeekFetch(config: SearchFetchServiceConfig, input: 
         estimatedCost: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
       },
       async (apiKey) => {
+        rejectIfCancelledBeforeSend(signal)
         let response: DeepSeekFetchResponse
         try {
-          response = await deepSeekFetch({ url: reviewed.canonicalUrl }, {
+          response = await deepSeekFetch({ url: canonicalUrl }, {
             apiKey,
             fetcher,
             signal,
@@ -436,7 +527,7 @@ export async function runDeepSeekFetch(config: SearchFetchServiceConfig, input: 
         } catch (error) {
           mapClientError(error)
         }
-        const meta = trimFetchMeta(reviewed.canonicalUrl, response)
+        const meta = trimFetchMeta(canonicalUrl, response)
         const billable = !meta.empty
         freshBody = response
         return {

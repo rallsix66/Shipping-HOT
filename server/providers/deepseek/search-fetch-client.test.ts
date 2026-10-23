@@ -133,3 +133,15 @@ describe("deepSeekSearch / deepSeekFetch client", () => {
     await expect(pending).rejects.toMatchObject({ code: "request_aborted" })
   })
 })
+
+describe("transport error mapping", () => {
+  it("maps non-abort transport errors to request_failed without leaking message text", async () => {
+    const poison = "ECONNRESET https://evil.example Bearer sk-LEAKED_KEY_999"
+    const fetcher: InjectedFetcher = async () => {
+      throw new Error(poison)
+    }
+    await expect(deepSeekSearch({ query: "x" }, { apiKey: "k", fetcher }))
+      .rejects
+      .toMatchObject({ name: "DeepSeekToolsOutcomeUnknownError", code: "request_failed", message: "request_failed" })
+  })
+})

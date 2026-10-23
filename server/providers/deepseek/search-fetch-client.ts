@@ -198,10 +198,12 @@ async function postJson(
       signal: options.signal,
     })
   } catch (error) {
+    // Never persist/rethrow arbitrary transport text (URL, Bearer, upstream).
+    if (error instanceof DeepSeekToolsOutcomeUnknownError) throw error
     if (options.signal?.aborted) {
       throw new DeepSeekToolsOutcomeUnknownError("request_aborted")
     }
-    throw error
+    throw new DeepSeekToolsOutcomeUnknownError("request_failed")
   }
   let text: string
   try {

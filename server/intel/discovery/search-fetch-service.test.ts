@@ -18,8 +18,10 @@ import {
   DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
 } from "./deepseek-search-fetch-policy"
 import {
+  SearchFetchCancelledError,
   SearchFetchDisabledError,
   type SearchFetchServiceConfig,
+  readResponseBodyLimited,
   reviewFetchTarget,
   runDeepSeekFetch,
   runDeepSeekSearch,
@@ -42,7 +44,7 @@ function isUnknownOutcome(error: unknown): boolean {
 
 const T0 = new Date("2026-10-23T03:00:00.000Z")
 const PLACEHOLDER_KEY = "test-placeholder-not-a-real-key"
-const TMP_ROOT = join(process.cwd(), ".tmp", "deepseek-search-fetch-gapfix-2026-10-23")
+const TMP_ROOT = join(process.cwd(), ".tmp", "deepseek-search-fetch-gapfix2-2026-10-23")
 mkdirSync(TMP_ROOT, { recursive: true })
 
 const cleanups: Array<() => void> = []
@@ -715,12 +717,212 @@ describe("runDeepSeekFetch (offline)", () => {
   })
 })
 
+describe("contract gapfix2: exception codes / URL bind / cancel / stream cap", () => {
+  it("transport errors with fake key text book unknown using fixed code only (receipt + attempt)", async () => {
+    const { db, native } = await setup()
+    const poison = `socket hang up url=https://evil.example/ Bearer ${PLACEHOLDER_KEY} sk-FAKE_TRANSPORT`
+    const { state, fetcher } = mockFetcher(async () => {
+      throw new Error(poison)
+    })
+    await expect(runDeepSeekSearch(baseConfig(db, {
+      monthlyBudgetSearch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
+      fetcher,
+    }), { query: "transport-leak", purpose: "slice1_test", subject: "transport-leak" }))
+      .rejects
+      .toSatisfy(isUnknownOutcome)
+    const row = native.prepare("SELECT id, status, error, request, response FROM paid_receipt WHERE subject = ?").get("transport-leak") as {
+      id: string
+      status: string
+      error: string | null
+      request: string | null
+      response: string | null
+    }
+    expect(row.status).toBe("unknown")
+    expect(row.error).toBe("request_failed")
+    const attempt = native.prepare("SELECT status, error FROM paid_receipt_attempt WHERE receipt_id = ?").get(row.id) as {
+      status: string
+      error: string | null
+    }
+    expect(attempt.status).toBe("unknown")
+    expect(attempt.error).toBe("request_failed")
+    const blob = `${row.error}${row.request}${row.response}${attempt.error}`
+    expect(blob).not.toMatch(/Bearer |sk-FAKE|evil\.example|PLACEHOLDER|test-placeholder/)
+    expect(containsSecretLike(blob, PLACEHOLDER_KEY)).toBe(false)
+    expect(state.hits).toBe(1)
+  })
+
+  it("rejects supplied targetReview that does not bind input.url (zero secret/receipt/HTTP)", async () => {
+    const { db, native } = await setup()
+    const gets: string[] = []
+    const { state, fetcher } = mockFetcher(async () => jsonResponse(200, { title: "t", content: "c" }))
+    const cfg = baseConfig(db, { secretStore: secrets({}, { gets }), fetcher })
+    await expect(runDeepSeekFetch(cfg, {
+      url: "https://example.com/real-target",
+      purpose: "slice1_test",
+      subject: "mismatch",
+      persistence: "full",
+      targetReview: { status: "syntactically_allowed", canonicalUrl: "https://example.com/other-target" },
+    })).rejects.toMatchObject({ code: "target_review_mismatch" })
+    // Forged approved private-network object still fails closed on input.url.
+    await expect(runDeepSeekFetch(cfg, {
+      url: "http://127.0.0.1/secret",
+      purpose: "slice1_test",
+      subject: "forged-private",
+      persistence: "full",
+      targetReview: { status: "syntactically_allowed", canonicalUrl: "http://127.0.0.1/secret" },
+    })).rejects.toMatchObject({ code: "url_blocked" })
+    await expect(runDeepSeekFetch(cfg, {
+      url: "http://[::1]/",
+      purpose: "slice1_test",
+      persistence: "full",
+      targetReview: { status: "syntactically_allowed", canonicalUrl: "https://example.com/public" },
+    })).rejects.toMatchObject({ code: "url_blocked" })
+    expect(gets).toEqual([])
+    expect(state.hits).toBe(0)
+    const count = native.prepare("SELECT COUNT(*) AS c FROM paid_receipt").get() as { c: number }
+    expect(count.c).toBe(0)
+  })
+
+  it("matching licensed targetReview still binds to input.url and does not retarget", async () => {
+    const { db } = await setup()
+    const { state, fetcher } = mockFetcher(async (_url, init) => {
+      const body = JSON.parse(init?.body ?? "{}") as { url?: string }
+      expect(body.url).toBe("https://example.com/bound")
+      return jsonResponse(200, { title: "ok", content: "body" })
+    })
+    const reviewed = reviewFetchTarget("https://example.com/bound")
+    expect(reviewed.status).toBe("syntactically_allowed")
+    await runDeepSeekFetch(baseConfig(db, { fetcher }), {
+      url: "https://example.com/bound",
+      purpose: "slice1_test",
+      subject: "bound",
+      persistence: "full",
+      targetReview: reviewed,
+    })
+    expect(state.hits).toBe(1)
+  })
+
+  it("entry already-cancelled refuses without secret, receipt, or HTTP", async () => {
+    const { db, native } = await setup()
+    const gets: string[] = []
+    const { state, fetcher } = mockFetcher(async () => jsonResponse(200, searchHitBody))
+    const ac = new AbortController()
+    ac.abort()
+    await expect(runDeepSeekSearch(baseConfig(db, {
+      secretStore: secrets({}, { gets }),
+      fetcher,
+    }), { query: "pre-cancel", purpose: "slice1_test", subject: "pre-cancel", signal: ac.signal }))
+      .rejects
+      .toBeInstanceOf(SearchFetchCancelledError)
+    await expect(runDeepSeekFetch(baseConfig(db, {
+      secretStore: secrets({}, { gets }),
+      fetcher,
+    }), {
+      url: "https://example.com/pre",
+      purpose: "slice1_test",
+      persistence: "full",
+      signal: ac.signal,
+    })).rejects.toBeInstanceOf(SearchFetchCancelledError)
+    expect(gets).toEqual([])
+    expect(state.hits).toBe(0)
+    const count = native.prepare("SELECT COUNT(*) AS c FROM paid_receipt").get() as { c: number }
+    expect(count.c).toBe(0)
+  })
+
+  it("cancel while awaiting secret stays non-billing (no receipt / no HTTP)", async () => {
+    const { db, native } = await setup()
+    const ac = new AbortController()
+    let getStarted = false
+    const hangStore = {
+      get: async () => {
+        getStarted = true
+        await new Promise<never>(() => {
+          /* hang until abort races */
+        })
+        return PLACEHOLDER_KEY
+      },
+      set: async () => undefined,
+      delete: async () => undefined,
+      has: async () => true,
+      source: async () => "file" as const,
+    }
+    const { state, fetcher } = mockFetcher(async () => jsonResponse(200, searchHitBody))
+    const pending = runDeepSeekSearch(baseConfig(db, {
+      secretStore: hangStore as never,
+      fetcher,
+      timeoutMs: 5_000,
+    }), { query: "secret-cancel", purpose: "slice1_test", subject: "secret-cancel", signal: ac.signal })
+    for (let i = 0; i < 50; i++) {
+      if (getStarted) break
+      await new Promise(r => setTimeout(r, 10))
+    }
+    expect(getStarted).toBe(true)
+    ac.abort()
+    await expect(pending).rejects.toBeInstanceOf(SearchFetchCancelledError)
+    expect(state.hits).toBe(0)
+    const count = native.prepare("SELECT COUNT(*) AS c FROM paid_receipt").get() as { c: number }
+    expect(count.c).toBe(0)
+  })
+
+  it("cancel after HTTP dispatch keeps unknown (existing post-send path)", async () => {
+    const { db, native } = await setup()
+    const ac = new AbortController()
+    const { state, fetcher } = mockFetcher(async (_url, init) => new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(new Error("aborted-after-send")), { once: true })
+    }))
+    const pending = runDeepSeekSearch(baseConfig(db, {
+      monthlyBudgetSearch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
+      fetcher,
+      timeoutMs: 5_000,
+    }), { query: "post-cancel", purpose: "slice1_test", subject: "post-cancel", signal: ac.signal })
+    for (let i = 0; i < 50; i++) {
+      if (state.hits >= 1) break
+      await new Promise(r => setTimeout(r, 10))
+    }
+    expect(state.hits).toBe(1)
+    ac.abort()
+    await expect(pending).rejects.toSatisfy(isUnknownOutcome)
+    const row = native.prepare("SELECT status, error FROM paid_receipt WHERE subject = ?").get("post-cancel") as {
+      status: string
+      error: string | null
+    }
+    expect(row.status).toBe("unknown")
+    expect(String(row.error ?? "")).not.toMatch(/aborted-after-send|Bearer/)
+  })
+
+  it("readResponseBodyLimited enforces byte cap on synthetic ReadableStream Response", async () => {
+    const maxBytes = 64
+    const chunk = new TextEncoder().encode("Z".repeat(40))
+    let pulls = 0
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        pulls++
+        if (pulls <= 3) controller.enqueue(chunk)
+        else controller.close()
+      },
+    })
+    const response = new Response(stream, { status: 200 })
+    await expect(readResponseBodyLimited(response, maxBytes))
+      .rejects
+      .toMatchObject({ code: "response_too_large" })
+    expect(pulls).toBeLessThanOrEqual(3)
+
+    const small = new Response(new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode("ok-body"))
+        controller.close()
+      },
+    }), { status: 200 })
+    await expect(readResponseBodyLimited(small, maxBytes)).resolves.toBe("ok-body")
+  })
+})
+
 describe("policy constants", () => {
   it("keeps CNY unit cost and capability ids stable for slice-1", () => {
     expect(DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY).toBe(0.005)
     expect(DEEPSEEK_SEARCH_CAPABILITY).toBe("deepseek_search")
     expect(DEEPSEEK_FETCH_CAPABILITY).toBe("deepseek_fetch")
     expect(DEEPSEEK_SEARCH_FETCH_PROVIDER_ID).toBe("deepseek")
-    expect(DEEPSEEK_SEARCH_FETCH_POLICY_VERSION).toBe("ds-sf-v1.1-2026-10-23")
+    expect(DEEPSEEK_SEARCH_FETCH_POLICY_VERSION).toBe("ds-sf-v1.2-2026-10-23")
   })
 })
