@@ -7,6 +7,7 @@ import { type Stats, existsSync, lstatSync, mkdirSync, rmSync, statSync, symlink
 import { join } from "node:path"
 import process from "node:process"
 import { type TestContext, afterEach, describe, expect, it } from "vitest"
+import NativeDatabase from "better-sqlite3"
 import {
   BUDGET_MILLI_CNY,
   FIRST_ROUND_FETCH_TARGETS,
@@ -20,6 +21,7 @@ import {
   UNIT_COST_MILLI_CNY,
   assertTestIsolationAllowed,
   countAttempts,
+  createLiveOutbound,
   createMemorySecretStore,
   finalizeAttempt,
   lstatExistingEntry,
@@ -36,7 +38,11 @@ import {
 } from "./deepseek-search-fetch-pilot-lib"
 import { DEEPSEEK_SEARCH_CAPABILITY } from "#/intel/discovery/deepseek-search-fetch-policy"
 import type { InjectedFetcher } from "#/providers/deepseek/search-fetch-client"
-import { staticReadText } from "#/providers/deepseek/search-fetch-client"
+import {
+  DEEPSEEK_SEARCH_PATH,
+  DEEPSEEK_TOOLS_BASE,
+  staticReadText,
+} from "#/providers/deepseek/search-fetch-client"
 
 const REPO_ROOT = process.cwd()
 mkdirSync(join(REPO_ROOT, ".tmp"), { recursive: true })
@@ -693,5 +699,256 @@ describe("deepseek-search-fetch-pilot attempt hard gate", () => {
     expect(existsSync(paths.ledgerPath)).toBe(false)
     expect(() => resolveFixedPilotPaths(REPO_ROOT, name)).toThrow(/pilot_symlink_refused/)
     expect(existsSync(paths.paidDbPath)).toBe(false)
+  })
+})
+
+describe("default HTTP adapter via global fetch stub (no injectedFetcher)", () => {
+  const FAKE_KEY = "sk-test-default-adapter-fake-not-real"
+  const expectedSearchUrl = `${DEEPSEEK_TOOLS_BASE}${DEEPSEEK_SEARCH_PATH}`
+
+  interface FetchCall {
+    url: string
+    method?: string
+    headers?: Record<string, string>
+    body?: string
+    hasSignal: boolean
+  }
+
+  type FetchInput = Parameters<typeof fetch>[0]
+
+  function installOutboundHangThenStub(handler: (input: FetchInput, init?: RequestInit) => Promise<Response> | Response) {
+    const original = globalThis.fetch
+    const calls: FetchCall[] = []
+    let armed = false
+    const hung = async () => {
+      throw new Error("OUTBOUND_FORBIDDEN_BEFORE_STUB_ARMED")
+    }
+    // Hang first so any accidental call before stub arming fails closed.
+    globalThis.fetch = hung as typeof globalThis.fetch
+    const stub = (async (input: FetchInput, init?: RequestInit) => {
+      if (!armed) throw new Error("OUTBOUND_FORBIDDEN_STUB_NOT_ARMED")
+      const url = typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.toString()
+          : String((input as Request).url)
+      const headersRaw = init?.headers
+      const headers: Record<string, string> = {}
+      if (headersRaw && typeof headersRaw === "object" && !Array.isArray(headersRaw) && !(headersRaw instanceof Headers)) {
+        for (const [k, v] of Object.entries(headersRaw as Record<string, string>)) headers[k] = String(v)
+      } else if (headersRaw instanceof Headers) {
+        headersRaw.forEach((v, k) => {
+          headers[k] = v
+        })
+      }
+      calls.push({
+        url,
+        method: init?.method,
+        headers,
+        body: typeof init?.body === "string" ? init.body : init?.body != null ? String(init.body) : undefined,
+        hasSignal: init?.signal instanceof AbortSignal,
+      })
+      if (url !== expectedSearchUrl) {
+        throw new Error("OUTBOUND_FORBIDDEN_UNEXPECTED_URL")
+      }
+      return handler(input, init)
+    }) as typeof globalThis.fetch
+    globalThis.fetch = stub
+    armed = true
+    const restore = () => {
+      armed = false
+      globalThis.fetch = original
+    }
+    cleanups.push(restore)
+    return { calls, restore }
+  }
+
+  function freshPaidDb(label: string): string {
+    const name = isolationName(`default-fetch-${label}`)
+    const dir = join(REPO_ROOT, ".tmp", name)
+    mkdirSync(dir, { recursive: true })
+    return join(dir, "pilot-paid.sqlite3")
+  }
+
+  function readReceipt(paidDbPath: string, subject: string): { id: string, status: string, error: string | null } | undefined {
+    const native = new NativeDatabase(paidDbPath, { readonly: true })
+    try {
+      return native.prepare(
+        "SELECT id, status, error FROM paid_receipt WHERE subject = ? ORDER BY created_at DESC LIMIT 1",
+      ).get(subject) as { id: string, status: string, error: string | null } | undefined
+    } finally {
+      native.close()
+    }
+  }
+
+  it("200 Search through default adapter: asserts URL/method/headers/body/signal and success", async () => {
+    const paidDbPath = freshPaidDb("ok200")
+    const body = {
+      results: [{ title: "Default Adapter Hit", url: "https://example.com/default-ok", date: "2026-10-02" }],
+    }
+    const { calls } = installOutboundHangThenStub(() =>
+      new Response(JSON.stringify(body), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    )
+    const secrets = createMemorySecretStore(FAKE_KEY)
+    const live = await createLiveOutbound({ paidDbPath, secrets })
+    try {
+      const attemptId = "attempt-default-ok-200"
+      const out = await live.outbound.search("default-adapter-ok-query", attemptId)
+      expect(out.ok).toBe(true)
+      expect(out.receiptId).toBeTruthy()
+      expect(out.billable).toBe(true)
+      expect(out.upstreamResultCount).toBe(1)
+      expect(out.candidates).toHaveLength(1)
+      expect(calls).toHaveLength(1)
+      expect(calls[0]?.url).toBe(expectedSearchUrl)
+      expect(calls[0]?.method).toBe("POST")
+      expect(calls[0]?.hasSignal).toBe(true)
+      expect(calls[0]?.headers?.["Content-Type"]).toBe("application/json")
+      expect(calls[0]?.headers?.Accept).toBe("application/json")
+      expect(calls[0]?.headers?.Authorization).toBe(`Bearer ${FAKE_KEY}`)
+      const parsed = JSON.parse(calls[0]!.body!) as Record<string, unknown>
+      expect(parsed).toMatchObject({
+        query: "default-adapter-ok-query",
+        count: 10,
+        need_content: false,
+      })
+      expect(parsed).not.toHaveProperty("localization")
+      const row = readReceipt(paidDbPath, attemptId)
+      expect(row?.id).toBe(out.receiptId)
+      expect(row?.status).toBe("received")
+    } finally {
+      live.dispose()
+      secrets.clear()
+    }
+  })
+
+  it("http 401 reject through default adapter books failed (not request_failed/unknown)", async () => {
+    const paidDbPath = freshPaidDb("http401")
+    const { calls } = installOutboundHangThenStub(() =>
+      new Response(JSON.stringify({ error: "nope" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      }),
+    )
+    const secrets = createMemorySecretStore(FAKE_KEY)
+    const live = await createLiveOutbound({ paidDbPath, secrets })
+    try {
+      const attemptId = "attempt-default-http-401"
+      const out = await live.outbound.search("default-adapter-401-query", attemptId)
+      expect(out.ok).toBe(false)
+      expect(out.unknown).toBeFalsy()
+      expect(out.errorCode).toBe("ProviderRejectedError")
+      expect(out.receiptId).toBeTruthy()
+      expect(calls).toHaveLength(1)
+      expect(calls[0]?.url).toBe(expectedSearchUrl)
+      const row = readReceipt(paidDbPath, attemptId)
+      expect(row?.id).toBe(out.receiptId)
+      expect(row?.status).toBe("failed")
+      expect(row?.error).toBe("deepseek_tools_http_401")
+    } finally {
+      live.dispose()
+      secrets.clear()
+    }
+  })
+
+  it("underlying fetch throw maps to request_failed/unknown and backfills receiptId", async () => {
+    const paidDbPath = freshPaidDb("throw")
+    const { calls } = installOutboundHangThenStub(() => {
+      throw new TypeError("synthetic_transport_boom")
+    })
+    const secrets = createMemorySecretStore(FAKE_KEY)
+    const live = await createLiveOutbound({ paidDbPath, secrets })
+    try {
+      const attemptId = "attempt-default-throw"
+      const out = await live.outbound.search("default-adapter-throw-query", attemptId)
+      expect(out.ok).toBe(false)
+      expect(out.unknown).toBe(true)
+      expect(out.errorCode).toBe("DeepSeekToolsOutcomeUnknownError")
+      expect(out.detail).toBe("request_failed")
+      expect(out.receiptId).toBeTruthy()
+      expect(calls).toHaveLength(1)
+      expect(calls[0]?.url).toBe(expectedSearchUrl)
+      expect(calls[0]?.method).toBe("POST")
+      const row = readReceipt(paidDbPath, attemptId)
+      expect(row?.id).toBe(out.receiptId)
+      expect(row?.status).toBe("unknown")
+      expect(row?.error).toBe("request_failed")
+    } finally {
+      live.dispose()
+      secrets.clear()
+    }
+  })
+
+  it("response stream body is read via default adapter readText path", async () => {
+    const paidDbPath = freshPaidDb("stream")
+    const payload = JSON.stringify({
+      results: [{ title: "Stream Hit", url: "https://example.com/stream", date: "2026-10-03" }],
+    })
+    const { calls } = installOutboundHangThenStub(() => {
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode(payload))
+          controller.close()
+        },
+      })
+      return new Response(stream, {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      })
+    })
+    const secrets = createMemorySecretStore(FAKE_KEY)
+    const live = await createLiveOutbound({ paidDbPath, secrets })
+    try {
+      const attemptId = "attempt-default-stream"
+      const out = await live.outbound.search("default-adapter-stream-query", attemptId)
+      expect(out.ok).toBe(true)
+      expect(out.receiptId).toBeTruthy()
+      expect(out.candidates?.[0]?.title).toBe("Stream Hit")
+      expect(calls).toHaveLength(1)
+      expect(calls[0]?.url).toBe(expectedSearchUrl)
+    } finally {
+      live.dispose()
+      secrets.clear()
+    }
+  })
+
+  it("adapter sync throw while reading status/ok after fetch resolves still becomes request_failed", async () => {
+    const paidDbPath = freshPaidDb("adapt-sync")
+    const { calls } = installOutboundHangThenStub(() => {
+      // Not a real Response: default adapter accesses .status/.ok after await fetch(...)
+      return {
+        get status(): number {
+          throw new TypeError("synthetic_status_access_boom")
+        },
+        get ok(): boolean {
+          throw new TypeError("synthetic_ok_access_boom")
+        },
+        headers: { get: () => null },
+        body: null,
+        text: async () => "",
+      } as unknown as Response
+    })
+    const secrets = createMemorySecretStore(FAKE_KEY)
+    const live = await createLiveOutbound({ paidDbPath, secrets })
+    try {
+      const attemptId = "attempt-default-adapt-sync"
+      const out = await live.outbound.search("default-adapter-adapt-sync-query", attemptId)
+      expect(out.ok).toBe(false)
+      expect(out.unknown).toBe(true)
+      expect(out.errorCode).toBe("DeepSeekToolsOutcomeUnknownError")
+      expect(out.detail).toBe("request_failed")
+      expect(out.receiptId).toBeTruthy()
+      expect(calls).toHaveLength(1)
+      const row = readReceipt(paidDbPath, attemptId)
+      expect(row?.status).toBe("unknown")
+      expect(row?.error).toBe("request_failed")
+      expect(row?.id).toBe(out.receiptId)
+    } finally {
+      live.dispose()
+      secrets.clear()
+    }
   })
 })

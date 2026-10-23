@@ -747,6 +747,21 @@ export async function resolveExecuteKey(opts: {
   return undefined
 }
 
+function lookupReceiptIdForAttempt(native: Native, attemptId: string, error: unknown): string | undefined {
+  if (error && typeof error === "object" && "receiptId" in error) {
+    const id = (error as { receiptId?: unknown }).receiptId
+    if (typeof id === "string" && id.length > 0) return id
+  }
+  try {
+    const row = native.prepare(
+      "SELECT id FROM paid_receipt WHERE subject = ? ORDER BY created_at DESC LIMIT 1",
+    ).get(attemptId) as { id: string } | undefined
+    return row?.id
+  } catch {
+    return undefined
+  }
+}
+
 function wrapDb(native: Native) {
   return createDatabase({
     name: "sqlite",
@@ -816,6 +831,9 @@ export async function createLiveOutbound(input: {
           unknown,
           errorCode: sanitizePilotText(name),
           detail: sanitizePilotText(message),
+          // Diagnostic gap fix: paid layer may already have booked a receipt (subject=attemptId)
+          // before throwing OutcomeUnknown / ReceiptUnknown; surface id without mutating history rows.
+          receiptId: lookupReceiptIdForAttempt(native, attemptId, error),
         }
       }
     },
@@ -845,6 +863,7 @@ export async function createLiveOutbound(input: {
           unknown,
           errorCode: sanitizePilotText(name),
           detail: sanitizePilotText(message),
+          receiptId: lookupReceiptIdForAttempt(native, attemptId, error),
         }
       }
     },
