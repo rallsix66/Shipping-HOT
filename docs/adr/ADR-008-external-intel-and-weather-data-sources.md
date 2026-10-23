@@ -4,7 +4,7 @@
 - Status: **Accepted (user sign-off 2026-10-09)**
 - Decision owners: User
 - Authoritative catalog: **`docs/intel-source-catalog.md`** (sole runtime seed list for intel sources)
-- Related: ADR-007; plan §4.8, §5.4; R1.5 weather/calendar/policy tables
+- Related: ADR-007; **ADR-011 Proposed** (DeepSeek Search/Fetch as discovery/third-party Markdown assist — does not replace catalog collectors); plan §4.8, §5.4; R1.5 weather/calendar/policy tables
 
 ## Context
 

@@ -643,3 +643,7 @@ LLM 月成本 ≈ 日均新条目 × 30 ×（预筛单价 + 通过率 × 抽取�
 | 9 | 新增依赖 | zod、@mozilla/readability + linkedom、undici、p-limit（已同意） | 2026-09-30 |
 | 10 | 开发时恢复外部请求 | 同意在 R1.5 打开 Open-Meteo 天气预报和 JMA 台风数据，其他数据源继续关闭 | 2026-09-30 |
 | 11 | SCFI 运价 | **不接入**（用户决定） | 2026-09-30 |
+## 待审增补：DeepSeek Search/Fetch 采集辅助（2026-10-23）
+
+- 状态：**方案待审**（非本计划已批准范围的自动授权）。详见 [`r2-deepseek-search-fetch-2026-10-23.md`](r2-deepseek-search-fetch-2026-10-23.md) 与 Proposed [`ADR-011`](../adr/ADR-011-deepseek-search-fetch-intel-assist.md)。
+- 不改变本计划 R2-4/R2-5 分子分母口径；不授权无头浏览器；不把 Search/Fetch 算作已有 R2-3 token 回执的同一计费语义。
