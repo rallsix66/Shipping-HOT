@@ -3,7 +3,7 @@
 - `server/runtime/intel-production.ts` 独立维护生产允许选择 19 个 catalogId（原 TH-W01/ID-W01 + 新 17），**不**把 registry 注册当作生产许可；按 catalogId 从 `registeredIntelSources` 查找后 `structuredClone`，再覆盖 `enabled:true` 与 `adaptive:{minMinutes:15,maxMinutes:60}`。
 - 本阶段排除（非永久）：CN-T01、XX-M01；另拒 MY-P02/MY-P03、未合格/未注册及 `intel:`/`bounded:`/`the-loadstar` 形式。新增 17 源保持原 `disallowed`；原两源 `full`/`excerpt_only` 不被统一覆盖。
 - 总开关默认关；空/仅逗号选择仍 `intel_source_selection_invalid`；整批失败；保留输入顺序。应用启动仍 `seeds ?? []`。未启服务、未采 live、未做 24h。R2-4 28/39、R2-5 25/34 不变。
-- 证据与测试：`server/runtime/intel-production.test.ts`（含 BackgroundRuntime 调度零网络与生产链路隔离 SQLite）、`server/intel/sources/registry.test.ts` b 节、`maersk-mofcom.test.ts`。
+- 证据与测试：`server/runtime/intel-production.test.ts`（disabled 路径 ownership spy 已接入 productionIntelOptions 与 bootstrap，关闭时不获取锁；XX-M03 生产链核对 UTC publishedAt / sourcePublishedAt·sourceUpdatedAt 回退 / title-only blocks；missing-config 隔离 mock；深克隆含 XX-K02 jsonList·allowedContentTypes·adaptive；BackgroundRuntime 调度零网络与生产链路隔离 SQLite）、`server/intel/sources/registry.test.ts` b 节、`maersk-mofcom.test.ts`。
 
 ## 2026-10-22 R2 XX-M01 / XX-M03 RSS 默认关闭接线（dots 1792665925.725299）
 

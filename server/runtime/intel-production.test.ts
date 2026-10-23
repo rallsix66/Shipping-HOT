@@ -252,44 +252,112 @@ describe("phase allow-select expansion", () => {
     expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: ids }, dependencies })).toThrow("intel_source_selection_invalid")
   })
 
+  it("fails closed with intel_source_config_missing when allow-selected id is absent from registry (isolated module mock; real shared registry untouched)", async () => {
+    vi.resetModules()
+    vi.doMock("#/intel/sources/registry", async () => {
+      const actual = await vi.importActual<typeof import("#/intel/sources/registry")>("#/intel/sources/registry")
+      return {
+        ...actual,
+        registeredIntelSources: actual.registeredIntelSources.filter(s => s.catalogId !== "PH-M01"),
+      }
+    })
+    try {
+      const { productionIntelOptions: isolatedProduction } = await import("#/runtime/intel-production")
+      const { registeredIntelSources: mockedRegistry } = await import("#/intel/sources/registry")
+      expect(mockedRegistry.some(s => s.catalogId === "PH-M01")).toBe(false)
+      // Top-level static import still binds the real shared registry; mock must not mutate it.
+      expect(registeredIntelSources.some(s => s.catalogId === "PH-M01")).toBe(true)
+      expect(() =>
+        isolatedProduction({
+          env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "PH-M01" },
+          dependencies,
+        }),
+      ).toThrow("intel_source_config_missing:PH-M01")
+    } finally {
+      vi.doUnmock("#/intel/sources/registry")
+      vi.resetModules()
+    }
+  })
+
   it("structuredClone isolates returned seeds from registry and across calls", () => {
-    const first = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "XX-K01,MY-C01" }, dependencies })
-    const [maerskCopy, customsCopy] = first.registry!.intel!.seeds!
+    const first = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "XX-K01,MY-C01,XX-K02" }, dependencies })
+    const byId = Object.fromEntries(first.registry!.intel!.seeds!.map(s => [s.catalogId, s]))
+    const maerskCopy = byId["XX-K01"]
+    const customsCopy = byId["MY-C01"]
+    const oneCopy = byId["XX-K02"]
     const registryMaersk = registeredIntelSources.find(s => s.catalogId === "XX-K01")!
     const registryCustoms = registeredIntelSources.find(s => s.catalogId === "MY-C01")!
+    const registryOne = registeredIntelSources.find(s => s.catalogId === "XX-K02")!
     expect(maerskCopy).not.toBe(registryMaersk)
     expect(maerskCopy.allowedHosts).not.toBe(registryMaersk.allowedHosts)
     expect(maerskCopy.webList).not.toBe(registryMaersk.webList)
     expect(maerskCopy.sourceHeaderLimit).not.toBe(registryMaersk.sourceHeaderLimit)
+    expect(maerskCopy.allowedContentTypes).not.toBe(registryMaersk.allowedContentTypes)
+    expect(maerskCopy.adaptive).not.toBe(registryMaersk.adaptive)
     expect(customsCopy.allowedHosts).not.toBe(registryCustoms.allowedHosts)
+    expect(oneCopy).not.toBe(registryOne)
+    expect(oneCopy.jsonList).not.toBe(registryOne.jsonList)
+    expect(oneCopy.jsonList?.itemsPaths).toBeDefined()
+    expect(registryOne.jsonList?.itemsPaths).toBeDefined()
+    expect(oneCopy.jsonList!.itemsPaths).not.toBe(registryOne.jsonList!.itemsPaths)
+    expect(oneCopy.allowedContentTypes).not.toBe(registryOne.allowedContentTypes)
+    expect(oneCopy.adaptive).not.toBe(registryOne.adaptive)
     const hostsBefore = [...registryMaersk.allowedHosts]
     const headerBefore = { ...registryMaersk.sourceHeaderLimit! }
+    const maerskTypesBefore = [...registryMaersk.allowedContentTypes]
+    const onePathsBefore = [...registryOne.jsonList!.itemsPaths!]
+    const oneTypesBefore = [...registryOne.allowedContentTypes]
+    expect(registryMaersk.adaptive).toBeUndefined()
+    expect(registryOne.adaptive).toBeUndefined()
     maerskCopy.allowedHosts.push("evil.example")
     maerskCopy.sourceHeaderLimit!.maxHeaderSize = 1
+    maerskCopy.allowedContentTypes.push("application/evil")
+    maerskCopy.adaptive = { minMinutes: 1, maxMinutes: 2 }
     if (maerskCopy.webList) (maerskCopy.webList as { itemSelector?: string }).itemSelector = "evil"
     customsCopy.allowedHosts.push("evil.example")
+    oneCopy.jsonList!.itemsPaths!.push("props.evil")
+    oneCopy.allowedContentTypes.push("application/evil")
+    oneCopy.adaptive = { minMinutes: 9, maxMinutes: 99 }
     expect(registryMaersk.allowedHosts).toEqual(hostsBefore)
     expect(registryMaersk.sourceHeaderLimit).toEqual(headerBefore)
+    expect(registryMaersk.allowedContentTypes).toEqual(maerskTypesBefore)
     expect(registryCustoms.allowedHosts).not.toContain("evil.example")
-    const second = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "XX-K01,MY-C01" }, dependencies })
-    expect(second.registry!.intel!.seeds![0]).not.toBe(maerskCopy)
-    expect(second.registry!.intel!.seeds![0].allowedHosts).not.toContain("evil.example")
-    expect(second.registry!.intel!.seeds![0].sourceHeaderLimit?.maxHeaderSize).toBe(32768)
-    expect(second.registry!.intel!.seeds![1].allowedHosts).not.toContain("evil.example")
+    expect(registryOne.jsonList!.itemsPaths).toEqual(onePathsBefore)
+    expect(registryOne.allowedContentTypes).toEqual(oneTypesBefore)
+    expect(registryMaersk.adaptive).toBeUndefined()
+    expect(registryOne.adaptive).toBeUndefined()
+    const second = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "XX-K01,MY-C01,XX-K02" }, dependencies })
+    const secondById = Object.fromEntries(second.registry!.intel!.seeds!.map(s => [s.catalogId, s]))
+    expect(secondById["XX-K01"]).not.toBe(maerskCopy)
+    expect(secondById["XX-K01"].allowedHosts).not.toContain("evil.example")
+    expect(secondById["XX-K01"].sourceHeaderLimit?.maxHeaderSize).toBe(32768)
+    expect(secondById["XX-K01"].allowedContentTypes).not.toContain("application/evil")
+    expect(secondById["XX-K01"].adaptive).toEqual({ minMinutes: 15, maxMinutes: 60 })
+    expect(secondById["MY-C01"].allowedHosts).not.toContain("evil.example")
+    expect(secondById["XX-K02"]).not.toBe(oneCopy)
+    expect(secondById["XX-K02"].jsonList!.itemsPaths).toEqual(onePathsBefore)
+    expect(secondById["XX-K02"].allowedContentTypes).not.toContain("application/evil")
+    expect(secondById["XX-K02"].adaptive).toEqual({ minMinutes: 15, maxMinutes: 60 })
     expect(intelSourceSeeds.map(s => s.persistence)).toEqual(["full", "excerpt_only"])
     expect(rssCandidates.find(s => s.catalogId === "MY-C01")).toMatchObject({ enabled: false, persistence: "disallowed" })
     expect(htmlIndexCandidates.find(s => s.catalogId === "XX-K01")).toMatchObject({ enabled: false, persistence: "disallowed" })
+    expect(htmlIndexCandidates.find(s => s.catalogId === "XX-K02")).toMatchObject({ enabled: false, persistence: "disallowed" })
   })
 
-  it("master switch off: BackgroundRuntime schedule path never hits DNS/transport/ownership (not job.run evidence)", async () => {
+  it("master switch off: ownership spy wired into productionIntelOptions and bootstrap; schedule path never hits DNS/transport/ownership (not job.run evidence)", async () => {
     const lookup = vi.fn(async () => [{ address: "93.184.216.34", family: 4 as const }])
     const transport = vi.fn(async () => ({ status: 200, headers: { "content-type": "application/rss+xml" }, body: "<rss/>" }))
     const acquireOwnership = vi.fn(async () => ({ release: async () => undefined }))
     const setTimeoutSpy = vi.fn(() => 0 as unknown as NodeJS.Timeout)
     const clearTimeoutSpy = vi.fn()
-    const options = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "false" } })
+    // Spy must enter the disabled resolve path (not a vacuous local unused fn).
+    const options = productionIntelOptions({
+      env: { SHIPPING_INTEL_ENABLED: "false" },
+      dependencies: { fetch: { lookup, transport }, acquireOwnership },
+    })
     expect(options.registry?.intel).toEqual({ enabled: false, seeds: [] })
     expect(options.acquireIntelOwnership).toBeUndefined()
+    expect(acquireOwnership).not.toHaveBeenCalled()
     const state = open()
     vi.stubEnv("SHIPPING_DATA_MODE", "real")
     vi.stubEnv("SHIPPING_WEATHER_ALERT_PROVIDER", "off")
@@ -305,10 +373,12 @@ describe("phase allow-select expansion", () => {
       }).filter(job => job.id === INTEL_COLLECT_JOB_ID)
       expect(jobs).toHaveLength(1)
       expect(jobs[0].enabled).toBe(false)
+      // Wire the same spy into bootstrap so "not called" is a real gate when jobs are disabled.
       const runtime = await bootstrapBackgroundRuntime({
         database: state.database,
         jobs,
         enabled: true,
+        acquireIntelOwnership: acquireOwnership,
         runtimeOptions: { now, setTimeout: setTimeoutSpy as never, clearTimeout: clearTimeoutSpy, logger: { info: vi.fn(), error: vi.fn() } },
       })
       expect(runtime.getStatus().jobs.find(j => j.id === INTEL_COLLECT_JOB_ID)).toMatchObject({ enabled: false, status: "disabled" })
@@ -382,10 +452,23 @@ describe("phase allow-select expansion", () => {
       expect(state.native.prepare("SELECT enabled, persistence FROM intel_source WHERE id = ?").get("intel:xx-m03")).toEqual({ enabled: 1, persistence: "disallowed" })
       const items = await state.repository.listItems("intel:xx-m03")
       expect(items).toHaveLength(2)
+      // Concrete UTC publishedAt from splash247 fixture (+0000 pubDate); RSS keeps dateEvidence=null.
+      // No <updated> in fixture → sourceUpdatedAt is parser fallback to pubDate, not an independent update.
+      // Title-only blocks: description in synthetic RSS is not persisted.
+      expect(items.map(item => [item.canonicalUrl, item.title, item.publishedAt]).sort()).toEqual([
+        ["https://splash247.com/synthetic-splash-one", "Synthetic Splash story one", "2026-10-14T22:05:11.000Z"],
+        ["https://splash247.com/synthetic-splash-two", "Synthetic Splash story two", "2026-10-12T06:00:00.000Z"],
+      ].sort())
       for (const item of items) {
         const versions = await state.repository.listVersions(item.id)
+        expect(versions).toHaveLength(1)
         expect(versions[0].contentScope).toBe("metadata_only")
         expect(versions[0].dateEvidence).toBeNull()
+        expect(versions[0].sourcePublishedAt).toBe(item.publishedAt)
+        expect(versions[0].sourceUpdatedAt).toBe(item.publishedAt)
+        expect(await state.repository.readVersionBlocks(versions[0].id)).toEqual([
+          expect.objectContaining({ type: "title", text: item.title }),
+        ])
       }
       for (const opts of transportOpts) expect(opts).not.toMatchObject({ maxHeaderSize: 32768 })
     } finally {
