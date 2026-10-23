@@ -1,14 +1,18 @@
 /**
- * Offline DeepSeek Search/Fetch slice-1 tests.
+ * Offline DeepSeek Search/Fetch slice-1 tests (contract-gap fixes).
  * Synthetic HTTP only; never reads real SecretStore credentials or calls the network.
+ * Temp SQLite / logs stay under project `.tmp`.
  */
+import { mkdirSync } from "node:fs"
+import { join } from "node:path"
 import { afterEach, describe, expect, it } from "vitest"
 import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
-import { containsSecretLike, receiptPayloadHasBodyLeak, trimSearchCandidates } from "./candidate-trim"
+import { containsSecretLike, receiptPayloadHasBodyLeak, trimFetchMeta, trimSearchCandidates } from "./candidate-trim"
 import {
   DEEPSEEK_FETCH_CAPABILITY,
   DEEPSEEK_SEARCH_CAPABILITY,
+  DEEPSEEK_SEARCH_FETCH_DEFAULT_TIMEOUT_MS,
   DEEPSEEK_SEARCH_FETCH_POLICY_VERSION,
   DEEPSEEK_SEARCH_FETCH_PROVIDER_ID,
   DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
@@ -16,16 +20,31 @@ import {
 import {
   SearchFetchDisabledError,
   type SearchFetchServiceConfig,
+  reviewFetchTarget,
   runDeepSeekFetch,
   runDeepSeekSearch,
 } from "./search-fetch-service"
 import { initShippingTables } from "#/database/shipping"
 import type { SecretStore } from "#/providers/contracts"
 import { PaidGateError, ReceiptUnknownError } from "#/intel/llm/receipts"
-import { DEEPSEEK_TOOLS_BASE, type InjectedFetcher } from "#/providers/deepseek/search-fetch-client"
+import {
+  DEEPSEEK_TOOLS_BASE,
+  DeepSeekToolsOutcomeUnknownError,
+  type InjectedFetcher,
+  staticReadText,
+} from "#/providers/deepseek/search-fetch-client"
+
+function isUnknownOutcome(error: unknown): boolean {
+  // paidRequest wraps Timeout as ReceiptUnknownError; other post-send ambiguities
+  // are rethrown as-is after booking status=unknown.
+  return error instanceof ReceiptUnknownError || error instanceof DeepSeekToolsOutcomeUnknownError
+}
 
 const T0 = new Date("2026-10-23T03:00:00.000Z")
 const PLACEHOLDER_KEY = "test-placeholder-not-a-real-key"
+const TMP_ROOT = join(process.cwd(), ".tmp", "deepseek-search-fetch-gapfix-2026-10-23")
+mkdirSync(TMP_ROOT, { recursive: true })
+
 const cleanups: Array<() => void> = []
 afterEach(() => {
   while (cleanups.length) cleanups.pop()!()
@@ -54,12 +73,16 @@ function wrap(native: Native) {
   } as never)
 }
 
-async function setup() {
-  const native = new NativeDatabase(":memory:")
-  cleanups.push(() => native.close())
+async function setup(path?: string) {
+  const native = path ? new NativeDatabase(path) : new NativeDatabase(":memory:")
+  cleanups.push(() => {
+    try {
+      native.close()
+    } catch { /* already closed */ }
+  })
   const db = wrap(native)
   await initShippingTables(db, "mock")
-  return { db, native }
+  return { db, native, path }
 }
 
 function secrets(values: Record<string, string> = { [DEEPSEEK_SEARCH_FETCH_PROVIDER_ID]: PLACEHOLDER_KEY }, tracker?: { gets: string[] }): SecretStore {
@@ -81,17 +104,18 @@ function jsonResponse(status: number, body: unknown) {
   return {
     status,
     ok: status >= 200 && status < 300,
-    text: async () => text,
+    readText: staticReadText(text),
     headers: { get: () => null },
   }
 }
 
 function mockFetcher(handler: (url: string, init?: Parameters<InjectedFetcher>[1]) => ReturnType<InjectedFetcher> | Promise<ReturnType<InjectedFetcher>>) {
-  const state = { hits: 0, urls: [] as string[], bodies: [] as string[] }
+  const state = { hits: 0, urls: [] as string[], bodies: [] as string[], signals: [] as Array<AbortSignal | undefined> }
   const fetcher: InjectedFetcher = async (url, init) => {
     state.hits++
     state.urls.push(url)
     state.bodies.push(init?.body ?? "")
+    state.signals.push(init?.signal)
     return handler(url, init)
   }
   return { state, fetcher }
@@ -139,6 +163,33 @@ describe("candidate-trim", () => {
     expect(trimmed[0]?.titleUrlHash).toMatch(/^[a-f0-9]{64}$/)
     expect(JSON.stringify(trimmed)).not.toMatch(/SECRET_|snippet|summary|content/)
   })
+
+  it("labels Fetch meta as third_party_markdown without origin/local evidence", () => {
+    const meta = trimFetchMeta("https://example.com/x", {
+      title: "T",
+      content: "# md SECRET_BODY",
+    })
+    expect(meta).toMatchObject({
+      provenance: "third_party_markdown",
+      originResponseHash: null,
+      localFetchEvidence: "none",
+      empty: false,
+    })
+    expect(meta.convertedContentHash).toMatch(/^[a-f0-9]{64}$/)
+    expect(meta).not.toHaveProperty("contentHash")
+    expect(JSON.stringify(meta)).not.toMatch(/SECRET_BODY/)
+  })
+})
+
+describe("reviewFetchTarget", () => {
+  it("rejects blocked targets and allows public https", () => {
+    expect(reviewFetchTarget("http://[::1]/")).toMatchObject({ status: "locally_rejected", code: "url_blocked" })
+    expect(reviewFetchTarget("http://localhost./")).toMatchObject({ status: "locally_rejected" })
+    expect(reviewFetchTarget("https://example.com/a")).toMatchObject({
+      status: "syntactically_allowed",
+      canonicalUrl: "https://example.com/a",
+    })
+  })
 })
 
 describe("runDeepSeekSearch (offline)", () => {
@@ -170,6 +221,21 @@ describe("runDeepSeekSearch (offline)", () => {
     }
   })
 
+  it("invalid query/count fail before paidRequest (no unknown receipt)", async () => {
+    const { db, native } = await setup()
+    const { state, fetcher } = mockFetcher(async () => jsonResponse(200, searchHitBody))
+    const cfg = baseConfig(db, { fetcher })
+    await expect(runDeepSeekSearch(cfg, { query: "   ", purpose: "slice1_test", subject: "bad-q" }))
+      .rejects
+      .toMatchObject({ code: "invalid_query" })
+    await expect(runDeepSeekSearch(cfg, { query: "ok", count: 0, purpose: "slice1_test", subject: "bad-c" }))
+      .rejects
+      .toMatchObject({ code: "invalid_count" })
+    expect(state.hits).toBe(0)
+    const rows = native.prepare("SELECT COUNT(*) AS n FROM paid_receipt").get() as { n: number }
+    expect(rows.n).toBe(0)
+  })
+
   it("empty results book zero cost and leave budget for the next call", async () => {
     const { db, native } = await setup()
     const { state, fetcher } = mockFetcher(async () => jsonResponse(200, { results: [] }))
@@ -177,16 +243,41 @@ describe("runDeepSeekSearch (offline)", () => {
     const first = await runDeepSeekSearch(cfg, { query: "empty-q", purpose: "slice1_test", subject: "empty" })
     expect(first.billable).toBe(false)
     expect(first.candidates).toEqual([])
+    expect(first.upstreamResultCount).toBe(0)
     expect(state.hits).toBe(1)
     const usage = native.prepare(
       "SELECT COALESCE(SUM(estimated_cost),0) AS cost, COALESCE(SUM(success_count),0) AS ok FROM provider_usage WHERE capability = ?",
     ).get(DEEPSEEK_SEARCH_CAPABILITY) as { cost: number, ok: number }
     expect(usage.cost).toBe(0)
-    // Second distinct query still allowed under the same 1-unit budget.
     const { state: state2, fetcher: fetcher2 } = mockFetcher(async () => jsonResponse(200, searchHitBody))
     const second = await runDeepSeekSearch({ ...cfg, fetcher: fetcher2 }, { query: "filled-q", purpose: "slice1_test", subject: "filled" })
     expect(second.billable).toBe(true)
     expect(state2.hits).toBe(1)
+  })
+
+  it("upstream non-empty still bills when every candidate is trimmed away", async () => {
+    const { db, native } = await setup()
+    const { state, fetcher } = mockFetcher(async () => jsonResponse(200, {
+      results: [{ title: "x", url: "not-a-url", snippet: "SECRET" }],
+    }))
+    const cfg = baseConfig(db, { monthlyBudgetSearch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY, fetcher })
+    const out = await runDeepSeekSearch(cfg, { query: "all-filtered", purpose: "slice1_test", subject: "filtered" })
+    expect(out.candidates).toEqual([])
+    expect(out.upstreamResultCount).toBe(1)
+    expect(out.billable).toBe(true)
+    expect(state.hits).toBe(1)
+    const receipt = native.prepare("SELECT estimated_cost, status FROM paid_receipt WHERE subject = ?").get("filtered") as {
+      estimated_cost: number
+      status: string
+    }
+    expect(receipt.status).toBe("received")
+    expect(receipt.estimated_cost).toBeCloseTo(DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY)
+    // Budget consumed — second distinct search blocked.
+    const { state: state2, fetcher: fetcher2 } = mockFetcher(async () => jsonResponse(200, searchHitBody))
+    await expect(runDeepSeekSearch({ ...cfg, fetcher: fetcher2 }, { query: "next", purpose: "slice1_test", subject: "next" }))
+      .rejects
+      .toMatchObject({ code: "paid_budget_exhausted" })
+    expect(state2.hits).toBe(0)
   })
 
   it("billable success reserves unit cost; cache hit issues zero HTTP", async () => {
@@ -233,7 +324,6 @@ describe("runDeepSeekSearch (offline)", () => {
       fetcher,
     })
     const a = runDeepSeekSearch(cfg, { query: "concurrent-a", purpose: "slice1_test", subject: "ca" })
-    // Wait until first has claimed pending inside paidRequest (HTTP started).
     for (let i = 0; i < 50; i++) {
       if (entered >= 1) break
       await new Promise(r => setTimeout(r, 10))
@@ -247,34 +337,99 @@ describe("runDeepSeekSearch (offline)", () => {
     expect(state.hits).toBe(1)
   })
 
-  it("post-send unknown keeps reservation; restart does not rebuy or free the unit", async () => {
-    const { db, native } = await setup()
-    const hang: InjectedFetcher = async () => new Promise(() => { /* never resolves */ })
+  it("post-send unknown keeps reservation; temp-file restart does not rebuy", async () => {
+    const dbPath = join(TMP_ROOT, `search-restart-${Date.now()}.sqlite`)
+    const { db, native } = await setup(dbPath)
+    const hang: InjectedFetcher = async (_url, init) => new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(new Error("aborted")), { once: true })
+    })
     const cfg = baseConfig(db, {
       monthlyBudgetSearch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
       fetcher: hang,
-      timeoutMs: 30,
+      timeoutMs: 40,
     })
     await expect(runDeepSeekSearch(cfg, { query: "hang-q", purpose: "slice1_test", subject: "hang" }))
       .rejects
-      .toBeInstanceOf(ReceiptUnknownError)
-    const row = native.prepare("SELECT status, estimated_cost FROM paid_receipt WHERE subject = ?").get("hang") as {
+      .toSatisfy(isUnknownOutcome)
+    const row = native.prepare("SELECT status, estimated_cost, error FROM paid_receipt WHERE subject = ?").get("hang") as {
       status: string
       estimated_cost: number
+      error: string | null
     }
     expect(row.status).toBe("unknown")
     expect(row.estimated_cost).toBeCloseTo(DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY)
-    // Same identity after "restart" must not rebuy.
+    expect(String(row.error ?? "")).not.toMatch(/Bearer |sk-|SECRET_/)
+    native.close()
+
+    // Re-open the same on-disk DB — restart evidence, not same in-memory handle.
+    const native2 = new NativeDatabase(dbPath)
+    cleanups.push(() => {
+      try {
+        native2.close()
+      } catch { /* */ }
+    })
+    const db2 = wrap(native2)
     const { state, fetcher } = mockFetcher(async () => jsonResponse(200, searchHitBody))
-    await expect(runDeepSeekSearch({ ...cfg, fetcher, timeoutMs: undefined }, { query: "hang-q", purpose: "slice1_test", subject: "hang" }))
+    const cfg2 = baseConfig(db2, {
+      monthlyBudgetSearch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
+      fetcher,
+    })
+    await expect(runDeepSeekSearch(cfg2, { query: "hang-q", purpose: "slice1_test", subject: "hang" }))
       .rejects
-      .toBeInstanceOf(ReceiptUnknownError)
+      .toSatisfy(isUnknownOutcome)
     expect(state.hits).toBe(0)
-    // Distinct query also blocked — unknown still occupies the sole budget unit.
-    await expect(runDeepSeekSearch({ ...cfg, fetcher }, { query: "other-q", purpose: "slice1_test", subject: "other" }))
+    await expect(runDeepSeekSearch(cfg2, { query: "other-q", purpose: "slice1_test", subject: "other" }))
       .rejects
       .toMatchObject({ code: "paid_budget_exhausted" })
     expect(state.hits).toBe(0)
+  })
+
+  it("hTTP 200 invalid JSON keeps unknown reservation (not free release)", async () => {
+    const { db, native } = await setup()
+    const { state, fetcher } = mockFetcher(async () => jsonResponse(200, "NOT_JSON{{{"))
+    const cfg = baseConfig(db, {
+      monthlyBudgetSearch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
+      fetcher,
+    })
+    await expect(runDeepSeekSearch(cfg, { query: "bad-json", purpose: "slice1_test", subject: "bad-json" }))
+      .rejects
+      .toSatisfy(isUnknownOutcome)
+    const row = native.prepare("SELECT status, estimated_cost, error FROM paid_receipt WHERE subject = ?").get("bad-json") as {
+      status: string
+      estimated_cost: number
+      error: string | null
+    }
+    expect(row.status).toBe("unknown")
+    expect(row.estimated_cost).toBeCloseTo(DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY)
+    expect(String(row.error ?? "")).not.toMatch(/NOT_JSON/)
+    expect(state.hits).toBe(1)
+    const { state: state2, fetcher: fetcher2 } = mockFetcher(async () => jsonResponse(200, searchHitBody))
+    await expect(runDeepSeekSearch({ ...cfg, fetcher: fetcher2 }, { query: "after", purpose: "slice1_test", subject: "after" }))
+      .rejects
+      .toMatchObject({ code: "paid_budget_exhausted" })
+    expect(state2.hits).toBe(0)
+  })
+
+  it("error bodies with fake Bearer/key never land in receipt or request columns", async () => {
+    const { db, native } = await setup()
+    const poison = "Authorization: Bearer sk-FAKESECRET999 body SECRET_UPSTREAM"
+    const { fetcher } = mockFetcher(async () => jsonResponse(401, poison))
+    await expect(runDeepSeekSearch(baseConfig(db, { fetcher }), {
+      query: "leak-check",
+      purpose: "slice1_test",
+      subject: "leak",
+    })).rejects.toBeTruthy()
+    const row = native.prepare("SELECT response, request, error, status FROM paid_receipt WHERE subject = ?").get("leak") as {
+      response: string | null
+      request: string | null
+      error: string | null
+      status: string
+    }
+    expect(row.status).toBe("failed")
+    const blob = `${row.response ?? ""}${row.request ?? ""}${row.error ?? ""}`
+    expect(blob).not.toMatch(/Bearer |sk-FAKESECRET|SECRET_UPSTREAM/)
+    expect(containsSecretLike(blob, PLACEHOLDER_KEY)).toBe(false)
+    expect(String(row.error ?? "")).toBe("deepseek_tools_http_401")
   })
 
   it("receipt and requestSummary never carry body or key material", async () => {
@@ -303,9 +458,35 @@ describe("runDeepSeekSearch (offline)", () => {
     const reuse = await runDeepSeekSearch(cfg, { query: "same query", purpose: "slice1_test", subject: "n2" })
     expect(reuse.reused).toBe(true)
     expect(state.hits).toBe(1)
-    // Different count → different identity → new call.
     await runDeepSeekSearch(cfg, { query: "same query", count: 5, purpose: "slice1_test", subject: "n3" })
     expect(state.hits).toBe(2)
+  })
+
+  it("caller cancel after send keeps unknown and does not auto-retry", async () => {
+    const { db, native } = await setup()
+    const ac = new AbortController()
+    const { state, fetcher } = mockFetcher(async (_url, init) => new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(new Error("aborted")), { once: true })
+    }))
+    const pending = runDeepSeekSearch(baseConfig(db, {
+      monthlyBudgetSearch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
+      fetcher,
+      timeoutMs: 5_000,
+    }), { query: "cancel-q", purpose: "slice1_test", subject: "cancel", signal: ac.signal })
+    for (let i = 0; i < 50; i++) {
+      if (state.hits >= 1) break
+      await new Promise(r => setTimeout(r, 10))
+    }
+    expect(state.hits).toBe(1)
+    ac.abort()
+    await expect(pending).rejects.toSatisfy(isUnknownOutcome)
+    const row = native.prepare("SELECT status FROM paid_receipt WHERE subject = ?").get("cancel") as { status: string }
+    expect(row.status).toBe("unknown")
+  })
+
+  it("default timeoutMs is finite when omitted", () => {
+    expect(DEEPSEEK_SEARCH_FETCH_DEFAULT_TIMEOUT_MS).toBeGreaterThan(0)
+    expect(DEEPSEEK_SEARCH_FETCH_DEFAULT_TIMEOUT_MS).toBeLessThanOrEqual(60_000)
   })
 })
 
@@ -340,7 +521,7 @@ describe("runDeepSeekFetch (offline)", () => {
     expect(state.hits).toBe(0)
   })
 
-  it("persistence disallowed and blocked URL fail closed with zero HTTP / zero SecretStore", async () => {
+  it("persistence disallowed, blocked URL, and prior locally_rejected fail closed with zero HTTP", async () => {
     const { db } = await setup()
     const gets: string[] = []
     const { state, fetcher } = mockFetcher(async () => jsonResponse(200, fetchBody))
@@ -356,15 +537,27 @@ describe("runDeepSeekFetch (offline)", () => {
       persistence: "full",
     })).rejects.toMatchObject({ code: "url_blocked" })
     await expect(runDeepSeekFetch(cfg, {
+      url: "http://[::1]/",
+      purpose: "slice1_test",
+      persistence: "full",
+    })).rejects.toMatchObject({ code: "url_blocked" })
+    await expect(runDeepSeekFetch(cfg, {
       url: "https://user:pass@example.com/x",
       purpose: "slice1_test",
       persistence: "full",
     })).rejects.toMatchObject({ code: "invalid_url" })
+    // Caller already marked rejected — persistence=full cannot bypass.
+    await expect(runDeepSeekFetch(cfg, {
+      url: "https://example.com/ok",
+      purpose: "slice1_test",
+      persistence: "full",
+      targetReview: { status: "locally_rejected", code: "url_blocked", message: "prior reject" },
+    })).rejects.toMatchObject({ code: "url_blocked" })
     expect(gets).toEqual([])
     expect(state.hits).toBe(0)
   })
 
-  it("empty Fetch books zero; non-empty stores meta only; reuse has no body and zero HTTP", async () => {
+  it("empty Fetch books zero; non-empty stores provenance meta only; reuse has no body", async () => {
     const { db, native } = await setup()
     const { state, fetcher } = mockFetcher(async (_url, init) => {
       const body = JSON.parse(init?.body ?? "{}") as { url?: string }
@@ -390,7 +583,11 @@ describe("runDeepSeekFetch (offline)", () => {
     expect(fresh.billable).toBe(true)
     expect(fresh.content).toContain("SECRET_FETCH_BODY")
     expect(fresh.meta.contentByteLength).toBeGreaterThan(0)
+    expect(fresh.meta.provenance).toBe("third_party_markdown")
+    expect(fresh.meta.originResponseHash).toBeNull()
+    expect(fresh.meta.localFetchEvidence).toBe("none")
     expect(fresh.meta).not.toHaveProperty("content")
+    expect(fresh.meta).not.toHaveProperty("contentHash")
 
     const reused = await runDeepSeekFetch(cfg, {
       url: "https://example.com/full",
@@ -406,9 +603,82 @@ describe("runDeepSeekFetch (offline)", () => {
     expect(receiptPayloadHasBodyLeak(JSON.parse(row.response))).toBe(false)
     expect(row.response).not.toMatch(/SECRET_FETCH_BODY|Markdown body/)
     expect(containsSecretLike(row.response, PLACEHOLDER_KEY)).toBe(false)
+    const parsed = JSON.parse(row.response) as { meta: Record<string, unknown> }
+    expect(parsed.meta.convertedContentHash).toMatch(/^[a-f0-9]{64}$/)
   })
 
-  it("posts to DeepSeek Tools paths without localization", async () => {
+  it("fetch last-unit concurrency: only one of two distinct fetches may spend the final unit", async () => {
+    const { db } = await setup()
+    let release!: () => void
+    const gate = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    let entered = 0
+    const { state, fetcher } = mockFetcher(async () => {
+      entered++
+      if (entered === 1) await gate
+      return jsonResponse(200, fetchBody)
+    })
+    const cfg = baseConfig(db, {
+      monthlyBudgetFetch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
+      fetcher,
+    })
+    const a = runDeepSeekFetch(cfg, {
+      url: "https://example.com/fa",
+      purpose: "slice1_test",
+      subject: "fa",
+      persistence: "full",
+    })
+    for (let i = 0; i < 50; i++) {
+      if (entered >= 1) break
+      await new Promise(r => setTimeout(r, 10))
+    }
+    expect(entered).toBe(1)
+    const b = runDeepSeekFetch(cfg, {
+      url: "https://example.com/fb",
+      purpose: "slice1_test",
+      subject: "fb",
+      persistence: "full",
+    })
+    await expect(b).rejects.toMatchObject({ code: "paid_budget_exhausted" })
+    release()
+    const won = await a
+    expect(won.billable).toBe(true)
+    expect(state.hits).toBe(1)
+  })
+
+  it("search and fetch budgets are separate (not one shared pool)", async () => {
+    const { db } = await setup()
+    const { state, fetcher } = mockFetcher(async (url) => {
+      if (url.endsWith("/v1/tools/search")) return jsonResponse(200, searchHitBody)
+      return jsonResponse(200, fetchBody)
+    })
+    const cfg = baseConfig(db, {
+      monthlyBudgetSearch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
+      monthlyBudgetFetch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
+      fetcher,
+    })
+    await runDeepSeekSearch(cfg, { query: "sep-s", purpose: "slice1_test", subject: "sep-s" })
+    await runDeepSeekFetch(cfg, {
+      url: "https://example.com/sep-f",
+      purpose: "slice1_test",
+      subject: "sep-f",
+      persistence: "full",
+    })
+    expect(state.hits).toBe(2)
+    // Exhaust search — fetch still has its own unit already spent; another search blocked, another fetch blocked independently.
+    await expect(runDeepSeekSearch(cfg, { query: "sep-s2", purpose: "slice1_test", subject: "sep-s2" }))
+      .rejects
+      .toMatchObject({ code: "paid_budget_exhausted" })
+    await expect(runDeepSeekFetch(cfg, {
+      url: "https://example.com/sep-f2",
+      purpose: "slice1_test",
+      subject: "sep-f2",
+      persistence: "full",
+    })).rejects.toMatchObject({ code: "paid_budget_exhausted" })
+  })
+
+  it("posts to DeepSeek Tools paths without localization; passes abort signal", async () => {
     const { db } = await setup()
     const { state, fetcher } = mockFetcher(async (url) => {
       if (url.endsWith("/v1/tools/search")) return jsonResponse(200, searchHitBody)
@@ -423,6 +693,25 @@ describe("runDeepSeekFetch (offline)", () => {
     for (const body of state.bodies) {
       expect(body).not.toMatch(/localization/)
     }
+    expect(state.signals[0]).toBeInstanceOf(AbortSignal)
+    expect(state.signals[1]).toBeInstanceOf(AbortSignal)
+  })
+
+  it("response oversize after send keeps unknown", async () => {
+    const { db, native } = await setup()
+    const big = { title: "t", content: "Y".repeat(600_000) }
+    const { fetcher } = mockFetcher(async () => jsonResponse(200, big))
+    await expect(runDeepSeekFetch(baseConfig(db, {
+      monthlyBudgetFetch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
+      fetcher,
+    }), {
+      url: "https://example.com/huge",
+      purpose: "slice1_test",
+      subject: "huge",
+      persistence: "full",
+    })).rejects.toSatisfy(isUnknownOutcome)
+    const row = native.prepare("SELECT status FROM paid_receipt WHERE subject = ?").get("huge") as { status: string }
+    expect(row.status).toBe("unknown")
   })
 })
 
@@ -432,5 +721,6 @@ describe("policy constants", () => {
     expect(DEEPSEEK_SEARCH_CAPABILITY).toBe("deepseek_search")
     expect(DEEPSEEK_FETCH_CAPABILITY).toBe("deepseek_fetch")
     expect(DEEPSEEK_SEARCH_FETCH_PROVIDER_ID).toBe("deepseek")
+    expect(DEEPSEEK_SEARCH_FETCH_POLICY_VERSION).toBe("ds-sf-v1.1-2026-10-23")
   })
 })

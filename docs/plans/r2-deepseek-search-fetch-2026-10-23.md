@@ -87,6 +87,12 @@
 ### 3.3 删除安全拒绝后的「单独开关预览」路径
 
 - 已安全拒绝的目标：首片**直接排除**，无远程绕行、无预览开关。
+- 目标审核与 persistence **分离**：`reviewFetchTarget` / `FetchTargetReview` 为句法闸（复用 `isBlockedAddress`，规范化括号与尾点）；**不**宣称能验证第三方实际 DNS/IP/跳转。persistence 许可不能代替目标安全审核；调用方已 `locally_rejected` 时即使 persistence=full 亦拒绝。
+- **计费**：按上游有效非空结果次数结算（Search 以 `results.length` 为准），不以裁剪后 `candidates.length`；HTTP200 无效 JSON / 错误 schema → `unknown` 保留额度；仅明确有效空结果释放。query/count 等入参校验在 `paidRequest` 之前。
+- **错误**：回执/日志只存固定错误码（如 `deepseek_tools_http_401`），禁止附响应正文或凭据。
+- **时限**：本服务有限默认总期限 + 调用方取消信号传到 HTTP；响应体流式字节上限；发送后超时/取消/超限且无法确认计费 → `unknown`。
+- **预算**：`deepseek_search` 与 `deepseek_fetch` **各自**月预算，不是共享总池。
+
 - Search **请求缓存键** = 规范化 query ＋ 有效参数 ＋ 策略版本；**不能**用请求前还没有的结果 `dedupeKey`。候选 URL 去重是**另一层**（结果侧）。
 - Fetch 按**审核 URL ＋ 许可/转换策略**隔离缓存（identity 含 `persistence` + `converter`）。
 
@@ -121,7 +127,7 @@
 
 ### 5.2 Fetch meta DTO（回执）
 
-`{ url, titleLength, contentByteLength, titleHash, contentHash, empty }` — 无 title/content 正文。
+`{ url, titleLength, contentByteLength, titleHash, convertedContentHash, provenance:"third_party_markdown", originResponseHash:null, localFetchEvidence:"none", empty }` — 无 title/content 正文；不冒充本机 raw/版本 hash。
 
 ### 5.3 迁移 / schema
 
@@ -164,7 +170,9 @@
 5. 回执/日志无正文或密钥
 6. 默认关闭零外呼（且不读 SecretStore）
 7. 许可/安全拒绝 fail-closed 零外呼
-8. 取消/超时路径不把 unknown 当免费
+8. 取消/超时/超限路径不把 unknown 当免费
+9. Fetch 最后额度并发；临时文件 SQLite 关闭再打开不重购
+10. 两 capability 预算分离；错误正文/假 Bearer 不落库
 
 全部用合成 HTTP；不读真实密钥、不调 API。
 

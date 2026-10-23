@@ -56,3 +56,12 @@ Search/Fetch 成功 **不得**自动写入 `registeredIntelSources`、抬高 all
 ## R0 / 本阶段范围
 
 文档合同修正 + 默认关闭离线实现与测试；无 live、无合并部署。
+
+## Slice-1 contract gap fix (2026-10-23)
+
+- URL 门禁复用 `isBlockedAddress`，规范化 IPv6 括号与 hostname 尾点；明确**不能**验证第三方 DNS/IP/跳转。
+- 计费按上游有效非空；无效 JSON/schema → unknown；入参校验在预留前。
+- 错误只存固定码，不存上游正文/凭据。
+- 服务默认总期限 + AbortSignal 下传 + 响应字节上限；发送后不确定保持 unknown。
+- `TrimmedFetchMeta`：`provenance=third_party_markdown`，`convertedContentHash`，`originResponseHash=null`，`localFetchEvidence=none`。
+- Search/Fetch **分 capability 分预算**；policyVersion `ds-sf-v1.1-2026-10-23`。

@@ -1,8 +1,17 @@
 /**
  * DeepSeek Tools Search/Fetch HTTP client (injected fetcher).
  * No SecretStore, no DB, no persistence — pure request/response validation.
+ *
+ * URL gate is syntactic only: reuses isBlockedAddress for literals after
+ * normalizing brackets/trailing dots. Does NOT verify third-party DNS, resolved
+ * IPs, or redirects (those remain unknown for remote Tools Fetch).
  */
+import { Buffer } from "node:buffer"
 import { ProviderRejectedError } from "#/intel/llm/receipts"
+import { type ResolvedAddress, isBlockedAddress } from "#/services/article-fetch-security"
+
+/** Hard cap when reading Search/Fetch HTTP bodies (bytes, UTF-8). Mirrored in policy module. */
+export const DEEPSEEK_TOOLS_MAX_RESPONSE_BYTES = 512 * 1024
 
 export const DEEPSEEK_TOOLS_BASE = "https://api.deepseek.com"
 export const DEEPSEEK_SEARCH_PATH = "/v1/tools/search"
@@ -18,8 +27,12 @@ export interface InjectedFetchInit {
 export interface InjectedFetchResponse {
   status: number
   ok: boolean
-  text: () => Promise<string>
   headers: { get: (name: string) => string | null }
+  /**
+   * Read body with a hard byte cap. Implementations should stop reading once
+   * maxBytes is exceeded (stream when possible). Oversize must reject.
+   */
+  readText: (maxBytes: number, signal?: AbortSignal) => Promise<string>
 }
 
 export type InjectedFetcher = (input: string, init?: InjectedFetchInit) => Promise<InjectedFetchResponse>
@@ -29,6 +42,20 @@ export class DeepSeekToolsClientError extends Error {
   constructor(code: string, message: string) {
     super(message)
     this.name = "DeepSeekToolsClientError"
+    this.code = code
+  }
+}
+
+/**
+ * Thrown after the HTTP request was sent when the billable outcome cannot be
+ * confirmed (invalid JSON/schema, oversize, abort). Receipts treat this as
+ * unknown and keep the budget reservation — never as a free release.
+ */
+export class DeepSeekToolsOutcomeUnknownError extends Error {
+  readonly code: string
+  constructor(code: string) {
+    super(code)
+    this.name = "DeepSeekToolsOutcomeUnknownError"
     this.code = code
   }
 }
@@ -64,7 +91,7 @@ export interface DeepSeekFetchResponse {
   content: string
 }
 
-function assertQuery(query: string): string {
+export function assertQuery(query: string): string {
   if (typeof query !== "string") throw new DeepSeekToolsClientError("invalid_query", "query must be a string")
   const trimmed = query.trim()
   if (!trimmed) throw new DeepSeekToolsClientError("invalid_query", "query must be non-empty")
@@ -72,7 +99,7 @@ function assertQuery(query: string): string {
   return trimmed
 }
 
-function assertCount(count: number | undefined): number {
+export function assertCount(count: number | undefined): number {
   if (count === undefined) return 10
   if (!Number.isInteger(count) || count < 1 || count > 50) {
     throw new DeepSeekToolsClientError("invalid_count", "count must be an integer in 1..50")
@@ -80,7 +107,26 @@ function assertCount(count: number | undefined): number {
   return count
 }
 
-/** Syntactic public-URL gate (no DNS). Rejects userinfo, non-http(s), localhost, obvious private/literal hosts. */
+/** Normalize hostname: strip optional brackets and trailing DNS dots. */
+export function normalizeHostname(hostname: string): string {
+  let host = hostname.trim().toLowerCase()
+  if (host.startsWith("[") && host.endsWith("]")) host = host.slice(1, -1)
+  while (host.endsWith(".")) host = host.slice(0, -1)
+  return host
+}
+
+function asLiteralAddress(host: string): ResolvedAddress | null {
+  if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) return { address: host, family: 4 }
+  if (host.includes(":")) return { address: host, family: 6 }
+  return null
+}
+
+/**
+ * Syntactic public-URL gate (no DNS). Reuses audited isBlockedAddress for
+ * literal IPv4/IPv6 (incl. mapped). Rejects userinfo, non-http(s), localhost
+ * (incl. trailing-dot), metadata hosts. Does not claim to know third-party
+ * resolution or redirects.
+ */
 export function assertPublicHttpUrl(raw: string): URL {
   if (typeof raw !== "string" || raw.length === 0 || raw.length > 8192) {
     throw new DeepSeekToolsClientError("invalid_url", "url must be a non-empty string ≤8192 chars")
@@ -97,112 +143,144 @@ export function assertPublicHttpUrl(raw: string): URL {
   if (url.username || url.password) {
     throw new DeepSeekToolsClientError("invalid_url", "url must not carry userinfo")
   }
-  const host = url.hostname.toLowerCase()
+  const host = normalizeHostname(url.hostname)
   if (!host) throw new DeepSeekToolsClientError("invalid_url", "url host required")
-  if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") || host === "0.0.0.0") {
-    throw new DeepSeekToolsClientError("url_blocked", `host not publicly sendable: ${host}`)
+  if (
+    host === "localhost"
+    || host.endsWith(".localhost")
+    || host.endsWith(".local")
+    || host === "0.0.0.0"
+    || host === "metadata.google.internal"
+    || host === "metadata"
+  ) {
+    throw new DeepSeekToolsClientError("url_blocked", "host not publicly sendable")
   }
-  if (host === "metadata.google.internal" || host === "metadata") {
-    throw new DeepSeekToolsClientError("url_blocked", `host not publicly sendable: ${host}`)
-  }
-  // Literal IPv4 private / loopback / link-local / docs ranges (no DNS).
-  if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) {
-    const parts = host.split(".").map(Number)
-    const [a, b] = parts
-    const blocked
-      = a === 0 || a === 10 || a === 127 || a === 224 || a >= 240
-        || (a === 169 && b === 254)
-        || (a === 172 && b >= 16 && b <= 31)
-        || (a === 192 && b === 168)
-        || (a === 100 && b >= 64 && b <= 127)
-        || (a === 192 && b === 0)
-        || (a === 198 && (b === 18 || b === 19))
-    if (blocked) throw new DeepSeekToolsClientError("url_blocked", `literal address not publicly sendable: ${host}`)
-  }
-  if (host.includes(":")) {
-    // IPv6 literals: reject loopback/link-local/unique-local heuristically.
-    if (host === "::1" || host.startsWith("fe80:") || host.startsWith("fc") || host.startsWith("fd") || host.startsWith("::ffff:")) {
-      throw new DeepSeekToolsClientError("url_blocked", `IPv6 address not publicly sendable: ${host}`)
-    }
+  const literal = asLiteralAddress(host)
+  if (literal && isBlockedAddress(literal)) {
+    throw new DeepSeekToolsClientError("url_blocked", "literal address not publicly sendable")
   }
   return url
 }
 
-function mapHttpError(status: number, bodyText: string): never {
-  const snippet = bodyText.slice(0, 200)
-  // Clear non-billable / non-retryable per official docs → ProviderRejectedError (receipt books 0).
+/** Fixed-code HTTP rejection — never attach response body, credentials, or upstream text. */
+function mapHttpError(status: number): never {
+  const code = `deepseek_tools_http_${status}`
   if (status === 400 || status === 401 || status === 402 || status === 403 || status === 404) {
-    throw new ProviderRejectedError(`deepseek_tools_http_${status}: ${snippet}`, status, false)
+    throw new ProviderRejectedError(code, status, false)
   }
   if (status === 429 || status >= 500) {
-    throw new ProviderRejectedError(`deepseek_tools_http_${status}: ${snippet}`, status, true)
+    throw new ProviderRejectedError(code, status, true)
   }
-  throw new ProviderRejectedError(`deepseek_tools_http_${status}: ${snippet}`, status, false)
+  throw new ProviderRejectedError(code, status, false)
 }
 
-async function postJson<T>(
+async function postJson(
   fetcher: InjectedFetcher,
   path: string,
   apiKey: string,
   body: Record<string, unknown>,
-  signal?: AbortSignal,
-): Promise<T> {
+  options: { signal?: AbortSignal, maxBytes?: number },
+): Promise<unknown> {
   if (!apiKey || typeof apiKey !== "string") throw new DeepSeekToolsClientError("auth_failed", "api key required")
-  // Defence: never allow localization in the outbound body even if a caller stuffed it.
   const { localization: _drop, ...safe } = body as Record<string, unknown> & { localization?: unknown }
   void _drop
-  const response = await fetcher(`${DEEPSEEK_TOOLS_BASE}${path}`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-    },
-    body: JSON.stringify(safe),
-    signal,
-  })
-  const text = await response.text()
-  if (!response.ok) mapHttpError(response.status, text)
+  const maxBytes = options.maxBytes ?? DEEPSEEK_TOOLS_MAX_RESPONSE_BYTES
+  let response: InjectedFetchResponse
+  try {
+    response = await fetcher(`${DEEPSEEK_TOOLS_BASE}${path}`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify(safe),
+      signal: options.signal,
+    })
+  } catch (error) {
+    if (options.signal?.aborted) {
+      throw new DeepSeekToolsOutcomeUnknownError("request_aborted")
+    }
+    throw error
+  }
+  let text: string
+  try {
+    text = await response.readText(maxBytes, options.signal)
+  } catch (error) {
+    if (error instanceof DeepSeekToolsClientError || error instanceof DeepSeekToolsOutcomeUnknownError) throw error
+    if (options.signal?.aborted) throw new DeepSeekToolsOutcomeUnknownError("request_aborted")
+    const message = error instanceof Error ? error.message : ""
+    if (message.includes("response_too_large") || (error as { code?: string })?.code === "response_too_large") {
+      throw new DeepSeekToolsOutcomeUnknownError("response_too_large")
+    }
+    throw new DeepSeekToolsOutcomeUnknownError("response_read_failed")
+  }
+  if (!response.ok) {
+    // Drain happened; never pass body into the rejection message.
+    void text
+    mapHttpError(response.status)
+  }
   let parsed: unknown
   try {
     parsed = JSON.parse(text) as unknown
   } catch {
-    throw new ProviderRejectedError("deepseek_tools_invalid_json", response.status, false)
+    throw new DeepSeekToolsOutcomeUnknownError("invalid_json")
   }
-  return parsed as T
+  return parsed
+}
+
+function parseSearchResponse(raw: unknown): DeepSeekSearchResponse {
+  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new DeepSeekToolsOutcomeUnknownError("invalid_schema")
+  }
+  const record = raw as Record<string, unknown>
+  if (!("results" in record) || !Array.isArray(record.results)) {
+    throw new DeepSeekToolsOutcomeUnknownError("invalid_schema")
+  }
+  return { results: record.results as DeepSeekSearchResultItem[] }
+}
+
+function parseFetchResponse(raw: unknown): DeepSeekFetchResponse {
+  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new DeepSeekToolsOutcomeUnknownError("invalid_schema")
+  }
+  const record = raw as Record<string, unknown>
+  if (!("content" in record) || typeof record.content !== "string") {
+    throw new DeepSeekToolsOutcomeUnknownError("invalid_schema")
+  }
+  if ("title" in record && record.title != null && typeof record.title !== "string") {
+    throw new DeepSeekToolsOutcomeUnknownError("invalid_schema")
+  }
+  return {
+    title: typeof record.title === "string" ? record.title : "",
+    content: record.content,
+  }
 }
 
 export async function deepSeekSearch(
   req: DeepSeekSearchRequest,
-  options: { apiKey: string, fetcher: InjectedFetcher, signal?: AbortSignal },
+  options: { apiKey: string, fetcher: InjectedFetcher, signal?: AbortSignal, maxBytes?: number },
 ): Promise<DeepSeekSearchResponse> {
   const query = assertQuery(req.query)
   const count = assertCount(req.count)
   const need_content = req.need_content === true
-  const raw = await postJson<Record<string, unknown>>(options.fetcher, DEEPSEEK_SEARCH_PATH, options.apiKey, {
+  const raw = await postJson(options.fetcher, DEEPSEEK_SEARCH_PATH, options.apiKey, {
     query,
     count,
     need_content,
-  }, options.signal)
-  const results = Array.isArray(raw.results) ? raw.results as DeepSeekSearchResultItem[] : []
-  return { results }
+  }, { signal: options.signal, maxBytes: options.maxBytes })
+  return parseSearchResponse(raw)
 }
 
 export async function deepSeekFetch(
   req: DeepSeekFetchRequest,
-  options: { apiKey: string, fetcher: InjectedFetcher, signal?: AbortSignal },
+  options: { apiKey: string, fetcher: InjectedFetcher, signal?: AbortSignal, maxBytes?: number },
 ): Promise<DeepSeekFetchResponse> {
   const url = assertPublicHttpUrl(req.url)
-  const raw = await postJson<Record<string, unknown>>(options.fetcher, DEEPSEEK_FETCH_PATH, options.apiKey, {
+  const raw = await postJson(options.fetcher, DEEPSEEK_FETCH_PATH, options.apiKey, {
     url: url.toString(),
-  }, options.signal)
-  const title = typeof raw.title === "string" ? raw.title : ""
-  const content = typeof raw.content === "string" ? raw.content : ""
-  if (!content) {
-    // HTTP 200 with empty body: treat as clear non-billable empty outcome for the service layer.
-    return { title, content: "" }
-  }
-  return { title, content }
+  }, { signal: options.signal, maxBytes: options.maxBytes })
+  return parseFetchResponse(raw)
 }
 
 export function buildSearchRequestBody(req: DeepSeekSearchRequest): Record<string, unknown> {
@@ -210,5 +288,16 @@ export function buildSearchRequestBody(req: DeepSeekSearchRequest): Record<strin
     query: assertQuery(req.query),
     count: assertCount(req.count),
     need_content: req.need_content === true,
+  }
+}
+
+/** Helper for tests / adapters: wrap a full string as a capped readText body. */
+export function staticReadText(body: string): InjectedFetchResponse["readText"] {
+  return async (maxBytes, signal) => {
+    if (signal?.aborted) throw new DeepSeekToolsOutcomeUnknownError("request_aborted")
+    if (Buffer.byteLength(body, "utf8") > maxBytes) {
+      throw new DeepSeekToolsOutcomeUnknownError("response_too_large")
+    }
+    return body
   }
 }

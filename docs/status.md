@@ -1,3 +1,11 @@
+## 2026-10-23 — DeepSeek Search/Fetch 合同缺口修补（默认关闭）
+
+- 基线 e11ec92 → 本修补 tip（待提交）；policyVersion ds-sf-v1.1-2026-10-23。
+- 修补：URL 门禁（IPv6 括号/尾点/isBlockedAddress）、上游非空计费、无效 JSON→unknown、错误码无正文、默认时限+取消+字节上限、Fetch provenance 标签、分 capability 预算。
+- 仍默认关闭；未启源、未真实 API/密钥、未合并部署；R2 计数不变。
+- 本地安全门禁与目标审核不声称能验证第三方实际 DNS/IP/跳转；persistence 许可不能代替目标安全审核。
+- 日志：.tmp/logs/deepseek-search-fetch-gapfix-2026-10-23/。
+
 ## 2026-10-23 DeepSeek Search/Fetch 合同修正 + 默认关闭第一片（dots `1792725183.066059`）
 
 - 方向认可基线 `a9ae16d`；同一授权内先修正方案三点，再落地默认关闭、离线可测最小接入；不另等用户批准；不联系 Guyang。

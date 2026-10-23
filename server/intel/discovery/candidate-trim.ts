@@ -16,12 +16,22 @@ export interface TrimmedSearchCandidate {
   titleUrlHash: string
 }
 
+/**
+ * Fetch receipt/cache meta. Labels third-party Markdown conversion explicitly;
+ * does not claim local raw-response or version-scope hashes.
+ */
 export interface TrimmedFetchMeta {
   url: string
   titleLength: number
   contentByteLength: number
   titleHash: string
-  contentHash: string
+  /** SHA-256 of the third-party converted Markdown string (not local rawBody). */
+  convertedContentHash: string
+  provenance: "third_party_markdown"
+  /** Unknown for Tools Fetch — we do not possess the origin HTTP body. */
+  originResponseHash: null
+  /** No local secureFetchArticle evidence accompanies a remote Tools Fetch. */
+  localFetchEvidence: "none"
   empty: boolean
 }
 
@@ -72,7 +82,10 @@ export function trimFetchMeta(url: string, response: DeepSeekFetchResponse): Tri
     titleLength: [...title].length,
     contentByteLength: contentBytes,
     titleHash: sha256Hex(title),
-    contentHash: sha256Hex(content),
+    convertedContentHash: sha256Hex(content),
+    provenance: "third_party_markdown",
+    originResponseHash: null,
+    localFetchEvidence: "none",
     empty: contentBytes === 0,
   }
 }
@@ -88,11 +101,11 @@ export function containsSecretLike(text: string, apiKey?: string): boolean {
 export function receiptPayloadHasBodyLeak(payload: unknown): boolean {
   if (payload == null) return false
   const json = JSON.stringify(payload)
-  // Trimmed Search DTO keys only; Fetch meta never has content/snippet/summary/markdown.
+  // Trimmed Search DTO keys only; Fetch meta never has content/snippet/summary/markdown bodies.
   if (/"snippet"\s*:/.test(json)) return true
   if (/"summary"\s*:/.test(json)) return true
+  // Exact key "content" (not contentByteLength / convertedContentHash).
   if (/"content"\s*:/.test(json)) return true
   if (/"markdown"\s*:/.test(json)) return true
-  if (/"third_party_markdown"\s*:/.test(json)) return true
   return false
 }
