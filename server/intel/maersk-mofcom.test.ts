@@ -81,11 +81,10 @@ describe("explicit abbreviated English Gregorian day", () => {
 })
 
 describe("disabled metadata candidates and collector forwarding", () => {
-  it("keeps both sources outside active and production selections", async () => {
+  it("keeps both sources outside active seeds; CN-T01 stays production-excluded while XX-K01 is allow-selectable with disallowed", async () => {
     for (const seed of [maersk, mofcom]) {
       expect(seed).toMatchObject({ enabled: false, persistence: "disallowed" })
       expect(intelSourceSeeds.some(active => active.id === seed.id)).toBe(false)
-      expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: seed.catalogId } })).toThrow("intel_source_selection_invalid")
       const db = await setup(seed)
       const deps = offline(seed === maersk ? maerskHtml : mofcomHtml)
       const job = createIntelCollectJob({ db: db.database, seeds: [seed], fetch: deps, now: () => now })
@@ -100,6 +99,15 @@ describe("disabled metadata candidates and collector forwarding", () => {
         db.native.close()
       }
     }
+    // Phase exclusion (not permanent): CN-T01 / Loadstar-overlap path remains rejected.
+    expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "CN-T01" } })).toThrow("intel_source_selection_invalid")
+    expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "ID-W01,CN-T01" } })).toThrow("intel_source_selection_invalid")
+    // XX-K01 is now allow-selectable but keeps disallowed + exact Maersk header opt-in; does not rewrite original two licenses.
+    const deps = { fetch: { lookup: async () => [{ address: "93.184.216.34", family: 4 as const }], transport: async () => ({ status: 503, headers: {}, body: new Uint8Array() }) }, acquireOwnership: async () => ({ release: async () => undefined }) }
+    const selected = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "XX-K01,TH-W01" }, dependencies: deps })
+    expect(selected.registry?.intel?.seeds?.map(s => s.catalogId)).toEqual(["XX-K01", "TH-W01"])
+    expect(selected.registry?.intel?.seeds?.[0]).toMatchObject({ persistence: "disallowed", sourceHeaderLimit: { sourceId: "intel:xx-k01", url: "https://www.maersk.com/news", maxHeaderSize: 32768 }, adaptive: { minMinutes: 15, maxMinutes: 60 } })
+    expect(selected.registry?.intel?.seeds?.[1].persistence).toBe("full")
   })
   it("pairs each own title/date, excludes image duplicates and leaves HTTP policy identities out", () => {
     const m = fromHtml(maerskHtml, maersk.url, maersk.webList!, sourcePolicy(maersk))

@@ -6,8 +6,14 @@ import { resolve } from "node:path"
 import { pathToFileURL } from "node:url"
 import { spawnSync } from "node:child_process"
 import { createApp, createRouter, toNodeListener } from "h3"
-import { afterEach, expect, it, vi } from "vitest"
-import { productionIntelOptions } from "#/runtime/intel-production"
+import { afterEach, describe, expect, it, vi } from "vitest"
+import { PRODUCTION_ALLOW_SELECT_CATALOG_IDS, productionIntelOptions } from "#/runtime/intel-production"
+import { registeredIntelSources } from "#/intel/sources/registry"
+import { htmlIndexCandidates } from "#/intel/sources/html-index-candidates"
+import { rssCandidates } from "#/intel/sources/rss-candidates"
+import { intelSourceSeeds } from "#/intel/sources.ts"
+import { SPLASH247_RSS_SYNTHETIC } from "#/intel/sources/__fixtures__/splash247-rss-synthetic"
+import { maerskHtml as MAERSK_SYNTHETIC } from "#/intel/sources/__fixtures__/maersk-news-synthetic"
 import { acquireIntelDatabaseOwnership } from "#/runtime/intel-ownership"
 import { bootstrapBackgroundRuntime, shutdownBackgroundRuntime } from "#/runtime/bootstrap"
 import { getDefaultRuntimeJobs } from "#/runtime/registry"
@@ -22,9 +28,35 @@ afterEach(async () => {
   vi.unstubAllEnvs()
 })
 const enabled = { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "TH-W01" }
+/** Independent literal expected allow-select set (must not be derived from PRODUCTION_ALLOW_SELECT_CATALOG_IDS). */
+const EXPECTED_ALLOW_SELECT_LITERAL = [
+  "TH-W01",
+  "ID-W01",
+  "CN-T02",
+  "TH-C01",
+  "PH-C01",
+  "CN-P01",
+  "TH-C02",
+  "VN-P03",
+  "VN-T01",
+  "ID-T01",
+  "XX-K03",
+  "ID-T02",
+  "VN-D01",
+  "XX-K02",
+  "XX-K01",
+  "MY-C01",
+  "MY-T01",
+  "PH-M01",
+  "XX-M03",
+] as const
 it("defaults off with no sources/dependency work and rejects incomplete enabled settings", () => {
   expect(productionIntelOptions({ env: {}, dependencies: null }).registry?.intel).toMatchObject({ enabled: false, seeds: [] })
+  expect(productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "" } }).registry?.intel).toEqual({ enabled: false, seeds: [] })
+  expect(productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "false" } }).registry?.intel).toEqual({ enabled: false, seeds: [] })
   expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true" } })).toThrow("source_selection_invalid")
+  expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "" } })).toThrow("source_selection_invalid")
+  expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: " , , " } })).toThrow("source_selection_invalid")
   expect(() => productionIntelOptions({ env: enabled, dependencies: null })).toThrow("dependencies_missing")
   expect(() => productionIntelOptions({ env: { ...enabled, SHIPPING_INTEL_SOURCE_IDS: "CN-P05" } })).toThrow("source_selection_invalid")
   expect(() => productionIntelOptions({ env: { ...enabled, SHIPPING_RUNTIME_ENABLED: "false" } })).toThrow("requires_running_runtime")
@@ -141,4 +173,273 @@ it("the wired Runtime drains before ownership release and preserves all manual s
     await shutdownBackgroundRuntime()
     state.native.close()
   }
+})
+
+describe("phase allow-select expansion", () => {
+  const dependencies = {
+    fetch: {
+      lookup: vi.fn(async () => [{ address: "93.184.216.34", family: 4 as const }]),
+      transport: vi.fn(async () => ({ status: 503, headers: {}, body: new Uint8Array() })),
+    },
+    acquireOwnership: vi.fn(async () => ({ release: async () => undefined })),
+  }
+
+  it("allow-select constant matches independent literal (old 2 + new 17) without deriving expected from the constant", () => {
+    expect([...PRODUCTION_ALLOW_SELECT_CATALOG_IDS]).toEqual([...EXPECTED_ALLOW_SELECT_LITERAL])
+    expect(PRODUCTION_ALLOW_SELECT_CATALOG_IDS).toHaveLength(19)
+    expect(PRODUCTION_ALLOW_SELECT_CATALOG_IDS.slice(0, 2)).toEqual(["TH-W01", "ID-W01"])
+    expect(PRODUCTION_ALLOW_SELECT_CATALOG_IDS.slice(2)).toEqual([
+      "CN-T02",
+      "TH-C01",
+      "PH-C01",
+      "CN-P01",
+      "TH-C02",
+      "VN-P03",
+      "VN-T01",
+      "ID-T01",
+      "XX-K03",
+      "ID-T02",
+      "VN-D01",
+      "XX-K02",
+      "XX-K01",
+      "MY-C01",
+      "MY-T01",
+      "PH-M01",
+      "XX-M03",
+    ])
+  })
+
+  it("accepts valid single and mixed selections in input order", () => {
+    const single = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "XX-M03" }, dependencies })
+    expect(single.registry?.intel?.seeds?.map(s => s.catalogId)).toEqual(["XX-M03"])
+    const mixed = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "ID-W01,MY-C01,TH-W01,XX-K01" }, dependencies })
+    expect(mixed.registry?.intel?.seeds?.map(s => s.catalogId)).toEqual(["ID-W01", "MY-C01", "TH-W01", "XX-K01"])
+  })
+
+  it("preserves original two license contracts and new seventeen disallowed", () => {
+    const options = productionIntelOptions({
+      env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "TH-W01,ID-W01,CN-T02,XX-M03,XX-K01" },
+      dependencies,
+    })
+    const byId = Object.fromEntries(options.registry!.intel!.seeds!.map(s => [s.catalogId, s]))
+    expect(byId["TH-W01"].persistence).toBe("full")
+    expect(byId["ID-W01"].persistence).toBe("excerpt_only")
+    expect(byId["CN-T02"].persistence).toBe("disallowed")
+    expect(byId["XX-M03"].persistence).toBe("disallowed")
+    expect(byId["XX-K01"].persistence).toBe("disallowed")
+    expect(byId["XX-K01"].sourceHeaderLimit).toEqual({ sourceId: "intel:xx-k01", url: "https://www.maersk.com/news", maxHeaderSize: 32768 })
+    for (const seed of options.registry!.intel!.seeds!) {
+      expect(seed.enabled).toBe(true)
+      expect(seed.adaptive).toEqual({ minMinutes: 15, maxMinutes: 60 })
+    }
+  })
+
+  it.each([
+    "CN-T01",
+    "XX-M01",
+    "MY-P02",
+    "MY-P03",
+    "CN-P05",
+    "the-loadstar",
+    "intel:xx-m03",
+    "bounded:MY-C01",
+    "TH-W01,CN-T01",
+    "ID-W01,XX-M01",
+    "XX-M03,XX-M01",
+    "TH-W01,TH-W01",
+    "TH-W01,the-loadstar",
+  ])("rejects %s as whole-batch intel_source_selection_invalid", (ids) => {
+    expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: ids }, dependencies })).toThrow("intel_source_selection_invalid")
+  })
+
+  it("structuredClone isolates returned seeds from registry and across calls", () => {
+    const first = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "XX-K01,MY-C01" }, dependencies })
+    const [maerskCopy, customsCopy] = first.registry!.intel!.seeds!
+    const registryMaersk = registeredIntelSources.find(s => s.catalogId === "XX-K01")!
+    const registryCustoms = registeredIntelSources.find(s => s.catalogId === "MY-C01")!
+    expect(maerskCopy).not.toBe(registryMaersk)
+    expect(maerskCopy.allowedHosts).not.toBe(registryMaersk.allowedHosts)
+    expect(maerskCopy.webList).not.toBe(registryMaersk.webList)
+    expect(maerskCopy.sourceHeaderLimit).not.toBe(registryMaersk.sourceHeaderLimit)
+    expect(customsCopy.allowedHosts).not.toBe(registryCustoms.allowedHosts)
+    const hostsBefore = [...registryMaersk.allowedHosts]
+    const headerBefore = { ...registryMaersk.sourceHeaderLimit! }
+    maerskCopy.allowedHosts.push("evil.example")
+    maerskCopy.sourceHeaderLimit!.maxHeaderSize = 1
+    if (maerskCopy.webList) (maerskCopy.webList as { itemSelector?: string }).itemSelector = "evil"
+    customsCopy.allowedHosts.push("evil.example")
+    expect(registryMaersk.allowedHosts).toEqual(hostsBefore)
+    expect(registryMaersk.sourceHeaderLimit).toEqual(headerBefore)
+    expect(registryCustoms.allowedHosts).not.toContain("evil.example")
+    const second = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "XX-K01,MY-C01" }, dependencies })
+    expect(second.registry!.intel!.seeds![0]).not.toBe(maerskCopy)
+    expect(second.registry!.intel!.seeds![0].allowedHosts).not.toContain("evil.example")
+    expect(second.registry!.intel!.seeds![0].sourceHeaderLimit?.maxHeaderSize).toBe(32768)
+    expect(second.registry!.intel!.seeds![1].allowedHosts).not.toContain("evil.example")
+    expect(intelSourceSeeds.map(s => s.persistence)).toEqual(["full", "excerpt_only"])
+    expect(rssCandidates.find(s => s.catalogId === "MY-C01")).toMatchObject({ enabled: false, persistence: "disallowed" })
+    expect(htmlIndexCandidates.find(s => s.catalogId === "XX-K01")).toMatchObject({ enabled: false, persistence: "disallowed" })
+  })
+
+  it("master switch off: BackgroundRuntime schedule path never hits DNS/transport/ownership (not job.run evidence)", async () => {
+    const lookup = vi.fn(async () => [{ address: "93.184.216.34", family: 4 as const }])
+    const transport = vi.fn(async () => ({ status: 200, headers: { "content-type": "application/rss+xml" }, body: "<rss/>" }))
+    const acquireOwnership = vi.fn(async () => ({ release: async () => undefined }))
+    const setTimeoutSpy = vi.fn(() => 0 as unknown as NodeJS.Timeout)
+    const clearTimeoutSpy = vi.fn()
+    const options = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "false" } })
+    expect(options.registry?.intel).toEqual({ enabled: false, seeds: [] })
+    expect(options.acquireIntelOwnership).toBeUndefined()
+    const state = open()
+    vi.stubEnv("SHIPPING_DATA_MODE", "real")
+    vi.stubEnv("SHIPPING_WEATHER_ALERT_PROVIDER", "off")
+    try {
+      await initShippingTables(state.database, "real")
+      const now = () => new Date("2026-10-20T12:00:00Z")
+      const jobs = getDefaultRuntimeJobs({
+        ...options.registry,
+        database: state.database,
+        dataMode: "real",
+        now,
+        intel: { enabled: false, seeds: [], fetch: { lookup, transport } },
+      }).filter(job => job.id === INTEL_COLLECT_JOB_ID)
+      expect(jobs).toHaveLength(1)
+      expect(jobs[0].enabled).toBe(false)
+      const runtime = await bootstrapBackgroundRuntime({
+        database: state.database,
+        jobs,
+        enabled: true,
+        runtimeOptions: { now, setTimeout: setTimeoutSpy as never, clearTimeout: clearTimeoutSpy, logger: { info: vi.fn(), error: vi.fn() } },
+      })
+      expect(runtime.getStatus().jobs.find(j => j.id === INTEL_COLLECT_JOB_ID)).toMatchObject({ enabled: false, status: "disabled" })
+      expect(setTimeoutSpy).not.toHaveBeenCalled()
+      expect(lookup).not.toHaveBeenCalled()
+      expect(transport).not.toHaveBeenCalled()
+      expect(acquireOwnership).not.toHaveBeenCalled()
+      expect(state.native.prepare("SELECT COUNT(*) AS n FROM intel_fetch_run").get()).toEqual({ n: 0 })
+    } finally {
+      await shutdownBackgroundRuntime()
+      state.native.close()
+    }
+  })
+
+  it("productionIntelOptions -> runtime registry -> BackgroundRuntime -> isolated SQLite for allow-selected closed candidate", async () => {
+    mkdirSync(".tmp", { recursive: true })
+    const dir = mkdtempSync(resolve(".tmp", "intel-allow-select-chain-"))
+    const file = resolve(dir, "isolated.sqlite3")
+    const state = open(file)
+    const lookups: string[] = []
+    const calls: string[] = []
+    const transportOpts: unknown[] = []
+    const release = vi.fn(async () => {})
+    const lookup = vi.fn(async (host: string) => {
+      lookups.push(host)
+      return [{ address: "93.184.216.34", family: 4 as const }]
+    })
+    const transport = vi.fn(async (url: URL, _a: unknown, opts: unknown) => {
+      calls.push(url.toString())
+      transportOpts.push(opts)
+      if (url.toString() === "https://splash247.com/feed/") {
+        return { status: 200, headers: { "content-type": "application/rss+xml; charset=utf-8" }, body: new TextEncoder().encode(SPLASH247_RSS_SYNTHETIC) }
+      }
+      return { status: 503, headers: {}, body: new Uint8Array() }
+    })
+    vi.stubEnv("SHIPPING_DATA_MODE", "real")
+    vi.stubEnv("SHIPPING_WEATHER_ALERT_PROVIDER", "off")
+    try {
+      await initShippingTables(state.database, "real")
+      const options = productionIntelOptions({
+        env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "XX-M03" },
+        dependencies: {
+          fetch: { lookup, transport },
+          acquireOwnership: async () => {
+            const lease = await acquireIntelDatabaseOwnership(file)
+            return {
+              release: async () => {
+                await lease.release()
+                await release()
+              },
+            }
+          },
+        },
+      })
+      const seed = options.registry!.intel!.seeds![0]
+      expect(seed).toMatchObject({ catalogId: "XX-M03", enabled: true, persistence: "disallowed", adaptive: { minMinutes: 15, maxMinutes: 60 } })
+      expect(seed.intervalMs).toBe(3_600_000)
+      const now = () => new Date("2026-10-20T12:00:00Z")
+      const jobs = getDefaultRuntimeJobs({ ...options.registry, database: state.database, dataMode: "real", now }).filter(job => job.id === INTEL_COLLECT_JOB_ID)
+      expect(jobs).toHaveLength(1)
+      const runtime = await bootstrapBackgroundRuntime({
+        ...options,
+        database: state.database,
+        jobs,
+        enabled: true,
+        runtimeOptions: { now, setTimeout: vi.fn(() => 0) as never, clearTimeout: vi.fn(), logger: { info: vi.fn(), error: vi.fn() } },
+      })
+      expect(await runtime.runNow(INTEL_COLLECT_JOB_ID)).toMatchObject({ status: "success", recordsRead: 2, recordsWritten: 2 })
+      expect(calls).toEqual(["https://splash247.com/feed/"])
+      expect(lookups).toEqual(["splash247.com"])
+      expect(state.native.prepare("SELECT enabled, persistence FROM intel_source WHERE id = ?").get("intel:xx-m03")).toEqual({ enabled: 1, persistence: "disallowed" })
+      const items = await state.repository.listItems("intel:xx-m03")
+      expect(items).toHaveLength(2)
+      for (const item of items) {
+        const versions = await state.repository.listVersions(item.id)
+        expect(versions[0].contentScope).toBe("metadata_only")
+        expect(versions[0].dateEvidence).toBeNull()
+      }
+      for (const opts of transportOpts) expect(opts).not.toMatchObject({ maxHeaderSize: 32768 })
+    } finally {
+      await shutdownBackgroundRuntime()
+      state.native.close()
+    }
+  })
+
+  it("maersk allow-select keeps exact 32768 header opt-in on production chain", async () => {
+    mkdirSync(".tmp", { recursive: true })
+    const dir = mkdtempSync(resolve(".tmp", "intel-allow-select-maersk-"))
+    const file = resolve(dir, "isolated.sqlite3")
+    const state = open(file)
+    const optionsSeen: unknown[] = []
+    const transport = vi.fn(async (url: URL, _a: unknown, opts: unknown) => {
+      optionsSeen.push(opts)
+      if (url.toString() === "https://www.maersk.com/news") {
+        return { status: 200, headers: { "content-type": "text/html; charset=utf-8" }, body: new TextEncoder().encode(MAERSK_SYNTHETIC) }
+      }
+      return { status: 503, headers: {}, body: new Uint8Array() }
+    })
+    vi.stubEnv("SHIPPING_DATA_MODE", "real")
+    vi.stubEnv("SHIPPING_WEATHER_ALERT_PROVIDER", "off")
+    try {
+      await initShippingTables(state.database, "real")
+      const options = productionIntelOptions({
+        env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "XX-K01" },
+        dependencies: {
+          fetch: { lookup: async () => [{ address: "93.184.216.34", family: 4 }], transport },
+          acquireOwnership: async () => {
+            const lease = await acquireIntelDatabaseOwnership(file)
+            return { release: async () => {
+              await lease.release()
+            } }
+          },
+        },
+      })
+      expect(options.registry!.intel!.seeds![0].persistence).toBe("disallowed")
+      const now = () => new Date("2026-10-20T12:00:00Z")
+      const jobs = getDefaultRuntimeJobs({ ...options.registry, database: state.database, dataMode: "real", now }).filter(job => job.id === INTEL_COLLECT_JOB_ID)
+      const runtime = await bootstrapBackgroundRuntime({
+        ...options,
+        database: state.database,
+        jobs,
+        enabled: true,
+        runtimeOptions: { now, setTimeout: vi.fn(() => 0) as never, clearTimeout: vi.fn(), logger: { info: vi.fn(), error: vi.fn() } },
+      })
+      expect(await runtime.runNow(INTEL_COLLECT_JOB_ID)).toMatchObject({ status: "success", recordsRead: 2, recordsWritten: 2 })
+      expect(optionsSeen).toHaveLength(1)
+      expect(optionsSeen[0]).toMatchObject({ maxHeaderSize: 32768, maxBytes: 524288, timeoutMs: 10000 })
+      expect((optionsSeen[0] as { caPem?: unknown }).caPem).toBeUndefined()
+    } finally {
+      await shutdownBackgroundRuntime()
+      state.native.close()
+    }
+  })
 })

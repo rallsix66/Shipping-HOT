@@ -104,3 +104,9 @@ dots 放行：Slack C0C8BC001NY ts 1792657970.271849、1792658044.563019。基�
 
 - **未来启用 `intel:xx-m01` 前须确定单一抓取责任，禁止两条链路独立抓取同一 URL**（`https://theloadstar.com/feed/`，与 shipping feed 源 `the-loadstar` 相同）。`the-loadstar` 保持现状；`intel:xx-m01` 不启用。
 - 本 README 与 `docs/status.md` 中“未启用”类表述仅指本轮新增 intel 来源（十九个默认关闭注册），不泛指已有 shipping feed 或天气链路。
+
+## 第十二切片：生产允许选择扩展（阶段，dots 1792719565.465609）
+- 生产允许集合放在 `server/runtime/intel-production.ts` 的 `PRODUCTION_ALLOW_SELECT_CATALOG_IDS`（旧 2 + 新 17），与 registry 注册分离；注册 ≠ 生产许可。
+- 解析：`registeredIntelSources` 按 catalogId 查找 → `structuredClone` → `enabled:true` + 全新 adaptive 15–60；查不到抛 `intel_source_config_missing`；不用非空断言。
+- 本阶段排除（非永久）CN-T01、XX-M01；MY-P02/MY-P03 及未注册项继续拒；新增 17 保持 disallowed；TH-W01/ID-W01 许可不被覆盖。
+- 测试：独立字面预期核对全集；克隆隔离；总开关关时 BackgroundRuntime 调度路径零 DNS/transport/ownership；`productionIntelOptions→registry→BackgroundRuntime→隔离 SQLite`（XX-M03 RSS UTC/dateEvidence=null；XX-K01 精确 32768 opt-in）。未启服务、未 live、未 24h。R2-4 28/39、R2-5 25/34 不变。

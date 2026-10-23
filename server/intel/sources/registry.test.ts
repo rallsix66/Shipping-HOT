@@ -219,13 +219,38 @@ describe("default collect job (no seeds) on the BackgroundRuntime with isolated 
   })
 })
 
-describe("b) production selection is unchanged", () => {
+describe("b) production allow-select is independent of registry registration", () => {
   const dependencies = { fetch: fake().deps, acquireOwnership: async () => ({ release: async () => undefined }) }
-  it("still selects only TH-W01/ID-W01", () => {
-    const options = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: "TH-W01,ID-W01" }, dependencies })
-    expect(options.registry?.intel?.seeds?.map(seed => seed.catalogId)).toEqual(["TH-W01", "ID-W01"])
+  /** Independent literal (not taken from PRODUCTION_ALLOW_SELECT_CATALOG_IDS). */
+  const EXPECTED = ["TH-W01", "ID-W01", "CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "XX-K03", "ID-T02", "VN-D01", "XX-K02", "XX-K01", "MY-C01", "MY-T01", "PH-M01", "XX-M03"] as const
+  it("accepts the phase allow-select set (old 2 + new 17) in input order with contracts preserved", () => {
+    const options = productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: EXPECTED.join(",") }, dependencies })
+    expect(options.registry?.intel?.seeds?.map(seed => seed.catalogId)).toEqual([...EXPECTED])
+    const byId = Object.fromEntries(options.registry!.intel!.seeds!.map(s => [s.catalogId, s]))
+    expect(byId["TH-W01"].persistence).toBe("full")
+    expect(byId["ID-W01"].persistence).toBe("excerpt_only")
+    for (const id of EXPECTED.slice(2)) expect(byId[id].persistence).toBe("disallowed")
+    for (const seed of options.registry!.intel!.seeds!) {
+      expect(seed.enabled).toBe(true)
+      expect(seed.adaptive).toEqual({ minMinutes: 15, maxMinutes: 60 })
+    }
   })
-  it.each(["CN-T02", "TH-C01", "PH-C01", "CN-P01", "TH-W01,CN-T02", "ID-W01,TH-C01", "TH-W01,PH-C01", "ID-W01,CN-P01", "TH-C02", "VN-P03", "VN-T01", "ID-T01", "TH-W01,TH-C02", "ID-W01,ID-T01", "XX-K03", "ID-T02", "TH-W01,XX-K03", "ID-W01,ID-T02", "VN-D01", "TH-W01,VN-D01", "XX-K02", "ID-W01,XX-K02", "XX-K01", "TH-W01,XX-K01", "CN-T01", "ID-W01,CN-T01", "MY-C01", "TH-W01,MY-C01", "intel:my-c01", "bounded:MY-C01", "MY-T01", "PH-M01", "ID-W01,MY-T01", "TH-W01,PH-M01", "MY-T01,PH-M01", "intel:my-t01", "intel:ph-m01", "bounded:MY-T01", "bounded:PH-M01", "XX-M01", "XX-M03", "TH-W01,XX-M01", "ID-W01,XX-M03", "XX-M01,XX-M03", "intel:xx-m01", "intel:xx-m03", "bounded:XX-M01", "bounded:XX-M03", "the-loadstar"])("rejects %s with intel_source_selection_invalid", (ids) => {
+  it.each([
+    "CN-T01",
+    "XX-M01",
+    "MY-P02",
+    "MY-P03",
+    "TH-W01,CN-T01",
+    "ID-W01,XX-M01",
+    "XX-M03,XX-M01",
+    "intel:my-c01",
+    "bounded:MY-C01",
+    "intel:xx-m01",
+    "intel:xx-m03",
+    "bounded:XX-M01",
+    "bounded:XX-M03",
+    "the-loadstar",
+  ])("rejects phase-excluded / unknown / alias %s with intel_source_selection_invalid", (ids) => {
     expect(() => productionIntelOptions({ env: { SHIPPING_INTEL_ENABLED: "true", SHIPPING_INTEL_SOURCE_IDS: ids }, dependencies })).toThrow("intel_source_selection_invalid")
   })
   it("disabled production passes explicit empty seeds", () => {
