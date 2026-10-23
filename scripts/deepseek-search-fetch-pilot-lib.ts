@@ -729,37 +729,44 @@ export function finalizeAttempt(
 }
 
 /**
- * Decode stdin key bytes. Windows PowerShell 5.1 often pipes UTF-16LE (with or
- * without BOM) when \System.Text.ASCIIEncoding is Unicode; Node must not treat those NUL
- * bytes as part of the key (that falsely yields preflight_key_format).
- * Does not loosen format rules — only corrects encoding before classify.
+ * Decode stdin key bytes as **strict UTF-8** only (UTF-8 BOM allowed).
+ * No UTF-16 / encoding heuristics: NUL-polluted or non-UTF-8 input is a fixed
+ * format failure — never reinterpreted into a plausible key.
+ * Strips a leading UTF-8 BOM and trims only leading/trailing whitespace (pipe CRLF).
+ * Does not loosen Authorization ByteString rules (interior controls still fail later).
  */
-export function decodeKeyStdinBuffer(buf: Buffer): string {
-  let text: string
-  if (buf.length >= 2 && buf[0] === 0xFF && buf[1] === 0xFE) {
-    text = buf.toString("utf16le")
-  } else if (buf.length >= 2 && buf[0] === 0xFE && buf[1] === 0xFF) {
-    // UTF-16BE BOM (rare); swap to LE then decode
-    const swapped = Buffer.from(buf)
-    swapped.swap16()
-    text = swapped.toString("utf16le")
-  } else if (looksLikeUtf16LeAsciiKey(buf)) {
-    text = buf.toString("utf16le")
-  } else {
-    text = buf.toString("utf8")
+export type KeyStdinDecodeResult =
+  | { ok: true, key: string }
+  | { ok: false }
+
+export function decodeKeyStdinBuffer(buf: Buffer): KeyStdinDecodeResult {
+  // Raw NUL => reject (typical of UTF-16LE pipes). Do not reinterpret.
+  for (let i = 0; i < buf.length; i += 1) {
+    if (buf[i] === 0x00) return { ok: false }
   }
-  return text.replace(/^\uFEFF/, "").trim()
+  let offset = 0
+  if (buf.length >= 3 && buf[0] === 0xEF && buf[1] === 0xBB && buf[2] === 0xBF) {
+    offset = 3
+  }
+  let text: string
+  try {
+    text = new TextDecoder("utf-8", { fatal: true }).decode(buf.subarray(offset))
+  } catch {
+    return { ok: false }
+  }
+  // Defense: decoded NUL (should not appear if raw scan passed)
+  if (text.includes("\u0000")) return { ok: false }
+  const key = text.replace(/^\uFEFF/, "").trim()
+  return { ok: true, key }
 }
 
-/** Heuristic: even-length buffer whose code units are mostly ASCII (high byte 0). */
-function looksLikeUtf16LeAsciiKey(buf: Buffer): boolean {
-  if (buf.length < 4 || buf.length % 2 !== 0) return false
-  const pairs = buf.length / 2
-  let asciiUnits = 0
-  for (let i = 0; i < buf.length; i += 2) {
-    if (buf[i + 1] === 0x00 && buf[i]! >= 0x01 && buf[i]! <= 0x7F) asciiUnits += 1
+/** Thrown when stdin bytes are not strict UTF-8 / contain NUL. Message is fixed code only. */
+export class KeyStdinDecodeError extends Error {
+  readonly code = "preflight_key_format" as const
+  constructor() {
+    super("preflight_key_format")
+    this.name = "KeyStdinDecodeError"
   }
-  return asciiUnits >= Math.ceil(pairs * 0.8)
 }
 
 export async function readKeyFromStdin(): Promise<string | undefined> {
@@ -768,8 +775,9 @@ export async function readKeyFromStdin(): Promise<string | undefined> {
   for await (const chunk of process.stdin) {
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
   }
-  const text = decodeKeyStdinBuffer(Buffer.concat(chunks))
-  return text.length > 0 ? text : undefined
+  const decoded = decodeKeyStdinBuffer(Buffer.concat(chunks))
+  if (!decoded.ok) throw new KeyStdinDecodeError()
+  return decoded.key.length > 0 ? decoded.key : undefined
 }
 
 /**

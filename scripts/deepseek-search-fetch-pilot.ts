@@ -6,6 +6,7 @@ import process from "node:process"
 import { resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import {
+  KeyStdinDecodeError,
   parsePilotArgs,
   printHelp,
   resolveExecuteKey,
@@ -36,7 +37,17 @@ async function main(): Promise<void> {
       process.exitCode = 2
       return
     }
-    const key = await resolveExecuteKey({ keyFromStdin: true })
+    let key: string | undefined
+    try {
+      key = await resolveExecuteKey({ keyFromStdin: true })
+    } catch (error) {
+      if (error instanceof KeyStdinDecodeError) {
+        console.log("preflight_key_format")
+        process.exitCode = 3
+        return
+      }
+      throw error
+    }
     const code = runPreflightKeyRequest(key)
     console.log(code)
     process.exitCode = code === "preflight_ok" ? 0 : 3
@@ -64,6 +75,11 @@ async function main(): Promise<void> {
 const moduleUrl = import.meta.url
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === moduleUrl) {
   void main().catch((error: unknown) => {
+    if (error instanceof KeyStdinDecodeError) {
+      console.error("preflight_key_format")
+      process.exitCode = 3
+      return
+    }
     const message = error instanceof Error ? error.message : String(error)
     console.error(sanitizePilotText(message))
     process.exitCode = 1

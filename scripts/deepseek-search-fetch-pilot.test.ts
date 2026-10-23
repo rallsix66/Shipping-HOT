@@ -13,6 +13,7 @@ import {
   BUDGET_MILLI_CNY,
   FIRST_ROUND_FETCH_TARGETS,
   FIRST_ROUND_SEARCH_QUERIES,
+  KeyStdinDecodeError,
   MAX_ATTEMPTS_PER_CAPABILITY,
   PILOT_ID,
   PILOT_LEDGER_FILENAME,
@@ -957,32 +958,50 @@ describe("default HTTP adapter via global fetch stub (no injectedFetcher)", () =
   })
 })
 
-describe("decodeKeyStdinBuffer (PS 5.1 UTF-16LE pipe vs UTF-8)", () => {
+describe("decodeKeyStdinBuffer (strict UTF-8 only)", () => {
   const fake = "sk-abcdefghijklmnopqrstuvwxyz123456"
 
-  it("accepts UTF-8 and UTF-8 BOM + CRLF", () => {
-    expect(decodeKeyStdinBuffer(Buffer.from(fake, "utf8"))).toBe(fake)
+  it("accepts UTF-8 and UTF-8 BOM + trailing CRLF", () => {
+    expect(decodeKeyStdinBuffer(Buffer.from(fake, "utf8"))).toEqual({ ok: true, key: fake })
     const withBomChar = `\uFEFF${fake}\r\n`
-    expect(decodeKeyStdinBuffer(Buffer.from(withBomChar, "utf8"))).toBe(fake)
+    expect(decodeKeyStdinBuffer(Buffer.from(withBomChar, "utf8"))).toEqual({ ok: true, key: fake })
     const bom = Buffer.concat([
       Buffer.from([0xEF, 0xBB, 0xBF]),
       Buffer.from(`${fake}\r\n`, "utf8"),
     ])
-    expect(decodeKeyStdinBuffer(bom)).toBe(fake)
+    expect(decodeKeyStdinBuffer(bom)).toEqual({ ok: true, key: fake })
   })
 
-  it("accepts UTF-16LE with and without BOM (PS OutputEncoding=Unicode)", () => {
+  it("rejects UTF-16LE (with or without BOM) as format failure — no reinterpret", () => {
     const le = Buffer.from(`${fake}\r\n`, "utf16le")
-    expect(decodeKeyStdinBuffer(le)).toBe(fake)
+    expect(decodeKeyStdinBuffer(le)).toEqual({ ok: false })
     const bomLe = Buffer.concat([
       Buffer.from([0xFF, 0xFE]),
       Buffer.from(`${fake}\r\n`, "utf16le"),
     ])
-    expect(decodeKeyStdinBuffer(bomLe)).toBe(fake)
+    expect(decodeKeyStdinBuffer(bomLe)).toEqual({ ok: false })
   })
 
-  it("still leaves embedded controls for format gate (does not strip interior newline)", () => {
-    expect(decodeKeyStdinBuffer(Buffer.from("sk-ab\ncd", "utf8"))).toBe("sk-ab\ncd")
+  it("rejects raw NUL, invalid UTF-8, and odd truncated multi-byte tails", () => {
+    expect(decodeKeyStdinBuffer(Buffer.from([0x73, 0x00, 0x6B]))).toEqual({ ok: false })
+    // orphan continuation / overlong-ish invalid sequence
+    expect(decodeKeyStdinBuffer(Buffer.from([0x80, 0x61]))).toEqual({ ok: false })
+    expect(decodeKeyStdinBuffer(Buffer.from([0xE2, 0x82]))).toEqual({ ok: false }) // truncated 3-byte
+  })
+
+  it("trims pipe whitespace but leaves interior newline for the format gate", () => {
+    expect(decodeKeyStdinBuffer(Buffer.from("  sk-ab\ncd  \r\n", "utf8"))).toEqual({
+      ok: true,
+      key: "sk-ab\ncd",
+    })
+    expect(runPreflightKeyRequest("sk-ab\ncd")).toBe("preflight_key_format")
+  })
+
+  it("keyStdinDecodeError message is fixed code only (no raw bytes)", () => {
+    const err = new KeyStdinDecodeError()
+    expect(err.message).toBe("preflight_key_format")
+    expect(err.code).toBe("preflight_key_format")
+    expect(JSON.stringify(err)).not.toMatch(/sk-|\\x00|Bearer/)
   })
 })
 
