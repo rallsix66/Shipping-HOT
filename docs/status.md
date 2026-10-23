@@ -1,9 +1,9 @@
-## 2026-10-23 DeepSeek Search/Fetch 增强采集（**仅方案待审**，dots 1792724533.820219）
+## 2026-10-23 DeepSeek Search/Fetch 合同修正 + 默认关闭第一片（dots `1792725183.066059`）
 
-- 用户同意用 DeepSeek Search/Fetch 增强自动情报采集；**本轮只改方案/ADR/状态说明**，审核通过前不实装、不调付费 API、不配置真实密钥、不启源。
-- 方案：[`docs/plans/r2-deepseek-search-fetch-2026-10-23.md`](plans/r2-deepseek-search-fetch-2026-10-23.md)；Proposed ADR：[`docs/adr/ADR-011-deepseek-search-fetch-intel-assist.md`](adr/ADR-011-deepseek-search-fetch-intel-assist.md)。
-- 要点：Search→候选审核（发现/栏目迁移/临时公告），不自动注册/启用/抬 R2/确认事件；稳定 RSS/天气不绕经；Fetch=第三方 Markdown 适配器，不冒充本机 DNS/IP/跳转与 rawBody；按次计费与翻译 token 预算分离；默认关闭；仓库**尚无** Search/Fetch 预算实现（须新增，不假称已有）。
-- R2-4 **28/39**、R2-5 **25/34** 不变；生产允许选择 19 ≠ 启用；CN-T01/XX-M01 门槛保持；R3/24h/合并部署不在此次授权。
+- 方向认可基线 `a9ae16d`；同一授权内先修正方案三点，再落地默认关闭、离线可测最小接入；不另等用户批准；不联系 Guyang。
+- 合同三点：①硬预算发送前原子预留（复用 `receipts` BEGIN IMMEDIATE / pending / unknown；`decidePaidBudget`  alone 不足）；②`third_party_markdown` 为 provenance 非 contentScope，删除 disallowed Markdown 存证例外，回执/缓存/日志无正文；③删除安全拒绝后预览绕行；Search 缓存键=规范化 query+参数+策略版本。
+- 方案：[`docs/plans/r2-deepseek-search-fetch-2026-10-23.md`](plans/r2-deepseek-search-fetch-2026-10-23.md)；ADR：[`docs/adr/ADR-011-deepseek-search-fetch-intel-assist.md`](adr/ADR-011-deepseek-search-fetch-intel-assist.md)。
+- 实现：`server/providers/deepseek/search-fetch-client.ts`、`server/intel/discovery/{deepseek-search-fetch-policy,candidate-trim,search-fetch-service}.ts` + 离线测试。零 schema 迁移。真实付费/启源/R3/24h/合并部署仍未授权。R2 28/39、25/34 与允许选择 19≠启用、CN-T01/XX-M01 不变。
 
 ## 2026-10-23 R2 生产允许选择扩展（阶段，dots 1792719565.465609）
 

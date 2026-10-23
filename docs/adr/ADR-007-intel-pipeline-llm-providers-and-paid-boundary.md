@@ -3,7 +3,7 @@
 - Date: 2026-10-09
 - Status: **Accepted (user sign-off 2026-10-09)**
 - Decision owners: User
-- Related: ADR-008 (external fetch/embeddings sources); **ADR-011 Proposed** (DeepSeek Search/Fetch assist, not chat translation); active plan §4–§5; `docs/intel-source-catalog.md`
+- Related: ADR-008 (external fetch/embeddings sources); **ADR-011 Accepted-for-slice-1** (DeepSeek Search/Fetch assist, not chat translation); active plan §4–§5; `docs/intel-source-catalog.md`
 - Schema baseline before intel migrations: **v13** (article content); **v14** is R1 vessel retirement (`014-retire-vessel-voyage`). Intel and ops tables begin at **`015-*` and upward**, one migration per approved slice (R1.5/R2/R3…), additive and idempotent.
 
 ## Context

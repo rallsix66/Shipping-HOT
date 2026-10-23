@@ -645,5 +645,5 @@ LLM 月成本 ≈ 日均新条目 × 30 ×（预筛单价 + 通过率 × 抽取�
 | 11 | SCFI 运价 | **不接入**（用户决定） | 2026-09-30 |
 ## 待审增补：DeepSeek Search/Fetch 采集辅助（2026-10-23）
 
-- 状态：**方案待审**（非本计划已批准范围的自动授权）。详见 [`r2-deepseek-search-fetch-2026-10-23.md`](r2-deepseek-search-fetch-2026-10-23.md) 与 Proposed [`ADR-011`](../adr/ADR-011-deepseek-search-fetch-intel-assist.md)。
-- 不改变本计划 R2-4/R2-5 分子分母口径；不授权无头浏览器；不把 Search/Fetch 算作已有 R2-3 token 回执的同一计费语义。
+- 状态：**合同已修正；第一片默认关闭离线接入已在同一授权内实施**（dots `1792725183.066059`）。详见 [`r2-deepseek-search-fetch-2026-10-23.md`](r2-deepseek-search-fetch-2026-10-23.md) 与 [`ADR-011`](../adr/ADR-011-deepseek-search-fetch-intel-assist.md)。
+- 不改变本计划 R2-4/R2-5 计数与父门槛；不把 Search/Fetch 按次 CNY 与 R2-3 token 预算混为同一计费账户。真实启源/付费实测/合并部署仍须另授权。
