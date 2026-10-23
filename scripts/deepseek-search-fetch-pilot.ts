@@ -10,6 +10,7 @@ import {
   printHelp,
   resolveExecuteKey,
   runPilot,
+  runPreflightKeyRequest,
   sanitizePilotText,
   summaryForStdout,
 } from "./deepseek-search-fetch-pilot-lib"
@@ -21,6 +22,24 @@ async function main(): Promise<void> {
   const args = parsePilotArgs(process.argv.slice(2))
   if (args.help) {
     printHelp()
+    return
+  }
+  // Explicit-only preflight: never implicit, never chains into paid execute.
+  if (args.preflightKeyRequest) {
+    if (args.execute) {
+      console.error("preflight_incompatible_with_execute")
+      process.exitCode = 2
+      return
+    }
+    if (!args.keyFromStdin) {
+      console.error("preflight_requires_key_from_stdin")
+      process.exitCode = 2
+      return
+    }
+    const key = await resolveExecuteKey({ keyFromStdin: true })
+    const code = runPreflightKeyRequest(key)
+    console.log(code)
+    process.exitCode = code === "preflight_ok" ? 0 : 3
     return
   }
   const mode = args.execute ? "execute" : "plan"

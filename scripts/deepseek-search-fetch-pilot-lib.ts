@@ -34,7 +34,11 @@ import {
 } from "#/intel/discovery/search-fetch-service"
 import { initShippingTables } from "#/database/shipping"
 import type { SecretStore } from "#/providers/contracts"
-import type { InjectedFetcher } from "#/providers/deepseek/search-fetch-client"
+import {
+  type InjectedFetcher,
+  type PreflightResultCode,
+  preflightKeyAndDefaultSearchRequest,
+} from "#/providers/deepseek/search-fetch-client"
 
 export const PILOT_ID = "ds-pilot-2026-10-23-r1" as const
 export const PILOT_DIR_RELATIVE = ".tmp/deepseek-pilot-2026-10-23"
@@ -738,6 +742,16 @@ export async function readKeyFromStdin(): Promise<string | undefined> {
  * Execute key source: stdin only (SecureString → pipe on Windows).
  * No interactive Read-Host inside Node (conflicts with -NonInteractive hosts).
  */
+/**
+ * Explicit preflight only: key format + default Search Request construct.
+ * Zero fetch, zero DB, zero attempt, zero credential persistence.
+ * Returns fixed codes only (no key length/fingerprint/Request object).
+ * Does not attribute past unknown receipts; diagnostic aid for a future attempt only.
+ */
+export function runPreflightKeyRequest(apiKey: string | undefined): PreflightResultCode {
+  return preflightKeyAndDefaultSearchRequest(apiKey)
+}
+
 export async function resolveExecuteKey(opts: {
   keyFromStdin: boolean
   readKey?: () => Promise<string | undefined>
@@ -1182,10 +1196,12 @@ export interface CliArgs {
   help: boolean
   execute: boolean
   keyFromStdin: boolean
+  /** Explicit-only: key format + native Request construct. Never default/implicit. */
+  preflightKeyRequest: boolean
 }
 
 export function parsePilotArgs(argv: string[]): CliArgs {
-  const out: CliArgs = { help: false, execute: false, keyFromStdin: false }
+  const out: CliArgs = { help: false, execute: false, keyFromStdin: false, preflightKeyRequest: false }
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]!
     if (arg === "--help" || arg === "-h") {
@@ -1194,6 +1210,8 @@ export function parsePilotArgs(argv: string[]): CliArgs {
       out.execute = true
     } else if (arg === "--key-from-stdin") {
       out.keyFromStdin = true
+    } else if (arg === "--preflight-key-request") {
+      out.preflightKeyRequest = true
     } else if (arg === "--dry-run" || arg === "--plan-only") {
       out.execute = false
     } else if (arg === "--ledger" || arg === "--paid-db" || arg === "--pilot-id" || arg === "--cwd") {
@@ -1215,7 +1233,8 @@ export function printHelp(): void {
     "",
     "Flags:",
     "  --execute          Allow outbound after atomic attempt reserve (requires --key-from-stdin)",
-    "  --key-from-stdin   Read API key once from stdin (required with --execute)",
+    "  --key-from-stdin   Read API key once from stdin (required with --execute or --preflight-key-request)",
+    "  --preflight-key-request  Explicit-only: key header format + native Request construct; no fetch/DB/attempt/paid",
     "  --plan-only|--dry-run  Force plan mode (default)",
     "",
     "Forbidden (isolation contract): --ledger, --paid-db, --pilot-id, --cwd",

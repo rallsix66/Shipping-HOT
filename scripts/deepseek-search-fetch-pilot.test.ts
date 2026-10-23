@@ -31,6 +31,7 @@ import {
   reserveAttempt,
   resolveFixedPilotPaths,
   runPilot,
+  runPreflightKeyRequest,
   sanitizePilotText,
   searchOperationKey,
   spawnReserveOnce,
@@ -854,7 +855,7 @@ describe("default HTTP adapter via global fetch stub (no injectedFetcher)", () =
     }
   })
 
-  it("underlying fetch throw maps to request_failed/unknown and backfills receiptId", async () => {
+  it("underlying fetch TypeError maps to transport_param/unknown and backfills receiptId", async () => {
     const paidDbPath = freshPaidDb("throw")
     const { calls } = installOutboundHangThenStub(() => {
       throw new TypeError("synthetic_transport_boom")
@@ -867,7 +868,8 @@ describe("default HTTP adapter via global fetch stub (no injectedFetcher)", () =
       expect(out.ok).toBe(false)
       expect(out.unknown).toBe(true)
       expect(out.errorCode).toBe("DeepSeekToolsOutcomeUnknownError")
-      expect(out.detail).toBe("request_failed")
+      // TypeError is whitelisted as transport_param (still OutcomeUnknown; retry/fees unchanged)
+      expect(out.detail).toBe("transport_param")
       expect(out.receiptId).toBeTruthy()
       expect(calls).toHaveLength(1)
       expect(calls[0]?.url).toBe(expectedSearchUrl)
@@ -875,7 +877,7 @@ describe("default HTTP adapter via global fetch stub (no injectedFetcher)", () =
       const row = readReceipt(paidDbPath, attemptId)
       expect(row?.id).toBe(out.receiptId)
       expect(row?.status).toBe("unknown")
-      expect(row?.error).toBe("request_failed")
+      expect(row?.error).toBe("transport_param")
     } finally {
       live.dispose()
       secrets.clear()
@@ -915,7 +917,7 @@ describe("default HTTP adapter via global fetch stub (no injectedFetcher)", () =
     }
   })
 
-  it("adapter sync throw while reading status/ok after fetch resolves still becomes request_failed", async () => {
+  it("adapter sync TypeError while reading status/ok still becomes transport_param/unknown", async () => {
     const paidDbPath = freshPaidDb("adapt-sync")
     const { calls } = installOutboundHangThenStub(() => {
       // Not a real Response: default adapter accesses .status/.ok after await fetch(...)
@@ -939,16 +941,72 @@ describe("default HTTP adapter via global fetch stub (no injectedFetcher)", () =
       expect(out.ok).toBe(false)
       expect(out.unknown).toBe(true)
       expect(out.errorCode).toBe("DeepSeekToolsOutcomeUnknownError")
-      expect(out.detail).toBe("request_failed")
+      expect(out.detail).toBe("transport_param")
       expect(out.receiptId).toBeTruthy()
       expect(calls).toHaveLength(1)
       const row = readReceipt(paidDbPath, attemptId)
       expect(row?.status).toBe("unknown")
-      expect(row?.error).toBe("request_failed")
+      expect(row?.error).toBe("transport_param")
       expect(row?.id).toBe(out.receiptId)
     } finally {
       live.dispose()
       secrets.clear()
     }
+  })
+})
+
+describe("explicit preflight-key-request (no fetch / no DB / no attempt)", () => {
+  it("parsePilotArgs defaults preflight off; flag is explicit only", () => {
+    expect(parsePilotArgs([]).preflightKeyRequest).toBe(false)
+    expect(parsePilotArgs(["--plan-only"]).preflightKeyRequest).toBe(false)
+    expect(parsePilotArgs(["--execute", "--key-from-stdin"]).preflightKeyRequest).toBe(false)
+    expect(parsePilotArgs(["--preflight-key-request", "--key-from-stdin"]).preflightKeyRequest).toBe(true)
+  })
+
+  it("runs with global fetch poisoned and never opens pilot DBs; zero fetch hits", () => {
+    const hits = { fetch: 0 }
+    const originalFetch = globalThis.fetch
+    globalThis.fetch = (async () => {
+      hits.fetch += 1
+      throw new Error("FETCH_MUST_NOT_RUN")
+    }) as typeof globalThis.fetch
+    cleanups.push(() => {
+      globalThis.fetch = originalFetch
+    })
+
+    const trapName = isolationName("preflight-trap")
+    const trapDir = join(REPO_ROOT, ".tmp", trapName)
+    mkdirSync(trapDir, { recursive: true })
+    // Poison paths that createLiveOutbound / openPilotLedger would use if preflight leaked.
+    const poisonOpen = () => {
+      hits.fetch += 1000
+      throw new Error("DB_MUST_NOT_OPEN")
+    }
+    const ledgerPath = join(trapDir, "pilot-attempt-ledger.sqlite3")
+    const paidPath = join(trapDir, "pilot-paid.sqlite3")
+
+    const code = runPreflightKeyRequest("sk-test-preflight-ok-fake")
+    expect(code).toBe("preflight_ok")
+    expect(hits.fetch).toBe(0)
+    expect(existsSync(ledgerPath)).toBe(false)
+    expect(existsSync(paidPath)).toBe(false)
+    // Prove open would fail if touched (constructor throw), without opening real pilot DBs.
+    expect(() => {
+      poisonOpen()
+    }).toThrow(/DB_MUST_NOT_OPEN/)
+    expect(hits.fetch).toBe(1000)
+  })
+
+  it("returns fixed format/missing codes only (no key length/fingerprint)", () => {
+    expect(runPreflightKeyRequest(undefined)).toBe("preflight_key_missing")
+    expect(runPreflightKeyRequest("sk-bad\nkey")).toBe("preflight_key_format")
+    expect(runPreflightKeyRequest("sk-bad-假key")).toBe("preflight_key_format")
+    const dumped = JSON.stringify({
+      a: runPreflightKeyRequest("sk-test-preflight-ok-fake"),
+      b: runPreflightKeyRequest("sk-bad\nkey"),
+    })
+    expect(dumped).not.toMatch(/length|fingerprint|Bearer |Request/)
+    expect(dumped).toContain("preflight_ok")
+    expect(dumped).toContain("preflight_key_format")
   })
 })

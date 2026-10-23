@@ -174,11 +174,19 @@ function mapHttpError(status: number): never {
   throw new ProviderRejectedError(code, status, false)
 }
 
-/** Fixed unknown codes allowed through transport catch — always rebuilt, never rethrown. */
-const TRANSPORT_OUTCOME_CODES = new Set([
-  "request_aborted",
-  "request_failed",
-])
+/**
+ * Fixed transport/unknown outcome codes. Classification is diagnostic only for a
+ * future attempt: it never releases unknown budget, never changes retry rules,
+ * and never claims to explain a past receipt. Never store raw message/stack/URL/headers/cause.
+ */
+export type TransportOutcomeCode =
+  | "request_aborted"
+  | "request_failed"
+  | "transport_param"
+  | "transport_cert"
+  | "transport_dns"
+  | "transport_connect"
+  | "transport_timeout"
 
 /** Fixed unknown codes allowed through readText catch — always rebuilt, never rethrown. */
 const READ_OUTCOME_CODES = new Set([
@@ -187,10 +195,86 @@ const READ_OUTCOME_CODES = new Set([
   "response_read_failed",
 ])
 
+/** Whitelist: error.code / one-level cause.code → fixed class. No message inspection. */
+const TRANSPORT_CLASS_BY_CODE: Readonly<Record<string, TransportOutcomeCode>> = {
+  request_aborted: "request_aborted",
+  request_failed: "request_failed",
+  transport_param: "transport_param",
+  transport_cert: "transport_cert",
+  transport_dns: "transport_dns",
+  transport_connect: "transport_connect",
+  transport_timeout: "transport_timeout",
+  ENOTFOUND: "transport_dns",
+  EAI_AGAIN: "transport_dns",
+  ECONNREFUSED: "transport_connect",
+  ECONNRESET: "transport_connect",
+  ECONNABORTED: "transport_connect",
+  ENETUNREACH: "transport_connect",
+  EHOSTUNREACH: "transport_connect",
+  EPIPE: "transport_connect",
+  ETIMEDOUT: "transport_timeout",
+  UND_ERR_CONNECT_TIMEOUT: "transport_timeout",
+  UND_ERR_HEADERS_TIMEOUT: "transport_timeout",
+  UND_ERR_BODY_TIMEOUT: "transport_timeout",
+  UND_ERR_SOCKET: "transport_connect",
+  CERT_HAS_EXPIRED: "transport_cert",
+  UNABLE_TO_VERIFY_LEAF_SIGNATURE: "transport_cert",
+  DEPTH_ZERO_SELF_SIGNED_CERT: "transport_cert",
+  ERR_TLS_CERT_ALTNAME_INVALID: "transport_cert",
+  ERR_SSL_WRONG_VERSION_NUMBER: "transport_cert",
+  ERR_INVALID_URL: "transport_param",
+  ERR_INVALID_ARG_TYPE: "transport_param",
+  ERR_INVALID_ARG_VALUE: "transport_param",
+  ERR_INVALID_CHAR: "transport_param",
+}
+
+/** Whitelist: error.name only → fixed class. No message inspection. */
+const TRANSPORT_CLASS_BY_NAME: Readonly<Record<string, TransportOutcomeCode>> = {
+  AbortError: "request_aborted",
+  TimeoutError: "transport_timeout",
+  TypeError: "transport_param",
+}
+
 function readErrorCode(error: unknown): string | null {
   if (error == null || typeof error !== "object") return null
   const code = (error as { code?: unknown }).code
   return typeof code === "string" ? code : null
+}
+
+function readErrorName(error: unknown): string | null {
+  if (error == null || typeof error !== "object") return null
+  const name = (error as { name?: unknown }).name
+  return typeof name === "string" ? name : null
+}
+
+function readCauseCode(error: unknown): string | null {
+  if (error == null || typeof error !== "object") return null
+  const cause = (error as { cause?: unknown }).cause
+  if (cause == null || typeof cause !== "object") return null
+  const code = (cause as { code?: unknown }).code
+  return typeof code === "string" ? code : null
+}
+
+/**
+ * Map transport failure to a fixed OutcomeUnknown code.
+ * Uses only whitelisted name / code / one-level cause.code — never message/stack/URL/headers/cause body.
+ * Still always OutcomeUnknown (unknown budget retained; retry rules unchanged).
+ */
+export function classifyTransportOutcomeCode(error: unknown, signal?: AbortSignal): TransportOutcomeCode {
+  if (signal?.aborted) return "request_aborted"
+  const code = readErrorCode(error)
+  if (code && Object.prototype.hasOwnProperty.call(TRANSPORT_CLASS_BY_CODE, code)) {
+    return TRANSPORT_CLASS_BY_CODE[code]!
+  }
+  const causeCode = readCauseCode(error)
+  if (causeCode && Object.prototype.hasOwnProperty.call(TRANSPORT_CLASS_BY_CODE, causeCode)) {
+    return TRANSPORT_CLASS_BY_CODE[causeCode]!
+  }
+  const name = readErrorName(error)
+  if (name && Object.prototype.hasOwnProperty.call(TRANSPORT_CLASS_BY_NAME, name)) {
+    return TRANSPORT_CLASS_BY_NAME[name]!
+  }
+  return "request_failed"
 }
 
 /**
@@ -198,12 +282,59 @@ function readErrorCode(error: unknown): string | null {
  * Rebuild OutcomeUnknown from a fixed whitelist only.
  */
 function remapTransportError(error: unknown, signal?: AbortSignal): never {
-  if (signal?.aborted) throw new DeepSeekToolsOutcomeUnknownError("request_aborted")
-  const code = readErrorCode(error)
-  if (code && TRANSPORT_OUTCOME_CODES.has(code)) {
-    throw new DeepSeekToolsOutcomeUnknownError(code)
+  throw new DeepSeekToolsOutcomeUnknownError(classifyTransportOutcomeCode(error, signal))
+}
+
+export type PreflightResultCode =
+  | "preflight_ok"
+  | "preflight_key_missing"
+  | "preflight_key_format"
+  | "preflight_request_construct_failed"
+
+/**
+ * Key header-format gate only (no length/fingerprint returned).
+ * Rejects empty, ASCII controls, and non-ByteString code points that break Authorization.
+ */
+export function classifyApiKeyHeaderFormat(apiKey: string): "ok" | "preflight_key_format" {
+  if (typeof apiKey !== "string" || apiKey.length === 0) return "preflight_key_format"
+  for (let i = 0; i < apiKey.length; i += 1) {
+    const c = apiKey.charCodeAt(i)
+    if (c <= 0x1F || c === 0x7F || c > 0xFF) return "preflight_key_format"
   }
-  throw new DeepSeekToolsOutcomeUnknownError("request_failed")
+  return "ok"
+}
+
+/** Real default Search URL + init used by postJson (no localization). Does not call fetch. */
+export function buildDefaultSearchRequestInit(apiKey: string, query = "preflight"): { url: string, init: RequestInit } {
+  return {
+    url: `${DEEPSEEK_TOOLS_BASE}${DEEPSEEK_SEARCH_PATH}`,
+    init: {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({ query, count: 10, need_content: false }),
+      signal: AbortSignal.abort(),
+    },
+  }
+}
+
+/**
+ * Construct native Request with default Search params. Never fetches.
+ * Returns fixed codes only — never the Request, never key length/fingerprint.
+ */
+export function preflightKeyAndDefaultSearchRequest(apiKey: string | undefined): PreflightResultCode {
+  if (apiKey == null || apiKey === "") return "preflight_key_missing"
+  if (classifyApiKeyHeaderFormat(apiKey) !== "ok") return "preflight_key_format"
+  try {
+    const { url, init } = buildDefaultSearchRequestInit(apiKey)
+    void new Request(url, init)
+    return "preflight_ok"
+  } catch {
+    return "preflight_request_construct_failed"
+  }
 }
 
 function remapReadTextError(error: unknown, signal?: AbortSignal): never {

@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest"
 import {
+  DEEPSEEK_SEARCH_PATH,
+  DEEPSEEK_TOOLS_BASE,
   DeepSeekToolsClientError,
   DeepSeekToolsOutcomeUnknownError,
   type InjectedFetcher,
   assertPublicHttpUrl,
+  buildDefaultSearchRequestInit,
+  classifyTransportOutcomeCode,
   deepSeekFetch,
   deepSeekSearch,
   normalizeHostname,
+  preflightKeyAndDefaultSearchRequest,
   staticReadText,
 } from "./search-fetch-client"
 import { ProviderRejectedError } from "#/intel/llm/receipts"
@@ -197,5 +202,87 @@ describe("typed error sanitization (no instanceof passthrough)", () => {
     await expect(deepSeekSearch({ query: "x" }, { apiKey: "k", fetcher: fetcherTooLarge }))
       .rejects
       .toMatchObject({ code: "response_too_large", message: "response_too_large" })
+  })
+})
+
+describe("native Request construct with default Search params (pre-network)", () => {
+  it("constructs successfully for a normal fake key", () => {
+    const key = "sk-test-default-request-normal"
+    const { url, init } = buildDefaultSearchRequestInit(key, "preflight-normal")
+    expect(url).toBe(`${DEEPSEEK_TOOLS_BASE}${DEEPSEEK_SEARCH_PATH}`)
+    const req = new Request(url, init)
+    expect(req.method).toBe("POST")
+    expect(req.url).toBe(url)
+    expect(preflightKeyAndDefaultSearchRequest(key)).toBe("preflight_ok")
+  })
+
+  it("fails before network for non-ASCII fake key (ByteString)", () => {
+    const key = "sk-test-假key-café"
+    const { url, init } = buildDefaultSearchRequestInit(key)
+    expect(() => new Request(url, init)).toThrow(TypeError)
+    expect(preflightKeyAndDefaultSearchRequest(key)).toBe("preflight_key_format")
+  })
+
+  it("fails before network for newline/control fake keys", () => {
+    const newlineKey = "sk-test-fake\nkey"
+    const crKey = "sk-test-fake\rkey"
+    const nullKey = "sk-test-fake\0key"
+    for (const key of [newlineKey, crKey, nullKey]) {
+      const { url, init } = buildDefaultSearchRequestInit(key)
+      expect(() => new Request(url, init)).toThrow(TypeError)
+      expect(preflightKeyAndDefaultSearchRequest(key)).toBe("preflight_key_format")
+    }
+  })
+
+  it("returns fixed missing code without constructing", () => {
+    expect(preflightKeyAndDefaultSearchRequest(undefined)).toBe("preflight_key_missing")
+    expect(preflightKeyAndDefaultSearchRequest("")).toBe("preflight_key_missing")
+  })
+})
+
+describe("transport outcome classification (whitelist name/code/cause.code only)", () => {
+  it("maps code and one-level cause.code to fixed classes without leaking message", () => {
+    const poison = "Bearer sk-LEAK https://evil.example ECONNRESET secret"
+    const withCode = Object.assign(new Error(poison), { code: "ECONNRESET" })
+    expect(classifyTransportOutcomeCode(withCode)).toBe("transport_connect")
+    const wrapped = new Error(poison)
+    Object.assign(wrapped, { cause: Object.assign(new Error(poison), { code: "ENOTFOUND" }) })
+    expect(classifyTransportOutcomeCode(wrapped)).toBe("transport_dns")
+    const cert = Object.assign(new Error(poison), { code: "CERT_HAS_EXPIRED" })
+    expect(classifyTransportOutcomeCode(cert)).toBe("transport_cert")
+    const timeout = Object.assign(new Error(poison), { code: "ETIMEDOUT" })
+    expect(classifyTransportOutcomeCode(timeout)).toBe("transport_timeout")
+  })
+
+  it("maps whitelisted names only; unknown stays request_failed", () => {
+    expect(classifyTransportOutcomeCode(new TypeError("Cannot convert argument to a ByteString"))).toBe("transport_param")
+    const te = new Error("timeout")
+    te.name = "TimeoutError"
+    expect(classifyTransportOutcomeCode(te)).toBe("transport_timeout")
+    expect(classifyTransportOutcomeCode(new Error("ECONNRESET https://evil Bearer sk-X"))).toBe("request_failed")
+  })
+
+  it("deepSeekSearch surfaces classified code as OutcomeUnknown without raw message", async () => {
+    const poison = "ECONNRESET https://evil.example Bearer sk-LEAKED_CLASSIFY"
+    const fetcher: InjectedFetcher = async () => {
+      throw Object.assign(new Error(poison), { code: "ECONNRESET" })
+    }
+    await expect(deepSeekSearch({ query: "x" }, { apiKey: "k", fetcher }))
+      .rejects
+      .toMatchObject({
+        name: "DeepSeekToolsOutcomeUnknownError",
+        code: "transport_connect",
+        message: "transport_connect",
+      })
+  })
+
+  it("does not walk cause deeper than one level", () => {
+    const deep = new Error("outer")
+    Object.assign(deep, {
+      cause: {
+        cause: Object.assign(new Error("inner"), { code: "ENOTFOUND" }),
+      },
+    })
+    expect(classifyTransportOutcomeCode(deep)).toBe("request_failed")
   })
 })
