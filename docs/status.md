@@ -1,3 +1,10 @@
+## 2026-10-23 — DeepSeek Search/Fetch 错误脱敏白名单收口（默认关闭）
+
+- 基线 94a71bc → 本修补 tip；仍 policyVersion `ds-sf-v1.2-2026-10-23`。
+- client transport/readText 不再 `instanceof` 原样透传：按固定 code 白名单重建 `OutcomeUnknown`，丢弃原 message/cause；未知码 → `request_failed` / `response_read_failed`。
+- 补 typed poison（假密钥/URL/正文）→ receipt+attempt 双表负例；保留 abort / too_large / HTTP 状态语义。
+- 仍默认关闭；未启源、未真实 API/密钥；不联系 Guyang。日志：`.tmp/logs/deepseek-search-fetch-gapfix3-2026-10-23/`。
+
 ## 2026-10-23 — DeepSeek Search/Fetch 三缺口合并修补 v1.2（默认关闭）
 
 - 基线 efd1e005 → 本修补 tip；policyVersion `ds-sf-v1.2-2026-10-23`。

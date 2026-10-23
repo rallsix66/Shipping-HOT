@@ -31,6 +31,7 @@ import type { SecretStore } from "#/providers/contracts"
 import { PaidGateError, ReceiptUnknownError } from "#/intel/llm/receipts"
 import {
   DEEPSEEK_TOOLS_BASE,
+  DeepSeekToolsClientError,
   DeepSeekToolsOutcomeUnknownError,
   type InjectedFetcher,
   staticReadText,
@@ -44,7 +45,7 @@ function isUnknownOutcome(error: unknown): boolean {
 
 const T0 = new Date("2026-10-23T03:00:00.000Z")
 const PLACEHOLDER_KEY = "test-placeholder-not-a-real-key"
-const TMP_ROOT = join(process.cwd(), ".tmp", "deepseek-search-fetch-gapfix2-2026-10-23")
+const TMP_ROOT = join(process.cwd(), ".tmp", "deepseek-search-fetch-gapfix3-2026-10-23")
 mkdirSync(TMP_ROOT, { recursive: true })
 
 const cleanups: Array<() => void> = []
@@ -914,6 +915,81 @@ describe("contract gapfix2: exception codes / URL bind / cancel / stream cap", (
       },
     }), { status: 200 })
     await expect(readResponseBodyLimited(small, maxBytes)).resolves.toBe("ok-body")
+  })
+})
+
+describe("contract gapfix3: typed-error sanitization dual-table", () => {
+  it("transport typed OutcomeUnknown with poison message books fixed code only (receipt + attempt)", async () => {
+    const { db, native } = await setup()
+    const poison = `Bearer ${PLACEHOLDER_KEY} https://evil.example/leak body=SECRET_DOC`
+    const { state, fetcher } = mockFetcher(async () => {
+      const err = new DeepSeekToolsOutcomeUnknownError("request_failed")
+      Object.defineProperty(err, "message", { value: poison, configurable: true })
+      throw err
+    })
+    await expect(runDeepSeekSearch(baseConfig(db, {
+      monthlyBudgetSearch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
+      fetcher,
+    }), { query: "typed-transport", purpose: "slice1_test", subject: "typed-transport" }))
+      .rejects
+      .toSatisfy(isUnknownOutcome)
+    const row = native.prepare("SELECT id, status, error, request, response FROM paid_receipt WHERE subject = ?").get("typed-transport") as {
+      id: string
+      status: string
+      error: string | null
+      request: string | null
+      response: string | null
+    }
+    expect(row.status).toBe("unknown")
+    expect(row.error).toBe("request_failed")
+    const attempt = native.prepare("SELECT status, error FROM paid_receipt_attempt WHERE receipt_id = ?").get(row.id) as {
+      status: string
+      error: string | null
+    }
+    expect(attempt.status).toBe("unknown")
+    expect(attempt.error).toBe("request_failed")
+    const blob = `${row.error}${row.request}${row.response}${attempt.error}`
+    expect(blob).not.toMatch(/Bearer |evil\.example|SECRET_DOC|PLACEHOLDER|test-placeholder/)
+    expect(containsSecretLike(blob, PLACEHOLDER_KEY)).toBe(false)
+    expect(state.hits).toBe(1)
+  })
+
+  it("readText typed ClientError with poison message books response_read_failed only (receipt + attempt)", async () => {
+    const { db, native } = await setup()
+    const poison = `Bearer ${PLACEHOLDER_KEY} https://evil.example/read body=SECRET_READ`
+    const { state, fetcher } = mockFetcher(async () => ({
+      status: 200,
+      ok: true,
+      headers: { get: () => null },
+      readText: async () => {
+        throw new DeepSeekToolsClientError("invalid_schema", poison)
+      },
+    }))
+    await expect(runDeepSeekSearch(baseConfig(db, {
+      monthlyBudgetSearch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
+      fetcher,
+    }), { query: "typed-read", purpose: "slice1_test", subject: "typed-read" }))
+      .rejects
+      .toSatisfy(isUnknownOutcome)
+    const row = native.prepare("SELECT id, status, error, request, response FROM paid_receipt WHERE subject = ?").get("typed-read") as {
+      id: string
+      status: string
+      error: string | null
+      request: string | null
+      response: string | null
+    }
+    expect(row.status).toBe("unknown")
+    expect(row.error).toBe("response_read_failed")
+    const attempt = native.prepare("SELECT status, error FROM paid_receipt_attempt WHERE receipt_id = ?").get(row.id) as {
+      status: string
+      error: string | null
+    }
+    expect(attempt.status).toBe("unknown")
+    expect(attempt.error).toBe("response_read_failed")
+    const blob = `${row.error}${row.request}${row.response}${attempt.error}`
+    expect(blob).not.toMatch(/Bearer |evil\.example|SECRET_READ|PLACEHOLDER|test-placeholder/)
+    expect(containsSecretLike(blob, PLACEHOLDER_KEY)).toBe(false)
+    expect(state.hits).toBe(1)
   })
 })
 

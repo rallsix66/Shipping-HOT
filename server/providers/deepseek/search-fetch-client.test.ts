@@ -145,3 +145,57 @@ describe("transport error mapping", () => {
       .toMatchObject({ name: "DeepSeekToolsOutcomeUnknownError", code: "request_failed", message: "request_failed" })
   })
 })
+
+describe("typed error sanitization (no instanceof passthrough)", () => {
+  it("rebuilds poisoned OutcomeUnknown from transport without keeping message", async () => {
+    const poison = "Bearer sk-FAKE_TRANSPORT https://evil.example/body"
+    // Overwrite message after construct (simulates forged / mutated typed error).
+    const boom = new DeepSeekToolsOutcomeUnknownError("request_failed")
+    Object.defineProperty(boom, "message", { value: poison, configurable: true })
+    const fetcher2: InjectedFetcher = async () => {
+      throw boom
+    }
+    await expect(deepSeekSearch({ query: "x" }, { apiKey: "k", fetcher: fetcher2 }))
+      .rejects
+      .toMatchObject({ name: "DeepSeekToolsOutcomeUnknownError", code: "request_failed", message: "request_failed" })
+
+    const weird = new DeepSeekToolsOutcomeUnknownError("not_a_real_code")
+    Object.defineProperty(weird, "message", { value: poison, configurable: true })
+    const fetcher3: InjectedFetcher = async () => {
+      throw weird
+    }
+    await expect(deepSeekSearch({ query: "x" }, { apiKey: "k", fetcher: fetcher3 }))
+      .rejects
+      .toMatchObject({ code: "request_failed", message: "request_failed" })
+  })
+
+  it("rebuilds poisoned ClientError/OutcomeUnknown from readText without keeping message", async () => {
+    const poison = "Bearer sk-FAKE_READ https://evil.example/ article-body-secret"
+    const fetcher: InjectedFetcher = async () => ({
+      status: 200,
+      ok: true,
+      headers: { get: () => null },
+      readText: async () => {
+        const err = new DeepSeekToolsClientError("invalid_schema", poison)
+        throw err
+      },
+    })
+    await expect(deepSeekSearch({ query: "x" }, { apiKey: "k", fetcher }))
+      .rejects
+      .toMatchObject({ name: "DeepSeekToolsOutcomeUnknownError", code: "response_read_failed", message: "response_read_failed" })
+
+    const fetcherTooLarge: InjectedFetcher = async () => ({
+      status: 200,
+      ok: true,
+      headers: { get: () => null },
+      readText: async () => {
+        const err = new DeepSeekToolsOutcomeUnknownError("response_too_large")
+        Object.defineProperty(err, "message", { value: poison, configurable: true })
+        throw err
+      },
+    })
+    await expect(deepSeekSearch({ query: "x" }, { apiKey: "k", fetcher: fetcherTooLarge }))
+      .rejects
+      .toMatchObject({ code: "response_too_large", message: "response_too_large" })
+  })
+})

@@ -174,6 +174,47 @@ function mapHttpError(status: number): never {
   throw new ProviderRejectedError(code, status, false)
 }
 
+/** Fixed unknown codes allowed through transport catch — always rebuilt, never rethrown. */
+const TRANSPORT_OUTCOME_CODES = new Set([
+  "request_aborted",
+  "request_failed",
+])
+
+/** Fixed unknown codes allowed through readText catch — always rebuilt, never rethrown. */
+const READ_OUTCOME_CODES = new Set([
+  "request_aborted",
+  "response_too_large",
+  "response_read_failed",
+])
+
+function readErrorCode(error: unknown): string | null {
+  if (error == null || typeof error !== "object") return null
+  const code = (error as { code?: unknown }).code
+  return typeof code === "string" ? code : null
+}
+
+/**
+ * Never rethrow typed errors as-is: code/message/cause may carry secrets.
+ * Rebuild OutcomeUnknown from a fixed whitelist only.
+ */
+function remapTransportError(error: unknown, signal?: AbortSignal): never {
+  if (signal?.aborted) throw new DeepSeekToolsOutcomeUnknownError("request_aborted")
+  const code = readErrorCode(error)
+  if (code && TRANSPORT_OUTCOME_CODES.has(code)) {
+    throw new DeepSeekToolsOutcomeUnknownError(code)
+  }
+  throw new DeepSeekToolsOutcomeUnknownError("request_failed")
+}
+
+function remapReadTextError(error: unknown, signal?: AbortSignal): never {
+  if (signal?.aborted) throw new DeepSeekToolsOutcomeUnknownError("request_aborted")
+  const code = readErrorCode(error)
+  if (code && READ_OUTCOME_CODES.has(code)) {
+    throw new DeepSeekToolsOutcomeUnknownError(code)
+  }
+  throw new DeepSeekToolsOutcomeUnknownError("response_read_failed")
+}
+
 async function postJson(
   fetcher: InjectedFetcher,
   path: string,
@@ -198,24 +239,14 @@ async function postJson(
       signal: options.signal,
     })
   } catch (error) {
-    // Never persist/rethrow arbitrary transport text (URL, Bearer, upstream).
-    if (error instanceof DeepSeekToolsOutcomeUnknownError) throw error
-    if (options.signal?.aborted) {
-      throw new DeepSeekToolsOutcomeUnknownError("request_aborted")
-    }
-    throw new DeepSeekToolsOutcomeUnknownError("request_failed")
+    // Never rethrow: typed errors may carry arbitrary code/message/cause.
+    remapTransportError(error, options.signal)
   }
   let text: string
   try {
     text = await response.readText(maxBytes, options.signal)
   } catch (error) {
-    if (error instanceof DeepSeekToolsClientError || error instanceof DeepSeekToolsOutcomeUnknownError) throw error
-    if (options.signal?.aborted) throw new DeepSeekToolsOutcomeUnknownError("request_aborted")
-    const message = error instanceof Error ? error.message : ""
-    if (message.includes("response_too_large") || (error as { code?: string })?.code === "response_too_large") {
-      throw new DeepSeekToolsOutcomeUnknownError("response_too_large")
-    }
-    throw new DeepSeekToolsOutcomeUnknownError("response_read_failed")
+    remapReadTextError(error, options.signal)
   }
   if (!response.ok) {
     // Drain happened; never pass body into the rejection message.

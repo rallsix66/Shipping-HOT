@@ -7,7 +7,8 @@ export const DEEPSEEK_SEARCH_FETCH_CURRENCY = "CNY" as const
 export const DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY = 0.005 as const
 /**
  * Cache / identity policy version — bump when request normalization or trim rules change.
- * v1.2: fixed transport error codes; targetReview bound to input.url; pre-send cancel non-billing.
+ * v1.2: fixed transport error codes; targetReview bound to input.url; pre-send cancel non-billing;
+ * typed-error whitelist remap (no instanceof passthrough of message/cause).
  */
 export const DEEPSEEK_SEARCH_FETCH_POLICY_VERSION = "ds-sf-v1.2-2026-10-23" as const
 /** Product default: Search need_content=false. */
