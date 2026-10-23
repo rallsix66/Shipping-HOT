@@ -232,7 +232,9 @@ const TRANSPORT_CLASS_BY_CODE: Readonly<Record<string, TransportOutcomeCode>> = 
 const TRANSPORT_CLASS_BY_NAME: Readonly<Record<string, TransportOutcomeCode>> = {
   AbortError: "request_aborted",
   TimeoutError: "transport_timeout",
-  TypeError: "transport_param",
+  // TypeError intentionally omitted: undici/fetch network failures often surface as
+  // TypeError too, so name-alone must not imply transport_param. Param stays via
+  // ERR_INVALID_* codes (and Request construct is covered by preflight separately).
 }
 
 function readErrorCode(error: unknown): string | null {

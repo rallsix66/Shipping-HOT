@@ -254,11 +254,15 @@ describe("transport outcome classification (whitelist name/code/cause.code only)
     expect(classifyTransportOutcomeCode(timeout)).toBe("transport_timeout")
   })
 
-  it("maps whitelisted names only; unknown stays request_failed", () => {
-    expect(classifyTransportOutcomeCode(new TypeError("Cannot convert argument to a ByteString"))).toBe("transport_param")
+  it("maps whitelisted names only; TypeError stays request_failed (not param)", () => {
+    // Fetch network failures can also be TypeError — do not attribute param from name alone.
+    expect(classifyTransportOutcomeCode(new TypeError("Cannot convert argument to a ByteString"))).toBe("request_failed")
+    expect(classifyTransportOutcomeCode(new TypeError("fetch failed"))).toBe("request_failed")
     const te = new Error("timeout")
     te.name = "TimeoutError"
     expect(classifyTransportOutcomeCode(te)).toBe("transport_timeout")
+    // Param still via whitelisted code, not name:
+    expect(classifyTransportOutcomeCode(Object.assign(new TypeError("bad"), { code: "ERR_INVALID_CHAR" }))).toBe("transport_param")
     expect(classifyTransportOutcomeCode(new Error("ECONNRESET https://evil Bearer sk-X"))).toBe("request_failed")
   })
 

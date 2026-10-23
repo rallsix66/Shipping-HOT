@@ -855,7 +855,7 @@ describe("default HTTP adapter via global fetch stub (no injectedFetcher)", () =
     }
   })
 
-  it("underlying fetch TypeError maps to transport_param/unknown and backfills receiptId", async () => {
+  it("underlying fetch TypeError maps to request_failed/unknown and backfills receiptId", async () => {
     const paidDbPath = freshPaidDb("throw")
     const { calls } = installOutboundHangThenStub(() => {
       throw new TypeError("synthetic_transport_boom")
@@ -868,8 +868,8 @@ describe("default HTTP adapter via global fetch stub (no injectedFetcher)", () =
       expect(out.ok).toBe(false)
       expect(out.unknown).toBe(true)
       expect(out.errorCode).toBe("DeepSeekToolsOutcomeUnknownError")
-      // TypeError is whitelisted as transport_param (still OutcomeUnknown; retry/fees unchanged)
-      expect(out.detail).toBe("transport_param")
+      // TypeError alone is neutral request_failed (fetch network failures also use TypeError)
+      expect(out.detail).toBe("request_failed")
       expect(out.receiptId).toBeTruthy()
       expect(calls).toHaveLength(1)
       expect(calls[0]?.url).toBe(expectedSearchUrl)
@@ -877,7 +877,7 @@ describe("default HTTP adapter via global fetch stub (no injectedFetcher)", () =
       const row = readReceipt(paidDbPath, attemptId)
       expect(row?.id).toBe(out.receiptId)
       expect(row?.status).toBe("unknown")
-      expect(row?.error).toBe("transport_param")
+      expect(row?.error).toBe("request_failed")
     } finally {
       live.dispose()
       secrets.clear()
@@ -917,7 +917,7 @@ describe("default HTTP adapter via global fetch stub (no injectedFetcher)", () =
     }
   })
 
-  it("adapter sync TypeError while reading status/ok still becomes transport_param/unknown", async () => {
+  it("adapter sync TypeError while reading status/ok still becomes request_failed/unknown", async () => {
     const paidDbPath = freshPaidDb("adapt-sync")
     const { calls } = installOutboundHangThenStub(() => {
       // Not a real Response: default adapter accesses .status/.ok after await fetch(...)
@@ -941,12 +941,12 @@ describe("default HTTP adapter via global fetch stub (no injectedFetcher)", () =
       expect(out.ok).toBe(false)
       expect(out.unknown).toBe(true)
       expect(out.errorCode).toBe("DeepSeekToolsOutcomeUnknownError")
-      expect(out.detail).toBe("transport_param")
+      expect(out.detail).toBe("request_failed")
       expect(out.receiptId).toBeTruthy()
       expect(calls).toHaveLength(1)
       const row = readReceipt(paidDbPath, attemptId)
       expect(row?.status).toBe("unknown")
-      expect(row?.error).toBe("transport_param")
+      expect(row?.error).toBe("request_failed")
       expect(row?.id).toBe(out.receiptId)
     } finally {
       live.dispose()
@@ -963,7 +963,11 @@ describe("explicit preflight-key-request (no fetch / no DB / no attempt)", () =>
     expect(parsePilotArgs(["--preflight-key-request", "--key-from-stdin"]).preflightKeyRequest).toBe(true)
   })
 
-  it("runs with global fetch poisoned and never opens pilot DBs; zero fetch hits", () => {
+  it("static branch: fetch-poisoned + no pilot DB files created (no DB ctor hook)", () => {
+    // Honesty bound: this does NOT stub better-sqlite3 / NativeDatabase.
+    // runPreflightKeyRequest is pure (key format + Request construct only); it has no
+    // DB dependency. We prove: poisoned global fetch gets zero hits, and no ledger/paid
+    // files appear under an isolated trap dir (preflight never mkdir/opens them).
     const hits = { fetch: 0 }
     const originalFetch = globalThis.fetch
     globalThis.fetch = (async () => {
@@ -977,11 +981,6 @@ describe("explicit preflight-key-request (no fetch / no DB / no attempt)", () =>
     const trapName = isolationName("preflight-trap")
     const trapDir = join(REPO_ROOT, ".tmp", trapName)
     mkdirSync(trapDir, { recursive: true })
-    // Poison paths that createLiveOutbound / openPilotLedger would use if preflight leaked.
-    const poisonOpen = () => {
-      hits.fetch += 1000
-      throw new Error("DB_MUST_NOT_OPEN")
-    }
     const ledgerPath = join(trapDir, "pilot-attempt-ledger.sqlite3")
     const paidPath = join(trapDir, "pilot-paid.sqlite3")
 
@@ -990,11 +989,6 @@ describe("explicit preflight-key-request (no fetch / no DB / no attempt)", () =>
     expect(hits.fetch).toBe(0)
     expect(existsSync(ledgerPath)).toBe(false)
     expect(existsSync(paidPath)).toBe(false)
-    // Prove open would fail if touched (constructor throw), without opening real pilot DBs.
-    expect(() => {
-      poisonOpen()
-    }).toThrow(/DB_MUST_NOT_OPEN/)
-    expect(hits.fetch).toBe(1000)
   })
 
   it("returns fixed format/missing codes only (no key length/fingerprint)", () => {
