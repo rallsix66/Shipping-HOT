@@ -2,6 +2,7 @@
  * Offline mock + synthetic-HTTP tests for DeepSeek Search/Fetch pilot hard-gate.
  * Temp ledgers under project `.tmp`; never reads real secrets or live network.
  */
+import { Buffer } from "node:buffer"
 import { randomBytes } from "node:crypto"
 import { type Stats, existsSync, lstatSync, mkdirSync, rmSync, statSync, symlinkSync } from "node:fs"
 import { join } from "node:path"
@@ -23,6 +24,7 @@ import {
   countAttempts,
   createLiveOutbound,
   createMemorySecretStore,
+  decodeKeyStdinBuffer,
   finalizeAttempt,
   lstatExistingEntry,
   openPilotLedger,
@@ -952,6 +954,35 @@ describe("default HTTP adapter via global fetch stub (no injectedFetcher)", () =
       live.dispose()
       secrets.clear()
     }
+  })
+})
+
+describe("decodeKeyStdinBuffer (PS 5.1 UTF-16LE pipe vs UTF-8)", () => {
+  const fake = "sk-abcdefghijklmnopqrstuvwxyz123456"
+
+  it("accepts UTF-8 and UTF-8 BOM + CRLF", () => {
+    expect(decodeKeyStdinBuffer(Buffer.from(fake, "utf8"))).toBe(fake)
+    const withBomChar = `\uFEFF${fake}\r\n`
+    expect(decodeKeyStdinBuffer(Buffer.from(withBomChar, "utf8"))).toBe(fake)
+    const bom = Buffer.concat([
+      Buffer.from([0xEF, 0xBB, 0xBF]),
+      Buffer.from(`${fake}\r\n`, "utf8"),
+    ])
+    expect(decodeKeyStdinBuffer(bom)).toBe(fake)
+  })
+
+  it("accepts UTF-16LE with and without BOM (PS OutputEncoding=Unicode)", () => {
+    const le = Buffer.from(`${fake}\r\n`, "utf16le")
+    expect(decodeKeyStdinBuffer(le)).toBe(fake)
+    const bomLe = Buffer.concat([
+      Buffer.from([0xFF, 0xFE]),
+      Buffer.from(`${fake}\r\n`, "utf16le"),
+    ])
+    expect(decodeKeyStdinBuffer(bomLe)).toBe(fake)
+  })
+
+  it("still leaves embedded controls for format gate (does not strip interior newline)", () => {
+    expect(decodeKeyStdinBuffer(Buffer.from("sk-ab\ncd", "utf8"))).toBe("sk-ab\ncd")
   })
 })
 
