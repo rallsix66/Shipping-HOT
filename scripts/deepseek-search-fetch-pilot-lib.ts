@@ -12,7 +12,7 @@
  */
 import { Buffer } from "node:buffer"
 import { createHash, randomUUID } from "node:crypto"
-import { existsSync, lstatSync, mkdirSync, realpathSync, statSync } from "node:fs"
+import { type Stats, existsSync, lstatSync, mkdirSync, realpathSync, statSync } from "node:fs"
 import { dirname, join, resolve, sep } from "node:path"
 import process from "node:process"
 import { spawn } from "node:child_process"
@@ -126,6 +126,8 @@ export type MemorySecretStore = SecretStore & {
   peekConfigured: () => boolean
 }
 
+export type PilotLstat = (path: string) => Stats
+
 export interface PilotOptions {
   mode: "plan" | "execute"
   /** Absolute project root (directory that contains `scripts/` and `.tmp/`). */
@@ -143,6 +145,8 @@ export interface PilotOptions {
    */
   testIsolationName?: string
   now?: () => Date
+  /** Test-only lstat override for dangling-link probes. Requires testIsolationName. */
+  lstat?: PilotLstat
 }
 
 export interface PilotOpResult {
@@ -221,10 +225,48 @@ export function normalizeProjectRoot(projectRoot: string): string {
 }
 
 /**
+ * lstat a path entry without following links.
+ * - ENOENT → null (absent)
+ * - symbolic link (dangling or not) → refuse
+ * - any other lstat error → fail closed
+ */
+export function lstatExistingEntry(
+  path: string,
+  label: string,
+  lstat: PilotLstat = lstatSync,
+): Stats | null {
+  try {
+    const st = lstat(path)
+    if (st.isSymbolicLink()) {
+      throw new Error(`pilot_symlink_refused:${label}`)
+    }
+    return st
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("pilot_symlink_refused:")) {
+      throw error
+    }
+    const err = error as NodeJS.ErrnoException
+    if (err?.code === "ENOENT") return null
+    throw new Error(`path_lstat_failed:${label}:${err?.code ?? "unknown"}`)
+  }
+}
+
+export interface ResolveFixedPilotPathsOptions {
+  /** Test-only lstat override (e.g. dangling-link probe). Never wired from CLI. */
+  lstat?: PilotLstat
+}
+
+/**
  * Resolve fixed pilot DB paths under projectRoot/.tmp/deepseek-pilot-2026-10-23/.
  * Optional testIsolationName replaces the fixed round dir name but must stay under .tmp/.
+ * Directory entries are probed with lstat (not existsSync) so dangling symlinks cannot skip checks.
  */
-export function resolveFixedPilotPaths(projectRoot: string, testIsolationName?: string): FixedPilotPaths {
+export function resolveFixedPilotPaths(
+  projectRoot: string,
+  testIsolationName?: string,
+  options?: ResolveFixedPilotPathsOptions,
+): FixedPilotPaths {
+  const lstat = options?.lstat ?? lstatSync
   const root = normalizeProjectRoot(projectRoot)
   if (testIsolationName !== undefined) {
     if (!/^[\w.-]{1,128}$/.test(testIsolationName)) {
@@ -235,44 +277,49 @@ export function resolveFixedPilotPaths(projectRoot: string, testIsolationName?: 
     }
   }
   const relDir = testIsolationName ? join(".tmp", testIsolationName) : PILOT_DIR_RELATIVE
-  const pilotDir = resolve(root, relDir)
-  const tmpRoot = resolve(root, ".tmp")
-  // Parent .tmp must be inside project (create allowed later only on execute open).
-  const plannedTmp = tmpRoot
-  const plannedPilot = pilotDir
+  const plannedPilot = resolve(root, relDir)
+  const plannedTmp = resolve(root, ".tmp")
   if (!plannedPilot.startsWith(`${plannedTmp}${sep}`) && plannedPilot !== plannedTmp) {
     throw new Error(`pilot_dir_escapes_tmp:${plannedPilot}`)
   }
   if (!plannedPilot.startsWith(`${root}${sep}`)) {
     throw new Error(`pilot_dir_escapes_project:${plannedPilot}`)
   }
-  // If dirs already exist, verify realpath cannot escape via symlink.
-  if (existsSync(plannedTmp)) {
+
+  const tmpEntry = lstatExistingEntry(plannedTmp, "tmp", lstat)
+  if (tmpEntry && !tmpEntry.isDirectory()) {
+    throw new Error(`tmp_not_directory:${plannedTmp}`)
+  }
+  if (tmpEntry) {
     const realTmp = realPathSafe(plannedTmp)
     if (!realTmp.startsWith(`${root}${sep}`) && realTmp !== root) {
       throw new Error(`tmp_realpath_escapes_project:${realTmp}`)
     }
   }
-  if (existsSync(plannedPilot)) {
-    const realPilot = realPathSafe(plannedPilot)
-    const realTmp = existsSync(plannedTmp) ? realPathSafe(plannedTmp) : plannedTmp
+
+  const pilotEntry = lstatExistingEntry(plannedPilot, "pilot_dir", lstat)
+  if (pilotEntry && !pilotEntry.isDirectory()) {
+    throw new Error(`pilot_dir_not_directory:${plannedPilot}`)
+  }
+  let realPilot = plannedPilot
+  if (pilotEntry) {
+    realPilot = realPathSafe(plannedPilot)
+    const realTmp = tmpEntry ? realPathSafe(plannedTmp) : plannedTmp
     if (!realPilot.startsWith(`${realTmp}${sep}`) && realPilot !== realTmp) {
       throw new Error(`pilot_realpath_escapes_tmp:${realPilot}`)
     }
-    // Refuse if ledger/paid already exist as links to paths outside pilot dir.
-    for (const name of [PILOT_LEDGER_FILENAME, PILOT_PAID_DB_FILENAME]) {
-      const p = join(plannedPilot, name)
-      if (!existsSync(p)) continue
-      const link = lstatSync(p)
-      if (link.isSymbolicLink()) {
-        throw new Error(`pilot_db_symlink_refused:${name}`)
-      }
-      const realDb = realPathSafe(p)
-      if (!realDb.startsWith(`${realPilot}${sep}`) && dirname(realDb) !== realPilot) {
-        throw new Error(`pilot_db_realpath_escapes:${name}`)
-      }
+  }
+
+  for (const name of [PILOT_LEDGER_FILENAME, PILOT_PAID_DB_FILENAME]) {
+    const p = join(plannedPilot, name)
+    const entry = lstatExistingEntry(p, name, lstat)
+    if (!entry) continue
+    const realDb = realPathSafe(p)
+    if (!realDb.startsWith(`${realPilot}${sep}`) && dirname(realDb) !== realPilot) {
+      throw new Error(`pilot_db_realpath_escapes:${name}`)
     }
   }
+
   return {
     projectRoot: root,
     pilotDir: plannedPilot,
@@ -282,6 +329,9 @@ export function resolveFixedPilotPaths(projectRoot: string, testIsolationName?: 
 }
 
 export function assertTestIsolationAllowed(options: PilotOptions): void {
+  if (options.lstat && !options.testIsolationName) {
+    throw new Error("lstat_override_requires_test_isolation")
+  }
   if (!options.testIsolationName) return
   if (options.outbound || options.injectedFetcher) return
   throw new Error("test_isolation_requires_mock_or_injected_fetcher")
@@ -840,7 +890,7 @@ function restoredOp(
 export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
   assertUnitCostAligned()
   assertTestIsolationAllowed(options)
-  const paths = resolveFixedPilotPaths(options.projectRoot, options.testIsolationName)
+  const paths = resolveFixedPilotPaths(options.projectRoot, options.testIsolationName, { lstat: options.lstat })
   const pilotId = PILOT_ID
   const searchQueries = [...(options.searchQueries ?? FIRST_ROUND_SEARCH_QUERIES)]
   const fetchTargets = [...(options.fetchTargets ?? FIRST_ROUND_FETCH_TARGETS)]

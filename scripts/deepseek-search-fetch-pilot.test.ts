@@ -3,23 +3,26 @@
  * Temp ledgers under project `.tmp`; never reads real secrets or live network.
  */
 import { randomBytes } from "node:crypto"
-import { existsSync, mkdirSync, rmSync, statSync } from "node:fs"
+import { type Stats, existsSync, lstatSync, mkdirSync, rmSync, statSync, symlinkSync } from "node:fs"
 import { join } from "node:path"
 import process from "node:process"
-import { afterEach, describe, expect, it } from "vitest"
+import { type TestContext, afterEach, describe, expect, it } from "vitest"
 import {
   BUDGET_MILLI_CNY,
   FIRST_ROUND_FETCH_TARGETS,
   FIRST_ROUND_SEARCH_QUERIES,
   MAX_ATTEMPTS_PER_CAPABILITY,
   PILOT_ID,
+  PILOT_LEDGER_FILENAME,
   type PilotFetchTarget,
+  type PilotLstat,
   type PilotOutbound,
   UNIT_COST_MILLI_CNY,
   assertTestIsolationAllowed,
   countAttempts,
   createMemorySecretStore,
   finalizeAttempt,
+  lstatExistingEntry,
   openPilotLedger,
   parsePilotArgs,
   readPilotLedgerSnapshot,
@@ -116,6 +119,28 @@ function mockFetcher(handler: (url: string) => ReturnType<InjectedFetcher> | Pro
     return handler(url)
   }
   return { state, fetcher }
+}
+
+function symlinkStats(): Stats {
+  return {
+    isSymbolicLink: () => true,
+    isDirectory: () => false,
+    isFile: () => false,
+  } as Stats
+}
+
+/** Injected lstat that reports DB path(s) as symlinks (dangling: lstat ok, existsSync would be false). */
+function danglingDbLstat(
+  paths: { ledgerPath: string, paidDbPath: string },
+  which: "ledger" | "paid" | "both" = "both",
+): PilotLstat {
+  return (p: string) => {
+    const s = String(p)
+    const hitLedger = which !== "paid" && s === paths.ledgerPath
+    const hitPaid = which !== "ledger" && s === paths.paidDbPath
+    if (hitLedger || hitPaid) return symlinkStats()
+    return lstatSync(p)
+  }
 }
 
 const searchHitBody = {
@@ -566,5 +591,107 @@ describe("deepseek-search-fetch-pilot attempt hard gate", () => {
     expect(summary.ops[0]?.outcome).toBe("failed")
     expect(summary.exitCode).toBe(4)
     expect(summary.fetchAttempts).toBe(1)
+  })
+
+  it("refuses dangling ledger symlink via lstat with zero key/DB/HTTP", async () => {
+    const name = isolationName("dangling-ledger")
+    const paths = resolveFixedPilotPaths(REPO_ROOT, name)
+    const fake = danglingDbLstat(paths, "ledger")
+    expect(() => lstatExistingEntry(paths.ledgerPath, PILOT_LEDGER_FILENAME, fake)).toThrow(
+      /pilot_symlink_refused/,
+    )
+    expect(() => resolveFixedPilotPaths(REPO_ROOT, name, { lstat: fake })).toThrow(
+      /pilot_symlink_refused:pilot-attempt-ledger/,
+    )
+    const tracker = { search: [] as string[], fetch: [] as string[] }
+    let keyReads = 0
+    await expect(
+      runPilot({
+        mode: "execute",
+        projectRoot: REPO_ROOT,
+        testIsolationName: name,
+        outbound: mockOutbound({ tracker }),
+        lstat: fake,
+        readKey: async () => {
+          keyReads += 1
+          return "sk-should-not-be-read"
+        },
+      }),
+    ).rejects.toThrow(/pilot_symlink_refused/)
+    expect(keyReads).toBe(0)
+    expect(tracker.search).toEqual([])
+    expect(tracker.fetch).toEqual([])
+    expect(existsSync(paths.ledgerPath)).toBe(false)
+    expect(existsSync(paths.paidDbPath)).toBe(false)
+  })
+
+  it("refuses dangling paid DB symlink the same way", async () => {
+    const name = isolationName("dangling-paid")
+    const paths = resolveFixedPilotPaths(REPO_ROOT, name)
+    const fake = danglingDbLstat(paths, "paid")
+    expect(() => resolveFixedPilotPaths(REPO_ROOT, name, { lstat: fake })).toThrow(
+      /pilot_symlink_refused:pilot-paid/,
+    )
+    const tracker = { search: [] as string[], fetch: [] as string[] }
+    let keyReads = 0
+    await expect(
+      runPilot({
+        mode: "execute",
+        projectRoot: REPO_ROOT,
+        testIsolationName: name,
+        outbound: mockOutbound({ tracker }),
+        lstat: fake,
+        readKey: async () => {
+          keyReads += 1
+          return "sk-should-not-be-read"
+        },
+      }),
+    ).rejects.toThrow(/pilot_symlink_refused/)
+    expect(keyReads).toBe(0)
+    expect(tracker.search).toEqual([])
+    expect(existsSync(paths.ledgerPath)).toBe(false)
+    expect(existsSync(paths.paidDbPath)).toBe(false)
+  })
+
+  it("fail-closed on non-ENOENT lstat errors for DB paths", () => {
+    const name = isolationName("lstat-eacces")
+    const paths = resolveFixedPilotPaths(REPO_ROOT, name)
+    const boom: PilotLstat = (p) => {
+      if (String(p) === paths.ledgerPath) {
+        const err = new Error("denied") as NodeJS.ErrnoException
+        err.code = "EACCES"
+        throw err
+      }
+      return lstatSync(p)
+    }
+    expect(() => resolveFixedPilotPaths(REPO_ROOT, name, { lstat: boom })).toThrow(
+      /path_lstat_failed:pilot-attempt-ledger\.sqlite3:EACCES/,
+    )
+  })
+
+  it("refuses lstat override without test isolation", () => {
+    expect(() => assertTestIsolationAllowed({
+      mode: "plan",
+      projectRoot: REPO_ROOT,
+      lstat: () => symlinkStats(),
+    })).toThrow(/lstat_override_requires_test_isolation/)
+  })
+
+  it("refuses real dangling file symlink when OS allows", (context: TestContext) => {
+    const name = isolationName("dangling-os")
+    const paths = resolveFixedPilotPaths(REPO_ROOT, name)
+    mkdirSync(paths.pilotDir, { recursive: true })
+    const missingTarget = join(paths.pilotDir, "missing-outside-target")
+    try {
+      symlinkSync(missingTarget, paths.ledgerPath)
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error)
+      context.skip(`file symlink unsupported: ${msg}`)
+      return
+    }
+    // Hole: existsSync is false for dangling links and used to skip the check.
+    expect(existsSync(paths.ledgerPath)).toBe(false)
+    expect(() => resolveFixedPilotPaths(REPO_ROOT, name)).toThrow(/pilot_symlink_refused/)
+    expect(existsSync(paths.paidDbPath)).toBe(false)
   })
 })
