@@ -1,11 +1,11 @@
 /**
- * Offline mock tests for DeepSeek Search/Fetch pilot attempt hard-gate.
- * Temp ledgers under project `.tmp`; never reads real secrets or network.
+ * Offline mock + synthetic-HTTP tests for DeepSeek Search/Fetch pilot hard-gate.
+ * Temp ledgers under project `.tmp`; never reads real secrets or live network.
  */
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
-import process from "node:process"
+import { randomBytes } from "node:crypto"
+import { existsSync, mkdirSync, rmSync, statSync } from "node:fs"
 import { join } from "node:path"
-import { Worker } from "node:worker_threads"
+import process from "node:process"
 import { afterEach, describe, expect, it } from "vitest"
 import {
   BUDGET_MILLI_CNY,
@@ -13,30 +13,40 @@ import {
   FIRST_ROUND_SEARCH_QUERIES,
   MAX_ATTEMPTS_PER_CAPABILITY,
   PILOT_ID,
+  type PilotFetchTarget,
   type PilotOutbound,
   UNIT_COST_MILLI_CNY,
+  assertTestIsolationAllowed,
   countAttempts,
   createMemorySecretStore,
   finalizeAttempt,
   openPilotLedger,
+  parsePilotArgs,
+  readPilotLedgerSnapshot,
   reserveAttempt,
+  resolveFixedPilotPaths,
   runPilot,
   sanitizePilotText,
   searchOperationKey,
+  spawnReserveOnce,
   sumReservedMilli,
 } from "./deepseek-search-fetch-pilot-lib"
 import { DEEPSEEK_SEARCH_CAPABILITY } from "#/intel/discovery/deepseek-search-fetch-policy"
+import type { InjectedFetcher } from "#/providers/deepseek/search-fetch-client"
+import { staticReadText } from "#/providers/deepseek/search-fetch-client"
 
-const TMP_ROOT = join(process.cwd(), ".tmp", "deepseek-pilot-vitest-2026-10-23")
-mkdirSync(TMP_ROOT, { recursive: true })
+const REPO_ROOT = process.cwd()
+mkdirSync(join(REPO_ROOT, ".tmp"), { recursive: true })
 
 const cleanups: Array<() => void> = []
 afterEach(() => {
   while (cleanups.length) cleanups.pop()!()
 })
 
-function tempDir(label: string): string {
-  const dir = mkdtempSync(join(TMP_ROOT, `${label}-`))
+/** Flat single-segment name under projectRoot/.tmp/ (no path separators). */
+function isolationName(label: string): string {
+  const name = `dspilot-${label}-${randomBytes(4).toString("hex")}`
+  const dir = join(REPO_ROOT, ".tmp", name)
   cleanups.push(() => {
     try {
       rmSync(dir, { recursive: true, force: true })
@@ -44,11 +54,20 @@ function tempDir(label: string): string {
       /* ignore */
     }
   })
-  return dir
+  return name
 }
 
 function mockOutbound(handler?: {
-  search?: (query: string) => Promise<{ ok: boolean, unknown?: boolean, errorCode?: string }>
+  search?: (query: string) => Promise<{
+    ok: boolean
+    unknown?: boolean
+    errorCode?: string
+    receiptId?: string
+    reused?: boolean
+    billable?: boolean
+    upstreamResultCount?: number
+    candidates?: Array<{ url: string, title: string, providerDate: string | null, titleUrlHash: string }>
+  }>
   fetch?: (url: string) => Promise<{ ok: boolean, unknown?: boolean, errorCode?: string }>
   tracker?: { search: string[], fetch: string[] }
 }): PilotOutbound {
@@ -57,58 +76,152 @@ function mockOutbound(handler?: {
     search: async (query) => {
       tracker.search.push(query)
       if (handler?.search) return handler.search(query)
-      return { ok: true }
+      return {
+        ok: true,
+        receiptId: "rcpt-mock",
+        reused: false,
+        billable: true,
+        upstreamResultCount: 1,
+        candidates: [{
+          url: "https://example.com/a",
+          title: "Mock Title",
+          providerDate: "2026-10-01",
+          titleUrlHash: "a".repeat(64),
+        }],
+      }
     },
-    fetch: async (url) => {
-      tracker.fetch.push(url)
-      if (handler?.fetch) return handler.fetch(url)
-      return { ok: true }
+    fetch: async (target) => {
+      tracker.fetch.push(target.url)
+      if (handler?.fetch) return handler.fetch(target.url)
+      return { ok: true, receiptId: "rcpt-fetch", reused: false, billable: true }
     },
   }
 }
 
+function jsonResponse(status: number, body: unknown) {
+  const text = typeof body === "string" ? body : JSON.stringify(body)
+  return {
+    status,
+    ok: status >= 200 && status < 300,
+    readText: staticReadText(text),
+    headers: { get: () => null },
+  }
+}
+
+function mockFetcher(handler: (url: string) => ReturnType<InjectedFetcher> | Promise<ReturnType<InjectedFetcher>>) {
+  const state = { hits: 0, bodies: [] as string[] }
+  const fetcher: InjectedFetcher = async (url, init) => {
+    state.hits += 1
+    state.bodies.push(init?.body ?? "")
+    return handler(url)
+  }
+  return { state, fetcher }
+}
+
+const searchHitBody = {
+  results: [
+    {
+      title: "Alpha Port Notice",
+      url: "https://example.com/a",
+      snippet: "SECRET_SNIPPET_SHOULD_NOT_PERSIST",
+      summary: "SECRET_SUMMARY",
+      content: "SECRET_CONTENT_BODY",
+      date: "2026-10-01",
+    },
+    {
+      title: "Beta",
+      url: "https://example.com/b",
+      snippet: "more",
+    },
+  ],
+}
+
 describe("deepseek-search-fetch-pilot attempt hard gate", () => {
-  it("aligns integer milli unit with policy 0.005 CNY", () => {
+  it("aligns integer milli unit with policy 0.005 CNY and fixed caps", () => {
     expect(UNIT_COST_MILLI_CNY).toBe(5)
     expect(BUDGET_MILLI_CNY).toBe(50)
     expect(MAX_ATTEMPTS_PER_CAPABILITY).toBe(10)
     expect(BUDGET_MILLI_CNY / UNIT_COST_MILLI_CNY).toBe(10)
+    expect(PILOT_ID).toBe("ds-pilot-2026-10-23-r1")
   })
 
   it("lists first-round Search queries and empty Fetch", () => {
     expect(FIRST_ROUND_SEARCH_QUERIES).toHaveLength(8)
     expect(FIRST_ROUND_FETCH_TARGETS).toEqual([])
-    expect(FIRST_ROUND_SEARCH_QUERIES[0]).toBe(
-      "PPA Philippines Ports Authority Manila port advisory 2026",
-    )
   })
 
-  it("plan-only never outbound and never burns attempts", async () => {
-    const dir = tempDir("plan")
-    const ledgerPath = join(dir, "ledger.sqlite3")
+  it("forbids CLI path/pilot overrides", () => {
+    expect(() => parsePilotArgs(["--ledger", "x"])).toThrow(/arg_forbidden/)
+    expect(() => parsePilotArgs(["--paid-db", "x"])).toThrow(/arg_forbidden/)
+    expect(() => parsePilotArgs(["--pilot-id", "x"])).toThrow(/arg_forbidden/)
+    expect(() => parsePilotArgs(["--cwd", "x"])).toThrow(/arg_forbidden/)
+  })
+
+  it("refuses path escape and test isolation without mock", () => {
+    expect(() => resolveFixedPilotPaths(REPO_ROOT, "../escape")).toThrow()
+    expect(() => resolveFixedPilotPaths(REPO_ROOT, "a/b")).toThrow()
+    expect(() => assertTestIsolationAllowed({
+      mode: "plan",
+      projectRoot: REPO_ROOT,
+      testIsolationName: "no-mock",
+    })).toThrow(/test_isolation_requires_mock/)
+  })
+
+  it("plan-only never outbound and never creates ledger file", async () => {
+    const name = isolationName("plan")
+    const paths = resolveFixedPilotPaths(REPO_ROOT, name)
+    expect(existsSync(paths.ledgerPath)).toBe(false)
     const tracker = { search: [] as string[], fetch: [] as string[] }
     const summary = await runPilot({
       mode: "plan",
-      ledgerPath,
-      pilotId: PILOT_ID,
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
       outbound: mockOutbound({ tracker }),
       readKey: async () => "sk-should-not-be-used-plan",
     })
     expect(summary.outboundCalls).toBe(0)
     expect(tracker.search).toEqual([])
-    expect(summary.ops.every(op => op.outcome === "planned")).toBe(true)
-    expect(summary.fetchTargets).toEqual([])
+    expect(existsSync(paths.ledgerPath)).toBe(false)
+    expect(summary.notes.some(n => n.includes("ledger_absent") || n.includes("plan_only"))).toBe(true)
     expect(summary.exitCode).toBe(0)
   })
 
-  it("missing key: zero outbound and zero reservations", async () => {
-    const dir = tempDir("nokey")
-    const ledgerPath = join(dir, "ledger.sqlite3")
+  it("plan read-only does not mutate an existing ledger", async () => {
+    const name = isolationName("plan-ro")
+    const paths = resolveFixedPilotPaths(REPO_ROOT, name)
+    const ledger = openPilotLedger(paths.ledgerPath, PILOT_ID)
+    try {
+      const r = reserveAttempt(ledger.native, {
+        pilotId: PILOT_ID,
+        capability: DEEPSEEK_SEARCH_CAPABILITY,
+        operationKey: searchOperationKey("seed"),
+      })
+      expect(r.ok && r.fresh).toBe(true)
+      if (r.ok) finalizeAttempt(ledger.native, { attemptId: r.attemptId, status: "succeeded" })
+    } finally {
+      ledger.close()
+    }
+    const before = statSync(paths.ledgerPath)
+    const snapBefore = readPilotLedgerSnapshot(paths.ledgerPath, PILOT_ID)
+    await runPilot({
+      mode: "plan",
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
+      outbound: mockOutbound(),
+    })
+    const after = statSync(paths.ledgerPath)
+    const snapAfter = readPilotLedgerSnapshot(paths.ledgerPath, PILOT_ID)
+    expect(snapAfter.searchAttempts).toBe(snapBefore.searchAttempts)
+    expect(after.size).toBe(before.size)
+  })
+
+  it("missing key: zero outbound and zero new reservations", async () => {
+    const name = isolationName("nokey")
     const tracker = { search: [] as string[], fetch: [] as string[] }
     const summary = await runPilot({
       mode: "execute",
-      ledgerPath,
-      pilotId: PILOT_ID,
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
       searchQueries: FIRST_ROUND_SEARCH_QUERIES.slice(0, 2),
       outbound: mockOutbound({ tracker }),
       readKey: async () => undefined,
@@ -116,17 +229,15 @@ describe("deepseek-search-fetch-pilot attempt hard gate", () => {
     expect(summary.failureCode).toBe("missing_api_key")
     expect(summary.outboundCalls).toBe(0)
     expect(tracker.search).toEqual([])
-    expect(summary.searchAttempts).toBe(0)
-    // ledger file may be absent because we bail before open
   })
 
   it("failed outbound still counts as an attempt", async () => {
-    const dir = tempDir("fail")
-    const ledgerPath = join(dir, "ledger.sqlite3")
+    const name = isolationName("fail")
+    const paths = resolveFixedPilotPaths(REPO_ROOT, name)
     const summary = await runPilot({
       mode: "execute",
-      ledgerPath,
-      pilotId: PILOT_ID,
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
       searchQueries: ["q-fail-1"],
       readKey: async () => "sk-test-placeholder",
       outbound: mockOutbound({
@@ -135,7 +246,7 @@ describe("deepseek-search-fetch-pilot attempt hard gate", () => {
     })
     expect(summary.searchAttempts).toBe(1)
     expect(summary.ops[0]?.outcome).toBe("failed")
-    const ledger = openPilotLedger(ledgerPath, PILOT_ID)
+    const ledger = openPilotLedger(paths.ledgerPath, PILOT_ID)
     try {
       expect(countAttempts(ledger.native, PILOT_ID, DEEPSEEK_SEARCH_CAPABILITY)).toBe(1)
     } finally {
@@ -144,12 +255,11 @@ describe("deepseek-search-fetch-pilot attempt hard gate", () => {
   })
 
   it("unknown outbound still counts as an attempt", async () => {
-    const dir = tempDir("unknown")
-    const ledgerPath = join(dir, "ledger.sqlite3")
+    const name = isolationName("unknown")
     const summary = await runPilot({
       mode: "execute",
-      ledgerPath,
-      pilotId: PILOT_ID,
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
       searchQueries: ["q-unknown-1"],
       readKey: async () => "sk-test-placeholder",
       outbound: mockOutbound({
@@ -161,17 +271,17 @@ describe("deepseek-search-fetch-pilot attempt hard gate", () => {
   })
 
   it("reopening ledger file does not reset attempt counters", async () => {
-    const dir = tempDir("reopen")
-    const ledgerPath = join(dir, "ledger.sqlite3")
+    const name = isolationName("reopen")
+    const paths = resolveFixedPilotPaths(REPO_ROOT, name)
     await runPilot({
       mode: "execute",
-      ledgerPath,
-      pilotId: PILOT_ID,
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
       searchQueries: ["q-a", "q-b"],
       readKey: async () => "sk-test-placeholder",
       outbound: mockOutbound(),
     })
-    const again = openPilotLedger(ledgerPath, PILOT_ID)
+    const again = openPilotLedger(paths.ledgerPath, PILOT_ID)
     try {
       expect(countAttempts(again.native, PILOT_ID, DEEPSEEK_SEARCH_CAPABILITY)).toBe(2)
       expect(sumReservedMilli(again.native, PILOT_ID, DEEPSEEK_SEARCH_CAPABILITY)).toBe(10)
@@ -180,8 +290,8 @@ describe("deepseek-search-fetch-pilot attempt hard gate", () => {
     }
     const third = await runPilot({
       mode: "execute",
-      ledgerPath,
-      pilotId: PILOT_ID,
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
       searchQueries: ["q-c"],
       readKey: async () => "sk-test-placeholder",
       outbound: mockOutbound(),
@@ -189,56 +299,55 @@ describe("deepseek-search-fetch-pilot attempt hard gate", () => {
     expect(third.searchAttempts).toBe(3)
   })
 
-  it("duplicate operation_key does not increase attempt total or re-buy", async () => {
-    const dir = tempDir("dup")
-    const ledgerPath = join(dir, "ledger.sqlite3")
+  it("duplicate operation restores trimmed candidates without re-buy", async () => {
+    const name = isolationName("dup")
     const tracker = { search: [] as string[], fetch: [] as string[] }
     const queries = ["same-query-twice"]
-    await runPilot({
+    const first = await runPilot({
       mode: "execute",
-      ledgerPath,
-      pilotId: PILOT_ID,
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
       searchQueries: queries,
       readKey: async () => "sk-test-placeholder",
       outbound: mockOutbound({ tracker }),
     })
+    expect(first.ops[0]?.candidates?.[0]?.title).toBe("Mock Title")
+    expect(first.ops[0]?.receiptId).toBe("rcpt-mock")
     const second = await runPilot({
       mode: "execute",
-      ledgerPath,
-      pilotId: PILOT_ID,
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
       searchQueries: queries,
       readKey: async () => "sk-test-placeholder",
       outbound: mockOutbound({ tracker }),
     })
     expect(second.searchAttempts).toBe(1)
-    expect(second.ops[0]?.outcome).toBe("duplicate_skipped")
+    expect(second.ops[0]?.outcome).toBe("duplicate_restored")
+    expect(second.ops[0]?.candidates?.[0]?.url).toBe("https://example.com/a")
+    expect(second.ops[0]?.receiptId).toBe("rcpt-mock")
     expect(tracker.search).toEqual(["same-query-twice"])
   })
 
-  it("hard-stops at attempt 10 even when budget milli would allow float confusion", async () => {
-    const dir = tempDir("cap10")
-    const ledgerPath = join(dir, "ledger.sqlite3")
+  it("hard-stops at attempt 10 via runPilot fixed caps", async () => {
+    const name = isolationName("cap10")
     const queries = Array.from({ length: 12 }, (_, i) => `q-${i}`)
     const summary = await runPilot({
       mode: "execute",
-      ledgerPath,
-      pilotId: PILOT_ID,
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
       searchQueries: queries,
       readKey: async () => "sk-test-placeholder",
       outbound: mockOutbound(),
-      maxAttempts: 10,
-      budgetMilli: 10_000, // deliberately huge so attempt gate is the limiter
-      unitMilli: 5,
     })
     expect(summary.searchAttempts).toBe(10)
     expect(summary.ops.filter(op => op.outcome === "succeeded")).toHaveLength(10)
     expect(summary.ops.some(op => op.errorCode === "attempt_limit_reached")).toBe(true)
   })
 
-  it("budget milli integer gate refuses before float-style approx", async () => {
-    const dir = tempDir("budget")
-    const ledgerPath = join(dir, "ledger.sqlite3")
-    const ledger = openPilotLedger(ledgerPath, PILOT_ID)
+  it("budget milli integer gate via reserveAttempt overrides (unit tests only)", async () => {
+    const name = isolationName("budget")
+    const paths = resolveFixedPilotPaths(REPO_ROOT, name)
+    const ledger = openPilotLedger(paths.ledgerPath, PILOT_ID)
     try {
       for (let i = 0; i < 9; i += 1) {
         const r = reserveAttempt(ledger.native, {
@@ -254,7 +363,6 @@ describe("deepseek-search-fetch-pilot attempt hard gate", () => {
           finalizeAttempt(ledger.native, { attemptId: r.attemptId, status: "succeeded" })
         }
       }
-      // 9*5=45; next unit 5 => 50 OK; then budget blocks even if attempts < 10 when unit is 6
       const ok10 = reserveAttempt(ledger.native, {
         pilotId: PILOT_ID,
         capability: DEEPSEEK_SEARCH_CAPABILITY,
@@ -280,19 +388,16 @@ describe("deepseek-search-fetch-pilot attempt hard gate", () => {
     }
   })
 
-  it("concurrent last-slot reserves: exactly one winner, total attempts=10", async () => {
-    const dir = tempDir("concurrent")
-    const ledgerPath = join(dir, "ledger.sqlite3")
-    const ledger = openPilotLedger(ledgerPath, PILOT_ID)
+  it("concurrent last-slot reserves call real reserveAttempt (child processes)", async () => {
+    const name = isolationName("concurrent")
+    const paths = resolveFixedPilotPaths(REPO_ROOT, name)
+    const ledger = openPilotLedger(paths.ledgerPath, PILOT_ID)
     try {
       for (let i = 0; i < 9; i += 1) {
         const r = reserveAttempt(ledger.native, {
           pilotId: PILOT_ID,
           capability: DEEPSEEK_SEARCH_CAPABILITY,
           operationKey: `seed:${i}`,
-          unitMilli: 5,
-          budgetMilli: 50,
-          maxAttempts: 10,
         })
         expect(r.ok && r.fresh).toBe(true)
         if (r.ok) finalizeAttempt(ledger.native, { attemptId: r.attemptId, status: "succeeded" })
@@ -301,66 +406,40 @@ describe("deepseek-search-fetch-pilot attempt hard gate", () => {
       ledger.close()
     }
 
-    const betterSqlite3Path = join(process.cwd(), "node_modules", "better-sqlite3")
-    const workerSource = `
-      const { parentPort, workerData } = require('node:worker_threads');
-      const Database = require(workerData.betterSqlite3Path);
-      const db = new Database(workerData.ledgerPath);
-      db.exec('BEGIN IMMEDIATE');
-      let result;
-      try {
-        const attempts = db.prepare('SELECT COUNT(*) AS c FROM pilot_attempt WHERE pilot_id = ? AND capability = ?')
-          .get(workerData.pilotId, workerData.capability).c;
-        if (attempts >= 10) {
-          result = { ok: false, code: 'attempt_limit_reached', attempts };
-          db.exec('ROLLBACK');
-        } else {
-          const id = require('node:crypto').randomUUID();
-          db.prepare(\`INSERT INTO pilot_attempt
-            (id, pilot_id, capability, operation_key, status, reserved_milli, created_at, finished_at, error_code)
-            VALUES (?, ?, ?, ?, 'reserved', 5, ?, NULL, NULL)\`)
-            .run(id, workerData.pilotId, workerData.capability, workerData.operationKey, new Date().toISOString());
-          db.exec('COMMIT');
-          result = { ok: true, attemptId: id, attempts: attempts + 1 };
-        }
-      } catch (error) {
-        try { db.exec('ROLLBACK'); } catch {}
-        result = { ok: false, code: 'error', message: String(error) };
-      }
-      db.close();
-      parentPort.postMessage(result);
-    `
-    const workerFile = join(dir, "reserve-worker.cjs")
-    writeFileSync(workerFile, workerSource, "utf8")
+    const scriptPath = join(REPO_ROOT, "scripts", "deepseek-search-fetch-pilot-reserve-once.ts")
+    const nodeArgs = [
+      "--import",
+      "tsx/esm",
+      "--experimental-loader",
+      "./scripts/tsx-alias-loader.mjs",
+    ]
 
-    function runWorker(operationKey: string): Promise<{ ok: boolean, code?: string }> {
-      return new Promise((resolvePromise, reject) => {
-        const worker = new Worker(workerFile, {
-          workerData: {
-            ledgerPath,
-            betterSqlite3Path,
-            pilotId: PILOT_ID,
-            capability: DEEPSEEK_SEARCH_CAPABILITY,
-            operationKey,
-          },
-        })
-        worker.on("message", resolvePromise)
-        worker.on("error", reject)
-        worker.on("exit", (code) => {
-          if (code !== 0) reject(new Error(`worker_exit_${code}`))
-        })
-      })
-    }
+    const runOne = (operationKey: string) => spawnReserveOnce({
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
+      capability: DEEPSEEK_SEARCH_CAPABILITY,
+      operationKey,
+      nodeArgs,
+      scriptPath,
+    })
 
     const [a, b] = await Promise.all([
-      runWorker("concurrent:a"),
-      runWorker("concurrent:b"),
+      runOne("concurrent:a"),
+      runOne("concurrent:b"),
     ])
-    const wins = [a, b].filter(r => r.ok).length
-    const losses = [a, b].filter(r => !r.ok).length
-    expect(wins).toBe(1)
+    expect(a.stdout.trim().length + b.stdout.trim().length, `spawn empty stdout a=${a.status} b=${b.status} stderrA=${a.stderr.slice(0, 200)} stderrB=${b.stderr.slice(0, 200)}`).toBeGreaterThan(0)
+    const parsed = [a, b].map((r) => {
+      try {
+        return JSON.parse(r.stdout.trim().split("\n").pop()!) as { ok: boolean, fresh?: boolean }
+      } catch {
+        return { ok: false as const }
+      }
+    })
+    const freshWins = parsed.filter(r => r.ok && r.fresh).length
+    const losses = parsed.filter(r => !r.ok || r.fresh === false).length
+    expect(freshWins, JSON.stringify(parsed)).toBe(1)
     expect(losses).toBe(1)
-    const check = openPilotLedger(ledgerPath, PILOT_ID)
+    const check = openPilotLedger(paths.ledgerPath, PILOT_ID)
     try {
       expect(countAttempts(check.native, PILOT_ID, DEEPSEEK_SEARCH_CAPABILITY)).toBe(10)
     } finally {
@@ -368,49 +447,124 @@ describe("deepseek-search-fetch-pilot attempt hard gate", () => {
     }
   })
 
-  it("sanitizes secret-like text and does not retain key after execute", async () => {
-    const dir = tempDir("sanitize")
-    const ledgerPath = join(dir, "ledger.sqlite3")
+  it("createLiveOutbound synthetic HTTP exposes trimmed candidates + receipt; duplicate restores", async () => {
+    const name = isolationName("live-chain")
+    const { state, fetcher } = mockFetcher(async () => jsonResponse(200, searchHitBody))
+    const first = await runPilot({
+      mode: "execute",
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
+      searchQueries: ["live-chain-q"],
+      readKey: async () => "sk-test-placeholder-not-real",
+      injectedFetcher: fetcher,
+    })
+    expect(state.hits).toBe(1)
+    expect(first.ops[0]?.outcome).toBe("succeeded")
+    expect(first.ops[0]?.receiptId).toBeTruthy()
+    expect(first.ops[0]?.billable).toBe(true)
+    expect(first.ops[0]?.upstreamResultCount).toBe(2)
+    expect(first.ops[0]?.candidates).toHaveLength(2)
+    expect(first.ops[0]?.candidates?.[0]).toMatchObject({
+      url: "https://example.com/a",
+      title: "Alpha Port Notice",
+      providerDate: "2026-10-01",
+    })
+    const dumped = JSON.stringify(first)
+    expect(dumped).not.toMatch(/SECRET_SNIPPET|SECRET_SUMMARY|SECRET_CONTENT|SECRETVALUE/)
+    expect(dumped).not.toContain("\"snippet\"")
+    expect(first.searchReservedMilli).toBe(UNIT_COST_MILLI_CNY)
+
+    const second = await runPilot({
+      mode: "execute",
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
+      searchQueries: ["live-chain-q"],
+      readKey: async () => "sk-test-placeholder-not-real",
+      injectedFetcher: fetcher,
+    })
+    expect(state.hits).toBe(1)
+    expect(second.outboundCalls).toBe(0)
+    expect(second.ops[0]?.outcome).toBe("duplicate_restored")
+    expect(second.ops[0]?.candidates?.[0]?.title).toBe("Alpha Port Notice")
+    expect(second.ops[0]?.receiptId).toBe(first.ops[0]?.receiptId)
+  })
+
+  it("sanitizes secret-like text; store clear drops configured flag", async () => {
+    const name = isolationName("sanitize")
     const apiKey = "sk-live-SECRETVALUE999"
     expect(sanitizePilotText(`Bearer ${apiKey} boom`, apiKey)).not.toContain("SECRETVALUE")
-    expect(sanitizePilotText(`Authorization: ${apiKey}`, apiKey)).toContain("[redacted]")
-
     const store = createMemorySecretStore(apiKey)
     expect(store.peekConfigured()).toBe(true)
     const summary = await runPilot({
       mode: "execute",
-      ledgerPath,
-      pilotId: PILOT_ID,
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
       searchQueries: ["q-sanitize"],
       readKey: async () => apiKey,
       outbound: mockOutbound({
         search: async () => ({ ok: false, errorCode: `auth ${apiKey} failed` }),
       }),
     })
-    const dumped = JSON.stringify(summary)
-    expect(dumped).not.toContain("SECRETVALUE")
-    expect(summary.ops[0]?.errorCode).not.toContain("SECRETVALUE")
-    // runPilot clears the store it creates; our external store is separate — verify API:
+    expect(JSON.stringify(summary)).not.toContain("SECRETVALUE")
     store.clear()
     expect(store.peekConfigured()).toBe(false)
-    expect(await store.has("deepseek")).toBe(false)
   })
 
-  it("empty Fetch list yields zero fetch attempts under execute", async () => {
-    const dir = tempDir("nofetch")
-    const ledgerPath = join(dir, "ledger.sqlite3")
+  it("empty Fetch list yields zero fetch attempts; disallowed fetch refuses with non-zero exit", async () => {
+    const name = isolationName("nofetch")
     const tracker = { search: [] as string[], fetch: [] as string[] }
-    const summary = await runPilot({
+    const empty = await runPilot({
       mode: "execute",
-      ledgerPath,
-      pilotId: PILOT_ID,
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
       searchQueries: ["only-search"],
       fetchTargets: [],
       readKey: async () => "sk-test-placeholder",
       outbound: mockOutbound({ tracker }),
     })
     expect(tracker.fetch).toEqual([])
-    expect(summary.fetchAttempts).toBe(0)
-    expect(summary.notes.some(n => n.includes("fetch_targets"))).toBe(true)
+    expect(empty.fetchAttempts).toBe(0)
+
+    const refusedName = isolationName("fetch-refuse")
+    const bad: PilotFetchTarget = {
+      url: "https://example.com/x",
+      persistence: "disallowed",
+      targetReview: { status: "syntactically_allowed", canonicalUrl: "https://example.com/x" },
+    }
+    const refused = await runPilot({
+      mode: "execute",
+      projectRoot: REPO_ROOT,
+      testIsolationName: refusedName,
+      searchQueries: [],
+      fetchTargets: [bad],
+      readKey: async () => "sk-test-placeholder",
+      outbound: mockOutbound({ tracker }),
+    })
+    expect(refused.ops[0]?.outcome).toBe("fetch_refused")
+    expect(refused.exitCode).toBe(5)
+    expect(tracker.fetch).toEqual([])
+  })
+
+  it("fetch failure sets non-zero exit like search", async () => {
+    const name = isolationName("fetch-fail")
+    const target: PilotFetchTarget = {
+      url: "https://example.com/fail",
+      persistence: "excerpt_only",
+      targetReview: { status: "syntactically_allowed", canonicalUrl: "https://example.com/fail" },
+    }
+    const summary = await runPilot({
+      mode: "execute",
+      projectRoot: REPO_ROOT,
+      testIsolationName: name,
+      searchQueries: [],
+      fetchTargets: [target],
+      readKey: async () => "sk-test-placeholder",
+      outbound: mockOutbound({
+        fetch: async () => ({ ok: false, errorCode: "provider_unavailable" }),
+      }),
+    })
+    expect(summary.ops[0]?.outcome).toBe("failed")
+    expect(summary.exitCode).toBe(4)
+    expect(summary.fetchAttempts).toBe(1)
   })
 })

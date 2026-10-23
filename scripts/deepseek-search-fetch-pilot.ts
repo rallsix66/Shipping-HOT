@@ -1,18 +1,21 @@
 /**
- * CLI entry for DeepSeek Search/Fetch pilot. Logic lives in deepseek-search-fetch-pilot-lib.ts.
+ * CLI entry for DeepSeek Search/Fetch pilot. Logic in deepseek-search-fetch-pilot-lib.ts.
+ * Project root is derived from this script's location (…/scripts → repo root), not cwd.
  */
 import process from "node:process"
 import { resolve } from "node:path"
-import { pathToFileURL } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 import {
   parsePilotArgs,
   printHelp,
   resolveExecuteKey,
-  resolveUnderCwd,
   runPilot,
   sanitizePilotText,
   summaryForStdout,
 } from "./deepseek-search-fetch-pilot-lib"
+
+const scriptDir = fileURLToPath(new URL(".", import.meta.url))
+const projectRoot = resolve(scriptDir, "..")
 
 async function main(): Promise<void> {
   const args = parsePilotArgs(process.argv.slice(2))
@@ -20,21 +23,19 @@ async function main(): Promise<void> {
     printHelp()
     return
   }
-  const cwd = process.cwd()
   const mode = args.execute ? "execute" : "plan"
+  if (mode === "execute" && !args.keyFromStdin) {
+    console.error("execute_requires_key_from_stdin")
+    process.exitCode = 2
+    return
+  }
   let readKey: (() => Promise<string | undefined>) | undefined
   if (mode === "execute") {
-    readKey = async () => resolveExecuteKey({
-      keyFromStdin: args.keyFromStdin || !process.stdin.isTTY,
-      allowSecurePrompt: !args.keyFromStdin,
-    })
+    readKey = async () => resolveExecuteKey({ keyFromStdin: true })
   }
   const summary = await runPilot({
-    cwd,
+    projectRoot,
     mode,
-    ledgerPath: args.ledgerPath ? resolveUnderCwd(cwd, args.ledgerPath) : undefined,
-    paidDbPath: args.paidDbPath ? resolveUnderCwd(cwd, args.paidDbPath) : undefined,
-    pilotId: args.pilotId,
     readKey,
   })
   console.log(JSON.stringify(summaryForStdout(summary), null, 2))

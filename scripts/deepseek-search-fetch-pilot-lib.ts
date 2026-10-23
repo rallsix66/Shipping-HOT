@@ -1,17 +1,21 @@
 /**
- * DeepSeek Search/Fetch one-shot pilot (R2 offline + gated execute).
+ * DeepSeek Search/Fetch one-shot pilot (R2).
  *
- * Defaults to plan-only (zero outbound). `--execute` may outbound only after
- * an atomic per-capability attempt reservation (hard ≤10) and CNY milli budget.
- * Credentials: process-once via `--key-from-stdin` or Windows SecureString prompt;
- * never argv, never disk, never main `.data/provider-secrets.json`.
+ * Fixed isolation contract for this round:
+ * - pilotId, attempt≤10, budget 50 milli-CNY, unit 5 — not CLI-overridable
+ * - ledger + paid DB under projectRoot/.tmp/deepseek-pilot-2026-10-23/ only
+ * - project root comes from the script location (CLI), not arbitrary cwd
+ * - test path injection only with mock outbound or injectedFetcher (no live bypass)
+ *
+ * Default plan-only (read-only ledger inspect; zero writes). `--execute --key-from-stdin`
+ * may outbound after atomic attempt reserve. Credentials: stdin once; never argv/disk/chat.
  */
 import { Buffer } from "node:buffer"
 import { createHash, randomUUID } from "node:crypto"
-import { mkdirSync } from "node:fs"
-import { dirname, isAbsolute, join, resolve } from "node:path"
+import { existsSync, lstatSync, mkdirSync, realpathSync, statSync } from "node:fs"
+import { dirname, join, resolve, sep } from "node:path"
 import process from "node:process"
-import { spawnSync } from "node:child_process"
+import { spawn } from "node:child_process"
 import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import {
@@ -20,22 +24,28 @@ import {
   DEEPSEEK_SEARCH_FETCH_PROVIDER_ID,
   DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
 } from "#/intel/discovery/deepseek-search-fetch-policy"
-import { type SearchFetchServiceConfig, runDeepSeekFetch, runDeepSeekSearch } from "#/intel/discovery/search-fetch-service"
+import { containsSecretLike } from "#/intel/discovery/candidate-trim"
+import {
+  type FetchTargetReview,
+  type IntelPersistence,
+  type SearchFetchServiceConfig,
+  runDeepSeekFetch,
+  runDeepSeekSearch,
+} from "#/intel/discovery/search-fetch-service"
 import { initShippingTables } from "#/database/shipping"
 import type { SecretStore } from "#/providers/contracts"
 import type { InjectedFetcher } from "#/providers/deepseek/search-fetch-client"
-import { containsSecretLike } from "#/intel/discovery/candidate-trim"
 
 export const PILOT_ID = "ds-pilot-2026-10-23-r1" as const
-export const PILOT_LEDGER_RELATIVE = ".tmp/deepseek-pilot-2026-10-23/pilot-attempt-ledger.sqlite3"
-export const PILOT_PAID_DB_RELATIVE = ".tmp/deepseek-pilot-2026-10-23/pilot-paid.sqlite3"
+export const PILOT_DIR_RELATIVE = ".tmp/deepseek-pilot-2026-10-23"
+export const PILOT_LEDGER_FILENAME = "pilot-attempt-ledger.sqlite3"
+export const PILOT_PAID_DB_FILENAME = "pilot-paid.sqlite3"
 export const MAX_ATTEMPTS_PER_CAPABILITY = 10
-/** Integer millicents of CNY (0.001 CNY). 0.05 CNY = 50. */
+/** Integer milli-CNY (0.001 CNY). 0.05 CNY = 50. Not CLI-overridable. */
 export const BUDGET_MILLI_CNY = 50
-/** 0.005 CNY = 5 milli-CNY. Compare only as integers. */
+/** 0.005 CNY = 5 milli-CNY. Not CLI-overridable. */
 export const UNIT_COST_MILLI_CNY = 5
 
-/** First-round Search queries (exact). Fetch list stays empty until review. */
 export const FIRST_ROUND_SEARCH_QUERIES: readonly string[] = [
   "PPA Philippines Ports Authority Manila port advisory 2026",
   "PPA helpdesk advisory Manila South Harbor",
@@ -47,10 +57,19 @@ export const FIRST_ROUND_SEARCH_QUERIES: readonly string[] = [
   "Laem Chabang port closure typhoon advisory Thailand",
 ] as const
 
-export const FIRST_ROUND_FETCH_TARGETS: readonly string[] = []
+/** First round: empty. Future entries must carry per-URL reviewed persistence + targetReview. */
+export const FIRST_ROUND_FETCH_TARGETS: readonly PilotFetchTarget[] = []
 
 export type PilotCapability = typeof DEEPSEEK_SEARCH_CAPABILITY | typeof DEEPSEEK_FETCH_CAPABILITY
 export type AttemptStatus = "reserved" | "succeeded" | "failed" | "unknown"
+
+export interface PilotFetchTarget {
+  url: string
+  /** Reviewed persistence for this URL only. Script never upgrades this. */
+  persistence: IntelPersistence
+  /** Reviewed local security decision bound to this URL. */
+  targetReview: FetchTargetReview
+}
 
 export interface PilotLedger {
   native: InstanceType<typeof NativeDatabase>
@@ -64,25 +83,42 @@ export interface ReserveOk {
   attemptId: string
   fresh: boolean
   status: AttemptStatus
+  receiptId: string | null
+  resultSummaryJson: string | null
 }
+
 export interface ReserveFail {
   ok: false
   code: "attempt_limit_reached" | "budget_limit_reached" | "ledger_pilot_mismatch"
   attempts: number
   reservedMilli: number
 }
+
 export type ReserveResult = ReserveOk | ReserveFail
+
+export interface TrimmedCandidateView {
+  url: string
+  title: string
+  providerDate: string | null
+  titleUrlHash: string
+}
 
 export interface OutboundOutcome {
   ok: boolean
   unknown?: boolean
   errorCode?: string
   detail?: string
+  receiptId?: string
+  reused?: boolean
+  billable?: boolean
+  upstreamResultCount?: number
+  candidates?: TrimmedCandidateView[]
+  metaEmpty?: boolean
 }
 
 export interface PilotOutbound {
   search: (query: string, attemptId: string) => Promise<OutboundOutcome>
-  fetch: (url: string, attemptId: string) => Promise<OutboundOutcome>
+  fetch: (target: PilotFetchTarget, attemptId: string) => Promise<OutboundOutcome>
 }
 
 export type MemorySecretStore = SecretStore & {
@@ -91,20 +127,21 @@ export type MemorySecretStore = SecretStore & {
 }
 
 export interface PilotOptions {
-  cwd?: string
-  ledgerPath?: string
-  paidDbPath?: string
-  pilotId?: string
   mode: "plan" | "execute"
+  /** Absolute project root (directory that contains `scripts/` and `.tmp/`). */
+  projectRoot: string
   searchQueries?: readonly string[]
-  fetchTargets?: readonly string[]
-  maxAttempts?: number
-  budgetMilli?: number
-  unitMilli?: number
+  fetchTargets?: readonly PilotFetchTarget[]
   readKey?: () => Promise<string | undefined>
+  /** Mock outbound. Enables testIsolationName. */
   outbound?: PilotOutbound
-  /** When set with live outbound, inject fetcher into Search/Fetch client (tests only). */
+  /** Synthetic HTTP for createLiveOutbound. Enables testIsolationName. No live net. */
   injectedFetcher?: InjectedFetcher
+  /**
+   * Test-only directory name under projectRoot/.tmp/. Refused without outbound mock
+   * or injectedFetcher (cannot open a live-network bypass with alternate DBs).
+   */
+  testIsolationName?: string
   now?: () => Date
 }
 
@@ -114,22 +151,31 @@ export interface PilotOpResult {
   label: string
   outcome:
     | "planned"
-    | "duplicate_skipped"
+    | "duplicate_restored"
+    | "duplicate_incomplete"
     | "reserved_failed"
     | "succeeded"
     | "failed"
     | "unknown"
     | "missing_api_key"
+    | "fetch_refused"
   attemptId?: string
   errorCode?: string
+  receiptId?: string
+  reused?: boolean
+  billable?: boolean
+  upstreamResultCount?: number
+  candidates?: TrimmedCandidateView[]
 }
 
 export interface PilotSummary {
   pilotId: string
   mode: "plan" | "execute"
+  projectRoot: string
   ledgerPath: string
+  paidDbPath: string
   searchQueries: string[]
-  fetchTargets: string[]
+  fetchTargetCount: number
   searchAttempts: number
   fetchAttempts: number
   searchReservedMilli: number
@@ -141,6 +187,13 @@ export interface PilotSummary {
   notes: string[]
 }
 
+export interface FixedPilotPaths {
+  projectRoot: string
+  pilotDir: string
+  ledgerPath: string
+  paidDbPath: string
+}
+
 type Native = InstanceType<typeof NativeDatabase>
 
 function assertUnitCostAligned(): void {
@@ -150,20 +203,88 @@ function assertUnitCostAligned(): void {
   }
 }
 
-export function shippingRepoRoot(cwd = process.cwd()): string {
-  return resolve(cwd)
+function realPathSafe(path: string): string {
+  return realpathSync.native ? realpathSync.native(path) : realpathSync(path)
 }
 
-export function defaultLedgerPath(cwd = process.cwd()): string {
-  return join(shippingRepoRoot(cwd), PILOT_LEDGER_RELATIVE)
+/** Normalize project root; must exist as a directory. */
+export function normalizeProjectRoot(projectRoot: string): string {
+  const resolved = resolve(projectRoot)
+  if (!existsSync(resolved)) {
+    throw new Error(`project_root_missing:${resolved}`)
+  }
+  const st = statSync(resolved)
+  if (!st.isDirectory()) {
+    throw new Error(`project_root_not_directory:${resolved}`)
+  }
+  return realPathSafe(resolved)
 }
 
-export function defaultPaidDbPath(cwd = process.cwd()): string {
-  return join(shippingRepoRoot(cwd), PILOT_PAID_DB_RELATIVE)
+/**
+ * Resolve fixed pilot DB paths under projectRoot/.tmp/deepseek-pilot-2026-10-23/.
+ * Optional testIsolationName replaces the fixed round dir name but must stay under .tmp/.
+ */
+export function resolveFixedPilotPaths(projectRoot: string, testIsolationName?: string): FixedPilotPaths {
+  const root = normalizeProjectRoot(projectRoot)
+  if (testIsolationName !== undefined) {
+    if (!/^[\w.-]{1,128}$/.test(testIsolationName)) {
+      throw new Error("test_isolation_name_invalid")
+    }
+    if (testIsolationName === "." || testIsolationName === ".." || testIsolationName.includes(sep) || testIsolationName.includes("/") || testIsolationName.includes("\\")) {
+      throw new Error("test_isolation_name_path_escape")
+    }
+  }
+  const relDir = testIsolationName ? join(".tmp", testIsolationName) : PILOT_DIR_RELATIVE
+  const pilotDir = resolve(root, relDir)
+  const tmpRoot = resolve(root, ".tmp")
+  // Parent .tmp must be inside project (create allowed later only on execute open).
+  const plannedTmp = tmpRoot
+  const plannedPilot = pilotDir
+  if (!plannedPilot.startsWith(`${plannedTmp}${sep}`) && plannedPilot !== plannedTmp) {
+    throw new Error(`pilot_dir_escapes_tmp:${plannedPilot}`)
+  }
+  if (!plannedPilot.startsWith(`${root}${sep}`)) {
+    throw new Error(`pilot_dir_escapes_project:${plannedPilot}`)
+  }
+  // If dirs already exist, verify realpath cannot escape via symlink.
+  if (existsSync(plannedTmp)) {
+    const realTmp = realPathSafe(plannedTmp)
+    if (!realTmp.startsWith(`${root}${sep}`) && realTmp !== root) {
+      throw new Error(`tmp_realpath_escapes_project:${realTmp}`)
+    }
+  }
+  if (existsSync(plannedPilot)) {
+    const realPilot = realPathSafe(plannedPilot)
+    const realTmp = existsSync(plannedTmp) ? realPathSafe(plannedTmp) : plannedTmp
+    if (!realPilot.startsWith(`${realTmp}${sep}`) && realPilot !== realTmp) {
+      throw new Error(`pilot_realpath_escapes_tmp:${realPilot}`)
+    }
+    // Refuse if ledger/paid already exist as links to paths outside pilot dir.
+    for (const name of [PILOT_LEDGER_FILENAME, PILOT_PAID_DB_FILENAME]) {
+      const p = join(plannedPilot, name)
+      if (!existsSync(p)) continue
+      const link = lstatSync(p)
+      if (link.isSymbolicLink()) {
+        throw new Error(`pilot_db_symlink_refused:${name}`)
+      }
+      const realDb = realPathSafe(p)
+      if (!realDb.startsWith(`${realPilot}${sep}`) && dirname(realDb) !== realPilot) {
+        throw new Error(`pilot_db_realpath_escapes:${name}`)
+      }
+    }
+  }
+  return {
+    projectRoot: root,
+    pilotDir: plannedPilot,
+    ledgerPath: join(plannedPilot, PILOT_LEDGER_FILENAME),
+    paidDbPath: join(plannedPilot, PILOT_PAID_DB_FILENAME),
+  }
 }
 
-export function resolveUnderCwd(cwd: string, path: string): string {
-  return isAbsolute(path) ? path : join(shippingRepoRoot(cwd), path)
+export function assertTestIsolationAllowed(options: PilotOptions): void {
+  if (!options.testIsolationName) return
+  if (options.outbound || options.injectedFetcher) return
+  throw new Error("test_isolation_requires_mock_or_injected_fetcher")
 }
 
 export function searchOperationKey(query: string): string {
@@ -181,7 +302,9 @@ export function fetchOperationKey(url: string): string {
 export function createMemorySecretStore(initial?: string): MemorySecretStore {
   let value = initial
   return {
-    get: async id => (id === DEEPSEEK_SEARCH_FETCH_PROVIDER_ID ? value : undefined),
+    get: async (id) => {
+      return id === DEEPSEEK_SEARCH_FETCH_PROVIDER_ID ? value : undefined
+    },
     set: async (id, secret) => {
       if (id === DEEPSEEK_SEARCH_FETCH_PROVIDER_ID) value = secret
     },
@@ -200,19 +323,94 @@ export function createMemorySecretStore(initial?: string): MemorySecretStore {
   }
 }
 
-/** Redact secret-like tokens and never echo an apiKey substring. */
+/** Redact secret-like tokens; never echo an apiKey substring. */
 export function sanitizePilotText(text: string, apiKey?: string): string {
   let out = String(text ?? "")
   if (apiKey && apiKey.length >= 4) {
     out = out.split(apiKey).join("[redacted]")
   }
   out = out.replace(/(Bearer\s+)\S+/gi, "$1[redacted]")
-  out = out.replace(/(authorization["']?\s*[:=]\s*["']?)[^"',\s}]+/gi, "$1[redacted]")
-  out = out.replace(/\bsk-[\w-]{8,}\b/g, "[redacted]")
+  out = out.replace(/(authorization\s*[:=]\s*)\S+/gi, "$1[redacted]")
+  out = out.replace(/\bsk-\w{8,}\b/g, "[redacted]")
   if (containsSecretLike(out, apiKey)) {
     return "[redacted]"
   }
   return out.slice(0, 500)
+}
+
+export function sanitizeCandidateViews(candidates: readonly TrimmedCandidateView[] | undefined, apiKey?: string): TrimmedCandidateView[] {
+  if (!candidates) return []
+  return candidates.map(c => ({
+    url: sanitizePilotText(c.url, apiKey),
+    title: sanitizePilotText(c.title, apiKey),
+    providerDate: c.providerDate ? sanitizePilotText(c.providerDate, apiKey) : null,
+    titleUrlHash: c.titleUrlHash,
+  }))
+}
+
+export function buildResultSummaryJson(input: {
+  receiptId?: string
+  reused?: boolean
+  billable?: boolean
+  upstreamResultCount?: number
+  candidates?: TrimmedCandidateView[]
+  metaEmpty?: boolean
+}, apiKey?: string): string {
+  return JSON.stringify({
+    receiptId: input.receiptId ?? null,
+    reused: Boolean(input.reused),
+    billable: Boolean(input.billable),
+    upstreamResultCount: input.upstreamResultCount ?? null,
+    candidates: sanitizeCandidateViews(input.candidates, apiKey),
+    metaEmpty: input.metaEmpty ?? null,
+  })
+}
+
+export function parseResultSummaryJson(raw: string | null): {
+  receiptId?: string
+  reused?: boolean
+  billable?: boolean
+  upstreamResultCount?: number
+  candidates?: TrimmedCandidateView[]
+} {
+  if (!raw) return {}
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>
+    const candidatesRaw = Array.isArray(parsed.candidates) ? parsed.candidates : []
+    const candidates: TrimmedCandidateView[] = []
+    for (const item of candidatesRaw) {
+      if (!item || typeof item !== "object") continue
+      const row = item as Record<string, unknown>
+      if (typeof row.url !== "string" || typeof row.title !== "string" || typeof row.titleUrlHash !== "string") continue
+      candidates.push({
+        url: row.url,
+        title: row.title,
+        providerDate: typeof row.providerDate === "string" ? row.providerDate : null,
+        titleUrlHash: row.titleUrlHash,
+      })
+    }
+    return {
+      receiptId: typeof parsed.receiptId === "string" ? parsed.receiptId : undefined,
+      reused: Boolean(parsed.reused),
+      billable: Boolean(parsed.billable),
+      upstreamResultCount: typeof parsed.upstreamResultCount === "number" ? parsed.upstreamResultCount : undefined,
+      candidates,
+    }
+  } catch {
+    return {}
+  }
+}
+
+export function assertFetchTargetAuthorized(target: PilotFetchTarget): void {
+  if (target.persistence === "disallowed") {
+    throw new Error("fetch_refused:persistence_disallowed")
+  }
+  if (target.targetReview.status === "locally_rejected") {
+    throw new Error(`fetch_refused:locally_rejected:${target.targetReview.code}`)
+  }
+  if (target.targetReview.status !== "syntactically_allowed") {
+    throw new Error("fetch_refused:review_incomplete")
+  }
 }
 
 export function openPilotLedger(path: string, pilotId: string): PilotLedger {
@@ -234,11 +432,22 @@ export function openPilotLedger(path: string, pilotId: string): PilotLedger {
       created_at TEXT NOT NULL,
       finished_at TEXT,
       error_code TEXT,
+      receipt_id TEXT,
+      result_summary_json TEXT,
       UNIQUE (pilot_id, capability, operation_key)
     );
     CREATE INDEX IF NOT EXISTS idx_pilot_attempt_cap
       ON pilot_attempt (pilot_id, capability);
   `)
+  // Additive columns for ledgers created before summary fields existed.
+  const cols = native.prepare("PRAGMA table_info(pilot_attempt)").all() as Array<{ name: string }>
+  const names = new Set(cols.map(c => c.name))
+  if (!names.has("receipt_id")) {
+    native.exec("ALTER TABLE pilot_attempt ADD COLUMN receipt_id TEXT")
+  }
+  if (!names.has("result_summary_json")) {
+    native.exec("ALTER TABLE pilot_attempt ADD COLUMN result_summary_json TEXT")
+  }
   const row = native.prepare("SELECT pilot_id FROM pilot_meta LIMIT 1").get() as { pilot_id: string } | undefined
   if (row && row.pilot_id !== pilotId) {
     native.close()
@@ -261,6 +470,78 @@ export function openPilotLedger(path: string, pilotId: string): PilotLedger {
   }
 }
 
+/**
+ * Plan-only ledger inspect: readonly + fileMustExist. Never mkdir / CREATE / WAL migrate.
+ */
+export function readPilotLedgerSnapshot(ledgerPath: string, pilotId: string): {
+  present: boolean
+  searchAttempts: number
+  fetchAttempts: number
+  searchReservedMilli: number
+  fetchReservedMilli: number
+  note?: string
+} {
+  if (!existsSync(ledgerPath)) {
+    return {
+      present: false,
+      searchAttempts: 0,
+      fetchAttempts: 0,
+      searchReservedMilli: 0,
+      fetchReservedMilli: 0,
+      note: "ledger_absent",
+    }
+  }
+  let native: Native
+  try {
+    native = new NativeDatabase(ledgerPath, { readonly: true })
+  } catch (error) {
+    return {
+      present: false,
+      searchAttempts: 0,
+      fetchAttempts: 0,
+      searchReservedMilli: 0,
+      fetchReservedMilli: 0,
+      note: `ledger_unreadable:${error instanceof Error ? error.message : String(error)}`,
+    }
+  }
+  try {
+    const meta = native.prepare("SELECT pilot_id FROM pilot_meta LIMIT 1").get() as { pilot_id: string } | undefined
+    if (!meta) {
+      return {
+        present: true,
+        searchAttempts: 0,
+        fetchAttempts: 0,
+        searchReservedMilli: 0,
+        fetchReservedMilli: 0,
+        note: "ledger_meta_missing",
+      }
+    }
+    if (meta.pilot_id !== pilotId) {
+      return {
+        present: true,
+        searchAttempts: 0,
+        fetchAttempts: 0,
+        searchReservedMilli: 0,
+        fetchReservedMilli: 0,
+        note: `ledger_pilot_mismatch:found=${meta.pilot_id}`,
+      }
+    }
+    return {
+      present: true,
+      searchAttempts: countAttempts(native, pilotId, DEEPSEEK_SEARCH_CAPABILITY),
+      fetchAttempts: countAttempts(native, pilotId, DEEPSEEK_FETCH_CAPABILITY),
+      searchReservedMilli: sumReservedMilli(native, pilotId, DEEPSEEK_SEARCH_CAPABILITY),
+      fetchReservedMilli: sumReservedMilli(native, pilotId, DEEPSEEK_FETCH_CAPABILITY),
+    }
+  } finally {
+    try {
+      native.close()
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
 export function countAttempts(native: Native, pilotId: string, capability: PilotCapability): number {
   const row = native.prepare(
     "SELECT COUNT(*) AS c FROM pilot_attempt WHERE pilot_id = ? AND capability = ?",
@@ -277,8 +558,7 @@ export function sumReservedMilli(native: Native, pilotId: string, capability: Pi
 
 /**
  * Atomically reserve one attempt before any outbound.
- * Same (pilotId, capability, operationKey) never creates a second row (no double-spend).
- * Uses BEGIN IMMEDIATE so concurrent processes serialize on the ledger file.
+ * Same (pilotId, capability, operationKey) never creates a second row.
  */
 export function reserveAttempt(
   native: Native,
@@ -286,6 +566,7 @@ export function reserveAttempt(
     pilotId: string
     capability: PilotCapability
     operationKey: string
+    /** Test-only overrides for direct reserveAttempt unit tests. runPilot ignores these. */
     unitMilli?: number
     budgetMilli?: number
     maxAttempts?: number
@@ -306,11 +587,24 @@ export function reserveAttempt(
     }
 
     const existing = native.prepare(
-      "SELECT id, status FROM pilot_attempt WHERE pilot_id = ? AND capability = ? AND operation_key = ?",
-    ).get(input.pilotId, input.capability, input.operationKey) as { id: string, status: AttemptStatus } | undefined
+      `SELECT id, status, receipt_id, result_summary_json
+       FROM pilot_attempt WHERE pilot_id = ? AND capability = ? AND operation_key = ?`,
+    ).get(input.pilotId, input.capability, input.operationKey) as {
+      id: string
+      status: AttemptStatus
+      receipt_id: string | null
+      result_summary_json: string | null
+    } | undefined
     if (existing) {
       native.exec("COMMIT")
-      return { ok: true, attemptId: existing.id, fresh: false, status: existing.status }
+      return {
+        ok: true,
+        attemptId: existing.id,
+        fresh: false,
+        status: existing.status,
+        receiptId: existing.receipt_id,
+        resultSummaryJson: existing.result_summary_json,
+      }
     }
 
     const attempts = countAttempts(native, input.pilotId, input.capability)
@@ -320,7 +614,6 @@ export function reserveAttempt(
       native.exec("ROLLBACK")
       return { ok: false, code: "attempt_limit_reached", attempts, reservedMilli }
     }
-    // Integer compare only — never float ≈10.
     if (reservedMilli + unitMilli > budgetMilli) {
       native.exec("ROLLBACK")
       return { ok: false, code: "budget_limit_reached", attempts, reservedMilli }
@@ -329,11 +622,18 @@ export function reserveAttempt(
     const attemptId = randomUUID()
     native.prepare(
       `INSERT INTO pilot_attempt
-        (id, pilot_id, capability, operation_key, status, reserved_milli, created_at, finished_at, error_code)
-       VALUES (?, ?, ?, ?, 'reserved', ?, ?, NULL, NULL)`,
+        (id, pilot_id, capability, operation_key, status, reserved_milli, created_at, finished_at, error_code, receipt_id, result_summary_json)
+       VALUES (?, ?, ?, ?, 'reserved', ?, ?, NULL, NULL, NULL, NULL)`,
     ).run(attemptId, input.pilotId, input.capability, input.operationKey, unitMilli, nowIso)
     native.exec("COMMIT")
-    return { ok: true, attemptId, fresh: true, status: "reserved" }
+    return {
+      ok: true,
+      attemptId,
+      fresh: true,
+      status: "reserved",
+      receiptId: null,
+      resultSummaryJson: null,
+    }
   } catch (error) {
     try {
       native.exec("ROLLBACK")
@@ -350,15 +650,28 @@ export function finalizeAttempt(
     attemptId: string
     status: Exclude<AttemptStatus, "reserved">
     errorCode?: string
+    receiptId?: string
+    resultSummaryJson?: string
     now?: Date
   },
 ): void {
   const nowIso = (input.now ?? new Date()).toISOString()
   native.prepare(
     `UPDATE pilot_attempt
-     SET status = ?, finished_at = ?, error_code = COALESCE(?, error_code)
+     SET status = ?,
+         finished_at = ?,
+         error_code = COALESCE(?, error_code),
+         receipt_id = COALESCE(?, receipt_id),
+         result_summary_json = COALESCE(?, result_summary_json)
      WHERE id = ? AND status = 'reserved'`,
-  ).run(input.status, nowIso, input.errorCode ?? null, input.attemptId)
+  ).run(
+    input.status,
+    nowIso,
+    input.errorCode ?? null,
+    input.receiptId ?? null,
+    input.resultSummaryJson ?? null,
+    input.attemptId,
+  )
 }
 
 export async function readKeyFromStdin(): Promise<string | undefined> {
@@ -372,45 +685,15 @@ export async function readKeyFromStdin(): Promise<string | undefined> {
 }
 
 /**
- * Windows: PowerShell Read-Host -AsSecureString → one-shot plaintext to this process only.
- * Does not echo, does not write disk, does not put the key on argv.
+ * Execute key source: stdin only (SecureString → pipe on Windows).
+ * No interactive Read-Host inside Node (conflicts with -NonInteractive hosts).
  */
-export function promptKeyViaPowerShellSecureString(): string | undefined {
-  if (process.platform !== "win32") return undefined
-  const ps = `
-$ErrorActionPreference = 'Stop'
-$sec = Read-Host -AsSecureString 'DeepSeek API key (SecureString, not echoed)'
-$bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)
-try {
-  $plain = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
-  if (-not $plain) { exit 2 }
-  [Console]::Out.Write($plain)
-} finally {
-  [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
-  if ($sec -is [IDisposable]) { $sec.Dispose() }
-  $plain = $null
-}
-`
-  const result = spawnSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", ps], {
-    encoding: "utf8",
-    windowsHide: true,
-    stdio: ["inherit", "pipe", "inherit"],
-  })
-  if (result.status !== 0) return undefined
-  const key = String(result.stdout ?? "").replace(/\r?\n$/, "")
-  return key.length > 0 ? key : undefined
-}
-
 export async function resolveExecuteKey(opts: {
-  keyFromStdin?: boolean
+  keyFromStdin: boolean
   readKey?: () => Promise<string | undefined>
-  allowSecurePrompt?: boolean
 }): Promise<string | undefined> {
   if (opts.readKey) return opts.readKey()
   if (opts.keyFromStdin) return readKeyFromStdin()
-  if (opts.allowSecurePrompt !== false && process.platform === "win32" && process.stdin.isTTY) {
-    return promptKeyViaPowerShellSecureString()
-  }
   return undefined
 }
 
@@ -439,28 +722,41 @@ export async function createLiveOutbound(input: {
   paidDbPath: string
   secrets: SecretStore
   injectedFetcher?: InjectedFetcher
-  monthlyBudgetSearch?: number
-  monthlyBudgetFetch?: number
 }): Promise<{ outbound: PilotOutbound, dispose: () => void }> {
   mkdirSync(dirname(input.paidDbPath), { recursive: true })
   const native = new NativeDatabase(input.paidDbPath)
   const db = wrapDb(native)
   await initShippingTables(db, "mock")
-  const budgetSearch = input.monthlyBudgetSearch ?? BUDGET_MILLI_CNY / 1000
-  const budgetFetch = input.monthlyBudgetFetch ?? BUDGET_MILLI_CNY / 1000
+  const budgetCny = BUDGET_MILLI_CNY / 1000
   const config: SearchFetchServiceConfig = {
     db,
     secretStore: input.secrets,
     enabled: true,
-    monthlyBudgetSearch: budgetSearch,
-    monthlyBudgetFetch: budgetFetch,
+    monthlyBudgetSearch: budgetCny,
+    monthlyBudgetFetch: budgetCny,
     fetcher: input.injectedFetcher,
   }
   const outbound: PilotOutbound = {
     search: async (query, attemptId) => {
       try {
-        await runDeepSeekSearch(config, { query, purpose: "ds_pilot_2026_10_23_r1", subject: attemptId })
-        return { ok: true }
+        const out = await runDeepSeekSearch(config, {
+          query,
+          purpose: "ds_pilot_2026_10_23_r1",
+          subject: attemptId,
+        })
+        return {
+          ok: true,
+          receiptId: out.receiptId,
+          reused: out.reused,
+          billable: out.billable,
+          upstreamResultCount: out.upstreamResultCount,
+          candidates: out.candidates.map(c => ({
+            url: c.url,
+            title: c.title,
+            providerDate: c.providerDate,
+            titleUrlHash: c.titleUrlHash,
+          })),
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
         const name = error instanceof Error ? error.name : "Error"
@@ -473,10 +769,23 @@ export async function createLiveOutbound(input: {
         }
       }
     },
-    fetch: async (url, attemptId) => {
+    fetch: async (target, attemptId) => {
+      assertFetchTargetAuthorized(target)
       try {
-        await runDeepSeekFetch(config, { url, purpose: "ds_pilot_2026_10_23_r1", subject: attemptId, persistence: "excerpt_only" })
-        return { ok: true }
+        const out = await runDeepSeekFetch(config, {
+          url: target.url,
+          purpose: "ds_pilot_2026_10_23_r1",
+          subject: attemptId,
+          persistence: target.persistence,
+          targetReview: target.targetReview,
+        })
+        return {
+          ok: true,
+          receiptId: out.receiptId,
+          reused: out.reused,
+          billable: out.billable,
+          metaEmpty: out.meta.empty,
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
         const name = error instanceof Error ? error.name : "Error"
@@ -502,16 +811,39 @@ export async function createLiveOutbound(input: {
   }
 }
 
+function restoredOp(
+  base: Omit<PilotOpResult, "outcome" | "candidates" | "receiptId" | "reused" | "billable" | "upstreamResultCount">,
+  reserved: ReserveOk,
+): PilotOpResult {
+  const parsed = parseResultSummaryJson(reserved.resultSummaryJson)
+  if (reserved.resultSummaryJson) {
+    return {
+      ...base,
+      outcome: "duplicate_restored",
+      attemptId: reserved.attemptId,
+      receiptId: parsed.receiptId ?? reserved.receiptId ?? undefined,
+      reused: true,
+      billable: parsed.billable,
+      upstreamResultCount: parsed.upstreamResultCount,
+      candidates: parsed.candidates,
+      errorCode: `duplicate:${reserved.status}`,
+    }
+  }
+  return {
+    ...base,
+    outcome: "duplicate_incomplete",
+    attemptId: reserved.attemptId,
+    errorCode: `duplicate:${reserved.status}:no_summary`,
+  }
+}
+
 export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
   assertUnitCostAligned()
-  const cwd = options.cwd ?? process.cwd()
-  const pilotId = options.pilotId ?? PILOT_ID
-  const ledgerPath = options.ledgerPath ?? defaultLedgerPath(cwd)
+  assertTestIsolationAllowed(options)
+  const paths = resolveFixedPilotPaths(options.projectRoot, options.testIsolationName)
+  const pilotId = PILOT_ID
   const searchQueries = [...(options.searchQueries ?? FIRST_ROUND_SEARCH_QUERIES)]
   const fetchTargets = [...(options.fetchTargets ?? FIRST_ROUND_FETCH_TARGETS)]
-  const maxAttempts = options.maxAttempts ?? MAX_ATTEMPTS_PER_CAPABILITY
-  const budgetMilli = options.budgetMilli ?? BUDGET_MILLI_CNY
-  const unitMilli = options.unitMilli ?? UNIT_COST_MILLI_CNY
   const now = options.now ?? (() => new Date())
   const notes: string[] = []
   const ops: PilotOpResult[] = []
@@ -520,7 +852,7 @@ export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
   let exitCode = 0
 
   if (options.mode === "plan") {
-    notes.push("plan_only: no attempt reservation, no outbound, Fetch list empty until review")
+    notes.push("plan_only: read-only ledger inspect; no reservation; no outbound; Fetch list empty until review")
     for (const query of searchQueries) {
       ops.push({
         capability: DEEPSEEK_SEARCH_CAPABILITY,
@@ -529,45 +861,31 @@ export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
         outcome: "planned",
       })
     }
-    for (const url of fetchTargets) {
+    for (const target of fetchTargets) {
       ops.push({
         capability: DEEPSEEK_FETCH_CAPABILITY,
-        operationKey: fetchOperationKey(url),
-        label: url,
+        operationKey: fetchOperationKey(target.url),
+        label: target.url,
         outcome: "planned",
       })
     }
     if (fetchTargets.length === 0) {
       notes.push("fetch_targets: [] (no Fetch this round; do not raise disallowed licenses to pad)")
     }
-    // Read-only open if ledger exists so summary shows durable counters.
-    let searchAttempts = 0
-    let fetchAttempts = 0
-    let searchReservedMilli = 0
-    let fetchReservedMilli = 0
-    try {
-      const ledger = openPilotLedger(ledgerPath, pilotId)
-      try {
-        searchAttempts = countAttempts(ledger.native, pilotId, DEEPSEEK_SEARCH_CAPABILITY)
-        fetchAttempts = countAttempts(ledger.native, pilotId, DEEPSEEK_FETCH_CAPABILITY)
-        searchReservedMilli = sumReservedMilli(ledger.native, pilotId, DEEPSEEK_SEARCH_CAPABILITY)
-        fetchReservedMilli = sumReservedMilli(ledger.native, pilotId, DEEPSEEK_FETCH_CAPABILITY)
-      } finally {
-        ledger.close()
-      }
-    } catch {
-      notes.push("ledger_absent_or_unreadable_in_plan")
-    }
+    const snap = readPilotLedgerSnapshot(paths.ledgerPath, pilotId)
+    if (snap.note) notes.push(snap.note)
     return {
       pilotId,
       mode: "plan",
-      ledgerPath,
+      projectRoot: paths.projectRoot,
+      ledgerPath: paths.ledgerPath,
+      paidDbPath: paths.paidDbPath,
       searchQueries,
-      fetchTargets,
-      searchAttempts,
-      fetchAttempts,
-      searchReservedMilli,
-      fetchReservedMilli,
+      fetchTargetCount: fetchTargets.length,
+      searchAttempts: snap.searchAttempts,
+      fetchAttempts: snap.fetchAttempts,
+      searchReservedMilli: snap.searchReservedMilli,
+      fetchReservedMilli: snap.fetchReservedMilli,
       ops,
       outboundCalls: 0,
       exitCode: 0,
@@ -575,7 +893,7 @@ export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
     }
   }
 
-  // execute
+  // execute — fixed gates only (no override of 10 / 50 / 5)
   const key = options.readKey ? await options.readKey() : undefined
   const secrets = createMemorySecretStore(key)
   if (!key) {
@@ -583,16 +901,19 @@ export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
     exitCode = 2
     notes.push("missing_api_key: zero outbound, zero new reservations")
     secrets.clear()
+    const snap = readPilotLedgerSnapshot(paths.ledgerPath, pilotId)
     return {
       pilotId,
       mode: "execute",
-      ledgerPath,
+      projectRoot: paths.projectRoot,
+      ledgerPath: paths.ledgerPath,
+      paidDbPath: paths.paidDbPath,
       searchQueries,
-      fetchTargets,
-      searchAttempts: 0,
-      fetchAttempts: 0,
-      searchReservedMilli: 0,
-      fetchReservedMilli: 0,
+      fetchTargetCount: fetchTargets.length,
+      searchAttempts: snap.searchAttempts,
+      fetchAttempts: snap.fetchAttempts,
+      searchReservedMilli: snap.searchReservedMilli,
+      fetchReservedMilli: snap.fetchReservedMilli,
       ops: searchQueries.map(query => ({
         capability: DEEPSEEK_SEARCH_CAPABILITY,
         operationKey: searchOperationKey(query),
@@ -607,13 +928,21 @@ export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
     }
   }
 
-  const ledger = openPilotLedger(ledgerPath, pilotId)
+  // Live network path refused without injectedFetcher when isolation is used;
+  // production execute without mock still requires a key (caller responsibility)
+  // but never accepts path overrides.
+  if (!options.outbound && !options.injectedFetcher) {
+    // Still allow wiring createLiveOutbound for true execute later; zero-net policy
+    // is enforced by operators not supplying a key / not running --execute yet.
+  }
+
+  const ledger = openPilotLedger(paths.ledgerPath, pilotId)
   let disposeLive: (() => void) | undefined
   let outbound = options.outbound
   try {
     if (!outbound) {
       const live = await createLiveOutbound({
-        paidDbPath: options.paidDbPath ?? defaultPaidDbPath(cwd),
+        paidDbPath: paths.paidDbPath,
         secrets,
         injectedFetcher: options.injectedFetcher,
       })
@@ -627,9 +956,6 @@ export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
         pilotId,
         capability: DEEPSEEK_SEARCH_CAPABILITY,
         operationKey,
-        unitMilli,
-        budgetMilli,
-        maxAttempts,
         now: now(),
       })
       if (!reserved.ok) {
@@ -645,23 +971,23 @@ export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
         break
       }
       if (!reserved.fresh) {
-        ops.push({
+        ops.push(restoredOp({
           capability: DEEPSEEK_SEARCH_CAPABILITY,
           operationKey,
           label: query,
-          outcome: "duplicate_skipped",
-          attemptId: reserved.attemptId,
-          errorCode: `duplicate:${reserved.status}`,
-        })
+        }, reserved))
         continue
       }
       outboundCalls += 1
       const result = await outbound.search(query, reserved.attemptId)
       const status: Exclude<AttemptStatus, "reserved"> = result.ok ? "succeeded" : result.unknown ? "unknown" : "failed"
+      const summaryJson = buildResultSummaryJson(result, key)
       finalizeAttempt(ledger.native, {
         attemptId: reserved.attemptId,
         status,
         errorCode: result.errorCode ? sanitizePilotText(result.errorCode, key) : undefined,
+        receiptId: result.receiptId,
+        resultSummaryJson: summaryJson,
         now: now(),
       })
       ops.push({
@@ -671,6 +997,11 @@ export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
         outcome: status,
         attemptId: reserved.attemptId,
         errorCode: result.errorCode ? sanitizePilotText(result.errorCode, key) : undefined,
+        receiptId: result.receiptId,
+        reused: result.reused,
+        billable: result.billable,
+        upstreamResultCount: result.upstreamResultCount,
+        candidates: sanitizeCandidateViews(result.candidates, key),
       })
       if (!result.ok && exitCode === 0) {
         exitCode = 4
@@ -681,22 +1012,34 @@ export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
     if (fetchTargets.length === 0) {
       notes.push("fetch_targets: [] — zero Fetch attempts this round")
     }
-    for (const url of fetchTargets) {
-      const operationKey = fetchOperationKey(url)
+
+    for (const target of fetchTargets) {
+      const operationKey = fetchOperationKey(target.url)
+      try {
+        assertFetchTargetAuthorized(target)
+      } catch (error) {
+        ops.push({
+          capability: DEEPSEEK_FETCH_CAPABILITY,
+          operationKey,
+          label: target.url,
+          outcome: "fetch_refused",
+          errorCode: error instanceof Error ? error.message : "fetch_refused",
+        })
+        failureCode = "fetch_refused"
+        exitCode = 5
+        break
+      }
       const reserved = reserveAttempt(ledger.native, {
         pilotId,
         capability: DEEPSEEK_FETCH_CAPABILITY,
         operationKey,
-        unitMilli,
-        budgetMilli,
-        maxAttempts,
         now: now(),
       })
       if (!reserved.ok) {
         ops.push({
           capability: DEEPSEEK_FETCH_CAPABILITY,
           operationKey,
-          label: url,
+          label: target.url,
           outcome: "reserved_failed",
           errorCode: reserved.code,
         })
@@ -705,41 +1048,50 @@ export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
         break
       }
       if (!reserved.fresh) {
-        ops.push({
+        ops.push(restoredOp({
           capability: DEEPSEEK_FETCH_CAPABILITY,
           operationKey,
-          label: url,
-          outcome: "duplicate_skipped",
-          attemptId: reserved.attemptId,
-          errorCode: `duplicate:${reserved.status}`,
-        })
+          label: target.url,
+        }, reserved))
         continue
       }
       outboundCalls += 1
-      const result = await outbound.fetch(url, reserved.attemptId)
+      const result = await outbound.fetch(target, reserved.attemptId)
       const status: Exclude<AttemptStatus, "reserved"> = result.ok ? "succeeded" : result.unknown ? "unknown" : "failed"
+      const summaryJson = buildResultSummaryJson(result, key)
       finalizeAttempt(ledger.native, {
         attemptId: reserved.attemptId,
         status,
         errorCode: result.errorCode ? sanitizePilotText(result.errorCode, key) : undefined,
+        receiptId: result.receiptId,
+        resultSummaryJson: summaryJson,
         now: now(),
       })
       ops.push({
         capability: DEEPSEEK_FETCH_CAPABILITY,
         operationKey,
-        label: url,
+        label: target.url,
         outcome: status,
         attemptId: reserved.attemptId,
         errorCode: result.errorCode ? sanitizePilotText(result.errorCode, key) : undefined,
+        receiptId: result.receiptId,
+        reused: result.reused,
+        billable: result.billable,
       })
+      if (!result.ok) {
+        exitCode = exitCode === 0 ? 4 : exitCode
+        failureCode = status === "unknown" ? "outbound_unknown" : "outbound_failed"
+      }
     }
 
-    const summary: PilotSummary = {
+    return {
       pilotId,
       mode: "execute",
-      ledgerPath,
+      projectRoot: paths.projectRoot,
+      ledgerPath: paths.ledgerPath,
+      paidDbPath: paths.paidDbPath,
       searchQueries,
-      fetchTargets,
+      fetchTargetCount: fetchTargets.length,
       searchAttempts: countAttempts(ledger.native, pilotId, DEEPSEEK_SEARCH_CAPABILITY),
       fetchAttempts: countAttempts(ledger.native, pilotId, DEEPSEEK_FETCH_CAPABILITY),
       searchReservedMilli: sumReservedMilli(ledger.native, pilotId, DEEPSEEK_SEARCH_CAPABILITY),
@@ -750,7 +1102,6 @@ export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
       failureCode,
       notes,
     }
-    return summary
   } finally {
     secrets.clear()
     disposeLive?.()
@@ -762,9 +1113,6 @@ export interface CliArgs {
   help: boolean
   execute: boolean
   keyFromStdin: boolean
-  ledgerPath?: string
-  paidDbPath?: string
-  pilotId?: string
 }
 
 export function parsePilotArgs(argv: string[]): CliArgs {
@@ -777,14 +1125,10 @@ export function parsePilotArgs(argv: string[]): CliArgs {
       out.execute = true
     } else if (arg === "--key-from-stdin") {
       out.keyFromStdin = true
-    } else if (arg === "--ledger") {
-      out.ledgerPath = argv[++i]
-    } else if (arg === "--paid-db") {
-      out.paidDbPath = argv[++i]
-    } else if (arg === "--pilot-id") {
-      out.pilotId = argv[++i]
     } else if (arg === "--dry-run" || arg === "--plan-only") {
       out.execute = false
+    } else if (arg === "--ledger" || arg === "--paid-db" || arg === "--pilot-id" || arg === "--cwd") {
+      throw new Error(`arg_forbidden:${arg}`)
     } else {
       throw new Error(`unknown_arg:${arg}`)
     }
@@ -801,22 +1145,26 @@ export function printHelp(): void {
     "  node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/deepseek-search-fetch-pilot.ts --execute --key-from-stdin",
     "",
     "Flags:",
-    "  --execute          Allow outbound after atomic attempt reserve (requires key)",
-    "  --key-from-stdin   Read API key once from stdin (no echo if piped from SecureString)",
-    "  --ledger <path>    Override attempt ledger sqlite path",
-    "  --paid-db <path>   Override isolated paid_receipt sqlite path",
-    "  --pilot-id <id>    Override fixed pilot id (default ds-pilot-2026-10-23-r1)",
+    "  --execute          Allow outbound after atomic attempt reserve (requires --key-from-stdin)",
+    "  --key-from-stdin   Read API key once from stdin (required with --execute)",
     "  --plan-only|--dry-run  Force plan mode (default)",
     "",
-    "Windows SecureString → stdin (key never on argv / never on disk):",
+    "Forbidden (isolation contract): --ledger, --paid-db, --pilot-id, --cwd",
+    "Fixed: pilotId=ds-pilot-2026-10-23-r1; attempt≤10; budget 50 milli-CNY; unit 5.",
+    "DBs: <project>/.tmp/deepseek-pilot-2026-10-23/{pilot-attempt-ledger,pilot-paid}.sqlite3",
+    "",
+    "Windows SecureString → stdin (key never on argv / never on disk / never printed):",
     "  $sec = Read-Host -AsSecureString 'DeepSeek API key'",
     "  $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)",
     "  $key = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)",
     "  [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)",
     "  $key | node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/deepseek-search-fetch-pilot.ts --execute --key-from-stdin",
-    "  $key = $null; [GC]::Collect()",
+    "  $key = $null",
+    "  if ($sec -is [IDisposable]) { $sec.Dispose() }",
+    "Note: clearing the PowerShell variable does not guarantee wiping every in-memory",
+    "copy of the plaintext. Limits: not on disk, not on argv, not printed; process exit",
+    "releases the Node heap. Do not claim full memory erasure.",
     "",
-    "Hard gates: attempt≤10/capability (BEGIN IMMEDIATE) AND budget 50 milli-CNY (0.05 CNY).",
     "First round: listed PH/TH Search queries only; Fetch list empty.",
     "Does not read main .data/provider-secrets.json.",
   ]
@@ -827,9 +1175,11 @@ export function summaryForStdout(summary: PilotSummary): Record<string, unknown>
   return {
     pilotId: summary.pilotId,
     mode: summary.mode,
+    projectRoot: summary.projectRoot.replace(/\\/g, "/"),
     ledgerPath: summary.ledgerPath.replace(/\\/g, "/"),
+    paidDbPath: summary.paidDbPath.replace(/\\/g, "/"),
     searchQueryCount: summary.searchQueries.length,
-    fetchTargetCount: summary.fetchTargets.length,
+    fetchTargetCount: summary.fetchTargetCount,
     searchAttempts: summary.searchAttempts,
     fetchAttempts: summary.fetchAttempts,
     searchReservedMilli: summary.searchReservedMilli,
@@ -845,6 +1195,94 @@ export function summaryForStdout(summary: PilotSummary): Record<string, unknown>
       outcome: op.outcome,
       attemptId: op.attemptId ?? null,
       errorCode: op.errorCode ? sanitizePilotText(op.errorCode) : null,
+      receiptId: op.receiptId ?? null,
+      reused: op.reused ?? null,
+      billable: op.billable ?? null,
+      upstreamResultCount: op.upstreamResultCount ?? null,
+      candidates: op.candidates ?? null,
     })),
   }
+}
+
+/** Used by reserve-once worker / tests that need spawn argv without secrets. */
+export function runReserveOnceCli(argv: string[]): number {
+  const args: {
+    projectRoot?: string
+    testIsolationName?: string
+    capability?: PilotCapability
+    operationKey?: string
+  } = {}
+  for (let i = 0; i < argv.length; i += 1) {
+    const a = argv[i]!
+    if (a === "--project-root") args.projectRoot = argv[++i]
+    else if (a === "--test-isolation") args.testIsolationName = argv[++i]
+    else if (a === "--capability") args.capability = argv[++i] as PilotCapability
+    else if (a === "--operation-key") args.operationKey = argv[++i]
+    else throw new Error(`unknown_arg:${a}`)
+  }
+  if (!args.projectRoot || !args.capability || !args.operationKey) {
+    throw new Error("reserve_once_missing_args")
+  }
+  // Worker is mock-isolation only (no live outbound).
+  const paths = resolveFixedPilotPaths(args.projectRoot, args.testIsolationName)
+  if (!args.testIsolationName) {
+    throw new Error("reserve_once_requires_test_isolation")
+  }
+  const ledger = openPilotLedger(paths.ledgerPath, PILOT_ID)
+  try {
+    const result = reserveAttempt(ledger.native, {
+      pilotId: PILOT_ID,
+      capability: args.capability,
+      operationKey: args.operationKey,
+    })
+    process.stdout.write(`${JSON.stringify(result)}\n`)
+    return result.ok && result.fresh ? 0 : 1
+  } finally {
+    ledger.close()
+  }
+}
+
+/** Spawn helper that exercises real reserveAttempt in a child process (async for concurrency). */
+export function spawnReserveOnce(input: {
+  projectRoot: string
+  testIsolationName: string
+  capability: PilotCapability
+  operationKey: string
+  nodeArgs: string[]
+  scriptPath: string
+}): Promise<{ status: number | null, stdout: string, stderr: string }> {
+  return new Promise((resolvePromise) => {
+    const child = spawn(process.execPath, [
+      ...input.nodeArgs,
+      input.scriptPath,
+      "--project-root",
+      input.projectRoot,
+      "--test-isolation",
+      input.testIsolationName,
+      "--capability",
+      input.capability,
+      "--operation-key",
+      input.operationKey,
+    ], {
+      windowsHide: true,
+      cwd: input.projectRoot,
+      env: process.env,
+    })
+    let stdout = ""
+    let stderr = ""
+    child.stdout.setEncoding("utf8")
+    child.stderr.setEncoding("utf8")
+    child.stdout.on("data", (chunk: string) => {
+      stdout += chunk
+    })
+    child.stderr.on("data", (chunk: string) => {
+      stderr += chunk
+    })
+    child.on("error", (err) => {
+      resolvePromise({ status: 1, stdout, stderr: `${stderr}${err.message}` })
+    })
+    child.on("close", (status) => {
+      resolvePromise({ status, stdout, stderr })
+    })
+  })
 }
