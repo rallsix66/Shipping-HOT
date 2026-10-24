@@ -1,5 +1,5 @@
 import { lookup } from "node:dns/promises"
-import { existsSync, mkdirSync, readFileSync, realpathSync } from "node:fs"
+import { closeSync, lstatSync, mkdirSync, openSync, readFileSync, realpathSync } from "node:fs"
 import { isAbsolute, relative, resolve, sep } from "node:path"
 import { parseArgs } from "node:util"
 import NativeDatabase from "better-sqlite3"
@@ -44,7 +44,18 @@ export interface PhM01BudgetState {
   budgetRejections: number
   detailRequests: number
   otherHostRequests: number
+  entryUrlRejections: number
   dns: "not_called" | "ok" | "timed_out" | "aborted" | "failed"
+}
+
+export type PhM01PathKind = "absent" | "link" | "directory" | "file" | "other"
+
+/** Synchronous path gate used before SQLite opens. Tests may inject a fake; the CLI uses the real filesystem. */
+export interface PhM01Io {
+  lstat: (path: string) => PhM01PathKind
+  realpath: (path: string) => string
+  mkdirExclusive: (path: string) => void
+  createFileExclusive: (path: string) => void
 }
 
 export interface PhM01OneshotRequest {
@@ -56,6 +67,7 @@ export interface PhM01OneshotRequest {
   signal?: AbortSignal
   now?: () => Date
   dnsWaitMs?: number
+  io?: PhM01Io
 }
 
 export interface PhM01OneshotSummary {
@@ -76,6 +88,7 @@ export interface PhM01OneshotSummary {
   budgetRejections: number
   detailRequests: number
   otherHostRequests: number
+  entryUrlRejections: number
   recordsRead: number | null
   recordsWritten: number | null
   itemsNew: number | null
@@ -122,7 +135,7 @@ interface RunSnapshot {
 }
 
 function emptyBudget(): PhM01BudgetState {
-  return { httpRequests: 0, lookupCalls: 0, redirectResponses: 0, budgetRejections: 0, detailRequests: 0, otherHostRequests: 0, dns: "not_called" }
+  return { httpRequests: 0, lookupCalls: 0, redirectResponses: 0, budgetRejections: 0, detailRequests: 0, otherHostRequests: 0, entryUrlRejections: 0, dns: "not_called" }
 }
 
 function inertFetch(): IntelFetchDeps {
@@ -167,12 +180,144 @@ export function resolvePhM01Paths(workspace: string, runId: string) {
   return { directory, databasePath }
 }
 
-function assertRealPathContained(workspace: string, directory: string) {
-  const tmp = realpathSync(resolve(workspace, ".tmp"))
-  const realDirectory = realpathSync(directory)
-  const contained = relative(tmp, realDirectory)
-  if (!contained || contained === ".." || contained.startsWith(`..${sep}`) || isAbsolute(contained)) throw new Error("ph_m01_directory_escape")
-  return realDirectory
+const PATH_EXISTS = "ph_m01_eexist"
+
+function nodePathKind(path: string): PhM01PathKind {
+  try {
+    const stat = lstatSync(path)
+    if (stat.isSymbolicLink()) return "link"
+    if (stat.isDirectory()) return "directory"
+    if (stat.isFile()) return "file"
+    return "other"
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return "absent"
+    throw new Error("ph_m01_path_check_failed")
+  }
+}
+
+export const phM01NodeIo: PhM01Io = {
+  lstat: nodePathKind,
+  realpath(path) {
+    try {
+      return realpathSync(path)
+    } catch {
+      throw new Error("ph_m01_path_check_failed")
+    }
+  },
+  mkdirExclusive(path) {
+    try {
+      mkdirSync(path)
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "EEXIST") throw new Error(PATH_EXISTS)
+      throw new Error("ph_m01_directory_create_failed")
+    }
+  },
+  createFileExclusive(path) {
+    let fd: number
+    try {
+      fd = openSync(path, "wx")
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "EEXIST") throw new Error(PATH_EXISTS)
+      throw new Error("ph_m01_database_create_failed")
+    }
+    try {
+      closeSync(fd)
+    } catch {
+      throw new Error("ph_m01_database_create_failed")
+    }
+  },
+}
+
+function pathKind(io: PhM01Io, path: string): PhM01PathKind {
+  try {
+    return io.lstat(path)
+  } catch (error) {
+    if (error instanceof Error && error.message === "ph_m01_path_check_failed") throw error
+    throw new Error("ph_m01_path_check_failed")
+  }
+}
+
+function pathReal(io: PhM01Io, path: string): string {
+  try {
+    return io.realpath(path)
+  } catch (error) {
+    if (error instanceof Error && error.message === "ph_m01_path_check_failed") throw error
+    throw new Error("ph_m01_path_check_failed")
+  }
+}
+
+function assertDirectChild(parent: string, child: string, name: string) {
+  if (relative(parent, child) !== name) throw new Error("ph_m01_path_escape")
+}
+
+/**
+ * Path guarantees: the workspace leaf must be a real directory and its realpath is the project root.
+ * `.tmp` and the run directory must be real direct children, never a symlink, junction, or dangling link.
+ * The run directory uses non-recursive exclusive mkdir; the database uses exclusive `wx` creation.
+ * SQLite opens only after those checks. The ownership lock must name this database realpath.
+ * Limit: this does not close every TOCTOU if a local writer replaces the path after the check and before SQLite opens it.
+ */
+export function isolatePhM01Database(workspace: string, runId: string, io: PhM01Io = phM01NodeIo) {
+  if (!RUN_ID_PATTERN.test(runId)) throw new Error("ph_m01_run_id_invalid")
+  const lexicalRoot = resolve(workspace)
+  const rootKind = pathKind(io, lexicalRoot)
+  if (rootKind === "absent") throw new Error("ph_m01_workspace_missing")
+  if (rootKind === "link") throw new Error("ph_m01_workspace_link")
+  if (rootKind !== "directory") throw new Error("ph_m01_workspace_not_directory")
+  const root = pathReal(io, lexicalRoot)
+  const tmpPath = resolve(root, ".tmp")
+  let tmpKind = pathKind(io, tmpPath)
+  if (tmpKind === "link") throw new Error("ph_m01_tmp_link")
+  if (tmpKind === "file" || tmpKind === "other") throw new Error("ph_m01_tmp_not_directory")
+  if (tmpKind === "absent") {
+    try {
+      io.mkdirExclusive(tmpPath)
+    } catch (error) {
+      if (!(error instanceof Error) || error.message !== PATH_EXISTS) throw error
+    }
+    tmpKind = pathKind(io, tmpPath)
+    if (tmpKind === "link") throw new Error("ph_m01_tmp_link")
+    if (tmpKind !== "directory") throw new Error("ph_m01_tmp_not_directory")
+  }
+  const tmp = pathReal(io, tmpPath)
+  assertDirectChild(root, tmp, ".tmp")
+  const runName = `ph-m01-oneshot-${runId}`
+  const runPath = resolve(tmp, runName)
+  const runKind = pathKind(io, runPath)
+  if (runKind === "link") throw new Error("ph_m01_directory_link")
+  if (runKind !== "absent") {
+    const databaseKind = pathKind(io, resolve(runPath, "ph-m01.sqlite3"))
+    if (databaseKind === "link") throw new Error("ph_m01_database_link")
+    if (databaseKind !== "absent") throw new Error("ph_m01_database_exists")
+    throw new Error("ph_m01_directory_exists")
+  }
+  try {
+    io.mkdirExclusive(runPath)
+  } catch (error) {
+    if (error instanceof Error && error.message === PATH_EXISTS) throw new Error("ph_m01_directory_exists")
+    throw error
+  }
+  const createdKind = pathKind(io, runPath)
+  if (createdKind === "link") throw new Error("ph_m01_directory_link")
+  if (createdKind !== "directory") throw new Error("ph_m01_directory_create_failed")
+  const directory = pathReal(io, runPath)
+  assertDirectChild(tmp, directory, runName)
+  const databaseLexical = resolve(directory, "ph-m01.sqlite3")
+  const databaseKind = pathKind(io, databaseLexical)
+  if (databaseKind === "link") throw new Error("ph_m01_database_link")
+  if (databaseKind !== "absent") throw new Error("ph_m01_database_exists")
+  try {
+    io.createFileExclusive(databaseLexical)
+  } catch (error) {
+    if (error instanceof Error && error.message === PATH_EXISTS) throw new Error("ph_m01_database_exists")
+    throw error
+  }
+  const createdDatabase = pathKind(io, databaseLexical)
+  if (createdDatabase === "link") throw new Error("ph_m01_database_link")
+  if (createdDatabase !== "file") throw new Error("ph_m01_database_create_failed")
+  const databasePath = pathReal(io, databaseLexical)
+  assertDirectChild(directory, databasePath, "ph-m01.sqlite3")
+  return { root, directory, databasePath }
 }
 
 export function createPhM01BoundedFetch(inner: IntelFetchDeps, signal: AbortSignal, dnsWaitMs: number, state = emptyBudget()) {
@@ -213,17 +358,29 @@ export function createPhM01BoundedFetch(inner: IntelFetchDeps, signal: AbortSign
   }
   const transport: ArticleTransport = async (url, addresses, options) => {
     if (signal.aborted) throw new Error("fetch_timeout")
+    assertExactFeedUrl(url, state)
     if (state.httpRequests >= PH_M01_MAX_HTTP_REQUESTS) {
       state.budgetRejections += 1
       throw new Error("ph_m01_http_budget_exhausted")
     }
     state.httpRequests += 1
-    if (url.hostname !== PH_M01_HOST) state.otherHostRequests += 1
-    else if (url.pathname !== "/feed/") state.detailRequests += 1
     const linked = options.signal ? AbortSignal.any([options.signal, signal]) : signal
     try {
       const response = await inner.transport(url, addresses, { ...options, signal: linked })
-      if (REDIRECT_STATUSES.has(response.status)) state.redirectResponses += 1
+      if (REDIRECT_STATUSES.has(response.status)) {
+        state.redirectResponses += 1
+        const location = redirectLocation(response.headers)
+        if (location !== undefined) {
+          let next: URL
+          try {
+            next = new URL(location, url)
+          } catch {
+            state.entryUrlRejections += 1
+            throw new Error("ph_m01_entry_url_rejected")
+          }
+          assertExactFeedUrl(next, state)
+        }
+      }
       return response
     } catch (error) {
       if (signal.aborted) throw new Error("fetch_timeout")
@@ -231,6 +388,22 @@ export function createPhM01BoundedFetch(inner: IntelFetchDeps, signal: AbortSign
     }
   }
   return { fetch: { lookup: lookupHost, transport }, state }
+}
+
+function assertExactFeedUrl(url: URL, state: PhM01BudgetState) {
+  if (url.href !== PH_M01_FEED_URL) {
+    state.entryUrlRejections += 1
+    throw new Error("ph_m01_entry_url_rejected")
+  }
+}
+
+function redirectLocation(headers: Record<string, string | string[] | undefined>) {
+  for (const [key, value] of Object.entries(headers)) {
+    if (key.toLowerCase() !== "location" || value === undefined) continue
+    const first = Array.isArray(value) ? value[0] : value
+    if (first) return first
+  }
+  return undefined
 }
 
 function openDatabase(databasePath: string) {
@@ -283,7 +456,7 @@ function classify(result: SyncResult | undefined, snapshot: RunSnapshot | undefi
   if (state.httpRequests === 0) return { exit: "failed" as const, exitCode: 1 as const, reason: "not_requested" }
   if (!snapshot || snapshot.runCount !== 1) return { exit: "failed" as const, exitCode: 1 as const, reason: "run_count_rejected" }
   if ((snapshot.recordsRead ?? 0) <= 0) return { exit: "failed" as const, exitCode: 1 as const, reason: "empty_result" }
-  if (state.detailRequests > 0 || state.otherHostRequests > 0) return { exit: "failed" as const, exitCode: 1 as const, reason: "detail_or_host_rejected" }
+  if (state.detailRequests > 0 || state.otherHostRequests > 0 || state.entryUrlRejections > 0) return { exit: "failed" as const, exitCode: 1 as const, reason: "detail_or_host_rejected" }
   if (!snapshot || snapshot.descriptionPersisted || snapshot.contentScope !== "metadata_only" || snapshot.enabledCatalogIds.length !== 1 || snapshot.enabledCatalogIds[0] !== PH_M01_CATALOG_ID || snapshot.dateEvidenceRows !== 0) return { exit: "failed" as const, exitCode: 1 as const, reason: "content_scope_rejected" }
   return { exit: "collected" as const, exitCode: 0 as const, reason: "collected" }
 }
@@ -309,6 +482,7 @@ function baseSummary(mode: "plan" | "execute", network: PhM01OneshotSummary["net
     budgetRejections: state.budgetRejections,
     detailRequests: state.detailRequests,
     otherHostRequests: state.otherHostRequests,
+    entryUrlRejections: state.entryUrlRejections,
     recordsRead: null,
     recordsWritten: null,
     itemsNew: null,
@@ -357,13 +531,8 @@ export async function runPhM01Oneshot(request: PhM01OneshotRequest): Promise<PhM
   selectPhM01({ fetch: bounded.fetch, acquireOwnership: async () => {
     throw new Error("ph_m01_acquire_during_select")
   } })
-  const paths = resolvePhM01Paths(request.workspace, request.runId)
-  if (existsSync(paths.databasePath)) throw new Error("ph_m01_database_exists")
-  if (existsSync(paths.directory)) throw new Error("ph_m01_directory_exists")
-  mkdirSync(paths.directory, { recursive: true })
-  const directory = assertRealPathContained(request.workspace, paths.directory)
-  const databasePath = resolve(directory, "ph-m01.sqlite3")
-  if (existsSync(databasePath)) throw new Error("ph_m01_database_exists")
+  const isolated = isolatePhM01Database(request.workspace, request.runId, request.io ?? phM01NodeIo)
+  const databasePath = isolated.databasePath
   const summary = baseSummary("execute", network, bounded.state)
   summary.databasePath = databasePath
   let native: SqliteHandle | undefined
@@ -415,7 +584,7 @@ export async function runPhM01Oneshot(request: PhM01OneshotRequest): Promise<PhM
     const canonical = realpathSync(databasePath)
     const lockPath = `${canonical}.intel-owner.lock`
     const payload = JSON.parse(readFileSync(lockPath, "utf8")) as { database?: string }
-    summary.lockMatchesDatabase = payload.database === canonical
+    summary.lockMatchesDatabase = payload.database === canonical && canonical === databasePath
     if (!summary.lockMatchesDatabase) throw new Error("ph_m01_lock_database_mismatch")
     job = createIntelCollectJob({ db: opened.database, enabled: false, fetch: bounded.fetch, seeds: [selectPhM01({ fetch: bounded.fetch, acquireOwnership: async () => {
       throw new Error("ph_m01_acquire_during_select")
@@ -455,6 +624,7 @@ export async function runPhM01Oneshot(request: PhM01OneshotRequest): Promise<PhM
     summary.budgetRejections = bounded.state.budgetRejections
     summary.detailRequests = bounded.state.detailRequests
     summary.otherHostRequests = bounded.state.otherHostRequests
+    summary.entryUrlRejections = bounded.state.entryUrlRejections
     await cleanup()
     summary.reason = outcome.reason
     summary.exit = outcome.exit
