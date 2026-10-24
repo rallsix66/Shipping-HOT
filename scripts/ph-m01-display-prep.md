@@ -20,7 +20,9 @@ Start only the display copy, with the guard preloaded before `dist/output/server
 - `SHIPPING_INTEL_ENABLED=false`
 - `PH_M01_DISPLAY_ALLOW` empty
 
-The hook rejects DNS, TCP, TLS, HTTP(S), HTTP/2, `fetch`, UDP send, and `child_process` unless the target is an allow-listed `127.0.0.1` port. This launch allow-list is empty, because the `/feed` read path does not open an outbound socket. SQLite uses a file, not the network. The hook is not an OS firewall: a native addon can still call `connect`, and later JavaScript can replace the wrapped methods.
+The hook rejects DNS, TCP, TLS, HTTP(S), HTTP/2, `fetch`, UDP send, and `child_process` unless the target is an allow-listed `127.0.0.1` port. `dns.lookup("127.0.0.1")` answers from that permit: an omitted or numeric family returns the address and family, and `all: true` returns a one-element address array. Family 6 and conflicting options are rejected. This launch allow-list is empty, because the `/feed` read path does not open an outbound socket. SQLite uses a file, not the network. The hook is not an OS firewall: a native addon can still call `connect`, and later JavaScript can replace the wrapped methods.
+
+Both the application listener and the shutdown listener must pass `server.address()` before the process writes `ph-m01-display-bound`. The address has to be `127.0.0.1` and the port has to be the planned port. A wildcard address, an omitted host, or a different port closes that listener, writes `ph-m01-display-guard-failed`, and exits. Do not treat `HOST` or Nitro's `Listening on` line as the bind check.
 
 Clearing provider keys, turning Runtime off, or seeing unchanged counters is not the network control. The old outbound recorder only writes a log.
 

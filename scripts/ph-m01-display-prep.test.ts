@@ -1,7 +1,9 @@
-import { spawn } from "node:child_process"
+import { execFile, spawn } from "node:child_process"
+import type { ChildProcess } from "node:child_process"
 import type { Buffer } from "node:buffer"
 import { createRequire } from "node:module"
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
+import { connect as connectNet } from "node:net"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import process from "node:process"
@@ -28,6 +30,8 @@ const guard = require("./scripts/lib/ph-m01-display-guard.cjs") as {
   parseAllowList: (value?: string) => Array<{ host: string, port: number }>
   installDisplayEgressGuard: (options: { allow: Array<{ host: string, port: number }>, modules: Record<string, unknown> }) => { restore: () => void }
   installShutdownLatch: (options: { host?: string, port: number, token: string, emit: (signal: string) => void }) => { close: (callback?: () => void) => void, address: () => { port: number } | string | null }
+  confirmListenerBind: (server: { address?: () => { address?: string, port?: number } | string | null, close?: () => void }, expectedPort: number) => { ok: boolean, address?: string, port?: number, actual?: string, expected?: string }
+  installListenerBindGuard: (options?: { net?: typeof import("node:net"), appPort?: number, shutdownPort?: number, exit?: (code: number) => void }) => { restore: () => void }
 }
 
 const roots: string[] = []
@@ -161,6 +165,32 @@ describe("display egress guard", () => {
     const installed = guard.installDisplayEgressGuard({ allow: [], modules })
     const lookup = modules.dns.promises.lookup as unknown as (host: string) => Promise<{ address: string }>
     await expect(lookup("127.0.0.1")).resolves.toMatchObject({ address: "127.0.0.1" })
+    expect(calls).toEqual([])
+    installed.restore()
+  })
+
+  it("returns the loopback lookup shape for callback and promise forms without a resolver call", async () => {
+    const { calls, mark } = callsOf()
+    const { modules } = fakeModules(mark)
+    const installed = guard.installDisplayEgressGuard({ allow: [], modules })
+    const lookup = modules.dns.lookup as (host: string, ...rest: unknown[]) => void
+    const promisesLookup = modules.dns.promises.lookup as unknown as (host: string, options?: unknown) => Promise<unknown>
+    const callbackResult = (args: unknown[]) => new Promise<{ address: unknown, family: unknown }>((resolveDone, reject) => {
+      lookup("127.0.0.1", ...args, (error: NodeJS.ErrnoException | null, address: unknown, family: unknown) => {
+        if (error) reject(error)
+        else resolveDone({ address, family })
+      })
+    })
+    await expect(callbackResult([])).resolves.toEqual({ address: "127.0.0.1", family: 4 })
+    await expect(callbackResult([4])).resolves.toEqual({ address: "127.0.0.1", family: 4 })
+    await expect(callbackResult([{ all: true }])).resolves.toEqual({ address: [{ address: "127.0.0.1", family: 4 }], family: undefined })
+    await expect(callbackResult([{ all: true, family: 4 }])).resolves.toEqual({ address: [{ address: "127.0.0.1", family: 4 }], family: undefined })
+    await expect(promisesLookup("127.0.0.1")).resolves.toEqual({ address: "127.0.0.1", family: 4 })
+    await expect(promisesLookup("127.0.0.1", { all: true })).resolves.toEqual([{ address: "127.0.0.1", family: 4 }])
+    expect(() => lookup("127.0.0.1", 6, () => undefined)).toThrow(guard.DENIED)
+    expect(() => lookup("127.0.0.1", { family: 6, all: true }, () => undefined)).toThrow(/family 6 conflicts/)
+    expect(() => lookup("127.0.0.1", 4, { all: true }, () => undefined)).toThrow(/conflicting options/)
+    expect(() => promisesLookup("127.0.0.1", { family: 6 })).toThrow(guard.DENIED)
     expect(calls).toEqual([])
     installed.restore()
   })
@@ -521,5 +551,237 @@ describe("preload order", () => {
     expect(stdout).toContain("RESULT lookup display_egress_denied")
     expect(stdout).toContain("RESULT fetch display_egress_denied")
     expect(stdout).toContain("RESULT spawn display_egress_denied")
+  })
+})
+
+describe("display bind check", () => {
+  function listeningHosts(port: number): Promise<string[]> {
+    return new Promise((resolveHosts, reject) => {
+      execFile("netstat", ["-ano", "-p", "tcp"], { windowsHide: true }, (error, stdout) => {
+        if (error) {
+          reject(error)
+          return
+        }
+        const hosts: string[] = []
+        for (const line of stdout.split(/\r?\n/)) {
+          const parts = line.trim().split(/\s+/)
+          if (parts[0] !== "TCP" || parts[3] !== "LISTENING") continue
+          const match = /^(.*):(\d+)$/.exec(parts[1] ?? "")
+          if (match && Number(match[2]) === port) hosts.push(match[1])
+        }
+        resolveHosts(hosts)
+      })
+    })
+  }
+
+  async function sendToken(port: number, token: string): Promise<void> {
+    await new Promise<void>((resolveStop) => {
+      const socket = connectNet({ host: "127.0.0.1", port })
+      const timer = setTimeout(() => {
+        socket.destroy()
+        resolveStop()
+      }, 1000)
+      socket.once("error", () => {
+        clearTimeout(timer)
+        resolveStop()
+      })
+      socket.once("connect", () => {
+        socket.end(`${token}\n`)
+      })
+      socket.once("close", () => {
+        clearTimeout(timer)
+        resolveStop()
+      })
+    })
+  }
+
+  async function withGuardChild(body: string, env: NodeJS.ProcessEnv, inspect: (streams: { stdout: () => string, stderr: () => string, exited: Promise<{ code: number | null, signal: NodeJS.Signals | null }> }) => Promise<void>): Promise<void> {
+    const root = workspace()
+    const entry = join(root, "entry.cjs")
+    writeFileSync(entry, body)
+    const child: ChildProcess = spawn(process.execPath, ["--require", join(process.cwd(), "scripts", "lib", "ph-m01-display-guard.cjs"), entry], {
+      cwd: root,
+      env: childEnv({
+        PH_M01_DISPLAY_GUARD: "1",
+        PH_M01_DISPLAY_ALLOW: "",
+        ...env,
+      }),
+      windowsHide: true,
+      stdio: ["ignore", "pipe", "pipe"],
+    })
+    leftovers.push({
+      child,
+      pid: child.pid ?? 0,
+      entry,
+      cwd: root,
+      args: [],
+      startedAt: new Date().toISOString(),
+      shutdownPort: Number(env.PH_M01_DISPLAY_SHUTDOWN_PORT),
+      shutdownToken: String(env.PH_M01_DISPLAY_SHUTDOWN_TOKEN ?? ""),
+      appPort: Number(env.PORT),
+      stdout: "",
+      stderr: "",
+    })
+    let stdout = ""
+    let stderr = ""
+    child.stdout?.on("data", (chunk: Buffer) => {
+      stdout += chunk.toString("utf8")
+    })
+    child.stderr?.on("data", (chunk: Buffer) => {
+      stderr += chunk.toString("utf8")
+    })
+    const exited = new Promise<{ code: number | null, signal: NodeJS.Signals | null }>((resolveExit) => {
+      child.once("exit", (code, signal) => resolveExit({ code, signal }))
+    })
+    let forced = false
+    try {
+      await inspect({ stdout: () => stdout, stderr: () => stderr, exited })
+    } finally {
+      if (child.exitCode === null && !child.signalCode) {
+        await sendToken(Number(env.PH_M01_DISPLAY_SHUTDOWN_PORT), String(env.PH_M01_DISPLAY_SHUTDOWN_TOKEN ?? ""))
+        const stopped = await Promise.race([
+          exited.then(() => true),
+          new Promise<boolean>(resolveStop => setTimeout(() => resolveStop(false), 3000)),
+        ])
+        if (!stopped && child.exitCode === null && !child.signalCode) {
+          forced = true
+          child.kill()
+          await exited
+        }
+      }
+    }
+    if (forced) throw new Error("display guard child required a forced stop")
+  }
+
+  it("closes injected wildcard and wrong-port results before ready", () => {
+    const cases = [
+      { address: "::", port: 9 },
+      { address: "0.0.0.0", port: 9 },
+      { address: "127.0.0.1", port: 10 },
+    ]
+    for (const actual of cases) {
+      let closed = false
+      let ready = false
+      let api = false
+      const result = guard.confirmListenerBind({
+        address: () => ({ address: actual.address, port: actual.port }),
+        close: () => {
+          closed = true
+        },
+      }, 9)
+      if (result.ok) {
+        ready = true
+        api = true
+      }
+      expect(result.ok).toBe(false)
+      expect(closed).toBe(true)
+      expect(ready).toBe(false)
+      expect(api).toBe(false)
+    }
+    expect(guard.confirmListenerBind({ address: () => ({ address: "127.0.0.1", port: 9 }) }, 9)).toEqual({ ok: true, address: "127.0.0.1", port: 9 })
+  })
+
+  it("rejects wildcard listen arguments before opening a socket", () => {
+    const net = require("node:net") as typeof import("node:net")
+    const original = net.Server.prototype.listen
+    let calls = 0
+    net.Server.prototype.listen = function listenCounter(this: InstanceType<typeof net.Server>) {
+      calls += 1
+      return this
+    } as typeof original
+    const installed = guard.installListenerBindGuard({ net, appPort: 9, shutdownPort: 10, exit: () => undefined })
+    try {
+      const server = net.createServer()
+      expect(() => server.listen(9, "::")).toThrow(guard.DENIED)
+      expect(() => server.listen(9, "0.0.0.0")).toThrow(guard.DENIED)
+      expect(() => server.listen(9)).toThrow(/omitted/)
+      expect(() => server.listen({ port: 9, host: "::" })).toThrow(guard.DENIED)
+      expect(calls).toBe(0)
+    } finally {
+      installed.restore()
+      net.Server.prototype.listen = original
+    }
+  })
+
+  it("binds the preloaded app and shutdown listeners to the planned loopback ports", async () => {
+    const appPort = await reserveLoopbackPort()
+    const shutdownPort = await reserveLoopbackPort()
+    const token = createShutdownToken()
+    let outcome: { code: number | null, signal: NodeJS.Signals | null } | undefined
+    await withGuardChild(`
+      const http = require("node:http");
+      const fs = require("node:fs");
+      const server = http.createServer((req, res) => res.end("ok"));
+      process.on("SIGTERM", () => server.close(() => process.exit(0)));
+      server.listen(Number(process.env.PORT), "127.0.0.1", () => {
+        const address = server.address();
+        fs.writeSync(1, "app-address " + address.address + ":" + address.port + "\\n");
+      });
+    `, {
+      PORT: String(appPort),
+      NITRO_PORT: String(appPort),
+      PH_M01_DISPLAY_SHUTDOWN_PORT: String(shutdownPort),
+      PH_M01_DISPLAY_SHUTDOWN_TOKEN: token,
+    }, async ({ stdout, exited }) => {
+      const started = Date.now()
+      while (!stdout().includes(`ph-m01-display-bound app=127.0.0.1:${appPort} shutdown=127.0.0.1:${shutdownPort}`) || !stdout().includes(`app-address 127.0.0.1:${appPort}`)) {
+        if (Date.now() - started > 5000) throw new Error(`bind line missing\n${stdout()}`)
+        await new Promise(resolveWait => setTimeout(resolveWait, 50))
+      }
+      expect(await listeningHosts(appPort)).toEqual(["127.0.0.1"])
+      expect(await listeningHosts(shutdownPort)).toEqual(["127.0.0.1"])
+      await sendToken(shutdownPort, token)
+      outcome = await exited
+    })
+    expect(outcome).toEqual({ code: 0, signal: null })
+    expect(await listeningHosts(appPort)).toEqual([])
+    expect(await listeningHosts(shutdownPort)).toEqual([])
+  })
+
+  it("stops an injected bad address before ready or the API callback", async () => {
+    const modes = ["wildcard6", "wildcard4", "port"]
+    for (const mode of modes) {
+      const appPort = await reserveLoopbackPort()
+      const shutdownPort = await reserveLoopbackPort()
+      const token = createShutdownToken()
+      let outcome: { code: number | null, signal: NodeJS.Signals | null } | undefined
+      let output = ""
+      let errors = ""
+      await withGuardChild(`
+        const http = require("node:http");
+        const fs = require("node:fs");
+        const server = http.createServer((req, res) => res.end("ok"));
+        const original = server.address.bind(server);
+        server.address = function () {
+          const actual = original();
+          if (!actual || typeof actual === "string") return actual;
+          if (${JSON.stringify(mode)} === "wildcard6") return { address: "::", family: "IPv6", port: actual.port };
+          if (${JSON.stringify(mode)} === "wildcard4") return { address: "0.0.0.0", family: "IPv4", port: actual.port };
+          return { address: "127.0.0.1", family: "IPv4", port: actual.port + 1 };
+        };
+        server.listen(Number(process.env.PORT), "127.0.0.1", () => fs.writeSync(1, "API-START\\n"));
+      `, {
+        PORT: String(appPort),
+        NITRO_PORT: String(appPort),
+        PH_M01_DISPLAY_SHUTDOWN_PORT: String(shutdownPort),
+        PH_M01_DISPLAY_SHUTDOWN_TOKEN: token,
+      }, async ({ stdout, stderr, exited }) => {
+        outcome = await Promise.race([
+          exited,
+          new Promise<{ code: number | null, signal: NodeJS.Signals | null }>((_resolveExit, reject) => {
+            setTimeout(() => reject(new Error(`injected ${mode} did not exit\n${stdout()}\n${stderr()}`)), 5000)
+          }),
+        ])
+        output = stdout()
+        errors = stderr()
+      })
+      expect(outcome?.code).toBe(1)
+      expect(outcome?.signal).toBeNull()
+      expect(output).not.toContain("ph-m01-display-bound")
+      expect(output).not.toContain("API-START")
+      expect(errors).toContain("ph-m01-display-guard-failed")
+      expect(await listeningHosts(appPort)).toEqual([])
+      expect(await listeningHosts(shutdownPort)).toEqual([])
+    }
   })
 })

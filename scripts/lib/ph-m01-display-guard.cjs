@@ -87,13 +87,153 @@ function callbackOf(args) {
   return undefined
 }
 
+function lookupRequest(args) {
+  const callback = callbackOf(args)
+  const end = callback ? args.lastIndexOf(callback) : args.length
+  const inputs = []
+  for (let index = 0; index < end; index += 1) {
+    if (args[index] !== undefined) inputs.push(args[index])
+  }
+  if (inputs.length > 1) throw denied("dns.lookup received conflicting options")
+  const options = inputs.length === 0 ? null : inputs[0]
+  if (options == null) return { all: false }
+  if (typeof options === "number") {
+    if (options !== 0 && options !== 4) {
+      throw denied(options === 6
+        ? "dns.lookup family 6 conflicts with 127.0.0.1"
+        : `dns.lookup family ${options} is invalid`)
+    }
+    return { all: false }
+  }
+  if (typeof options !== "object" || Array.isArray(options)) throw denied("dns.lookup options are invalid")
+  if (options.all !== undefined && typeof options.all !== "boolean") throw denied("dns.lookup all option conflicts with the boolean form")
+  const family = options.family == null ? 0 : options.family
+  if (typeof family !== "number" || !Number.isInteger(family) || (family !== 0 && family !== 4 && family !== 6)) {
+    throw denied(`dns.lookup family ${String(family)} is invalid`)
+  }
+  if (family === 6) throw denied("dns.lookup family 6 conflicts with 127.0.0.1")
+  if (options.hints !== undefined && (!Number.isInteger(options.hints) || options.hints < 0)) throw denied("dns.lookup hints conflict with 127.0.0.1")
+  return { all: options.all === true }
+}
+
 function localIpLookup(args) {
+  const request = lookupRequest(args)
   const callback = callbackOf(args)
   if (callback) {
-    process.nextTick(() => callback(null, "127.0.0.1", 4))
+    process.nextTick(() => {
+      if (request.all) callback(null, [{ address: "127.0.0.1", family: 4 }])
+      else callback(null, "127.0.0.1", 4)
+    })
     return undefined
   }
+  if (request.all) return Promise.resolve([{ address: "127.0.0.1", family: 4 }])
   return Promise.resolve({ address: "127.0.0.1", family: 4 })
+}
+
+function confirmListenerBind(server, expectedPort) {
+  const address = server && typeof server.address === "function" ? server.address() : null
+  const actualHost = address && typeof address === "object" ? address.address : undefined
+  const actualPort = address && typeof address === "object" ? address.port : undefined
+  const ephemeral = expectedPort === 0
+  const portMatches = ephemeral
+    ? Number.isInteger(actualPort) && actualPort >= 1 && actualPort <= 65535
+    : actualPort === expectedPort
+  if (actualHost === "127.0.0.1" && portMatches) return { ok: true, address: "127.0.0.1", port: actualPort }
+  if (server && typeof server.close === "function") {
+    try {
+      server.close()
+    } catch {
+      // The rejected listener may already be closing.
+    }
+  }
+  const actual = address && typeof address === "object" ? `${String(actualHost)}:${String(actualPort)}` : String(address)
+  const expected = ephemeral ? "127.0.0.1:<assigned>" : `127.0.0.1:${expectedPort}`
+  return { ok: false, actual, expected }
+}
+
+function readListenPlan(args, ports) {
+  if (args.length === 0) throw denied("listen host is omitted")
+  let port
+  let host
+  if (typeof args[0] === "object" && args[0]) {
+    if (args[0].path || args[0].fd != null || args[0].handle) throw denied("non-tcp listen is not permitted")
+    port = args[0].port
+    host = args[0].host
+  } else if (typeof args[0] === "number") {
+    port = args[0]
+    host = typeof args[1] === "string" ? args[1] : undefined
+  } else {
+    throw denied("listen arguments are not a loopback port")
+  }
+  if (host !== "127.0.0.1") throw denied(`listen host ${host == null ? "(omitted)" : host} is not 127.0.0.1`)
+  if (!Number.isInteger(port) || port < 0 || port > 65535) throw denied(`listen port ${String(port)} is invalid`)
+  const appPort = ports.appPort
+  const shutdownPort = ports.shutdownPort
+  let role
+  if (Number.isInteger(shutdownPort) && port === shutdownPort) role = "shutdown"
+  else if (Number.isInteger(appPort) && port === appPort) role = "app"
+  else if (port === 0 && !Number.isInteger(appPort)) role = "app"
+  else throw denied(`listen port ${port} conflicts with planned ports app=${String(appPort)} shutdown=${String(shutdownPort)}`)
+  return { role, port }
+}
+
+function installListenerBindGuard(options = {}) {
+  const netModule = options.net ?? require("node:net")
+  const prototype = netModule.Server?.prototype
+  if (!prototype || typeof prototype.listen !== "function") throw denied("server listen hook is unavailable")
+  const write = options.write ?? (line => fs.writeSync(1, line))
+  const writeError = options.writeError ?? (line => fs.writeSync(2, line))
+  const exit = options.exit ?? (code => process.exit(code))
+  const portValue = options.appPort ?? process.env.PORT
+  const nitroPort = options.nitroPort ?? process.env.NITRO_PORT
+  if (portValue != null && portValue !== "" && nitroPort != null && nitroPort !== "" && Number(portValue) !== Number(nitroPort)) {
+    throw denied("PORT conflicts with NITRO_PORT")
+  }
+  const ports = {
+    appPort: portValue == null || portValue === "" ? Number.NaN : Number(portValue),
+    shutdownPort: options.shutdownPort == null ? Number(process.env.PH_M01_DISPLAY_SHUTDOWN_PORT) : Number(options.shutdownPort),
+  }
+  const original = prototype.listen
+  const open = new Set()
+  const confirmed = {}
+  let announced = false
+  function rejectBind(result) {
+    for (const server of open) {
+      try {
+        server.close()
+      } catch {
+        // Closing a rejected listener is best-effort before the process exits.
+      }
+    }
+    writeError(`ph-m01-display-guard-failed bind ${result.actual} is not ${result.expected}\n`)
+    exit(1)
+  }
+  function announce() {
+    if (announced || !confirmed.app || !confirmed.shutdown) return
+    announced = true
+    write(`ph-m01-display-bound app=127.0.0.1:${confirmed.app.port} shutdown=127.0.0.1:${confirmed.shutdown.port}\n`)
+  }
+  prototype.listen = function guardedListen(...args) {
+    const callback = typeof args[args.length - 1] === "function" ? args.pop() : undefined
+    const plan = readListenPlan(args, ports)
+    open.add(this)
+    this.prependOnceListener("listening", () => {
+      const result = confirmListenerBind(this, plan.port)
+      if (!result.ok) {
+        rejectBind(result)
+        return
+      }
+      confirmed[plan.role] = result
+      announce()
+      if (callback) callback()
+    })
+    return original.apply(this, args)
+  }
+  return {
+    restore() {
+      prototype.listen = original
+    },
+  }
 }
 
 function installDisplayEgressGuard(options = {}) {
@@ -311,6 +451,7 @@ function installPreload() {
   }
   let server
   try {
+    installListenerBindGuard()
     server = installShutdownLatch({
       port,
       token,
@@ -322,11 +463,6 @@ function installPreload() {
     fs.writeSync(2, `ph-m01-display-guard-failed ${error instanceof Error ? error.message : String(error)}\n`)
     process.exit(1)
   }
-  server.once("listening", () => {
-    const address = server.address()
-    const bound = address && typeof address === "object" ? address.port : port
-    fs.writeSync(1, `ph-m01-display-guard-listening ${bound}\n`)
-  })
   server.once("error", (error) => {
     fs.writeSync(2, `ph-m01-display-guard-failed ${error.message}\n`)
     process.exit(1)
@@ -338,7 +474,9 @@ if (process.env.PH_M01_DISPLAY_GUARD === "1") installPreload()
 
 module.exports = {
   DENIED,
+  confirmListenerBind,
   installDisplayEgressGuard,
+  installListenerBindGuard,
   installShutdownLatch,
   parseAllowList,
 }
