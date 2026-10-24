@@ -1,0 +1,75 @@
+{
+  "schema": "ds-pilot-candidate-dedupe-v1",
+  "pilotId": "ds-pilot-2026-10-23-r1",
+  "generatedAt": "2026-10-24T11:30:00+08:00",
+  "dedupeRule": "exact_url_trim_only_no_scheme_host_path_alias_merge",
+  "receipts": {
+    "search9": {
+      "operationKey": "search:3fc560fdf5c1c88bbfbad2a9a826e646",
+      "receiptId": "676978c3-52f4-4055-9e7d-a70f216bdba0",
+      "status": "succeeded",
+      "savedCount": 10
+    },
+    "search10": {
+      "operationKey": "search:623d1734d7db398bef928df98243d5f3",
+      "receiptId": "94bb33fe-515c-4d0f-97bd-1b335830d742",
+      "status": "succeeded",
+      "savedCount": 10
+    }
+  },
+  "counts": {
+    "savedSearch9": 10,
+    "savedSearch10": 10,
+    "internalDuplicateUrlsSearch9": 0,
+    "internalDuplicateUrlsSearch10": 0,
+    "crossSearchDuplicateUrls": 2,
+    "uniqueUrlTotal": 18
+  },
+  "crossSearchDuplicateUrls": [
+    "https://www.mpa.gov.sg/media-centre/details/port-marine-notice-no.-54-of-2026---navigation--restrictions-under-the-rts-link",
+    "https://www.mpa.gov.sg/media-centre/details/port-marine-circular-no-10-of-2026-submission-of-accurate-information-for-vessel-port-calls-and-port-clearance"
+  ],
+  "sameUrlDifferentTitleConflicts": [],
+  "suspectedTopicOverlapNotMerged": [
+    {
+      "note": "Third-party news on false vessel/port-call data (Splash247 vs Ship&Bunker) — distinct URLs, not merged.",
+      "urls": [
+        "https://splash247.com/singapore-warns-shipowners-over-false-vessel-data-at-port-calls/",
+        "https://shipandbunker.com/news/apac/111394-singapore-warns-port-users-against-false-vessel-identity-and-ownership-data-in-port-call-filings#1"
+      ]
+    },
+    {
+      "note": "Two Manifold Times haze-related articles — distinct URLs.",
+      "urls": [
+        "https://www.manifoldtimes.com/news/singapore-mpa-urges-maritime-firms-to-prepare-for-potential-haze-with-plan/#mvp-tab-col2",
+        "https://www.manifoldtimes.com/news/singapore-mpa-alerts-maritime-sector-to-potential-reduced-visibility-amid-haze/"
+      ]
+    },
+    {
+      "note": "PMC 03 slug uses dotted \"no.-03\" path; PMC 10 uses different slug — not treated as same URL.",
+      "urls": [
+        "https://www.mpa.gov.sg/media-centre/details/port-marine-circular-no.-03-of-2026--maritime-declaration-of-health",
+        "https://www.mpa.gov.sg/media-centre/details/port-marine-circular-no-10-of-2026-submission-of-accurate-information-for-vessel-port-calls-and-port-clearance"
+      ]
+    }
+  ],
+  "aggregateByClassification": {
+    "officialMpaHostUrlCount": 11,
+    "specificNoticeOrCircularCount": 6,
+    "businessClassCounts": {
+      "declaration_compliance": 4,
+      "general_admin_or_program_info": 3,
+      "general_ops_hazard_or_safety_advisory": 4,
+      "port_ops_disruption_or_restriction": 4,
+      "uncertain": 2,
+      "unrelated_or_low_signal": 1
+    },
+    "pageTypeCounts": {
+      "listing_hub": 1,
+      "news_report": 7,
+      "pdf_download": 1,
+      "section_or_program_page": 3,
+      "specific_notice_or_circular": 6
+    }
+  }
+}
