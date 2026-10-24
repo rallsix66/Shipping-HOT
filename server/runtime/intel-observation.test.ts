@@ -178,3 +178,57 @@ it("rejects a retained/outside directory, prior DB and non-real mode before crea
   expect(existsSync(resolve(fresh, ".data"))).toBe(false)
   expect(readFileSync(resolve(old, ".data/retained.txt"), "utf8")).toBe("untouched")
 })
+
+it("stops after two naturally due PH-M01 rounds, keeps metadata title blocks, and treats an unchanged second feed as new=0", async () => {
+  const fetch = vi.fn<ArticleTransport>(async () => ({ status: 200, headers: { "content-type": "application/rss+xml" }, body: `<rss version="2.0"><channel><title>Offline PortCalls</title><item><title>Offline synthetic port call</title><link>https://portcalls.com/synthetic-one</link><pubDate>Mon, 19 Oct 2026 00:00:00 GMT</pubDate><description>${"Synthetic content. ".repeat(80)}</description></item></channel></rss>` }))
+  const f = await start(fetch, config({ sourceIds: ["PH-M01"], maxHttpRequests: 8, stopAfterSuccessfulRounds: 2 }))
+  expect(fetch).not.toHaveBeenCalled()
+  await vi.advanceTimersByTimeAsync(15 * minute)
+  expect(fetch).toHaveBeenCalledTimes(1)
+  expect(fetch.mock.calls[0][0].href).toBe("https://portcalls.com/feed/")
+  expect(read(f.session.databasePath, "SELECT status, next_sync_at FROM intel_source WHERE id = 'intel:ph-m01'")).toEqual([{ status: "ok", next_sync_at: new Date(initial + 75 * minute).toISOString() }])
+  await vi.advanceTimersByTimeAsync(59 * minute)
+  expect(fetch).toHaveBeenCalledTimes(1)
+  await vi.advanceTimersByTimeAsync(minute)
+  expect(fetch.mock.calls.map(call => call[0].href)).toEqual(["https://portcalls.com/feed/", "https://portcalls.com/feed/"])
+  const result = await f.session.done
+  expect(result).toMatchObject({ reason: "rounds_complete", successfulRounds: 2, httpRequests: 2, dnsRequests: 2, hardAborted: false, ownershipReleased: true, readOnlyReopen: true })
+  expect(read(f.session.databasePath, "SELECT status, items_seen, items_new, items_revised FROM intel_fetch_run ORDER BY started_at")).toEqual([
+    { status: "ok_items", items_seen: 1, items_new: 1, items_revised: 0 },
+    { status: "ok_items", items_seen: 1, items_new: 0, items_revised: 0 },
+  ])
+  expect(read(f.session.databasePath, "SELECT content_scope FROM intel_item_version")).toEqual([{ content_scope: "metadata_only" }])
+  expect(read(f.session.databasePath, "SELECT DISTINCT block_type FROM intel_item_block")).toEqual([{ block_type: "title" }])
+  expect(readFileSync(resolve(f.dir, "events.jsonl"), "utf8")).not.toContain("Synthetic content.")
+  expect(read(f.session.databasePath, "SELECT ended_at FROM intel_executor")[0].ended_at).not.toBeNull()
+  expect(existsSync(`${f.session.databasePath}.intel-owner.lock`)).toBe(false)
+  expect(() => validateObservationDirectory(workspace, f.dir)).toThrow("run_exists")
+})
+
+it("records the first failed round and does not dispatch another collection", async () => {
+  const fetch = transport().mockResolvedValue({ status: 503, headers: {}, body: "unavailable" })
+  const f = await start(fetch, config({ sourceIds: ["PH-M01"], maxHttpRequests: 8, stopAfterSuccessfulRounds: 2 }))
+  await vi.advanceTimersByTimeAsync(15 * minute)
+  const result = await f.session.done
+  expect(result).toMatchObject({ reason: "round_failed", successfulRounds: 0, httpRequests: 1, ownershipReleased: true, readOnlyReopen: true })
+  expect(read(f.session.databasePath, "SELECT status FROM intel_fetch_run")).toEqual([{ status: "failed" }])
+  await vi.advanceTimersByTimeAsync(60 * minute)
+  expect(fetch).toHaveBeenCalledTimes(1)
+  expect(read(f.session.databasePath, "SELECT ended_at FROM intel_executor")[0].ended_at).not.toBeNull()
+  expect(existsSync(`${f.session.databasePath}.intel-owner.lock`)).toBe(false)
+})
+
+it("does not copy the Maersk header limit onto PH-M01 or admit that source into a PH-M01 manifest", async () => {
+  const ph = await start(transport(), config({ sourceIds: ["PH-M01"], maxHttpRequests: 0 }))
+  const phManifest = JSON.parse(readFileSync(resolve(ph.dir, "manifest.json"), "utf8"))
+  expect(phManifest.sources.map((row: { catalogId: string }) => row.catalogId)).toEqual(["PH-M01"])
+  expect(phManifest.sources[0]).toMatchObject({ url: "https://portcalls.com/feed/", persistence: "disallowed", enabled: true })
+  expect(phManifest.sources[0].sourceHeaderLimit).toBeUndefined()
+  expect(await ph.session.done).toMatchObject({ reason: "http_budget", httpRequests: 0 })
+  session = undefined
+  const maersk = await start(transport(), config({ sourceIds: ["XX-K01"], maxHttpRequests: 0 }))
+  const manifest = JSON.parse(readFileSync(resolve(maersk.dir, "manifest.json"), "utf8"))
+  expect(manifest.sources).toHaveLength(1)
+  expect(manifest.sources[0]).toMatchObject({ catalogId: "XX-K01", sourceHeaderLimit: { sourceId: "intel:xx-k01", url: "https://www.maersk.com/news", maxHeaderSize: 32768 } })
+  expect(await maersk.session.done).toMatchObject({ reason: "http_budget", httpRequests: 0 })
+})

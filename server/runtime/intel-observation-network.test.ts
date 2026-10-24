@@ -1,8 +1,10 @@
 import { expect, it, vi } from "vitest"
 import { type IntelObservationConfig, createObservationNetwork, validateObservationConfig } from "#/runtime/intel-observation-network"
+import { PRODUCTION_ALLOW_SELECT_CATALOG_IDS } from "#/runtime/intel-allow-select"
 import { type ArticleLookup, type ArticleTransport, secureFetchArticle } from "#/services/article-fetch-security"
 import { sourcePolicy } from "#/intel/collect"
 import { intelSourceSeeds } from "#/intel/sources"
+import { registeredIntelSources } from "#/intel/sources/registry"
 
 const seed = intelSourceSeeds[0]
 const url = new URL(seed.url)
@@ -149,4 +151,44 @@ it("a deadline still aborts the final reserved request while a budget stop is dr
   await expect(request).rejects.toThrow("deadline abort")
   expect(abortSignal?.aborted).toBe(true)
   expect(f.guard.snapshot()).toMatchObject({ reason: "http_budget", stopReasons: ["http_budget", "deadline"], httpRequests: 1, hardAborted: true })
+})
+
+it("accepts every allow-select id, including the original pair and PH-M01, and rejects excluded or repeated selections", () => {
+  expect(validateObservationConfig({ ...config(), sourceIds: [...PRODUCTION_ALLOW_SELECT_CATALOG_IDS] }).sourceIds).toEqual([...PRODUCTION_ALLOW_SELECT_CATALOG_IDS])
+  expect(validateObservationConfig({ ...config(), sourceIds: ["TH-W01", "ID-W01"] }).sourceIds).toEqual(["TH-W01", "ID-W01"])
+  expect(validateObservationConfig({ ...config(), sourceIds: ["PH-M01"], stopAfterSuccessfulRounds: 2 })).toMatchObject({ sourceIds: ["PH-M01"], stopAfterSuccessfulRounds: 2 })
+  for (const sourceIds of [["CN-T01"], ["XX-M01"], ["MY-P03"], ["PH-M01", "PH-M01"], ["PH-M01", "CN-T01"], ["ID-W01", "XX-M01"], ["TH-W01", "MY-P03"]]) {
+    expect(() => validateObservationConfig({ ...config(), sourceIds })).toThrow("sources_invalid")
+  }
+  expect(() => validateObservationConfig({ ...config(), stopAfterSuccessfulRounds: 0 as never })).toThrow("round_bound_invalid")
+  expect(() => validateObservationConfig({ ...config(), stopAfterSuccessfulRounds: 3 as never })).toThrow("round_bound_invalid")
+})
+
+it("permits only the selected entry URL and spends no DNS or HTTP on an unselected source", async () => {
+  const ph = registeredIntelSources.find(row => row.catalogId === "PH-M01")!
+  const selected = fixture(3, { sourceIds: ["PH-M01"] })
+  await selected.guard.fetch.transport(new URL(ph.url), addresses, transportOptions)
+  expect(selected.transport).toHaveBeenCalledTimes(1)
+  expect(selected.lookup).not.toHaveBeenCalled()
+  for (const seed of registeredIntelSources.filter(row => row.catalogId !== "PH-M01")) {
+    const blockedUrl = fixture(3, { sourceIds: ["PH-M01"] })
+    await expect(blockedUrl.guard.fetch.transport(new URL(seed.url), addresses, transportOptions)).rejects.toThrow("url_out_of_scope")
+    expect(blockedUrl.transport).not.toHaveBeenCalled()
+    if (new URL(seed.url).hostname !== new URL(ph.url).hostname) {
+      const blockedHost = fixture(3, { sourceIds: ["PH-M01"] })
+      await expect(blockedHost.guard.fetch.lookup(new URL(seed.url).hostname)).rejects.toThrow("host_out_of_scope")
+      expect(blockedHost.lookup).not.toHaveBeenCalled()
+    }
+  }
+  expect(() => validateObservationConfig({ ...config(), sourceIds: ["PH-M01"], approvedRedirects: [{ from: ph.url, to: "https://www.maersk.com/news" }] })).toThrow("redirects_invalid")
+  expect(() => validateObservationConfig({ ...config(), sourceIds: ["PH-M01"], approvedRedirects: [{ from: intelSourceSeeds[0].url, to: "https://www.tmd.go.th/en/api/xml/other" }] })).toThrow("redirects_invalid")
+  const approved = validateObservationConfig({ ...config(), sourceIds: ["PH-M01"], approvedRedirects: [{ from: ph.url, to: "https://portcalls.com/feed/page" }] })
+  expect(approved.approvedRedirects).toEqual([{ from: ph.url, to: "https://portcalls.com/feed/page" }])
+  const maersk = registeredIntelSources.find(row => row.catalogId === "XX-K01")!
+  const rejected = fixture(1, { sourceIds: ["XX-K01"] })
+  await expect(rejected.guard.fetch.transport(new URL(ph.url), addresses, transportOptions)).rejects.toThrow("url_out_of_scope")
+  expect(rejected.transport).not.toHaveBeenCalled()
+  const maerskOnly = fixture(1, { sourceIds: ["XX-K01"] })
+  await maerskOnly.guard.fetch.transport(new URL(maersk.url), addresses, transportOptions)
+  expect(maerskOnly.transport).toHaveBeenCalledTimes(1)
 })

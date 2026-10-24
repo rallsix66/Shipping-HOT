@@ -10,7 +10,7 @@ const scriptWorkspace = fileURLToPath(new URL("../", moduleUrl))
 async function main() {
   const input = parseObservationArguments(process.argv.slice(2))
   if (input.help) {
-    console.log("Explicit observation only: --execute --run-id <new-id> --sources TH-W01,ID-W01 --duration-ms <1..86400000> --max-http-requests <0..200> [--approved-redirect '{\"from\":\"https://...\",\"to\":\"https://...\"}']\nFrequency: existing 15min job tick / adaptive15..60min. No args never starts. A real run needs separate user approval; this implementation's acceptance is offline only.")
+    console.log("Explicit observation only: --execute --run-id <new-id> --sources <allow-select catalog ids> --duration-ms <1..86400000> --max-http-requests <0..200> [--stop-after-successful-rounds 1|2] [--approved-redirect '{\"from\":\"https://...\",\"to\":\"https://...\"}']\nFrequency: existing 15min job tick / adaptive15..60min. One run permits only the sources named this time. The round bound stops after that many successful source rounds, or on the first failed round; omitting it keeps the duration window. No args never starts. A real run needs separate user approval; this implementation's acceptance is offline only.")
     return
   }
   const launch = prepareObservationLaunch(input, scriptWorkspace)

@@ -41,12 +41,14 @@ async function runWorker(latch: WorkerStopLatch) {
     // Read metadata from this already-validated workspace only; do not load system/user Git configuration.
     const gitEnvironment = { ...process.env, GIT_CONFIG_NOSYSTEM: "1", GIT_CONFIG_GLOBAL: join(environmentIsolation.home, ".gitconfig") }
     const readGit = (args: string[]) => execFileSync("git", ["-c", `safe.directory=${root.replace(/\\/g, "/")}`, ...args], { cwd: root, encoding: "utf8", env: gitEnvironment }).trim()
-    const codeFiles = ["scripts/r2-intel-observe.ts", "scripts/r2-intel-observe-options.ts", "scripts/r2-intel-observe-environment.ts", "scripts/r2-intel-observe-worker.ts", "scripts/r2-intel-observe-worker-startup.ts", "scripts/tsx-alias-loader.mjs", "server/runtime/intel-observation.ts", "server/runtime/intel-observation-network.ts", "server/runtime/intel-collect-job.ts", "server/runtime/intel-production.ts", "server/runtime/bootstrap.ts", "server/runtime/background-runtime.ts", "server/services/article-fetch-security.ts", "server/intel/collect.ts", "server/intel/sources.ts"]
+    const codeFiles = ["scripts/r2-intel-observe.ts", "scripts/r2-intel-observe-options.ts", "scripts/r2-intel-observe-environment.ts", "scripts/r2-intel-observe-worker.ts", "scripts/r2-intel-observe-worker-startup.ts", "scripts/tsx-alias-loader.mjs", "server/runtime/intel-observation.ts", "server/runtime/intel-observation-network.ts", "server/runtime/intel-allow-select.ts", "server/runtime/intel-collect-job.ts", "server/runtime/intel-production.ts", "server/runtime/bootstrap.ts", "server/runtime/background-runtime.ts", "server/services/article-fetch-security.ts", "server/intel/collect.ts", "server/intel/sources.ts", "server/intel/sources/registry.ts", "server/intel/sources/rss-candidates.ts", "server/intel/sources/html-index-candidates.ts"]
     const codeIdentity = { head: readGit(["rev-parse", "HEAD"]), worktreeDirty: Boolean(readGit(["status", "--porcelain"])), files: Object.fromEntries(codeFiles.map(file => [file, createHash("sha256").update(readFileSync(join(root, file))).digest("hex")])), environmentKeys: Object.keys(process.env).sort(), environmentIsolation: { ...environmentIsolation, moduleGlobalPaths, homedirMatches: true, gitConfig: "repository-only; system/global config disabled" } }
     const session = await startIntelObservation({ workspace: root, directory, config, evidenceMode: "live", codeIdentity, stopSignal, fetch: { lookup: async host => (await lookup(host, { all: true })).map(row => ({ address: row.address, family: row.family as 4 | 6 })), transport: defaultTransport } })
     const result = await session.done
     console.log(JSON.stringify({ directory, reason: result.reason, httpRequests: result.httpRequests, continuous24hAcceptance: result.continuous24hAcceptance }))
-    process.exitCode = result.reason === "deadline" ? 0 : 2
+    const bounded = config.stopAfterSuccessfulRounds !== undefined
+    const reason = String(result.reason ?? "")
+    process.exitCode = reason === "rounds_complete" || (reason === "deadline" && !bounded) ? 0 : reason === "deadline" && bounded ? 3 : 2
   })
 }
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {

@@ -1,3 +1,9 @@
+## 2026-10-24 — 观察执行器接入 19 源允许选择（默认关闭）
+
+- 现有 `intel-observation` 的资格、入口 URL 和重定向边界改为现役 `PRODUCTION_ALLOW_SELECT_CATALOG_IDS` 与 `registeredIntelSources`。一次运行只放开本次显式选中的入口；CN-T01、XX-M01、MY-P03 仍拒绝。Maersk `sourceHeaderLimit` 仍只在 XX-K01。
+- 子进程来源校验只读无副作用的 `server/runtime/intel-allow-select.ts`，不在应用加载前导入 registry / production。可选 `--stop-after-successful-rounds 1|2`：两轮成功或任一轮失败即停；省略时仍按原时长窗口。不新增调度器、不续跑、不清账本。
+- 门禁：定向观察/生产/oneshot 测试、全量 Vitest **2012 passed / 5 skipped**、typecheck、lint、build、`git diff --check`。受控 PH-M01 两轮自然调度不在本提交内宣称。
+
 ## 2026-10-24 — DeepSeek 试点 Search 候选盘点口径修正 + PM Notice 54 单条核验
 
 - **候选盘点**（离线元数据 + 去重）：[`docs/evidence/r2-deepseek-pilot-candidate-review-2026-10-24/README.md`](evidence/r2-deepseek-pilot-candidate-review-2026-10-24/README.md)。**18** 唯一 URL；非 MPA **7** 条（**6** 贸易媒体 + **1** 中文聚合）；六种官方详情分 **PM Notice / PM Circular / Shipping Circular**；PM Notice **107**（2026-09-08/15 维护）相对盘点日移出当前风险优先；**2021** / **nov23** 线索标待核实/可能历史。

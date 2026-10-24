@@ -341,7 +341,7 @@ it("rejects a lock whose database path is not the isolated file", async () => {
   expect(transport).not.toHaveBeenCalled()
 })
 
-it("leaves the registry, production default, and observation allowlist unchanged", async () => {
+it("leaves the registry and production default unchanged while observation accepts only an explicit allow-select id", async () => {
   const before = registeredIntelSources.map(seed => ({ id: seed.id, enabled: seed.enabled, url: seed.url, persistence: seed.persistence, allowedHosts: [...seed.allowedHosts] }))
   const allow = [...PRODUCTION_ALLOW_SELECT_CATALOG_IDS]
   const dir = workspace()
@@ -350,7 +350,10 @@ it("leaves the registry, production default, and observation allowlist unchanged
   expect([...PRODUCTION_ALLOW_SELECT_CATALOG_IDS]).toEqual(allow)
   expect(registeredIntelSources.find(seed => seed.catalogId === "PH-M01")).toMatchObject({ enabled: false, url: PH_M01_FEED_URL, persistence: "disallowed", allowedHosts: ["portcalls.com"] })
   expect(productionIntelOptions({ env: {}, dependencies: null }).registry?.intel).toMatchObject({ enabled: false, seeds: [] })
-  expect(() => validateObservationConfig({ sourceIds: ["PH-M01"], durationMs: 1000, maxHttpRequests: 1, approvedRedirects: [] })).toThrow("observation_sources_invalid")
+  expect(validateObservationConfig({ sourceIds: ["PH-M01"], durationMs: 1000, maxHttpRequests: 1, approvedRedirects: [] }).sourceIds).toEqual(["PH-M01"])
+  for (const sourceIds of [["CN-T01"], ["XX-M01"], ["MY-P03"], ["PH-M01", "CN-T01"]]) {
+    expect(() => validateObservationConfig({ sourceIds, durationMs: 1000, maxHttpRequests: 1, approvedRedirects: [] })).toThrow("observation_sources_invalid")
+  }
   const source = `${readFileSync(resolve("scripts/ph-m01-oneshot.ts"), "utf8")}\n${readFileSync(resolve("scripts/ph-m01-oneshot-cli.ts"), "utf8")}`
   expect(source).not.toContain("bootstrapBackgroundRuntime")
   expect(source).not.toContain("setInterval")

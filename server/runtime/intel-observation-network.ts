@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto"
 import { Buffer } from "node:buffer"
+import { PRODUCTION_ALLOW_SELECT_CATALOG_IDS } from "./intel-allow-select"
 import type { IntelFetchDeps } from "#/intel/collect"
-import { intelSourceSeeds } from "#/intel/sources"
+import { registeredIntelSources } from "#/intel/sources/registry"
 import { isBlockedAddress } from "#/services/article-fetch-security"
 
 export interface IntelObservationConfig {
@@ -9,18 +10,30 @@ export interface IntelObservationConfig {
   durationMs: number
   maxHttpRequests: number
   approvedRedirects: { from: string, to: string }[]
+  /** When set, the existing observer stops after this many successful source rounds, or on the first failed round. */
+  stopAfterSuccessfulRounds?: 1 | 2
+}
+const ALLOW_SELECT = new Set<string>(PRODUCTION_ALLOW_SELECT_CATALOG_IDS)
+
+function selectedEntries(sourceIds: string[]) {
+  return sourceIds.map((id) => {
+    const seed = registeredIntelSources.find(row => row.catalogId === id)
+    if (!seed) throw new Error("observation_sources_invalid")
+    return seed.url
+  })
 }
 export type ObservationEvent = Record<string, unknown> & { type: string }
 const redirects = new Set([301, 302, 303, 307, 308])
 const digest = (value: string | Uint8Array) => createHash("sha256").update(value).digest("hex")
 
 export function validateObservationConfig(input: IntelObservationConfig): IntelObservationConfig {
-  if (!input || Object.keys(input).some(key => !["sourceIds", "durationMs", "maxHttpRequests", "approvedRedirects"].includes(key))) throw new Error("observation_config_invalid")
-  if (!Array.isArray(input.sourceIds) || !input.sourceIds.length || new Set(input.sourceIds).size !== input.sourceIds.length || input.sourceIds.some(id => !["TH-W01", "ID-W01"].includes(id))) throw new Error("observation_sources_invalid")
+  if (!input || Object.keys(input).some(key => !["sourceIds", "durationMs", "maxHttpRequests", "approvedRedirects", "stopAfterSuccessfulRounds"].includes(key))) throw new Error("observation_config_invalid")
+  if (!Array.isArray(input.sourceIds) || !input.sourceIds.length || new Set(input.sourceIds).size !== input.sourceIds.length || input.sourceIds.some(id => !ALLOW_SELECT.has(id))) throw new Error("observation_sources_invalid")
+  if (input.stopAfterSuccessfulRounds !== undefined && input.stopAfterSuccessfulRounds !== 1 && input.stopAfterSuccessfulRounds !== 2) throw new Error("observation_round_bound_invalid")
   if (!Number.isSafeInteger(input.durationMs) || input.durationMs <= 0 || input.durationMs > 24 * 60 * 60 * 1000) throw new Error("observation_duration_invalid")
   if (!Number.isSafeInteger(input.maxHttpRequests) || input.maxHttpRequests < 0 || input.maxHttpRequests > 200) throw new Error("observation_budget_invalid")
   if (!Array.isArray(input.approvedRedirects) || input.approvedRedirects.length > 6) throw new Error("observation_redirects_invalid")
-  const reachable = new Set(intelSourceSeeds.filter(seed => input.sourceIds.includes(seed.catalogId)).map(seed => seed.url))
+  const reachable = new Set(selectedEntries(input.sourceIds))
   const edges = new Set<string>()
   for (const edge of input.approvedRedirects) {
     if (!edge || Object.keys(edge).sort().join(",") !== "from,to" || typeof edge.from !== "string" || typeof edge.to !== "string") throw new Error("observation_redirects_invalid")
@@ -32,7 +45,7 @@ export function validateObservationConfig(input: IntelObservationConfig): IntelO
     edges.add(key)
     reachable.add(edge.to)
   }
-  return { sourceIds: [...input.sourceIds], durationMs: input.durationMs, maxHttpRequests: input.maxHttpRequests, approvedRedirects: input.approvedRedirects.map(edge => ({ ...edge })) }
+  return { sourceIds: [...input.sourceIds], durationMs: input.durationMs, maxHttpRequests: input.maxHttpRequests, approvedRedirects: input.approvedRedirects.map(edge => ({ ...edge })), ...(input.stopAfterSuccessfulRounds ? { stopAfterSuccessfulRounds: input.stopAfterSuccessfulRounds } : {}) }
 }
 
 /** One run-wide boundary around the existing transport, not a fetcher or scheduler. */
@@ -46,7 +59,7 @@ export function createObservationNetwork(options: {
 }) {
   const config = validateObservationConfig(options.config)
   const until = options.startedAt + config.durationMs
-  const urls = new Set(intelSourceSeeds.filter(seed => config.sourceIds.includes(seed.catalogId)).map(seed => seed.url))
+  const urls = new Set(selectedEntries(config.sourceIds))
   const edges = new Set(config.approvedRedirects.map(edge => JSON.stringify([edge.from, edge.to])))
   for (const edge of config.approvedRedirects) urls.add(edge.to)
   const hosts = new Set(Array.from(urls, value => new URL(value).hostname))

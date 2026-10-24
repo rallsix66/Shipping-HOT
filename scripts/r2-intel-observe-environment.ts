@@ -1,6 +1,9 @@
 import process from "node:process"
 import { existsSync, mkdirSync, realpathSync } from "node:fs"
 import { basename, dirname, join, resolve } from "node:path"
+import { PRODUCTION_ALLOW_SELECT_CATALOG_IDS } from "../server/runtime/intel-allow-select"
+
+const observationSources = new Set<string>(PRODUCTION_ALLOW_SELECT_CATALOG_IDS)
 
 // Observed on Windows before application imports. Never inherited by the launcher or trusted as paths.
 // logonserver: Node v24.15.0 / libuv 1.51.0 required_vars re-add it from the parent even when an explicit
@@ -17,7 +20,7 @@ export function observationEnvironment(env: NodeJS.ProcessEnv, sourceIds: string
 }
 
 export function validateObservationChildEnvironment(env: NodeJS.ProcessEnv, sourceIds: string[], workspace?: string): void {
-  if (!Array.isArray(sourceIds) || !sourceIds.length || new Set(sourceIds).size !== sourceIds.length || sourceIds.some(id => !["TH-W01", "ID-W01"].includes(id))) throw new Error("observation_child_environment_invalid")
+  if (!Array.isArray(sourceIds) || !sourceIds.length || new Set(sourceIds).size !== sourceIds.length || sourceIds.some(id => !observationSources.has(id))) throw new Error("observation_child_environment_invalid")
   const expected = observationEnvironment(env, sourceIds, workspace)
   const allowed = new Set([...Object.keys(expected).map(key => key.toLowerCase()), "node_channel_fd", "node_channel_serialization_mode", ...(process.platform === "win32" ? windowsInjected : [])])
   const keys = Object.keys(env).map(key => key.toLowerCase())

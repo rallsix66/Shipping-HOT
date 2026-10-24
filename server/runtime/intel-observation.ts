@@ -48,6 +48,7 @@ export async function startIntelObservation(options: {
   let ending: Promise<void> | undefined
   let sequence = 0
   const seenRuns = new Set<string>()
+  let successfulRounds = 0
   let resolveDone!: (value: Record<string, unknown>) => void
   let rejectDone!: (error: unknown) => void
   const done = new Promise<Record<string, unknown>>((resolve, reject) => {
@@ -80,16 +81,32 @@ export async function startIntelObservation(options: {
   const base = createIntelCollectJob({ db: database, enabled: true, fetch: network.fetch, seeds, signal: network.collectionSignal, now })
   const job = { ...base, async run() {
     const result = await base.run()
+    const roundRuns: { status: string }[] = []
     for (const seed of seeds) {
       const source = await repository.getSource(seed.id)
       for (const run of await repository.listRuns(seed.id)) {
         if (seenRuns.has(run.id)) continue
         record({ type: "source_run", sourceId: seed.id, run })
         seenRuns.add(run.id)
+        roundRuns.push(run)
       }
       if (source) record({ type: "source_state", sourceId: source.id, status: source.status, failures: source.consecutiveFailures, lastOkAt: source.lastOkAt, nextSyncAt: source.nextSyncAt })
     }
     record({ type: "job_result", result })
+    if (config.stopAfterSuccessfulRounds && result.status !== "skipped") {
+      const failed = result.status === "failed" || roundRuns.some(run => run.status !== "ok_items" && run.status !== "ok_empty")
+      if (failed) {
+        record({ type: "round_stop", reason: "round_failed", successfulRounds })
+        network.stop("round_failed", false)
+      } else if (roundRuns.length > 0) {
+        successfulRounds += 1
+        record({ type: "successful_round", count: successfulRounds, bound: config.stopAfterSuccessfulRounds })
+        if (successfulRounds >= config.stopAfterSuccessfulRounds) {
+          record({ type: "round_stop", reason: "rounds_complete", successfulRounds })
+          network.stop("rounds_complete", false)
+        }
+      }
+    }
     return result
   } }
   const manifest = { evidenceMode: options.evidenceMode, codeIdentity: options.codeIdentity, processCwd: process.cwd(), directory, databasePath, startedAt: new Date(startedAt).toISOString(), until: new Date(startedAt + config.durationMs).toISOString(), config, frequency: { jobTickMinutes: 15, adaptiveMinMinutes: 15, adaptiveMaxMinutes: 60 }, sources: seeds, registeredJobs: [job.id], resumeSupported: false, paidJobsRegistered: false }
@@ -146,7 +163,7 @@ export async function startIntelObservation(options: {
         } finally {
           reopened.close()
         }
-        const result = { evidenceMode: options.evidenceMode, stoppedAt: now().toISOString(), elapsedMs: now().getTime() - startedAt, ...network.snapshot(), databasePath, counts, sources, readOnlyReopen: true, ownershipReleased: !existsSync(`${databasePath}.intel-owner.lock`), continuous24hAcceptance: "NOT_GRANTED; clock/sleep/network gaps require independent review" }
+        const result = { evidenceMode: options.evidenceMode, stoppedAt: now().toISOString(), elapsedMs: now().getTime() - startedAt, successfulRounds, roundBound: config.stopAfterSuccessfulRounds ?? null, ...network.snapshot(), databasePath, counts, sources, readOnlyReopen: true, ownershipReleased: !existsSync(`${databasePath}.intel-owner.lock`), continuous24hAcceptance: "NOT_GRANTED; clock/sleep/network gaps require independent review" }
         record({ type: "finished", reason: result.reason })
         writeFileSync(join(directory, "result.json"), `${JSON.stringify(result, null, 2)}\n`, { flag: "wx" })
         observationActive = false

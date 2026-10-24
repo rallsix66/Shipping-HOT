@@ -9,7 +9,7 @@ import { observationEnvironment } from "./r2-intel-observe-environment"
 export { observationEnvironment, validateObservationChildEnvironment } from "./r2-intel-observe-environment"
 
 export function parseObservationArguments(args: string[]) {
-  const parsed = parseArgs({ args, strict: true, allowPositionals: false, tokens: true, options: { "help": { type: "boolean" }, "execute": { type: "boolean" }, "run-id": { type: "string" }, "sources": { type: "string" }, "duration-ms": { type: "string" }, "max-http-requests": { type: "string" }, "approved-redirect": { type: "string", multiple: true } } })
+  const parsed = parseArgs({ args, strict: true, allowPositionals: false, tokens: true, options: { "help": { type: "boolean" }, "execute": { type: "boolean" }, "run-id": { type: "string" }, "sources": { type: "string" }, "duration-ms": { type: "string" }, "max-http-requests": { type: "string" }, "stop-after-successful-rounds": { type: "string" }, "approved-redirect": { type: "string", multiple: true } } })
   if (parsed.values.help) return { help: true as const }
   for (const token of parsed.tokens) {
     if (token.kind === "option" && token.name !== "approved-redirect" && parsed.tokens.filter(other => other.kind === "option" && other.name === token.name).length > 1) throw new Error("observation_duplicate_argument")
@@ -18,7 +18,8 @@ export function parseObservationArguments(args: string[]) {
   if (!values.execute) throw new Error("observation_explicit_execute_required")
   if (!/^[a-z0-9-]{1,64}$/.test(values["run-id"] ?? "")) throw new Error("observation_run_id_invalid")
   if (!/^\d+$/.test(values["duration-ms"] ?? "") || !/^\d+$/.test(values["max-http-requests"] ?? "")) throw new Error("observation_limits_required")
-  const config = validateObservationConfig({ sourceIds: (values.sources ?? "").split(",").map(id => id.trim()), durationMs: Number(values["duration-ms"]), maxHttpRequests: Number(values["max-http-requests"]), approvedRedirects: (values["approved-redirect"] ?? []).map(value => JSON.parse(value)) })
+  if (values["stop-after-successful-rounds"] !== undefined && !/^[12]$/.test(values["stop-after-successful-rounds"])) throw new Error("observation_round_bound_invalid")
+  const config = validateObservationConfig({ sourceIds: (values.sources ?? "").split(",").map(id => id.trim()), durationMs: Number(values["duration-ms"]), maxHttpRequests: Number(values["max-http-requests"]), approvedRedirects: (values["approved-redirect"] ?? []).map(value => JSON.parse(value)), ...(values["stop-after-successful-rounds"] ? { stopAfterSuccessfulRounds: Number(values["stop-after-successful-rounds"]) as 1 | 2 } : {}) })
   return { help: false as const, runId: values["run-id"]!, config }
 }
 
