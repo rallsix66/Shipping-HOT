@@ -151,6 +151,8 @@ export interface PilotOptions {
   now?: () => Date
   /** Test-only lstat override for dangling-link probes. Requires testIsolationName. */
   lstat?: PilotLstat
+  /** Opt-in: DeepSeek Search need_content=true (product default remains false). */
+  searchNeedContent?: boolean
 }
 
 export interface PilotOpResult {
@@ -341,10 +343,22 @@ export function assertTestIsolationAllowed(options: PilotOptions): void {
   throw new Error("test_isolation_requires_mock_or_injected_fetcher")
 }
 
-export function searchOperationKey(query: string): string {
+export function searchOperationKey(
+  query: string,
+  options?: { needContent?: boolean },
+): string {
   const norm = query.trim().replace(/\s+/g, " ")
-  const digest = createHash("sha256").update(`search\0${norm}`, "utf8").digest("hex").slice(0, 32)
+  const needSuffix = options?.needContent === true ? "\0need_content=1" : ""
+  const digest = createHash("sha256").update(`search\0${norm}${needSuffix}`, "utf8").digest("hex").slice(0, 32)
   return `search:${digest}`
+}
+
+/** Resolve pilot ledger operation key for a Search execute (matches runPilot). */
+export function searchPilotOperationKey(
+  query: string,
+  searchNeedContent?: boolean,
+): string {
+  return searchOperationKey(query, { needContent: searchNeedContent === true })
 }
 
 export function fetchOperationKey(url: string): string {
@@ -843,6 +857,7 @@ export async function createLiveOutbound(input: {
   paidDbPath: string
   secrets: SecretStore
   injectedFetcher?: InjectedFetcher
+  searchNeedContent?: boolean
 }): Promise<{ outbound: PilotOutbound, dispose: () => void }> {
   mkdirSync(dirname(input.paidDbPath), { recursive: true })
   const native = new NativeDatabase(input.paidDbPath)
@@ -864,6 +879,7 @@ export async function createLiveOutbound(input: {
           query,
           purpose: "ds_pilot_2026_10_23_r1",
           subject: attemptId,
+          needContent: input.searchNeedContent === true,
         })
         return {
           ok: true,
@@ -981,7 +997,7 @@ export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
     for (const query of searchQueries) {
       ops.push({
         capability: DEEPSEEK_SEARCH_CAPABILITY,
-        operationKey: searchOperationKey(query),
+        operationKey: searchPilotOperationKey(query, options.searchNeedContent),
         label: query,
         outcome: "planned",
       })
@@ -1041,7 +1057,7 @@ export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
       fetchReservedMilli: snap.fetchReservedMilli,
       ops: searchQueries.map(query => ({
         capability: DEEPSEEK_SEARCH_CAPABILITY,
-        operationKey: searchOperationKey(query),
+        operationKey: searchPilotOperationKey(query, options.searchNeedContent),
         label: query,
         outcome: "missing_api_key",
         errorCode: "missing_api_key",
@@ -1070,13 +1086,14 @@ export async function runPilot(options: PilotOptions): Promise<PilotSummary> {
         paidDbPath: paths.paidDbPath,
         secrets,
         injectedFetcher: options.injectedFetcher,
+        searchNeedContent: options.searchNeedContent,
       })
       outbound = live.outbound
       disposeLive = live.dispose
     }
 
     for (const query of searchQueries) {
-      const operationKey = searchOperationKey(query)
+      const operationKey = searchPilotOperationKey(query, options.searchNeedContent)
       const reserved = reserveAttempt(ledger.native, {
         pilotId,
         capability: DEEPSEEK_SEARCH_CAPABILITY,

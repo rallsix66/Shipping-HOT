@@ -37,6 +37,7 @@ import {
   runPreflightKeyRequest,
   sanitizePilotText,
   searchOperationKey,
+  searchPilotOperationKey,
   spawnReserveOnce,
   sumReservedMilli,
 } from "./deepseek-search-fetch-pilot-lib"
@@ -183,6 +184,15 @@ describe("deepseek-search-fetch-pilot attempt hard gate", () => {
   it("lists first-round Search queries and empty Fetch", () => {
     expect(FIRST_ROUND_SEARCH_QUERIES).toHaveLength(8)
     expect(FIRST_ROUND_FETCH_TARGETS).toEqual([])
+  })
+
+  it("search operation keys diverge when need_content differs (ledger + paid identity alignment)", () => {
+    const query = "site:example.test port notice 2026"
+    const plain = searchOperationKey(query)
+    const withBody = searchOperationKey(query, { needContent: true })
+    expect(plain).not.toBe(withBody)
+    expect(searchPilotOperationKey(query, false)).toBe(plain)
+    expect(searchPilotOperationKey(query, true)).toBe(withBody)
   })
 
   it("forbids CLI path/pilot overrides", () => {

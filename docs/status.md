@@ -1,23 +1,31 @@
+## 2026-10-24 — DeepSeek Search/Fetch 受控试点 live 收尾（默认关闭）
+
+- **试点** `ds-pilot-2026-10-23-r1`：本机双库 live **已发生**（非 docs-only）。第 **9/10** 次 Search 成功；**2** 次 Fetch（MPA PMC detail）失败 **HTTP 404**（官方语义：无法提取 markdown，**non-billable**）。首轮 **8** 条 Search 仍为 **`unknown`**，**未释放、未重跑**。
+- **额度**：Search **10/10** attempts、**50/50** milli-CNY；Fetch **2/10**、**10/50** milli-CNY。per-capability，非共享。
+- **边界**：`need_content=true` **≠** 已取得可入库正文；`excerpt_only` **≠** 站点许可。生产 Search/Fetch **仍默认关闭**；未启 intel 源、未 24h、未合并部署、未改 R2 28/39 / 25/34 计数。
+- **证据**：[`docs/evidence/r2-deepseek-pilot-live-2026-10-24/README.md`](evidence/r2-deepseek-pilot-live-2026-10-24/README.md)；本机 `.tmp/deepseek-pilot-2026-10-23/` 账本与 JSON 交叉引用（未入库）。
+- **代码收口**：oneshot 脚本 + pilot `searchNeedContent`；ledger Search 键在 `searchNeedContent:true` 时含 `need_content` 后缀（live 第 10 次 Search 行保留 legacy query-only 键，见证据说明）。
+
 ## 2026-10-23 — DeepSeek Search/Fetch 错误脱敏白名单收口（默认关闭）
 
 - 基线 94a71bc → 本修补 tip；仍 policyVersion `ds-sf-v1.2-2026-10-23`。
 - client transport/readText 不再 `instanceof` 原样透传：按固定 code 白名单重建 `OutcomeUnknown`，丢弃原 message/cause；未知码 → `request_failed` / `response_read_failed`。
 - 补 typed poison（假密钥/URL/正文）→ receipt+attempt 双表负例；保留 abort / too_large / HTTP 状态语义。
-- 仍默认关闭；未启源、未真实 API/密钥；不联系 Guyang。日志：`.tmp/logs/deepseek-search-fetch-gapfix3-2026-10-23/`。
+- 仍默认关闭；**产品路径**未启源；**受控试点** live 见上 2026-10-24 块。日志：`.tmp/logs/deepseek-search-fetch-gapfix3-2026-10-23/`。
 
 ## 2026-10-23 — DeepSeek Search/Fetch 三缺口合并修补 v1.2（默认关闭）
 
 - 基线 efd1e005 → 本修补 tip；policyVersion `ds-sf-v1.2-2026-10-23`。
 - 三缺口：① transport/readText 未知异常统一固定码（`request_failed`/`response_read_failed` 等），receipt+attempt 不落敏感文本；② `targetReview` 必须绑定实际 `input.url`，不以其 canonical 替换请求目标；伪造/错配审核零密钥、零回执、零 HTTP；③ 入口与 dispatch 前拒绝已取消；未发送取消固定非计费，已 dispatch 才 unknown。另补默认 HTTP 适配器 ReadableStream 字节上限测试。
 - 措辞：25s controller 主要约束 outbound HTTP；`secretStore.get`/DB claim 不受完整总期限约束；既有 `paidRequest` 仍是先读密钥再原子预留——不宣称端到端总期限或「先预留再读密钥」。
-- 仍默认关闭；未启源、未真实 API/密钥、未合并部署；不联系 Guyang。R2 计数与 CN-T01/XX-M01 不变。
+- 仍默认关闭；未启源、未合并部署；不联系 Guyang。R2 计数与 CN-T01/XX-M01 不变。（受控 pilot live 见 2026-10-24 块。）
 - 门禁含**全量** `pnpm lint`（非仅改动文件 eslint）。日志：`.tmp/logs/deepseek-search-fetch-gapfix2-2026-10-23/`。
 
 ## 2026-10-23 — DeepSeek Search/Fetch 合同缺口修补（默认关闭）
 
 - 基线 e11ec92 → 本修补 tip（待提交）；policyVersion ds-sf-v1.1-2026-10-23。
 - 修补：URL 门禁（IPv6 括号/尾点/isBlockedAddress）、上游非空计费、无效 JSON→unknown、错误码无正文、默认时限+取消+字节上限、Fetch provenance 标签、分 capability 预算。
-- 仍默认关闭；未启源、未真实 API/密钥、未合并部署；R2 计数不变。
+- 仍默认关闭；未启源、未合并部署；R2 计数不变。（受控 pilot live 见 2026-10-24 块。）
 - 本地安全门禁与目标审核不声称能验证第三方实际 DNS/IP/跳转；persistence 许可不能代替目标安全审核。
 - 日志：.tmp/logs/deepseek-search-fetch-gapfix-2026-10-23/。
 
@@ -26,7 +34,7 @@
 - 方向认可基线 `a9ae16d`；同一授权内先修正方案三点，再落地默认关闭、离线可测最小接入；不另等用户批准；不联系 Guyang。
 - 合同三点：①硬预算在 `paidRequest` 内原子预留（复用 BEGIN IMMEDIATE / pending / unknown；既有顺序先读 Secret 再预留；`decidePaidBudget` alone 不足）；②`third_party_markdown` 为 provenance 非 contentScope，删除 disallowed Markdown 存证例外，回执/缓存/日志无正文；③删除安全拒绝后预览绕行；Search 缓存键=规范化 query+参数+策略版本。
 - 方案：[`docs/plans/r2-deepseek-search-fetch-2026-10-23.md`](plans/r2-deepseek-search-fetch-2026-10-23.md)；ADR：[`docs/adr/ADR-011-deepseek-search-fetch-intel-assist.md`](adr/ADR-011-deepseek-search-fetch-intel-assist.md)。
-- 实现：`server/providers/deepseek/search-fetch-client.ts`、`server/intel/discovery/{deepseek-search-fetch-policy,candidate-trim,search-fetch-service}.ts` + 离线测试。零 schema 迁移。真实付费/启源/R3/24h/合并部署仍未授权。R2 28/39、25/34 与允许选择 19≠启用、CN-T01/XX-M01 不变。
+- 实现：`server/providers/deepseek/search-fetch-client.ts`、`server/intel/discovery/{deepseek-search-fetch-policy,candidate-trim,search-fetch-service}.ts` + 离线测试。零 schema 迁移。生产启源/R3/24h/合并部署仍未授权；**受控 pilot**（2 Search + 2 Fetch live，8 unknown 保留）见 2026-10-24 块。R2 28/39、25/34 与允许选择 19≠启用、CN-T01/XX-M01 不变。
 
 ## 2026-10-23 R2 生产允许选择扩展（阶段，dots 1792719565.465609）
 
