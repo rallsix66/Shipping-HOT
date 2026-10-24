@@ -1,7 +1,7 @@
 ## 2026-10-24 — DeepSeek 试点 Search 候选盘点口径修正 + PM Notice 54 单条核验
 
 - **候选盘点**（离线元数据 + 去重）：[`docs/evidence/r2-deepseek-pilot-candidate-review-2026-10-24/README.md`](evidence/r2-deepseek-pilot-candidate-review-2026-10-24/README.md)。**18** 唯一 URL；非 MPA **7** 条（**6** 贸易媒体 + **1** 中文聚合）；六种官方详情分 **PM Notice / PM Circular / Shipping Circular**；PM Notice **107**（2026-09-08/15 维护）相对盘点日移出当前风险优先；**2021** / **nov23** 线索标待核实/可能历史。
-- **PM Notice 54（RTS Link）**：仅对 `candidates.json` 精确 URL 做**一次**只读 HTTPS；官方 **404**，**结论 C**（信息不足，未确认）。**不是** DeepSeek Fetch 成功。证据：[`notice-54-verification-2026-10-24/README.md`](evidence/r2-deepseek-pilot-candidate-review-2026-10-24/notice-54-verification-2026-10-24/README.md)。**不**写生产 intel、**不**增 R2 计数。
+- **PM Notice 54（RTS Link）**：对 `candidates.json` **一条精确 URL** 做只读 HTTPS 核验（**非**单次 GET 声明；物理请求次数未完整记录）；官方 **404**，**结论 C**（信息不足，未确认）；`accessedAt` **未核准**（原 11:45 估算不采信）。**不是** DeepSeek Fetch 成功。证据：[`notice-54-verification-2026-10-24/README.md`](evidence/r2-deepseek-pilot-candidate-review-2026-10-24/notice-54-verification-2026-10-24/README.md)。**不**写生产 intel、**不**增 R2 计数。
 - 本片 **无**新 Search/Fetch；门禁：`pnpm lint` + `git diff --check`（文档-only，**未**重跑全量 Vitest）。
 
 ## 2026-10-24 — DeepSeek Search/Fetch 受控试点 live 收尾（默认关闭）

@@ -2,9 +2,16 @@
   "schema": "single-notice-business-verification-v1",
   "noticeLabel": "Port Marine Notice 54 of 2026 (RTS Link navigation restrictions)",
   "candidateUrl": "https://www.mpa.gov.sg/media-centre/details/port-marine-notice-no.-54-of-2026---navigation--restrictions-under-the-rts-link",
-  "accessedAt": "2026-10-24T11:45:00+08:00",
-  "accessMethod": "read_only_https_get_not_deepseek_not_secure_fetch_article",
-  "httpStatus": 404,
+  "accessedAt": null,
+  "accessedAtNote": "实际访问时间未核准；原 accessedAt=2026-10-24T11:45:00+08:00 为证据初稿撰写时的估算值，无独立 HTTP 访问日志或带时间戳的终端记录可核对，不采信。",
+  "evidenceReportFirstCommittedAt": "2026-10-24T11:22:32+08:00",
+  "evidenceReportFirstCommittedAtBasis": "git commit 01fb66299b76298054f9fa0481eea755880b44e9（报告首次入库时间，不等于 HTTP 访问时间）",
+  "verificationScope": "read_only_verification_of_one_exact_candidate_url",
+  "accessMethod": "ordinary_https_clients_not_deepseek_not_secure_fetch_article",
+  "physicalHttpRequestCount": null,
+  "physicalHttpRequestCountNote": "物理 HTTP 请求次数未完整记录；对一条精确 URL 的核验不等同于单次 GET，亦不假定仅一次请求。",
+  "httpStatusObserved": 404,
+  "httpStatusNote": "404 来自当时核验观察（官方 host 返回 Page not Found）；404 不证明公告从未发布、永久消失或已撤销。",
   "conclusion": "C_insufficient_unconfirmed",
   "searchMetadataTitle": "PORT MARINE NOTICE NO. 54 OF 2026 - NAVIGATION RESTRICTIONS UNDER THE RTS LINK",
   "searchProviderDateUnverified": "2026-04-06T16:00:00+00:00",
@@ -16,6 +23,8 @@
   "limitations": [
     "exact_url_returns_404_no_attachment_followed",
     "no_slug_alternate_or_site_crawl",
-    "search_title_not_treated_as_operational_fact"
+    "search_title_not_treated_as_operational_fact",
+    "access_timestamp_not_verified",
+    "http_request_count_not_fully_logged"
   ]
 }
