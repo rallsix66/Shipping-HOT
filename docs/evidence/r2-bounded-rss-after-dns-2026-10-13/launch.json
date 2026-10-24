@@ -1,0 +1,1 @@
+{"started":"2026-10-13T07:00:26.089Z","command":"pnpm exec vitest run -c .tmp/after-dns.config.ts","environment":"SHIPPING_APPROVED_SIX=1","sha":"208be3567ff06101c6e3bb52c23e781c06ddcae5"}

@@ -1,0 +1,313 @@
+{
+  "at": "2026-10-19T03:56:00.003Z",
+  "cwd": "D:\\try one\\Shipping HOT",
+  "branch": "codex/shipping-hot-r2",
+  "head": "3506e61e47d6764189c27aaaf1b69e251c150305",
+  "sourceFiles": {
+    "extensions/shipping-hot-clipper/src/extract.ts": "0e96122ea0042b796f574b7f15d3edd6f4906442d50c3df53059100529eea7ee",
+    "test/clipper-dom.test.ts": "40ffece805f26deb9fa0f45080c54a00e6c7ecedabd0ca401216f6f0a3007dff"
+  },
+  "codePatchSha256": "7bb6059e1e34a53609339103dd469bc50bc129b86b28b0899a9309f236f7fa66",
+  "candidateDirectory": "D:\\try one\\Shipping HOT\\.tmp\\clipper-tail-p2-20261019",
+  "packageDirectory": "D:\\try one\\Shipping HOT\\.tmp\\clipper-tail-p2-20261019\\.tmp\\clipper-package",
+  "bundleSha256": "0628839376a48ce100d233b87909f868b0e703858df9ee3a59463aa72d5d0325",
+  "toolchain": {
+    "node": "v24.15.0",
+    "abi": "137",
+    "pnpm": "10.30.3"
+  },
+  "reviewRepairs": {
+    "ariaHidden": "No subtree pruning from aria-hidden alone",
+    "visibility": "No subtree pruning from visibility:hidden or collapse; no computedStyle/CSS algorithm",
+    "retained": [
+      "role complementary/navigation/contentinfo",
+      "HTML hidden",
+      "inline display:none"
+    ],
+    "red": {
+      "failed": 3,
+      "skipped": 50,
+      "log": ".tmp/clipper-tail-review-20261019/p2/red.log"
+    },
+    "green": {
+      "domPassed": 53,
+      "log": ".tmp/clipper-tail-review-20261019/p2/green.log"
+    },
+    "counterexamples": [
+      {
+        "name": "aria-hidden visual prose",
+        "expected": "原创视觉正文：订阅服务的购买条件。",
+        "baselineBody": "原创视觉正文：订阅服务的购买条件。",
+        "preRepairError": "clip_empty_use_metadata",
+        "repairedBody": "原创视觉正文：订阅服务的购买条件。"
+      },
+      {
+        "name": "visibility-hidden parent with visible child",
+        "expected": "原创可见子段：购买与订阅研究。",
+        "baselineBody": "原创可见子段：购买与订阅研究。",
+        "preRepairError": "clip_empty_use_metadata",
+        "repairedBody": "原创可见子段：购买与订阅研究。"
+      },
+      {
+        "name": "visibility-collapse parent with visible child",
+        "expected": "原创可见子段：折叠容器中的正文。",
+        "baselineBody": "原创可见子段：折叠容器中的正文。",
+        "preRepairError": "clip_empty_use_metadata",
+        "repairedBody": "原创可见子段：折叠容器中的正文。"
+      }
+    ]
+  },
+  "verification": {
+    "localGate": "PASS",
+    "cleanInstall": {
+      "rawExit": 0,
+      "scriptsEnabled": true,
+      "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-tail-review-20261019\\p2\\install.log",
+      "oldNodeModulesCopied": false
+    },
+    "results": [
+      {
+        "name": "build",
+        "command": "pnpm build",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-tail-p2-20261019",
+        "startedAt": "2026-10-19T03:52:44.730Z",
+        "endedAt": "2026-10-19T03:53:15.119Z",
+        "rawExit": 0
+      },
+      {
+        "name": "typecheck",
+        "command": "pnpm typecheck",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-tail-p2-20261019",
+        "startedAt": "2026-10-19T03:53:15.120Z",
+        "endedAt": "2026-10-19T03:53:25.697Z",
+        "rawExit": 0
+      },
+      {
+        "name": "lint",
+        "command": "pnpm lint",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-tail-p2-20261019",
+        "startedAt": "2026-10-19T03:53:25.698Z",
+        "endedAt": "2026-10-19T03:53:54.934Z",
+        "rawExit": 0
+      },
+      {
+        "name": "clipper-build",
+        "command": "pnpm build:clipper",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-tail-p2-20261019",
+        "startedAt": "2026-10-19T03:53:54.935Z",
+        "endedAt": "2026-10-19T03:53:56.473Z",
+        "rawExit": 0
+      },
+      {
+        "name": "targeted",
+        "command": "pnpm exec vitest run -c vitest.config.ts server/intel/manual-clip.test.ts server/intel/manual.test.ts server/intel/material-read.test.ts server/api/shipping/intel/manual-http.test.ts server/api/shipping/intel/read-http.test.ts test/manual-intel.test.ts test/clipper-bridge.test.ts test/clipper-dom.test.ts test/clipper-package.test.ts test/clip-import.test.ts server/runtime/clip-synthetic-guard.test.ts --reporter=dot",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-tail-p2-20261019",
+        "startedAt": "2026-10-19T03:53:56.473Z",
+        "endedAt": "2026-10-19T03:54:00.637Z",
+        "rawExit": 0
+      },
+      {
+        "name": "vitest",
+        "command": "pnpm exec vitest run -c vitest.config.ts --reporter=dot",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-tail-p2-20261019",
+        "startedAt": "2026-10-19T03:54:00.637Z",
+        "endedAt": "2026-10-19T03:54:15.843Z",
+        "rawExit": 0
+      },
+      {
+        "name": "smoke-p0",
+        "command": "pnpm smoke:p0-native",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-tail-p2-20261019",
+        "startedAt": "2026-10-19T03:54:15.844Z",
+        "endedAt": "2026-10-19T03:54:16.991Z",
+        "rawExit": 0
+      },
+      {
+        "name": "smoke-p2c",
+        "command": "pnpm smoke:p2c-runtime",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-tail-p2-20261019",
+        "startedAt": "2026-10-19T03:54:16.992Z",
+        "endedAt": "2026-10-19T03:54:18.085Z",
+        "rawExit": 0
+      },
+      {
+        "name": "smoke-feed",
+        "command": "pnpm smoke:p3-feed-freshness",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-tail-p2-20261019",
+        "startedAt": "2026-10-19T03:54:18.085Z",
+        "endedAt": "2026-10-19T03:54:19.247Z",
+        "rawExit": 0
+      },
+      {
+        "name": "diff-check",
+        "command": "git -c core.excludesFile= diff --check",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-tail-p2-20261019",
+        "startedAt": "2026-10-19T03:54:19.247Z",
+        "endedAt": "2026-10-19T03:54:19.725Z",
+        "rawExit": 0
+      }
+    ],
+    "targeted": {
+      "files": 11,
+      "passed": 217,
+      "domTests": 53
+    },
+    "full": {
+      "files": 138,
+      "passed": 1481,
+      "skipped": 3,
+      "failed": 0
+    },
+    "bundleAssertions": 42,
+    "bundleScope": "Node VM + authored linkedom only; not 42 independent browser flows",
+    "network": "No article fetches; VM fetch attempts0; registry install is separate, not packet capture",
+    "binding": {
+      "inputType": "pre_commit_controlled_source_snapshot",
+      "baseCommit": "3506e61e47d6764189c27aaaf1b69e251c150305",
+      "sourceByteSha256": {
+        "extensions/shipping-hot-clipper/src/extract.ts": "0e96122ea0042b796f574b7f15d3edd6f4906442d50c3df53059100529eea7ee",
+        "test/clipper-dom.test.ts": "40ffece805f26deb9fa0f45080c54a00e6c7ecedabd0ca401216f6f0a3007dff"
+      },
+      "codePatchSha256": "7bb6059e1e34a53609339103dd469bc50bc129b86b28b0899a9309f236f7fa66",
+      "cleanCommitShaGate": "NOT_RUN",
+      "postCommit": "Only committed source identity can be checked after commit; not a rerun of this full gate"
+    }
+  },
+  "preservation": {
+    "at": "2026-10-19T03:55:58.819Z",
+    "protectedFiles": 14,
+    "protectedUnchanged": true,
+    "formal": {
+      "metadata": {
+        "schema_version": 29,
+        "data_mode": "real",
+        "database_id": "a323010a-ac67-4039-874e-a53b626c6197"
+      },
+      "counts": {
+        "intel_item": 1,
+        "intel_item_version": 1,
+        "intel_manual_action": 1,
+        "provider_usage": 0,
+        "provider_runtime": 0,
+        "translation_cache": 0,
+        "intel_fetch_run": 0,
+        "intel_executor": 0
+      }
+    },
+    "oldSynthetic": {
+      "metadata": {
+        "schema_version": 29,
+        "data_mode": "real",
+        "database_id": "f79f2bd2-050f-42b0-831e-6e787eb1344f"
+      },
+      "counts": {
+        "intel_item": 1,
+        "intel_item_version": 1,
+        "intel_manual_action": 1,
+        "provider_usage": 0,
+        "provider_runtime": 0,
+        "translation_cache": 0,
+        "intel_fetch_run": 0,
+        "intel_executor": 0
+      }
+    },
+    "serviceStatus": 200,
+    "normalHtmlMatches": true,
+    "servicesStarted": 0,
+    "servicesStopped": 0,
+    "browserControl": false,
+    "upstreamFetches": 0,
+    "userBodyRead": false,
+    "priorCandidateFiles": 8,
+    "priorCandidateUnchanged": true
+  },
+  "limits": {
+    "realPageDom": "NOT_OBTAINED",
+    "publisherSpecificFix": "NOT_RUN",
+    "fullGuiS7": "NOT_RUN",
+    "runtime24h": "NOT_RUN",
+    "classHeuristic": {
+      "fixtureClass": "subscription-research",
+      "baselineKeepsProse": false,
+      "candidateKeepsProse": false,
+      "sameObservedResultForThisFixture": true,
+      "generalNoRegressionClaim": false
+    },
+    "generalNoAddedMisdeletionGuarantee": false,
+    "R2": "BLOCKED:25/39,24/34,historical3/5"
+  },
+  "operations": {
+    "recordWrites": 0,
+    "servicesStarted": 0,
+    "servicesStopped": 0,
+    "browserControl": false,
+    "pushed": false,
+    "prUpdated": false,
+    "merged": false,
+    "deployed": false,
+    "paidCalls": 0,
+    "llmCalls": 0,
+    "commitRetried": false,
+    "commitStatus": "Earlier DENIED action did not execute; user subsequently authorized one local retry; exact outcome is in git/local receipt",
+    "cleanup": false
+  },
+  "closeout": {
+    "skill": "C:/Users/Administrator/.codex/skills/neat-freak/SKILL.md",
+    "inventoryScriptExit": 0,
+    "inventorySha256": "ae63920b5ad5aefe9e3f4737536e8dc7a424b959835e6c4c4fc4013758c40d96",
+    "status": "PASS: local knowledge closeout; full gate bound to pre-commit snapshot",
+    "review": "PASS: P2 limited review; real-page/GUI not accepted",
+    "finalAudit": {
+      "path": ".tmp/clipper-tail-review-20261019/p2/closeout-audit-recovery.json",
+      "linksChecked": 15,
+      "missingLinks": 0,
+      "secretHits": 0,
+      "trackedDatabasesOrSecrets": 0,
+      "todoInAffectedCode": 0,
+      "rootRuleBytes": 28170,
+      "docsLintRawExit": 0,
+      "jsonSyntax": "PASS; ignored by existing ESLint configuration"
+    },
+    "transportInterruption": "An exec session was lost during final audit; absent output was checked first, then a separate bounded recovery audit completed. Gate/build/package results were not rerun or replaced."
+  },
+  "priorEvidence": "Previous attempts and pre-repair candidate retained under .tmp/clipper-tail-review-20261019; original 27-check result not overwritten",
+  "docs": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "0729f86b64546824c66b248bb6679d120b0e18245fabffb3eb61c9f657c623d7"
+    },
+    {
+      "path": "README.md",
+      "sha256": "1a6f54cb411863a0a710fd3fd5cc781f35bf5c2711ad4a04b840559d8100a738"
+    },
+    {
+      "path": "docs/architecture.md",
+      "sha256": "dcd917bacd869dd13c6825f8b3da9155d75cd32494c4e5f8f77db5e14ff91519"
+    },
+    {
+      "path": "docs/status.md",
+      "sha256": "0151c5e7c01c5369ba7871d48d8b5c966fd9144ebba026afd27f767abbba2f78"
+    },
+    {
+      "path": "extensions/shipping-hot-clipper/README.md",
+      "sha256": "9ccbef5bb7a3f721fa5253a864538f3d7345e90b1ac36fa9fc58c2f3bb105f8a"
+    },
+    {
+      "path": "docs/evidence/clipper-structure-2026-10-19/report.md",
+      "sha256": "6db348b6b378410bb14d2e15c6c97681d9258d70576c8c2f7a9bee4c4c371649"
+    },
+    {
+      "path": "docs/evidence/clipper-structure-2026-10-19/closeout.md",
+      "sha256": "23587952e7e53cc2c3eeccee5ef532427ae49401ff331364ef7ee2f2786114a1"
+    }
+  ],
+  "testedInputWasUncommittedCandidate": true,
+  "candidateState": "P2 scope review passed; local commit authorized; exact outcome recorded by git and local receipt",
+  "localResidue": [
+    {
+      "path": ".gitignore",
+      "change": "local .pnpm-store cache ignore",
+      "includedInCommit": false
+    }
+  ]
+}

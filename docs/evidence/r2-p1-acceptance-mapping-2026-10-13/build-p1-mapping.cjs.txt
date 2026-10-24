@@ -1,0 +1,73 @@
+const fs=require('node:fs');
+const prev=JSON.parse(fs.readFileSync('docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json','utf8'));
+const weather=new Set(['CN-W01','CN-W02','VN-W01','TH-W01','MY-W01','ID-W01','PH-W01','PH-W02']);
+function mapping(r){
+ let contract='资讯采集 R2-4/5',basis='9/29 §6 R2-4/5；ADR008 §2 Intel RSS/web/json/manual',ambiguity='属于资讯候选；URL/格式不等于来源专属配置或许可，未完成真实页面资格';
+ if(weather.has(r.id)){contract='双重候选：资讯 R2-4/5 + 官方天气/预警 R1.5';basis='9/29 §4.8及§6 R1.5-1/2/3；ADR008 §2 Official alerts/Tropical cyclone；R2-4/5原文未分域';ambiguity='预警有效性/地区/路径必须按运营契约；原文标题/链接/发布时间属于资讯资格，两者不得互相替代或自动豁免';}
+ if(r.id==='ID-W02'){contract='运营海况候选 R1.5；非文章列表';basis='目录ID-W02；9/29 §4.8海况及R1.5-1；ADR008 §2 Land+marine';ambiguity='未接实际BMKG港口接口；原目录仅根路径/参数化文档。既有Open-Meteo七天PASS不覆盖本源；R2-4运行环境可达性仍需映射，R2-5不能伪造标题链接日期';}
+ if(['XX-W01','XX-W02'].includes(r.id)){contract='运营台风路径 R1.5';basis='9/29 §4.8 JMA targetTc/forecast及R1.5-1；ADR008 §2 Tropical cyclone';ambiguity='列表/轨迹/风圈的身份、位置、时间、覆盖、有效性验收；非文章标题。R2-4可达性和R2-5载荷契约归属待确认，旧验收不能豁免';}
+ if(['XX-A01','XX-A02'].includes(r.id)){contract='运营天气 R1.5 + L阶段许可';basis='9/29 §4.8及R1.5-1；ADR008 §2 Land+marine及§4 Attribution/licensing';ambiguity='按八港7天/字段/重启/来源映射验收，ADR009保留VNSGN原点缺测/独立参考；不适用文章标题，目录可达核查归属待确认';}
+ if(r.id==='XX-A03'){contract='付费天气 L阶段用户决策';basis='9/29 §4.8上线前决定是否购买；ADR008 §2/§4';ambiguity='目录P1不等于付费授权或当前必须购买；未买既不算失败也不默认豁免；需确认R2分域及L阶段选择，无key/budget不得调用';}
+ if(r.id==='XX-A04'){contract='向量服务 R3';basis='9/29 §4.10、§6 R3-1/R3-5及已选Bailian；ADR007绑定/付费边界、ADR008 §2 Embeddings';ambiguity='目录URL是产品文档，不是资讯索引或已配置调用端点；向量输出/预算/回执契约，不得以文档可达称R2-5通过；R2映射待确认';}
+ if(r.id==='XX-F01'){contract='政策整页版本 R2采集候选 + R3-8';basis='目录§9b；9/29 §4.11和§6 R3-8（TikTok整页新增段落夹具）';ambiguity='整页带日期段落哈希不等于list条目；当前collector未支持自动配置该产品契约，是否作为独立资讯子契约需批准';}
+ return {...r,proposedContract:contract,planBasis:basis,mappingAmbiguity:ambiguity,acceptanceMapping:'PENDING_CONFIRMATION'};
+}
+const entries=prev.entries.map(mapping);
+const groups={newsCandidates:25,weatherDual:8,wholePolicyPage:1,operational:5,paidWeatherL:1,embeddingsR3:1};
+const selected=['MY-P02','PH-M01','MY-C01','MY-T01','TH-W01','ID-W01'].map(id=>{
+ const r=entries.find(e=>e.id===id);const url=new URL(r.url);
+ return {id,url:r.url,format:r.format,host:url.hostname,role:['TH-W01','ID-W01'].includes(id)?'endpoint baseline; no new unique archive source':'new candidate coverage',catalogState:r.catalogState,permission:'catalog candidate authorization only; no explicit full-body republication entitlement assumed',persistence:'metadata only in proposed batch; no full text',requestLimit:1,maxBytes:524288,timeoutMs:10000,maxRedirects:0,retries:0,details:0,paidCalls:0,status:'NOT_RUN / awaiting parent approval'};
+});
+const dir='docs/evidence/r2-p1-acceptance-mapping-2026-10-13';
+fs.writeFileSync(dir+'/acceptance-mapping.json',JSON.stringify({baseline:'0b532e1917ee5425194965b20e0fdf8c2a1f4805',catalogSha256:prev.catalogSha256,totalAutoInventory:41,manualSeparate:17,p2Separate:40,groups,finalR2ArticleDenominator:null,finalCoverage:null,acceptanceMapping:'PENDING_CONFIRMATION',entries,batch:selected,maxTotalHttpRequests:6,batchStatus:'NOT_RUN'},null,2)+'\n');
+const esc=s=>s.replaceAll('|','\\|');
+const table=entries.map(e=>`| ${e.id} | ${esc(e.proposedContract)} | ${esc(e.planBasis)} | ${esc(e.mappingAmbiguity)} |`).join('\n');
+fs.writeFileSync(dir+'/acceptance-mapping.md',`# P1 自动来源验收映射提案 — 2026-10-13
+
+基线0b532e1917ee5425194965b20e0fdf8c2a1f4805。41自动总清单及每项原URL/格式/状态不变；17manual与40P2仍分开。目录哈希与完整41行在acceptance-mapping.json，原方案、目录和ADR都未修改。本文件是待父确认的验收映射，不是豁免决定。
+
+**最终R2-4/5文章分母与覆盖率均未设定。** 原方案§6写“P1自动信源”，但目录同时含运营时序和付费/向量接口，ADR008又把它们分别映射R1.5、L、R3。保留41作为总盘点集合，不能把41直接当文章最终分母，也不擅自以34替代。此前3/41只表示固定清单下已有存档标题/链接/时间子检查，非R2最终覆盖率。映射确认之前不重算阈值、改目录状态或宣布豁免。
+
+待确认分组：一般资讯候选25、天气/资讯双重候选8、整页政策1、运营海况/台风/预报5、付费天气L1、向量R3 1，总41。各域仍应承担真实环境可达、来源/数据正确、失败处理/持久化等合适契约；分域不消除验收，只消除把向量和天气数值伪装成新闻标题的要求。
+
+| ID | 提议归属 | 原计划/ADR依据 | 歧义与未覆盖 |
+| --- | --- | --- | --- |
+${table}
+
+## NMC已有存档离线适用性
+
+CN-W01/02两页均为#text当前产品，不是详情列表：有div.title，#text内a[href]为0。用候选body/#text/a[href]配置经当前安全入口、HTMLparser到内存SQLite，两项都明确parse_failed/web_list_invalid_link，条目0；这是不适用性测试PASS，不是来源解析成功。
+
+CN-W01年总1873期是版本/期号身份；表格11日08时是观测时刻，没有可独立归一化的绝对发布时间。不得拼页面生成时间/抓取时间成发布时刻。CN-W02作者行含2026年10月05日06时，既有专用nmc-warning可保留其原始发布文本；当前通用日期函数既不剥作者前缀，也不支持“06时”尾部，测试分别unsupported_format/invalid_time，publishedAt=null。假设配置+08也不会自动修复语法，不能声称页面明确声明时区。隐藏页面生成时间两页存在，但不是产品发布时间，旧产品/历史提示不可推断当前有效。
+
+当前配置允许list/item/link/title/date selectors，但没有固定页面URL产品入口、同页URL特例、日期文本变换或期号身份模式。页面全局导航虽有链接，不能拿栏目导航配该产品标题/发布时间。不可用新fetch、未公开JSON、伪造锚点、抓取时刻或跨页任意时间绕过。要进入intel需另批产品页契约/复用专用normalizer的明确设计，不在本轮实施，不把NMC从总清单删除。
+
+存档路径/hash/字节与两项完整结果见nmc-offline.log；使用server/providers/__fixtures__/nmc-2026-10-11/typhoon_flash.html、warning_index.html，原谱系见docs/evidence/nmc-integration-2026-10-11/nmc-live-evidence.json（旧2026-10-11T01:38:50.372Z运行，各请求egress时间）。这些是已存真实衍生页面，非本次上游。global fetch阻断、raw bytes transport仅本机注入、内存库，无保留库读写。首次probe误断言Repository未返回errorMessage而失败（exit1），失败日志保留；直接断言DB已保存error_message后两项PASS exit0，没有改生产代码或放松断言含义。
+
+本轮只评估，不增加已有三源离线成功子检查分子，不修改最终文章分母。需要确认：各域映射及原R2-4/5条款的领域化验收；NMC是否将来采用独立产品页契约而非列表；下述精确有界批次及元数据许可范围。批次和所有新实网NOT_RUN。
+`);
+const bt=selected.map(e=>`| ${e.id} | ${e.url} | ${e.host} | ${e.role} | ${e.catalogState} |`).join('\n');
+fs.writeFileSync(dir+'/bounded-batch.md',`# 单次有界批次准备（待父确认；未执行）
+
+目录固定六ID和精确URL，没有猜/feed新路径或切换站点。MY-P02/PH-M01/MY-C01/MY-T01均在当前目录明确为P1 rss；TMD/BMKG亦是P1 rss，仅端点基准。各原目录状态是历史核查，不代表本轮可达。
+
+| ID | 唯一请求URL | 唯一host白名单 | 用途 | 目录原状态 |
+| --- | --- | --- | --- | --- |
+${bt}
+
+## 请求和安全边界
+
+- 仅当前Windows实际出口，按表顺序串行，一源一次无凭据索引GET；最多6个HTTP请求。0重试/0调度/0详情/0重定向跟随，任意3xx记录后该源结束；失败不换URL/出口，也不补请求。仅DNS解析不计HTTP请求，但仍使用已有public-IP过滤和地址固定，域名不扩。不会启动Runtime。
+- 使用已有secureFetchArticle安全检查与pinned Node transport；单源明确maxRedirects=0（现有可注入请求参数的收紧，不改生产默认）、maxBytes=512*1024（解码前）、timeoutMs=10000，总批次墙钟上限120秒（AbortController终止，不产生补请求）。原Intel collector默认是512KiB/10秒；旧盘点建议中的2MiB来自既有Feed列表上限，本提案纠正该混用，**不放宽intel默认**。不使用库默认fetch或跟随重定向，不TLS bypass、不新增CA/host/headers/cookies/API key。
+- Accept/允许类型只用已有RSS/XML类型：application/rss+xml、application/atom+xml、application/rdf+xml、application/xml、text/xml；非XML/登录/挑战页面不当作成功列表。响应正文空、非法XML、无非空title/link/真实发布时间分别记录失败/partial，时间缺失不以抓取时刻补值；302不自动改目录URL。
+- 来源归属与版权不同：目录批准接入候选，不授第三方正文再发布权。四个新RSS没有已记录full-text许可，**只允许标题/URL/发布时间元数据**；TMD旧RSS声明public domain，BMKG需注明来源且商业许可仍有限制。整批不保存description/content:encoded/正文、不抓文章；任何未来excerpt/full存储另行核许可。
+- 原响应只在内存解析、hash/字节计量，原wire全文和响应头不落盘/不提交。仅保留脱敏公共元数据、status/content-type、原始编码选择/冲突、sha256/时间及可回放的最小RSS元数据衍生片；明确标记衍生而非逐字节原响应。cookie/authorization/key值及带凭据URL不记录；仅必要头字段白名单，无原始headers dump。原始完整RSS存档若确需R2-5完整谱系须另批许可和保管，不默认授权。
+- 不操作保留库；如做采集器回放只用新内存/隔离库，测试seed为局部配置且元数据许可，不注册/启用来源。没有LLM、embedding、付费、browser/JS、24h或历史封港任务。全部status=NOT_RUN。
+
+## 预期新增覆盖和确认项
+
+若四个新RSS均可达/安全/元数据三字段合格并能在当前collector离线回放，最多增加4个独立真实存档候选：历史三源子检查从3项到最多7项，**只是个数展望，不发布分母/百分比或R2-4/5PASS承诺**。TMD/BMKG重复基准不新增ID，可补精确目录端点与最新字节谱系；旧BMKG/en成功不证明/rss.xml。
+
+父确认前须明确：上述唯一6URL/当前Windows出口/最大6次请求与120秒边界；仅metadata和脱敏衍生夹具的保存许可；先批准各域验收映射再定义最终R2文章分母。遇限流/403/redirect/证书/超限，按原事实返回，不自动CA修复、换域名、改目录或扩大预算。批准后才实施一次批次并交原始日志审查。本文件准备不构成已发请求或授权。
+`);
+console.log(JSON.stringify({rows:entries.length,groups,batch:selected.map(e=>e.id),finalDenominator:null,requestsMade:0}));

@@ -1,0 +1,42 @@
+{
+  "sha": "258bfb8eb20ca5b7a37700f703c95b8ed7992997",
+  "method": "actual baseline plainSelection isolated in VM with synthetic inert DOM; not a browser run",
+  "cases": [
+    {
+      "name": "paragraphs",
+      "expected": "关闭10:00\n\n恢复18:00",
+      "baselineActual": "关闭10:00恢复18:00",
+      "baselineFails": true
+    },
+    {
+      "name": "br",
+      "expected": "关闭10:00\n恢复18:00\n\n次日复核",
+      "baselineActual": "关闭10:00恢复18:00次日复核",
+      "baselineFails": true
+    },
+    {
+      "name": "list",
+      "expected": "关闭10:00\n恢复18:00",
+      "baselineActual": "关闭10:00恢复18:00",
+      "baselineFails": true
+    },
+    {
+      "name": "table",
+      "expected": "作业\t时间\n关闭\t10:00\n恢复\t18:00",
+      "baselineActual": "作业时间关闭10:00恢复18:00",
+      "baselineFails": true
+    },
+    {
+      "name": "selected cells",
+      "expected": "关闭10:00\t恢复18:00",
+      "baselineActual": "关闭10:00恢复18:00",
+      "baselineFails": true
+    },
+    {
+      "name": "selected rows",
+      "expected": "关闭\t10:00\n恢复\t18:00",
+      "baselineActual": "关闭10:00恢复18:00",
+      "baselineFails": true
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/calendar-demo-review-build
+
+ ✓ test/policy-console.test.ts (12 tests) 15ms
+ ✓ test/reduce-motion.test.ts (2 tests) 60ms
+ ✓ test/calendar-demo.test.ts (8 tests) 108ms
+ ✓ test/ui-smoke.test.ts (13 tests) 12ms
+ ✓ test/ports-demo.test.ts (11 tests) 30ms
+ ✓ server/services/port-weather-panel.test.ts (2 tests) 80ms
+ ✓ server/services/promo-calendar.test.ts (12 tests) 511ms
+ ✓ server/database/policy.test.ts (19 tests) 609ms
+
+ Test Files  8 passed (8)
+      Tests  79 passed (79)
+   Start at  11:47:13
+   Duration  1.52s (transform 2.37s, setup 0ms, import 4.11s, tests 1.42s, environment 1ms)
+

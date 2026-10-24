@@ -1,0 +1,86 @@
+[
+  {
+    "id": "PH-W01",
+    "host": "www.pagasa.dost.gov.ph",
+    "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+    "reservedAt": "2026-10-15T05:53:36.026Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "3.1.88.230",
+        "family": 4
+      },
+      {
+        "address": "54.255.117.221",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T05:53:36.295Z"
+  },
+  {
+    "id": "PH-W02",
+    "host": "www.pagasa.dost.gov.ph",
+    "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+    "reservedAt": "2026-10-15T05:53:36.715Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "3.1.88.230",
+        "family": 4
+      },
+      {
+        "address": "54.255.117.221",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T05:53:36.716Z"
+  },
+  {
+    "id": "ID-W02-root",
+    "host": "maritim.bmkg.go.id",
+    "url": "https://maritim.bmkg.go.id/marine2026-data/",
+    "reservedAt": "2026-10-15T05:53:36.849Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "104.20.20.136",
+        "family": 4
+      },
+      {
+        "address": "172.66.159.70",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T05:53:36.962Z"
+  },
+  {
+    "id": "XX-W02-targetTc",
+    "host": "www.jma.go.jp",
+    "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+    "reservedAt": "2026-10-15T05:53:37.474Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "99.86.195.38",
+        "family": 4
+      },
+      {
+        "address": "99.86.195.127",
+        "family": 4
+      },
+      {
+        "address": "99.86.195.19",
+        "family": 4
+      },
+      {
+        "address": "99.86.195.124",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T05:53:37.588Z"
+  }
+]

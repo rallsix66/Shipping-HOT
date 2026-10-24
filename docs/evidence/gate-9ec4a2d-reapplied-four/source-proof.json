@@ -1,0 +1,64 @@
+{
+  "type": "read_only_source_and_evidence_proof",
+  "codeSha": "9ec4a2dd4e6a76657ec3ed2a6dabb15187b4d5a8",
+  "gateCommandsPassed": 9,
+  "rawReplayCodeShaMatched": true,
+  "rootAndCloneSourceFilesMatched": [
+    {
+      "path": "server/intel/sources/config-keys.ts",
+      "lfSha256": "2a74c77f14cb1482bd4e47e747392c305c5d42b9665ce6c9180bf0156627c1b1"
+    },
+    {
+      "path": "server/intel/sources/web-list.ts",
+      "lfSha256": "110dd1bddaabec2354aa2c348d9f6939c43eb0d07aeb7cf1181cc3c983fa025d"
+    },
+    {
+      "path": "server/intel/sources/html-index-candidates.ts",
+      "lfSha256": "0502f14430452f56406d2c74b916bf0275e1f475acfa3b51a1292cda303da59e"
+    },
+    {
+      "path": "server/intel/vn-disaster-index.test.ts",
+      "lfSha256": "9431b9bb7b04be8152deb487be35f3d6eac0edb4a7719a1fb5393763dbfe5e5e"
+    },
+    {
+      "path": "package.json",
+      "lfSha256": "ab275bad655edb4dbc35cdf566b7cf75517008f3556c868447c6230f62a5d9a9"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "lfSha256": "28e8010ac2ac1a27de09ad9e2b3f3d01d302c9a7e77e7168d24949ab901e94d4"
+    },
+    {
+      "path": "nitro.config.ts",
+      "lfSha256": "0cbba82dd6020a5a7666b2d7e943458a6f312d40b21f597f0009ffcf5c34efb5"
+    }
+  ],
+  "privateCaptureChecks": [
+    {
+      "id": "CN-P02",
+      "bytes": 207,
+      "wireHashMatched": true,
+      "privateRawIgnored": true
+    },
+    {
+      "id": "VN-D01",
+      "bytes": 183913,
+      "wireHashMatched": true,
+      "privateRawIgnored": true
+    },
+    {
+      "id": "MY-L01",
+      "bytes": 124208,
+      "wireHashMatched": true,
+      "privateRawIgnored": true
+    },
+    {
+      "id": "ID-T02",
+      "bytes": 5,
+      "wireHashMatched": true,
+      "privateRawIgnored": true
+    }
+  ],
+  "rawExit": 0,
+  "noNewNetworkOrTestRun": true
+}

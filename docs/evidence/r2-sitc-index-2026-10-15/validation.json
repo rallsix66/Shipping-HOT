@@ -1,0 +1,88 @@
+{
+  "type": "sitc_exact_main_index_dns_block_evidence_validation",
+  "at": "2026-10-15T06:19:48.820Z",
+  "executionHead": "14b6548bcab3ef9df5a24f718dcbf9556cc0ffa5",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "sourceGetAttempts": 0,
+  "systemDnsCalls": 1,
+  "productGate": "NOT_RUN_no_product_change",
+  "checks": [
+    {
+      "name": "Exact branch/execution/product binding",
+      "pass": true
+    },
+    {
+      "name": "Zero product/schema/dependency/production/workflow/catalogue diff",
+      "pass": true
+    },
+    {
+      "name": "Exact authorized main-site catalogue URL and query, only one target",
+      "pass": true
+    },
+    {
+      "name": "DNS1 reserved198.18.0.64 captured once",
+      "pass": true
+    },
+    {
+      "name": "Blocked before HTTP, request ledger empty and no fabricated body/status/hash",
+      "pass": true
+    },
+    {
+      "name": "No retry/redirect/Vietnam/other source/details/pagination/settings/credentials",
+      "pass": true
+    },
+    {
+      "name": "Private destination ignored and empty; no new public raw or DB",
+      "pass": true
+    },
+    {
+      "name": "No configuration/parser/SQLite replay or unknown source dates manufactured",
+      "pass": true
+    },
+    {
+      "name": "OnlyXX-K03 appended diagnostic, other40 entries identical",
+      "pass": true
+    },
+    {
+      "name": "All41 qualification/permissions/defaults/numeric evidence unchanged",
+      "pass": true
+    },
+    {
+      "name": "Coverage23/39,21/34,historical3/5 and denominator/threshold24h unchanged",
+      "pass": true
+    },
+    {
+      "name": "Existing safe entry/pinned normal TLS, exactquery guard and no CA bypass",
+      "pass": true
+    },
+    {
+      "name": "Capture harness rawexit0 with exact stdout/stderr hashes",
+      "pass": true
+    },
+    {
+      "name": "Current matrix references and LF hashes resolve",
+      "pass": true,
+      "detail": {
+        "occurrences": 289,
+        "uniquePaths": 108,
+        "bad": []
+      }
+    },
+    {
+      "name": "Affected local Markdown links resolve",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Frontier16 nonOK entries and currentSITC blocked attempt remain distinct from qualification",
+      "pass": true
+    },
+    {
+      "name": "Bounded new evidence credential-value pattern scan clear",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "errors": [],
+  "rawExit": 0
+}

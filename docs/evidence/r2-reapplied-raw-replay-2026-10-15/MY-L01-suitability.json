@@ -1,0 +1,121 @@
+{
+  "status": "FAIL_REAL_LIST_MISSING_DETAIL_LINK",
+  "rawSha256": "9e9787d4cf60f454824a0529787b1d345a2814ac45f91a957ff1d8b57c1cb310",
+  "rawBytes": 124208,
+  "originalRawRedistributed": false,
+  "cards": [
+    {
+      "titleExcerpt": "Retail Operations Planning for October 2026",
+      "titleAnchorCount": 1,
+      "titleAnchorHasHref": false,
+      "categoryLinksOnly": [
+        "/service-update"
+      ],
+      "sourceTimeText": "07 Oct 2026 06:30 pm"
+    },
+    {
+      "titleExcerpt": "Alternative Services During the Temporary Closure ",
+      "titleAnchorCount": 1,
+      "titleAnchorHasHref": false,
+      "categoryLinksOnly": [
+        "/service-update"
+      ],
+      "sourceTimeText": "22 Sep 2026 06:30 pm"
+    },
+    {
+      "titleExcerpt": "Termination of Agency Services at Pos Malaysia Cha",
+      "titleAnchorCount": 1,
+      "titleAnchorHasHref": false,
+      "categoryLinksOnly": [
+        "/service-update"
+      ],
+      "sourceTimeText": "21 Sep 2026 04:00 pm"
+    },
+    {
+      "titleExcerpt": "Discontinuation of SendParcel Prepaid Service​",
+      "titleAnchorCount": 1,
+      "titleAnchorHasHref": false,
+      "categoryLinksOnly": [
+        "/service-update"
+      ],
+      "sourceTimeText": "09 Sep 2026 04:00 pm"
+    },
+    {
+      "titleExcerpt": "Service Disruption Affecting Shipments to Indonesi",
+      "titleAnchorCount": 1,
+      "titleAnchorHasHref": false,
+      "categoryLinksOnly": [
+        "/service-update"
+      ],
+      "sourceTimeText": "06 Sep 2026 06:30 pm"
+    },
+    {
+      "titleExcerpt": "Malaysia Day Service Availability​",
+      "titleAnchorCount": 1,
+      "titleAnchorHasHref": false,
+      "categoryLinksOnly": [
+        "/service-update"
+      ],
+      "sourceTimeText": "03 Sep 2026 04:01 pm"
+    },
+    {
+      "titleExcerpt": "Service Disruption Due to Haze​",
+      "titleAnchorCount": 1,
+      "titleAnchorHasHref": false,
+      "categoryLinksOnly": [
+        "/service-update"
+      ],
+      "sourceTimeText": "03 Sep 2026 04:00 pm"
+    },
+    {
+      "titleExcerpt": "Lembaga Tabung Haji Service via PosOnline Temporar",
+      "titleAnchorCount": 1,
+      "titleAnchorHasHref": false,
+      "categoryLinksOnly": [
+        "/service-update"
+      ],
+      "sourceTimeText": "06 Aug 2026 04:00 pm"
+    },
+    {
+      "titleExcerpt": "Birthday of Prophet Muhammad Service Availability​",
+      "titleAnchorCount": 1,
+      "titleAnchorHasHref": false,
+      "categoryLinksOnly": [
+        "/service-update"
+      ],
+      "sourceTimeText": "29 Jul 2026 04:00 pm"
+    },
+    {
+      "titleExcerpt": "National Day (Merdeka) Service Availability​",
+      "titleAnchorCount": 1,
+      "titleAnchorHasHref": false,
+      "categoryLinksOnly": [
+        "/service-update"
+      ],
+      "sourceTimeText": "29 Jul 2026 04:00 pm"
+    }
+  ],
+  "configuredDateProbe": {
+    "raw": "07 Oct 2026 06:30 pm",
+    "rule": "unsupported_format",
+    "basis": "Original10cards observed2026-10-15, title anchor missing href and own local time text; probe only, no guessed date/route or production config.",
+    "calendar": "gregorian",
+    "precision": "unknown",
+    "timezone": "missing",
+    "utcOffset": null,
+    "localDate": null,
+    "publishedAt": null
+  },
+  "collector": {
+    "status": "failed",
+    "runId": "6a286a58-d40c-4d4c-8b11-c8c195161459",
+    "errorCode": "parse_failed",
+    "itemsCommitted": 0
+  },
+  "storedError": {
+    "error_message": "web_list_invalid_link"
+  },
+  "items": 0,
+  "actualSourceHttpRequests": 0,
+  "sourceConfigAdded": false
+}

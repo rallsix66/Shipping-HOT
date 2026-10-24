@@ -1,0 +1,47 @@
+{
+  "sourceId": "intel:xx-k01",
+  "target": "https://www.maersk.com/news",
+  "startedAt": "2026-10-20T07:28:29.935Z",
+  "receivedAt": "2026-10-20T07:28:30.700Z",
+  "finishedAt": "2026-10-20T07:28:30.739Z",
+  "DNS": 1,
+  "physicalGETReservations": 1,
+  "transportInvocations": 1,
+  "allDNSAddresses": [
+    {
+      "address": "23.204.139.71",
+      "family": 4,
+      "blocked": false
+    },
+    {
+      "address": "23.204.139.85",
+      "family": 4,
+      "blocked": false
+    }
+  ],
+  "sourceHeaderLimit": {
+    "sourceId": "intel:xx-k01",
+    "url": "https://www.maersk.com/news",
+    "maxHeaderSize": 32768
+  },
+  "forwardedHeaderLimit": 32768,
+  "nodeGlobalHeaderDefault": 16384,
+  "timeoutMs": 10000,
+  "maxBytes": 524288,
+  "maxRedirects": 0,
+  "retries": 0,
+  "status": 200,
+  "contentType": "text/html; charset=utf-8",
+  "bodyBytes": 46251,
+  "bodySha256": "9e7271c8d37da91032150dfff719de6fb7fd8d30426cfad50ae123e10fd72673",
+  "actualWireHeaderBytes": null,
+  "rawPath": ".tmp/r2-three-url-diagnostic-20261020/maersk/response-32k-20261020.bin",
+  "rawPrivateIgnored": true,
+  "completeHeadersOrRawPacketSaved": false,
+  "rawExit": 0,
+  "underlyingError": null,
+  "detailRequests": 0,
+  "attachments": 0,
+  "otherSourceRequests": 0,
+  "networkOrCAChanges": false
+}

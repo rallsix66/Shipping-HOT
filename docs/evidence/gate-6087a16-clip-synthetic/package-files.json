@@ -1,0 +1,103 @@
+{
+  "sha": "6087a169cb2e591e3acb10d23ccc641d8212f5c0",
+  "extensionId": "jihkanbaffodclncabodmbahbbgkjoad",
+  "normal": {
+    "path": "D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-6087a16\\.tmp\\clipper-package",
+    "files": [
+      {
+        "path": "assets/popup-aVjAIvTt.css",
+        "bytes": 465,
+        "sha256": "8a2411b56c91c16e429d97f0d5fe6de4556b718846ca7997d098bb3885dd68db"
+      },
+      {
+        "path": "assets/popup-CIA-2KyO.js",
+        "bytes": 6496,
+        "sha256": "81ef0e6a701bfe50b784e8d619b02a6e79a3814ccf8ded15db5b10dfe18b8343"
+      },
+      {
+        "path": "content.js",
+        "bytes": 326516,
+        "sha256": "e44d1caff777c56deda5fda6260826b76d0c193643650dae681e803bf132be04"
+      },
+      {
+        "path": "licenses/defuddle-MIT.txt",
+        "bytes": 1076,
+        "sha256": "c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092"
+      },
+      {
+        "path": "licenses/obsidian-clipper-MIT.txt",
+        "bytes": 1088,
+        "sha256": "3ca04f8f046005103b08302723521f546605a34a269d5a867a82d200dfd9c0d7"
+      },
+      {
+        "path": "manifest.json",
+        "bytes": 1011,
+        "sha256": "8d2cc507bd632cbe95a740aee6a2f7801e3c07c079a787aa77b34dcbddae67e8"
+      },
+      {
+        "path": "popup.html",
+        "bytes": 2124,
+        "sha256": "929ce281c4b4d289a349c5e5f504fa6ab31eb053055b8045e3d1cf60688fcbd4"
+      },
+      {
+        "path": "worker.js",
+        "bytes": 5394,
+        "sha256": "68526fd29cc403edd94c50972eb88c0c28b1f680a4d474211a928d1b5c0f56a8"
+      }
+    ]
+  },
+  "synthetic": {
+    "path": "D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-6087a16\\extension-test",
+    "files": [
+      {
+        "path": "assets/popup-aVjAIvTt.css",
+        "bytes": 465,
+        "sha256": "8a2411b56c91c16e429d97f0d5fe6de4556b718846ca7997d098bb3885dd68db"
+      },
+      {
+        "path": "assets/popup-mkRLBbSk.js",
+        "bytes": 6595,
+        "sha256": "62036fe96039d551a457c90cb76c0dfb27f64d3ca68780586ff978406082f424"
+      },
+      {
+        "path": "content.js",
+        "bytes": 326631,
+        "sha256": "c24781c496cbfc9e7084c3fdca84f5dc99c101172b87d920eb773dc823ac0e2b"
+      },
+      {
+        "path": "licenses/defuddle-MIT.txt",
+        "bytes": 1076,
+        "sha256": "c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092"
+      },
+      {
+        "path": "licenses/obsidian-clipper-MIT.txt",
+        "bytes": 1088,
+        "sha256": "3ca04f8f046005103b08302723521f546605a34a269d5a867a82d200dfd9c0d7"
+      },
+      {
+        "path": "manifest.json",
+        "bytes": 1086,
+        "sha256": "a7890899d2fa62e4b7e32321119a8450d7fbef1d77c3c11f4ea80a71ce75532c"
+      },
+      {
+        "path": "popup.html",
+        "bytes": 2330,
+        "sha256": "123ca49edb1914f49efbe6d9bd0a5f364dac118c582c43ebc1d9693d480209cc"
+      },
+      {
+        "path": "worker.js",
+        "bytes": 5499,
+        "sha256": "4061a47fc7ead3e8127b05b7a81142afc5781bfef8c976ec5eadaee853528379"
+      }
+    ]
+  },
+  "zip": {
+    "path": "D:\\try one\\Shipping HOT\\.tmp\\Shipping-HOT-Clipper-Synthetic-6087a16.zip",
+    "sha256": "6cf98f33451b8c0d82f20a62855df809378f7502f801d8bc046d8520def2e86b",
+    "bytes": 106074
+  },
+  "fullArtifactInventory": {
+    "path": "D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-6087a16\\artifact-files.json",
+    "sha256": "4bafab75a9aa87cb3c26db18ae9cf6b65931aa8fa7bea0493eea86884dd49f2f"
+  }
+}

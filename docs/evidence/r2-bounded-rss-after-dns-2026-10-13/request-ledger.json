@@ -1,0 +1,50 @@
+[
+  {
+    "id": "MY-P02",
+    "url": "https://www.westportsholdings.com/category/press-release/feed/",
+    "state": "response_received",
+    "reservedAt": "2026-10-13T07:00:27.728Z",
+    "httpStatus": 200,
+    "finishedAt": "2026-10-13T07:00:29.490Z"
+  },
+  {
+    "id": "PH-M01",
+    "url": "https://portcalls.com/feed/",
+    "state": "response_received",
+    "reservedAt": "2026-10-13T07:00:29.491Z",
+    "httpStatus": 200,
+    "finishedAt": "2026-10-13T07:00:30.791Z"
+  },
+  {
+    "id": "MY-C01",
+    "url": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
+    "state": "response_received",
+    "reservedAt": "2026-10-13T07:00:30.792Z",
+    "httpStatus": 200,
+    "finishedAt": "2026-10-13T07:00:35.340Z"
+  },
+  {
+    "id": "MY-T01",
+    "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+    "state": "response_received",
+    "reservedAt": "2026-10-13T07:00:35.341Z",
+    "httpStatus": 200,
+    "finishedAt": "2026-10-13T07:00:38.388Z"
+  },
+  {
+    "id": "TH-W01",
+    "url": "https://www.tmd.go.th/en/api/xml/CAP",
+    "state": "response_received",
+    "reservedAt": "2026-10-13T07:00:38.391Z",
+    "httpStatus": 200,
+    "finishedAt": "2026-10-13T07:00:40.269Z"
+  },
+  {
+    "id": "ID-W01",
+    "url": "https://www.bmkg.go.id/alerts/nowcast/en/rss.xml",
+    "state": "response_received",
+    "reservedAt": "2026-10-13T07:00:40.271Z",
+    "httpStatus": 200,
+    "finishedAt": "2026-10-13T07:00:40.907Z"
+  }
+]

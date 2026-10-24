@@ -1,0 +1,125 @@
+{
+  "baselineHead": "cfce1b3f0a1cccf8cc61527f5aebea879a8a1aec",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "files": [
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+      "committedTextLfSha256": "2ad3019659918d0be56c320913aa5e212032ac9aa222f57f3b19727c1f82be7b"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+      "committedTextLfSha256": "f1fa8890fa6186eb3bc6511965675088100e0414b1ef065c242f3bd78b2249b4"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+      "committedTextLfSha256": "11d62300c4085c11118177d28b019b05eceb7ffdbac438f4b1b33226eb28f926"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+      "committedTextLfSha256": "2f7b8345a96acd41dc8a793d5f18e37f6e60c204b0837b89ebe7ae0d7ee53839"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/ID-W02-root-capture.json",
+      "committedTextLfSha256": "10d49a6a1fbdd7bf69e6e3fb5ff1b60dc27ed126c72c101c780510eb791627c0"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/PH-W01-capture.json",
+      "committedTextLfSha256": "751942793b372807478195102bd49eeb4a03a8057d45b3679b75c176fbe499fb"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/PH-W02-capture.json",
+      "committedTextLfSha256": "8155b2e824e2f1b08f1c9b649a82ff74d1dc8c75f2cca67cfc74b3a99846adbe"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/XX-W02-targetTc-capture.json",
+      "committedTextLfSha256": "d54343bcda531e910dcb4860c70fbd5642c6ea6e39c870d174dc1fb77f48bcc8"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/archive-procedure.cjs.txt",
+      "committedTextLfSha256": "2098e9ed5d3cc25ebf729e7e9d853ca697499fa87a34631f72512943460c65f5"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/archive-verification-procedure.cjs.txt",
+      "committedTextLfSha256": "86e348523369a82bb0402b24e66437b813d4e691e218428ff19167b6fd9b65f4"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/capture-command-initial.json",
+      "committedTextLfSha256": "b5e783fec1dff07c5da16eb53eccf311ddbac27d24da95128f57afb64f9ca55a"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/capture-config.ts.txt",
+      "committedTextLfSha256": "501a1ef2b03a3b1d6b6715b06edd72464437ec1fd0a64cc56cae0d1accd9b3fd"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/capture-procedure.test.ts.txt",
+      "committedTextLfSha256": "2b778ee620998e5608de024b5a96bd2a8bb492a05453ab9d5996576863b13ba1"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/capture-runner.cjs.txt",
+      "committedTextLfSha256": "8f891d86db967d3a1fb0c5814fc3e6ae448707bab507482ef9905a04435105b1"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/capture-summary.json",
+      "committedTextLfSha256": "9564299b7b0c48431c004dfef951e0a319afce5e3f723d19d0610375ee4cf90d"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/closeout.md",
+      "committedTextLfSha256": "6b528c1f83d53980e7435330528578c30889ee13d1f765aba24ec92c49b8c6e2"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/conditional-decisions.json",
+      "committedTextLfSha256": "00361e955a6d77e39c9c52f604f1db69ab6870f9ae8ed8d039aa856eede9b784"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/dns-ledger.json",
+      "committedTextLfSha256": "f2c7ff89e921d8e67b5a2cb5bdeb63cddab340f6c5b2cc41c2d5c42595b37d6c"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/doc-lint-procedure.cjs.txt",
+      "committedTextLfSha256": "c6b7bd75ef996747b6ae77c78aafedabb54e8a6390369478c6381f254eb0cccc"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/doc-lint.json",
+      "committedTextLfSha256": "5b1d386126dd627f67d77776a3369cc6ffb8c3d9f9c85daed5c63973dc1890ca"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/manifest.json",
+      "committedTextLfSha256": "842076d9524713aebd7c2ed7c3926705914757780e65ab174e47820ce646a3a9"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/matrix-delta.json",
+      "committedTextLfSha256": "d3d9c5f2c746d83a46c9b3b807bde074f0ff665c3b07a34f93802f3787afe7f4"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/report.md",
+      "committedTextLfSha256": "eb5fa0808b7e4215400331ae518353409db0d58e38fa5df80974eab9398e7763"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/request-ledger.json",
+      "committedTextLfSha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/source-proof.json",
+      "committedTextLfSha256": "b229178e6dc5aaf1eddb3edfdb0ca061485b5f8b4a22e016ebcc39175fbbf2cf"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/validation-procedure.cjs.txt",
+      "committedTextLfSha256": "99cd2511808a39b02846000b92835e34aa1e040405cf229c2e4e670a5ad97d89"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-2026-10-15/validation.json",
+      "committedTextLfSha256": "2f7b8345a96acd41dc8a793d5f18e37f6e60c204b0837b89ebe7ae0d7ee53839"
+    },
+    {
+      "path": "docs/handoffs/r2-next-execution-2026-10-15.md",
+      "committedTextLfSha256": "38ce6559973d8c7dfce8acc800f47005f1c879d49ffb2dd4fd0d3879b1f50194"
+    },
+    {
+      "path": "docs/status.md",
+      "committedTextLfSha256": "3f5e8a06f00ed141e81debdfc68c15e4c45b29fb83a2192af7af90c8e93b2c24"
+    }
+  ],
+  "sourceGetAttempts": 0,
+  "systemDnsCalls": 4,
+  "productGate": "NOT_RUN_no_product_change"
+}

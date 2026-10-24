@@ -1,0 +1,9 @@
+{
+  "name": "smoke-p0",
+  "command": "pnpm smoke:p0-native",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\thai-document-final-build",
+  "sha": "2acfda4c8ddab3f8064d199bb3cfcf26873ff288",
+  "startedAt": "2026-10-14T08:39:24.529Z",
+  "endedAt": "2026-10-14T08:39:25.724Z",
+  "rawExit": 0
+}

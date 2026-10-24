@@ -1,0 +1,223 @@
+{
+  "at": "2026-10-20T03:35:39.628Z",
+  "sourceURL": "https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json",
+  "sourceSha256": "3af2b483aeb5623312ae86fbef5d63ca31ec6653e10b2ac24bfaa6213da98ba1",
+  "sourceBytes": 11259,
+  "topLevelKeys": [
+    "code",
+    "name",
+    "issued",
+    "valid_from",
+    "valid_to",
+    "forecast_day1",
+    "forecast_day2-4"
+  ],
+  "identity": {
+    "code": "XJ001",
+    "name": "Pelabuhan Tanjung Priok",
+    "exactIndexMatch": true,
+    "indexProvince": "DK Jakarta",
+    "indexCoordinates": {
+      "lat": -6.103879776,
+      "lon": 106.882294878
+    },
+    "payloadCoordinatesPresent": false,
+    "coordinateVerdict": "NOT_COMPARABLE_PRODUCT_OMITS_COORDINATES; index location retained separately; project coordinates unchanged"
+  },
+  "time": {
+    "issuedRaw": "2026-10-19 12:00 UTC",
+    "issuedISO": "2026-10-19T12:00:00.000Z",
+    "updatedFieldPresent": false,
+    "validFromRaw": "2026-10-20 00:00 UTC",
+    "validToRaw": "2026-10-23 00:00 UTC",
+    "validFromISO": "2026-10-20T00:00:00.000Z",
+    "validToISO": "2026-10-23T00:00:00.000Z",
+    "declaredSpanHours": 72,
+    "issuedAgeHoursAtFetch": 15.565307777777777,
+    "fetchWithinDeclaredValidity": true,
+    "remainingValidityHoursAtFetch": 68.43469222222222,
+    "firstToLastHours": 72,
+    "futurePoints": 37,
+    "pastPoints": 4,
+    "groupStats": [
+      {
+        "key": "forecast_day1",
+        "count": 24,
+        "firstRaw": "2026-10-20 00:00 UTC",
+        "lastRaw": "2026-10-20 23:00 UTC",
+        "firstISO": "2026-10-20T00:00:00.000Z",
+        "lastISO": "2026-10-20T23:00:00.000Z",
+        "intervalMinutes": [
+          60
+        ],
+        "strictlyAscending": true
+      },
+      {
+        "key": "forecast_day2-4",
+        "count": 17,
+        "firstRaw": "2026-10-21 00:00 UTC",
+        "lastRaw": "2026-10-23 00:00 UTC",
+        "firstISO": "2026-10-21T00:00:00.000Z",
+        "lastISO": "2026-10-23T00:00:00.000Z",
+        "intervalMinutes": [
+          180
+        ],
+        "strictlyAscending": true
+      }
+    ],
+    "allTimesExplicitUTC": true,
+    "issuedIsNotFetchedAtOrValidTime": true,
+    "noNewFreshnessSLA": true
+  },
+  "rowCount": 41,
+  "rowKeys": [
+    "time",
+    "weather",
+    "visibility",
+    "temp_avg",
+    "rh_avg",
+    "wind_from",
+    "wind_speed",
+    "wind_gust",
+    "wave_cat",
+    "wave_height",
+    "current_to",
+    "current_speed",
+    "tides"
+  ],
+  "numericStats": {
+    "visibility": {
+      "observedTypes": [
+        "number"
+      ],
+      "missing": 0,
+      "nulls": 0,
+      "finite": 41,
+      "min": 7,
+      "max": 10
+    },
+    "temp_avg": {
+      "observedTypes": [
+        "number"
+      ],
+      "missing": 0,
+      "nulls": 0,
+      "finite": 41,
+      "min": 27,
+      "max": 30
+    },
+    "rh_avg": {
+      "observedTypes": [
+        "number"
+      ],
+      "missing": 0,
+      "nulls": 0,
+      "finite": 41,
+      "min": 66,
+      "max": 83
+    },
+    "wind_speed": {
+      "observedTypes": [
+        "number"
+      ],
+      "missing": 0,
+      "nulls": 0,
+      "finite": 41,
+      "min": 1,
+      "max": 9
+    },
+    "wind_gust": {
+      "observedTypes": [
+        "number"
+      ],
+      "missing": 0,
+      "nulls": 0,
+      "finite": 41,
+      "min": 4,
+      "max": 18
+    },
+    "wave_height": {
+      "observedTypes": [
+        "number"
+      ],
+      "missing": 0,
+      "nulls": 0,
+      "finite": 41,
+      "min": 0.1,
+      "max": 0.3
+    },
+    "current_speed": {
+      "observedTypes": [
+        "number"
+      ],
+      "missing": 0,
+      "nulls": 0,
+      "finite": 41,
+      "min": 0.59,
+      "max": 0.8
+    },
+    "tides": {
+      "observedTypes": [
+        "number"
+      ],
+      "missing": 0,
+      "nulls": 0,
+      "finite": 41,
+      "min": -0.52,
+      "max": 0.22
+    }
+  },
+  "stringCategories": {
+    "weather": [
+      "Berawan Tebal",
+      "Cerah Berawan",
+      "Cerah",
+      "Berawan"
+    ],
+    "wind_from": [
+      "Tenggara",
+      "Utara",
+      "Timur Laut",
+      "Selatan",
+      "Timur",
+      "Barat Daya"
+    ],
+    "wave_cat": [
+      "Tenang"
+    ],
+    "current_to": [
+      "Barat",
+      "Selatan",
+      "Tenggara",
+      "Timur",
+      "Timur Laut",
+      "Utara",
+      "Barat Laut",
+      "Barat Daya"
+    ]
+  },
+  "qualityCodeFieldSeen": false,
+  "nullCount": 0,
+  "anomalies": {
+    "duplicateTimes": 0,
+    "nonascending": 0,
+    "outsideDeclaredBounds": 0,
+    "negativeNonnegativeFields": [],
+    "humidityOutside0To100": 0,
+    "gustBelowWind": 0
+  },
+  "unitBasis": "previous local official apidoc UTC/unit evidence; actual payload has no unit metadata",
+  "payloadUnitFieldsPresent": false,
+  "coverage": {
+    "onePortOnly": true,
+    "points": 41,
+    "day1Hourly": true,
+    "day2To4ThreeHourly": true,
+    "sevenDayHourly": false,
+    "precipitationMmPresent": false,
+    "swellSeparatePresent": false,
+    "officialWarningOrOperationalImpact": false
+  },
+  "classification": "numeric_weather_not_information_feed",
+  "qualificationChanged": false
+}

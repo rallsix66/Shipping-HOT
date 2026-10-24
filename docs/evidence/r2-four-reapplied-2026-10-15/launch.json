@@ -1,0 +1,13 @@
+{
+  "startedAt": "2026-10-15T01:16:07.779Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "-c",
+    ".tmp/four-reapplied-20261015.config.ts"
+  ],
+  "head": "50da3805ee14e72222a4e26f4230073cf1842bc7",
+  "productCodeSha": "355bc861d4020ba22ddd00401de709d7cee497e3",
+  "authorization": "parent delegated exact four catalogue URLs once system DNS each, at most one pinned index GET per public result; no retries, redirect, domain switch or network configuration"
+}

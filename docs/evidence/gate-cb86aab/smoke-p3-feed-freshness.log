@@ -1,0 +1,16 @@
+# command: pnpm smoke:p3-feed-freshness
+# full_sha: cb86aabaf715f82eed6d53aa5e481404b37635e3
+# started: 2026-10-13T02:19:10.737Z
+# ---- stdout ----
+
+> shipping-hot@0.0.41 smoke:p3-feed-freshness D:\try one\Shipping HOT
+> node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p3-feed-freshness-sqlite-smoke.ts
+
+{"process":"B","persisted":true,"current":1,"history":3,"visibility":"current"}
+
+# ---- stderr ----
+(node:59104) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("./scripts/tsx-alias-loader.mjs", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+# raw_exit_code: 0

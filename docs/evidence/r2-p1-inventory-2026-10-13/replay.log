@@ -1,0 +1,36 @@
+# command: pnpm exec vitest run -c .tmp/p1-replay.config.ts
+# full_sha: a9e637fd52c69fbfde7fd226c660e58da0ea2ae8
+# captured_at: 2026-10-13T03:37:29.350Z
+# stdout
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+stdout | .tmp/p1-replay.test.ts > existing real archives through current intel collector only > 'TH-W01' exact catalog URL mapped to archived bytes
+{"catalogId":"TH-W01","url":"https://www.tmd.go.th/en/api/xml/CAP","archive":"server/providers/__fixtures__/tmd-cap-2026-10-10/index.xml","sha256":"26ca1fd0cd2f766f5ef50361d7e56d702c563df1290a259fc412e934c1756d36","bytes":9754,"outcome":{"status":"ok_items","runId":"84ea4fbf-54cc-498e-8294-aa2f870bcd5e","itemsSeen":7,"itemsNew":7,"itemsRevised":0},"items":7,"titleLinkTimeAssertions":"all persisted items nonempty title, same-host HTTPS link, parseable publishedAt","networkCalls":0,"transport":"injected offline raw bytes; not a real socket","first":{"title":"Heavy Rain","link":"https://www.tmd.go.th/uploads/CAP/en/CAPTMD20261007164420_2.xml","publishedAt":"2026-10-07T02:31:00.000Z"}}
+
+stdout | .tmp/p1-replay.test.ts > existing real archives through current intel collector only > 'ID-W01' exact catalog URL mapped to archived bytes
+{"catalogId":"ID-W01","url":"https://www.bmkg.go.id/alerts/nowcast/en/rss.xml","archive":"server/providers/__fixtures__/bmkg-cap-2026-10-10/index.xml","sha256":"a97a0cd066811719b62f019b950027545f08ecec017a0eb61c85dc5bc2cf07fb","bytes":16595,"outcome":{"status":"ok_items","runId":"9463c7d7-4032-4b67-afce-6affe2fc0ed0","itemsSeen":12,"itemsNew":12,"itemsRevised":0},"items":12,"titleLinkTimeAssertions":"all persisted items nonempty title, same-host HTTPS link, parseable publishedAt","networkCalls":0,"transport":"injected offline raw bytes; not a real socket","first":{"title":"Thunderstorm This Afternoon in Aceh","link":"https://www.bmkg.go.id/alerts/nowcast/en/CAH20261010003_alert.xml","publishedAt":"2026-10-10T04:20:00.000Z"}}
+
+stdout | .tmp/p1-replay.test.ts > existing real archives through current intel collector only > 'VN-W01' exact catalog URL mapped to archived bytes
+{"catalogId":"VN-W01","url":"https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html","archive":"docs/evidence/nchmf-integration-2026-10-10/raw/index.html","sha256":"e710f9f75c2036e0e796e3ce7fd78137de5784121ee7bd60894395d33f714b90","bytes":252878,"outcome":{"status":"ok_items","runId":"5afacf9a-16bc-4e3c-a75d-5c088601761e","itemsSeen":5,"itemsNew":5,"itemsRevised":0},"items":5,"titleLinkTimeAssertions":"all persisted items nonempty title, same-host HTTPS link, parseable publishedAt","networkCalls":0,"transport":"injected offline raw bytes; not a real socket","first":{"title":"TIN CẢNH BÁO LŨ PHỤC VỤ QUY TRÌNH VẬN HÀNH LIÊN HỒ CHỨA SÔNG HƯƠNG","link":"https://www.nchmf.gov.vn/kttv/vi-VN/1/tin-canh-bao-lu-phuc-vu-quy-trinh-van-hanh-lien-ho-chua-song-huong-post54540.html","publishedAt":"2026-10-10T08:30:00.000Z"}}
+
+ ✓ .tmp/p1-replay.test.ts (3 tests) 186ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  11:37:28
+   Duration  1.07s (transform 390ms, setup 0ms, import 716ms, tests 186ms, environment 0ms)
+
+
+# stderr
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+
+# raw_exit_code: 0

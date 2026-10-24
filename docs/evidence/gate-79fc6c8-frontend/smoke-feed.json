@@ -1,0 +1,9 @@
+{
+  "name": "smoke-feed",
+  "command": "pnpm smoke:p3-feed-freshness",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\manual-p2-final-build",
+  "sha": "79fc6c84b29497c869e029d27130ac02c8c04251",
+  "startedAt": "2026-10-14T04:58:28.093Z",
+  "endedAt": "2026-10-14T04:58:29.148Z",
+  "rawExit": 0
+}

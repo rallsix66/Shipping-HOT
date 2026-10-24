@@ -1,0 +1,20 @@
+{
+  "basis": "Git UTF8 text LF; wire hashes and JSON captured stdout/stderr not normalized",
+  "files": {
+    "command.json": "d51b5de48bc982e471a4f482df3a10337e9f263fa15d0d1baa05a34314cb2d5f",
+    "launch.json": "70ae3fe93a268b02a115a83430eede8153bd564111270b02cd28b2af3fd11b3b",
+    "MY-L01-suitability.json": "e36a850f9df530dbefb8d51fb8fcc6b95edebff6509f938a1c9a25ab2c84cd5b",
+    "partial-results.json": "ca542fd02ecd6fdadca405a225b6f839742d49237f44d460fe254b6da849e5d9",
+    "raw-replay-config.ts.txt": "12c63eea910eb08b9356fd63a411468828ff3705f2b2353eefc013ea07908529",
+    "raw-replay-launch.cjs.txt": "2c4faec7e0ffa7b453b5f4110169bd5d8a105e6c33ec10bd3680c4b667aaa420",
+    "raw-replay-procedure.ts.txt": "39c706ad5ac953606d4a13c370fa40b429f2402f8321fe1444c9536e2e702941",
+    "report.md": "52f5ba8fffa3f8ca7861e293ffdb6b2b7e81bf0b47670e8338cf98bb1c8ce8d9",
+    "stderr.log": "2b2089ef48a0decf6778aa45b416b29808b7d9476761ca686b28c9a254486d42",
+    "stdout.log": "4c2a0609297a599f1f055dfcc7e2f4f1d0e48fb21e3b22542b29d6a4a66b6e0e",
+    "summary.json": "10430d43b76b7416086a3bca07798e55350bc720c098ea574897a0de72d86499",
+    "VN-D01-adapter.json": "a896db03f2d2c483abd211f9e9a8a1f87c009c1d2d456f5570999c6e342965fc",
+    "VN-D01-first.json": "092209a3efce66577b982a962cb61d277a757ea5caee28169e0e46067a475981",
+    "VN-D01-repeat.json": "38cb1be11244a2a320676ab091460792bd8f29232197e7640cd3d40ed89ee349",
+    "VN-D01-result.json": "610c72fa3c6664bcbb0dffed019855c647deecbe6b98cb84cafe4464f60f4e3a"
+  }
+}

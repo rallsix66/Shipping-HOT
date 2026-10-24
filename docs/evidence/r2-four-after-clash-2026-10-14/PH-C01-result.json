@@ -1,0 +1,42 @@
+{
+  "id": "PH-C01",
+  "url": "https://customs.gov.ph/category/media-releases/",
+  "startedAt": "2026-10-14T07:56:33.170Z",
+  "status": "PARTIAL",
+  "httpRequests": 1,
+  "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+  "receivedAt": "2026-10-14T07:56:34.958Z",
+  "httpStatus": 200,
+  "contentType": "text/html; charset=UTF-8",
+  "rawByteLength": 166897,
+  "fetchedBytesSha256": "9d56a123e75dd0d3fa7523da3d410125a5c71f23e42dbacd012c50d31627a6c6",
+  "rawLocalOnly": true,
+  "parse": "DOM_OBSERVATION_ONLY",
+  "parserError": null,
+  "observedCandidateCount": 2,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 166897
+  },
+  "archivedMetadataSha256": "c5f972b908f41d5676416bc3c861958718e4445e298753932fde9f15bd41c7c6",
+  "originalHtmlCommitted": false,
+  "sensitiveScan": {
+    "positiveControlDetected": true,
+    "committedMaterialHits": 0
+  },
+  "finishedAt": "2026-10-14T07:56:34.989Z"
+}

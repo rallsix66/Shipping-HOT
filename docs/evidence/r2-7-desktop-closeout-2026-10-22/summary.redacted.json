@@ -1,0 +1,183 @@
+{
+  "generatedFrom": "local evidence files of run 72bb94e7 (not shipped); redacted: no paths, no body text, no database_id/bootstrap values (verified unchanged across phases)",
+  "runId": "72bb94e7-3123-413c-a00d-fc9b78181a18",
+  "reviewedScriptSHA256": "5c484e1dfda71192ecd82e82e18aefbe6fc6ea42cf2f18843c45b806d51daaea",
+  "entrySHA256": "c55b32d9d6a69e31ec6e939f9791be3f2c62704c9704c6466e21af98e3d7c763",
+  "outputTreeSHA256": "09fe17ba95a91683c19c02d4f8372e2d70f73788dac37340d0598cd7bb8d9f5a",
+  "bind": "127.0.0.1:4489",
+  "stdinRelay": {
+    "file": "control/launcher.cjs (local, not shipped)",
+    "sha256": "b562426675c766e05a303c77832a2c009913a2369619a6754ea80f6a722d2c98"
+  },
+  "preflight": {
+    "pass": true,
+    "fileState": "3d6ac989de787db8dcf42998b632744ec51b84ebf97e794caa66a63b5b569a2d",
+    "runId": null
+  },
+  "before": {
+    "phase": "before",
+    "at": "2026-10-22T03:02:37.159Z",
+    "pass": true,
+    "problems": [],
+    "fileState": "3d6ac989de787db8dcf42998b632744ec51b84ebf97e794caa66a63b5b569a2d",
+    "integrity": "ok",
+    "schemaSHA256": "9dbcadd648fa6338a95262f7d1fc9de2d9934a92f3d807dfcec9a139894fdfbb",
+    "itemsSHA256": "35ef68b07ecebd8eb26bc101cc8edadadb4a5e5bba07bc8767e3b4689004e404",
+    "versionsSHA256": "15ac463c25492cd4d8ae3db7841d42108d4f59e99e4a40707c6724b26bda450e",
+    "actionsSHA256": "4cf53703155a80c2b665734cab885f953375c9779fd7c28eb979dc9a4fee3286",
+    "blocksSHA256": {
+      "A": "9324a8f768b873808d76c441bfc789c935d43e8a94edb9ccb0c03b775a611929",
+      "B": "b0858c8d826628e5ea26c8a7589636a4e5aa06219f9779e67e35b327af08b319"
+    },
+    "currentVersionId": "1c9de08e-10e2-4742-9339-f9898e02568c",
+    "counts": {
+      "intel_item": 1,
+      "intel_item_version": 2,
+      "intel_manual_action": 5,
+      "provider_usage": 0,
+      "provider_runtime": 0,
+      "sync_runs": 0,
+      "translation_cache": 0,
+      "intel_fetch_run": 0,
+      "intel_executor": 0,
+      "ports": 0,
+      "feed_items": 0
+    },
+    "enabledSources": 0,
+    "translation": {
+      "enabled": false,
+      "monthlyBudget": 0
+    },
+    "metadata": {
+      "schema_version": 29,
+      "last_migration_at": "2026-10-21T02:16:29.672Z",
+      "columns": [
+        "bootstrap_completed_at",
+        "data_mode",
+        "database_id",
+        "id",
+        "last_migration_at",
+        "schema_version"
+      ]
+    }
+  },
+  "ready": {
+    "at": "2026-10-22T03:02:37.823Z",
+    "listening": true,
+    "bootstrapObserved": true,
+    "lastMigrationAt": "2026-10-22T03:02:37.555Z"
+  },
+  "startup": {
+    "phase": "startup",
+    "at": "2026-10-22T03:03:15.157Z",
+    "pass": true,
+    "problems": [],
+    "fileState": "8ad65e8282e7871eb06aa678b8f17322fcdeb3703a45d95197406fdaf2048737",
+    "integrity": "ok",
+    "schemaSHA256": "9dbcadd648fa6338a95262f7d1fc9de2d9934a92f3d807dfcec9a139894fdfbb",
+    "itemsSHA256": "35ef68b07ecebd8eb26bc101cc8edadadb4a5e5bba07bc8767e3b4689004e404",
+    "versionsSHA256": "15ac463c25492cd4d8ae3db7841d42108d4f59e99e4a40707c6724b26bda450e",
+    "actionsSHA256": "4cf53703155a80c2b665734cab885f953375c9779fd7c28eb979dc9a4fee3286",
+    "blocksSHA256": {
+      "A": "9324a8f768b873808d76c441bfc789c935d43e8a94edb9ccb0c03b775a611929",
+      "B": "b0858c8d826628e5ea26c8a7589636a4e5aa06219f9779e67e35b327af08b319"
+    },
+    "currentVersionId": "1c9de08e-10e2-4742-9339-f9898e02568c",
+    "counts": {
+      "intel_item": 1,
+      "intel_item_version": 2,
+      "intel_manual_action": 5,
+      "provider_usage": 0,
+      "provider_runtime": 0,
+      "sync_runs": 0,
+      "translation_cache": 0,
+      "intel_fetch_run": 0,
+      "intel_executor": 0,
+      "ports": 0,
+      "feed_items": 0
+    },
+    "enabledSources": 0,
+    "translation": {
+      "enabled": false,
+      "monthlyBudget": 0
+    },
+    "metadata": {
+      "schema_version": 29,
+      "last_migration_at": "2026-10-22T03:02:37.555Z",
+      "columns": [
+        "bootstrap_completed_at",
+        "data_mode",
+        "database_id",
+        "id",
+        "last_migration_at",
+        "schema_version"
+      ]
+    }
+  },
+  "guiAfter": {
+    "phase": "gui-readonly",
+    "at": "2026-10-22T03:41:46.668Z",
+    "pass": true,
+    "problems": [],
+    "fileState": "221e593aee8c82ab0a5a345da61cc60f04b5f5a068d9cc0faade1622d5339f53",
+    "integrity": "ok",
+    "schemaSHA256": "9dbcadd648fa6338a95262f7d1fc9de2d9934a92f3d807dfcec9a139894fdfbb",
+    "itemsSHA256": "35ef68b07ecebd8eb26bc101cc8edadadb4a5e5bba07bc8767e3b4689004e404",
+    "versionsSHA256": "15ac463c25492cd4d8ae3db7841d42108d4f59e99e4a40707c6724b26bda450e",
+    "actionsSHA256": "4cf53703155a80c2b665734cab885f953375c9779fd7c28eb979dc9a4fee3286",
+    "blocksSHA256": {
+      "A": "9324a8f768b873808d76c441bfc789c935d43e8a94edb9ccb0c03b775a611929",
+      "B": "b0858c8d826628e5ea26c8a7589636a4e5aa06219f9779e67e35b327af08b319"
+    },
+    "currentVersionId": "1c9de08e-10e2-4742-9339-f9898e02568c",
+    "counts": {
+      "intel_item": 1,
+      "intel_item_version": 2,
+      "intel_manual_action": 5,
+      "provider_usage": 0,
+      "provider_runtime": 0,
+      "sync_runs": 0,
+      "translation_cache": 0,
+      "intel_fetch_run": 0,
+      "intel_executor": 0,
+      "ports": 0,
+      "feed_items": 0
+    },
+    "enabledSources": 0,
+    "translation": {
+      "enabled": false,
+      "monthlyBudget": 0
+    },
+    "metadata": {
+      "schema_version": 29,
+      "last_migration_at": "2026-10-22T03:09:42.160Z",
+      "columns": [
+        "bootstrap_completed_at",
+        "data_mode",
+        "database_id",
+        "id",
+        "last_migration_at",
+        "schema_version"
+      ]
+    }
+  },
+  "metadataOtherColumnsUnchangedAcrossPhases": true,
+  "stop": {
+    "stopSentAt": "2026-10-22T03:41:56.732Z",
+    "shutdownV2Json": "MISSING - close-event evidence incomplete",
+    "processExit": {
+      "at": "2026-10-22T03:41:56.733Z",
+      "code": 0
+    },
+    "launcherExit": {
+      "at": "2026-10-22T03:41:56.743Z",
+      "code": 0,
+      "signal": null
+    },
+    "pidAndPort4489": "process gone and 4489 released (checked ~25 s after stop)"
+  },
+  "serverProtection": {
+    "outboundGuardLog": "not created - no interception events recorded (not proof of browser zero network)",
+    "executeStderr": "empty"
+  }
+}

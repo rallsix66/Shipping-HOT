@@ -1,0 +1,14 @@
+{
+  "command": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs .tmp/r2-nmc-mapping-20261015.ts",
+  "startedAt": "2026-10-15T05:06:50.418Z",
+  "finishedAt": "2026-10-15T05:06:50.909Z",
+  "executionHead": "f58e01e7360f17ab55706e36ce09851e265ddedb",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "rawExit": 0,
+  "stdoutExactUtf8": "{\"status\":\"PASS\",\"catalogueIds\":2,\"products\":6,\"historicalNotices\":4,\"liftStatements\":4,\"sourceRequests\":0,\"systemDns\":0}\n",
+  "stderrExactUtf8": "(node:54052) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/tsx-alias-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+  "stdoutOriginalByteSha256": "b18fc78a56edd59b6eccfe141d6b34f7cae7735f251bac43a712ca91b4fbdd03",
+  "stderrOriginalByteSha256": "bd4b10561dbac56e63aeb71bcca06774355adb0f342c7c16c99c71e3bab8f3dc",
+  "sourceRequests": 0,
+  "systemDns": 0
+}

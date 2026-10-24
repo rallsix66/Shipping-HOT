@@ -1,0 +1,9 @@
+{
+  "name": "smoke-p0",
+  "command": "pnpm smoke:p0-native",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\post-clash-final2-build",
+  "sha": "355bc861d4020ba22ddd00401de709d7cee497e3",
+  "startedAt": "2026-10-14T09:27:15.736Z",
+  "endedAt": "2026-10-14T09:27:17.180Z",
+  "rawExit": 0
+}

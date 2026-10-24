@@ -1,0 +1,16 @@
+{"name":"typecheck","command":"pnpm typecheck","sha":"81c5ad552575c6bccfc7f19b836bf41632ee739a","started":"2026-10-13T09:30:30.816Z","finished":"2026-10-13T09:30:33.473Z","rawExit":2,"signal":null}
+STDOUT
+
+> shipping-hot@0.0.41 typecheck D:\try one\Shipping HOT
+> tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.app.json
+
+scripts/lib/two-index-probe-results.test.ts(16,47): error TS2322: Type 'IntelCollectOutcome | { itemsNew: number; status: "failed"; runId: string; errorCode: string; itemsCommitted: number; } | { itemsNew: number; status: "storage_unavailable"; runId: string | null; errorCode: string; storageError: string; } | { ...; }' is not assignable to type 'IntelCollectOutcome | undefined'.
+  Object literal may only specify known properties, and 'itemsNew' does not exist in type '{ status: "failed"; runId: string; errorCode: string; itemsCommitted: number; }'.
+scripts/lib/two-index-probe-results.test.ts(149,37): error TS2352: Conversion of type '{ id: "../invalid"; run: (progress: ProbeProgress, checkpoint: () => Promise<void>) => Promise<void>; dispose?: () => void | Promise<void>; }' to type 'ProbeTask' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'id' are incompatible.
+    Type '"../invalid"' is not comparable to type 'SourceId'.
+scripts/lib/two-index-probe-results.ts(64,28): error TS7053: Element implicitly has an 'any' type because expression of type '"itemsSeen" | "itemsNew" | "itemsRevised" | "itemsCommitted"' can't be used to index type '{ status: "ok_items" | "ok_empty"; runId: string; itemsSeen: number; itemsNew: number; itemsRevised: number; } | { status: "failed"; runId: string; errorCode: string; itemsCommitted: number; } | { ...; } | { ...; }'.
+  Property 'itemsSeen' does not exist on type '{ status: "ok_items" | "ok_empty"; runId: string; itemsSeen: number; itemsNew: number; itemsRevised: number; } | { status: "failed"; runId: string; errorCode: string; itemsCommitted: number; } | { ...; } | { ...; }'.
+ ELIFECYCLE  Command failed with exit code 2.
+
+STDERR

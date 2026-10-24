@@ -1,0 +1,105 @@
+{
+  "sha": "aaa85bcc212ff285ab581086e0ff0a890dff6b43",
+  "cleanAtStart": true,
+  "results": [
+    {
+      "name": "install",
+      "command": "pnpm install --frozen-lockfile",
+      "sha": "aaa85bcc212ff285ab581086e0ff0a890dff6b43",
+      "started": "2026-10-13T10:34:44.158Z",
+      "finished": "2026-10-13T10:34:46.149Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "build",
+      "command": "pnpm build",
+      "sha": "aaa85bcc212ff285ab581086e0ff0a890dff6b43",
+      "started": "2026-10-13T10:34:46.150Z",
+      "finished": "2026-10-13T10:35:06.188Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "typecheck",
+      "command": "pnpm typecheck",
+      "sha": "aaa85bcc212ff285ab581086e0ff0a890dff6b43",
+      "started": "2026-10-13T10:35:06.189Z",
+      "finished": "2026-10-13T10:35:11.540Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "lint",
+      "command": "pnpm lint",
+      "sha": "aaa85bcc212ff285ab581086e0ff0a890dff6b43",
+      "started": "2026-10-13T10:35:11.541Z",
+      "finished": "2026-10-13T10:35:40.679Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "probe-driver-types",
+      "command": "pnpm exec tsc --noEmit -p .tmp/two-probe-typecheck.json",
+      "sha": "aaa85bcc212ff285ab581086e0ff0a890dff6b43",
+      "started": "2026-10-13T10:35:40.680Z",
+      "finished": "2026-10-13T10:35:45.073Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "targeted-probe",
+      "command": "pnpm exec vitest run -c vitest.config.ts scripts/lib/two-index-probe-results.test.ts",
+      "sha": "aaa85bcc212ff285ab581086e0ff0a890dff6b43",
+      "started": "2026-10-13T10:35:45.074Z",
+      "finished": "2026-10-13T10:35:46.145Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "targeted-html",
+      "command": "pnpm exec vitest run -c vitest.config.ts server/intel/sources/web-list-conflicts.test.ts server/intel/web-list-conflicts-collect.test.ts server/intel/sources/html-index-candidates.test.ts server/intel/html-index-candidates-collect.test.ts server/intel/sources/web-list.test.ts server/intel/web-list-collect.test.ts server/intel/sources/json-list.test.ts server/intel/json-list-collect.test.ts",
+      "sha": "aaa85bcc212ff285ab581086e0ff0a890dff6b43",
+      "started": "2026-10-13T10:35:46.146Z",
+      "finished": "2026-10-13T10:35:48.351Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "test",
+      "command": "pnpm exec vitest run -c vitest.config.ts",
+      "sha": "aaa85bcc212ff285ab581086e0ff0a890dff6b43",
+      "started": "2026-10-13T10:35:48.353Z",
+      "finished": "2026-10-13T10:35:59.208Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "smoke-p0-native",
+      "command": "pnpm smoke:p0-native",
+      "sha": "aaa85bcc212ff285ab581086e0ff0a890dff6b43",
+      "started": "2026-10-13T10:35:59.209Z",
+      "finished": "2026-10-13T10:36:00.234Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "smoke-p2c-runtime",
+      "command": "pnpm smoke:p2c-runtime",
+      "sha": "aaa85bcc212ff285ab581086e0ff0a890dff6b43",
+      "started": "2026-10-13T10:36:00.235Z",
+      "finished": "2026-10-13T10:36:01.205Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "smoke-p3-feed-freshness",
+      "command": "pnpm smoke:p3-feed-freshness",
+      "sha": "aaa85bcc212ff285ab581086e0ff0a890dff6b43",
+      "started": "2026-10-13T10:36:01.206Z",
+      "finished": "2026-10-13T10:36:02.195Z",
+      "rawExit": 0,
+      "signal": null
+    }
+  ]
+}

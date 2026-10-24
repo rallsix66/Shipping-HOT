@@ -1,0 +1,16 @@
+[
+  {
+    "role": "catalogue",
+    "hostname": "www.sz.msa.gov.cn",
+    "reservedAt": "2026-10-15T08:27:32.368Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "125.124.253.156",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T08:27:32.424Z"
+  }
+]

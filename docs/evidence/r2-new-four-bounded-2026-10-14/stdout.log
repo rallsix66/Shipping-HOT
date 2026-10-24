@@ -1,0 +1,9 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ .tmp/new-four-bounded-20261014.test.ts (1 test) 16ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  18:55:50
+   Duration  686ms (transform 197ms, setup 0ms, import 502ms, tests 16ms, environment 0ms)

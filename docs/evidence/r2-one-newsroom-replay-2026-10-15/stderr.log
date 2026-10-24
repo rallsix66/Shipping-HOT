@@ -1,0 +1,140 @@
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  .tmp/one-newsroom-raw-replay-20261015.test.ts > complete ONE HTML bytes through existing collector, exact raw fields, repeat and read-only reopen
+AssertionError: expected [ { …(8) }, { …(8) }, { …(8) }, …(7) ] to deeply equal [ { …(8) }, { …(8) }, { …(8) }, …(7) ]
+
+- Expected
++ Received
+
+@@ -2,101 +2,101 @@
+    {
+      "canonicalUrl": "https://www.one-line.com/newsroom/financial-results-fy2025",
+      "currentVersionId": "52bdb37f-1eef-47d4-9f74-7c5f7369a44c",
+      "firstSeenAt": "2026-10-15T03:10:00.000Z",
+      "id": "e997b183-309b-4454-ac92-5c73d221055a",
+-     "lastSeenAt": "2026-10-15T03:10:00.000Z",
++     "lastSeenAt": "2026-10-15T03:10:01.000Z",
+      "publishedAt": null,
+      "sourceId": "intel:xx-k02",
+      "title": "Ocean Network Express Announces Financial Results for FY2025",
+    },
+    {
+      "canonicalUrl": "https://www.one-line.com/newsroom/financial-results-fy2026-1st-quarter",
+      "currentVersionId": "01b74d7f-ff59-4729-af82-25a5217e829d",
+      "firstSeenAt": "2026-10-15T03:10:00.000Z",
+      "id": "31254bc0-029b-48a8-a4d5-9b39f068ebd1",
+-     "lastSeenAt": "2026-10-15T03:10:00.000Z",
++     "lastSeenAt": "2026-10-15T03:10:01.000Z",
+      "publishedAt": null,
+      "sourceId": "intel:xx-k02",
+      "title": "Ocean Network Express Announces Financial Results For Q1 FY2026",
+    },
+    {
+      "canonicalUrl": "https://www.one-line.com/newsroom/ocean-network-express-announces-ceo-succession-plan",
+      "currentVersionId": "55065072-bc58-48f0-9ad5-16ea38236b95",
+      "firstSeenAt": "2026-10-15T03:10:00.000Z",
+      "id": "41f61532-11d7-4786-a524-81b5f9711538",
+-     "lastSeenAt": "2026-10-15T03:10:00.000Z",
++     "lastSeenAt": "2026-10-15T03:10:01.000Z",
+      "publishedAt": null,
+      "sourceId": "intel:xx-k02",
+      "title": "Ocean Network Express Announces CEO Succession Plan - Mr Till Ole Barrelet Appointed as Chief Executive Officer-Designate",
+    },
+    {
+      "canonicalUrl": "https://www.one-line.com/newsroom/one-and-classnk-launch-joint-research-evaluate-effectiveness-rdts",
+      "currentVersionId": "eb3e6a3b-7369-4131-a14c-091fa3b4b744",
+      "firstSeenAt": "2026-10-15T03:10:00.000Z",
+      "id": "dc60a7bd-27e0-49e9-abb2-2de0650cf7b6",
+-     "lastSeenAt": "2026-10-15T03:10:00.000Z",
++     "lastSeenAt": "2026-10-15T03:10:01.000Z",
+      "publishedAt": null,
+      "sourceId": "intel:xx-k02",
+      "title": "ONE and ClassNK Launch Research to Quantify Roll Damping Tank Effectiveness on Large Container Ships",
+    },
+    {
+      "canonicalUrl": "https://www.one-line.com/newsroom/one-announces-additional-investment-poseidon-corp",
+      "currentVersionId": "629f2455-25e4-4942-8242-533fac6d5fab",
+      "firstSeenAt": "2026-10-15T03:10:00.000Z",
+      "id": "327d9de2-017d-426b-a15b-18475598aff4",
+-     "lastSeenAt": "2026-10-15T03:10:00.000Z",
++     "lastSeenAt": "2026-10-15T03:10:01.000Z",
+      "publishedAt": null,
+      "sourceId": "intel:xx-k02",
+      "title": "Ocean Network Express Announces Additional Investment in Poseidon Corp.",
+    },
+    {
+      "canonicalUrl": "https://www.one-line.com/newsroom/one-enhances-network-reliability-through-strategic-partnership-dongwon-group",
+      "currentVersionId": "fd7ffa2e-e74f-4ac0-8bd5-ea77e01a966f",
+      "firstSeenAt": "2026-10-15T03:10:00.000Z",
+      "id": "1273f930-47e9-4137-91b6-fbe7eef9c0f4",
+-     "lastSeenAt": "2026-10-15T03:10:00.000Z",
++     "lastSeenAt": "2026-10-15T03:10:01.000Z",
+      "publishedAt": null,
+      "sourceId": "intel:xx-k02",
+      "title": "Ocean Network Express to Enhance Network Reliability Through Strategic Partnership with Dongwon Group and Investment in Busan Terminal",
+    },
+    {
+      "canonicalUrl": "https://www.one-line.com/newsroom/one-hosts-5th-container-shipping-summit",
+      "currentVersionId": "0c6ffb89-595c-46cf-bf03-50153a29b114",
+      "firstSeenAt": "2026-10-15T03:10:00.000Z",
+      "id": "599acccd-1d74-4670-bce4-d4db6095b0ce",
+-     "lastSeenAt": "2026-10-15T03:10:00.000Z",
++     "lastSeenAt": "2026-10-15T03:10:01.000Z",
+      "publishedAt": null,
+      "sourceId": "intel:xx-k02",
+      "title": "ONE hosts 5th Container Shipping Summit in Nagasaki: Addressing Today's Challenges by Backcasting from the Future",
+    },
+    {
+      "canonicalUrl": "https://www.one-line.com/newsroom/one-publishes-sustainability-report-2026",
+      "currentVersionId": "235f0da2-aa87-4940-9892-8c3abbffd669",
+      "firstSeenAt": "2026-10-15T03:10:00.000Z",
+      "id": "3f2c91d2-4de1-46ca-8002-af0300710eec",
+-     "lastSeenAt": "2026-10-15T03:10:00.000Z",
++     "lastSeenAt": "2026-10-15T03:10:01.000Z",
+      "publishedAt": null,
+      "sourceId": "intel:xx-k02",
+      "title": "Ocean Network Express Publishes Sustainability Report 2026",
+    },
+    {
+      "canonicalUrl": "https://www.one-line.com/newsroom/one-secures-stake-hutchinson-laemchabang-terminal",
+      "currentVersionId": "597a9604-df52-4d79-a46a-e2c83bed190d",
+      "firstSeenAt": "2026-10-15T03:10:00.000Z",
+      "id": "7e5c6369-79a1-4a6a-9365-a30abc1c3316",
+-     "lastSeenAt": "2026-10-15T03:10:00.000Z",
++     "lastSeenAt": "2026-10-15T03:10:01.000Z",
+      "publishedAt": null,
+      "sourceId": "intel:xx-k02",
+      "title": "Ocean Network Express Secures Stake in Hutchison Laemchabang Terminal",
+    },
+    {
+      "canonicalUrl": "https://www.one-line.com/newsroom/one-strengthens-its-regional-structure-asia-pacific-and-africa",
+      "currentVersionId": "27c2ee2a-835b-4932-81be-7170c39cac93",
+      "firstSeenAt": "2026-10-15T03:10:00.000Z",
+      "id": "1e121303-63f3-4abb-a8c7-141e54855c09",
+-     "lastSeenAt": "2026-10-15T03:10:00.000Z",
++     "lastSeenAt": "2026-10-15T03:10:01.000Z",
+      "publishedAt": null,
+      "sourceId": "intel:xx-k02",
+      "title": "Ocean Network Express Strengthens its Regional Structure in Asia Pacific and Africa",
+    },
+  ]
+
+ ❯ .tmp/one-newsroom-raw-replay-20261015.test.ts:78:5
+     76|     result.repeat = await collectIntelSource(state.repository, seed, d…
+     77|     expect(result.repeat).toMatchObject({ status: "ok_items", itemsSee…
+     78|     expect(await state.repository.listItems(seed.id)).toEqual(beforeIt…
+       |     ^
+     79|     expect(await Promise.all(beforeItems.map(item => state.repository.…
+     80|     result.injectedLookupCalls = injectedLookupCalls; result.injectedT…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯

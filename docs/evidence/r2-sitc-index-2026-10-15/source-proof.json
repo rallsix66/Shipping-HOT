@@ -1,0 +1,10 @@
+{
+  "executionHead": "14b6548bcab3ef9df5a24f718dcbf9556cc0ffa5",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "productDiff": "",
+  "catalogueDiff": "",
+  "sourceGetAttempts": 0,
+  "systemDnsCalls": 1,
+  "scope": "SITC exact main index one safetyDNS blocked beforeHTTP; no product/catalogue/qualification changes",
+  "productGate": "NOT_RUN_no_product_change"
+}

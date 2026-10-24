@@ -1,0 +1,23 @@
+{
+  "seed": {
+    "id": "bounded:MY-P02",
+    "catalogId": "MY-P02",
+    "name": "MY-P02",
+    "kind": "rss",
+    "url": "https://www.westportsholdings.com/category/press-release/feed/",
+    "enabled": false,
+    "persistence": "disallowed",
+    "allowedHosts": [
+      "www.westportsholdings.com"
+    ],
+    "allowedContentTypes": [
+      "application/rss+xml",
+      "application/atom+xml",
+      "application/rdf+xml",
+      "application/xml",
+      "text/xml"
+    ],
+    "intervalMs": 3600000
+  },
+  "role": "Isolated evidence-only configuration, not production registry/candidate or active seed"
+}

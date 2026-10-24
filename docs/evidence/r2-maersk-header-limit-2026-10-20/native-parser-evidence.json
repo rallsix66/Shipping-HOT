@@ -1,0 +1,57 @@
+{
+  "type": "assertions_in_passing_real_Node_parser_tests",
+  "node": "24.15.0",
+  "defaultMaxHeaderBytes": 16384,
+  "optInMaxHeaderBytes": 32768,
+  "fixture": "127.0.0.1 ephemeral HTTP server; injected test-only mapping into actual defaultTransport and actual Node parser",
+  "newTestFileCases": 38,
+  "actualNativeFixtureCases": 7,
+  "additionalExistingTransportCase": 1,
+  "externalDNS": 0,
+  "externalHTTP": 0,
+  "realTLSOrWebsiteProof": false,
+  "rawHeadersOrRawPacketArchived": false,
+  "cases": [
+    {
+      "name": "default",
+      "syntheticHeaderValueBytes": 20480,
+      "optIn": false,
+      "assertedResult": "HPE_HEADER_OVERFLOW"
+    },
+    {
+      "name": "exact_opt_in",
+      "syntheticHeaderValueBytes": 20480,
+      "optIn": true,
+      "assertedResult": "success_200_synthetic_HTML"
+    },
+    {
+      "name": "hard_ceiling",
+      "syntheticHeaderValueBytes": 40960,
+      "optIn": true,
+      "assertedResult": "HPE_HEADER_OVERFLOW"
+    },
+    {
+      "name": "other_source_default",
+      "syntheticHeaderValueBytes": 20480,
+      "optIn": false,
+      "assertedResult": "HPE_HEADER_OVERFLOW"
+    },
+    {
+      "name": "body_ceiling",
+      "bodyBytes": 524289,
+      "maxBodyBytes": 524288,
+      "assertedResult": "body_too_large"
+    },
+    {
+      "name": "timeout",
+      "fixtureTimeoutMs": 100,
+      "assertedResult": "fetch_timeout"
+    },
+    {
+      "name": "cancellation",
+      "assertedResult": "ABORT_ERR_and_failed_fetch"
+    }
+  ],
+  "totalSyntheticHeaderBytes": "not claimed equal to value length; response framing adds bytes; no inference about real Maersk headers",
+  "testSourceSha256": "07d5e81746b4c8c4936104a60eede7507f0816ec7bac345da15dfeca1baaf0de"
+}

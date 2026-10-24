@@ -1,0 +1,19 @@
+{
+  "executionHead": "45d2296301bb85aa18a6e4a5e6509bfa854319b0",
+  "productCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "id": "CN-P02",
+  "exactCatalogueUrl": "https://www.sz.msa.gov.cn/",
+  "catalogueRowLfSha256": "fb8626584a4638504f67317547732ce3b2d3b288cc96bbde8d25b99c6c0bed19",
+  "allowedHost": "www.sz.msa.gov.cn",
+  "maximumSystemDnsCalls": 2,
+  "maximumGetAttempts": 2,
+  "additionalGetCondition": "Actual Location only; same approved exact host/HTTPS/no credentials/no abnormal port, then existing safety boundary; never a second redirect",
+  "retries": 0,
+  "automaticRedirects": 0,
+  "details": 0,
+  "pagination": 0,
+  "rawLocalOnly": true,
+  "persistence": "disallowed",
+  "systemSettingsWritten": false,
+  "productChanged": false
+}

@@ -1,0 +1,141 @@
+{
+  "phase": "after",
+  "rawSha256": "9e9787d4cf60f454824a0529787b1d345a2814ac45f91a957ff1d8b57c1cb310",
+  "rawBytes": 124208,
+  "rawRedistributed": false,
+  "cards": 10,
+  "dates": [
+    {
+      "raw": "07 Oct 2026 06:30 pm",
+      "rule": "configured_english_month_abbr_12h",
+      "basis": "MY-L01 complete private 2026-10-15 response: explicit card time format only; timezone and time role unproven. Missing article links remain rejected.",
+      "calendar": "gregorian",
+      "precision": "minute",
+      "timezone": "missing",
+      "utcOffset": null,
+      "localDate": "2026-10-07",
+      "publishedAt": null
+    },
+    {
+      "raw": "22 Sep 2026 06:30 pm",
+      "rule": "configured_english_month_abbr_12h",
+      "basis": "MY-L01 complete private 2026-10-15 response: explicit card time format only; timezone and time role unproven. Missing article links remain rejected.",
+      "calendar": "gregorian",
+      "precision": "minute",
+      "timezone": "missing",
+      "utcOffset": null,
+      "localDate": "2026-09-22",
+      "publishedAt": null
+    },
+    {
+      "raw": "21 Sep 2026 04:00 pm",
+      "rule": "configured_english_month_abbr_12h",
+      "basis": "MY-L01 complete private 2026-10-15 response: explicit card time format only; timezone and time role unproven. Missing article links remain rejected.",
+      "calendar": "gregorian",
+      "precision": "minute",
+      "timezone": "missing",
+      "utcOffset": null,
+      "localDate": "2026-09-21",
+      "publishedAt": null
+    },
+    {
+      "raw": "09 Sep 2026 04:00 pm",
+      "rule": "configured_english_month_abbr_12h",
+      "basis": "MY-L01 complete private 2026-10-15 response: explicit card time format only; timezone and time role unproven. Missing article links remain rejected.",
+      "calendar": "gregorian",
+      "precision": "minute",
+      "timezone": "missing",
+      "utcOffset": null,
+      "localDate": "2026-09-09",
+      "publishedAt": null
+    },
+    {
+      "raw": "06 Sep 2026 06:30 pm",
+      "rule": "configured_english_month_abbr_12h",
+      "basis": "MY-L01 complete private 2026-10-15 response: explicit card time format only; timezone and time role unproven. Missing article links remain rejected.",
+      "calendar": "gregorian",
+      "precision": "minute",
+      "timezone": "missing",
+      "utcOffset": null,
+      "localDate": "2026-09-06",
+      "publishedAt": null
+    },
+    {
+      "raw": "03 Sep 2026 04:01 pm",
+      "rule": "configured_english_month_abbr_12h",
+      "basis": "MY-L01 complete private 2026-10-15 response: explicit card time format only; timezone and time role unproven. Missing article links remain rejected.",
+      "calendar": "gregorian",
+      "precision": "minute",
+      "timezone": "missing",
+      "utcOffset": null,
+      "localDate": "2026-09-03",
+      "publishedAt": null
+    },
+    {
+      "raw": "03 Sep 2026 04:00 pm",
+      "rule": "configured_english_month_abbr_12h",
+      "basis": "MY-L01 complete private 2026-10-15 response: explicit card time format only; timezone and time role unproven. Missing article links remain rejected.",
+      "calendar": "gregorian",
+      "precision": "minute",
+      "timezone": "missing",
+      "utcOffset": null,
+      "localDate": "2026-09-03",
+      "publishedAt": null
+    },
+    {
+      "raw": "06 Aug 2026 04:00 pm",
+      "rule": "configured_english_month_abbr_12h",
+      "basis": "MY-L01 complete private 2026-10-15 response: explicit card time format only; timezone and time role unproven. Missing article links remain rejected.",
+      "calendar": "gregorian",
+      "precision": "minute",
+      "timezone": "missing",
+      "utcOffset": null,
+      "localDate": "2026-08-06",
+      "publishedAt": null
+    },
+    {
+      "raw": "29 Jul 2026 04:00 pm",
+      "rule": "configured_english_month_abbr_12h",
+      "basis": "MY-L01 complete private 2026-10-15 response: explicit card time format only; timezone and time role unproven. Missing article links remain rejected.",
+      "calendar": "gregorian",
+      "precision": "minute",
+      "timezone": "missing",
+      "utcOffset": null,
+      "localDate": "2026-07-29",
+      "publishedAt": null
+    },
+    {
+      "raw": "29 Jul 2026 04:00 pm",
+      "rule": "configured_english_month_abbr_12h",
+      "basis": "MY-L01 complete private 2026-10-15 response: explicit card time format only; timezone and time role unproven. Missing article links remain rejected.",
+      "calendar": "gregorian",
+      "precision": "minute",
+      "timezone": "missing",
+      "utcOffset": null,
+      "localDate": "2026-07-29",
+      "publishedAt": null
+    }
+  ],
+  "collector": {
+    "status": "failed",
+    "runId": "eaaa8b20-c5ed-401e-9acd-bd0e5a7b2e09",
+    "errorCode": "parse_failed",
+    "itemsCommitted": 0
+  },
+  "storedError": {
+    "error_message": "web_list_invalid_link"
+  },
+  "tableCounts": {
+    "intel_item": 0,
+    "intel_item_version": 0,
+    "provider_usage": 0,
+    "translation_cache": 0,
+    "provider_runtime": 0
+  },
+  "readOnlyReopen": true,
+  "actualDNS": 0,
+  "actualHTTP": 0,
+  "injectedArchiveTransports": 1,
+  "productionConfigAdded": false,
+  "classificationChanged": false
+}

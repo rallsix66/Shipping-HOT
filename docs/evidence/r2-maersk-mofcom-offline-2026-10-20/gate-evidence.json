@@ -1,0 +1,211 @@
+{
+  "toolchain": {
+    "node": "24.15.0",
+    "ABI": 137,
+    "pnpm": "10.30.3"
+  },
+  "candidate": "D:\\try one\\Shipping HOT\\.tmp\\two-source-clean-20261020",
+  "normalFrozenOfflineInstall": true,
+  "ignoreScripts": false,
+  "reusedOldNodeModules": false,
+  "manuallyCopiedNativeModules": false,
+  "providerEnvironmentScrubbed": true,
+  "gates": [
+    {
+      "name": "install",
+      "artifact": "install-attempt2",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\two-source-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "install",
+        "--frozen-lockfile",
+        "--offline"
+      ],
+      "startedAt": "2026-10-20T08:05:57.849Z",
+      "finishedAt": "2026-10-20T08:06:08.223Z",
+      "rawExit": 0,
+      "stdout": {
+        "path": ".tmp/two-source-offline-20261020/install-attempt2.stdout.log",
+        "sha256": "d3918d8e288a6bd41e80cc60ac01496fc614b640d580d4cf50235e940e6446a2"
+      },
+      "stderr": {
+        "path": ".tmp/two-source-offline-20261020/install-attempt2.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "build",
+      "artifact": "build",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\two-source-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "build"
+      ],
+      "startedAt": "2026-10-20T08:06:41.298Z",
+      "finishedAt": "2026-10-20T08:07:22.049Z",
+      "rawExit": 0,
+      "stdout": {
+        "path": ".tmp/two-source-offline-20261020/build.stdout.log",
+        "sha256": "281202285ae6026e2a23bfb65e27a518cbbb3f114cff08988508df9e3d5276a5"
+      },
+      "stderr": {
+        "path": ".tmp/two-source-offline-20261020/build.stderr.log",
+        "sha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658"
+      }
+    },
+    {
+      "name": "typecheck",
+      "artifact": "typecheck-attempt3",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\two-source-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "typecheck"
+      ],
+      "startedAt": "2026-10-20T08:11:06.393Z",
+      "finishedAt": "2026-10-20T08:11:10.073Z",
+      "rawExit": 0,
+      "stdout": {
+        "path": ".tmp/two-source-offline-20261020/typecheck-attempt3.stdout.log",
+        "sha256": "58343f3a62b91e1a100c98c39e1e6c6445f7fe0136e9275d0191ff2e09ea7cb4"
+      },
+      "stderr": {
+        "path": ".tmp/two-source-offline-20261020/typecheck-attempt3.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "lint",
+      "artifact": "lint-attempt2",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\two-source-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "lint"
+      ],
+      "startedAt": "2026-10-20T08:11:10.074Z",
+      "finishedAt": "2026-10-20T08:11:51.643Z",
+      "rawExit": 0,
+      "stdout": {
+        "path": ".tmp/two-source-offline-20261020/lint-attempt2.stdout.log",
+        "sha256": "78c1b5462506cb348b2d83aeb696b99983a6c2c75c58eaf937ea5551b452d9ac"
+      },
+      "stderr": {
+        "path": ".tmp/two-source-offline-20261020/lint-attempt2.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "targeted",
+      "artifact": "targeted",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\two-source-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "exec",
+        "vitest",
+        "run",
+        "-c",
+        "vitest.config.ts",
+        "server/intel/maersk-mofcom.test.ts",
+        "server/intel/sources/html-index-candidates.test.ts",
+        "server/intel/sources/web-list.test.ts",
+        "server/intel/sources/web-list-english-12h.test.ts",
+        "server/services/article-fetch-header-limit.test.ts",
+        "server/services/article-fetch-security.test.ts",
+        "server/services/article-fetch-transport.test.ts",
+        "server/intel/collect.test.ts"
+      ],
+      "startedAt": "2026-10-20T08:06:08.226Z",
+      "finishedAt": "2026-10-20T08:06:11.397Z",
+      "rawExit": 0,
+      "stdout": {
+        "path": ".tmp/two-source-offline-20261020/targeted.stdout.log",
+        "sha256": "9972f173a632a7b1d8e4dc820d2f3ac14eb2b75924bcc661f3bba62196ab5219"
+      },
+      "stderr": {
+        "path": ".tmp/two-source-offline-20261020/targeted.stderr.log",
+        "sha256": "6c19790ffbe08ce0f2dbe2fe736c2538564162f9ccad157faf511103c86397b4"
+      }
+    },
+    {
+      "name": "vitest",
+      "artifact": "vitest",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\two-source-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "exec",
+        "vitest",
+        "run",
+        "-c",
+        "vitest.config.ts"
+      ],
+      "startedAt": "2026-10-20T08:11:51.644Z",
+      "finishedAt": "2026-10-20T08:12:08.094Z",
+      "rawExit": 0,
+      "stdout": {
+        "path": ".tmp/two-source-offline-20261020/vitest.stdout.log",
+        "sha256": "ebdf4e330a6ac152bb8186ab8b31e46e36f88dc83a11ef4b2009bf021e31d3e8"
+      },
+      "stderr": {
+        "path": ".tmp/two-source-offline-20261020/vitest.stderr.log",
+        "sha256": "46f8f28d473b7956b17f00478f3c12388c6918b5cc84ad962514088aa45fb939"
+      }
+    },
+    {
+      "name": "replay",
+      "artifact": "replay",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\two-source-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "exec",
+        "vitest",
+        "run",
+        "-c",
+        ".tmp/two-source-offline-20261020/replay.config.ts"
+      ],
+      "startedAt": "2026-10-20T08:06:11.398Z",
+      "finishedAt": "2026-10-20T08:06:13.505Z",
+      "rawExit": 0,
+      "stdout": {
+        "path": ".tmp/two-source-offline-20261020/replay.stdout.log",
+        "sha256": "a3d8a61c1b55f313e97bec6f5e53add0eb67baa61ab4f497e98556c5182588ad"
+      },
+      "stderr": {
+        "path": ".tmp/two-source-offline-20261020/replay.stderr.log",
+        "sha256": "6c19790ffbe08ce0f2dbe2fe736c2538564162f9ccad157faf511103c86397b4"
+      }
+    }
+  ],
+  "results": {
+    "targeted": 226,
+    "newTests": 50,
+    "fullPassed": 1777,
+    "fullSkipped": 3,
+    "fullFiles": 146,
+    "completeOriginalReplayTests": 2
+  },
+  "earlierFailuresRetained": [
+    {
+      "artifact": "install.json",
+      "reason": "default sandbox offline store unavailable; elevated offline install reused cache and succeeded; no online install"
+    },
+    {
+      "artifact": "typecheck.json",
+      "reason": "new test helper unknown[] incompatible with db0 SQL Value; corrected typed parameters"
+    },
+    {
+      "artifact": "lint.json",
+      "reason": "adjacent existing single-line if required braces after new named CN-T01 branch; corrected"
+    },
+    {
+      "artifact": "new-test-lint-fix.log",
+      "reason": "one new test finally had two statements per line; corrected"
+    }
+  ],
+  "buildBinding": "production files unchanged after build; subsequent repairs only touched test parameter types/format; final typecheck/lint/full test ran on final files"
+}

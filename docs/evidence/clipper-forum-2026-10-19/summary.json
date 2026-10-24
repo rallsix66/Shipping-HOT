@@ -1,0 +1,550 @@
+{
+  "at": "2026-10-19T07:22:25.276Z",
+  "cwd": "D:\\try one\\Shipping HOT",
+  "branch": "codex/shipping-hot-r2",
+  "head": "777007073f184d025147eb19f8ece86858e68362",
+  "uncommittedCandidate": true,
+  "cleanCommitShaGate": "NOT_RUN; reviewed working-source overlay on HEAD, no commit authorized",
+  "extractorVersion": "defuddle-0.19.2-dom-v3",
+  "sourceFiles": [
+    {
+      "path": "extensions/shipping-hot-clipper/src/extract.ts",
+      "sha256": "d5e332c673401cb2e0fdccbf56138ea69f60e5a973e6efc1a1bc3b24efb1b514"
+    },
+    {
+      "path": "extensions/shipping-hot-clipper/src/clip-utils.ts",
+      "sha256": "d5f3389fd7614a8c498a2fff3929190f4394e63b9f14ab187370138e694b2085"
+    },
+    {
+      "path": "test/clipper-dom.test.ts",
+      "sha256": "010df759d6c8c0f4035918af28b7060de05e7c1fbc8f01d3ea0aed7a9f8153ed"
+    },
+    {
+      "path": "test/clipper-forum.test.ts",
+      "sha256": "3579bf8567f7f092b2723a8148e7c7ee029a6bcb271ead759364c72c11ea3087"
+    },
+    {
+      "path": "tsconfig.node.json",
+      "sha256": "c074fca66be697a18cce157ff7f7ad9e4fba0e1b871a7f8e464ff12c3508b2b2"
+    },
+    {
+      "path": "extensions/shipping-hot-clipper/README.md",
+      "sha256": "8b2f12e8bc97a5601dd3902a08536ad485652609f5369a803d28519124433b58"
+    },
+    {
+      "path": "docs/architecture.md",
+      "sha256": "dff3028183c0add8a94bbfccc226d89f6e7a0e365794da8c97f273df4063e0e0"
+    }
+  ],
+  "codePatchSha256": "b493f931f2a6175e7fe41bd43bea2afa2866ae2184df3e570130ff6e82915f87",
+  "codePatchBytes": 12854,
+  "implementation": {
+    "scope": "Verified first-page Discuz main-post contentSelector only",
+    "preserved": [
+      "resource-free inertSnapshot",
+      "hidden/role/display pruning",
+      "synchronous network-disabled Defuddle",
+      "default clutter removal",
+      "selection/metadata dom-v1",
+      "plain/PRE/table semantics",
+      "existing storage/rights/version behavior"
+    ],
+    "unsupported": "Later/unknown thread pages, inconsistent post identities or excluded main post require explicit selection; no reply fallback"
+  },
+  "verification": {
+    "install": {
+      "command": "pnpm install --frozen-lockfile",
+      "rawExit": 0,
+      "scriptsEnabled": true,
+      "oldNodeModulesCopied": false,
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\snapshot",
+      "sandboxFailureRetained": true,
+      "escalatedRetrySucceeded": true
+    },
+    "results": [
+      {
+        "name": "build",
+        "command": "pnpm build",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:16:19.070Z",
+        "endedAt": "2026-10-19T07:16:40.087Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\build.log"
+      },
+      {
+        "name": "typecheck",
+        "command": "pnpm typecheck",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:16:40.087Z",
+        "endedAt": "2026-10-19T07:16:43.971Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\typecheck.log"
+      },
+      {
+        "name": "lint",
+        "command": "pnpm lint",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:16:43.972Z",
+        "endedAt": "2026-10-19T07:17:13.410Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\lint.log"
+      },
+      {
+        "name": "clipper-build",
+        "command": "pnpm build:clipper",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:17:13.412Z",
+        "endedAt": "2026-10-19T07:17:14.889Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\clipper-build.log"
+      },
+      {
+        "name": "targeted",
+        "command": "pnpm exec vitest run -c vitest.config.ts server/intel/manual-clip.test.ts server/intel/manual.test.ts server/intel/material-read.test.ts server/api/shipping/intel/manual-http.test.ts server/api/shipping/intel/read-http.test.ts test/manual-intel.test.ts test/clipper-bridge.test.ts test/clipper-dom.test.ts test/clipper-forum.test.ts test/clipper-package.test.ts test/clip-import.test.ts server/runtime/clip-synthetic-guard.test.ts --reporter=dot",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:17:14.891Z",
+        "endedAt": "2026-10-19T07:17:19.307Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\targeted.log"
+      },
+      {
+        "name": "vitest",
+        "command": "pnpm exec vitest run -c vitest.config.ts --reporter=dot",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:18:38.863Z",
+        "endedAt": "2026-10-19T07:18:54.326Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\vitest.log"
+      },
+      {
+        "name": "smoke-p0",
+        "command": "pnpm smoke:p0-native",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:18:54.327Z",
+        "endedAt": "2026-10-19T07:18:55.514Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\smoke-p0.log"
+      },
+      {
+        "name": "smoke-p2c",
+        "command": "pnpm smoke:p2c-runtime",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:18:55.515Z",
+        "endedAt": "2026-10-19T07:18:56.665Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\smoke-p2c.log"
+      },
+      {
+        "name": "smoke-feed",
+        "command": "pnpm smoke:p3-feed-freshness",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\snapshot",
+        "startedAt": "2026-10-19T07:18:56.665Z",
+        "endedAt": "2026-10-19T07:18:57.774Z",
+        "rawExit": 0,
+        "signal": null,
+        "log": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\smoke-feed.log"
+      }
+    ],
+    "related": {
+      "files": 12,
+      "passed": 240
+    },
+    "full": {
+      "files": 139,
+      "passed": 1504,
+      "skipped": 3,
+      "failed": 0
+    },
+    "forumFixtures": 23,
+    "originalFixtureRedBeforeFix": true,
+    "smokes": 3,
+    "rgEnvironment": "Existing bundled rg directory prepended to child-process Path only; no system settings/dependency/test changes",
+    "priorFailures": "Preserved sandbox-install failure, initial DOM test-project routing typecheck, lint-formatting failures and no-rg full-suite failure. Final source gate all rawExit0."
+  },
+  "actualReplay": {
+    "at": "2026-10-19T07:19:56.101Z",
+    "file": {
+      "path": "C:\\Users\\Administrator\\Desktop\\下周或有超级台风.html",
+      "bytes": 93508,
+      "sha256": "1d02a77ff25a0a247f26ce43abe53b9748cef09d7e92eb404329884e491aeaf3",
+      "sourceTitleVerified": true,
+      "sourceAddressVerified": true,
+      "unchanged": true
+    },
+    "method": "Full local user-saved HTML; current source and separate formal browser bundle in offline linkedom/Node VM",
+    "extractorVersion": "defuddle-0.19.2-dom-v3",
+    "stages": {
+      "source": {
+        "exactParagraphs": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "retainedChars": 340,
+        "positions": [
+          79,
+          149,
+          329,
+          399,
+          461
+        ],
+        "inOriginalOrder": true,
+        "occurrences": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "totalChars": 506,
+        "sha256": "395a8aace9605a809ae02b6b546b9d50783eb62d9938af16755c75db7bc7ac75"
+      },
+      "snapshot": {
+        "exactParagraphs": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "retainedChars": 340,
+        "positions": [
+          79,
+          149,
+          257,
+          327,
+          389
+        ],
+        "inOriginalOrder": true,
+        "occurrences": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "totalChars": 434,
+        "sha256": "bbb593a5c74ec97bccd01703bf1791b8ad8d97b5c991448673fa5d8b836385ee"
+      },
+      "defuddle": {
+        "contentSelector": "#postmessage_14378788",
+        "removePartialSelectors": "default true",
+        "wordCount": 343,
+        "text": {
+          "exactParagraphs": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "retainedChars": 340,
+          "positions": [
+            47,
+            118,
+            225,
+            296,
+            359
+          ],
+          "inOriginalOrder": true,
+          "occurrences": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "totalChars": 405,
+          "sha256": "4d58b6144685068d631cdfe8197e23725b17c30b1158740af23aa0aeec7e664b"
+        }
+      },
+      "plain": {
+        "exactParagraphs": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "retainedChars": 340,
+        "positions": [
+          43,
+          113,
+          217,
+          287,
+          349
+        ],
+        "inOriginalOrder": true,
+        "occurrences": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "totalChars": 391,
+        "sha256": "1c3fa4c042521c4daa213e457ba1afa7efb30ef02c5b22fd36fedc9b1c07d0db"
+      },
+      "sourceDomUnchanged": true
+    },
+    "actualScope": {
+      "totalBodyChars": 391,
+      "equalsExactlyFiveParagraphs": false,
+      "expectedFiveParagraphsWithSeparatorsChars": 348,
+      "extraCharsIncludingSeparators": 43,
+      "residualNonWhitespaceChars": 35,
+      "residualBlocks": [
+        {
+          "chars": 11,
+          "sha256": "7cb02c0857b34868c90dbe09288ec58668f6d65501e4831fca40aa3ec190d7ac",
+          "classification": "attachment-permission hint/control"
+        },
+        {
+          "chars": 26,
+          "sha256": "3362eb9a22661c74b4034902617fc9ef4fd64a63fc8be8e33eaf57796d936ae5",
+          "classification": "attachment-permission hint/control"
+        },
+        {
+          "chars": 1,
+          "sha256": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+          "classification": "attachment-permission hint/control"
+        }
+      ],
+      "residualBlockCount": 3
+    },
+    "bundle": {
+      "path": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\snapshot\\.tmp\\clipper-package\\content.js",
+      "sha256": "ad174d9fd407b46b64d0a618ba12abaaba361da6384c89b8da1b613e64bfc7e6",
+      "matchesCurrentSourceOutput": true,
+      "sourceDomUnchanged": true,
+      "authoredRegressionCases": [
+        {
+          "name": "single main post",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "long replies excluded",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "later page rejected",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "excluded main never falls to reply",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "index-like detail rejected",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "recommendation list not promoted",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "normal bundle rejects synthetic HTTP exception",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "normal bundle rejects public HTTP",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "normal bundle rejects credential identity",
+          "passed": true,
+          "sourceDomUnchanged": true
+        },
+        {
+          "name": "normal bundle rejects sensitive query field",
+          "passed": true,
+          "sourceDomUnchanged": true
+        }
+      ]
+    },
+    "retainedUserBundle": {
+      "path": "D:\\try one\\Shipping HOT\\.tmp\\clipper-private-abb1b99\\.tmp\\clipper-package\\content.js",
+      "sha256": "0628839376a48ce100d233b87909f868b0e703858df9ee3a59463aa72d5d0325",
+      "unchanged": true
+    },
+    "networkAttempts": 0,
+    "operations": {
+      "databaseOpened": false,
+      "pageScriptsExecuted": false,
+      "externalResourcesLoaded": false,
+      "rawArticleOrHtmlWritten": false,
+      "installed": false,
+      "serviceChanged": false,
+      "gitCommitOrPush": false
+    },
+    "limits": [
+      "Offline saved-page replay does not attest capture-time live DOM or Chrome-loaded build",
+      "GUI/S7/installation remain NOT_RUN"
+    ]
+  },
+  "package": {
+    "directory": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\snapshot\\.tmp\\clipper-package",
+    "normalBuild": true,
+    "synthetic": false,
+    "installed": false,
+    "extensionId": "jihkanbaffodclncabodmbahbbgkjoad",
+    "origin": "http://127.0.0.1:5173/feed",
+    "permissions": [
+      "activeTab",
+      "scripting",
+      "storage"
+    ],
+    "hostPermissions": [],
+    "files": [
+      {
+        "path": "assets/popup-aVjAIvTt.css",
+        "bytes": 465,
+        "sha256": "8a2411b56c91c16e429d97f0d5fe6de4556b718846ca7997d098bb3885dd68db"
+      },
+      {
+        "path": "assets/popup-DHU7aOx9.js",
+        "bytes": 6280,
+        "sha256": "058f037b30b5b2c1953d2c196afa69906c5c40a487206178efb881e1910c8e56"
+      },
+      {
+        "path": "content.js",
+        "bytes": 327958,
+        "sha256": "ad174d9fd407b46b64d0a618ba12abaaba361da6384c89b8da1b613e64bfc7e6"
+      },
+      {
+        "path": "licenses/defuddle-MIT.txt",
+        "bytes": 1076,
+        "sha256": "c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092"
+      },
+      {
+        "path": "licenses/obsidian-clipper-MIT.txt",
+        "bytes": 1088,
+        "sha256": "3ca04f8f046005103b08302723521f546605a34a269d5a867a82d200dfd9c0d7"
+      },
+      {
+        "path": "manifest.json",
+        "bytes": 1011,
+        "sha256": "8d2cc507bd632cbe95a740aee6a2f7801e3c07c079a787aa77b34dcbddae67e8"
+      },
+      {
+        "path": "popup.html",
+        "bytes": 1015,
+        "sha256": "2d2bf242cf996d12ab286226bc55cf5c6668c3dc1d2d80054b06d80f4bad86b9"
+      },
+      {
+        "path": "worker.js",
+        "bytes": 5639,
+        "sha256": "cd60d4fd354e043235a57ca67d808b6e008bac9369fab6ce436d5d7ac3291638"
+      }
+    ],
+    "treeHashAlgorithm": "SHA256 of UTF8 sorted path + NUL + sha256 + LF",
+    "treeSha256": "6bfb9678a5d179088905bf5bf38d94d8f01e1313811f0983287d668eedd248ba",
+    "zip": {
+      "path": "D:\\try one\\Shipping HOT\\.tmp\\Shipping-HOT-Clipper-forum-dom-v3-20261019.zip",
+      "bytes": 106057,
+      "sha256": "ecee02795ba4a83b81c073f0687bae1a7bb92d7e5df93874e2138ab89cad98f3"
+    }
+  },
+  "preservation": {
+    "userInstalledPackageAll8FilesUnchanged": true,
+    "userDesktopOriginalUnchanged": true,
+    "gitignoreUnchanged": true,
+    "statusOriginalBytesPreserved": true,
+    "retainedDatabaseOpened": false,
+    "retainedServiceChanged": false,
+    "statusBeforeSha256": "99b40464ed0d42f29e25e8b63865f6bfee2b78c75c5c1cdf299e6647a312a886",
+    "statusAfterSha256": "e931c787dde5883e251083f702c5f20cc1ef4347e152005fd31e39fc891d2a15",
+    "statusAddedBytes": 1770
+  },
+  "operations": {
+    "commit": false,
+    "push": false,
+    "PRChanged": false,
+    "merge": false,
+    "deploy": false,
+    "installExtension": false,
+    "serviceSwitch": false,
+    "paidCall": false,
+    "newDependency": false,
+    "migration": false,
+    "sourceFetch": false,
+    "rawArticleOrHtmlInGit": false,
+    "secretsInGit": false,
+    "cleanup": false
+  },
+  "limits": {
+    "parentIndependentReview": "pending",
+    "installedUserChrome": "NOT_RUN; existing dom-v2 package retained",
+    "GUI_S7": "NOT_RUN; no shell/route changes or browser automation authorized",
+    "historicalCaptureDomIdentity": "Not established; this is the user-saved complete HTML, not original capture-time DOM",
+    "R2": "BLOCKED unchanged; no qualification/24h acceptance implied"
+  },
+  "closeout": {
+    "skill": "C:/Users/Administrator/.codex/skills/neat-freak/SKILL.md",
+    "inventory": {
+      "fileCount": 3664,
+      "markdownCount": 233,
+      "rules": [
+        "AGENTS.md"
+      ],
+      "applicable": [
+        "AGENTS.md"
+      ],
+      "fullLocalInventory": "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\inventory.json"
+    },
+    "facts": {
+      "code": "changed-and-verified",
+      "runtime": "verified-current (old package preservation); candidate live use pending",
+      "docs": "changed-and-verified",
+      "rules": "verified-current; AGENTS.md unchanged, no schema/provider/architecture change requiring ADR",
+      "memory": "out-of-scope / generated-read-only",
+      "workspace": "verified-current / all residue retained"
+    },
+    "cleanupCandidates": [
+      "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\snapshot\\.tmp\\clipper-forum-v3-20261019\\snapshot",
+      "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\gate-first-attempt.json",
+      "D:\\try one\\Shipping HOT\\.tmp\\clipper-forum-v3-20261019\\gate-no-rg.json"
+    ],
+    "cleanupState": "Nothing removed; evidence and all prior residue retained",
+    "pending": "Parent review and later explicit user installation/manual GUI acceptance",
+    "status": "performed; candidate knowledge receipt complete, parent review pending"
+  },
+  "warnings": [
+    "Existing duplicated-import and build chunk-size warnings remain",
+    "Original page main-cell attachment hint/control residue:35 non-whitespace characters (43 extra characters including separators); not pure five-paragraph-only output",
+    "Root Git cannot read unrelated global ignore path; scoped diff uses core.excludesFile empty; no global config changed",
+    "Initial helper copy ran from wrong cwd and left only base-source files under an ignored nested .tmp; correct 7-file overlay verified before final gate; residue retained"
+  ],
+  "finalAudit": {
+    "at": "2026-10-19T07:24:28.630Z",
+    "sourceInputsMatchReviewedGate": true,
+    "userPackageAll8FilesUnchanged": true,
+    "statusExistingPrefixPreserved": true,
+    "gitignoreUnchanged": true,
+    "desktopOriginalUnchanged": true,
+    "originalParagraphLeakCount": 0,
+    "publicFilesScanned": 10,
+    "localMarkdownLinksChecked": 8,
+    "diffCheckExit": 0,
+    "head": "777007073f184d025147eb19f8ece86858e68362",
+    "gitStatus": " M .gitignore\n M docs/architecture.md\n M docs/status.md\n M extensions/shipping-hot-clipper/README.md\n M extensions/shipping-hot-clipper/src/clip-utils.ts\n M extensions/shipping-hot-clipper/src/extract.ts\n M test/clipper-dom.test.ts\n M tsconfig.node.json\n?? docs/evidence/clipper-forum-2026-10-19/\n?? test/clipper-forum.test.ts\n"
+  }
+}

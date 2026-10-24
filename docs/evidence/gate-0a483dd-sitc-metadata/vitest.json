@@ -1,0 +1,9 @@
+{
+  "name": "vitest",
+  "command": "pnpm exec vitest run -c vitest.config.ts",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\sitc-metadata-build-20261015",
+  "sha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "startedAt": "2026-10-15T07:05:36.356Z",
+  "finishedAt": "2026-10-15T07:05:51.759Z",
+  "rawExit": 0
+}

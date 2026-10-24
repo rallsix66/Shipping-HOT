@@ -1,0 +1,2 @@
+import base from "../vitest.config"
+export default { ...base, test: { ...base.test, include: [process.env.SHIPPING_APPROVED_SIX==="1"?".tmp/after-dns-live.test.ts":".tmp/after-dns-guard.test.ts"] } }

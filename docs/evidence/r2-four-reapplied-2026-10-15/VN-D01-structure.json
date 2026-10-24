@@ -1,0 +1,118 @@
+{
+  "kind": "sanitized bounded structural metadata, not raw HTML or configured fields",
+  "counts": {
+    "anchors": 357,
+    "tables": 0,
+    "times": 0
+  },
+  "candidates": [
+    {
+      "index": 0,
+      "titleExcerpt": "Turn on more accessible mode",
+      "href": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx#",
+      "dateCandidates": [
+        "14/10/2026",
+        "13/10/2026",
+        "11/10/2026",
+        "16/09/2026",
+        "16/9/2026"
+      ],
+      "ancestorDepth": 2,
+      "localAnchorCount": 357,
+      "association": "observation_only_not_assigned"
+    },
+    {
+      "index": 1,
+      "titleExcerpt": "Turn off more accessible mode",
+      "href": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx#",
+      "dateCandidates": [
+        "14/10/2026",
+        "13/10/2026",
+        "11/10/2026",
+        "16/09/2026",
+        "16/9/2026"
+      ],
+      "ancestorDepth": 2,
+      "localAnchorCount": 357,
+      "association": "observation_only_not_assigned"
+    },
+    {
+      "index": 4,
+      "titleExcerpt": "Turn off Animations",
+      "href": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx#",
+      "dateCandidates": [
+        "14/10/2026",
+        "13/10/2026",
+        "11/10/2026",
+        "16/09/2026",
+        "16/9/2026"
+      ],
+      "ancestorDepth": 2,
+      "localAnchorCount": 357,
+      "association": "observation_only_not_assigned"
+    },
+    {
+      "index": 5,
+      "titleExcerpt": "Turn on Animations",
+      "href": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx#",
+      "dateCandidates": [
+        "14/10/2026",
+        "13/10/2026",
+        "11/10/2026",
+        "16/09/2026",
+        "16/9/2026"
+      ],
+      "ancestorDepth": 2,
+      "localAnchorCount": 357,
+      "association": "observation_only_not_assigned"
+    },
+    {
+      "index": 301,
+      "titleExcerpt": "Tin tức - Sự kiện",
+      "href": "https://phongchongthientai.mard.gov.vn/Pages/Tin-tuc.aspx",
+      "dateCandidates": [
+        "14/10/2026",
+        "13/10/2026",
+        "11/10/2026"
+      ],
+      "ancestorDepth": 2,
+      "localAnchorCount": 20,
+      "association": "observation_only_not_assigned"
+    },
+    {
+      "index": 310,
+      "titleExcerpt": "Đà Nẵng khẩn trương bảo vệ người dân vùng sạt... (14/10/2026)",
+      "href": "https://phongchongthientai.mard.gov.vn/Pages/da-nang-khan-truong-bao-ve-nguoi-dan-vung-sat-lo-ven-song-vu-gia.aspx",
+      "dateCandidates": [
+        "14/10/2026"
+      ],
+      "ancestorDepth": 1,
+      "localAnchorCount": 1,
+      "association": "observation_only_not_assigned"
+    },
+    {
+      "index": 311,
+      "titleExcerpt": "Cà Mau chủ động bảo vệ người dân trước thiên tai (14/10/2026)",
+      "href": "https://phongchongthientai.mard.gov.vn/Pages/ca-mau-chu-dong-bao-ve-nguoi-dan-truoc-thien-tai.aspx",
+      "dateCandidates": [
+        "14/10/2026"
+      ],
+      "ancestorDepth": 1,
+      "localAnchorCount": 1,
+      "association": "observation_only_not_assigned"
+    },
+    {
+      "index": 312,
+      "titleExcerpt": "Nâng cao khả năng chống chịu thiên tai, bắt đầu... (13/10/2026)",
+      "href": "https://phongchongthientai.mard.gov.vn/Pages/nang-cao-kha-nang-chong-chiu-thien-tai-bat-dau-tu-chinh-ngoi-nha-cua-ban.aspx",
+      "dateCandidates": [
+        "13/10/2026"
+      ],
+      "ancestorDepth": 1,
+      "localAnchorCount": 1,
+      "association": "observation_only_not_assigned"
+    }
+  ],
+  "parser": "NOT_RUN",
+  "fullFieldsPass": false
+}

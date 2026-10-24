@@ -1,0 +1,44 @@
+{
+  "at": "2026-10-20T03:18:43.490Z",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "target": "https://www.mofcom.gov.cn/zcfb/index.html",
+  "userApplicationReported": true,
+  "configurationCheck": {
+    "at": "2026-10-20T03:17:31.313Z",
+    "extensionLiteralCount": 28,
+    "generatedFilterCount": 27,
+    "scriptAndGeneratedListMatch": false,
+    "original27Preserved": true,
+    "lastItemMofcom": false,
+    "mofcomOccurrences": 0,
+    "BMKGOccurrences": 1,
+    "modes": {
+      "enhanced-mode": "fake-ip"
+    },
+    "filterModeExplicit": null,
+    "modeUnchanged": true,
+    "globalExtensionUnchanged": true,
+    "generatedFullEqualityClaim": false,
+    "runningCoreVerified": false,
+    "DNS": 0,
+    "HTTP": 0
+  },
+  "status": "BLOCKED_BEFORE_DNS_GENERATED_LIST_NOT_UPDATED",
+  "requestLaunchCreated": false,
+  "sourceDNS": 0,
+  "physicalHTTP": 0,
+  "sourceResponse": null,
+  "reloadOrConfigWrite": false,
+  "original27AndBMKGPreserved": true,
+  "productDiff": "EMPTY_THIS_ROUND",
+  "productGate": "NOT_RUN_NO_PRODUCT_CHANGE",
+  "qualificationUnchanged": "25/39;24/34;historical3/5",
+  "BMKGThisRound": "NOT_REQUESTED",
+  "protectedUnchanged": true,
+  "priorSourceUnchanged": true,
+  "generatedTopLevelDNSBlocks": 1,
+  "closeout": {
+    "docsLintRawExit": 0,
+    "inventoryRawExit": 0
+  }
+}

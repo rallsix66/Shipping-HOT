@@ -1,0 +1,30 @@
+{
+  "sourceId": "VN-P01",
+  "target": "https://vimawa.gov.vn/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-cua-luong-tu-phao-bao-hieu-hang-hai-so-0-den-het-vung",
+  "selection": "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/vn-p01-selection.json",
+  "archiveCheckedBeforeRequest": true,
+  "startedAt": "2026-10-20T04:08:23.785Z",
+  "receivedAt": "2026-10-20T04:08:26.323Z",
+  "finishedAt": "2026-10-20T04:08:26.366Z",
+  "systemDNSCalls": 1,
+  "physicalHTTP": 1,
+  "transportInvocations": 1,
+  "status": 200,
+  "contentType": "text/html; charset=utf-8",
+  "bytes": 45326,
+  "sha256": "53f944fa37ba4a7cf7423b171b81d749511650044656f5777eb88c498be2847e",
+  "rawExit": 0,
+  "limits": {
+    "timeoutMs": 10000,
+    "maxBytes": 524288,
+    "maxRedirects": 0,
+    "retries": 0
+  },
+  "otherDetails": 0,
+  "PDF": 0,
+  "images": 0,
+  "pagination": 0,
+  "login": false,
+  "rawRedistributed": false,
+  "outcome": "same_identity_HTML_no_own_date; qualified_source_status_unchanged"
+}

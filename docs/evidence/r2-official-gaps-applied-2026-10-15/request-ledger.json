@@ -1,0 +1,34 @@
+[
+  {
+    "id": "PH-W01",
+    "method": "GET",
+    "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+    "reservedAt": "2026-10-15T05:53:36.296Z",
+    "state": "complete_response_captured",
+    "finishedAt": "2026-10-15T05:53:36.714Z"
+  },
+  {
+    "id": "PH-W02",
+    "method": "GET",
+    "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+    "reservedAt": "2026-10-15T05:53:36.716Z",
+    "state": "complete_response_captured",
+    "finishedAt": "2026-10-15T05:53:36.848Z"
+  },
+  {
+    "id": "ID-W02-root",
+    "method": "GET",
+    "url": "https://maritim.bmkg.go.id/marine2026-data/",
+    "reservedAt": "2026-10-15T05:53:36.963Z",
+    "state": "complete_response_captured",
+    "finishedAt": "2026-10-15T05:53:37.473Z"
+  },
+  {
+    "id": "XX-W02-targetTc",
+    "method": "GET",
+    "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+    "reservedAt": "2026-10-15T05:53:37.588Z",
+    "state": "complete_response_captured",
+    "finishedAt": "2026-10-15T05:53:37.778Z"
+  }
+]

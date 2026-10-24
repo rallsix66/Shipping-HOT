@@ -1,0 +1,10 @@
+# command: git diff --check -- docs/status.md docs/evidence/r2-p1-inventory-2026-10-13/qualification-matrix.md
+# baseline_sha: 0b532e1917ee5425194965b20e0fdf8c2a1f4805
+# started: 2026-10-13T04:00:13.187Z
+# stdout
+
+# stderr
+warning: in the working copy of 'docs/evidence/r2-p1-inventory-2026-10-13/qualification-matrix.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it
+
+# raw_exit_code: 0

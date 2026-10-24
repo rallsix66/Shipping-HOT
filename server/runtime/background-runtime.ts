@@ -102,6 +102,7 @@ export class BackgroundRuntime {
   private readonly jobs = new Map<string, JobState>()
   private readonly timers = new Map<string, ReturnType<typeof setTimeout>>()
   private readonly inFlight = new Set<string>()
+  private readonly pendingExecutions = new Set<Promise<SyncResult>>()
   private readonly now: () => Date
   private readonly setTimer: typeof globalThis.setTimeout
   private readonly clearTimer: typeof globalThis.clearTimeout
@@ -155,6 +156,11 @@ export class BackgroundRuntime {
     this.running = false
     this.clearTimers()
     this.log.info("runtime stopped")
+  }
+
+  /** Call after stop(): wait for active job finalization before executor ownership is released. */
+  async drain(): Promise<void> {
+    await Promise.allSettled([...this.pendingExecutions])
   }
 
   async runNow(jobId: string): Promise<SyncResult> {
@@ -258,7 +264,15 @@ export class BackgroundRuntime {
     this.timers.clear()
   }
 
-  private async execute(state: JobState): Promise<SyncResult> {
+  private execute(state: JobState): Promise<SyncResult> {
+    const pending = this.executeOnce(state)
+    this.pendingExecutions.add(pending)
+    const remove = () => this.pendingExecutions.delete(pending)
+    void pending.then(remove, remove)
+    return pending
+  }
+
+  private async executeOnce(state: JobState): Promise<SyncResult> {
     if (this.inFlight.has(state.job.id)) return { status: "skipped", errorCode: "job_running" }
     if (!this.running || !state.job.enabled) return { status: "skipped", errorCode: "runtime_stopped" }
     this.inFlight.add(state.job.id)

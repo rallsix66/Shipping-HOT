@@ -1,0 +1,174 @@
+{
+  "sourceId": "VN-P01",
+  "scope": "single exact existing material HTML only; no other details or attachments",
+  "selectionEvidence": "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/vn-p01-selection.json",
+  "url": "https://vimawa.gov.vn/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-cua-luong-tu-phao-bao-hieu-hang-hai-so-0-den-het-vung",
+  "capture": {
+    "target": "https://vimawa.gov.vn/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-cua-luong-tu-phao-bao-hieu-hang-hai-so-0-den-het-vung",
+    "startedAt": "2026-10-20T04:08:23.785Z",
+    "systemDNSCalls": 1,
+    "reservedPhysicalHTTP": 1,
+    "transportInvocations": 1,
+    "addresses": [
+      {
+        "address": "144.79.79.14",
+        "family": 4,
+        "blocked": false
+      }
+    ],
+    "response": {
+      "status": 200,
+      "receivedAt": "2026-10-20T04:08:26.323Z",
+      "contentType": "text/html; charset=utf-8",
+      "location": null,
+      "bytes": 45326,
+      "wireSha256": "53f944fa37ba4a7cf7423b171b81d749511650044656f5777eb88c498be2847e"
+    },
+    "transportError": null,
+    "finishedAt": "2026-10-20T04:08:26.366Z",
+    "result": {
+      "ok": true,
+      "status": 200,
+      "finalUrl": "https://vimawa.gov.vn/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-cua-luong-tu-phao-bao-hieu-hang-hai-so-0-den-het-vung",
+      "contentType": "text/html; charset=utf-8",
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "http",
+        "declarations": [
+          {
+            "source": "http",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          },
+          {
+            "source": "meta",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          }
+        ],
+        "conflict": false,
+        "byteLength": 45326
+      },
+      "hops": 0
+    },
+    "retries": 0,
+    "follows": 0,
+    "otherDetails": 0,
+    "attachments": 0,
+    "login": false,
+    "paidCalls": 0,
+    "DBWrites": 0,
+    "rawRedistributed": false,
+    "rawPath": ".tmp/r2-qualification-vnp01-20261020/response.bin",
+    "rawIgnored": true,
+    "rawSha256": "53f944fa37ba4a7cf7423b171b81d749511650044656f5777eb88c498be2847e"
+  },
+  "identity": {
+    "headingSelector": "h3.page-header",
+    "headingMatchesOriginalTitle": true,
+    "canonicalRaw": "/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-cua-luong-tu-phao-bao-hieu-hang-hai-so-0-den-het-vung",
+    "canonicalResolved": "https://vimawa.gov.vn/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-cua-luong-tu-phao-bao-hieu-hang-hai-so-0-den-het-vung",
+    "canonicalMatchesOriginalHref": true,
+    "identifierFromOriginalRow": "200/TBHH-CHHĐTVN",
+    "identifierVisibleInDetailText": false,
+    "loginFormCount": 0
+  },
+  "dateInspection": {
+    "timeOrDateNodes": [
+      {
+        "tag": "span",
+        "attrs": {
+          "class": "submitted"
+        },
+        "text": ""
+      }
+    ],
+    "dateAttributes": [],
+    "dateMetas": [],
+    "jsonLD": [],
+    "visibleDateCandidates": [
+      {
+        "tag": "span",
+        "attrs": {
+          "style": "font-size: 13px;"
+        },
+        "text": "Giấy phép số 70/GP-BC do Cục Báo chí - Bộ Văn hoá Thông tin cấp ngày 29/12/2003",
+        "ancestorTags": [
+          "p",
+          "div.content",
+          "div#block-block-10.block.block-block.up-footer",
+          "div.region.region-footer",
+          "div.col-md-12",
+          "div.row"
+        ]
+      }
+    ],
+    "fieldStructure": [
+      {
+        "tag": "article",
+        "class": "node node-thong-bao-hang-hai node-promoted clearfix",
+        "text": "Khu vực: Gia LaiTài liệu đính kèm: 200.pdf"
+      },
+      {
+        "tag": "span",
+        "class": "submitted",
+        "text": ""
+      },
+      {
+        "tag": "div",
+        "class": "field field-name-field-khu-vuc-term field-type-taxonomy-term-reference field-label-above",
+        "text": "Khu vực: Gia Lai"
+      },
+      {
+        "tag": "div",
+        "class": "field-label",
+        "text": "Khu vực:"
+      },
+      {
+        "tag": "div",
+        "class": "field-items",
+        "text": "Gia Lai"
+      },
+      {
+        "tag": "div",
+        "class": "field-item even",
+        "text": "Gia Lai"
+      },
+      {
+        "tag": "div",
+        "class": "field field-name-field-tai-lieu-dinh-kem field-type-file field-label-above",
+        "text": "Tài liệu đính kèm: 200.pdf"
+      },
+      {
+        "tag": "div",
+        "class": "field-label",
+        "text": "Tài liệu đính kèm:"
+      },
+      {
+        "tag": "div",
+        "class": "field-items",
+        "text": "200.pdf"
+      },
+      {
+        "tag": "div",
+        "class": "field-item even",
+        "text": "200.pdf"
+      }
+    ]
+  },
+  "conclusion": {
+    "sourcePublicationDate": null,
+    "sourceUpdatedAt": null,
+    "timeRole": "unknown",
+    "precision": "unknown",
+    "sourceDeclaredTimezone": null,
+    "publicationInstant": null,
+    "footerExcluded": true,
+    "fetchTimeUsedAsSourceTime": false,
+    "documentNumberUsedAsDate": false,
+    "singleSampleDoesNotCompleteTenRows": true,
+    "r2_4": "PARTIAL_UNCHANGED",
+    "r2_5": "PARTIAL_UNCHANGED"
+  },
+  "nextDesign": "No date parser/config from this sample. Keep explicit unknown; do not use footer licence date. Future real own-date evidence is required before a separately bounded detail-date chain can be designed; no automatic ten-detail fetch expansion."
+}

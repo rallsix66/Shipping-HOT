@@ -1,0 +1,127 @@
+from pathlib import Path
+from datetime import datetime, timezone
+import json,hashlib,re,shutil,subprocess
+
+capture=Path('docs/evidence/r2-one-newsroom-target-2026-10-15')
+initial=Path('docs/evidence/r2-one-newsroom-replay-2026-10-15')
+replay=Path('docs/evidence/r2-one-newsroom-replay-final-2026-10-15')
+gate=Path('docs/evidence/gate-01934a5-one-newsroom-json')
+matrix=Path('docs/evidence/r2-current-source-matrix-2026-10-14')
+code='01934a5746c10d4165f4c4ffc5ce145d6de33d16'
+capture_head='03d1515d33dd1c5d96137c43e0aafb596b334be3'
+old_code='355952c0e8c01266adbe692dfcfd3bca9b3c17b2'
+def read(p):return json.loads(Path(p).read_text(encoding='utf-8-sig'))
+def write(p,x):Path(p).write_bytes((json.dumps(x,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
+def text(p,s):Path(p).write_bytes(('\n'.join(l.rstrip() for l in s.splitlines()).rstrip()+'\n').encode('utf-8'))
+def sha(b):return hashlib.sha256(b).hexdigest()
+assert subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()==code
+c=read(capture/'summary.json')['results'][0];s=read(replay/'summary.json');g=read(gate/'summary.json')
+assert c['httpStatus']==200 and c['bytes']==635664 and c['catalogUrl']=='https://www.one-line.com/en/news'
+assert c['url']=='https://www.one-line.com/en/newsroom' and not c['location']['present']
+raw=Path('.tmp/r2-one-newsroom-target-2026-10-15-private/XX-K02.response.bin')
+assert sha(raw.read_bytes())==c['wireSha256']
+assert read(capture/'launch.json')['head']==read(capture/'command.json')['head']==capture_head
+assert read(capture/'manifest.json')['productCodeSha']==old_code
+assert read(replay/'command.json')['sha']==g['sha']==code
+assert read(replay/'command.json')['rawExit']==0 and read(initial/'command.json')['rawExit']==1
+assert len(g['commands'])==9 and all(r['rawExit']==0 for r in g['commands']) and g['retainedUnchanged'] and not g['testedSourceDiff']
+assert s['results'][0]['reopen']['mismatches']==0 and s['results'][0]['reopen']['rows']==10
+assert not (gate/'source-proof.json').exists(), 'one-time evidence normalization already performed'
+private_logs=Path('.tmp/one-newsroom-gate-original-logs-20261015');private_logs.mkdir(exist_ok=False)
+for command in g['commands']:
+    name=command['name'];record=read(gate/(name+'.json'))
+    for stream in ['stdout','stderr']:
+        p=gate/(name+'.'+stream+'.log');data=p.read_bytes();shutil.copyfile(p,private_logs/p.name)
+        record[stream+'ExactUtf8']=data.decode('utf-8');record[stream+'OriginalByteSha256']=sha(data)
+        text(p,data.decode('utf-8'))
+    write(gate/(name+'.json'),record)
+write(gate/'source-proof.json',{'sha':code,'testedSourceDiff':g['testedSourceDiff'],'cleanClone':True,
+    'installScriptsNotSkipped':True,'node':'v24.15.0','abi':'137','existingNodeModulesBeforeInstall':False,
+    'commandsAllRawExitZero':True,'targeted':{'files':17,'passed':244},'full':{'files':129,'passed':1229,'skipped':3},
+    'retainedUnchanged':g['retainedUnchanged'],'sourceRequestsInFunctionalGate':'NOT_USED_no_live_source_work; dependency installation network separate',
+    'displayLogs':'Whitespace-normalized only; exact original UTF-8 and byte digests retained in each command JSON and local original logs',
+    's7':'NOT_RUN_no_UI_or_route_changes; prior_GUI_pending'})
+for folder,pairs in [
+    (capture,[('.tmp/one-newsroom-target-20261015.test.ts','capture-procedure.test.ts.txt'),('.tmp/one-newsroom-target-20261015.config.ts','capture-config.ts.txt'),('.tmp/execute-one-newsroom-target-20261015.cjs','capture-launcher.cjs.txt'),('.tmp/run-one-error-only-20261015.cjs','error-only-launcher.cjs.txt')]),
+    (initial,[('.tmp/one-newsroom-raw-replay-20261015.test.ts','replay-procedure.test.ts.txt'),('.tmp/one-newsroom-raw-replay-20261015.config.ts','replay-config.ts.txt'),('.tmp/execute-one-newsroom-replay-20261015.cjs','replay-launcher.cjs.txt')]),
+    (replay,[('.tmp/one-newsroom-raw-replay-final-20261015.test.ts','replay-procedure.test.ts.txt'),('.tmp/one-newsroom-raw-replay-final-20261015.config.ts','replay-config.ts.txt'),('.tmp/execute-one-newsroom-replay-final-20261015.cjs','replay-launcher.cjs.txt')]),
+    (gate,[('.tmp/one-newsroom-clean-gate-20261015.cjs','gate-driver.cjs.txt')])]:
+    for source,name in pairs:text(folder/name,Path(source).read_text(encoding='utf-8'))
+logs={}
+for name in ['stdout.log','stderr.log']:
+    p=capture/name;data=p.read_bytes();logs[name]={'byteSha256':sha(data),'utf8':data.decode('utf-8')};text(p,data.decode('utf-8'))
+write(capture/'capture-output-original.json',{'command':'command.json','rawExit':0,'logs':logs,'displayNormalization':'trailing whitespace only'})
+for folder in [initial,replay]:
+    for name in ['stdout.log','stderr.log']:text(folder/name,(folder/name).read_text(encoding='utf-8'))
+inventory=Path('.tmp/one-newsroom-target-inventory-20261015.txt').read_bytes();kept=[];skip=False
+for line in inventory.decode('utf-8').splitlines():
+    if line.startswith('## '):skip=line=='## project-markdown'
+    if not skip:kept.append(line)
+text(capture/'inventory.txt','\n'.join(kept))
+write(capture/'inventory-metadata.json',{'rawExit':0,'fullInventoryByteSha256':sha(inventory),'localOriginal':'.tmp/one-newsroom-target-inventory-20261015.txt','scope':'Directory inventory, not safety audit; only full Markdown enumeration omitted from public excerpt'})
+write(capture/'capture-integrity.json',{'executionHead':capture_head,'capturedProductCodeSha':old_code,'replayedAndGatedCodeSha':code,
+    'sourceId':'XX-K02','originalCatalogUrl':c['catalogUrl'],'savedRedirect':c['redirectProvenance'],
+    'separatelyAuthorizedTarget':c['url'],'systemDnsCalls':1,'transportAttempts':1,'MaerskRequests':0,
+    'bytes':c['bytes'],'wireSha256':c['wireSha256'],'privateRawIgnoredHashVerified':True,
+    'contentType':c['contentType'],'location':c['location'],'originalCatalogFileChanged':False,
+    'sourceQualificationBasis':'Actual saved308 same-host resolution plus ONE canonical Newsroom identity and complete10 raw JSON metadata field replay; original catalog URL still308, not claimed200',
+    'syntheticErrorProof':'error-recording-offline-result.json; not an actual Maersk diagnosis'})
+catalog=Path('docs/intel-source-catalog.md');catalog_before=catalog.read_bytes()
+old_line=next(l for l in catalog.read_text(encoding='utf-8').splitlines() if l.startswith('| XX-K02 |'))
+new_line=old_line.replace(c['catalogUrl'],c['url'],1)
+write(capture/'catalogue-url-proposal.json',{'status':'PROPOSED_NOT_APPLIED','id':'XX-K02','originalRow':old_line,'proposedRow':new_line,
+    'onlyProposedFieldChange':'URL; identity, format, priority and historical label left unchanged',
+    'reason':'Original exact URL observed308 with relative Location /en/newsroom; separately approved same-host HTTPS target returned200, canonical/h1/Next page verify corresponding Newsroom and complete10 metadata fields replay successfully.',
+    'catalogFileLfSha256':sha(catalog_before.replace(b'\r\n',b'\n')),'catalogStillUnchanged':True,
+    'runtimeRegistration':'NOT_CHANGED','license':'metadata_only','approvalAndApplication':'parent/user review required within existing catalog authority; no new real request authorized by this proposal'})
+text(capture/'catalogue-url-proposal.diff.txt','--- docs/intel-source-catalog.md (current)\n+++ docs/intel-source-catalog.md (proposed only)\n-'+old_line+'\n+'+new_line)
+assert catalog.read_bytes()==catalog_before
+
+shutil.copyfile(matrix/'mapping.json','.tmp/one-newsroom-matrix-before.json')
+p=Path('.tmp/build-current-r2-matrix.py');builder=p.read_text(encoding='utf-8')
+builder=builder.replace("HEAD = '0ad53dd63632f097e719197345a1000b0e0c1d29'",f"HEAD = '{code}'").replace("CODE = '355952c0e8c01266adbe692dfcfd3bca9b3c17b2'",f"CODE = '{code}'")
+block="""    if sid=='XX-K02':
+        target_batch='docs/evidence/r2-one-newsroom-target-2026-10-15'
+        actual=outcome(target_batch+'/summary.json',sid)
+        e['historicalAttempts'].append(e['latestAttempt'])
+        e['originalCatalogLastResponse']=e['latestActualFetch']
+        e['resolvedProductUrl']=actual['url']
+        e['latestActualFetch']=fetch(target_batch+'/summary.json',sid)
+        e['latestActualFetch']['scope']='separately approved target from saved308; original catalogue URL remains308'
+        e['latestActualFetch']['capturedAtHead']='03d1515d33dd1c5d96137c43e0aafb596b334be3'
+        e['latestAttempt']={'evidence':ref(target_batch+'/summary.json',{'id':sid}),
+            'dnsEvidence':ref(target_batch+'/dns-ledger.json',{'id':sid}),
+            'captureIntegrity':ref(target_batch+'/capture-integrity.json'),
+            'originalRedirectEvidence':ref('docs/evidence/r2-carrier-reapplied-2026-10-15/XX-K02-response.json',{'id':sid}),
+            'at':actual['startedAt'],'url':actual['url'],'originalCatalogUrl':actual['catalogUrl'],
+            'host':actual['host'],'addresses':actual['addresses'],'systemDnsCalls':1,'httpRequests':1,
+            'responseCaptured':True,'httpStatus':200,'parser':'STRUCTURE_ONLY at capture; separate full inert-JSON raw replay passed',
+            'scope':'same-ID separately approved saved308 target, not automatic follow or permanent catalogue substitution'}
+        e['fieldReplayEvidence']={'status':'PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS',
+            'evidence':ref('docs/evidence/r2-one-newsroom-replay-final-2026-10-15/summary.json',{'id':sid}),
+            'independentRawFields':ref('docs/evidence/r2-one-newsroom-replay-final-2026-10-15/raw-field-metadata.json',{'id':sid}),
+            'offlineCandidateConfig':ref('docs/evidence/r2-one-newsroom-replay-final-2026-10-15/candidate-config.json'),
+            'codeGate':ref('docs/evidence/gate-01934a5-one-newsroom-json/source-proof.json'),
+            'records':10,'role':'one pinned plus nine listed records from original HTML inert application/json, not rebuilt JSON transport',
+            'sourceDateRole':'source-labelled releaseDate local datetime; no timezone/publication instant certification'}
+        e['dateEvidence']={'role':'source_label_releaseDate_local_datetime','precision':'second','sourceDeclaredTimezone':'missing','publicationInstant':None}
+        e['defaultState']['sourceConfig']='offline_candidate_only_not_registered'
+        e['defaultState']['offlineCandidateEnabled']=False
+        e['r2_4']={'verdict':'OK','countedOK':True,'reason':'Saved original308 resolves to explicitly approved same-host HTTPS target; canonical/h1/embedded page verify ONE Newsroom,200 complete original bytes and10 real metadata collector/repeat/read-only-reopen fields pass. Counts resolved source product qualification; original catalogue URL not claimed200 and permanent catalogue/registration remain unchanged.'}
+        e['r2_5']={'verdict':'PASS','countedPass':True,'reason':'All10 pinned/list records compared to original JSON title/aliasUrl/releaseDate and complete stored date evidence after read-only reopen; zero repeat versions. Second precision, missing timezone and null UTC/publication instant retained.'}
+        e['catalogChangeProposal']=ref(target_batch+'/catalogue-url-proposal.json')
+        e['gaps']=['Formal one-row catalogue URL proposal remains unapplied; original catalogue endpoint still308.', 'Typed metadata-only candidate exists only in offline evidence, not active seeds/allowlist/production.', 'releaseDate has no timezone; no UTC publication or operational port-impact inference.']
+        e['historicalSuperseded'].append('ONE target now verified with200 and original embedded10-field replay; prior original308 and DNS history retained rather than overwritten. Maersk unchanged this round.')
+"""
+assert builder.count('    entries.append(e)')==1
+builder=builder.replace('    entries.append(e)',block+'    entries.append(e)')
+text(p,builder);subprocess.run(['python',str(p)],check=True);shutil.copyfile(p,matrix/'build-matrix.py.txt')
+before=read('.tmp/one-newsroom-matrix-before.json');after=read(matrix/'mapping.json');previous={e['id']:e for e in before['entries']}
+other=[e['id'] for e in after['entries'] if e['id']!='XX-K02' and e!=previous[e['id']]]
+assert other==[] and after['measuredCoverage']['r2_4']['numerator']==21 and after['measuredCoverage']['r2_5']['numerator']==13
+write(capture/'matrix-delta.json',{'changedSourceIdsOnly':['XX-K02'],'other40SourceEntryDifferences':other,
+    'r2_4Before':before['measuredCoverage']['r2_4'],'r2_4After':after['measuredCoverage']['r2_4'],
+    'r2_5Before':before['measuredCoverage']['r2_5'],'r2_5After':after['measuredCoverage']['r2_5'],
+    'numericUnchanged':before['measuredCoverage']['numericFieldsSeparate']==after['measuredCoverage']['numericFieldsSeparate'],
+    'countBasis':'Verified separately approved saved redirect target, not direct originalURL200 or source default activation'})
+print(json.dumps({'code':code,'other40SourceDifferences':other,'coverage':after['measuredCoverage']},ensure_ascii=True))

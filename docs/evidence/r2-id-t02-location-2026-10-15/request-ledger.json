@@ -1,0 +1,36 @@
+[
+  {
+    "role": "catalogue",
+    "method": "GET",
+    "endpoint": {
+      "protocol": "https:",
+      "hostname": "jdih.kemenkeu.go.id",
+      "port": null,
+      "pathname": "/",
+      "queryPresent": false,
+      "querySha256": null,
+      "credentialsPresent": false,
+      "fragmentPresent": false
+    },
+    "reservedAt": "2026-10-15T07:37:47.996Z",
+    "state": "complete_response_captured",
+    "finishedAt": "2026-10-15T07:37:48.415Z"
+  },
+  {
+    "role": "location-target",
+    "method": "GET",
+    "endpoint": {
+      "protocol": "https:",
+      "hostname": "jdih.kemenkeu.go.id",
+      "port": null,
+      "pathname": "/home",
+      "queryPresent": false,
+      "querySha256": null,
+      "credentialsPresent": false,
+      "fragmentPresent": false
+    },
+    "reservedAt": "2026-10-15T07:37:48.419Z",
+    "state": "complete_response_captured",
+    "finishedAt": "2026-10-15T07:37:48.921Z"
+  }
+]

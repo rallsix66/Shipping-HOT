@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-16T07:48:03.314Z",
+  "file": ".tmp/clipper-manual-6087a16/run/.data/shipping-hot-v3.sqlite3",
+  "metadata": {
+    "schema_version": 29,
+    "data_mode": "real",
+    "database_id": "f79f2bd2-050f-42b0-831e-6e787eb1344f"
+  },
+  "counts": {
+    "intel_item": 0,
+    "intel_item_version": 0,
+    "intel_manual_action": 0,
+    "provider_usage": 0,
+    "provider_runtime": 0,
+    "translation_cache": 0,
+    "intel_fetch_run": 0,
+    "intel_executor": 0
+  }
+}

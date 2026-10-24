@@ -1,0 +1,131 @@
+{
+  "executionHead": "0321584ffbbb2f99c1f8ecd64c680b78d0affcc6",
+  "productCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
+  "productDiff": "",
+  "productGate": "NOT_RUN_docs_only",
+  "historicalGate": {
+    "path": "docs/evidence/gate-954c831-material-read/summary.json",
+    "sha256": "ac14624a122e8466ddbb3b1a56bf7bf97be01c3f27276b987ded7d18b94f8726",
+    "hashBasis": "committed_text_LF"
+  },
+  "sourceDnsCalls": 0,
+  "sourceGetRequests": 0,
+  "newRealRecords": 0,
+  "llmCalls": 0,
+  "paidCalls": 0,
+  "retainedBefore": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedAfter": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedUnchanged": true,
+  "currentCoverage": {
+    "r2_4": {
+      "numerator": 25,
+      "denominator": 39,
+      "ratio": 0.6410256410256411,
+      "minimumOK": 32,
+      "shortfall": 7,
+      "ids": [
+        "CN-P01",
+        "CN-W01",
+        "CN-W02",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-W01",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "ID-T02",
+        "PH-C01",
+        "PH-M01",
+        "XX-K02",
+        "XX-K03",
+        "XX-M01",
+        "XX-M03",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "statusCounts": {
+        "OK": 25,
+        "PARTIAL": 7,
+        "NOT_RUN": 4,
+        "STALE": 1,
+        "BLOCKED": 2
+      },
+      "pass": false
+    },
+    "r2_5": {
+      "numerator": 24,
+      "denominator": 34,
+      "ratio": 0.7058823529411765,
+      "remaining": 10,
+      "ids": [
+        "CN-P01",
+        "CN-W01",
+        "CN-W02",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-P02",
+        "MY-W01",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "ID-T02",
+        "PH-C01",
+        "PH-M01",
+        "XX-K02",
+        "XX-K03",
+        "XX-M01",
+        "XX-M03"
+      ],
+      "statusCounts": {
+        "PASS": 24,
+        "NOT_RUN": 7,
+        "PARTIAL": 1,
+        "FAIL": 2
+      },
+      "pass": false
+    },
+    "numericFieldsSeparate": {
+      "numerator": 3,
+      "denominator": 5,
+      "ids": [
+        "XX-W01",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness"
+    },
+    "r2Continuous24h": {
+      "numerator": 0,
+      "denominator": 39,
+      "status": "NOT_RUN"
+    },
+    "overallR2Pass": false
+  },
+  "noNewImplementation": true,
+  "noNewSourceRequests": true,
+  "noPilotStarted": true
+}

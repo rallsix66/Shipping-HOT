@@ -1,0 +1,25 @@
+{
+  "id": "XX-K01",
+  "url": "https://www.maersk.com/news",
+  "host": "www.maersk.com",
+  "catalogLineSha256": "76ee5690128ed1208d5c3738898effd40531eac09705c4fbf902bb9335590051",
+  "startedAt": "2026-10-15T02:38:28.356Z",
+  "systemDnsCalls": 1,
+  "httpRequests": 1,
+  "status": "BLOCKED",
+  "rawHtmlCommitted": false,
+  "addresses": [
+    {
+      "address": "23.53.3.137",
+      "family": 4
+    },
+    {
+      "address": "23.53.3.144",
+      "family": 4
+    }
+  ],
+  "addressClassification": "public_address",
+  "reason": "fetch_failed",
+  "parser": "NOT_RUN",
+  "finishedAt": "2026-10-15T02:38:28.806Z"
+}

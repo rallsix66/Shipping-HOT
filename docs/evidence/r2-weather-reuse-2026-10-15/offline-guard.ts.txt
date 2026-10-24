@@ -1,0 +1,17 @@
+import net from "node:net"
+import dns from "node:dns/promises"
+import { afterAll, expect, vi } from "vitest"
+import { mkdirSync, writeFileSync } from "node:fs"
+import { basename } from "node:path"
+let tcp = 0, dnsCalls = 0, fetchCalls = 0
+const tcpGuard = vi.spyOn(net.Socket.prototype, "connect").mockImplementation(() => { tcp++; throw new Error("offline_tcp_forbidden") })
+const dnsGuard = vi.spyOn(dns, "lookup").mockImplementation(async () => { dnsCalls++; throw new Error("offline_dns_forbidden") })
+vi.stubGlobal("fetch", () => { fetchCalls++; throw new Error("offline_fetch_forbidden") })
+afterAll(() => {
+  mkdirSync("docs/evidence/r2-weather-reuse-2026-10-15", { recursive: true })
+  writeFileSync(`docs/evidence/r2-weather-reuse-2026-10-15/${basename(expect.getState().testPath!)}-egress.json`, JSON.stringify({ tcpConnectionAttempts: tcp, systemDnsCalls: dnsCalls, globalFetchCalls: fetchCalls, sourceHttpRequests: 0 }, null, 2) + "\n")
+  expect(vi.isMockFunction(net.Socket.prototype.connect)).toBe(true)
+  expect(vi.isMockFunction(dns.lookup)).toBe(true)
+  expect({ tcp, dnsCalls, fetchCalls }).toEqual({ tcp: 0, dnsCalls: 0, fetchCalls: 0 })
+  tcpGuard.mockRestore(); dnsGuard.mockRestore(); vi.unstubAllGlobals()
+})

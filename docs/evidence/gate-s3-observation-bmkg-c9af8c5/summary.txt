@@ -1,0 +1,11 @@
+full_sha=c9af8c5559ff8ccd2a59650f5a26f13a4319df3f
+worktree_clean_before_gates=true
+node=v24.15.0
+cwd=D:\wt-s3
+install raw_exit_code=0  cmd: pnpm install --frozen-lockfile
+build raw_exit_code=0  cmd: pnpm build
+typecheck raw_exit_code=0  cmd: pnpm typecheck
+lint raw_exit_code=0  cmd: pnpm lint
+targeted raw_exit_code=0  cmd: npx vitest run scripts/r2-intel-observe.test.ts scripts/r2-intel-observe-logonserver.test.ts server/runtime/intel-observation.test.ts server/runtime/intel-observation-network.test.ts server/services/bmkg-port-forecast.test.ts
+test raw_exit_code=0  cmd: pnpm test --run
+post_gate_worktree_changes="M src/routeTree.gen.ts\n?? docs/evidence/gate-s3-observation-bmkg-c9af8c5/"

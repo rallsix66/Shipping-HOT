@@ -1,0 +1,15 @@
+{
+  "rawExit": 0,
+  "base": "aa2e9e1ba1e6095cdd504f2a54bc9b60eb008388",
+  "sourceRequests": 0,
+  "changedEntryIds": [
+    "MY-P02"
+  ],
+  "approvedCoverage": [
+    "25/39",
+    "24/34"
+  ],
+  "recursiveMatrixHashReferences": 356,
+  "productGate": "NOT_RUN_docs_only",
+  "originalEvidenceUntouched": true
+}

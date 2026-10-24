@@ -1,0 +1,13 @@
+{
+  "name": "lint",
+  "command": "pnpm lint",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\one-catalog-candidate-build-20261015",
+  "sha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "startedAt": "2026-10-15T03:40:51.677Z",
+  "finishedAt": "2026-10-15T03:41:21.449Z",
+  "rawExit": 0,
+  "stdoutExactUtf8": "\n> shipping-hot@0.0.41 lint D:\\try one\\Shipping HOT\\.tmp\\one-catalog-candidate-build-20261015\n> eslint\n\n",
+  "stdoutOriginalByteSha256": "bbf5e5d07711a2953f2d08970bde87ccaa02b905b897c8107556b4c6129d944c",
+  "stderrExactUtf8": "",
+  "stderrOriginalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

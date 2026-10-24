@@ -1,0 +1,37 @@
+{
+  "id": "CN-T02",
+  "url": "https://szs.mof.gov.cn/zhengcefabu/",
+  "startedAt": "2026-10-14T07:56:30.392Z",
+  "status": "PARTIAL",
+  "httpRequests": 1,
+  "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+  "receivedAt": "2026-10-14T07:56:30.683Z",
+  "httpStatus": 200,
+  "contentType": "text/html",
+  "rawByteLength": 12222,
+  "fetchedBytesSha256": "934dfb210e414105867c99db2907ebcf98c175b643a3bc74157f2d9c1679df04",
+  "rawLocalOnly": true,
+  "parse": "DOM_OBSERVATION_ONLY",
+  "parserError": null,
+  "observedCandidateCount": 6,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "meta",
+    "declarations": [
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 12222
+  },
+  "archivedMetadataSha256": "b50fdd478df2e8f96e942d4422d3b159c5b6894f8a7ab91940ae2e74699ba237",
+  "originalHtmlCommitted": false,
+  "sensitiveScan": {
+    "positiveControlDetected": true,
+    "committedMaterialHits": 0
+  },
+  "finishedAt": "2026-10-14T07:56:30.690Z"
+}

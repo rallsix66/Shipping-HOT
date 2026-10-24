@@ -1,0 +1,15 @@
+{
+  "origin": "Transcribed from actual tool stdout/exit; not a raw disk log",
+  "command": "pnpm exec vitest run -c .tmp/two-index-observe.config.ts",
+  "fetchBaseline": "6e204d2bf6fd2ee27cedb2b22ad898fe6954a1f4",
+  "codeStateDuringRamIntegration": "Uncommitted implementation; not the subsequent clean-SHA gate",
+  "rawToolExitCode": 1,
+  "testDurationMs": 169924,
+  "assertion": "expected 'failed' to be 'ok_items'",
+  "firstSource": "MY-P03",
+  "northport": {"ramIntegration": "FAIL", "secondOutcomeStatus": "failed", "errorCode": null, "itemCounts": null, "detailedResults": "not written before early assertion"},
+  "thaiCustoms": {"ramIntegration": "NOT_RUN", "reason": "earlier source assertion terminated probe"},
+  "memoryBodiesReleased": true,
+  "repeatedSourceRequests": 0,
+  "conclusion": "No claim of successful real-response collector or SQLite qualification. Request journal/response hashes and minimal relationship facts remain available. Do not infer product error cause from missing details."
+}

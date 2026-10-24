@@ -1,0 +1,36 @@
+{
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "branch": "codex/shipping-hot-r2",
+  "relativeTo": "saved dirty working state at this slice start",
+  "files": [
+    {
+      "path": "scripts/s7-local-seed.ts",
+      "sha256": "50e47bbda83de48d96aff29c61c9a3e2554e9a9ef6ff19c85c34b19e96b83429",
+      "bytes": 23142
+    },
+    {
+      "path": "scripts/e2e-s7-integrated.mjs",
+      "sha256": "91a832e09cfb0e14214704d1fa5e4351d648bae5ac45b1177b5afdb759e3257c",
+      "bytes": 62688
+    },
+    {
+      "path": "test/manual-intel.test.ts",
+      "sha256": "1181a7ede29ce2645fddf496d74ad0b5c14ec90acaf60ad96e70ed69614e4d7e",
+      "bytes": 16762
+    },
+    {
+      "path": "src/components/shipping/manual-intel.tsx",
+      "sha256": "253af306eae882d8786533a37197e7073e592e09425716f7e004f6ee98e8fd57",
+      "bytes": 14370
+    },
+    {
+      "path": "scripts/s7-local-seed.test.ts",
+      "sha256": "9edfad8b320cedb1d8f8e34f449ea09c4a8965ff9e8e6052523e7606b02c0d8e",
+      "bytes": 7047
+    }
+  ],
+  "diff": {
+    "path": "product.diff",
+    "sha256": "8996311d3a98de4e509914f4e226eef728a77821c625b46f3df66674530b9928"
+  }
+}

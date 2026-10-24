@@ -1,0 +1,27 @@
+{"command":"pnpm exec vitest run -c .tmp/two-html-live.config.ts","baseline":"4a99126f0221ef0eb82eb4fdd777cb8b999f8a49","started":"2026-10-13T09:52:48.935Z","finished":"2026-10-13T09:52:53.218Z","rawExit":0}
+STDOUT
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+stdout | .tmp/two-html-live.test.ts > runs the separately approved two exact index GETs with same-response offline collection
+{"attempts":2,"sources":[{"id":"MY-P03","evidenceKind":"held_live_response","status":"PASS","first":{"status":"ok_items","runId":"0e2b6c4a-f720-4760-9b98-c28912175cce","itemsSeen":84,"itemsNew":84,"itemsRevised":0},"second":{"status":"ok_items","runId":"343185b2-4f7f-4bd5-87ae-42db0bbeab0d","itemsSeen":84,"itemsNew":0,"itemsRevised":0},"count":84,"failure":null,"exceptionType":null,"persistenceErrors":[],"startedAt":"2026-10-13T09:52:50.843Z","finishedAt":"2026-10-13T09:52:51.795Z"},{"id":"TH-C01","evidenceKind":"held_live_response","status":"PASS","first":{"status":"ok_items","runId":"d31088e4-5270-48a8-aabc-de15810f428f","itemsSeen":100,"itemsNew":100,"itemsRevised":0},"second":{"status":"ok_items","runId":"82274006-a8f5-4302-88c5-156b9b99f88f","itemsSeen":100,"itemsNew":0,"itemsRevised":0},"count":100,"failure":null,"exceptionType":null,"persistenceErrors":[],"startedAt":"2026-10-13T09:52:51.796Z","finishedAt":"2026-10-13T09:52:53.164Z"}],"ok":true}
+
+ ✓ .tmp/two-html-live.test.ts (1 test) 2440ms
+   ✓ runs the separately approved two exact index GETs with same-response offline collection  2439ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  17:52:49
+   Duration  3.34s (transform 408ms, setup 0ms, import 717ms, tests 2.44s, environment 0ms)
+
+
+STDERR
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used

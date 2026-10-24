@@ -1,0 +1,203 @@
+{
+  "baselineHead": "32c8974c6c5f50ad8630b6eb771f0a6af3bd9b44",
+  "changedSourceIdsOnly": [
+    "XX-W01",
+    "XX-W02",
+    "ID-W02"
+  ],
+  "other38EntriesUnchanged": true,
+  "onlyR24VerdictChange": "XX-W01:OK->BLOCKED",
+  "beforeCoverage": {
+    "r2_4": {
+      "numerator": 24,
+      "denominator": 39,
+      "ratio": 0.6153846153846154,
+      "minimumOK": 32,
+      "shortfall": 8,
+      "ids": [
+        "CN-P01",
+        "CN-W01",
+        "CN-W02",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-W01",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "PH-M01",
+        "XX-W01",
+        "XX-K02",
+        "XX-M01",
+        "XX-M03",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "statusCounts": {
+        "OK": 24,
+        "PARTIAL": 8,
+        "NOT_RUN": 5,
+        "STALE": 1,
+        "BLOCKED": 1
+      },
+      "pass": false
+    },
+    "r2_5": {
+      "numerator": 21,
+      "denominator": 34,
+      "ratio": 0.6176470588235294,
+      "remaining": 13,
+      "ids": [
+        "CN-P01",
+        "CN-W01",
+        "CN-W02",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-W01",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "PH-M01",
+        "XX-K02",
+        "XX-M01",
+        "XX-M03"
+      ],
+      "statusCounts": {
+        "PASS": 21,
+        "NOT_RUN": 10,
+        "PARTIAL": 1,
+        "FAIL": 2
+      },
+      "pass": false
+    },
+    "numericFieldsSeparate": {
+      "numerator": 3,
+      "denominator": 5,
+      "ids": [
+        "XX-W01",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness"
+    },
+    "r2Continuous24h": {
+      "numerator": 0,
+      "denominator": 39,
+      "status": "NOT_RUN"
+    },
+    "overallR2Pass": false
+  },
+  "afterCoverage": {
+    "r2_4": {
+      "numerator": 23,
+      "denominator": 39,
+      "ratio": 0.5897435897435898,
+      "minimumOK": 32,
+      "shortfall": 9,
+      "ids": [
+        "CN-P01",
+        "CN-W01",
+        "CN-W02",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-W01",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "PH-M01",
+        "XX-K02",
+        "XX-M01",
+        "XX-M03",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "statusCounts": {
+        "OK": 23,
+        "PARTIAL": 8,
+        "NOT_RUN": 5,
+        "STALE": 1,
+        "BLOCKED": 2
+      },
+      "pass": false
+    },
+    "r2_5": {
+      "numerator": 21,
+      "denominator": 34,
+      "ratio": 0.6176470588235294,
+      "remaining": 13,
+      "ids": [
+        "CN-P01",
+        "CN-W01",
+        "CN-W02",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-W01",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "PH-M01",
+        "XX-K02",
+        "XX-M01",
+        "XX-M03"
+      ],
+      "statusCounts": {
+        "PASS": 21,
+        "NOT_RUN": 10,
+        "PARTIAL": 1,
+        "FAIL": 2
+      },
+      "pass": false
+    },
+    "numericFieldsSeparate": {
+      "numerator": 3,
+      "denominator": 5,
+      "ids": [
+        "XX-W01",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness"
+    },
+    "r2Continuous24h": {
+      "numerator": 0,
+      "denominator": 39,
+      "status": "NOT_RUN"
+    },
+    "overallR2Pass": false
+  },
+  "allR25AndNumericDiagnosticsUnchanged": true,
+  "newSourceGetAttempts": 1,
+  "newSystemDnsCalls": 1,
+  "newJmaRequests": 0
+}

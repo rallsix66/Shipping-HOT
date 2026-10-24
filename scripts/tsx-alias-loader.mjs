@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs"
+import { existsSync, statSync } from "node:fs"
 import { resolve as pathResolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
@@ -7,7 +7,7 @@ const projectRoot = pathResolve(fileURLToPath(new URL("..", import.meta.url)))
 function aliasPath(base, relativePath) {
   const candidate = pathResolve(projectRoot, base, relativePath)
   for (const suffix of ["", ".ts", ".tsx", ".js", ".mjs", "/index.ts"]) {
-    if (existsSync(`${candidate}${suffix}`)) return pathToFileURL(`${candidate}${suffix}`).href
+    if (existsSync(`${candidate}${suffix}`) && statSync(`${candidate}${suffix}`).isFile()) return pathToFileURL(`${candidate}${suffix}`).href
   }
   return pathToFileURL(candidate).href
 }

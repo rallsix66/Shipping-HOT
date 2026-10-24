@@ -1,0 +1,89 @@
+
+> shipping-hot@0.0.41 build:clip-synthetic D:\try one\Shipping HOT\.tmp\clipper-synthetic-final-6087a16
+> node tools/clip-synthetic/build.mjs
+
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 794 modules transformed.
+rendering chunks...
+computing gzip size...
+[2m.tmp/clip-synthetic-build/client/[22m[32mindex.html                 [39m[1m[2m  2.32 kB[22m[1m[22m[2m │ gzip:   1.19 kB[22m
+[2m.tmp/clip-synthetic-build/client/[22m[35massets/index-DrKgC5Ig.css  [39m[1m[2m 90.55 kB[22m[1m[22m[2m │ gzip:  18.65 kB[22m
+[2m.tmp/clip-synthetic-build/client/[22m[36massets/index-DovXF-M4.js   [39m[1m[33m572.59 kB[39m[22m[2m │ gzip: 183.46 kB[22m
+[32m✓ built in 2.32s[39m
+[success] [nitro] Generated public [36m.tmp/clip-synthetic-build/app/public[39m
+[start] Building Server...
+[info] [nitro] Building Nitro Server (preset: `node-server`, compatibility date: `2024-10-16`)
+[success] [nitro] Nitro Server built
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/_/annual-calendar.mjs (85 kB)[39m[90m (12.6 kB gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/_/feed-translation-display.mjs (4.72 kB)[39m[90m (1.36 kB gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/_/intel-read.mjs (9.13 kB)[39m[90m (3.06 kB gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/_/manual-license.mjs (1.7 kB)[39m[90m (734 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/_/nitro.mjs (830 kB)[39m[90m (194 kB gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/_/policy-api.mjs (750 B)[39m[90m (396 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/_/policy-clock.mjs (350 B)[39m[90m (245 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/_/promo-calendar.mjs (7.88 kB)[39m[90m (2.46 kB gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/_/translation-recovery.mjs (809 B)[39m[90m (347 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/index.get.mjs (2.06 kB)[39m[90m (807 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/calendar.get.mjs (1.97 kB)[39m[90m (769 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/calendar/index.get.mjs (1.25 kB)[39m[90m (554 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/calendar/promotions/confirm.post.mjs (1.36 kB)[39m[90m (551 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/calendar/promotions/generate.post.mjs (1.36 kB)[39m[90m (592 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/calendar/reference.get.mjs (1.05 kB)[39m[90m (488 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/calendar/sync.post.mjs (1.65 kB)[39m[90m (690 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/feed.get.mjs (1.23 kB)[39m[90m (532 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/feed/_id_.get.mjs (7.34 kB)[39m[90m (2.21 kB gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/feed/history.get.mjs (1.04 kB)[39m[90m (460 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/health.get.mjs (689 B)[39m[90m (311 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/index.get.mjs (1.03 kB)[39m[90m (420 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/index.post.mjs (1.08 kB)[39m[90m (473 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/intel/items.get.mjs (702 B)[39m[90m (290 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/intel/items/_id_.get.mjs (707 B)[39m[90m (290 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/intel/manual.get.mjs (2.05 kB)[39m[90m (957 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/intel/manual.post.mjs (8.69 kB)[39m[90m (2.94 kB gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/intel/sources.get.mjs (710 B)[39m[90m (292 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/policies/_id/repeal.post.mjs (1.11 kB)[39m[90m (470 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/policies/_id/revise.post.mjs (1.22 kB)[39m[90m (537 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/policies/export.get.mjs (1.12 kB)[39m[90m (477 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/policies/index.get.mjs (1.11 kB)[39m[90m (510 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/ports/_id/weather.get.mjs (21.4 kB)[39m[90m (6.22 kB gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/readiness.get.mjs (24 kB)[39m[90m (5.85 kB gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/runtime.get.mjs (800 B)[39m[90m (373 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/search/ports.get.mjs (1.51 kB)[39m[90m (632 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/settings.post.mjs (4.2 kB)[39m[90m (1.17 kB gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/translation/secret.delete.mjs (1.11 kB)[39m[90m (488 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/translation/secret.get.mjs (726 B)[39m[90m (338 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/translation/secret.post.mjs (2.27 kB)[39m[90m (882 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/translation/status.get.mjs (1.15 kB)[39m[90m (503 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/translation/test.post.mjs (5.52 kB)[39m[90m (1.84 kB gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/tropical-cyclones.get.mjs (7.63 kB)[39m[90m (2.71 kB gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/chunks/routes/api/shipping/watch.post.mjs (919 B)[39m[90m (437 B gzip)[39m
+[90m  ├─ .tmp/clip-synthetic-build/app/server/index.mjs (1.92 kB)[39m[90m (806 B gzip)[39m
+[90m  └─ .tmp/clip-synthetic-build/app/server/package.json (1.38 kB)[39m[90m (584 B gzip)[39m
+[36mΣ Total size:[39m 7.98 MB (2.85 MB gzip)
+[success] [nitro] You can preview this build using `node .tmp/clip-synthetic-build/app/server/index.mjs`
+[success] The server has been successfully built.
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 9 modules transformed.
+rendering chunks...
+computing gzip size...
+[2m../../.tmp/clip-synthetic-build/extension/[22m[32mpopup.html                 [39m[1m[2m2.33 kB[22m[1m[22m[2m │ gzip: 1.27 kB[22m
+[2m../../.tmp/clip-synthetic-build/extension/[22m[35massets/popup-aVjAIvTt.css  [39m[1m[2m0.47 kB[22m[1m[22m[2m │ gzip: 0.30 kB[22m
+[2m../../.tmp/clip-synthetic-build/extension/[22m[36massets/popup-mkRLBbSk.js   [39m[1m[2m6.60 kB[22m[1m[22m[2m │ gzip: 3.06 kB[22m
+[32m✓ built in 26ms[39m
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 11 modules transformed.
+rendering chunks...
+computing gzip size...
+[2m../../.tmp/clip-synthetic-build/extension/[22m[36mcontent.js  [39m[1m[2m326.63 kB[22m[1m[22m[2m │ gzip: 95.52 kB[22m
+[32m✓ built in 438ms[39m
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 5 modules transformed.
+rendering chunks...
+computing gzip size...
+[2m../../.tmp/clip-synthetic-build/extension/[22m[36mworker.js  [39m[1m[2m5.50 kB[22m[1m[22m[2m │ gzip: 2.38 kB[22m
+[32m✓ built in 15ms[39m
+{"outDir":"D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-6087a16\\.tmp\\clip-synthetic-build\\extension","synthetic":true,"extensionId":"jihkanbaffodclncabodmbahbbgkjoad","origin":"http://127.0.0.1:5173","installed":false}

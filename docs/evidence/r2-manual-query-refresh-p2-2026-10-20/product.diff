@@ -1,0 +1,155 @@
+diff --git a/src/components/shipping/manual-intel.tsx b/src/components/shipping/manual-intel.tsx
+--- a/src/components/shipping/manual-intel.tsx
++++ b/src/components/shipping/manual-intel.tsx
+@@ -93,11 +93,11 @@ export function ManualIntelPage({ onLegacy }: { onLegacy: () => void }) {
+         setVersion("")
+       }
+       try {
+-        await client.invalidateQueries({ queryKey: ["intel-manual"] })
+-        await client.invalidateQueries({ queryKey: ["intel-items"] })
+-        await client.invalidateQueries({ queryKey: ["intel-item"] })
++        await client.invalidateQueries({ queryKey: ["intel-manual"] }, { throwOnError: true })
++        await client.invalidateQueries({ queryKey: ["intel-items"] }, { throwOnError: true })
++        await client.invalidateQueries({ queryKey: ["intel-item"] }, { throwOnError: true })
+       } catch {
+-        setMessage(`${savedMessage} 列表刷新失败，请刷新页面查看已存记录。`)
++        setMessage(`${savedMessage} 读取刷新失败，请刷新页面查看已存记录。`)
+       }
+     } catch {
+       setMessage("保存未确认，请检查字段或重试；输入保留，重试沿用同一提交编号。")
+diff --git a/test/manual-intel.test.ts b/test/manual-intel.test.ts
+--- a/test/manual-intel.test.ts
++++ b/test/manual-intel.test.ts
+@@ -16,6 +16,7 @@ const { manualSubmit } = await vi.importActual<{ manualSubmit: (repo: unknown, i
+ const { manualChecklist } = await vi.importActual<{ manualChecklist: (repo: unknown) => Promise<unknown[]> }>("#/intel/manual-checklist")
+ const { intelSourceSeeds } = await vi.importActual<{ intelSourceSeeds: { id: string, url: string }[] }>("#/intel/sources")
+ const { readIntelItem, readIntelItems } = await vi.importActual<{ readIntelItem: (event: unknown, repo: unknown) => Promise<unknown>, readIntelItems: (event: unknown, repo: unknown) => Promise<unknown> }>("#/utils/intel-read")
++const { QueryClient, QueryObserver } = await vi.importActual<typeof import("@tanstack/react-query")>("@tanstack/react-query")
+ 
+ const state = vi.hoisted(() => ({ values: [] as unknown[], index: 0, sources: {} as Record<string, any>, items: {} as Record<string, any>, detail: {} as Record<string, any>, fetch: vi.fn(), invalidate: vi.fn(), queries: [] as { queryKey: string[], queryFn: () => Promise<unknown>, enabled?: boolean }[] }))
+ vi.mock("react", async original => ({ ...await original<typeof import("react")>(), useState: (initial: unknown) => {
+@@ -229,16 +230,117 @@ it("rolls back an audit failure and uses the same ID until retry succeeds; edite
+   expect(await local!.repository.listManualActions(intelSourceSeeds[0].id)).toHaveLength(1)
+ })
+ 
+-it("does not call a confirmed save uncertain when subsequent list refresh fails", async () => {
++function activeQueries() {
++  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity, staleTime: Infinity } } })
++  tree()
++  const queries = state.queries.filter(query => query.enabled !== false)
++  const unsubscribe = queries.map((query) => {
++    const data = query.queryKey[0] === "intel-manual" ? state.sources.data : query.queryKey[0] === "intel-items" ? state.items.data : state.detail.data
++    client.setQueryData(query.queryKey, data)
++    const observer = new QueryObserver(client, { ...query, retry: false, staleTime: Infinity })
++    const stop = observer.subscribe(() => {})
++    expect(client.getQueryCache().find({ queryKey: query.queryKey, exact: true })?.isActive()).toBe(true)
++    return stop
++  })
++  state.invalidate.mockImplementation(client.invalidateQueries.bind(client))
++  return { client, queries, close: () => {
++    unsubscribe.forEach(stop => stop())
++    client.clear()
++  } }
++}
++
++it("confirms the installed QueryClient swallows active refetch rejection by default and propagates it with throwOnError", async () => {
++  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity, staleTime: Infinity } } })
++  const key = ["manual-refresh-contract"]
++  const failure = new Error("offline active query rejection")
++  const queryFn = vi.fn(async () => {
++    throw failure
++  })
++  client.setQueryData(key, "cached")
++  const observer = new QueryObserver(client, { queryKey: key, queryFn, retry: false, staleTime: Infinity })
++  const stop = observer.subscribe(() => {})
++  try {
++    expect(client.getQueryCache().find({ queryKey: key, exact: true })?.isActive()).toBe(true)
++    expect(queryFn).not.toHaveBeenCalled()
++    await expect(client.invalidateQueries({ queryKey: key })).resolves.toBeUndefined()
++    expect(client.getQueryState(key)?.status).toBe("error")
++    expect(queryFn).toHaveBeenCalledTimes(1)
++    await expect(client.invalidateQueries({ queryKey: key }, { throwOnError: true })).rejects.toBe(failure)
++    expect(queryFn).toHaveBeenCalledTimes(2)
++  } finally {
++    stop()
++    client.clear()
++  }
++})
++
++it.each(["intel-manual", "intel-items", "intel-item"])("keeps a confirmed save and warns for a real active %s refetch rejection", async (failingKey) => {
+   await interaction()
+   fillA()
+-  state.invalidate.mockRejectedValue(new Error("synthetic cache refresh fault"))
+   await submit()
+-  expect(await local!.repository.listItems(intelSourceSeeds[0].id)).toHaveLength(1)
+-  expect(label(tree())).toContain("已保存")
+-  expect(label(tree())).toContain("刷新失败")
+-  expect(label(tree())).not.toContain("保存未确认")
+-  expect(state.values[10]).toBeNull()
++  const active = activeQueries()
++  const route = state.fetch.getMockImplementation()!
++  const readFailures: string[] = []
++  state.fetch.mockImplementation(async (url: string, options?: { method?: string }) => {
++    const kind = url === "/shipping/intel/manual" ? "intel-manual" : url.startsWith("/shipping/intel/items?") ? "intel-items" : "intel-item"
++    if (options?.method !== "POST" && kind === failingKey) {
++      readFailures.push(url)
++      throw new Error(`offline ${failingKey} queryFn failed`)
++    }
++    return route(url, options)
++  })
++  try {
++    field("许可范围纯文本", "S7 原创合成正文 B；只用于修订断言。")
++    await submit()
++    const key = active.queries.find(query => query.queryKey[0] === failingKey)!.queryKey
++    expect(readFailures).toHaveLength(1)
++    expect(active.client.getQueryState(key)?.status).toBe("error")
++    expect(label(tree())).toContain("已保存：revised")
++    expect(label(tree())).toContain("刷新失败")
++    expect(label(tree())).not.toContain("保存未确认")
++    expect(state.values[10]).toBeNull()
++    expect(state.values[8]).toBe(false)
++    expect(button("保存人工条目").props.disabled).toBe(false)
++    const items = await local!.repository.listItems(intelSourceSeeds[0].id)
++    expect(items).toHaveLength(1)
++    expect(await local!.repository.listVersions(items[0].id)).toHaveLength(2)
++    expect(await local!.repository.listManualActions(intelSourceSeeds[0].id)).toHaveLength(2)
++    expect(state.values[4]).toContain("正文 B")
++  } finally {
++    active.close()
++  }
++})
++
++it.each(["before_commit", "after_commit"])("retains input, releases busy and retries the same ID with real QueryClient after %s failure", async (mode) => {
++  const controls = await interaction()
++  fillA()
++  await refresh("intel-items")
++  const active = activeQueries()
++  try {
++    controls.failAudit = mode === "before_commit"
++    controls.uncertainAfterCommit = mode === "after_commit"
++    await submit()
++    expect(label(tree())).toContain("保存未确认")
++    expect(label(tree())).not.toContain("刷新失败")
++    expect(state.values[4]).toContain("正文 A")
++    expect(state.values[8]).toBe(false)
++    expect(state.invalidate).not.toHaveBeenCalled()
++    const requestId = posts()[0][1].body.requestId
++    expect(state.values[10]).toMatchObject({ requestId })
++    controls.failAudit = false
++    await submit()
++    expect(posts()[1][1].body.requestId).toBe(requestId)
++    expect(state.values[10]).toBeNull()
++    expect(state.values[8]).toBe(false)
++    expect(label(tree())).toContain("已保存")
++    expect(label(tree())).not.toContain("保存未确认")
++    const items = await local!.repository.listItems(intelSourceSeeds[0].id)
++    expect(items).toHaveLength(1)
++    expect(await local!.repository.listVersions(items[0].id)).toHaveLength(1)
++    expect(await local!.repository.listManualActions(intelSourceSeeds[0].id)).toHaveLength(1)
++    expect(active.client.getQueryData<{ items: unknown[] }>(["intel-items", intelSourceSeeds[0].id])?.items).toHaveLength(1)
++  } finally {
++    active.close()
++  }
+ })
+ 
+ it("disables save while its actual callback is pending, then restores the button after confirmation", async () => {

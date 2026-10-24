@@ -1,0 +1,43 @@
+[
+  {
+    "id": "MY-P03",
+    "httpStatus": 200,
+    "transportAttempts": 1,
+    "bytes": 73037,
+    "rawResponseSha256": "880e1a180dc686d9d9d71578a753ee87af24042563a7c58f82c0885f8d3c5691",
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "default",
+      "declarations": [],
+      "conflict": false,
+      "byteLength": 73037
+    },
+    "originalFixture": false
+  },
+  {
+    "id": "TH-C01",
+    "httpStatus": 200,
+    "transportAttempts": 1,
+    "bytes": 123625,
+    "rawResponseSha256": "d4d7320c35b24728d06a52269f32b398f41ee650e093f2b2d0c3fe194a7e9f53",
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "http",
+      "declarations": [
+        {
+          "source": "http",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        },
+        {
+          "source": "meta",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        }
+      ],
+      "conflict": false,
+      "byteLength": 123625
+    },
+    "originalFixture": false
+  }
+]

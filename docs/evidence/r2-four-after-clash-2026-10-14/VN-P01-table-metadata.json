@@ -1,0 +1,185 @@
+{
+  "source": "VN-P01",
+  "url": "https://vimawa.gov.vn/vi/thong-bao-hang-hai",
+  "rawSha256": "da133741708879c9fd4544a0137dd8050a92c1dab662ac843bc9892d412bd4ef",
+  "kind": "sanitized bounded table metadata; not full raw or configured parser output",
+  "tables": [
+    {
+      "index": 0,
+      "headers": [
+        "Số/ Thời gian ban hành",
+        "Thông báo hàng hải"
+      ],
+      "rows": [
+        {
+          "cells": [
+            {
+              "textExcerpt": "200/TBHH-CHHĐTVN",
+              "anchors": []
+            },
+            {
+              "textExcerpt": "Thông báo hàng hải thông số kỹ thuật của luồng từ phao báo hiệu hàng hải số “0” đến hết vũng quay tàu bến số 01 - cảng Q",
+              "anchors": [
+                {
+                  "titleExcerpt": "Thông báo hàng hải thông số kỹ thuật của luồng từ phao báo hiệu hàng hải số “0” đến hết vũng quay tàu bến số 01 - cảng Q",
+                  "href": "https://vimawa.gov.vn/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-cua-luong-tu-phao-bao-hieu-hang-hai-so-0-den-het-vung"
+                }
+              ]
+            }
+          ],
+          "association": "same original row metadata, date interpretation NOT_RUN"
+        },
+        {
+          "cells": [
+            {
+              "textExcerpt": "144/TBHH-CHHĐTVN",
+              "anchors": []
+            },
+            {
+              "textExcerpt": "Thông báo hàng hải về thông số kỹ thuật của vùng quay trở tàu và vùng nước trước cầu cảng tạm (kết cấu hạ tầng cảng biển",
+              "anchors": [
+                {
+                  "titleExcerpt": "Thông báo hàng hải về thông số kỹ thuật của vùng quay trở tàu và vùng nước trước cầu cảng tạm (kết cấu hạ tầng cảng biển",
+                  "href": "https://vimawa.gov.vn/vi/noi-dung/thong-bao-hang-hai-ve-thong-so-ky-thuat-cua-vung-quay-tro-tau-va-vung-nuoc-truoc-cau-cang"
+                }
+              ]
+            }
+          ],
+          "association": "same original row metadata, date interpretation NOT_RUN"
+        },
+        {
+          "cells": [
+            {
+              "textExcerpt": "185/TBHH-CHHĐTVN",
+              "anchors": []
+            },
+            {
+              "textExcerpt": "Thông báo hàng hải thông số kỹ thuật của luồng hàng hải đoạn Phân luồng từ Phao “0” đến Phao “GR”, đoạn luồng Sài Gòn - ",
+              "anchors": [
+                {
+                  "titleExcerpt": "Thông báo hàng hải thông số kỹ thuật của luồng hàng hải đoạn Phân luồng từ Phao “0” đến Phao “GR”, đoạn luồng Sài Gòn - ",
+                  "href": "https://vimawa.gov.vn/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-cua-luong-hang-hai-doan-phan-luong-tu-phao-0-den-phao"
+                }
+              ]
+            }
+          ],
+          "association": "same original row metadata, date interpretation NOT_RUN"
+        },
+        {
+          "cells": [
+            {
+              "textExcerpt": "136/TBHH-CHHĐTVN",
+              "anchors": []
+            },
+            {
+              "textExcerpt": "Thông báo hàng hải thông số kỹ thuật của luồng hàng hải chuyên dùng, vùng quay trở tàu và vùng nước trước Bến cảng thuộc",
+              "anchors": [
+                {
+                  "titleExcerpt": "Thông báo hàng hải thông số kỹ thuật của luồng hàng hải chuyên dùng, vùng quay trở tàu và vùng nước trước Bến cảng thuộc",
+                  "href": "https://vimawa.gov.vn/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-cua-luong-hang-hai-chuyen-dung-vung-quay-tro-tau-va"
+                }
+              ]
+            }
+          ],
+          "association": "same original row metadata, date interpretation NOT_RUN"
+        },
+        {
+          "cells": [
+            {
+              "textExcerpt": "137/TBHH-CHHĐTVN",
+              "anchors": []
+            },
+            {
+              "textExcerpt": "Thông báo hàng hải thông số kỹ thuật vùng đón trả hoa tiêu, kiểm dịch luồng hàng hải Phú Quý",
+              "anchors": [
+                {
+                  "titleExcerpt": "Thông báo hàng hải thông số kỹ thuật vùng đón trả hoa tiêu, kiểm dịch luồng hàng hải Phú Quý",
+                  "href": "https://vimawa.gov.vn/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-vung-don-tra-hoa-tieu-kiem-dich-luong-hang-hai-phu-quy"
+                }
+              ]
+            }
+          ],
+          "association": "same original row metadata, date interpretation NOT_RUN"
+        },
+        {
+          "cells": [
+            {
+              "textExcerpt": "138/TBHH-CHHĐTVN",
+              "anchors": []
+            },
+            {
+              "textExcerpt": "Thông báo hàng hải thông số kỹ thuật đoạn luồng từ phao báo hiệu P1, P2 đến vũng quay tàu, vũng quay tàu thuộc Dự án Đầu",
+              "anchors": [
+                {
+                  "titleExcerpt": "Thông báo hàng hải thông số kỹ thuật đoạn luồng từ phao báo hiệu P1, P2 đến vũng quay tàu, vũng quay tàu thuộc Dự án Đầu",
+                  "href": "https://vimawa.gov.vn/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-doan-luong-tu-phao-bao-hieu-p1-p2-den-vung-quay-tau"
+                }
+              ]
+            }
+          ],
+          "association": "same original row metadata, date interpretation NOT_RUN"
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "headers": [],
+      "rows": [
+        {
+          "cells": [
+            {
+              "textExcerpt": "Điện thoại: Email:",
+              "anchors": []
+            },
+            {
+              "textExcerpt": "+84-(0)24.32242309thanhtrahh@vinamarine.gov.vn",
+              "anchors": []
+            }
+          ],
+          "association": "same original row metadata, date interpretation NOT_RUN"
+        },
+        {
+          "cells": [
+            {
+              "textExcerpt": "Thời gian tiếp công dân:",
+              "anchors": []
+            },
+            {
+              "textExcerpt": "Từ thứ 2 đến thứ 6 hàng tuần- Sáng từ: 8 giờ 00 phút đến 11 giờ 30 phút- Chiều từ: 13 giờ 30 phút đến 17 giờ 00 phút.",
+              "anchors": []
+            }
+          ],
+          "association": "same original row metadata, date interpretation NOT_RUN"
+        },
+        {
+          "cells": [
+            {
+              "textExcerpt": "Lịch tiếp công dân:",
+              "anchors": []
+            },
+            {
+              "textExcerpt": "- Cục trưởng Cục Hàng hải và Đường thủy Việt Nam thực hiện tiếp công dân định kỳ một ngày trong một tháng vào ngày 25 hà",
+              "anchors": []
+            }
+          ],
+          "association": "same original row metadata, date interpretation NOT_RUN"
+        },
+        {
+          "cells": [
+            {
+              "textExcerpt": "Bộ phận Một cửa:",
+              "anchors": []
+            },
+            {
+              "textExcerpt": "1. Bộ phận một cửa tại cơ quan Cục HHĐTVN đặt tại tầng 1 nhà A, số 8, đường Phạm Hùng, phường Từ Liêm, Thành phố Hà Nội.",
+              "anchors": []
+            }
+          ],
+          "association": "same original row metadata, date interpretation NOT_RUN"
+        }
+      ]
+    }
+  ],
+  "publicationDate": "not inferred from identifiers/years; requires explicit source field evidence",
+  "originalHtmlCommitted": false
+}

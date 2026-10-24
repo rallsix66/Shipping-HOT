@@ -1,0 +1,11 @@
+{
+  "kind": "sanitized bounded structural metadata, not raw HTML or configured fields",
+  "counts": {
+    "anchors": 111,
+    "tables": 0,
+    "times": 0
+  },
+  "candidates": [],
+  "parser": "NOT_RUN",
+  "fullFieldsPass": false
+}

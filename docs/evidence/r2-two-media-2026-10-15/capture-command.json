@@ -1,0 +1,8 @@
+{
+  "command": "pnpm exec vitest run -c .tmp/r2-two-media-capture-20261015.config.ts",
+  "startedAt": "2026-10-15T04:25:56.501Z",
+  "finishedAt": "2026-10-15T04:26:00.168Z",
+  "rawExit": 0,
+  "signal": null,
+  "error": null
+}

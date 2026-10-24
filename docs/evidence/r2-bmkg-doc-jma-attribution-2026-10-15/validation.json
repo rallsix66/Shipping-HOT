@@ -1,0 +1,109 @@
+{
+  "type": "jma_shared404_attribution_and_single_bmkg_doc_validation",
+  "at": "2026-10-15T06:10:26.037Z",
+  "executionHead": "32c8974c6c5f50ad8630b6eb771f0a6af3bd9b44",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "sourceGetAttempts": 1,
+  "systemDnsCalls": 1,
+  "newJmaRequests": 0,
+  "productGate": "NOT_RUN_no_product_change",
+  "checks": [
+    {
+      "name": "Exact branch/execution/product binding",
+      "pass": true
+    },
+    {
+      "name": "No product/schema/dependency/production/workflow/catalogue changes",
+      "pass": true
+    },
+    {
+      "name": "Only three source entries changed and other38 identical",
+      "pass": true
+    },
+    {
+      "name": "JMA exact catalogue URL/provider constant matches one original404",
+      "pass": true
+    },
+    {
+      "name": "Both products share same request identity/time/hash without new freshness",
+      "pass": true
+    },
+    {
+      "name": "OnlyXX-W01 current R24 changes OK toBLOCKED, XX-W02 remainsPARTIAL",
+      "pass": true
+    },
+    {
+      "name": "Original historic200 and priorOK retained",
+      "pass": true
+    },
+    {
+      "name": "R24 independently recomputes23/39 and gap9, statuses and ids",
+      "pass": true
+    },
+    {
+      "name": "All R25 and numeric diagnostics unchanged,21/34 and historical3/5 retained",
+      "pass": true
+    },
+    {
+      "name": "41 inventory, denominators, thresholds, permissions/defaults and24h unchanged",
+      "pass": true
+    },
+    {
+      "name": "Only authorized observedBMKG doc DNS1/GET1, public addresses and200",
+      "pass": true
+    },
+    {
+      "name": "Private complete raw bytes size/hash match capture and observation",
+      "pass": true
+    },
+    {
+      "name": "doc identity remains directory,16links=7PDF7PNG2dirs, no KODE/API assertion",
+      "pass": true
+    },
+    {
+      "name": "No other requests/retry/redirect/traversal/PDF/portJSON/settings/credential use",
+      "pass": true
+    },
+    {
+      "name": "Existing security entry and pinned transport retained",
+      "pass": true
+    },
+    {
+      "name": "Prior32c8974 captured evidence/config verification directory untouched",
+      "pass": true
+    },
+    {
+      "name": "Capture harness rawexit0 and exact original stdout/stderr hash",
+      "pass": true
+    },
+    {
+      "name": "All matrix and cross-attribution references/hash resolve",
+      "pass": true,
+      "detail": {
+        "occurrences": 287,
+        "uniquePaths": 105,
+        "bad": []
+      }
+    },
+    {
+      "name": "Frontier exact16nonOK rows includesXX-W01 once",
+      "pass": true
+    },
+    {
+      "name": "Affected local Markdown links resolve",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Status/report/handoff current23/39 and21/34",
+      "pass": true
+    },
+    {
+      "name": "Bounded new evidence credential-value scan and no public raw/DB",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "errors": [],
+  "rawExit": 0
+}

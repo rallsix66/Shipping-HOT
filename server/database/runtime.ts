@@ -74,11 +74,23 @@ async function runMigrations(db: Database) {
   const applied = new Set(appliedRows.map(row => Number(row.version)))
   for (const migration of shippingMigrations) {
     if (applied.has(migration.version)) continue
-    await transaction(db, async () => {
-      await migration.up(db)
-      await db.prepare("INSERT INTO schema_migrations (version, name, applied_at) VALUES (?, ?, ?)")
-        .run(migration.version, migration.name, new Date().toISOString())
-    })
+    const rebuild = migration.rebuildWithForeignKeysDisabled
+    const foreignKeys = rebuild ? await db.prepare("PRAGMA foreign_keys").get() as { foreign_keys: number } : null
+    try {
+      if (rebuild) {
+        await db.exec("PRAGMA foreign_keys = OFF")
+        const state = await db.prepare("PRAGMA foreign_keys").get() as { foreign_keys: number }
+        if (Number(state.foreign_keys) !== 0) throw new Error("Table rebuild requires migration outside an active transaction")
+      }
+      await transaction(db, async () => {
+        await migration.up(db)
+        if (rebuild && (await db.prepare("PRAGMA foreign_key_check").all()).length) throw new Error("Foreign key violation after table rebuild")
+        await db.prepare("INSERT INTO schema_migrations (version, name, applied_at) VALUES (?, ?, ?)")
+          .run(migration.version, migration.name, new Date().toISOString())
+      })
+    } finally {
+      if (rebuild) await db.exec(`PRAGMA foreign_keys = ${Number(foreignKeys?.foreign_keys) === 1 ? "ON" : "OFF"}`)
+    }
   }
   return latestSchemaVersion
 }

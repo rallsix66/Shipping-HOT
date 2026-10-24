@@ -20,6 +20,7 @@ import type { SecretStore, TranslationProvider } from "#/providers/contracts"
 import { createDeepSeekTranslationProvider } from "#/providers/translation/deepseek-provider"
 import { TRANSLATION_PROVIDER_ID } from "#/services/translation-settings"
 import { FileSecretStore } from "#/secrets/file-secret-store"
+import { type IntelCollectJobOptions, createIntelCollectJob } from "#/runtime/intel-collect-job"
 
 export interface RuntimeRegistryOptions {
   database: Database
@@ -28,6 +29,8 @@ export interface RuntimeRegistryOptions {
   translationProvider?: TranslationProvider
   translationSecretStore?: SecretStore
   now?: () => Date
+  /** Explicit injection only: no environment enable switch or implicit live sources/fetcher. */
+  intel?: Omit<IntelCollectJobOptions, "db" | "now">
 }
 
 function feedIntervalMs(): number {
@@ -183,5 +186,7 @@ function translationJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
 }
 
 export function getDefaultRuntimeJobs(options: RuntimeRegistryOptions): RuntimeJob[] {
-  return [...feedJobs(options), ...articleJobs(options), ...translationJobs(options), ...calendarJobs(options), ...portJobs(options), ...tropicalCycloneJobs(options), ...weatherJobs(options), ...weatherAlertJobs(options)]
+  if (options.intel?.enabled && (!options.intel.fetch || !options.intel.seeds?.length)) throw new Error("intel_explicit_fetch_and_sources_required")
+  const intel = createIntelCollectJob({ ...options.intel, db: options.database, now: options.now, seeds: options.intel?.seeds ?? [] })
+  return [...feedJobs(options), ...articleJobs(options), ...translationJobs(options), ...calendarJobs(options), ...portJobs(options), ...tropicalCycloneJobs(options), ...weatherJobs(options), ...weatherAlertJobs(options), intel]
 }

@@ -1,0 +1,14 @@
+const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),Database=require('../node_modules/better-sqlite3');
+(async()=>{
+ const root=process.cwd(),build=path.join(root,'.tmp','manual-intel-final3-build'),dir=path.join(root,'.tmp','manual-preview-final-r2-7'),port=4487;
+ if(fs.existsSync(dir))throw Error('preview_directory_exists_inspect_first');
+ fs.mkdirSync(path.join(dir,'.data'),{recursive:true});
+ const source=path.join(root,'.tmp','policy-preview-3fb3ad3','.data','shipping-hot-v3.sqlite3'),target=path.join(dir,'.data','shipping-hot-v3.sqlite3');
+ const original=new Database(source,{readonly:true,fileMustExist:true});await original.backup(target);original.close();
+ const db=new Database(target),row=db.prepare("SELECT data FROM settings WHERE id='default'").get();const settings=JSON.parse(row.data);settings.translation.enabled=false;db.prepare("UPDATE settings SET data=? WHERE id='default'").run(JSON.stringify(settings));db.close();
+ const env={};for(const key of ['PATH','Path','SystemRoot','SYSTEMROOT','WINDIR','COMSPEC','TEMP','TMP','PATHEXT','SystemDrive'])if(process.env[key])env[key]=process.env[key];
+ Object.assign(env,{HOST:'127.0.0.1',NITRO_HOST:'127.0.0.1',PORT:String(port),NITRO_PORT:String(port),SHIPPING_DATA_MODE:'mock',SHIPPING_RUNTIME_ENABLED:'false',SHIPPING_FEED_PROVIDER:'off',SHIPPING_WEATHER_ALERT_PROVIDER:'off',SHIPPING_ARTICLE_FETCH_PROVIDER:'off',SHIPPING_PORT_PROVIDER:'off',SHIPPING_WEATHER_PROVIDER:'off',SHIPPING_CALENDAR_PROVIDER:'off',SHIPPING_TEST_CLOCK:'1',TEST_NOW:'2026-10-14T00:00:00.000Z'});
+ const out=fs.openSync(path.join(dir,'server.log'),'a');const child=cp.spawn(process.execPath,[path.join(build,'dist','output','server','index.mjs')],{cwd:dir,env,detached:true,windowsHide:true,stdio:['ignore',out,out]});child.unref();fs.closeSync(out);
+ const sha=cp.execFileSync('git',['rev-parse','HEAD'],{cwd:build,encoding:'utf8'}).trim();
+ const info={pid:child.pid,url:`http://127.0.0.1:${port}/feed`,sha,cwd:dir,database:target,build,data:'Synthetic S7 integration fixture plus explicit policy fixtures; not real notices/live data',runtime:false,translation:false,credentials:'minimal OS environment, no project env or secret file',testClock:'2026-10-14T00:00:00Z',port};fs.writeFileSync(path.join(dir,'preview-info.json'),JSON.stringify(info,null,2));console.log(JSON.stringify(info));
+})().catch(e=>{console.error(e.name+': isolated preview failed');process.exitCode=1});

@@ -1,0 +1,188 @@
+{
+  "scope": "three exact URLs after user save/apply; each at most once",
+  "configurationBasis": {
+    "snapshot": "2026-10-20T07:40:19.090Z",
+    "generatedFileMtime": "2026-10-20T07:32:13.019Z",
+    "totalItems": 29,
+    "targetCounts": {
+      "www.ppa.com.ph": 1,
+      "www.mofcom.gov.cn": 1
+    },
+    "original27Preserved": true,
+    "activeProcessReadNotAGate": true
+  },
+  "limits": {
+    "totalGET": 3,
+    "perURL": 1,
+    "timeoutMs": 10000,
+    "maxBytes": 524288,
+    "maxRedirects": 0,
+    "retries": 0
+  },
+  "networkPolicy": "normal system DNS; all returned addresses audited; pinned original TLS transport; no CA/network edits",
+  "finishedAt": "2026-10-20T07:51:37.012Z",
+  "totalPhysicalGETReservations": 3,
+  "totalDNS": 3,
+  "blockedHosts": [],
+  "targets": [
+    {
+      "key": "mofcom",
+      "sourceId": "intel:cn-t01",
+      "target": "https://www.mofcom.gov.cn/zcfb/index.html",
+      "startedAt": "2026-10-20T07:51:35.830Z",
+      "DNS": 1,
+      "physicalGETReservations": 1,
+      "transportInvocations": 1,
+      "phase": "http_response_captured",
+      "nodeGlobalHeaderDefault": 16384,
+      "sourceHeaderOverride": false,
+      "addresses": [
+        {
+          "address": "59.56.30.250",
+          "family": 4,
+          "blocked": false
+        },
+        {
+          "address": "117.24.10.137",
+          "family": 4,
+          "blocked": false
+        }
+      ],
+      "response": {
+        "status": 200,
+        "receivedAt": "2026-10-20T07:51:35.913Z",
+        "contentType": "text/html",
+        "bodyBytes": 20318,
+        "bodySha256": "ab5e3780d9988fe7032458a05ad00adf4f6e66bb891aaaed385f8e2f515d340f",
+        "location": null,
+        "privateHTMLRetained": true
+      },
+      "underlyingError": null,
+      "finishedAt": "2026-10-20T07:51:35.945Z",
+      "result": {
+        "ok": true,
+        "status": 200,
+        "finalUrl": "https://www.mofcom.gov.cn/zcfb/index.html",
+        "contentType": "text/html",
+        "hops": 0
+      },
+      "rawPath": ".tmp/cn-t01-https-20261020/response-after-save-20261020.bin",
+      "retries": 0,
+      "followedRedirects": 0,
+      "details": 0,
+      "attachments": 0,
+      "sourceCAChanged": false,
+      "networkSettingsChanged": false,
+      "completeHeadersOrRawPacketSaved": false,
+      "DBWrites": 0
+    },
+    {
+      "key": "ppa-helpdesk",
+      "sourceId": "intel:ph-p01",
+      "target": "https://www.ppa.com.ph/content/ppa-helpdesk-advisory",
+      "startedAt": "2026-10-20T07:51:35.946Z",
+      "DNS": 1,
+      "physicalGETReservations": 1,
+      "transportInvocations": 1,
+      "phase": "tls_certificate_verification",
+      "nodeGlobalHeaderDefault": 16384,
+      "sourceHeaderOverride": false,
+      "addresses": [
+        {
+          "address": "115.84.233.11",
+          "family": 4,
+          "blocked": false
+        },
+        {
+          "address": "103.176.226.11",
+          "family": 4,
+          "blocked": false
+        }
+      ],
+      "response": null,
+      "underlyingError": {
+        "code": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+        "message": "unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca",
+        "phase": "tls_certificate_verification",
+        "certificateErrorType": "UNABLE_TO_VERIFY_LEAF_SIGNATURE"
+      },
+      "finishedAt": "2026-10-20T07:51:36.549Z",
+      "result": {
+        "ok": false,
+        "code": "fetch_failed",
+        "message": "unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca"
+      },
+      "rawPath": null,
+      "retries": 0,
+      "followedRedirects": 0,
+      "details": 0,
+      "attachments": 0,
+      "sourceCAChanged": false,
+      "networkSettingsChanged": false,
+      "completeHeadersOrRawPacketSaved": false,
+      "DBWrites": 0
+    },
+    {
+      "key": "ppa-news",
+      "sourceId": "intel:ph-p01",
+      "target": "https://www.ppa.com.ph/ppa-port-news",
+      "startedAt": "2026-10-20T07:51:36.550Z",
+      "DNS": 1,
+      "physicalGETReservations": 1,
+      "transportInvocations": 1,
+      "phase": "tls_certificate_verification",
+      "nodeGlobalHeaderDefault": 16384,
+      "sourceHeaderOverride": false,
+      "addresses": [
+        {
+          "address": "115.84.233.11",
+          "family": 4,
+          "blocked": false
+        },
+        {
+          "address": "103.176.226.11",
+          "family": 4,
+          "blocked": false
+        }
+      ],
+      "response": null,
+      "underlyingError": {
+        "code": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+        "message": "unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca",
+        "phase": "tls_certificate_verification",
+        "certificateErrorType": "UNABLE_TO_VERIFY_LEAF_SIGNATURE"
+      },
+      "finishedAt": "2026-10-20T07:51:37.011Z",
+      "result": {
+        "ok": false,
+        "code": "fetch_failed",
+        "message": "unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca"
+      },
+      "rawPath": null,
+      "retries": 0,
+      "followedRedirects": 0,
+      "details": 0,
+      "attachments": 0,
+      "sourceCAChanged": false,
+      "networkSettingsChanged": false,
+      "completeHeadersOrRawPacketSaved": false,
+      "DBWrites": 0
+    }
+  ],
+  "accounting": {
+    "DNS": 3,
+    "transportInvocations": 3,
+    "GETBudgetReservations": 3,
+    "completeHTTPResponses": 1,
+    "TLSFailuresBeforeHTTPResponse": 2,
+    "retries": 0,
+    "redirectsFollowed": 0,
+    "detailOrAttachmentRequests": 0,
+    "MaerskRequests": 0,
+    "DBWrites": 0
+  },
+  "exitCode": 0,
+  "exitMeaning": "0 means the bounded diagnostic orchestrator completed; per-target failure remains failure",
+  "completeHeadersCookiesTokensRawPacketSaved": false,
+  "processMetadataRead": "not repeated; prior OS denial respected; runtime active config path is not a precondition"
+}

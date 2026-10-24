@@ -1,0 +1,48 @@
+{
+  "id": "MY-L01",
+  "url": "https://www.pos.com.my/service-update",
+  "host": "www.pos.com.my",
+  "catalogLineSha256": "4dcce7c27f05b11245fe478de0872b4aee55dc338ef0ea00e878cf5526bc7078",
+  "startedAt": "2026-10-15T01:16:13.254Z",
+  "systemDnsCalls": 1,
+  "httpRequests": 1,
+  "status": "PARTIAL",
+  "rawHtmlCommitted": false,
+  "addresses": [
+    {
+      "address": "23.56.0.78",
+      "family": 4
+    },
+    {
+      "address": "23.56.0.83",
+      "family": 4
+    }
+  ],
+  "addressClassification": "public_address",
+  "receivedAt": "2026-10-15T01:16:15.006Z",
+  "httpStatus": 200,
+  "contentType": "text/html; charset=utf-8",
+  "bytes": 124208,
+  "wireSha256": "9e9787d4cf60f454824a0529787b1d345a2814ac45f91a957ff1d8b57c1cb310",
+  "rawLocalOnly": true,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 124208
+  },
+  "parser": "STRUCTURE_ONLY",
+  "finishedAt": "2026-10-15T01:16:15.021Z"
+}

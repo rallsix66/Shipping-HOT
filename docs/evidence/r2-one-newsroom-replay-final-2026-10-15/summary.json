@@ -1,0 +1,53 @@
+{
+  "results": [
+    {
+      "id": "XX-K02",
+      "url": "https://www.one-line.com/en/newsroom",
+      "originalCatalogUrl": "https://www.one-line.com/en/news",
+      "enabled": false,
+      "persistence": "disallowed",
+      "sourceConfig": "offline_candidate_only_not_registered",
+      "rawBytes": 635664,
+      "fetchedRawSha256": "682943942c38c8aebcbc68ec3888ca65e9278ed27a38d30a11134d283d893fe0",
+      "actualSourceHttpRequests": 0,
+      "first": {
+        "status": "ok_items",
+        "runId": "aea310aa-f9aa-4b1e-94dc-a4d412c38a7d",
+        "itemsSeen": 10,
+        "itemsNew": 10,
+        "itemsRevised": 0
+      },
+      "repeat": {
+        "status": "ok_items",
+        "runId": "94d43d13-4465-4a87-abc5-bcf27fae228f",
+        "itemsSeen": 10,
+        "itemsNew": 0,
+        "itemsRevised": 0
+      },
+      "repeatLastSeenAt": "All ten advanced to repeat clock as intended; all other item fields and versions unchanged",
+      "injectedLookupCalls": 2,
+      "injectedTransports": 2,
+      "reopen": {
+        "readOnly": true,
+        "rows": 10,
+        "versions": 10,
+        "fullTitleUrlDateEvidenceCompared": true,
+        "independentlyComparedToRawJsonFields": true,
+        "mismatches": 0,
+        "secondPrecision": 10,
+        "missingTimezone": 10,
+        "nullPublicationInstants": 10,
+        "metadataOnlyTitleBlocks": 10,
+        "databaseBytesUnchanged": true
+      },
+      "status": "OFFLINE_REPLAY_ONLY_PASS"
+    }
+  ],
+  "actualSourceHttpRequests": 0,
+  "actualSystemDnsCalls": 0,
+  "tcpConnectionAttempts": 0,
+  "globalFetchCalls": 0,
+  "originalRawRedistributed": false,
+  "productionEnabled": false,
+  "overallR2Pass": false
+}

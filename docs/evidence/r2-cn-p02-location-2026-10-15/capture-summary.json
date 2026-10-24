@@ -1,0 +1,62 @@
+{
+  "results": [
+    {
+      "role": "catalogue",
+      "endpoint": {
+        "protocol": "https:",
+        "hostname": "www.sz.msa.gov.cn",
+        "port": null,
+        "pathname": "/",
+        "queryPresent": false,
+        "querySha256": null,
+        "credentialsPresent": false,
+        "fragmentPresent": false
+      },
+      "startedAt": "2026-10-15T08:27:32.368Z",
+      "systemDnsCalls": 1,
+      "getAttempts": 1,
+      "status": "BLOCKED",
+      "addressClassification": "public_address",
+      "receivedAt": "2026-10-15T08:27:32.616Z",
+      "httpStatus": 302,
+      "contentType": "text/html",
+      "bytes": 207,
+      "wireSha256": "0636ef4de5a01c1744ea9e76e6dbb29b0668d130d6b7f349d1b2268ea73dd29e",
+      "completeResponseCaptured": true,
+      "location": {
+        "rawHeaderSha256": "0830d1a040223df9f6c8d4a2b448a6254fe5d2e9890aedacd62ac19307ad6966",
+        "rawValueLength": 26,
+        "resolved": {
+          "protocol": "https:",
+          "hostname": "www.sz.msa.gov.cn",
+          "port": null,
+          "pathname": "/",
+          "queryPresent": false,
+          "querySha256": null,
+          "credentialsPresent": false,
+          "fragmentPresent": false
+        },
+        "followedAutomatically": false
+      },
+      "secureEntryError": {
+        "code": "redirect_limit",
+        "message": "Too many redirects"
+      },
+      "finishedAt": "2026-10-15T08:27:32.616Z"
+    }
+  ],
+  "systemDnsCalls": 1,
+  "getAttempts": 1,
+  "completeResponses": 1,
+  "conditionalTargetAttempted": false,
+  "automaticRedirects": 0,
+  "retries": 0,
+  "details": 0,
+  "pagination": 0,
+  "otherSourceRequests": 0,
+  "rawRedistributed": false,
+  "credentialsUsed": false,
+  "systemSettingsWritten": false,
+  "productChanged": false,
+  "recordsPersisted": 0
+}

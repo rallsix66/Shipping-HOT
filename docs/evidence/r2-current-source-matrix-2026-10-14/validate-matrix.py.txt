@@ -1,0 +1,217 @@
+from pathlib import Path
+from collections import Counter
+from datetime import datetime, timezone
+import json,re,hashlib,subprocess
+
+root=Path('.').resolve();out=root/'docs/evidence/r2-current-source-matrix-2026-10-14'
+m=json.loads((out/'mapping.json').read_text(encoding='utf-8'))
+errors=[];checks=[]
+def check(label,condition,detail=None):
+    checks.append({'check':label,'pass':bool(condition),'detail':detail})
+    if not condition:errors.append(label)
+def objects(x):
+    if isinstance(x,dict):
+        yield x
+        for v in x.values():yield from objects(v)
+    elif isinstance(x,list):
+        for v in x:yield from objects(v)
+def lf(b):return b.replace(b'\r\n',b'\n')
+def sha(p):return hashlib.sha256(lf(p.read_bytes())).hexdigest()
+catalog={}
+header=[]
+for line in (root/'docs/intel-source-catalog.md').read_text(encoding='utf-8').splitlines():
+    cells=[c.strip() for c in line.split('|')[1:-1]]
+    if cells and cells[0]=='ID':header=cells;continue
+    url_header='URL' if 'URL' in header else 'RSS' if 'RSS' in header else None
+    if not cells or not re.fullmatch(r'[A-Z]{2}-[A-Z]\d{2}',cells[0]) or not url_header or '优先级' not in header:continue
+    fmt=cells[header.index('方式')] if '方式' in header else 'implicit_automatic'
+    if cells[header.index('优先级')]=='P1' and fmt!='manual':catalog[cells[0]]=cells[header.index(url_header)]
+entries=m['entries'];ids=[e['id'] for e in entries]
+check('41 unique entries match current catalogue automatic P1 rows',len(ids)==len(set(ids))==41 and set(ids)==set(catalog),{'catalogCount':len(catalog)})
+check('All literal product URL text retained from catalogue',all(e['catalogUrlText']==catalog.get(e['id']) for e in entries))
+check('Approved 34 information / 5 numeric / 2 deferred partition',Counter(e['classification'] for e in entries)=={'information_notice':34,'numeric_weather':5,'later_stage':2})
+check('Current catalogue LF text digest',sha(root/'docs/intel-source-catalog.md')==m['catalogSha256'])
+refs=[r for r in objects(m) if 'path' in r and 'sha256' in r]
+selector_errors=[];hash_errors=[];missing=[]
+for r in refs:
+    p=root/r['path']
+    if not p.is_file():missing.append(r['path']);continue
+    if sha(p)!=r['sha256']:hash_errors.append(r['path'])
+    sel=r.get('selector')
+    if not sel:continue
+    x=json.loads(p.read_text(encoding='utf-8'));nodes=list(objects(x))
+    if 'id' in sel and not any(o.get('id')==sel['id'] or o.get('sourceId')==sel['id'] for o in nodes):selector_errors.append({'path':r['path'],'selector':sel})
+    if 'egress.url' in sel and not any(o.get('url')==sel['egress.url'] for o in x.get('egress',[])):selector_errors.append({'path':r['path'],'selector':sel})
+check('All evidence paths exist',not missing,{'referenceOccurrences':len(refs),'uniquePaths':len({r['path'] for r in refs}),'missing':missing})
+check('All evidence LF text hashes match',not hash_errors,hash_errors)
+check('All evidence source selectors resolve',not selector_errors,selector_errors)
+pub=[e for e in entries if e['inPublicDenominator']];info=[e for e in entries if e['classification']=='information_notice'];numeric=[e for e in entries if e['classification']=='numeric_weather']
+ok=[e['id'] for e in pub if e['r2_4']['verdict']=='OK'];passed=[e['id'] for e in info if e['r2_5']['verdict']=='PASS'];numok=[e['id'] for e in numeric if (e['numericFieldValidation'] or {}).get('status')=='PASS_LIMITED_STORED_REAL_DIAGNOSTIC']
+check('R2-4 independently recomputed verdicts and flags',len(pub)==39 and ok==m['measuredCoverage']['r2_4']['ids'] and len(ok)==21 and all(e['r2_4']['countedOK']==(e['r2_4']['verdict']=='OK') for e in pub))
+check('R2-5 independently recomputed verdicts and flags',len(info)==34 and passed==m['measuredCoverage']['r2_5']['ids'] and len(passed)==13 and all(e['r2_5']['countedPass']==(e['r2_5']['verdict']=='PASS') for e in info))
+check('Numeric 3/5 separate and absent from article numerator',len(numeric)==5 and len(numok)==3 and set(numok).isdisjoint(passed) and all(e['r2_5']['verdict']=='NOT_APPLICABLE_NUMERIC' for e in numeric))
+for which,subset in [('r2_4',pub),('r2_5',info)]:
+    actual=dict(Counter(e[which]['verdict'] for e in subset));check(which+' status totals recomputed',actual==m['measuredCoverage'][which]['statusCounts'],actual)
+replay_errors=[]
+for e in info:
+    f=e['fieldReplayEvidence'] or {}
+    if f.get('status')=='PASS_REAL_COMPLETE_PRIVATE_RAW_FIELDS':
+        p=root/f['evidence']['path'];x=json.loads(p.read_text(encoding='utf-8'));v=next(r for r in x['results'] if r['id']==e['id'])
+        if v['first']['status']!='ok_items' or v['repeat'].get('itemsNew')!=0 or v['repeat'].get('itemsRevised')!=0:replay_errors.append(e['id'])
+        reopen=v.get('reopen')
+        if e['id']=='TH-C01':
+            audit=json.loads((root/f['independentStorageAudit']['path']).read_text(encoding='utf-8'));reopen=next(r for r in audit['reports'] if r['id']==e['id'])
+        if not reopen or reopen.get('mismatches')!=0 or not (reopen.get('fullTitleUrlDateEvidenceCompared') or reopen.get('fullDateEvidenceCompared')):replay_errors.append(e['id'])
+check('Ten complete original HTML field passes refer to actual successful collection/repeat/reopen',not replay_errors,replay_errors)
+oldlog=(root/'docs/evidence/r2-p1-inventory-2026-10-13/replay.log').read_text(encoding='utf-8')
+procedure=(root/'docs/evidence/r2-p1-inventory-2026-10-13/replay.test.ts.txt').read_text(encoding='utf-8')
+check('Three older original field replays have stored source results and raw exit0',all(s in oldlog for s in ['TH-W01','ID-W01','VN-W01']) and ('raw_exit_code: 0' in oldlog or 'raw_exit: 0' in oldlog) and 'expect' in procedure)
+nmc=(root/'docs/evidence/r2-p1-acceptance-mapping-2026-10-13/nmc-offline.log').read_text(encoding='utf-8')
+check('NMC failed source results preserved with actual time and successful assertion harness',all(s in nmc for s in ['2026-10-13T03:55:13.246Z','CN-W01','CN-W02','web_list_invalid_link','"items":0','raw_exit_code: 0']) and all(next(e for e in entries if e['id']==s)['r2_5']['verdict']=='FAIL' for s in ['CN-W01','CN-W02']))
+check('Document/enactment days not relabelled publication instants',all(next(e for e in entries if e['id']==s)['dateEvidence']['publicationInstant'] is None for s in ['TH-C02','ID-T01']))
+proposal=m['historicalCompletedBatchProposal'];check('Four exact catalogue URLs captured once after fresh public DNS',len(proposal)==4 and all(p['url']==catalog[p['id']] and next(e for e in entries if e['id']==p['id'])['latestActualFetch'] is not None and next(e for e in entries if e['id']==p['id'])['latestAttempt']['httpRequests']==1 for p in proposal))
+git=subprocess.run(['git','diff','--name-only',m['reviewedCodeSha']],capture_output=True,text=True)
+changes=git.stdout.splitlines();check('Tracked changes confined to approved docs and rule correction',git.returncode==0 and all(p.startswith('docs/') or p=='AGENTS.md' for p in changes),changes)
+check('Production Intel job and HTML candidates remain unchanged',not any(p.startswith(('server/','src/','scripts/','package','pnpm','nitro','.github/')) for p in changes))
+candidate_code=(root/'server/intel/sources/html-index-candidates.ts').read_text(encoding='utf-8')
+seed_code=(root/'server/intel/sources.ts').read_text(encoding='utf-8')
+candidate_ids=re.findall(r'catalogId:\s*"([A-Z]{2}-[A-Z]\d{2})"',candidate_code)
+check('Eleven disabled page candidates / two enabled active-seed declarations distinguished',len(candidate_ids)==11 and candidate_code.count('enabled: false')==11 and seed_code.count('enabled: true')==2 and all(next(e for e in entries if e['id']==s)['defaultState']['declaredSeedEnabled'] is False for s in candidate_ids) and all(next(e for e in entries if e['id']==s)['defaultState']['declaredSeedEnabled'] is True for s in ['TH-W01','ID-W01']))
+batch=root/'docs/evidence/r2-four-reapplied-2026-10-15'
+dns=json.loads((batch/'dns-ledger.json').read_text(encoding='utf-8'))
+requests=json.loads((batch/'request-ledger.json').read_text(encoding='utf-8'))
+captures=json.loads((batch/'summary.json').read_text(encoding='utf-8'))
+check('Four latest system DNS records and exactly one index request per source',len(dns)==4 and len(requests)==4 and captures['systemDnsCalls']==4 and captures['reservedTransportCalls']==4 and all(r['systemDnsCalls']==1 and r['httpRequests']==1 and r['addressClassification']=='public_address' for r in captures['results']))
+check('Fresh public addresses match current matrix attempts',all(next(e for e in entries if e['id']==r['id'])['latestAttempt']['addresses']==r['addresses'] for r in captures['results']))
+westports=next(e for e in entries if e['id']=='MY-P02')
+check('Westports latest saved date enforces STALE without changing field denominator',westports['contentFreshness']['latestItemDay']=='2025-08-01' and westports['r2_4']['verdict']=='STALE' and not westports['r2_4']['countedOK'] and westports['r2_5']['verdict']=='NOT_RUN')
+comparison=json.loads((root/'docs/evidence/r2-anchor-date-review-replay-2026-10-15/baseline-comparison.json').read_text(encoding='utf-8'))
+check('P2 repair leaves all four accepted real title URL date records unchanged',comparison['matchedAll4OriginalFields'] and comparison['fullTitleUrlDateEvidenceCompared'] and comparison['newUpstreamRequests']==0 and not comparison['baselineRecordsRevoked'])
+redirects=json.loads((root/'docs/evidence/r2-anchor-date-review-repair-2026-10-15/redirect-material-inspection.json').read_text(encoding='utf-8'))
+check('Redirect relative body literals are not promoted to saved Location or absolute host',all(not r['locationHeaderSaved'] and r['absoluteDestination'] is None and r['sameHostNotEstablished'] and r['newRequests']==0 for r in redirects['results']))
+carrier=root/'docs/evidence/r2-carrier-news-two-2026-10-15'
+carrier_summary=json.loads((carrier/'summary.json').read_text(encoding='utf-8'))
+carrier_dns=json.loads((carrier/'dns-ledger.json').read_text(encoding='utf-8'))
+carrier_requests=json.loads((carrier/'request-ledger.json').read_text(encoding='utf-8'))
+expected_carrier={'XX-K01':('https://www.maersk.com/news','www.maersk.com','198.18.0.217'),'XX-K02':('https://www.one-line.com/en/news','www.one-line.com','198.18.0.218')}
+check('Carrier batch exactly two once-only system DNS and no HTTP',len(carrier_dns)==2 and len(carrier_summary['results'])==2 and carrier_summary['systemDnsCalls']==2 and carrier_summary['reservedTransportCalls']==0 and carrier_requests==[])
+check('Carrier exact catalogue URLs hosts actual addresses preserved',all((r['url'],r['host'],r['addresses'][0]['address'])==expected_carrier[r['id']] and len(r['addresses'])==1 and r['systemDnsCalls']==1 and r['httpRequests']==0 and r['parser']=='NOT_RUN' and r['status']=='BLOCKED' for r in carrier_summary['results']))
+check('Historical carrier DNS-only records remain no-response no-parser',all((lambda e:e['historicalAttempts'][0]['httpRequests']==0 and e['historicalAttempts'][0]['parser']=='NOT_RUN' and e['historicalAttempts'][0]['addresses']==next(r['addresses'] for r in carrier_summary['results'] if r['id']==sid))(next(e for e in entries if e['id']==sid)) for sid in expected_carrier))
+binding=json.loads((carrier/'execution-binding.json').read_text(encoding='utf-8'))
+manifest=json.loads((carrier/'manifest.json').read_text(encoding='utf-8'))
+original_manifest=json.loads((carrier/'manifest.original.json').read_text(encoding='utf-8'))
+launch=json.loads((carrier/'launch.json').read_text(encoding='utf-8'))
+capture_command=json.loads((carrier/'command.json').read_text(encoding='utf-8'))
+check('Carrier actual launch and code binding corrected without hiding original label',binding['executionHead']==capture_command['head']==launch['head']=='a5da09871d1a017ae947a0f3f56980461807bfaf' and binding['productCodeSha']==manifest['productCodeSha']==launch['productCodeSha']=='355952c0e8c01266adbe692dfcfd3bca9b3c17b2' and original_manifest['productCodeSha']==binding['originalIncorrectManifestProductCodeSha'] and hashlib.sha256((carrier/'manifest.original.json').read_bytes()).hexdigest()==binding['originalManifestByteSha256'] and original_manifest['productCodeSha'] in (carrier/'capture-procedure.test.ts.txt').read_text(encoding='utf-8') and all(v['matches'] for v in binding['catalogRowChecks']))
+clash=json.loads((carrier/'clash-host-presence.json').read_text(encoding='utf-8'))
+check('Read-only Clash exact host absence and21 generated entries',clash['readOnly'] and clash['sourceDnsCalls']==clash['httpRequests']==0 and not clash['networkSettingsChanged'] and clash['allInspectedFilesUnchangedSizeAndMtime'] and not clash['credentialFieldsInspectedOrExported'] and clash['generatedConfig']['filterCount']==21 and all(not clash['selectedExtension']['exactHostLiteralPresent'][h] and not clash['globalExtension']['exactHostLiteralPresent'][h] and not clash['generatedConfig']['exactHostInFakeIpFilter'][h] for _,h,_ in expected_carrier.values()))
+delta=json.loads((carrier/'matrix-delta.json').read_text(encoding='utf-8'))
+check('Carrier two entries only and coverage unchanged',delta['onlyChangedSourceIds']==list(expected_carrier) and delta['otherSourceEntryDifferences']==[] and delta['r2_5Unchanged'] and delta['numericUnchanged'] and delta['r2_4Before']['numerator']==delta['r2_4After']['numerator']==20 and delta['r2_4After']==json.loads((root/'docs/evidence/r2-carrier-reapplied-2026-10-15/matrix-delta.json').read_text(encoding='utf-8'))['r2_4Before'])
+raw_output=json.loads((carrier/'capture-output-original.json').read_text(encoding='utf-8'))
+check('Original capture stdout stderr byte hashes retained',raw_output['rawExit']==capture_command['rawExit']==0 and all(hashlib.sha256(v['utf8'].encode('utf-8')).hexdigest()==v['byteSha256'] for v in raw_output['logs'].values()))
+reapplied=root/'docs/evidence/r2-carrier-reapplied-2026-10-15'
+new_summary=json.loads((reapplied/'summary.json').read_text(encoding='utf-8'))
+new_dns=json.loads((reapplied/'dns-ledger.json').read_text(encoding='utf-8'))
+new_requests=json.loads((reapplied/'request-ledger.json').read_text(encoding='utf-8'))
+new_config=json.loads((reapplied/'applied-config-check.json').read_text(encoding='utf-8'))
+integrity=json.loads((reapplied/'capture-integrity.json').read_text(encoding='utf-8'))
+new_launch=json.loads((reapplied/'launch.json').read_text(encoding='utf-8'))
+new_cmd=json.loads((reapplied/'command.json').read_text(encoding='utf-8'))
+new_manifest=json.loads((reapplied/'manifest.json').read_text(encoding='utf-8'))
+new_results={r['id']:r for r in new_summary['results']}
+actual_ips={'XX-K01':['23.53.3.137','23.53.3.144'],'XX-K02':['104.19.145.47','104.19.144.47']}
+check('User-applied23 exact entries preserve old21 with no agent config writes',new_config['selectedExtensionExactlyOriginal21Plus2'] and new_config['generatedExactlyOriginal21Plus2'] and new_config['original21Preserved'] and new_config['generatedConfig']['filterCount']==new_config['selectedExtensionCount']==23 and new_config['allInspectedFilesUnchangedSizeAndMtime'] and not new_config['agentSystemWriteExecuted'] and not new_config['credentialFieldsInspectedOrExported'])
+check('Reapplied batch two actual once-only DNS and exact transport attempts',len(new_dns)==len(new_requests)==2 and new_summary['systemDnsCalls']==new_summary['reservedTransportCalls']==2 and all(r['systemDnsCalls']==r['httpRequests']==1 and r['addressClassification']=='public_address' and r['url']==('https://www.one-line.com/en/news' if r['id']=='XX-K02' else catalog[r['id']]) and [a['address'] for a in r['addresses']]==actual_ips[r['id']] for r in new_results.values()) and all(next(r for r in new_requests if r['id']==d['id'])['addresses']==d['addresses'] for d in new_dns))
+check('No redirect retry details production paid or LLM in current batch',all(new_summary[k]==0 for k in ['retries','redirects','details','paidCalls','llmCalls']) and not new_summary['productionEnabled'] and new_summary['live24h']=='NOT_RUN')
+check('Reapplied manifest launch command bind exact existing code and head',new_launch['head']==new_cmd['head']==integrity['executionHead']=='0ad53dd63632f097e719197345a1000b0e0c1d29' and new_launch['productCodeSha']==new_manifest['productCodeSha']==integrity['productCodeSha']=='355952c0e8c01266adbe692dfcfd3bca9b3c17b2' and new_cmd['rawExit']==0)
+me=next(e for e in entries if e['id']=='XX-K01');oe=next(e for e in entries if e['id']=='XX-K02')
+check('Maersk generic failure no invented response or underlying diagnosis',new_results['XX-K01']['reason']=='fetch_failed' and 'receivedAt' not in new_results['XX-K01'] and 'httpStatus' not in new_results['XX-K01'] and me['latestActualFetch'] is None and me['latestAttempt']['httpRequests']==1 and not me['latestAttempt']['responseCaptured'] and me['latestAttempt']['httpStatus'] is None and me['r2_4']['verdict']=='BLOCKED' and integrity['Maersk']['underlyingErrorCodeOrMessage']=='NOT_RECORDED')
+check('ONE actual308 relative header12bytes retained without follow or field promotion',new_results['XX-K02']['httpStatus']==308 and new_results['XX-K02']['bytes']==12 and new_results['XX-K02']['wireSha256']=='8d3e9d688c23a2e9d23f1e8fb252bb339ce3bfb0f7bb63fbb262d4d9d07e1578' and new_results['XX-K02']['location']['present'] and new_results['XX-K02']['location']['relative'] and not new_results['XX-K02']['location']['followed'] and new_results['XX-K02']['location']['sanitized']=='/en/newsroom' and oe['originalCatalogLastResponse']['httpStatus']==308 and oe['originalCatalogLastResponse']['url']=='https://www.one-line.com/en/news' and integrity['ONE']['privateRawHashVerified'])
+def saved_public_attempt(e):
+    return next(a for a in [e['latestAttempt'],*e.get('historicalAttempts',[])] if a['evidence']['path']=='docs/evidence/r2-carrier-reapplied-2026-10-15/summary.json')
+check('Historical public attempts preserve actual source results without claiming original list parse',all(saved_public_attempt(next(e for e in entries if e['id']==sid))['addresses']==r['addresses'] and saved_public_attempt(next(e for e in entries if e['id']==sid))['httpRequests']==1 and r['parser']=='NOT_RUN' for sid,r in new_results.items()))
+new_delta=json.loads((reapplied/'matrix-delta.json').read_text(encoding='utf-8'))
+check('Only two source entries changed in reapplied round, numerators preserved',new_delta['changedSourceIdsOnly']==['XX-K01','XX-K02'] and new_delta['other39SourceEntryDifferences']==[] and new_delta['r2_5Unchanged'] and new_delta['numericUnchanged'] and new_delta['r2_4After']==json.loads((root/'docs/evidence/r2-one-newsroom-target-2026-10-15/matrix-delta.json').read_text(encoding='utf-8'))['r2_4Before'])
+new_output=json.loads((reapplied/'capture-output-original.json').read_text(encoding='utf-8'))
+check('Reapplied original stdout stderr byte digests retained',new_output['rawExit']==0 and all(hashlib.sha256(v['utf8'].encode('utf-8')).hexdigest()==v['byteSha256'] for v in new_output['logs'].values()))
+target=root/'docs/evidence/r2-one-newsroom-target-2026-10-15'
+final_replay=root/'docs/evidence/r2-one-newsroom-replay-final-2026-10-15'
+failed_replay=root/'docs/evidence/r2-one-newsroom-replay-2026-10-15'
+code_gate=root/'docs/evidence/gate-01934a5-one-newsroom-json'
+target_summary=json.loads((target/'summary.json').read_text(encoding='utf-8'))
+t=target_summary['results'][0]
+tdns=json.loads((target/'dns-ledger.json').read_text(encoding='utf-8'))
+treq=json.loads((target/'request-ledger.json').read_text(encoding='utf-8'))
+target_integrity=json.loads((target/'capture-integrity.json').read_text(encoding='utf-8'))
+from urllib.parse import urljoin,urlsplit
+import ipaddress
+check('Historical ONE target resolves actual saved308 and current approved catalog names that same target',t['catalogUrl']=='https://www.one-line.com/en/news' and catalog['XX-K02']=='https://www.one-line.com/en/newsroom' and t['url']==urljoin(t['catalogUrl'],t['redirectProvenance']['location']['sanitized'])=='https://www.one-line.com/en/newsroom' and urlsplit(t['url']).hostname==urlsplit(t['catalogUrl']).hostname and t['redirectProvenance']['originalStatus']==308 and t['redirectProvenance']['separatelyAuthorizedTarget'] and not t['redirectProvenance']['automaticFollow'])
+check('ONE target exactly one new public DNS and one pinned transport, Maersk zero',len(tdns)==len(treq)==len(target_summary['results'])==1 and target_summary['systemDnsCalls']==target_summary['reservedTransportCalls']==1 and target_summary['MaerskRequests']==0 and tdns[0]['addresses']==treq[0]['addresses']==t['addresses'] and all(ipaddress.ip_address(a['address']).is_global for a in t['addresses']) and treq[0]['url']==t['url'] and all(target_summary[k]==0 for k in ['retries','redirects','details','paidCalls','llmCalls']))
+check('ONE target200 byte encoding content type and absence of further Location recorded',t['httpStatus']==200 and t['bytes']==635664 and t['wireSha256']=='682943942c38c8aebcbc68ec3888ca65e9278ed27a38d30a11134d283d893fe0' and t['contentType']=='text/html; charset=utf-8' and t['location']=={'present':False} and t['decoding']['encoding']=='utf-8' and not t['decoding']['conflict'] and target_integrity['privateRawIgnoredHashVerified'])
+fl=json.loads((final_replay/'launch.json').read_text(encoding='utf-8'));fc=json.loads((final_replay/'command.json').read_text(encoding='utf-8'))
+f=json.loads((final_replay/'summary.json').read_text(encoding='utf-8'));fr=f['results'][0]
+check('Capture and replay bind distinct accurate execution code states',target_integrity['executionHead']=='03d1515d33dd1c5d96137c43e0aafb596b334be3' and target_integrity['capturedProductCodeSha']=='355952c0e8c01266adbe692dfcfd3bca9b3c17b2' and target_integrity['replayedAndGatedCodeSha']==fl['sha']==fc['sha']=='01934a5746c10d4165f4c4ffc5ce145d6de33d16' and fc['rawExit']==0)
+check('Full original HTML10 records collector repeat and read-only reopen passed',fr['rawBytes']==635664 and fr['fetchedRawSha256']==t['wireSha256'] and fr['first']['status']=='ok_items' and fr['first']['itemsSeen']==fr['first']['itemsNew']==10 and fr['repeat']['itemsNew']==fr['repeat']['itemsRevised']==0 and fr['reopen']['rows']==fr['reopen']['versions']==fr['reopen']['secondPrecision']==fr['reopen']['missingTimezone']==fr['reopen']['nullPublicationInstants']==fr['reopen']['metadataOnlyTitleBlocks']==10 and fr['reopen']['mismatches']==0 and fr['reopen']['independentlyComparedToRawJsonFields'] and fr['reopen']['databaseBytesUnchanged'] and f['actualSourceHttpRequests']==f['actualSystemDnsCalls']==f['tcpConnectionAttempts']==f['globalFetchCalls']==0)
+fields=json.loads((final_replay/'raw-field-metadata.json').read_text(encoding='utf-8'))
+check('ONE identity and independent complete raw source fields do not invent aliases or timezone',fields['id']=='XX-K02' and fields['canonical']==t['url'] and fields['heading']=='Newsroom' and fields['payloadPage']=='/newsroom' and fields['pinned']==1 and fields['listed']==9 and len(fields['fields'])==10 and len({r['canonicalUrl'] for r in fields['fields']})==10 and all(r['title'] and r['canonicalUrl']==urljoin(t['url'],r['rawAliasUrl']) and re.fullmatch(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}',r['rawReleaseDate']) for r in fields['fields']))
+candidate=json.loads((final_replay/'candidate-config.json').read_text(encoding='utf-8'))
+proposal=json.loads((target/'catalogue-url-proposal.json').read_text(encoding='utf-8'))
+check('Historical ONE offline mapping and then-unapplied proposal retained; current declaration remains disabled metadata-only',not candidate['seed']['enabled'] and candidate['seed']['persistence']=='disallowed' and candidate['seed']['jsonList']['itemsPaths']==['props.pageProps.pinArticle','props.pageProps.articles'] and not candidate['activeRegistryChanged'] and candidate['permanentCatalogUnchanged'] and proposal['status']=='PROPOSED_NOT_APPLIED' and proposal['catalogStillUnchanged'] and proposal['catalogFileLfSha256']==json.loads((root/'docs/evidence/r2-one-catalog-candidate-2026-10-15/catalogue-change-applied.json').read_text(encoding='utf-8'))['oldCatalogLfSha256'] and proposal['originalRow'].split('|')[4].strip()==t['catalogUrl'] and proposal['proposedRow']==proposal['originalRow'].replace(t['catalogUrl'],t['url'],1) and oe['exactProductUrl']==catalog['XX-K02'] and oe['resolvedProductUrl']==t['url'] and oe['originalCatalogLastResponse']['httpStatus']==308 and oe['defaultState']['sourceConfig']=='configured_disabled_candidate')
+initial_cmd=json.loads((failed_replay/'command.json').read_text(encoding='utf-8'))
+check('Initial lastSeenAt-only harness failure preserved separately from passing final proof',initial_cmd['rawExit']==1 and 'lastSeenAt' in initial_cmd['stderrCapturedUtf8'] and fc['rawExit']==0 and fr['repeatLastSeenAt'].startswith('All ten advanced'))
+error_proof=json.loads((target/'error-recording-offline-result.json').read_text(encoding='utf-8'))
+error_cmd=json.loads((target/'error-recording-offline-command.json').read_text(encoding='utf-8'))
+check('Synthetic error cause recording and redaction proof makes no Maersk diagnosis or requests',error_cmd['rawExit']==0 and error_proof['sourceDnsCalls']==error_proof['realTransportCalls']==error_proof['MaerskRequests']==0 and error_proof['secureEntryError']['code']=='fetch_failed' and error_proof['transportError']['code']=='ECONNRESET' and all('synthetic connection reset' in error_proof[k]['message'] and '[redacted]' in error_proof[k]['message'] and not any(secret in error_proof[k]['message'] for secret in ['SYNTHETIC_ONLY_VALUE','synthetic-user','synthetic-pass','api_key=','#fragment']) for k in ['secureEntryError','transportError']))
+gs=json.loads((code_gate/'summary.json').read_text(encoding='utf-8'));gl=json.loads((code_gate/'launch.json').read_text(encoding='utf-8'));gp=json.loads((code_gate/'source-proof.json').read_text(encoding='utf-8'))
+check('Exact clean code gate frozen real install and all nine commands raw exit0',gs['sha']==gl['sha']==gp['sha']=='01934a5746c10d4165f4c4ffc5ce145d6de33d16' and len(gs['commands'])==9 and all(r['rawExit']==0 and r['sha']=='01934a5746c10d4165f4c4ffc5ce145d6de33d16' for r in gs['commands']) and gs['commands'][0]['command']=='pnpm install --frozen-lockfile' and gl['cleanClone'] and not gl['existingNodeModules'] and gl['installScriptsNotSkipped'] and gl['node']=='v24.15.0' and gl['abi']=='137' and gs['retainedUnchanged'] and not gs['testedSourceDiff'] and gp['targeted']['passed']==244 and gp['full']['passed']==1229 and gp['full']['skipped']==3)
+targeted_log=json.loads((code_gate/'targeted.json').read_text(encoding='utf-8'))['stdoutExactUtf8']
+full_log=json.loads((code_gate/'vitest.json').read_text(encoding='utf-8'))['stdoutExactUtf8']
+check('Gate reported test counts match actual original stdout summaries',bool(re.search(r'Test Files\s+17 passed',targeted_log)) and bool(re.search(r'Tests\s+244 passed',targeted_log)) and bool(re.search(r'Test Files\s+129 passed',full_log)) and bool(re.search(r'Tests\s+1229 passed\s*\|\s*3 skipped',full_log)))
+log_errors=[]
+for command in gs['commands']:
+    phase=json.loads((code_gate/(command['name']+'.json')).read_text(encoding='utf-8'))
+    for stream in ['stdout','stderr']:
+        if hashlib.sha256(phase[stream+'ExactUtf8'].encode('utf-8')).hexdigest()!=phase[stream+'OriginalByteSha256']:log_errors.append(command['name']+'.'+stream)
+check('Clean gate exact original UTF8 stdout stderr hashes retained',not log_errors,log_errors)
+target_delta=json.loads((target/'matrix-delta.json').read_text(encoding='utf-8'))
+check('Only ONE source qualification changes to21/39 and13/34 with other40 untouched',target_delta['changedSourceIdsOnly']==['XX-K02'] and target_delta['other40SourceEntryDifferences']==[] and target_delta['numericUnchanged'] and target_delta['r2_4After']==m['measuredCoverage']['r2_4'] and target_delta['r2_5After']==m['measuredCoverage']['r2_5'] and oe['r2_4']['verdict']=='OK' and oe['r2_5']['verdict']=='PASS' and me['r2_4']['verdict']=='BLOCKED' and me['latestAttempt']['reason']=='fetch_failed')
+adoption=root/'docs/evidence/r2-one-catalog-candidate-2026-10-15'
+adoption_replay=root/'docs/evidence/r2-one-catalog-candidate-replay-2026-10-15'
+adoption_gate=root/'docs/evidence/gate-bebe144-one-catalog-candidate'
+applied=json.loads((adoption/'catalogue-change-applied.json').read_text(encoding='utf-8'))
+adopted_cfg=json.loads((adoption_replay/'candidate-config.json').read_text(encoding='utf-8'))
+ar=json.loads((adoption_replay/'summary.json').read_text(encoding='utf-8'));a=ar['results'][0]
+check('Approved one-row same-product catalog URL applied with original308 preserved',applied['status']=='APPLIED_APPROVED' and applied['id']=='XX-K02' and applied['oldUrl']=='https://www.one-line.com/en/news' and applied['newUrl']==catalog['XX-K02']==oe['exactProductUrl']=='https://www.one-line.com/en/newsroom' and applied['newRow']==applied['oldRow'].replace(applied['oldUrl'],applied['newUrl'],1) and applied['tableRowsChangedOnly']==['XX-K02'] and applied['newCatalogLfSha256']==m['catalogSha256'] and oe['previousCatalogProductUrl']==applied['oldUrl'] and oe['originalCatalogLastResponse']['httpStatus']==308)
+check('Catalog web_list page shape explicitly maps to inert-HTML json_list without active-source expansion',applied['directoryFormat']=='web_list' and applied['parserKind']==adopted_cfg['seed']['kind']=='json_list' and adopted_cfg['seed']['jsonList']['htmlScriptSelector']=='script#__NEXT_DATA__' and adopted_cfg['catalogFormat']=='web_list' and adopted_cfg['seed']['allowedHosts']==['www.one-line.com'] and not adopted_cfg['seed']['enabled'] and adopted_cfg['seed']['persistence']=='disallowed' and not applied['activeSeedsOrProductionAllowlistChanged'] and oe['defaultState']['sourceConfig']=='configured_disabled_candidate' and oe['defaultState']['declaredSeedEnabled'] is False)
+old_cfg=json.loads((root/'docs/evidence/r2-one-newsroom-replay-final-2026-10-15/candidate-config.json').read_text(encoding='utf-8'))['seed']
+compare_cfg=dict(adopted_cfg['seed']);compare_cfg['name']=old_cfg['name']
+check('Declared ONE config preserves all previously verified mapping except display name',compare_cfg==old_cfg and adopted_cfg['mappingMatchesPriorProof'] and a['configMatchesPreviouslyVerifiedMapping'])
+new_raw_fields=json.loads((adoption_replay/'raw-field-metadata.json').read_text(encoding='utf-8'))
+check('Declared candidate replays all10 previous original metadata without new network',a['all10RawMetadataFieldsMatchPreviousProof'] and new_raw_fields['fields']==fields['fields'] and a['first']['status']=='ok_items' and a['first']['itemsSeen']==a['first']['itemsNew']==10 and a['repeat']['itemsNew']==a['repeat']['itemsRevised']==0 and a['reopen']['rows']==a['reopen']['versions']==a['reopen']['secondPrecision']==a['reopen']['missingTimezone']==a['reopen']['nullPublicationInstants']==10 and a['reopen']['mismatches']==0 and a['reopen']['databaseBytesUnchanged'] and ar['actualSourceHttpRequests']==ar['actualSystemDnsCalls']==ar['tcpConnectionAttempts']==ar['globalFetchCalls']==0 and applied['sourceDnsCallsThisRound']==applied['sourceHttpRequestsThisRound']==applied['MaerskRequests']==0)
+ag=json.loads((adoption_gate/'summary.json').read_text(encoding='utf-8'));al=json.loads((adoption_gate/'launch.json').read_text(encoding='utf-8'));ap=json.loads((adoption_gate/'source-proof.json').read_text(encoding='utf-8'));ac=json.loads((adoption_replay/'command.json').read_text(encoding='utf-8'))
+check('Exact adopted candidate code gate and local replay share clean approved SHA',ag['sha']==al['sha']==ap['sha']==ac['sha']==applied['appliedCodeSha']==m['reviewedCodeSha']==m['evidenceHead']=='bebe1441465adfcabb9daf93cb2a8656ec1fc796' and ac['rawExit']==0 and len(ag['commands'])==9 and all(c['rawExit']==0 for c in ag['commands']) and al['cleanClone'] and not al['existingNodeModules'] and al['installScriptsNotSkipped'] and al['node']=='v24.15.0' and al['abi']=='137' and ag['commands'][0]['command']=='pnpm install --frozen-lockfile' and ag['retainedUnchanged'] and not ag['testedSourceDiff'])
+adoption_log_errors=[]
+for phase_info in ag['commands']:
+    phase=json.loads((adoption_gate/(phase_info['name']+'.json')).read_text(encoding='utf-8'))
+    for stream in ['stdout','stderr']:
+        if hashlib.sha256(phase[stream+'ExactUtf8'].encode('utf-8')).hexdigest()!=phase[stream+'OriginalByteSha256']:adoption_log_errors.append(phase_info['name']+'.'+stream)
+atarget=json.loads((adoption_gate/'targeted.json').read_text(encoding='utf-8'))['stdoutExactUtf8'];afull=json.loads((adoption_gate/'vitest.json').read_text(encoding='utf-8'))['stdoutExactUtf8']
+check('Adoption original gate log hashes and245/1230+3 reported counts match',not adoption_log_errors and bool(re.search(r'Tests\s+245 passed',atarget)) and bool(re.search(r'Tests\s+1230 passed\s*\|\s*3 skipped',afull)),adoption_log_errors)
+adelta=json.loads((adoption/'matrix-delta.json').read_text(encoding='utf-8'))
+check('ONE adoption changes only its config/catalog state, leaves all coverage and40others unchanged',adelta['changedSourceIdsOnly']==['XX-K02'] and adelta['other40SourceEntryDifferences']==[] and adelta['allCoverageCountsAndStatusesUnchanged'] and adelta['beforeCoverage']==adelta['afterCoverage']==m['measuredCoverage'] and adelta['latestActualFetchUnchanged'] and not adelta['newLiveQualification'] and oe['latestActualFetch']['capturedAtHead']=='03d1515d33dd1c5d96137c43e0aafb596b334be3')
+next_batch=json.loads((adoption/'next-batch-recommendations.json').read_text(encoding='utf-8'))
+check('Next recommendations are at most3 already-measured RSS gaps, no probes or repeated failed search',len(next_batch['entries'])==len(m['nextBatchProposal'])==3 and [r['id'] for r in next_batch['entries']]==['MY-C01','MY-T01','PH-M01'] and next_batch['entries']==m['nextBatchProposal'] and next_batch['sourceDnsCalls']==next_batch['sourceHttpRequests']==0 and all(r['status']=='PROPOSED_ONLY_NOT_EXECUTED' and r['thisRoundDnsCalls']==r['thisRoundHttpRequests']==0 and r['currentR2_4']=='OK' and r['currentR2_5']=='NOT_RUN' and r['storedParsedItems']==r['storedCompleteTitleLinkTime']=={'MY-C01':10,'MY-T01':6,'PH-M01':10}[r['id']] and r['url']==catalog[r['id']] for r in next_batch['entries']))
+markdown=[root/p for p in changes if p.endswith('.md')]+[out/'report.md',out/'closeout.md',batch/'report.md',carrier/'report.md',carrier/'closeout.md',reapplied/'report.md',reapplied/'closeout.md',root/'docs/handoffs/r2-next-execution-2026-10-15.md',target/'report.md',target/'closeout.md',final_replay/'report.md',failed_replay/'report.md',code_gate/'report.md',adoption/'report.md',adoption/'closeout.md',adoption_replay/'report.md',adoption_gate/'report.md']
+link_errors=[]
+for p in markdown:
+    if not p.exists():continue
+    for target in re.findall(r'\]\(([^)]+)\)',p.read_text(encoding='utf-8')):
+        t=target.strip('<>');t=t.split('#')[0]
+        if not t or re.match(r'^[a-z]+:',t):continue
+        if not (p.parent/t).exists():link_errors.append({'file':p.relative_to(root).as_posix(),'target':t})
+check('Changed Markdown local links exist',not link_errors,link_errors)
+report=(out/'report.md').read_text(encoding='utf-8');check('Readable report retains one row for every ID',all(len(re.findall(r'^\| '+re.escape(s)+r' \|',report,re.M))==1 for s in ids))
+value={'type':'docs_and_saved_evidence_validation','at':datetime.now(timezone.utc).isoformat(),'codeSha':m['reviewedCodeSha'],'evidenceBaseline':m['evidenceHead'],'command':'python .tmp/validate-current-r2-matrix.py','validatorSourceRequests':0,'validatorSourceDns':0,'lastQualificationBatchSystemDns':4,'lastQualificationBatchHttpRequests':4,'thisAdoptionRoundTransportAttempts':0,'thisAdoptionRoundSystemDns':0,'latestRealTargetCaptureRetainedFromPriorRound':True,'thisRoundMaerskRequests':0,'thisCloseoutSourceRequests':0,'thisCloseoutSystemDns':0,'functionalTests':'PASS_exact_clean_code_gate_bebe144; separate from docs validation command','originalFieldReplay':'PASS_declared_disabled_ONE_config_existing_full_HTML10_metadata_fields; all40other_entries_and_all_coverage_unchanged','checks':checks,'errors':errors,'rawExit':1 if errors else 0}
+(out/'validation.json').write_bytes((json.dumps(value,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
+print(json.dumps({'checks':len(checks),'errors':errors,'referenceOccurrences':len(refs),'uniquePaths':len({r['path'] for r in refs}),'rawExit':value['rawExit']},ensure_ascii=True))
+raise SystemExit(value['rawExit'])

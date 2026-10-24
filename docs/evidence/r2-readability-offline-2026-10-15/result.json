@@ -1,0 +1,36 @@
+{
+  "codeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
+  "implementationCommit": "0a511c09114674d31f3c6334ab1a3834ba8f2c0a",
+  "typeRepairCommit": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
+  "qualificationCommit": "77ba29b01a444db19035a739c35d17ad59ec7be2",
+  "previousEvidenceHead": "aa2e9e1ba1e6095cdd504f2a54bc9b60eb008388",
+  "gate": {
+    "path": "docs/evidence/gate-c7ba3c6-readability/summary.json",
+    "sha256": "e9346a7d7fa8b66996e74d0c780b5d3a98f480aba215824aaea8964e7dc823e2",
+    "hashBasis": "committed_text_LF"
+  },
+  "priorFailedGate": {
+    "path": "docs/evidence/gate-0a511c0-readability/summary.json",
+    "sha256": "a864cf15c72d9c5d7d14d1af8a62776247befedaa331ac34a460a46e6c8f93c6",
+    "hashBasis": "committed_text_LF"
+  },
+  "targetedTests": 124,
+  "fullTestsPassed": 1314,
+  "fullTestsSkipped": 3,
+  "newTests": 14,
+  "sourceRequests": 0,
+  "sourceDnsCalls": 0,
+  "llmCalls": 0,
+  "paidCalls": 0,
+  "sourceQualification": [
+    "25/39",
+    "24/34"
+  ],
+  "numericHistorical": "3/5",
+  "migrationChanged": false,
+  "registryProductionEnabled": false,
+  "retainedHashesUnchangedSinceWestports": true,
+  "independentReview": "PENDING_PARENT",
+  "guiS7": "NOT_RUN_no_UI_route_change; prior acceptance remains pending",
+  "production24h": "NOT_RUN"
+}

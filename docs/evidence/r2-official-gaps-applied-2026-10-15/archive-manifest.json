@@ -1,0 +1,145 @@
+{
+  "baselineHead": "440affa012e06b80c38d97f08b04e395b8506d0f",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "files": [
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+      "committedTextLfSha256": "8400ddf8e7f97eb59d6efb704a642c5dae0002ccc09c61fcf9e5951a7f0cb31c"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+      "committedTextLfSha256": "a46eef71b060551906ea730f5f6a62a2f8fd99edda302e6f208b61ea5a34065a"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+      "committedTextLfSha256": "cce41396d39647908314396b76a0a4698e93ba7166719e947657b378c97acbe7"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+      "committedTextLfSha256": "bf5c0bf77d3fe7971eb747667c1b40f2d00eb6cd7a114f0be00fb6daa17ac0e6"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/ID-W02-root-capture.json",
+      "committedTextLfSha256": "a8cf4da28b74da69cc178ea054d82002ee5ef4f147d24e0e361da5774e537a42"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/PH-W01-capture.json",
+      "committedTextLfSha256": "29c0d4947fdbeca0869f107af98203702b43e4918b42a3ed626e98cbf0010480"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/PH-W02-capture.json",
+      "committedTextLfSha256": "0cfd7c2d6e3010ddcf4eb25b1f7b800f189e7ea555e645e8cfe1500599cacfc6"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/XX-W02-targetTc-capture.json",
+      "committedTextLfSha256": "8e791a21bead8c6f565faf4847351e6333934677e88e518d0eb5d8da4bc36100"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/archive-procedure.cjs.txt",
+      "committedTextLfSha256": "5b43125fd534cbe8388b8f125638efa17799bd0d42e1999a3906871c0fe4f34e"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/archive-verification-procedure.cjs.txt",
+      "committedTextLfSha256": "f1fdf56a8949001023287186402b2588d8f90798973b803a74007be3af467207"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/capture-command-initial.json",
+      "committedTextLfSha256": "ca723f1bae0469ff63b223855533cb5ff0647cb523a14e805da774db1017ec34"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/capture-config.ts.txt",
+      "committedTextLfSha256": "c9af967c3dac4c4080af844aeeaab51835c31f4184e747e41c26f513360104da"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/capture-procedure.test.ts.txt",
+      "committedTextLfSha256": "8db4f48286119868cfbe00827416a49af5214dd9f2ea506281d8a510e3d46ab8"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/capture-runner.cjs.txt",
+      "committedTextLfSha256": "157259c158c7644707667063c83f732cd1a3bd6309b109fe9bb7ed2e1136e4b9"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/capture-summary.json",
+      "committedTextLfSha256": "7e20f70a91a51c96741ba14ca4cb0f0304478381100e2bcbb7ef6f866e8d7fd9"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/clash-applied-first-extra-byte-guard.json",
+      "committedTextLfSha256": "41050254d8cd325d7e17348f9a029b8854d9e7a022c4ccb432e34b6046a27255"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/clash-applied-verification.json",
+      "committedTextLfSha256": "71524cf19de32e7fcf4c2838e35350904bcdf4a34b873844d64c19b39bad099d"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/closeout.md",
+      "committedTextLfSha256": "a4fdd5271b9eeae9d11908308ea7fd3278facd3d14af57619d467171e31dba84"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/conditional-decisions.json",
+      "committedTextLfSha256": "71243f4a918cc487b41a329597462c85f73ec998591e72ec5d1e152997614362"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/configuration-verification.py.txt",
+      "committedTextLfSha256": "3f149e18d7c4a2df097f0edcf5c0c998abdbaa5a5f37ac76d09ba0cc25864ad7"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/dns-ledger.json",
+      "committedTextLfSha256": "22d9f6ad64b9dceb5f0b87b00abe037bec631e4feb0b6e5a34174e9c46aee2b2"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/doc-lint-procedure.cjs.txt",
+      "committedTextLfSha256": "47fb6b78c1c0c3eab1cc807cd44c25b6b4085b3974a7e00a5fdcbfc9ef5ffb9e"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/doc-lint.json",
+      "committedTextLfSha256": "640c9c49573e8c678a905d3d184ac73e3d200c054427fad4d6225cda759b8972"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/manifest.json",
+      "committedTextLfSha256": "b12c1110bda67cfcfbbade8d43cd35df372ee41907c72d0079401cb7bdb95f73"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/matrix-delta.json",
+      "committedTextLfSha256": "c26612307c1e3a3c70473e4cf8b9dd7f5f2f5e961420ee0cdeb6fb04d8d9a195"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/observation-procedure.cjs.txt",
+      "committedTextLfSha256": "baa7b7d3e9255bcdcf060783235b4f6d3bc1de0779b6fc94adc95b2a0ec9b026"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/report.md",
+      "committedTextLfSha256": "7d20cc7df1350f728c6b8fadf1a93302d37e1fee01831614dc1fdbf990b913dc"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/request-ledger.json",
+      "committedTextLfSha256": "2fdacbb87f06311b0c5920cb2625999b73a2def5b0a3ca3b5708eeedd9909d1c"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/source-proof.json",
+      "committedTextLfSha256": "617d20ed4b37fe48fd5c3b62a1d301cde479bfb3c56f8ae3a4d2dcd392f168aa"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/structure-observation.json",
+      "committedTextLfSha256": "c15adc9c04aeba84e4320b54b0e6945ed5be0d73528baa1da8267ba2e9ecf42f"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/validation-procedure.cjs.txt",
+      "committedTextLfSha256": "bf5b4325f898cd8425c9a8fd523dc9b1d842436aabfee2a30ac58ae37125e391"
+    },
+    {
+      "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/validation.json",
+      "committedTextLfSha256": "bf5c0bf77d3fe7971eb747667c1b40f2d00eb6cd7a114f0be00fb6daa17ac0e6"
+    },
+    {
+      "path": "docs/handoffs/r2-next-execution-2026-10-15.md",
+      "committedTextLfSha256": "98945ac624a7c5a303677288cbfaf20bfd91dbacdb1788c6d250e82ec199f284"
+    },
+    {
+      "path": "docs/status.md",
+      "committedTextLfSha256": "b38f8011349cc316d6ce560008bc40a110b53f485d330c30a84efbd8e5f75bd2"
+    }
+  ],
+  "sourceGetAttempts": 4,
+  "systemDnsCalls": 4,
+  "productGate": "NOT_RUN_no_product_change"
+}

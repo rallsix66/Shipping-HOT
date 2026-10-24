@@ -8,36 +8,42 @@ import nitro from "./nitro.config"
 import { projectDir } from "./shared/dir"
 import pwa from "./pwa.config"
 import { loadServerEnv } from "./scripts/load-env"
+import { clipSyntheticMark } from "./scripts/clip-synthetic-mark"
 
-loadServerEnv()
-
-export default defineConfig({
-  resolve: {
-    alias: {
-      "~": join(projectDir, "src"),
-      "@shared": join(projectDir, "shared"),
+export function shippingViteConfig(synthetic = false) {
+  if (!synthetic) loadServerEnv()
+  return defineConfig({
+    define: { __SHIPPING_CLIP_SYNTHETIC_TEST__: JSON.stringify(synthetic) },
+    ...(synthetic ? { envDir: false as const, build: { outDir: ".tmp/clip-synthetic-build/client" } } : {}),
+    resolve: {
+      alias: {
+        "~": join(projectDir, "src"),
+        "@shared": join(projectDir, "shared"),
+      },
     },
-  },
-  plugins: [
-    TanStackRouterVite({
+    plugins: [
+      TanStackRouterVite({
       // error with auto import and vite-plugin-pwa
       // autoCodeSplitting: true,
-    }),
-    unimport.vite({
-      dirs: ["src/hooks", "src/utils", "shared/type.util.ts"],
-      presets: ["react", {
-        from: "jotai",
-        imports: ["atom", "useAtom", "useAtomValue", "useSetAtom"],
-      }],
-      imports: [
-        { from: "clsx", name: "clsx", as: "$" },
-        { from: "jotai/utils", name: "atomWithStorage" },
-      ],
-      dts: "imports.app.d.ts",
-    }),
-    unocss(),
-    react(),
-    pwa(),
-    nitro(),
-  ],
-})
+      }),
+      unimport.vite({
+        dirs: ["src/hooks", "src/utils", "shared/type.util.ts"],
+        presets: ["react", {
+          from: "jotai",
+          imports: ["atom", "useAtom", "useAtomValue", "useSetAtom"],
+        }],
+        imports: [
+          { from: "clsx", name: "clsx", as: "$" },
+          { from: "jotai/utils", name: "atomWithStorage" },
+        ],
+        dts: "imports.app.d.ts",
+      }),
+      unocss(),
+      react(),
+      pwa(synthetic),
+      nitro(synthetic),
+      ...(synthetic ? [clipSyntheticMark()] : []),
+    ],
+  })
+}
+export default defineConfig(() => shippingViteConfig(false))

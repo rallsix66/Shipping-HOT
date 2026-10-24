@@ -1,0 +1,113 @@
+{
+  "wireSha256": "db9676f1167a48d5c36ad76364e6215221173eefb6874d16a77204a160befc8b",
+  "originalBytes": 36266,
+  "rawItems": 10,
+  "emptyTitleItems": 7,
+  "nonemptyTitleItems": 3,
+  "sourceNotParserOmission": true,
+  "existingParserContract": "server/providers/feed.ts parseFeedEntries: if(!title)continue, unchanged",
+  "rows": [
+    {
+      "sourceIndex": 0,
+      "xmlDomTitleCharacters": 0,
+      "independentXmlParserTitleCharacters": 0,
+      "sourceEmptyTitleConfirmed": true,
+      "titleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourcePubDate": "Mon, 28 Sep 2026 07:28:20 +0000",
+      "sourceLinkSha256": "0726c8355b8358b8a389f52e8cc83657ab8bd364c873611a5d627486c0f316a9",
+      "sourceLinkIsDateDirectory": false
+    },
+    {
+      "sourceIndex": 1,
+      "xmlDomTitleCharacters": 0,
+      "independentXmlParserTitleCharacters": 0,
+      "sourceEmptyTitleConfirmed": true,
+      "titleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourcePubDate": "Mon, 28 Sep 2026 07:20:14 +0000",
+      "sourceLinkSha256": "2dd2a25377cb5d8df758bc705a812f43a19310fdaaf6911ffd2e13b1fd05bd15",
+      "sourceLinkIsDateDirectory": false
+    },
+    {
+      "sourceIndex": 2,
+      "xmlDomTitleCharacters": 0,
+      "independentXmlParserTitleCharacters": 0,
+      "sourceEmptyTitleConfirmed": true,
+      "titleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourcePubDate": "Thu, 03 Sep 2026 01:21:31 +0000",
+      "sourceLinkSha256": "7e9f82845a90ee9eeef1eca2e1c3089c2c54fd7acd62f0516dd1e207c8376f18",
+      "sourceLinkIsDateDirectory": false
+    },
+    {
+      "sourceIndex": 3,
+      "xmlDomTitleCharacters": 0,
+      "independentXmlParserTitleCharacters": 0,
+      "sourceEmptyTitleConfirmed": true,
+      "titleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourcePubDate": "Wed, 17 Jun 2026 02:46:13 +0000",
+      "sourceLinkSha256": "f3a5af08704f9a155f2a4c0584ca1325715a6307ef2546747311a3a16f344592",
+      "sourceLinkIsDateDirectory": false
+    },
+    {
+      "sourceIndex": 4,
+      "xmlDomTitleCharacters": 0,
+      "independentXmlParserTitleCharacters": 0,
+      "sourceEmptyTitleConfirmed": true,
+      "titleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourcePubDate": "Thu, 19 Mar 2026 07:55:00 +0000",
+      "sourceLinkSha256": "1d4aa0710d0ac3c56f7056c6e993d4e6b4fccd4e40d92934257a1bac723a06ad",
+      "sourceLinkIsDateDirectory": false
+    },
+    {
+      "sourceIndex": 5,
+      "xmlDomTitleCharacters": 0,
+      "independentXmlParserTitleCharacters": 0,
+      "sourceEmptyTitleConfirmed": true,
+      "titleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourcePubDate": "Tue, 28 Oct 2025 01:19:41 +0000",
+      "sourceLinkSha256": "c0ff24f3d76d9a00b8e8f4664663066a81868aa76181583e0baf2c9d836321df",
+      "sourceLinkIsDateDirectory": false
+    },
+    {
+      "sourceIndex": 6,
+      "xmlDomTitleCharacters": 0,
+      "independentXmlParserTitleCharacters": 0,
+      "sourceEmptyTitleConfirmed": true,
+      "titleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourcePubDate": "Thu, 02 Oct 2025 03:17:35 +0000",
+      "sourceLinkSha256": "7b97d0eaac8c518012439328d7056aae9a4b0997d9942005385cc08294567f01",
+      "sourceLinkIsDateDirectory": false
+    },
+    {
+      "sourceIndex": 7,
+      "xmlDomTitleCharacters": 119,
+      "independentXmlParserTitleCharacters": 119,
+      "sourceEmptyTitleConfirmed": false,
+      "titleSha256": "5ff7aafb5275321fd662e3e361b027cadf5e20b5ab314729a4743d503579d579",
+      "sourcePubDate": "Fri, 01 Aug 2025 04:35:40 +0000",
+      "sourceLinkSha256": "d2686b13cdbcbb4f2bee8e76a377fa33b37e2303b8d240944092ecce74290b51",
+      "sourceLinkIsDateDirectory": false
+    },
+    {
+      "sourceIndex": 8,
+      "xmlDomTitleCharacters": 45,
+      "independentXmlParserTitleCharacters": 45,
+      "sourceEmptyTitleConfirmed": false,
+      "titleSha256": "e14bc88343bf9012ffb70cf8e02096d14027b31fae2fe7259fe26a44009b0c91",
+      "sourcePubDate": "Sat, 01 Feb 2025 01:24:34 +0000",
+      "sourceLinkSha256": "8cbf0f37554d14f2bd43391185d7b8bcb8a0ece340785616da9b374a63c9176a",
+      "sourceLinkIsDateDirectory": false
+    },
+    {
+      "sourceIndex": 9,
+      "xmlDomTitleCharacters": 112,
+      "independentXmlParserTitleCharacters": 112,
+      "sourceEmptyTitleConfirmed": false,
+      "titleSha256": "f94d66642beb4aae342aed645b5a1d9fe1bb67506a3eeab4538a3d956ffb6cca",
+      "sourcePubDate": "Fri, 08 Nov 2024 04:43:31 +0000",
+      "sourceLinkSha256": "0fbc1dc64a274f5276a32589a5a371b6be5a08e164711df790a99641ce9a85f2",
+      "sourceLinkIsDateDirectory": false
+    }
+  ],
+  "sourceRequests": 0,
+  "productChanged": false
+}

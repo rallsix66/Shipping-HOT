@@ -1,0 +1,13 @@
+{
+  "name": "smoke-feed",
+  "command": "pnpm smoke:p3-feed-freshness",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\one-newsroom-json-build-20261015",
+  "sha": "01934a5746c10d4165f4c4ffc5ce145d6de33d16",
+  "startedAt": "2026-10-15T03:08:19.773Z",
+  "finishedAt": "2026-10-15T03:08:21.236Z",
+  "rawExit": 0,
+  "stdoutExactUtf8": "\n> shipping-hot@0.0.41 smoke:p3-feed-freshness D:\\try one\\Shipping HOT\\.tmp\\one-newsroom-json-build-20261015\n> node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p3-feed-freshness-sqlite-smoke.ts\n\n{\"process\":\"B\",\"persisted\":true,\"current\":1,\"history\":3,\"visibility\":\"current\"}\n",
+  "stdoutOriginalByteSha256": "94ce57d167745187c075e4379d36a2fb5d4d5f920d49bcb2385e2484ebebcf4e",
+  "stderrExactUtf8": "(node:30880) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/tsx-alias-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+  "stderrOriginalByteSha256": "3524ed19c13a0d117071be044d265a8d58a5d27a64f3f0e74c113d41a9106999"
+}

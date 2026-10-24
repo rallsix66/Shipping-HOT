@@ -1,0 +1,83 @@
+{"name":"build","command":"pnpm build","sha":"56603ff618ed90f3d8408b6eb1dce461530c98c5","started":"2026-10-13T09:35:42.394Z","finished":"2026-10-13T09:35:57.264Z","rawExit":0,"signal":null}
+STDOUT
+
+> shipping-hot@0.0.41 build D:\try one\Shipping HOT
+> vite build
+
+vite v7.3.1 building client environment for production...
+transforming...
+✓ 779 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/manifest.webmanifest                          0.57 kB
+dist/index.html                                    2.16 kB │ gzip:   1.05 kB
+dist/assets/index-C6fu4beG.css                    74.51 kB │ gzip:  16.25 kB
+dist/assets/workbox-window.prod.es5-BIl4cyR9.js    5.76 kB │ gzip:   2.37 kB
+dist/assets/index-CdVOWEKS.js                    566.45 kB │ gzip: 181.11 kB
+✓ built in 2.83s
+
+PWA v1.2.0
+mode      generateSW
+precache  6 entries (633.67 KiB)
+files generated
+  dist/swx.js
+  dist/workbox-4bf5dfea.js
+[nitro] √ Generated public dist/output/public
+o Building Server...                                                          
+[nitro] i Building Nitro Server (preset: node-server, compatibility date: 2024-10-16)
+[nitro] √ Nitro Server built
+  ├─ dist/output/server/chunks/_/annual-calendar.mjs (85 kB) (12.6 kB gzip)
+  ├─ dist/output/server/chunks/_/feed-translation-display.mjs (4.72 kB) (1.36 kB gzip)
+  ├─ dist/output/server/chunks/_/intel-read.mjs (6.91 kB) (2.38 kB gzip)
+  ├─ dist/output/server/chunks/_/nitro.mjs (792 kB) (184 kB gzip)
+  ├─ dist/output/server/chunks/_/policy-api.mjs (749 B) (395 B gzip)
+  ├─ dist/output/server/chunks/_/policy-clock.mjs (350 B) (245 B gzip)
+  ├─ dist/output/server/chunks/_/promo-calendar.mjs (7.88 kB) (2.46 kB gzip)
+  ├─ dist/output/server/chunks/_/translation-recovery.mjs (809 B) (345 B gzip)
+  ├─ dist/output/server/chunks/routes/api/index.get.mjs (2.01 kB) (779 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/calendar.get.mjs (1.92 kB) (740 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/calendar/index.get.mjs (1.2 kB) (529 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/calendar/promotions/confirm.post.mjs (1.31 kB) (526 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/calendar/promotions/generate.post.mjs (1.31 kB) (566 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/calendar/reference.get.mjs (1 kB) (461 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/calendar/sync.post.mjs (1.6 kB) (665 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/feed.get.mjs (1.18 kB) (507 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/feed/_id_.get.mjs (7.29 kB) (2.19 kB gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/feed/history.get.mjs (990 B) (434 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/health.get.mjs (639 B) (286 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/index.get.mjs (979 B) (392 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/index.post.mjs (1.03 kB) (445 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/intel/items.get.mjs (609 B) (252 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/intel/items/_id_.get.mjs (611 B) (251 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/intel/sources.get.mjs (617 B) (254 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/policies/_id/repeal.post.mjs (1.06 kB) (444 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/policies/_id/revise.post.mjs (1.17 kB) (512 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/policies/export.get.mjs (1.06 kB) (450 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/policies/index.get.mjs (1.06 kB) (483 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/ports/_id/weather.get.mjs (21.3 kB) (6.18 kB gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/readiness.get.mjs (24 kB) (5.83 kB gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/runtime.get.mjs (750 B) (343 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/search/ports.get.mjs (1.46 kB) (606 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/settings.post.mjs (4.15 kB) (1.15 kB gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/translation/secret.delete.mjs (1.06 kB) (461 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/translation/secret.get.mjs (676 B) (312 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/translation/secret.post.mjs (2.22 kB) (854 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/translation/status.get.mjs (1.09 kB) (477 B gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/translation/test.post.mjs (5.47 kB) (1.81 kB gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/tropical-cyclones.get.mjs (7.58 kB) (2.69 kB gzip)
+  ├─ dist/output/server/chunks/routes/api/shipping/watch.post.mjs (869 B) (413 B gzip)
+  ├─ dist/output/server/index.mjs (1.87 kB) (778 B gzip)
+  └─ dist/output/server/package.json (1.27 kB) (532 B gzip)
+Σ Total size: 5.83 MB (2.16 MB gzip)
+[nitro] √ You can preview this build using node dist/output/server/index.mjs
+√ The server has been successfully built.                                     
+
+STDERR
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+Browserslist: browsers data (caniuse-lite) is 18 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme

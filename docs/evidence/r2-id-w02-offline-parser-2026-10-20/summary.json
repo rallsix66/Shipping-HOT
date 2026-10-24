@@ -1,0 +1,580 @@
+{
+  "type": "local_offline_implementation_evidence",
+  "at": "2026-10-20T03:58:48.821Z",
+  "root": "D:\\try one\\Shipping HOT",
+  "branch": "codex/shipping-hot-r2",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "productScope": [
+    "server/services/bmkg-port-forecast.ts",
+    "server/services/bmkg-port-forecast.test.ts"
+  ],
+  "sourceFiles": [
+    {
+      "path": "package.json",
+      "sha256": "32716b71ba5f3d807d141fb41373eacbedebc99fac727514dd59abb56e295196",
+      "matchesGate": true
+    },
+    {
+      "path": "scripts/tsx-alias-loader.mjs",
+      "sha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+      "matchesGate": true
+    },
+    {
+      "path": "server/runtime/intel-collect-job.ts",
+      "sha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2",
+      "matchesGate": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-environment.ts",
+      "sha256": "1100f875229b901f5a8b5fc32108afc593f4671f880461009d4e880142aa1d23",
+      "matchesGate": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-options.ts",
+      "sha256": "09b5e5f5b68879bf835d73b7b5b4b9c0064a09ca17049d0f3300c8900c53f5e8",
+      "matchesGate": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-worker.ts",
+      "sha256": "47dbb370b05c717feed2928a0afaf4236eb8fec7186bc5ae514b7ac4da4870f7",
+      "matchesGate": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.test.ts",
+      "sha256": "3e442d363e6a3b766199f102c6c47a18584a2b847f95497763086c5507a97066",
+      "matchesGate": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.ts",
+      "sha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224",
+      "matchesGate": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.test.ts",
+      "sha256": "361168e5fb7339bde62a69f85d75400218e290967a88ae03f30b875ff3739e75",
+      "matchesGate": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.ts",
+      "sha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006",
+      "matchesGate": true
+    },
+    {
+      "path": "server/runtime/intel-observation.test.ts",
+      "sha256": "24212377dbefe7fbc6dbdf4286e19df6e5356d3bea4913123d835c353f002774",
+      "matchesGate": true
+    },
+    {
+      "path": "server/runtime/intel-observation.ts",
+      "sha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019",
+      "matchesGate": true
+    },
+    {
+      "path": "server/intel/sources/web-list.ts",
+      "sha256": "86f893311fb3c3d8c65256d1e6709acd547658b8cd3e71499900229ec26f75b5",
+      "matchesGate": true
+    },
+    {
+      "path": "server/intel/sources/config-keys.ts",
+      "sha256": "2efbb61e1ab1e19bb349853a65a7b79bd080ab073420c28a645e56f95a8be620",
+      "matchesGate": true
+    },
+    {
+      "path": "server/intel/sources/web-list-english-12h.test.ts",
+      "sha256": "c37a3b958a769a415b0775ce997198e1a42819c6652724e3f623306d02eff5b9",
+      "matchesGate": true
+    },
+    {
+      "path": "server/intel/sources/html-index-candidates.ts",
+      "sha256": "64e674df2a6acd2f0cb6b3a51387a099c1052413de0ad984f481236533de2b3c",
+      "matchesGate": true
+    },
+    {
+      "path": "server/services/article-fetch-security.ts",
+      "sha256": "967b106148c5d2dfcd6388b4602a4b9055d3732a9fa4a49d32c69aabb310d2a4",
+      "matchesGate": true
+    },
+    {
+      "path": "server/intel/manual-checklist.ts",
+      "sha256": "b1802fe28a487ef9edecc95a976cee706f7903f4d24eeb43cf037d133a589329",
+      "matchesGate": true
+    },
+    {
+      "path": "server/services/bmkg-port-forecast.ts",
+      "sha256": "e179c8987787ceca2d2525a1ebbfc3586f3732838612d63fb4e1255eadb37083",
+      "matchesGate": true
+    },
+    {
+      "path": "server/services/bmkg-port-forecast.test.ts",
+      "sha256": "03dfba1cd9e3aad37c6067fdbbb55b9f31859bc9e0a3ed7cfd1c2436637a0d1c",
+      "matchesGate": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "install",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\bmkg-offline-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "install",
+        "--frozen-lockfile",
+        "--offline"
+      ],
+      "startedAt": "2026-10-20T03:52:39.305Z",
+      "finishedAt": "2026-10-20T03:52:48.410Z",
+      "rawExit": 0,
+      "logs": [
+        {
+          "path": ".tmp/bmkg-offline-parser-20261020/install.stdout.log",
+          "sha256": "53b9fe4ed880526bb818dcfc4f1ca86e3d0d6f9e6e8c58ef3b37515254d5e177"
+        },
+        {
+          "path": ".tmp/bmkg-offline-parser-20261020/install.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "name": "build",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\bmkg-offline-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "build"
+      ],
+      "startedAt": "2026-10-20T03:52:48.411Z",
+      "finishedAt": "2026-10-20T03:53:12.107Z",
+      "rawExit": 0,
+      "logs": [
+        {
+          "path": ".tmp/bmkg-offline-parser-20261020/build.stdout.log",
+          "sha256": "48d7664c30f8e0e24f21468a7057760d8c539b3b4bb8e5c661903fdbf7b4121e"
+        },
+        {
+          "path": ".tmp/bmkg-offline-parser-20261020/build.stderr.log",
+          "sha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658"
+        }
+      ]
+    },
+    {
+      "name": "typecheck",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\bmkg-offline-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "typecheck"
+      ],
+      "startedAt": "2026-10-20T03:53:12.107Z",
+      "finishedAt": "2026-10-20T03:53:21.513Z",
+      "rawExit": 0,
+      "logs": [
+        {
+          "path": ".tmp/bmkg-offline-parser-20261020/typecheck.stdout.log",
+          "sha256": "43e5972169fdefd5d15830fd39cf9c60080cb3119dafba54578e8c68cd86ff0d"
+        },
+        {
+          "path": ".tmp/bmkg-offline-parser-20261020/typecheck.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "name": "lint",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\bmkg-offline-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "lint"
+      ],
+      "startedAt": "2026-10-20T03:53:21.513Z",
+      "finishedAt": "2026-10-20T03:54:02.847Z",
+      "rawExit": 0,
+      "logs": [
+        {
+          "path": ".tmp/bmkg-offline-parser-20261020/lint.stdout.log",
+          "sha256": "3e387bb530bdbf10f995f1d4c4377265b0147bc809fdf66483e894f3ddaa5a6b"
+        },
+        {
+          "path": ".tmp/bmkg-offline-parser-20261020/lint.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "name": "targeted",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\bmkg-offline-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "exec",
+        "vitest",
+        "run",
+        "-c",
+        "vitest.config.ts",
+        "server/services/bmkg-port-forecast.test.ts"
+      ],
+      "startedAt": "2026-10-20T03:54:02.848Z",
+      "finishedAt": "2026-10-20T03:54:04.026Z",
+      "rawExit": 0,
+      "logs": [
+        {
+          "path": ".tmp/bmkg-offline-parser-20261020/targeted.stdout.log",
+          "sha256": "4add39f293822c1e7734ed8f18ba14d0118d2eaa4ca2f8f8d6396f57232af3a8"
+        },
+        {
+          "path": ".tmp/bmkg-offline-parser-20261020/targeted.stderr.log",
+          "sha256": "407e4ae447cf49a4204a2cdb18de5db12f2b48e036021105707390f75487a324"
+        }
+      ]
+    },
+    {
+      "name": "vitest",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\bmkg-offline-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "exec",
+        "vitest",
+        "run",
+        "-c",
+        "vitest.config.ts"
+      ],
+      "startedAt": "2026-10-20T03:54:04.027Z",
+      "finishedAt": "2026-10-20T03:54:19.076Z",
+      "rawExit": 0,
+      "logs": [
+        {
+          "path": ".tmp/bmkg-offline-parser-20261020/vitest.stdout.log",
+          "sha256": "6547d18217102d1f4695507854755d5c6e1c7b14709a20757dea5fd6426db598"
+        },
+        {
+          "path": ".tmp/bmkg-offline-parser-20261020/vitest.stderr.log",
+          "sha256": "c671a335f8aed372a9b6cf10182134e4b14f2215959fc34452029d9389e00276"
+        }
+      ]
+    }
+  ],
+  "tests": {
+    "targetedPassed": 30,
+    "fullPassed": 1688,
+    "fullSkipped": 3,
+    "fullFiles": 144,
+    "originalReplayPassed": 1
+  },
+  "original": {
+    "path": ".tmp/id-w02-xj001-20261020/response.bin",
+    "bytes": 11259,
+    "sha256": "3af2b483aeb5623312ae86fbef5d63ca31ec6653e10b2ac24bfaa6213da98ba1",
+    "ignored": true,
+    "wholePayloadPassedThroughActualParser": true
+  },
+  "replay": {
+    "points": 41,
+    "numericFields": 328,
+    "textFields": 164,
+    "projections": 164,
+    "timeMatches": 41,
+    "mismatches": 0,
+    "missing": 0,
+    "nulls": 0,
+    "uninterpreted": 0,
+    "originalRejected": 0,
+    "controlledMissing": 1,
+    "controlledNull": 1,
+    "controlledRefusal": {
+      "code": "invalid_field_type",
+      "path": "$.forecast_day1[0].wind_speed"
+    },
+    "parserSha256": "e179c8987787ceca2d2525a1ebbfc3586f3732838612d63fb4e1255eadb37083"
+  },
+  "countersThisSlice": {
+    "sourceDNS": 0,
+    "sourceHTTP": 0,
+    "DBWrites": 0,
+    "configurationWrites": 0,
+    "serviceOrPluginSwitches": 0
+  },
+  "preservation": {
+    "previousSource": [
+      {
+        "path": "package.json",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/tsx-alias-loader.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-collect-job.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-environment.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-options.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-worker.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation-network.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation-network.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/web-list.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/config-keys.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/web-list-english-12h.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/html-index-candidates.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/services/article-fetch-security.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/manual-checklist.ts",
+        "unchanged": true
+      }
+    ],
+    "protectedFiles": [
+      {
+        "path": ".data/calendarific-double-year-verification-20260908-b.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/calendarific-double-year-verification-20260908.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/p7-final-seal-20260904.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/provider-secrets.json",
+        "unchanged": true
+      },
+      {
+        "path": ".data/shipping-hot-v3-browser.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-https-abb1b99-20261019/run/.data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-manual-6087a16/run/.data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/dist/output/server/index.mjs",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/r2-four-reapplied-2026-10-15-private/MY-L01.response.bin",
+        "unchanged": true
+      },
+      {
+        "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "unchanged": true
+      },
+      {
+        "path": ".gitignore",
+        "unchanged": true
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "unchanged": true
+      },
+      {
+        "path": "AGENTS.md",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/content.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/manifest.json",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/popup.html",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/worker.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-aVjAIvTt.css",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-DHU7aOx9.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/defuddle-MIT.txt",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/obsidian-clipper-MIT.txt",
+        "unchanged": true
+      }
+    ],
+    "headUnchanged": true,
+    "stagedEmpty": true
+  },
+  "qualification": {
+    "type": "proposal_only_pending_parent_review",
+    "applied": false,
+    "sourceId": "ID-W02",
+    "currentR2_4": "NOT_RUN",
+    "proposedR2_4": "OK_LIMITED_TO_RECORDED_PRODUCT_AND_OFFLINE_PARSE",
+    "basis": "Genuine expected XJ001 response plus complete original 41-point parsing, normalization and field verification; no new database or Provider-registration condition.",
+    "currentPublic": {
+      "numerator": 25,
+      "denominator": 39
+    },
+    "possibleAfterReview": {
+      "numerator": 26,
+      "denominator": 39,
+      "minimum": 32,
+      "shortfall": 6
+    },
+    "informationReplay": {
+      "numerator": 24,
+      "denominator": 34,
+      "unchanged": true,
+      "ID_W02": "N/A_NUMERIC"
+    },
+    "numericEvidence": {
+      "denominator": 5,
+      "historical": {
+        "count": 3,
+        "type": "limited_normalized_diagnostics"
+      },
+      "added": {
+        "count": 1,
+        "source": "ID-W02",
+        "type": "complete_original_offline_parse",
+        "points": 41
+      },
+      "productionIntegrationRate": "NOT_CLAIMED"
+    },
+    "excludes": [
+      "current uptime or continuous availability",
+      "database integration",
+      "Provider activation",
+      "seven-day hourly coverage",
+      "24h/R3"
+    ],
+    "unchangedAuthoritativeMatrix": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json"
+  },
+  "warnings": [
+    "Existing build chunk-size warning",
+    "Existing Browserslist data age warning",
+    "Git global ignore read permission warning; no host config changes",
+    "Initial source lint failure retained and fixed before final gate"
+  ],
+  "initialFailureLog": ".tmp/bmkg-offline-parser-20261020/source-lint-fix.log",
+  "finalAudit": {
+    "status": "passed_local_closeout_parent_review_pending",
+    "at": "2026-10-20T03:59:49.021Z",
+    "inventory": {
+      "skill": "e0/neat-freak",
+      "path": ".tmp/bmkg-offline-parser-20261020/neat-inventory.log",
+      "rawExit": 0,
+      "sha256": "ef80ede3340d26969fef8bbe5dc57b3df76fc2b7f0bcbb3a466caaa29018f493",
+      "markdownEntries": 8020,
+      "worktrees": 1
+    },
+    "docsLint": {
+      "path": ".tmp/bmkg-offline-parser-20261020/docs-lint.log",
+      "rawExit": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "links": {
+      "checked": 125,
+      "broken": []
+    },
+    "documentation": [
+      {
+        "path": "docs/status.md",
+        "sha256": "954761704b03ecacdf8cd5114b448cf83686649cc2b5bf8df777161defcb9b57"
+      },
+      {
+        "path": "docs/evidence/r2-id-w02-xj001-2026-10-20/integration-design.md",
+        "sha256": "a7f3fb4fe0d028ebb2818ada75a2b3b7ed1b1c0fd0ebb209341f451b5bbf095c"
+      },
+      {
+        "path": "docs/evidence/r2-id-w02-offline-parser-2026-10-20/report.md",
+        "sha256": "c9fed5c322e6a98d454ecb405a382ea5808598547891ddeb69eb2dd2099074c0"
+      },
+      {
+        "path": "docs/evidence/r2-id-w02-offline-parser-2026-10-20/closeout.md",
+        "sha256": "87a6ab8adab30a46c45756849de109cab81b165b6369c1330c5e4e698fd0114d"
+      }
+    ],
+    "protectedUnchanged": 22,
+    "previousSourceUnchanged": 18,
+    "headUnchanged": true,
+    "stagedEmpty": true,
+    "statusEntries": 36,
+    "gitStatusLog": ".tmp/bmkg-offline-parser-20261020/final-git-status.log",
+    "projectRules": {
+      "path": "AGENTS.md",
+      "bytes": 28170,
+      "unchanged": true,
+      "approximateDefaultCodexBudgetFraction": 0.85968017578125
+    },
+    "generatedMemory": "read-only; no edits",
+    "secrets": "opaque protected hash checks only; no decoded values",
+    "cleanup": "not authorized; all raw evidence, failures and isolated clones preserved",
+    "pending": [
+      "parent independent review and qualification decision",
+      "runtime integration/continuous availability outside this slice",
+      "R2 GUI/S7 and 24h not accepted by this slice"
+    ],
+    "noArchitectureChange": true,
+    "noADRNeededForPureParser": true
+  }
+}

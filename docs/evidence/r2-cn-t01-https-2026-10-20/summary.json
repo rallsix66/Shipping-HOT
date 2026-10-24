@@ -1,0 +1,385 @@
+{
+  "at": "2026-10-20T02:52:50.576Z",
+  "root": "D:\\try one\\Shipping HOT",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "branch": "codex/shipping-hot-r2",
+  "target": "https://www.mofcom.gov.cn/zcfb/index.html",
+  "originalCatalogURL": "http://www.mofcom.gov.cn/zcfb/index.html",
+  "sameProductBasis": {
+    "authority": "current_parent_delegation_official_web_research_2026-10-20",
+    "sameHost": "www.mofcom.gov.cn",
+    "samePath": "/zcfb/index.html",
+    "formalHTTPS": "https://www.mofcom.gov.cn/zcfb/index.html",
+    "notLocalFetchProof": true,
+    "notNarrowerForeignTradeColumn": true
+  },
+  "preflight": {
+    "at": "2026-10-20T02:51:00.792Z",
+    "exactTarget": "https://www.mofcom.gov.cn/zcfb/index.html",
+    "searchRawExit": 1,
+    "existingCompletedExactHTTPSRecords": [],
+    "excluded": "dependencies/builds/git/preimage_snapshots/current_task_records",
+    "processCheck": {
+      "method": "read-only Get-CimInstance Win32_Process",
+      "onlyExistingProjectNode": {
+        "pid": 33364,
+        "entry": ".tmp/clipper-private-abb1b99/dist/output/server/index.mjs"
+      },
+      "sameTargetRequestProcessObserved": false
+    },
+    "historicalHTTP": "CN-T01 had no physical HTTP dispatch per parent and stored qualification matrix",
+    "parentOfficialWebResearch": "same HTTPS host/path publicly readable; not local execution evidence"
+  },
+  "capture": {
+    "target": "https://www.mofcom.gov.cn/zcfb/index.html",
+    "startedAt": "2026-10-20T02:51:16.524Z",
+    "systemDNSCalls": 1,
+    "reservedPhysicalHTTP": 0,
+    "transportInvocations": 0,
+    "addresses": [
+      {
+        "address": "198.18.0.5",
+        "family": 4,
+        "blocked": true
+      }
+    ],
+    "response": null,
+    "transportError": null,
+    "finishedAt": "2026-10-20T02:51:16.533Z",
+    "result": {
+      "ok": false,
+      "code": "blocked_address",
+      "message": "Resolved address is not a public address: 198.18.0.5"
+    },
+    "retryAllowed": false,
+    "productionEnabled": false,
+    "live24h": "NOT_RUN",
+    "paidCalls": 0,
+    "detailRequests": 0,
+    "rawRedistributed": false
+  },
+  "command": {
+    "cwd": "D:\\try one\\Shipping HOT",
+    "args": [
+      "node",
+      "--import",
+      "tsx/esm",
+      "--experimental-loader",
+      "./scripts/tsx-alias-loader.mjs",
+      ".tmp/cn-t01-https-20261020/capture.ts"
+    ],
+    "rawExit": 2,
+    "stdoutStderr": {
+      "path": ".tmp/cn-t01-https-20261020/capture.log",
+      "sha256": "da51c5ac70195accf221c40fe72546d0979243aa3893e911e529e57ca3083b63"
+    }
+  },
+  "qualificationProposal": {
+    "catalogId": "CN-T01",
+    "originalAvailability": "NOT_RUN",
+    "proposedAvailability": "BLOCKED",
+    "fields": "NOT_RUN",
+    "countedOK": false,
+    "countedFieldPass": false,
+    "reason": "Official same-product HTTPS basis resolved; local system DNS returned198.18.0.5 blocked before transport. No origin/TLS/HTTP response or raw page. Parent review pending; existing qualification matrix not rewritten."
+  },
+  "coverageUnchanged": {
+    "publicOK": 25,
+    "publicDenominator": 39,
+    "requiredMinimum": 32,
+    "informationPass": 24,
+    "informationDenominator": 34,
+    "historicalNumeric": "3/5"
+  },
+  "rawFileExists": false,
+  "productDiff": "EMPTY_FOR_THIS_SLICE",
+  "productTests": "NOT_RUN_NO_PRODUCT_CHANGE_OR_POSITIVE_PAGE",
+  "isolatedReplay": "BLOCKED_NO_SOURCE_BYTES",
+  "fullGate": "NOT_RUN_FOR_THIS_SLICE; prior MY-L01 execution evidence inherited only, not reexecuted",
+  "protectedFiles": [
+    {
+      "path": ".data/calendarific-double-year-verification-20260908-b.sqlite3",
+      "sha256": "4029ff8075eb78dfa1a806d5d24f443514a12f8d9d15d38d92aef06a7e9a7c3d",
+      "bytes": 991232,
+      "afterSha256": "4029ff8075eb78dfa1a806d5d24f443514a12f8d9d15d38d92aef06a7e9a7c3d",
+      "unchanged": true
+    },
+    {
+      "path": ".data/calendarific-double-year-verification-20260908.sqlite3",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "afterSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unchanged": true
+    },
+    {
+      "path": ".data/p7-final-seal-20260904.sqlite3",
+      "sha256": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+      "bytes": 978944,
+      "afterSha256": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+      "unchanged": true
+    },
+    {
+      "path": ".data/provider-secrets.json",
+      "sha256": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1",
+      "bytes": 56,
+      "afterSha256": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1",
+      "unchanged": true
+    },
+    {
+      "path": ".data/shipping-hot-v3-browser.sqlite3",
+      "sha256": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+      "bytes": 1572864,
+      "afterSha256": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+      "unchanged": true
+    },
+    {
+      "path": ".data/shipping-hot-v3.sqlite3",
+      "sha256": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+      "bytes": 8425472,
+      "afterSha256": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-https-abb1b99-20261019/run/.data/shipping-hot-v3.sqlite3",
+      "sha256": "023ef5c603ac2ff8282149ad0cd281911d96dbbffbe7ead0cd64dafeb370a025",
+      "bytes": 667648,
+      "afterSha256": "023ef5c603ac2ff8282149ad0cd281911d96dbbffbe7ead0cd64dafeb370a025",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-manual-6087a16/run/.data/shipping-hot-v3.sqlite3",
+      "sha256": "c4292b3c18076d38838b1533d51b1f99c03b59b8d42a1de3818338eec4eb5d91",
+      "bytes": 667648,
+      "afterSha256": "c4292b3c18076d38838b1533d51b1f99c03b59b8d42a1de3818338eec4eb5d91",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/dist/output/server/index.mjs",
+      "sha256": "c55b32d9d6a69e31ec6e939f9791be3f2c62704c9704c6466e21af98e3d7c763",
+      "bytes": 1919,
+      "afterSha256": "c55b32d9d6a69e31ec6e939f9791be3f2c62704c9704c6466e21af98e3d7c763",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/r2-four-reapplied-2026-10-15-private/MY-L01.response.bin",
+      "sha256": "9e9787d4cf60f454824a0529787b1d345a2814ac45f91a957ff1d8b57c1cb310",
+      "bytes": 124208,
+      "afterSha256": "9e9787d4cf60f454824a0529787b1d345a2814ac45f91a957ff1d8b57c1cb310",
+      "unchanged": true
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+      "sha256": "d7b70b273454925249610db514b21064551b130c6a5061398f9b457419d584eb",
+      "bytes": 318540,
+      "afterSha256": "d7b70b273454925249610db514b21064551b130c6a5061398f9b457419d584eb",
+      "unchanged": true
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "5cb2122a9e9c62ceee2253251feeeb39bdae11fc8a0796dc33e8dfbfd875d67e",
+      "bytes": 164,
+      "afterSha256": "5cb2122a9e9c62ceee2253251feeeb39bdae11fc8a0796dc33e8dfbfd875d67e",
+      "unchanged": true
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "68638a3267a597e7d4e16d336f5f56c8fca2ff657700b97605c0d2847dfb324c",
+      "bytes": 458937,
+      "afterSha256": "68638a3267a597e7d4e16d336f5f56c8fca2ff657700b97605c0d2847dfb324c",
+      "unchanged": true
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "0729f86b64546824c66b248bb6679d120b0e18245fabffb3eb61c9f657c623d7",
+      "bytes": 28170,
+      "afterSha256": "0729f86b64546824c66b248bb6679d120b0e18245fabffb3eb61c9f657c623d7",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/content.js",
+      "sha256": "12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630",
+      "bytes": 328094,
+      "afterSha256": "12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/manifest.json",
+      "sha256": "8d2cc507bd632cbe95a740aee6a2f7801e3c07c079a787aa77b34dcbddae67e8",
+      "bytes": 1011,
+      "afterSha256": "8d2cc507bd632cbe95a740aee6a2f7801e3c07c079a787aa77b34dcbddae67e8",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/popup.html",
+      "sha256": "2d2bf242cf996d12ab286226bc55cf5c6668c3dc1d2d80054b06d80f4bad86b9",
+      "bytes": 1015,
+      "afterSha256": "2d2bf242cf996d12ab286226bc55cf5c6668c3dc1d2d80054b06d80f4bad86b9",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/worker.js",
+      "sha256": "cd60d4fd354e043235a57ca67d808b6e008bac9369fab6ce436d5d7ac3291638",
+      "bytes": 5639,
+      "afterSha256": "cd60d4fd354e043235a57ca67d808b6e008bac9369fab6ce436d5d7ac3291638",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-aVjAIvTt.css",
+      "sha256": "8a2411b56c91c16e429d97f0d5fe6de4556b718846ca7997d098bb3885dd68db",
+      "bytes": 465,
+      "afterSha256": "8a2411b56c91c16e429d97f0d5fe6de4556b718846ca7997d098bb3885dd68db",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-DHU7aOx9.js",
+      "sha256": "058f037b30b5b2c1953d2c196afa69906c5c40a487206178efb881e1910c8e56",
+      "bytes": 6280,
+      "afterSha256": "058f037b30b5b2c1953d2c196afa69906c5c40a487206178efb881e1910c8e56",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/defuddle-MIT.txt",
+      "sha256": "c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092",
+      "bytes": 1076,
+      "afterSha256": "c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/obsidian-clipper-MIT.txt",
+      "sha256": "3ca04f8f046005103b08302723521f546605a34a269d5a867a82d200dfd9c0d7",
+      "bytes": 1088,
+      "afterSha256": "3ca04f8f046005103b08302723521f546605a34a269d5a867a82d200dfd9c0d7",
+      "unchanged": true
+    }
+  ],
+  "unchangedCode": [
+    {
+      "path": "package.json",
+      "sha256": "32716b71ba5f3d807d141fb41373eacbedebc99fac727514dd59abb56e295196",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/tsx-alias-loader.mjs",
+      "sha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-collect-job.ts",
+      "sha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-environment.ts",
+      "sha256": "1100f875229b901f5a8b5fc32108afc593f4671f880461009d4e880142aa1d23",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-options.ts",
+      "sha256": "09b5e5f5b68879bf835d73b7b5b4b9c0064a09ca17049d0f3300c8900c53f5e8",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-worker.ts",
+      "sha256": "47dbb370b05c717feed2928a0afaf4236eb8fec7186bc5ae514b7ac4da4870f7",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.test.ts",
+      "sha256": "3e442d363e6a3b766199f102c6c47a18584a2b847f95497763086c5507a97066",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.ts",
+      "sha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.test.ts",
+      "sha256": "361168e5fb7339bde62a69f85d75400218e290967a88ae03f30b875ff3739e75",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.ts",
+      "sha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation.test.ts",
+      "sha256": "24212377dbefe7fbc6dbdf4286e19df6e5356d3bea4913123d835c353f002774",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation.ts",
+      "sha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/web-list.ts",
+      "sha256": "86f893311fb3c3d8c65256d1e6709acd547658b8cd3e71499900229ec26f75b5",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/config-keys.ts",
+      "sha256": "2efbb61e1ab1e19bb349853a65a7b79bd080ab073420c28a645e56f95a8be620",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/web-list-english-12h.test.ts",
+      "sha256": "c37a3b958a769a415b0775ce997198e1a42819c6652724e3f623306d02eff5b9",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/html-index-candidates.ts",
+      "sha256": "64e674df2a6acd2f0cb6b3a51387a099c1052413de0ad984f481236533de2b3c",
+      "unchanged": true
+    },
+    {
+      "path": "server/services/article-fetch-security.ts",
+      "sha256": "967b106148c5d2dfcd6388b4602a4b9055d3732a9fa4a49d32c69aabb310d2a4",
+      "unchanged": true
+    }
+  ],
+  "notRun": [
+    "retry",
+    "alternate_fetch_tool",
+    "network_or_DNS_or_CA_change",
+    "BMKG",
+    "browser_control",
+    "24h",
+    "R3_models_paid",
+    "schema_source_activation",
+    "service_plugin_change",
+    "commit_push_PR_merge_deploy"
+  ],
+  "finalAudit": {
+    "at": "2026-10-20T02:55:40.837Z",
+    "head": "40629587e22d8932df105962ec214530e4054414",
+    "branch": "codex/shipping-hot-r2",
+    "productDiff": "EMPTY_THIS_SLICE",
+    "unchangedPriorSourceFiles": 17,
+    "protectedFilesUnchanged": 22,
+    "docsLintRawExit": 0,
+    "inventoryRawExit": 0,
+    "markdownInventoryCount": 7532,
+    "invalidLinks": [],
+    "stagedFiles": [],
+    "status": "M .gitignore\n M docs/architecture.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/pilot-24h-proposal.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/report.md\n M docs/handoffs/r2-next-execution-2026-10-15.md\n M docs/intel-source-catalog.md\n M docs/status.md\n M package.json\n M scripts/tsx-alias-loader.mjs\n M server/intel/sources/config-keys.ts\n M server/intel/sources/web-list.ts\n M server/runtime/intel-collect-job.ts\n?? docs/evidence/r2-closeout-offline-2026-10-20/\n?? docs/evidence/r2-cn-t01-https-2026-10-20/\n?? docs/evidence/r2-observation-env-repair-2026-10-19/\n?? docs/evidence/r2-observation-launcher-offline-2026-10-19/\n?? scripts/r2-intel-observe-environment.ts\n?? scripts/r2-intel-observe-options.ts\n?? scripts/r2-intel-observe-worker.ts\n?? scripts/r2-intel-observe.test.ts\n?? scripts/r2-intel-observe.ts\n?? server/intel/sources/web-list-english-12h.test.ts\n?? server/runtime/intel-observation-network.test.ts\n?? server/runtime/intel-observation-network.ts\n?? server/runtime/intel-observation.test.ts\n?? server/runtime/intel-observation.ts",
+    "modifiedDocumentation": [
+      "docs/status.md",
+      "docs/intel-source-catalog.md",
+      "docs/evidence/r2-closeout-offline-2026-10-20/remaining-matrix.md"
+    ],
+    "newEvidenceFiles": [
+      "capture-result.json",
+      "closeout.md",
+      "preflight.json",
+      "report.md",
+      "summary.json"
+    ],
+    "previousMatrixBodyUnchanged": true,
+    "cleanup": "none",
+    "source": "current_task_only",
+    "path": ".tmp/cn-t01-https-20261020/final-audit.json",
+    "sha256": "620f81b76b0a67c1a5ec89fb39434e49c92bc57b110fc9f219ebb45c743aa989"
+  }
+}

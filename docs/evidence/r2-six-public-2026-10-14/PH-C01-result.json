@@ -1,0 +1,11 @@
+{
+  "id": "PH-C01",
+  "url": "https://customs.gov.ph/category/media-releases/",
+  "startedAt": "2026-10-14T07:16:47.634Z",
+  "status": "BLOCKED",
+  "httpRequests": 0,
+  "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+  "reason": "blocked_address",
+  "parse": "NOT_RUN",
+  "finishedAt": "2026-10-14T07:16:47.635Z"
+}

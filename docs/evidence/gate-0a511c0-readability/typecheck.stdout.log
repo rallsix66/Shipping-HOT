@@ -1,0 +1,9 @@
+
+> shipping-hot@0.0.41 typecheck D:\try one\Shipping HOT\.tmp\readability-build-20261015
+> tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.app.json
+
+server/providers/article-extractor.ts(183,7): error TS2322: Type 'Cheerio<AnyNode>' is not assignable to type 'Cheerio<Element>'.
+  Type 'AnyNode' is not assignable to type 'Element'.
+    Type 'Document' is missing the following properties from type 'Element': name, attribs, tagName, attributes
+server/providers/article-extractor.ts(196,15): error TS2339: Property 'document' does not exist on type 'Window & typeof globalThis'.
+ ELIFECYCLE  Command failed with exit code 2.

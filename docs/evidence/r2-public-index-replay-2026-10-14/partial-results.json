@@ -1,0 +1,514 @@
+[
+  {
+    "id": "CN-T02",
+    "url": "https://szs.mof.gov.cn/zhengcefabu/",
+    "enabled": false,
+    "persistence": "disallowed",
+    "config": {
+      "listSelector": ".zzright .listBox > ul.liBox",
+      "itemSelector": "li",
+      "linkSelector": "a[href]",
+      "titleSelector": "a[href]",
+      "publishedAtSelector": "span",
+      "calendar": "gregorian",
+      "allowUrlPrefixes": [
+        "https://szs.mof.gov.cn/zhengcefabu"
+      ],
+      "dateRuleBasis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone."
+    },
+    "startedAt": "2026-10-14T08:19:35.017Z",
+    "httpRequests": 0,
+    "material": "complete private real response bytes, not synthetic or sanitized skeleton",
+    "rawHtmlCommitted": false,
+    "fetchedRawSha256": "934dfb210e414105867c99db2907ebcf98c175b643a3bc74157f2d9c1679df04",
+    "rawBytes": 12222,
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "meta",
+      "declarations": [
+        {
+          "source": "meta",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        }
+      ],
+      "conflict": false,
+      "byteLength": 12222
+    },
+    "adapterCount": 10,
+    "dateRules": [
+      "ymd"
+    ],
+    "samples": [
+      {
+        "titleExcerpt": "关于调整部分产品出口退税政策的公告",
+        "canonicalUrl": "https://szs.mof.gov.cn/zhengcefabu/202610/t20261012_4002592.htm",
+        "dateEvidence": {
+          "raw": "2026-10-12",
+          "rule": "ymd",
+          "basis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-12",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "关于发布《境内单位代扣代缴自然人增值税管理办法》的公告",
+        "canonicalUrl": "https://szs.mof.gov.cn/zhengcefabu/202609/t20260904_3996707.htm",
+        "dateEvidence": {
+          "raw": "2026-09-04",
+          "rule": "ymd",
+          "basis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-09-04",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "关于外籍个人股息红利个人所得税政策有关事项的公告",
+        "canonicalUrl": "https://szs.mof.gov.cn/zhengcefabu/202609/t20260901_3996442.htm",
+        "dateEvidence": {
+          "raw": "2026-09-01",
+          "rule": "ymd",
+          "basis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-09-01",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "关于明确非应税交易等增值税有关事项的公告",
+        "canonicalUrl": "https://szs.mof.gov.cn/zhengcefabu/202608/t20260828_3996295.htm",
+        "dateEvidence": {
+          "raw": "2026-08-28",
+          "rule": "ymd",
+          "basis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-08-28",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "关于规范转让上市公司限售股个人所得税政策的公告",
+        "canonicalUrl": "https://szs.mof.gov.cn/zhengcefabu/202608/t20260828_3996290.htm",
+        "dateEvidence": {
+          "raw": "2026-08-28",
+          "rule": "ymd",
+          "basis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-08-28",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "关于集成电路企业、工业母机企业非货币性资产交换企业所得税政策的公告",
+        "canonicalUrl": "https://szs.mof.gov.cn/zhengcefabu/202608/t20260814_3995441.htm",
+        "dateEvidence": {
+          "raw": "2026-08-14",
+          "rule": "ymd",
+          "basis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-08-14",
+          "publishedAt": null
+        }
+      }
+    ],
+    "first": {
+      "status": "ok_items",
+      "runId": "f945561e-828a-4161-ae1f-2159e2c0b163",
+      "itemsSeen": 10,
+      "itemsNew": 10,
+      "itemsRevised": 0
+    },
+    "firstCounts": {
+      "items": 10,
+      "versions": 10
+    },
+    "repeat": {
+      "status": "ok_items",
+      "runId": "c4c45927-38b5-43c8-baf2-155d1959efb9",
+      "itemsSeen": 10,
+      "itemsNew": 0,
+      "itemsRevised": 0
+    },
+    "repeatCounts": {
+      "items": 10,
+      "versions": 10
+    },
+    "injectedTransports": 2,
+    "status": "OFFLINE_REPLAY_ONLY_PASS",
+    "reopen": {
+      "readOnly": true,
+      "rows": 10,
+      "versions": 10,
+      "fullTitleUrlDateEvidenceCompared": true,
+      "mismatches": 0,
+      "dayPrecision": 10,
+      "missingTimezone": 10,
+      "nullPublicationInstants": 10
+    },
+    "finishedAt": "2026-10-14T08:19:35.198Z"
+  },
+  {
+    "id": "PH-C01",
+    "url": "https://customs.gov.ph/category/media-releases/",
+    "enabled": false,
+    "persistence": "disallowed",
+    "config": {
+      "listSelector": ".uk-child-width-1-1.uk-grid-match",
+      "itemSelector": ".el-item.uk-card",
+      "linkSelector": "h3.el-title > a[href]",
+      "titleSelector": "h3.el-title > a[href]",
+      "publishedAtSelector": ".el-meta",
+      "calendar": "gregorian",
+      "dateFormat": "english_month_name",
+      "dateRuleBasis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone."
+    },
+    "startedAt": "2026-10-14T08:19:35.199Z",
+    "httpRequests": 0,
+    "material": "complete private real response bytes, not synthetic or sanitized skeleton",
+    "rawHtmlCommitted": false,
+    "fetchedRawSha256": "9d56a123e75dd0d3fa7523da3d410125a5c71f23e42dbacd012c50d31627a6c6",
+    "rawBytes": 166897,
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "http",
+      "declarations": [
+        {
+          "source": "http",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        },
+        {
+          "source": "meta",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        }
+      ],
+      "conflict": false,
+      "byteLength": 166897
+    },
+    "adapterCount": 11,
+    "dateRules": [
+      "configured_english_month_name"
+    ],
+    "samples": [
+      {
+        "titleExcerpt": "BOC, Pinasalamatan ang PH Navy sa Mahigit ₱4-Bilyong Nasamsam na Kontrabando sa Mindanao",
+        "canonicalUrl": "https://customs.gov.ph/boc-pinasalamatan-ang-ph-navy-sa-mahigit-%e2%82%b14-bilyong-nasamsam-na-kontrabando-sa-mindanao",
+        "dateEvidence": {
+          "raw": "October 14, 2026",
+          "rule": "configured_english_month_name",
+          "basis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-14",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "Nepomuceno: “The BOC is your Partner in Growth”",
+        "canonicalUrl": "https://customs.gov.ph/nepomuceno-the-boc-is-your-partner-in-growth",
+        "dateEvidence": {
+          "raw": "October 14, 2026",
+          "rule": "configured_english_month_name",
+          "basis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-14",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "BOC, DA, at Navy, Kinilala ni Sen. Kiko Dahil sa Matagumpay na Paghuli ng ₱700M na Bigas!",
+        "canonicalUrl": "https://customs.gov.ph/boc-da-at-navy-kinilala-ni-sen-kiko-dahil-sa-matagumpay-na-paghuli-ng-%e2%82%b1700m-na-bigas",
+        "dateEvidence": {
+          "raw": "October 13, 2026",
+          "rule": "configured_english_month_name",
+          "basis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-13",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "₱43.7-M Droga, Nasabat ng BOC-NAIA sa 8 Abandonadong Parcel!",
+        "canonicalUrl": "https://customs.gov.ph/%e2%82%b143-7-m-droga-nasabat-ng-boc-naia-sa-8-abandonadong-parcel",
+        "dateEvidence": {
+          "raw": "October 12, 2026",
+          "rule": "configured_english_month_name",
+          "basis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-12",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "BOC, Iba’t Ibang Ahensya Nagkaisa para Sugpuin ang Smuggling",
+        "canonicalUrl": "https://customs.gov.ph/boc-ibat-ibang-ahensya-nagkaisa-para-sugpuin-ang-smuggling",
+        "dateEvidence": {
+          "raw": "October 10, 2026",
+          "rule": "configured_english_month_name",
+          "basis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-10",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "₱29.17-M Halaga Ng Sigarilyo, Bistado Sa Shipment Na Dineklarang Scrap Metal",
+        "canonicalUrl": "https://customs.gov.ph/%e2%82%b129-17-m-halaga-ng-sigarilyo-bistado-sa-shipment-na-dineklarang-scrap-metal",
+        "dateEvidence": {
+          "raw": "October 9, 2026",
+          "rule": "configured_english_month_name",
+          "basis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-09",
+          "publishedAt": null
+        }
+      }
+    ],
+    "first": {
+      "status": "ok_items",
+      "runId": "a9e28198-8fb9-4bc5-af09-b8329e763166",
+      "itemsSeen": 11,
+      "itemsNew": 11,
+      "itemsRevised": 0
+    },
+    "firstCounts": {
+      "items": 11,
+      "versions": 11
+    },
+    "repeat": {
+      "status": "ok_items",
+      "runId": "1c4e71e1-4d49-487b-aaa4-77301f4f2077",
+      "itemsSeen": 11,
+      "itemsNew": 0,
+      "itemsRevised": 0
+    },
+    "repeatCounts": {
+      "items": 11,
+      "versions": 11
+    },
+    "injectedTransports": 2,
+    "status": "OFFLINE_REPLAY_ONLY_PASS",
+    "reopen": {
+      "readOnly": true,
+      "rows": 11,
+      "versions": 11,
+      "fullTitleUrlDateEvidenceCompared": true,
+      "mismatches": 0,
+      "dayPrecision": 11,
+      "missingTimezone": 11,
+      "nullPublicationInstants": 11
+    },
+    "finishedAt": "2026-10-14T08:19:35.407Z"
+  },
+  {
+    "id": "CN-P01",
+    "url": "https://www.gd.msa.gov.cn/",
+    "enabled": false,
+    "persistence": "disallowed",
+    "config": {
+      "listSelector": ".index-tab-box:has(.index-tabs > li:first-child > a[href='/html/gdmsa/xxgk/gkml/tzgg/index.html']) .index-tab-con > ul.index-tab-item:first-child",
+      "itemSelector": "li",
+      "linkSelector": "a[href]",
+      "titleSelector": "a[href]",
+      "publishedAtSelector": "span.index-tab-date",
+      "calendar": "gregorian",
+      "allowUrlPrefixes": [
+        "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article"
+      ],
+      "dateRuleBasis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only."
+    },
+    "startedAt": "2026-10-14T08:19:35.407Z",
+    "httpRequests": 0,
+    "material": "complete private real response bytes, not synthetic or sanitized skeleton",
+    "rawHtmlCommitted": false,
+    "fetchedRawSha256": "6dc9a6c69a50a0643510cc2fc0125f8bb686a150ff42f3abc1d5a88e25593a2a",
+    "rawBytes": 80546,
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "http",
+      "declarations": [
+        {
+          "source": "http",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        },
+        {
+          "source": "meta",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        }
+      ],
+      "conflict": false,
+      "byteLength": 80546
+    },
+    "adapterCount": 8,
+    "dateRules": [
+      "ymd"
+    ],
+    "samples": [
+      {
+        "titleExcerpt": "广东海事局 广东省人力资源和社会保障厅 广州海事法院 中国海员工会广东省委员会 关于联合发布《广东省船员权益保障中心 服务指南（1.0版）》的通告",
+        "canonicalUrl": "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article/2026/5439613d219d442990fa9476af68b338.html",
+        "dateEvidence": {
+          "raw": "2026-06-17",
+          "rule": "ymd",
+          "basis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-06-17",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "广东海事局 广东省交通运输厅关于联合发布《广东省船员驿站“一站一册”（1.0版）》的通告",
+        "canonicalUrl": "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article/2026/404d8be53e524d028c5ab4ba6cb5edcc.html",
+        "dateEvidence": {
+          "raw": "2026-06-16",
+          "rule": "ymd",
+          "basis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-06-16",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "广东海事局关于辖区船舶污染清除单位应急清污能力监督检查情况的公告 （2026年10月）",
+        "canonicalUrl": "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article/2026/9f6ba044ad294732b0bc700d19f05d8b.html",
+        "dateEvidence": {
+          "raw": "2026-10-10",
+          "rule": "ymd",
+          "basis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-10",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "中华人民共和国清远海事局 清远市工业和信息化局 清远市应急管理局 广东省北江航道事务中心关于划定清远市船舶修造企业作业水域的通知",
+        "canonicalUrl": "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article/2026/790d1d2c9d15469b9807da53593e082d.html",
+        "dateEvidence": {
+          "raw": "2026-10-10",
+          "rule": "ymd",
+          "basis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-10-10",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "中华人民共和国广东海事局“海巡09”船信息化运维服务采购项目成交公告",
+        "canonicalUrl": "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article/2026/47c15c528ebb4983bc0eba7783cc3751.html",
+        "dateEvidence": {
+          "raw": "2026-09-18",
+          "rule": "ymd",
+          "basis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-09-18",
+          "publishedAt": null
+        }
+      },
+      {
+        "titleExcerpt": "广东海事局关于公布2026年度第一次船载危险货物申报人员和集装箱装箱现场检查人员从业资格考核合格人员名单的通知",
+        "canonicalUrl": "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article/2026/d45b6c06178142bd9c95d89b1ce44679.html",
+        "dateEvidence": {
+          "raw": "2026-08-26",
+          "rule": "ymd",
+          "basis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only.",
+          "calendar": "gregorian",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-08-26",
+          "publishedAt": null
+        }
+      }
+    ],
+    "first": {
+      "status": "ok_items",
+      "runId": "1968d96a-e0e1-43a7-9202-476afaad5f99",
+      "itemsSeen": 8,
+      "itemsNew": 8,
+      "itemsRevised": 0
+    },
+    "firstCounts": {
+      "items": 8,
+      "versions": 8
+    },
+    "repeat": {
+      "status": "ok_items",
+      "runId": "d4b86bcf-d8ec-4bfd-8c56-f4856aff2f5a",
+      "itemsSeen": 8,
+      "itemsNew": 0,
+      "itemsRevised": 0
+    },
+    "repeatCounts": {
+      "items": 8,
+      "versions": 8
+    },
+    "injectedTransports": 2,
+    "status": "OFFLINE_REPLAY_ONLY_PASS",
+    "reopen": {
+      "readOnly": true,
+      "rows": 8,
+      "versions": 8,
+      "fullTitleUrlDateEvidenceCompared": true,
+      "mismatches": 0,
+      "dayPrecision": 8,
+      "missingTimezone": 8,
+      "nullPublicationInstants": 8
+    },
+    "finishedAt": "2026-10-14T08:19:35.558Z"
+  }
+]

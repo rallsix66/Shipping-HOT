@@ -1,0 +1,4 @@
+# command: node .tmp/check-probe-repair-artifacts.cjs
+# full code SHA: 56603ff618ed90f3d8408b6eb1dce461530c98c5
+# raw exit: 0
+PASS: old source evidence/product unchanged, repaired snapshot hash bound, actual source qualification not promoted, no new source requests, final clean-SHA gate11 commands exit0

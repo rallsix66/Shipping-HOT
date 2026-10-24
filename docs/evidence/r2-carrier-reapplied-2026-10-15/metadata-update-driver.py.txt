@@ -1,0 +1,113 @@
+from pathlib import Path
+from datetime import datetime, timezone
+import hashlib,json,re,shutil,subprocess
+
+batch=Path('docs/evidence/r2-carrier-reapplied-2026-10-15')
+matrix=Path('docs/evidence/r2-current-source-matrix-2026-10-14')
+head='0ad53dd63632f097e719197345a1000b0e0c1d29'
+code='355952c0e8c01266adbe692dfcfd3bca9b3c17b2'
+def read(p):return json.loads(Path(p).read_text(encoding='utf-8-sig'))
+def write(p,x):Path(p).write_bytes((json.dumps(x,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
+def text(p,s):Path(p).write_bytes((s.rstrip()+'\n').encode('utf-8'))
+def sha(b):return hashlib.sha256(b).hexdigest()
+assert subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()==head
+s=read(batch/'summary.json');launch=read(batch/'launch.json');cmd=read(batch/'command.json');manifest=read(batch/'manifest.json')
+assert launch['head']==cmd['head']==head and launch['productCodeSha']==manifest['productCodeSha']==code and cmd['rawExit']==0
+assert s['systemDnsCalls']==s['reservedTransportCalls']==2 and len(s['results'])==2
+maersk,one=s['results']
+assert maersk['id']=='XX-K01' and maersk['reason']=='fetch_failed' and 'receivedAt' not in maersk
+assert one['id']=='XX-K02' and one['httpStatus']==308 and one['location']['sanitized']=='/en/newsroom' and not one['location']['followed']
+assert all(r['addressClassification']=='public_address' and r['systemDnsCalls']==r['httpRequests']==1 for r in s['results'])
+raw=Path('.tmp/r2-carrier-reapplied-2026-10-15-private/XX-K02.response.bin')
+assert len(raw.read_bytes())==one['bytes']==12 and sha(raw.read_bytes())==one['wireSha256']
+assert subprocess.run(['git','check-ignore','-q','--',str(raw)]).returncode==0
+assert not Path('.tmp/r2-carrier-reapplied-2026-10-15-private/XX-K01.response.bin').exists()
+diff=subprocess.check_output(['git','diff','--name-only',code,head],text=True).splitlines()
+assert all(p.startswith('docs/') or p=='AGENTS.md' for p in diff)
+write(batch/'capture-integrity.json',{'checkedAt':datetime.now(timezone.utc).isoformat(),'executionHead':head,'productCodeSha':code,
+    'manifestLaunchCommandAgree':True,'nonDocumentationDifferenceCodeToExecutionHead':[],
+    'systemDnsCalls':2,'reservedTransportCalls':2,'rawExit':0,'captureDiagnosticIsNotFunctionalGate':True,
+    'Maersk':{'responseCaptured':False,'knownCode':'fetch_failed','underlyingErrorCodeOrMessage':'NOT_RECORDED','httpStatus':None,
+              'limitation':'Secure entry returned generic failure; original capture did not retain its message/underlying transport error. No TLS/CA/HTTP403/anti-bot diagnosis and no retry.'},
+    'ONE':{'responseCaptured':True,'httpStatus':308,'bytes':12,'wireSha256':one['wireSha256'],
+           'rawLocalIgnored':True,'privateRawHashVerified':True,'contentTypeValue':'NOT_RECORDED_result_field_absent',
+           'location':one['location'],'parser':'NOT_RUN'},
+    'additionalSourceDnsOrHttpForThisInspection':0})
+for local,name in [('.tmp/carrier-reapplied-20261015.test.ts','capture-procedure.test.ts.txt'),
+                   ('.tmp/carrier-reapplied-20261015.config.ts','capture-config.ts.txt'),
+                   ('.tmp/execute-carrier-reapplied-20261015.cjs','capture-launcher.cjs.txt'),
+                   ('.tmp/inspect-carrier-reapplied-readonly.py','applied-config-readonly.py.txt')]:
+    text(batch/name,Path(local).read_text(encoding='utf-8'))
+logs={}
+for name in ['stdout.log','stderr.log']:
+    original=(batch/name).read_bytes();logs[name]={'byteSha256':sha(original),'utf8':original.decode('utf-8')}
+    text(batch/name,'\n'.join(l.rstrip() for l in original.decode('utf-8').splitlines()))
+write(batch/'capture-output-original.json',{'rawExit':cmd['rawExit'],'command':'command.json','logs':logs,
+    'scope':'Exact original UTF-8 stdout/stderr with byte hashes; adjacent display logs trim trailing whitespace only.'})
+inventory=Path('.tmp/carrier-reapplied-inventory-20261015.txt').read_bytes()
+keep=[];skip=False
+for line in inventory.decode('utf-8').splitlines():
+    if line.startswith('## '):skip=line=='## project-markdown'
+    if not skip:keep.append(line.rstrip())
+text(batch/'inventory.txt','\n'.join(keep))
+write(batch/'inventory-metadata.json',{'rawExit':0,'fullInventoryByteSha256':sha(inventory),
+    'localOriginal':'.tmp/carrier-reapplied-inventory-20261015.txt','publicExcerpt':'inventory.txt',
+    'omitted':'project-markdown full listing only','scope':'Inventory is not a security audit; original residue remains local.'})
+shutil.copyfile(matrix/'mapping.json','.tmp/carrier-reapplied-matrix-before.json')
+p=Path('.tmp/build-current-r2-matrix.py');builder=p.read_text(encoding='utf-8')
+builder=builder.replace("HEAD = 'a5da09871d1a017ae947a0f3f56980461807bfaf'",f"HEAD = '{head}'")
+block="""    if sid in ['XX-K01','XX-K02']:
+        new_batch='docs/evidence/r2-carrier-reapplied-2026-10-15'
+        attempt=outcome(new_batch+'/summary.json',sid)
+        e['historicalAttempts']=[e['latestAttempt']]
+        e['latestAttempt']={'evidence':ref(new_batch+'/summary.json',{'id':sid}),
+            'dnsEvidence':ref(new_batch+'/dns-ledger.json',{'id':sid}),
+            'appliedConfigEvidence':ref(new_batch+'/applied-config-check.json'),
+            'captureIntegrity':ref(new_batch+'/capture-integrity.json'),
+            'at':attempt['startedAt'],'url':attempt['url'],'host':attempt['host'],
+            'addresses':attempt['addresses'],'addressClassification':'public_address',
+            'systemDnsCalls':1,'httpRequests':1,'requestCountMeaning':'one reserved transport invocation; not proof that complete HTTP response or on-wire send succeeded',
+            'responseCaptured':bool(attempt.get('receivedAt')),'httpStatus':attempt.get('httpStatus'),
+            'reason':attempt['reason'],'parser':'NOT_RUN',
+            'scope':'exact catalogue index attempt once after user-applied23 exceptions; no follow retry detail or agent network config write'}
+        e['r2_5']={'verdict':'NOT_RUN','countedPass':False,'reason':'No original news-list payload obtained, no title/link/time parsing or collector/SQLite replay.'}
+        e['historicalSuperseded'].append('Earlier198.18 DNS block superseded by one public system DNS result; this round current outcome is transport failure or actual308, not DNS blockage.')
+        if sid=='XX-K01':
+            e['latestActualFetch']=None
+            e['r2_4']={'verdict':'BLOCKED','countedOK':False,'reason':'Public system DNS and one exact transport attempt, generic secure entry fetch_failed; no completed response captured. Underlying error not recorded; no TLS/CA/anti-bot diagnosis.'}
+            e['gaps']=['No captured response/status/content type/raw bytes/Location; no qualifying news fields.', 'Any later diagnostic needs explicit bounded task and sanitized underlying error capture; no automatic retry or network settings change.']
+        else:
+            e['latestActualFetch']=fetch(new_batch+'/summary.json',sid)
+            e['latestActualFetch']['location']=attempt['location']
+            e['r2_4']={'verdict':'PARTIAL','countedOK':False,'reason':'Exact catalogue index returned308 with saved relative Location /en/newsroom and12 original bytes; no redirect followed, target list product and fields unverified.'}
+            e['gaps']=['Actual Location /en/newsroom is a relative response header, not a confirmed news-list product.', 'Current catalogue remains /en/news; any product URL change/future request must be explicitly coordinated, no silent substitution or follow.']
+"""
+assert builder.count('    entries.append(e)')==1
+builder=builder.replace('    entries.append(e)',block+'    entries.append(e)')
+text(p,builder)
+subprocess.run(['python',str(p)],check=True)
+shutil.copyfile(p,matrix/'build-matrix.py.txt')
+old=read('.tmp/carrier-reapplied-matrix-before.json');new=read(matrix/'mapping.json')
+old_entries={e['id']:e for e in old['entries']}
+other=[e['id'] for e in new['entries'] if e['id'] not in ['XX-K01','XX-K02'] and e!=old_entries[e['id']]]
+assert not other
+write(batch/'matrix-delta.json',{'changedSourceIdsOnly':['XX-K01','XX-K02'],'other39SourceEntryDifferences':other,
+    'r2_4Before':old['measuredCoverage']['r2_4'],'r2_4After':new['measuredCoverage']['r2_4'],
+    'r2_5Unchanged':old['measuredCoverage']['r2_5']==new['measuredCoverage']['r2_5'],
+    'numericUnchanged':old['measuredCoverage']['numericFieldsSeparate']==new['measuredCoverage']['numericFieldsSeparate']})
+p=matrix/'report.md';report=p.read_text(encoding='utf-8')
+first=report.index('\n\n');end=report.index('\n\n',first+2)
+report=report[:first+2]+f'''当前两源已由用户亲自应用例外，选中扩展/生成filter均23项，原21项逐项保留。2026-10-15 02:38 UTC每域系统DNS一次均为公网，各精确目录索引transport尝试一次：Maersk通用fetch_failed、未捕获完整响应；ONE308，实际相对Location `/en/newsroom`，12字节原响应仅本地，未跟随。两源无列表原页，解析/collector回放NOT_RUN。执行HEAD `{head}`、产品代码 `{code}`；本轮不改产品、不跑功能门禁。[当前两源报告](../r2-carrier-reapplied-2026-10-15/report.md)。'''+report[end:]
+report=report.replace('20 OK、11 PARTIAL、1 STALE、2 BLOCKED、5 NOT_RUN','20 OK、12 PARTIAL、1 STALE、1 BLOCKED、5 NOT_RUN')
+rows={
+ 'XX-K01':'| XX-K01 | https://www.maersk.com/news | 2026-10-15T02:38:28.356Z / 尝试1、未捕获响应 [当前证据](../r2-carrier-reapplied-2026-10-15/summary.json) | BLOCKED | NOT_RUN | 公网23.53.3.137/.144；fetch_failed无底层错误记录，不判断CA/TLS/反爬；不重试。 |',
+ 'XX-K02':'| XX-K02 | https://www.one-line.com/en/news | 2026-10-15T02:38:29.155Z / 308 [当前证据](../r2-carrier-reapplied-2026-10-15/summary.json) | PARTIAL | NOT_RUN | 公网104.19.145.47/.144.47；12字节，相对Location /en/newsroom已脱敏保存，未跟随，无列表字段。 |'}
+for sid,line in rows.items():report=re.sub(r'^\| '+sid+r' \|.*$',lambda _:line,report,flags=re.M)
+text(p,report)
+text(matrix/'closeout.md','当前收尾见[用户应用后两源限界核验真实Neat Freak](../r2-carrier-reapplied-2026-10-15/closeout.md)。本批系统DNS2、精确目录transport尝试2；Maersk未捕获响应，ONE308未跟随。源码仍355952c0e8c01266adbe692dfcfd3bca9b3c17b2，功能门禁NOT_RUN。覆盖20/39、12/34、有限数值3/5不变。[当前逐源报告](report.md)。')
+p=Path('docs/status.md');status=p.read_text(encoding='utf-8')
+status=status.replace('20 OK / 11 PARTIAL / 1 STALE / 2 BLOCKED / 5 NOT_RUN','20 OK / 12 PARTIAL / 1 STALE / 1 BLOCKED / 5 NOT_RUN',1)
+a=status.index('最新Maersk/ONE两源');b=status.index('\n\n',a)
+status=status[:a]+f'''最新Maersk/ONE两域例外由用户亲自保存应用；只读验证扩展和生成配置均23项、原21项逐项保留。2026-10-15 02:38 UTC每域一次系统DNS均公网：Maersk23.53.3.137/.144、ONE104.19.145.47/.144.47，各原目录transport尝试1。Maersk通用fetch_failed、未捕获完整响应，底层错误未记录，不推断TLS/CA/反爬；ONE308、12字节、实际相对Location /en/newsroom已脱敏保存且未跟随。两源解析/collector/SQLite字段NOT_RUN，Maersk R2-4 BLOCKED、ONE PARTIAL，R2-5均NOT_RUN。旧198.18仅历史。执行HEAD {head}、代码{code}；本轮无系统写入或产品变更，不跑功能门禁。[最新两源证据](evidence/r2-carrier-reapplied-2026-10-15/report.md) / [后续交接](handoffs/r2-next-execution-2026-10-15.md)。'''+status[b:]
+text(p,status)
+print(json.dumps({'executionHead':head,'other39SourceDifferences':other,'coverage':new['measuredCoverage']},ensure_ascii=True))

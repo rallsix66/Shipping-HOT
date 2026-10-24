@@ -1,0 +1,9 @@
+{
+  "name": "typecheck",
+  "command": "pnpm typecheck",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\sitc-metadata-build-20261015",
+  "sha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "startedAt": "2026-10-15T07:04:56.390Z",
+  "finishedAt": "2026-10-15T07:05:04.253Z",
+  "rawExit": 0
+}

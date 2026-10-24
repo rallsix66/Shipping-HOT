@@ -1,0 +1,56 @@
+{
+  "source": "PH-C01",
+  "url": "https://customs.gov.ph/category/media-releases/",
+  "kind": "sanitized DOM structural metadata derivative; not original HTML or configured parser output",
+  "counts": {
+    "anchors": 392,
+    "tables": 0,
+    "rows": 0,
+    "times": 0
+  },
+  "candidates": [
+    {
+      "anchorDocumentIndex": 205,
+      "titleExcerpt": "",
+      "href": "https://customs.gov.ph/",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "14 October 2026"
+      ],
+      "anchorCountInAncestor": 1,
+      "association": "same-local-container-observation-only",
+      "siblingTags": [
+        "div"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 381,
+      "titleExcerpt": "Skip to content",
+      "href": "https://customs.gov.ph/category/media-releases/#content",
+      "ancestorTags": [
+        "a",
+        "body",
+        "html"
+      ],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "14 October 2026"
+      ],
+      "anchorCountInAncestor": 392,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "div",
+        "div",
+        "nav"
+      ]
+    }
+  ],
+  "itemParser": "NOT_RUN: no source adapter configured in this observation",
+  "noCandidateMeaning": "No numeric/English date association observed by bounded heuristic; not proof of no items",
+  "completeFieldsPass": false
+}

@@ -1,0 +1,11 @@
+{
+  "command": "node .tmp/update-r2-three-rss-docs-20261015.cjs",
+  "firstRawExit": 1,
+  "errorCode": "ENOENT",
+  "missingEvidenceArchive": "docs/evidence/r2-three-rss-2026-10-15/replay-procedure.test.ts.txt",
+  "authoritativeMatrixWrittenBeforeFailure": false,
+  "remediation": "Copied the already executed replay procedure into its referenced evidence archive, then reran the documentation preparation command successfully.",
+  "finalRawExit": 0,
+  "newSourceRequests": 0,
+  "productCodeChanged": false
+}

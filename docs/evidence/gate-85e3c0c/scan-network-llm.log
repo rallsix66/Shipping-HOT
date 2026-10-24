@@ -1,0 +1,34 @@
+# command: rg -n -i "fetch\(|https?://|openai|anthropic|llm" server/intel server/runtime/intel-collect-job.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts server/database/migrations/024-paid-receipt.ts server/database/migrations/025-paid-receipt-usage-booking.ts server/services/paid-budget.ts server/providers/feed.ts server/services/article-fetch-security.ts
+# full_sha: 85e3c0c85b832a2caf613ea2f3a9301843feea6a
+# started: 2026-10-12T09:26:24.050Z
+# ---- stdout ----
+server/providers/feed.ts:45:    url: "https://theloadstar.com/feed/",
+server/providers/feed.ts:46:    sourceUrl: "https://theloadstar.com/",
+server/providers/feed.ts:65:    url: "https://maritime-executive.com/rss",
+server/providers/feed.ts:66:    sourceUrl: "https://maritime-executive.com/",
+server/providers/feed.ts:78:    url: "https://www.portshekou.com/ywgg/",
+server/providers/feed.ts:79:    sourceUrl: "https://www.portshekou.com/ywgg/",
+server/providers/feed.ts:103:    url: "https://www.port.co.th/",
+server/providers/feed.ts:104:    sourceUrl: "https://www.port.co.th/",
+server/providers/feed.ts:117:    url: "https://www.pka.gov.my/index.php/en/",
+server/providers/feed.ts:118:    sourceUrl: "https://www.pka.gov.my/index.php/en/",
+server/providers/feed.ts:131:    url: "https://www.yantian.gov.cn/",
+server/providers/feed.ts:132:    sourceUrl: "https://www.yantian.gov.cn/",
+server/providers/feed.ts:145:    url: "https://www.gzns.gov.cn/",
+server/providers/feed.ts:146:    sourceUrl: "https://www.gzns.gov.cn/",
+server/providers/feed.ts:165:  mock: { sourceType: "mock", dataNature: "reported", sourceId: "mock-port-notice", sourceUrl: "https://example.com/mock/feed", verified: false },
+server/intel\sources.ts:30:    url: "https://www.tmd.go.th/en/api/xml/CAP",
+server/intel\sources.ts:43:    url: "https://www.bmkg.go.id/alerts/nowcast/en/rss.xml",
+server/intel\collect.test.ts:104:    expect(items.every(item => item.title && item.canonicalUrl.startsWith("https://www.tmd.go.th/") && item.publishedAt)).toBe(true)
+server/intel\collect.test.ts:294:    const broken: IntelSourceSeed = { ...TMD, id: "intel:test-broken", url: "https://www.tmd.go.th/broken" }
+server/intel\collect.test.ts:352:    const offHost: IntelSourceSeed = { ...TMD, id: "intel:test-offhost", url: "https://evil.example/feed" }
+server/intel\collect.test.ts:358:    const downgrade = offline({ [TMD.url]: () => ({ status: 302, headers: { location: "http://www.tmd.go.th/en/api/xml/CAP" }, body: "" }) })
+server/intel\llm\receipts.test.ts:27:} from "#/intel/llm/receipts"
+server/intel\llm\receipts.test.ts:68:function secrets(values: Record<string, string> = { "fake-llm": "test-placeholder" }): SecretStore {
+server/intel\llm\receipts.test.ts:92:    providerId: "fake-llm",
+server/intel\llm\receipts.test.ts:110:const usage = (native: Native) => native.prepare("SELECT COALESCE(SUM(request_count),0) AS requests, COALESCE(SUM(success_count),0) AS ok, COALESCE(SUM(failure_count),0) AS failed, COALESCE(SUM(estimated_cost),0) AS cost FROM provider_usage WHERE provider_id = 'fake-llm'").get() as { requests: number, ok: number, failed: number, cost: number }
+server/intel\llm\receipts.test.ts:127:      VALUES (?, ?, 'fake-llm', 'x', 'p', 'received', ?, ?, 't', 't')`).run(`id-${basis}-${actual}`, `k-${basis}-${actual}`, actual, basis)
+
+# ---- stderr ----
+
+# raw_exit_code: 0

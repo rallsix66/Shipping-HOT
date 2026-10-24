@@ -1,0 +1,157 @@
+{
+  "id": "CN-T02",
+  "url": "https://szs.mof.gov.cn/zhengcefabu/",
+  "enabled": false,
+  "persistence": "disallowed",
+  "config": {
+    "listSelector": ".zzright .listBox > ul.liBox",
+    "itemSelector": "li",
+    "linkSelector": "a[href]",
+    "titleSelector": "a[href]",
+    "publishedAtSelector": "span",
+    "calendar": "gregorian",
+    "allowUrlPrefixes": [
+      "https://szs.mof.gov.cn/zhengcefabu"
+    ],
+    "dateRuleBasis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone."
+  },
+  "startedAt": "2026-10-14T08:19:35.017Z",
+  "httpRequests": 0,
+  "material": "complete private real response bytes, not synthetic or sanitized skeleton",
+  "rawHtmlCommitted": false,
+  "fetchedRawSha256": "934dfb210e414105867c99db2907ebcf98c175b643a3bc74157f2d9c1679df04",
+  "rawBytes": 12222,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "meta",
+    "declarations": [
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 12222
+  },
+  "adapterCount": 10,
+  "dateRules": [
+    "ymd"
+  ],
+  "samples": [
+    {
+      "titleExcerpt": "关于调整部分产品出口退税政策的公告",
+      "canonicalUrl": "https://szs.mof.gov.cn/zhengcefabu/202610/t20261012_4002592.htm",
+      "dateEvidence": {
+        "raw": "2026-10-12",
+        "rule": "ymd",
+        "basis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-12",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "关于发布《境内单位代扣代缴自然人增值税管理办法》的公告",
+      "canonicalUrl": "https://szs.mof.gov.cn/zhengcefabu/202609/t20260904_3996707.htm",
+      "dateEvidence": {
+        "raw": "2026-09-04",
+        "rule": "ymd",
+        "basis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-04",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "关于外籍个人股息红利个人所得税政策有关事项的公告",
+      "canonicalUrl": "https://szs.mof.gov.cn/zhengcefabu/202609/t20260901_3996442.htm",
+      "dateEvidence": {
+        "raw": "2026-09-01",
+        "rule": "ymd",
+        "basis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-01",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "关于明确非应税交易等增值税有关事项的公告",
+      "canonicalUrl": "https://szs.mof.gov.cn/zhengcefabu/202608/t20260828_3996295.htm",
+      "dateEvidence": {
+        "raw": "2026-08-28",
+        "rule": "ymd",
+        "basis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-28",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "关于规范转让上市公司限售股个人所得税政策的公告",
+      "canonicalUrl": "https://szs.mof.gov.cn/zhengcefabu/202608/t20260828_3996290.htm",
+      "dateEvidence": {
+        "raw": "2026-08-28",
+        "rule": "ymd",
+        "basis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-28",
+        "publishedAt": null
+      }
+    },
+    {
+      "titleExcerpt": "关于集成电路企业、工业母机企业非货币性资产交换企业所得税政策的公告",
+      "canonicalUrl": "https://szs.mof.gov.cn/zhengcefabu/202608/t20260814_3995441.htm",
+      "dateEvidence": {
+        "raw": "2026-08-14",
+        "rule": "ymd",
+        "basis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-08-14",
+        "publishedAt": null
+      }
+    }
+  ],
+  "first": {
+    "status": "ok_items",
+    "runId": "f945561e-828a-4161-ae1f-2159e2c0b163",
+    "itemsSeen": 10,
+    "itemsNew": 10,
+    "itemsRevised": 0
+  },
+  "firstCounts": {
+    "items": 10,
+    "versions": 10
+  },
+  "repeat": {
+    "status": "ok_items",
+    "runId": "c4c45927-38b5-43c8-baf2-155d1959efb9",
+    "itemsSeen": 10,
+    "itemsNew": 0,
+    "itemsRevised": 0
+  },
+  "repeatCounts": {
+    "items": 10,
+    "versions": 10
+  },
+  "injectedTransports": 2,
+  "status": "OFFLINE_REPLAY_PENDING_REOPEN"
+}

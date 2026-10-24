@@ -1,0 +1,8 @@
+const fs=require('node:fs'),cp=require('node:child_process');
+const dir='docs/evidence/r2-four-after-clash-2026-10-14';fs.mkdirSync(dir,{recursive:true});
+if(fs.existsSync(dir+'/request-ledger.json')||fs.existsSync(dir+'/launch.json'))throw Error('existing_launch_never_repeat');
+const started=new Date().toISOString();const command='pnpm exec vitest run -c .tmp/four-after-clash-20261014.config.ts';
+fs.writeFileSync(dir+'/launch.json',JSON.stringify({started,command,head:'087050204e0e2e5c90f315ebd350630901ccc594',authorization:'parent delegated four exact catalog after authorized Clash reapply public URLs; no retry/redirect/detail/production activation',permission:'unknown reuse; private ignored response bytes for inspection only, sanitized structural metadata committed'}));
+const r=cp.spawnSync(command,{shell:true,encoding:'utf8',maxBuffer:1<<24,env:{...process.env,SHIPPING_APPROVED_PUBLIC_FOUR:'1'}});
+fs.writeFileSync(dir+'/command.json',JSON.stringify({started,endedAt:new Date().toISOString(),command,rawExit:r.status,signal:r.signal}));
+fs.writeFileSync(dir+'/stdout.log',r.stdout||'');fs.writeFileSync(dir+'/stderr.log',r.stderr||'');console.log(JSON.stringify({rawExit:r.status,evidence:dir}));process.exitCode=r.status??1;

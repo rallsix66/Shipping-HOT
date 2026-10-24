@@ -1,0 +1,245 @@
+{
+  "at": "2026-10-20T07:40:19.090Z",
+  "scope": "single scoped disk/installed-metadata diagnosis after new screenshot; no process commandline output, network/config changes or polling",
+  "processRead": {
+    "status": "DENIED_BY_OS",
+    "action": "Get-CimInstance Win32_Process, selected Clash/Mihomo processes, executable metadata and only -f/-d config path flags",
+    "reason": "access denied; no process metadata obtained",
+    "retried": false,
+    "activeCoreConfigPath": "pending"
+  },
+  "applicationSettings": {
+    "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\verge.yaml",
+    "values": {
+      "enable_dns_settings": false,
+      "enable_builtin_enhanced": true
+    }
+  },
+  "files": {
+    "verge.yaml": {
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\verge.yaml",
+      "bytes": 4813,
+      "mtimeUtc": "2026-10-14T03:00:08.446Z"
+    },
+    "dns_config.yaml": {
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\dns_config.yaml",
+      "bytes": 1035,
+      "mtimeUtc": "2026-05-07T01:16:44.865Z"
+    },
+    "config.yaml": {
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\config.yaml",
+      "bytes": 645,
+      "mtimeUtc": "2026-09-20T02:45:10.680Z"
+    },
+    "profiles.yaml": {
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\profiles.yaml",
+      "bytes": 2448,
+      "mtimeUtc": "2026-10-20T02:43:46.518Z"
+    },
+    "clash-verge.yaml": {
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\clash-verge.yaml",
+      "bytes": 58415,
+      "mtimeUtc": "2026-10-20T07:32:13.019Z"
+    }
+  },
+  "applicationDNS": {
+    "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\dns_config.yaml",
+    "shapeHasDNSRoot": true,
+    "present": true,
+    "keys": [
+      "enable",
+      "listen",
+      "enhanced-mode",
+      "fake-ip-range",
+      "fake-ip-filter-mode",
+      "prefer-h3",
+      "respect-rules",
+      "use-hosts",
+      "use-system-hosts",
+      "fake-ip-filter",
+      "default-nameserver",
+      "nameserver",
+      "fallback",
+      "nameserver-policy",
+      "proxy-server-nameserver",
+      "direct-nameserver",
+      "direct-nameserver-follow-policy",
+      "fallback-filter"
+    ],
+    "values": {
+      "enable": true,
+      "enhanced-mode": "fake-ip",
+      "fake-ip-filter-mode": "blacklist",
+      "respect-rules": false,
+      "use-hosts": false,
+      "use-system-hosts": false,
+      "listen": ":53"
+    },
+    "filter": {
+      "isArray": true,
+      "count": 10,
+      "targetCounts": {
+        "www.ppa.com.ph": 0,
+        "www.mofcom.gov.cn": 0
+      },
+      "original27AllPresent": false,
+      "original27PresentCount": 0
+    }
+  },
+  "generatedDNS": {
+    "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\clash-verge.yaml",
+    "present": true,
+    "keys": [
+      "enable",
+      "ipv6",
+      "default-nameserver",
+      "enhanced-mode",
+      "fake-ip-range",
+      "use-hosts",
+      "nameserver",
+      "fallback",
+      "proxy-server-nameserver",
+      "fallback-filter",
+      "nameserver-policy",
+      "fake-ip-range6",
+      "fake-ip-filter"
+    ],
+    "values": {
+      "enable": true,
+      "enhanced-mode": "fake-ip",
+      "ipv6": true,
+      "use-hosts": true
+    },
+    "filter": {
+      "isArray": true,
+      "count": 29,
+      "targetCounts": {
+        "www.ppa.com.ph": 1,
+        "www.mofcom.gov.cn": 1
+      },
+      "original27AllPresent": true,
+      "original27PresentCount": 27
+    }
+  },
+  "baseApplicationConfigDNS": {
+    "present": false
+  },
+  "DNSComparison": {
+    "wholeSubtreeEqual": false,
+    "filterArrayEqual": false,
+    "visibleModeFieldsEqual": false,
+    "differentTopLevelDNSKeys": [
+      "listen",
+      "fake-ip-filter-mode",
+      "prefer-h3",
+      "respect-rules",
+      "use-hosts",
+      "use-system-hosts",
+      "fake-ip-filter",
+      "default-nameserver",
+      "nameserver",
+      "fallback",
+      "nameserver-policy",
+      "proxy-server-nameserver",
+      "direct-nameserver",
+      "direct-nameserver-follow-policy",
+      "fallback-filter",
+      "ipv6",
+      "fake-ip-range6"
+    ]
+  },
+  "association": {
+    "currentSubscriptionFound": true,
+    "subscriptionFile": "R0coi38zEaOV.yaml",
+    "selectedScriptUID": "shf0fNvLCn9b",
+    "selectedScriptPath": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\profiles\\shf0fNvLCn9b.js",
+    "selectedMergeUID": "mBhQBurZWbst",
+    "selectedMergeFile": "mBhQBurZWbst.yaml",
+    "scriptMtimeUtc": "2026-10-20T07:32:12.938Z",
+    "scriptTargetCounts": {
+      "www.ppa.com.ph": 1,
+      "www.mofcom.gov.cn": 1
+    },
+    "original27Preserved": true,
+    "scriptModeCondition": [
+      "if (shippingHotDns && shippingHotDns[\"enhanced-mode\"] === \"fake-ip\"",
+      "&& (shippingHotDns[\"fake-ip-filter-mode\"] ?? \"blacklist\") === \"blacklist\""
+    ]
+  },
+  "associatedInputDNS": [
+    {
+      "kind": "selected_subscription",
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\profiles\\R0coi38zEaOV.yaml",
+      "mtimeUtc": "2026-10-20T02:43:46.518Z",
+      "DNS": {
+        "present": true,
+        "keys": [
+          "enable",
+          "ipv6",
+          "default-nameserver",
+          "enhanced-mode",
+          "fake-ip-range",
+          "use-hosts",
+          "nameserver",
+          "fallback",
+          "proxy-server-nameserver",
+          "fallback-filter",
+          "nameserver-policy"
+        ],
+        "values": {
+          "enable": true,
+          "enhanced-mode": "fake-ip",
+          "ipv6": true,
+          "use-hosts": true
+        },
+        "filter": {
+          "isArray": false,
+          "count": 0,
+          "targetCounts": {
+            "www.ppa.com.ph": 0,
+            "www.mofcom.gov.cn": 0
+          },
+          "original27AllPresent": false,
+          "original27PresentCount": 0
+        }
+      }
+    },
+    {
+      "kind": "selected_merge",
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\profiles\\mBhQBurZWbst.yaml",
+      "mtimeUtc": "2026-08-31T02:24:08.813Z",
+      "DNS": {
+        "present": false
+      }
+    },
+    {
+      "kind": "other_extension_input",
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\profiles\\Merge.yaml",
+      "mtimeUtc": "2026-05-09T09:21:48.037Z",
+      "DNS": {
+        "present": false
+      }
+    }
+  ],
+  "otherRootYAMLFiles": [],
+  "configWrites": 0,
+  "appliedOrReloaded": false,
+  "cacheCleared": false,
+  "siteRequests": 0,
+  "installedVersion": {
+    "registry": "2.5.8",
+    "binaryProductVersion": "2.5.8",
+    "binaryFileVersion": "2.5.8"
+  },
+  "conclusion": {
+    "diskGeneratedTargetsPresent": true,
+    "applicationDNSOverwriteCurrentlySupported": false,
+    "scriptConditionMissCurrentlySupported": false,
+    "activeCoreConfigPath": "pending_OS_denial",
+    "otherTopLevelGeneratedCandidateFound": false,
+    "configurationFixNeededNow": "none_proven; do not edit",
+    "minimumNext": "authorized read-only runtime config path/load confirmation",
+    "newWebsiteRequests": 0,
+    "newConfigurationWrites": 0
+  }
+}

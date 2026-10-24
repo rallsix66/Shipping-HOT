@@ -1,0 +1,10 @@
+{
+  "command": "node .tmp/finalize-id-t02-finite-20261015.cjs",
+  "rawExit": 0,
+  "stdoutExactUtf8": "{\"associatedDateFound\":true,\"groupLabels\":[[\"S:1\",\"Terkini\"],[\"S:2\",\"Populer\"],[\"S:4\",\"Terkini\"],[\"S:5\",\"Populer\"]],\"identityCount\":7,\"repeatedFieldsEqual\":true,\"rawDates\":[\"08 Okt 2026\",\"08 Okt 2026\",\"08 Okt 2026\",\"02 Okt 2026\",\"20 Mei 2025\",\"31 Jul 2026\",\"16 Agu 2007\"],\"candidateDecision\":\"AUTHORIZED_MINIMAL_DISABLED_METADATA_CANDIDATE_CAN_PROCEED\",\"sourceGetAttempts\":0,\"cnP02ConditionalBranch\":\"NOT_OPENED_ID_T02_HAS_RELIABLY_ASSOCIATED_RAW_DATES\"}\n",
+  "stderrExactUtf8": "",
+  "stdoutOriginalByteSha256": "6cae51c8b6e9b6517aff36cbe2c2a5044f5fcb47b04c02ed4b9f1643474bdb31",
+  "stderrOriginalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "networkCalls": 0,
+  "scriptExecution": false
+}

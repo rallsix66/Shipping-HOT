@@ -1,0 +1,119 @@
+[
+  {
+    "id": "CN-P01",
+    "url": "https://www.gd.msa.gov.cn/",
+    "startedAt": "2026-10-14T07:16:47.623Z",
+    "status": "BLOCKED",
+    "httpRequests": 0,
+    "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+    "reason": "blocked_address",
+    "parse": "NOT_RUN",
+    "finishedAt": "2026-10-14T07:16:47.630Z"
+  },
+  {
+    "id": "CN-T02",
+    "url": "https://szs.mof.gov.cn/zhengcefabu/",
+    "startedAt": "2026-10-14T07:16:47.630Z",
+    "status": "BLOCKED",
+    "httpRequests": 0,
+    "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+    "reason": "blocked_address",
+    "parse": "NOT_RUN",
+    "finishedAt": "2026-10-14T07:16:47.632Z"
+  },
+  {
+    "id": "VN-P01",
+    "url": "https://vimawa.gov.vn/vi/thong-bao-hang-hai",
+    "startedAt": "2026-10-14T07:16:47.632Z",
+    "status": "BLOCKED",
+    "httpRequests": 0,
+    "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+    "reason": "blocked_address",
+    "parse": "NOT_RUN",
+    "finishedAt": "2026-10-14T07:16:47.633Z"
+  },
+  {
+    "id": "PH-C01",
+    "url": "https://customs.gov.ph/category/media-releases/",
+    "startedAt": "2026-10-14T07:16:47.634Z",
+    "status": "BLOCKED",
+    "httpRequests": 0,
+    "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+    "reason": "blocked_address",
+    "parse": "NOT_RUN",
+    "finishedAt": "2026-10-14T07:16:47.635Z"
+  },
+  {
+    "id": "MY-P03",
+    "url": "https://www.northport.com.my/np/page-announcements.html",
+    "startedAt": "2026-10-14T07:16:47.635Z",
+    "status": "PARTIAL",
+    "httpRequests": 1,
+    "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+    "receivedAt": "2026-10-14T07:16:50.033Z",
+    "httpStatus": 200,
+    "contentType": "text/html",
+    "rawByteLength": 73037,
+    "fetchedBytesSha256": "880e1a180dc686d9d9d71578a753ee87af24042563a7c58f82c0885f8d3c5691",
+    "rawLocalOnly": true,
+    "parse": "DOM_OBSERVATION_ONLY",
+    "parserError": null,
+    "observedCandidateCount": 6,
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "default",
+      "declarations": [],
+      "conflict": false,
+      "byteLength": 73037
+    },
+    "archivedMetadataSha256": "3b8070615983910833839b2cb92a5e7d5e0bd3a6a25f6e6a543f3a28cc5ffb6d",
+    "originalHtmlCommitted": false,
+    "sensitiveScan": {
+      "positiveControlDetected": true,
+      "committedMaterialHits": 0
+    },
+    "finishedAt": "2026-10-14T07:16:50.062Z"
+  },
+  {
+    "id": "TH-C01",
+    "url": "https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th",
+    "startedAt": "2026-10-14T07:16:50.062Z",
+    "status": "PARTIAL",
+    "httpRequests": 1,
+    "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+    "receivedAt": "2026-10-14T07:16:51.316Z",
+    "httpStatus": 200,
+    "contentType": "text/html; charset=UTF-8",
+    "rawByteLength": 123781,
+    "fetchedBytesSha256": "96349dcd1383c8ed1e33b9ad7905f5355f4a6ff9c5528e065e13a09aae30398c",
+    "rawLocalOnly": true,
+    "parse": "DOM_OBSERVATION_ONLY",
+    "parserError": null,
+    "observedCandidateCount": 0,
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "http",
+      "declarations": [
+        {
+          "source": "http",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        },
+        {
+          "source": "meta",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        }
+      ],
+      "conflict": false,
+      "byteLength": 123781
+    },
+    "archivedMetadataSha256": "9cfe69a7e68ca2685adfc50051e2f7dc49189b4f5b5a719e50213a8fc9358ed8",
+    "originalHtmlCommitted": false,
+    "sensitiveScan": {
+      "positiveControlDetected": true,
+      "committedMaterialHits": 0
+    },
+    "finishedAt": "2026-10-14T07:16:51.334Z"
+  }
+]

@@ -1,0 +1,112 @@
+{
+  "files": [
+    {
+      "path": "docs/evidence/gate-954c831-material-read/build.stderr.log",
+      "originalBytes": 524,
+      "originalByteSha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658",
+      "committedTextLfSha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/build.stdout.log",
+      "originalBytes": 5446,
+      "originalByteSha256": "d4236e7a3fe56c5196345add3a936dfefd43f68c4c1dbf06f420f49f4f9774c7",
+      "committedTextLfSha256": "d4236e7a3fe56c5196345add3a936dfefd43f68c4c1dbf06f420f49f4f9774c7"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/install.stderr.log",
+      "originalBytes": 0,
+      "originalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedTextLfSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/install.stdout.log",
+      "originalBytes": 1922,
+      "originalByteSha256": "d64373a475a2f8251c45a0cad6ecb2bac861b9cece8691f0e924eb9637ff921c",
+      "committedTextLfSha256": "d64373a475a2f8251c45a0cad6ecb2bac861b9cece8691f0e924eb9637ff921c"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/lint.stderr.log",
+      "originalBytes": 0,
+      "originalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedTextLfSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/lint.stdout.log",
+      "originalBytes": 96,
+      "originalByteSha256": "893bb2c1316be7ce4ea0a9fc053545fb1e2ff393ec3912957a9318dc7b10eb7c",
+      "committedTextLfSha256": "893bb2c1316be7ce4ea0a9fc053545fb1e2ff393ec3912957a9318dc7b10eb7c"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/smoke-feed.stderr.log",
+      "originalBytes": 365,
+      "originalByteSha256": "58ed5e6f4fa2b07cf74d930953772c071eb349342ea30ee2958b306ccd4cd9b9",
+      "committedTextLfSha256": "58ed5e6f4fa2b07cf74d930953772c071eb349342ea30ee2958b306ccd4cd9b9"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/smoke-feed.stdout.log",
+      "originalBytes": 307,
+      "originalByteSha256": "fdf353ad3a5ead29b87e8ba7131bc6d75e12690255b952a9fd1f5cea4d95d874",
+      "committedTextLfSha256": "fdf353ad3a5ead29b87e8ba7131bc6d75e12690255b952a9fd1f5cea4d95d874"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/smoke-p0.stderr.log",
+      "originalBytes": 1247,
+      "originalByteSha256": "0b285e9f544025103b612a1e63ca549c8d6ea2edbd48f222060712c866da5066",
+      "committedTextLfSha256": "0b285e9f544025103b612a1e63ca549c8d6ea2edbd48f222060712c866da5066"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/smoke-p0.stdout.log",
+      "originalBytes": 368,
+      "originalByteSha256": "7edde3a8e3ba24f7dca818544566b04a4d40dce2b9986c6792a9087953cb0a79",
+      "committedTextLfSha256": "7edde3a8e3ba24f7dca818544566b04a4d40dce2b9986c6792a9087953cb0a79"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/smoke-p2c.stderr.log",
+      "originalBytes": 365,
+      "originalByteSha256": "8bfd5c8c8623bbc0a46dda75ad878ff727c2384308106131601c4c0d1e685781",
+      "committedTextLfSha256": "8bfd5c8c8623bbc0a46dda75ad878ff727c2384308106131601c4c0d1e685781"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/smoke-p2c.stdout.log",
+      "originalBytes": 323,
+      "originalByteSha256": "5f4bbfa01171c1a751d1e75b6f5b042b5639d1c6c38f1391f11971686eeaa406",
+      "committedTextLfSha256": "5f4bbfa01171c1a751d1e75b6f5b042b5639d1c6c38f1391f11971686eeaa406"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/targeted.stderr.log",
+      "originalBytes": 2087,
+      "originalByteSha256": "bf50d627904626db9750e8983753127ae12c967588a2ca9e1bdea173105d6d5a",
+      "committedTextLfSha256": "bf50d627904626db9750e8983753127ae12c967588a2ca9e1bdea173105d6d5a"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/targeted.stdout.log",
+      "originalBytes": 999,
+      "originalByteSha256": "665e224a412f3559a03e9a972a618cae8dab6cf4406a410a800279eb3e7d3982",
+      "committedTextLfSha256": "665e224a412f3559a03e9a972a618cae8dab6cf4406a410a800279eb3e7d3982"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/typecheck.stderr.log",
+      "originalBytes": 0,
+      "originalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedTextLfSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/typecheck.stdout.log",
+      "originalBytes": 166,
+      "originalByteSha256": "83666923552ce11625998c79f72a631531d537e7480863641da5c94e42307c55",
+      "committedTextLfSha256": "83666923552ce11625998c79f72a631531d537e7480863641da5c94e42307c55"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/vitest.stderr.log",
+      "originalBytes": 5339,
+      "originalByteSha256": "e14156c4b6f5a5e295eb3ffa5af99aace2497f4d482c1e27b5b956bce7ca65ea",
+      "committedTextLfSha256": "e14156c4b6f5a5e295eb3ffa5af99aace2497f4d482c1e27b5b956bce7ca65ea"
+    },
+    {
+      "path": "docs/evidence/gate-954c831-material-read/vitest.stdout.log",
+      "originalBytes": 17819,
+      "originalByteSha256": "f359bdfd91c6dae325fe216ec08618c4855955a21562c4bad665556fa1a287b3",
+      "committedTextLfSha256": "f359bdfd91c6dae325fe216ec08618c4855955a21562c4bad665556fa1a287b3"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ .tmp/four-reapplied-20261015.test.ts (1 test) 8896ms
+   ✓ four approved exact catalogue targets: one OS DNS and at most one pinned index request each  8895ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  09:16:08
+   Duration  9.83s (transform 235ms, setup 0ms, import 725ms, tests 8.90s, environment 0ms)

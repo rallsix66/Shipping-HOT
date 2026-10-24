@@ -1,0 +1,9 @@
+{
+  "name": "install",
+  "command": "pnpm install --frozen-lockfile",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\post-clash-final-build",
+  "sha": "af38350709d2fa4c9e9b98accbae8bc7ef678da1",
+  "startedAt": "2026-10-14T09:18:26.272Z",
+  "endedAt": "2026-10-14T09:18:35.010Z",
+  "rawExit": 0
+}

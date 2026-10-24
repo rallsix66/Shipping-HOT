@@ -1,0 +1,14 @@
+{
+  "id": "VN-P01",
+  "url": "https://vimawa.gov.vn/vi/thong-bao-hang-hai",
+  "startedAt": "2026-10-14T07:56:30.690Z",
+  "status": "NOT_RUN",
+  "httpRequests": 1,
+  "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+  "receivedAt": "2026-10-14T07:56:33.148Z",
+  "httpStatus": 200,
+  "contentType": "text/html; charset=utf-8",
+  "rawByteLength": 63083,
+  "fetchedBytesSha256": "da133741708879c9fd4544a0137dd8050a92c1dab662ac843bc9892d412bd4ef",
+  "rawLocalOnly": true
+}

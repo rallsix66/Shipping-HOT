@@ -1,0 +1,34 @@
+{
+  "id": "ID-W02-root",
+  "url": "https://maritim.bmkg.go.id/marine2026-data/",
+  "phase": "initial",
+  "host": "maritim.bmkg.go.id",
+  "startedAt": "2026-10-15T05:53:36.849Z",
+  "systemDnsCalls": 1,
+  "getAttempts": 1,
+  "status": "CAPTURED_SAFE_RESPONSE",
+  "rawLocalOnly": true,
+  "qualificationChanged": false,
+  "addressClassification": "public_address",
+  "receivedAt": "2026-10-15T05:53:37.472Z",
+  "httpStatus": 200,
+  "contentType": "text/html; charset=utf-8",
+  "bytes": 577,
+  "wireSha256": "6d66fa455f6bc943ff0d6dd33de2c4928126ac72217a38d555bf9e784995ad76",
+  "completeResponseCaptured": true,
+  "location": null,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 577
+  },
+  "finishedAt": "2026-10-15T05:53:37.473Z"
+}

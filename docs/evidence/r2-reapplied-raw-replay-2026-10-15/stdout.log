@@ -1,0 +1,9 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ .tmp/reapplied-raw-replay-20261015.test.ts (2 tests) 316ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  09:23:49
+   Duration  1.34s (transform 503ms, setup 0ms, import 838ms, tests 316ms, environment 0ms)

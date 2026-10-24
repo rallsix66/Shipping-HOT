@@ -1,0 +1,10 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ .tmp/two-raw-storage-audit-20261014.test.ts (1 test) 75ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  15:32:10
+   Duration  717ms (transform 229ms, setup 0ms, import 481ms, tests 75ms, environment 0ms)
+

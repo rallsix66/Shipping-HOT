@@ -1,0 +1,20 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/readability-final-build-20261015
+
+ ✓ server/services/article-translation-source.test.ts (10 tests) 18ms
+ ✓ server/providers/article-extractor.test.ts (18 tests) 80ms
+ ✓ server/services/article-fetch-security.test.ts (10 tests) 11ms
+ ✓ server/database/article.test.ts (8 tests) 438ms
+ ✓ server/runtime/translation-sync-article-job.test.ts (8 tests) 459ms
+ ✓ server/services/article-fetch-transport.test.ts (16 tests) 236ms
+ ✓ server/services/article-translation-display.test.ts (7 tests) 961ms
+ ✓ server/runtime/intel-production.test.ts (4 tests) 471ms
+ ✓ server/intel/collect.test.ts (22 tests) 917ms
+ ✓ server/services/article-translation-view.test.ts (10 tests) 1499ms
+ ✓ server/services/article-service.test.ts (11 tests) 1453ms
+
+ Test Files  11 passed (11)
+      Tests  124 passed (124)
+   Start at  17:36:29
+   Duration  2.87s (transform 4.23s, setup 0ms, import 7.89s, tests 6.54s, environment 1ms)
+

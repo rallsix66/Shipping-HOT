@@ -1,0 +1,21 @@
+{
+  "id": "VN-D01",
+  "url": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
+  "host": "phongchongthientai.mard.gov.vn",
+  "catalogLineSha256": "d788316a9a0286c442c1309fc448266e4d8ec2d1e74846949c30ef2bd8e19e0e",
+  "startedAt": "2026-10-14T10:55:51.558Z",
+  "systemDnsCalls": 1,
+  "httpRequests": 0,
+  "status": "BLOCKED",
+  "rawHtmlCommitted": false,
+  "addresses": [
+    {
+      "address": "198.18.0.167",
+      "family": 4
+    }
+  ],
+  "addressClassification": "blocked_address",
+  "reason": "blocked_address",
+  "parser": "NOT_RUN",
+  "finishedAt": "2026-10-14T10:55:51.560Z"
+}

@@ -1,0 +1,303 @@
+{
+  "sha": "79fc6c84b29497c869e029d27130ac02c8c04251",
+  "url": "http://127.0.0.1:4488/feed",
+  "checks": [
+    {
+      "name": "manual checklist41 existing catalog entries",
+      "status": "PASS"
+    },
+    {
+      "name": "39 manual sources disabled and metadata only",
+      "status": "PASS"
+    },
+    {
+      "name": "explicit licensed manual submit",
+      "status": "PASS"
+    },
+    {
+      "name": "same request replay",
+      "status": "PASS"
+    },
+    {
+      "name": "conflicting same request409",
+      "status": "PASS"
+    },
+    {
+      "name": "revision creates distinct version",
+      "status": "PASS"
+    },
+    {
+      "name": "A-B-A restores old version",
+      "status": "PASS"
+    },
+    {
+      "name": "manual official label plus unverified fixture",
+      "status": "PASS"
+    },
+    {
+      "name": "publication unknown separate from enteredAt",
+      "status": "PASS"
+    },
+    {
+      "name": "shared canonical URL strips tracking and slash",
+      "status": "PASS"
+    },
+    {
+      "name": "old immutable versions retained",
+      "status": "PASS"
+    },
+    {
+      "name": "restored permitted body reads original",
+      "status": "PASS"
+    },
+    {
+      "name": "checked-empty distinct from collection health",
+      "status": "PASS"
+    },
+    {
+      "name": "manual metadata source saves title only",
+      "status": "PASS"
+    },
+    {
+      "name": "restricted body400",
+      "status": "PASS"
+    },
+    {
+      "name": "HTML rejected400",
+      "status": "PASS"
+    },
+    {
+      "name": "unapproved URL rejected400",
+      "status": "PASS"
+    },
+    {
+      "name": "cross-origin rejected403",
+      "status": "PASS"
+    },
+    {
+      "name": "same-host non-CAP body rejected400",
+      "status": "PASS"
+    },
+    {
+      "name": "BMKG same-host non-feed body rejected400",
+      "status": "PASS"
+    },
+    {
+      "name": "exact BMKG feed retains excerpt maximum",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 0",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 1",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 2",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 3",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 4",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 5",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 6",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 7",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 8",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 9",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 10",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 11",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 12",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 13",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 14",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 15",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 16",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 17",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 18",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 19",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 20",
+      "status": "PASS"
+    },
+    {
+      "name": "new manual history 21",
+      "status": "PASS"
+    },
+    {
+      "name": "early identity independent of audit20",
+      "status": "PASS"
+    },
+    {
+      "name": "only28 successful manual actions persisted",
+      "status": "PASS"
+    },
+    {
+      "name": "GET /api/shipping/intel/manual",
+      "status": "PASS"
+    },
+    {
+      "name": "GET /api/shipping/intel/items",
+      "status": "PASS"
+    },
+    {
+      "name": "GET /api/shipping/intel/sources",
+      "status": "PASS"
+    },
+    {
+      "name": "GET /api/shipping/intel/items/b40cd839-5579-4191-b965-2fcf720f41f2",
+      "status": "PASS"
+    },
+    {
+      "name": "GET audit unchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "usage/runtime/policy/calendar counts unchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "SPA HTTP /",
+      "status": "PASS"
+    },
+    {
+      "name": "SPA HTTP /feed",
+      "status": "PASS"
+    },
+    {
+      "name": "asset /assets/index-DtH8n1Yz.js",
+      "status": "PASS"
+    },
+    {
+      "name": "asset /assets/index-DrKgC5Ig.css",
+      "status": "PASS"
+    },
+    {
+      "name": "SPA HTTP /calendar",
+      "status": "PASS"
+    },
+    {
+      "name": "SPA HTTP /ports",
+      "status": "PASS"
+    },
+    {
+      "name": "SPA HTTP /policies",
+      "status": "PASS"
+    },
+    {
+      "name": "SPA HTTP /events",
+      "status": "PASS"
+    },
+    {
+      "name": "SPA HTTP /settings",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4477",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4482",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4483",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4484",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4485",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4486",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4487",
+      "status": "PASS"
+    },
+    {
+      "name": "schema28",
+      "status": "PASS"
+    }
+  ],
+  "summary": {
+    "passed": 68,
+    "failed": 0
+  },
+  "countsBefore": {
+    "provider_usage": 0,
+    "paid_receipt": 0,
+    "sync_runs": 0,
+    "calendar_events": 0,
+    "ops_calendar_event": 0,
+    "policy_record": 3,
+    "policy_version": 4
+  },
+  "countsAfter": {
+    "provider_usage": 0,
+    "paid_receipt": 0,
+    "sync_runs": 0,
+    "calendar_events": 0,
+    "ops_calendar_event": 0,
+    "policy_record": 3,
+    "policy_version": 4
+  },
+  "browser": "NOT_RUN",
+  "samples": "Synthetic local manual notices only; no upstream requests or actual official notice validation",
+  "limits": "Loopback APIs/static assets only, no DOM events/keyboard/layout or packet-level egress capture"
+}

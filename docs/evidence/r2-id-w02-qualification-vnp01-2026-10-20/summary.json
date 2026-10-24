@@ -1,0 +1,355 @@
+{
+  "type": "documentation_qualification_and_single_HTML_evidence",
+  "recordedAt": "2026-10-20T04:11:48.125Z",
+  "root": "D:\\try one\\Shipping HOT",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "branch": "codex/shipping-hot-r2",
+  "qualification": {
+    "source": "ID-W02",
+    "verdict": "OK_LIMITED",
+    "public": "26/39",
+    "minimum": 32,
+    "shortfall": 6,
+    "information": "24/34",
+    "numeric": "historical3 limited diagnostics + new1 complete original offline parse; denominator5; no production integration rate",
+    "other40EntriesUnchanged": true,
+    "countingRulesUnchanged": true,
+    "r2_5Unchanged": true,
+    "parentReview": "independent static; did not rerun executor gates"
+  },
+  "productGateThisRound": "NOT_RUN_NO_PRODUCT_CHANGE_REUSE_ACCEPTED_PREVIOUS_EVIDENCE",
+  "vnP01": {
+    "request": {
+      "sourceId": "VN-P01",
+      "target": "https://vimawa.gov.vn/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-cua-luong-tu-phao-bao-hieu-hang-hai-so-0-den-het-vung",
+      "selection": "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/vn-p01-selection.json",
+      "archiveCheckedBeforeRequest": true,
+      "startedAt": "2026-10-20T04:08:23.785Z",
+      "receivedAt": "2026-10-20T04:08:26.323Z",
+      "finishedAt": "2026-10-20T04:08:26.366Z",
+      "systemDNSCalls": 1,
+      "physicalHTTP": 1,
+      "transportInvocations": 1,
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 45326,
+      "sha256": "53f944fa37ba4a7cf7423b171b81d749511650044656f5777eb88c498be2847e",
+      "rawExit": 0,
+      "limits": {
+        "timeoutMs": 10000,
+        "maxBytes": 524288,
+        "maxRedirects": 0,
+        "retries": 0
+      },
+      "otherDetails": 0,
+      "PDF": 0,
+      "images": 0,
+      "pagination": 0,
+      "login": false,
+      "rawRedistributed": false,
+      "outcome": "same_identity_HTML_no_own_date; qualified_source_status_unchanged"
+    },
+    "ownDate": null,
+    "submitted": "empty",
+    "footerDate": "29/12/2003 licence, excluded",
+    "verdictUnchanged": "PARTIAL/PARTIAL",
+    "sampleCount": 1,
+    "other9": "not generalized",
+    "sourceParserImplemented": false
+  },
+  "preservation": {
+    "checks": [
+      {
+        "path": "package.json",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/tsx-alias-loader.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-collect-job.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-environment.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-options.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-worker.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation-network.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation-network.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/web-list.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/config-keys.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/web-list-english-12h.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/html-index-candidates.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/services/article-fetch-security.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/manual-checklist.ts",
+        "unchanged": true
+      },
+      {
+        "path": ".data/calendarific-double-year-verification-20260908-b.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/calendarific-double-year-verification-20260908.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/p7-final-seal-20260904.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/provider-secrets.json",
+        "unchanged": true
+      },
+      {
+        "path": ".data/shipping-hot-v3-browser.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-https-abb1b99-20261019/run/.data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-manual-6087a16/run/.data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/dist/output/server/index.mjs",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/r2-four-reapplied-2026-10-15-private/MY-L01.response.bin",
+        "unchanged": true
+      },
+      {
+        "path": ".gitignore",
+        "unchanged": true
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "unchanged": true
+      },
+      {
+        "path": "AGENTS.md",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/content.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/manifest.json",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/popup.html",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/worker.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-aVjAIvTt.css",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-DHU7aOx9.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/defuddle-MIT.txt",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/obsidian-clipper-MIT.txt",
+        "unchanged": true
+      },
+      {
+        "path": "server/services/bmkg-port-forecast.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/services/bmkg-port-forecast.test.ts",
+        "unchanged": true
+      }
+    ],
+    "sourceFiles": 20,
+    "otherProtectedFiles": 21,
+    "HEADUnchanged": true
+  },
+  "CN_T01": "waiting user; no poll/DNS/HTTP",
+  "DBWrites": 0,
+  "sourceActivation": 0,
+  "serviceOrPluginSwitches": 0,
+  "paidCalls": 0,
+  "continuous24h": "NOT_RUN",
+  "R3": "NOT_RUN",
+  "commitPushPRMergeDeploy": 0,
+  "cleanup": "not authorized; preserved",
+  "finalAudit": {
+    "status": "passed_documentation_and_evidence_closeout_parent_review_pending",
+    "at": "2026-10-20T04:14:03.735Z",
+    "inventory": {
+      "skill": "e0/neat-freak",
+      "path": ".tmp/r2-qualification-vnp01-20261020/neat-inventory.log",
+      "rawExit": 0,
+      "sha256": "54f4d52f574598d7a2407b678890baef845dac7917346b616fb975a8dfca5267",
+      "markdownEntries": 8027
+    },
+    "docLint": {
+      "rawExit": 0,
+      "log": ".tmp/r2-qualification-vnp01-20261020/docs-lint-final.log",
+      "sha256": "e9710b4144d2259c28eba4994605ef41dc6cbb08b147526ed9e5c92f40f19322",
+      "originalRunLog": ".tmp/r2-qualification-vnp01-20261020/docs-lint.log"
+    },
+    "links": {
+      "checked": 283,
+      "broken": []
+    },
+    "diffCheck": {
+      "rawExit": 0,
+      "log": ".tmp/r2-qualification-vnp01-20261020/diff-check.log"
+    },
+    "json": {
+      "changedEntryIds": [
+        "ID-W02"
+      ],
+      "other40EntriesUnchanged": true,
+      "countingRulesUnchanged": true,
+      "r2_5Unchanged": true,
+      "public": 26,
+      "totalPublic": 39,
+      "statusCounts": {
+        "OK": 26,
+        "PARTIAL": 7,
+        "NOT_RUN": 3,
+        "STALE": 1,
+        "BLOCKED": 2
+      },
+      "availabilityRemaining": 13,
+      "informationRemaining": 10
+    },
+    "preservation": {
+      "sourceAndProtectedFilesUnchanged": 41,
+      "sourceFiles": 20,
+      "otherProtectedFiles": 21,
+      "headUnchanged": true,
+      "stagedEmpty": true,
+      "gitStatusEntries": 39,
+      "statusLog": ".tmp/r2-qualification-vnp01-20261020/final-git-status.log",
+      "originalParserDocuments": [
+        {
+          "path": "docs/evidence/r2-id-w02-offline-parser-2026-10-20/report.md",
+          "unchanged": true
+        },
+        {
+          "path": "docs/evidence/r2-id-w02-offline-parser-2026-10-20/closeout.md",
+          "unchanged": true
+        }
+      ],
+      "originalListUnchanged": true,
+      "BMKGOriginalUnchanged": true,
+      "VNDetailRawIgnored": true,
+      "VNDetailRawTracked": false
+    },
+    "docs": [
+      {
+        "path": "docs/status.md",
+        "sha256": "9268d78656f8406798a7637451348ff5d744b3257e24d2117f4e5f04a9d93923"
+      },
+      {
+        "path": "docs/intel-source-catalog.md",
+        "sha256": "6c2d06eeac91ed2e9429983ed127736606fbf4d7e78d7816a76bd4d08a69eede"
+      },
+      {
+        "path": "docs/handoffs/r2-next-execution-2026-10-15.md",
+        "sha256": "235242f4ff6dfac3abda68c8312c4b93e36d447a379c0761726f9c2590ec7701"
+      },
+      {
+        "path": "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+        "sha256": "c501d5d5659df3fdcea5377c8c6cd0d7902a75b22ebc6aedc2a1c657e1e6ad8d"
+      },
+      {
+        "path": "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/report.md",
+        "sha256": "09fcc3e4404ad41a74fd647ac32ac9e8ed79cdea9563b53ea6b0a12c8b747c8c"
+      },
+      {
+        "path": "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/remaining-matrix.md",
+        "sha256": "35ac6c08bcc13a946970ef977a73720be7137c59d45bb2216ed1653f58c77c5a"
+      },
+      {
+        "path": "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/closeout.md",
+        "sha256": "8f2ccaedc71c9c812b061808abc2cfd0f765563f4cd6f3ed48714038c711c8ec"
+      }
+    ],
+    "runtime": "single VN-P01 GET only; no DB/config/service/plugin changes",
+    "memory": "generated-read-only",
+    "rules": {
+      "bytes": 28170,
+      "unchanged": true,
+      "default32KiBBudgetFraction": 0.85968017578125
+    },
+    "warnings": [
+      "Git global ignore read permission warning unchanged",
+      "Node existing experimental-loader warning retained",
+      "mapping.json ignored by project ESLint rule (exit0/one warning); JSON parsing/counts/sole changed entry and other40 invariance checked independently"
+    ],
+    "pending": [
+      "parent review of documentation and single VN-P01 date evidence",
+      "VN-P01 own date unavailable in this HTML; no further request or source adapter authorized",
+      "R2 GUI/S7 and continuous24h remain unaccepted; R3 paused"
+    ],
+    "cleanup": "all evidence, backups, raw responses and temporary helpers preserved; no deletion"
+  }
+}

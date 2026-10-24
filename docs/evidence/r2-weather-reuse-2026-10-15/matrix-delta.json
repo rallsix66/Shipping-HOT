@@ -1,0 +1,190 @@
+{
+  "baselineHead": "16ae7b7c1f2e149caeceea0c727d7dba788d272c",
+  "changedSourceIdsOnly": [
+    "MY-W01"
+  ],
+  "other40SourceEntryDifferences": [],
+  "beforeCoverage": {
+    "r2_4": {
+      "numerator": 21,
+      "denominator": 39,
+      "ratio": 0.5384615384615384,
+      "minimumOK": 32,
+      "shortfall": 11,
+      "ids": [
+        "CN-P01",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "PH-M01",
+        "XX-W01",
+        "XX-K02",
+        "XX-M01",
+        "XX-M03",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "statusCounts": {
+        "OK": 21,
+        "PARTIAL": 11,
+        "NOT_RUN": 5,
+        "STALE": 1,
+        "BLOCKED": 1
+      },
+      "pass": false
+    },
+    "r2_5": {
+      "numerator": 18,
+      "denominator": 34,
+      "ratio": 0.5294117647058824,
+      "remaining": 16,
+      "ids": [
+        "CN-P01",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "PH-M01",
+        "XX-K02",
+        "XX-M01",
+        "XX-M03"
+      ],
+      "statusCounts": {
+        "PASS": 18,
+        "NOT_RUN": 11,
+        "FAIL": 4,
+        "PARTIAL": 1
+      },
+      "pass": false
+    },
+    "numericFieldsSeparate": {
+      "numerator": 3,
+      "denominator": 5,
+      "ids": [
+        "XX-W01",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness"
+    },
+    "r2Continuous24h": {
+      "numerator": 0,
+      "denominator": 39,
+      "status": "NOT_RUN"
+    },
+    "overallR2Pass": false
+  },
+  "afterCoverage": {
+    "r2_4": {
+      "numerator": 22,
+      "denominator": 39,
+      "ratio": 0.5641025641025641,
+      "minimumOK": 32,
+      "shortfall": 10,
+      "ids": [
+        "CN-P01",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-W01",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "PH-M01",
+        "XX-W01",
+        "XX-K02",
+        "XX-M01",
+        "XX-M03",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "statusCounts": {
+        "OK": 22,
+        "PARTIAL": 10,
+        "NOT_RUN": 5,
+        "STALE": 1,
+        "BLOCKED": 1
+      },
+      "pass": false
+    },
+    "r2_5": {
+      "numerator": 19,
+      "denominator": 34,
+      "ratio": 0.5588235294117647,
+      "remaining": 15,
+      "ids": [
+        "CN-P01",
+        "CN-T02",
+        "VN-P03",
+        "VN-W01",
+        "VN-T01",
+        "VN-D01",
+        "TH-W01",
+        "TH-C01",
+        "TH-C02",
+        "MY-W01",
+        "MY-C01",
+        "MY-T01",
+        "ID-W01",
+        "ID-T01",
+        "PH-C01",
+        "PH-M01",
+        "XX-K02",
+        "XX-M01",
+        "XX-M03"
+      ],
+      "statusCounts": {
+        "PASS": 19,
+        "NOT_RUN": 10,
+        "FAIL": 4,
+        "PARTIAL": 1
+      },
+      "pass": false
+    },
+    "numericFieldsSeparate": {
+      "numerator": 3,
+      "denominator": 5,
+      "ids": [
+        "XX-W01",
+        "XX-A01",
+        "XX-A02"
+      ],
+      "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness"
+    },
+    "r2Continuous24h": {
+      "numerator": 0,
+      "denominator": 39,
+      "status": "NOT_RUN"
+    },
+    "overallR2Pass": false
+  },
+  "otherWeatherQualificationsChanged": false,
+  "upstreamRequests": 0,
+  "systemDns": 0
+}

@@ -1,0 +1,16 @@
+const fs=require('node:fs'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+const dir='docs/evidence/r2-p1-acceptance-mapping-2026-10-13';
+const j=JSON.parse(fs.readFileSync(dir+'/acceptance-mapping.json','utf8'));
+const p=JSON.parse(fs.readFileSync('docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json','utf8'));
+assert.equal(crypto.createHash('sha256').update(fs.readFileSync('docs/intel-source-catalog.md')).digest('hex'),j.catalogSha256);
+assert.deepEqual(j.entries.map(r=>[r.id,r.url,r.format,r.catalogState]),p.entries.map(r=>[r.id,r.url,r.format,r.catalogState]));
+assert.equal(j.entries.length,41);assert.equal(new Set(j.entries.map(r=>r.id)).size,41);
+assert.equal(j.finalR2ArticleDenominator,null);assert.equal(j.finalCoverage,null);
+assert.equal(Object.values(j.groups).reduce((a,b)=>a+b,0),41);
+assert.deepEqual(j.batch.map(r=>r.id),['MY-P02','PH-M01','MY-C01','MY-T01','TH-W01','ID-W01']);
+assert.equal(j.batch.length,6);assert.equal(j.maxTotalHttpRequests,6);
+for(const r of j.batch){const original=p.entries.find(s=>s.id===r.id);assert.equal(r.url,original.url);assert.equal(r.format,'rss');assert.equal(r.requestLimit,1);assert.equal(r.maxBytes,524288);assert.equal(r.timeoutMs,10000);assert.equal(r.maxRedirects,0);assert.equal(r.retries,0);assert.equal(r.paidCalls,0);assert.equal(r.details,0);assert.equal(new URL(r.url).hostname,r.host);assert.ok(r.status.startsWith('NOT_RUN'));}
+const log=fs.readFileSync(dir+'/nmc-offline.log','utf8');assert.ok(log.includes('# full_sha: '+j.baseline));assert.ok(log.includes('# raw_exit_code: 0'));
+const result=log.split('\n').filter(l=>l.startsWith('{"id"')).map(l=>JSON.parse(l));assert.equal(result.length,2);
+for(const r of result){assert.equal(r.qualifyingAnchors,0);assert.equal(r.items,0);assert.equal(r.collector,'failed');assert.equal(r.networkCalls,0);assert.equal(r.publishedAt,null);assert.equal(r.sha256,crypto.createHash('sha256').update(fs.readFileSync(r.archive)).digest('hex'));}
+console.log('PASS unchanged catalog hash and41 ID/URL/format/state rows; proposed groups sum41; final denominator/coverage null; exact6 RSS batch URLs with 512KiB/10s/one request/no redirect/retry/paid; NMC archive hashes and negative suitability results');

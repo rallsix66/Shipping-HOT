@@ -1,0 +1,13 @@
+{
+  "command": "node node_modules/vitest/vitest.mjs run -c .tmp/r2-id-t02-location-20261015.config.ts",
+  "startedAt": "2026-10-15T07:37:45.594Z",
+  "finishedAt": "2026-10-15T07:37:48.949Z",
+  "executionHead": "4ca3a77cd8cdb1be3c793052b7edff628cec0529",
+  "productCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "rawExit": 0,
+  "signal": null,
+  "stdoutExactUtf8": "\n RUN  v4.0.18 D:/try one/Shipping HOT\n\n ✓ .tmp/r2-id-t02-location-20261015.test.ts (1 test) 2114ms\n   ✓ one exact ID-T02 catalogue GET and at most one independently validated real Location target  2114ms\n\n Test Files  1 passed (1)\n      Tests  1 passed (1)\n   Start at  15:37:46\n   Duration  2.74s (transform 182ms, setup 0ms, import 454ms, tests 2.11s, environment 0ms)\n\n",
+  "stderrExactUtf8": "Duplicated imports \"string\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/calendar.ts\" is used\nDuplicated imports \"VN\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"TH\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"MY\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"PH\", the one from \"D:/try one/Shipping HOT/shared/annual-calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"string\", the one from \"D:/try one/Shipping HOT/shared/calendar.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/policy.ts\" is used\nDuplicated imports \"lazada\", the one from \"D:/try one/Shipping HOT/shared/policy.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/promo-calendar.ts\" is used\nDuplicated imports \"tiktok_shop\", the one from \"D:/try one/Shipping HOT/shared/policy.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/promo-calendar.ts\" is used\nDuplicated imports \"string\", the one from \"D:/try one/Shipping HOT/shared/policy.ts\" has been ignored and \"D:/try one/Shipping HOT/shared/promo-calendar.ts\" is used\n",
+  "stdoutOriginalByteSha256": "203710949f0a0d7fe6d2951a3374e7999c4f83346f4db6768b2daedeca011118",
+  "stderrOriginalByteSha256": "2b2089ef48a0decf6778aa45b416b29808b7d9476761ca686b28c9a254486d42"
+}

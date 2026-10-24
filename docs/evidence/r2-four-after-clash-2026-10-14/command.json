@@ -1,0 +1,1 @@
+{"started":"2026-10-14T07:56:28.653Z","endedAt":"2026-10-14T07:56:35.039Z","command":"pnpm exec vitest run -c .tmp/four-after-clash-20261014.config.ts","rawExit":0,"signal":null}

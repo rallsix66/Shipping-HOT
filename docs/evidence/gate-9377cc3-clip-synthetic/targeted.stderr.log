@@ -1,0 +1,26 @@
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/clipper-synthetic-final-9377cc3/shared/promo-calendar.ts" is used
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m server/api/shipping/intel/read-http.test.ts[2m > [22mintel actual HTTP read routes[2m > [22mrepeated GETs remain SELECT-only; read dependency closure contains no network/LLM/runtime imports
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m server/api/shipping/intel/read-http.test.ts:[2m177:208[22m[39m
+
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+

@@ -1,0 +1,28 @@
+const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),crypto=require('node:crypto')
+const root=process.cwd(),cwd=path.join(root,'.tmp','sitc-metadata-build-20261015'),sha=cp.execFileSync('git',['rev-parse','HEAD'],{cwd,encoding:'utf8'}).trim()
+if(process.version!=='v24.15.0'||process.versions.modules!=='137')throw Error('wrong_toolchain')
+if(sha!==fs.readFileSync('.tmp/sitc-metadata-code-sha.txt','utf8').trim())throw Error('wrong_clean_sha')
+if(cp.execFileSync('git',['status','--porcelain'],{cwd,encoding:'utf8'}).trim())throw Error('clone_not_clean')
+if(fs.existsSync(path.join(cwd,'node_modules')))throw Error('fresh_install_requires_no_existing_modules')
+const dir=path.join(root,'docs','evidence','gate-'+sha.slice(0,7)+'-sitc-metadata');fs.mkdirSync(dir,{recursive:true})
+if(fs.existsSync(path.join(dir,'launch.json')))throw Error('gate_already_launched')
+const commands=[['install','pnpm install --frozen-lockfile'],['build','pnpm build'],['typecheck','pnpm typecheck'],['lint','pnpm lint'],['targeted','pnpm exec vitest run -c vitest.config.ts server/intel/sitc-index.test.ts server/intel/sources/json-list-html.test.ts server/intel/sources/json-list.test.ts server/intel/vn-disaster-index.test.ts server/intel/post-clash-index.test.ts server/intel/thai-document-index.test.ts server/intel/public-index-candidates-collect.test.ts server/intel/html-index-candidates-collect.test.ts server/intel/sources/html-index-candidates.test.ts server/intel/sources/web-list.test.ts server/intel/sources/web-list-conflicts.test.ts server/intel/web-list-conflicts-collect.test.ts server/intel/json-list-collect.test.ts server/intel/web-list-collect.test.ts server/intel/adaptive.test.ts server/runtime/intel-production.test.ts server/runtime/intel-bootstrap.test.ts server/intel/collect.test.ts'],['vitest','pnpm exec vitest run -c vitest.config.ts'],['smoke-p0','pnpm smoke:p0-native'],['smoke-p2c','pnpm smoke:p2c-runtime'],['smoke-feed','pnpm smoke:p3-feed-freshness']]
+const env=Object.fromEntries(Object.entries(process.env).filter(([k])=>!/(?:DEEPSEEK|BAILIAN|DASHSCOPE|QWEN|OPENAI|ANTHROPIC|GFW|VESSELAPI|AISSTREAM|SHIPPING_INTEL_ENABLED|SHIPPING_INTEL_SOURCE_IDS)/i.test(k)))
+const files=['.data/shipping-hot-v3.sqlite3','.data/shipping-hot-v3-browser.sqlite3','.data/p7-final-seal-20260904.sqlite3','.data/provider-secrets.json']
+function hashes(){return Object.fromEntries(files.map(p=>[p,fs.existsSync(p)?crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'):'absent']))}
+fs.mkdirSync(path.join(cwd,'.tmp'),{recursive:true})
+const before=hashes(),results=[]
+fs.writeFileSync(path.join(dir,'launch.json'),JSON.stringify({sha,cwd,startedAt:new Date().toISOString(),cleanClone:true,existingNodeModules:false,installScriptsNotSkipped:true,providerCredentialEnvironmentScrubbed:true,node:process.version,abi:process.versions.modules},null,2)+'\n')
+;(async()=>{for(const [name,command]of commands){
+ const startedAt=new Date().toISOString();console.log('START '+name)
+ const out=fs.openSync(path.join(dir,name+'.stdout.log'),'w'),err=fs.openSync(path.join(dir,name+'.stderr.log'),'w')
+ const child=cp.spawn(process.env.ComSpec||'cmd.exe',['/d','/s','/c',command],{cwd,env,windowsHide:true,stdio:['ignore',out,err]})
+ const rawExit=await new Promise((resolve,reject)=>{child.once('error',reject);child.once('exit',resolve)})
+ fs.closeSync(out);fs.closeSync(err)
+ const item={name,command,cwd,sha,startedAt,finishedAt:new Date().toISOString(),rawExit};results.push(item);fs.writeFileSync(path.join(dir,name+'.json'),JSON.stringify(item,null,2)+'\n');console.log('END '+name+' exit='+rawExit)
+ if(rawExit!==0)break
+}
+const after=hashes(),sourceDiff=cp.execFileSync('git',['diff','--name-only','--','server','src','shared','scripts','package.json','pnpm-lock.yaml','nitro.config.ts','.github'],{cwd,encoding:'utf8'}).trim()
+const summary={sha,cwd,commands:results,retainedBefore:before,retainedAfter:after,retainedUnchanged:JSON.stringify(before)===JSON.stringify(after),testedSourceDiff:sourceDiff,browser:'NOT_RUN',s7:'NOT_RUN_no_UI_or_route_change; prior_GUI_acceptance_pending'}
+fs.writeFileSync(path.join(dir,'summary.json'),JSON.stringify(summary,null,2)+'\n');process.exitCode=results.length===commands.length&&results.every(x=>x.rawExit===0)&&summary.retainedUnchanged&&!sourceDiff?0:1
+})().catch(e=>{console.log(JSON.stringify({gateErrorType:e.name}));process.exitCode=1})

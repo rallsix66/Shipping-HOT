@@ -1,0 +1,120 @@
+from pathlib import Path
+from datetime import datetime, timezone
+import hashlib, json, re, shutil, subprocess
+
+root = Path('.').resolve()
+batch = Path('docs/evidence/r2-carrier-news-two-2026-10-15')
+matrix = Path('docs/evidence/r2-current-source-matrix-2026-10-14')
+head = 'a5da09871d1a017ae947a0f3f56980461807bfaf'
+code = '355952c0e8c01266adbe692dfcfd3bca9b3c17b2'
+now = datetime.now(timezone.utc).isoformat()
+def read(p): return json.loads(Path(p).read_text(encoding='utf-8-sig'))
+def write(p, x): Path(p).write_bytes((json.dumps(x, ensure_ascii=False, indent=2) + '\n').encode('utf-8'))
+def text(p, s): Path(p).write_bytes((s.rstrip() + '\n').encode('utf-8'))
+def sha(b): return hashlib.sha256(b).hexdigest()
+assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == head
+launch = read(batch/'launch.json'); command = read(batch/'command.json'); summary = read(batch/'summary.json')
+assert launch['head'] == command['head'] == head and launch['productCodeSha'] == code
+assert summary['systemDnsCalls'] == 2 and summary['reservedTransportCalls'] == 0
+assert read(batch/'request-ledger.json') == []
+source_diff = subprocess.check_output(['git','diff','--name-only',code,head],text=True).splitlines()
+assert all(p.startswith('docs/') or p == 'AGENTS.md' for p in source_diff)
+original = (batch/'manifest.json').read_bytes()
+assert not (batch/'manifest.original.json').exists(), 'One-time provenance correction already applied'
+(batch/'manifest.original.json').write_bytes(original)
+manifest = json.loads(original)
+old_label = manifest['productCodeSha']
+assert old_label == '355bc861d4020ba22ddd00401de709d7cee497e3'
+manifest.update({'productCodeSha':code, 'executionHead':head,
+                 'provenanceCorrection':'execution-binding.json; original stale diagnostic label retained in manifest.original.json and executed procedure'})
+write(batch/'manifest.json',manifest)
+for local, archive in [
+    ('.tmp/carrier-news-two-20261015.test.ts','capture-procedure.test.ts.txt'),
+    ('.tmp/carrier-news-two-20261015.config.ts','capture-config.ts.txt'),
+    ('.tmp/execute-carrier-news-two-20261015.cjs','capture-launcher.cjs.txt'),
+    ('.tmp/inspect-carrier-clash-readonly.py','clash-readonly-procedure.py.txt')]:
+    text(batch/archive,Path(local).read_text(encoding='utf-8'))
+catalog = Path('docs/intel-source-catalog.md').read_text(encoding='utf-8').splitlines()
+row_checks=[]
+for result in summary['results']:
+    row=next(l for l in catalog if l.startswith('| '+result['id']+' |'))
+    row_checks.append({'id':result['id'],'matches':sha(row.encode('utf-8'))==result['catalogLineSha256']})
+assert all(r['matches'] for r in row_checks)
+write(batch/'execution-binding.json',{
+    'correctedAt':now,'executionHead':head,'productCodeSha':code,
+    'launchAndCommandHeadAgree':True,'launcherProductCodeShaAgrees':True,
+    'codeToExecutionHeadNonDocumentationDiff':[], 'catalogRowChecks':row_checks,
+    'originalIncorrectManifestProductCodeSha':old_label,
+    'originalManifestPreserved':'manifest.original.json','originalManifestByteSha256':sha(original),
+    'reason':'Copied diagnostic test hardcoded an older code label; launch.json and command.json bind the actual clean execution HEAD. Product tree matches the accepted 355952c code. Only metadata corrected; no capture rerun.',
+    'executedProcedureRetainsOriginalStaleLabel':True,
+    'additionalDnsCalls':0,'additionalHttpRequests':0,
+    'functionalGateThisRound':'NOT_RUN_docs_only; accepted clean code gate remains separate at gate-355952c-anchor-date-repair'
+})
+raw_logs={}
+for name in ['stdout.log','stderr.log']:
+    raw=(batch/name).read_bytes()
+    raw_logs[name]={'byteSha256':sha(raw),'utf8':raw.decode('utf-8')}
+    text(batch/name,'\n'.join(l.rstrip() for l in raw.decode('utf-8').splitlines()))
+write(batch/'capture-output-original.json',{'command':'command.json','rawExit':command['rawExit'],
+    'scope':'Exact original UTF-8 stdout/stderr strings and byte hashes; adjacent display logs only trim trailing whitespace/blank EOF.',
+    'logs':raw_logs})
+inventory=Path('.tmp/carrier-closeout-inventory-20261015.txt').read_bytes()
+lines=inventory.decode('utf-8').splitlines();kept=[];skip=False
+for line in lines:
+    if line.startswith('## '):skip=line=='## project-markdown'
+    if not skip:kept.append(line.rstrip())
+text(batch/'inventory.txt','\n'.join(kept))
+write(batch/'inventory-metadata.json',{'rawExit':0,'fullInventoryByteSha256':sha(inventory),
+    'localOriginal':'.tmp/carrier-closeout-inventory-20261015.txt',
+    'publicExcerpt':'inventory.txt','omittedSection':'project-markdown full path enumeration only',
+    'scope':'Directory/rule/Git inventory, not security audit. Full local listing and workspace residue preserved.'})
+
+shutil.copyfile(matrix/'mapping.json','.tmp/carrier-matrix-before.json')
+p=Path('.tmp/build-current-r2-matrix.py');s=p.read_text(encoding='utf-8')
+s=s.replace("HEAD = 'd22019c3e432fc84ad51e1132aedd14708a82b4e'",f"HEAD = '{head}'")
+block="""    if sid in ['XX-K01','XX-K02']:
+        current_batch='docs/evidence/r2-carrier-news-two-2026-10-15'
+        attempt=outcome(current_batch+'/summary.json',sid)
+        e['latestAttempt']={'evidence':ref(current_batch+'/summary.json',{'id':sid}),
+            'dnsEvidence':ref(current_batch+'/dns-ledger.json',{'id':sid}),
+            'configPresenceEvidence':ref(current_batch+'/clash-host-presence.json'),
+            'executionBinding':ref(current_batch+'/execution-binding.json'),
+            'at':attempt['startedAt'],'url':attempt['url'],'host':attempt['host'],
+            'addresses':attempt['addresses'],'systemDnsCalls':1,'httpRequests':0,
+            'reason':'blocked_address','parser':'NOT_RUN',
+            'scope':'one system DNS only; special-range address blocked before HTTP; no retry or settings change'}
+        e['r2_4']={'verdict':'BLOCKED','countedOK':False,'reason':'One actual system DNS resolved 198.18 special-range address; existing secure-fetch safety check stopped before transport. Environment blockage is not a page/content qualification failure.'}
+        e['r2_5']={'verdict':'NOT_RUN','countedPass':False,'reason':'HTTP0; no response bytes, title/link/date parsing or original-page replay. No invented selectors or source-time semantics.'}
+        e['gaps']=['Target exact host absent from selected extension literals and generated DNS filter at read-only check; no settings modified.', 'Public DNS/actual exact index response and source field/license qualification remain pending; no retry authorized by this closeout.']
+"""
+assert s.count('    entries.append(e)')==1
+s=s.replace('    entries.append(e)',block+'    entries.append(e)')
+text(p,s)
+subprocess.run(['python',str(p)],check=True)
+shutil.copyfile(p,matrix/'build-matrix.py.txt')
+before=read('.tmp/carrier-matrix-before.json');after=read(matrix/'mapping.json')
+old={e['id']:e for e in before['entries']};other_changes=[e['id'] for e in after['entries'] if e['id'] not in ['XX-K01','XX-K02'] and e!=old[e['id']]]
+assert other_changes == []
+write(batch/'matrix-delta.json',{'onlyChangedSourceIds':['XX-K01','XX-K02'],
+    'otherSourceEntryDifferences':other_changes,'r2_4Before':before['measuredCoverage']['r2_4'],
+    'r2_4After':after['measuredCoverage']['r2_4'],'r2_5Unchanged':before['measuredCoverage']['r2_5']==after['measuredCoverage']['r2_5'],
+    'numericUnchanged':before['measuredCoverage']['numericFieldsSeparate']==after['measuredCoverage']['numericFieldsSeparate']})
+report=matrix/'report.md';s=report.read_text(encoding='utf-8')
+s=s.replace('20 OK、11 PARTIAL、1 STALE、7 NOT_RUN','20 OK、11 PARTIAL、1 STALE、2 BLOCKED、5 NOT_RUN')
+s=s.replace('## 四源最新批次（精确索引已各GET一次）','## 前一四源批次（精确索引已各GET一次）')
+s=s.replace('[最新报告](../r2-four-reapplied-2026-10-15/report.md)','[该历史批次报告](../r2-four-reapplied-2026-10-15/report.md)')
+s=s.replace('覆盖不变，本轮新增来源HTTP/DNS0','覆盖不变，P2修复轮新增来源HTTP/DNS0')
+intro='本轮最新两源只做系统DNS各1次：Maersk `www.maersk.com`→`198.18.0.217`，ONE `www.one-line.com`→`198.18.0.218`；现有安全检查均BLOCKED、HTTP0、解析NOT_RUN。两精确主机不在当前选中扩展字面量/生成DNS过滤表中；仅只读核对，未改设置、未重试。执行HEAD `'+head+'`，产品源码仍为 `'+code+'`；旧manifest标签已带原件更正，未重跑采集。[两源事实、SHA绑定和最小下一步](../r2-carrier-news-two-2026-10-15/report.md)。\n\n'
+s=s.replace('\n\n','\n\n'+intro,1)
+for sid,host,ip,url in [('XX-K01','www.maersk.com','198.18.0.217','https://www.maersk.com/news'),('XX-K02','www.one-line.com','198.18.0.218','https://www.one-line.com/en/news')]:
+    new=f'| {sid} | {url} | 2026-10-15T02:03:12Z / HTTP0 [DNS](../r2-carrier-news-two-2026-10-15/dns-ledger.json) | BLOCKED | NOT_RUN | `{host}`系统DNS一次返回`{ip}`，安全检查阻断；无响应/解析，不判页面不合格，未改设置。 |'
+    s=re.sub(r'^\| '+sid+r' \|.*$',lambda _:new,s,flags=re.M)
+text(report,s)
+text(matrix/'closeout.md','当前收尾见[两源DNS证据与真实Neat Freak](../r2-carrier-news-two-2026-10-15/closeout.md)。本批系统DNS2、HTTP0，收尾阶段新增DNS/HTTP0；产品源码仍为355952c0e8c01266adbe692dfcfd3bca9b3c17b2，功能门禁本轮NOT_RUN。覆盖20/39、12/34、有限数值3/5不变；两源从未运行改为环境DNS BLOCKED。[当前逐源报告](report.md)。')
+status=Path('docs/status.md');s=status.read_text(encoding='utf-8')
+s=s.replace('20 OK / 11 PARTIAL / 1 STALE / 7 NOT_RUN','20 OK / 11 PARTIAL / 1 STALE / 2 BLOCKED / 5 NOT_RUN',1)
+addition='最新Maersk/ONE两源在2026-10-15 02:03:12 UTC各做一次系统DNS：`www.maersk.com`=`198.18.0.217`、`www.one-line.com`=`198.18.0.218`。安全检查在HTTP前阻断，两源R2-4 BLOCKED、R2-5/解析NOT_RUN；无正文、HTTP状态或页面字段结论。选中Clash扩展与磁盘生成filter21项均无这两个精确主机；只读检查，未读取/导出凭据字段或修改设置。采集HEAD a5da09871d1a017ae947a0f3f56980461807bfaf，代码355952c0e8c01266adbe692dfcfd3bca9b3c17b2；manifest旧标签已保留原件后更正，没有重跑采集。本轮仅证据文档收尾，功能门禁NOT_RUN，[两源证据](evidence/r2-carrier-news-two-2026-10-15/report.md) / [后续执行交接](handoffs/r2-next-execution-2026-10-15.md)。以下前批次与P2修复记录保留其原范围。\n\n'
+needle='用户重新应用后只读核实生成21项'
+assert needle in s;s=s.replace(needle,addition+needle,1);text(status,s)
+print(json.dumps({'manifestCorrected':True,'otherSourceEntryDifferences':other_changes,'coverage':after['measuredCoverage']},ensure_ascii=True))

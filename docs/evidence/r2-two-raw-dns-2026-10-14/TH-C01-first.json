@@ -1,0 +1,66 @@
+{
+  "id": "TH-C01",
+  "startedAt": "2026-10-14T07:30:18.408Z",
+  "status": "NOT_RUN",
+  "config": {
+    "listSelector": "table.table-hover",
+    "itemSelector": "tbody > tr",
+    "linkSelector": "td:nth-child(3) a[href]",
+    "titleSelector": "td:nth-child(3) a[href]",
+    "publishedAtSelector": "td:nth-child(4)",
+    "calendar": "buddhist",
+    "dateFormat": "thai_month_name",
+    "allowUrlPrefixes": [
+      "https://www.customs.go.th/cont_strc_simple_with_date.php"
+    ],
+    "dateRuleBasis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied."
+  },
+  "sourceEnabled": false,
+  "permission": "private complete raw replay only; sanitized bounded metadata committed, not raw HTML",
+  "actualHttpRequests": 0,
+  "rawBytes": 123781,
+  "rawSha256": "96349dcd1383c8ed1e33b9ad7905f5355f4a6ff9c5528e065e13a09aae30398c",
+  "expectedRawSha256": "96349dcd1383c8ed1e33b9ad7905f5355f4a6ff9c5528e065e13a09aae30398c",
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 123781
+  },
+  "adapter": {
+    "status": "parsed",
+    "count": 100,
+    "withLocalDay": 100,
+    "withInstant": 0,
+    "dateRules": [
+      "configured_thai_month_name_buddhist_minus_543"
+    ]
+  },
+  "first": {
+    "status": "ok_items",
+    "runId": "5b7b015c-907d-414d-ad70-0e77c3225584",
+    "itemsSeen": 100,
+    "itemsNew": 100,
+    "itemsRevised": 0
+  },
+  "firstCounts": {
+    "items": {
+      "n": 100
+    },
+    "versions": {
+      "n": 100
+    }
+  }
+}

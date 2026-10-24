@@ -1,0 +1,13 @@
+{
+  "sha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "startedAt": "2026-10-15T03:40:11.160Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "-c",
+    ".tmp/one-catalog-candidate-replay-20261015.config.ts"
+  ],
+  "actualSourceHttpRequests": 0,
+  "material": "Complete original ONE635664byte HTML through collector, not reconstructed JSON response"
+}

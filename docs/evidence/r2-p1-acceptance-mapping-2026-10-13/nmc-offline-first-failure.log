@@ -1,0 +1,52 @@
+# command: pnpm exec vitest run -c .tmp/nmc-offline.config.ts
+# full_sha: 0b532e1917ee5425194965b20e0fdf8c2a1f4805
+# started: 2026-10-13T03:54:03.208Z
+# stdout
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ❯ .tmp/nmc-offline.test.ts (2 tests | 2 failed) 216ms
+     × 'CN-W01' has product metadata but no qualifying list detail link 154ms
+     × 'CN-W02' has product metadata but no qualifying list detail link 61ms
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  11:54:04
+   Duration  1.56s (transform 606ms, setup 0ms, import 1.06s, tests 216ms, environment 1ms)
+
+
+# stderr
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  .tmp/nmc-offline.test.ts > NMC existing product-page suitability for current intel list contract > 'CN-W01' has product metadata but no qualifying list detail link
+ FAIL  .tmp/nmc-offline.test.ts > NMC existing product-page suitability for current intel list contract > 'CN-W02' has product metadata but no qualifying list detail link
+AssertionError: expected undefined to be 'web_list_invalid_link' // Object.is equality
+
+- Expected: 
+"web_list_invalid_link"
+
++ Received: 
+undefined
+
+ ❯ .tmp/nmc-offline.test.ts:47:7
+     45|       expect(result).toMatchObject({ status: "failed", errorCode: "par…
+     46|       expect(await state.repository.listItems(seed.id)).toEqual([])
+     47|       expect((await state.repository.listRuns(seed.id))[0].errorMessag…
+       |       ^
+     48|       expect(forbiddenFetch).not.toHaveBeenCalled()
+     49|       expect(transports).toBe(1)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+# raw_exit_code: 1

@@ -1,0 +1,20 @@
+{
+  "repository": "https://github.com/KKKKhazix/AIHOT",
+  "commit": "44578fa11da55f2e863900752653e0c221f6cf70",
+  "file": "packages/backend/src/content/materials.ts",
+  "blobOid": "b22b96b2766faad7150273b520a8ca4653daa990",
+  "fileBytes": 11503,
+  "fileSha256": "84c029ce0c995060c18ce7f7a1b52ea1eb7f0201d602775c2039a393331c72ec",
+  "readFromExistingLocalClone": true,
+  "networkFetchesForReference": 0,
+  "exports": [
+    "decideTimeline",
+    "isHistorical",
+    "contentHash",
+    "identityKeyFor",
+    "upsertMaterial"
+  ],
+  "adaptation": "responsibility mapping only; no upsertMaterial/storage copy; missing internal exact-version read composed from existing repositories/license functions",
+  "auditPath": "docs/evidence/r2-material-read-2026-10-15/audit.md",
+  "codeSha": "954c831f27eff4fd4382a0ea68be3894de053759"
+}

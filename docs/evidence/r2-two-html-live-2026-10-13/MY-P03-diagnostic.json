@@ -1,0 +1,12 @@
+{
+  "id": "MY-P03",
+  "kind": "same-response in-memory structural counts and parser diagnostic; not original HTML",
+  "listSelector": ".div-article-main2",
+  "listMatches": 1,
+  "itemMatches": 86,
+  "parserErrorCode": null,
+  "parsedCount": 84,
+  "dateOnly": 83,
+  "unknownDate": 1,
+  "publishedInstants": 0
+}

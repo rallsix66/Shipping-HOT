@@ -1,0 +1,12 @@
+const fs = require('node:fs'), cp = require('node:child_process')
+const dir = 'docs/evidence/r2-one-newsroom-target-2026-10-15'
+fs.mkdirSync(dir, { recursive: true })
+if (fs.existsSync(dir + '/launch.json') || fs.existsSync(dir + '/dns-ledger.json') || fs.existsSync(dir + '/request-ledger.json')) throw Error('launch_exists_do_not_repeat')
+const args = ['node_modules/vitest/vitest.mjs', 'run', '-c', '.tmp/one-newsroom-target-20261015.config.ts']
+const startedAt = new Date().toISOString(), head = cp.execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
+if (head !== '03d1515d33dd1c5d96137c43e0aafb596b334be3') throw Error('unexpected_head_do_not_capture')
+fs.writeFileSync(dir + '/launch.json', JSON.stringify({ startedAt, command: [process.execPath, ...args], head, productCodeSha: '355952c0e8c01266adbe692dfcfd3bca9b3c17b2', authorization: 'ONE only: separately approved saved308 target https://www.one-line.com/en/newsroom, once systemDNS/public pinned GET, no further follow/retry/detail or config/catalog write; Maersk synthetic-only no real request' }, null, 2) + '\n')
+const result = cp.spawnSync(process.execPath, args, { windowsHide: true, encoding: 'utf8', maxBuffer: 1 << 22, env: { ...process.env, SHIPPING_APPROVED_ONE_NEWSROOM_TARGET: '1', SHIPPING_ERROR_RECORDING_ONLY: '0' } })
+fs.writeFileSync(dir + '/command.json', JSON.stringify({ startedAt, finishedAt: new Date().toISOString(), command: [process.execPath, ...args], head, rawExit: result.status, signal: result.signal }, null, 2) + '\n')
+fs.writeFileSync(dir + '/stdout.log', result.stdout ?? '', 'utf8'); fs.writeFileSync(dir + '/stderr.log', result.stderr ?? '', 'utf8')
+console.log(JSON.stringify({ rawExit: result.status, evidence: dir, noAutomaticRerun: true })); process.exitCode = result.status ?? 1

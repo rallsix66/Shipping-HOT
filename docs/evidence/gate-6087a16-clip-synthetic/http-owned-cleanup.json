@@ -1,0 +1,16 @@
+[
+  {
+    "pid": 26824,
+    "command": "\"C:\\Program Files\\nodejs\\node.exe\" \"D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-6087a16\\dist\\output\\server\\index.mjs\"",
+    "parentPid": 32928,
+    "parentCommand": "\"C:\\Program Files\\nodejs\\node.exe\" .tmp/clip-synthetic-accept.cjs",
+    "stoppedOnlyVerifiedOwned": true
+  },
+  {
+    "pid": 20908,
+    "command": "\"C:\\Program Files\\nodejs\\node.exe\" \"D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-6087a16\\.tmp\\clipper-manual-6087a16\\app-test\\server\\index.mjs\"",
+    "parentPid": 31580,
+    "parentCommand": "\"C:\\Program Files\\nodejs\\node.exe\" --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs \"D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-6087a16\\tools\\clip-synthetic\\serve.ts\" \"D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-6087a16\\.tmp\\clipper-manual-6087a16\"",
+    "stoppedOnlyVerifiedOwned": true
+  }
+]

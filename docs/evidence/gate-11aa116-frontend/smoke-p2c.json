@@ -1,0 +1,9 @@
+{
+  "name": "smoke-p2c",
+  "command": "pnpm smoke:p2c-runtime",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\ports-demo-review-build",
+  "sha": "11aa1162a286d96bdc7a44a2f61a95d3d2a886e8",
+  "startedAt": "2026-10-14T03:00:35.151Z",
+  "endedAt": "2026-10-14T03:00:36.282Z",
+  "rawExit": 0
+}

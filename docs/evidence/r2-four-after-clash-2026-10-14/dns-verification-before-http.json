@@ -1,0 +1,77 @@
+{
+  "systemLookups": 4,
+  "httpRequests": 0,
+  "changes": 0,
+  "results": [
+    {
+      "hostname": "www.gd.msa.gov.cn",
+      "startedAt": "2026-10-14T07:54:13.711Z",
+      "resolver": "system node:dns/promises.lookup all:true",
+      "httpRequests": 0,
+      "addresses": [
+        {
+          "address": "121.8.249.10",
+          "family": 4,
+          "blockedByProjectSafety": false
+        },
+        {
+          "address": "183.236.4.162",
+          "family": 4,
+          "blockedByProjectSafety": false
+        }
+      ],
+      "classification": "PUBLIC_BY_PROJECT_SAFETY",
+      "finishedAt": "2026-10-14T07:54:13.760Z"
+    },
+    {
+      "hostname": "szs.mof.gov.cn",
+      "startedAt": "2026-10-14T07:54:13.760Z",
+      "resolver": "system node:dns/promises.lookup all:true",
+      "httpRequests": 0,
+      "addresses": [
+        {
+          "address": "58.220.78.75",
+          "family": 4,
+          "blockedByProjectSafety": false
+        },
+        {
+          "address": "180.163.118.9",
+          "family": 4,
+          "blockedByProjectSafety": false
+        }
+      ],
+      "classification": "PUBLIC_BY_PROJECT_SAFETY",
+      "finishedAt": "2026-10-14T07:54:13.804Z"
+    },
+    {
+      "hostname": "vimawa.gov.vn",
+      "startedAt": "2026-10-14T07:54:13.805Z",
+      "resolver": "system node:dns/promises.lookup all:true",
+      "httpRequests": 0,
+      "addresses": [
+        {
+          "address": "144.79.79.14",
+          "family": 4,
+          "blockedByProjectSafety": false
+        }
+      ],
+      "classification": "PUBLIC_BY_PROJECT_SAFETY",
+      "finishedAt": "2026-10-14T07:54:14.418Z"
+    },
+    {
+      "hostname": "customs.gov.ph",
+      "startedAt": "2026-10-14T07:54:14.418Z",
+      "resolver": "system node:dns/promises.lookup all:true",
+      "httpRequests": 0,
+      "addresses": [
+        {
+          "address": "20.43.168.254",
+          "family": 4,
+          "blockedByProjectSafety": false
+        }
+      ],
+      "classification": "PUBLIC_BY_PROJECT_SAFETY",
+      "finishedAt": "2026-10-14T07:54:14.683Z"
+    }
+  ]
+}

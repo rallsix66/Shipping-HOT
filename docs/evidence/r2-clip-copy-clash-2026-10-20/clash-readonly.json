@@ -1,0 +1,122 @@
+{
+  "at": "2026-10-20T03:02:07.284Z",
+  "readOnly": true,
+  "selectedProfileAndScriptResolved": true,
+  "selectedExtension": {
+    "role": "selected_subscription_extension",
+    "staticOnly": true,
+    "executed": false,
+    "modes": {},
+    "fakeIPFilterWriteFound": true,
+    "literalArrays": [
+      {
+        "literalCount": 27,
+        "otherElements": 1,
+        "exactHostOccurrences": {
+          "www.mofcom.gov.cn": 0,
+          "maritim.bmkg.go.id": 1
+        },
+        "orderedLiteralSha256": "2702b764f109b2984a83865e0f70fa71bd482b9ea0fdbd98dcb8494a9d7c9ff7"
+      }
+    ],
+    "referencedLiteralArrays": [],
+    "exactQuotedHostLiterals": {
+      "www.mofcom.gov.cn": false,
+      "maritim.bmkg.go.id": true
+    }
+  },
+  "globalExtension": {
+    "role": "global_extension",
+    "staticOnly": true,
+    "executed": false,
+    "modes": {},
+    "fakeIPFilterWriteFound": false,
+    "literalArrays": [],
+    "referencedLiteralArrays": [],
+    "exactQuotedHostLiterals": {
+      "www.mofcom.gov.cn": false,
+      "maritim.bmkg.go.id": false
+    }
+  },
+  "generated": {
+    "role": "clash-verge.yaml",
+    "dnsBlockFound": true,
+    "modes": {
+      "enhanced-mode": "fake-ip"
+    },
+    "filterModeExplicit": null,
+    "filterCount": 27,
+    "exactHostOccurrences": {
+      "www.mofcom.gov.cn": 0,
+      "maritim.bmkg.go.id": 1
+    },
+    "matchingLiteralPatternsCount": {
+      "www.mofcom.gov.cn": 0,
+      "maritim.bmkg.go.id": 1
+    },
+    "nonLiteralDomainRulesCount": 0,
+    "orderedSha256": "2702b764f109b2984a83865e0f70fa71bd482b9ea0fdbd98dcb8494a9d7c9ff7",
+    "historical27OrderedFingerprintMatches": true
+  },
+  "applicationBase": {
+    "role": "config.yaml",
+    "dnsBlockFound": false,
+    "modes": {},
+    "filterModeExplicit": null,
+    "filterCount": 0,
+    "exactHostOccurrences": {
+      "www.mofcom.gov.cn": 0,
+      "maritim.bmkg.go.id": 0
+    },
+    "matchingLiteralPatternsCount": {
+      "www.mofcom.gov.cn": 0,
+      "maritim.bmkg.go.id": 0
+    },
+    "nonLiteralDomainRulesCount": 0,
+    "orderedSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "historical27OrderedFingerprintMatches": false
+  },
+  "sourceDNS": 0,
+  "HTTP": 0,
+  "controllerRead": false,
+  "configurationWrites": 0,
+  "reloadOrCacheClear": false,
+  "runningCoreLoadedConfiguration": "NOT_VERIFIED_NO_CONTROLLER_REQUEST",
+  "files": [
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\profiles.yaml",
+      "bytes": 2448,
+      "mtimeMs": 1792464226518.3877,
+      "sha256": "8d97e6b76e5deb60362d08ea689208efbab9415dadd05759105f6855f51e0252",
+      "unchangedBytesAndMtime": true
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\profiles\\shf0fNvLCn9b.js",
+      "bytes": 1244,
+      "mtimeMs": 1792045673022.6233,
+      "sha256": "3e22727b5b239afb5f0ff6578c3923069a00da2ba9d96383d803bbb93cf1dbe1",
+      "unchangedBytesAndMtime": true
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\profiles\\Script.js",
+      "bytes": 218,
+      "mtimeMs": 1788944349120.5496,
+      "sha256": "0f7be089d03ca3532b717b4634d3b464e3e2df93efc203e832c6c1d6deaeb3ea",
+      "unchangedBytesAndMtime": true
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\clash-verge.yaml",
+      "bytes": 58374,
+      "mtimeMs": 1792464226745.701,
+      "sha256": "8c8a12cc069354a25c5f9641f02727ec97d0540705eff7514efc9b56f4aca9f3",
+      "unchangedBytesAndMtime": true
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\config.yaml",
+      "bytes": 645,
+      "mtimeMs": 1789872310679.704,
+      "sha256": "e100c4561564cb769de90960d6b91e242da1502a62190b0e1f0f40b32d2d057e",
+      "unchangedBytesAndMtime": true
+    }
+  ]
+}

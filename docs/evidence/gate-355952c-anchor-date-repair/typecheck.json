@@ -1,0 +1,14 @@
+{
+  "name": "typecheck",
+  "command": "pnpm typecheck",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\anchor-date-repair-build-20261015",
+  "sha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
+  "startedAt": "2026-10-15T01:47:45.667Z",
+  "finishedAt": "2026-10-15T01:47:54.008Z",
+  "rawExit": 0,
+  "stderrCapturedUtf8": "",
+  "stderrCapturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "displayLogTrailingWhitespaceTrimmed": true,
+  "stdoutCapturedUtf8": "\n> shipping-hot@0.0.41 typecheck D:\\try one\\Shipping HOT\\.tmp\\anchor-date-repair-build-20261015\n> tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.app.json\n\n",
+  "stdoutCapturedSha256": "169eea4ec59d69143acec1c59d1b7205b4d07870c12c173c55e0590112d13135"
+}

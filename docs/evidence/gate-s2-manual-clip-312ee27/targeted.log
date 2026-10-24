@@ -1,0 +1,33 @@
+command: npx vitest run test/manual-intel.test.ts scripts/s7-local-seed.test.ts server/intel/manual
+full_sha: 312ee273a25f03292d28e70fbb1241244cc20d3b
+started: 2026-10-21T03:31:54.939Z
+finished: 2026-10-21T03:32:05.090Z
+raw_exit_code: 0
+--- stdout ---
+
+ RUN  v4.0.18 D:/wt-s2
+
+ ✓ server/intel/manual.test.ts (27 tests) 1203ms
+ ✓ scripts/s7-local-seed.test.ts (5 tests) 2126ms
+   ✓ prepares the existing S7 native schema/manifest for manual use without any app server, browser, business rows or provider activity  855ms
+   ✓ keeps the original default S7 fixture recipe and only adds the manual acceptance descriptor  403ms
+ ✓ server/intel/manual-clip.test.ts (45 tests) 1984ms
+ ✓ test/manual-intel.test.ts (15 tests) 1962ms
+
+ Test Files  4 passed (4)
+      Tests  92 passed (92)
+   Start at  11:32:01
+   Duration  3.62s (transform 2.62s, setup 0ms, import 4.42s, tests 7.27s, environment 1ms)
+
+
+--- stderr ---
+Duplicated imports "string", the one from "D:/wt-s2/shared/annual-calendar.ts" has been ignored and "D:/wt-s2/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/wt-s2/shared/annual-calendar.ts" has been ignored and "D:/wt-s2/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/wt-s2/shared/annual-calendar.ts" has been ignored and "D:/wt-s2/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/wt-s2/shared/annual-calendar.ts" has been ignored and "D:/wt-s2/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/wt-s2/shared/annual-calendar.ts" has been ignored and "D:/wt-s2/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/wt-s2/shared/calendar.ts" has been ignored and "D:/wt-s2/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/wt-s2/shared/policy.ts" has been ignored and "D:/wt-s2/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/wt-s2/shared/policy.ts" has been ignored and "D:/wt-s2/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/wt-s2/shared/policy.ts" has been ignored and "D:/wt-s2/shared/promo-calendar.ts" is used
+

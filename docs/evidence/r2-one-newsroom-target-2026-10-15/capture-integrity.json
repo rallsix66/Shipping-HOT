@@ -1,0 +1,38 @@
+{
+  "executionHead": "03d1515d33dd1c5d96137c43e0aafb596b334be3",
+  "capturedProductCodeSha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
+  "replayedAndGatedCodeSha": "01934a5746c10d4165f4c4ffc5ce145d6de33d16",
+  "sourceId": "XX-K02",
+  "originalCatalogUrl": "https://www.one-line.com/en/news",
+  "savedRedirect": {
+    "path": "docs/evidence/r2-carrier-reapplied-2026-10-15/XX-K02-response.json",
+    "committedTextLfSha256": "b0a49d5c77d05002d2d499bfd8daf5e5766f23d8184d4e61ef488a944a1a4cc1",
+    "originalStatus": 308,
+    "location": {
+      "present": true,
+      "sanitized": "/en/newsroom",
+      "relative": true,
+      "credentialsRemoved": false,
+      "queryRemoved": false,
+      "fragmentRemoved": false,
+      "pathRedacted": false,
+      "followed": false
+    },
+    "separatelyAuthorizedTarget": true,
+    "automaticFollow": false
+  },
+  "separatelyAuthorizedTarget": "https://www.one-line.com/en/newsroom",
+  "systemDnsCalls": 1,
+  "transportAttempts": 1,
+  "MaerskRequests": 0,
+  "bytes": 635664,
+  "wireSha256": "682943942c38c8aebcbc68ec3888ca65e9278ed27a38d30a11134d283d893fe0",
+  "privateRawIgnoredHashVerified": true,
+  "contentType": "text/html; charset=utf-8",
+  "location": {
+    "present": false
+  },
+  "originalCatalogFileChanged": false,
+  "sourceQualificationBasis": "Actual saved308 same-host resolution plus ONE canonical Newsroom identity and complete10 raw JSON metadata field replay; original catalog URL still308, not claimed200",
+  "syntheticErrorProof": "error-recording-offline-result.json; not an actual Maersk diagnosis"
+}

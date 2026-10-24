@@ -1,0 +1,13 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/frontend-overview-review-build
+
+ ✓ test/reduce-motion.test.ts (2 tests) 51ms
+ ✓ test/policy-console.test.ts (12 tests) 18ms
+ ✓ test/ui-smoke.test.ts (13 tests) 12ms
+ ✓ server/database/policy.test.ts (19 tests) 546ms
+
+ Test Files  4 passed (4)
+      Tests  46 passed (46)
+   Start at  09:58:02
+   Duration  1.19s (transform 659ms, setup 0ms, import 1.17s, tests 628ms, environment 1ms)
+

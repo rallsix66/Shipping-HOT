@@ -1,0 +1,96 @@
+import { it, expect, vi } from "vitest"
+import { lookup } from "node:dns/promises"
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs"
+import { createHash } from "node:crypto"
+import { resolve } from "node:path"
+import { open } from "../server/intel/__fixtures__/isolated-db"
+import { initShippingTables } from "../server/database/shipping"
+import { collectIntelSource, sourcePolicy } from "../server/intel/collect"
+import { htmlIndexCandidates } from "../server/intel/sources/html-index-candidates"
+import { fromHtml } from "../server/intel/sources/web-list"
+import { decodeResponse } from "../server/services/response-decoding"
+import { isBlockedAddress } from "../server/services/article-fetch-security"
+
+const dir = "docs/evidence/r2-two-raw-dns-2026-10-14"
+const privateDir = ".tmp/r2-six-public-2026-10-14-private"
+const hash = (v: string | Uint8Array) => createHash("sha256").update(v).digest("hex")
+const save = (name: string, v: unknown) => writeFileSync(`${dir}/${name}.json`, JSON.stringify(v, null, 2) + "\n", "utf8")
+const sensitive = /(?:authorization|bearer|cookie|api[_-]?key|password|credential|token|secret|csrf)/i
+function safeUrl(value: string) { const u = new URL(value); return !u.username && !u.password && ![...u.searchParams.keys()].some(k => sensitive.test(k) || /signature|^sig$|utm_|gclid|fbclid/i.test(k)) ? u.href : "[redacted]" }
+const title = (v: string) => sensitive.test(v) ? "[redacted]" : v.slice(0, 120)
+
+it("replays both exact raw captures through existing adapters and isolated SQLite before assertions", async () => {
+  mkdirSync(dir, { recursive: true })
+  mkdirSync(".tmp/r2-two-raw-dns-2026-10-14", { recursive: true })
+  if (existsSync(`${dir}/replay-summary.json`)) throw new Error("replay_already_recorded")
+  const noFetch = vi.fn(() => { throw new Error("no_http_allowed") }); vi.stubGlobal("fetch", noFetch)
+  const results: any[] = []
+  try {
+    for (const seed of htmlIndexCandidates) {
+      const result: any = { id: seed.catalogId, startedAt: new Date().toISOString(), status: "NOT_RUN", config: seed.webList, sourceEnabled: seed.enabled, permission: "private complete raw replay only; sanitized bounded metadata committed, not raw HTML", actualHttpRequests: 0 }
+      const file = resolve(`.tmp/r2-two-raw-dns-2026-10-14/${seed.catalogId}-${Date.now()}.sqlite3`)
+      const state = open(file)
+      try {
+        const raw = readFileSync(`${privateDir}/${seed.catalogId}.response.bin`)
+        const original = JSON.parse(readFileSync(`docs/evidence/r2-six-public-2026-10-14/${seed.catalogId}-result.json`, "utf8"))
+        result.rawBytes = raw.length; result.rawSha256 = hash(raw); result.expectedRawSha256 = original.fetchedBytesSha256
+        if (result.rawSha256 !== result.expectedRawSha256) throw new Error("raw_hash_mismatch")
+        const decoded = decodeResponse(raw, original.contentType)
+        result.decoding = decoded.decoding
+        let parsed: ReturnType<typeof fromHtml> = []
+        try { parsed = fromHtml(decoded.body, seed.url, seed.webList!, sourcePolicy(seed)); result.adapter = { status: "parsed", count: parsed.length, withLocalDay: parsed.filter(e => e.dateEvidence.localDate).length, withInstant: parsed.filter(e => e.publishedAt).length, dateRules: [...new Set(parsed.map(e => e.dateEvidence.rule))] } }
+        catch (error) { result.adapter = { status: "failed", errorCode: error instanceof Error ? error.message : "unknown" } }
+        save(`${seed.catalogId}-adapter`, result)
+        await initShippingTables(state.database, "mock")
+        const now = new Date("2026-10-14T07:16:51.335Z")
+        await state.repository.upsertSource(seed, now.toISOString())
+        let transports = 0
+        const deps = { lookup: async (host: string) => { if (host !== new URL(seed.url).hostname) throw new Error("offline_host_mismatch"); return [{ address: "93.184.216.34", family: 4 as const }] }, transport: async (url: URL) => { if (url.href !== seed.url) throw new Error("offline_url_mismatch"); transports++; return { status: original.httpStatus, headers: { "content-type": original.contentType }, body: raw } } }
+        result.first = await collectIntelSource(state.repository, seed, deps, now)
+        result.firstCounts = { items: state.native.prepare("SELECT COUNT(*) AS n FROM intel_item WHERE source_id=?").get(seed.id), versions: state.native.prepare("SELECT COUNT(*) AS n FROM intel_item_version").get() }
+        save(`${seed.catalogId}-first`, result)
+        result.repeat = await collectIntelSource(state.repository, seed, deps, new Date(now.getTime() + 1000))
+        result.repeatCounts = { items: state.native.prepare("SELECT COUNT(*) AS n FROM intel_item WHERE source_id=?").get(seed.id), versions: state.native.prepare("SELECT COUNT(*) AS n FROM intel_item_version").get() }
+        result.injectedTransports = transports
+        const items = await state.repository.listItems(seed.id)
+        const samples = []
+        for (const item of items.slice(0, 6)) {
+          const versions = await state.repository.listVersions(item.id)
+          const entry = parsed.find(e => e.canonicalUrl === item.canonicalUrl)
+          samples.push({ titleExcerpt: title(item.title), canonicalUrl: safeUrl(item.canonicalUrl), publishedAt: item.publishedAt, dateEvidence: versions[0]?.dateEvidence, versionCount: versions.length, scope: versions[0]?.contentScope, adapterToStoredIdentityMatch: !!entry && entry.title === item.title && entry.dateEvidence.localDate === versions[0]?.dateEvidence?.localDate })
+        }
+        result.samples = samples
+        result.allStoredDateEvidenceMatches = items.every(item => { const entry = parsed.find(e => e.canonicalUrl === item.canonicalUrl); return !!entry && entry.title === item.title && (entry.dateEvidence.publishedAt ?? null) === item.publishedAt })
+        result.status = result.first.status === "failed" ? "FAIL" : "OFFLINE_REPLAY_ONLY"
+        result.nativeDatabaseLocalOnly = file
+      } catch (error) { result.status = "FAIL"; result.exception = error instanceof Error ? error.message : "unknown" }
+      finally { state.native.close(); result.finishedAt = new Date().toISOString(); save(`${seed.catalogId}-result`, result); results.push(result); save("replay-partial", results) }
+    }
+    save("replay-summary", { codeSha: "e5d2f0bb0aa4651984d69d280db0c2485d9467a2", evidenceBaseline: "3f76a414c9152a2b0f17183f8294de4a47256c52", results, httpRequests: 0, sourceAvailabilityPasses: 0, note: "harness assertions separate from source failures; original raw bytes are not committed" })
+    expect(results).toHaveLength(2)
+    const north = results.find(r => r.id === "MY-P03"), thai = results.find(r => r.id === "TH-C01")
+    expect(north.first).toMatchObject({ status: "failed", errorCode: "web_list_duplicate_conflict", itemsCommitted: 0 })
+    expect(north.repeat).toMatchObject({ status: "failed", errorCode: "web_list_duplicate_conflict", itemsCommitted: 0 })
+    expect(thai.first.status).toBe("ok_items")
+    expect(thai.repeat).toMatchObject({ status: "ok_items", itemsNew: 0, itemsRevised: 0 })
+    expect(thai.firstCounts).toEqual(thai.repeatCounts)
+    expect(thai.allStoredDateEvidenceMatches).toBe(true)
+    expect(noFetch).not.toHaveBeenCalled()
+  } finally { vi.unstubAllGlobals() }
+}, 30000)
+
+it("one system DNS lookup per exact domain; classify through unchanged existing safety function", async () => {
+  mkdirSync(dir, { recursive: true })
+  if (existsSync(`${dir}/dns-ledger.json`)) throw new Error("dns_already_reserved_never_repeat")
+  const ledger: any[] = [], results: any[] = []
+  save("dns-ledger", ledger)
+  for (const hostname of ["www.gd.msa.gov.cn", "szs.mof.gov.cn", "vimawa.gov.vn", "customs.gov.ph"]) {
+    const result: any = { hostname, startedAt: new Date().toISOString(), resolver: "node:dns/promises.lookup hostname {all:true}; existing system resolver only", httpRequests: 0 }
+    ledger.push({ hostname, reservedAt: result.startedAt, state: "reserved_unknown" }); save("dns-ledger", ledger)
+    try { result.addresses = (await lookup(hostname, { all: true })).map(row => ({ ...row, blockedByExistingSafety: isBlockedAddress({ address: row.address, family: row.family as 4 | 6 }), benchmark19818Range: row.family === 4 && /^198\.(?:18|19)\./.test(row.address) })); result.safetyResult = result.addresses.some((r: any) => r.blockedByExistingSafety) ? "blocked_address" : result.addresses.length ? "public_address" : "dns_empty" }
+    catch (error) { result.safetyResult = "dns_error"; const code = (error as any)?.code; result.errorCode = typeof code === "string" && /^[A-Z0-9_]{1,80}$/.test(code) ? code : "unknown" }
+    finally { result.finishedAt = new Date().toISOString(); results.push(result); save(hostname.replace(/\./g, "-") + "-dns", result); ledger[ledger.length - 1].state = "finished"; save("dns-ledger", ledger); save("dns-partial", results) }
+  }
+  save("dns-summary", { systemLookupCalls: 4, httpRequests: 0, settingsChanged: false, customResolvers: false, results, attribution: "198.18/15 benchmark addresses may be proxy fake-IP, but resolver output alone does not identify the proxy or prove its configuration" })
+  expect(results).toHaveLength(4)
+}, 30000)

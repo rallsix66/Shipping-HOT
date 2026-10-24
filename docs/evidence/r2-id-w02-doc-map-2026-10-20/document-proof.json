@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-20T03:25:22.970Z",
+  "documentURL": "https://maritim.bmkg.go.id/apidoc",
+  "documentSha256": "9e93a3e44829174d6ef9e660b0fbd80e021d0d2a6fae09fce093650c2130e0a3",
+  "supportedByActualDocument": true,
+  "baseInAnchor": true,
+  "base": "https://maritim.bmkg.go.id/marine2026-data/",
+  "documentedGETTemplate": "/meta/{file}",
+  "explicitFileExample": "port_province.json",
+  "exactTarget": "https://maritim.bmkg.go.id/marine2026-data/meta/port_province.json",
+  "derivation": "documented base + documented /meta/{file} GET + explicit file example; no guessed path or traversal",
+  "metaScope": "location/region metadata, not hourly forecasts",
+  "portTemplatePresent": true,
+  "pelabuhanMetadataExamplePresent": true,
+  "timeUnitFacts": {
+    "UTC": true,
+    "day1Hourly": true,
+    "day2To4ThreeHourly": true,
+    "waveMetres": true,
+    "windKnots": true,
+    "currentKnots": true,
+    "visibilityKm": true
+  },
+  "requiresAuthenticationAccordingToMetaSection": false,
+  "XJ001LiteralInVisibleDoc": false,
+  "secondRequestApprovedMaximum": 1,
+  "evidenceContextSha256": "cea0a8adb20dd6e22b76c8275a09ed42bf211022a2b2717569fda55025b90b73"
+}

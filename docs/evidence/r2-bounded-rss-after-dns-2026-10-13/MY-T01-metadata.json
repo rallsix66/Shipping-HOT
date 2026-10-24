@@ -1,0 +1,37 @@
+{
+  "id": "MY-T01",
+  "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+  "kind": "parsed metadata derivative only, not original RSS/encoding fixture",
+  "items": [
+    {
+      "title": "Harga Petrol dan Diesel Tanpa Subsidi Turun Bagi Tempoh 1 Oktober hingga 7 Oktober 2026",
+      "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media/harga-petroleum-30092026",
+      "publishedAt": "2026-09-30T10:04:20.000Z"
+    },
+    {
+      "title": "Kekangan Bekalan Produk Petroleum Bertapis Dorong Kenaikan Harga Petrol Tanpa Subsidi",
+      "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media/kekangan-bekalan-produk-petroleum-bertapis-dorong-kenaikan-harga-petrol-tanpa-subsidi",
+      "publishedAt": "2026-10-07T12:12:07.000Z"
+    },
+    {
+      "title": "Kekangan Kapasiti Penapisan Global Dorong Kenaikan Harga Produk Petroleum",
+      "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media/kekangan-kapasiti-penapisan-global-dorong-kenaikan-harga-produk-petroleum",
+      "publishedAt": "2026-09-23T12:00:36.000Z"
+    },
+    {
+      "title": "Kerajaan Madani Tambah Baik Budi Diesel Demi Manfaat Pengguna Kenderaan Diesel",
+      "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media/kerajaan-madani-tambah-baik-budi-diesel-demi-manfaat-pengguna-kenderaan-diesel",
+      "publishedAt": "2026-09-16T14:47:48.000Z"
+    },
+    {
+      "title": "Konflik Asia Barat Memuncak Selepas 200 Hari, Harga Produk Petroleum Meningkat",
+      "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media/konflik-asia-barat-memuncak-selepas-200-hari-harga-produk-petroleum-meningkat",
+      "publishedAt": "2026-09-16T11:07:26.000Z"
+    },
+    {
+      "title": "Penarafan Kredit Berdaulat Malaysia Dikekalkan S&P Global Ratings: A-, Tinjauan Stabil",
+      "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media/penarafan-kredit-berdaulat-malaysia-dikekalkan-s-p-global-ratings-a-tinjauan-stabil",
+      "publishedAt": "2026-09-29T09:19:40.000Z"
+    }
+  ]
+}

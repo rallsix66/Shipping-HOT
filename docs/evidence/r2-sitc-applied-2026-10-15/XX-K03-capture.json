@@ -1,0 +1,36 @@
+{
+  "id": "XX-K03",
+  "url": "https://www.sitc.com/en/list.asp?classid=44",
+  "startedAt": "2026-10-15T06:32:47.777Z",
+  "systemDnsCalls": 1,
+  "getAttempts": 1,
+  "status": "CAPTURED_SAFE_HTML",
+  "rawLocalOnly": true,
+  "addressClassification": "public_address",
+  "receivedAt": "2026-10-15T06:32:48.737Z",
+  "httpStatus": 200,
+  "contentType": "text/html; Charset=utf-8",
+  "bytes": 38839,
+  "wireSha256": "2f590a0f00dbe6f6cacc98102775942c42d288995c69206c0d33b46b99afe7c4",
+  "completeResponseCaptured": true,
+  "location": null,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 38839
+  },
+  "finishedAt": "2026-10-15T06:32:48.740Z"
+}

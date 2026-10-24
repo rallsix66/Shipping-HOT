@@ -26,7 +26,9 @@ import type { ArticleBlock, ArticleVersion } from "@shared/article"
 import type { DataProvenance, FeedItem, Port, ShippingEvent, ShippingSettings } from "@shared/shipping"
 import { portDirectoryBaseline } from "@shared/port-directory"
 import { ArticleRepository } from "#/database/article"
-import { defaultShippingSettings } from "#/database/runtime"
+import { defaultShippingSettings, readDatabaseMetadata } from "#/database/runtime"
+import { IntelRepository } from "#/database/intel"
+import { intelSourceSeeds } from "#/intel/sources"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { TranslationRepository } from "#/database/translation"
 import { computeArticleContentHash } from "#/services/article-content-hash"
@@ -85,29 +87,27 @@ const ISOLATED_ROOT = resolve(join(ROOT, ".tmp"))
 const MANIFEST_FILE = "s7-local-manifest.json"
 
 function assertIsolatedRunDir(runDir: string, databasePath: string): void {
-  if (process.env.S7_SEED_ALLOW_OUTSIDE_TMP === "1") return
   if (!runDir.startsWith(ISOLATED_ROOT + sep)) {
     throw new Error(
-      `refusing to seed ${runDir}: S7 fixtures must be written inside ${ISOLATED_ROOT} `
-      + "(set S7_SEED_ALLOW_OUTSIDE_TMP=1 only for a throwaway database)",
+      `refusing to seed ${runDir}: S7 fixtures must be written inside ${ISOLATED_ROOT}`,
     )
   }
-  if (existsSync(databasePath) && !existsSync(join(runDir, MANIFEST_FILE)) && process.env.S7_SEED_ALLOW_OVERWRITE !== "1") {
+  if (existsSync(databasePath) && !existsSync(join(runDir, MANIFEST_FILE))) {
     if (existingBusinessRows(databasePath) !== 0) {
       throw new Error(
         `refusing to seed ${runDir}: it already contains ${basename(databasePath)} with data and no ${MANIFEST_FILE}, `
-        + "so it is not an S7 fixture directory (set S7_SEED_ALLOW_OVERWRITE=1 to replace it deliberately)",
+        + "so it is not an S7 fixture directory",
       )
     }
   }
 }
 
-/** Total rows in ports and feed_items, or -1 when the database is not ours/unreadable. */
+/** Includes R2 material/audit rows; a manual-only database is never an empty seed target. */
 function existingBusinessRows(databasePath: string): number {
   let probe: InstanceType<typeof NativeDatabase> | undefined
   try {
     probe = new NativeDatabase(databasePath, { readonly: true })
-    const tables = probe.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('ports', 'feed_items')").all() as { name: string }[]
+    const tables = probe.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('ports','feed_items','events','calendar_events','feed_articles','article_versions','article_blocks','weather_forecast','weather_impact','tropical_cyclone','ops_calendar_event','policy_record','policy_version','intel_item','intel_item_version','intel_item_block','intel_manual_action')").all() as { name: string }[]
     if (tables.length === 0) return -1
     return tables.reduce((total, table) => total + (probe!.prepare(`SELECT COUNT(*) AS count FROM ${table.name}`).get() as { count: number }).count, 0)
   } catch {
@@ -291,15 +291,51 @@ async function seedArticle(input: {
 
 /* --------------------------------------------------------------------- main */
 
-async function main() {
-  const runDir = resolve(process.argv[2] ?? join(process.cwd(), ".tmp", "s7-local"))
+export async function seedS7Local(inputDir = join(process.cwd(), ".tmp", "s7-local"), options: { manualOnly?: boolean } = {}) {
+  const runDir = resolve(inputDir)
   const databasePath = join(runDir, ".data", DB_FILE)
   assertIsolatedRunDir(runDir, databasePath)
+  if (options.manualOnly && (existsSync(databasePath) || existsSync(join(runDir, MANIFEST_FILE)))) throw new Error("manual preparation requires a fresh S7 directory; existing files are retained")
   mkdirSync(dirname(databasePath), { recursive: true })
 
   const { database, native } = createNativeDatabase(databasePath)
   await initShippingTables(database, "real")
   const shipping = new ShippingRepository(database, "real")
+  const intel = new IntelRepository(database)
+  for (const seed of intelSourceSeeds) await intel.upsertSource({ ...seed, enabled: false }, NOW.toISOString())
+  const manualAcceptance = {
+    synthetic: true,
+    notOfficialContent: true,
+    sourceId: "intel:th-w01",
+    catalogId: "TH-W01",
+    operator: "S7 合成验收",
+    url: intelSourceSeeds.find(seed => seed.id === "intel:th-w01")!.url,
+    title: "【S7合成】人工交互材料，非官方内容",
+    publishedAt: "",
+    bodyA: "S7 原创合成正文 A；不是真实官方通知。",
+    bodyB: "S7 原创合成正文 B；只用于修订断言。",
+    checkedEmptySourceId: "intel:manual:cn-p05",
+    checkedEmptyCatalogId: "CN-P05",
+    invalidPublishedAt: "S7-not-an-ISO-date",
+    expected: { initialMaterials: 0, afterSaveMaterials: 1, afterRepeatVersions: 1, afterRevisionVersions: 2, publishedAt: null, providerCalls: 0, guiStatus: "NOT_RUN" },
+  }
+  if (options.manualOnly) {
+    await shipping.seed([], [], [], { ...structuredClone(defaultShippingSettings), translation: { enabled: false, monthlyBudget: 0, providerId: PROVIDER, model: MODEL, targetLanguage: TARGET_LANGUAGE } })
+    const manifest = {
+      generatedAt: new Date().toISOString(),
+      runDir,
+      databasePath,
+      schemaVersion: (await readDatabaseMetadata(database)).schemaVersion,
+      dataMode: "real",
+      preparation: "R2-7 manual only; no app server or browser launched",
+      fixtureDataProvenance: "original synthetic manual input; no real official material, provider or network call",
+      manualAcceptance,
+      requestedPaths: ["/feed"],
+    }
+    writeFileSync(join(runDir, MANIFEST_FILE), `${JSON.stringify(manifest, null, 2)}\n`, { encoding: "utf8", flag: "wx" })
+    native.close()
+    return manifest
+  }
 
   const settings: ShippingSettings = {
     ...structuredClone(defaultShippingSettings),
@@ -461,6 +497,7 @@ async function main() {
     dataMode: "real",
     fixtureDataProvenance: "synthetic deterministic fixture with real-lineage source_type (exercises Real-Mode read filters); not captured real Provider data, and no Provider/Secret/Runtime/network call was made",
     seededAt: NOW.toISOString(),
+    manualAcceptance,
     expectations: {
       portId: S7.port,
       portSecondaryId: S7.portSecondary,
@@ -500,10 +537,13 @@ async function main() {
   native.close()
   console.log(`S7 seed complete: ${databasePath}`)
   console.log(`S7 fixtures: ports=2(+1 decoy) feed=2(+1 decoy) article=${article.versionId}`)
+  return manifest
 }
 
-main().catch((error) => {
-  console.error(`S7 seed failed: ${error instanceof Error ? error.message : String(error)}`)
-  if (error instanceof Error && error.stack) console.error(error.stack.split("\n").slice(1, 6).join("\n"))
-  process.exitCode = 1
-})
+if (process.argv[1] && resolve(process.argv[1]) === join(ROOT, "scripts", "s7-local-seed.ts")) {
+  seedS7Local(process.argv[2], { manualOnly: process.argv.slice(3).includes("--manual-only") }).catch((error) => {
+    console.error(`S7 seed failed: ${error instanceof Error ? error.message : String(error)}`)
+    if (error instanceof Error && error.stack) console.error(error.stack.split("\n").slice(1, 6).join("\n"))
+    process.exitCode = 1
+  })
+}

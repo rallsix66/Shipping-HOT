@@ -1,0 +1,19 @@
+[
+  {
+    "id": "XX-K02",
+    "url": "https://www.one-line.com/en/newsroom",
+    "addresses": [
+      {
+        "address": "104.19.145.47",
+        "family": 4
+      },
+      {
+        "address": "104.19.144.47",
+        "family": 4
+      }
+    ],
+    "reservedAt": "2026-10-15T02:56:20.187Z",
+    "state": "response_captured",
+    "finishedAt": "2026-10-15T02:56:22.193Z"
+  }
+]

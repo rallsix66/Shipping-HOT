@@ -1,0 +1,86 @@
+{
+  "status": "PASS",
+  "artifactSha256": "24d20e53b4ca59547c83ecfccea542ab11e0da094e863da3a2de40adb4124ebf",
+  "fullResponseText": true,
+  "wireByteCertification": false,
+  "firstRun": {
+    "status": "success",
+    "recordsRead": 4,
+    "recordsWritten": 4
+  },
+  "repeat": {
+    "status": "success",
+    "recordsRead": 4,
+    "recordsWritten": 4
+  },
+  "realRows": 4,
+  "distinctApprovedIds": 4,
+  "firstReceivedAt": "2026-10-10T08:30:40.728Z",
+  "repeatFetchedAt": "2026-10-10T08:31:10.728Z",
+  "firstReceivedPreservedAcrossRestart": true,
+  "sharedCanonicalSourceUrl": "https://api.data.gov.my/weather/warning/",
+  "unknownValidity": 4,
+  "unknownTimezone": 4,
+  "portsAssociated": 0,
+  "eventEligible": 0,
+  "officialImpacts": 0,
+  "noAdvisoryRecords": 1,
+  "otherWarningsPreserved": 3,
+  "injectedFetcherCalls": 2,
+  "actualSourceRequests": 0,
+  "actualSystemDns": 0,
+  "reopen": {
+    "readonly": true,
+    "queryOnly": true,
+    "allFeedAndHistoryRowsEqual": true,
+    "fullRawAndIdentityFieldsCompared": true,
+    "mismatches": 0,
+    "databaseBytesUnchanged": true
+  },
+  "intelItems": 0,
+  "intelVersions": 0,
+  "intelFetchRuns": 0,
+  "scope": "Existing Feed provider -> weather-alert sync job -> SQLite/read repository; not R2 intel collector/runtime/API/browser/production activation",
+  "fields": [
+    {
+      "id": "weather-alert:metmalaysia:1085cd3aec39f7e4",
+      "titleSha256": "fa3b80d47fdbcdebb045241b345a2609bf75b03a358cdc88ddc6515975208344",
+      "issued": "2026-10-10T10:30:00",
+      "validFrom": null,
+      "validTo": null,
+      "receivedAt": "2026-10-10T08:30:40.728Z",
+      "timeBasis": "received_at",
+      "sourceUrl": "https://api.data.gov.my/weather/warning/"
+    },
+    {
+      "id": "weather-alert:metmalaysia:c839053dda1e9e11",
+      "titleSha256": "f420c12b85a66243c0bff284a5526289b5cbda75a212f9d1d4f0b7976f5f4b2e",
+      "issued": "2026-10-10T15:50:00",
+      "validFrom": "2026-10-10T15:00:00",
+      "validTo": "2026-10-10T20:00:00",
+      "receivedAt": "2026-10-10T08:30:40.728Z",
+      "timeBasis": "received_at",
+      "sourceUrl": "https://api.data.gov.my/weather/warning/"
+    },
+    {
+      "id": "weather-alert:metmalaysia:468debfe0e6d17a5",
+      "titleSha256": "2b04160760f12190302cbb5da4504b56e64248f234d0d5dfac84bcf842ab280b",
+      "issued": "2026-10-10T14:00:00",
+      "validFrom": "2026-10-10T13:00:00",
+      "validTo": "2026-10-10T18:00:00",
+      "receivedAt": "2026-10-10T08:30:40.728Z",
+      "timeBasis": "received_at",
+      "sourceUrl": "https://api.data.gov.my/weather/warning/"
+    },
+    {
+      "id": "weather-alert:metmalaysia:85e8ecb33970658b",
+      "titleSha256": "2b04160760f12190302cbb5da4504b56e64248f234d0d5dfac84bcf842ab280b",
+      "issued": "2026-10-10T14:00:00",
+      "validFrom": "2026-10-08T00:00:00",
+      "validTo": "2026-10-10T23:59:00",
+      "receivedAt": "2026-10-10T08:30:40.728Z",
+      "timeBasis": "received_at",
+      "sourceUrl": "https://api.data.gov.my/weather/warning/"
+    }
+  ]
+}

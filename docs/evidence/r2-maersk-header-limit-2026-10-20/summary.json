@@ -1,0 +1,656 @@
+{
+  "type": "offline_source_bound_header_budget_implementation",
+  "at": "2026-10-20T07:19:25.355Z",
+  "root": "D:\\try one\\Shipping HOT",
+  "branch": "codex/shipping-hot-r2",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "sourceFiles": [
+    {
+      "path": "server/services/article-fetch-security.ts",
+      "sha256": "76394e1864f99f02d28e41c358c94db1ce991ddfcabdde04c92e6135a25bc4da",
+      "bytes": 18546
+    },
+    {
+      "path": "server/services/article-fetch-header-limit.test.ts",
+      "sha256": "07d5e81746b4c8c4936104a60eede7507f0816ec7bac345da15dfeca1baaf0de",
+      "bytes": 11136
+    },
+    {
+      "path": "server/services/article-fetch-transport.test.ts",
+      "sha256": "00b4bfa822b6acade0b1a824eb8ccf58fba384544c413f12cda45fd2bf06d7a4",
+      "bytes": 21919
+    }
+  ],
+  "gate": {
+    "candidate": "D:\\try one\\Shipping HOT\\.tmp\\maersk-header-clean-20261020",
+    "base": "40629587e22d8932df105962ec214530e4054414",
+    "normalFrozenOfflineInstallWithScripts": true,
+    "oldNodeModulesOrNativeCopied": false,
+    "providerChildEnvironmentScrubbed": true,
+    "commands": [
+      {
+        "name": "install",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\maersk-header-clean-20261020",
+        "args": [
+          "C:\\Program Files\\nodejs\\node.exe",
+          "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+          "install",
+          "--frozen-lockfile",
+          "--offline"
+        ],
+        "startedAt": "2026-10-20T07:13:51.371Z",
+        "finishedAt": "2026-10-20T07:14:04.551Z",
+        "rawExit": 0,
+        "logs": [
+          {
+            "path": ".tmp/maersk-header-20261020/install.stdout.log",
+            "sha256": "cba8471bd842e0bdbf79cb4b8437d93b9a3de4d32da37360ec75d0468f360a9e"
+          },
+          {
+            "path": ".tmp/maersk-header-20261020/install.stderr.log",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ]
+      },
+      {
+        "name": "build",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\maersk-header-clean-20261020",
+        "args": [
+          "C:\\Program Files\\nodejs\\node.exe",
+          "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+          "build"
+        ],
+        "startedAt": "2026-10-20T07:14:04.552Z",
+        "finishedAt": "2026-10-20T07:14:41.594Z",
+        "rawExit": 0,
+        "logs": [
+          {
+            "path": ".tmp/maersk-header-20261020/build.stdout.log",
+            "sha256": "119e167c62c475546132629ec9990169ca700ecb1dd7bcb5f717944cf22fccb9"
+          },
+          {
+            "path": ".tmp/maersk-header-20261020/build.stderr.log",
+            "sha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658"
+          }
+        ]
+      },
+      {
+        "name": "typecheck",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\maersk-header-clean-20261020",
+        "args": [
+          "C:\\Program Files\\nodejs\\node.exe",
+          "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+          "typecheck"
+        ],
+        "startedAt": "2026-10-20T07:14:41.595Z",
+        "finishedAt": "2026-10-20T07:14:51.790Z",
+        "rawExit": 0,
+        "logs": [
+          {
+            "path": ".tmp/maersk-header-20261020/typecheck.stdout.log",
+            "sha256": "fc3580692bb951d0e8158c9039868402ca9b2f1dde317e0be383cfddf9167a76"
+          },
+          {
+            "path": ".tmp/maersk-header-20261020/typecheck.stderr.log",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ]
+      },
+      {
+        "name": "lint",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\maersk-header-clean-20261020",
+        "args": [
+          "C:\\Program Files\\nodejs\\node.exe",
+          "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+          "lint"
+        ],
+        "startedAt": "2026-10-20T07:14:51.791Z",
+        "finishedAt": "2026-10-20T07:15:35.411Z",
+        "rawExit": 0,
+        "logs": [
+          {
+            "path": ".tmp/maersk-header-20261020/lint.stdout.log",
+            "sha256": "43cb31fb1365c91df682f2b91730e9264d55d38dc55b9ac2444703aacd2fd559"
+          },
+          {
+            "path": ".tmp/maersk-header-20261020/lint.stderr.log",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ]
+      },
+      {
+        "name": "targeted",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\maersk-header-clean-20261020",
+        "args": [
+          "C:\\Program Files\\nodejs\\node.exe",
+          "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+          "exec",
+          "vitest",
+          "run",
+          "-c",
+          "vitest.config.ts",
+          "server/services/article-fetch-header-limit.test.ts",
+          "server/services/article-fetch-security.test.ts",
+          "server/services/article-fetch-transport.test.ts",
+          "server/runtime/intel-observation-network.test.ts"
+        ],
+        "startedAt": "2026-10-20T07:15:35.411Z",
+        "finishedAt": "2026-10-20T07:15:37.689Z",
+        "rawExit": 0,
+        "logs": [
+          {
+            "path": ".tmp/maersk-header-20261020/targeted.stdout.log",
+            "sha256": "71bf5629121ab6d7c48fb24566f955b1e83fc511e344cc3fe8b58641ace386d9"
+          },
+          {
+            "path": ".tmp/maersk-header-20261020/targeted.stderr.log",
+            "sha256": "2f08bab7011f3cb3c83e7c40b5c31616a6617d6ed102952d1d87d33de6049981"
+          }
+        ]
+      },
+      {
+        "name": "vitest",
+        "cwd": "D:\\try one\\Shipping HOT\\.tmp\\maersk-header-clean-20261020",
+        "args": [
+          "C:\\Program Files\\nodejs\\node.exe",
+          "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+          "exec",
+          "vitest",
+          "run",
+          "-c",
+          "vitest.config.ts"
+        ],
+        "startedAt": "2026-10-20T07:15:37.690Z",
+        "finishedAt": "2026-10-20T07:15:54.709Z",
+        "rawExit": 0,
+        "logs": [
+          {
+            "path": ".tmp/maersk-header-20261020/vitest.stdout.log",
+            "sha256": "a15db74e303f85d70114b3452bbed7d5502c8f8679fb0e7b1dce5687bcbd5ac4"
+          },
+          {
+            "path": ".tmp/maersk-header-20261020/vitest.stderr.log",
+            "sha256": "57b5a3d1bae71b1f5c95b3a2066cd57ccedba30542877d085746b5ca7168bfa9"
+          }
+        ]
+      }
+    ],
+    "sourceMatches": [
+      {
+        "path": "package.json",
+        "sha256": "32716b71ba5f3d807d141fb41373eacbedebc99fac727514dd59abb56e295196",
+        "matchesGate": true
+      },
+      {
+        "path": "scripts/tsx-alias-loader.mjs",
+        "sha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+        "matchesGate": true
+      },
+      {
+        "path": "server/runtime/intel-collect-job.ts",
+        "sha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2",
+        "matchesGate": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-environment.ts",
+        "sha256": "1100f875229b901f5a8b5fc32108afc593f4671f880461009d4e880142aa1d23",
+        "matchesGate": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-options.ts",
+        "sha256": "09b5e5f5b68879bf835d73b7b5b4b9c0064a09ca17049d0f3300c8900c53f5e8",
+        "matchesGate": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-worker.ts",
+        "sha256": "47dbb370b05c717feed2928a0afaf4236eb8fec7186bc5ae514b7ac4da4870f7",
+        "matchesGate": true
+      },
+      {
+        "path": "scripts/r2-intel-observe.test.ts",
+        "sha256": "3e442d363e6a3b766199f102c6c47a18584a2b847f95497763086c5507a97066",
+        "matchesGate": true
+      },
+      {
+        "path": "scripts/r2-intel-observe.ts",
+        "sha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224",
+        "matchesGate": true
+      },
+      {
+        "path": "server/runtime/intel-observation-network.test.ts",
+        "sha256": "361168e5fb7339bde62a69f85d75400218e290967a88ae03f30b875ff3739e75",
+        "matchesGate": true
+      },
+      {
+        "path": "server/runtime/intel-observation-network.ts",
+        "sha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006",
+        "matchesGate": true
+      },
+      {
+        "path": "server/runtime/intel-observation.test.ts",
+        "sha256": "24212377dbefe7fbc6dbdf4286e19df6e5356d3bea4913123d835c353f002774",
+        "matchesGate": true
+      },
+      {
+        "path": "server/runtime/intel-observation.ts",
+        "sha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019",
+        "matchesGate": true
+      },
+      {
+        "path": "server/intel/sources/web-list.ts",
+        "sha256": "86f893311fb3c3d8c65256d1e6709acd547658b8cd3e71499900229ec26f75b5",
+        "matchesGate": true
+      },
+      {
+        "path": "server/intel/sources/config-keys.ts",
+        "sha256": "2efbb61e1ab1e19bb349853a65a7b79bd080ab073420c28a645e56f95a8be620",
+        "matchesGate": true
+      },
+      {
+        "path": "server/intel/sources/web-list-english-12h.test.ts",
+        "sha256": "c37a3b958a769a415b0775ce997198e1a42819c6652724e3f623306d02eff5b9",
+        "matchesGate": true
+      },
+      {
+        "path": "server/intel/sources/html-index-candidates.ts",
+        "sha256": "64e674df2a6acd2f0cb6b3a51387a099c1052413de0ad984f481236533de2b3c",
+        "matchesGate": true
+      },
+      {
+        "path": "server/services/article-fetch-security.ts",
+        "sha256": "76394e1864f99f02d28e41c358c94db1ce991ddfcabdde04c92e6135a25bc4da",
+        "matchesGate": true
+      },
+      {
+        "path": "server/intel/manual-checklist.ts",
+        "sha256": "b1802fe28a487ef9edecc95a976cee706f7903f4d24eeb43cf037d133a589329",
+        "matchesGate": true
+      },
+      {
+        "path": "server/services/bmkg-port-forecast.ts",
+        "sha256": "e179c8987787ceca2d2525a1ebbfc3586f3732838612d63fb4e1255eadb37083",
+        "matchesGate": true
+      },
+      {
+        "path": "server/services/bmkg-port-forecast.test.ts",
+        "sha256": "03dfba1cd9e3aad37c6067fdbbb55b9f31859bc9e0a3ed7cfd1c2436637a0d1c",
+        "matchesGate": true
+      },
+      {
+        "path": "server/services/article-fetch-header-limit.test.ts",
+        "sha256": "07d5e81746b4c8c4936104a60eede7507f0816ec7bac345da15dfeca1baaf0de",
+        "matchesGate": true
+      },
+      {
+        "path": "server/services/article-fetch-transport.test.ts",
+        "sha256": "00b4bfa822b6acade0b1a824eb8ccf58fba384544c413f12cda45fd2bf06d7a4",
+        "matchesGate": true
+      }
+    ],
+    "sourceOverlayFiles": 22
+  },
+  "tests": {
+    "targetedPassed": 92,
+    "fullPassed": 1727,
+    "fullSkipped": 3,
+    "fullFilesPassed": 145,
+    "newCases": 39,
+    "actualNativeFixtureCases": 7
+  },
+  "nativeParser": {
+    "type": "assertions_in_passing_real_Node_parser_tests",
+    "node": "24.15.0",
+    "defaultMaxHeaderBytes": 16384,
+    "optInMaxHeaderBytes": 32768,
+    "fixture": "127.0.0.1 ephemeral HTTP server; injected test-only mapping into actual defaultTransport and actual Node parser",
+    "newTestFileCases": 38,
+    "actualNativeFixtureCases": 7,
+    "additionalExistingTransportCase": 1,
+    "externalDNS": 0,
+    "externalHTTP": 0,
+    "realTLSOrWebsiteProof": false,
+    "rawHeadersOrRawPacketArchived": false,
+    "cases": [
+      {
+        "name": "default",
+        "syntheticHeaderValueBytes": 20480,
+        "optIn": false,
+        "assertedResult": "HPE_HEADER_OVERFLOW"
+      },
+      {
+        "name": "exact_opt_in",
+        "syntheticHeaderValueBytes": 20480,
+        "optIn": true,
+        "assertedResult": "success_200_synthetic_HTML"
+      },
+      {
+        "name": "hard_ceiling",
+        "syntheticHeaderValueBytes": 40960,
+        "optIn": true,
+        "assertedResult": "HPE_HEADER_OVERFLOW"
+      },
+      {
+        "name": "other_source_default",
+        "syntheticHeaderValueBytes": 20480,
+        "optIn": false,
+        "assertedResult": "HPE_HEADER_OVERFLOW"
+      },
+      {
+        "name": "body_ceiling",
+        "bodyBytes": 524289,
+        "maxBodyBytes": 524288,
+        "assertedResult": "body_too_large"
+      },
+      {
+        "name": "timeout",
+        "fixtureTimeoutMs": 100,
+        "assertedResult": "fetch_timeout"
+      },
+      {
+        "name": "cancellation",
+        "assertedResult": "ABORT_ERR_and_failed_fetch"
+      }
+    ],
+    "totalSyntheticHeaderBytes": "not claimed equal to value length; response framing adds bytes; no inference about real Maersk headers",
+    "testSourceSha256": "07d5e81746b4c8c4936104a60eede7507f0816ec7bac345da15dfeca1baaf0de"
+  },
+  "configurationCheck": {
+    "at": "2026-10-20T07:06:20.811Z",
+    "scriptCounts": {
+      "www.ppa.com.ph": 1,
+      "www.mofcom.gov.cn": 1,
+      "maritim.bmkg.go.id": 1
+    },
+    "generatedCounts": {
+      "www.ppa.com.ph": 0,
+      "www.mofcom.gov.cn": 0,
+      "maritim.bmkg.go.id": 1
+    },
+    "networkValidationAllowed": false,
+    "postApplyTargetDNS": 0,
+    "postApplyTargetHTTP": 0,
+    "noFurtherPolling": true
+  },
+  "liveMaersk": "NOT_RUN_PENDING_CODE_REVIEW",
+  "sourceQualification": {
+    "public": "26/39",
+    "information": "24/34",
+    "numeric": "historical3 limited diagnostics + new1 complete original offline parse",
+    "unchanged": true
+  },
+  "preservation": {
+    "oldSourceUnchanged": [
+      {
+        "path": "package.json",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/tsx-alias-loader.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-collect-job.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-environment.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-options.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-worker.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation-network.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation-network.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/web-list.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/config-keys.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/web-list-english-12h.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/html-index-candidates.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/manual-checklist.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/services/bmkg-port-forecast.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/services/bmkg-port-forecast.test.ts",
+        "unchanged": true
+      }
+    ],
+    "protectedChecks": [
+      {
+        "path": ".data/calendarific-double-year-verification-20260908-b.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/calendarific-double-year-verification-20260908.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/p7-final-seal-20260904.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/provider-secrets.json",
+        "unchanged": true
+      },
+      {
+        "path": ".data/shipping-hot-v3-browser.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-https-abb1b99-20261019/run/.data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-manual-6087a16/run/.data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/dist/output/server/index.mjs",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/r2-four-reapplied-2026-10-15-private/MY-L01.response.bin",
+        "unchanged": true
+      },
+      {
+        "path": ".gitignore",
+        "unchanged": true
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "unchanged": true
+      },
+      {
+        "path": "AGENTS.md",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/content.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/manifest.json",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/popup.html",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/worker.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-aVjAIvTt.css",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-DHU7aOx9.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/defuddle-MIT.txt",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/obsidian-clipper-MIT.txt",
+        "unchanged": true
+      },
+      {
+        "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "unchanged": true
+      },
+      {
+        "path": "docs/intel-source-catalog.md",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/r2-qualification-vnp01-20261020/response.bin",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/id-w02-xj001-20261020/response.bin",
+        "unchanged": true
+      }
+    ],
+    "architectureOriginalBytesPreserved": true
+  },
+  "warnings": [
+    "Existing build chunk-size warning",
+    "Existing Browserslist data age warning",
+    "Existing auto-import duplicate notices",
+    "Git global ignore read permission warning",
+    "Initial new JSDoc warning fixed; original log retained"
+  ],
+  "sourceNetwork": {
+    "externalDNS": 0,
+    "externalHTTP": 0,
+    "syntheticLoopbackHTTPUsedByNativeTests": true
+  },
+  "runtimeActivation": false,
+  "DBWrites": 0,
+  "sourceCAChanges": 0,
+  "globalNodeFlagsOrHeaderEnvironmentChanges": 0,
+  "serviceOrPluginSwitches": 0,
+  "continuous24h": "NOT_RUN",
+  "R3": "NOT_RUN",
+  "commitPushPRMergeDeploy": 0,
+  "S7ThisSlice": "NOT_RUN_NO_ROUTE_OR_SHELL_CHANGE",
+  "productDiff": {
+    "path": "docs/evidence/r2-maersk-header-limit-2026-10-20/product.diff",
+    "sha256": "71f1d9e2741bc7f8b1677bb7ad3f70d7420ebc9974e71fb7bb7922b007685e38"
+  },
+  "finalAudit": {
+    "status": "passed_local_implementation_closeout_parent_independent_review_pending",
+    "at": "2026-10-20T07:21:17.610Z",
+    "inventory": {
+      "skill": "e0/neat-freak",
+      "path": ".tmp/maersk-header-20261020/neat-inventory.log",
+      "rawExit": 0,
+      "sha256": "d3dfff85991fa5588690612a9baed365b68e06cfaed6a5d6985ac645f36159d5",
+      "markdownEntries": 8269
+    },
+    "docLint": {
+      "rawExit": 0,
+      "log": ".tmp/maersk-header-20261020/docs-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "links": {
+      "checked": 146,
+      "broken": []
+    },
+    "diffCheck": {
+      "rawExit": 0,
+      "log": ".tmp/maersk-header-20261020/diff-check.log"
+    },
+    "preservation": {
+      "previousSourceUnchanged": 19,
+      "protectedUnchanged": 25,
+      "sourceOverlayMatchesGate": 22,
+      "headUnchanged": true,
+      "stagedEmpty": true,
+      "statusEntries": 44,
+      "statusLog": ".tmp/maersk-header-20261020/final-git-status.log",
+      "architectureOriginalBytesPreserved": true,
+      "existingTransportTestBeforeBackupUnchanged": true
+    },
+    "docs": [
+      {
+        "path": "docs/status.md",
+        "sha256": "0a9484e50a19433ffcc47a716ed314fb5a7f5264ae8083bee6dc4a1f2c9e4256"
+      },
+      {
+        "path": "docs/architecture.md",
+        "sha256": "07e340204ab7eb75562a18c64022e34e7cf91ee2f7f9ff4f335a287ca713320d"
+      },
+      {
+        "path": "docs/evidence/r2-maersk-header-limit-2026-10-20/report.md",
+        "sha256": "0f6660cd518bcc43bd3f5f4ec6cdc60aa12471a275065efaf728e0e5bfe5e930"
+      },
+      {
+        "path": "docs/evidence/r2-maersk-header-limit-2026-10-20/closeout.md",
+        "sha256": "37bc41f0ddd6310e8cabd1b9630530cb5111c272dd9a3f056dfb3819f7ea6ccd"
+      }
+    ],
+    "rules": {
+      "AGENTSUnchanged": true,
+      "bytes": 28170,
+      "default32KiBBudgetFraction": 0.85968017578125
+    },
+    "memory": "generated-read-only",
+    "pending": [
+      "parent independent source review",
+      "real Maersk verification NOT_RUN; actual header size/status and sufficiency of32KiB unknown",
+      "07:06 pre-change generated config check lacked PPA/MOFCOM; conditional three-URL verification stopped with zero source DNS/HTTP",
+      "no further Clash poll or application by agent",
+      "overall GUI/S7 and24h unaccepted; R3 paused"
+    ],
+    "cleanup": "not authorized; all previous/current evidence and isolated clone retained"
+  }
+}

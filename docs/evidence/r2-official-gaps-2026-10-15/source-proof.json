@@ -1,0 +1,10 @@
+{
+  "executionHead": "cfce1b3f0a1cccf8cc61527f5aebea879a8a1aec",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "productDiff": "",
+  "catalogueDiff": "",
+  "sourceGetAttempts": 0,
+  "systemDnsCalls": 4,
+  "scope": "Official exact target safety-DNS evidence and documentation only; all source qualifications unchanged",
+  "productGate": "NOT_RUN_no_product_change"
+}

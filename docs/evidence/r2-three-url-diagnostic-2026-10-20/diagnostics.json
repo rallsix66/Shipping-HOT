@@ -1,0 +1,142 @@
+[
+  {
+    "sourceId": "XX-K01",
+    "target": "https://www.maersk.com/news",
+    "startedAt": "2026-10-20T04:18:45.500Z",
+    "DNS": 1,
+    "physicalGETReservations": 1,
+    "transportInvocations": 1,
+    "phase": "transport_before_http_response",
+    "addresses": [
+      {
+        "address": "23.204.139.71",
+        "family": 4,
+        "blocked": false
+      },
+      {
+        "address": "23.204.139.85",
+        "family": 4,
+        "blocked": false
+      }
+    ],
+    "response": null,
+    "underlyingError": {
+      "code": "HPE_HEADER_OVERFLOW",
+      "message": "Parse Error: Header overflow",
+      "phase": "transport_before_http_response",
+      "certificateErrorType": null
+    },
+    "finishedAt": "2026-10-20T04:18:46.098Z",
+    "result": {
+      "ok": false,
+      "code": "fetch_failed",
+      "message": "Parse Error: Header overflow"
+    },
+    "retries": 0,
+    "followedRedirects": 0,
+    "details": 0,
+    "images": 0,
+    "pagination": 0,
+    "login": false,
+    "certificateValidationDisabled": false,
+    "sourceCAAdded": false,
+    "networkSettingsChanged": false,
+    "DBWrites": 0,
+    "paidCalls": 0,
+    "rawRedistributed": false,
+    "key": "maersk",
+    "rawExit": 2,
+    "classification": {
+      "phase": "http_response_header_parser",
+      "basis": "observed Node transport HPE_HEADER_OVERFLOW; original state recorded generic pre-response transport phase",
+      "capturedHTTPStatus": null,
+      "HTMLAvailable": false,
+      "certificateCauseProven": false,
+      "antiBotCauseProven": false,
+      "headerBytesOrCause": "unknown; no raw headers/error packet archived"
+    },
+    "minimumNextStep": "No HTML adapter can be derived. A future separately reviewed bounded HTTP-header policy decision is needed before any new request; do not increase limits or replace transport now."
+  },
+  {
+    "sourceId": "PH-P01",
+    "target": "https://www.ppa.com.ph/content/ppa-helpdesk-advisory",
+    "startedAt": "2026-10-20T04:19:32.542Z",
+    "DNS": 1,
+    "physicalGETReservations": 0,
+    "transportInvocations": 0,
+    "phase": "address_validation",
+    "addresses": [
+      {
+        "address": "198.18.0.79",
+        "family": 4,
+        "blocked": true
+      }
+    ],
+    "response": null,
+    "underlyingError": null,
+    "finishedAt": "2026-10-20T04:19:32.549Z",
+    "result": {
+      "ok": false,
+      "code": "blocked_address",
+      "message": "Resolved address is not a public address: 198.18.0.79"
+    },
+    "retries": 0,
+    "followedRedirects": 0,
+    "details": 0,
+    "images": 0,
+    "pagination": 0,
+    "login": false,
+    "certificateValidationDisabled": false,
+    "sourceCAAdded": false,
+    "networkSettingsChanged": false,
+    "DBWrites": 0,
+    "paidCalls": 0,
+    "rawRedistributed": false,
+    "key": "ppa-helpdesk",
+    "rawExit": 2,
+    "classification": {
+      "phase": "address_validation",
+      "basis": "system DNS yielded blocked 198.18.0.79 and unchanged secureFetchArticle refused before transport",
+      "capturedHTTPStatus": null,
+      "HTMLAvailable": false,
+      "TLSReached": false,
+      "certificateCauseProven": false,
+      "antiBotCauseProven": false
+    },
+    "minimumNextStep": "No source adapter or CA decision from this evidence. Remain blocked until separately authorized legitimate public-address evidence; no proxy/CA/DNS modification or retry."
+  },
+  {
+    "sourceId": "PH-P01",
+    "target": "https://www.ppa.com.ph/ppa-port-news",
+    "recordedAt": "2026-10-20T04:21:33.686Z",
+    "status": "NOT_REQUESTED_SHARED_HOST_SAFETY_REFUSAL",
+    "DNS": 0,
+    "physicalGETReservations": 0,
+    "transportInvocations": 0,
+    "phase": "address_validation_common_host_evidence",
+    "basis": {
+      "target": "https://www.ppa.com.ph/content/ppa-helpdesk-advisory",
+      "startedAt": "2026-10-20T04:19:32.542Z",
+      "code": "blocked_address",
+      "hostname": "www.ppa.com.ph",
+      "address": "198.18.0.79",
+      "originalSafetyLayerStoppedBeforeTransport": true
+    },
+    "scope": "Same host and same policy; avoid repeating DNS after current safety refusal. This is not an actual response or TLS/HTTP finding for port-news.",
+    "response": null,
+    "underlyingError": null,
+    "retries": 0,
+    "followedRedirects": 0,
+    "networkOrCAChanges": false,
+    "key": "ppa-news",
+    "rawExit": null,
+    "classification": {
+      "phase": "not_requested_after_common_host_safety_refusal",
+      "capturedHTTPStatus": null,
+      "HTMLAvailable": false,
+      "TLSReached": false,
+      "actualPageFailureProven": false
+    },
+    "minimumNextStep": "Keep this product unverified; no new request in this round and do not transfer helpdesk page findings to it."
+  }
+]

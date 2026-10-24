@@ -1,0 +1,735 @@
+{
+  "executionHead": "0274014037fbf68d7821309d2fd4090eaa036396",
+  "sourceCapturedAt": "2026-10-15T07:37:48.920Z",
+  "sourceWireSha256": "be6dd13c7c42b55e6c5526fd88dd00c2c8fcc4f7a1526929c713725776bd8d2b",
+  "sourceBytes": 212037,
+  "scope": "Finite offline association check of4 law-card groups and7 /dok/ identities from one already-saved complete page; no page script evaluated, no network or details",
+  "groups": [
+    {
+      "group": "S:1",
+      "cards": 4,
+      "segmentRange": {
+        "byteStart": 60360,
+        "byteEndExclusive": 63887,
+        "rangeSha256": "d196288a75fcf545fbde579cb1a9073e6ceb214993b0cc5c43b34b1aa1ff0e19"
+      },
+      "placeholderRange": {
+        "byteStart": 31983,
+        "byteEndExclusive": 32013,
+        "rangeSha256": "7bdb88b39333d20c1507e1749e7537635456de7d24c3b2d984bb0a785171954c"
+      },
+      "mapping": {
+        "scriptIndex": 19,
+        "placeholder": "B:1",
+        "segment": "S:1",
+        "callLiteral": "$RC(\"B:1\",\"S:1\")",
+        "range": {
+          "byteStart": 63895,
+          "byteEndExclusive": 63911,
+          "rangeSha256": "a7b184efc6db3070eb138216ce988c4adb40b13a54bbbc308b9ff0be71f9e0eb"
+        }
+      },
+      "labels": [
+        {
+          "label": "Terkini",
+          "selectedClass": true,
+          "range": {
+            "byteStart": 31089,
+            "byteEndExclusive": 31562,
+            "rangeSha256": "c65fdff548cb8524fe35d1d8ebff43d6a3802b93dba02264085361c0f146c263"
+          }
+        },
+        {
+          "label": "Populer",
+          "selectedClass": false,
+          "range": {
+            "byteStart": 31562,
+            "byteEndExclusive": 31954,
+            "rangeSha256": "ec25b0b5931927d5b912f13681fdeef9fc5642d940cac779e2bacfab25376537"
+          }
+        }
+      ],
+      "placeholderParentIndex": 1,
+      "wrapperClass": "",
+      "responsiveAncestorClasses": [],
+      "staticPositionalSection": "Terkini",
+      "sectionBasis": "literalRC segment-to-template mapping; two literal button labels in same isotop-wrapper order; content sibling1 visible/sibling2 d-none. No click/script execution."
+    },
+    {
+      "group": "S:2",
+      "cards": 4,
+      "segmentRange": {
+        "byteStart": 63920,
+        "byteEndExclusive": 67141,
+        "rangeSha256": "eb015bf1c70bab4eaf004072f397096e53628760225d25eae0aa6bc6331c2c10"
+      },
+      "placeholderRange": {
+        "byteStart": 32057,
+        "byteEndExclusive": 32087,
+        "rangeSha256": "14b065ce3665c968bc98666dd441a6d035156ae463c0c8acb7454c11991e4a47"
+      },
+      "mapping": {
+        "scriptIndex": 20,
+        "placeholder": "B:2",
+        "segment": "S:2",
+        "callLiteral": "$RC(\"B:2\",\"S:2\")",
+        "range": {
+          "byteStart": 67149,
+          "byteEndExclusive": 67165,
+          "rangeSha256": "a2de2e58c50b3a040444955e5bed514b82e241acde87d5586be2336f0097e375"
+        }
+      },
+      "labels": [
+        {
+          "label": "Terkini",
+          "selectedClass": true,
+          "range": {
+            "byteStart": 31089,
+            "byteEndExclusive": 31562,
+            "rangeSha256": "c65fdff548cb8524fe35d1d8ebff43d6a3802b93dba02264085361c0f146c263"
+          }
+        },
+        {
+          "label": "Populer",
+          "selectedClass": false,
+          "range": {
+            "byteStart": 31562,
+            "byteEndExclusive": 31954,
+            "rangeSha256": "ec25b0b5931927d5b912f13681fdeef9fc5642d940cac779e2bacfab25376537"
+          }
+        }
+      ],
+      "placeholderParentIndex": 2,
+      "wrapperClass": "d-none",
+      "responsiveAncestorClasses": [],
+      "staticPositionalSection": "Populer",
+      "sectionBasis": "literalRC segment-to-template mapping; two literal button labels in same isotop-wrapper order; content sibling1 visible/sibling2 d-none. No click/script execution."
+    },
+    {
+      "group": "S:4",
+      "cards": 4,
+      "segmentRange": {
+        "byteStart": 70647,
+        "byteEndExclusive": 74174,
+        "rangeSha256": "b3394476044d7ab1089ced36564441baf28eecfef9c31ef36a492974c56b778c"
+      },
+      "placeholderRange": {
+        "byteStart": 34155,
+        "byteEndExclusive": 34185,
+        "rangeSha256": "0f69c04fd4271975640e8e26044cc13a268293470fd5df817a28aa169bb1b10a"
+      },
+      "mapping": {
+        "scriptIndex": 22,
+        "placeholder": "B:4",
+        "segment": "S:4",
+        "callLiteral": "$RC(\"B:4\",\"S:4\")",
+        "range": {
+          "byteStart": 74182,
+          "byteEndExclusive": 74198,
+          "rangeSha256": "7e4d21abcbd5084aff9b115fab65013ac5ffd20f8dc98677334fdbd25021d20b"
+        }
+      },
+      "labels": [
+        {
+          "label": "Terkini",
+          "selectedClass": true,
+          "range": {
+            "byteStart": 33261,
+            "byteEndExclusive": 33734,
+            "rangeSha256": "c65fdff548cb8524fe35d1d8ebff43d6a3802b93dba02264085361c0f146c263"
+          }
+        },
+        {
+          "label": "Populer",
+          "selectedClass": false,
+          "range": {
+            "byteStart": 33734,
+            "byteEndExclusive": 34126,
+            "rangeSha256": "ec25b0b5931927d5b912f13681fdeef9fc5642d940cac779e2bacfab25376537"
+          }
+        }
+      ],
+      "placeholderParentIndex": 1,
+      "wrapperClass": "",
+      "responsiveAncestorClasses": [
+        "d-md-none"
+      ],
+      "staticPositionalSection": "Terkini",
+      "sectionBasis": "literalRC segment-to-template mapping; two literal button labels in same isotop-wrapper order; content sibling1 visible/sibling2 d-none. No click/script execution."
+    },
+    {
+      "group": "S:5",
+      "cards": 4,
+      "segmentRange": {
+        "byteStart": 82642,
+        "byteEndExclusive": 85863,
+        "rangeSha256": "429d67a24eb7a81ec540e7cd6e3b79cd1758230aec21b52b280529a4fa54f907"
+      },
+      "placeholderRange": {
+        "byteStart": 34229,
+        "byteEndExclusive": 34259,
+        "rangeSha256": "d148b3eb2cdd509c31a7810280f19cf2e2ba5d256e32a454398a9b0ceebbdac4"
+      },
+      "mapping": {
+        "scriptIndex": 24,
+        "placeholder": "B:5",
+        "segment": "S:5",
+        "callLiteral": "$RC(\"B:5\",\"S:5\")",
+        "range": {
+          "byteStart": 85871,
+          "byteEndExclusive": 85887,
+          "rangeSha256": "22e7ad077032eb51daeae35671ed471a2d3877ff4ccdc12e073f63477ae3620b"
+        }
+      },
+      "labels": [
+        {
+          "label": "Terkini",
+          "selectedClass": true,
+          "range": {
+            "byteStart": 33261,
+            "byteEndExclusive": 33734,
+            "rangeSha256": "c65fdff548cb8524fe35d1d8ebff43d6a3802b93dba02264085361c0f146c263"
+          }
+        },
+        {
+          "label": "Populer",
+          "selectedClass": false,
+          "range": {
+            "byteStart": 33734,
+            "byteEndExclusive": 34126,
+            "rangeSha256": "ec25b0b5931927d5b912f13681fdeef9fc5642d940cac779e2bacfab25376537"
+          }
+        }
+      ],
+      "placeholderParentIndex": 2,
+      "wrapperClass": "d-none",
+      "responsiveAncestorClasses": [
+        "d-md-none"
+      ],
+      "staticPositionalSection": "Populer",
+      "sectionBasis": "literalRC segment-to-template mapping; two literal button labels in same isotop-wrapper order; content sibling1 visible/sibling2 d-none. No click/script execution."
+    }
+  ],
+  "observedCardNodes": 16,
+  "differentIdentities": 7,
+  "samples": [
+    {
+      "sample": 0,
+      "identityPathSha256": "429e0e1fcc8d25799d396025ee12013a7113fc0333e22ed390763bd7babd0b7a",
+      "identityExample": "/dok/pmk-74-tahun-2026",
+      "identifierExample": "PMK 74 TAHUN 2026",
+      "identifierSha256": "a23f3c50033946b0fdfbf2038cbacd5ade18a275010001372c9f266a7185668c",
+      "descriptiveTitlePrefixExample": "Tata Cara Pelaksan…",
+      "descriptiveTitleCharacters": 89,
+      "descriptiveTitleSha256": "dbab3c31f8fc205af20c00731581ca5c4e6df21bd52a290394d3fbf408debb8a",
+      "occurrences": 2,
+      "groupIds": [
+        "S:1",
+        "S:4"
+      ],
+      "repeatedFieldsEqual": true,
+      "firstCardRange": {
+        "byteStart": 60449,
+        "byteEndExclusive": 61218,
+        "rangeSha256": "09328d1446381237203d02e897ad458e994a2f185791c94e6c7b5c106e643595"
+      },
+      "flightIdentityProps": [
+        {
+          "locator": "flight_record:7@line51$[0][3].children[3].children[0][3].children[1][3].children[3].children[0][3].children[3].children[0][3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "7892fbef667ef2096d1164b6c2a8f210f192c903896e6d97d025bdc7889d71bf"
+        },
+        {
+          "locator": "flight_record:23@line72$[3].children[3].children[0][3].children[3].children[0][3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "7892fbef667ef2096d1164b6c2a8f210f192c903896e6d97d025bdc7889d71bf"
+        }
+      ],
+      "explicitAssociatedPublicationDate": null,
+      "dateEvidenceStatus": "OWN_CARD_RAW_DAY_ASSOCIATED_NOT_CERTIFIED_PUBLICATION_INSTANT",
+      "sourceCardDateRaw": "08 Okt 2026",
+      "localDate": "2026-10-08",
+      "dateRole": "unlabelled_source_card_day_not_certified_publication_enactment_or_effective_date",
+      "precision": "day",
+      "timezone": "missing",
+      "utcOffset": null,
+      "publicationInstant": null,
+      "cardTagRange": {
+        "byteStart": 60646,
+        "byteEndExclusive": 61092,
+        "rangeSha256": "c123c3b1f5ba47ddb142ac74bac1761d729fd4907014904cb86f73d2488e50f8"
+      },
+      "rawDateAlsoInOwnFlightIdentityProps": true,
+      "identifierAlsoInOwnFlightIdentityProps": true,
+      "descriptiveTitleBasis": "Own DOM p text, equal across every repeated identity; no need to resolve further RSC component/text references",
+      "safeJsonDirectParagraphMatches": 2,
+      "safeJsonIdentityOccurrences": 2
+    },
+    {
+      "sample": 1,
+      "identityPathSha256": "aaea9a09757e13b05341dfd3d42f0c6e554f811494a2053668735574efb85143",
+      "identityExample": null,
+      "identifierExample": null,
+      "identifierSha256": "3de979a05cbef02c7cd91e76233613217092eebebe28f6b1d14c1820a8db728e",
+      "descriptiveTitlePrefixExample": null,
+      "descriptiveTitleCharacters": 118,
+      "descriptiveTitleSha256": "78cabae3414b53e02efe6d5f4bca44392d51c673ef81d51ef3c0ec2fb39e43fa",
+      "occurrences": 2,
+      "groupIds": [
+        "S:1",
+        "S:4"
+      ],
+      "repeatedFieldsEqual": true,
+      "firstCardRange": {
+        "byteStart": 61269,
+        "byteEndExclusive": 62067,
+        "rangeSha256": "a7e14e70507635fa07fb2f74b194d8733def0c4dc022ca1bd876910aa75fe4f1"
+      },
+      "flightIdentityProps": [
+        {
+          "locator": "flight_record:7@line51$[0][3].children[3].children[0][3].children[1][3].children[3].children[0][3].children[3].children[1][3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "d8b73a39694f44373b2f7d6ef3444acbf8f50f684e5a18492165cd4db90fdeda"
+        },
+        {
+          "locator": "flight_record:23@line72$[3].children[3].children[0][3].children[3].children[1][3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "2997c2f9698f535e899655d722181b5ad8be0ee8e06dcbf680854bca5af57cd9"
+        }
+      ],
+      "explicitAssociatedPublicationDate": null,
+      "dateEvidenceStatus": "OWN_CARD_RAW_DAY_ASSOCIATED_NOT_CERTIFIED_PUBLICATION_INSTANT",
+      "sourceCardDateRaw": "08 Okt 2026",
+      "localDate": "2026-10-08",
+      "dateRole": "unlabelled_source_card_day_not_certified_publication_enactment_or_effective_date",
+      "precision": "day",
+      "timezone": "missing",
+      "utcOffset": null,
+      "publicationInstant": null,
+      "cardTagRange": {
+        "byteStart": 61466,
+        "byteEndExclusive": 61912,
+        "rangeSha256": "c123c3b1f5ba47ddb142ac74bac1761d729fd4907014904cb86f73d2488e50f8"
+      },
+      "rawDateAlsoInOwnFlightIdentityProps": true,
+      "identifierAlsoInOwnFlightIdentityProps": true,
+      "descriptiveTitleBasis": "Own DOM p text, equal across every repeated identity; no need to resolve further RSC component/text references",
+      "safeJsonDirectParagraphMatches": 1,
+      "safeJsonIdentityOccurrences": 2
+    },
+    {
+      "sample": 2,
+      "identityPathSha256": "2c4518156bba72f46abba6a732dbec447585d2714c38a24a29c7527b1697dbe4",
+      "identityExample": null,
+      "identifierExample": null,
+      "identifierSha256": "124b6562cb58204d0a230cd93c5f26a556f1eed3158887dcf3b0c19f86c14a13",
+      "descriptiveTitlePrefixExample": null,
+      "descriptiveTitleCharacters": 177,
+      "descriptiveTitleSha256": "037bfe1589b00f85de89200f3da602d02d13d3eb1d2461d88e91163168f9b4a0",
+      "occurrences": 2,
+      "groupIds": [
+        "S:1",
+        "S:4"
+      ],
+      "repeatedFieldsEqual": true,
+      "firstCardRange": {
+        "byteStart": 62118,
+        "byteEndExclusive": 62975,
+        "rangeSha256": "480f7e584af480b114e7c096760599af5d5bebbb7df30bb04026904cbdea249f"
+      },
+      "flightIdentityProps": [
+        {
+          "locator": "flight_record:1e@line67$[3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "2672eeb8cdca050d3225b9ba1152d3e2390d3b72ea1afbda372e2f9e2fb5cd58"
+        },
+        {
+          "locator": "flight_record:23@line72$[3].children[3].children[0][3].children[3].children[2][3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "2672eeb8cdca050d3225b9ba1152d3e2390d3b72ea1afbda372e2f9e2fb5cd58"
+        }
+      ],
+      "explicitAssociatedPublicationDate": null,
+      "dateEvidenceStatus": "OWN_CARD_RAW_DAY_ASSOCIATED_NOT_CERTIFIED_PUBLICATION_INSTANT",
+      "sourceCardDateRaw": "08 Okt 2026",
+      "localDate": "2026-10-08",
+      "dateRole": "unlabelled_source_card_day_not_certified_publication_enactment_or_effective_date",
+      "precision": "day",
+      "timezone": "missing",
+      "utcOffset": null,
+      "publicationInstant": null,
+      "cardTagRange": {
+        "byteStart": 62315,
+        "byteEndExclusive": 62761,
+        "rangeSha256": "c123c3b1f5ba47ddb142ac74bac1761d729fd4907014904cb86f73d2488e50f8"
+      },
+      "rawDateAlsoInOwnFlightIdentityProps": true,
+      "identifierAlsoInOwnFlightIdentityProps": true,
+      "descriptiveTitleBasis": "Own DOM p text, equal across every repeated identity; no need to resolve further RSC component/text references",
+      "safeJsonDirectParagraphMatches": 2,
+      "safeJsonIdentityOccurrences": 2
+    },
+    {
+      "sample": 3,
+      "identityPathSha256": "5756bac83c91f17c29d3cbb5712bcb84c73d30178b864548f4c799b9a5565fc6",
+      "identityExample": null,
+      "identifierExample": null,
+      "identifierSha256": "b4842bfeb7d9c55f02163fd2516d755d17dadc5ea985cd08f8ed44bdbc5bfbe2",
+      "descriptiveTitlePrefixExample": null,
+      "descriptiveTitleCharacters": 165,
+      "descriptiveTitleSha256": "0a4ce2a05eefe86bbebe7ac5a7fb036a319d701043c8e40ab19dbb381fca4f63",
+      "occurrences": 4,
+      "groupIds": [
+        "S:1",
+        "S:2",
+        "S:4",
+        "S:5"
+      ],
+      "repeatedFieldsEqual": true,
+      "firstCardRange": {
+        "byteStart": 63026,
+        "byteEndExclusive": 63871,
+        "rangeSha256": "9c6509bdf7c1741526771ec277dca2803b1543f3caf2b1a49de19d8577e89cfe"
+      },
+      "flightIdentityProps": [
+        {
+          "locator": "flight_record:1f@line68$[3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "b04d98951ad989efd656e66b728cee8d74d1111c2cfc50290ad2ce6e3f96d4bb"
+        },
+        {
+          "locator": "flight_record:20@line69$[3].children[3].children[1][3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "b04d98951ad989efd656e66b728cee8d74d1111c2cfc50290ad2ce6e3f96d4bb"
+        },
+        {
+          "locator": "flight_record:23@line72$[3].children[3].children[0][3].children[3].children[3][3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "1be64081d66c2390fee6dd02b5bb27de7ae2a8dc62ec827dfc961d51fd910342"
+        },
+        {
+          "locator": "flight_record:45@line97$[3].children[3].children[1][3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "b04d98951ad989efd656e66b728cee8d74d1111c2cfc50290ad2ce6e3f96d4bb"
+        }
+      ],
+      "explicitAssociatedPublicationDate": null,
+      "dateEvidenceStatus": "OWN_CARD_RAW_DAY_ASSOCIATED_NOT_CERTIFIED_PUBLICATION_INSTANT",
+      "sourceCardDateRaw": "02 Okt 2026",
+      "localDate": "2026-10-02",
+      "dateRole": "unlabelled_source_card_day_not_certified_publication_enactment_or_effective_date",
+      "precision": "day",
+      "timezone": "missing",
+      "utcOffset": null,
+      "publicationInstant": null,
+      "cardTagRange": {
+        "byteStart": 63223,
+        "byteEndExclusive": 63669,
+        "rangeSha256": "d3ca082e76c555a79fa5e1fa58ff020271296d405c9a8db02cb6158c7cf598ee"
+      },
+      "rawDateAlsoInOwnFlightIdentityProps": true,
+      "identifierAlsoInOwnFlightIdentityProps": true,
+      "descriptiveTitleBasis": "Own DOM p text, equal across every repeated identity; no need to resolve further RSC component/text references",
+      "safeJsonDirectParagraphMatches": 3,
+      "safeJsonIdentityOccurrences": 4
+    },
+    {
+      "sample": 4,
+      "identityPathSha256": "182bb7780424b0ede3383d797dd57638e7a0a105ec0e73c37f11eaac098cefd2",
+      "identityExample": null,
+      "identifierExample": null,
+      "identifierSha256": "8540316fecce60e49e22c3585973edadb8426dd7f87dc3a3142bf5eafae2f982",
+      "descriptiveTitlePrefixExample": null,
+      "descriptiveTitleCharacters": 41,
+      "descriptiveTitleSha256": "463a0f3af69ba653f47c167db79a30dc06eae9192790309a0971357e68ccfb4c",
+      "occurrences": 2,
+      "groupIds": [
+        "S:2",
+        "S:5"
+      ],
+      "repeatedFieldsEqual": true,
+      "firstCardRange": {
+        "byteStart": 64009,
+        "byteEndExclusive": 64730,
+        "rangeSha256": "af9fb9ae969dce84e93ad06f3b813b1fc3282d4331f660b5cc92c549b283110f"
+      },
+      "flightIdentityProps": [
+        {
+          "locator": "flight_record:20@line69$[3].children[3].children[0][3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "7b12b089dda20228da94369fcaf88919e9fa216ec1759f3ada1528d900ecad15"
+        },
+        {
+          "locator": "flight_record:45@line97$[3].children[3].children[0][3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "7b12b089dda20228da94369fcaf88919e9fa216ec1759f3ada1528d900ecad15"
+        }
+      ],
+      "explicitAssociatedPublicationDate": null,
+      "dateEvidenceStatus": "OWN_CARD_RAW_DAY_ASSOCIATED_NOT_CERTIFIED_PUBLICATION_INSTANT",
+      "sourceCardDateRaw": "20 Mei 2025",
+      "localDate": "2025-05-20",
+      "dateRole": "unlabelled_source_card_day_not_certified_publication_enactment_or_effective_date",
+      "precision": "day",
+      "timezone": "missing",
+      "utcOffset": null,
+      "publicationInstant": null,
+      "cardTagRange": {
+        "byteStart": 64206,
+        "byteEndExclusive": 64652,
+        "rangeSha256": "d91860a55f7ffe29bfeb6f37b28f74dc783d7627ea10790df2f95dc1c7edeeeb"
+      },
+      "rawDateAlsoInOwnFlightIdentityProps": true,
+      "identifierAlsoInOwnFlightIdentityProps": true,
+      "descriptiveTitleBasis": "Own DOM p text, equal across every repeated identity; no need to resolve further RSC component/text references",
+      "safeJsonDirectParagraphMatches": 2,
+      "safeJsonIdentityOccurrences": 2
+    },
+    {
+      "sample": 5,
+      "identityPathSha256": "f84b8bb69d6f3e2bcec78303767eed8f5fab7c02c37e74676b79b3c85a492914",
+      "identityExample": null,
+      "identifierExample": null,
+      "identifierSha256": "1870b8cfb8b9c86d4fcd1af539dc9ea0ba66ef88b1e27778388aca5540e2da2b",
+      "descriptiveTitlePrefixExample": null,
+      "descriptiveTitleCharacters": 21,
+      "descriptiveTitleSha256": "c08152e208e17bb82aea28cd52468ae020487d618265d495e568713487c210b7",
+      "occurrences": 2,
+      "groupIds": [
+        "S:2",
+        "S:5"
+      ],
+      "repeatedFieldsEqual": true,
+      "firstCardRange": {
+        "byteStart": 65677,
+        "byteEndExclusive": 66378,
+        "rangeSha256": "febeebb67599a1175b7c915be9c21fd8e5e6f84cf3dd7c96cc037bdc1089c7a9"
+      },
+      "flightIdentityProps": [
+        {
+          "locator": "flight_record:20@line69$[3].children[3].children[2][3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "da71653ac9e1e9f0fb803a274ce40d840603ced4a1e26d41ad7f82d90d48da17"
+        },
+        {
+          "locator": "flight_record:45@line97$[3].children[3].children[2][3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "da71653ac9e1e9f0fb803a274ce40d840603ced4a1e26d41ad7f82d90d48da17"
+        }
+      ],
+      "explicitAssociatedPublicationDate": null,
+      "dateEvidenceStatus": "OWN_CARD_RAW_DAY_ASSOCIATED_NOT_CERTIFIED_PUBLICATION_INSTANT",
+      "sourceCardDateRaw": "31 Jul 2026",
+      "localDate": "2026-07-31",
+      "dateRole": "unlabelled_source_card_day_not_certified_publication_enactment_or_effective_date",
+      "precision": "day",
+      "timezone": "missing",
+      "utcOffset": null,
+      "publicationInstant": null,
+      "cardTagRange": {
+        "byteStart": 65874,
+        "byteEndExclusive": 66320,
+        "rangeSha256": "51944a382ff51ebaedc7b090ddbab31b11182a58d375c380419be63e224d6b10"
+      },
+      "rawDateAlsoInOwnFlightIdentityProps": true,
+      "identifierAlsoInOwnFlightIdentityProps": true,
+      "descriptiveTitleBasis": "Own DOM p text, equal across every repeated identity; no need to resolve further RSC component/text references",
+      "safeJsonDirectParagraphMatches": 2,
+      "safeJsonIdentityOccurrences": 2
+    },
+    {
+      "sample": 6,
+      "identityPathSha256": "1a10ef0a60c2f5c1d2eb2dcf9a68be45ee274c55e8ff7b1fc9147c942b398cd6",
+      "identityExample": null,
+      "identifierExample": null,
+      "identifierSha256": "6de078e4e5c211742a3030500e41de321c2b5ceb1cabd27ff027e4fdd77c57ae",
+      "descriptiveTitlePrefixExample": null,
+      "descriptiveTitleCharacters": 18,
+      "descriptiveTitleSha256": "795c38f9e64a7a1e0af3642cfcaa46bb7ba1bf2f03b56dc8b7b985c03896b1b8",
+      "occurrences": 2,
+      "groupIds": [
+        "S:2",
+        "S:5"
+      ],
+      "repeatedFieldsEqual": true,
+      "firstCardRange": {
+        "byteStart": 66428,
+        "byteEndExclusive": 67125,
+        "rangeSha256": "c0e7839e95bad561655432d4ba6cffdd6b307c59c65aa875ebb1771373d1d216"
+      },
+      "flightIdentityProps": [
+        {
+          "locator": "flight_record:20@line69$[3].children[3].children[3][3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "6ae20b9553759221277bc8f0ca44116c32674bb20725cdbe8ce1df23b1173d92"
+        },
+        {
+          "locator": "flight_record:45@line97$[3].children[3].children[3][3]",
+          "keys": [
+            "href",
+            "prefetch",
+            "className",
+            "children"
+          ],
+          "subtreeSha256": "46a106930b5fe53a637e1da934315d0063c108901fb989d6ea2b9bbdb75e8055"
+        }
+      ],
+      "explicitAssociatedPublicationDate": null,
+      "dateEvidenceStatus": "OWN_CARD_RAW_DAY_ASSOCIATED_NOT_CERTIFIED_PUBLICATION_INSTANT",
+      "sourceCardDateRaw": "16 Agu 2007",
+      "localDate": "2007-08-16",
+      "dateRole": "unlabelled_source_card_day_not_certified_publication_enactment_or_effective_date",
+      "precision": "day",
+      "timezone": "missing",
+      "utcOffset": null,
+      "publicationInstant": null,
+      "cardTagRange": {
+        "byteStart": 66624,
+        "byteEndExclusive": 67070,
+        "rangeSha256": "d0fcccf021cb5e079ba7cdc92a768b924d8f7bbcc7078730468054a3d8a446a6"
+      },
+      "rawDateAlsoInOwnFlightIdentityProps": true,
+      "identifierAlsoInOwnFlightIdentityProps": true,
+      "descriptiveTitleBasis": "Own DOM p text, equal across every repeated identity; no need to resolve further RSC component/text references",
+      "safeJsonDirectParagraphMatches": 0,
+      "safeJsonIdentityOccurrences": 2
+    }
+  ],
+  "safelyReadableData": {
+    "method": "Regex select one exact self.__next_f.push(JSON) wrapper, JSON.parse argument only; split payload record lines, JSON.parse JSON-only values; never eval/Function/vm/browser execute",
+    "scriptIndex": 26,
+    "scriptRange": {
+      "byteStart": 85956,
+      "byteEndExclusive": 212023,
+      "rangeSha256": "7fed1132cde7bdbeb41ccb74d9591291f5b80326e344376c9d0e658351ffcffd"
+    },
+    "decodedPayloadSha256": "21372379735a3f9a67c6039ebee7b5ef5ea92c9ab2ac4ca25d43c0b3f96dd027",
+    "decodedPayloadCharacters": 114565,
+    "parsedJsonRecords": 62,
+    "skippedRecordKinds": {
+      "I": 32,
+      "not_record": 8,
+      "X": 7,
+      "C": 7,
+      "T": 8
+    },
+    "skippedRecordCount": 62,
+    "dateKeyHits": [],
+    "matchedIdentityPropObjects": 16,
+    "matchedDistinctIdentities": 7,
+    "relatedKeyNames": [
+      "templateStyles"
+    ],
+    "initialFullMonthPatternHits": [
+      {
+        "locator": "flight_record:20@line69$[3].children[3].children[0][3].children[3].children[3].children[3].children[0][3].children[1][3].children[3].children[1]",
+        "values": [
+          "20 Mei 2025"
+        ],
+        "originalValueSha256": "84204df9f3fd23a2279858a42138606766ec575beb3d624d35f90d3985e31d89"
+      },
+      {
+        "locator": "flight_record:45@line97$[3].children[3].children[0][3].children[3].children[3].children[3].children[0][3].children[1][3].children[3].children[1]",
+        "values": [
+          "20 Mei 2025"
+        ],
+        "originalValueSha256": "84204df9f3fd23a2279858a42138606766ec575beb3d624d35f90d3985e31d89"
+      }
+    ],
+    "initialPatternScope": "Initial full-month diagnostic only; definitive raw abbreviated card dates and associations are in samples/cardTagRange"
+  },
+  "associatedDateFound": true,
+  "wholePageHasNoDatesClaimed": false,
+  "sourceDnsCalls": 0,
+  "sourceGetAttempts": 0,
+  "scriptExecution": false,
+  "normalizedRecords": 0,
+  "recordsPersisted": 0,
+  "adapterImplemented": false,
+  "qualificationChanged": false,
+  "all16IdentityIdentifierDescriptionAndDateAssociationsConsistent": true,
+  "correction": {
+    "priorEvidence": "docs/evidence/r2-id-t02-location-2026-10-15/structure-observation.json",
+    "priorClaim": "No explicit date field in16 cards",
+    "cause": "Previous inspection only counted time/datetime/date-class and excluded non-leaf direct text in span.card-tag because it also contains an SVG icon. Initial finite full-month regex also missed abbreviated Okt/Jul/Agu tokens.",
+    "correctedFinding": "Every own card has explicit raw DD month-abbreviation YYYY in span.card-tag, corroborated in safely JSON-decoded own href props. This does not certify its date role as publication/enactment/effectiveness.",
+    "priorEvidencePreserved": true
+  },
+  "candidateDecision": "AUTHORIZED_MINIMAL_DISABLED_METADATA_CANDIDATE_CAN_PROCEED",
+  "cnP02ConditionalBranch": "NOT_OPENED_ID_T02_HAS_RELIABLY_ASSOCIATED_RAW_DATES"
+}

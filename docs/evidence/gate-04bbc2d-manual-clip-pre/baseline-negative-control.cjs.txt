@@ -1,0 +1,21 @@
+const fs = require('node:fs');
+const cp = require('node:child_process');
+const vm = require('node:vm');
+const ts = require('typescript');
+const { parseHTML } = require('linkedom');
+const sha = 'f95f73b4f6b3e6c150fc442f1b10f5fb308e6b71';
+const source = cp.execFileSync('git', ['show', sha + ':extensions/shipping-hot-clipper/src/extract.ts'], { encoding: 'utf8' });
+const method = source.slice(source.indexOf('export function plainSelection'), source.indexOf('export function extractDocument')).replace(/^export /gm, '');
+const compiled = ts.transpileModule(method, { compilerOptions: { target: ts.ScriptTarget.ES2020 } }).outputText;
+const { document } = parseHTML('<html><head></head><body></body></html>');
+const convert = vm.runInNewContext(compiled + '\nplainSelection', { document });
+const cases = [
+  ['double spaces and lines', '<pre>港口A  10:00\n港口B  18:00</pre>', '港口A  10:00\n港口B  18:00'],
+  ['tabs', '<pre>港口A\t10:00\n港口B\t\t18:00</pre>', '港口A\t10:00\n港口B\t\t18:00'],
+  ['edge spaces and blank lines', '<pre>  港口A  10:00 \n\n\n\t港口B  18:00  \n </pre>', '  港口A  10:00 \n\n\n\t港口B  18:00  \n '],
+  ['inline elements', '<pre>  <strong>港口A</strong>  <code>10:00\t开港</code>\n\n\n<span>港口B</span>\t 18:00  <script>unsafe script</script></pre>', '  港口A  10:00\t开港\n\n\n港口B\t 18:00  '],
+  ['surrounded by normal blocks', '<p> 前文 </p><pre>  港口A  10:00 \n\n\n港口B\t18:00  </pre><p> 后文<br>复核 </p>', '前文\n\n  港口A  10:00 \n\n\n港口B\t18:00  \n\n后文\n复核'],
+].map(([name, html, expected]) => ({ name, expected, baselineActual: convert(html), baselineFails: convert(html) !== expected }));
+fs.writeFileSync('.tmp/clip-pre-negative.json', JSON.stringify({ sha, method: 'actual baseline plainSelection, type annotations transpiled away; synthetic inert DOM in isolated VM, not a browser run', cases }, null, 2));
+if (!cases.every(c => c.baselineFails)) process.exitCode = 1;
+console.log(JSON.stringify({ baselineCases: cases.length, baselineFailures: cases.filter(c => c.baselineFails).length }));

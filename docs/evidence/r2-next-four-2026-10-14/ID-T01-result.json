@@ -1,0 +1,11 @@
+{
+  "id": "ID-T01",
+  "url": "https://jdih.kemendag.go.id/",
+  "startedAt": "2026-10-14T08:33:17.700Z",
+  "status": "BLOCKED",
+  "httpRequests": 0,
+  "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+  "reason": "blocked_address",
+  "parse": "NOT_RUN",
+  "finishedAt": "2026-10-14T08:33:17.701Z"
+}

@@ -1,0 +1,99 @@
+import { it, expect } from "vitest"
+import { mkdirSync, existsSync, readFileSync, writeFileSync } from "node:fs"
+import { createHash } from "node:crypto"
+import { load } from "cheerio"
+import { defaultTransport, secureFetchArticle } from "../server/services/article-fetch-security"
+
+const dir = "docs/evidence/r2-four-after-clash-2026-10-14"
+const local = ".tmp/r2-four-after-clash-2026-10-14-private"
+const ids = ["CN-P01", "CN-T02", "VN-P01", "PH-C01"]
+const hash = (v: string | Uint8Array) => createHash("sha256").update(v).digest("hex")
+const write = (name: string, v: unknown) => writeFileSync(`${dir}/${name}.json`, JSON.stringify(v, null, 2) + "\n", "utf8")
+const secret = /(?:authorization|bearer|set-cookie|api[_-]?key|password|credential|token|secret|csrf|cookie)/i
+function safeUrl(value: string, base: string) {
+  try { const u = new URL(value, base); return ["http:", "https:"].includes(u.protocol) && !u.username && !u.password && ![...u.searchParams.keys()].some(k => secret.test(k) || /signature|^sig$|utm_|gclid|fbclid/i.test(k)) ? u.href : null } catch { return null }
+}
+const safeText = (v: string) => secret.test(v) ? "[redacted]" : v.replace(/\s+/g, " ").trim().slice(0, 120)
+function structure(body: string, url: string) {
+  const $ = load(body)
+  $("script,style,noscript,iframe,input,meta,link").remove()
+  const candidates: unknown[] = []
+  const datePattern = /(?:\b\d{4}[-/]\d{1,2}[-/]\d{1,2}\b|\b\d{1,2}[-/]\d{1,2}[-/]\d{4}\b|\b\d{1,2}[ -](?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[ ,/-]+\d{4}\b)/gi
+  const tag = (el: any) => String(el?.tagName ?? "").replace(/[^a-z0-9-]/gi, "")
+  $("a[href]").each((index, el) => {
+    if (candidates.length >= 6) return
+    const a = $(el), href = safeUrl(a.attr("href") ?? "", url)
+    if (!href) return
+    let container = a.parent(), depth = 1, dates: string[] = []
+    for (; depth <= 3; depth++) {
+      dates = [...new Set(container.text().match(datePattern) ?? [])]
+      if (dates.length || tag(container[0]) === "body") break
+      container = container.parent()
+    }
+    if (!dates.length) return
+    const chain = [el, a.parent()[0], a.parent().parent()[0]].filter(Boolean).map(tag)
+    candidates.push({ anchorDocumentIndex: index, titleExcerpt: safeText(a.text() || a.attr("title") || ""), href, ancestorTags: chain, ancestorDepth: depth, dateTextCandidates: dates.slice(0, 8), anchorCountInAncestor: container.find("a[href]").length, association: dates.length === 1 && container.find("a[href]").length === 1 ? "same-local-container-observation-only" : "ambiguous-container-not-assigned", siblingTags: a.siblings().toArray().map(tag).slice(0, 16) })
+  })
+  return { kind: "sanitized DOM structural metadata derivative; not original HTML or configured parser output", counts: { anchors: $("a[href]").length, tables: $("table").length, rows: $("tr").length, times: $("time").length }, candidates, itemParser: "NOT_RUN: no source adapter configured in this observation", noCandidateMeaning: "No numeric/English date association observed by bounded heuristic; not proof of no items", completeFieldsPass: false }
+}
+it("one approved four-source observation after Clash reapply; durable response capture precedes decoding/observation", async () => {
+  expect(process.env.SHIPPING_APPROVED_PUBLIC_FOUR).toBe("1")
+  mkdirSync(dir, { recursive: true }); mkdirSync(local, { recursive: true })
+  if (existsSync(`${dir}/request-ledger.json`)) throw new Error("ledger_exists_do_not_repeat")
+  const catalog = readFileSync("docs/intel-source-catalog.md", "utf8")
+  const rows = ids.map(id => {
+    const line = catalog.split(/\r?\n/).find(l => l.startsWith(`| ${id} |`))!
+    const cells = line.split("|").map(x => x.trim()), url = cells[4]
+    const u = new URL(url); if (u.protocol !== "https:") throw new Error("catalog_https_required")
+    return { id, url, host: u.hostname, catalogLineSha256: hash(line), permission: "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML" }
+  })
+  write("manifest", { codeSha: "e5d2f0bb0aa4651984d69d280db0c2485d9467a2", rows, maxRequests: 4, maxBytes: 524288, perSourceMs: 10000, totalMs: 120000, retries: 0, redirects: 0, details: 0, productionEnabled: false })
+  const ledger: any[] = [], results: any[] = []
+  write("request-ledger", ledger)
+  const batch = new AbortController(), timer = setTimeout(() => batch.abort(), 120000)
+  const started = new Date().toISOString()
+  try {
+    for (const row of rows) {
+      const outcome: any = { id: row.id, url: row.url, startedAt: new Date().toISOString(), status: "NOT_RUN", httpRequests: 0, permission: row.permission }
+      if (batch.signal.aborted) { outcome.reason = "batch_deadline"; results.push(outcome); write("partial-results", results); continue }
+      const controller = new AbortController(), abort = () => controller.abort()
+      batch.signal.addEventListener("abort", abort, { once: true }); const timeout = setTimeout(abort, 10000)
+      try {
+        const fetched = await secureFetchArticle(row.url, { policy: { sourceId: row.id, status: "allowed", fetchAllowed: true, persistence: "disallowed", allowedHosts: [row.host], allowedContentTypes: ["text/html", "application/xhtml+xml"] }, maxBytes: 524288, timeoutMs: 10000, maxRedirects: 0, signal: controller.signal,
+          transport: async (url, addresses, options) => {
+            if (outcome.httpRequests || ledger.length >= 4 || url.href !== row.url || options.caPem) throw new Error("one_shot_boundary")
+            outcome.httpRequests = 1
+            ledger.push({ id: row.id, url: row.url, reservedAt: new Date().toISOString(), state: "reserved_unknown" }); write("request-ledger", ledger)
+            const response = await defaultTransport(url, addresses, { ...options, signal: controller.signal })
+            const raw = typeof response.body === "string" ? Buffer.from(response.body) : response.body
+            // Local ignored bytes are not redistributed. No headers/cookies/script secrets are copied into committed material.
+            writeFileSync(`${local}/${row.id}.response.bin`, raw)
+            Object.assign(outcome, { receivedAt: new Date().toISOString(), httpStatus: response.status, contentType: response.headers["content-type"], rawByteLength: raw.length, fetchedBytesSha256: hash(raw), rawLocalOnly: true })
+            write(`${row.id}-response`, outcome) // durable before secureFetch decoding or parsing
+            return response
+          } })
+        if (!fetched.ok) { outcome.status = "BLOCKED"; outcome.reason = fetched.code; outcome.httpStatus ??= fetched.status; outcome.parse = "NOT_RUN" }
+        else {
+          const observed = structure(fetched.body, row.url)
+          const archive = JSON.stringify({ source: row.id, url: row.url, ...observed }, null, 2) + "\n"
+          // Positive control checks the exact scan used on committed metadata; no real sensitive value is printed.
+          const scan = /(?:api[_-]?key|password|token|secret|cookie|csrf)\s*[=:]\s*["']?[^\s"'<>]{6,}/i
+          if (!scan.test('api_key="synthetic-positive-control"')) throw new Error("scanner_control_failed")
+          if (scan.test(archive)) throw new Error("metadata_sensitive_scan_failed")
+          writeFileSync(`${dir}/${row.id}-structure.json`, archive, "utf8")
+          Object.assign(outcome, { status: "PARTIAL", parse: "DOM_OBSERVATION_ONLY", parserError: null, observedCandidateCount: observed.candidates.length, decoding: fetched.decoding, archivedMetadataSha256: hash(archive), originalHtmlCommitted: false, sensitiveScan: { positiveControlDetected: true, committedMaterialHits: 0 } })
+        }
+      } catch (error) {
+        outcome.status = "BLOCKED"; outcome.reason = "observation_exception"; outcome.errorName = error instanceof Error ? error.name : "unknown"
+        const code = (error as any)?.code; outcome.transportErrorCode = typeof code === "string" && /^[A-Z0-9_]{1,80}$/.test(code) ? code : null
+      } finally {
+        clearTimeout(timeout); batch.signal.removeEventListener("abort", abort)
+        outcome.finishedAt = new Date().toISOString(); write(`${row.id}-result`, outcome)
+        const entry = ledger.find(e => e.id === row.id); if (entry) { entry.state = outcome.receivedAt ? "response_captured" : "finished_without_response"; entry.finishedAt = outcome.finishedAt; write("request-ledger", ledger) }
+        results.push(outcome); write("partial-results", results)
+      }
+    }
+  } finally { clearTimeout(timer) }
+  write("summary", { startedAt: started, finishedAt: new Date().toISOString(), reservedTransportCalls: ledger.length, results, approvedPublicDenominator: 39, requiredAvailable: 32, batchPassClaims: 0, fullP1Pass: false, paidCalls: 0, llmCalls: 0, productionActivation: "NOT_RUN", live24h: "NOT_RUN" })
+  expect(results).toHaveLength(4); expect(ledger.length).toBeLessThanOrEqual(4)
+}, 125000)

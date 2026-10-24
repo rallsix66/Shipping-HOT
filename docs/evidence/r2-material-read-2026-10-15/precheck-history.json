@@ -1,0 +1,19 @@
+{
+  "scope": "working-tree precheck, before code commit and clean-SHA gate",
+  "typecheckInitialRawExit": 1,
+  "observedErrors": [
+    "server/intel/material-read.test.ts(42,30): TS2339 serialize does not exist on type Database",
+    "server/intel/material-read.test.ts(53,30): TS2339 serialize does not exist on type Database"
+  ],
+  "resolution": "Installed native serialize worked in the 91 passing offline tests; repository local native type declaration omitted it. Narrow test-local signature only, no runtime/native/dependency or tsconfig change.",
+  "firstCommitHookRawExit": 1,
+  "lintObservedError": "material-read.test.ts ts/no-use-before-define: state was used before it was defined",
+  "lintResolution": "Move test state declaration above the serialization helper. Hook blocked the first commit; no bypass.",
+  "documentationHelper": {
+    "scope": "after successful clean-SHA product gate",
+    "initialLauncherRawExit": 1,
+    "observedError": "Inline temporary-script generator had a PowerShell/Node quoting SyntaxError; no lint ran and helper file was not created.",
+    "resolution": "Write fixed helper with apply_patch and run it directly; final lint result is independently recorded in doc-lint.json. Product code unchanged."
+  },
+  "notAClaimOfCleanGatePass": true
+}

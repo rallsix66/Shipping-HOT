@@ -1,0 +1,87 @@
+{
+  "results": [
+    {
+      "id": "XX-K02",
+      "url": "https://www.one-line.com/en/newsroom",
+      "catalogUrl": "https://www.one-line.com/en/news",
+      "host": "www.one-line.com",
+      "catalogLineSha256": "661332dd77a5036797e5870d0ac3cf63a643c551eb7faaa3a91763c0735011b0",
+      "redirectProvenance": {
+        "path": "docs/evidence/r2-carrier-reapplied-2026-10-15/XX-K02-response.json",
+        "committedTextLfSha256": "b0a49d5c77d05002d2d499bfd8daf5e5766f23d8184d4e61ef488a944a1a4cc1",
+        "originalStatus": 308,
+        "location": {
+          "present": true,
+          "sanitized": "/en/newsroom",
+          "relative": true,
+          "credentialsRemoved": false,
+          "queryRemoved": false,
+          "fragmentRemoved": false,
+          "pathRedacted": false,
+          "followed": false
+        },
+        "separatelyAuthorizedTarget": true,
+        "automaticFollow": false
+      },
+      "startedAt": "2026-10-15T02:56:19.741Z",
+      "systemDnsCalls": 1,
+      "httpRequests": 1,
+      "status": "PARTIAL",
+      "rawHtmlCommitted": false,
+      "addresses": [
+        {
+          "address": "104.19.145.47",
+          "family": 4
+        },
+        {
+          "address": "104.19.144.47",
+          "family": 4
+        }
+      ],
+      "addressClassification": "public_address",
+      "receivedAt": "2026-10-15T02:56:22.136Z",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 635664,
+      "wireSha256": "682943942c38c8aebcbc68ec3888ca65e9278ed27a38d30a11134d283d893fe0",
+      "rawLocalOnly": true,
+      "location": {
+        "present": false
+      },
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "http",
+        "declarations": [
+          {
+            "source": "http",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          },
+          {
+            "source": "meta",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          }
+        ],
+        "conflict": false,
+        "byteLength": 635664
+      },
+      "parser": "STRUCTURE_ONLY",
+      "finishedAt": "2026-10-15T02:56:22.193Z"
+    }
+  ],
+  "originalCatalogUnchanged": true,
+  "permanentAllowlistChanged": false,
+  "MaerskRequests": 0,
+  "systemDnsCalls": 1,
+  "reservedTransportCalls": 1,
+  "retries": 0,
+  "redirects": 0,
+  "details": 0,
+  "productionEnabled": false,
+  "live24h": "NOT_RUN",
+  "paidCalls": 0,
+  "llmCalls": 0,
+  "fullRawRedistributed": false,
+  "overallR2Pass": false
+}

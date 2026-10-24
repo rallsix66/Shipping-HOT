@@ -1,0 +1,151 @@
+{
+  "sha": "3fb3ad3dd0d6435c7d36376c579de238b6ecfa3c",
+  "checks": [
+    {
+      "name": "isolated initial policy list",
+      "status": "PASS"
+    },
+    {
+      "name": "no policies before explicit fixture creation",
+      "status": "PASS"
+    },
+    {
+      "name": "create explicit fixture through existing API",
+      "status": "PASS"
+    },
+    {
+      "name": "revision creates v2",
+      "status": "PASS"
+    },
+    {
+      "name": "create explicit platform fixture",
+      "status": "PASS"
+    },
+    {
+      "name": "future replacement API retains relationship",
+      "status": "PASS"
+    },
+    {
+      "name": "three fixtures clearly identified",
+      "status": "PASS"
+    },
+    {
+      "name": "test clock disclosed",
+      "status": "PASS"
+    },
+    {
+      "name": "filter country=VN",
+      "status": "PASS"
+    },
+    {
+      "name": "filter country=TH",
+      "status": "PASS"
+    },
+    {
+      "name": "filter platform=shopee",
+      "status": "PASS"
+    },
+    {
+      "name": "filter category=customs_tax",
+      "status": "PASS"
+    },
+    {
+      "name": "filter status=published",
+      "status": "PASS"
+    },
+    {
+      "name": "filter effectiveFrom=2026-12-01",
+      "status": "PASS"
+    },
+    {
+      "name": "filter q=%E4%B8%8D%E5%AD%98%E5%9C%A8",
+      "status": "PASS"
+    },
+    {
+      "name": "detail retains both versions",
+      "status": "PASS"
+    },
+    {
+      "name": "old version basis retained",
+      "status": "PASS"
+    },
+    {
+      "name": "future replacement not activated",
+      "status": "PASS"
+    },
+    {
+      "name": "unconfigured detail returns404",
+      "status": "PASS"
+    },
+    {
+      "name": "filtered CSV download",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP route /",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP route /ports",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP route /feed",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP route /events",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP route /calendar",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP route /policies",
+      "status": "PASS"
+    },
+    {
+      "name": "asset /assets/index-HhjILP7H.js",
+      "status": "PASS"
+    },
+    {
+      "name": "asset /assets/index-B7S5Invf.css",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP route /settings",
+      "status": "PASS"
+    },
+    {
+      "name": "preview Runtime disabled",
+      "status": "PASS"
+    },
+    {
+      "name": "read checks preserve provider/receipt/run counts",
+      "status": "PASS"
+    },
+    {
+      "name": "existing4477 still responds",
+      "status": "PASS"
+    }
+  ],
+  "summary": {
+    "passed": 32,
+    "failed": 0
+  },
+  "url": "http://127.0.0.1:4482/policies",
+  "fixtureOnly": true,
+  "browser": "NOT_RUN",
+  "scope": "loopback HTTP/API/static-assets and synthetic policy data; not browser interaction or visual matching",
+  "countersBefore": {
+    "provider_usage": 0,
+    "paid_receipt": 0,
+    "sync_runs": 0
+  },
+  "countersAfter": {
+    "provider_usage": 0,
+    "paid_receipt": 0,
+    "sync_runs": 0
+  }
+}

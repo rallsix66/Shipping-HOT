@@ -1,0 +1,6 @@
+{
+  "sha": "11aa1162a286d96bdc7a44a2f61a95d3d2a886e8",
+  "normalizedTrackedDiffRawExit": 0,
+  "stdout": "",
+  "stderr": "warning: in the working copy of 'src/routeTree.gen.ts', LF will be replaced by CRLF the next time Git touches it\n"
+}

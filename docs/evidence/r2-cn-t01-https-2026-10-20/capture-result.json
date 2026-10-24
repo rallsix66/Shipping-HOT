@@ -1,0 +1,28 @@
+{
+  "target": "https://www.mofcom.gov.cn/zcfb/index.html",
+  "startedAt": "2026-10-20T02:51:16.524Z",
+  "systemDNSCalls": 1,
+  "reservedPhysicalHTTP": 0,
+  "transportInvocations": 0,
+  "addresses": [
+    {
+      "address": "198.18.0.5",
+      "family": 4,
+      "blocked": true
+    }
+  ],
+  "response": null,
+  "transportError": null,
+  "finishedAt": "2026-10-20T02:51:16.533Z",
+  "result": {
+    "ok": false,
+    "code": "blocked_address",
+    "message": "Resolved address is not a public address: 198.18.0.5"
+  },
+  "retryAllowed": false,
+  "productionEnabled": false,
+  "live24h": "NOT_RUN",
+  "paidCalls": 0,
+  "detailRequests": 0,
+  "rawRedistributed": false
+}

@@ -1,0 +1,232 @@
+{
+  "source": "MY-P03",
+  "url": "https://www.northport.com.my/np/page-announcements.html",
+  "kind": "sanitized DOM structural metadata derivative; not original HTML or configured parser output",
+  "counts": {
+    "anchors": 107,
+    "tables": 0,
+    "rows": 0,
+    "times": 0
+  },
+  "candidates": [
+    {
+      "anchorDocumentIndex": 1,
+      "titleExcerpt": "ABOUT US",
+      "href": "https://www.northport.com.my/np/index.html#About",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "6-10-2026",
+        "15-09-2026",
+        "12-02-2026",
+        "19-12-2025",
+        "28-11-2025",
+        "15-8-2025",
+        "11-8-2025",
+        "9-7-2025"
+      ],
+      "anchorCountInAncestor": 107,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "a",
+        "a",
+        "a",
+        "a",
+        "a",
+        "a",
+        "hr",
+        "a",
+        "a",
+        "a",
+        "a"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 2,
+      "titleExcerpt": "OUR SERVICES",
+      "href": "https://www.northport.com.my/np/index.html#Services",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "6-10-2026",
+        "15-09-2026",
+        "12-02-2026",
+        "19-12-2025",
+        "28-11-2025",
+        "15-8-2025",
+        "11-8-2025",
+        "9-7-2025"
+      ],
+      "anchorCountInAncestor": 107,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "a",
+        "a",
+        "a",
+        "a",
+        "a",
+        "a",
+        "hr",
+        "a",
+        "a",
+        "a",
+        "a"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 3,
+      "titleExcerpt": "SUSTAINABILITY",
+      "href": "https://www.northport.com.my/np/index.html#Sustain",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "6-10-2026",
+        "15-09-2026",
+        "12-02-2026",
+        "19-12-2025",
+        "28-11-2025",
+        "15-8-2025",
+        "11-8-2025",
+        "9-7-2025"
+      ],
+      "anchorCountInAncestor": 107,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "a",
+        "a",
+        "a",
+        "a",
+        "a",
+        "a",
+        "hr",
+        "a",
+        "a",
+        "a",
+        "a"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 4,
+      "titleExcerpt": "HSSE",
+      "href": "https://www.northport.com.my/np/index.html#HSSE",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "6-10-2026",
+        "15-09-2026",
+        "12-02-2026",
+        "19-12-2025",
+        "28-11-2025",
+        "15-8-2025",
+        "11-8-2025",
+        "9-7-2025"
+      ],
+      "anchorCountInAncestor": 107,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "a",
+        "a",
+        "a",
+        "a",
+        "a",
+        "a",
+        "hr",
+        "a",
+        "a",
+        "a",
+        "a"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 5,
+      "titleExcerpt": "MEDIA CENTRE",
+      "href": "https://www.northport.com.my/np/index.html#Media",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "6-10-2026",
+        "15-09-2026",
+        "12-02-2026",
+        "19-12-2025",
+        "28-11-2025",
+        "15-8-2025",
+        "11-8-2025",
+        "9-7-2025"
+      ],
+      "anchorCountInAncestor": 107,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "a",
+        "a",
+        "a",
+        "a",
+        "a",
+        "a",
+        "hr",
+        "a",
+        "a",
+        "a",
+        "a"
+      ]
+    },
+    {
+      "anchorDocumentIndex": 6,
+      "titleExcerpt": "CONTACT US",
+      "href": "https://www.northport.com.my/np/index.html#Contacts",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 2,
+      "dateTextCandidates": [
+        "6-10-2026",
+        "15-09-2026",
+        "12-02-2026",
+        "19-12-2025",
+        "28-11-2025",
+        "15-8-2025",
+        "11-8-2025",
+        "9-7-2025"
+      ],
+      "anchorCountInAncestor": 107,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "a",
+        "a",
+        "a",
+        "a",
+        "a",
+        "a",
+        "hr",
+        "a",
+        "a",
+        "a",
+        "a"
+      ]
+    }
+  ],
+  "itemParser": "NOT_RUN: no source adapter configured in this observation",
+  "noCandidateMeaning": "No numeric/English date association observed by bounded heuristic; not proof of no items",
+  "completeFieldsPass": false
+}

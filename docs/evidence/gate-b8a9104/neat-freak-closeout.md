@@ -1,0 +1,9 @@
+# Web-list P2 query identity repair — 2026-10-12
+
+- Code SHA `b8a91049f1106e999a64fde3e2ce6ac52f3891d6`, clean before gates. This is only the parent-requested self-link fix, not migration 026 or collector/storage integration.
+- Before: self-link exclusion compared host/path and dropped valid same-path detail IDs. After: both sides use the existing `canonicalizeFeedUrl`, preserving business query differences while removing fragments/tracking parameters and sorting query keys.
+- Regression covers IDs 123/456 on the same path, pure anchor, tracking-only self link and reordered/tracking detail duplicate. Web-list 35/35. Full suite 104 files / 937 passed / 3 skipped. Install/build/typecheck/lint, all targeted sets and three isolated smoke commands exit 0. Raw UTF-8 command/SHA/stdout/stderr/exit evidence is in this directory.
+- Real Neat Freak v3.0.0 skill loaded earlier in this task and applied again to this narrow repair; actual inventory exit 0. Code/doc diff reviewed: two source/test files and one plan line, then status/evidence only. Plan and status now describe complete-URL self identity. No architecture/ADR change; no duplicate URL normalizer. Existing parser provenance/license mapping remains correct.
+- Code/docs/rules: verified-current for this repair. Runtime live: pending/NOT_RUN. Memory: out-of-scope. Workspace: reviewed files only, no secrets or retained databases staged; temp evidence retained, no cleanup. Inventory is not a security audit; secret scan exit 1 means no match in its recorded scope.
+- Existing bundle/Browserslist/auto-import warnings and Windows symlink skips retained. Browser/S7 NOT_RUN (no UI/routes), business source live/paid/LLM NOT_RUN.
+- Parent review pending. Web-list integrated slice remains BLOCKED awaiting explicit migration confirmation; parser tests do not prove storage/failure-retention completion. No merge, deployment or production switch.

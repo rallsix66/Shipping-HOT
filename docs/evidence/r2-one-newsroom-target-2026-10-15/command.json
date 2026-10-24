@@ -1,0 +1,14 @@
+{
+  "startedAt": "2026-10-15T02:56:18.469Z",
+  "finishedAt": "2026-10-15T02:56:22.231Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "-c",
+    ".tmp/one-newsroom-target-20261015.config.ts"
+  ],
+  "head": "03d1515d33dd1c5d96137c43e0aafb596b334be3",
+  "rawExit": 0,
+  "signal": null
+}

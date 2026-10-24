@@ -1,0 +1,40 @@
+{
+  "rows": [
+    {
+      "id": "CN-P02",
+      "url": "https://www.sz.msa.gov.cn/",
+      "host": "www.sz.msa.gov.cn",
+      "catalogLineSha256": "fb8626584a4638504f67317547732ce3b2d3b288cc96bbde8d25b99c6c0bed19"
+    },
+    {
+      "id": "VN-D01",
+      "url": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
+      "host": "phongchongthientai.mard.gov.vn",
+      "catalogLineSha256": "d788316a9a0286c442c1309fc448266e4d8ec2d1e74846949c30ef2bd8e19e0e"
+    },
+    {
+      "id": "MY-L01",
+      "url": "https://www.pos.com.my/service-update",
+      "host": "www.pos.com.my",
+      "catalogLineSha256": "4dcce7c27f05b11245fe478de0872b4aee55dc338ef0ea00e878cf5526bc7078"
+    },
+    {
+      "id": "ID-T02",
+      "url": "https://jdih.kemenkeu.go.id/",
+      "host": "jdih.kemenkeu.go.id",
+      "catalogLineSha256": "badbcb5421386368eaa2d608b1cfe39bcc9ecbb6868b09e16812792b916d539b"
+    }
+  ],
+  "productCodeSha": "355bc861d4020ba22ddd00401de709d7cee497e3",
+  "maxSystemDns": 4,
+  "maxHttpRequests": 4,
+  "maxBytes": 524288,
+  "perRequestMs": 10000,
+  "batchMs": 120000,
+  "retries": 0,
+  "redirects": 0,
+  "pagination": 0,
+  "details": 0,
+  "networkSettingsChanged": false,
+  "fullRawPermission": "unknown; ignored private response bytes only, no redistribution"
+}

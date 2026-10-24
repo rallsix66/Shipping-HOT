@@ -1,0 +1,9 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ .tmp/r2-two-media-replay-20261015.test.ts (2 tests) 358ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  12:26:27
+   Duration  1.18s (transform 397ms, setup 0ms, import 671ms, tests 358ms, environment 0ms)

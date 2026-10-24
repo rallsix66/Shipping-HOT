@@ -1,0 +1,5 @@
+{"command":["node",".tmp/check-four-results.cjs"],"baseline":"01ea950ab023255fdb7e9efe1f2799d9320c260e","started":"2026-10-13T08:27:47.927Z","finished":"2026-10-13T08:27:47.993Z","rawExit":0}
+STDOUT
+PASS: four exact one-shot requests, limits, journal, derivative hashes, no original fixtures, HTML NOT_RUN, unresolved denominator
+
+STDERR

@@ -1,0 +1,9 @@
+{
+  "name": "install",
+  "command": "pnpm install --frozen-lockfile --offline",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\material-read-build-20261015",
+  "sha": "954c831f27eff4fd4382a0ea68be3894de053759",
+  "startedAt": "2026-10-15T10:00:04.838Z",
+  "finishedAt": "2026-10-15T10:00:13.523Z",
+  "rawExit": 0
+}

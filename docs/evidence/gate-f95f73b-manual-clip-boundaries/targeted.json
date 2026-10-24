@@ -1,0 +1,9 @@
+{
+  "name": "targeted",
+  "command": "pnpm exec vitest run -c vitest.config.ts server/intel/manual-clip.test.ts server/intel/manual.test.ts server/intel/material-read.test.ts server/api/shipping/intel/manual-http.test.ts server/api/shipping/intel/read-http.test.ts test/manual-intel.test.ts test/clipper-bridge.test.ts test/clipper-dom.test.ts test/clipper-package.test.ts test/clip-import.test.ts --reporter=dot",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-final-f95f73b",
+  "sha": "f95f73b4f6b3e6c150fc442f1b10f5fb308e6b71",
+  "startedAt": "2026-10-16T03:29:03.314Z",
+  "endedAt": "2026-10-16T03:29:06.551Z",
+  "rawExit": 0
+}

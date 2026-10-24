@@ -1,0 +1,11 @@
+const fs = require('node:fs'), cp = require('node:child_process')
+const dir = 'docs/evidence/r2-new-four-bounded-2026-10-14'
+fs.mkdirSync(dir, { recursive: true })
+if (fs.existsSync(dir + '/launch.json') || fs.existsSync(dir + '/dns-ledger.json') || fs.existsSync(dir + '/request-ledger.json')) throw Error('launch_exists_do_not_repeat')
+const args = ['node_modules/vitest/vitest.mjs', 'run', '-c', '.tmp/new-four-bounded-20261014.config.ts']
+const startedAt = new Date().toISOString(), head = cp.execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
+fs.writeFileSync(dir + '/launch.json', JSON.stringify({ startedAt, command: [process.execPath, ...args], head, productCodeSha: '355bc861d4020ba22ddd00401de709d7cee497e3', authorization: 'parent delegated exact four catalogue URLs once system DNS each, at most one pinned index GET per public result; no retries, redirect, domain switch or network configuration' }, null, 2) + '\n')
+const result = cp.spawnSync(process.execPath, args, { windowsHide: true, encoding: 'utf8', maxBuffer: 1 << 22, env: { ...process.env, SHIPPING_APPROVED_NEW_FOUR: '1' } })
+fs.writeFileSync(dir + '/command.json', JSON.stringify({ startedAt, finishedAt: new Date().toISOString(), command: [process.execPath, ...args], head, rawExit: result.status, signal: result.signal }, null, 2) + '\n')
+fs.writeFileSync(dir + '/stdout.log', result.stdout ?? '', 'utf8'); fs.writeFileSync(dir + '/stderr.log', result.stderr ?? '', 'utf8')
+console.log(JSON.stringify({ rawExit: result.status, evidence: dir, noAutomaticRerun: true })); process.exitCode = result.status ?? 1

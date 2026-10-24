@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-21T02:12:54.129Z",
+  "documentationLinksChecked": 176,
+  "brokenLinks": 0,
+  "diffCheck": 0,
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "branch": "codex/shipping-hot-r2",
+  "stagedPaths": [],
+  "scope": "readonly evidence and docs only; no product implementation change or test gate rerun",
+  "docsLint": 0,
+  "serviceAvailability": "blocked:4489 ECONNREFUSED; known PID73356 ESRCH; no restart in read-only scope",
+  "guiEvidence": "CN-P05 F5 screenshot confirmed by parent; only viewport1280/360 and actual keyboard pending"
+}

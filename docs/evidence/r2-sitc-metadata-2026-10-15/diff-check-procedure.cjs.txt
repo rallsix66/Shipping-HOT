@@ -1,0 +1,7 @@
+const fs = require('node:fs'), cp = require('node:child_process'), crypto = require('node:crypto'), assert = require('node:assert/strict');
+const code = '0a483dd18a2027c73bf950cc0b948c013e29cf09', sha = s => crypto.createHash('sha256').update(s).digest('hex');
+const run = args => { const r = cp.spawnSync('git', args, { encoding: 'utf8' }); return { command: ['git', ...args], rawExit: r.status, stdoutExactUtf8: r.stdout, stderrExactUtf8: r.stderr, stdoutOriginalByteSha256: sha(r.stdout), stderrOriginalByteSha256: sha(r.stderr) }; };
+const rawLogInclusive = run(['diff', '--check', code]); const nonLogChanges = run(['diff', '--check', code, '--', '.', ':(exclude)docs/evidence/gate-0a483dd-sitc-metadata/*.log']);
+assert.equal(rawLogInclusive.rawExit, 2); assert.equal(nonLogChanges.rawExit, 0); assert.match(rawLogInclusive.stdoutExactUtf8, /build\.stdout\.log:24: trailing whitespace/);
+assert(!rawLogInclusive.stdoutExactUtf8.split('\n').filter(l => l.includes(': trailing whitespace.') || l.includes(': new blank line at EOF.')).some(l => !l.startsWith('docs/evidence/gate-0a483dd-sitc-metadata/')));
+fs.writeFileSync('docs/evidence/r2-sitc-metadata-2026-10-15/diff-check.json', JSON.stringify({ rawLogInclusive, nonLogChanges, decision: 'Preserve original command stdout exactly, including CLI trailing spaces/blank lines; all non-log changes pass whitespace check', productGateImpact: 'none' }, null, 2) + '\n'); console.log(JSON.stringify({ originalLogWhitespaceRawExit: rawLogInclusive.rawExit, nonLogChangesRawExit: nonLogChanges.rawExit }));

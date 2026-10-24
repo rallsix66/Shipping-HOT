@@ -1,0 +1,30 @@
+{
+  "id": "ID-W02-doc",
+  "url": "https://maritim.bmkg.go.id/marine2026-data/doc/",
+  "startedAt": "2026-10-15T06:05:16.385Z",
+  "systemDnsCalls": 1,
+  "getAttempts": 1,
+  "status": "CAPTURED_SAFE_RESPONSE",
+  "rawLocalOnly": true,
+  "receivedAt": "2026-10-15T06:05:16.816Z",
+  "httpStatus": 200,
+  "contentType": "text/html; charset=utf-8",
+  "bytes": 1137,
+  "wireSha256": "1ac1835765cc2354cfed278a191bd229f9f23df452eb7b69de1d3398b46b9aaf",
+  "completeResponseCaptured": true,
+  "location": null,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 1137
+  },
+  "finishedAt": "2026-10-15T06:05:16.817Z"
+}

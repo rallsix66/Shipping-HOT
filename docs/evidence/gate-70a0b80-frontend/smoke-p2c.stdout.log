@@ -1,0 +1,5 @@
+
+> shipping-hot@0.0.41 smoke:p2c-runtime D:\try one\Shipping HOT\.tmp\intel-production-final-build
+> node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p2c-runtime-sqlite-smoke.ts
+
+{"process":"B","persisted":true,"status":"healthy","lastSuccessAt":"2026-08-24T00:00:01.000Z","syncRuns":1}

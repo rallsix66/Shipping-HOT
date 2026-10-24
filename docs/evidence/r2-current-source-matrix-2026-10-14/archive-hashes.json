@@ -1,0 +1,55 @@
+{
+  "type": "committed_text_archive_hashes",
+  "at": "2026-10-15T03:53:09.000761+00:00",
+  "hashBasis": "Git LF text only; original wire/log byte digests remain exact and are never normalized",
+  "excluded": [
+    "archive-hashes.json"
+  ],
+  "files": [
+    {
+      "file": "build-matrix.py.txt",
+      "sha256": "c1c6630b4a0d74d350bdb7e5a0d9e09f887075030d22891ef39401d473cdb404",
+      "bytesLF": 44711
+    },
+    {
+      "file": "closeout.md",
+      "sha256": "aebf244fe41959941101619cf56ec8182fc26717721c0234e69ef918a12b6ff5",
+      "bytesLF": 428
+    },
+    {
+      "file": "commands.json",
+      "sha256": "1835da3dfdd4c61256604b3f8aca90c07a8db3901c4bee9765e7e7a9ca975465",
+      "bytesLF": 228933
+    },
+    {
+      "file": "inventory.txt",
+      "sha256": "827432f362ad8cd1e8680016dabe1831344ec8db66429f5f42d52bacbfbdbc4a",
+      "bytesLF": 2900
+    },
+    {
+      "file": "mapping.json",
+      "sha256": "211aacbd40eab06fd2d57b9fd54ab04b253503a14562dbb45ef97e82df02611e",
+      "bytesLF": 193776
+    },
+    {
+      "file": "metadata-scan.json",
+      "sha256": "e25e4f8ac1dad0157292b8a16a13500c32b5645cac706d521c2c4108fd6e770e",
+      "bytesLF": 286
+    },
+    {
+      "file": "report.md",
+      "sha256": "bb9c4ffe6756854b917beb71c72ecc6d617ff56c3ece347b9f89d06ffb48df47",
+      "bytesLF": 19746
+    },
+    {
+      "file": "validate-matrix.py.txt",
+      "sha256": "b19812b17b3afce39dfe9b8f42a203a4d6bb46e53b4ce0967ea7a0fe299e67ef",
+      "bytesLF": 36290
+    },
+    {
+      "file": "validation.json",
+      "sha256": "2a0ab9ec2eabedcb1f1511b2d8c21f92c1bfceb2bc2daa8800801da715f7319e",
+      "bytesLF": 11018
+    }
+  ]
+}

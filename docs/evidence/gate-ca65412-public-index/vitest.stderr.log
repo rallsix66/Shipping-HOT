@@ -1,0 +1,97 @@
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/public-index-final-build/shared/promo-calendar.ts" is used
+[error] job failed {
+  jobId: [32m'translation-sync'[39m,
+  providerId: [32m'deepseek'[39m,
+  errorCode: [32m'auth_failed'[39m
+}
+[error] job failed {
+  jobId: [32m'calendar-sync'[39m,
+  providerId: [32m'calendarific'[39m,
+  errorCode: [32m'provider_unavailable'[39m
+}
+[error] job failed {
+  jobId: [32m'failing-job'[39m,
+  providerId: [32m'provider-failing'[39m,
+  errorCode: [32m'job_failed'[39m
+}
+[error] job failed {
+  jobId: [32m'provider-error-job'[39m,
+  providerId: [32m'provider-error'[39m,
+  errorCode: [32m'rate_limited'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  errorCode: [32m'nchmf_partial_article_failure'[39m
+}
+[error] job failed {
+  jobId: [32m'capability-b'[39m,
+  providerId: [32m'provider-shared'[39m,
+  errorCode: [32m'capability_b_failed'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  errorCode: [32m'nchmf_partial_article_failure'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  errorCode: [32m'provider_contract_changed'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  errorCode: [32m'nchmf_partial_article_failure'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  errorCode: [32m'provider_contract_changed'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m,
+  errorCode: [32m'nmc_partial_page_failure'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m,
+  errorCode: [32m'provider_contract_changed'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m,
+  errorCode: [32m'provider_contract_changed'[39m
+}
+[error] Shipping SQLite unavailable; no in-memory replacement will be used database unavailable
+  at D:/try one/Shipping HOT/.tmp/public-index-final-build/server/shipping-store.persistence.test.ts:98:5
+  at D:/try one/Shipping HOT/.tmp/public-index-final-build/server/shipping-store.ts:64:7
+  at initialize (D:/try one/Shipping HOT/.tmp/public-index-final-build/server/shipping-store.ts:79:5)
+  at syncCalendarEvents (D:/try one/Shipping HOT/.tmp/public-index-final-build/server/shipping-store.ts:213:3)
+  at D:/try one/Shipping HOT/.tmp/public-index-final-build/server/shipping-store.persistence.test.ts:199:5
+  at processTicksAndRejections (node:internal/process/task_queues:104:5)
+  at /D:/try%20one/Shipping%20HOT/.tmp/public-index-final-build/node_modules/.pnpm/@vitest+runner@4.0.18/node_modules/@vitest/runner/dist/index.js:915:20
+[error] job failed {
+  jobId: [32m'feed-sync:failed-source'[39m,
+  providerId: [32m'failed-source'[39m,
+  errorCode: [32m'job_failed'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:tmd'[39m,
+  providerId: [32m'tmd'[39m,
+  errorCode: [32m'provider_contract_changed'[39m
+}
+[error] job failed {
+  jobId: [32m'tropical-cyclone-sync'[39m,
+  providerId: [32m'jma-typhoon'[39m,
+  errorCode: [32m'jma_detail_total_failure'[39m
+}

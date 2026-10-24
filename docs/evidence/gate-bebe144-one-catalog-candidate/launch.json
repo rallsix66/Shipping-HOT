@@ -1,0 +1,11 @@
+{
+  "sha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\one-catalog-candidate-build-20261015",
+  "startedAt": "2026-10-15T03:40:08.643Z",
+  "cleanClone": true,
+  "existingNodeModules": false,
+  "installScriptsNotSkipped": true,
+  "providerCredentialEnvironmentScrubbed": true,
+  "node": "v24.15.0",
+  "abi": "137"
+}

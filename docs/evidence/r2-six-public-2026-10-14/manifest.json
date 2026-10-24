@@ -1,0 +1,55 @@
+{
+  "codeSha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2",
+  "rows": [
+    {
+      "id": "CN-P01",
+      "url": "https://www.gd.msa.gov.cn/",
+      "host": "www.gd.msa.gov.cn",
+      "catalogLineSha256": "c5d36c960c72788caad595312855ad7fb4afb89a2d5e19e8cefae6ceeeda4969",
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML"
+    },
+    {
+      "id": "CN-T02",
+      "url": "https://szs.mof.gov.cn/zhengcefabu/",
+      "host": "szs.mof.gov.cn",
+      "catalogLineSha256": "4500f42cb2f40d3b08b1f3b1e5901a15a638b3b67aad0ca6f118f70db86a4b78",
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML"
+    },
+    {
+      "id": "VN-P01",
+      "url": "https://vimawa.gov.vn/vi/thong-bao-hang-hai",
+      "host": "vimawa.gov.vn",
+      "catalogLineSha256": "2314601bc9108646c036683ddb62680928932add1852a5a77026cd7526aea8a2",
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML"
+    },
+    {
+      "id": "PH-C01",
+      "url": "https://customs.gov.ph/category/media-releases/",
+      "host": "customs.gov.ph",
+      "catalogLineSha256": "9c8035fb91c9b956953d51734426893c143a148f1e74758c4faf814f495b8620",
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML"
+    },
+    {
+      "id": "MY-P03",
+      "url": "https://www.northport.com.my/np/page-announcements.html",
+      "host": "www.northport.com.my",
+      "catalogLineSha256": "a79a32d1251899b639323aa921ea6d9b27dedfae6f8beb86db40d5c07db8592a",
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML"
+    },
+    {
+      "id": "TH-C01",
+      "url": "https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th",
+      "host": "www.customs.go.th",
+      "catalogLineSha256": "a420cd85b4c7f5bc76604a3346ef1bb9fce0779e9c4ed86cfdef53cde75c6bac",
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML"
+    }
+  ],
+  "maxRequests": 6,
+  "maxBytes": 524288,
+  "perSourceMs": 10000,
+  "totalMs": 120000,
+  "retries": 0,
+  "redirects": 0,
+  "details": 0,
+  "productionEnabled": false
+}

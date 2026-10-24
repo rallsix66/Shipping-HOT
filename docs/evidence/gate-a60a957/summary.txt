@@ -1,0 +1,17 @@
+full_sha=a60a957a2a281066bca61f565f12db99095965bd
+worktree_clean_before_gates=true
+node=v24.15.0
+runner=docs/evidence/run-gates.cjs (spawnSync, UTF-8 capture)
+install raw_exit_code=0  cmd: pnpm install --frozen-lockfile
+build raw_exit_code=0  cmd: pnpm build
+typecheck raw_exit_code=0  cmd: pnpm typecheck
+lint raw_exit_code=0  cmd: pnpm lint
+targeted-intel raw_exit_code=0  cmd: npx vitest run server/intel
+test raw_exit_code=0  cmd: pnpm test --run
+smoke-p0-native raw_exit_code=0  cmd: pnpm smoke:p0-native
+smoke-p2c-runtime raw_exit_code=0  cmd: pnpm smoke:p2c-runtime
+smoke-p3-feed-freshness raw_exit_code=0  cmd: pnpm smoke:p3-feed-freshness
+scan-network-llm raw_exit_code=0  cmd: rg -n -i "fetch\(|https?://|openai|anthropic|llm" server/intel server/runtime/intel-collect-job.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts
+scan-secrets raw_exit_code=1  cmd: rg -n -i "(api[_-]?key|secret|token|password)\s*[:=]\s*.[A-Za-z0-9_-]{12,}" server/intel server/runtime/intel-collect-job.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts
+neat-freak-inventory raw_exit_code=0  cmd: "C:\Program Files\Git\bin\bash.exe" scripts/audit-inventory.sh .
+note: rg exit 1 = no match; audit-inventory.sh is an inventory only, not a security audit.

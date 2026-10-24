@@ -1,0 +1,2 @@
+import base from "../vitest.config"
+export default { ...base, test: { ...base.test, include: ["server/providers/nmc-warning.test.ts", "server/providers/nchmf-warning.test.ts", "server/providers/tmd-cap.test.ts", "server/providers/bmkg-cap.test.ts"], setupFiles:[".tmp/r2-weather-reuse-20261015.guard.ts"], fileParallelism:false } }

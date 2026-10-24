@@ -1,0 +1,7 @@
+{
+  "rawExit": 1,
+  "phase": "documentation validation only; product checks NOT_RUN",
+  "observedError": "assert(r.scope.length > 10) rejected a valid short Chinese description",
+  "resolution": "Remove the arbitrary minimum-length assumption; require nonempty trimmed scope. Actual classifications, code/test hashes and original acceptance thresholds are unchanged.",
+  "productCodeChanged": false
+}

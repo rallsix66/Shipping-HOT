@@ -1,0 +1,9 @@
+const fs=require('node:fs'),cp=require('node:child_process');
+const dir='docs/evidence/r2-four-index-2026-10-13';
+if(fs.existsSync(dir+'/request-ledger.json'))throw Error('ledger exists; do not resend');
+const started=new Date().toISOString();
+fs.writeFileSync(dir+'/launch.json',JSON.stringify({started,command:'pnpm exec vitest run -c .tmp/four-index.config.ts',environment:'SHIPPING_APPROVED_SIX=1',sha:'01ea950ab023255fdb7e9efe1f2799d9320c260e'}));
+const r=cp.spawnSync('pnpm exec vitest run -c .tmp/four-index.config.ts',{shell:true,encoding:'utf8',maxBuffer:1<<24,env:{...process.env,SHIPPING_APPROVED_SIX:'1'}});
+fs.writeFileSync(dir+'/batch.log',JSON.stringify({started,finished:new Date().toISOString(),rawExit:r.status,signal:r.signal})+'\nSTDOUT\n'+r.stdout+'\nSTDERR\n'+r.stderr);
+console.log(JSON.stringify({rawExit:r.status,log:dir+'/batch.log'}));
+process.exitCode=r.status??1;

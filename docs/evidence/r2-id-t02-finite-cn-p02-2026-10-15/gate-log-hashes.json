@@ -1,0 +1,118 @@
+{
+  "codeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "gateDirectory": "docs/evidence/gate-8d0993e-id-mof-card",
+  "logs": [
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/build.stderr.log",
+      "originalByteSha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658",
+      "committedTextLfSha256": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658",
+      "originalBytes": 524
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/build.stdout.log",
+      "originalByteSha256": "228cf0c635bf47f252430f56c54b805744b9e8de62e052468f82d5ba9f81f680",
+      "committedTextLfSha256": "228cf0c635bf47f252430f56c54b805744b9e8de62e052468f82d5ba9f81f680",
+      "originalBytes": 5435
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/install.stderr.log",
+      "originalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedTextLfSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "originalBytes": 0
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/install.stdout.log",
+      "originalByteSha256": "ae6678d71762438e28aa9d35f27805a0ee5023991f91bc2cc4d3e9aa259bc23b",
+      "committedTextLfSha256": "ae6678d71762438e28aa9d35f27805a0ee5023991f91bc2cc4d3e9aa259bc23b",
+      "originalBytes": 1872
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/lint.stderr.log",
+      "originalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedTextLfSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "originalBytes": 0
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/lint.stdout.log",
+      "originalByteSha256": "33a409955b2e9a0fe3d72bf5ea1fa7adbe543b9e330ccb5e8b3c8c7f99b1f3ba",
+      "committedTextLfSha256": "33a409955b2e9a0fe3d72bf5ea1fa7adbe543b9e330ccb5e8b3c8c7f99b1f3ba",
+      "originalBytes": 94
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/smoke-feed.stderr.log",
+      "originalByteSha256": "f3643421402b63d091ed4a4cdcdff822ca12255d520cf54b15ba41709a9fce46",
+      "committedTextLfSha256": "f3643421402b63d091ed4a4cdcdff822ca12255d520cf54b15ba41709a9fce46",
+      "originalBytes": 365
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/smoke-feed.stdout.log",
+      "originalByteSha256": "bc8b002196acd4e6a2d8da6832d526af17f373d6dccd99cb51be6c45fef72cd8",
+      "committedTextLfSha256": "bc8b002196acd4e6a2d8da6832d526af17f373d6dccd99cb51be6c45fef72cd8",
+      "originalBytes": 305
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/smoke-p0.stderr.log",
+      "originalByteSha256": "a2b73c52a733195afd4555d8073477f55e9d4d411f3447d16987c7542d27df04",
+      "committedTextLfSha256": "a2b73c52a733195afd4555d8073477f55e9d4d411f3447d16987c7542d27df04",
+      "originalBytes": 1241
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/smoke-p0.stdout.log",
+      "originalByteSha256": "b5b14fad6f235727d66ca10c3bc0d45fb4f788fd2c8fc02e414e0885930ce478",
+      "committedTextLfSha256": "b5b14fad6f235727d66ca10c3bc0d45fb4f788fd2c8fc02e414e0885930ce478",
+      "originalBytes": 366
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/smoke-p2c.stderr.log",
+      "originalByteSha256": "7723b45275a4bf0945605800aad44f41a1fd0d9b127e7f5ca2ce5cf79896b12c",
+      "committedTextLfSha256": "7723b45275a4bf0945605800aad44f41a1fd0d9b127e7f5ca2ce5cf79896b12c",
+      "originalBytes": 365
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/smoke-p2c.stdout.log",
+      "originalByteSha256": "eac60a02244e01542f4ed279d11ad842e4ce06e03619af085120f8a5560fd079",
+      "committedTextLfSha256": "eac60a02244e01542f4ed279d11ad842e4ce06e03619af085120f8a5560fd079",
+      "originalBytes": 321
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/targeted.stderr.log",
+      "originalByteSha256": "06fe6723c66d2c526685a33e06ebcb375c4840a3104a3e84921b06480eeed1f1",
+      "committedTextLfSha256": "06fe6723c66d2c526685a33e06ebcb375c4840a3104a3e84921b06480eeed1f1",
+      "originalBytes": 2051
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/targeted.stdout.log",
+      "originalByteSha256": "ced26f486999781faecc17b006a014ff4110fb7efca6075a300f135ba66806de",
+      "committedTextLfSha256": "ced26f486999781faecc17b006a014ff4110fb7efca6075a300f135ba66806de",
+      "originalBytes": 1537
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/typecheck.stderr.log",
+      "originalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedTextLfSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "originalBytes": 0
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/typecheck.stdout.log",
+      "originalByteSha256": "964a9b9737aaa7f21302f031e90eaf22bec83454c1baed24d79da708f0bcc88c",
+      "committedTextLfSha256": "964a9b9737aaa7f21302f031e90eaf22bec83454c1baed24d79da708f0bcc88c",
+      "originalBytes": 164
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/vitest.stderr.log",
+      "originalByteSha256": "0a855d34949562d438e3a8022dbd74e3d90429f58249e85ddc16f5a8487fdbfe",
+      "committedTextLfSha256": "0a855d34949562d438e3a8022dbd74e3d90429f58249e85ddc16f5a8487fdbfe",
+      "originalBytes": 5291
+    },
+    {
+      "path": "docs/evidence/gate-8d0993e-id-mof-card/vitest.stdout.log",
+      "originalByteSha256": "cadb9185b44620c8c2dcb36da5c7bec5c0b6d3f254026533e0554645f7aac002",
+      "committedTextLfSha256": "cadb9185b44620c8c2dcb36da5c7bec5c0b6d3f254026533e0554645f7aac002",
+      "originalBytes": 17802
+    }
+  ],
+  "localPrecheckMaterials": [
+    ".tmp/id-mof-lint-before-commit.json",
+    ".tmp/id-mof-targeted-before-commit.json"
+  ]
+}

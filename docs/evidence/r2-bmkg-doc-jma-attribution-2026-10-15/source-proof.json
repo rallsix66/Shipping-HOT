@@ -1,0 +1,10 @@
+{
+  "executionHead": "32c8974c6c5f50ad8630b6eb771f0a6af3bd9b44",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "productDiff": "",
+  "catalogueDiff": "",
+  "sourceGetAttempts": 1,
+  "systemDnsCalls": 1,
+  "scope": "JMA existing shared404 attribution and currentXX-W01 availability correction; single observedBMKG doc GET; no product or catalogue change",
+  "productGate": "NOT_RUN_no_product_change"
+}

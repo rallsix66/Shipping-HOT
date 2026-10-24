@@ -1,0 +1,42 @@
+// Scoped compiled HTTP diagnostic; authored fixture only, no Chrome or external source requests.
+const fs=require('node:fs'),p=require('node:path'),cp=require('node:child_process'),http=require('node:http'),net=require('node:net'),assert=require('node:assert/strict'),Native=require('better-sqlite3');
+const root=process.cwd(),sha=cp.execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+const ev=p.join(root,'.tmp/private-http-evidence'),run=p.join(root,'.tmp/private-http-run');
+if(fs.existsSync(run))throw Error('refuse_existing_run');fs.mkdirSync(ev,{recursive:true});fs.mkdirSync(run);
+const checks=[];function check(name,test){assert(test,name);checks.push(name);}
+function request(path,body,origin='http://127.0.0.1:5273'){return new Promise((ok,fail)=>{const data=body===undefined?null:Buffer.from(JSON.stringify(body));const req=http.request({hostname:'127.0.0.1',port:5273,path,method:data?'POST':'GET',headers:data?{'Content-Type':'application/json','Content-Length':data.length,Origin:origin}:{}},res=>{let text='';res.setEncoding('utf8');res.on('data',s=>text+=s);res.on('end',()=>{let json;try{json=JSON.parse(text);}catch{}ok({status:res.statusCode,json});});});req.setTimeout(2000,()=>req.destroy(Error('timeout')));req.on('error',fail);req.end(data);});}
+function counts(){const db=new Native(p.join(run,'.data/shipping-hot-v3.sqlite3'),{readonly:true,fileMustExist:true});try{return Object.fromEntries(db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(x=>x.name).filter(n=>/^(?:intel_|provider_usage$|provider_runtime$|translation_cache$)/.test(n)).map(n=>[n,db.prepare(`SELECT count(*) AS n FROM "${n}"`).get().n]));}finally{db.close();}}
+const body='Authored private fixture  \t\n\n'.repeat(40);
+const payload={requestId:'private-http-request-001',sourceId:'intel:manual:clip',action:'submit',clip:{protocol:'shipping-hot-clip-v1',actualUrl:'https://example.org/private-fixture',title:'Private capture fixture',body,mode:'selection',capturedAt:'2026-10-16T07:45:00.000Z',extractorVersion:'synthetic-private-v1'}};
+(async()=>{let child,error;const startedAt=new Date().toISOString();try{
+  const probe=net.createServer();await new Promise((ok,fail)=>{probe.once('error',fail);probe.listen(5273,'127.0.0.1',ok);});await new Promise(ok=>probe.close(ok));
+  const env=Object.fromEntries(Object.entries(process.env).filter(([k])=>/^(?:systemroot|windir|temp|tmp|userprofile|appdata|localappdata|comspec|programfiles(?:\(x86\))?|programdata|pathext|number_of_processors|processor_architecture|processor_identifier|os|path)$/i.test(k)));
+  Object.assign(env,{HOST:'127.0.0.1',NITRO_HOST:'127.0.0.1',PORT:'5273',NITRO_PORT:'5273',SHIPPING_DATA_MODE:'real',SHIPPING_RUNTIME_ENABLED:'false',SHIPPING_INTEL_ENABLED:'false',NODE_ENV:'production'});
+  child=cp.spawn(process.execPath,[p.join(root,'dist/output/server/index.mjs')],{cwd:run,env,windowsHide:true,stdio:['ignore',fs.openSync(ev+'/server.stdout.log','w'),fs.openSync(ev+'/server.stderr.log','w')]});
+  let ready=false;for(let i=0;i<60;i++){if(child.exitCode!==null)throw Error('server_exited');try{if((await request('/api/shipping/intel/items?sourceId=intel%3Amanual%3Aclip')).status===200){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,100));}check('compiled server ready',ready);
+  const before=counts();check('fresh isolated DB empty',before.intel_item===0&&before.intel_manual_action===0);
+  for(const [name,data,origin]of [
+    ['cross origin',payload,'https://evil.example'],
+    ['normal build exact local URL',{...payload,clip:{...payload.clip,actualUrl:'http://127.0.0.1:5174/synthetic-article.html'}}],
+    ['unsafe body',{...payload,clip:{...payload.clip,body:'<script>unsafe</script>'}}],
+    ['oversized body',{...payload,clip:{...payload.clip,body:'x'.repeat(100001)}}],
+    ['automatic source',{...payload,sourceId:'intel:th-w01'}],
+    ['fake permission field',{...payload,authorized:true}],
+  ])check(name+' rejected',(await request('/api/shipping/intel/manual',data,origin)).status>=400);
+  check('rejections zero DB delta',JSON.stringify(before)===JSON.stringify(counts()));
+  const legacy={...payload,requestId:'private-http-legacy-001',clip:{...payload.clip,body:'',mode:'metadata'},rights:{basis:'unknown',scope:'metadata_only',evidence:'',applicableUrl:payload.clip.actualUrl}};
+  const old=await request('/api/shipping/intel/manual',legacy);check('legacy metadata accepted',old.status===200);
+  const saved=await request('/api/shipping/intel/manual',payload);check('no declaration body save HTTP200',saved.status===200);
+  const replay=await request('/api/shipping/intel/manual',payload);check('same request replay idempotent',replay.status===200&&replay.json.versionId===saved.json.versionId);
+  const detail=await request('/api/shipping/intel/items/'+saved.json.itemId);
+  check('private audit rights unknown without fabricated declaration',detail.status===200&&detail.json.clip.usage==='private_material'&&detail.json.clip.rightsStatus==='unknown'&&!('rights' in detail.json.clip));
+  check('body over280 exact readback',detail.json.selectedVersion.blocks.filter(b=>b.type!=='title').map(b=>b.text).join('')===body&&body.length>280);
+  check('automatic unknown date',detail.json.clip.date.role==='unknown'&&detail.json.item.publishedAt===null);
+  const historical=await request(`/api/shipping/intel/items/${saved.json.itemId}?versionId=${old.json.versionId}`);check('legacy version preserved metadata-only',historical.json.selectedVersion.contentScope==='metadata_only'&&historical.json.clip.verification==='user_declaration_unverified');
+  const unchanged=await request('/api/shipping/intel/manual',{...payload,requestId:'private-http-unchanged-002'});check('same private text no new version',unchanged.json.outcome==='unchanged'&&unchanged.json.versionId===saved.json.versionId);
+  const after=counts();for(const n of ['provider_usage','provider_runtime','translation_cache','intel_fetch_run','intel_executor'])check('zero background '+n,after[n]===0);
+  fs.writeFileSync(ev+'/readback.json',JSON.stringify({legacy:old.json,saved:saved.json,detail:detail.json,historical:historical.json,after},null,2));
+}catch(e){error=e.message;process.exitCode=1;}finally{
+  let cleanup='not started';if(child&&child.exitCode===null){const stopped=cp.spawnSync('taskkill',['/F','/PID',String(child.pid),'/T'],{encoding:'utf8',windowsHide:true});cleanup=stopped.status;await new Promise(resolve=>{if(child.exitCode!==null)return resolve();child.once('exit',resolve);setTimeout(resolve,2000);});if(stopped.status!==0){error=error||'owned_cleanup_failed';process.exitCode=1;}}
+  const result={sha,startedAt,endedAt:new Date().toISOString(),passed:checks.length,checks,error,cleanup,ownServerPid:child?.pid,programmaticOnly:true,browser:'NOT_RUN',sourceRequests:0};fs.writeFileSync(ev+'/result.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
+}})();

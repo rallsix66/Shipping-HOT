@@ -1,0 +1,17 @@
+{
+  "checks": {
+    "same41Ids": true,
+    "sameUrlsAndPriorities": true,
+    "noRemovalOrPassPromotion": true,
+    "originalThresholdsUnchanged": true,
+    "denominatorAndCoverageUnset": true,
+    "original8ClausesExact": true,
+    "sixBoundedUrlsOnlyProposed": true,
+    "trackedChangesDocsOnly": true
+  },
+  "rawExit": 0,
+  "functionalTests": "NOT_RUN / docs-only by instruction",
+  "sourceRequests": 0,
+  "24hRuns": 0,
+  "baselineCodeSha": "8707019a74ac81a698d303d852a40b3c13bed489"
+}

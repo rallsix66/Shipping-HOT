@@ -1,0 +1,28 @@
+import { lookup } from "node:dns/promises"
+import { readFileSync, writeFileSync } from "node:fs"
+import { describe, expect, it, vi } from "vitest"
+import { isBlockedAddress } from "../server/services/article-fetch-security"
+
+const DIR="docs/evidence/r2-dns-diagnostic-2026-10-13"
+function category(address: string) {
+  if (/^198\.(?:18|19)\./.test(address)) return {category:"special range (code's denylist; not RFC1918)",rule:"BLOCKED_V4_RANGES: 198.18.0.0..198.19.255.255"}
+  if (/^(?:10\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.)/.test(address)) return {category:"RFC1918 private",rule:"BLOCKED_V4_RANGES private ranges"}
+  return {category:"other; use current classifier result",rule:"isBlockedAddress current implementation"}
+}
+describe("DNS-only and current IP classifier diagnostics",()=>{
+  it("queries each of six approved hosts exactly once using system getaddrinfo; no HTTP",async()=>{
+    const rows=JSON.parse(readFileSync("docs/evidence/r2-p1-acceptance-mapping-2026-10-13/acceptance-mapping.json","utf8")).batch
+    const noHttp=vi.fn(()=>{throw new Error("HTTP prohibited")});vi.stubGlobal("fetch",noHttp)
+    const results=[]
+    try {
+      for(const row of rows){const started=new Date().toISOString();let timer:ReturnType<typeof setTimeout>|undefined;try{const addresses=await Promise.race([lookup(row.host,{all:true}),new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(new Error("system_dns_deadline")),10000)})]);results.push({id:row.id,hostname:row.host,started,finished:new Date().toISOString(),method:"node:dns/promises.lookup(all:true), OS getaddrinfo/default resolver, no resolver override",apiCalls:1,addresses:addresses.map(address=>({...address,...category(address.address),blockedByCurrentCode:isBlockedAddress({...address,family:address.family as 4|6})}))})}catch(error){results.push({id:row.id,hostname:row.host,started,finished:new Date().toISOString(),method:"system getaddrinfo",apiCalls:1,errorCode:(error as {code?:string}).code??"system_dns_deadline"})}finally{clearTimeout(timer)}}
+      expect(results).toHaveLength(6);expect(noHttp).not.toHaveBeenCalled()
+      const report={baseline:"7905d5dbb7b377767913a17d9e49762ea507e037",dnsApiCalls:6,httpCalls:0,resolverOverride:false,results};writeFileSync(`${DIR}/dns-results.json`,JSON.stringify(report,null,2)+"\n");console.log(JSON.stringify(report))
+    }finally{vi.unstubAllGlobals()}
+  },65000)
+  it("denies both boundaries and mapped special range; does not extend that range into adjacent public candidates",()=>{
+    for(const address of ["198.18.0.0","198.18.0.1","198.18.255.255","198.19.0.0","198.19.255.255"])expect(isBlockedAddress({address,family:4}),address).toBe(true)
+    for(const address of ["::ffff:198.18.0.1","::ffff:c612:0001"])expect(isBlockedAddress({address,family:6}),address).toBe(true)
+    for(const address of ["198.17.255.255","198.20.0.0","93.184.216.34"])expect(isBlockedAddress({address,family:4}),address).toBe(false)
+  })
+})
