@@ -53,6 +53,17 @@
       ]
     }
   ],
+  "nonMpaHostBreakdown": {
+    "total": 7,
+    "tradeMediaNewsReport": 6,
+    "chineseAggregationPage": 1
+  },
+  "officialDetailDocumentKinds": {
+    "portMarineNotice": 3,
+    "portMarineCircular": 2,
+    "shippingCircular": 1,
+    "note": "Six media-centre detail URLs; do not lump as PM Notice/PMC only. PMC 03 and PMC 10 are different slugs and not deduped."
+  },
   "aggregateByClassification": {
     "officialMpaHostUrlCount": 11,
     "specificNoticeOrCircularCount": 6,

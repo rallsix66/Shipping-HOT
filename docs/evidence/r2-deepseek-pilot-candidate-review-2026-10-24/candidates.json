@@ -164,15 +164,18 @@
     "domain": "www.mpa.gov.sg",
     "sourceTier": "url_host_matches_mpa_gov_sg",
     "pageType": "pdf_download",
+    "mpaDocumentKind": "notices_to_mariners_pdf_api",
     "businessClass": "port_ops_disruption_or_restriction",
     "classificationBasis": "title_and_url_only_no_page_fetch",
     "evidenceState": "search_snippet_metadata_only",
+    "temporalAssessment": "likely_historical_pending_verification_title_contains_2021_path_contains_nov23",
     "limitations": [
       "page_body_not_fetched_in_pilot",
       "provider_date_not_verified_against_source",
-      "official_host_by_url_only"
+      "official_host_by_url_only",
+      "historical_date_clues_in_title_or_path_not_current_risk_without_page_read"
     ],
-    "riskIntelRelevance": "possible_risk_signal_pending_page_read"
+    "riskIntelRelevance": "historical_or_unverified_not_current_operational_risk"
   },
   {
     "url": "https://www.mpa.gov.sg/media-centre/details/no-7-of-2026-resolutions-adopted-by-the-84th-session-of-the-marine-environment-protection-committee-mepc-84-of-the-international-maritime-organization-imo?_x_output_type_b6db407c4_=embedded_pdf#1#1#1",
@@ -189,6 +192,7 @@
     "domain": "www.mpa.gov.sg",
     "sourceTier": "url_host_matches_mpa_gov_sg",
     "pageType": "specific_notice_or_circular",
+    "mpaDocumentKind": "shipping_circular",
     "businessClass": "declaration_compliance",
     "classificationBasis": "title_and_url_only_no_page_fetch",
     "evidenceState": "search_snippet_metadata_only",
@@ -215,13 +219,15 @@
     "domain": "www.mpa.gov.sg",
     "sourceTier": "url_host_matches_mpa_gov_sg",
     "pageType": "specific_notice_or_circular",
+    "mpaDocumentKind": "port_marine_circular",
     "businessClass": "declaration_compliance",
     "classificationBasis": "title_and_url_only_no_page_fetch",
     "evidenceState": "search_snippet_metadata_only",
     "limitations": [
       "page_body_not_fetched_in_pilot",
       "provider_date_not_verified_against_source",
-      "official_host_by_url_only"
+      "official_host_by_url_only",
+      "distinct_slug_from_pmc_03_not_same_topic_as_pmc_10"
     ],
     "riskIntelRelevance": "possible_risk_signal_pending_page_read"
   },
@@ -240,13 +246,15 @@
     "domain": "www.mpa.gov.sg",
     "sourceTier": "url_host_matches_mpa_gov_sg",
     "pageType": "specific_notice_or_circular",
+    "mpaDocumentKind": "port_marine_circular",
     "businessClass": "uncertain",
     "classificationBasis": "title_and_url_only_no_page_fetch",
     "evidenceState": "search_snippet_metadata_only",
     "limitations": [
       "page_body_not_fetched_in_pilot",
       "provider_date_not_verified_against_source",
-      "official_host_by_url_only"
+      "official_host_by_url_only",
+      "distinct_slug_from_pmc_10_not_deduped_by_path_similarity"
     ],
     "riskIntelRelevance": "possible_risk_signal_pending_page_read"
   },
@@ -265,15 +273,18 @@
     "domain": "www.mpa.gov.sg",
     "sourceTier": "url_host_matches_mpa_gov_sg",
     "pageType": "specific_notice_or_circular",
+    "mpaDocumentKind": "port_marine_notice",
     "businessClass": "port_ops_disruption_or_restriction",
     "classificationBasis": "title_and_url_only_no_page_fetch",
     "evidenceState": "search_snippet_metadata_only",
+    "temporalAssessment": "maintenance_window_2026_09_08_and_09_15_before_review_date_2026_10_24_not_current_risk_priority",
     "limitations": [
       "page_body_not_fetched_in_pilot",
       "provider_date_not_verified_against_source",
-      "official_host_by_url_only"
+      "official_host_by_url_only",
+      "title_dates_suggest_past_maintenance_window_relative_to_inventory_date"
     ],
-    "riskIntelRelevance": "possible_risk_signal_pending_page_read"
+    "riskIntelRelevance": "historical_timing_sample_not_current_risk_priority"
   },
   {
     "url": "https://www.mpa.gov.sg/media-centre/details/port-marine-notice-117-of-2026-deployment-of-seabed-acoustic-doppler-current-profilers-adcp-at-sudong-island",
@@ -290,6 +301,7 @@
     "domain": "www.mpa.gov.sg",
     "sourceTier": "url_host_matches_mpa_gov_sg",
     "pageType": "specific_notice_or_circular",
+    "mpaDocumentKind": "port_marine_notice",
     "businessClass": "port_ops_disruption_or_restriction",
     "classificationBasis": "title_and_url_only_no_page_fetch",
     "evidenceState": "search_snippet_metadata_only",
@@ -316,15 +328,19 @@
     "domain": "www.mpa.gov.sg",
     "sourceTier": "url_host_matches_mpa_gov_sg",
     "pageType": "specific_notice_or_circular",
+    "mpaDocumentKind": "port_marine_notice",
     "businessClass": "port_ops_disruption_or_restriction",
     "classificationBasis": "title_and_url_only_no_page_fetch",
-    "evidenceState": "search_snippet_metadata_only",
+    "evidenceState": "read_only_https_verification_404_2026_10_24",
+    "businessVerificationConclusion": "C_insufficient_unconfirmed",
     "limitations": [
-      "page_body_not_fetched_in_pilot",
+      "exact_url_http_404_on_official_host_2026_10_24",
+      "no_notice_body_or_attachment_obtained",
       "provider_date_not_verified_against_source",
-      "official_host_by_url_only"
+      "official_host_by_url_only",
+      "not_deepseek_fetch_success"
     ],
-    "riskIntelRelevance": "possible_risk_signal_pending_page_read"
+    "riskIntelRelevance": "unconfirmed_pending_valid_official_url_or_body"
   },
   {
     "url": "https://www.mpa.gov.sg/media-centre?page=1&type=b3e76070-be00-4ff9-9210-2245ce047e04&year=All",

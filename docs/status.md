@@ -1,3 +1,9 @@
+## 2026-10-24 — DeepSeek 试点 Search 候选盘点口径修正 + PM Notice 54 单条核验
+
+- **候选盘点**（离线元数据 + 去重）：[`docs/evidence/r2-deepseek-pilot-candidate-review-2026-10-24/README.md`](evidence/r2-deepseek-pilot-candidate-review-2026-10-24/README.md)。**18** 唯一 URL；非 MPA **7** 条（**6** 贸易媒体 + **1** 中文聚合）；六种官方详情分 **PM Notice / PM Circular / Shipping Circular**；PM Notice **107**（2026-09-08/15 维护）相对盘点日移出当前风险优先；**2021** / **nov23** 线索标待核实/可能历史。
+- **PM Notice 54（RTS Link）**：仅对 `candidates.json` 精确 URL 做**一次**只读 HTTPS；官方 **404**，**结论 C**（信息不足，未确认）。**不是** DeepSeek Fetch 成功。证据：[`notice-54-verification-2026-10-24/README.md`](evidence/r2-deepseek-pilot-candidate-review-2026-10-24/notice-54-verification-2026-10-24/README.md)。**不**写生产 intel、**不**增 R2 计数。
+- 本片 **无**新 Search/Fetch；门禁：`pnpm lint` + `git diff --check`（文档-only，**未**重跑全量 Vitest）。
+
 ## 2026-10-24 — DeepSeek Search/Fetch 受控试点 live 收尾（默认关闭）
 
 - **试点** `ds-pilot-2026-10-23-r1`：本机双库 live **已发生**（非 docs-only）。**Search 第 9、10 次**成功；**2** 次 Fetch（两条 MPA PMC detail URL）失败，paid **`deepseek_tools_http_404`**、**non-billable**。失败响应 **符合**官方 Fetch「未取得可用页面内容」的 404 定义；**本次记录未独立确定**具体失败原因，**不**推广为整个 Fetch 接口不可用。首轮 **8** 条 Search 仍为 **`unknown`**，ledger 保守预留合计 **≈¥0.04（40 milli）**，**不**称为已确认扣费；**未释放、未重跑**。

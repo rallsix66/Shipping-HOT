@@ -2,7 +2,7 @@
 
 > **目的**：判断已有 Search 第 9、10 次结果「搜到的是否有用」——**不是**再测接口。
 > **数据源**（只读、本机未入库）：`pilot-attempt-ledger.sqlite3` 中 `result_summary_json`；回执与 `ninth-run-evidence.json` / `mpa-followup-closeout.json` 交叉一致。
-> **无**新 Search/Fetch/DNS/HTTP；**无**正文、密钥或原始响应入仓。
+> **无**新 Search/Fetch/DNS/HTTP（**例外**：PM Notice 54 单条只读 HTTPS 核验见 [`notice-54-verification-2026-10-24/README.md`](notice-54-verification-2026-10-24/README.md)）；**无**密钥或原始响应入仓。
 
 关联试点收口：[`../r2-deepseek-pilot-live-2026-10-24/README.md`](../r2-deepseek-pilot-live-2026-10-24/README.md)
 
@@ -36,18 +36,27 @@
 
 **同 URL 不同标题**：0 条（`sameUrlDifferentTitleConflicts` 为空）。
 
-**疑似同题不同 URL（未强并）**：见 `dedupe-summary.json` → `suspectedTopicOverlapNotMerged`（含第三方重复报道、两条 Manifold haze 文、PMC 03 与 PMC 10 不同 slug）。
+**疑似同题不同 URL（未强并）**：见 `dedupe-summary.json` → `suspectedTopicOverlapNotMerged`。其中 **PMC 03 与 PMC 10** 仅为路径 slug 形态相近，**不能**仅凭相似判为同题或重复；**Shipping Circular** 与 **Port Marine Circular/Notice** 文书类型亦不同。
 
-## 分类统计（仅依据标题 + URL，未读原页）
+## 分类统计（标题 + URL；Notice 54 另见单条 HTTPS 核验）
 
 | 维度 | 数量 | 说明 |
 |------|------|------|
-| 主机为 `www.mpa.gov.sg` | **11** / 18 | 仅 URL 主机匹配项目语境下的 MPA 官方域；**未**读页核实 |
-| 页面类型 `specific_notice_or_circular` | **6** | 含 PM Notice / PMC 详情路径或标题模式 |
-| 页面类型 `news_report` | 7 | 第三方贸易媒体 |
+| 主机为 `www.mpa.gov.sg` | **11** / 18 | 仅 URL 主机匹配；Notice 54 精确 URL 已访问但 **404** |
+| **非 MPA 主机** | **7** / 18 | **6** 条贸易媒体 + **1** 条中文聚合页（`wap.sol.com.cn`）；**不**与 MPA 11 条重复计数 |
+| 页面类型 `specific_notice_or_circular` | **6** | 见下「六种官方详情文书类型」 |
+| 页面类型 `news_report` | 7 | 与上「7 条非 MPA」一致（含 1 条中文页） |
 | 页面类型 `section_or_program_page` | 3 | 栏目/项目说明页 |
 | 页面类型 `listing_hub` | 1 | Media Centre 列表 |
-| 页面类型 `pdf_download` | 1 | MPA API PDF 链 |
+| 页面类型 `pdf_download` | 1 | MPA API PDF 链（文件名含 `nov23`；标题含 **2021** → 待核实/可能历史） |
+
+**六种官方详情链接（不宜统称 PM Notice/PMC）**
+
+| 文书类型 | 条数 | 候选 URL 特征 |
+|----------|------|----------------|
+| Port Marine **Notice** | 3 | PM Notice 54、107、117 |
+| Port Marine **Circular** | 2 | PMC 03、PMC 10（slug 不同，**非**重复） |
+| **Shipping Circular** | 1 | 标题 `SHIPPING CIRCULAR NO. 7 of 2026`（MEPC 84 决议，偏合规/行政） |
 
 **业务分类（`businessClass`）**
 
@@ -60,53 +69,57 @@
 | `uncertain` | 2 |
 | `unrelated_or_low_signal` | 1 |
 
+**时效标注（元数据层，非读页结论）**
+
+- **PM Notice 107**（ICA CREW 维护 **2026-09-08 / 09-15**）：相对盘点日 **2026-10-24** 维护窗口已过 → **移出当前风险优先项**；可保留为「标题日期 vs 盘点日」历史时效样例。
+- 标题或路径含 **2021**、**nov23** 等旧线索（如 `notmarinov23.pdf` / 91P/2021）：标记 **待核实 / 可能历史内容**；**不**把「作业相关」标题词直接当作 **当前有效风险**。
+
 `providerDate` 一律视为 **提供方日期 / 未核验**，**不是** `publishedAt` 或事件生效时间。
 
 ## 「有没有用」——结论摘要
 
-- **有用的一面**：两次 Search 在 **18 个唯一 URL** 中带回 **11 条 MPA 官方主机**链接，其中 **6 条**像具体 PM Notice/PMC **详情页**（含航行限制、系统维护、设备部署、合规 circular 等），与新加坡港口风险情报 **可能相关**，但均需读原页才能确认影响范围与时效。
-- **噪声 / 间接**：7 条第三方新闻（多为合规提醒、haze、bunkering 规则转述）、1 条中文聚合页（`wap.sol.com.cn`）、若干 **栏目/列表/ PDF 索引** 页 — 对「港口停航/拥堵/中断」类情报 **信号弱或间接**。
-- **不能**把「申报/虚假船籍/port clearance 数据」类 circular **等同于**停港或延误事件；归类为 **合规与申报**（`declaration_compliance` / `compliance_context_not_operational_closure`）。
-- Search 第 10 次虽带 `need_content=true`，ledger **仍只有** trim 元数据；**不**证明已有可用正文。`excerpt_only` **不是**网站许可。
+- **有用的一面**：18 个唯一 URL 中含 **11 条 MPA 官方主机**链接，其中 **6 条**为具体 **Notice/Circular 详情路径**（见上表分类型），与新加坡港口情报 **可能相关**，但多数仍缺正文；**PMC 03 与 PMC 10 不是同题重复**。
+- **非 MPA**：**7 条**（**6** 贸易媒体 + **1** 中文聚合），对停航/拥堵类情报 **信号弱或间接**。
+- **合规 vs 作业中断**：申报/船籍/port clearance 类 **PMC** **≠** 停港或延误事件（`declaration_compliance`）。
+- Search 第 10 次 `need_content=true` **不**证明已有正文；`excerpt_only` **不是**网站许可。
 
-## 最值得下一步核实（最多 3 个，本片不联网）
+## PM Notice 54（RTS Link）单条核验
+
+- 精确 URL 见 [`notice-54-verification-2026-10-24/README.md`](notice-54-verification-2026-10-24/README.md)。
+- **结论 C**：信息不足，保持未确认（官方 **404**，未取得正文；**不是** DeepSeek Fetch 成功）。
+
+## 其余待读（当前优先，本片未联网）
 
 | 优先级 | URL | 理由 |
 |--------|-----|------|
-| 1 | `https://www.mpa.gov.sg/media-centre/details/port-marine-notice-no.-54-of-2026---navigation--restrictions-under-the-rts-link` | 标题明示 **航行限制**（RTS Link）；两次 Search 均命中；**可能**属作业/通航风险，需读文确认区域、时段与是否影响商港。 |
-| 2 | `https://www.mpa.gov.sg/media-centre/details/port-marine-notice-107-of-2026-scheduled-maintenance-of-ica-crew-system-8-and-15-sep-2026` | 标题明示 **ICA CREW 系统计划维护**（2026-09-08/15）；**可能**影响到港手续时效，需读文确认是否造成实质延误。 |
-| 3 | `https://www.mpa.gov.sg/media-centre/details/port-marine-circular-no-10-of-2026-submission-of-accurate-information-for-vessel-port-calls-and-port-clearance` | 官方 **PMC 10** 合规 circular；两次 Search 均命中；试点 Fetch 对该 URL **404**（见 live 收口证据）— 若业务需要正文，需 **另授权** 读页方式，**不能**假设 DeepSeek Fetch 可用。 |
+| 1 | `https://www.mpa.gov.sg/media-centre/details/port-marine-circular-no-10-of-2026-submission-of-accurate-information-for-vessel-port-calls-and-port-clearance` | 官方 **PMC 10**；两次 Search 命中；试点 Fetch **404** — 需另授权读页，**不能**假设 DeepSeek Fetch 可用。 |
+| 2 | `https://www.mpa.gov.sg/media-centre/details/port-marine-notice-117-of-2026-deployment-of-seabed-acoustic-doppler-current-profilers-adcp-at-sudong-island` | 标题为 Sudong 岛 ADCP 部署；可能局部作业/通航提示，**未读页**。 |
 
-**读原页时最小确认问题（示例）**：生效/适用日期、地理范围（锚地/航道/全港）、是否强制、与八港业务是否相关、是否构成 Event 级「中断/恢复」还是一般行政通知。
+**已降级（历史/过期窗口，不作当前风险优先）**
+
+- PM Notice **107**（ICA CREW 2026-09-08/15 维护）— 见上时效标注。
 
 ## 当前证据能证明 / 不能证明
 
-**能证明（在元数据层）**
+**能证明（在元数据层 + Notice 54 单次 HTTPS）**
 
-- 两次 Search 各返回 10 条保存候选；回执 ID 与 ledger 一致。
-- 按 **精确 URL** 去重后 **18** 个唯一目标；其中 **2** 个 URL 在两次 Search 中重复出现。
-- 给定 URL 的主机名、搜索返回的标题字符串、提供方日期字段（未核验）。
+- 两次 Search 各 10 条；回执与 ledger 一致；精确 URL 去重 **18**；跨次重复 **2**。
+- Notice 54 **精确 URL** 在 **2026-10-24** 只读访问为 MPA 官方 **404**（见子目录证据）。
 
 **不能证明**
 
-- 原页真实性、正文、完整日期、事件是否已发生/结束。
-- 候选是否仍在线、是否与 MPA 当前站点结构一致（PMC 03 等 slug 与 PMC 10 不同，Fetch 试点均失败）。
-- 第三方新闻与 MPA 原文是否一致；`wap.sol.com.cn` 与检索意图的相关性。
-- 任何港口 **实际** 拥堵、停航或延误。
-
-## 不联网仍可继续的事项
-
-- 将 18 条 URL 与 `docs/intel-source-catalog.md` / R2 新加坡源配置 **人工对照**（是否已有注册 catalogId、许可与 persistence 边界）。
-- 维护 **slug 变体清单**（如 PMC `no.-03` vs `no-10`）供日后 **单独授权** 的读页/Fetch 策略讨论。
-- 对第三方报道与 MPA 官方条目做 **引用关系表**（仍不读页，仅记录「新闻指向哪条 circular」的标题级猜测，标为 unverified）。
+- 除 Notice 54 的 404 外，其它候选原页、生效期、范围、是否仍有效。
+- PMC 03/10 slug 差异下的同题关系；第三方新闻与 MPA 原文一致性与 `wap.sol.com.cn` 相关性。
+- 任何 **实际** 全港停港、拥堵或延误（含将 RTS Link 限制外推全港）。
 
 ## 文件
 
 | 文件 | 内容 |
 |------|------|
-| `dedupe-summary.json` | 去重计数、跨次重复列表、疑似同题、分类聚合 |
-| `candidates.json` | 18 条唯一 URL 记录（含分类与限制） |
-| `candidates.csv` | 同上（便于表格查看） |
+| `dedupe-summary.json` | 去重计数、跨次重复、疑似同题、分类聚合 |
+| `candidates.json` | 18 条唯一 URL（含分类、文书类型与限制） |
+| `candidates.csv` | 同上（表格） |
+| `notice-54-verification-2026-10-24/` | PM Notice 54 单条业务核验（结论 C） |
 
 生成方法：本机 worktree `.tmp/build-candidate-review-artifacts.mjs`（**未提交**；只读 ledger，可复跑）。
 
