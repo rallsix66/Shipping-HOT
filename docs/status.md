@@ -1,10 +1,10 @@
 ## 2026-10-24 — DeepSeek Search/Fetch 受控试点 live 收尾（默认关闭）
 
-- **试点** `ds-pilot-2026-10-23-r1`：本机双库 live **已发生**（非 docs-only）。第 **9/10** 次 Search 成功；**2** 次 Fetch（MPA PMC detail）失败 **HTTP 404**（官方语义：无法提取 markdown，**non-billable**）。首轮 **8** 条 Search 仍为 **`unknown`**，**未释放、未重跑**。
-- **额度**：Search **10/10** attempts、**50/50** milli-CNY；Fetch **2/10**、**10/50** milli-CNY。per-capability，非共享。
-- **边界**：`need_content=true` **≠** 已取得可入库正文；`excerpt_only` **≠** 站点许可。生产 Search/Fetch **仍默认关闭**；未启 intel 源、未 24h、未合并部署、未改 R2 28/39 / 25/34 计数。
+- **试点** `ds-pilot-2026-10-23-r1`：本机双库 live **已发生**（非 docs-only）。**Search 第 9、10 次**成功；**2** 次 Fetch（两条 MPA PMC detail URL）失败，paid **`deepseek_tools_http_404`**、**non-billable**。失败响应 **符合**官方 Fetch「未取得可用页面内容」的 404 定义；**本次记录未独立确定**具体失败原因，**不**推广为整个 Fetch 接口不可用。首轮 **8** 条 Search 仍为 **`unknown`**，ledger 保守预留合计 **≈¥0.04（40 milli）**，**不**称为已确认扣费；**未释放、未重跑**。
+- **额度**：Search **10/10** 已满，**不再**调用；Fetch **2/10**、**10/50** milli-CNY，剩余额度 **不自动使用**。per-capability，非共享。
+- **边界**：`need_content=true` **≠** 已取得可入库正文；`excerpt_only` **≠** 站点许可。跨两次 Search 的 URL 去重、有效候选数、逐条来源 **未核验**；不得将两次各 10 条上游结果计为 20 条独立情报。默认关闭试点 **已收尾** **≠** 生产启用 **≠** R2 整体验收通过；未启 intel 源、未 24h、未合并部署、未改 R2 28/39 / 25/34 计数。
 - **证据**：[`docs/evidence/r2-deepseek-pilot-live-2026-10-24/README.md`](evidence/r2-deepseek-pilot-live-2026-10-24/README.md)；本机 `.tmp/deepseek-pilot-2026-10-23/` 账本与 JSON 交叉引用（未入库）。
-- **代码收口**：oneshot 脚本 + pilot `searchNeedContent`；ledger Search 键在 `searchNeedContent:true` 时含 `need_content` 后缀（live 第 10 次 Search 行保留 legacy query-only 键，见证据说明）。
+- **代码（上一提交 `045467e…`）**：oneshot 脚本 + pilot `searchNeedContent`；ledger Search 键在 `searchNeedContent:true` 时可含 `need_content` 后缀（live **账本第 11 行** = Search 第 10 次，legacy query-only 键，见证据说明）。全量 Vitest **1970 passed / 4 skipped** 为该提交历史门禁，文档-only 修正 **未**重跑。
 
 ## 2026-10-23 — DeepSeek Search/Fetch 错误脱敏白名单收口（默认关闭）
 
@@ -34,7 +34,7 @@
 - 方向认可基线 `a9ae16d`；同一授权内先修正方案三点，再落地默认关闭、离线可测最小接入；不另等用户批准；不联系 Guyang。
 - 合同三点：①硬预算在 `paidRequest` 内原子预留（复用 BEGIN IMMEDIATE / pending / unknown；既有顺序先读 Secret 再预留；`decidePaidBudget` alone 不足）；②`third_party_markdown` 为 provenance 非 contentScope，删除 disallowed Markdown 存证例外，回执/缓存/日志无正文；③删除安全拒绝后预览绕行；Search 缓存键=规范化 query+参数+策略版本。
 - 方案：[`docs/plans/r2-deepseek-search-fetch-2026-10-23.md`](plans/r2-deepseek-search-fetch-2026-10-23.md)；ADR：[`docs/adr/ADR-011-deepseek-search-fetch-intel-assist.md`](adr/ADR-011-deepseek-search-fetch-intel-assist.md)。
-- 实现：`server/providers/deepseek/search-fetch-client.ts`、`server/intel/discovery/{deepseek-search-fetch-policy,candidate-trim,search-fetch-service}.ts` + 离线测试。零 schema 迁移。生产启源/R3/24h/合并部署仍未授权；**受控 pilot**（2 Search + 2 Fetch live，8 unknown 保留）见 2026-10-24 块。R2 28/39、25/34 与允许选择 19≠启用、CN-T01/XX-M01 不变。
+- 实现：`server/providers/deepseek/search-fetch-client.ts`、`server/intel/discovery/{deepseek-search-fetch-policy,candidate-trim,search-fetch-service}.ts` + 离线测试。零 schema 迁移。生产启源/R3/24h/合并部署仍未授权；**受控 pilot**（Search 第 9/10 成功、2 次 Fetch 失败、8 unknown 保留）见 2026-10-24 块。R2 28/39、25/34 与允许选择 19≠启用、CN-T01/XX-M01 不变。
 
 ## 2026-10-23 R2 生产允许选择扩展（阶段，dots 1792719565.465609）
 
