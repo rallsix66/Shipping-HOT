@@ -1,0 +1,62 @@
+[
+  {
+    "id": "PH-W01",
+    "host": "www.pagasa.dost.gov.ph",
+    "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+    "reservedAt": "2026-10-15T05:21:25.064Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "198.18.0.85",
+        "family": 4
+      }
+    ],
+    "classification": "blocked_address",
+    "finishedAt": "2026-10-15T05:21:25.070Z"
+  },
+  {
+    "id": "PH-W02",
+    "host": "www.pagasa.dost.gov.ph",
+    "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+    "reservedAt": "2026-10-15T05:21:25.071Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "198.18.0.85",
+        "family": 4
+      }
+    ],
+    "classification": "blocked_address",
+    "finishedAt": "2026-10-15T05:21:25.072Z"
+  },
+  {
+    "id": "ID-W02-root",
+    "host": "maritim.bmkg.go.id",
+    "url": "https://maritim.bmkg.go.id/marine2026-data/",
+    "reservedAt": "2026-10-15T05:21:25.073Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "198.18.0.86",
+        "family": 4
+      }
+    ],
+    "classification": "blocked_address",
+    "finishedAt": "2026-10-15T05:21:25.073Z"
+  },
+  {
+    "id": "XX-W02-targetTc",
+    "host": "www.jma.go.jp",
+    "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+    "reservedAt": "2026-10-15T05:21:25.074Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "198.18.2.99",
+        "family": 4
+      }
+    ],
+    "classification": "blocked_address",
+    "finishedAt": "2026-10-15T05:21:25.075Z"
+  }
+]

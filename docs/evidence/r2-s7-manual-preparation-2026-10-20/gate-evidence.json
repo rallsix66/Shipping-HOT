@@ -1,0 +1,162 @@
+{
+  "node": "24.15.0",
+  "ABI": 137,
+  "pnpm": "10.30.3",
+  "candidate": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020",
+  "normalFrozenOfflineInstall": true,
+  "ignoreScripts": false,
+  "oldNodeModulesCopied": false,
+  "nativeModulesCopied": false,
+  "gates": [
+    {
+      "name": "install",
+      "artifact": "install",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "install",
+        "--frozen-lockfile",
+        "--offline"
+      ],
+      "startedAt": "2026-10-20T08:45:23.019Z",
+      "finishedAt": "2026-10-20T08:45:34.668Z",
+      "rawExit": 0,
+      "file": "install.json",
+      "stdoutSHA": "8303b06f6cd7d479fbb0fc59c90640ed40694a532c448f316151b24f0df72e1f",
+      "stderrSHA": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "build",
+      "artifact": "build",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "build"
+      ],
+      "startedAt": "2026-10-20T08:52:02.684Z",
+      "finishedAt": "2026-10-20T08:52:28.188Z",
+      "rawExit": 0,
+      "file": "build.json",
+      "stdoutSHA": "d90e5c7064249d8aaa147828639b85f219f1c5dcb999008eb4b41561038e7885",
+      "stderrSHA": "763fa851361b4b56370619b20b9c439ff5dd179f0759a13f3dd626d849221658"
+    },
+    {
+      "name": "typecheck",
+      "artifact": "typecheck-attempt4",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "typecheck"
+      ],
+      "startedAt": "2026-10-20T08:58:55.987Z",
+      "finishedAt": "2026-10-20T08:59:03.003Z",
+      "rawExit": 0,
+      "file": "typecheck-attempt4.json",
+      "stdoutSHA": "d11254c949e084096c71cb6d875d65df4cbf3d0cb2d7d45998e00bf459358728",
+      "stderrSHA": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "lint",
+      "artifact": "lint",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "lint"
+      ],
+      "startedAt": "2026-10-20T08:59:03.005Z",
+      "finishedAt": "2026-10-20T08:59:30.567Z",
+      "rawExit": 0,
+      "file": "lint.json",
+      "stdoutSHA": "60cc2504d6d077bf3327abab81d95d5971139d642026525df2bdfe42c3f156e1",
+      "stderrSHA": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "targeted",
+      "artifact": "targeted-attempt3",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "exec",
+        "vitest",
+        "run",
+        "-c",
+        "vitest.config.ts",
+        "test/manual-intel.test.ts",
+        "scripts/s7-local-seed.test.ts",
+        "server/intel/manual.test.ts",
+        "server/api/shipping/intel/manual-http.test.ts",
+        "test/clip-import.test.ts"
+      ],
+      "startedAt": "2026-10-20T08:50:16.871Z",
+      "finishedAt": "2026-10-20T08:50:20.862Z",
+      "rawExit": 0,
+      "file": "targeted-attempt3.json",
+      "stdoutSHA": "880a5a96febe416b6b02454bab767a692f4697ea337e6b039969619107e19ca6",
+      "stderrSHA": "5d752a099b16cca6916e124a059c79b2618e6a0449fb2171d1904543e273de62"
+    },
+    {
+      "name": "vitest",
+      "artifact": "vitest",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:/Program Files/nodejs/node_modules/corepack/dist/pnpm.js",
+        "exec",
+        "vitest",
+        "run",
+        "-c",
+        "vitest.config.ts"
+      ],
+      "startedAt": "2026-10-20T08:59:30.567Z",
+      "finishedAt": "2026-10-20T08:59:46.337Z",
+      "rawExit": 0,
+      "file": "vitest.json",
+      "stdoutSHA": "4a1d443fad7b849ca91bbdf015175c6bdf90f6d154fee160218257687da4bedd",
+      "stderrSHA": "1fca9eb5031410d6273ee63bf6892bf36e0b2f27d5d537c58ea5be8fcd9c580a"
+    },
+    {
+      "name": "prepareManual",
+      "artifact": "prepareManual",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--import",
+        "tsx/esm",
+        "--experimental-loader",
+        "./scripts/tsx-alias-loader.mjs",
+        "scripts/s7-local-seed.ts",
+        ".tmp/s7-r2-manual-ready-20261020",
+        "--manual-only"
+      ],
+      "startedAt": "2026-10-20T08:59:46.337Z",
+      "finishedAt": "2026-10-20T08:59:46.700Z",
+      "rawExit": 0,
+      "file": "prepareManual.json",
+      "stdoutSHA": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA": "67ae89cd29ec1878c3a032378218fed90754f447391bb389ea7215235b4c9598"
+    }
+  ],
+  "targetedPassed": 51,
+  "fullPassed": 1789,
+  "fullSkipped": 3,
+  "fullFiles": 147,
+  "sourceNetworkRequests": 0,
+  "appServerStarted": false,
+  "browserStarted": false,
+  "S7GUI": "NOT_RUN",
+  "buildBinding": "production TSX unchanged since successful build; later repairs only test type boundaries and explicit seed settings typing",
+  "retainedFailures": [
+    "targeted: real confirmed-save/cache-refresh regression failed; seed import.meta transform failure",
+    "targeted-attempt2: component fixed, seed direct-import transform failure persisted",
+    "changed-lint-fix: new test multi-statement formatting fixed",
+    "typecheck: explicit environment/optional settings/Translation fields fixed",
+    "typecheck-attempt2: frontend static server aliases replaced by existing vi.importActual pattern",
+    "typecheck-attempt3: native handle uses a minimal test boundary rather than unavailable app-side native declarations"
+  ],
+  "noFixtureCleanup": true
+}

@@ -1,0 +1,39 @@
+{
+  "checkedAt": "2026-10-15T02:41:19.140379+00:00",
+  "executionHead": "0ad53dd63632f097e719197345a1000b0e0c1d29",
+  "productCodeSha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
+  "manifestLaunchCommandAgree": true,
+  "nonDocumentationDifferenceCodeToExecutionHead": [],
+  "systemDnsCalls": 2,
+  "reservedTransportCalls": 2,
+  "rawExit": 0,
+  "captureDiagnosticIsNotFunctionalGate": true,
+  "Maersk": {
+    "responseCaptured": false,
+    "knownCode": "fetch_failed",
+    "underlyingErrorCodeOrMessage": "NOT_RECORDED",
+    "httpStatus": null,
+    "limitation": "Secure entry returned generic failure; original capture did not retain its message/underlying transport error. No TLS/CA/HTTP403/anti-bot diagnosis and no retry."
+  },
+  "ONE": {
+    "responseCaptured": true,
+    "httpStatus": 308,
+    "bytes": 12,
+    "wireSha256": "8d3e9d688c23a2e9d23f1e8fb252bb339ce3bfb0f7bb63fbb262d4d9d07e1578",
+    "rawLocalIgnored": true,
+    "privateRawHashVerified": true,
+    "contentTypeValue": "NOT_RECORDED_result_field_absent",
+    "location": {
+      "present": true,
+      "sanitized": "/en/newsroom",
+      "relative": true,
+      "credentialsRemoved": false,
+      "queryRemoved": false,
+      "fragmentRemoved": false,
+      "pathRedacted": false,
+      "followed": false
+    },
+    "parser": "NOT_RUN"
+  },
+  "additionalSourceDnsOrHttpForThisInspection": 0
+}

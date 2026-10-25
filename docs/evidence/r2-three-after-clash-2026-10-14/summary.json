@@ -1,0 +1,141 @@
+{
+  "startedAt": "2026-10-14T09:08:39.423Z",
+  "finishedAt": "2026-10-14T09:08:53.001Z",
+  "reservedTransportCalls": 3,
+  "results": [
+    {
+      "id": "VN-P03",
+      "url": "https://saigonnewport.com.vn/tin-tuc",
+      "startedAt": "2026-10-14T09:08:39.423Z",
+      "status": "PARTIAL",
+      "httpRequests": 1,
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+      "receivedAt": "2026-10-14T09:08:42.844Z",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=UTF-8",
+      "rawByteLength": 143215,
+      "fetchedBytesSha256": "e730d4af7dacc5b95995139b6407f91a2adb2d4be7f1e2bbec7dbadc738b51c8",
+      "rawLocalOnly": true,
+      "parse": "DOM_OBSERVATION_ONLY",
+      "parserError": null,
+      "observedCandidateCount": 6,
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "http",
+        "declarations": [
+          {
+            "source": "http",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          },
+          {
+            "source": "meta",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          }
+        ],
+        "conflict": false,
+        "byteLength": 143215
+      },
+      "archivedMetadataSha256": "d7589460d1f52a1f15bed0cfd0acc079f81f989e700764c7e432048518f6b95d",
+      "originalHtmlCommitted": false,
+      "sensitiveScan": {
+        "positiveControlDetected": true,
+        "committedMaterialHits": 0
+      },
+      "finishedAt": "2026-10-14T09:08:42.878Z"
+    },
+    {
+      "id": "VN-T01",
+      "url": "https://idea.gov.vn/",
+      "startedAt": "2026-10-14T09:08:42.879Z",
+      "status": "PARTIAL",
+      "httpRequests": 1,
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+      "receivedAt": "2026-10-14T09:08:45.043Z",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "rawByteLength": 22451,
+      "fetchedBytesSha256": "972674566750a436a01f84020a512400391dd47427a79464ed735f146f8c16ca",
+      "rawLocalOnly": true,
+      "parse": "DOM_OBSERVATION_ONLY",
+      "parserError": null,
+      "observedCandidateCount": 6,
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "http",
+        "declarations": [
+          {
+            "source": "http",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          },
+          {
+            "source": "meta",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          }
+        ],
+        "conflict": false,
+        "byteLength": 22451
+      },
+      "archivedMetadataSha256": "cba0318951b5e7f6c857016dbac87163969230405dcf82ff11eea6e0e35dcc26",
+      "originalHtmlCommitted": false,
+      "sensitiveScan": {
+        "positiveControlDetected": true,
+        "committedMaterialHits": 0
+      },
+      "finishedAt": "2026-10-14T09:08:45.055Z"
+    },
+    {
+      "id": "ID-T01",
+      "url": "https://jdih.kemendag.go.id/",
+      "startedAt": "2026-10-14T09:08:45.056Z",
+      "status": "PARTIAL",
+      "httpRequests": 1,
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+      "receivedAt": "2026-10-14T09:08:52.943Z",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=UTF-8",
+      "rawByteLength": 390183,
+      "fetchedBytesSha256": "7bda040e2c0db0ba557bc91837f1c05bc8a30e34d18e6a5568c9a37426b74032",
+      "rawLocalOnly": true,
+      "parse": "DOM_OBSERVATION_ONLY",
+      "parserError": null,
+      "observedCandidateCount": 6,
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "http",
+        "declarations": [
+          {
+            "source": "http",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          },
+          {
+            "source": "meta",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          }
+        ],
+        "conflict": false,
+        "byteLength": 390183
+      },
+      "archivedMetadataSha256": "fb2c97c3e1bb941880f65bdc5221ba762a794283877fe32ca8ae4f34f26f02ef",
+      "originalHtmlCommitted": false,
+      "sensitiveScan": {
+        "positiveControlDetected": true,
+        "committedMaterialHits": 0
+      },
+      "finishedAt": "2026-10-14T09:08:53.001Z"
+    }
+  ],
+  "approvedPublicDenominator": 39,
+  "requiredAvailable": 32,
+  "batchPassClaims": 0,
+  "fullP1Pass": false,
+  "paidCalls": 0,
+  "llmCalls": 0,
+  "productionActivation": "NOT_RUN",
+  "live24h": "NOT_RUN"
+}

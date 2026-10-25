@@ -1,0 +1,8 @@
+{
+  "rawExit": 0,
+  "fullInventoryByteSha256": "f0e4c5c470fb88eaf8cdb1689f18e116fd62f39bd5235f5197ff9cb795b0f272",
+  "localOriginal": ".tmp/carrier-closeout-inventory-20261015.txt",
+  "publicExcerpt": "inventory.txt",
+  "omittedSection": "project-markdown full path enumeration only",
+  "scope": "Directory/rule/Git inventory, not security audit. Full local listing and workspace residue preserved."
+}

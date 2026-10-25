@@ -1,0 +1,34 @@
+{
+  "url": "https://seller-my.tiktok.com/university/essay?knowledge_id=4293090978809617",
+  "startedAt": "2026-10-21T06:40:32.307Z",
+  "dnsCalls": 1,
+  "getCalls": 0,
+  "bounds": {
+    "dnsCallsMax": 1,
+    "getMax": 1,
+    "retries": 0,
+    "redirectsFollowed": 0,
+    "totalMs": 10000,
+    "maxBodyBytes": 524288,
+    "maxHeaderBytes": 16384,
+    "nodeMaxHeaderSize": 16384,
+    "decompression": "none"
+  },
+  "dns": {
+    "ms": 6,
+    "count": 1,
+    "families": [
+      4
+    ]
+  },
+  "endedAt": "2026-10-21T06:40:32.314Z",
+  "elapsedMs": 6,
+  "complete": false,
+  "stopReason": "blocked_address",
+  "secureFetchCode": "blocked_address",
+  "httpStatus": "unknown",
+  "bytes": "unknown",
+  "sha256": "unknown",
+  "partialBodySaved": false,
+  "note": "no complete response; status/bytes unknown"
+}

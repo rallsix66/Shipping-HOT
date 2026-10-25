@@ -1,0 +1,9 @@
+{
+  "name": "vitest",
+  "command": "pnpm exec vitest run -c vitest.config.ts",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\intel-production-final-build",
+  "sha": "70a0b80cde1946bd1bff1cffb4f84f9fd28171f8",
+  "startedAt": "2026-10-14T06:39:13.953Z",
+  "endedAt": "2026-10-14T06:39:28.769Z",
+  "rawExit": 0
+}

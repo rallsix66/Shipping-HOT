@@ -1,0 +1,135 @@
+
+ RUN  v4.0.18 D:/wt-s3
+
+Duplicated imports "string", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/wt-s3/shared/calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/wt-s3/shared/policy.ts" has been ignored and "D:/wt-s3/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/wt-s3/shared/policy.ts" has been ignored and "D:/wt-s3/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/wt-s3/shared/policy.ts" has been ignored and "D:/wt-s3/shared/promo-calendar.ts" is used
+ ❯ scripts/r2-intel-observe.test.ts (34 tests | 1 failed) 1954ms
+   ✓ requires an explicit start, all limits and allowlisted sources 4ms
+   ✓ uses a system-only environment plus fixed flags; no inherited credentials, proxy or Node options 0ms
+   ✓ prepares a fresh isolated cwd and explicit child entry without spawning or writing persistent config 3ms
+   ✓ the child independently rejects inherited extra settings or mismatched enable/source flags 1ms
+   ✓ actual Node CLI resolves file/directory aliases and exits without starting on help or missing execute  1069ms
+   ✓ actual isolated worker rejects an extra environment key before DB/bootstrap or any source work 190ms
+   ✓ accepts only the six observed Windows keys, discards their paths and establishes an empty private home 3ms
+   ✓ still rejects untrusted configuration/credentials before home creation: HOME 2ms
+   ✓ still rejects untrusted configuration/credentials before home creation: XDG_CONFIG_HOME 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: APPDATA 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: LOCALAPPDATA 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: ARBITRARY_SETTING 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: DEEPSEEK_API_KEY 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: ACCESS_TOKEN 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: PROVIDER_SECRET 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: USERNAME_SECRET 2ms
+   ✓ still rejects untrusted configuration/credentials before home creation: HTTP_PROXY 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: HTTPS_PROXY 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: ALL_PROXY 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: NO_PROXY 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: NODE_OPTIONS 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: NODE_PATH 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: NODE_EXTRA_CA_CERTS 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: NODE_USE_SYSTEM_CA 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: NODE_USE_ENV_PROXY 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: SHIPPING_DATABASE_PATH 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: GIT_CONFIG_GLOBAL 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: GIT_CONFIG_SYSTEM 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: GIT_CONFIG_COUNT 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: GIT_CONFIG_NOSYSTEM 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: NPM_CONFIG_USERCONFIG 1ms
+   ✓ still rejects untrusted configuration/credentials before home creation: TSX_TSCONFIG_PATH 1ms
+   ✓ does not inherit profile/config paths and pins tsx plus disabled global module search in the actual launch 1ms
+   × actual execute CLI reaches bootstrap, zero-budget stop, read-only reopen and released ownership with an isolated home 648ms
+ ❯ scripts/r2-intel-observe-logonserver.test.ts (11 tests | 3 failed) 2802ms
+   × accepts a lone LOGONSERVER on win32, then removes it; HOME/USERPROFILE are the isolated home 8ms
+   × accepts a lone LogonServer on win32, then removes it; HOME/USERPROFILE are the isolated home 2ms
+   ✓ still rejects case-duplicated LOGONSERVER keys 2ms
+   ✓ rejects LOGONSERVER outside win32 1ms
+   ✓ with LOGONSERVER present, still rejects unknown key 2ms
+   ✓ with LOGONSERVER present, still rejects fake credential 2ms
+   ✓ with LOGONSERVER present, still rejects NODE_OPTIONS 2ms
+   ✓ with LOGONSERVER present, still rejects proxy 2ms
+   ✓ with LOGONSERVER present, still rejects expected value mismatch 1ms
+   × actual two-level CLI reaches exit 2 with parent LOGONSERVER=<marker> (null = absent), not visible to the business phase 894ms
+   ✓ actual two-level CLI reaches exit 2 with parent LOGONSERVER=null (null = absent), not visible to the business phase  1885ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/r2-intel-observe-logonserver.test.ts > accepts a lone LOGONSERVER on win32, then removes it; HOME/USERPROFILE are the isolated home
+ FAIL  scripts/r2-intel-observe-logonserver.test.ts > accepts a lone LogonServer on win32, then removes it; HOME/USERPROFILE are the isolated home
+AssertionError: expected [Function] to not throw an error but 'Error: observation_child_environment_…' was thrown
+
+- Expected: 
+undefined
+
++ Received: 
+"Error: observation_child_environment_invalid"
+
+ ❯ scripts/r2-intel-observe-logonserver.test.ts:32:100
+     30|   const { input, launch } = launchEnv("logon-alone")
+     31|   const env: NodeJS.ProcessEnv = { ...launch.env, [key]: MARKER }
+     32|   expect(() => validateObservationChildEnvironment(env, input.config.s…
+       |                                                                                                    ^
+     33|   const isolation = isolateObservationChildEnvironment(env, input.conf…
+     34|   expect(isolation.discardedWindowsKeys).toEqual([key])
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  scripts/r2-intel-observe-logonserver.test.ts > actual two-level CLI reaches exit 2 with parent LOGONSERVER=<marker> (null = absent), not visible to the business phase
+AssertionError: (node:50492) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("file%3A///D%3A/wt-s3/scripts/tsx-alias-loader.mjs", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:8508) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("file%3A///D%3A/wt-s3/scripts/tsx-alias-loader.mjs", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+observation_child_environment_invalid
+: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ scripts/r2-intel-observe-logonserver.test.ts:99:92
+     97| it.skipIf(process.platform !== "win32").each([[MARKER], [null]])("actu…
+     98|   const { directory, child } = runCli(marker)
+     99|   expect(child.status, child.status === 2 ? "" : child.stderr.replace(…
+       |                                                                                            ^
+    100|   const manifest = JSON.parse(readFileSync(resolve(directory, "manifes…
+    101|   expect(manifest.codeIdentity.environmentKeys.some((key: string) => k…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  scripts/r2-intel-observe.test.ts > actual execute CLI reaches bootstrap, zero-budget stop, read-only reopen and released ownership with an isolated home
+AssertionError: (node:22036) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("file%3A///D%3A/wt-s3/scripts/tsx-alias-loader.mjs", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:68064) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("file%3A///D%3A/wt-s3/scripts/tsx-alias-loader.mjs", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+observation_child_environment_invalid
+: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ scripts/r2-intel-observe.test.ts:117:38
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 41 passed (45)
+   Start at  11:54:52
+   Duration  3.54s (transform 437ms, setup 0ms, import 1.10s, tests 4.76s, environment 0ms)
+

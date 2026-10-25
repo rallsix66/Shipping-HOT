@@ -1,0 +1,19 @@
+{
+  "baselineEvidenceHead": "0274014037fbf68d7821309d2fd4090eaa036396",
+  "testedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "changedSourceIdsOnly": [
+    "ID-T02"
+  ],
+  "other40EntriesUnchanged": true,
+  "coverageUnchanged": true,
+  "approvedCoverage": [
+    "24/39",
+    "22/34"
+  ],
+  "numericHistorical": "3/5",
+  "qualificationUpgrade": "pending_parent",
+  "oldFalseCardDateAbsenceCorrected": true,
+  "sourceGetAttempts": 0,
+  "sourceDnsCalls": 0,
+  "cnP02Requests": 0
+}

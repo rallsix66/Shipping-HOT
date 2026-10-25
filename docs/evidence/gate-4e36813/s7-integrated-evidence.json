@@ -1,0 +1,153 @@
+{
+  "runDir": "D:\\try one\\Shipping HOT\\.tmp\\s7-intel-4e36813-1791861850640",
+  "databasePath": "D:\\try one\\Shipping HOT\\.tmp\\s7-intel-4e36813-1791861850640\\.data\\shipping-hot-v3.sqlite3",
+  "baseUrl": "http://127.0.0.1:4477",
+  "productionBuild": "D:\\try one\\Shipping HOT\\dist\\output\\server\\index.mjs",
+  "gitHead": "4e36813eb8859f4fb4d658f8cacdedde5b6275ad",
+  "workspaceClean": false,
+  "coverage": "clean local integration acceptance: fresh isolated DB init/migration, restart persistence, Real-Mode boundary, Flow A/B/C over the production build in system Chrome",
+  "fixtureDataProvenance": "synthetic deterministic fixture (see scripts/s7-local-seed.ts); not captured real Provider data",
+  "inheritedNotReVerified": "S2 coverage, S3 MY/TH/PH calendar, S4 real samples and S5 real long-article acceptance stay BLOCKED and are not re-run here",
+  "hermeticity": {
+    "isolatedRoot": "D:\\try one\\Shipping HOT\\.tmp",
+    "scrubbedProviderEnvKeys": [
+      "GFW_API_TOKEN",
+      "VESSELAPI_API_KEY",
+      "AISSTREAM_API_KEY",
+      "CALENDARIFIC_API_KEY",
+      "DEEPSEEK_API_KEY",
+      "QWEN_MT_API_KEY",
+      "GEMINI_API_KEY",
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY",
+      "DEEPL_API_KEY",
+      "AZURE_TRANSLATOR_API_KEY"
+    ],
+    "browserEgressInterception": "CDP Network.requestWillBeSent for http/https requests whose host is not the loopback server",
+    "serverEgressBound": "SHIPPING_RUNTIME_ENABLED=false, provider credentials deleted from the child environment, and zero provider/usage/runtime/cache deltas across the browse window"
+  },
+  "phases": {
+    "freshInit": {
+      "schemaVersion": 27,
+      "tables": 44,
+      "seedIsolation": {
+        "ports": 0,
+        "feedItems": 0
+      }
+    },
+    "seed": {
+      "realPorts": 2,
+      "mockPorts": 1,
+      "mockFeed": 1,
+      "realFeed": 2,
+      "articleVersions": 1,
+      "articleBlocks": 6,
+      "translationCache": 6,
+      "legacyCache": 1,
+      "portWatchlist": 1
+    },
+    "totals": {
+      "checks": 162,
+      "passed": 162,
+      "failed": 0,
+      "runtimeErrors": 0,
+      "unexpectedApi5xx": 0,
+      "externalRequests": 0
+    }
+  },
+  "flows": [
+    {
+      "flow": "A",
+      "checks": 16,
+      "failed": 0
+    },
+    {
+      "flow": "B",
+      "checks": 22,
+      "failed": 0
+    },
+    {
+      "flow": "C",
+      "checks": 62,
+      "failed": 0
+    }
+  ],
+  "counters": {
+    "before": {
+      "providerUsageRows": 0,
+      "deepseekUsageRows": 0,
+      "translationUsageRows": 0,
+      "syncRunRows": 0,
+      "translationCacheRows": 6,
+      "providerRuntimeRows": 0,
+      "providerRuntimeState": "[]",
+      "articleVersionRows": 1,
+      "articleFetchRows": 1,
+      "portRows": 3,
+      "feedRows": 3,
+      "eventRows": 1,
+      "calendarEventRows": 0,
+      "articleBlockRows": 6,
+      "portDirectoryRows": 8,
+      "appMetadataRows": 1
+    },
+    "after": {
+      "providerUsageRows": 0,
+      "deepseekUsageRows": 0,
+      "translationUsageRows": 0,
+      "syncRunRows": 0,
+      "translationCacheRows": 6,
+      "providerRuntimeRows": 0,
+      "providerRuntimeState": "[]",
+      "articleVersionRows": 1,
+      "articleFetchRows": 1,
+      "portRows": 3,
+      "feedRows": 3,
+      "eventRows": 1,
+      "calendarEventRows": 0,
+      "articleBlockRows": 6,
+      "portDirectoryRows": 8,
+      "appMetadataRows": 1
+    },
+    "delta": {
+      "providerUsageRows": 0,
+      "deepseekUsageRows": 0,
+      "translationUsageRows": 0,
+      "syncRunRows": 0,
+      "translationCacheRows": 0,
+      "providerRuntimeRows": 0,
+      "articleVersionRows": 0,
+      "articleFetchRows": 0,
+      "portRows": 0,
+      "feedRows": 0,
+      "eventRows": 0,
+      "calendarEventRows": 0,
+      "articleBlockRows": 0,
+      "portDirectoryRows": 0,
+      "appMetadataRows": 0
+    }
+  },
+  "retainedDatabases": {
+    "before": {
+      "D:\\try one\\Shipping HOT\\.data\\shipping-hot-v3.sqlite3": "af1a62291c75a714|8425472:1790663050789.5464",
+      "D:\\try one\\Shipping HOT\\.data\\shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8|1572864:1788406513543.2524",
+      "D:\\try one\\Shipping HOT\\.data\\p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a|978944:1788510203224.2683",
+      "D:\\try one\\Shipping HOT\\.data\\provider-secrets.json": "843c54062551d938|56:1788417973720.671"
+    },
+    "after": {
+      "D:\\try one\\Shipping HOT\\.data\\shipping-hot-v3.sqlite3": "af1a62291c75a714|8425472:1790663050789.5464",
+      "D:\\try one\\Shipping HOT\\.data\\shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8|1572864:1788406513543.2524",
+      "D:\\try one\\Shipping HOT\\.data\\p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a|978944:1788510203224.2683",
+      "D:\\try one\\Shipping HOT\\.data\\provider-secrets.json": "843c54062551d938|56:1788417973720.671"
+    }
+  },
+  "observations": [
+    {
+      "id": "S7-OBS-01",
+      "topic": "calendar product surface",
+      "finding": "`/calendar` renders the bundled annual reference calendar. The operational provider-calendar page (CalendarPage in src/components/shipping/pages.tsx) is exported but has no route in this build.",
+      "disposition": "confirms the already-documented 2026-09-09 decision (operational-cache UI entry removed, legacy component left unmounted); recorded only, not changed in S7 because choosing the operational calendar surface is a product/scope decision and provider calendar completeness stays partial/BLOCKED"
+    }
+  ],
+  "failedChecks": []
+}

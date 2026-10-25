@@ -1,234 +1,89 @@
 import { Link, useMatchRoute } from "@tanstack/react-router"
-import { MotionConfig, motion } from "framer-motion"
-import { type ReactNode, useEffect, useRef, useState } from "react"
-import { AuroraBackground } from "./aurora"
+import { type ReactNode, useEffect } from "react"
+import { MotionConfig } from "framer-motion"
 import { providerSummary, severityTone, statusBadgePresentation, statusLabels } from "./format"
-import { GradientText, StatusDot } from "./ui"
+import { MotionToggle, StatusDot } from "./ui"
 import { useShipping } from "./data"
+import { consoleNavigation } from "./console-navigation"
 import { useDark } from "~/hooks/useDark"
 import { useReduceMotion } from "~/hooks/useReduceMotion"
+import "./risk-console.css"
 
 export { ProvenanceBadge } from "./ui"
 
-const navLinks = [
-  { to: "/", label: "首页", icon: "i-ph-fire" },
-  { to: "/ports", label: "港口", icon: "i-ph-lighthouse" },
-  { to: "/events", label: "事件", icon: "i-ph-bell-ringing" },
-  { to: "/feed", label: "资讯", icon: "i-ph-newspaper" },
-  { to: "/calendar", label: "国家日历", icon: "i-ph-calendar-blank" },
-  { to: "/policies", label: "政策库", icon: "i-ph-scroll" },
-  { to: "/settings", label: "设置", icon: "i-ph-gear" },
-] as const
-
-const bottomTabLinks = [
-  { to: "/", label: "首页", icon: "i-ph-fire" },
-  { to: "/ports", label: "港口", icon: "i-ph-lighthouse" },
-  { to: "/feed", label: "资讯", icon: "i-ph-newspaper" },
-  { to: "/calendar", label: "日历", icon: "i-ph-calendar-blank" },
-  { to: "/settings", label: "设置", icon: "i-ph-gear" },
-] as const
-
-function NavItem({ to, label, icon }: { to: (typeof navLinks)[number]["to"], label: string, icon: string }) {
+function ConsoleLink({ to, label }: { to: "/" | "/events" | "/feed" | "/settings" | "/policies" | "/calendar" | "/ports", label: string }) {
   const matchRoute = useMatchRoute()
-  const ref = useRef<HTMLAnchorElement>(null)
-  const isActive = !!matchRoute({ to, fuzzy: to !== "/" })
-  useEffect(() => {
-    if (isActive) {
-      ref.current?.scrollIntoView({ inline: "nearest", block: "nearest" })
-    }
-  }, [isActive])
-  return (
-    <Link
-      ref={ref}
-      to={to}
-      className={`side-nav-link${isActive ? " active" : ""}`}
-      activeOptions={{ exact: to === "/" }}
-    >
-      {isActive && <motion.span layoutId="side-pill" className="side-pill" transition={{ type: "spring", bounce: 0.18, duration: 0.55 }} />}
-      <span className={`${icon} relative z-1 text-base`} />
-      <span className="side-label relative z-1">{label}</span>
-    </Link>
-  )
+  const active = !!matchRoute({ to, fuzzy: to !== "/" })
+  return <Link to={to} aria-current={active ? "page" : undefined} activeOptions={{ exact: to === "/" }}>{label}</Link>
 }
 
-function BottomTabItem({ to, label, icon }: { to: (typeof bottomTabLinks)[number]["to"], label: string, icon: string }) {
-  const matchRoute = useMatchRoute()
-  const isActive = !!matchRoute({ to, fuzzy: to !== "/" })
-  return (
-    <Link to={to} className={isActive ? "active" : ""} activeOptions={{ exact: to === "/" }}>
-      <span className={`${icon} text-lg`} />
-      {label}
-    </Link>
-  )
-}
-
-function formatClock(value?: string) {
-  if (!value) return "—"
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })
-}
-
-const providerRows = [
-  { key: "weather", label: "天气" },
-  { key: "weatherAlerts", label: "官方预警" },
-  { key: "port", label: "港口" },
-  { key: "feed", label: "资讯" },
-] as const
-
-export function ShippingShell({ children, title }: { children: ReactNode, title?: string }) {
+export function ShippingShell({ children, title, showLegend = true }: { children: ReactNode, title?: string, showLegend?: boolean }) {
   const { isDark, toggleDark } = useDark()
-  const { reduced: reduceMotion, toggle: toggleReduceMotion } = useReduceMotion()
-  const { data } = useShipping()
-  const [collapsed, setCollapsed] = useState(() => {
-    try {
-      return localStorage.getItem("sh-side-collapsed") === "1"
-    } catch {
-      return false
-    }
-  })
-  // ChatGPT 式：收起后 hover 窄栏顶部才浮现「打开边栏」按钮
-  const [roVisible, setRoVisible] = useState(false)
-  const roHideTimer = useRef<number | undefined>(undefined)
-  const showRo = () => {
-    window.clearTimeout(roHideTimer.current)
-    setRoVisible(true)
-  }
-  const hideRo = () => {
-    window.clearTimeout(roHideTimer.current)
-    roHideTimer.current = window.setTimeout(() => setRoVisible(false), 160)
-  }
-  useEffect(() => () => window.clearTimeout(roHideTimer.current), [])
+  const { reduced, toggle: toggleReduceMotion } = useReduceMotion()
+  const { data, isError } = useShipping()
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark)
   }, [isDark])
-  useEffect(() => {
-    try {
-      localStorage.setItem("sh-side-collapsed", collapsed ? "1" : "0")
-    } catch {
-      // ignore storage failures
-    }
-  }, [collapsed])
-
-  const hotCount = data?.hot.length
-  const fetchedAts = data?.providerFreshness
-    ? Object.values(data.providerFreshness).map(freshness => freshness.fetchedAt).filter((value): value is string => Boolean(value))
-    : []
-  const lastRefresh = fetchedAts.length
-    ? formatClock(new Date(Math.max(...fetchedAts.map(value => new Date(value).getTime()))).toISOString())
-    : "—"
-  const summary = data ? providerSummary(data.provider) : undefined
-  const providerLabel = summary?.label ?? "—"
-
+  const summary = isError ? "读取失败" : data ? providerSummary(data.provider).label : "读取中…"
   return (
-    <MotionConfig reducedMotion={reduceMotion ? "always" : "user"}>
-      <div className={`shipping-shell min-h-dvh${collapsed ? " side-collapsed" : ""}`}>
-        <AuroraBackground enabled={!reduceMotion} />
-        <aside className={`console-sidebar${roVisible ? " ro-visible" : ""}`}>
-          <div
-            className="side-head"
-            onMouseEnter={collapsed ? showRo : undefined}
-            onMouseLeave={collapsed ? hideRo : undefined}
-          >
-            <Link to="/" className="brand-mark h-9 w-9 shrink-0 overflow-hidden rounded-xl" title="Shipping HOT">
-              <img src="/shipping-hot-icon.svg" alt="Shipping HOT" className="h-full w-full rounded-xl" />
-            </Link>
-            <span className="side-title">
-              Shipping
-              {" "}
-              <GradientText>HOT</GradientText>
-            </span>
-            <button
-              type="button"
-              className="icon-btn side-collapse"
-              title="折叠侧栏"
-              onClick={() => setCollapsed(value => !value)}
-            >
-              <span className="i-ph-caret-double-left" />
-            </button>
-            {/* 收起后 hover：Logo 位置变成此按钮，右侧弹出「打开边栏」提示 */}
-            <button
-              type="button"
-              className="side-reopen"
-              title="打开边栏"
-              aria-label="打开边栏"
-              onClick={() => setCollapsed(false)}
-              onMouseEnter={showRo}
-              onMouseLeave={hideRo}
-            >
-              <span className="ro-icon i-ph-sidebar-simple" />
-              <span className="ro-label">打开边栏</span>
-            </button>
-          </div>
-          <nav className="side-nav">
-            {navLinks.map(link => <NavItem key={link.to} {...link} />)}
-          </nav>
-          <div className="side-foot">
-            {providerRows.map(row => (
-              <div key={row.key} className="sf-row">
-                <StatusDot tone={data?.provider[row.key] && data.provider[row.key] !== "mock" && !(row.key === "weatherAlerts" && data.provider[row.key] === "off") ? "info" : "dim"} />
-                <span className="lbl grow">{row.label}</span>
-                <span className="val">{data?.provider[row.key] ?? "—"}</span>
-              </div>
-            ))}
-          </div>
-        </aside>
-        <div className="console-main">
-          <header className="console-topbar">
-            <h1>{title ?? "运营态势 · 首页"}</h1>
-            <span className="topbar-spacer" />
-            <span className="tchip">
-              <StatusDot tone={hotCount ? "failed" : "fresh"} pulse={Boolean(hotCount)} />
-              活跃 HOT
-              {" "}
-              {hotCount ?? "—"}
-            </span>
-            <span className="tchip">
-              <span className="i-ph-clock" />
-              最后刷新
-              {" "}
-              {lastRefresh}
-            </span>
-            <span className="tchip">
-              数据源
-              {" "}
-              {providerLabel}
-            </span>
-            <button
-              type="button"
-              aria-label="关闭动效"
-              aria-pressed={reduceMotion}
-              title={reduceMotion ? "动效已关闭，点击恢复背景动画与滚动光环" : "关闭重绘类动效（降低滚动卡顿与 GPU 占用）"}
-              onClick={toggleReduceMotion}
-              className="icon-btn"
-            >
-              <span className={`${reduceMotion ? "i-ph-lightning-slash" : "i-ph-lightning"} block`} />
-            </button>
-            <button
-              type="button"
-              aria-label="切换明暗主题"
-              title="切换明暗主题"
-              onClick={toggleDark}
-              className="icon-btn"
-            >
-              <motion.span
-                key={isDark ? "moon" : "sun"}
-                initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
-                animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
-                className={`${isDark ? "i-ph-moon-stars" : "i-ph-sun"} block`}
-              />
-            </button>
-          </header>
-          <main>
-            {children}
-          </main>
-          <footer className="mt-8 text-center text-xs op-55">
-            Shipping HOT · 本地指挥台 · Open-Meteo Marine / Calendar / Mock
-          </footer>
+    <MotionConfig reducedMotion={reduced ? "always" : "never"}>
+      <div className="shipping-shell risk-console">
+        <div className="rc-banner">
+          <b>功能逐步开放</b>
+          {" "}
+          · 国家风险汇总与延误估算尚未开放。未评估不代表正常；模拟、历史和真实数据以条目标注为准。
         </div>
-        <nav className="console-bottom-tab">
-          {bottomTabLinks.map(link => <BottomTabItem key={link.to} {...link} />)}
-        </nav>
+        <a className="rc-skip" href="#shipping-content">跳到页面内容</a>
+        <aside className="rc-side">
+          <Link className="rc-brand" to="/">
+            Shipping HOT
+            <small>中国 → 东南亚 航运风险看板</small>
+          </Link>
+          <nav className="rc-nav" aria-label="主导航">
+            {consoleNavigation.map(item => item.available
+              ? <ConsoleLink key={item.label} to={item.to} label={item.label} />
+              : (
+                  <button key={item.label} type="button" disabled title={item.stage} data-testid="unopened-module">
+                    <span>{item.label}</span>
+                    <small>
+                      未开放 ·
+                      {item.stage}
+                    </small>
+                  </button>
+                ))}
+            <details className="rc-source-help">
+              <summary>来源说明</summary>
+              <p>🏛 官方：政府与监管机构原文。</p>
+              <p>📰 报道：媒体或当事方原文。</p>
+              <p>⚙ 系统：按规则生成，需查看规则和输入。</p>
+              <p>🤖 AI：需标明模型与依据。风险分析未开放。</p>
+              <p>来源健康与采集管理未开放。读取接口存在不代表采集已启用。</p>
+            </details>
+          </nav>
+          <p className="rc-side-note">系统和 AI 的判断仅供参考。参考日历不代表港口停运。</p>
+        </aside>
+        <div className="rc-main">
+          <header className="rc-topbar">
+            <span>{title ?? "首页"}</span>
+            <span className="rc-data-status" role="status">
+              数据源：
+              {summary}
+            </span>
+            <button type="button" aria-label="切换明暗主题" onClick={toggleDark}>{isDark ? "☀ 亮色" : "☾ 暗色"}</button>
+            <MotionToggle reduced={reduced} onToggle={toggleReduceMotion} />
+          </header>
+          {showLegend && (
+            <div className="rc-legend" aria-label="来源标记图例">
+              <span className="rc-pv official">🏛 官方</span>
+              <span className="rc-pv report">📰 报道</span>
+              <span className="rc-pv system">⚙ 系统</span>
+              <span className="rc-pv ai">🤖 AI</span>
+              <p>来源标记说明判断依据；数据是否为模拟、历史或真实记录以各条标注为准。没有数据不等于没有风险。</p>
+            </div>
+          )}
+          <main id="shipping-content" tabIndex={-1}>{children}</main>
+          <footer className="rc-footer">Shipping HOT · 仅供参考 · 未开放模块随方案验收逐步开放</footer>
+        </div>
       </div>
     </MotionConfig>
   )

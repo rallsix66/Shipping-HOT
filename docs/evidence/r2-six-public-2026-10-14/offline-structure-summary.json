@@ -1,0 +1,41 @@
+{
+  "httpRequests": 0,
+  "results": [
+    {
+      "id": "MY-P03",
+      "localRawHashVerified": true,
+      "domShapeSha256": "a86528961f4dabc907d496468577c8b6785ff6e4d8adb93bfaa8e61384223120",
+      "diagnostics": {
+        "htmlTitleExcerpt": "Northport (Malaysia) Bhd",
+        "scriptElements": 6,
+        "formElements": 0,
+        "bodyCharacters": 19362,
+        "totalElements": 544,
+        "scriptContentExcluded": true,
+        "sanitizedAnchors": 107,
+        "sanitizedRows": 0
+      },
+      "localDateGroupCount": 85,
+      "positiveControlDetected": true,
+      "committedSensitiveHits": 0
+    },
+    {
+      "id": "TH-C01",
+      "localRawHashVerified": true,
+      "domShapeSha256": "4aad177a16fe268b24ed44b50406af7a123094b6315148733aabdc7db8811c51",
+      "diagnostics": {
+        "htmlTitleExcerpt": "กรมศุลกากร - Thai Customs",
+        "scriptElements": 10,
+        "formElements": 1,
+        "bodyCharacters": 24929,
+        "totalElements": 1153,
+        "scriptContentExcluded": true,
+        "sanitizedAnchors": 230,
+        "sanitizedRows": 101
+      },
+      "localDateGroupCount": 101,
+      "positiveControlDetected": true,
+      "committedSensitiveHits": 0
+    }
+  ]
+}

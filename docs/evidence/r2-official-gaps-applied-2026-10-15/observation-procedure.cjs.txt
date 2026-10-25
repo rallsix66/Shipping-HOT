@@ -1,0 +1,17 @@
+const fs = require('node:fs'), crypto = require('node:crypto'), cheerio = require('cheerio');
+const d = 'docs/evidence/r2-official-gaps-applied-2026-10-15', local = '.tmp/r2-official-gaps-applied-20261015-private', summary = JSON.parse(fs.readFileSync(d + '/capture-summary.json', 'utf8')), sha = s => crypto.createHash('sha256').update(s).digest('hex');
+const rows = summary.results.map(r => {
+ const raw = fs.readFileSync(local + '/' + r.id + '.response.bin'); if (sha(raw) !== r.wireSha256 || raw.length !== r.bytes) throw Error('raw_hash_or_size_mismatch');
+ const $ = cheerio.load(new TextDecoder('utf-8', { fatal: true }).decode(raw));
+ const title = $('title').text().trim(), headings = $('h1,h2,h3').map((i, e) => $(e).text().replace(/\s+/g, ' ').trim()).get();
+ const links = $('a[href]').map((i, e) => ({ label: $(e).text().trim(), hrefLiteral: $(e).attr('href') })).get();
+ const apiDocs = links.filter(l => /apidoc|api\s*doc(?:umentation)?/i.test(l.label + ' ' + l.hrefLiteral));
+ const row = { id: r.id, url: r.url, at: r.receivedAt, status: r.httpStatus, wireSha256: r.wireSha256, bytes: r.bytes, title, headings, observedPdfLinks: links.filter(l => /\.pdf(?:[?#]|$)/i.test(l.hrefLiteral)).map(l => ({ hrefLiteral: l.hrefLiteral, sourcePage: r.url, downloaded: false })), businessRecordsObserved: 0, businessRecordsPersisted: 0 };
+ if (r.id === 'ID-W02-root') Object.assign(row, { classification: 'directory_index_only_not_numeric_product', anchorCount: links.length, explicitApiDocLinkCount: apiDocs.length, relevantObservedLinks: links.filter(l => ['doc/', 'help/', 'pelabuhan/', 'pelabuhan_slug/'].includes(l.hrefLiteral)).map(l => ({ ...l, absoluteObservedUrl: new URL(l.hrefLiteral, r.url).href, followed: false, officialApiDocConfirmed: false })), officialJakartaKode: null, numericFieldSample: false });
+ else Object.assign(row, { classification: r.id === 'XX-W02-targetTc' ? 'http404_not_json_or_empty_list' : 'http403_not_official_empty_weather_state', activeIdentity: null, sourcePublicationTime: null, sourceRegion: null });
+ return row;
+});
+const result = { executionHead: '440affa012e06b80c38d97f08b04e395b8506d0f', method: 'Offline minimal DOM inspection with already installed cheerio; no new product parser/provider or requests', sourceGetAttemptsThisScript: 0, systemDnsCallsThisScript: 0, originalResponses: rows.length, rows, qualificationChanges: 0, parserStorageReplay: 'NOT_RUN_no_qualified_positive_or_numeric_response' };
+fs.writeFileSync(d + '/structure-observation.json', JSON.stringify(result, null, 2) + '\n');
+fs.writeFileSync(d + '/conditional-decisions.json', JSON.stringify({ status: 'NOT_RUN', targets: [], bmkg: { rootStatus: 200, observedDocDirectory: 'https://maritim.bmkg.go.id/marine2026-data/doc/', explicitOfficialApiDocLinks: 0, docDirectoryIdentity: 'UNCONFIRMED_generic_directory_name_is_not_proof_of_api_documentation', apidocGetAttempts: 0, noGuessedUrlOrKode: true }, jma: { targetTcStatus: 404, validObjectObserved: false, actualTropicalCyclone: null, forecastGetAttempts: 0, specificationsGetAttempts: 0, oldIdsReused: false, emptyListConfirmed: false }, pdfDownloads: 0, portJsonRequests: 0, unusedGetAllowance: 3, automaticRetryAuthorized: false }, null, 2) + '\n');
+console.log(JSON.stringify({ responseHashesVerified: rows.length, businessRecords: 0, bmkgAnchors: rows.find(r => r.id === 'ID-W02-root').anchorCount, apiDocLinks: 0, conditionalGet: 0, sourceGetThisScript: 0, systemDnsThisScript: 0 }));

@@ -1,0 +1,127 @@
+{
+  "at": "2026-10-20T09:24:40.672Z",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "branch": "codex/shipping-hot-r2",
+  "product": {
+    "head": "40629587e22d8932df105962ec214530e4054414",
+    "branch": "codex/shipping-hot-r2",
+    "relativeTo": "saved dirty working state at this slice start",
+    "files": [
+      {
+        "path": "src/components/shipping/manual-intel.tsx",
+        "sha256": "55bfc2e882f5c3d21773337e0e6d7c68eed398afba4b898d1f0df5701fbc6de2",
+        "bytes": 14442
+      },
+      {
+        "path": "test/manual-intel.test.ts",
+        "sha256": "758c08d293607c93d20a3ba233820b86313183e1790debe1f09dbce4c8bc3cda",
+        "bytes": 21838
+      }
+    ],
+    "diff": {
+      "path": "product.diff",
+      "sha256": "b7caeee7edbf895dc291fa8df9d14fd404a014e029478765f30f262b9199d081"
+    }
+  },
+  "gateEvidence": "gate-evidence.json",
+  "results": {
+    "targeted": 51,
+    "full": 1794,
+    "skipped": 3,
+    "files": 147
+  },
+  "independentReview": "pending",
+  "S7": "not accepted; parent review ongoing",
+  "GUI": "NOT_RUN",
+  "finalAudit": {
+    "at": "2026-10-20T09:25:22.512Z",
+    "status": "P2 local code/verification/knowledge closeout complete; independent review pending; S7 not accepted",
+    "skill": "e0/neat-freak",
+    "inventory": {
+      "rawExit": 0,
+      "log": ".tmp/manual-query-p2-20261020/neat-inventory-final.log",
+      "sha256": "931ba61b25e0e132ba99863f8e0afb2f874f42b460ccb5ca70bb3e64412552b3",
+      "markdownEntries": 9000
+    },
+    "docLint": {
+      "rawExit": 0,
+      "log": ".tmp/manual-query-p2-20261020/docs-lint.log"
+    },
+    "links": {
+      "checked": 177,
+      "broken": []
+    },
+    "diffCheck": 0,
+    "preservation": {
+      "protectedFilesUnchanged": 59,
+      "rootAndCandidateOverlayEqual": 31,
+      "sourceQualificationUnchanged": "28/39;25/34",
+      "statusPriorBytesPreserved": true,
+      "architectureUnchanged": true,
+      "HEADUnchanged": true,
+      "branchUnchanged": true,
+      "stagedEmpty": true,
+      "previousS7PreparedDBSHA": "f5f243fe2901f193ca1a32f3af71cfdd0757fe6031a963f85818ef2f070f3e70",
+      "previousS7PreparedManifestSHA": "74003b013dffb7b8dfd8fe514f638b352641efb6bc692b41df49f99013fad563",
+      "previousS7EvidenceUnchanged": true
+    },
+    "rules": {
+      "AGENTSUnchanged": true,
+      "bytes": 28170,
+      "budget32KiBFraction": 0.85968017578125
+    },
+    "memory": "generated-read-only",
+    "artifacts": [
+      {
+        "path": "closeout.md",
+        "sha256": "d4da47b9677172b4c15d28ae2a3c1f38a4e5c55ef0e72061229e61c940adb75e"
+      },
+      {
+        "path": "gate-evidence.json",
+        "sha256": "5cc71cf241be3a045374d886a819e84e5c0acf7032a309ab73ee10687fa8cbbe"
+      },
+      {
+        "path": "product-files.json",
+        "sha256": "2cf5ab170578bb4074b7036cc5a210800d92abc1e005edffb66384d2ae8f6805"
+      },
+      {
+        "path": "product.diff",
+        "sha256": "b7caeee7edbf895dc291fa8df9d14fd404a014e029478765f30f262b9199d081"
+      },
+      {
+        "path": "query-contract.json",
+        "sha256": "babf6fb5a0d2be6ec0e4a81734182b99ebf4c10587f0e33bcb225e13cf2da8bb"
+      },
+      {
+        "path": "report.md",
+        "sha256": "df6f8edac64c92fa420e15f7e6291b1af945bf9aac57711fc187b63baf1fccb6"
+      }
+    ],
+    "pending": [
+      "P2 parent independent review",
+      "separate S7 review and real GUI/keyboard/viewport acceptance"
+    ],
+    "sourceNetworkRequests": 0,
+    "productionSQLiteOperations": 0,
+    "secretManagementOperations": 0,
+    "protectedFileAccess": "opaque file hash only; no contents output",
+    "applicationServerStarted": false,
+    "browserStarted": false,
+    "pluginChanges": false,
+    "networkChanges": false,
+    "trial24h": false,
+    "R3": false,
+    "commit": false,
+    "push": false,
+    "merge": false,
+    "deploy": false,
+    "cleanup": false,
+    "newDeniedActions": false,
+    "priorCDPDenialRespected": true,
+    "warnings": [
+      "existing header test JSDoc warning",
+      "existing chunk/Browserslist notices",
+      "Git global-ignore permission and CRLF notices"
+    ]
+  }
+}

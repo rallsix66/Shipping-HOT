@@ -1,0 +1,13 @@
+{
+  "startedAt": "2026-10-15T02:56:18.469Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "-c",
+    ".tmp/one-newsroom-target-20261015.config.ts"
+  ],
+  "head": "03d1515d33dd1c5d96137c43e0aafb596b334be3",
+  "productCodeSha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
+  "authorization": "ONE only: separately approved saved308 target https://www.one-line.com/en/newsroom, once systemDNS/public pinned GET, no further follow/retry/detail or config/catalog write; Maersk synthetic-only no real request"
+}

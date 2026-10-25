@@ -1,0 +1,9 @@
+{
+  "name": "smoke-feed",
+  "command": "pnpm smoke:p3-feed-freshness",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\post-clash-final-build",
+  "sha": "af38350709d2fa4c9e9b98accbae8bc7ef678da1",
+  "startedAt": "2026-10-14T09:19:40.710Z",
+  "endedAt": "2026-10-14T09:19:41.814Z",
+  "rawExit": 0
+}

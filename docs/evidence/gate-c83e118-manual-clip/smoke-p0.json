@@ -1,0 +1,9 @@
+{
+  "name": "smoke-p0",
+  "command": "pnpm smoke:p0-native",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-final-c83e118",
+  "sha": "c83e118da17c4ebe04d42b748000d502694d3888",
+  "startedAt": "2026-10-16T03:00:13.003Z",
+  "endedAt": "2026-10-16T03:00:14.180Z",
+  "rawExit": 0
+}

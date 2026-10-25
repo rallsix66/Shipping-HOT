@@ -1,0 +1,19 @@
+{
+  "id": "PH-W01",
+  "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+  "phase": "initial",
+  "host": "www.pagasa.dost.gov.ph",
+  "startedAt": "2026-10-15T05:21:25.064Z",
+  "systemDnsCalls": 1,
+  "getAttempts": 0,
+  "status": "BLOCKED",
+  "rawLocalOnly": true,
+  "qualificationChanged": false,
+  "addressClassification": "blocked_address",
+  "secureEntryError": {
+    "code": "blocked_address",
+    "message": "Resolved address is not a public address: 198.18.0.85"
+  },
+  "httpStatus": null,
+  "finishedAt": "2026-10-15T05:21:25.070Z"
+}

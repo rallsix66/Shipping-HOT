@@ -1,0 +1,28 @@
+# command: npx vitest run server/intel
+# full_sha: 0e4e57fafa619c697f59e67fdfdf3aa79718815e
+# started: 2026-10-12T09:03:02.264Z
+# ---- stdout ----
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ server/intel/llm/receipts.test.ts (16 tests) 545ms
+ ✓ server/intel/collect.test.ts (22 tests) 682ms
+
+ Test Files  2 passed (2)
+      Tests  38 passed (38)
+   Start at  17:03:03
+   Duration  1.51s (transform 587ms, setup 0ms, import 952ms, tests 1.23s, environment 0ms)
+
+
+# ---- stderr ----
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+
+# raw_exit_code: 0

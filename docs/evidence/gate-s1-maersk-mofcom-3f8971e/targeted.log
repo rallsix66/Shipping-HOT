@@ -1,0 +1,38 @@
+command: npx vitest run server/intel/maersk-mofcom.test.ts server/intel/sources/web-list-english-12h.test.ts server/services/article-fetch-header-limit.test.ts server/services/article-fetch-transport.test.ts server/services/article-fetch-security.test.ts server/intel/sources/html-index-candidates.test.ts server/intel/sources server/intel/collect.test.ts
+full_sha: 3f8971e3fcb2bfc32a6f736b1172bf0ed0e274d0
+started: 2026-10-21T03:26:29.658Z
+finished: 2026-10-21T03:26:32.932Z
+raw_exit_code: 0
+--- stdout ---
+
+ RUN  v4.0.18 D:/wt-s1
+
+ ✓ server/services/article-fetch-security.test.ts (10 tests) 13ms
+ ✓ server/intel/sources/web-list-english-12h.test.ts (29 tests) 19ms
+ ✓ server/intel/sources/json-list.test.ts (42 tests) 45ms
+ ✓ server/intel/sources/json-list-html.test.ts (5 tests) 48ms
+ ✓ server/intel/sources/web-list-conflicts.test.ts (12 tests) 32ms
+ ✓ server/intel/sources/web-list.test.ts (35 tests) 77ms
+ ✓ server/intel/sources/html-index-candidates.test.ts (25 tests) 45ms
+ ✓ server/services/article-fetch-header-limit.test.ts (38 tests) 168ms
+ ✓ server/services/article-fetch-transport.test.ts (17 tests) 212ms
+ ✓ server/intel/maersk-mofcom.test.ts (50 tests) 704ms
+ ✓ server/intel/collect.test.ts (22 tests) 888ms
+
+ Test Files  11 passed (11)
+      Tests  285 passed (285)
+   Start at  11:26:30
+   Duration  2.22s (transform 3.26s, setup 0ms, import 7.41s, tests 2.25s, environment 2ms)
+
+
+--- stderr ---
+Duplicated imports "string", the one from "D:/wt-s1/shared/annual-calendar.ts" has been ignored and "D:/wt-s1/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/wt-s1/shared/annual-calendar.ts" has been ignored and "D:/wt-s1/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/wt-s1/shared/annual-calendar.ts" has been ignored and "D:/wt-s1/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/wt-s1/shared/annual-calendar.ts" has been ignored and "D:/wt-s1/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/wt-s1/shared/annual-calendar.ts" has been ignored and "D:/wt-s1/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/wt-s1/shared/calendar.ts" has been ignored and "D:/wt-s1/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/wt-s1/shared/policy.ts" has been ignored and "D:/wt-s1/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/wt-s1/shared/policy.ts" has been ignored and "D:/wt-s1/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/wt-s1/shared/policy.ts" has been ignored and "D:/wt-s1/shared/promo-calendar.ts" is used
+

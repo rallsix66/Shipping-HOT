@@ -1,0 +1,9 @@
+{
+  "phase": "Generating lint wrapper through PowerShell node -e quoting",
+  "rawExit": 1,
+  "diagnostic": "SyntaxError: Invalid or unexpected token; Expected unicode escape. Follow-up node invocation: MODULE_NOT_FOUND for .tmp/lint-r2-nmc-close-20261015.cjs.",
+  "lintActuallyStarted": false,
+  "resolution": "Saved wrapper with apply_patch and invoked node on that file. Real lint result is doc-lint.json; this failed launcher is not represented as a lint result.",
+  "sourceRequests": 0,
+  "systemDns": 0
+}

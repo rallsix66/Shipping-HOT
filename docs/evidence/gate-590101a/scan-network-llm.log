@@ -1,0 +1,19 @@
+# command: rg -n -i "fetch\(|https?://|openai|anthropic|llm" server/intel server/runtime/intel-collect-job.ts server/database/intel.ts server/database/migrations/023-intel-executor-current.ts server/database/migrations/024-paid-receipt.ts server/database/migrations/025-paid-receipt-usage-booking.ts server/services/paid-budget.ts
+# full_sha: 590101acd3028f9df7bf3850adf73af9df08f9ca
+# started: 2026-10-12T09:10:30.338Z
+# ---- stdout ----
+server/intel\sources.ts:30:    url: "https://www.tmd.go.th/en/api/xml/CAP",
+server/intel\sources.ts:43:    url: "https://www.bmkg.go.id/alerts/nowcast/en/rss.xml",
+server/intel\llm\receipts.test.ts:27:} from "#/intel/llm/receipts"
+server/intel\llm\receipts.test.ts:68:function secrets(values: Record<string, string> = { "fake-llm": "test-placeholder" }): SecretStore {
+server/intel\llm\receipts.test.ts:92:    providerId: "fake-llm",
+server/intel\llm\receipts.test.ts:110:const usage = (native: Native) => native.prepare("SELECT COALESCE(SUM(request_count),0) AS requests, COALESCE(SUM(success_count),0) AS ok, COALESCE(SUM(failure_count),0) AS failed, COALESCE(SUM(estimated_cost),0) AS cost FROM provider_usage WHERE provider_id = 'fake-llm'").get() as { requests: number, ok: number, failed: number, cost: number }
+server/intel\llm\receipts.test.ts:127:      VALUES (?, ?, 'fake-llm', 'x', 'p', 'received', ?, ?, 't', 't')`).run(`id-${basis}-${actual}`, `k-${basis}-${actual}`, actual, basis)
+server/intel\collect.test.ts:104:    expect(items.every(item => item.title && item.canonicalUrl.startsWith("https://www.tmd.go.th/") && item.publishedAt)).toBe(true)
+server/intel\collect.test.ts:294:    const broken: IntelSourceSeed = { ...TMD, id: "intel:test-broken", url: "https://www.tmd.go.th/broken" }
+server/intel\collect.test.ts:352:    const offHost: IntelSourceSeed = { ...TMD, id: "intel:test-offhost", url: "https://evil.example/feed" }
+server/intel\collect.test.ts:358:    const downgrade = offline({ [TMD.url]: () => ({ status: 302, headers: { location: "http://www.tmd.go.th/en/api/xml/CAP" }, body: "" }) })
+
+# ---- stderr ----
+
+# raw_exit_code: 0

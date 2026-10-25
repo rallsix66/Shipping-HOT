@@ -1,0 +1,14 @@
+from pathlib import Path
+from datetime import datetime,timezone
+import ast,hashlib,json,re
+repo=Path('D:/try one/Shipping HOT');root=Path('C:/Users/Administrator/AppData/Roaming/io.github.clash-verge-rev.clash-verge-rev')
+d=repo/'docs/evidence/r2-sitc-applied-2026-10-15';d.mkdir(exist_ok=True)
+p=json.loads((repo/'.tmp/clash-sitc-host-20261015-prepared.json').read_text(encoding='utf-8'));m=json.loads(Path(p['manifest']).read_text(encoding='utf-8'))
+tree=ast.parse((repo/'.tmp/prepare-clash-three-weather-hosts-20261015.py').read_text(encoding='utf-8'))
+for node in tree.body:
+    if isinstance(node,ast.FunctionDef) and node.name in ['selected_extension','generated_dns']:
+        exec(compile(ast.Module(body=[node],type_ignores=[]),'<read-only-config-reader>','exec'))
+target=selected_extension();actual=target.read_bytes();hosts=re.findall(r'^\s+"([^"\r\n]+)",\s*$',actual.decode('utf-8-sig'),re.M);dns=generated_dns();expected=m['original26']+['www.sitc.com']
+checks={'selectedExtensionExpectedBytes':hashlib.sha256(actual).hexdigest()==m['proposedSha256'],'extension27ExactExpectedOrder':hosts==expected and len(hosts)==27,'generated27ExactExpectedOrder':dns['filter']==expected and len(dns['filter'])==27,'original26Preserved':dns['filter'][:26]==m['original26'],'sitcExactlyOnceInBoth':hosts.count('www.sitc.com')==1 and dns['filter'].count('www.sitc.com')==1,'fakeIpBlacklistMode':dns['modes'].get('enhanced-mode')=='fake-ip' and dns['modes'].get('fake-ip-filter-mode','blacklist')=='blacklist'}
+result={'checkedAt':datetime.now(timezone.utc).isoformat(),'readOnly':True,'userAppliedAt':'2026-10-15T06:30:48Z','extensionHostCount':len(hosts),'generatedFilterCount':len(dns['filter']),'checks':checks,'original26OrderedSha256':hashlib.sha256(json.dumps(m['original26'],separators=(',',':')).encode()).hexdigest(),'extensionAfterSha256':hashlib.sha256(actual).hexdigest(),'generatedFilterOrderedSha256':hashlib.sha256(json.dumps(dns['filter'],separators=(',',':')).encode()).hexdigest(),'noFullConfigurationEqualityClaim':True,'previousWholeGeneratedByteDifference':'UNRESOLVED_prior_full_image_missing_not_reinvestigated','systemSettingsWritten':False,'credentialValuesExported':False,'sourceDnsCalls':0,'upstreamGet':0,'runningCoreApiInspected':False,'status':'VERIFIED_EXACT_FILTER27' if all(checks.values()) else 'BLOCKED_REQUIRED_FILTER_DIFFERENCE'}
+(d/'clash-applied-verification.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print(json.dumps(result,ensure_ascii=True));raise SystemExit(0 if all(checks.values()) else 1)

@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-10-20T03:27:36.632Z",
+  "sourceURL": "https://maritim.bmkg.go.id/marine2026-data/meta/port_province.json",
+  "sourceSha256": "299fc83669ca506b42d66ddee3444844ea589b66bff29cc39516e65244e97b1a",
+  "sourceBytes": 132947,
+  "rootShape": "{data: [{province, ports:[{id,name,lat,lon},...]}]}",
+  "provinceCount": 37,
+  "portCount": 659,
+  "targetMatches": [
+    {
+      "path": "$.data[6].ports[0]",
+      "province": "DK Jakarta",
+      "id": "XJ001",
+      "name": "Pelabuhan Tanjung Priok",
+      "lat": -6.103879776,
+      "lon": 106.882294878
+    }
+  ],
+  "uniqueExactTarget": true,
+  "mappingVerdict": "VERIFIED_LOCAL_OFFICIAL_METADATA_ID_NAME_PROVINCE_ONLY",
+  "forecastProductURLCandidate": "https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json",
+  "candidateDerivation": "actual documented GET /pelabuhan/{KODE}.json plus actual official metadata id XJ001; product not requested",
+  "forecastProductCodeFinallyVerified": false,
+  "officialMainPage": {
+    "URL": "https://www.bmkg.go.id/cuaca/maritim/pelabuhan/XJ001",
+    "basis": "parent official-page research identifies Tanjung Priok; NOT requested in this local round"
+  },
+  "contract": {
+    "base": "https://maritim.bmkg.go.id/marine2026-data/",
+    "method": "GET",
+    "metadataTemplate": "/meta/{file}",
+    "portTemplate": "/pelabuhan/{KODE}.json",
+    "metaFileNamesDocumented": [
+      "port_province.json",
+      "pelabuhan.json"
+    ],
+    "forecastTime": "UTC, YYYY-MM-DD HH:00 UTC; valid time, not publication time",
+    "day1": "hourly, 24 points 00..23 UTC",
+    "day2To4": "3-hourly",
+    "units": {
+      "waveHeight": "m",
+      "windAndGustSpeed": "knot",
+      "currentSpeed": "knot",
+      "visibility": "km",
+      "temperature": "Celsius",
+      "relativeHumidity": "percent",
+      "tide": "m"
+    },
+    "geoJSONCoordinates": "[longitude,latitude] WGS84; independent of index named lat/lon fields",
+    "authentication": "meta section says no authentication headers; no credentials supplied",
+    "sourceRawLicense": "no redistribution/full-text permission inferred from availability"
+  },
+  "unverified": [
+    "real single-port response/status/content-type/schema",
+    "forecast field names/nullable values/quality codes and period arrays",
+    "issued/update time versus valid time and freshness",
+    "numeric parsing/unit normalization and range checks",
+    "collector/repository persistence/dedupe/restart and retained-data impact",
+    "provider activation/runtime/continuous24h"
+  ],
+  "noNeedForAdditionalLocationIndexForThisTarget": true,
+  "nextIndexIfNeededLater": "https://maritim.bmkg.go.id/marine2026-data/meta/pelabuhan.json (documented, not requested)",
+  "forecastRequests": 0,
+  "qualificationChanged": false
+}

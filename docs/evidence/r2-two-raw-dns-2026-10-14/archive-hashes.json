@@ -1,0 +1,26 @@
+{
+  "kind": "sanitized evidence archive bytes, distinct from fetched raw page hashes",
+  "sha256": {
+    "command.json": "fa9f295e1733b3e815a2ae656d7583851fa62b9eef332a7588d5818d6e5d8bba",
+    "customs-gov-ph-dns.json": "e8308500689c2d9db50f186272a90c91d0419441083fd8836f7345673e330e39",
+    "dns-ledger.json": "27663fee83e9d278c8d1d3909e60ee3e27317acf6544ef23da55d61add4271d2",
+    "dns-partial.json": "115593d140bdd2b2ff646a0dc22dfe09981bb90a6dff6c335b552bfd9a31255e",
+    "dns-summary.json": "c18a253f31cac7200a3ffeb8cef0a6969297f93626c52f5ab62fc19cf77ad648",
+    "launch.json": "23a33722fd45cfb1eaab57c13fa6d49daa69eb57faedcf4e14a5154c46dc0662",
+    "MY-P03-adapter.json": "1e802eead415bc5e595adc7ae6fe10ef9a0f41eac7dae76d730500fb3ae56399",
+    "MY-P03-first.json": "4aa580167d91ba46405eb34bdfe6c8554e4db5712ed2ebc72e157412bc258da1",
+    "MY-P03-result.json": "28442d2010bb7a228a2d58625961815e24ba2c1312d19dc9c7fa59eb833a16b1",
+    "neat-inventory.json": "613758238cc131b058c4bd39ce888c1b5994ab779d99aaf2c18186b6271a4ae0",
+    "replay-partial.json": "04e5f9555d0030c6a22f8286a90330ef1ccaeba66fc17c8c3d89bc4d72ddbe8a",
+    "replay-summary.json": "6b0f0630fb8757d1e2f95c6905a7cdcd5b28922bc8427451682521afdd857ba3",
+    "sensitive-scan.json": "d39ace22f545de78fb93aa9b00ff81427a662a40dc526c539810b8c20ddaa472",
+    "storage-and-conflicts-audit.json": "4d8d88eda51326e7e3a0dca922406b7f19ace29f411ce4d42d7da7dd7c73b0d6",
+    "storage-audit-command.json": "55d0661bf26ecf407a2b6573c7a165faa0682735f4f96f85d6d97e7fc7bd34de",
+    "szs-mof-gov-cn-dns.json": "9d71c7bd06505b128724d53943d42258ef78f8dd4b62276b85f911df368ac1c9",
+    "TH-C01-adapter.json": "3d6bc0bca467a485493b04a25665d11b9738ef0f202b4f32753f58d212d6062d",
+    "TH-C01-first.json": "78fa000761bd7987c628a7d57afde70b9a5795a58e3c052bfec472ec956063f3",
+    "TH-C01-result.json": "87c5bd4a6ad0083cad591ca787aec9f723ca087e71d90deffc96eeb54668ab90",
+    "vimawa-gov-vn-dns.json": "a5392cb6543afd5ca2f7de5f3c9b38902f8d61b1ad587f532028513f2f0dcff4",
+    "www-gd-msa-gov-cn-dns.json": "a44c121a6165e291b0723fb1393407f4ba6afb7c00dcd3962d12a389fcad7a46"
+  }
+}

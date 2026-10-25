@@ -1,0 +1,5 @@
+
+> shipping-hot@0.0.41 smoke:p0-native D:\try one\Shipping HOT\.tmp\manual-intel-final2-build
+> node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p0-native-sqlite-smoke.ts
+
+{"process":"B","node":"v24.15.0","abi":"137","bootstrapCompletedAt":"2026-10-14T04:38:56.354Z","watchedPort":"p0-smoke-port-shekou","portDirectory":"ready"}

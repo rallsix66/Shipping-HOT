@@ -1,0 +1,43 @@
+import { it, expect } from "vitest"
+import { readFileSync, writeFileSync } from "node:fs"
+import NativeDatabase from "better-sqlite3"
+import { load } from "cheerio"
+import { htmlIndexCandidates } from "../server/intel/sources/html-index-candidates"
+import { fromHtml, parseLooseDate } from "../server/intel/sources/web-list"
+import { sourcePolicy } from "../server/intel/collect"
+import { decodeResponse } from "../server/services/response-decoding"
+import { canonicalizeFeedUrl } from "../server/providers/feed"
+const dir = "docs/evidence/r2-two-raw-dns-2026-10-14"
+it("read-only reopen checks every persisted date association, with non-vacuous count; preserves real Northport conflicts", () => {
+  const reports: any[] = []
+  for (const seed of htmlIndexCandidates) {
+    const previous = JSON.parse(readFileSync(`${dir}/${seed.catalogId}-result.json`, "utf8"))
+    const original = JSON.parse(readFileSync(`docs/evidence/r2-six-public-2026-10-14/${seed.catalogId}-result.json`, "utf8"))
+    const raw = readFileSync(`.tmp/r2-six-public-2026-10-14-private/${seed.catalogId}.response.bin`)
+    const decoded = decodeResponse(raw, original.contentType)
+    const db = new NativeDatabase(previous.nativeDatabaseLocalOnly, { readonly: true })
+    try {
+      if (seed.catalogId === "TH-C01") {
+        const parsed = fromHtml(decoded.body, seed.url, seed.webList!, sourcePolicy(seed))
+        const stored = db.prepare("SELECT i.canonical_url,i.title,i.published_at,v.date_evidence,v.content_scope FROM intel_item i JOIN intel_item_version v ON v.id=i.current_version_id WHERE i.source_id=?").all(seed.id) as any[]
+        const mismatches = stored.filter(row => { const e = parsed.find(entry => entry.canonicalUrl === row.canonical_url); return !e || e.title !== row.title || JSON.stringify(JSON.parse(row.date_evidence)) !== JSON.stringify(e.dateEvidence) || row.published_at !== (e.publishedAt ?? null) || row.content_scope !== "metadata_only" })
+        reports.push({ id: seed.catalogId, readOnlyReopen: true, parsedCount: parsed.length, storedCount: stored.length, fullDateEvidenceCompared: true, mismatches: mismatches.length, dayPrecision: parsed.filter(e => e.dateEvidence.precision === "day").length, nullInstants: stored.filter(row => row.published_at === null).length, localDateRange: [parsed.map(e => e.dateEvidence.localDate).sort()[0], parsed.map(e => e.dateEvidence.localDate).sort().at(-1)], status: "OFFLINE_STORED_ASSOCIATIONS_MATCH" })
+      } else {
+        const $ = load(decoded.body), c = seed.webList!, groups = new Map<string, any[]>()
+        $(c.listSelector).find(c.itemSelector).each((_, node) => {
+          const a = $(node).find(c.linkSelector!).first(), url = canonicalizeFeedUrl(a.attr("href") ?? "", seed.url)
+          if (!url) return
+          const text = a.text().replace(/\s+/g, " ").trim(), pair = /^(\d{1,2}-\d{1,2}-\d{4}) (\S.*)$/.exec(text)
+          const record = { titleExcerpt: (pair?.[2] ?? text).slice(0, 120), dateEvidence: parseLooseDate(pair?.[1], c) }
+          groups.set(url, [...(groups.get(url) ?? []), record])
+        })
+        const conflicts = [...groups].filter(([, values]) => new Set(values.map(v => JSON.stringify(v))).size > 1)
+        reports.push({ id: seed.catalogId, readOnlyReopen: true, itemRows: (db.prepare("SELECT COUNT(*) AS n FROM intel_item WHERE source_id=?").get(seed.id) as any).n, conflictGroupCount: conflicts.length, conflictGroups: conflicts.slice(0, 6).map(([url, occurrences]) => ({ url, occurrences })), status: "FAIL_REAL_DUPLICATE_ASSOCIATIONS", selection: "all configured nodes observed; first six conflict groups recorded in document order; no conflict resolution" })
+      }
+    } finally { db.close() }
+  }
+  writeFileSync(`${dir}/storage-and-conflicts-audit.json`, JSON.stringify({ httpRequests: 0, dnsLookups: 0, codeChanged: false, reports }, null, 2) + "\n")
+  const thai = reports.find(r => r.id === "TH-C01"), north = reports.find(r => r.id === "MY-P03")
+  expect(thai.storedCount).toBe(100); expect(thai.mismatches).toBe(0); expect(thai.dayPrecision).toBe(100); expect(thai.nullInstants).toBe(100)
+  expect(north.itemRows).toBe(0); expect(north.conflictGroupCount).toBeGreaterThan(0)
+})

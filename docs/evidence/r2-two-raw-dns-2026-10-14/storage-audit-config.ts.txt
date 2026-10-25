@@ -1,0 +1,2 @@
+import base from "../vitest.config"
+export default { ...base, test: { ...base.test, include: [".tmp/two-raw-storage-audit-20261014.test.ts"] } }

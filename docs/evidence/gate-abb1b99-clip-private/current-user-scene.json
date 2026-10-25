@@ -1,0 +1,55 @@
+{
+  "at": "2026-10-16T08:06:48.206Z",
+  "metadata": {
+    "schema_version": 29,
+    "data_mode": "real",
+    "database_id": "f79f2bd2-050f-42b0-831e-6e787eb1344f"
+  },
+  "counts": {
+    "intel_item": 0,
+    "intel_item_version": 0,
+    "intel_manual_action": 0,
+    "provider_usage": 0,
+    "provider_runtime": 0,
+    "translation_cache": 0,
+    "intel_fetch_run": 0,
+    "intel_executor": 0
+  },
+  "pages": [
+    {
+      "port": 5173,
+      "status": 200
+    },
+    {
+      "port": 5174,
+      "status": 200
+    }
+  ],
+  "currentService": {
+    "sha": "bdc7b59d88d440966d8c6aff7fc68229c136dbb1",
+    "actualCodeSha": "bdc7b59d88d440966d8c6aff7fc68229c136dbb1",
+    "isolationSha": "6087a169cb2e591e3acb10d23ccc641d8212f5c0",
+    "receiverPid": 10880,
+    "sourcePid": 40064,
+    "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-6087a16\\run",
+    "databasePath": "D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-6087a16\\run\\.data\\shipping-hot-v3.sqlite3",
+    "databaseId": "f79f2bd2-050f-42b0-831e-6e787eb1344f",
+    "entrypoint": "D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-bdc7b59\\app-test\\server\\index.mjs",
+    "receiver": "http://127.0.0.1:5173/feed",
+    "source": "http://127.0.0.1:5174/synthetic-article.html",
+    "synthetic": true,
+    "browserOperated": false
+  },
+  "newPrivateBuildStagedOnly": true,
+  "retainedUnchanged": true,
+  "retained": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "bindings": [
+    "  TCP    127.0.0.1:5173         0.0.0.0:0              LISTENING       10880",
+    "  TCP    127.0.0.1:5174         0.0.0.0:0              LISTENING       40064"
+  ]
+}

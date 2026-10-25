@@ -1,3 +1,15 @@
+> 当前交付口径（2026-10-21）：以 [mapping.json](evidence/r2-current-source-matrix-2026-10-14/mapping.json) measuredCoverage 为准。R2-4 来源 28/39（至少 32，差 4），R2-5 资讯 25/34（余 9），均未通过。数值分列：历史 3 项有限诊断，另加 ID-W02 一项完整原件离线解析，不称 4/5 生产接入。新增的 CN-T01、ID-W02、XX-K01 支撑链都已随库：[Maersk/商务部认可](evidence/r2-maersk-mofcom-qualification-2026-10-20/acceptance.json)、[ID-W02 认可与剩余矩阵](evidence/r2-id-w02-qualification-vnp01-2026-10-20/remaining-matrix.md)。下方 26/39、25/39、24/34 等是当时的数字，按原时点保留。S7、R2 均未通过。
+
+> 交付更新（2026-10-21）：已普通推送到 `codex/shipping-hot-r2`。Maersk/商务部/日期切片 `3f8971e3`，门禁 `1b68adcd`。观察工具 + BMKG(ID-W02) 切片 `c9af8c55`，门禁 `5e665216`，包含 LOGONSERVER 仅 win32 隔离前认可。worker 启动竞态 `160c67a9`，门禁 `00e97518`。以上均经 dots 限定复审通过。下文“未提交/uncommitted/待父审”是当时的口径。正预算实网观察、24h、R3 仍未运行、未授权；S7、R2 均未通过。
+
+> 当前限定更新（2026-10-20）：仅ID-W02按父独立静态源码审查改限定OK，26/39、资讯24/34；数字为历史3项有限诊断＋新增1项完整原件离线解析。未启用/入库或扩大到七日天气；前轮门禁由执行者运行，父未重跑。其他来源判定不变，VN-P01本次同身份HTML未见自身日期，仍PARTIAL。现役[剩余矩阵](evidence/r2-id-w02-qualification-vnp01-2026-10-20/remaining-matrix.md) / [本轮报告](evidence/r2-id-w02-qualification-vnp01-2026-10-20/report.md)。
+
+> CN-T01同产品HTTPS依据（2026-10-20）：保留下表原HTTP条目与编制时标签；父会话核实同host/path的HTTPS后，本机在用户保存应用后的单次安全GET取得完整200/20318B（早前198.18 DNS阻断为历史）。离线核对最新政策8项，7条相对HTTPS身份完成默认关闭metadata配置及collector/隔离SQLite回放，1条原HTTP政策身份和解释链接由原安全规则排除，不补造HTTPS或授予HTTP抓取/全文许可。详见[最新证据和待审建议](evidence/r2-maersk-mofcom-offline-2026-10-20/report.md)与[原始访问账本](evidence/r2-three-url-after-save-2026-10-20/request-ledger.json)；当前matrix/计数保持，未获父审前不自动改资格。
+
+> R2当前复核（2026-10-15）：[41项累计证据与缺口](evidence/r2-current-source-matrix-2026-10-14/report.md) / [逐源矩阵](evidence/r2-current-source-matrix-2026-10-14/mapping.json)。下表核查标签保留为编制时历史；当前R2-4/5结论以逐源矩阵为准。所有ID、URL、格式和优先级保持原样；默认启用状态与采集资格分开记录。
+
+> XX-K02 同源同产品 URL 更新（2026-10-15，已批准）：原 `https://www.one-line.com/en/news` 的实际308 Location为 `/en/newsroom`，现目录改为已核实的 `https://www.one-line.com/en/newsroom`。[原308记录](evidence/r2-carrier-reapplied-2026-10-15/XX-K02-response.json)与[目标实网/原页回放依据](evidence/r2-one-newsroom-target-2026-10-15/report.md)保留。目录 `web_list` 描述HTML新闻页面形态；实现用现有 `json_list` 的HTML惰性JSON模式读取其内嵌数据，不是新增JSON接口。候选默认关闭、仅metadata，不加入生产允许列表或改变许可。
+
 # Shipping HOT 信源目录（草案）
 
 > 状态：`DRAFT`。首次核查日期 2026-09-30，核查方式为 curl 与 WebFetch，核查网络为编制者本机（中国大陆，Windows）。
@@ -98,7 +110,7 @@
 | MY-P04 | B | 丹戎帕拉帕斯港 PTP | https://www.ptp.com.my/announcements | web_list | en | PARTIAL | P3 | |
 | MY-P05 | B | 槟城港 | https://www.penangport.com.my/Media-Center/Announcements | web_list | en | OK | P3 | |
 | MY-P06 | A | 海事局 JLM | https://www.marine.gov.my/feed/ ；航运通告页 https://www.marine.gov.my/b-notis-perkapalan-malaysia/ | rss + web_list | ms | OK / PARTIAL | P2 | |
-| MY-W01 | A | 马来西亚气象局（经 data.gov.my） | https://api.data.gov.my/weather/warning | json_list | en/ms | OK (30/09/2026) | P1 | 开放 API，带 valid_from 和 valid_to 字段 |
+| MY-W01 | A | 马来西亚气象局（经 data.gov.my） | https://api.data.gov.my/weather/warning/ | json_list | en/ms | OK (30/09/2026) | P1 | 开放 API，带 valid_from 和 valid_to 字段 |
 | MY-W02 | A | 洪水信息门户 | https://publicinfobanjir.water.gov.my/ | manual | ms/en | PARTIAL (JS) | P2 | |
 | MY-C01 | A | 皇家关税局 JKDM 公告 | https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss | rss | ms | OK (28/09/2026) | P1 | 媒体报道 feed：`/ms/arkib/liputan-media?format=feed&type=rss` |
 | MY-T01 | A | 财政部 新闻稿 | https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss | rss | ms | OK (29/09/2026) | P1 | 低价值商品税为 10%（≤ RM500）。2027 年预算案将于 2026 年 10 月公布 |
@@ -116,7 +128,7 @@
 | ID-P01 | A | 交通部海运总局 Hubla / MaritimHUB | https://maritimhub.kemenhub.go.id/ | manual | id | BLOCKED (JS) | P1 | 门户正在迁移 |
 | ID-P02 | B | Pelindo | https://www.pelindo.co.id/media/berita | manual | id/en | BLOCKED (403) | P2 | |
 | ID-W01 | A | BMKG nowcast 预警（项目已有） | https://www.bmkg.go.id/alerts/nowcast/en/rss.xml | rss | en/id | OK (WebFetch) | P1 | 限流 60 次/分钟/IP，必须注明来源。curl 会返回 403 |
-| ID-W02 | A | BMKG 海事天气 API | https://maritim.bmkg.go.id/marine2026-data/ （文档 `/apidoc`；`/pelabuhan/{KODE}.json`） | json_list | id | PARTIAL | P1 | 按港口提供海况数据，不需要鉴权 |
+| ID-W02 | A | BMKG 海事天气 API | https://maritim.bmkg.go.id/marine2026-data/ （文档 `/apidoc`；已证 `/pelabuhan/XJ001.json`） | json_list | id | OK（限定归档产品/离线解析） | P1 | Tanjung Priok XJ001完整41点原件已解析/归一化/字段验证，父独立静态审查认可；72h混合步长，未生产接入/启用或24h |
 | ID-C01 | A | 印尼海关 DJBC | https://www.beacukai.go.id/ | manual | id | BLOCKED | P1 | 新闻页还指向旧站 |
 | ID-T01 | A | 贸易部 法规库 JDIH | https://jdih.kemendag.go.id/ | web_list | id | OK | P1 | 可以看到 2026 年的法规 |
 | ID-T02 | A | 财政部 法规库 JDIH（PMK） | https://jdih.kemenkeu.go.id/ | web_list | id | PARTIAL | P1 | 跨境电商进口规定以 PMK 形式发布 |
@@ -159,7 +171,7 @@
 | ID | 等级 | 船公司 | URL | 方式 | 核查 | 优先级 | 备注 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | XX-K01 | B | Maersk | https://www.maersk.com/news | web_list | OK | P1 | 文章路径里带日期，有台风季更新。没有 RSS |
-| XX-K02 | B | ONE | https://www.one-line.com/en/news | web_list | OK | P1 | 页面约 635 KB |
+| XX-K02 | B | ONE | https://www.one-line.com/en/newsroom | web_list | OK | P1 | 页面约 635 KB |
 | XX-K03 | B | SITC | https://www.sitc.com/en/list.asp?classid=44 ；越南站 https://sitcline.vn/ | web_list | OK | P1 | 近洋航线主力船公司 |
 | XX-K04 | B | Hapag-Lloyd / Yang Ming | https://www.hapag-lloyd.com/en/services-information/news.html ，https://www.yangming.com/en/esolution/news | manual | PARTIAL (JS) | P3 | |
 | XX-K05 | B | COSCO / Evergreen / Wan Hai / MSC / CMA CGM | — | manual | BLOCKED | P2 | 反爬或需要 JS 渲染 |

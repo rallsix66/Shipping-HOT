@@ -1,0 +1,17 @@
+{
+  "status": "NOT_RUN",
+  "reason": "Existing security entry blocked reserved DNS address before HTTP; no original source page exists for this batch.",
+  "completeOriginalResponse": false,
+  "sourceStructure": "unknown",
+  "siteConfigurationImplemented": false,
+  "parserRun": false,
+  "isolatedSqliteRun": false,
+  "repeatZeroNewZeroRevisedVerified": false,
+  "readonlyQueryOnlyFieldReplayVerified": false,
+  "sourcePublicationTime": null,
+  "sourceTimezone": "unknown",
+  "businessRecordsObserved": 0,
+  "businessRecordsPersisted": 0,
+  "newDatabaseCreated": false,
+  "productGate": "NOT_RUN_no_product_change"
+}

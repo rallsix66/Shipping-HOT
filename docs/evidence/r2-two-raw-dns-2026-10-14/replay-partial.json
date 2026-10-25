@@ -1,0 +1,270 @@
+[
+  {
+    "id": "MY-P03",
+    "startedAt": "2026-10-14T07:30:18.265Z",
+    "status": "FAIL",
+    "config": {
+      "listSelector": ".div-article-main2",
+      "itemSelector": ".release-grid2 > article.card2",
+      "linkSelector": "a[href]",
+      "linkTextFormat": "dmy-date-title",
+      "dateOrder": "dmy",
+      "calendar": "gregorian",
+      "allowUrlPrefixes": [
+        "https://www.northport.com.my/np/docs/Announcements"
+      ],
+      "dateRuleBasis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied."
+    },
+    "sourceEnabled": false,
+    "permission": "private complete raw replay only; sanitized bounded metadata committed, not raw HTML",
+    "actualHttpRequests": 0,
+    "rawBytes": 73037,
+    "rawSha256": "880e1a180dc686d9d9d71578a753ee87af24042563a7c58f82c0885f8d3c5691",
+    "expectedRawSha256": "880e1a180dc686d9d9d71578a753ee87af24042563a7c58f82c0885f8d3c5691",
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "default",
+      "declarations": [],
+      "conflict": false,
+      "byteLength": 73037
+    },
+    "adapter": {
+      "status": "failed",
+      "errorCode": "web_list_duplicate_conflict"
+    },
+    "first": {
+      "status": "failed",
+      "runId": "273462a6-033d-46cb-ac99-50387af3cb0f",
+      "errorCode": "web_list_duplicate_conflict",
+      "itemsCommitted": 0
+    },
+    "firstCounts": {
+      "items": {
+        "n": 0
+      },
+      "versions": {
+        "n": 0
+      }
+    },
+    "repeat": {
+      "status": "failed",
+      "runId": "ff94103d-bc30-460b-b6c3-8a6eda134e10",
+      "errorCode": "web_list_duplicate_conflict",
+      "itemsCommitted": 0
+    },
+    "repeatCounts": {
+      "items": {
+        "n": 0
+      },
+      "versions": {
+        "n": 0
+      }
+    },
+    "injectedTransports": 2,
+    "samples": [],
+    "allStoredDateEvidenceMatches": true,
+    "nativeDatabaseLocalOnly": "D:\\try one\\Shipping HOT\\.tmp\\r2-two-raw-dns-2026-10-14\\MY-P03-1791963018265.sqlite3",
+    "finishedAt": "2026-10-14T07:30:18.408Z"
+  },
+  {
+    "id": "TH-C01",
+    "startedAt": "2026-10-14T07:30:18.408Z",
+    "status": "OFFLINE_REPLAY_ONLY",
+    "config": {
+      "listSelector": "table.table-hover",
+      "itemSelector": "tbody > tr",
+      "linkSelector": "td:nth-child(3) a[href]",
+      "titleSelector": "td:nth-child(3) a[href]",
+      "publishedAtSelector": "td:nth-child(4)",
+      "calendar": "buddhist",
+      "dateFormat": "thai_month_name",
+      "allowUrlPrefixes": [
+        "https://www.customs.go.th/cont_strc_simple_with_date.php"
+      ],
+      "dateRuleBasis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied."
+    },
+    "sourceEnabled": false,
+    "permission": "private complete raw replay only; sanitized bounded metadata committed, not raw HTML",
+    "actualHttpRequests": 0,
+    "rawBytes": 123781,
+    "rawSha256": "96349dcd1383c8ed1e33b9ad7905f5355f4a6ff9c5528e065e13a09aae30398c",
+    "expectedRawSha256": "96349dcd1383c8ed1e33b9ad7905f5355f4a6ff9c5528e065e13a09aae30398c",
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "http",
+      "declarations": [
+        {
+          "source": "http",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        },
+        {
+          "source": "meta",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        }
+      ],
+      "conflict": false,
+      "byteLength": 123781
+    },
+    "adapter": {
+      "status": "parsed",
+      "count": 100,
+      "withLocalDay": 100,
+      "withInstant": 0,
+      "dateRules": [
+        "configured_thai_month_name_buddhist_minus_543"
+      ]
+    },
+    "first": {
+      "status": "ok_items",
+      "runId": "5b7b015c-907d-414d-ad70-0e77c3225584",
+      "itemsSeen": 100,
+      "itemsNew": 100,
+      "itemsRevised": 0
+    },
+    "firstCounts": {
+      "items": {
+        "n": 100
+      },
+      "versions": {
+        "n": 100
+      }
+    },
+    "repeat": {
+      "status": "ok_items",
+      "runId": "a1ebd663-ad13-427c-8ce5-ac0227cd06c8",
+      "itemsSeen": 100,
+      "itemsNew": 0,
+      "itemsRevised": 0
+    },
+    "repeatCounts": {
+      "items": {
+        "n": 100
+      },
+      "versions": {
+        "n": 100
+      }
+    },
+    "injectedTransports": 2,
+    "samples": [
+      {
+        "titleExcerpt": "วารสาร Asia/Pacific Customs News ฉบับที่ 78",
+        "canonicalUrl": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b48464b48&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+        "publishedAt": null,
+        "dateEvidence": {
+          "raw": "27 สิงหาคม 2569",
+          "rule": "configured_thai_month_name_buddhist_minus_543",
+          "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+          "calendar": "buddhist",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-08-27",
+          "publishedAt": null
+        },
+        "versionCount": 1,
+        "scope": "metadata_only",
+        "adapterToStoredIdentityMatch": true
+      },
+      {
+        "titleExcerpt": "รษก.ทปษ. ยุทธนา และคณะ เข้าร่วมประชุมกับคณะอนุกรรมาธิการพิจารณาศึกษาทบทวนระเบียบมาตรฐานอุตสาหกรรมปัจจุบันฯ",
+        "canonicalUrl": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b49464a4f&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+        "publishedAt": null,
+        "dateEvidence": {
+          "raw": "27 สิงหาคม 2569",
+          "rule": "configured_thai_month_name_buddhist_minus_543",
+          "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+          "calendar": "buddhist",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-08-27",
+          "publishedAt": null
+        },
+        "versionCount": 1,
+        "scope": "metadata_only",
+        "adapterToStoredIdentityMatch": true
+      },
+      {
+        "titleExcerpt": "ทปษ.กิจจาลักษณ์เข้าร่วมการประชุมหารือเกี่ยวกับ FTA Utilization and Customs Administration ร่วมกับคณะผู้แทน JETRO",
+        "canonicalUrl": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b49464b48&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+        "publishedAt": null,
+        "dateEvidence": {
+          "raw": "27 สิงหาคม 2569",
+          "rule": "configured_thai_month_name_buddhist_minus_543",
+          "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+          "calendar": "buddhist",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-08-27",
+          "publishedAt": null
+        },
+        "versionCount": 1,
+        "scope": "metadata_only",
+        "adapterToStoredIdentityMatch": true
+      },
+      {
+        "titleExcerpt": "สำนักงานพิทักษ์เขตแดนออสเตรเลีย (Australian Border Force:ABF) ได้ออกประกาศศุลกากรออสเตรเลีย ที่ 2026/29 >> เรื่อง การปรั",
+        "canonicalUrl": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b49464b4d&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+        "publishedAt": null,
+        "dateEvidence": {
+          "raw": "28 สิงหาคม 2569",
+          "rule": "configured_thai_month_name_buddhist_minus_543",
+          "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+          "calendar": "buddhist",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-08-28",
+          "publishedAt": null
+        },
+        "versionCount": 1,
+        "scope": "metadata_only",
+        "adapterToStoredIdentityMatch": true
+      },
+      {
+        "titleExcerpt": "การรับ Form AJ Japan แบบไฟล์ PDF จากประเทศญี่ปุ่น ภายใต้ความตกลง AJCEP",
+        "canonicalUrl": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b4a464b4a&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+        "publishedAt": null,
+        "dateEvidence": {
+          "raw": "28 สิงหาคม 2569",
+          "rule": "configured_thai_month_name_buddhist_minus_543",
+          "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+          "calendar": "buddhist",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-08-28",
+          "publishedAt": null
+        },
+        "versionCount": 1,
+        "scope": "metadata_only",
+        "adapterToStoredIdentityMatch": true
+      },
+      {
+        "titleExcerpt": "ทปษ. นันท์ฐิตาฯ และคณะ เข้าร่วมหารือแลกเปลี่ยนเกี่ยวกับสถานการณ์ ทิศทาง และนโยบายเศรษฐกิจของประเทศไทย",
+        "canonicalUrl": "https://www.customs.go.th/cont_strc_simple_with_date.php?current_id=14232b324147505f49464b4b464b46&ini_menu=menu_public_relations_160421_04&lang=th&left_menu=&top_menu=menu_homepage",
+        "publishedAt": null,
+        "dateEvidence": {
+          "raw": "28 สิงหาคม 2569",
+          "rule": "configured_thai_month_name_buddhist_minus_543",
+          "basis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied.",
+          "calendar": "buddhist",
+          "precision": "day",
+          "timezone": "missing",
+          "utcOffset": null,
+          "localDate": "2026-08-28",
+          "publishedAt": null
+        },
+        "versionCount": 1,
+        "scope": "metadata_only",
+        "adapterToStoredIdentityMatch": true
+      }
+    ],
+    "allStoredDateEvidenceMatches": true,
+    "nativeDatabaseLocalOnly": "D:\\try one\\Shipping HOT\\.tmp\\r2-two-raw-dns-2026-10-14\\TH-C01-1791963018408.sqlite3",
+    "finishedAt": "2026-10-14T07:30:18.923Z"
+  }
+]

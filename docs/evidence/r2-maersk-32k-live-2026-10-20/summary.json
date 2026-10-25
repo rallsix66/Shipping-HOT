@@ -1,0 +1,491 @@
+{
+  "type": "single_approved_real_sample_and_offline_structure_check",
+  "at": "2026-10-20T07:36:02.181Z",
+  "root": "D:\\try one\\Shipping HOT",
+  "branch": "codex/shipping-hot-r2",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "parentReview": {
+    "type": "independent_static",
+    "P1P2": "none_found",
+    "executorTestsNotRerunByParent": true,
+    "reviewedSourceFiles": [
+      {
+        "path": "server/services/article-fetch-security.ts",
+        "sha256": "76394e1864f99f02d28e41c358c94db1ce991ddfcabdde04c92e6135a25bc4da",
+        "matches": true
+      },
+      {
+        "path": "server/services/article-fetch-header-limit.test.ts",
+        "sha256": "07d5e81746b4c8c4936104a60eede7507f0816ec7bac345da15dfeca1baaf0de",
+        "matches": true
+      },
+      {
+        "path": "server/services/article-fetch-transport.test.ts",
+        "sha256": "00b4bfa822b6acade0b1a824eb8ccf58fba384544c413f12cda45fd2bf06d7a4",
+        "matches": true
+      }
+    ]
+  },
+  "request": {
+    "sourceId": "intel:xx-k01",
+    "target": "https://www.maersk.com/news",
+    "startedAt": "2026-10-20T07:28:29.935Z",
+    "receivedAt": "2026-10-20T07:28:30.700Z",
+    "finishedAt": "2026-10-20T07:28:30.739Z",
+    "DNS": 1,
+    "physicalGETReservations": 1,
+    "transportInvocations": 1,
+    "allDNSAddresses": [
+      {
+        "address": "23.204.139.71",
+        "family": 4,
+        "blocked": false
+      },
+      {
+        "address": "23.204.139.85",
+        "family": 4,
+        "blocked": false
+      }
+    ],
+    "sourceHeaderLimit": {
+      "sourceId": "intel:xx-k01",
+      "url": "https://www.maersk.com/news",
+      "maxHeaderSize": 32768
+    },
+    "forwardedHeaderLimit": 32768,
+    "nodeGlobalHeaderDefault": 16384,
+    "timeoutMs": 10000,
+    "maxBytes": 524288,
+    "maxRedirects": 0,
+    "retries": 0,
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bodyBytes": 46251,
+    "bodySha256": "9e7271c8d37da91032150dfff719de6fb7fd8d30426cfad50ae123e10fd72673",
+    "actualWireHeaderBytes": null,
+    "rawPath": ".tmp/r2-three-url-diagnostic-20261020/maersk/response-32k-20261020.bin",
+    "rawPrivateIgnored": true,
+    "completeHeadersOrRawPacketSaved": false,
+    "rawExit": 0,
+    "underlyingError": null,
+    "detailRequests": 0,
+    "attachments": 0,
+    "otherSourceRequests": 0,
+    "networkOrCAChanges": false
+  },
+  "fieldAudit": {
+    "expectedProduct": true,
+    "pureJSShell": false,
+    "groups": [
+      {
+        "group": "Latest news",
+        "count": 12
+      },
+      {
+        "group": "Advisories",
+        "count": 3
+      },
+      {
+        "group": "Rate announcements",
+        "count": 3
+      }
+    ],
+    "items": 18,
+    "uniqueURLs": 18,
+    "titleLinkOwnDatePresent": 18,
+    "missingFields": 0,
+    "conflictingIdentities": 0,
+    "rawArticleAnchors": 30,
+    "emptyImageAnchors": 12,
+    "displayedDateRange": {
+      "earliest": "2026-09-28",
+      "latest": "2026-10-20",
+      "counts": {
+        "2026-09-28": 1,
+        "2026-09-30": 1,
+        "2026-10-07": 3,
+        "2026-10-08": 2,
+        "2026-10-13": 1,
+        "2026-10-14": 1,
+        "2026-10-16": 1,
+        "2026-10-19": 7,
+        "2026-10-20": 1
+      },
+      "all2026": true,
+      "newestSameGregorianDayAsCapture": true,
+      "publicationFreshnessOrUTCCertified": false
+    },
+    "timezone": null,
+    "publicationInstant": null,
+    "dateRole": "unlabelled_card_display_date"
+  },
+  "existingParser": {
+    "probeRawExit": 0,
+    "probeTestsPassed": 1,
+    "entries": 18,
+    "dateRules": {
+      "unsupported_format": 18
+    },
+    "publicationInstant": null,
+    "independentTitleURLRawDateComparisons": 18,
+    "mismatches": 0,
+    "sourceNetworkCalls": 0,
+    "DBWrites": 0
+  },
+  "preservation": {
+    "checks": [
+      {
+        "path": "package.json",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/tsx-alias-loader.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-collect-job.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-environment.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-options.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-worker.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation-network.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation-network.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/web-list.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/config-keys.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/web-list-english-12h.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/html-index-candidates.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/services/article-fetch-security.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/manual-checklist.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/services/bmkg-port-forecast.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/services/bmkg-port-forecast.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": ".data/calendarific-double-year-verification-20260908-b.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/calendarific-double-year-verification-20260908.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/p7-final-seal-20260904.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/provider-secrets.json",
+        "unchanged": true
+      },
+      {
+        "path": ".data/shipping-hot-v3-browser.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-https-abb1b99-20261019/run/.data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-manual-6087a16/run/.data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/dist/output/server/index.mjs",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/r2-four-reapplied-2026-10-15-private/MY-L01.response.bin",
+        "unchanged": true
+      },
+      {
+        "path": ".gitignore",
+        "unchanged": true
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "unchanged": true
+      },
+      {
+        "path": "AGENTS.md",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/content.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/manifest.json",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/popup.html",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/worker.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-aVjAIvTt.css",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-DHU7aOx9.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/defuddle-MIT.txt",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/obsidian-clipper-MIT.txt",
+        "unchanged": true
+      },
+      {
+        "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "unchanged": true
+      },
+      {
+        "path": "docs/intel-source-catalog.md",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/r2-qualification-vnp01-20261020/response.bin",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/id-w02-xj001-20261020/response.bin",
+        "unchanged": true
+      },
+      {
+        "path": "server/services/article-fetch-header-limit.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/services/article-fetch-transport.test.ts",
+        "unchanged": true
+      }
+    ],
+    "reviewedSourceUnchanged": true
+  },
+  "sourceQualification": {
+    "public": "26/39",
+    "information": "24/34",
+    "numeric": "historical3 limited diagnostics + new1 complete original offline parse",
+    "changed": false
+  },
+  "productGateThisRound": "NOT_RUN_NO_PRODUCT_CHANGES_PREVIOUS_ACCEPTED_GATE_RETAINED",
+  "previousGate": {
+    "targeted": 92,
+    "fullPassed": 1727,
+    "skipped": 3,
+    "scope": "executor evidence; parent static review"
+  },
+  "DBWrites": 0,
+  "runtimeEnabled": false,
+  "PPA_MOFCOM": "new screenshot followed by single scoped readonly diagnosis; generated contains both; no website requests/config writes",
+  "continuous24h": "NOT_RUN",
+  "R3": "NOT_RUN",
+  "commitPushPRMergeDeploy": 0,
+  "warnings": [
+    "Existing global Git ignore read permission warning",
+    "Existing Node loader and auto-import warnings"
+  ],
+  "cleanup": "no deletion, preserve all raw/metadata/logs",
+  "finalAudit": {
+    "status": "local_evidence_closeout_complete_with_pending_OS_process_read",
+    "at": "2026-10-20T07:45:34.471Z",
+    "inventory": {
+      "skill": "e0/neat-freak",
+      "path": ".tmp/maersk-32k-live-20261020/neat-inventory.log",
+      "rawExit": 0,
+      "sha256": "99d8c73f7238d9f96fbb16fd76be2e9e3c5fdaf149345b56606da00b5c67bac7",
+      "markdownEntries": 8274
+    },
+    "docLint": {
+      "rawExit": 0,
+      "log": ".tmp/maersk-32k-live-20261020/docs-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "links": {
+      "checked": 158,
+      "broken": []
+    },
+    "diffCheck": {
+      "rawExit": 0,
+      "log": ".tmp/maersk-32k-live-20261020/diff-check.log"
+    },
+    "preservation": {
+      "existingFilesUnchanged": 47,
+      "reviewedSourceSHAUnchanged": true,
+      "architectureOtherBytesPreserved": true,
+      "statusOriginalBytesPreserved": true,
+      "HEADUnchanged": true,
+      "stagedEmpty": true,
+      "statusEntries": 45,
+      "log": ".tmp/maersk-32k-live-20261020/final-git-status.log",
+      "rawIgnored": true,
+      "rawTracked": false
+    },
+    "docs": [
+      {
+        "path": "docs/status.md",
+        "sha256": "e5094e0becb9534e98c9e79278e335ba2d8c8dcf06d45b93c8338623a49451b0"
+      },
+      {
+        "path": "docs/architecture.md",
+        "sha256": "c78c5a22a0a9c76f204362951a0c5e96a67e953347b42bbb224f14720ca2a177"
+      },
+      {
+        "path": "docs/evidence/r2-maersk-32k-live-2026-10-20/report.md",
+        "sha256": "d79b0c0550be04498a4db1bb4a70e45a7e7e9faae61b873cb69993b7fd87e928"
+      },
+      {
+        "path": "docs/evidence/r2-maersk-32k-live-2026-10-20/closeout.md",
+        "sha256": "87ff5bbe586cc3320e01d74b2d18fa81b047703428d7e5b4a3752f8e25abf6ab"
+      },
+      {
+        "path": "docs/evidence/r2-maersk-32k-live-2026-10-20/clash-readonly-report.md",
+        "sha256": "7d755ecde72ee6e9b1c51d2fe3a534c93222975d075d92113ba0343ee9067058"
+      }
+    ],
+    "evidence": [
+      {
+        "path": "docs/evidence/r2-maersk-32k-live-2026-10-20/request-ledger.json",
+        "sha256": "42118580cd6d00f30a7d619d0b805e6019d7ebd5896412ad9cb4a2a80c1dfc3b"
+      },
+      {
+        "path": "docs/evidence/r2-maersk-32k-live-2026-10-20/field-audit.json",
+        "sha256": "0761dd5f20b0c737bb8af08e0ec28dba68897bdfc1a6cbf2688c2ec041e6af82"
+      },
+      {
+        "path": "docs/evidence/r2-maersk-32k-live-2026-10-20/parser-probe.json",
+        "sha256": "7bac03a259756b25af39ca6e2b4eeb77a04a4f664ba9a041f2d18bca747aa461"
+      },
+      {
+        "path": "docs/evidence/r2-maersk-32k-live-2026-10-20/clash-dns-readonly.json",
+        "sha256": "a6f432f537af66f962d1ac80ef3bf46b46dcdc58f8f85e1d070d461025e32137"
+      }
+    ],
+    "rules": {
+      "AGENTSUnchanged": true,
+      "bytes": 28170,
+      "default32KiBBudgetFraction": 0.85968017578125
+    },
+    "generatedMemory": "read-only",
+    "sourceRequests": {
+      "MaerskDNS": 1,
+      "MaerskGET": 1,
+      "retries": 0,
+      "follows": 0,
+      "details": 0,
+      "otherSites": 0
+    },
+    "clashDiagnosis": {
+      "oneReadonlySnapshot": true,
+      "siteRequests": 0,
+      "configWrites": 0,
+      "generatedTargetsPresent": true,
+      "DNSOverrideEnabled": false,
+      "activeCorePath": "pending; OS denied process query; no retry"
+    },
+    "blockedActions": [
+      {
+        "action": "Read filtered Clash/Mihomo process executable/config -f/-d path metadata with Get-CimInstance",
+        "target": "local Win32_Process metadata",
+        "reason": "OS access denied",
+        "completed": "installed version and scoped file/association/DNS snapshot obtained independently; no process metadata",
+        "status": "DENIED; runtime active file path pending",
+        "retried": false
+      }
+    ],
+    "pending": [
+      "parent review of single real sample and minimum date/config adaptation",
+      "18 existing generic parser dates remain unsupported_format; no source qualification update",
+      "runtime core file/load state unverified due denied process query",
+      "overall GUI/S7 and24h unaccepted; R3 paused"
+    ],
+    "cleanup": "no deletion; all response bytes, before snapshots, metadata and logs retained"
+  },
+  "clashReadOnly": {
+    "at": "2026-10-20T07:40:19.090Z",
+    "version": "2.5.8",
+    "enable_dns_settings": false,
+    "generatedPath": "C:\\Users\\Administrator\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev\\clash-verge.yaml",
+    "generatedMtimeUTC": "2026-10-20T07:32:13.019Z",
+    "generatedTargetCounts": {
+      "www.ppa.com.ph": 1,
+      "www.mofcom.gov.cn": 1
+    },
+    "original27Preserved": true,
+    "totalFilterItems": 29,
+    "applicationDNSFilterItems": 10,
+    "applicationDNSSubtreeEqualToGenerated": false,
+    "processRead": {
+      "status": "DENIED_BY_OS",
+      "action": "Get-CimInstance Win32_Process, selected Clash/Mihomo processes, executable metadata and only -f/-d config path flags",
+      "reason": "access denied; no process metadata obtained",
+      "retried": false,
+      "activeCoreConfigPath": "pending"
+    },
+    "changes": 0,
+    "siteRequests": 0
+  }
+}

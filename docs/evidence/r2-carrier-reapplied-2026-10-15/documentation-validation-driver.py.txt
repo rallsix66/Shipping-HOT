@@ -1,0 +1,32 @@
+from pathlib import Path
+from datetime import datetime, timezone
+import json,subprocess,shutil,re
+
+out=Path('docs/evidence/r2-current-source-matrix-2026-10-14')
+commands=json.loads((out/'commands.json').read_text(encoding='utf-8'))['commands'] if (out/'commands.json').exists() else []
+def run(args,label):
+    started=datetime.now(timezone.utc).isoformat()
+    r=subprocess.run(args,capture_output=True)
+    def decode(b):
+        try:return b.decode('utf-8')
+        except UnicodeDecodeError:return b.decode('gb18030')
+    rec={'label':label,'command':args,'startedAt':started,'finishedAt':datetime.now(timezone.utc).isoformat(),'stdout':decode(r.stdout),'stderr':decode(r.stderr),'rawExit':r.returncode}
+    commands.append(rec);print(json.dumps({'label':label,'rawExit':r.returncode,'stdoutTail':rec['stdout'][-1200:],'stderrTail':rec['stderr'][-800:]},ensure_ascii=True));return r
+
+changed=subprocess.run(['git','diff','--name-only'],capture_output=True,text=True).stdout.splitlines()
+batch=Path('docs/evidence/r2-carrier-reapplied-2026-10-15')
+extra=[batch]
+targets=['docs/handoffs/r2-next-execution-2026-10-15.md']+[p for p in changed if p.endswith(('.md','.json'))]+[p.as_posix() for p in out.glob('*') if p.suffix in ['.md','.json']]+[p.as_posix() for d in extra for p in d.glob('*') if p.suffix in ['.md','.json']]
+lint=run([shutil.which('node') or 'node','node_modules/eslint/bin/eslint.js',*targets],'docs_lint_direct_installed_node_no_fix')
+diff=run(['git','diff','--check'],'tracked_diff_whitespace')
+scan_targets=[out/'mapping.json',out/'report.md',out/'build-matrix.py.txt',out/'closeout.md']+[p for d in extra for p in d.iterdir() if p.is_file()]+[Path('docs/handoffs/r2-next-execution-2026-10-15.md')]
+patterns=[re.compile(r'\bsk-[A-Za-z0-9_-]{20,}\b'),re.compile(r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----'),re.compile(r'(?i)(?:api[_-]?key|authorization|cookie)\s*[:=]\s*["\x27]([A-Za-z0-9._/-]{20,})')]
+control='sk-'+'SYNTHETIC_CONTROL_'+'A'*24
+positive=any(p.search(control) for p in patterns)
+hits=[{'file':str(p),'patternIndex':i} for p in scan_targets for i,rx in enumerate(patterns) if rx.search(p.read_text(encoding='utf-8'))]
+scan={'scope':'Current matrix/report/builder/closeout, this carrier batch evidence and requested handoff only; no historic-third-party/full-project safety claim','syntheticPositiveControlDetected':positive,'valueHits':hits,'rawExit':0 if positive and not hits else 1}
+(out/'metadata-scan.json').write_bytes((json.dumps(scan,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
+validation=run([shutil.which('python') or 'python','.tmp/validate-current-r2-matrix.py'],'matrix_structural_evidence_validation')
+(out/'commands.json').write_bytes((json.dumps({'type':'docs_only_commands','evidenceBaseline':json.loads((out/'mapping.json').read_text(encoding='utf-8'))['evidenceHead'],'commands':commands,'metadataScan':scan,'initialInventoryRawExit':127,'finalInventoryRawExit':0,'functionalGates':'NOT_RUN_this_docs_only_round; accepted gate355952c preserved separately','initialDocValidationFailures':'Historical initial validator syntax/header issues were corrected; local intermediate logs retained.'},ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
+shutil.copyfile('.tmp/validate-current-r2-matrix.py',out/'validate-matrix.py.txt')
+raise SystemExit(0 if lint.returncode==diff.returncode==scan['rawExit']==validation.returncode==0 else 1)

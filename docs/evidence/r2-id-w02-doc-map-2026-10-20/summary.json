@@ -1,0 +1,466 @@
+{
+  "at": "2026-10-20T03:29:58.305Z",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "root": "D:\\try one\\Shipping HOT",
+  "scope": "official_apidoc_and_exact_location_index_only",
+  "captures": [
+    {
+      "step": "docs",
+      "target": "https://maritim.bmkg.go.id/apidoc",
+      "startedAt": "2026-10-20T03:23:54.736Z",
+      "DNS": 1,
+      "HTTPReservations": 1,
+      "transportInvocations": 1,
+      "addresses": [
+        {
+          "address": "104.20.20.136",
+          "family": 4,
+          "blocked": false
+        },
+        {
+          "address": "172.66.159.70",
+          "family": 4,
+          "blocked": false
+        }
+      ],
+      "response": {
+        "status": 200,
+        "contentType": "text/html;charset=utf-8",
+        "location": null,
+        "bytes": 148259,
+        "sha256": "9e93a3e44829174d6ef9e660b0fbd80e021d0d2a6fae09fce093650c2130e0a3",
+        "receivedAt": "2026-10-20T03:23:55.586Z"
+      },
+      "underlyingError": null,
+      "finishedAt": "2026-10-20T03:23:55.599Z",
+      "result": {
+        "ok": true,
+        "status": 200,
+        "finalUrl": "https://maritim.bmkg.go.id/apidoc",
+        "contentType": "text/html;charset=utf-8",
+        "decoding": {
+          "encoding": "utf-8",
+          "selectedBy": "http",
+          "declarations": [
+            {
+              "source": "http",
+              "label": "utf-8",
+              "encoding": "utf-8"
+            },
+            {
+              "source": "meta",
+              "label": "utf-8",
+              "encoding": "utf-8"
+            }
+          ],
+          "conflict": false,
+          "byteLength": 148259
+        },
+        "hops": 0
+      },
+      "retries": 0,
+      "details": 0,
+      "forecastProductRequests": 0,
+      "paidCalls": 0,
+      "rawRedistributed": false,
+      "rawExit": 0,
+      "log": {
+        "path": ".tmp/id-w02-doc-map-20261020/docs-capture.log",
+        "sha256": "d43132ca226492bdabcef62d91ef2f174f7640d6e7b2f57b02c7d34dd976a0de"
+      }
+    },
+    {
+      "step": "province",
+      "target": "https://maritim.bmkg.go.id/marine2026-data/meta/port_province.json",
+      "startedAt": "2026-10-20T03:25:47.670Z",
+      "DNS": 1,
+      "HTTPReservations": 1,
+      "transportInvocations": 1,
+      "addresses": [
+        {
+          "address": "104.20.20.136",
+          "family": 4,
+          "blocked": false
+        },
+        {
+          "address": "172.66.159.70",
+          "family": 4,
+          "blocked": false
+        }
+      ],
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "location": null,
+        "bytes": 132947,
+        "sha256": "299fc83669ca506b42d66ddee3444844ea589b66bff29cc39516e65244e97b1a",
+        "receivedAt": "2026-10-20T03:25:48.459Z"
+      },
+      "underlyingError": null,
+      "finishedAt": "2026-10-20T03:25:48.465Z",
+      "result": {
+        "ok": true,
+        "status": 200,
+        "finalUrl": "https://maritim.bmkg.go.id/marine2026-data/meta/port_province.json",
+        "contentType": "application/json",
+        "decoding": {
+          "encoding": "utf-8",
+          "selectedBy": "default",
+          "declarations": [],
+          "conflict": false,
+          "byteLength": 132947
+        },
+        "hops": 0
+      },
+      "retries": 0,
+      "details": 0,
+      "forecastProductRequests": 0,
+      "paidCalls": 0,
+      "rawRedistributed": false,
+      "rawExit": 0,
+      "log": {
+        "path": ".tmp/id-w02-doc-map-20261020/province-capture.log",
+        "sha256": "e141c3eb1d7705e683d0e5b9f5a1c98eb05f372794aba3d81f2343de3f05efe7"
+      }
+    }
+  ],
+  "ledger": {
+    "reservations": [
+      {
+        "step": "docs",
+        "target": "https://maritim.bmkg.go.id/apidoc",
+        "at": "2026-10-20T03:23:54.854Z"
+      },
+      {
+        "step": "province",
+        "target": "https://maritim.bmkg.go.id/marine2026-data/meta/port_province.json",
+        "at": "2026-10-20T03:25:47.678Z"
+      }
+    ],
+    "DNSCalls": [
+      {
+        "step": "docs",
+        "at": "2026-10-20T03:23:54.737Z"
+      },
+      {
+        "step": "province",
+        "at": "2026-10-20T03:25:47.671Z"
+      }
+    ]
+  },
+  "mapping": {
+    "generatedAt": "2026-10-20T03:27:36.632Z",
+    "sourceURL": "https://maritim.bmkg.go.id/marine2026-data/meta/port_province.json",
+    "sourceSha256": "299fc83669ca506b42d66ddee3444844ea589b66bff29cc39516e65244e97b1a",
+    "sourceBytes": 132947,
+    "rootShape": "{data: [{province, ports:[{id,name,lat,lon},...]}]}",
+    "provinceCount": 37,
+    "portCount": 659,
+    "targetMatches": [
+      {
+        "path": "$.data[6].ports[0]",
+        "province": "DK Jakarta",
+        "id": "XJ001",
+        "name": "Pelabuhan Tanjung Priok",
+        "lat": -6.103879776,
+        "lon": 106.882294878
+      }
+    ],
+    "uniqueExactTarget": true,
+    "mappingVerdict": "VERIFIED_LOCAL_OFFICIAL_METADATA_ID_NAME_PROVINCE_ONLY",
+    "forecastProductURLCandidate": "https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json",
+    "candidateDerivation": "actual documented GET /pelabuhan/{KODE}.json plus actual official metadata id XJ001; product not requested",
+    "forecastProductCodeFinallyVerified": false,
+    "officialMainPage": {
+      "URL": "https://www.bmkg.go.id/cuaca/maritim/pelabuhan/XJ001",
+      "basis": "parent official-page research identifies Tanjung Priok; NOT requested in this local round"
+    },
+    "contract": {
+      "base": "https://maritim.bmkg.go.id/marine2026-data/",
+      "method": "GET",
+      "metadataTemplate": "/meta/{file}",
+      "portTemplate": "/pelabuhan/{KODE}.json",
+      "metaFileNamesDocumented": [
+        "port_province.json",
+        "pelabuhan.json"
+      ],
+      "forecastTime": "UTC, YYYY-MM-DD HH:00 UTC; valid time, not publication time",
+      "day1": "hourly, 24 points 00..23 UTC",
+      "day2To4": "3-hourly",
+      "units": {
+        "waveHeight": "m",
+        "windAndGustSpeed": "knot",
+        "currentSpeed": "knot",
+        "visibility": "km",
+        "temperature": "Celsius",
+        "relativeHumidity": "percent",
+        "tide": "m"
+      },
+      "geoJSONCoordinates": "[longitude,latitude] WGS84; independent of index named lat/lon fields",
+      "authentication": "meta section says no authentication headers; no credentials supplied",
+      "sourceRawLicense": "no redistribution/full-text permission inferred from availability"
+    },
+    "unverified": [
+      "real single-port response/status/content-type/schema",
+      "forecast field names/nullable values/quality codes and period arrays",
+      "issued/update time versus valid time and freshness",
+      "numeric parsing/unit normalization and range checks",
+      "collector/repository persistence/dedupe/restart and retained-data impact",
+      "provider activation/runtime/continuous24h"
+    ],
+    "noNeedForAdditionalLocationIndexForThisTarget": true,
+    "nextIndexIfNeededLater": "https://maritim.bmkg.go.id/marine2026-data/meta/pelabuhan.json (documented, not requested)",
+    "forecastRequests": 0,
+    "qualificationChanged": false
+  },
+  "protectedFiles": [
+    {
+      "path": ".data/calendarific-double-year-verification-20260908-b.sqlite3",
+      "sha256": "4029ff8075eb78dfa1a806d5d24f443514a12f8d9d15d38d92aef06a7e9a7c3d",
+      "unchanged": true
+    },
+    {
+      "path": ".data/calendarific-double-year-verification-20260908.sqlite3",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unchanged": true
+    },
+    {
+      "path": ".data/p7-final-seal-20260904.sqlite3",
+      "sha256": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+      "unchanged": true
+    },
+    {
+      "path": ".data/provider-secrets.json",
+      "sha256": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1",
+      "unchanged": true
+    },
+    {
+      "path": ".data/shipping-hot-v3-browser.sqlite3",
+      "sha256": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+      "unchanged": true
+    },
+    {
+      "path": ".data/shipping-hot-v3.sqlite3",
+      "sha256": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-https-abb1b99-20261019/run/.data/shipping-hot-v3.sqlite3",
+      "sha256": "023ef5c603ac2ff8282149ad0cd281911d96dbbffbe7ead0cd64dafeb370a025",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-manual-6087a16/run/.data/shipping-hot-v3.sqlite3",
+      "sha256": "c4292b3c18076d38838b1533d51b1f99c03b59b8d42a1de3818338eec4eb5d91",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/dist/output/server/index.mjs",
+      "sha256": "c55b32d9d6a69e31ec6e939f9791be3f2c62704c9704c6466e21af98e3d7c763",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/r2-four-reapplied-2026-10-15-private/MY-L01.response.bin",
+      "sha256": "9e9787d4cf60f454824a0529787b1d345a2814ac45f91a957ff1d8b57c1cb310",
+      "unchanged": true
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+      "sha256": "d7b70b273454925249610db514b21064551b130c6a5061398f9b457419d584eb",
+      "unchanged": true
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "5cb2122a9e9c62ceee2253251feeeb39bdae11fc8a0796dc33e8dfbfd875d67e",
+      "unchanged": true
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "68638a3267a597e7d4e16d336f5f56c8fca2ff657700b97605c0d2847dfb324c",
+      "unchanged": true
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "0729f86b64546824c66b248bb6679d120b0e18245fabffb3eb61c9f657c623d7",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/content.js",
+      "sha256": "12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/manifest.json",
+      "sha256": "8d2cc507bd632cbe95a740aee6a2f7801e3c07c079a787aa77b34dcbddae67e8",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/popup.html",
+      "sha256": "2d2bf242cf996d12ab286226bc55cf5c6668c3dc1d2d80054b06d80f4bad86b9",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/worker.js",
+      "sha256": "cd60d4fd354e043235a57ca67d808b6e008bac9369fab6ce436d5d7ac3291638",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-aVjAIvTt.css",
+      "sha256": "8a2411b56c91c16e429d97f0d5fe6de4556b718846ca7997d098bb3885dd68db",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-DHU7aOx9.js",
+      "sha256": "058f037b30b5b2c1953d2c196afa69906c5c40a487206178efb881e1910c8e56",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/defuddle-MIT.txt",
+      "sha256": "c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092",
+      "unchanged": true
+    },
+    {
+      "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/obsidian-clipper-MIT.txt",
+      "sha256": "3ca04f8f046005103b08302723521f546605a34a269d5a867a82d200dfd9c0d7",
+      "unchanged": true
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "package.json",
+      "sha256": "32716b71ba5f3d807d141fb41373eacbedebc99fac727514dd59abb56e295196",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/tsx-alias-loader.mjs",
+      "sha256": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-collect-job.ts",
+      "sha256": "fa4b84348a2c77f9952f5d9ad9181b0ba092ba7cd995ceffa4cd93558d2110e2",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-environment.ts",
+      "sha256": "1100f875229b901f5a8b5fc32108afc593f4671f880461009d4e880142aa1d23",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-options.ts",
+      "sha256": "09b5e5f5b68879bf835d73b7b5b4b9c0064a09ca17049d0f3300c8900c53f5e8",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe-worker.ts",
+      "sha256": "47dbb370b05c717feed2928a0afaf4236eb8fec7186bc5ae514b7ac4da4870f7",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.test.ts",
+      "sha256": "3e442d363e6a3b766199f102c6c47a18584a2b847f95497763086c5507a97066",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/r2-intel-observe.ts",
+      "sha256": "453f9585ca9886dac1cd3be93a8926be231db8e2777bb4d735ca784ae5a04224",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.test.ts",
+      "sha256": "361168e5fb7339bde62a69f85d75400218e290967a88ae03f30b875ff3739e75",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation-network.ts",
+      "sha256": "d9ebacb53672da980f26ef5729bdad5dc1005502d2ca57d30cd735c2dc73b006",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation.test.ts",
+      "sha256": "24212377dbefe7fbc6dbdf4286e19df6e5356d3bea4913123d835c353f002774",
+      "unchanged": true
+    },
+    {
+      "path": "server/runtime/intel-observation.ts",
+      "sha256": "3fe8dc71e2107eb4c9b26378726b98229a3702438f69d7063afb55e7bd789019",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/web-list.ts",
+      "sha256": "86f893311fb3c3d8c65256d1e6709acd547658b8cd3e71499900229ec26f75b5",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/config-keys.ts",
+      "sha256": "2efbb61e1ab1e19bb349853a65a7b79bd080ab073420c28a645e56f95a8be620",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/web-list-english-12h.test.ts",
+      "sha256": "c37a3b958a769a415b0775ce997198e1a42819c6652724e3f623306d02eff5b9",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/sources/html-index-candidates.ts",
+      "sha256": "64e674df2a6acd2f0cb6b3a51387a099c1052413de0ad984f481236533de2b3c",
+      "unchanged": true
+    },
+    {
+      "path": "server/services/article-fetch-security.ts",
+      "sha256": "967b106148c5d2dfcd6388b4602a4b9055d3732a9fa4a49d32c69aabb310d2a4",
+      "unchanged": true
+    },
+    {
+      "path": "server/intel/manual-checklist.ts",
+      "sha256": "b1802fe28a487ef9edecc95a976cee706f7903f4d24eeb43cf037d133a589329",
+      "unchanged": true
+    }
+  ],
+  "productDiff": "EMPTY",
+  "productGate": "NOT_RUN_NO_PRODUCT_CODE_OR_TEST_CHANGE",
+  "sourceQualificationChanged": false,
+  "coverage": {
+    "public": "25/39",
+    "information": "24/34",
+    "historicalNumeric": "3/5"
+  },
+  "rawPrivateOnly": [
+    ".tmp/id-w02-doc-map-20261020/docs-response.bin",
+    ".tmp/id-w02-doc-map-20261020/province-response.bin"
+  ],
+  "notRun": [
+    "forecast_product",
+    "extra_location_index",
+    "CN_T01_config_poll_or_DNS_HTTP",
+    "Clash_DNS_CA_change",
+    "browser",
+    "24h_R3_paid",
+    "schema_source_activation_service_plugin_change",
+    "commit_push_PR_merge_deploy"
+  ],
+  "cleanup": "none",
+  "review": "PENDING_PARENT",
+  "finalAudit": {
+    "at": "2026-10-20T03:30:37.533Z",
+    "head": "40629587e22d8932df105962ec214530e4054414",
+    "productDiff": "EMPTY_THIS_ROUND",
+    "protectedUnchanged": 22,
+    "sourceUnchanged": 18,
+    "sourceDNSCalls": 2,
+    "physicalGETs": 2,
+    "forecastGETs": 0,
+    "retries": 0,
+    "redirects": 0,
+    "sourceRawOnlyIgnored": true,
+    "invalidLinks": [],
+    "docsLintRawExit": 0,
+    "inventoryRawExit": 0,
+    "markdownCount": 7776,
+    "stagedFiles": [],
+    "status": "M .gitignore\n M docs/architecture.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/pilot-24h-proposal.md\n M docs/evidence/r2-final-reuse-audit-2026-10-15/report.md\n M docs/handoffs/r2-next-execution-2026-10-15.md\n M docs/intel-source-catalog.md\n M docs/status.md\n M package.json\n M scripts/tsx-alias-loader.mjs\n M server/intel/manual-checklist.ts\n M server/intel/sources/config-keys.ts\n M server/intel/sources/web-list.ts\n M server/runtime/intel-collect-job.ts\n?? docs/evidence/r2-clip-copy-clash-2026-10-20/\n?? docs/evidence/r2-closeout-offline-2026-10-20/\n?? docs/evidence/r2-cn-t01-after-apply-2026-10-20/\n?? docs/evidence/r2-cn-t01-https-2026-10-20/\n?? docs/evidence/r2-id-w02-doc-map-2026-10-20/\n?? docs/evidence/r2-mofcom-host-append-2026-10-20/\n?? docs/evidence/r2-observation-env-repair-2026-10-19/\n?? docs/evidence/r2-observation-launcher-offline-2026-10-19/\n?? scripts/r2-intel-observe-environment.ts\n?? scripts/r2-intel-observe-options.ts\n?? scripts/r2-intel-observe-worker.ts\n?? scripts/r2-intel-observe.test.ts\n?? scripts/r2-intel-observe.ts\n?? server/intel/sources/web-list-english-12h.test.ts\n?? server/runtime/intel-observation-network.test.ts\n?? server/runtime/intel-observation-network.ts\n?? server/runtime/intel-observation.test.ts\n?? server/runtime/intel-observation.ts",
+    "cleanup": "none",
+    "path": ".tmp/id-w02-doc-map-20261020/final-audit.json",
+    "sha256": "7e3a12c86583d92a06394e22827d5a40c3773a51a8ddf08644b7558d5cb7bf1e"
+  }
+}

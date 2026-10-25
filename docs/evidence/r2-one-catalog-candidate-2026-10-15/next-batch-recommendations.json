@@ -1,0 +1,89 @@
+{
+  "type": "at_most_three_evidence_based_recommendations",
+  "basis": "Current accepted matrix plus stored genuine RSS metadata; no new probe, no repeat of concluded failed investigations",
+  "entries": [
+    {
+      "id": "MY-C01",
+      "url": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
+      "status": "PROPOSED_ONLY_NOT_EXECUTED",
+      "currentR2_4": "OK",
+      "currentR2_5": "NOT_RUN",
+      "storedActualHttpStatus": 200,
+      "storedActualAt": "2026-10-13T07:00:30.791Z",
+      "storedParsedItems": 10,
+      "storedCompleteTitleLinkTime": 10,
+      "reusableEvidence": {
+        "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+        "selector": {
+          "id": "MY-C01"
+        },
+        "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+        "hashBasis": "committed_text_LF"
+      },
+      "reusableImplementation": "Existing RSS Feed parser, secure byte transport/decoder, collector, metadata-only SQLite versions and read-only reopen harness",
+      "gap": "Full original XML was not retained; stored metadata/hash is not a real raw replay. Need original XML -> collector -> idempotency -> read-only field comparison with explicit source-date semantics.",
+      "license": "Unknown full-body reuse; metadata_only, raw XML private ignored only if separately authorized; never reconstruct raw XML from metadata.",
+      "expectedBenefit": "At most one additional R2-5 pass if qualified; already R2-4 OK so no new availability numerator",
+      "futurePrerequisite": "Separate bounded next round; read-only config/safety DNS check then at most one exact GET each if approved. No probe or source configuration change in this recommendation.",
+      "thisRoundDnsCalls": 0,
+      "thisRoundHttpRequests": 0
+    },
+    {
+      "id": "MY-T01",
+      "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+      "status": "PROPOSED_ONLY_NOT_EXECUTED",
+      "currentR2_4": "OK",
+      "currentR2_5": "NOT_RUN",
+      "storedActualHttpStatus": 200,
+      "storedActualAt": "2026-10-13T07:00:35.340Z",
+      "storedParsedItems": 6,
+      "storedCompleteTitleLinkTime": 6,
+      "reusableEvidence": {
+        "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+        "selector": {
+          "id": "MY-T01"
+        },
+        "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+        "hashBasis": "committed_text_LF"
+      },
+      "reusableImplementation": "Existing RSS Feed parser, secure byte transport/decoder, collector, metadata-only SQLite versions and read-only reopen harness",
+      "gap": "Full original XML was not retained; stored metadata/hash is not a real raw replay. Need original XML -> collector -> idempotency -> read-only field comparison with explicit source-date semantics.",
+      "license": "Unknown full-body reuse; metadata_only, raw XML private ignored only if separately authorized; never reconstruct raw XML from metadata.",
+      "expectedBenefit": "At most one additional R2-5 pass if qualified; already R2-4 OK so no new availability numerator",
+      "futurePrerequisite": "Separate bounded next round; read-only config/safety DNS check then at most one exact GET each if approved. No probe or source configuration change in this recommendation.",
+      "thisRoundDnsCalls": 0,
+      "thisRoundHttpRequests": 0
+    },
+    {
+      "id": "PH-M01",
+      "url": "https://portcalls.com/feed/",
+      "status": "PROPOSED_ONLY_NOT_EXECUTED",
+      "currentR2_4": "OK",
+      "currentR2_5": "NOT_RUN",
+      "storedActualHttpStatus": 200,
+      "storedActualAt": "2026-10-13T07:00:29.490Z",
+      "storedParsedItems": 10,
+      "storedCompleteTitleLinkTime": 10,
+      "reusableEvidence": {
+        "path": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+        "selector": {
+          "id": "PH-M01"
+        },
+        "sha256": "580a4271b91c205e26d738054613b48d6714e82d28d8fcbcd4e6a922677031c7",
+        "hashBasis": "committed_text_LF"
+      },
+      "reusableImplementation": "Existing RSS Feed parser, secure byte transport/decoder, collector, metadata-only SQLite versions and read-only reopen harness",
+      "gap": "Full original XML was not retained; stored metadata/hash is not a real raw replay. Need original XML -> collector -> idempotency -> read-only field comparison with explicit source-date semantics.",
+      "license": "Unknown full-body reuse; metadata_only, raw XML private ignored only if separately authorized; never reconstruct raw XML from metadata.",
+      "expectedBenefit": "At most one additional R2-5 pass if qualified; already R2-4 OK so no new availability numerator",
+      "futurePrerequisite": "Separate bounded next round; read-only config/safety DNS check then at most one exact GET each if approved. No probe or source configuration change in this recommendation.",
+      "thisRoundDnsCalls": 0,
+      "thisRoundHttpRequests": 0
+    }
+  ],
+  "maximumPotentialR2_5": "13/34 ->16/34 only if all3 full original XML replays qualify",
+  "r2_4Remains": "21/39; these three already OK, public shortfall11 not reduced",
+  "notAuthorizedByThisFile": "No live DNS/HTTP/activation; exact execution and source scope must be coordinated by parent",
+  "sourceDnsCalls": 0,
+  "sourceHttpRequests": 0
+}

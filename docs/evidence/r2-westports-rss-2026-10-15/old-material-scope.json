@@ -1,0 +1,10 @@
+{
+  "oldEvidence": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/batch-results.json",
+  "id": "MY-P02",
+  "rawStructureFixtureRetained": false,
+  "oldDerivative": "docs/evidence/r2-bounded-rss-after-dns-2026-10-13/MY-P02-metadata.json",
+  "oldDerivedRecords": 3,
+  "oldLatestItemDay": "2025-08-01",
+  "oldDerivativesNotReconstructedAsXml": true,
+  "action": "Explicitly authorized one new exact RSS request; new full response is independent material"
+}

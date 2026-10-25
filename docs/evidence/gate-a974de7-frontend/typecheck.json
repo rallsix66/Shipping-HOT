@@ -1,0 +1,9 @@
+{
+  "name": "typecheck",
+  "command": "pnpm typecheck",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\manual-intel-final2-build",
+  "sha": "a974de75fc8db1e5bf2ef1122b4953a65602cc2e",
+  "startedAt": "2026-10-14T04:38:08.479Z",
+  "endedAt": "2026-10-14T04:38:16.387Z",
+  "rawExit": 0
+}

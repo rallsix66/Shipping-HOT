@@ -1,0 +1,22 @@
+{
+  "results": [
+    {
+      "id": "MY-P02",
+      "status": "FAIL",
+      "url": "https://www.westportsholdings.com/category/press-release/feed/",
+      "rawBytes": 36266,
+      "wireSha256": "db9676f1167a48d5c36ad76364e6215221173eefb6874d16a77204a160befc8b",
+      "actualSystemDnsCalls": 0,
+      "actualSourceHttpRequests": 0
+    }
+  ],
+  "status": "FAIL",
+  "evidenceOnly": true,
+  "actualSystemDnsCalls": 0,
+  "actualSourceHttpRequests": 0,
+  "productionEnabled": false,
+  "live24h": "NOT_RUN",
+  "paidCalls": 0,
+  "llmCalls": 0,
+  "productGate": "NOT_RUN_no_product_code_changed"
+}

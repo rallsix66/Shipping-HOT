@@ -1,0 +1,13 @@
+{
+  "name": "typecheck",
+  "command": "pnpm typecheck",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\one-catalog-candidate-build-20261015",
+  "sha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "startedAt": "2026-10-15T03:40:43.701Z",
+  "finishedAt": "2026-10-15T03:40:51.677Z",
+  "rawExit": 0,
+  "stdoutExactUtf8": "\n> shipping-hot@0.0.41 typecheck D:\\try one\\Shipping HOT\\.tmp\\one-catalog-candidate-build-20261015\n> tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.app.json\n\n",
+  "stdoutOriginalByteSha256": "3999ef9d002305dd1b5615e78098ad40c7374cf9501bbb962b72660afe9caa53",
+  "stderrExactUtf8": "",
+  "stderrOriginalByteSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

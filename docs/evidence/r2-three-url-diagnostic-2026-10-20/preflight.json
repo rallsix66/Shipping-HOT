@@ -1,0 +1,76 @@
+{
+  "at": "2026-10-20T04:17:34.891Z",
+  "scope": "local project evidence/private capture archives; dependencies, build/clone snapshots and retained databases excluded",
+  "enumerated": 3010,
+  "inspected": 3010,
+  "targets": [
+    {
+      "key": "maersk",
+      "sourceId": "XX-K01",
+      "url": "https://www.maersk.com/news",
+      "priorRequests": [
+        {
+          "file": "docs/evidence\\r2-carrier-reapplied-2026-10-15\\XX-K01-result.json",
+          "path": "$",
+          "status": null,
+          "statusLabel": "BLOCKED",
+          "reason": "fetch_failed",
+          "startedAt": "2026-10-15T02:38:28.356Z",
+          "httpRequests": 1
+        },
+        {
+          "file": "docs/evidence\\r2-carrier-news-two-2026-10-15\\XX-K01-result.json",
+          "path": "$",
+          "status": null,
+          "statusLabel": "BLOCKED",
+          "reason": "blocked_address",
+          "startedAt": "2026-10-15T02:03:12.613Z",
+          "httpRequests": 0
+        }
+      ],
+      "archiveCandidates": [],
+      "priorExplicitRefusals": [],
+      "eligible": true,
+      "reason": "latest_real_attempt_generic_fetch_failed_without_underlying_error",
+      "matchingFileCount": 40
+    },
+    {
+      "key": "ppa-helpdesk",
+      "sourceId": "PH-P01",
+      "url": "https://www.ppa.com.ph/content/ppa-helpdesk-advisory",
+      "priorRequests": [],
+      "archiveCandidates": [],
+      "priorExplicitRefusals": [],
+      "eligible": true,
+      "reason": "no_qualifying_prior_request_or_specific_TLS_error; catalogue_CA_note_not_measured_browser_warning",
+      "matchingFileCount": 18
+    },
+    {
+      "key": "ppa-news",
+      "sourceId": "PH-P01",
+      "url": "https://www.ppa.com.ph/ppa-port-news",
+      "priorRequests": [],
+      "archiveCandidates": [],
+      "priorExplicitRefusals": [],
+      "eligible": true,
+      "reason": "no_qualifying_prior_request_or_specific_TLS_error; catalogue_CA_note_not_measured_browser_warning",
+      "matchingFileCount": 18
+    }
+  ],
+  "limits": {
+    "totalPhysicalGET": 3,
+    "perURL": 1,
+    "timeoutMs": 10000,
+    "maxBytes": 524288,
+    "retries": 0,
+    "redirectFollows": 0
+  },
+  "priorKnownEvidence": [
+    "docs/evidence/r2-carrier-reapplied-2026-10-15/XX-K01-result.json",
+    "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+    "docs/evidence/r2-p1-inventory-2026-10-13/qualification-matrix.md"
+  ],
+  "catalogueCAClaim": "unverified inherited label; not a permission to add CA or disable TLS",
+  "CN_T01": "not polled",
+  "priorDelegatedTask": "completed raw exit0, no outstanding own capture"
+}

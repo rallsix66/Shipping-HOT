@@ -1,0 +1,9 @@
+const fs=require('node:fs'),cp=require('node:child_process')
+const dir='docs/evidence/r2-one-newsroom-target-2026-10-15'
+fs.mkdirSync(dir,{recursive:true})
+const command=[process.execPath,'node_modules/vitest/vitest.mjs','run','-c','.tmp/one-newsroom-target-20261015.config.ts']
+const start=new Date().toISOString()
+const run=cp.spawnSync(command[0],command.slice(1),{windowsHide:true,encoding:'utf8',maxBuffer:1<<22,env:{...process.env,SHIPPING_ERROR_RECORDING_ONLY:'1'}})
+fs.writeFileSync(dir+'/error-recording-offline-command.json',JSON.stringify({startedAt:start,finishedAt:new Date().toISOString(),command,head:cp.execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),mode:'SHIPPING_ERROR_RECORDING_ONLY=1; early-return before any real DNS/transport',stdout:run.stdout,stderr:run.stderr,rawExit:run.status,sourceDnsCalls:0,sourceHttpRequests:0,MaerskRequests:0},null,2)+'\n')
+if(run.status===0)fs.copyFileSync('.tmp/one-newsroom-error-only-20261015/synthetic-error-recording.json',dir+'/error-recording-offline-result.json')
+console.log(JSON.stringify({rawExit:run.status,mode:'synthetic_only',realDns:0,realHttp:0}));process.exitCode=run.status??1

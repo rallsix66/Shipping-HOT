@@ -1,0 +1,251 @@
+{
+  "at": "2026-10-20T09:01:11.226Z",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "branch": "codex/shipping-hot-r2",
+  "scope": "offline S7 manual preparation and true application-callback assertions only",
+  "sourceFiles": [
+    {
+      "path": "scripts/s7-local-seed.ts",
+      "sha256": "50e47bbda83de48d96aff29c61c9a3e2554e9a9ef6ff19c85c34b19e96b83429",
+      "bytes": 23142
+    },
+    {
+      "path": "scripts/e2e-s7-integrated.mjs",
+      "sha256": "91a832e09cfb0e14214704d1fa5e4351d648bae5ac45b1177b5afdb759e3257c",
+      "bytes": 62688
+    },
+    {
+      "path": "test/manual-intel.test.ts",
+      "sha256": "1181a7ede29ce2645fddf496d74ad0b5c14ec90acaf60ad96e70ed69614e4d7e",
+      "bytes": 16762
+    },
+    {
+      "path": "src/components/shipping/manual-intel.tsx",
+      "sha256": "253af306eae882d8786533a37197e7073e592e09425716f7e004f6ee98e8fd57",
+      "bytes": 14370
+    },
+    {
+      "path": "scripts/s7-local-seed.test.ts",
+      "sha256": "9edfad8b320cedb1d8f8e34f449ea09c4a8965ff9e8e6052523e7606b02c0d8e",
+      "bytes": 7047
+    }
+  ],
+  "prepared": {
+    "generatedAt": "2026-10-20T08:59:46.686Z",
+    "runDir": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020\\.tmp\\s7-r2-manual-ready-20261020",
+    "databasePath": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020\\.tmp\\s7-r2-manual-ready-20261020\\.data\\shipping-hot-v3.sqlite3",
+    "schemaVersion": 29,
+    "dataMode": "real",
+    "preparation": "R2-7 manual only; no app server or browser launched",
+    "fixtureDataProvenance": "original synthetic manual input; no real official material, provider or network call",
+    "manualAcceptance": {
+      "synthetic": true,
+      "notOfficialContent": true,
+      "sourceId": "intel:th-w01",
+      "catalogId": "TH-W01",
+      "operator": "S7 合成验收",
+      "url": "https://www.tmd.go.th/en/api/xml/CAP",
+      "title": "【S7合成】人工交互材料，非官方内容",
+      "publishedAt": "",
+      "bodyA": "S7 原创合成正文 A；不是真实官方通知。",
+      "bodyB": "S7 原创合成正文 B；只用于修订断言。",
+      "checkedEmptySourceId": "intel:manual:cn-p05",
+      "checkedEmptyCatalogId": "CN-P05",
+      "invalidPublishedAt": "S7-not-an-ISO-date",
+      "expected": {
+        "initialMaterials": 0,
+        "afterSaveMaterials": 1,
+        "afterRepeatVersions": 1,
+        "afterRevisionVersions": 2,
+        "publishedAt": null,
+        "providerCalls": 0,
+        "guiStatus": "NOT_RUN"
+      }
+    },
+    "requestedPaths": [
+      "/feed"
+    ],
+    "applicationServerStarted": false,
+    "browserStarted": false,
+    "plannedBind": {
+      "host": "127.0.0.1",
+      "port": 4489,
+      "portAvailability": "NOT_PROBED"
+    },
+    "builtEntry": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020\\dist\\output\\server\\index.mjs",
+    "databaseSHA256": "f5f243fe2901f193ca1a32f3af71cfdd0757fe6031a963f85818ef2f070f3e70",
+    "manifestSHA256": "74003b013dffb7b8dfd8fe514f638b352641efb6bc692b41df49f99013fad563",
+    "counts": {
+      "ports": 0,
+      "feed_items": 0,
+      "intel_item": 0,
+      "intel_item_version": 0,
+      "intel_manual_action": 0,
+      "provider_usage": 0,
+      "provider_runtime": 0,
+      "sync_runs": 0,
+      "translation_cache": 0
+    },
+    "sources": [
+      {
+        "id": "intel:id-w01",
+        "enabled": 0,
+        "persistence": "excerpt_only"
+      },
+      {
+        "id": "intel:manual:cn-p05",
+        "enabled": 0,
+        "persistence": "disallowed"
+      },
+      {
+        "id": "intel:th-w01",
+        "enabled": 0,
+        "persistence": "full"
+      }
+    ],
+    "secretFilePresent": false,
+    "settings": "Translation enabled=false/monthlyBudget=0 verified by native seed test; no credentials copied",
+    "fixtureOnly": true,
+    "sourceNetworkRequests": 0
+  },
+  "results": {
+    "install": 0,
+    "build": 0,
+    "typecheck": 0,
+    "lint": 0,
+    "targetedPassed": 51,
+    "fullPassed": 1789,
+    "fullSkipped": 3,
+    "fullFiles": 147,
+    "GUI": "NOT_RUN",
+    "S7Browser": "NOT_RUN"
+  },
+  "sourceQualificationUnchanged": "28/39;25/34",
+  "next": "parent reviews change; actual manual GUI only after supported channel or user operation and selected isolated-service start",
+  "finalAudit": {
+    "at": "2026-10-20T09:03:20.678Z",
+    "status": "offline implementation/preparation and knowledge closeout complete; independent review and actual GUI pending",
+    "skill": "e0/neat-freak",
+    "inventory": {
+      "rawExit": 0,
+      "log": ".tmp/s7-manual-prep-20261020/neat-inventory.log",
+      "sha256": "01df73273199a5ff0821fe8ea9f0dff26a6a5c015c1ed83c082ca44a0bd82ea0",
+      "markdownEntries": 8762
+    },
+    "docLint": {
+      "rawExit": 0,
+      "log": ".tmp/s7-manual-prep-20261020/docs-lint.log"
+    },
+    "links": {
+      "checked": 175,
+      "broken": []
+    },
+    "diffCheck": {
+      "rawExit": 0,
+      "log": ".tmp/s7-manual-prep-20261020/diff-check.log"
+    },
+    "preservation": {
+      "protectedFilesUnchanged": 53,
+      "finalRootAndGateOverlaySHAEqual": 31,
+      "sourceQualificationMatrixUnchanged": true,
+      "sourceTotals": "28/39;25/34",
+      "statusOldBytesPreserved": true,
+      "architectureUnchanged": true,
+      "HEADUnchanged": true,
+      "branchUnchanged": true,
+      "stagedEmpty": true,
+      "gitStatusEntries": 59,
+      "gitStatusLog": ".tmp/s7-manual-prep-20261020/git-status-final.log",
+      "preparedDBUnchangedSincePreparation": true,
+      "preparedManifestUnchanged": true
+    },
+    "documents": [
+      {
+        "path": "docs/status.md",
+        "sha256": "074c31e9e2f15d8e6ececc336b7201163ac338141d4b5543a9377aefe6f99fc0"
+      },
+      {
+        "path": "docs/evidence/r2-s7-manual-preparation-2026-10-20/closeout.md",
+        "sha256": "00d156644ea4f2b35910ceb6bdd31b680b9acfd39bfb5fa1a1c2c11df8b0a087"
+      },
+      {
+        "path": "docs/evidence/r2-s7-manual-preparation-2026-10-20/coverage.md",
+        "sha256": "8f88ea3516d6369caa32532b54a56caac5d879f596e0c810386d5973b7607a34"
+      },
+      {
+        "path": "docs/evidence/r2-s7-manual-preparation-2026-10-20/manual-checklist.md",
+        "sha256": "0211457d1b263fe8ee09e2f5c970c631fe33d4fe79adccf3578afc1e2a4c7079"
+      },
+      {
+        "path": "docs/evidence/r2-s7-manual-preparation-2026-10-20/report.md",
+        "sha256": "fa74311526eb57aa13743939e1263939108fb1668341fb053016943ff2a3a6da"
+      }
+    ],
+    "artifacts": [
+      {
+        "path": "closeout.md",
+        "sha256": "00d156644ea4f2b35910ceb6bdd31b680b9acfd39bfb5fa1a1c2c11df8b0a087"
+      },
+      {
+        "path": "coverage.md",
+        "sha256": "8f88ea3516d6369caa32532b54a56caac5d879f596e0c810386d5973b7607a34"
+      },
+      {
+        "path": "gate-evidence.json",
+        "sha256": "64a753186bb314f171934303cf2d2ced8f96c62d7e7cbba55de83f905488cb6e"
+      },
+      {
+        "path": "manual-checklist.md",
+        "sha256": "0211457d1b263fe8ee09e2f5c970c631fe33d4fe79adccf3578afc1e2a4c7079"
+      },
+      {
+        "path": "prepared-environment.json",
+        "sha256": "45a970466d1e4de368306a44a2efd268bc8b3ee70a7ee06029320899ad908b50"
+      },
+      {
+        "path": "product-files.json",
+        "sha256": "9916c892f36dd7369503fd3b9847c6ba6b7598e887cf36870023a87db28ed1f7"
+      },
+      {
+        "path": "product.diff",
+        "sha256": "8996311d3a98de4e509914f4e226eef728a77821c625b46f3df66674530b9928"
+      },
+      {
+        "path": "report.md",
+        "sha256": "fa74311526eb57aa13743939e1263939108fb1668341fb053016943ff2a3a6da"
+      }
+    ],
+    "rules": {
+      "AGENTSUnchanged": true,
+      "bytes": 28170,
+      "budget32KiBFraction": 0.85968017578125
+    },
+    "memory": "generated-read-only; no write",
+    "realSourceRequests": 0,
+    "productionDBOperations": 0,
+    "applicationServerStarted": false,
+    "browserStarted": false,
+    "GUI": "NOT_RUN",
+    "S7Browser": "NOT_RUN",
+    "serviceSwitches": 0,
+    "pluginChanges": 0,
+    "CAOrNetworkChanges": 0,
+    "trial24h": false,
+    "R3": false,
+    "commit": false,
+    "push": false,
+    "deploy": false,
+    "cleanup": "none; private data, tests, prepared environment and success/failure logs retained",
+    "pending": [
+      "parent independent review of five-file full diff",
+      "selected future isolated-service start; planned4489 not probed",
+      "actual five-step user/browser clicks, viewport360/1280 and keyboard checks",
+      "current R2 not passed; R2-8/24h and R3 remain paused"
+    ],
+    "warnings": [
+      "existing reviewed header-test JSDoc warning unchanged",
+      "Git ignore/CRLF and auto-import/loader messages retained"
+    ],
+    "deniedActions": "none new; previous self-built CDP denial respected without retry"
+  }
+}

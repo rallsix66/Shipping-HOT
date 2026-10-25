@@ -1,0 +1,27 @@
+{
+  "executionHead": "4ca3a77cd8cdb1be3c793052b7edff628cec0529",
+  "productCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "productDiff": "",
+  "catalogueDiff": "",
+  "previousEvidenceDiff": "",
+  "retainedBefore": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedAfter": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedUnchanged": true,
+  "sourceDnsCalls": 2,
+  "sourceGetAttempts": 2,
+  "productGate": "NOT_RUN_no_product_change",
+  "guiS7": "NOT_RUN",
+  "production24h": "NOT_RUN",
+  "rawOriginalsLocalIgnoredOnly": true,
+  "noCleanup": true
+}

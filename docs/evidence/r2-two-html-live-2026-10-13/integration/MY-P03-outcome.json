@@ -1,0 +1,25 @@
+{
+  "id": "MY-P03",
+  "evidenceKind": "held_live_response",
+  "status": "PASS",
+  "first": {
+    "status": "ok_items",
+    "runId": "0e2b6c4a-f720-4760-9b98-c28912175cce",
+    "itemsSeen": 84,
+    "itemsNew": 84,
+    "itemsRevised": 0
+  },
+  "second": {
+    "status": "ok_items",
+    "runId": "343185b2-4f7f-4bd5-87ae-42db0bbeab0d",
+    "itemsSeen": 84,
+    "itemsNew": 0,
+    "itemsRevised": 0
+  },
+  "count": 84,
+  "failure": null,
+  "exceptionType": null,
+  "persistenceErrors": [],
+  "startedAt": "2026-10-13T09:52:50.843Z",
+  "finishedAt": "2026-10-13T09:52:51.795Z"
+}

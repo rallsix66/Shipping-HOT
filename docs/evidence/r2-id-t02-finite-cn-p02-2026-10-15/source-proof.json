@@ -1,0 +1,18 @@
+{
+  "baselineEvidenceHead": "0274014037fbf68d7821309d2fd4090eaa036396",
+  "testedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "productDiffAfterGate": "",
+  "unchangedBoundariesDiff": "",
+  "codeFiles": [
+    "server/intel/id-mof-index.test.ts",
+    "server/intel/sources/__fixtures__/public-index-synthetic.ts",
+    "server/intel/sources/config-keys.ts",
+    "server/intel/sources/html-index-candidates.ts",
+    "server/intel/sources/web-list.ts"
+  ],
+  "oldEvidenceDiff": "",
+  "sourceGetAttempts": 0,
+  "sourceDnsCalls": 0,
+  "cnP02Requests": 0,
+  "productionEnabled": false
+}

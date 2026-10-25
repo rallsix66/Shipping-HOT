@@ -1,0 +1,64 @@
+{
+  "url": "https://seller-my.tiktok.com/university/essay?knowledge_id=4293090978809617",
+  "startedAt": "2026-10-22T01:19:16.493Z",
+  "dnsCalls": 1,
+  "getCalls": 1,
+  "bounds": {
+    "dnsCallsMax": 1,
+    "getMax": 1,
+    "retries": 0,
+    "redirectsFollowed": 0,
+    "totalMs": 10000,
+    "maxBodyBytes": 2097152,
+    "maxHeaderBytes": 16384,
+    "nodeMaxHeaderSize": 16384,
+    "decompression": "none"
+  },
+  "dns": {
+    "ms": 7,
+    "count": 7,
+    "families": [
+      4
+    ]
+  },
+  "getStartedMs": 7,
+  "response": {
+    "status": 504,
+    "contentType": null,
+    "contentLength": "0",
+    "contentEncoding": null,
+    "headerNames": [
+      "access-control-expose-headers",
+      "connection",
+      "content-length",
+      "content-security-policy",
+      "date",
+      "reporting-endpoints",
+      "server",
+      "server-timing",
+      "strict-transport-security",
+      "x-akamai-request-id",
+      "x-cache",
+      "x-frame-options",
+      "x-ggw-config-version",
+      "x-ggw-error-message",
+      "x-origin-response-time",
+      "x-tt-logid",
+      "x-tt-trace-host",
+      "x-tt-trace-id",
+      "x-tt-trace-tag"
+    ],
+    "locationHost": null,
+    "ms": 6306
+  },
+  "endedAt": "2026-10-22T01:19:22.799Z",
+  "elapsedMs": 6306,
+  "complete": false,
+  "stopReason": "http_error",
+  "secureFetchCode": "http_error",
+  "httpStatus": 504,
+  "bytes": 0,
+  "sha256": "unknown",
+  "partialBodySaved": false,
+  "note": "response received but not accepted; no body stored"
+}

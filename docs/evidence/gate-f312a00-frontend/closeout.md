@@ -1,0 +1,25 @@
+# R2-7 manual intel closeout — 2026-10-14
+
+Final code f312a002445f788ed3322dd20273fa0dfd3b01cd. User schema approval: Sentinel_f5a7de1612248191acd792729e3262d5 at04:15UTC.
+
+## Reuse and scope
+
+No parallel content/version/date/budget/scheduler system. Reused IntelRepository.writeEntry transaction and A-B-A pointer history, licensedBlocks/contentScopeFor, canonicalizeFeedUrl and existing intel GETs. Only additive028; historical migrations unchanged. Manual submission audit stores operator/action/server timestamp/request key/hash/item/version/outcome; no historical actor backfill. Source kind manual is valid but automatic due queries exclude it.39catalog manual seeds disabled/metadata-only;2existing licensed sources inserted disabled only when absent. Existing source state/licensing untouched. XX-W06 historical replay not reopened. Missing/manual source licenses do not authorize body. Self-entered operator does not imply account authentication; manual official label is source class, not independent verification or risk confirmation.
+
+POST is explicit manual only and existing security middleware applies. Unknown original publication stays null; original per-version publication is visible. Successful checked-empty is separate from no record and auto-fetch failure. Faulted saves report503 and transaction rollback preserves previous content/actions. A request conflict409 does not silently resend. No URL fetch, extraction, Provider, LLM, paid usage or production setting changes. GET checklist module separated from write service, query_only actual HTTP reads pass. Manual labels/audits apply to selected/current version, not all historical auto versions.
+
+## Frontend
+
+Existing demo shell/palette/sidebar retained, with local two-column checklist/form/list/detail and existing Feed/weather switch. Demo source hash23d6efbb343182eba93caa74a4b1ca1657bab25f414fb873d9c448efe98b51b7 unchanged; ink/panel/line/accent/r tokens and btn rule at demo164–165 adapted to scoped manual controls. No demo risk/event/AI sample arrays imported; form is actual local API, not static mock. Plain text React rendering; HTML/entity-looking submissions rejected. Failed reads hide cached success; input is retained on failed writes.47focused synthetic/non-browser cases (25repository,3real H3 write/read,17read-route cases including one new checklist,2SSR; 31added tests relative to previous suite) must not be called GUI interaction acceptance. List50/actions20/versionsfirst20 limitations disclosed; no unlimited history/pagination claim.
+
+## Raw gate
+
+Fresh final clone install (scripts enabled), build/typecheck/lint,126targeted,121files1146pass/3existing Windows skips and3native/Runtime/Feed smokes rawexit0. Final normalized tracked diff0, retained DB/secret-file hash equality recorded. c1c79d5 gate failed native smoke due CLI sources.ts/sources directory collision; subsequent two stages NOT_RUN in that failed gate. a974de7 explicit imports/URL canonicalization repaired it and full gate passed; final f312a00 scoped CSS gate rerun passed. All three directories retained; no docs commit substituted for tested code.
+
+41loopback checks on4487/feed cover explicit synthetic submit/replay/conflict/revision/restore/check-empty/license/XSS/URL/cross-origin, read-only responses/audit invariance, schema28, SPA/assets and all old previews. Samples prominently synthetic, no actual official notice/date/source entitlement verified. Protected usage/receipt/run/policy/calendar counts unchanged. Network guard tests block external fetch, code uses no manual fetching; no packet capture or claim that counters alone prove no external egress. No browser visuals, live clicks/keyboard/widths or S7: NOT_RUN; official browser unavailable and previous customCDP rejection not bypassed.
+
+## Actual Neat Freak
+
+Installed v3.0.0 skill and verification reference read. Actual Bash audit-inventory.sh exit0 recorded; enumeration is not security audit. Affected status/architecture/AGENTS reconciled with schema/API/UI/tests; old calendar review limited acceptance recorded without raising GUI/coverage status. ADR007/008 reviewed, no new framework/provider/ports/secret/budget. React review: hooks unconditional within each mounted page, read query keys scoped, retries keep write IDs, native labelled controls, body rendered as text, no direct SQLite/external API in UI. Existing warnings retained (unimport duplicates/chunk size/Browserslist/loader experimental/Windows skips/CRLF). New evidence pattern scan only; no historical credential inspection or leak claim.
+
+Facts: code changed-and-verified (offline/API); runtime partial verified, browser pending; docs changed-and-verified; rules verified-current with approved028 exception; memory generated-read-only/out-of-scope; workspace preserved, cleanup pending explicit post-report approval. Old previews, all clones, ignored drivers, failed evidence and databases retained. Draft PR8 only, parent review pending, no merge/deploy/live-switch/force-push. R2-7/R2/R5 overall acceptance not claimed PASS.

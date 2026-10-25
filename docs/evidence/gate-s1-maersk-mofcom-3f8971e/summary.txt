@@ -1,0 +1,11 @@
+full_sha=3f8971e3fcb2bfc32a6f736b1172bf0ed0e274d0
+worktree_clean_before_gates=true
+node=v24.15.0
+cwd=D:\wt-s1
+install raw_exit_code=0  cmd: pnpm install --frozen-lockfile
+build raw_exit_code=0  cmd: pnpm build
+typecheck raw_exit_code=0  cmd: pnpm typecheck
+lint raw_exit_code=0  cmd: pnpm lint
+targeted raw_exit_code=0  cmd: npx vitest run server/intel/maersk-mofcom.test.ts server/intel/sources/web-list-english-12h.test.ts server/services/article-fetch-header-limit.test.ts server/services/article-fetch-transport.test.ts server/services/article-fetch-security.test.ts server/intel/sources/html-index-candidates.test.ts server/intel/sources server/intel/collect.test.ts
+test raw_exit_code=0  cmd: pnpm test --run
+post_gate_worktree_changes="M src/routeTree.gen.ts\n?? docs/evidence/gate-s1-maersk-mofcom-3f8971e/"

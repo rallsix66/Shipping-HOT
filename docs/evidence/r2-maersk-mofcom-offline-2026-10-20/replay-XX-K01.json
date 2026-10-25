@@ -1,0 +1,507 @@
+{
+  "catalogId": "XX-K01",
+  "input": {
+    "path": ".tmp/r2-three-url-diagnostic-20261020/maersk/response-32k-20261020.bin",
+    "bytes": 46251,
+    "sha256": "9e7271c8d37da91032150dfff719de6fb7fd8d30426cfad50ae123e10fd72673"
+  },
+  "productParser": "fromHtml",
+  "collector": "createIntelCollectJob -> collectIntelSource -> secureFetchArticle with fixed offline lookup/transport -> IntelRepository",
+  "independentExpected": 18,
+  "parsed": 18,
+  "independentNodeDifferences": 0,
+  "first": {
+    "status": "success",
+    "recordsRead": 18,
+    "recordsWritten": 18
+  },
+  "second": {
+    "status": "success",
+    "recordsRead": 18,
+    "recordsWritten": 0
+  },
+  "versionCount": 18,
+  "blockCount": 18,
+  "duplicateItems": 0,
+  "revisionsOnRepeat": 0,
+  "closedAndReopened": true,
+  "allRowsReadBack": true,
+  "SQLitePath": ".tmp\\two-source-offline-20261020\\native-JR02Jv\\replay.sqlite3",
+  "productionDBAccess": false,
+  "sourceDefaultEnabled": false,
+  "testOnlyIsolatedSeedEnabled": true,
+  "transportCalls": [
+    {
+      "url": "https://www.maersk.com/news",
+      "maxHeaderSize": 32768,
+      "timeoutMs": 10000,
+      "maxBytes": 524288
+    },
+    {
+      "url": "https://www.maersk.com/news",
+      "maxHeaderSize": 32768,
+      "timeoutMs": 10000,
+      "maxBytes": 524288
+    }
+  ],
+  "syntheticDNS": [
+    "www.maersk.com",
+    "www.maersk.com"
+  ],
+  "systemDNSCalls": 0,
+  "actualHTTPRequests": 0,
+  "otherSites": 0,
+  "providerUsageRows": 0,
+  "rows": [
+    {
+      "url": "https://www.maersk.com/news/articles/2026/09/28/maersk-completes-first-us-ethanol-bunkering-of-a-deep-sea-container-vessel",
+      "title": "Maersk completes first U.S. ethanol bunkering of a deep-sea container vessel",
+      "versionId": "db9f308f-b50f-4dd5-a42f-beaf3b83a46a",
+      "contentHash": "3690c346f19ba236ad328fdb1c60cf69dff9f81382616d1cc04451d4244e6b9f",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "28 Sep 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-28",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/09/30/rail-forward-india",
+      "title": "RAIL FORWARD: Delivering India's manufacturing growth through rail logistics",
+      "versionId": "dc12f1c7-526e-4ec3-a188-c4f28f3a7a5f",
+      "contentHash": "63eafa11c84f05da75fe761307122c41a2917e62b93fe1160e8d56f8a331ba85",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "30 Sep 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-30",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/07/europe-market-update-october",
+      "title": "Maersk Europe Market Update October 2026",
+      "versionId": "8baf24b8-46dc-411a-8cc5-e9985a652b25",
+      "contentHash": "c824f0be0e113ac07d778190aa07ccb4835dc236d484682fb296ce04bd3a5c86",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "7 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-07",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/07/maersk-asia-pacific-market-update-october",
+      "title": "Maersk Asia Pacific Market Update – October 2026",
+      "versionId": "75e4363a-192e-4ce3-9c19-21760916d91d",
+      "contentHash": "14a4de8bc284141d926b5fef692fc3a4a07e78b6f4c864ab40a3e9fff0499804",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "7 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-07",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/07/north-america-market-update-october",
+      "title": "Maersk North America Market Update — October 2026",
+      "versionId": "6d5455a2-5ea6-4b1e-b9fa-1e2b869ce059",
+      "contentHash": "e1a3d6f3972fc449b86ca149df84434535707ad3c8abb12d6065863ee988278c",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "7 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-07",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/08/maersk-supply-chain-leaders-forum-strengthening-supply-chains-through-ai",
+      "title": "Maersk Supply Chain Leaders Forum 2026: strengthening supply chains through AI",
+      "versionId": "0f3a0678-9663-489f-8819-16ae4219e9a9",
+      "contentHash": "f1edf79c1a9cfb0a33727fb31a5ad29057d3f6c68a08aec3bde6d5e738507204",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "8 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-08",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/08/pharma-asia-international-conference",
+      "title": "Discover supply chain innovation at Pharma Asia International Conference 2026",
+      "versionId": "7b1341d6-18eb-4710-aaf6-f10f9add29bc",
+      "contentHash": "2b8c06fbf4c2573f04a8821d0d43cf922d5f8d0674c7e280af7e48107d40bc26",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "8 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-08",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/13/india-middle-east-and-africa-market-update-october",
+      "title": "IMEA Maersk Market Update – October 2026",
+      "versionId": "f971b81b-b7fc-425d-bd23-b68e694e41c6",
+      "contentHash": "1b325cc5bf7846443c4810791cec9ddb28073403413b59064eb231b36ba9f1cd",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "13 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-13",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/14/latin-america-market-update-october",
+      "title": "Maersk Latin America Market Update – October, 2026",
+      "versionId": "b7921d28-bc8e-4c9b-9c90-8820e330f400",
+      "contentHash": "537befbc30219078637a7bccb0399db50b454ef3c9955f3a2704ac08ee67949b",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "14 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-14",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/16/us-canada-emergency-intermodal-fuel-surcharge-november",
+      "title": "U.S. & Canada Emergency Intermodal Fuel Surcharge Inland Rail Ramps and Container Yards",
+      "versionId": "efbbb76a-c6b0-4f8e-ad31-a440a388fd3d",
+      "contentHash": "cc593d1461aca1dc4085acc90c410a88fb12ce3fd40b69f0f1c84cdfe3721beb",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "16 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-16",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/19/adidas-sporting-event-logistics",
+      "title": "How adidas scaled sporting event logistics with Maersk Ground Freight",
+      "versionId": "8d4b91ef-cad1-4983-a2b5-729b5361f679",
+      "contentHash": "84c1e343d0b3aeebe71350cfa934f0ee4df3a998ca31232c4b248c049cb9a11f",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "19 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-19",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/19/booking-vehicles-for-container-transport",
+      "title": "Booking Vehicles for Container Transport",
+      "versionId": "9129f2c0-3a20-45a6-8abd-c15ac075c14b",
+      "contentHash": "d7a6aa3425ef7e4146432fed7b6f54e7b145a7175024b40732e13ffa5ac55e67",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "19 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-19",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/19/gemini-network-service-enhancements-ae18",
+      "title": "Further enhancements to the Gemini network Gemini Service",
+      "versionId": "3e9b266d-c372-493b-99a9-ce0c86e848b7",
+      "contentHash": "16cdbcf59fb84f48cc4909cbcade6d5b500285d2b94e63ecfd76320ccb69d36f",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "19 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-19",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/19/maersk-completes-worlds-largest-ethanol-bunkering-singapore",
+      "title": "Maersk completes the world’s largest ethanol bunkering in Singapore",
+      "versionId": "07be5a61-fb1b-48c4-b7ad-b4aa0e76a228",
+      "contentHash": "55003d13a1b5aee9833d3b00dfd04893b842ed2999982f6fb183414881ade9f8",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "19 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-19",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/19/network-update-me2-ae12-jeddah-colombo",
+      "title": "Network update: ME2 and AE12",
+      "versionId": "a4cd5c1f-76d2-45a0-9328-32da6f9664e7",
+      "contentHash": "6000264a85faae9c048e8711cc3ee5ba5d3d95df5b18f83c86c18eda7f3f2de1",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "19 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-19",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/19/transport-document-amendment-fee-export-europe-world",
+      "title": "Customer Advisory - European and Mediterranean countries - Transport Document Amendment Fee Export (AME) Revised Egypt rates and Algeria implementation.",
+      "versionId": "986de8fa-70ef-4b76-8b0f-40d64173384a",
+      "contentHash": "7ae93c8a4029f120f2066bd4b5bb6fad764b461c9643736b2cbed7022b5d264f",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "19 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-19",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/19/western-mediterranean-west-africa-network-enhancements",
+      "title": "Enhanced connectivity between the Western Mediterranean and West Africa",
+      "versionId": "8de916b8-51f7-4b80-932a-cba24ea4c48b",
+      "contentHash": "759f701f0b63b210627d9eac1bc23179783f9686430818b5644fe3171fe35add",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "19 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-19",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    },
+    {
+      "url": "https://www.maersk.com/news/articles/2026/10/20/maersk-lt-first-planned-drydocking-india-kattupalli",
+      "title": "Maersk partners with L&T for its first planned drydocking in India",
+      "versionId": "fbc762ad-717f-4931-a496-854f3743ce85",
+      "contentHash": "d3b05a0c36a3d2f1fa99b6355e3d3b0133b7e573ab6b5cebb788d5628826f26a",
+      "scope": "metadata_only",
+      "dateEvidence": {
+        "raw": "20 Oct 2026",
+        "rule": "configured_english_month_abbr_day",
+        "basis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-20",
+        "publishedAt": null,
+        "role": "unknown"
+      },
+      "blocks": [
+        {
+          "type": "title",
+          "blockKey": "title"
+        }
+      ]
+    }
+  ]
+}

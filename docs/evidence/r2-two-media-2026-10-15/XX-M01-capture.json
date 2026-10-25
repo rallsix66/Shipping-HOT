@@ -1,0 +1,55 @@
+{
+  "id": "XX-M01",
+  "url": "https://theloadstar.com/feed/",
+  "host": "theloadstar.com",
+  "catalogLineLfSha256": "e1a3833f9aa4958f0ff2fba3a1c65c479e33020edeaf7acd36d57370649e42c0",
+  "oldWireSha256": "48d0e7d2b8a37ba89ceb91a4b74361b782b7109d5ac854320ad3bedb2f9c64b9",
+  "startedAt": "2026-10-15T04:25:58.202Z",
+  "systemDnsCalls": 1,
+  "transportInvocations": 1,
+  "status": "CAPTURED_SAFE_XML",
+  "parser": "NOT_RUN",
+  "rawLocalOnly": true,
+  "addresses": [
+    {
+      "address": "104.26.3.171",
+      "family": 4
+    },
+    {
+      "address": "104.26.2.171",
+      "family": 4
+    },
+    {
+      "address": "172.67.68.194",
+      "family": 4
+    }
+  ],
+  "addressClassification": "public_address",
+  "receivedAt": "2026-10-15T04:25:58.866Z",
+  "httpStatus": 200,
+  "contentType": "application/rss+xml; charset=UTF-8",
+  "bytes": 20417,
+  "wireSha256": "295d274b904d6d0badea109dc22f74b0caaefc2bbe3f6fcdc38145e4d878bd7a",
+  "completeResponseCaptured": true,
+  "locationPresent": false,
+  "locationFollowed": false,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "xml",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 20417
+  },
+  "finishedAt": "2026-10-15T04:25:58.867Z"
+}

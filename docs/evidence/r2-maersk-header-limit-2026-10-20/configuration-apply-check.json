@@ -1,0 +1,23 @@
+{
+  "at": "2026-10-20T07:06:20.811Z",
+  "currentAssociationConfirmed": true,
+  "scriptCount": 29,
+  "scriptCounts": {
+    "www.ppa.com.ph": 1,
+    "www.mofcom.gov.cn": 1,
+    "maritim.bmkg.go.id": 1
+  },
+  "scriptAllExpectedPreserved": true,
+  "generatedCounts": {
+    "www.ppa.com.ph": 0,
+    "www.mofcom.gov.cn": 0,
+    "maritim.bmkg.go.id": 1
+  },
+  "generatedAllExpectedPreserved": false,
+  "generatedExpectedOrderPreserved": false,
+  "enhancedMode": "fake-ip",
+  "filterMode": null,
+  "networkValidationAllowed": false,
+  "runningKernelChecked": false,
+  "appliedOrReloadedByAgent": false
+}

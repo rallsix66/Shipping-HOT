@@ -1,0 +1,15 @@
+{
+  "currentProfileFile": "R0coi38zEaOV.yaml",
+  "currentScriptFile": "shf0fNvLCn9b.js",
+  "backup": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\shipping-hot-clash-four-2026-10-13T08-21-22-981Z\\shf0fNvLCn9b.js.six-hosts.bak",
+  "beforeScriptSha256": "f31e35c360e1a30301c690821d183f21b0986e7278c490b52f8ee5e09ea66336",
+  "afterScriptSha256": "ad2e6c6aa37cbdd9628713c4eb3f1101a650f203dba38af583aa7d5e39fc896e",
+  "addedDomains": ["theloadstar.com", "splash247.com", "www.northport.com.my", "www.customs.go.th"],
+  "previousSixRetained": true,
+  "offlineProtectedFieldsUnchanged": true,
+  "manualSaveConfirmedByUser": "2026-10-13T08:22:26Z",
+  "generatedTenDomainsVerified": true,
+  "tunEnabled": true,
+  "controllerApiUsed": false,
+  "fullConfigurationSavedToRepository": false
+}

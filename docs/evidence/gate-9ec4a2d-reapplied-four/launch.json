@@ -1,0 +1,11 @@
+{
+  "sha": "9ec4a2dd4e6a76657ec3ed2a6dabb15187b4d5a8",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\reapplied-four-build-20261015",
+  "startedAt": "2026-10-15T01:24:39.879Z",
+  "cleanClone": true,
+  "existingNodeModules": false,
+  "installScriptsNotSkipped": true,
+  "providerCredentialEnvironmentScrubbed": true,
+  "node": "v24.15.0",
+  "abi": "137"
+}

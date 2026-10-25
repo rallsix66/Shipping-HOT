@@ -1,0 +1,9 @@
+{
+  "name": "clipper-build",
+  "command": "pnpm build:clipper",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-final-6aa509b",
+  "sha": "6aa509b8daa2f931827cef2b6d3d7e57e4d56a04",
+  "startedAt": "2026-10-16T03:20:54.114Z",
+  "endedAt": "2026-10-16T03:20:55.463Z",
+  "rawExit": 0
+}

@@ -1,0 +1,27 @@
+{
+  "fixture": "server/providers/__fixtures__/tmd-cap-2026-10-10/index.xml",
+  "fixtureSha256": "a68a6e12cffb88ccfb8d6db8e13725ef3601cb12dc39a6ed3b9ecb47040962ff",
+  "archived": "Real stored TMD 2026-10-10 bytes, replayed offline",
+  "synthetic": [
+    "revision",
+    "503 failure",
+    "empty RSS",
+    "checked_empty operator"
+  ],
+  "pipeline": [
+    "existing registry/runtime",
+    "secure fetch injected bytes",
+    "parse",
+    "SQLite",
+    "reopen",
+    "actual H3 GET query_only",
+    "actual page SSR with HTTP query cache"
+  ],
+  "itemId": "ee939793-4aae-4641-ae20-96807025f516",
+  "firstVersion": "d8f3e966-6670-4e06-bfc1-b2f6ebf97e59",
+  "rows": 7,
+  "outboundAttempts": [],
+  "browser": "NOT_RUN",
+  "database": "D:\\try one\\Shipping HOT\\.tmp\\intel-chain-final2-build\\.tmp\\intel-chain-mhIi1b\\chain.sqlite3",
+  "codeSha": "8707019a74ac81a698d303d852a40b3c13bed489"
+}

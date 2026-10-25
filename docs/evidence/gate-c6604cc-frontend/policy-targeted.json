@@ -1,0 +1,9 @@
+{
+  "name": "policy-targeted",
+  "command": "pnpm exec vitest run -c vitest.config.ts test/policy-console.test.ts test/reduce-motion.test.ts test/ui-smoke.test.ts server/database/policy.test.ts test/ports-demo.test.ts server/services/port-weather-panel.test.ts test/calendar-demo.test.ts server/services/promo-calendar.test.ts",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-review-build",
+  "sha": "c6604cc9b803d3a590354cf4d79ad1f3d7237c5c",
+  "startedAt": "2026-10-14T03:47:12.128Z",
+  "endedAt": "2026-10-14T03:47:14.589Z",
+  "rawExit": 0
+}

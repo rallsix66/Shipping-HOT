@@ -1,0 +1,117 @@
+{
+  "checkedAt": "2026-10-15T02:38:17.985445+00:00",
+  "readOnly": true,
+  "sourceDnsCalls": 0,
+  "httpRequests": 0,
+  "networkSettingsChanged": false,
+  "selectedProfileAndScriptResolved": true,
+  "selectedExtension": {
+    "role": "selected_subscription_extension",
+    "file": "profiles/shf0fNvLCn9b.js",
+    "exactHostLiteralPresent": {
+      "www.maersk.com": true,
+      "www.one-line.com": true
+    },
+    "unchangedSizeAndMtime": true,
+    "executedOrEvaluated": false
+  },
+  "globalExtension": {
+    "role": "global_extension",
+    "file": "profiles/Script.js",
+    "exactHostLiteralPresent": {
+      "www.maersk.com": false,
+      "www.one-line.com": false
+    },
+    "unchangedSizeAndMtime": true,
+    "executedOrEvaluated": false
+  },
+  "generatedConfig": {
+    "role": "generated_config_on_disk",
+    "file": "clash-verge.yaml",
+    "dnsBlockFound": true,
+    "modes": {
+      "enhanced-mode": "fake-ip"
+    },
+    "filterCount": 23,
+    "exactHostInFakeIpFilter": {
+      "www.maersk.com": true,
+      "www.one-line.com": true
+    },
+    "unchangedSizeAndMtime": true
+  },
+  "baseConfig": {
+    "role": "application_base_config_on_disk",
+    "file": "config.yaml",
+    "dnsBlockFound": false,
+    "modes": {},
+    "filterCount": 0,
+    "exactHostInFakeIpFilter": {
+      "www.maersk.com": false,
+      "www.one-line.com": false
+    },
+    "unchangedSizeAndMtime": true
+  },
+  "allInspectedFilesUnchangedSizeAndMtime": true,
+  "credentialFieldsInspectedOrExported": false,
+  "scope": "Allowlisted profile linkage, exact quoted target-host literals and DNS keys only; no full config, subscription URL, proxy, secret or credential values exported. Disk presence is not a running-core/API verification.",
+  "files": [
+    {
+      "role": "profile_linkage_only",
+      "unchangedSizeAndMtime": true
+    },
+    {
+      "role": "selected_subscription_extension",
+      "file": "profiles/shf0fNvLCn9b.js",
+      "exactHostLiteralPresent": {
+        "www.maersk.com": true,
+        "www.one-line.com": true
+      },
+      "unchangedSizeAndMtime": true,
+      "executedOrEvaluated": false
+    },
+    {
+      "role": "global_extension",
+      "file": "profiles/Script.js",
+      "exactHostLiteralPresent": {
+        "www.maersk.com": false,
+        "www.one-line.com": false
+      },
+      "unchangedSizeAndMtime": true,
+      "executedOrEvaluated": false
+    },
+    {
+      "role": "generated_config_on_disk",
+      "file": "clash-verge.yaml",
+      "dnsBlockFound": true,
+      "modes": {
+        "enhanced-mode": "fake-ip"
+      },
+      "filterCount": 23,
+      "exactHostInFakeIpFilter": {
+        "www.maersk.com": true,
+        "www.one-line.com": true
+      },
+      "unchangedSizeAndMtime": true
+    },
+    {
+      "role": "application_base_config_on_disk",
+      "file": "config.yaml",
+      "dnsBlockFound": false,
+      "modes": {},
+      "filterCount": 0,
+      "exactHostInFakeIpFilter": {
+        "www.maersk.com": false,
+        "www.one-line.com": false
+      },
+      "unchangedSizeAndMtime": true
+    }
+  ],
+  "originalFilterCount": 21,
+  "selectedExtensionCount": 23,
+  "selectedExtensionExactlyOriginal21Plus2": true,
+  "original21Preserved": true,
+  "generatedExactly23TargetsPresent": true,
+  "generatedExactlyOriginal21Plus2": true,
+  "userAppliedChange": true,
+  "agentSystemWriteExecuted": false
+}

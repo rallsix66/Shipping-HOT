@@ -1,0 +1,1518 @@
+{
+  "kind": "normalized metadata derivative, not original DOM fixture",
+  "id": "MY-P03",
+  "items": [
+    {
+      "id": "85223349-95a4-4358-9604-3b804c6d2de5",
+      "title": "ANNOUNCEMENT - CLOSURE DURING HARI RAYA 2017",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2017/Announcement%20-%20Closure%20During%20Hari%20Raya%202017.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "21-6-2017",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2017-06-21",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "60a8da81-7b0b-4c55-b494-256373cb9614",
+      "title": "BREAKING OF FAST ON RAMADHAN 2017",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2017/Breaking%20of%20Fast%20on%20Ramadhan%202017.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "12-5-2017",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2017-05-12",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "634c8a46-afa6-4654-a5f3-b3de91f05b29",
+      "title": "CIRCULAR ON CASHLESS TRANSACTIONS",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2017/Circular%20on%20cashless%20transactions.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "13-9-2017",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2017-09-13",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "15a51db5-f106-4693-88d2-ca40af537c63",
+      "title": "NOTICE PORT KLANG AUTHORITY-1",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2017/NOTICE%20PORT%20KLANG%20AUTHOURITY-1.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "27-7-2017",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2017-07-27",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "24d021a9-0ba2-4eff-a3de-74ab375b7465",
+      "title": "NEW PRICE NP DOCUMENT",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2017/New%20Price%20NP%20Document.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "2-5-2017",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2017-05-02",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "66d4bc77-9f02-4895-9840-bb84932586b1",
+      "title": "NOTIS GANGGUAN LALULINTAS",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2017/Notis%20Gangguan%20Lalulintas.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "6-3-2017",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2017-03-06",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "b7a7be59-f368-473e-8a92-6a3c71fbe5d8",
+      "title": "RANSOMWARE",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2017/Ransomware.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "30-4-2017",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2017-04-30",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "108a3485-219a-45af-8ecf-3e00a583750b",
+      "title": "SAFETY BRIEFING FOR NORTHPORT13072017(1)",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2017/SAFETY%20BRIEFING%20FOR%20NORTHPORT13072017(1).pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "18-7-2017",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2017-07-18",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "f66486d0-d321-444a-a31a-977d41e02294",
+      "title": "STC-1",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2017/STC-1.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "26-1-2017",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2017-01-26",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "670ff414-e119-4c08-a5f0-c39d99e21f59",
+      "title": "AMH (2 FILES MERGED)",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/AMH%20(2%20files%20merged).pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "11-6-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-06-11",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "dc466d35-ec54-4f1f-9f64-d7b408e684c4",
+      "title": "BREAKING OF FAST DURING THE MONTH OF RAMADHAN 1439H",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/Breaking%20of%20Fast%20During%20the%20Month%20of%20Ramadhan%201439H.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "16-5-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-05-16",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "ffe72c75-3d4d-463c-896b-7b8ed6dae670",
+      "title": "CHARGES FOR EXTRA SERVICES EFFECTIVE 01 OCT 2018",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/Charges%20for%20extra%20services%20effective%2001%20Oct%202018.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "26-9-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-09-26",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "5aceca99-b66c-4f53-99d5-615ec70366f3",
+      "title": "CIRCULAR ON LATE PAYMENT INTEREST_4TH APRIL 2018",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/Circular%20on%20late%20payment%20interest_4th%20April%202018.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "9-4-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-04-09",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "95848d29-93f4-4488-a101-c5bdf4ed40c9",
+      "title": "IMPLEMENTATION OF URINE DRUG SCREENING PRIOR TO PORT PASS APPLICATION",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/Implementation%20of%20Urine%20Drug%20Screening%20Prior%20to%20Port%20Pass%20Application.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "16-8-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-08-16",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "6a2ee322-812c-4771-96c5-2549b3383a83",
+      "title": "LENGTH OVERALL (LOA) RESTRICTION AT SOUTHPOINT",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/Length%20Overall%20(LOA)%20Restriction%20at%20Southpoint.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "16-1-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-01-16",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "3ce445c8-49d6-400a-8ba9-622333ae49b7",
+      "title": "NEW OPERATING MODEL FOR NORTHPORTS DEPOT $ CFS CTI OPERATIONS",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/New%20Operating%20Model%20For%20Northports%20Depot%20&%20CFS%20CT1%20Operations.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "5-7-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-07-05",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "605d7687-b3e3-4018-b357-346ba58abc88",
+      "title": "NORTHPORT'S OPERATION ON THE 14TH GENERAL ELECTION",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/Northport's%20Operation%20on%20the%2014th%20General%20Election.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "18-4-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-04-18",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "156a15a4-ade1-4694-ae10-9d95956495a2",
+      "title": "NOTICE ON REVISED DEPOT GATE CHARGE (DCG) FOR NDSB CUSTOMERS",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/Notice%20on%20Revised%20Depot%20Gate%20Charge%20(DGC)%20for%20NDSB%20Customers.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "24-9-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-09-24",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "579f53cb-3473-421a-8e53-f92c2fcef71e",
+      "title": "PORT CLOSURE DURING HARI RAYA AIDILFITRI 2018",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/Port%20Closure%20During%20Hari%20Raya%20Aidilfitri%202018.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "11-6-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-06-11",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "d8b8104b-129b-4bb9-be3a-e00cf7c27a9d",
+      "title": "SUPPLY OF GENERAL WORKER CUM CARPENTER FOR INSPECTION OF CONTAINERS AT DEPOT 1 DEPOT 2 AND NDSB",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/Supply%20of%20General%20Worker%20cum%20Carpentar%20for%20Inspection%20of%20Containers%20at%20Depot%201%20Depot%202%20and%20NDSB.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "2-5-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-05-02",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "9e825669-31cb-4755-8063-5119d85d219c",
+      "title": "SYSTEM PREVENTIVE MAINTENANCE AT CT1",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/System%20Preventive%20Maintenance%20at%20CT1.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "2-3-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-03-02",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "5d904f10-6356-45c2-8820-db3269908a03",
+      "title": "SYSTEM PREVENTIVE MAINTENANCE",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/System%20Preventive%20Maintenance.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "1-3-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-03-01",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "a99fa3fc-218f-49cb-8216-296a4ef0fe8c",
+      "title": "TEMPORARY POWER SHUTDOWN FOR UPS MAINTENANCE",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/Temporary%20Power%20Shutdown%20for%20UPS%20Maintenance.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "30-8-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-08-30",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "f2a245ff-26e4-4b99-a7db-1a316d3dc93d",
+      "title": "TEMPORARY CLOSE WHARF 15",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2018/Temporary%20close%20wharf%2015.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "2-3-2018",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2018-03-02",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "9fd6d854-8262-4ed4-9b61-9af3d4a87d6e",
+      "title": "BREAKING OF FAST DURING THE MONTH OF RAMADHAN 1440H",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2019/Breaking%20of%20Fast%20During%20the%20Month%20of%20Ramadhan%201440H.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "3-5-2019",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2019-05-03",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "e3090ace-0c7b-4b78-8e31-026f27b0d0ed",
+      "title": "CIRCULAR SPEED LIMIT ENFORCEMENT AT NORTHPORT",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2019/Circular%20on%20Speed%20Limit%20Enforcement%20at%20Northport.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "3-5-2019",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2019-05-03",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "35e1263a-4941-4274-a47d-a266e2159921",
+      "title": "CIRCULAR ON STORAGE CHARGES FOR HEAVY VEHICLES",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2019/Circular%20on%20Storage%20Charges%20for%20Heavy%20Vehicles.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "29-5-2019",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2019-05-29",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "e5df14e6-012f-4410-903a-0fbeed121803",
+      "title": "INCIDENT AT NORTHPORT CONTAINER YARD",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2019/Company%20Statement%20-%20Incident%20at%20Northport%20Container%20Yard(1).pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "14-4-2019",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2019-04-14",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "1f5bf5b6-335a-426e-85d3-60ea70dcb9bd",
+      "title": "NOTIS LARANGAN PENGAMBILAN GAMBAR DAN VIDEO DI PREMIS NORTHPORT",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2019/NOTIS%20LARANGAN.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "29-5-2019",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2019-05-29",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "bc087466-fdbe-45cc-b25d-909db24df918",
+      "title": "PROHIBITION NOTICE",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2019/PROHIBITION%20NOTICE.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "29-5-2019",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2019-05-29",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "706939c5-2240-43a2-a4ad-b94ff27e21d4",
+      "title": "VEHICLE ROADWORTHINESS ENTERING PORT TERMINAL",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2019/Vehicle%20Roadworthiness%20Entering%20Port%20Terminal.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "9-5-2019",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2019-05-09",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "ff0c5eff-f598-4702-a12c-4f12e5c4ff71",
+      "title": "REPORTED COVID-19 POSITIVE CASES INVOLVING EMPLOYEES OF A CONTRACTOR COMPANY IN NORTHPORT (MALAYSIA) BHD",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Company%20Statement%20-%20Contractor%20(Stakeholders)%2030-12-2020(1).pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "30-12-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-12-30",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "b5a82853-3329-49b4-9032-82f1b7704966",
+      "title": "COVID-19 CASES INVOLVING FOREIGN WORKERS EMPLOYED BY PORT SERVICE CONTRACTORS IN PORT KLANG",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Company%20Statement%20-%20Contractor%20Company%20(Stakeholder)%2010-11-2020.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "10-11-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-11-10",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "69b5cc2c-3b21-4242-8755-c1006b9b31bd",
+      "title": "REPORTED COVID-19 POSITIVE CASES INVOLVING EMPLOYEES OF A CONTRACTOR COMPANY IN NORTHPORT (MALAYSIA) BHD",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Company%20Statement%20-%20Contractor%20Company%20(Stakeholder)%2025-11-2020.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "25-11-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-11-25",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "db62eaee-802f-4af7-a641-8ecc30a85b6a",
+      "title": "REPORTED COVID-19 POSITIVE CASES INVOLVING EMPLOYEES OF A CONTRACTOR COMPANY IN NORTHPORT (MALAYSIA) BHD",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Company%20Statement%20-%20Contractor%20NDSB2(Stakeholders)%2018-11-%202020.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "18-11-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-11-18",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "579b1628-1f7d-4612-ac8b-62228a238e93",
+      "title": "REPORTED COVID-19 POSITIVE CASES INVOLVING EMPLOYEES OF TWO (2) CONTRACTOR COMPANIES IN NORTHPORT (MALAYSIA) BHD",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Company%20Statement%20-%20Contractors%20(Stakeholders)%2028-12-2020.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "28-12-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-12-28",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "03e9196f-051b-4c62-9437-b1f5edf2a96e",
+      "title": "OFFICIAL STATEMENT REGARDING COVID-19 CASE IN NORTHPORT (MALAYSIA) BHD",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Company%20Statement%20-%20Staff%20(Stakeholders)%2030-11-2020.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "30-11-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-11-30",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "a9432645-f113-45a4-bc7e-4c4084bc14a6",
+      "title": "REPORTED COVID-19 POSITIVE CASES INVOLVING EMPLOYEES OF A TENANT IN NORTHPORT (MALAYSIA) BHD",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Company%20Statement%20-%20Tenant%20(Stakeholder)%203-12-2020.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "3-12-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-12-03",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "18e3f0a6-e1bc-466f-8c7d-c413b26c3d9e",
+      "title": "REPORTED COVID-19 POSITIVE CASES INVOLVING EMPLOYEES OF A TENANT IN NORTHPORT (MALAYSIA) BHD",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Company%20Statement%20-%20Tenant%20(Stakeholders)%2015-12-2020.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "15-12-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-12-15",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "aafc24a7-4842-4a1a-9323-48a4340594c6",
+      "title": "REPORTED COVID-19 POSITIVE CASES INVOLVING EMPLOYEES OF A TENANT IN NORTHPORT (MALAYSIA) BHD",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Company%20Statement%20-%20Tenant%20(Stakeholders)%2019-11-2020.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "19-11-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-11-19",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "dcb80947-714a-4f3b-afa3-25a6c8d58d52",
+      "title": "EXTENSION OF DEADLINE TO SUBMIT WAIVER OF STORAGE AND REMOVAL CHARGE",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/DEADLINE%20TO%20SUBMIT%20WAIVER%20OF%20STORAGE.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "9-6-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-06-09",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "9957b03a-7bd6-486c-be6e-cb586f582ff7",
+      "title": "NOTIS KEMASKINI KEAHLIAN DI DALAM KUMPULAN KERJA RASMI MELALUI APLIKASI KOMUNIKASI DAN MEDIA SOSIAL",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Kemaskini%20Keahlian%20dalam%20Kumpulan%20Kerja%20Rasmi.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "1-4-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-04-01",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "9599f7c5-39dd-410c-8b83-c14cdfb4b7b6",
+      "title": "KEMASKINI MAKLUMAT BERKAITAN INISIATIF SYARIKAT MENDEPANI WABAK COVID-19",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Kemaskini%20Maklumat%20Berkaitan%20Inisiatif%20Syarikat%20Mendepani%20Wabak%20COVID-19%20(v2).pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "1-4-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-04-01",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "910f0145-eec9-465e-8c36-0781f7ac2d9c",
+      "title": "INCENTIVES FOR THE PORT AND LOGISTICS SECTOR IN PORT KLANG FOLLOWING THE IMPACT OF COVID-19 PANDEMIC OUTBREAK (DETAILS ON EXTENSION OF FREE STORAGE)",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Northport%20Circular%20070820%20reduce-compressed.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "3-8-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-08-03",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "4d964838-796d-4802-b69b-ce336845348e",
+      "title": "NORTHPORT'S OPERATIONS DURING CONDITIONAL MOVEMENT CONTROL ORDER",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Northport's%20Operations%20During%20Conditional%20Movement%20Control%20Order.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "8-10-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-10-08",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "e1084a6f-2001-4c82-a032-707082201290",
+      "title": "PENGUATKUASAAN PEMAKAIAN TOPI KELEDAR DAN \"VEST\" KESELAMATAN KE ATAS PENGGUNAAN MOTOSIKAL DI DALAM TERMINAL NORTHPORT",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/PENGUATKUASAAN%20PEMAKAIAN%20TOPI%20KELEDAR%20DAN%20VEST%20KESELAMATAN%20KE%20ATAS%20PENGGUNAAN%20MOTOSIKAL%20DI%20DALAM%20TERMINAL%20NORTHPORT.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "3-6-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-06-03",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "3110df17-a6cb-4924-bb34-340de3d258e1",
+      "title": "NORTHPORT GATE ACCESS CONTROL SYSTEM MIGRATION & REGISTRATION FOR PORT USERS (NON-HAULIERS)",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2020/Poster-Gate-pemberitahuan-utk-pengguna-luar-ENG.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "17-9-2020",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2020-09-17",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "0171b8d0-4161-4667-b4ab-03b681a041d9",
+      "title": "KESAN NEGATIF COVID-19 KEPADA INDIVIDU, KELUARGA & SYARIKAT",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2021/Kesan%20Negatif%20COVID-19%20kepada%20Individu,%20Keluarga%20&%20Syarikat.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "5-1-2021",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2021-01-05",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "d668d850-2020-4f91-a1cc-d03d4301df97",
+      "title": "NASIHAT UNTUK MENGELAKKAN DARIPADA MENGUNJUNGI TEMPAT-TEMPAT SESAK DI BULAN RAMADHAN & HARI RAYA AIDILFITRI",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2021/Nasihat%20untuk%20Mengelakkan%20Berkunjung%20ke%20Tempat%20yang%20Sesak%20di%20%20Bulan%20Rmadhan%20dan%20Hari%20Raya%20Aidilfitri.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "27-4-2021",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2021-04-27",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "a19a43f8-c093-410c-a29f-debe61e62412",
+      "title": "NOTIFICATION ON SERVICE CHARGE FOR RE-ISSUANCE/REPLACE OF DOCUMENT",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2021/Notice%20-%20Service%20Charge%20for%20Re-Issuance%20or%20Replacement%20of%20Document.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "24-3-2021",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2021-03-24",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "febb659b-8a1b-42b5-b01f-954bf739dba7",
+      "title": "PELAKSANAAN PAPERLESS EIR UNTUK PENGELUARAN FCL IMPORT KONTENA MELALUI NORTHPORT",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2021/Pelaksanaan%20Paperless%20EIR%20untuk%20Pengeluaran%20FCL%20Import%20Kontena%20Melalui%20Northport.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "5-3-2021",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2021-03-05",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "618fe1c1-d720-458d-aad4-dd5e04f7f68c",
+      "title": "PEMAKAIAN WAJIB PELITUP MUKA DI PREMIS NORTHPORT",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2021/Pemakaian%20Wajib%20Pelitup%20Muka%20di%20Premis%20Northport.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "26-4-2021",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2021-04-26",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "8cbb1e26-24d3-470b-9927-14b3e011bb90",
+      "title": "PEMBERITAHUAN MENGENAI POLISI WHISTLEBLOWING",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2021/Pemberitahuan%20-%20Polisi%20Whistleblowing.png",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "20-4-2021",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2021-04-20",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "ad5ee4b2-6ab5-45d0-bacc-c6f098446d27",
+      "title": "KETETAPAN PENGANJURAN MESYUARAT ATAU PERBINCANGAN DAN PENANGGUHAN AKTIVITI BERKUMPULAN",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2022/Ketetapan%20Penganjuran%20Mesyuarat%20atau%20Perbincangan%20dan%20Penangguhan%20Aktiviti%20Berkumpulan.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "14-2-2022",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2022-02-14",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "4dd15cc1-a666-4a07-80f6-f349431c2a47",
+      "title": "NASIHAT KESELAMATAN JALAN RAYA BAGI SAMBUTAN HARI RAYA AIDILFITRI",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2022/Nasihat%20Keselamatan%20Jalan%20Raya%20Bagi%20Sambutan%20Hari%20Raya%20Aidilfitri.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "28-4-2022",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2022-04-28",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "98ac5f43-cc93-4961-b642-e4b9c3cda3d5",
+      "title": "PORT CLOSURE DURING HARI RAYA AIDILFITRI 2022",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2022/Notice%20-%20Port%20Closure%20During%20Hari%20Raya%20Aidilfitri%202022.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "26-4-2022",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2022-04-26",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "925a66c1-d3ea-4de1-9b31-8d0051b45094",
+      "title": "FASA PERALIHAN KE ENDEMIK",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2022/Notis%20-%20Fasa%20Peralihan%20ke%20Endemik.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "4-4-2022",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2022-04-04",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "bfde76f7-8096-4997-8337-4ed2889b8111",
+      "title": "PELAKSANAAN KOMPAUN BAGI KESALAHAN PERATURAN PELABUHAN DI BAWAH PORT AUTHORITIES ACT 1963 (ACT 488) DAN UNDANG-UNDANG KECIL LEMBAGA PELABUHAN KELANG 1965",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2022/Notis%20-%20Pelaksanaan%20Kompaun%20Bagi%20Kesalahan%20Peraturan%20Pelabuhan%20di%20Bawah%20Port%20Authorities%20Act%201963.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "18-3-2022",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2022-03-18",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "e59288d5-f932-45cc-bafb-fba3a5f850e3",
+      "title": "WAKTU BEKERJA BAGI SELURUH KAKITANGAN NMB SEPANJANG BULAN RAMADHAN 2022",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2022/Waktu%20Bekerja%20bagi%20seluruh%20kakitangan%20NMB%20sepanjang%20bulan%20Ramadhan%202022.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "31-3-2022",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2022-03-31",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "fcb61961-592e-4e65-9668-b1012c3bc36e",
+      "title": "KENYATAAN SYARIKAT NO. 1 - PENCEMARAN AIR SG. PULOH",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2023/Company%20Statement%20-%20Suspected%20Water%20Pollution%20Around%20Sg.%20Puloh.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "9-6-2023",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2023-06-09",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "fd3ab55d-98b8-4d2a-92fa-13b50b7da762",
+      "title": "FIRE INCIDENT AT NORTHPORT CONTAINER YARD",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2023/Company%20Statement%20No.%201%20-Fire%20Incident%20at%20Northport%20Container%20Yard%20(7%20June%202023).pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "7-6-2023",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2023-06-07",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "06b0519f-dc09-4713-8019-cb9df19e98ca",
+      "title": "COMPULSORY WEARING OF FACE MASK ONBOARD THE VESSELS FROM INDIA",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2023/Notice%20-%20Compulsory%20Wearing%20of%20Face%20Mask%20Onboard%20the%20Vessels%20from%20India.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "5-10-2023",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2023-10-05",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "7d311ce7-6c6b-48d5-b32a-862a92f655a7",
+      "title": "COMPULSORY WEARING OF FACE MASK ONBOARD THE VESSELS FROM CHINA",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2023/Notice%20-%20Compulsory%20Wearing%20of%20Face%20Mask%20on%20Board%20the%20Vessel%20from%20China.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "10-1-2023",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2023-01-10",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "ba27d87b-931b-462a-921b-7adb3886ccda",
+      "title": "NOTIFICATION FOR WEEKLY BILLING OF MONITORING AND ELECTRICITY CHARGE FOR IMPORT REEFER CONTAINER",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2023/Notice%20-%20Weekly%20Billing%20of%20Monitoring%20and%20Electricity%20Charge%20for%20Import%20Reefer%20Container.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "5-12-2023",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2023-12-05",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "5facb6d3-4bd3-4dcc-bff1-da25eb98faa3",
+      "title": "ANNOUNCEMENT - APPOINTMENT OF CEO OF MMC PORTS",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2024/Announcement%20-%20Appointment%20of%20CEO%20of%20MMC%20Ports.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "1-12-2024",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2024-12-01",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "19a49346-7388-4ae1-b4a4-d48dde2b0eb6",
+      "title": "ANNOUNCEMENT - APPOINTMENT OF NORTHPORT CHIEF EXECUTIVE OFFICER & CHIEF OPERATING OFFICER",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2024/Announcement%20-%20Appointment%20of%20Northport%20Chief%20Executive%20Officer%20&%20Chief%20Operating%20Officer.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "1-12-2024",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2024-12-01",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "05c14d8c-ecd6-4a14-8f33-f711e3f33c06",
+      "title": "10-2024 ANNOUNCEMENT - NORTHPORT ACCESS CONTROL SYSTEM V1",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2024/Announcement%20-%20Northport%20Access%20Control%20System%20v1.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": null,
+        "rule": "missing",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "unknown",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": null,
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "c1a568e5-47e5-432a-9c74-f18480d6ee7f",
+      "title": "ANNOUNCEMENT - NORTHPORT ACCESS CONTROL SYSTEM V2",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2024/Announcement%20-%20Northport%20Access%20Control%20System%20v2.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "10-12-2024",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2024-12-10",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "36c942e1-3555-4ba8-a75e-2782c8480d67",
+      "title": "NOTICE - 6% SERVICE TAX ON LOGISTICS SERVICES",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2024/Notice%20-%206%20Service%20Tax%20on%20Logistics%20Services.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "1-3-2024",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2024-03-01",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "fafa4aa7-1316-450a-b25f-3bc61953d380",
+      "title": "NOTICE - BREAKING OF FAST DURING THE MONTH OF RAMADHAN 1445H",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2024/Notice%20-%20Breaking%20of%20Fast%20During%20the%20Month%20of%20Ramadhan%201445H.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "1-3-2024",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2024-03-01",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "6d387f85-5296-4ba1-920a-73d91f7e64e4",
+      "title": "NOTICE - IMPLEMENTATION OF CUSTOMS REMOTE GATE",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2024/Notice%20-%20Implementation%20of%20Customs%20Remote%20Gate.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "2-8-2024",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2024-08-02",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "df43d33d-1ccd-4b36-bad1-0f173ed6a4b9",
+      "title": "KENYATAAN SYARIKAT NO. 1 - PENCEMARAN AIR SG. PULOH",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2024/Notice%20-%20Port%20Closure%20During%20Hari%20Raya%20Aidilfitri%202024.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "9-6-2024",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2024-06-09",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "d385de2f-2b13-48bf-9c7b-88f61603e0de",
+      "title": "NOTICE - SCHEDULED MAINTENANCE FOR THE CONVENTIONAL LOGISTICS SYSTEM (CLS)",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2024/Notice%20-%20Scheduled%20Maintenance%20for%20the%20Conventional%20Logistics%20System%20(CLS).pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "16-10-2024",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2024-10-16",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "f50f5740-a56d-4c9c-9277-69e2787a0f4c",
+      "title": "NOTICE - WEEKLY BILLING OF MONITORING AND ELECTRICITY CHARGE FOR IMPORT REEFER CONTAINER",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2024/Notice%20-%20Weekly%20Billing%20of%20Monitoring%20and%20Electricity%20Charge%20for%20Import%20Reefer%20Container.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "7-10-2024",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2024-10-07",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "f6a9d49d-2cd7-4387-933e-fea3ccfecee6",
+      "title": "ANNOUNCEMENT - NORTHPORT ACTING CEO",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2025/Announcement-Northport%20Acting%20CEO.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "15-8-2025",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2025-08-15",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "bf33bf6f-bfc9-4f83-862e-e2fe1d68d9bd",
+      "title": "NOTIFICATION ON PORT KELANG AUTHORITY (SCALE OF RATES, DUES AND CHARGES)",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2025/NOTIFICATION%20ON%20PORT%20KELANG%20AUTHORITY%20(SCALE%20OF%20RATES,%20DUES%20AND%20CHARGES).pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "14-6-2025",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2025-06-14",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "241670be-6de2-485f-b701-f791aaa8476e",
+      "title": "NOTIFICATION ON THE IMPLEMENTATION OF SERVICE TAX ON RENTAL OR LEASING",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2025/NOTIFICATION%20ON%20THE%20IMPLEMENTATION%20OF%20SERVICE%20TAX%20ON%20RENTAL%20OR%20LEASING.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "9-7-2025",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2025-07-09",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "89a9e018-e220-477b-8fa1-a62d90c8e4ee",
+      "title": "NOTIFICATION ON NORTHPORT'S PORT RECEPTION FACILITIES (PRF) SERVICES",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2025/Notification%20on%20Northport%20PRF%20Services.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "19-12-2025",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2025-12-19",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "ce3c6aa6-b036-40e4-9250-b502a7c73397",
+      "title": "NOTIFICATION ON THE IMPLEMENTATION OF PROGRESSIVE BILLING FOR LONG STAY CONTAINERS",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2025/Notification%20on%20the%20Implementation%20of%20Progressive%20Billing%20for%20Long%20Stay%20Containers.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "11-8-2025",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2025-08-11",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "8b6c5617-1392-4004-8419-e97a1e3df3cc",
+      "title": "NOTIFICATION ON THE SECOND PHASE FOR REVISION OF TARIFF RATES OF PORT KELANG AUTHORITY (SCALE OF RATES, DUES AND CHARGES) (AMENDMENT) (NO.2) BT-LAWS 2025",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2025/Notification%20on%20the%20Second%20Phase%20for%20Revision%20of%20Tariff%20Rates.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "28-11-2025",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2025-11-28",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "f0a1f521-0e3a-4eb5-9dc8-4285b0ac2ac1",
+      "title": "PEMBERITAHUAN - LARANGAN PENGGUNAAN NAMA, LOGO ATAU JENAMA NORTHPORT TANPA KEBENARAN",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2025/Pemberitahuan%20-%20Larangan%20Penggunaan%20Nama,%20,%20Logo%20atau%20Jenama%20Northport%20Tanpa%20Kebenaran.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "17-3-2025",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2025-03-17",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "854ca84c-23eb-42e3-b4fb-8242d87f1ad3",
+      "title": "BREAKING OF FAST DURING THE MONTH OF RAMADHAN 1447H",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2026/Breaking%20of%20Fast%20During%20the%20Month%20of%20Ramadhan%201447H.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "12-02-2026",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-02-12",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "bacf0ac9-eb51-4f63-8718-426121349b7e",
+      "title": "NOTICE OF NORTHPORT'S NEW CONTAINER TERMINAL OPERATING SYSTEM (NAVIS N4) GO-LIVE",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2026/Notice%20of%20Northport's%20New%20Container%20Terminal%20Operating%20System%20N4%20Go%20Live%20-%20Both.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "6-10-2026",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-10-06",
+        "publishedAt": null
+      },
+      "versions": 1
+    },
+    {
+      "id": "57bbcc7b-66b6-4f08-905e-c191c32237c0",
+      "title": "STAMP DUTY CIRCULAR TO VENDORS/SUPPLIERS",
+      "url": "https://www.northport.com.my/np/docs/Announcements/2026/Stamp%20Duty%20Circular%20to%20Vendors%20Suppliers.pdf",
+      "publishedAt": null,
+      "dateEvidence": {
+        "raw": "15-09-2026",
+        "rule": "configured_dmy_dash",
+        "basis": "MY-P03 index observed 2026-10-13: each article.card2 has one document link with leading D-M-YYYY and title. Month-only 10-2024 stays unknown; no publication time/offset supplied.",
+        "calendar": "gregorian",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "localDate": "2026-09-15",
+        "publishedAt": null
+      },
+      "versions": 1
+    }
+  ]
+}

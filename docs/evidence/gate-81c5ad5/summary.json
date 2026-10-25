@@ -1,0 +1,33 @@
+{
+  "sha": "81c5ad552575c6bccfc7f19b836bf41632ee739a",
+  "cleanAtStart": true,
+  "results": [
+    {
+      "name": "install",
+      "command": "pnpm install --frozen-lockfile",
+      "sha": "81c5ad552575c6bccfc7f19b836bf41632ee739a",
+      "started": "2026-10-13T09:30:14.144Z",
+      "finished": "2026-10-13T09:30:16.370Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "build",
+      "command": "pnpm build",
+      "sha": "81c5ad552575c6bccfc7f19b836bf41632ee739a",
+      "started": "2026-10-13T09:30:16.371Z",
+      "finished": "2026-10-13T09:30:30.815Z",
+      "rawExit": 0,
+      "signal": null
+    },
+    {
+      "name": "typecheck",
+      "command": "pnpm typecheck",
+      "sha": "81c5ad552575c6bccfc7f19b836bf41632ee739a",
+      "started": "2026-10-13T09:30:30.816Z",
+      "finished": "2026-10-13T09:30:33.473Z",
+      "rawExit": 2,
+      "signal": null
+    }
+  ]
+}

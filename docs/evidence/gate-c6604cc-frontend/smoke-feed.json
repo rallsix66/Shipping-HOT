@@ -1,0 +1,9 @@
+{
+  "name": "smoke-feed",
+  "command": "pnpm smoke:p3-feed-freshness",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-review-build",
+  "sha": "c6604cc9b803d3a590354cf4d79ad1f3d7237c5c",
+  "startedAt": "2026-10-14T03:47:28.504Z",
+  "endedAt": "2026-10-14T03:47:29.647Z",
+  "rawExit": 0
+}

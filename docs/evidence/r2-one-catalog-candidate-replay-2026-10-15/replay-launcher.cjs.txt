@@ -1,0 +1,11 @@
+const fs=require('node:fs'),cp=require('node:child_process')
+const dir='docs/evidence/r2-one-catalog-candidate-replay-2026-10-15';fs.mkdirSync(dir,{recursive:true})
+if(fs.existsSync(dir+'/launch.json'))throw Error('replay_already_launched')
+const sha=cp.execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim()
+if(sha!==fs.readFileSync('.tmp/one-catalog-candidate-code-sha.txt','utf8').trim())throw Error('wrong_code_sha')
+const args=['node_modules/vitest/vitest.mjs','run','-c','.tmp/one-catalog-candidate-replay-20261015.config.ts'],startedAt=new Date().toISOString()
+fs.writeFileSync(dir+'/launch.json',JSON.stringify({sha,startedAt,command:[process.execPath,...args],actualSourceHttpRequests:0,material:'Complete original ONE635664byte HTML through collector, not reconstructed JSON response'},null,2)+'\n')
+const r=cp.spawnSync(process.execPath,args,{windowsHide:true,encoding:'utf8',maxBuffer:1<<24})
+fs.writeFileSync(dir+'/command.json',JSON.stringify({sha,startedAt,finishedAt:new Date().toISOString(),command:[process.execPath,...args],rawExit:r.status,stdoutCapturedUtf8:r.stdout||'',stderrCapturedUtf8:r.stderr||''},null,2)+'\n')
+fs.writeFileSync(dir+'/stdout.log',(r.stdout||'').trimEnd()+'\n');fs.writeFileSync(dir+'/stderr.log',(r.stderr||'').trimEnd()+(r.stderr?'\n':''))
+console.log(JSON.stringify({rawExit:r.status,sha,evidence:dir}));process.exitCode=r.status??1

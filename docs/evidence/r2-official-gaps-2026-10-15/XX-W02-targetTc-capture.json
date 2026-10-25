@@ -1,0 +1,19 @@
+{
+  "id": "XX-W02-targetTc",
+  "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+  "phase": "initial",
+  "host": "www.jma.go.jp",
+  "startedAt": "2026-10-15T05:21:25.074Z",
+  "systemDnsCalls": 1,
+  "getAttempts": 0,
+  "status": "BLOCKED",
+  "rawLocalOnly": true,
+  "qualificationChanged": false,
+  "addressClassification": "blocked_address",
+  "secureEntryError": {
+    "code": "blocked_address",
+    "message": "Resolved address is not a public address: 198.18.2.99"
+  },
+  "httpStatus": null,
+  "finishedAt": "2026-10-15T05:21:25.075Z"
+}

@@ -1,0 +1,11 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/public-index-final-build
+
+ ✓ .tmp/public-index-raw-replay.test.ts (1 test) 547ms
+   ✓ full real archived bytes through disabled configs, repeat collection and read-only SQLite reopen  547ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  16:19:34
+   Duration  1.50s (transform 424ms, setup 0ms, import 755ms, tests 547ms, environment 0ms)
+

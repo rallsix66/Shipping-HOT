@@ -1,0 +1,676 @@
+command: pnpm test --run
+full_sha: 312ee273a25f03292d28e70fbb1241244cc20d3b
+started: 2026-10-21T03:32:05.090Z
+finished: 2026-10-21T03:32:28.715Z
+raw_exit_code: 0
+--- stdout ---
+
+> shipping-hot@0.0.41 test D:\wt-s2
+> vitest -c vitest.config.ts "--run"
+
+
+ RUN  v4.0.18 D:/wt-s2
+
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'translation-sync'[39m,
+  providerId: [32m'deepseek'[39m,
+  capability: [32m'translation'[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'translation-sync'[39m,
+  providerId: [32m'deepseek'[39m,
+  capability: [32m'translation'[39m
+}
+[info] runtime stopped
+ ✓ server/services/article-translation-display.test.ts (7 tests) 1393ms
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'translation-sync'[39m,
+  providerId: [32m'deepseek'[39m,
+  capability: [32m'translation'[39m
+}
+[info] job success {
+  jobId: [32m'translation-sync'[39m,
+  providerId: [32m'deepseek'[39m
+}
+[info] runtime stopped
+ ✓ server/runtime/translation-sync-job.test.ts (17 tests) 1612ms
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+[info] job started {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+ ✓ server/services/translation-live-acceptance.test.ts (28 tests) 2274ms
+     ✓ reads successful cache and Feed display after a real database reopen  339ms
+[info] runtime stopped
+ ✓ server/intel/llm/receipts.test.ts (24 tests) 2484ms
+ ✓ server/api/shipping/intel/read-http.test.ts (19 tests) 2244ms
+ ✓ test/clipper-dom.test.ts (53 tests) 2918ms
+   ✓ preserves 'widgets with formatted prose' from 'selection' preview through save payload to stored material  602ms
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+ ✓ server/services/article-translation-view.test.ts (10 tests) 2687ms
+     ✓ reports complete at 20/20  308ms
+     ✓ judges eligibility on the mutable state completeness the page shows  443ms
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+ ✓ server/services/v3-readiness.test.ts (24 tests) 2458ms
+[info] job started {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+[info] job success {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m
+}
+[info] runtime stopped
+ ✓ server/providers/nchmf-warning.test.ts (22 tests) 2721ms
+     ✓ partial article failures are reported and keep prior records (not cleared)  309ms
+     ✓ stores records in SQLite, re-run keeps first-received time, archives nothing on partial failure  399ms
+     ✓ partial success/failure: successful articles stored, run + source status failed with failed postIds/count  360ms
+ ✓ server/services/article-service.test.ts (11 tests) 2622ms
+     ✓ rotates through all allowed articles across bounded batches  488ms
+ ✓ server/intel/collect.test.ts (22 tests) 2795ms
+ ✓ server/intel/material-read.test.ts (24 tests) 2945ms
+ ✓ test/manual-intel.test.ts (15 tests) 3656ms
+   ✓ connects checklist/save/duplicate/revision/old-version/reload callbacks to real manual repositories and read DTOs  410ms
+   ✓ rolls back an audit failure and uses the same ID until retry succeeds; edited failed input receives a new ID  406ms
+   ✓ keeps a confirmed save and warns for a real active intel-manual refetch rejection  301ms
+   ✓ keeps a confirmed save and warns for a real active intel-items refetch rejection  417ms
+   ✓ keeps a confirmed save and warns for a real active intel-item refetch rejection  316ms
+   ✓ retains input, releases busy and retries the same ID with real QueryClient after before_commit failure  383ms
+   ✓ retains input, releases busy and retries the same ID with real QueryClient after after_commit failure  316ms
+   ✓ keeps invalid date input on server rejection and saves unknown publication after the user corrects it  312ms
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+[info] job success {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m
+}
+[info] job started {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+[info] job success {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+[info] job success {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m
+}
+[info] job started {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+ ✓ server/services/translation-t2.test.ts (12 tests) 2242ms
+     ✓ keeps disabled, budget and missing-secret states ahead of a provider circuit block  560ms
+     ✓ rejects zero or exhausted budgets and does not expose secret values  382ms
+[info] job success {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m
+}
+[info] job started {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+[info] runtime stopped
+ ✓ server/intel/maersk-mofcom.test.ts (50 tests) 2418ms
+     ✓ never forwards the header opt-in to redirect http://www.maersk.com/news  389ms
+ ✓ server/providers/nmc-warning.test.ts (16 tests) 2343ms
+     ✓ partial failure: successes kept, failed page's old record kept stale, run + source status failed with column  334ms
+     ✓ first run, all pages failed: failure, never success-empty  396ms
+ ✓ server/shipping-store.read-only.test.ts (3 tests) 2313ms
+     ✓ reads Feed from SQLite without invoking any Provider  2274ms
+ ✓ server/intel/json-list-collect.test.ts (9 tests) 1713ms
+     ✓ collects a bounded inert data script from full HTML bytes without changing legacy limits  390ms
+ ✓ server/intel/manual-clip.test.ts (45 tests) 5735ms
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'slow-job'[39m,
+  providerId: [32m'provider-slow'[39m,
+  capability: [32m'test'[39m
+}
+[info] job success {
+  jobId: [32m'slow-job'[39m,
+  providerId: [32m'provider-slow'[39m
+}
+[info] runtime stopped
+ ✓ server/intel/chain.test.ts (1 test) 589ms
+   ✓ joins existing Runtime, archived safe-byte fetch, SQLite, restart, HTTP and real page SSR offline  588ms
+[info] runtime started {
+  jobs: [33m2[39m
+}
+[info] job started {
+  jobId: [32m'failing-job'[39m,
+  providerId: [32m'provider-failing'[39m,
+  capability: [32m'test'[39m
+}
+[info] job started {
+  jobId: [32m'healthy-job'[39m,
+  providerId: [32m'provider-healthy'[39m,
+  capability: [32m'test'[39m
+}
+[info] job success {
+  jobId: [32m'healthy-job'[39m,
+  providerId: [32m'provider-healthy'[39m
+}
+[info] job started {
+  jobId: [32m'failing-job'[39m,
+  providerId: [32m'provider-failing'[39m,
+  capability: [32m'test'[39m
+}
+[info] job success {
+  jobId: [32m'failing-job'[39m,
+  providerId: [32m'provider-failing'[39m
+}
+ ✓ server/services/promo-calendar.test.ts (12 tests) 2236ms
+     ✓ repeat generation is idempotent; same date carries one row per platform  374ms
+     ✓ confirm, edit date, regenerate: manual edit preserved, old confirmation invalid (history only)  550ms
+     ✓ manual edits and manual entries are never overwritten and stay distinguishable  335ms
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'provider-error-job'[39m,
+  providerId: [32m'provider-error'[39m,
+  capability: [32m'feed_sync'[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'stoppable-job'[39m,
+  providerId: [32m'provider-stoppable'[39m,
+  capability: [32m'test'[39m
+}
+[info] job success {
+  jobId: [32m'stoppable-job'[39m,
+  providerId: [32m'provider-stoppable'[39m
+}
+[info] runtime stopped
+ ✓ server/providers/tmd-cap.test.ts (48 tests) 1748ms
+     ✓ missing area or cross-country area yields no port impact  326ms
+ ✓ server/providers/bmkg-cap.test.ts (15 tests) 1779ms
+ ✓ server/intel/manual.test.ts (27 tests) 3439ms
+ ✓ server/database/policy.test.ts (19 tests) 2814ms
+     ✓ migrations reach schema v18  306ms
+[info] runtime started {
+  jobs: [33m2[39m
+}
+[info] job started {
+  jobId: [32m'capability-a'[39m,
+  providerId: [32m'provider-shared'[39m,
+  capability: [32m'capability-A'[39m
+}
+[info] job started {
+  jobId: [32m'capability-b'[39m,
+  providerId: [32m'provider-shared'[39m,
+  capability: [32m'capability-B'[39m
+}
+ ✓ server/runtime/intel-bootstrap.test.ts (9 tests) 1224ms
+[info] job success {
+  jobId: [32m'capability-a'[39m,
+  providerId: [32m'provider-shared'[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m2[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'cadence-job'[39m,
+  providerId: [32m'provider-cadence'[39m,
+  capability: [32m'cadence'[39m
+}
+[info] job success {
+  jobId: [32m'cadence-job'[39m,
+  providerId: [32m'provider-cadence'[39m
+}
+[info] job started {
+  jobId: [32m'cadence-job'[39m,
+  providerId: [32m'provider-cadence'[39m,
+  capability: [32m'cadence'[39m
+}
+[info] job success {
+  jobId: [32m'cadence-job'[39m,
+  providerId: [32m'provider-cadence'[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'skipped-job'[39m,
+  providerId: [32m'provider-skipped'[39m,
+  capability: [32m'skipped'[39m
+}
+[info] runtime stopped
+ ✓ server/database/translation.test.ts (10 tests) 1741ms
+ ✓ server/api/shipping/translation/secret.test.ts (5 tests) 369ms
+ ✓ server/runtime/translation-sync-article-job.test.ts (8 tests) 1380ms
+     ✓ excludes same-language, incomplete/restricted and historical versions  381ms
+ ✓ server/shipping-store.persistence.test.ts (3 tests) 568ms
+     ✓ migrates a persisted legacy local fact after a process-like restart  519ms
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] runtime stopped
+ ✓ server/runtime/background-runtime.test.ts (12 tests) 1961ms
+ ✓ server/intel/web-list-collect.test.ts (7 tests) 1598ms
+     ✓ passes archived HTML bytes through secure transport, decoding, parser and SQLite, then reads evidence after restart  391ms
+     ✓ retains old items, date evidence and versions after a failed version write  322ms
+ ✓ server/services/translation-service.test.ts (14 tests) 2242ms
+     ✓ separates historical display fallback from provider/model translation execution  357ms
+ ✓ server/services/port-weather-panel-official.test.ts (9 tests) 1586ms
+     ✓ negative: past expiry alert disappears from officialAlertImpacts  345ms
+ ✓ server/api/shipping/index.test.ts (2 tests) 361ms
+     ✓ uses cached Feed display text for Feed HOT while keeping Event HOT original  340ms
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'calendar-sync'[39m,
+  providerId: [32m'calendarific'[39m,
+  capability: [32m'calendar_sync'[39m
+}
+[info] job success {
+  jobId: [32m'calendar-sync'[39m,
+  providerId: [32m'calendarific'[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'calendar-sync'[39m,
+  providerId: [32m'calendarific'[39m,
+  capability: [32m'calendar_sync'[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'calendar-sync'[39m,
+  providerId: [32m'calendarific'[39m,
+  capability: [32m'calendar_sync'[39m
+}
+[info] job success {
+  jobId: [32m'calendar-sync'[39m,
+  providerId: [32m'calendarific'[39m
+}
+[info] runtime stopped
+ ✓ server/database/article.test.ts (8 tests) 1161ms
+ ✓ server/runtime/intel-production.test.ts (4 tests) 3102ms
+   ✓ holds a database-scoped lease across processes, refuses competitors and never deletes a stale lease  2246ms
+   ✓ actual Nitro plugin defaults intel off; GET is query-only and never starts collection  640ms
+ ✓ test/clipper-forum.test.ts (81 tests) 950ms
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'calendar-sync'[39m,
+  providerId: [32m'calendarific'[39m,
+  capability: [32m'calendar_sync'[39m
+}
+[info] runtime stopped
+ ✓ server/runtime/calendar-sync-job.test.ts (11 tests) 1555ms
+     ✓ aggregates final coverage through the default Provider-to-Repository path  346ms
+     ✓ requires every configured composite source to be fresh before cache-only skip  354ms
+ ✓ server/services/tropical-cyclone-lifecycle.test.ts (5 tests) 1211ms
+     ✓ preserves first missingFromListAt across repeat ok_empty sync  388ms
+ ✓ server/database/shipping.test.ts (4 tests) 888ms
+     ✓ persists port follow state independently from provider rows  338ms
+ ✓ server/services/real-data-gate.test.ts (4 tests) 745ms
+     ✓ fails when a normalized column is real but JSON provenance is Mock  337ms
+ ✓ server/services/marine-reference-status.test.ts (7 tests) 1009ms
+ ✓ server/intel/public-index-candidates-collect.test.ts (22 tests) 799ms
+   ✓ synthetic 'CN-T02' maps only its own list and preserves metadata/day evidence on repeats  309ms
+ ✓ server/services/forecast-retention-window.test.ts (15 tests) 709ms
+     ✓ panel returns window-end hours even with 300 old rows stored (afternoon)  346ms
+ ✓ server/services/article-fetch-transport.test.ts (17 tests) 539ms
+ ✓ server/intel/html-index-candidates-collect.test.ts (4 tests) 491ms
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'weather-alert-sync:tmd'[39m,
+  providerId: [32m'tmd'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+ ✓ test/reduce-motion.test.ts (2 tests) 34ms
+[info] job success {
+  jobId: [32m'weather-alert-sync:tmd'[39m,
+  providerId: [32m'tmd'[39m
+}
+[info] runtime stopped
+ ✓ scripts/s7-local-seed.test.ts (5 tests) 12006ms
+   ✓ prepares the existing S7 native schema/manifest for manual use without any app server, browser, business rows or provider activity  2356ms
+   ✓ does not accept legacy outside-tmp override flags or create a target outside .tmp  2269ms
+   ✓ recognizes a manual-only retained candidate as business data and never honors overwrite flags  2136ms
+   ✓ preserves an existing manifest in manual preparation even when its database is absent  2746ms
+   ✓ keeps the original default S7 fixture recipe and only adds the manual acceptance descriptor  2497ms
+ ✓ server/services/translation-recovery.test.ts (3 tests) 285ms
+ ✓ server/services/feed-translation-display.test.ts (11 tests) 325ms
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'weather-alert-sync:tmd'[39m,
+  providerId: [32m'tmd'[39m,
+  capability: [32m'weather_alerts'[39m
+}
+[info] runtime stopped
+ ✓ server/database/port-directory.test.ts (4 tests) 420ms
+ ✓ server/runtime/weather-alert-sync-job.test.ts (4 tests) 432ms
+ ✓ scripts/evidence-secret-scan.test.ts (2 tests) 368ms
+[info] runtime started {
+  jobs: [33m2[39m
+}
+[info] job started {
+  jobId: [32m'feed-sync:failed-source'[39m,
+  providerId: [32m'failed-source'[39m,
+  capability: [32m'feed_sync'[39m
+}
+[info] job started {
+  jobId: [32m'feed-sync:healthy-source'[39m,
+  providerId: [32m'healthy-source'[39m,
+  capability: [32m'feed_sync'[39m
+}
+[info] job success {
+  jobId: [32m'feed-sync:healthy-source'[39m,
+  providerId: [32m'healthy-source'[39m
+}
+[info] runtime stopped
+ ✓ test/r1-retired-surface.contract.test.ts (9 tests) 301ms
+ ✓ server/intel/id-mof-index.test.ts (31 tests) 229ms
+ ✓ server/runtime/feed-sync-job.test.ts (4 tests) 446ms
+ ✓ test/calendar-demo.test.ts (8 tests) 236ms
+ ✓ server/intel/post-clash-index.test.ts (18 tests) 406ms
+ ✓ server/api/shipping/intel/manual-http.test.ts (3 tests) 446ms
+ ✓ server/providers/metmalaysia-warning.test.ts (14 tests) 415ms
+ ✓ server/services/tropical-cyclone-sync-chain.test.ts (2 tests) 114ms
+ ✓ server/intel/web-list-conflicts-collect.test.ts (3 tests) 336ms
+ ✓ server/providers/feed.test.ts (24 tests) 145ms
+ ✓ server/providers/weather.test.ts (7 tests) 188ms
+ ✓ server/services/article-fetch-header-limit.test.ts (38 tests) 217ms
+ ✓ server/services/port-weather-panel.test.ts (2 tests) 240ms
+ ✓ server/intel/sitc-index.test.ts (39 tests) 325ms
+ ✓ server/database/migrations/015-ops-weather-calendar-policy.test.ts (2 tests) 436ms
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'tropical-cyclone-sync'[39m,
+  providerId: [32m'jma-typhoon'[39m,
+  capability: [32m'tropical_cyclone_sync'[39m
+}
+ ✓ server/runtime/tropical-cyclone-background-runtime.test.ts (1 test) 269ms
+ ✓ server/runtime/tropical-cyclone-sync-job.test.ts (1 test) 295ms
+ ✓ server/intel/thai-document-index.test.ts (4 tests) 206ms
+ ✓ server/intel/adaptive.test.ts (2 tests) 221ms
+ ✓ server/providers/article-extractor.test.ts (18 tests) 285ms
+ ✓ server/intel/sources/web-list.test.ts (35 tests) 224ms
+ ✓ server/runtime/weather-sync-job.test.ts (4 tests) 474ms
+ ✓ server/runtime/port-sync-job.test.ts (3 tests) 347ms
+ ✓ test/clip-import.test.ts (6 tests) 136ms
+ ✓ server/services/tropical-cyclone-panel.test.ts (1 test) 132ms
+ ✓ server/services/weather-impact-interval.test.ts (3 tests) 127ms
+ ✓ server/database/shipping-weather-batch.test.ts (1 test) 156ms
+ ✓ server/services/marine-reference.test.ts (5 tests) 342ms
+     ✓ returns the labelled reference separately and leaves forecasts/forecastMeta/impacts of the port untouched  324ms
+ ✓ server/secrets/file-secret-store.test.ts (3 tests) 452ms
+     ✓ persists local secrets with redacted metadata and restrictive mode  444ms
+ ✓ server/api/shipping/settings.test.ts (5 tests) 67ms
+ ✓ server/services/weather-impact-chain.test.ts (1 test) 120ms
+ ✓ server/services/tropical-cyclone-wr-s03-impact-chain.test.ts (1 test) 132ms
+ ✓ server/intel/sources/json-list.test.ts (42 tests) 143ms
+ ✓ server/intel/sources/html-index-candidates.test.ts (25 tests) 203ms
+ ✓ server/intel/vn-disaster-index.test.ts (22 tests) 347ms
+ ✓ server/providers/weather-alerts.test.ts (16 tests) 53ms
+ ✓ server/providers/jma-tropical-cyclone.test.ts (5 tests) 43ms
+ ✓ scripts/lib/two-index-probe-results.test.ts (14 tests) 102ms
+ ✓ server/providers/translation/deepseek-provider.test.ts (28 tests) 117ms
+ ✓ server/services/port-weather-eight-port-audit.test.ts (1 test) 148ms
+ ✓ scripts/r1-migration-copy-guard.test.ts (12 tests | 3 skipped) 124ms
+ ✓ server/runtime/registry.test.ts (2 tests) 338ms
+ ✓ server/services/annual-calendar.test.ts (5 tests) 41ms
+ ✓ server/services/article-translation-source.test.ts (10 tests) 32ms
+ ✓ scripts/lib/adr009-mapping.test.ts (7 tests) 28ms
+ ✓ server/intel/sources/json-list-html.test.ts (5 tests) 98ms
+ ✓ server/intel/sources/web-list-conflicts.test.ts (12 tests) 111ms
+ ✓ test/clipper-bridge.test.ts (26 tests) 27ms
+ ✓ server/providers/calendar.test.ts (28 tests) 26ms
+ ✓ server/providers/feed-formats.test.ts (6 tests) 23ms
+ ✓ scripts/lib/forecast-window-coverage.test.ts (12 tests) 18ms
+ ✓ test/policy-console.test.ts (12 tests) 25ms
+ ✓ server/services/response-decoding.test.ts (6 tests) 10ms
+ ✓ server/services/translation-protection.test.ts (10 tests) 26ms
+ ✓ server/database/migrations/012-translation-runtime-work-state.test.ts (2 tests) 16ms
+ ✓ server/services/weather-calibration-replay.test.ts (25 tests) 22ms
+ ✓ server/intel/sources/web-list-english-12h.test.ts (29 tests) 23ms
+ ✓ server/services/open-meteo-port-forecast.test.ts (4 tests) 11ms
+ ✓ server/env-loader.test.ts (3 tests) 16ms
+ ✓ server/services/official-alert-impact.test.ts (36 tests) 15ms
+ ✓ server/middleware/security.test.ts (15 tests) 13ms
+ ✓ server/runtime/bootstrap.test.ts (1 test) 141ms
+ ✓ server/services/article-fetch-security.test.ts (10 tests) 14ms
+ ✓ shared/shipping-rules.test.ts (7 tests) 10ms
+ ✓ test/ui-smoke.test.ts (13 tests) 21ms
+ ✓ scripts/lib/recording-fetcher.test.ts (4 tests) 12ms
+ ✓ test/ports-demo.test.ts (11 tests) 81ms
+ ✓ shared/shipping-engine.test.ts (5 tests) 10ms
+ ✓ test/clipper-package.test.ts (2 tests) 8ms
+ ✓ server/services/weather-rule-evaluation.test.ts (4 tests) 8ms
+ ✓ server/services/precipitation-window.test.ts (4 tests) 7ms
+ ✓ shared/shipping-feed.test.ts (2 tests) 8ms
+ ✓ server/runtime/clip-synthetic-guard.test.ts (9 tests) 9ms
+ ✓ server/services/weather-impact-engine.test.ts (14 tests) 8ms
+ ✓ server/services/weather-rule-coverage.test.ts (7 tests) 9ms
+ ✓ server/services/annual-calendar-diff.test.ts (4 tests) 8ms
+ ✓ server/services/jma-typhoon-parse.test.ts (3 tests) 6ms
+ ✓ server/middleware/retired-spa-routes.test.ts (5 tests) 7ms
+ ✓ server/services/jma-target-tc-strict.test.ts (3 tests) 6ms
+ ✓ server/services/translation-failure-policy.test.ts (20 tests) 6ms
+ ✓ server/providers/contracts.test.ts (8 tests) 4ms
+ ✓ server/services/translation-secret.test.ts (3 tests) 5ms
+ ✓ server/services/tropical-cyclone-wr-s03.test.ts (3 tests) 4ms
+ ✓ test/common.test.ts (1 test) 2ms
+ ✓ server/services/typhoon-position-validity.test.ts (3 tests) 4ms
+ ✓ server/providers/shipping.test.ts (6 tests) 7ms
+ ✓ server/providers/jtwc-typhoon-fixture.test.ts (1 test) 4ms
+ ✓ server/shipping-store.test.ts (3 tests) 7ms
+ ✓ server/providers/translation/fake-provider.test.ts (1 test) 4ms
+
+ Test Files  143 passed (143)
+      Tests  1697 passed | 3 skipped (1700)
+   Start at  11:32:05
+   Duration  22.60s (transform 48.83s, setup 0ms, import 117.63s, tests 113.32s, environment 38ms)
+
+
+--- stderr ---
+Duplicated imports "string", the one from "D:/wt-s2/shared/annual-calendar.ts" has been ignored and "D:/wt-s2/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/wt-s2/shared/annual-calendar.ts" has been ignored and "D:/wt-s2/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/wt-s2/shared/annual-calendar.ts" has been ignored and "D:/wt-s2/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/wt-s2/shared/annual-calendar.ts" has been ignored and "D:/wt-s2/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/wt-s2/shared/annual-calendar.ts" has been ignored and "D:/wt-s2/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/wt-s2/shared/calendar.ts" has been ignored and "D:/wt-s2/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/wt-s2/shared/policy.ts" has been ignored and "D:/wt-s2/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/wt-s2/shared/policy.ts" has been ignored and "D:/wt-s2/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/wt-s2/shared/policy.ts" has been ignored and "D:/wt-s2/shared/promo-calendar.ts" is used
+[error] job failed {
+  jobId: [32m'translation-sync'[39m,
+  providerId: [32m'deepseek'[39m,
+  errorCode: [32m'auth_failed'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  errorCode: [32m'nchmf_partial_article_failure'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  errorCode: [32m'nchmf_partial_article_failure'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  errorCode: [32m'provider_contract_changed'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  errorCode: [32m'nchmf_partial_article_failure'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nchmf'[39m,
+  providerId: [32m'nchmf'[39m,
+  errorCode: [32m'provider_contract_changed'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m,
+  errorCode: [32m'nmc_partial_page_failure'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m,
+  errorCode: [32m'provider_contract_changed'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:nmc'[39m,
+  providerId: [32m'nmc'[39m,
+  errorCode: [32m'provider_contract_changed'[39m
+}
+[error] job failed {
+  jobId: [32m'failing-job'[39m,
+  providerId: [32m'provider-failing'[39m,
+  errorCode: [32m'job_failed'[39m
+}
+[error] job failed {
+  jobId: [32m'provider-error-job'[39m,
+  providerId: [32m'provider-error'[39m,
+  errorCode: [32m'rate_limited'[39m
+}
+[error] job failed {
+  jobId: [32m'capability-b'[39m,
+  providerId: [32m'provider-shared'[39m,
+  errorCode: [32m'capability_b_failed'[39m
+}
+[error] Shipping SQLite unavailable; no in-memory replacement will be used database unavailable
+  at D:/wt-s2/server/shipping-store.persistence.test.ts:98:5
+  at D:/wt-s2/server/shipping-store.ts:64:7
+  at initialize (D:/wt-s2/server/shipping-store.ts:79:5)
+  at syncCalendarEvents (D:/wt-s2/server/shipping-store.ts:213:3)
+  at D:/wt-s2/server/shipping-store.persistence.test.ts:199:5
+  at processTicksAndRejections (node:internal/process/task_queues:104:5)
+  at /D:/wt-s2/node_modules/.pnpm/@vitest+runner@4.0.18/node_modules/@vitest/runner/dist/index.js:915:20
+[error] job failed {
+  jobId: [32m'calendar-sync'[39m,
+  providerId: [32m'calendarific'[39m,
+  errorCode: [32m'provider_unavailable'[39m
+}
+[error] job failed {
+  jobId: [32m'weather-alert-sync:tmd'[39m,
+  providerId: [32m'tmd'[39m,
+  errorCode: [32m'provider_contract_changed'[39m
+}
+[error] job failed {
+  jobId: [32m'feed-sync:failed-source'[39m,
+  providerId: [32m'failed-source'[39m,
+  errorCode: [32m'job_failed'[39m
+}
+[error] job failed {
+  jobId: [32m'tropical-cyclone-sync'[39m,
+  providerId: [32m'jma-typhoon'[39m,
+  errorCode: [32m'jma_detail_total_failure'[39m
+}
+

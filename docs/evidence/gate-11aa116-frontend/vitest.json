@@ -1,0 +1,9 @@
+{
+  "name": "vitest",
+  "command": "pnpm exec vitest run -c vitest.config.ts",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\ports-demo-review-build",
+  "sha": "11aa1162a286d96bdc7a44a2f61a95d3d2a886e8",
+  "startedAt": "2026-10-14T03:00:21.517Z",
+  "endedAt": "2026-10-14T03:00:34.016Z",
+  "rawExit": 0
+}

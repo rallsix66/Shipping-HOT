@@ -1,0 +1,37 @@
+const fs=require('node:fs'), crypto=require('node:crypto'), {load}=require('cheerio');
+const dir='docs/evidence/r2-six-public-2026-10-14', local='.tmp/r2-six-public-2026-10-14-private';
+const hash=v=>crypto.createHash('sha256').update(v).digest('hex');
+const sensitive=/(?:authorization|bearer|cookie|api[_-]?key|password|credential|token|secret|csrf)/i;
+const scan=/(?:api[_-]?key|password|token|secret|cookie|csrf)\s*[=:]\s*["']?[^\s"'<>]{6,}/i;
+function safeUrl(v,base){try{const u=new URL(v,base);return /^(http|https):$/.test(u.protocol)&&!u.username&&!u.password&&![...u.searchParams.keys()].some(k=>sensitive.test(k)||/signature|^sig$|utm_|gclid|fbclid/i.test(k))?u.href:null}catch{return null}}
+function smallText(v){return sensitive.test(v)?'[redacted]':v.replace(/\s+/g,' ').trim().slice(0,120)}
+const results=[];
+for(const id of ['MY-P03','TH-C01']){
+ const result=JSON.parse(fs.readFileSync(`${dir}/${id}-result.json`,'utf8')), raw=fs.readFileSync(`${local}/${id}.response.bin`);
+ if(hash(raw)!==result.fetchedBytesSha256)throw Error('local_raw_hash_mismatch');
+ const $=load(raw.toString('utf8'));
+ const diagnostics={htmlTitleExcerpt:smallText($('title').text()),scriptElements:$('script').length,formElements:$('form').length,bodyCharacters:$('body').text().length,totalElements:$('*').length,scriptContentExcluded:true};
+ const skeleton=[];
+ // Tag hierarchy/attribute names only. Never preserve attribute values, hidden values, scripts, comments or page prose.
+ function walk(el,parent){if(skeleton.length>=1200)return;if(!el.tagName){for(const c of el.children||[])walk(c,parent);return}const i=skeleton.length;skeleton.push({index:i,parent,tag:el.tagName,attributeNames:Object.keys(el.attribs||{}).filter(n=>!sensitive.test(n))});if(['script','style','noscript','iframe','input'].includes(el.tagName))return;for(const c of el.children||[])walk(c,i)}
+ walk($.root()[0],null);
+ $('script,style,noscript,iframe,input,meta,link').remove();
+ const datePattern=/\d{1,2}\s+[\u0e00-\u0e7f.]+\s+\d{4}|\b\d{1,2}[-/]\d{1,2}[-/]\d{4}\b|\b\d{4}[-/]\d{1,2}[-/]\d{1,2}\b/g;
+ diagnostics.sanitizedAnchors=$('a[href]').length;diagnostics.sanitizedRows=$('tr').length; const groups=[], seen=new Set();
+ $('*').each((index,el)=>{
+  const direct=(el.children||[]).filter(c=>c.type==='text').map(c=>c.data).join(' '), dates=direct.match(datePattern);
+  if(!dates)return;
+  let node=$(el);for(let depth=0;depth<4;depth++,node=node.parent()){
+   const anchors=node.find('a[href]');if(anchors.length===0||anchors.length>8)continue;
+   const key=node[0];if(seen.has(key))break;seen.add(key);
+   const groupDates=[...new Set(node.text().match(datePattern)||[])];
+   groups.push({dateElementIndex:index,dateElementTag:el.tagName,ancestorTag:node[0].tagName,ancestorDepth:depth,dateTextCandidates:groupDates,anchors:anchors.toArray().map(a=>({tag:a.tagName,titleExcerpt:smallText($(a).text()||$(a).attr('title')||''),href:safeUrl($(a).attr('href'),result.url)})),association:'original local container observed, not publication-time interpretation or parser PASS'});break;
+  }
+ });
+ const material={source:id,url:result.url,fetchedBytesSha256:hash(raw),kind:'tag hierarchy and bounded local metadata observations; full HTML not redistributed',diagnostics,skeleton,skeletonTruncated:skeleton.length>=1200,localDateGroupCount:groups.length,localDateGroups:groups.slice(0,6),selection:'first six local date containers in original document order; no sorting/merging/conflict resolution',originalHtmlCommitted:false,permission:'unknown full-page reuse; text excerpts bounded to six groups, no scripts/keys/cookies/attribute values',parserStatus:'NOT_RUN',completeFieldsPass:false};
+ const out=JSON.stringify(material,null,2)+'\n';if(!scan.test('token="synthetic-positive-control"')||scan.test(out))throw Error('metadata_scan_failed');
+ fs.writeFileSync(`${dir}/${id}-dom-shape.json`,out,'utf8');
+ results.push({id,localRawHashVerified:true,domShapeSha256:hash(out),diagnostics,localDateGroupCount:groups.length,positiveControlDetected:true,committedSensitiveHits:0});
+}
+fs.writeFileSync(`${dir}/offline-structure-summary.json`,JSON.stringify({httpRequests:0,results},null,2)+'\n');
+console.log(JSON.stringify(results.map(({id,diagnostics,localDateGroupCount})=>({id,diagnostics,localDateGroupCount}))));

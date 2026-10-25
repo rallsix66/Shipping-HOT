@@ -1,0 +1,61 @@
+{
+  "rawExit": 0,
+  "startedAt": "2026-10-15T07:27:34.447Z",
+  "finishedAt": "2026-10-15T07:27:34.951Z",
+  "baselineEvidenceHead": "8be5bdda81ed5f88d43aec5f36d8d970cf479dbe",
+  "testedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "independentReview": "pending_parent",
+  "checks": [
+    {
+      "name": "branch/code SHA and source scope unchanged after code commit",
+      "pass": true
+    },
+    {
+      "name": "fresh clean SHA nine-command gate, normal install and exact results",
+      "pass": true
+    },
+    {
+      "name": "original-byte identity, source capture time and zero new external calls",
+      "pass": true
+    },
+    {
+      "name": "collector first20/repeat zero, query-only exact fields and counters",
+      "pass": true
+    },
+    {
+      "name": "candidate fixed/default off, exact metadata selectors and explicit source day",
+      "pass": true
+    },
+    {
+      "name": "only SITC source entry updated, accepted numerators and remaining limits unchanged",
+      "pass": true
+    },
+    {
+      "name": "all recursive matrix file/hash references resolve with committed LF basis",
+      "pass": true
+    },
+    {
+      "name": "gate original bytes/LF hashes and public evidence minimum disclosure",
+      "pass": true
+    },
+    {
+      "name": "affected local Markdown links and evidence-only pending scope",
+      "pass": true
+    }
+  ],
+  "matrixFileHashReferences": 314,
+  "localMarkdownLinks": 151,
+  "sourceGetAttemptsThisRound": 0,
+  "actualSourceDnsThisRound": 0,
+  "realItems": 20,
+  "approvedNumerators": [
+    23,
+    21
+  ],
+  "historicalNumericSeparate": [
+    3,
+    5
+  ],
+  "guiS7": "NOT_RUN",
+  "production24h": "NOT_RUN"
+}

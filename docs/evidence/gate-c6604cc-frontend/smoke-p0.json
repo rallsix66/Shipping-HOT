@@ -1,0 +1,9 @@
+{
+  "name": "smoke-p0",
+  "command": "pnpm smoke:p0-native",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-review-build",
+  "sha": "c6604cc9b803d3a590354cf4d79ad1f3d7237c5c",
+  "startedAt": "2026-10-14T03:47:26.266Z",
+  "endedAt": "2026-10-14T03:47:27.435Z",
+  "rawExit": 0
+}

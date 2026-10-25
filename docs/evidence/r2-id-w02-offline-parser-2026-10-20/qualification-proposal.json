@@ -1,0 +1,46 @@
+{
+  "type": "proposal_only_pending_parent_review",
+  "applied": false,
+  "sourceId": "ID-W02",
+  "currentR2_4": "NOT_RUN",
+  "proposedR2_4": "OK_LIMITED_TO_RECORDED_PRODUCT_AND_OFFLINE_PARSE",
+  "basis": "Genuine expected XJ001 response plus complete original 41-point parsing, normalization and field verification; no new database or Provider-registration condition.",
+  "currentPublic": {
+    "numerator": 25,
+    "denominator": 39
+  },
+  "possibleAfterReview": {
+    "numerator": 26,
+    "denominator": 39,
+    "minimum": 32,
+    "shortfall": 6
+  },
+  "informationReplay": {
+    "numerator": 24,
+    "denominator": 34,
+    "unchanged": true,
+    "ID_W02": "N/A_NUMERIC"
+  },
+  "numericEvidence": {
+    "denominator": 5,
+    "historical": {
+      "count": 3,
+      "type": "limited_normalized_diagnostics"
+    },
+    "added": {
+      "count": 1,
+      "source": "ID-W02",
+      "type": "complete_original_offline_parse",
+      "points": 41
+    },
+    "productionIntegrationRate": "NOT_CLAIMED"
+  },
+  "excludes": [
+    "current uptime or continuous availability",
+    "database integration",
+    "Provider activation",
+    "seven-day hourly coverage",
+    "24h/R3"
+  ],
+  "unchangedAuthoritativeMatrix": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json"
+}

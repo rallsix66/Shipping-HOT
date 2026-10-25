@@ -1,0 +1,13 @@
+{
+  "name": "smoke-p2c",
+  "command": "pnpm smoke:p2c-runtime",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\one-catalog-candidate-build-20261015",
+  "sha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "startedAt": "2026-10-15T03:41:42.638Z",
+  "finishedAt": "2026-10-15T03:41:43.854Z",
+  "rawExit": 0,
+  "stdoutExactUtf8": "\n> shipping-hot@0.0.41 smoke:p2c-runtime D:\\try one\\Shipping HOT\\.tmp\\one-catalog-candidate-build-20261015\n> node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/p2c-runtime-sqlite-smoke.ts\n\n{\"process\":\"B\",\"persisted\":true,\"status\":\"healthy\",\"lastSuccessAt\":\"2026-08-24T00:00:01.000Z\",\"syncRuns\":1}\n",
+  "stdoutOriginalByteSha256": "cc19846dd96aec13d886e3100620a293b1c9857475dbc15972bad5ea66cc762b",
+  "stderrExactUtf8": "(node:30776) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/tsx-alias-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+  "stderrOriginalByteSha256": "62f6e1b63319a941ad287e19bc12d5fd42d136bbddfa637645aec42751ec1bbe"
+}

@@ -1,0 +1,35 @@
+{
+  "sha": "c83e118da17c4ebe04d42b748000d502694d3888",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-final-c83e118",
+  "results": [
+    {
+      "name": "clone",
+      "command": "git -c core.excludesFile= clone --no-hardlinks --branch codex/shipping-hot-r2 . \"D:\\try one\\Shipping HOT\\.tmp\\clipper-final-c83e118\"",
+      "cwd": "D:\\try one\\Shipping HOT",
+      "sha": "c83e118da17c4ebe04d42b748000d502694d3888",
+      "startedAt": "2026-10-16T02:57:24.873Z",
+      "endedAt": "2026-10-16T02:57:24.924Z",
+      "rawExit": 129
+    }
+  ],
+  "error": "clone failed",
+  "retainedBefore": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedAfter": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedUnchanged": true,
+  "environment": "OS-only child environment; no project env/credentials copied; process-local PATH adds installed bins and existing bundled rg",
+  "browser": "NOT_RUN: installation, permissions and real-page reads not authorized; no CDP workaround",
+  "s7": "NOT_RUN: browser acceptance outside this authorized offline slice",
+  "sourceNetworkCalls": 0,
+  "liveRecordsAdded": 0,
+  "paidCalls": 0
+}

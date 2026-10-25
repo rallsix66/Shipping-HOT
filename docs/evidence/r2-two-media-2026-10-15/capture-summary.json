@@ -1,0 +1,125 @@
+{
+  "results": [
+    {
+      "id": "XX-M01",
+      "url": "https://theloadstar.com/feed/",
+      "host": "theloadstar.com",
+      "catalogLineLfSha256": "e1a3833f9aa4958f0ff2fba3a1c65c479e33020edeaf7acd36d57370649e42c0",
+      "oldWireSha256": "48d0e7d2b8a37ba89ceb91a4b74361b782b7109d5ac854320ad3bedb2f9c64b9",
+      "startedAt": "2026-10-15T04:25:58.202Z",
+      "systemDnsCalls": 1,
+      "transportInvocations": 1,
+      "status": "CAPTURED_SAFE_XML",
+      "parser": "NOT_RUN",
+      "rawLocalOnly": true,
+      "addresses": [
+        {
+          "address": "104.26.3.171",
+          "family": 4
+        },
+        {
+          "address": "104.26.2.171",
+          "family": 4
+        },
+        {
+          "address": "172.67.68.194",
+          "family": 4
+        }
+      ],
+      "addressClassification": "public_address",
+      "receivedAt": "2026-10-15T04:25:58.866Z",
+      "httpStatus": 200,
+      "contentType": "application/rss+xml; charset=UTF-8",
+      "bytes": 20417,
+      "wireSha256": "295d274b904d6d0badea109dc22f74b0caaefc2bbe3f6fcdc38145e4d878bd7a",
+      "completeResponseCaptured": true,
+      "locationPresent": false,
+      "locationFollowed": false,
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "http",
+        "declarations": [
+          {
+            "source": "http",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          },
+          {
+            "source": "xml",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          }
+        ],
+        "conflict": false,
+        "byteLength": 20417
+      },
+      "finishedAt": "2026-10-15T04:25:58.867Z"
+    },
+    {
+      "id": "XX-M03",
+      "url": "https://splash247.com/feed/",
+      "host": "splash247.com",
+      "catalogLineLfSha256": "d44d8c72b22b7ed0f2297e90bb084c76cb18a556bf5436acbc914efb5e2ddd27",
+      "oldWireSha256": "728d1f80635db0dde301c0bbd918d7d761d4c851738d041c03a1d9ca464e4ad2",
+      "startedAt": "2026-10-15T04:25:58.867Z",
+      "systemDnsCalls": 1,
+      "transportInvocations": 1,
+      "status": "CAPTURED_SAFE_XML",
+      "parser": "NOT_RUN",
+      "rawLocalOnly": true,
+      "addresses": [
+        {
+          "address": "172.67.73.185",
+          "family": 4
+        },
+        {
+          "address": "104.26.7.32",
+          "family": 4
+        },
+        {
+          "address": "104.26.6.32",
+          "family": 4
+        }
+      ],
+      "addressClassification": "public_address",
+      "receivedAt": "2026-10-15T04:26:00.119Z",
+      "httpStatus": 200,
+      "contentType": "application/rss+xml; charset=UTF-8",
+      "bytes": 18929,
+      "wireSha256": "969e258cf2ab584fcf8e616c5afe27126dd95d2506206e7f83c67ffdbd1e1bab",
+      "completeResponseCaptured": true,
+      "locationPresent": false,
+      "locationFollowed": false,
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "http",
+        "declarations": [
+          {
+            "source": "http",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          },
+          {
+            "source": "xml",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          }
+        ],
+        "conflict": false,
+        "byteLength": 18929
+      },
+      "finishedAt": "2026-10-15T04:26:00.120Z"
+    }
+  ],
+  "systemDnsCalls": 2,
+  "transportInvocations": 2,
+  "completeResponses": 2,
+  "redirectsFollowed": 0,
+  "retries": 0,
+  "details": 0,
+  "paidCalls": 0,
+  "llmCalls": 0,
+  "rawRedistributed": false,
+  "networkSettingsChanged": false,
+  "overallR2Pass": false
+}

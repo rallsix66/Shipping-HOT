@@ -1,0 +1,81 @@
+import { it, expect } from "vitest"
+import { lookup } from "node:dns/promises"
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs"
+import { createHash } from "node:crypto"
+import { execFileSync } from "node:child_process"
+import { secureFetchArticle, defaultTransport, isBlockedAddress } from "../server/services/article-fetch-security"
+
+const dir = "docs/evidence/r2-two-media-2026-10-15"
+const local = ".tmp/r2-two-media-2026-10-15-private"
+const ids = ["XX-M01", "XX-M03"]
+const hash = (v: string | Uint8Array) => createHash("sha256").update(v).digest("hex")
+const save = (n: string, v: unknown) => writeFileSync(`${dir}/${n}.json`, JSON.stringify(v, null, 2) + "\n")
+function safeError(error: unknown) {
+  const code = (error as any)?.code
+  const message = error instanceof Error ? error.message : "unknown_error"
+  return { code: typeof code === "string" && /^[A-Z_0-9]{1,80}$/.test(code) ? code : null,
+    message: message.replace(/https?:\/\/\S+/g, "[url-redacted]").replace(/\b(?:cookie|authorization|token|secret|password|api[_-]?key)\s*[:=].*/gi, "[redacted]").replace(/[\r\n]/g, " ").slice(0, 400), stackSaved: false }
+}
+it("authorized two exact media RSS products once each, with pinned safe DNS and no retry/redirect", async () => {
+  expect(process.env.SHIPPING_APPROVED_TWO_MEDIA).toBe("1")
+  mkdirSync(dir, { recursive: true }); mkdirSync(local, { recursive: true })
+  if (existsSync(`${dir}/dns-ledger.json`) || existsSync(`${dir}/request-ledger.json`)) throw new Error("ledger_exists_never_repeat")
+  const catalog = readFileSync("docs/intel-source-catalog.md", "utf8")
+  const old = JSON.parse(readFileSync("docs/evidence/r2-four-index-2026-10-13/batch-results.json", "utf8"))
+  const rows = ids.map(id => {
+    const row = old.results.find((r: any) => r.id === id)
+    expect(row.rawStructureFixtureRetained).toBe(false)
+    const line = catalog.split(/\r?\n/).find(s => s.startsWith(`| ${id} |`))!
+    expect(line.split("|")[4].trim()).toBe(row.url) // Catalogue section7.3 explicitly lists these products under RSS.
+    const url = new URL(row.url)
+    expect(url.protocol).toBe("https:"); expect(url.username + url.password).toBe("")
+    return { id, url: row.url, host: url.hostname, catalogLineLfSha256: hash(line), oldWireSha256: row.rawResponseSha256 }
+  })
+  const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim()
+  save("manifest", { executedAtHead: head, productCodeSha: "bebe1441465adfcabb9daf93cb2a8656ec1fc796", rows, authorized: "Delegated user instruction 2026-10-15: two named exact media RSS products; private complete bytes; no settings changes", maxSystemDns: 2, maxTransportInvocations: 2, maxBytes: 524288, perRequestMs: 10000, batchMs: 60000, retries: 0, redirectsFollowed: 0, details: 0, pagination: 0, persistence: "disallowed", productionEnabled: false, rawRedistributed: false })
+  const dns: any[] = [], requests: any[] = [], results: any[] = []
+  save("dns-ledger", dns); save("request-ledger", requests)
+  const batch = new AbortController(), timer = setTimeout(() => batch.abort(), 60000)
+  try {
+    for (const row of rows) {
+      const result: any = { ...row, startedAt: new Date().toISOString(), systemDnsCalls: 0, transportInvocations: 0, status: "NOT_RUN", parser: "NOT_RUN", rawLocalOnly: true }
+      try {
+        if (batch.signal.aborted) throw new Error("batch_deadline")
+        result.systemDnsCalls = 1
+        const d: any = { id: row.id, host: row.host, reservedAt: new Date().toISOString(), state: "reserved_unknown" }; dns.push(d); save("dns-ledger", dns)
+        let dnsTimer: ReturnType<typeof setTimeout> | undefined
+        let addresses: any[]
+        try {
+          addresses = await Promise.race([lookup(row.host, { all: true, verbatim: true }), new Promise<never>((_, reject) => { dnsTimer = setTimeout(() => reject(new Error("system_dns_timeout")), 10000) })])
+          d.addresses = addresses; d.classification = !addresses.length ? "dns_empty" : addresses.some(isBlockedAddress) ? "blocked_address" : "public_address"; d.state = "finished"
+        } catch (error) { d.state = "failed"; d.error = safeError(error); throw error }
+        finally { if (dnsTimer) clearTimeout(dnsTimer); d.finishedAt = new Date().toISOString(); save("dns-ledger", dns) }
+        result.addresses = addresses; result.addressClassification = d.classification
+        const response = await secureFetchArticle(row.url, {
+          policy: { sourceId: row.id, status: "allowed", fetchAllowed: true, persistence: "disallowed", allowedHosts: [row.host], allowedContentTypes: ["application/rss+xml", "application/atom+xml", "application/rdf+xml", "application/xml", "text/xml"] },
+          maxBytes: 524288, timeoutMs: 10000, maxRedirects: 0, signal: batch.signal, accept: "application/rss+xml, application/xml, text/xml",
+          lookup: async host => { expect(host).toBe(row.host); return addresses },
+          transport: async (url, ips, options) => {
+            if (result.transportInvocations || requests.length >= 2 || url.href !== row.url || options.caPem) throw new Error("one_shot_boundary")
+            result.transportInvocations++
+            const r: any = { id: row.id, url: row.url, reservedAt: new Date().toISOString(), state: "reserved_unknown" }; requests.push(r); save("request-ledger", requests)
+            let response
+            try { response = await defaultTransport(url, ips, options) } catch (error) { result.transportError = safeError(error); throw error }
+            const raw = typeof response.body === "string" ? Buffer.from(response.body) : response.body
+            writeFileSync(`${local}/${row.id}.response.bin`, raw, { flag: "wx" })
+            Object.assign(result, { receivedAt: new Date().toISOString(), httpStatus: response.status, contentType: response.headers["content-type"] ?? null, bytes: raw.length, wireSha256: hash(raw), completeResponseCaptured: true, locationPresent: Boolean(response.headers.location), locationFollowed: false })
+            return response
+          },
+        })
+        if (response.ok) { result.status = "CAPTURED_SAFE_XML"; result.decoding = response.decoding }
+        else { result.status = "BLOCKED"; result.secureEntryError = { code: response.code, message: response.message }; result.httpStatus ??= response.status ?? null }
+      } catch (error) { result.status = "BLOCKED"; result.error = safeError(error) }
+      finally {
+        result.finishedAt = new Date().toISOString(); results.push(result); save(`${row.id}-capture`, result)
+        const req = requests.find(r => r.id === row.id); if (req) { req.state = result.receivedAt ? "complete_response_captured" : "finished_without_complete_response"; req.finishedAt = result.finishedAt; save("request-ledger", requests) }
+        save("capture-summary", { results, systemDnsCalls: dns.length, transportInvocations: requests.length, completeResponses: results.filter(r => r.completeResponseCaptured).length, redirectsFollowed: 0, retries: 0, details: 0, paidCalls: 0, llmCalls: 0, rawRedistributed: false, networkSettingsChanged: false, overallR2Pass: false })
+      }
+    }
+  } finally { clearTimeout(timer) }
+  expect(results).toHaveLength(2); expect(dns.length).toBeLessThanOrEqual(2); expect(requests.length).toBeLessThanOrEqual(2)
+}, 65000)

@@ -1,0 +1,13 @@
+{
+  "phase": "Staged evidence manifest verification before evidence commit",
+  "rawExit": 1,
+  "cause": "The sealing wrapper's changed-file union included an already-staged archive-manifest.json in its own file list on regeneration, creating an impossible self-hash assertion.",
+  "assertionPath": "docs/evidence/r2-sitc-metadata-2026-10-15/archive-manifest.json",
+  "observedCommittedLfSha256": "80634070c5ca3bc7da149458ae9cb9350d2782036bfec6e771db3d007f30f73d",
+  "selfReferencingExpectedSha256": "e9e3eabc60ac65932986acca33aebe35d527488e069324451c55ac4da7e48e95",
+  "resolution": "Explicitly exclude the manifest itself after the entire union, then regenerate and verify staged and committed evidence.",
+  "productCodeChanged": false,
+  "productGateRepeated": false,
+  "sourceGetAttempts": 0,
+  "systemDnsCalls": 0
+}

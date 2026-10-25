@@ -1,0 +1,42 @@
+{
+  "id": "TH-C02",
+  "url": "https://www.customs.go.th/list_strc_download_with_docno_date.php?ini_content=announce_160426_01&order_by=date&sort_type=0&lang=th",
+  "startedAt": "2026-10-14T08:33:16.386Z",
+  "status": "PARTIAL",
+  "httpRequests": 1,
+  "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+  "receivedAt": "2026-10-14T08:33:17.641Z",
+  "httpStatus": 200,
+  "contentType": "text/html; charset=UTF-8",
+  "rawByteLength": 115531,
+  "fetchedBytesSha256": "d3569050a2f6be3f01a0a8cd9e62fd6c5c632520bc91956efefa679364f85ec7",
+  "rawLocalOnly": true,
+  "parse": "DOM_OBSERVATION_ONLY",
+  "parserError": null,
+  "observedCandidateCount": 0,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 115531
+  },
+  "archivedMetadataSha256": "79920cc05dfeecdee3b9e20b1d5da8ef888dde2412d0891f218415ad1ba92b81",
+  "originalHtmlCommitted": false,
+  "sensitiveScan": {
+    "positiveControlDetected": true,
+    "committedMaterialHits": 0
+  },
+  "finishedAt": "2026-10-14T08:33:17.699Z"
+}

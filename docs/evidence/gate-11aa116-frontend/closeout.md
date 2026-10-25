@@ -1,0 +1,24 @@
+# Demo ports and existing weather — 2026-10-14
+
+Code `11aa1162a286d96bdc7a44a2f61a95d3d2a886e8`. Parent/user authorized one port/weather slice; backend plan unchanged.
+
+## Implementation and source trace
+
+- Demo `ports()` at `.tmp/demo/shipping-hot-demo.html:666`, eight-port tabs at667, operational header at683, announcement/weather columns at690 and forecast table at695. React adaptation in `src/components/shipping/ports-demo.tsx` opens the existing `/ports` and `/ports/:id` routes, with the exact eight approved IDs in demo order. Static scope directory is not evidence of current operational data.
+- Demo CSS tabs/table rules at165–177 copied with `.ports-demo` scope into `risk-console.css`; table structure adapted to existing hourly/current API records rather than hardcoded three daily rows. Original km/h and raw mm values retained; no day aggregation or client-side threshold recomputation. Missing values stay missing, numerical zero is not a missing value.
+- Existing weather panel extracted from `pages.tsx` into `port-weather.tsx`; precipitation/rule coverage, source/target window/missing metadata, stale/failed/empty copy, official warnings and ADR-009 reference status/geometry/last-success/history remain. Added existing rule input values/valid-until disclosure. Forecast list becomes a horizontally/vertically scrollable table; reference wave values never enter original-point table.
+- Original port watch control and tropical-cyclone panel reused. Regional weather/R5 country aggregation, delay totals and port shutdown-day aggregation remain unopened. Holiday dates are never labelled shutdown dates. No new Provider, schema, source, sample acquisition, budget or production switch.
+- Minimal backend compatibility: the existing weather GET previously rejected an approved focus port absent from operational snapshot before reading weather/reference cache. It now permits approved baseline IDs to reach the same Repository read. No port creation, synchronization, inference, data-source, threshold or sampling change; unapproved absent IDs still404.
+
+## Verification boundaries
+
+- Precommit targeted9/9 passed (seven synthetic UI trust tests and two existing weather service tests). UI regression covers eight IDs/order, units/zero/missing fields, stale/failed/empty/partial states and historical independent reference with missing original-point forecasts. No actual visual/keyboard tests.
+- Exact-SHA isolated fresh-install gate completed in `.tmp/ports-demo-review-build`: frozen install (scripts enabled),build,typecheck,lint,55targeted, full117files/1103pass/3existing Windows skips and3isolated native/Runtime/Feed smokes all raw exit0. Separate stdout/stderr, command/SHA/cwd/timestamps/raw exits adjacent. Clone normalized tracked diff exit0; primary repo dist was not rebuilt.
+- Browser/pixel/mobile/keyboard/S7 **NOT_RUN / pending**. Earlier custom CDP rejected and official browser unavailable; no bypass. Backend source qualification, R1.5 historical replay and R2/R3–R5 acceptance not promoted.
+- Execution transport briefly disconnected during inspection; after recovery existing metadata confirmed the original gate completed. It was not restarted. New preview `http://127.0.0.1:4484/ports` PID52080 uses isolated `.tmp/ports-preview-11aa116`, a copy of the original4482 fixture DB. Original policy samples retained; minimal OS env, no credentials/project env/secret file, Runtime/providers/translation off.54loopback HTTP checks: eight approved weather GETs and detail routes, unknown404, existing3snapshot-port DTOs/statuses unchanged, seven pages/assets, Runtime off, original previews4477/4482/4483 preserved. No port/weather/usage/receipt/run count changes across reads. Scope placeholders and empty states are not eight-port live coverage; no new forecasts or source acquisition. Counts do not prove zero egress; no egress capture claimed.
+
+## Actual Neat Freak inspection
+
+Real installed skill and verification reference were already loaded; actual Bash inventory ran raw exit0 and is held in `.tmp/ports-review-neat.log`. Inventory is an enumeration, not security audit. Code/architecture inspection found the existing snapshot prerequisite and source-adaptation gaps; no history cleanup or secret-value inspection.
+
+Code and non-browser gate/HTTP checks are delivered for review; visual/keyboard/mobile/S7 and parent acceptance remain pending. Architecture/status now distinguish eight-port selection/read capability from current data coverage. Rules unchanged; memory generated-read-only/out-of-scope. Actual inventory copied here (enumeration only), new evidence secret-pattern scan only. Existing warnings (chunk size,Browserslist,duplicate imports,Windows skips/CRLF/ignore permission) retained. No merge/deploy/force-push or further slice. All previews/isolated DBs/drivers/clones preserved; cleanup needs explicit post-report authorization.

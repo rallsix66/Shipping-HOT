@@ -1,0 +1,9 @@
+{
+  "name": "install",
+  "command": "pnpm install --frozen-lockfile",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-final-build",
+  "sha": "2b988bca8574247c277b1ed7aabc14525d973515",
+  "startedAt": "2026-10-14T03:50:14.484Z",
+  "endedAt": "2026-10-14T03:50:22.697Z",
+  "rawExit": 0
+}

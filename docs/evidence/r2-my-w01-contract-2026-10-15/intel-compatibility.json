@@ -1,0 +1,18 @@
+{
+  "status": "PASS_EXPECTED_UNSUPPORTED_BRIDGE",
+  "sourceRequests": 0,
+  "systemDns": 0,
+  "existingMetMalaysiaParserReused": true,
+  "newParserCreated": false,
+  "approvedFeedIdentity": "issued + title_en + validFrom + validTo; per-record Feed id; shared canonical source URL",
+  "genericJsonConstantSourceUrlError": "urlTemplate placeholders invalid",
+  "genericJsonMissingArticleUrlError": "json_list_invalid_link",
+  "intelStorageUniqueKey": "source_id + canonical_url",
+  "sameSourceUrlDistinctRecords": 4,
+  "productionSourceSelectable": false,
+  "defaultIntelJobEnabled": false,
+  "intelCollectionClaimed": false,
+  "wireProofClaimed": false,
+  "coverageChanged": false,
+  "scope": "Negative compatibility diagnostic only; no product identity/schema/catalogue/acceptance changes"
+}

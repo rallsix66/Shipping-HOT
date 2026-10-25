@@ -1,4 +1,628 @@
+## 2026-10-24 — 观察执行器接入 19 源允许选择（默认关闭）
+
+- 现有 `intel-observation` 的资格、入口 URL 和重定向边界改为现役 `PRODUCTION_ALLOW_SELECT_CATALOG_IDS` 与 `registeredIntelSources`。一次运行只放开本次显式选中的入口；CN-T01、XX-M01、MY-P03 仍拒绝。Maersk `sourceHeaderLimit` 仍只在 XX-K01。
+- 子进程来源校验只读无副作用的 `server/runtime/intel-allow-select.ts`，不在应用加载前导入 registry / production。可选 `--stop-after-successful-rounds 1|2`：两轮成功或任一轮失败即停；省略时仍按原时长窗口。不新增调度器、不续跑、不清账本。
+- 门禁：定向观察/生产/oneshot 测试、全量 Vitest **2012 passed / 5 skipped**、typecheck、lint、build、`git diff --check`。受控 PH-M01 两轮自然调度不在本提交内宣称。
+
+## 2026-10-24 — DeepSeek 试点 Search 候选盘点口径修正 + PM Notice 54 单条核验
+
+- **候选盘点**（离线元数据 + 去重）：[`docs/evidence/r2-deepseek-pilot-candidate-review-2026-10-24/README.md`](evidence/r2-deepseek-pilot-candidate-review-2026-10-24/README.md)。**18** 唯一 URL；非 MPA **7** 条（**6** 贸易媒体 + **1** 中文聚合）；六种官方详情分 **PM Notice / PM Circular / Shipping Circular**；PM Notice **107**（2026-09-08/15 维护）相对盘点日移出当前风险优先；**2021** / **nov23** 线索标待核实/可能历史。
+- **PM Notice 54（RTS Link）**：对 `candidates.json` **一条精确 URL** 做只读 HTTPS 核验（**非**单次 GET 声明；物理请求次数未完整记录）；官方 **404**，**结论 C**（信息不足，未确认）；`accessedAt` **未核准**（原 11:45 估算不采信）。**不是** DeepSeek Fetch 成功。证据：[`notice-54-verification-2026-10-24/README.md`](evidence/r2-deepseek-pilot-candidate-review-2026-10-24/notice-54-verification-2026-10-24/README.md)。**不**写生产 intel、**不**增 R2 计数。
+- 本片 **无**新 Search/Fetch；门禁：`pnpm lint` + `git diff --check`（文档-only，**未**重跑全量 Vitest）。
+
+## 2026-10-24 — DeepSeek Search/Fetch 受控试点 live 收尾（默认关闭）
+
+- **试点** `ds-pilot-2026-10-23-r1`：本机双库 live **已发生**（非 docs-only）。**Search 第 9、10 次**成功；**2** 次 Fetch（两条 MPA PMC detail URL）失败，paid **`deepseek_tools_http_404`**、**non-billable**。失败响应 **符合**官方 Fetch「未取得可用页面内容」的 404 定义；**本次记录未独立确定**具体失败原因，**不**推广为整个 Fetch 接口不可用。首轮 **8** 条 Search 仍为 **`unknown`**，ledger 保守预留合计 **≈¥0.04（40 milli）**，**不**称为已确认扣费；**未释放、未重跑**。
+- **额度**：Search **10/10** 已满，**不再**调用；Fetch **2/10**、**10/50** milli-CNY，剩余额度 **不自动使用**。per-capability，非共享。
+- **边界**：`need_content=true` **≠** 已取得可入库正文；`excerpt_only` **≠** 站点许可。跨两次 Search 的 URL 去重、有效候选数、逐条来源 **未核验**；不得将两次各 10 条上游结果计为 20 条独立情报。默认关闭试点 **已收尾** **≠** 生产启用 **≠** R2 整体验收通过；未启 intel 源、未 24h、未合并部署、未改 R2 28/39 / 25/34 计数。
+- **证据**：[`docs/evidence/r2-deepseek-pilot-live-2026-10-24/README.md`](evidence/r2-deepseek-pilot-live-2026-10-24/README.md)；本机 `.tmp/deepseek-pilot-2026-10-23/` 账本与 JSON 交叉引用（未入库）。
+- **代码（上一提交 `045467e…`）**：oneshot 脚本 + pilot `searchNeedContent`；ledger Search 键在 `searchNeedContent:true` 时可含 `need_content` 后缀（live **账本第 11 行** = Search 第 10 次，legacy query-only 键，见证据说明）。全量 Vitest **1970 passed / 4 skipped** 为该提交历史门禁，文档-only 修正 **未**重跑。
+
+## 2026-10-23 — DeepSeek Search/Fetch 错误脱敏白名单收口（默认关闭）
+
+- 基线 94a71bc → 本修补 tip；仍 policyVersion `ds-sf-v1.2-2026-10-23`。
+- client transport/readText 不再 `instanceof` 原样透传：按固定 code 白名单重建 `OutcomeUnknown`，丢弃原 message/cause；未知码 → `request_failed` / `response_read_failed`。
+- 补 typed poison（假密钥/URL/正文）→ receipt+attempt 双表负例；保留 abort / too_large / HTTP 状态语义。
+- 仍默认关闭；**产品路径**未启源；**受控试点** live 见上 2026-10-24 块。日志：`.tmp/logs/deepseek-search-fetch-gapfix3-2026-10-23/`。
+
+## 2026-10-23 — DeepSeek Search/Fetch 三缺口合并修补 v1.2（默认关闭）
+
+- 基线 efd1e005 → 本修补 tip；policyVersion `ds-sf-v1.2-2026-10-23`。
+- 三缺口：① transport/readText 未知异常统一固定码（`request_failed`/`response_read_failed` 等），receipt+attempt 不落敏感文本；② `targetReview` 必须绑定实际 `input.url`，不以其 canonical 替换请求目标；伪造/错配审核零密钥、零回执、零 HTTP；③ 入口与 dispatch 前拒绝已取消；未发送取消固定非计费，已 dispatch 才 unknown。另补默认 HTTP 适配器 ReadableStream 字节上限测试。
+- 措辞：25s controller 主要约束 outbound HTTP；`secretStore.get`/DB claim 不受完整总期限约束；既有 `paidRequest` 仍是先读密钥再原子预留——不宣称端到端总期限或「先预留再读密钥」。
+- 仍默认关闭；未启源、未合并部署；不联系 Guyang。R2 计数与 CN-T01/XX-M01 不变。（受控 pilot live 见 2026-10-24 块。）
+- 门禁含**全量** `pnpm lint`（非仅改动文件 eslint）。日志：`.tmp/logs/deepseek-search-fetch-gapfix2-2026-10-23/`。
+
+## 2026-10-23 — DeepSeek Search/Fetch 合同缺口修补（默认关闭）
+
+- 基线 e11ec92 → 本修补 tip（待提交）；policyVersion ds-sf-v1.1-2026-10-23。
+- 修补：URL 门禁（IPv6 括号/尾点/isBlockedAddress）、上游非空计费、无效 JSON→unknown、错误码无正文、默认时限+取消+字节上限、Fetch provenance 标签、分 capability 预算。
+- 仍默认关闭；未启源、未合并部署；R2 计数不变。（受控 pilot live 见 2026-10-24 块。）
+- 本地安全门禁与目标审核不声称能验证第三方实际 DNS/IP/跳转；persistence 许可不能代替目标安全审核。
+- 日志：.tmp/logs/deepseek-search-fetch-gapfix-2026-10-23/。
+
+## 2026-10-23 DeepSeek Search/Fetch 合同修正 + 默认关闭第一片（dots `1792725183.066059`）
+
+- 方向认可基线 `a9ae16d`；同一授权内先修正方案三点，再落地默认关闭、离线可测最小接入；不另等用户批准；不联系 Guyang。
+- 合同三点：①硬预算在 `paidRequest` 内原子预留（复用 BEGIN IMMEDIATE / pending / unknown；既有顺序先读 Secret 再预留；`decidePaidBudget` alone 不足）；②`third_party_markdown` 为 provenance 非 contentScope，删除 disallowed Markdown 存证例外，回执/缓存/日志无正文；③删除安全拒绝后预览绕行；Search 缓存键=规范化 query+参数+策略版本。
+- 方案：[`docs/plans/r2-deepseek-search-fetch-2026-10-23.md`](plans/r2-deepseek-search-fetch-2026-10-23.md)；ADR：[`docs/adr/ADR-011-deepseek-search-fetch-intel-assist.md`](adr/ADR-011-deepseek-search-fetch-intel-assist.md)。
+- 实现：`server/providers/deepseek/search-fetch-client.ts`、`server/intel/discovery/{deepseek-search-fetch-policy,candidate-trim,search-fetch-service}.ts` + 离线测试。零 schema 迁移。生产启源/R3/24h/合并部署仍未授权；**受控 pilot**（Search 第 9/10 成功、2 次 Fetch 失败、8 unknown 保留）见 2026-10-24 块。R2 28/39、25/34 与允许选择 19≠启用、CN-T01/XX-M01 不变。
+
+## 2026-10-23 R2 生产允许选择扩展（阶段，dots 1792719565.465609）
+
+- `server/runtime/intel-production.ts` 独立维护生产允许选择 19 个 catalogId（原 TH-W01/ID-W01 + 新 17），**不**把 registry 注册当作生产许可；按 catalogId 从 `registeredIntelSources` 查找后 `structuredClone`，再覆盖 `enabled:true` 与 `adaptive:{minMinutes:15,maxMinutes:60}`。
+- 本阶段排除（非永久）：CN-T01、XX-M01；另拒 MY-P02/MY-P03、未合格/未注册及 `intel:`/`bounded:`/`the-loadstar` 形式。新增 17 源保持原 `disallowed`；原两源 `full`/`excerpt_only` 不被统一覆盖。
+- 总开关默认关；空/仅逗号选择仍 `intel_source_selection_invalid`；整批失败；保留输入顺序。应用启动仍 `seeds ?? []`。未启服务、未采 live、未做 24h。R2-4 28/39、R2-5 25/34 不变。
+- 证据与测试：`server/runtime/intel-production.test.ts`（disabled 路径 ownership spy 已接入 productionIntelOptions 与 bootstrap，关闭时不获取锁；XX-M03 生产链核对 UTC publishedAt / sourcePublishedAt·sourceUpdatedAt 回退 / title-only blocks；missing-config 隔离 mock；深克隆含 XX-K02 jsonList·allowedContentTypes·adaptive；BackgroundRuntime 调度零网络与生产链路隔离 SQLite）、`server/intel/sources/registry.test.ts` b 节、`maersk-mofcom.test.ts`。
+
+## 2026-10-22 R2 XX-M01 / XX-M03 RSS 默认关闭接线（dots 1792665925.725299）
+
+- 新增 `intel:xx-m01`、`intel:xx-m03`（既有 Feed parser，enabled:false、persistence:disallowed，与 10/15 隔离配置一致），默认关闭注册共十九个；既有 shipping feed 源 `the-loadstar` 未改、与 intel ID 分离（其 enabled=true 只说明配置存在，不证明当前实例在运行）；未来启用 `intel:xx-m01` 前须确定单一抓取责任，禁止两条链路独立抓取同一 URL。synthetic RSS（+0000）逐条核对 UTC，dateEvidence=null，sourceUpdatedAt 为 pubDate 回退值。
+- 默认关闭注册 ≠ 生产启用：本轮新增 intel 来源均未启用（不泛指已有 shipping feed 或天气链路），intel 生产白名单仍仅 TH-W01/ID-W01。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
+## 2026-10-22 R2 MY-T01 / PH-M01 RSS 默认关闭接线（dots 1792665219.519459）
+
+- 新增 `intel:my-t01`、`intel:ph-m01`（既有 Feed parser，enabled:false、persistence:disallowed，与 10/15 隔离配置一致），默认关闭注册共十七个；新编 synthetic RSS 做 Runtime→隔离 SQLite 测试，RSS 分支逐条核对 UTC，dateEvidence=null，sourceUpdatedAt 为回退 pubDate 值。
+- 默认关闭注册 ≠ 生产启用：本轮新增 intel 来源均未启用，intel 生产白名单仍仅 TH-W01/ID-W01。不新增资格分子，R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
+## 2026-10-22 R2 MY-C01 RSS 默认关闭接线（dots 1792664710.276179）
+
+- 新增 RSS 关闭候选 `intel:my-c01`（既有 Feed parser，enabled:false、persistence:disallowed），接入 registry；不复用取证 ID `bounded:MY-C01`。新编 synthetic RSS 做 Runtime→隔离 SQLite 测试。三源“补原 XML 回放”建议已过时（10/15 证据已完成 26 条回放、OK/PASS）。
+- 默认关闭注册共十五个（含 MY-C01）≠ 生产启用：本轮新增 intel 来源均未启用，intel 生产白名单仍仅 TH-W01/ID-W01，应用启动仍显式空 seeds。本次不新增资格分子，R2-4 28/39、R2-5 25/34 不变，未接通 live。MY-T01/PH-M01 留后续。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
+## 2026-10-22 R2 CN-T01 加入默认关闭注册，不升级资格（dots 1792664101.141579 / 1792664168.380759）
+
+- `registeredIntelSources` 新增 CN-T01（web_list，enabled:false、persistence:disallowed），默认关闭注册共十四个；`mofcomHtml` 原样移到共享 fixture。只入库两条合成 HTTPS 政策，原始 HTTP 身份与解读链接仍排除；无 header 例外；日期 day、无时区、publishedAt=null。
+- CN-T01 为 R2-4 OK / R2-5 PARTIAL（7/8），注册不补足缺失身份；“默认关闭注册”不是资格声明，本轮新增 intel 来源均未启用。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
+## 2026-10-22 R2 XX-K01 加入默认关闭注册（dots 1792663523.596789）
+
+- `registeredIntelSources` 新增 XX-K01（web_list，enabled:false、persistence:disallowed），默认关闭候选共十三个；`maerskHtml` 原样移到共享 fixture。仅 intel:xx-k01 + https://www.maersk.com/news 精确 opt-in 32768 响应头（正文 524288、10000ms、无 caPem），例外未扩大。
+- CN-T01 未注册（R2-5 PARTIAL）；R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
+## 2026-10-22 R2 XX-K02 加入默认关闭注册（dots 1792662529.753349 / 1792662635.586629）
+
+- `registeredIntelSources` 新增 XX-K02（json_list，enabled:false、persistence:disallowed），默认关闭候选共十二个；新增明确标记的合成 `__NEXT_DATA__` fixture，releaseDate 保留秒精度原串、publishedAt=null；解析器、安全合同未改。
+- 同时修正 VN-D01 安装记录：离线安装 exit 0，但 prepare hook setup 有报错。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
+## 2026-10-22 R2 VN-D01 加入默认关闭注册（dots 1792661910.864189）
+
+- `registeredIntelSources` 新增 VN-D01（enabled:false、persistence:disallowed），默认关闭候选共十一个；VN-D01 合成样本逐字移到共享 fixture，原测试与负例不变。新 worktree 位于主项目 `.tmp/worktrees/r2-compat`，日志在其 `.tmp/logs/`；离线安装 exit 0，但 prepare hook setup 有报错（共享 hooks 未改）。
+- 配置注册/运行接线与迁移预置 42 行目录行分开；R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
+## 2026-10-22 R2 XX-K03 / ID-T02 加入默认关闭注册（dots 1792660394.720859 / 1792660460.596279）
+
+- `registeredIntelSources` 新增 XX-K03、ID-T02（enabled:false、persistence:disallowed），默认关闭候选共十个；未新设 HTTP/重定向/许可例外。sitc_show 只是元数据身份规则，不是 HTTP 正文抓取许可；ID-T02 入口仍为 HTTPS 根路径。
+- 隔离测试：副本经 Runtime→SQLite 只请求配置字面值 HTTPS 入口，metadata_only、publishedAt=null；生产拒绝、`[]` 零新增注册行、enabled=1 行回到 0 均覆盖。配置注册/运行接线与迁移预置 42 行目录行分开；R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
+## 2026-10-22 R2 TH-C02 / VN-P03 / VN-T01 / ID-T01 加入默认关闭注册（dots 1792659856.878179 / 1792659922.734899）
+
+- `registeredIntelSources` 新增四源（enabled:false、persistence:disallowed，复用候选对象），默认关闭注册候选共八个。TH-C02 `markup()` 与 VN/ID `fixtures` 逐字移到 `server/intel/sources/__fixtures__/` 共享，原测试输入与断言不变（块文本 SHA-256 前后一致）。
+- 隔离测试覆盖默认不请求/不进 due、生产拒绝、`[]` 零新增注册行且迁移预置行不变、测试副本 Runtime→SQLite（metadata-only，日期证据不升级为发布时间）、enabled=1 行回到 0。配置注册/运行接线与迁移预置 42 行目录行分开；普通应用启动不自动注册。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
+## 2026-10-22 R2 PH-C01 / CN-P01 加入默认关闭注册（dots 1792659213.305219）
+
+- `registeredIntelSources` 新增 PH-C01、CN-P01（enabled:false、persistence:disallowed，复用候选对象）；隔离测试复用 PH_SYNTHETIC/GD_SYNTHETIC 覆盖默认不请求/不进 due、生产拒绝、测试副本 Runtime→SQLite、enabled=1 行回到 0。
+- 配置注册/运行接线与迁移预置的 42 行目录行分开写：后者是数据库已有目录行，本切片不改变。upsert 只在 job 实际执行且有 fetch 时发生，构造时不写库。普通应用启动仍不自动注册（runtime registry 显式 `seeds ?? []`）。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+
+## 2026-10-22 R2 CN-T02 / TH-C01 默认关闭注册（collect-job 默认接线，dots 1792657970.271849 / 1792658044.563019）
+
+- 新增 `registeredIntelSources`（原两源不变 + CN-T02/TH-C01 enabled:false、persistence:disallowed），`createIntelCollectJob` 未传 seeds 时默认用它；显式 seeds（含 `[]`）原样优先。
+- 只是 collect-job factory 的默认注册接入；普通应用启动不自动注册四源（runtime registry 仍显式 `seeds ?? []`），生产白名单、migration/manual/observation 不变。
+- 隔离测试覆盖默认注册不请求、生产选择不变、`[]` 零新增注册行且迁移预置行不变、测试副本 Runtime→SQLite（metadata-only）、同 ID enabled=1 行回到 0。R2-4 28/39、R2-5 25/34 不变，未接通 live。证据：[docs/evidence/r2-registered-closed-sources-2026-10-22/README.md](evidence/r2-registered-closed-sources-2026-10-22/README.md)
+## 2026-10-22 R2-7 电脑端两项补验（限定通过，dots 1792640825.474229）
+
+- 在隔离 v2 现场按已审恢复脚本（5c484e1d…）执行一次：before、READY、startup、gui-after 全部通过；所列业务/schema/指针/计数/设置不变，只有 last_migration_at 随启动和页面 GET 前移。
+- 用户做了 1280×900 截图（主审在用户会话查看，未随库）和键盘版本切换（用户自报，无录像）。
+- 停止：进程已退出、4489 已释放；`shutdown-v2.json` 缺失，记为关闭事件取证不完整。
+- 服务器防护未记录拦截事件；浏览器无网络记录，不声称零外联/零 POST。
+- 只是 R2-7 两项电脑端的限定通过：S7、R2 整体未通过，手机端仍暂缓。证据：[docs/evidence/r2-7-desktop-closeout-2026-10-22/README.md](evidence/r2-7-desktop-closeout-2026-10-22/README.md)。
+
+## 2026-10-22 XX-F01 第二、三次单次取样（均未取得样本）
+
+- 第二次（10-21 17:29 UTC+8，脚本 b6249464…9c14，正文上限 512 KiB）：用户先在界面内为该主机加了精确 fake-IP 例外。DNS 1 次（5 个公网 IPv4）/ GET 1 次，`body_too_large`，没有完整响应。证据：[docs/evidence/xx-f01-oneshot-r2-2026-10-21/README.md](evidence/xx-f01-oneshot-r2-2026-10-21/README.md)。
+- 第三次（10-22 09:19 UTC+8，脚本 cccb565c…4fa4，正文上限 2 MiB）：DNS 1 次（7 个公网 IPv4）/ GET 1 次，**HTTP 504**，正文为空。504 具体在哪个环节产生、原因是什么，均未确认。证据：[docs/evidence/xx-f01-oneshot-r3-2026-10-22/README.md](evidence/xx-f01-oneshot-r3-2026-10-22/README.md)。
+- 两次都只运行了一次，没有重试；exit 0 只是正常记录。**XX-F01 仍未取得政策样本**，资格判断与 28/39、25/34 不变。
+- 第一次的 `blocked_address` 见下方 10-21 记录。10-21 16:01 的 DNS-only 诊断返回的是配置的 fake-IP 网段地址；14:40 那次返回的地址没有留存，无法证明两者对应。
+
+## 2026-10-21 XX-F01 单次授权取样尝试（未成功，已收口）
+
+- 用户 14:39（UTC+8）派发，dots 准备审核通过（1792564287.178719）。一次性脚本 SHA256 b6249464…9c14 只运行了一次。
+- 结果：DNS 1 次 / GET 0 次，`blocked_address`（DNS 结果未通过公网地址校验）。无响应、无原文，未重试。exit 0 不表示取样成功。
+- 代理/fake-IP 只是未验证假设，不归因到站点。这次尝试不是源站失败，也不是接入通过；matrix 资格判断与 28/39、25/34 不变。
+- 证据：[docs/evidence/xx-f01-oneshot-2026-10-21/README.md](evidence/xx-f01-oneshot-2026-10-21/README.md)（脱敏账本副本）。
+
+## 当前：文档与证据收尾（2026-10-21，dots 1792556271.212689）
+
+- 启动竞态 P2 已由 dots 关闭（160c67a/00e97518）。本节只收尾文档和证据，没有新开发，也没有发请求。
+- 以远端 `00e97518` 为基线逐项对照原工作区。已推送的三个切片没有重复提交，也没有用旧文件覆盖。
+- 本次提交：
+  - 来源矩阵 mapping/report：CN-T01、ID-W02、XX-K01，累计 28/39、25/34。
+  - catalog、handoff、final-reuse-audit：现行口径与交付指针。
+  - `r2-closeout-offline-2026-10-20`：作为历史快照随库，并加了历史本地证据说明。
+  - 原工作区的 status 历史记录，以及 `.gitignore` 的 `.pnpm-store/`。
+- 所有相对链接都可读。文中的 `.tmp/…`、`D:\…`、私有原存档、隔离 DB 是历史本地证据，不随库交付。
+- S7 未通过。R2 总体未通过：R2-4 28/39 差 4，R2-5 25/34 余 9。正预算实网、24h、R3 未运行；手机端暂缓。
+
+## 2026-10-21 切片3补修：观察 worker 启动时序竞态（离线）
+
+- 按 dots 1792555459.663299 与更正 1792555472.118219：`scripts/r2-intel-observe-worker.ts` 在首次异步业务导入前同步安装并锁存 stop/disconnect/SIGINT/SIGTERM。逻辑在新文件 `scripts/r2-intel-observe-worker-startup.ts`，代码身份已列入该文件。
+- 有 IPC 通道时，立即检查 `process.connected`；导入屏障释放后再检查一次。已中止的信号贯穿到 `startIntelObservation`，沿用其既有的 operator_stop 收尾：只读重开、释放所有权、写 result.json。
+- 测试 `scripts/r2-intel-observe-worker-startup.test.ts` 确定性、离线：
+  - 主要回归：导入屏障期间父进程断连。
+  - 屏障期间 connected=false 但没有事件。
+  - 启动时已断连。
+  - 早期 stop（屏障前/屏障中，仅作兼容性测试）。
+  - 正常启动与运行期 stop/断连不回退。
+- 以上中止场景都没有 DNS/HTTP、没有 source_run，锁已释放。
+- DNS 无法取消导致 drain 等待仍按历史限制口径；不删锁，不强杀。未运行实网，R2 总体仍未通过。
+
+## 2026-10-21 切片3：观察工具 + BMKG(ID-W02) 候选（离线）
+
+- 按 dots 裁定（1792554503.258689）最小修复：win32 `windowsInjected` 加小写 `logonserver`。保证表述为“隔离后业务阶段不可见”（Node v24.15.0 / libuv 1.51.0），不是“从未收到”。
+- 未扩大其它白名单，也未放宽拒绝条件。修复前失败与修复后通过的记录见 `docs/evidence/r2-observation-logonserver-2026-10-21/`。
+- 本切片未对 live 网络运行观察工具，未启动 24h/R3，也未调用模型或付费服务。R2 总体仍未通过。
+- mapping.json、source-matrix、intel-source-catalog、handoff、final-reuse-audit 以及 r2-closeout-offline（与 MY-L01/manual 混合）仍留在原工作区，未纳入本切片。
+
+## 当前：人工录入/剪藏切片已单独提交（2026-10-21）
+
+本次提交只含人工录入/剪藏这一切片，从原工作区按文件原样复制到隔离 worktree，基于切片 1 的 `1b68adcd5ebe33bc4ed655c894f8830fec7f3138` 生成：
+- 代码：`src/components/shipping/manual-intel.tsx`（三处 invalidateQueries 显式 throwOnError，单独提示读取刷新失败）；`server/intel/manual-checklist.ts`（MANUAL-CLIP 说明改为保留原始出处、本地私人资料，无需填写权利声明，不代表官方确认）；`scripts/s7-local-seed.ts` 的 `--manual-only` 及其 CLI 测试；`scripts/e2e-s7-integrated.mjs` 的增量；`scripts/tsx-alias-loader.mjs` 只在候选路径是文件时才解析（s7-local-seed 的 CLI 测试必需，否则 `#/intel/sources` 会被当成目录解析失败；观察工具也用到这个修复）。
+- 测试：`test/manual-intel.test.ts`、`scripts/s7-local-seed.test.ts`。
+- 证据：s7-manual-preparation、manual-query-refresh-p2、manual-gui-launch、manual-gui-limited、manual-read-recovery、manual-desktop-resume、clip-copy-clash 这些目录。只含摘要、读回计数、hash 和 diff，没有原始响应全文、临时数据库或凭据；隔离数据库只在 ignored `.tmp`。
+
+验收口径不变：人工核心流程（错误日期拒收、创建、去重、A→B 修订、旧 A 保留、刷新保留、CN-P05 仅查看记录）已验证，*不等于整个 S7 PASS*。电脑端 1280 宽布局和键盘操作未验证；手机端为用户暂缓，不算通过。R2-7 GUI/S7 仍未通过，R2 整体未通过。
+
+不在本切片：观察工具与 BMKG（`observation_child_environment_invalid` 测试失败未查清）、r2-closeout-offline（MY-L01 回放与人工交互验收混在同一目录）、逐源矩阵和目录说明的修改。clip-copy-clash/summary.json 引用了尚未入库的本地证据目录，这些链接目前只在本机有效。
+
+## 当前：Maersk/商务部及日期切片已单独提交（2026-10-21）
+
+本次提交只含 Maersk（XX-K01）/商务部（CN-T01）及日期这一切片，从原工作区按文件原样复制到隔离 worktree，基于 `40629587e22d8932df105962ec214530e4054414` 生成：
+- 代码：`article-fetch-security.ts` 新增显式 `SourceHeaderLimitConfig`，只允许 intel:xx-k01 ＋ 精确 `https://www.maersk.com/news` ＋ 32768 字节；collector 和 seed 类型透传；web_list 新增 `english_month_abbr_day`（Maersk 卡片显示日，role unknown、时区 missing）和 `english_month_abbr_12h`（MY-L01 卡片本地时间，无 offset）；`html-index-candidates.ts` 新增 XX-K01、CN-T01 两个默认关闭（enabled=false、persistence=disallowed）的 metadata 候选。
+- 测试：maersk-mofcom、web-list-english-12h、article-fetch-header-limit，以及 article-fetch-transport、html-index-candidates 的增量。
+- 证据：三 URL 诊断、Maersk header-limit／32KiB 单次 GET、三 URL 保存后验证、CN-T01 HTTPS／应用核对、MOFCOM host 追加、Maersk/MOFCOM 离线适配和限定资格这些目录。只含摘要、字段审计、hash 和 diff，没有原始响应全文、临时数据库或凭据。
+
+资格口径（限定）：XX-K01 OK/PASS（限定），CN-T01 OK/PARTIAL（限定）。累计 28/39（至少 32，差 4）、资讯 25/34 是*本地已审结果*。逐源矩阵 `mapping.json`、累计报告和目录说明的对应修改与 ID-W02（BMKG 实现仍留本地）及其他切片混在一起，本次没有提交，仍保留在原工作区。部分随附证据（如 qualification/remaining-r2.md、cn-t01-https/summary.json）引用了尚未入库的本地证据目录，这些链接目前只在本机有效。
+
+不在本切片：观察工具与 BMKG（`observation_child_environment_invalid` 测试失败未查清）、人工录入/剪藏、MY-L01 回放证据（r2-closeout-offline，与人工交互验收混在同一目录）。来源均默认关闭；没有实网请求或生产启用。R2 整体未通过。
+
+## 当前：4489已按授权恢复，手机端暂缓，只补电脑端布局与键盘（2026-10-21 02:16 UTC）
+
+父会话解除上一回合仅只读不得重启限制；先确认未恢复/旧PID已退出、同库hash未变，再按原已审方式恢复同一127.0.0.1:4489与隔离DB，无seed/清空/业务POST。31个源码SHA一致，GET页面/shipping/runtime/manual/TH与CN列表/详情均200，新PID37780/session27371，未配置后台持久化或开机启动。库仍TH1材料/2版本/4审计＋CN1查看/0材料，恢复前后计数一致、原manifest和数据库身份不变；42源全disabled、Runtime false、模型off/预算0、Provider/同步/翻译/intel执行均0，无出站/5173/生产库或Git发布操作。[恢复证据与停止标识](evidence/r2-manual-desktop-resume-2026-10-21/ready.json)。
+
+用户2026-10-21 02:14 UTC明确手机端先不做：360验收为用户暂缓，不算通过、不阻止约定电脑端范围收尾。[有限GUI与剩余清单](evidence/r2-manual-gui-limited-2026-10-21/acceptance.md)仅剩电脑端1280 CSS宽布局截图及真实Tab/ShiftTab/方向键版本选择；创建/重复/修订/旧版/TH和CN刷新已确认，不重复写入。S7整体仍不写PASS，来源资格28/39、25/34及24h/R3不升级；下方服务不可用是此前时点。
+
+## 当前：GUI有限证据补齐CN刷新，4489断线后不可用，宽度/键盘仍待（2026-10-21）
+
+父会话亲审截图确认TH-W01 revised B(01:53:43.282Z)、重复B unchanged(02:01:32.014Z)、可选旧A及F5后两版本仍在；补充截图Sentinel_462c584618e48191a908175bf0721678确认CN-P05刷新后02:04:53.275Z查看时间仍保留。无选源时全局列表的TH材料不是CN材料，不要求重复写入。02:06本机只读核对：TH1材料/2版本/4审计、CN仅1查看/无材料，发布时间均null；42源全disabled、Runtime false、模型off/预算0、usage/runtime/sync/cache/intel执行计数0，GET均200。
+
+02:09执行器offline、父于02:10确认重连；02:11GET为ECONNREFUSED，已知PID73356为ESRCH，无退出日志，终止机制未知。DB文件hash仍与02:06读回完全相同；本轮只读/不得重启，未恢复服务，未POST/seed/改代码/操作浏览器或5173。[有限证据与当前阻塞](evidence/r2-manual-gui-limited-2026-10-21/readback.json) / [剩余清单](evidence/r2-manual-gui-limited-2026-10-21/acceptance.md)。已完成保存/重复/修订/旧版及TH/CN刷新不重做；仅剩明确1280/360宽度及真实键盘操作，需4489恢复后再补。S7整体不写PASS，来源28/39、25/34及24h/R3不升级。
+
+## 当前：4489人工测试页读取失败已恢复，原A版记录保留（2026-10-21 01:32 UTC）
+
+只读核验昨日session88802已不存在、已知PID62716为ESRCH，4489所有GET为ECONNREFUSED；服务退出是当前读取失败直接原因，无退出日志，具体终止机制未知。按已有授权同一构建/31源码SHA、同一隔离cwd/DB恢复127.0.0.1:4489，新PID73356/session92781。页面及shipping/runtime/manual/list/detail均200；原1材料/1版本（A）/2审计created→unchanged前后不变，无B版，不替用户计修订验收。42源全disabled、Runtime false、Translation off/预算0、usage/runtime/sync/cache均0；无POST/出站/浏览器/5173/生产库操作，未seed/清理；正常初始化只更新last_migration_at。原manifest不变。[恢复证据与停服标识](evidence/r2-manual-read-recovery-2026-10-21/recovered.json)。用户可刷新、重选TH-W01打开原A版后继续，GUI/S7仍待验收；无代码/构建/提交推送部署或范围升级。
+
+## 当前：隔离人工GUI测试页已启动，等待用户五步操作（2026-10-20 09:42 UTC）
+
+父会话确认P2独立复审关闭、其余S7离线准备有限认可，用户批准本机测试页。最新31个覆盖源码SHA与根工作区一致并重新build退出0；从既有隔离manual-ready cwd启动，仅127.0.0.1:4489/feed。只读页面/脚本/API均200，Runtime running=false、42源全disabled、Translation off/预算0，启动前后业务/审计/usage/runtime/cache均0；未提交人工POST。启动正常更新last_migration_at与SQLite文件hash，schema29/数据库身份/空业务及原manifest保留，未seed或清理。进程限定环境无凭据/.env、进程内出站阻断，无浏览器操作或5173/生产库/网络变更。[启动与构建/计数证据](evidence/r2-manual-gui-launch-2026-10-20/ready.json)。GUI仍NOT_RUN，S7整体未验收，来源28/39、25/34及24h/R3状态不变。下方“未启动”属于此前执行快照。
+
+## 当前：人工录入刷新错误传播P2已修复，本地通过、待独立审查（2026-10-20）
+
+主会话复核确认前一轮弱mock测试不足：安装版React Query 5.90.21/query-core 5.90.20默认吞掉refetch异常，旧“刷新失败提示已验证”不能成立。本次三处invalidateQueries显式传{throwOnError:true}，保留保存确认、真正POST失败的输入/同ID重试及finally释放busy；提示统称读取刷新失败。
+
+新增真实QueryClient＋活跃QueryObserver＋实际queryFn回归，修前51项中恰有清单/列表/详情三个提示失败，修后51全过；事务失败和提交后丢响应仍同ID收敛到一版本/一审计。全新隔离clone正常frozen offline安装含scripts，build/typecheck/lint均0，全量1794通过＋3既有Windows跳过/147文件；不是DOM/Chrome证据。[仅本P2完整diff及SHA](evidence/r2-manual-query-refresh-p2-2026-10-20/product-files.json) / [RED/GREEN](evidence/r2-manual-query-refresh-p2-2026-10-20/gate-evidence.json) / [报告与限界](evidence/r2-manual-query-refresh-p2-2026-10-20/report.md) / [真实Neat Freak](evidence/r2-manual-query-refresh-p2-2026-10-20/closeout.md)。旧S7快照保留，此条纠正其提示分支验证口径；S7整体/GUI仍待父审，不升级。无应用服务/浏览器/实网/生产DB/网络或Git发布操作；来源28/39、25/34及旧准备环境保持。
+
+## 当前：R2-7离线人工准备与逻辑补缺完成，真实GUI仍NOT_RUN（2026-10-20）
+
+普通手工页新增7个真实事件/query回调接manual/读取DTO/native SQLite用例：清单、保存/重复/修订/旧版、状态重置后读回、切源/无新内容、未知响应同ID重试/事务失败/编辑换ID、busy及非法日期；不冒充DOM、Chrome刷新或布局证据。回归发现并修复保存已确认但列表刷新失败误报未知保存，现保留确认并单独提示刷新失败，真正POST未知仍保留输入/ID。
+
+既有S7 seed新增--manual-only，在新.tmp目录准备schema29/空业务与审计/usage/runtime/cache为0、源disabled、翻译off预算0及无Secret的合成数据/manifest，不另建harness；修正既有schema27常量及越界/覆盖flag，补5个真实CLI用例并保留原默认夹具。新隔离副本正常frozen offline安装含scripts、build/typecheck/lint全0，定向51、全量1789通过＋3既有Windows跳过/147文件；仅一次全量，类型/格式和import.meta导入失败日志保留。
+
+[五步中文清单与启动方案](evidence/r2-s7-manual-preparation-2026-10-20/manual-checklist.md) / [准备结果](evidence/r2-s7-manual-preparation-2026-10-20/prepared-environment.json) / [完整增量及hash](evidence/r2-s7-manual-preparation-2026-10-20/product-files.json) / [覆盖/限界](evidence/r2-s7-manual-preparation-2026-10-20/coverage.md) / [报告](evidence/r2-s7-manual-preparation-2026-10-20/report.md) / [Neat Freak](evidence/r2-s7-manual-preparation-2026-10-20/closeout.md)。父审待定；应用验收服务与Chrome未启动，4489仅未探测计划，现用服务/插件未切换；360/1280/键盘与实际五步点击仍NOT_RUN。继承forum clip/已认可HTTPS保存，不重测；自建CDP拒绝不重试。来源28/39、25/34不变，R2整体未过，24h/R3未开；无实网/保留DB操作、提交推送部署或清理。
+
+## 当前：Maersk/CN-T01限定资格已获独立审查并应用，28/39、25/34（2026-10-20）
+
+父会话完整读取三段七文件代码及逐项补证后批准精确应用：XX-K01有限R2-4 OK/R2-5 PASS；CN-T01有限OK/PARTIAL。仅改matrix两行及对应汇总，39条其他源与countingRules原文逐字节不变；当前公开28/39（最低32，差4），资讯25/34（余9）。Maersk仅单次历史32KiB响应＋18原项完整离线回放；CN同产品HTTPS单次历史200＋8原项/7接纳，原HTTP项不改写，存储role键缺省非publication；均day、无timezone/instant、metadata-only、默认关闭，不扩大持续或生产声明。数值仍分历史3项有限诊断＋新增1项完整原件离线解析，不写4/5生产接入。
+
+[限定认可](evidence/r2-maersk-mofcom-qualification-2026-10-20/acceptance.json) / [剩余R2与下一最小动作](evidence/r2-maersk-mofcom-qualification-2026-10-20/remaining-r2.md) / [核对与Neat Freak](evidence/r2-maersk-mofcom-qualification-2026-10-20/summary.json)。R2-4/5仍FAIL，R2-7 GUI/S7仍BLOCKED、R2-8 NOT_RUN、R3暂停；不重开R2-6限定PASS或历史回放1/10。此轮仅资格/证据文档，沿用1777＋3跳过等既有执行证据且父未重跑，无源码/实网/试跑/服务启用/提交推送部署。下方26/39、24/34与待审建议是此轮之前历史，最新以本条及当前matrix为准。
+
+## 当前：Maersk与CN-T01离线最小适配完成，资格建议待父审（2026-10-20）
+
+马士基新增显式d Mon YYYY严格公历day规则、unknown role/rawDate/localDate，时区missing、offset/发布时间null；默认关闭metadata候选经现有collector转交已审固定exact intel:xx-k01＋https://www.maersk.com/news＋32768 opt-in，原secureFetch及生产选源名单不改。完整46251B原件18/18与独立节点0差异，真实collector写入隔离SQLite18版本/title blocks，重复新增0/修订0，关闭重开逐项一致。
+
+商务部完整20318B“最新政策”8项均有标题/原URL/自身日；7条相对HTTPS身份按现有规则解析/入库/重复/重开通过，1条原HTTP政策及解释链接排除，不补造HTTPS或扩大SITC例外。日期2026-10-09至10-19，role/时区/发布时间未知；保留目录原HTTP及同path已验证HTTPS证据。两个候选均false/disallowed，未加入active seeds或production IDs，无schema或新调度/库。
+
+正常frozen offline安装含scripts、build/typecheck/lint与全量1777通过＋3既有Windows跳过（146文件），定向226/真实原件独立回放2通过。失败日志保留；网络为固定样本模拟，原生HTTP/系统DNS调用0、usage0，无实网请求或PPA/CA/TLS/Clash/服务操作。[报告](evidence/r2-maersk-mofcom-offline-2026-10-20/report.md) / [完整增量与文件hash](evidence/r2-maersk-mofcom-offline-2026-10-20/product-files.json) / [门禁](evidence/r2-maersk-mofcom-offline-2026-10-20/gate-evidence.json) / [proposed mapping](evidence/r2-maersk-mofcom-offline-2026-10-20/proposed-mapping.json) / [Neat Freak](evidence/r2-maersk-mofcom-offline-2026-10-20/closeout.md)。实际matrix不改，仍26/39、24/34；建议Maersk有限OK/PASS、CN有限OK/PARTIAL待父审，R2整体未过。GUI/S7/24h未验收、R3暂停；无生产启用、Git发布或清理。下方日期grammar/collector尚未实现与CN仅访问记录为此轮之前历史。
+
+## 当前：保存应用后三URL验证完成，商务部200、PPA严格TLS失败（2026-10-20）
+
+依据已确认的29项生成配置执行精确三URL各一次，07:51:35.830Z—07:51:37.012Z：商务部zcfb/index.html返回200/text-html/20318字节，原件仅ignored私有目录；PPA helpdesk与port-news均UNABLE_TO_VERIFY_LEAF_SIGNATURE，TLS阶段结束，无HTTP响应/body。DNS3/transport3/请求预算3，三次均公网地址，0重试/跳转跟随/详情/附件；10秒512KiB、原DNS全地址校验/pinning/TLS保持，不改CA/网络。未重读受拒进程数据；运行核心路径不另设为本轮门禁。无Maersk请求。
+
+[准确账本](evidence/r2-three-url-after-save-2026-10-20/request-ledger.json) / [报告](evidence/r2-three-url-after-save-2026-10-20/report.md) / [summary](evidence/r2-three-url-after-save-2026-10-20/summary.json) / [真实Neat Freak](evidence/r2-three-url-after-save-2026-10-20/closeout.md)。200仅为一次访问证据，CN-T01字段/日期未验；PPA两个入口仍同一PH-P01。来源matrix/目录及26/39、24/34不变；Maersk日期/collector留下一轮。本轮无产品/配置实现、DB/Secret/服务/插件变更、生产启用/24h/R3或Git发布操作。下方等待截图/请求0及最小后续读取运行路径，是本轮之前状态；本条为最新访问结果。
+
+## 补充当前：Clash生成文件已含两域名，运行核心路径读取受拒（2026-10-20）
+
+Maersk一次GET与离线核查完成后，按父已读用户截图新增授权作最小只读诊断，无重发请求。Clash Verge注册与exe版本均2.5.8；选中脚本shf0fNvLCn9b.js保留原27及PPA/MOFCOM各1。应用数据目录clash-verge.yaml于07:32:13.019Z写入，现在filter29项、两域名各1、原27完整；已取代07:06缺项快照。enable_dns_settings=false，独立dns_config.yaml的10项filter与生成DNS不同，故当前不支持应用DNS覆写覆盖判断；选中源DNS为fake-ip，当前输出也不支持脚本条件未命中。
+
+[只读结论](evidence/r2-maersk-32k-live-2026-10-20/clash-readonly-report.md) / [仅相关字段](evidence/r2-maersk-32k-live-2026-10-20/clash-dns-readonly.json)。WMI进程元数据/-f/-d读取被系统拒绝，未重试；运行核心实际路径/加载时间仍pending，不以磁盘文件冒充运行态。未发现其他顶层YAML生成候选，当前没有进一步改配置的依据；最小后续是获准的运行配置路径只读凭证。没有配置改写/重载/清缓存/TUN/DNS替换或PPA/MOFCOM请求。下方等待截图或生成缺项为之前检查时状态；Maersk单次请求与字段结论仍见下方本轮记录。
+
+## 当前：Maersk固定32KiB一次真实GET200，18项字段存在、日期适配待审（2026-10-20）
+
+父已独立只读审查三份完整diff、无P1/P2；既有92定向/1727通过＋3跳过仍为执行者证据，父未重跑。本轮请求前后交付SHA一致，未改产品源码。仅对https://www.maersk.com/news显式intel:xx-k01/32768执行一次原安全GET：2026-10-20T07:28:29.935Z开始，07:28:30.700Z接收、30.739Z结束；系统DNS1/GET1，200/text-html/46251字节、raw exit0；10秒512KiB、0跳/重试/详情/附件。参数32768实际转交，Node全局默认仍16384；实际header总字节未测，完整header/cookie/token/rawPacket未存。
+
+真实初始HTML为News & Advisories/Latest news，18条=Latest news12＋Advisories3＋Rate announcements3、18唯一URL、18标题/自身可见日期，缺字段/冲突0，不是纯JS壳。显示日范围2026-09-28至10-20，全2026；仅day，角色为未标注卡片显示日，时区/发布时间instant未知，不来自URL/页脚/抓取时间。现有fromHtml完整原件离线探针18条title/link/rawDate与独立核查0差异，但日期18项均unsupported_format；探针1项通过只证明抽取和缺口如实保留，不是R2字段PASS。下一建议仅补显式d Mon YYYY规则、默认关闭同页配置及固定opt-in在既有collector的转交，本轮未实现。
+
+[本轮报告](evidence/r2-maersk-32k-live-2026-10-20/report.md) / [单次账本](evidence/r2-maersk-32k-live-2026-10-20/request-ledger.json) / [逐项字段](evidence/r2-maersk-32k-live-2026-10-20/field-audit.json) / [现有parser结果](evidence/r2-maersk-32k-live-2026-10-20/parser-probe.json) / [summary](evidence/r2-maersk-32k-live-2026-10-20/summary.json) / [真实Neat Freak](evidence/r2-maersk-32k-live-2026-10-20/closeout.md)。原件仅既有ignored私有样本目录，机器矩阵/目录及26/39、24/34、数字两类型证据保持；不因200自动改判。PPA/MOFCOM等用户截图，本轮没有配置核对或请求。无试跑/24h/R3、生产启用、DB/Secret/服务/插件切换、提交推送/PR/merge/deploy或删除。下方真实Maersk未请求说法为前轮历史，本条仅证明一次有界响应，不代表持续可用。
+
+## 当前：Maersk精确URL32KiB opt-in离线完成，生成配置差异阻止三URL验证（2026-10-20）
+
+已按用户批准实现现有secureFetch的显式SourceHeaderLimitConfig：仅intel:xx-k01＋精确https://www.maersk.com/news＋32768字节，默认不传/不启用、其他来源保留Node原默认。非法配置或来源/URL不匹配在DNS前拒绝；配置快照、每跳精确重核，不同跳转目标不继承预算，transport另拒绝其他显式数值。DNS全地址/pinning、TLS、超时/取消、正文/Content-Type/跳转规则保持；无来源配置/Settings/Runtime激活或全局Node/环境参数。
+
+真实Node parser合成loopback测试：默认16384拒绝20KiB header值，精确32KiB opt-in接受同一20KiB值，40KiB继续HPE_HEADER_OVERFLOW；另一来源默认、512KiB body、timeout、abort、配置隔离/跳转/安全回归均通过。TLS选项另用既有Node边界mock验证，不冒称真实TLS。新隔离副本正常frozen offline install含scripts，build/typecheck/lint/定向92/全量1727通过＋3既有跳过，六命令raw exit0。
+
+用户报告手动应用完成后，07:06:20.811Z只读检查：脚本29项完整且PPA/MOFCOM/BMKG各1，磁盘生成PPA0/MOFCOM0/BMKG1。因此按前置条件停止post-apply三URL验证，外网DNS/HTTP0，不再次轮询或自行应用/重载。该结论是当次磁盘检查，不推断用户未操作或运行内核状态。Maersk真实GET仍NOT_RUN，待代码审查；真实头大小/32KiB能否容纳/反爬或CA均未新增结论。
+
+[实现报告](evidence/r2-maersk-header-limit-2026-10-20/report.md) / [原生parser证据](evidence/r2-maersk-header-limit-2026-10-20/native-parser-evidence.json) / [配置必要字段](evidence/r2-maersk-header-limit-2026-10-20/configuration-apply-check.json) / [完整产品diff](evidence/r2-maersk-header-limit-2026-10-20/product.diff) / [门禁/指纹summary](evidence/r2-maersk-header-limit-2026-10-20/summary.json) / [真实Neat Freak](evidence/r2-maersk-header-limit-2026-10-20/closeout.md)。公共26/39、资讯24/34、历史3项有限数字诊断＋新增1项完整原件离线解析保持。原未提交改动/保护库/Secret/服务/插件保留；无提交推送、试跑/24h/R3或清理。下方诊断/无新能力说法为前轮历史，现役实现以本条为准。
+
+## 当前：三URL有界诊断止步，Maersk响应头溢出、PPA地址拒绝（2026-10-20）
+
+本轮先核对本地已有证据与前轮任务退出，再仅诊断已批准目录URL；未见这三URL已测403/401、浏览器安全警告或足够原件。Maersk前轮generic fetch_failed，本次系统DNS1/GET尝试1，真实底层HPE_HEADER_OVERFLOW（Parse Error: Header overflow），定位HTTP响应头解析阶段，无完整HTTP状态/HTML；不归因反爬或CA，也未提高header限制/更换transport。PPA helpdesk系统DNS1返回198.18.0.79，原安全链blocked_address，HTTP0且未到TLS；port-news同host据刚取得的地址安全拒绝停止，DNS0/HTTP0，明确未请求，不声称其页面返回错误。总DNS2/GET尝试1、0重试/跟随/详情/图片/分页/登录，无成功HTML或适配候选。
+
+[逐目标报告](evidence/r2-three-url-diagnostic-2026-10-20/report.md) / [诊断原字段与限定分类](evidence/r2-three-url-diagnostic-2026-10-20/diagnostics.json) / [账本](evidence/r2-three-url-diagnostic-2026-10-20/request-ledger.json) / [前置归档核对](evidence/r2-three-url-diagnostic-2026-10-20/preflight.json) / [summary](evidence/r2-three-url-diagnostic-2026-10-20/summary.json) / [真实Neat Freak](evidence/r2-three-url-diagnostic-2026-10-20/closeout.md)。权威矩阵/目录和26/39、24/34、数字类型分列不改；PH-P01两产品仍一行，单产品诊断不算通过。没有生产源码/测试变化，产品门禁不重跑；当前不改抓取器、CA、代理、DNS/网络、安全规则、schema或来源开关。CN-T01未轮询，无浏览器探测、服务/插件切换、24h/R3、提交推送/PR/merge/deploy或清理。
+
+## 当前：ID-W02限定OK已落地，VN-P01单HTML详情无自身日期（2026-10-20）
+
+父独立静态源码审查BMKG纯parser无P2阻断，限定认可归档XJ001真实产品及完整原件离线解析/归一化/字段验证；前轮30定向、1688通过/3跳过、41点零差异是执行者证据，父未重跑。本轮仅资格/证据文档，无产品增量或重复门禁。权威matrix仅ID-W02由NOT_RUN改限定OK，累计26/39、至少32还差6；资讯24/34不变。数值分列历史3项有限诊断＋新增1项完整原件离线解析（分母5），不称4/5生产接入。其他40来源条目、countingRules、默认开关保持，不加先入库/注册Provider或七日逐小时门槛。
+
+VN-P01完整已存10行中第一条200/TBHH-CHHĐTVN原href已证，无同URL请求/详情归档后，按另批上限只执行一次HTTPS HTML GET：2026-10-20T04:08:23.785Z，200/45326字节，系统DNS1/GET1、raw exit0、0重试/跟随/PDF/图片/分页/其他详情。标题及canonical与原行匹配；submitted为空，无日期属性/meta/JSON-LD，唯一29/12/2003属公共许可证页脚而排除。发布/更新时间、角色、精度、时区/instant保持未知；该源PARTIAL/PARTIAL不变，不推广其余9条、不写VN适配。
+
+[本轮报告](evidence/r2-id-w02-qualification-vnp01-2026-10-20/report.md) / [资格认可](evidence/r2-id-w02-qualification-vnp01-2026-10-20/qualification-acceptance.json) / [现役剩余13项与10字段缺口](evidence/r2-id-w02-qualification-vnp01-2026-10-20/remaining-matrix.md) / [VN选择及归档核对](evidence/r2-id-w02-qualification-vnp01-2026-10-20/vn-p01-selection.json) / [日期审计](evidence/r2-id-w02-qualification-vnp01-2026-10-20/vn-p01-date-audit.json) / [请求账本](evidence/r2-id-w02-qualification-vnp01-2026-10-20/request-ledger.json) / [summary](evidence/r2-id-w02-qualification-vnp01-2026-10-20/summary.json) / [真实Neat Freak](evidence/r2-id-w02-qualification-vnp01-2026-10-20/closeout.md)。原件仅ignored.tmp，旧proposal/历史证据不重写。未启用来源/入库/切换服务插件，CN-T01未轮询，无浏览器探测、24h/R3、提交推送或部署；原工作区保留。下方待父审/25项等为前轮历史状态，以本条现役资格为准。
+
+## 当前：ID-W02纯离线解析与完整41点原件回放完成，资格建议待父审（2026-10-20）
+
+本轮仅新增`server/services/bmkg-port-forecast.ts`及测试：保留来源/原始UTC/issued/valid range、60/180分钟分组及missing/null/value，严格身份、日期、顺序/重复/跨组冲突和数值语义；原值与四项单位投影分离，无插值、时效推断或网络/DB/Provider激活。完整私有原件41点通过实际parser；328数值原值、164文本、164投影、41时间对照一致，差异0，实际缺失/null/拒收0；受控未知和拒收独立验证。
+
+新本地隔离副本正常frozen offline install（含scripts），build/typecheck/lint/定向30项/全量1688通过＋3项既有Windows skip，六命令raw exit均0；原件回放另1项通过。既有18源码及22保护项hash保持，原件只在ignored `.tmp`，现用服务/插件未切换。真实[Neat Freak](evidence/r2-id-w02-offline-parser-2026-10-20/closeout.md)、[报告](evidence/r2-id-w02-offline-parser-2026-10-20/report.md)、[完整比较](evidence/r2-id-w02-offline-parser-2026-10-20/raw-replay.json)、[门禁与指纹](evidence/r2-id-w02-offline-parser-2026-10-20/summary.json)。
+
+按原countingRules，R2-4不新增每数值源先入库或注册Provider条件，ID-W02的72h混合步长不套R1.5七日逐小时要求。仅[建议](evidence/r2-id-w02-offline-parser-2026-10-20/qualification-proposal.json)父审后将该项改限定OK、公共累计可能26/39；当前权威matrix/目录未改，仍25/39、资讯24/34。数字证据分列历史3项有限归一化诊断＋新增1项完整原件离线解析，不宣称4/5已接入。无新来源请求、CN-T01轮询、提交推送、24h或R3。下方单样本“无parser/待实现”为历史轮次状态，本条优先。
+
+## 当前：ID-W02 XJ001单样本合同核对完成，离线接入设计待审（2026-10-20）
+
+本轮只取`https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json`一次：HTTP200/application-json/11259字节，raw exit0；系统DNS1/物理GET1，10秒/512KiB，无重试/跟随/其他目标。CN-T01配置未轮询、该源DNS/HTTP0。
+
+code/name与官方索引逐字一致；产品没有坐标，不能以索引坐标补成已返回/已比对。issued为2026-10-19 12:00 UTC，valid_from20日00至23日00 UTC，无updated字段；41点=24小时点＋17三小时点、跨度72h，抓取时源issued年龄15.5653h但仍处有效窗。null/质量码未见只是本样本，不补0/新码表或时效阈值；无7日逐小时/降水mm/swell/current实测完整覆盖。
+
+[报告](evidence/r2-id-w02-xj001-2026-10-20/report.md) / [合同矩阵](evidence/r2-id-w02-xj001-2026-10-20/contract-matrix.md) / [聚合审计](evidence/r2-id-w02-xj001-2026-10-20/contract-audit.json) / [最小离线建议](evidence/r2-id-w02-xj001-2026-10-20/integration-design.md) / [执行摘要](evidence/r2-id-w02-xj001-2026-10-20/summary.json) / [真实Neat Freak](evidence/r2-id-w02-xj001-2026-10-20/closeout.md)。现存天气库整港替换及无source行ID不能直接并行写入，issued/分辨率/来源点合同也待审；下一轮建议仅纯parser和候选单位投影，无网络/DB/Provider激活。
+
+本轮产品代码/测试diff为空，目录资格/分母/schema/港口坐标/来源开关/正式合同不变，产品门禁NOT_RUN；原件仅ignored.tmp，不发布完整41条。无服务/库/插件/网络变更、提交推送、24h或R3。25/39、24/34、历史数字3/5保持，单样本验证不自动计PASS。
+
+## 当前：ID-W02官方文档/位置映射已本机取证，产品待审（2026-10-20）
+
+本轮独立恢复BMKG小轮，旧轮零请求已核对；按最多两次GET先取`https://maritim.bmkg.go.id/apidoc`，真实文档明确base＋GET /meta/{file}＋port_province.json后才取该精确索引。两次均HTTP200/raw exit0（148259/132947字节），各系统DNS一次/物理GET一次，10秒/512KiB、无重试/跟随/额外链接或预报产品。CN-T01仍暂停，本轮不轮询其配置、不做该源DNS/HTTP。
+
+真实索引含37省分组/659港口，唯一`$.data[6].ports[0]`为XJ001 / Pelabuhan Tanjung Priok / DK Jakarta，lat -6.103879776、lon106.882294878。文档GET /pelabuhan/{KODE}.json、UTC有效时间、day1小时/day2–4三小时及波高m、风/流速knot、能见度km已证；这是模板/位置映射，不是XJ001预报API code最终验证。候选精确产品未请求，不自动提高资格。
+
+[报告](evidence/r2-id-w02-doc-map-2026-10-20/report.md) / [位置映射](evidence/r2-id-w02-doc-map-2026-10-20/mapping-evidence.json) / [第二步依据](evidence/r2-id-w02-doc-map-2026-10-20/document-proof.json) / [原退出码/计数/保护摘要](evidence/r2-id-w02-doc-map-2026-10-20/summary.json) / [真实Neat Freak](evidence/r2-id-w02-doc-map-2026-10-20/closeout.md)。原件只保留ignored.tmp，Git只记允许的合同事实/目标元数据；无原始全文/完整索引/凭据重分发。产品代码/测试/目录资格/分母/schema不改，产品门禁本轮NOT_RUN；现用库/服务/插件不动，无提交/推送、24h、R3或付费，25/39、24/34、历史数字3/5不变。待父审决定是否单独验证一个港口产品。
+
+## 当前：用户已报告应用，商务部生成过滤表仍未更新（2026-10-20）
+
+用户已明确完成保存应用；本轮随后只读核对当前关联扩展为28项，但磁盘生成fake-ip-filter仍27项、商务部0/BMKG1。原27项和enhanced-mode=fake-ip保持，fake-ip-filter-mode仍未显式写出；运行内核未访问核验。因此是“生成结果未反映新增项，生效核对未通过”，不能断言用户未操作，也不能声称已生效。
+
+按授权前置条件立即停止，未创建请求launch/result，系统DNS/HTTP均0；没有自行保存/应用/重载、清缓存、配置或安全规则变更，也未发BMKG请求。产品代码/测试无增量，来源抓取、适配和回放BLOCKED，资格各分子不变。待父会话处理该应用结果差异；不能仅因用户此前报告已应用就跳过本轮生成表检查。
+
+[必要核对字段](evidence/r2-cn-t01-after-apply-2026-10-20/configuration-apply-check.json) / [停止凭证](evidence/r2-cn-t01-after-apply-2026-10-20/summary.json)。前轮已写入的脚本28项、备份和用户工作区保持；未提交/推送/PR/部署、切换服务/插件、24h或R3。下方“等待用户保存应用”为上轮操作完成时状态，当前以本条为准。
+
+## 当前：商务部单host扩展已写入，等待用户保存应用（2026-10-20）
+
+用户当次批准先备份后仅追加`www.mofcom.gov.cn`。已确认五个Clash相关文件与刚核验快照一致，备份当前订阅扩展，再只作一次插入：脚本字面项27→28、原27顺序/继承spread保留、BMKG精确host仍一次；语法仅编译、不执行。全局扩展、profile关联、基础和生成配置摘要保持不变。操作完成时生成过滤表仍27项、商务部0/BMKG1，不能称已应用或生效。
+
+备份与操作凭证在`.tmp/clash-mofcom-singlehost-20261020/`，详情见[结果](evidence/r2-mofcom-host-append-2026-10-20/result.json)。本轮未自动保存应用/重载内核/清缓存，CN-T01 DNS/HTTP0；BMKG只作本地预检，DNS/HTTP0，无在途请求，余步骤留下一轮。后续必须等用户明确应用完成，核对结果后才能进行已有批准范围内的解析/单次政策页请求；不提前执行。项目源码/保留库/Secret/插件/现用服务不变，无提交推送、24h或R3。
+
+## 当前：人工剪藏提示修正与两host网络只读核对（2026-10-20，待父审）
+
+本轮只将MANUAL-CLIP focus改为保留原始出处、本地私人资料、无需填写权利声明、非官方确认/预警/自动来源验证；不改权限、数据、保存行为、其他表单或操作者要求。现用服务/插件未替换，提示候选只在工作源码/隔离门禁中。上一MY-L01及CN-T01有限阻塞认可继承，已接受案例不重开。
+
+新本地副本正常offline frozen install含scripts、build/typecheck/lint、5文件84相关、143文件1658全量＋3既有Windows跳过均raw0，无新测试文件或论坛/浏览器专项复验。真实Neat Freak与文档/保护收尾见[本轮报告](evidence/r2-clip-copy-clash-2026-10-20/report.md)、[原退出码/输入指纹](evidence/r2-clip-copy-clash-2026-10-20/summary.json)和[收尾](evidence/r2-clip-copy-clash-2026-10-20/closeout.md)。
+
+只读Clash当前订阅扩展与磁盘生成fake-ip-filter均保留原27项有序指纹：商务部精确host0、maritim.bmkg.go.id精确host1，生成enhanced-mode=fake-ip，fake-ip-filter-mode未显式设置；运行内核加载未核验。未输出配置/订阅/secret/节点/控制凭据，未做DNS/HTTP、配置写入/重载/清缓存。仅追加商务部精确host的方案仍须用户单独批准，本轮不是修改授权。
+
+既有源码/用户改动、保留数据库/Secret/插件/服务入口保持；无暂存/提交/推送/PR/部署、24h、R3/付费或生产开关。R2仍BLOCKED，25/39、24/34、历史数字3/5不变。
+
+## 当前：CN-T01正式HTTPS单次本机取证受阻（2026-10-20，待父审）
+
+父会话已限定认可上一MY-L01显式日期格式切片，76相关/1658通过＋3跳过为本地执行证据，非父独立运行；该源码保留未提交。CN-T01新增正式同产品HTTPS依据来自父会话官方网页研究：`https://www.mofcom.gov.cn/zcfb/index.html`，host/path与原目录HTTP相同，不是猜协议或外贸司窄栏目。此依据解除“缺正式HTTPS产品”的前置资料缺口，不证明本机可达。
+
+本机同目标预检无已完成/在执行请求后，按授权只尝试一次既有secure fetch：系统DNS返回`198.18.0.5`，现有SSRF检查在transport前返回`blocked_address`，raw exit2；DNS1、物理HTTP派发/预留/transport均0、无TLS/来源响应/原页。已停止，不因剩余额度为1而重试，也未换工具或改网络/DNS/CA。没有原页，产品适配/collector→SQLite完整回放BLOCKED；本轮产品diff为空，未跑新产品门禁。
+
+[本机取证与边界](evidence/r2-cn-t01-https-2026-10-20/report.md) / [原result](evidence/r2-cn-t01-https-2026-10-20/capture-result.json) / [退出码/预检/保护指纹](evidence/r2-cn-t01-https-2026-10-20/summary.json) / [真实Neat Freak](evidence/r2-cn-t01-https-2026-10-20/closeout.md)。建议CN-T01可用性由NOT_RUN改记本机DNS BLOCKED、资讯字段仍NOT_RUN，供父审；原资格矩阵/目录历史行未改判，25/39、24/34、历史数字3/5不变。BMKG、浏览器、24h、R3、生产开关/现用服务/插件、提交推送均未动。下方待审措辞按历史时点保留，上一MY-L01的当前认可以上述交接为准。
+
+## 当前：R2离线收口候选（2026-10-20，待本轮父审）
+
+本机 `D:\try one\Shipping HOT`，`codex/shipping-hot-r2@40629587e22d8932df105962ec214530e4054414`；保留原未提交观察启动器/Windows环境修复及用户现场。本次父会话交接确认这些观察工作已获离线限定认可、dom-v4用户实测已解决具体论坛剪藏问题；下方2026-10-19“待父审/待用户重测”是当时历史状态，不再要求重做该案例。R2-6继承aea56e72限定PASS；完整GUI/S7仍按精确剩余场景验收。
+
+已逐项复核14个可用性非OK来源、10个资讯字段未PASS来源及前置资料/请求权限。累计仍25/39（至少32，差7）、24/34、历史数字诊断3/5；不代表当前在线率。历史天气回放1/10停止扩展，不作为本轮R2阻塞。矩阵原文件与许可/分母逐字节不改。
+
+最小修复只在既有web-list加入显式 `english_month_abbr_12h`：MY-L01合法私有原存档10条时间均从unsupported变为原始本地日期/分钟精度，时区缺失、offset/发布时间null；该格式拒绝配置offset/佛历，不增加源配置、schema或Provider。原页文章href仍缺，collector继续failed、0材料/版本、只读重开一致；不提高任何资格分子。
+
+新隔离副本正常冻结锁离线安装（含scripts，无忽略或复制原生模块）、build/typecheck/lint与测试raw0：相关76 passed (76)，全量1658 passed | 3 skipped (1661)（143 passed (143)）。原存档隔离SQLite回放raw0；首次构建原生异常、lint格式修正和误扩大范围的临时预检失败均保留，不冒充通过。真实Neat Freak已执行；本轮只写3个产品/测试文件及收口文档，已审观察源码逐字节未变。
+
+[完整报告](evidence/r2-closeout-offline-2026-10-20/report.md) / [14+10逐项矩阵](evidence/r2-closeout-offline-2026-10-20/remaining-matrix.md) / [R2-7交互复用与余项](evidence/r2-closeout-offline-2026-10-20/interaction-acceptance.md) / [原退出码/指纹](evidence/r2-closeout-offline-2026-10-20/summary.json) / [真实Neat Freak](evidence/r2-closeout-offline-2026-10-20/closeout.md)。本轮待父审，未提交/推送/更新PR；R2仍BLOCKED、24h未启、R3未开、无新上游/模型/付费/浏览器/服务/插件/网络配置动作。
+
+## 当前：剪藏插件文件已更新（2026-10-19，7770070，仅待用户Chrome重新加载）
+
+## 2026-10-19 — observation CLI Windows environment P2 repair, offline
+
+**未提交候选，父审 pending。** 原实际 CLI 零预算正例在环境校验前置处失败（exit1，未到 bootstrap）；诊断证明 Windows Node 在应用导入前自动补入六个系统键。已最小修复：仅容忍该有限集合、丢弃原值，业务模块加载前切到全新空白 run/.home；未知变量、输入 HOME、凭据／代理／Node 参数／CA／数据库路径／用户配置覆盖仍拒绝。Node关闭全局模块搜索，tsx固定候选仓库 tsconfig；Git元数据读取禁用系统／用户全局配置，仅对已校验精确根目录作命令内 safe.directory，不写全局配置。
+
+独立实际 `pnpm observe:intel --execute` 两源／10秒／HTTP预算0 已走通父进程→worker→bootstrap→自动预算停止→drain/end/release→SQLite只读重开，原始exit2（预算停止预期），result的DNS/HTTP/预留均0、ownershipReleased/readOnlyReopen为true。manifest确认隔离cwd、6键已丢弃、空home、homedir匹配、moduleGlobalPaths=[]；无Secret文件、真实业务记录、付费或翻译增量。不是直接函数调用或预期拒绝替代，也不是24h／真实来源证据；worker既有live标签只表示生产依赖接线。
+
+当前候选正常依赖基础上 `pnpm install --frozen-lockfile --offline`、build/typecheck/lint、67相关用例（新增28，含25项敏感配置反例）及142文件／1629全量通过＋3既有Windows跳过。首次CLI失败、隔离home暴露的Git全局信任依赖、typing失败、sandbox离线安装no-TTY和全量子进程用例默认5秒超时日志均保留；仅该测试增加20秒上限，子进程15秒限制及10秒窗口／零预算断言不变。核心Runtime／预算／安全抓取／schema／源目录均未因本修复改动；现用服务未变。
+
+[修复与配置查找边界](evidence/r2-observation-env-repair-2026-10-19/report.md) / [指纹与原始门禁](evidence/r2-observation-env-repair-2026-10-19/summary.json) / [原result](evidence/r2-observation-env-repair-2026-10-19/actual-cli-result.json) / [真实Neat Freak](evidence/r2-observation-env-repair-2026-10-19/closeout.md)。R2仍BLOCKED；25/39、24/34、历史3/5不变。没有正预算来源调用、付费、24h、浏览器控制、部署或提交推送；R2-6继承限定PASS。
+
+## 2026-10-19 — R2 TMD/BMKG bounded observation launcher, offline candidate
+
+**本地实现与门禁已完成，父审 pending；未提交、未推送。** 基线 `codex/shipping-hot-r2@40629587e22d8932df105962ec214530e4054414`，仍在本机 `D:\try one\Shipping HOT`。显式 CLI 在新 `.tmp/r2-intel-observe-<id>` cwd/SQLite 中，只注册既有唯一 BackgroundRuntime 的 intel-collect；子进程仅系统环境白名单和固定开关，不继承 Provider 凭据、代理、Node options 或额外 CA，不复制保留库或 SecretStore。默认入口未启用。
+
+物理 HTTP 上限逐次 transport 同步预留，失败派发和每一重定向跳分别计数；0..200 次、窗口最多24h，固定15分钟 job tick／每源自适应15–60分钟，沿用现有退避、去重、版本和许可 blocks。仅精确 TMD/BMKG URL 与另行明确的同 host HTTPS 重定向边；未审批转向在目标 DNS/HTTP 前拒绝。最后额度允许在途响应完成，截止／越界中止在途 HTTP，停止后依既有 drain→end→release，异常不删除锁、不恢复窗口。同步调用 usage 计数仍不等于物理 HTTP。修复共享 TS alias loader 的同名目录误解析，并对 Windows 绝对 loader 使用文件 URL。无 schema、依赖或网络安全策略放宽。
+
+新干净克隆 `.tmp/intel-observation-clean-20261019`：正常 frozen install 含生命周期脚本、build、typecheck、lint、39项新增离线测试、142文件／1601全量通过＋3既有 Windows migration-copy-guard 跳过、3条隔离 SQLite smoke，成功门禁均 raw exit0。初次 EACCES、夹具／类型／CLI 及首次全量 loader 失败日志均保留。真实 Neat Freak 已加载并执行；本轮发现 Git Bash 可通过绝对路径调用，真实 inventory 脚本 exit0，不沿用历史 Bash unavailable 作为本轮结论。7个保留 SQLite 和1个 Secret 文件、现用插件8文件的前后 hash 不变；原有 dirty .gitignore 保持逐字节不变，原 status 内容完整保留。
+
+**R2-6 已在 `aea56e72ec11fa76986deccc5c3a9797584ab157` 获父审限定 PASS**，范围是复用／去重架构，不是52行全部落地或 R2整体通过；下方历史“建议PASS待主审／cursor待裁定”不再是当前门禁。R2仍 BLOCKED，25/39、24/34、历史数字3/5不变。真实来源 DNS/HTTP、真实记录、LLM／付费、GUI/S7、真实24h、部署和生产激活均 NOT_RUN；本轮只离线合成／拒绝路径。实际观察须另批精确 URL／时窗／频率／物理总数和隔离目录，中断不拼接、不续跑；两源观察不能替代39源验收。
+
+[实现与边界](evidence/r2-observation-launcher-offline-2026-10-19/report.md) / [命令、raw exit与源码指纹](evidence/r2-observation-launcher-offline-2026-10-19/summary.json) / [真实 Neat Freak 收尾](evidence/r2-observation-launcher-offline-2026-10-19/closeout.md)。
+
+用户明确批准更新本地正在用的插件文件。已核实正式目录仍为`.tmp/clipper-private-abb1b99/.tmp/clipper-package`，原8文件逐项匹配abb1b99记录；P2包42项构建输入与提交`777007073f184d025147eb19f8ece86858e68362`一致，直接复用已验产物，未从带本地改动的工作区重建，也不新增干净SHA完整门禁结论。
+
+先完整备份到`.tmp/clipper-package-update-7770070-20261019T054809Z/backup-package`，再仅原子替换`content.js`；最终8文件逐项匹配P2包，其他7文件、manifest、公开ID和三项权限不变。目录树SHA256为`9f776aa560251ce23b205986d4a7dd6832f483ac0d3b2b8ca1d73c421e00325e`（算法及逐文件hash见本机该目录的`update-result.json`/`final-verification.json`）。更新后的实际目录包通过46项Node VM/原创DOM断言，含正式HTTPS边界拒绝检查；不是Chrome/GUI证据。
+
+6个受保护DB/Secret文件hash不变，旧新闻未修改；5173仍GET200且HTML匹配原abb1b99服务，未启停或替换服务。没有浏览器配置/权限变更或自动加载，没有push/PR/合并/部署。**用户仍需在Chrome扩展管理页对Shipping HOT点“重新加载”；未观察到该动作，也未重新读取真实新闻页。** 实页效果、完整GUI/S7、24h仍未验，R2仍BLOCKED。此为本机操作状态补记，未另行提交。
+
+## 历史：剪藏提取结构候选（2026-10-19，两项P2限定复审通过，仅本地提交交接，未切换）
+
+用户已在普通abb1b99包手动保存一条HTTPS新闻，本地只读确认1材料/1版本/1审计，详情API与SQLite正文一致、private_material/unknown，但正文尾部含非正文杂项；存储一致不证明原网页完整。原始页面DOM未取得，未自动抓取或浏览器控制，旧记录/版本不改写。
+
+本轮沿用`codex/shipping-hot-r2`，提交前门禁基线为`3506e61e47d6764189c27aaaf1b69e251c150305`加受控源码快照：article快照在丢弃属性前排除明确非正文ARIA地标、HTML hidden和内联display:none，审计标签dom-v2；主审两项P2已移除aria-hidden及visibility整棵剪枝，三个视觉正文反例从删空改为精确保留，不实现computedStyle/CSS算法；没有文案/域名/class/id黑名单，选区及Defuddle/后端Readability保持原样。缺原DOM使实际新闻尾部修复仍NOT_RUN；上游既有class/id误删风险未改。[修复范围与限制](evidence/clipper-structure-2026-10-19/report.md)。
+
+独立全新检出正常frozen install含scripts、普通app/扩展build、typecheck、lint、**217相关/1481全量通过+3既有Windows跳过、3条SQLite smoke和42项正式bundle合成DOM断言**通过。此前候选的初次安装EACCES及错误测试环境导致的首轮7失败原始日志保留；本次P2门禁全部raw0，不改产品Runtime。真实Neat Freak已执行；[结果](evidence/clipper-structure-2026-10-19/summary.json) / [收尾](evidence/clipper-structure-2026-10-19/closeout.md)。
+
+新P2普通包仅在`.tmp/clipper-tail-p2-20261019/.tmp/clipper-package`，上轮候选包8文件也保留未变。本轮未启停或替换5173服务/用户包；原abb1b99普通HTML仍GET200，旧包/两测试库/保留库/Secret共14文件hash不变，正式记录正文hash和版本不变，usage/runtime/cache/fetch/executor仍0。未推送、PR更新、合并、部署、生产启用或付费/模型调用。
+
+两项P2限定复审通过，用户后续明确允许仅本地提交；精确提交SHA/动作结果以本地git记录和本机交接凭证为准。上述完整门禁绑定提交前基线加受控源码快照，不是干净提交SHA验证；源码内容指纹见summary。缓存ignore改动留在工作区，不纳入本轮提交。真实页面重测、完整GUI/S7、24h未验，R2仍BLOCKED：25/39、24/34、历史3/5。下方为此前时点历史，不覆盖本条现状。
+
+## 历史：普通私人剪藏（2026-10-16，限定复审通过，测试服务已切换，GUI待验）
+
+用户15:46UTC+8决定取消权利/保存范围/依据及时间角色表单（Sentinel_e20d7de212748191815c0f692ae9efd9）。产品SHA **`abb1b992a7de030025b16ad06ded63211e99ff1b`**：普通剪藏为提取→预览→明确保存，页面时间自动/未知；确认正文按原100000字符/体积/纯文本限制存入原版本。独立服务端审计为manual_user_capture/private_material/rights unknown及自动保存时间，不伪造本人原创或授权。
+
+本地人工详情按精确来源和私人审计读回正文；通用许可材料读取仍metadata_only/bodyText=null。legacy声明、旧版本和其他表单/自动来源策略保持原合同；新私人与legacy hash区分usage，防止相同正文覆盖旧声明版本。没有schema/依赖/认证/网络权限/Host/Origin/CORS/SSRF或合成URL隔离变更。[用户新决定与实现](evidence/gate-abb1b99-clip-private/report.md) / ADR-010。
+
+精确SHA新检出`.tmp/clipper-private-abb1b99`正常frozen install含scripts、普通与合成build/typecheck/lint、**200定向/1464全量通过+3既有Windows跳过、3smoke全部raw0**；同检出的编译后普通服务在独立库/5273通过22项HTTP：无声明正文POST200/超过280字精确读回、未知日期、旧版本兼容、拒绝请求零增量和usage/runtime/cache/fetch/executor0；自己的进程树已结束。不是GUI证据。[门禁](evidence/gate-abb1b99-clip-private/summary.json) / [编译HTTP](evidence/gate-abb1b99-clip-private/compiled-http-result.json) / [真实Neat Freak](evidence/gate-abb1b99-clip-private/closeout.md)。
+
+主会话限定复审已通过，无代码阻塞。已按审查脚本切换本轮自有测试服务到abb1b99，实际HTML/JS及合成文章匹配构建；receiver33992/source40400只监听127.0.0.1:5173/5174，GET200。继续使用原6087 run的同一个DB文件、UUID`f79f2bd2-050f-42b0-831e-6e787eb1344f`和schema29/real；08:16UTC前后材料/版本/动作/usage等0、来源42，先留一致backup，原库未清空/搬动，四个保留DB/Secret hash未变。新准确目录`.tmp/clipper-manual-abb1b99/extension-test`可交用户手动加载，旧包/ZIP保留。[切换核验](evidence/gate-abb1b99-clip-private/switch-verification.json) / [保全](evidence/gate-abb1b99-clip-private/switch-database-preservation.json) / [用户最短步骤](evidence/gate-abb1b99-clip-private/handoff.md)。PR正文发布仍被拒，未重试。
+
+新包真实GUI/nonce/保存重开NOT_RUN，限定复审已通过；普通HTTPS浏览器、完整GUI/S7、24h未验。R2仍BLOCKED：25/39、24/34、历史3/5。无生产启用/付费/模型/合并/部署/强推/删除。下方是此前时点历史，不覆盖本条新产品决定。
+
+## 历史：bdc7b59免填录入人（后来普通流程进一步简化，见上）
+
+用户15:14UTC+8明确要求去掉姓名输入（Sentinel_386b8dfb40ac8191b002c84c69d904d5）。产品SHA **`bdc7b59d88d440966d8c6aff7fc68229c136dbb1`**：扩展与系统接收预览均无录入人输入/必填；剪藏专用桥接/后端把缺省或空白姓名记为`未识别人工操作（未经身份认证）`，自动保留保存时间/来源/操作审计。合法旧姓名与旧版本仍可读；畸形旧字段仍拒绝。其他人工/政策表单原要求不变，许可/URL/正文/同源/幂等/版本校验未放松，无schema/认证/权限变更。
+
+精确SHA新检出`.tmp/clipper-no-operator-bdc7b59`正常frozen install含scripts、普通与合成build、typecheck、lint、**190定向/1454全量通过+3既有Windows跳过、3隔离smoke**全部raw0。新增17回归覆盖无姓名保存/重放/旧版本与许可拒绝，含真实H3 POST→SQLite→GET；本轮未把6087的108HTTP检查冒称重新执行。[报告](evidence/gate-bdc7b59-clip-no-operator/report.md) / [原门禁](evidence/gate-bdc7b59-clip-no-operator/summary.json) / [真实Neat Freak](evidence/gate-bdc7b59-clip-no-operator/closeout.md)。
+
+新扩展目录`.tmp/clipper-manual-bdc7b59/extension-test`、ZIP`.tmp/Shipping-HOT-Clipper-Synthetic-bdc7b59.zip`；旧6087包8文件/ZIP hash未变。[包/hash](evidence/gate-bdc7b59-clip-no-operator/synthetic-package.json)。继续使用原`.tmp/clipper-manual-6087a16/run/.data/shipping-hot-v3.sqlite3`，UUID`f79f2bd2-050f-42b0-831e-6e787eb1344f`、schema29/real，未搬库/清空；另留一致backup。07:24UTC材料/版本/动作/usage等仍0，仅来源42；receiver10880/source40064仅loopback5173/5174，GET200且HTML/JS匹配新构建。运行证据明确区分实际代码bdc7与原隔离目录6087标记，不伪改旧标记。[保全](evidence/gate-bdc7b59-clip-no-operator/preserved-database.json) / [只读结果](evidence/gate-bdc7b59-clip-no-operator/after-update-readonly.json) / [健康](evidence/gate-bdc7b59-clip-no-operator/manual-service-health.json)。四个保留DB/Secret hash不变。
+
+父审后用户需自行加载新目录、刷新接收页并重新提取草稿；旧目录只点重新加载不会升级。[最短步骤](evidence/gate-bdc7b59-clip-no-operator/handoff.md)。未操作浏览器，本SHA真实GUI/nonce/保存重开仍NOT_RUN；普通HTTPS/完整GUI/S7/24h未验。R2仍BLOCKED：25/39、24/34、历史3/5；无生产启用/付费/模型/合并/部署/强推/清场。
+
+## 历史：6087a16精确来源合成包（限定父审通过，后续免姓名修正见上）
+
+用户14:12UTC+8批准唯一额外来源`http://127.0.0.1:5174/synthetic-article.html`（Sentinel_93f0d70a11e88191be1cf2aac55064f7）。当前产品SHA **`6087a169cb2e591e3acb10d23ccc641d8212f5c0`**（实现9377cc3，随后补全只读依赖闭包审计）。仅显式编译的独立扩展/前端/后端支持该原始整串URL，均有“合成测试版”标记；普通包不能通过环境变量、请求头或Settings开启例外。复用原人工来源、schema29、Intel版本/去重/审计及许可，不改全局Host/Origin/CORS/SSRF、Readability、公开ID、三项权限或桥接。合同见ADR-010。
+
+精确SHA新检出`.tmp/clipper-synthetic-final-6087a16`正常frozen install含scripts、普通build/typecheck/lint、普通及合成app/扩展build、**173定向/1437全量通过+3既有Windows跳过、3隔离smoke**。同检出HTTP重试**108检查通过**：普通包19个拒绝URL零库增量、合成包18变体拒绝、精确URL保存/读回/旧版本/幂等/未知时间/许可，以及Provider/Runtime/cache/fetch/executor零增量。均为程序化证据。首轮依赖闭包遗漏、首次HTTP端口冲突、Windows驱动结束子进程失败均保留；核实PID/命令/父进程后仅停止本轮测试进程。以[completion](evidence/gate-6087a16-clip-synthetic/completion.json)解释[原始门禁](evidence/gate-6087a16-clip-synthetic/summary.json)，不改写原失败。[报告](evidence/gate-6087a16-clip-synthetic/report.md) / [真实Neat Freak](evidence/gate-6087a16-clip-synthetic/closeout.md)。四个保留DB/Secret hash不变。
+
+交接目录`.tmp/clipper-manual-6087a16/extension-test`，ZIP`.tmp/Shipping-HOT-Clipper-Synthetic-6087a16.zip`，[包哈希](evidence/gate-6087a16-clip-synthetic/package-files.json)。新库在该目录的`run/.data`，UUID`f79f2bd2-050f-42b0-831e-6e787eb1344f`；06:51UTC只读确认材料/版本/人工操作/usage等0，仅初始化来源42。接收PID58772/来源PID25368，仅127.0.0.1:5173/5174，GET均200，Runtime/intel关闭、无凭据。[零基线](evidence/gate-6087a16-clip-synthetic/manual-zero-baseline.json) / [当时健康](evidence/gate-6087a16-clip-synthetic/manual-service-health.json) / [用户步骤及只读核实](evidence/gate-6087a16-clip-synthetic/handoff.md)。使用前重读存活性，不推定PID永久有效。
+
+ChatGPT控制扩展在未登录独立Chrome配置中商店报“此商品无法购买或下载”，未安装/登录/绕过；用户改选自行加载、点击、保存。**本包真实Chrome加载、nonce交付、首次保存/重开/截图NOT_RUN，待父审后用户操作；普通HTTPS、完整GUI/S7也NOT_RUN。** 合成剪藏不证明官方事件、自动来源资格、R2或24h。R2仍BLOCKED，25/39、24/34、历史3/5不变；无生产启用、24h、付费/模型调用、合并、部署、强推或删除现场。
+
+## 历史：本地人工剪藏第一切片（2026-10-16，04bbc2d离线父审通过）
+
+以下为当时历史记录。旧SHA、包及服务未启动说明不作为当前状态；当时工具Chrome阻塞由上方用户手动方案接续，不要求安装ChatGPT控制扩展。
+
+**实际Chrome验收：BLOCKED（2026-10-16）。** 用户11:51UTC+8已明确批准独立Chrome测试配置加载已审插件，只访问原创合成页面和隔离库；此前安装/权限的待授权状态在此限定范围内已解除。受支持工具创建Chrome测试页返回`Browser is not available: chrome`，随后浏览器清单`[]`；原生控制禁用、无node_repl入口，未改用自建CDP。已备份校验8文件扩展副本、空配置目录、含段落/列表/表格/PRE的原创合成页，以及隔离schema29/real库（仅初始化配置，无材料/版本/usage）；保留DB/Secret hash未变。未启动服务、加载扩展、授予权限或模拟成功，故实际ID/manifest/点击提取/预览/真实sender与nonce/保存重开/失败显示/截图/GUI/S7全部NOT_RUN。继续需已连接的本地Chrome或原生Windows控制通道，并确定不放宽现有URL校验的有效HTTPS合成页加载方式；不新增剪藏权限或改网络安全配置。[阻塞与准备证据](evidence/clipper-browser-2026-10-16/report.md)。
+
+**历史产品代码：`04bbc2d6c72f452fe9cf5a963659670d9b3f9f77`，两个P2已获父审关闭，离线限定通过。** 父审已复核原P2的p/br/列表/表格分隔修好，随后指出PRE被普通文本节点与最终换行整理压缩的回归。本次只将PRE子树（含行内元素）的原始空白作为独立片段保护；选区中的双空格、tab、连续/边缘换行不再被转换器压缩，危险节点移除和既有分隔断言不变。article仍先经过未改动的Defuddle0.19.2既有代码块处理（会展开tab、修剪/整理空白），测试分别固定该输出，不宣称article原始页面空白保真。新增5类精确转换断言与10条预览→保存→SQLite读回链路，DOM共36条/全链路20条；旧f95函数负对照5/5复现。干净检出`.tmp/clipper-pre-04bbc2d`正常frozen install含scripts、build/typecheck/lint、扩展build、159定向/1423全量通过/3既有Windows跳过、3隔离smoke均rawexit0；四个保留DB/Secret hash不变。无后端/schema/依赖/权限/Provider/桥接/工作流变化，真实Neat Freak已执行。最新未安装包`.tmp/Shipping-HOT-Clipper-04bbc2d.zip`；原c83/6aa/f95包和证据保留为历史。Chrome安装/权限/真实页/GUI/S7仍NOT_RUN；R2整体BLOCKED及25/39、24/34、历史3/5不变。[报告](evidence/gate-04bbc2d-manual-clip-pre/report.md) / [原始门禁](evidence/gate-04bbc2d-manual-clip-pre/summary.json) / [Neat Freak](evidence/gate-04bbc2d-manual-clip-pre/closeout.md)。
+
+用户于2026-10-16 10:18 UTC+8确认“能写进系统里面就行了”（Sentinel_22d4c3856c0881918829ea55d72e760b），随后主会话批准本地代码/合成夹具/隔离库实现。此新授权取代下方上一轮审计的停工文字，仅限ADR-010；不是对任意网页的版权授权。代码`c83e118da17c4ebe04d42b748000d502694d3888`新增disabled人工剪藏资料来源、schema029原审计元数据、插件预览/短期草稿桥接与系统内显式保存/查看。权利未知只允许元数据，正文须明确的用户声明、依据、范围及适用URL；声明未经独立核验，不授予自动来源权限/官方预警身份/模型权利。实际URL、原日期、提取/录入时间分开保存，原Intel版本/幂等/审计复用，后端Readability/全局防护不变。
+
+精确SHA在本机新检出`.tmp/clipper-final-c83e118`正常frozen install含scripts、build/typecheck/lint、扩展build、10文件128定向、137文件1392全量通过/3既有Windows跳过、3隔离smoke全部rawexit0；54新用例含nonce/发送身份/导航/重放、显式保存、许可、时间、旧版本、native重启及schema29回滚重试。四个保留DB/Secret文件前后hash不变。固定Web Clipper MIT提交`6d56d618b00bd970aa738d6a7a61edee27783e81`的实际代码复用清单、Defuddle0.19.2 DOM-only边界、生成包hash和真实Neat Freak均见[报告](evidence/gate-c83e118-manual-clip/report.md)、[门禁](evidence/gate-c83e118-manual-clip/summary.json)、[收尾](evidence/gate-c83e118-manual-clip/closeout.md)。无真实信源请求命令/新真实记录/LLM/付费；测试拒绝fetch和本机合成HTTP，不冒称整机逐包零外呼。首次driver clone引用错误未创建检出，原件保留，修复结构化参数后上述门禁通过。
+
+扩展仅已打包、未安装/授予权限/读取真实页面；实际Chrome Manifest加载、sender字段、消息交付、视觉/键盘/宽度/当前GUI与S7仍`NOT_RUN`，主会话独立审查pending。接收地址严格`http://127.0.0.1:5173/feed`、公开ID`jihkanbaffodclncabodmbahbbgkjoad`，这是构建配置，不代表服务已启动。包位于`.tmp/clipper-final-c83e118/.tmp/clipper-package`，zip`.tmp/Shipping-HOT-Clipper-c83e118.zip`。未启动应用/24h、改生产开关、合并/部署/强推；原R2整体BLOCKED和25/39、24/34、历史3/5不变。临时现场未清理。
+
+## R2 41项来源当前累计证据（2026-10-15，待独立审查）
+
+R2-6最终文档复用审计：52行§5.3来源/代码/测试映射已完成，本地无第二Runtime/预算表/通用RSS解析器，建议PASS待主审；未概称整份上游已移植。collector完整cursor/RSS validator等差异待裁定。R2整体仍BLOCKED，25/39、24/34、历史3/5不变，GUI/S7/真实24h未验。材料读取954c831已获限定认可：仅已存intel精确版本内部合同，无业务消费者、Feed桥接或R3输入，source是当前配置而非完整历史快照。本轮产品门禁NOT_RUN，仅文档核验，业务请求/新真实记录/LLM/付费0。24h两源仅提案未启动。**推送后停止新实现和信源请求，等待主审与用户下一阶段决定。** [最终审计](evidence/r2-final-reuse-audit-2026-10-15/report.md) / [原验收与动作](evidence/r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md)。
+
+材料读取离线切片：已认可代码`954c831f27eff4fd4382a0ea68be3894de053759`，主会话限定审查通过、无新增P2；无业务消费者，source为当前配置。先核对固定materials.ts，复用已有版本/去重/A→B→A/审计，仅补显式item+version的内部许可材料读接口，五SELECT、无Feed正文隐式桥接/抓取/写入/R3模型。24新用例，正常新clone离线frozen install含scripts及九命令全0，134定向/1338全量通过/3跳过；源网络/新增真实记录/LLM/付费0，25/39、24/34、历史3/5不变。Readability c7ba3c6已获限定认可。[职责核对/结果](evidence/r2-material-read-2026-10-15/report.md) / [门禁](evidence/gate-954c831-material-read/summary.json)。
+
+前轮Readability离线切片：已认可代码`c7ba3c62786a7554aeaf92ce9e4d9809fd137754`（主会话限定审查通过、未发现新增P2；不证明实时/24h或整体R2），唯一article-extractor合入固定AIHOT Readability，显式container优先且缺失失败，原安全fetch/许可/版本合同不变。正常第二份新clone九命令全0，124定向/1314全量通过/3跳过；首份0a511c0类型门禁FAIL及原件保留。业务信源/LLM/付费0，无UI/route/GUI/S7/生产/24h。本轮不改25/39、24/34、历史3/5。[实现与限制](evidence/r2-readability-offline-2026-10-15/report.md) / [门禁](evidence/gate-c7ba3c6-readability/summary.json)。
+
+Westports 已获限定认可：R2-4仍 STALE、25/39；R2-5按既有 parser 的3条有效记录回放 PASS，累计24/34。原XML10项、7空标题排除；原XML最高日期2026-09-28，有效最新2025-08-01，两个日期不可混同。此前待审记录保留为历史，后续停止新信源请求。[认可范围](evidence/r2-westports-acceptance-2026-10-15/report.md)。
+
+全部41项保留：34资讯/公告、5数值天气、2原定后续阶段。当前R2-4 **25/39**（至少32，差7；25 OK / 7 PARTIAL / 1 STALE / 2 BLOCKED / 4 NOT_RUN）；R2-5 **24/34**（24 PASS / 2 FAIL / 1 PARTIAL / 7 NOT_RUN），数值有限历史诊断另列 **3/5**。不是整体R2 PASS或24小时证明。[唯一当前逐源矩阵](evidence/r2-current-source-matrix-2026-10-14/mapping.json) / [41项报告](evidence/r2-current-source-matrix-2026-10-14/report.md)。以下旧批次按发生时点保留，不单独充当当前累计。
+
+前轮MY-P02 Westports精确RSS（以下为送审时点，限定认可见上文）（执行起点3e3b2fc、产品8d0993e未改）：2026-10-15T08:46:47.628Z安全DNS1/GET1=200/36266字节，无跳转/重试/详情，完整XML仅本地ignored。全量10item里7项源title确为空（较新5项2026），正式parser既有规则跳过；3项有标题/链接/pubDate，最新有效记录仍2025-08-01。原始日期最高2026-09-28及channel时间不当有效内容新鲜度，R2-4 STALE保持；旧3派生是有效子集，不是全量XML。完整原件→collector/隔离SQLite3/3/3、重复0新0修订、query_only3字段0差异/DBhash不变，原pubDate明确+0000、秒精度、updated缺失按既有回退，RSS date_evidence仍null，不造字段/迁移。两次验收假设失败保留，最终离线TCP/DNS/fetch0、usage不变，无产品缺陷/改动。R2-5限定本地PASS待父审，不增加25/39、23/34、历史3/5；完整产品门禁/GUI/S7/生产/24h本轮NOT_RUN。本批停止新信源请求，[报告/全部10项记账](evidence/r2-westports-rss-2026-10-15/report.md)及[14项精简阻塞与最小条件](evidence/r2-westports-rss-2026-10-15/remaining-blockers.md)。
+
+前轮CN-P02真实Location有界补证（3e3b2fc文档已复核通过，继续不尝试自指URL；执行起点45d2296、产品8d0993e未改）：精确目录2026-10-15T08:27:32.616Z返回302/207字节，DNS1公网125.124.253.156、GET1；真实Location为同一https://www.sz.msa.gov.cn/，无凭据/异常端口但与原URL相同，追加会重复请求，按零重试停止，目标DNS/GET0。只观察单次自指，不宣称实测多跳循环/根因；旧正文/btatw23_atbp/bt不当Location、不猜路径。没有实际列表，结构/字段回放NOT_RUN、规范化/入库0，CN-P02仍PARTIAL/NOT_RUN；只有ID-T02按限定过程认可升至25/39、23/34，历史3/5不变。完整产品门禁/GUI/S7/生产/24h本轮NOT_RUN，原件/旧失败保留，无网络设置改动。[请求、真实Location及终点](evidence/r2-cn-p02-location-2026-10-15/report.md)。
+
+ID-T02独立审查限定通过（2026-10-15）：主会话未发现新增P2，明确认可R2-4 OK/R2-5 PASS，累计25/39、23/34，历史数值3/5不变。仅代码/过程证据认可，不称独立重放私有原页或CI/24h通过；来源日期角色/时区未知、publishedAt=null和原漏检更正均保留。代码仍8d0993e，本轮产品无改、完整产品门禁NOT_RUN。
+
+前轮ID-T02有限原页更正与关闭候选（45d2296过程证据，现已按上段限定认可；代码8d0993e4164dae0b7a7f96dc531b9aac92be54b1）：前轮time/datetime/date-class及叶节点检查漏掉含SVG的span.card-tag直接日期文本，旧“卡片无日期”结论更正且原证据保留。S:1/S:4=Terkini最新、S:2/S:5=Populer热门，通过静态RC/template/按钮顺序定位；16节点身份/标识/描述标题/原日期一致归7项，日期包括08 Okt2026、20 Mei2025、16 Agu2007，不认证发布/颁布/生效或新鲜度。默认关闭第13候选（12web_list+ONEjson），原目录root不改；仅现有parser显式整串印尼月缩写公历day，raw/localDate保留、TZmissing/UTCnull。新clone代码SHA门禁9项rawexit0，315定向、1300全量/3既有跳过、3smoke；保存完整307→真实Location/home200链回放7items/versions/titleblocks、重复0新0修订、query_only7字段0差异，usage与根保留文件摘要不变。源DNS/GET0，脚本/详情0，CN-P02条件未开启0请求。代码/资格待父审，批准24/39、22/34、历史3/5不加；GUI/S7/生产/24h未验。[更正、定位及完整验收](evidence/r2-id-t02-finite-cn-p02-2026-10-15/report.md)。
+
+前轮ID-T02真实Location有界补证（0274014初检漏掉卡片日期，已由上段更正；执行起点4ca3a77、产品0a483dd未改）：原目录07:37:48.414Z返回307/5字节，首次保存真实Location /home；解析后精确同主机HTTPS、无凭据/query/异常端口，经现有安全入口再单次GET目标/home，07:37:48.920Z返回200/212037字节。DNS2/GET2预算用尽，无自动多跳/重试/详情/其他源/网络设置改动。离线只观察16隐藏DOM卡片/7不同文档身份、重复流片段、标识与描述标题分列；卡片无明确发布日期，unknown不猜。规范化/入库0、parser/config不扩，ID-T02仍PARTIAL/NOT_RUN；仅SITC按审定升至24/39、22/34，历史3/5不变。产品全门禁/GUI/S7/生产/24h本批NOT_RUN，旧失败与原件保留。[请求、结构和适配差异](evidence/r2-id-t02-location-2026-10-15/report.md)。
+
+SITC独立审查限定通过（2026-10-15）：主会话未发现新增P2，明确批准XX-K03 R2-4 OK、R2-5 PASS，累计24/39、22/34，历史数值仍3/5。认可基于代码及执行过程证据；20条私有原页回放由执行线程完成，主会话没有独立重放原页，不宣称CI或24h通过。代码0a483dd、证据4ca3a77保留；默认关闭、metadata-only与正文安全边界不变。本轮无产品改动，完整产品门禁NOT_RUN。
+
+前轮SITC限定metadata修正（4ca3a77过程证据，当前资格由上段审定；代码0a483dd18a2027c73bf950cc0b948c013e29cf09）：用户已明确允许固定来源ID/disallowed/www.sitc.com/en/show.asp/单一数值id的原HTTP(S)身份，仅metadata保存；secureFetchArticle/allowHttp/HTTPS降级策略未改。显式整串发布日期: YYYY.MM.DD严格公历day/raw/localDate，timezone missing、publishedAt/offset null。新增第12个关闭候选（11web_list+ONEjson），active/production仍仅TMD/BMKG、job off。复用同一38839字节原页，源GET/DNS0，干净SHA隔离20items/20versions/20titleblocks，重复0新0修订，query_only重开20字段0差异/DBhash不变、usage不变。全新clone正常frozen install/scripts、build/typecheck/lint、284定向、1269全量通过/3既有跳过、3smoke全rawexit0，源码diff0、根保留DB/secret-file摘要不变。已批准SITCPARTIAL，OK/PASS仅建议待父复审，不增加23/39、21/34、历史3/5。原负例/脚本失败/库保留；无新实网/生产/24h/GUI/S7/付费/合并部署。[实现与完整验收](evidence/r2-sitc-metadata-2026-10-15/report.md) / [cleanSHA门禁](evidence/gate-0a483dd-sitc-metadata/summary.json)。
+
+前轮SITC用户应用后真实索引（8be5bdd限定认可/兼容性负例，起点e37c5e4）：只读确认扩展/生成27、原26保留、SITC一次，06:32:48.737Z安全DNS1/GET1=200/38839字节，20真实新闻卡片。标题原链接全部HTTP，现有HTTPS-only web-list排除全部；发布日期点分文字规则unsupported，原串/未知时区保留，不改协议/日期或安全边界。完整原字节经既有parser/collector隔离负例两次parse_failed/no_allowed_items，items/versions/blocks0，readonly+query_only空表与DBhash一致，不冒充20字段PASS。初次脚本错表名FAIL与私有库保留，改现有表名后离线rawexit0，无重抓。只提出PARTIAL/兼容性阻塞待父审，原资格/23/39、21/34、历史3/5和其他40条不改。未加正式配置，无产品/规则/目录/生产/迁移改变，产品门禁/GUI/S7/24h本批NOT_RUN。[材料、失败与具体差异](evidence/r2-sitc-applied-2026-10-15/report.md)。
+
+前轮SITC XX-K03主站精确索引（e37c5e4历史DNS阻断保留，起点14b6548，前批限定认可）：目录https://www.sitc.com/en/list.asp?classid=44于06:16:38.795–802Z安全DNS1返回198.18.0.64，现有入口blocked_address在transport前停止，GET0/响应0。未改网络/CA，无越南站/重试/跳转/详情/分页或其他信源请求。没有原页，配置/解析/SQLite回放NOT_RUN，业务入库0；仅追加取证BLOCKED，原资格NOT_RUN暂不改，23/39、21/34、历史数值3/5及其他40来源条目不变。无产品/目录/生产/迁移/阈值变动，产品门禁/GUI/S7/24h本批NOT_RUN。[精确目标、台账与阻塞](evidence/r2-sitc-index-2026-10-15/report.md)，待父审。
+
+前轮JMA归属修正+BMKG doc单请求（14b6548已获限定认可，起点32c8974）：已有05:53:37.778Z targetTc404与XX-W01目录/既有provider常量完全同URL，上轮只归XX-W02遗漏已修，交叉关联同一请求不重复计数。XX-W01当前OK→BLOCKED，R2-4=23/39、差9；R2-5=21/34与历史数值3/5不变。JMA/PAGASA新请求0。BMKG精确doc/于06:05:16.816Z安全DNS1/GET1=200/1137字节，只是7PDF+7PNG+2子目录索引，未见apidoc/目标港口/KODE映射；无下载/遍历/港口JSON，业务入库0，ID-W02不升格。旧200/404/32c8974误归属版本和原件保留，无系统写入；26项与额外生成字节unknown限制沿用，不再盘点旧全文。产品/目录/生产/迁移/阈值不改，产品门禁/GUI/S7/24h本批NOT_RUN。[修正依据、单请求与下一步](evidence/r2-bmkg-doc-jma-attribution-2026-10-15/report.md)，待父审。
+
+前轮26项过滤列表核验后官方补证（32c8974旧遗漏由上段修正，起点440affa）：用户确认应用后，只读核实扩展/生成均26、原23顺序保留、新3各一次；生成文件整体额外字节差异无法归因，未宣称其他设置完全相同。05:53:36–37Z四目标DNS4均公网/GET4：PAGASA两页403各118字节，BMKG根200/577字节目录18链接、无明确apidoc/KODE，JMA targetTc404/2203字节非JSON/空列表。条件追加0、PDF/港口JSON0、业务/入库0，不重试/跳转/改设置。原件只本地ignored，旧440affa阻断保留；真实响应与历史成功分开，资格待父审、不改24/39、21/34、数值3/5。无产品/目录/生产/迁移/阈值改变，产品门禁/GUI/S7/24h本批NOT_RUN。[本轮材料与精确下一步](evidence/r2-official-gaps-applied-2026-10-15/report.md)。
+
+前轮官方缺口有界取证（440affa原件保留，执行起点cfce1b3，NMC前批已获限定认可）：2026-10-15 05:21:25Z对PAGASA两既定入口、BMKG海事根、JMA targetTc逐目标DNS共4次，分别198.18.0.85（两次）/198.18.0.86/198.18.2.99，均被既有安全入口blocked_address，GET0、响应0。无当前页面/空状态/结构，BMKG apidoc和JMA forecast/specifications条件未满足，追加0；无PDF/港口JSON/重试/跳转/网络设置改动。只追加尝试记录，24/39、21/34、数值3/5与所有原资格/历史证据保持；不直接升格，不把安全阻断认定来源失败。产品不改、完整门禁/GUI/S7/24h本批NOT_RUN。[精确目标、台账及下一步](evidence/r2-official-gaps-2026-10-15/report.md)，待父审查。
+
+前轮NMC两目录合并收口（cfce1b3已获限定认可）：CN-W01/CN-W02依9.29原标准复用10/11六页实网200/六条入库及已有16专用测试，审定历史OK/字段PASS，当前24/39、21/34、数值3/5。10/13失败已核实是读旧存档、注入200、强制通用web_list a[href]/div.author的零网络适配负例，原件保留，不是后来源不可达或专用provider失效。必要最小六产品映射对照标题/固定URL/原时间期号/Feed身份一致，4历史提示/4解除通知可作为真实字段，保持unknown生命周期/TZ、无港口影响，不称今天实网或24h。其他39来源不改；VN/TH/ID及三数值仅整理已有引用，不重复测试；NCHMF部分失败、VNSGN原点缺测保留。PAGASA活动正样本、ID-W02官方KODE数值、XX-W02specifications的精确下一步有现存来源，不猜URL/不请求。[收口及下一步](evidence/r2-nmc-close-2026-10-15/report.md)。无产品/迁移/生产/付费，完整门禁/GUI/S7/24h本轮NOT_RUN；该批已获限定认可，整体R2仍未通过。
+
+前轮MY-W01审定收尾：依据9.29原R2-4/5与已有天气表复用，MY按10/10 08:30历史200/7754完整响应文本、4条既有Feed回放认可OK/PASS；不是今天实网。目录仅将同产品URL补尾斜杠，旧301证据保留，主机/许可/生产配置不扩。unknown时区/有效性、received_at、零港口影响保持；不增加独立文章URL/已知UTC/intel表/wire hash门槛，当前22/39、19/34、数值3/5，只有MY计数增加。另有界复核13天气来源：NMC专用6/6旧证据与10/13零网络generic适配负例保留，后已更正其非实网失败性质；NCHMF8成功4失败不作全成功，已修失败传播；PAGASA只有明确官方无活动状态，无活动正样本不升格。101现有provider/存储链离线测试全通过、TCP/DNS/fetch0，其他40来源原判定不改，逐项待父审。无产品源码/迁移/阈值/生产/24h/付费，产品全门禁/GUI/S7本轮NOT_RUN。[本轮报告及逐项复用边界](evidence/r2-weather-reuse-2026-10-15/report.md)。
+
+前轮MY-W01零网络复用核验：0754Z的7688字节probe与0830Z的7754字节integration是两次实跑，旧frontier混淆已更正；0830完整response.text()与来源/4条入库有证，wire字节/hash未认证，不预设重抓。复用既有parseMetMalaysiaRows/provider/WeatherAlertSyncJob/ShippingRepository，4个批准身份、共享来源URL、首次接收received_at、原日期未知时区/有效性、No Advisory独立性及零港口影响均保留；重启/重复/query_only重开0差异。现有14+本轮3测试17通过（初次负例期望层级失败已保留修正），TCP/DNS/fetch0。R2 generic JSON与source+URL唯一键不能纯配置保留4个既有身份，接线/验收差异只列审；intel items/versions/runs0，产品/目录/身份合同未改，21/39、18/34、数值3/5不变。MY优先不代表其他来源没有既有实现。[复用报告与最小建议](evidence/r2-my-w01-contract-2026-10-15/report.md)。产品全门禁/GUI/S7/24h本轮NOT_RUN，待父审查。
+
+前轮Loadstar/Splash RSS有界批次（2026-10-15，待父会话审查）：本地没有可证来源的完整旧XML，各10条旧派生记录不拼原文。于04:25:58–04:26:00 UTC各一次安全DNS/精确GET，共2/2，均RSS200，20417/18929完整字节仅私有ignored。复用Feed/安全解码/collector，隔离SQLite各10条，共20items/versions/metadata-only标题块；pubDate全部秒精度且明确+0000，无独立updated，既有sourceUpdatedAt回退如实保留。逐字段原日期/时区/UTC一致，重复0新增0修订，readonly+query_only重开全部字段0差异、库字节不变，离线TCP/fetch守卫0。仅这两项R2-5升至18/34（差16），21/39不变，其他39源逐项不变，数值3/5另列。产品代码仍bebe144、执行起点1833854；证据采集1项/回放2项退出0，无产品缺陷/改动，完整产品门禁和GUI/S7本轮NOT_RUN。默认关闭、许可metadata-only、无迁移/网络设置/生产/24h/真实LLM/付费；预算2次来源GET已用尽。[本批证据](evidence/r2-two-media-2026-10-15/report.md) / [18项非OK来源的下一步边界](evidence/r2-two-media-2026-10-15/availability-frontier.md)。
+
+前轮三源RSS有界原字节取证与回放（1833854已获父会话限定认可，16/34认可）：先盘点本地未发现旧完整原XML；按新授权于04:10:40–04:10:43 UTC对MY-C01/MY-T01/PH-M01各一次安全DNS和精确GET，总DNS3/GET3，均200、7619/6185/10179字节。完整原XML只在ignored私有区；与旧10/6/10派生记录不拼接。复用现有Feed解析/安全解码/collector，隔离SQLite实际10/6/10条、26个metadata-only版本；原pubDate全部秒精度，马来两源明确+0800、PortCalls明确+0000，无updated字段，sourceUpdatedAt按既有pubDate回退。逐字段原文/时区/UTC核对、重复0新0修订、readonly+query_only重开26条全部字段0差异、库字节不变；离线TCP/global fetch均0尝试。RSS业务date_evidence列仍null，原日期字面量/offset保存在私有XML及最小字段审计，未扩迁移。仅这三项R2-5 NOT_RUN→PASS、16/34（差18），已计R2-4的21/39不增，其他38项逐源不变，数值有限历史3/5单列。无产品代码缺陷/变更，代码仍bebe1441465adfcabb9daf93cb2a8656ec1fc796，执行起点8027aeeda436faff8eb6ac3c0f0f0dd8d763f9be；仅证据验证1采集+3回放测试退出0，install/typecheck/产品lint/全量test/build/S7本轮NOT_RUN，不继承成新门禁。无registry/生产开启、网络设置、24h、真实LLM/付费，旧GUI/S7 pending。授权3次来源请求已用尽；不自动开展下一批。[本轮报告与限制](evidence/r2-three-rss-2026-10-15/report.md) / [原始回放](evidence/r2-three-rss-2026-10-15/replay-summary.json)。
+
+前轮ONE目录/候选落地（本轮来源DNS/HTTP0）：按批准将XX-K02 URL由/en/news改为已核实的https://www.one-line.com/en/newsroom，旧URL/实际308和依据留存；目录web_list是HTML页面形态，实现json_list显式惰性内嵌JSON模式，不是新接口。已验配置加入现有默认关闭页面候选，enabled=false/persistence=disallowed，仅metadata；现11个页面候选（10web_list mapper+ONE json_list HTML模式）全部关闭，活动TMD/BMKG及默认job开关/生产允许选择范围不变。源码bebe1441465adfcabb9daf93cb2a8656ec1fc796新clone正常frozen install/scripts/build/typecheck/lint、245定向、1230全量通过/3既有跳过、3smoke全退出0，源码diff0、根保留DB/secret-file摘要不变。正式候选复用已有635664字节HTML，10条完整原字段与前轮相同，入库10/版本10、重复0新0修订、只读重开0差异；秒精度releaseDate无时区/UTC null不变，没有新的连通性或连续可用性证明。矩阵其他40来源及全部计数/状态不变，21/39、13/34、有限数值3/5；整体R2/24h未通过。仅建议MY-C01/MY-T01/PH-M01基于既有10/6/10条RSS完整派生补原XML回放，三项已计R2-4 OK，不重复增加分子；（2026-10-22 标注：此建议已过时，已由 [r2-three-rss-2026-10-15](evidence/r2-three-rss-2026-10-15/report.md) 完成 26 条原 XML 回放、矩阵 OK/PASS；不再重找原件或重跑）本轮不探测或重找已结束失败材料，Maersk请求0。[已应用目录及建议](evidence/r2-one-catalog-candidate-2026-10-15/report.md) / [新门禁](evidence/gate-bebe144-one-catalog-candidate/summary.json) / [交接](handoffs/r2-next-execution-2026-10-15.md)。前轮ONE目标验证原件见其独立证据；此前四源/P2记录仅按历史范围保留。
+
+用户重新应用后只读核实生成21项、原17保留，四次系统DNS均公网、各精确GET一次。CN-P02=302和ID-T02=307未跟随；VN-D01=200原183913字节4条新闻，完整title属性和同锚点末尾DMY日期；MY-L01=200原124208字节，10张标题卡片无href，真实collector探针失败/写入0。当前源码355952c0e8c01266adbe692dfcfd3bca9b3c17b2继承关闭VN候选；本轮仅修复title-dmy-date语法不匹配时的通用回退，无迁移/Provider/框架或active生产范围变化。原页→隔离SQLite4 items/versions，重复0新0修订，只读重开全字段0差异，源列表日/day、missing timezone/瞬间null，不猜发布日期或港口影响。[本批结果与边界](evidence/r2-four-reapplied-2026-10-15/report.md)。
+
+该源码全新隔离克隆frozen install正常scripts、build/typecheck/lint、195定向、1222全量通过/3既有跳过、3smoke全退出0，测试源码diff0、根保留DB/secret-file摘要不变；[精确SHA原始门禁](evidence/gate-355952c-anchor-date-repair/summary.json)。原字节私有ignored，远端只有必要派生metadata/过程/hash。TMD/BMKG seed enabled=true与生产job默认off区分，10个HTML候选enabled=false；本轮未修改网络设置/系统配置，不启生产、24h、付费或LLM，GUI/S7 NOT_RUN且原GUI仍pending。临时stack PR8/base codex/shipping-hot-r1-5保持。
+
+Westports独立修正e4d56116cda05fe4a8dbe151040c26874b6807c1保留，RSS最新保存日2025-08-01仍STALE；Northport冲突、VN-P01无日期、NMC旧generic适配FAIL（离线负例，后已审定专用链OK/PASS）、XX-W02仅forecast/specifications未验证、VNSGN原点缺测/约61.8km独立参考边界不变。旧四源198.18 DNS阻断已由本批公网实响取代，不能当当前阻断。R1.5历史1/10用户延后、不重找；不合并部署。
+
+本轮P2修复严格阻止title-dmy-date不匹配后回退通用日期解析，原文留存unknown；裸DMY、ISO、单独括号日期与空白/零宽标题均有负例。仅保存原页重放，四条与修前完整字段一致，覆盖不变。CN-P02正文仅相对`/btatw23_atbp/bt`、ID-T02仅`/home`，Location未保存，不确认绝对目标/同域且未重新请求。MY-L01有十张静态卡片，详情href缺失，不判断隐藏接口。[修复与边界](evidence/r2-anchor-date-review-repair-2026-10-15/report.md)。
+
+## R2 三域例外已应用、三索引真实原页适配（2026-10-14）
+
+当前订阅扩展/生成配置17精确例外（旧14保留），三个系统DNS均公网；09:08本轮目录索引各GET1共HTTP3，TLS/SSRF/地址固定未弱化，无retry/redirect/detail，TH-C02不重抓。最终代码355bc861d4020ba22ddd00401de709d7cee497e3：VN-P03资讯14条、VN-T01新闻3条、ID-T01最新法规可见标题/制定日8条，默认关闭metadata候选、不加入active registry/生产允许列表。原卡片标题省略号保留、不猜完整法规标题或运营影响；显式Gregorian制定日规则，不猜timezone/发布时间。初始af38350原页回放ID7/8日期、October unknown造成harness FAIL保留；只补实页literal October别名，最终同raw14/3/8入库/版本、重复new0/revised0、只读重开全部字段/日期0差异。只有当前原页metadata有限回放通过。173定向、1200全量/3跳过、install/build/typecheck/lint/3smoke全退出0，根DB/secret-file哈希不变。39≥32/整体R2仍未通过，Northport/VN-P01缺口保留，生产/24h/付费/GUI/S7未运行。[抓取、失败、更正与范围](evidence/r2-three-after-clash-2026-10-14/report.md)，[最终门禁](evidence/gate-355bc86-post-clash/summary.json)。
+
+## R2 下一四源核查及 TH-C02 文件日期适配（2026-10-14）
+
+代码2acfda4c8ddab3f8064d199bb3cfcf26873ff288：VN-P03/VN-T01/ID-T01均安全DNS blocked_address、HTTP0，未取得原页，不判来源本身不合格；TH-C02原目录GET1、200、115531bytes。本批HTTP1，无retry/redirect/detail/网络配置改动。TH-C02默认关闭、仅metadata，不加入active registry；复用第3列标题/link、第4列Thai佛历“文件日期”规则，不把编号/计数当日期，不声明发布时间/时区。完整原字节现collector隔离SQLite100items/100versions、重复new0/revised0、只读重开全部字段0差异；仅该原页文件日期metadata回放有限通过。原页许可未知仍只本地。155定向、1182全量/3既有跳过、install/build/typecheck/lint/3smoke全退出0，根保留DB/secret-file哈希不变。39≥32/整体R2未通过，生产/24h/付费未启用、GUI/S7未运行。[四源事实和边界](evidence/r2-next-four-2026-10-14/report.md)，[精确SHA门禁](evidence/gate-2acfda4-thai-document/summary.json)。
+
+## R2 三源默认关闭适配与完整原字节回放（2026-10-14）
+
+代码ca654122bcad240f090d0e675071a5e208237e8e：CN-T02政策10条、PH-C01真实标题card11条、CN-P01真正“通知公告”tab8条加入现有HTML候选配置，全部enabled=false/persistence=disallowed，不加入active registry，production仍仅原TMD/BMKG允许。PH只取h3标题link，Read more排除；新增显式Gregorian完整英文月份day规则，无宽松Date.parse/时间推断，重复URL冲突仍fail-closed。三份完整本地原字节→现collector/隔离SQLite→重复0新0修订→只读重开全部title/URL/dateEvidence核对0差异，day precision、未知时区/publishedAtnull。VN-P01全表10行日期缺失，unknown/缺字段、不详情。本轮sourceHTTP0/DNS0，未知原页许可仍只本地，不把骨架称raw。
+
+精确代码SHA新克隆install/build/typecheck/lint、151定向、1178全量/3既有跳过、3smoke全rawexit0，保留DB/secret-file哈希不变。限三原页离线回放通过，整体R2/39≥32与全源100%仍未通过，Northport真实冲突FAIL保留；生产/24h/付费/GUI/S7未运行。[真实回放与合成边界](evidence/r2-public-index-replay-2026-10-14/report.md)，[门禁原始日志](evidence/gate-ca65412-public-index/summary.json)。
+
+## R2 DNS 修复后四源独立只读核查（2026-10-14）
+
+已批准四域Clash精确例外经用户重新应用，生成filter14项（原10+新4）；只读系统DNS均公网。随后目录原URL四源各GET1，07:56本批HTTP4，均200且原字节即时本地留证，既有安全DNS/TLS/SSRF未弱化，无重试/redirect/detail。CN-P01需区分要闻样本与通告栏目；CN-T02已有同li标题/link/日期观察；VN-P01真实table标题/link存在但日期样本缺口保留；PH-C01本地容器英文日期/标题/同目标双链接已留证。四源均PARTIAL、新增PASS0、完整adapter/SQLite回放未跑；39≥32未达标。上一HTTP0/DNS198.18批为历史，不称当前阻塞。[独立四源证据与最小下一步](evidence/r2-four-after-clash-2026-10-14/report.md)。产品/目录/阈值/网络设置本批未改；Northport/Thai不重抓，生产/24h/付费未启用。
+
+## R2 两源原字节回放及明确 DNS 事实（2026-10-14）
+
+产品/候选配置未改。Northport与10/13同hash原页经现有适配器首次/重复均duplicate_conflict、写入0，仍FAIL；Thai完整原字节现配置解析100条、隔离SQLite100版本、重复无新版本；只读重开对全部100条完整dateEvidence/身份检查0差异，day precision/localDate，publishedAt仍null。该原页离线回放有限通过，不计全P1可用性PASS。四域各一次系统DNS分别返回198.18.2.24–27，现有SSRF均blocked_address；符合fake-IP形态但不单凭结果归因代理配置，交父处理，无HTTP或网络设置更改。[结果、许可边界和已实现规则纠正](evidence/r2-two-raw-dns-2026-10-14/report.md)。原页仍仅本地；39≥32未达标，24h/生产/付费未启用。
+
+## R2 六源有界公开观察（2026-10-14；非生产启用）
+
+本轮目录内六源各评估一次：CN-P01/CN-T02/VN-P01/PH-C01 在 DNS 安全检查 blocked_address，HTTP0；MY-P03/TH-C01 各 GET1、200，合计HTTP2，保存响应前置哈希和脱敏标签树/同行字段关系。两源均 PARTIAL，产品适配器 NOT_RUN、原页再分发许可未知，完整原字节仅本地忽略目录；没有新增 PASS。首次 Thai form 子树误删观察已离线纠正，不据初始0计数认定无条目。Northport 旧关联 FAIL 保留，已有原结构观察不等于产品通过。无重试/重定向/详情/换路/网络设置/LLM/付费/生产开关/24h；39公开源≥32通过仍未达标。[本批证据和下一最小适配需求](evidence/r2-six-public-2026-10-14/report.md)。
+
+> 验收分类已批准（2026-10-14 06:31:44 UTC，用户消息 Sentinel_81b542f9f60c8191a2b32b4cc8018c61）：41 项信源全部保留；34 项资讯／公告检查真实页面解析，5 项数值天气检查数据字段；付费天气、向量接口保留在原定后续阶段。R2 的 39 项公开自动源要求至少 80% 可用，即至少 32 项通过；各项缺口照实保留。真实页面／字段验收要求仍保留，分类本身不是 PASS。本批准不授权六次实网、24h 启用、付费或网络设置；下方“分类／分母未批准”均为批准前历史记录。
+
 # Project Status — Shipping HOT / NewsNow Foundation
+
+## R2 default-off production wiring / upstream adaptation — 2026-10-14
+
+- Code `e5d2f0bb0aa4651984d69d280db0c2485d9467a2` (initial70a0b80 plus integer-bound validation). Actual AIHOT commit44578fa11da55f2e863900752653e0c221f6cf70 recovered read-only from retained local Git packs: real path `packages/backend/src/sources/collect.ts`, adaptIntervals. Existing cache worktrees/HEAD were incomplete, not treated as valid source; no upstream download. Blob SHA256/raw source proof and MIT licence retained. Upstream rule:7-day non-backfill daily count/7,<=0.15 uses max, otherwise round(clamp1440/(perDay*3)); free editorial15..60min. No user-designed multiplier.
+- New pure adaptation runs inside the same collection job. Minimal SQLite differences: UTC daily-window boundary rather than a second daily scheduler; initial successful import excluded using first ok_items/ok_empty fetch-run time because no backfill column; only original auto extractor lineage contributes, manual-origin and current-day discoveries excluded. Target15..60minutes for the two existing free RSS info products; failure15min exponential/24hcap still wins while failing, success resets and uses target. This is faithful formula/bounds with explicit timing/backfill adaptation, not a byte-for-byte upstream transplant. Real job tick may round due dispatch; target interval is not an exact wall-clock SLA.
+- Nitro plugin now supplies productionIntelOptions to existing bootstrap/registry/Runtime. Default SHIPPING_INTEL_ENABLED absent/false = disabled/empty sources/no intel dependencies executed. Enabled requires explicit SHIPPING_INTEL_SOURCE_IDS catalog IDs limited to TH-W01/ID-W01; invalid/manual/unadapted selection or missing dependencies fails closed. Real DNS promises.lookup + existing defaultTransport retain pinned-address/security/byte/CA path. No source URL/permission or user persistent env/config changed. Existing source seeds reused;39unadapted source decision/41mapping pending and not activated or countedPASS.
+- Concrete database-scoped ownership is an adjacent `.intel-owner.lock` held through Runtime drain/executor end; exclusive wx acquisition, realpath canonical DB identity, token-checked release. Concurrent same-file process cannot acquire; stale/PID-age lock is never auto-deleted. Default DB is exact Nitro cwd/.data/shipping-hot-v3.sqlite3, not SHIPPING_DATABASE_PATH override. Hard-crash lock can deliberately block restart until authorized operator recovery; no age-based bypass. Only current owner removes its own lock as lifecycle release, not workspace cleanup.
+- New6offline cases: verified formula/source bounds (incl fractional reject), initial/manual/today exclusion and success/failure coordination, default/incomplete/unsupported startup, actual other-process lease competition and stale preservation, pause/drain/release/manual source-row invariance, actual Nitro default-off + query_only HTTP GET with0intel runs/executors. Tests enable only injected fake transport in isolated DB; default real dependency is constructed but never invoked. Existing9bootstrap/22collector and read security suites retained.
+- Exact final new clone `.tmp/intel-production-final2-build`: frozen install/build/typecheck/lint,17files167targeted,124files1156pass/3existing Windows skips,3isolated smokes allrawexit0. Initial70a0b80 also passed; final boundary tightening reran gate. Retained DB/secret-file hashes unchanged. Raw/source proof and actual Neat Freak: `docs/evidence/gate-e5d2f0b-frontend/closeout.md`.
+- **Implementation locally verified, parent wiring review pending.** Actual production enabled calls0, public6batch0, paid/LLM0,24h0. No .env/production config/schema/threshold/denominator/source permission change. GUI/S7NOT_RUN; old previews untouched and no new live server launched.41classification/39public denominator still require user confirmation, NorthportFAIL/originalmaterial gaps remain. No merge/deploy/forcepush or blanket R2PASS.
+
+## Historical R2 原验收收敛 — 2026-10-14（接线/自适应代码事实由上方新实现替代）
+
+- 原9.29条款不扩写：R2-1是指定格式/日期/编码等单元覆盖；真实来源配置归4/5。R2-2是SSRF与分源CA隔离测试，不另加全站实网TLS硬门槛。R2-3是发送后超时/重启不重复付费与零/未配预算零调用，不把实际对账、分钟限流、unknown UI或真实实付加入通关标准。
+- 仅读代码确认：成功nextSync固定seed.intervalMs，独立成功态自适应没有实现；失败15min指数退避/24h封顶及failing/成功重置已有。生产Nitro bootstrap未提供intel seeds/fetch/acquireIntelOwnership，默认disabled/empty；测试注入不是完整生产接线。生产接线是明确未完成项；原“自适应”的算法/验收含义尚须按参考实现或用户确认，不能擅把“成功态变化算法”定义为新硬门槛。本轮未实施。
+- 回执“new process”测试实际同内存DB/new fake caller/context，不称真实OS重启；已有重启语义断言和双文件连接竞争证据分开。若需补持久重开证据，可离线补原重启行为，不要求真实付费或额外进程压力门槛。
+- 41项P1自动库存逐项保留，建议分为普通资讯25/天气双重8/政策整页1/运营5/付费天气1/向量1；任何类型/分母解释须用户同意后再用于覆盖率，≥80%/100%原值不改。N/A建议不是PASS，也不自动把41变34或25。Northport关联FAIL与原DOM0保留。
+- 完整原条款→8707019具体代码/既有日志→缺口/决策、逐源fixture许可/脱敏、下一批精确6URL×1GET/512KiB/10s/总120s及24h准备：`docs/plans/r2-acceptance-convergence-2026-10-14.md`。提案NOT_RUN，本轮请求0、实网0、收费0、功能测试重跑0，无新实现/迁移/源启用/权限变更。现有完整链不重复。
+
+## R2 archived Runtime → GET → page SSR chain — 2026-10-14
+
+- Code `8707019a74ac81a698d303d852a40b3c13bed489`; only `server/intel/chain.test.ts` is new relative to the accepted79fc6c8 production tree. No business/UI/migration/provider/config/permission changes. Existing separate tests already covered real TMD collection/dedupe, Runtime scheduling/lifecycle, read-only HTTP and synthetic SSR; this test joins their interfaces in one execution rather than replacing them.
+- Real approved TH-W01 TMD2026-10-10 stored bytes (fixture path/hash in adjacent chain-result evidence) travel through existing registry-generated intel job/BackgroundRuntime.runNow, secure fetch with injected DNS/transport bytes, existing Feed parser and7SQLite items. Literal Heavy Rain URL/title/publication `2026-10-09T16:00:00.000Z` and allowed full Feed body asserted. Repeated run adds0versions; one explicitly synthetic revision adds1immutable version. Synthetic503 keeps prior pointer/rows and source failing; synthetic checked_empty leaves the entire source row unchanged; valid synthetic empty RSS is ok_empty and retains prior items. Five actual local task invocations, not24hours/scheduled-live proof.
+- After Runtime shutdown/ownership release, native SQLite closes/reopens without initialization/recovery. Actual H3 GET list/current/historical/checklist runs under PRAGMA query_only, before/after all-table snapshots equal. Real React Query caches are populated from actual HTTP JSON and the actual ManualIntelPage is SSR-rendered. Shell and unused legacy page only are stubbed; read query function is a throwing tripwire and is not called. HTTP data/state/query hooks are not fabricated. Stored revised title/source link/original published time appear in saved partial SSR. No actual DOM events/styles/pixels/browser acceptance.
+- External TCP connects and non-loopback fetch are blocked by process-local test guards; fetch transport is bytes only and DNS is injected. No external attempts observed, no LLM/paid usage; local intel_collect capability accounting exists and is not misreported as zero Provider invocation.7source rows are archived replay, not live notifications or confirmed port impacts. Revision/503/empty/check operator are synthetic and identified as such.
+- Fresh exact code clone `.tmp/intel-chain-final2-build`: install/build/typecheck/lint,13files130targeted,122files1150pass/3existing Windows skips,3isolated smokes all rawexit0. Targeted and full runs each generated chain proof. Initialde793ce gate typecheck FAIL (test imported server aliases from frontend project), later phases NOT_RUN; test moved to the server project, HTTP result types added, view loaded at runtime while production view remains app-typechecked. Failed evidence retained. Final raw logs, chain metadata and partial HTML: `docs/evidence/gate-8707019-frontend/`.
+- **Offline chain parent limited review accepted; overallR2 incomplete.** Visual/keyboard/live events/widths/S7 NOT_RUN. Existing4488/feed preview still serves79fc6c8 unchanged production code; no new production build/preview switch was needed. SSR artifact is not an interactive preview. Old previews, raw/evidence logs, clones and isolated DBs retained; no network source fetch, live/paid run, merge/deploy/force-push.
+
+### R2 remaining acceptance — final reuse audit 2026-10-15（原9/29标准不变）
+
+当前逐条原文、范围判定和权限动作以[最终验收审计](evidence/r2-final-reuse-audit-2026-10-15/acceptance-and-next-actions.md)为准；`docs/plans/r2-acceptance-convergence-2026-10-14.md`保留作历史对照。原≥80%/100%和已批准39/34/5口径不变，本地审计建议不替代主会话正式验收。
+
+| 项目 | 原标准/已有码证据 | 真正剩余与边界 |
+| --- | --- | --- |
+| R2-1 | PASS：原指定单元合同已有覆盖；RSS/Atom/RDF、HTML/JSON、显式日期/unknown、编码、URL、修订、白名单。引用954c831既有全量日志，本轮未跑测试。 | 不把真实源100%配置/回放追加为本条条件；原实际来源缺口归4/5。 |
+| R2-2 | PASS：私网/跳转私网阻断与分源CA单元已有；保护沿既有secure fetch。 | scope仅该安全链/单测；实际源CA与真实TLS握手未验证，不新增全站握手门槛。 |
+| R2-3 | PASS：既有fake-caller测试：零/未配预算零调用、发送后超时unknown不重发、复用已收响应、启动恢复/过期模拟。 | “restart”用例是在同一测试DB重建caller/context，不冒充真实OS重启/实付验证；双连接测试也是同进程。通用业务caller未接；不新增实付/分钟限流/unknown UI门槛。 |
+| R2-4 | FAIL：批准口径41保留，公开自动39；25 OK /7 PARTIAL /1 STALE /2 BLOCKED /4 NOT_RUN，即25/39，至少32，差7。 | 14非OK逐源条件保留，必须获新的有界任务后才能复核；不靠HTTP200或本次文档审计提高分子。 |
+| R2-5 | FAIL：资讯/公告24/34，24 PASS /2 FAIL /1 PARTIAL /7 NOT_RUN；历史数值3/5独立，不冒充资讯字段全覆盖。 | 还差10源真实结构字段链。unknown日期不补造，缺href/同URL冲突不绕过；完整原件只在许可范围保存。 |
+| R2-6 | PASS：本次静态审计建议PASS：52行§5.3映射、唯一通用RSS/Runtime/月度预算决策且无第二预算/任务队列表。 | 仅本地审计结果/建议，主会话正式独立认可pending；不等于整份上游或整个R2已完成，collector cursor对应关系仍需裁定。 |
+| R2-7 | BLOCKED：R3前允许纯手动；manualSubmit/检查清单/旧版本/精确产品许可及native/HTTP/SSR已实现、已有测试。 | 真实表单/键盘/宽度/浏览器交互及当前R2 GUI/S7未验。不得用SSR或旧S0–S8冻结S7代替；不新增本轮AI识别/真实付费条件。 |
+| R2-8 | NOT_RUN：实际连续24h未启动，当前生产选择只允许TMD/BMKG且默认off。 | 需要用户独立明确授权；2源观察只能覆盖2/39，不替代原P1全体要求。完整配置/选择范围扩展须另批，见只读提案。 |
+
+额外对账/频率上限/unknown管理/实付/多进程压力是已知限制或后续范围，不擅升为R2-1/2/3新标准。原实施要求的“自适应抓取频率、现有Runtime定时、付费回执/统一预算”仍保留，不能因删除额外门槛而漏掉真实实施缺口。原R2-3切片registry/GET未做项已被后续实现取代。历史1/10用户延后，不重找。
+
+## R2-7 P2 license / attribution repair — 2026-10-14
+
+- Code `79fc6c84b29497c869e029d27130ac02c8c04251` fixes the two parent-review findings in f312a00, without migration or new permission. Manual body allowance now requires an exact existing verified Feed product URL: TH-W01 `https://www.tmd.go.th/en/api/xml/CAP` (existing full) and ID-W01 `https://www.bmkg.go.id/alerts/nowcast/en/rss.xml` (existing excerpt). Existing Feed canonicalization removes tracking/fragment/trailing slash before comparison; unrelated query parameters or same-host story pages do not acquire body rights. Effective permission is the smaller of DB permission and existing product permission. Other/unknown manual sources remain metadata-only, even if a source-level policy were broader. Non-empty out-of-product body is rejected; metadata can still be saved. Checklist/UI disclose product scope. No source permission was broadened.
+- Provider-free GET applies the same bound to manual versions, including formerly stored out-of-product bodies: returns metadata only while leaving immutable rows untouched. Automatic versions retain their original existing source contract; manual/automatic identity is determined from version audit, not extractor text. `getManualVersionAction(source,item,version)` queries identity independently of audit display20; current-list and historical detail use it. Selected version's actor/time are explicit in DTO/UI.23 submissions followed by automatic version prove old manual identity survives while automatic identity stays null; selected old version can be read even outside the first20 version-list page.
+- Clean exact-SHA fresh clone `.tmp/manual-p2-final-build`: install/build/typecheck/lint,12files129targeted,121files1149pass/3existing Windows skips,3isolated smokes all rawexit0.50manual-related focused cases include3new regressions: exact CAP/BMKG/product downgrade,23-action historical/automatic identity under query_only, and legacy out-of-product read clipping without writes. Previously proven migration/FK/atomic/check-empty/unknown-publication/same-origin boundaries remain covered. Logs and actual Neat Freak: `docs/evidence/gate-79fc6c8-frontend/closeout.md`.
+- New preview `http://127.0.0.1:4488/feed`, PID65236, `.tmp/manual-p2-preview-79fc6c8`:68loopback checks PASS, including same-host negative cases, legal Feed product positives and early-version attribution after22later submissions. All records synthetic; no source-site/license re-verification, LLM or paid call. Old4477/4482/4483/4484/4485/4486/4487 previews and3policy fixtures preserved. Usage/receipt/run/policy/calendar counts unchanged, not packet-level egress proof.
+- **Visual/live UI events/keyboard/widths/S7 NOT_RUN; parent read-only P2 review accepted within limited scope; overallR2 incomplete.** No migrations, real-source activation, new license, permission/production setting change, merge/deploy/force-push or next slice. Audit display20/list50/versionsfirst20 limitations remain; direct version identity is no longer truncated.
+
+## Historical R2-7 manual intel slice — 2026-10-14 (license/identity superseded by P2 repair)
+
+- Code `f312a002445f788ed3322dd20273fa0dfd3b01cd` (c1c79d5 implementation, a974de7 URL/CLI repair, f312a00 demo-token styling). User explicitly approved one schema addition at 2026-10-14 04:15 UTC, message `Sentinel_f5a7de1612248191acd792729e3262d5`. Migration028 alone expands manual kind and adds `intel_manual_action`; old migrations/data/operator history are not rewritten. Catalog39 manual entries are inactive, metadata-only by default; two already-approved licensed sources are inserted only if absent, disabled, without overwriting existing health or permissions. Historical XX-W06 remains non-enterable.
+- Explicit localhost/same-origin JSON POST `/api/shipping/intel/manual` accepts manual submit or checked-empty. No URL fetch, extraction, LLM, usage booking or new scheduler. Mandatory self-entered operator is not authenticated identity; server entry time is distinct from original publication, which stays null when unknown. Existing Feed URL canonicalizer, licensedBlocks, IntelRepository transaction, immutable versions and current-pointer restoration reused. Audit and item/version/pointer commit or roll back together; request retries reuse their result, conflict409; successful checks do not mark automatic health successful. Failed writes leave previous content/check history intact; failed attempts are not persisted as successful actions.
+- GET checklist/items/detail are provider-free and do not initialize or write. Manual provenance belongs to the selected/current version; historical automatic versions do not acquire invented manual actors. Checklist shows catalog URL/focus, category/priority-derived suggested cadence, last successful check/entry or no record. Cadence is a UI suggestion, not an activated schedule. URLs are opened only by explicit user click. Missing catalog URLs cannot accept arbitrary-domain items. Unknown manual content licenses allow metadata only, not pasted body; existing TMD full/BMKG excerpt policies remain unchanged.
+- `/feed` now defaults to stored intel/manual-entry surface in the existing demo shell. Existing Feed/weather alerts remain accessible by explicit switch. Plain text only, HTTPS/known hosts/no credentials or credential query keys, bounded inputs; HTML/entity-looking inputs rejected and React escapes stored text. Form inputs survive failures; retries retain submission IDs. List capped50, action history20, version selector uses existing paginated GET (first20); broader pagination/real GUI acceptance not claimed. No automatic risk/official-impact confirmation or AI-filled fields (R3 pending).
+- Exact clean code fresh clone `.tmp/manual-intel-final3-build`: frozen install with scripts/build/typecheck/lint,12files126targeted,121files1146pass/3existing Windows skips,3isolated smokes all raw exit0. 47focused cases (31new tests relative to prior suite) include schema27 preservation and schema28 rollback/FK/retry, request replay/conflict, revisions/A-B-A, atomic audit failure, checked-empty, licenses, URL canonicalization/input/XSS, real H3 same-origin writes and query-only GET, plus2synthetic SSR cases. Initialc1c79d5 native smoke FAIL was a same-name sources.ts/directory CLI resolution defect, repaired by explicit `.ts` imports; failed evidence retained. a974de7 gate also passed; final styling triggered exact-SHA rerun. See `docs/evidence/gate-f312a00-frontend/closeout.md` and adjacent raw metadata/stdout/stderr.
+- New isolated preview `http://127.0.0.1:4487/feed`, PID14476, cwd`.tmp/manual-preview-final-r2-7`;41loopback/API/assets checks PASS. Samples are visibly synthetic manual notices only, not actual official notifications or live-source validation; original3policy fixtures and old4477/4482/4483/4484/4485/4486 previews retained. Runtime/providers/translation off, minimal OS environment, no project env/secrets. Protected calendar/policy/usage/receipt/run counters unchanged; counters alone are not packet-level egress proof.
+- Offline/local API verification PASS; **browser visuals/events/keyboard/widths/S7 NOT_RUN; independent parent review pending**. R2-7/overall R2/R5 not blanket PASS; no merge/deploy/force-push or production switch. Real source/license expansion, R3 automatic fields and live execution remain outside this slice.
+
+## Existing calendar demo-source adaptation — 2026-10-14
+
+- Code `2b988bca8574247c277b1ed7aabc14525d973515` (initialc6604cc plus unknown layer-count fix). Existing left-country/month/day component and GET reference/promotion/policy services reused; direct scoped demo annual-ref CSS copied. Heading/Today/unopened risk layer adapted; existing multi-country, workday filter, CN-only policy flag and2026–2027 date boundaries retained. No demo dates/risks/preparation windows, new backend/generator/DTO/schema/provider/date/source/paid/production switch.
+- Existing pending/anchor/window status and E-R04/E-R06 gaps retained. Policy fixture/local-zone/localToday and stored confirmation notes disclosed; no re-verification or client date-derived activation. Error responses no longer show cached records/zero counts as success. Loaded empty, loading, missing year, no-country and error remain distinct.
+- Exact clean-SHA fresh-install gate: install/build/typecheck/lint,79targeted,full118files/1115pass/3existing Windows skips,3isolated smokes all exit0. Initialc6604cc gate retained separately. Eight actual-page synthetic SSR cases cover filters/layers/boundaries/empty/error/CN/fixture/timezone but not live event interaction. Actual Neat Freak and raw logs: `docs/evidence/gate-2b988bc-frontend/closeout.md`.
+- New isolated preview `http://127.0.0.1:4486/calendar` PID64764;28loopback HTTP/API/assets checks pass, reference/promotion/policy responses identical to old4485, original3fixture policies retained and read counts unchanged. Bundled reference dates are separate from synthetic cache/policy samples; no new real-date validation or generation. Old previews4477/4482/4483/4484/4485 untouched; credentials/project env absent and Runtime/providers/translation off.
+- **Visual/keyboard/widths/S7 NOT_RUN; parent read-only limited review accepted (2026-10-14).** No workaround of browser restriction, no true full calendar/country/R1.5/R2/R5 PASS, no merge/deploy/force-push.
+
+## Port notice metadata P2 repair — 2026-10-14
+
+- Code `180f919ebdcbf350a23a75d28bd2efbcf5765f67`: existing publication/unknown-time/first-receipt semantics and stale/sourceStatus/persisted lifecycle labels restored on demo port notice cards. received_at never becomes publication; no date-derived expiry/state, backend/DTO/schema/source/weather/reference/rule changes. Four synthetic SSR regression cases; no calendar or new slice.
+- Exact clean-SHA fresh-install gate: install/build/typecheck/lint,59targeted,full117files/1107pass/3existing Windows skips,3isolated smokes all exit0. Actual Neat Freak and raw logs: `docs/evidence/gate-180f919-frontend/closeout.md`.
+- New independent preview `http://127.0.0.1:4485/ports` PID11600, old previews and original isolated policy samples retained; no credentials/project env and Runtime/providers/translation off.54HTTP/API/assets checks pass, but all eight approved-port forecasts are empty: read/empty-state proof only, not actual weather coverage or browser switching.
+- **Visual/keyboard/widths/S7 NOT_RUN; parent review pending.** No bypass of browser rejection, real source/paid/LLM calls, merge/deploy/force-push; no stage-wide PASS.
+
+## Demo ports / existing weather slice — 2026-10-14
+
+- Code `11aa1162a286d96bdc7a44a2f61a95d3d2a886e8`: `/ports` and `/ports/:id` adapt actual demo eight-port selection/header/announcement-weather columns/table CSS. Existing cache APIs, port watch and tropical-cyclone display reused. Forecasts remain hourly/current with API units and missing values; no daily aggregation, fake shutdown/risks/delay or frontend threshold recomputation.
+- Weather presentation extracted without dropping source/window/precipitation/rule/stale/failure disclosures. VNSGN original point and ADR-009 independent engineering reference remain separate, with reference distance/grid/attempt/success/history/coverage; reference marine values never fill original-point rows. Focus directory is scope, not evidence of current data. Regional weather and R5 country/event/calendar summaries remain unopened.
+- Minimal read compatibility: approved focus IDs can read existing weather/reference cache even when absent from operational snapshot; no port insertion or synchronization. Missing unapproved IDs still404. Schema,provider,threshold,sampling,source/budget/production configuration unchanged.
+- Exact clean-SHA fresh-install gate: install/build/typecheck/lint,55targeted,full117files/1103pass/3existing Windows skips,3isolated smokes all exit0. Original gate completed during a temporary transport disconnect; recovered metadata inspected, no duplicate gate. Actual Neat Freak/raw evidence: `docs/evidence/gate-11aa116-frontend/closeout.md`.
+- New isolated preview `http://127.0.0.1:4484/ports` PID52080; original4482fixture DB copied, policy samples retained, credentials/project env absent and Runtime/providers/translation off.54loopback HTTP/API/assets checks passed including eight reads, unknown404, three existing snapshot DTOs/statuses unchanged and read-count preservation. Old4477/4482/4483 previews untouched.
+- **Browser/visual/keyboard/mobile/S7 NOT_RUN; parent review pending.** No workaround of rejected CDP path, no source or paid/LLM requests, no new real-data evidence, no R1.5/R2/R5 overall PASS. No merge/deploy/force-push.
+
+## Demo overview correction / same-round review repairs — 2026-10-14
+
+- User screenshot comparison showed the previous default homepage was still legacy HOT, and navigation had duplicate home/event entries. Earlier shell/policy adaptation did not meet the requested overall demo structure. Code `c3e08408623c69a3a071d761ed0300659644bd68` now mounts the actual demo country-overview framework at `/`: six ordered country cards, judgement/status legend, banner and attention panel. Single navigation preserves seven routes. Risk fields explicitly unevaluated/unopened; no fake severity/count/delay/AI output. Original reference hash unchanged; legacy HotPage unmounted.
+- Parent review repairs: original motion preference hook/storage/html class and MotionConfig/native switch restored; real policy published/effective CSS mappings fixed;<=1280px policy panels stack and row/status content wraps. Mid-width overflow was a static risk, not reproduced visual evidence. Policy APIs/schema/timezones/fixtures/business rules and backend stage gates unchanged.
+- Fresh exact-SHA frozen-install gate: install/build/typecheck/lint,46 targeted, full116files/1096pass/3existing Windows skips and3isolated smokes all exit0. Actual Neat Freak and raw evidence: `docs/evidence/gate-c3e0840-frontend/closeout.md`.
+- New preview `http://127.0.0.1:4483/` (PID15768),18loopback HTTP/API/resource checks pass. Copied4482 isolated DB preserving original3policy fixtures and versions; disclosed fixed test clock, no credentials/project env, Runtime/providers/translation off.4477 and4482 unchanged.
+- **Browser/pixel/real keyboard/mobile/S7 NOT_RUN; full UI acceptance pending.** Executor did not independently view the two user attachments; used parent's reported screenshot observations and original HTML. No workaround of rejected browser path. Country framework open does not imply R4/R5 risk aggregation or R2/source qualification PASS. DraftPR8 review pending; no merge/deploy/force-push.
+
+## Historical first demo-source frontend / manual policy slice — 2026-10-14 (superseded homepage/navigation)
+
+- User requested frontend/backend parallel progress: frontend adapts the selected demo source; backend remains on the2026-09-29 plan, modules open according to actual capabilities. Code `3fb3ad3dd0d6435c7d36376c579de238b6ecfa3c` (initial7666890 plus cached-read-error repair), draftPR8 stacked on R1.5.
+- Reused demo palette/sidebar/mobile nav/filter tabs/policy list/detail CSS and structure; reference SHA256 `23d6efbb343182eba93caa74a4b1ca1657bab25f414fb873d9c448efe98b51b7` unchanged. Seven existing pages remain reachable. Country overview, independent weather and merged risk-event modules unopened; manual policies use existing APIs/validation/timezones/fixture and version semantics. No hardcoded demo counts/AI output, new backend/schema/dependency/source activation or paid work.
+- Final isolated fresh-install gate: install/build/typecheck/lint,28 targeted tests, full115files/1090pass/3existing Windows skips and3isolated smokes raw exit0. Initial7666890 missing`.tmp` failure remains archived; environment corrected, no product/test relaxation. Evidence/actual Neat Freak: `docs/evidence/gate-3fb3ad3-frontend/closeout.md` and adjacent raw logs.
+- Built-server HTTP32pass on `http://127.0.0.1:4482/policies`; synthetic S7/policy fixtures only, fixed test clock explicitly disclosed, no credentials/project env, Runtime/translation/providers disabled, independent cwd/build. Existing4477 was not replaced/rebuilt/restarted.
+- **Browser/pixel/mobile/keyboard/S7 NOT_RUN; full UI acceptance pending.** Custom CDP action was rejected by automatic approval; official browser unavailable, no bypass. Source adaptation/non-browser continuation explicitly approved. Implementation is available for parent/user review, not a full frontend-stage PASS. R1.5 and R2 remaining gaps unchanged; R3–R5 targets not promoted. No merge/deploy/force-push.
 
 ## Shipping Risk Intelligence — R0 Baseline, Decisions & Authorization — 2026-10-09
 
@@ -80,6 +704,14 @@
   - **R1.5-4：** **BLOCKED** — 合格 **0/10**；回放命中口径 **warning/critical**（watch 不计）；≥10 样本且 **≥80% 回放** 才解除 blocked，**不**自动标 PASS。候选 `port-closure-replay-candidates.ts` 含 `verificationAudit` 初核记录，仍 **blocked**。2026-10-12 资格核验清单：八港范围内候选事件 **6** 个（原第 7 行只是来源检索汇总），合格 **0**。尼格/蛇口只证明闸口交提箱的停工和恢复；第二轮补了 HKO 最佳路径算出的气旋距离输入（这个产品页能否算获批来源待确认），并起草了入选校验清单和观察时刻规则（`r1-5-4-eligibility-round2-2026-10-12.md`）。用户已批准事件级口径（≥10 个合格事件且命中率 ≥80%），也批准了作业范围明确的闸口或部分作业停工可以计入；HKO 最佳路径已于 14:05 获用户批准，仅用于离线事后回放（XX-W06）。`f703047` 实现了按时间序列逐点回放和 C1–C8 结构校验（16 项夹具测试，门禁见 `gate-f703047`）；真实语料仍为空，**BLOCKED**，见 `docs/evidence/r1-5-4-replay-method-2026-10-12.md`。P2 修正（负值、严格 UTC 校验）已完成；尼格单事件已录入真实语料并离线回放（eligible、命中 WR-S03 2022-11-02T00Z），仍 **BLOCKED 1/10**，这只是事后一致性试录，见 `r1-5-4-nalgae-replay-trial-2026-10-12.md`。暹芭/蛇口候选本轮核验结束：本次存档栏目和限定检索里没有找到恢复原文，不合格，不计入语料（`r1-5-4-chaba-resume-2026-10-12.md`）。剩余四个候选（苏拉、摩羯、奥鹿、海燕）已一次批查，都没有完整的官方或运营方停复工窗口，本轮结束（`r1-5-4-candidate-batch-2026-10-12.md`），口径差异待 dots 确认，见 `docs/evidence/r1-5-4-eligibility-2026-10-12.md`。
     - **用户决定（2026-10-12 15:31 UTC+8，dots 15:47 转达）**：原话「历史回放就这样吧，要那么多历史也没用，我要的还是之后的自动抓取的信息。」→ **停止历史样本采集**，不再新增历史来源；Nalgae 1/10 保留为**未完成验证（用户延后）**，**不阻塞 R2**；R1.5-4 **不标 PASS**。
     - **R1.5 其他缺口（与上条分开）**：PAGASA 正样本未取得；E-R04/E-R06 促销窗口仍为待定（VN 博客四窗口仅为候选，ID/VN 两条为“官方URL提取文本支持，实时原始页面复核未完成”）；XX-E03 实现仅放行 PH（不扩）。
+    - **R2 首切片（离线闭环，2026-10-12，分支 codex/shipping-hot-r2，草稿 PR base = codex/shipping-hot-r1-5）**：待审。默认关闭、零外网、零 LLM、无凭据、无付费；paid_receipt 等 R2-3 仍在 R2 验收内未做。见 `docs/plans/r2-first-slice-2026-10-12.md`。
+    - **R2 P2 返修（2026-10-12 dots 16:34）**：A→B→A 回滚恢复当前版本、写入失败隔离/storage_unavailable 显式上报、executor 归属回收（迁移 023，schema 23）；registry/GET 仍未完成，paid_receipt 未开始。详见计划 §8。
+    - **R2 第二轮 P2 返修（dots 16:44）**：成功收尾 run+来源状态同事务；executor.end() 运行中拒绝、结束后禁止 run；证据日志改为 UTF-8 并记录命令/完整 SHA/原始 exit code。详见计划 §9。
+    - **R2-3 paid_receipt 离线切片（dots 16:58）**：首个离线采集切片已获准关闭（a60a957）；本轮从 AIHOT@44578fa 最小移植 receipts.ts（迁移 024，schema 24），用 BEGIN IMMEDIATE 认领，复用 provider_usage、SecretStore 和统一预算判定；仅离线（假调用器）。R2 整体仍未完成。见 `docs/plans/r2-3-paid-receipt-2026-10-12.md` §5 未覆盖项。
+    - **R2-3 复审返修（dots 17:06）**：unknown 恢复按尝试幂等记入 provider_usage，不释放预留（迁移 025，schema 25）；费用校验非负、有限、币种一致。预算门禁只称为预估预算门禁。见计划 §6。
+    - **R2 现有 Feed 统一安全抓取（dots 17:16）**：R2-3 离线回执切片已关闭（保留限制：遗留 unknown 的保守预留可能重复占用；实际费用对账和真实调用方仍未完成）。本片让 Feed 列表请求改走 secureFetchArticle（只允许列表主机、2 MiB 上限），解析仍只用 feed.ts；默认开关和白名单不变；没有实网验证。见 `docs/plans/r2-feed-safe-fetch-2026-10-12.md`。R2 整体仍未完成。
+    - **dots 17:29 复审 P2 修复**：defaultTransport 之前没有调用 `request.end()`，GET 不会发出、只会超时；已修复并补 timeout/error/超限清理，加 Node request 边界离线回归（`article-fetch-transport.test.ts`）。另勘误 gate-85e3c0c targeted 覆盖范围（feed-sync-job 是 4 项；没跑 article-fetch-job/article-extractor）。仍没有实网验证。
+    - **R2 原始字节/编码切片（2026-10-12，Codex 执行，父会话审查通过）**：代码 `b8528e9494f4e3706b01dc0e0cce7def59887bd3`。transport 保留字节，解码前上限；BOM → HTTP charset → XML 声明/HTML meta → UTF-8，记录选择/冲突，严格解码失败保留旧数据。支持 GBK、TIS-620/windows-874、windows-1258，保留组合字符。原始字节仅在抓取结果中保留，不新增落库。Node request mock → Feed/intel SQLite 合成编码字节回归；非历史抓取/当次实网。干净代码 SHA 全门禁 **PASS**：install/build/typecheck/lint、定向 Feed **71/71**、全量 **103 files / 902 passed / 3 skipped**、P0/P2C/P3 Feed smoke、Neat Freak inventory 均 exit 0；日志 `docs/evidence/gate-b8528e9/`。Neat Freak 见该目录 closeout（盘点不等于安全审计）。无 UI/路由变化，浏览器/S7 **NOT_RUN**；实网/LLM **NOT_RUN**。CA、web_list/json_list、日期规则、registry/GET 接线及 R2 其他缺口不变；编码切片已由父会话只读审查通过（未独立重跑），**R2 整体未完成**。
   - 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 **R1.5-1（整项）：** **BLOCKED**（2026-10-10 第二轮复审后；PR #7 未合并）。原因只剩一项：VNSGN 海况（浪/涌浪）缺测。其余七港七天海况 + 陆地覆盖已 PASS。
     - **口径来源（分开写）：** 「7 天」来自 9/29 主方案 R1.5-1（8 个港口都要有 7 天的海况和陆地预报）；具体滚动窗口 `[now−1h, now+7d]` 来自现有 `server/services/weather-panel-policy.ts`（`isForecastInstantInWindow` / `WEATHER_FORECAST_HORIZON_MS`）。验收按窗口内每个 UTC 整点逐一核验（唯一、首尾、无缺口、陆地 + 海况字段），current 单列。
     - **本轮修复（代码 `356e6fec9431747aa42624daf8f01cff9f971f76`）：** Open-Meteo marine + weather 两个现有端点改为 `forecast_days=8`、`past_days=1`（坐标、`cell_selection=sea`、数据源未改）；normalizer 原来只保留最早 170 条，改为先按保留窗口 `[now−1h−24h 降水回看, now+7d]` 过滤，再按上限 `7*24+24+8` 截断（截断时先丢最旧的）；仓储新增按窗口读取（截断保留最新）和陈旧回退读取；面板先读窗口；live-sync 诊断不再只读最早 176 条。固定时间测试覆盖下午、23:59:30、UTC 整零点、旧小时超过上限、current 与 hourly 并存、窗口末尾未来小时不被挤掉（`server/services/forecast-retention-window.test.ts`）。
@@ -100,6 +732,115 @@
   - **门禁（`356e6fe`，2026-10-10，Windows 10 19045 / Node v24.15.0 / pnpm 10.30.3）：** `pnpm install --frozen-lockfile` 0；`pnpm build` 0；`pnpm typecheck` 0；`pnpm lint` 0；Vitest **84 files / 587 passed / 3 skipped** exit 0；`pnpm smoke:p0-native` 0；S7 **151/151** exit 0；`pnpm test:r1-5-1-live` exit **2（BLOCKED）**；Neat Freak `scripts/audit-inventory.sh .` exit 0。**未**合并 / **未**部署 / **未**开始 R2。
 - **Neat Freak（本批）：** Git Bash `scripts/audit-inventory.sh .` exit **0**。
 - 【历史，已被取代：R1.5-1 已于 2026-10-10 按 ADR-009 映射判定 PASS，VNSGN 原点海况不可用（dots 14:11 UTC+8 批准映射；ff4ac76 远程审查通过）。以下原文与当时运行结果保留不改】 **结论：** **R1.5 = IN PROGRESS**；R1.5-1 **BLOCKED**（VNSGN 海况）、R1.5-4 **BLOCKED**；**非**阶段 PASS。
+
+### R2 intel persisted read-only GET (2026-10-13)
+
+- Three routes: sources health/recent runs, item paging, item/current-or-historical-version detail with date evidence. Read closure only queries existing Repository tables; no initialization/runtime/provider/fetch/recovery/translation dependency. Explicit safe DTOs, no raw config/CA/errors/credentials; no-store and stricter current/stored license scope enforced.
+- Actual loopback HTTP + isolated SQLite query_only/snapshot + external-fetch interception/read-dependency assertions verify normal/failed/unknown/empty/invalid/uninitialized reads, privacy and full->excerpt->metadata restrictions. No schema, write/enable/API registration change or existing page edits; Runtime remains disabled.
+- Clean code SHA `4e36813eb8859f4fb4d658f8cacdedde5b6275ad` local gate PASS: actual HTTP 16/16; full suite 109 files / 1024 passed / 3 Windows symlink skipped; intel137/web42/json49/Runtime24/paid-translation114/Feed-safe77 passed. Install/build/typecheck/lint and three isolated smokes exit0. Existing production S7 PASS 162/162, schema27, zero browser external requests/errors/unexpected5xx and retained-file fingerprints unchanged. S7 `workspaceClean=false` reflects newly generated untracked gate evidence; tracked code stayed unchanged after the clean start. UTF-8 full-SHA/command/stdout/stderr/raw-exit logs and actual Neat Freak closeout: `docs/evidence/gate-4e36813/`. Secret scan exit0 matched synthetic `private-marker` test strings only, not credentials; inventory is not a security audit. Parent review PASS for code/evidence `4e36813` / `a9e637f`; GET offline read slice closed, no independent parent test rerun claimed. R2 overall incomplete. Contract: `docs/plans/r2-intel-read-2026-10-13.md`. Real sources/LLM/paid/production ownership/UI remain NOT_RUN or outside this slice.
+
+### R2 P1 source/archive inventory (2026-10-13)
+
+- Fixed current catalog P1 denominator: 58 IDs = 41 automatic + 17 manual. Includes 7 non-article interfaces and all PARTIAL/missing/unconfigured/paid entries; no catalog state, URL or priority edits. P2 (40 IDs) and synthetic fixtures stay separate. Inventory baseline `a9e637fd52c69fbfde7fd226c660e58da0ea2ae8` and catalog SHA256 are recorded in `docs/evidence/r2-p1-inventory-2026-10-13/source-inventory.json`.
+- Existing real stored-page payloads through the current collector: TH-W01 7 items, ID-W01 12, VN-W01 5; offline title/link/time subcheck **3/41**, remaining **38/41 NOT_RUN/missing**. Actual isolated-memory SQLite replay 3/3 exit0; no socket/LLM/provider call. BMKG capture used `/en`, while the catalog and RSS self-link use `/en/rss.xml`; TMD/NCHMF stored derivative/provenance limits are explicit. This is not exact-endpoint live proof, R2-5 whole-stage PASS or R2-4 >=80%.
+- Formal intel seeds remain only TH-W01/ID-W01; VN-W01 configuration is test-local. Dedicated weather-alert/Feed/forecast evidence does not prove current intel-chain coverage. Matrix, raw UTF-8 baseline-SHA replay log, reproducible probe text and closeout: `docs/evidence/r2-p1-inventory-2026-10-13/`. Real recheck, 24h and paid/embedding calls NOT_RUN. Parent confirmed inventory arithmetic and archive subchecks; final article denominator awaits mapping approval below. R2 incomplete. The earlier two-source batch suggestion is superseded by the pending six-source proposal below; neither was executed.
+
+### R2 P1 acceptance mapping and bounded-batch preparation (2026-10-13)
+
+- Parent reviewed inventory `0b532e1`: 58/41/17/P2-40 arithmetic and three archive title/link/time subchecks stand, but **41 is the retained total automatic inventory, not an approved final R2-4/5 article denominator**. Final denominator/coverage stay unset. Proposed per-ID mapping: ordinary news25, dual weather/news8, policy whole-page1, operational weather/track5, paid weather L1, embeddings R3 1 =41. Original plan/ADR bases and ambiguities are recorded; no source exempted, reprioritized or removed. Mapping parent confirmation pending.
+- NMC existing archives assessed on baseline `0b532e1917ee5425194965b20e0fdf8c2a1f4805`: two offline suitability tests PASS exit0, but collector results are both `parse_failed/web_list_invalid_link`, items0. Current product DOM has no detail anchors; flash annual issue/observation time is not publication, warning author/Chinese-hour text is unsupported by current generic date grammar. Page generation/fetch time was not used. Not new successful-source coverage. First probe exit1 from an absent Repository errorMessage property is retained; corrected probe checks the stored error_message directly, no product edit.
+- Current batch proposal supersedes the earlier two-source suggestion: MY-P02/PH-M01/MY-C01/MY-T01 new RSS candidates plus TH-W01/ID-W01 endpoint baselines. Exact catalog URLs; each1 GET, total<=6, no redirects/details/retries/scheduling/LLM/paid. **512KiB/10s**, matching intel defaults (earlier2MiB suggestion mixed in Feed-list limit); 120s batch cap and metadata-only sanitized derivative evidence. Full-text license is not inferred from catalog inclusion. Preparation at9d7b39b was NOT_RUN; parent subsequently approved one public batch, whose blocked execution is recorded below. Acceptance mapping remains pending. Per-source mapping, bounded list, raw SHA-bound offline logs and actual closeout: `docs/evidence/r2-p1-acceptance-mapping-2026-10-13/`. No product/schema/production config/source URL/security-policy change; R2 incomplete.
+
+### R2 HTML same-URL association-conflict P2 repair (2026-10-13, offline only)
+
+- The4171aaa real run's two GETs and84/100 memory-SQLite/idempotency execution facts are retained, but **Northport association quality FAIL**: two same-URL groups have conflicting titles/dates and old early seen-check silently selected the first. Thai's100 records remain scoped snapshot validation only. No original DOM fixtures, candidates stay disabled, R2 incomplete.
+- HTML now reads/normalizes title and full date evidence before comparing an already-seen canonical URL. Only identical association evidence merges; differing title, raw date/provenance, precision or missing/incomplete versus complete evidence fails with dedicated `web_list_duplicate_conflict`. No first/last choice, new identity, schema or relationship framework. Collector uses existing failure/backoff semantics before entry writes; existing rows/versions/blocks and last successful time preserved. Probe whitelist retains this safe code.
+- Saved factual URL/date pairs are used only to construct explicitly synthetic regression markup.12 parser conflict/boundary tests and3 isolated collector tests cover identical merges, title/date differences, input-order reversal and old-data preservation; probe code propagation adds1 test. Final code `aaa85bcc212ff285ab581086e0ff0a890dff6b43`, clean-SHA gate: install/build/typecheck/lint, driver static check, probe14/14, related HTML/JSON134/134, full114 files/1081 passed/3 existing Windows skips,3 isolated smokes all exit0. Raw UTF-8 full SHA/command/stdout/stderr/exit logs: `docs/evidence/gate-aaa85bc/`; actual Neat Freak closeout complete. No real page replay, DNS/index/details requests or source configuration/activation change in this round. Source directory status/final denominator unchanged.
+
+### R2 separately approved real HTML index → isolated SQLite validation (2026-10-13)
+
+- User separately approved two index GETs at09:47:48UTC after the probe P2 repair review. Clean baseline `4a99126f0221ef0eb82eb4fdd777cb8b999f8a49`, helper code56603ff; new before-send fsynced journal, each source once, both HTTP200 at09:52:50.843–09:52:53.166UTC. Actual transport2, no unknown/retry/redirect/details/credentials/network change. Source candidates remain disabled; no product or schema changes.
+- Current real response → parser → memory SQLite passed: Northport84 records (86 nodes/84 distinct URLs), Thai Customs100. Second collector calls reused the same raw responses offline and yielded0 new/0 revised; all184 items retain one version. Northport83 complete day dates +1 unknown month-only; Thai100 day dates with explicit Buddhist calendar. All publication instants remain null, timezone/offset unknown; no fetchedAt replacement.
+- Northport two duplicate-URL groups carry differing titles/dates, existing first-occurrence behavior retained; document association unverified. Latest listed day2026-10-06, with historical items; Thai latest2026-10-13 but business relevance/sustained timeliness not established. Raw source bodies not retained, original fixtures0; normalized metadata is not original DOM/encoding replay evidence. No catalog OK promotion or final denominator change. Old Northport failed-probe cause remains unknown, old FAIL/NOT_RUN history intact; this new authorized snapshot has its own scoped PASS. Evidence: `docs/evidence/r2-two-html-live-2026-10-13/`. R2 incomplete.
+
+### R2 two-index probe evidence-loss P2 repair (2026-10-13, offline only)
+
+- Repaired probe orchestration only: each already-held response has independent processing/cleanup and immediate first/second/count checkpoints, per-source final persistence before the next source, then aggregate assertion. One failure cannot discard its captured outcomes or skip the other held response. Atomic output with fsync and preserved failed pending files; save failures are sticky FAIL and aggregate save failure explicitly returns non-success. Safe output field/error-code whitelist excludes exception messages/body/storage-error text.
+- Final repair code `56603ff618ed90f3d8408b6eb1dce461530c98c5` (initial81c5ad5 plus TypeScript narrowing fix). Clean-SHA install/build/typecheck/lint, extra repaired-driver static typecheck,13 synthetic probe tests, related HTML/JSON119, full112 files/1065 passed/3 existing Windows skips and3 isolated smokes all exit0. Raw UTF-8 full-SHA logs: `docs/evidence/gate-56603ff/`; first81c5ad5 typecheck exit2 logs retained separately, no later checks claimed for that failed gate. Actual Neat Freak inventory/closeout complete.
+- No source requests or product changes; revised live driver NOT_RUN, old source ledger/snapshot untouched. Original real Northport error remains unknown and qualification FAIL/incomplete; Thai real qualification NOT_RUN. Candidate configurations stay disabled. Repair evidence: `docs/evidence/r2-two-html-probe-repair-2026-10-13/`. R2 incomplete.
+
+### R2 Northport / Thai Customs disabled HTML configuration implementation (2026-10-13)
+
+- User separately approved two further exact index GETs at08:33:59UTC to observe item relationships. Both completed once HTTP200 at08:38:12.976–08:38:15.312UTC, no details/retry/redirect or network change. Raw pages stayed in RAM; only minimal factual title/link/date/DOM relationship descriptors archived, no original HTML fixture or full-text permission inferred.
+- Northport observed article.card2 within release-grid2, with one document anchor containing leading D-M-YYYY and title; month-only10-2024 remains unknown. Thai Customs title/link is in row column3, confirmed by saved short-title child text; date is column4 with full Thai month/year2569 and explicit Buddhist-era wording in the same index. An initial column2 assumption was corrected before final gate. Added disabled candidate configurations outside active seeds, strict opt-in dash DMY/full Thai month parsing and paired-link date/title mapping; preserve day precision, unknown timezone and null publication instant. No schema, scheduling, registry, security whitelist or production activation change.
+- Final implementation code `484db7b7a173f5c31312f3f7320807f4d521e5dd` (initial implementation `b1ca0ee1fbfe509e2ef810f6d7fd01b6c19cb6c8` plus third-column correction). Clean-SHA full gate: install/build/typecheck/lint and3 isolated smokes exit0; related HTML/JSON tests119/119; full111 files/1052 passed/3 existing Windows skips. Raw UTF-8 commands/full SHA/stdout/stderr/raw exits: `docs/evidence/gate-484db7b/`; prior SHA gate remains separate at `gate-b1ca0ee/`. No UI/route change, S7 NOT_RUN. New tests are23 synthetic configuration/date/safety,1 retained real scalar-date/column-fact check and4 synthetic isolated collector tests; not original-source HTML fixtures.
+- The same-response RAM collector probe **FAIL**: Northport second outcome was failed, an early probe assertion exited before detailed results were written; error code/item counts unavailable. Thai Customs live-response collector NOT_RUN. Bodies were released; no unauthorized re-fetch. Observed real relationships support configuration preparation, but final real-response parse/storage qualification remains pending. Real Neat Freak closeout and remaining original-structure permission gap are recorded in `docs/evidence/r2-two-html-2026-10-13/`; R2 is incomplete.
+
+### R2 four-source index snapshot after approved DNS exceptions (2026-10-13)
+
+- On baseline `01ea950ab023255fdb7e9efe1f2799d9320c260e`, user-approved current-subscription four-domain addition was backed up; user manually saved/reloaded. Generated configuration contains prior six plus four exact domains, blacklist semantics and TUN enabled. Four system DNS lookups passed the existing address classifier. No project security/network policy relaxation.
+- Four exact catalog index GETs each once, all HTTP200, durable before-send reservations completed: Loadstar/Splash247 current collector in isolated memory SQLite each10 complete title/link/time records. Northport/Thai Customs only fetched and inspected in memory; collector **NOT_RUN** because source configuration is missing. Northport has unassociated dash-DMY text candidates, unsupported by current date grammar; Thai Customs needs actual source date-basis observation, no forced Buddhist-calendar inference. No product/parser/source configuration changes.
+- Original fixtures0; saved metadata derivatives cannot prove original structure/encoding/date syntax. Loadstar full text remains disallowed; other original reuse permission not established. Actual reachability, parse, date traceability, timeliness and original-structure qualification are separately recommended in `docs/evidence/r2-four-index-2026-10-13/results.md`. Prior Westports latest2025-08-01 is stale for current news; prior MY Customs includes old/non-core items, so parsing success does not establish business timeliness. No directory promotion, denominator change or R2-4/R2-5 whole-stage PASS. Evidence-only checks and real closeout apply; R2 remains incomplete.
+
+### R2 after-DNS renewed bounded RSS batch (2026-10-13)
+
+- Parent confirmed renewed user approval after the DNS correction. On clean code baseline `208be3567ff06101c6e3bb52c23e781c06ddcae5`, six exact catalog index URLs each used one secure pinned transport attempt, all HTTP 200; no retries, redirects, details, credentials, paid/LLM calls or scheduling. Existing collector in isolated memory SQLite parsed title/link/time for MY-P02 3/3, PH-M01 10/10, MY-C01 10/10, MY-T01 6/6, TH-W01 10/10, ID-W01 13/13. The four new candidate sources yielded 29 complete parsed items; the two weather baselines yielded 23. This single snapshot does not establish ongoing source reliability.
+- One TMD public-domain XML was retained as exact original bytes and replayed offline; other responses remain metadata-only derivatives because original reuse permission was not established. Derivatives are not original XML, encoding, or date fixtures. Raw/derivative hashes, durable before-send journal, scoped logs, tests and limits: `docs/evidence/r2-bounded-rss-after-dns-2026-10-13/`. Old DNS-blocked HTTP0 batch remains separate. Automatic inventory denominator41 stays an inventory, final article denominator/coverage remain unresolved, no source OK promotion and no R2-4/R2-5 whole-stage PASS. No product/config/schema changes or full product gate rerun.
+
+### R2 single approved bounded RSS batch (2026-10-13)
+
+- Parent approved the exact six-URL public read-only batch after `9d7b39b`; not acceptance mapping exemptions. Executed once 2026-10-13T04:10:15.298Z–04:10:15.314Z on baseline `9d7b39b68cc3e2bad9cd93e3ea7cc4829a046ed6`. All six current secureFetch checks rejected DNS results with `blocked_address` before transport; **actual HTTP requests0**, no response/status/body/hash, collector/title-link-date parsing NOT_RUN. This is local DNS/security BLOCKED, not evidence that upstream sites are down or blocked. No retry/alternate URL/resolver/exit/security relaxation.
+- New parsed candidates **0/4**; TMD/BMKG exact endpoints remain unverified. New original-structure R2-5 fixtures **0** (no metadata derivative either); no reconstruction-as-proof. Retained automatic inventory41 and final article denominator/coverage still unset. No directory status/production settings/provider/schema/paid/LLM/24h changes; retained DB untouched. Temporary guard tests2/2 and single batch-boundary test1/1 exit0 do not make failed source probes PASS. Raw UTF-8 full-SHA/command/stdout/stderr/raw exits, per-source results and actual closeout: `docs/evidence/r2-bounded-rss-2026-10-13/`. Parent review pending; R2 incomplete. Any subsequent network/DNS diagnostic or second batch needs separate parent direction.
+
+### R2 DNS-only blocker diagnosis (2026-10-13)
+
+- Parent separately authorized one system DNS query per same six hosts, with no HTTP, resolver override, settings/product change or bypass. Old batch logs lacked IPs. Current system getaddrinfo observation2026-10-13T04:18:13.153Z–.166Z returned198.18.1.44–49 in six-source order, each blocked by the explicit198.18.0.0..198.19.255.255 deny interval. Current IPs do not backfill the earlier batch's unknown exact addresses. Boundary/adjacent/mapped-form offline assertions pass; no classification arithmetic error found for this scope.
+- Sanitized OS categories show an active tunnel/VPN-marked interface and a special-range configured DNS server; WinINET proxy disabled (stored loopback endpoint category), four proxy env settings absent, no hosts overrides for six names. Sequential special answers are consistent with proxy/TUN synthetic-IP mapping, but specific component/fake-IP mode and tool-only versus OS-client ownership remain **unknown**. No upstream availability or actual-private-origin conclusion. Source success/fixtures/coverage unchanged, acquisition still BLOCKED.
+- Findings, per-query times/IPs/classification, safe configuration categories and UTF-8 baseline-SHA diagnostic logs: `docs/evidence/r2-dns-diagnostic-2026-10-13/`. No full product gate or second HTTP batch. Recovery proposal only: user/network maintainer identifies the resolver client/mode, then separately decides any supported real-public-resolution change and later revalidation; do not allow198.18/15, change DNS/exit, stop TUN or bypass SSL/SSRF automatically. Parent diagnosis review pending.
+
+### R2 intel Runtime default-off registration (2026-10-13)
+
+- Shutdown P2 repair: code `cb86aabaf715f82eed6d53aa5e481404b37635e3` retains incomplete cleanup and rejects bootstrap before returning a stopped runtime. Successful end steps are removed from the pending queue; release is retried only while ownership remains. End-first-failure and release-first-failure regressions verify held ownership, explicit bootstrap rejection, safe cleanup retry, no repeated successful steps and normal fresh startup. Parent re-review PASS for code/evidence `cb86aab` / `1cd3657`, reported before the GET slice; default-off registry/bootstrap offline slice closed, not production readiness.
+- Repair clean-SHA local gate PASS: registry/bootstrap/Runtime 24/24, full suite 108 files / 1008 passed / 3 skipped; install/build/typecheck/lint, all other targeted suites and three isolated smoke commands exit 0. Original UTF-8 SHA/command/stdout/stderr/raw exit and actual Neat Freak closeout: `docs/evidence/gate-cb86aab/`. Parent re-review PASS for `cb86aab` / `1cd3657`; the following 22/1006 results are pre-repair executor evidence, not production readiness.
+
+- Actual plugin/bootstrap/registry path now registers one disabled intel-collect job with no implicit sources/fetch. Existing Feed/weather registration is preserved; TMD/BMKG are not silently enabled in a second pipeline. No new scheduler/schema/GET/UI or enable environment switch.
+- Explicit offline injection can enable the job only with seeds/fetch and acquired DB-exclusive lifetime ownership. Optional interrupted-run recovery is gated by that acquisition before startup, never by record age or a repeated bootstrap. Shutdown stops/drains, ends executor, then releases ownership; replacement startup waits. Ownership contract is an injection seam, not a production cross-process lock implementation.
+- Local gate PASS on clean code SHA `3c74ad20004f8bde9797512cea699b9a70b5ce31`: actual registry/bootstrap/Runtime 22/22 (7 new integration cases), full suite 108 files / 1006 passed / 3 skipped; install/build/typecheck/lint, other targeted sets and three isolated smoke commands exit 0. UTF-8 original command/SHA/stdout/stderr/raw exit and actual Neat Freak closeout: `docs/evidence/gate-3c74ad2/`.
+- Isolated actual-factory/bootstrap tests cover default-off/no duplicates, due/backoff/health, reentry, concurrent bootstrap, drain/restart, denied/missing lease, startup cleanup and file-backed reopen with synthetic crash residue and explicit ownership before recovery. Parent review NOT_RUN; R2 overall incomplete. No live/paid/LLM/retained DB/production-switch operation; schema unchanged at 27. CI silence is not CI PASS.
+- Not connected: production ownership provider/live seed/fetch, real activation, GET/UI, 304/ETag, P1 real fixtures/manual input/24h live. Contract: `docs/plans/r2-intel-runtime-2026-10-13.md`.
+
+### R2-2 source-specific CA support (2026-10-13)
+
+- Application-only optional source/precise-host/public-PEM binding implemented in the existing secureFetchArticle chain and passed by intel/Feed list sources. No current real source has a CA configured; no schema or global/system trust change.
+- Config validates before DNS and is snapshotted before awaits. CA applies only to the matching HTTPS host; another allowed redirect host/default source uses system trust. rejectUnauthorized remains true, normal hostname verification and existing DNS/private-address/downgrade/limits stay active. Invalid/missing fields or TLS errors fail without weak-trust fallback and preserve existing data.
+- Local gate PASS on clean code SHA `7d98bdb99caf9fdaf15c833ef91f457bee05a2cd`: Feed/security/etc 77/77, Node transport boundary 16/16 including six CA cases, full suite 107 files / 999 passed / 3 skipped; install/build/typecheck/lint, other targeted sets and three isolated smoke commands exit 0. Raw UTF-8 command/SHA/stdout/stderr/exit evidence and actual Neat Freak closeout: `docs/evidence/gate-7d98bdb/`.
+- Initial gate `3038651aa92b70f4d8045559501418e5e686c685` failed only because test-certificate Base64 accidentally matched the R1 business-code retirement scan. Moved the public fixture from server/services to test/__fixtures__ without changing any scan rule, then fully reran. Original failure logs remain in `docs/evidence/gate-3038651/`.
+- Offline Node-boundary certificate/fixtures verify scope, redirect/mutation isolation, transport settings and retained intel/Feed data. Parent review PASS for code `7d98bdb` / evidence `020f649`, reported before the Runtime slice; CA application offline scope closed. No sockets or live TLS handshake. R2 overall incomplete; production trust configuration/system root installation/live/paid/browser/S7 NOT_RUN. CI silence is not CI PASS; existing warnings/skips and raw build-log trailing spaces retained.
+- Contract: `docs/plans/r2-source-ca-2026-10-13.md`.
+
+### R2 json_list - approved 027 and offline integration (2026-10-13)
+
+- P2 unsafe numeric URL identity repair: code `8a1e7044e5baad45265cce31cc696d8a613ed13f` requires Number.isSafeInteger for numeric template parameters; larger IDs must be strings. Original wire JSON with 9007199254740992/9007199254740993 now fails collection before writes and preserves old data; string forms create two distinct URLs/records. Parent re-review PASS for code/evidence `8a1e704` / `a2b9ef2`, as reported before the CA slice; JSON/027 offline slice closed within that scope. Tests remain executor evidence, not live or CI acceptance.
+- Repair local gate PASS on that clean SHA: JSON 49/49, intel 137/137, full suite 107 files / 993 passed / 3 skipped; install/build/typecheck/lint, all targeted sets and three isolated smoke commands exit 0. UTF-8 raw logs and actual Neat Freak closeout: `docs/evidence/gate-8a1e704/`. The following 47/991 figures are pre-repair historical executor evidence, not the latest acceptance or an independent parent rerun.
+
+- User approval at 00:57:52 UTC covers JSON integration and 027 on isolated databases only. 027 extends the source kind; existing version date_evidence is reused. Existing rows/IDs/health/FK/indexes/triggers are preserved, RSS/web-list identities unchanged.
+- Pinned AIHOT JSON mapping adapted to pure JSON, one GET, bounded own-property paths and encoded URL templates. Shared security/byte decoder/date rules/collector/repository remain authoritative. Unknown configuration, JSONP/scripts, custom request credentials/headers/POST, pagination and detail fetching are unsupported.
+- No production JSON seed or registry/GET activation. Synthetic UTF-8/GBK JSON fixtures do not claim live MY-W01 coverage. ID-W02 entitlement and HTTP/JSONP XX-W05 remain unsupported boundaries; no CA work.
+- Local gate PASS on clean code SHA `8081997c1ff60786826d579f7f5d461b1a011a3d`: JSON 47/47 (41 parser + 6 integration), web-list 42/42, intel 135/135, full suite 107 files / 991 passed / 3 skipped. Install/build/typecheck/lint, all targeted sets and three isolated smoke commands exit 0. Raw UTF-8 command/SHA/stdout/stderr/exit logs and actual Neat Freak closeout: `docs/evidence/gate-8081997/`.
+- Initial code `aac1560cf0699f16a3c53bb3ebb707f0707cb366` also passed its gate (990/3); closeout review then replaced native JSON parse errors with a constant code to prevent response snippets entering run errors. Added a regression and repeated the full gate on the final SHA; both evidence directories remain. No retained database migration, new dependency, production seed or live source request.
+- JSON/027 parent review PASS after the P2 repair (see repair record above); R2 overall incomplete. Live/paid/LLM/browser/S7 NOT_RUN (no UI/routes). Code/docs whitespace check passes excluding raw build logs, whose tool-emitted trailing spaces remain intact. CI silence is not CI PASS.
+- Slice contract: `docs/plans/r2-json-list-2026-10-13.md`.
+
+### R2 web_list - approved 026 and collector/storage integration (2026-10-12)
+
+- User approval at 12:11:25 UTC resolves the previous migration-confirmation blocker. This slice implements 026 and wiring only; no retained database migration or live source activation.
+- Source kind now permits web_list. Nullable per-version date_evidence preserves raw/date/timezone basis without modifying old versions. Existing source rows, IDs, health, foreign keys, indexes and triggers are preserved by the transaction-safe rebuild. RSS identity stays unchanged; only web_list version identity includes date evidence.
+- The collector reuses the secure byte-fetch/decoder path and existing writeEntry/finalization. Invalid configuration fails before fetching; empty lists require the parser's explicit empty marker. No production seed, registry/GET, CA, json_list, paid or R3 change.
+- Local gate PASS on clean code SHA `8cbf8343444b62c0bb06f59a249cefc74f404caf`: install/build/typecheck/lint, all targeted sets and three isolated smoke commands exit 0; web_list 42/42 (35 parser + 7 integration), intel 88/88, full suite 105 files / 944 passed / 3 skipped. Raw command/SHA/stdout/stderr/exit logs and actual Neat Freak closeout: `docs/evidence/gate-8cbf834/`.
+- First gate at `1f12ce1528c82aace4a2839bbda00a078c2b9c5e` failed only the stale translation test schema assertion (25 vs 26); its unmodified evidence remains in `docs/evidence/gate-1f12ce1/`. The assertion repair is in the final tested code SHA. Code/docs diff check passes excluding raw logs; raw build logs retain tool-emitted trailing spaces and therefore produce whitespace warnings.
+- Parent review PASS for code `8cbf834` / evidence `97fc682` (reported by parent before the JSON slice). The 42/944+3 results remain executor evidence, not an independent parent rerun; R2 overall remains incomplete. Browser/S7 NOT_RUN (no UI/routes); live/paid/LLM NOT_RUN. No retained database was opened for migration. Branch CI silence is not CI PASS.
+- Prior parser evidence: code 6c5e1515173f4d35a7c7d1b4f17176d4e813e725, gate-6c5e151 (34 parser, 936 full passed / 3 skipped). P2 query identity fix: b8a91049f1106e999a64fde3e2ce6ac52f3891d6, gate-b8a9104 (35 parser, 937 full passed / 3 skipped). Those earlier gates do not verify this new integration.
+- Current slice contract: docs/plans/r2-web-list-2026-10-12.md.
 
 ### R0 — 门禁 G 执行记录
 
@@ -1350,3 +2091,31 @@ The final seal keeps Voyage focus-port coverage, Calendar completeness, JMA/geog
   - **PR #1**：`state = MERGED`、`mergedAt = 2026-09-15T02:57:44Z`、`mergedBy = rallsix66`、`mergeCommit = 96886948a906bda0b273c8da458a185a41887ad6`、base 仍为 `6f0a22cb`（**无 base drift**）、head = `d4e679e`。final CI run `34923163109` **两个 job 全绿**（`checks` 02:57:48→02:58:56；`e2e-windows` 02:58:58→03:01:03，含 “S7 isolated acceptance” 与证据上传 success）→ `merged = PASS` / `final CI = PASS`，此前“`e2e-windows` 合并前无法预演”的限制就此解除。
   - **PR #2（本次性能修复）**：按用户指示从 `main`（`9688694`）拉出 `codex/shipping-hot-render-performance`，把本次三个提交 cherry-pick 过去（新分支树与已全面验证的 `9980cf9` 树 `git diff` 为空，故门禁与 S7 结论直接沿用）；分支 push 与 PR 创建实测新增 CI run = **0**。**已按用户明确授权合并**：`state = MERGED`、`mergedAt = 2026-09-15T05:46:24Z`、`mergedBy = rallsix66`、`mergeCommit = efe170f135bdf2cebab01d5d00f718df2c4956dc`（merge commit，符合约定）、base 仍为 `9688694`（无 drift）、head = `50a43bd`。其 final CI run `34934104496`（`main` @ `efe170f`，`push` 触发）**两个 job 全绿**：`checks`（05:46:28→05:47:34，install / build / typecheck / lint / tests / whitespace 全部 success）与 `e2e-windows`（05:47:38→05:49:52，“Build production server”、“S7 isolated acceptance (production build + system Chrome)”、“Upload S7 isolated acceptance evidence” 全部 success）。
   - **结论**：**`main` 现已包含本次渲染性能修复**（`merged = PASS` + `final CI = PASS` ×2）。`deployed` / `live verified` 仍为 `NOT_RUN`（未授权、未执行），Docker 仍为 `UNVERIFIED / FUTURE`；不得写“全部完成”。
+
+## 论坛主帖提取修复候选（2026-10-19，待父审/未安装）
+
+在HEAD`777007073f184d025147eb19f8ece86858e68362`之上完成未提交最小修复：`defuddle-0.19.2-dom-v3`只在明确第一页Discuz详情结构与首帖身份配对成立时，把安全快照中的首帖正文交给Defuddle contentSelector；不含域名/文章ID/标题特判，不关闭全局噪声清理，不混入回复。非第一页/歧义/主帖被原安全边界排除时提示选区。旧hidden/role/display、无资源快照、PRE/表格、选区/元数据版本及后端/许可边界保持不变。
+
+原创夹具先红后绿，23论坛用例；隔离全新frozen install/scripts、build/typecheck/lint/正式插件构建、240相关/1504全量通过（3既有Windows跳过）、3原生smoke均exit0。现有rg仅追加到检查子进程Path，未改系统设置。用户桌面93508字节原HTML只读离线回放：五段340字在snapshot/Defuddle/纯文本逐字、顺序、次数均完整；独立正式bundle同结果。最终391字仍有35非空白字符的附件提示/关闭控件（含分隔多43字符），不宣称纯净全文/全部论坛覆盖。
+
+正式候选目录`.tmp/clipper-forum-v3-20261019/snapshot/.tmp/clipper-package`；content.js SHA256 `ad174d9fd407b46b64d0a618ba12abaaba361da6384c89b8da1b613e64bfc7e6`。原用户包8文件、桌面原件、.gitignore不变；status此前内容完整保留。未提交/推送/更新PR/安装/切换5173/操作旧DB/调用付费/启动24h。父审、真实Chrome/GUI/S7仍pending/NOT_RUN；R2整体BLOCKED与来源计数保持不变。[报告](evidence/clipper-forum-2026-10-19/report.md) / [证据](evidence/clipper-forum-2026-10-19/summary.json) / [真实Neat Freak](evidence/clipper-forum-2026-10-19/closeout.md)。
+
+## 论坛主帖父审P2修复候选（2026-10-19，dom-v4待复核/未安装）
+
+dom-v3被父审发现排序/筛选query可将前置回复误当主帖。本次未提交最小修复仅支持默认未筛选第一页：pretty URL只准page，forum.php只准mod/tid/page，解码后精确小写键且每键一次；其他键、重复、大小写变体及ordertype=0等均提示选区，不解释排序。全局敏感URL规则未改，authorid匹配auth故各模式仍拒绝；其他合规过滤URL可用selection/metadata。审计版本`defuddle-0.19.2-dom-v4`。
+
+3反例先红；81论坛（本轮新增58）、298相关、1562全量通过（3既有Windows跳过）、fresh frozen install/scripts、build/typecheck/lint/正式构建/3smoke均exit0。独立正常包64项检查通过；原93508字节HTML五段340字仍在snapshot/Defuddle/plain逐字、顺序和各一次完整，最终391字/35非空白附件提示残留不变。新content.js SHA256 `12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630`；独立目录`.tmp/clipper-forum-v4-p2-20261019/snapshot/.tmp/clipper-package`。
+
+旧用户包8文件、dom-v3候选、原HTML、.gitignore和status已有字节保留；无提交/推送/安装/服务或旧DB操作/付费/网络设置变更。父审复核、真实Chrome/GUI/S7仍pending/NOT_RUN，R2整体BLOCKED和计数不变。[P2报告](evidence/clipper-forum-p2-2026-10-19/report.md) / [证据](evidence/clipper-forum-p2-2026-10-19/summary.json) / [真实Neat Freak增量](evidence/clipper-forum-p2-2026-10-19/closeout.md)。
+
+## dom-v4父审与本地交付授权（2026-10-19）
+
+父会话已关闭排序/筛选P2并给予离线限定通过；用户于2026-10-19 15:44 UTC+8明确批准本地提交并更新现用插件。已审dom-v4代码、测试与正式包摘要核对一致；交付执行仅允许content.js变更（预期SHA256 12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630），备份后更新，不代替用户重新加载Chrome。现有298相关/1562全量与其他门禁为提交前受控快照证据，未宣称提交后重跑；父审不等于真实Chrome/GUI/S7或R2整体通过。实际提交、钩子、备份及更新结果记录在本机`.tmp/clipper-delivery-dom-v4-20261019/`交付收据；服务保持原版本，仅只读健康检查，禁止推送/PR更新/合并/部署。
+
+## dom-v4本地提交与用户包更新结果（2026-10-19）
+
+已按用户明确授权在`codex/shipping-hot-r2`完成本地提交`40629587e22d8932df105962ec214530e4054414`（父提交`777007073f184d025147eb19f8ece86858e68362`），仅14个本轮文件；原.gitignore及status无关改动未提交。pre-commit实际执行`npx lint-staged → eslint --fix`成功（exit0，未跳过）；生产/测试/配置7个已审输入摘要保持一致，钩子仅规范status空行/行尾，已将工作区原有status字节恢复保留。298相关/1562全量等门禁仍为提交前受控源码快照证据，提交后仅核验提交内容与摘要/钩子，未重跑或改写为clean-SHA门禁。
+
+已备份现用插件全部8文件至`.tmp/clipper-delivery-dom-v4-20261019/backup-package`，再仅更新`.tmp/clipper-private-abb1b99/.tmp/clipper-package/content.js`。实际SHA256 `12cef13d2863623b6fc9aaa9e15e2bccd6776898ffa9dce7210b283c84040630`，磁盘dom-v4标识确认；其他7文件、manifest/权限/固定公开ID及`http://127.0.0.1:5173/feed`接收地址不变，无新增host权限。旧content.js备份SHA256为0628839376a48ce100d233b87909f868b0e703858df9ee3a59463aa72d5d0325。现有接收服务只读GET /feed返回200/HTML；原server入口摘要不变，未重启或替换服务。7个SQLite文件及SecretStore文件摘要不变，未打开SQL连接或改记录，原桌面HTML也未变。
+
+本机收据`.tmp/clipper-delivery-dom-v4-20261019/delivery-result.json`记录提交/钩子/备份/包核验/健康及Neat Freak增量。未推送、更新PR、合并、部署或代替用户操作Chrome；磁盘更新不证明Chrome已加载，新包须由用户手动重新加载后再试，真实GUI/S7仍pending。35非空白字符附件提示残留及R2整体BLOCKED保持不变。此结果条目保留在工作区，连同原有.gitignore/status改动如实交接；未清理任何既有现场。

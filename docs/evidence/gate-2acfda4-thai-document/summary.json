@@ -1,0 +1,102 @@
+{
+  "sha": "2acfda4c8ddab3f8064d199bb3cfcf26873ff288",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\thai-document-final-build",
+  "commands": [
+    {
+      "name": "install",
+      "command": "pnpm install --frozen-lockfile",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\thai-document-final-build",
+      "sha": "2acfda4c8ddab3f8064d199bb3cfcf26873ff288",
+      "startedAt": "2026-10-14T08:38:06.271Z",
+      "endedAt": "2026-10-14T08:38:14.964Z",
+      "rawExit": 0
+    },
+    {
+      "name": "build",
+      "command": "pnpm build",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\thai-document-final-build",
+      "sha": "2acfda4c8ddab3f8064d199bb3cfcf26873ff288",
+      "startedAt": "2026-10-14T08:38:14.965Z",
+      "endedAt": "2026-10-14T08:38:33.085Z",
+      "rawExit": 0
+    },
+    {
+      "name": "typecheck",
+      "command": "pnpm typecheck",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\thai-document-final-build",
+      "sha": "2acfda4c8ddab3f8064d199bb3cfcf26873ff288",
+      "startedAt": "2026-10-14T08:38:33.086Z",
+      "endedAt": "2026-10-14T08:38:41.275Z",
+      "rawExit": 0
+    },
+    {
+      "name": "lint",
+      "command": "pnpm lint",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\thai-document-final-build",
+      "sha": "2acfda4c8ddab3f8064d199bb3cfcf26873ff288",
+      "startedAt": "2026-10-14T08:38:41.275Z",
+      "endedAt": "2026-10-14T08:39:07.705Z",
+      "rawExit": 0
+    },
+    {
+      "name": "policy-targeted",
+      "command": "pnpm exec vitest run -c vitest.config.ts server/intel/thai-document-index.test.ts server/intel/public-index-candidates-collect.test.ts server/intel/html-index-candidates-collect.test.ts server/intel/sources/html-index-candidates.test.ts server/intel/sources/web-list.test.ts server/intel/sources/web-list-conflicts.test.ts server/intel/web-list-conflicts-collect.test.ts server/intel/json-list-collect.test.ts server/intel/web-list-collect.test.ts server/intel/adaptive.test.ts server/runtime/intel-production.test.ts server/runtime/intel-bootstrap.test.ts server/intel/collect.test.ts",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\thai-document-final-build",
+      "sha": "2acfda4c8ddab3f8064d199bb3cfcf26873ff288",
+      "startedAt": "2026-10-14T08:39:07.705Z",
+      "endedAt": "2026-10-14T08:39:11.240Z",
+      "rawExit": 0
+    },
+    {
+      "name": "vitest",
+      "command": "pnpm exec vitest run -c vitest.config.ts",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\thai-document-final-build",
+      "sha": "2acfda4c8ddab3f8064d199bb3cfcf26873ff288",
+      "startedAt": "2026-10-14T08:39:11.240Z",
+      "endedAt": "2026-10-14T08:39:24.528Z",
+      "rawExit": 0
+    },
+    {
+      "name": "smoke-p0",
+      "command": "pnpm smoke:p0-native",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\thai-document-final-build",
+      "sha": "2acfda4c8ddab3f8064d199bb3cfcf26873ff288",
+      "startedAt": "2026-10-14T08:39:24.529Z",
+      "endedAt": "2026-10-14T08:39:25.724Z",
+      "rawExit": 0
+    },
+    {
+      "name": "smoke-p2c",
+      "command": "pnpm smoke:p2c-runtime",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\thai-document-final-build",
+      "sha": "2acfda4c8ddab3f8064d199bb3cfcf26873ff288",
+      "startedAt": "2026-10-14T08:39:25.725Z",
+      "endedAt": "2026-10-14T08:39:26.874Z",
+      "rawExit": 0
+    },
+    {
+      "name": "smoke-feed",
+      "command": "pnpm smoke:p3-feed-freshness",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\thai-document-final-build",
+      "sha": "2acfda4c8ddab3f8064d199bb3cfcf26873ff288",
+      "startedAt": "2026-10-14T08:39:26.875Z",
+      "endedAt": "2026-10-14T08:39:28.025Z",
+      "rawExit": 0
+    }
+  ],
+  "retainedBefore": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedAfter": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedUnchanged": true,
+  "browser": "NOT_RUN: official browser unavailable, custom CDP action rejected",
+  "s7": "NOT_RUN: no UI/route changes in this round; prior browser integration acceptance remains pending"
+}

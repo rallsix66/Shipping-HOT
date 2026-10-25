@@ -1,0 +1,605 @@
+diff --git a/scripts/s7-local-seed.ts b/scripts/s7-local-seed.ts
+--- a/scripts/s7-local-seed.ts
++++ b/scripts/s7-local-seed.ts
+@@ -26,7 +26,9 @@ import type { ArticleBlock, ArticleVersion } from "@shared/article"
+ import type { DataProvenance, FeedItem, Port, ShippingEvent, ShippingSettings } from "@shared/shipping"
+ import { portDirectoryBaseline } from "@shared/port-directory"
+ import { ArticleRepository } from "#/database/article"
+-import { defaultShippingSettings } from "#/database/runtime"
++import { defaultShippingSettings, readDatabaseMetadata } from "#/database/runtime"
++import { IntelRepository } from "#/database/intel"
++import { intelSourceSeeds } from "#/intel/sources"
+ import { ShippingRepository, initShippingTables } from "#/database/shipping"
+ import { TranslationRepository } from "#/database/translation"
+ import { computeArticleContentHash } from "#/services/article-content-hash"
+@@ -85,29 +87,27 @@ const ISOLATED_ROOT = resolve(join(ROOT, ".tmp"))
+ const MANIFEST_FILE = "s7-local-manifest.json"
+ 
+ function assertIsolatedRunDir(runDir: string, databasePath: string): void {
+-  if (process.env.S7_SEED_ALLOW_OUTSIDE_TMP === "1") return
+   if (!runDir.startsWith(ISOLATED_ROOT + sep)) {
+     throw new Error(
+-      `refusing to seed ${runDir}: S7 fixtures must be written inside ${ISOLATED_ROOT} `
+-      + "(set S7_SEED_ALLOW_OUTSIDE_TMP=1 only for a throwaway database)",
++      `refusing to seed ${runDir}: S7 fixtures must be written inside ${ISOLATED_ROOT}`,
+     )
+   }
+-  if (existsSync(databasePath) && !existsSync(join(runDir, MANIFEST_FILE)) && process.env.S7_SEED_ALLOW_OVERWRITE !== "1") {
++  if (existsSync(databasePath) && !existsSync(join(runDir, MANIFEST_FILE))) {
+     if (existingBusinessRows(databasePath) !== 0) {
+       throw new Error(
+         `refusing to seed ${runDir}: it already contains ${basename(databasePath)} with data and no ${MANIFEST_FILE}, `
+-        + "so it is not an S7 fixture directory (set S7_SEED_ALLOW_OVERWRITE=1 to replace it deliberately)",
++        + "so it is not an S7 fixture directory",
+       )
+     }
+   }
+ }
+ 
+-/** Total rows in ports and feed_items, or -1 when the database is not ours/unreadable. */
++/** Includes R2 material/audit rows; a manual-only database is never an empty seed target. */
+ function existingBusinessRows(databasePath: string): number {
+   let probe: InstanceType<typeof NativeDatabase> | undefined
+   try {
+     probe = new NativeDatabase(databasePath, { readonly: true })
+-    const tables = probe.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('ports', 'feed_items')").all() as { name: string }[]
++    const tables = probe.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('ports','feed_items','events','calendar_events','feed_articles','article_versions','article_blocks','weather_forecast','weather_impact','tropical_cyclone','ops_calendar_event','policy_record','policy_version','intel_item','intel_item_version','intel_item_block','intel_manual_action')").all() as { name: string }[]
+     if (tables.length === 0) return -1
+     return tables.reduce((total, table) => total + (probe!.prepare(`SELECT COUNT(*) AS count FROM ${table.name}`).get() as { count: number }).count, 0)
+   } catch {
+@@ -291,15 +291,51 @@ async function seedArticle(input: {
+ 
+ /* --------------------------------------------------------------------- main */
+ 
+-async function main() {
+-  const runDir = resolve(process.argv[2] ?? join(process.cwd(), ".tmp", "s7-local"))
++export async function seedS7Local(inputDir = join(process.cwd(), ".tmp", "s7-local"), options: { manualOnly?: boolean } = {}) {
++  const runDir = resolve(inputDir)
+   const databasePath = join(runDir, ".data", DB_FILE)
+   assertIsolatedRunDir(runDir, databasePath)
++  if (options.manualOnly && (existsSync(databasePath) || existsSync(join(runDir, MANIFEST_FILE)))) throw new Error("manual preparation requires a fresh S7 directory; existing files are retained")
+   mkdirSync(dirname(databasePath), { recursive: true })
+ 
+   const { database, native } = createNativeDatabase(databasePath)
+   await initShippingTables(database, "real")
+   const shipping = new ShippingRepository(database, "real")
++  const intel = new IntelRepository(database)
++  for (const seed of intelSourceSeeds) await intel.upsertSource({ ...seed, enabled: false }, NOW.toISOString())
++  const manualAcceptance = {
++    synthetic: true,
++    notOfficialContent: true,
++    sourceId: "intel:th-w01",
++    catalogId: "TH-W01",
++    operator: "S7 合成验收",
++    url: intelSourceSeeds.find(seed => seed.id === "intel:th-w01")!.url,
++    title: "【S7合成】人工交互材料，非官方内容",
++    publishedAt: "",
++    bodyA: "S7 原创合成正文 A；不是真实官方通知。",
++    bodyB: "S7 原创合成正文 B；只用于修订断言。",
++    checkedEmptySourceId: "intel:manual:cn-p05",
++    checkedEmptyCatalogId: "CN-P05",
++    invalidPublishedAt: "S7-not-an-ISO-date",
++    expected: { initialMaterials: 0, afterSaveMaterials: 1, afterRepeatVersions: 1, afterRevisionVersions: 2, publishedAt: null, providerCalls: 0, guiStatus: "NOT_RUN" },
++  }
++  if (options.manualOnly) {
++    await shipping.seed([], [], [], { ...structuredClone(defaultShippingSettings), translation: { enabled: false, monthlyBudget: 0, providerId: PROVIDER, model: MODEL, targetLanguage: TARGET_LANGUAGE } })
++    const manifest = {
++      generatedAt: new Date().toISOString(),
++      runDir,
++      databasePath,
++      schemaVersion: (await readDatabaseMetadata(database)).schemaVersion,
++      dataMode: "real",
++      preparation: "R2-7 manual only; no app server or browser launched",
++      fixtureDataProvenance: "original synthetic manual input; no real official material, provider or network call",
++      manualAcceptance,
++      requestedPaths: ["/feed"],
++    }
++    writeFileSync(join(runDir, MANIFEST_FILE), `${JSON.stringify(manifest, null, 2)}\n`, { encoding: "utf8", flag: "wx" })
++    native.close()
++    return manifest
++  }
+ 
+   const settings: ShippingSettings = {
+     ...structuredClone(defaultShippingSettings),
+@@ -461,6 +497,7 @@ async function main() {
+     dataMode: "real",
+     fixtureDataProvenance: "synthetic deterministic fixture with real-lineage source_type (exercises Real-Mode read filters); not captured real Provider data, and no Provider/Secret/Runtime/network call was made",
+     seededAt: NOW.toISOString(),
++    manualAcceptance,
+     expectations: {
+       portId: S7.port,
+       portSecondaryId: S7.portSecondary,
+@@ -500,10 +537,13 @@ async function main() {
+   native.close()
+   console.log(`S7 seed complete: ${databasePath}`)
+   console.log(`S7 fixtures: ports=2(+1 decoy) feed=2(+1 decoy) article=${article.versionId}`)
++  return manifest
+ }
+ 
+-main().catch((error) => {
+-  console.error(`S7 seed failed: ${error instanceof Error ? error.message : String(error)}`)
+-  if (error instanceof Error && error.stack) console.error(error.stack.split("\n").slice(1, 6).join("\n"))
+-  process.exitCode = 1
+-})
++if (process.argv[1] && resolve(process.argv[1]) === join(ROOT, "scripts", "s7-local-seed.ts")) {
++  seedS7Local(process.argv[2], { manualOnly: process.argv.slice(3).includes("--manual-only") }).catch((error) => {
++    console.error(`S7 seed failed: ${error instanceof Error ? error.message : String(error)}`)
++    if (error instanceof Error && error.stack) console.error(error.stack.split("\n").slice(1, 6).join("\n"))
++    process.exitCode = 1
++  })
++}
+diff --git a/scripts/e2e-s7-integrated.mjs b/scripts/e2e-s7-integrated.mjs
+--- a/scripts/e2e-s7-integrated.mjs
++++ b/scripts/e2e-s7-integrated.mjs
+@@ -40,7 +40,7 @@ const SEED_ENTRY = join(ROOT, "scripts", "s7-local-seed.ts")
+ const PORT = Number(process.env.E2E_S7_PORT ?? "4477")
+ const BASE = (process.env.E2E_BASE_URL ?? `http://127.0.0.1:${PORT}`).replace(/\/$/, "")
+ const DEBUG_PORT = Number(process.env.E2E_DEBUG_PORT ?? "9345")
+-const EXPECTED_SCHEMA_VERSION = 27
++const EXPECTED_SCHEMA_VERSION = 29
+ 
+ const REQUIRED_TABLES = [
+   "app_metadata",
+@@ -62,6 +62,11 @@ const REQUIRED_TABLES = [
+   "ops_calendar_event",
+   "policy_record",
+   "policy_version",
++  "intel_source",
++  "intel_item",
++  "intel_item_version",
++  "intel_item_block",
++  "intel_manual_action",
+ ]
+ 
+ /** Retained (never-seeded, never-written) databases this run must not touch. */
+@@ -79,8 +84,8 @@ const RETAINED_DATABASES = [
+  * retained production database before the retained-file check could only report it.
+  */
+ const ISOLATED_ROOT = resolve(join(ROOT, ".tmp"))
+-if (!RUN_DIR.startsWith(ISOLATED_ROOT + sep) && process.env.E2E_S7_ALLOW_OUTSIDE_TMP !== "1") {
+-  throw new Error(`refusing to run: E2E_S7_DIR must stay inside ${ISOLATED_ROOT} (got ${RUN_DIR}); set E2E_S7_ALLOW_OUTSIDE_TMP=1 only for a throwaway directory`)
++if (!RUN_DIR.startsWith(ISOLATED_ROOT + sep)) {
++  throw new Error(`refusing to run: E2E_S7_DIR must stay inside ${ISOLATED_ROOT} (got ${RUN_DIR})`)
+ }
+ if (RETAINED_DATABASES.includes(DB_PATH)) {
+   throw new Error(`refusing to run: ${DB_PATH} is a retained database and must never be deleted or written`)
+diff --git a/test/manual-intel.test.ts b/test/manual-intel.test.ts
+--- a/test/manual-intel.test.ts
++++ b/test/manual-intel.test.ts
+@@ -1,26 +1,281 @@
+-import { createElement } from "react"
++import { type ReactElement, createElement } from "react"
+ import { renderToString } from "react-dom/server"
+-import { beforeEach, expect, it, vi } from "vitest"
++import { createEvent } from "h3"
++import { afterEach, beforeEach, expect, it, vi } from "vitest"
+ import { ManualIntelPage } from "../src/components/shipping/manual-intel"
+ 
+-const state = vi.hoisted(() => ({ values: [] as unknown[], index: 0, sources: {} as Record<string, unknown>, items: {} as Record<string, unknown>, detail: {} as Record<string, unknown> }))
+-vi.mock("react", async original => ({ ...await original<typeof import("react")>(), useState: (initial: unknown) => [state.values[state.index++] ?? initial, vi.fn()] }))
+-vi.mock("@tanstack/react-query", () => ({ useQueryClient: () => ({}), useQuery: (query: { queryKey: unknown[] }) => query.queryKey[0] === "intel-manual" ? state.sources : query.queryKey[0] === "intel-items" ? state.items : state.detail }))
++// Keep server-only aliases out of the app tsconfig, as in the existing clipper DOM tests.
++interface LocalDatabase {
++  native: { close: () => void, prepare: (sql: string) => { get: () => unknown } }
++  database: unknown
++  repository: Record<string, (...args: any[]) => Promise<any>>
++}
++const { open } = await vi.importActual<{ open: (path?: string, fault?: (sql: string) => void) => LocalDatabase }>("#/intel/__fixtures__/isolated-db")
++const { initShippingTables } = await vi.importActual<{ initShippingTables: (db: unknown, mode: string) => Promise<void> }>("#/database/shipping")
++const { manualSubmit } = await vi.importActual<{ manualSubmit: (repo: unknown, input: unknown, now: string) => Promise<unknown> }>("#/intel/manual")
++const { manualChecklist } = await vi.importActual<{ manualChecklist: (repo: unknown) => Promise<unknown[]> }>("#/intel/manual-checklist")
++const { intelSourceSeeds } = await vi.importActual<{ intelSourceSeeds: { id: string, url: string }[] }>("#/intel/sources")
++const { readIntelItem, readIntelItems } = await vi.importActual<{ readIntelItem: (event: unknown, repo: unknown) => Promise<unknown>, readIntelItems: (event: unknown, repo: unknown) => Promise<unknown> }>("#/utils/intel-read")
++
++const state = vi.hoisted(() => ({ values: [] as unknown[], index: 0, sources: {} as Record<string, any>, items: {} as Record<string, any>, detail: {} as Record<string, any>, fetch: vi.fn(), invalidate: vi.fn(), queries: [] as { queryKey: string[], queryFn: () => Promise<unknown>, enabled?: boolean }[] }))
++vi.mock("react", async original => ({ ...await original<typeof import("react")>(), useState: (initial: unknown) => {
++  const index = state.index++
++  return [state.values[index] ?? initial, (value: unknown) => {
++    state.values[index] = value
++  }]
++} }))
++vi.mock("@tanstack/react-query", () => ({ useQueryClient: () => ({ invalidateQueries: state.invalidate }), useQuery: (query: typeof state.queries[number]) => {
++  state.queries.push(query)
++  return query.queryKey[0] === "intel-manual" ? state.sources : query.queryKey[0] === "intel-items" ? state.items : state.detail
++} }))
+ vi.mock("../src/components/shipping/app", () => ({ ShippingShell: ({ children }: { children: unknown }) => children }))
+ vi.mock("../src/components/shipping/pages", () => ({ FeedPage: () => null }))
+-vi.mock("~/utils", () => ({ myFetch: vi.fn(() => {
+-  throw new Error("SSR must not fetch")
+-}) }))
++vi.mock("~/utils", () => ({ myFetch: (...args: unknown[]) => state.fetch(...args) }))
+ function draw() {
+   state.index = 0
+   return renderToString(createElement(ManualIntelPage, { onLegacy: vi.fn() }))
+ }
+ beforeEach(() => {
++  state.fetch.mockReset().mockImplementation(() => {
++    throw new Error("SSR must not fetch")
++  })
++  state.invalidate.mockReset().mockResolvedValue(undefined)
++  state.queries = []
+   state.values = ["manual:synthetic", "", "", "", "", "", "item", "", false, "", null]
+   state.sources = { data: { items: [{ id: "manual:synthetic", catalogId: "SYNTHETIC", name: "Synthetic source", urls: [], cadence: "每周", focus: "Synthetic", persistence: "disallowed", recentActions: [] }] } }
+   state.items = { data: { items: [] } }
+   state.detail = { data: { manualLabel: "官方通知（人工录入）", manualActions: [{ operator: "<img onerror=alert(1)>", entered_at: "2026-10-14T00:00:00Z", outcome: "created" }], selectedVersion: { id: "v1", blocks: [{ blockKey: "title", text: "<script>alert(1)</script>" }] }, versions: { items: [{ id: "v1", createdAt: "2026-10-14" }] } } }
+ })
++
++let local: ReturnType<typeof open> | undefined
++afterEach(() => {
++  local?.native.close()
++  local = undefined
++  vi.unstubAllGlobals()
++})
++
++// Calls actual component event/query callbacks with controlled hooks/cache and real SQLite.
++// This exercises application logic, not DOM events, browser layout or GUI acceptance.
++function tree() {
++  state.index = 0
++  state.queries = []
++  return ManualIntelPage({ onLegacy: vi.fn() })
++}
++function nodes(node: unknown): ReactElement<Record<string, any>>[] {
++  if (Array.isArray(node)) return node.flatMap(nodes)
++  if (!node || typeof node !== "object" || !("props" in node)) return []
++  const el = node as ReactElement<Record<string, any>>
++  return [el, ...nodes(el.props.children)]
++}
++function label(node: unknown): string {
++  if (Array.isArray(node)) return node.map(label).join("")
++  if (typeof node === "string" || typeof node === "number") return String(node)
++  return node && typeof node === "object" && "props" in node ? label((node as ReactElement<{ children?: unknown }>).props.children) : ""
++}
++function button(text: string) {
++  const found = nodes(tree()).find(el => el.type === "button" && label(el).includes(text))
++  expect(found, text).toBeDefined()
++  return found!
++}
++function field(text: string, value: string) {
++  const group = nodes(tree()).find(el => el.type === "label" && label(el).includes(text))!
++  nodes(group).find(el => el.type === "input" || el.type === "textarea")!.props.onChange({ target: { value } })
++}
++const posts = () => state.fetch.mock.calls.filter(([, options]) => options?.method === "POST")
++async function submit() {
++  nodes(tree()).find(el => el.type === "form")!.props.onSubmit({ preventDefault: vi.fn() })
++  await vi.waitFor(() => expect(state.values[8]).toBe(false))
++}
++async function refresh(key?: string) {
++  tree()
++  for (const query of state.queries.filter(q => q.enabled !== false && (!key || q.queryKey[0] === key))) {
++    const target = query.queryKey[0] === "intel-manual" ? state.sources : query.queryKey[0] === "intel-items" ? state.items : state.detail
++    target.data = await query.queryFn()
++  }
++}
++function event(url: string, id?: string) {
++  const e = createEvent({ url, method: "GET", headers: { host: "127.0.0.1" } } as Parameters<typeof createEvent>[0], {} as Parameters<typeof createEvent>[1])
++  e.context.params = id ? { id } : {}
++  return e
++}
++async function interaction() {
++  const controls = { failAudit: false, uncertainAfterCommit: false, now: "2026-10-20T08:00:00.000Z" }
++  local = open(":memory:", (sql) => {
++    if (controls.failAudit && sql.startsWith("INSERT INTO intel_manual_action")) throw new Error("synthetic storage fault")
++  })
++  await initShippingTables(local.database, "real")
++  for (const seed of intelSourceSeeds) await local.repository.upsertSource({ ...seed, enabled: false }, controls.now)
++  state.values = ["", "", "", "", "", "", "", "", false, "", null]
++  state.sources = {}
++  state.items = {}
++  state.detail = {}
++  vi.stubGlobal("fetch", () => {
++    throw new Error("network forbidden")
++  })
++  state.fetch.mockImplementation(async (route: string, options?: { method?: string, body?: unknown }) => {
++    if (options?.method === "POST") {
++      const result = await manualSubmit(local!.repository, options.body, controls.now)
++      if (controls.uncertainAfterCommit) {
++        controls.uncertainAfterCommit = false
++        throw new Error("synthetic response lost after commit")
++      }
++      return result
++    }
++    if (route === "/shipping/intel/manual") return { items: await manualChecklist(local!.repository) }
++    if (route.startsWith("/shipping/intel/items?")) return readIntelItems(event(route), local!.repository)
++    if (route.startsWith("/shipping/intel/items/")) return readIntelItem(event(route, decodeURIComponent(route.split("?")[0].split("/").at(-1)!)), local!.repository)
++    throw new Error("unexpected application route")
++  })
++  state.invalidate.mockImplementation(async ({ queryKey }: { queryKey: string[] }) => refresh(queryKey[0]))
++  await refresh()
++  return controls
++}
++function fillA() {
++  button("TH-W01").props.onClick()
++  field("录入人", "S7 合成验收")
++  field("原文链接", intelSourceSeeds[0].url)
++  field("标题", "【S7合成】人工交互材料，非官方内容")
++  field("许可范围纯文本", "S7 原创合成正文 A；不是真实官方通知。")
++}
++
++it("connects checklist/save/duplicate/revision/old-version/reload callbacks to real manual repositories and read DTOs", async () => {
++  const controls = await interaction()
++  expect(state.sources.data.items.find((x: { catalogId: string }) => x.catalogId === "TH-W01")).toMatchObject({ persistence: "full", recentActions: [] })
++  fillA()
++  await submit()
++  const item = (await local!.repository.listItems(intelSourceSeeds[0].id))[0]
++  const a = item.currentVersionId!
++  expect(state.items.data.items).toHaveLength(1)
++  expect(state.detail.data).toMatchObject({ manualLabel: "官方通知（人工录入）", manualEntry: { operator: "S7 合成验收" }, selectedVersion: { id: a, publishedAt: null } })
++  expect(label(tree())).toContain("真实性未独立核验")
++  await submit()
++  expect(await local!.repository.listVersions(item.id)).toHaveLength(1)
++  expect(posts()[1][1].body.requestId).not.toBe(posts()[0][1].body.requestId)
++  controls.now = "2026-10-20T09:00:00.000Z"
++  field("许可范围纯文本", "S7 原创合成正文 B；只用于修订断言。")
++  await submit()
++  const b = state.detail.data.selectedVersion.id
++  expect(b).not.toBe(a)
++  expect(state.detail.data.selectedVersion.blocks[1].text).toContain("正文 B")
++  nodes(tree()).find(el => el.type === "select")!.props.onChange({ target: { value: a } })
++  await refresh("intel-item")
++  expect(state.detail.data.selectedVersion.blocks[1].text).toContain("正文 A")
++  expect(state.detail.data.manualEntry.enteredAt).toBe("2026-10-20T08:00:00.000Z")
++  state.values = ["", "", "", "", "", "", "", "", false, "", null]
++  await refresh()
++  button("TH-W01").props.onClick()
++  await refresh("intel-items")
++  button("【S7合成】").props.onClick()
++  await refresh("intel-item")
++  expect(state.detail.data.selectedVersion.id).toBe(b)
++  expect(state.detail.data.versions.items).toHaveLength(2)
++  expect(state.detail.data.item.publishedAt).toBeNull()
++  expect(state.detail.data.manualEntry.enteredAt).toBe(controls.now)
++  expect(local!.native.prepare("SELECT COUNT(*) AS n FROM provider_usage").get()).toEqual({ n: 0 })
++})
++
++it("clears body/detail on source switch and records checked-empty without creating a material or verified source", async () => {
++  await interaction()
++  fillA()
++  await submit()
++  button("CN-P05").props.onClick()
++  expect(state.values[4]).toBe("")
++  expect(state.values[6]).toBe("")
++  expect(state.values[7]).toBe("")
++  expect(nodes(tree()).find(el => el.type === "textarea")!.props.disabled).toBe(true)
++  button("已查看，无新内容").props.onClick()
++  await vi.waitFor(() => expect(state.values[8]).toBe(false))
++  expect(posts().at(-1)![1].body).toMatchObject({ action: "checked_empty", sourceId: "intel:manual:cn-p05", operator: "S7 合成验收" })
++  expect(posts().at(-1)![1].body).not.toHaveProperty("body")
++  expect(await local!.repository.listItems("intel:manual:cn-p05")).toEqual([])
++  expect((await local!.repository.getSource("intel:manual:cn-p05"))?.status).toBe("never_run")
++  expect(state.sources.data.items.find((x: { catalogId: string }) => x.catalogId === "CN-P05").recentActions).toHaveLength(1)
++  expect(label(tree())).toContain("不是抓取成功或来源已验证")
++})
++
++it("retains input and request ID after a lost committed response, and retries without duplicate audit or versions", async () => {
++  const controls = await interaction()
++  fillA()
++  controls.uncertainAfterCommit = true
++  await submit()
++  expect(label(tree())).toContain("保存未确认")
++  expect(state.values[4]).toContain("正文 A")
++  expect(button("保存人工条目").props.disabled).toBe(false)
++  const requestId = posts()[0][1].body.requestId
++  await submit()
++  expect(posts()[1][1].body.requestId).toBe(requestId)
++  const items = await local!.repository.listItems(intelSourceSeeds[0].id)
++  expect(items).toHaveLength(1)
++  expect(await local!.repository.listVersions(items[0].id)).toHaveLength(1)
++  expect(await local!.repository.listManualActions(intelSourceSeeds[0].id)).toHaveLength(1)
++  expect(label(tree())).toContain("已保存")
++})
++
++it("rolls back an audit failure and uses the same ID until retry succeeds; edited failed input receives a new ID", async () => {
++  const controls = await interaction()
++  fillA()
++  controls.failAudit = true
++  await submit()
++  expect(await local!.repository.listItems(intelSourceSeeds[0].id)).toEqual([])
++  const first = posts()[0][1].body.requestId
++  field("标题", "【S7合成】已编辑的失败输入")
++  await submit()
++  const edited = posts()[1][1].body.requestId
++  expect(edited).not.toBe(first)
++  controls.failAudit = false
++  await submit()
++  expect(posts()[2][1].body.requestId).toBe(edited)
++  expect(await local!.repository.listItems(intelSourceSeeds[0].id)).toHaveLength(1)
++  expect(await local!.repository.listManualActions(intelSourceSeeds[0].id)).toHaveLength(1)
++})
++
++it("does not call a confirmed save uncertain when subsequent list refresh fails", async () => {
++  await interaction()
++  fillA()
++  state.invalidate.mockRejectedValue(new Error("synthetic cache refresh fault"))
++  await submit()
++  expect(await local!.repository.listItems(intelSourceSeeds[0].id)).toHaveLength(1)
++  expect(label(tree())).toContain("已保存")
++  expect(label(tree())).toContain("刷新失败")
++  expect(label(tree())).not.toContain("保存未确认")
++  expect(state.values[10]).toBeNull()
++})
++
++it("disables save while its actual callback is pending, then restores the button after confirmation", async () => {
++  await interaction()
++  fillA()
++  const actual = state.fetch.getMockImplementation()!
++  let release!: () => void
++  const pending = new Promise<void>((resolve) => {
++    release = resolve
++  })
++  state.fetch.mockImplementation(async (route: string, options?: { method?: string }) => {
++    if (options?.method === "POST") await pending
++    return actual(route, options)
++  })
++  nodes(tree()).find(el => el.type === "form")!.props.onSubmit({ preventDefault: vi.fn() })
++  expect(button("保存中").props.disabled).toBe(true)
++  expect(button("已查看，无新内容").props.disabled).toBe(true)
++  release()
++  await vi.waitFor(() => expect(state.values[8]).toBe(false))
++  expect(button("保存人工条目").props.disabled).toBe(false)
++  expect(await local!.repository.listItems(intelSourceSeeds[0].id)).toHaveLength(1)
++})
++
++it("keeps invalid date input on server rejection and saves unknown publication after the user corrects it", async () => {
++  await interaction()
++  fillA()
++  field("原文发布时间", "S7-not-an-ISO-date")
++  await submit()
++  expect(state.values[5]).toBe("S7-not-an-ISO-date")
++  expect(await local!.repository.listItems(intelSourceSeeds[0].id)).toEqual([])
++  expect(label(tree())).toContain("保存未确认")
++  const rejectedId = posts()[0][1].body.requestId
++  field("原文发布时间", "")
++  await submit()
++  expect(posts()[1][1].body.requestId).not.toBe(rejectedId)
++  expect(state.detail.data.item.publishedAt).toBeNull()
++})
+ it("renders checklist, no-network limits, metadata-only form and escaped stored text", () => {
+   const html = draw()
+   expect(html).toContain("官方通知（人工录入）")
+diff --git a/src/components/shipping/manual-intel.tsx b/src/components/shipping/manual-intel.tsx
+--- a/src/components/shipping/manual-intel.tsx
++++ b/src/components/shipping/manual-intel.tsx
+@@ -85,15 +85,20 @@ export function ManualIntelPage({ onLegacy }: { onLegacy: () => void }) {
+     setMessage("")
+     try {
+       const result = await myFetch<{ outcome: string, itemId?: string }>("/shipping/intel/manual", { method: "POST", body: { ...data, requestId } })
+-      setMessage(result.outcome === "checked_empty" ? "已记录：查看后无新内容。不是抓取成功或来源已验证。" : `已保存：${result.outcome}。人工录入不代表已核实港口影响。`)
++      const savedMessage = result.outcome === "checked_empty" ? "已记录：查看后无新内容。不是抓取成功或来源已验证。" : `已保存：${result.outcome}。人工录入不代表已核实港口影响。`
++      setMessage(savedMessage)
+       setPending(null)
+       if (result.itemId) {
+         setSelected(result.itemId)
+         setVersion("")
+       }
+-      await client.invalidateQueries({ queryKey: ["intel-manual"] })
+-      await client.invalidateQueries({ queryKey: ["intel-items"] })
+-      await client.invalidateQueries({ queryKey: ["intel-item"] })
++      try {
++        await client.invalidateQueries({ queryKey: ["intel-manual"] })
++        await client.invalidateQueries({ queryKey: ["intel-items"] })
++        await client.invalidateQueries({ queryKey: ["intel-item"] })
++      } catch {
++        setMessage(`${savedMessage} 列表刷新失败，请刷新页面查看已存记录。`)
++      }
+     } catch {
+       setMessage("保存未确认，请检查字段或重试；输入保留，重试沿用同一提交编号。")
+     } finally {
+diff --git a/scripts/s7-local-seed.test.ts b/scripts/s7-local-seed.test.ts
+new file mode 100644
+--- /dev/null
++++ b/scripts/s7-local-seed.test.ts
+@@ -0,0 +1,114 @@
++import { createHash } from "node:crypto"
++import { spawnSync } from "node:child_process"
++import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs"
++import { join, resolve } from "node:path"
++import { afterEach, expect, it, vi } from "vitest"
++import { open } from "#/intel/__fixtures__/isolated-db"
++import { readDatabaseMetadata } from "#/database/runtime"
++import { ShippingRepository } from "#/database/shipping"
++
++const digest = (file: string) => createHash("sha256").update(readFileSync(file)).digest("hex")
++// Exercise the existing CLI directly; importing its import.meta path through Vite/unimport conflicts.
++// These stubs exist only in the test child; they never change host CA/DNS/network configuration.
++const denyNetwork = `data:text/javascript,${encodeURIComponent(`
++  import http from 'node:http'; import https from 'node:https';
++  import dns from 'node:dns'; import dnsPromises from 'node:dns/promises';
++  import net from 'node:net'; import { syncBuiltinESMExports } from 'node:module';
++  const denied = () => { throw new Error('S7 seed network forbidden'); };
++  globalThis.fetch = denied; http.request = denied; http.get = denied;
++  https.request = denied; https.get = denied; dns.lookup = denied;
++  dnsPromises.lookup = denied; net.connect = denied; net.createConnection = denied;
++  syncBuiltinESMExports();
++`)}`
++async function seedS7Local(dir: string, options: { manualOnly?: boolean } = {}) {
++  const env: NodeJS.ProcessEnv = { ...process.env, SHIPPING_RUNTIME_ENABLED: "false", SHIPPING_INTEL_ENABLED: "false" }
++  for (const key of Object.keys(env)) {
++    if (/^(?:SHIPPING_.*(?:KEY|TOKEN|SECRET)|GFW_|VESSELAPI_|AISSTREAM_|CALENDARIFIC_|DEEPSEEK_|QWEN_|GEMINI_|OPENAI_|ANTHROPIC_|DASHSCOPE_|BAILIAN_)/.test(key)) delete env[key]
++  }
++  const result = spawnSync(process.execPath, ["--import", denyNetwork, "--import", "tsx/esm", "--experimental-loader", "./scripts/tsx-alias-loader.mjs", "scripts/s7-local-seed.ts", dir, ...(options.manualOnly ? ["--manual-only"] : [])], { cwd: process.cwd(), env, encoding: "utf8", windowsHide: true, timeout: 15000 })
++  if (result.status !== 0) throw new Error(`${result.error?.message ?? ""}\n${result.stderr}\n${result.stdout}`)
++  return JSON.parse(readFileSync(join(dir, "s7-local-manifest.json"), "utf8"))
++}
++function fresh() {
++  mkdirSync(".tmp", { recursive: true })
++  return mkdtempSync(resolve(".tmp/s7-manual-prep-"))
++}
++afterEach(() => {
++  vi.unstubAllEnvs()
++  vi.unstubAllGlobals()
++})
++
++it("prepares the existing S7 native schema/manifest for manual use without any app server, browser, business rows or provider activity", async () => {
++  vi.stubGlobal("fetch", () => {
++    throw new Error("offline seed forbids network")
++  })
++  const dir = fresh()
++  const manifest = await seedS7Local(dir, { manualOnly: true })
++  const saved = JSON.parse(readFileSync(join(dir, "s7-local-manifest.json"), "utf8"))
++  expect(saved).toEqual(manifest)
++  expect(saved).toMatchObject({ dataMode: "real", schemaVersion: 29, manualAcceptance: { synthetic: true, notOfficialContent: true, publishedAt: "", expected: { initialMaterials: 0, guiStatus: "NOT_RUN" } } })
++  const local = open(saved.databasePath)
++  try {
++    expect((await readDatabaseMetadata(local.database)).schemaVersion).toBe(saved.schemaVersion)
++    const harness = readFileSync("scripts/e2e-s7-integrated.mjs", "utf8")
++    expect(Number(/const EXPECTED_SCHEMA_VERSION = (\d+)/.exec(harness)![1])).toBe(saved.schemaVersion)
++    for (const table of ["ports", "feed_items", "intel_item", "intel_item_version", "intel_manual_action", "provider_usage", "provider_runtime", "sync_runs", "translation_cache"]) {
++      expect(local.native.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get(), table).toEqual({ n: 0 })
++    }
++    for (const id of ["intel:th-w01", "intel:id-w01", "intel:manual:cn-p05"]) expect((await local.repository.getSource(id))?.enabled).toBe(false)
++    const settings = await new ShippingRepository(local.database, "real").getSettings()
++    expect(settings?.translation).toMatchObject({ enabled: false, monthlyBudget: 0 })
++    expect(saved.requestedPaths).toEqual(["/feed"])
++  } finally {
++    local.native.close()
++  }
++  expect(existsSync(join(dir, ".data/provider-secrets.json"))).toBe(false)
++  const before = { db: digest(saved.databasePath), manifest: digest(join(dir, "s7-local-manifest.json")) }
++  await expect(seedS7Local(dir, { manualOnly: true })).rejects.toThrow("fresh S7 directory")
++  expect({ db: digest(saved.databasePath), manifest: digest(join(dir, "s7-local-manifest.json")) }).toEqual(before)
++}, 20_000)
++
++it("does not accept legacy outside-tmp override flags or create a target outside .tmp", async () => {
++  vi.stubEnv("S7_SEED_ALLOW_OUTSIDE_TMP", "1")
++  const target = resolve("s7-forbidden-not-created")
++  expect(existsSync(target)).toBe(false)
++  await expect(seedS7Local(target, { manualOnly: true })).rejects.toThrow("must be written inside")
++  expect(existsSync(target)).toBe(false)
++  expect(readFileSync("scripts/e2e-s7-integrated.mjs", "utf8")).not.toContain("E2E_S7_ALLOW_OUTSIDE_TMP")
++}, 20_000)
++
++it("recognizes a manual-only retained candidate as business data and never honors overwrite flags", async () => {
++  const dir = fresh()
++  const file = join(dir, ".data/shipping-hot-v3.sqlite3")
++  mkdirSync(join(dir, ".data"))
++  const local = open(file)
++  local.native.exec("CREATE TABLE ports(id TEXT); CREATE TABLE feed_items(id TEXT); CREATE TABLE intel_item(id TEXT); INSERT INTO intel_item VALUES ('synthetic-preserve')")
++  local.native.close()
++  const before = digest(file)
++  vi.stubEnv("S7_SEED_ALLOW_OVERWRITE", "1")
++  await expect(seedS7Local(dir, { manualOnly: true })).rejects.toThrow("not an S7 fixture directory")
++  expect(digest(file)).toBe(before)
++  expect(existsSync(join(dir, "s7-local-manifest.json"))).toBe(false)
++}, 20_000)
++
++it("preserves an existing manifest in manual preparation even when its database is absent", async () => {
++  const dir = fresh()
++  const file = join(dir, "s7-local-manifest.json")
++  writeFileSync(file, "synthetic existing marker to preserve\n")
++  await expect(seedS7Local(dir, { manualOnly: true })).rejects.toThrow("fresh S7 directory")
++  expect(readFileSync(file, "utf8")).toBe("synthetic existing marker to preserve\n")
++  expect(existsSync(join(dir, ".data/shipping-hot-v3.sqlite3"))).toBe(false)
++}, 20_000)
++
++it("keeps the original default S7 fixture recipe and only adds the manual acceptance descriptor", async () => {
++  const manifest = await seedS7Local(fresh())
++  const local = open(manifest.databasePath)
++  try {
++    expect(local.native.prepare("SELECT COUNT(*) AS n FROM ports").get()).toEqual({ n: 3 })
++    expect(local.native.prepare("SELECT COUNT(*) AS n FROM feed_items").get()).toEqual({ n: 3 })
++    expect(local.native.prepare("SELECT COUNT(*) AS n FROM intel_item").get()).toEqual({ n: 0 })
++    expect(manifest).toMatchObject({ expectations: { portId: "port-s7-shekou", articleFeedId: "feed-s7-article" }, manualAcceptance: { expected: { guiStatus: "NOT_RUN" } } })
++  } finally {
++    local.native.close()
++  }
++}, 20_000)

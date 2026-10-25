@@ -1,0 +1,23 @@
+{
+  "sha": "01934a5746c10d4165f4c4ffc5ce145d6de33d16",
+  "testedSourceDiff": "",
+  "cleanClone": true,
+  "installScriptsNotSkipped": true,
+  "node": "v24.15.0",
+  "abi": "137",
+  "existingNodeModulesBeforeInstall": false,
+  "commandsAllRawExitZero": true,
+  "targeted": {
+    "files": 17,
+    "passed": 244
+  },
+  "full": {
+    "files": 129,
+    "passed": 1229,
+    "skipped": 3
+  },
+  "retainedUnchanged": true,
+  "sourceRequestsInFunctionalGate": "NOT_USED_no_live_source_work; dependency installation network separate",
+  "displayLogs": "Whitespace-normalized only; exact original UTF-8 and byte digests retained in each command JSON and local original logs",
+  "s7": "NOT_RUN_no_UI_or_route_changes; prior_GUI_pending"
+}

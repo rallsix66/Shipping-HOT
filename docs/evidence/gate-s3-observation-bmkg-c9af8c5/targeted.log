@@ -1,0 +1,37 @@
+command: npx vitest run scripts/r2-intel-observe.test.ts scripts/r2-intel-observe-logonserver.test.ts server/runtime/intel-observation.test.ts server/runtime/intel-observation-network.test.ts server/services/bmkg-port-forecast.test.ts
+full_sha: c9af8c5559ff8ccd2a59650f5a26f13a4319df3f
+started: 2026-10-21T03:59:31.989Z
+finished: 2026-10-21T03:59:37.248Z
+raw_exit_code: 0
+--- stdout ---
+
+ RUN  v4.0.18 D:/wt-s3
+
+ ✓ server/services/bmkg-port-forecast.test.ts (30 tests) 13ms
+ ✓ server/runtime/intel-observation-network.test.ts (27 tests) 15ms
+ ✓ server/runtime/intel-observation.test.ts (6 tests) 1111ms
+   ✓ uses one existing job, adaptive due times, license-scoped blocks and dedupe across ticks  384ms
+ ✓ scripts/r2-intel-observe.test.ts (34 tests) 2880ms
+   ✓ actual Node CLI resolves file/directory aliases and exits without starting on help or missing execute  1084ms
+   ✓ actual execute CLI reaches bootstrap, zero-budget stop, read-only reopen and released ownership with an isolated home  1540ms
+ ✓ scripts/r2-intel-observe-logonserver.test.ts (11 tests) 3341ms
+   ✓ actual two-level CLI reaches exit 2 with parent LOGONSERVER synthetic marker, not visible to the business phase  1738ms
+   ✓ actual two-level CLI reaches exit 2 with parent LOGONSERVER absent, not visible to the business phase  1581ms
+
+ Test Files  5 passed (5)
+      Tests  108 passed (108)
+   Start at  11:59:33
+   Duration  4.12s (transform 1.49s, setup 0ms, import 2.99s, tests 7.36s, environment 1ms)
+
+
+--- stderr ---
+Duplicated imports "string", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/wt-s3/shared/calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/wt-s3/shared/policy.ts" has been ignored and "D:/wt-s3/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/wt-s3/shared/policy.ts" has been ignored and "D:/wt-s3/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/wt-s3/shared/policy.ts" has been ignored and "D:/wt-s3/shared/promo-calendar.ts" is used
+

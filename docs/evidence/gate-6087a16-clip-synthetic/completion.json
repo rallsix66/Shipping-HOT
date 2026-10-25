@@ -1,0 +1,23 @@
+{
+  "sha": "6087a169cb2e591e3acb10d23ccc641d8212f5c0",
+  "completedAt": "2026-10-16T06:51:57.329Z",
+  "offlineStatus": "PASS",
+  "originalGate": "summary.json retained unchanged: twelve preceding commands raw0, initial HTTP command raw1 (port collision)",
+  "successfulHttpRetry": {
+    "name": "synthetic-http-retry",
+    "sha": "6087a169cb2e591e3acb10d23ccc641d8212f5c0",
+    "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-synthetic-final-6087a16",
+    "startedAt": "2026-10-16T06:44:39.6144871Z",
+    "endedAt": "2026-10-16T06:46:31.7645439Z",
+    "rawExit": 0
+  },
+  "httpChecks": 108,
+  "cleanup": "Supervised read-only PID/command/parent verification then stopped only owned test processes; http-owned-cleanup.json. Driver ownReceiverStopExit128 is retained, not successful self-cleanup.",
+  "retainedUnchanged": true,
+  "manualHandoffFreshDatabase": true,
+  "actualChrome": "NOT_RUN: user manual loading/click/save pending; no ChatGPT control",
+  "normalHttpsBrowser": "NOT_RUN",
+  "guiS7": "NOT_RUN",
+  "parentReview": "pending",
+  "r2": "BLOCKED;25/39,24/34,historical3/5 unchanged"
+}

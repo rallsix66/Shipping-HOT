@@ -1,0 +1,47 @@
+{
+  "productSha": "04bbc2d6c72f452fe9cf5a963659670d9b3f9f77",
+  "database": "D:\\try one\\Shipping HOT\\.tmp\\clipper-browser-20261016\\.data\\shipping-hot-v3.sqlite3",
+  "metadata": {
+    "schemaVersion": 29,
+    "bootstrapCompletedAt": "2026-10-16T03:55:48.143Z",
+    "databaseId": "8467088b-d38f-4c0b-aff7-2b769bd28bd4",
+    "lastMigrationAt": "2026-10-16T03:55:48.143Z",
+    "dataMode": "real"
+  },
+  "tableCount": 45,
+  "counts": {
+    "translation_cache": {
+      "n": 0
+    },
+    "provider_usage": {
+      "n": 0
+    },
+    "intel_fetch_run": {
+      "n": 0
+    },
+    "intel_item": {
+      "n": 0
+    },
+    "intel_item_version": {
+      "n": 0
+    },
+    "intel_item_block": {
+      "n": 0
+    },
+    "intel_executor": {
+      "n": 0
+    },
+    "intel_item_current_change": {
+      "n": 0
+    },
+    "intel_source": {
+      "n": 42
+    },
+    "intel_manual_action": {
+      "n": 0
+    }
+  },
+  "serverStarted": false,
+  "extensionInstalled": false,
+  "browserAcceptance": "NOT_RUN"
+}

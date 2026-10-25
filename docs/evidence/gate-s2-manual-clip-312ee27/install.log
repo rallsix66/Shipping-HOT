@@ -1,0 +1,18 @@
+command: pnpm install --frozen-lockfile
+full_sha: 312ee273a25f03292d28e70fbb1241244cc20d3b
+started: 2026-10-21T03:31:00.100Z
+finished: 2026-10-21T03:31:01.122Z
+raw_exit_code: 0
+--- stdout ---
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+
+> shipping-hot@0.0.41 prepare D:\wt-s2
+> simple-git-hooks
+
+[ERROR], Was not able to set git hooks. Error: Error: ENOTDIR: not a directory, mkdir 'D:\wt-s2\.git\hooks'
+Done in 909ms using pnpm v10.30.3
+
+--- stderr ---
+

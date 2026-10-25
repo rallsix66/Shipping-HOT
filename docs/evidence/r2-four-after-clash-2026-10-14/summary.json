@@ -1,0 +1,178 @@
+{
+  "startedAt": "2026-10-14T07:56:30.108Z",
+  "finishedAt": "2026-10-14T07:56:34.990Z",
+  "reservedTransportCalls": 4,
+  "results": [
+    {
+      "id": "CN-P01",
+      "url": "https://www.gd.msa.gov.cn/",
+      "startedAt": "2026-10-14T07:56:30.108Z",
+      "status": "PARTIAL",
+      "httpRequests": 1,
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+      "receivedAt": "2026-10-14T07:56:30.357Z",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "rawByteLength": 80546,
+      "fetchedBytesSha256": "6dc9a6c69a50a0643510cc2fc0125f8bb686a150ff42f3abc1d5a88e25593a2a",
+      "rawLocalOnly": true,
+      "parse": "DOM_OBSERVATION_ONLY",
+      "parserError": null,
+      "observedCandidateCount": 6,
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "http",
+        "declarations": [
+          {
+            "source": "http",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          },
+          {
+            "source": "meta",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          }
+        ],
+        "conflict": false,
+        "byteLength": 80546
+      },
+      "archivedMetadataSha256": "3f0676cad0b4ec2781dde3aa8753ca68b7454ddfa74d1feb2fd84ec6dce69ece",
+      "originalHtmlCommitted": false,
+      "sensitiveScan": {
+        "positiveControlDetected": true,
+        "committedMaterialHits": 0
+      },
+      "finishedAt": "2026-10-14T07:56:30.391Z"
+    },
+    {
+      "id": "CN-T02",
+      "url": "https://szs.mof.gov.cn/zhengcefabu/",
+      "startedAt": "2026-10-14T07:56:30.392Z",
+      "status": "PARTIAL",
+      "httpRequests": 1,
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+      "receivedAt": "2026-10-14T07:56:30.683Z",
+      "httpStatus": 200,
+      "contentType": "text/html",
+      "rawByteLength": 12222,
+      "fetchedBytesSha256": "934dfb210e414105867c99db2907ebcf98c175b643a3bc74157f2d9c1679df04",
+      "rawLocalOnly": true,
+      "parse": "DOM_OBSERVATION_ONLY",
+      "parserError": null,
+      "observedCandidateCount": 6,
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "meta",
+        "declarations": [
+          {
+            "source": "meta",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          }
+        ],
+        "conflict": false,
+        "byteLength": 12222
+      },
+      "archivedMetadataSha256": "b50fdd478df2e8f96e942d4422d3b159c5b6894f8a7ab91940ae2e74699ba237",
+      "originalHtmlCommitted": false,
+      "sensitiveScan": {
+        "positiveControlDetected": true,
+        "committedMaterialHits": 0
+      },
+      "finishedAt": "2026-10-14T07:56:30.690Z"
+    },
+    {
+      "id": "VN-P01",
+      "url": "https://vimawa.gov.vn/vi/thong-bao-hang-hai",
+      "startedAt": "2026-10-14T07:56:30.690Z",
+      "status": "PARTIAL",
+      "httpRequests": 1,
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+      "receivedAt": "2026-10-14T07:56:33.148Z",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "rawByteLength": 63083,
+      "fetchedBytesSha256": "da133741708879c9fd4544a0137dd8050a92c1dab662ac843bc9892d412bd4ef",
+      "rawLocalOnly": true,
+      "parse": "DOM_OBSERVATION_ONLY",
+      "parserError": null,
+      "observedCandidateCount": 1,
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "http",
+        "declarations": [
+          {
+            "source": "http",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          },
+          {
+            "source": "meta",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          }
+        ],
+        "conflict": false,
+        "byteLength": 63083
+      },
+      "archivedMetadataSha256": "249ecba32f815f03e80cfd409213b21d10e25e51f16b8c146b6e14cce5ef6a39",
+      "originalHtmlCommitted": false,
+      "sensitiveScan": {
+        "positiveControlDetected": true,
+        "committedMaterialHits": 0
+      },
+      "finishedAt": "2026-10-14T07:56:33.169Z"
+    },
+    {
+      "id": "PH-C01",
+      "url": "https://customs.gov.ph/category/media-releases/",
+      "startedAt": "2026-10-14T07:56:33.170Z",
+      "status": "PARTIAL",
+      "httpRequests": 1,
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+      "receivedAt": "2026-10-14T07:56:34.958Z",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=UTF-8",
+      "rawByteLength": 166897,
+      "fetchedBytesSha256": "9d56a123e75dd0d3fa7523da3d410125a5c71f23e42dbacd012c50d31627a6c6",
+      "rawLocalOnly": true,
+      "parse": "DOM_OBSERVATION_ONLY",
+      "parserError": null,
+      "observedCandidateCount": 2,
+      "decoding": {
+        "encoding": "utf-8",
+        "selectedBy": "http",
+        "declarations": [
+          {
+            "source": "http",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          },
+          {
+            "source": "meta",
+            "label": "utf-8",
+            "encoding": "utf-8"
+          }
+        ],
+        "conflict": false,
+        "byteLength": 166897
+      },
+      "archivedMetadataSha256": "c5f972b908f41d5676416bc3c861958718e4445e298753932fde9f15bd41c7c6",
+      "originalHtmlCommitted": false,
+      "sensitiveScan": {
+        "positiveControlDetected": true,
+        "committedMaterialHits": 0
+      },
+      "finishedAt": "2026-10-14T07:56:34.989Z"
+    }
+  ],
+  "approvedPublicDenominator": 39,
+  "requiredAvailable": 32,
+  "batchPassClaims": 0,
+  "fullP1Pass": false,
+  "paidCalls": 0,
+  "llmCalls": 0,
+  "productionActivation": "NOT_RUN",
+  "live24h": "NOT_RUN"
+}

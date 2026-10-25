@@ -1,0 +1,25 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/one-catalog-candidate-build-20261015
+
+ ✓ server/intel/sources/json-list.test.ts (42 tests) 61ms
+ ✓ server/intel/sources/json-list-html.test.ts (5 tests) 77ms
+ ✓ server/intel/sources/web-list.test.ts (35 tests) 109ms
+ ✓ server/intel/sources/html-index-candidates.test.ts (25 tests) 69ms
+ ✓ server/intel/thai-document-index.test.ts (4 tests) 159ms
+ ✓ server/intel/post-clash-index.test.ts (18 tests) 338ms
+ ✓ server/intel/adaptive.test.ts (2 tests) 159ms
+ ✓ server/intel/html-index-candidates-collect.test.ts (4 tests) 420ms
+ ✓ server/intel/vn-disaster-index.test.ts (22 tests) 219ms
+ ✓ server/intel/public-index-candidates-collect.test.ts (22 tests) 509ms
+ ✓ server/intel/sources/web-list-conflicts.test.ts (12 tests) 41ms
+ ✓ server/intel/web-list-conflicts-collect.test.ts (3 tests) 181ms
+ ✓ server/intel/web-list-collect.test.ts (7 tests) 694ms
+ ✓ server/intel/json-list-collect.test.ts (9 tests) 830ms
+ ✓ server/runtime/intel-production.test.ts (4 tests) 524ms
+ ✓ server/runtime/intel-bootstrap.test.ts (9 tests) 572ms
+ ✓ server/intel/collect.test.ts (22 tests) 1169ms
+
+ Test Files  17 passed (17)
+      Tests  245 passed (245)
+   Start at  11:41:22
+   Duration  2.96s (transform 5.88s, setup 0ms, import 16.69s, tests 6.13s, environment 2ms)

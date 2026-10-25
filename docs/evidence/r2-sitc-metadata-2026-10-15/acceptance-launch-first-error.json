@@ -1,0 +1,10 @@
+{
+  "phase": "Preflight before acceptance process launch",
+  "rawExit": 1,
+  "message": "clean_gate_not_complete",
+  "cause": "Wrapper erroneously expected10 commands, while approved clean gate defines9. All9 actual gate commands had already exited0.",
+  "acceptanceActuallyStarted": false,
+  "resolution": "Compare the exact9 expected command names instead of a mistaken numeric count; no gate or product change.",
+  "sourceGetAttempts": 0,
+  "systemDnsCalls": 0
+}

@@ -1,0 +1,9 @@
+# command: node .tmp/check-dns-evidence.cjs
+# baseline_sha: 7905d5dbb7b377767913a17d9e49762ea507e037
+# started: 2026-10-13T04:23:09.339Z
+# stdout
+PASS same six approved hostnames / one later system lookup each / zero HTTP / no override / returned deny-range matches / sanitized configuration categories / no earlier-log backfill / no fetch or transport call in DNS probe
+
+# stderr
+
+# raw_exit_code: 0

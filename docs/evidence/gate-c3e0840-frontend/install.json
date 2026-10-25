@@ -1,0 +1,9 @@
+{
+  "name": "install",
+  "command": "pnpm install --frozen-lockfile",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\frontend-overview-review-build",
+  "sha": "c3e08408623c69a3a071d761ed0300659644bd68",
+  "startedAt": "2026-10-14T01:57:03.040Z",
+  "endedAt": "2026-10-14T01:57:10.335Z",
+  "rawExit": 0
+}

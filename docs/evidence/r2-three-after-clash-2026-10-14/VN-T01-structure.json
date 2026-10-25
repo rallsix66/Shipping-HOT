@@ -1,0 +1,130 @@
+{
+  "source": "VN-T01",
+  "url": "https://idea.gov.vn/",
+  "kind": "sanitized DOM structural metadata derivative; not original HTML or configured parser output",
+  "counts": {
+    "anchors": 56,
+    "tables": 0,
+    "rows": 0,
+    "times": 0
+  },
+  "candidates": [
+    {
+      "anchorDocumentIndex": 17,
+      "titleExcerpt": "02/10/2026 Hải Phòng thúc đẩy kết nối qua thương mại điện tử",
+      "href": "https://idea.gov.vn/default.aspx?page=news&do=detail&id=a7f3cc49-326f-4da5-aedb-2a12cbd4b43c",
+      "ancestorTags": [
+        "a",
+        "li",
+        "ul"
+      ],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "02/10/2026"
+      ],
+      "anchorCountInAncestor": 1,
+      "association": "same-local-container-observation-only",
+      "siblingTags": []
+    },
+    {
+      "anchorDocumentIndex": 18,
+      "titleExcerpt": "01/10/2026 Cục Thương mại điện tử đồng hành cùng Hải Phòng nâng cao hiệu lực quản lý và phát triển thị trường thương mại",
+      "href": "https://idea.gov.vn/default.aspx?page=news&do=detail&id=d9379a52-1b51-4dcb-b0f3-5675939eb95b",
+      "ancestorTags": [
+        "a",
+        "li",
+        "ul"
+      ],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "01/10/2026"
+      ],
+      "anchorCountInAncestor": 1,
+      "association": "same-local-container-observation-only",
+      "siblingTags": []
+    },
+    {
+      "anchorDocumentIndex": 19,
+      "titleExcerpt": "01/10/2026 Hải Phòng tổ chức Hội chợ Thương mại điện tử năm 2026",
+      "href": "https://idea.gov.vn/default.aspx?page=news&do=detail&id=1a1ddc3f-3eeb-406a-bfc5-5d8095241b9d",
+      "ancestorTags": [
+        "a",
+        "li",
+        "ul"
+      ],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "01/10/2026"
+      ],
+      "anchorCountInAncestor": 1,
+      "association": "same-local-container-observation-only",
+      "siblingTags": []
+    },
+    {
+      "anchorDocumentIndex": 20,
+      "titleExcerpt": "",
+      "href": "https://vanban.chinhphu.vn/?pageid=27160&docid=216503&classid=1&orggroupid=1",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 3,
+      "dateTextCandidates": [
+        "02/10/2026",
+        "01/10/2026"
+      ],
+      "anchorCountInAncestor": 10,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": []
+    },
+    {
+      "anchorDocumentIndex": 21,
+      "titleExcerpt": "",
+      "href": "https://moit.gov.vn/van-ban-phap-luat/quyet-dinh-phe-duyet-ke-hoach-tong-the-phat-trien-thuong-mai-dien-tu-quoc-gia-giai-doan-2026-2030.html",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 3,
+      "dateTextCandidates": [
+        "02/10/2026",
+        "01/10/2026"
+      ],
+      "anchorCountInAncestor": 10,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": []
+    },
+    {
+      "anchorDocumentIndex": 22,
+      "titleExcerpt": "",
+      "href": "https://idea.gov.vn/default.aspx?page=news&do=browse&category_id=c2e423ad-56be-4fc4-9303-4cfecfa6cc79",
+      "ancestorTags": [
+        "a",
+        "div",
+        "div"
+      ],
+      "ancestorDepth": 1,
+      "dateTextCandidates": [
+        "02/10/2026",
+        "01/10/2026",
+        "10/04/2026",
+        "25/07/2023",
+        "26/12/2022"
+      ],
+      "anchorCountInAncestor": 37,
+      "association": "ambiguous-container-not-assigned",
+      "siblingTags": [
+        "div",
+        "div",
+        "div",
+        "div",
+        "div"
+      ]
+    }
+  ],
+  "itemParser": "NOT_RUN: no source adapter configured in this observation",
+  "noCandidateMeaning": "No numeric/English date association observed by bounded heuristic; not proof of no items",
+  "completeFieldsPass": false
+}

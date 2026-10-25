@@ -1,0 +1,9 @@
+{
+  "name": "smoke-p2c",
+  "command": "pnpm smoke:p2c-runtime",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\port-notice-fix-build",
+  "sha": "180f919ebdcbf350a23a75d28bd2efbcf5765f67",
+  "startedAt": "2026-10-14T03:24:15.691Z",
+  "endedAt": "2026-10-14T03:24:16.881Z",
+  "rawExit": 0
+}

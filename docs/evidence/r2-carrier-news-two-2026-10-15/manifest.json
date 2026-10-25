@@ -1,0 +1,30 @@
+{
+  "rows": [
+    {
+      "id": "XX-K01",
+      "url": "https://www.maersk.com/news",
+      "host": "www.maersk.com",
+      "catalogLineSha256": "76ee5690128ed1208d5c3738898effd40531eac09705c4fbf902bb9335590051"
+    },
+    {
+      "id": "XX-K02",
+      "url": "https://www.one-line.com/en/news",
+      "host": "www.one-line.com",
+      "catalogLineSha256": "661332dd77a5036797e5870d0ac3cf63a643c551eb7faaa3a91763c0735011b0"
+    }
+  ],
+  "productCodeSha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
+  "maxSystemDns": 2,
+  "maxHttpRequests": 2,
+  "maxBytes": 1048576,
+  "perRequestMs": 10000,
+  "batchMs": 60000,
+  "retries": 0,
+  "redirects": 0,
+  "pagination": 0,
+  "details": 0,
+  "networkSettingsChanged": false,
+  "fullRawPermission": "unknown; ignored private response bytes only, no redistribution",
+  "executionHead": "a5da09871d1a017ae947a0f3f56980461807bfaf",
+  "provenanceCorrection": "execution-binding.json; original stale diagnostic label retained in manifest.original.json and executed procedure"
+}

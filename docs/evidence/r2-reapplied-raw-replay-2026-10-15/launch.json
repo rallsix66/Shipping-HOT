@@ -1,0 +1,13 @@
+{
+  "sha": "9ec4a2dd4e6a76657ec3ed2a6dabb15187b4d5a8",
+  "startedAt": "2026-10-15T01:23:49.312Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "-c",
+    ".tmp/reapplied-raw-replay-20261015.config.ts"
+  ],
+  "actualSourceHttpRequests": 0,
+  "material": "full original private response bytes, not synthetic or sanitized reconstruction"
+}

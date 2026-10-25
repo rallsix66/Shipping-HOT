@@ -1,0 +1,33 @@
+{
+  "kind": "sanitized committed archive bytes distinct from fetched page bytes; CRLF normalization accounted for",
+  "sha256": {
+    "clash-filter-verification.json": "535338eb3a67e892b27db234b45887a7a0af193f3c775f78bb8c2e543ec1b9ee",
+    "CN-P01-dom-shape.json": "5a69c9b2f85b26be12ecc91406a4cc8e91ddbf70987dc8c11c9601043d08ec69",
+    "CN-P01-response.json": "1bce91a92637589faf781b2f37b9d34dd37225de6b74056214513cf541f5a29e",
+    "CN-P01-result.json": "0ae2f4b1225bba0c6a0fad39f57c37926ca6708c21ea13b233d9e676a870487e",
+    "CN-P01-structure.json": "3f0676cad0b4ec2781dde3aa8753ca68b7454ddfa74d1feb2fd84ec6dce69ece",
+    "CN-T02-dom-shape.json": "b5a177330268854f2a85fe5afa43838eba9b9baec53ec4d7a9b5a0e980ef75b1",
+    "CN-T02-response.json": "1e8870b3f3b21596d421e655a573afd4aba70f8de7c12ec7cb00665d4dc7d5be",
+    "CN-T02-result.json": "f2a1aa87156d2e9e85c6124e5274371fafa5160779741e10be8046d8f2f666cc",
+    "CN-T02-structure.json": "b50fdd478df2e8f96e942d4422d3b159c5b6894f8a7ab91940ae2e74699ba237",
+    "command.json": "53b470d3ba7884e91c8755b62339e0507306d3eb6752a8fce73a4f1f392c94df",
+    "dns-verification-before-http.json": "ad7870e258b1148fae950f129d440315327b1ece57ae7a8e0a60830260a9aac2",
+    "launch.json": "050a94967333d783b46d0043b5572591f0ab9220a4e46037ced500f54e358022",
+    "manifest.json": "6fa767e000db2026e1ebef7fc328808595ae807839a3a5bb58830fc0752cf52a",
+    "neat-inventory.json": "613758238cc131b058c4bd39ce888c1b5994ab779d99aaf2c18186b6271a4ae0",
+    "offline-structure-summary.json": "f3f2606c13f37d5ee925418bea3175edd18f7173595e4f6a11335f74d0be9e7c",
+    "partial-results.json": "f95e60c90cb3f75d6e283b17110319fddc723d763ad7d293b2e55023c125b5d4",
+    "PH-C01-dom-shape.json": "85fd98b931ca59761ebbd7b3e079282355436caae9853f84ca5dd52e1e97de5d",
+    "PH-C01-response.json": "c84689edb46ee199cfcef167c777e39585ebd93ad58b7c1e280256976a84a16e",
+    "PH-C01-result.json": "fa7b0e186dd23a51df89cef6f58618e1c4c4c8b00a7120d421cf689a98b9b9e7",
+    "PH-C01-structure.json": "c5f972b908f41d5676416bc3c861958718e4445e298753932fde9f15bd41c7c6",
+    "request-ledger.json": "1df11757d0636d00e175189988e9b42efa57268febafaae3d194516bcdf322e5",
+    "sensitive-scan.json": "db4699d5371d4621995e21a989461d3b786df49bec6d7c10e758c4685361cfe6",
+    "summary.json": "6257a6b9cafef66b5de783d11594b31cb9601d8723e7ffc185bfc6d6794101ba",
+    "VN-P01-dom-shape.json": "1bbce3ec873814e4c662d562b1dc541596cffd775c3ffc34fc96a2def63fe28a",
+    "VN-P01-response.json": "8b26c86e64ba64c623f38060ae80cfe6b7eb8138725b1423423814b51bfe5034",
+    "VN-P01-result.json": "d99e74c7a0a10652eed0e8231dcfc46494b295b47534d56507112fe0f9bb9bfc",
+    "VN-P01-structure.json": "249ecba32f815f03e80cfd409213b21d10e25e51f16b8c146b6e14cce5ef6a39",
+    "VN-P01-table-metadata.json": "745acf673f366c6c3829b1a5f068f44438e1a624f5a4c654acfc0b5b574bc34c"
+  }
+}

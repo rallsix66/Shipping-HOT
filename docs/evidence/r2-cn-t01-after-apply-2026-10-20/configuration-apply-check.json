@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-20T03:17:31.313Z",
+  "extensionLiteralCount": 28,
+  "generatedFilterCount": 27,
+  "scriptAndGeneratedListMatch": false,
+  "original27Preserved": true,
+  "lastItemMofcom": false,
+  "mofcomOccurrences": 0,
+  "BMKGOccurrences": 1,
+  "modes": {
+    "enhanced-mode": "fake-ip"
+  },
+  "filterModeExplicit": null,
+  "modeUnchanged": true,
+  "globalExtensionUnchanged": true,
+  "generatedFullEqualityClaim": false,
+  "runningCoreVerified": false,
+  "DNS": 0,
+  "HTTP": 0
+}

@@ -1,0 +1,125 @@
+{
+  "baselineHead": "f58e01e7360f17ab55706e36ce09851e265ddedb",
+  "productCodeSha": "bebe1441465adfcabb9daf93cb2a8656ec1fc796",
+  "files": [
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+      "committedTextLfSha256": "97b7e4aee96ff2be2db37e3ac1abd70879352a1c0bb78f5cad96434b61695e38"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+      "committedTextLfSha256": "d44b7839c64a6548ae22771709c742697ef54f8dab90f934a281425959c2be47"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+      "committedTextLfSha256": "cefec078e1f0337e0fdbf1d6fc5a28275b3fa013bba20c19198f44be9c2d3a3c"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+      "committedTextLfSha256": "bccd615f2417ebac5186793e65fb6a96b1579d7e40256486ca68050c99f2ab5d"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/accepted-reference-index.json",
+      "committedTextLfSha256": "98b69e02b82d48541c2803eff26d3b45802c36dc84d6be797ef7b320a6d28b87"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/archive-procedure.cjs.txt",
+      "committedTextLfSha256": "c883a1d7e0f425571e6f11302a08fa55eb0d6360621bbb58fb8fa2ccfa3a6ecd"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/archive-verification-procedure.cjs.txt",
+      "committedTextLfSha256": "a7848194a7aa5bcb44c1f917d75471744be8977cb2b44fa38262b567bc49d777"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/closeout.md",
+      "committedTextLfSha256": "d1056f72c1b91950067d19c20007d1e12e95de470579e5ee0596e542cf1d566b"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/doc-lint-launch-failure.json",
+      "committedTextLfSha256": "7d5f707016bfb0851c9487bf0624fab5ac3c65e98aebd4bd8f1728d1bc7bf6d3"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/doc-lint-procedure.cjs.txt",
+      "committedTextLfSha256": "b92b0136dcf363234ffa80ec6fe07be18712aee38e301d0ffc9072b1dd5da469"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/doc-lint.json",
+      "committedTextLfSha256": "78786e0afda554f9944b5efe3f3358f3c3aab8d8785285084ae64cb4606f2f31"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/mapping-command.json",
+      "committedTextLfSha256": "7face4918c3ebb05e7bc77f5950c5163f3445346fc628bcb2cafb526679d3acf"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/mapping-procedure.ts.txt",
+      "committedTextLfSha256": "e33b510139e4ed4dcc39f542d19eeedca7cc6c0804613cb2b997d6be19f03339"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/mapping-runner.cjs.txt",
+      "committedTextLfSha256": "63e63e26cf47b643ba2a61da729c870d637b4cd27e924ac6669322a98a11cfd1"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/matrix-delta.json",
+      "committedTextLfSha256": "8633083f9d21d6f2c26e80fc3c4f036bcc3a7bd54fde4f399868fe793b64e788"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/next-gaps.md",
+      "committedTextLfSha256": "e70474c8f398922dad93f34f7bf259b55105fa6cb1453487a137153619de720a"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/prior-interpretation-texts.json",
+      "committedTextLfSha256": "cc0aedaaf39238ec1c912d414db3ec052237db0b81ceb847fab69b52e792c4b8"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/product-mapping.json",
+      "committedTextLfSha256": "d1ca354aca16775094bd2b18cc4afedde73b4119118dd7c262a3220f0b68de63"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/report.md",
+      "committedTextLfSha256": "745db812c18fe267521be111d97aa9e994eb85a6fd989d08af1cb256d39ad222"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/source-proof.json",
+      "committedTextLfSha256": "16567847c83dd48ccff62199f259ea40df6a29e0aa06b0096218e7373b16d942"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/validation-procedure.cjs.txt",
+      "committedTextLfSha256": "9bc36a6132c919eb78669f4afb1294dec1ad5bbb6af02490dc84b017954a34a2"
+    },
+    {
+      "path": "docs/evidence/r2-nmc-close-2026-10-15/validation.json",
+      "committedTextLfSha256": "bccd615f2417ebac5186793e65fb6a96b1579d7e40256486ca68050c99f2ab5d"
+    },
+    {
+      "path": "docs/evidence/r2-two-media-2026-10-15/availability-frontier.md",
+      "committedTextLfSha256": "4715ddfe33ce15b7e3fe1405f1e2f7ba5fd0ced1083030b249cf69c9db052f2e"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/archive-manifest.json",
+      "committedTextLfSha256": "c50a4f36df555fa9901bac9586ab5e173cc16a3af4b1845447c9a8ca6bf0ebb8"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/closeout.md",
+      "committedTextLfSha256": "915cae8e2a0c4e5b7369e3c4f7b7a702487bf0cb43de35535a8ff264b2d502a3"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/report.md",
+      "committedTextLfSha256": "09b4236ab18dfeb63d4bada56d63054062b52e85492d061a3e180e367263d643"
+    },
+    {
+      "path": "docs/evidence/r2-weather-reuse-2026-10-15/weather-review.json",
+      "committedTextLfSha256": "49dd068e6b0ef775435accac6af80ebe581276d7fe979875b343dec0be26942b"
+    },
+    {
+      "path": "docs/handoffs/r2-next-execution-2026-10-15.md",
+      "committedTextLfSha256": "821ad385bfc119ff3d8f06347015cfa9c4c71be51847eff95a4d2de6c153cb7c"
+    },
+    {
+      "path": "docs/status.md",
+      "committedTextLfSha256": "978c653f7735abd8a9429352189e0e7931ec7f3c51a58649b834be9d3a38c059"
+    }
+  ],
+  "sourceRequests": 0,
+  "systemDns": 0,
+  "productGate": "NOT_RUN_no_product_change"
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "XX-K02",
+    "host": "www.one-line.com",
+    "reservedAt": "2026-10-15T02:56:19.742Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "104.19.145.47",
+        "family": 4
+      },
+      {
+        "address": "104.19.144.47",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T02:56:20.187Z"
+  }
+]

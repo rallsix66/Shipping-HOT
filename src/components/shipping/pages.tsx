@@ -3,10 +3,10 @@ import { motion } from "framer-motion"
 import { type ReactNode, useEffect, useState } from "react"
 import type { ArticleBlock, ArticleCompletenessStatus, ArticleTranslationBlockSource, ArticleTranslationViewStatus } from "@shared/article"
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
-import { type FeedItem, type PortWeatherPanelResponse, type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
-import { ruleCoverageReasonLabelZh } from "@shared/weather-rule-coverage-display"
+import { type FeedItem, type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
-import { type ShippingResponse, type TranslationStatusResponse, useFeedArticle, usePortWeather, useShipping, useTranslationSecret, useTranslationStatus, useTropicalCyclones } from "./data"
+import { type ShippingResponse, type TranslationStatusResponse, useFeedArticle, useShipping, useTranslationSecret, useTranslationStatus, useTropicalCyclones } from "./data"
+import { PortWeatherPanelSection } from "./port-weather"
 import { FeedItemDisplayText } from "./feed-display"
 import { formatDate, formatPortMetric, formatStatus, severityTone } from "./format"
 import { AnimatedNumber, EmptyState, Marquee, ProvenanceBadge, ProviderChip, Reveal, Segmented, StatusDot } from "./ui"
@@ -242,7 +242,7 @@ function WeatherChips({ weather }: { weather: WeatherDetail }) {
   )
 }
 
-function WatchChip({ id, watched, onSaved }: { id: string, watched: boolean, onSaved: () => void }) {
+export function WatchChip({ id, watched, onSaved }: { id: string, watched: boolean, onSaved: () => void }) {
   const [busy, setBusy] = useState(false)
   return (
     <motion.button
@@ -475,25 +475,6 @@ export function PortsPage() {
   )
 }
 
-function portWeatherImpactEmptyCopy(state: PortWeatherPanelResponse["state"]): string {
-  switch (state) {
-    case "sync_failed":
-      return "天气同步失败或数据源不可用；潜在影响暂不可信。"
-    case "data_empty":
-      return "暂无有效窗口内的持久化预报；请等待 Open-Meteo 同步。"
-    case "data_stale":
-      return "预报数据已过期；请触发同步后再查看潜在影响。"
-    case "no_rule_hits":
-      return "有效窗口内无规则命中（⚙ 潜在影响）；不含已实施封港结论。"
-    case "partial_rule_coverage":
-      return "部分规则因阵风/浪高/能见度/降水缺测或台风分支未接入而未评估；已评估规则的无命中不代表完整排除风险。"
-    case "data_insufficient":
-      return "测值不足，无法判断规则命中；请等待完整预报同步。"
-    default:
-      return "当前无规则命中；仅展示 ⚙ 潜在影响，不含已实施封港结论。"
-  }
-}
-
 function TropicalCyclonePathChart({ cycloneId, trackHistory, current, forecast }: {
   cycloneId: string
   trackHistory: Array<{ lat: number, lon: number }>
@@ -564,7 +545,7 @@ function TropicalCyclonePathChart({ cycloneId, trackHistory, current, forecast }
   )
 }
 
-function TropicalCyclonePanelSection() {
+export function TropicalCyclonePanelSection() {
   const { data, isLoading, isError } = useTropicalCyclones()
   if (isLoading) return <div className="glass-panel d-panel mt-4"><p className="text-sm op-60">加载台风路径…</p></div>
   if (isError || !data) return null
@@ -632,206 +613,6 @@ function TropicalCyclonePanelSection() {
               ))}
             </ul>
           )}
-    </div>
-  )
-}
-
-function PortWeatherPanelSection({ portId }: { portId: string }) {
-  const { data, isLoading, isError } = usePortWeather(portId)
-  if (isLoading) return <div className="glass-panel d-panel"><p className="text-sm op-60">加载港口天气…</p></div>
-  if (isError || !data) return <div className="glass-panel d-panel"><p className="text-sm op-60">港口天气 API 不可用（同步失败或网络错误）。</p></div>
-  const nextForecasts = data.forecasts
-  const nextImpacts = data.impacts
-  const forecastEmptyCopy = data.state === "data_stale"
-    ? "预报数据已过期，请重新同步。"
-    : data.state === "sync_failed"
-      ? "天气同步失败，暂无可靠预报数值。"
-      : "暂无 7 天持久化预报；Open-Meteo 同步后会写入 SQLite。"
-  return (
-    <div className="mt-4 flex flex-col gap-4">
-      {data.panelNotice && (
-        <p className="text-sm op-80 glass-panel d-panel py-2 px-3" data-testid="port-weather-notice">
-          {data.panelNotice.messageZh}
-        </p>
-      )}
-      {(data.precipCoverage.status !== "full" || data.ruleCoverage.some(r => r.evaluation === "unevaluated")) && (
-        <p className="text-sm op-75 glass-panel d-panel py-2 px-3" data-testid="port-weather-coverage">
-          24h 降水覆盖
-          {" "}
-          {data.precipCoverage.hourlySamplesInWindow}
-          /
-          {data.precipCoverage.fullRequired}
-          {" "}
-          小时（
-          {data.precipCoverage.status === "full" ? "完整" : data.precipCoverage.status === "partial" ? "部分" : "不足"}
-          ）
-          {data.precipCoverage.status === "partial" && data.precipCoverage.partialSumMm !== undefined
-            ? ` · 参考累计 ${data.precipCoverage.partialSumMm.toFixed(1)} mm（不可用于 WR-S05）`
-            : null}
-          {data.ruleCoverage.filter(r => r.evaluation === "unevaluated").map(r => (
-            <span key={r.ruleId} className="block text-xs op-70 mt-1">
-              {r.ruleId}
-              {" "}
-              未评估：
-              {ruleCoverageReasonLabelZh(r.reason)}
-            </span>
-          ))}
-        </p>
-      )}
-      {data.impactMeta.truncated && (
-        <p className="text-xs op-60">
-          共
-          {" "}
-          {data.impactMeta.totalMatched}
-          {" "}
-          条命中，展示
-          {" "}
-          {data.displayMeta.impactsReturned}
-          /
-          {data.displayMeta.impactLimit}
-          {" "}
-          条（近期高等级优先）。
-        </p>
-      )}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="glass-panel d-panel">
-          <div className="panel-h">
-            <h3>预报数值（7 天）</h3>
-            <span className="text-xs op-60">{data.sources.forecast}</span>
-          </div>
-          {data.forecastMeta && (
-            <p className="text-xs op-65 mb-2" data-testid="port-weather-forecast-meta">
-              目标窗口
-              {" "}
-              {formatDate(data.forecastMeta.targetWindow.start)}
-              {" → "}
-              {formatDate(data.forecastMeta.targetWindow.end)}
-              {" · 实际返回 "}
-              {data.forecastMeta.actualCoverage.totalReturned}
-              {" 条（hourly "}
-              {data.forecastMeta.actualCoverage.hourlyReturned}
-              {" / current "}
-              {data.forecastMeta.actualCoverage.currentReturned}
-              ）
-              {data.forecastMeta.actualCoverage.firstInstant && data.forecastMeta.actualCoverage.lastInstant
-                ? ` · 覆盖 ${formatDate(data.forecastMeta.actualCoverage.firstInstant)} → ${formatDate(data.forecastMeta.actualCoverage.lastInstant)}`
-                : null}
-              {data.forecastMeta.fetchedAt ? ` · 更新 ${formatDate(data.forecastMeta.fetchedAt)}` : null}
-              {(data.forecastMeta.missingCounts.windGust > 0 || data.forecastMeta.missingCounts.wave > 0)
-                ? ` · 缺测 阵风${data.forecastMeta.missingCounts.windGust} 浪${data.forecastMeta.missingCounts.wave} 降水${data.forecastMeta.missingCounts.precipitation} 能见度${data.forecastMeta.missingCounts.visibility}`
-                : null}
-              {data.forecastMeta.marineCoverageNote
-                ? (
-                    <span className="block mt-1 op-70">{data.forecastMeta.marineCoverageNote}</span>
-                  )
-                : null}
-            </p>
-          )}
-          {data.marineReference
-            ? (
-                <div className="mb-3 rounded border border-amber-400/30 p-2 text-xs" data-testid="port-weather-marine-reference">
-                  <p className="font-medium">{data.marineReference.nameZh}</p>
-                  <p className="op-70">{data.marineReference.labelZh}</p>
-                  <p data-testid="port-weather-marine-reference-status">
-                    {`参考状态：${data.marineReference.status} · ${data.marineReference.statusNoteZh}`}
-                    {` · 最近尝试 ${data.marineReference.lastAttemptAt ? formatDate(data.marineReference.lastAttemptAt) : "无"}（${data.marineReference.lastAttemptOutcome ?? "未运行"}）`}
-                    {` · 最近成功 ${data.marineReference.lastSuccessAt ? formatDate(data.marineReference.lastSuccessAt) : "无"}`}
-                  </p>
-                  <p className="op-80" data-testid="port-weather-marine-reference-grid">
-                    {`请求点 ${data.marineReference.latitude}N ${data.marineReference.longitude}E（距港口约 ${data.marineReference.approxDistanceKm} km） · 请求模型 ${data.marineReference.model}`}
-                    {data.marineReference.grid?.returnedLatitude !== undefined && data.marineReference.grid?.returnedLongitude !== undefined
-                      ? ` · 实际返回网格 ${data.marineReference.grid.returnedLatitude}N ${data.marineReference.grid.returnedLongitude}E（距请求点 ${data.marineReference.grid.requestedToReturnedKm ?? "?"} km，获取于 ${formatDate(data.marineReference.grid.fetchedAt)}）`
-                      : " · 实际返回网格：无记录"}
-                  </p>
-                  <p className="op-80">
-                    {data.marineReference.showingHistoricalData ? `历史参考（更新于 ${data.marineReference.lastSuccessAt ? formatDate(data.marineReference.lastSuccessAt) : "未知"}）：` : ""}
-                    {`7 天整点含海况 ${data.marineReference.coverage.hourlyWithMarine}/${data.marineReference.coverage.expectedHours}`}
-                    {data.marineReference.maxWaveHeightM !== undefined ? ` · 7 天最大浪高 ${data.marineReference.maxWaveHeightM.toFixed(1)} m` : " · 暂无参考海况测值"}
-                    {` · 当前参考规则命中 ${data.marineReference.impacts.length}`}
-                    {data.marineReference.historicalImpactCount > 0 ? ` · 历史命中 ${data.marineReference.historicalImpactCount}（不计入当前）` : ""}
-                  </p>
-                </div>
-              )
-            : null}
-          {nextForecasts.length === 0
-            ? <p className="text-sm op-60">{forecastEmptyCopy}</p>
-            : (
-                <ul className="space-y-2 text-sm max-h-96 overflow-y-auto pr-1" data-testid="port-weather-forecast-list">
-                  {nextForecasts.map(row => (
-                    <li key={row.id} className="flex flex-col gap-0.5 border-b border-white/5 pb-2 last:border-0">
-                      <span className="font-medium">{formatDate(row.forecastAt)}</span>
-                      <span className="op-80">
-                        {row.windGustKmh !== undefined ? `阵风 ${Math.round(row.windGustKmh)} km/h` : "阵风 —"}
-                        {" · "}
-                        {row.waveHeightM !== undefined ? `浪 ${row.waveHeightM.toFixed(1)} m` : "浪 —"}
-                        {" · "}
-                        {row.precipitationMm !== undefined ? `降水 ${row.precipitationMm.toFixed(1)} mm/h` : "降水 —"}
-                        {" · "}
-                        {row.visibilityM !== undefined ? `能见度 ${Math.round(row.visibilityM)} m` : "能见度 —"}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-        </div>
-        <div className="glass-panel d-panel">
-          <div className="panel-h">
-            <h3>潜在影响</h3>
-            <span className="text-xs op-60">
-              ⚙
-              {data.sources.impacts}
-            </span>
-          </div>
-          {nextImpacts.length === 0
-            ? <p className="text-sm op-60">{portWeatherImpactEmptyCopy(data.state)}</p>
-            : (
-                <ul className="space-y-2 text-sm" data-testid="port-weather-impacts">
-                  {nextImpacts.map(row => (
-                    <li key={row.id} className="flex items-start gap-2">
-                      <StatusDot tone={severityTone(row.severity)} />
-                      <div>
-                        <p className="font-medium">{row.summaryZh}</p>
-                        <p className="text-xs op-60">
-                          {row.ruleId}
-                          {" "}
-                          ·
-                          {" "}
-                          {formatDate(row.validFrom)}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-        </div>
-        <div className="glass-panel d-panel">
-          <div className="panel-h">
-            <h3>官方预警</h3>
-            <span className="text-xs op-60">{data.sources.alerts}</span>
-          </div>
-          {data.officialAlerts.length === 0
-            ? <p className="text-sm op-60">未配置或未同步到本港相关官方预警。</p>
-            : (
-                <ul className="space-y-2 text-sm">
-                  {data.officialAlerts.map(alert => (
-                    <li key={alert.id} className="flex items-start gap-2">
-                      <StatusDot tone={severityTone(alert.severity)} />
-                      <div>
-                        <p className="font-medium">{alert.title}</p>
-                        <p className="text-xs op-60">
-                          {formatDate(alert.publishedAt)}
-                          {" "}
-                          ·
-                          {" "}
-                          {alert.sourceId}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-        </div>
-      </div>
     </div>
   )
 }

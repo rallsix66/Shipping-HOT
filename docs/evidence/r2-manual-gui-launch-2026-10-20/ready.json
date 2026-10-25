@@ -1,0 +1,103 @@
+{
+  "at": "2026-10-20T09:42:11.563Z",
+  "url": "http://127.0.0.1:4489/feed",
+  "http": [
+    {
+      "route": "/feed",
+      "status": 200,
+      "bytes": 2161
+    },
+    {
+      "path": "/assets/index-KEO4BGGs.js",
+      "status": 200,
+      "bytes": 574940
+    },
+    {
+      "route": "/api/shipping/runtime",
+      "status": 200
+    },
+    {
+      "route": "/api/shipping/intel/manual",
+      "status": 200
+    },
+    {
+      "route": "/api/shipping/intel/items?sourceId=intel%3Ath-w01",
+      "status": 200
+    }
+  ],
+  "runtimeRunning": false,
+  "runtimeJobs": 5,
+  "counts": {
+    "ports": 0,
+    "feed_items": 0,
+    "intel_item": 0,
+    "intel_item_version": 0,
+    "intel_manual_action": 0,
+    "provider_usage": 0,
+    "provider_runtime": 0,
+    "sync_runs": 0,
+    "translation_cache": 0
+  },
+  "enabledSources": 0,
+  "totalSources": 42,
+  "translation": {
+    "enabled": false,
+    "monthlyBudget": 0
+  },
+  "metadata": [
+    {
+      "id": "default",
+      "schema_version": 29,
+      "bootstrap_completed_at": "2026-10-20T08:59:46.681Z",
+      "database_id": "ddfc3749-f886-4050-ba7e-aa94265bb5c2",
+      "last_migration_at": "2026-10-20T09:41:38.587Z",
+      "data_mode": "real"
+    }
+  ],
+  "manifestSHA": "74003b013dffb7b8dfd8fe514f638b352641efb6bc692b41df49f99013fad563",
+  "databaseSHA": "0cc514e702608070685811a05945bab1146cf4ddc78556ba2cadd2d50bc1d5cd",
+  "blockedOutboundAttempts": 0,
+  "sourceRequests": 0,
+  "POSTs": 0,
+  "browserOperated": false,
+  "GUI": "NOT_RUN; awaiting user clicks",
+  "execSessionId": 88802,
+  "stop": "write_stdin session_id=88802 chars=stop\\n",
+  "process": {
+    "pid": 62716,
+    "execSessionId": 88802,
+    "cwd": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020\\.tmp\\s7-r2-manual-ready-20261020",
+    "entry": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020\\dist\\output\\server\\index.mjs",
+    "entrySHA": "c55b32d9d6a69e31ec6e939f9791be3f2c62704c9704c6466e21af98e3d7c763",
+    "controlledStop": "write_stdin session_id=88802 with literal stop followed by newline; Nitro SIGTERM graceful handler"
+  },
+  "build": {
+    "at": "2026-10-20T09:37:08.814Z",
+    "finishedAt": "2026-10-20T09:37:31.519Z",
+    "rawExit": 0,
+    "candidate": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020",
+    "filesSHAEqual": true,
+    "sourceFilesCompared": 31,
+    "sourceSHAEqual": true,
+    "manualIntelSHA": "55bfc2e882f5c3d21773337e0e6d7c68eed398afba4b898d1f0df5701fbc6de2",
+    "testSHA": "758c08d293607c93d20a3ba233820b86313183e1790debe1f09dbce4c8bc3cda"
+  },
+  "beforeCounts": {
+    "ports": 0,
+    "feed_items": 0,
+    "intel_item": 0,
+    "intel_item_version": 0,
+    "intel_manual_action": 0,
+    "provider_usage": 0,
+    "provider_runtime": 0,
+    "sync_runs": 0,
+    "translation_cache": 0
+  },
+  "initialStartupMetadataOnly": "app_metadata.last_migration_at and SQLite file hash changed during normal initialization; schema/database identity and all business/activity counts unchanged; original DB and manifest retained, no reseed/reset",
+  "network": "process-local outbound transport guard; numeric127.0.0.1 bind resolves locally without DNS; 9 denial self-tests plus guarded bind passed; no OS network/CA/proxy modifications",
+  "portCheck": "Get-NetTCPConnection OS access denied; no retry/process information requested; supported Node exclusive bind verified4489 free",
+  "productionOr5173Operations": 0,
+  "manualPOSTs": 0,
+  "P2": "independent review CLOSED per parent",
+  "remainingS7": "offline preparation limited acceptance; real GUI pending"
+}

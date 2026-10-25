@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest"
+import { Readability } from "@mozilla/readability"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { type ArticleSourcePolicy, canonicalArticleBlocks, normalizeArticleBlockText } from "@shared/article"
 import { extractArticle } from "./article-extractor"
 
@@ -109,5 +110,79 @@ describe("extractArticle", () => {
     const rowCollapsed = [{ id: "b0", blockKey: "0", order: 0, type: "table" as const, text: "Berth | Status 1 | Closed", metadata: { header: true, columns: 2 } }]
     expect(normalizeArticleBlockText(rowPreserved[0].text)).toBe(normalizeArticleBlockText(rowCollapsed[0].text))
     expect(canonicalArticleBlocks(rowPreserved)).toBe(canonicalArticleBlocks(rowCollapsed))
+  })
+})
+
+describe("generic Readability articles (offline)", () => {
+  const genericPolicy: ArticleSourcePolicy = { ...policy, selectors: undefined }
+  const url = "https://www.portshekou.com/notices/current"
+  const prose = "The port authority published operational guidance for safe cargo handling, berth access and the revised terminal working arrangements. Operators should review the official timetable and coordinate arrival before dispatch. "
+  const body = Array.from({ length: 6 }, (_, i) => `<p>Section ${i + 1}. ${prose.repeat(2)}</p>`).join("")
+  const page = (content: string, lang = "en") => `<html lang="${lang}"><head><title>Cargo handling guidance</title></head><body><div id="story"><h1>Cargo handling guidance</h1>${content}</div></body></html>`
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
+  })
+
+  it("finds generic prose, removes navigation interference and keeps structured blocks and safe links", () => {
+    const chrome = `<div class="menu">${Array.from({ length: 50 }, (_, i) => `<a href="/menu/${i}">Navigation ${i}</a>`).join(" ")}</div>`
+    const markup = page(`<h2>Terminal arrangements</h2>${body}<p>${prose}<a href="../attachment?id=5&utm_source=test#part">Official attachment</a></p><ol><li>First procedure</li><li>Second procedure</li></ol><table><thead><tr><th>Berth</th><th>Status</th></tr></thead><tbody><tr><td>1</td><td>Closed</td></tr><tr><td>2</td><td>Open</td></tr></tbody></table>`).replace("<div id=\"story\">", `${chrome}<div id="story">`)
+    const result = extractArticle(markup, url, genericPolicy)
+    expect(result).toMatchObject({ status: "complete", title: "Cargo handling guidance", language: "en" })
+    expect(result.blocks.map(b => b.text).join(" ")).not.toContain("Navigation")
+    expect(result.blocks).toContainEqual(expect.objectContaining({ type: "heading", text: "Terminal arrangements", metadata: { level: 2 } }))
+    expect(result.blocks).toContainEqual(expect.objectContaining({ type: "list", text: "First procedure • Second procedure", metadata: { ordered: true } }))
+    expect(result.blocks).toContainEqual(expect.objectContaining({ type: "table", text: "Berth | Status\n1 | Closed\n2 | Open", metadata: { header: true, columns: 2 } }))
+    expect(result.blocks.find(b => b.metadata?.href)?.metadata?.href).toBe("https://www.portshekou.com/attachment?id=5")
+    expect(result.blocks.filter(b => b.type === "paragraph")).toHaveLength(7)
+  })
+
+  it.each([
+    ["zh-CN", "港口作业通知：船舶靠泊及货物装卸安排已调整，请码头运营方核对官方通告、协调车辆到港时间，并按照安全要求组织作业。"],
+    ["th", "ประกาศการท่าเรือเกี่ยวกับการขนส่งสินค้า ผู้ประกอบการต้องตรวจสอบตารางเวลาทำการและปฏิบัติตามข้อกำหนดความปลอดภัยของท่าเรือ "],
+    ["vi", "Thông báo cảng biển về lịch khai thác hàng hóa. Doanh nghiệp cần kiểm tra thông tin chính thức, phối hợp thời gian đến cảng và tuân thủ yêu cầu an toàn. "],
+  ])("retains %s source text without language or timezone inference", (lang, text) => {
+    const result = extractArticle(page(`<h2>Notice</h2><p>${text.repeat(6)}</p><p>${text.repeat(6)}</p>`, lang), url, genericPolicy)
+    expect(result.status).toBe("complete")
+    expect(result.language).toBe(lang)
+    expect(result.blocks.filter(b => b.type === "paragraph").map(b => b.text)).toEqual([text.repeat(6).trim(), text.repeat(6).trim()])
+  })
+
+  it("never executes scripts, handlers or loads resources and ignores a malicious base", () => {
+    const fetcher = vi.fn(() => {
+      throw new Error("external resource requested")
+    })
+    vi.stubGlobal("fetch", fetcher)
+    const marker = vi.fn()
+    vi.stubGlobal("articleScriptProbe", marker)
+    const markup = page(`${body}<p>${prose}<a href="../safe">Safe attachment</a><a href="javascript:articleScriptProbe()">Unsafe link</a></p><img src="https://invalid.example/remote" onload="articleScriptProbe()"><iframe src="https://invalid.example/frame"></iframe><script>articleScriptProbe(); fetch('https://invalid.example/script')</script>`).replace("<head>", "<head><base href=\"https://attacker.invalid/\"><link rel=\"stylesheet\" href=\"https://invalid.example/style\">")
+    const result = extractArticle(markup, url, genericPolicy)
+    expect(result.status).toBe("complete")
+    expect(result.blocks.find(b => b.metadata?.href)?.metadata?.href).toBe("https://www.portshekou.com/safe")
+    expect(fetcher).not.toHaveBeenCalled()
+    expect(marker).not.toHaveBeenCalled()
+    expect(JSON.stringify(result.blocks)).not.toContain("articleScriptProbe")
+  })
+
+  it.each(["", "<html><body></body></html>", "<nav><a href='/'>Home only</a></nav>", "<p>A tiny fragment.</p>"])("rejects empty or unconfirmed generic content without whole-body fallback: %s", (markup) => {
+    expect(extractArticle(markup, url, genericPolicy)).toEqual({ blocks: [], status: "source_unavailable" })
+  })
+
+  it("fails closed when Readability cannot parse, with no alternate extractor", () => {
+    vi.spyOn(Readability.prototype, "parse").mockImplementation(() => {
+      throw new Error("DOM parsing failure")
+    })
+    expect(extractArticle(page(body), url, genericPolicy)).toEqual({ blocks: [], status: "source_unavailable" })
+  })
+
+  it("keeps explicit containers authoritative and the original completeness contract", () => {
+    const parse = vi.spyOn(Readability.prototype, "parse")
+    expect(extractArticle(page(body), url, policy)).toEqual({ blocks: [], status: "source_unavailable" })
+    const result = extractArticle("<div class=\"content\"><h2>Short notice</h2><p>Short body.</p></div>", url, policy)
+    expect(result.status).toBe("incomplete")
+    expect(result.blocks.map(b => b.text)).toEqual(["Short notice", "Short body."])
+    expect(parse).not.toHaveBeenCalled()
+    expect(extractArticle(page(body), url, { ...genericPolicy, completeness: { minParagraphs: 20 } }).status).toBe("incomplete")
   })
 })

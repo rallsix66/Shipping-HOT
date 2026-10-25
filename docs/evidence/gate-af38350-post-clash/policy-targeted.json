@@ -1,0 +1,9 @@
+{
+  "name": "policy-targeted",
+  "command": "pnpm exec vitest run -c vitest.config.ts server/intel/post-clash-index.test.ts server/intel/thai-document-index.test.ts server/intel/public-index-candidates-collect.test.ts server/intel/html-index-candidates-collect.test.ts server/intel/sources/html-index-candidates.test.ts server/intel/sources/web-list.test.ts server/intel/sources/web-list-conflicts.test.ts server/intel/web-list-conflicts-collect.test.ts server/intel/json-list-collect.test.ts server/intel/web-list-collect.test.ts server/intel/adaptive.test.ts server/runtime/intel-production.test.ts server/runtime/intel-bootstrap.test.ts server/intel/collect.test.ts",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\post-clash-final-build",
+  "sha": "af38350709d2fa4c9e9b98accbae8bc7ef678da1",
+  "startedAt": "2026-10-14T09:19:23.077Z",
+  "endedAt": "2026-10-14T09:19:26.509Z",
+  "rawExit": 0
+}

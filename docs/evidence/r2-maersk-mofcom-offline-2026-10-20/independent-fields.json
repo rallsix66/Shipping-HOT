@@ -1,0 +1,324 @@
+{
+  "createdAt": "2026-10-20T08:03:30.857Z",
+  "networkRequests": 0,
+  "raw": [
+    {
+      "sourceId": "XX-K01",
+      "path": ".tmp/r2-three-url-diagnostic-20261020/maersk/response-32k-20261020.bin",
+      "expected": "9e7271c8d37da91032150dfff719de6fb7fd8d30426cfad50ae123e10fd72673",
+      "bytes": 46251,
+      "sha256": "9e7271c8d37da91032150dfff719de6fb7fd8d30426cfad50ae123e10fd72673"
+    },
+    {
+      "sourceId": "CN-T01",
+      "path": ".tmp/cn-t01-https-20261020/response-after-save-20261020.bin",
+      "expected": "ab5e3780d9988fe7032458a05ad00adf4f6e66bb891aaaed385f8e2f515d340f",
+      "bytes": 20318,
+      "sha256": "ab5e3780d9988fe7032458a05ad00adf4f6e66bb891aaaed385f8e2f515d340f"
+    }
+  ],
+  "Maersk": {
+    "independentEvidence": "docs/evidence/r2-maersk-32k-live-2026-10-20/field-audit.json",
+    "rows": [
+      {
+        "title": "Maersk partners with L&T for its first planned drydocking in India",
+        "url": "https://www.maersk.com/news/articles/2026/10/20/maersk-lt-first-planned-drydocking-india-kattupalli",
+        "rawDate": "20 Oct 2026",
+        "calendarDay": "2026-10-20"
+      },
+      {
+        "title": "How adidas scaled sporting event logistics with Maersk Ground Freight",
+        "url": "https://www.maersk.com/news/articles/2026/10/19/adidas-sporting-event-logistics",
+        "rawDate": "19 Oct 2026",
+        "calendarDay": "2026-10-19"
+      },
+      {
+        "title": "Maersk completes the world’s largest ethanol bunkering in Singapore",
+        "url": "https://www.maersk.com/news/articles/2026/10/19/maersk-completes-worlds-largest-ethanol-bunkering-singapore",
+        "rawDate": "19 Oct 2026",
+        "calendarDay": "2026-10-19"
+      },
+      {
+        "title": "Maersk Latin America Market Update – October, 2026",
+        "url": "https://www.maersk.com/news/articles/2026/10/14/latin-america-market-update-october",
+        "rawDate": "14 Oct 2026",
+        "calendarDay": "2026-10-14"
+      },
+      {
+        "title": "IMEA Maersk Market Update – October 2026",
+        "url": "https://www.maersk.com/news/articles/2026/10/13/india-middle-east-and-africa-market-update-october",
+        "rawDate": "13 Oct 2026",
+        "calendarDay": "2026-10-13"
+      },
+      {
+        "title": "Discover supply chain innovation at Pharma Asia International Conference 2026",
+        "url": "https://www.maersk.com/news/articles/2026/10/08/pharma-asia-international-conference",
+        "rawDate": "8 Oct 2026",
+        "calendarDay": "2026-10-08"
+      },
+      {
+        "title": "Maersk Supply Chain Leaders Forum 2026: strengthening supply chains through AI",
+        "url": "https://www.maersk.com/news/articles/2026/10/08/maersk-supply-chain-leaders-forum-strengthening-supply-chains-through-ai",
+        "rawDate": "8 Oct 2026",
+        "calendarDay": "2026-10-08"
+      },
+      {
+        "title": "Maersk Europe Market Update October 2026",
+        "url": "https://www.maersk.com/news/articles/2026/10/07/europe-market-update-october",
+        "rawDate": "7 Oct 2026",
+        "calendarDay": "2026-10-07"
+      },
+      {
+        "title": "Maersk North America Market Update — October 2026",
+        "url": "https://www.maersk.com/news/articles/2026/10/07/north-america-market-update-october",
+        "rawDate": "7 Oct 2026",
+        "calendarDay": "2026-10-07"
+      },
+      {
+        "title": "Maersk Asia Pacific Market Update – October 2026",
+        "url": "https://www.maersk.com/news/articles/2026/10/07/maersk-asia-pacific-market-update-october",
+        "rawDate": "7 Oct 2026",
+        "calendarDay": "2026-10-07"
+      },
+      {
+        "title": "RAIL FORWARD: Delivering India's manufacturing growth through rail logistics",
+        "url": "https://www.maersk.com/news/articles/2026/09/30/rail-forward-india",
+        "rawDate": "30 Sep 2026",
+        "calendarDay": "2026-09-30"
+      },
+      {
+        "title": "Maersk completes first U.S. ethanol bunkering of a deep-sea container vessel",
+        "url": "https://www.maersk.com/news/articles/2026/09/28/maersk-completes-first-us-ethanol-bunkering-of-a-deep-sea-container-vessel",
+        "rawDate": "28 Sep 2026",
+        "calendarDay": "2026-09-28"
+      },
+      {
+        "title": "Enhanced connectivity between the Western Mediterranean and West Africa",
+        "url": "https://www.maersk.com/news/articles/2026/10/19/western-mediterranean-west-africa-network-enhancements",
+        "rawDate": "19 Oct 2026",
+        "calendarDay": "2026-10-19"
+      },
+      {
+        "title": "Further enhancements to the Gemini network Gemini Service",
+        "url": "https://www.maersk.com/news/articles/2026/10/19/gemini-network-service-enhancements-ae18",
+        "rawDate": "19 Oct 2026",
+        "calendarDay": "2026-10-19"
+      },
+      {
+        "title": "Network update: ME2 and AE12",
+        "url": "https://www.maersk.com/news/articles/2026/10/19/network-update-me2-ae12-jeddah-colombo",
+        "rawDate": "19 Oct 2026",
+        "calendarDay": "2026-10-19"
+      },
+      {
+        "title": "Customer Advisory - European and Mediterranean countries - Transport Document Amendment Fee Export (AME) Revised Egypt rates and Algeria implementation.",
+        "url": "https://www.maersk.com/news/articles/2026/10/19/transport-document-amendment-fee-export-europe-world",
+        "rawDate": "19 Oct 2026",
+        "calendarDay": "2026-10-19"
+      },
+      {
+        "title": "Booking Vehicles for Container Transport",
+        "url": "https://www.maersk.com/news/articles/2026/10/19/booking-vehicles-for-container-transport",
+        "rawDate": "19 Oct 2026",
+        "calendarDay": "2026-10-19"
+      },
+      {
+        "title": "U.S. & Canada Emergency Intermodal Fuel Surcharge Inland Rail Ramps and Container Yards",
+        "url": "https://www.maersk.com/news/articles/2026/10/16/us-canada-emergency-intermodal-fuel-surcharge-november",
+        "rawDate": "16 Oct 2026",
+        "calendarDay": "2026-10-16"
+      }
+    ],
+    "count": 18,
+    "groups": [
+      {
+        "group": "Latest news",
+        "count": 12
+      },
+      {
+        "group": "Advisories",
+        "count": 3
+      },
+      {
+        "group": "Rate announcements",
+        "count": 3
+      }
+    ],
+    "displayedDateRange": {
+      "earliest": "2026-09-28",
+      "latest": "2026-10-20",
+      "counts": {
+        "2026-09-28": 1,
+        "2026-09-30": 1,
+        "2026-10-07": 3,
+        "2026-10-08": 2,
+        "2026-10-13": 1,
+        "2026-10-14": 1,
+        "2026-10-16": 1,
+        "2026-10-19": 7,
+        "2026-10-20": 1
+      },
+      "all2026": true,
+      "newestSameGregorianDayAsCapture": true,
+      "publicationFreshnessOrUTCCertified": false
+    }
+  },
+  "CN_T01": {
+    "catalogURL": "http://www.mofcom.gov.cn/zcfb/index.html",
+    "capturedURL": "https://www.mofcom.gov.cn/zcfb/index.html",
+    "sameHostPath": true,
+    "documentTitle": "政策发布",
+    "listHeading": "最新政策",
+    "listIdentity": "eight direct li under the ul following Latest policy heading; own primary title anchor and direct sibling date span; other interpretation/cards excluded",
+    "rows": [
+      {
+        "index": 10,
+        "title": "商务部 海关总署公告2026年第52号 公布进一步优化两用物项出口管制质疑和鉴别工作有关事项",
+        "titleAttribute": "商务部 海关总署公告2026年第52号 公布进一步优化两用物项出口管制质疑和鉴别工作有关事项",
+        "href": "/zcfb/zc/art/2026/art_531d1a665fab4dafb810927f37788e24.html",
+        "url": "https://www.mofcom.gov.cn/zcfb/zc/art/2026/art_531d1a665fab4dafb810927f37788e24.html",
+        "rawDate": "2026-10-19",
+        "calendarDay": "2026-10-19",
+        "precision": "day",
+        "role": "unknown",
+        "timezone": "missing",
+        "publishedAt": null,
+        "httpsEligible": true,
+        "interpretationLinks": [],
+        "bodyStored": false
+      },
+      {
+        "index": 11,
+        "title": "商务部 海关总署公告2026年第51号 公布优化调整挖泥船相关物项出口管制措施的决定",
+        "titleAttribute": "商务部 海关总署公告2026年第51号 公布优化调整挖泥船相关物项出口管制措施的决定",
+        "href": "/zcfb/zc/art/2026/art_f4ab31f0b7e94c159b357e39f5a12fc9.html",
+        "url": "https://www.mofcom.gov.cn/zcfb/zc/art/2026/art_f4ab31f0b7e94c159b357e39f5a12fc9.html",
+        "rawDate": "2026-10-19",
+        "calendarDay": "2026-10-19",
+        "precision": "day",
+        "role": "unknown",
+        "timezone": "missing",
+        "publishedAt": null,
+        "httpsEligible": true,
+        "interpretationLinks": [],
+        "bodyStored": false
+      },
+      {
+        "index": 12,
+        "title": "商务部 海关总署公告2026年第50号 公布对盾构机等物项实施出口管制的决定",
+        "titleAttribute": "商务部 海关总署公告2026年第50号 公布对盾构机等物项实施出口管制的决定",
+        "href": "/zcfb/zc/art/2026/art_1628d886f39840489513af242f93517b.html",
+        "url": "https://www.mofcom.gov.cn/zcfb/zc/art/2026/art_1628d886f39840489513af242f93517b.html",
+        "rawDate": "2026-10-19",
+        "calendarDay": "2026-10-19",
+        "precision": "day",
+        "role": "unknown",
+        "timezone": "missing",
+        "publishedAt": null,
+        "httpsEligible": true,
+        "interpretationLinks": [],
+        "bodyStored": false
+      },
+      {
+        "index": 13,
+        "title": "商务部 海关总署 中央军委装备发展部公告2026年第49号 公布优化调整无人机相关物项出口管制措施的决定",
+        "titleAttribute": "商务部 海关总署 中央军委装备发展部公告2026年第49号 公布优化调整无人机相关物项出口管制措施的决定",
+        "href": "/zcfb/zc/art/2026/art_b2fa4e60bcd24bdf8c658e476b808785.html",
+        "url": "https://www.mofcom.gov.cn/zcfb/zc/art/2026/art_b2fa4e60bcd24bdf8c658e476b808785.html",
+        "rawDate": "2026-10-19",
+        "calendarDay": "2026-10-19",
+        "precision": "day",
+        "role": "unknown",
+        "timezone": "missing",
+        "publishedAt": null,
+        "httpsEligible": true,
+        "interpretationLinks": [],
+        "bodyStored": false
+      },
+      {
+        "index": 14,
+        "title": "商务部等9部门关于加快推进科技兴商的意见",
+        "titleAttribute": "商务部等9部门关于加快推进科技兴商的意见",
+        "href": "/zcfb/zc/art/2026/art_202618c40d1943e9abfed97cef83e671.html",
+        "url": "https://www.mofcom.gov.cn/zcfb/zc/art/2026/art_202618c40d1943e9abfed97cef83e671.html",
+        "rawDate": "2026-10-19",
+        "calendarDay": "2026-10-19",
+        "precision": "day",
+        "role": "unknown",
+        "timezone": "missing",
+        "publishedAt": null,
+        "httpsEligible": true,
+        "interpretationLinks": [],
+        "bodyStored": false
+      },
+      {
+        "index": 15,
+        "title": "商务部 科技部公告2026年第48号 就修订《中国禁止出口限制出口技术目录》公开征求意见并对相关技术出口实施临时登记管理",
+        "titleAttribute": "商务部 科技部公告2026年第48号 就修订《中国禁止出口限制出口技术目录》公开征求意见并对相关技术出口实施临时登记管理",
+        "href": "http://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+        "url": "http://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+        "rawDate": "2026-10-16",
+        "calendarDay": "2026-10-16",
+        "precision": "day",
+        "role": "unknown",
+        "timezone": "missing",
+        "publishedAt": null,
+        "httpsEligible": false,
+        "interpretationLinks": [
+          {
+            "href": "http://www.mofcom.gov.cn/zcjd/dwmy/art/2026/art_c8712c94f11f49de96c190f876777e44.html",
+            "label": "[政策解读]"
+          }
+        ],
+        "bodyStored": false
+      },
+      {
+        "index": 16,
+        "title": "公布2027年化肥进口关税配额总量、分配原则及相关程序",
+        "titleAttribute": "公布2027年化肥进口关税配额总量、分配原则及相关程序",
+        "href": "/zcfb/zc/art/2026/art_a16bf7fda92441fcb3626866b86a19f4.html",
+        "url": "https://www.mofcom.gov.cn/zcfb/zc/art/2026/art_a16bf7fda92441fcb3626866b86a19f4.html",
+        "rawDate": "2026-10-14",
+        "calendarDay": "2026-10-14",
+        "precision": "day",
+        "role": "unknown",
+        "timezone": "missing",
+        "publishedAt": null,
+        "httpsEligible": true,
+        "interpretationLinks": [],
+        "bodyStored": false
+      },
+      {
+        "index": 17,
+        "title": "商务部公告2026年第46号 2027年食糖、羊毛、毛条进口关税配额实施细则",
+        "titleAttribute": "商务部公告2026年第46号 2027年食糖、羊毛、毛条进口关税配额实施细则",
+        "href": "/zcfb/zc/art/2026/art_fd6a83b3c0fe416fb810384ae79ba473.html",
+        "url": "https://www.mofcom.gov.cn/zcfb/zc/art/2026/art_fd6a83b3c0fe416fb810384ae79ba473.html",
+        "rawDate": "2026-10-09",
+        "calendarDay": "2026-10-09",
+        "precision": "day",
+        "role": "unknown",
+        "timezone": "missing",
+        "publishedAt": null,
+        "httpsEligible": true,
+        "interpretationLinks": [],
+        "bodyStored": false
+      }
+    ],
+    "visibleRows": 8,
+    "eligibleHTTPSRows": 7,
+    "excludedOriginalHTTPRows": 1,
+    "uniqueURLs": 8,
+    "displayedDateRange": {
+      "earliest": "2026-10-09",
+      "latest": "2026-10-19",
+      "captureDay": "2026-10-20",
+      "calendarDayDifferenceNewest": 1,
+      "calendarDayDifferenceOldest": 11
+    },
+    "publicationRoleVerified": false,
+    "timezoneKnown": false,
+    "publicationInstant": null,
+    "scope": "only complete captured policy-list HTML, not all categories, archives, pagination or detail pages"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "actualLocationPresent": true,
+  "extraTargetGetAllowed": true,
+  "extraTargetGetAttempted": true,
+  "actualLocationOnly": true,
+  "checks": {
+    "noControlCharacters": true,
+    "sameApprovedHost": true,
+    "https": true,
+    "noCredentials": true,
+    "noAbnormalPort": true,
+    "noFragment": true,
+    "notSelfRedirect": true
+  },
+  "resolved": {
+    "protocol": "https:",
+    "hostname": "jdih.kemenkeu.go.id",
+    "port": null,
+    "pathname": "/home",
+    "queryPresent": false,
+    "querySha256": null,
+    "credentialsPresent": false,
+    "fragmentPresent": false
+  },
+  "secondRedirectFollowed": false
+}

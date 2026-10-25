@@ -1,0 +1,9 @@
+{
+  "name": "build",
+  "command": "pnpm build",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\manual-intel-final3-build",
+  "sha": "f312a002445f788ed3322dd20273fa0dfd3b01cd",
+  "startedAt": "2026-10-14T04:39:56.972Z",
+  "endedAt": "2026-10-14T04:40:14.261Z",
+  "rawExit": 0
+}

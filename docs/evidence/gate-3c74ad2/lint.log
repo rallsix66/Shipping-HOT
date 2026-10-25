@@ -1,0 +1,12 @@
+# command: pnpm lint
+# full_sha: 3c74ad20004f8bde9797512cea699b9a70b5ce31
+# started: 2026-10-13T02:03:11.904Z
+# ---- stdout ----
+
+> shipping-hot@0.0.41 lint D:\try one\Shipping HOT
+> eslint
+
+
+# ---- stderr ----
+
+# raw_exit_code: 0

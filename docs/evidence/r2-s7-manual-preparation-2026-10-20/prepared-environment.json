@@ -1,0 +1,78 @@
+{
+  "generatedAt": "2026-10-20T08:59:46.686Z",
+  "runDir": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020\\.tmp\\s7-r2-manual-ready-20261020",
+  "databasePath": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020\\.tmp\\s7-r2-manual-ready-20261020\\.data\\shipping-hot-v3.sqlite3",
+  "schemaVersion": 29,
+  "dataMode": "real",
+  "preparation": "R2-7 manual only; no app server or browser launched",
+  "fixtureDataProvenance": "original synthetic manual input; no real official material, provider or network call",
+  "manualAcceptance": {
+    "synthetic": true,
+    "notOfficialContent": true,
+    "sourceId": "intel:th-w01",
+    "catalogId": "TH-W01",
+    "operator": "S7 合成验收",
+    "url": "https://www.tmd.go.th/en/api/xml/CAP",
+    "title": "【S7合成】人工交互材料，非官方内容",
+    "publishedAt": "",
+    "bodyA": "S7 原创合成正文 A；不是真实官方通知。",
+    "bodyB": "S7 原创合成正文 B；只用于修订断言。",
+    "checkedEmptySourceId": "intel:manual:cn-p05",
+    "checkedEmptyCatalogId": "CN-P05",
+    "invalidPublishedAt": "S7-not-an-ISO-date",
+    "expected": {
+      "initialMaterials": 0,
+      "afterSaveMaterials": 1,
+      "afterRepeatVersions": 1,
+      "afterRevisionVersions": 2,
+      "publishedAt": null,
+      "providerCalls": 0,
+      "guiStatus": "NOT_RUN"
+    }
+  },
+  "requestedPaths": [
+    "/feed"
+  ],
+  "applicationServerStarted": false,
+  "browserStarted": false,
+  "plannedBind": {
+    "host": "127.0.0.1",
+    "port": 4489,
+    "portAvailability": "NOT_PROBED"
+  },
+  "builtEntry": "D:\\try one\\Shipping HOT\\.tmp\\s7-manual-clean-20261020\\dist\\output\\server\\index.mjs",
+  "databaseSHA256": "f5f243fe2901f193ca1a32f3af71cfdd0757fe6031a963f85818ef2f070f3e70",
+  "manifestSHA256": "74003b013dffb7b8dfd8fe514f638b352641efb6bc692b41df49f99013fad563",
+  "counts": {
+    "ports": 0,
+    "feed_items": 0,
+    "intel_item": 0,
+    "intel_item_version": 0,
+    "intel_manual_action": 0,
+    "provider_usage": 0,
+    "provider_runtime": 0,
+    "sync_runs": 0,
+    "translation_cache": 0
+  },
+  "sources": [
+    {
+      "id": "intel:id-w01",
+      "enabled": 0,
+      "persistence": "excerpt_only"
+    },
+    {
+      "id": "intel:manual:cn-p05",
+      "enabled": 0,
+      "persistence": "disallowed"
+    },
+    {
+      "id": "intel:th-w01",
+      "enabled": 0,
+      "persistence": "full"
+    }
+  ],
+  "secretFilePresent": false,
+  "settings": "Translation enabled=false/monthlyBudget=0 verified by native seed test; no credentials copied",
+  "fixtureOnly": true,
+  "sourceNetworkRequests": 0
+}

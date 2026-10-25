@@ -1,0 +1,23 @@
+{
+  "seed": {
+    "id": "bounded:MY-T01",
+    "catalogId": "MY-T01",
+    "name": "MY-T01",
+    "kind": "rss",
+    "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+    "enabled": false,
+    "persistence": "disallowed",
+    "allowedHosts": [
+      "www.mof.gov.my"
+    ],
+    "allowedContentTypes": [
+      "application/rss+xml",
+      "application/atom+xml",
+      "application/rdf+xml",
+      "application/xml",
+      "text/xml"
+    ],
+    "intervalMs": 3600000
+  },
+  "role": "Isolated evidence-only configuration, not production registry/candidate or active seed"
+}

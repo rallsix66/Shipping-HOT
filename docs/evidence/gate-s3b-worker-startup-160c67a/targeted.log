@@ -1,0 +1,83 @@
+command: npx vitest run scripts/r2-intel-observe-worker-startup.test.ts scripts/r2-intel-observe.test.ts scripts/r2-intel-observe-logonserver.test.ts server/runtime/intel-observation.test.ts server/runtime/intel-observation-network.test.ts
+full_sha: 160c67a91698a44803df19e9585ac99c8827c8bb
+started: 2026-10-21T04:15:31.168Z
+finished: 2026-10-21T04:15:35.765Z
+raw_exit_code: 0
+--- stdout ---
+
+ RUN  v4.0.18 D:/wt-s3
+
+ ✓ server/runtime/intel-observation-network.test.ts (27 tests) 14ms
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'intel-collect'[39m,
+  providerId: [32m'intel-collect'[39m,
+  capability: [32m'intel_collect'[39m
+}
+[info] job success {
+  jobId: [32m'intel-collect'[39m,
+  providerId: [32m'intel-collect'[39m
+}
+[info] runtime stopped
+[info] runtime started {
+  jobs: [33m1[39m
+}
+[info] job started {
+  jobId: [32m'intel-collect'[39m,
+  providerId: [32m'intel-collect'[39m,
+  capability: [32m'intel_collect'[39m
+}
+[info] job success {
+  jobId: [32m'intel-collect'[39m,
+  providerId: [32m'intel-collect'[39m
+}
+[info] runtime stopped
+ ✓ scripts/r2-intel-observe-worker-startup.test.ts (9 tests) 907ms
+ ✓ server/runtime/intel-observation.test.ts (6 tests) 1099ms
+   ✓ uses one existing job, adaptive due times, license-scoped blocks and dedupe across ticks  370ms
+ ✓ scripts/r2-intel-observe.test.ts (34 tests) 2598ms
+   ✓ actual Node CLI resolves file/directory aliases and exits without starting on help or missing execute  947ms
+   ✓ actual execute CLI reaches bootstrap, zero-budget stop, read-only reopen and released ownership with an isolated home  1408ms
+ ✓ scripts/r2-intel-observe-logonserver.test.ts (11 tests) 2972ms
+   ✓ actual two-level CLI reaches exit 2 with parent LOGONSERVER synthetic marker, not visible to the business phase  1558ms
+   ✓ actual two-level CLI reaches exit 2 with parent LOGONSERVER absent, not visible to the business phase  1394ms
+
+ Test Files  5 passed (5)
+      Tests  87 passed (87)
+   Start at  12:15:32
+   Duration  3.60s (transform 1.74s, setup 0ms, import 3.47s, tests 7.59s, environment 0ms)
+
+
+--- stderr ---
+Duplicated imports "string", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/wt-s3/shared/annual-calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/wt-s3/shared/calendar.ts" has been ignored and "D:/wt-s3/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/wt-s3/shared/policy.ts" has been ignored and "D:/wt-s3/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/wt-s3/shared/policy.ts" has been ignored and "D:/wt-s3/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/wt-s3/shared/policy.ts" has been ignored and "D:/wt-s3/shared/promo-calendar.ts" is used
+

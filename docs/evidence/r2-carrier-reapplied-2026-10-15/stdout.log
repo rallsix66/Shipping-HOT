@@ -1,0 +1,10 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ .tmp/carrier-reapplied-20261015.test.ts (1 test) 806ms
+   ✓ two approved exact carrier-news catalogue targets: one OS DNS and at most one pinned index request each  805ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  10:38:27
+   Duration  1.51s (transform 219ms, setup 0ms, import 521ms, tests 806ms, environment 0ms)

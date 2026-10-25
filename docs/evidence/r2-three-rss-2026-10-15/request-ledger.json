@@ -1,0 +1,23 @@
+[
+  {
+    "id": "MY-C01",
+    "url": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
+    "reservedAt": "2026-10-15T04:10:40.716Z",
+    "state": "complete_response_captured",
+    "finishedAt": "2026-10-15T04:10:41.341Z"
+  },
+  {
+    "id": "MY-T01",
+    "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+    "reservedAt": "2026-10-15T04:10:41.717Z",
+    "state": "complete_response_captured",
+    "finishedAt": "2026-10-15T04:10:42.205Z"
+  },
+  {
+    "id": "PH-M01",
+    "url": "https://portcalls.com/feed/",
+    "reservedAt": "2026-10-15T04:10:42.306Z",
+    "state": "complete_response_captured",
+    "finishedAt": "2026-10-15T04:10:43.168Z"
+  }
+]

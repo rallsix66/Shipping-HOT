@@ -1,0 +1,21 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/public-index-final-build
+
+ ✓ server/intel/sources/web-list-conflicts.test.ts (12 tests) 57ms
+ ✓ server/intel/sources/web-list.test.ts (35 tests) 104ms
+ ✓ server/intel/sources/html-index-candidates.test.ts (24 tests) 71ms
+ ✓ server/intel/web-list-conflicts-collect.test.ts (3 tests) 240ms
+ ✓ server/intel/adaptive.test.ts (2 tests) 109ms
+ ✓ server/intel/html-index-candidates-collect.test.ts (4 tests) 325ms
+ ✓ server/intel/public-index-candidates-collect.test.ts (22 tests) 364ms
+ ✓ server/intel/json-list-collect.test.ts (7 tests) 479ms
+ ✓ server/intel/web-list-collect.test.ts (7 tests) 530ms
+ ✓ server/runtime/intel-production.test.ts (4 tests) 483ms
+ ✓ server/runtime/intel-bootstrap.test.ts (9 tests) 518ms
+ ✓ server/intel/collect.test.ts (22 tests) 955ms
+
+ Test Files  12 passed (12)
+      Tests  151 passed (151)
+   Start at  16:18:19
+   Duration  2.38s (transform 3.90s, setup 0ms, import 10.24s, tests 4.24s, environment 2ms)
+

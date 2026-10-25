@@ -1,9 +1,12 @@
 import { Buffer } from "node:buffer"
+import { X509Certificate } from "node:crypto"
 import { lookup as dnsLookup } from "node:dns/promises"
 import { request as httpRequest } from "node:http"
 import { request as httpsRequest } from "node:https"
 import type { ArticleSourcePolicy } from "@shared/article"
+import { consola } from "consola"
 import { articlePolicyHostResolves } from "#/services/source-policy"
+import { type ResponseDecoding, decodeResponse } from "#/services/response-decoding"
 
 export const ARTICLE_FETCH_DEFAULTS = {
   maxBytes: 512 * 1024,
@@ -20,24 +23,55 @@ export interface ResolvedAddress {
 export interface ArticleHttpResponse {
   status: number
   headers: Record<string, string | string[] | undefined>
-  body: string
+  /** Production transport returns bytes. Strings remain supported for existing UTF-8 test transports. */
+  body: string | Uint8Array
 }
 
 export type ArticleLookup = (hostname: string) => Promise<ResolvedAddress[]>
+/** Request-scoped public trust anchor, bound to one source and one exact host. No file/global trust mutation. */
+export interface SourceCaConfig {
+  sourceId: string
+  hostname: string
+  certificatePem: string
+}
+
+/** Explicit, request-scoped opt-in; only the approved Maersk URL may use 32 KiB. */
+export interface SourceHeaderLimitConfig {
+  sourceId: string
+  url: string
+  maxHeaderSize: number
+}
+
+const MAERSK_HEADER_LIMIT = { sourceId: "intel:xx-k01", url: "https://www.maersk.com/news", maxHeaderSize: 32768 } as const
+
+export interface ArticleTransportOptions {
+  timeoutMs: number
+  maxBytes: number
+  headers: Record<string, string>
+  signal?: AbortSignal
+  /** Validated by secureFetchArticle and selected independently for each HTTPS hop. */
+  caPem?: string
+  /** Resolved by secureFetchArticle. Undefined preserves Node's default. */
+  maxHeaderSize?: 32768
+}
 export type ArticleTransport = (
   url: URL,
   addresses: ResolvedAddress[],
-  options: { timeoutMs: number, maxBytes: number, headers: Record<string, string> },
+  options: ArticleTransportOptions,
 ) => Promise<ArticleHttpResponse>
 
 export interface SecureFetchOptions {
   policy: ArticleSourcePolicy
+  sourceCa?: SourceCaConfig
+  sourceHeaderLimit?: SourceHeaderLimitConfig
   lookup?: ArticleLookup
   transport?: ArticleTransport
   maxBytes?: number
   timeoutMs?: number
   maxRedirects?: number
   signal?: AbortSignal
+  /** Accept header; defaults to the article (HTML) value. Feed list requests pass their XML/HTML types. */
+  accept?: string
 }
 
 export interface SecureFetchSuccess {
@@ -46,6 +80,8 @@ export interface SecureFetchSuccess {
   finalUrl: string
   contentType?: string
   body: string
+  rawBody: Uint8Array
+  decoding: ResponseDecoding
   hops: number
 }
 
@@ -53,6 +89,8 @@ export interface SecureFetchFailure {
   ok: false
   code: string
   message: string
+  /** HTTP status for code 'http_error'. */
+  status?: number
 }
 
 function ipv4ToInt(address: string): number | null {
@@ -176,33 +214,76 @@ export function validatedLookup(addresses: readonly ResolvedAddress[]) {
   }
 }
 
-function defaultTransport(url: URL, addresses: ResolvedAddress[], options: { timeoutMs: number, maxBytes: number, headers: Record<string, string> }): Promise<ArticleHttpResponse> {
+/**
+ * Node request boundary. Exported only for the offline regression test, which
+ * mocks node:http/node:https; production callers go through secureFetchArticle.
+ * The GET request must be ended explicitly or it is never sent and only times out.
+ */
+export function defaultTransport(url: URL, addresses: ResolvedAddress[], options: ArticleTransportOptions): Promise<ArticleHttpResponse> {
+  if (options.maxHeaderSize !== undefined && options.maxHeaderSize !== MAERSK_HEADER_LIMIT.maxHeaderSize) return Promise.reject(new Error("source_header_limit_invalid"))
   return new Promise((resolve, reject) => {
-    const request = (url.protocol === "https:" ? httpsRequest : httpRequest)(url, {
+    let settled = false
+    let request: ReturnType<typeof httpRequest> | undefined
+    const fail = (error: unknown) => {
+      if (settled) return
+      settled = true
+      request?.destroy()
+      reject(error instanceof Error ? error : new Error("fetch failed"))
+    }
+    request = (url.protocol === "https:" ? httpsRequest : httpRequest)(url, {
       method: "GET",
       headers: options.headers,
       timeout: options.timeoutMs,
+      signal: options.signal,
       lookup: validatedLookup(addresses) as never,
+      ...(options.maxHeaderSize === undefined ? {} : { maxHeaderSize: options.maxHeaderSize }),
+      ...(url.protocol === "https:" ? { rejectUnauthorized: true, ...(options.caPem ? { ca: options.caPem } : {}) } : {}),
     }, (response) => {
       const chunks: Buffer[] = []
       let total = 0
       response.on("data", (chunk: Buffer) => {
         total += chunk.length
         if (total > options.maxBytes) {
-          response.destroy(new Error("body_too_large"))
+          response.destroy()
+          fail(new Error("body_too_large"))
           return
         }
         chunks.push(chunk)
       })
-      response.on("end", () => resolve({ status: response.statusCode ?? 0, headers: response.headers, body: Buffer.concat(chunks).toString("utf8") }))
-      response.on("error", reject)
+      response.on("end", () => {
+        if (settled) return
+        settled = true
+        resolve({ status: response.statusCode ?? 0, headers: response.headers, body: Buffer.concat(chunks) })
+      })
+      response.on("error", fail)
     })
-    request.on("timeout", () => request.destroy(new Error("fetch_timeout")))
-    request.on("error", reject)
+    request.on("timeout", () => fail(new Error("fetch_timeout")))
+    request.on("error", fail)
+    request.end()
   })
 }
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308])
+
+function validateSourceCa(config: SourceCaConfig, policy: ArticleSourcePolicy): boolean {
+  try {
+    if (!config || typeof config !== "object" || Array.isArray(config) || Object.keys(config).some(key => !["sourceId", "hostname", "certificatePem"].includes(key))) return false
+    if (config.sourceId !== policy.sourceId || typeof config.hostname !== "string" || !config.hostname) return false
+    const host = config.hostname.toLowerCase()
+    // A URL/port/wildcard/path is not an exact hostname. Keep the policy's exact-host boundary.
+    if (!/^[a-z0-9.-]+$/.test(host) || new URL(`https://${host}`).hostname !== host || !articlePolicyHostResolves(policy, host)) return false
+    if (typeof config.certificatePem !== "string" || config.certificatePem.length > 64 * 1024 || !/^\s*-----BEGIN CERTIFICATE-----\r?\n[A-Za-z0-9+/=\r\n]+-----END CERTIFICATE-----\s*$/.test(config.certificatePem)) return false
+    return new X509Certificate(config.certificatePem).ca
+  } catch {
+    return false
+  }
+}
+
+function validateSourceHeaderLimit(config: SourceHeaderLimitConfig, policy: ArticleSourcePolicy): boolean {
+  if (!config || typeof config !== "object" || Array.isArray(config) || Object.keys(config).some(key => !["sourceId", "url", "maxHeaderSize"].includes(key))) return false
+  return config.sourceId === MAERSK_HEADER_LIMIT.sourceId && policy.sourceId === config.sourceId
+    && config.url === MAERSK_HEADER_LIMIT.url && config.maxHeaderSize === MAERSK_HEADER_LIMIT.maxHeaderSize
+}
 
 /**
  * Connection-level SSRF-safe fetch. Every hop revalidates protocol, exact host,
@@ -218,7 +299,7 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
   const maxRedirects = options.maxRedirects ?? ARTICLE_FETCH_DEFAULTS.maxRedirects
   const headers = {
     "user-agent": "shipping-hot-article/1.0",
-    "accept": "text/html,application/xhtml+xml",
+    "accept": options.accept ?? "text/html,application/xhtml+xml",
     "accept-encoding": "identity",
   }
 
@@ -229,7 +310,22 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
     return failure("invalid_url", "Article URL is not a valid absolute URL")
   }
 
+  // Snapshot scalar configuration before DNS/transport awaits; callers cannot retarget trust mid-flight.
+  const sourceCa = options.sourceCa === undefined ? undefined : { ...options.sourceCa }
+  if (sourceCa !== undefined && (!validateSourceCa(sourceCa, options.policy) || current.protocol !== "https:")) {
+    return failure("source_ca_invalid", "Source CA configuration is invalid or not bound to this HTTPS source")
+  }
+  const sourceHeaderLimit = options.sourceHeaderLimit === undefined ? undefined : { ...options.sourceHeaderLimit }
+  if (sourceHeaderLimit !== undefined && (!validateSourceHeaderLimit(sourceHeaderLimit, options.policy) || target !== sourceHeaderLimit.url)) {
+    return failure("source_header_limit_invalid", "Response-header limit is invalid or not bound to this source and exact URL")
+  }
+
   for (let hop = 0; hop <= maxRedirects; hop++) {
+    if (options.signal?.aborted) return failure("fetch_timeout", "Request aborted")
+    // Opt-in is exact-URL-only: a different redirect target is refused before its DNS lookup.
+    if (sourceHeaderLimit !== undefined && (!validateSourceHeaderLimit(sourceHeaderLimit, options.policy) || current.href !== sourceHeaderLimit.url)) {
+      return failure("source_header_limit_invalid", "Response-header limit does not apply to this redirect target")
+    }
     if (current.username || current.password) return failure("credentials_not_allowed", "URL credentials are not allowed")
     const protocolError = validateProtocol(current, options.policy)
     if (protocolError) return protocolError
@@ -245,9 +341,12 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
     if (addresses.length === 0) return failure("dns_empty", `No addresses resolved for ${current.hostname}`)
     const blocked = addresses.find(isBlockedAddress)
     if (blocked) return failure("blocked_address", `Resolved address is not a public address: ${blocked.address}`)
+    if (sourceHeaderLimit !== undefined && !validateSourceHeaderLimit(sourceHeaderLimit, options.policy)) return failure("source_header_limit_invalid", "Response-header source binding changed")
     let response: ArticleHttpResponse
     try {
-      response = await transport(current, addresses, { timeoutMs, maxBytes, headers })
+      // Never carry a previous hop's trust anchor to another host or another source.
+      const caPem = sourceCa && current.protocol === "https:" && current.hostname === sourceCa.hostname.toLowerCase() ? sourceCa.certificatePem : undefined
+      response = await transport(current, addresses, { timeoutMs, maxBytes, headers, signal: options.signal, ...(caPem ? { caPem } : {}), ...(sourceHeaderLimit ? { maxHeaderSize: MAERSK_HEADER_LIMIT.maxHeaderSize } : {}) })
     } catch (error) {
       const message = error instanceof Error ? error.message : "fetch failed"
       return failure(message === "body_too_large" ? "body_too_large" : message === "fetch_timeout" ? "fetch_timeout" : "fetch_failed", message)
@@ -266,13 +365,24 @@ export async function secureFetchArticle(target: string, options: SecureFetchOpt
       current = next
       continue
     }
-    if (response.status >= 400) return failure("http_error", `Article request failed with status ${response.status}`)
+    if (response.status >= 400) return { ...failure("http_error", `Article request failed with status ${response.status}`), status: response.status }
     const contentType = headerValue(response.headers, "content-type")
     const mime = contentType?.split(";")[0]?.trim().toLowerCase()
     const allowed = options.policy.allowedContentTypes.map(type => type.toLowerCase())
     if (!mime) return failure("content_type_missing", "Response had no Content-Type header")
     if (!allowed.includes(mime)) return failure("content_type_unsupported", `Unsupported content type: ${mime}`)
-    return { ok: true, status: response.status, finalUrl: current.toString(), contentType, body: response.body, hops: hop }
+    const rawBody = typeof response.body === "string" ? Buffer.from(response.body, "utf8") : response.body
+    // Enforce the same pre-decode limit for injected transports as the Node transport.
+    if (rawBody.byteLength > maxBytes) return failure("body_too_large", "Response exceeds the byte limit")
+    try {
+      const decoded = decodeResponse(rawBody, contentType!)
+      // Metadata only: no response body, URL, cookies or credentials in the audit record.
+      consola.info("source response decoded", { sourceId: options.policy.sourceId, ...decoded.decoding })
+      return { ok: true, status: response.status, finalUrl: current.toString(), contentType, ...decoded, rawBody, hops: hop }
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "encoding_invalid"
+      return failure(code, "Response encoding is unsupported or the byte sequence is invalid")
+    }
   }
   return failure("redirect_limit", "Too many redirects")
 }

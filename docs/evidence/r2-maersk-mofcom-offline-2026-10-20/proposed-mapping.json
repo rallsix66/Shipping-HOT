@@ -1,0 +1,80 @@
+{
+  "type": "PROPOSED_ONLY_NOT_APPLIED",
+  "at": "2026-10-20T08:16:12.906Z",
+  "reviewRequired": true,
+  "matrix": {
+    "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+    "sha256": "886dac164d6a1bad8c3aa5536faacc43bec94b6fe3aa41a1d3888ec4678579c0",
+    "currentR2_4": "26/39",
+    "currentR2_5": "24/34",
+    "unchanged": true
+  },
+  "entries": [
+    {
+      "id": "XX-K01",
+      "catalogURL": "https://www.maersk.com/news",
+      "proposedR2_4": {
+        "verdict": "OK",
+        "scope": "limited single complete original GET with approved exact32KiB budget; no sustained/production claim"
+      },
+      "proposedR2_5": {
+        "verdict": "PASS",
+        "scope": "18/18 initial HTML own-title/link/raw Gregorian day -> actual collector -> metadata-only SQLite -> idempotent repeat -> reopen; role/timezone/instant remain unknown"
+      },
+      "actualFetchEvidence": "docs/evidence/r2-maersk-32k-live-2026-10-20/request-ledger.json",
+      "offlineEvidence": "replay-XX-K01.json",
+      "date": {
+        "format": "d Mon YYYY",
+        "role": "unknown",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "publicationInstant": null
+      },
+      "sourceEnabled": false,
+      "productionSelectable": false
+    },
+    {
+      "id": "CN-T01",
+      "catalogURL": "http://www.mofcom.gov.cn/zcfb/index.html",
+      "verifiedSameProductHTTPS": "https://www.mofcom.gov.cn/zcfb/index.html",
+      "sameHostPath": true,
+      "proposedR2_4": {
+        "verdict": "OK",
+        "scope": "limited single complete original200 of approved same-host/path HTTPS policy list; original HTTP catalog row preserved"
+      },
+      "proposedR2_5": {
+        "verdict": "PARTIAL",
+        "scope": "8 original rows have own title/link/day;7 HTTPS identities parsed/stored/reopened.1 original HTTP identity excluded without rewrite or exception; cannot claim8/8"
+      },
+      "actualFetchEvidence": "docs/evidence/r2-three-url-after-save-2026-10-20/request-ledger.json",
+      "offlineEvidence": "replay-CN-T01.json",
+      "date": {
+        "role": "unknown (existing optional role omitted, not publication)",
+        "precision": "day",
+        "timezone": "missing",
+        "utcOffset": null,
+        "publicationInstant": null
+      },
+      "displayedLocalDateRange": {
+        "earliest": "2026-10-09",
+        "latest": "2026-10-19",
+        "captureDay": "2026-10-20",
+        "calendarDayAgeNewest": 1,
+        "notUTCFreshnessCertification": true
+      },
+      "unresolved": "one original HTTP policy identity and HTTP interpretation are deliberately excluded; no transport equivalence proved for that detail URL",
+      "sourceEnabled": false,
+      "productionSelectable": false
+    }
+  ],
+  "conditionalTotalsIfParentAcceptsExactlyThisProposal": {
+    "r2_4": "28/39; still short4 of minimum32",
+    "r2_5": "25/34; CN-T01 remains PARTIAL",
+    "applied": false
+  },
+  "numericEvidenceUnchanged": "historical3 limited normalized diagnostics plus additional1 complete-original offline parse; denominator5; no4/5 production integration claim",
+  "continuous24h": "NOT_RUN",
+  "overallR2": "not passed",
+  "defaultActivation": "unchanged; only TH-W01/ID-W01 selectable; both new candidates false/disallowed"
+}

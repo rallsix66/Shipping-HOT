@@ -1,0 +1,64 @@
+import { expect, it, vi } from "vitest"
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs"
+import { resolve } from "node:path"
+import { execFileSync } from "node:child_process"
+import { createHash } from "node:crypto"
+import net from "node:net"
+import dns from "node:dns/promises"
+import NativeDatabase from "better-sqlite3"
+import { load } from "cheerio"
+import { open } from "../server/intel/__fixtures__/isolated-db"
+import { initShippingTables } from "../server/database/shipping"
+import { collectIntelSource, sourcePolicy } from "../server/intel/collect"
+import { htmlIndexCandidates } from "../server/intel/sources/html-index-candidates"
+import { fromHtml } from "../server/intel/sources/web-list"
+import { decodeResponse } from "../server/services/response-decoding"
+
+const origin=process.env.SITC_ACCEPTANCE_ORIGIN!,d=resolve(origin,"docs/evidence/r2-sitc-metadata-2026-10-15"),local=resolve(origin,".tmp/r2-sitc-metadata-20261015-private"),codeSha="0a483dd18a2027c73bf950cc0b948c013e29cf09"
+const hash=(v:string|Uint8Array)=>createHash("sha256").update(v).digest("hex"),save=(n:string,v:unknown)=>writeFileSync(resolve(d,n+".json"),JSON.stringify(v,null,2)+"\n")
+const snapshot=(db:NativeDatabase.Database)=>Object.fromEntries(["intel_item","intel_item_version","intel_item_block"].map(t=>[t,db.prepare(`SELECT * FROM ${t} ORDER BY id`).all()]))
+it("saved completeSITC original -> declared disabled candidate -> SQLite20 -> repeat0 -> query-only20 exact field comparisons",async()=>{
+ expect(execFileSync("git",["rev-parse","HEAD"],{encoding:"utf8"}).trim()).toBe(codeSha)
+ expect(execFileSync("git",["diff","--name-only","--","server","src","shared","scripts","package.json","pnpm-lock.yaml","nitro.config.ts",".github"],{encoding:"utf8"}).trim()).toBe("")
+ mkdirSync(d,{recursive:true});mkdirSync(resolve(local,"db"),{recursive:true})
+ const capture=JSON.parse(readFileSync(resolve(origin,"docs/evidence/r2-sitc-applied-2026-10-15/XX-K03-capture.json"),"utf8")),raw=readFileSync(resolve(origin,".tmp/r2-sitc-applied-20261015-private/XX-K03.response.bin"))
+ expect(capture.httpStatus).toBe(200);expect(raw.length).toBe(38839);expect(hash(raw)).toBe(capture.wireSha256)
+ const seed=htmlIndexCandidates.find(s=>s.catalogId==="XX-K03")!;expect(seed).toMatchObject({id:"intel:xx-k03",url:capture.url,enabled:false,persistence:"disallowed"});expect(sourcePolicy(seed).allowHttp).toBeUndefined()
+ const decoded=decodeResponse(raw,capture.contentType),$=load(decoded.body)
+ const expected=$("#content .media.row-fluid").toArray().map((el,index)=>{
+  const row=$(el),anchor=row.find("h4.title.media-heading > a[href]"),date=row.find("ul.meta > li");expect(anchor).toHaveLength(1);expect(date).toHaveLength(1)
+  const title=anchor.text().replace(/\s+/g," ").trim(),originalUrl=anchor.attr("href")!,rawDate=date.text().trim(),m=/^发布日期: (\d{4})[.](\d{2})[.](\d{2})$/.exec(rawDate)!
+  expect(m).not.toBeNull();expect(originalUrl).toMatch(/^http:\/\/www\.sitc\.com\/en\/show\.asp\?id=\d+$/)
+  const checked=new Date(Date.UTC(+m[1],+m[2]-1,+m[3]));expect([checked.getUTCFullYear(),checked.getUTCMonth()+1,checked.getUTCDate()]).toEqual([+m[1],+m[2],+m[3]])
+  return {index,title,originalUrl,rawDate,localDate:`${m[1]}-${m[2]}-${m[3]}`,sourceTimezone:"missing",utcOffset:null,publishedAt:null}
+ });expect(expected).toHaveLength(20);expect(new Set(expected.map(e=>e.originalUrl)).size).toBe(20)
+ writeFileSync(resolve(local,"exact-field-audit.json"),JSON.stringify(expected,null,2)+"\n")
+ const parsed=fromHtml(decoded.body,capture.url,seed.webList!,sourcePolicy(seed));expect(parsed).toHaveLength(20)
+ for(let i=0;i<20;i++){const p=parsed[i],e=expected[i];expect(p.title).toBe(e.title);expect(p.canonicalUrl).toBe(e.originalUrl);expect(p.publishedAt).toBeUndefined();expect(p.dateEvidence).toMatchObject({raw:e.rawDate,rule:"configured_sitc_publication_day",precision:"day",localDate:e.localDate,calendar:"gregorian",timezone:"missing",utcOffset:null,publishedAt:null})}
+ let tcp=0,systemDns=0,fetch=0,injectedLookup=0,injectedTransport=0
+ const tcpGuard=vi.spyOn(net.Socket.prototype,"connect").mockImplementation(()=>{tcp++;throw Error("offline TCP forbidden")}),dnsGuard=vi.spyOn(dns,"lookup").mockImplementation(async()=>{systemDns++;throw Error("offline DNS forbidden")});vi.stubGlobal("fetch",()=>{fetch++;throw Error("offline fetch forbidden")})
+ const dbPath=resolve(local,"db",`sitc-positive-${Date.now()}.sqlite3`),state=open(dbPath);let closed=false
+ try{
+  const now=new Date(capture.receivedAt),repeatAt=new Date(now.getTime()+1000);await initShippingTables(state.database,"mock");await state.repository.upsertSource(seed,now.toISOString())
+  expect(await state.repository.getSource(seed.id)).toMatchObject({enabled:false,persistence:"disallowed"})
+  const usage=state.native.prepare("SELECT * FROM provider_usage ORDER BY rowid").all()
+  const deps={lookup:async(host:string)=>{expect(host).toBe("www.sitc.com");injectedLookup++;return [{address:"93.184.216.34",family:4 as const}]},transport:async(url:URL)=>{expect(url.href).toBe(seed.url);expect(url.protocol).toBe("https:");injectedTransport++;return {status:200,headers:{"content-type":capture.contentType},body:raw}}}
+  const first=await collectIntelSource(state.repository,seed,deps,now);expect(first).toMatchObject({status:"ok_items",itemsSeen:20,itemsNew:20,itemsRevised:0})
+  const firstItems=await state.repository.listItems(seed.id),firstVersions=state.native.prepare("SELECT * FROM intel_item_version ORDER BY id").all()
+  const repeat=await collectIntelSource(state.repository,seed,deps,repeatAt);expect(repeat).toMatchObject({status:"ok_items",itemsSeen:20,itemsNew:0,itemsRevised:0})
+  const repeated=await state.repository.listItems(seed.id),stable=({lastSeenAt:_lastSeen,...rest}:any)=>rest
+  expect(repeated.map(stable)).toEqual(firstItems.map(stable));expect(repeated.every(i=>i.lastSeenAt===repeatAt.toISOString())).toBe(true);expect(state.native.prepare("SELECT * FROM intel_item_version ORDER BY id").all()).toEqual(firstVersions)
+  const stateBefore=snapshot(state.native);expect(Object.values(stateBefore).map(v=>v.length)).toEqual([20,20,20]);expect(state.native.prepare("SELECT * FROM provider_usage ORDER BY rowid").all()).toEqual(usage)
+  for(const item of repeated){const e=expected.find(e=>e.originalUrl===item.canonicalUrl)!;expect(item.title).toBe(e.title);expect(item.publishedAt).toBeNull();const v=await state.repository.listVersions(item.id);expect(v).toHaveLength(1);expect(v[0]).toMatchObject({contentScope:"metadata_only",sourcePublishedAt:null,dateEvidence:{raw:e.rawDate,localDate:e.localDate,precision:"day",timezone:"missing",utcOffset:null,publishedAt:null}});expect(await state.repository.readVersionBlocks(v[0].id)).toEqual([expect.objectContaining({type:"title",text:e.title})])}
+  state.native.close();closed=true;const beforeHash=hash(readFileSync(dbPath)),reopened=new NativeDatabase(dbPath,{readonly:true,fileMustExist:true});let mismatches=0,queryOnly
+  try{
+   reopened.pragma("query_only = ON");queryOnly=reopened.pragma("query_only",{simple:true});expect(queryOnly).toBe(1);expect(snapshot(reopened)).toEqual(stateBefore)
+   const rows=reopened.prepare("SELECT i.*,v.source_published_at,v.source_updated_at,v.content_scope,v.extractor_version,v.date_evidence FROM intel_item i JOIN intel_item_version v ON v.id=i.current_version_id ORDER BY i.canonical_url").all() as any[];expect(rows).toHaveLength(20)
+   for(const row of rows){const e=expected.find(e=>e.originalUrl===row.canonical_url)!,date=JSON.parse(row.date_evidence);const equal=!!e&&row.title===e.title&&row.canonical_url===e.originalUrl&&row.published_at===null&&row.source_published_at===null&&row.source_updated_at===null&&row.content_scope==="metadata_only"&&row.extractor_version==="intel-web-list-v1"&&date.raw===e.rawDate&&date.localDate===e.localDate&&date.precision==="day"&&date.timezone==="missing"&&date.utcOffset===null&&date.publishedAt===null;if(!equal)mismatches++;expect(equal).toBe(true)}
+  }finally{reopened.close()}
+  const afterHash=hash(readFileSync(dbPath));expect(afterHash).toBe(beforeHash);expect(tcp+systemDns+fetch).toBe(0);expect(injectedTransport).toBe(2);expect(injectedLookup).toBe(2)
+  save("field-audit",{scope:"20 complete private original title/HTTP identity/source-date fields independently compared with parser, SQLite and readonly reopen; remote hashes and raw date only, no summary/body",sourceWireSha256:capture.wireSha256,fields:expected.map(({title,originalUrl,...rest})=>({...rest,titleSha256:hash(title),originalUrlSha256:hash(originalUrl),exactTitleMatch:true,exactOriginalHttpIdentityMatch:true,exactRawDateMatch:true,exactDayMatch:true,unknownTimezoneRetained:true}))})
+  save("candidate-config",{seed,role:"Declared disabled candidate used unchanged in isolated evidence DB, not active registry/production allowlist"})
+  save("replay-result",{status:"PASS_ISOLATED_SAVED_ORIGINAL20_FIELD_REPLAY",testedCodeSha:codeSha,sourceCapturedAt:capture.receivedAt,sourceCaptureHead:"e37c5e49c0c90d69663af3c5f45f347bfc8326f4",originalWireSha256:capture.wireSha256,originalBytes:raw.length,first,repeat,items:20,versions:20,blocks:20,sourceEnabled:false,contentScope:"metadata_only",originalHttpProtocolAndBusinessIdsPreserved:true,rawSourceLabelAndDatePreserved:true,dayPrecision:true,unknownTimezone:true,publishedAtNull:true,offsetNull:true,providerUsageUnchanged:true,readonlyReopen:{readonly:true,queryOnly,recordsCompared:20,fieldMismatches:mismatches,allBusinessTablesUnchanged:true,dbBytesUnchanged:true},dbBeforeSha256:beforeHash,dbAfterSha256:afterHash,sourceGetAttemptsThisRound:0,actualSystemDns:systemDns,tcpConnectionAttempts:tcp,globalFetchCalls:fetch,injectedLookupCalls:injectedLookup,injectedTransportCalls:injectedTransport,detailRequests:0,bodyRequests:0,prodEnabled:false,overallR2Pass:false})
+ }finally{if(!closed)state.native.close();tcpGuard.mockRestore();dnsGuard.mockRestore();vi.unstubAllGlobals()}
+},30000)

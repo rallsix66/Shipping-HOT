@@ -1,0 +1,33 @@
+# command: pnpm exec vitest run -c .tmp/nmc-offline.config.ts
+# full_sha: 0b532e1917ee5425194965b20e0fdf8c2a1f4805
+# started: 2026-10-13T03:55:13.246Z
+# stdout
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+stdout | .tmp/nmc-offline.test.ts > NMC existing product-page suitability for current intel list contract > 'CN-W01' has product metadata but no qualifying list detail link
+{"id":"CN-W01","url":"https://www.nmc.cn/publish/typhoon/typhoon_new.html","archive":"server/providers/__fixtures__/nmc-2026-10-11/typhoon_flash.html","sha256":"f0c625cd5c9eb03b9340141d16f97952a3614d0c23f80ecdc68ccb53fad6f49b","bytes":59861,"productTitle":"台风快讯","qualifyingAnchors":0,"authorDateRule":"missing","publishedAt":null,"timeSemantics":"annual issue identity + day/hour observation, not an absolute publication timestamp","hiddenGeneratedTime":"present but deliberately not used as publication","collector":"failed","errorCode":"web_list_invalid_link","items":0,"networkCalls":0}
+
+stdout | .tmp/nmc-offline.test.ts > NMC existing product-page suitability for current intel list contract > 'CN-W02' has product metadata but no qualifying list detail link
+{"id":"CN-W02","url":"https://www.nmc.cn/publish/country/warning/index.html","archive":"server/providers/__fixtures__/nmc-2026-10-11/warning_index.html","sha256":"8c4ed5ea03f13615641b178c4bd1b2fae49589cbb8c4b4a57a0aa182bd4f4d38","bytes":62233,"productTitle":"大风预警","qualifyingAnchors":0,"authorDateRule":"unsupported_format","publishedAt":null,"timeSemantics":"author preamble + Chinese hour format; configured offset cannot repair unsupported text/time grammar","hiddenGeneratedTime":"present but deliberately not used as publication","collector":"failed","errorCode":"web_list_invalid_link","items":0,"networkCalls":0}
+
+ ✓ .tmp/nmc-offline.test.ts (2 tests) 202ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  11:55:14
+   Duration  1.43s (transform 583ms, setup 0ms, import 985ms, tests 202ms, environment 0ms)
+
+
+# stderr
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/shared/promo-calendar.ts" is used
+
+# raw_exit_code: 0

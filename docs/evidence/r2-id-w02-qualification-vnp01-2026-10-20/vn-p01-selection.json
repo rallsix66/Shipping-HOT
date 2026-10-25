@@ -1,0 +1,45 @@
+{
+  "sourceId": "VN-P01",
+  "listEvidence": {
+    "path": ".tmp/r2-four-after-clash-2026-10-14-private/VN-P01.response.bin",
+    "sha256": "da133741708879c9fd4544a0137dd8050a92c1dab662ac843bc9892d412bd4ef",
+    "bytes": 63083,
+    "completeRows": 10,
+    "tableHeaders": [
+      "Số/ Thời gian ban hành",
+      "Thông báo hàng hải"
+    ]
+  },
+  "selection": {
+    "rawRowIndex": 1,
+    "identifier": "200/TBHH-CHHĐTVN",
+    "title": "Thông báo hàng hải thông số kỹ thuật của luồng từ phao báo hiệu hàng hải số “0” đến hết vũng quay tàu bến số 01 - cảng Quy Nhơn thuộc Dự án ĐTXD công trình cải tạo, nâng cấp luồng Quy Nhơn cho tàu 50.000DWT",
+    "href": "/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-cua-luong-tu-phao-bao-hieu-hang-hai-so-0-den-het-vung",
+    "dateEvidence": "unknown_in_list",
+    "exactUrl": "https://vimawa.gov.vn/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-cua-luong-tu-phao-bao-hieu-hang-hai-so-0-den-het-vung",
+    "association": "same original first table row; exact original href, not identifier-derived",
+    "host": "vimawa.gov.vn",
+    "https": true,
+    "htmlRouteCandidate": true,
+    "contentTypeStillRequiresActualResponse": true,
+    "permission": "single authorized private temporary HTML date/identity inspection; metadata-only persistence; no redistribution"
+  },
+  "archiveCheck": {
+    "scope": "project evidence plus private capture archives; dependency/build/clone snapshots and retained databases excluded",
+    "enumerated": 2997,
+    "inspected": 2997,
+    "matchingFiles": [
+      "docs/evidence\\r2-four-after-clash-2026-10-14\\VN-P01-table-metadata.json"
+    ],
+    "requestMatches": [],
+    "detailArchives": [],
+    "priorKnownInspection": {
+      "path": "docs/evidence/r2-public-index-replay-2026-10-14/cn-vn-full-raw-field-inspection.json",
+      "detailsFetched": 0
+    }
+  },
+  "eligibleForAtMostOneGET": true,
+  "guessedPaths": 0,
+  "newHost": 0,
+  "pdfOrAttachmentRequests": 0
+}

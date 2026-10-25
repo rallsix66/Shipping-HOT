@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-10-15T01:15:36.294579+00:00",
+  "selectedScriptMatches": true,
+  "extensionMatchesAuthorizedBytes": true,
+  "generatedFilterCount": 21,
+  "generatedExactlyOriginal17Plus4": true,
+  "original17Preserved": true,
+  "newFourPresent": {
+    "www.sz.msa.gov.cn": true,
+    "phongchongthientai.mard.gov.vn": true,
+    "www.pos.com.my": true,
+    "jdih.kemenkeu.go.id": true
+  },
+  "mode": "fake-ip",
+  "filterMode": "blacklist",
+  "readOnly": true
+}

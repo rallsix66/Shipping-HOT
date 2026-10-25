@@ -1,0 +1,13 @@
+{
+  "startedAt": "2026-10-15T02:03:11.186Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "-c",
+    ".tmp/carrier-news-two-20261015.config.ts"
+  ],
+  "head": "a5da09871d1a017ae947a0f3f56980461807bfaf",
+  "productCodeSha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
+  "authorization": "exact two catalogue carrier-news URLs once system DNS each, at most one pinned index GET per public result; no retries, redirect, domain switch or network configuration"
+}

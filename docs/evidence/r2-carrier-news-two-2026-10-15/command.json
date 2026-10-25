@@ -1,0 +1,14 @@
+{
+  "startedAt": "2026-10-15T02:03:11.186Z",
+  "finishedAt": "2026-10-15T02:03:12.684Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "-c",
+    ".tmp/carrier-news-two-20261015.config.ts"
+  ],
+  "head": "a5da09871d1a017ae947a0f3f56980461807bfaf",
+  "rawExit": 0,
+  "signal": null
+}

@@ -1,0 +1,9 @@
+# command: git diff --check -- docs/status.md
+# baseline_sha: 7905d5dbb7b377767913a17d9e49762ea507e037
+# started: 2026-10-13T04:23:09.462Z
+# stdout
+
+# stderr
+warning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it
+
+# raw_exit_code: 0

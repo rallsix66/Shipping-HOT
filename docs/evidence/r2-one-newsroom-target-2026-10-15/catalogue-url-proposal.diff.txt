@@ -1,0 +1,4 @@
+--- docs/intel-source-catalog.md (current)
++++ docs/intel-source-catalog.md (proposed only)
+-| XX-K02 | B | ONE | https://www.one-line.com/en/news | web_list | OK | P1 | 页面约 635 KB |
++| XX-K02 | B | ONE | https://www.one-line.com/en/newsroom | web_list | OK | P1 | 页面约 635 KB |

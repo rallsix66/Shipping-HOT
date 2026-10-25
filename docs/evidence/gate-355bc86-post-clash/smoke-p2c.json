@@ -1,0 +1,9 @@
+{
+  "name": "smoke-p2c",
+  "command": "pnpm smoke:p2c-runtime",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\post-clash-final2-build",
+  "sha": "355bc861d4020ba22ddd00401de709d7cee497e3",
+  "startedAt": "2026-10-14T09:27:17.180Z",
+  "endedAt": "2026-10-14T09:27:18.456Z",
+  "rawExit": 0
+}

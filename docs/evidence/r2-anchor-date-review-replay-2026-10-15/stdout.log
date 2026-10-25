@@ -1,0 +1,9 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT
+
+ ✓ .tmp/anchor-date-review-replay-20261015.test.ts (1 test) 209ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  09:46:51
+   Duration  1.12s (transform 451ms, setup 0ms, import 742ms, tests 209ms, environment 0ms)

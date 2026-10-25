@@ -1,0 +1,340 @@
+{
+  "type": "bounded_exact_catalogue_URL_diagnostics_only",
+  "at": "2026-10-20T04:21:33.703Z",
+  "root": "D:\\try one\\Shipping HOT",
+  "branch": "codex/shipping-hot-r2",
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "baseline": ".tmp/r2-three-url-diagnostic-20261020/baseline.json",
+  "preflight": {
+    "enumerated": 3010,
+    "inspected": 3010,
+    "previousTaskCompletedRawExit": 0,
+    "initialEligible": 3,
+    "explicitPrior403401OrBrowserWarningsFound": 0,
+    "sufficientArchivesFound": 0
+  },
+  "totals": {
+    "URLsInScope": 3,
+    "URLsWithSystemDNS": 2,
+    "systemDNSCalls": 2,
+    "physicalGETReservations": 1,
+    "transportInvocations": 1,
+    "capturedHTTPResponses": 0,
+    "successfulHTML": 0,
+    "skippedURLs": 1,
+    "retries": 0,
+    "followedRedirects": 0,
+    "details": 0,
+    "images": 0,
+    "pagination": 0,
+    "login": 0,
+    "sourceCAChanges": 0,
+    "certificateValidationDisabled": 0,
+    "networkChanges": 0,
+    "DBWrites": 0,
+    "paidCalls": 0
+  },
+  "diagnosticResults": {
+    "maersk": "HPE_HEADER_OVERFLOW at HTTP response header parser; no HTTP status/HTML",
+    "ppaHelpdesk": "blocked_address before transport/TLS/HTTP",
+    "ppaNews": "not requested after just-observed same-host address refusal; no page response claimed"
+  },
+  "qualification": {
+    "public": "26/39",
+    "information": "24/34",
+    "numeric": "historical3 limited diagnostics + new1 complete original offline parse",
+    "changed": false,
+    "PH_P01": "one source row with two catalogue products; neither complete"
+  },
+  "productGate": "NOT_RUN_NO_PRODUCT_CHANGE",
+  "preservation": {
+    "checks": [
+      {
+        "path": "package.json",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/tsx-alias-loader.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-collect-job.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-environment.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-options.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe-worker.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/r2-intel-observe.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation-network.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation-network.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/runtime/intel-observation.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/web-list.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/config-keys.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/web-list-english-12h.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/sources/html-index-candidates.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/services/article-fetch-security.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/intel/manual-checklist.ts",
+        "unchanged": true
+      },
+      {
+        "path": ".data/calendarific-double-year-verification-20260908-b.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/calendarific-double-year-verification-20260908.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/p7-final-seal-20260904.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/provider-secrets.json",
+        "unchanged": true
+      },
+      {
+        "path": ".data/shipping-hot-v3-browser.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-https-abb1b99-20261019/run/.data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-manual-6087a16/run/.data/shipping-hot-v3.sqlite3",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/dist/output/server/index.mjs",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/r2-four-reapplied-2026-10-15-private/MY-L01.response.bin",
+        "unchanged": true
+      },
+      {
+        "path": ".gitignore",
+        "unchanged": true
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "unchanged": true
+      },
+      {
+        "path": "AGENTS.md",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/content.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/manifest.json",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/popup.html",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/worker.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-aVjAIvTt.css",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/assets/popup-DHU7aOx9.js",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/defuddle-MIT.txt",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/clipper-private-abb1b99/.tmp/clipper-package/licenses/obsidian-clipper-MIT.txt",
+        "unchanged": true
+      },
+      {
+        "path": "server/services/bmkg-port-forecast.ts",
+        "unchanged": true
+      },
+      {
+        "path": "server/services/bmkg-port-forecast.test.ts",
+        "unchanged": true
+      },
+      {
+        "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+        "unchanged": true
+      },
+      {
+        "path": "docs/intel-source-catalog.md",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/r2-qualification-vnp01-20261020/response.bin",
+        "unchanged": true
+      },
+      {
+        "path": ".tmp/id-w02-xj001-20261020/response.bin",
+        "unchanged": true
+      }
+    ],
+    "sourceFiles": 20,
+    "otherProtectedFiles": 25
+  },
+  "warnings": [
+    "Git global ignore read permission warning retained",
+    "Node existing experimental-loader warning retained"
+  ],
+  "CN_T01": "waiting user, not polled",
+  "continuous24h": "NOT_RUN",
+  "R3": "NOT_RUN",
+  "commitPushPRMergeDeploy": 0,
+  "cleanup": "preserve all evidence, no deletion",
+  "finalAudit": {
+    "status": "passed_local_documentation_closeout_parent_review_pending",
+    "at": "2026-10-20T04:22:47.689Z",
+    "inventory": {
+      "skill": "e0/neat-freak",
+      "path": ".tmp/r2-three-url-diagnostic-20261020/neat-inventory.log",
+      "rawExit": 0,
+      "sha256": "d519423bf810ab0b4af89d9e4fa70fbd027e7f24a7c4ecfdd621b3cf825d4331",
+      "markdownEntries": 8030
+    },
+    "docLint": {
+      "rawExit": 0,
+      "log": ".tmp/r2-three-url-diagnostic-20261020/docs-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "links": {
+      "checked": 140,
+      "broken": []
+    },
+    "diffCheck": {
+      "rawExit": 0,
+      "log": ".tmp/r2-three-url-diagnostic-20261020/diff-check.log"
+    },
+    "jsonLedger": {
+      "targets": 3,
+      "launched": 2,
+      "skipped": 1,
+      "dispatchReservations": 1,
+      "systemDNSCalls": 2,
+      "HTTPResponses": 0,
+      "MaerskRawExit": 2,
+      "PPAHelpdeskRawExit": 2,
+      "PPANewsRawExit": null,
+      "unknownOutcome": false
+    },
+    "preservation": {
+      "allFilesUnchanged": 45,
+      "sourceFiles": 20,
+      "otherProtectedFiles": 25,
+      "HEADUnchanged": true,
+      "stagedEmpty": true,
+      "matrixAndCatalogUnchanged": true,
+      "statusEntries": 40,
+      "statusLog": ".tmp/r2-three-url-diagnostic-20261020/final-git-status.log",
+      "rawResponseFilesAbsent": true,
+      "skippedTargetHasNoLaunchOrDispatch": true
+    },
+    "docs": [
+      {
+        "path": "docs/status.md",
+        "sha256": "077e6b5d883e916deac422299f74200c8fd19179ddba40161ff43dcc15812e22"
+      },
+      {
+        "path": "docs/evidence/r2-three-url-diagnostic-2026-10-20/report.md",
+        "sha256": "08411e66e53a32ea2a8d77a3968880f8d2f0fabcb545a900ffb2df5873e6b36d"
+      },
+      {
+        "path": "docs/evidence/r2-three-url-diagnostic-2026-10-20/closeout.md",
+        "sha256": "9dd3f4077b2c76b05c1c16796ac34f3ba17559e3e1d52dd0226cc0c48340745e"
+      }
+    ],
+    "artifacts": [
+      {
+        "path": "docs/evidence/r2-three-url-diagnostic-2026-10-20/preflight.json",
+        "sha256": "289c49152668044fd68c837cc2b5f2ef3b1077e2f94f65be3b25b2aac303c836"
+      },
+      {
+        "path": "docs/evidence/r2-three-url-diagnostic-2026-10-20/diagnostics.json",
+        "sha256": "77df69ffc888d0b1ddf27e908c994fa22fc48190dacf58123caee99c12592c28"
+      },
+      {
+        "path": "docs/evidence/r2-three-url-diagnostic-2026-10-20/request-ledger.json",
+        "sha256": "ab93cd07c49cca64f768567339f2f81a7999f1681d768362727ab3f4f8564cff"
+      }
+    ],
+    "rules": {
+      "AGENTSBytes": 28170,
+      "unchanged": true,
+      "default32KiBBudgetFraction": 0.85968017578125
+    },
+    "generatedMemory": "read-only; no writes",
+    "sourceReadiness": {
+      "public": "26/39",
+      "information": "24/34",
+      "qualificationChanged": false,
+      "PH_P01ProductsCountAsOneSource": true
+    },
+    "pending": [
+      "parent review of three-target diagnostic evidence",
+      "Maersk no valid HTML; header-policy decision requires separate review before any new request",
+      "PPA helpdesk safety refusal before TLS; port-news not requested",
+      "GUI/S7 and 24h not accepted, R3 paused"
+    ],
+    "cleanup": "no deletion; all diagnostic scripts, failure logs and original evidence preserved"
+  }
+}

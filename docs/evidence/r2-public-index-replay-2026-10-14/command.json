@@ -1,0 +1,9 @@
+{
+  "sha": "ca654122bcad240f090d0e675071a5e208237e8e",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\public-index-final-build",
+  "command": "pnpm exec vitest run -c .tmp/public-index-raw-replay.config.ts",
+  "startedAt": "2026-10-14T08:19:33.155Z",
+  "finishedAt": "2026-10-14T08:19:35.618Z",
+  "rawExit": 0,
+  "sourceHttpRequests": 0
+}

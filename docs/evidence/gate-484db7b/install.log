@@ -1,0 +1,14 @@
+{"name":"install","command":"pnpm install --frozen-lockfile","sha":"484db7b7a173f5c31312f3f7320807f4d521e5dd","started":"2026-10-13T09:00:16.797Z","finished":"2026-10-13T09:00:18.865Z","rawExit":0,"signal":null}
+STDOUT
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+
+> shipping-hot@0.0.41 prepare D:\try one\Shipping HOT
+> simple-git-hooks
+
+[INFO] Successfully set the pre-commit with command: npx lint-staged
+[INFO] Successfully set all git hooks
+Done in 1.9s using pnpm v10.30.3
+
+STDERR

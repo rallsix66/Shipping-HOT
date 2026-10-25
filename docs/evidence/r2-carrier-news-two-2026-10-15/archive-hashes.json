@@ -1,0 +1,145 @@
+{
+  "type": "committed_text_archive_hashes",
+  "generatedAt": "2026-10-15T02:17:57.953305+00:00",
+  "hashBasis": "committed text LF normalization only; nested original/wire byte hashes remain exact and unchanged",
+  "excluded": [
+    "archive-hashes.json"
+  ],
+  "files": [
+    {
+      "file": "capture-config.ts.txt",
+      "sha256": "2131a7162f25220d4688b4b9722d034a1a6757f6069403b92b30e2b319c2743f",
+      "bytesLF": 140
+    },
+    {
+      "file": "capture-launcher.cjs.txt",
+      "sha256": "9285c38eeb85884427c11dd4d94d5ba55bb1b4be154eaa428d3af01c0d3cac2d",
+      "bytesLF": 1610
+    },
+    {
+      "file": "capture-output-original.json",
+      "sha256": "d8822f16362aadc78f0cb771a0e83aa10653a1a5124a92650220c1e014552b40",
+      "bytesLF": 2278
+    },
+    {
+      "file": "capture-procedure.test.ts.txt",
+      "sha256": "870877160b1bdf8b32536b47c915502ca2f569dd270e2dc7ef856fcbd39d5563",
+      "bytesLF": 9812
+    },
+    {
+      "file": "clash-host-presence.json",
+      "sha256": "42c4431be44c7988321d02c0dcac5145f1e91f1365f662ab0a5b34f229160478",
+      "bytesLF": 3039
+    },
+    {
+      "file": "clash-readonly-procedure.py.txt",
+      "sha256": "841bf3d4ce63e26326cf40fdb6f3fcd42d15061474b51cdb14fa657a94f1ef1c",
+      "bytesLF": 4278
+    },
+    {
+      "file": "closeout.md",
+      "sha256": "6bdff3d3eb4e8e292e38174e440e8e375c1628b1e49f969b297fb61232131fa0",
+      "bytesLF": 3325
+    },
+    {
+      "file": "command.json",
+      "sha256": "53cb7a9c0f75d7d9aa6fb033b922396b495d2d613b23ce19435c3e5478b39feb",
+      "bytesLF": 347
+    },
+    {
+      "file": "dns-ledger.json",
+      "sha256": "850e49f78e870804c9d2dff33b33276a7c9cbf240b0bfb63d12627df0bcc5ae6",
+      "bytesLF": 631
+    },
+    {
+      "file": "documentation-validation-driver.py.txt",
+      "sha256": "dd528217ae1ef7f423ef8c320309d1214c1e08260ac974136a8d941ee44919e3",
+      "bytesLF": 3402
+    },
+    {
+      "file": "execution-binding.json",
+      "sha256": "c0712f41ea32a4dea38422d282b0490df7951a4daa02d4e0431fd61efce975f0",
+      "bytesLF": 1164
+    },
+    {
+      "file": "initial-doc-validation.json",
+      "sha256": "2a6692eca74780b83e94816bafdf9bc5553969165ff9b34db2b66d16aa428df8",
+      "bytesLF": 10592
+    },
+    {
+      "file": "inventory-metadata.json",
+      "sha256": "3d1690a1f2862b9ceb8e2659d58bce1eaac438d88d5d7dd3eee30983186d68e7",
+      "bytesLF": 402
+    },
+    {
+      "file": "inventory.txt",
+      "sha256": "37377ebd249f97d4846d6134bbd317eead5094fe3fb068203170f74b83a4aa19",
+      "bytesLF": 2597
+    },
+    {
+      "file": "launch.json",
+      "sha256": "eb84d089ffb616fb9d36d8d9f5ebf59110174d84bae3e4a3503c7b8e049eddba",
+      "bytesLF": 524
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "c65882016ed815a6a53c39fa76b3eeebf653a4a769b197c599c5d1d7cd11272e",
+      "bytesLF": 1013
+    },
+    {
+      "file": "manifest.original.json",
+      "sha256": "b98fe7b28931d75db3c09cfe2b3ca57e61d6260f9dfc2473ec37620e2e37c068",
+      "bytesLF": 807
+    },
+    {
+      "file": "matrix-delta.json",
+      "sha256": "f902ef4b6351b78e46b7f6f371c3a56bab202875c8f56d2a7872b83d63af9e0b",
+      "bytesLF": 1376
+    },
+    {
+      "file": "metadata-correction-driver.py.txt",
+      "sha256": "218c18cec12dc673bc6e43a31bcc9698323ab343694507c2b09d001c22a1cee9",
+      "bytesLF": 10742
+    },
+    {
+      "file": "partial-results.json",
+      "sha256": "3406e7881baa44d7879ad6d39c88caeb072eb50e004a84114c029f0bda634936",
+      "bytesLF": 1192
+    },
+    {
+      "file": "report.md",
+      "sha256": "542c178c9cf3f1de6ac9e4b59f5ba81b7b8c47954c63346f54697ceec0f25082",
+      "bytesLF": 5060
+    },
+    {
+      "file": "request-ledger.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "bytesLF": 3
+    },
+    {
+      "file": "stderr.log",
+      "sha256": "2b2089ef48a0decf6778aa45b416b29808b7d9476761ca686b28c9a254486d42",
+      "bytesLF": 1475
+    },
+    {
+      "file": "stdout.log",
+      "sha256": "19b17cc83398ebfad637050e614645036cf20378b66960284e88bc02cbb1e959",
+      "bytesLF": 264
+    },
+    {
+      "file": "summary.json",
+      "sha256": "cb5f74745b29c6dc08283b5d9758aace29583cd2ca3cbcabb86190a69d2b3127",
+      "bytesLF": 1547
+    },
+    {
+      "file": "XX-K01-result.json",
+      "sha256": "a418f9f89a0874356c7340f6a820b72fc3d28eb9103509bce6bcc04561df18a9",
+      "bytesLF": 548
+    },
+    {
+      "file": "XX-K02-result.json",
+      "sha256": "9204bd9f6a2ded51ab003c2e9e7ac888b43af9cd816d9ad5b1170b48d50d370f",
+      "bytesLF": 555
+    }
+  ]
+}

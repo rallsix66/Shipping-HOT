@@ -1,0 +1,10 @@
+# command: git diff --check -- docs/status.md docs/evidence/r2-p1-acceptance-mapping-2026-10-13/bounded-batch.md
+# baseline_sha: 9d7b39b68cc3e2bad9cd93e3ea7cc4829a046ed6
+# started: 2026-10-13T04:13:09.418Z
+# stdout
+
+# stderr
+warning: in the working copy of 'docs/evidence/r2-p1-acceptance-mapping-2026-10-13/bounded-batch.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/status.md', LF will be replaced by CRLF the next time Git touches it
+
+# raw_exit_code: 0

@@ -1,0 +1,42 @@
+{
+  "id": "VN-P03",
+  "url": "https://saigonnewport.com.vn/tin-tuc",
+  "startedAt": "2026-10-14T09:08:39.423Z",
+  "status": "PARTIAL",
+  "httpRequests": 1,
+  "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML",
+  "receivedAt": "2026-10-14T09:08:42.844Z",
+  "httpStatus": 200,
+  "contentType": "text/html; charset=UTF-8",
+  "rawByteLength": 143215,
+  "fetchedBytesSha256": "e730d4af7dacc5b95995139b6407f91a2adb2d4be7f1e2bbec7dbadc738b51c8",
+  "rawLocalOnly": true,
+  "parse": "DOM_OBSERVATION_ONLY",
+  "parserError": null,
+  "observedCandidateCount": 6,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "meta",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 143215
+  },
+  "archivedMetadataSha256": "d7589460d1f52a1f15bed0cfd0acc079f81f989e700764c7e432048518f6b95d",
+  "originalHtmlCommitted": false,
+  "sensitiveScan": {
+    "positiveControlDetected": true,
+    "committedMaterialHits": 0
+  },
+  "finishedAt": "2026-10-14T09:08:42.878Z"
+}

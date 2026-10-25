@@ -5,6 +5,7 @@ import { RuntimeRepository, isProviderCircuitBlocked } from "#/database/runtime-
 import { canonicalLanguage } from "#/services/translation-service"
 import type { ProviderCircuitBlockCode } from "#/database/runtime-jobs"
 import type { SecretSource, SecretStore } from "#/providers/contracts"
+import { decidePaidBudget, paidBudgetWindow } from "#/services/paid-budget"
 
 export const TRANSLATION_CAPABILITY = "translation"
 export const TRANSLATION_PROVIDER_ID = "deepseek"
@@ -81,9 +82,7 @@ export function mergeTranslationSettings(current: TranslationSettings | undefine
 }
 
 export function translationBudgetWindow(now = new Date()): { from: string, to: string } {
-  const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
-  const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1))
-  return { from: from.toISOString(), to: to.toISOString() }
+  return paidBudgetWindow(now)
 }
 
 export async function currentTranslationUsage(database: Database, now = new Date()): Promise<TranslationUsageAggregate> {
@@ -119,8 +118,9 @@ export async function assertTranslationReady(settingsValue: TranslationSettings 
   if (raw?.providerId !== undefined && raw.providerId !== TRANSLATION_PROVIDER_ID) throw new TranslationGateError("translation_provider_not_allowed")
   if (raw?.model !== undefined && raw.model !== TRANSLATION_MODEL) throw new TranslationGateError("translation_model_not_allowed")
   const settings = normalizeTranslationSettings(settingsValue)
-  if (settings.monthlyBudget <= 0) throw new TranslationGateError("translation_budget_zero")
-  if (monthSpend >= settings.monthlyBudget) throw new TranslationGateError("translation_budget_exhausted")
+  const budget = decidePaidBudget(settings.monthlyBudget, monthSpend)
+  if (budget === "budget_zero" || budget === "budget_unconfigured") throw new TranslationGateError("translation_budget_zero")
+  if (budget === "budget_exhausted") throw new TranslationGateError("translation_budget_exhausted")
   const apiKey = (await secretStore.get(TRANSLATION_PROVIDER_ID))?.trim()
   if (!apiKey) throw new TranslationGateError("translation_secret_missing")
   return { settings, apiKey }
@@ -137,10 +137,10 @@ export async function readTranslationStatus(database: Database, settingsValue: S
   if (!settings.enabled) {
     state = "disabled"
     gateCode = "translation_disabled"
-  } else if (settings.monthlyBudget <= 0) {
+  } else if (decidePaidBudget(settings.monthlyBudget, usage.estimatedCost) === "budget_zero") {
     state = "budget_zero"
     gateCode = "translation_budget_zero"
-  } else if (usage.estimatedCost >= settings.monthlyBudget) {
+  } else if (decidePaidBudget(settings.monthlyBudget, usage.estimatedCost) === "budget_exhausted") {
     state = "budget_exhausted"
     gateCode = "translation_budget_exhausted"
   } else if (!metadata.configured) {

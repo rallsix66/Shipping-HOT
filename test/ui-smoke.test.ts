@@ -2,7 +2,7 @@ import { renderToString } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { FeedItemDisplayText } from "../src/components/shipping/feed-display"
-import { EmptyState, GradientText, ProvenanceBadge, ProviderChip, StatusDot } from "../src/components/shipping/ui"
+import { EmptyState, GradientText, MotionToggle, ProvenanceBadge, ProviderChip, StatusDot } from "../src/components/shipping/ui"
 import { formatDataNature, formatDate, formatPortMetric, formatProvenance, formatSourceStatus, formatSourceType, formatStatus, navTone, providerSummary, severityTone, statusBadgePresentation, statusLabels } from "../src/components/shipping/format"
 
 /**
@@ -11,6 +11,18 @@ import { formatDataNature, formatDate, formatPortMetric, formatProvenance, forma
  * 并锁定 format 纯函数的标签/色调映射。
  */
 describe("shipping UI primitives smoke", () => {
+  it("renders an operable motion switch with the current preference", () => {
+    let toggles = 0
+    const control = MotionToggle({ reduced: true, onToggle: () => {
+      toggles += 1
+    } })
+    const html = renderToString(control)
+    expect(html).toContain("aria-pressed=\"true\"")
+    expect(html).toContain("动效已关闭")
+    control.props.onClick()
+    expect(toggles).toBe(1)
+    expect(renderToString(MotionToggle({ reduced: false, onToggle: () => {} }))).toContain("aria-pressed=\"false\"")
+  })
   it("renders StatusDot with tone and pulse classes", () => {
     const html = renderToString(StatusDot({ tone: "fresh", pulse: true }))
     expect(html).toContain("status-dot")

@@ -1,0 +1,119 @@
+import { it, expect, vi } from "vitest"
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs"
+import { resolve } from "node:path"
+import { createHash } from "node:crypto"
+import net from "node:net"
+import dns from "node:dns/promises"
+import NativeDatabase from "better-sqlite3"
+import { load } from "cheerio"
+import { open } from "../server/intel/__fixtures__/isolated-db"
+import { initShippingTables } from "../server/database/shipping"
+import { collectIntelSource } from "../server/intel/collect"
+import type { IntelSourceSeed } from "../server/intel/sources"
+import { parseFeedEntries } from "../server/providers/feed"
+import { decodeResponse } from "../server/services/response-decoding"
+
+const dir = "docs/evidence/r2-westports-rss-2026-10-15", local = ".tmp/r2-westports-rss-2026-10-15-private"
+const save = (n: string, v: unknown) => writeFileSync(`${dir}/${n}.json`, JSON.stringify(v, null, 2) + "\n")
+const hash = (v: string | Uint8Array) => createHash("sha256").update(v).digest("hex")
+const captures = JSON.parse(readFileSync(`${dir}/capture-summary.json`, "utf8"))
+const results: any[] = []
+function snapshot(db: NativeDatabase.Database) {
+  return Object.fromEntries(["intel_item", "intel_item_version", "intel_item_block"].map(t => [t, db.prepare(`SELECT * FROM ${t} ORDER BY id`).all()]))
+}
+for (const capture of captures.results) it(`${capture.id}: original full XML -> existing collector -> repeat -> query-only reopen`, async () => {
+  if (capture.status !== "CAPTURED_SAFE_XML") { results.push({ id: capture.id, status: "BLOCKED", reason: "no_safe_complete_XML" }); return }
+  mkdirSync(`${local}/db`, { recursive: true })
+  const dbPath = resolve(`${local}/db/${capture.id}-${Date.now()}.sqlite3`)
+  let tcpAttempts = 0
+  let actualDnsAttempts = 0
+  const dnsGuard = vi.spyOn(dns, "lookup").mockImplementation(async () => { actualDnsAttempts++; throw new Error("offline_dns_forbidden") })
+  const tcpGuard = vi.spyOn(net.Socket.prototype, "connect").mockImplementation(() => { tcpAttempts++; throw new Error("offline_tcp_forbidden") })
+  const noFetch = vi.fn(() => { throw new Error("offline_fetch_forbidden") }); vi.stubGlobal("fetch", noFetch)
+  const state = open(dbPath)
+  const result: any = { id: capture.id, status: "FAIL", url: capture.url, rawBytes: capture.bytes, wireSha256: capture.wireSha256, actualSystemDnsCalls: 0, actualSourceHttpRequests: 0 }
+  try {
+    const raw = readFileSync(`${local}/${capture.id}.response.bin`)
+    expect(raw.length).toBe(capture.bytes); expect(hash(raw)).toBe(capture.wireSha256)
+    const decoded = decodeResponse(raw, capture.contentType)
+    expect(decoded.decoding.conflict).toBe(false)
+    // Audit literals directly from the saved XML DOM. This is evidence inspection only;
+    // production collection still calls the one existing Feed parser.
+    const $ = load(decoded.body, { xmlMode: true })
+    expect($("rss > channel").length).toBe(1)
+    const text = (s: string) => load(`<div>${s}</div>`).text().replace(/\s+/g, " ").trim()
+    const expected = $("rss > channel > item").toArray().map((el, index) => {
+      const item = $(el), title = text(item.children("title").text()), rawLink = item.children("link").text().trim()
+      const rawPubDate = item.children("pubDate").text().trim(), rawUpdated = item.children("updated").text().trim() || null
+      expect(title.length).toBeGreaterThan(0); expect(rawLink).toMatch(/^https:\/\//)
+      const u = new URL(rawLink, capture.url)
+      expect(u.username + u.password + u.hash).toBe("")
+      expect([...u.searchParams.keys()].some(k => /token|secret|password|credential|auth|api.?key/i.test(k))).toBe(false)
+      if (u.pathname.length > 1) u.pathname = u.pathname.replace(/\/+$/, "")
+      u.searchParams.sort()
+      const zone = rawPubDate.match(/\s(GMT|UTC|[+-]\d{4})$/i)?.[1] ?? null
+      // A missing timezone must remain unknown; no process/local timezone is substituted.
+      const publishedAt = zone ? new Date(Date.parse(rawPubDate)).toISOString() : null
+      const updateZone = rawUpdated?.match(/\s(GMT|UTC|[+-]\d{4})$/i)?.[1] ?? null
+      const updatedAt = rawUpdated ? (updateZone ? new Date(Date.parse(rawUpdated)).toISOString() : null) : publishedAt
+      return { index, title, canonicalUrl: u.href, rawLink, rawPubDate, rawUpdated, sourceTimezoneLiteral: zone, utcOffset: zone && /^(?:GMT|UTC)$/i.test(zone) ? "+00:00" : zone ? `${zone.slice(0,3)}:${zone.slice(3)}` : null, publishedAt, updatedAt }
+    })
+    expect(expected.length).toBeGreaterThan(0); expect(new Set(expected.map(e => e.canonicalUrl)).size).toBe(expected.length)
+    const parsed = parseFeedEntries(decoded.body, capture.url)
+    expect(parsed.format).toBe("rss"); expect(parsed.entries.length).toBe(expected.length)
+    for (let i = 0; i < expected.length; i++) {
+      expect(parsed.entries[i].title).toBe(expected[i].title); expect(parsed.entries[i].canonicalUrl).toBe(expected[i].canonicalUrl)
+      expect(parsed.entries[i].publishedAt ?? null).toBe(expected[i].publishedAt); expect(parsed.entries[i].sourceUpdatedAt ?? null).toBe(expected[i].updatedAt)
+    }
+    writeFileSync(`${local}/${capture.id}-exact-field-audit.json`, JSON.stringify(expected, null, 2) + "\n")
+    save(`${capture.id}-field-audit`, { id: capture.id, scope: "Full title/link and original source time independently compared locally; remote titles/URLs are hashes only, no summaries/body", fields: expected.map(({ title, canonicalUrl, rawLink, ...rest }) => ({ ...rest, titleSha256: hash(title), canonicalUrlSha256: hash(canonicalUrl), rawLinkSha256: hash(rawLink), exactTitleMatch: true, exactCanonicalLinkMatch: true, exactSourceDateMatch: true })) })
+    const seed: IntelSourceSeed = { id: `bounded:${capture.id}`, catalogId: capture.id, name: capture.id, kind: "rss", url: capture.url, enabled: false, persistence: "disallowed", allowedHosts: [capture.host], allowedContentTypes: ["application/rss+xml", "application/atom+xml", "application/rdf+xml", "application/xml", "text/xml"], intervalMs: 3600000 }
+    save(`${capture.id}-isolated-config`, { seed, role: "Isolated evidence-only configuration, not production registry/candidate or active seed" })
+    await initShippingTables(state.database, "mock")
+    const now = new Date(capture.receivedAt), repeatedAt = new Date(now.getTime() + 1000)
+    await state.repository.upsertSource(seed, now.toISOString())
+    const usageBefore = state.native.prepare("SELECT * FROM provider_usage ORDER BY rowid").all()
+    let injectedLookupCalls = 0, injectedTransportCalls = 0
+    const deps = { lookup: async (host: string) => { expect(host).toBe(capture.host); injectedLookupCalls++; return [{ address: "93.184.216.34", family: 4 as const }] }, transport: async (url: URL) => { expect(url.href).toBe(capture.url); injectedTransportCalls++; return { status: capture.httpStatus, headers: { "content-type": capture.contentType }, body: raw } } }
+    result.first = await collectIntelSource(state.repository, seed, deps, now)
+    expect(result.first).toMatchObject({ status: "ok_items", itemsSeen: expected.length, itemsNew: expected.length, itemsRevised: 0 })
+    const firstItems = await state.repository.listItems(seed.id)
+    const firstVersions = state.native.prepare("SELECT * FROM intel_item_version ORDER BY id").all()
+    result.repeat = await collectIntelSource(state.repository, seed, deps, repeatedAt)
+    expect(result.repeat).toMatchObject({ status: "ok_items", itemsSeen: expected.length, itemsNew: 0, itemsRevised: 0 })
+    const repeatedItems = await state.repository.listItems(seed.id)
+    const stable = ({ lastSeenAt: _lastSeenAt, ...rest }: any) => rest
+    expect(repeatedItems.map(stable)).toEqual(firstItems.map(stable))
+    expect(repeatedItems.every(i => i.lastSeenAt === repeatedAt.toISOString())).toBe(true)
+    expect(state.native.prepare("SELECT * FROM intel_item_version ORDER BY id").all()).toEqual(firstVersions)
+    expect(state.native.prepare("SELECT * FROM provider_usage ORDER BY rowid").all()).toEqual(usageBefore)
+    const beforeClose = snapshot(state.native)
+    state.native.close()
+    const dbHashBefore = hash(readFileSync(dbPath))
+    const reopened = new NativeDatabase(dbPath, { readonly: true, fileMustExist: true })
+    let mismatches = 0
+    try {
+      reopened.pragma("query_only = ON"); expect(reopened.pragma("query_only", { simple: true })).toBe(1)
+      expect(snapshot(reopened)).toEqual(beforeClose)
+      const rows = reopened.prepare("SELECT i.*,v.source_published_at,v.source_updated_at,v.content_scope,v.extractor_version,v.date_evidence FROM intel_item i JOIN intel_item_version v ON v.id=i.current_version_id WHERE i.source_id=? ORDER BY i.canonical_url").all(seed.id) as any[]
+      expect(rows.length).toBe(expected.length)
+      for (const row of rows) {
+        const e = expected.find(e => e.canonicalUrl === row.canonical_url)
+        if (!e || row.title !== e.title || row.published_at !== e.publishedAt || row.source_published_at !== e.publishedAt || row.source_updated_at !== e.updatedAt) mismatches++
+        expect(row.content_scope).toBe("metadata_only"); expect(row.extractor_version).toBe("intel-feed-v1"); expect(row.date_evidence).toBe(null)
+        expect(reopened.prepare("SELECT block_key,block_order,block_type,text FROM intel_item_block WHERE version_id=? ORDER BY block_order").all(row.current_version_id)).toEqual([{ block_key: "title", block_order: 0, block_type: "title", text: e?.title }])
+      }
+      expect(mismatches).toBe(0)
+      expect(reopened.prepare("SELECT COUNT(*) AS n FROM intel_item_version").get()).toEqual({ n: expected.length })
+      result.reopen = { queryOnly: true, readonlyConnection: true, rows: rows.length, versions: expected.length, mismatches, fullTitleUrlDateEvidenceCompared: true, allItemVersionBlockFieldsEqualAfterReopen: true, metadataOnlyTitleBlocks: rows.length, dateEvidenceColumn: "null_existing_RSS_contract; exact literal/timezone preserved in private XML and bounded evidence, not a new migration" }
+    } finally { reopened.close() }
+    result.reopen.dbBeforeSha256 = dbHashBefore; result.reopen.dbAfterSha256 = hash(readFileSync(dbPath)); result.reopen.databaseBytesUnchanged = result.reopen.dbAfterSha256 === dbHashBefore
+    expect(result.reopen.databaseBytesUnchanged).toBe(true)
+    expect(tcpAttempts).toBe(0); expect(actualDnsAttempts).toBe(0); expect(noFetch).not.toHaveBeenCalled()
+    Object.assign(result, { status: "PASS", realRecords: expected.length, rawDateRole: "RSS item pubDate", precision: "second", sourceTimezoneLiterals: [...new Set(expected.map(e => e.sourceTimezoneLiteral))], utcOffsets: [...new Set(expected.map(e => e.utcOffset))], unknownTimezoneRecords: expected.filter(e => !e.sourceTimezoneLiteral).length, sourceUpdatedField: expected.some(e => e.rawUpdated) ? "RSS updated" : "absent; existing sourceUpdatedAt falls back to pubDate", injectedLookupCalls, injectedTransportCalls, tcpConnectionAttempts: tcpAttempts, globalFetchCalls: noFetch.mock.calls.length, providerUsageRowsUnchanged: true, rawRedistributed: false, productionConfigChanged: false, repeatLastSeenAdvancedOnly: true })
+  } finally {
+    if (state.native.open) state.native.close()
+    tcpGuard.mockRestore(); dnsGuard.mockRestore(); vi.unstubAllGlobals(); results.push(result); save(`${capture.id}-replay`, result)
+    save("replay-summary", { results, status: results.length === 1 && results.every(r => r.status === "PASS") ? "PASS" : "FAIL", evidenceOnly: true, actualSystemDnsCalls: 0, actualSourceHttpRequests: 0, productionEnabled: false, live24h: "NOT_RUN", paidCalls: 0, llmCalls: 0, productGate: "NOT_RUN_no_product_code_changed" })
+  }
+}, 30000)

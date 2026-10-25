@@ -1,0 +1,243 @@
+{
+  "executionHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",
+  "productCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "files": [
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/closeout.md",
+      "committedTextLfSha256": "41937d1b582f66b6cdd2e577a8ee28591f619b6329f3455233f4a6f664ec0d76"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json",
+      "committedTextLfSha256": "fca6aca3bf7c32a98c90fe76832c377e871d2e90e66d07ccc6c96a7917a86b30"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/report.md",
+      "committedTextLfSha256": "facbd48b9d3484ce6f07ca490d2b1f102717f15e9a19621d20a727486edfa11e"
+    },
+    {
+      "path": "docs/evidence/r2-current-source-matrix-2026-10-14/validation.json",
+      "committedTextLfSha256": "f838d263f7f0803a3d808dbff49e37fbed94b4ea252831c6b38e53c83bed0284"
+    },
+    {
+      "path": "docs/evidence/r2-two-media-2026-10-15/availability-frontier.md",
+      "committedTextLfSha256": "fea32f4e06832a7cfe219ca09680e22cde15110e087062d12c0765538efe836f"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-capture.json",
+      "committedTextLfSha256": "3fd7267538b80dd3bb5d9f10fed6b45d667faf473f33f612d241bffe243379d3"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-field-audit.json",
+      "committedTextLfSha256": "5208b6fd1945f8495487d2f88fa0bd73f53821fdb2b3d10d4957cab179332ddd"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-isolated-config.json",
+      "committedTextLfSha256": "b345a8737df7a31737b476ec04d4da23d0c0f2f588b23890628f94f41c692c0f"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-replay-first-error.json",
+      "committedTextLfSha256": "4e385b9b969256a7f3af28bb3ea09258195690af68fe1f34f22e44c89fb5ffab"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/MY-P02-replay.json",
+      "committedTextLfSha256": "acbe258a9eef99ebc4564f6d017d1f817cead35ba9e15881527cd15ed612d8f1"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/archive-verification-procedure.cjs.txt",
+      "committedTextLfSha256": "266669fe80f9e23fa37a625437a6c0a45d5f32a77a34121867a1412b31b38e66"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/capture-command.json",
+      "committedTextLfSha256": "a5f0a1677e479270f393328890d5110c80afa04df3ba6dc637e7debab7a6be3d"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/capture-config.ts.txt",
+      "committedTextLfSha256": "5bdf7de526deeefdf2d054855b77ba44c0ec636830a1f4bd7cb815f0aa6a64d1"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/capture-procedure.test.ts.txt",
+      "committedTextLfSha256": "c28845aa20a05572291535764f59fb5b5b238c281e99db3ff0406c15d90a8a97"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/capture-runner.cjs.txt",
+      "committedTextLfSha256": "23b05ae8527790e1120a8d13ec79794324ac0622c4b630af19014074da5adb3f"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/capture-summary.json",
+      "committedTextLfSha256": "78751a6bc30cbe93d82c604cb550fb8d17bc13e7508d470ad057eaf2c533ed35"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/closeout.md",
+      "committedTextLfSha256": "941a9ece132c805580da94127152c6656673e0f5e8f3ef00fa06d835e3442ff5"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/dns-ledger.json",
+      "committedTextLfSha256": "532b33362bbce1370d8e7bde6fb4c0464a1096eeaf8e4c40b407e425c6e3a339"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/doc-lint-procedure.cjs.txt",
+      "committedTextLfSha256": "4b90e904ffb0e8031cee9ea51b2c5b2da15c3b04d9a59dc848efd1368259c867"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/doc-lint.json",
+      "committedTextLfSha256": "2f0d7077177107d928deb7fa692523233cdbb6ac40df851c6ebd5a63d5c4855a"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/doc-sync-procedure.cjs.txt",
+      "committedTextLfSha256": "7a44c64e7f77a249fb32d12e861c1bebd326ae5035b412cec471d4ecdf57496d"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/documentation-correction-procedure.cjs.txt",
+      "committedTextLfSha256": "2f29ee6283b1f97b49e9c978fcde3a13f64a1a507c342b493952e1dc84945f80"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/documentation-precheck-first-error.json",
+      "committedTextLfSha256": "2ab316cfaa2c841654ee453c1edb27d843474df50686158d5e25c78a1db4859b"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/expectation-repair-procedure.cjs.txt",
+      "committedTextLfSha256": "14c49e5ed7e43a702e4f8eaa6976f87b68955b8765e47649e4541babc07a4e9f"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/manifest.json",
+      "committedTextLfSha256": "69fa1d49123d8a23fd614b733da61ab75878250a5c085c37264c70787e1fb755"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/matrix-delta.json",
+      "committedTextLfSha256": "4d43bb2ad4bb92a40fc4cdbd5aa9332ac0cd8e97c82301eb31e35191cb9e7a55"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/old-material-scope.json",
+      "committedTextLfSha256": "b5e3c05e91c61d9882d7e90fd25835bfa8eb4174eb9d9ab312560054dcb5f942"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/preflight-first-error.json",
+      "committedTextLfSha256": "1015cb52ff1e7dbebda7f19ba139de54c6c2d5f4c5b42666840262493c8dd0e9"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/preparation-procedure.cjs.txt",
+      "committedTextLfSha256": "4a3a72cb98b3d762947ccccddbb27dfc726b497b325dba4ef18fef7039877ae6"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/remaining-blockers.md",
+      "committedTextLfSha256": "0545847a98abea24aa2366968190022c2dfe71a4382a58d05c0159f1af90aeea"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/replay-command-first-error.json",
+      "committedTextLfSha256": "7fb8305992369d13b5ababc5e9d7461c0536e643363d92e51fec52ec09e7fcdc"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/replay-command.json",
+      "committedTextLfSha256": "7fb8305992369d13b5ababc5e9d7461c0536e643363d92e51fec52ec09e7fcdc"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/replay-config.ts.txt",
+      "committedTextLfSha256": "5e30e9bbe7aaa117fe3cd62662ff934fadaca8b68bfecf0c72baacfd2dd76422"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/replay-final-command.json",
+      "committedTextLfSha256": "8a9defa7cb6ede8b5d7411e81aed21afdd7ccb84b89ccffcebe39f5218ff7cb9"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/replay-final-config.ts.txt",
+      "committedTextLfSha256": "76e5c72f33e8da9128fc8f9c7ce66fd98c101c74cfc6a0e75f6541904cfb33d3"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/replay-final-procedure.test.ts.txt",
+      "committedTextLfSha256": "832c5225c79fe5d5e37c9e2d45e6bb3509819cfef8aacbd18fc407230ef95913"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/replay-final-runner.cjs.txt",
+      "committedTextLfSha256": "1f75f9752f5140bf2f89f831cb2354aa48628109bc0192300a9e17eb442fe54b"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/replay-procedure.test.ts.txt",
+      "committedTextLfSha256": "d050c6afba1762095ed7a25dc40299e3a4f24300ab51a26800dbc5a388dd38de"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/replay-runner.cjs.txt",
+      "committedTextLfSha256": "e98d3bd888fbdcfce43fd3e2d7f1c37c6d03965e995ca3c82fd00e9c79185f71"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/replay-summary-first-error.json",
+      "committedTextLfSha256": "588b6027645bcf00abb2427f5da27e653f1f28b66a93524403ea3deced013bde"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/replay-summary.json",
+      "committedTextLfSha256": "e1b87e5ae51999467ced09e8717e7960a370b7873d4850ab6ccacaa654b59840"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/report.md",
+      "committedTextLfSha256": "b3044307d8af455c1c7f9c2e8d94424b6b0a4cdca21efda2f287cdcc7cb0745f"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/request-ledger.json",
+      "committedTextLfSha256": "55d10b2c4f381f34e43d63837190264e15791b3433632a33e913511fa8640497"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/seal-procedure.cjs.txt",
+      "committedTextLfSha256": "c7c166fd154d02203713a0bb0448dff2bdf88fe8a2710a67ea3fc0607b9cdd3b"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/source-field-verification-procedure.cjs.txt",
+      "committedTextLfSha256": "7b7ccc901fdb38fb3482c47222dd42fefd558aa37e4088fb5d138c2fd9e367d3"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/source-field-verification.json",
+      "committedTextLfSha256": "f1adffec4e1a018bbdb58a5f1e5cd6a30b99c321709558c6d1d8dce7907514f4"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/source-item-accounting.json",
+      "committedTextLfSha256": "785ec553e3118f67979f2fb994bd18332d62ef903e0a71af3f3b7059224f220c"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/source-proof.json",
+      "committedTextLfSha256": "70b8c0025e9f79cd3a5630ab02d7aef1398c02c851eaf932f7a6b67c4fe3f118"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/validation-procedure.cjs.txt",
+      "committedTextLfSha256": "28817e7aa49cd9171bcad85a27e268436ea96a282108270dd38c4f5ff4b141b7"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/validation.json",
+      "committedTextLfSha256": "f838d263f7f0803a3d808dbff49e37fbed94b4ea252831c6b38e53c83bed0284"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/xml-preflight-before-item-accounting.json",
+      "committedTextLfSha256": "374cc312c796b0f6fed813ff0f5552acf680c35a4121f43d939ed92c611cf502"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/xml-preflight-procedure.cjs.txt",
+      "committedTextLfSha256": "3d45349bda09b2543cf74180a7e1e32b506180abaa5345b152213d2d9658ddeb"
+    },
+    {
+      "path": "docs/evidence/r2-westports-rss-2026-10-15/xml-preflight.json",
+      "committedTextLfSha256": "c46ca07614c5dff3d48b9c8f0ff00bc4518f9cb7e4cec1c0df6dd7a1cc8474d2"
+    },
+    {
+      "path": "docs/handoffs/r2-next-execution-2026-10-15.md",
+      "committedTextLfSha256": "85c6cc82e18351219c08ffe87be03fe9b0eea22243ce8d85ad24080f31a55462"
+    },
+    {
+      "path": "docs/status.md",
+      "committedTextLfSha256": "b8cc10aa3783fe06716aeb085089d1cf595d2b64a2f6e8ce01b30273c566be25"
+    }
+  ],
+  "productGate": "NOT_RUN_no_product_change",
+  "sourceDnsCalls": 1,
+  "sourceGetAttempts": 1,
+  "rawSourceItems": 10,
+  "emptySourceTitles": 7,
+  "normalizedRecords": 3,
+  "r24": "STALE",
+  "r25": "approved_NOT_RUN_local_limitedPASS_pending_parent",
+  "approvedCoverage": [
+    "25/39",
+    "23/34"
+  ],
+  "numericHistorical": "3/5",
+  "blockerSources": 14,
+  "noFurtherSourceRequests": true,
+  "rawSourceOriginalsLocalIgnoredOnly": true,
+  "cleanup": "none"
+}

@@ -1,0 +1,47 @@
+{
+  "id": "MY-T01",
+  "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+  "host": "www.mof.gov.my",
+  "catalogLineLfSha256": "00c52ccf8e53b5460b7836bb94eec3d2607d35c4a3f0c2518a1cbb575997d548",
+  "oldWireSha256": "6136eaa0b359ed2a1c9d76bf00814a787706540e0eb0f02bd64d5b737e092439",
+  "startedAt": "2026-10-15T04:10:41.342Z",
+  "systemDnsCalls": 1,
+  "transportInvocations": 1,
+  "status": "CAPTURED_SAFE_XML",
+  "parser": "NOT_RUN",
+  "rawLocalOnly": true,
+  "addresses": [
+    {
+      "address": "163.53.154.2",
+      "family": 4
+    }
+  ],
+  "addressClassification": "public_address",
+  "receivedAt": "2026-10-15T04:10:42.205Z",
+  "httpStatus": 200,
+  "contentType": "application/rss+xml; charset=utf-8",
+  "bytes": 6185,
+  "wireSha256": "576ea0c1878c50591cd326fe07d27aafe9c6ba7f402df0ae1adc3b42a448a0c0",
+  "completeResponseCaptured": true,
+  "locationPresent": false,
+  "locationFollowed": false,
+  "decoding": {
+    "encoding": "utf-8",
+    "selectedBy": "http",
+    "declarations": [
+      {
+        "source": "http",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      },
+      {
+        "source": "xml",
+        "label": "utf-8",
+        "encoding": "utf-8"
+      }
+    ],
+    "conflict": false,
+    "byteLength": 6185
+  },
+  "finishedAt": "2026-10-15T04:10:42.205Z"
+}

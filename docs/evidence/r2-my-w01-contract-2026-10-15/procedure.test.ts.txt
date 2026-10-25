@@ -1,0 +1,110 @@
+import { it, expect } from "vitest"
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs"
+import { resolve } from "node:path"
+import { createHash } from "node:crypto"
+import NativeDatabase from "better-sqlite3"
+import { createDatabase } from "db0"
+import { open } from "../server/intel/__fixtures__/isolated-db"
+import { ShippingRepository, initShippingTables } from "../server/database/shipping"
+import { createMockSnapshot } from "../shared/shipping-fixtures"
+import { parseMetMalaysiaRows, parseMetMalaysiaWarnings, metMalaysiaRecordKey, METMALAYSIA_WARNING_URL } from "../server/providers/metmalaysia-warning"
+import { officialWeatherAlertSources, weatherAlertProvenance, createOfficialWeatherAlertProvider, resetWeatherAlertRateLimit } from "../server/providers/weather-alerts"
+import { createWeatherAlertSyncJob } from "../server/runtime/weather-alert-sync-job"
+import { evaluateOfficialAlertImpactRules } from "../server/services/official-alert-impact"
+import { getPortWeatherPanel } from "../server/services/port-weather-panel"
+import { fromJson } from "../server/intel/sources/json-list"
+import { intelSourceSeeds } from "../server/intel/sources"
+import { productionIntelOptions } from "../server/runtime/intel-production"
+const d="docs/evidence/r2-my-w01-contract-2026-10-15", local=".tmp/r2-my-w01-contract-2026-10-15-private"
+mkdirSync(d,{recursive:true});mkdirSync(local,{recursive:true})
+const save=(n:string,v:unknown)=>writeFileSync(`${d}/${n}.json`,JSON.stringify(v,null,2)+"\n")
+const hash=(v:string|Uint8Array)=>createHash("sha256").update(v).digest("hex")
+const artifact="docs/evidence/metmalaysia-integration-2026-10-10/raw/warning-2026-10-10T0830Z.json"
+const body=readFileSync(artifact,"utf8"), evidence=JSON.parse(readFileSync("docs/evidence/metmalaysia-integration-2026-10-10/live-evidence.json","utf8"))
+const source=officialWeatherAlertSources.find(s=>s.id==="metmalaysia")!, first=evidence.ranAt, second="2026-10-10T08:31:10.728Z"
+const ctx={id:source.id,sourceUrl:source.sourceUrl,provenance:weatherAlertProvenance(source)}
+it("distinct0754 probe and0830 integration; full response text provenance, never wire-byte certification",()=>{
+  const early=readFileSync("docs/evidence/metmalaysia-warning-2026-10-10/raw/warning.json")
+  const retained=readFileSync(".tmp/metmalaysia-live-eab30a7/warning-raw.json","utf8")
+  expect(early.length).toBe(7688);expect(Buffer.byteLength(body)).toBe(7754);expect(body).toBe(retained)
+  expect(evidence.egress).toHaveLength(1);expect(evidence.egress[0]).toMatchObject({url:METMALAYSIA_WARNING_URL,status:200,bytes:7754,at:"2026-10-10T08:30:40.790Z"})
+  expect(evidence.jobResult).toMatchObject({status:"success",recordsRead:4,recordsWritten:4})
+  const harness=readFileSync("scripts/r1-5-metmalaysia-live.ts","utf8")
+  expect(harness).toContain("const text = await res.text()");expect(harness).toContain("bytes: Buffer.byteLength(text)");expect(harness).toContain('writeFileSync(join(RUN_DIR, "warning-raw.json"), rawBody)')
+  save("provenance-correction",{previousEvidenceHead:"f5ffcda5629343456bd74ee0264c6e7c02dc448a",earlyProbe:{at:"2026-10-10T07:54:44Z",reportedBytes:7688,artifactBytes:early.length,artifactSha256:hash(early)},integration:{at:first,requestAt:evidence.egress[0].at,url:METMALAYSIA_WARNING_URL,httpStatus:200,recordedResponseTextUtf8Bytes:7754,artifactUtf8Bytes:Buffer.byteLength(body),artifactSha256:hash(body),exactTextMatchesRetainedRunFile:true,rows:4,persistedRecords:4,executionCodeSha:evidence.gitHead},sameResponseCompared:false,sizeDifferenceIsMismatch:false,fullResponseTextAndLiveOriginRecorded:true,originalWireByteHashVerified:false,reason:"Historical harness stored response.text() and its UTF8 byte length; no arrayBuffer/raw transport hash. Two different real runs are not a same-response size mismatch.",sourceRequestsThisRound:0,systemDnsThisRound:0})
+})
+it("reuses approved parser/provider/sync job/SQLite with first-received semantics across restart and query-only read",async()=>{
+  const raw=JSON.parse(body),rows=parseMetMalaysiaRows(body)
+  expect(rows).toHaveLength(4);expect(new Set(rows.map(metMalaysiaRecordKey)).size).toBe(4)
+  rows.forEach((r,i)=>expect(r).toMatchObject({issued:raw[i].warning_issue.issued,titleEn:raw[i].warning_issue.title_en,validFrom:raw[i].valid_from,validTo:raw[i].valid_to,textEn:raw[i].text_en}))
+  const parsed=parseMetMalaysiaWarnings(body,ctx,first)
+  expect(parsed.map(x=>x.id).sort()).toEqual(evidence.records.map((x:any)=>x.id).sort())
+  expect(parsed[0].id).not.toBe(parsed[1].id)
+  const path=resolve(`${local}/feed-${Date.now()}.sqlite3`)
+  let state=open(path),repo=new ShippingRepository(state.database,"real"),calls=0
+  const run=async(at:string)=>{
+    resetWeatherAlertRateLimit()
+    const fetcher=async(url:string,init?:{redirect?:string})=>{expect(url).toBe(METMALAYSIA_WARNING_URL);expect(init).toEqual({redirect:"error"});calls++;return{ok:true,status:200,redirected:false,url,text:async()=>body}}
+    const provider=createOfficialWeatherAlertProvider({sources:[source],allowPending:true,fetcher,now:()=>new Date(at),throwOnSourceFailureWithoutLastKnown:true})
+    return createWeatherAlertSyncJob({database:state.database,dataMode:"real",sourceId:"metmalaysia",provider:provider as typeof provider&{providerId:string},intervalMs:900000,now:()=>new Date(at)}).run()
+  }
+  const assertItems=(items:any[],fetchedAt:string)=>{
+    expect(items).toHaveLength(4)
+    for(const item of items){
+      const original=parsed.find(x=>x.id===item.id)!
+      expect(item.title).toBe(original.title);expect(item.canonicalUrl).toBe(METMALAYSIA_WARNING_URL);expect(item.sourceUrl).toBe(METMALAYSIA_WARNING_URL)
+      expect(item.publishedAt).toBe(first);expect(item.fetchedAt).toBe(fetchedAt)
+      expect(item.weather).toMatchObject({timeBasis:"received_at",alertState:"unknown",validityStatus:"unknown",timezoneStatus:"unconfirmed",officialSeverity:"not_provided"})
+      const {fetchedAt:_fetchedAt,...rawFields}=item.weather.alertRaw,{fetchedAt:_old,...originalRaw}=original.weather!.alertRaw!
+      expect(rawFields).toEqual(originalRaw);expect(item.weather.alertRaw.fetchedAt).toBe(fetchedAt)
+      expect(item.relatedPortIds).toEqual([]);expect(item.eventEligibility).toBe(false);expect(item.severity).toBe("info")
+      for(const key of ["alertIssuedAt","alertEffectiveAt","alertExpiresAt","alertRegion"])expect(item.weather[key]).toBeUndefined()
+      expect(item.effectiveAt).toBeUndefined();expect(item.expiresAt).toBeUndefined()
+    }
+    expect(items.filter(x=>x.title==="No Advisory")).toHaveLength(1);expect(items.filter(x=>x.title!=="No Advisory")).toHaveLength(3)
+    expect(evaluateOfficialAlertImpactRules(items,{portId:"port-klang",portCountry:"MY",cities:["Klang","Selangor"],now:new Date(fetchedAt)} as never)).toEqual([])
+  }
+  try{
+    await initShippingTables(state.database,"real")
+    const snapshot=createMockSnapshot(),port=snapshot.ports.find(p=>p.id==="port-klang")!
+    await repo.seed([{...port,provenance:{sourceType:"official",dataNature:"reported",sourceId:"unlocode",verified:true}}],[],[],snapshot.settings)
+    const firstRun=await run(first);expect(firstRun).toMatchObject({status:"success",recordsRead:4,recordsWritten:4})
+    const before=await repo.listFeedItems({view:"all",now:new Date(first)});assertItems(before,first)
+    state.native.close()
+    state=open(path);repo=new ShippingRepository(state.database,"real")
+    assertItems(await repo.listFeedItems({view:"all",now:new Date(second)}),first)
+    const repeat=await run(second);expect(repeat).toMatchObject({status:"success",recordsRead:4,recordsWritten:4})
+    const after=await repo.listFeedItems({view:"all",now:new Date(second)});assertItems(after,second)
+    expect(after.map(x=>x.id).sort()).toEqual(before.map(x=>x.id).sort())
+    const panel=await getPortWeatherPanel(repo,"port-klang",after,"test","MetMalaysia",{now:new Date(second)})
+    expect(panel.officialAlerts).toEqual([]);expect(panel.officialAlertImpacts).toEqual([])
+    const tables=["feed_items","feed_item_history","intel_item","intel_item_version","intel_fetch_run"]
+    const beforeClose=Object.fromEntries(tables.map(t=>[t,state.native.prepare(`SELECT * FROM ${t} ORDER BY rowid`).all()]))
+    expect((beforeClose.intel_item as any[]).length).toBe(0);expect((beforeClose.intel_fetch_run as any[]).length).toBe(0)
+    state.native.close();const dbHash=hash(readFileSync(path)),ro=new NativeDatabase(path,{readonly:true,fileMustExist:true})
+    let readRepoItems:any[]=[]
+    try{
+      ro.pragma("query_only=ON");expect(ro.pragma("query_only",{simple:true})).toBe(1)
+      const database=createDatabase({name:"sqlite",dialect:"sqlite",getInstance:()=>ro,exec:()=>{throw Error("readonly_exec_forbidden")},prepare:(sql:string)=>{const stmt=ro.prepare(sql);return{all:async(...args:never[])=>stmt.all(...args),get:async(...args:never[])=>stmt.get(...args),run:async()=>{throw Error("readonly_write_forbidden")}}}} as never)
+      readRepoItems=await new ShippingRepository(database,"real").listFeedItems({view:"all",now:new Date(second)})
+      assertItems(readRepoItems,second)
+      expect(Object.fromEntries(tables.map(t=>[t,ro.prepare(`SELECT * FROM ${t} ORDER BY rowid`).all()]))).toEqual(beforeClose)
+    }finally{ro.close()}
+    expect(hash(readFileSync(path))).toBe(dbHash);expect(calls).toBe(2)
+    writeFileSync(`${local}/full-replayed-items.json`,JSON.stringify(readRepoItems,null,2)+"\n")
+    save("feed-replay",{status:"PASS",artifactSha256:hash(body),fullResponseText:true,wireByteCertification:false,firstRun,repeat,realRows:4,distinctApprovedIds:4,firstReceivedAt:first,repeatFetchedAt:second,firstReceivedPreservedAcrossRestart:true,sharedCanonicalSourceUrl:METMALAYSIA_WARNING_URL,unknownValidity:4,unknownTimezone:4,portsAssociated:0,eventEligible:0,officialImpacts:0,noAdvisoryRecords:1,otherWarningsPreserved:3,injectedFetcherCalls:calls,actualSourceRequests:0,actualSystemDns:0,reopen:{readonly:true,queryOnly:true,allFeedAndHistoryRowsEqual:true,fullRawAndIdentityFieldsCompared:true,mismatches:0,databaseBytesUnchanged:true},intelItems:0,intelVersions:0,intelFetchRuns:0,scope:"Existing Feed provider -> weather-alert sync job -> SQLite/read repository; not R2 intel collector/runtime/API/browser/production activation",fields:readRepoItems.map(x=>({id:x.id,titleSha256:hash(x.title),issued:x.weather.alertRaw.issued,validFrom:x.weather.alertRaw.validFrom,validTo:x.weather.alertRaw.validTo,receivedAt:x.publishedAt,timeBasis:x.weather.timeBasis,sourceUrl:x.sourceUrl}))})
+  }finally{if(state.native.open)state.native.close()}
+})
+it("existing intel generic JSON config is not a lossless bridge for approved shared-URL identity",()=>{
+  const candidate={titlePaths:["warning_issue.title_en"],urlTemplate:METMALAYSIA_WARNING_URL,publishedAtPath:"warning_issue.issued",dateRuleBasis:"Offline negative compatibility check only; not a proposed source config or date reinterpretation"}
+  const policy={sourceId:"offline:MY-W01",status:"allowed" as const,fetchAllowed:true,persistence:"disallowed" as const,allowedHosts:["api.data.gov.my"],allowedContentTypes:["application/json"]}
+  expect(()=>fromJson(body,METMALAYSIA_WARNING_URL,candidate,policy)).toThrow("urlTemplate placeholders invalid")
+  const {urlTemplate:_template,...withPaths}=candidate
+  expect(()=>fromJson(body,METMALAYSIA_WARNING_URL,{...withPaths,urlPath:"link"},policy)).toThrow("json_list_invalid_link")
+  expect(intelSourceSeeds.some(s=>s.catalogId==="MY-W01")).toBe(false)
+  expect(productionIntelOptions({env:{}}).registry?.intel?.enabled).toBe(false)
+  expect(()=>productionIntelOptions({env:{SHIPPING_INTEL_ENABLED:"true",SHIPPING_INTEL_SOURCE_IDS:"MY-W01"}})).toThrow("intel_source_selection_invalid")
+  const ddl=readFileSync("server/database/migrations/022-intel-items.ts","utf8")
+  expect(ddl).toContain("UNIQUE (source_id, canonical_url)")
+  save("intel-compatibility",{status:"PASS_EXPECTED_UNSUPPORTED_BRIDGE",sourceRequests:0,systemDns:0,existingMetMalaysiaParserReused:true,newParserCreated:false,approvedFeedIdentity:"issued + title_en + validFrom + validTo; per-record Feed id; shared canonical source URL",genericJsonConstantSourceUrlError:"urlTemplate placeholders invalid",genericJsonMissingArticleUrlError:"json_list_invalid_link",intelStorageUniqueKey:"source_id + canonical_url",sameSourceUrlDistinctRecords:4,productionSourceSelectable:false,defaultIntelJobEnabled:false,intelCollectionClaimed:false,wireProofClaimed:false,coverageChanged:false,scope:"Negative compatibility diagnostic only; no product identity/schema/catalogue/acceptance changes"})
+})

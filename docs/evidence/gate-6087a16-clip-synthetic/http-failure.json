@@ -1,0 +1,7 @@
+{
+  "sha": "6087a169cb2e591e3acb10d23ccc641d8212f5c0",
+  "error": "Cannot open database because the directory does not exist",
+  "checks": [
+    "normal HTML has no synthetic mark"
+  ]
+}

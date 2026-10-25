@@ -1,0 +1,48 @@
+const fs=require('node:fs'),path=require('node:path'),Database=require('../node_modules/better-sqlite3');
+const root=process.cwd(),dir=path.join(root,'.tmp','manual-p2-preview-79fc6c8'),info=JSON.parse(fs.readFileSync(path.join(dir,'preview-info.json'),'utf8')),base='http://127.0.0.1:4488',checks=[];
+function check(name,ok){checks.push({name,status:ok?'PASS':'FAIL'});if(!ok)throw Error(name)}
+async function get(route){const r=await fetch(base+route);return {status:r.status,body:await r.json()}}
+async function post(data,origin=base){const r=await fetch(base+'/api/shipping/intel/manual',{method:'POST',headers:{'Content-Type':'application/json','Origin':origin},body:JSON.stringify(data)});return {status:r.status,body:await r.json()}}
+const tables=['provider_usage','paid_receipt','sync_runs','calendar_events','ops_calendar_event','policy_record','policy_version'];
+const counts=db=>Object.fromEntries(tables.map(t=>[t,db.prepare('SELECT COUNT(*) AS n FROM '+t).get().n]));
+(async()=>{
+ const db=new Database(info.database);const before=counts(db);
+ const list=await get('/api/shipping/intel/manual');check('manual checklist41 existing catalog entries',list.status===200&&list.body.items.length===41);
+ check('39 manual sources disabled and metadata only',db.prepare("SELECT COUNT(*) AS n FROM intel_source WHERE kind='manual' AND enabled=0 AND persistence='disallowed'").get().n===39);
+ const data={requestId:'preview-manual-a',sourceId:'intel:th-w01',operator:'SYNTHETIC local tester',action:'submit',url:'https://www.tmd.go.th/en/api/xml/CAP/?utm_source=synthetic#fragment',title:'[合成测试，非真实通知] R2-7人工录入',body:'Synthetic fixture only. Not an actual official notice.'};
+ const a=await post(data);check('explicit licensed manual submit',a.status===200&&a.body.outcome==='created');
+ const replay=await post(data);check('same request replay',JSON.stringify(replay)===JSON.stringify(a));
+ check('conflicting same request409',(await post({...data,title:'Different synthetic title'})).status===409);
+ const b=await post({...data,requestId:'preview-manual-b',body:'Synthetic revision only.'});check('revision creates distinct version',b.status===200&&b.body.versionId!==a.body.versionId);
+ const restored=await post({...data,requestId:'preview-manual-restore'});check('A-B-A restores old version',restored.status===200&&restored.body.outcome==='restored'&&restored.body.versionId===a.body.versionId);
+ const detail=await get('/api/shipping/intel/items/'+a.body.itemId);check('manual official label plus unverified fixture',detail.body.manualLabel==='官方通知（人工录入）'&&detail.body.item.title.includes('合成测试'));
+ check('publication unknown separate from enteredAt',detail.body.item.publishedAt===null&&detail.body.selectedVersion.publishedAt===null&&detail.body.manualActions.every(x=>x.operator===data.operator&&Number.isFinite(Date.parse(x.entered_at))));
+ check('shared canonical URL strips tracking and slash',detail.body.item.canonicalUrl==='https://www.tmd.go.th/en/api/xml/CAP');
+ check('old immutable versions retained',detail.body.versions.items.length===2);
+ check('restored permitted body reads original',detail.body.selectedVersion.blocks[1].text===data.body);
+ const empty=await post({requestId:'preview-check-empty',sourceId:'intel:manual:cn-p05',operator:data.operator,action:'checked_empty'});check('checked-empty distinct from collection health',empty.status===200&&db.prepare("SELECT status FROM intel_source WHERE id='intel:manual:cn-p05'").get().status==='never_run');
+ const meta=await post({...data,requestId:'preview-meta-only',sourceId:'intel:manual:cn-p05',url:'https://www.msa.gov.cn/offline-fixture/r2-7',body:'',title:'[合成测试，非真实通知] metadata only'});check('manual metadata source saves title only',meta.status===200&&(await get('/api/shipping/intel/items/'+meta.body.itemId)).body.selectedVersion.blocks.length===1);
+ check('restricted body400',(await post({...data,requestId:'preview-restricted',sourceId:'intel:manual:cn-p05',url:'https://www.msa.gov.cn/offline-fixture/r2-7'})).status===400);
+ check('HTML rejected400',(await post({...data,requestId:'preview-html',body:'<script>alert(1)</script>'})).status===400);
+ check('unapproved URL rejected400',(await post({...data,requestId:'preview-url',url:'https://example.invalid/'})).status===400);
+ check('cross-origin rejected403',(await post({...data,requestId:'preview-origin'},'https://evil.invalid')).status===403);
+
+ check('same-host non-CAP body rejected400',(await post({...data,requestId:'same-host-negative',url:'https://www.tmd.go.th/story'})).status===400);
+ check('BMKG same-host non-feed body rejected400',(await post({...data,requestId:'bmkg-host-negative',sourceId:'intel:id-w01',url:'https://www.bmkg.go.id/story'})).status===400);
+ const bmkg=await post({...data,requestId:'bmkg-feed-positive',sourceId:'intel:id-w01',url:'https://www.bmkg.go.id/alerts/nowcast/en/rss.xml',body:'X'.repeat(1000)});
+ check('exact BMKG feed retains excerpt maximum',bmkg.status===200&&(await get('/api/shipping/intel/items/'+bmkg.body.itemId)).body.selectedVersion.blocks[1].text.length===280);
+ for(let n=0;n<22;n++)check('new manual history '+n,(await post({...data,requestId:'history-'+n,body:'Synthetic later CAP revision '+n})).status===200);
+ const early=await get('/api/shipping/intel/items/'+a.body.itemId+'?versionId='+a.body.versionId);
+ check('early identity independent of audit20',early.status===200&&early.body.manualActions.length===20&&early.body.manualLabel==='官方通知（人工录入）'&&early.body.manualEntry.operator===data.operator&&early.body.selectedVersion.blocks[1].text===data.body);
+ const actions=db.prepare('SELECT COUNT(*) AS n FROM intel_manual_action').get().n;
+ check('only28 successful manual actions persisted',actions===28);
+ const beforeReads=JSON.stringify(db.prepare('SELECT * FROM intel_manual_action ORDER BY request_id').all());
+ for(const route of ['/api/shipping/intel/manual','/api/shipping/intel/items','/api/shipping/intel/sources','/api/shipping/intel/items/'+a.body.itemId])check('GET '+route,(await get(route)).status===200);
+ check('GET audit unchanged',beforeReads===JSON.stringify(db.prepare('SELECT * FROM intel_manual_action ORDER BY request_id').all()));
+ check('usage/runtime/policy/calendar counts unchanged',JSON.stringify(before)===JSON.stringify(counts(db)));
+ for(const route of ['/','/feed','/calendar','/ports','/policies','/events','/settings']){const r=await fetch(base+route);check('SPA HTTP '+route,r.status===200);if(route==='/feed'){const html=await r.text();for(const asset of [...html.matchAll(/(?:src|href)="(\/assets\/[^\"]+\.(?:js|css))"/g)].map(x=>x[1]))check('asset '+asset,(await fetch(base+asset)).status===200)}}
+ for(const port of [4477,4482,4483,4484,4485,4486,4487])check('old preview retained '+port,(await fetch('http://127.0.0.1:'+port+'/')).status===200);
+ check('schema28',db.prepare("SELECT schema_version FROM app_metadata WHERE id='default'").get().schema_version===28);
+ const after=counts(db);db.close();const result={sha:info.sha,url:info.url,checks,summary:{passed:checks.filter(x=>x.status==='PASS').length,failed:0},countsBefore:before,countsAfter:after,browser:'NOT_RUN',samples:'Synthetic local manual notices only; no upstream requests or actual official notice validation',limits:'Loopback APIs/static assets only, no DOM events/keyboard/layout or packet-level egress capture'};
+ fs.writeFileSync(path.join(root,'docs','evidence','gate-'+info.sha.slice(0,7)+'-frontend','preview-http.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result.summary));
+})().catch(e=>{console.error(e.message);process.exitCode=1});

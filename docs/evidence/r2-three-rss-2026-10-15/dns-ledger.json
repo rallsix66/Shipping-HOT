@@ -1,0 +1,44 @@
+[
+  {
+    "id": "MY-C01",
+    "host": "www.customs.gov.my",
+    "reservedAt": "2026-10-15T04:10:40.625Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "103.245.91.224",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T04:10:40.715Z"
+  },
+  {
+    "id": "MY-T01",
+    "host": "www.mof.gov.my",
+    "reservedAt": "2026-10-15T04:10:41.343Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "163.53.154.2",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T04:10:41.716Z"
+  },
+  {
+    "id": "PH-M01",
+    "host": "portcalls.com",
+    "reservedAt": "2026-10-15T04:10:42.206Z",
+    "state": "finished",
+    "addresses": [
+      {
+        "address": "173.231.251.20",
+        "family": 4
+      }
+    ],
+    "classification": "public_address",
+    "finishedAt": "2026-10-15T04:10:42.305Z"
+  }
+]

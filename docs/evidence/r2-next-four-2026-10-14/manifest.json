@@ -1,0 +1,41 @@
+{
+  "codeSha": "e5d2f0bb0aa4651984d69d280db0c2485d9467a2",
+  "rows": [
+    {
+      "id": "VN-P03",
+      "url": "https://saigonnewport.com.vn/tin-tuc",
+      "host": "saigonnewport.com.vn",
+      "catalogLineSha256": "1673470b8e7167d03ff635963444707d1d9a6f7750cdbb3ef95459339711065a",
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML"
+    },
+    {
+      "id": "VN-T01",
+      "url": "https://idea.gov.vn/",
+      "host": "idea.gov.vn",
+      "catalogLineSha256": "c6a44ac4e30997cc3c210a31c7b96885cf8f2b3612e6516a394f325526450d3e",
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML"
+    },
+    {
+      "id": "TH-C02",
+      "url": "https://www.customs.go.th/list_strc_download_with_docno_date.php?ini_content=announce_160426_01&order_by=date&sort_type=0&lang=th",
+      "host": "www.customs.go.th",
+      "catalogLineSha256": "77e344ec404481696226fc48aca64bb8f8b9e11b3eb8a362e4205c534e939066",
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML"
+    },
+    {
+      "id": "ID-T01",
+      "url": "https://jdih.kemendag.go.id/",
+      "host": "jdih.kemendag.go.id",
+      "catalogLineSha256": "d0c3509bdf66df50aa869514411edb1b6b365aed4b619184a10ffdf1025e2b8d",
+      "permission": "reuse permission not established; private temporary response bytes for authorized inspection only; commit sanitized bounded metadata, not full HTML"
+    }
+  ],
+  "maxRequests": 4,
+  "maxBytes": 524288,
+  "perSourceMs": 10000,
+  "totalMs": 120000,
+  "retries": 0,
+  "redirects": 0,
+  "details": 0,
+  "productionEnabled": false
+}

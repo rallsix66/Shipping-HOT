@@ -1,0 +1,61 @@
+{
+  "rawExit": 0,
+  "startedAt": "2026-10-15T08:16:55.145Z",
+  "finishedAt": "2026-10-15T08:16:55.618Z",
+  "baselineEvidenceHead": "0274014037fbf68d7821309d2fd4090eaa036396",
+  "testedCodeSha": "8d0993e4164dae0b7a7f96dc531b9aac92be54b1",
+  "priorParentAcceptedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "independentReview": "pending_parent",
+  "checks": [
+    {
+      "name": "clean code SHA five-file scope and fixed safety/collector/Runtime/schema/catalogue boundaries",
+      "pass": true
+    },
+    {
+      "name": "finite own-card correction, exact group binding and preserved failure records",
+      "pass": true
+    },
+    {
+      "name": "original complete bytes and all positional range hashes",
+      "pass": true
+    },
+    {
+      "name": "fresh normal install and full nine-command code gate",
+      "pass": true
+    },
+    {
+      "name": "complete saved307-to200 chain,7 real rows/repeat0/query-only7 and no external calls",
+      "pass": true
+    },
+    {
+      "name": "only ID-T02 entry changed, entire approved coverage and40 other entries unchanged",
+      "pass": true
+    },
+    {
+      "name": "all current matrix evidence references resolve on committed LF basis",
+      "pass": true
+    },
+    {
+      "name": "affected links/default-off count, minimum disclosure, ignored originals and evidence-only diff",
+      "pass": true
+    },
+    {
+      "name": "exact command streams and original/LF gate log hashes retained",
+      "pass": true
+    }
+  ],
+  "originalByteRangeHashes": 35,
+  "recursiveMatrixFileHashes": 332,
+  "localMarkdownLinks": 156,
+  "sourceDnsCalls": 0,
+  "sourceGetAttempts": 0,
+  "cnP02Requests": 0,
+  "realItems": 7,
+  "approvedCoverage": [
+    "24/39",
+    "22/34"
+  ],
+  "numericHistorical": "3/5",
+  "guiS7": "NOT_RUN",
+  "production24h": "NOT_RUN"
+}

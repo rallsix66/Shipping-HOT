@@ -1,0 +1,198 @@
+# command: pnpm test:e2e:s7
+# full_sha: 4e36813eb8859f4fb4d658f8cacdedde5b6275ad
+# started: 2026-10-13T03:26:50.620Z
+# ---- stdout ----
+
+> shipping-hot@0.0.41 test:e2e:s7 D:\try one\Shipping HOT
+> node scripts/e2e-s7-integrated.mjs
+
+
+--- Phase 1 — clean local initialization and schema migration ---
+PASS  start from a run directory with no database file
+PASS  health reports a healthy database (healthy)
+PASS  fresh database reached schema v27 (got 27)
+PASS  the isolated database file was created on first request
+PASS  app_metadata.schema_version = 27
+PASS  app_metadata.data_mode = real
+PASS  bootstrap completed timestamp recorded
+PASS  all 19 required business tables exist
+PASS  migration 014 archived vessel tables as _retired_vessels on fresh init
+PASS  fresh database carries no business rows (ports 0, feed 0)
+PASS  port_directory baseline was migrated in
+
+--- Phase 2 — deterministic provider-free fixture seed ---
+PASS  seed exited 0
+PASS  seed wrote the expectation manifest
+PASS  manifest dataMode = real
+PASS  2 real-lineage ports seeded (got 2)
+PASS  2 real-lineage feed items seeded (got 2)
+PASS  article version 1 / 6 blocks seeded (got 1/6)
+PASS  6 translated blocks seeded (got 6)
+PASS  1 historical-model cache row seeded (got 1)
+PASS  port watchlist row seeded (got 1)
+PASS  mock-source decoy rows are present in the database (1/1)
+
+--- Phase 3 — restart persistence in Real Mode ---
+PASS  GET /api/shipping after restart -> 200
+PASS  port survived the restart (port-s7-shekou)
+PASS  both feed items survived the restart
+PASS  snapshot carries no vessel records after R1
+PASS  snapshot carries no voyage records after R1
+
+--- Phase 3b — Real-Mode boundary: no Mock leakage, no Mock fallback ---
+PASS  mock-source decoy rows stay invisible in Real Mode even though they exist in SQLite
+PASS  no payload record carries mock provenance (0 mock of 4)
+PASS  payload reports dataMode = real
+PASS  no capability silently fell back to Mock in Real Mode ({"dataMode":"real","port":"unavailable","weather":"unavailable","weatherAlerts":"off","feed":"unavailable","calendar":"unavailable","calendarSourceIds":[]})
+PASS  no decoy content leaked into the snapshot payload (0)
+PASS  retired vessel search endpoint returns 404 (got 404)
+PASS  intel sources route reads empty persisted table (repeat 0)
+PASS  intel sources read is not cached (repeat 0)
+PASS  intel items route reads empty persisted table (repeat 0)
+PASS  intel items read is not cached (repeat 0)
+PASS  intel sources route reads empty persisted table (repeat 1)
+PASS  intel sources read is not cached (repeat 1)
+PASS  intel items route reads empty persisted table (repeat 1)
+PASS  intel items read is not cached (repeat 1)
+PASS  registered intel detail route returns coded unknown-item 404
+PASS  intel production route rejects out-of-range paging
+PASS  repeated production intel GETs leave all database tables unchanged
+
+--- Flow A — home, retired routes, navigation boundary ---
+PASS  [A] home HOT loads with real-data-only content
+PASS  [A] home renders the HOT console surface
+PASS  [A] home navigation has no vessel or voyage links
+PASS  [A] GET /vessels direct HTTP 404 (got 404)
+PASS  [A] /vessels list renders the not-found page in the browser (client router)
+PASS  [A] GET /voyages direct HTTP 404 (got 404)
+PASS  [A] /voyages list renders the not-found page in the browser (client router)
+PASS  [A] GET /vessels/$id direct HTTP 404 (got 404)
+PASS  [A] /vessels/$id renders the not-found page in the browser (client router)
+PASS  [A] GET /voyages/$id direct HTTP 404 (got 404)
+PASS  [A] /voyages/$id renders the not-found page in the browser (client router)
+PASS  [A] vessel position API removed (got 404)
+PASS  [A] vessel voyage API removed (got 404)
+PASS  [A] ports navigation has no vessel or voyage links
+PASS  [A] vessel search API is removed (got 404)
+PASS  [A] port list still works after R1 retirement
+
+--- Flow B — feed list -> detail -> original/Chinese/bilingual/historical ---
+PASS  [B] feed list shows the article item
+PASS  [B] feed list shows no mock-source item
+PASS  [B] weather-category item renders its forecast chips from stored weather detail
+PASS  [B] weather chips expose the 24h/72h/7d windows
+PASS  [B] feed list opens the article detail
+PASS  [B] in-app navigation reached /feed/feed-s7-article
+PASS  [B] article detail renders the original headline
+PASS  [B] article detail reports the translation progress from the cache
+PASS  [B] a legacy-model cache row is labelled historical, not current
+PASS  [B] no unrelated fixture text leaked into the article view
+PASS  [B] feed detail API returns article.translation (200)
+PASS  [B] translation view is version-scoped to article-version:feed-s7-article:a55d884bb68f73f6
+PASS  [B] 5 of 6 blocks counted as translated (5/6)
+PASS  [B] historical counter = 1
+PASS  [B] full current-or-historical coverage reports complete status (complete)
+PASS  [B] 中文 mode renders the cached Chinese translation
+PASS  [B] bilingual mode pairs the original and the Chinese text
+PASS  [B] bilingual mode keeps the original text visible
+PASS  [B] 原文 mode returns to the original text
+PASS  [B] deep-link refresh restores the article page
+PASS  [B] refresh resets to 原文 without inventing a translation mode
+PASS  [B] back navigation restores the feed list
+
+--- Flow C — ports, weather and calendar load and switch ---
+PASS  [C] port list renders both seeded ports
+PASS  [C] port list keeps the UN/LOCODE identities
+PASS  [C] port list shows no mock-source port
+PASS  [C] port watch API accepts follow (200)
+PASS  [C] port follow persisted to SQLite/API after watch POST
+PASS  [C] port list renders 已关注 after API follow
+PASS  [C] port follow state survives a home round-trip refresh
+PASS  [C] port detail shows name and UN/LOCODE
+PASS  [C] port detail surfaces congestion information
+PASS  [C] port detail lists the related weather item
+PASS  [C] port weather API returns panel payload
+PASS  [C] port weather API exposes state, forecasts and impacts arrays
+PASS  [C] port weather API returns non-empty forecasts/impacts with aligned displayMeta counts
+PASS  [C] port weather API impact rows have validUntil strictly after validFrom
+PASS  [C] port weather API exposes insufficient 24h precip coverage for seeded sparse forecast
+PASS  [C] port weather API marks WR-S05 unevaluated when 24h precip is incomplete
+PASS  [C] port weather API forecastMeta splits target window vs actual coverage aligned with displayMeta
+PASS  [C] tropical cyclone API returns JMA sync panel
+PASS  [C] tropical cyclone API returns seeded ok sync with cyclone row
+PASS  [C] tropical cyclone API exposes current, history and forecast points separately
+PASS  [C] port weather API state reflects partial rule coverage with other rules still evaluated
+PASS  [C] port weather API includes seeded WR-S02 impact row
+PASS  [C] port detail renders the three weather blocks
+PASS  [C] port weather block shows seeded gust value
+PASS  [C] port weather block shows rule id and impact summary
+PASS  [C] port weather coverage block shows WR-S05 unevaluated notice
+PASS  [C] port detail renders tropical cyclone panel
+PASS  [C] tropical cyclone panel renders path chart and seeded current longitude
+PASS  [C] tropical cyclone panel shows forecast position latitude
+PASS  [C] tropical cyclone API failed sync retains stored path rows
+PASS  [C] tropical cyclone UI keeps path chart after failed sync with failure notice
+PASS  [C] tropical cyclone API ok_empty reports zero active cyclones
+PASS  [C] tropical cyclone UI ok_empty shows zero active and no path chart
+PASS  [C] tropical cyclone UI partial sync shows partial notice
+PASS  [C] tropical cyclone UI stale sync shows expiry copy
+PASS  [C] port weather UI renders precip/rule coverage notice
+PASS  [C] port weather UI impact row count matches API displayMeta
+PASS  [C] weather item exposes its forecast window switch
+PASS  [C] switching to the 24h window recomputes the stored wave value
+PASS  [C] the 24h wind value is recomputed alongside the wave value
+PASS  [C] the weather card still offers the 72h window after switching
+PASS  [C] switching back restores the stored 72h wave/wind values (Swell and wind risk window for Shekou approaches打开来源Swell and wind risk window for Shekou approaches)
+PASS  [C] the calendar route renders the annual reference calendar
+PASS  [C] country-specific incompleteness is stated instead of implied completeness
+PASS  [C] all five reference countries are offered
+PASS  [C] advancing a month changes the calendar period (2026 年 10 月 -> 2026 年 11 月)
+PASS  [C] stepping back restores the original period
+PASS  [C] the year selector is available
+PASS  [C] switching the year reloads the 2027 calendar (2027 年 10 月)
+PASS  [C] country selection is offered
+PASS  [C] deselecting 泰国 narrows the reference scope (4 个国家已选 · 0 项本月参考安排 · 周一开始)
+PASS  [C] 全选 restores the full reference scope
+PASS  [C] bundled calendar reference API -> 200
+PASS  [C] / loads with real-data-only content
+PASS  [C] /events loads with real-data-only content
+PASS  [C] /settings loads with real-data-only content
+PASS  [C] settings no longer exposes anchored-hours controls
+PASS  [C] settings no longer exposes voyage delay controls
+PASS  [C] settings footer no longer advertises retired AIS providers
+PASS  [C] settings still exposes port congestion threshold
+PASS  [C] /voyages stays retired after visiting settings
+PASS  [C] /vessels stays retired after visiting settings
+
+--- Phase 4 — read-only browse window, zero external egress ---
+PASS  provider_usage delta = 0
+PASS  DeepSeek usage delta = 0
+PASS  translation usage delta = 0
+PASS  sync_runs delta = 0
+PASS  translation_cache writes delta = 0
+PASS  provider_runtime row delta = 0
+PASS  provider_runtime state unchanged
+PASS  article store is read-only during browsing
+PASS  operational stores are read-only during browsing
+PASS  event/calendar stores are read-only during browsing (0/0)
+PASS  article block store is read-only during browsing (0)
+PASS  port directory/metadata stores are read-only during browsing (0/0)
+
+--- Phase 5 — browser and API cleanliness ---
+PASS  unhandled runtime/console errors = 0
+PASS  unexpected API 5xx responses = 0
+PASS  no outbound browser request left the machine during browsing (0); server-side egress is bounded by the scrubbed provider credentials, the disabled Runtime and the zero provider/usage/cache deltas
+
+--- Phase 6 — retained data untouched ---
+PASS  retained .data\shipping-hot-v3.sqlite3 unchanged (af1a62291c75a714|8425472:1790663050789.5464)
+PASS  retained .data\shipping-hot-v3-browser.sqlite3 unchanged (3dbb014c94b500a8|1572864:1788406513543.2524)
+PASS  retained .data\p7-final-seal-20260904.sqlite3 unchanged (ca0efa0cabe3c85a|978944:1788510203224.2683)
+PASS  retained .data\provider-secrets.json unchanged (843c54062551d938|56:1788417973720.671)
+
+Evidence: D:\try one\Shipping HOT\.tmp\s7-intel-4e36813-1791861850640\s7-integrated-evidence.json
+
+S7 CLEAN LOCAL INTEGRATED ACCEPTANCE PASS
+
+# ---- stderr ----
+
+# raw_exit_code: 0

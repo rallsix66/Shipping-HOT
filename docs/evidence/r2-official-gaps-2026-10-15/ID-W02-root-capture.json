@@ -1,0 +1,19 @@
+{
+  "id": "ID-W02-root",
+  "url": "https://maritim.bmkg.go.id/marine2026-data/",
+  "phase": "initial",
+  "host": "maritim.bmkg.go.id",
+  "startedAt": "2026-10-15T05:21:25.073Z",
+  "systemDnsCalls": 1,
+  "getAttempts": 0,
+  "status": "BLOCKED",
+  "rawLocalOnly": true,
+  "qualificationChanged": false,
+  "addressClassification": "blocked_address",
+  "secureEntryError": {
+    "code": "blocked_address",
+    "message": "Resolved address is not a public address: 198.18.0.86"
+  },
+  "httpStatus": null,
+  "finishedAt": "2026-10-15T05:21:25.074Z"
+}

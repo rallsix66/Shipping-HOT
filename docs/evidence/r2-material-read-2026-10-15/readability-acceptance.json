@@ -1,0 +1,12 @@
+{
+  "reviewedCodeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
+  "evidenceHead": "0780da4e7d36bdffbf0114e7079d0511679fb69f",
+  "parentReview": "ACCEPTED_LIMITED_no_new_P2",
+  "scope": "offline Readability code/process; not live/continuous24h or overallR2",
+  "reviewDate": "2026-10-15",
+  "coverageUnchanged": [
+    "25/39",
+    "24/34"
+  ],
+  "numericHistorical": "3/5"
+}

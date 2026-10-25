@@ -1,0 +1,9 @@
+{
+  "name": "lint",
+  "command": "pnpm lint",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-final-build",
+  "sha": "2b988bca8574247c277b1ed7aabc14525d973515",
+  "startedAt": "2026-10-14T03:50:46.274Z",
+  "endedAt": "2026-10-14T03:51:09.760Z",
+  "rawExit": 0
+}

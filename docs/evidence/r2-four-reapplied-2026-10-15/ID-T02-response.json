@@ -1,0 +1,23 @@
+{
+  "id": "ID-T02",
+  "url": "https://jdih.kemenkeu.go.id/",
+  "host": "jdih.kemenkeu.go.id",
+  "catalogLineSha256": "badbcb5421386368eaa2d608b1cfe39bcc9ecbb6868b09e16812792b916d539b",
+  "startedAt": "2026-10-15T01:16:15.021Z",
+  "systemDnsCalls": 1,
+  "httpRequests": 1,
+  "status": "NOT_RUN",
+  "rawHtmlCommitted": false,
+  "addresses": [
+    {
+      "address": "103.196.166.252",
+      "family": 4
+    }
+  ],
+  "addressClassification": "public_address",
+  "receivedAt": "2026-10-15T01:16:18.420Z",
+  "httpStatus": 307,
+  "bytes": 5,
+  "wireSha256": "2cc974af6afc822c42a4e914df05c697348b80420941f6b27561b2bf688587b7",
+  "rawLocalOnly": true
+}

@@ -1,0 +1,9 @@
+{
+  "name": "smoke-p2c",
+  "command": "pnpm smoke:p2c-runtime",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-final-build",
+  "sha": "2b988bca8574247c277b1ed7aabc14525d973515",
+  "startedAt": "2026-10-14T03:51:25.440Z",
+  "endedAt": "2026-10-14T03:51:26.496Z",
+  "rawExit": 0
+}

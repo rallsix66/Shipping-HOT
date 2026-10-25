@@ -1,0 +1,102 @@
+{
+  "sha": "c6604cc9b803d3a590354cf4d79ad1f3d7237c5c",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-review-build",
+  "commands": [
+    {
+      "name": "install",
+      "command": "pnpm install --frozen-lockfile",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-review-build",
+      "sha": "c6604cc9b803d3a590354cf4d79ad1f3d7237c5c",
+      "startedAt": "2026-10-14T03:46:11.431Z",
+      "endedAt": "2026-10-14T03:46:19.269Z",
+      "rawExit": 0
+    },
+    {
+      "name": "build",
+      "command": "pnpm build",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-review-build",
+      "sha": "c6604cc9b803d3a590354cf4d79ad1f3d7237c5c",
+      "startedAt": "2026-10-14T03:46:19.270Z",
+      "endedAt": "2026-10-14T03:46:42.603Z",
+      "rawExit": 0
+    },
+    {
+      "name": "typecheck",
+      "command": "pnpm typecheck",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-review-build",
+      "sha": "c6604cc9b803d3a590354cf4d79ad1f3d7237c5c",
+      "startedAt": "2026-10-14T03:46:42.603Z",
+      "endedAt": "2026-10-14T03:46:50.012Z",
+      "rawExit": 0
+    },
+    {
+      "name": "lint",
+      "command": "pnpm lint",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-review-build",
+      "sha": "c6604cc9b803d3a590354cf4d79ad1f3d7237c5c",
+      "startedAt": "2026-10-14T03:46:50.012Z",
+      "endedAt": "2026-10-14T03:47:12.127Z",
+      "rawExit": 0
+    },
+    {
+      "name": "policy-targeted",
+      "command": "pnpm exec vitest run -c vitest.config.ts test/policy-console.test.ts test/reduce-motion.test.ts test/ui-smoke.test.ts server/database/policy.test.ts test/ports-demo.test.ts server/services/port-weather-panel.test.ts test/calendar-demo.test.ts server/services/promo-calendar.test.ts",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-review-build",
+      "sha": "c6604cc9b803d3a590354cf4d79ad1f3d7237c5c",
+      "startedAt": "2026-10-14T03:47:12.128Z",
+      "endedAt": "2026-10-14T03:47:14.589Z",
+      "rawExit": 0
+    },
+    {
+      "name": "vitest",
+      "command": "pnpm exec vitest run -c vitest.config.ts",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-review-build",
+      "sha": "c6604cc9b803d3a590354cf4d79ad1f3d7237c5c",
+      "startedAt": "2026-10-14T03:47:14.590Z",
+      "endedAt": "2026-10-14T03:47:26.266Z",
+      "rawExit": 0
+    },
+    {
+      "name": "smoke-p0",
+      "command": "pnpm smoke:p0-native",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-review-build",
+      "sha": "c6604cc9b803d3a590354cf4d79ad1f3d7237c5c",
+      "startedAt": "2026-10-14T03:47:26.266Z",
+      "endedAt": "2026-10-14T03:47:27.435Z",
+      "rawExit": 0
+    },
+    {
+      "name": "smoke-p2c",
+      "command": "pnpm smoke:p2c-runtime",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-review-build",
+      "sha": "c6604cc9b803d3a590354cf4d79ad1f3d7237c5c",
+      "startedAt": "2026-10-14T03:47:27.436Z",
+      "endedAt": "2026-10-14T03:47:28.503Z",
+      "rawExit": 0
+    },
+    {
+      "name": "smoke-feed",
+      "command": "pnpm smoke:p3-feed-freshness",
+      "cwd": "D:\\try one\\Shipping HOT\\.tmp\\calendar-demo-review-build",
+      "sha": "c6604cc9b803d3a590354cf4d79ad1f3d7237c5c",
+      "startedAt": "2026-10-14T03:47:28.504Z",
+      "endedAt": "2026-10-14T03:47:29.647Z",
+      "rawExit": 0
+    }
+  ],
+  "retainedBefore": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedAfter": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedUnchanged": true,
+  "browser": "NOT_RUN: official browser unavailable, custom CDP action rejected",
+  "s7": "NOT_RUN: browser control blocked; shell change still needs integration acceptance"
+}

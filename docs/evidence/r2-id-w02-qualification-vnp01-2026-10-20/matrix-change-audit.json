@@ -1,0 +1,80 @@
+{
+  "beforeSha256": "d7b70b273454925249610db514b21064551b130c6a5061398f9b457419d584eb",
+  "afterSha256": "886dac164d6a1bad8c3aa5536faacc43bec94b6fe3aa41a1d3888ec4678579c0",
+  "changedEntryIds": [
+    "ID-W02"
+  ],
+  "otherEntriesUnchanged": 40,
+  "countingRulesUnchanged": true,
+  "r2_5Unchanged": true,
+  "defaultStateUnchanged": true,
+  "historicalArtifactsRewritten": false,
+  "currentPublic": {
+    "numerator": 26,
+    "denominator": 39,
+    "ratio": 0.6666666666666666,
+    "minimumOK": 32,
+    "shortfall": 6,
+    "ids": [
+      "CN-P01",
+      "CN-W01",
+      "CN-W02",
+      "CN-T02",
+      "VN-P03",
+      "VN-W01",
+      "VN-T01",
+      "VN-D01",
+      "TH-W01",
+      "TH-C01",
+      "TH-C02",
+      "MY-W01",
+      "MY-C01",
+      "MY-T01",
+      "ID-W01",
+      "ID-W02",
+      "ID-T01",
+      "ID-T02",
+      "PH-C01",
+      "PH-M01",
+      "XX-K02",
+      "XX-K03",
+      "XX-M01",
+      "XX-M03",
+      "XX-A01",
+      "XX-A02"
+    ],
+    "statusCounts": {
+      "OK": 26,
+      "PARTIAL": 7,
+      "NOT_RUN": 3,
+      "STALE": 1,
+      "BLOCKED": 2
+    },
+    "pass": false
+  },
+  "numericEvidence": {
+    "numerator": 3,
+    "denominator": 5,
+    "ids": [
+      "XX-W01",
+      "XX-A01",
+      "XX-A02"
+    ],
+    "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness",
+    "additionalCompleteOriginalOfflineReplay": {
+      "count": 1,
+      "ids": [
+        "ID-W02"
+      ],
+      "type": "complete_original_offline_parse",
+      "acceptance": {
+        "path": "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/qualification-acceptance.json",
+        "sha256": "37eede08e0b0e8222400da4671d65e405cfc71364ffa7e4062a211018852ad2a",
+        "hashBasis": "local_file_bytes"
+      },
+      "productionIntegrationRate": "NOT_CLAIMED"
+    }
+  },
+  "catalogSha256": "6c2d06eeac91ed2e9429983ed127736606fbf4d7e78d7816a76bd4d08a69eede",
+  "catalogHashBasis": "current local text normalized LF"
+}

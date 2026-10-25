@@ -1,0 +1,56 @@
+{
+  "head": "40629587e22d8932df105962ec214530e4054414",
+  "branch": "codex/shipping-hot-r2",
+  "scope": "complete incremental diff versus saved dirty working state at slice start; existing changes retained",
+  "files": [
+    {
+      "path": "server/intel/collect.ts",
+      "sha256": "bfe42b1ca458568f0349b574d447392a85564abd9d073a399db0e6bbb7eb513e",
+      "bytes": 8914
+    },
+    {
+      "path": "server/intel/sources.ts",
+      "sha256": "9c8e8e7698c2d8d5f76047d52727c999ab5697d5a0156c586213928ebf9bf097",
+      "bytes": 2223
+    },
+    {
+      "path": "server/intel/sources/config-keys.ts",
+      "sha256": "47aaf058cdf1237608fe01d04ff1daf6ae24520ad7474ebe5bb5b64529210099",
+      "bytes": 6927
+    },
+    {
+      "path": "server/intel/sources/web-list.ts",
+      "sha256": "f8756527f55680292451050087991a52d05880197066fcb58db16d9073e1bcd0",
+      "bytes": 15045
+    },
+    {
+      "path": "server/intel/sources/html-index-candidates.ts",
+      "sha256": "73451082460a720108aeb8cd8feb089e0591f32fb12bb489b9ba4d9a3d11a1fe",
+      "bytes": 16088
+    },
+    {
+      "path": "server/intel/sources/html-index-candidates.test.ts",
+      "sha256": "253541545dcc05a0b71f276bf864a82b520703a47339ca0043b5ea79161c1905",
+      "bytes": 8264
+    },
+    {
+      "path": "server/intel/maersk-mofcom.test.ts",
+      "sha256": "1acc98bed2cb23c9bde19880f5a5bc7d82e03e43de1295735e08058a110c84ca",
+      "bytes": 12184
+    }
+  ],
+  "diff": {
+    "path": "product.diff",
+    "sha256": "bebd2a6829f849a331d10bff1e3f9227828ab7d5f4794e425a47dbc8b737c076"
+  },
+  "parts": [
+    {
+      "path": "adapters.diff",
+      "sha256": "38db21a99409100ceb2b62b07edca5da0194cf2c36b8fe2f877253d44e7aaed0"
+    },
+    {
+      "path": "tests.diff",
+      "sha256": "23ca821f99533f844efdee582e2bb3f12f72b183f40de56a940a93c1375fed52"
+    }
+  ]
+}

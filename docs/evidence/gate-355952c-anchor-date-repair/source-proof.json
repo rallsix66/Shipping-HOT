@@ -1,0 +1,40 @@
+{
+  "codeSha": "355952c0e8c01266adbe692dfcfd3bca9b3c17b2",
+  "cleanGateCommandsPassed": 9,
+  "matchedRootCloneFiles": [
+    {
+      "path": "server/intel/sources/web-list.ts",
+      "lfSha256": "6815b345ca89290e4d525e9e06e928eef2f2e86e3f8d2a3f72817bbf53e9f617"
+    },
+    {
+      "path": "server/intel/vn-disaster-index.test.ts",
+      "lfSha256": "54b80e009ab06185dd528cd57732606db6b5a790e6e1c415f93f7a5301802fff"
+    },
+    {
+      "path": "server/intel/sources/config-keys.ts",
+      "lfSha256": "2a74c77f14cb1482bd4e47e747392c305c5d42b9665ce6c9180bf0156627c1b1"
+    },
+    {
+      "path": "server/intel/sources/html-index-candidates.ts",
+      "lfSha256": "0502f14430452f56406d2c74b916bf0275e1f475acfa3b51a1292cda303da59e"
+    },
+    {
+      "path": "package.json",
+      "lfSha256": "ab275bad655edb4dbc35cdf566b7cf75517008f3556c868447c6230f62a5d9a9"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "lfSha256": "28e8010ac2ac1a27de09ad9e2b3f3d01d302c9a7e77e7168d24949ab901e94d4"
+    },
+    {
+      "path": "nitro.config.ts",
+      "lfSha256": "0cbba82dd6020a5a7666b2d7e943458a6f312d40b21f597f0009ffcf5c34efb5"
+    }
+  ],
+  "savedRawHashMatched": true,
+  "savedRawStillIgnored": true,
+  "newUpstreamRequests": 0,
+  "newSystemDns": 0,
+  "rawReplayCodeShaMatched": true,
+  "rawExit": 0
+}

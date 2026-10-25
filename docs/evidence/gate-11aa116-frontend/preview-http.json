@@ -1,0 +1,302 @@
+{
+  "sha": "11aa1162a286d96bdc7a44a2f61a95d3d2a886e8",
+  "url": "http://127.0.0.1:4484/ports",
+  "checks": [
+    {
+      "name": "original policy samples preserved",
+      "status": "PASS"
+    },
+    {
+      "name": "weatherGET port-yantian",
+      "status": "PASS"
+    },
+    {
+      "name": "weather DTO port-yantian",
+      "status": "PASS"
+    },
+    {
+      "name": "original-point rows stay correctly scoped port-yantian",
+      "status": "PASS"
+    },
+    {
+      "name": "detail route port-yantian",
+      "status": "PASS"
+    },
+    {
+      "name": "weatherGET port-shekou",
+      "status": "PASS"
+    },
+    {
+      "name": "weather DTO port-shekou",
+      "status": "PASS"
+    },
+    {
+      "name": "original-point rows stay correctly scoped port-shekou",
+      "status": "PASS"
+    },
+    {
+      "name": "detail route port-shekou",
+      "status": "PASS"
+    },
+    {
+      "name": "weatherGET port-nansha",
+      "status": "PASS"
+    },
+    {
+      "name": "weather DTO port-nansha",
+      "status": "PASS"
+    },
+    {
+      "name": "original-point rows stay correctly scoped port-nansha",
+      "status": "PASS"
+    },
+    {
+      "name": "detail route port-nansha",
+      "status": "PASS"
+    },
+    {
+      "name": "weatherGET port-ho-chi-minh",
+      "status": "PASS"
+    },
+    {
+      "name": "weather DTO port-ho-chi-minh",
+      "status": "PASS"
+    },
+    {
+      "name": "original-point rows stay correctly scoped port-ho-chi-minh",
+      "status": "PASS"
+    },
+    {
+      "name": "detail route port-ho-chi-minh",
+      "status": "PASS"
+    },
+    {
+      "name": "weatherGET port-laem-chabang",
+      "status": "PASS"
+    },
+    {
+      "name": "weather DTO port-laem-chabang",
+      "status": "PASS"
+    },
+    {
+      "name": "original-point rows stay correctly scoped port-laem-chabang",
+      "status": "PASS"
+    },
+    {
+      "name": "detail route port-laem-chabang",
+      "status": "PASS"
+    },
+    {
+      "name": "weatherGET port-klang",
+      "status": "PASS"
+    },
+    {
+      "name": "weather DTO port-klang",
+      "status": "PASS"
+    },
+    {
+      "name": "original-point rows stay correctly scoped port-klang",
+      "status": "PASS"
+    },
+    {
+      "name": "detail route port-klang",
+      "status": "PASS"
+    },
+    {
+      "name": "weatherGET port-jakarta",
+      "status": "PASS"
+    },
+    {
+      "name": "weather DTO port-jakarta",
+      "status": "PASS"
+    },
+    {
+      "name": "original-point rows stay correctly scoped port-jakarta",
+      "status": "PASS"
+    },
+    {
+      "name": "detail route port-jakarta",
+      "status": "PASS"
+    },
+    {
+      "name": "weatherGET port-manila",
+      "status": "PASS"
+    },
+    {
+      "name": "weather DTO port-manila",
+      "status": "PASS"
+    },
+    {
+      "name": "original-point rows stay correctly scoped port-manila",
+      "status": "PASS"
+    },
+    {
+      "name": "detail route port-manila",
+      "status": "PASS"
+    },
+    {
+      "name": "existing snapshot weather status port-s7-mock-decoy",
+      "status": "PASS"
+    },
+    {
+      "name": "existing snapshot weather DTO unchanged port-s7-mock-decoy",
+      "status": "PASS"
+    },
+    {
+      "name": "existing snapshot weather status port-s7-shekou",
+      "status": "PASS"
+    },
+    {
+      "name": "existing snapshot weather DTO unchanged port-s7-shekou",
+      "status": "PASS"
+    },
+    {
+      "name": "existing snapshot weather status port-s7-yantian",
+      "status": "PASS"
+    },
+    {
+      "name": "existing snapshot weather DTO unchanged port-s7-yantian",
+      "status": "PASS"
+    },
+    {
+      "name": "unapproved missing port stays404",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /ports",
+      "status": "PASS"
+    },
+    {
+      "name": "asset /assets/index-Jd_8stCh.js",
+      "status": "PASS"
+    },
+    {
+      "name": "asset /assets/index-CwpaQhsi.css",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /policies",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /feed",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /events",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /calendar",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP /settings",
+      "status": "PASS"
+    },
+    {
+      "name": "Runtime off",
+      "status": "PASS"
+    },
+    {
+      "name": "read probes do not create port/weather/usage/receipt/run rows",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4477",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4482",
+      "status": "PASS"
+    },
+    {
+      "name": "old preview retained 4483",
+      "status": "PASS"
+    }
+  ],
+  "observations": [
+    {
+      "id": "port-yantian",
+      "state": "data_empty",
+      "oldStatus": 404,
+      "rows": 0,
+      "referenceState": "none"
+    },
+    {
+      "id": "port-shekou",
+      "state": "data_empty",
+      "oldStatus": 404,
+      "rows": 0,
+      "referenceState": "none"
+    },
+    {
+      "id": "port-nansha",
+      "state": "data_empty",
+      "oldStatus": 404,
+      "rows": 0,
+      "referenceState": "none"
+    },
+    {
+      "id": "port-ho-chi-minh",
+      "state": "data_empty",
+      "oldStatus": 404,
+      "rows": 0,
+      "referenceState": "not_run"
+    },
+    {
+      "id": "port-laem-chabang",
+      "state": "data_empty",
+      "oldStatus": 404,
+      "rows": 0,
+      "referenceState": "none"
+    },
+    {
+      "id": "port-klang",
+      "state": "data_empty",
+      "oldStatus": 404,
+      "rows": 0,
+      "referenceState": "none"
+    },
+    {
+      "id": "port-jakarta",
+      "state": "data_empty",
+      "oldStatus": 404,
+      "rows": 0,
+      "referenceState": "none"
+    },
+    {
+      "id": "port-manila",
+      "state": "data_empty",
+      "oldStatus": 404,
+      "rows": 0,
+      "referenceState": "none"
+    }
+  ],
+  "summary": {
+    "passed": 54,
+    "failed": 0
+  },
+  "countsBefore": {
+    "ports": 3,
+    "weather_forecast": 1,
+    "weather_impact": 1,
+    "provider_usage": 0,
+    "paid_receipt": 0,
+    "sync_runs": 0
+  },
+  "countsAfter": {
+    "ports": 3,
+    "weather_forecast": 1,
+    "weather_impact": 1,
+    "provider_usage": 0,
+    "paid_receipt": 0,
+    "sync_runs": 0
+  },
+  "scope": "loopback HTTP/API/assets only, no browser DOM/interaction or live provider evidence",
+  "browser": "NOT_RUN"
+}

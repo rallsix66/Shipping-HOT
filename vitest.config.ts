@@ -10,10 +10,13 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
+    // Real Node+tsx CLI subprocesses consume extra resources; cap workers to leave headroom.
+    maxWorkers: "50%",
     include: ["server/**/*.test.ts", "shared/**/*.test.ts", "test/**/*.test.ts", "scripts/**/*.test.ts"],
   },
   resolve: {
     alias: {
+      "~": join(projectDir, "src"),
       "@shared": join(projectDir, "shared"),
       "#": join(projectDir, "server"),
     },

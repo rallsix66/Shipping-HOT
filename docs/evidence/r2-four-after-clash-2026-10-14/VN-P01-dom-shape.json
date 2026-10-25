@@ -1,0 +1,6331 @@
+{
+  "source": "VN-P01",
+  "url": "https://vimawa.gov.vn/vi/thong-bao-hang-hai",
+  "fetchedBytesSha256": "da133741708879c9fd4544a0137dd8050a92c1dab662ac843bc9892d412bd4ef",
+  "kind": "tag hierarchy and bounded local metadata observations; full HTML not redistributed",
+  "diagnostics": {
+    "htmlTitleExcerpt": "Thông báo hàng hải | CỤC HÀNG HẢI VÀ ĐƯỜNG THUỶ VIỆT NAM",
+    "scriptElements": 37,
+    "formElements": 2,
+    "bodyCharacters": 10544,
+    "totalElements": 597,
+    "scriptContentExcluded": true,
+    "sanitizedAnchors": 84,
+    "sanitizedRows": 15
+  },
+  "skeleton": [
+    {
+      "index": 0,
+      "parent": null,
+      "tag": "html",
+      "attributeNames": [
+        "xmlns:content",
+        "xmlns:dc",
+        "xmlns:foaf",
+        "xmlns:og",
+        "xmlns:rdfs",
+        "xmlns:sioc",
+        "xmlns:sioct",
+        "xmlns:skos",
+        "xmlns:xsd"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 1,
+      "parent": 0,
+      "tag": "head",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 2,
+      "parent": 1,
+      "tag": "link",
+      "attributeNames": [
+        "rel",
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 3,
+      "parent": 1,
+      "tag": "meta",
+      "attributeNames": [
+        "name",
+        "content"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 4,
+      "parent": 1,
+      "tag": "meta",
+      "attributeNames": [
+        "http-equiv",
+        "content"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 5,
+      "parent": 1,
+      "tag": "meta",
+      "attributeNames": [
+        "name",
+        "content"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 6,
+      "parent": 1,
+      "tag": "link",
+      "attributeNames": [
+        "rel",
+        "href",
+        "type"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 7,
+      "parent": 1,
+      "tag": "meta",
+      "attributeNames": [
+        "name",
+        "content"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 8,
+      "parent": 1,
+      "tag": "title",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 9,
+      "parent": 1,
+      "tag": "style",
+      "attributeNames": [
+        "type",
+        "media"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 10,
+      "parent": 1,
+      "tag": "style",
+      "attributeNames": [
+        "type",
+        "media"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 11,
+      "parent": 1,
+      "tag": "style",
+      "attributeNames": [
+        "type",
+        "media"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 12,
+      "parent": 1,
+      "tag": "style",
+      "attributeNames": [
+        "type",
+        "media"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 13,
+      "parent": 1,
+      "tag": "link",
+      "attributeNames": [
+        "type",
+        "rel",
+        "href",
+        "media"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 14,
+      "parent": 1,
+      "tag": "style",
+      "attributeNames": [
+        "type",
+        "media"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 15,
+      "parent": 1,
+      "tag": "style",
+      "attributeNames": [
+        "type",
+        "media"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 16,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 17,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 18,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 19,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 20,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 21,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 22,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 23,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 24,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 25,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 26,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 27,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 28,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 29,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 30,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 31,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 32,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 33,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 34,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 35,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 36,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 37,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 38,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 39,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 40,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 41,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 42,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 43,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 44,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 45,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 46,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 47,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 48,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 49,
+      "parent": 1,
+      "tag": "script",
+      "attributeNames": [
+        "type"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 50,
+      "parent": 0,
+      "tag": "body",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 51,
+      "parent": 50,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 52,
+      "parent": 51,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "element-invisible",
+        "element-focusable"
+      ]
+    },
+    {
+      "index": 53,
+      "parent": 50,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 54,
+      "parent": 53,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "container"
+      ]
+    },
+    {
+      "index": 55,
+      "parent": 54,
+      "tag": "div",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "row",
+        "no-gutters"
+      ]
+    },
+    {
+      "index": 56,
+      "parent": 55,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "col-xs-1",
+        "d-md-none",
+        "d-lg-none",
+        "d-block"
+      ]
+    },
+    {
+      "index": 57,
+      "parent": 56,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "header"
+      ]
+    },
+    {
+      "index": 58,
+      "parent": 57,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 59,
+      "parent": 58,
+      "tag": "img",
+      "attributeNames": [
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 60,
+      "parent": 56,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 61,
+      "parent": 60,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 62,
+      "parent": 61,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 63,
+      "parent": 62,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 64,
+      "parent": 61,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 65,
+      "parent": 64,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title",
+        "options"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 66,
+      "parent": 64,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 67,
+      "parent": 66,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 68,
+      "parent": 67,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 69,
+      "parent": 66,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 70,
+      "parent": 69,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 71,
+      "parent": 66,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 72,
+      "parent": 71,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 73,
+      "parent": 61,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 74,
+      "parent": 73,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 75,
+      "parent": 61,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 76,
+      "parent": 75,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title",
+        "options"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 77,
+      "parent": 75,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 78,
+      "parent": 77,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 79,
+      "parent": 78,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 80,
+      "parent": 77,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 81,
+      "parent": 80,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 82,
+      "parent": 61,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 83,
+      "parent": 82,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title",
+        "options"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 84,
+      "parent": 82,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 85,
+      "parent": 84,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 86,
+      "parent": 85,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 87,
+      "parent": 84,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 88,
+      "parent": 87,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 89,
+      "parent": 84,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 90,
+      "parent": 89,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 91,
+      "parent": 61,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 92,
+      "parent": 91,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title",
+        "options"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 93,
+      "parent": 91,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 94,
+      "parent": 93,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 95,
+      "parent": 94,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 96,
+      "parent": 93,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 97,
+      "parent": 96,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 98,
+      "parent": 61,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 99,
+      "parent": 98,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title",
+        "class"
+      ],
+      "structuralClasses": [
+        "active"
+      ]
+    },
+    {
+      "index": 100,
+      "parent": 61,
+      "tag": "li",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 101,
+      "parent": 100,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 102,
+      "parent": 55,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "col-xs-2",
+        "logo",
+        "text-center",
+        "d-block"
+      ]
+    },
+    {
+      "index": 103,
+      "parent": 102,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 104,
+      "parent": 103,
+      "tag": "img",
+      "attributeNames": [
+        "src",
+        "alt"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 105,
+      "parent": 55,
+      "tag": "div",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "col-xs-9"
+      ]
+    },
+    {
+      "index": 106,
+      "parent": 105,
+      "tag": "a",
+      "attributeNames": [
+        "id",
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 107,
+      "parent": 105,
+      "tag": "p",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "site_slogan"
+      ]
+    },
+    {
+      "index": 108,
+      "parent": 53,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 109,
+      "parent": 108,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "container"
+      ]
+    },
+    {
+      "index": 110,
+      "parent": 109,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "row",
+        "no-gutters"
+      ]
+    },
+    {
+      "index": 111,
+      "parent": 110,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "col-md-9",
+        "d-none",
+        "d-sm-block",
+        "d-xs-block"
+      ]
+    },
+    {
+      "index": 112,
+      "parent": 111,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "region",
+        "region-mainmn"
+      ]
+    },
+    {
+      "index": 113,
+      "parent": 112,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "block",
+        "block-superfish",
+        "main-menu"
+      ]
+    },
+    {
+      "index": 114,
+      "parent": 113,
+      "tag": "h2",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 115,
+      "parent": 113,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "content"
+      ]
+    },
+    {
+      "index": 116,
+      "parent": 115,
+      "tag": "ul",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "menu",
+        "sf-menu",
+        "sf-main-menu",
+        "sf-horizontal",
+        "sf-style-default",
+        "sf-total-items-8",
+        "sf-parent-items-4",
+        "sf-single-items-4"
+      ]
+    },
+    {
+      "index": 117,
+      "parent": 116,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "first",
+        "odd",
+        "sf-item-1",
+        "sf-depth-1",
+        "sf-no-children"
+      ]
+    },
+    {
+      "index": 118,
+      "parent": 117,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "menu_icon",
+        "menu-234",
+        "sf-depth-1"
+      ]
+    },
+    {
+      "index": 119,
+      "parent": 116,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "middle",
+        "even",
+        "sf-item-2",
+        "sf-depth-1",
+        "sf-total-children-3",
+        "sf-parent-children-0",
+        "sf-single-children-3",
+        "menuparent"
+      ]
+    },
+    {
+      "index": 120,
+      "parent": 119,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-1",
+        "menuparent"
+      ]
+    },
+    {
+      "index": 121,
+      "parent": 119,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 122,
+      "parent": 121,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "first",
+        "odd",
+        "sf-item-1",
+        "sf-depth-2",
+        "sf-no-children"
+      ]
+    },
+    {
+      "index": 123,
+      "parent": 122,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-2"
+      ]
+    },
+    {
+      "index": 124,
+      "parent": 121,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "middle",
+        "even",
+        "sf-item-2",
+        "sf-depth-2",
+        "sf-no-children"
+      ]
+    },
+    {
+      "index": 125,
+      "parent": 124,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-2"
+      ]
+    },
+    {
+      "index": 126,
+      "parent": 121,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "last",
+        "odd",
+        "sf-item-3",
+        "sf-depth-2",
+        "sf-no-children"
+      ]
+    },
+    {
+      "index": 127,
+      "parent": 126,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-2"
+      ]
+    },
+    {
+      "index": 128,
+      "parent": 116,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "middle",
+        "odd",
+        "sf-item-3",
+        "sf-depth-1",
+        "sf-no-children"
+      ]
+    },
+    {
+      "index": 129,
+      "parent": 128,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-1"
+      ]
+    },
+    {
+      "index": 130,
+      "parent": 116,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "middle",
+        "even",
+        "sf-item-4",
+        "sf-depth-1",
+        "sf-total-children-2",
+        "sf-parent-children-0",
+        "sf-single-children-2",
+        "menuparent"
+      ]
+    },
+    {
+      "index": 131,
+      "parent": 130,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-1",
+        "menuparent"
+      ]
+    },
+    {
+      "index": 132,
+      "parent": 130,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 133,
+      "parent": 132,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "first",
+        "odd",
+        "sf-item-1",
+        "sf-depth-2",
+        "sf-no-children"
+      ]
+    },
+    {
+      "index": 134,
+      "parent": 133,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-2"
+      ]
+    },
+    {
+      "index": 135,
+      "parent": 132,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "last",
+        "even",
+        "sf-item-2",
+        "sf-depth-2",
+        "sf-no-children"
+      ]
+    },
+    {
+      "index": 136,
+      "parent": 135,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-2"
+      ]
+    },
+    {
+      "index": 137,
+      "parent": 116,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "middle",
+        "odd",
+        "sf-item-5",
+        "sf-depth-1",
+        "sf-total-children-3",
+        "sf-parent-children-0",
+        "sf-single-children-3",
+        "menuparent"
+      ]
+    },
+    {
+      "index": 138,
+      "parent": 137,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-1",
+        "menuparent"
+      ]
+    },
+    {
+      "index": 139,
+      "parent": 137,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 140,
+      "parent": 139,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "first",
+        "odd",
+        "sf-item-1",
+        "sf-depth-2",
+        "sf-no-children"
+      ]
+    },
+    {
+      "index": 141,
+      "parent": 140,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-2"
+      ]
+    },
+    {
+      "index": 142,
+      "parent": 139,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "middle",
+        "even",
+        "sf-item-2",
+        "sf-depth-2",
+        "sf-no-children"
+      ]
+    },
+    {
+      "index": 143,
+      "parent": 142,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-2"
+      ]
+    },
+    {
+      "index": 144,
+      "parent": 139,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "last",
+        "odd",
+        "sf-item-3",
+        "sf-depth-2",
+        "sf-no-children"
+      ]
+    },
+    {
+      "index": 145,
+      "parent": 144,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-2"
+      ]
+    },
+    {
+      "index": 146,
+      "parent": 116,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "middle",
+        "even",
+        "sf-item-6",
+        "sf-depth-1",
+        "sf-total-children-2",
+        "sf-parent-children-0",
+        "sf-single-children-2",
+        "menuparent"
+      ]
+    },
+    {
+      "index": 147,
+      "parent": 146,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-1",
+        "menuparent"
+      ]
+    },
+    {
+      "index": 148,
+      "parent": 146,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 149,
+      "parent": 148,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "first",
+        "odd",
+        "sf-item-1",
+        "sf-depth-2",
+        "sf-no-children"
+      ]
+    },
+    {
+      "index": 150,
+      "parent": 149,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-2"
+      ]
+    },
+    {
+      "index": 151,
+      "parent": 148,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "last",
+        "even",
+        "sf-item-2",
+        "sf-depth-2",
+        "sf-no-children"
+      ]
+    },
+    {
+      "index": 152,
+      "parent": 151,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-2"
+      ]
+    },
+    {
+      "index": 153,
+      "parent": 116,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "active-trail",
+        "middle",
+        "odd",
+        "sf-item-7",
+        "sf-depth-1",
+        "sf-no-children"
+      ]
+    },
+    {
+      "index": 154,
+      "parent": 153,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-1",
+        "active"
+      ]
+    },
+    {
+      "index": 155,
+      "parent": 116,
+      "tag": "li",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "last",
+        "even",
+        "sf-item-8",
+        "sf-depth-1",
+        "sf-no-children"
+      ]
+    },
+    {
+      "index": 156,
+      "parent": 155,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "sf-depth-1"
+      ]
+    },
+    {
+      "index": 157,
+      "parent": 110,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "col-md-3",
+        "d-none",
+        "d-sm-block",
+        "d-xs-block"
+      ]
+    },
+    {
+      "index": 158,
+      "parent": 157,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "region",
+        "region-search-box"
+      ]
+    },
+    {
+      "index": 159,
+      "parent": 158,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "block",
+        "block-search",
+        "d-none",
+        "d-sm-block"
+      ]
+    },
+    {
+      "index": 160,
+      "parent": 159,
+      "tag": "h2",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 161,
+      "parent": 159,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "content"
+      ]
+    },
+    {
+      "index": 162,
+      "parent": 161,
+      "tag": "form",
+      "attributeNames": [
+        "class",
+        "role",
+        "action",
+        "method",
+        "id",
+        "accept-charset"
+      ],
+      "structuralClasses": [
+        "search-form"
+      ]
+    },
+    {
+      "index": 163,
+      "parent": 162,
+      "tag": "div",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 164,
+      "parent": 163,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "container-inline"
+      ]
+    },
+    {
+      "index": 165,
+      "parent": 164,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "form-item",
+        "form-type-textfield",
+        "form-item-search-block-form"
+      ]
+    },
+    {
+      "index": 166,
+      "parent": 165,
+      "tag": "input",
+      "attributeNames": [
+        "title",
+        "class",
+        "placeholder",
+        "type",
+        "id",
+        "name",
+        "value",
+        "size",
+        "maxlength"
+      ],
+      "structuralClasses": [
+        "custom-search-box",
+        "form-text"
+      ]
+    },
+    {
+      "index": 167,
+      "parent": 164,
+      "tag": "div",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "form-actions",
+        "form-wrapper"
+      ]
+    },
+    {
+      "index": 168,
+      "parent": 167,
+      "tag": "input",
+      "attributeNames": [
+        "alt",
+        "class",
+        "type",
+        "id",
+        "name",
+        "src"
+      ],
+      "structuralClasses": [
+        "custom-search-button",
+        "form-submit"
+      ]
+    },
+    {
+      "index": 169,
+      "parent": 164,
+      "tag": "input",
+      "attributeNames": [
+        "type",
+        "name",
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 170,
+      "parent": 164,
+      "tag": "input",
+      "attributeNames": [
+        "type",
+        "name",
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 171,
+      "parent": 157,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "region",
+        "region-lang-box"
+      ]
+    },
+    {
+      "index": 172,
+      "parent": 171,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "block",
+        "block-locale"
+      ]
+    },
+    {
+      "index": 173,
+      "parent": 172,
+      "tag": "h2",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 174,
+      "parent": 172,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "content"
+      ]
+    },
+    {
+      "index": 175,
+      "parent": 174,
+      "tag": "ul",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "language-switcher-locale-url"
+      ]
+    },
+    {
+      "index": 176,
+      "parent": 175,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "en",
+        "first"
+      ]
+    },
+    {
+      "index": 177,
+      "parent": 176,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class",
+        "xml:lang"
+      ],
+      "structuralClasses": [
+        "language-link"
+      ]
+    },
+    {
+      "index": 178,
+      "parent": 177,
+      "tag": "img",
+      "attributeNames": [
+        "class",
+        "typeof",
+        "src",
+        "width",
+        "height",
+        "alt",
+        "title"
+      ],
+      "structuralClasses": [
+        "language-icon"
+      ]
+    },
+    {
+      "index": 179,
+      "parent": 175,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "vi",
+        "last",
+        "active"
+      ]
+    },
+    {
+      "index": 180,
+      "parent": 179,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class",
+        "xml:lang"
+      ],
+      "structuralClasses": [
+        "language-link",
+        "active"
+      ]
+    },
+    {
+      "index": 181,
+      "parent": 180,
+      "tag": "img",
+      "attributeNames": [
+        "class",
+        "typeof",
+        "src",
+        "width",
+        "height",
+        "alt",
+        "title"
+      ],
+      "structuralClasses": [
+        "language-icon"
+      ]
+    },
+    {
+      "index": 182,
+      "parent": 50,
+      "tag": "div",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "container"
+      ]
+    },
+    {
+      "index": 183,
+      "parent": 182,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "row",
+        "no-gutters"
+      ]
+    },
+    {
+      "index": 184,
+      "parent": 183,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "col-md-9"
+      ]
+    },
+    {
+      "index": 185,
+      "parent": 184,
+      "tag": "h3",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "page-header"
+      ]
+    },
+    {
+      "index": 186,
+      "parent": 184,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 187,
+      "parent": 186,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "region",
+        "region-content"
+      ]
+    },
+    {
+      "index": 188,
+      "parent": 187,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "block",
+        "block-system"
+      ]
+    },
+    {
+      "index": 189,
+      "parent": 188,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "content"
+      ]
+    },
+    {
+      "index": 190,
+      "parent": 189,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "view",
+        "view-thong-bao-hang-hai",
+        "view-id-thong_bao_hang_hai",
+        "view-display-id-page_thong_bao_hang_hai"
+      ]
+    },
+    {
+      "index": 191,
+      "parent": 190,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "view-filters"
+      ]
+    },
+    {
+      "index": 192,
+      "parent": 191,
+      "tag": "form",
+      "attributeNames": [
+        "class",
+        "action",
+        "method",
+        "id",
+        "accept-charset"
+      ],
+      "structuralClasses": [
+        "d-none"
+      ]
+    },
+    {
+      "index": 193,
+      "parent": 192,
+      "tag": "div",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 194,
+      "parent": 193,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-exposed-form",
+        "vefl-layout",
+        "bootstrap-6-6"
+      ]
+    },
+    {
+      "index": 195,
+      "parent": 194,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-exposed-widgets",
+        "clearfix"
+      ]
+    },
+    {
+      "index": 196,
+      "parent": 195,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "vefl-region",
+        "vefl-region-left"
+      ]
+    },
+    {
+      "index": 197,
+      "parent": 196,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "views-exposed-widget",
+        "views-widget-edit-title"
+      ]
+    },
+    {
+      "index": 198,
+      "parent": 197,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-widget"
+      ]
+    },
+    {
+      "index": 199,
+      "parent": 198,
+      "tag": "input",
+      "attributeNames": [
+        "type",
+        "id",
+        "name",
+        "value",
+        "size",
+        "maxlength",
+        "class"
+      ],
+      "structuralClasses": [
+        "form-text"
+      ]
+    },
+    {
+      "index": 200,
+      "parent": 196,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "views-exposed-widget",
+        "views-widget-edit-field-khu-vuc-term-tid"
+      ]
+    },
+    {
+      "index": 201,
+      "parent": 200,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-widget"
+      ]
+    },
+    {
+      "index": 202,
+      "parent": 201,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "form-item",
+        "form-type-select",
+        "form-item-field-khu-vuc-term-tid"
+      ]
+    },
+    {
+      "index": 203,
+      "parent": 202,
+      "tag": "select",
+      "attributeNames": [
+        "class",
+        "id",
+        "name"
+      ],
+      "structuralClasses": [
+        "form-control",
+        "form-select"
+      ]
+    },
+    {
+      "index": 204,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value",
+        "selected"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 205,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 206,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 207,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 208,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 209,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 210,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 211,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 212,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 213,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 214,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 215,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 216,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 217,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 218,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 219,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 220,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 221,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 222,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 223,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 224,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 225,
+      "parent": 203,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 226,
+      "parent": 195,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "vefl-region",
+        "vefl-region-right"
+      ]
+    },
+    {
+      "index": 227,
+      "parent": 226,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "views-exposed-widget",
+        "views-widget-edit-field-ngay-bh-value"
+      ]
+    },
+    {
+      "index": 228,
+      "parent": 227,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-widget"
+      ]
+    },
+    {
+      "index": 229,
+      "parent": 228,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 230,
+      "parent": 229,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 231,
+      "parent": 230,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "container-inline-date"
+      ]
+    },
+    {
+      "index": 232,
+      "parent": 231,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "form-item",
+        "form-type-date-popup",
+        "form-item-field-ngay-bh-value-min"
+      ]
+    },
+    {
+      "index": 233,
+      "parent": 232,
+      "tag": "label",
+      "attributeNames": [
+        "for"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 234,
+      "parent": 232,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "date-padding"
+      ]
+    },
+    {
+      "index": 235,
+      "parent": 234,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "form-item",
+        "form-type-textfield",
+        "form-item-field-ngay-bh-value-min-date"
+      ]
+    },
+    {
+      "index": 236,
+      "parent": 235,
+      "tag": "label",
+      "attributeNames": [
+        "class",
+        "for"
+      ],
+      "structuralClasses": [
+        "element-invisible"
+      ]
+    },
+    {
+      "index": 237,
+      "parent": 235,
+      "tag": "input",
+      "attributeNames": [
+        "class",
+        "type",
+        "id",
+        "name",
+        "value",
+        "size",
+        "maxlength"
+      ],
+      "structuralClasses": [
+        "form-control",
+        "form-text"
+      ]
+    },
+    {
+      "index": 238,
+      "parent": 235,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "description"
+      ]
+    },
+    {
+      "index": 239,
+      "parent": 228,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 240,
+      "parent": 239,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 241,
+      "parent": 240,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "container-inline-date"
+      ]
+    },
+    {
+      "index": 242,
+      "parent": 241,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "form-item",
+        "form-type-date-popup",
+        "form-item-field-ngay-bh-value-max"
+      ]
+    },
+    {
+      "index": 243,
+      "parent": 242,
+      "tag": "label",
+      "attributeNames": [
+        "for"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 244,
+      "parent": 242,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "date-padding"
+      ]
+    },
+    {
+      "index": 245,
+      "parent": 244,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "form-item",
+        "form-type-textfield",
+        "form-item-field-ngay-bh-value-max-date"
+      ]
+    },
+    {
+      "index": 246,
+      "parent": 245,
+      "tag": "label",
+      "attributeNames": [
+        "class",
+        "for"
+      ],
+      "structuralClasses": [
+        "element-invisible"
+      ]
+    },
+    {
+      "index": 247,
+      "parent": 245,
+      "tag": "input",
+      "attributeNames": [
+        "class",
+        "type",
+        "id",
+        "name",
+        "value",
+        "size",
+        "maxlength"
+      ],
+      "structuralClasses": [
+        "form-control",
+        "form-text"
+      ]
+    },
+    {
+      "index": 248,
+      "parent": 245,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "description"
+      ]
+    },
+    {
+      "index": 249,
+      "parent": 226,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "views-exposed-widget",
+        "views-widget-button",
+        "views-submit-button"
+      ]
+    },
+    {
+      "index": 250,
+      "parent": 249,
+      "tag": "input",
+      "attributeNames": [
+        "type",
+        "id",
+        "name",
+        "value",
+        "class"
+      ],
+      "structuralClasses": [
+        "form-submit"
+      ]
+    },
+    {
+      "index": 251,
+      "parent": 190,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "view-content"
+      ]
+    },
+    {
+      "index": 252,
+      "parent": 251,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "row",
+        "mb-4"
+      ]
+    },
+    {
+      "index": 253,
+      "parent": 252,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "col-md-6"
+      ]
+    },
+    {
+      "index": 254,
+      "parent": 253,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "border",
+        "rouned",
+        "p-3"
+      ]
+    },
+    {
+      "index": 255,
+      "parent": 254,
+      "tag": "h5",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 256,
+      "parent": 255,
+      "tag": "span",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "text-danger"
+      ]
+    },
+    {
+      "index": 257,
+      "parent": 254,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "form-group"
+      ]
+    },
+    {
+      "index": 258,
+      "parent": 257,
+      "tag": "input",
+      "attributeNames": [
+        "type",
+        "class",
+        "placeholder",
+        "id"
+      ],
+      "structuralClasses": [
+        "form-control"
+      ]
+    },
+    {
+      "index": 259,
+      "parent": 254,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "form-group"
+      ]
+    },
+    {
+      "index": 260,
+      "parent": 259,
+      "tag": "select",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "form-control"
+      ]
+    },
+    {
+      "index": 261,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value",
+        "selected"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 262,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 263,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 264,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 265,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 266,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 267,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 268,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 269,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 270,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 271,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 272,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 273,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 274,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 275,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 276,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 277,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 278,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 279,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 280,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 281,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 282,
+      "parent": 260,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 283,
+      "parent": 254,
+      "tag": "button",
+      "attributeNames": [
+        "type",
+        "class"
+      ],
+      "structuralClasses": [
+        "btn",
+        "btn-primary",
+        "submit-thong-bao-hang-hai"
+      ]
+    },
+    {
+      "index": 284,
+      "parent": 252,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "col-md-6"
+      ]
+    },
+    {
+      "index": 285,
+      "parent": 284,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "border",
+        "rouned",
+        "p-3"
+      ]
+    },
+    {
+      "index": 286,
+      "parent": 285,
+      "tag": "h5",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 287,
+      "parent": 286,
+      "tag": "span",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "text-danger"
+      ]
+    },
+    {
+      "index": 288,
+      "parent": 285,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "form-group"
+      ]
+    },
+    {
+      "index": 289,
+      "parent": 288,
+      "tag": "input",
+      "attributeNames": [
+        "class",
+        "type",
+        "id",
+        "value",
+        "size",
+        "maxlength",
+        "placeholder"
+      ],
+      "structuralClasses": [
+        "form-control"
+      ]
+    },
+    {
+      "index": 290,
+      "parent": 285,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "form-group"
+      ]
+    },
+    {
+      "index": 291,
+      "parent": 290,
+      "tag": "input",
+      "attributeNames": [
+        "class",
+        "type",
+        "id",
+        "value",
+        "size",
+        "maxlength",
+        "placeholder"
+      ],
+      "structuralClasses": [
+        "form-control"
+      ]
+    },
+    {
+      "index": 292,
+      "parent": 285,
+      "tag": "button",
+      "attributeNames": [
+        "type",
+        "class"
+      ],
+      "structuralClasses": [
+        "btn",
+        "btn-primary",
+        "submit-thong-bao-hang-hai"
+      ]
+    },
+    {
+      "index": 293,
+      "parent": 251,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "thong-bao-hang-hai-box",
+        "mb-4"
+      ]
+    },
+    {
+      "index": 294,
+      "parent": 293,
+      "tag": "h5",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 295,
+      "parent": 294,
+      "tag": "span",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "text-primary-1"
+      ]
+    },
+    {
+      "index": 296,
+      "parent": 293,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "block",
+        "block-block"
+      ]
+    },
+    {
+      "index": 297,
+      "parent": 296,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "content"
+      ]
+    },
+    {
+      "index": 298,
+      "parent": 297,
+      "tag": "p",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 299,
+      "parent": 298,
+      "tag": "select",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "oplienket",
+        "form-control"
+      ]
+    },
+    {
+      "index": 300,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "selected",
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 301,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 302,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 303,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 304,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 305,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 306,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 307,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 308,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 309,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 310,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 311,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 312,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 313,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 314,
+      "parent": 299,
+      "tag": "option",
+      "attributeNames": [
+        "selected",
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 315,
+      "parent": 251,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "table-responsive"
+      ]
+    },
+    {
+      "index": 316,
+      "parent": 315,
+      "tag": "table",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-table",
+        "cols-2",
+        "table",
+        "table-bordered",
+        "table-hover",
+        "table-0",
+        "table-0"
+      ]
+    },
+    {
+      "index": 317,
+      "parent": 316,
+      "tag": "thead",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 318,
+      "parent": 317,
+      "tag": "tr",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 319,
+      "parent": 318,
+      "tag": "th",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-field-so-thoi-gian-ban-hanh"
+      ]
+    },
+    {
+      "index": 320,
+      "parent": 318,
+      "tag": "th",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-title"
+      ]
+    },
+    {
+      "index": 321,
+      "parent": 316,
+      "tag": "tbody",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 322,
+      "parent": 321,
+      "tag": "tr",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 323,
+      "parent": 322,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-field-so-thoi-gian-ban-hanh"
+      ]
+    },
+    {
+      "index": 324,
+      "parent": 322,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-title"
+      ]
+    },
+    {
+      "index": 325,
+      "parent": 324,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 326,
+      "parent": 321,
+      "tag": "tr",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 327,
+      "parent": 326,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-field-so-thoi-gian-ban-hanh"
+      ]
+    },
+    {
+      "index": 328,
+      "parent": 326,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-title"
+      ]
+    },
+    {
+      "index": 329,
+      "parent": 328,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 330,
+      "parent": 321,
+      "tag": "tr",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 331,
+      "parent": 330,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-field-so-thoi-gian-ban-hanh"
+      ]
+    },
+    {
+      "index": 332,
+      "parent": 330,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-title"
+      ]
+    },
+    {
+      "index": 333,
+      "parent": 332,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 334,
+      "parent": 321,
+      "tag": "tr",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 335,
+      "parent": 334,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-field-so-thoi-gian-ban-hanh"
+      ]
+    },
+    {
+      "index": 336,
+      "parent": 334,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-title"
+      ]
+    },
+    {
+      "index": 337,
+      "parent": 336,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 338,
+      "parent": 321,
+      "tag": "tr",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 339,
+      "parent": 338,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-field-so-thoi-gian-ban-hanh"
+      ]
+    },
+    {
+      "index": 340,
+      "parent": 338,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-title"
+      ]
+    },
+    {
+      "index": 341,
+      "parent": 340,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 342,
+      "parent": 321,
+      "tag": "tr",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 343,
+      "parent": 342,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-field-so-thoi-gian-ban-hanh"
+      ]
+    },
+    {
+      "index": 344,
+      "parent": 342,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-title"
+      ]
+    },
+    {
+      "index": 345,
+      "parent": 344,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 346,
+      "parent": 321,
+      "tag": "tr",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 347,
+      "parent": 346,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-field-so-thoi-gian-ban-hanh"
+      ]
+    },
+    {
+      "index": 348,
+      "parent": 346,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-title"
+      ]
+    },
+    {
+      "index": 349,
+      "parent": 348,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 350,
+      "parent": 321,
+      "tag": "tr",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 351,
+      "parent": 350,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-field-so-thoi-gian-ban-hanh"
+      ]
+    },
+    {
+      "index": 352,
+      "parent": 350,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-title"
+      ]
+    },
+    {
+      "index": 353,
+      "parent": 352,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 354,
+      "parent": 321,
+      "tag": "tr",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 355,
+      "parent": 354,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-field-so-thoi-gian-ban-hanh"
+      ]
+    },
+    {
+      "index": 356,
+      "parent": 354,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-title"
+      ]
+    },
+    {
+      "index": 357,
+      "parent": 356,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 358,
+      "parent": 321,
+      "tag": "tr",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 359,
+      "parent": 358,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-field-so-thoi-gian-ban-hanh"
+      ]
+    },
+    {
+      "index": 360,
+      "parent": 358,
+      "tag": "td",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-field",
+        "views-field-title"
+      ]
+    },
+    {
+      "index": 361,
+      "parent": 360,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 362,
+      "parent": 190,
+      "tag": "h2",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "element-invisible"
+      ]
+    },
+    {
+      "index": 363,
+      "parent": 190,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "item-list"
+      ]
+    },
+    {
+      "index": 364,
+      "parent": 363,
+      "tag": "ul",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "pager"
+      ]
+    },
+    {
+      "index": 365,
+      "parent": 364,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "pager-current",
+        "first"
+      ]
+    },
+    {
+      "index": 366,
+      "parent": 364,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "pager-item"
+      ]
+    },
+    {
+      "index": 367,
+      "parent": 366,
+      "tag": "a",
+      "attributeNames": [
+        "title",
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 368,
+      "parent": 364,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "pager-next"
+      ]
+    },
+    {
+      "index": 369,
+      "parent": 368,
+      "tag": "a",
+      "attributeNames": [
+        "title",
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 370,
+      "parent": 364,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "pager-last",
+        "last"
+      ]
+    },
+    {
+      "index": 371,
+      "parent": 370,
+      "tag": "a",
+      "attributeNames": [
+        "title",
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 372,
+      "parent": 183,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "col-md-3"
+      ]
+    },
+    {
+      "index": 373,
+      "parent": 372,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "region",
+        "region-right-col"
+      ]
+    },
+    {
+      "index": 374,
+      "parent": 373,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "block",
+        "block-menu",
+        "block-mn",
+        "block-chuyenmuc",
+        "block-menu-phai"
+      ]
+    },
+    {
+      "index": 375,
+      "parent": 374,
+      "tag": "h2",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 376,
+      "parent": 374,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "content"
+      ]
+    },
+    {
+      "index": 377,
+      "parent": 376,
+      "tag": "ul",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "menu"
+      ]
+    },
+    {
+      "index": 378,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "first",
+        "leaf"
+      ]
+    },
+    {
+      "index": 379,
+      "parent": 378,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 380,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 381,
+      "parent": 380,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 382,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 383,
+      "parent": 382,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 384,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 385,
+      "parent": 384,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 386,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 387,
+      "parent": 386,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 388,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 389,
+      "parent": 388,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 390,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 391,
+      "parent": 390,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 392,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 393,
+      "parent": 392,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 394,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 395,
+      "parent": 394,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 396,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 397,
+      "parent": 396,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 398,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 399,
+      "parent": 398,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 400,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 401,
+      "parent": 400,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 402,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 403,
+      "parent": 402,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 404,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 405,
+      "parent": 404,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 406,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 407,
+      "parent": 406,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 408,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 409,
+      "parent": 408,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 410,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 411,
+      "parent": 410,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 412,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 413,
+      "parent": 412,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 414,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 415,
+      "parent": 414,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 416,
+      "parent": 377,
+      "tag": "li",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "last",
+        "leaf"
+      ]
+    },
+    {
+      "index": 417,
+      "parent": 416,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 418,
+      "parent": 373,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "block",
+        "block-views",
+        "block-vb-moi",
+        "block-mn"
+      ]
+    },
+    {
+      "index": 419,
+      "parent": 418,
+      "tag": "h2",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 420,
+      "parent": 418,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "content"
+      ]
+    },
+    {
+      "index": 421,
+      "parent": 420,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "view",
+        "view-van-ban",
+        "view-id-van_ban",
+        "view-display-id-block",
+        "bang-dl"
+      ]
+    },
+    {
+      "index": 422,
+      "parent": 421,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "view-content"
+      ]
+    },
+    {
+      "index": 423,
+      "parent": 422,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "item-list"
+      ]
+    },
+    {
+      "index": 424,
+      "parent": 423,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 425,
+      "parent": 424,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 426,
+      "parent": 425,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 427,
+      "parent": 424,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 428,
+      "parent": 427,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 429,
+      "parent": 424,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 430,
+      "parent": 429,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 431,
+      "parent": 424,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 432,
+      "parent": 431,
+      "tag": "a",
+      "attributeNames": [
+        "href"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 433,
+      "parent": 373,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "block",
+        "block-block",
+        "block-mn",
+        "block-chuyenmuc",
+        "block-hotline"
+      ]
+    },
+    {
+      "index": 434,
+      "parent": 433,
+      "tag": "h2",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 435,
+      "parent": 434,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "class"
+      ],
+      "structuralClasses": [
+        "block-title-link"
+      ]
+    },
+    {
+      "index": 436,
+      "parent": 433,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "content"
+      ]
+    },
+    {
+      "index": 437,
+      "parent": 436,
+      "tag": "table",
+      "attributeNames": [
+        "border",
+        "cellpadding",
+        "cellspacing",
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 438,
+      "parent": 437,
+      "tag": "tbody",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 439,
+      "parent": 438,
+      "tag": "tr",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 440,
+      "parent": 439,
+      "tag": "td",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 441,
+      "parent": 440,
+      "tag": "p",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 442,
+      "parent": 441,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 443,
+      "parent": 441,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 444,
+      "parent": 441,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 445,
+      "parent": 439,
+      "tag": "td",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 446,
+      "parent": 445,
+      "tag": "p",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 447,
+      "parent": 446,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 448,
+      "parent": 447,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 449,
+      "parent": 446,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 450,
+      "parent": 446,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 451,
+      "parent": 438,
+      "tag": "tr",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 452,
+      "parent": 451,
+      "tag": "td",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 453,
+      "parent": 452,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 454,
+      "parent": 452,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 455,
+      "parent": 452,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 456,
+      "parent": 451,
+      "tag": "td",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 457,
+      "parent": 456,
+      "tag": "p",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 458,
+      "parent": 457,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 459,
+      "parent": 458,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 460,
+      "parent": 458,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 461,
+      "parent": 438,
+      "tag": "tr",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 462,
+      "parent": 461,
+      "tag": "td",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 463,
+      "parent": 462,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 464,
+      "parent": 461,
+      "tag": "td",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 465,
+      "parent": 464,
+      "tag": "p",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 466,
+      "parent": 465,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 467,
+      "parent": 466,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 468,
+      "parent": 467,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 469,
+      "parent": 465,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 470,
+      "parent": 438,
+      "tag": "tr",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 471,
+      "parent": 470,
+      "tag": "td",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 472,
+      "parent": 470,
+      "tag": "td",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 473,
+      "parent": 472,
+      "tag": "p",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 474,
+      "parent": 473,
+      "tag": "font",
+      "attributeNames": [
+        "color"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 475,
+      "parent": 473,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 476,
+      "parent": 473,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 477,
+      "parent": 473,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 478,
+      "parent": 473,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 479,
+      "parent": 473,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 480,
+      "parent": 473,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 481,
+      "parent": 473,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 482,
+      "parent": 473,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 483,
+      "parent": 473,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 484,
+      "parent": 473,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 485,
+      "parent": 473,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 486,
+      "parent": 473,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 487,
+      "parent": 486,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 488,
+      "parent": 486,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 489,
+      "parent": 486,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 490,
+      "parent": 436,
+      "tag": "p",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 491,
+      "parent": 373,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "block",
+        "block-views",
+        "block-hinhanhvideo",
+        "block-mn"
+      ]
+    },
+    {
+      "index": 492,
+      "parent": 491,
+      "tag": "h2",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 493,
+      "parent": 491,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "content"
+      ]
+    },
+    {
+      "index": 494,
+      "parent": 493,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "view",
+        "view-tin-tuc",
+        "view-id-tin_tuc",
+        "view-display-id-block_15"
+      ]
+    },
+    {
+      "index": 495,
+      "parent": 494,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "view-content"
+      ]
+    },
+    {
+      "index": 496,
+      "parent": 495,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "skin-default"
+      ]
+    },
+    {
+      "index": 497,
+      "parent": 496,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "views_slideshow_cycle_main",
+        "views_slideshow_main"
+      ]
+    },
+    {
+      "index": 498,
+      "parent": 497,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "views-slideshow-cycle-main-frame",
+        "views_slideshow_cycle_teaser_section"
+      ]
+    },
+    {
+      "index": 499,
+      "parent": 498,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "views-slideshow-cycle-main-frame-row",
+        "views_slideshow_cycle_slide",
+        "views_slideshow_slide",
+        "views-row-1",
+        "views-row-first",
+        "views-row-odd"
+      ]
+    },
+    {
+      "index": 500,
+      "parent": 499,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-row",
+        "views-row-0",
+        "views-row-odd",
+        "views-row-first"
+      ]
+    },
+    {
+      "index": 501,
+      "parent": 500,
+      "tag": "img",
+      "attributeNames": [
+        "typeof",
+        "src",
+        "width",
+        "height",
+        "alt"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 502,
+      "parent": 498,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "views-slideshow-cycle-main-frame-row",
+        "views_slideshow_cycle_slide",
+        "views_slideshow_slide",
+        "views-row-2",
+        "views_slideshow_cycle_hidden",
+        "views-row-even"
+      ]
+    },
+    {
+      "index": 503,
+      "parent": 502,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-row",
+        "views-row-0",
+        "views-row-odd"
+      ]
+    },
+    {
+      "index": 504,
+      "parent": 503,
+      "tag": "img",
+      "attributeNames": [
+        "typeof",
+        "src",
+        "width",
+        "height",
+        "alt"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 505,
+      "parent": 498,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "views-slideshow-cycle-main-frame-row",
+        "views_slideshow_cycle_slide",
+        "views_slideshow_slide",
+        "views-row-3",
+        "views_slideshow_cycle_hidden",
+        "views-row-odd"
+      ]
+    },
+    {
+      "index": 506,
+      "parent": 505,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-row",
+        "views-row-0",
+        "views-row-odd"
+      ]
+    },
+    {
+      "index": 507,
+      "parent": 506,
+      "tag": "img",
+      "attributeNames": [
+        "typeof",
+        "src",
+        "width",
+        "height",
+        "alt"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 508,
+      "parent": 498,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "views-slideshow-cycle-main-frame-row",
+        "views_slideshow_cycle_slide",
+        "views_slideshow_slide",
+        "views-row-4",
+        "views_slideshow_cycle_hidden",
+        "views-row-even"
+      ]
+    },
+    {
+      "index": 509,
+      "parent": 508,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-row",
+        "views-row-0",
+        "views-row-odd"
+      ]
+    },
+    {
+      "index": 510,
+      "parent": 509,
+      "tag": "img",
+      "attributeNames": [
+        "typeof",
+        "src",
+        "width",
+        "height",
+        "alt"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 511,
+      "parent": 498,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "views-slideshow-cycle-main-frame-row",
+        "views_slideshow_cycle_slide",
+        "views_slideshow_slide",
+        "views-row-5",
+        "views_slideshow_cycle_hidden",
+        "views-row-odd"
+      ]
+    },
+    {
+      "index": 512,
+      "parent": 511,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-row",
+        "views-row-0",
+        "views-row-odd"
+      ]
+    },
+    {
+      "index": 513,
+      "parent": 512,
+      "tag": "img",
+      "attributeNames": [
+        "typeof",
+        "src",
+        "width",
+        "height",
+        "alt"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 514,
+      "parent": 498,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "views-slideshow-cycle-main-frame-row",
+        "views_slideshow_cycle_slide",
+        "views_slideshow_slide",
+        "views-row-6",
+        "views_slideshow_cycle_hidden",
+        "views-row-even"
+      ]
+    },
+    {
+      "index": 515,
+      "parent": 514,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-row",
+        "views-row-0",
+        "views-row-odd"
+      ]
+    },
+    {
+      "index": 516,
+      "parent": 515,
+      "tag": "img",
+      "attributeNames": [
+        "typeof",
+        "src",
+        "width",
+        "height",
+        "alt"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 517,
+      "parent": 498,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "views-slideshow-cycle-main-frame-row",
+        "views_slideshow_cycle_slide",
+        "views_slideshow_slide",
+        "views-row-7",
+        "views_slideshow_cycle_hidden",
+        "views-row-odd"
+      ]
+    },
+    {
+      "index": 518,
+      "parent": 517,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-row",
+        "views-row-0",
+        "views-row-odd"
+      ]
+    },
+    {
+      "index": 519,
+      "parent": 518,
+      "tag": "img",
+      "attributeNames": [
+        "typeof",
+        "src",
+        "width",
+        "height",
+        "alt"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 520,
+      "parent": 498,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "views-slideshow-cycle-main-frame-row",
+        "views_slideshow_cycle_slide",
+        "views_slideshow_slide",
+        "views-row-8",
+        "views_slideshow_cycle_hidden",
+        "views-row-last",
+        "views-row-even"
+      ]
+    },
+    {
+      "index": 521,
+      "parent": 520,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "views-row",
+        "views-row-0",
+        "views-row-odd"
+      ]
+    },
+    {
+      "index": 522,
+      "parent": 521,
+      "tag": "img",
+      "attributeNames": [
+        "typeof",
+        "src",
+        "width",
+        "height",
+        "alt"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 523,
+      "parent": 373,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "block",
+        "block-block",
+        "block-lien-ket"
+      ]
+    },
+    {
+      "index": 524,
+      "parent": 523,
+      "tag": "h2",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 525,
+      "parent": 523,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "content"
+      ]
+    },
+    {
+      "index": 526,
+      "parent": 525,
+      "tag": "p",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 527,
+      "parent": 526,
+      "tag": "select",
+      "attributeNames": [
+        "class",
+        "id"
+      ],
+      "structuralClasses": [
+        "oplienket",
+        "form-control"
+      ]
+    },
+    {
+      "index": 528,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 529,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 530,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 531,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 532,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 533,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 534,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 535,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 536,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 537,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 538,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 539,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 540,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 541,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 542,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 543,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 544,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 545,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 546,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "selected",
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 547,
+      "parent": 527,
+      "tag": "option",
+      "attributeNames": [
+        "selected",
+        "value"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 548,
+      "parent": 373,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "block",
+        "block-thongketruycap",
+        "thong-ke"
+      ]
+    },
+    {
+      "index": 549,
+      "parent": 548,
+      "tag": "h2",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 550,
+      "parent": 548,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "content"
+      ]
+    },
+    {
+      "index": 551,
+      "parent": 550,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "item-list"
+      ]
+    },
+    {
+      "index": 552,
+      "parent": 551,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 553,
+      "parent": 552,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "first",
+        "last"
+      ]
+    },
+    {
+      "index": 554,
+      "parent": 553,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 555,
+      "parent": 553,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "item-list"
+      ]
+    },
+    {
+      "index": 556,
+      "parent": 555,
+      "tag": "ul",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 557,
+      "parent": 556,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "first"
+      ]
+    },
+    {
+      "index": 558,
+      "parent": 557,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 559,
+      "parent": 556,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "last"
+      ]
+    },
+    {
+      "index": 560,
+      "parent": 559,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 561,
+      "parent": 50,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 562,
+      "parent": 561,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "container"
+      ]
+    },
+    {
+      "index": 563,
+      "parent": 562,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "row"
+      ]
+    },
+    {
+      "index": 564,
+      "parent": 563,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "col-md-12"
+      ]
+    },
+    {
+      "index": 565,
+      "parent": 564,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "region",
+        "region-footer"
+      ]
+    },
+    {
+      "index": 566,
+      "parent": 565,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "block",
+        "block-block",
+        "up-footer"
+      ]
+    },
+    {
+      "index": 567,
+      "parent": 566,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "content"
+      ]
+    },
+    {
+      "index": 568,
+      "parent": 567,
+      "tag": "h5",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 569,
+      "parent": 567,
+      "tag": "p",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 570,
+      "parent": 569,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 571,
+      "parent": 569,
+      "tag": "br",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 572,
+      "parent": 569,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 573,
+      "parent": 569,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 574,
+      "parent": 569,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 575,
+      "parent": 567,
+      "tag": "p",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 576,
+      "parent": 575,
+      "tag": "span",
+      "attributeNames": [
+        "style"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 577,
+      "parent": 561,
+      "tag": "div",
+      "attributeNames": [
+        "id"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 578,
+      "parent": 577,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "container"
+      ]
+    },
+    {
+      "index": 579,
+      "parent": 578,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "row"
+      ]
+    },
+    {
+      "index": 580,
+      "parent": 579,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "col-md-12"
+      ]
+    },
+    {
+      "index": 581,
+      "parent": 580,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "region",
+        "region-b-footer"
+      ]
+    },
+    {
+      "index": 582,
+      "parent": 581,
+      "tag": "div",
+      "attributeNames": [
+        "id",
+        "class"
+      ],
+      "structuralClasses": [
+        "block",
+        "block-menu",
+        "footer-menu",
+        "col-md-12"
+      ]
+    },
+    {
+      "index": 583,
+      "parent": 582,
+      "tag": "h2",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 584,
+      "parent": 582,
+      "tag": "div",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "content"
+      ]
+    },
+    {
+      "index": 585,
+      "parent": 584,
+      "tag": "ul",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "menu"
+      ]
+    },
+    {
+      "index": 586,
+      "parent": 585,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "first",
+        "leaf"
+      ]
+    },
+    {
+      "index": 587,
+      "parent": 586,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 588,
+      "parent": 585,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 589,
+      "parent": 588,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 590,
+      "parent": 585,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "leaf"
+      ]
+    },
+    {
+      "index": 591,
+      "parent": 590,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 592,
+      "parent": 585,
+      "tag": "li",
+      "attributeNames": [
+        "class"
+      ],
+      "structuralClasses": [
+        "last",
+        "leaf"
+      ]
+    },
+    {
+      "index": 593,
+      "parent": 592,
+      "tag": "a",
+      "attributeNames": [
+        "href",
+        "title"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 594,
+      "parent": 50,
+      "tag": "script",
+      "attributeNames": [],
+      "structuralClasses": []
+    },
+    {
+      "index": 595,
+      "parent": 50,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    },
+    {
+      "index": 596,
+      "parent": 50,
+      "tag": "script",
+      "attributeNames": [
+        "type",
+        "src"
+      ],
+      "structuralClasses": []
+    }
+  ],
+  "skeletonTruncated": false,
+  "timeElements": [],
+  "localDateGroupCount": 0,
+  "localDateGroups": [],
+  "selection": "first six local date containers in original document order; no sorting/merging/conflict resolution",
+  "originalHtmlCommitted": false,
+  "permission": "unknown full-page reuse; text excerpts bounded to six groups, no scripts/keys/cookies/attribute values",
+  "parserStatus": "NOT_RUN",
+  "completeFieldsPass": false
+}

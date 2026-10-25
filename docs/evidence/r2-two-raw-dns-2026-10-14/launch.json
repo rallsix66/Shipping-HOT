@@ -1,0 +1,1 @@
+{"started":"2026-10-14T07:30:16.659Z","command":"pnpm exec vitest run -c .tmp/two-raw-dns-20261014.config.ts","codeSha":"e5d2f0bb0aa4651984d69d280db0c2485d9467a2","head":"3f76a414c9152a2b0f17183f8294de4a47256c52","scope":"two private raw offline replays and four exact system DNS lookups; HTTP0; no settings"}

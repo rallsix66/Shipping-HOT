@@ -43,6 +43,19 @@ const nitroOption: Parameters<typeof viteNitro>[0] = {
 // This project runs as a local Node server with SQLite. Edge/Cloudflare/Bun
 // presets cannot support the native better-sqlite3 + background Runtime model
 // and are intentionally retired (no CF/Vercel/Bun deployment entry).
-export default function () {
-  return viteNitro(nitroOption)
+export default function (synthetic = false) {
+  return viteNitro({
+    ...nitroOption,
+    replace: { __SHIPPING_CLIP_SYNTHETIC_TEST__: JSON.stringify(synthetic) },
+    ...(synthetic
+      ? {
+          buildDir: join(projectDir, ".tmp/clip-synthetic-build/.nitro"),
+          output: {
+            dir: join(projectDir, ".tmp/clip-synthetic-build/app"),
+            serverDir: join(projectDir, ".tmp/clip-synthetic-build/app/server"),
+            publicDir: join(projectDir, ".tmp/clip-synthetic-build/app/public"),
+          },
+        }
+      : {}),
+  })
 }

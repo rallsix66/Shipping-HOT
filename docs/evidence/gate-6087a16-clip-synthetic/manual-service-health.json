@@ -1,0 +1,32 @@
+{
+  "checkedAt": "2026-10-16T06:51:57.306Z",
+  "sha": "6087a169cb2e591e3acb10d23ccc641d8212f5c0",
+  "receiverPid": 58772,
+  "sourcePid": 25368,
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\clipper-manual-6087a16\\run",
+  "receiver": "http://127.0.0.1:5173/feed",
+  "source": {
+    "status": 200,
+    "noRedirect": true,
+    "sha256": "4899b96960947a0d173716c55f9e34f7ad2dda75f5639f130058ade24f70abe4"
+  },
+  "synthetic": true,
+  "browserOperated": false,
+  "feed": {
+    "status": 200,
+    "marked": true,
+    "sha256": "563a929b12afc7dbfe2f3f5bbd7599a11e2a536cc62072e983766ba026b95be8"
+  },
+  "bindings": [
+    "  TCP    127.0.0.1:5173         0.0.0.0:0              LISTENING       58772",
+    "  TCP    127.0.0.1:5174         0.0.0.0:0              LISTENING       25368"
+  ],
+  "retained": {
+    ".data/shipping-hot-v3.sqlite3": "af1a62291c75a7143d5ea374854f5166fe6924bc3335cb4b5adf2c1049cb1b5a",
+    ".data/shipping-hot-v3-browser.sqlite3": "3dbb014c94b500a8f0ea17c61d1a5a16286b15e9dcf8ee6e0d0be06cc4717226",
+    ".data/p7-final-seal-20260904.sqlite3": "ca0efa0cabe3c85a6a3aca95cd8ecc58fcb63fcaabe18b02b0f92dc55e0c2516",
+    ".data/provider-secrets.json": "843c54062551d938b28c81c33f2e7afa129639ffa364b6d1e70b1fd637cbeeb1"
+  },
+  "retainedUnchanged": true,
+  "sourceUrl": "http://127.0.0.1:5174/synthetic-article.html"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "build",
+  "command": "pnpm build",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\post-clash-final-build",
+  "sha": "af38350709d2fa4c9e9b98accbae8bc7ef678da1",
+  "startedAt": "2026-10-14T09:18:35.011Z",
+  "endedAt": "2026-10-14T09:18:51.386Z",
+  "rawExit": 0
+}

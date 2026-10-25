@@ -1,0 +1,62 @@
+{
+  "systemLookupCalls": 3,
+  "httpRequests": 0,
+  "settingsChanged": false,
+  "cacheCleared": false,
+  "customDnsUsed": false,
+  "functionalGatesRun": false,
+  "results": [
+    {
+      "hostname": "saigonnewport.com.vn",
+      "startedAt": "2026-10-14T09:06:44.594Z",
+      "resolver": "current system node:dns/promises.lookup all:true",
+      "httpRequests": 0,
+      "addresses": [
+        {
+          "address": "210.211.104.122",
+          "family": 4,
+          "version": "IPv4",
+          "blockedByExistingSafety": false,
+          "reason": "no blocked range matched by existing project classifier"
+        }
+      ],
+      "classification": "public_address",
+      "finishedAt": "2026-10-14T09:06:44.780Z"
+    },
+    {
+      "hostname": "idea.gov.vn",
+      "startedAt": "2026-10-14T09:06:44.780Z",
+      "resolver": "current system node:dns/promises.lookup all:true",
+      "httpRequests": 0,
+      "addresses": [
+        {
+          "address": "103.242.54.55",
+          "family": 4,
+          "version": "IPv4",
+          "blockedByExistingSafety": false,
+          "reason": "no blocked range matched by existing project classifier"
+        }
+      ],
+      "classification": "public_address",
+      "finishedAt": "2026-10-14T09:06:45.052Z"
+    },
+    {
+      "hostname": "jdih.kemendag.go.id",
+      "startedAt": "2026-10-14T09:06:45.053Z",
+      "resolver": "current system node:dns/promises.lookup all:true",
+      "httpRequests": 0,
+      "addresses": [
+        {
+          "address": "103.42.205.161",
+          "family": 4,
+          "version": "IPv4",
+          "blockedByExistingSafety": false,
+          "reason": "no blocked range matched by existing project classifier"
+        }
+      ],
+      "classification": "public_address",
+      "finishedAt": "2026-10-14T09:06:45.579Z"
+    }
+  ],
+  "attribution": "Post-user-reapply lookup: all three addresses public by unchanged project classifier; older benchmark/fake-IP diagnostic is historical."
+}

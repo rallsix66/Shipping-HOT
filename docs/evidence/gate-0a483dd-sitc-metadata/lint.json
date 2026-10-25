@@ -1,0 +1,9 @@
+{
+  "name": "lint",
+  "command": "pnpm lint",
+  "cwd": "D:\\try one\\Shipping HOT\\.tmp\\sitc-metadata-build-20261015",
+  "sha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "startedAt": "2026-10-15T07:05:04.254Z",
+  "finishedAt": "2026-10-15T07:05:32.276Z",
+  "rawExit": 0
+}
