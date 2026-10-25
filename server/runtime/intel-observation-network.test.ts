@@ -1,5 +1,5 @@
 import { expect, it, vi } from "vitest"
-import { type IntelObservationConfig, createObservationNetwork, validateObservationConfig } from "#/runtime/intel-observation-network"
+import { type IntelObservationConfig, OBSERVATION_24H_DURATION_MS, OBSERVATION_24H_HTTP_BUDGET_MAX, OBSERVATION_24H_REDIRECT, OBSERVATION_HTTP_BUDGET_MAX, OBSERVATION_PROFILE_24H, createObservationNetwork, validateObservationConfig } from "#/runtime/intel-observation-network"
 import { PRODUCTION_ALLOW_SELECT_CATALOG_IDS } from "#/runtime/intel-allow-select"
 import { type ArticleLookup, type ArticleTransport, secureFetchArticle } from "#/services/article-fetch-security"
 import { sourcePolicy } from "#/intel/collect"
@@ -24,6 +24,31 @@ function fixture(limit = 3, overrides: Partial<IntelObservationConfig> = {}) {
   } }
 }
 it.each([-1, 201, 1.5, Number.NaN])("rejects invalid physical budgets %s", limit => expect(() => validateObservationConfig(config(limit))).toThrow("budget_invalid"))
+it("accepts 2000 only for the exact 24h profile and rejects every other widening", () => {
+  expect(validateObservationConfig({ ...config(), maxHttpRequests: OBSERVATION_HTTP_BUDGET_MAX }).maxHttpRequests).toBe(200)
+  const day = (): IntelObservationConfig => ({ profile: OBSERVATION_PROFILE_24H, sourceIds: [...PRODUCTION_ALLOW_SELECT_CATALOG_IDS], durationMs: OBSERVATION_24H_DURATION_MS, maxHttpRequests: OBSERVATION_24H_HTTP_BUDGET_MAX, approvedRedirects: [{ ...OBSERVATION_24H_REDIRECT }] })
+  const accepted = validateObservationConfig(day())
+  expect(accepted).toMatchObject({ profile: OBSERVATION_PROFILE_24H, maxHttpRequests: 2000, durationMs: 86400000, sourceIds: [...PRODUCTION_ALLOW_SELECT_CATALOG_IDS], approvedRedirects: [OBSERVATION_24H_REDIRECT] })
+  expect(accepted.stopAfterSuccessfulRounds).toBeUndefined()
+  expect(registeredIntelSources.find(row => row.catalogId === "ID-T02")?.url).toBe(OBSERVATION_24H_REDIRECT.from)
+  expect(() => validateObservationConfig({ ...day(), maxHttpRequests: 2001 })).toThrow("budget_invalid")
+  expect(() => validateObservationConfig({ ...config(), maxHttpRequests: 2000 })).toThrow("budget_invalid")
+  expect(() => validateObservationConfig({ ...day(), durationMs: OBSERVATION_24H_DURATION_MS - 1 })).toThrow("duration_invalid")
+  expect(() => validateObservationConfig({ ...day(), durationMs: OBSERVATION_24H_DURATION_MS + 1 })).toThrow("duration_invalid")
+  expect(() => validateObservationConfig({ ...day(), sourceIds: PRODUCTION_ALLOW_SELECT_CATALOG_IDS.slice(0, -1) })).toThrow("sources_invalid")
+  const swapped = [...PRODUCTION_ALLOW_SELECT_CATALOG_IDS]
+  ;[swapped[0], swapped[1]] = [swapped[1], swapped[0]]
+  expect(() => validateObservationConfig({ ...day(), sourceIds: swapped })).toThrow("sources_invalid")
+  expect(() => validateObservationConfig({ ...day(), sourceIds: PRODUCTION_ALLOW_SELECT_CATALOG_IDS.map(id => id === "XX-M03" ? "CN-T01" : id) })).toThrow("sources_invalid")
+  expect(() => validateObservationConfig({ ...day(), sourceIds: PRODUCTION_ALLOW_SELECT_CATALOG_IDS.map(id => id === "XX-M03" ? "XX-M01" : id) })).toThrow("sources_invalid")
+  expect(() => validateObservationConfig({ ...day(), sourceIds: PRODUCTION_ALLOW_SELECT_CATALOG_IDS.map(id => id === "XX-M03" ? "MY-P03" : id) })).toThrow("sources_invalid")
+  expect(() => validateObservationConfig({ ...day(), approvedRedirects: [] })).toThrow("redirects_invalid")
+  expect(() => validateObservationConfig({ ...day(), approvedRedirects: [OBSERVATION_24H_REDIRECT, { from: OBSERVATION_24H_REDIRECT.to, to: "https://jdih.kemenkeu.go.id/dok" }] })).toThrow("redirects_invalid")
+  expect(() => validateObservationConfig({ ...day(), approvedRedirects: [{ from: OBSERVATION_24H_REDIRECT.from, to: "https://jdih.kemenkeu.go.id/other" }] })).toThrow("redirects_invalid")
+  expect(() => validateObservationConfig({ ...day(), stopAfterSuccessfulRounds: 1 })).toThrow("round_bound_invalid")
+  expect(() => validateObservationConfig({ ...day(), stopAfterSuccessfulRounds: 2 })).toThrow("round_bound_invalid")
+  expect(() => validateObservationConfig({ ...day(), profile: "other" as never })).toThrow("profile_invalid")
+})
 it.each([0, -1, 86400001])("rejects duration outside the proposed window %s", durationMs => expect(() => validateObservationConfig({ ...config(), durationMs })).toThrow("duration_invalid"))
 it("zero budget permits no DNS or transport invocation", async () => {
   const f = fixture(0)

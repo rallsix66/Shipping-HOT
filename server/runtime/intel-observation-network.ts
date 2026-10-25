@@ -5,6 +5,12 @@ import type { IntelFetchDeps } from "#/intel/collect"
 import { registeredIntelSources } from "#/intel/sources/registry"
 import { isBlockedAddress } from "#/services/article-fetch-security"
 
+export const OBSERVATION_PROFILE_24H = "24h-19"
+export const OBSERVATION_24H_DURATION_MS = 24 * 60 * 60 * 1000
+export const OBSERVATION_HTTP_BUDGET_MAX = 200
+export const OBSERVATION_24H_HTTP_BUDGET_MAX = 2000
+export const OBSERVATION_24H_REDIRECT = { from: "https://jdih.kemenkeu.go.id/", to: "https://jdih.kemenkeu.go.id/home" } as const
+
 export interface IntelObservationConfig {
   sourceIds: string[]
   durationMs: number
@@ -12,8 +18,11 @@ export interface IntelObservationConfig {
   approvedRedirects: { from: string, to: string }[]
   /** When set, the existing observer stops after this many successful source rounds, or on the first failed round. */
   stopAfterSuccessfulRounds?: 1 | 2
+  /** Ordinary runs omit this. `24h-19` is the only profile allowed to raise the shared HTTP cap. */
+  profile?: typeof OBSERVATION_PROFILE_24H
 }
 const ALLOW_SELECT = new Set<string>(PRODUCTION_ALLOW_SELECT_CATALOG_IDS)
+const CONFIG_KEYS = ["sourceIds", "durationMs", "maxHttpRequests", "approvedRedirects", "stopAfterSuccessfulRounds", "profile"]
 
 function selectedEntries(sourceIds: string[]) {
   return sourceIds.map((id) => {
@@ -27,12 +36,16 @@ const redirects = new Set([301, 302, 303, 307, 308])
 const digest = (value: string | Uint8Array) => createHash("sha256").update(value).digest("hex")
 
 export function validateObservationConfig(input: IntelObservationConfig): IntelObservationConfig {
-  if (!input || Object.keys(input).some(key => !["sourceIds", "durationMs", "maxHttpRequests", "approvedRedirects", "stopAfterSuccessfulRounds"].includes(key))) throw new Error("observation_config_invalid")
+  if (!input || Object.keys(input).some(key => !CONFIG_KEYS.includes(key))) throw new Error("observation_config_invalid")
+  const profile = input.profile
+  if (profile !== undefined && profile !== OBSERVATION_PROFILE_24H) throw new Error("observation_profile_invalid")
   if (!Array.isArray(input.sourceIds) || !input.sourceIds.length || new Set(input.sourceIds).size !== input.sourceIds.length || input.sourceIds.some(id => !ALLOW_SELECT.has(id))) throw new Error("observation_sources_invalid")
-  if (input.stopAfterSuccessfulRounds !== undefined && input.stopAfterSuccessfulRounds !== 1 && input.stopAfterSuccessfulRounds !== 2) throw new Error("observation_round_bound_invalid")
-  if (!Number.isSafeInteger(input.durationMs) || input.durationMs <= 0 || input.durationMs > 24 * 60 * 60 * 1000) throw new Error("observation_duration_invalid")
-  if (!Number.isSafeInteger(input.maxHttpRequests) || input.maxHttpRequests < 0 || input.maxHttpRequests > 200) throw new Error("observation_budget_invalid")
-  if (!Array.isArray(input.approvedRedirects) || input.approvedRedirects.length > 6) throw new Error("observation_redirects_invalid")
+  if (profile === OBSERVATION_PROFILE_24H && (input.sourceIds.length !== PRODUCTION_ALLOW_SELECT_CATALOG_IDS.length || input.sourceIds.some((id, index) => id !== PRODUCTION_ALLOW_SELECT_CATALOG_IDS[index]))) throw new Error("observation_sources_invalid")
+  if (input.stopAfterSuccessfulRounds !== undefined && (profile === OBSERVATION_PROFILE_24H || (input.stopAfterSuccessfulRounds !== 1 && input.stopAfterSuccessfulRounds !== 2))) throw new Error("observation_round_bound_invalid")
+  if (!Number.isSafeInteger(input.durationMs) || input.durationMs <= 0 || input.durationMs > OBSERVATION_24H_DURATION_MS || (profile === OBSERVATION_PROFILE_24H && input.durationMs !== OBSERVATION_24H_DURATION_MS)) throw new Error("observation_duration_invalid")
+  const budgetMax = profile === OBSERVATION_PROFILE_24H ? OBSERVATION_24H_HTTP_BUDGET_MAX : OBSERVATION_HTTP_BUDGET_MAX
+  if (!Number.isSafeInteger(input.maxHttpRequests) || input.maxHttpRequests < 0 || input.maxHttpRequests > budgetMax) throw new Error("observation_budget_invalid")
+  if (!Array.isArray(input.approvedRedirects) || input.approvedRedirects.length > 6 || (profile === OBSERVATION_PROFILE_24H && input.approvedRedirects.length !== 1)) throw new Error("observation_redirects_invalid")
   const reachable = new Set(selectedEntries(input.sourceIds))
   const edges = new Set<string>()
   for (const edge of input.approvedRedirects) {
@@ -45,7 +58,8 @@ export function validateObservationConfig(input: IntelObservationConfig): IntelO
     edges.add(key)
     reachable.add(edge.to)
   }
-  return { sourceIds: [...input.sourceIds], durationMs: input.durationMs, maxHttpRequests: input.maxHttpRequests, approvedRedirects: input.approvedRedirects.map(edge => ({ ...edge })), ...(input.stopAfterSuccessfulRounds ? { stopAfterSuccessfulRounds: input.stopAfterSuccessfulRounds } : {}) }
+  if (profile === OBSERVATION_PROFILE_24H && (input.approvedRedirects.length !== 1 || input.approvedRedirects[0]?.from !== OBSERVATION_24H_REDIRECT.from || input.approvedRedirects[0]?.to !== OBSERVATION_24H_REDIRECT.to)) throw new Error("observation_redirects_invalid")
+  return { sourceIds: [...input.sourceIds], durationMs: input.durationMs, maxHttpRequests: input.maxHttpRequests, approvedRedirects: input.approvedRedirects.map(edge => ({ ...edge })), ...(input.stopAfterSuccessfulRounds ? { stopAfterSuccessfulRounds: input.stopAfterSuccessfulRounds } : {}), ...(profile ? { profile } : {}) }
 }
 
 /** One run-wide boundary around the existing transport, not a fetcher or scheduler. */

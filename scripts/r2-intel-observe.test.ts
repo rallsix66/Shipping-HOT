@@ -6,7 +6,9 @@ import { spawnSync } from "node:child_process"
 import { pathToFileURL } from "node:url"
 import { homedir, userInfo } from "node:os"
 import { expect, it } from "vitest"
-import { observationEnvironment, parseObservationArguments, prepareObservationLaunch, validateObservationChildEnvironment } from "./r2-intel-observe-options"
+import { OBSERVATION_24H_DURATION_MS, OBSERVATION_24H_HTTP_BUDGET_MAX, OBSERVATION_24H_REDIRECT, OBSERVATION_PROFILE_24H } from "../server/runtime/intel-observation-network"
+import { PRODUCTION_ALLOW_SELECT_CATALOG_IDS } from "../server/runtime/intel-allow-select"
+import { observationEnvironment, parseObservationArguments, prepareObservationLaunch, previewObservation, validateObservationChildEnvironment } from "./r2-intel-observe-options"
 import { isolateObservationChildEnvironment } from "./r2-intel-observe-environment"
 
 const args = ["--execute", "--run-id", "offline-test", "--sources", "TH-W01,ID-W01", "--duration-ms", "60000", "--max-http-requests", "2"]
@@ -25,7 +27,23 @@ it("requires an explicit start, all limits and allowlisted sources", () => {
   expect(parseObservationArguments(args.map(value => value === "TH-W01,ID-W01" ? "PH-M01" : value))).toMatchObject({ config: { sourceIds: ["PH-M01"] } })
   expect(parseObservationArguments([...args, "--stop-after-successful-rounds", "2"])).toMatchObject({ config: { sourceIds: ["TH-W01", "ID-W01"], stopAfterSuccessfulRounds: 2 } })
   expect(() => parseObservationArguments(args.map(value => value === "offline-test" ? "../retained" : value))).toThrow("run_id_invalid")
-  expect(parseObservationArguments(args)).toMatchObject({ help: false, config: { maxHttpRequests: 2, durationMs: 60000, sourceIds: ["TH-W01", "ID-W01"] } })
+  expect(parseObservationArguments(args)).toMatchObject({ help: false, plan: false, config: { maxHttpRequests: 2, durationMs: 60000, sourceIds: ["TH-W01", "ID-W01"] } })
+  expect(() => parseObservationArguments(args.map(value => value === "2" ? "201" : value))).toThrow("budget_invalid")
+  expect(() => parseObservationArguments([...args, "--plan"])).toThrow("plan_execute_conflict")
+})
+const dayArgs = (overrides: { budget?: string, duration?: string, sources?: string, rounds?: string, redirect?: string, profile?: string } = {}) => ["--profile", overrides.profile ?? OBSERVATION_PROFILE_24H, "--run-id", "day19-plan", "--sources", overrides.sources ?? PRODUCTION_ALLOW_SELECT_CATALOG_IDS.join(","), "--duration-ms", overrides.duration ?? String(OBSERVATION_24H_DURATION_MS), "--max-http-requests", overrides.budget ?? String(OBSERVATION_24H_HTTP_BUDGET_MAX), "--approved-redirect", overrides.redirect ?? JSON.stringify(OBSERVATION_24H_REDIRECT), ...(overrides.rounds ? ["--stop-after-successful-rounds", overrides.rounds] : [])]
+it("the 24h profile accepts 2000 through the same validator and fails closed on any widened contract", () => {
+  const parsed = parseObservationArguments(["--plan", ...dayArgs()])
+  if (parsed.help || !parsed.plan) throw new Error("fixture")
+  expect(parsed.config).toMatchObject({ profile: OBSERVATION_PROFILE_24H, maxHttpRequests: 2000, durationMs: 86400000, sourceIds: [...PRODUCTION_ALLOW_SELECT_CATALOG_IDS], approvedRedirects: [OBSERVATION_24H_REDIRECT] })
+  expect(parsed.config.stopAfterSuccessfulRounds).toBeUndefined()
+  const preview = previewObservation(parsed, resolve("."))
+  expect(preview.directory).toBe(resolve(".tmp", "r2-intel-observe-day19-plan"))
+  expect(existsSync(preview.directory)).toBe(false)
+  expect(preview.sources.map(source => source.catalogId)).toEqual([...PRODUCTION_ALLOW_SELECT_CATALOG_IDS])
+  expect(preview.sources.find(source => source.catalogId === "ID-T02")?.url).toBe(OBSERVATION_24H_REDIRECT.from)
+  expect(preview.approvedRedirects).toEqual([OBSERVATION_24H_REDIRECT])
+  for (const args of [dayArgs({ budget: "2001" }), dayArgs({ duration: "86399999" }), dayArgs({ sources: PRODUCTION_ALLOW_SELECT_CATALOG_IDS.slice(0, -1).join(",") }), dayArgs({ sources: PRODUCTION_ALLOW_SELECT_CATALOG_IDS.map(id => id === "XX-M03" ? "CN-T01" : id).join(",") }), dayArgs({ sources: PRODUCTION_ALLOW_SELECT_CATALOG_IDS.map(id => id === "XX-M03" ? "XX-M01" : id).join(",") }), dayArgs({ sources: PRODUCTION_ALLOW_SELECT_CATALOG_IDS.map(id => id === "XX-M03" ? "MY-P03" : id).join(",") }), dayArgs({ redirect: JSON.stringify({ from: OBSERVATION_24H_REDIRECT.from, to: "https://jdih.kemenkeu.go.id/other" }) }), dayArgs({ rounds: "1" }), dayArgs({ profile: "other" })]) expect(() => parseObservationArguments(["--plan", ...args])).toThrow(/observation_(budget|duration|sources|redirects|round_bound|profile)_invalid/)
 })
 it("uses a system-only environment plus fixed flags; no inherited credentials, proxy or Node options", () => {
   const env = observationEnvironment({ Path: "synthetic-path", SystemRoot: "synthetic-root", TEMP: "synthetic-temp", DEEPSEEK_API_KEY: "synthetic-secret", SHIPPING_TRANSLATION_ENABLED: "true", HTTP_PROXY: "synthetic-proxy", NODE_OPTIONS: "--use-env-proxy", NODE_EXTRA_CA_CERTS: "synthetic-file", SHIPPING_DATABASE_PATH: "retained.sqlite3" }, ["TH-W01"])
@@ -62,6 +80,7 @@ it("the child independently rejects inherited extra settings or mismatched enabl
   expect(environmentSource).not.toMatch(/intel-production|sources\/registry|article-fetch-security|intel\/sources/)
   const workerSource = readFileSync(resolve("scripts/r2-intel-observe-worker.ts"), "utf8")
   for (const file of ["server/runtime/intel-allow-select.ts", "server/intel/sources/registry.ts", "server/intel/sources/rss-candidates.ts", "server/intel/sources/html-index-candidates.ts"]) expect(workerSource).toContain(file)
+  expect(workerSource).toContain("validateObservationConfig(launch.config)")
 })
 
 const cliEntry = () => ["--import", "tsx/esm", "--experimental-loader", pathToFileURL(resolve("scripts/tsx-alias-loader.mjs")).href, resolve("scripts/r2-intel-observe.ts")]
@@ -74,6 +93,21 @@ it("actual Node CLI resolves file/directory aliases and exits without starting o
   expect(help.error, cliFailure(help)).toBeUndefined()
   expect(help.status, cliFailure(help)).toBe(0)
   expect(help.stdout).toContain("Explicit observation only")
+  expect(help.stdout).toContain("--profile 24h-19")
+  expect(help.stdout).toContain("--plan")
+})
+it("plan mode prints the 24h contract and creates no directory or database", () => {
+  const runId = `plan24h-${randomUUID().slice(0, 8)}`
+  const directory = resolve(".tmp", `r2-intel-observe-${runId}`)
+  const entry = [...cliEntry(), "--plan", "--profile", OBSERVATION_PROFILE_24H, "--run-id", runId, "--sources", PRODUCTION_ALLOW_SELECT_CATALOG_IDS.join(","), "--duration-ms", String(OBSERVATION_24H_DURATION_MS), "--max-http-requests", String(OBSERVATION_24H_HTTP_BUDGET_MAX), "--approved-redirect", JSON.stringify(OBSERVATION_24H_REDIRECT)]
+  const child = spawnSync(process.execPath, entry, cliOptions())
+  expect(child.error, cliFailure(child)).toBeUndefined()
+  expect(child.status, cliFailure(child)).toBe(0)
+  const preview = JSON.parse(child.stdout.slice(child.stdout.indexOf("{")))
+  expect(preview).toMatchObject({ profile: OBSERVATION_PROFILE_24H, runId, directory, durationMs: 86400000, maxHttpRequests: 2000, approvedRedirects: [OBSERVATION_24H_REDIRECT] })
+  expect(preview.sources).toHaveLength(19)
+  expect(existsSync(directory)).toBe(false)
+  expect(existsSync(resolve(directory, ".data"))).toBe(false)
 })
 
 it("actual Node CLI resolves file/directory aliases and exits without starting on missing execute", () => {
