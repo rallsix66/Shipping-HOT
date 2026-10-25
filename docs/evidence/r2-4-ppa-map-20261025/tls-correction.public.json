@@ -1,0 +1,48 @@
+{
+  "round": "dots-1792919758",
+  "corrects": [
+    "dots-1792918191 packaging tls-implementation-note.md",
+    "dots-1792919667 review notes"
+  ],
+  "noNewNetwork": true,
+  "facts": {
+    "sourceCaConfigFields": [
+      "sourceId",
+      "hostname",
+      "certificatePem"
+    ],
+    "sourceCaUsesCertificatePem": true,
+    "sourceCaDefinesCaPem": false,
+    "transportOptionCaPemDerivedFromCertificatePem": true,
+    "thisRoundRequestLevelCaPassed": false,
+    "thisRoundSourceCaConfigured": false,
+    "thisRoundTrustStoreChanged": false,
+    "thisRoundCaImported": false,
+    "effectiveTrustSourceVerified": false,
+    "effectiveTrustSourceStatement": "未配置请求级 CA，有效信任来源未核实",
+    "priorIncorrectClaim": "Prior packaging asserted default trust was Node bundled Mozilla CA store merely because no ca option was passed; that inference is not proven by absence of request-level ca alone.",
+    "ppaProductThisRound": {
+      "bothEntries": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+      "via": "secureFetchArticle/defaultTransport",
+      "requestLevelCaPassed": false,
+      "sourceCaConfigured": false,
+      "httpStatus": null,
+      "bodySaved": false,
+      "separateFromPriorTlsDiagStrictOk": true,
+      "tlsSuccessOrHttp200ShellDoesNotQualify": true
+    }
+  },
+  "mapBodyTooLargeNullAlignment": {
+    "priorRound": "dots-1792918191",
+    "url": "https://www.jma.go.jp/bosai/map.html",
+    "priorMaxBytes": 524288,
+    "ledgerError": "body_too_large",
+    "ledgerHttpStatus": null,
+    "ledgerBytes": null,
+    "ledgerWireSha256": null,
+    "explanation": "defaultTransport destroys the response and rejects with Error(body_too_large) mid-stream when accumulated bytes exceed maxBytes, before resolve({status, body}). Therefore the forensic ledger correctly records error=body_too_large with httpStatus/bytes/wireSha256 null. Public summary null fields describe those unresolved response metrics for the same failure, not a different outcome. Private transportError.message and public error.message are the same body_too_large event; any code:null vs code:body_too_large difference is packaging-field normalization only.",
+    "thisRoundRetainsPriorFailureUnchanged": true,
+    "thisRoundNewRequestMaxBytes": 2097152,
+    "thisRoundNewRequestNotRewriteOfPrior": true
+  }
+}

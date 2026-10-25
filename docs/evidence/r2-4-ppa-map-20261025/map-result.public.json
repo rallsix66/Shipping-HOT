@@ -1,0 +1,26 @@
+{
+  "prior512KiBFailureRetained": {
+    "priorRound": "dots-1792918191",
+    "priorUrl": "https://www.jma.go.jp/bosai/map.html",
+    "priorMaxBytes": 524288,
+    "priorState": "secure_entry_blocked",
+    "priorError": "body_too_large",
+    "priorHttpStatus": null,
+    "priorBytes": null,
+    "priorWireSha256": null,
+    "retainedNotRewrittenAsSuccess": true,
+    "discrepancyNote": "Prior ledger bytes/httpStatus were null because defaultTransport rejects with body_too_large mid-stream before resolve(); public summary null fields describe the same failure, not a different outcome."
+  },
+  "thisRound": {
+    "url": "https://www.jma.go.jp/bosai/map.html",
+    "maxBytesTemporary": 2097152,
+    "status": "CAPTURED",
+    "httpStatus": 200,
+    "bytes": 861490,
+    "wireSha256": "71c57265064a4d54cc1ff957f3582059ff772403f1430b759333d053852c12e4",
+    "contentType": "text/html"
+  },
+  "externalScriptsFetched": 0,
+  "specsPathFoundInInlineScript": true,
+  "discoveryAssignSnippet": "\"/\";r[\"forecast_\"+n]=o+\"forecast.json\",r[\"forecastPreviousIssue_\"+n]=o+\"forecastPreviousIssue.json\",r[\"specifications_\"+n]=o+\"specifications.json\",r[\"probabilityThrough_\"+n]=o+\"probabilityThrough.json\",r[\"probabilityTime"
+}

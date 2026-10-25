@@ -1,0 +1,10 @@
+{
+  "round": "dots-1792919758",
+  "httpHardCap": 10,
+  "httpUsed": 5,
+  "redirectsFollowed": 0,
+  "retries": 0,
+  "tlsDiagUsed": 0,
+  "createdAt": "2026-10-25T09:21:55.564Z",
+  "baselineHead": "d5042321b7a7cc4288df1e4c224577dc17f9e0ec"
+}

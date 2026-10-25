@@ -14,7 +14,7 @@ Branch: `codex/shipping-hot-r2-4-gapfill-20261025`
 | --- | --- |
 | Library | Node built-in `node:tls` (`tls.connect`) |
 | Runtime | Node `v24.15.0` / modules ABI `137` / OpenSSL `3.5.5` (worktree toolchain) |
-| Default trust source | Node bundled Mozilla CA store (no `ca` option passed; `caInstalledOrImported=false`; `trustStoreChanged=false`; `sourceCaConfigured=false`) |
+| Default trust source | 未配置请求级 CA，有效信任来源未核实 (`ca` option not passed; `caInstalledOrImported=false`; `trustStoreChanged=false`; `sourceCaConfigured=false`; bundled-Mozilla inference not proven by that absence alone) |
 | Verification | `rejectUnauthorized: true`, `minVersion: "TLSv1.2"`, no ignore-error callback, no alternate client |
 | DNS gate | Reuses `isBlockedAddress` from `server/services/article-fetch-security.ts` |
 | HTTP | Not sent (`httpSent: false`) |
@@ -29,7 +29,7 @@ Script evidence: `.tmp/r2-4-jma-ppa-20261025/run-forensics.mjs` `tlsDiagOnce` (g
 | --- | --- |
 | Library | Node built-in `node:https` (`https.request`) inside `defaultTransport` |
 | Entry | `secureFetchArticle` in `server/services/article-fetch-security.ts` |
-| Trust | Same default Node CA store when no `SourceCaConfig.caPem` is supplied; PPA captures did not configure SourceCa |
+| Trust | No SourceCaConfig.certificatePem supplied on product path; PPA captures did not configure SourceCa; effective trust source not independently verified beyond rejectUnauthorized=true |
 | Verification | `rejectUnauthorized: true` (optional request-scoped `ca:` only when validated SourceCa present) |
 | DNS gate | Same `isBlockedAddress` + `validatedLookup` |
 | HTTP | Full GET after TLS; `maxBytes` default 512 KiB |
@@ -40,7 +40,7 @@ Evidence (prior gapfill round, not re-fetched): `.tmp/r2-4-gapfill-20261025/PH-P
 ## Same points
 
 1. Strict verification on (`rejectUnauthorized: true`); verification was not disabled.
-2. Default trust is Node's bundled CA set when no SourceCa PEM is attached.
+2. When no SourceCa PEM is attached, no request-level ca is passed; effective trust source is not independently verified from that fact alone.
 3. Same public-address DNS classification helper (`isBlockedAddress`).
 4. Same host `www.ppa.com.ph` resolved to public `115.84.233.11` in both rounds' ledgers.
 5. No CA import / trust-store mutation / SourceCaConfig in either the successful diag or the failing product captures.
@@ -58,3 +58,14 @@ Evidence (prior gapfill round, not re-fetched): `.tmp/r2-4-gapfill-20261025/PH-P
 - R2-4 **29/39**, R2-5 **25/34** (unchanged)
 - XX-W02 not raised (specifications URL still unverified)
 - PH-P01 product entries remain BLOCKED
+
+---
+
+## Correction addendum (dots 1792919758 / 1792919667)
+
+Applied without new network. Corrects over-precise trust-store wording in this note:
+
+1. **Trust source:** absence of a request-level `ca` option does **not** by itself prove the process used Node's bundled Mozilla CA store or the same trust store as an older process. Correct statement: **未配置请求级 CA，有效信任来源未核实**. Only restate a more precise trust source when independently logged.
+2. **SourceCaConfig field name:** the config field is **`certificatePem`**, not `caPem`. `ArticleTransportOptions.caPem` is a transport-level option that `secureFetchArticle` may populate from `sourceCa.certificatePem` when a validated SourceCa is present.
+3. **map.html prior failure vs null fields:** ledger error `body_too_large` with `httpStatus`/`bytes`/`wireSha256` null is expected because `defaultTransport` rejects mid-stream before `resolve`; summary nulls are the same event, not a second outcome.
+4. Product revalidation of the two PPA entries under `secureFetchArticle` in dots 1792919758 still returned `UNABLE_TO_VERIFY_LEAF_SIGNATURE`; prior `STRICT_TLS_OK` diag remains host-identity evidence only.

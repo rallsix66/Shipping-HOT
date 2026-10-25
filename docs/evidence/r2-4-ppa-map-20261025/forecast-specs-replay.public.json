@@ -1,0 +1,242 @@
+{
+  "forecast": {
+    "replays": [
+      {
+        "tc": "TC2637",
+        "ok": true,
+        "reusedPriorOriginal": true,
+        "httpRefetch": false,
+        "bytes": 3783,
+        "wireSha256": "9e4f3a259846c3317f0238d8d76755ba06709385d71d0c0a577d255a92012a02",
+        "matchesPriorLedger": true,
+        "parser": "parseJmaForecastJson_ok",
+        "identityMatches": true,
+        "publicFields": {
+          "id": "tc-jma-TC2637",
+          "basin": "NW_PACIFIC",
+          "jmaId": "TC2637",
+          "typhoonNumber": "2631",
+          "nameEn": "In-fa",
+          "nameJp": "インファ",
+          "issuedAt": "2026-10-25T07:05:00Z",
+          "current": {
+            "lat": 12.2,
+            "lon": 165.2,
+            "at": "2026-10-25T06:00:00Z"
+          },
+          "trackHistoryCount": 13,
+          "forecastCount": 5,
+          "lifecycleStatus": "active",
+          "dissipatedAt": null
+        }
+      },
+      {
+        "tc": "TC2636",
+        "ok": true,
+        "reusedPriorOriginal": true,
+        "httpRefetch": false,
+        "bytes": 2581,
+        "wireSha256": "d2c871329ecdabd374e80d54312c3a95e9363d6209257d272ba632fb37cf60ce",
+        "matchesPriorLedger": true,
+        "parser": "parseJmaForecastJson_ok",
+        "identityMatches": true,
+        "publicFields": {
+          "id": "tc-jma-TC2636",
+          "basin": "NW_PACIFIC",
+          "jmaId": "TC2636",
+          "typhoonNumber": "2630",
+          "nameEn": "Champi",
+          "nameJp": "チャンパー",
+          "issuedAt": "2026-10-25T06:45:00Z",
+          "current": {
+            "lat": 30,
+            "lon": 125.4,
+            "at": "2026-10-25T06:00:00Z"
+          },
+          "trackHistoryCount": 109,
+          "forecastCount": 2,
+          "lifecycleStatus": "active",
+          "dissipatedAt": null
+        }
+      }
+    ],
+    "listCheck": {
+      "priorListAvailable": true,
+      "priorListWireSha256": "73f95b534b79ad9564162e10949f7d22bbaecf08eb31c0f9172bc5bb6b4b4c31",
+      "strictStatus": "ok",
+      "verifiedIdentities": [
+        "TC2637",
+        "TC2636"
+      ],
+      "requestedIdentities": [
+        "TC2637",
+        "TC2636"
+      ],
+      "allRequestedWereOnVerifiedList": true
+    },
+    "note": "forecast-only reuse; specifications separate; XX-W02 not raised to OK on forecast-only"
+  },
+  "specificationsCaptures": [
+    {
+      "id": "XX-W02-specifications-product",
+      "status": "CAPTURED",
+      "httpStatus": 200,
+      "bytes": 4042,
+      "wireSha256": "4559062942c8c65dd89b4a197392c4b8c92f2beeecd55243080c1677d97c7317",
+      "contentType": "application/json",
+      "url": "https://www.jma.go.jp/bosai/typhoon/data/TC2637/specifications.json",
+      "tc": "TC2637"
+    },
+    {
+      "id": "XX-W02-specifications-TC2636",
+      "status": "CAPTURED",
+      "httpStatus": 200,
+      "bytes": 1790,
+      "wireSha256": "b6110f8e5eb5d6b85ff611913a3c228b142bf181c9098209679bac7d6287824d",
+      "contentType": "application/json",
+      "url": "https://www.jma.go.jp/bosai/typhoon/data/TC2636/specifications.json",
+      "tc": "TC2636"
+    }
+  ],
+  "specificationsFieldReplay": {
+    "TC2637": {
+      "tc": "TC2637",
+      "arrayLength": 7,
+      "title": {
+        "part": "title",
+        "issueUTC": "2026-10-25T07:05:00Z",
+        "issueJST": "2026-10-25T16:05:00+09:00",
+        "typhoonNumber": "2631",
+        "nameEn": "In-fa",
+        "nameJp": "インファ",
+        "categoryEn": "STS",
+        "categoryJp": "台風"
+      },
+      "rowCount": 6,
+      "rowKeysSample": [
+        "part",
+        "maximumWind",
+        "galeWarning",
+        "stormWarning",
+        "advancedHours",
+        "category",
+        "scale",
+        "intensity",
+        "position",
+        "location",
+        "course",
+        "speed",
+        "pressure",
+        "validtime"
+      ],
+      "rowPartLabels": [
+        {
+          "jp": "実況",
+          "en": "Analysis"
+        },
+        {
+          "jp": "予報　２４時間後",
+          "en": "Forecast for 24 hours ahead"
+        },
+        {
+          "jp": "予報　４８時間後",
+          "en": "Forecast for 48 hours ahead"
+        },
+        {
+          "jp": "予報　７２時間後",
+          "en": "Forecast for 72 hours ahead"
+        },
+        {
+          "jp": "予報　９６時間後",
+          "en": "Forecast for 96 hours ahead"
+        },
+        {
+          "jp": "予報　１２０時間後",
+          "en": "Forecast for 120 hours ahead"
+        }
+      ],
+      "crossCheckForecast": {
+        "typhoonNumberMatch": true,
+        "nameEnMatch": true,
+        "nameJpMatch": true,
+        "issuedAtMatch": true,
+        "forecastIssuedAt": "2026-10-25T07:05:00Z",
+        "specsIssueUTC": "2026-10-25T07:05:00Z"
+      }
+    },
+    "TC2636": {
+      "tc": "TC2636",
+      "arrayLength": 4,
+      "title": {
+        "part": "title",
+        "issueUTC": "2026-10-25T06:45:00Z",
+        "issueJST": "2026-10-25T15:45:00+09:00",
+        "typhoonNumber": "2630",
+        "nameEn": "Champi",
+        "nameJp": "チャンパー",
+        "categoryEn": "TS",
+        "categoryJp": "台風"
+      },
+      "rowCount": 3,
+      "rowKeysSample": [
+        "part",
+        "maximumWind",
+        "galeWarning",
+        "advancedHours",
+        "category",
+        "scale",
+        "intensity",
+        "position",
+        "location",
+        "course",
+        "speed",
+        "pressure",
+        "validtime"
+      ],
+      "rowPartLabels": [
+        {
+          "jp": "実況",
+          "en": "Analysis"
+        },
+        {
+          "jp": "予報　１２時間後",
+          "en": "Forecast for 12 hours ahead"
+        },
+        {
+          "jp": "予報　２４時間後",
+          "en": "Forecast for 24 hours ahead"
+        }
+      ],
+      "crossCheckForecast": {
+        "typhoonNumberMatch": true,
+        "nameEnMatch": true,
+        "nameJpMatch": true,
+        "issuedAtMatch": true,
+        "forecastIssuedAt": "2026-10-25T06:45:00Z",
+        "specsIssueUTC": "2026-10-25T06:45:00Z"
+      }
+    },
+    "separation": "forecast and specifications are separate products; forecast-only must not raise XX-W02 whole row to OK",
+    "parserStatus": "no parseJmaSpecifications in codebase; structural+crossCheck replay only this round; no new framework added"
+  },
+  "discovery": {
+    "exactUrlFound": true,
+    "assignSnippet": "\"/\";r[\"forecast_\"+n]=o+\"forecast.json\",r[\"forecastPreviousIssue_\"+n]=o+\"forecastPreviousIssue.json\",r[\"specifications_\"+n]=o+\"specifications.json\",r[\"probabilityThrough_\"+n]=o+\"probabilityThrough.json\",r[\"probabilityTime",
+    "exactProductUrls": [
+      {
+        "id": "TC2637",
+        "relative": "typhoon/data/TC2637/specifications.json",
+        "absolute": "https://www.jma.go.jp/bosai/typhoon/data/TC2637/specifications.json",
+        "construction": "z+n+\"/\"+\"specifications.json\" with z=\"typhoon/data/\" n=TC2637"
+      },
+      {
+        "id": "TC2636",
+        "relative": "typhoon/data/TC2636/specifications.json",
+        "absolute": "https://www.jma.go.jp/bosai/typhoon/data/TC2636/specifications.json",
+        "construction": "z+n+\"/\"+\"specifications.json\" with z=\"typhoon/data/\" n=TC2636"
+      }
+    ],
+    "sourceWireSha256": "71c57265064a4d54cc1ff957f3582059ff772403f1430b759333d053852c12e4",
+    "sourceBytes": 861490
+  }
+}

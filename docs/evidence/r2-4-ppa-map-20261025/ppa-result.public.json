@@ -1,0 +1,45 @@
+{
+  "sourceId": "PH-P01",
+  "entriesOneSourceCombined": true,
+  "results": [
+    {
+      "id": "PH-P01-helpdesk",
+      "url": "https://www.ppa.com.ph/content/ppa-helpdesk-advisory",
+      "status": "BLOCKED",
+      "httpStatus": null,
+      "bytes": null,
+      "wireSha256": null,
+      "transportErrorCode": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+      "transportErrorMessage": "unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca",
+      "requestLevelCaPassed": false,
+      "sourceCaConfigured": false,
+      "addresses": [
+        {
+          "address": "115.84.233.11",
+          "family": 4
+        }
+      ]
+    },
+    {
+      "id": "PH-P01-port-news",
+      "url": "https://www.ppa.com.ph/ppa-port-news",
+      "status": "BLOCKED",
+      "httpStatus": null,
+      "bytes": null,
+      "wireSha256": null,
+      "transportErrorCode": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+      "transportErrorMessage": "unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca",
+      "requestLevelCaPassed": false,
+      "sourceCaConfigured": false,
+      "addresses": [
+        {
+          "address": "115.84.233.11",
+          "family": 4
+        }
+      ]
+    }
+  ],
+  "parsePerformed": false,
+  "reason": "both entries stopped at TLS UNABLE_TO_VERIFY_LEAF_SIGNATURE under secureFetchArticle/defaultTransport; exact error retained; no retry; no additional TLS diagnostic this round",
+  "qualificationSuggestion": "keep PH-P01 BLOCKED; prior www:443 STRICT_TLS_OK diag remains host-identity only and does not flip product"
+}

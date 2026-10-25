@@ -1,0 +1,92 @@
+{
+  "round": "dots-1792919758",
+  "alsoCovers": "1792919667",
+  "httpUsed": 5,
+  "httpHardCap": 10,
+  "redirectsFollowed": 0,
+  "retries": 0,
+  "entries": [
+    {
+      "seq": 1,
+      "countsToward10": true,
+      "method": "GET",
+      "url": "https://www.ppa.com.ph/content/ppa-helpdesk-advisory",
+      "purpose": "PH-P01_product_revalidate_helpdesk_advisory",
+      "state": "transport_error",
+      "httpStatus": null,
+      "contentType": null,
+      "bytes": null,
+      "wireSha256": null,
+      "error": {
+        "message": "unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca",
+        "code": "UNABLE_TO_VERIFY_LEAF_SIGNATURE"
+      },
+      "reservedAt": "2026-10-25T09:22:10.717Z",
+      "finishedAt": "2026-10-25T09:22:11.112Z"
+    },
+    {
+      "seq": 2,
+      "countsToward10": true,
+      "method": "GET",
+      "url": "https://www.ppa.com.ph/ppa-port-news",
+      "purpose": "PH-P01_product_revalidate_port_news",
+      "state": "transport_error",
+      "httpStatus": null,
+      "contentType": null,
+      "bytes": null,
+      "wireSha256": null,
+      "error": {
+        "message": "unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca",
+        "code": "UNABLE_TO_VERIFY_LEAF_SIGNATURE"
+      },
+      "reservedAt": "2026-10-25T09:22:11.115Z",
+      "finishedAt": "2026-10-25T09:22:11.499Z"
+    },
+    {
+      "seq": 3,
+      "countsToward10": true,
+      "method": "GET",
+      "url": "https://www.jma.go.jp/bosai/map.html",
+      "purpose": "official_map_html_for_specifications_script_discovery_temp_2MiB",
+      "state": "finished",
+      "httpStatus": 200,
+      "contentType": "text/html",
+      "bytes": 861490,
+      "wireSha256": "71c57265064a4d54cc1ff957f3582059ff772403f1430b759333d053852c12e4",
+      "error": null,
+      "reservedAt": "2026-10-25T09:22:16.155Z",
+      "finishedAt": "2026-10-25T09:22:17.109Z"
+    },
+    {
+      "seq": 4,
+      "countsToward10": true,
+      "method": "GET",
+      "url": "https://www.jma.go.jp/bosai/typhoon/data/TC2637/specifications.json",
+      "purpose": "specifications_product_after_official_url_verified",
+      "state": "finished",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "bytes": 4042,
+      "wireSha256": "4559062942c8c65dd89b4a197392c4b8c92f2beeecd55243080c1677d97c7317",
+      "error": null,
+      "reservedAt": "2026-10-25T09:22:55.692Z",
+      "finishedAt": "2026-10-25T09:22:55.862Z"
+    },
+    {
+      "seq": 5,
+      "countsToward10": true,
+      "method": "GET",
+      "url": "https://www.jma.go.jp/bosai/typhoon/data/TC2636/specifications.json",
+      "purpose": "specifications_product_TC2636",
+      "state": "finished",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "bytes": 1790,
+      "wireSha256": "b6110f8e5eb5d6b85ff611913a3c228b142bf181c9098209679bac7d6287824d",
+      "error": null,
+      "reservedAt": "2026-10-25T09:23:15.044Z",
+      "finishedAt": "2026-10-25T09:23:15.294Z"
+    }
+  ],
+  "note": "Minimal public request ledger. Private response bodies not included."
+}

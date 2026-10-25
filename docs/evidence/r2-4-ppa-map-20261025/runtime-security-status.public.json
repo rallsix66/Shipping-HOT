@@ -1,0 +1,20 @@
+{
+  "node": "24.15.0",
+  "openssl": "3.5.5",
+  "modules": "137",
+  "defaultMaxBytes512KiB": true,
+  "transportRejectUnauthorizedTrue": true,
+  "sourceCaConfigFields": [
+    "sourceId",
+    "hostname",
+    "certificatePem"
+  ],
+  "sourceCaUsesCertificatePem": true,
+  "sourceCaDefinesCaPem": false,
+  "thisRoundRequestLevelCaPassed": false,
+  "thisRoundSourceCaConfigured": false,
+  "thisRoundTrustStoreChanged": false,
+  "thisRoundCaImported": false,
+  "effectiveTrustSourceVerified": false,
+  "effectiveTrustSourceNote": "request-level ca not passed; effective trust source not independently verified"
+}
