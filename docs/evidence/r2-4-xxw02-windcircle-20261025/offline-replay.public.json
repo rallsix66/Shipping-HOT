@@ -1,6 +1,11 @@
 {
-  "round": "dots-1792920528",
+  "round": "dots-1792921846",
+  "priorRound": "dots-1792920528",
   "httpRefetch": false,
+  "p2Fixes": {
+    "usableRadius": "finite non-negative; at least one valid unit; empty/null/string/negative-only => field invalid via existing range_invalid path",
+    "identityMatch": "true only when both sides have non-empty real values and equal; else unknown or false"
+  },
   "replays": [
     {
       "tc": "TC2637",
@@ -241,7 +246,7 @@
         "forecastCount": 5,
         "trackHistoryCount": 13
       },
-      "crossCheckForecast": {
+      "identityCrossCheck": {
         "typhoonNumberMatch": true,
         "nameEnMatch": true,
         "nameJpMatch": true,
@@ -353,7 +358,7 @@
         "forecastCount": 2,
         "trackHistoryCount": 109
       },
-      "crossCheckForecast": {
+      "identityCrossCheck": {
         "typhoonNumberMatch": true,
         "nameEnMatch": true,
         "nameJpMatch": true,

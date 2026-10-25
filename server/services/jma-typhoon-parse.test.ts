@@ -112,11 +112,52 @@ describe("jma specifications wind-circle parse", () => {
 
     const badRange = parseJmaSpecificationsJson([
       { part: "title", typhoonNumber: "2631", issue: { UTC: "2026-10-25T07:05:00Z" } },
-      { part: { en: "Analysis" }, advancedHours: 0, galeWarning: [{ area: "北東", range: "120nm" }] },
+      { part: { en: "Analysis" }, advancedHours: 0, galeWarning: [{ area: "NE", range: "120nm" }] },
     ])
     expect(badRange.status).toBe("ok")
     if (badRange.status === "ok") {
       expect(badRange.rows[0]?.galeWarning).toMatchObject({ status: "invalid", reason: "galeWarning_range_invalid" })
+    }
+
+    const emptyRange = parseJmaSpecificationsJson([
+      { part: "title", typhoonNumber: "2631", issue: { UTC: "2026-10-25T07:05:00Z" } },
+      { part: { en: "Analysis" }, advancedHours: 0, galeWarning: [{ area: "NE", range: {} }] },
+    ])
+    expect(emptyRange.status).toBe("ok")
+    if (emptyRange.status === "ok") {
+      expect(emptyRange.rows[0]?.galeWarning).toMatchObject({ status: "invalid", reason: "galeWarning_range_invalid" })
+    }
+
+    const nullStringRange = parseJmaSpecificationsJson([
+      { part: "title", typhoonNumber: "2631", issue: { UTC: "2026-10-25T07:05:00Z" } },
+      { part: { en: "Analysis" }, advancedHours: 0, galeWarning: [{ area: "NE", range: { km: null, nm: "120" } }] },
+    ])
+    expect(nullStringRange.status).toBe("ok")
+    if (nullStringRange.status === "ok") {
+      expect(nullStringRange.rows[0]?.galeWarning).toMatchObject({ status: "invalid", reason: "galeWarning_range_invalid" })
+    }
+
+    const negativeRange = parseJmaSpecificationsJson([
+      { part: "title", typhoonNumber: "2631", issue: { UTC: "2026-10-25T07:05:00Z" } },
+      { part: { en: "Analysis" }, advancedHours: 0, stormWarning: [{ area: "All", range: { km: -5, nm: -1 } }] },
+    ])
+    expect(negativeRange.status).toBe("ok")
+    if (negativeRange.status === "ok") {
+      expect(negativeRange.rows[0]?.stormWarning).toMatchObject({ status: "invalid", reason: "stormWarning_range_invalid" })
+      expect(negativeRange.rows[0]?.galeWarning).toEqual({ status: "absent" })
+    }
+
+    const oneValidUnit = parseJmaSpecificationsJson([
+      { part: "title", typhoonNumber: "2631", issue: { UTC: "2026-10-25T07:05:00Z" } },
+      { part: { en: "Analysis" }, advancedHours: 0, galeWarning: [{ area: "NE", range: { nm: 90 } }] },
+    ])
+    expect(oneValidUnit.status).toBe("ok")
+    if (oneValidUnit.status === "ok") {
+      expect(oneValidUnit.rows[0]?.galeWarning.status).toBe("present")
+      if (oneValidUnit.rows[0]?.galeWarning.status === "present") {
+        expect(oneValidUnit.rows[0].galeWarning.sectors[0]?.range).toMatchObject({ nm: 90 })
+        expect(oneValidUnit.rows[0].galeWarning.sectors[0]?.range.km).toBeUndefined()
+      }
     }
   })
 
@@ -139,6 +180,47 @@ describe("jma specifications wind-circle parse", () => {
       typhoonNumberMatch: false,
       nameEnMatch: false,
       nameJpMatch: true,
+      issuedAtMatch: true,
+    })
+
+    // Missing/empty optional fields are not identity evidence (undefined===undefined must not be true).
+    expect(crossCheckJmaSpecificationsAgainstForecast(specs, {
+      typhoonNumber: undefined,
+      nameEn: undefined,
+      nameJp: undefined,
+      issuedAt: undefined,
+    })).toEqual({
+      typhoonNumberMatch: "unknown",
+      nameEnMatch: "unknown",
+      nameJpMatch: "unknown",
+      issuedAtMatch: "unknown",
+    })
+    expect(crossCheckJmaSpecificationsAgainstForecast(specs, {
+      typhoonNumber: "",
+      nameEn: "",
+      nameJp: forecast.nameJp,
+      issuedAt: forecast.issuedAt,
+    })).toEqual({
+      typhoonNumberMatch: "unknown",
+      nameEnMatch: "unknown",
+      nameJpMatch: true,
+      issuedAtMatch: true,
+    })
+    expect(crossCheckJmaSpecificationsAgainstForecast(
+      {
+        ...specs,
+        title: { ...specs.title, nameEn: undefined, nameJp: undefined },
+      },
+      {
+        typhoonNumber: forecast.typhoonNumber,
+        nameEn: undefined,
+        nameJp: "",
+        issuedAt: forecast.issuedAt,
+      },
+    )).toEqual({
+      typhoonNumberMatch: true,
+      nameEnMatch: "unknown",
+      nameJpMatch: "unknown",
       issuedAtMatch: true,
     })
   })

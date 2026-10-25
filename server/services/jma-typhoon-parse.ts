@@ -225,7 +225,7 @@ export type JmaWindCircleArea =
   | { kind: "unknown", raw: unknown }
 
 export interface JmaWindCircleRange {
-  /** Present only when source provides a finite number; never invent 0 for absence. */
+  /** Present only when source provides a finite non-negative number; never invent 0 for absence. */
   km?: number
   nm?: number
   /** Raw source values retained even when non-numeric / unknown. */
@@ -309,12 +309,19 @@ function parseWindCircleArea(area: unknown): JmaWindCircleArea {
   return { kind: "unknown", raw: area }
 }
 
+function isUsableWindCircleRadius(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0
+}
+
 function parseWindCircleRange(range: unknown): JmaWindCircleRange | undefined {
   if (!range || typeof range !== "object" || Array.isArray(range)) return undefined
   const rawKm = (range as { km?: unknown }).km
   const rawNm = (range as { nm?: unknown }).nm
-  const km = typeof rawKm === "number" && Number.isFinite(rawKm) ? rawKm : undefined
-  const nm = typeof rawNm === "number" && Number.isFinite(rawNm) ? rawNm : undefined
+  const km = isUsableWindCircleRadius(rawKm) ? rawKm : undefined
+  const nm = isUsableWindCircleRadius(rawNm) ? rawNm : undefined
+  // Usable circle needs at least one finite non-negative unit value.
+  // Empty {}, null/string units, or negative-only radii must not become present.
+  if (km === undefined && nm === undefined) return undefined
   return { km, nm, rawKm, rawNm }
 }
 
@@ -413,15 +420,34 @@ export function jmaStormWarningLabelJp(advancedHours: number | undefined): strin
   return JMA_STORM_WARNING_LABEL_FORECAST_JP
 }
 
+export type JmaIdentityFieldMatch = boolean | "unknown"
+
+function matchOptionalIdentityField(
+  left: string | undefined,
+  right: string | undefined,
+): JmaIdentityFieldMatch {
+  const a = typeof left === "string" && left.length > 0 ? left : undefined
+  const b = typeof right === "string" && right.length > 0 ? right : undefined
+  // Three-way: both non-empty equal => true; both non-empty unequal => false;
+  // missing/empty on either side (no comparable value) => unknown.
+  if (a === undefined || b === undefined) return "unknown"
+  return a === b
+}
+
 /** Cross-check specifications title identity against a forecast parse (same TC). */
 export function crossCheckJmaSpecificationsAgainstForecast(
   specs: Extract<JmaSpecificationsParseResult, { status: "ok" }>,
   forecast: Pick<NormalizedTropicalCyclone, "typhoonNumber" | "nameEn" | "nameJp" | "issuedAt">,
-): { typhoonNumberMatch: boolean, nameEnMatch: boolean, nameJpMatch: boolean, issuedAtMatch: boolean } {
+): {
+    typhoonNumberMatch: JmaIdentityFieldMatch
+    nameEnMatch: JmaIdentityFieldMatch
+    nameJpMatch: JmaIdentityFieldMatch
+    issuedAtMatch: JmaIdentityFieldMatch
+  } {
   return {
-    typhoonNumberMatch: specs.title.typhoonNumber === forecast.typhoonNumber,
-    nameEnMatch: specs.title.nameEn === forecast.nameEn,
-    nameJpMatch: specs.title.nameJp === forecast.nameJp,
-    issuedAtMatch: specs.title.issueUtc === forecast.issuedAt,
+    typhoonNumberMatch: matchOptionalIdentityField(specs.title.typhoonNumber, forecast.typhoonNumber),
+    nameEnMatch: matchOptionalIdentityField(specs.title.nameEn, forecast.nameEn),
+    nameJpMatch: matchOptionalIdentityField(specs.title.nameJp, forecast.nameJp),
+    issuedAtMatch: matchOptionalIdentityField(specs.title.issueUtc, forecast.issuedAt),
   }
 }

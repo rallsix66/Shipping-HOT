@@ -1,5 +1,5 @@
 {
-  "round": "dots-1792920528",
+  "round": "dots-1792921846",
   "countsUnchanged": {
     "r2_4": "29/39",
     "r2_5": "25/34",
@@ -9,8 +9,10 @@
   "semantics": {
     "galeWarningAbsent": "key missing => status=absent (no applicable gale circle); not error; not 0",
     "stormWarningAbsent": "key missing => status=absent (no applicable storm circle); not error; not 0",
-    "invalid": "key present but null/non-array/bad sector/range => status=invalid for that field; whole document may still parse",
-    "units": "retain source km and nm; do not invent a preferred unit"
+    "invalid": "key present but null/non-array/bad sector/range (incl. empty {} / non-numeric units / negative-only) => status=invalid for that field; whole document may still parse",
+    "units": "retain source km and nm; do not invent a preferred unit",
+    "usableRadius": "finite non-negative number; require >=1 of km/nm; never invent 0 for absence; do not require both units; no km/nm conversion gate",
+    "identityMatch": "boolean|unknown per field; missing/empty is not match evidence"
   },
   "TCs": [
     {
@@ -285,5 +287,10 @@
     "Parser is pure-function only; jma-tropical-cyclone provider sync still forecast-only (no new provider/scheduler).",
     "XX-W02 whole-row OK not raised by executor; counts remain 29/39 and 25/34 pending dots ruling.",
     "Direction string lexicon (南西/北東/…) not normalized beyond retaining source text; bilingual All/全域 retained as emitted."
-  ]
+  ],
+  "priorRound": "dots-1792920528",
+  "p2Fixes": {
+    "usableRadius": "finite non-negative; at least one valid unit required; empty/null/string/negative-only => invalid via *_range_invalid",
+    "identityMatch": "true only when both sides non-empty and equal; missing/empty => unknown; mismatch => false"
+  }
 }

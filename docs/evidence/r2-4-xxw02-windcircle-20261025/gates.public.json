@@ -1,16 +1,43 @@
 {
-  "round": "dots-1792920528",
+  "round": "dots-1792921846",
+  "priorRound": "dots-1792920528",
   "worktree": "D:/try one/Shipping HOT/.tmp/worktrees/r2-4-gapfill-20261025",
   "branch": "codex/shipping-hot-r2-4-gapfill-20261025",
-  "baseline": "ffc633a2bf0d2a40348d36c217cd2727d5be47ff",
+  "baseline": "60090e26d48074e8f5e7a02a84b2b7f8f6f2ca7b",
   "gates": {
-    "targeted_vitest": { "exit": 0, "files": "jma-typhoon-parse.test.ts + jma-target-tc-strict.test.ts", "tests": "11 passed" },
-    "vitest_full": { "exit": 0, "files": "159 passed", "tests": "2021 passed | 5 skipped" },
-    "build": { "exit": 0 },
-    "typecheck": { "exit": 0 },
-    "lint": { "exit": 0, "note": "fixed sort-imports / blank-lines / interface / arrow-parens then re-ran clean" },
-    "diff": { "exit": 0, "note": "reviewed; routeTree.gen.ts build noise restored; no private originals staged" }
+    "targeted_vitest": {
+      "exit": 0,
+      "files": "jma-typhoon-parse.test.ts",
+      "tests": "7 passed"
+    },
+    "vitest_full": {
+      "exit": 0,
+      "files": "159 passed",
+      "tests": "2021 passed | 5 skipped"
+    },
+    "build": {
+      "exit": 0
+    },
+    "typecheck": {
+      "exit": 0
+    },
+    "lint": {
+      "exit": 0,
+      "note": "fixed README trailing spaces + return-type indent then re-ran clean"
+    },
+    "diff": {
+      "exit": 0,
+      "note": "reviewed; routeTree.gen.ts build noise restored; no private originals staged; zero new network"
+    }
   },
-  "countsHeld": { "XX-W02": "29/39 held; not raised", "other": "25/34 held" },
-  "network": "zero new network this round"
+  "countsHeld": {
+    "XX-W02": "29/39 held; not raised",
+    "other": "25/34 held",
+    "numericProductionPartition": "3/5 unchanged"
+  },
+  "network": "zero new network this round; offline reuse of preserved originals only",
+  "p2Fixes": {
+    "usableRadius": "finite non-negative; >=1 valid unit; empty/null/string/negative-only => *_range_invalid",
+    "identityMatch": "both non-empty equal => true; both non-empty unequal => false; missing comparable => unknown"
+  }
 }
