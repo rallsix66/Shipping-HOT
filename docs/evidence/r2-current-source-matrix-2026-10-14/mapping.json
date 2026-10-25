@@ -1,7 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-20T04:06:11.578Z",
-  "lastUpdatedAt": "2026-10-25T08:40:00.000Z",
+  "lastUpdatedAt": "2026-10-25T08:47:54.116Z",
+  "lastUpdatedAtSource": "this_write_utc; prior 2026-10-25T08:40:00.000Z was fabricated rounded future time",
   "lastUpdateNote": "2026-10-25 list-product contract ruling for XX-W01: limited R2-4 OK (scope=list product only). Numerator 28/39 → 29/39 (shortfall 3). Capture-time PARTIAL/28/39 retained as historical snapshot. Forecast omission is not an XX-W01 veto; providerSync partial and trackPersistence unverified remain significant facts. XX-W02 unchanged; R2-5 25/34 unchanged; numeric production partition 3/5 unchanged. Docs-only; no new network sample; gates not re-run (reuse 4f689fd logs). R2 not complete; no production enablement.",
   "reviewedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
   "evidenceHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",

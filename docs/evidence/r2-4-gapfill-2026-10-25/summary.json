@@ -94,7 +94,9 @@
     "r2Complete": false
   },
   "qualificationRuling": {
-    "at": "2026-10-25T08:40:00.000Z",
+    "at": "2026-10-25T08:30:03.239659Z",
+    "rulingMessageTs": "1792917003.239659",
+    "source": "slack_thread_message_ts:1792917003.239659 (= 2026-10-25T08:30:03.239659Z)",
     "basisHead": "4f689fd0bd557ae4f9153aeb6b8a5fbb64e81ee3",
     "xxW01": {
       "captureSnapshot": {
