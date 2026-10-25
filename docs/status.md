@@ -1,7 +1,14 @@
-## 2026-10-25 — R2-4 四源复检，分子仍是 28/39
+## 2026-10-25 — XX-W01 列表产品裁定落地，公开资格 29/39
+
+- 在零新网络采样前提下，按目录「当前热带气旋列表」独立产品合同，将 XX-W01 计为**限定** R2-4 OK（`r2_4=OK`，`countedOK=true`，`scope=list product only`）。**不是**整条台风同步或轨迹通过。
+- 预报未取**不再**作为 XX-W01 否决条件；**保留** providerSync partial 与 trackPersistence 未验证为显著事实。XX-W02 不动；R2-5 仍 **25/34**；数值生产分区仍 **3/5**；**不能宣称 R2 完成**，未生产启用。
+- 公开资格 **28/39 → 29/39（差 3）**。取样收尾的 28/39 与 PARTIAL 保留为当时快照。公开字段与裁定：[public-fields.json](evidence/r2-4-gapfill-2026-10-25/public-fields.json) / [list-product-ruling.md](evidence/r2-4-gapfill-2026-10-25/list-product-ruling.md)；矩阵：[mapping.json](evidence/r2-current-source-matrix-2026-10-14/mapping.json)。
+- 本提交**仅文档**。代码门禁沿用 `4f689fd0bd557ae4f9153aeb6b8a5fbb64e81ee3` 日志，不冒称重跑全量 Vitest/build。未合并、未部署、未改 `codex/shipping-hot-r2`。
+
+## 2026-10-25 — R2-4 四源复检取样快照（当时 28/39，XX-W01=PARTIAL）
 
 - 独立工作树自 `e41d3145b4276a0c02aab9f00d795476aefa1608`。五源六入口共 6 次传输尝试（上限 12，无跳转跟随）；其中 PH-P01 两个入口止于 TLS、无 HTTP 响应，其余四次取得正文。MY-P02 仍 STALE（有效最新 2025-08-01）；MY-P03 原件字节未变，冲突仍拒绝入库；PH-P01 两个入口均为 TLS `UNABLE_TO_VERIFY_LEAF_SIGNATURE`，记 BLOCKED；XX-W01 列表为 HTTP 200 且严格解析 ok，但预报未取，同步仍 partial，只从 BLOCKED 改为 PARTIAL，不计 OK。备选 MY-L01 的 10 张标题卡仍无 href。
-- 公开资格仍 **28/39（差 4）**、资讯 **25/34**。R2-5 不随这次列表响应升级。证据：[复检报告](evidence/r2-4-gapfill-2026-10-25/report.md)。未启用来源，未合并或部署。
+- 公开资格**当时** **28/39（差 4）**、资讯 **25/34**。R2-5 不随这次列表响应升级。该节保留为取样快照，不重写取样事实。证据：[复检报告](evidence/r2-4-gapfill-2026-10-25/report.md)。未启用来源，未合并或部署。
 
 ## 2026-10-24 — 观察执行器接入 19 源允许选择（默认关闭）
 

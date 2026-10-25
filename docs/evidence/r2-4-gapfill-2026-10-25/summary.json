@@ -61,9 +61,15 @@
       "syncOutcome": "partial",
       "prior404IsNotThisResponse": true,
       "emptyArrayIsNotThisResponse": true,
-      "verdict": "PARTIAL",
-      "countedOK": false,
-      "r2_5": "NOT_APPLICABLE_NUMERIC"
+      "verdict": "OK",
+      "countedOK": true,
+      "r2_5": "NOT_APPLICABLE_NUMERIC",
+      "captureVerdict": "PARTIAL",
+      "captureCountedOK": false,
+      "scope": "list product only",
+      "qualification": "limited_list_product_targetTc_only",
+      "providerSyncRemainsPartial": true,
+      "trackPersistenceUnverified": true
     },
     "MY-L01": {
       "requests": 1,
@@ -79,9 +85,44 @@
   },
   "qualification": {
     "before": "28/39",
-    "after": "28/39",
-    "shortfall": 4,
+    "after": "29/39",
+    "shortfall": 3,
+    "captureCloseoutAfter": "28/39",
     "r2_5Before": "25/34",
-    "r2_5After": "25/34"
+    "r2_5After": "25/34",
+    "numericProductionPartition": "3/5",
+    "r2Complete": false
+  },
+  "qualificationRuling": {
+    "at": "2026-10-25T08:40:00.000Z",
+    "basisHead": "4f689fd0bd557ae4f9153aeb6b8a5fbb64e81ee3",
+    "xxW01": {
+      "captureSnapshot": {
+        "verdict": "PARTIAL",
+        "countedOK": false,
+        "note": "Sampling closeout at 4f689fd; retained as historical snapshot"
+      },
+      "current": {
+        "verdict": "OK",
+        "countedOK": true,
+        "scope": "list product only",
+        "qualification": "limited_list_product_targetTc_only"
+      },
+      "retainedSignificantFacts": {
+        "providerSync": "partial",
+        "offlineForecastReadsRefused": 2,
+        "forecastHttpRequests": 0,
+        "trackPersistence": "unverified",
+        "xxW02": "unchanged PARTIAL",
+        "numericProductionPartition": "3/5 unchanged",
+        "r2Complete": false,
+        "productionEnabled": false
+      },
+      "evidence": {
+        "publicFields": "docs/evidence/r2-4-gapfill-2026-10-25/public-fields.json",
+        "ruling": "docs/evidence/r2-4-gapfill-2026-10-25/list-product-ruling.md",
+        "wireSha256": "73f95b534b79ad9564162e10949f7d22bbaecf08eb31c0f9172bc5bb6b4b4c31"
+      }
+    }
   }
 }

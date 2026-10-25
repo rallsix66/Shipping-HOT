@@ -1,4 +1,4 @@
-> 现役更新：2026-10-25 五源六入口复检后分子仍是 28/39（差 4）、资讯 25/34。XX-W01 由 BLOCKED 改为 PARTIAL（列表 200 可解析，预报未取，不计 OK）；PH-P01 由 NOT_RUN 改为 BLOCKED（两个入口均 TLS `UNABLE_TO_VERIFY_LEAF_SIGNATURE`）。MY-P02 仍 STALE，MY-P03 / MY-L01 仍 PARTIAL/FAIL。详见 [本轮复检](../r2-4-gapfill-2026-10-25/report.md)。此前 2026-10-20 父审仍是 XX-K01 有限 OK/PASS、CN-T01 有限 OK/PARTIAL。单次历史响应＋完整原件离线回放，CN7/8、role键缺省非publication，day无时区/instant；不是持续或生产声明。[认可与限界](../r2-maersk-mofcom-qualification-2026-10-20/acceptance.json) / [当前剩余R2](../r2-maersk-mofcom-qualification-2026-10-20/remaining-r2.md)。其余来源的 OK 计数未增；下方旧流程与旧“下一批”建议按原时点保留，最新判定以本轮复检和矩阵为准。
+> 现役更新：2026-10-25 XX-W01 列表产品合同裁定后分子 **29/39（差 3）**、资讯 **25/34**。XX-W01 按独立列表产品计**限定** R2-4 OK（`scope=list product only`）；预报未取不再作否决；providerSync partial 与轨迹未验证显著保留。取样收尾快照仍是 28/39 + PARTIAL，见 [list-product-ruling](../r2-4-gapfill-2026-10-25/list-product-ruling.md) / [复检报告](../r2-4-gapfill-2026-10-25/report.md)。PH-P01 仍 BLOCKED（TLS）。MY-P02 仍 STALE，MY-P03 / MY-L01 仍 PARTIAL/FAIL。不能宣称 R2 完成或生产启用。此前 2026-10-20 父审仍是 XX-K01 有限 OK/PASS、CN-T01 有限 OK/PARTIAL。单次历史响应＋完整原件离线回放，CN7/8、role键缺省非publication，day无时区/instant；不是持续或生产声明。[认可与限界](../r2-maersk-mofcom-qualification-2026-10-20/acceptance.json) / [当前剩余R2](../r2-maersk-mofcom-qualification-2026-10-20/remaining-r2.md)。其余来源的 OK 计数仅因 XX-W01 列表产品 +1；下方旧流程与旧“下一批”建议按原时点保留，最新判定以本裁定和矩阵为准。
 
 # R2 41项来源累计证据 — 2026-10-15
 
@@ -38,7 +38,7 @@ Westports 已获限定认可：R2-4仍 STALE、25/39；R2-5按既有 parser 的3
 
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
-| R2-4公开自动来源 | **28/39（71.79%）** | 最少32项，尚差4；28 OK、7 PARTIAL、1 STALE、1 BLOCKED、2 NOT_RUN，未通过 |
+| R2-4公开自动来源 | **29/39（74.36%）** | 最少32项，尚差3；29 OK、7 PARTIAL、1 STALE、1 BLOCKED、1 NOT_RUN，未通过 |
 | R2-5资讯/公告原页字段回放 | **25/34（73.53%）** | 尚差9；25 PASS、2 FAIL、2 PARTIAL、5 NOT_RUN，未通过 |
 | 数值字段独立检查 | **历史3项有限诊断＋新增1项完整原件离线解析** | 分母5，类型分列；不称4/5生产接入，不加到34项原页回放分子 |
 | R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
@@ -76,7 +76,7 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 | ID-W01 | https://www.bmkg.go.id/alerts/nowcast/en/rss.xml | 2026-10-13T07:00:40.269Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | PASS [字段](../r2-p1-inventory-2026-10-13/replay.log) | 最新精确RSS13条可读；回放是旧12条、原GET为/en别名，不把两份payload混为一份。 |
 | ID-T01 | https://jdih.kemendag.go.id/ | 2026-10-14T09:08:45.056Z / 200 [取证](../r2-three-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-post-clash-index-replay-final-2026-10-14/summary.json) | 8条完整原页回放通过；制定日不是发布日期，标题原有省略号保留，初始失败另存。 |
 | ID-T02 | https://jdih.kemenkeu.go.id/ | 原07:37:48.414Z root307→真实Location/home07:37:48.920Z 200，当前无新请求 | OK | PASS | 主会话限定代码/过程认可7条原件验收，日期角色/TZ未知、publishedAt null及漏检更正保留，不称独立私有原页重放/CI/24h通过。 |
-| PH-P01 | https://www.ppa.com.ph/content/ppa-helpdesk-advisory ，https://www.ppa.com.ph/ppa-port-news | NOT_RUN / 未知 | NOT_RUN | NOT_RUN | 没有可计数的实际产品抓取与完整原页回放证据；目录旧标签不充当实测。 |
+| PH-P01 | https://www.ppa.com.ph/content/ppa-helpdesk-advisory ，https://www.ppa.com.ph/ppa-port-news | 2026-10-25 两入口均止于 TLS `UNABLE_TO_VERIFY_LEAF_SIGNATURE`，无 HTTP 正文 [复检](../r2-4-gapfill-2026-10-25/summary.json) | BLOCKED | NOT_RUN | 取样轮两入口证书校验失败；未导出/安装证书、未关闭校验。两个 URL 仍计一个来源。 |
 | PH-W01 | https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin | 2026-10-15T05:53:36.714Z / 403 [本次](../r2-official-gaps-applied-2026-10-15/PH-W01-capture.json) | PARTIAL | NOT_RUN | 本次错误页非天气空状态，无活动正样本；10/10官方局部无活动状态另作历史，不称今天无风险。 |
 | PH-W02 | https://www.pagasa.dost.gov.ph/weather/weather-advisory | 2026-10-15T05:53:36.848Z / 403 [本次](../r2-official-gaps-applied-2026-10-15/PH-W02-capture.json) | PARTIAL | NOT_RUN | 本次错误页非天气空状态，无活动正样本；10/10官方局部无活动状态另作历史，不称今天无风险。 |
 | PH-C01 | https://customs.gov.ph/category/media-releases/ | 2026-10-14T07:56:33.170Z / 200 [取证](../r2-four-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-public-index-replay-2026-10-14/summary.json) | 完整私有实页标题/链接/源显示日期回放，重复和只读重开无差异；day精度，不推断时区。 |
@@ -93,7 +93,7 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 | ID | 精确目录URL / 原文本 | 最新已有采集UTC / HTTP | R2-4 | 独立数值字段 | 判定理由 / 保留缺口 |
 | --- | --- | --- | --- | --- | --- |
 | ID-W02 | https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json | 2026-10-20T03:33:54.513Z / 200，11259字节 | OK（限定） | 完整原件离线解析（限定） | 独立数值字段一列只表示XJ001完整原件离线解析；不适用于资讯R2-5（不计入34项分子/分母），也不增加生产数值覆盖计数。完整41点原件纯parser回放、归一化/字段验证已认可；父独立静态审查，门禁与回放为执行者证据。生产/24h未验证。 |
-| XX-W01 | https://www.jma.go.jp/bosai/typhoon/data/targetTc.json | 2026-10-15T05:53:37.778Z / 404 [同次归属](../r2-bmkg-doc-jma-attribution-2026-10-15/jma-cross-product-attribution.json) | BLOCKED | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [历史字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 最新精确URL404移出当前OK；历史数值诊断保留，404非无气旋，同一请求不重复计数。 |
+| XX-W01 | https://www.jma.go.jp/bosai/typhoon/data/targetTc.json | 2026-10-25T07:26:52.228Z / 200，210B [列表公开字段](../r2-4-gapfill-2026-10-25/public-fields.json) | OK（限定，list product only） | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [历史字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 列表产品限定 OK：严格解析 ok×2、issue 显式 +09:00；取样快照曾 PARTIAL/28/39。预报未取不作否决；providerSync partial 与轨迹未验证显著保留。非整条台风同步。历史 404 见 superseded。[裁定](../r2-4-gapfill-2026-10-25/list-product-ruling.md) |
 | XX-W02 | `https://www.jma.go.jp/bosai/typhoon/data/TC{id}/forecast.json` 、`/specifications.json` | 2026-10-15T05:53:37.778Z / 同次targetTc404 [归属](../r2-bmkg-doc-jma-attribution-2026-10-15/jma-cross-product-attribution.json) | PARTIAL | PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED [旧字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 前置列表与XX-W01是同一请求，没有两产品新请求；历史forecast保留，spec仍缺。 |
 | XX-A01 | https://api.open-meteo.com/v1/forecast | 2026-10-10T03:58:39.141Z / 200 [取证](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json) | OK | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 10/10陆地8港风/降水/能见度与时间字段诊断；不是保留原JSON回放或今天刷新。 |
 | XX-A02 | https://marine-api.open-meteo.com/v1/marine | 2026-10-10T03:58:39.141Z / 200 [取证](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json) | OK | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 10/10原点海况7港；VNSGN仍缺，约61.8公里独立参考点不能冒充泊位/原点。 |

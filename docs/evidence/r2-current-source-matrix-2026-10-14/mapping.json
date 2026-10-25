@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-20T04:06:11.578Z",
-  "lastUpdatedAt": "2026-10-25T08:13:22.262Z",
-  "lastUpdateNote": "2026-10-25 exact-entry recheck of MY-P02, MY-P03, PH-P01 and XX-W01, plus backup MY-L01. Numerator remains 28/39 and information 25/34. XX-W01 moves BLOCKED to PARTIAL; PH-P01 moves NOT_RUN to BLOCKED. Gaps for XX-W01 no longer keep the superseded HTTP404 as a current gap. No production enablement. Gate closeout recorded at 2026-10-25T08:13:22.262Z.",
+  "lastUpdatedAt": "2026-10-25T08:40:00.000Z",
+  "lastUpdateNote": "2026-10-25 list-product contract ruling for XX-W01: limited R2-4 OK (scope=list product only). Numerator 28/39 → 29/39 (shortfall 3). Capture-time PARTIAL/28/39 retained as historical snapshot. Forecast omission is not an XX-W01 veto; providerSync partial and trackPersistence unverified remain significant facts. XX-W02 unchanged; R2-5 25/34 unchanged; numeric production partition 3/5 unchanged. Docs-only; no new network sample; gates not re-run (reuse 4f689fd logs). R2 not complete; no production enablement.",
   "reviewedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
   "evidenceHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
@@ -37,11 +37,11 @@
   },
   "measuredCoverage": {
     "r2_4": {
-      "numerator": 28,
+      "numerator": 29,
       "denominator": 39,
-      "ratio": 0.717948717948718,
+      "ratio": 0.7435897435897436,
       "minimumOK": 32,
-      "shortfall": 4,
+      "shortfall": 3,
       "ids": [
         "CN-P01",
         "CN-W01",
@@ -70,14 +70,15 @@
         "XX-M01",
         "XX-M03",
         "XX-A01",
-        "XX-A02"
+        "XX-A02",
+        "XX-W01"
       ],
       "statusCounts": {
-        "OK": 28,
-        "PARTIAL": 8,
+        "OK": 29,
+        "PARTIAL": 7,
         "STALE": 1,
-        "NOT_RUN": 1,
-        "BLOCKED": 1
+        "BLOCKED": 1,
+        "NOT_RUN": 1
       },
       "pass": false
     },
@@ -4977,7 +4978,11 @@
         "wireSha256": "73f95b534b79ad9564162e10949f7d22bbaecf08eb31c0f9172bc5bb6b4b4c31",
         "contentType": "application/json",
         "scope": "exact list product; strict parse status ok with 2 entries; not an empty array and not the prior 404",
-        "forecastHttpRequests": 0
+        "forecastHttpRequests": 0,
+        "listProductEvidence": {
+          "path": "docs/evidence/r2-4-gapfill-2026-10-25/public-fields.json",
+          "ruling": "docs/evidence/r2-4-gapfill-2026-10-25/list-product-ruling.md"
+        }
       },
       "fieldReplayEvidence": null,
       "numericFieldValidation": {
@@ -5009,9 +5014,16 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "PARTIAL",
-        "countedOK": false,
-        "reason": "Exact targetTc.json is now HTTP 200 application/json and the existing strict list parser returns ok for 2 entries with explicit +09:00 issue offsets. Offline sync stays partial because the two forecast reads were refused. This does not count OK and does not change XX-W02 or the numeric production partition."
+        "verdict": "OK",
+        "countedOK": true,
+        "scope": "list product only",
+        "qualification": "limited_list_product_targetTc_only",
+        "reason": "Exact expected list product targetTc.json returned HTTP 200 application/json; strict parse status ok for 2 real entries with explicit +09:00 issue offsets; public field extract and wire hash verified. Counted as limited R2-4 OK for the catalogue list product only. Not whole typhoon sync OK and not track/path OK. Forecast omission is not an XX-W01 veto (XX-W02 / sync-chain). providerSync remains partial and trackPersistence remains unverified as retained significant facts. XX-W02 unchanged. No production enablement.",
+        "acceptance": {
+          "path": "docs/evidence/r2-4-gapfill-2026-10-25/list-product-ruling.md",
+          "publicFields": "docs/evidence/r2-4-gapfill-2026-10-25/public-fields.json",
+          "wireSha256": "73f95b534b79ad9564162e10949f7d22bbaecf08eb31c0f9172bc5bb6b4b4c31"
+        }
       },
       "r2_5": {
         "verdict": "NOT_APPLICABLE_NUMERIC",
@@ -5023,10 +5035,30 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Current gap: forecast/specifications were not requested this round; offline sync stayed partial after refusing forecast reads, so persisted cyclone tracks remain unverified.",
-        "Historical 10/10 numeric diagnostics retained, but do not prove current availability or raw numerical wire replay."
+        "Retained significant fact (does not veto list-product OK): providerSync stayed partial after refusing 2 offline forecast reads (forecastHttpRequests=0).",
+        "Retained significant fact (does not veto list-product OK): trackPersistence / persisted cyclone track fields were not verified this round because forecast/specifications were not fetched.",
+        "Not claimed: whole typhoon sync OK, XX-W02 OK, production enablement, R2 complete, or numeric production partition change (still 3/5).",
+        "Historical 10/10 numeric diagnostics retained, but do not prove current production readiness or raw numerical wire replay beyond the list product."
       ],
       "historicalSuperseded": [
+        {
+          "reason": "2026-10-25 capture/closeout snapshot only: list evidence was already complete, but the row stayed PARTIAL because forecast reads were refused and providerSync remained partial. That PARTIAL is retained as the sampling-time verdict; it is superseded for current counting by the list-product-only contract ruling (forecast is not an XX-W01 hard gate).",
+          "previousR24": {
+            "verdict": "PARTIAL",
+            "countedOK": false,
+            "reason": "Exact targetTc.json is now HTTP 200 application/json and the existing strict list parser returns ok for 2 entries with explicit +09:00 issue offsets. Offline sync stays partial because the two forecast reads were refused. This does not count OK and does not change XX-W02 or the numeric production partition."
+          },
+          "previousQualification": {
+            "r2_4": "28/39",
+            "shortfall": 4,
+            "countedOK": false,
+            "atHead": "4f689fd0bd557ae4f9153aeb6b8a5fbb64e81ee3",
+            "evidence": {
+              "path": "docs/evidence/r2-4-gapfill-2026-10-25/summary.json",
+              "note": "sources.XX-W01.verdict was PARTIAL / countedOK false at capture closeout"
+            }
+          }
+        },
         {
           "reason": "Historical only: 2026-10-15 exact targetTc HTTP 404 remains the previous availability result and is not a current gap; it is not rewritten as an empty list. Superseded by 2026-10-25 HTTP 200 list response.",
           "previousR24": {
