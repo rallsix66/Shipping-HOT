@@ -6,7 +6,7 @@ Branch: `codex/shipping-hot-r2-4-gapfill-20261025`
 
 ## One-line conclusion
 
-**Same** Node default trust store + `rejectUnauthorized=true` + shared DNS public-address gate; **different** API surface (diag = raw `node:tls.connect` with no HTTP; product failure path = `node:https.request` via `defaultTransport` / `secureFetchArticle`).
+**两次均报告严格验证，但有效信任来源及等价性未核实**；两端均 `rejectUnauthorized=true` 且复用同一 DNS 公网地址门控；**API 表面不同**（diag = 原始 `node:tls.connect` 无 HTTP；产品失败路径 = `node:https.request` via `defaultTransport` / `secureFetchArticle`）。
 
 ## PPA diagnostic actual stack (this round)
 

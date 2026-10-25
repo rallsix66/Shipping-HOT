@@ -208,3 +208,220 @@ export function normalizeStoredTropicalCyclonePayload(payload: {
     pathFetchedAt: payload.pathFetchedAt,
   }
 }
+
+/** Official map.html TyphoonTable labels (inline script evidence). */
+export const JMA_GALE_WARNING_LABEL_JP = "15m/s以上の強風域"
+export const JMA_STORM_WARNING_LABEL_ANALYSIS_JP = "25m/s以上の暴風域"
+export const JMA_STORM_WARNING_LABEL_FORECAST_JP = "暴風警戒域"
+
+export interface JmaLocalizedText {
+  jp?: string
+  en?: string
+}
+
+export type JmaWindCircleArea =
+  | { kind: "direction_string", value: string }
+  | { kind: "bilingual", jp?: string, en?: string }
+  | { kind: "unknown", raw: unknown }
+
+export interface JmaWindCircleRange {
+  /** Present only when source provides a finite number; never invent 0 for absence. */
+  km?: number
+  nm?: number
+  /** Raw source values retained even when non-numeric / unknown. */
+  rawKm: unknown
+  rawNm: unknown
+}
+
+export interface JmaWindCircleSector {
+  area: JmaWindCircleArea
+  range: JmaWindCircleRange
+}
+
+/**
+ * Field-level presence for galeWarning / stormWarning.
+ * - absent: key missing on the row (official UI skips render; not an error; not radius 0)
+ * - present: array of sectors (may be empty array if source emits [])
+ * - invalid: key present but not a usable array / sector shape
+ */
+export type JmaWindCircleField =
+  | { status: "absent" }
+  | { status: "present", sectors: JmaWindCircleSector[] }
+  | { status: "invalid", reason: string, raw: unknown }
+
+export interface JmaSpecificationsTitle {
+  part: "title"
+  typhoonNumber?: string
+  nameEn?: string
+  nameJp?: string
+  categoryEn?: string
+  categoryJp?: string
+  issueUtc?: string
+  issueJst?: string
+}
+
+export interface JmaSpecificationsRow {
+  partLabelEn?: string
+  partLabelJp?: string
+  advancedHours?: number
+  validtimeUtc?: string
+  validtimeJst?: string
+  galeWarning: JmaWindCircleField
+  stormWarning: JmaWindCircleField
+  /** Retained when present; not a hard gate for wind-circle parsing. */
+  probabilityCircleRadius?: JmaWindCircleRange
+}
+
+export type JmaSpecificationsParseResult =
+  | {
+    status: "ok"
+    title: JmaSpecificationsTitle
+    rows: JmaSpecificationsRow[]
+  }
+  | { status: "invalid", message: string }
+
+function parseLocalizedPart(part: unknown): { en?: string, jp?: string } | undefined {
+  if (typeof part === "string") return { en: part }
+  if (part && typeof part === "object" && !Array.isArray(part)) {
+    const en = (part as { en?: unknown }).en
+    const jp = (part as { jp?: unknown }).jp
+    return {
+      en: typeof en === "string" ? en : undefined,
+      jp: typeof jp === "string" ? jp : undefined,
+    }
+  }
+  return undefined
+}
+
+function parseWindCircleArea(area: unknown): JmaWindCircleArea {
+  if (typeof area === "string") return { kind: "direction_string", value: area }
+  if (area && typeof area === "object" && !Array.isArray(area)) {
+    const jp = (area as { jp?: unknown }).jp
+    const en = (area as { en?: unknown }).en
+    if (typeof jp === "string" || typeof en === "string") {
+      return {
+        kind: "bilingual",
+        jp: typeof jp === "string" ? jp : undefined,
+        en: typeof en === "string" ? en : undefined,
+      }
+    }
+  }
+  return { kind: "unknown", raw: area }
+}
+
+function parseWindCircleRange(range: unknown): JmaWindCircleRange | undefined {
+  if (!range || typeof range !== "object" || Array.isArray(range)) return undefined
+  const rawKm = (range as { km?: unknown }).km
+  const rawNm = (range as { nm?: unknown }).nm
+  const km = typeof rawKm === "number" && Number.isFinite(rawKm) ? rawKm : undefined
+  const nm = typeof rawNm === "number" && Number.isFinite(rawNm) ? rawNm : undefined
+  return { km, nm, rawKm, rawNm }
+}
+
+function parseWindCircleField(row: object, key: "galeWarning" | "stormWarning"): JmaWindCircleField {
+  if (!Object.prototype.hasOwnProperty.call(row, key)) {
+    return { status: "absent" }
+  }
+  const raw = (row as Record<string, unknown>)[key]
+  if (raw === null) {
+    return { status: "invalid", reason: `${key}_null`, raw }
+  }
+  if (!Array.isArray(raw)) {
+    return { status: "invalid", reason: `${key}_not_array`, raw }
+  }
+  const sectors: JmaWindCircleSector[] = []
+  for (const item of raw) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) {
+      return { status: "invalid", reason: `${key}_sector_not_object`, raw }
+    }
+    const range = parseWindCircleRange((item as { range?: unknown }).range)
+    if (!range) {
+      return { status: "invalid", reason: `${key}_range_invalid`, raw }
+    }
+    sectors.push({
+      area: parseWindCircleArea((item as { area?: unknown }).area),
+      range,
+    })
+  }
+  return { status: "present", sectors }
+}
+
+function parseProbabilityCircleRadius(row: object): JmaWindCircleRange | undefined {
+  if (!Object.prototype.hasOwnProperty.call(row, "probabilityCircleRadius")) return undefined
+  return parseWindCircleRange((row as { probabilityCircleRadius?: unknown }).probabilityCircleRadius)
+}
+
+/**
+ * Minimal pure parser for JMA `specifications.json` wind-circle fields.
+ * Does not invent radius units, does not coerce absent circles to 0, and does not
+ * require pressure/wind hard gates outside the catalog wind-radius scope.
+ */
+export function parseJmaSpecificationsJson(payload: unknown): JmaSpecificationsParseResult {
+  if (!Array.isArray(payload) || payload.length === 0) {
+    return { status: "invalid", message: "JMA specifications payload is not a non-empty array" }
+  }
+  const titleBlock = payload.find(block => block && typeof block === "object" && (block as { part?: unknown }).part === "title")
+  if (!titleBlock || typeof titleBlock !== "object") {
+    return { status: "invalid", message: "JMA specifications payload missing title part" }
+  }
+  const name = (titleBlock as { name?: { en?: string, jp?: string } }).name
+  const category = (titleBlock as { category?: { en?: string, jp?: string } }).category
+  const issue = (titleBlock as { issue?: { UTC?: string, JST?: string } }).issue
+  const title: JmaSpecificationsTitle = {
+    part: "title",
+    typhoonNumber: typeof (titleBlock as { typhoonNumber?: unknown }).typhoonNumber === "string"
+      ? (titleBlock as { typhoonNumber: string }).typhoonNumber
+      : undefined,
+    nameEn: typeof name?.en === "string" ? name.en : undefined,
+    nameJp: typeof name?.jp === "string" ? name.jp : undefined,
+    categoryEn: typeof category?.en === "string" ? category.en : undefined,
+    categoryJp: typeof category?.jp === "string" ? category.jp : undefined,
+    issueUtc: typeof issue?.UTC === "string" ? issue.UTC : undefined,
+    issueJst: typeof issue?.JST === "string" ? issue.JST : undefined,
+  }
+
+  const rows: JmaSpecificationsRow[] = []
+  for (const block of payload) {
+    if (!block || typeof block !== "object" || Array.isArray(block)) continue
+    if ((block as { part?: unknown }).part === "title") continue
+    const part = parseLocalizedPart((block as { part?: unknown }).part)
+    const advancedHoursRaw = (block as { advancedHours?: unknown }).advancedHours
+    const advancedHours = typeof advancedHoursRaw === "number" && Number.isFinite(advancedHoursRaw)
+      ? advancedHoursRaw
+      : undefined
+    const validtime = (block as { validtime?: { UTC?: unknown, JST?: unknown } }).validtime
+    rows.push({
+      partLabelEn: part?.en,
+      partLabelJp: part?.jp,
+      advancedHours,
+      validtimeUtc: typeof validtime?.UTC === "string" ? validtime.UTC : undefined,
+      validtimeJst: typeof validtime?.JST === "string" ? validtime.JST : undefined,
+      galeWarning: parseWindCircleField(block, "galeWarning"),
+      stormWarning: parseWindCircleField(block, "stormWarning"),
+      probabilityCircleRadius: parseProbabilityCircleRadius(block),
+    })
+  }
+  if (!rows.length) {
+    return { status: "invalid", message: "JMA specifications payload has title but no timed rows" }
+  }
+  return { status: "ok", title, rows }
+}
+
+/** Official UI storm-warning section label depends on analysis vs forecast timing. */
+export function jmaStormWarningLabelJp(advancedHours: number | undefined): string {
+  if (advancedHours !== undefined && advancedHours <= 1) return JMA_STORM_WARNING_LABEL_ANALYSIS_JP
+  return JMA_STORM_WARNING_LABEL_FORECAST_JP
+}
+
+/** Cross-check specifications title identity against a forecast parse (same TC). */
+export function crossCheckJmaSpecificationsAgainstForecast(
+  specs: Extract<JmaSpecificationsParseResult, { status: "ok" }>,
+  forecast: Pick<NormalizedTropicalCyclone, "typhoonNumber" | "nameEn" | "nameJp" | "issuedAt">,
+): { typhoonNumberMatch: boolean, nameEnMatch: boolean, nameJpMatch: boolean, issuedAtMatch: boolean } {
+  return {
+    typhoonNumberMatch: specs.title.typhoonNumber === forecast.typhoonNumber,
+    nameEnMatch: specs.title.nameEn === forecast.nameEn,
+    nameJpMatch: specs.title.nameJp === forecast.nameJp,
+    issuedAtMatch: specs.title.issueUtc === forecast.issuedAt,
+  }
+}

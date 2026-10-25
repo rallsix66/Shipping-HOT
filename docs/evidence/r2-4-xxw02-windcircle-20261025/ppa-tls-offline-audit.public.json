@@ -1,0 +1,57 @@
+{
+  "round": "dots-1792920528",
+  "network": "none_this_round",
+  "tlsDiagOnce": {
+    "location": ".tmp/r2-4-jma-ppa-20261025/run-forensics.mjs (gitignored forensics helper; not product code)",
+    "bootstrap": "phase=tls-diag via main(process.argv[2]); loads isBlockedAddress from article-fetch-security",
+    "api": "node:tls.connect",
+    "optionsWhitelisted": {
+      "host": "resolved public IP",
+      "port": 443,
+      "servername_SNI": "www.ppa.com.ph",
+      "rejectUnauthorized": true,
+      "minVersion": "TLSv1.2",
+      "timeout": 10000,
+      "ca_option_passed": false,
+      "checkServerIdentity_custom": false,
+      "ignoreErrorCallback": false,
+      "alternateClient": false
+    },
+    "codeEvidence": {
+      "rejectUnauthorizedLiteralPresent": true,
+      "minVersionTls12Present": true,
+      "servernamePresent": true,
+      "caOptionInTlsConnect": false
+    }
+  },
+  "productFailurePath": {
+    "entry": "secureFetchArticle / defaultTransport",
+    "file": "server/services/article-fetch-security.ts",
+    "rejectUnauthorized": true,
+    "requestLevelCaOnlyWithValidatedSourceCa": true,
+    "sourceCaFieldName": "certificatePem",
+    "thisRoundSourceCaConfigured": false,
+    "thisRoundRequestLevelCaPassed": false
+  },
+  "recordedRuntime": {
+    "node": "24.15.0",
+    "openssl": "3.5.5",
+    "modules": "137",
+    "note": "from prior round runtime-security-status; not re-probed"
+  },
+  "trustRelatedEnv": {
+    "NODE_EXTRA_CA_CERTS": "未记录",
+    "NODE_OPTIONS": "未记录",
+    "SSL_CERT_FILE": "未记录",
+    "use_system_ca_flag": "未记录_as_process_argv; only appeared inside transport error message text from product failures",
+    "note": "Cannot infer historical env from current shell; whitelist states only what prior ledgers recorded."
+  },
+  "identityCallbacks": {
+    "custom_checkServerIdentity_in_defaultTransport": false,
+    "product_tests_assert_no_checkServerIdentity_on_call": true
+  },
+  "diagResultRecorded": "STRICT_TLS_OK",
+  "productEntriesStillBlocked": true,
+  "conclusion": "PH-P01 remains BLOCKED. Diag STRICT_TLS_OK is host-identity only. No CA/protocol/transport change authorized.",
+  "tlsWordingFix": "Replaced opening 'Same Node default trust store' with '两次均报告严格验证，但有效信任来源及等价性未核实' in tls-implementation-note.md and report.md."
+}

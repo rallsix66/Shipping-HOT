@@ -1,0 +1,365 @@
+{
+  "round": "dots-1792920528",
+  "httpRefetch": false,
+  "replays": [
+    {
+      "tc": "TC2637",
+      "specsBytes": 4042,
+      "specsSha256": "4559062942c8c65dd89b4a197392c4b8c92f2beeecd55243080c1677d97c7317",
+      "specsShaMatch": true,
+      "forecastBytes": 3783,
+      "forecastSha256": "9e4f3a259846c3317f0238d8d76755ba06709385d71d0c0a577d255a92012a02",
+      "forecastShaMatch": true,
+      "parserStatus": "ok",
+      "title": {
+        "part": "title",
+        "typhoonNumber": "2631",
+        "nameEn": "In-fa",
+        "nameJp": "インファ",
+        "categoryEn": "STS",
+        "categoryJp": "台風",
+        "issueUtc": "2026-10-25T07:05:00Z",
+        "issueJst": "2026-10-25T16:05:00+09:00"
+      },
+      "message": null,
+      "rowCount": 6,
+      "rows": [
+        {
+          "partLabelEn": "Analysis",
+          "partLabelJp": "実況",
+          "advancedHours": 0,
+          "validtimeUtc": "2026-10-25T06:00:00Z",
+          "galeWarning": {
+            "status": "present",
+            "sectorCount": 2,
+            "sectors": [
+              {
+                "areaKind": "direction_string",
+                "area": "南西",
+                "km": 220,
+                "nm": 120,
+                "rawKm": 220,
+                "rawNm": 120
+              },
+              {
+                "areaKind": "direction_string",
+                "area": "北東",
+                "km": 165,
+                "nm": 90,
+                "rawKm": 165,
+                "rawNm": 90
+              }
+            ]
+          },
+          "stormWarning": {
+            "status": "present",
+            "sectorCount": 1,
+            "sectors": [
+              {
+                "areaKind": "bilingual",
+                "area": {
+                  "jp": "全域",
+                  "en": "All"
+                },
+                "km": 75,
+                "nm": 40,
+                "rawKm": 75,
+                "rawNm": 40
+              }
+            ]
+          },
+          "stormWarningLabelJp": "25m/s以上の暴風域",
+          "probabilityCircleRadius": null
+        },
+        {
+          "partLabelEn": "Forecast for 24 hours ahead",
+          "partLabelJp": "予報　２４時間後",
+          "advancedHours": 24,
+          "validtimeUtc": "2026-10-26T06:00:00Z",
+          "galeWarning": {
+            "status": "absent"
+          },
+          "stormWarning": {
+            "status": "present",
+            "sectorCount": 1,
+            "sectors": [
+              {
+                "areaKind": "bilingual",
+                "area": {
+                  "jp": "全域",
+                  "en": "All"
+                },
+                "km": 230,
+                "nm": 125,
+                "rawKm": 230,
+                "rawNm": 125
+              }
+            ]
+          },
+          "stormWarningLabelJp": "暴風警戒域",
+          "probabilityCircleRadius": {
+            "km": 120,
+            "nm": 65
+          }
+        },
+        {
+          "partLabelEn": "Forecast for 48 hours ahead",
+          "partLabelJp": "予報　４８時間後",
+          "advancedHours": 48,
+          "validtimeUtc": "2026-10-27T06:00:00Z",
+          "galeWarning": {
+            "status": "absent"
+          },
+          "stormWarning": {
+            "status": "present",
+            "sectorCount": 1,
+            "sectors": [
+              {
+                "areaKind": "bilingual",
+                "area": {
+                  "jp": "全域",
+                  "en": "All"
+                },
+                "km": 350,
+                "nm": 190,
+                "rawKm": 350,
+                "rawNm": 190
+              }
+            ]
+          },
+          "stormWarningLabelJp": "暴風警戒域",
+          "probabilityCircleRadius": {
+            "km": 210,
+            "nm": 115
+          }
+        },
+        {
+          "partLabelEn": "Forecast for 72 hours ahead",
+          "partLabelJp": "予報　７２時間後",
+          "advancedHours": 72,
+          "validtimeUtc": "2026-10-28T06:00:00Z",
+          "galeWarning": {
+            "status": "absent"
+          },
+          "stormWarning": {
+            "status": "present",
+            "sectorCount": 1,
+            "sectors": [
+              {
+                "areaKind": "bilingual",
+                "area": {
+                  "jp": "全域",
+                  "en": "All"
+                },
+                "km": 440,
+                "nm": 240,
+                "rawKm": 440,
+                "rawNm": 240
+              }
+            ]
+          },
+          "stormWarningLabelJp": "暴風警戒域",
+          "probabilityCircleRadius": {
+            "km": 300,
+            "nm": 160
+          }
+        },
+        {
+          "partLabelEn": "Forecast for 96 hours ahead",
+          "partLabelJp": "予報　９６時間後",
+          "advancedHours": 96,
+          "validtimeUtc": "2026-10-29T06:00:00Z",
+          "galeWarning": {
+            "status": "absent"
+          },
+          "stormWarning": {
+            "status": "present",
+            "sectorCount": 1,
+            "sectors": [
+              {
+                "areaKind": "bilingual",
+                "area": {
+                  "jp": "全域",
+                  "en": "All"
+                },
+                "km": 540,
+                "nm": 290,
+                "rawKm": 540,
+                "rawNm": 290
+              }
+            ]
+          },
+          "stormWarningLabelJp": "暴風警戒域",
+          "probabilityCircleRadius": {
+            "km": 370,
+            "nm": 200
+          }
+        },
+        {
+          "partLabelEn": "Forecast for 120 hours ahead",
+          "partLabelJp": "予報　１２０時間後",
+          "advancedHours": 120,
+          "validtimeUtc": "2026-10-30T06:00:00Z",
+          "galeWarning": {
+            "status": "absent"
+          },
+          "stormWarning": {
+            "status": "present",
+            "sectorCount": 1,
+            "sectors": [
+              {
+                "areaKind": "bilingual",
+                "area": {
+                  "jp": "全域",
+                  "en": "All"
+                },
+                "km": 650,
+                "nm": 340,
+                "rawKm": 650,
+                "rawNm": 340
+              }
+            ]
+          },
+          "stormWarningLabelJp": "暴風警戒域",
+          "probabilityCircleRadius": {
+            "km": 460,
+            "nm": 250
+          }
+        }
+      ],
+      "forecastIdentity": {
+        "jmaId": "TC2637",
+        "typhoonNumber": "2631",
+        "nameEn": "In-fa",
+        "nameJp": "インファ",
+        "issuedAt": "2026-10-25T07:05:00Z",
+        "current": {
+          "lat": 12.2,
+          "lon": 165.2,
+          "at": "2026-10-25T06:00:00Z"
+        },
+        "forecastCount": 5,
+        "trackHistoryCount": 13
+      },
+      "crossCheckForecast": {
+        "typhoonNumberMatch": true,
+        "nameEnMatch": true,
+        "nameJpMatch": true,
+        "issuedAtMatch": true
+      },
+      "allIdentityMatched": true
+    },
+    {
+      "tc": "TC2636",
+      "specsBytes": 1790,
+      "specsSha256": "b6110f8e5eb5d6b85ff611913a3c228b142bf181c9098209679bac7d6287824d",
+      "specsShaMatch": true,
+      "forecastBytes": 2581,
+      "forecastSha256": "d2c871329ecdabd374e80d54312c3a95e9363d6209257d272ba632fb37cf60ce",
+      "forecastShaMatch": true,
+      "parserStatus": "ok",
+      "title": {
+        "part": "title",
+        "typhoonNumber": "2630",
+        "nameEn": "Champi",
+        "nameJp": "チャンパー",
+        "categoryEn": "TS",
+        "categoryJp": "台風",
+        "issueUtc": "2026-10-25T06:45:00Z",
+        "issueJst": "2026-10-25T15:45:00+09:00"
+      },
+      "message": null,
+      "rowCount": 3,
+      "rows": [
+        {
+          "partLabelEn": "Analysis",
+          "partLabelJp": "実況",
+          "advancedHours": 0,
+          "validtimeUtc": "2026-10-25T06:00:00Z",
+          "galeWarning": {
+            "status": "present",
+            "sectorCount": 2,
+            "sectors": [
+              {
+                "areaKind": "direction_string",
+                "area": "北東",
+                "km": 560,
+                "nm": 300,
+                "rawKm": 560,
+                "rawNm": 300
+              },
+              {
+                "areaKind": "direction_string",
+                "area": "南西",
+                "km": 330,
+                "nm": 180,
+                "rawKm": 330,
+                "rawNm": 180
+              }
+            ]
+          },
+          "stormWarning": {
+            "status": "absent"
+          },
+          "stormWarningLabelJp": "25m/s以上の暴風域",
+          "probabilityCircleRadius": null
+        },
+        {
+          "partLabelEn": "Forecast for 12 hours ahead",
+          "partLabelJp": "予報　１２時間後",
+          "advancedHours": 12,
+          "validtimeUtc": "2026-10-25T18:00:00Z",
+          "galeWarning": {
+            "status": "absent"
+          },
+          "stormWarning": {
+            "status": "absent"
+          },
+          "stormWarningLabelJp": "暴風警戒域",
+          "probabilityCircleRadius": {
+            "km": 65,
+            "nm": 35
+          }
+        },
+        {
+          "partLabelEn": "Forecast for 24 hours ahead",
+          "partLabelJp": "予報　２４時間後",
+          "advancedHours": 24,
+          "validtimeUtc": "2026-10-26T06:00:00Z",
+          "galeWarning": {
+            "status": "absent"
+          },
+          "stormWarning": {
+            "status": "absent"
+          },
+          "stormWarningLabelJp": "暴風警戒域",
+          "probabilityCircleRadius": {
+            "km": 95,
+            "nm": 50
+          }
+        }
+      ],
+      "forecastIdentity": {
+        "jmaId": "TC2636",
+        "typhoonNumber": "2630",
+        "nameEn": "Champi",
+        "nameJp": "チャンパー",
+        "issuedAt": "2026-10-25T06:45:00Z",
+        "current": {
+          "lat": 30,
+          "lon": 125.4,
+          "at": "2026-10-25T06:00:00Z"
+        },
+        "forecastCount": 2,
+        "trackHistoryCount": 109
+      },
+      "crossCheckForecast": {
+        "typhoonNumberMatch": true,
+        "nameEnMatch": true,
+        "nameJpMatch": true,
+        "issuedAtMatch": true
+      },
+      "allIdentityMatched": true
+    }
+  ]
+}

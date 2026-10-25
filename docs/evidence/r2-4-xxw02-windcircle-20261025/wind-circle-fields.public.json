@@ -1,0 +1,289 @@
+{
+  "round": "dots-1792920528",
+  "countsUnchanged": {
+    "r2_4": "29/39",
+    "r2_5": "25/34",
+    "numericProductionPartition": "3/5",
+    "xxW02Raised": false
+  },
+  "semantics": {
+    "galeWarningAbsent": "key missing => status=absent (no applicable gale circle); not error; not 0",
+    "stormWarningAbsent": "key missing => status=absent (no applicable storm circle); not error; not 0",
+    "invalid": "key present but null/non-array/bad sector/range => status=invalid for that field; whole document may still parse",
+    "units": "retain source km and nm; do not invent a preferred unit"
+  },
+  "TCs": [
+    {
+      "tc": "TC2637",
+      "title": {
+        "part": "title",
+        "typhoonNumber": "2631",
+        "nameEn": "In-fa",
+        "nameJp": "インファ",
+        "categoryEn": "STS",
+        "categoryJp": "台風",
+        "issueUtc": "2026-10-25T07:05:00Z",
+        "issueJst": "2026-10-25T16:05:00+09:00"
+      },
+      "identityCrossCheck": {
+        "typhoonNumberMatch": true,
+        "nameEnMatch": true,
+        "nameJpMatch": true,
+        "issuedAtMatch": true
+      },
+      "allIdentityMatched": true,
+      "rows": [
+        {
+          "advancedHours": 0,
+          "validtimeUtc": "2026-10-25T06:00:00Z",
+          "partLabelEn": "Analysis",
+          "galeWarning": {
+            "status": "present",
+            "sectors": [
+              {
+                "area": "南西",
+                "km": 220,
+                "nm": 120
+              },
+              {
+                "area": "北東",
+                "km": 165,
+                "nm": 90
+              }
+            ]
+          },
+          "stormWarning": {
+            "status": "present",
+            "sectors": [
+              {
+                "area": {
+                  "jp": "全域",
+                  "en": "All"
+                },
+                "km": 75,
+                "nm": 40
+              }
+            ],
+            "labelJp": "25m/s以上の暴風域"
+          },
+          "probabilityCircleRadius": null
+        },
+        {
+          "advancedHours": 24,
+          "validtimeUtc": "2026-10-26T06:00:00Z",
+          "partLabelEn": "Forecast for 24 hours ahead",
+          "galeWarning": {
+            "status": "absent"
+          },
+          "stormWarning": {
+            "status": "present",
+            "sectors": [
+              {
+                "area": {
+                  "jp": "全域",
+                  "en": "All"
+                },
+                "km": 230,
+                "nm": 125
+              }
+            ],
+            "labelJp": "暴風警戒域"
+          },
+          "probabilityCircleRadius": {
+            "km": 120,
+            "nm": 65
+          }
+        },
+        {
+          "advancedHours": 48,
+          "validtimeUtc": "2026-10-27T06:00:00Z",
+          "partLabelEn": "Forecast for 48 hours ahead",
+          "galeWarning": {
+            "status": "absent"
+          },
+          "stormWarning": {
+            "status": "present",
+            "sectors": [
+              {
+                "area": {
+                  "jp": "全域",
+                  "en": "All"
+                },
+                "km": 350,
+                "nm": 190
+              }
+            ],
+            "labelJp": "暴風警戒域"
+          },
+          "probabilityCircleRadius": {
+            "km": 210,
+            "nm": 115
+          }
+        },
+        {
+          "advancedHours": 72,
+          "validtimeUtc": "2026-10-28T06:00:00Z",
+          "partLabelEn": "Forecast for 72 hours ahead",
+          "galeWarning": {
+            "status": "absent"
+          },
+          "stormWarning": {
+            "status": "present",
+            "sectors": [
+              {
+                "area": {
+                  "jp": "全域",
+                  "en": "All"
+                },
+                "km": 440,
+                "nm": 240
+              }
+            ],
+            "labelJp": "暴風警戒域"
+          },
+          "probabilityCircleRadius": {
+            "km": 300,
+            "nm": 160
+          }
+        },
+        {
+          "advancedHours": 96,
+          "validtimeUtc": "2026-10-29T06:00:00Z",
+          "partLabelEn": "Forecast for 96 hours ahead",
+          "galeWarning": {
+            "status": "absent"
+          },
+          "stormWarning": {
+            "status": "present",
+            "sectors": [
+              {
+                "area": {
+                  "jp": "全域",
+                  "en": "All"
+                },
+                "km": 540,
+                "nm": 290
+              }
+            ],
+            "labelJp": "暴風警戒域"
+          },
+          "probabilityCircleRadius": {
+            "km": 370,
+            "nm": 200
+          }
+        },
+        {
+          "advancedHours": 120,
+          "validtimeUtc": "2026-10-30T06:00:00Z",
+          "partLabelEn": "Forecast for 120 hours ahead",
+          "galeWarning": {
+            "status": "absent"
+          },
+          "stormWarning": {
+            "status": "present",
+            "sectors": [
+              {
+                "area": {
+                  "jp": "全域",
+                  "en": "All"
+                },
+                "km": 650,
+                "nm": 340
+              }
+            ],
+            "labelJp": "暴風警戒域"
+          },
+          "probabilityCircleRadius": {
+            "km": 460,
+            "nm": 250
+          }
+        }
+      ]
+    },
+    {
+      "tc": "TC2636",
+      "title": {
+        "part": "title",
+        "typhoonNumber": "2630",
+        "nameEn": "Champi",
+        "nameJp": "チャンパー",
+        "categoryEn": "TS",
+        "categoryJp": "台風",
+        "issueUtc": "2026-10-25T06:45:00Z",
+        "issueJst": "2026-10-25T15:45:00+09:00"
+      },
+      "identityCrossCheck": {
+        "typhoonNumberMatch": true,
+        "nameEnMatch": true,
+        "nameJpMatch": true,
+        "issuedAtMatch": true
+      },
+      "allIdentityMatched": true,
+      "rows": [
+        {
+          "advancedHours": 0,
+          "validtimeUtc": "2026-10-25T06:00:00Z",
+          "partLabelEn": "Analysis",
+          "galeWarning": {
+            "status": "present",
+            "sectors": [
+              {
+                "area": "北東",
+                "km": 560,
+                "nm": 300
+              },
+              {
+                "area": "南西",
+                "km": 330,
+                "nm": 180
+              }
+            ]
+          },
+          "stormWarning": {
+            "status": "absent",
+            "labelJp": "25m/s以上の暴風域"
+          },
+          "probabilityCircleRadius": null
+        },
+        {
+          "advancedHours": 12,
+          "validtimeUtc": "2026-10-25T18:00:00Z",
+          "partLabelEn": "Forecast for 12 hours ahead",
+          "galeWarning": {
+            "status": "absent"
+          },
+          "stormWarning": {
+            "status": "absent",
+            "labelJp": "暴風警戒域"
+          },
+          "probabilityCircleRadius": {
+            "km": 65,
+            "nm": 35
+          }
+        },
+        {
+          "advancedHours": 24,
+          "validtimeUtc": "2026-10-26T06:00:00Z",
+          "partLabelEn": "Forecast for 24 hours ahead",
+          "galeWarning": {
+            "status": "absent"
+          },
+          "stormWarning": {
+            "status": "absent",
+            "labelJp": "暴風警戒域"
+          },
+          "probabilityCircleRadius": {
+            "km": 95,
+            "nm": 50
+          }
+        }
+      ]
+    }
+  ],
+  "gaps": [
+    "No pressure/max-wind hard gates added (catalog wind-radius scope only).",
+    "Parser is pure-function only; jma-tropical-cyclone provider sync still forecast-only (no new provider/scheduler).",
+    "XX-W02 whole-row OK not raised by executor; counts remain 29/39 and 25/34 pending dots ruling.",
+    "Direction string lexicon (南西/北東/…) not normalized beyond retaining source text; bilingual All/全域 retained as emitted."
+  ]
+}

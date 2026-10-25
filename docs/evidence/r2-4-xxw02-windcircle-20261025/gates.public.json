@@ -1,0 +1,16 @@
+{
+  "round": "dots-1792920528",
+  "worktree": "D:/try one/Shipping HOT/.tmp/worktrees/r2-4-gapfill-20261025",
+  "branch": "codex/shipping-hot-r2-4-gapfill-20261025",
+  "baseline": "ffc633a2bf0d2a40348d36c217cd2727d5be47ff",
+  "gates": {
+    "targeted_vitest": { "exit": 0, "files": "jma-typhoon-parse.test.ts + jma-target-tc-strict.test.ts", "tests": "11 passed" },
+    "vitest_full": { "exit": 0, "files": "159 passed", "tests": "2021 passed | 5 skipped" },
+    "build": { "exit": 0 },
+    "typecheck": { "exit": 0 },
+    "lint": { "exit": 0, "note": "fixed sort-imports / blank-lines / interface / arrow-parens then re-ran clean" },
+    "diff": { "exit": 0, "note": "reviewed; routeTree.gen.ts build noise restored; no private originals staged" }
+  },
+  "countsHeld": { "XX-W02": "29/39 held; not raised", "other": "25/34 held" },
+  "network": "zero new network this round"
+}

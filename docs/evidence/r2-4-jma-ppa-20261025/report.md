@@ -31,7 +31,7 @@ Both identities match prior XX-W01 list sha `73f95b53…4b4c31`. Parser: `parseJ
 
 ## TLS contrast (one line)
 
-Same Node default trust + `rejectUnauthorized=true` + shared DNS gate; different API (diag `node:tls.connect` no HTTP vs product `https.request` via `secureFetchArticle`). See `tls-implementation-note.md`.
+两次均报告严格验证，但有效信任来源及等价性未核实；两端均 `rejectUnauthorized=true` 且复用同一 DNS 门控；API 不同（diag `node:tls.connect` 无 HTTP vs 产品 `https.request` / `secureFetchArticle`）。详见 `tls-implementation-note.md`。
 
 ## Still blocked
 
