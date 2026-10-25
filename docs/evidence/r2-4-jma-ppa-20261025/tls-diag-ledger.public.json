@@ -1,0 +1,66 @@
+{
+  "round": "dots-1792918191",
+  "packagingDots": "1792919016",
+  "tlsDiagUsed": 1,
+  "tlsDiagCap": 1,
+  "entries": [
+    {
+      "id": "PPA-TLS-DIAG-1",
+      "seq": 1,
+      "countsTowardTlsCap": true,
+      "countsToward12": false,
+      "targetHostPort": "www.ppa.com.ph:443",
+      "sni": "www.ppa.com.ph",
+      "httpSent": false,
+      "rejectUnauthorized": true,
+      "verificationDisabled": false,
+      "ignoreErrorCallback": false,
+      "alternateClient": false,
+      "caInstalledOrImported": false,
+      "trustStoreChanged": false,
+      "sourceCaConfigured": false,
+      "dnsClassification": "public_address",
+      "dnsAddresses": [
+        {
+          "address": "115.84.233.11",
+          "family": 4
+        }
+      ],
+      "connectedAddress": {
+        "address": "115.84.233.11",
+        "family": 4
+      },
+      "result": "STRICT_TLS_OK",
+      "tls": {
+        "authorized": true,
+        "authorizationError": null,
+        "protocol": "TLSv1.2",
+        "peerCertificate": {
+          "subject": {
+            "C": "PH",
+            "ST": "National Capital Region",
+            "O": "Philippine Ports Authority",
+            "CN": "*.ppa.com.ph"
+          },
+          "issuer": {
+            "C": "GB",
+            "O": "Sectigo Limited",
+            "CN": "Sectigo Public Server Authentication CA OV R36"
+          },
+          "valid_from": "May 14 00:00:00 2026 GMT",
+          "valid_to": "Nov 28 23:59:59 2026 GMT",
+          "fingerprint256": "97:19:5B:77:BD:72:77:29:D6:3B:BA:DD:5D:20:7E:85:9E:2D:D6:E9:FE:0A:4F:FC:B7:95:B1:34:B6:4A:41:84",
+          "subjectaltname": "DNS:*.ppa.com.ph, DNS:ppa.com.ph"
+        },
+        "issuerCertificateSubject": {
+          "C": "GB",
+          "O": "Sectigo Limited",
+          "CN": "Sectigo Public Server Authentication CA OV R36"
+        }
+      },
+      "startedAt": "2026-10-25T09:02:12.109Z",
+      "finishedAt": "2026-10-25T09:02:12.504Z"
+    }
+  ],
+  "note": "Host-identity TLS diagnostic only. Not a product HTTP fetch. Does not unblock PH-P01 product entries."
+}

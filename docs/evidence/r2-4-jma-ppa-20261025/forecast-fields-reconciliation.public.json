@@ -1,0 +1,78 @@
+{
+  "round": "dots-1792918191",
+  "packagingDots": "1792919016",
+  "priorListWireSha256": "73f95b534b79ad9564162e10949f7d22bbaecf08eb31c0f9172bc5bb6b4b4c31",
+  "priorListLocalOnlyPath": ".tmp/r2-4-gapfill-20261025/private/XX-W01.response.bin",
+  "strictStatus": "ok",
+  "verifiedIdentities": [
+    "TC2637",
+    "TC2636"
+  ],
+  "requestedIdentities": [
+    "TC2637",
+    "TC2636"
+  ],
+  "allRequestedWereOnVerifiedList": true,
+  "forecasts": [
+    {
+      "tc": "TC2637",
+      "url": "https://www.jma.go.jp/bosai/typhoon/data/TC2637/forecast.json",
+      "httpStatus": 200,
+      "bytes": 3783,
+      "wireSha256": "9e4f3a259846c3317f0238d8d76755ba06709385d71d0c0a577d255a92012a02",
+      "contentType": "application/json",
+      "parser": "parseJmaForecastJson_ok",
+      "identityMatchesVerifiedList": true,
+      "fields": {
+        "id": "tc-jma-TC2637",
+        "basin": "NW_PACIFIC",
+        "jmaId": "TC2637",
+        "typhoonNumber": "2631",
+        "nameEn": "In-fa",
+        "nameJp": "インファ",
+        "issuedAt": "2026-10-25T07:05:00Z",
+        "current": {
+          "lat": 12.2,
+          "lon": 165.2,
+          "at": "2026-10-25T06:00:00Z"
+        },
+        "trackHistoryCount": 13,
+        "forecastCount": 5,
+        "lifecycleStatus": "active",
+        "dissipatedAt": null
+      },
+      "unitsNotes": "lat/lon numeric degrees from center[0]/center[1]; times from issue.UTC / validtime.UTC as present in payload; no unit conversion applied"
+    },
+    {
+      "tc": "TC2636",
+      "url": "https://www.jma.go.jp/bosai/typhoon/data/TC2636/forecast.json",
+      "httpStatus": 200,
+      "bytes": 2581,
+      "wireSha256": "d2c871329ecdabd374e80d54312c3a95e9363d6209257d272ba632fb37cf60ce",
+      "contentType": "application/json",
+      "parser": "parseJmaForecastJson_ok",
+      "identityMatchesVerifiedList": true,
+      "fields": {
+        "id": "tc-jma-TC2636",
+        "basin": "NW_PACIFIC",
+        "jmaId": "TC2636",
+        "typhoonNumber": "2630",
+        "nameEn": "Champi",
+        "nameJp": "チャンパー",
+        "issuedAt": "2026-10-25T06:45:00Z",
+        "current": {
+          "lat": 30,
+          "lon": 125.4,
+          "at": "2026-10-25T06:00:00Z"
+        },
+        "trackHistoryCount": 109,
+        "forecastCount": 2,
+        "lifecycleStatus": "active",
+        "dissipatedAt": null
+      },
+      "unitsNotes": "lat/lon numeric degrees from center[0]/center[1]; times from issue.UTC / validtime.UTC as present in payload; no unit conversion applied"
+    }
+  ],
+  "xxW02RulingNote": "Forecast products independently replayed OK for TC2637/TC2636. specifications exact URL still unverified. Forecast alone does NOT grant XX-W02 whole-row OK. Counts remain R2-4 29/39 and R2-5 25/34.",
+  "note": "Minimal public forecast fields only. Sample track/forecast points and private raw bodies omitted from this packaging commit."
+}

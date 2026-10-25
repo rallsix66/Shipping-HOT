@@ -1,0 +1,13 @@
+{
+  "round": "dots-1792918191",
+  "createdAt": "2026-10-25T08:55:37.533Z",
+  "baselineHead": "978a7e4ff7df4e8e57cfa4fdabdca5b8bf02c2a2",
+  "httpHardCap": 12,
+  "tlsDiagCap": 1,
+  "httpUsed": 7,
+  "tlsDiagUsed": 1,
+  "redirectsFollowed": 0,
+  "retries": 0,
+  "notes": "Independent ledger for this round only. Do not re-fetch prior six catalogue entries. Do not retry 403. Do not guess specifications URL.",
+  "note": "Public copy of round budget. Source of truth remains under gitignored .tmp/r2-4-jma-ppa-20261025/. No new HTTP/TLS this packaging turn."
+}
