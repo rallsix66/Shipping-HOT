@@ -1,0 +1,46 @@
+{
+  "isolation": "local unit/integration vitest + build/typecheck/lint; no live provider scripts; no six-entry HTTP re-issued this closeout",
+  "finishedAt": "2026-10-25T08:13:22.262Z",
+  "baseline": "e41d3145b4276a0c02aab9f00d795476aefa1608",
+  "commands": [
+    {
+      "name": "targeted-jma",
+      "command": "pnpm exec vitest run -c vitest.config.ts server/providers/jma-tropical-cyclone.test.ts server/services/jma-target-tc-strict.test.ts",
+      "exit": 0,
+      "counts": "10 passed / 2 files",
+      "log": ".tmp/r2-4-gapfill-20261025/gates/targeted-jma.log"
+    },
+    {
+      "name": "vitest-full",
+      "command": "pnpm exec vitest run -c vitest.config.ts",
+      "exit": 0,
+      "counts": "2017 passed / 5 skipped / 159 files",
+      "log": ".tmp/r2-4-gapfill-20261025/gates/vitest-full.log"
+    },
+    {
+      "name": "build",
+      "command": "pnpm build",
+      "exit": 0,
+      "log": ".tmp/r2-4-gapfill-20261025/gates/build.log"
+    },
+    {
+      "name": "typecheck",
+      "command": "pnpm typecheck",
+      "exit": 0,
+      "note": "run after build so Nitro auto-imports exist",
+      "log": ".tmp/r2-4-gapfill-20261025/gates/typecheck.log"
+    },
+    {
+      "name": "lint",
+      "command": "pnpm lint",
+      "exit": 0,
+      "log": ".tmp/r2-4-gapfill-20261025/gates/lint.log"
+    },
+    {
+      "name": "diff-check",
+      "command": "git diff --check HEAD",
+      "exit": 0,
+      "log": ".tmp/r2-4-gapfill-20261025/gates/diff-check.log"
+    }
+  ]
+}

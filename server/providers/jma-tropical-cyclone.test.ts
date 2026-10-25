@@ -66,4 +66,18 @@ describe("syncJmaTropicalCyclones", () => {
     const result = await syncJmaTropicalCyclones(async () => new Response("", { status: 503 }), new Date("2026-08-15T12:00:00.000Z"))
     expect(result.outcome).toBe("failed")
   })
+
+  it("does not treat a targetTc 404 body as an empty cyclone list", async () => {
+    let detailRequests = 0
+    const result = await syncJmaTropicalCyclones(async (url) => {
+      if (!url.endsWith("/targetTc.json")) detailRequests += 1
+      return new Response("<html>missing</html>", { status: 404, headers: { "content-type": "text/html" } })
+    }, new Date("2026-10-25T07:26:52.228Z"))
+    expect(detailRequests).toBe(0)
+    expect(result).toMatchObject({
+      outcome: "failed",
+      errorCode: "provider_unavailable",
+      errorMessage: "JMA targetTc HTTP 404",
+    })
+  })
 })

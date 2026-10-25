@@ -1,0 +1,87 @@
+{
+  "baseline": "e41d3145b4276a0c02aab9f00d795476aefa1608",
+  "http": {
+    "used": 6,
+    "cap": 12,
+    "redirectsFollowed": 0,
+    "retries": 0,
+    "details": 0
+  },
+  "sources": {
+    "MY-P02": {
+      "requests": 1,
+      "httpStatus": 200,
+      "bytes": 36986,
+      "wireSha256": "062b6d3742e9c79c7368744eea78852a359032f595bca2e2dec93cd520d88ec0",
+      "parsedEntries": 3,
+      "latestEligibleDay": "2025-08-01",
+      "emptySourceTitlesRemain": 7,
+      "verdict": "STALE",
+      "countedOK": false
+    },
+    "MY-P03": {
+      "requests": 1,
+      "httpStatus": 200,
+      "bytes": 73037,
+      "wireSha256": "880e1a180dc686d9d9d71578a753ee87af24042563a7c58f82c0885f8d3c5691",
+      "sameBytesAs2026_10_14": true,
+      "parserError": "web_list_duplicate_conflict",
+      "itemsCommitted": 0,
+      "verdict": "PARTIAL",
+      "fieldVerdict": "FAIL",
+      "countedOK": false
+    },
+    "PH-P01": {
+      "requests": 2,
+      "entries": [
+        "https://www.ppa.com.ph/content/ppa-helpdesk-advisory",
+        "https://www.ppa.com.ph/ppa-port-news"
+      ],
+      "both": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+      "httpStatus": null,
+      "bodySaved": false,
+      "certificateInstalled": false,
+      "tlsVerificationDisabled": false,
+      "verdict": "BLOCKED",
+      "countedOK": false
+    },
+    "XX-W01": {
+      "requests": 1,
+      "httpStatus": 200,
+      "bytes": 210,
+      "wireSha256": "73f95b534b79ad9564162e10949f7d22bbaecf08eb31c0f9172bc5bb6b4b4c31",
+      "contentType": "application/json",
+      "listStatus": "ok",
+      "entryCount": 2,
+      "issueOffsets": [
+        "+09:00"
+      ],
+      "offlineForecastReadsRefused": 2,
+      "forecastHttpRequests": 0,
+      "syncOutcome": "partial",
+      "prior404IsNotThisResponse": true,
+      "emptyArrayIsNotThisResponse": true,
+      "verdict": "PARTIAL",
+      "countedOK": false,
+      "r2_5": "NOT_APPLICABLE_NUMERIC"
+    },
+    "MY-L01": {
+      "requests": 1,
+      "httpStatus": 200,
+      "bytes": 124339,
+      "wireSha256": "f651779b54fb0f0dfe1c8af9a2777dba80057154fe80effd362e9413b68b74c0",
+      "titleCardsWithoutHref": 10,
+      "tickerDetailLinksAreNotCardIdentity": true,
+      "verdict": "PARTIAL",
+      "fieldVerdict": "FAIL",
+      "countedOK": false
+    }
+  },
+  "qualification": {
+    "before": "28/39",
+    "after": "28/39",
+    "shortfall": 4,
+    "r2_5Before": "25/34",
+    "r2_5After": "25/34"
+  }
+}

@@ -1,3 +1,8 @@
+## 2026-10-25 — R2-4 四源复检，分子仍是 28/39
+
+- 独立工作树自 `e41d3145b4276a0c02aab9f00d795476aefa1608`。五源六入口共 6 次传输尝试（上限 12，无跳转跟随）；其中 PH-P01 两个入口止于 TLS、无 HTTP 响应，其余四次取得正文。MY-P02 仍 STALE（有效最新 2025-08-01）；MY-P03 原件字节未变，冲突仍拒绝入库；PH-P01 两个入口均为 TLS `UNABLE_TO_VERIFY_LEAF_SIGNATURE`，记 BLOCKED；XX-W01 列表为 HTTP 200 且严格解析 ok，但预报未取，同步仍 partial，只从 BLOCKED 改为 PARTIAL，不计 OK。备选 MY-L01 的 10 张标题卡仍无 href。
+- 公开资格仍 **28/39（差 4）**、资讯 **25/34**。R2-5 不随这次列表响应升级。证据：[复检报告](evidence/r2-4-gapfill-2026-10-25/report.md)。未启用来源，未合并或部署。
+
 ## 2026-10-24 — 观察执行器接入 19 源允许选择（默认关闭）
 
 - 现有 `intel-observation` 的资格、入口 URL 和重定向边界改为现役 `PRODUCTION_ALLOW_SELECT_CATALOG_IDS` 与 `registeredIntelSources`。一次运行只放开本次显式选中的入口；CN-T01、XX-M01、MY-P03 仍拒绝。Maersk `sourceHeaderLimit` 仍只在 XX-K01。

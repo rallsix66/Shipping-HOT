@@ -1,4 +1,4 @@
-> 现役更新：2026-10-20父会话独立代码与补证审查通过，精确应用XX-K01有限OK/PASS、CN-T01有限OK/PARTIAL，累计28/39（至少32，差4）、资讯25/34（余9）。单次历史响应＋完整原件离线回放，CN7/8、role键缺省非publication，day无时区/instant；不是持续或生产声明。[认可与限界](../r2-maersk-mofcom-qualification-2026-10-20/acceptance.json) / [当前剩余R2](../r2-maersk-mofcom-qualification-2026-10-20/remaining-r2.md)。其他39条来源保持；下方旧流程、旧总数与旧“下一批”建议按原时点保留，最新动作以当前剩余R2为准。
+> 现役更新：2026-10-25 五源六入口复检后分子仍是 28/39（差 4）、资讯 25/34。XX-W01 由 BLOCKED 改为 PARTIAL（列表 200 可解析，预报未取，不计 OK）；PH-P01 由 NOT_RUN 改为 BLOCKED（两个入口均 TLS `UNABLE_TO_VERIFY_LEAF_SIGNATURE`）。MY-P02 仍 STALE，MY-P03 / MY-L01 仍 PARTIAL/FAIL。详见 [本轮复检](../r2-4-gapfill-2026-10-25/report.md)。此前 2026-10-20 父审仍是 XX-K01 有限 OK/PASS、CN-T01 有限 OK/PARTIAL。单次历史响应＋完整原件离线回放，CN7/8、role键缺省非publication，day无时区/instant；不是持续或生产声明。[认可与限界](../r2-maersk-mofcom-qualification-2026-10-20/acceptance.json) / [当前剩余R2](../r2-maersk-mofcom-qualification-2026-10-20/remaining-r2.md)。其余来源的 OK 计数未增；下方旧流程与旧“下一批”建议按原时点保留，最新判定以本轮复检和矩阵为准。
 
 # R2 41项来源累计证据 — 2026-10-15
 

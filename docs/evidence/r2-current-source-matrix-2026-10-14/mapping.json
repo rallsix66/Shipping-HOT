@@ -1,8 +1,8 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-20T04:06:11.578Z",
-  "lastUpdatedAt": "2026-10-21T04:44:03.104Z",
-  "lastUpdateNote": "generatedAt is the historical build time; entries CN-T01/ID-W02/XX-K01, measuredCoverage and catalogSha256 were last updated in commit 8531a7b (2026-10-21) and this field was added afterwards; no source requests.",
+  "lastUpdatedAt": "2026-10-25T08:13:22.262Z",
+  "lastUpdateNote": "2026-10-25 exact-entry recheck of MY-P02, MY-P03, PH-P01 and XX-W01, plus backup MY-L01. Numerator remains 28/39 and information 25/34. XX-W01 moves BLOCKED to PARTIAL; PH-P01 moves NOT_RUN to BLOCKED. Gaps for XX-W01 no longer keep the superseded HTTP404 as a current gap. No production enablement. Gate closeout recorded at 2026-10-25T08:13:22.262Z.",
   "reviewedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
   "evidenceHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
@@ -74,9 +74,9 @@
       ],
       "statusCounts": {
         "OK": 28,
-        "PARTIAL": 7,
+        "PARTIAL": 8,
         "STALE": 1,
-        "NOT_RUN": 2,
+        "NOT_RUN": 1,
         "BLOCKED": 1
       },
       "pass": false
@@ -2291,6 +2291,7 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
+        "2026-10-25 exact RSS recheck: HTTP 200, 36986 bytes, wire 062b6d3742e9c79c7368744eea78852a359032f595bca2e2dec93cd520d88ec0. Existing parser still keeps 3 titled entries; latest eligible day remains 2025-08-01. Seven source titles remain empty. HTTP 200 does not lift STALE.",
         "Complete original XML gap now closed locally; old3 metadata are only the valid-title subset, not full10 raw feed.",
         "7 newer source items have genuinely empty source titles; original links are retained; no invented title/identity or detail fetch. Latest valid normalized item remains2025-08-01, retainSTALE.",
         "Normalized3 field chain acceptedPASS within existing parser contract;10 raw=7 excluded empty-title+3 valid. Raw latest2026-09-28, eligible latest2025-08-01; no all10 complete-record claim.",
@@ -2435,6 +2436,22 @@
         "rawSourceCompleteness": "7_of10_source_titles_empty",
         "currentApprovedAvailability": "STALE",
         "currentApprovedField": "PASS"
+      },
+      "latestConfirmingFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-4-gapfill-2026-10-25/summary.json",
+          "selector": {
+            "id": "MY-P02"
+          }
+        },
+        "at": "2026-10-25T07:26:48.977Z",
+        "url": "https://www.westportsholdings.com/category/press-release/feed/",
+        "httpStatus": 200,
+        "bytes": 36986,
+        "wireSha256": "062b6d3742e9c79c7368744eea78852a359032f595bca2e2dec93cd520d88ec0",
+        "parsedEntries": 3,
+        "latestEligibleDay": "2025-08-01",
+        "redirectsFollowed": 0
       }
     },
     {
@@ -2532,12 +2549,29 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
+        "2026-10-25 exact page recheck is byte-identical to the 2026-10-14 response, wire 880e1a180dc686d9d9d71578a753ee87af24042563a7c58f82c0885f8d3c5691. Existing parser still throws web_list_duplicate_conflict and commits 0. No title hash was adopted as an identity.",
         "Real duplicate URL title/date conflicts persist, 0 items committed.",
         "No licensed full raw redistribution."
       ],
       "historicalSuperseded": [
         "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
-      ]
+      ],
+      "latestConfirmingFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-4-gapfill-2026-10-25/summary.json",
+          "selector": {
+            "id": "MY-P03"
+          }
+        },
+        "at": "2026-10-25T07:26:50.693Z",
+        "url": "https://www.northport.com.my/np/page-announcements.html",
+        "httpStatus": 200,
+        "bytes": 73037,
+        "wireSha256": "880e1a180dc686d9d9d71578a753ee87af24042563a7c58f82c0885f8d3c5691",
+        "parserError": "web_list_duplicate_conflict",
+        "itemsCommitted": 0,
+        "redirectsFollowed": 0
+      }
     },
     {
       "id": "MY-W01",
@@ -3248,6 +3282,7 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
+        "2026-10-25 exact page recheck: HTTP 200, 124339 bytes, wire f651779b54fb0f0dfe1c8af9a2777dba80057154fe80effd362e9413b68b74c0. Ten title cards still have no href. Ticker postDetailId links are not the card identity and were not turned into slugs.",
         "Ten title anchors lack href; category URL cannot identify articles.",
         "Abbreviated English month/12h clock not supported by current strict grammar; no date/zone guess.",
         "No permanent source config or hidden-interface/detail request.",
@@ -3327,7 +3362,22 @@
           "reason": "blocked_address",
           "scope": "current_environment_dns_only_no_response_no_parse"
         }
-      ]
+      ],
+      "latestConfirmingFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-4-gapfill-2026-10-25/summary.json",
+          "selector": {
+            "id": "MY-L01"
+          }
+        },
+        "at": "2026-10-25T07:29:59.231Z",
+        "url": "https://www.pos.com.my/service-update",
+        "httpStatus": 200,
+        "bytes": 124339,
+        "wireSha256": "f651779b54fb0f0dfe1c8af9a2777dba80057154fe80effd362e9413b68b74c0",
+        "titleCardsWithoutHref": 10,
+        "redirectsFollowed": 0
+      }
     },
     {
       "id": "ID-W01",
@@ -4233,7 +4283,24 @@
         "sha256": "17f1f553359606cdcc557a32c96a6905abefcf7a325182c1581c9dd17962ee54",
         "hashBasis": "committed_text_LF"
       },
-      "latestActualFetch": null,
+      "latestActualFetch": {
+        "evidence": {
+          "path": "docs/evidence/r2-4-gapfill-2026-10-25/summary.json",
+          "selector": {
+            "id": "PH-P01"
+          }
+        },
+        "urls": [
+          "https://www.ppa.com.ph/content/ppa-helpdesk-advisory",
+          "https://www.ppa.com.ph/ppa-port-news"
+        ],
+        "at": "2026-10-25T07:26:51.940Z",
+        "httpStatus": null,
+        "bytes": 0,
+        "scope": "both exact entries stopped at TLS UNABLE_TO_VERIFY_LEAF_SIGNATURE; no HTTP body",
+        "certificateInstalled": false,
+        "tlsVerificationDisabled": false
+      },
       "fieldReplayEvidence": null,
       "numericFieldValidation": null,
       "dateEvidence": {
@@ -4255,9 +4322,9 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "NOT_RUN",
+        "verdict": "BLOCKED",
         "countedOK": false,
-        "reason": "No qualifying stored actual product request/data verification; catalogue notes alone are not evidence."
+        "reason": "2026-10-25 both exact entries resolved to public 115.84.233.11 and failed in the existing strict TLS path with UNABLE_TO_VERIFY_LEAF_SIGNATURE. No CA was installed and verification was not disabled. The two URLs remain one source."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
@@ -4269,6 +4336,7 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
+        "Both 2026-10-25 entries have no HTTP status or body. Certificate chain was not exported by the secure transport and was not replaced.",
         "目录一行两URL，仍只算1个ID；仅离线sourceCa机制，未配置真实CA/selector/存档"
       ],
       "historicalSuperseded": []
@@ -4897,17 +4965,19 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/XX-W02-targetTc-capture.json",
-          "sha256": "8e791a21bead8c6f565faf4847351e6333934677e88e518d0eb5d8da4bc36100",
-          "hashBasis": "committed_text_LF"
+          "path": "docs/evidence/r2-4-gapfill-2026-10-25/summary.json",
+          "selector": {
+            "id": "XX-W01"
+          }
         },
         "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
-        "at": "2026-10-15T05:53:37.778Z",
-        "httpStatus": 404,
-        "bytes": 2203,
-        "wireSha256": "959efccbba82d9eca9d398d32811d456f51929aff12dfba2ccaf60a0b1b35b58",
-        "scope": "exact_XX-W01_catalogue_targetTc_URL_HTTP404; same original captured request also prerequisite for_XX-W02",
-        "productQualificationChanged": true
+        "at": "2026-10-25T07:26:52.228Z",
+        "httpStatus": 200,
+        "bytes": 210,
+        "wireSha256": "73f95b534b79ad9564162e10949f7d22bbaecf08eb31c0f9172bc5bb6b4b4c31",
+        "contentType": "application/json",
+        "scope": "exact list product; strict parse status ok with 2 entries; not an empty array and not the prior 404",
+        "forecastHttpRequests": 0
       },
       "fieldReplayEvidence": null,
       "numericFieldValidation": {
@@ -4939,9 +5009,9 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "BLOCKED",
+        "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "Latest actual exact catalogue/provider-constant targetTc URL returnedHTTP404 at2026-10-15T05:53:37.778Z; same saved request previously only associated withXX-W02. Current availability is notOK; historical3/5 normalized diagnostics retained separately."
+        "reason": "Exact targetTc.json is now HTTP 200 application/json and the existing strict list parser returns ok for 2 entries with explicit +09:00 issue offsets. Offline sync stays partial because the two forecast reads were refused. This does not count OK and does not change XX-W02 or the numeric production partition."
       },
       "r2_5": {
         "verdict": "NOT_APPLICABLE_NUMERIC",
@@ -4953,10 +5023,32 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Latest exact targetTc URL HTTP404; not an empty cyclone list. No alternative URL or new request guessed.",
-        "Historical10/10 numeric diagnostics retained, but do not prove current availability or raw numerical wire replay."
+        "Current gap: forecast/specifications were not requested this round; offline sync stayed partial after refusing forecast reads, so persisted cyclone tracks remain unverified.",
+        "Historical 10/10 numeric diagnostics retained, but do not prove current availability or raw numerical wire replay."
       ],
       "historicalSuperseded": [
+        {
+          "reason": "Historical only: 2026-10-15 exact targetTc HTTP 404 remains the previous availability result and is not a current gap; it is not rewritten as an empty list. Superseded by 2026-10-25 HTTP 200 list response.",
+          "previousR24": {
+            "verdict": "BLOCKED",
+            "countedOK": false,
+            "reason": "Latest actual exact catalogue/provider-constant targetTc URL returnedHTTP404 at2026-10-15T05:53:37.778Z; same saved request previously only associated withXX-W02. Current availability is notOK; historical3/5 normalized diagnostics retained separately."
+          },
+          "previousLatestActualFetch": {
+            "evidence": {
+              "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/XX-W02-targetTc-capture.json",
+              "sha256": "8e791a21bead8c6f565faf4847351e6333934677e88e518d0eb5d8da4bc36100",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json",
+            "at": "2026-10-15T05:53:37.778Z",
+            "httpStatus": 404,
+            "bytes": 2203,
+            "wireSha256": "959efccbba82d9eca9d398d32811d456f51929aff12dfba2ccaf60a0b1b35b58",
+            "scope": "exact_XX-W01_catalogue_targetTc_URL_HTTP404; same original captured request also prerequisite for_XX-W02",
+            "productQualificationChanged": true
+          }
+        },
         {
           "reason": "Correct omitted shared exact URL404 attribution; prior historical200 and OK retained as prior state",
           "previousLatestActualFetch": {
