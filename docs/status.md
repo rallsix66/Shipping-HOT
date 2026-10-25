@@ -1,3 +1,10 @@
+## 2026-10-25 — XX-W02 限定产品裁定落地，公开资格 30/39
+
+- 在零新网络前提下，按已有两 TC（TC2636/TC2637）forecast+specifications 捕获及离线字段验证，将 XX-W02 计为**限定** R2-4 OK（`r2_4=OK`，`countedOK=true`，`scope=existing two-TC forecast+specifications capture and offline field verification`）。**是**已取产品的真实解析验证；**不是**生产 sync 集成或持续运行通过。
+- a2e99a01 两处 P2（usable-radius / identity unknown）已关闭。**显著保留**：specifications 尚未接入生产 sync、未验证整条实时持久化/持续运行；数值生产分区仍 **3/5**；R2-5 仍 **25/34**；PH-P01/PPA 继续 BLOCKED；**overallR2Pass=false**；未生产启用。
+- 公开资格 **29/39 → 30/39（差 2）**。原 29/39、forecast-only/PARTIAL 及历轮捕获结论保留为**当时快照**。裁定时间 `2026-10-25T10:08:31.869439Z`（`rulingMessageTs=1792922911.869439`）。证据：[product-ruling.md](evidence/r2-4-xxw02-windcircle-20261025/product-ruling.md) / [offline-replay.public.json](evidence/r2-4-xxw02-windcircle-20261025/offline-replay.public.json)；矩阵：[mapping.json](evidence/r2-current-source-matrix-2026-10-14/mapping.json)。
+- 本提交**仅文档**。代码门禁沿用 `a2e99a01d50f21fbce87e2972eed85d6d39a7156`，不冒称重跑全量 Vitest/build。未合并、未部署、未改 `codex/shipping-hot-r2`。
+
 ## 2026-10-25 — XX-W01 列表产品裁定落地，公开资格 29/39
 
 - 在零新网络采样前提下，按目录「当前热带气旋列表」独立产品合同，将 XX-W01 计为**限定** R2-4 OK（`r2_4=OK`，`countedOK=true`，`scope=list product only`）。**不是**整条台风同步或轨迹通过。

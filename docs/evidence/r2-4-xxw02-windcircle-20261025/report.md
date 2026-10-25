@@ -1,7 +1,7 @@
 # R2-4 XX-W02 wind-circle gapfill (dots 1792920528)
 
 Baseline `ffc633a2bf0d2a40348d36c217cd2727d5be47ff`. Branch `codex/shipping-hot-r2-4-gapfill-20261025`.
-**Zero new network.** Occupied existing gapfill worktree only. Counts kept **29/39** and **25/34**; XX-W02 not raised by executor.
+**Zero new network.** Occupied existing gapfill worktree only. Counts kept **29/39** and **25/34** at code-round closeout (historical snapshot); XX-W02 not raised by executor in that round. Later product ruling: see below (dots 1792922911).
 
 ### P2 local fixes (dots 1792921846)
 
@@ -64,11 +64,19 @@ See `ppa-tls-offline-audit.public.json`. Whitelist: Node 24.15.0 recorded; `reje
 
 Opening “Same Node default trust store” replaced with **「两次均报告严格验证，但有效信任来源及等价性未核实」** in `docs/evidence/r2-4-jma-ppa-20261025/{report.md,tls-implementation-note.md}`.
 
-## Still blocked / for dots
+## Still blocked / for dots（代码轮快照；裁定前）
 
 1. PH-P01 both product entries BLOCKED (`UNABLE_TO_VERIFY_LEAF_SIGNATURE`); no SourceCa.
-2. XX-W02 whole-row OK **not** raised here — submit wind-circle+identity evidence for ruling; keep 29/39 & 25/34 until dots decides.
-3. Provider sync still does not fetch specifications (intentional; no new framework this round).
+2. XX-W02 whole-row OK **not** raised in the code round — wind-circle+identity evidence submitted for ruling; 29/39 & 25/34 held until dots decided.
+3. Provider sync still does not fetch specifications (intentional; no new framework this round) — **显著保留** after ruling.
+
+## Product ruling landed (dots 1792922911)
+
+- Ruling at `2026-10-25T10:08:31.869439Z` (`rulingMessageTs=1792922911.869439`): XX-W02 **limited** R2-4 OK (`countedOK=true`, scope=existing two-TC forecast+specifications capture and offline field verification).
+- Counts after docs land: **30/39** (shortfall 2); R2-5 **25/34**; numeric production partition **3/5**; `overallR2Pass=false`; PPA still BLOCKED.
+- Prior 29/39 / forecast-only / PARTIAL statements above remain **historical snapshots**.
+- Docs-only; gates reuse `a2e99a01`; see [product-ruling.md](./product-ruling.md).
+- lastUpdatedAt for matrix write: `2026-10-25T10:16:43.402Z`.
 
 ## Gate EXIT (dots 1792921846 P2)
 

@@ -38,7 +38,7 @@ Westports 已获限定认可：R2-4仍 STALE、25/39；R2-5按既有 parser 的3
 
 | 核查 | 已有证据计数 | 剩余 / 结论 |
 | --- | --- | --- |
-| R2-4公开自动来源 | **29/39（74.36%）** | 最少32项，尚差3；29 OK、7 PARTIAL、1 STALE、1 BLOCKED、1 NOT_RUN，未通过 |
+| R2-4公开自动来源 | **30/39（76.92%）** | 最少32项，尚差2；30 OK、6 PARTIAL、1 STALE、1 BLOCKED、1 NOT_RUN，未通过 |
 | R2-5资讯/公告原页字段回放 | **25/34（73.53%）** | 尚差9；25 PASS、2 FAIL、2 PARTIAL、5 NOT_RUN，未通过 |
 | 数值字段独立检查 | **历史3项有限诊断＋新增1项完整原件离线解析** | 分母5，类型分列；不称4/5生产接入，不加到34项原页回放分子 |
 | R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
@@ -94,11 +94,11 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 | --- | --- | --- | --- | --- | --- |
 | ID-W02 | https://maritim.bmkg.go.id/marine2026-data/pelabuhan/XJ001.json | 2026-10-20T03:33:54.513Z / 200，11259字节 | OK（限定） | 完整原件离线解析（限定） | 独立数值字段一列只表示XJ001完整原件离线解析；不适用于资讯R2-5（不计入34项分子/分母），也不增加生产数值覆盖计数。完整41点原件纯parser回放、归一化/字段验证已认可；父独立静态审查，门禁与回放为执行者证据。生产/24h未验证。 |
 | XX-W01 | https://www.jma.go.jp/bosai/typhoon/data/targetTc.json | 2026-10-25T07:26:52.228Z / 200，210B [列表公开字段](../r2-4-gapfill-2026-10-25/public-fields.json) | OK（限定，list product only） | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [历史字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 列表产品限定 OK：严格解析 ok×2、issue 显式 +09:00；取样快照曾 PARTIAL/28/39。预报未取不作否决；providerSync partial 与轨迹未验证显著保留。非整条台风同步。历史 404 见 superseded。[裁定](../r2-4-gapfill-2026-10-25/list-product-ruling.md) |
-| XX-W02 | `https://www.jma.go.jp/bosai/typhoon/data/TC{id}/forecast.json` 、`/specifications.json` | 2026-10-15T05:53:37.778Z / 同次targetTc404 [归属](../r2-bmkg-doc-jma-attribution-2026-10-15/jma-cross-product-attribution.json) | PARTIAL | PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED [旧字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 前置列表与XX-W01是同一请求，没有两产品新请求；历史forecast保留，spec仍缺。 |
+| XX-W02 | `https://www.jma.go.jp/bosai/typhoon/data/{TCID}/forecast.json` 、`/specifications.json` | 离线两 TC 捕获回放 [裁定](../r2-4-xxw02-windcircle-20261025/product-ruling.md) / [回放](../r2-4-xxw02-windcircle-20261025/offline-replay.public.json)；历史同次 targetTc404 保留为快照 | OK（限定，offline forecast+specs） | PASS_LIMITED_OFFLINE_FORECAST_AND_SPECIFICATIONS | 路径/预报位置/风圈/身份对账离线验证通过；**不是**生产 sync；spec 未接入生产；3/5 不变。旧 PARTIAL/29/39 为快照。 |
 | XX-A01 | https://api.open-meteo.com/v1/forecast | 2026-10-10T03:58:39.141Z / 200 [取证](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json) | OK | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 10/10陆地8港风/降水/能见度与时间字段诊断；不是保留原JSON回放或今天刷新。 |
 | XX-A02 | https://marine-api.open-meteo.com/v1/marine | 2026-10-10T03:58:39.141Z / 200 [取证](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-sync-live.json) | OK | PASS_LIMITED_STORED_REAL_DIAGNOSTIC [字段](../r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json) | 10/10原点海况7港；VNSGN仍缺，约61.8公里独立参考点不能冒充泊位/原点。 |
 
-数值历史检查只有adapter/主机状态汇总与持久化字段，没有完整逐请求URL/原JSON回放台账；矩阵没有补造线证据。XX-W02 forecast/specifications产品范围仍须明确，不因旧forecast成功把整行标OK。VNSGN独立参考海况按ADR-009隔离，原点缺测继续保留。
+数值历史检查只有adapter/主机状态汇总与持久化字段，没有完整逐请求URL/原JSON回放台账；矩阵没有补造线证据。XX-W02 已按离线两 TC forecast+specifications 限定 OK（2026-10-25T10:08:31.869439Z）；不因本裁定宣称生产 sync 或持续运行通过。VNSGN独立参考海况按ADR-009隔离，原点缺测继续保留。
 
 ## 2项后续阶段（保留库存，不计公开分母）
 

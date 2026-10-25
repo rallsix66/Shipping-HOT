@@ -1,9 +1,9 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-20T04:06:11.578Z",
-  "lastUpdatedAt": "2026-10-25T08:47:54.116Z",
-  "lastUpdatedAtSource": "this_write_utc; prior 2026-10-25T08:40:00.000Z was fabricated rounded future time",
-  "lastUpdateNote": "2026-10-25 list-product contract ruling for XX-W01: limited R2-4 OK (scope=list product only). Numerator 28/39 → 29/39 (shortfall 3). Capture-time PARTIAL/28/39 retained as historical snapshot. Forecast omission is not an XX-W01 veto; providerSync partial and trackPersistence unverified remain significant facts. XX-W02 unchanged; R2-5 25/34 unchanged; numeric production partition 3/5 unchanged. Docs-only; no new network sample; gates not re-run (reuse 4f689fd logs). R2 not complete; no production enablement.",
+  "lastUpdatedAt": "2026-10-25T10:16:43.402Z",
+  "lastUpdatedAtSource": "this_write_utc; rulingMessageTs=1792922911.869439 (= 2026-10-25T10:08:31.869439Z)",
+  "lastUpdateNote": "2026-10-25 XX-W02 limited R2-4 OK (dots 1792922911): scope=existing two-TC forecast+specifications capture and offline field verification. Numerator 29/39 → 30/39 (shortfall 2). Prior 29/39 and forecast-only/PARTIAL retained as historical snapshots. specifications not in production sync; live persistence/continuous run unverified. R2-5 25/34 unchanged; numeric production partition 3/5 unchanged; PPA/PH-P01 BLOCKED; overallR2Pass=false. Docs-only; no new network; gates not re-run (reuse a2e99a01). R2 not complete; no production enablement.",
   "reviewedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
   "evidenceHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
@@ -38,11 +38,11 @@
   },
   "measuredCoverage": {
     "r2_4": {
-      "numerator": 29,
+      "numerator": 30,
       "denominator": 39,
-      "ratio": 0.7435897435897436,
+      "ratio": 0.7692307692307693,
       "minimumOK": 32,
-      "shortfall": 3,
+      "shortfall": 2,
       "ids": [
         "CN-P01",
         "CN-W01",
@@ -72,11 +72,12 @@
         "XX-M03",
         "XX-A01",
         "XX-A02",
-        "XX-W01"
+        "XX-W01",
+        "XX-W02"
       ],
       "statusCounts": {
-        "OK": 29,
-        "PARTIAL": 7,
+        "OK": 30,
+        "PARTIAL": 6,
         "STALE": 1,
         "BLOCKED": 1,
         "NOT_RUN": 1
@@ -154,7 +155,7 @@
     "overallR2Pass": false
   },
   "clarifications": [
-    "XX-W02 catalogue lists forecast plus specifications; current code/evidence only forecast. Keep row PARTIAL pending product contract clarification, not silently exclude or full-pass.",
+    "XX-W02 limited R2-4 OK (2026-10-25T10:08:31.869439Z / rulingMessageTs=1792922911.869439) for existing two-TC forecast+specifications capture and offline field verification only. Prior PARTIAL/forecast-only and 29/39 held remain historical snapshots. specifications not in production sync; live persistence/continuous run unverified; numeric partition 3/5 unchanged; not full-pass or production enablement.",
     "R2-5 field pass is actual source-time field with honest role/precision, not certification of news publication instant, warning validity or untruncated legal text. If a stricter publication-only contract is desired it is a separately stated change; no such new hard gate introduced.",
     "NCHMF older real sanitized DOM field replay retains configured+07 warning; no new UTC provenance claim. BMKG older raw URL alias and latest13-item exact request are separate proofs."
   ],
@@ -5184,12 +5185,11 @@
       "priority": "P1",
       "catalogUrlText": "`https://www.jma.go.jp/bosai/typhoon/data/TC{id}/forecast.json` 、`/specifications.json`",
       "catalogUrls": [
-        "https://www.jma.go.jp/bosai/typhoon/data/TC{id}/forecast.json"
+        "https://www.jma.go.jp/bosai/typhoon/data/{TCID}/forecast.json",
+        "https://www.jma.go.jp/bosai/typhoon/data/{TCID}/specifications.json"
       ],
-      "exactProductUrl": null,
-      "catalogUnresolvedFragments": [
-        "/specifications.json"
-      ],
+      "exactProductUrl": "https://www.jma.go.jp/bosai/typhoon/data/{TCID}/forecast.json and .../specifications.json",
+      "catalogUnresolvedFragments": [],
       "classification": "numeric_weather",
       "legacyGroup": "OP",
       "inPublicDenominator": true,
@@ -5217,15 +5217,16 @@
       },
       "fieldReplayEvidence": null,
       "numericFieldValidation": {
-        "status": "PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED",
+        "status": "PASS_LIMITED_OFFLINE_FORECAST_AND_SPECIFICATIONS",
         "evidence": {
-          "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+          "path": "docs/evidence/r2-4-xxw02-windcircle-20261025/offline-replay.public.json",
           "selector": null,
-          "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+          "sha256": "3660f0a303ace1f6ed12f18b6206687d767715fa61e13f5cf30446bb9094b397",
           "hashBasis": "committed_text_LF"
         },
-        "rawNumericalPayloadReplay": "NOT_RUN; do not confuse normalized diagnostics with retained raw replay",
-        "qualification": "Existing adapter fetches forecast.json, not specifications.json; exact per-request/raw product evidence incomplete."
+        "rawNumericalPayloadReplay": "OFFLINE_TWO_TC_CAPTURE_REPLAY; not production sync wire ledger; do not confuse with retained production raw replay",
+        "qualification": "Offline parse of preserved TC2636/TC2637 forecast.json + specifications.json: path/forecast positions, wind-circle fields, identity cross-check. Not production sync integration or continuous run.",
+        "previousStatus": "PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED"
       },
       "dateEvidence": {
         "role": "forecast_valid_time_or_cyclone_reference_time",
@@ -5245,9 +5246,29 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "PARTIAL",
-        "countedOK": false,
-        "reason": "Forecast branch has real persisted diagnostics, but catalogue also names specifications.json; that product not verified, no full-row OK."
+        "verdict": "OK",
+        "countedOK": true,
+        "scope": "existing two-TC forecast+specifications capture and offline field verification",
+        "qualification": "limited_offline_forecast_specifications_two_tc",
+        "reason": "Approved limited R2-4 OK for existing two-TC forecast+specifications capture and offline field verification (path, forecast positions, wind circles, identity reconciliation). Source chain z/o/n resolves absolute product URLs. a2e99a01 closed usable-radius and identity-unknown P2s. Not production sync integration; specifications not yet wired into production sync; live persistence/continuous run unverified. Numeric production partition remains 3/5. No production enablement.",
+        "acceptance": {
+          "path": "docs/evidence/r2-4-xxw02-windcircle-20261025/product-ruling.md",
+          "offlineReplay": "docs/evidence/r2-4-xxw02-windcircle-20261025/offline-replay.public.json",
+          "sourceChain": "docs/evidence/r2-4-xxw02-windcircle-20261025/source-chain-zon.public.json",
+          "windCircleFields": "docs/evidence/r2-4-xxw02-windcircle-20261025/wind-circle-fields.public.json",
+          "codeBaseline": "a2e99a01d50f21fbce87e2972eed85d6d39a7156",
+          "rulingAt": "2026-10-25T10:08:31.869439Z",
+          "rulingMessageTs": "1792922911.869439",
+          "hashes": {
+            "mapHtml": "71c57265064a4d54cc1ff957f3582059ff772403f1430b759333d053852c12e4",
+            "TC2637_forecast": "9e4f3a259846c3317f0238d8d76755ba06709385d71d0c0a577d255a92012a02",
+            "TC2637_specifications": "4559062942c8c65dd89b4a197392c4b8c92f2beeecd55243080c1677d97c7317",
+            "TC2636_forecast": "d2c871329ecdabd374e80d54312c3a95e9363d6209257d272ba632fb37cf60ce",
+            "TC2636_specifications": "b6110f8e5eb5d6b85ff611913a3c228b142bf181c9098209679bac7d6287824d"
+          },
+          "offlineReplaySha256": "3660f0a303ace1f6ed12f18b6206687d767715fa61e13f5cf30446bb9094b397",
+          "productRulingSha256": "ad9653752cca2b753cd7bcd120cf49e48ea711d307be817557cf7c9835ceef4a"
+        }
       },
       "r2_5": {
         "verdict": "NOT_APPLICABLE_NUMERIC",
@@ -5259,10 +5280,43 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "Resolve catalogue forecast/specifications product scope and retain field evidence; do not manufacture concrete unobserved URL or count forecast-only as full row.",
-        "Existing05:53:37.778Z targetTc404 is the same request cross-attributed to exactXX-W01; no object selection or two product requests."
+        "Retained significant fact (does not veto limited offline OK): specifications.json is not yet wired into production sync; live persistence and continuous run are unverified.",
+        "Retained significant fact: numeric production partition remains 3/5; this offline verification does not add a production integration count.",
+        "Not claimed: production sync OK, continuous/24h run, R2 complete, overallR2Pass, or PPA/PH-P01 recovery (still BLOCKED).",
+        "Historical forecast-only / PARTIAL / 29/39 snapshots retained; do not rewrite prior sampling facts."
       ],
       "historicalSuperseded": [
+        {
+          "supersededAt": "2026-10-25T10:08:31.869439Z",
+          "rulingMessageTs": "1792922911.869439",
+          "reason": "2026-10-25 product ruling: prior PARTIAL (forecast-only / specifications unverified) and 29/39 held counts are retained as historical snapshots; current counting uses limited offline forecast+specifications OK. Not a claim that production sync or continuous run passed.",
+          "previousR24": {
+            "verdict": "PARTIAL",
+            "countedOK": false,
+            "reason": "Forecast branch has real persisted diagnostics, but catalogue also names specifications.json; that product not verified, no full-row OK."
+          },
+          "previousNumericFieldValidation": {
+            "status": "PARTIAL_FORECAST_ONLY_SPECIFICATIONS_UNVERIFIED",
+            "evidence": {
+              "path": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json",
+              "selector": null,
+              "sha256": "91b760fdfc501d240184c084714a98b380a1ce36d8031d9129c562349fa5a5c8",
+              "hashBasis": "committed_text_LF"
+            },
+            "rawNumericalPayloadReplay": "NOT_RUN; do not confuse normalized diagnostics with retained raw replay",
+            "qualification": "Existing adapter fetches forecast.json, not specifications.json; exact per-request/raw product evidence incomplete."
+          },
+          "previousQualification": {
+            "r2_4": "29/39",
+            "shortfall": 3,
+            "countedOK": false,
+            "atHead": "a2e99a01d50f21fbce87e2972eed85d6d39a7156",
+            "evidence": {
+              "path": "docs/evidence/r2-4-xxw02-windcircle-20261025/report.md",
+              "note": "code-round held 29/39; XX-W02 not raised until dots 1792922911 ruling"
+            }
+          }
+        },
         {
           "supersededAt": "2026-10-15T05:57:37.873Z",
           "reason": "New separately authorized after-apply real response; prior DNS-only block and historical source capture preserved, no qualification change",
@@ -7716,5 +7770,23 @@
     "previousCatalogSha256": "f35bc4664e3c0803760884dad4edd684080b6a94d35c86aecf666c06f92e1593",
     "catalogHashBasis": "current local catalog text normalized to LF",
     "currentCatalogSha256": "6c2d06eeac91ed2e9429983ed127736606fbf4d7e78d7816a76bd4d08a69eede"
+  },
+  "lastXxW02ProductRuling": {
+    "at": "2026-10-25T10:08:31.869439Z",
+    "rulingMessageTs": "1792922911.869439",
+    "source": "slack_thread_message_ts:1792922911.869439 (= 2026-10-25T10:08:31.869439Z)",
+    "basisHead": "a2e99a01d50f21fbce87e2972eed85d6d39a7156",
+    "scope": "existing two-TC forecast+specifications capture and offline field verification",
+    "before": "29/39",
+    "after": "30/39",
+    "shortfallAfter": 2,
+    "r2_5": "25/34 unchanged",
+    "numericProductionPartition": "3/5 unchanged",
+    "overallR2Pass": false,
+    "evidence": {
+      "ruling": "docs/evidence/r2-4-xxw02-windcircle-20261025/product-ruling.md",
+      "offlineReplay": "docs/evidence/r2-4-xxw02-windcircle-20261025/offline-replay.public.json",
+      "sourceChain": "docs/evidence/r2-4-xxw02-windcircle-20261025/source-chain-zon.public.json"
+    }
   }
 }
