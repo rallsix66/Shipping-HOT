@@ -26,16 +26,15 @@ Do **not** promote catalog presence or site accessibility into "accepted full co
 
 | ID | Capabilities verified | Limitations (not claimed) |
 | --- | --- | --- |
+| CN-P02 | Checklist; HTTPS entry metadata on catalog host (`www.sz.msa.gov.cn`); empty date OK; checked_empty; body reject (metadata-only) | Full article scrape / auto-fetch not in scope; no invented dates |
+| VN-P01 | Checklist; HTTPS entry metadata on `vimawa.gov.vn`; empty/unknown date OK; checked_empty; body reject | TBHH id is not a date; auto-fetch not in scope |
+| MY-P03 | Checklist; HTTPS entry metadata on `www.northport.com.my`; empty date; checked_empty; body reject | Disabled htmlIndexCandidate stays offline; stop auto this round |
 | MY-L01 | Checklist; metadata save on exact catalog entry URL; empty `publishedAt` OK; date-only / invented midnight refused; body reject (metadata-only); shared URL → single entry + version bump | **Not** independent per-card persistence; no invented slug identity |
-| MY-L02 | Checklist; metadata; empty date; checked_empty; body reject | Full article scrape / auto-fetch not in scope |
-| MY-L03 | Same as L02 path | Same |
-| MY-L04 | Same | Same |
-| MY-F01 | Same | Same |
-| PH-W01 | www HTML entry metadata + checked_empty; empty date; body reject | **pubfiles PDF host rejected**; no PDF fetch; not "all PDFs enterable" |
-| PH-W02 | Same as PH-W01 for www entry | Same PDF limitation |
-| PH-F01 | Checklist + metadata path + empty + checked_empty + body reject | Full feed automation not claimed |
-| XX-F01 | Checklist + metadata path + empty + checked_empty + body reject | **待接入访问** unchanged — catalog wire-in only; site access not accepted |
-
+| PH-P01 | Checklist; HTTPS entry metadata on `www.ppa.com.ph` (advisory + port-news URLs); empty date; checked_empty; body reject | Do **not** install CA / disable TLS; prior BLOCKED TLS leaf preserved; auto-fetch not claimed |
+| PH-W01 | www HTML entry metadata + checked_empty; empty date; body reject | **pubfiles PDF host rejected**; no PDF fetch; not "all PDFs enterable"; historical empty/limited OK retained (not rewrite as parse-never-succeeded) |
+| PH-W02 | Same as PH-W01 for www weather-advisory entry | Same PDF limitation; historical empty-state auto-recognize retained |
+| XX-F01 | Checklist + metadata path + empty + checked_empty + body reject | Access risk unchanged — catalog wire-in only; login/JS may block humans; site access / full content not accepted |
+| MY-P02 | Checklist; catalog HTTPS entry/feed URLs wired; empty titles must not be forged valid; checked_empty; body reject | **Not** tech-cannot-fetch (historical 200s); keep R2-5 limited PASS + R2-4 STALE; auto product usability unresolved |
 ## Tests
 
 - File: `server/intel/manual-scope-gapfill-20261026.test.ts`
