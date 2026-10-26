@@ -512,7 +512,7 @@ export const manualCatalog = [
     ],
     grade: "B",
     cadence: "每日",
-    focus: "用户本轮决定改人工。内容类型：服务更新卡片。人工须填真实 title/link（host=www.pos.com.my；若卡片无独立 href 则不得编造 slug）/source date（页面时间可见才填；时区角色未知则只填日期或留空）。许可：metadata-only。无新内容 checked_empty。历史：有标题时间卡但无详情 href；english_month_abbr_12h 语法已落地但不足以自动产品化。",
+    focus: "用户本轮决定改人工。整页人工记录（非逐卡独立身份）：卡片共用 /service-update，save 按 sourceId+canonicalUrl 合并为同一条目的版本更新；不得编造 per-card slug/新身份框架；逐卡独立入库待真实详情身份。人工须填真实 title + 整页 link（仅允许 catalog 入口 URL）/source date（仅当有可信带时区的完整发布时间才填 ISO；禁止午夜假时间或仅日期冒充；否则 publishedAt 留空）。许可：metadata-only。无新内容 checked_empty。历史：有标题时间卡但无详情 href。",
     historicalOnly: false,
   },
   {
@@ -537,7 +537,7 @@ export const manualCatalog = [
     ],
     grade: "A",
     cadence: "台风期随时",
-    focus: "用户本轮决定改人工所有权（非“解析从未成功”）。历史：官方明确空状态可被自动识别并已获限定 R2-4 OK；R2-5 仍无完整 title/link/source-time 回放。内容类型：severe weather bulletin（HTML/PDF）。有公报时人工填真实 title/link/source date；无活动公报用 checked_empty。许可：metadata-only。不把空状态解读为“菲律宾无天气风险”。",
+    focus: "用户本轮决定改人工所有权（非解析从未成功）。历史：官方明确空状态可被自动识别并已获限定 R2-4 OK；R2-5 仍无完整 title/link/source-time 回放。内容类型：severe weather bulletin HTML 入口。有公报时人工填真实 title/link/source date（仅 www.pagasa.dost.gov.ph 的 catalog HTML 入口；无可信带时区发布时间则留空）。无活动公报用 checked_empty。许可：metadata-only。功能限制：pubfiles.pagasa.dost.gov.ph PDF 不在 save 许可内（不扩域名、不抓 PDF），不宣称全部 PDF 可录入。不把空状态解读为菲律宾无天气风险。",
     historicalOnly: false,
   },
   {
@@ -549,7 +549,7 @@ export const manualCatalog = [
     ],
     grade: "A",
     cadence: "台风期随时",
-    focus: "用户本轮决定改人工所有权（非“解析从未成功”）。历史：官方明确空状态可被自动识别并已获限定 R2-4 OK；R2-5 仍 NOT_RUN。内容类型：weather advisory。有预警时人工填真实 title/link/source date；无活动预警用 checked_empty。许可：metadata-only。",
+    focus: "用户本轮决定改人工所有权（非解析从未成功）。历史：官方明确空状态可被自动识别并已获限定 R2-4 OK；R2-5 仍 NOT_RUN。内容类型：weather advisory HTML 入口。有预警时人工填真实 title/link/source date（仅 www.pagasa.dost.gov.ph 的 catalog HTML 入口；无可信带时区发布时间则留空）。无活动预警用 checked_empty。许可：metadata-only。功能限制：pubfiles PDF host 不在 save 许可内（不扩域名、不抓 PDF）。",
     historicalOnly: false,
   },
   {

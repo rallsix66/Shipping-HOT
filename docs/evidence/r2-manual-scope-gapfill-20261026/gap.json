@@ -1,0 +1,42 @@
+{
+  "type": "r2_manual_scope_acceptance_gapfill",
+  "dotsTs": [
+    "1792999604.372009"
+  ],
+  "writtenAtAsiaShanghai": "2026-10-26 15:42:00 Asia/Shanghai",
+  "branch": "codex/shipping-hot-r2-4-gapfill-20261025",
+  "worktree": "D:/try one/Shipping HOT/.tmp/worktrees/r2-4-gapfill-20261025",
+  "productBaselineShaOld": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
+  "productBaselineNote": "OLD product baseline from prior CN-T01/batch work — NOT this batch tested code",
+  "tipBeforeThisBatch": "87002b85cdc1827a5dacee6af4ec7261e0176a7a",
+  "thisBatchTestedSha": "pending-commit",
+  "zeroNewHttp": true,
+  "day20Untouched": {
+    "runId": "day20-20261026a",
+    "workerPid": 82336,
+    "parentPid": 27916,
+    "hostPid": 15112,
+    "action": "leave_alone",
+    "confirmedAliveAtGate": true
+  },
+  "changes": {
+    "MY_L01": "whole-page shared /service-update only; exact catalog entry URL; revisions of one record; no invented slug; empty publishedAt unless trusted timezone ISO",
+    "PAGASA": "www HTML entry metadata + checked_empty only; pubfiles PDF host rejected; no domain expand; no PDF fetch",
+    "tests": "true v29 fixture (9 deleted) -> 030 upgrade + idempotent; 9-item path; shared URL; PDF host reject; empty/date-only",
+    "shaBinding": "separate productBaselineShaOld vs thisBatchTestedSha / product file hashes"
+  },
+  "productFileHashes": {
+    "server/intel/manual-scope-gapfill-20261026.test.ts": "125d8412daf9cf2c16d04eb5c17d5b8d75d65bc45f13ed0bc95324261956dd43",
+    "server/database/migrations/030-manual-scope-r2-20261026.ts": "e453106525915858030b1b99ec21facc58639a09c13750fb5d4fe046bea001e6",
+    "server/intel/manual.ts": "4c234118eaf08fe7a76edcf450d34579234436d4d89881ae7701a87585cb85cf",
+    "server/intel/manual-catalog.ts": "b9fe16bc21a6408455de03f317486ced96f77a1c857cd45a971cfeab43f5fd0d"
+  },
+  "gate": {
+    "overall": "PASS",
+    "logsDir": ".tmp/gate-manual-scope-gapfill-20261026/",
+    "vitest": "2059 passed | 9 skipped (2068); 162 files",
+    "gapfillTests": "4/4 pass (.tmp/gapfill-acceptance-20261026/vitest-after-lintfix.log)"
+  },
+  "overallR2Pass": false,
+  "claim": "9 entry wire-in; per-item verified capabilities AND limitations — NOT site access or full content availability promoted to accepted"
+}

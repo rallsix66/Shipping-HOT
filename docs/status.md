@@ -1,3 +1,13 @@
+## 2026-10-26 — R2 manual-9 acceptance gapfill (dots `1792999604.372009`)
+
+- Isolation: `codex/shipping-hot-r2-4-gapfill-20261025` @ worktree `.tmp/worktrees/r2-4-gapfill-20261025`
+- **product baseline (OLD, not this batch):** `f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c`
+- tip before gapfill: `87002b85cdc1827a5dacee6af4ec7261e0176a7a`
+- this batch tested SHA: *(filled after commit)*
+- Gaps closed: MY-L01 whole-page shared URL only; PAGASA www-only / pubfiles PDF reject; true v29→030 upgrade fixture; SHA binding
+- Evidence: `docs/evidence/r2-manual-scope-gapfill-20261026/`
+- day20 untouched; HTTP=0; no merge/deploy
+
 ## 2026-10-26 — 人工范围调整（用户决定；dots 1792998333.225029 + 1792998442.152949）
 
 - **用户决定**：剩余约 8 若不能自动抓取 → 人工；同时把反复无法产出可用自动产品的源改人工。本轮确认 **9**：CN-P02 / VN-P01 / MY-P03 / MY-L01 / PH-P01 / PH-W01 / PH-W02 / XX-F01 / **MY-P02（Westports）**。

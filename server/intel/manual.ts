@@ -52,6 +52,11 @@ export async function manualSubmit(repo: IntelRepository, input: unknown, now: s
   if (url.protocol !== "https:" || url.username || url.password || (url.port && url.port !== "443") || !hosts.includes(url.hostname) || [...url.searchParams.keys()].some(key => /key|token|secret|password|auth|credential|signature|cookie|csrf|sig/i.test(key))) return invalid()
   const canonicalUrl = canonicalizeFeedUrl(url.toString())
   if (!canonicalUrl) return invalid()
+  // Whole-page / HTML-entry sources: only catalog entry URL(s). No invented per-card slug identity this round.
+  if (manual && (manual.catalogId === "MY-L01" || manual.catalogId === "PH-W01" || manual.catalogId === "PH-W02")) {
+    const allowed = manual.urls.map(value => canonicalizeFeedUrl(value)).filter((value): value is string => Boolean(value))
+    if (!allowed.includes(canonicalUrl)) return invalid()
+  }
   const title = text(data.title, 500)
   const body = text(data.body ?? "", 100000, false)
   // Refuse prohibited text instead of silently storing a hash of restricted full text.

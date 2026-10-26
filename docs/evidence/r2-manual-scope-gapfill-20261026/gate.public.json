@@ -1,0 +1,41 @@
+{
+  "thisBatchTestedSha": "pending-commit",
+  "productBaselineShaOld": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
+  "atUtc": "2026-10-26T07:41:20Z",
+  "httpCountThisBatch": 0,
+  "overall": "PASS",
+  "productBaselineNote": "OLD product baseline — NOT this batch tested code",
+  "claim": "9 entry wire-in; per-item capabilities AND limitations — not full content accepted",
+  "type": "full_local_gate",
+  "day20Untouched": true,
+  "steps": {
+    "install": {
+      "exit": 0,
+      "note": "frozen-lockfile; prepare hooks ENOTDIR expected on worktree"
+    },
+    "build": {
+      "exit": 0
+    },
+    "vitest": {
+      "tests": "2059 passed | 9 skipped (2068)",
+      "files": "162 passed",
+      "exit": 0
+    },
+    "typecheck": {
+      "exit": 0
+    },
+    "lint": {
+      "exit": 0
+    },
+    "s7Harness": "NOT_RUN_NOT_REQUIRED (no shell/route behaviour change)"
+  },
+  "atAsiaShanghai": "2026-10-26 15:41:20 Asia/Shanghai",
+  "tipBeforeThisBatch": "87002b85cdc1827a5dacee6af4ec7261e0176a7a",
+  "productFileHashes": {
+    "server/intel/manual-scope-gapfill-20261026.test.ts": "125d8412daf9cf2c16d04eb5c17d5b8d75d65bc45f13ed0bc95324261956dd43",
+    "server/database/migrations/030-manual-scope-r2-20261026.ts": "e453106525915858030b1b99ec21facc58639a09c13750fb5d4fe046bea001e6",
+    "server/intel/manual.ts": "4c234118eaf08fe7a76edcf450d34579234436d4d89881ae7701a87585cb85cf",
+    "server/intel/manual-catalog.ts": "b9fe16bc21a6408455de03f317486ced96f77a1c857cd45a971cfeab43f5fd0d"
+  },
+  "logsDir": ".tmp/gate-manual-scope-gapfill-20261026/"
+}
