@@ -10,7 +10,7 @@
 | Workspace | verified-current | gapfill worktree; main dirty / day20 / D:/wt-s1~s5 preserved |
 
 proposal vs reality: product now admits exact twin under explicit rule; counts stay frozen pending review.
-## Review batch (dots 1792985451.804939) — 2026-10-26 11:44:04 Asia/Shanghai
+## Review batch (dots 1792985451.804939) - 2026-10-26 11:45:20 Asia/Shanghai
 
 | Dimension | Status | Note |
 | --- | --- | --- |
