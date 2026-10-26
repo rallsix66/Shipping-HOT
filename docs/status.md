@@ -1,3 +1,13 @@
+## 2026-10-26 — 人工范围调整（用户决定；dots 1792998333.225029 + 1792998442.152949）
+
+- **用户决定**：剩余约 8 若不能自动抓取 → 人工；同时把反复无法产出可用自动产品的源改人工。本轮确认 **9**：CN-P02 / VN-P01 / MY-P03 / MY-L01 / PH-P01 / PH-W01 / PH-W02 / XX-F01 / **MY-P02（Westports）**。
+- **真接入**：复用 `manualCatalog` → `checklist` → `save`（HTTPS host allowlist + `checked_empty` + metadata-only）；migration **030** 增量种子；**不**发明第二套采集框架。XX-F01 已接线但登录/JS 可能导致人工打不开 → 诚实 **待接入（访问）**；其余 8 **已接入**。
+- **MY-P02 理由**：不是“技术不能抓”——200（10/13、10/15、10/25）但 7/10 空标题、3 有效最新仍 2025-08-01；保留 R2-5 限定 PASS + R2-4 STALE。PH-W01/02 **不**改写历史“空状态可自动识别”。未因单次超时降权 PH-C01/VN-D01 等已恢复源。本轮无第 10 个额外人工。
+- **调整后口径（现有证据覆盖，非新全量 PASS）**：自动分母 **30**、历史 OK **30/30**；资讯 **25/25**；数值 5 另列；历史 R2-4 **32/39**、R2-5 **26/34** 可追溯；**overallR2Pass=false**。禁止把移出自动伪装成原 34/34 PASS。
+- **day20-20261026a**：PID 82336/27916/15112 **未动**；零新网络；未 merge/deploy/force/CA/生产启用。
+- **全量门禁**：install/build/typecheck/lint/Vitest **PASS**（2055 passed / 9 skipped / 161 files）；S7 harness NOT_REQUIRED（无 shell/route 行为变更）。日志 .tmp/gate-manual-scope-20261026/；[gate.public.json](evidence/r2-manual-scope-20261026/gate.public.json)。
+- 证据：[report](evidence/r2-manual-scope-20261026/report.md) / [scope.json](evidence/r2-manual-scope-20261026/scope.json) / [matrix](evidence/r2-current-source-matrix-2026-10-14/mapping.json)。
+
 ## 2026-10-26 — R2 batch convergence（dots 1792994131.133459 + 1792993982.228989 + 1792994253.888519）
 
 - **范围**：零新网络收敛一批：R2-8 coverage-diff 口径、剩余 8 可修 vs 外部缺材分类、PPA tls.connect vs secureFetch 对照、VN-P01 已存 `200.pdf` 标签身份核验（不下PDF）、day20 RO + VN-D01 自然恢复。

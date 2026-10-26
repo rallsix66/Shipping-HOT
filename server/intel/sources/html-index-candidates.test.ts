@@ -28,7 +28,11 @@ describe("disabled HTML index configurations and synthetic regressions", () => {
       } else {
         expect(cells[4]).toBe(seed.url)
       }
-      expect(cells[5]).toBe("web_list")
+      if (seed.catalogId === "MY-P03") {
+        expect(cells[5].startsWith("manual")).toBe(true)
+      } else {
+        expect(cells[5]).toBe("web_list")
+      }
       expect(seed).toMatchObject({ enabled: false, persistence: "disallowed" })
       expect(intelSourceSeeds.some(active => active.catalogId === seed.catalogId)).toBe(false)
       expect(seed.allowedHosts).toEqual([new URL(seed.url).hostname])

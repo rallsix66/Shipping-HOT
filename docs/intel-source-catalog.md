@@ -10,6 +10,8 @@
 
 > XX-K02 同源同产品 URL 更新（2026-10-15，已批准）：原 `https://www.one-line.com/en/news` 的实际308 Location为 `/en/newsroom`，现目录改为已核实的 `https://www.one-line.com/en/newsroom`。[原308记录](evidence/r2-carrier-reapplied-2026-10-15/XX-K02-response.json)与[目标实网/原页回放依据](evidence/r2-one-newsroom-target-2026-10-15/report.md)保留。目录 `web_list` 描述HTML新闻页面形态；实现用现有 `json_list` 的HTML惰性JSON模式读取其内嵌数据，不是新增JSON接口。候选默认关闭、仅metadata，不加入生产允许列表或改变许可。
 
+> **人工范围（用户决定，2026-10-26，dots 1792998333.225029 + 1792998442.152949）：** 本轮将 CN-P02 / VN-P01 / MY-P03 / MY-L01 / PH-P01 / PH-W01 / PH-W02 / XX-F01 / MY-P02 共 **9** 源改入既有 `manualCatalog`/`checklist`/`save` 路径，停止本轮自动抓取尝试。XX-A03/A04 仍属后期阶段（非抓取失败）。其余矩阵 30 源保持自动方向。历史 R2-4 **32/39**、R2-5 **26/34** 与非通过项可追溯；**overallR2Pass=false**。不是把移出自动伪装成原 34/34 PASS。详见 [r2-manual-scope-20261026](evidence/r2-manual-scope-20261026/report.md)。
+
 # Shipping HOT 信源目录（草案）
 
 > 状态：`DRAFT`。首次核查日期 2026-09-30，核查方式为 curl 与 WebFetch，核查网络为编制者本机（中国大陆，Windows）。
@@ -40,7 +42,7 @@
 | ID | 等级 | 机构 / 内容 | URL | 方式 | 语言 | 核查 | 优先级 | 备注 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | CN-P01 | A | 广东海事局 通告 | https://www.gd.msa.gov.cn/ | web_list | zh | OK (2026-09-29) | P1 | 通告链接在静态 HTML 里。航行警告列表的路径还没找到 |
-| CN-P02 | A | 深圳海事局 | https://www.sz.msa.gov.cn/ | web_list | zh | PARTIAL | P1 | 会跳转，R2 要确认最终地址 |
+| CN-P02 | A | 深圳海事局 | https://www.sz.msa.gov.cn/ | manual（本轮用户决定） | zh | PARTIAL | P1 | 会跳转，R2 要确认最终地址 |
 | CN-P03 | A | 上海海事局 | https://www.sh.msa.gov.cn/ | web_list | zh | OK (2026-09-20) | P2 | 负责上海港 |
 | CN-P04 | A | 福建海事局（厦门） | https://www.fj.msa.gov.cn/ | web_list | zh | OK (2026-09-24) | P2 | |
 | CN-P05 | A | 中国海事局 航行警告（全国） | https://www.msa.gov.cn/ | manual | zh | BLOCKED (403) | P1 | 价值最高，但自动抓取受阻。先人工录入 |
@@ -64,7 +66,7 @@
 
 | ID | 等级 | 机构 / 内容 | URL | 方式 | 语言 | 核查 | 优先级 | 备注 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| VN-P01 | A | 越南海事与内河局 VIMAWA 海事通告 | https://vimawa.gov.vn/vi/thong-bao-hang-hai | web_list | vi | PARTIAL | P1 | 原名 VINAMARINE，于 2025 年更名。列表不带日期，用通告编号（TBHH）去重 |
+| VN-P01 | A | 越南海事与内河局 VIMAWA 海事通告 | https://vimawa.gov.vn/vi/thong-bao-hang-hai | manual（本轮用户决定） | vi | PARTIAL | P1 | 原名 VINAMARINE，于 2025 年更名。列表不带日期，用通告编号（TBHH）去重 |
 | VN-P02 | B | 海防港 新闻 | https://haiphongport.com.vn/vi/tin-tuc | web_list | vi | OK (22/09/2026) | P2 | |
 | VN-P03 | B | 西贡新港（吉莱、盖梅） | https://saigonnewport.com.vn/tin-tuc | web_list | vi | OK (25/09/2026) | P1 | 各地港务监督（cảng vụ）的网站都超时 |
 | VN-W01 | A | 国家水文气象预报中心 NCHMF | https://www.nchmf.gov.vn/kttv/vi-VN/1/index.html | web_list | vi | OK (30/09/2026) | P1 | 风暴和洪水公告的链接形如 `-postNNNNN.html`。没有 RSS 或 CAP |
@@ -105,8 +107,8 @@
 | ID | 等级 | 机构 / 内容 | URL | 方式 | 语言 | 核查 | 优先级 | 备注 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | MY-P01 | A | 巴生港务局 PKA（项目已有） | https://www.pka.gov.my/index.php/en/ | manual | en/ms | BLOCKED (403) | P1 | 由 MY-P02/P03 部分替代 |
-| MY-P02 | B | Westports（巴生西港） | https://www.westportsholdings.com/category/press-release/feed/ | rss | en | OK (28/09/2026) | P1 | |
-| MY-P03 | B | Northport（巴生北港） | https://www.northport.com.my/np/page-announcements.html | web_list | en/ms | OK (15-09-2026) | P1 | 发布费率和停工通告 |
+| MY-P02 | B | Westports（巴生西港） | https://www.westportsholdings.com/category/press-release/feed/ | manual（本轮用户决定；可抓但内容陈旧/空标题） | en | OK (28/09/2026) | P1 | |
+| MY-P03 | B | Northport（巴生北港） | https://www.northport.com.my/np/page-announcements.html | manual（本轮用户决定；原 web_list 候选保留禁用） | en/ms | OK (15-09-2026) | P1 | 发布费率和停工通告 |
 | MY-P04 | B | 丹戎帕拉帕斯港 PTP | https://www.ptp.com.my/announcements | web_list | en | PARTIAL | P3 | |
 | MY-P05 | B | 槟城港 | https://www.penangport.com.my/Media-Center/Announcements | web_list | en | OK | P3 | |
 | MY-P06 | A | 海事局 JLM | https://www.marine.gov.my/feed/ ；航运通告页 https://www.marine.gov.my/b-notis-perkapalan-malaysia/ | rss + web_list | ms | OK / PARTIAL | P2 | |
@@ -116,7 +118,7 @@
 | MY-T01 | A | 财政部 新闻稿 | https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss | rss | ms | OK (29/09/2026) | P1 | 低价值商品税为 10%（≤ RM500）。2027 年预算案将于 2026 年 10 月公布 |
 | MY-T02 | A | MyLVG / MITI | https://mylvg.customs.gov.my/Home ，https://www.miti.gov.my/ | manual | en/ms | BLOCKED | P3 | |
 | MY-H01 | A | 内阁部 公共假期 | https://www.kabinet.gov.my/hari-kelepasan-am/ | manual | ms | BLOCKED (本次连接被断开) | P1 | 项目已有 MY-2026 年历 |
-| MY-L01 | B | Pos Malaysia 服务更新 | https://www.pos.com.my/service-update | web_list | en/ms | OK (22/09/2026) | P1 | |
+| MY-L01 | B | Pos Malaysia 服务更新 | https://www.pos.com.my/service-update | manual（本轮用户决定） | en/ms | OK (22/09/2026) | P1 | |
 | MY-L02 | B | J&T MY | https://www.jtexpress.my/news | web_list | en/ms | OK (2026-08-09) | P3 | |
 | MY-D01 | A | 国家灾害管理署 NADMA | https://www.nadma.gov.my/bm/media-2/berita?format=feed&type=rss | rss | ms | OK (28/09/2026) | P2 | 部分标题编码有问题 |
 | MY-M01 | C | Bernama | https://www.bernama.com/en/rssfeed.php | rss | en | OK | P2 | 需要关键词过滤 |
@@ -140,11 +142,11 @@
 
 | ID | 等级 | 机构 / 内容 | URL | 方式 | 语言 | 核查 | 优先级 | 备注 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| PH-P01 | A | 菲律宾港务局 PPA | https://www.ppa.com.ph/content/ppa-helpdesk-advisory ，https://www.ppa.com.ph/ppa-port-news | web_list | en | PARTIAL | P1 | 证书链不完整，需要给这个信源单独配置 CA 证书 |
+| PH-P01 | A | 菲律宾港务局 PPA | https://www.ppa.com.ph/content/ppa-helpdesk-advisory ，https://www.ppa.com.ph/ppa-port-news | manual（本轮用户决定） | en | PARTIAL | P1 | 证书链不完整，需要给这个信源单独配置 CA 证书 |
 | PH-P02 | A | 海事产业局 MARINA | https://marina.gov.ph/feed/ | rss | en | OK (29/09/2026) | P2 | |
 | PH-P03 | A | 菲律宾海岸警卫队 PCG（海上交通暂停） | https://coastguard.gov.ph/ | manual | en | BLOCKED (403) | P2 | 主要在 Facebook 上发布 |
-| PH-W01 | A | PAGASA 热带气旋公告 | https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin | web_list | en | OK | P1 | HTML 页面加 PDF。PDF 在风暴结束一周后删除，需要及时抓取 |
-| PH-W02 | A | PAGASA 天气/降雨预警 | https://www.pagasa.dost.gov.ph/weather/weather-advisory | web_list | en | OK | P1 | 没有历史归档，只能轮询 |
+| PH-W01 | A | PAGASA 热带气旋公告 | https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin | manual（本轮用户决定；历史空状态可自动识别仍保留） | en | OK | P1 | HTML 页面加 PDF。PDF 在风暴结束一周后删除，需要及时抓取 |
+| PH-W02 | A | PAGASA 天气/降雨预警 | https://www.pagasa.dost.gov.ph/weather/weather-advisory | manual（本轮用户决定；历史空状态可自动识别仍保留） | en | OK | P1 | 没有历史归档，只能轮询 |
 | PH-C01 | A | 菲律宾海关 BOC 新闻稿 | https://customs.gov.ph/category/media-releases/ | web_list | en | OK (WebFetch) | P1 | WordPress 站，R2 试一下 `/feed/`。CMO 列表：https://customs.gov.ph/customs-memorandum-order-cmo-2026/ |
 | PH-T01 | A | 贸工部 DTI 公告 | https://www.dti.gov.ph/category/dti-advisories/feed/ | rss | en | PARTIAL | P2 | |
 | PH-T02 | A | 国税局 BIR | https://www.bir.gov.ph/ | manual | en | BLOCKED (JS) | P2 | 负责数字服务 VAT |
@@ -239,7 +241,7 @@
 
 | ID | 等级 | 平台 / 站点 | URL | 方式 | 核查 | 优先级 | 备注 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| XX-F01 | B（当事方） | TikTok Shop 马来西亚（页面注明也适用于越南） | https://seller-my.tiktok.com/university/essay?knowledge_id=4293090978809617 | web_list（整页对比） | OK（更新于 17/09/2026） | P1 | 单个长页面，平台会反复改写它。按带日期的段落计算哈希，用来发现新增和修改 |
+| XX-F01 | B（当事方） | TikTok Shop 马来西亚（页面注明也适用于越南） | https://seller-my.tiktok.com/university/essay?knowledge_id=4293090978809617 | manual（本轮用户决定） | OK（更新于 17/09/2026） | P1 | 单个长页面，平台会反复改写它。按带日期的段落计算哈希，用来发现新增和修改 |
 | XX-F02 | B（当事方） | TikTok Shop 越南 | https://seller-vn.tiktok.com/university/essay?knowledge_id=8831988245645057&lang=en | web_list（整页对比） | OK（更新于 01/07/2026） | P3 | 可能已经被 XX-F01 取代 |
 | XX-F03 | B（当事方） | TikTok Shop 菲律宾 | https://seller-ph.tiktok.com/university/essay?knowledge_id=1348211165366017&lang=en | manual | STALE（页面标注已废弃，最后更新 25 Jun 2026） | P2 | 新页面的地址还没找到，R2 阶段再查 |
 | XX-F04 | B（当事方） | TikTok Shop / Tokopedia 印尼 | https://seller-id.tokopedia.com/university/essay?knowledge_id=4293090979071761 | web_list（整页对比） | BLOCKED（本次返回 504） | P2 | R2 阶段重试 |

@@ -46,7 +46,7 @@ it("prepares the existing S7 native schema/manifest for manual use without any a
   const manifest = await seedS7Local(dir, { manualOnly: true })
   const saved = JSON.parse(readFileSync(join(dir, "s7-local-manifest.json"), "utf8"))
   expect(saved).toEqual(manifest)
-  expect(saved).toMatchObject({ dataMode: "real", schemaVersion: 29, manualAcceptance: { synthetic: true, notOfficialContent: true, publishedAt: "", expected: { initialMaterials: 0, guiStatus: "NOT_RUN" } } })
+  expect(saved).toMatchObject({ dataMode: "real", schemaVersion: 30, manualAcceptance: { synthetic: true, notOfficialContent: true, publishedAt: "", expected: { initialMaterials: 0, guiStatus: "NOT_RUN" } } })
   const local = open(saved.databasePath)
   try {
     expect((await readDatabaseMetadata(local.database)).schemaVersion).toBe(saved.schemaVersion)

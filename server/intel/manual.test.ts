@@ -77,7 +77,9 @@ describe("r2-7 manual entry offline SQLite", () => {
       fault = false
       await initShippingTables(old.database, "real")
       await initShippingTables(old.database, "real")
-      expect(old.native.prepare("SELECT COUNT(*) AS n FROM intel_source WHERE kind='manual' AND enabled=0").get()).toEqual({ n: 40 })
+      expect(old.native.prepare("SELECT COUNT(*) AS n FROM intel_source WHERE kind='manual' AND enabled=0").get()).toEqual({ n: 49 })
+      expect((await old.repository.getSource("intel:manual:my-p02"))?.kind).toBe("manual")
+      expect((await old.repository.getSource("intel:manual:cn-p02"))?.kind).toBe("manual")
       expect(old.native.prepare("PRAGMA foreign_key_check").all()).toEqual([])
     } finally {
       old.native.close()

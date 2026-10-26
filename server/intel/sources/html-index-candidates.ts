@@ -1,6 +1,6 @@
 import type { IntelSourceSeed } from "../sources"
 
-/** Disabled catalog HTML pages, mapped by web_list or inert-HTML json_list; never active seeds. */
+/** Disabled catalog HTML pages, mapped by web_list or inert-HTML json_list; never active seeds. MY-P03 (2026-10-26 user decision): operational ownership moved to intel:manual:my-p03; keep this disabled candidate for offline conflict tests only — do not select for auto-fetch this round. */
 export const htmlIndexCandidates: readonly IntelSourceSeed[] = [
   {
     id: "intel:my-p03",

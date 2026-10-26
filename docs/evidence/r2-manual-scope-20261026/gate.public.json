@@ -1,0 +1,31 @@
+{
+  "type": "full_local_gate",
+  "atAsiaShanghai": "2026-10-26  15:22:15 Asia/Shanghai",
+  "atUtc": "2026-10-26T07:22:15.254Z",
+  "steps": {
+    "install": {
+      "exit": 0,
+      "note": "frozen-lockfile; prepare hooks ENOTDIR expected on worktree"
+    },
+    "build": {
+      "exit": 0
+    },
+    "typecheck": {
+      "exit": 0
+    },
+    "lint": {
+      "exit": 0
+    },
+    "vitest": {
+      "exit": 0,
+      "files": "161 passed",
+      "tests": "2055 passed | 9 skipped (2064)"
+    },
+    "s7Harness": "NOT_RUN_NOT_REQUIRED (no shell/route behaviour change; schema expect bump only in harness constant)"
+  },
+  "logsDir": ".tmp/gate-manual-scope-20261026/",
+  "productCodeShaBound": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
+  "day20Untouched": true,
+  "httpCountThisBatch": 0,
+  "overall": "PASS"
+}

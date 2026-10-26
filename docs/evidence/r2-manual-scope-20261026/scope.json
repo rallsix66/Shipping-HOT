@@ -1,0 +1,198 @@
+{
+  "type": "r2_manual_scope_user_decision",
+  "dotsTs": [
+    "1792998333.225029",
+    "1792998442.152949"
+  ],
+  "writtenAtUtc": "2026-10-26T07:16:22.943Z",
+  "writtenAtAsiaShanghai": "2026-10-26  15:16:22 Asia/Shanghai",
+  "userDecision": "If remaining ~8 cannot auto-fetch → manual; also move other sources that repeatedly failed auto to manual. Confirmed 9 this round.",
+  "zeroNewHttp": true,
+  "day20Untouched": {
+    "runId": "day20-20261026a",
+    "workerPid": 82336,
+    "parentPid": 27916,
+    "hostPid": 15112,
+    "observe": "D:/try one/Shipping HOT/.tmp/worktrees/r2-compat/.tmp/r2-intel-observe-day20-20261026a",
+    "host": "D:/try one/Shipping HOT/.tmp/day20-20261026a-host",
+    "action": "leave_alone_no_restart_no_lock_delete_no_hot_patch_no_day19"
+  },
+  "productCodeShaBound": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
+  "baselineTipBefore": "1cbefdfc30009e254794f6fe2d0761364b811bb6",
+  "branch": "codex/shipping-hot-r2-4-gapfill-20261025",
+  "worktree": "D:/try one/Shipping HOT/.tmp/worktrees/r2-4-gapfill-20261025",
+  "implementation": {
+    "reusedPath": "manualCatalog → manualChecklist → manualSubmit (HTTPS host allowlist from catalog urls; checked_empty; metadata-only persistence)",
+    "noSecondFramework": true,
+    "files": [
+      "server/intel/manual-catalog.ts (+9 entries)",
+      "server/database/migrations/030-manual-scope-r2-20261026.ts (additive ON CONFLICT DO NOTHING)",
+      "server/database/migrations/index.ts",
+      "server/intel/manual.test.ts (n:40→49 + my-p02/cn-p02 asserts)",
+      "server/intel/sources/html-index-candidates.ts (MY-P03 comment only)",
+      "docs/intel-source-catalog.md (method→manual note)",
+      "docs/evidence/r2-manual-scope-20261026/",
+      "docs/status.md",
+      "docs/evidence/r2-current-source-matrix-2026-10-14/mapping.json (annotation only; historical verdicts unchanged)"
+    ]
+  },
+  "matrix41": 41,
+  "laterPhase": [
+    "XX-A03",
+    "XX-A04"
+  ],
+  "manualThisRound": [
+    {
+      "id": "CN-P02",
+      "name": "深圳海事局",
+      "urls": [
+        "https://www.sz.msa.gov.cn/"
+      ],
+      "wired": "wired",
+      "note": "HTTPS entry present; checklist/submit host-allowlist = www.sz.msa.gov.cn; metadata-only; no invented dates."
+    },
+    {
+      "id": "VN-P01",
+      "name": "VIMAWA 海事通告",
+      "urls": [
+        "https://vimawa.gov.vn/vi/thong-bao-hang-hai"
+      ],
+      "wired": "wired",
+      "note": "HTTPS entry; host=vimawa.gov.vn; date often absent → leave unknown; TBHH id not a date."
+    },
+    {
+      "id": "MY-P03",
+      "name": "Northport 公告",
+      "urls": [
+        "https://www.northport.com.my/np/page-announcements.html"
+      ],
+      "wired": "wired",
+      "note": "HTTPS entry; host=www.northport.com.my; disabled htmlIndexCandidate retained offline; stop auto this round."
+    },
+    {
+      "id": "MY-L01",
+      "name": "Pos Malaysia 服务更新",
+      "urls": [
+        "https://www.pos.com.my/service-update"
+      ],
+      "wired": "wired",
+      "note": "HTTPS entry; host=www.pos.com.my; no invented slug when card lacks href."
+    },
+    {
+      "id": "PH-P01",
+      "name": "PPA",
+      "urls": [
+        "https://www.ppa.com.ph/content/ppa-helpdesk-advisory",
+        "https://www.ppa.com.ph/ppa-port-news"
+      ],
+      "wired": "wired",
+      "note": "HTTPS entries; host=www.ppa.com.ph; do NOT install CA / disable TLS; prior BLOCKED TLS leaf preserved."
+    },
+    {
+      "id": "PH-W01",
+      "name": "PAGASA SWB",
+      "urls": [
+        "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin"
+      ],
+      "wired": "wired",
+      "note": "User chooses manual ownership; historical explicit-empty auto-recognize + limited R2-4 OK retained; NOT rewrite as parse-never-succeeded."
+    },
+    {
+      "id": "PH-W02",
+      "name": "PAGASA Weather Advisory",
+      "urls": [
+        "https://www.pagasa.dost.gov.ph/weather/weather-advisory"
+      ],
+      "wired": "wired",
+      "note": "Same ownership decision as PH-W01; historical empty-state auto-recognize retained."
+    },
+    {
+      "id": "XX-F01",
+      "name": "TikTok Shop MY 费率/规则长页",
+      "urls": [
+        "https://seller-my.tiktok.com/university/essay?knowledge_id=4293090978809617"
+      ],
+      "wired": "wired_with_access_risk",
+      "note": "Catalog+migration+checklist wired; human may hit login/JS → degrade to 待接入 if page cannot be opened; no claim usable from docs alone for content."
+    },
+    {
+      "id": "MY-P02",
+      "name": "Westports 新闻稿",
+      "urls": [
+        "https://www.westportsholdings.com/category/press-release/feed/",
+        "https://www.westportsholdings.com/"
+      ],
+      "wired": "wired",
+      "note": "NOT tech-cannot-fetch: 200s on 10/13,10/15,10/25; 7/10 empty titles; 3 valid newest 2025-08-01; keep R2-5 limited PASS + R2-4 STALE. Empty titles must not be forged valid."
+    }
+  ],
+  "autoDirection": [
+    "CN-P01",
+    "CN-W01",
+    "CN-W02",
+    "CN-T01",
+    "CN-T02",
+    "VN-P03",
+    "VN-W01",
+    "VN-T01",
+    "VN-D01",
+    "TH-W01",
+    "TH-C01",
+    "TH-C02",
+    "MY-W01",
+    "MY-C01",
+    "MY-T01",
+    "ID-W01",
+    "ID-W02",
+    "ID-T01",
+    "ID-T02",
+    "PH-C01",
+    "PH-M01",
+    "XX-W01",
+    "XX-W02",
+    "XX-K01",
+    "XX-K02",
+    "XX-K03",
+    "XX-M01",
+    "XX-M03",
+    "XX-A01",
+    "XX-A02"
+  ],
+  "counts": {
+    "historical": {
+      "r2_4": "32/39",
+      "r2_5": "26/34",
+      "numericFieldsSeparate": "3/5 (historical limited diagnostics only)",
+      "overallR2Pass": false
+    },
+    "adjustedThisRound": {
+      "framing": "existing-evidence coverage only after user decision; NOT new full acceptance PASS",
+      "autoDenominator": 30,
+      "autoHistoricallyOk": "30/30",
+      "newsAmongAutoHistoricallyFieldPass": "25/25",
+      "numeric5ListedSeparately": [
+        "XX-W01",
+        "XX-A01",
+        "XX-A02",
+        "ID-W02",
+        "XX-W02"
+      ],
+      "manualListCount": 9,
+      "laterPhaseCount": 2,
+      "overallR2Pass": false,
+      "doNotClaim": [
+        "34/34 PASS by removing from auto",
+        "new full acceptance PASS",
+        "MY-P02 tech-cannot-fetch",
+        "PH-W01/02 parse-never-succeeded",
+        "demote recovered transient timeouts (PH-C01/VN-D01 etc.)"
+      ]
+    }
+  },
+  "extraBeyondOriginal8": {
+    "id": "MY-P02",
+    "rationale": "User decision includes moving sources that repeatedly failed to yield usable auto product. Evidence: HTTP 200 on 2026-10-13/15/25 but 7/10 titles empty, 3 valid items still newest 2025-08-01; content usability unresolved. Keep original R2-5 limited PASS on record; R2-4 STALE retained. Distinguishes from not-yet-wired and from recovered transient timeouts."
+  },
+  "othersBeyond9": "None. Evidence-only screen; no other source demoted this round.",
+  "httpCountThisBatch": 0
+}

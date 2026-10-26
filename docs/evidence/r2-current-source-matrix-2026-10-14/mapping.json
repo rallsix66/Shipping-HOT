@@ -1,9 +1,9 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-20T04:06:11.578Z",
-  "lastUpdatedAt": "2026-10-26T05:55:49.044Z",
-  "lastUpdatedAtSource": "this_write_utc; dotsTs=1792993692.018489; Asia/Shanghai=2026-10-26 13:55:49.044 Asia/Shanghai; productCodeSha=f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c; baselineTipBeforeDocs=f9d61698c74c133a33e83d6e9bfeafaf11b2f28d",
-  "lastUpdateNote": "2026-10-26 numeric 口径纠正 + R2 remaining inventory (dots 1792993692.018489): preserve historical numericFieldsSeparate 3/5 as limited-normalization diagnosis (not production attach); list five fields with evidence types; note ID-W02/XX-W02 separate offline evidence; R2-4 32/39, R2-5 26/34 remaining 8, R2-8 day20≠full P1; day20 untouched; zero network; overallR2Pass=false. Product gate bind f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c; baseline tip before docs f9d61698c74c133a33e83d6e9bfeafaf11b2f28d (final push tip reported separately).",
+  "lastUpdatedAt": "2026-10-26T07:16:22.943Z",
+  "lastUpdatedAtSource": "this_write",
+  "lastUpdateNote": "User decision 2026-10-26: 9 sources → manualCatalog/checklist/save; auto plan denominator 30; historical R2-4 32/39 & R2-5 26/34 preserved; overallR2Pass=false; dots 1792998333.225029 + 1792998442.152949; zero new HTTP; day20 untouched.",
   "reviewedCodeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
   "evidenceHead": "f9d61698c74c133a33e83d6e9bfeafaf11b2f28d",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
@@ -248,6 +248,15 @@
         "R3",
         "go-live"
       ]
+    },
+    "adjustedAutoManualScope20261026": {
+      "autoDenominator": 30,
+      "autoHistoricallyOk": "30/30",
+      "newsAmongAutoHistoricallyFieldPass": "25/25",
+      "manualCount": 9,
+      "laterPhaseCount": 2,
+      "overallR2Pass": false,
+      "note": "Does not replace historical r2_4 32/39 or r2_5 26/34; not a new full acceptance PASS."
     }
   },
   "clarifications": [
@@ -624,6 +633,13 @@
         "targetGetAttempts": 0,
         "multiHopCycleTested": false,
         "bodyPathNotUsedAsLocation": true
+      },
+      "userDecision20261026": {
+        "ownership": "manual",
+        "autoFetchThisRound": false,
+        "wired": "wired",
+        "note": "HTTPS entry present; checklist/submit host-allowlist = www.sz.msa.gov.cn; metadata-only; no invented dates.",
+        "evidence": "docs/evidence/r2-manual-scope-20261026/report.md"
       }
     },
     {
@@ -1440,7 +1456,14 @@
       ],
       "historicalSuperseded": [
         "Older DNS blocked_address/no-HTTP or missing-selector finding is historical where a later actual response/replay now exists; no old block remains counted as current."
-      ]
+      ],
+      "userDecision20261026": {
+        "ownership": "manual",
+        "autoFetchThisRound": false,
+        "wired": "wired",
+        "note": "HTTPS entry; host=vimawa.gov.vn; date often absent → leave unknown; TBHH id not a date.",
+        "evidence": "docs/evidence/r2-manual-scope-20261026/report.md"
+      }
     },
     {
       "id": "VN-P03",
@@ -2605,6 +2628,13 @@
         "parsedEntries": 3,
         "latestEligibleDay": "2025-08-01",
         "redirectsFollowed": 0
+      },
+      "userDecision20261026": {
+        "ownership": "manual",
+        "autoFetchThisRound": false,
+        "wired": "wired",
+        "note": "NOT tech-cannot-fetch: 200s on 10/13,10/15,10/25; 7/10 empty titles; 3 valid newest 2025-08-01; keep R2-5 limited PASS + R2-4 STALE. Empty titles must not be forged valid. NOT tech-cannot-fetch: 200 on 2026-10-13/15/25; 7/10 empty titles; 3 valid newest 2025-08-01; keep R2-5 limited PASS + R2-4 STALE.",
+        "evidence": "docs/evidence/r2-manual-scope-20261026/report.md"
       }
     },
     {
@@ -2724,6 +2754,13 @@
         "parserError": "web_list_duplicate_conflict",
         "itemsCommitted": 0,
         "redirectsFollowed": 0
+      },
+      "userDecision20261026": {
+        "ownership": "manual",
+        "autoFetchThisRound": false,
+        "wired": "wired",
+        "note": "HTTPS entry; host=www.northport.com.my; disabled htmlIndexCandidate retained offline; stop auto this round. htmlIndexCandidate disabled retained for offline tests; manual ownership this round.",
+        "evidence": "docs/evidence/r2-manual-scope-20261026/report.md"
       }
     },
     {
@@ -3532,6 +3569,13 @@
         "wireSha256": "f651779b54fb0f0dfe1c8af9a2777dba80057154fe80effd362e9413b68b74c0",
         "titleCardsWithoutHref": 10,
         "redirectsFollowed": 0
+      },
+      "userDecision20261026": {
+        "ownership": "manual",
+        "autoFetchThisRound": false,
+        "wired": "wired",
+        "note": "HTTPS entry; host=www.pos.com.my; no invented slug when card lacks href.",
+        "evidence": "docs/evidence/r2-manual-scope-20261026/report.md"
       }
     },
     {
@@ -4494,7 +4538,14 @@
         "Both 2026-10-25 entries have no HTTP status or body. Certificate chain was not exported by the secure transport and was not replaced.",
         "目录一行两URL，仍只算1个ID；仅离线sourceCa机制，未配置真实CA/selector/存档"
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "userDecision20261026": {
+        "ownership": "manual",
+        "autoFetchThisRound": false,
+        "wired": "wired",
+        "note": "HTTPS entries; host=www.ppa.com.ph; do NOT install CA / disable TLS; prior BLOCKED TLS leaf preserved.",
+        "evidence": "docs/evidence/r2-manual-scope-20261026/report.md"
+      }
     },
     {
       "id": "PH-W01",
@@ -4729,6 +4780,13 @@
         "result": "HTTP_ERROR",
         "code": "http_error",
         "qualificationUnchanged": true
+      },
+      "userDecision20261026": {
+        "ownership": "manual",
+        "autoFetchThisRound": false,
+        "wired": "wired",
+        "note": "User chooses manual ownership; historical explicit-empty auto-recognize + limited R2-4 OK retained; NOT rewrite as parse-never-succeeded. Historical empty-state CAN be auto-recognized (limited R2-4 OK retained); user chooses manual ownership — do NOT rewrite as parse-never-succeeded.",
+        "evidence": "docs/evidence/r2-manual-scope-20261026/report.md"
       }
     },
     {
@@ -4964,6 +5022,13 @@
         "result": "HTTP_ERROR",
         "code": "http_error",
         "qualificationUnchanged": true
+      },
+      "userDecision20261026": {
+        "ownership": "manual",
+        "autoFetchThisRound": false,
+        "wired": "wired",
+        "note": "Same ownership decision as PH-W01; historical empty-state auto-recognize retained. Historical empty-state CAN be auto-recognized (limited R2-4 OK retained); user chooses manual ownership — do NOT rewrite as parse-never-succeeded.",
+        "evidence": "docs/evidence/r2-manual-scope-20261026/report.md"
       }
     },
     {
@@ -7376,7 +7441,14 @@
       "gaps": [
         "整页带日期段落对比不是已配置list；无合规存档及可复现intel断言"
       ],
-      "historicalSuperseded": []
+      "historicalSuperseded": [],
+      "userDecision20261026": {
+        "ownership": "manual",
+        "autoFetchThisRound": false,
+        "wired": "wired_with_access_risk",
+        "note": "Catalog+migration+checklist wired; human may hit login/JS → degrade to 待接入 if page cannot be opened; no claim usable from docs alone for content.",
+        "evidence": "docs/evidence/r2-manual-scope-20261026/report.md"
+      }
     }
   ],
   "historicalCompletedBatchProposal": [
@@ -8185,5 +8257,103 @@
     "dotsTs": "1792993692.018489",
     "path": "docs/evidence/r2-remaining-inventory-20261026/remaining-inventory.json",
     "sha256": "b029d080d907545989c3f85160001ad951cdd4616a6cdbbb84dca6118156c413"
+  },
+  "lastManualScopeUserDecision": {
+    "dotsTs": [
+      "1792998333.225029",
+      "1792998442.152949"
+    ],
+    "atUtc": "2026-10-26T07:16:22.943Z",
+    "atAsiaShanghai": "2026-10-26  15:16:22 Asia/Shanghai",
+    "manualIds": [
+      "CN-P02",
+      "VN-P01",
+      "MY-P03",
+      "MY-L01",
+      "PH-P01",
+      "PH-W01",
+      "PH-W02",
+      "XX-F01",
+      "MY-P02"
+    ],
+    "autoIds": [
+      "CN-P01",
+      "CN-W01",
+      "CN-W02",
+      "CN-T01",
+      "CN-T02",
+      "VN-P03",
+      "VN-W01",
+      "VN-T01",
+      "VN-D01",
+      "TH-W01",
+      "TH-C01",
+      "TH-C02",
+      "MY-W01",
+      "MY-C01",
+      "MY-T01",
+      "ID-W01",
+      "ID-W02",
+      "ID-T01",
+      "ID-T02",
+      "PH-C01",
+      "PH-M01",
+      "XX-W01",
+      "XX-W02",
+      "XX-K01",
+      "XX-K02",
+      "XX-K03",
+      "XX-M01",
+      "XX-M03",
+      "XX-A01",
+      "XX-A02"
+    ],
+    "laterPhaseIds": [
+      "XX-A03",
+      "XX-A04"
+    ],
+    "newsHistoricallyPassAmongAuto": [
+      "CN-P01",
+      "CN-W01",
+      "CN-W02",
+      "CN-T01",
+      "CN-T02",
+      "VN-P03",
+      "VN-W01",
+      "VN-T01",
+      "VN-D01",
+      "TH-W01",
+      "TH-C01",
+      "TH-C02",
+      "MY-W01",
+      "MY-C01",
+      "MY-T01",
+      "ID-W01",
+      "ID-T01",
+      "ID-T02",
+      "PH-C01",
+      "PH-M01",
+      "XX-K01",
+      "XX-K02",
+      "XX-K03",
+      "XX-M01",
+      "XX-M03"
+    ],
+    "numeric5Separate": [
+      "XX-W01",
+      "XX-A01",
+      "XX-A02",
+      "ID-W02",
+      "XX-W02"
+    ],
+    "framing": "existing-evidence coverage only",
+    "autoHistoricallyOk": "30/30",
+    "newsHistoricallyFieldPass": "25/25",
+    "historicalR2_4": "32/39",
+    "historicalR2_5": "26/34",
+    "overallR2Pass": false,
+    "evidence": "docs/evidence/r2-manual-scope-20261026/report.md",
+    "productCodeShaBound": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
+    "httpCountThisBatch": 0
   }
 }

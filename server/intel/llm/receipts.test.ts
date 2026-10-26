@@ -112,9 +112,9 @@ const usage = (native: Native) => native.prepare("SELECT COALESCE(SUM(request_co
 describe("migrations 024/025 (paid_receipt)", () => {
   it("applies on a fresh isolated database to current schema v28 and is idempotent", async () => {
     const { db, native } = await setup()
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(29)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(30)
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(29)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(30)
     const tables = native.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE 'paid_receipt%' ORDER BY name").all()
     expect(tables).toEqual([{ name: "paid_receipt" }, { name: "paid_receipt_attempt" }])
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name IN ('budgets', 'budget')").all()).toEqual([])

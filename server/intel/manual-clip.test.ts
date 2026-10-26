@@ -232,7 +232,7 @@ it("appends migration29 atomically, preserving schema28 on failure and safely re
     if (fail && sql.startsWith("INSERT INTO intel_source (id,catalog_id,name,kind,url,persistence")) throw new Error("migration29 injected failure")
   })
   try {
-    expect(shippingMigrations.at(-1)?.version).toBe(29)
+    expect(shippingMigrations.at(-1)?.version).toBe(30)
     await expect(initShippingTables(old.database, "real")).rejects.toThrow("migration29")
     expect(old.native.prepare("SELECT MAX(version) AS n FROM schema_migrations").get()).toEqual({ n: 28 })
     expect(old.native.prepare("PRAGMA table_info(intel_manual_action)").all().some((row: any) => row.name === "metadata_json")).toBe(false)

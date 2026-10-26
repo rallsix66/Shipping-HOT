@@ -107,7 +107,7 @@ describe("intel actual HTTP read routes", () => {
   it("reads manual checklist with query_only and no external requests", async () => {
     const response = await get("manual")
     expect(response.status).toBe(200)
-    expect(response.body.items).toHaveLength(42)
+    expect(response.body.items).toHaveLength(51)
     expect(response.body.items.find((row: { catalogId: string }) => row.catalogId === "CN-P05")).toMatchObject({ persistence: "disallowed", recentActions: [] })
   })
 
