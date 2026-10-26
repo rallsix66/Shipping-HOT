@@ -1,3 +1,11 @@
+## 2026-10-26 — 矩阵文档一致性（dots 1792982122.073619）
+
+- **纯文档**：统一 `lastUpdatedAt` / `lastUpdatedAtSource` 为本写语义（此前 tip e9ee10b 的 lastUpdatedAt=02:33:38.780Z，但 source 仍声称 10:31:26.773 为本写）。
+- **continuous-24h**：总览由「NOT_RUN / 未启用」改为区分 —— day19 19-source observe **已尝试但不完整**（ATTEMPTED_INCOMPLETE；约 3.8h 可证事件；退出未知），**验收仍 NOT_PASSED / 未授予**；不是从未启动。
+- **MY-L01**：`english_month_abbr_12h` 已于 2026-10-20 落地（3f8971e3）；**不再列待修日期语法**。当前缺口是卡片标题 **无 href**。
+- **计数不变**：R2-4 **32/39**、R2-5 **25/34**、numeric **3/5**、`overallR2Pass=false`。历史快照保留。代码门禁沿用 `7a1975682078e1fb8107a7992b6a36833a293b0b`。未启动 observe、未合并/部署。
+- 矩阵：[mapping.json](evidence/r2-current-source-matrix-2026-10-14/mapping.json) / [report.md](evidence/r2-current-source-matrix-2026-10-14/report.md)。
+
 ## 2026-10-26 — PAGASA PH-W01/PH-W02 限定产品裁定落地，公开资格 32/39
 
 - 在零新网络前提下，按**已有官方明确空状态捕获及离线产品范围解析核验**，将 PH-W01 与 PH-W02 **各**计为**限定** R2-4 OK（`r2_4=OK`，`countedOK=true`，`scope=existing official explicit-empty captures and offline product-scoped parse verification`）。

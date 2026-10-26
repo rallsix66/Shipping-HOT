@@ -1,9 +1,9 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-20T04:06:11.578Z",
-  "lastUpdatedAt": "2026-10-26T02:33:38.780Z",
-  "lastUpdatedAtSource": "this_write_utc; dotsTs=1792981339.583919; Asia/Shanghai=2026-10-26 10:31:26.773 Asia/Shanghai",
-  "lastUpdateNote": "2026-10-26 PAGASA PH-W01/PH-W02 limited product ruling (dots 1792981339.583919): each limited R2-4 OK for existing official explicit-empty captures and offline product-scoped parse verification. 30/39 → 32/39 (meets minimum); R2-5 25/34; numeric 3/5; PPA BLOCKED; day19 incomplete; overallR2Pass=false. Pure docs; gates bound to 7a1975682078e1fb8107a7992b6a36833a293b0b (no full suite re-run).",
+  "lastUpdatedAt": "2026-10-26T02:41:26.990Z",
+  "lastUpdatedAtSource": "this_write_utc; dotsTs=1792982122.073619; Asia/Shanghai=2026-10-26 10:41:26.990 Asia/Shanghai",
+  "lastUpdateNote": "2026-10-26 docs consistency (dots 1792982122.073619): unify lastUpdatedAtSource to this write; distinguish day19 19-source observe ATTEMPTED_INCOMPLETE vs continuous-24h acceptance not passed; MY-L01 date grammar fixed 2026-10-20 — current gap is missing card href (not pending syntax). Counts unchanged R2-4 32/39, R2-5 25/34, numeric 3/5, overallR2Pass=false. Preserve historical snapshots. Pure docs; gates bound to 7a1975682078e1fb8107a7992b6a36833a293b0b (no full suite re-run).",
   "reviewedCodeSha": "7a1975682078e1fb8107a7992b6a36833a293b0b",
   "evidenceHead": "4c515bab4517ffc504b8d3f2424c3288eb0c9637",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
@@ -152,11 +152,15 @@
     "r2Continuous24h": {
       "numerator": 0,
       "denominator": 39,
-      "status": "NOT_RUN"
+      "status": "ATTEMPTED_INCOMPLETE",
+      "acceptance": "NOT_PASSED",
+      "note": "day19 19-source observe (profile 24h-19, run-id day19-20261025a) was attempted but incomplete (last proven event ~3.8h after start; exit time/reason unknown). Not never-started/未启用. Does not grant continuous-24h acceptance or overall R2 PASS. See docs/evidence/r2-4-day19-interrupt-20261026/.",
+      "claim24hPass": false
     },
     "overallR2Pass": false
   },
   "clarifications": [
+    "Continuous-24h: a new 19-source observe was attempted (day19) but remains incomplete; overall continuous-24h acceptance is NOT_PASSED / not granted. Distinguish attempted-incomplete from never-started; do not read as production enablement or overallR2Pass.",
     "PH-W01/PH-W02 limited R2-4 OK (2026-10-26T02:22:19.583919Z / rulingMessageTs=1792981339.583919) for existing official explicit-empty captures and offline product-scoped parse verification only. Prior PARTIAL/403/30/39 held remain historical snapshots. Not active bulletin, production ingest, continuous availability, or 24h pass; R2-5 25/34 and numeric 3/5 unchanged; overallR2Pass=false.",
     "XX-W02 limited R2-4 OK (2026-10-25T10:08:31.869439Z / rulingMessageTs=1792922911.869439) for existing two-TC forecast+specifications capture and offline field verification only. Prior PARTIAL/forecast-only and 29/39 held remain historical snapshots. specifications not in production sync; live persistence/continuous run unverified; numeric partition 3/5 unchanged; not full-pass or production enablement.",
     "R2-5 field pass is actual source-time field with honest role/precision, not certification of news publication instant, warning validity or untruncated legal text. If a stricter publication-only contract is desired it is a separately stated change; no such new hard gate introduced.",
@@ -3256,10 +3260,12 @@
       "numericFieldValidation": null,
       "dateEvidence": {
         "role": "source_displayed_card_local_datetime",
-        "precision": "unverified_by_existing_grammar",
+        "precision": "minute",
         "sourceDeclaredTimezone": "missing",
         "publicationInstant": null,
-        "rawExample": "07 Oct 2026 06:30 pm"
+        "rawExample": "07 Oct 2026 06:30 pm",
+        "grammarLanded": "english_month_abbr_12h (2026-10-20; code 3f8971e3); not a pending syntax fix",
+        "note": "Date syntax fixed offline 2026-10-20; current blocking gap is missing article href on title cards."
       },
       "licensePolicy": {
         "storedBody": "metadata_only_until_source_permission_verified",
@@ -3289,8 +3295,8 @@
       },
       "gaps": [
         "2026-10-25 exact page recheck: HTTP 200, 124339 bytes, wire f651779b54fb0f0dfe1c8af9a2777dba80057154fe80effd362e9413b68b74c0. Ten title cards still have no href. Ticker postDetailId links are not the card identity and were not turned into slugs.",
+        "Date grammar english_month_abbr_12h landed 2026-10-20 (3f8971e3); ten card times parse to local minute precision with missing timezone/null instant. Current gap is missing article href — not a pending code syntax fix.",
         "Ten title anchors lack href; category URL cannot identify articles.",
-        "Abbreviated English month/12h clock not supported by current strict grammar; no date/zone guess.",
         "No permanent source config or hidden-interface/detail request.",
         "Static response contains ten title/time cards; rendering method or hidden API is not established by this missing-href result."
       ],

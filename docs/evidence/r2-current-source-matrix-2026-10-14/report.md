@@ -41,7 +41,7 @@ Westports 已获限定认可：R2-4仍 STALE、25/39；R2-5按既有 parser 的3
 | R2-4公开自动来源 | **32/39（82.05%）** | 最小32项，差0；32 OK、4 PARTIAL、1 STALE、1 BLOCKED、1 NOT_RUN；门槛计数通过，但 overallR2Pass=false |
 | R2-5资讯/公告原页字段回放 | **25/34（73.53%）** | 尚差9；25 PASS、2 FAIL、2 PARTIAL、5 NOT_RUN，未通过 |
 | 数值字段独立检查 | **历史3项有限诊断＋新增1项完整原件离线解析** | 分母5，类型分列；不称4/5生产接入，不加到34项原页回放分子 |
-| R2连续24小时 | **NOT_RUN** | 未启用，不推导生产可用性或整体R2 PASS |
+| R2连续24小时 | **ATTEMPTED_INCOMPLETE** | day19 19-source observe 已尝试但不完整（约3.8h 可证事件；退出时刻/原因未知）；continuous-24h 验收 **NOT_PASSED** / 未授予 — 不是从未启动/未启用；不推导生产可用性或整体 R2 PASS |
 
 34资讯/公告、5数值天气、2后续阶段的分类于06:31:44 UTC已批准，41项全部保留。后续付费天气与向量只从公开39项分母排除，没有标PASS。这里的OK只描述留证时的实产品可用和数据/解析检查，不描述今天实时可用、生产默认启用或24小时表现。默认关闭独立于来源资格，不记作失败。
 
@@ -72,7 +72,7 @@ NMC旧降级依据现已更正：10/13 03:55Z是读10/11存档、注入200、强
 | MY-W01 | https://api.data.gov.my/weather/warning/ | 2026-10-10T08:30:40.728Z / 200（历史实测，非本日） | OK | PASS（已审定天气Feed复用） | [4条完整响应文本回放](../r2-my-w01-contract-2026-10-15/feed-replay.json)：unknown时区/有效性、received_at、0港口影响不变；目录同产品补尾斜杠，旧301保留。未运行24h。 |
 | MY-C01 | https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss | 2026-10-15T04:10:40.625Z / 200 [本轮取证](../r2-three-rss-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-three-rss-2026-10-15/MY-C01-replay.json) | 完整私有XML→既有collector→隔离SQLite 10条；重复0新0修订，readonly/query_only重开0差异；pubDate秒精度、原offset +0800，无独立updated。仅metadata，未生产启用。 |
 | MY-T01 | https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss | 2026-10-15T04:10:41.342Z / 200 [本轮取证](../r2-three-rss-2026-10-15/capture-summary.json) | OK | PASS [字段](../r2-three-rss-2026-10-15/MY-T01-replay.json) | 完整私有XML→既有collector→隔离SQLite 6条；重复0新0修订，readonly/query_only重开0差异；pubDate秒精度、原offset +0800，无独立updated。仅metadata，未生产启用。 |
-| MY-L01 | https://www.pos.com.my/service-update | 2026-10-15T01:16:13.254Z / 200 [本批](../r2-four-reapplied-2026-10-15/report.md) | PARTIAL | FAIL | 原页10张卡片标题锚点均无href；类别链接是列表自身。真实适用性探针失败/写入0，不猜路由或时区。 |
+| MY-L01 | https://www.pos.com.my/service-update | 2026-10-15T01:16:13.254Z / 200 [本批](../r2-four-reapplied-2026-10-15/report.md) | PARTIAL | FAIL | 当前缺口：10张卡片标题锚点均无href（类别链接是列表自身）。日期语法 english_month_abbr_12h 已于 2026-10-20 落地（3f8971e3），不再列待修语法；真实适用性探针失败/写入0，不猜路由或时区。 |
 | ID-W01 | https://www.bmkg.go.id/alerts/nowcast/en/rss.xml | 2026-10-13T07:00:40.269Z / 200 [取证](../r2-bounded-rss-after-dns-2026-10-13/batch-results.json) | OK | PASS [字段](../r2-p1-inventory-2026-10-13/replay.log) | 最新精确RSS13条可读；回放是旧12条、原GET为/en别名，不把两份payload混为一份。 |
 | ID-T01 | https://jdih.kemendag.go.id/ | 2026-10-14T09:08:45.056Z / 200 [取证](../r2-three-after-clash-2026-10-14/summary.json) | OK | PASS [字段](../r2-post-clash-index-replay-final-2026-10-14/summary.json) | 8条完整原页回放通过；制定日不是发布日期，标题原有省略号保留，初始失败另存。 |
 | ID-T02 | https://jdih.kemenkeu.go.id/ | 原07:37:48.414Z root307→真实Location/home07:37:48.920Z 200，当前无新请求 | OK | PASS | 主会话限定代码/过程认可7条原件验收，日期角色/TZ未知、publishedAt null及漏检更正保留，不称独立私有原页重放/CI/24h通过。 |
