@@ -3,7 +3,7 @@
 - Isolation: `codex/shipping-hot-r2-4-gapfill-20261025` @ worktree `.tmp/worktrees/r2-4-gapfill-20261025`
 - **product baseline (OLD, not this batch):** `f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c`
 - tip before gapfill: `87002b85cdc1827a5dacee6af4ec7261e0176a7a`
-- this batch tested SHA: *(filled after commit)*
+- this batch tested SHA: `D:\try one\Shipping HOT\.tmp\worktrees\r2-4-gapfill-20261025\.tmp\bind-sha.mjs`
 - Gaps closed: MY-L01 whole-page shared URL only; PAGASA www-only / pubfiles PDF reject; true v29→030 upgrade fixture; SHA binding
 - Evidence: `docs/evidence/r2-manual-scope-gapfill-20261026/`
 - day20 untouched; HTTP=0; no merge/deploy

@@ -4,7 +4,7 @@
 
 | Label | SHA | Meaning |
 | --- | --- | --- |
-| **product baseline (OLD)** | `*(final commit after gate — see gap.json)*` | Prior product baseline; **NOT** this batch's tested code |
+| **product baseline (OLD)** | ``D:\try one\Shipping HOT\.tmp\worktrees\r2-4-gapfill-20261025\.tmp\bind-sha.mjs`` | Prior product baseline; **NOT** this batch's tested code |
 | tip before this gapfill | `87002b85cdc1827a5dacee6af4ec7261e0176a7a` | Isolation tip when gapfill started |
 | **this batch tested SHA** | `D:\try one\Shipping HOT\.tmp\worktrees\r2-4-gapfill-20261025\.tmp\patch-sha.mjs` | Code under test for this acceptance-gap fill |
 
