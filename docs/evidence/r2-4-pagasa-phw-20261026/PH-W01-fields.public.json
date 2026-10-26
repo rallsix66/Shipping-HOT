@@ -1,0 +1,57 @@
+{
+  "id": "PH-W01",
+  "productClass": "severe_weather_bulletin",
+  "executorMeasured": true,
+  "entryUrl": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+  "captureStatus": "CAPTURED",
+  "httpStatus": 200,
+  "addressClassification": "public_address",
+  "addresses": [
+    {
+      "address": "18.136.188.82",
+      "family": 4
+    },
+    {
+      "address": "13.214.5.83",
+      "family": 4
+    }
+  ],
+  "bytes": 141029,
+  "wireSha256": "b5ecb77a40ada689ef08f52fb942b94cc3f5fe88f6e2dbb84096cb1d08a5a1ad",
+  "tlsVerified": true,
+  "redirectsFollowed": false,
+  "emptyStateActive": true,
+  "emptyStateOriginalText": "No Active Tropical Cyclone within the Philippine Area of Responsibility",
+  "emptyStateContainer": ".tropical-cyclone-weather-bulletin-page .article-content .panel-body > h3",
+  "bodyAvailability": "legal_empty_state_shell",
+  "identity": null,
+  "originalPublishTime": null,
+  "timezoneRole": null,
+  "validity": null,
+  "updateRevoke": null,
+  "stableLink": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+  "tcAdvisorySubstituted": false,
+  "archivePdfLinksOnPage": 17,
+  "latestArchivePdfLinked": {
+    "url": "https://pubfiles.pagasa.dost.gov.ph/tamss/weather/bulletin/TCB%2317_rosal.pdf",
+    "linkText": "TCB#17_rosal.pdf",
+    "host": "pubfiles.pagasa.dost.gov.ph",
+    "officialHost": true,
+    "section": "Archive",
+    "currentUsable": false,
+    "fetchStatus": "BLOCKED",
+    "fetchBlockedReason": "addressClassification=blocked_address",
+    "resolvedAddress": [
+      {
+        "address": "198.18.0.141",
+        "family": 4
+      }
+    ],
+    "httpGetAttempted": false,
+    "note": "Stopped at DNS blocked_address (198.18.0.141); no retry; no egress/client/domain swap; no bypass."
+  },
+  "currentUsableBulletin": false,
+  "limitation": "Page explicitly inactive; archive PDFs linked but not treated as current usable bulletin; latest archive PDF host DNS blocked under secure chain.",
+  "rawLocalOnly": true,
+  "redistributedOriginal": false
+}

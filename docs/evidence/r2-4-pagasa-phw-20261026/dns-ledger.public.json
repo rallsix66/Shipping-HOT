@@ -1,0 +1,49 @@
+[
+  {
+    "id": "PH-W01",
+    "host": "www.pagasa.dost.gov.ph",
+    "classification": "public_address",
+    "addresses": [
+      {
+        "address": "18.136.188.82",
+        "family": 4
+      },
+      {
+        "address": "13.214.5.83",
+        "family": 4
+      }
+    ],
+    "state": "finished",
+    "finishedAt": "2026-10-26T01:19:46.244Z"
+  },
+  {
+    "id": "PH-W02",
+    "host": "www.pagasa.dost.gov.ph",
+    "classification": "public_address",
+    "addresses": [
+      {
+        "address": "18.136.188.82",
+        "family": 4
+      },
+      {
+        "address": "13.214.5.83",
+        "family": 4
+      }
+    ],
+    "state": "finished",
+    "finishedAt": "2026-10-26T01:19:47.028Z"
+  },
+  {
+    "id": "PH-W01-pdf-latest-archive",
+    "host": "pubfiles.pagasa.dost.gov.ph",
+    "classification": "blocked_address",
+    "addresses": [
+      {
+        "address": "198.18.0.141",
+        "family": 4
+      }
+    ],
+    "state": "finished",
+    "finishedAt": "2026-10-26T01:20:46.595Z"
+  }
+]

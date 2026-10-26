@@ -1,0 +1,40 @@
+{
+  "id": "PH-W02",
+  "productClass": "weather_advisory",
+  "executorMeasured": true,
+  "entryUrl": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+  "captureStatus": "CAPTURED",
+  "httpStatus": 200,
+  "addressClassification": "public_address",
+  "addresses": [
+    {
+      "address": "18.136.188.82",
+      "family": 4
+    },
+    {
+      "address": "13.214.5.83",
+      "family": 4
+    }
+  ],
+  "bytes": 131818,
+  "wireSha256": "8ac1546c1681d5b67f71ceeb1626a92553d0ffe6f5224294d7cc9de62068ff53",
+  "tlsVerified": true,
+  "redirectsFollowed": false,
+  "emptyStateActive": true,
+  "emptyStateOriginalText": "As of today, there is no Weather Advisory issued.",
+  "emptyStateContainer": ".article-content.weather-advisory / notable <p>",
+  "bodyAvailability": "legal_empty_state_shell",
+  "identity": null,
+  "originalPublishTime": null,
+  "timezoneRole": null,
+  "validity": null,
+  "updateRevoke": null,
+  "stableLink": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+  "pdfLinksOnPage": 0,
+  "pdfFetch": "not_applicable_no_confirmable_pdf_link",
+  "currentUsableAdvisory": false,
+  "sharedEmptyStateWithPhW01": false,
+  "limitation": "Page explicitly inactive with official original empty-state text; no advisory body/id/time/PDF on this snapshot.",
+  "rawLocalOnly": true,
+  "redistributedOriginal": false
+}

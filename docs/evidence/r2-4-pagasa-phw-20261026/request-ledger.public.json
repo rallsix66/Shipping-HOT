@@ -1,0 +1,22 @@
+[
+  {
+    "id": "PH-W01",
+    "method": "GET",
+    "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+    "reservedAt": "2026-10-26T01:19:46.245Z",
+    "state": "finished",
+    "httpStatus": 200,
+    "bytes": 141029,
+    "finishedAt": "2026-10-26T01:19:47.025Z"
+  },
+  {
+    "id": "PH-W02",
+    "method": "GET",
+    "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+    "reservedAt": "2026-10-26T01:19:47.028Z",
+    "state": "finished",
+    "httpStatus": 200,
+    "bytes": 131818,
+    "finishedAt": "2026-10-26T01:19:47.402Z"
+  }
+]

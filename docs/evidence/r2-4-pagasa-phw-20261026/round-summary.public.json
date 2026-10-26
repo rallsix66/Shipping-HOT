@@ -1,0 +1,82 @@
+{
+  "round": "dots-1792977003.407069",
+  "kind": "PAGASA limited verification PH-W01+PH-W02 only",
+  "baselineHead": "fe8b2f8c9ec449dff043e6ce3ba91c0a5691ffd9",
+  "branch": "codex/shipping-hot-r2-4-gapfill-20261025",
+  "worktree": "D:/try one/Shipping HOT/.tmp/worktrees/r2-4-gapfill-20261025",
+  "finishedAt": "2026-10-26T01:21:37.111Z",
+  "scopeExclusions": [
+    "NO_JMA_redo",
+    "NO_PPA_redo"
+  ],
+  "countsFrozen": {
+    "R2_4": "30/39",
+    "R2_5": "25/34",
+    "numericProductionPartition": "3/5",
+    "overallR2Pass": false,
+    "PPA": "BLOCKED",
+    "executorDidNotUpgradeOK": true
+  },
+  "http": {
+    "used": 2,
+    "cap": 6,
+    "redirectsFollowed": 0,
+    "retries": 0
+  },
+  "products": {
+    "PH-W01": {
+      "entry": "CAPTURED_200_legal_empty_state",
+      "emptyStateOriginalText": "No Active Tropical Cyclone within the Philippine Area of Responsibility",
+      "archivePdfLinked": 17,
+      "latestArchivePdfFetch": "BLOCKED_dns_blocked_address",
+      "currentUsable": false,
+      "countedOKUnchanged": true
+    },
+    "PH-W02": {
+      "entry": "CAPTURED_200_legal_empty_state",
+      "emptyStateOriginalText": "As of today, there is no Weather Advisory issued.",
+      "pdfLinked": 0,
+      "currentUsable": false,
+      "countedOKUnchanged": true
+    }
+  },
+  "day19Observe": {
+    "path": "D:/try one/Shipping HOT/.tmp/worktrees/r2-compat/.tmp/r2-intel-observe-day19-20261025a",
+    "profile": "24h-19",
+    "startedAt": "2026-10-25T03:57:37.686Z",
+    "until": "2026-10-26T03:57:37.686Z",
+    "untilAsiaShanghai": "2026-10-26 11:57:37 Asia/Shanghai",
+    "checkedAtAsiaShanghai": "2026-10-26 09:21:07 Asia/Shanghai",
+    "remainingApprox": "~2h36m until expected end (not elapsed)",
+    "running": false,
+    "lastEventAt": "2026-10-25T07:45:29.905Z",
+    "lastEventSequence": 799,
+    "lastEventType": "job_result",
+    "abnormalStop": true,
+    "abnormalStopNote": "Events stopped ~3.8h after start; no further events through check time. Existing log facts only; no restart.",
+    "scheduleRecordsExist": true,
+    "sampleNextSyncAt": "2026-10-25T08:15:28.208Z",
+    "lockFilePresent": true,
+    "lockPid": 29736,
+    "lockPidRunning": false,
+    "early24hPassClaimed": false,
+    "readOnly": true,
+    "noRestart": true,
+    "noLockDbConfigChange": true
+  },
+  "isolation": {
+    "exclusiveWorktreePreserved": true,
+    "mainR2BranchUntouched": true,
+    "r2CompatHead": "e41d3145b4276a0c02aab9f00d795476aefa1608",
+    "junctionsPreserved": [
+      "D:/wt-s1",
+      "D:/wt-s2",
+      "D:/wt-s3",
+      "D:/wt-s4",
+      "D:/wt-s5",
+      "D:/wt-diag-3d42100"
+    ]
+  },
+  "privateEvidenceRoot": ".tmp/r2-4-pagasa-phw-20261026",
+  "publicEvidenceRoot": "docs/evidence/r2-4-pagasa-phw-20261026"
+}

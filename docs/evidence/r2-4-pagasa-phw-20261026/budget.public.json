@@ -1,0 +1,41 @@
+{
+  "round": "dots-1792977003-pagasa",
+  "baselineHead": "fe8b2f8c9ec449dff043e6ce3ba91c0a5691ffd9",
+  "used": 2,
+  "cap": 6,
+  "redirectsFollowed": 0,
+  "retries": 0,
+  "note": "Fresh ledger; not mixed with r2-4-gapfill-20261025 budget (used6/cap12).",
+  "countedRequests": [
+    {
+      "id": "PH-W01",
+      "method": "GET",
+      "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+      "httpStatus": 200,
+      "bytes": 141029,
+      "state": "finished"
+    },
+    {
+      "id": "PH-W02",
+      "method": "GET",
+      "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+      "httpStatus": 200,
+      "bytes": 131818,
+      "state": "finished"
+    }
+  ],
+  "dnsOnlyNoHttp": [
+    {
+      "id": "PH-W01-pdf-latest-archive",
+      "host": "pubfiles.pagasa.dost.gov.ph",
+      "classification": "blocked_address",
+      "addresses": [
+        {
+          "address": "198.18.0.141",
+          "family": 4
+        }
+      ],
+      "httpCounted": false
+    }
+  ]
+}
