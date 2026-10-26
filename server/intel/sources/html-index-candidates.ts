@@ -341,7 +341,8 @@ export const htmlIndexCandidates: readonly IntelSourceSeed[] = [
       publishedAtSelector: "span",
       calendar: "gregorian",
       allowUrlPrefixes: ["https://www.mofcom.gov.cn/zcfb"],
-      dateRuleBasis: "CN-T01 complete 20318-byte same-product HTTPS HTML saved 2026-10-20: Latest policy ul.policy-list has eight own title/link/span YYYY-MM-DD rows. Seven relative HTTPS identities retained; one original HTTP policy and its interpretation link excluded by existing policy. Displayed day only, publication role/clock/timezone unknown; no protocol rewrite or detail fetch.",
+      metadataLinkRule: "mofcom_art_http_https_twin",
+      dateRuleBasis: "CN-T01 20318B list 2026-10-20 + Part B twin evidence r2-cn-t01-item8-https-20261026 (wireSha256=f73324f6...; dots 1792984344.944339 one twin only). Eight own title/link/day rows; seven relative HTTPS kept; one exact HTTP identity via metadataLinkRule=mofcom_art_http_https_twin (HTTPS alias only, not blanket upgrade); interpretation links excluded. Displayed day only; no detail fetch. Prior HTML-copy href-mutation 8/8 is non-qualifying.",
     },
   },
 ]

@@ -1,0 +1,92 @@
+{
+  "atAsiaShanghai": "2026-10-26 11:20+",
+  "dotsTs": "1792984344.944339",
+  "acks": [
+    "1792984214.875899",
+    "Part A ack already handled"
+  ],
+  "purpose": "Minimal default-off CN-T01 metadataLinkRule=mofcom_art_http_https_twin: exact HTTP list identity kept as canonicalUrl; verified HTTPS twin is alias only. Not blanket HTTP->HTTPS upgrade. Zero new network.",
+  "design": {
+    "modeledOn": "sitc_show metadataLinkRule (source-scoped, metadata-only, no HTTP body fetch)",
+    "rule": "mofcom_art_http_https_twin",
+    "sourceId": "intel:cn-t01",
+    "persistence": "disallowed",
+    "enabled": false,
+    "requireExplicitEnable": true,
+    "aliasBeforeCanonicalize": true,
+    "canonicalIdentity": "http://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "aliasTarget": "https://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "aliasMustPassExistingHttpsAllowUrlPrefixes": true,
+    "noWidenCrawlWhitelist": true,
+    "noHttpTransportAllow": true,
+    "noGlobalUrlCanonicalizer": true,
+    "noTlsSsrfChange": true,
+    "collectPersists": "canonicalUrl only (entry.url not persisted) — original HTTP kept as canonicalUrl",
+    "schemaExpansion": "none",
+    "conflictOnTitleOrDateAfterMerge": "reject (WEB_LIST_DUPLICATE_CONFLICT)",
+    "priorHtmlCopyHrefMutation8of8": "NON_QUALIFYING_EXPERIMENTAL_ONLY"
+  },
+  "listOriginal": {
+    "path": ".tmp/cn-t01-item8-https-20261026/private/list-response-after-save-20261020.bin",
+    "bytes": 20318,
+    "sha256": "ab5e3780d9988fe7032458a05ad00adf4f6e66bb891aaaed385f8e2f515d340f",
+    "expectedSha256": "ab5e3780d9988fe7032458a05ad00adf4f6e66bb891aaaed385f8e2f515d340f",
+    "byteForByteUnmodified": true
+  },
+  "twinEvidence": {
+    "partB": "docs/evidence/r2-cn-t01-item8-https-20261026",
+    "wireSha256": "f73324f611d39e885fae695961f7dcbafd958a1619104e95704d49fca816e392",
+    "equivalence": "EQUIVALENT_FOR_IDENTITY_FIELDS"
+  },
+  "offline8of8ProductPath": {
+    "path": "fromHtml(unmodified list) -> collectIntelSource -> isolated native SQLite -> repeat -> read-only reopen",
+    "itemsSeen": 8,
+    "itemsNewFirst": 8,
+    "itemsNewSecond": 0,
+    "itemsRevisedSecond": 0,
+    "item8CanonicalUrl": "http://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "item8AliasUrlField": "https://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "otherSevenHttpsUnchanged": true,
+    "sourceDayRole": "2026-10-16 displayed list day; detail page 10-26 header NOT used as publish time",
+    "versionsPerItem": 1,
+    "contentScope": "metadata_only",
+    "extractorVersion": "intel-web-list-v1"
+  },
+  "countsFrozen": {
+    "r2_4": "32/39",
+    "r2_5": "25/34",
+    "note": "R2-5 stays 25/34 pending review; R2-4 unchanged. No silent bump."
+  },
+  "filesChanged": [
+    "server/intel/sources/config-keys.ts",
+    "server/intel/sources/web-list.ts",
+    "server/intel/sources/html-index-candidates.ts",
+    "server/intel/sources/cn-t01-http-https-twin.test.ts"
+  ],
+  "gates": {
+    "build": "exit 0",
+    "typecheck": "exit 0",
+    "lint": "exit 0",
+    "vitest": "2054 passed | 7 skipped (2061) / 161 files",
+    "network": "zero new during this work"
+  },
+  "day20FirstRoundRO": {
+    "runId": "day20-20261026a",
+    "workerPid": 82336,
+    "workerAlive": true,
+    "firstCollectAsiaShanghai": "2026-10-26 11:13:16",
+    "firstJobResultAsiaShanghai": "2026-10-26 11:13:52",
+    "sourceRuns": 19,
+    "status": "ok_items x19",
+    "itemsSeen": 363,
+    "itemsNew": 363,
+    "eventsTotal": 141,
+    "httpCompletedInEvents": 20,
+    "note": "read-only inspect only; no second start / lock delete / day19 touch"
+  },
+  "inspectedAtAsiaShanghai": "2026-10-26 11:27:11",
+  "codeSha": "a916a0f6cbbccfad94a6f38ce6a3bfed0a0c54d0",
+  "tip": "a916a0f6cbbccfad94a6f38ce6a3bfed0a0c54d0",
+  "baselineTipWas": "bad4f05d9c7a0a9d35165d7447af3933797125e2",
+  "committedAtAsiaShanghai": "2026-10-26 11:27+"
+}

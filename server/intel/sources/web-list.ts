@@ -26,6 +26,40 @@ export interface WebListEntry extends FeedEntry {
 
 export const WEB_LIST_DUPLICATE_CONFLICT = "web_list_duplicate_conflict"
 
+/**
+ * Exact CN-T01 list HTTP identity <-> verified official HTTPS detail twin (Part B 2026-10-26).
+ * Evidence: docs/evidence/r2-cn-t01-item8-https-20261026 (wireSha256=f73324f611d39e885fae695961f7dcbafd958a1619104e95704d49fca816e392).
+ * dots ts 1792984344.944339 accepts this one twin only; never a blanket HTTP->HTTPS upgrade.
+ * Metadata-only / default-off; never grants HTTP body fetch, crawl-whitelist widening, TLS/SSRF changes.
+ */
+export const MOFCOM_CN_T01_HTTP_IDENTITY = "http://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html"
+export const MOFCOM_CN_T01_HTTPS_ALIAS = "https://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html"
+
+function exactHrefKey(raw: string): string | null {
+  try {
+    const target = new URL(raw)
+    if (target.username || target.password || target.port || target.hash) return null
+    return `${target.protocol}//${target.hostname}${target.pathname}${target.search}`
+  } catch {
+    return null
+  }
+}
+
+/** Apply the fixed CN-T01 metadata alias on exact inputs before generic URL normalization. */
+export function resolveMetadataUrlAlias(
+  absoluteHref: string,
+  config: Pick<WebListConfig, "allowUrlPrefixes" | "denyUrlPrefixes" | "metadataLinkRule">,
+  policy: ArticleSourcePolicy,
+): { identity: string, aliasTarget: string } | undefined {
+  if (config.metadataLinkRule !== "mofcom_art_http_https_twin") return undefined
+  if (policy.sourceId !== "intel:cn-t01" || policy.persistence !== "disallowed") return undefined
+  const key = exactHrefKey(absoluteHref)
+  if (key !== MOFCOM_CN_T01_HTTP_IDENTITY && key !== MOFCOM_CN_T01_HTTPS_ALIAS) return undefined
+  // Alias target must still satisfy ordinary HTTPS host/prefix/deny rules (no metadataLinkRule bypass).
+  if (!allowed(MOFCOM_CN_T01_HTTPS_ALIAS, { allowUrlPrefixes: config.allowUrlPrefixes, denyUrlPrefixes: config.denyUrlPrefixes }, policy)) return undefined
+  return { identity: MOFCOM_CN_T01_HTTP_IDENTITY, aliasTarget: MOFCOM_CN_T01_HTTPS_ALIAS }
+}
+
 function unknownDateEvidence(value: string | null | undefined, config: Pick<WebListConfig, "calendar" | "dateRuleBasis">): WebDate {
   return { raw: value?.trim() || null, rule: "missing", basis: config.dateRuleBasis, calendar: config.calendar ?? "gregorian", precision: "unknown", timezone: "missing", utcOffset: null, localDate: null, publishedAt: null }
 }
@@ -158,6 +192,13 @@ export function parseLooseDate(value: string | null | undefined, config: Pick<We
 /** Prefix filters compare origin and path boundaries; they cannot widen the source policy. */
 export function allowed(url: string, config: Pick<WebListConfig, "allowUrlPrefixes" | "denyUrlPrefixes" | "metadataLinkRule">, policy: ArticleSourcePolicy): boolean {
   const target = new URL(url)
+  if (config.metadataLinkRule === "mofcom_art_http_https_twin") {
+    const key = exactHrefKey(url)
+    if (key === MOFCOM_CN_T01_HTTP_IDENTITY && policy.sourceId === "intel:cn-t01" && policy.persistence === "disallowed") {
+      return allowed(MOFCOM_CN_T01_HTTPS_ALIAS, { allowUrlPrefixes: config.allowUrlPrefixes, denyUrlPrefixes: config.denyUrlPrefixes }, policy)
+    }
+    // HTTPS twin and every other URL fall through to ordinary HTTPS checks; no blanket HTTP privilege.
+  }
   if (config.metadataLinkRule === "sitc_show") {
     // Only a stored identity. secureFetchArticle and its independent HTTP/redirect policy are unchanged.
     return policy.sourceId === "intel:xx-k03" && policy.persistence === "disallowed"
@@ -205,9 +246,19 @@ export function fromHtml(html: string, base: string, config: WebListConfig, poli
     const el = $(node)
     const linkEl = c.linkSelector ? (el.is(c.linkSelector) ? el : el.find(c.linkSelector).first()) : el.is("a") ? el : el.find("a[href]").first()
     const href = linkEl.attr("href")
-    const url = href ? canonicalizeFeedUrl(href, base) : undefined
+    if (!href) throw new Error("web_list_invalid_link")
+    let absoluteHref: string
+    try {
+      absoluteHref = new URL(href, base).href
+    } catch {
+      throw new Error("web_list_invalid_link")
+    }
+    // Exact metadata alias before generic URL normalization (CN-T01 HTTP<->HTTPS twin only when explicitly enabled).
+    const alias = resolveMetadataUrlAlias(absoluteHref, c, policy)
+    const identityHref = alias?.identity ?? absoluteHref
+    const url = canonicalizeFeedUrl(identityHref)
     if (!url) throw new Error("web_list_invalid_link")
-    if (c.metadataLinkRule && !allowed(new URL(href!, base).href, c, policy)) continue
+    if (c.metadataLinkRule && !allowed(absoluteHref, c, policy)) continue
     if (!allowed(url, c, policy) || listingItself(url, base)) continue
     const titleEl = c.titleSelector ? (el.is(c.titleSelector) ? el : el.find(c.titleSelector).first()) : linkEl
     let title = (c.titleAttribute ? titleEl.attr(c.titleAttribute) ?? "" : titleEl.text() || linkEl.attr("title") || "").replace(/\s+/g, " ").trim()
@@ -240,7 +291,8 @@ export function fromHtml(html: string, base: string, config: WebListConfig, poli
       continue
     }
     seen.set(url, association)
-    out.push({ url, canonicalUrl: url, title, summary: title, bodyText: "", publishedAt: dateEvidence.publishedAt ?? undefined, dateEvidence })
+    // Keep original HTTP as canonical identity; HTTPS twin is the verified alias only (collect persists canonicalUrl).
+    out.push({ url: alias?.aliasTarget ?? url, canonicalUrl: url, title, summary: title, bodyText: "", publishedAt: dateEvidence.publishedAt ?? undefined, dateEvidence })
   }
   if (!out.length) throw new Error("web_list_no_allowed_items")
   return out

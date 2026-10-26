@@ -51,3 +51,7 @@
 
 - 本轮落地：本证据目录元数据；隔离 `.tmp` 探针/离线账本
 - **无**产品代码 diff；**无** originals/secrets 入 git；**无** main R2 / mapping 改写；**无** merge/deploy/force；**未** Slack / 未联系 Guyang；**未**打扰 day20 observe
+
+## Qualification note (dots 1792984344.944339)
+
+The evidence-only HTML-copy href-mutation 8/8 above is **experimental / NON_QUALIFYING**. Product qualification uses the minimal `metadataLinkRule=mofcom_art_http_https_twin` path in [../r2-cn-t01-http-https-alias-20261026/report.md](../r2-cn-t01-http-https-alias-20261026/report.md) (original HTTP canonical identity; HTTPS alias only; not blanket upgrade).

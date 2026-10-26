@@ -1,6 +1,6 @@
 {
   "at": "2026-10-26T03:08:02.163Z",
-  "purpose": "Evidence-only offline 8/8 demonstration after HTTPS detail twin probe; product identity rewrite NOT applied; qualification counts remain frozen for dots ruling.",
+  "purpose": "EXPERIMENTAL ONLY / NON-QUALIFYING. Evidence-only offline 8/8 after HTTPS detail twin probe via private HTML href mutation; NOT a qualification basis. See r2-cn-t01-http-https-alias-20261026 for product alias path.",
   "listOriginal": {
     "path": "private/list-response-after-save-20261020.bin",
     "sourcePathHistorical": ".tmp/cn-t01-https-20261020/response-after-save-20261020.bin",
@@ -127,5 +127,10 @@
   "codeChange": {
     "applied": false,
     "reason": "Evidence-only path sufficient to show offline 8/8 under HTTPS twin; product rewrite deferred to dots."
+  },
+  "qualification": {
+    "status": "NON_QUALIFYING_EXPERIMENTAL_ONLY",
+    "reason": "HTML-copy href-mutation path; product identity rewrite was not applied. Superseded for qualification by product alias evidence r2-cn-t01-http-https-alias-20261026 under dots 1792984344.944339.",
+    "supersededBy": "docs/evidence/r2-cn-t01-http-https-alias-20261026"
   }
 }

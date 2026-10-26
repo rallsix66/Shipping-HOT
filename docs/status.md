@@ -1,3 +1,12 @@
+## 2026-10-26 · CN-T01 exact HTTP↔HTTPS metadata alias（dots 1792984344.944339）
+
+- **零新网络**。按 dots 对本 twin 的身份字段等价裁定落地最小默认关闭 `metadataLinkRule=mofcom_art_http_https_twin`（源作用域、metadata-only；**不是**同 allowUrlPrefixes 下的 blanket HTTP→HTTPS 升级）。
+- 原 HTTP 列表 href 保持 **canonicalUrl**；已核验 HTTPS twin 仅为 alias（`entry.url`，collector 不持久化该字段）。别名在通用 URL 规范化之前、且仍须通过既有 HTTPS host/prefix/deny。
+- 未改抓取白名单 / HTTP 传输放行 / 全局规范化 / TLS / SSRF / schema。标题/日期冲突合并后仍拒绝。其他 HTTP、解读链、错源/错模式、未选规则、query/hash/port/凭据/编码变体无特权。
+- 原件 20318B sha `ab5e3780…515d340f` 字节未改；fromHtml→collector→隔离 SQLite→再跑→只读重开 **8/8**；二跑 0 new/0 revise；item8 保留 HTTP 身份。源日角色保持；详情页 10-26 抬头不作发布时间。
+- 先前 Part B **HTML-copy href-mutation 8/8** 明确标为 **experimental / NON_QUALIFYING**。证据：[alias report](evidence/r2-cn-t01-http-https-alias-20261026/report.md) / [Part B](evidence/r2-cn-t01-item8-https-20261026/report.md)。
+- **计数冻结**：R2-4 **32/39**；R2-5 **25/34**（pending review，不静默抬分）；numeric **3/5**；`overallR2Pass=false`。未合并/部署；day20 只读观察未打扰。
+
 ## 2026-10-26 — 矩阵文档一致性（dots 1792982122.073619）
 
 - **纯文档**：统一 `lastUpdatedAt` / `lastUpdatedAtSource` 为本写语义（此前 tip e9ee10b 的 lastUpdatedAt=02:33:38.780Z，但 source 仍声称 10:31:26.773 为本写）。

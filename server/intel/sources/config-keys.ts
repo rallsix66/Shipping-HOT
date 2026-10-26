@@ -13,8 +13,8 @@ export interface WebListConfig {
   dateOrder?: "dmy"
   calendar?: "gregorian" | "buddhist"
   dateFormat?: "thai_month_name" | "english_month_name" | "english_month_abbr_12h" | "english_month_abbr_day" | "indonesian_enactment_date" | "indonesian_month_abbr" | "sitc_publication_day"
-  /** Fixed SITC metadata identity exception; never grants permission to fetch HTTP bodies. */
-  metadataLinkRule?: "sitc_show"
+  /** Fixed metadata identity exceptions; never grant permission to fetch HTTP bodies. */
+  metadataLinkRule?: "sitc_show" | "mofcom_art_http_https_twin"
   /** Date and title share the observed anchor text; no prose/date searching. */
   linkTextFormat?: "dmy-date-title" | "title-dmy-date"
   dateRuleBasis: string
@@ -41,7 +41,7 @@ const KEYS = new Set([
   "allowUrlPrefixes",
   "denyUrlPrefixes",
 ])
-const VALUES: Record<string, string[]> = { titleAttribute: ["title", "alt"], dateOrder: ["dmy"], calendar: ["gregorian", "buddhist"], dateFormat: ["thai_month_name", "english_month_name", "english_month_abbr_12h", "english_month_abbr_day", "indonesian_enactment_date", "indonesian_month_abbr", "sitc_publication_day"], metadataLinkRule: ["sitc_show"], linkTextFormat: ["dmy-date-title", "title-dmy-date"] }
+const VALUES: Record<string, string[]> = { titleAttribute: ["title", "alt"], dateOrder: ["dmy"], calendar: ["gregorian", "buddhist"], dateFormat: ["thai_month_name", "english_month_name", "english_month_abbr_12h", "english_month_abbr_day", "indonesian_enactment_date", "indonesian_month_abbr", "sitc_publication_day"], metadataLinkRule: ["sitc_show", "mofcom_art_http_https_twin"], linkTextFormat: ["dmy-date-title", "title-dmy-date"] }
 const SELECTORS = ["listSelector", "itemSelector", "linkSelector", "titleSelector", "publishedAtSelector", "emptySelector"]
 
 export class UnsupportedConfig extends Error {}
@@ -81,6 +81,7 @@ export function assertSupportedConfig(input: unknown): asserts input is WebListC
   if (config.dateFormat === "sitc_publication_day" && (config.calendar === "buddhist" || config.publishedAtUtcOffset !== undefined)) throw new UnsupportedConfig("sitc_publication_day requires Gregorian day without offset")
   if (config.dateFormat === "indonesian_month_abbr" && (config.calendar === "buddhist" || config.publishedAtUtcOffset !== undefined)) throw new UnsupportedConfig("indonesian_month_abbr requires Gregorian day without offset")
   if (config.metadataLinkRule === "sitc_show" && (config.allowUrlPrefixes !== undefined || config.denyUrlPrefixes !== undefined)) throw new UnsupportedConfig("sitc_show uses its fixed metadata host/path rule, not prefix overrides")
+  if (config.metadataLinkRule === "mofcom_art_http_https_twin" && (!Array.isArray(config.allowUrlPrefixes) || !(config.allowUrlPrefixes as unknown[]).length)) throw new UnsupportedConfig("mofcom_art_http_https_twin requires existing HTTPS allowUrlPrefixes; it does not widen them")
   if (config.linkTextFormat && (config.dateOrder !== "dmy" || config.dateFormat || config.titleSelector || config.publishedAtSelector)) throw new UnsupportedConfig("linkTextFormat requires dmy and exclusive link text mapping")
   if (config.linkTextFormat === "dmy-date-title" && config.titleAttribute) throw new UnsupportedConfig("dmy-date-title cannot use a separate title attribute")
   if (config.linkTextFormat === "title-dmy-date" && config.titleAttribute !== "title") throw new UnsupportedConfig("title-dmy-date requires the same anchor's full title attribute")
