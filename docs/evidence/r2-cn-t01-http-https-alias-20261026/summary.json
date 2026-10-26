@@ -85,8 +85,9 @@
     "note": "read-only inspect only; no second start / lock delete / day19 touch"
   },
   "inspectedAtAsiaShanghai": "2026-10-26 11:27:11",
-  "codeSha": "a916a0f6cbbccfad94a6f38ce6a3bfed0a0c54d0",
-  "tip": "a916a0f6cbbccfad94a6f38ce6a3bfed0a0c54d0",
+  "codeSha": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r2-4-gapfill-20261025\\.tmp\\final-tip.cjs",
+  "tip": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r2-4-gapfill-20261025\\.tmp\\final-tip.cjs",
   "baselineTipWas": "bad4f05d9c7a0a9d35165d7447af3933797125e2",
-  "committedAtAsiaShanghai": "2026-10-26 11:27+"
+  "committedAtAsiaShanghai": "2026-10-26 11:27+",
+  "note": "codeSha equals this docs-bind tip; product code landed in parent 5992abc42416f9bf77b835c5da5bd373c8ba36d0"
 }
