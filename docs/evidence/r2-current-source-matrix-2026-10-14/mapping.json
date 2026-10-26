@@ -1,11 +1,11 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-20T04:06:11.578Z",
-  "lastUpdatedAt": "2026-10-26T02:31:26.773Z",
+  "lastUpdatedAt": "2026-10-26T02:33:38.780Z",
   "lastUpdatedAtSource": "this_write_utc; dotsTs=1792981339.583919; Asia/Shanghai=2026-10-26 10:31:26.773 Asia/Shanghai",
   "lastUpdateNote": "2026-10-26 PAGASA PH-W01/PH-W02 limited product ruling (dots 1792981339.583919): each limited R2-4 OK for existing official explicit-empty captures and offline product-scoped parse verification. 30/39 → 32/39 (meets minimum); R2-5 25/34; numeric 3/5; PPA BLOCKED; day19 incomplete; overallR2Pass=false. Pure docs; gates bound to 7a1975682078e1fb8107a7992b6a36833a293b0b (no full suite re-run).",
   "reviewedCodeSha": "7a1975682078e1fb8107a7992b6a36833a293b0b",
-  "evidenceHead": "d5d366ce09bcfb9f89abf4f3020c69d1f4f2818c",
+  "evidenceHead": "4c515bab4517ffc504b8d3f2424c3288eb0c9637",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "1b98532577a3de49b394dc0746e3a556717c94a0058bb35c14dacb453d0bc90f",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -4453,7 +4453,9 @@
             "parsedEmptyReplay": "def8f1e7bb3a38272a675ee6d34165fbd06ec9534424090268167e81ca7b146a",
             "productRuling": "c830f600aef6e03d4b8661bbc708011e5c9db9c6150f7900ac4cbacab1c5c75c"
           },
-          "productRulingSha256": "c830f600aef6e03d4b8661bbc708011e5c9db9c6150f7900ac4cbacab1c5c75c"
+          "productRulingSha256": "c830f600aef6e03d4b8661bbc708011e5c9db9c6150f7900ac4cbacab1c5c75c",
+          "evidenceHead": "4c515bab4517ffc504b8d3f2424c3288eb0c9637",
+          "docsCommit": "4c515bab4517ffc504b8d3f2424c3288eb0c9637"
         }
       },
       "r2_5": {
@@ -4686,7 +4688,9 @@
             "parsedEmptyReplay": "def8f1e7bb3a38272a675ee6d34165fbd06ec9534424090268167e81ca7b146a",
             "productRuling": "c830f600aef6e03d4b8661bbc708011e5c9db9c6150f7900ac4cbacab1c5c75c"
           },
-          "productRulingSha256": "c830f600aef6e03d4b8661bbc708011e5c9db9c6150f7900ac4cbacab1c5c75c"
+          "productRulingSha256": "c830f600aef6e03d4b8661bbc708011e5c9db9c6150f7900ac4cbacab1c5c75c",
+          "evidenceHead": "4c515bab4517ffc504b8d3f2424c3288eb0c9637",
+          "docsCommit": "4c515bab4517ffc504b8d3f2424c3288eb0c9637"
         }
       },
       "r2_5": {
@@ -7995,6 +7999,8 @@
       "fieldsPHW01": "docs/evidence/r2-4-pagasa-phw-20261026/PH-W01-fields.public.json",
       "fieldsPHW02": "docs/evidence/r2-4-pagasa-phw-20261026/PH-W02-fields.public.json"
     },
-    "productRulingSha256": "c830f600aef6e03d4b8661bbc708011e5c9db9c6150f7900ac4cbacab1c5c75c"
+    "productRulingSha256": "c830f600aef6e03d4b8661bbc708011e5c9db9c6150f7900ac4cbacab1c5c75c",
+    "evidenceHead": "4c515bab4517ffc504b8d3f2424c3288eb0c9637",
+    "docsCommit": "4c515bab4517ffc504b8d3f2424c3288eb0c9637"
   }
 }
