@@ -89,8 +89,8 @@
   "committedAtAsiaShanghai": "2026-10-26 11:27+",
   "note": "productCodeSha is alias impl commit 5992abc; tip/codeSha is this docs tip",
   "productCodeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
-  "tip": "PENDING_BIND",
-  "codeSha": "PENDING_BIND",
+  "tip": "66eba0878fecf7d2deffe0350a9f22067935b5f9",
+  "codeSha": "66eba0878fecf7d2deffe0350a9f22067935b5f9",
   "reviewFixesDotsTs": "1792985451.804939",
   "reviewFixesAtAsiaShanghai": "2026-10-26 11:45:20",
   "reviewFixes": {
@@ -131,7 +131,8 @@
     "tip": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
     "productCodeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
     "codeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
-    "boundAtAsiaShanghai": "2026-10-26 11:45:20"
+    "boundAtAsiaShanghai": "2026-10-26 11:45:20",
+    "evidenceTip": "66eba0878fecf7d2deffe0350a9f22067935b5f9"
   },
   "priorProductCodeSha": "5992abc42416f9bf77b835c5da5bd373c8ba36d0",
   "baselineTipBefore": "94bb9c9f290d7d0e76d990a5787f0335e8b5405c"
