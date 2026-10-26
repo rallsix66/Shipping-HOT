@@ -4,8 +4,8 @@
   "lastUpdatedAt": "2026-10-26T02:06:45.599Z",
   "lastUpdatedAtSource": "this_write_utc; dotsTs=1792979708.860879; Asia/Shanghai=2026-10-26 10:06:45 Asia/Shanghai",
   "lastUpdateNote": "2026-10-26 PAGASA PH-W01/PH-W02 P2 harden (dots 1792979708): empty-state residual-body conflict miss + missing-raw false PASS→skip/strict. Zero new HTTP/TLS/PDF. Counts frozen 30/39 & 25/34; countedOK=false pending dots; overallR2Pass=false. day19 incomplete unchanged.",
-  "reviewedCodeSha": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r2-4-gapfill-20261025\\.tmp\\patch-sha.cjs",
-  "evidenceHead": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r2-4-gapfill-20261025\\.tmp\\patch-sha.cjs",
+  "reviewedCodeSha": "26617b301382b901d2d647934cc7e19c005568cc",
+  "evidenceHead": "26617b301382b901d2d647934cc7e19c005568cc",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "1b98532577a3de49b394dc0746e3a556717c94a0058bb35c14dacb453d0bc90f",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -4386,7 +4386,7 @@
             "products": "PH-W01",
             "status": "parsed_empty"
           },
-          "sha256": "b52d85a0eef7e3fd3ab6bd0cc4affaf1a96e55422bdbc34ceabf9ccbc93cc797",
+          "sha256": "c3733135d97990fd0df59c9c613cec2aa03f3c90010d9fb3142be41b527b27ba",
           "hashBasis": "committed_text_LF"
         },
         "realSourceCapturePublic": {
@@ -4406,7 +4406,7 @@
         "zeroNewHttpTlsPdf": true,
         "emptyNodeSelector": ".tropical-cyclone-weather-bulletin-page .article-content .panel-body > h3",
         "p2Hardened": true,
-        "codeSha": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r2-4-gapfill-20261025\\.tmp\\patch-sha.cjs"
+        "codeSha": "26617b301382b901d2d647934cc7e19c005568cc"
       },
       "numericFieldValidation": null,
       "dateEvidence": {
@@ -4561,7 +4561,7 @@
             "products": "PH-W02",
             "status": "parsed_empty"
           },
-          "sha256": "b52d85a0eef7e3fd3ab6bd0cc4affaf1a96e55422bdbc34ceabf9ccbc93cc797",
+          "sha256": "c3733135d97990fd0df59c9c613cec2aa03f3c90010d9fb3142be41b527b27ba",
           "hashBasis": "committed_text_LF"
         },
         "realSourceCapturePublic": {
@@ -4581,7 +4581,7 @@
         "zeroNewHttpTlsPdf": true,
         "emptyNodeSelector": ".article-content.weather-advisory .weekly-content-adv > p",
         "p2Hardened": true,
-        "codeSha": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r2-4-gapfill-20261025\\.tmp\\patch-sha.cjs"
+        "codeSha": "26617b301382b901d2d647934cc7e19c005568cc"
       },
       "numericFieldValidation": null,
       "dateEvidence": {
