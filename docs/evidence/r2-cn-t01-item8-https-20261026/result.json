@@ -1,0 +1,88 @@
+{
+  "target": "https://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+  "startedAt": "2026-10-26T03:04:43.800Z",
+  "systemDNSCalls": 1,
+  "reservedPhysicalHTTP": 1,
+  "transportInvocations": 1,
+  "addresses": [
+    {
+      "address": "60.163.129.136",
+      "family": 4,
+      "blocked": false
+    },
+    {
+      "address": "180.163.117.53",
+      "family": 4,
+      "blocked": false
+    }
+  ],
+  "response": {
+    "status": 200,
+    "receivedAt": "2026-10-26T03:04:43.950Z",
+    "contentType": "text/html",
+    "location": null,
+    "bytes": 22473,
+    "wireSha256": "f73324f611d39e885fae695961f7dcbafd958a1619104e95704d49fca816e392"
+  },
+  "transportError": null,
+  "httpIdentitySnapshot": {
+    "index": 15,
+    "title": "商务部 科技部公告2026年第48号 就修订《中国禁止出口限制出口技术目录》公开征求意见并对相关技术出口实施临时登记管理",
+    "titleAttribute": "商务部 科技部公告2026年第48号 就修订《中国禁止出口限制出口技术目录》公开征求意见并对相关技术出口实施临时登记管理",
+    "href": "http://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "url": "http://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "rawDate": "2026-10-16",
+    "calendarDay": "2026-10-16",
+    "precision": "day",
+    "role": "unknown",
+    "timezone": "missing",
+    "publishedAt": null,
+    "httpsEligible": false,
+    "interpretationLinks": [
+      {
+        "href": "http://www.mofcom.gov.cn/zcjd/dwmy/art/2026/art_c8712c94f11f49de96c190f876777e44.html",
+        "label": "[政策解读]"
+      }
+    ],
+    "bodyStored": false,
+    "source": "docs/evidence/r2-maersk-mofcom-offline-2026-10-20/independent-fields.json"
+  },
+  "finishedAt": "2026-10-26T03:04:43.958Z",
+  "result": {
+    "ok": true,
+    "status": 200,
+    "finalUrl": "https://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "contentType": "text/html",
+    "decoding": {
+      "encoding": "utf-8",
+      "selectedBy": "meta",
+      "declarations": [
+        {
+          "source": "meta",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        },
+        {
+          "source": "meta",
+          "label": "utf-8",
+          "encoding": "utf-8"
+        }
+      ],
+      "conflict": false,
+      "byteLength": 22473
+    },
+    "hops": 0
+  },
+  "retryAllowed": false,
+  "productionEnabled": false,
+  "live24h": "NOT_RUN",
+  "paidCalls": 0,
+  "detailRequests": 0,
+  "rawRedistributed": false,
+  "countsFrozen": {
+    "r2_4": "32/39",
+    "r2_5": "25/34",
+    "numeric": "3/5",
+    "overallR2Pass": false
+  }
+}

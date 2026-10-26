@@ -1,0 +1,99 @@
+{
+  "at": "2026-10-26T03:08:14.810Z",
+  "head": "f43a14a9583046685007d2ee65d968df2a4d152f",
+  "branch": "codex/shipping-hot-r2-4-gapfill-20261025",
+  "task": "PART B CN-T01 item8 single HTTPS detail probe + evidence-only offline 8/8",
+  "dotsTs": "1792983062.325659",
+  "http": {
+    "target": "https://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "status": 200,
+    "error": null,
+    "bytes": 22473,
+    "wireSha256": "f73324f611d39e885fae695961f7dcbafd958a1619104e95704d49fca816e392",
+    "hops": 0,
+    "systemDNSCalls": 1,
+    "reservedPhysicalHTTP": 1,
+    "addresses": [
+      {
+        "address": "60.163.129.136",
+        "family": 4,
+        "blocked": false
+      },
+      {
+        "address": "180.163.117.53",
+        "family": 4,
+        "blocked": false
+      }
+    ],
+    "retries": 0,
+    "redirects": 0
+  },
+  "equivalence": {
+    "verdict": "EQUIVALENT_FOR_IDENTITY_FIELDS",
+    "sameHostPath": {
+      "httpPath": "/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+      "httpsPath": "/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+      "equal": true,
+      "sameHost": true
+    },
+    "titleTagExact": true,
+    "numbering": {
+      "year48": true,
+      "announcementPhrase": true,
+      "catalogPhrase": true,
+      "temporaryRegistration": true
+    },
+    "sourceDay20261016Present": true,
+    "note": "HTTP 200 alone is not equivalence; identity fields matched."
+  },
+  "offline8of8": {
+    "productBaselineAsIs": 7,
+    "evidenceOnlyUpgraded": 8,
+    "collector": {
+      "first": {
+        "status": "ok_items",
+        "runId": "d678dc22-0318-403c-9731-1756593e7f4f",
+        "itemsSeen": 8,
+        "itemsNew": 8,
+        "itemsRevised": 0
+      },
+      "second": {
+        "status": "ok_items",
+        "runId": "53c0e1ae-a252-4eaf-9487-3946efbd5f78",
+        "itemsSeen": 8,
+        "itemsNew": 0,
+        "itemsRevised": 0
+      },
+      "reopenItemCount": 8,
+      "secondIdempotent": true
+    },
+    "productCodeChanged": false
+  },
+  "relationship": {
+    "httpListIdentity": "http://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "httpsOfficialDetail": "https://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "sameHostPath": true,
+    "transportEquivalenceProvedForDetail": true,
+    "productStillExcludesHttpAbsoluteWithoutRewrite": true,
+    "note": "Prior unresolved gap was absence of transport equivalence for the HTTP detail identity; Part B probe fills that evidence. Completing registered 8/8 still needs dots ruling on whether to accept same-host/path HTTP→HTTPS upgrade under existing allowUrlPrefixes."
+  },
+  "countsFrozen": {
+    "r2_4": "32/39",
+    "r2_5": "25/34",
+    "numeric": "3/5",
+    "overallR2Pass": false,
+    "cnT01RemainsPartialUntilRuling": true,
+    "noSilentBump": true
+  },
+  "isolation": {
+    "day20ObserveUntouched": true,
+    "day20WorkerPidAliveAtEndCheck": true,
+    "runId": "day20-20261026a",
+    "independentLedgerDir": ".tmp/cn-t01-item8-https-20261026"
+  },
+  "git": {
+    "originalsInGit": false,
+    "secretsInGit": false,
+    "codeChangeApplied": false
+  }
+}

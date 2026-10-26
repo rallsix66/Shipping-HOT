@@ -1,0 +1,8 @@
+{
+  "target": "https://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+  "reservedAt": "2026-10-26T03:04:43.808Z",
+  "reservation": 1,
+  "allowedMaximum": 1,
+  "timeoutMs": 10000,
+  "maxBytes": 524288
+}

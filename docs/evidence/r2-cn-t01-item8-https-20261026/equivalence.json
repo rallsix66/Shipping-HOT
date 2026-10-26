@@ -1,0 +1,59 @@
+{
+  "at": "2026-10-26T03:05:04.755Z",
+  "httpOriginal": {
+    "url": "http://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "title": "商务部 科技部公告2026年第48号 就修订《中国禁止出口限制出口技术目录》公开征求意见并对相关技术出口实施临时登记管理",
+    "calendarDay": "2026-10-16",
+    "httpsEligibleRecorded": false
+  },
+  "httpsEvidence": {
+    "url": "https://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "status": 200,
+    "bytes": 22473,
+    "wireSha256": "f73324f611d39e885fae695961f7dcbafd958a1619104e95704d49fca816e392",
+    "hops": 0,
+    "contentType": "text/html"
+  },
+  "equivalence": {
+    "sameHostPath": {
+      "httpPath": "/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+      "httpsPath": "/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+      "equal": true,
+      "sameHost": true
+    },
+    "titleChecks": {
+      "titleTag": {
+        "match": true,
+        "kind": "exact"
+      },
+      "h1": {
+        "match": false,
+        "reason": "missing"
+      },
+      "ogTitle": {
+        "match": false,
+        "reason": "missing"
+      }
+    },
+    "numbering": {
+      "year48": true,
+      "announcementPhrase": true,
+      "catalogPhrase": true,
+      "temporaryRegistration": true
+    },
+    "dateCandidates": [
+      "2026-10-26",
+      "2026-10-16"
+    ],
+    "sourceDay20261016Present": true,
+    "note": "HTTP 200 alone is not equivalence; relationship recorded before any identity rewrite or count bump.",
+    "verdict": "EQUIVALENT_FOR_IDENTITY_FIELDS",
+    "canSupportOffline8of8Proposal": true
+  },
+  "countsRemainFrozen": {
+    "r2_4": "32/39",
+    "r2_5": "25/34",
+    "numeric": "3/5",
+    "overallR2Pass": false
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "target": "https://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+  "startedAt": "2026-10-26T03:04:43.800Z",
+  "systemDNSCalls": 0,
+  "reservedPhysicalHTTP": 0,
+  "transportInvocations": 0,
+  "addresses": [],
+  "response": null,
+  "transportError": null,
+  "httpIdentitySnapshot": {
+    "index": 15,
+    "title": "商务部 科技部公告2026年第48号 就修订《中国禁止出口限制出口技术目录》公开征求意见并对相关技术出口实施临时登记管理",
+    "titleAttribute": "商务部 科技部公告2026年第48号 就修订《中国禁止出口限制出口技术目录》公开征求意见并对相关技术出口实施临时登记管理",
+    "href": "http://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "url": "http://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "rawDate": "2026-10-16",
+    "calendarDay": "2026-10-16",
+    "precision": "day",
+    "role": "unknown",
+    "timezone": "missing",
+    "publishedAt": null,
+    "httpsEligible": false,
+    "interpretationLinks": [
+      {
+        "href": "http://www.mofcom.gov.cn/zcjd/dwmy/art/2026/art_c8712c94f11f49de96c190f876777e44.html",
+        "label": "[政策解读]"
+      }
+    ],
+    "bodyStored": false
+  },
+  "limits": {
+    "physicalHTTP": 1,
+    "timeoutMs": 10000,
+    "maxBytes": 524288,
+    "maxRedirects": 0,
+    "retries": 0,
+    "details": 0
+  },
+  "policy": {
+    "sourceId": "intel:cn-t01",
+    "status": "allowed",
+    "fetchAllowed": true,
+    "persistence": "disallowed",
+    "allowedHosts": [
+      "www.mofcom.gov.cn"
+    ],
+    "allowedContentTypes": [
+      "text/html",
+      "application/xhtml+xml"
+    ],
+    "notes": "Part B single approved HTTPS detail identity probe for CN-T01 item #8; metadata comparison only; no redistribution."
+  },
+  "day20Isolation": {
+    "workerPid": 82336,
+    "note": "do not disturb day20 observe"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "branch": "codex/shipping-hot-r2-4-gapfill-20261025",
+  "note": "Part B CN-T01 #8 single HTTPS probe; independent of day20 observe",
+  "limits": {
+    "retries": 0,
+    "maxBytes": 524288,
+    "maxRedirects": 0,
+    "timeoutMs": 10000,
+    "physicalHTTP": 1
+  },
+  "head": "f43a14a9583046685007d2ee65d968df2a4d152f",
+  "at": "2026-10-26T03:02:27.2540324Z",
+  "processCheck": {
+    "sameTargetRequestProcessObserved": false,
+    "method": "read-only Get-Process/Get-CimInstance",
+    "day20WorkerPid": 82336,
+    "day20Alive": true
+  },
+  "countsFrozen": {
+    "overallR2Pass": false,
+    "r2_4": "32/39",
+    "numeric": "3/5",
+    "r2_5": "25/34"
+  },
+  "worktree": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r2-4-gapfill-20261025",
+  "existingCompletedExactHTTPSRecords": [],
+  "dnsPreview": {
+    "err": null,
+    "addresses": [
+      {
+        "address": "117.27.148.143",
+        "family": 4
+      },
+      {
+        "address": "59.56.30.250",
+        "family": 4
+      }
+    ]
+  },
+  "exactTarget": "https://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+  "httpIdentity": {
+    "title": "商务部 科技部公告2026年第48号 就修订《中国禁止出口限制出口技术目录》公开征求意见并对相关技术出口实施临时登记管理",
+    "titleAttribute": "商务部 科技部公告2026年第48号 就修订《中国禁止出口限制出口技术目录》公开征求意见并对相关技术出口实施临时登记管理",
+    "href": "http://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "url": "http://www.mofcom.gov.cn/zcfb/dwmygl/art/2026/art_61446ab4beee4f63973d4d0ab3097648.html",
+    "calendarDay": "2026-10-16",
+    "rawDate": "2026-10-16",
+    "httpsEligible": false,
+    "index": 15,
+    "source": "docs/evidence/r2-maersk-mofcom-offline-2026-10-20/independent-fields.json"
+  }
+}
