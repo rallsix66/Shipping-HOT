@@ -1,3 +1,11 @@
+## 2026-10-26 — 数值口径纠正 + R2 剩余清单盘点（dots 1792993692.018489）
+
+- **裁定/盘点**：dots 要求纠正「数值生成 3/5 / 还缺两个生产挂载」不准确表述；只读盘点更新剩余清单（2026-10-26T05:48:12.018489Z / Asia/Shanghai 2026-10-26 13:48:12.018）。
+- **数值口径**：`numericFieldsSeparate` **3/5** = **历史有限归一化字段诊断**（XX-W01/XX-A01/XX-A02），**不是**生产 attach rate。ID-W02=完整原件离线 parse（另列）；XX-W02=forecast+specifications 有限字段离线证据（另列）；均 `ProductionIntegrationRate=NOT_CLAIMED`。禁止 blanket 5/5 生产通过；禁止发明原合同外新门槛。
+- **R2 剩余**：R2-4 **32/39**；R2-5 **26/34** 剩余 **8**（CN-P02/VN-P01/MY-P03/MY-L01/PH-P01/PH-W01/PH-W02/XX-F01）；R2-8 19 源 day20 运行中 **≠** 全 P1 连续验收完成；仍需既有适用集成门禁 / 独立审查 / 状态收口。不重做已接受 R2-1/2/3 与限定 6/7；Mobile/R1.5 历史/R3/go-live 范围外。
+- **day20 vs 全 P1**：已覆盖 19 源（TH-W01/ID-W01/CN-T02/TH-C01/PH-C01/CN-P01/TH-C02/VN-P03/VN-T01/ID-T01/XX-K03/ID-T02/VN-D01/XX-K02/XX-K01/MY-C01/MY-T01/PH-M01/XX-M03）；公开 39 中另 20 源未进 day20。不覆盖全 P1 连续 24h、数值生产挂载、R2-5 余 8、overallR2Pass。
+- **门禁**：产品代码 SHA f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c（与 tip 解耦，不作 tip 自指重绑）；**day20-20261026a（PID 82336）未动**；零新网络；**overallR2Pass=false**。证据：[remaining-inventory](evidence/r2-remaining-inventory-20261026/remaining-inventory.md) / [mapping](evidence/r2-current-source-matrix-2026-10-14/mapping.json)。
+
 ## 2026-10-26 · CN-T01 限定 R2-5 PASS（dots 1792987108.133129）
 
 - **裁定**：dots 接受 CN-T01 **限定** R2-5 PASS → 资讯计数 **25/34 → 26/34**（2026-10-26T03:58:28.133129Z / Asia/Shanghai 2026-10-26 11:58:28.133）。

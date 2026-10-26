@@ -1,11 +1,11 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-20T04:06:11.578Z",
-  "lastUpdatedAt": "2026-10-26T04:09:49.103769Z",
-  "lastUpdatedAtSource": "this_write_utc; dotsTs=1792987108.133129; Asia/Shanghai=2026-10-26 12:09:49.103 Asia/Shanghai; productCodeSha=f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c; baselineTipBeforeDocs=f961c050c8ca70b58358739c2b2fcddfb74e980b",
-  "lastUpdateNote": "2026-10-26 CN-T01 limited R2-5 PASS (dots 1792987108.133129): 25/34→26/34 for unmodified 20318B original + one HTTP/HTTPS alias + 8/8 + true readonly reopen only. R2-4 32/39, numeric 3/5, overallR2Pass=false unchanged. Preserve historical 7/8 PARTIAL / href-mutation / RW-reopen. Pure docs; product gate bind f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c; baseline tip before docs f961c050c8ca70b58358739c2b2fcddfb74e980b (no tip-self-reference rebind; final push tip reported separately). Zero new network; day20 untouched.",
+  "lastUpdatedAt": "2026-10-26T05:55:49.044Z",
+  "lastUpdatedAtSource": "this_write_utc; dotsTs=1792993692.018489; Asia/Shanghai=2026-10-26 13:55:49.044 Asia/Shanghai; productCodeSha=f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c; baselineTipBeforeDocs=f9d61698c74c133a33e83d6e9bfeafaf11b2f28d",
+  "lastUpdateNote": "2026-10-26 numeric 口径纠正 + R2 remaining inventory (dots 1792993692.018489): preserve historical numericFieldsSeparate 3/5 as limited-normalization diagnosis (not production attach); list five fields with evidence types; note ID-W02/XX-W02 separate offline evidence; R2-4 32/39, R2-5 26/34 remaining 8, R2-8 day20≠full P1; day20 untouched; zero network; overallR2Pass=false. Product gate bind f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c; baseline tip before docs f9d61698c74c133a33e83d6e9bfeafaf11b2f28d (final push tip reported separately).",
   "reviewedCodeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
-  "evidenceHead": "f961c050c8ca70b58358739c2b2fcddfb74e980b",
+  "evidenceHead": "f9d61698c74c133a33e83d6e9bfeafaf11b2f28d",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "1b98532577a3de49b394dc0746e3a556717c94a0058bb35c14dacb453d0bc90f",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -135,7 +135,7 @@
         "XX-A01",
         "XX-A02"
       ],
-      "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness",
+      "scope": "limited historical normalized-field diagnostics, not retained raw JSON replay or source impact/production readiness; NOT production attach rate",
       "additionalCompleteOriginalOfflineReplay": {
         "count": 1,
         "ids": [
@@ -147,7 +147,68 @@
           "sha256": "37eede08e0b0e8222400da4671d65e405cfc71364ffa7e4062a211018852ad2a",
           "hashBasis": "local_file_bytes"
         },
-        "productionIntegrationRate": "NOT_CLAIMED"
+        "productionIntegrationRate": "NOT_CLAIMED",
+        "note": "Already-accepted full-original offline parse; separate from historical 3/5 numerator; not a missing production attach."
+      },
+      "productionAttachRate": "NOT_CLAIMED",
+      "doNotReadAs": [
+        "production attach rate",
+        "still missing two production attaches",
+        "blanket 5/5 production pass"
+      ],
+      "口径CorrectionAt": "2026-10-26T05:55:49.044Z",
+      "口径CorrectionDotsTs": "1792993692.018489",
+      "fieldByField": [
+        {
+          "id": "XX-W01",
+          "evidenceType": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+          "countedInNumericFieldsSeparate3of5": true,
+          "currentLimitation": "Historical limited normalized-field diagnostic (target TC list/IDs / persisted cyclones). Not retained raw JSON production replay; not production sync attach rate; not continuous/24h readiness.",
+          "evidencePath": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json"
+        },
+        {
+          "id": "XX-A01",
+          "evidenceType": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+          "countedInNumericFieldsSeparate3of5": true,
+          "currentLimitation": "Historical limited normalized-field diagnostic (windGust/precipitation/visibility at eight land points). Not retained raw JSON production replay; not production sync attach rate.",
+          "evidencePath": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json"
+        },
+        {
+          "id": "XX-A02",
+          "evidenceType": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+          "countedInNumericFieldsSeparate3of5": true,
+          "currentLimitation": "Historical limited normalized-field diagnostic (wave/swell at 7 port origins + ADR009 engineering reference; original VNSGN missing). Not retained raw JSON production replay; not production sync attach rate.",
+          "evidencePath": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json"
+        },
+        {
+          "id": "ID-W02",
+          "evidenceType": "COMPLETE_ORIGINAL_OFFLINE_PARSE_LIMITED_ACCEPTED",
+          "countedInNumericFieldsSeparate3of5": false,
+          "currentLimitation": "Full-original offline parse already accepted (41 points / groups forecast_day1+day2-4). Separate from the historical 3/5 limited-normalization numerator. ProductionIntegrationRate=NOT_CLAIMED; no DB/Provider activation/current uptime claim. Must NOT be read as one of two still-missing production attaches.",
+          "evidencePath": "docs/evidence/r2-id-w02-offline-parser-2026-10-20/raw-replay.json",
+          "acceptancePath": "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/qualification-acceptance.json"
+        },
+        {
+          "id": "XX-W02",
+          "evidenceType": "PASS_LIMITED_OFFLINE_FORECAST_AND_SPECIFICATIONS",
+          "countedInNumericFieldsSeparate3of5": false,
+          "currentLimitation": "Limited offline forecast.json + specifications.json field evidence already present (two-TC path/positions/wind-circles/identity). Not production sync wire ledger; specifications not claimed as production sync integration; live persistence/continuous run unverified. Must NOT be read as one of two still-missing production attaches; must NOT invent new gates beyond original contract.",
+          "evidencePath": "docs/evidence/r2-4-xxw02-windcircle-20261025/offline-replay.public.json"
+        }
+      ],
+      "additionalLimitedOfflineForecastAndSpecifications": {
+        "count": 1,
+        "ids": [
+          "XX-W02"
+        ],
+        "type": "limited_offline_forecast_and_specifications",
+        "evidence": {
+          "path": "docs/evidence/r2-4-xxw02-windcircle-20261025/offline-replay.public.json",
+          "sha256": "3660f0a303ace1f6ed12f18b6206687d767715fa61e13f5cf30446bb9094b397",
+          "hashBasis": "committed_text_LF"
+        },
+        "productionIntegrationRate": "NOT_CLAIMED",
+        "note": "Already-present limited forecast+specifications offline field evidence; separate from historical 3/5 numerator; not a missing production attach; not production sync wire ledger."
       }
     },
     "r2Continuous24h": {
@@ -155,12 +216,42 @@
       "denominator": 39,
       "status": "ATTEMPTED_INCOMPLETE",
       "acceptance": "NOT_PASSED",
-      "note": "day19 19-source observe (profile 24h-19, run-id day19-20261025a) was attempted but incomplete (last proven event ~3.8h after start; exit time/reason unknown). Not never-started/未启用. Does not grant continuous-24h acceptance or overall R2 PASS. See docs/evidence/r2-4-day19-interrupt-20261026/.",
-      "claim24hPass": false
+      "note": "day19 19-source observe (profile 24h-19, run-id day19-20261025a) was attempted but incomplete (last proven event ~3.8h after start; exit time/reason unknown). day20-20261026a (same profile 24h-19, worker PID 82336, until ~2026-10-27 10:58 Asia/Shanghai) is currently running and left alone; near-19 observe ≠ full P1 39-source continuous acceptance. Not never-started/未启用. Does not grant continuous-24h acceptance or overall R2 PASS. Inventory: docs/evidence/r2-remaining-inventory-20261026/.",
+      "claim24hPass": false,
+      "previousNote": "day19 19-source observe (profile 24h-19, run-id day19-20261025a) was attempted but incomplete (last proven event ~3.8h after start; exit time/reason unknown). Not never-started/未启用. Does not grant continuous-24h acceptance or overall R2 PASS. See docs/evidence/r2-4-day19-interrupt-20261026/.",
+      "day20": {
+        "runId": "day20-20261026a",
+        "profile": "24h-19",
+        "status": "RUNNING_LEAVE_ALONE",
+        "workerPid": 82336,
+        "sources": 19,
+        "fullP1Coverage": false
+      }
     },
-    "overallR2Pass": false
+    "overallR2Pass": false,
+    "remainingInventory": {
+      "path": "docs/evidence/r2-remaining-inventory-20261026/remaining-inventory.json",
+      "sha256": "b029d080d907545989c3f85160001ad951cdd4616a6cdbbb84dca6118156c413",
+      "hashBasis": "local_file_bytes",
+      "dotsTs": "1792993692.018489",
+      "r2_4": "32/39",
+      "r2_5": "26/34 remaining 8",
+      "r2_8": "day20 19-source running ≠ full P1 complete",
+      "stillNeeded": [
+        "existing applicable integration gates",
+        "independent review",
+        "status closeout"
+      ],
+      "outOfScope": [
+        "mobile deferred",
+        "R1.5 history redo",
+        "R3",
+        "go-live"
+      ]
+    }
   },
   "clarifications": [
+    "Numeric 口径纠正 (2026-10-26 / dotsTs=1792993692.018489): mapping.numericFieldsSeparate 3/5 is historical limited-normalization field diagnosis (XX-W01/XX-A01/XX-A02), NOT production attach rate. ID-W02 already has complete-original offline parse; XX-W02 already has limited forecast+specifications offline field evidence—both ProductionIntegrationRate=NOT_CLAIMED, listed separately; do NOT say still missing two production attaches; do NOT invent new gates; do NOT claim blanket 5/5 production pass. R2 remaining inventory: R2-4 32/39; R2-5 26/34 remaining 8; R2-8 day20 19-source running ≠ full P1 continuous acceptance; still need existing applicable integration gates / independent review / status closeout. Do not redo accepted R2-1/2/3 and limited 6/7. Mobile deferred; R1.5 history / R3 / go-live out of scope. day20-20261026a PID 82336 left alone; zero new network. Evidence: docs/evidence/r2-remaining-inventory-20261026/. overallR2Pass=false.",
     "CN-T01 limited R2-5 PASS (2026-10-26T03:58:28.133129Z / rulingMessageTs=1792987108.133129) for unmodified 20318B original + one verified HTTP/HTTPS identity alias + original 8 items fields/ingest/dedupe + true readonly reopen only. Prior 7/8 PARTIAL / href-mutation / RW-reopen retained as history. Not HTTP transport relax, production enablement, or continuous-run endorsement. R2-4 32/39 and numeric 3/5 unchanged; overallR2Pass=false; 25/34→26/34.",
     "Continuous-24h: a new 19-source observe was attempted (day19) but remains incomplete; overall continuous-24h acceptance is NOT_PASSED / not granted. Distinguish attempted-incomplete from never-started; do not read as production enablement or overallR2Pass.",
     "PH-W01/PH-W02 limited R2-4 OK (2026-10-26T02:22:19.583919Z / rulingMessageTs=1792981339.583919) for existing official explicit-empty captures and offline product-scoped parse verification only. Prior PARTIAL/403/30/39 held remain historical snapshots. Not active bulletin, production ingest, continuous availability, or 24h pass; R2-5 25/34 and numeric 3/5 unchanged; overallR2Pass=false.",
@@ -5491,7 +5582,7 @@
         "countedOK": true,
         "scope": "existing two-TC forecast+specifications capture and offline field verification",
         "qualification": "limited_offline_forecast_specifications_two_tc",
-        "reason": "Approved limited R2-4 OK for existing two-TC forecast+specifications capture and offline field verification (path, forecast positions, wind circles, identity reconciliation). Source chain z/o/n resolves absolute product URLs. a2e99a01 closed usable-radius and identity-unknown P2s. Not production sync integration; specifications not yet wired into production sync; live persistence/continuous run unverified. Numeric production partition remains 3/5. No production enablement.",
+        "reason": "Approved limited R2-4 OK for existing two-TC forecast+specifications capture and offline field verification (path, forecast positions, wind circles, identity reconciliation). Source chain z/o/n resolves absolute product URLs. a2e99a01 closed usable-radius and identity-unknown P2s. Not production sync integration; specifications not yet wired into production sync; live persistence/continuous run unverified. numericFieldsSeparate historical limited-normalization diagnosis remains 3/5 (XX-W01/XX-A01/XX-A02) and is NOT a production attach rate; XX-W02 limited offline forecast/specs evidence is listed separately (ProductionIntegrationRate=NOT_CLAIMED)—do not read as one of two still-missing production attaches. No production enablement.",
         "acceptance": {
           "path": "docs/evidence/r2-4-xxw02-windcircle-20261025/product-ruling.md",
           "offlineReplay": "docs/evidence/r2-4-xxw02-windcircle-20261025/offline-replay.public.json",
@@ -5509,7 +5600,10 @@
           },
           "offlineReplaySha256": "3660f0a303ace1f6ed12f18b6206687d767715fa61e13f5cf30446bb9094b397",
           "productRulingSha256": "ad9653752cca2b753cd7bcd120cf49e48ea711d307be817557cf7c9835ceef4a"
-        }
+        },
+        "previousReasonRetained": "Approved limited R2-4 OK for existing two-TC forecast+specifications capture and offline field verification (path, forecast positions, wind circles, identity reconciliation). Source chain z/o/n resolves absolute product URLs. a2e99a01 closed usable-radius and identity-unknown P2s. Not production sync integration; specifications not yet wired into production sync; live persistence/continuous run unverified. Numeric production partition remains 3/5. No production enablement.",
+        "reasonCorrectedAt": "2026-10-26T05:55:49.044Z",
+        "reasonCorrectionDotsTs": "1792993692.018489"
       },
       "r2_5": {
         "verdict": "NOT_APPLICABLE_NUMERIC",
@@ -8085,5 +8179,11 @@
     "productRulingSha256": "a1cb3381948958a1b563566cfe11dbe2a0616c310d8226fd1a9e4b7e0b14995b",
     "day20UntouchedPid": 82336,
     "zeroNewNetwork": true
+  },
+  "lastRemainingInventory": {
+    "at": "2026-10-26T05:55:49.044Z",
+    "dotsTs": "1792993692.018489",
+    "path": "docs/evidence/r2-remaining-inventory-20261026/remaining-inventory.json",
+    "sha256": "b029d080d907545989c3f85160001ad951cdd4616a6cdbbb84dca6118156c413"
   }
 }

@@ -1,0 +1,256 @@
+{
+  "type": "r2_remaining_inventory_and_numeric_口径_correction",
+  "dotsTs": "1792993692.018489",
+  "dotsAtUtc": "2026-10-26T05:48:12.018489Z",
+  "dotsAtAsiaShanghai": "2026-10-26 13:48:12.018 Asia/Shanghai",
+  "writtenAtUtc": "2026-10-26T05:55:16.799Z",
+  "writtenAtAsiaShanghai": "2026-10-26T13:55:16.801+08:00 Asia/Shanghai",
+  "baselineTip": "f9d61698c74c133a33e83d6e9bfeafaf11b2f28d",
+  "productCodeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
+  "tipBeforeDocs": "f9d61698c74c133a33e83d6e9bfeafaf11b2f28d",
+  "zeroNetwork": true,
+  "day20Untouched": {
+    "runId": "day20-20261026a",
+    "workerPid": 82336,
+    "profile": "24h-19",
+    "untilAsiaShanghai": "2026-10-27 10:58:16",
+    "action": "leave_alone_no_restart_no_lock_delete_no_day19"
+  },
+  "numeric口径Correction": {
+    "priorInaccuratePhrasing": "numeric 生成 3/5 / still missing two production attaches",
+    "accurateReading": "mapping.measuredCoverage.numericFieldsSeparate 3/5 is historical limited-normalization field diagnosis only, NOT production attach rate",
+    "doNotClaim": [
+      "blanket 5/5 production pass",
+      "still missing two production attaches (as if ID-W02/XX-W02 had no evidence)",
+      "new gates beyond original contract"
+    ],
+    "historicalNumeratorPreserved": {
+      "numerator": 3,
+      "denominator": 5,
+      "ids": [
+        "XX-W01",
+        "XX-A01",
+        "XX-A02"
+      ]
+    },
+    "fields": [
+      {
+        "id": "XX-W01",
+        "evidenceType": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+        "countedInNumericFieldsSeparate3of5": true,
+        "currentLimitation": "Historical limited normalized-field diagnostic (target TC list/IDs / persisted cyclones). Not retained raw JSON production replay; not production sync attach rate; not continuous/24h readiness.",
+        "evidencePath": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json"
+      },
+      {
+        "id": "XX-A01",
+        "evidenceType": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+        "countedInNumericFieldsSeparate3of5": true,
+        "currentLimitation": "Historical limited normalized-field diagnostic (windGust/precipitation/visibility at eight land points). Not retained raw JSON production replay; not production sync attach rate.",
+        "evidencePath": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json"
+      },
+      {
+        "id": "XX-A02",
+        "evidenceType": "PASS_LIMITED_STORED_REAL_DIAGNOSTIC",
+        "countedInNumericFieldsSeparate3of5": true,
+        "currentLimitation": "Historical limited normalized-field diagnostic (wave/swell at 7 port origins + ADR009 engineering reference; original VNSGN missing). Not retained raw JSON production replay; not production sync attach rate.",
+        "evidencePath": "docs/evidence/r1-5-1-live-2026-10-10-356e6fe/r1-5-1-evidence.json"
+      },
+      {
+        "id": "ID-W02",
+        "evidenceType": "COMPLETE_ORIGINAL_OFFLINE_PARSE_LIMITED_ACCEPTED",
+        "countedInNumericFieldsSeparate3of5": false,
+        "currentLimitation": "Full-original offline parse already accepted (41 points / groups forecast_day1+day2-4). Separate from the historical 3/5 limited-normalization numerator. ProductionIntegrationRate=NOT_CLAIMED; no DB/Provider activation/current uptime claim. Must NOT be read as one of two still-missing production attaches.",
+        "evidencePath": "docs/evidence/r2-id-w02-offline-parser-2026-10-20/raw-replay.json",
+        "acceptancePath": "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/qualification-acceptance.json"
+      },
+      {
+        "id": "XX-W02",
+        "evidenceType": "PASS_LIMITED_OFFLINE_FORECAST_AND_SPECIFICATIONS",
+        "countedInNumericFieldsSeparate3of5": false,
+        "currentLimitation": "Limited offline forecast.json + specifications.json field evidence already present (two-TC path/positions/wind-circles/identity). Not production sync wire ledger; specifications not claimed as production sync integration; live persistence/continuous run unverified. Must NOT be read as one of two still-missing production attaches; must NOT invent new gates beyond original contract.",
+        "evidencePath": "docs/evidence/r2-4-xxw02-windcircle-20261025/offline-replay.public.json"
+      }
+    ]
+  },
+  "r2Remaining": {
+    "r2_1_2_3": "accepted — do not redo",
+    "r2_4": {
+      "numerator": 32,
+      "denominator": 39,
+      "minimumOK": 32,
+      "pass": true,
+      "remainingNonOk": [
+        {
+          "id": "CN-P02",
+          "verdict": "PARTIAL"
+        },
+        {
+          "id": "VN-P01",
+          "verdict": "PARTIAL"
+        },
+        {
+          "id": "MY-P02",
+          "verdict": "STALE"
+        },
+        {
+          "id": "MY-P03",
+          "verdict": "PARTIAL"
+        },
+        {
+          "id": "MY-L01",
+          "verdict": "PARTIAL"
+        },
+        {
+          "id": "PH-P01",
+          "verdict": "BLOCKED"
+        },
+        {
+          "id": "XX-F01",
+          "verdict": "NOT_RUN"
+        }
+      ],
+      "note": "minimum 32 reached; remaining non-OK are residual gaps, not a reopened R2-4 shortfall gate"
+    },
+    "r2_5": {
+      "numerator": 26,
+      "denominator": 34,
+      "remaining": 8,
+      "items": [
+        {
+          "id": "CN-P02",
+          "r2_4": "PARTIAL",
+          "r2_5": "NOT_RUN",
+          "gap": "root302 Location self-points; no distinct list/target payload for title/link/date replay"
+        },
+        {
+          "id": "VN-P01",
+          "r2_4": "PARTIAL",
+          "r2_5": "PARTIAL",
+          "gap": "title/link table present; no visible date/date attribute"
+        },
+        {
+          "id": "MY-P03",
+          "r2_4": "PARTIAL",
+          "r2_5": "FAIL",
+          "gap": "duplicate URL with conflicting title/date; collector fails closed"
+        },
+        {
+          "id": "MY-L01",
+          "r2_4": "PARTIAL",
+          "r2_5": "FAIL",
+          "gap": "missing detail href; date syntax historically fixed but no title-anchor link"
+        },
+        {
+          "id": "PH-P01",
+          "r2_4": "BLOCKED",
+          "r2_5": "NOT_RUN",
+          "gap": "strict TLS UNABLE_TO_VERIFY_LEAF_SIGNATURE on exact entries; no field replay"
+        },
+        {
+          "id": "PH-W01",
+          "r2_4": "OK",
+          "r2_5": "NOT_RUN",
+          "gap": "limited R2-4 OK for explicit-empty offline parse; no stored full title/link/source-time replay"
+        },
+        {
+          "id": "PH-W02",
+          "r2_4": "OK",
+          "r2_5": "NOT_RUN",
+          "gap": "limited R2-4 OK for explicit-empty offline parse; no stored full title/link/source-time replay"
+        },
+        {
+          "id": "XX-F01",
+          "r2_4": "NOT_RUN",
+          "r2_5": "NOT_RUN",
+          "gap": "no qualifying stored product request/data verification"
+        }
+      ]
+    },
+    "r2_6_7_limited": "accepted limited portions — do not redo",
+    "r2_8": {
+      "status": "IN_PROGRESS_PARTIAL_OBSERVE_NOT_FULL_P1",
+      "note": "current 19-source day20-20261026a running ≠ full P1 continuous acceptance complete",
+      "day19": "ATTEMPTED_INCOMPLETE historical",
+      "day20": "running profile 24h-19 until ~2026-10-27 10:58 Asia/Shanghai; leave alone",
+      "fullP1Requirement": "P1 sources continuous 24h (plan R2-8); 19-source observe cannot grant full 39-source continuous acceptance"
+    },
+    "stillNeeded": [
+      "existing applicable integration gates",
+      "independent review",
+      "status closeout"
+    ],
+    "outOfScope": [
+      "mobile deferred",
+      "R1.5 history redo",
+      "R3",
+      "go-live"
+    ]
+  },
+  "day20CoverageVsFullP1": {
+    "profile": "24h-19",
+    "runId": "day20-20261026a",
+    "sourcesCoveredCount": 19,
+    "sourcesCovered": [
+      "TH-W01",
+      "ID-W01",
+      "CN-T02",
+      "TH-C01",
+      "PH-C01",
+      "CN-P01",
+      "TH-C02",
+      "VN-P03",
+      "VN-T01",
+      "ID-T01",
+      "XX-K03",
+      "ID-T02",
+      "VN-D01",
+      "XX-K02",
+      "XX-K01",
+      "MY-C01",
+      "MY-T01",
+      "PH-M01",
+      "XX-M03"
+    ],
+    "publicP1Denominator": 39,
+    "publicP1NotInDay20Count": 20,
+    "publicP1NotInDay20": [
+      "CN-P02",
+      "CN-W01",
+      "CN-W02",
+      "CN-T01",
+      "VN-P01",
+      "VN-W01",
+      "MY-P02",
+      "MY-P03",
+      "MY-W01",
+      "MY-L01",
+      "ID-W02",
+      "PH-P01",
+      "PH-W01",
+      "PH-W02",
+      "XX-W01",
+      "XX-W02",
+      "XX-M01",
+      "XX-A01",
+      "XX-A02",
+      "XX-F01"
+    ],
+    "alreadyCovers": "near-19 continuous observe of selected sources under profile 24h-19 (first round 19 ok_items observed historically on disk)",
+    "doesNotCover": [
+      "full 39-source P1 continuous-24h acceptance",
+      "numeric 5-source production attach/integration",
+      "R2-5 remaining 8 field-replay gaps",
+      "BLOCKED/STALE/PARTIAL residual R2-4 non-OK sources as continuous success",
+      "overallR2Pass"
+    ],
+    "existingAttachIntegrationLimitations": [
+      "Intel default-off; production enablement not granted by observe",
+      "numericFieldsSeparate 3/5 is diagnostics not attach rate; ID-W02/XX-W02 have offline evidence with ProductionIntegrationRate NOT_CLAIMED",
+      "day20 HTTP budget/observe ≠ qualification field gates",
+      "many day20 sources persistence=disallowed (metadata-only)"
+    ],
+    "inventoryOnly": true,
+    "noExtraSourcesTasksSampling": true
+  },
+  "overallR2Pass": false
+}
