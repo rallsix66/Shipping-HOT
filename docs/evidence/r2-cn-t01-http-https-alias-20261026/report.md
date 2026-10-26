@@ -47,3 +47,30 @@ Fixture: `server/intel/sources/cn-t01-http-https-twin.test.ts` (pos/neg + strict
 ## Non-changes
 
 No merge/deploy/force; main dirty preserved; day20 not restarted / locks not deleted; day19 untouched; no Guyang / no Slack send from this executor.
+
+## Review fixes (dots 1792985451.804939) - Asia/Shanghai 2026-10-26 11:44:39
+
+**Zero new network.** day20-20261026a worker PID 82336 left alone (RO peek only). Counts still frozen: R2-4 **32/39**, R2-5 **25/34**, CN-T01 **not PASS**, overallR2Pass=false.
+
+### 1) Exact raw href privilege
+- `resolveMetadataUrlAlias(originalHrefLiteral)` matches **only** the two approved absolute original strings (HTTP identity / HTTPS alias). No `new URL(...).href` / exactHrefKey path before eligibility.
+- Twin privilege removed from `allowed()`; unmatched HTTP cannot regain exception later in canonicalize/allowed.
+- `fromHtml` end-to-end negatives: `:80`, `%2e`/dot-segments, empty `?`/`#`, port/credentials/encoding variants -> `web_list_no_allowed_items` (HTTP) or no HTTP-identity mapping (HTTPS ordinary allow only).
+
+### 2) Gitignored private fixture gate (PAGASA pattern)
+- Ordinary run, private raw missing -> explicit **skip** (not false PASS).
+- `CN_T01_STRICT_PRIVATE_REPLAY=1` missing original or hash mismatch -> **fail**.
+- Local full-chain replay keeps unmodified 20318B (`ab5e3780...515d340f`).
+
+### 3) True readonly reopen
+- `isolated-db::openReadonly(path)`: `{ readonly: true, fileMustExist: true }` + `PRAGMA query_only=ON`; returns `readonly` / `fileMustExist` / `queryOnly` facts.
+- **Prior RW-reopen evidence (as-was, not rewritten):** earlier offline 8/8 path used `open()` / `new NativeDatabase(path)` without readonly - that reopen+query was **not** a true readonly open. Annotated here; do not treat prior wording as readonly proof.
+
+### 4) dateRuleBasis + upgrade-db
+- Restored / kept existing `dateRuleBasis` string (alias rationale in comments + this evidence only) so contentHash for original 7 does not revise.
+- Proof: isolated DB pre-fix **7** rows (HTTP twin + `/zcjd/` replaced with `https://example.invalid/...`), upgrade with rule on -> only item **8** added; original 7 keys/content/versions unchanged; second run `itemsNew=0` / `itemsRevised=0`; close + **true readonly** reopen consistent.
+
+### Gates (this round)
+- build / typecheck / lint: exit 0
+- vitest: **2056 passed | 8 skipped (2064)** / 161 files (`CN_T01_STRICT_PRIVATE_REPLAY=1`)
+- SHAs filled in `summary.json` after commit (tip = product/code SHA for this one-batch fix).
