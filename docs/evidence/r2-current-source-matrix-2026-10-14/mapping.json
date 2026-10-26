@@ -4,8 +4,8 @@
   "lastUpdatedAt": "2026-10-26T02:19:53.527Z",
   "lastUpdatedAtSource": "this_write_utc; dotsTs=1792980601.287869; Asia/Shanghai=2026-10-26 10:19:53 Asia/Shanghai",
   "lastUpdateNote": "2026-10-26 PAGASA PH-W01/PH-W02 P2 self-media residual (dots 1792980601): hasResidualMeaningfulBody checks current node + descendants for media/links. Zero new HTTP/TLS/PDF. Counts frozen 30/39 & 25/34; countedOK=false pending dots; overallR2Pass=false. day19 incomplete unchanged.",
-  "reviewedCodeSha": "PENDING_BIND_AFTER_COMMIT",
-  "evidenceHead": "PENDING_BIND_AFTER_COMMIT",
+  "reviewedCodeSha": "7a1975682078e1fb8107a7992b6a36833a293b0b",
+  "evidenceHead": "7a1975682078e1fb8107a7992b6a36833a293b0b",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "1b98532577a3de49b394dc0746e3a556717c94a0058bb35c14dacb453d0bc90f",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -4386,7 +4386,7 @@
             "products": "PH-W01",
             "status": "parsed_empty"
           },
-          "sha256": "710510f78d3eb557956a412029c836b6ec1fe42116c298b1ebe8978f41d936c8",
+          "sha256": "def8f1e7bb3a38272a675ee6d34165fbd06ec9534424090268167e81ca7b146a",
           "hashBasis": "committed_text_LF"
         },
         "realSourceCapturePublic": {
@@ -4406,7 +4406,7 @@
         "zeroNewHttpTlsPdf": true,
         "emptyNodeSelector": ".tropical-cyclone-weather-bulletin-page .article-content .panel-body > h3",
         "p2Hardened": true,
-        "codeSha": "PENDING_BIND_AFTER_COMMIT",
+        "codeSha": "7a1975682078e1fb8107a7992b6a36833a293b0b",
         "p2SelfMediaResidual": true
       },
       "numericFieldValidation": null,
@@ -4562,7 +4562,7 @@
             "products": "PH-W02",
             "status": "parsed_empty"
           },
-          "sha256": "710510f78d3eb557956a412029c836b6ec1fe42116c298b1ebe8978f41d936c8",
+          "sha256": "def8f1e7bb3a38272a675ee6d34165fbd06ec9534424090268167e81ca7b146a",
           "hashBasis": "committed_text_LF"
         },
         "realSourceCapturePublic": {
@@ -4582,7 +4582,7 @@
         "zeroNewHttpTlsPdf": true,
         "emptyNodeSelector": ".article-content.weather-advisory .weekly-content-adv > p",
         "p2Hardened": true,
-        "codeSha": "PENDING_BIND_AFTER_COMMIT",
+        "codeSha": "7a1975682078e1fb8107a7992b6a36833a293b0b",
         "p2SelfMediaResidual": true
       },
       "numericFieldValidation": null,
