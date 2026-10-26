@@ -1,3 +1,11 @@
+## 2026-10-26 — PAGASA PH-W01/PH-W02 限定产品裁定落地，公开资格 32/39
+
+- 在零新网络前提下，按**已有官方明确空状态捕获及离线产品范围解析核验**，将 PH-W01 与 PH-W02 **各**计为**限定** R2-4 OK（`r2_4=OK`，`countedOK=true`，`scope=existing official explicit-empty captures and offline product-scoped parse verification`）。
+- **依据**：两独立官方产品真实已存 explicit-empty + 严格双原件 parse replay，且 conflict/false-PASS（含 self-media residual）已关闭；**不是**仅凭 200；**不要求**捕获当时必有活动公报。
+- **不是**活动公报字段、生产 ingest 启用、持续可用或 24h 通过。**显著保留**：R2-5 仍 **25/34**；数值生产分区仍 **3/5**；PPA/PH-P01 继续 BLOCKED；day19 **incomplete**；**overallR2Pass=false**；未生产启用。
+- 公开资格 **30/39 → 32/39（差 0，达到 R2-4 最小 32）**。原 30/39、PARTIAL、历史 HTTP 403 及更早快照保留为**当时快照 / historical superseded**。裁定时间 `2026-10-26T02:22:19.583919Z`（`rulingMessageTs=1792981339.583919`）。证据：[product-ruling.md](evidence/r2-4-pagasa-phw-20261026/product-ruling.md) / [parsed-empty-replay.public.json](evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json)；矩阵：[mapping.json](evidence/r2-current-source-matrix-2026-10-14/mapping.json)。
+- 本提交**仅文档**。代码门禁沿用 `7a1975682078e1fb8107a7992b6a36833a293b0b`（不冒称重跑全量 Vitest/build）。未合并、未部署、未改 `codex/shipping-hot-r2`。
+
 ## 2026-10-26 — PAGASA PH-W01/PH-W02 P2 self-media residual（dots 1792980601.287869）
 
 - **零新 HTTP/TLS/PDF**；复用已捕 private wire（SHA 与台账一致：`b5ecb77a40ada689...` / `8ac1546c1681d5b6...`）。

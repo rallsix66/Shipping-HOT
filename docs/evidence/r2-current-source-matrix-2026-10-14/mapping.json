@@ -1,11 +1,11 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-20T04:06:11.578Z",
-  "lastUpdatedAt": "2026-10-26T02:19:53.527Z",
-  "lastUpdatedAtSource": "this_write_utc; dotsTs=1792980601.287869; Asia/Shanghai=2026-10-26 10:19:53 Asia/Shanghai",
-  "lastUpdateNote": "2026-10-26 PAGASA PH-W01/PH-W02 P2 self-media residual (dots 1792980601): hasResidualMeaningfulBody checks current node + descendants for media/links. Zero new HTTP/TLS/PDF. Counts frozen 30/39 & 25/34; countedOK=false pending dots; overallR2Pass=false. day19 incomplete unchanged.",
+  "lastUpdatedAt": "2026-10-26T02:31:26.773Z",
+  "lastUpdatedAtSource": "this_write_utc; dotsTs=1792981339.583919; Asia/Shanghai=2026-10-26 10:31:26.773 Asia/Shanghai",
+  "lastUpdateNote": "2026-10-26 PAGASA PH-W01/PH-W02 limited product ruling (dots 1792981339.583919): each limited R2-4 OK for existing official explicit-empty captures and offline product-scoped parse verification. 30/39 → 32/39 (meets minimum); R2-5 25/34; numeric 3/5; PPA BLOCKED; day19 incomplete; overallR2Pass=false. Pure docs; gates bound to 7a1975682078e1fb8107a7992b6a36833a293b0b (no full suite re-run).",
   "reviewedCodeSha": "7a1975682078e1fb8107a7992b6a36833a293b0b",
-  "evidenceHead": "7a1975682078e1fb8107a7992b6a36833a293b0b",
+  "evidenceHead": "d5d366ce09bcfb9f89abf4f3020c69d1f4f2818c",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "1b98532577a3de49b394dc0746e3a556717c94a0058bb35c14dacb453d0bc90f",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -38,11 +38,11 @@
   },
   "measuredCoverage": {
     "r2_4": {
-      "numerator": 30,
+      "numerator": 32,
       "denominator": 39,
-      "ratio": 0.7692307692307693,
+      "ratio": 0.8205128205128205,
       "minimumOK": 32,
-      "shortfall": 2,
+      "shortfall": 0,
       "ids": [
         "CN-P01",
         "CN-W01",
@@ -63,26 +63,28 @@
         "ID-W02",
         "ID-T01",
         "ID-T02",
+        "PH-W01",
+        "PH-W02",
         "PH-C01",
         "PH-M01",
+        "XX-W01",
+        "XX-W02",
         "XX-K01",
         "XX-K02",
         "XX-K03",
         "XX-M01",
         "XX-M03",
         "XX-A01",
-        "XX-A02",
-        "XX-W01",
-        "XX-W02"
+        "XX-A02"
       ],
       "statusCounts": {
-        "OK": 30,
-        "PARTIAL": 6,
+        "OK": 32,
+        "PARTIAL": 4,
         "STALE": 1,
         "BLOCKED": 1,
         "NOT_RUN": 1
       },
-      "pass": false
+      "pass": true
     },
     "r2_5": {
       "numerator": 25,
@@ -155,6 +157,7 @@
     "overallR2Pass": false
   },
   "clarifications": [
+    "PH-W01/PH-W02 limited R2-4 OK (2026-10-26T02:22:19.583919Z / rulingMessageTs=1792981339.583919) for existing official explicit-empty captures and offline product-scoped parse verification only. Prior PARTIAL/403/30/39 held remain historical snapshots. Not active bulletin, production ingest, continuous availability, or 24h pass; R2-5 25/34 and numeric 3/5 unchanged; overallR2Pass=false.",
     "XX-W02 limited R2-4 OK (2026-10-25T10:08:31.869439Z / rulingMessageTs=1792922911.869439) for existing two-TC forecast+specifications capture and offline field verification only. Prior PARTIAL/forecast-only and 29/39 held remain historical snapshots. specifications not in production sync; live persistence/continuous run unverified; numeric partition 3/5 unchanged; not full-pass or production enablement.",
     "R2-5 field pass is actual source-time field with honest role/precision, not certification of news publication instant, warning validity or untruncated legal text. If a stricter publication-only contract is desired it is a separately stated change; no such new hard gate introduced.",
     "NCHMF older real sanitized DOM field replay retains configured+07 warning; no new UTC provenance claim. BMKG older raw URL alias and latest13-item exact request are separate proofs."
@@ -4366,20 +4369,21 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/PH-W01-capture.json",
-          "sha256": "29c0d4947fdbeca0869f107af98203702b43e4918b42a3ed626e98cbf0010480",
+          "path": "docs/evidence/r2-4-pagasa-phw-20261026/PH-W01-fields.public.json",
+          "sha256": "865a39b720e22305c8985056912170c5bde8a3f05a91d1bec68e9da6dc5b563c",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
-        "at": "2026-10-15T05:53:36.714Z",
-        "httpStatus": 403,
-        "bytes": 118,
-        "wireSha256": "58bf2215b395dcac74c009aa98701854e43cbe54a1cd3a95fee6a647ca9910d4",
-        "scope": "exact_catalogue_entry_HTTP403_not_weather_empty_or_active_positive",
-        "productQualificationChanged": false
+        "at": "2026-10-26T01:19:47.025Z",
+        "httpStatus": 200,
+        "bytes": 141029,
+        "wireSha256": "b5ecb77a40ada689ef08f52fb942b94cc3f5fe88f6e2dbb84096cb1d08a5a1ad",
+        "scope": "official_page_explicit_empty_state_CAPTURED_200_not_active_bulletin_body",
+        "productQualificationChanged": true,
+        "note": "Replaces historical after-apply HTTP 403 as current measured capture for limited empty-state qualification; 403 retained under historicalSuperseded."
       },
       "fieldReplayEvidence": {
-        "status": "PARSED_EMPTY_OFFLINE_REPLAY_P2_SELF_MEDIA_AWAITING_DOTS",
+        "status": "PARSED_EMPTY_OFFLINE_REPLAY_LIMITED_OK",
         "evidence": {
           "path": "docs/evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json",
           "selector": {
@@ -4402,12 +4406,13 @@
         "emptyStateOriginalText": "No Active Tropical Cyclone within the Philippine Area of Responsibility",
         "productContainerSelector": ".tropical-cyclone-weather-bulletin-page",
         "interpretation": "official_page_explicit_empty_state_only",
-        "countedOKUnchanged": true,
+        "countedOK": true,
         "zeroNewHttpTlsPdf": true,
-        "emptyNodeSelector": ".tropical-cyclone-weather-bulletin-page .article-content .panel-body > h3",
         "p2Hardened": true,
+        "p2SelfMediaResidual": true,
         "codeSha": "7a1975682078e1fb8107a7992b6a36833a293b0b",
-        "p2SelfMediaResidual": true
+        "rulingAt": "2026-10-26T02:22:19.583919Z",
+        "rulingMessageTs": "1792981339.583919"
       },
       "numericFieldValidation": null,
       "dateEvidence": {
@@ -4429,9 +4434,27 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "PARTIAL",
-        "countedOK": false,
-        "reason": "Official-page explicit empty-state parsed_empty offline replay P2 self-media residual (self+descendant media residual; wire SHA matched; citations: .tropical-cyclone-weather-bulletin-page / 'No Active Tropical Cyclone within the Philippine Area of Responsibility'). Executor did NOT upgrade countedOK; awaiting dots ruling."
+        "verdict": "OK",
+        "countedOK": true,
+        "scope": "existing official explicit-empty captures and offline product-scoped parse verification",
+        "qualification": "limited_offline_explicit_empty_parse",
+        "reason": "Approved limited R2-4 OK for existing official explicit-empty captures and offline product-scoped parse verification (strict dual-original parse replay; conflict/false-PASS including self-media residual closed). Not mere HTTP 200; does not require active bulletin at capture time. Not active-bulletin fields, production ingest enablement, continuous availability, or 24h pass. R2-5 remains NOT_RUN; numeric partition 3/5 unchanged; overallR2Pass=false.",
+        "acceptance": {
+          "path": "docs/evidence/r2-4-pagasa-phw-20261026/product-ruling.md",
+          "offlineReplay": "docs/evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json",
+          "fieldsPublic": "docs/evidence/r2-4-pagasa-phw-20261026/PH-W01-fields.public.json",
+          "gate": "docs/evidence/r2-4-pagasa-phw-20261026/gate-parsed-empty.public.json",
+          "codeBaseline": "7a1975682078e1fb8107a7992b6a36833a293b0b",
+          "rulingAt": "2026-10-26T02:22:19.583919Z",
+          "rulingMessageTs": "1792981339.583919",
+          "hashes": {
+            "wireHtml": "b5ecb77a40ada689ef08f52fb942b94cc3f5fe88f6e2dbb84096cb1d08a5a1ad",
+            "fieldsPublic": "865a39b720e22305c8985056912170c5bde8a3f05a91d1bec68e9da6dc5b563c",
+            "parsedEmptyReplay": "def8f1e7bb3a38272a675ee6d34165fbd06ec9534424090268167e81ca7b146a",
+            "productRuling": "c830f600aef6e03d4b8661bbc708011e5c9db9c6150f7900ac4cbacab1c5c75c"
+          },
+          "productRulingSha256": "c830f600aef6e03d4b8661bbc708011e5c9db9c6150f7900ac4cbacab1c5c75c"
+        }
       },
       "r2_5": {
         "verdict": "NOT_RUN",
@@ -4443,10 +4466,47 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "parsed_empty offline replay P2 self-media residual; countedOK frozen pending dots ruling",
-        "archive PDF host DNS blocked; no current usable bulletin body/id/time"
+        "Retained significant fact (does not veto limited empty-state OK): no active bulletin body/id/publish time/PDF on this snapshot; archive PDF host DNS previously blocked.",
+        "Retained significant fact: R2-5 remains NOT_RUN (no full title/link/source-time article replay).",
+        "Not claimed: production ingest enable, continuous availability, 24h pass, overallR2Pass, or PPA/PH-P01 recovery (still BLOCKED).",
+        "Historical HTTP 403 / PARTIAL / 30/39 snapshots retained; do not rewrite prior sampling facts.",
+        "day19 observation remains incomplete (exit time/reason unknown)."
       ],
       "historicalSuperseded": [
+        {
+          "supersededAt": "2026-10-26T02:22:19.583919Z",
+          "rulingMessageTs": "1792981339.583919",
+          "reason": "2026-10-26 product ruling: prior PARTIAL (parsed_empty offline replay pending dots; historical HTTP 403 after-apply) and 30/39 held counts retained as historical snapshots; current counting uses limited official explicit-empty + offline product-scoped parse OK. Not a claim of active bulletin, production ingest, continuous availability, or 24h pass.",
+          "previousR24": {
+            "verdict": "PARTIAL",
+            "countedOK": false,
+            "reason": "Official-page explicit empty-state parsed_empty offline replay P2 self-media residual (self+descendant media residual; wire SHA matched; citations: .tropical-cyclone-weather-bulletin-page / 'No Active Tropical Cyclone within the Philippine Area of Responsibility'). Executor did NOT upgrade countedOK; awaiting dots ruling."
+          },
+          "previousLatestActualFetch": {
+            "evidence": {
+              "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/PH-W01-capture.json",
+              "sha256": "29c0d4947fdbeca0869f107af98203702b43e4918b42a3ed626e98cbf0010480",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin",
+            "at": "2026-10-15T05:53:36.714Z",
+            "httpStatus": 403,
+            "bytes": 118,
+            "wireSha256": "58bf2215b395dcac74c009aa98701854e43cbe54a1cd3a95fee6a647ca9910d4",
+            "scope": "exact_catalogue_entry_HTTP403_not_weather_empty_or_active_positive",
+            "productQualificationChanged": false
+          },
+          "previousQualification": {
+            "r2_4": "30/39",
+            "shortfall": 2,
+            "countedOK": false,
+            "atHead": "7a1975682078e1fb8107a7992b6a36833a293b0b",
+            "evidence": {
+              "path": "docs/evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json",
+              "note": "P2 self-media residual held 30/39; PH-W01/PH-W02 not raised until dots 1792981339.583919 ruling"
+            }
+          }
+        },
         {
           "supersededAt": "2026-10-15T05:57:37.872Z",
           "reason": "New separately authorized after-apply real response; prior DNS-only block and historical source capture preserved, no qualification change",
@@ -4542,20 +4602,21 @@
       },
       "latestActualFetch": {
         "evidence": {
-          "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/PH-W02-capture.json",
-          "sha256": "0cfd7c2d6e3010ddcf4eb25b1f7b800f189e7ea555e645e8cfe1500599cacfc6",
+          "path": "docs/evidence/r2-4-pagasa-phw-20261026/PH-W02-fields.public.json",
+          "sha256": "e5de15f3c1e8fd17451de6e630f31985d2fa3ea05c44192cf435fde1c831f67a",
           "hashBasis": "committed_text_LF"
         },
         "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
-        "at": "2026-10-15T05:53:36.848Z",
-        "httpStatus": 403,
-        "bytes": 118,
-        "wireSha256": "58bf2215b395dcac74c009aa98701854e43cbe54a1cd3a95fee6a647ca9910d4",
-        "scope": "exact_catalogue_entry_HTTP403_not_weather_empty_or_active_positive",
-        "productQualificationChanged": false
+        "at": "2026-10-26T01:19:47.402Z",
+        "httpStatus": 200,
+        "bytes": 131818,
+        "wireSha256": "8ac1546c1681d5b67f71ceeb1626a92553d0ffe6f5224294d7cc9de62068ff53",
+        "scope": "official_page_explicit_empty_state_CAPTURED_200_not_active_bulletin_body",
+        "productQualificationChanged": true,
+        "note": "Replaces historical after-apply HTTP 403 as current measured capture for limited empty-state qualification; 403 retained under historicalSuperseded."
       },
       "fieldReplayEvidence": {
-        "status": "PARSED_EMPTY_OFFLINE_REPLAY_P2_SELF_MEDIA_AWAITING_DOTS",
+        "status": "PARSED_EMPTY_OFFLINE_REPLAY_LIMITED_OK",
         "evidence": {
           "path": "docs/evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json",
           "selector": {
@@ -4578,12 +4639,13 @@
         "emptyStateOriginalText": "As of today, there is no Weather Advisory issued.",
         "productContainerSelector": ".article-content.weather-advisory",
         "interpretation": "official_page_explicit_empty_state_only",
-        "countedOKUnchanged": true,
+        "countedOK": true,
         "zeroNewHttpTlsPdf": true,
-        "emptyNodeSelector": ".article-content.weather-advisory .weekly-content-adv > p",
         "p2Hardened": true,
+        "p2SelfMediaResidual": true,
         "codeSha": "7a1975682078e1fb8107a7992b6a36833a293b0b",
-        "p2SelfMediaResidual": true
+        "rulingAt": "2026-10-26T02:22:19.583919Z",
+        "rulingMessageTs": "1792981339.583919"
       },
       "numericFieldValidation": null,
       "dateEvidence": {
@@ -4605,9 +4667,27 @@
         "currentUserPersistedSettings": "not_inspected"
       },
       "r2_4": {
-        "verdict": "PARTIAL",
-        "countedOK": false,
-        "reason": "Official-page explicit empty-state parsed_empty offline replay P2 self-media residual (self+descendant media residual; wire SHA matched; citations: .article-content.weather-advisory / 'As of today, there is no Weather Advisory issued.'). Executor did NOT upgrade countedOK; awaiting dots ruling."
+        "verdict": "OK",
+        "countedOK": true,
+        "scope": "existing official explicit-empty captures and offline product-scoped parse verification",
+        "qualification": "limited_offline_explicit_empty_parse",
+        "reason": "Approved limited R2-4 OK for existing official explicit-empty captures and offline product-scoped parse verification (strict dual-original parse replay; conflict/false-PASS including self-media residual closed). Not mere HTTP 200; does not require active bulletin at capture time. Not active-bulletin fields, production ingest enablement, continuous availability, or 24h pass. R2-5 remains NOT_RUN; numeric partition 3/5 unchanged; overallR2Pass=false.",
+        "acceptance": {
+          "path": "docs/evidence/r2-4-pagasa-phw-20261026/product-ruling.md",
+          "offlineReplay": "docs/evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json",
+          "fieldsPublic": "docs/evidence/r2-4-pagasa-phw-20261026/PH-W02-fields.public.json",
+          "gate": "docs/evidence/r2-4-pagasa-phw-20261026/gate-parsed-empty.public.json",
+          "codeBaseline": "7a1975682078e1fb8107a7992b6a36833a293b0b",
+          "rulingAt": "2026-10-26T02:22:19.583919Z",
+          "rulingMessageTs": "1792981339.583919",
+          "hashes": {
+            "wireHtml": "8ac1546c1681d5b67f71ceeb1626a92553d0ffe6f5224294d7cc9de62068ff53",
+            "fieldsPublic": "e5de15f3c1e8fd17451de6e630f31985d2fa3ea05c44192cf435fde1c831f67a",
+            "parsedEmptyReplay": "def8f1e7bb3a38272a675ee6d34165fbd06ec9534424090268167e81ca7b146a",
+            "productRuling": "c830f600aef6e03d4b8661bbc708011e5c9db9c6150f7900ac4cbacab1c5c75c"
+          },
+          "productRulingSha256": "c830f600aef6e03d4b8661bbc708011e5c9db9c6150f7900ac4cbacab1c5c75c"
+        }
       },
       "r2_5": {
         "verdict": "NOT_RUN",
@@ -4619,10 +4699,47 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "parsed_empty offline replay P2 self-media residual; countedOK frozen pending dots ruling",
-        "no advisory body/id/time/PDF on this snapshot"
+        "Retained significant fact (does not veto limited empty-state OK): no active bulletin body/id/publish time/PDF on this snapshot; archive PDF host DNS previously blocked.",
+        "Retained significant fact: R2-5 remains NOT_RUN (no full title/link/source-time article replay).",
+        "Not claimed: production ingest enable, continuous availability, 24h pass, overallR2Pass, or PPA/PH-P01 recovery (still BLOCKED).",
+        "Historical HTTP 403 / PARTIAL / 30/39 snapshots retained; do not rewrite prior sampling facts.",
+        "day19 observation remains incomplete (exit time/reason unknown)."
       ],
       "historicalSuperseded": [
+        {
+          "supersededAt": "2026-10-26T02:22:19.583919Z",
+          "rulingMessageTs": "1792981339.583919",
+          "reason": "2026-10-26 product ruling: prior PARTIAL (parsed_empty offline replay pending dots; historical HTTP 403 after-apply) and 30/39 held counts retained as historical snapshots; current counting uses limited official explicit-empty + offline product-scoped parse OK. Not a claim of active bulletin, production ingest, continuous availability, or 24h pass.",
+          "previousR24": {
+            "verdict": "PARTIAL",
+            "countedOK": false,
+            "reason": "Official-page explicit empty-state parsed_empty offline replay P2 self-media residual (self+descendant media residual; wire SHA matched; citations: .article-content.weather-advisory / 'As of today, there is no Weather Advisory issued.'). Executor did NOT upgrade countedOK; awaiting dots ruling."
+          },
+          "previousLatestActualFetch": {
+            "evidence": {
+              "path": "docs/evidence/r2-official-gaps-applied-2026-10-15/PH-W02-capture.json",
+              "sha256": "0cfd7c2d6e3010ddcf4eb25b1f7b800f189e7ea555e645e8cfe1500599cacfc6",
+              "hashBasis": "committed_text_LF"
+            },
+            "url": "https://www.pagasa.dost.gov.ph/weather/weather-advisory",
+            "at": "2026-10-15T05:53:36.848Z",
+            "httpStatus": 403,
+            "bytes": 118,
+            "wireSha256": "58bf2215b395dcac74c009aa98701854e43cbe54a1cd3a95fee6a647ca9910d4",
+            "scope": "exact_catalogue_entry_HTTP403_not_weather_empty_or_active_positive",
+            "productQualificationChanged": false
+          },
+          "previousQualification": {
+            "r2_4": "30/39",
+            "shortfall": 2,
+            "countedOK": false,
+            "atHead": "7a1975682078e1fb8107a7992b6a36833a293b0b",
+            "evidence": {
+              "path": "docs/evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json",
+              "note": "P2 self-media residual held 30/39; PH-W01/PH-W02 not raised until dots 1792981339.583919 ruling"
+            }
+          }
+        },
         {
           "supersededAt": "2026-10-15T05:57:37.873Z",
           "reason": "New separately authorized after-apply real response; prior DNS-only block and historical source capture preserved, no qualification change",
@@ -7850,5 +7967,34 @@
       "offlineReplay": "docs/evidence/r2-4-xxw02-windcircle-20261025/offline-replay.public.json",
       "sourceChain": "docs/evidence/r2-4-xxw02-windcircle-20261025/source-chain-zon.public.json"
     }
+  },
+  "lastPhWProductRuling": {
+    "at": "2026-10-26T02:22:19.583919Z",
+    "rulingMessageTs": "1792981339.583919",
+    "source": "slack_thread_message_ts:1792981339.583919 (= 2026-10-26T02:22:19.583919Z)",
+    "basisHead": "7a1975682078e1fb8107a7992b6a36833a293b0b",
+    "parentTip": "d5d366ce09bcfb9f89abf4f3020c69d1f4f2818c",
+    "scope": "existing official explicit-empty captures and offline product-scoped parse verification",
+    "before": "30/39",
+    "after": "32/39",
+    "shortfallAfter": 0,
+    "meetsR24Minimum": true,
+    "r2_5": "25/34 unchanged",
+    "numericProductionPartition": "3/5 unchanged",
+    "PPA": "BLOCKED unchanged",
+    "day19": "incomplete unchanged",
+    "overallR2Pass": false,
+    "products": [
+      "PH-W01",
+      "PH-W02"
+    ],
+    "evidence": {
+      "ruling": "docs/evidence/r2-4-pagasa-phw-20261026/product-ruling.md",
+      "offlineReplay": "docs/evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json",
+      "gate": "docs/evidence/r2-4-pagasa-phw-20261026/gate-parsed-empty.public.json",
+      "fieldsPHW01": "docs/evidence/r2-4-pagasa-phw-20261026/PH-W01-fields.public.json",
+      "fieldsPHW02": "docs/evidence/r2-4-pagasa-phw-20261026/PH-W02-fields.public.json"
+    },
+    "productRulingSha256": "c830f600aef6e03d4b8661bbc708011e5c9db9c6150f7900ac4cbacab1c5c75c"
   }
 }

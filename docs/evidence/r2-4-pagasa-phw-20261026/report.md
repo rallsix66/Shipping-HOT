@@ -79,3 +79,12 @@ used=**2**/6；redirects=0；retries=0。未混用旧轮 `r2-4-gapfill-20261025`
 - Offline replay → `parsed_empty`；wire SHA 匹配；严格双原件 `PAGASA_STRICT_PRIVATE_REPLAY=1` → **27 pass / 1 skip**。
 - 计数冻结 **30/39** / **25/34**；`countedOK=false` 直至 dots 另裁。
 - 证据：[`parsed-empty-replay.public.json`](./parsed-empty-replay.public.json)（finishedAtAsiaShanghai=2026-10-26 10:19:53 Asia/Shanghai）。
+
+## 本轮追加（dots 1792981339.583919）：限定产品裁定落地
+
+- **零新网络**；纯文档；代码门禁沿用 `7a1975682078e1fb8107a7992b6a36833a293b0b`（不重跑全量 Vitest/build）。
+- dots 裁定：PH-W01 / PH-W02 **各**限定 R2-4 OK；`scope=existing official explicit-empty captures and offline product-scoped parse verification`。
+- 依据：两独立官方产品真实已存 explicit-empty + 严格双原件 parse replay + conflict/false-PASS（含 self-media）已关闭；**不是**仅 200；不要求当时必有活动公报。
+- 计数：**30/39 → 32/39**（达到最小 32）；R2-5 **25/34**；numeric **3/5**；PPA BLOCKED；day19 incomplete；**overallR2Pass=false**。
+- 历史 30/39、PARTIAL、HTTP 403 保留为 historical/superseded。
+- 裁定证据：[product-ruling.md](./product-ruling.md)；矩阵同步见 `docs/evidence/r2-current-source-matrix-2026-10-14/`。

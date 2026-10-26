@@ -98,5 +98,40 @@
     "PH-W02": "parsed_empty",
     "countsStillFrozen": true,
     "executorDidNotUpgradeOK": true
+  },
+  "productRuling": {
+    "round": "dots-1792981339.583919",
+    "at": "2026-10-26T02:22:19.583919Z",
+    "rulingMessageTs": "1792981339.583919",
+    "codeBaseline": "7a1975682078e1fb8107a7992b6a36833a293b0b",
+    "scope": "existing official explicit-empty captures and offline product-scoped parse verification",
+    "before": "30/39",
+    "after": "32/39",
+    "shortfallAfter": 0,
+    "meetsR24Minimum": true,
+    "r2_5": "25/34",
+    "numericProductionPartition": "3/5",
+    "PPA": "BLOCKED",
+    "day19": "incomplete",
+    "overallR2Pass": false,
+    "zeroNewNetwork": true,
+    "pureDocs": true,
+    "evidence": "docs/evidence/r2-4-pagasa-phw-20261026/product-ruling.md"
+  },
+  "countsFrozenHistoricalBeforeRuling": {
+    "R2_4": "30/39",
+    "R2_5": "25/34",
+    "numericProductionPartition": "3/5",
+    "overallR2Pass": false,
+    "PPA": "BLOCKED",
+    "executorDidNotUpgradeOK": true
+  },
+  "countsAfterRuling": {
+    "R2_4": "32/39",
+    "R2_5": "25/34",
+    "numericProductionPartition": "3/5",
+    "overallR2Pass": false,
+    "PPA": "BLOCKED",
+    "day19": "incomplete"
   }
 }
