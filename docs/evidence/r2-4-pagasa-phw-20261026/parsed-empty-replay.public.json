@@ -1,0 +1,73 @@
+{
+  "round": "dots-1792978528.526279",
+  "kind": "PH-W01/PH-W02 official-page explicit empty-state parsed-empty offline replay",
+  "finishedAtAsiaShanghai": "2026-10-26 09:48:41 Asia/Shanghai",
+  "zeroNewHttpTlsPdf": true,
+  "privateRawRoot": ".tmp/r2-4-pagasa-phw-20261026/private/",
+  "publicCaptureEvidence": "docs/evidence/r2-4-pagasa-phw-20261026/",
+  "module": "server/services/pagasa-empty-state-parse.ts",
+  "tests": "server/services/pagasa-empty-state-parse.test.ts",
+  "fixtures": "server/fixtures/pagasa/",
+  "interpretation": "official_page_explicit_empty_state_only ? NOT 'Philippines has no weather risk'",
+  "countsFrozen": {
+    "R2_4": "30/39",
+    "R2_5": "25/34",
+    "numericProductionPartition": "3/5",
+    "overallR2Pass": false,
+    "executorDidNotUpgradeOK": true
+  },
+  "products": {
+    "PH-W01": {
+      "wireSha256": "b5ecb77a40ada689ef08f52fb942b94cc3f5fe88f6e2dbb84096cb1d08a5a1ad",
+      "wireMatchCaptureLedger": true,
+      "httpStatus": 200,
+      "bytes": 141029,
+      "status": "parsed_empty",
+      "emptyStateOriginalText": "No Active Tropical Cyclone within the Philippine Area of Responsibility",
+      "productContainerSelector": ".tropical-cyclone-weather-bulletin-page",
+      "emptyNodeSelector": ".tropical-cyclone-weather-bulletin-page .article-content .panel-body > h3",
+      "citations": {
+        "productContainerPresent": true,
+        "emptyTextExactMatch": true,
+        "emptyTextCitation": "No Active Tropical Cyclone within the Philippine Area of Responsibility",
+        "activeBodyConflict": false
+      },
+      "interpretation": "official_page_explicit_empty_state_only",
+      "identity": null,
+      "originalPublishTime": null,
+      "articleUrl": null
+    },
+    "PH-W02": {
+      "wireSha256": "8ac1546c1681d5b67f71ceeb1626a92553d0ffe6f5224294d7cc9de62068ff53",
+      "wireMatchCaptureLedger": true,
+      "httpStatus": 200,
+      "bytes": 131818,
+      "status": "parsed_empty",
+      "emptyStateOriginalText": "As of today, there is no Weather Advisory issued.",
+      "productContainerSelector": ".article-content.weather-advisory",
+      "emptyNodeSelector": ".article-content.weather-advisory .weekly-content-adv > p",
+      "citations": {
+        "productContainerPresent": true,
+        "emptyTextExactMatch": true,
+        "emptyTextCitation": "As of today, there is no Weather Advisory issued.",
+        "activeBodyConflict": false
+      },
+      "interpretation": "official_page_explicit_empty_state_only",
+      "identity": null,
+      "originalPublishTime": null,
+      "articleUrl": null
+    }
+  },
+  "negativeCasesCovered": [
+    "missing_product_container",
+    "unknown_empty_copy",
+    "active_body_conflict",
+    "failed_response_shape (error page / non-2xx)",
+    "missing_html"
+  ],
+  "notAddedAsExtraEmptyStateGates": [
+    "activity-bulletin",
+    "independent article URL",
+    "production sync"
+  ]
+}

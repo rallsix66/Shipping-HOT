@@ -1,3 +1,12 @@
+## 2026-10-26 — PH-W01/PH-W02 官方页面明确空状态 parsed-empty 回放（dots 1792978528.526279）
+
+- **零新 HTTP/TLS/PDF**：复用已存 PH-W01/PH-W02 private wire；wire SHA 与台账一致（`b5ecb77a40ada689...` / `8ac1546c1681d5b6...`）。
+- 产品范围解析（**非** production collector）：`server/services/pagasa-empty-state-parse.ts` + fixtures/tests；正例 offline replay → **parsed_empty**（容器+原文引用）；负例 missing container / unknown copy / body conflict / error必须 **not_empty**。
+- 用词：「法定空状态」→「官方页面明确空状态」。**不** 解读为「菲律宾无天气风险」；**不** 编造风险事件/发布时间。
+- day19：**incomplete**；最后证实事件约启动后 3.8h；**退出时间/原因未知**；红行证据 [`evidence/r2-4-day19-interrupt-20261026/`](evidence/r2-4-day19-interrupt-20261026/)；原 observe 现场未动。
+- **计数仍冻结** R2-4 **30/39**、R2-5 **25/34**、numeric **3/5**、`overallR2Pass=false`；PH-W01/PH-W02 `countedOK=false` 直到 dots 按既有规则裁定（上下文：explicit parsed-empty 可不要求当时必有活动公报）。
+- 证据：[parsed-empty-replay.public.json](evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json) / [report.md](evidence/r2-4-pagasa-phw-20261026/report.md) / [mapping.json](evidence/r2-current-source-matrix-2026-10-14/mapping.json)。
+
 ## 2026-10-25 — XX-W02 限定产品裁定落地，公开资格 30/39
 
 - 在零新网络前提下，按已有两 TC（TC2636/TC2637）forecast+specifications 捕获及离线字段验证，将 XX-W02 计为**限定** R2-4 OK（`r2_4=OK`，`countedOK=true`，`scope=existing two-TC forecast+specifications capture and offline field verification`）。**是**已取产品的真实解析验证；**不是**生产 sync 集成或持续运行通过。

@@ -25,7 +25,7 @@
   },
   "products": {
     "PH-W01": {
-      "entry": "CAPTURED_200_legal_empty_state",
+      "entry": "CAPTURED_200_official_page_explicit_empty_state",
       "emptyStateOriginalText": "No Active Tropical Cyclone within the Philippine Area of Responsibility",
       "archivePdfLinked": 17,
       "latestArchivePdfFetch": "BLOCKED_dns_blocked_address",
@@ -33,7 +33,7 @@
       "countedOKUnchanged": true
     },
     "PH-W02": {
-      "entry": "CAPTURED_200_legal_empty_state",
+      "entry": "CAPTURED_200_official_page_explicit_empty_state",
       "emptyStateOriginalText": "As of today, there is no Weather Advisory issued.",
       "pdfLinked": 0,
       "currentUsable": false,
@@ -53,7 +53,7 @@
     "lastEventSequence": 799,
     "lastEventType": "job_result",
     "abnormalStop": true,
-    "abnormalStopNote": "Events stopped ~3.8h after start; no further events through check time. Existing log facts only; no restart.",
+    "abnormalStopNote": "Last proven event ~3.8h after start; actual process exit time/reason unknown (no exit_code footer / no finished event). Do not claim natural stop / sleep kill / user kill. Observation incomplete; no 24h pass.",
     "scheduleRecordsExist": true,
     "sampleNextSyncAt": "2026-10-25T08:15:28.208Z",
     "lockFilePresent": true,
@@ -62,7 +62,17 @@
     "early24hPassClaimed": false,
     "readOnly": true,
     "noRestart": true,
-    "noLockDbConfigChange": true
+    "noLockDbConfigChange": true,
+    "status": "incomplete",
+    "exitTime": null,
+    "exitTimeVerdict": "unknown",
+    "exitReason": null,
+    "exitReasonVerdict": "unknown",
+    "lastProvenEventAt": "2026-10-25T07:45:29.905Z",
+    "lastProvenEventAtAsiaShanghai": "2026-10-25 15:45:29 Asia/Shanghai",
+    "hoursAfterStartToLastEventApprox": 3.8,
+    "redactedEvidence": "docs/evidence/r2-4-day19-interrupt-20261026/",
+    "observeSiteUntouched": true
   },
   "isolation": {
     "exclusiveWorktreePreserved": true,
@@ -78,5 +88,15 @@
     ]
   },
   "privateEvidenceRoot": ".tmp/r2-4-pagasa-phw-20261026",
-  "publicEvidenceRoot": "docs/evidence/r2-4-pagasa-phw-20261026"
+  "publicEvidenceRoot": "docs/evidence/r2-4-pagasa-phw-20261026",
+  "parsedEmptyFollowUp": {
+    "round": "dots-1792978528.526279",
+    "zeroNewHttpTlsPdf": true,
+    "module": "server/services/pagasa-empty-state-parse.ts",
+    "tests": "server/services/pagasa-empty-state-parse.test.ts",
+    "PH-W01": "parsed_empty",
+    "PH-W02": "parsed_empty",
+    "countsStillFrozen": true,
+    "executorDidNotUpgradeOK": true
+  }
 }

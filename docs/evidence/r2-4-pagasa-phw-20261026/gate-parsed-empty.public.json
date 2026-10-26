@@ -1,0 +1,41 @@
+{
+  "round": "dots-1792978528.526279",
+  "kind": "PH-W01/PH-W02 parsed-empty offline replay + day19 incomplete docs",
+  "checkedAtAsiaShanghai": "2026-10-26 09:52:00 Asia/Shanghai",
+  "baselineHead": "37eab90b19102b0f0c99cb1c629954e680f0cfee",
+  "branch": "codex/shipping-hot-r2-4-gapfill-20261025",
+  "gates": {
+    "vitest": {
+      "exit": 0,
+      "passed": 2034,
+      "skipped": 5,
+      "failed": 0,
+      "files": 160
+    },
+    "typecheck": {
+      "exit": 0
+    },
+    "lint": {
+      "exit": 0
+    },
+    "build": {
+      "exit": 0
+    },
+    "gitDiffCheck": {
+      "exit": 0
+    }
+  },
+  "countsFrozen": {
+    "R2_4": "30/39",
+    "R2_5": "25/34",
+    "numericProductionPartition": "3/5",
+    "overallR2Pass": false,
+    "executorDidNotUpgradeOK": true
+  },
+  "zeroNewHttpTlsPdf": true,
+  "isolation": {
+    "r2CompatHead": "e41d3145b4276a0c02aab9f00d795476aefa1608",
+    "junctionsPreserved": true,
+    "noMergeDeployForce": true
+  }
+}

@@ -23,7 +23,7 @@
   "emptyStateActive": true,
   "emptyStateOriginalText": "No Active Tropical Cyclone within the Philippine Area of Responsibility",
   "emptyStateContainer": ".tropical-cyclone-weather-bulletin-page .article-content .panel-body > h3",
-  "bodyAvailability": "legal_empty_state_shell",
+  "bodyAvailability": "official_page_explicit_empty_state",
   "identity": null,
   "originalPublishTime": null,
   "timezoneRole": null,

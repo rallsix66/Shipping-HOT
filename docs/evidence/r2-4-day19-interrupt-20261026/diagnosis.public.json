@@ -1,0 +1,206 @@
+{
+  "task": "dots ts 1792977829.388019 — day19 observation interrupt read-only diagnosis",
+  "checkedAtAsiaShanghai": "2026-10-26 09:34:03 Asia/Shanghai",
+  "isolation": {
+    "worktree": "D:/try one/Shipping HOT/.tmp/worktrees/r2-4-gapfill-20261025",
+    "branch": "codex/shipping-hot-r2-4-gapfill-20261025",
+    "head": "37eab90b19102b0f0c99cb1c629954e680f0cfee",
+    "artifactsDir": "D:/try one/Shipping HOT/.tmp/worktrees/r2-4-gapfill-20261025/.tmp/r2-4-day19-interrupt-20261026",
+    "gitignored": true,
+    "committed": false,
+    "mainR2Untouched": true,
+    "r2CompatHeadExpected": "e41d3145",
+    "constraintsHonored": [
+      "zero_new_HTTP_TLS",
+      "no_restart",
+      "no_lock_delete",
+      "no_db_open",
+      "no_product_code_change",
+      "counts_frozen_30_39_and_25_34",
+      "no_slack_send",
+      "no_guyang_contact"
+    ]
+  },
+  "observePath": "D:/try one/Shipping HOT/.tmp/worktrees/r2-compat/.tmp/r2-intel-observe-day19-20261025a",
+  "window": {
+    "startedAt": "2026-10-25T03:57:37.686Z",
+    "startedAtAsiaShanghai": "2026-10-25 11:57:37 Asia/Shanghai",
+    "until": "2026-10-26T03:57:37.686Z",
+    "untilAsiaShanghai": "2026-10-26 11:57:37 Asia/Shanghai",
+    "profile": "24h-19",
+    "durationMs": 86400000,
+    "claim24hPass": false,
+    "oldRoundStatus": "incomplete"
+  },
+  "hosting": {
+    "method": "Cursor agent terminal (foreground shell session), cwd r2-compat worktree",
+    "terminalFile": "C:/Users/<redacted>/.cursor/projects/d-try-one-Shipping-HOT/terminals/605466.txt",
+    "terminalShellPid": 78372,
+    "terminalStatusFieldStale": "running",
+    "terminalLastWriteAsiaShanghai": "2026-10-25 15:49:12 Asia/Shanghai",
+    "terminalRunningForMsHeader": 13896804,
+    "terminalExitCodeFooter": "absent",
+    "startCommandProven": "$sources = \"TH-W01,ID-W01,CN-T02,TH-C01,PH-C01,CN-P01,TH-C02,VN-P03,VN-T01,ID-T01,XX-K03,ID-T02,VN-D01,XX-K02,XX-K01,MY-C01,MY-T01,PH-M01,XX-M03\"; pnpm observe:intel --execute --profile 24h-19 --run-id day19-20261025a --sources $sources --duration-ms 86400000 --max-http-requests 2000 --approved-redirect '{\"from\":\"https://jdih.kemenkeu.go.id/\",\"to\":\"https://jdih.kemenkeu.go.id/home\"}'",
+    "resolvedNodeInvocation": "node --import tsx/esm --experimental-loader ./scripts/tsx-alias-loader.mjs ./scripts/r2-intel-observe.ts ...",
+    "parentNodePidFromStdout": 75280,
+    "workerPidFromStdoutAndLock": 29736,
+    "stdio": "inherit to Cursor terminal (no separate stdout/stderr files)",
+    "pidsAliveNow": {
+      "78372": false,
+      "75280": false,
+      "29736": false
+    }
+  },
+  "lastSuccessEvent": {
+    "proven": true,
+    "sequence": 799,
+    "at": "2026-10-25T07:45:29.905Z",
+    "atAsiaShanghai": "2026-10-25 15:45:29 Asia/Shanghai",
+    "type": "job_result",
+    "result": {
+      "status": "success",
+      "recordsRead": 0,
+      "recordsWritten": 0
+    },
+    "note": "Empty tick expected: most sources nextSyncAt ~08:15Z; cn-p01 nextSyncAt 08:30Z. Distinguishes last successful logged event from process exit."
+  },
+  "processExit": {
+    "provenExitTime": null,
+    "exitTimeVerdict": "未知",
+    "exitCode": null,
+    "exitCodeVerdict": "未知",
+    "exitReasonVerdict": "未知",
+    "notClaimed": [
+      "natural abnormal stop",
+      "clean deadline stop",
+      "sleep-caused stop",
+      "user kill"
+    ],
+    "boundingEvidenceOnly": {
+      "eventsJsonlLastWriteAsiaShanghai": "2026-10-25 15:45:29 Asia/Shanghai",
+      "terminalLastWriteAsiaShanghai": "2026-10-25 15:49:12 Asia/Shanghai",
+      "dbFileMtimeAsiaShanghai": "2026-10-25 16:00:29 Asia/Shanghai",
+      "dbMtimeNote": "File mtime only; DB was NOT opened (avoid WAL/SHM/recovery). Do not treat mtime as exit proof.",
+      "expectedNextJobTickIfAlive": "~2026-10-25T08:00:29Z would mirror prior 15min empty source_state+job_result pattern; no such events present"
+    }
+  },
+  "lock": {
+    "path": "D:/try one/Shipping HOT/.tmp/worktrees/r2-compat/.tmp/r2-intel-observe-day19-20261025a/.data/shipping-hot-v3.sqlite3.intel-owner.lock",
+    "present": true,
+    "contents": {
+      "token": "2cb4b5f2-6e03-47db-8b32-0ca0fe14e6dc",
+      "database": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r2-compat\\.tmp\\r2-intel-observe-day19-20261025a\\.data\\shipping-hot-v3.sqlite3",
+      "pid": 29736
+    },
+    "pidAlive": false,
+    "cmdlineOfPidNow": "不可得（PID 已不存在）",
+    "lockRelease": false,
+    "actionTaken": "lock left untouched"
+  },
+  "endMarkers": {
+    "finishedEvent": false,
+    "shutdown_incompleteEvent": false,
+    "round_stopEvent": false,
+    "bootstrap_failedEvent": false,
+    "exitCodeRecord": false,
+    "ownershipReleased": false,
+    "cleanShutdownWouldEmit": [
+      "finished (or shutdown_incomplete)",
+      "lock release after drain"
+    ]
+  },
+  "httpLedger": {
+    "reserved": 83,
+    "started": 83,
+    "completed": 79,
+    "failed": 4,
+    "redirectApproved": 4,
+    "dnsStarted": 83,
+    "dnsCompleted": 83,
+    "maxHttpRequestsCap": 2000,
+    "failures": [
+      {
+        "number": 5,
+        "at": "2026-10-25T04:13:02.342Z",
+        "url": "https://customs.gov.ph/category/media-releases/",
+        "mappedSource": "PH-C01",
+        "errorFromSourceRun": "fetch_timeout"
+      },
+      {
+        "number": 21,
+        "at": "2026-10-25T04:28:55.680Z",
+        "url": "https://customs.gov.ph/category/media-releases/",
+        "mappedSource": "PH-C01",
+        "errorFromSourceRun": "fetch_timeout"
+      },
+      {
+        "number": 27,
+        "at": "2026-10-25T05:14:09.816Z",
+        "url": "https://www.gd.msa.gov.cn/",
+        "mappedSource": "CN-P01",
+        "errorFromSourceRun": "fetch_timeout"
+      },
+      {
+        "number": 43,
+        "at": "2026-10-25T05:59:44.958Z",
+        "url": "https://customs.gov.ph/category/media-releases/",
+        "mappedSource": "PH-C01",
+        "errorFromSourceRun": "fetch_timeout"
+      }
+    ]
+  },
+  "jobsAndWrites": {
+    "job_resultCount": 15,
+    "jobSuccess": 13,
+    "jobFailed": 2,
+    "jobFailedCodes": [
+      "intel_all_sources_failed",
+      "intel_all_sources_failed"
+    ],
+    "sumRecordsReadFromJobResults": 1465,
+    "sumRecordsWrittenFromJobResults": 390,
+    "source_runItemsSeen": 1465,
+    "source_runItemsNew": 390,
+    "note": "job_result recordsRead/Written totals match source_run itemsSeen/itemsNew aggregates from events.jsonl"
+  },
+  "perSourceLastOk": {
+    "note": "All 19 sources status=ok in final source_state block at 07:45:29Z; lastOkAt mostly 07:15Z except cn-p01 07:30Z",
+    "notableFailuresDuringRun": {
+      "intel:ph-c01": "3x fetch_timeout then recovered to ok",
+      "intel:cn-p01": "1x fetch_timeout then recovered to ok"
+    }
+  },
+  "machineLocalRecords": {
+    "lastBootAsiaShanghai": "2026-09-20 10:48:46 Asia/Shanghai",
+    "rebootDuringObserveWindow": false,
+    "sleepLogoutEvidence": "未证实（无命中事件；powercfg lastwake 历史为空；缺席≠否定）"
+  },
+  "dbOpen": {
+    "opened": false,
+    "reason": "read-only check might write WAL/SHM or trigger recovery — reported and skipped",
+    "walPresent": false,
+    "shmPresent": false
+  },
+  "countsFrozen": {
+    "R2-4": "30/39",
+    "R2-5": "25/34"
+  },
+  "minimalRecoverySuggestion": {
+    "doNow": "nothing — diagnosis only",
+    "laterSeparateScope": [
+      "Treat day19-20261025a as incomplete; do NOT splice into continuous 24h",
+      "Do NOT delete residual intel-owner.lock by age/PID (AGENTS.md)",
+      "resumeSupported=false — any continuation needs a NEW --run-id under separate explicit approval",
+      "Keep zero claim of 24h pass; window end remains 2026-10-26 11:57:37 Asia/Shanghai for the interrupted attempt only as historical bound",
+      "Optional later: host with detached/nohup-equivalent + exit-code capture file, and retain terminal/exit footer",
+      "Do not reopen original DB for write; new run uses isolated directory"
+    ]
+  },
+  "redaction": {
+    "note": "Absolute user-profile paths redacted. Original observe site untouched. Private machine-local copies remain under worktree .tmp/ (gitignored).",
+    "observeSiteUntouched": true,
+    "status": "incomplete",
+    "exitTimeUnknown": true,
+    "exitReasonUnknown": true
+  }
+}

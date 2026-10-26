@@ -4378,7 +4378,34 @@
         "scope": "exact_catalogue_entry_HTTP403_not_weather_empty_or_active_positive",
         "productQualificationChanged": false
       },
-      "fieldReplayEvidence": null,
+      "fieldReplayEvidence": {
+        "status": "PARSED_EMPTY_OFFLINE_REPLAY_FILED_AWAITING_DOTS",
+        "evidence": {
+          "path": "docs/evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json",
+          "selector": {
+            "products": "PH-W01",
+            "status": "parsed_empty"
+          },
+          "sha256": "38bcdb3d7857729d3a0adadaf33813931f0e76599b3fde1f8ed343f0fb4c55ed",
+          "hashBasis": "committed_text_LF"
+        },
+        "realSourceCapturePublic": {
+          "path": "docs/evidence/r2-4-pagasa-phw-20261026/PH-W01-fields.public.json",
+          "selector": {
+            "id": "PH-W01"
+          },
+          "sha256": "865a39b720e22305c8985056912170c5bde8a3f05a91d1bec68e9da6dc5b563c",
+          "hashBasis": "committed_text_LF"
+        },
+        "parseModule": "server/services/pagasa-empty-state-parse.ts",
+        "tests": "server/services/pagasa-empty-state-parse.test.ts",
+        "emptyStateOriginalText": "No Active Tropical Cyclone within the Philippine Area of Responsibility",
+        "productContainerSelector": ".tropical-cyclone-weather-bulletin-page",
+        "interpretation": "official_page_explicit_empty_state_only",
+        "countedOKUnchanged": true,
+        "zeroNewHttpTlsPdf": true,
+        "emptyNodeSelector": ".tropical-cyclone-weather-bulletin-page .article-content .panel-body > h3"
+      },
       "numericFieldValidation": null,
       "dateEvidence": {
         "role": "unknown",
@@ -4401,7 +4428,7 @@
       "r2_4": {
         "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "Page response alone is not usable verified warning payload; no positive item/explicit parsed-empty contract proved."
+        "reason": "Official-page explicit empty-state parsed_empty offline replay filed (wire SHA matched; citations: .tropical-cyclone-weather-bulletin-page / 'No Active Tropical Cyclone within the Philippine Area of Responsibility'). Executor did NOT upgrade countedOK; awaiting dots ruling under existing explicit parsed-empty contract (activity bulletin not required). Prior: page response alone was not usable verified warning payload."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
@@ -4413,7 +4440,8 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "空壳/iframe与正样本缺口；不称标题时间通过"
+        "parsed_empty offline replay filed; countedOK frozen pending dots ruling",
+        "archive PDF host DNS blocked; no current usable bulletin body/id/time"
       ],
       "historicalSuperseded": [
         {
@@ -4523,7 +4551,34 @@
         "scope": "exact_catalogue_entry_HTTP403_not_weather_empty_or_active_positive",
         "productQualificationChanged": false
       },
-      "fieldReplayEvidence": null,
+      "fieldReplayEvidence": {
+        "status": "PARSED_EMPTY_OFFLINE_REPLAY_FILED_AWAITING_DOTS",
+        "evidence": {
+          "path": "docs/evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json",
+          "selector": {
+            "products": "PH-W02",
+            "status": "parsed_empty"
+          },
+          "sha256": "38bcdb3d7857729d3a0adadaf33813931f0e76599b3fde1f8ed343f0fb4c55ed",
+          "hashBasis": "committed_text_LF"
+        },
+        "realSourceCapturePublic": {
+          "path": "docs/evidence/r2-4-pagasa-phw-20261026/PH-W02-fields.public.json",
+          "selector": {
+            "id": "PH-W02"
+          },
+          "sha256": "e5de15f3c1e8fd17451de6e630f31985d2fa3ea05c44192cf435fde1c831f67a",
+          "hashBasis": "committed_text_LF"
+        },
+        "parseModule": "server/services/pagasa-empty-state-parse.ts",
+        "tests": "server/services/pagasa-empty-state-parse.test.ts",
+        "emptyStateOriginalText": "As of today, there is no Weather Advisory issued.",
+        "productContainerSelector": ".article-content.weather-advisory",
+        "interpretation": "official_page_explicit_empty_state_only",
+        "countedOKUnchanged": true,
+        "zeroNewHttpTlsPdf": true,
+        "emptyNodeSelector": ".article-content.weather-advisory .weekly-content-adv > p"
+      },
       "numericFieldValidation": null,
       "dateEvidence": {
         "role": "unknown",
@@ -4546,7 +4601,7 @@
       "r2_4": {
         "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "Page response alone is not usable verified warning payload; no positive item/explicit parsed-empty contract proved."
+        "reason": "Official-page explicit empty-state parsed_empty offline replay filed (wire SHA matched; citations: .article-content.weather-advisory / 'As of today, there is no Weather Advisory issued.'). Executor did NOT upgrade countedOK; awaiting dots ruling under existing explicit parsed-empty contract (activity bulletin not required). Prior: page response alone was not usable verified warning payload."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
@@ -4558,7 +4613,8 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "正样本/selector/时间规则缺失"
+        "parsed_empty offline replay filed; countedOK frozen pending dots ruling",
+        "no advisory body/id/time/PDF on this snapshot"
       ],
       "historicalSuperseded": [
         {
