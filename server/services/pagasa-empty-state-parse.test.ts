@@ -234,6 +234,54 @@ describe("parsePagasaEmptyState -> synthetic fixtures", () => {
     expect(result).toMatchObject({ status: "not_empty", reason: "active_body_conflict" })
   })
 
+  it("rejects PH-W01 direct img after empty h3 (self media, not only descendants)", () => {
+    const result = parsePagasaEmptyState(
+      "PH-W01",
+      readFixture("ph-w01-direct-img-after-empty.html"),
+    )
+    expect(result).toMatchObject({ status: "not_empty", reason: "active_body_conflict" })
+  })
+
+  it("rejects PH-W01 direct iframe after empty h3 (self media, not only descendants)", () => {
+    const result = parsePagasaEmptyState(
+      "PH-W01",
+      readFixture("ph-w01-direct-iframe-after-empty.html"),
+    )
+    expect(result).toMatchObject({ status: "not_empty", reason: "active_body_conflict" })
+  })
+
+  it("rejects PH-W01 nested media after empty h3 while Archive stays excluded", () => {
+    const result = parsePagasaEmptyState(
+      "PH-W01",
+      readFixture("ph-w01-nested-media-after-empty.html"),
+    )
+    expect(result).toMatchObject({ status: "not_empty", reason: "active_body_conflict" })
+  })
+
+  it("rejects PH-W02 direct img after empty p (self media, not only descendants)", () => {
+    const result = parsePagasaEmptyState(
+      "PH-W02",
+      readFixture("ph-w02-direct-img-after-empty.html"),
+    )
+    expect(result).toMatchObject({ status: "not_empty", reason: "active_body_conflict" })
+  })
+
+  it("rejects PH-W02 direct iframe after empty p (self media, not only descendants)", () => {
+    const result = parsePagasaEmptyState(
+      "PH-W02",
+      readFixture("ph-w02-direct-iframe-after-empty.html"),
+    )
+    expect(result).toMatchObject({ status: "not_empty", reason: "active_body_conflict" })
+  })
+
+  it("rejects PH-W02 nested media after empty p", () => {
+    const result = parsePagasaEmptyState(
+      "PH-W02",
+      readFixture("ph-w02-nested-media-after-empty.html"),
+    )
+    expect(result).toMatchObject({ status: "not_empty", reason: "active_body_conflict" })
+  })
+
   it("rejects PH-W02 duplicate product regions conservatively", () => {
     const result = parsePagasaEmptyState(
       "PH-W02",

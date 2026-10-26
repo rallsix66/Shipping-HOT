@@ -153,8 +153,14 @@ function hasResidualMeaningfulBody(
     const el = node as any
     const text = normalizeText($(el).text())
     if (text.length > 0) return true
-    // Empty-looking wrappers that still carry media / links count as body.
-    if ($(el).find("img, iframe, object, embed, video, a[href]").length > 0) return true
+    // Current node itself OR descendants: direct img/iframe (find excludes self) counts as body.
+    const $el = $(el)
+    if (
+      $el.is("img, iframe, object, embed, video, a[href]")
+      || $el.find("img, iframe, object, embed, video, a[href]").length > 0
+    ) {
+      return true
+    }
   }
   return false
 }

@@ -1,11 +1,11 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-20T04:06:11.578Z",
-  "lastUpdatedAt": "2026-10-26T02:06:45.599Z",
-  "lastUpdatedAtSource": "this_write_utc; dotsTs=1792979708.860879; Asia/Shanghai=2026-10-26 10:06:45 Asia/Shanghai",
-  "lastUpdateNote": "2026-10-26 PAGASA PH-W01/PH-W02 P2 harden (dots 1792979708): empty-state residual-body conflict miss + missing-raw false PASS→skip/strict. Zero new HTTP/TLS/PDF. Counts frozen 30/39 & 25/34; countedOK=false pending dots; overallR2Pass=false. day19 incomplete unchanged.",
-  "reviewedCodeSha": "26617b301382b901d2d647934cc7e19c005568cc",
-  "evidenceHead": "26617b301382b901d2d647934cc7e19c005568cc",
+  "lastUpdatedAt": "2026-10-26T02:19:53.527Z",
+  "lastUpdatedAtSource": "this_write_utc; dotsTs=1792980601.287869; Asia/Shanghai=2026-10-26 10:19:53 Asia/Shanghai",
+  "lastUpdateNote": "2026-10-26 PAGASA PH-W01/PH-W02 P2 self-media residual (dots 1792980601): hasResidualMeaningfulBody checks current node + descendants for media/links. Zero new HTTP/TLS/PDF. Counts frozen 30/39 & 25/34; countedOK=false pending dots; overallR2Pass=false. day19 incomplete unchanged.",
+  "reviewedCodeSha": "PENDING_BIND_AFTER_COMMIT",
+  "evidenceHead": "PENDING_BIND_AFTER_COMMIT",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "1b98532577a3de49b394dc0746e3a556717c94a0058bb35c14dacb453d0bc90f",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -4379,14 +4379,14 @@
         "productQualificationChanged": false
       },
       "fieldReplayEvidence": {
-        "status": "PARSED_EMPTY_OFFLINE_REPLAY_P2_HARDENED_AWAITING_DOTS",
+        "status": "PARSED_EMPTY_OFFLINE_REPLAY_P2_SELF_MEDIA_AWAITING_DOTS",
         "evidence": {
           "path": "docs/evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json",
           "selector": {
             "products": "PH-W01",
             "status": "parsed_empty"
           },
-          "sha256": "c3733135d97990fd0df59c9c613cec2aa03f3c90010d9fb3142be41b527b27ba",
+          "sha256": "710510f78d3eb557956a412029c836b6ec1fe42116c298b1ebe8978f41d936c8",
           "hashBasis": "committed_text_LF"
         },
         "realSourceCapturePublic": {
@@ -4406,7 +4406,8 @@
         "zeroNewHttpTlsPdf": true,
         "emptyNodeSelector": ".tropical-cyclone-weather-bulletin-page .article-content .panel-body > h3",
         "p2Hardened": true,
-        "codeSha": "26617b301382b901d2d647934cc7e19c005568cc"
+        "codeSha": "PENDING_BIND_AFTER_COMMIT",
+        "p2SelfMediaResidual": true
       },
       "numericFieldValidation": null,
       "dateEvidence": {
@@ -4430,7 +4431,7 @@
       "r2_4": {
         "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "Official-page explicit empty-state parsed_empty offline replay P2-hardened (residual body / duplicate regions; wire SHA matched; citations: .tropical-cyclone-weather-bulletin-page / 'No Active Tropical Cyclone within the Philippine Area of Responsibility'). Executor did NOT upgrade countedOK; awaiting dots ruling."
+        "reason": "Official-page explicit empty-state parsed_empty offline replay P2 self-media residual (self+descendant media residual; wire SHA matched; citations: .tropical-cyclone-weather-bulletin-page / 'No Active Tropical Cyclone within the Philippine Area of Responsibility'). Executor did NOT upgrade countedOK; awaiting dots ruling."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
@@ -4442,7 +4443,7 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "parsed_empty offline replay P2-hardened; countedOK frozen pending dots ruling",
+        "parsed_empty offline replay P2 self-media residual; countedOK frozen pending dots ruling",
         "archive PDF host DNS blocked; no current usable bulletin body/id/time"
       ],
       "historicalSuperseded": [
@@ -4554,14 +4555,14 @@
         "productQualificationChanged": false
       },
       "fieldReplayEvidence": {
-        "status": "PARSED_EMPTY_OFFLINE_REPLAY_P2_HARDENED_AWAITING_DOTS",
+        "status": "PARSED_EMPTY_OFFLINE_REPLAY_P2_SELF_MEDIA_AWAITING_DOTS",
         "evidence": {
           "path": "docs/evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json",
           "selector": {
             "products": "PH-W02",
             "status": "parsed_empty"
           },
-          "sha256": "c3733135d97990fd0df59c9c613cec2aa03f3c90010d9fb3142be41b527b27ba",
+          "sha256": "710510f78d3eb557956a412029c836b6ec1fe42116c298b1ebe8978f41d936c8",
           "hashBasis": "committed_text_LF"
         },
         "realSourceCapturePublic": {
@@ -4581,7 +4582,8 @@
         "zeroNewHttpTlsPdf": true,
         "emptyNodeSelector": ".article-content.weather-advisory .weekly-content-adv > p",
         "p2Hardened": true,
-        "codeSha": "26617b301382b901d2d647934cc7e19c005568cc"
+        "codeSha": "PENDING_BIND_AFTER_COMMIT",
+        "p2SelfMediaResidual": true
       },
       "numericFieldValidation": null,
       "dateEvidence": {
@@ -4605,7 +4607,7 @@
       "r2_4": {
         "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "Official-page explicit empty-state parsed_empty offline replay P2-hardened (residual body / duplicate regions; wire SHA matched; citations: .article-content.weather-advisory / 'As of today, there is no Weather Advisory issued.'). Executor did NOT upgrade countedOK; awaiting dots ruling."
+        "reason": "Official-page explicit empty-state parsed_empty offline replay P2 self-media residual (self+descendant media residual; wire SHA matched; citations: .article-content.weather-advisory / 'As of today, there is no Weather Advisory issued.'). Executor did NOT upgrade countedOK; awaiting dots ruling."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
@@ -4617,7 +4619,7 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "parsed_empty offline replay P2-hardened; countedOK frozen pending dots ruling",
+        "parsed_empty offline replay P2 self-media residual; countedOK frozen pending dots ruling",
         "no advisory body/id/time/PDF on this snapshot"
       ],
       "historicalSuperseded": [

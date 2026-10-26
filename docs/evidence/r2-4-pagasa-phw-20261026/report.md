@@ -70,3 +70,12 @@ used=**2**/6；redirects=0；retries=0。未混用旧轮 `r2-4-gapfill-20261025`
 - **P2-2 missing-raw false PASS**：`it.skipIf`；严格本地资格 `PAGASA_STRICT_PRIVATE_REPLAY=1`；raw 在场时强制校验 capture/public SHA 与 HTTP status。
 - Offline replay 仍 `parsed_empty`；wire SHA 匹配；计数冻结 **30/39** / **25/34**。
 - 证据：[`parsed-empty-replay.public.json`](./parsed-empty-replay.public.json)（finishedAtAsiaShanghai=2026-10-26 10:03:12 Asia/Shanghai）。
+
+## 本轮追加（dots 1792980601.287869）：P2 self-media residual
+
+- **零新 HTTP/TLS/PDF**。
+- **P2**：`hasResidualMeaningfulBody` 对媒体/有义链接同时检查**当前节点自身与后代**（`find` 不含 self；空状态后紧跟直接 `img`/`iframe` 先前误判 `parsed_empty`，包进 `div` 才拒绝）。
+- 负例：PH-W01/PH-W02 **direct img + direct iframe + nested media**；Archive 排除不变。
+- Offline replay → `parsed_empty`；wire SHA 匹配；严格双原件 `PAGASA_STRICT_PRIVATE_REPLAY=1` → **27 pass / 1 skip**。
+- 计数冻结 **30/39** / **25/34**；`countedOK=false` 直至 dots 另裁。
+- 证据：[`parsed-empty-replay.public.json`](./parsed-empty-replay.public.json)（finishedAtAsiaShanghai=2026-10-26 10:19:53 Asia/Shanghai）。

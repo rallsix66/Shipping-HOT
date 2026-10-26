@@ -1,14 +1,14 @@
 {
-  "round": "dots-1792979708.860879",
-  "kind": "PH-W01/PH-W02 parsed-empty P2 harden offline replay",
-  "checkedAtAsiaShanghai": "2026-10-26 10:06:45 Asia/Shanghai",
-  "checkedAtUtc": "2026-10-26T02:06:45.599Z",
-  "baselineHead": "85c59922b780e3526824196ff3e6df8a8be33ec1",
+  "round": "dots-1792980601.287869",
+  "kind": "PH-W01/PH-W02 parsed-empty P2 self-media residual offline replay",
+  "checkedAtAsiaShanghai": "2026-10-26 10:19:53 Asia/Shanghai",
+  "checkedAtUtc": "2026-10-26T02:19:53.527Z",
+  "baselineHead": "4529d2e296f10fa8b1cbd0f661b3be8f45f93a02",
   "branch": "codex/shipping-hot-r2-4-gapfill-20261025",
   "gates": {
     "vitest": {
       "exit": 0,
-      "passed": 2041,
+      "passed": 2047,
       "skipped": 7,
       "failed": 0,
       "files": 160
@@ -28,13 +28,13 @@
   },
   "targetedPagasaEmptyState": {
     "defaultPath": {
-      "passed": 20,
+      "passed": 26,
       "skipped": 2,
       "note": "2 skips = strict-only + non-strict-absent (raw present so latter skipped)"
     },
     "strictPrivateReplay": {
       "env": "PAGASA_STRICT_PRIVATE_REPLAY=1",
-      "passed": 21,
+      "passed": 27,
       "skipped": 1,
       "note": "requires both private originals; no synthetic substitute"
     }
@@ -52,5 +52,5 @@
     "junctionsPreserved": true,
     "noMergeDeployForce": true
   },
-  "commitSha": "26617b301382b901d2d647934cc7e19c005568cc"
+  "commitSha": "PENDING_BIND_AFTER_COMMIT"
 }

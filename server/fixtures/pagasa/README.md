@@ -10,7 +10,8 @@ Real-sample offline replay uses the private wire HTML when present on the
 isolation machine; CI uses these synthetic positives + negatives only.
 
 Negative coverage includes: missing container, unknown copy, paragraph/div/h3/
-nested/bare-text body conflicts, duplicate product regions, and error pages.
+nested/bare-text body conflicts, direct img/iframe (self, not only descendants),
+nested media controls, duplicate product regions, and error pages.
 Archive region content must not be misclassified as active bulletin body.
 
 Private-raw replay: default path uses explicit `it.skipIf` when raw is absent

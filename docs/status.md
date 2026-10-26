@@ -1,3 +1,11 @@
+## 2026-10-26 — PAGASA PH-W01/PH-W02 P2 self-media residual（dots 1792980601.287869）
+
+- **零新 HTTP/TLS/PDF**；复用已捕 private wire（SHA 与台账一致：`b5ecb77a40ada689...` / `8ac1546c1681d5b6...`）。
+- P2：`hasResidualMeaningfulBody` 检查**当前节点自身与后代**的媒体/有义链接；空状态后直接 `img`/`iframe` 不再误判 `parsed_empty`；嵌套 media 对照 + Archive 排除不变。
+- 严格双原件 `PAGASA_STRICT_PRIVATE_REPLAY=1`：**27 pass / 1 skip**；全量 Vitest **2047/7 skip**；typecheck/lint/build/git-diff-check 全 exit 0。
+- 计数仍冻结 R2-4 **30/39**、R2-5 **25/34**、numeric **3/5**、`overallR2Pass=false`；`countedOK=false` 直至 dots 另裁；day19 incomplete 不变；原 observe 未触碰。
+- 证据：[parsed-empty-replay.public.json](evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json) / [report.md](evidence/r2-4-pagasa-phw-20261026/report.md) / [mapping.json](evidence/r2-current-source-matrix-2026-10-14/mapping.json)。
+
 ## 2026-10-26 — PAGASA PH-W01/PH-W02 P2 harden（dots 1792979708.860879）
 
 - **零新 HTTP/TLS/PDF**：复用已存 private wire；SHA 与台账一致（`b5ecb77a40ada689...` / `8ac1546c1681d5b6...`）。
