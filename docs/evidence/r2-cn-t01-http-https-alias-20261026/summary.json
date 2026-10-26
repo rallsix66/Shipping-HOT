@@ -87,10 +87,10 @@
   "inspectedAtAsiaShanghai": "2026-10-26 11:45:20",
   "baselineTipWas": "bad4f05d9c7a0a9d35165d7447af3933797125e2",
   "committedAtAsiaShanghai": "2026-10-26 11:27+",
-  "note": "productCodeSha is alias impl commit 5992abc; tip/codeSha is this docs tip",
+  "note": "productCodeSha is review-fix impl f87a262; tip/codeSha is docs tip after bind (this file updated to prior tip then rebound).",
   "productCodeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
-  "tip": "66eba0878fecf7d2deffe0350a9f22067935b5f9",
-  "codeSha": "66eba0878fecf7d2deffe0350a9f22067935b5f9",
+  "tip": "d169aceff3666362221bee5eb6efee464e0d962f",
+  "codeSha": "d169aceff3666362221bee5eb6efee464e0d962f",
   "reviewFixesDotsTs": "1792985451.804939",
   "reviewFixesAtAsiaShanghai": "2026-10-26 11:45:20",
   "reviewFixes": {
@@ -132,7 +132,8 @@
     "productCodeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
     "codeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
     "boundAtAsiaShanghai": "2026-10-26 11:45:20",
-    "evidenceTip": "66eba0878fecf7d2deffe0350a9f22067935b5f9"
+    "evidenceTip": "d169aceff3666362221bee5eb6efee464e0d962f",
+    "evidenceTipBoundFrom": "fa50a19999d1b71a6cb2351061e5f7a046e7b6b8"
   },
   "priorProductCodeSha": "5992abc42416f9bf77b835c5da5bd373c8ba36d0",
   "baselineTipBefore": "94bb9c9f290d7d0e76d990a5787f0335e8b5405c"
