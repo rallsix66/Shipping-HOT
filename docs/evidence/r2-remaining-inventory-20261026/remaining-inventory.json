@@ -169,10 +169,25 @@
     "r2_6_7_limited": "accepted limited portions — do not redo",
     "r2_8": {
       "status": "IN_PROGRESS_PARTIAL_OBSERVE_NOT_FULL_P1",
-      "note": "current 19-source day20-20261026a running ≠ full P1 continuous acceptance complete",
-      "day19": "ATTEMPTED_INCOMPLETE historical",
+      "note": "current 19-source day20-20261026a running != full P1 continuous acceptance complete",
+      "day19": "ATTEMPTED_INCOMPLETE historical; may cite collect/recover locally; MUST NOT stitch time ranges with day20 into continuous 24h",
       "day20": "running profile 24h-19 until ~2026-10-27 10:58 Asia/Shanghai; leave alone",
-      "fullP1Requirement": "P1 sources continuous 24h (plan R2-8); 19-source observe cannot grant full 39-source continuous acceptance"
+      "fullP1Requirement": "P1 continuous 24h (plan R2-8)",
+      "contractBoundary": {
+        "dotsTs": "1792993982.228989",
+        "doesNotMandate": [
+          "all 39 share one concurrent window",
+          "every source add forces full re-run",
+          "stitching discontinuous windows into continuous 24h"
+        ],
+        "not24hPass": [
+          "prior two-source proposal",
+          "10s zero-HTTP lifecycle tests",
+          "day20 19-source observe alone"
+        ],
+        "incrementalObserve": "separate review only; do not self-add a whole new round",
+        "evidence": "docs/evidence/r2-batch-convergence-20261026/r2-8-coverage-diff.md"
+      }
     },
     "stillNeeded": [
       "existing applicable integration gates",
@@ -252,5 +267,18 @@
     "inventoryOnly": true,
     "noExtraSourcesTasksSampling": true
   },
-  "overallR2Pass": false
+  "overallR2Pass": false,
+  "batchConvergenceAddendum": {
+    "dotsTs": [
+      "1792994131.133459",
+      "1792993982.228989",
+      "1792994253.888519"
+    ],
+    "path": "docs/evidence/r2-batch-convergence-20261026/",
+    "remaining8AllExternalMissingMaterials": true,
+    "fixableCodeDefectsThisBatch": 0,
+    "r28CoverageDiffLanded": true,
+    "nextUrlBudgetNecessary": false,
+    "updatedAtUtc": "2026-10-26T06:10:01.532Z"
+  }
 }

@@ -1,0 +1,63 @@
+{
+  "type": "r2_remaining8_classification_addendum",
+  "dotsTs": [
+    "1792994131.133459",
+    "1792993982.228989",
+    "1792994253.888519"
+  ],
+  "writtenAtUtc": "2026-10-26T06:09:32.745Z",
+  "writtenAtAsiaShanghai": "2026-10-26 14:09:32 Asia/Shanghai",
+  "productCodeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
+  "baselineTip": "6a2dafad88f051a85c220e946ce144d24ef9bd87",
+  "zeroNetwork": true,
+  "countsUnchanged": {
+    "r2_4": "32/39",
+    "r2_5": "26/34",
+    "remaining8": 8,
+    "overallR2Pass": false
+  },
+  "classification": [
+    {
+      "id": "CN-P02",
+      "class": "EXTERNAL_MISSING_MATERIALS",
+      "fixableInCodeThisBatch": false
+    },
+    {
+      "id": "VN-P01",
+      "class": "EXTERNAL_MISSING_MATERIALS",
+      "fixableInCodeThisBatch": false
+    },
+    {
+      "id": "MY-P03",
+      "class": "EXTERNAL_MISSING_MATERIALS",
+      "fixableInCodeThisBatch": false
+    },
+    {
+      "id": "MY-L01",
+      "class": "EXTERNAL_MISSING_MATERIALS",
+      "fixableInCodeThisBatch": false
+    },
+    {
+      "id": "PH-P01",
+      "class": "EXTERNAL_MISSING_MATERIALS",
+      "fixableInCodeThisBatch": false
+    },
+    {
+      "id": "PH-W01",
+      "class": "EXTERNAL_MISSING_MATERIALS",
+      "fixableInCodeThisBatch": false
+    },
+    {
+      "id": "PH-W02",
+      "class": "EXTERNAL_MISSING_MATERIALS",
+      "fixableInCodeThisBatch": false
+    },
+    {
+      "id": "XX-F01",
+      "class": "EXTERNAL_MISSING_MATERIALS",
+      "fixableInCodeThisBatch": false
+    }
+  ],
+  "r28CoverageDiffPath": "docs/evidence/r2-batch-convergence-20261026/r2-8-coverage-diff.md",
+  "batchReportPath": "docs/evidence/r2-batch-convergence-20261026/report.md"
+}

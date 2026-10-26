@@ -1,3 +1,13 @@
+## 2026-10-26 — R2 batch convergence（dots 1792994131.133459 + 1792993982.228989 + 1792994253.888519）
+
+- **范围**：零新网络收敛一批：R2-8 coverage-diff 口径、剩余 8 可修 vs 外部缺材分类、PPA tls.connect vs secureFetch 对照、VN-P01 已存 `200.pdf` 标签身份核验（不下PDF）、day20 RO + VN-D01 自然恢复。
+- **R2-8**：原合同要 P1 连续 24h；**不**强制 39 源同窗并发、**不**强制每加源全量重跑、**不**拼接 day19+day20 为连续 24h；双源提案/10s 零 HTTP 生命周期测试 **≠** 24h 通过；是否增量观察另审，本批不自开新轮。
+- **剩余 8**：全部 EXTERNAL_MISSING_MATERIALS；本批 **0** 可证代码缺陷 → **无**产品代码改动。
+- **PPA**：diag STRICT_TLS_OK vs 产品 UNABLE_TO_VERIFY_LEAF_SIGNATURE；有效信任来源未核实；缺产品路径证书链等证据；停止重复同一诊断。
+- **VN-P01**：`200/TBHH-…` 与详情附件名文本 `200.pdf` 同页印证；未下载；日期缺口仍在；PARTIAL/PARTIAL 不变。
+- **day20**：PID 82336 未动；VN-D01 于 2026-10-26 13:14:35 Asia/Shanghai `fetch_timeout` 后 13:29:50 自然 `ok_items` 恢复。
+- **计数**：R2-4 **32/39**；R2-5 **26/34**；**overallR2Pass=false**；产品 SHA `f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c`；门禁 docs-only 未跑全量 gate。
+- 证据：[report](evidence/r2-batch-convergence-20261026/report.md) / [r2-8-coverage-diff](evidence/r2-batch-convergence-20261026/r2-8-coverage-diff.md) / [batch-report.json](evidence/r2-batch-convergence-20261026/batch-report.json)。
 ## 2026-10-26 — 数值口径纠正 + R2 剩余清单盘点（dots 1792993692.018489）
 
 - **裁定/盘点**：dots 要求纠正「数值生成 3/5 / 还缺两个生产挂载」不准确表述；只读盘点更新剩余清单（2026-10-26T05:48:12.018489Z / Asia/Shanghai 2026-10-26 13:48:12.018）。

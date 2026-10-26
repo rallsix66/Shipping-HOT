@@ -1,0 +1,379 @@
+{
+  "type": "r2_batch_convergence",
+  "dotsMainTs": "1792994131.133459",
+  "dotsR28BoundaryTs": "1792993982.228989",
+  "dotsContinueTs": "1792994253.888519",
+  "writtenAtUtc": "2026-10-26T06:09:32.745Z",
+  "writtenAtAsiaShanghai": "2026-10-26 14:09:32 Asia/Shanghai",
+  "baselineTip": "6a2dafad88f051a85c220e946ce144d24ef9bd87",
+  "productCodeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
+  "zeroNetwork": true,
+  "httpRequestsThisBatch": 0,
+  "codeChanged": false,
+  "gateRun": "NOT_REQUIRED_DOCS_ONLY",
+  "countsUnchanged": {
+    "r2_4": "32/39",
+    "r2_5": "26/34",
+    "overallR2Pass": false
+  },
+  "day20Untouched": true,
+  "sections": {
+    "A_r28_coverage_diff": {
+      "originalContract": "docs/plans/shipping-hot-risk-intelligence-2026-09-29.md R2-8: P1 sources continuous 24h; failures auto-backoff and mark failing; record to docs/live-verification.md",
+      "originalDoesRequire": [
+        "P1 continuous 24h observe under user authorization",
+        "failed sources auto-backoff + failing mark",
+        "results recorded to docs/live-verification.md"
+      ],
+      "originalDoesNotMandate": [
+        "all 39 public P1 sources must share one concurrent wall-clock window",
+        "every new source add forces a full re-run of all previously observed sources",
+        "stitching discontinuous historical windows (e.g. day19 + day20) into one continuous 24h"
+      ],
+      "coverageDiffSet": {
+        "day20_profile": "24h-19",
+        "day20_runId": "day20-20261026a",
+        "coveredNow": [
+          "TH-W01",
+          "ID-W01",
+          "CN-T02",
+          "TH-C01",
+          "PH-C01",
+          "CN-P01",
+          "TH-C02",
+          "VN-P03",
+          "VN-T01",
+          "ID-T01",
+          "XX-K03",
+          "ID-T02",
+          "VN-D01",
+          "XX-K02",
+          "XX-K01",
+          "MY-C01",
+          "MY-T01",
+          "PH-M01",
+          "XX-M03"
+        ],
+        "coveredCount": 19,
+        "publicP1Denominator": 39,
+        "notInDay20": [
+          "CN-P02",
+          "CN-W01",
+          "CN-W02",
+          "CN-T01",
+          "VN-P01",
+          "VN-W01",
+          "MY-P02",
+          "MY-P03",
+          "MY-W01",
+          "MY-L01",
+          "ID-W02",
+          "PH-P01",
+          "PH-W01",
+          "PH-W02",
+          "XX-W01",
+          "XX-W02",
+          "XX-M01",
+          "XX-A01",
+          "XX-A02",
+          "XX-F01"
+        ],
+        "notInDay20Count": 20
+      },
+      "reusableEvidenceOnly": [
+        "day20-20261026a local observe events/launch (RO; leave alone until ~2026-10-27 10:58 Asia/Shanghai)",
+        "day19 ATTEMPTED_INCOMPLETE may be cited as local historical evidence of collect/recover behavior",
+        "prior two-source proposal and 10s zero-HTTP lifecycle tests are NOT a 24h pass"
+      ],
+      "explicitNonClaims": [
+        "day20 19-source observe is not full P1 continuous acceptance complete",
+        "day19 time range cannot be stitched with day20 into continuous 24h",
+        "no new gate invented that requires another full-39 concurrent re-run",
+        "whether later incremental observe is needed = separate dots review; executor does not self-add a whole new round"
+      ],
+      "day20Action": "DO_NOT_STOP_RESET_RESTART_LOCK_DELETE_DAY19_TOUCH_TIMER_RESET"
+    },
+    "B_remaining8": [
+      {
+        "id": "CN-P02",
+        "class": "EXTERNAL_MISSING_MATERIALS",
+        "fixableInCodeThisBatch": false,
+        "r2_4": "PARTIAL",
+        "r2_5": "NOT_RUN",
+        "blocker": "exact root 302 Location self-points to same HTTPS root; zero-retry boundary stops before duplicate GET; no distinct list/target payload for title/link/date",
+        "newConclusionThisBatch": "unchanged; no new materials; blind replay would not add conclusion value",
+        "nextMaterialIfAny": "approved distinct list URL or non-self Location that yields list payload"
+      },
+      {
+        "id": "VN-P01",
+        "class": "EXTERNAL_MISSING_MATERIALS",
+        "fixableInCodeThisBatch": false,
+        "r2_4": "PARTIAL",
+        "r2_5": "PARTIAL",
+        "blocker": "title/link table present; no visible own date/date attribute; TBHH identifier cannot substitute for date",
+        "newConclusionThisBatch": "verified existing 200.pdf attachment LABEL vs original entry identity offline only (see section D); no PDF download; date gap remains",
+        "nextMaterialIfAny": "source-owned publication date on list or detail; PDF download only if dots separately approves URL+budget"
+      },
+      {
+        "id": "MY-P03",
+        "class": "EXTERNAL_MISSING_MATERIALS",
+        "fixableInCodeThisBatch": false,
+        "r2_4": "PARTIAL",
+        "r2_5": "FAIL",
+        "blocker": "duplicate URL with conflicting title/date; collector fails closed by design",
+        "newConclusionThisBatch": "unchanged; no new materials that resolve conflict; do not invent merge/select to manufacture pass",
+        "nextMaterialIfAny": "upstream page that removes duplicate conflict or official clarification of canonical row"
+      },
+      {
+        "id": "MY-L01",
+        "class": "EXTERNAL_MISSING_MATERIALS",
+        "fixableInCodeThisBatch": false,
+        "r2_4": "PARTIAL",
+        "r2_5": "FAIL",
+        "blocker": "ten title/time cards but no title-anchor detail href; category links point to listing itself",
+        "newConclusionThisBatch": "unchanged; date syntax historically fixed; still missing detail href materials",
+        "nextMaterialIfAny": "page/API that exposes stable per-item detail hrefs"
+      },
+      {
+        "id": "PH-P01",
+        "class": "EXTERNAL_MISSING_MATERIALS",
+        "fixableInCodeThisBatch": false,
+        "r2_4": "BLOCKED",
+        "r2_5": "NOT_RUN",
+        "blocker": "product secureFetchArticle path UNABLE_TO_VERIFY_LEAF_SIGNATURE on both exact entries; prior tls.connect STRICT_TLS_OK is host-identity only",
+        "newConclusionThisBatch": "PPA zero-net recompare (section C): no definite product code defect proven; missing chain-on-product-path evidence",
+        "nextMaterialIfAny": "approved same-process product-path peer chain capture / trust-stack logging; no CA import without separate approval"
+      },
+      {
+        "id": "PH-W01",
+        "class": "EXTERNAL_MISSING_MATERIALS",
+        "fixableInCodeThisBatch": false,
+        "r2_4": "OK_LIMITED_EXPLICIT_EMPTY",
+        "r2_5": "NOT_RUN",
+        "blocker": "official explicit-empty page; no stored full title/link/source-time replay for active bulletin; archive PDF host blocked_address historically",
+        "newConclusionThisBatch": "unchanged; empty announcement state already proven; blind re-fetch adds no R2-5 field materials",
+        "nextMaterialIfAny": "active bulletin snapshot with title/link/source-time when PAGASA publishes; or approved archive PDF path with non-blocked DNS"
+      },
+      {
+        "id": "PH-W02",
+        "class": "EXTERNAL_MISSING_MATERIALS",
+        "fixableInCodeThisBatch": false,
+        "r2_4": "OK_LIMITED_EXPLICIT_EMPTY",
+        "r2_5": "NOT_RUN",
+        "blocker": "official explicit-empty advisory page; no advisory body/id/time/PDF on snapshot",
+        "newConclusionThisBatch": "unchanged; empty state already proven; no new materials",
+        "nextMaterialIfAny": "active weather advisory snapshot with identity/time when issued"
+      },
+      {
+        "id": "XX-F01",
+        "class": "EXTERNAL_MISSING_MATERIALS",
+        "fixableInCodeThisBatch": false,
+        "r2_4": "NOT_RUN",
+        "r2_5": "NOT_RUN",
+        "blocker": "no qualifying stored product request/data; prior oneshots stopped at blocked_address before GET",
+        "newConclusionThisBatch": "unchanged; catalogue notes alone are not evidence; no blind retry",
+        "nextMaterialIfAny": "approved egress/DNS path yielding public addresses + successful product GET with field materials"
+      }
+    ],
+    "C_ppa": {
+      "zeroNewNetwork": true,
+      "storedTlsConnectEvidence": {
+        "path": "docs/evidence/r2-4-jma-ppa-20261025/tls-diag-ledger.public.json",
+        "api": "node:tls.connect",
+        "result": "STRICT_TLS_OK",
+        "rejectUnauthorized": true,
+        "minVersion": "TLSv1.2",
+        "sni": "www.ppa.com.ph",
+        "connectedIp": "115.84.233.11",
+        "httpSent": false,
+        "caOptionPassed": false,
+        "leafCN": "*.ppa.com.ph",
+        "issuer": "Sectigo Public Server Authentication CA OV R36"
+      },
+      "productImplementation": {
+        "file": "server/services/article-fetch-security.ts",
+        "entry": "secureFetchArticle -> defaultTransport",
+        "api": "node:https.request",
+        "rejectUnauthorized": true,
+        "requestLevelCa": "only when validated SourceCaConfig.certificatePem bound to exact host",
+        "minVersionExplicit": false,
+        "customCheckServerIdentity": false,
+        "dnsGate": "same isBlockedAddress + validatedLookup"
+      },
+      "productFailureEvidence": {
+        "path": "docs/evidence/r2-4-ppa-map-20261025/ppa-result.public.json",
+        "bothEntries": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+        "requestLevelCaPassed": false,
+        "sourceCaConfigured": false,
+        "httpStatus": null
+      },
+      "samePoints": [
+        "rejectUnauthorized=true on both paths",
+        "no SourceCa / no request-level ca in both recorded rounds",
+        "same public DNS classification helper",
+        "same host resolves to 115.84.233.11 in ledgers"
+      ],
+      "differentPoints": [
+        "API: tls.connect (diag, no HTTP) vs https.request (product, full GET after TLS)",
+        "diag sets minVersion TLSv1.2 explicitly; product relies on Node defaults",
+        "diag purpose=host-identity only; product path must succeed for qualification"
+      ],
+      "trustEquivalence": {
+        "statement": "Current env can only label current state; cannot fabricate historical trust-stack equivalence",
+        "effectiveTrustSourceVerified": false,
+        "canonicalWording": "No request-level CA attached; effective trust source not independently verified",
+        "cannotInfer": [
+          "historical NODE_EXTRA_CA_CERTS / SSL_CERT_FILE / --use-system-ca argv",
+          "bundled Mozilla vs system store solely from absent request-level ca",
+          "peer certificate chain as presented on the failing https.request path"
+        ]
+      },
+      "definiteCodeDefectProven": false,
+      "codeFixThisBatch": "NONE",
+      "missingEvidenceToDecide": [
+        "peer certificate chain (and authorizationError detail) captured on the product https.request path in the same process/toolchain as a concurrent tls.connect",
+        "process env/argv trust-affecting flags at the exact product failure moment",
+        "whether intermediate CA presentation differs between raw tls.connect and https.request to the same IP/SNI"
+      ],
+      "stopRepeating": "Do not restate the same diag-OK vs product-FAIL diagnosis without one of the missing evidence items above; do not auto-import CA or flip PH-P01"
+    },
+    "D_vn_p01": {
+      "downloadedPdfThisBatch": false,
+      "httpRequestsThisBatch": 0,
+      "materialsUsed": [
+        "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/vn-p01-selection.json",
+        "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/vn-p01-date-audit.json",
+        "docs/evidence/r2-id-w02-qualification-vnp01-2026-10-20/report.md",
+        "docs/evidence/r2-four-after-clash-2026-10-14/VN-P01-table-metadata.json"
+      ],
+      "originalEntryIdentity": {
+        "listIdentifier": "200/TBHH-CHHĐTVN",
+        "listHref": "https://vimawa.gov.vn/vi/noi-dung/thong-bao-hang-hai-thong-so-ky-thuat-cua-luong-tu-phao-bao-hieu-hang-hai-so-0-den-het-vung",
+        "association": "same original first table row; exact original href, not identifier-derived"
+      },
+      "known200Pdf": {
+        "observedAs": "attachment filename TEXT on detail HTML (field-name-field-tai-lieu-dinh-kem); label 200.pdf",
+        "hrefCapturedInAudit": false,
+        "pdfGetPerformedHistorically": false,
+        "pdfGetThisBatch": false,
+        "identityRelation": "filename prefix 200 aligns with document-number prefix of 200/TBHH-CHHĐTVN on the SAME detail page whose heading/canonical already match the original list row; display-label corroboration only",
+        "doesNotProve": [
+          "publication date",
+          "downloadable PDF bytes identity",
+          "R2-5 date field completion",
+          "qualification upgrade"
+        ]
+      },
+      "verdictUnchanged": {
+        "r2_4": "PARTIAL",
+        "r2_5": "PARTIAL"
+      }
+    },
+    "E_day20": {
+      "runId": "day20-20261026a",
+      "profile": "24h-19",
+      "workerPid": 82336,
+      "processAliveAtCheck": true,
+      "startedAsiaShanghai": "2026-10-26 10:58:16",
+      "untilAsiaShanghai": "2026-10-27 10:58:16",
+      "lastEventAtUtc": "2026-10-26T05:59:57.697Z",
+      "lastEventAtAsiaShanghai": "2026-10-26 13:59:57 Asia/Shanghai",
+      "http": {
+        "started": 61,
+        "completed": 60,
+        "failed": 1
+      },
+      "source_run": {
+        "total": 58,
+        "note": "19 sources x ~3 ok rounds + VN-D01 one fail then recover"
+      },
+      "all19LatestStatus": "ok",
+      "vnD01NaturalRecovery": {
+        "failAtUtc": "2026-10-26T05:14:35.647Z",
+        "failAtAsiaShanghai": "2026-10-26 13:14:35 Asia/Shanghai",
+        "errorCode": "fetch_timeout",
+        "recoverAtUtc": "2026-10-26T05:29:50.264Z",
+        "recoverAtAsiaShanghai": "2026-10-26 13:29:50 Asia/Shanghai",
+        "recoverStatus": "ok_items",
+        "itemsSeen": 4,
+        "latestStatus": "ok",
+        "failuresAfterRecover": 0,
+        "note": "natural adaptive retry recovery; day20 left running; not claimed as full P1 24h pass"
+      },
+      "actionsForbiddenAndNotDone": [
+        "stop/reset/restart",
+        "lock delete",
+        "day19 touch",
+        "timer reset"
+      ]
+    }
+  },
+  "nextMinimalUrlBudget": {
+    "necessaryThisBatch": false,
+    "statement": "none - all rem8 blockers are external missing materials or unproven TLS chain evidence; zero-net batch exhausted new conclusion value without downloads",
+    "ifLaterApprovedSeparately": [
+      {
+        "id": "VN-P01",
+        "need": "only if dots approves: at most one GET of exact attachment URL if/when href is first extracted from already-stored detail HTML, or a fresh detail capture under budget"
+      },
+      {
+        "id": "PH-P01",
+        "need": "approved diagnostic capturing peer chain on product https.request path (explicit budget if network)"
+      },
+      {
+        "id": "XX-F01",
+        "need": "approved public-DNS egress path + one product GET"
+      },
+      {
+        "id": "CN-P02",
+        "need": "approved distinct list URL"
+      },
+      {
+        "id": "PH-W01/PH-W02",
+        "need": "wait for active bulletin OR approved non-blocked archive PDF"
+      }
+    ]
+  },
+  "fixedOrVerifiedThisBatch": [
+    "R2-8 coverage-diff contract wording landed (not full-39 concurrent mandate; no self-added full re-run gate)",
+    "Remaining 8 classified: 0 fixable code defects this batch; 8/8 EXTERNAL_MISSING_MATERIALS",
+    "PPA zero-net tls.connect vs secureFetchArticle/defaultTransport recompare; definite code defect = false; missing evidence listed",
+    "VN-P01 existing 200.pdf label vs original entry identity verified offline; no download",
+    "day20 RO status + VN-D01 natural recovery after fetch_timeout recorded",
+    "counts preserved 32/39 and 26/34; overallR2Pass=false; day20 untouched; zero HTTP"
+  ],
+  "trueExternalBlockers": [
+    {
+      "id": "CN-P02",
+      "blocker": "exact root 302 Location self-points to same HTTPS root; zero-retry boundary stops before duplicate GET; no distinct list/target payload for title/link/date"
+    },
+    {
+      "id": "VN-P01",
+      "blocker": "title/link table present; no visible own date/date attribute; TBHH identifier cannot substitute for date"
+    },
+    {
+      "id": "MY-P03",
+      "blocker": "duplicate URL with conflicting title/date; collector fails closed by design"
+    },
+    {
+      "id": "MY-L01",
+      "blocker": "ten title/time cards but no title-anchor detail href; category links point to listing itself"
+    },
+    {
+      "id": "PH-P01",
+      "blocker": "product secureFetchArticle path UNABLE_TO_VERIFY_LEAF_SIGNATURE on both exact entries; prior tls.connect STRICT_TLS_OK is host-identity only"
+    },
+    {
+      "id": "PH-W01",
+      "blocker": "official explicit-empty page; no stored full title/link/source-time replay for active bulletin; archive PDF host blocked_address historically"
+    },
+    {
+      "id": "PH-W02",
+      "blocker": "official explicit-empty advisory page; no advisory body/id/time/PDF on snapshot"
+    },
+    {
+      "id": "XX-F01",
+      "blocker": "no qualifying stored product request/data; prior oneshots stopped at blocked_address before GET"
+    }
+  ]
+}

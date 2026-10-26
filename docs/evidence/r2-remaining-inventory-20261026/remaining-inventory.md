@@ -63,3 +63,9 @@
 - day20 host 只读盘点目录（未改）：`D:/try one/Shipping HOT/.tmp/day20-20261026a-host/`（`start-identity.json` / `plan.stdout.txt` / `part-a-report.json`）
 
 **未合并 / 未部署 / 未 force；未碰 main dirty、D:/wt-s1~s5、D:/wt-diag-3d42100、Junctions。**
+
+## Addendum — batch convergence（dots 1792994131 / 3982 / 4253）
+
+- R2-8 **coverage-diff** 口径已落盘：不强制 39 同窗 / 不强制每加源全量重跑 / 不拼接 day19+day20；详见 [../r2-batch-convergence-20261026/r2-8-coverage-diff.md](../r2-batch-convergence-20261026/r2-8-coverage-diff.md)。
+- 剩余 8 本批分类：**8/8 EXTERNAL_MISSING_MATERIALS**；可修代码缺陷 **0**；下一 URL 预算 **none**。
+- 完整批次报告：[../r2-batch-convergence-20261026/report.md](../r2-batch-convergence-20261026/report.md)。
