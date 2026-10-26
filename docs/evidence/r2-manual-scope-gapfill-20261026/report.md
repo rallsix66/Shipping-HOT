@@ -4,7 +4,7 @@
 
 | Label | SHA | Meaning |
 | --- | --- | --- |
-| **product baseline (OLD)** | ``353886d1ff7270a6d6bff3c95ccc3c86259f6a28`` | Prior product baseline; **NOT** this batch's tested code |
+| **product baseline (OLD)** | `f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c` | Prior product baseline; **NOT** this batch's tested code |
 | tip before this gapfill | `87002b85cdc1827a5dacee6af4ec7261e0176a7a` | Isolation tip when gapfill started |
 | **this batch tested SHA** | `353886d1ff7270a6d6bff3c95ccc3c86259f6a28` | Code under test for this acceptance-gap fill |
 
