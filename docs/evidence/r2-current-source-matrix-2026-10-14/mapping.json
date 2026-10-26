@@ -1,11 +1,11 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-20T04:06:11.578Z",
-  "lastUpdatedAt": "2026-10-26T02:43:19.523Z",
-  "lastUpdatedAtSource": "this_write_utc; dotsTs=1792982122.073619; Asia/Shanghai=2026-10-26 10:43:19.523 Asia/Shanghai; bind evidenceHead to docs consistency tip c2042268699333a43405d62573fc97d8d7d9fb43",
-  "lastUpdateNote": "2026-10-26 docs consistency (dots 1792982122.073619): unify lastUpdatedAtSource to this write; distinguish day19 19-source observe ATTEMPTED_INCOMPLETE vs continuous-24h acceptance not passed; MY-L01 date grammar fixed 2026-10-20 — current gap is missing card href (not pending syntax). Counts unchanged R2-4 32/39, R2-5 25/34, numeric 3/5, overallR2Pass=false. Preserve historical snapshots. Pure docs; gates bound to 7a1975682078e1fb8107a7992b6a36833a293b0b (no full suite re-run).",
-  "reviewedCodeSha": "7a1975682078e1fb8107a7992b6a36833a293b0b",
-  "evidenceHead": "c2042268699333a43405d62573fc97d8d7d9fb43",
+  "lastUpdatedAt": "2026-10-26T04:09:49.103769Z",
+  "lastUpdatedAtSource": "this_write_utc; dotsTs=1792987108.133129; Asia/Shanghai=2026-10-26 12:09:49.103 Asia/Shanghai; productCodeSha=f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c; baselineTipBeforeDocs=f961c050c8ca70b58358739c2b2fcddfb74e980b",
+  "lastUpdateNote": "2026-10-26 CN-T01 limited R2-5 PASS (dots 1792987108.133129): 25/34→26/34 for unmodified 20318B original + one HTTP/HTTPS alias + 8/8 + true readonly reopen only. R2-4 32/39, numeric 3/5, overallR2Pass=false unchanged. Preserve historical 7/8 PARTIAL / href-mutation / RW-reopen. Pure docs; product gate bind f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c; baseline tip before docs f961c050c8ca70b58358739c2b2fcddfb74e980b (no tip-self-reference rebind; final push tip reported separately). Zero new network; day20 untouched.",
+  "reviewedCodeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
+  "evidenceHead": "f961c050c8ca70b58358739c2b2fcddfb74e980b",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "1b98532577a3de49b394dc0746e3a556717c94a0058bb35c14dacb453d0bc90f",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -87,14 +87,15 @@
       "pass": true
     },
     "r2_5": {
-      "numerator": 25,
+      "numerator": 26,
       "denominator": 34,
-      "ratio": 0.7352941176470589,
-      "remaining": 9,
+      "ratio": 0.7647058823529411,
+      "remaining": 8,
       "ids": [
         "CN-P01",
         "CN-W01",
         "CN-W02",
+        "CN-T01",
         "CN-T02",
         "VN-P03",
         "VN-W01",
@@ -119,9 +120,9 @@
         "XX-M03"
       ],
       "statusCounts": {
-        "PASS": 25,
+        "PASS": 26,
         "NOT_RUN": 5,
-        "PARTIAL": 2,
+        "PARTIAL": 1,
         "FAIL": 2
       },
       "pass": false
@@ -160,6 +161,7 @@
     "overallR2Pass": false
   },
   "clarifications": [
+    "CN-T01 limited R2-5 PASS (2026-10-26T03:58:28.133129Z / rulingMessageTs=1792987108.133129) for unmodified 20318B original + one verified HTTP/HTTPS identity alias + original 8 items fields/ingest/dedupe + true readonly reopen only. Prior 7/8 PARTIAL / href-mutation / RW-reopen retained as history. Not HTTP transport relax, production enablement, or continuous-run endorsement. R2-4 32/39 and numeric 3/5 unchanged; overallR2Pass=false; 25/34→26/34.",
     "Continuous-24h: a new 19-source observe was attempted (day19) but remains incomplete; overall continuous-24h acceptance is NOT_PASSED / not granted. Distinguish attempted-incomplete from never-started; do not read as production enablement or overallR2Pass.",
     "PH-W01/PH-W02 limited R2-4 OK (2026-10-26T02:22:19.583919Z / rulingMessageTs=1792981339.583919) for existing official explicit-empty captures and offline product-scoped parse verification only. Prior PARTIAL/403/30/39 held remain historical snapshots. Not active bulletin, production ingest, continuous availability, or 24h pass; R2-5 25/34 and numeric 3/5 unchanged; overallR2Pass=false.",
     "XX-W02 limited R2-4 OK (2026-10-25T10:08:31.869439Z / rulingMessageTs=1792922911.869439) for existing two-TC forecast+specifications capture and offline field verification only. Prior PARTIAL/forecast-only and 29/39 held remain historical snapshots. specifications not in production sync; live persistence/continuous run unverified; numeric partition 3/5 unchanged; not full-pass or production enablement.",
@@ -995,7 +997,7 @@
         "noDetailProtocolRewrite": true
       },
       "fieldReplayEvidence": {
-        "status": "PARTIAL_PARENT_ACCEPTED_7_OF_8_ORIGINAL_ITEMS_ONE_HTTP_IDENTITY_EXCLUDED",
+        "status": "PASS_LIMITED_8_OF_8_HTTP_HTTPS_ALIAS_TRUE_READONLY",
         "evidence": {
           "path": "docs/evidence/r2-maersk-mofcom-offline-2026-10-20/replay-CN-T01.json",
           "sha256": "4332ca2142b1d24997b92637c5287a6dfec14095dc7418ddbb9e8a6599d407ef",
@@ -1007,11 +1009,11 @@
           "hashBasis": "local_file_bytes"
         },
         "originalItems": 8,
-        "acceptedItems": 7,
+        "acceptedItems": 8,
         "independentNodeDifferences": 0,
-        "itemsPersisted": 7,
-        "versions": 7,
-        "metadataOnlyBlocks": 7,
+        "itemsPersisted": 8,
+        "versions": 8,
+        "metadataOnlyBlocks": 8,
         "repeatNew": 0,
         "repeatRevised": 0,
         "closedAndReopened": true,
@@ -1022,6 +1024,26 @@
           "path": "docs/evidence/r2-maersk-mofcom-qualification-2026-10-20/acceptance.json",
           "sha256": "149c4e0e3eb5a6d7bb920cd296eaad4b8309b027488701b7f2265868c1938343",
           "hashBasis": "local_file_bytes"
+        },
+        "trueReadonlyReopen": true,
+        "priorRwReopenNotProof": true,
+        "aliasRule": "mofcom_art_http_https_twin",
+        "canonicalIdentityProtocol": "http",
+        "limitedAliasEvidence": {
+          "path": "docs/evidence/r2-cn-t01-http-https-alias-20261026/summary.json",
+          "sha256": "355e710a7d5cd335465ee922ba7f5b5ee6976e35b105ed373acab3e7acea10a0",
+          "hashBasis": "committed_text_LF"
+        },
+        "productRuling": {
+          "path": "docs/evidence/r2-cn-t01-http-https-alias-20261026/product-ruling.md",
+          "sha256": "a1cb3381948958a1b563566cfe11dbe2a0616c310d8226fd1a9e4b7e0b14995b",
+          "hashBasis": "committed_text_LF"
+        },
+        "priorPartial7of8EvidenceRetained": {
+          "path": "docs/evidence/r2-maersk-mofcom-offline-2026-10-20/replay-CN-T01.json",
+          "sha256": "4332ca2142b1d24997b92637c5287a6dfec14095dc7418ddbb9e8a6599d407ef",
+          "hashBasis": "local_file_bytes",
+          "note": "historical 7/8 PARTIAL snapshot retained"
         }
       },
       "numericFieldValidation": null,
@@ -1059,22 +1081,52 @@
         "reason": "Parent accepted limited same-host/path HTTPS policy-list historical200 and complete8-row original accounting with7 eligible identities verified through collector/SQLite; original HTTP catalog identity retained; no continuous or production claim."
       },
       "r2_5": {
-        "verdict": "PARTIAL",
-        "countedPass": false,
-        "reason": "Parent accepted7/8 eligible original title/link/day identities through collector/SQLite/repeat/reopen. One original HTTP policy identity excluded without rewrite or exception, so no8/8 PASS. Stored optional role key omitted, not publication; timezone missing and instant null."
+        "verdict": "PASS",
+        "countedPass": true,
+        "scope": "20318B real original + one verified HTTP/HTTPS identity alias + original 8 items fields/ingest/dedupe + true readonly reopen",
+        "qualification": "limited_http_https_alias_8of8_true_readonly",
+        "reason": "Approved limited R2-5 PASS for specified unmodified 20318B real original list, the one verified HTTP/HTTPS identity alias (HTTP canonicalUrl; HTTPS twin alias only), and original 8 items fields/ingest/dedupe with true readonly reopen. Prior 7/8 PARTIAL and href-mutation experiment retained as history. NOT relaxing HTTP transport, production enablement, or continuous-run endorsement. R2-4 32/39 and numeric 3/5 unchanged; overallR2Pass=false.",
+        "acceptance": {
+          "path": "docs/evidence/r2-cn-t01-http-https-alias-20261026/product-ruling.md",
+          "aliasReport": "docs/evidence/r2-cn-t01-http-https-alias-20261026/report.md",
+          "aliasSummary": "docs/evidence/r2-cn-t01-http-https-alias-20261026/summary.json",
+          "partB": "docs/evidence/r2-cn-t01-item8-https-20261026",
+          "prior7of8": "docs/evidence/r2-maersk-mofcom-qualification-2026-10-20/acceptance.json",
+          "codeBaseline": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
+          "rulingAt": "2026-10-26T03:58:28.133129Z",
+          "rulingMessageTs": "1792987108.133129",
+          "productRulingSha256": "a1cb3381948958a1b563566cfe11dbe2a0616c310d8226fd1a9e4b7e0b14995b",
+          "listOriginalSha256": "ab5e3780d9988fe7032458a05ad00adf4f6e66bb891aaaed385f8e2f515d340f",
+          "baselineTipBeforeDocs": "f961c050c8ca70b58358739c2b2fcddfb74e980b"
+        }
       },
       "continuousProduction": {
         "status": "NOT_RUN",
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "One original HTTP policy identity and its HTTP interpretation remain excluded; no proved detail-URL HTTPS equivalence and no protocol rewrite or exception.",
-        "Eight original visible rows accounted, only seven eligible identities stored; R2-5 remainsPARTIAL.",
-        "Stored dateEvidence role key omitted, not publication; displayed day without timezone/instant.",
-        "Same-host/path HTTPS evidence does not grant HTTP body fetch, detail fetch, full-text rights, current uptime or production/24h acceptance."
+        "Limited PASS scope only: unmodified 20318B original + one HTTP/HTTPS alias + 8/8 + true readonly reopen; not blanket HTTP->HTTPS, HTTP body fetch, crawl widen, TLS/SSRF change.",
+        "Not claimed: production ingest enable, continuous availability, 24h pass, or overallR2Pass.",
+        "Stored dateEvidence role key omitted / unknown, not publication; displayed day without timezone/instant (unchanged honesty).",
+        "Historical 7/8 PARTIAL, href-mutation NON_QUALIFYING experiment, and prior RW-reopen facts retained; do not erase.",
+        "day20 observation left alone; day19 remains incomplete."
       ],
       "historicalSuperseded": [
-        "Earlier catalog-HTTP-only/no-response state superseded by approved same-product HTTPS historical200 and7/8 offline collector replay; original HTTP catalog text remains."
+        "Earlier catalog-HTTP-only/no-response state superseded by approved same-product HTTPS historical200 and7/8 offline collector replay; original HTTP catalog text remains.",
+        {
+          "supersededAt": "2026-10-26T03:58:28.133129Z",
+          "rulingMessageTs": "1792987108.133129",
+          "reason": "2026-10-26 dots limited R2-5 PASS: prior 7/8 PARTIAL (one HTTP identity excluded) retained as historical snapshot; current counting uses unmodified 20318B original + one verified HTTP/HTTPS alias + 8/8 fields/ingest/dedupe + true readonly reopen. Not HTTP transport relax, production enablement, or continuous-run endorsement.",
+          "previousR25": {
+            "verdict": "PARTIAL",
+            "countedPass": false,
+            "reason": "Parent accepted7/8 eligible original title/link/day identities through collector/SQLite/repeat/reopen. One original HTTP policy identity excluded without rewrite or exception, so no8/8 PASS. Stored optional role key omitted, not publication; timezone missing and instant null."
+          },
+          "previousFieldReplayStatus": "PARTIAL_PARENT_ACCEPTED_7_OF_8_ORIGINAL_ITEMS_ONE_HTTP_IDENTITY_EXCLUDED",
+          "previousAcceptedItems": 7,
+          "hrefMutationExperimental": "NON_QUALIFYING retained",
+          "priorRwReopen": "annotated as-was; not true readonly proof"
+        }
       ],
       "qualificationAcceptance": {
         "path": "docs/evidence/r2-maersk-mofcom-qualification-2026-10-20/acceptance.json",
@@ -7628,7 +7680,7 @@
     "sourceGetAttemptsThisRound": 0,
     "productionEnabled": false
   },
-  "previousReviewedCodeSha": "0a483dd18a2027c73bf950cc0b948c013e29cf09",
+  "previousReviewedCodeSha": "7a1975682078e1fb8107a7992b6a36833a293b0b",
   "codeVerification": {
     "testedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
     "priorParentAcceptedCodeSha": "c7ba3c62786a7554aeaf92ce9e4d9809fd137754",
@@ -8008,5 +8060,30 @@
     "productRulingSha256": "c830f600aef6e03d4b8661bbc708011e5c9db9c6150f7900ac4cbacab1c5c75c",
     "evidenceHead": "4c515bab4517ffc504b8d3f2424c3288eb0c9637",
     "docsCommit": "4c515bab4517ffc504b8d3f2424c3288eb0c9637"
+  },
+  "lastCnT01LimitedR25PassRuling": {
+    "at": "2026-10-26T03:58:28.133129Z",
+    "rulingMessageTs": "1792987108.133129",
+    "source": "slack_thread_message_ts:1792987108.133129 (= 2026-10-26T03:58:28.133129Z)",
+    "productCodeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
+    "baselineTipBeforeDocs": "f961c050c8ca70b58358739c2b2fcddfb74e980b",
+    "scope": "20318B real original + one verified HTTP/HTTPS identity alias + original 8 items fields/ingest/dedupe + true readonly reopen",
+    "before": "25/34",
+    "after": "26/34",
+    "r2_4": "32/39 unchanged",
+    "numericProductionPartition": "3/5 unchanged",
+    "overallR2Pass": false,
+    "products": [
+      "CN-T01"
+    ],
+    "evidence": {
+      "ruling": "docs/evidence/r2-cn-t01-http-https-alias-20261026/product-ruling.md",
+      "aliasReport": "docs/evidence/r2-cn-t01-http-https-alias-20261026/report.md",
+      "aliasSummary": "docs/evidence/r2-cn-t01-http-https-alias-20261026/summary.json",
+      "partB": "docs/evidence/r2-cn-t01-item8-https-20261026"
+    },
+    "productRulingSha256": "a1cb3381948958a1b563566cfe11dbe2a0616c310d8226fd1a9e4b7e0b14995b",
+    "day20UntouchedPid": 82336,
+    "zeroNewNetwork": true
   }
 }

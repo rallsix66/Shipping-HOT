@@ -40,7 +40,7 @@ Fixture: `server/intel/sources/cn-t01-http-https-twin.test.ts` (pos/neg + strict
 | Bucket | Value |
 | --- | --- |
 | R2-4 | **32/39** |
-| R2-5 | **25/34** (pending review; not silently bumped) |
+| R2-5 | **26/34** (limited PASS after dots 1792987108.133129; was 25/34) |
 | numeric | **3/5** |
 | overallR2Pass | **false** |
 
@@ -50,7 +50,7 @@ No merge/deploy/force; main dirty preserved; day20 not restarted / locks not del
 
 ## Review fixes (dots 1792985451.804939) - Asia/Shanghai 2026-10-26 11:44:39
 
-**Zero new network.** day20-20261026a worker PID 82336 left alone (RO peek only). Counts still frozen: R2-4 **32/39**, R2-5 **25/34**, CN-T01 **not PASS**, overallR2Pass=false.
+**Zero new network.** day20-20261026a worker PID 82336 left alone (RO peek only). Prior review-fix freeze held until dots ruling; now CN-T01 limited PASS — R2-4 **32/39**, R2-5 **26/34**, overallR2Pass=false.
 
 ### 1) Exact raw href privilege
 - `resolveMetadataUrlAlias(originalHrefLiteral)` matches **only** the two approved absolute original strings (HTTP identity / HTTPS alias). No `new URL(...).href` / exactHrefKey path before eligibility.
@@ -74,3 +74,22 @@ No merge/deploy/force; main dirty preserved; day20 not restarted / locks not del
 - build / typecheck / lint: exit 0
 - vitest: **2056 passed | 8 skipped (2064)** / 161 files (`CN_T01_STRICT_PRIVATE_REPLAY=1`)
 - SHAs filled in `summary.json` after commit (tip = product/code SHA for this one-batch fix).
+
+## Limited R2-5 PASS ruling (dots 1792987108.133129) - 2026-10-26T03:58:28.133129Z / 2026-10-26 11:58:28.133 Asia/Shanghai
+
+Accepted by dots. **CN-T01 limited R2-5 PASS** → count **25/34 → 26/34**.
+
+Scope ONLY: specified 20318B real original; the one verified HTTP/HTTPS identity alias; original 8 items fields/ingest/dedupe + true readonly reopen verification.
+
+NOT: relaxing HTTP transport, production enablement, or continuous-run endorsement.
+
+| Bucket | Value |
+| --- | --- |
+| R2-4 | **32/39** unchanged |
+| R2-5 | **26/34** |
+| numeric | **3/5** unchanged |
+| overallR2Pass | **false** |
+
+History retained: old 7/8 PARTIAL; href-mutation experimental NON_QUALIFYING; prior RW-reopen annotated as-was.
+
+Gate bind product code SHA f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c. Baseline tip before this docs write f961c050c8ca70b58358739c2b2fcddfb74e980b. day20 PID 82336 untouched; zero new network. See [product-ruling.md](./product-ruling.md).

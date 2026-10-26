@@ -54,8 +54,8 @@
   },
   "countsFrozen": {
     "r2_4": "32/39",
-    "r2_5": "25/34",
-    "note": "R2-5 stays 25/34 pending review; R2-4 unchanged. No silent bump."
+    "r2_5": "26/34",
+    "note": "dots limited R2-5 PASS ruling 1792987108.133129: 25/34 -> 26/34 for CN-T01 only. R2-4 unchanged. No silent bump beyond ruling."
   },
   "filesChanged": [
     "server/intel/sources/config-keys.ts",
@@ -87,7 +87,7 @@
   "inspectedAtAsiaShanghai": "2026-10-26 11:45:20",
   "baselineTipWas": "bad4f05d9c7a0a9d35165d7447af3933797125e2",
   "committedAtAsiaShanghai": "2026-10-26 11:27+",
-  "note": "productCodeSha=f87a262 (review-fix impl). tip/codeSha names the docs tip commit at bind time; HEAD after this bind commit is the branch tip.",
+  "note": "productCodeSha=f87a262 (review-fix impl). Docs tip after ordinary push reported separately; avoid tip-self-reference rebind commits.",
   "productCodeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
   "tip": "24cadee933079376c3c5f6de719140e431ee1c9a",
   "codeSha": "24cadee933079376c3c5f6de719140e431ee1c9a",
@@ -107,8 +107,10 @@
     "countsFrozen": {
       "overallR2Pass": false,
       "r2_4": "32/39",
-      "cnT01Pass": false,
-      "r2_5": "25/34"
+      "cnT01Pass": true,
+      "cnT01PassQualification": "limited",
+      "r2_5": "26/34",
+      "supersededByRulingTs": "1792987108.133129"
     },
     "gates": {
       "vitestEnv": "CN_T01_STRICT_PRIVATE_REPLAY=1",
@@ -136,5 +138,41 @@
     "evidenceTipBoundFrom": "fa50a19999d1b71a6cb2351061e5f7a046e7b6b8"
   },
   "priorProductCodeSha": "5992abc42416f9bf77b835c5da5bd373c8ba36d0",
-  "baselineTipBefore": "94bb9c9f290d7d0e76d990a5787f0335e8b5405c"
+  "baselineTipBefore": "94bb9c9f290d7d0e76d990a5787f0335e8b5405c",
+  "limitedR2_5PassRuling": {
+    "dotsTs": "1792987108.133129",
+    "atUtc": "2026-10-26T03:58:28.133129Z",
+    "atAsiaShanghai": "2026-10-26 11:58:28.133 Asia/Shanghai",
+    "verdict": "PASS_LIMITED",
+    "countedPass": true,
+    "scope": [
+      "20318B real original list ab5e3780...515d340f unmodified",
+      "one verified HTTP/HTTPS identity alias mofcom_art_http_https_twin",
+      "original 8 items fields/ingest/dedupe + true readonly reopen"
+    ],
+    "notInScope": [
+      "HTTP transport relax",
+      "production enablement",
+      "continuous-run endorsement",
+      "blanket HTTP->HTTPS upgrade"
+    ],
+    "counts": {
+      "r2_4": "32/39",
+      "r2_5_before": "25/34",
+      "r2_5_after": "26/34",
+      "numeric": "3/5",
+      "overallR2Pass": false
+    },
+    "historyRetained": [
+      "old 7/8 PARTIAL",
+      "href-mutation experimental NON_QUALIFYING",
+      "prior RW-reopen annotated as-was"
+    ],
+    "productCodeSha": "f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c",
+    "baselineTipBeforeDocs": "f961c050c8ca70b58358739c2b2fcddfb74e980b",
+    "productRulingPath": "docs/evidence/r2-cn-t01-http-https-alias-20261026/product-ruling.md",
+    "productRulingSha256": "a1cb3381948958a1b563566cfe11dbe2a0616c310d8226fd1a9e4b7e0b14995b",
+    "day20UntouchedPid": 82336,
+    "zeroNewNetwork": true
+  }
 }

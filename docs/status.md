@@ -1,3 +1,12 @@
+## 2026-10-26 · CN-T01 限定 R2-5 PASS（dots 1792987108.133129）
+
+- **裁定**：dots 接受 CN-T01 **限定** R2-5 PASS → 资讯计数 **25/34 → 26/34**（2026-10-26T03:58:28.133129Z / Asia/Shanghai 2026-10-26 11:58:28.133）。
+- **范围仅**：指定未改 **20318B** 真实原件；已核的 **一条** HTTP/HTTPS 身份别名；原 **8** 项字段/入库/去重 + **真只读**重开核验。
+- **不是**：放宽 HTTP 传输、生产启用、或持续运行背书；不是 blanket HTTP→HTTPS。
+- **不变**：R2-4 **32/39**；数值 **3/5**；其他来源不变；**overallR2Pass=false**。
+- **历史保留**：旧 7/8 PARTIAL、href-mutation 实验（NON_QUALIFYING）、先前 RW-reopen 事实（非只读证明）均保留为快照。
+- **门禁绑定**产品代码 SHA f87a2626239baf049e3e0e6a9da7bd7ef4aa8c9c（非 tip 自引用连环绑定）。day20-20261026a（PID 82336）未触碰；零新网络。证据：[product-ruling](evidence/r2-cn-t01-http-https-alias-20261026/product-ruling.md) / [alias report](evidence/r2-cn-t01-http-https-alias-20261026/report.md) / [matrix](evidence/r2-current-source-matrix-2026-10-14/mapping.json)。
+
 ## 2026-10-26 · CN-T01 exact HTTP↔HTTPS metadata alias（dots 1792984344.944339）
 
 - **零新网络**。按 dots 对本 twin 的身份字段等价裁定落地最小默认关闭 `metadataLinkRule=mofcom_art_http_https_twin`（源作用域、metadata-only；**不是**同 allowUrlPrefixes 下的 blanket HTTP→HTTPS 升级）。
