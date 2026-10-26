@@ -3,7 +3,7 @@
  *
  * Scope: offline verification of official-page explicit empty-state only.
  * Not a production collector, not an ingest job, and does not invent risk events.
- * parsed_empty means the official product container shows the known empty copy ?
+ * parsed_empty means the official product container shows the known empty copy —
  * it does NOT mean "Philippines has no weather risk".
  */
 import * as cheerio from "cheerio"
@@ -130,15 +130,62 @@ function notEmpty(
   }
 }
 
+/**
+ * Residual body after exempting only the matched empty-state node.
+ * Conservative: any other meaningful text/body node in the target region is a conflict.
+ * Does not rely solely on keyword or tag allowlists.
+ */
+function hasResidualMeaningfulBody(
+  $: cheerio.CheerioAPI,
+  region: cheerio.Cheerio<any>,
+  exemptNode: cheerio.Cheerio<any>,
+): boolean {
+  const exemptEl = exemptNode.length ? exemptNode.get(0) : null
+  const nodes = region.contents().toArray()
+  for (const node of nodes) {
+    if (exemptEl && node === exemptEl) continue
+    if (node.type === "text") {
+      if (normalizeText((node as { data?: string }).data ?? "").length > 0) return true
+      continue
+    }
+    if (node.type === "comment") continue
+    if (node.type !== "tag") continue
+    const el = node as any
+    const text = normalizeText($(el).text())
+    if (text.length > 0) return true
+    // Empty-looking wrappers that still carry media / links count as body.
+    if ($(el).find("img, iframe, object, embed, video, a[href]").length > 0) return true
+  }
+  return false
+}
+
+function hasPdfLink(root: cheerio.Cheerio<any>): boolean {
+  return root.find(`a[href$=".pdf"], a[href*=".pdf?"]`).length > 0
+}
+
 function parsePhW01(html: string): PagasaEmptyParseResult {
   const $ = cheerio.load(html)
-  const product = $(PH_W01_PRODUCT_CONTAINER).first()
-  if (product.length === 0) {
+  const products = $(PH_W01_PRODUCT_CONTAINER)
+  if (products.length === 0) {
     return notEmpty("PH-W01", "missing_product_container", "product container absent", {
       productContainerSelector: PH_W01_PRODUCT_CONTAINER,
       emptyNodeSelector: PH_W01_EMPTY_NODE,
     })
   }
+  // Duplicate product regions: do not trust .first(); treat as conflict.
+  if (products.length > 1) {
+    return notEmpty(
+      "PH-W01",
+      "active_body_conflict",
+      `duplicate product containers (${products.length}); refusing empty classification`,
+      {
+        productContainerSelector: PH_W01_PRODUCT_CONTAINER,
+        emptyNodeSelector: PH_W01_EMPTY_NODE,
+      },
+    )
+  }
+
+  const product = products.first()
 
   // Scope to the Tropical Cyclone Bulletin article-content only (exclude Archive).
   const bulletinHeader = product
@@ -157,16 +204,33 @@ function parsePhW01(html: string): PagasaEmptyParseResult {
     })
   }
 
-  const panelBody = bulletinContent.find(".panel-body").first()
-  const emptyNode = panelBody.find("> h3").first()
+  const panelBodies = bulletinContent.find(".panel-body")
+  if (panelBodies.length > 1) {
+    return notEmpty(
+      "PH-W01",
+      "active_body_conflict",
+      `duplicate bulletin panel-body regions (${panelBodies.length}); refusing empty classification`,
+      {
+        productContainerSelector: PH_W01_PRODUCT_CONTAINER,
+        emptyNodeSelector: PH_W01_EMPTY_NODE,
+      },
+    )
+  }
+
+  const panelBody = panelBodies.first()
+  const emptyNode = panelBody.find("> h3").filter((_, el) => {
+    return normalizeText($(el).text()) === PH_W01_EMPTY_TEXT
+  }).first()
   const emptyText = emptyNode.length ? normalizeText(emptyNode.text()) : ""
 
   if (!emptyNode.length || emptyText !== PH_W01_EMPTY_TEXT) {
+    const firstH3 = panelBody.find("> h3").first()
+    const observed = firstH3.length ? normalizeText(firstH3.text()) : ""
     return notEmpty(
       "PH-W01",
       "unknown_empty_copy",
-      emptyNode.length
-        ? `h3 text did not match known empty copy: ${JSON.stringify(emptyText.slice(0, 160))}`
+      firstH3.length
+        ? `h3 text did not match known empty copy: ${JSON.stringify(observed.slice(0, 160))}`
         : "empty-state h3 missing inside bulletin panel-body",
       {
         productContainerSelector: PH_W01_PRODUCT_CONTAINER,
@@ -176,19 +240,12 @@ function parsePhW01(html: string): PagasaEmptyParseResult {
   }
 
   const bulletinRegionText = normalizeText(bulletinContent.text())
-  const pdfInBulletin = bulletinContent.find("a[href$=\".pdf\"], a[href*=\".pdf?\"]").length > 0
+  const pdfInBulletin = hasPdfLink(bulletinContent)
+  const residualInPanel = hasResidualMeaningfulBody($, panelBody, emptyNode)
   const activeBody
     = ACTIVE_BODY_RE.test(bulletinRegionText)
       || pdfInBulletin
-      || panelBody
-        .children()
-        .toArray()
-        .some((el) => {
-          const tag = ((el as { tagName?: string }).tagName ?? "").toLowerCase()
-          if (tag === "h3") return false
-          const t = normalizeText($(el).text())
-          return t.length > 0 && t !== PH_W01_EMPTY_TEXT
-        })
+      || residualInPanel
 
   if (activeBody) {
     return notEmpty(
@@ -213,31 +270,59 @@ function parsePhW01(html: string): PagasaEmptyParseResult {
 
 function parsePhW02(html: string): PagasaEmptyParseResult {
   const $ = cheerio.load(html)
-  const product = $(PH_W02_PRODUCT_CONTAINER).first()
-  if (product.length === 0) {
+  const products = $(PH_W02_PRODUCT_CONTAINER)
+  if (products.length === 0) {
     return notEmpty("PH-W02", "missing_product_container", "product container absent", {
       productContainerSelector: PH_W02_PRODUCT_CONTAINER,
       emptyNodeSelector: PH_W02_EMPTY_NODE,
     })
   }
+  if (products.length > 1) {
+    return notEmpty(
+      "PH-W02",
+      "active_body_conflict",
+      `duplicate product containers (${products.length}); refusing empty classification`,
+      {
+        productContainerSelector: PH_W02_PRODUCT_CONTAINER,
+        emptyNodeSelector: PH_W02_EMPTY_NODE,
+      },
+    )
+  }
 
-  const region = product.find(".weekly-content-adv").first()
-  if (region.length === 0) {
+  const product = products.first()
+  const regions = product.find(".weekly-content-adv")
+  if (regions.length === 0) {
     return notEmpty("PH-W02", "missing_product_container", "weekly-content-adv region absent", {
       productContainerSelector: PH_W02_PRODUCT_CONTAINER,
       emptyNodeSelector: PH_W02_EMPTY_NODE,
     })
   }
+  if (regions.length > 1) {
+    return notEmpty(
+      "PH-W02",
+      "active_body_conflict",
+      `duplicate weekly-content-adv regions (${regions.length}); refusing empty classification`,
+      {
+        productContainerSelector: PH_W02_PRODUCT_CONTAINER,
+        emptyNodeSelector: PH_W02_EMPTY_NODE,
+      },
+    )
+  }
 
-  const emptyNode = region.find("> p").first()
+  const region = regions.first()
+  const emptyNode = region.find("> p").filter((_, el) => {
+    return normalizeText($(el).text()) === PH_W02_EMPTY_TEXT
+  }).first()
   const emptyText = emptyNode.length ? normalizeText(emptyNode.text()) : ""
 
   if (!emptyNode.length || emptyText !== PH_W02_EMPTY_TEXT) {
+    const firstP = region.find("> p").first()
+    const observed = firstP.length ? normalizeText(firstP.text()) : ""
     return notEmpty(
       "PH-W02",
       "unknown_empty_copy",
-      emptyNode.length
-        ? `p text did not match known empty copy: ${JSON.stringify(emptyText.slice(0, 160))}`
+      firstP.length
+        ? `p text did not match known empty copy: ${JSON.stringify(observed.slice(0, 160))}`
         : "empty-state p missing inside weekly-content-adv",
       {
         productContainerSelector: PH_W02_PRODUCT_CONTAINER,
@@ -247,16 +332,10 @@ function parsePhW02(html: string): PagasaEmptyParseResult {
   }
 
   const regionText = normalizeText(region.text())
-  const pdfInRegion = region.find("a[href$=\".pdf\"], a[href*=\".pdf?\"]").length > 0
-  const extraParagraphs = region
-    .find("> p")
-    .toArray()
-    .filter((el) => {
-      const t = normalizeText($(el).text())
-      return t.length > 0 && t !== PH_W02_EMPTY_TEXT
-    })
+  const pdfInRegion = hasPdfLink(region)
+  const residualInRegion = hasResidualMeaningfulBody($, region, emptyNode)
   const activeBody
-    = ACTIVE_BODY_RE.test(regionText) || pdfInRegion || extraParagraphs.length > 0
+    = ACTIVE_BODY_RE.test(regionText) || pdfInRegion || residualInRegion
 
   if (activeBody) {
     return notEmpty(

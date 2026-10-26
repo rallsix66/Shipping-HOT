@@ -62,3 +62,11 @@ used=**2**/6；redirects=0；retries=0。未混用旧轮 `r2-4-gapfill-20261025`
 1. PH-W01 / PH-W02 入口可达恢复（相对历史 403/blocked），但快照为**官方页面明确空状态**
 2. 现行可用正文/编号/发布时间仍缺；归档 PDF 主机 DNS 被拦
 3. 计数请保持 **30/39** & **25/34** 直至 dots 另裁
+
+## 本轮追加（dots 1792979708.860879）：P2 harden
+
+- **零新 HTTP/TLS/PDF**。
+- **P2-1 empty-state conflict miss**：仅豁免匹配空节点；div/裸文本/嵌套/第二 h3/重复 product → not_empty；Archive 排除不变。负例 fixtures 已补。
+- **P2-2 missing-raw false PASS**：`it.skipIf`；严格本地资格 `PAGASA_STRICT_PRIVATE_REPLAY=1`；raw 在场时强制校验 capture/public SHA 与 HTTP status。
+- Offline replay 仍 `parsed_empty`；wire SHA 匹配；计数冻结 **30/39** / **25/34**。
+- 证据：[`parsed-empty-replay.public.json`](./parsed-empty-replay.public.json)（finishedAtAsiaShanghai=2026-10-26 10:03:12 Asia/Shanghai）。

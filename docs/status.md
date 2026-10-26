@@ -1,3 +1,11 @@
+## 2026-10-26 — PAGASA PH-W01/PH-W02 P2 harden（dots 1792979708.860879）
+
+- **零新 HTTP/TLS/PDF**：复用已存 private wire；SHA 与台账一致（`b5ecb77a40ada689...` / `8ac1546c1681d5b6...`）。
+- P2-1：仅豁免**实际匹配**的空状态节点；残留 div/裸文本/嵌套/第二 h3 正文 → `active_body_conflict`；重复 product region 保守 non-empty；Archive 仍排除。
+- P2-2：缺 raw 改为显式 `it.skipIf`（禁止 `expect(true)` 假 PASS）；`PAGASA_STRICT_PRIVATE_REPLAY=1` 要求双原件+台账 SHA/HTTP status，缺任一即 FAIL；不得默认 200。
+- 计数仍冻结 R2-4 **30/39**、R2-5 **25/34**、numeric **3/5**、`overallR2Pass=false`；`countedOK=false` 直至 dots 裁定。day19 incomplete 不变；原 observe 未动。
+- 证据：[parsed-empty-replay.public.json](evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json) / [report.md](evidence/r2-4-pagasa-phw-20261026/report.md) / [mapping.json](evidence/r2-current-source-matrix-2026-10-14/mapping.json)。
+
 ## 2026-10-26 — PH-W01/PH-W02 官方页面明确空状态 parsed-empty 回放（dots 1792978528.526279）
 
 - **零新 HTTP/TLS/PDF**：复用已存 PH-W01/PH-W02 private wire；wire SHA 与台账一致（`b5ecb77a40ada689...` / `8ac1546c1681d5b6...`）。

@@ -1,11 +1,11 @@
 {
   "type": "current_authoritative_evidence_matrix",
   "generatedAt": "2026-10-20T04:06:11.578Z",
-  "lastUpdatedAt": "2026-10-25T10:16:43.402Z",
-  "lastUpdatedAtSource": "this_write_utc; rulingMessageTs=1792922911.869439 (= 2026-10-25T10:08:31.869439Z)",
-  "lastUpdateNote": "2026-10-25 XX-W02 limited R2-4 OK (dots 1792922911): scope=existing two-TC forecast+specifications capture and offline field verification. Numerator 29/39 → 30/39 (shortfall 2). Prior 29/39 and forecast-only/PARTIAL retained as historical snapshots. specifications not in production sync; live persistence/continuous run unverified. R2-5 25/34 unchanged; numeric production partition 3/5 unchanged; PPA/PH-P01 BLOCKED; overallR2Pass=false. Docs-only; no new network; gates not re-run (reuse a2e99a01). R2 not complete; no production enablement.",
-  "reviewedCodeSha": "954c831f27eff4fd4382a0ea68be3894de053759",
-  "evidenceHead": "3e3b2fc94c2965a96a5952b3ea29c035ed723c56",
+  "lastUpdatedAt": "2026-10-26T02:06:45.599Z",
+  "lastUpdatedAtSource": "this_write_utc; dotsTs=1792979708.860879; Asia/Shanghai=2026-10-26 10:06:45 Asia/Shanghai",
+  "lastUpdateNote": "2026-10-26 PAGASA PH-W01/PH-W02 P2 harden (dots 1792979708): empty-state residual-body conflict miss + missing-raw false PASS→skip/strict. Zero new HTTP/TLS/PDF. Counts frozen 30/39 & 25/34; countedOK=false pending dots; overallR2Pass=false. day19 incomplete unchanged.",
+  "reviewedCodeSha": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r2-4-gapfill-20261025\\.tmp\\patch-sha.cjs",
+  "evidenceHead": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r2-4-gapfill-20261025\\.tmp\\patch-sha.cjs",
   "historicalMapping": "docs/evidence/r2-acceptance-convergence-2026-10-14/mapping.json",
   "catalogSha256": "1b98532577a3de49b394dc0746e3a556717c94a0058bb35c14dacb453d0bc90f",
   "referenceHashBasis": "committed text with CRLF normalized to LF; actual wire hashes and private raw bytes are not normalized",
@@ -4379,14 +4379,14 @@
         "productQualificationChanged": false
       },
       "fieldReplayEvidence": {
-        "status": "PARSED_EMPTY_OFFLINE_REPLAY_FILED_AWAITING_DOTS",
+        "status": "PARSED_EMPTY_OFFLINE_REPLAY_P2_HARDENED_AWAITING_DOTS",
         "evidence": {
           "path": "docs/evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json",
           "selector": {
             "products": "PH-W01",
             "status": "parsed_empty"
           },
-          "sha256": "38bcdb3d7857729d3a0adadaf33813931f0e76599b3fde1f8ed343f0fb4c55ed",
+          "sha256": "b52d85a0eef7e3fd3ab6bd0cc4affaf1a96e55422bdbc34ceabf9ccbc93cc797",
           "hashBasis": "committed_text_LF"
         },
         "realSourceCapturePublic": {
@@ -4404,7 +4404,9 @@
         "interpretation": "official_page_explicit_empty_state_only",
         "countedOKUnchanged": true,
         "zeroNewHttpTlsPdf": true,
-        "emptyNodeSelector": ".tropical-cyclone-weather-bulletin-page .article-content .panel-body > h3"
+        "emptyNodeSelector": ".tropical-cyclone-weather-bulletin-page .article-content .panel-body > h3",
+        "p2Hardened": true,
+        "codeSha": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r2-4-gapfill-20261025\\.tmp\\patch-sha.cjs"
       },
       "numericFieldValidation": null,
       "dateEvidence": {
@@ -4428,7 +4430,7 @@
       "r2_4": {
         "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "Official-page explicit empty-state parsed_empty offline replay filed (wire SHA matched; citations: .tropical-cyclone-weather-bulletin-page / 'No Active Tropical Cyclone within the Philippine Area of Responsibility'). Executor did NOT upgrade countedOK; awaiting dots ruling under existing explicit parsed-empty contract (activity bulletin not required). Prior: page response alone was not usable verified warning payload."
+        "reason": "Official-page explicit empty-state parsed_empty offline replay P2-hardened (residual body / duplicate regions; wire SHA matched; citations: .tropical-cyclone-weather-bulletin-page / 'No Active Tropical Cyclone within the Philippine Area of Responsibility'). Executor did NOT upgrade countedOK; awaiting dots ruling."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
@@ -4440,7 +4442,7 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "parsed_empty offline replay filed; countedOK frozen pending dots ruling",
+        "parsed_empty offline replay P2-hardened; countedOK frozen pending dots ruling",
         "archive PDF host DNS blocked; no current usable bulletin body/id/time"
       ],
       "historicalSuperseded": [
@@ -4552,14 +4554,14 @@
         "productQualificationChanged": false
       },
       "fieldReplayEvidence": {
-        "status": "PARSED_EMPTY_OFFLINE_REPLAY_FILED_AWAITING_DOTS",
+        "status": "PARSED_EMPTY_OFFLINE_REPLAY_P2_HARDENED_AWAITING_DOTS",
         "evidence": {
           "path": "docs/evidence/r2-4-pagasa-phw-20261026/parsed-empty-replay.public.json",
           "selector": {
             "products": "PH-W02",
             "status": "parsed_empty"
           },
-          "sha256": "38bcdb3d7857729d3a0adadaf33813931f0e76599b3fde1f8ed343f0fb4c55ed",
+          "sha256": "b52d85a0eef7e3fd3ab6bd0cc4affaf1a96e55422bdbc34ceabf9ccbc93cc797",
           "hashBasis": "committed_text_LF"
         },
         "realSourceCapturePublic": {
@@ -4577,7 +4579,9 @@
         "interpretation": "official_page_explicit_empty_state_only",
         "countedOKUnchanged": true,
         "zeroNewHttpTlsPdf": true,
-        "emptyNodeSelector": ".article-content.weather-advisory .weekly-content-adv > p"
+        "emptyNodeSelector": ".article-content.weather-advisory .weekly-content-adv > p",
+        "p2Hardened": true,
+        "codeSha": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r2-4-gapfill-20261025\\.tmp\\patch-sha.cjs"
       },
       "numericFieldValidation": null,
       "dateEvidence": {
@@ -4601,7 +4605,7 @@
       "r2_4": {
         "verdict": "PARTIAL",
         "countedOK": false,
-        "reason": "Official-page explicit empty-state parsed_empty offline replay filed (wire SHA matched; citations: .article-content.weather-advisory / 'As of today, there is no Weather Advisory issued.'). Executor did NOT upgrade countedOK; awaiting dots ruling under existing explicit parsed-empty contract (activity bulletin not required). Prior: page response alone was not usable verified warning payload."
+        "reason": "Official-page explicit empty-state parsed_empty offline replay P2-hardened (residual body / duplicate regions; wire SHA matched; citations: .article-content.weather-advisory / 'As of today, there is no Weather Advisory issued.'). Executor did NOT upgrade countedOK; awaiting dots ruling."
       },
       "r2_5": {
         "verdict": "NOT_RUN",
@@ -4613,7 +4617,7 @@
         "scope": "No approved R2-8 24h run for this source"
       },
       "gaps": [
-        "parsed_empty offline replay filed; countedOK frozen pending dots ruling",
+        "parsed_empty offline replay P2-hardened; countedOK frozen pending dots ruling",
         "no advisory body/id/time/PDF on this snapshot"
       ],
       "historicalSuperseded": [

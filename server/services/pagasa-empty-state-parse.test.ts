@@ -20,28 +20,100 @@ const PRIVATE_CAPTURE_ROOT = path.resolve(
   ".tmp/r2-4-pagasa-phw-20261026",
 )
 
-function loadPrivateCapture(productId: "PH-W01" | "PH-W02"): {
+/**
+ * Strict local qualification: PAGASA_STRICT_PRIVATE_REPLAY=1 makes missing raw FAIL
+ * instead of skip. Default CI/dev path uses explicit it.skipWhenMissingRaw.
+ */
+const STRICT_PRIVATE_REPLAY = process.env.PAGASA_STRICT_PRIVATE_REPLAY === "1"
+
+interface PrivateCapture {
   html: string
   wireSha256: string
   httpStatus: number
-  expectedWireSha256: string | null
-} | null {
+  expectedWireSha256: string
+  publicWireSha256: string
+  publicHttpStatus: number
+}
+
+type PrivateCaptureLoad =
+  | { ok: true, capture: PrivateCapture }
+  | { ok: false, reason: "missing_raw" | "incomplete_evidence", detail: string }
+
+function loadPrivateCapture(productId: "PH-W01" | "PH-W02"): PrivateCaptureLoad {
   const binPath = path.join(PRIVATE_CAPTURE_ROOT, "private", `${productId}.response.bin`)
   const capturePath = path.join(PRIVATE_CAPTURE_ROOT, `${productId}-capture.json`)
-  if (!existsSync(binPath) || !existsSync(capturePath)) return null
+  const publicLedger = path.resolve(
+    process.cwd(),
+    `docs/evidence/r2-4-pagasa-phw-20261026/${productId}-fields.public.json`,
+  )
+  if (!existsSync(binPath) || !existsSync(capturePath)) {
+    return {
+      ok: false,
+      reason: "missing_raw",
+      detail: `missing ${productId} private raw and/or capture json`,
+    }
+  }
+  if (!existsSync(publicLedger)) {
+    return {
+      ok: false,
+      reason: "incomplete_evidence",
+      detail: `missing public ledger ${productId}-fields.public.json`,
+    }
+  }
   const buf = readFileSync(binPath)
   const wireSha256 = createHash("sha256").update(buf).digest("hex")
   const capture = JSON.parse(readFileSync(capturePath, "utf8")) as {
     httpStatus?: number
     wireSha256?: string
   }
+  const fields = JSON.parse(readFileSync(publicLedger, "utf8")) as {
+    httpStatus?: number
+    wireSha256?: string
+  }
+  if (typeof capture.httpStatus !== "number") {
+    return {
+      ok: false,
+      reason: "incomplete_evidence",
+      detail: `${productId} capture.httpStatus missing`,
+    }
+  }
+  if (typeof capture.wireSha256 !== "string" || capture.wireSha256.length === 0) {
+    return {
+      ok: false,
+      reason: "incomplete_evidence",
+      detail: `${productId} capture.wireSha256 missing`,
+    }
+  }
+  if (typeof fields.httpStatus !== "number") {
+    return {
+      ok: false,
+      reason: "incomplete_evidence",
+      detail: `${productId} public ledger httpStatus missing`,
+    }
+  }
+  if (typeof fields.wireSha256 !== "string" || fields.wireSha256.length === 0) {
+    return {
+      ok: false,
+      reason: "incomplete_evidence",
+      detail: `${productId} public ledger wireSha256 missing`,
+    }
+  }
   return {
-    html: buf.toString("utf8"),
-    wireSha256,
-    httpStatus: capture.httpStatus ?? 200,
-    expectedWireSha256: capture.wireSha256 ?? null,
+    ok: true,
+    capture: {
+      html: buf.toString("utf8"),
+      wireSha256,
+      httpStatus: capture.httpStatus,
+      expectedWireSha256: capture.wireSha256,
+      publicWireSha256: fields.wireSha256,
+      publicHttpStatus: fields.httpStatus,
+    },
   }
 }
+
+const privateW01 = loadPrivateCapture("PH-W01")
+const privateW02 = loadPrivateCapture("PH-W02")
+const bothPrivateReady = privateW01.ok && privateW02.ok
 
 describe("parsePagasaEmptyState -> synthetic fixtures", () => {
   it("parses PH-W01 positive: official empty copy in product container -> parsed_empty", () => {
@@ -66,6 +138,14 @@ describe("parsePagasaEmptyState -> synthetic fixtures", () => {
     if (result.status !== "parsed_empty") return
     expect(result.emptyStateOriginalText).toBe(PH_W02_EMPTY_TEXT)
     expect(result.citations.emptyTextCitation).toBe(PH_W02_EMPTY_TEXT)
+  })
+
+  it("keeps PH-W01 Archive PDF out of active-body conflict", () => {
+    const result = parsePagasaEmptyState(
+      "PH-W01",
+      readFixture("ph-w01-empty-positive.html"),
+    )
+    expect(result.status).toBe("parsed_empty")
   })
 
   it("rejects PH-W01 missing product container -> not_empty (even if empty text appears elsewhere)", () => {
@@ -122,6 +202,54 @@ describe("parsePagasaEmptyState -> synthetic fixtures", () => {
     expect(result).toMatchObject({ status: "not_empty", reason: "active_body_conflict" })
   })
 
+  it("rejects PH-W02 div body after empty-state p (not only extra p)", () => {
+    const result = parsePagasaEmptyState(
+      "PH-W02",
+      readFixture("ph-w02-div-body-after-empty.html"),
+    )
+    expect(result).toMatchObject({ status: "not_empty", reason: "active_body_conflict" })
+  })
+
+  it("rejects PH-W01 second h3 body (matched empty h3 is not a blanket h3 skip)", () => {
+    const result = parsePagasaEmptyState(
+      "PH-W01",
+      readFixture("ph-w01-second-h3-body.html"),
+    )
+    expect(result).toMatchObject({ status: "not_empty", reason: "active_body_conflict" })
+  })
+
+  it("rejects PH-W02 bare text residual after empty-state p", () => {
+    const result = parsePagasaEmptyState(
+      "PH-W02",
+      readFixture("ph-w02-bare-text-after-empty.html"),
+    )
+    expect(result).toMatchObject({ status: "not_empty", reason: "active_body_conflict" })
+  })
+
+  it("rejects PH-W01 nested body after empty h3 while Archive stays excluded", () => {
+    const result = parsePagasaEmptyState(
+      "PH-W01",
+      readFixture("ph-w01-nested-body-after-empty.html"),
+    )
+    expect(result).toMatchObject({ status: "not_empty", reason: "active_body_conflict" })
+  })
+
+  it("rejects PH-W02 duplicate product regions conservatively", () => {
+    const result = parsePagasaEmptyState(
+      "PH-W02",
+      readFixture("ph-w02-duplicate-product.html"),
+    )
+    expect(result).toMatchObject({ status: "not_empty", reason: "active_body_conflict" })
+  })
+
+  it("rejects PH-W01 duplicate product regions conservatively", () => {
+    const result = parsePagasaEmptyState(
+      "PH-W01",
+      readFixture("ph-w01-duplicate-product.html"),
+    )
+    expect(result).toMatchObject({ status: "not_empty", reason: "active_body_conflict" })
+  })
+
   it("error / Cloudflare page -> not_empty failed_response_shape", () => {
     const result = parsePagasaEmptyState(
       "PH-W01",
@@ -156,29 +284,19 @@ describe("parsePagasaEmptyState -> synthetic fixtures", () => {
 })
 
 describe("parsePagasaEmptyState -> real-sample offline replay (private capture)", () => {
-  it("replays PH-W01: wire SHA matches ledger and parse yields parsed_empty with citations", () => {
-    const capture = loadPrivateCapture("PH-W01")
-    if (!capture) {
-      // Synthetic fixtures already cover contract; private raw is machine-local.
-      expect(true).toBe(true)
-      return
-    }
-    expect(capture.wireSha256).toBeTruthy()
-    if (capture.expectedWireSha256) {
-      expect(capture.wireSha256).toBe(capture.expectedWireSha256)
-    }
-    const publicLedger = path.resolve(
-      process.cwd(),
-      "docs/evidence/r2-4-pagasa-phw-20261026/PH-W01-fields.public.json",
-    )
-    if (existsSync(publicLedger)) {
-      const fields = JSON.parse(readFileSync(publicLedger, "utf8")) as {
-        wireSha256?: string
-      }
-      if (fields.wireSha256) {
-        expect(capture.wireSha256).toBe(fields.wireSha256)
-      }
-    }
+  it.skipIf(!STRICT_PRIVATE_REPLAY)("strict mode requires both private originals + ledger evidence (no synthetic substitute)", () => {
+    expect(privateW01.ok, privateW01.ok ? undefined : privateW01.detail).toBe(true)
+    expect(privateW02.ok, privateW02.ok ? undefined : privateW02.detail).toBe(true)
+  })
+
+  it.skipIf(!privateW01.ok)("replays PH-W01: wire SHA matches ledger and parse yields parsed_empty with citations", () => {
+    if (!privateW01.ok) throw new Error("unreachable: skipIf should have skipped")
+    const capture = privateW01.capture
+    expect(capture.wireSha256).toBe(capture.expectedWireSha256)
+    expect(capture.wireSha256).toBe(capture.publicWireSha256)
+    expect(capture.httpStatus).toBe(capture.publicHttpStatus)
+    expect(capture.httpStatus).toBeGreaterThanOrEqual(200)
+    expect(capture.httpStatus).toBeLessThan(300)
     const result = parsePagasaEmptyState("PH-W01", capture.html, {
       httpStatus: capture.httpStatus,
     })
@@ -189,27 +307,14 @@ describe("parsePagasaEmptyState -> real-sample offline replay (private capture)"
     expect(result.citations.activeBodyConflict).toBe(false)
   })
 
-  it("replays PH-W02: wire SHA matches ledger and parse yields parsed_empty with citations", () => {
-    const capture = loadPrivateCapture("PH-W02")
-    if (!capture) {
-      expect(true).toBe(true)
-      return
-    }
-    if (capture.expectedWireSha256) {
-      expect(capture.wireSha256).toBe(capture.expectedWireSha256)
-    }
-    const publicLedger = path.resolve(
-      process.cwd(),
-      "docs/evidence/r2-4-pagasa-phw-20261026/PH-W02-fields.public.json",
-    )
-    if (existsSync(publicLedger)) {
-      const fields = JSON.parse(readFileSync(publicLedger, "utf8")) as {
-        wireSha256?: string
-      }
-      if (fields.wireSha256) {
-        expect(capture.wireSha256).toBe(fields.wireSha256)
-      }
-    }
+  it.skipIf(!privateW02.ok)("replays PH-W02: wire SHA matches ledger and parse yields parsed_empty with citations", () => {
+    if (!privateW02.ok) throw new Error("unreachable: skipIf should have skipped")
+    const capture = privateW02.capture
+    expect(capture.wireSha256).toBe(capture.expectedWireSha256)
+    expect(capture.wireSha256).toBe(capture.publicWireSha256)
+    expect(capture.httpStatus).toBe(capture.publicHttpStatus)
+    expect(capture.httpStatus).toBeGreaterThanOrEqual(200)
+    expect(capture.httpStatus).toBeLessThan(300)
     const result = parsePagasaEmptyState("PH-W02", capture.html, {
       httpStatus: capture.httpStatus,
     })
@@ -217,5 +322,10 @@ describe("parsePagasaEmptyState -> real-sample offline replay (private capture)"
     if (result.status !== "parsed_empty") return
     expect(result.emptyStateOriginalText).toBe(PH_W02_EMPTY_TEXT)
     expect(result.citations.emptyTextExactMatch).toBe(true)
+  })
+
+  it.skipIf(STRICT_PRIVATE_REPLAY || bothPrivateReady)("non-strict path explicitly skips when private raw is absent (not false PASS)", () => {
+    expect(privateW01.ok).toBe(false)
+    expect(privateW02.ok).toBe(false)
   })
 })
