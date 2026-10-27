@@ -8,7 +8,7 @@
  *
  * Billing branches:
  * - Clear unpaid reject (auth/entitlement/forbidden/rate_limit) -> ProviderRejected -> 0-cost release, retryable.
- * - HTTP success with usage but business validation fail -> book usage/cost, rejectReceived (no free release, no auto-resend of same received body).
+ * - HTTP success with usage but business validation fail -> book usage/cost, keep received/completed failure payload (no free release; same key reuses business failure without calling Provider again). Search/Fetch keep rejectReceivedResponse for their own fresh-attempt semantics.
  * - Ambiguous / no usage on post-call failure -> unknown, keep reservation.
  *
  * Usage: paidRequest records provider_usage once on success/unknown/reject.
@@ -24,8 +24,8 @@ import {
   ProviderRejectedError,
   ReceiptBusyError,
   ReceiptUnknownError,
+  completeReceipt,
   paidRequest,
-  rejectReceivedResponse,
 } from "#/intel/llm/receipts"
 import { resolveSharedLlmBudgetFromTranslation } from "#/intel/llm/shared-budget"
 import { TranslationValidationError, protectTranslationText, restoreAndValidateProtectedTranslation } from "#/services/translation-protection"
@@ -236,8 +236,11 @@ export async function executeTranslationViaPaidRequest(options: PaidTranslationO
 
     const payload = paid.response as TranslationPaidResponse | null
     if (payload?.businessFailure) {
+      // Keep reusable received/completed failure payload: do NOT rejectReceivedResponse
+      // (that would mark failed and allow paidRequest to open a new attempt on the same key).
+      // Search/Fetch may still call rejectReceivedResponse for explicit fresh attempts.
       if (!paid.reused) {
-        await rejectReceivedResponse(options.db, paid.receiptId, payload.businessFailure.message, clock())
+        await completeReceipt(options.db, paid.receiptId, clock())
       }
       return {
         sourceText: source.sourceText,

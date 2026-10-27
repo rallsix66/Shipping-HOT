@@ -466,6 +466,95 @@ describe("billing classification: HTTP 200 + usage + bad output keeps spend", ()
     expect(fake.calls).toHaveLength(1)
   })
 
+  it("same sourceHash business failure reuses completed payload: provider.calls=1, requestCount=1, no success cache", async () => {
+    const { db } = await setup()
+    const usageTokens = {
+      promptTokens: 100,
+      promptCacheHitTokens: 0,
+      promptCacheMissTokens: 100,
+      completionTokens: 50,
+      totalTokens: 150,
+    }
+    const fake = new FakeTranslationProvider({
+      providerId: TRANSLATION_PROVIDER_ID,
+      model: TRANSLATION_MODEL,
+      translateText: () => "Translation: 港口拥堵更新",
+      usage: usageTokens,
+    })
+    // Identical identity twice (same prepare text => same sourceHash).
+    const source = prepared("same-key-no-retry Port congestion")
+    const first = await executeTranslationViaPaidRequest({
+      db,
+      secretStore: secrets(),
+      monthlyBudget: 5,
+      provider: fake,
+      source,
+      estimatedCost: 0.03,
+      now: () => T0,
+    })
+    expect(first.status).toBe("failed")
+    expect(first.errorCode).toBe("provider_contract_changed")
+    expect(first.reused).toBe(false)
+    expect(first.providerCalled).toBe(true)
+    expect(fake.calls).toHaveLength(1)
+
+    const second = await executeTranslationViaPaidRequest({
+      db,
+      secretStore: secrets(),
+      monthlyBudget: 5,
+      provider: fake,
+      source,
+      estimatedCost: 0.03,
+      now: () => T0,
+    })
+    expect(second.status).toBe("failed")
+    expect(second.errorCode).toBe("provider_contract_changed")
+    expect(second.errorMessage).toBe(first.errorMessage)
+    expect(second.reused).toBe(true)
+    expect(second.providerCalled).toBe(false)
+    expect(fake.calls).toHaveLength(1)
+
+    const runtime = new RuntimeRepository(db)
+    const window = paidBudgetWindow(T0)
+    const agg = await runtime.aggregateProviderUsage({
+      providerId: TRANSLATION_PROVIDER_ID,
+      capability: TRANSLATION_CAPABILITY,
+      windowStartFrom: window.from,
+      windowStartTo: window.to,
+    })
+    expect(agg.requestCount).toBe(1)
+    expect(agg.estimatedCost).toBeGreaterThan(0)
+
+    // Business failure must not land a succeeded translation_cache row.
+    const cacheHits = await db.prepare(
+      "SELECT COUNT(*) AS n FROM translation_cache WHERE status = 'succeeded' AND source_hash = ?",
+    ).get(source.sourceHash) as { n: number }
+    expect(Number(cacheHits.n)).toBe(0)
+
+    // Explicit diagnostic attemptTag is a new logical key and must re-gate + call Provider.
+    const tagged = await executeTranslationViaPaidRequest({
+      db,
+      secretStore: secrets(),
+      monthlyBudget: 5,
+      provider: fake,
+      source,
+      estimatedCost: 0.03,
+      now: () => T0,
+      attemptTag: "diagnostic:2026-10-12T08:00:00.000Z",
+    })
+    expect(tagged.status).toBe("failed")
+    expect(tagged.reused).toBe(false)
+    expect(tagged.providerCalled).toBe(true)
+    expect(fake.calls).toHaveLength(2)
+    const aggAfterTag = await runtime.aggregateProviderUsage({
+      providerId: TRANSLATION_PROVIDER_ID,
+      capability: TRANSLATION_CAPABILITY,
+      windowStartFrom: window.from,
+      windowStartTo: window.to,
+    })
+    expect(aggAfterTag.requestCount).toBe(2)
+  })
+
   it("protected-term validation failure with usage keeps spend (not ProviderRejected free release)", async () => {
     const { db } = await setup()
     const service = new TranslationService(
